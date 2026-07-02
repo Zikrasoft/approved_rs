@@ -1,0 +1,44 @@
+import { config, collection, fields } from '@keystatic/core';
+
+export default config({
+  storage: { kind: 'local' },
+
+  collections: {
+    cases: collection({
+      label: 'Кейсы',
+      slugField: 'title',
+      path: 'src/content/cases/*',
+      format: { contentField: 'content' },
+      schema: {
+        title: fields.slug({ name: { label: 'Заголовок' } }),
+        car: fields.text({ label: 'Автомобиль' }),
+        year: fields.number({ label: 'Год', validation: { min: 2000 } }),
+        price: fields.text({ label: 'Цена' }),
+        country: fields.select({
+          label: 'Страна',
+          options: [
+            { label: 'Германия', value: 'de' },
+            { label: 'Сербия', value: 'rs' },
+            { label: 'Испания', value: 'es' },
+          ],
+          defaultValue: 'de',
+        }),
+        service: fields.select({
+          label: 'Услуга',
+          options: [
+            { label: 'Автоподбор', value: 'autopodbor' },
+            { label: 'Доставка', value: 'delivery' },
+            { label: 'Подбор + доставка', value: 'combined' },
+            { label: 'Выкуп', value: 'buyout' },
+            { label: 'Проверка', value: 'inspection' },
+          ],
+          defaultValue: 'autopodbor',
+        }),
+        image: fields.text({ label: 'Фото (путь, напр. /cases/bmw.jpg)' }),
+        date: fields.date({ label: 'Дата' }),
+        published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
+        content: fields.markdoc({ label: 'Описание' }),
+      },
+    }),
+  },
+});

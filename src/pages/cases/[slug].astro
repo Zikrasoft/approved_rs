@@ -1,0 +1,77 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TelegramCTA from '../../components/TelegramCTA.astro';
+import { SERVICE_LABELS } from '../../utils/labels';
+import { getCollection, render } from 'astro:content';
+import { SITE_URL, SITE_NAME } from '../../utils/constants';
+
+export async function getStaticPaths() {
+  const cases = await getCollection('cases', c => c.data.published);
+  return cases.map(c => ({ params: { slug: c.id }, props: { case: c } }));
+}
+
+const { case: c } = Astro.props;
+const { Content } = await render(c);
+
+const meta = {
+  title: `${c.data.title} | ${SITE_NAME}`,
+  description: `${c.data.car} ${c.data.year}, ${c.data.price}. Реальный кейс.`,
+  canonical: `${SITE_URL}/cases/${c.id}/`,
+};
+---
+
+<BaseLayout {...meta}>
+  <!-- Hero image -->
+  {c.data.image && (
+    <div class="w-full h-[40vh] min-h-[280px] overflow-hidden border-b border-default">
+      <img
+        src={c.data.image}
+        alt={c.data.car}
+        class="w-full h-full object-cover brightness-[.8]"
+      />
+    </div>
+  )}
+
+  <div class="max-w-4xl mx-auto px-6">
+    <!-- Meta info -->
+    <div class="py-10 border-b border-default">
+      <div class="flex flex-wrap items-center gap-3 mb-6">
+        <span class="text-xs tracking-widest uppercase font-medium px-3 py-1 rounded-sm border text-accent border-accent">
+          {SERVICE_LABELS[c.data.service] ?? c.data.service}
+        </span>
+        <span class="text-xs text-muted">{c.data.country?.toUpperCase()}</span>
+      </div>
+
+      <h1 class="font-display text-4xl md:text-5xl font-bold mb-6 fade-up fade-up-1">{c.data.title}</h1>
+
+      <div class="grid grid-cols-3 gap-6 max-w-sm">
+        <div>
+          <p class="text-xs tracking-wide uppercase mb-1 font-medium text-muted">Авто</p>
+          <p class="text-sm font-medium text-primary">{c.data.car}</p>
+        </div>
+        <div>
+          <p class="text-xs tracking-wide uppercase mb-1 font-medium text-muted">Год</p>
+          <p class="text-sm font-medium text-primary">{c.data.year}</p>
+        </div>
+        <div>
+          <p class="text-xs tracking-wide uppercase mb-1 font-medium text-muted">Цена</p>
+          <p class="text-sm font-bold font-display text-accent">{c.data.price}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="py-12 prose-custom">
+      <div class="leading-relaxed text-base text-primary max-w-[65ch]">
+        <Content />
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="py-10 border-t mb-16 border-default">
+      <p class="text-xs tracking-widest uppercase mb-2 font-medium text-accent">Нужна такая же услуга?</p>
+      <h2 class="font-display text-3xl font-bold mb-6">Обсудим ваш автомобиль</h2>
+      <TelegramCTA label="Написать в Telegram" />
+    </div>
+  </div>
+</BaseLayout>

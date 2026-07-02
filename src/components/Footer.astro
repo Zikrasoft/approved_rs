@@ -1,0 +1,85 @@
+---
+import SiteLogo from './SiteLogo.astro';
+import { SERVICES } from '../data/services';
+import { SITE_NAME, TG_CHANNEL_FALLBACK, TG_MANAGER_FALLBACK, DEFAULT_COUNTRY } from '../utils/constants';
+const year = new Date().getFullYear();
+const TG_CHANNEL = import.meta.env.PUBLIC_TG_CHANNEL ?? TG_CHANNEL_FALLBACK;
+const TG_MANAGER = import.meta.env.PUBLIC_TG_MANAGER ?? TG_MANAGER_FALLBACK;
+---
+
+<footer class="mt-24 border-t border-default">
+  <div class="max-w-6xl mx-auto px-6 pt-14 pb-10">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+
+      <!-- Brand -->
+      <div class="lg:col-span-2">
+        <div class="mb-3">
+          <SiteLogo size="sm" />
+        </div>
+        <p class="text-sm leading-relaxed max-w-xs mb-6 text-muted">
+          Подберём, проверим и доставим автомобиль из Европы — полностью удалённо, через Telegram.
+        </p>
+        <a
+          href={`https://t.me/${TG_MANAGER}`}
+          target="_blank"
+          rel="noopener"
+          class="footer-tg inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline border border-accent-border text-accent"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.23 13.4l-2.95-.924c-.642-.204-.657-.642.136-.953l11.57-4.461c.537-.194 1.006.131.908.159z"/>
+          </svg>
+          Написать менеджеру
+        </a>
+      </div>
+
+      <!-- Services -->
+      <div>
+        <p class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted">Услуги</p>
+        <nav class="flex flex-col gap-2.5 text-sm footer-nav text-secondary">
+          {SERVICES.map(s => (
+            <a href={`/${DEFAULT_COUNTRY}/${s.slug}/`}>{s.label}</a>
+          ))}
+        </nav>
+      </div>
+
+      <!-- Company -->
+      <div>
+        <p class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted">Компания</p>
+        <nav class="flex flex-col gap-2.5 text-sm footer-nav text-secondary">
+          <a href="/cases/">Кейсы</a>
+          <a href="/contacts/">Контакты</a>
+          <a href="/privacy/">Конфиденциальность</a>
+        </nav>
+        <div class="mt-6 space-y-1.5">
+          <p class="text-xs text-muted">Германия · Испания · Сербия</p>
+          <p class="text-xs text-muted">Пн–Сб, 9:00–20:00 CET</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom -->
+    <div class="pt-6 border-t border-default flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <p class="text-xs text-muted">© {year} {SITE_NAME} — Автоподбор и доставка авто из Европы</p>
+      <a
+        href={`https://t.me/${TG_CHANNEL}`}
+        target="_blank"
+        rel="noopener"
+        class="footer-channel text-xs no-underline text-muted"
+      >
+        Telegram-канал →
+      </a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer-nav a { transition: color 0.2s; }
+  .footer-nav a:hover { color: var(--color-text) !important; }
+
+  .footer-tg { transition: background-color 0.2s, border-color 0.2s; }
+  .footer-tg:hover { background-color: var(--color-accent-subtle); border-color: var(--color-accent) !important; }
+
+  .footer-channel { transition: color 0.2s; }
+  .footer-channel:hover { color: var(--color-accent) !important; }
+</style>

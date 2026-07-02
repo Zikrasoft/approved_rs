@@ -1,0 +1,60 @@
+---
+import FormField from './FormField.astro';
+
+interface Props {
+  service?: string;
+  country?: string;
+  city?: string;
+}
+
+const { service = '', country = '', city = '' } = Astro.props;
+const sourceUrl = Astro.url.pathname;
+---
+
+<div class="lead-form-card rounded-sm p-7 bg-surface-glass border border-t-2 border-border-strong border-t-accent backdrop-blur-[12px]">
+
+  <div class="mb-6">
+    <span class="eyebrow">Оставить заявку</span>
+    <h3 class="font-display text-2xl leading-snug text-primary">
+      Свяжемся с вами<br/><em>в течение 2 часов</em>
+    </h3>
+  </div>
+
+  <form method="POST" action="/api/leads">
+    <input type="hidden" name="service" value={service} />
+    <input type="hidden" name="country" value={country} />
+    <input type="hidden" name="city" value={city} />
+    <input type="hidden" name="source_url" value={sourceUrl} />
+
+    <FormField name="name"    label="Ваше имя"            placeholder="Иван"                    required />
+    <FormField name="contact" label="Telegram или телефон" placeholder="@username или +381…"     required />
+    <FormField name="comment" label="Комментарий"          placeholder="Марка, бюджет, пожелания…" type="textarea" />
+
+    <label class="flex items-start gap-3 mb-6 cursor-pointer text-muted">
+      <input
+        type="checkbox"
+        name="consent"
+        required
+        class="mt-0.5 shrink-0 w-4 h-4 cursor-pointer accent-accent"
+      />
+      <span class="text-xs leading-relaxed">
+        Согласен с <a href="/privacy/" target="_blank" class="underline text-accent">политикой конфиденциальности</a>
+      </span>
+    </label>
+
+    <button
+      type="submit"
+      class="lead-submit w-full py-3.5 text-sm font-medium tracking-[0.06em] cursor-pointer rounded-sm border-none bg-accent text-on-accent font-sans"
+    >
+      Отправить заявку
+    </button>
+  </form>
+</div>
+
+<style>
+  .lead-submit { transition: background-color 0.2s, box-shadow 0.2s; }
+  .lead-submit:hover {
+    background-color: var(--color-accent-hover) !important;
+    box-shadow: 0 0 20px var(--color-accent-glow);
+  }
+</style>

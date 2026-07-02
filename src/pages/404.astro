@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TelegramCTA from '../components/TelegramCTA.astro';
+import { SITE_URL, SITE_NAME } from '../utils/constants';
+
+const meta = {
+  title: `Страница не найдена — ${SITE_NAME}`,
+  description: 'Запрошенная страница не существует.',
+  canonical: `${SITE_URL}/404/`,
+};
+---
+
+<BaseLayout {...meta}>
+  <div class="min-h-[75vh] flex items-center">
+    <div class="max-w-2xl mx-auto px-6 py-20 w-full">
+
+      <div class="relative mb-10">
+        <span class="deco-word" style="font-size: clamp(8rem, 22vw, 18rem); left: -0.04em; top: -0.1em; opacity: 0.6;">404</span>
+        <div class="relative pt-12">
+          <span class="eyebrow fade-up fade-up-1">Ошибка</span>
+          <h1 class="font-display text-4xl font-bold mb-4 fade-up fade-up-2">Страница не найдена</h1>
+          <p class="text-base text-muted max-w-sm fade-up fade-up-3">
+            Возможно, адрес изменился или страница была удалена. Попробуйте вернуться на главную или напишите нам.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-4 fade-up fade-up-4">
+        <a
+          href="/"
+          class="inline-flex items-center justify-center px-6 py-3 rounded-sm text-sm font-medium no-underline border border-accent text-accent transition-colors hover:bg-accent-subtle"
+        >
+          ← На главную
+        </a>
+        <TelegramCTA label="Написать нам" />
+      </div>
+
+    </div>
+  </div>
+</BaseLayout>

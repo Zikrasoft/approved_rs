@@ -1,0 +1,42 @@
+---
+import ServicePageLayout from '../../layouts/ServicePageLayout.astro';
+import StepsList from '../../components/StepsList.astro';
+import { getCountryPaths } from '../../utils/paths';
+import { getCountry } from '../../utils/geo';
+import { generateMeta } from '../../utils/seo';
+import { getCollection } from 'astro:content';
+import { getCasesForPage } from '../../utils/cases';
+import { SITE_URL, SITE_NAME } from '../../utils/constants';
+
+export const getStaticPaths = getCountryPaths;
+
+const { country: countryCode } = Astro.params;
+const country = getCountry(countryCode!)!;
+const meta = generateMeta('autopodbor', { country, baseUrl: SITE_URL, path: `/${countryCode}/autopodbor/` });
+const cases = getCasesForPage(await getCollection('cases'), { country: countryCode, service: 'autopodbor' }).slice(0, 3);
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: `Автоподбор в ${country.nameLocative}`,
+  provider: { '@type': 'LocalBusiness', name: SITE_NAME },
+  areaServed: country.name,
+  url: `${SITE_URL}/${countryCode}/autopodbor/`,
+};
+---
+
+<ServicePageLayout
+  {meta} {schema} {cases}
+  title={`Автоподбор в ${country.nameLocative}`}
+  description={`Подберём автомобиль в ${country.nameLocative} с полной проверкой. Сопровождение сделки, помощь с документами. Работаем удалённо — всё через Telegram.`}
+  formService="autopodbor"
+  currentCountry={countryCode!}
+  currentService="autopodbor"
+  casesHeading={`Кейсы: автоподбор в ${country.nameLocative}`}
+>
+  <StepsList steps={[
+    { n: '01', text: 'Оставляете заявку с требованиями — бюджет, марка, пробег' },
+    { n: '02', text: `Ищем варианты в ${country.nameLocative} по вашим критериям` },
+    { n: '03', text: 'Независимый эксперт осматривает и проверяет автомобиль' },
+    { n: '04', text: 'Сопровождаем сделку, помогаем с документами и оформлением' },
+  ]} />
+</ServicePageLayout>

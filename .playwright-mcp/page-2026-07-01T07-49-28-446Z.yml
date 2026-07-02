@@ -1,0 +1,171 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "APPROVED .RS" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e5]: APPROVED
+        - generic [ref=e6]: .RS
+      - navigation [ref=e7]:
+        - link "Автоподбор" [ref=e8] [cursor=pointer]:
+          - /url: /de/autopodbor/
+        - link "Доставка" [ref=e9] [cursor=pointer]:
+          - /url: /de/dostavka/
+        - link "Выкуп" [ref=e10] [cursor=pointer]:
+          - /url: /de/vykup/
+        - link "Проверка" [ref=e11] [cursor=pointer]:
+          - /url: /de/proverka/
+        - link "Под ключ" [ref=e12] [cursor=pointer]:
+          - /url: /de/combined/
+        - link "Кейсы" [ref=e13] [cursor=pointer]:
+          - /url: /cases/
+        - link "Контакты" [ref=e14] [cursor=pointer]:
+          - /url: /contacts/
+      - generic [ref=e15]:
+        - button "Переключить тему" [ref=e16]:
+          - img [ref=e18]
+        - link "Telegram" [ref=e20] [cursor=pointer]:
+          - /url: https://t.me/approved_rs
+          - img [ref=e21]
+          - text: Telegram
+  - main [ref=e24]:
+    - generic [ref=e25]:
+      - generic: DE
+      - generic [ref=e27]:
+        - generic [ref=e28]:
+          - generic [ref=e29]: Approved.rs
+          - heading "Автоподбор в Германии" [level=1] [ref=e30]
+          - paragraph [ref=e31]: Подберём автомобиль в Германии с полной проверкой. Сопровождение сделки, помощь с документами. Работаем удалённо — всё через Telegram.
+          - generic [ref=e33]:
+            - link "Написать в Telegram" [ref=e34] [cursor=pointer]:
+              - /url: https://t.me/approved_manager
+              - img [ref=e35]
+              - text: Написать в Telegram
+            - link "Наш канал →" [ref=e37] [cursor=pointer]:
+              - /url: https://t.me/approved_rs
+              - text: Наш канал
+              - generic [ref=e38]: →
+          - generic [ref=e40]:
+            - generic [ref=e41]:
+              - generic [ref=e42]: "01"
+              - paragraph [ref=e43]: Оставляете заявку с требованиями — бюджет, марка, пробег
+            - generic [ref=e44]:
+              - generic [ref=e45]: "02"
+              - paragraph [ref=e46]: Ищем варианты в Германии по вашим критериям
+            - generic [ref=e47]:
+              - generic [ref=e48]: "03"
+              - paragraph [ref=e49]: Независимый эксперт осматривает и проверяет автомобиль
+            - generic [ref=e50]:
+              - generic [ref=e51]: "04"
+              - paragraph [ref=e52]: Сопровождаем сделку, помогаем с документами и оформлением
+        - generic [ref=e54]:
+          - generic [ref=e55]:
+            - generic [ref=e56]: Оставить заявку
+            - heading "Свяжемся с вами в течение 2 часов" [level=3] [ref=e57]:
+              - text: Свяжемся с вами
+              - emphasis [ref=e58]: в течение 2 часов
+          - generic [ref=e59]:
+            - generic [ref=e60]:
+              - generic [ref=e61]: Ваше имя*
+              - textbox "Иван" [ref=e62]
+            - generic [ref=e63]:
+              - generic [ref=e64]: Telegram или телефон*
+              - textbox "@username или +381…" [ref=e65]
+            - generic [ref=e66]:
+              - generic [ref=e67]: Комментарий
+              - textbox "Марка, бюджет, пожелания…" [ref=e68]
+            - generic [ref=e69] [cursor=pointer]:
+              - checkbox "Согласен с политикой конфиденциальности" [ref=e70]
+              - generic [ref=e71]:
+                - text: Согласен с
+                - link "политикой конфиденциальности" [ref=e72]:
+                  - /url: /privacy/
+            - button "Отправить заявку" [ref=e73] [cursor=pointer]
+    - generic [ref=e75]:
+      - 'heading "Кейсы: автоподбор в Германии" [level=2] [ref=e77]'
+      - link "BMW X5 xDrive40i Автоподбор → BMW X5 xDrive40i 2023 68 000 €" [ref=e79] [cursor=pointer]:
+        - /url: /cases/bmw-x5-2023-de/
+        - generic [ref=e80]:
+          - img [ref=e83]
+          - paragraph [ref=e87]: BMW X5 xDrive40i
+        - generic [ref=e88]:
+          - generic [ref=e89]:
+            - generic [ref=e90]: Автоподбор
+            - generic [ref=e91]: →
+          - heading "BMW X5 xDrive40i 2023" [level=3] [ref=e92]
+          - paragraph [ref=e93]: 68 000 €
+    - generic [ref=e94]:
+      - generic [ref=e95]:
+        - paragraph [ref=e96]: "Также работаем в:"
+        - generic [ref=e97]:
+          - link "Сербия" [ref=e98] [cursor=pointer]:
+            - /url: /rs/autopodbor/
+          - link "Испания" [ref=e99] [cursor=pointer]:
+            - /url: /es/autopodbor/
+      - generic [ref=e100]:
+        - paragraph [ref=e101]: "Другие услуги:"
+        - generic [ref=e102]:
+          - link "Доставка" [ref=e103] [cursor=pointer]:
+            - /url: /de/dostavka/
+          - link "Выкуп" [ref=e104] [cursor=pointer]:
+            - /url: /de/vykup/
+          - link "Проверка" [ref=e105] [cursor=pointer]:
+            - /url: /de/proverka/
+          - link "Под ключ" [ref=e106] [cursor=pointer]:
+            - /url: /de/combined/
+  - contentinfo [ref=e107]:
+    - generic [ref=e108]:
+      - generic [ref=e109]:
+        - generic [ref=e110]:
+          - link "APPROVED .RS" [ref=e112] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e113]: APPROVED
+            - generic [ref=e114]: .RS
+          - paragraph [ref=e115]: Подберём, проверим и доставим автомобиль из Европы — полностью удалённо, через Telegram.
+          - link "Написать менеджеру" [ref=e116] [cursor=pointer]:
+            - /url: https://t.me/approved_manager
+            - img [ref=e117]
+            - text: Написать менеджеру
+        - generic [ref=e119]:
+          - paragraph [ref=e120]: Услуги
+          - navigation [ref=e121]:
+            - link "Автоподбор" [ref=e122] [cursor=pointer]:
+              - /url: /de/autopodbor/
+            - link "Доставка" [ref=e123] [cursor=pointer]:
+              - /url: /de/dostavka/
+            - link "Выкуп" [ref=e124] [cursor=pointer]:
+              - /url: /de/vykup/
+            - link "Проверка" [ref=e125] [cursor=pointer]:
+              - /url: /de/proverka/
+            - link "Под ключ" [ref=e126] [cursor=pointer]:
+              - /url: /de/combined/
+        - generic [ref=e127]:
+          - paragraph [ref=e128]: Компания
+          - navigation [ref=e129]:
+            - link "Кейсы" [ref=e130] [cursor=pointer]:
+              - /url: /cases/
+            - link "Контакты" [ref=e131] [cursor=pointer]:
+              - /url: /contacts/
+            - link "Конфиденциальность" [ref=e132] [cursor=pointer]:
+              - /url: /privacy/
+          - generic [ref=e133]:
+            - paragraph [ref=e134]: Германия · Испания · Сербия
+            - paragraph [ref=e135]: Пн–Сб, 9:00–20:00 CET
+      - generic [ref=e136]:
+        - paragraph [ref=e137]: © 2026 Approved.rs — Автоподбор и доставка авто из Европы
+        - link "Telegram-канал →" [ref=e138] [cursor=pointer]:
+          - /url: https://t.me/approved_rs
+  - generic [ref=e141]:
+    - button "Menu" [ref=e142]:
+      - img [ref=e144]
+      - generic: Menu
+    - button "Inspect" [ref=e148]:
+      - img [ref=e150]
+      - generic: Inspect
+    - button "Audit" [ref=e152]:
+      - generic [ref=e153]:
+        - img [ref=e154]
+        - img [ref=e157]
+      - generic: Audit
+    - button "Settings" [ref=e160]:
+      - img [ref=e162]
+      - generic: Settings

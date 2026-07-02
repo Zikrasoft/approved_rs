@@ -1,0 +1,65 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { SERVICE_LABELS } from '../utils/labels';
+
+interface Props {
+  case: CollectionEntry<'cases'>;
+}
+
+const { case: c } = Astro.props;
+---
+
+<a
+  href={`/cases/${c.id}/`}
+  class="case-card group block rounded-sm overflow-hidden no-underline glow-border bg-surface border border-default"
+>
+  {c.data.image
+    ? <div class="overflow-hidden h-52">
+        <img
+          src={c.data.image}
+          alt={c.data.car}
+          class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          loading="lazy"
+        />
+      </div>
+    : <div class="h-52 flex flex-col items-center justify-center gap-4 relative overflow-hidden bg-surface-2">
+        <div class="absolute inset-0" style="background: radial-gradient(ellipse 70% 60% at 50% 50%, var(--color-ambient-glow) 0%, transparent 70%);"></div>
+        <div class="absolute inset-0 opacity-40" style="background-image: linear-gradient(var(--color-grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--color-grid-line) 1px, transparent 1px); background-size: 20px 20px;"></div>
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" class="relative text-accent-mid">
+          <path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h1l2-3h10l2 3h1a2 2 0 012 2v6a2 2 0 01-2 2h-2"/>
+          <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+          <path d="M5 9h14" stroke-opacity="0.4"/>
+        </svg>
+        <p class="text-xs font-medium tracking-[0.18em] uppercase relative text-accent-mid">{c.data.car}</p>
+      </div>
+  }
+
+  <div class="p-5">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-xs tracking-[0.16em] uppercase font-semibold text-accent">
+        {SERVICE_LABELS[c.data.service] ?? c.data.service}
+      </span>
+      <span class="case-arrow text-xs text-muted">→</span>
+    </div>
+    <h3 class="font-display text-lg mt-1 mb-2 leading-snug text-primary">
+      {c.data.car} <span class="text-muted">{c.data.year}</span>
+    </h3>
+    <p class="font-display text-xl font-bold text-accent">
+      {c.data.price}
+    </p>
+  </div>
+</a>
+
+<style>
+  .case-card { transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s; }
+  .case-card:hover {
+    border-color: var(--color-accent-mid) !important;
+    box-shadow: 0 0 0 1px var(--color-accent-subtle), 0 12px 40px var(--color-ambient-glow);
+    transform: translateY(-4px);
+  }
+  .case-card:hover .case-arrow {
+    transform: translateX(4px);
+    color: var(--color-accent) !important;
+  }
+  .case-arrow { transition: transform 0.3s, color 0.3s; }
+</style>

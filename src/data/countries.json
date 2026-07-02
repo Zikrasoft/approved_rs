@@ -1,0 +1,5 @@
+[
+  { "code": "de", "name": "Германия", "nameGenitive": "Германии", "nameLocative": "Германии", "nameAccusative": "Германию", "active": true },
+  { "code": "rs", "name": "Сербия", "nameGenitive": "Сербии", "nameLocative": "Сербии", "nameAccusative": "Сербию", "active": true },
+  { "code": "es", "name": "Испания", "nameGenitive": "Испании", "nameLocative": "Испании", "nameAccusative": "Испанию", "active": true }
+]

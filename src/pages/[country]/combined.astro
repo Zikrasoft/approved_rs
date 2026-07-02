@@ -1,0 +1,32 @@
+---
+import ServicePageLayout from '../../layouts/ServicePageLayout.astro';
+import StepsList from '../../components/StepsList.astro';
+import { getCountryPaths } from '../../utils/paths';
+import { getCountry } from '../../utils/geo';
+import { generateMeta } from '../../utils/seo';
+import { SITE_URL } from '../../utils/constants';
+
+export const getStaticPaths = getCountryPaths;
+
+const { country: countryCode } = Astro.params;
+const country = getCountry(countryCode!)!;
+const meta = generateMeta('combined', { country, baseUrl: SITE_URL, path: `/${countryCode}/combined/` });
+---
+
+<ServicePageLayout
+  {meta}
+  title={`Подбор и доставка авто из ${country.nameGenitive}`}
+  description={`Подберём автомобиль в ${country.nameLocative} и привезём к вам. Полное сопровождение: поиск, проверка, таможня, доставка до двери.`}
+  ctaLabel="Обсудить под ключ"
+  formService="combined"
+  currentCountry={countryCode!}
+  currentService="combined"
+>
+  <StepsList steps={[
+    { n: '01', text: `Подбор в ${country.nameLocative} по вашим критериям` },
+    { n: '02', text: 'Независимая проверка эксперта перед покупкой' },
+    { n: '03', text: 'Сопровождение сделки и помощь с документами' },
+    { n: '04', text: 'Таможенное оформление на всех этапах' },
+    { n: '05', text: 'Доставка до вашего города — под ключ' },
+  ]} />
+</ServicePageLayout>

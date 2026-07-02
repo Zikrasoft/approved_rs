@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /keystatic/
+Disallow: /api/
+
+Sitemap: https://approved.rs/sitemap-index.xml

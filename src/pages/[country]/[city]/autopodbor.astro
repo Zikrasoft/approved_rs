@@ -1,0 +1,38 @@
+---
+import ServicePageLayout from '../../../layouts/ServicePageLayout.astro';
+import { getCityPaths } from '../../../utils/paths';
+import { getCountry } from '../../../utils/geo';
+import { generateMeta } from '../../../utils/seo';
+import { getCollection } from 'astro:content';
+import { getCasesForPage } from '../../../utils/cases';
+import { SITE_URL } from '../../../utils/constants';
+
+export const getStaticPaths = getCityPaths;
+
+const { country: countryCode } = Astro.params;
+const { city } = Astro.props;
+const country = getCountry(countryCode!)!;
+const meta = generateMeta('autopodbor', { country, city, baseUrl: SITE_URL, path: `/${countryCode}/${city.slug}/autopodbor/` });
+const cases = getCasesForPage(await getCollection('cases'), { country: countryCode, service: 'autopodbor' }).slice(0, 3);
+---
+
+<ServicePageLayout
+  {meta} {cases}
+  title={`Автоподбор в ${city.nameLocative}`}
+  description={`Подберём автомобиль в ${city.nameLocative} с полной проверкой. Работаем по всему региону ${country.name}.`}
+  formService="autopodbor"
+  currentCountry={countryCode!}
+  currentService="autopodbor"
+  city={city.slug}
+  casesHeading={`Кейсы из ${country.nameGenitive}`}
+>
+  <div>
+    <h2 class="text-2xl mb-4">Почему {city.name}</h2>
+    <ul class="pl-5 leading-loose text-muted">
+      <li>Крупный автомобильный рынок региона</li>
+      <li>Много вариантов с хорошей историей</li>
+      <li>Наш эксперт в {city.nameLocative}</li>
+      <li>Проверка DEKRA / TÜV по запросу</li>
+    </ul>
+  </div>
+</ServicePageLayout>

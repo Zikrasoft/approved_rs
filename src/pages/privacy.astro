@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE_URL, SITE_NAME, TG_MANAGER_FALLBACK } from '../utils/constants';
+
+const meta = {
+  title: `Политика конфиденциальности | ${SITE_NAME}`,
+  description: `Политика конфиденциальности и обработки персональных данных сайта ${SITE_NAME}.`,
+  canonical: `${SITE_URL}/privacy/`,
+};
+
+const sections = [
+  {
+    title: 'Какие данные мы собираем',
+    text: 'При отправке заявки мы собираем имя и контактные данные (Telegram/телефон), которые вы вводите в форму. Мы также фиксируем страницу, с которой отправлена заявка.',
+  },
+  {
+    title: 'Как мы используем данные',
+    text: 'Собранные данные используются исключительно для обратной связи по вашей заявке. Мы не передаём данные третьим лицам и не используем их для рекламы.',
+  },
+  {
+    title: 'Хранение данных',
+    text: 'Данные хранятся на защищённых серверах Neon (PostgreSQL). Вы можете запросить удаление ваших данных в любое время, написав нам в Telegram.',
+  },
+  {
+    title: 'Cookies',
+    text: 'Сайт не использует рекламные или аналитические cookies. Используются только технические cookies, необходимые для работы сайта.',
+  },
+];
+---
+
+<BaseLayout {...meta}>
+  <section class="border-b border-default">
+    <div class="max-w-6xl mx-auto px-6 py-16">
+      <span class="accent-line"></span>
+      <h1 class="font-display text-5xl font-bold mb-3">Политика конфиденциальности</h1>
+      <p class="text-sm text-muted">Последнее обновление: июнь 2026</p>
+    </div>
+  </section>
+
+  <section class="max-w-3xl mx-auto px-6 py-16">
+    <div class="space-y-10">
+      {sections.map((s, i) => (
+        <div class="pb-10 border-b border-default" style={`animation: fadeUp 0.5s ${0.1 + i * 0.1}s both`}>
+          <h2 class="font-display text-2xl font-bold mb-4">{s.title}</h2>
+          <p class="text-base leading-relaxed text-muted">{s.text}</p>
+        </div>
+      ))}
+
+      <div>
+        <h2 class="font-display text-2xl font-bold mb-4">Контакт</h2>
+        <p class="text-base leading-relaxed text-muted">
+          По вопросам конфиденциальности обратитесь к нам через{' '}
+          <a
+            href={`https://t.me/${import.meta.env.PUBLIC_TG_MANAGER ?? TG_MANAGER_FALLBACK}`}
+            class="underline transition-colors text-accent"
+          >
+            Telegram
+          </a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

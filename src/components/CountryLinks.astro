@@ -1,0 +1,16 @@
+---
+import ChipLinks from './ChipLinks.astro';
+import { getActiveCountries } from '../utils/geo';
+
+interface Props {
+  currentCountry?: string;
+  service: string;
+}
+
+const { currentCountry, service } = Astro.props;
+const items = getActiveCountries()
+  .filter(c => c.code !== currentCountry)
+  .map(c => ({ href: `/${c.code}/${service}/`, text: c.name }));
+---
+
+<ChipLinks label="Также работаем в:" {items} />

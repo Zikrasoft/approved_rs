@@ -1,0 +1,53 @@
+---
+interface Props {
+  manager?: string;
+  channel?: string;
+  label?: string;
+}
+
+import { TG_CHANNEL_FALLBACK, TG_MANAGER_FALLBACK } from '../utils/constants';
+const {
+  manager = import.meta.env.PUBLIC_TG_MANAGER ?? TG_MANAGER_FALLBACK,
+  channel = import.meta.env.PUBLIC_TG_CHANNEL ?? TG_CHANNEL_FALLBACK,
+  label = 'Написать в Telegram',
+} = Astro.props;
+---
+
+<div class="flex flex-wrap gap-3 my-8">
+  <a
+    href={`https://t.me/${manager}`}
+    target="_blank"
+    rel="noopener"
+    class="tg-primary inline-flex items-center gap-2.5 px-6 py-3 rounded-sm text-sm font-medium no-underline bg-accent text-white tracking-[0.03em]"
+  >
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.23 13.4l-2.95-.924c-.642-.204-.657-.642.136-.953l11.57-4.461c.537-.194 1.006.131.908.159z"/>
+    </svg>
+    {label}
+  </a>
+
+  <a
+    href={`https://t.me/${channel}`}
+    target="_blank"
+    rel="noopener"
+    class="tg-secondary inline-flex items-center gap-2 px-6 py-3 rounded-sm text-sm font-medium no-underline border border-accent/50 bg-transparent text-secondary tracking-[0.03em]"
+  >
+    Наш канал
+    <span class="tg-arrow text-[0.85em] transition-transform duration-200">→</span>
+  </a>
+</div>
+
+<style>
+  .tg-primary { transition: background-color 0.2s, box-shadow 0.2s; }
+  .tg-primary:hover {
+    background-color: var(--color-accent-hover) !important;
+    box-shadow: 0 0 20px var(--color-accent-glow);
+  }
+
+  .tg-secondary { transition: background-color 0.2s, border-color 0.2s; }
+  .tg-secondary:hover {
+    border-color: var(--color-accent) !important;
+    color: var(--color-accent) !important;
+  }
+  .tg-secondary:hover .tg-arrow { transform: translateX(3px); }
+</style>

@@ -1,0 +1,32 @@
+---
+import ServicePageLayout from '../../layouts/ServicePageLayout.astro';
+import StepsList from '../../components/StepsList.astro';
+import { getCountryPaths } from '../../utils/paths';
+import { getCountry } from '../../utils/geo';
+import { generateMeta } from '../../utils/seo';
+import { SITE_URL } from '../../utils/constants';
+
+export const getStaticPaths = getCountryPaths;
+
+const { country: countryCode } = Astro.params;
+const country = getCountry(countryCode!)!;
+const meta = generateMeta('proverka', { country, baseUrl: SITE_URL, path: `/${countryCode}/proverka/` });
+---
+
+<ServicePageLayout
+  {meta}
+  title={`Проверка авто в ${country.nameLocative}`}
+  description="Независимая проверка автомобиля перед покупкой. Выезд эксперта, диагностика, отчёт — без обязательства покупки."
+  ctaLabel="Заказать проверку"
+  formService="inspection"
+  currentCountry={countryCode!}
+  currentService="proverka"
+>
+  <StepsList steps={[
+    { n: '01', text: 'Кузов и лакокрасочное покрытие — наличие ремонта или ДТП' },
+    { n: '02', text: 'Ходовая, подвеска, тормоза' },
+    { n: '03', text: 'Двигатель, коробка, трансмиссия' },
+    { n: '04', text: 'Электроника и история обслуживания по VIN' },
+    { n: '05', text: 'Юридическая чистота — залог, запрет регистрации, ДТП' },
+  ]} />
+</ServicePageLayout>

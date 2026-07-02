@@ -1,0 +1,42 @@
+---
+interface Props {
+  name: string;
+  label: string;
+  placeholder?: string;
+  required?: boolean;
+  type?: 'text' | 'textarea';
+  rows?: number;
+}
+
+const { name, label, placeholder = '', required = false, type = 'text', rows = 3 } = Astro.props;
+---
+
+<div class="mb-5">
+  <label class="block text-xs font-medium mb-2 tracking-[0.14em] uppercase text-muted">
+    {label}{required && <span class="text-accent ml-0.5">*</span>}
+  </label>
+  {type === 'textarea'
+    ? <textarea
+        {name}
+        {rows}
+        {placeholder}
+        class="form-field w-full px-4 py-3 rounded-sm text-sm outline-none resize-y bg-page border border-border-strong text-primary font-sans"
+      ></textarea>
+    : <input
+        type="text"
+        {name}
+        {required}
+        {placeholder}
+        class="form-field w-full px-4 py-3 rounded-sm text-sm outline-none bg-page border border-border-strong text-primary font-sans"
+      />
+  }
+</div>
+
+<style>
+  .form-field { transition: border-color 0.2s, box-shadow 0.2s; }
+  .form-field::placeholder { color: var(--color-muted); }
+  .form-field:focus {
+    border-color: var(--color-accent) !important;
+    box-shadow: 0 0 0 3px var(--color-accent-soft);
+  }
+</style>

@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TelegramCTA from '../components/TelegramCTA.astro';
+import { SITE_URL, SITE_NAME } from '../utils/constants';
+
+const meta = {
+  title: `Контакты | ${SITE_NAME}`,
+  description: 'Свяжитесь с нами в Telegram. Автоподбор, доставка, выкуп авто из Европы.',
+  canonical: `${SITE_URL}/contacts/`,
+};
+
+const info = [
+  { label: 'Время ответа', value: 'В течение 2 часов' },
+  { label: 'Рабочие дни', value: 'Пн–Сб, 9:00–20:00 CET' },
+  { label: 'Языки',        value: 'Русский, English' },
+  { label: 'Страны',       value: 'Германия, Испания, Сербия и др.' },
+];
+
+const steps = [
+  { n: '01', text: 'Пишете в Telegram или оставляете заявку на сайте' },
+  { n: '02', text: 'Обсуждаем ваш запрос, уточняем детали и критерии' },
+  { n: '03', text: 'Начинаем работу — находим, проверяем, привозим' },
+];
+---
+
+<BaseLayout {...meta}>
+
+  <section class="hero-grid relative border-b overflow-hidden border-default">
+    <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 50% 60% at 5% 50%, var(--color-ambient-glow) 0%, transparent 60%);"></div>
+    <span class="deco-word" style="font-size: clamp(6rem, 18vw, 15rem); bottom: -1rem; right: -1%; opacity: 0.8;">CONTACT</span>
+    <div class="relative max-w-6xl mx-auto px-6 py-16 md:py-20">
+      <span class="eyebrow fade-up fade-up-1">{SITE_NAME}</span>
+      <h1 class="font-display font-bold mb-3 fade-up fade-up-2 tracking-[-0.02em]" style="font-size: clamp(2.4rem, 5vw, 4rem);">Контакты</h1>
+      <p class="text-base fade-up fade-up-3 text-muted">Работаем через Telegram — быстро и удобно</p>
+    </div>
+  </section>
+
+  <section class="max-w-6xl mx-auto px-6 py-16">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+
+      <div class="fade-up fade-up-1">
+        <TelegramCTA />
+        <div class="mt-8">
+          {info.map((item, i) => (
+            <div class="flex justify-between items-center py-4 border-b border-default" style={`animation: fadeUp 0.75s ${0.15 + i * 0.08}s cubic-bezier(0.16,1,0.3,1) both;`}>
+              <span class="text-sm text-muted">{item.label}</span>
+              <span class="text-sm font-medium text-secondary">{item.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div class="fade-up fade-up-2 rounded-sm p-8 border border-t-2 bg-surface border-border-strong border-t-accent">
+        <span class="eyebrow">Как мы работаем</span>
+        <div class="space-y-6">
+          {steps.map((step, i) => (
+            <div class="flex gap-4" style={`animation: fadeUp 0.75s ${0.2 + i * 0.1}s cubic-bezier(0.16,1,0.3,1) both;`}>
+              <div class="step-circle shrink-0 !mb-0">{step.n}</div>
+              <p class="text-sm leading-relaxed pt-2.5 text-muted">{step.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</BaseLayout>

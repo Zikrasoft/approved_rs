@@ -1,0 +1,274 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── Light default palette ── */
+  --color-bg:            #F4F6FA;
+  --color-surface:       #FFFFFF;
+  --color-surface-2:     #EAECF4;
+  --color-border:        #D8DCE8;
+  --color-border-strong: #C4C9D8;
+  --color-text:          #0D0F14;
+  --color-text-2:        #2D3448;
+  --color-muted:         #6B7280;
+  --color-accent:        #1E3A5F;
+  --color-accent-hover:  #142E50;
+  --color-accent-glow:   rgba(30, 58, 95, 0.18);
+  --color-on-accent:     #ffffff;
+
+  /* ── Semantic alpha tokens (light defaults) ── */
+  --color-accent-subtle:  rgba(30, 58, 95, 0.06);
+  --color-accent-soft:    rgba(30, 58, 95, 0.10);
+  --color-accent-border:  rgba(30, 58, 95, 0.22);
+  --color-accent-mid:     rgba(30, 58, 95, 0.30);
+  --color-surface-glass:  rgba(255, 255, 255, 0.95);
+  --color-header-glass:   rgba(244, 246, 250, 0.90);
+  --color-header-mobile:  rgba(244, 246, 250, 0.99);
+
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-sans:    'Rubik', system-ui, sans-serif;
+}
+
+/* ── Non-class tokens (only used in CSS rules / inline gradients) ── */
+:root {
+  --color-grid-line:    rgba(59, 79, 110, 0.06);
+  --color-deco-stroke:  rgba(59, 79, 110, 0.05);
+  --color-ambient-glow: rgba(59, 79, 110, 0.05);
+  --grain-opacity:      0.012;
+}
+
+/* ── Dark theme overrides ── */
+[data-theme="dark"] {
+  --color-bg:            #0D0F14;
+  --color-surface:       #14171F;
+  --color-surface-2:     #1B1F2A;
+  --color-border:        #22273A;
+  --color-border-strong: #2D3448;
+  --color-text:          #F1F3F9;
+  --color-text-2:        #C8D0E0;
+  --color-muted:         #8892A4;
+  --color-accent:        #94A3B8;
+  --color-accent-hover:  #CBD5E1;
+  --color-accent-glow:   rgba(148, 163, 184, 0.2);
+  --color-on-accent:     #0D0F14;
+
+  --color-accent-subtle:  rgba(148, 163, 184, 0.07);
+  --color-accent-soft:    rgba(148, 163, 184, 0.12);
+  --color-accent-border:  rgba(148, 163, 184, 0.22);
+  --color-accent-mid:     rgba(148, 163, 184, 0.36);
+  --color-surface-glass:  rgba(20, 23, 31, 0.92);
+  --color-header-glass:   rgba(13, 15, 20, 0.88);
+  --color-header-mobile:  rgba(13, 15, 20, 0.98);
+
+  --color-grid-line:    rgba(148, 163, 184, 0.05);
+  --color-deco-stroke:  rgba(148, 163, 184, 0.07);
+  --color-ambient-glow: rgba(148, 163, 184, 0.06);
+  --grain-opacity:      0.03;
+}
+
+/* ── Readable aliases for Tailwind's auto-generated names ──────────── */
+/* Tailwind v4 generates bg-surface, text-muted, border-border etc.    */
+/* These aliases make common patterns more readable.                    */
+@layer utilities {
+  .text-primary   { color: var(--color-text); }
+  .text-secondary { color: var(--color-text-2); }
+  .text-on-accent { color: var(--color-on-accent); }
+  .bg-page        { background-color: var(--color-bg); }
+  .border-default { border-color: var(--color-border); }
+}
+
+/* ─── Base ─────────────────────────────────────────────── */
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: var(--grain-opacity);
+  pointer-events: none;
+  z-index: 9000;
+  mix-blend-mode: overlay;
+  transition: opacity 0.3s;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--color-text);
+}
+
+@layer base {
+  a { color: inherit; text-decoration: none; }
+}
+
+::selection { background: var(--color-accent); color: var(--color-bg); }
+
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: var(--color-bg); }
+::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
+
+/* ─── Animations ─────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes slideRight {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+
+.fade-up { animation: fadeUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.fade-up-1 { animation-delay: 0.06s; }
+.fade-up-2 { animation-delay: 0.16s; }
+.fade-up-3 { animation-delay: 0.28s; }
+.fade-up-4 { animation-delay: 0.42s; }
+.fade-up-5 { animation-delay: 0.56s; }
+.fade-up-6 { animation-delay: 0.72s; }
+
+/* ─── Eyebrow label ──────────────────────────────────────── */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 1.25rem;
+}
+.eyebrow::before {
+  content: '';
+  display: block;
+  width: 22px;
+  height: 1px;
+  background: var(--color-accent);
+  flex-shrink: 0;
+  animation: slideRight 0.5s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: left;
+}
+
+/* ─── Accent line ────────────────────────────────────────── */
+.accent-line {
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-accent), transparent);
+  margin-bottom: 1.5rem;
+}
+
+/* ─── Hero grid ──────────────────────────────────────────── */
+.hero-grid {
+  background-image:
+    linear-gradient(var(--color-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid-line) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* ─── Decorative ghost word ──────────────────────────────── */
+.deco-word {
+  position: absolute;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--color-deco-stroke);
+  user-select: none;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ─── Stat block ─────────────────────────────────────────── */
+.stat-block {
+  position: relative;
+  padding-left: 1.1rem;
+}
+.stat-block::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.15rem;
+  bottom: 0.15rem;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--color-accent), transparent);
+  border-radius: 1px;
+}
+.stat-n {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.stat-l {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-muted);
+  font-weight: 500;
+  margin-top: 0.3rem;
+}
+
+/* ─── Card index number ──────────────────────────────────── */
+.card-index {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-accent-mid);
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+/* ─── Step circle badge ──────────────────────────────────── */
+.step-circle {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  border: 1px solid var(--color-accent-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--color-accent);
+  background: var(--color-accent-subtle);
+  flex-shrink: 0;
+  margin-bottom: 1.25rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Glow hover card ────────────────────────────────────── */
+.glow-border {
+  transition: border-color 0.3s, box-shadow 0.3s, background-color 0.25s, transform 0.25s;
+}
+.glow-border:hover {
+  border-color: var(--color-accent-mid) !important;
+  box-shadow: 0 0 0 1px var(--color-accent-subtle), 0 8px 40px var(--color-ambient-glow);
+}
+
+/* ─── Divider ────────────────────────────────────────────── */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+}

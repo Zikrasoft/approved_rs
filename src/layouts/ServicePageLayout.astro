@@ -1,0 +1,73 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import LeadForm from '../components/LeadForm.astro';
+import TelegramCTA from '../components/TelegramCTA.astro';
+import CaseCard from '../components/CaseCard.astro';
+import CountryLinks from '../components/CountryLinks.astro';
+import ServiceLinks from '../components/ServiceLinks.astro';
+import type { MetaProps } from '../utils/seo';
+import type { CollectionEntry } from 'astro:content';
+import { SITE_NAME } from '../utils/constants';
+
+interface Props {
+  meta: MetaProps;
+  schema?: object;
+  title: string;
+  description: string;
+  ctaLabel?: string;
+  formService: string;
+  currentCountry: string;
+  currentService: string;
+  cases?: CollectionEntry<'cases'>[];
+  casesHeading?: string;
+  city?: string;
+}
+
+const {
+  meta, schema, title, description, ctaLabel,
+  formService, currentCountry, currentService,
+  cases = [], casesHeading, city,
+} = Astro.props;
+---
+
+<BaseLayout {...meta} schema={schema}>
+
+  <section class="hero-grid relative border-b overflow-hidden border-default">
+    <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 50% 60% at 0% 50%, var(--color-ambient-glow) 0%, transparent 60%), radial-gradient(ellipse 40% 50% at 100% 0%, var(--color-accent-subtle) 0%, transparent 55%);"></div>
+    <span class="deco-word" style="font-size: clamp(7rem, 18vw, 16rem); bottom: -1rem; right: -1%; opacity: 0.8;">{currentCountry.toUpperCase()}</span>
+
+    <div class="relative max-w-6xl mx-auto px-6 py-16 md:py-24">
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-start">
+        <div class="lg:col-span-3">
+          <span class="eyebrow fade-up fade-up-1">{SITE_NAME}</span>
+          <h1 class="font-display font-bold mb-5 leading-tight fade-up fade-up-2 tracking-[-0.02em]"
+            style="font-size: clamp(2.2rem, 4.5vw, 3.8rem);">{title}</h1>
+          <p class="text-base max-w-lg mb-2 leading-relaxed fade-up fade-up-3 text-muted">{description}</p>
+          <div class="fade-up fade-up-4"><TelegramCTA label={ctaLabel} /></div>
+          <div class="fade-up fade-up-5 pt-2"><slot /></div>
+        </div>
+        <div class="lg:col-span-2 fade-up fade-up-3">
+          <LeadForm service={formService} country={currentCountry} city={city} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {cases.length > 0 && (
+    <section class="border-b border-default">
+      <div class="max-w-6xl mx-auto px-6 py-16">
+        <span class="accent-line"></span>
+        <h2 class="font-display text-3xl mb-10">{casesHeading}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {cases.map(c => <CaseCard case={c} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <div class="max-w-6xl mx-auto px-6 pb-16 pt-4">
+    <CountryLinks currentCountry={currentCountry} service={currentService} />
+    <ServiceLinks currentService={currentService} country={currentCountry} />
+  </div>
+
+</BaseLayout>

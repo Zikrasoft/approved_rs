@@ -1,0 +1,14 @@
+---
+import { SITE_BRAND, SITE_TLD } from '../utils/constants';
+
+interface Props {
+  size?: 'sm' | 'md';
+}
+const { size = 'md' } = Astro.props;
+const textClass = size === 'sm' ? 'text-lg' : 'text-xl';
+---
+
+<a href="/" class="flex items-baseline gap-1.5 no-underline shrink-0">
+  <span class={`font-display font-bold ${textClass} tracking-tight text-primary`}>{SITE_BRAND}</span>
+  <span class="text-xs font-semibold px-1.5 py-0.5 rounded-sm bg-accent text-on-accent tracking-[0.04em]">{SITE_TLD}</span>
+</a>

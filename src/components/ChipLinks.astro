@@ -1,0 +1,29 @@
+---
+interface Props {
+  label: string;
+  items: { href: string; text: string }[];
+}
+
+const { label, items } = Astro.props;
+---
+
+{items.length > 0 && (
+  <div class="mt-12 pt-8 border-t border-default">
+    <p class="text-xs tracking-widest uppercase mb-4 font-medium text-muted">{label}</p>
+    <div class="flex flex-wrap gap-2">
+      {items.map(item => (
+        <a href={item.href} class="chip-link px-4 py-1.5 rounded-sm text-xs font-medium no-underline border border-default text-muted">
+          {item.text}
+        </a>
+      ))}
+    </div>
+  </div>
+)}
+
+<style>
+  .chip-link { transition: border-color 0.2s, color 0.2s; }
+  .chip-link:hover {
+    border-color: var(--color-accent) !important;
+    color: var(--color-accent) !important;
+  }
+</style>

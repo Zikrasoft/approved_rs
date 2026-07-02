@@ -1,0 +1,67 @@
+---
+import ServicePageLayout from '../../layouts/ServicePageLayout.astro';
+import { getCountryPaths } from '../../utils/paths';
+import { getCountry, getActiveRoutes } from '../../utils/geo';
+import { generateMeta } from '../../utils/seo';
+import { SITE_URL } from '../../utils/constants';
+
+export const getStaticPaths = getCountryPaths;
+
+const { country: countryCode } = Astro.params;
+const country = getCountry(countryCode!)!;
+const meta = generateMeta('delivery', {
+  fromCountry: country,
+  toCountry: { name: 'вашу страну', nameGenitive: 'вашей страны', nameLocative: 'вашей стране', nameAccusative: 'вашу страну' },
+  baseUrl: SITE_URL,
+  path: `/${countryCode}/dostavka/`,
+});
+const routes = getActiveRoutes().filter(r => r.from === countryCode);
+---
+
+<ServicePageLayout
+  {meta}
+  title={`Доставка авто из ${country.nameGenitive}`}
+  description={`Организуем доставку вашего автомобиля из ${country.nameGenitive}. Таможенное оформление, страховка, транспортировка.`}
+  ctaLabel="Узнать стоимость доставки"
+  formService="delivery"
+  currentCountry={countryCode!}
+  currentService="dostavka"
+>
+  <div class="mt-8">
+    {routes.length > 0 ? (
+      <div class="flex flex-col gap-3">
+        {routes.map(r => (
+          <a
+            href={`/dostavka/${r.from}-${r.to}/`}
+            class="route-link flex justify-between items-center py-3 px-4 rounded-sm border no-underline border-default bg-surface"
+          >
+            <span class="text-sm font-medium text-primary">{country.name} → {r.to.toUpperCase()}</span>
+            <span class="text-xs text-accent">Подробнее →</span>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="space-y-4">
+        {[
+          { n: '01', text: 'Таможенное оформление и сертификация' },
+          { n: '02', text: 'Страховка груза на весь маршрут' },
+          { n: '03', text: 'Транспортировка автовозом или эвакуатором' },
+          { n: '04', text: 'Срок доставки 7–14 дней' },
+        ].map(step => (
+          <div class="flex gap-4 items-start">
+            <span class="font-display font-bold text-sm shrink-0 mt-0.5 w-7 text-accent">{step.n}</span>
+            <p class="text-sm leading-relaxed text-muted">{step.text}</p>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+
+  <style>
+    .route-link { transition: border-color 0.2s, background-color 0.2s; }
+    .route-link:hover {
+      border-color: var(--color-accent) !important;
+      background-color: var(--color-surface-2) !important;
+    }
+  </style>
+</ServicePageLayout>

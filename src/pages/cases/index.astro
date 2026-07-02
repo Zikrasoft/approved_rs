@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CaseCard from '../../components/CaseCard.astro';
+import { getCollection } from 'astro:content';
+import { SITE_URL, SITE_NAME } from '../../utils/constants';
+
+const meta = {
+  title: `Кейсы — реальные автомобили наших клиентов | ${SITE_NAME}`,
+  description: 'Реальные кейсы подбора, доставки и выкупа автомобилей. Смотрите что мы уже сделали для клиентов.',
+  canonical: `${SITE_URL}/cases/`,
+};
+
+const allCases = await getCollection('cases');
+const publishedCases = allCases.filter(c => c.data.published)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<BaseLayout {...meta}>
+
+  <section class="hero-grid relative border-b overflow-hidden border-default">
+    <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 50% 60% at 5% 50%, var(--color-ambient-glow) 0%, transparent 60%);"></div>
+    <span class="deco-word" style="font-size: clamp(6rem, 18vw, 15rem); bottom: -1rem; right: -1%; opacity: 0.8;">CASES</span>
+    <div class="relative max-w-6xl mx-auto px-6 py-16 md:py-20">
+      <span class="eyebrow fade-up fade-up-1">{SITE_NAME}</span>
+      <h1 class="font-display font-bold mb-3 fade-up fade-up-2 tracking-[-0.02em]" style="font-size: clamp(2.4rem, 5vw, 4rem);">Кейсы</h1>
+      <p class="text-base fade-up fade-up-3 text-muted">Реальные автомобили, реальные цены, реальные истории</p>
+    </div>
+  </section>
+
+  <section class="max-w-6xl mx-auto px-6 py-16">
+    {publishedCases.length > 0
+      ? <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {publishedCases.map((c, i) => (
+            <div style={`animation: fadeUp 0.75s ${0.05 + 0.07 * i}s cubic-bezier(0.16,1,0.3,1) both;`}>
+              <CaseCard case={c} />
+            </div>
+          ))}
+        </div>
+      : <p class="text-sm text-muted">Кейсы скоро появятся.</p>
+    }
+  </section>
+
+</BaseLayout>

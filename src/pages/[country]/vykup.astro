@@ -1,0 +1,35 @@
+---
+import ServicePageLayout from '../../layouts/ServicePageLayout.astro';
+import StepsList from '../../components/StepsList.astro';
+import { getCountryPaths } from '../../utils/paths';
+import { getCountry } from '../../utils/geo';
+import { generateMeta } from '../../utils/seo';
+import { getCollection } from 'astro:content';
+import { getCasesForPage } from '../../utils/cases';
+import { SITE_URL } from '../../utils/constants';
+
+export const getStaticPaths = getCountryPaths;
+
+const { country: countryCode } = Astro.params;
+const country = getCountry(countryCode!)!;
+const meta = generateMeta('vykup', { country, baseUrl: SITE_URL, path: `/${countryCode}/vykup/` });
+const cases = getCasesForPage(await getCollection('cases'), { country: countryCode, service: 'buyout' }).slice(0, 3);
+---
+
+<ServicePageLayout
+  {meta} {cases}
+  title={`Выкуп авто в ${country.nameLocative}`}
+  description={`Выкупаем автомобили на иностранных номерах в ${country.nameLocative}. Российские, европейские номера. Оценка онлайн, оформление за 1 день, перевод в день сделки.`}
+  ctaLabel="Получить оценку"
+  formService="buyout"
+  currentCountry={countryCode!}
+  currentService="vykup"
+  casesHeading="Кейсы выкупа"
+>
+  <StepsList steps={[
+    { n: '01', text: 'Отправляете фото и описание автомобиля' },
+    { n: '02', text: 'Оцениваем онлайн по фото за 1 час' },
+    { n: '03', text: 'Встречаемся на осмотр — любые иностранные номера' },
+    { n: '04', text: 'Оформляем сделку, деньги в день подписания' },
+  ]} />
+</ServicePageLayout>

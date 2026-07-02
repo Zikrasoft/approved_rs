@@ -1,0 +1,5 @@
+[
+  { "from": "de", "to": "rs", "active": true },
+  { "from": "de", "to": "es", "active": true },
+  { "from": "de", "to": "me", "active": false }
+]

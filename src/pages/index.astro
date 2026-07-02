@@ -1,0 +1,209 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TelegramCTA from '../components/TelegramCTA.astro';
+import CaseCard from '../components/CaseCard.astro';
+import LeadForm from '../components/LeadForm.astro';
+import { Search, Truck, Banknote, ClipboardCheck, KeyRound } from 'lucide-astro';
+import { getCollection } from 'astro:content';
+import { getActiveCountries } from '../utils/geo';
+import { SITE_URL, SITE_NAME } from '../utils/constants';
+
+const meta = {
+  title: `Автоподбор и доставка авто из Европы | ${SITE_NAME}`,
+  description: 'Подберём и привезём автомобиль из Германии, Испании, Сербии. Проверка, выкуп, доставка. Работаем для русскоязычных по всему миру.',
+  canonical: `${SITE_URL}/`,
+};
+
+const allCases = await getCollection('cases');
+const latestCases = allCases.filter(c => c.data.published).slice(0, 3);
+const countries = getActiveCountries();
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: SITE_NAME,
+  description: meta.description,
+  url: SITE_URL,
+  serviceType: ['Автоподбор', 'Доставка автомобилей', 'Выкуп авто'],
+};
+
+const services = [
+  { href: '/de/autopodbor/', Icon: Search,         title: 'Автоподбор',   desc: 'Находим и проверяем подходящие автомобили на европейских рынках' },
+  { href: '/de/dostavka/',   Icon: Truck,          title: 'Доставка',     desc: 'Доставим ваш автомобиль до двери в любой стране' },
+  { href: '/de/vykup/',      Icon: Banknote,       title: 'Выкуп',        desc: 'Быстрый выкуп авто на иностранных номерах' },
+  { href: '/de/proverka/',   Icon: ClipboardCheck, title: 'Проверка',     desc: 'Независимая экспертиза перед покупкой у любого продавца' },
+  { href: '/de/combined/',   Icon: KeyRound,       title: 'Под ключ',     desc: 'Полный цикл: подбор, проверка и доставка включены' },
+];
+
+const steps = [
+  { n: '01', title: 'Заявка',   desc: 'Оставляете заявку через форму или пишете напрямую в Telegram' },
+  { n: '02', title: 'Подбор',   desc: 'Ищем варианты по вашим критериям — марка, бюджет, год' },
+  { n: '03', title: 'Проверка', desc: 'Независимый эксперт осматривает автомобиль перед покупкой' },
+  { n: '04', title: 'Доставка', desc: 'Оформляем документы и доставляем авто к вам' },
+];
+---
+
+<BaseLayout {...meta} schema={schema}>
+
+  <!-- ─── Hero ──────────────────────────────────────────── -->
+  <section class="hero-grid relative border-b overflow-hidden border-default">
+    <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 55% 60% at 10% 55%, var(--color-ambient-glow) 0%, transparent 65%), radial-gradient(ellipse 45% 40% at 90% 15%, var(--color-accent-subtle) 0%, transparent 60%);"></div>
+    <span class="deco-word" style="font-size: clamp(8rem, 22vw, 20rem); bottom: -1.5rem; right: -2%; opacity: 0.9;">EUROPA</span>
+
+    <div class="relative max-w-6xl mx-auto px-6 py-20 md:py-28">
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
+
+        <div class="lg:col-span-3">
+          <span class="eyebrow fade-up fade-up-1">Европейский автосервис для русскоязычных</span>
+          <h1 class="font-display font-bold leading-none mb-8 fade-up fade-up-2 text-primary tracking-[-0.02em]" style="font-size: clamp(2.6rem, 5.5vw, 4.4rem);">
+            Автоподбор<br/>
+            и доставка авто<br/>
+            <em class="text-accent italic">из Европы</em>
+          </h1>
+          <p class="text-base leading-relaxed mb-10 max-w-md fade-up fade-up-3 text-muted">
+            Подберём, проверим и привезём автомобиль из Германии, Испании или Сербии. Работаем полностью удалённо — через Telegram.
+          </p>
+          <div class="fade-up fade-up-4">
+            <TelegramCTA />
+          </div>
+          <div class="grid grid-cols-3 gap-6 mt-8 pt-8 border-t fade-up fade-up-5 border-default">
+            <div class="stat-block"><p class="stat-n">200+</p><p class="stat-l">клиентов</p></div>
+            <div class="stat-block"><p class="stat-n">4</p><p class="stat-l">страны</p></div>
+            <div class="stat-block"><p class="stat-n">5 лет</p><p class="stat-l">на рынке</p></div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-2 fade-up fade-up-3">
+          <LeadForm />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Services ──────────────────────────────────────── -->
+  <section class="border-b border-default">
+    <div class="max-w-6xl mx-auto px-6 py-20">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
+        <div>
+          <span class="accent-line"></span>
+          <h2 class="font-display text-4xl font-bold">Наши услуги</h2>
+        </div>
+        <p class="text-sm max-w-xs sm:text-right text-muted">Германия · Испания · Сербия</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {services.map((s, i) => {
+          const Icon = s.Icon;
+          const idx = String(i + 1).padStart(2, '0');
+          return (
+            <a
+              href={s.href}
+              class="service-card group flex flex-col p-7 rounded-sm no-underline glow-border bg-surface border border-default"
+              style={`animation: fadeUp 0.75s ${0.08 + i * 0.08}s cubic-bezier(0.16,1,0.3,1) both;`}
+            >
+              <div class="flex items-start justify-between mb-5">
+                <span class="flex items-center justify-center w-10 h-10 rounded-sm shrink-0 bg-accent-subtle text-accent">
+                  <Icon size={19} />
+                </span>
+                <span class="card-index">{idx}</span>
+              </div>
+              <h3 class="font-display text-xl font-bold mb-2 text-primary">{s.title}</h3>
+              <p class="text-sm leading-relaxed flex-1 text-muted">{s.desc}</p>
+              <span class="inline-flex items-center gap-1 mt-5 text-xs font-medium text-accent">
+                Подробнее
+                <span class="service-arrow transition-transform duration-200">→</span>
+              </span>
+            </a>
+          );
+        })}
+
+        {countries.map((c) => (
+          <a
+            href={`/${c.code}/autopodbor/`}
+            class="country-card group flex items-center gap-5 p-7 rounded-sm no-underline glow-border bg-surface border border-default"
+          >
+            <div class="w-11 h-11 rounded-sm flex items-center justify-center shrink-0 text-2xl bg-surface-2">
+              {c.code === 'de' ? '🇩🇪' : c.code === 'rs' ? '🇷🇸' : c.code === 'es' ? '🇪🇸' : '🏳️'}
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium mb-0.5 text-primary">Автоподбор в {c.nameLocative}</p>
+              <p class="text-xs text-muted">Европейский рынок · Под ключ</p>
+            </div>
+            <span class="country-arrow text-xs text-accent transition-transform duration-200">→</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── How it works ──────────────────────────────────── -->
+  <section class="border-b border-default">
+    <div class="max-w-6xl mx-auto px-6 py-20">
+      <span class="accent-line"></span>
+      <h2 class="font-display text-4xl font-bold mb-14">Как это работает</h2>
+      <div class="relative">
+        <div class="hidden lg:block absolute h-px" style="top: 1.375rem; left: 2.5rem; right: 2.5rem; background: linear-gradient(90deg, transparent 0%, var(--color-accent-border) 15%, var(--color-accent-border) 85%, transparent 100%);"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {steps.map((step, i) => (
+            <div style={`animation: fadeUp 0.75s ${0.1 + i * 0.1}s cubic-bezier(0.16,1,0.3,1) both;`}>
+              <div class="step-circle">{step.n}</div>
+              <h3 class="font-display text-xl font-bold mb-3 text-primary">{step.title}</h3>
+              <p class="text-sm leading-relaxed text-muted">{step.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Cases ─────────────────────────────────────────── -->
+  {latestCases.length > 0 && (
+    <section class="border-b border-default">
+      <div class="max-w-6xl mx-auto px-6 py-20">
+        <div class="flex items-end justify-between mb-12">
+          <div>
+            <span class="accent-line"></span>
+            <h2 class="font-display text-4xl font-bold">Последние кейсы</h2>
+          </div>
+          <a href="/cases/" class="cases-link hidden sm:flex items-center gap-1 text-sm font-medium no-underline text-accent">
+            Все кейсы <span class="cases-arrow transition-transform duration-200">→</span>
+          </a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {latestCases.map(c => <CaseCard case={c} />)}
+        </div>
+        <div class="mt-8 sm:hidden">
+          <a href="/cases/" class="text-sm font-medium text-accent">Все кейсы →</a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- ─── CTA ───────────────────────────────────────────── -->
+  <section class="max-w-6xl mx-auto px-6 py-20">
+    <div class="cta-card relative rounded-sm p-10 md:p-16 text-center overflow-hidden bg-surface border border-border-strong">
+      <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 70% 80% at 50% 50%, var(--color-ambient-glow) 0%, transparent 70%);"></div>
+      <div class="absolute top-0 left-0 w-16 h-16 pointer-events-none" style="background: linear-gradient(135deg, var(--color-accent-soft) 0%, transparent 60%);"></div>
+      <div class="absolute bottom-0 right-0 w-16 h-16 pointer-events-none" style="background: linear-gradient(315deg, var(--color-accent-soft) 0%, transparent 60%);"></div>
+      <div class="relative">
+        <span class="eyebrow justify-center">Готовы начать?</span>
+        <h2 class="font-display font-bold mb-5 leading-[1.1] tracking-[-0.02em]" style="font-size: clamp(2rem, 4vw, 3.2rem);">
+          Расскажите нам<br/>о своём автомобиле
+        </h2>
+        <p class="text-base mb-2 mx-auto max-w-sm text-muted leading-[1.7]">
+          Отвечаем в течение 2 часов. Консультация бесплатна.
+        </p>
+        <TelegramCTA label="Написать в Telegram" />
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+  .service-card:hover { background-color: var(--color-surface-2) !important; }
+  .service-card:hover .service-arrow { transform: translateX(4px); }
+  .country-card:hover { background-color: var(--color-surface-2) !important; }
+  .country-card:hover .country-arrow { transform: translateX(4px); }
+  .cases-link:hover .cases-arrow { transform: translateX(4px); }
+</style>
