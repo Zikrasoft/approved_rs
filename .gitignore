@@ -27,3 +27,4 @@ npm-debug.log*
 # SDD scratch (not needed in repo)
 .superpowers/
 docs/superpowers/
+.playwright-mcp
