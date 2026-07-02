@@ -1,5 +1,6 @@
 ---
 import FormField from './FormField.astro';
+import Button from './Button.astro';
 
 interface Props {
   service?: string;
@@ -42,19 +43,9 @@ const sourceUrl = Astro.url.pathname;
       </span>
     </label>
 
-    <button
-      type="submit"
-      class="lead-submit w-full py-3.5 text-sm font-medium tracking-[0.06em] cursor-pointer rounded-sm border-none bg-accent text-on-accent font-sans"
-    >
+    <Button type="submit" class="lead-btn w-full py-3.5 justify-center tracking-[0.06em]">
       Отправить заявку
-    </button>
+    </Button>
   </form>
 </div>
 
-<style>
-  .lead-submit { transition: background-color 0.2s, box-shadow 0.2s; }
-  .lead-submit:hover {
-    background-color: var(--color-accent-hover) !important;
-    box-shadow: 0 0 20px var(--color-accent-glow);
-  }
-</style>

@@ -1,6 +1,7 @@
 ---
 import { Menu, X, Send, Sun, Moon } from 'lucide-astro';
 import SiteLogo from './SiteLogo.astro';
+import Button from './Button.astro';
 import { SERVICES } from '../data/services';
 import { TG_CHANNEL_FALLBACK, DEFAULT_COUNTRY } from '../utils/constants';
 const TG_CHANNEL = import.meta.env.PUBLIC_TG_CHANNEL ?? `https://t.me/${TG_CHANNEL_FALLBACK}`;
@@ -35,15 +36,10 @@ const TG_CHANNEL = import.meta.env.PUBLIC_TG_CHANNEL ?? `https://t.me/${TG_CHANN
       </button>
 
       <!-- Desktop CTA -->
-      <a
-        href={TG_CHANNEL}
-        target="_blank"
-        rel="noopener"
-        class="header-cta hidden md:flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-medium no-underline bg-accent text-on-accent"
-      >
+      <Button href={TG_CHANNEL} target="_blank" rel="noopener" class="hidden md:flex px-4 py-2">
         <Send size={13} />
         Telegram
-      </a>
+      </Button>
 
       <!-- Mobile burger -->
       <button
@@ -71,15 +67,10 @@ const TG_CHANNEL = import.meta.env.PUBLIC_TG_CHANNEL ?? `https://t.me/${TG_CHANN
       <a href="/contacts/" class="text-secondary">Контакты</a>
     </nav>
     <div class="max-w-6xl mx-auto px-6 pb-6">
-      <a
-        href={TG_CHANNEL}
-        target="_blank"
-        rel="noopener"
-        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-sm text-sm font-medium no-underline bg-accent text-on-accent"
-      >
+      <Button href={TG_CHANNEL} target="_blank" rel="noopener" class="px-5 py-2.5">
         <Send size={14} />
         Написать в Telegram
-      </a>
+      </Button>
     </div>
   </div>
 </header>
@@ -104,12 +95,6 @@ const TG_CHANNEL = import.meta.env.PUBLIC_TG_CHANNEL ?? `https://t.me/${TG_CHANN
   }
   .header-nav a:hover { color: var(--color-text) !important; }
   .header-nav a:hover::after { transform: scaleX(1); }
-
-  .header-cta { transition: background-color 0.2s, box-shadow 0.2s; }
-  .header-cta:hover {
-    background-color: var(--color-accent-hover) !important;
-    box-shadow: 0 0 16px var(--color-accent-glow);
-  }
 
   .theme-btn { transition: border-color 0.2s, color 0.2s, background-color 0.2s; }
   .theme-btn:hover {

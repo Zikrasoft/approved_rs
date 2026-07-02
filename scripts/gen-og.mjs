@@ -16,18 +16,18 @@ const svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http
 
   <!-- Subtle bottom-right glow -->
   <ellipse cx="1050" cy="520" rx="380" ry="280"
-    fill="#3B4F6E" opacity="0.05"/>
+    fill="#1E3A5F" opacity="0.05"/>
 
   <!-- Ghost deco word -->
   <text x="${W + 20}" y="${H - 30}"
     text-anchor="end"
     font-family="Georgia, 'Times New Roman', serif"
     font-size="320" font-weight="bold" font-style="italic"
-    fill="none" stroke="#3B4F6E" stroke-width="1.5" opacity="0.055"
+    fill="none" stroke="#1E3A5F" stroke-width="1.5" opacity="0.055"
     letter-spacing="-12">AUTO</text>
 
   <!-- Left accent vertical bar -->
-  <rect x="72" y="72" width="2.5" height="${H - 144}" fill="#3B4F6E" rx="1.5" opacity="0.35"/>
+  <rect x="72" y="72" width="2.5" height="${H - 144}" fill="#1E3A5F" rx="1.5" opacity="0.35"/>
 
   <!-- Eyebrow label -->
   <text x="96" y="122"
@@ -42,7 +42,7 @@ const svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http
     fill="#0D0F14" letter-spacing="-4">APPROVED</text>
 
   <!-- .RS badge (pill) -->
-  <rect x="92" y="308" width="80" height="34" rx="3" fill="#3B4F6E"/>
+  <rect x="92" y="308" width="80" height="34" rx="3" fill="#1E3A5F"/>
   <text x="132" y="332"
     text-anchor="middle"
     font-family="Arial, Helvetica, sans-serif"
@@ -69,7 +69,7 @@ const svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http
   <!-- URL -->
   <text x="96" y="553"
     font-family="Arial, Helvetica, sans-serif"
-    font-size="18" font-weight="600" fill="#3B4F6E" letter-spacing="0.5">approved.rs</text>
+    font-size="18" font-weight="600" fill="#1E3A5F" letter-spacing="0.5">approved.rs</text>
 
   <!-- Outer border -->
   <rect x="3" y="3" width="${W - 6}" height="${H - 6}"

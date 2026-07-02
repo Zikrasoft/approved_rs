@@ -2,7 +2,7 @@
 import BaseLayout from './BaseLayout.astro';
 import LeadForm from '../components/LeadForm.astro';
 import TelegramCTA from '../components/TelegramCTA.astro';
-import CaseCard from '../components/CaseCard.astro';
+import CasesGrid from '../components/CasesGrid.astro';
 import CountryLinks from '../components/CountryLinks.astro';
 import ServiceLinks from '../components/ServiceLinks.astro';
 import type { MetaProps } from '../utils/seo';
@@ -53,17 +53,7 @@ const {
     </div>
   </section>
 
-  {cases.length > 0 && (
-    <section class="border-b border-default">
-      <div class="max-w-6xl mx-auto px-6 py-16">
-        <span class="accent-line"></span>
-        <h2 class="font-display text-3xl mb-10">{casesHeading}</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {cases.map(c => <CaseCard case={c} />)}
-        </div>
-      </div>
-    </section>
-  )}
+  <CasesGrid {cases} heading={casesHeading ?? ''} />
 
   <div class="max-w-6xl mx-auto px-6 pb-16 pt-4">
     <CountryLinks currentCountry={currentCountry} service={currentService} />

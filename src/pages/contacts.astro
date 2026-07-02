@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import TelegramCTA from '../components/TelegramCTA.astro';
+import PageHero from '../components/PageHero.astro';
 import { SITE_URL, SITE_NAME } from '../utils/constants';
 
 const meta = {
@@ -25,15 +26,7 @@ const steps = [
 
 <BaseLayout {...meta}>
 
-  <section class="hero-grid relative border-b overflow-hidden border-default">
-    <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 50% 60% at 5% 50%, var(--color-ambient-glow) 0%, transparent 60%);"></div>
-    <span class="deco-word" style="font-size: clamp(6rem, 18vw, 15rem); bottom: -1rem; right: -1%; opacity: 0.8;">CONTACT</span>
-    <div class="relative max-w-6xl mx-auto px-6 py-16 md:py-20">
-      <span class="eyebrow fade-up fade-up-1">{SITE_NAME}</span>
-      <h1 class="font-display font-bold mb-3 fade-up fade-up-2 tracking-[-0.02em]" style="font-size: clamp(2.4rem, 5vw, 4rem);">Контакты</h1>
-      <p class="text-base fade-up fade-up-3 text-muted">Работаем через Telegram — быстро и удобно</p>
-    </div>
-  </section>
+  <PageHero decoWord="CONTACT" title="Контакты" subtitle="Работаем через Telegram — быстро и удобно" />
 
   <section class="max-w-6xl mx-auto px-6 py-16">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">

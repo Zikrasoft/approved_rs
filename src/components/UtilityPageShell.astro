@@ -1,0 +1,14 @@
+---
+interface Props {
+  centered?: boolean;
+  minHeight?: string;
+}
+
+const { centered = false, minHeight = '72vh' } = Astro.props;
+---
+
+<div class:list={['flex items-center']} style={`min-height: ${minHeight};`}>
+  <div class:list={['max-w-2xl mx-auto px-6 py-20 w-full', centered && 'text-center']}>
+    <slot />
+  </div>
+</div>

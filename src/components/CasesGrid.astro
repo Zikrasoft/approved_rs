@@ -1,0 +1,45 @@
+---
+import CaseCard from './CaseCard.astro';
+import SectionHeading from './SectionHeading.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  cases: CollectionEntry<'cases'>[];
+  heading: string;
+  headingSize?: 'xl' | 'lg';
+  viewAllHref?: string;
+  topBorder?: boolean;
+  class?: string;
+}
+
+const { cases, heading, headingSize = 'lg', viewAllHref, topBorder = false, class: className } = Astro.props;
+---
+
+{cases.length > 0 && (
+  <section class:list={[topBorder ? 'border-t' : 'border-b', 'border-default', className]}>
+    <div class="max-w-6xl mx-auto px-6 py-16">
+      <div class:list={['mb-10', viewAllHref && 'flex items-end justify-between']}>
+        <div>
+          <SectionHeading title={heading} size={headingSize} />
+        </div>
+        {viewAllHref && (
+          <a href={viewAllHref} class="cases-more hidden sm:flex items-center gap-1 text-sm font-medium no-underline text-accent">
+            Все кейсы <span class="arrow transition-transform duration-200">→</span>
+          </a>
+        )}
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {cases.map(c => <CaseCard case={c} />)}
+      </div>
+      {viewAllHref && (
+        <div class="mt-8 sm:hidden">
+          <a href={viewAllHref} class="text-sm font-medium text-accent">Все кейсы →</a>
+        </div>
+      )}
+    </div>
+  </section>
+)}
+
+<style>
+  .cases-more:hover .arrow { transform: translateX(4px); }
+</style>

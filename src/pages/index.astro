@@ -1,7 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import TelegramCTA from '../components/TelegramCTA.astro';
-import CaseCard from '../components/CaseCard.astro';
+import CasesGrid from '../components/CasesGrid.astro';
+import SectionHeading from '../components/SectionHeading.astro';
 import LeadForm from '../components/LeadForm.astro';
 import { Search, Truck, Banknote, ClipboardCheck, KeyRound } from 'lucide-astro';
 import { getCollection } from 'astro:content';
@@ -85,8 +86,7 @@ const steps = [
     <div class="max-w-6xl mx-auto px-6 py-20">
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
         <div>
-          <span class="accent-line"></span>
-          <h2 class="font-display text-4xl font-bold">Наши услуги</h2>
+          <SectionHeading title="Наши услуги" />
         </div>
         <p class="text-sm max-w-xs sm:text-right text-muted">Германия · Испания · Сербия</p>
       </div>
@@ -139,8 +139,7 @@ const steps = [
   <!-- ─── How it works ──────────────────────────────────── -->
   <section class="border-b border-default">
     <div class="max-w-6xl mx-auto px-6 py-20">
-      <span class="accent-line"></span>
-      <h2 class="font-display text-4xl font-bold mb-14">Как это работает</h2>
+      <SectionHeading title="Как это работает" class="mb-14" />
       <div class="relative">
         <div class="hidden lg:block absolute h-px" style="top: 1.375rem; left: 2.5rem; right: 2.5rem; background: linear-gradient(90deg, transparent 0%, var(--color-accent-border) 15%, var(--color-accent-border) 85%, transparent 100%);"></div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -157,27 +156,7 @@ const steps = [
   </section>
 
   <!-- ─── Cases ─────────────────────────────────────────── -->
-  {latestCases.length > 0 && (
-    <section class="border-b border-default">
-      <div class="max-w-6xl mx-auto px-6 py-20">
-        <div class="flex items-end justify-between mb-12">
-          <div>
-            <span class="accent-line"></span>
-            <h2 class="font-display text-4xl font-bold">Последние кейсы</h2>
-          </div>
-          <a href="/cases/" class="cases-link hidden sm:flex items-center gap-1 text-sm font-medium no-underline text-accent">
-            Все кейсы <span class="cases-arrow transition-transform duration-200">→</span>
-          </a>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {latestCases.map(c => <CaseCard case={c} />)}
-        </div>
-        <div class="mt-8 sm:hidden">
-          <a href="/cases/" class="text-sm font-medium text-accent">Все кейсы →</a>
-        </div>
-      </div>
-    </section>
-  )}
+  <CasesGrid cases={latestCases} heading="Последние кейсы" headingSize="xl" viewAllHref="/cases/" />
 
   <!-- ─── CTA ───────────────────────────────────────────── -->
   <section class="max-w-6xl mx-auto px-6 py-20">
@@ -205,5 +184,4 @@ const steps = [
   .service-card:hover .service-arrow { transform: translateX(4px); }
   .country-card:hover { background-color: var(--color-surface-2) !important; }
   .country-card:hover .country-arrow { transform: translateX(4px); }
-  .cases-link:hover .cases-arrow { transform: translateX(4px); }
 </style>

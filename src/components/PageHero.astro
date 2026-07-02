@@ -1,0 +1,23 @@
+---
+import { SITE_NAME } from '../utils/constants';
+
+interface Props {
+  decoWord: string;
+  title: string;
+  subtitle?: string;
+  eyebrow?: string;
+}
+
+const { decoWord, title, subtitle, eyebrow = SITE_NAME } = Astro.props;
+---
+
+<section class="hero-grid relative border-b overflow-hidden border-default">
+  <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 50% 60% at 5% 50%, var(--color-ambient-glow) 0%, transparent 60%);"></div>
+  <span class="deco-word" style="font-size: clamp(6rem, 18vw, 15rem); bottom: -1rem; right: -1%; opacity: 0.8;">{decoWord}</span>
+  <div class="relative max-w-6xl mx-auto px-6 py-16 md:py-20">
+    {eyebrow && <span class="eyebrow fade-up fade-up-1">{eyebrow}</span>}
+    <h1 class="font-display font-bold mb-3 fade-up fade-up-2 tracking-[-0.02em]" style="font-size: clamp(2.4rem, 5vw, 4rem);">{title}</h1>
+    {subtitle && <p class="text-base fade-up fade-up-3 text-muted">{subtitle}</p>}
+    <slot />
+  </div>
+</section>

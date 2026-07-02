@@ -1,0 +1,12 @@
+---
+interface Props {
+  title: string;
+  size?: 'xl' | 'lg';
+  class?: string;
+}
+
+const { title, size = 'xl', class: className } = Astro.props;
+---
+
+<span class="accent-line"></span>
+<h2 class:list={['font-display font-bold', size === 'xl' ? 'text-4xl' : 'text-3xl', className]}>{title}</h2>
