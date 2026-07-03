@@ -4,7 +4,6 @@ import { getCityPaths } from '../../../utils/paths';
 import { getCountry } from '../../../utils/geo';
 import { generateMeta } from '../../../utils/seo';
 import { getCollection } from 'astro:content';
-import { getCasesForPage } from '../../../utils/cases';
 import { SITE_URL } from '../../../utils/constants';
 
 export const getStaticPaths = getCityPaths;
@@ -13,7 +12,7 @@ const { country: countryCode } = Astro.params;
 const { city } = Astro.props;
 const country = getCountry(countryCode!)!;
 const meta = generateMeta('autopodbor', { country, city, baseUrl: SITE_URL, path: `/${countryCode}/${city.slug}/autopodbor/` });
-const cases = getCasesForPage(await getCollection('cases'), { country: countryCode, service: 'autopodbor' }).slice(0, 3);
+const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === countryCode && c.data.service === 'autopodbor').slice(0, 3);
 ---
 
 <ServicePageLayout
