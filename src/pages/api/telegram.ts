@@ -1,7 +1,6 @@
 export const prerender = false;
 
 import type { APIContext } from 'astro';
-import { updateLeadStatus } from '../../lib/db';
 import { editGroupMessage, answerCallbackQuery } from '../../lib/telegram';
 import { ACTION_TO_STATUS } from '../../utils/labels';
 
@@ -34,7 +33,6 @@ export async function POST({ request }: APIContext): Promise<Response> {
   }
 
   try {
-    await updateLeadStatus(leadId, status, handledBy);
     await editGroupMessage(cq.message.message_id, cq.message.text, handledBy, status);
     await answerCallbackQuery(cq.id);
   } catch (err) {

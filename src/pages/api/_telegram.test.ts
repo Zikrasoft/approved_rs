@@ -1,15 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('../../lib/db', () => ({
-  updateLeadStatus: vi.fn().mockResolvedValue(undefined),
-}));
 vi.mock('../../lib/telegram', () => ({
   editGroupMessage: vi.fn().mockResolvedValue(undefined),
   answerCallbackQuery: vi.fn().mockResolvedValue(undefined),
 }));
 
 import { POST } from './telegram';
-import { updateLeadStatus } from '../../lib/db';
 import { editGroupMessage, answerCallbackQuery } from '../../lib/telegram';
 
 const SECRET = 'test-webhook-secret';
@@ -35,9 +31,6 @@ const baseCallbackQuery = {
 describe('POST /api/telegram', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(updateLeadStatus).mockResolvedValue(undefined);
-    vi.mocked(editGroupMessage).mockResolvedValue(undefined);
-    vi.mocked(answerCallbackQuery).mockResolvedValue(undefined);
   });
 
   it('returns 403 when secret token is missing', async () => {
@@ -50,24 +43,6 @@ describe('POST /api/telegram', () => {
     const ctx = makeCtx({ callback_query: { ...baseCallbackQuery, data: 'accept:42' } });
     const res = await POST(ctx);
     expect(res.status).toBe(200);
-  });
-
-  it('maps accept → in_progress status', async () => {
-    const ctx = makeCtx({ callback_query: { ...baseCallbackQuery, data: 'accept:42' } });
-    await POST(ctx);
-    expect(updateLeadStatus).toHaveBeenCalledWith(42, 'in_progress', 'manager1');
-  });
-
-  it('maps close → closed status', async () => {
-    const ctx = makeCtx({ callback_query: { ...baseCallbackQuery, data: 'close:42' } });
-    await POST(ctx);
-    expect(updateLeadStatus).toHaveBeenCalledWith(42, 'closed', 'manager1');
-  });
-
-  it('maps spam → spam status', async () => {
-    const ctx = makeCtx({ callback_query: { ...baseCallbackQuery, data: 'spam:42' } });
-    await POST(ctx);
-    expect(updateLeadStatus).toHaveBeenCalledWith(42, 'spam', 'manager1');
   });
 
   it('calls editGroupMessage with message_id and username', async () => {
@@ -91,11 +66,11 @@ describe('POST /api/telegram', () => {
     const ctx = makeCtx({ message: { text: '/start', from: { username: 'user1' } } });
     const res = await POST(ctx);
     expect(res.status).toBe(200);
-    expect(updateLeadStatus).not.toHaveBeenCalled();
+    expect(editGroupMessage).not.toHaveBeenCalled();
   });
 
-  it('returns 200 even when DB update throws', async () => {
-    vi.mocked(updateLeadStatus).mockRejectedValueOnce(new Error('DB error'));
+  it('returns 200 even when Telegram update throws', async () => {
+    vi.mocked(editGroupMessage).mockRejectedValueOnce(new Error('TG error'));
     const ctx = makeCtx({ callback_query: { ...baseCallbackQuery, data: 'accept:42' } });
     const res = await POST(ctx);
     expect(res.status).toBe(200);

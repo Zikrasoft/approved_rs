@@ -1,4 +1,3 @@
-import type { Lead } from './db';
 import { SERVICE_LABELS, STATUS_LABELS } from '../utils/labels';
 
 const BOT_TOKEN = import.meta.env.TELEGRAM_BOT_TOKEN!;
@@ -6,7 +5,17 @@ const CHANNEL_ID = import.meta.env.TELEGRAM_CHANNEL_ID!;
 const GROUP_ID = import.meta.env.TELEGRAM_GROUP_ID!;
 const API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
-function formatLeadText(lead: Lead): string {
+export interface LeadData {
+  id: number;
+  name: string;
+  contact: string;
+  service: string;
+  comment?: string | null;
+  country?: string | null;
+  source_url?: string | null;
+}
+
+function formatLeadText(lead: LeadData): string {
   const service = SERVICE_LABELS[lead.service] ?? lead.service;
   const lines: string[] = [
     `🚗 Заявка #${lead.id} — ${service}`,
@@ -33,14 +42,12 @@ async function tgPost(method: string, body: object): Promise<unknown> {
   return data.result;
 }
 
-export async function sendLeadNotification(lead: Lead): Promise<number> {
+export async function sendLeadNotification(lead: LeadData): Promise<void> {
   const text = formatLeadText(lead);
 
-  // Broadcast to channel — no buttons
   await tgPost('sendMessage', { chat_id: CHANNEL_ID, text });
 
-  // Post to moderation group — with inline keyboard
-  const result = await tgPost('sendMessage', {
+  await tgPost('sendMessage', {
     chat_id: GROUP_ID,
     text,
     reply_markup: {
@@ -50,9 +57,7 @@ export async function sendLeadNotification(lead: Lead): Promise<number> {
         { text: '🚫 Спам',   callback_data: `spam:${lead.id}` },
       ]],
     },
-  }) as { message_id: number };
-
-  return result.message_id;
+  });
 }
 
 export async function editGroupMessage(

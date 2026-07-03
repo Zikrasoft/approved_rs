@@ -4,22 +4,16 @@ const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
 import { sendLeadNotification, editGroupMessage, answerCallbackQuery } from './telegram';
-import type { Lead } from './db';
+import type { LeadData } from './telegram';
 
-const mockLead: Lead = {
+const mockLead: LeadData = {
   id: 42,
   name: 'Иван',
   contact: '@ivan',
   service: 'autopodbor',
   comment: 'BMW X5',
   country: 'de',
-  city: null,
   source_url: '/de/autopodbor/',
-  status: 'new',
-  tg_message_id: null,
-  handled_by: null,
-  created_at: '2026-01-01T00:00:00Z',
-  updated_at: '2026-01-01T00:00:00Z',
 };
 
 function mockFetchOk(result: unknown = { message_id: 999 }) {
@@ -68,11 +62,6 @@ describe('sendLeadNotification', () => {
     expect(body.text).toContain('Автоподбор');
     expect(body.text).toContain('Иван');
     expect(body.text).toContain('@ivan');
-  });
-
-  it('returns the group message_id', async () => {
-    const result = await sendLeadNotification(mockLead);
-    expect(result).toBe(999);
   });
 
   it('throws when Telegram returns ok: false', async () => {
