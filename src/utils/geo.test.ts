@@ -4,7 +4,6 @@ import {
   getCountry,
   getCitiesForCountry,
   getActiveRoutes,
-  getRoute,
 } from './geo';
 
 describe('getActiveCountries', () => {
@@ -45,14 +44,3 @@ describe('getActiveRoutes', () => {
   });
 });
 
-describe('getRoute', () => {
-  it('parses slug and finds route', () => {
-    const result = getRoute('de-rs');
-    expect(result?.from).toBe('de');
-    expect(result?.to).toBe('rs');
-  });
-
-  it('returns undefined for unknown route', () => {
-    expect(getRoute('xx-yy')).toBeUndefined();
-  });
-});

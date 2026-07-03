@@ -2,7 +2,7 @@
 import { Menu, X, Send, Sun, Moon } from 'lucide-astro';
 import SiteLogo from './SiteLogo.astro';
 import Button from './Button.astro';
-import { SERVICES } from '../data/services';
+import { SERVICES } from '../utils/labels';
 import { TG_CHANNEL_FALLBACK, DEFAULT_COUNTRY } from '../utils/constants';
 const TG_CHANNEL = import.meta.env.PUBLIC_TG_CHANNEL ?? `https://t.me/${TG_CHANNEL_FALLBACK}`;
 ---

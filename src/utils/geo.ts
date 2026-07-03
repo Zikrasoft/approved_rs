@@ -40,8 +40,3 @@ export const getCitiesForCountry = (countryCode: string): City[] =>
 
 export const getActiveRoutes = (): Route[] =>
   routes.filter(r => r.active);
-
-export const getRoute = (slug: string): Route | undefined => {
-  const [from, to] = slug.split('-');
-  return routes.find(r => r.from === from && r.to === to && r.active);
-};
