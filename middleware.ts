@@ -11,6 +11,9 @@ const GEO_MAP: Record<string, string> = {
   DE: 'de',
   RS: 'rs',
   ES: 'es',
+  ME: 'de',
+  KZ: 'de',
+  KG: 'de',
 };
 
 export default function middleware(req: Request): Response | undefined {

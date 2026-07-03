@@ -3,11 +3,12 @@ import BaseLayout from './BaseLayout.astro';
 import LeadForm from '../components/LeadForm.astro';
 import TelegramCTA from '../components/TelegramCTA.astro';
 import CasesGrid from '../components/CasesGrid.astro';
-import CountryLinks from '../components/CountryLinks.astro';
-import ServiceLinks from '../components/ServiceLinks.astro';
+import ChipLinks from '../components/ChipLinks.astro';
 import type { MetaProps } from '../utils/seo';
 import type { CollectionEntry } from 'astro:content';
 import { SITE_NAME } from '../utils/constants';
+import { getActiveCountries } from '../utils/geo';
+import { SERVICES } from '../data/services';
 
 interface Props {
   meta: MetaProps;
@@ -56,8 +57,8 @@ const {
   <CasesGrid {cases} heading={casesHeading ?? ''} />
 
   <div class="max-w-6xl mx-auto px-6 pb-16 pt-4">
-    <CountryLinks currentCountry={currentCountry} service={currentService} />
-    <ServiceLinks currentService={currentService} country={currentCountry} />
+    <ChipLinks label="Также работаем в:" items={getActiveCountries().filter(c => c.code !== currentCountry).map(c => ({ href: `/${c.code}/${currentService}/`, text: c.name }))} />
+    <ChipLinks label="Другие услуги:" items={SERVICES.filter(s => s.slug !== currentService).map(s => ({ href: `/${currentCountry}/${s.slug}/`, text: s.label }))} />
   </div>
 
 </BaseLayout>

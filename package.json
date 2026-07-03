@@ -4,7 +4,6 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "start": "astro dev",
     "stop": "astro dev stop",
     "build": "astro build",
     "preview": "astro preview",
@@ -25,7 +24,6 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.1",
-    "@vitest/ui": "^3.0.0",
     "lucide-astro": "^0.556.0",
     "sharp": "^0.35.2",
     "tailwindcss": "^4.3.1",

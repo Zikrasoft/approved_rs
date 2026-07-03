@@ -5,7 +5,6 @@ import { getCountryPaths } from '../../utils/paths';
 import { getCountry } from '../../utils/geo';
 import { generateMeta } from '../../utils/seo';
 import { getCollection } from 'astro:content';
-import { getCasesForPage } from '../../utils/cases';
 import { SITE_URL } from '../../utils/constants';
 
 export const getStaticPaths = getCountryPaths;
@@ -13,7 +12,7 @@ export const getStaticPaths = getCountryPaths;
 const { country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
 const meta = generateMeta('vykup', { country, baseUrl: SITE_URL, path: `/${countryCode}/vykup/` });
-const cases = getCasesForPage(await getCollection('cases'), { country: countryCode, service: 'buyout' }).slice(0, 3);
+const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === countryCode && c.data.service === 'buyout').slice(0, 3);
 ---
 
 <ServicePageLayout

@@ -8,7 +8,6 @@ import { getRoutePaths } from '../../utils/paths';
 import { getCountry } from '../../utils/geo';
 import { generateMeta } from '../../utils/seo';
 import { getCollection } from 'astro:content';
-import { getCasesForPage } from '../../utils/cases';
 import { SITE_URL, SITE_NAME } from '../../utils/constants';
 
 export const getStaticPaths = getRoutePaths;
@@ -18,7 +17,7 @@ const { route: routeData } = Astro.props;
 const fromCountry = getCountry(routeData.from)!;
 const toCountry = getCountry(routeData.to)!;
 const meta = generateMeta('delivery', { fromCountry, toCountry, baseUrl: SITE_URL, path: `/dostavka/${route}/` });
-const cases = getCasesForPage(await getCollection('cases'), { country: routeData.from, service: 'delivery' }).slice(0, 3);
+const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === routeData.from && c.data.service === 'delivery').slice(0, 3);
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'Service',

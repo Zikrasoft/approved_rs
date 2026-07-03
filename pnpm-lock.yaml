@@ -41,9 +41,6 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.3.1
         version: 4.3.2(vite@8.1.2(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0))
-      '@vitest/ui':
-        specifier: ^3.0.0
-        version: 3.2.6(vitest@3.2.6)
       lucide-astro:
         specifier: ^0.556.0
         version: 0.556.0(astro@7.0.4(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@24.13.2)(@vercel/functions@3.7.4)(idb-keyval@6.2.6)(jiti@2.7.0)(rollup@4.62.2))
@@ -4719,7 +4716,8 @@ snapshots:
 
   '@oxc-project/types@0.137.0': {}
 
-  '@polka/url@1.0.0-next.29': {}
+  '@polka/url@1.0.0-next.29':
+    optional: true
 
   '@react-aria/actiongroup@3.8.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
@@ -5972,6 +5970,7 @@ snapshots:
       tinyglobby: 0.2.17
       tinyrainbow: 2.0.0
       vitest: 3.2.6(@types/debug@4.1.13)(@types/node@24.13.2)(@vitest/ui@3.2.6)(jiti@2.7.0)(lightningcss@1.32.0)
+    optional: true
 
   '@vitest/utils@3.2.6':
     dependencies:
@@ -6428,13 +6427,15 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.4
 
-  fflate@0.8.3: {}
+  fflate@0.8.3:
+    optional: true
 
   file-uri-to-path@1.0.0: {}
 
   find-root@1.1.0: {}
 
-  flatted@3.4.2: {}
+  flatted@3.4.2:
+    optional: true
 
   flattie@1.1.1: {}
 
@@ -7585,6 +7586,7 @@ snapshots:
       '@polka/url': 1.0.0-next.29
       mrmime: 2.0.1
       totalist: 3.0.1
+    optional: true
 
   sisteransi@1.0.5: {}
 
@@ -7701,7 +7703,8 @@ snapshots:
 
   tinyspy@4.0.4: {}
 
-  totalist@3.0.1: {}
+  totalist@3.0.1:
+    optional: true
 
   tr46@0.0.3: {}
 
