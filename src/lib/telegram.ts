@@ -1,7 +1,6 @@
 import { SERVICE_LABELS, STATUS_LABELS } from '../utils/labels';
 
 const BOT_TOKEN = import.meta.env.TELEGRAM_BOT_TOKEN!;
-const CHANNEL_ID = import.meta.env.TELEGRAM_CHANNEL_ID!;
 const GROUP_ID = import.meta.env.TELEGRAM_GROUP_ID!;
 const API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
@@ -44,8 +43,6 @@ async function tgPost(method: string, body: object): Promise<unknown> {
 
 export async function sendLeadNotification(lead: LeadData): Promise<void> {
   const text = formatLeadText(lead);
-
-  await tgPost('sendMessage', { chat_id: CHANNEL_ID, text });
 
   await tgPost('sendMessage', {
     chat_id: GROUP_ID,

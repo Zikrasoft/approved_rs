@@ -27,28 +27,21 @@ describe('sendLeadNotification', () => {
   beforeEach(() => mockFetchOk());
   afterEach(() => mockFetch.mockReset());
 
-  it('makes exactly 2 fetch calls (channel + group)', async () => {
+  it('makes exactly 1 fetch call (group only)', async () => {
     await sendLeadNotification(mockLead);
-    expect(mockFetch).toHaveBeenCalledTimes(2);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
-  it('first call posts to channel without reply_markup', async () => {
+  it('posts to group with 3-button inline keyboard', async () => {
     await sendLeadNotification(mockLead);
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.chat_id).toBe('-1001234567890');
-    expect(body.reply_markup).toBeUndefined();
-  });
-
-  it('second call posts to group with 3-button inline keyboard', async () => {
-    await sendLeadNotification(mockLead);
-    const body = JSON.parse(mockFetch.mock.calls[1][1].body);
     expect(body.chat_id).toBe('-1009876543210');
     expect(body.reply_markup.inline_keyboard[0]).toHaveLength(3);
   });
 
   it('buttons have correct callback_data with lead id', async () => {
     await sendLeadNotification(mockLead);
-    const body = JSON.parse(mockFetch.mock.calls[1][1].body);
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     const buttons = body.reply_markup.inline_keyboard[0];
     expect(buttons[0].callback_data).toBe('accept:42');
     expect(buttons[1].callback_data).toBe('close:42');
@@ -58,6 +51,7 @@ describe('sendLeadNotification', () => {
   it('message text contains lead id, service label, name, contact', async () => {
     await sendLeadNotification(mockLead);
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.chat_id).toBe('-1009876543210');
     expect(body.text).toContain('#42');
     expect(body.text).toContain('Автоподбор');
     expect(body.text).toContain('Иван');
