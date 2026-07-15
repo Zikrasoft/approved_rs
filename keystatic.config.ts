@@ -7,7 +7,7 @@ export default config({
     cases: collection({
       label: 'Кейсы',
       slugField: 'title',
-      path: 'src/content/cases/*.md',
+      path: 'src/content/cases/*',
       format: { contentField: 'content' },
       schema: {
         title: fields.slug({ name: { label: 'Заголовок' } }),
@@ -34,7 +34,7 @@ export default config({
           ],
           defaultValue: 'autopodbor',
         }),
-        image: fields.text({ label: 'Фото (путь, напр. /cases/bmw.jpg)' }),
+        image: fields.image({ label: 'Фото', directory: 'public/cases', publicPath: '/cases/' }),
         date: fields.date({ label: 'Дата' }),
         published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
         content: fields.markdoc({ label: 'Описание' }),
