@@ -41,7 +41,7 @@ const sections = [
   <section class="max-w-3xl mx-auto px-6 py-16">
     <div class="space-y-10">
       {sections.map((s, i) => (
-        <div class="pb-10 border-b border-default" style={`animation: fadeUp 0.5s ${0.1 + i * 0.1}s both`}>
+        <div class="pb-10 border-b border-default anim-inline-fast" style={`--anim-delay: ${0.1 + i * 0.1}s`}>
           <h2 class="font-display text-2xl font-bold mb-4">{s.title}</h2>
           <p class="text-base leading-relaxed text-muted">{s.text}</p>
         </div>

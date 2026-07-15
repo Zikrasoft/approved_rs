@@ -8,5 +8,10 @@ interface Props {
 const { title, size = 'xl', class: className } = Astro.props;
 ---
 
-<span class="accent-line"></span>
-<h2 class:list={['font-display font-bold', size === 'xl' ? 'text-4xl' : 'text-3xl', className]}>{title}</h2>
+<div class:list={['section-heading', className]}>
+  <span class="accent-line"></span>
+  <h2 class:list={[
+    'font-display font-bold tracking-[-0.025em] leading-tight',
+    size === 'xl' ? 'text-[2.75rem]' : 'text-[2.25rem]',
+  ]}>{title}</h2>
+</div>

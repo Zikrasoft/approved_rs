@@ -1,4 +1,12 @@
 @import "tailwindcss";
+@import "@fontsource/outfit/300.css";
+@import "@fontsource/outfit/400.css";
+@import "@fontsource/outfit/500.css";
+@import "@fontsource/outfit/600.css";
+@import "@fontsource/outfit/700.css";
+@import "@fontsource/playfair-display/700.css";
+@import "@fontsource/playfair-display/700-italic.css";
+@import "@fontsource/playfair-display/800.css";
 
 @theme {
   /* ── Light default palette ── */
@@ -25,7 +33,7 @@
   --color-header-mobile:  rgba(244, 246, 250, 0.99);
 
   --font-display: 'Playfair Display', Georgia, serif;
-  --font-sans:    'Rubik', system-ui, sans-serif;
+  --font-sans:    'Outfit', system-ui, sans-serif;
 }
 
 /* ── Non-class tokens (only used in CSS rules / inline gradients) ── */
@@ -34,6 +42,16 @@
   --color-deco-stroke:  rgba(59, 79, 110, 0.05);
   --color-ambient-glow: rgba(59, 79, 110, 0.05);
   --grain-opacity:      0.012;
+  --ease-spring:        cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Semantic z-index scale */
+  --z-base:    0;
+  --z-raised:  10;
+  --z-sticky:  40;
+  --z-overlay: 50;
+  --z-modal:   60;
+  --z-grain:   70;
+  --z-toast:   80;
 }
 
 /* ── Dark theme overrides ── */
@@ -77,6 +95,8 @@
 }
 
 /* ─── Base ─────────────────────────────────────────────── */
+html { scroll-behavior: smooth; }
+
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
@@ -95,7 +115,7 @@ body::after {
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
   opacity: var(--grain-opacity);
   pointer-events: none;
-  z-index: 9000;
+  z-index: var(--z-grain);
   mix-blend-mode: overlay;
   transition: opacity 0.3s;
 }
@@ -105,6 +125,7 @@ h1, h2, h3, h4 {
   font-weight: 700;
   line-height: 1.15;
   color: var(--color-text);
+  text-wrap: balance;
 }
 
 @layer base {
@@ -129,13 +150,17 @@ h1, h2, h3, h4 {
   to   { transform: scaleX(1); opacity: 1; }
 }
 
-.fade-up { animation: fadeUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.fade-up { animation: fadeUp 0.75s var(--ease-spring) both; }
 .fade-up-1 { animation-delay: 0.06s; }
 .fade-up-2 { animation-delay: 0.16s; }
 .fade-up-3 { animation-delay: 0.28s; }
 .fade-up-4 { animation-delay: 0.42s; }
 .fade-up-5 { animation-delay: 0.56s; }
 .fade-up-6 { animation-delay: 0.72s; }
+
+/* Staggered entrance for inline-animated elements (delay via --anim-delay var) */
+.anim-inline      { animation: fadeUp 0.75s var(--anim-delay, 0s) var(--ease-spring) both; }
+.anim-inline-fast { animation: fadeUp 0.5s  var(--anim-delay, 0s) var(--ease-spring) both; }
 
 /* ─── Eyebrow label ──────────────────────────────────────── */
 .eyebrow {
@@ -157,7 +182,7 @@ h1, h2, h3, h4 {
   height: 1px;
   background: var(--color-accent);
   flex-shrink: 0;
-  animation: slideRight 0.5s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: slideRight 0.5s 0.1s var(--ease-spring) both;
   transform-origin: left;
 }
 
@@ -250,7 +275,7 @@ h1, h2, h3, h4 {
   font-weight: 700;
   font-style: italic;
   color: var(--color-accent);
-  background: var(--color-accent-subtle);
+  background: var(--color-bg);
   flex-shrink: 0;
   margin-bottom: 1.25rem;
   position: relative;
@@ -264,6 +289,36 @@ h1, h2, h3, h4 {
 .glow-border:hover {
   border-color: var(--color-accent-mid) !important;
   box-shadow: 0 0 0 1px var(--color-accent-subtle), 0 8px 40px var(--color-ambient-glow);
+}
+
+/* ─── Reduced motion ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .fade-up, .fade-up-1, .fade-up-2, .fade-up-3,
+  .fade-up-4, .fade-up-5, .fade-up-6,
+  .anim-inline, .anim-inline-fast {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .eyebrow::before { animation: none; }
+  #mobile-menu { clip-path: none !important; transition: opacity 0.1s ease; }
+  /* Suppress movement; preserve color/opacity/shadow feedback */
+  *, *::before, *::after {
+    transition-property: color, background-color, border-color, box-shadow, outline-color !important;
+    transition-duration: 0.2s !important;
+  }
+}
+
+/* ─── Form validation ───────────────────────────────────── */
+.form-field.has-error {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.10) !important;
+}
+.field-error {
+  color: #dc2626;
+  font-size: 0.72rem;
+  margin-top: 0.3rem;
+  font-family: var(--font-sans);
 }
 
 /* ─── Divider ────────────────────────────────────────────── */

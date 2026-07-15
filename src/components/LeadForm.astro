@@ -12,16 +12,16 @@ const { service = '', country = '', city = '' } = Astro.props;
 const sourceUrl = Astro.url.href;
 ---
 
-<div class="lead-form-card rounded-sm p-7 bg-surface-glass border border-t-2 border-border-strong border-t-accent backdrop-blur-[12px]">
+<div class="lead-form-card rounded-sm p-7 bg-surface-glass border border-border-strong backdrop-blur-[12px]">
 
   <div class="mb-6">
-    <span class="eyebrow">Оставить заявку</span>
-    <h3 class="font-display text-2xl leading-snug text-primary">
+    <h3 class="font-display text-2xl leading-snug text-primary mb-1">
       Свяжемся с вами<br/><em>в течение 2 часов</em>
     </h3>
+    <p class="text-xs text-muted">Бесплатная консультация</p>
   </div>
 
-  <form method="POST" action="/api/leads">
+  <form method="POST" action="/api/leads" novalidate>
     <input type="hidden" name="service" value={service} />
     <input type="hidden" name="country" value={country} />
     <input type="hidden" name="city" value={city} />
@@ -29,23 +29,88 @@ const sourceUrl = Astro.url.href;
 
     <FormField name="name"    label="Ваше имя"            placeholder="Иван"                    required />
     <FormField name="contact" label="Telegram или телефон" placeholder="@username или +381…"     required />
-    <FormField name="comment" label="Комментарий"          placeholder="Марка, бюджет, пожелания…" type="textarea" />
+    <FormField name="comment" label="Марка, модель, бюджет" placeholder="BMW 3, 2020–2022, до €25 000…" type="textarea" />
 
-    <label class="flex items-start gap-3 mb-6 cursor-pointer text-muted">
+    <label class="flex items-start gap-3 mb-2 cursor-pointer text-muted consent-label">
       <input
         type="checkbox"
         name="consent"
-        required
         class="mt-0.5 shrink-0 w-4 h-4 cursor-pointer accent-accent"
       />
       <span class="text-xs leading-relaxed">
         Согласен с <a href="/privacy/" target="_blank" class="underline text-accent">политикой конфиденциальности</a>
       </span>
     </label>
+    <p class="field-error consent-error mb-4" style="display:none">Необходимо ваше согласие</p>
 
     <Button type="submit" class="lead-btn w-full py-3.5 justify-center tracking-[0.06em]">
-      Отправить заявку
+      Рассчитать стоимость
     </Button>
   </form>
 </div>
+
+<script is:inline>
+(function () {
+  var cards = document.querySelectorAll('.lead-form-card');
+  var card = cards[cards.length - 1];
+  if (!card) return;
+  var form = card.querySelector('form');
+  if (!form || form.dataset.validated) return;
+  form.dataset.validated = '1';
+
+  function fieldWrap(input) { return input.closest('.mb-5') || input.parentElement; }
+
+  function setError(input, msg) {
+    input.classList.add('has-error');
+    var wrap = fieldWrap(input);
+    var err = wrap.querySelector('.field-error');
+    if (!err) { err = document.createElement('p'); err.className = 'field-error'; wrap.appendChild(err); }
+    err.textContent = msg;
+  }
+
+  function clearError(input) {
+    input.classList.remove('has-error');
+    var wrap = fieldWrap(input);
+    var err = wrap.querySelector('.field-error');
+    if (err) err.remove();
+  }
+
+  form.addEventListener('submit', function (e) {
+    var ok = true;
+    var name    = form.querySelector('[name="name"]');
+    var contact = form.querySelector('[name="contact"]');
+    var consent = form.querySelector('[name="consent"]');
+    var consentErr = form.querySelector('.consent-error');
+
+    if (!name.value.trim()) {
+      setError(name, 'Введите ваше имя'); ok = false;
+    } else clearError(name);
+
+    var cv = contact.value.trim();
+    if (!cv) {
+      setError(contact, 'Введите Telegram или телефон'); ok = false;
+    } else if (!/^@\w{3,}$/.test(cv) && !/^\+?[\d\s()\-]{7,}$/.test(cv)) {
+      setError(contact, 'Формат: @username или +7 (999) 000-00-00'); ok = false;
+    } else clearError(contact);
+
+    if (consentErr) consentErr.style.display = consent && consent.checked ? 'none' : '';
+    if (!consent || !consent.checked) ok = false;
+
+    if (!ok) e.preventDefault();
+  });
+
+  ['name', 'contact'].forEach(function (n) {
+    var f = form.querySelector('[name="' + n + '"]');
+    if (f) f.addEventListener('input', function () { clearError(f); });
+  });
+
+  var consent = form.querySelector('[name="consent"]');
+  var consentErr = form.querySelector('.consent-error');
+  if (consent && consentErr) {
+    consent.addEventListener('change', function () {
+      consentErr.style.display = consent.checked ? 'none' : '';
+    });
+  }
+})();
+</script>
 

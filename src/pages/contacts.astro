@@ -36,7 +36,7 @@ const steps = [
         <TelegramCTA />
         <div class="mt-8">
           {info.map((item, i) => (
-            <div class="flex justify-between items-center py-4 border-b border-default" style={`animation: fadeUp 0.75s ${0.15 + i * 0.08}s cubic-bezier(0.16,1,0.3,1) both;`}>
+            <div class="flex justify-between items-center py-4 border-b border-default anim-inline" style={`--anim-delay: ${0.15 + i * 0.08}s`}>
               <span class="text-sm text-muted">{item.label}</span>
               <span class="text-sm font-medium text-secondary">{item.value}</span>
             </div>
@@ -48,7 +48,7 @@ const steps = [
         <span class="eyebrow">Как мы работаем</span>
         <div class="space-y-6">
           {steps.map((step, i) => (
-            <div class="flex gap-4" style={`animation: fadeUp 0.75s ${0.2 + i * 0.1}s cubic-bezier(0.16,1,0.3,1) both;`}>
+            <div class="flex gap-4 anim-inline" style={`--anim-delay: ${0.2 + i * 0.1}s`}>
               <div class="step-circle shrink-0 !mb-0">{step.n}</div>
               <p class="text-sm leading-relaxed pt-2.5 text-muted">{step.text}</p>
             </div>

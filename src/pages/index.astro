@@ -5,10 +5,11 @@ import TelegramCTA from '../components/TelegramCTA.astro';
 import CasesGrid from '../components/CasesGrid.astro';
 import SectionHeading from '../components/SectionHeading.astro';
 import LeadForm from '../components/LeadForm.astro';
-import { Search, Truck, Banknote, ClipboardCheck, KeyRound } from 'lucide-astro';
+import { Search, Truck, Banknote, ClipboardCheck, KeyRound, Eye, Shield, MapPin } from 'lucide-astro';
 import { getCollection } from 'astro:content';
 import { getActiveCountries } from '../utils/geo';
 import { SITE_URL, SITE_NAME } from '../utils/constants';
+import StatBlock from '../components/StatBlock.astro';
 
 const meta = {
   title: `Автоподбор и доставка авто из Европы | ${SITE_NAME}`,
@@ -57,7 +58,7 @@ const steps = [
 
         <div class="lg:col-span-3">
           <span class="eyebrow fade-up fade-up-1">Европейский автосервис для русскоязычных</span>
-          <h1 class="font-display font-bold leading-none mb-8 fade-up fade-up-2 text-primary tracking-[-0.02em]" style="font-size: clamp(2.6rem, 5.5vw, 4.4rem);">
+          <h1 class="font-display font-bold leading-none mb-8 fade-up fade-up-2 text-primary tracking-[-0.03em]" style="font-size: clamp(3rem, 6.5vw, 5.2rem); font-weight: 800;">
             Автоподбор<br/>
             и доставка авто<br/>
             <em class="text-accent italic">из Европы</em>
@@ -69,9 +70,9 @@ const steps = [
             <TelegramCTA />
           </div>
           <div class="grid grid-cols-3 gap-6 mt-8 pt-8 border-t fade-up fade-up-5 border-default">
-            <div class="stat-block"><p class="stat-n">200+</p><p class="stat-l">клиентов</p></div>
-            <div class="stat-block"><p class="stat-n">4</p><p class="stat-l">страны</p></div>
-            <div class="stat-block"><p class="stat-n">5 лет</p><p class="stat-l">на рынке</p></div>
+            <StatBlock value="200+" label="клиентов" />
+            <StatBlock value="4" label="страны" />
+            <StatBlock value="5 лет" label="на рынке" />
           </div>
         </div>
 
@@ -92,24 +93,29 @@ const steps = [
         <p class="text-sm max-w-xs sm:text-right text-muted">Германия · Испания · Сербия</p>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Bento: featured first card spans 2 cols, rest fill naturally -->
+      <div class="services-bento grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {services.map((s, i) => {
           const Icon = s.Icon;
           const idx = String(i + 1).padStart(2, '0');
+          const featured = i === 0;
           return (
             <a
               href={s.href}
-              class="service-card group flex flex-col p-7 rounded-sm no-underline glow-border bg-surface border border-default"
-              style={`animation: fadeUp 0.75s ${0.08 + i * 0.08}s cubic-bezier(0.16,1,0.3,1) both;`}
+              class:list={[
+                'service-card group flex flex-col no-underline glow-border bg-surface border border-default rounded-sm anim-inline',
+                featured ? 'lg:col-span-2 p-9' : 'p-7',
+              ]}
+              style={`--anim-delay: ${0.08 + i * 0.08}s`}
             >
               <div class="flex items-start justify-between mb-5">
-                <span class="flex items-center justify-center w-10 h-10 rounded-sm shrink-0 bg-accent-subtle text-accent">
-                  <Icon size={19} />
+                <span class:list={['flex items-center justify-center rounded-sm shrink-0 bg-accent-subtle text-accent', featured ? 'w-12 h-12' : 'w-10 h-10']}>
+                  <Icon size={featured ? 22 : 19} />
                 </span>
                 <span class="card-index">{idx}</span>
               </div>
-              <h3 class="font-display text-xl font-bold mb-2 text-primary">{s.title}</h3>
-              <p class="text-sm leading-relaxed flex-1 text-muted">{s.desc}</p>
+              <h3 class:list={['font-display font-bold mb-2 text-primary', featured ? 'text-2xl' : 'text-xl']}>{s.title}</h3>
+              <p class:list={['leading-relaxed flex-1 text-muted', featured ? 'text-base max-w-sm' : 'text-sm']}>{s.desc}</p>
               <span class="inline-flex items-center gap-1 mt-5 text-xs font-medium text-accent">
                 Подробнее
                 <span class="service-arrow transition-transform duration-200">→</span>
@@ -117,19 +123,17 @@ const steps = [
             </a>
           );
         })}
+      </div>
 
+      <!-- Country strip -->
+      <div class="flex flex-wrap gap-3 mt-4">
         {countries.map((c) => (
           <a
             href={`/${c.code}/autopodbor/`}
-            class="country-card group flex items-center gap-5 p-7 rounded-sm no-underline glow-border bg-surface border border-default"
+            class="country-pill group inline-flex items-center gap-2.5 px-4 py-2.5 rounded-sm no-underline glow-border bg-surface border border-default"
           >
-            <div class="w-11 h-11 rounded-sm flex items-center justify-center shrink-0 text-2xl bg-surface-2">
-              {c.code === 'de' ? '🇩🇪' : c.code === 'rs' ? '🇷🇸' : c.code === 'es' ? '🇪🇸' : '🏳️'}
-            </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium mb-0.5 text-primary">Автоподбор в {c.nameLocative}</p>
-              <p class="text-xs text-muted">Европейский рынок · Под ключ</p>
-            </div>
+            <span class="text-lg leading-none">{c.code === 'de' ? '🇩🇪' : c.code === 'rs' ? '🇷🇸' : c.code === 'es' ? '🇪🇸' : '🏳️'}</span>
+            <span class="text-sm font-medium text-primary">Автоподбор в {c.nameLocative}</span>
             <span class="country-arrow text-xs text-accent transition-transform duration-200">→</span>
           </a>
         ))}
@@ -145,7 +149,7 @@ const steps = [
         <div class="hidden lg:block absolute h-px" style="top: 1.375rem; left: 2.5rem; right: 2.5rem; background: linear-gradient(90deg, transparent 0%, var(--color-accent-border) 15%, var(--color-accent-border) 85%, transparent 100%);"></div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {steps.map((step, i) => (
-            <div style={`animation: fadeUp 0.75s ${0.1 + i * 0.1}s cubic-bezier(0.16,1,0.3,1) both;`}>
+            <div class="anim-inline" style={`--anim-delay: ${0.1 + i * 0.1}s`}>
               <div class="step-circle">{step.n}</div>
               <h3 class="font-display text-xl font-bold mb-3 text-primary">{step.title}</h3>
               <p class="text-sm leading-relaxed text-muted">{step.desc}</p>
@@ -159,21 +163,125 @@ const steps = [
   <!-- ─── Cases ─────────────────────────────────────────── -->
   <CasesGrid cases={latestCases} heading="Последние кейсы" headingSize="xl" viewAllHref="/cases/" />
 
+  <!-- ─── Why us ───────────────────────────────────────── -->
+  <section class="border-b border-default">
+    <div class="max-w-6xl mx-auto px-6 py-20">
+      <div class="mb-14">
+        <SectionHeading title="Почему выбирают нас" />
+        <p class="text-base max-w-md text-muted mt-3 leading-relaxed">
+          Покупка авто удалённо вызывает вопросы. Вот как мы их снимаем.
+        </p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <div class="trust-card glow-border bg-surface border border-default rounded-sm p-8 anim-inline" style="--anim-delay: 0.08s">
+          <div class="flex items-center justify-center w-11 h-11 rounded-sm mb-6 bg-accent-subtle text-accent">
+            <Eye size={20} />
+          </div>
+          <h3 class="font-display text-xl font-bold mb-3 text-primary">Полная прозрачность</h3>
+          <p class="text-sm leading-relaxed text-muted">
+            Высылаем подробный чек-лист (100+ пунктов) и видео каждого нюанса: кузов, салон, ходовая. Вы видите автомобиль так, как будто стоите рядом.
+          </p>
+        </div>
+
+        <div class="trust-card glow-border bg-surface border border-default rounded-sm p-8 anim-inline" style="--anim-delay: 0.16s">
+          <div class="flex items-center justify-center w-11 h-11 rounded-sm mb-6 bg-accent-subtle text-accent">
+            <Shield size={20} />
+          </div>
+          <h3 class="font-display text-xl font-bold mb-3 text-primary">Безопасность сделки</h3>
+          <p class="text-sm leading-relaxed text-muted">
+            Поэтапная оплата и понятные условия. Сопровождаем документы на всех этапах: оформление, растаможка, регистрация — без сюрпризов.
+          </p>
+        </div>
+
+        <div class="trust-card glow-border bg-surface border border-default rounded-sm p-8 anim-inline" style="--anim-delay: 0.24s">
+          <div class="flex items-center justify-center w-11 h-11 rounded-sm mb-6 bg-accent-subtle text-accent">
+            <MapPin size={20} />
+          </div>
+          <h3 class="font-display text-xl font-bold mb-3 text-primary">Локальная экспертиза</h3>
+          <p class="text-sm leading-relaxed text-muted">
+            Знаем специфику каждого рынка: автобанные пробеги Германии, особенности кузова испанских авто, нюансы оформления на иностранные номера в Сербии.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Social proof ──────────────────────────────────── -->
+  <section class="border-b border-default">
+    <div class="max-w-6xl mx-auto px-6 py-20">
+      <div class="mb-14">
+        <SectionHeading title="Что говорят клиенты" />
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <figure class="review-card glow-border bg-surface border border-default rounded-sm p-7 flex flex-col gap-5 anim-inline" style="--anim-delay: 0.08s">
+          <blockquote class="text-sm leading-relaxed text-secondary flex-1">
+            «Привезли BMW 3 серии из Мюнхена в Белград. Всё чётко — от осмотра до постановки на учёт. Сэкономили кучу нервов на оформлении.»
+          </blockquote>
+          <figcaption class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-accent-subtle flex items-center justify-center text-accent font-display font-bold text-sm">А</div>
+            <div>
+              <p class="text-sm font-medium text-primary">Александр</p>
+              <p class="text-xs text-muted">BMW 320d, Германия → Сербия</p>
+            </div>
+          </figcaption>
+        </figure>
+
+        <figure class="review-card glow-border bg-surface border border-default rounded-sm p-7 flex flex-col gap-5 anim-inline" style="--anim-delay: 0.16s">
+          <blockquote class="text-sm leading-relaxed text-secondary flex-1">
+            «Долго искал Skoda Octavia в хорошем состоянии. Ребята нашли вариант в Испании, проверили независимым экспертом — всё совпало с описанием.»
+          </blockquote>
+          <figcaption class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-accent-subtle flex items-center justify-center text-accent font-display font-bold text-sm">М</div>
+            <div>
+              <p class="text-sm font-medium text-primary">Михаил</p>
+              <p class="text-xs text-muted">Skoda Octavia, Испания → Россия</p>
+            </div>
+          </figcaption>
+        </figure>
+
+        <figure class="review-card glow-border bg-surface border border-default rounded-sm p-7 flex flex-col gap-5 anim-inline" style="--anim-delay: 0.24s">
+          <blockquote class="text-sm leading-relaxed text-secondary flex-1">
+            «Оформление на иностранные номера казалось сложным. Команда провела через каждый шаг — и через месяц я уже ездил. Рекомендую.»
+          </blockquote>
+          <figcaption class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-accent-subtle flex items-center justify-center text-accent font-display font-bold text-sm">Д</div>
+            <div>
+              <p class="text-sm font-medium text-primary">Дмитрий</p>
+              <p class="text-xs text-muted">VW Passat, Германия → Сербия</p>
+            </div>
+          </figcaption>
+        </figure>
+
+      </div>
+    </div>
+  </section>
+
   <!-- ─── CTA ───────────────────────────────────────────── -->
   <section class="max-w-6xl mx-auto px-6 py-20">
-    <div class="cta-card relative rounded-sm p-10 md:p-16 text-center overflow-hidden bg-surface border border-border-strong">
-      <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 70% 80% at 50% 50%, var(--color-ambient-glow) 0%, transparent 70%);"></div>
-      <div class="absolute top-0 left-0 w-16 h-16 pointer-events-none" style="background: linear-gradient(135deg, var(--color-accent-soft) 0%, transparent 60%);"></div>
-      <div class="absolute bottom-0 right-0 w-16 h-16 pointer-events-none" style="background: linear-gradient(315deg, var(--color-accent-soft) 0%, transparent 60%);"></div>
-      <div class="relative">
-        <span class="eyebrow justify-center">Готовы начать?</span>
-        <h2 class="font-display font-bold mb-5 leading-[1.1] tracking-[-0.02em]" style="font-size: clamp(2rem, 4vw, 3.2rem);">
-          Расскажите нам<br/>о своём автомобиле
-        </h2>
-        <p class="text-base mb-2 mx-auto max-w-sm text-muted leading-[1.7]">
-          Отвечаем в течение 2 часов. Консультация бесплатна.
-        </p>
-        <TelegramCTA label="Написать в Telegram" />
+    <div class="cta-card relative rounded-sm overflow-hidden bg-surface border border-border-strong">
+      <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 80% 120% at -5% 50%, var(--color-accent-soft) 0%, transparent 55%), radial-gradient(ellipse 50% 60% at 100% 100%, var(--color-ambient-glow) 0%, transparent 60%);"></div>
+      <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-0">
+        <div class="p-10 md:p-16">
+          <span class="eyebrow">Готовы начать?</span>
+          <h2 class="font-display font-bold mb-4 leading-[1.1] tracking-[-0.025em]" style="font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 800;">
+            Расскажите нам<br/>о своём<br/><em class="text-accent italic">автомобиле</em>
+          </h2>
+          <p class="text-base mb-2 max-w-sm text-muted leading-[1.7]">
+            Отвечаем в течение 2 часов. Консультация бесплатна.
+          </p>
+          <TelegramCTA label="Написать в Telegram" />
+        </div>
+        <div class="cta-aside hidden lg:flex items-end justify-end p-10 md:p-16">
+          <div class="grid grid-cols-2 gap-6">
+            <StatBlock value="200+" label="клиентов" />
+            <StatBlock value="4" label="страны" />
+            <StatBlock value="5 лет" label="опыт" />
+            <StatBlock value="2 ч" label="ответ" />
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -183,6 +291,9 @@ const steps = [
 <style>
   .service-card:hover { background-color: var(--color-surface-2) !important; }
   .service-card:hover .service-arrow { transform: translateX(4px); }
-  .country-card:hover { background-color: var(--color-surface-2) !important; }
-  .country-card:hover .country-arrow { transform: translateX(4px); }
+  .country-pill:hover { background-color: var(--color-surface-2) !important; }
+  .country-pill:hover .country-arrow { transform: translateX(4px); }
+  .trust-card { transition: background-color 0.25s; }
+  .trust-card:hover { background-color: var(--color-surface-2) !important; }
+  .review-card { transition: background-color 0.25s; }
 </style>

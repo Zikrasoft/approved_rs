@@ -17,7 +17,7 @@ const Tag = href ? 'a' : 'button';
   href={href}
   type={!href ? type : undefined}
   class:list={[
-    'btn inline-flex items-center gap-2 rounded-sm text-sm font-medium no-underline cursor-pointer font-sans',
+    'btn inline-flex items-center gap-2 rounded-sm text-sm font-medium no-underline cursor-pointer font-sans active:scale-[0.97] active:translate-y-px',
     variant === 'primary'
       ? 'btn-primary bg-accent text-on-accent'
       : 'btn-secondary border border-accent/50 bg-transparent text-secondary',
@@ -31,7 +31,7 @@ const Tag = href ? 'a' : 'button';
 <style>
   .btn-primary {
     border: none;
-    transition: background-color 0.2s, box-shadow 0.2s;
+    transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s, translate 0.1s;
   }
   .btn-primary:hover {
     background-color: var(--color-accent-hover) !important;
