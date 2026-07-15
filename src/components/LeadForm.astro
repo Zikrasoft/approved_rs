@@ -9,7 +9,7 @@ interface Props {
 }
 
 const { service = '', country = '', city = '' } = Astro.props;
-const sourceUrl = Astro.url.pathname;
+const sourceUrl = Astro.url.href;
 ---
 
 <div class="lead-form-card rounded-sm p-7 bg-surface-glass border border-t-2 border-border-strong border-t-accent backdrop-blur-[12px]">
