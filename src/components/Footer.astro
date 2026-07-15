@@ -1,10 +1,10 @@
 ---
 import SiteLogo from './SiteLogo.astro';
 import { SERVICES } from '../utils/labels';
-import { SITE_NAME, TG_CHANNEL_FALLBACK, TG_MANAGER_FALLBACK, DEFAULT_COUNTRY } from '../utils/constants';
+import { SITE_NAME, DEFAULT_COUNTRY } from '../utils/constants';
 const year = new Date().getFullYear();
-const TG_CHANNEL = import.meta.env.PUBLIC_TG_CHANNEL ?? TG_CHANNEL_FALLBACK;
-const TG_MANAGER = import.meta.env.PUBLIC_TG_MANAGER ?? TG_MANAGER_FALLBACK;
+const TG_CHANNEL = import.meta.env.PUBLIC_TG_CHANNEL!;
+const TG_MANAGER = import.meta.env.PUBLIC_TG_MANAGER!;
 ---
 
 <footer class="mt-24 border-t border-default">
