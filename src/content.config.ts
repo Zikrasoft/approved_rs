@@ -6,7 +6,7 @@ const cases = defineCollection({
   schema: z.object({
     title: z.string(),
     car: z.string(),
-    year: z.number(),
+    year: z.coerce.number(),
     price: z.string(),
     country: z.string(),
     service: z.enum(['autopodbor', 'delivery', 'combined', 'buyout', 'inspection']),
