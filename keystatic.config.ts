@@ -7,7 +7,7 @@ export default config({
     cases: collection({
       label: 'Кейсы',
       slugField: 'title',
-      path: 'src/content/cases/*',
+      path: 'src/content/cases/*.md',
       format: { contentField: 'content' },
       schema: {
         title: fields.slug({ name: { label: 'Заголовок' } }),
