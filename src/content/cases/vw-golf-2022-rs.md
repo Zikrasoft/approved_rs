@@ -5,7 +5,6 @@ year: 2022
 price: 32 000 €
 country: de
 service: delivery
-image: /cases/vw-golf-2022-rs/image.png
 date: 2024-10-03
 published: true
 ---
