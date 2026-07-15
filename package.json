@@ -17,6 +17,8 @@
     "@astrojs/vercel": "^11.0.0",
     "@keystatic/astro": "^5.1.0",
     "@keystatic/core": "^0.5.50",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "astro": "^7.0.2",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
