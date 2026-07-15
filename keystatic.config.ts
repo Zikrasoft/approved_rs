@@ -37,7 +37,7 @@ export default config({
         image: fields.image({ label: 'Фото', directory: 'public/cases', publicPath: '/cases/' }),
         date: fields.date({ label: 'Дата' }),
         published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
-        content: fields.markdoc({ label: 'Описание' }),
+        content: fields.markdoc({ label: 'Описание', extension: 'md' }),
       },
     }),
   },

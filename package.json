@@ -12,7 +12,6 @@
     "gen:og": "node scripts/gen-og.mjs"
   },
   "dependencies": {
-    "@astrojs/markdoc": "^2.0.3",
     "@astrojs/react": "^6.0.0",
     "@astrojs/sitemap": "^3.7.3",
     "@astrojs/vercel": "^11.0.0",
