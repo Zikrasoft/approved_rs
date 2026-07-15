@@ -2,7 +2,6 @@
 export const prerender = true;
 import BaseLayout from '../layouts/BaseLayout.astro';
 import TelegramCTA from '../components/TelegramCTA.astro';
-import UtilityPageShell from '../components/UtilityPageShell.astro';
 import { SITE_URL, SITE_NAME } from '../utils/constants';
 
 const meta = {
@@ -13,33 +12,132 @@ const meta = {
 ---
 
 <BaseLayout {...meta}>
-  <UtilityPageShell minHeight="70vh" centered>
-    <div>
+  <section class="thanks-section min-h-[80vh] flex items-center justify-center px-6 py-20">
+    <div class="thanks-inner text-center max-w-lg mx-auto">
 
-      <div class="w-16 h-16 rounded-sm mx-auto mb-8 flex items-center justify-center bg-accent-soft border border-accent">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-accent">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
+      <!-- Animated checkmark -->
+      <div class="check-wrap mx-auto mb-10">
+        <div class="pulse-ring ring-1"></div>
+        <div class="pulse-ring ring-2"></div>
+        <div class="check-circle">
+          <svg class="check-svg" width="36" height="36" viewBox="0 0 24 24" fill="none">
+            <polyline class="check-path" points="20 6 9 17 4 12"
+              stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round"
+            />
+          </svg>
+        </div>
       </div>
 
-      <p class="text-xs tracking-widest uppercase mb-4 font-medium fade-up fade-up-1 text-accent">Отлично</p>
-      <h1 class="font-display text-5xl font-bold mb-6 fade-up fade-up-2">Заявка принята</h1>
-      <p class="text-lg mb-10 mx-auto max-w-md fade-up fade-up-3 text-muted">
-        Мы получили вашу заявку и свяжемся в течение 2 часов. Если срочно — пишите в Telegram напрямую.
+      <!-- Text -->
+      <p class="eyebrow justify-center thanks-item" style="--i:0">Заявка отправлена</p>
+      <h1 class="font-display text-[clamp(2.8rem,6vw,4.5rem)] font-bold leading-none tracking-[-0.03em] mb-5 thanks-item" style="--i:1">
+        Скоро свяжемся
+      </h1>
+      <p class="text-base leading-relaxed max-w-sm mx-auto mb-10 text-muted thanks-item" style="--i:2">
+        Мы получили вашу заявку и свяжемся в течение&nbsp;2&nbsp;часов.
+        Если срочно&nbsp;— пишите в&nbsp;Telegram напрямую.
       </p>
 
-      <div class="fade-up fade-up-4">
+      <!-- CTA -->
+      <div class="thanks-item" style="--i:3">
         <TelegramCTA label="Написать напрямую" />
       </div>
 
-      <div class="mt-12 p-6 rounded-sm border fade-up fade-up-4 bg-surface border-default">
-        <p class="text-sm mb-3 text-muted">Пока ждёте, посмотрите:</p>
-        <div class="flex flex-wrap justify-center gap-4">
-          <a href="/cases/"        class="text-sm font-medium no-underline text-accent">Наши кейсы →</a>
-          <a href="/de/dostavka/" class="text-sm font-medium no-underline text-accent">Доставка из Германии →</a>
+      <!-- While you wait -->
+      <div class="wait-card mt-14 p-6 rounded-sm border thanks-item" style="--i:4">
+        <p class="text-xs uppercase tracking-[0.16em] font-medium mb-4 text-muted">Пока ждёте</p>
+        <div class="flex flex-wrap justify-center gap-6">
+          <a href="/cases/"        class="wait-link">Наши кейсы →</a>
+          <a href="/de/dostavka/" class="wait-link">Доставка из Германии →</a>
         </div>
       </div>
 
     </div>
-  </UtilityPageShell>
+  </section>
 </BaseLayout>
+
+<style>
+  /* ── Check icon ── */
+  .check-wrap {
+    position: relative;
+    width: 7rem;
+    height: 7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .check-circle {
+    position: relative;
+    z-index: 1;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-accent-border);
+    background: var(--color-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent);
+    animation: pop-in 0.5s 0.2s var(--ease-spring) both;
+  }
+
+  .check-path {
+    stroke-dasharray: 30;
+    stroke-dashoffset: 30;
+    animation: draw-check 0.45s 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Pulse rings */
+  .pulse-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-accent-border);
+    animation: pulse-out 2s ease-out infinite;
+  }
+  .ring-2 { animation-delay: 0.7s; }
+
+  /* ── Item entrance ── */
+  .thanks-item {
+    opacity: 0;
+    transform: translateY(18px);
+    animation: fadeUp 0.6s calc(0.5s + var(--i, 0) * 0.1s) var(--ease-spring) both;
+  }
+
+  /* ── Wait card ── */
+  .wait-card {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+  }
+  .wait-link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-accent);
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .wait-link:hover { opacity: 0.7; }
+
+  /* ── Keyframes ── */
+  @keyframes pop-in {
+    from { opacity: 0; transform: scale(0.6); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes draw-check {
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes pulse-out {
+    0%   { transform: scale(0.9); opacity: 0.5; }
+    100% { transform: scale(1.8); opacity: 0; }
+  }
+
+  /* ── Reduced motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    .check-path   { animation: none; stroke-dashoffset: 0; }
+    .check-circle { animation: none; opacity: 1; transform: none; }
+    .pulse-ring   { animation: none; opacity: 0; }
+    .thanks-item  { animation: none; opacity: 1; transform: none; }
+  }
+</style>
