@@ -8,7 +8,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   site: "https://approved.rs",
-  output: "static",
+  output: "server",
   adapter: vercel(),
   integrations: [react(), keystatic(), sitemap()],
   vite: {
