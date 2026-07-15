@@ -12,7 +12,7 @@ export default config({
       schema: {
         title: fields.slug({ name: { label: 'Заголовок' } }),
         car: fields.text({ label: 'Автомобиль' }),
-        year: fields.text({ label: 'Год' }),
+        year: fields.integer({ label: 'Год' }),
         price: fields.text({ label: 'Цена' }),
         country: fields.select({
           label: 'Страна',
