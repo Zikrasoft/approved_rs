@@ -1,0 +1,49 @@
+<div
+  id="cookie-consent"
+  hidden
+  class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-sm z-50 rounded-sm border border-default p-5 shadow-lg"
+  style="background: var(--color-surface);"
+>
+  <p class="text-sm leading-relaxed text-secondary mb-4">
+    Мы используем аналитические cookies (Google Analytics), чтобы понимать, как посетители используют сайт.
+    Подробнее в{' '}
+    <a href="/privacy/" class="underline text-accent">политике конфиденциальности</a>.
+  </p>
+  <div class="flex gap-3">
+    <button
+      id="cookie-accept"
+      class="px-4 py-2 rounded-sm text-xs font-medium border border-accent-border text-accent"
+    >
+      Принять
+    </button>
+    <button
+      id="cookie-decline"
+      class="px-4 py-2 rounded-sm text-xs font-medium text-muted"
+    >
+      Отклонить
+    </button>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    var consent;
+    try { consent = localStorage.getItem('cookie_consent'); } catch (e) {}
+    if (consent) return;
+
+    var el = document.getElementById('cookie-consent');
+    if (!el) return;
+    el.hidden = false;
+
+    document.getElementById('cookie-accept').addEventListener('click', function () {
+      try { localStorage.setItem('cookie_consent', 'granted'); } catch (e) {}
+      if (window.loadAnalytics) window.loadAnalytics();
+      el.hidden = true;
+    });
+
+    document.getElementById('cookie-decline').addEventListener('click', function () {
+      try { localStorage.setItem('cookie_consent', 'denied'); } catch (e) {}
+      el.hidden = true;
+    });
+  })();
+</script>

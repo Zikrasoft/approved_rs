@@ -2,6 +2,7 @@
 import type { MetaProps } from '../utils/seo';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import CookieConsent from '../components/CookieConsent.astro';
 import Analytics from '@vercel/analytics/astro';
 import SpeedInsights from '@vercel/speed-insights/astro';
 import '../styles/global.css';
@@ -40,13 +41,23 @@ const { title, description, canonical, schema, ogImage = `${SITE_URL}/og.png` } 
       <script type="application/ld+json" set:html={JSON.stringify(schema)} />
     )}
 
-    <!-- Google tag (gtag.js) -->
-    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-M17GZT849M"></script>
+    <!-- Google tag (gtag.js) — loaded only after cookie consent, see CookieConsent.astro -->
     <script is:inline>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-M17GZT849M');
+      window.loadAnalytics = function () {
+        if (window.__gaLoaded) return;
+        window.__gaLoaded = true;
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-M17GZT849M';
+        document.head.appendChild(s);
+        gtag('js', new Date());
+        gtag('config', 'G-M17GZT849M');
+      };
+      try {
+        if (localStorage.getItem('cookie_consent') === 'granted') window.loadAnalytics();
+      } catch (e) {}
     </script>
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -71,6 +82,7 @@ const { title, description, canonical, schema, ogImage = `${SITE_URL}/og.png` } 
       <slot />
     </main>
     <Footer />
+    <CookieConsent />
     <Analytics />
     <SpeedInsights />
     <script is:inline>
