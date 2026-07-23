@@ -1,5 +1,5 @@
 ---
-title: Mini ONE
+title: Mini ONE Станислав
 car: Mini ONE
 year: 2018
 price: '8600'
