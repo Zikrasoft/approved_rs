@@ -5,6 +5,8 @@ import TelegramCTA from '../../components/TelegramCTA.astro';
 import { SERVICE_LABELS } from '../../utils/labels';
 import { getCollection, render } from 'astro:content';
 import { SITE_URL, SITE_NAME } from '../../utils/constants';
+import { GEO_BANNERS } from '../../data/geo-banners';
+import { marked } from 'marked';
 
 export async function getStaticPaths() {
   const cases = await getCollection('cases', c => c.data.published);
@@ -13,6 +15,7 @@ export async function getStaticPaths() {
 
 const { case: c } = Astro.props;
 const { Content } = await render(c);
+const geoBanner = await marked.parseInline(GEO_BANNERS[Math.floor(Math.random() * GEO_BANNERS.length)]);
 
 const meta = {
   title: `${c.data.title} | ${SITE_NAME}`,
@@ -77,9 +80,7 @@ const meta = {
         </svg>
         География работы
       </p>
-      <p class="leading-relaxed text-sm text-secondary max-w-[65ch]">
-        Если вам нужен <strong class="text-primary font-semibold">автоподбор в Сербии</strong>, <strong class="text-primary font-semibold">Белграде</strong>, <strong class="text-primary font-semibold">Нови-Саде</strong>, <strong class="text-primary font-semibold">Нише</strong>, <strong class="text-primary font-semibold">Суботице</strong>, <strong class="text-primary font-semibold">Панчево</strong>, <strong class="text-primary font-semibold">Крагуеваце</strong>, <strong class="text-primary font-semibold">Чачаке</strong>, <strong class="text-primary font-semibold">Ужице</strong>, <strong class="text-primary font-semibold">Валево</strong>, <strong class="text-primary font-semibold">Зренянине</strong> или любом другом городе Сербии, мы подберем автомобиль, тщательно проверим его историю, техническое состояние и поможем купить действительно достойный вариант.
-      </p>
+      <p class="leading-relaxed text-sm text-secondary max-w-[65ch] [&_strong]:text-primary [&_strong]:font-semibold" set:html={geoBanner} />
     </div>
 
     <!-- CTA -->
