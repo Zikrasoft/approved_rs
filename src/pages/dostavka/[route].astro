@@ -1,7 +1,7 @@
 ---
 export const prerender = true;
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { Truck, ShieldCheck, FileText, MapPin, Home } from '@lucide/astro';
+import { Truck, ShieldCheck, FileText, MapPin, Home, ArrowRight } from '@lucide/astro';
 import LeadForm from '../../components/LeadForm.astro';
 import TelegramCTA from '../../components/TelegramCTA.astro';
 import CasesGrid from '../../components/CasesGrid.astro';
@@ -36,7 +36,7 @@ const schema = {
       <span class="accent-line"></span>
       <div class="flex items-center gap-3 mb-4 fade-up fade-up-1">
         <span class="text-sm font-medium text-muted">{fromCountry.name}</span>
-        <span class="text-accent">→</span>
+        <ArrowRight size={14} class="text-accent" />
         <span class="text-sm font-medium text-muted">{toCountry.name}</span>
       </div>
       <h1 class="font-display text-5xl md:text-6xl font-bold mb-6 leading-tight fade-up fade-up-2">
