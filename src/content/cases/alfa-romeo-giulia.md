@@ -3,7 +3,8 @@ title: ALFA ROMEO GIULIA
 car: ALFA ROMEO GIULIA
 year: 2021
 price:
-  value: 'по запросу'
+  value: '29900'
+  currency: '€'
 country: rs
 service: autopodbor
 image: /cases/alfa-romeo-giulia/image.jpg
