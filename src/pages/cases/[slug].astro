@@ -26,48 +26,49 @@ const meta = {
 ---
 
 <BaseLayout {...meta}>
-  <!-- Hero image -->
-  {c.data.image && (
-    <div class="w-full h-[40vh] min-h-[280px] overflow-hidden border-b border-default">
-      <img
-        src={c.data.image}
-        alt={c.data.car}
-        class="w-full h-full object-cover brightness-[.8]"
-      />
-    </div>
-  )}
-
   <div class="max-w-4xl mx-auto px-6">
-    <!-- Meta info -->
-    <div class="py-10 border-b border-default">
-      <div class="flex flex-wrap items-center gap-3 mb-6">
-        <span class="text-xs tracking-widest uppercase font-medium px-3 py-1 rounded-sm border text-accent border-accent">
-          {SERVICE_LABELS[c.data.service] ?? c.data.service}
-        </span>
-        <span class="text-xs text-muted">{c.data.country?.toUpperCase()}</span>
+    <!-- Meta info + hero image -->
+    <div class="py-10 md:py-14 border-b border-default grid md:grid-cols-2 gap-8 md:gap-10 md:items-center">
+      <div>
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+          <span class="text-xs tracking-widest uppercase font-medium px-3 py-1 rounded-sm border text-accent border-accent">
+            {SERVICE_LABELS[c.data.service] ?? c.data.service}
+          </span>
+          <span class="text-xs text-muted">{c.data.country?.toUpperCase()}</span>
+        </div>
+
+        <h1 class="font-display text-4xl md:text-5xl font-bold mb-6 fade-up fade-up-1">{c.data.title}</h1>
+
+        <div class="grid grid-cols-3 gap-6 max-w-sm">
+          <div>
+            <p class="text-xs tracking-wide uppercase mb-1 font-medium text-muted">Авто</p>
+            <p class="text-sm font-medium text-primary">{c.data.car}</p>
+          </div>
+          <div>
+            <p class="text-xs tracking-wide uppercase mb-1 font-medium text-muted">Год</p>
+            <p class="text-sm font-medium text-primary">{c.data.year}</p>
+          </div>
+          <div>
+            <p class="text-xs tracking-wide uppercase mb-1 font-medium text-muted">Цена</p>
+            <Price price={c.data.price} class="text-sm font-bold font-display text-accent" />
+          </div>
+        </div>
       </div>
 
-      <h1 class="font-display text-4xl md:text-5xl font-bold mb-6 fade-up fade-up-1">{c.data.title}</h1>
-
-      <div class="grid grid-cols-3 gap-6 max-w-sm">
-        <div>
-          <p class="text-xs tracking-wide uppercase mb-1 font-medium text-muted">Авто</p>
-          <p class="text-sm font-medium text-primary">{c.data.car}</p>
+      {c.data.image && (
+        <div class="-mx-6 md:mx-0 overflow-hidden border-y md:border md:rounded-sm border-default aspect-[4/3] order-first md:order-last">
+          <img
+            src={c.data.image}
+            alt={c.data.car}
+            class="w-full h-full object-cover"
+          />
         </div>
-        <div>
-          <p class="text-xs tracking-wide uppercase mb-1 font-medium text-muted">Год</p>
-          <p class="text-sm font-medium text-primary">{c.data.year}</p>
-        </div>
-        <div>
-          <p class="text-xs tracking-wide uppercase mb-1 font-medium text-muted">Цена</p>
-          <Price price={c.data.price} class="text-sm font-bold font-display text-accent" />
-        </div>
-      </div>
+      )}
     </div>
 
     <!-- Content -->
     <div class="py-12 prose-custom">
-      <div class="leading-relaxed text-base text-primary max-w-[65ch]">
+      <div class="leading-relaxed text-base text-primary max-w-[65ch] [&>p]:mb-5 [&>p:last-child]:mb-0">
         <Content />
       </div>
     </div>
