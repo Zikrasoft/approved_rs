@@ -1,0 +1,64 @@
+---
+import { getActiveCountries } from '../utils/geo';
+import type { Country } from '../utils/geo';
+
+interface Props {
+  detected: Country;
+}
+
+const { detected } = Astro.props;
+const options = getActiveCountries();
+const flag = (code: string) => code === 'de' ? '🇩🇪' : code === 'rs' ? '🇷🇸' : code === 'es' ? '🇪🇸' : '🏳️';
+---
+
+<div id="geo-banner" class="geo-banner border-b border-default bg-accent-subtle">
+  <div class="max-w-6xl mx-auto px-6 py-3 flex items-center gap-3 flex-wrap">
+    <p class="text-sm text-secondary shrink-0">Откуда вы?</p>
+    <div class="flex items-center gap-2 flex-wrap">
+      {options.map(c => (
+        <a
+          href={`/${c.code}/autopodbor/`}
+          data-geo-choice
+          class:list={[
+            'geo-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium no-underline border',
+            c.code === detected.code
+              ? 'border-accent-border bg-surface text-accent'
+              : 'border-default bg-surface text-secondary',
+          ]}
+        >
+          <span class="leading-none">{flag(c.code)}</span>{c.name}
+        </a>
+      ))}
+      <button
+        type="button"
+        data-geo-skip
+        class="geo-pill px-3 py-1.5 rounded-sm text-xs font-medium border border-default bg-transparent text-muted"
+      >
+        Другая страна
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .geo-banner { animation: fadeUp 0.5s var(--ease-spring) both; }
+  .geo-pill { transition: border-color 0.2s, background-color 0.2s, color 0.2s; }
+  .geo-pill:hover { border-color: var(--color-accent-mid) !important; color: var(--color-accent) !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .geo-banner { animation: none; }
+  }
+</style>
+
+<script>
+  const COOKIE = 'geo-banner-dismissed';
+  const banner = document.getElementById('geo-banner');
+  if (banner) {
+    const dismiss = () => {
+      document.cookie = `${COOKIE}=1; path=/; max-age=${60 * 60 * 24 * 30}`;
+      banner.remove();
+    };
+    banner.querySelectorAll('[data-geo-choice]').forEach(el => el.addEventListener('click', dismiss));
+    banner.querySelector('[data-geo-skip]')?.addEventListener('click', dismiss);
+  }
+</script>
