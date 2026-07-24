@@ -29,6 +29,8 @@ const meta = {
   title: `${c.data.title} | ${SITE_NAME}`,
   description: hook ? `${hook} ${c.data.car} ${c.data.year}, ${c.data.price.value} ${c.data.price.currency ?? ''}.`.trim() : `${c.data.car} ${c.data.year}, ${c.data.price.value}. Реальный кейс.`,
   canonical,
+  // Real car photo makes a more compelling share preview than the generic template.
+  ogImage: imageUrl,
 };
 
 const schema = generateArticleSchema({

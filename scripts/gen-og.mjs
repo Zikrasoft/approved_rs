@@ -1,15 +1,16 @@
 import sharp from 'sharp';
-import { writeFileSync } from 'fs';
+import { writeFileSync, mkdirSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const OUT = join(__dirname, '../public/og.png');
+const PUBLIC = join(__dirname, '../public');
 
 const W = 1200;
 const H = 630;
 
-const svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+function renderSvg({ tagline, subtagline }) {
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
 
   <!-- Background -->
   <rect width="${W}" height="${H}" fill="#F4F6FA"/>
@@ -53,14 +54,14 @@ const svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http
   <text x="96" y="416"
     font-family="Arial, Helvetica, sans-serif"
     font-size="26" fill="#2D3448">
-    Подберём и доставим автомобиль из Европы
+    ${tagline}
   </text>
 
   <!-- Sub-tagline -->
   <text x="96" y="462"
     font-family="Arial, Helvetica, sans-serif"
     font-size="17" fill="#6B7280" letter-spacing="0.5">
-    Германия · Испания · Сербия · Полностью удалённо, через Telegram
+    ${subtagline}
   </text>
 
   <!-- Separator -->
@@ -76,10 +77,32 @@ const svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http
     fill="none" stroke="#D8DCE8" stroke-width="1.5" rx="2"/>
 
 </svg>`;
+}
 
-const buf = await sharp(Buffer.from(svg))
-  .png({ quality: 95 })
-  .toBuffer();
+async function renderOg(outPath, options) {
+  const buf = await sharp(Buffer.from(renderSvg(options)))
+    .png({ quality: 95 })
+    .toBuffer();
+  writeFileSync(outPath, buf);
+  console.log(`✓ saved (${(buf.length / 1024).toFixed(0)} KB) → ${outPath.replace(PUBLIC, 'public')}`);
+}
 
-writeFileSync(OUT, buf);
-console.log(`✓ og.png saved (${(buf.length / 1024).toFixed(0)} KB) → public/og.png`);
+const DEFAULT_SUB = 'Германия · Испания · Сербия · Полностью удалённо, через Telegram';
+
+const SERVICE_VARIANTS = {
+  autopodbor: 'Подберём и проверим автомобиль под ваши критерии',
+  dostavka: 'Доставим ваш автомобиль из Европы до двери',
+  vykup: 'Срочный выкуп авто на иностранных номерах',
+  proverka: 'Независимая проверка перед покупкой',
+  combined: 'Подбор, проверка и доставка — под ключ',
+};
+
+await renderOg(join(PUBLIC, 'og.png'), {
+  tagline: 'Подберём и доставим автомобиль из Европы',
+  subtagline: DEFAULT_SUB,
+});
+
+mkdirSync(join(PUBLIC, 'og'), { recursive: true });
+for (const [service, tagline] of Object.entries(SERVICE_VARIANTS)) {
+  await renderOg(join(PUBLIC, 'og', `${service}.png`), { tagline, subtagline: DEFAULT_SUB });
+}
