@@ -10,6 +10,8 @@ import { SITE_URL, SITE_NAME } from '../utils/constants';
 // Logo/heading font: preload so it's ready before first paint (avoids the
 // fallback→webfont width jump on every navigation, most visible on the logo).
 import logoFontUrl from '@fontsource/playfair-display/files/playfair-display-latin-700-normal.woff2?url';
+// ".RS" badge next to the logo uses this weight — same swap-jump issue.
+import tldFontUrl from '@fontsource/outfit/files/outfit-latin-600-normal.woff2?url';
 
 interface Props extends MetaProps {
   schema?: object;
@@ -25,6 +27,7 @@ const { title, description, canonical, noindex, schema, ogImage = `${SITE_URL}/o
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preload" as="font" type="font/woff2" href={logoFontUrl} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={tldFontUrl} crossorigin />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
