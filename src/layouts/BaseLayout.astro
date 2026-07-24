@@ -13,7 +13,7 @@ interface Props extends MetaProps {
   ogImage?: string;
 }
 
-const { title, description, canonical, schema, ogImage = `${SITE_URL}/og.png` } = Astro.props;
+const { title, description, canonical, noindex, schema, ogImage = `${SITE_URL}/og.png` } = Astro.props;
 ---
 
 <!DOCTYPE html>
@@ -24,6 +24,7 @@ const { title, description, canonical, schema, ogImage = `${SITE_URL}/og.png` } 
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
 
     <meta property="og:site_name" content={SITE_NAME} />
     <meta property="og:title" content={title} />

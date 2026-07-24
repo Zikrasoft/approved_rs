@@ -2,6 +2,7 @@ export interface MetaProps {
   title: string;
   description: string;
   canonical: string;
+  noindex?: boolean;
 }
 
 interface CountryRef {
