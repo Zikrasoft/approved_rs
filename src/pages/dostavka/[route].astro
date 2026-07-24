@@ -1,6 +1,7 @@
 ---
 export const prerender = true;
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Truck, ShieldCheck, FileText, MapPin, Home } from '@lucide/astro';
 import LeadForm from '../../components/LeadForm.astro';
 import TelegramCTA from '../../components/TelegramCTA.astro';
 import CasesGrid from '../../components/CasesGrid.astro';
@@ -58,14 +59,14 @@ const schema = {
         <SectionHeading title="Что входит в стоимость" size="lg" class="mb-8" />
         <div class="space-y-4">
           {[
-            { icon: '🚛', title: 'Транспортировка', desc: 'Перевозка автомобиля на профессиональном автовозе' },
-            { icon: '🛡️', title: 'Страховка груза', desc: 'Полное страхование на весь маршрут' },
-            { icon: '📑', title: 'Таможенное оформление', desc: 'Все документы и оформление под ключ' },
-            { icon: '📍', title: 'Трекинг в реальном времени', desc: 'Отслеживайте авто на каждом этапе' },
-            { icon: '🏠', title: 'Доставка до двери', desc: 'Привезём прямо к вашему адресу' },
+            { Icon: Truck, title: 'Транспортировка', desc: 'Перевозка автомобиля на профессиональном автовозе' },
+            { Icon: ShieldCheck, title: 'Страховка груза', desc: 'Полное страхование на весь маршрут' },
+            { Icon: FileText, title: 'Таможенное оформление', desc: 'Все документы и оформление под ключ' },
+            { Icon: MapPin, title: 'Трекинг в реальном времени', desc: 'Отслеживайте авто на каждом этапе' },
+            { Icon: Home, title: 'Доставка до двери', desc: 'Привезём прямо к вашему адресу' },
           ].map(item => (
             <div class="flex gap-4 p-4 rounded-sm border bg-surface border-default">
-              <span class="text-xl shrink-0">{item.icon}</span>
+              <item.Icon size={20} class="shrink-0 text-accent" />
               <div>
                 <p class="text-sm font-medium mb-0.5 text-primary">{item.title}</p>
                 <p class="text-xs leading-relaxed text-muted">{item.desc}</p>

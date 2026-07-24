@@ -1,5 +1,6 @@
 ---
 import Button from './Button.astro';
+import { X, ChevronLeft, ChevronRight } from '@lucide/astro';
 
 interface Props {
   images: string[];
@@ -45,10 +46,10 @@ const VISIBLE = 6;
     )}
 
     <dialog class="gallery-dialog">
-      <button type="button" data-close aria-label="Закрыть" class="gallery-btn gallery-close">✕</button>
-      <button type="button" data-prev aria-label="Предыдущее фото" class="gallery-btn gallery-nav gallery-prev">‹</button>
+      <button type="button" data-close aria-label="Закрыть" class="gallery-btn gallery-close"><X size={16} /></button>
+      <button type="button" data-prev aria-label="Предыдущее фото" class="gallery-btn gallery-nav gallery-prev"><ChevronLeft size={20} /></button>
       <img data-dialog-img alt="" />
-      <button type="button" data-next aria-label="Следующее фото" class="gallery-btn gallery-nav gallery-next">›</button>
+      <button type="button" data-next aria-label="Следующее фото" class="gallery-btn gallery-nav gallery-next"><ChevronRight size={20} /></button>
     </dialog>
   </div>
 )}

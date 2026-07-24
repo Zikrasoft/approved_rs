@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { Car } from '@lucide/astro';
 import { SERVICE_LABELS } from '../utils/labels';
 import Price from './Price.astro';
 
@@ -26,11 +27,7 @@ const { case: c } = Astro.props;
     : <div class="h-52 flex flex-col items-center justify-center gap-4 relative overflow-hidden bg-surface-2">
         <div class="absolute inset-0" style="background: radial-gradient(ellipse 70% 60% at 50% 50%, var(--color-ambient-glow) 0%, transparent 70%);"></div>
         <div class="absolute inset-0 opacity-40" style="background-image: linear-gradient(var(--color-grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--color-grid-line) 1px, transparent 1px); background-size: 20px 20px;"></div>
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" class="relative text-accent-mid">
-          <path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h1l2-3h10l2 3h1a2 2 0 012 2v6a2 2 0 01-2 2h-2"/>
-          <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
-          <path d="M5 9h14" stroke-opacity="0.4"/>
-        </svg>
+        <Car size={48} stroke-width={1.2} class="relative text-accent-mid" />
         <p class="text-xs font-medium tracking-[0.18em] uppercase relative text-accent-mid">{c.data.car}</p>
       </div>
   }
