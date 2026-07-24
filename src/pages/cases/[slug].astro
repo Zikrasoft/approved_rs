@@ -9,6 +9,7 @@ import { SERVICE_LABELS } from '../../utils/labels';
 import { getCollection, render } from 'astro:content';
 import { SITE_URL, SITE_NAME } from '../../utils/constants';
 import { GEO_BANNERS } from '../../data/geo-banners';
+import { excerptFromMarkdown, generateArticleSchema } from '../../utils/seo';
 import { marked } from 'marked';
 
 export async function getStaticPaths() {
@@ -20,14 +21,26 @@ const { case: c } = Astro.props;
 const { Content } = await render(c);
 const geoBanner = await marked.parseInline(GEO_BANNERS[Math.floor(Math.random() * GEO_BANNERS.length)]);
 
+const hook = excerptFromMarkdown(c.body ?? '');
+const canonical = `${SITE_URL}/cases/${c.id}/`;
+const imageUrl = c.data.image ? `${SITE_URL}${c.data.image}` : undefined;
+
 const meta = {
   title: `${c.data.title} | ${SITE_NAME}`,
-  description: `${c.data.car} ${c.data.year}, ${c.data.price.value}. Реальный кейс.`,
-  canonical: `${SITE_URL}/cases/${c.id}/`,
+  description: hook ? `${hook} ${c.data.car} ${c.data.year}, ${c.data.price.value} ${c.data.price.currency ?? ''}.`.trim() : `${c.data.car} ${c.data.year}, ${c.data.price.value}. Реальный кейс.`,
+  canonical,
 };
+
+const schema = generateArticleSchema({
+  headline: c.data.title,
+  description: meta.description,
+  image: imageUrl,
+  datePublished: c.data.date,
+  url: canonical,
+});
 ---
 
-<BaseLayout {...meta}>
+<BaseLayout {...meta} {schema}>
   <div class="max-w-4xl mx-auto px-6">
     <!-- Meta info + hero image -->
     <div class="py-10 md:py-14 border-b border-default grid md:grid-cols-2 gap-8 md:gap-10 md:items-center">
