@@ -1,5 +1,7 @@
 import { config, collection, fields } from '@keystatic/core';
 
+const caseImage = () => fields.image({ label: 'Фото', directory: 'public/cases', publicPath: '/cases/' });
+
 export default config({
   storage: { kind: 'github', repo: 'Zikrasoft/approved_rs' },
 
@@ -48,7 +50,8 @@ export default config({
           ],
           defaultValue: 'autopodbor',
         }),
-        image: fields.image({ label: 'Фото', directory: 'public/cases', publicPath: '/cases/' }),
+        image: caseImage(),
+        gallery: fields.array(caseImage(), { label: 'Больше фото', itemLabel: props => props.value || 'Фото' }),
         date: fields.date({ label: 'Дата' }),
         published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
         content: fields.markdoc({ label: 'Описание', extension: 'md' }),

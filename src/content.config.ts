@@ -11,6 +11,7 @@ const cases = defineCollection({
     country: z.string(),
     service: z.enum(['autopodbor', 'delivery', 'combined', 'buyout', 'inspection']),
     image: z.string().optional(),
+    gallery: z.array(z.string()).default([]),
     date: z.coerce.date(),
     published: z.boolean().default(true),
   }),

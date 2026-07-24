@@ -1,0 +1,121 @@
+---
+import Button from './Button.astro';
+
+interface Props {
+  images: string[];
+  name: string;
+}
+
+const { images, name } = Astro.props;
+const VISIBLE = 6;
+---
+
+{images.length > 0 && (
+  <div class="case-gallery py-10 border-t border-default">
+    <p class="text-xs tracking-widest uppercase mb-6 font-medium text-accent">Больше фото</p>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      {images.map((src, i) => {
+        const alt = `${name}, фото ${i + 1}`;
+        return (
+          <button
+            type="button"
+            class:list={[
+              'gallery-item group relative block overflow-hidden rounded-sm border border-default aspect-square',
+              { hidden: i >= VISIBLE },
+            ]}
+            data-src={src}
+            data-alt={alt}
+            aria-label={`Открыть фото ${i + 1} из ${images.length}`}
+          >
+            <img
+              src={src}
+              alt={alt}
+              loading="lazy"
+              class="w-full h-full object-cover transition-transform duration-400 ease-out group-hover:scale-105"
+            />
+          </button>
+        );
+      })}
+    </div>
+
+    {images.length > VISIBLE && (
+      <Button data-more variant="secondary" class="mt-5 px-5 py-2.5 text-xs tracking-widest uppercase">
+        Показать ещё ({images.length - VISIBLE})
+      </Button>
+    )}
+
+    <dialog class="gallery-dialog">
+      <button type="button" data-close aria-label="Закрыть" class="gallery-btn gallery-close">✕</button>
+      <button type="button" data-prev aria-label="Предыдущее фото" class="gallery-btn gallery-nav gallery-prev">‹</button>
+      <img data-dialog-img alt="" />
+      <button type="button" data-next aria-label="Следующее фото" class="gallery-btn gallery-nav gallery-next">›</button>
+    </dialog>
+  </div>
+)}
+
+<style>
+  .gallery-item { cursor: pointer; transition: border-color 0.3s; }
+  .gallery-item:hover { border-color: var(--color-accent-mid) !important; }
+
+  .gallery-dialog {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 2px;
+    padding: 0;
+    max-width: 90vw;
+    max-height: 90vh;
+    margin: auto;
+  }
+  .gallery-dialog::backdrop { background: rgba(13, 15, 20, 0.85); backdrop-filter: blur(4px); }
+  .gallery-dialog img { display: block; max-width: 90vw; max-height: 90vh; object-fit: contain; }
+
+  .gallery-btn {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-surface-glass);
+    border: 1px solid var(--color-border);
+    border-radius: 2px;
+    color: var(--color-text);
+    cursor: pointer;
+  }
+  .gallery-close { top: 0.75rem; right: 0.75rem; width: 2rem; height: 2rem; }
+  .gallery-nav { top: 50%; translate: 0 -50%; width: 2.5rem; height: 2.5rem; font-size: 1.5rem; }
+  .gallery-prev { left: 0.75rem; }
+  .gallery-next { right: 0.75rem; }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.case-gallery').forEach(root => {
+    root.querySelector('[data-more]')?.addEventListener('click', e => {
+      root.querySelectorAll('.gallery-item.hidden').forEach(el => el.classList.remove('hidden'));
+      (e.currentTarget as HTMLElement).remove();
+    });
+
+    const dialog = root.querySelector('dialog') as HTMLDialogElement | null;
+    const dialogImg = root.querySelector('[data-dialog-img]') as HTMLImageElement | null;
+    const items = Array.from(root.querySelectorAll('.gallery-item')) as HTMLButtonElement[];
+
+    if (dialog && dialogImg && items.length > 0) {
+      let current = 0;
+
+      const show = (i: number) => {
+        current = (i + items.length) % items.length;
+        const btn = items[current];
+        dialogImg.src = btn.dataset.src ?? '';
+        dialogImg.alt = btn.dataset.alt ?? '';
+      };
+
+      items.forEach((btn, i) => btn.addEventListener('click', () => { show(i); dialog.showModal(); }));
+      dialog.querySelector('[data-close]')?.addEventListener('click', () => dialog.close());
+      dialog.querySelector('[data-prev]')?.addEventListener('click', () => show(current - 1));
+      dialog.querySelector('[data-next]')?.addEventListener('click', () => show(current + 1));
+      dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
+      dialog.addEventListener('keydown', e => {
+        if (e.key === 'ArrowRight') show(current + 1);
+        if (e.key === 'ArrowLeft') show(current - 1);
+      });
+    }
+  });
+</script>

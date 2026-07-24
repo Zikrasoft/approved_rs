@@ -3,6 +3,7 @@ export const prerender = true;
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TelegramCTA from '../../components/TelegramCTA.astro';
 import Price from '../../components/Price.astro';
+import CaseGallery from '../../components/CaseGallery.astro';
 import { SERVICE_LABELS } from '../../utils/labels';
 import { getCollection, render } from 'astro:content';
 import { SITE_URL, SITE_NAME } from '../../utils/constants';
@@ -72,6 +73,9 @@ const meta = {
         <Content />
       </div>
     </div>
+
+    <!-- More photos -->
+    <CaseGallery images={c.data.gallery} name={c.data.car} />
 
     <!-- SEO banner -->
     <div class="py-10 border-t border-default">
