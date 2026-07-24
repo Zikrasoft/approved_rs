@@ -7,7 +7,7 @@ price:
   currency: '€'
 country: rs
 service: combined
-image: /cases/range-rover-evoque/image.jpg
+image: ./range-rover-evoque/image.jpg
 date: 2026-02-23
 published: true
 ---

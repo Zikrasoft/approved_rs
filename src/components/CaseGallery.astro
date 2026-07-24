@@ -1,9 +1,11 @@
 ---
 import Button from './Button.astro';
+import { Image } from 'astro:assets';
 import { X, ChevronLeft, ChevronRight } from '@lucide/astro';
+import type { ImageMetadata } from 'astro';
 
 interface Props {
-  images: string[];
+  images: ImageMetadata[];
   name: string;
 }
 
@@ -15,7 +17,7 @@ const VISIBLE = 6;
   <div class="case-gallery py-10 border-t border-default">
     <p class="text-xs tracking-widest uppercase mb-6 font-medium text-accent">Больше фото</p>
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-      {images.map((src, i) => {
+      {images.map((img, i) => {
         const alt = `${name}, фото ${i + 1}`;
         return (
           <button
@@ -24,13 +26,16 @@ const VISIBLE = 6;
               'gallery-item group relative block overflow-hidden rounded-sm border border-default aspect-square',
               { hidden: i >= VISIBLE },
             ]}
-            data-src={src}
+            data-src={img.src}
             data-alt={alt}
             aria-label={`Открыть фото ${i + 1} из ${images.length}`}
           >
-            <img
-              src={src}
+            <Image
+              src={img}
               alt={alt}
+              format="webp"
+              width={300}
+              height={300}
               loading="lazy"
               class="w-full h-full object-cover transition-transform duration-400 ease-out group-hover:scale-105"
             />

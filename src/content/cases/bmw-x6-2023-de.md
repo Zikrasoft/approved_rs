@@ -7,7 +7,7 @@ price:
   currency: '€'
 country: rs
 service: combined
-image: /cases/bmw-x6-2023-de/image.jpg
+image: ./bmw-x6-2023-de/image.jpg
 date: 2026-03-10
 published: true
 ---

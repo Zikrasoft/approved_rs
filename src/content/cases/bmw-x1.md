@@ -7,7 +7,7 @@ price:
   currency: '€'
 country: rs
 service: autopodbor
-image: /cases/bmw-x1/image.jpg
+image: ./bmw-x1/image.jpg
 date: 2026-07-24
 published: true
 ---

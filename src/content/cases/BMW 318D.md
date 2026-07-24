@@ -7,7 +7,7 @@ price:
   currency: '€'
 country: rs
 service: autopodbor
-image: /cases/BMW 318D/image.jpg
+image: ./BMW 318D/image.jpg
 date: 2026-04-20
 published: true
 ---

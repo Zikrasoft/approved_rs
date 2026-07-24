@@ -7,7 +7,7 @@ price:
   currency: '€'
 country: rs
 service: autopodbor
-image: /cases/mini-cooper-s/image.jpg
+image: ./mini-cooper-s/image.jpg
 date: 2025-12-20
 published: true
 ---

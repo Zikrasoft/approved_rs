@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
 import { Car } from '@lucide/astro';
 import { SERVICE_LABELS } from '../utils/labels';
 import Price from './Price.astro';
@@ -17,9 +18,12 @@ const { case: c } = Astro.props;
 >
   {c.data.image
     ? <div class="overflow-hidden h-52">
-        <img
+        <Image
           src={c.data.image}
           alt={c.data.car}
+          format="webp"
+          width={400}
+          height={208}
           class="w-full h-full object-cover transition-transform duration-400 ease-out group-hover:scale-105"
           loading="lazy"
         />

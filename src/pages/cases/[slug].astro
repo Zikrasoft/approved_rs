@@ -1,6 +1,7 @@
 ---
 export const prerender = true;
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Image } from 'astro:assets';
 import { MapPin } from '@lucide/astro';
 import TelegramCTA from '../../components/TelegramCTA.astro';
 import Price from '../../components/Price.astro';
@@ -23,7 +24,7 @@ const geoBanner = await marked.parseInline(GEO_BANNERS[Math.floor(Math.random() 
 
 const hook = excerptFromMarkdown(c.body ?? '');
 const canonical = `${SITE_URL}/cases/${c.id}/`;
-const imageUrl = c.data.image ? `${SITE_URL}${c.data.image}` : undefined;
+const imageUrl = c.data.image ? `${SITE_URL}${c.data.image.src}` : undefined;
 
 const meta = {
   title: `${c.data.title} | ${SITE_NAME}`,
@@ -31,6 +32,8 @@ const meta = {
   canonical,
   // Real car photo makes a more compelling share preview than the generic template.
   ogImage: imageUrl,
+  ogImageWidth: c.data.image?.width,
+  ogImageHeight: c.data.image?.height,
 };
 
 const schema = generateArticleSchema({
@@ -74,9 +77,10 @@ const schema = generateArticleSchema({
 
       {c.data.image && (
         <div class="-mx-6 md:mx-0 overflow-hidden border-y md:border md:rounded-sm border-default aspect-[4/3] order-first md:order-last">
-          <img
+          <Image
             src={c.data.image}
             alt={c.data.car}
+            format="webp"
             class="w-full h-full object-cover"
           />
         </div>
