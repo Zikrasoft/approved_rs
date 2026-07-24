@@ -200,6 +200,16 @@ import { DEFAULT_COUNTRY } from '../utils/constants';
       });
     }
 
+    /* Follow OS theme changes live, but only while the user hasn't picked one explicitly */
+    try {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+        if (localStorage.getItem('theme')) return;
+        if (e.matches) document.documentElement.setAttribute('data-theme', 'dark');
+        else document.documentElement.removeAttribute('data-theme');
+        updateIcons();
+      });
+    } catch (e) {}
+
     /* ── Lead form modal ── */
     var leadModal = document.getElementById('lead-modal');
     if (leadModal) {

@@ -81,12 +81,13 @@ const {
     <link rel="manifest" href="/site.webmanifest" />
 
 
-    <!-- Prevent flash of wrong theme (light is default) -->
+    <!-- Prevent flash of wrong theme: explicit choice wins, otherwise follow OS preference -->
     <script is:inline>
       (function () {
         try {
-          var t = localStorage.getItem('theme');
-          if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+          var stored = localStorage.getItem('theme');
+          var wantsDark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (wantsDark) document.documentElement.setAttribute('data-theme', 'dark');
         } catch (e) {}
       })();
     </script>
