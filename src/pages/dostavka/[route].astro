@@ -23,7 +23,7 @@ const cases = (await getCollection('cases')).filter(c => c.data.published && c.d
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'Service',
-  name: `Доставка авто из ${fromCountry.nameGenitive} в ${toCountry.name}`,
+  name: `Доставка авто из ${fromCountry.nameGenitive} в ${toCountry.nameAccusative}`,
   provider: { '@type': 'LocalBusiness', name: SITE_NAME },
   areaServed: [fromCountry.name, toCountry.name],
 };
@@ -41,7 +41,7 @@ const schema = {
       </div>
       <h1 class="font-display text-5xl md:text-6xl font-bold mb-6 leading-tight fade-up fade-up-2">
         Доставка авто<br/>из {fromCountry.nameGenitive}<br/>
-        <span class="text-accent">в {toCountry.name}</span>
+        <span class="text-accent">в {toCountry.nameAccusative}</span>
       </h1>
       <p class="text-lg max-w-xl mb-2 fade-up fade-up-3 text-muted">
         Таможенное оформление, автовоз, страховка. Срок 7–14 дней.
