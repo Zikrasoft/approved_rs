@@ -1,14 +1,13 @@
 ---
 import Button from './Button.astro';
+import ThreadsButton from './ThreadsButton.astro';
 interface Props {
   manager?: string;
-  channel?: string;
   label?: string;
 }
 
 const {
   manager = import.meta.env.PUBLIC_TG_MANAGER!,
-  channel = import.meta.env.PUBLIC_TG_CHANNEL!,
   label = 'Написать в Telegram',
 } = Astro.props;
 ---
@@ -21,12 +20,5 @@ const {
     {label}
   </Button>
 
-  <Button variant="secondary" href={`https://t.me/${channel}`} target="_blank" rel="noopener" class="tg-channel px-6 py-3 tracking-[0.03em]">
-    Наш канал
-    <span class="tg-arrow text-[0.85em] transition-transform duration-200">→</span>
-  </Button>
+  <ThreadsButton />
 </div>
-
-<style>
-  .tg-channel:hover .tg-arrow { transform: translateX(3px); }
-</style>

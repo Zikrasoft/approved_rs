@@ -25,6 +25,7 @@
 | `SITE` | Публичный URL сайта, напр. `https://approved.rs` | Домен проекта |
 | `PUBLIC_TG_MANAGER` | Username Telegram менеджера (без @) | — |
 | `PUBLIC_TG_CHANNEL` | Username Telegram канала (без @) | — |
+| `PUBLIC_THREADS_CHANNEL` | Username Threads-канала (без @) | — |
 | `TELEGRAM_BOT_TOKEN` | Токен бота для приёма заявок | [@BotFather](https://t.me/BotFather) |
 | `TELEGRAM_CHANNEL_ID` | ID канала/группы куда слать заявки | `@username` или `-100...` |
 | `DATABASE_URL` | Строка подключения Neon Postgres | [neon.tech](https://neon.tech) |
