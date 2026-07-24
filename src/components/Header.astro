@@ -2,9 +2,9 @@
 import { Menu, X, Send, Sun, Moon } from '@lucide/astro';
 import SiteLogo from './SiteLogo.astro';
 import Button from './Button.astro';
+import LeadForm from './LeadForm.astro';
 import { SERVICES } from '../utils/labels';
 import { DEFAULT_COUNTRY } from '../utils/constants';
-const TG_CHANNEL = `https://t.me/${import.meta.env.PUBLIC_TG_CHANNEL!}`;
 ---
 
 <header class="sticky top-0 z-50 border-b bg-header-glass border-default backdrop-blur-[16px]">
@@ -13,7 +13,7 @@ const TG_CHANNEL = `https://t.me/${import.meta.env.PUBLIC_TG_CHANNEL!}`;
     <SiteLogo />
 
     <!-- Desktop Nav -->
-    <nav class="hidden md:flex items-center gap-7 text-sm font-sans font-normal header-nav flex-1 justify-center">
+    <nav class="hidden lg:flex items-center gap-7 text-sm font-sans font-normal header-nav flex-1 justify-center">
       {SERVICES.map(s => (
         <a href={`/${DEFAULT_COUNTRY}/${s.slug}/`} class="text-muted" aria-current={Astro.url.pathname.includes(`/${s.slug}/`) ? 'page' : undefined}>{s.label}</a>
       ))}
@@ -35,16 +35,17 @@ const TG_CHANNEL = `https://t.me/${import.meta.env.PUBLIC_TG_CHANNEL!}`;
         <span id="icon-moon"><Moon size={16} /></span>
       </button>
 
-      <!-- Desktop CTA -->
-      <Button href={TG_CHANNEL} target="_blank" rel="noopener" class="hidden md:flex px-4 py-2">
+      <!-- CTA: always visible, text shortens below the lg breakpoint -->
+      <Button type="button" data-open-lead-modal class="px-4 py-2">
         <Send size={13} />
-        Telegram
+        <span class="lg:hidden">Заявка</span>
+        <span class="hidden lg:inline">Оставить заявку</span>
       </Button>
 
       <!-- Mobile burger -->
       <button
         id="burger"
-        class="md:hidden flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong text-secondary"
+        class="lg:hidden flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong text-secondary"
         aria-label="Меню"
         aria-expanded="false"
       >
@@ -57,7 +58,7 @@ const TG_CHANNEL = `https://t.me/${import.meta.env.PUBLIC_TG_CHANNEL!}`;
   <!-- Mobile Menu -->
   <div
     id="mobile-menu"
-    class="md:hidden border-t bg-header-mobile border-default"
+    class="lg:hidden border-t bg-header-mobile border-default"
     style="display:none"
   >
     <nav class="max-w-6xl mx-auto px-6 py-5 flex flex-col gap-0 mobile-nav">
@@ -67,13 +68,15 @@ const TG_CHANNEL = `https://t.me/${import.meta.env.PUBLIC_TG_CHANNEL!}`;
       <a href="/cases/"    class="text-secondary">Кейсы</a>
       <a href="/contacts/" class="text-secondary">Контакты</a>
     </nav>
-    <div class="max-w-6xl mx-auto px-6 pb-6">
-      <Button href={TG_CHANNEL} target="_blank" rel="noopener" class="px-5 py-2.5">
-        <Send size={14} />
-        Написать в Telegram
-      </Button>
-    </div>
   </div>
+
+  <!-- Lead form modal -->
+  <dialog id="lead-modal" class="lead-modal">
+    <button type="button" data-close aria-label="Закрыть" class="lead-modal-close">
+      <X size={16} />
+    </button>
+    <LeadForm />
+  </dialog>
 </header>
 
 <style>
@@ -130,6 +133,42 @@ const TG_CHANNEL = `https://t.me/${import.meta.env.PUBLIC_TG_CHANNEL!}`;
     opacity: 1;
     pointer-events: auto;
   }
+
+  :global(html.modal-open) {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  .lead-modal {
+    position: relative;
+    background: transparent;
+    border: none;
+    padding: 0;
+    max-width: 26rem;
+    width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    margin: auto;
+  }
+  .lead-modal::backdrop { background: rgba(13, 15, 20, 0.6); backdrop-filter: blur(4px); }
+  .lead-modal-close {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 2px;
+    border: 1px solid var(--color-border-strong);
+    background: var(--color-surface);
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .lead-modal-close:hover { border-color: var(--color-accent) !important; color: var(--color-accent) !important; }
 </style>
 
 <script is:inline>
@@ -158,6 +197,27 @@ const TG_CHANNEL = `https://t.me/${import.meta.env.PUBLIC_TG_CHANNEL!}`;
           try { localStorage.setItem('theme', 'dark'); } catch (e) {}
         }
         updateIcons();
+      });
+    }
+
+    /* ── Lead form modal ── */
+    var leadModal = document.getElementById('lead-modal');
+    if (leadModal) {
+      document.querySelectorAll('[data-open-lead-modal]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          if (burger && burger.getAttribute('aria-expanded') === 'true') closeMenu();
+          document.documentElement.classList.add('modal-open');
+          leadModal.showModal();
+        });
+      });
+      var leadModalClose = leadModal.querySelector('[data-close]');
+      if (leadModalClose) leadModalClose.addEventListener('click', function () { leadModal.close(); });
+      leadModal.addEventListener('click', function (e) {
+        if (e.target === leadModal) leadModal.close();
+      });
+      // fires on every close path (button, backdrop click, Escape key)
+      leadModal.addEventListener('close', function () {
+        document.documentElement.classList.remove('modal-open');
       });
     }
 

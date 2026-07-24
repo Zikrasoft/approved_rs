@@ -1,10 +1,12 @@
 ---
 import SiteLogo from './SiteLogo.astro';
+import { Send } from '@lucide/astro';
 import { SERVICES } from '../utils/labels';
 import { SITE_NAME, DEFAULT_COUNTRY } from '../utils/constants';
+import { telegramLink } from '../utils/telegramLink';
 const year = new Date().getFullYear();
-const TG_CHANNEL = import.meta.env.PUBLIC_TG_CHANNEL!;
 const TG_MANAGER = import.meta.env.PUBLIC_TG_MANAGER!;
+const THREADS_CHANNEL = import.meta.env.PUBLIC_THREADS_CHANNEL!;
 ---
 
 <footer class="mt-24 border-t border-default">
@@ -20,14 +22,12 @@ const TG_MANAGER = import.meta.env.PUBLIC_TG_MANAGER!;
           Подберём, проверим и доставим автомобиль из Европы. Берём на себя весь процесс — от поиска до доставки.
         </p>
         <a
-          href={`https://t.me/${TG_MANAGER}`}
+          href={telegramLink(TG_MANAGER)}
           target="_blank"
           rel="noopener"
           class="footer-tg inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline border border-accent-border text-accent"
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.23 13.4l-2.95-.924c-.642-.204-.657-.642.136-.953l11.57-4.461c.537-.194 1.006.131.908.159z"/>
-          </svg>
+          <Send size={13} />
           Написать менеджеру
         </a>
       </div>
@@ -52,7 +52,7 @@ const TG_MANAGER = import.meta.env.PUBLIC_TG_MANAGER!;
         </nav>
         <div class="mt-6 space-y-1.5">
           <p class="text-xs text-muted">Германия · Испания · Сербия</p>
-          <p class="text-xs text-muted">Пн–Сб, 9:00–20:00 CET</p>
+          <p class="text-xs text-muted">Круглосуточно, без выходных</p>
         </div>
       </div>
 
@@ -62,12 +62,12 @@ const TG_MANAGER = import.meta.env.PUBLIC_TG_MANAGER!;
     <div class="pt-6 border-t border-default flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
       <p class="text-xs text-muted">© {year} {SITE_NAME} — Автоподбор и доставка авто из Европы</p>
       <a
-        href={`https://t.me/${TG_CHANNEL}`}
+        href={`https://www.threads.com/@${THREADS_CHANNEL}`}
         target="_blank"
         rel="noopener"
         class="footer-channel text-xs no-underline text-muted"
       >
-        Telegram-канал →
+        Наш канал →
       </a>
     </div>
   </div>

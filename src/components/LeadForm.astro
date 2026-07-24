@@ -1,6 +1,7 @@
 ---
 import FormField from './FormField.astro';
 import Button from './Button.astro';
+import { Send, Phone, ChevronDown } from '@lucide/astro';
 
 interface Props {
   service?: string;
@@ -10,6 +11,31 @@ interface Props {
 
 const { service = '', country = '', city = '' } = Astro.props;
 const sourceUrl = Astro.url.href;
+
+// ponytail: curated list covering the site's own markets + common client
+// origins (Balkans/CIS). Not exhaustive — extend PHONE_COUNTRIES if leads
+// keep arriving from countries missing here.
+// Static default is always Serbia — the page's `country` prop is the deal's
+// country (e.g. "car coming from DE"), not the visitor's location. The client
+// script refines this to the visitor's real region via timezone, falling
+// back to this same default (RS) when that can't be determined.
+const PHONE_COUNTRIES = [
+  { iso: 'RS', dial: '381', label: 'Сербия',              flag: '🇷🇸' },
+  { iso: 'DE', dial: '49',  label: 'Германия',             flag: '🇩🇪' },
+  { iso: 'ES', dial: '34',  label: 'Испания',              flag: '🇪🇸' },
+  { iso: 'RU', dial: '7',   label: 'Россия',               flag: '🇷🇺' },
+  { iso: 'UA', dial: '380', label: 'Украина',              flag: '🇺🇦' },
+  { iso: 'BY', dial: '375', label: 'Беларусь',             flag: '🇧🇾' },
+  { iso: 'KZ', dial: '7',   label: 'Казахстан',            flag: '🇰🇿' },
+  { iso: 'BA', dial: '387', label: 'Босния и Герцеговина', flag: '🇧🇦' },
+  { iso: 'HR', dial: '385', label: 'Хорватия',             flag: '🇭🇷' },
+  { iso: 'ME', dial: '382', label: 'Черногория',           flag: '🇲🇪' },
+  { iso: 'MK', dial: '389', label: 'Северная Македония',   flag: '🇲🇰' },
+  { iso: 'TR', dial: '90',  label: 'Турция',                flag: '🇹🇷' },
+];
+const defaultPhoneCountry = 'RS';
+
+const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page border border-border-strong text-primary font-sans';
 ---
 
 <div class="lead-form-card rounded-sm p-7 bg-surface-glass border border-border-strong backdrop-blur-[12px]">
@@ -27,8 +53,59 @@ const sourceUrl = Astro.url.href;
     <input type="hidden" name="city" value={city} />
     <input type="hidden" name="source_url" value={sourceUrl} />
 
-    <FormField name="name"    label="Ваше имя"            placeholder="Иван"                    required />
-    <FormField name="contact" label="Telegram или телефон" placeholder="@username или +381…"     required />
+    <FormField name="name" label="Ваше имя" placeholder="Иван" required />
+
+    <div class="mb-5 contact-field">
+      <label class="block text-xs font-medium mb-2 tracking-[0.14em] uppercase text-muted">
+        Как с вами связаться<span class="text-accent ml-0.5">*</span>
+      </label>
+
+      <div class="contact-tabs relative inline-flex gap-1 p-1 mb-2 rounded-sm bg-page border border-border-strong" role="tablist">
+        <span class="contact-tab-pill" aria-hidden="true"></span>
+        <button type="button" data-tab="telegram" class="contact-tab relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium cursor-pointer text-on-accent" role="tab" aria-selected="true" aria-controls="contact-panel-telegram">
+          <Send size={13} /> Telegram
+        </button>
+        <button type="button" data-tab="phone" class="contact-tab relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium cursor-pointer text-muted" role="tab" aria-selected="false" aria-controls="contact-panel-phone">
+          <Phone size={13} /> Телефон
+        </button>
+      </div>
+
+      <div id="contact-panel-telegram" class="contact-panel" data-panel="telegram" role="tabpanel">
+        <input
+          type="text"
+          id="contact-telegram"
+          name="contact"
+          placeholder="@username"
+          class={`${fieldClass} w-full px-4`}
+        />
+      </div>
+
+      <div id="contact-panel-phone" class="contact-panel hidden" data-panel="phone" role="tabpanel">
+        <div class="flex gap-2">
+          <div class="relative shrink-0 w-[6.5rem]">
+            <select
+              id="contact-phone-country"
+              class={`${fieldClass} w-full pl-2 pr-6 appearance-none cursor-pointer`}
+            >
+              {PHONE_COUNTRIES.map(c => (
+                <option value={c.iso} selected={c.iso === defaultPhoneCountry}>{c.flag} +{c.dial}</option>
+              ))}
+            </select>
+            <ChevronDown size={14} class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-muted" />
+          </div>
+          <input
+            type="tel"
+            id="contact-phone-number"
+            inputmode="tel"
+            placeholder="060 123 4567"
+            class={`${fieldClass} flex-1 min-w-0 px-4`}
+          />
+        </div>
+      </div>
+
+      <input type="hidden" name="contact" />
+    </div>
+
     <FormField name="comment" label="Марка, модель, бюджет" placeholder="BMW 3, 2020–2022, до €25 000…" type="textarea" />
 
     <label class="flex items-start gap-3 mb-2 cursor-pointer text-muted consent-label">
@@ -49,68 +126,251 @@ const sourceUrl = Astro.url.href;
   </form>
 </div>
 
-<script is:inline>
-(function () {
-  var cards = document.querySelectorAll('.lead-form-card');
-  var card = cards[cards.length - 1];
-  if (!card) return;
-  var form = card.querySelector('form');
-  if (!form || form.dataset.validated) return;
-  form.dataset.validated = '1';
-
-  function fieldWrap(input) { return input.closest('.mb-5') || input.parentElement; }
-
-  function setError(input, msg) {
-    input.classList.add('has-error');
-    var wrap = fieldWrap(input);
-    var err = wrap.querySelector('.field-error');
-    if (!err) { err = document.createElement('p'); err.className = 'field-error'; wrap.appendChild(err); }
-    err.textContent = msg;
+<style>
+  .contact-tab-pill {
+    position: absolute;
+    top: 0.25rem;
+    bottom: 0.25rem;
+    left: 0;
+    border-radius: 2px;
+    background: var(--color-accent);
+    transition: transform 0.35s var(--ease-spring), width 0.35s var(--ease-spring);
+    will-change: transform, width;
   }
+  .contact-tab { transition: color 0.2s; background: transparent; border: none; }
+</style>
 
-  function clearError(input) {
-    input.classList.remove('has-error');
-    var wrap = fieldWrap(input);
-    var err = wrap.querySelector('.field-error');
-    if (err) err.remove();
-  }
+<script>
+  import { AsYouType, parsePhoneNumberFromString, type CountryCode } from 'libphonenumber-js/min';
 
-  form.addEventListener('submit', function (e) {
-    var ok = true;
-    var name    = form.querySelector('[name="name"]');
-    var contact = form.querySelector('[name="contact"]');
-    var consent = form.querySelector('[name="consent"]');
-    var consentErr = form.querySelector('.consent-error');
-
-    if (!name.value.trim()) {
-      setError(name, 'Введите ваше имя'); ok = false;
-    } else clearError(name);
-
-    var cv = contact.value.trim();
-    if (!cv) {
-      setError(contact, 'Введите Telegram или телефон'); ok = false;
-    } else if (!/^@\w{3,}$/.test(cv) && !/^\+?[\d\s()\-]{7,}$/.test(cv)) {
-      setError(contact, 'Формат: @username или +7 (999) 000-00-00'); ok = false;
-    } else clearError(contact);
-
-    if (consentErr) consentErr.style.display = consent && consent.checked ? 'none' : '';
-    if (!consent || !consent.checked) ok = false;
-
-    if (!ok) e.preventDefault();
+  // A page can have more than one LeadForm instance (e.g. a page-level form
+  // plus the header's "Оставить заявку" modal) — Astro only emits this
+  // <script> once per page regardless, so it must initialize every card.
+  document.querySelectorAll<HTMLElement>('.lead-form-card').forEach(card => {
+    const form = card.querySelector<HTMLFormElement>('form');
+    if (form && !form.dataset.validated) {
+      form.dataset.validated = '1';
+      initLeadForm(form);
+    }
   });
 
-  ['name', 'contact'].forEach(function (n) {
-    var f = form.querySelector('[name="' + n + '"]');
-    if (f) f.addEventListener('input', function () { clearError(f); });
-  });
+  function initLeadForm(form: HTMLFormElement) {
+    function fieldWrap(input: HTMLElement) { return input.closest('.mb-5') || input.parentElement!; }
 
-  var consent = form.querySelector('[name="consent"]');
-  var consentErr = form.querySelector('.consent-error');
-  if (consent && consentErr) {
-    consent.addEventListener('change', function () {
-      consentErr.style.display = consent.checked ? 'none' : '';
+    function setError(input: HTMLElement, msg: string) {
+      input.classList.add('has-error');
+      const wrap = fieldWrap(input);
+      let err = wrap.querySelector('.field-error');
+      if (!err) { err = document.createElement('p'); err.className = 'field-error'; wrap.appendChild(err); }
+      err.textContent = msg;
+    }
+
+    function clearError(input: HTMLElement) {
+      input.classList.remove('has-error');
+      const err = fieldWrap(input).querySelector('.field-error');
+      if (err) err.remove();
+    }
+
+    // ── Contact switcher (Telegram / Phone) ──
+    const contactField = form.querySelector('.contact-field')!;
+    const tabs = contactField.querySelectorAll<HTMLButtonElement>('.contact-tab');
+    const panels = contactField.querySelectorAll<HTMLElement>('.contact-panel');
+    const pill = contactField.querySelector<HTMLElement>('.contact-tab-pill')!;
+    const hiddenContact = form.querySelector<HTMLInputElement>('input[type="hidden"][name="contact"]')!;
+    const tgInput = contactField.querySelector<HTMLInputElement>('#contact-telegram')!;
+    const phoneCountry = contactField.querySelector<HTMLSelectElement>('#contact-phone-country')!;
+    const phoneNumber = contactField.querySelector<HTMLInputElement>('#contact-phone-number')!;
+    const consent = form.querySelector<HTMLInputElement>('[name="consent"]')!;
+    const consentErr = form.querySelector<HTMLElement>('.consent-error');
+
+    // progressive enhancement: the Telegram field ships with name="contact"
+    // so the form still submits something if this script never runs (ad
+    // blocker, disabled JS, failed dynamic import). Once we're here, JS is
+    // confirmed working, so hand control to the hidden field exclusively —
+    // otherwise the two same-named fields would collide on submit.
+    tgInput.removeAttribute('name');
+
+    function isSupportedCountry(iso: string) {
+      return Array.from(phoneCountry.options).some(o => o.value === iso);
+    }
+
+    let activeTab: 'telegram' | 'phone' = 'telegram';
+    let activeTabButton: HTMLButtonElement = tabs[0];
+
+    function movePill(tab: HTMLElement) {
+      pill.style.width = tab.offsetWidth + 'px';
+      pill.style.transform = `translateX(${tab.offsetLeft}px)`;
+    }
+    movePill(tabs[0]);
+
+    // if this form lives inside a <dialog> (e.g. the header's lead modal),
+    // it's unrendered (zero size) at init time, so the pill above measured
+    // 0×0 — re-measure once the dialog actually becomes visible.
+    const dialogAncestor = form.closest('dialog');
+    if (dialogAncestor) {
+      dialogAncestor.addEventListener('toggle', (e) => {
+        if ((e as ToggleEvent).newState === 'open') movePill(activeTabButton);
+      });
+    }
+
+    // ponytail: timezone → country lookup covers our curated list only;
+    // falls back to the static Serbia default when the visitor's zone isn't
+    // one of these (no network call, no IP-geolocation dependency). Values
+    // here must stay a subset of PHONE_COUNTRIES' `iso` codes above — this
+    // map is keyed by IANA timezone (many-to-one), so it can't be generated
+    // from that list automatically.
+    const TIMEZONE_COUNTRY: Record<string, string> = {
+      'Europe/Belgrade': 'RS',
+      'Europe/Berlin': 'DE',
+      'Europe/Madrid': 'ES',
+      'Europe/Moscow': 'RU',
+      'Europe/Kyiv': 'UA', 'Europe/Kiev': 'UA',
+      'Europe/Minsk': 'BY',
+      'Asia/Almaty': 'KZ', 'Asia/Aqtobe': 'KZ', 'Asia/Qyzylorda': 'KZ',
+      'Europe/Sarajevo': 'BA',
+      'Europe/Zagreb': 'HR',
+      'Europe/Podgorica': 'ME',
+      'Europe/Skopje': 'MK',
+      'Europe/Istanbul': 'TR',
+    };
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const detected = TIMEZONE_COUNTRY[tz];
+      if (detected) phoneCountry.value = detected;
+    } catch {}
+
+    function parsedPhone() {
+      return parsePhoneNumberFromString(phoneNumber.value, phoneCountry.value as CountryCode);
+    }
+
+    // ponytail: re-mask from raw digits on every keystroke instead of a
+    // caret-aware stateful mask — simpler, good enough for a lead form.
+    function formatPhone() {
+      const value = phoneNumber.value;
+      if (value.trim().startsWith('+')) {
+        // pasted/typed as international — detect the country, then show the
+        // properly grouped national format so the dial code isn't shown twice.
+        // If the detected country isn't one of our <option>s, assigning it to
+        // the <select> would clear the selection (value becomes ""), which
+        // then breaks parsing — so keep the full "+..." text instead, which
+        // parses fine on its own regardless of the <select>'s value.
+        const digits = '+' + value.replace(/[^\d]/g, '');
+        const ayt = new AsYouType();
+        const formatted = ayt.input(digits);
+        const num = ayt.getNumber();
+        if (num?.country && isSupportedCountry(num.country)) {
+          phoneCountry.value = num.country;
+          phoneNumber.value = num.formatNational();
+        } else {
+          phoneNumber.value = formatted;
+        }
+        return;
+      }
+      const raw = value.replace(/[^\d]/g, '');
+      phoneNumber.value = new AsYouType(phoneCountry.value as CountryCode).input(raw);
+    }
+
+    function syncContact() {
+      if (activeTab === 'telegram') {
+        hiddenContact.value = tgInput.value.trim();
+      } else {
+        const parsed = parsedPhone();
+        hiddenContact.value = parsed ? parsed.number : phoneNumber.value.trim();
+      }
+    }
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        activeTab = tab.dataset.tab as 'telegram' | 'phone';
+        activeTabButton = tab;
+        movePill(tab);
+        tabs.forEach(t => {
+          const isActive = t === tab;
+          t.classList.toggle('text-on-accent', isActive);
+          t.classList.toggle('text-muted', !isActive);
+          t.setAttribute('aria-selected', String(isActive));
+        });
+        panels.forEach(p => p.classList.toggle('hidden', p.dataset.panel !== activeTab));
+        clearError(tgInput);
+        clearError(phoneNumber);
+        syncContact();
+        (activeTab === 'telegram' ? tgInput : phoneNumber).focus();
+      });
+    });
+
+    tgInput.addEventListener('input', () => { clearError(tgInput); syncContact(); });
+    tgInput.addEventListener('blur', () => {
+      const v = tgInput.value.trim();
+      if (v && !v.startsWith('@')) { tgInput.value = '@' + v; syncContact(); }
+    });
+    phoneNumber.addEventListener('input', () => { formatPhone(); clearError(phoneNumber); syncContact(); });
+    phoneCountry.addEventListener('change', () => {
+      // if the field holds international "+..." text, the user picking a
+      // different country is overriding the auto-detect — drop the stale
+      // text instead of silently re-showing a number for the old country.
+      if (phoneNumber.value.trim().startsWith('+')) phoneNumber.value = '';
+      formatPhone();
+      syncContact();
+      phoneNumber.focus();
+    });
+
+    form.addEventListener('submit', (e) => {
+      let ok = true;
+      const name = form.querySelector<HTMLInputElement>('[name="name"]')!;
+
+      if (!name.value.trim()) {
+        setError(name, 'Введите ваше имя'); ok = false;
+      } else clearError(name);
+
+      if (activeTab === 'telegram') {
+        const v = tgInput.value.trim();
+        if (!v) {
+          setError(tgInput, 'Введите Telegram'); ok = false;
+        } else if (!/^@?\w{3,}$/.test(v)) {
+          setError(tgInput, 'Формат: @username'); ok = false;
+        } else {
+          if (!v.startsWith('@')) tgInput.value = '@' + v;
+          clearError(tgInput);
+        }
+      } else {
+        const parsed = parsedPhone();
+        if (!phoneNumber.value.trim()) {
+          setError(phoneNumber, 'Введите номер телефона'); ok = false;
+        } else if (!parsed || !parsed.isValid()) {
+          setError(phoneNumber, 'Проверьте номер телефона'); ok = false;
+        } else clearError(phoneNumber);
+      }
+      syncContact();
+
+      if (consentErr) consentErr.style.display = consent.checked ? 'none' : '';
+      if (!consent.checked) ok = false;
+
+      if (!ok) e.preventDefault();
+    });
+
+    if (consentErr) {
+      consent.addEventListener('change', () => {
+        consentErr.style.display = consent.checked ? 'none' : '';
+      });
+    }
+
+    syncContact();
+  }
+
+  // "Узнать стоимость"-style CTAs elsewhere on the page link to #lead-form —
+  // scroll there and focus its name field instead of just jumping. Runs once
+  // globally (not per-card) and is scoped to the #lead-form target itself,
+  // so it stays correct regardless of how many LeadForm instances exist.
+  const leadFormTarget = document.getElementById('lead-form');
+  if (leadFormTarget) {
+    const nameInput = leadFormTarget.querySelector<HTMLInputElement>('[name="name"]');
+    document.querySelectorAll<HTMLAnchorElement>('a[href="#lead-form"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        leadFormTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        nameInput?.focus({ preventScroll: true });
+      });
     });
   }
-})();
 </script>
 

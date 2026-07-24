@@ -47,7 +47,7 @@ const schema = {
         Таможенное оформление, автовоз, страховка. Срок 7–14 дней.
       </p>
       <div class="fade-up fade-up-4">
-        <TelegramCTA label="Узнать стоимость" />
+        <TelegramCTA label="Узнать стоимость" formHref="#lead-form" />
       </div>
     </div>
   </section>
@@ -75,7 +75,7 @@ const schema = {
           ))}
         </div>
       </div>
-      <div class="fade-up fade-up-2">
+      <div id="lead-form" class="fade-up fade-up-2 scroll-mt-24">
         <LeadForm service="delivery" country={routeData.from} />
       </div>
     </div>

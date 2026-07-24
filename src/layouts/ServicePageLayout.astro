@@ -44,10 +44,10 @@ const {
           <h1 class="font-display font-bold mb-5 leading-tight fade-up fade-up-2 tracking-[-0.02em]"
             style="font-size: clamp(2.2rem, 4.5vw, 3.8rem);">{title}</h1>
           <p class="text-base max-w-lg mb-2 leading-relaxed fade-up fade-up-3 text-muted">{description}</p>
-          <div class="fade-up fade-up-4"><TelegramCTA label={ctaLabel} /></div>
+          <div class="fade-up fade-up-4"><TelegramCTA label={ctaLabel} formHref="#lead-form" /></div>
           <div class="fade-up fade-up-5 pt-2"><slot /></div>
         </div>
-        <div class="lg:col-span-2 fade-up fade-up-3">
+        <div id="lead-form" class="lg:col-span-2 fade-up fade-up-3 scroll-mt-24">
           <LeadForm service={formService} country={currentCountry} city={city} />
         </div>
       </div>

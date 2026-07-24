@@ -20,6 +20,7 @@ const cases = (await getCollection('cases')).filter(c => c.data.published && c.d
   {meta} {cases}
   title={`Автоподбор в ${city.nameLocative}`}
   description={`Подберём автомобиль в ${city.nameLocative} с полной проверкой. Работаем по всему региону ${country.name}.`}
+  ctaLabel="Оставить заявку"
   formService="autopodbor"
   currentCountry={countryCode!}
   currentService="autopodbor"

@@ -2,6 +2,7 @@
 export const prerender = true;
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE_URL, SITE_NAME } from '../utils/constants';
+import { telegramLink } from '../utils/telegramLink';
 
 const meta = {
   title: `Политика конфиденциальности | ${SITE_NAME}`,
@@ -52,7 +53,7 @@ const sections = [
         <p class="text-base leading-relaxed text-muted">
           По вопросам конфиденциальности обратитесь к нам через{' '}
           <a
-            href={`https://t.me/${import.meta.env.PUBLIC_TG_MANAGER!}`}
+            href={telegramLink(import.meta.env.PUBLIC_TG_MANAGER!)}
             class="underline transition-colors text-accent"
           >
             Telegram
