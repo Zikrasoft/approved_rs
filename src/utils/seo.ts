@@ -47,8 +47,8 @@ export function generateMeta(
     }
     case 'delivery': {
       return {
-        title: `Доставка авто из ${fromCountry!.nameGenitive} в ${toCountry!.nameAccusative || toCountry!.name} — цены и сроки | ${SITE_NAME}`,
-        description: `Доставка автомобилей из ${fromCountry!.nameGenitive} в ${toCountry!.name}. Таможенное оформление, транспортировка, страховка. Срок 7–14 дней.`,
+        title: `Доставка авто из ${fromCountry!.nameGenitive} в ${toCountry!.nameAccusative} — цены и сроки | ${SITE_NAME}`,
+        description: `Доставка автомобилей из ${fromCountry!.nameGenitive} в ${toCountry!.nameAccusative}. Таможенное оформление, транспортировка, страховка. Срок 7–14 дней.`,
         canonical,
       };
     }
