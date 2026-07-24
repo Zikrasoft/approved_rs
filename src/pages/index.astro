@@ -18,6 +18,8 @@ import {
 import { getCollection } from "astro:content";
 import { getActiveCountries } from "../utils/geo";
 import { SITE_URL, SITE_NAME } from "../utils/constants";
+import { generateOrganizationSchema } from "../utils/seo";
+import { telegramLink } from "../utils/telegramLink";
 import StatBlock from "../components/StatBlock.astro";
 
 const meta = {
@@ -31,14 +33,16 @@ const allCases = await getCollection("cases");
 const latestCases = allCases.filter((c) => c.data.published).slice(0, 3);
 const countries = getActiveCountries();
 
-const schema = {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    name: SITE_NAME,
-    description: meta.description,
+const tgManager = import.meta.env.PUBLIC_TG_MANAGER!;
+const threadsChannel = import.meta.env.PUBLIC_THREADS_CHANNEL!;
+
+const schema = generateOrganizationSchema({
     url: SITE_URL,
-    serviceType: ["Автоподбор", "Доставка автомобилей", "Выкуп авто"],
-};
+    description: meta.description,
+    areaServed: countries.map((c) => c.name),
+    sameAs: [`https://t.me/${tgManager}`, `https://www.threads.com/@${threadsChannel}`],
+    contactUrl: telegramLink(tgManager),
+});
 
 const services = [
     {

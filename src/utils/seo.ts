@@ -98,9 +98,41 @@ export function generateServiceSchema(name: string, areaServed: string | string[
     '@context': 'https://schema.org',
     '@type': 'Service',
     name,
-    provider: { '@type': 'LocalBusiness', name: SITE_NAME },
+    // Organization, not LocalBusiness: the business has no physical storefront
+    // or service address — it operates cross-border, entirely through Telegram.
+    provider: { '@type': 'Organization', name: SITE_NAME },
     areaServed,
     url,
+  };
+}
+
+// Homepage/business-entity schema. Organization (not LocalBusiness — no address,
+// no fixed service location) with sameAs pointing at the actual public profiles
+// and a contactPoint for the real (Telegram-only) contact channel, instead of
+// fabricating an address/telephone/geo the business doesn't have.
+export function generateOrganizationSchema(options: {
+  url: string;
+  description: string;
+  areaServed: string[];
+  sameAs: string[];
+  contactUrl: string;
+}) {
+  const { url, description, areaServed, sameAs, contactUrl } = options;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: SITE_NAME,
+    description,
+    url,
+    logo: `${url}/apple-touch-icon.png`,
+    areaServed,
+    sameAs,
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer service',
+      url: contactUrl,
+      availableLanguage: ['Russian', 'English'],
+    },
   };
 }
 
