@@ -2,7 +2,9 @@
 title: 'BMW 318D - Автоподбор '
 car: BMW 318D
 year: 2026
-price: '26500'
+price:
+  value: '26500'
+  currency: '€'
 country: rs
 service: autopodbor
 image: /cases/BMW 318D/image.jpg

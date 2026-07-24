@@ -2,7 +2,9 @@
 title: Range rover Evoque
 car: Range rover Evoque
 year: 2018
-price: '17500'
+price:
+  value: '17500'
+  currency: '€'
 country: rs
 service: combined
 image: /cases/range-rover-evoque/image.jpg

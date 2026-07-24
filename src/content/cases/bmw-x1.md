@@ -2,7 +2,9 @@
 title: BMW X1
 car: BMW X1
 year: 2019
-price: '18500'
+price:
+  value: '18500'
+  currency: '€'
 country: rs
 service: autopodbor
 image: /cases/bmw-x1/image.jpg

@@ -7,7 +7,7 @@ const cases = defineCollection({
     title: z.string(),
     car: z.string(),
     year: z.coerce.number(),
-    price: z.string(),
+    price: z.object({ value: z.string(), currency: z.string().optional() }),
     country: z.string(),
     service: z.enum(['autopodbor', 'delivery', 'combined', 'buyout', 'inspection']),
     image: z.string().optional(),

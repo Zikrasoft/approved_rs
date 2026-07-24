@@ -2,7 +2,9 @@
 title: BMW X6 2023 — подбор в Германии
 car: BMW X6 xDrive40D
 year: 2023
-price: 68 000 €
+price:
+  value: '68 000'
+  currency: '€'
 country: rs
 service: combined
 image: /cases/bmw-x6-2023-de/image.jpg

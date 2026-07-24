@@ -13,7 +13,21 @@ export default config({
         title: fields.slug({ name: { label: 'Заголовок' } }),
         car: fields.text({ label: 'Автомобиль' }),
         year: fields.integer({ label: 'Год' }),
-        price: fields.text({ label: 'Цена' }),
+        price: fields.object(
+          {
+            value: fields.text({ label: 'Цена' }),
+            currency: fields.select({
+              label: 'Валюта',
+              options: [
+                { label: '€', value: '€' },
+                { label: '$', value: '$' },
+                { label: 'дин.', value: 'дин.' },
+              ],
+              defaultValue: '€',
+            }),
+          },
+          { layout: [8, 4] }
+        ),
         country: fields.select({
           label: 'Страна',
           options: [

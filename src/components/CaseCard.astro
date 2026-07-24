@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { SERVICE_LABELS } from '../utils/labels';
+import Price from './Price.astro';
 
 interface Props {
   case: CollectionEntry<'cases'>;
@@ -44,9 +45,7 @@ const { case: c } = Astro.props;
     <h3 class="font-display text-lg mt-1 mb-2 leading-snug text-primary">
       {c.data.car} <span class="text-muted">{c.data.year}</span>
     </h3>
-    <p class="font-display text-xl font-bold text-accent">
-      {c.data.price}
-    </p>
+    <Price price={c.data.price} class="font-display text-xl font-bold text-accent" />
   </div>
 </a>
 

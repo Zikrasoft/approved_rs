@@ -2,7 +2,9 @@
 title: Mini ONE Станислав
 car: Mini ONE
 year: 2018
-price: '8600'
+price:
+  value: '8600'
+  currency: '€'
 country: rs
 service: autopodbor
 image: /cases/mini-one/image.jpg

@@ -2,7 +2,9 @@
 title: MINI COOPER S
 car: MINI COOPER S
 year: 2023
-price: '32500'
+price:
+  value: '32500'
+  currency: '€'
 country: rs
 service: autopodbor
 image: /cases/mini-cooper-s/image.jpg

@@ -2,7 +2,9 @@
 title: Skoda Superb для Анатолия
 car: Skoda Superb
 year: 2020
-price: '18600'
+price:
+  value: '18600'
+  currency: '€'
 country: rs
 service: autopodbor
 image: /cases/skoda-superb-dlya-anatoliya/image.jpg
