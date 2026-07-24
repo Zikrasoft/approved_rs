@@ -4,7 +4,7 @@ import ServicePageLayout from '../../layouts/ServicePageLayout.astro';
 import StepsList from '../../components/StepsList.astro';
 import { getCountryPaths } from '../../utils/paths';
 import { getCountry } from '../../utils/geo';
-import { generateMeta } from '../../utils/seo';
+import { generateMeta, generateServiceSchema } from '../../utils/seo';
 import { SITE_URL } from '../../utils/constants';
 
 export const getStaticPaths = getCountryPaths;
@@ -12,10 +12,11 @@ export const getStaticPaths = getCountryPaths;
 const { country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
 const meta = generateMeta('proverka', { country, baseUrl: SITE_URL, path: `/${countryCode}/proverka/` });
+const schema = generateServiceSchema(`Проверка авто в ${country.nameLocative}`, country.name, meta.canonical);
 ---
 
 <ServicePageLayout
-  {meta}
+  {meta} {schema}
   title={`Проверка авто в ${country.nameLocative}`}
   description="Независимая проверка автомобиля перед покупкой. Выезд эксперта, диагностика, отчёт — без обязательства покупки."
   ctaLabel="Заказать проверку"

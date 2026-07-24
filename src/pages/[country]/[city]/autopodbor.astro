@@ -3,7 +3,7 @@ export const prerender = true;
 import ServicePageLayout from '../../../layouts/ServicePageLayout.astro';
 import { getCityPaths } from '../../../utils/paths';
 import { getCountry } from '../../../utils/geo';
-import { generateMeta } from '../../../utils/seo';
+import { generateMeta, generateServiceSchema } from '../../../utils/seo';
 import { getCollection } from 'astro:content';
 import { SITE_URL } from '../../../utils/constants';
 
@@ -14,10 +14,11 @@ const { city } = Astro.props;
 const country = getCountry(countryCode!)!;
 const meta = generateMeta('autopodbor', { country, city, baseUrl: SITE_URL, path: `/${countryCode}/${city.slug}/autopodbor/` });
 const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === countryCode && c.data.service === 'autopodbor').slice(0, 3);
+const schema = generateServiceSchema(`Автоподбор в ${city.nameLocative}`, city.name, meta.canonical);
 ---
 
 <ServicePageLayout
-  {meta} {cases}
+  {meta} {schema} {cases}
   title={`Автоподбор в ${city.nameLocative}`}
   description={`Подберём автомобиль в ${city.nameLocative} с полной проверкой. Работаем по всему региону ${country.name}.`}
   ctaLabel="Оставить заявку"

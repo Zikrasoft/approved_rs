@@ -4,7 +4,7 @@ import ServicePageLayout from '../../layouts/ServicePageLayout.astro';
 import StepsList from '../../components/StepsList.astro';
 import { getCountryPaths } from '../../utils/paths';
 import { getCountry } from '../../utils/geo';
-import { generateMeta } from '../../utils/seo';
+import { generateMeta, generateServiceSchema } from '../../utils/seo';
 import { getCollection } from 'astro:content';
 import { SITE_URL } from '../../utils/constants';
 
@@ -14,10 +14,11 @@ const { country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
 const meta = generateMeta('vykup', { country, baseUrl: SITE_URL, path: `/${countryCode}/vykup/` });
 const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === countryCode && c.data.service === 'buyout').slice(0, 3);
+const schema = generateServiceSchema(`Выкуп авто в ${country.nameLocative}`, country.name, meta.canonical);
 ---
 
 <ServicePageLayout
-  {meta} {cases}
+  {meta} {schema} {cases}
   title={`Выкуп авто в ${country.nameLocative}`}
   description={`Выкупаем автомобили на иностранных номерах в ${country.nameLocative}. Российские, европейские номера. Оценка онлайн, оформление за 1 день, перевод в день сделки.`}
   ctaLabel="Получить оценку"

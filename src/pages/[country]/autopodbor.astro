@@ -4,9 +4,9 @@ import ServicePageLayout from '../../layouts/ServicePageLayout.astro';
 import StepsList from '../../components/StepsList.astro';
 import { getCountryPaths } from '../../utils/paths';
 import { getCountry } from '../../utils/geo';
-import { generateMeta } from '../../utils/seo';
+import { generateMeta, generateServiceSchema } from '../../utils/seo';
 import { getCollection } from 'astro:content';
-import { SITE_URL, SITE_NAME } from '../../utils/constants';
+import { SITE_URL } from '../../utils/constants';
 
 export const getStaticPaths = getCountryPaths;
 
@@ -14,14 +14,7 @@ const { country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
 const meta = generateMeta('autopodbor', { country, baseUrl: SITE_URL, path: `/${countryCode}/autopodbor/` });
 const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === countryCode && c.data.service === 'autopodbor').slice(0, 3);
-const schema = {
-  '@context': 'https://schema.org',
-  '@type': 'Service',
-  name: `Автоподбор в ${country.nameLocative}`,
-  provider: { '@type': 'LocalBusiness', name: SITE_NAME },
-  areaServed: country.name,
-  url: `${SITE_URL}/${countryCode}/autopodbor/`,
-};
+const schema = generateServiceSchema(`Автоподбор в ${country.nameLocative}`, country.name, meta.canonical);
 ---
 
 <ServicePageLayout

@@ -76,3 +76,14 @@ export function generateMeta(
     }
   }
 }
+
+export function generateServiceSchema(name: string, areaServed: string | string[], url: string) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name,
+    provider: { '@type': 'LocalBusiness', name: SITE_NAME },
+    areaServed,
+    url,
+  };
+}

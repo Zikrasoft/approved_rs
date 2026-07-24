@@ -8,9 +8,9 @@ import CasesGrid from '../../components/CasesGrid.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import { getRoutePaths } from '../../utils/paths';
 import { getCountry } from '../../utils/geo';
-import { generateMeta } from '../../utils/seo';
+import { generateMeta, generateServiceSchema } from '../../utils/seo';
 import { getCollection } from 'astro:content';
-import { SITE_URL, SITE_NAME } from '../../utils/constants';
+import { SITE_URL } from '../../utils/constants';
 
 export const getStaticPaths = getRoutePaths;
 
@@ -20,13 +20,11 @@ const fromCountry = getCountry(routeData.from)!;
 const toCountry = getCountry(routeData.to)!;
 const meta = generateMeta('delivery', { fromCountry, toCountry, baseUrl: SITE_URL, path: `/dostavka/${route}/` });
 const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === routeData.from && c.data.service === 'delivery').slice(0, 3);
-const schema = {
-  '@context': 'https://schema.org',
-  '@type': 'Service',
-  name: `Доставка авто из ${fromCountry.nameGenitive} в ${toCountry.nameAccusative}`,
-  provider: { '@type': 'LocalBusiness', name: SITE_NAME },
-  areaServed: [fromCountry.name, toCountry.name],
-};
+const schema = generateServiceSchema(
+  `Доставка авто из ${fromCountry.nameGenitive} в ${toCountry.nameAccusative}`,
+  [fromCountry.name, toCountry.name],
+  meta.canonical
+);
 ---
 
 <BaseLayout {...meta} {schema}>

@@ -3,7 +3,7 @@ export const prerender = true;
 import ServicePageLayout from '../../layouts/ServicePageLayout.astro';
 import { getCountryPaths } from '../../utils/paths';
 import { getCountry, getActiveRoutes } from '../../utils/geo';
-import { generateMeta } from '../../utils/seo';
+import { generateMeta, generateServiceSchema } from '../../utils/seo';
 import { SITE_URL } from '../../utils/constants';
 
 export const getStaticPaths = getCountryPaths;
@@ -16,11 +16,12 @@ const meta = generateMeta('delivery', {
   baseUrl: SITE_URL,
   path: `/${countryCode}/dostavka/`,
 });
+const schema = generateServiceSchema(`Доставка авто из ${country.nameGenitive}`, country.name, meta.canonical);
 const routes = getActiveRoutes().filter(r => r.from === countryCode);
 ---
 
 <ServicePageLayout
-  {meta}
+  {meta} {schema}
   title={`Доставка авто из ${country.nameGenitive}`}
   description={`Организуем доставку вашего автомобиля из ${country.nameGenitive}. Таможенное оформление, страховка, транспортировка.`}
   ctaLabel="Узнать стоимость доставки"
