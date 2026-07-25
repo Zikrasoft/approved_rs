@@ -5,6 +5,10 @@ import Button from './Button.astro';
 import LeadForm from './LeadForm.astro';
 import { SERVICES } from '../utils/labels';
 import { DEFAULT_COUNTRY } from '../utils/constants';
+import { getActiveCountries } from '../utils/geo';
+
+const urlCountry = Astro.url.pathname.split('/')[1];
+const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCountry : DEFAULT_COUNTRY;
 ---
 
 <header class="sticky top-0 z-50 border-b bg-header-glass border-default backdrop-blur-[16px]">
@@ -15,7 +19,7 @@ import { DEFAULT_COUNTRY } from '../utils/constants';
     <!-- Desktop Nav -->
     <nav class="hidden lg:flex items-center gap-7 text-sm font-sans font-normal header-nav flex-1 justify-center">
       {SERVICES.map(s => (
-        <a href={`/${DEFAULT_COUNTRY}/${s.slug}/`} class="text-muted" aria-current={Astro.url.pathname.includes(`/${s.slug}/`) ? 'page' : undefined}>{s.label}</a>
+        <a href={`/${navCountry}/${s.slug}/`} class="text-muted" aria-current={Astro.url.pathname.includes(`/${s.slug}/`) ? 'page' : undefined}>{s.label}</a>
       ))}
       <a href="/cases/"    class="text-muted" aria-current={Astro.url.pathname === '/cases/' ? 'page' : undefined}>Кейсы</a>
       <a href="/contacts/" class="text-muted" aria-current={Astro.url.pathname === '/contacts/' ? 'page' : undefined}>Контакты</a>
@@ -63,7 +67,7 @@ import { DEFAULT_COUNTRY } from '../utils/constants';
   >
     <nav class="max-w-6xl mx-auto px-6 py-5 flex flex-col gap-0 mobile-nav">
       {SERVICES.map(s => (
-        <a href={`/${DEFAULT_COUNTRY}/${s.slug}/`} class="text-secondary">{s.label}</a>
+        <a href={`/${navCountry}/${s.slug}/`} class="text-secondary">{s.label}</a>
       ))}
       <a href="/cases/"    class="text-secondary">Кейсы</a>
       <a href="/contacts/" class="text-secondary">Контакты</a>
