@@ -12,10 +12,10 @@ export default defineConfig({
   adapter: vercel(),
   integrations: [react(), keystatic(), sitemap()],
   redirects: {
-    "/cases": "/cases/autopodbor",
-    "/de/combined": "/de/autopodbor",
-    "/rs/combined": "/rs/autopodbor",
-    "/es/combined": "/es/autopodbor",
+    "/cases/": "/cases/autopodbor",
+    "/de/combined/": "/de/autopodbor",
+    "/rs/combined/": "/rs/autopodbor",
+    "/es/combined/": "/es/autopodbor",
   },
   vite: {
     plugins: [tailwindcss()],
