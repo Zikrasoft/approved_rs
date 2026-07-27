@@ -21,7 +21,7 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
       {getNavItems(navCountry).map(item => (
         <a href={item.href} class="text-muted" aria-current={isNavItemActive(item, navCountry, Astro.url.pathname) ? 'page' : undefined}>{item.label}</a>
       ))}
-      <a href="/cases/"    class="text-muted" aria-current={Astro.url.pathname.startsWith('/cases/') ? 'page' : undefined}>Кейсы</a>
+      <a href="/cases/autopodbor/" class="text-muted" aria-current={Astro.url.pathname.startsWith('/cases/') ? 'page' : undefined}>Кейсы</a>
       <a href="/contacts/" class="text-muted" aria-current={Astro.url.pathname === '/contacts/' ? 'page' : undefined}>Контакты</a>
     </nav>
 
@@ -69,7 +69,7 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
       {getNavItems(navCountry).map(item => (
         <a href={item.href} class="text-secondary">{item.label}</a>
       ))}
-      <a href="/cases/"    class="text-secondary">Кейсы</a>
+      <a href="/cases/autopodbor/" class="text-secondary">Кейсы</a>
       <a href="/contacts/" class="text-secondary">Контакты</a>
     </nav>
   </div>
