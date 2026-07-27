@@ -12,7 +12,7 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
 ---
 
 <header class="sticky top-0 z-50 border-b bg-header-glass border-default backdrop-blur-[16px]">
-  <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-8">
 
     <SiteLogo />
 
@@ -26,21 +26,20 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
     </nav>
 
     <div class="flex items-center gap-2 shrink-0">
-      <!-- Theme toggle -->
+      <!-- Theme toggle: desktop only — mobile gets its own row inside #mobile-menu -->
       <button
-        id="theme-toggle"
-        class="theme-btn flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong bg-surface text-muted"
+        class="theme-toggle-btn theme-btn hidden lg:flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong bg-surface text-muted"
         aria-label="Переключить тему"
         title="Переключить тему"
       >
         <!-- Sun: shown when dark (click → light) -->
-        <span id="icon-sun" class="hidden"><Sun size={16} /></span>
+        <span class="theme-icon-sun hidden"><Sun size={16} /></span>
         <!-- Moon: shown when light (click → dark) -->
-        <span id="icon-moon"><Moon size={16} /></span>
+        <span class="theme-icon-moon"><Moon size={16} /></span>
       </button>
 
       <!-- CTA: always visible, text shortens below the lg breakpoint -->
-      <Button type="button" data-open-lead-modal class="px-4 py-2">
+      <Button type="button" data-open-lead-modal class="px-3 lg:px-4 py-2">
         <Send size={13} />
         <span class="lg:hidden">Заявка</span>
         <span class="hidden lg:inline">Оставить заявку</span>
@@ -71,6 +70,11 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
       ))}
       <a href="/cases/autopodbor/" class="text-secondary">Кейсы</a>
       <a href="/contacts/" class="text-secondary">Контакты</a>
+      <button type="button" class="theme-toggle-btn flex items-center gap-2 w-full py-[0.85rem] text-secondary">
+        <span class="theme-icon-sun hidden"><Sun size={16} /></span>
+        <span class="theme-icon-moon"><Moon size={16} /></span>
+        Сменить тему
+      </button>
     </nav>
   </div>
 
@@ -136,17 +140,14 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
 <script is:inline>
   function updateThemeIcons() {
     var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    var sun = document.getElementById('icon-sun');
-    var moon = document.getElementById('icon-moon');
-    if (sun)  sun.classList.toggle('hidden', !isDark);
-    if (moon) moon.classList.toggle('hidden', isDark);
+    document.querySelectorAll('.theme-icon-sun').forEach(function (el) { el.classList.toggle('hidden', !isDark); });
+    document.querySelectorAll('.theme-icon-moon').forEach(function (el) { el.classList.toggle('hidden', isDark); });
   }
 
   function initHeader() {
-    /* ── Theme toggle ── */
+    /* ── Theme toggle: one in the desktop bar, one in the mobile menu ── */
     updateThemeIcons();
-    var toggle = document.getElementById('theme-toggle');
-    if (toggle) {
+    document.querySelectorAll('.theme-toggle-btn').forEach(function (toggle) {
       toggle.addEventListener('click', function () {
         var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         if (isDark) {
@@ -158,7 +159,7 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
         }
         updateThemeIcons();
       });
-    }
+    });
 
     /* ── Mobile burger ── */
     var burger = document.getElementById('burger');
@@ -201,6 +202,15 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
           if (burger.getAttribute('aria-expanded') === 'true') closeMenu();
         });
       });
+
+      // openMenu() sets an inline display:block that would otherwise outlive
+      // a resize past the lg breakpoint (inline style beats the lg:hidden
+      // utility class) — force it closed if the viewport grows into desktop.
+      try {
+        window.matchMedia('(min-width: 1024px)').addEventListener('change', function (e) {
+          if (e.matches) closeMenu();
+        });
+      } catch (e) {}
     }
   }
 
