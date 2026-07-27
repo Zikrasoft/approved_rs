@@ -3,6 +3,7 @@ export const prerender = true;
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { Truck, ShieldCheck, FileText, MapPin, Home, ArrowRight } from '@lucide/astro';
 import LeadForm from '../../components/LeadForm.astro';
+import LeadFormModal from '../../components/LeadFormModal.astro';
 import TelegramCTA from '../../components/TelegramCTA.astro';
 import CasesGrid from '../../components/CasesGrid.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
@@ -11,6 +12,7 @@ import { getCountry } from '../../utils/geo';
 import { generateMeta, generateServiceSchema } from '../../utils/seo';
 import { getCollection } from 'astro:content';
 import { SITE_URL } from '../../utils/constants';
+import { toCaseItem } from '../../utils/cases';
 
 export const getStaticPaths = getRoutePaths;
 
@@ -20,6 +22,7 @@ const fromCountry = getCountry(routeData.from)!;
 const toCountry = getCountry(routeData.to)!;
 const meta = generateMeta('delivery', { fromCountry, toCountry, baseUrl: SITE_URL, path: `/dostavka/${route}/` });
 const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === routeData.from && c.data.service === 'delivery').slice(0, 3);
+const items = cases.map(toCaseItem);
 const schema = generateServiceSchema(
   `Доставка авто из ${fromCountry.nameGenitive} в ${toCountry.nameAccusative}`,
   [fromCountry.name, toCountry.name],
@@ -45,7 +48,7 @@ const schema = generateServiceSchema(
         Таможенное оформление, автовоз, страховка. Срок 7–14 дней.
       </p>
       <div class="fade-up fade-up-4">
-        <TelegramCTA label="Узнать стоимость" formHref="#lead-form" />
+        <TelegramCTA label="Узнать стоимость" openModal />
       </div>
     </div>
   </section>
@@ -73,11 +76,13 @@ const schema = generateServiceSchema(
           ))}
         </div>
       </div>
-      <div id="lead-form" class="fade-up fade-up-2 scroll-mt-24">
+      <div class="fade-up fade-up-2">
         <LeadForm service="delivery" country={routeData.from} />
       </div>
     </div>
   </section>
 
-  <CasesGrid {cases} heading={`Кейсы: ${fromCountry.name} → ${toCountry.name}`} topBorder />
+  <LeadFormModal id="page-lead-modal" triggerAttr="data-open-page-lead-modal" service="delivery" country={routeData.from} />
+
+  <CasesGrid {items} heading={`Кейсы: ${fromCountry.name} → ${toCountry.name}`} topBorder />
 </BaseLayout>

@@ -1,0 +1,34 @@
+---
+import { getCountryFlag } from '../utils/geo';
+import type { Country } from '../utils/geo';
+
+interface Props {
+  country: Country;
+}
+
+const { country } = Astro.props;
+---
+
+<a
+  href={`/${country.code}/autopodbor/`}
+  class="country-pill group inline-flex items-center gap-2.5 px-4 py-2.5 rounded-sm no-underline glow-border bg-surface border border-default"
+>
+  <span class="text-lg leading-none">
+    {getCountryFlag(country.code)}
+  </span>
+  <span class="text-sm font-medium text-primary">
+    Автоподбор в {country.nameLocative}
+  </span>
+  <span class="country-arrow text-xs text-accent transition-transform duration-200">
+    →
+  </span>
+</a>
+
+<style>
+  .country-pill:hover {
+    background-color: var(--color-surface-2) !important;
+  }
+  .country-pill:hover .country-arrow {
+    transform: translateX(4px);
+  }
+</style>

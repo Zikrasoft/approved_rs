@@ -1,6 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import LeadForm from '../components/LeadForm.astro';
+import LeadFormModal from '../components/LeadFormModal.astro';
 import TelegramCTA from '../components/TelegramCTA.astro';
 import CasesGrid from '../components/CasesGrid.astro';
 import ChipLinks from '../components/ChipLinks.astro';
@@ -9,6 +10,7 @@ import type { CollectionEntry } from 'astro:content';
 import { SITE_NAME } from '../utils/constants';
 import { getActiveCountries } from '../utils/geo';
 import { SERVICES } from '../utils/labels';
+import { toCaseItem } from '../utils/cases';
 
 interface Props {
   meta: MetaProps;
@@ -29,6 +31,8 @@ const {
   formService, currentCountry, currentService,
   cases = [], casesHeading, city,
 } = Astro.props;
+
+const items = cases.map(toCaseItem);
 ---
 
 <BaseLayout {...meta} schema={schema}>
@@ -44,17 +48,19 @@ const {
           <h1 class="font-display font-bold mb-5 leading-tight fade-up fade-up-2 tracking-[-0.02em]"
             style="font-size: clamp(2.2rem, 4.5vw, 3.8rem);">{title}</h1>
           <p class="text-base max-w-lg mb-2 leading-relaxed fade-up fade-up-3 text-muted">{description}</p>
-          <div class="fade-up fade-up-4"><TelegramCTA label={ctaLabel} formHref="#lead-form" /></div>
+          <div class="fade-up fade-up-4"><TelegramCTA label={ctaLabel} openModal /></div>
           <div class="fade-up fade-up-5 pt-2"><slot /></div>
         </div>
-        <div id="lead-form" class="lg:col-span-2 fade-up fade-up-3 scroll-mt-24">
+        <div class="lg:col-span-2 fade-up fade-up-3">
           <LeadForm service={formService} country={currentCountry} city={city} />
         </div>
       </div>
     </div>
   </section>
 
-  <CasesGrid {cases} heading={casesHeading ?? ''} />
+  <LeadFormModal id="page-lead-modal" triggerAttr="data-open-page-lead-modal" service={formService} country={currentCountry} city={city} />
+
+  <CasesGrid {items} heading={casesHeading ?? ''} />
 
   <div class="max-w-6xl mx-auto px-6 pb-16 pt-4">
     <ChipLinks label="Также работаем в:" items={getActiveCountries().filter(c => c.code !== currentCountry).map(c => ({ href: `/${c.code}/${currentService}/`, text: c.name }))} />

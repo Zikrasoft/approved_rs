@@ -2,8 +2,8 @@
 import { Menu, X, Send, Sun, Moon } from '@lucide/astro';
 import SiteLogo from './SiteLogo.astro';
 import Button from './Button.astro';
-import LeadForm from './LeadForm.astro';
-import { SERVICES } from '../utils/labels';
+import LeadFormModal from './LeadFormModal.astro';
+import { getNavItems, isNavItemActive } from '../utils/labels';
 import { DEFAULT_COUNTRY } from '../utils/constants';
 import { getActiveCountries } from '../utils/geo';
 
@@ -18,10 +18,10 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
 
     <!-- Desktop Nav -->
     <nav class="hidden lg:flex items-center gap-7 text-sm font-sans font-normal header-nav flex-1 justify-center">
-      {SERVICES.map(s => (
-        <a href={`/${navCountry}/${s.slug}/`} class="text-muted" aria-current={Astro.url.pathname.includes(`/${s.slug}/`) ? 'page' : undefined}>{s.label}</a>
+      {getNavItems(navCountry).map(item => (
+        <a href={item.href} class="text-muted" aria-current={isNavItemActive(item, navCountry, Astro.url.pathname) ? 'page' : undefined}>{item.label}</a>
       ))}
-      <a href="/cases/"    class="text-muted" aria-current={Astro.url.pathname === '/cases/' ? 'page' : undefined}>Кейсы</a>
+      <a href="/cases/"    class="text-muted" aria-current={Astro.url.pathname.startsWith('/cases/') ? 'page' : undefined}>Кейсы</a>
       <a href="/contacts/" class="text-muted" aria-current={Astro.url.pathname === '/contacts/' ? 'page' : undefined}>Контакты</a>
     </nav>
 
@@ -66,21 +66,15 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
     style="display:none"
   >
     <nav class="max-w-6xl mx-auto px-6 py-5 flex flex-col gap-0 mobile-nav">
-      {SERVICES.map(s => (
-        <a href={`/${navCountry}/${s.slug}/`} class="text-secondary">{s.label}</a>
+      {getNavItems(navCountry).map(item => (
+        <a href={item.href} class="text-secondary">{item.label}</a>
       ))}
       <a href="/cases/"    class="text-secondary">Кейсы</a>
       <a href="/contacts/" class="text-secondary">Контакты</a>
     </nav>
   </div>
 
-  <!-- Lead form modal -->
-  <dialog id="lead-modal" class="lead-modal">
-    <button type="button" data-close aria-label="Закрыть" class="lead-modal-close">
-      <X size={16} />
-    </button>
-    <LeadForm />
-  </dialog>
+  <LeadFormModal id="lead-modal" triggerAttr="data-open-lead-modal" />
 </header>
 
 <style>
@@ -137,59 +131,31 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
     opacity: 1;
     pointer-events: auto;
   }
-
-  :global(html.modal-open) {
-    overflow: hidden;
-    overscroll-behavior: none;
-  }
-  .lead-modal {
-    position: relative;
-    background: transparent;
-    border: none;
-    padding: 0;
-    max-width: 26rem;
-    width: 90vw;
-    max-height: 90vh;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    margin: auto;
-  }
-  .lead-modal::backdrop { background: rgba(13, 15, 20, 0.6); backdrop-filter: blur(4px); }
-  .lead-modal-close {
-    position: absolute;
-    top: 1.25rem;
-    right: 1.25rem;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 2px;
-    border: 1px solid var(--color-border-strong);
-    background: var(--color-surface);
-    color: var(--color-muted);
-    cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
-  }
-  .lead-modal-close:hover { border-color: var(--color-accent) !important; color: var(--color-accent) !important; }
 </style>
 
 <script is:inline>
-  (function () {
+  // ClientRouter (astro:transitions) is enabled site-wide: this identical
+  // inline script only executes once by default (Astro dedupes it on later
+  // client-side navigations since its content never changes), but Header's
+  // own markup IS re-rendered per page, so every DOM node these handlers
+  // attach to gets swapped out from under them. initHeader() re-queries and
+  // re-attaches everything fresh on every "astro:page-load" (fired on the
+  // first load too), except the matchMedia listener below, which is
+  // registered exactly once since it targets a MediaQueryList, not a DOM
+  // node — re-registering it per navigation would stack duplicate listeners
+  // forever instead of getting garbage-collected like DOM listeners do.
+  function updateThemeIcons() {
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    var sun = document.getElementById('icon-sun');
+    var moon = document.getElementById('icon-moon');
+    if (sun)  sun.classList.toggle('hidden', !isDark);
+    if (moon) moon.classList.toggle('hidden', isDark);
+  }
+
+  function initHeader() {
     /* ── Theme toggle ── */
+    updateThemeIcons();
     var toggle = document.getElementById('theme-toggle');
-    var sun    = document.getElementById('icon-sun');
-    var moon   = document.getElementById('icon-moon');
-
-    function updateIcons() {
-      var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      if (sun)  sun.classList.toggle('hidden', !isDark);
-      if (moon) moon.classList.toggle('hidden', isDark);
-    }
-
-    updateIcons();
-
     if (toggle) {
       toggle.addEventListener('click', function () {
         var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -200,38 +166,7 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
           document.documentElement.setAttribute('data-theme', 'dark');
           try { localStorage.setItem('theme', 'dark'); } catch (e) {}
         }
-        updateIcons();
-      });
-    }
-
-    /* Follow OS theme changes live, but only while the user hasn't picked one explicitly */
-    try {
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
-        if (localStorage.getItem('theme')) return;
-        if (e.matches) document.documentElement.setAttribute('data-theme', 'dark');
-        else document.documentElement.removeAttribute('data-theme');
-        updateIcons();
-      });
-    } catch (e) {}
-
-    /* ── Lead form modal ── */
-    var leadModal = document.getElementById('lead-modal');
-    if (leadModal) {
-      document.querySelectorAll('[data-open-lead-modal]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          if (burger && burger.getAttribute('aria-expanded') === 'true') closeMenu();
-          document.documentElement.classList.add('modal-open');
-          leadModal.showModal();
-        });
-      });
-      var leadModalClose = leadModal.querySelector('[data-close]');
-      if (leadModalClose) leadModalClose.addEventListener('click', function () { leadModal.close(); });
-      leadModal.addEventListener('click', function (e) {
-        if (e.target === leadModal) leadModal.close();
-      });
-      // fires on every close path (button, backdrop click, Escape key)
-      leadModal.addEventListener('close', function () {
-        document.documentElement.classList.remove('modal-open');
+        updateThemeIcons();
       });
     }
 
@@ -240,9 +175,9 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
     var menu   = document.getElementById('mobile-menu');
     var open   = document.getElementById('burger-open');
     var close  = document.getElementById('burger-close');
-    if (!burger || !menu) return;
 
     function openMenu() {
+      if (!menu || !burger) return;
       menu.style.display = 'block';
       menu.offsetHeight; // force reflow so clip-path animates
       menu.classList.add('menu-open');
@@ -252,6 +187,7 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
     }
 
     function closeMenu() {
+      if (!menu || !burger) return;
       menu.classList.remove('menu-open');
       burger.setAttribute('aria-expanded', 'false');
       open  && open.classList.remove('hidden');
@@ -259,12 +195,36 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
       setTimeout(function () { menu.style.display = 'none'; }, 220);
     }
 
-    burger.addEventListener('click', function () {
-      burger.getAttribute('aria-expanded') === 'true' ? closeMenu() : openMenu();
-    });
+    if (burger && menu) {
+      burger.addEventListener('click', function () {
+        burger.getAttribute('aria-expanded') === 'true' ? closeMenu() : openMenu();
+      });
+      menu.querySelectorAll('a').forEach(function (a) {
+        a.addEventListener('click', closeMenu);
+      });
 
-    menu.querySelectorAll('a').forEach(function (a) {
-      a.addEventListener('click', closeMenu);
+      // Close the mobile menu when the "Оставить заявку" button opens the
+      // lead modal (LeadFormModal.astro owns the modal itself, this just
+      // keeps the burger menu from staying open behind it).
+      document.querySelectorAll('[data-open-lead-modal]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          if (burger.getAttribute('aria-expanded') === 'true') closeMenu();
+        });
+      });
+    }
+  }
+
+  initHeader();
+  document.addEventListener('astro:page-load', initHeader);
+
+  /* Follow OS theme changes live, but only while the user hasn't picked one explicitly.
+     Registered once — see comment above initHeader for why. */
+  try {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+      if (localStorage.getItem('theme')) return;
+      if (e.matches) document.documentElement.setAttribute('data-theme', 'dark');
+      else document.documentElement.removeAttribute('data-theme');
+      updateThemeIcons();
     });
-  })();
+  } catch (e) {}
 </script>

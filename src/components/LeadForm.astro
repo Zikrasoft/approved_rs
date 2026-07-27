@@ -61,11 +61,11 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
       </label>
 
       <div class="contact-tabs relative inline-flex gap-1 p-1 mb-2 rounded-sm bg-page border border-border-strong" role="tablist">
-        <span class="contact-tab-pill" aria-hidden="true"></span>
-        <button type="button" data-tab="telegram" class="contact-tab relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium cursor-pointer text-on-accent" role="tab" aria-selected="true" aria-controls="contact-panel-telegram">
+        <span class="pill-tab-track" aria-hidden="true"></span>
+        <button type="button" data-tab="telegram" class="pill-tab relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium cursor-pointer text-on-accent" role="tab" aria-selected="true" aria-controls="contact-panel-telegram">
           <Send size={13} /> Telegram
         </button>
-        <button type="button" data-tab="phone" class="contact-tab relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium cursor-pointer text-muted" role="tab" aria-selected="false" aria-controls="contact-panel-phone">
+        <button type="button" data-tab="phone" class="pill-tab relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium cursor-pointer text-muted" role="tab" aria-selected="false" aria-controls="contact-panel-phone">
           <Phone size={13} /> Телефон
         </button>
       </div>
@@ -126,33 +126,26 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
   </form>
 </div>
 
-<style>
-  .contact-tab-pill {
-    position: absolute;
-    top: 0.25rem;
-    bottom: 0.25rem;
-    left: 0;
-    border-radius: 2px;
-    background: var(--color-accent);
-    transition: transform 0.35s var(--ease-spring), width 0.35s var(--ease-spring);
-    will-change: transform, width;
-  }
-  .contact-tab { transition: color 0.2s; background: transparent; border: none; }
-</style>
-
 <script>
   import { AsYouType, parsePhoneNumberFromString, type CountryCode } from 'libphonenumber-js/min';
+  import { onPageLoad } from '../utils/onPageLoad';
 
   // A page can have more than one LeadForm instance (e.g. a page-level form
   // plus the header's "Оставить заявку" modal) — Astro only emits this
   // <script> once per page regardless, so it must initialize every card.
-  document.querySelectorAll<HTMLElement>('.lead-form-card').forEach(card => {
-    const form = card.querySelector<HTMLFormElement>('form');
-    if (form && !form.dataset.validated) {
-      form.dataset.validated = '1';
-      initLeadForm(form);
-    }
-  });
+  // The data-validated guard also makes this safe to call again on every
+  // astro:page-load (ClientRouter is enabled site-wide): already-wired
+  // cards are skipped, freshly-swapped-in ones on the new page get wired up.
+  function initAllLeadForms() {
+    document.querySelectorAll<HTMLElement>('.lead-form-card').forEach(card => {
+      const form = card.querySelector<HTMLFormElement>('form');
+      if (form && !form.dataset.validated) {
+        form.dataset.validated = '1';
+        initLeadForm(form);
+      }
+    });
+  }
+  onPageLoad(initAllLeadForms);
 
   function initLeadForm(form: HTMLFormElement) {
     function fieldWrap(input: HTMLElement) { return input.closest('.mb-5') || input.parentElement!; }
@@ -173,9 +166,9 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
 
     // ── Contact switcher (Telegram / Phone) ──
     const contactField = form.querySelector('.contact-field')!;
-    const tabs = contactField.querySelectorAll<HTMLButtonElement>('.contact-tab');
+    const tabs = contactField.querySelectorAll<HTMLButtonElement>('.pill-tab');
     const panels = contactField.querySelectorAll<HTMLElement>('.contact-panel');
-    const pill = contactField.querySelector<HTMLElement>('.contact-tab-pill')!;
+    const pill = contactField.querySelector<HTMLElement>('.pill-tab-track')!;
     const hiddenContact = form.querySelector<HTMLInputElement>('input[type="hidden"][name="contact"]')!;
     const tgInput = contactField.querySelector<HTMLInputElement>('#contact-telegram')!;
     const phoneCountry = contactField.querySelector<HTMLSelectElement>('#contact-phone-country')!;
@@ -355,22 +348,6 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
     }
 
     syncContact();
-  }
-
-  // "Узнать стоимость"-style CTAs elsewhere on the page link to #lead-form —
-  // scroll there and focus its name field instead of just jumping. Runs once
-  // globally (not per-card) and is scoped to the #lead-form target itself,
-  // so it stays correct regardless of how many LeadForm instances exist.
-  const leadFormTarget = document.getElementById('lead-form');
-  if (leadFormTarget) {
-    const nameInput = leadFormTarget.querySelector<HTMLInputElement>('[name="name"]');
-    document.querySelectorAll<HTMLAnchorElement>('a[href="#lead-form"]').forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        leadFormTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        nameInput?.focus({ preventScroll: true });
-      });
-    });
   }
 </script>
 

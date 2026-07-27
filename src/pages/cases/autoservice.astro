@@ -1,0 +1,18 @@
+---
+export const prerender = true;
+import CasesTabPage from '../../components/CasesTabPage.astro';
+import { SITE_URL, SITE_NAME } from '../../utils/constants';
+import { toAutoserviceCaseItem } from '../../utils/cases';
+import { getPublishedCases, getPublishedAutoserviceCases } from '../../utils/casesQueries';
+
+const meta = {
+  title: `Кейсы автосервиса в Белграде — примеры работ | ${SITE_NAME}`,
+  description: 'Реальные кейсы ремонта и обслуживания автомобилей в нашем автосервисе в Белграде: диагностика, ТО, ремонт подвески, двигателя и трансмиссии.',
+  canonical: `${SITE_URL}/cases/autoservice/`,
+};
+
+const items = (await getPublishedAutoserviceCases()).map(toAutoserviceCaseItem);
+const otherCount = (await getPublishedCases()).length;
+---
+
+<CasesTabPage active="autoservice" {items} {otherCount} {meta} />

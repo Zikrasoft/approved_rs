@@ -4,6 +4,7 @@ import {
   getCountry,
   getCitiesForCountry,
   getActiveRoutes,
+  getCountryFlag,
 } from './geo';
 
 describe('getActiveCountries', () => {
@@ -41,6 +42,16 @@ describe('getActiveRoutes', () => {
   it('returns only active routes', () => {
     const result = getActiveRoutes();
     expect(result.every(r => r.active)).toBe(true);
+  });
+});
+
+describe('getCountryFlag', () => {
+  it('returns flag for known country code', () => {
+    expect(getCountryFlag('de')).toBe('🇩🇪');
+  });
+
+  it('returns fallback flag for unknown code', () => {
+    expect(getCountryFlag('xx')).toBe('🏳️');
   });
 });
 

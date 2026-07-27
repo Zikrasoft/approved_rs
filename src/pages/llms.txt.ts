@@ -1,14 +1,15 @@
 export const prerender = true;
 
 import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
 import { SITE_URL, SITE_NAME } from '../utils/constants';
 import { SERVICES } from '../utils/labels';
 import { getActiveCountries, getCitiesForCountry, getActiveRoutes, getCountry } from '../utils/geo';
+import { getPublishedCases, getPublishedAutoserviceCases } from '../utils/casesQueries';
 
 export const GET: APIRoute = async () => {
   const countries = getActiveCountries();
-  const cases = (await getCollection('cases')).filter(c => c.data.published);
+  const cases = await getPublishedCases();
+  const autoserviceCases = await getPublishedAutoserviceCases();
 
   const lines: string[] = [];
 
@@ -19,9 +20,14 @@ export const GET: APIRoute = async () => {
     ''
   );
 
+  // Includes 'dostavka' even though it's no longer in the nav-driving
+  // SERVICES list — those pages are still live and indexable, just unlinked
+  // from primary nav, and should stay discoverable here regardless.
+  const LLMS_SERVICES = [...SERVICES, { slug: 'dostavka', label: 'Доставка' }];
+
   lines.push('## Услуги по странам', '');
   for (const country of countries) {
-    for (const s of SERVICES) {
+    for (const s of LLMS_SERVICES) {
       lines.push(`- [${s.label} в ${country.nameLocative}](${SITE_URL}/${country.code}/${s.slug}/)`);
     }
   }
@@ -47,7 +53,8 @@ export const GET: APIRoute = async () => {
   }
 
   lines.push('## Кейсы', '');
-  lines.push(`- [Все кейсы](${SITE_URL}/cases/) — ${cases.length} реализованных подборов с автомобилем, страной и ценой`);
+  lines.push(`- [Кейсы автоподбора](${SITE_URL}/cases/autopodbor/) — ${cases.length} реализованных подборов с автомобилем, страной и ценой`);
+  lines.push(`- [Кейсы автосервиса](${SITE_URL}/cases/autoservice/) — ${autoserviceCases.length} примеров ремонта и обслуживания в Белграде`);
   lines.push('');
 
   lines.push('## Прочее', '');

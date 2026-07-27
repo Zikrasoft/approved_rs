@@ -35,11 +35,10 @@ const OG_IMAGE_BY_SERVICE: Record<string, string> = {
   delivery: 'dostavka',
   vykup: 'vykup',
   proverka: 'proverka',
-  combined: 'combined',
 };
 
 export function generateMeta(
-  service: 'autopodbor' | 'delivery' | 'vykup' | 'proverka' | 'combined',
+  service: 'autopodbor' | 'delivery' | 'vykup' | 'proverka',
   options: MetaOptions
 ): MetaProps {
   const { country, city, fromCountry, toCountry, baseUrl, path } = options;
@@ -69,7 +68,7 @@ export function generateMeta(
     case 'vykup': {
       return {
         title: `Выкуп авто в ${country!.nameLocative} на иностранных номерах — срочно | ${SITE_NAME}`,
-        description: `Срочный выкуп автомобилей в ${country!.nameLocative}. Российские, европейские номера. Оценка онлайн, оформление за 1 день, перевод в день сделки.`,
+        description: `Срочный выкуп автомобилей в ${country!.nameLocative} на любых номерах — иностранных, российских или сербских. Оценка онлайн, оформление за 1 день, перевод в день сделки.`,
         canonical,
         ogImage,
       };
@@ -82,13 +81,9 @@ export function generateMeta(
         ogImage,
       };
     }
-    case 'combined': {
-      return {
-        title: `Подбор и доставка авто из ${country!.nameGenitive} под ключ | ${SITE_NAME}`,
-        description: `Подберём автомобиль в ${country!.nameLocative} и привезём к вам. Полное сопровождение: поиск, проверка, таможня, доставка.`,
-        canonical,
-        ogImage,
-      };
+    default: {
+      const _exhaustive: never = service;
+      throw new Error(`generateMeta: unhandled service ${_exhaustive}`);
     }
   }
 }

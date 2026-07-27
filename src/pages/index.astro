@@ -4,13 +4,13 @@ import GeoBanner from "../components/GeoBanner.astro";
 import TelegramCTA from "../components/TelegramCTA.astro";
 import CasesGrid from "../components/CasesGrid.astro";
 import SectionHeading from "../components/SectionHeading.astro";
+import CountryPill from "../components/CountryPill.astro";
 import LeadForm from "../components/LeadForm.astro";
 import {
     Search,
-    Truck,
+    Wrench,
     Banknote,
     ClipboardCheck,
-    KeyRound,
     Eye,
     Shield,
     MapPin,
@@ -21,6 +21,7 @@ import { SITE_URL, SITE_NAME } from "../utils/constants";
 import { generateOrganizationSchema } from "../utils/seo";
 import { telegramLink } from "../utils/telegramLink";
 import StatBlock from "../components/StatBlock.astro";
+import { toCaseItem } from "../utils/cases";
 
 const meta = {
     title: `Автоподбор и доставка авто из Европы | ${SITE_NAME}`,
@@ -31,6 +32,7 @@ const meta = {
 
 const allCases = await getCollection("cases");
 const latestCases = allCases.filter((c) => c.data.published).slice(0, 3);
+const items = latestCases.map(toCaseItem);
 const countries = getActiveCountries();
 
 const tgManager = import.meta.env.PUBLIC_TG_MANAGER!;
@@ -52,10 +54,10 @@ const services = [
         desc: "Находим и проверяем подходящие автомобили на европейских рынках",
     },
     {
-        href: "/de/dostavka/",
-        Icon: Truck,
-        title: "Доставка",
-        desc: "Доставим ваш автомобиль до двери в любой стране",
+        href: "/avtoservis-belgrade/",
+        Icon: Wrench,
+        title: "Автосервис",
+        desc: "Ремонт и обслуживание автомобилей в Белграде с гарантией качества",
     },
     {
         href: "/de/vykup/",
@@ -68,12 +70,6 @@ const services = [
         Icon: ClipboardCheck,
         title: "Проверка",
         desc: "Независимая экспертиза перед покупкой у любого продавца",
-    },
-    {
-        href: "/de/combined/",
-        Icon: KeyRound,
-        title: "Под ключ",
-        desc: "Полный цикл: подбор, проверка и доставка включены",
     },
 ];
 
@@ -238,30 +234,7 @@ const steps = [
 
             <!-- Country strip -->
             <div class="flex flex-wrap gap-3 mt-4">
-                {
-                    countries.map((c) => (
-                        <a
-                            href={`/${c.code}/autopodbor/`}
-                            class="country-pill group inline-flex items-center gap-2.5 px-4 py-2.5 rounded-sm no-underline glow-border bg-surface border border-default"
-                        >
-                            <span class="text-lg leading-none">
-                                {c.code === "de"
-                                    ? "🇩🇪"
-                                    : c.code === "rs"
-                                      ? "🇷🇸"
-                                      : c.code === "es"
-                                        ? "🇪🇸"
-                                        : "🏳️"}
-                            </span>
-                            <span class="text-sm font-medium text-primary">
-                                Автоподбор в {c.nameLocative}
-                            </span>
-                            <span class="country-arrow text-xs text-accent transition-transform duration-200">
-                                →
-                            </span>
-                        </a>
-                    ))
-                }
+                {countries.map((c) => <CountryPill country={c} />)}
             </div>
         </div>
     </section>
@@ -302,7 +275,7 @@ const steps = [
 
     <!-- ─── Cases ─────────────────────────────────────────── -->
     <CasesGrid
-        cases={latestCases}
+        items={items}
         heading="Последние кейсы"
         headingSize="xl"
         viewAllHref="/cases/"
@@ -525,12 +498,6 @@ const steps = [
         background-color: var(--color-surface-2) !important;
     }
     .service-card:hover .service-arrow {
-        transform: translateX(4px);
-    }
-    .country-pill:hover {
-        background-color: var(--color-surface-2) !important;
-    }
-    .country-pill:hover .country-arrow {
         transform: translateX(4px);
     }
     .trust-card {

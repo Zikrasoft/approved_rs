@@ -7,23 +7,24 @@ import { telegramLink } from '../utils/telegramLink';
 interface Props {
   manager?: string;
   label?: string;
-  formHref?: string;
+  openModal?: boolean;
   text?: string;
 }
 
 const {
   manager = import.meta.env.PUBLIC_TG_MANAGER!,
   label = 'Написать в Telegram',
-  formHref,
+  openModal = false,
   text,
 } = Astro.props;
 ---
 
 <div class="flex flex-wrap gap-3 my-8">
   <Button
-    href={formHref ?? telegramLink(manager, text)}
-    target={formHref ? undefined : '_blank'}
-    rel={formHref ? undefined : 'noopener'}
+    data-open-page-lead-modal={openModal ? true : undefined}
+    href={openModal ? undefined : telegramLink(manager, text)}
+    target={openModal ? undefined : '_blank'}
+    rel={openModal ? undefined : 'noopener'}
     class="gap-2.5 px-6 py-3 tracking-[0.03em]"
   >
     <Send size={15} />

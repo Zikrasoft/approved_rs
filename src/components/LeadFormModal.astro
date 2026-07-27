@@ -1,0 +1,89 @@
+---
+import { X } from '@lucide/astro';
+import LeadForm from './LeadForm.astro';
+
+interface Props {
+  id: string;
+  triggerAttr: string;
+  service?: string;
+  country?: string;
+  city?: string;
+}
+
+const { id, triggerAttr, service = '', country = '', city = '' } = Astro.props;
+---
+
+<dialog id={id} class="lead-modal">
+  <button type="button" data-close aria-label="Закрыть" class="lead-modal-close">
+    <X size={16} />
+  </button>
+  <LeadForm service={service} country={country} city={city} />
+</dialog>
+
+<style>
+  :global(html.modal-open) {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  .lead-modal {
+    position: relative;
+    background: transparent;
+    border: none;
+    padding: 0;
+    max-width: 26rem;
+    width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    margin: auto;
+  }
+  .lead-modal::backdrop { background: rgba(13, 15, 20, 0.6); backdrop-filter: blur(4px); }
+  .lead-modal-close {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 2px;
+    border: 1px solid var(--color-border-strong);
+    background: var(--color-surface);
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .lead-modal-close:hover { border-color: var(--color-accent) !important; color: var(--color-accent) !important; }
+</style>
+
+<script define:vars={{ id, triggerAttr }}>
+  // Own self-contained open/close wiring, keyed by `id`/`triggerAttr` so
+  // multiple independent modals (header's generic one, a page's contextual
+  // one) can coexist without colliding. Re-run on astro:page-load — with
+  // ClientRouter enabled site-wide this identical script only auto-executes
+  // once, but every navigation swaps in a fresh dialog + fresh trigger
+  // buttons that need their own listeners.
+  function initLeadFormModal() {
+    var modal = document.getElementById(id);
+    if (!modal) return;
+    document.querySelectorAll('[' + triggerAttr + ']').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.documentElement.classList.add('modal-open');
+        modal.showModal();
+      });
+    });
+    var closeBtn = modal.querySelector('[data-close]');
+    if (closeBtn) closeBtn.addEventListener('click', function () { modal.close(); });
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) modal.close();
+    });
+    // fires on every close path (button, backdrop click, Escape key)
+    modal.addEventListener('close', function () {
+      document.documentElement.classList.remove('modal-open');
+    });
+  }
+  initLeadFormModal();
+  document.addEventListener('astro:page-load', initLeadFormModal);
+</script>

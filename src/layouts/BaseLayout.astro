@@ -7,6 +7,7 @@ import Analytics from '@vercel/analytics/astro';
 import SpeedInsights from '@vercel/speed-insights/astro';
 import '../styles/global.css';
 import { SITE_URL, SITE_NAME } from '../utils/constants';
+import { ClientRouter } from 'astro:transitions';
 // Logo/heading font: preload so it's ready before first paint (avoids the
 // fallback→webfont width jump on every navigation, most visible on the logo).
 import logoFontUrl from '@fontsource/playfair-display/files/playfair-display-latin-700-normal.woff2?url';
@@ -75,21 +76,44 @@ const {
       } catch (e) {}
     </script>
 
+    <ClientRouter />
+
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
 
-    <!-- Prevent flash of wrong theme: explicit choice wins, otherwise follow OS preference -->
+    <!-- Prevent flash of wrong theme: explicit choice wins, otherwise follow OS preference.
+         Two triggers, for two different moments:
+         - astro:page-load fires AFTER the new page is already swapped in and
+           painted — needed for real page loads (first visit, hard navigation),
+           but on a ClientRouter transition it's too late: the incoming
+           document is server-rendered with no data-theme (that's only ever
+           set client-side), so it paints light for a frame or two before this
+           runs, a visible flash mid-transition.
+         - astro:before-swap fires BEFORE that swap/paint, with a reference to
+           the incoming document — copying the CURRENT (already-correct)
+           data-theme state onto it there means the new page never paints
+           wrong in the first place. This is the one that actually kills the
+           flash; astro:page-load stays as the fallback for real loads, where
+           before-swap never fires at all. -->
     <script is:inline>
-      (function () {
+      function applyStoredTheme() {
         try {
           var stored = localStorage.getItem('theme');
           var wantsDark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
           if (wantsDark) document.documentElement.setAttribute('data-theme', 'dark');
+          else document.documentElement.removeAttribute('data-theme');
         } catch (e) {}
-      })();
+      }
+      applyStoredTheme();
+      document.addEventListener('astro:page-load', applyStoredTheme);
+      document.addEventListener('astro:before-swap', function (event) {
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (isDark) event.newDocument.documentElement.setAttribute('data-theme', 'dark');
+        else event.newDocument.documentElement.removeAttribute('data-theme');
+      });
     </script>
   </head>
   <body>
@@ -103,14 +127,21 @@ const {
     <SpeedInsights />
     <script is:inline>
       // Safety net: if CSS animations fail to run (slow connection, power-save mode),
-      // force all animated elements visible after 1.6s (covers longest fade-up-6 delay)
-      setTimeout(function () {
-        document.querySelectorAll('.fade-up,.anim-inline,.anim-inline-fast').forEach(function (el) {
-          el.style.opacity = '1';
-          el.style.transform = 'none';
-          el.style.animation = 'none';
-        });
-      }, 1600);
+      // force all animated elements visible after 1.6s (covers longest fade-up-6 delay).
+      // Re-armed on astro:page-load too — with ClientRouter enabled, this identical
+      // script won't re-execute on its own after a client-side transition, but each
+      // new page still has its own fresh .fade-up elements that need the same net.
+      function armFadeUpSafetyNet() {
+        setTimeout(function () {
+          document.querySelectorAll('.fade-up,.anim-inline,.anim-inline-fast').forEach(function (el) {
+            el.style.opacity = '1';
+            el.style.transform = 'none';
+            el.style.animation = 'none';
+          });
+        }, 1600);
+      }
+      armFadeUpSafetyNet();
+      document.addEventListener('astro:page-load', armFadeUpSafetyNet);
     </script>
   </body>
 </html>

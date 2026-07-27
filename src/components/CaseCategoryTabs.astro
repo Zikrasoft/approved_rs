@@ -1,0 +1,60 @@
+---
+interface Props {
+  active: 'autopodbor' | 'autoservice';
+  autopodborCount: number;
+  autoserviceCount: number;
+}
+
+const { active, autopodborCount, autoserviceCount } = Astro.props;
+
+const tabs = [
+  { id: 'autopodbor', href: '/cases/autopodbor/', label: 'Автоподбор', count: autopodborCount },
+  { id: 'autoservice', href: '/cases/autoservice/', label: 'Автосервис', count: autoserviceCount },
+] as const;
+---
+
+<div class="case-tabs relative inline-flex gap-1 p-1 mb-10 rounded-sm bg-surface border border-border-strong" role="tablist" transition:name="case-tabs">
+  <span class="pill-tab-track" aria-hidden="true"></span>
+  {tabs.map(tab => (
+    <a
+      href={tab.href}
+      data-astro-prefetch
+      class:list={[
+        'pill-tab relative z-10 flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-medium no-underline',
+        tab.id === active ? 'text-on-accent' : 'text-muted',
+      ]}
+      role="tab"
+      aria-selected={tab.id === active ? 'true' : 'false'}
+      aria-current={tab.id === active ? 'page' : undefined}
+    >
+      {tab.label}
+      <span class="case-tab-count text-xs">{tab.count}</span>
+    </a>
+  ))}
+</div>
+
+<style>
+  .case-tab-count {
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    background: var(--color-accent-subtle);
+    color: inherit;
+    opacity: 0.75;
+  }
+  .pill-tab[aria-selected="true"] .case-tab-count { background: rgba(255, 255, 255, 0.18); }
+</style>
+
+<script>
+  import { onPageLoad } from '../utils/onPageLoad';
+
+  function positionPill() {
+    document.querySelectorAll<HTMLElement>('.case-tabs').forEach(root => {
+      const pill = root.querySelector<HTMLElement>('.pill-tab-track');
+      const active = root.querySelector<HTMLElement>('[aria-selected="true"]');
+      if (!pill || !active) return;
+      pill.style.width = active.offsetWidth + 'px';
+      pill.style.transform = `translateX(${active.offsetLeft}px)`;
+    });
+  }
+  onPageLoad(positionPill);
+</script>

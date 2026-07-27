@@ -93,6 +93,9 @@ const VISIBLE = 6;
 </style>
 
 <script>
+  import { onPageLoad } from '../utils/onPageLoad';
+
+  function initCaseGalleries() {
   document.querySelectorAll<HTMLElement>('.case-gallery').forEach(root => {
     root.querySelector('[data-more]')?.addEventListener('click', e => {
       root.querySelectorAll('.gallery-item.hidden').forEach(el => el.classList.remove('hidden'));
@@ -124,4 +127,6 @@ const VISIBLE = 6;
       });
     }
   });
+  }
+  onPageLoad(initCaseGalleries);
 </script>

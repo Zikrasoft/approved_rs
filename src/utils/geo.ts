@@ -40,3 +40,7 @@ export const getCitiesForCountry = (countryCode: string): City[] =>
 
 export const getActiveRoutes = (): Route[] =>
   routes.filter(r => r.active);
+
+const COUNTRY_FLAGS: Record<string, string> = { de: '🇩🇪', rs: '🇷🇸', es: '🇪🇸' };
+
+export const getCountryFlag = (code: string): string => COUNTRY_FLAGS[code] ?? '🏳️';

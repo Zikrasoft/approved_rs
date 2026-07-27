@@ -1,0 +1,18 @@
+---
+export const prerender = true;
+import CasesTabPage from '../../components/CasesTabPage.astro';
+import { SITE_URL, SITE_NAME } from '../../utils/constants';
+import { toCaseItem } from '../../utils/cases';
+import { getPublishedCases, getPublishedAutoserviceCases } from '../../utils/casesQueries';
+
+const meta = {
+  title: `Кейсы автоподбора — реальные автомобили клиентов | ${SITE_NAME}`,
+  description: 'Реальные кейсы автоподбора, доставки, выкупа и проверки автомобилей из Германии, Испании и Сербии. Машина, цена, история сделки.',
+  canonical: `${SITE_URL}/cases/autopodbor/`,
+};
+
+const items = (await getPublishedCases()).map(toCaseItem);
+const otherCount = (await getPublishedAutoserviceCases()).length;
+---
+
+<CasesTabPage active="autopodbor" {items} {otherCount} {meta} />

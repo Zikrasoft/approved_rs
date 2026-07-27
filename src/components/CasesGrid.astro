@@ -1,10 +1,10 @@
 ---
 import CaseCard from './CaseCard.astro';
 import SectionHeading from './SectionHeading.astro';
-import type { CollectionEntry } from 'astro:content';
+import type { CaseCardProps } from './CaseCard.astro';
 
 interface Props {
-  cases: CollectionEntry<'cases'>[];
+  items: CaseCardProps[];
   heading: string;
   headingSize?: 'xl' | 'lg';
   viewAllHref?: string;
@@ -12,10 +12,10 @@ interface Props {
   class?: string;
 }
 
-const { cases, heading, headingSize = 'lg', viewAllHref, topBorder = false, class: className } = Astro.props;
+const { items, heading, headingSize = 'lg', viewAllHref, topBorder = false, class: className } = Astro.props;
 ---
 
-{cases.length > 0 && (
+{items.length > 0 && (
   <section class:list={[topBorder ? 'border-t' : 'border-b', 'border-default', className]}>
     <div class="max-w-6xl mx-auto px-6 py-16">
       <div class:list={['mb-10', viewAllHref && 'flex items-end justify-between']}>
@@ -29,7 +29,7 @@ const { cases, heading, headingSize = 'lg', viewAllHref, topBorder = false, clas
         )}
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {cases.map(c => <CaseCard case={c} />)}
+        {items.map(item => <CaseCard {...item} />)}
       </div>
       {viewAllHref && (
         <div class="mt-8 sm:hidden">
