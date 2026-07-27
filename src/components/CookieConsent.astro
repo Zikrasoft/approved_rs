@@ -26,11 +26,6 @@
 </div>
 
 <script is:inline>
-  // Re-run on astro:page-load too: this banner is part of every page's body
-  // (rendered fresh, `hidden` by default, each navigation), but with
-  // ClientRouter enabled this identical script only auto-executes once —
-  // without this, the banner would silently vanish after the first
-  // client-side navigation for a visitor who hasn't decided yet.
   function initCookieConsent() {
     var consent;
     try { consent = localStorage.getItem('cookie_consent'); } catch (e) {}
@@ -52,5 +47,4 @@
     });
   }
   initCookieConsent();
-  document.addEventListener('astro:page-load', initCookieConsent);
 </script>

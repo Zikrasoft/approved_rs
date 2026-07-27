@@ -13,12 +13,11 @@ const tabs = [
 ] as const;
 ---
 
-<div class="case-tabs relative inline-flex gap-1 p-1 mb-10 rounded-sm bg-surface border border-border-strong" role="tablist" transition:name="case-tabs">
+<div class="case-tabs relative inline-flex gap-1 p-1 mb-10 rounded-sm bg-surface border border-border-strong" role="tablist">
   <span class="pill-tab-track" aria-hidden="true"></span>
   {tabs.map(tab => (
     <a
       href={tab.href}
-      data-astro-prefetch
       class:list={[
         'pill-tab relative z-10 flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-medium no-underline',
         tab.id === active ? 'text-on-accent' : 'text-muted',
@@ -45,16 +44,11 @@ const tabs = [
 </style>
 
 <script>
-  import { onPageLoad } from '../utils/onPageLoad';
-
-  function positionPill() {
-    document.querySelectorAll<HTMLElement>('.case-tabs').forEach(root => {
-      const pill = root.querySelector<HTMLElement>('.pill-tab-track');
-      const active = root.querySelector<HTMLElement>('[aria-selected="true"]');
-      if (!pill || !active) return;
-      pill.style.width = active.offsetWidth + 'px';
-      pill.style.transform = `translateX(${active.offsetLeft}px)`;
-    });
-  }
-  onPageLoad(positionPill);
+  document.querySelectorAll<HTMLElement>('.case-tabs').forEach(root => {
+    const pill = root.querySelector<HTMLElement>('.pill-tab-track');
+    const active = root.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (!pill || !active) return;
+    pill.style.width = active.offsetWidth + 'px';
+    pill.style.transform = `translateX(${active.offsetLeft}px)`;
+  });
 </script>

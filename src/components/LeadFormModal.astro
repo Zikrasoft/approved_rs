@@ -61,10 +61,7 @@ const { id, triggerAttr, service = '', country = '', city = '' } = Astro.props;
 <script define:vars={{ id, triggerAttr }}>
   // Own self-contained open/close wiring, keyed by `id`/`triggerAttr` so
   // multiple independent modals (header's generic one, a page's contextual
-  // one) can coexist without colliding. Re-run on astro:page-load — with
-  // ClientRouter enabled site-wide this identical script only auto-executes
-  // once, but every navigation swaps in a fresh dialog + fresh trigger
-  // buttons that need their own listeners.
+  // one) can coexist without colliding.
   function initLeadFormModal() {
     var modal = document.getElementById(id);
     if (!modal) return;
@@ -85,5 +82,4 @@ const { id, triggerAttr, service = '', country = '', city = '' } = Astro.props;
     });
   }
   initLeadFormModal();
-  document.addEventListener('astro:page-load', initLeadFormModal);
 </script>

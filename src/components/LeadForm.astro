@@ -128,14 +128,10 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
 
 <script>
   import { AsYouType, parsePhoneNumberFromString, type CountryCode } from 'libphonenumber-js/min';
-  import { onPageLoad } from '../utils/onPageLoad';
 
   // A page can have more than one LeadForm instance (e.g. a page-level form
   // plus the header's "Оставить заявку" modal) — Astro only emits this
   // <script> once per page regardless, so it must initialize every card.
-  // The data-validated guard also makes this safe to call again on every
-  // astro:page-load (ClientRouter is enabled site-wide): already-wired
-  // cards are skipped, freshly-swapped-in ones on the new page get wired up.
   function initAllLeadForms() {
     document.querySelectorAll<HTMLElement>('.lead-form-card').forEach(card => {
       const form = card.querySelector<HTMLFormElement>('form');
@@ -145,7 +141,7 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
       }
     });
   }
-  onPageLoad(initAllLeadForms);
+  initAllLeadForms();
 
   function initLeadForm(form: HTMLFormElement) {
     function fieldWrap(input: HTMLElement) { return input.closest('.mb-5') || input.parentElement!; }

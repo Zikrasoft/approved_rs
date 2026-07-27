@@ -134,16 +134,6 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
 </style>
 
 <script is:inline>
-  // ClientRouter (astro:transitions) is enabled site-wide: this identical
-  // inline script only executes once by default (Astro dedupes it on later
-  // client-side navigations since its content never changes), but Header's
-  // own markup IS re-rendered per page, so every DOM node these handlers
-  // attach to gets swapped out from under them. initHeader() re-queries and
-  // re-attaches everything fresh on every "astro:page-load" (fired on the
-  // first load too), except the matchMedia listener below, which is
-  // registered exactly once since it targets a MediaQueryList, not a DOM
-  // node — re-registering it per navigation would stack duplicate listeners
-  // forever instead of getting garbage-collected like DOM listeners do.
   function updateThemeIcons() {
     var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     var sun = document.getElementById('icon-sun');
@@ -215,10 +205,8 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
   }
 
   initHeader();
-  document.addEventListener('astro:page-load', initHeader);
 
-  /* Follow OS theme changes live, but only while the user hasn't picked one explicitly.
-     Registered once — see comment above initHeader for why. */
+  // Follow OS theme changes live, but only while the user hasn't picked one explicitly.
   try {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
       if (localStorage.getItem('theme')) return;

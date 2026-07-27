@@ -20,7 +20,7 @@ const autoserviceCount = active === 'autoservice' ? items.length : otherCount;
 <BaseLayout {...meta}>
   <PageHero decoWord="CASES" title="Кейсы" subtitle="Реальные автомобили, реальные цены, реальные истории" />
 
-  <section class="max-w-6xl mx-auto px-6 py-16" transition:animate="fade">
+  <section class="max-w-6xl mx-auto px-6 py-16">
     <CaseCategoryTabs {active} {autopodborCount} {autoserviceCount} />
 
     {items.length > 0
