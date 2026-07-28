@@ -43,10 +43,10 @@ describe('POST /api/leads', () => {
   });
 
   it('calls sendLeadNotification with parsed form fields', async () => {
-    const ctx = makeCtx({ name: 'Иван', contact: '@ivan', service: 'delivery', country: 'de', source_url: '/de/dostavka/' });
+    const ctx = makeCtx({ name: 'Иван', contact: '@ivan', service: 'vykup', country: 'de', source_url: '/de/vykup/' });
     await POST(ctx);
     expect(sendLeadNotification).toHaveBeenCalledWith(expect.objectContaining({
-      name: 'Иван', contact: '@ivan', service: 'delivery', country: 'de',
+      name: 'Иван', contact: '@ivan', service: 'vykup', country: 'de',
     }));
   });
 

@@ -3,7 +3,6 @@ import {
   getActiveCountries,
   getCountry,
   getCitiesForCountry,
-  getActiveRoutes,
   getCountryFlag,
 } from './geo';
 
@@ -35,13 +34,6 @@ describe('getCitiesForCountry', () => {
 
   it('returns empty array for unknown country', () => {
     expect(getCitiesForCountry('xx')).toEqual([]);
-  });
-});
-
-describe('getActiveRoutes', () => {
-  it('returns only active routes', () => {
-    const result = getActiveRoutes();
-    expect(result.every(r => r.active)).toBe(true);
   });
 });
 

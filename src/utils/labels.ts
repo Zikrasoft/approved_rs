@@ -29,8 +29,6 @@ export function isNavItemActive(item: { href: string }, navCountry: string, path
 // Keyed by form/Telegram service value
 export const SERVICE_LABELS: Record<string, string> = {
   autopodbor: 'Автоподбор',
-  delivery:   'Доставка',
-  combined:   'Подбор + доставка',
   buyout:     'Выкуп',
   inspection: 'Проверка',
   autoservice: 'Автосервис', // still used: LeadForm on /avtoservis-belgrade/ submits service="autoservice", telegram.ts looks it up

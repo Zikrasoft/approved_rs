@@ -7,5 +7,7 @@
   { "slug": "pancevo", "name": "Панчево", "nameLocative": "Панчеве", "country": "rs", "active": true },
   { "slug": "subotica", "name": "Суботица", "nameLocative": "Суботице", "country": "rs", "active": true },
   { "slug": "madrid", "name": "Мадрид", "nameLocative": "Мадриде", "country": "es", "active": true },
-  { "slug": "barcelona", "name": "Барселона", "nameLocative": "Барселоне", "country": "es", "active": true }
+  { "slug": "barcelona", "name": "Барселона", "nameLocative": "Барселоне", "country": "es", "active": true },
+  { "slug": "zurich", "name": "Цюрих", "nameLocative": "Цюрихе", "country": "ch", "active": true },
+  { "slug": "geneva", "name": "Женева", "nameLocative": "Женеве", "country": "ch", "active": true }
 ]

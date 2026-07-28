@@ -289,8 +289,9 @@ h1, h2, h3, h4 {
 
 /* ─── Step circle badge ──────────────────────────────────── */
 .step-circle {
-  width: 2.75rem;
-  height: 2.75rem;
+  --circle-size: 2.75rem;
+  width: var(--circle-size);
+  height: var(--circle-size);
   border-radius: 50%;
   border: 1px solid var(--color-accent-border);
   display: flex;
@@ -298,14 +299,19 @@ h1, h2, h3, h4 {
   justify-content: center;
   font-family: var(--font-display);
   font-size: 0.8rem;
+  line-height: 1;
   font-weight: 700;
   font-style: italic;
   color: var(--color-accent);
   background: var(--color-bg);
   flex-shrink: 0;
-  margin-bottom: 1.25rem;
   position: relative;
   z-index: 1;
+}
+/* Smaller variant: vertical timelines with more, denser items (StepsList.astro) */
+.step-circle.step-circle-sm {
+  --circle-size: 2.25rem;
+  font-size: 0.72rem;
 }
 
 /* ─── Glow hover card ────────────────────────────────────── */

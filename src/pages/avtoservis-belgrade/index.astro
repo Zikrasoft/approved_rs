@@ -1,10 +1,7 @@
 ---
 export const prerender = true;
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import ServicePageLayout from '../../layouts/ServicePageLayout.astro';
 import { SearchCheck, Droplet, Wrench, Cog, ClipboardCheck, MapPin } from '@lucide/astro';
-import LeadForm from '../../components/LeadForm.astro';
-import LeadFormModal from '../../components/LeadFormModal.astro';
-import TelegramCTA from '../../components/TelegramCTA.astro';
 import CasesGrid from '../../components/CasesGrid.astro';
 import ChipLinks from '../../components/ChipLinks.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
@@ -35,88 +32,74 @@ const WHAT_WE_DO = [
 ] as const;
 ---
 
-<BaseLayout {...meta} {schema}>
-  <!-- Hero -->
-  <section class="border-b border-default">
-    <div class="max-w-6xl mx-auto px-6 py-16 md:py-20">
-      <span class="accent-line"></span>
-      <h1 class="font-display text-5xl md:text-6xl font-bold mb-6 leading-tight fade-up fade-up-2">
-        Автосервис<br/><span class="text-accent">в Белграде</span>
-      </h1>
-      <p class="text-lg max-w-xl mb-2 fade-up fade-up-3 text-muted">
-        Профессиональный ремонт и обслуживание автомобилей в Белграде с гарантией качества.
-      </p>
-      <div class="fade-up fade-up-4">
-        <TelegramCTA label="Записаться на сервис" openModal />
-      </div>
-    </div>
-  </section>
-
-  <!-- Details + Form -->
-  <section class="max-w-6xl mx-auto px-6 py-16">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-      <div class="fade-up fade-up-1">
-        <SectionHeading title="Что мы делаем" size="lg" class="mb-8" />
-        <div class="space-y-4">
-          {WHAT_WE_DO.map(item => (
-            <div class="flex gap-4 p-4 rounded-sm border bg-surface border-default">
-              <item.Icon size={20} class="shrink-0 text-accent" />
-              <div>
-                <p class="text-sm font-medium mb-0.5 text-primary">{AUTOSERVICE_LABELS[item.key]}</p>
-                <p class="text-xs leading-relaxed text-muted">{item.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-        <ChipLinks label="Также подбираем авто:" items={getActiveCountries().filter(c => c.code !== 'rs').map(c => ({ href: `/${c.code}/autopodbor/`, text: c.name }))} />
-      </div>
-      <div class="fade-up fade-up-2">
-        <LeadForm service="autoservice" country="rs" city="belgrade" />
-      </div>
-    </div>
-  </section>
-
-  <LeadFormModal id="page-lead-modal" triggerAttr="data-open-page-lead-modal" service="autoservice" country="rs" city="belgrade" />
-
-  <!-- Address + map -->
-  <section class="border-t border-default">
-    <div class="max-w-6xl mx-auto px-6 py-16">
-      <SectionHeading title="Как нас найти" size="lg" class="mb-10" />
-      <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
-        <div class="lg:col-span-2 glow-border flex flex-col h-72 lg:h-[26rem] p-7 rounded-sm border bg-surface border-default">
-          <span class="flex items-center justify-center w-11 h-11 rounded-sm mb-5 shrink-0 bg-accent-subtle text-accent">
-            <MapPin size={20} />
-          </span>
-          <p class="text-xs tracking-[0.16em] uppercase font-medium mb-2 text-muted">Адрес автосервиса</p>
-          <p class="font-display text-xl font-bold leading-snug text-primary">Пека Павловића 39</p>
-          <p class="text-sm text-muted">Београд, Сербия</p>
-          <Button
-            href="https://share.google/PmmBqmEvqnLCQK4i6"
-            target="_blank"
-            rel="noopener"
-            variant="secondary"
-            class="mt-auto w-fit px-4 py-2.5 text-xs"
-          >
-            Открыть в Google Maps
-          </Button>
-        </div>
-        <div class="lg:col-span-3 map-embed glow-border h-72 lg:h-[26rem] rounded-sm overflow-hidden border border-default">
-          <iframe
-            src={`https://www.google.com/maps?q=${encodeURIComponent('Пека Павловића 39, Београд')}&output=embed`}
-            width="100%"
-            height="100%"
-            class="border-0 block"
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-            title="Автосервис на карте — Пека Павловића 39, Белград"
-          ></iframe>
+<ServicePageLayout
+  {meta} {schema}
+  title="Автосервис"
+  titleHighlight="в Белграде"
+  description="Профессиональный ремонт и обслуживание автомобилей в Белграде с гарантией качества."
+  ctaLabel="Записаться на сервис"
+  formService="autoservice"
+  currentCountry="rs"
+  currentService="autoservice"
+  city="belgrade"
+  showCountryCrossLinks={false}
+>
+  <SectionHeading title="Что мы делаем" size="lg" class="mb-8 mt-6" />
+  <div class="space-y-4">
+    {WHAT_WE_DO.map(item => (
+      <div class="flex gap-4 p-4 rounded-sm border bg-surface border-default">
+        <item.Icon size={20} class="shrink-0 text-accent" />
+        <div>
+          <p class="text-sm font-medium mb-0.5 text-primary">{AUTOSERVICE_LABELS[item.key]}</p>
+          <p class="text-xs leading-relaxed text-muted">{item.desc}</p>
         </div>
       </div>
-    </div>
-  </section>
+    ))}
+  </div>
+  <ChipLinks label="Также подбираем авто:" items={getActiveCountries().filter(c => c.code !== 'rs').map(c => ({ href: `/${c.code}/autopodbor/`, text: c.name }))} />
 
-  <CasesGrid {items} heading="Примеры работ" topBorder />
-</BaseLayout>
+  <Fragment slot="extra">
+    <section class="border-t border-default">
+      <div class="max-w-6xl mx-auto px-6 py-16">
+        <SectionHeading title="Как нас найти" size="lg" class="mb-10" />
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+          <div class="lg:col-span-2 glow-border flex flex-col h-72 lg:h-[26rem] p-7 rounded-sm border bg-surface border-default">
+            <span class="flex items-center justify-center w-11 h-11 rounded-sm mb-5 shrink-0 bg-accent-subtle text-accent">
+              <MapPin size={20} />
+            </span>
+            <p class="text-xs tracking-[0.16em] uppercase font-medium mb-2 text-muted">Адрес автосервиса</p>
+            <p class="font-display text-xl font-bold leading-snug text-primary">Пека Павловића 39</p>
+            <p class="text-sm text-muted">Београд, Сербия</p>
+            <Button
+              href="https://share.google/PmmBqmEvqnLCQK4i6"
+              target="_blank"
+              rel="noopener"
+              variant="secondary"
+              class="mt-auto w-fit px-4 py-2.5 text-xs"
+            >
+              Открыть в Google Maps
+            </Button>
+          </div>
+          <div class="lg:col-span-3 map-embed glow-border h-72 lg:h-[26rem] rounded-sm overflow-hidden border border-default">
+            <iframe
+              src={`https://www.google.com/maps?q=${encodeURIComponent('Пека Павловића 39, Београд')}&output=embed`}
+              width="100%"
+              height="100%"
+              class="border-0 block"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              title="Автосервис на карте — Пека Павловића 39, Белград"
+            ></iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+  </Fragment>
+
+  <Fragment slot="cases">
+    <CasesGrid {items} heading="Примеры работ" topBorder />
+  </Fragment>
+</ServicePageLayout>
 
 <style>
   /* Google's classic embed iframe has no style API — desaturate it so the

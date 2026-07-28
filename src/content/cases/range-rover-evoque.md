@@ -6,7 +6,7 @@ price:
   value: '17500'
   currency: '€'
 country: rs
-service: combined
+service: autopodbor
 image: ./range-rover-evoque/image.jpg
 date: 2026-02-23
 published: true

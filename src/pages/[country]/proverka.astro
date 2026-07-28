@@ -17,7 +17,8 @@ const schema = generateServiceSchema(`Проверка авто в ${country.nam
 
 <ServicePageLayout
   {meta} {schema}
-  title={`Проверка авто в ${country.nameLocative}`}
+  title="Проверка авто"
+  titleHighlight={`в ${country.nameLocative}`}
   description="Независимая проверка автомобиля перед покупкой. Выезд эксперта, диагностика, отчёт — без обязательства покупки."
   ctaLabel="Заказать проверку"
   formService="inspection"
@@ -31,4 +32,7 @@ const schema = generateServiceSchema(`Проверка авто в ${country.nam
     { n: '04', text: 'Электроника и история обслуживания по VIN' },
     { n: '05', text: 'Юридическая чистота — залог, запрет регистрации, ДТП' },
   ]} />
+  <p class="mt-6 text-sm leading-relaxed text-muted">
+    Работаем и в других странах Европы, включая Португалию, — уточните при заявке.
+  </p>
 </ServicePageLayout>

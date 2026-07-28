@@ -1,36 +1,68 @@
 ---
 export const prerender = true;
-import ServicePageLayout from '../../layouts/ServicePageLayout.astro';
-import StepsList from '../../components/StepsList.astro';
-import { getCountryPaths } from '../../utils/paths';
-import { getCountry } from '../../utils/geo';
-import { generateMeta, generateServiceSchema } from '../../utils/seo';
-import { getCollection } from 'astro:content';
-import { SITE_URL } from '../../utils/constants';
+import ServicePageLayout from "../../layouts/ServicePageLayout.astro";
+import StepsList from "../../components/StepsList.astro";
+import { getCountryPaths } from "../../utils/paths";
+import { getCountry } from "../../utils/geo";
+import { generateMeta, generateServiceSchema } from "../../utils/seo";
+import { getCollection } from "astro:content";
+import { SITE_URL } from "../../utils/constants";
 
 export const getStaticPaths = getCountryPaths;
 
 const { country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
-const meta = generateMeta('vykup', { country, baseUrl: SITE_URL, path: `/${countryCode}/vykup/` });
-const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === countryCode && c.data.service === 'buyout').slice(0, 3);
-const schema = generateServiceSchema(`Выкуп авто в ${country.nameLocative}`, country.name, meta.canonical);
+const meta = generateMeta("vykup", {
+    country,
+    baseUrl: SITE_URL,
+    path: `/${countryCode}/vykup/`,
+});
+const cases = (await getCollection("cases"))
+    .filter(
+        (c) =>
+            c.data.published &&
+            c.data.country === countryCode &&
+            c.data.service === "buyout",
+    )
+    .slice(0, 3);
+const schema = generateServiceSchema(
+    `Выкуп авто в ${country.nameLocative}`,
+    country.name,
+    meta.canonical,
+);
+const isSerbia = countryCode === "rs";
+const description = isSerbia
+    ? `Выкупаем автомобили на русских номерах ниже рыночной цены — машина может находиться в любой стране Европы. Также выкупаем авто на сербских номерах в Сербии и Черногории. Оценка онлайн, оформление за 1 день, перевод в день сделки.`
+    : `Выкупаем автомобили на русских номерах ниже рыночной цены — машина может находиться в любой стране Европы, включая ${country.nameAccusative}. Оценка онлайн, оформление за 1 день, перевод в день сделки.`;
 ---
 
 <ServicePageLayout
-  {meta} {schema} {cases}
-  title={`Выкуп авто в ${country.nameLocative}`}
-  description={`Выкупаем автомобили в ${country.nameLocative} на любых номерах — иностранных, российских или сербских. Оценка онлайн, оформление за 1 день, перевод в день сделки.`}
-  ctaLabel="Получить оценку"
-  formService="buyout"
-  currentCountry={countryCode!}
-  currentService="vykup"
-  casesHeading="Кейсы выкупа"
+    {meta}
+    {schema}
+    {cases}
+    title="Выкуп авто"
+    titleHighlight={`в ${country.nameLocative}`}
+    {description}
+    ctaLabel="Получить оценку"
+    formService="buyout"
+    currentCountry={countryCode!}
+    currentService="vykup"
+    casesHeading="Кейсы выкупа"
 >
-  <StepsList steps={[
-    { n: '01', text: 'Отправляете фото и описание автомобиля' },
-    { n: '02', text: 'Оцениваем онлайн по фото за 1 час' },
-    { n: '03', text: 'Встречаемся на осмотр — любые иностранные номера' },
-    { n: '04', text: 'Оформляем сделку, деньги в день подписания' },
-  ]} />
+    <StepsList
+        steps={[
+            { n: "01", text: "Отправляете фото и описание автомобиля" },
+            {
+                n: "02",
+                text: "Оцениваем онлайн по фото за 1 час — ниже рыночной цены",
+            },
+            {
+                n: "03",
+                text: isSerbia
+                    ? "Встречаемся на осмотр — русские номера (в любой стране Европы) или сербские номера (Сербия, Черногория)"
+                    : "Встречаемся на осмотр — русские номера, машина может быть в любой стране Европы",
+            },
+            { n: "04", text: "Оформляем сделку, деньги в день подписания" },
+        ]}
+    />
 </ServicePageLayout>

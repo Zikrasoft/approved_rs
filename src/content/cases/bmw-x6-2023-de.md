@@ -6,7 +6,7 @@ price:
   value: '68 000'
   currency: '€'
 country: rs
-service: combined
+service: autopodbor
 image: ./bmw-x6-2023-de/image.jpg
 date: 2026-03-10
 published: true

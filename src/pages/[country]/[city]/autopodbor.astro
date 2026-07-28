@@ -6,6 +6,7 @@ import { getCountry } from '../../../utils/geo';
 import { generateMeta, generateServiceSchema } from '../../../utils/seo';
 import { getCollection } from 'astro:content';
 import { SITE_URL } from '../../../utils/constants';
+import { TrendingUp, History, UserCheck, BadgeCheck } from '@lucide/astro';
 
 export const getStaticPaths = getCityPaths;
 
@@ -15,11 +16,23 @@ const country = getCountry(countryCode!)!;
 const meta = generateMeta('autopodbor', { country, city, baseUrl: SITE_URL, path: `/${countryCode}/${city.slug}/autopodbor/` });
 const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === countryCode && c.data.service === 'autopodbor').slice(0, 3);
 const schema = generateServiceSchema(`Автоподбор в ${city.nameLocative}`, city.name, meta.canonical);
+
+// DEKRA/TÜV are German-specific certification bodies — only true for country: 'de'.
+// Other countries get the generic claim instead of an invented local equivalent.
+const WHY_CITY = [
+  { Icon: TrendingUp, text: 'Крупный автомобильный рынок региона' },
+  { Icon: History,    text: 'Много вариантов с хорошей историей' },
+  { Icon: UserCheck,  text: `Наш эксперт в ${city.nameLocative}` },
+  { Icon: BadgeCheck, text: countryCode === 'de'
+      ? 'Проверка DEKRA / TÜV по запросу'
+      : 'Независимая техническая экспертиза по запросу' },
+];
 ---
 
 <ServicePageLayout
   {meta} {schema} {cases}
-  title={`Автоподбор в ${city.nameLocative}`}
+  title="Автоподбор"
+  titleHighlight={`в ${city.nameLocative}`}
   description={`Подберём автомобиль в ${city.nameLocative} с полной проверкой. Работаем по всему региону ${country.name}.`}
   ctaLabel="Оставить заявку"
   formService="autopodbor"
@@ -29,12 +42,16 @@ const schema = generateServiceSchema(`Автоподбор в ${city.nameLocativ
   casesHeading={`Кейсы из ${country.nameGenitive}`}
 >
   <div>
-    <h2 class="text-2xl mb-4">Почему {city.name}</h2>
-    <ul class="pl-5 leading-loose text-muted">
-      <li>Крупный автомобильный рынок региона</li>
-      <li>Много вариантов с хорошей историей</li>
-      <li>Наш эксперт в {city.nameLocative}</li>
-      <li>Проверка DEKRA / TÜV по запросу</li>
-    </ul>
+    <h2 class="font-display text-xl font-bold mb-4 text-primary">Почему {city.name}</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {WHY_CITY.map(item => (
+        <div class="flex items-center gap-3 p-4 rounded-sm border bg-surface border-default">
+          <span class="flex items-center justify-center w-9 h-9 rounded-sm shrink-0 bg-accent-subtle text-accent">
+            <item.Icon size={18} />
+          </span>
+          <p class="text-sm leading-relaxed text-muted">{item.text}</p>
+        </div>
+      ))}
+    </div>
   </div>
 </ServicePageLayout>

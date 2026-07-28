@@ -41,6 +41,7 @@ export default config({
             { label: 'Германия', value: 'de' },
             { label: 'Сербия', value: 'rs' },
             { label: 'Испания', value: 'es' },
+            { label: 'Швейцария', value: 'ch' },
           ],
           defaultValue: 'de',
         }),
@@ -48,8 +49,6 @@ export default config({
           label: 'Услуга',
           options: [
             { label: 'Автоподбор', value: 'autopodbor' },
-            { label: 'Доставка', value: 'delivery' },
-            { label: 'Подбор + доставка', value: 'combined' },
             { label: 'Выкуп', value: 'buyout' },
             { label: 'Проверка', value: 'inspection' },
           ],

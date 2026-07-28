@@ -4,7 +4,7 @@ import Button from './Button.astro';
 const channel = import.meta.env.PUBLIC_THREADS_CHANNEL!;
 ---
 
-<Button variant="secondary" href={`https://www.threads.com/@${channel}`} target="_blank" rel="noopener" class="tg-channel px-6 py-3 tracking-[0.03em]">
+<Button variant="secondary" href={`https://www.threads.com/@${channel}`} target="_blank" rel="noopener" class="tg-channel px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center">
   Наш канал
   <span class="tg-arrow text-[0.85em] transition-transform duration-200">→</span>
 </Button>

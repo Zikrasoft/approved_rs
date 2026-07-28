@@ -1,6 +1,5 @@
 import countriesData from '../data/countries.json';
 import citiesData from '../data/cities.json';
-import routesData from '../data/routes.json';
 
 export interface Country {
   code: string;
@@ -19,15 +18,8 @@ export interface City {
   active: boolean;
 }
 
-export interface Route {
-  from: string;
-  to: string;
-  active: boolean;
-}
-
 const countries = countriesData as Country[];
 const cities = citiesData as City[];
-const routes = routesData as Route[];
 
 export const getActiveCountries = (): Country[] =>
   countries.filter(c => c.active);
@@ -38,9 +30,6 @@ export const getCountry = (code: string): Country | undefined =>
 export const getCitiesForCountry = (countryCode: string): City[] =>
   cities.filter(c => c.country === countryCode && c.active);
 
-export const getActiveRoutes = (): Route[] =>
-  routes.filter(r => r.active);
-
-const COUNTRY_FLAGS: Record<string, string> = { de: '🇩🇪', rs: '🇷🇸', es: '🇪🇸' };
+const COUNTRY_FLAGS: Record<string, string> = { de: '🇩🇪', rs: '🇷🇸', es: '🇪🇸', ch: '🇨🇭' };
 
 export const getCountryFlag = (code: string): string => COUNTRY_FLAGS[code] ?? '🏳️';

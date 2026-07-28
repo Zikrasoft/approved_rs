@@ -16,6 +16,7 @@ interface Props {
   meta: MetaProps;
   schema?: object;
   title: string;
+  titleHighlight?: string;
   description: string;
   ctaLabel?: string;
   formService: string;
@@ -24,12 +25,16 @@ interface Props {
   cases?: CollectionEntry<'cases'>[];
   casesHeading?: string;
   city?: string;
+  // Belgrade-only Автосервис isn't offered in the other countries — showing
+  // "Также работаем в: {other countries}" there would be a false claim.
+  showCountryCrossLinks?: boolean;
 }
 
 const {
-  meta, schema, title, description, ctaLabel,
+  meta, schema, title, titleHighlight, description, ctaLabel,
   formService, currentCountry, currentService,
   cases = [], casesHeading, city,
+  showCountryCrossLinks = true,
 } = Astro.props;
 
 const items = cases.map(toCaseItem);
@@ -45,8 +50,10 @@ const items = cases.map(toCaseItem);
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-start">
         <div class="lg:col-span-3">
           <span class="eyebrow fade-up fade-up-1">{SITE_NAME}</span>
-          <h1 class="font-display font-bold mb-5 leading-tight fade-up fade-up-2 tracking-[-0.02em]"
-            style="font-size: clamp(2.2rem, 4.5vw, 3.8rem);">{title}</h1>
+          <h1 class="font-display font-bold mb-5 leading-none fade-up fade-up-2 tracking-[-0.03em] text-primary"
+            style="font-size: clamp(3rem, 6.5vw, 5.2rem); font-weight: 800;">
+            {title}{titleHighlight && <><br /><em class="text-accent italic">{titleHighlight}</em></>}
+          </h1>
           <p class="text-base max-w-lg mb-2 leading-relaxed fade-up fade-up-3 text-muted">{description}</p>
           <div class="fade-up fade-up-4"><TelegramCTA label={ctaLabel} openModal /></div>
           <div class="fade-up fade-up-5 pt-2"><slot /></div>
@@ -58,12 +65,16 @@ const items = cases.map(toCaseItem);
     </div>
   </section>
 
+  <slot name="extra" />
+
   <LeadFormModal id="page-lead-modal" triggerAttr="data-open-page-lead-modal" service={formService} country={currentCountry} city={city} />
 
-  <CasesGrid {items} heading={casesHeading ?? ''} />
+  <slot name="cases"><CasesGrid {items} heading={casesHeading ?? ''} /></slot>
 
   <div class="max-w-6xl mx-auto px-6 pb-16 pt-4">
-    <ChipLinks label="Также работаем в:" items={getActiveCountries().filter(c => c.code !== currentCountry).map(c => ({ href: `/${c.code}/${currentService}/`, text: c.name }))} />
+    {showCountryCrossLinks && (
+      <ChipLinks label="Также работаем в:" items={getActiveCountries().filter(c => c.code !== currentCountry).map(c => ({ href: `/${c.code}/${currentService}/`, text: c.name }))} />
+    )}
     <ChipLinks label="Другие услуги:" items={SERVICES.filter(s => s.slug !== currentService).map(s => ({ href: `/${currentCountry}/${s.slug}/`, text: s.label }))} />
   </div>
 

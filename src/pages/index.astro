@@ -26,7 +26,7 @@ import { toCaseItem } from "../utils/cases";
 const meta = {
     title: `Автоподбор и доставка авто из Европы | ${SITE_NAME}`,
     description:
-        "Подберём и привезём автомобиль из Германии, Испании, Сербии. Проверка, выкуп, доставка. Работаем для русскоязычных по всему миру.",
+        "Подберём и привезём автомобиль из Германии, Испании, Сербии и Швейцарии. Проверка, выкуп, доставка. Работаем для русскоязычных по всему миру.",
     canonical: `${SITE_URL}/`,
 };
 
@@ -50,8 +50,8 @@ const services = [
     {
         href: "/de/autopodbor/",
         Icon: Search,
-        title: "Автоподбор",
-        desc: "Находим и проверяем подходящие автомобили на европейских рынках",
+        title: "Автоподбор под ключ",
+        desc: "Находим, проверяем и доставляем автомобиль до вашего города — под ключ",
     },
     {
         href: "/avtoservis-belgrade/",
@@ -167,7 +167,7 @@ const steps = [
                     <SectionHeading title="Наши услуги" />
                 </div>
                 <p class="text-sm max-w-xs sm:text-right text-muted">
-                    Германия · Испания · Сербия
+                    Германия · Испания · Сербия · Швейцария
                 </p>
             </div>
 
@@ -233,7 +233,8 @@ const steps = [
             </div>
 
             <!-- Country strip -->
-            <div class="flex flex-wrap gap-3 mt-4">
+            <p class="text-xs tracking-widest uppercase mt-10 mb-3 font-medium text-muted">Автоподбор по странам:</p>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {countries.map((c) => <CountryPill country={c} />)}
             </div>
         </div>
@@ -258,7 +259,7 @@ const steps = [
                                 class="anim-inline"
                                 style={`--anim-delay: ${0.1 + i * 0.1}s`}
                             >
-                                <div class="step-circle">{step.n}</div>
+                                <div class="step-circle mb-5">{step.n}</div>
                                 <h3 class="font-display text-xl font-bold mb-3 text-primary">
                                     {step.title}
                                 </h3>

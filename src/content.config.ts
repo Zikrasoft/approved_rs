@@ -10,7 +10,7 @@ const cases = defineCollection({
     year: z.coerce.number(),
     price: z.object({ value: z.string(), currency: z.string().optional() }),
     country: z.string(),
-    service: z.enum(['autopodbor', 'delivery', 'combined', 'buyout', 'inspection']),
+    service: z.enum(['autopodbor', 'buyout', 'inspection']),
     image: image().optional(),
     gallery: z.array(image()).default([]),
     date: z.coerce.date(),
