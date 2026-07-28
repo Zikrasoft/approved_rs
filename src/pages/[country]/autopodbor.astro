@@ -29,6 +29,7 @@ const schema = generateServiceSchema(`Автоподбор в ${country.nameLoca
   currentCountry={countryCode!}
   currentService="autopodbor"
   casesHeading={`Кейсы: автоподбор в ${country.nameLocative}`}
+  breadcrumbs={[{ label: `Автоподбор в ${country.nameLocative}` }]}
 >
   <StepsList steps={[
     { n: '01', text: 'Оставляете заявку с требованиями — бюджет, марка, пробег' },

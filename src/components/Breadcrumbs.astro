@@ -1,0 +1,39 @@
+---
+import { SITE_URL } from '../utils/constants';
+
+interface Crumb { label: string; href?: string }
+interface Props { items: Crumb[] }
+
+const { items } = Astro.props;
+const trail: Crumb[] = [{ label: 'Главная', href: '/' }, ...items];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: trail.map((item, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: item.label,
+    ...(item.href ? { item: `${SITE_URL}${item.href}` } : {}),
+  })),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />
+<nav aria-label="breadcrumb" class="mb-6">
+  <ol class="flex flex-wrap items-center gap-1.5 text-xs text-muted">
+    {trail.map((item, i) => (
+      <li class="flex items-center gap-1.5">
+        {i > 0 && <span aria-hidden="true">/</span>}
+        {item.href && i < trail.length - 1
+          ? <a href={item.href} class="breadcrumb-link">{item.label}</a>
+          : <span class="text-primary">{item.label}</span>}
+      </li>
+    ))}
+  </ol>
+</nav>
+
+<style>
+  .breadcrumb-link { transition: color 0.2s; }
+  .breadcrumb-link:hover { color: var(--color-accent); }
+</style>

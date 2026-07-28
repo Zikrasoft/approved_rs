@@ -24,6 +24,10 @@ const schema = generateServiceSchema(`Проверка авто в ${country.nam
   formService="inspection"
   currentCountry={countryCode!}
   currentService="proverka"
+  breadcrumbs={[
+    { label: country.name, href: `/${countryCode}/autopodbor/` },
+    { label: 'Проверка авто' },
+  ]}
 >
   <StepsList steps={[
     { n: '01', text: 'Кузов и лакокрасочное покрытие — наличие ремонта или ДТП' },

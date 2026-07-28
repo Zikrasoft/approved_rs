@@ -1,8 +1,9 @@
 ---
 export const prerender = true;
 import ServicePageLayout from '../../../layouts/ServicePageLayout.astro';
+import ChipLinks from '../../../components/ChipLinks.astro';
 import { getCityPaths } from '../../../utils/paths';
-import { getCountry } from '../../../utils/geo';
+import { getCountry, getCitiesForCountry } from '../../../utils/geo';
 import { generateMeta, generateServiceSchema } from '../../../utils/seo';
 import { getCollection } from 'astro:content';
 import { SITE_URL } from '../../../utils/constants';
@@ -40,6 +41,10 @@ const WHY_CITY = [
   currentService="autopodbor"
   city={city.slug}
   casesHeading={`Кейсы из ${country.nameGenitive}`}
+  breadcrumbs={[
+    { label: country.name, href: `/${countryCode}/autopodbor/` },
+    { label: city.name },
+  ]}
 >
   <div>
     <h2 class="font-display text-xl font-bold mb-4 text-primary">Почему {city.name}</h2>
@@ -54,4 +59,10 @@ const WHY_CITY = [
       ))}
     </div>
   </div>
+  <ChipLinks
+    label={`Другие города в ${country.nameLocative}:`}
+    items={getCitiesForCountry(countryCode!)
+      .filter(c => c.slug !== city.slug)
+      .map(c => ({ href: `/${countryCode}/${c.slug}/autopodbor/`, text: c.name }))}
+  />
 </ServicePageLayout>

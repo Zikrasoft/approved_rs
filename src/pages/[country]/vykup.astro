@@ -48,6 +48,10 @@ const description = isSerbia
     currentCountry={countryCode!}
     currentService="vykup"
     casesHeading="Кейсы выкупа"
+    breadcrumbs={[
+        { label: country.name, href: `/${countryCode}/autopodbor/` },
+        { label: "Выкуп авто" },
+    ]}
 >
     <StepsList
         steps={[
