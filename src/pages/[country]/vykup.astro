@@ -2,11 +2,13 @@
 export const prerender = true;
 import ServicePageLayout from "../../layouts/ServicePageLayout.astro";
 import StepsList from "../../components/StepsList.astro";
+import Faq from "../../components/Faq.astro";
 import { getCountryPaths } from "../../utils/paths";
 import { getCountry } from "../../utils/geo";
 import { generateMeta, generateServiceSchema } from "../../utils/seo";
 import { getCollection } from "astro:content";
 import { SITE_URL } from "../../utils/constants";
+import { FAQ_VYKUP } from "../../utils/faq";
 
 export const getStaticPaths = getCountryPaths;
 
@@ -69,4 +71,8 @@ const description = isSerbia
             { n: "04", text: "Оформляем сделку, деньги в день подписания" },
         ]}
     />
+
+    <Fragment slot="extra">
+        <Faq items={FAQ_VYKUP} />
+    </Fragment>
 </ServicePageLayout>

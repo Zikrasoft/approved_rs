@@ -2,10 +2,12 @@
 export const prerender = true;
 import ServicePageLayout from '../../layouts/ServicePageLayout.astro';
 import StepsList from '../../components/StepsList.astro';
+import Faq from '../../components/Faq.astro';
 import { getCountryPaths } from '../../utils/paths';
 import { getCountry } from '../../utils/geo';
 import { generateMeta, generateServiceSchema } from '../../utils/seo';
 import { SITE_URL } from '../../utils/constants';
+import { FAQ_PROVERKA } from '../../utils/faq';
 
 export const getStaticPaths = getCountryPaths;
 
@@ -39,4 +41,8 @@ const schema = generateServiceSchema(`Проверка авто в ${country.nam
   <p class="mt-6 text-sm leading-relaxed text-muted">
     Работаем и в других странах Европы, включая Португалию, — уточните при заявке.
   </p>
+
+  <Fragment slot="extra">
+    <Faq items={FAQ_PROVERKA} />
+  </Fragment>
 </ServicePageLayout>

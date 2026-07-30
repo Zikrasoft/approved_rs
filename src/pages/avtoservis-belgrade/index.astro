@@ -12,6 +12,8 @@ import { AUTOSERVICE_LABELS } from '../../utils/labels';
 import { toAutoserviceCaseItem } from '../../utils/cases';
 import { getPublishedAutoserviceCases } from '../../utils/casesQueries';
 import { getActiveCountries } from '../../utils/geo';
+import Faq from '../../components/Faq.astro';
+import { FAQ_AUTOSERVICE } from '../../utils/faq';
 
 const meta = {
   title: `Автосервис в Белграде — ремонт и обслуживание | ${SITE_NAME}`,
@@ -95,6 +97,10 @@ const WHAT_WE_DO = [
         </div>
       </div>
     </section>
+  </Fragment>
+
+  <Fragment slot="extra">
+    <Faq items={FAQ_AUTOSERVICE} />
   </Fragment>
 
   <Fragment slot="cases">

@@ -3,7 +3,9 @@ export const prerender = true;
 import BaseLayout from '../layouts/BaseLayout.astro';
 import TelegramCTA from '../components/TelegramCTA.astro';
 import PageHero from '../components/PageHero.astro';
+import Faq from '../components/Faq.astro';
 import { SITE_URL, SITE_NAME } from '../utils/constants';
+import { FAQ_GENERAL } from '../utils/faq';
 
 const meta = {
   title: `Контакты | ${SITE_NAME}`,
@@ -58,5 +60,7 @@ const steps = [
 
     </div>
   </section>
+
+  <Faq items={FAQ_GENERAL} />
 
 </BaseLayout>
