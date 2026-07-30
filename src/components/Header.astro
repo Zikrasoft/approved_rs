@@ -1,5 +1,5 @@
 ---
-import { Menu, X, Send, Sun, Moon } from '@lucide/astro';
+import { Menu, X, Send, Sun, Moon, Search, Wrench, Banknote, ClipboardCheck } from '@lucide/astro';
 import SiteLogo from './SiteLogo.astro';
 import Button from './Button.astro';
 import LeadFormModal from './LeadFormModal.astro';
@@ -9,6 +9,24 @@ import { getActiveCountries } from '../utils/geo';
 
 const urlCountry = Astro.url.pathname.split('/')[1];
 const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCountry : DEFAULT_COUNTRY;
+const isHome = Astro.url.pathname === '/';
+
+// Record (not `as const` + cast) so a slug added to labels.ts without a
+// matching entry here degrades to a missing icon instead of a broken build.
+const SERVICE_ICONS: Record<string, typeof Search> = {
+  autopodbor: Search,
+  autoservice: Wrench,
+  vykup: Banknote,
+  proverka: ClipboardCheck,
+};
+
+// Computed once and shared by the desktop and mobile nav below (both used
+// to call getNavItems()/isNavItemActive() separately for the same country).
+const navItems = getNavItems(navCountry).map(item => ({
+  ...item,
+  Icon: SERVICE_ICONS[item.slug],
+  active: isNavItemActive(item, navCountry, Astro.url.pathname),
+}));
 ---
 
 <header class="sticky top-0 z-50 border-b bg-header-glass border-default backdrop-blur-[16px]">
@@ -17,12 +35,15 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
     <SiteLogo />
 
     <!-- Desktop Nav -->
-    <nav class="hidden lg:flex items-center gap-7 text-sm font-sans font-normal header-nav flex-1 justify-center">
-      {getNavItems(navCountry).map(item => (
-        <a href={item.href} class="text-muted" aria-current={isNavItemActive(item, navCountry, Astro.url.pathname) ? 'page' : undefined}>{item.label}</a>
+    <nav class="hidden lg:flex items-center gap-2 text-sm font-sans font-normal header-nav flex-1 justify-center">
+      {navItems.map(item => (
+        <a href={item.href} class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-muted" aria-current={item.active ? 'page' : undefined}>
+          {item.Icon && <item.Icon size={14} />}
+          {item.label}
+        </a>
       ))}
-      <a href="/cases/autopodbor/" class="text-muted" aria-current={Astro.url.pathname.startsWith('/cases/') ? 'page' : undefined}>Кейсы</a>
-      <a href="/contacts/" class="text-muted" aria-current={Astro.url.pathname === '/contacts/' ? 'page' : undefined}>Контакты</a>
+      <a href="/cases/autopodbor/" class="px-2.5 py-1.5 text-muted" aria-current={Astro.url.pathname.startsWith('/cases/') ? 'page' : undefined}>Кейсы</a>
+      <a href="/contacts/" class="px-2.5 py-1.5 text-muted" aria-current={Astro.url.pathname === '/contacts/' ? 'page' : undefined}>Контакты</a>
     </nav>
 
     <div class="flex items-center gap-2 shrink-0">
@@ -50,32 +71,40 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
         id="burger"
         class="lg:hidden flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong text-secondary"
         aria-label="Меню"
-        aria-expanded="false"
+        aria-expanded={isHome ? 'true' : 'false'}
       >
-        <span id="burger-open"><Menu size={18} /></span>
-        <span id="burger-close" class="hidden"><X size={18} /></span>
+        <span id="burger-open" class:list={{ hidden: isHome }}><Menu size={18} /></span>
+        <span id="burger-close" class:list={{ hidden: !isHome }}><X size={18} /></span>
       </button>
     </div>
   </div>
 
-  <!-- Mobile Menu -->
+  <!-- Mobile Menu: open by default on the homepage -->
   <div
     id="mobile-menu"
-    class="lg:hidden border-t bg-header-mobile border-default"
-    style="display:none"
+    class:list={['lg:hidden border-t bg-header-mobile border-default', { 'menu-open': isHome }]}
+    aria-hidden={isHome ? undefined : 'true'}
+    inert={isHome ? undefined : true}
   >
-    <nav class="max-w-6xl mx-auto px-6 py-5 flex flex-col gap-0 mobile-nav">
-      {getNavItems(navCountry).map(item => (
-        <a href={item.href} class="text-secondary">{item.label}</a>
-      ))}
-      <a href="/cases/autopodbor/" class="text-secondary">Кейсы</a>
-      <a href="/contacts/" class="text-secondary">Контакты</a>
-      <button type="button" class="theme-toggle-btn flex items-center gap-2 w-full py-[0.85rem] text-secondary">
-        <span class="theme-icon-sun hidden"><Sun size={16} /></span>
-        <span class="theme-icon-moon"><Moon size={16} /></span>
-        Сменить тему
-      </button>
-    </nav>
+    <div class="overflow-hidden">
+      <nav class="max-w-6xl mx-auto px-6 py-5 flex flex-col gap-0 mobile-nav">
+        <div class="grid grid-cols-2 gap-2 mb-4">
+          {navItems.map(item => (
+            <a href={item.href} class="mobile-service-card flex flex-col items-center justify-center gap-2 py-5 rounded-sm border border-default text-secondary" aria-current={item.active ? 'page' : undefined}>
+              {item.Icon && <item.Icon size={20} />}
+              <span class="text-sm">{item.label}</span>
+            </a>
+          ))}
+        </div>
+        <a href="/cases/autopodbor/" class="text-secondary">Кейсы</a>
+        <a href="/contacts/" class="text-secondary">Контакты</a>
+        <button type="button" class="theme-toggle-btn flex items-center gap-2 w-full py-[0.85rem] text-secondary">
+          <span class="theme-icon-sun hidden"><Sun size={16} /></span>
+          <span class="theme-icon-moon"><Moon size={16} /></span>
+          Сменить тему
+        </button>
+      </nav>
+    </div>
   </div>
 
   <LeadFormModal id="lead-modal" triggerAttr="data-open-lead-modal" />
@@ -110,7 +139,7 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
     color: var(--color-accent) !important;
   }
 
-  .mobile-nav a {
+  .mobile-nav > a {
     display: block;
     padding: 0.85rem 0;
     font-size: 1rem;
@@ -118,22 +147,39 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
     border-bottom: 1px solid var(--color-border);
     transition: color 0.2s, transform 0.2s;
   }
-  .mobile-nav a:last-child { border-bottom: none; }
-  .mobile-nav a:hover { color: var(--color-text) !important; transform: translateX(0.5rem); }
+  .mobile-nav > a:last-of-type { border-bottom: none; }
+  .mobile-nav > a:hover { color: var(--color-text) !important; transform: translateX(0.5rem); }
 
-  #mobile-menu {
-    overflow: hidden;
-    clip-path: inset(0 0 100% 0);
-    opacity: 0;
-    transition:
-      clip-path 220ms var(--ease-spring),
-      opacity 180ms ease;
-    pointer-events: none;
+  .mobile-service-card { transition: background-color 0.2s, border-color 0.2s; }
+  .mobile-service-card:active,
+  .mobile-service-card[aria-current="page"] {
+    background-color: var(--color-accent-subtle);
+    border-color: var(--color-accent-border);
+    color: var(--color-accent) !important;
   }
-  #mobile-menu.menu-open {
-    clip-path: inset(0 0 0% 0);
-    opacity: 1;
-    pointer-events: auto;
+
+  /* Grid-rows collapse: animates real layout height (not just a visual
+     clip), so closing actually shrinks the sticky header smoothly instead
+     of snapping via display:none. Scoped under lg's breakpoint so it never
+     fights the lg:hidden utility's display:none on desktop. */
+  @media (max-width: 1023px) {
+    #mobile-menu {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transition:
+        grid-template-rows 280ms var(--ease-spring),
+        opacity 200ms ease;
+      pointer-events: none;
+    }
+    #mobile-menu.menu-open {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #mobile-menu.no-anim {
+      transition: none;
+    }
   }
 </style>
 
@@ -145,6 +191,17 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
   }
 
   function initHeader() {
+    // Guard against double init: Vite/Astro HMR can re-run this inline
+    // script on the same live DOM (e.g. after editing this file) without a
+    // full page reload. Without this, every listener below (theme toggle,
+    // OS-theme listener, burger/menu/scroll) stacks a second copy on top of
+    // the first, and a single click/scroll fires both in the same tick —
+    // e.g. the theme flips twice (looks like the button "stopped working"),
+    // or the menu opens then immediately closes (looks like it toggles on
+    // its own).
+    if (document.body.dataset.headerInit) return;
+    document.body.dataset.headerInit = '1';
+
     /* ── Theme toggle: one in the desktop bar, one in the mobile menu ── */
     updateThemeIcons();
     document.querySelectorAll('.theme-toggle-btn').forEach(function (toggle) {
@@ -169,21 +226,29 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
 
     function openMenu() {
       if (!menu || !burger) return;
-      menu.style.display = 'block';
-      menu.offsetHeight; // force reflow so clip-path animates
       menu.classList.add('menu-open');
+      menu.removeAttribute('aria-hidden');
+      menu.inert = false;
       burger.setAttribute('aria-expanded', 'true');
       open  && open.classList.add('hidden');
       close && close.classList.remove('hidden');
     }
 
-    function closeMenu() {
+    function closeMenu(instant) {
       if (!menu || !burger) return;
+      if (instant) menu.classList.add('no-anim');
       menu.classList.remove('menu-open');
+      menu.setAttribute('aria-hidden', 'true');
+      menu.inert = true;
       burger.setAttribute('aria-expanded', 'false');
       open  && open.classList.remove('hidden');
       close && close.classList.add('hidden');
-      setTimeout(function () { menu.style.display = 'none'; }, 220);
+      if (instant) {
+        // Force the closed state to paint before re-enabling the
+        // transition, so it doesn't animate a state that was never visible.
+        menu.offsetHeight;
+        requestAnimationFrame(function () { menu.classList.remove('no-anim'); });
+      }
     }
 
     if (burger && menu) {
@@ -191,7 +256,7 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
         burger.getAttribute('aria-expanded') === 'true' ? closeMenu() : openMenu();
       });
       menu.querySelectorAll('a').forEach(function (a) {
-        a.addEventListener('click', closeMenu);
+        a.addEventListener('click', function () { closeMenu(); });
       });
 
       // Close the mobile menu when the "Оставить заявку" button opens the
@@ -203,26 +268,49 @@ const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCo
         });
       });
 
-      // openMenu() sets an inline display:block that would otherwise outlive
-      // a resize past the lg breakpoint (inline style beats the lg:hidden
-      // utility class) — force it closed if the viewport grows into desktop.
+      // Reset menu state if the viewport grows into desktop, so it doesn't
+      // reappear pre-opened if the user shrinks back to mobile later.
       try {
         window.matchMedia('(min-width: 1024px)').addEventListener('change', function (e) {
           if (e.matches) closeMenu();
         });
       } catch (e) {}
+
+      // Header is sticky, so a menu left open pins to the top and eats the
+      // viewport — close it whenever it's open and the user scrolls past a
+      // small threshold (the home page's default-open state, but also any
+      // page where the burger was opened by hand). Checks the live
+      // aria-expanded state each time rather than closing once and
+      // detaching, so it keeps working for every open on every page.
+      window.addEventListener('scroll', function () {
+        if (window.scrollY <= 60) return;
+        if (burger.getAttribute('aria-expanded') === 'true') closeMenu();
+      }, { passive: true });
+
+      // Browsers restore the previous scroll position on reload — if that
+      // lands us already past the threshold, the menu (pre-opened by SSR)
+      // would otherwise flash open for a frame and then visibly snap shut.
+      // Correct it instantly, before that ever paints. This script runs
+      // early (top of <body>), before some browsers finish restoring the
+      // scroll position, so the check may fire too soon and miss — a
+      // same-frame backstop catches that case too.
+      function correctForRestoredScroll() {
+        if (window.scrollY > 60 && burger.getAttribute('aria-expanded') === 'true') closeMenu(true);
+      }
+      correctForRestoredScroll();
+      requestAnimationFrame(correctForRestoredScroll);
     }
+
+    // Follow OS theme changes live, but only while the user hasn't picked one explicitly.
+    try {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+        if (localStorage.getItem('theme')) return;
+        if (e.matches) document.documentElement.setAttribute('data-theme', 'dark');
+        else document.documentElement.removeAttribute('data-theme');
+        updateThemeIcons();
+      });
+    } catch (e) {}
   }
 
   initHeader();
-
-  // Follow OS theme changes live, but only while the user hasn't picked one explicitly.
-  try {
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
-      if (localStorage.getItem('theme')) return;
-      if (e.matches) document.documentElement.setAttribute('data-theme', 'dark');
-      else document.documentElement.removeAttribute('data-theme');
-      updateThemeIcons();
-    });
-  } catch (e) {}
 </script>

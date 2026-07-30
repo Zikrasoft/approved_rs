@@ -10,11 +10,19 @@ describe('getNavItems', () => {
   it('builds per-country hrefs for country-scoped items and a fixed href for Автосервис', () => {
     const result = getNavItems('rs');
     expect(result).toEqual([
-      { href: '/rs/autopodbor/', label: 'Автоподбор' },
-      { href: '/avtoservis-belgrade/', label: 'Автосервис' },
-      { href: '/rs/vykup/', label: 'Выкуп' },
-      { href: '/rs/proverka/', label: 'Проверка' },
+      { href: '/rs/autopodbor/', label: 'Автоподбор', slug: 'autopodbor' },
+      { href: '/avtoservis-belgrade/', label: 'Автосервис', slug: 'autoservice' },
+      { href: '/rs/vykup/', label: 'Выкуп', slug: 'vykup' },
+      { href: '/rs/proverka/', label: 'Проверка', slug: 'proverka' },
     ]);
+  });
+
+  it('every slug has an icon mapping in Header.astro\'s SERVICE_ICONS', () => {
+    // Keep in sync with SERVICE_ICONS in src/components/Header.astro — a
+    // slug missing there renders without an icon rather than crashing, so
+    // this test is what actually catches the drift.
+    const knownSlugs = ['autopodbor', 'autoservice', 'vykup', 'proverka'];
+    getNavItems('de').forEach(item => expect(knownSlugs).toContain(item.slug));
   });
 });
 

@@ -60,6 +60,9 @@
 
   --font-display: 'Playfair Display', Georgia, serif;
   --font-sans:    'Outfit', system-ui, sans-serif;
+
+  /* Ink-stamp accent — used only by the hero "approved" seal, nowhere else. */
+  --color-stamp-ink: #B23A2E;
 }
 
 /* ── Non-class tokens (only used in CSS rules / inline gradients) ── */
@@ -107,6 +110,8 @@
   --color-deco-stroke:  rgba(148, 163, 184, 0.07);
   --color-ambient-glow: rgba(148, 163, 184, 0.06);
   --grain-opacity:      0.03;
+
+  --color-stamp-ink: #D9695A;
 }
 
 /* ── Readable aliases for Tailwind's auto-generated names ──────────── */
@@ -261,7 +266,7 @@ h1, h2, h3, h4 {
 }
 .stat-n {
   font-family: var(--font-display);
-  font-size: 2.4rem;
+  font-size: clamp(1.5rem, 5.5vw, 2.4rem);
   font-weight: 700;
   color: var(--color-accent);
   line-height: 1;
@@ -274,17 +279,6 @@ h1, h2, h3, h4 {
   color: var(--color-muted);
   font-weight: 500;
   margin-top: 0.3rem;
-}
-
-/* ─── Card index number ──────────────────────────────────── */
-.card-index {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--color-accent-mid);
-  letter-spacing: 0.04em;
-  line-height: 1;
 }
 
 /* ─── Step circle badge ──────────────────────────────────── */
@@ -348,7 +342,6 @@ h1, h2, h3, h4 {
     transform: none !important;
   }
   .eyebrow::before { animation: none; }
-  #mobile-menu { clip-path: none !important; transition: opacity 0.1s ease; }
   /* Suppress movement; preserve color/opacity/shadow feedback */
   *, *::before, *::after {
     transition-property: color, background-color, border-color, box-shadow, outline-color !important;

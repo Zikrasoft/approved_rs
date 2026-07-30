@@ -7,10 +7,16 @@ export const SERVICES: { slug: string; label: string }[] = [
 // Primary nav order: Автоподбор first, then the single-page Автосервис
 // (Belgrade only, not per-country like the rest), then the remaining
 // per-country SERVICES. Shared by Header (desktop + mobile) and Footer.
-export const getNavItems = (countryCode: string): { href: string; label: string }[] => [
-  { href: `/${countryCode}/autopodbor/`, label: 'Автоподбор' },
-  { href: '/avtoservis-belgrade/', label: 'Автосервис' },
-  ...SERVICES.filter(s => s.slug !== 'autopodbor').map(s => ({ href: `/${countryCode}/${s.slug}/`, label: s.label })),
+// slug is exposed so consumers (Header) can map an icon per service without
+// this plain .ts file importing Astro icon components.
+export const getNavItems = (countryCode: string): { href: string; label: string; slug: string }[] => [
+  { href: `/${countryCode}/autopodbor/`, label: 'Автоподбор', slug: 'autopodbor' },
+  { href: '/avtoservis-belgrade/', label: 'Автосервис', slug: 'autoservice' },
+  ...SERVICES.filter(s => s.slug !== 'autopodbor').map(s => ({
+    href: `/${countryCode}/${s.slug}/`,
+    label: s.label,
+    slug: s.slug,
+  })),
 ];
 
 // Country-scoped items (autopodbor/vykup/proverka) can sit under a city
