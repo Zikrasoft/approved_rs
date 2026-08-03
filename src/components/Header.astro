@@ -3,11 +3,16 @@ import { Menu, X, Send, Sun, Moon, Search, Wrench, Banknote, ClipboardCheck } fr
 import SiteLogo from './SiteLogo.astro';
 import Button from './Button.astro';
 import LeadFormModal from './LeadFormModal.astro';
+import LanguageSwitcher from './LanguageSwitcher.astro';
 import { getNavItems, isNavItemActive } from '../utils/labels';
+import { getDictionary } from '../i18n/getDictionary';
+import type { Locale } from '../i18n/config';
 import { DEFAULT_COUNTRY } from '../utils/constants';
 import { getActiveCountries } from '../utils/geo';
 
-const urlCountry = Astro.url.pathname.split('/')[1];
+const locale = (Astro.currentLocale ?? 'ru') as Locale;
+const dict = getDictionary(locale);
+const urlCountry = Astro.url.pathname.split('/')[2];
 const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCountry : DEFAULT_COUNTRY;
 const isHome = Astro.url.pathname === '/';
 
@@ -22,10 +27,10 @@ const SERVICE_ICONS: Record<string, typeof Search> = {
 
 // Computed once and shared by the desktop and mobile nav below (both used
 // to call getNavItems()/isNavItemActive() separately for the same country).
-const navItems = getNavItems(navCountry).map(item => ({
+const navItems = getNavItems(locale, navCountry).map(item => ({
   ...item,
   Icon: SERVICE_ICONS[item.slug],
-  active: isNavItemActive(item, navCountry, Astro.url.pathname),
+  active: isNavItemActive(item, locale, navCountry, Astro.url.pathname),
 }));
 ---
 
@@ -42,16 +47,17 @@ const navItems = getNavItems(navCountry).map(item => ({
           {item.label}
         </a>
       ))}
-      <a href="/cases/autopodbor/" class="px-2.5 py-1.5 text-muted" aria-current={Astro.url.pathname.startsWith('/cases/') ? 'page' : undefined}>Кейсы</a>
-      <a href="/contacts/" class="px-2.5 py-1.5 text-muted" aria-current={Astro.url.pathname === '/contacts/' ? 'page' : undefined}>Контакты</a>
+      <a href={`/${locale}/cases/autopodbor/`} class="px-2.5 py-1.5 text-muted" aria-current={Astro.url.pathname.includes('/cases/') ? 'page' : undefined}>{dict.nav.cases}</a>
+      <a href={`/${locale}/contacts/`} class="px-2.5 py-1.5 text-muted" aria-current={Astro.url.pathname === `/${locale}/contacts/` ? 'page' : undefined}>{dict.nav.contacts}</a>
+      <LanguageSwitcher />
     </nav>
 
     <div class="flex items-center gap-2 shrink-0">
       <!-- Theme toggle: desktop only — mobile gets its own row inside #mobile-menu -->
       <button
         class="theme-toggle-btn theme-btn hidden lg:flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong bg-surface text-muted"
-        aria-label="Переключить тему"
-        title="Переключить тему"
+        aria-label={dict.header.themeToggleLabel}
+        title={dict.header.themeToggleLabel}
       >
         <!-- Sun: shown when dark (click → light) -->
         <span class="theme-icon-sun hidden"><Sun size={16} /></span>
@@ -62,15 +68,15 @@ const navItems = getNavItems(navCountry).map(item => ({
       <!-- CTA: always visible, text shortens below the lg breakpoint -->
       <Button type="button" data-open-lead-modal class="px-3 lg:px-4 py-2">
         <Send size={13} />
-        <span class="lg:hidden">Заявка</span>
-        <span class="hidden lg:inline">Оставить заявку</span>
+        <span class="lg:hidden">{dict.header.ctaShort}</span>
+        <span class="hidden lg:inline">{dict.header.ctaLong}</span>
       </Button>
 
       <!-- Mobile burger -->
       <button
         id="burger"
         class="lg:hidden flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong text-secondary"
-        aria-label="Меню"
+        aria-label={dict.header.menuLabel}
         aria-expanded={isHome ? 'true' : 'false'}
       >
         <span id="burger-open" class:list={{ hidden: isHome }}><Menu size={18} /></span>
@@ -96,12 +102,13 @@ const navItems = getNavItems(navCountry).map(item => ({
             </a>
           ))}
         </div>
-        <a href="/cases/autopodbor/" class="text-secondary">Кейсы</a>
-        <a href="/contacts/" class="text-secondary">Контакты</a>
+        <a href={`/${locale}/cases/autopodbor/`} class="text-secondary">{dict.nav.cases}</a>
+        <a href={`/${locale}/contacts/`} class="text-secondary">{dict.nav.contacts}</a>
+        <div class="py-3"><LanguageSwitcher /></div>
         <button type="button" class="theme-toggle-btn flex items-center gap-2 w-full py-[0.85rem] text-secondary">
           <span class="theme-icon-sun hidden"><Sun size={16} /></span>
           <span class="theme-icon-moon"><Moon size={16} /></span>
-          Сменить тему
+          {dict.header.themeToggleMobileLabel}
         </button>
       </nav>
     </div>
