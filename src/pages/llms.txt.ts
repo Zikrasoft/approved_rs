@@ -3,6 +3,7 @@ export const prerender = true;
 import type { APIRoute } from 'astro';
 import { SITE_URL, SITE_NAME } from '../utils/constants';
 import { SERVICES } from '../utils/labels';
+import { getDictionary } from '../i18n/getDictionary';
 import { getActiveCountries, getCitiesForCountry } from '../utils/geo';
 import { getPublishedCases, getPublishedAutoserviceCases } from '../utils/casesQueries';
 
@@ -10,6 +11,7 @@ export const GET: APIRoute = async () => {
   const countries = getActiveCountries();
   const cases = await getPublishedCases();
   const autoserviceCases = await getPublishedAutoserviceCases();
+  const nav = getDictionary('ru').nav;
 
   const lines: string[] = [];
 
@@ -23,7 +25,7 @@ export const GET: APIRoute = async () => {
   lines.push('## Услуги по странам', '');
   for (const country of countries) {
     for (const s of SERVICES) {
-      lines.push(`- [${s.label} в ${country.nameLocative}](${SITE_URL}/${country.code}/${s.slug}/)`);
+      lines.push(`- [${nav[s.slug]} в ${country.nameLocative}](${SITE_URL}/${country.code}/${s.slug}/)`);
     }
   }
   lines.push('');
