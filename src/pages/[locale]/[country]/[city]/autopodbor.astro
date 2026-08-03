@@ -1,22 +1,22 @@
 ---
 export const prerender = true;
-import ServicePageLayout from '../../../layouts/ServicePageLayout.astro';
-import ChipLinks from '../../../components/ChipLinks.astro';
-import Faq from '../../../components/Faq.astro';
-import { getCityPaths } from '../../../utils/paths';
-import { getCountry, getCitiesForCountry } from '../../../utils/geo';
-import { generateMeta, generateServiceSchema } from '../../../utils/seo';
+import ServicePageLayout from '../../../../layouts/ServicePageLayout.astro';
+import ChipLinks from '../../../../components/ChipLinks.astro';
+import Faq from '../../../../components/Faq.astro';
+import { getCityPaths, withLocales } from '../../../../utils/paths';
+import { getCountry, getCitiesForCountry } from '../../../../utils/geo';
+import { generateMeta, generateServiceSchema } from '../../../../utils/seo';
 import { getCollection } from 'astro:content';
-import { SITE_URL } from '../../../utils/constants';
-import { FAQ_AUTOPODBOR, FAQ_CITY_EXPERT } from '../../../utils/faq';
+import { SITE_URL } from '../../../../utils/constants';
+import { FAQ_AUTOPODBOR, FAQ_CITY_EXPERT } from '../../../../utils/faq';
 import { TrendingUp, History, UserCheck, BadgeCheck } from '@lucide/astro';
 
-export const getStaticPaths = getCityPaths;
+export const getStaticPaths = () => withLocales(getCityPaths());
 
-const { country: countryCode } = Astro.params;
+const { locale, country: countryCode } = Astro.params;
 const { city } = Astro.props;
 const country = getCountry(countryCode!)!;
-const meta = generateMeta('autopodbor', { country, city, baseUrl: SITE_URL, path: `/${countryCode}/${city.slug}/autopodbor/` });
+const meta = generateMeta('autopodbor', { country, city, baseUrl: SITE_URL, path: `/${locale}/${countryCode}/${city.slug}/autopodbor/` });
 const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === countryCode && c.data.service === 'autopodbor').slice(0, 3);
 const schema = generateServiceSchema(`Автоподбор в ${city.nameLocative}`, city.name, meta.canonical);
 
@@ -44,7 +44,7 @@ const WHY_CITY = [
   city={city.slug}
   casesHeading={`Кейсы из ${country.nameGenitive}`}
   breadcrumbs={[
-    { label: country.name, href: `/${countryCode}/autopodbor/` },
+    { label: country.name, href: `/${locale}/${countryCode}/autopodbor/` },
     { label: city.name },
   ]}
 >
@@ -65,7 +65,7 @@ const WHY_CITY = [
     label={`Другие города в ${country.nameLocative}:`}
     items={getCitiesForCountry(countryCode!)
       .filter(c => c.slug !== city.slug)
-      .map(c => ({ href: `/${countryCode}/${c.slug}/autopodbor/`, text: c.name }))}
+      .map(c => ({ href: `/${locale}/${countryCode}/${c.slug}/autopodbor/`, text: c.name }))}
   />
 
   <Fragment slot="extra">

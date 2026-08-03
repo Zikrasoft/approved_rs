@@ -1,19 +1,19 @@
 ---
 export const prerender = true;
-import ServicePageLayout from '../../layouts/ServicePageLayout.astro';
-import StepsList from '../../components/StepsList.astro';
-import Faq from '../../components/Faq.astro';
-import { getCountryPaths } from '../../utils/paths';
-import { getCountry } from '../../utils/geo';
-import { generateMeta, generateServiceSchema } from '../../utils/seo';
-import { SITE_URL } from '../../utils/constants';
-import { FAQ_PROVERKA } from '../../utils/faq';
+import ServicePageLayout from '../../../layouts/ServicePageLayout.astro';
+import StepsList from '../../../components/StepsList.astro';
+import Faq from '../../../components/Faq.astro';
+import { getCountryPaths, withLocales } from '../../../utils/paths';
+import { getCountry } from '../../../utils/geo';
+import { generateMeta, generateServiceSchema } from '../../../utils/seo';
+import { SITE_URL } from '../../../utils/constants';
+import { FAQ_PROVERKA } from '../../../utils/faq';
 
-export const getStaticPaths = getCountryPaths;
+export const getStaticPaths = () => withLocales(getCountryPaths());
 
-const { country: countryCode } = Astro.params;
+const { locale, country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
-const meta = generateMeta('proverka', { country, baseUrl: SITE_URL, path: `/${countryCode}/proverka/` });
+const meta = generateMeta('proverka', { country, baseUrl: SITE_URL, path: `/${locale}/${countryCode}/proverka/` });
 const schema = generateServiceSchema(`Проверка авто в ${country.nameLocative}`, country.name, meta.canonical);
 ---
 
@@ -27,7 +27,7 @@ const schema = generateServiceSchema(`Проверка авто в ${country.nam
   currentCountry={countryCode!}
   currentService="proverka"
   breadcrumbs={[
-    { label: country.name, href: `/${countryCode}/autopodbor/` },
+    { label: country.name, href: `/${locale}/${countryCode}/autopodbor/` },
     { label: 'Проверка авто' },
   ]}
 >

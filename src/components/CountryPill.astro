@@ -4,13 +4,14 @@ import type { Country } from '../utils/geo';
 
 interface Props {
   country: Country;
+  locale: string;
 }
 
-const { country } = Astro.props;
+const { country, locale } = Astro.props;
 ---
 
 <a
-  href={`/${country.code}/autopodbor/`}
+  href={`/${locale}/${country.code}/autopodbor/`}
   class="country-pill group flex items-center justify-between gap-2.5 px-4 py-2.5 rounded-sm no-underline glow-border bg-surface border border-default"
 >
   <span class="flex items-center gap-2.5 min-w-0">

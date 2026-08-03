@@ -1,22 +1,22 @@
 ---
 export const prerender = true;
-import ServicePageLayout from '../../layouts/ServicePageLayout.astro';
-import StepsList from '../../components/StepsList.astro';
-import ChipLinks from '../../components/ChipLinks.astro';
-import CountryPill from '../../components/CountryPill.astro';
-import Faq from '../../components/Faq.astro';
-import { FAQ_AUTOPODBOR } from '../../utils/faq';
-import { getCountryPaths } from '../../utils/paths';
-import { getCountry, getActiveCountries, getCitiesForCountry } from '../../utils/geo';
-import { generateMeta, generateServiceSchema } from '../../utils/seo';
+import ServicePageLayout from '../../../layouts/ServicePageLayout.astro';
+import StepsList from '../../../components/StepsList.astro';
+import ChipLinks from '../../../components/ChipLinks.astro';
+import CountryPill from '../../../components/CountryPill.astro';
+import Faq from '../../../components/Faq.astro';
+import { FAQ_AUTOPODBOR } from '../../../utils/faq';
+import { getCountryPaths, withLocales } from '../../../utils/paths';
+import { getCountry, getActiveCountries, getCitiesForCountry } from '../../../utils/geo';
+import { generateMeta, generateServiceSchema } from '../../../utils/seo';
 import { getCollection } from 'astro:content';
-import { SITE_URL, DELIVERY_DESTINATIONS_ACCUSATIVE } from '../../utils/constants';
+import { SITE_URL, DELIVERY_DESTINATIONS_ACCUSATIVE } from '../../../utils/constants';
 
-export const getStaticPaths = getCountryPaths;
+export const getStaticPaths = () => withLocales(getCountryPaths());
 
-const { country: countryCode } = Astro.params;
+const { locale, country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
-const meta = generateMeta('autopodbor', { country, baseUrl: SITE_URL, path: `/${countryCode}/autopodbor/` });
+const meta = generateMeta('autopodbor', { country, baseUrl: SITE_URL, path: `/${locale}/${countryCode}/autopodbor/` });
 const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === countryCode && c.data.service === 'autopodbor').slice(0, 3);
 const schema = generateServiceSchema(`Автоподбор в ${country.nameLocative}`, country.name, meta.canonical);
 ---
@@ -43,11 +43,11 @@ const schema = generateServiceSchema(`Автоподбор в ${country.nameLoca
   <p class="mt-6 text-sm leading-relaxed text-muted">
     Доставляем в {DELIVERY_DESTINATIONS_ACCUSATIVE.join(', ')} — и в любую другую страну, обсудим при заявке.
   </p>
-  <ChipLinks label="Города:" items={getCitiesForCountry(countryCode!).map(city => ({ href: `/${countryCode}/${city.slug}/autopodbor/`, text: city.name }))} />
+  <ChipLinks label="Города:" items={getCitiesForCountry(countryCode!).map(city => ({ href: `/${locale}/${countryCode}/${city.slug}/autopodbor/`, text: city.name }))} />
   <div class="mt-12 pt-8 border-t border-default">
     <p class="text-xs tracking-widest uppercase mb-4 font-medium text-muted">Также подбираем в:</p>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-      {getActiveCountries().filter(c => c.code !== countryCode).map(c => <CountryPill country={c} />)}
+      {getActiveCountries().filter(c => c.code !== countryCode).map(c => <CountryPill country={c} locale={locale!} />)}
     </div>
   </div>
 

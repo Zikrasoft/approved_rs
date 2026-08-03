@@ -222,7 +222,7 @@ const journey = [
             <!-- Country strip -->
             <p class="text-xs tracking-widest uppercase mt-14 mb-3 font-medium text-muted">Автоподбор по странам:</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {countries.map((c) => <CountryPill country={c} />)}
+                {countries.map((c) => <CountryPill country={c} locale={locale!} />)}
             </div>
 
             <!-- Mobile-only lead form: desktop keeps it in the hero sidebar,
