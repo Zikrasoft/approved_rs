@@ -1,28 +1,44 @@
+// src/middleware.ts
 import { defineMiddleware } from 'astro:middleware';
-import { getCountry } from './utils/geo';
+import { requestHasLocale } from 'astro:i18n';
+import { detectLocale } from './i18n/detectLocale';
 
-// ISO 3166-1 alpha-2 → site country code. Countries we don't serve
-// are intentionally left unmapped — those visitors just get the default homepage.
-const GEO_MAP: Record<string, string> = {
-  DE: 'de',
-  RS: 'rs',
-  ES: 'es',
+const LOCALE_COOKIE = 'lang';
+const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
+
+// Pre-i18n legacy redirects (old service slugs). Kept here instead of
+// astro.config.mjs's `redirects` so the slug rewrite and the locale prefix
+// resolve in a single 301, not two.
+const LEGACY_PATH_REWRITES: Record<string, string> = {
+  '/cases/': '/cases/autopodbor',
+  '/de/combined/': '/de/autopodbor',
+  '/rs/combined/': '/rs/autopodbor',
+  '/es/combined/': '/es/autopodbor',
 };
 
-const DISMISS_COOKIE = 'geo-banner-dismissed';
+const UNLOCALIZED_PREFIXES = ['/api/'];
+const UNLOCALIZED_EXACT = ['/llms.txt'];
 
-// Suggests a country page on the homepage instead of hard-redirecting,
-// so crawlers and every visitor always get the real homepage (see SEO audit).
 export const onRequest = defineMiddleware((context, next) => {
-  if (context.url.pathname !== '/') return next();
-  if (context.cookies.has(DISMISS_COOKIE)) return next();
+  const { pathname, search } = context.url;
 
-  const ipCountry = context.request.headers.get('x-vercel-ip-country') ?? '';
-  const siteCode = GEO_MAP[ipCountry.toUpperCase()];
-
-  if (siteCode) {
-    context.locals.suggestedCountry = getCountry(siteCode);
+  if (UNLOCALIZED_EXACT.includes(pathname) || UNLOCALIZED_PREFIXES.some(p => pathname.startsWith(p))) {
+    return next();
   }
 
-  return next();
+  const rewritten = LEGACY_PATH_REWRITES[pathname] ?? pathname;
+
+  if (rewritten === pathname && requestHasLocale(context)) {
+    context.cookies.set(LOCALE_COOKIE, pathname.split('/')[1], {
+      path: '/',
+      maxAge: ONE_YEAR_SECONDS,
+    });
+    return next();
+  }
+
+  const locale = detectLocale(
+    context.request.headers.get('accept-language'),
+    context.cookies.get(LOCALE_COOKIE)?.value
+  );
+  return context.redirect(`/${locale}${rewritten}${search}`, 301);
 });
