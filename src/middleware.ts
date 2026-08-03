@@ -2,6 +2,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { requestHasLocale } from 'astro:i18n';
 import { detectLocale } from './i18n/detectLocale';
+import { getCountry } from './utils/geo';
 
 const LOCALE_COOKIE = 'lang';
 const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
@@ -19,6 +20,13 @@ const LEGACY_PATH_REWRITES: Record<string, string> = {
 const UNLOCALIZED_PREFIXES = ['/api/'];
 const UNLOCALIZED_EXACT = ['/llms.txt'];
 
+// ISO 3166-1 alpha-2 → site country code, for the homepage's "we detected
+// you're in Germany, see our DE page" suggestion banner. Countries we don't
+// serve are intentionally left unmapped — those visitors just get the
+// default homepage.
+const GEO_MAP: Record<string, string> = { DE: 'de', RS: 'rs', ES: 'es' };
+const GEO_DISMISS_COOKIE = 'geo-banner-dismissed';
+
 export const onRequest = defineMiddleware((context, next) => {
   const { pathname, search } = context.url;
 
@@ -29,10 +37,21 @@ export const onRequest = defineMiddleware((context, next) => {
   const rewritten = LEGACY_PATH_REWRITES[pathname] ?? pathname;
 
   if (rewritten === pathname && requestHasLocale(context)) {
-    context.cookies.set(LOCALE_COOKIE, pathname.split('/')[1], {
+    const locale = pathname.split('/')[1];
+    context.cookies.set(LOCALE_COOKIE, locale, {
       path: '/',
       maxAge: ONE_YEAR_SECONDS,
     });
+
+    const isHome = pathname === `/${locale}/` || pathname === `/${locale}`;
+    if (isHome && !context.cookies.has(GEO_DISMISS_COOKIE)) {
+      const ipCountry = context.request.headers.get('x-vercel-ip-country') ?? '';
+      const siteCode = GEO_MAP[ipCountry.toUpperCase()];
+      if (siteCode) {
+        context.locals.suggestedCountry = getCountry(siteCode);
+      }
+    }
+
     return next();
   }
 
