@@ -12,6 +12,8 @@ import { SITE_NAME } from '../utils/constants';
 import { getActiveCountries } from '../utils/geo';
 import { SERVICES } from '../utils/labels';
 import { toCaseItem } from '../utils/cases';
+import { getDictionary } from '../i18n/getDictionary';
+import type { Locale } from '../i18n/config';
 
 interface Props {
   meta: MetaProps;
@@ -41,6 +43,8 @@ const {
 } = Astro.props;
 
 const items = cases.map(toCaseItem);
+const locale = (Astro.currentLocale ?? 'ru') as Locale;
+const dict = getDictionary(locale);
 ---
 
 <BaseLayout {...meta} schema={schema}>
@@ -77,9 +81,9 @@ const items = cases.map(toCaseItem);
 
   <div class="max-w-6xl mx-auto px-6 pb-16 pt-4">
     {showCountryCrossLinks && (
-      <ChipLinks label="Также работаем в:" items={getActiveCountries().filter(c => c.code !== currentCountry).map(c => ({ href: `/${c.code}/${currentService}/`, text: c.name }))} />
+      <ChipLinks label={dict.common.alsoWorkingInLabel} items={getActiveCountries().filter(c => c.code !== currentCountry).map(c => ({ href: `/${locale}/${c.code}/${currentService}/`, text: c.name }))} />
     )}
-    <ChipLinks label="Другие услуги:" items={SERVICES.filter(s => s.slug !== currentService).map(s => ({ href: `/${currentCountry}/${s.slug}/`, text: s.label }))} />
+    <ChipLinks label={dict.common.otherServicesLabel} items={SERVICES.filter(s => s.slug !== currentService).map(s => ({ href: `/${locale}/${currentCountry}/${s.slug}/`, text: dict.nav[s.slug] }))} />
   </div>
 
 </BaseLayout>
