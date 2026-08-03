@@ -29,6 +29,6 @@ export const ru = {
     otherServicesLabel: 'Другие услуги:',
     alsoWorkingInLabel: 'Также работаем в:',
   },
-} as const;
+};
 
 export type Dictionary = typeof ru;
