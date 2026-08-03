@@ -6,10 +6,11 @@ interface Props {
 }
 
 const { active, autopodborCount, autoserviceCount } = Astro.props;
+const locale = Astro.currentLocale ?? 'ru';
 
 const tabs = [
-  { id: 'autopodbor', href: '/cases/autopodbor/', label: 'Автоподбор', count: autopodborCount },
-  { id: 'autoservice', href: '/cases/autoservice/', label: 'Автосервис', count: autoserviceCount },
+  { id: 'autopodbor', href: `/${locale}/cases/autopodbor/`, label: 'Автоподбор', count: autopodborCount },
+  { id: 'autoservice', href: `/${locale}/cases/autoservice/`, label: 'Автосервис', count: autoserviceCount },
 ] as const;
 ---
 
