@@ -1,14 +1,18 @@
 ---
 export const prerender = true;
-import CasesTabPage from '../../components/CasesTabPage.astro';
-import { SITE_URL, SITE_NAME } from '../../utils/constants';
-import { toCaseItem } from '../../utils/cases';
-import { getPublishedCases, getPublishedAutoserviceCases } from '../../utils/casesQueries';
+import CasesTabPage from '../../../components/CasesTabPage.astro';
+import { SITE_URL, SITE_NAME } from '../../../utils/constants';
+import { toCaseItem } from '../../../utils/cases';
+import { getPublishedCases, getPublishedAutoserviceCases } from '../../../utils/casesQueries';
+import { withLocales } from '../../../utils/paths';
 
+export const getStaticPaths = () => withLocales([{ params: {} }]);
+
+const { locale } = Astro.params;
 const meta = {
   title: `Кейсы автоподбора — реальные автомобили клиентов | ${SITE_NAME}`,
   description: 'Реальные кейсы автоподбора, доставки, выкупа и проверки автомобилей из Германии, Испании, Сербии и Швейцарии. Машина, цена, история сделки.',
-  canonical: `${SITE_URL}/cases/autopodbor/`,
+  canonical: `${SITE_URL}/${locale}/cases/autopodbor/`,
 };
 
 const items = (await getPublishedCases()).map(toCaseItem);

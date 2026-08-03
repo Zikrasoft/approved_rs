@@ -1,13 +1,17 @@
 ---
 export const prerender = true;
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { SITE_URL, SITE_NAME } from '../utils/constants';
-import { telegramLink } from '../utils/telegramLink';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE_URL, SITE_NAME } from '../../utils/constants';
+import { telegramLink } from '../../utils/telegramLink';
+import { withLocales } from '../../utils/paths';
 
+export const getStaticPaths = () => withLocales([{ params: {} }]);
+
+const { locale } = Astro.params;
 const meta = {
   title: `Политика конфиденциальности | ${SITE_NAME}`,
   description: `Политика конфиденциальности и обработки персональных данных сайта ${SITE_NAME}.`,
-  canonical: `${SITE_URL}/privacy/`,
+  canonical: `${SITE_URL}/${locale}/privacy/`,
 };
 
 const sections = [

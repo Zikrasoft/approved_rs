@@ -1,16 +1,20 @@
 ---
 export const prerender = true;
-import BaseLayout from '../layouts/BaseLayout.astro';
-import TelegramCTA from '../components/TelegramCTA.astro';
-import PageHero from '../components/PageHero.astro';
-import Faq from '../components/Faq.astro';
-import { SITE_URL, SITE_NAME } from '../utils/constants';
-import { FAQ_GENERAL } from '../utils/faq';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TelegramCTA from '../../components/TelegramCTA.astro';
+import PageHero from '../../components/PageHero.astro';
+import Faq from '../../components/Faq.astro';
+import { SITE_URL, SITE_NAME } from '../../utils/constants';
+import { FAQ_GENERAL } from '../../utils/faq';
+import { withLocales } from '../../utils/paths';
 
+export const getStaticPaths = () => withLocales([{ params: {} }]);
+
+const { locale } = Astro.params;
 const meta = {
   title: `Контакты | ${SITE_NAME}`,
   description: 'Свяжитесь с нами в Telegram. Автоподбор, доставка, выкуп авто из Европы.',
-  canonical: `${SITE_URL}/contacts/`,
+  canonical: `${SITE_URL}/${locale}/contacts/`,
 };
 
 const info = [

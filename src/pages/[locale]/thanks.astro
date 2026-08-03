@@ -1,13 +1,17 @@
 ---
 export const prerender = true;
-import BaseLayout from '../layouts/BaseLayout.astro';
-import TelegramCTA from '../components/TelegramCTA.astro';
-import { SITE_URL, SITE_NAME } from '../utils/constants';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TelegramCTA from '../../components/TelegramCTA.astro';
+import { SITE_URL, SITE_NAME } from '../../utils/constants';
+import { withLocales } from '../../utils/paths';
 
+export const getStaticPaths = () => withLocales([{ params: {} }]);
+
+const { locale } = Astro.params;
 const meta = {
   title: `Заявка принята — ${SITE_NAME}`,
   description: 'Ваша заявка принята. Свяжемся с вами в ближайшее время.',
-  canonical: `${SITE_URL}/thanks/`,
+  canonical: `${SITE_URL}/${locale}/thanks/`,
   noindex: true,
 };
 ---
@@ -49,8 +53,8 @@ const meta = {
       <div class="wait-card mt-14 p-6 rounded-sm border thanks-item" style="--i:4">
         <p class="text-xs uppercase tracking-[0.16em] font-medium mb-4 text-muted">Пока ждёте</p>
         <div class="flex flex-wrap justify-center gap-6">
-          <a href="/cases/autopodbor/" class="wait-link">Наши кейсы →</a>
-          <a href="/de/autopodbor/" class="wait-link">Автоподбор под ключ →</a>
+          <a href={`/${locale}/cases/autopodbor/`} class="wait-link">Наши кейсы →</a>
+          <a href={`/${locale}/de/autopodbor/`} class="wait-link">Автоподбор под ключ →</a>
         </div>
       </div>
 

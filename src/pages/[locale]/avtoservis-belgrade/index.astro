@@ -1,24 +1,28 @@
 ---
 export const prerender = true;
-import ServicePageLayout from '../../layouts/ServicePageLayout.astro';
+import ServicePageLayout from '../../../layouts/ServicePageLayout.astro';
 import { SearchCheck, Droplet, Wrench, Cog, ClipboardCheck, MapPin } from '@lucide/astro';
-import CasesGrid from '../../components/CasesGrid.astro';
-import ChipLinks from '../../components/ChipLinks.astro';
-import SectionHeading from '../../components/SectionHeading.astro';
-import Button from '../../components/Button.astro';
-import { generateServiceSchema } from '../../utils/seo';
-import { SITE_URL, SITE_NAME } from '../../utils/constants';
-import { AUTOSERVICE_LABELS } from '../../utils/labels';
-import { toAutoserviceCaseItem } from '../../utils/cases';
-import { getPublishedAutoserviceCases } from '../../utils/casesQueries';
-import { getActiveCountries } from '../../utils/geo';
-import Faq from '../../components/Faq.astro';
-import { FAQ_AUTOSERVICE } from '../../utils/faq';
+import CasesGrid from '../../../components/CasesGrid.astro';
+import ChipLinks from '../../../components/ChipLinks.astro';
+import SectionHeading from '../../../components/SectionHeading.astro';
+import Button from '../../../components/Button.astro';
+import { generateServiceSchema } from '../../../utils/seo';
+import { SITE_URL, SITE_NAME } from '../../../utils/constants';
+import { AUTOSERVICE_LABELS } from '../../../utils/labels';
+import { toAutoserviceCaseItem } from '../../../utils/cases';
+import { getPublishedAutoserviceCases } from '../../../utils/casesQueries';
+import { getActiveCountries } from '../../../utils/geo';
+import Faq from '../../../components/Faq.astro';
+import { FAQ_AUTOSERVICE } from '../../../utils/faq';
+import { withLocales } from '../../../utils/paths';
 
+export const getStaticPaths = () => withLocales([{ params: {} }]);
+
+const { locale } = Astro.params;
 const meta = {
   title: `Автосервис в Белграде — ремонт и обслуживание | ${SITE_NAME}`,
   description: 'Профессиональный ремонт и обслуживание автомобилей в Белграде с гарантией качества. Диагностика, ТО, ремонт подвески, двигателя и трансмиссии.',
-  canonical: `${SITE_URL}/avtoservis-belgrade/`,
+  canonical: `${SITE_URL}/${locale}/avtoservis-belgrade/`,
   ogImage: `${SITE_URL}/og/autoservice.png`,
 };
 const schema = generateServiceSchema('Автосервис в Белграде', 'Сербия', meta.canonical);
@@ -59,7 +63,7 @@ const WHAT_WE_DO = [
       </div>
     ))}
   </div>
-  <ChipLinks label="Также подбираем авто:" items={getActiveCountries().filter(c => c.code !== 'rs').map(c => ({ href: `/${c.code}/autopodbor/`, text: c.name }))} />
+  <ChipLinks label="Также подбираем авто:" items={getActiveCountries().filter(c => c.code !== 'rs').map(c => ({ href: `/${locale}/${c.code}/autopodbor/`, text: c.name }))} />
 
   <Fragment slot="extra">
     <section class="border-t border-default">

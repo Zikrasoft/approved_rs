@@ -1,11 +1,11 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import GeoBanner from "../components/GeoBanner.astro";
-import TelegramCTA from "../components/TelegramCTA.astro";
-import CasesGrid from "../components/CasesGrid.astro";
-import SectionHeading from "../components/SectionHeading.astro";
-import CountryPill from "../components/CountryPill.astro";
-import LeadForm from "../components/LeadForm.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import GeoBanner from "../../components/GeoBanner.astro";
+import TelegramCTA from "../../components/TelegramCTA.astro";
+import CasesGrid from "../../components/CasesGrid.astro";
+import SectionHeading from "../../components/SectionHeading.astro";
+import CountryPill from "../../components/CountryPill.astro";
+import LeadForm from "../../components/LeadForm.astro";
 import {
     Search,
     Wrench,
@@ -16,18 +16,19 @@ import {
     MapPin,
 } from "@lucide/astro";
 import { getCollection } from "astro:content";
-import { getActiveCountries } from "../utils/geo";
-import { SITE_URL, SITE_NAME } from "../utils/constants";
-import { generateOrganizationSchema } from "../utils/seo";
-import { telegramLink } from "../utils/telegramLink";
-import StatBlock from "../components/StatBlock.astro";
-import { toCaseItem } from "../utils/cases";
+import { getActiveCountries } from "../../utils/geo";
+import { SITE_URL, SITE_NAME } from "../../utils/constants";
+import { generateOrganizationSchema } from "../../utils/seo";
+import { telegramLink } from "../../utils/telegramLink";
+import StatBlock from "../../components/StatBlock.astro";
+import { toCaseItem } from "../../utils/cases";
 
+const { locale } = Astro.params;
 const meta = {
     title: `Автоподбор и доставка авто из Европы | ${SITE_NAME}`,
     description:
         "Подберём и привезём автомобиль из Германии, Испании, Сербии и Швейцарии. Проверка, выкуп, доставка. Работаем для русскоязычных по всему миру.",
-    canonical: `${SITE_URL}/`,
+    canonical: `${SITE_URL}/${locale}/`,
 };
 
 const allCases = await getCollection("cases");
@@ -51,27 +52,27 @@ const schema = generateOrganizationSchema({
 // jump in if you're not starting from zero).
 const journey = [
     {
-        href: "/de/autopodbor/",
+        href: `/${locale}/de/autopodbor/`,
         Icon: Search,
         title: "Подбор",
         desc: "Находим, проверяем и доставляем автомобиль под ваш бюджет — под ключ, в Германии, Испании, Сербии и Швейцарии.",
     },
     {
-        href: "/de/proverka/",
+        href: `/${locale}/de/proverka/`,
         Icon: ClipboardCheck,
         title: "Проверка",
         desc: "Независимый эксперт осматривает автомобиль перед покупкой — по 100+ пунктам с видео.",
         note: "Нашли машину сами? Закажем проверку отдельно",
     },
     {
-        href: "/de/vykup/",
+        href: `/${locale}/de/vykup/`,
         Icon: Banknote,
         title: "Выкуп",
         desc: "Оформляем выкуп и растаможку автомобиля на иностранных номерах.",
         note: "Машина уже за границей? Поможем её оформить",
     },
     {
-        href: "/avtoservis-belgrade/",
+        href: `/${locale}/avtoservis-belgrade/`,
         Icon: Wrench,
         title: "Автосервис",
         desc: "Ремонт и обслуживание автомобиля в Белграде — с гарантией качества.",
@@ -238,7 +239,7 @@ const journey = [
         items={items}
         heading="Последние кейсы"
         headingSize="xl"
-        viewAllHref="/cases/autopodbor/"
+        viewAllHref={`/${locale}/cases/autopodbor/`}
     />
 
     <!-- ─── Why us ───────────────────────────────────────── -->

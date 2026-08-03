@@ -1,25 +1,31 @@
 ---
 export const prerender = true;
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
-import TelegramCTA from '../../components/TelegramCTA.astro';
-import Price from '../../components/Price.astro';
-import CaseGallery from '../../components/CaseGallery.astro';
-import { AUTOSERVICE_LABELS } from '../../utils/labels';
+import { MapPin } from '@lucide/astro';
+import TelegramCTA from '../../../components/TelegramCTA.astro';
+import Price from '../../../components/Price.astro';
+import CaseGallery from '../../../components/CaseGallery.astro';
+import { SERVICE_LABELS } from '../../../utils/labels';
 import { getCollection, render } from 'astro:content';
-import { SITE_URL, SITE_NAME } from '../../utils/constants';
-import { excerptFromMarkdown, generateArticleSchema } from '../../utils/seo';
+import { SITE_URL, SITE_NAME } from '../../../utils/constants';
+import { GEO_BANNERS } from '../../../data/geo-banners';
+import { excerptFromMarkdown, generateArticleSchema } from '../../../utils/seo';
+import { withLocales } from '../../../utils/paths';
+import { marked } from 'marked';
 
 export async function getStaticPaths() {
-  const cases = await getCollection('autoserviceCases', c => c.data.published);
-  return cases.map(c => ({ params: { slug: c.id }, props: { case: c } }));
+  const cases = await getCollection('cases', c => c.data.published);
+  return withLocales(cases.map(c => ({ params: { slug: c.id }, props: { case: c } })));
 }
 
+const { locale } = Astro.params;
 const { case: c } = Astro.props;
 const { Content } = await render(c);
+const geoBanner = await marked.parseInline(GEO_BANNERS[Math.floor(Math.random() * GEO_BANNERS.length)]);
 
 const hook = excerptFromMarkdown(c.body ?? '');
-const canonical = `${SITE_URL}/avtoservis-belgrade/${c.id}/`;
+const canonical = `${SITE_URL}/${locale}/cases/${c.id}/`;
 const imageUrl = c.data.image ? `${SITE_URL}${c.data.image.src}` : undefined;
 
 const meta = {
@@ -46,12 +52,11 @@ const schema = generateArticleSchema({
     <!-- Meta info + hero image -->
     <div class="py-10 md:py-14 border-b border-default grid md:grid-cols-2 gap-8 md:gap-10 md:items-center">
       <div>
-        <div class="flex flex-wrap gap-2 mb-6">
-          {c.data.servicesApplied.map(s => (
-            <span class="text-xs tracking-widest uppercase font-medium px-3 py-1 rounded-sm border text-accent border-accent">
-              {AUTOSERVICE_LABELS[s] ?? s}
-            </span>
-          ))}
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+          <span class="text-xs tracking-widest uppercase font-medium px-3 py-1 rounded-sm border text-accent border-accent">
+            {SERVICE_LABELS[c.data.service] ?? c.data.service}
+          </span>
+          <span class="text-xs text-muted">{c.data.country?.toUpperCase()}</span>
         </div>
 
         <h1 class="font-display text-4xl md:text-5xl font-bold mb-6 fade-up fade-up-1">{c.data.title}</h1>
@@ -93,6 +98,15 @@ const schema = generateArticleSchema({
 
     <!-- More photos -->
     <CaseGallery images={c.data.gallery} name={c.data.car} />
+
+    <!-- SEO banner -->
+    <div class="py-10 border-t border-default">
+      <p class="flex items-center gap-2 text-xs tracking-widest uppercase mb-3 font-medium text-accent">
+        <MapPin size={14} class="shrink-0" />
+        География работы
+      </p>
+      <p class="leading-relaxed text-sm text-secondary [&_strong]:text-primary [&_strong]:font-semibold" set:html={geoBanner} />
+    </div>
 
     <!-- CTA -->
     <div class="py-10 border-t mb-16 border-default">

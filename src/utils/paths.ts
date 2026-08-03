@@ -1,5 +1,5 @@
 import { getActiveCountries, getCitiesForCountry } from './geo';
-import { SUPPORTED_LOCALES } from '../i18n/config';
+import { SUPPORTED_LOCALES, type Locale } from '../i18n/config';
 
 export function getCountryPaths() {
   return getActiveCountries().map(c => ({ params: { country: c.code } }));
@@ -14,7 +14,9 @@ export function getCityPaths() {
   );
 }
 
-export function withLocales<T extends { params: Record<string, string | undefined> }>(paths: T[]): T[] {
+export function withLocales<T extends { params: Record<string, string | undefined> }>(
+  paths: T[]
+): (Omit<T, 'params'> & { params: T['params'] & { locale: Locale } })[] {
   return SUPPORTED_LOCALES.flatMap(locale =>
     paths.map(p => ({ ...p, params: { locale, ...p.params } }))
   );
