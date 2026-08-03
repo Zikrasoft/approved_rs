@@ -14,7 +14,7 @@ const locale = (Astro.currentLocale ?? 'ru') as Locale;
 const dict = getDictionary(locale);
 const urlCountry = Astro.url.pathname.split('/')[2];
 const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCountry : DEFAULT_COUNTRY;
-const isHome = Astro.url.pathname === '/';
+const isHome = Astro.url.pathname === `/${locale}/` || Astro.url.pathname === `/${locale}`;
 
 // Record (not `as const` + cast) so a slug added to labels.ts without a
 // matching entry here degrades to a missing icon instead of a broken build.

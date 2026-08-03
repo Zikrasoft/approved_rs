@@ -11,6 +11,7 @@ interface Props {
 
 const { service = '', country = '', city = '' } = Astro.props;
 const sourceUrl = Astro.url.href;
+const locale = Astro.currentLocale ?? 'ru';
 
 // ponytail: curated list covering the site's own markets + common client
 // origins (Balkans/CIS). Not exhaustive — extend PHONE_COUNTRIES if leads
@@ -115,7 +116,7 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
         class="mt-0.5 shrink-0 w-4 h-4 cursor-pointer accent-accent"
       />
       <span class="text-xs leading-relaxed">
-        Согласен с <a href="/privacy/" target="_blank" class="underline text-accent">политикой конфиденциальности</a>
+        Согласен с <a href={`/${locale}/privacy/`} target="_blank" class="underline text-accent">политикой конфиденциальности</a>
       </span>
     </label>
     <p class="field-error consent-error mb-4" style="display:none">Необходимо ваше согласие</p>

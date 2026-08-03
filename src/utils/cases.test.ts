@@ -11,8 +11,8 @@ describe('toCaseItem', () => {
       data: { service: 'autopodbor', car: 'BMW X1', year: 2020, price, image: undefined },
     } as unknown as CollectionEntry<'cases'>;
 
-    const item = toCaseItem(entry);
-    expect(item.href).toBe('/cases/bmw-x1/');
+    const item = toCaseItem(entry, 'ru');
+    expect(item.href).toBe('/ru/cases/bmw-x1/');
     expect(item.badges).toEqual(['Автоподбор']);
   });
 
@@ -22,7 +22,7 @@ describe('toCaseItem', () => {
       data: { service: 'unknown-service', car: 'Skoda Superb', year: 2019, price, image: undefined },
     } as unknown as CollectionEntry<'cases'>;
 
-    expect(toCaseItem(entry).badges).toEqual(['unknown-service']);
+    expect(toCaseItem(entry, 'ru').badges).toEqual(['unknown-service']);
   });
 });
 
@@ -39,8 +39,8 @@ describe('toAutoserviceCaseItem', () => {
       },
     } as unknown as CollectionEntry<'autoserviceCases'>;
 
-    const item = toAutoserviceCaseItem(entry);
-    expect(item.href).toBe('/avtoservis-belgrade/bmw-320/');
+    const item = toAutoserviceCaseItem(entry, 'ru');
+    expect(item.href).toBe('/ru/avtoservis-belgrade/bmw-320/');
     expect(item.badges).toEqual(['Компьютерная диагностика', 'Двигатель и трансмиссия', 'unknown-service']);
   });
 });

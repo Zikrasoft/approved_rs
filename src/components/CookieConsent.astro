@@ -1,3 +1,7 @@
+---
+const locale = Astro.currentLocale ?? 'ru';
+---
+
 <div
   id="cookie-consent"
   hidden
@@ -7,7 +11,7 @@
   <p class="text-sm leading-relaxed text-secondary mb-4">
     Мы используем аналитические cookies (Google Analytics), чтобы понимать, как посетители используют сайт.
     Подробнее в{' '}
-    <a href="/privacy/" class="underline text-accent">политике конфиденциальности</a>.
+    <a href={`/${locale}/privacy/`} class="underline text-accent">политике конфиденциальности</a>.
   </p>
   <div class="flex gap-3">
     <button

@@ -8,6 +8,7 @@ interface Props {
 
 const { detected } = Astro.props;
 const options = getActiveCountries();
+const locale = Astro.currentLocale ?? 'ru';
 ---
 
 <div id="geo-banner" class="geo-banner border-b border-default bg-accent-subtle">
@@ -16,7 +17,7 @@ const options = getActiveCountries();
     <div class="flex items-center gap-2 flex-wrap">
       {options.map(c => (
         <a
-          href={`/${c.code}/autopodbor/`}
+          href={`/${locale}/${c.code}/autopodbor/`}
           data-geo-choice
           class:list={[
             'geo-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium no-underline border',

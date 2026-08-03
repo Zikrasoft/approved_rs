@@ -15,7 +15,7 @@ const meta = {
   canonical: `${SITE_URL}/${locale}/cases/autoservice/`,
 };
 
-const items = (await getPublishedAutoserviceCases()).map(toAutoserviceCaseItem);
+const items = (await getPublishedAutoserviceCases()).map((c) => toAutoserviceCaseItem(c, locale));
 const otherCount = (await getPublishedCases()).length;
 ---
 

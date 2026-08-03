@@ -17,7 +17,10 @@ const LEGACY_PATH_REWRITES: Record<string, string> = {
   '/es/combined/': '/es/autopodbor',
 };
 
-const UNLOCALIZED_PREFIXES = ['/api/'];
+// No trailing slash on '/keystatic': the CMS admin's own root route is the
+// bare path (no trailing slash) before Keystatic does its own internal
+// routing, so a trailing-slash prefix would miss it.
+const UNLOCALIZED_PREFIXES = ['/api/', '/keystatic'];
 const UNLOCALIZED_EXACT = ['/llms.txt'];
 // @astrojs/sitemap generates these as real routes (not static files under
 // public/), so they pass through this middleware like any other page and

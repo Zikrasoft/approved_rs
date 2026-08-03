@@ -33,7 +33,7 @@ const meta = {
 
 const allCases = await getCollection("cases");
 const latestCases = allCases.filter((c) => c.data.published).slice(0, 3);
-const items = latestCases.map(toCaseItem);
+const items = latestCases.map((c) => toCaseItem(c, locale ?? 'ru'));
 const countries = getActiveCountries();
 
 const tgManager = import.meta.env.PUBLIC_TG_MANAGER!;

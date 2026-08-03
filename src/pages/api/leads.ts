@@ -2,8 +2,9 @@ export const prerender = false;
 
 import type { APIContext } from 'astro';
 import { sendLeadNotification } from '../../lib/telegram';
+import { isLocale } from '../../i18n/config';
 
-export async function POST({ request, redirect }: APIContext): Promise<Response> {
+export async function POST({ request, redirect, cookies }: APIContext): Promise<Response> {
   const form = await request.formData();
 
   const name    = form.get('name')?.toString().trim() ?? '';
@@ -23,5 +24,7 @@ export async function POST({ request, redirect }: APIContext): Promise<Response>
     console.error('[leads] Telegram notification failed:', err);
   }
 
-  return redirect('/thanks/', 302);
+  const cookieLocale = cookies.get('lang')?.value;
+  const locale = cookieLocale && isLocale(cookieLocale) ? cookieLocale : 'ru';
+  return redirect(`/${locale}/thanks/`, 302);
 }

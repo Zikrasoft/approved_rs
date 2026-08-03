@@ -42,8 +42,8 @@ const {
   breadcrumbs,
 } = Astro.props;
 
-const items = cases.map(toCaseItem);
 const locale = (Astro.currentLocale ?? 'ru') as Locale;
+const items = cases.map(c => toCaseItem(c, locale));
 const dict = getDictionary(locale);
 ---
 

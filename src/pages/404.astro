@@ -7,6 +7,7 @@ import UtilityPageShell from '../components/UtilityPageShell.astro';
 import { MapPin, X } from '@lucide/astro';
 import { SITE_URL, SITE_NAME } from '../utils/constants';
 
+const locale = Astro.currentLocale ?? 'ru';
 const meta = {
   title: `Страница не найдена — ${SITE_NAME}`,
   description: 'Запрошенная страница не существует.',
@@ -42,7 +43,7 @@ const meta = {
       </p>
 
       <div class="flex flex-col sm:flex-row sm:items-center gap-4 fade-up fade-up-5">
-        <Button variant="secondary" href="/" class="px-6 py-3 justify-center">
+        <Button variant="secondary" href={`/${locale}/`} class="px-6 py-3 justify-center">
           ← На главную
         </Button>
         <TelegramCTA label="Написать нам" />

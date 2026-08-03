@@ -27,7 +27,7 @@ const meta = {
 };
 const schema = generateServiceSchema('Автосервис в Белграде', 'Сербия', meta.canonical);
 
-const items = (await getPublishedAutoserviceCases()).map(toAutoserviceCaseItem);
+const items = (await getPublishedAutoserviceCases()).map((c) => toAutoserviceCaseItem(c, locale));
 
 const WHAT_WE_DO = [
   { key: 'diagnostics', Icon: SearchCheck, desc: 'Поиск неисправностей современным диагностическим оборудованием' },
