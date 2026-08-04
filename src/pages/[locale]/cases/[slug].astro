@@ -6,12 +6,13 @@ import { MapPin } from '@lucide/astro';
 import TelegramCTA from '../../../components/TelegramCTA.astro';
 import Price from '../../../components/Price.astro';
 import CaseGallery from '../../../components/CaseGallery.astro';
-import { SERVICE_LABELS } from '../../../utils/labels';
 import { getCollection, render } from 'astro:content';
 import { SITE_URL, SITE_NAME } from '../../../utils/constants';
 import { GEO_BANNERS } from '../../../data/geo-banners';
 import { excerptFromMarkdown, generateArticleSchema } from '../../../utils/seo';
 import { withLocales } from '../../../utils/paths';
+import { getServicesContent } from '../../../i18n/content/services';
+import type { Locale } from '../../../i18n/config';
 import { marked } from 'marked';
 
 export async function getStaticPaths() {
@@ -20,6 +21,7 @@ export async function getStaticPaths() {
 }
 
 const { locale } = Astro.params;
+const cc = getServicesContent(locale as Locale).caseChrome;
 const { case: c } = Astro.props;
 const { Content } = await render(c);
 const geoBanner = await marked.parseInline(GEO_BANNERS[Math.floor(Math.random() * GEO_BANNERS.length)]);
@@ -30,7 +32,7 @@ const imageUrl = c.data.image ? `${SITE_URL}${c.data.image.src}` : undefined;
 
 const meta = {
   title: `${c.data.title} | ${SITE_NAME}`,
-  description: hook ? `${hook} ${c.data.car} ${c.data.year}, ${c.data.price.value} ${c.data.price.currency ?? ''}.`.trim() : `${c.data.car} ${c.data.year}, ${c.data.price.value}. Реальный кейс.`,
+  description: hook ? `${hook} ${c.data.car} ${c.data.year}, ${c.data.price.value} ${c.data.price.currency ?? ''}.`.trim() : `${c.data.car} ${c.data.year}, ${c.data.price.value}. ${cc.realCaseFallback}`,
   canonical,
   // Real car photo makes a more compelling share preview than the generic template.
   ogImage: imageUrl,
@@ -54,7 +56,7 @@ const schema = generateArticleSchema({
       <div>
         <div class="flex flex-wrap items-center gap-3 mb-6">
           <span class="text-xs tracking-widest uppercase font-medium px-3 py-1 rounded-sm border text-accent border-accent">
-            {SERVICE_LABELS[c.data.service] ?? c.data.service}
+            {cc.serviceBadges[c.data.service as keyof typeof cc.serviceBadges] ?? c.data.service}
           </span>
           <span class="text-xs text-muted">{c.data.country?.toUpperCase()}</span>
         </div>
@@ -63,15 +65,15 @@ const schema = generateArticleSchema({
 
         <div class="grid grid-cols-3 gap-6 max-w-sm">
           <div>
-            <p class="text-xs tracking-wide uppercase mb-1 font-medium text-muted">Авто</p>
+            <p class="text-xs tracking-wide uppercase mb-1 font-medium text-muted">{cc.autoLabel}</p>
             <p class="text-sm font-medium text-primary">{c.data.car}</p>
           </div>
           <div>
-            <p class="text-xs tracking-wide uppercase mb-1 font-medium text-muted">Год</p>
+            <p class="text-xs tracking-wide uppercase mb-1 font-medium text-muted">{cc.yearLabel}</p>
             <p class="text-sm font-medium text-primary">{c.data.year}</p>
           </div>
           <div>
-            <p class="text-xs tracking-wide uppercase mb-1 font-medium text-muted">Цена</p>
+            <p class="text-xs tracking-wide uppercase mb-1 font-medium text-muted">{cc.priceLabel}</p>
             <Price price={c.data.price} class="text-sm font-bold font-display text-accent" />
           </div>
         </div>
@@ -103,16 +105,16 @@ const schema = generateArticleSchema({
     <div class="py-10 border-t border-default">
       <p class="flex items-center gap-2 text-xs tracking-widest uppercase mb-3 font-medium text-accent">
         <MapPin size={14} class="shrink-0" />
-        География работы
+        {cc.geoWorkLabel}
       </p>
       <p class="leading-relaxed text-sm text-secondary [&_strong]:text-primary [&_strong]:font-semibold" set:html={geoBanner} />
     </div>
 
     <!-- CTA -->
     <div class="py-10 border-t mb-16 border-default">
-      <p class="text-xs tracking-widest uppercase mb-2 font-medium text-accent">Нужна такая же услуга?</p>
-      <h2 class="font-display text-3xl font-bold mb-6">Обсудим ваш автомобиль</h2>
-      <TelegramCTA label="Написать в Telegram" />
+      <p class="text-xs tracking-widest uppercase mb-2 font-medium text-accent">{cc.ctaEyebrow}</p>
+      <h2 class="font-display text-3xl font-bold mb-6">{cc.ctaHeading}</h2>
+      <TelegramCTA label={cc.ctaButtonLabel} />
     </div>
   </div>
 </BaseLayout>

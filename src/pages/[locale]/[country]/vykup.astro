@@ -5,16 +5,19 @@ import StepsList from "../../../components/StepsList.astro";
 import Faq from "../../../components/Faq.astro";
 import { getCountryPaths, withLocales } from "../../../utils/paths";
 import { getCountry } from "../../../utils/geo";
-import { generateMeta, generateServiceSchema } from "../../../utils/seo";
+import { generateMeta, generateServiceSchema, buildLocation } from "../../../utils/seo";
 import { getCollection } from "astro:content";
 import { SITE_URL } from "../../../utils/constants";
 import { getFaq } from "../../../i18n/content/faq";
+import { getServicesContent } from "../../../i18n/content/services";
 import type { Locale } from "../../../i18n/config";
 
 export const getStaticPaths = () => withLocales(getCountryPaths());
 
 const { locale, country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
+const sc = getServicesContent(locale as Locale).vykup;
+const location = buildLocation(locale as Locale, country);
 const meta = generateMeta("vykup", {
     country,
     baseUrl: SITE_URL,
@@ -36,41 +39,33 @@ const schema = generateServiceSchema(
 );
 const isSerbia = countryCode === "rs";
 const description = isSerbia
-    ? `Выкупаем автомобили на русских номерах ниже рыночной цены — машина может находиться в любой стране Европы. Также выкупаем авто на сербских номерах в Сербии и Черногории. Оценка онлайн, оформление за 1 день, перевод в день сделки.`
-    : `Выкупаем автомобили на русских номерах ниже рыночной цены — машина может находиться в любой стране Европы, включая ${country.ru.nameAccusative}. Оценка онлайн, оформление за 1 день, перевод в день сделки.`;
+    ? sc.descriptionSerbia
+    : sc.descriptionOtherFor((country[locale as Locale] as { nameAccusative?: string; name: string }).nameAccusative ?? country[locale as Locale].name);
 ---
 
 <ServicePageLayout
     {meta}
     {schema}
     {cases}
-    title="Выкуп авто"
-    titleHighlight={`в ${country.ru.nameLocative}`}
+    title={sc.title}
+    titleHighlight={location}
     {description}
-    ctaLabel="Получить оценку"
+    ctaLabel={sc.ctaLabel}
     formService="buyout"
     currentCountry={countryCode!}
     currentService="vykup"
-    casesHeading="Кейсы выкупа"
+    casesHeading={sc.casesHeading}
     breadcrumbs={[
-        { label: country.ru.name, href: `/${locale}/${countryCode}/autopodbor/` },
-        { label: "Выкуп авто" },
+        { label: country[locale as Locale].name, href: `/${locale}/${countryCode}/autopodbor/` },
+        { label: sc.breadcrumbLabel },
     ]}
 >
     <StepsList
         steps={[
-            { n: "01", text: "Отправляете фото и описание автомобиля" },
-            {
-                n: "02",
-                text: "Оцениваем онлайн по фото за 1 час — ниже рыночной цены",
-            },
-            {
-                n: "03",
-                text: isSerbia
-                    ? "Встречаемся на осмотр — русские номера (в любой стране Европы) или сербские номера (Сербия, Черногория)"
-                    : "Встречаемся на осмотр — русские номера, машина может быть в любой стране Европы",
-            },
-            { n: "04", text: "Оформляем сделку, деньги в день подписания" },
+            { n: "01", text: sc.step1 },
+            { n: "02", text: sc.step2 },
+            { n: "03", text: isSerbia ? sc.step3Serbia : sc.step3Other },
+            { n: "04", text: sc.step4 },
         ]}
     />
 

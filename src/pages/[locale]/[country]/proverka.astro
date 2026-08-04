@@ -5,42 +5,39 @@ import StepsList from '../../../components/StepsList.astro';
 import Faq from '../../../components/Faq.astro';
 import { getCountryPaths, withLocales } from '../../../utils/paths';
 import { getCountry } from '../../../utils/geo';
-import { generateMeta, generateServiceSchema } from '../../../utils/seo';
+import { generateMeta, generateServiceSchema, buildLocation } from '../../../utils/seo';
 import { SITE_URL } from '../../../utils/constants';
 import { getFaq } from '../../../i18n/content/faq';
+import { getServicesContent } from '../../../i18n/content/services';
 import type { Locale } from '../../../i18n/config';
 
 export const getStaticPaths = () => withLocales(getCountryPaths());
 
 const { locale, country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
+const sc = getServicesContent(locale as Locale).proverka;
+const location = buildLocation(locale as Locale, country);
 const meta = generateMeta('proverka', { country, baseUrl: SITE_URL, path: `/${locale}/${countryCode}/proverka/`, locale: locale as Locale });
 const schema = generateServiceSchema(`Проверка авто в ${country.ru.nameLocative}`, country.ru.name, meta.canonical);
 ---
 
 <ServicePageLayout
   {meta} {schema}
-  title="Проверка авто"
-  titleHighlight={`в ${country.ru.nameLocative}`}
-  description="Независимая проверка автомобиля перед покупкой. Выезд эксперта, диагностика, отчёт — без обязательства покупки."
-  ctaLabel="Заказать проверку"
+  title={sc.title}
+  titleHighlight={location}
+  description={sc.description}
+  ctaLabel={sc.ctaLabel}
   formService="inspection"
   currentCountry={countryCode!}
   currentService="proverka"
   breadcrumbs={[
-    { label: country.ru.name, href: `/${locale}/${countryCode}/autopodbor/` },
-    { label: 'Проверка авто' },
+    { label: country[locale as Locale].name, href: `/${locale}/${countryCode}/autopodbor/` },
+    { label: sc.breadcrumbLabel },
   ]}
 >
-  <StepsList steps={[
-    { n: '01', text: 'Кузов и лакокрасочное покрытие — наличие ремонта или ДТП' },
-    { n: '02', text: 'Ходовая, подвеска, тормоза' },
-    { n: '03', text: 'Двигатель, коробка, трансмиссия' },
-    { n: '04', text: 'Электроника и история обслуживания по VIN' },
-    { n: '05', text: 'Юридическая чистота — залог, запрет регистрации, ДТП' },
-  ]} />
+  <StepsList steps={sc.steps} />
   <p class="mt-6 text-sm leading-relaxed text-muted">
-    Работаем и в других странах Европы, включая Португалию, — уточните при заявке.
+    {sc.extraLine}
   </p>
 
   <Fragment slot="extra">

@@ -8,20 +8,22 @@ import SectionHeading from '../../../components/SectionHeading.astro';
 import Button from '../../../components/Button.astro';
 import { generateServiceSchema } from '../../../utils/seo';
 import { SITE_URL, SITE_NAME } from '../../../utils/constants';
-import { AUTOSERVICE_LABELS } from '../../../utils/labels';
 import { toAutoserviceCaseItem } from '../../../utils/cases';
 import { getPublishedAutoserviceCases } from '../../../utils/casesQueries';
 import { getActiveCountries } from '../../../utils/geo';
 import Faq from '../../../components/Faq.astro';
 import { getFaq } from '../../../i18n/content/faq';
+import { getServicesContent } from '../../../i18n/content/services';
 import { withLocales } from '../../../utils/paths';
+import type { Locale } from '../../../i18n/config';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const { locale } = Astro.params;
+const bc = getServicesContent(locale as Locale).avtoservisBelgrade;
 const meta = {
-  title: `Автосервис в Белграде — ремонт и обслуживание | ${SITE_NAME}`,
-  description: 'Профессиональный ремонт и обслуживание автомобилей в Белграде с гарантией качества. Диагностика, ТО, ремонт подвески, двигателя и трансмиссии.',
+  title: `${bc.metaTitle} | ${SITE_NAME}`,
+  description: bc.metaDescription,
   canonical: `${SITE_URL}/${locale}/avtoservis-belgrade/`,
   ogImage: `${SITE_URL}/og/autoservice.png`,
 };
@@ -29,54 +31,49 @@ const schema = generateServiceSchema('Автосервис в Белграде',
 
 const items = (await getPublishedAutoserviceCases()).map((c) => toAutoserviceCaseItem(c, locale));
 
-const WHAT_WE_DO = [
-  { key: 'diagnostics', Icon: SearchCheck, desc: 'Поиск неисправностей современным диагностическим оборудованием' },
-  { key: 'maintenance', Icon: Droplet, desc: 'Замена масел, фильтров и технических жидкостей' },
-  { key: 'suspension', Icon: Wrench, desc: 'Диагностика и ремонт подвески, тормозной системы и рулевого управления' },
-  { key: 'engine', Icon: Cog, desc: 'Ремонт двигателя, трансмиссии и навесного оборудования' },
-  { key: 'prepurchase', Icon: ClipboardCheck, desc: 'Комплексная проверка автомобиля перед покупкой или дальней поездкой' },
-] as const;
+const ICONS = { diagnostics: SearchCheck, maintenance: Droplet, suspension: Wrench, engine: Cog, prepurchase: ClipboardCheck } as const;
+const WHAT_WE_DO = bc.whatWeDo.map(item => ({ ...item, Icon: ICONS[item.key] }));
 ---
 
 <ServicePageLayout
   {meta} {schema}
-  title="Автосервис"
-  titleHighlight="в Белграде"
-  description="Профессиональный ремонт и обслуживание автомобилей в Белграде с гарантией качества."
-  ctaLabel="Записаться на сервис"
+  title={bc.title}
+  titleHighlight={bc.titleHighlight}
+  description={bc.description}
+  ctaLabel={bc.ctaLabel}
   formService="autoservice"
   currentCountry="rs"
   currentService="autoservice"
   city="belgrade"
   showCountryCrossLinks={false}
-  breadcrumbs={[{ label: 'Автосервис в Белграде' }]}
+  breadcrumbs={[{ label: bc.breadcrumbLabel }]}
 >
-  <SectionHeading title="Что мы делаем" size="lg" class="mb-8 mt-6" />
+  <SectionHeading title={bc.whatWeDoHeading} size="lg" class="mb-8 mt-6" />
   <div class="space-y-4">
     {WHAT_WE_DO.map(item => (
       <div class="flex gap-4 p-4 rounded-sm border bg-surface border-default">
         <item.Icon size={20} class="shrink-0 text-accent" />
         <div>
-          <p class="text-sm font-medium mb-0.5 text-primary">{AUTOSERVICE_LABELS[item.key]}</p>
+          <p class="text-sm font-medium mb-0.5 text-primary">{item.label}</p>
           <p class="text-xs leading-relaxed text-muted">{item.desc}</p>
         </div>
       </div>
     ))}
   </div>
-  <ChipLinks label="Также подбираем авто:" items={getActiveCountries().filter(c => c.code !== 'rs').map(c => ({ href: `/${locale}/${c.code}/autopodbor/`, text: c.ru.name }))} />
+  <ChipLinks label={bc.alsoSourcingLabel} items={getActiveCountries().filter(c => c.code !== 'rs').map(c => ({ href: `/${locale}/${c.code}/autopodbor/`, text: c[locale as Locale].name }))} />
 
   <Fragment slot="extra">
     <section class="border-t border-default">
       <div class="max-w-6xl mx-auto px-6 py-16">
-        <SectionHeading title="Как нас найти" size="lg" class="mb-10" />
+        <SectionHeading title={bc.howToFindHeading} size="lg" class="mb-10" />
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
           <div class="lg:col-span-2 glow-border flex flex-col h-72 lg:h-[26rem] p-7 rounded-sm border bg-surface border-default">
             <span class="flex items-center justify-center w-11 h-11 rounded-sm mb-5 shrink-0 bg-accent-subtle text-accent">
               <MapPin size={20} />
             </span>
-            <p class="text-xs tracking-[0.16em] uppercase font-medium mb-2 text-muted">Адрес автосервиса</p>
+            <p class="text-xs tracking-[0.16em] uppercase font-medium mb-2 text-muted">{bc.addressLabel}</p>
             <p class="font-display text-xl font-bold leading-snug text-primary">Пека Павловића 39</p>
-            <p class="text-sm text-muted">Београд, Сербия</p>
+            <p class="text-sm text-muted">{bc.cityCountryLine}</p>
             <Button
               href="https://share.google/PmmBqmEvqnLCQK4i6"
               target="_blank"
@@ -84,7 +81,7 @@ const WHAT_WE_DO = [
               variant="secondary"
               class="mt-auto w-fit px-4 py-2.5 text-xs"
             >
-              Открыть в Google Maps
+              {bc.mapButtonLabel}
             </Button>
           </div>
           <div class="lg:col-span-3 map-embed glow-border h-72 lg:h-[26rem] rounded-sm overflow-hidden border border-default">
@@ -95,7 +92,7 @@ const WHAT_WE_DO = [
               class="border-0 block"
               loading="lazy"
               referrerpolicy="no-referrer-when-downgrade"
-              title="Автосервис на карте — Пека Павловића 39, Белград"
+              title={bc.mapIframeTitle}
             ></iframe>
           </div>
         </div>
@@ -108,7 +105,7 @@ const WHAT_WE_DO = [
   </Fragment>
 
   <Fragment slot="cases">
-    <CasesGrid {items} heading="Примеры работ" topBorder />
+    <CasesGrid {items} heading={bc.worksHeading} topBorder />
   </Fragment>
 </ServicePageLayout>
 

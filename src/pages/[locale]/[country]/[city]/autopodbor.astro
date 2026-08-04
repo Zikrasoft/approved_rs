@@ -5,10 +5,11 @@ import ChipLinks from '../../../../components/ChipLinks.astro';
 import Faq from '../../../../components/Faq.astro';
 import { getCityPaths, withLocales } from '../../../../utils/paths';
 import { getCountry, getCitiesForCountry } from '../../../../utils/geo';
-import { generateMeta, generateServiceSchema } from '../../../../utils/seo';
+import { generateMeta, generateServiceSchema, buildLocation } from '../../../../utils/seo';
 import { getCollection } from 'astro:content';
 import { SITE_URL } from '../../../../utils/constants';
 import { getFaq } from '../../../../i18n/content/faq';
+import { getServicesContent } from '../../../../i18n/content/services';
 import { TrendingUp, History, UserCheck, BadgeCheck } from '@lucide/astro';
 import type { Locale } from '../../../../i18n/config';
 
@@ -17,6 +18,9 @@ export const getStaticPaths = () => withLocales(getCityPaths());
 const { locale, country: countryCode } = Astro.params;
 const { city } = Astro.props;
 const country = getCountry(countryCode!)!;
+const sc = getServicesContent(locale as Locale).cityAutopodbor;
+const cityLocation = buildLocation(locale as Locale, undefined, city);
+const countryLocation = buildLocation(locale as Locale, country);
 const meta = generateMeta('autopodbor', { country, city, baseUrl: SITE_URL, path: `/${locale}/${countryCode}/${city.slug}/autopodbor/`, locale: locale as Locale });
 const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === countryCode && c.data.service === 'autopodbor').slice(0, 3);
 const schema = generateServiceSchema(`Автоподбор в ${city.ru.nameLocative}`, city.ru.name, meta.canonical);
@@ -24,33 +28,31 @@ const schema = generateServiceSchema(`Автоподбор в ${city.ru.nameLoca
 // DEKRA/TÜV are German-specific certification bodies — only true for country: 'de'.
 // Other countries get the generic claim instead of an invented local equivalent.
 const WHY_CITY = [
-  { Icon: TrendingUp, text: 'Крупный автомобильный рынок региона' },
-  { Icon: History,    text: 'Много вариантов с хорошей историей' },
-  { Icon: UserCheck,  text: `Наш эксперт в ${city.ru.nameLocative}` },
-  { Icon: BadgeCheck, text: countryCode === 'de'
-      ? 'Проверка DEKRA / TÜV по запросу'
-      : 'Независимая техническая экспертиза по запросу' },
+  { Icon: TrendingUp, text: sc.reason1 },
+  { Icon: History,    text: sc.reason2 },
+  { Icon: UserCheck,  text: sc.reason3For(cityLocation) },
+  { Icon: BadgeCheck, text: countryCode === 'de' ? sc.reason4Dekra : sc.reason4Generic },
 ];
 ---
 
 <ServicePageLayout
   {meta} {schema} {cases}
-  title="Автоподбор"
-  titleHighlight={`в ${city.ru.nameLocative}`}
-  description={`Подберём автомобиль в ${city.ru.nameLocative} с полной проверкой. Работаем по всему региону ${country.ru.name}.`}
-  ctaLabel="Оставить заявку"
+  title={sc.title}
+  titleHighlight={cityLocation}
+  description={sc.descriptionFor(cityLocation, (country[locale as Locale] as { nameGenitive?: string; name: string }).nameGenitive ?? country[locale as Locale].name)}
+  ctaLabel={getServicesContent(locale as Locale).autopodbor.ctaLabel}
   formService="autopodbor"
   currentCountry={countryCode!}
   currentService="autopodbor"
   city={city.slug}
-  casesHeading={`Кейсы из ${country.ru.nameGenitive}`}
+  casesHeading={sc.casesHeadingFor((country[locale as Locale] as { nameGenitive?: string; name: string }).nameGenitive ?? country[locale as Locale].name)}
   breadcrumbs={[
-    { label: country.ru.name, href: `/${locale}/${countryCode}/autopodbor/` },
-    { label: city.ru.name },
+    { label: country[locale as Locale].name, href: `/${locale}/${countryCode}/autopodbor/` },
+    { label: city[locale as Locale].name },
   ]}
 >
   <div>
-    <h2 class="font-display text-xl font-bold mb-4 text-primary">Почему {city.ru.name}</h2>
+    <h2 class="font-display text-xl font-bold mb-4 text-primary">{sc.whyCityHeadingFor(city[locale as Locale].name)}</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       {WHY_CITY.map(item => (
         <div class="flex items-center gap-3 p-4 rounded-sm border bg-surface border-default">
@@ -63,10 +65,10 @@ const WHY_CITY = [
     </div>
   </div>
   <ChipLinks
-    label={`Другие города в ${country.ru.nameLocative}:`}
+    label={sc.otherCitiesLabelFor(countryLocation)}
     items={getCitiesForCountry(countryCode!)
       .filter(c => c.slug !== city.slug)
-      .map(c => ({ href: `/${locale}/${countryCode}/${c.slug}/autopodbor/`, text: c.ru.name }))}
+      .map(c => ({ href: `/${locale}/${countryCode}/${c.slug}/autopodbor/`, text: c[locale as Locale].name }))}
   />
 
   <Fragment slot="extra">
