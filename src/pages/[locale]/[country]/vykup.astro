@@ -9,6 +9,7 @@ import { generateMeta, generateServiceSchema } from "../../../utils/seo";
 import { getCollection } from "astro:content";
 import { SITE_URL } from "../../../utils/constants";
 import { FAQ_VYKUP } from "../../../utils/faq";
+import type { Locale } from "../../../i18n/config";
 
 export const getStaticPaths = () => withLocales(getCountryPaths());
 
@@ -18,6 +19,7 @@ const meta = generateMeta("vykup", {
     country,
     baseUrl: SITE_URL,
     path: `/${locale}/${countryCode}/vykup/`,
+    locale: locale as Locale,
 });
 const cases = (await getCollection("cases"))
     .filter(
@@ -28,14 +30,14 @@ const cases = (await getCollection("cases"))
     )
     .slice(0, 3);
 const schema = generateServiceSchema(
-    `Выкуп авто в ${country.nameLocative}`,
-    country.name,
+    `Выкуп авто в ${country.ru.nameLocative}`,
+    country.ru.name,
     meta.canonical,
 );
 const isSerbia = countryCode === "rs";
 const description = isSerbia
     ? `Выкупаем автомобили на русских номерах ниже рыночной цены — машина может находиться в любой стране Европы. Также выкупаем авто на сербских номерах в Сербии и Черногории. Оценка онлайн, оформление за 1 день, перевод в день сделки.`
-    : `Выкупаем автомобили на русских номерах ниже рыночной цены — машина может находиться в любой стране Европы, включая ${country.nameAccusative}. Оценка онлайн, оформление за 1 день, перевод в день сделки.`;
+    : `Выкупаем автомобили на русских номерах ниже рыночной цены — машина может находиться в любой стране Европы, включая ${country.ru.nameAccusative}. Оценка онлайн, оформление за 1 день, перевод в день сделки.`;
 ---
 
 <ServicePageLayout
@@ -43,7 +45,7 @@ const description = isSerbia
     {schema}
     {cases}
     title="Выкуп авто"
-    titleHighlight={`в ${country.nameLocative}`}
+    titleHighlight={`в ${country.ru.nameLocative}`}
     {description}
     ctaLabel="Получить оценку"
     formService="buyout"
@@ -51,7 +53,7 @@ const description = isSerbia
     currentService="vykup"
     casesHeading="Кейсы выкупа"
     breadcrumbs={[
-        { label: country.name, href: `/${locale}/${countryCode}/autopodbor/` },
+        { label: country.ru.name, href: `/${locale}/${countryCode}/autopodbor/` },
         { label: "Выкуп авто" },
     ]}
 >

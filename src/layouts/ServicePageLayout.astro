@@ -81,7 +81,7 @@ const dict = getDictionary(locale);
 
   <div class="max-w-6xl mx-auto px-6 pb-16 pt-4">
     {showCountryCrossLinks && (
-      <ChipLinks label={dict.common.alsoWorkingInLabel} items={getActiveCountries().filter(c => c.code !== currentCountry).map(c => ({ href: `/${locale}/${c.code}/${currentService}/`, text: c.name }))} />
+      <ChipLinks label={dict.common.alsoWorkingInLabel} items={getActiveCountries().filter(c => c.code !== currentCountry).map(c => ({ href: `/${locale}/${c.code}/${currentService}/`, text: c[locale].name }))} />
     )}
     <ChipLinks label={dict.common.otherServicesLabel} items={SERVICES.filter(s => s.slug !== currentService).map(s => ({ href: `/${locale}/${currentCountry}/${s.slug}/`, text: dict.nav[s.slug] }))} />
   </div>

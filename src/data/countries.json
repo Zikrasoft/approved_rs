@@ -1,6 +1,30 @@
 [
-  { "code": "de", "name": "Германия", "nameGenitive": "Германии", "nameLocative": "Германии", "nameAccusative": "Германию", "active": true },
-  { "code": "rs", "name": "Сербия", "nameGenitive": "Сербии", "nameLocative": "Сербии", "nameAccusative": "Сербию", "active": true },
-  { "code": "es", "name": "Испания", "nameGenitive": "Испании", "nameLocative": "Испании", "nameAccusative": "Испанию", "active": true },
-  { "code": "ch", "name": "Швейцария", "nameGenitive": "Швейцарии", "nameLocative": "Швейцарии", "nameAccusative": "Швейцарию", "active": true }
+  {
+    "code": "de",
+    "ru": { "name": "Германия", "nameGenitive": "Германии", "nameLocative": "Германии", "nameAccusative": "Германию" },
+    "en": { "name": "Germany" },
+    "sr": { "name": "Nemačka", "nameGenitive": "Nemačke", "nameLocative": "Nemačkoj", "nameAccusative": "Nemačku" },
+    "active": true
+  },
+  {
+    "code": "rs",
+    "ru": { "name": "Сербия", "nameGenitive": "Сербии", "nameLocative": "Сербии", "nameAccusative": "Сербию" },
+    "en": { "name": "Serbia" },
+    "sr": { "name": "Srbija", "nameGenitive": "Srbije", "nameLocative": "Srbiji", "nameAccusative": "Srbiju" },
+    "active": true
+  },
+  {
+    "code": "es",
+    "ru": { "name": "Испания", "nameGenitive": "Испании", "nameLocative": "Испании", "nameAccusative": "Испанию" },
+    "en": { "name": "Spain" },
+    "sr": { "name": "Španija", "nameGenitive": "Španije", "nameLocative": "Španiji", "nameAccusative": "Španiju" },
+    "active": true
+  },
+  {
+    "code": "ch",
+    "ru": { "name": "Швейцария", "nameGenitive": "Швейцарии", "nameLocative": "Швейцарии", "nameAccusative": "Швейцарию" },
+    "en": { "name": "Switzerland" },
+    "sr": { "name": "Švajcarska", "nameGenitive": "Švajcarske", "nameLocative": "Švajcarskoj", "nameAccusative": "Švajcarsku" },
+    "active": true
+  }
 ]

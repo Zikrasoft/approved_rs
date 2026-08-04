@@ -1,6 +1,7 @@
 ---
 import { getActiveCountries, getCountryFlag } from '../utils/geo';
 import type { Country } from '../utils/geo';
+import type { Locale } from '../i18n/config';
 
 interface Props {
   detected: Country;
@@ -8,7 +9,7 @@ interface Props {
 
 const { detected } = Astro.props;
 const options = getActiveCountries();
-const locale = Astro.currentLocale ?? 'ru';
+const locale = (Astro.currentLocale ?? 'ru') as Locale;
 ---
 
 <div id="geo-banner" class="geo-banner border-b border-default bg-accent-subtle">
@@ -26,7 +27,7 @@ const locale = Astro.currentLocale ?? 'ru';
               : 'border-default bg-surface text-secondary',
           ]}
         >
-          <span class="leading-none">{getCountryFlag(c.code)}</span>{c.name}
+          <span class="leading-none">{getCountryFlag(c.code)}</span>{c[locale].name}
         </a>
       ))}
       <button

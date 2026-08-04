@@ -10,22 +10,23 @@ import { getCollection } from 'astro:content';
 import { SITE_URL } from '../../../../utils/constants';
 import { FAQ_AUTOPODBOR, FAQ_CITY_EXPERT } from '../../../../utils/faq';
 import { TrendingUp, History, UserCheck, BadgeCheck } from '@lucide/astro';
+import type { Locale } from '../../../../i18n/config';
 
 export const getStaticPaths = () => withLocales(getCityPaths());
 
 const { locale, country: countryCode } = Astro.params;
 const { city } = Astro.props;
 const country = getCountry(countryCode!)!;
-const meta = generateMeta('autopodbor', { country, city, baseUrl: SITE_URL, path: `/${locale}/${countryCode}/${city.slug}/autopodbor/` });
+const meta = generateMeta('autopodbor', { country, city, baseUrl: SITE_URL, path: `/${locale}/${countryCode}/${city.slug}/autopodbor/`, locale: locale as Locale });
 const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === countryCode && c.data.service === 'autopodbor').slice(0, 3);
-const schema = generateServiceSchema(`Автоподбор в ${city.nameLocative}`, city.name, meta.canonical);
+const schema = generateServiceSchema(`Автоподбор в ${city.ru.nameLocative}`, city.ru.name, meta.canonical);
 
 // DEKRA/TÜV are German-specific certification bodies — only true for country: 'de'.
 // Other countries get the generic claim instead of an invented local equivalent.
 const WHY_CITY = [
   { Icon: TrendingUp, text: 'Крупный автомобильный рынок региона' },
   { Icon: History,    text: 'Много вариантов с хорошей историей' },
-  { Icon: UserCheck,  text: `Наш эксперт в ${city.nameLocative}` },
+  { Icon: UserCheck,  text: `Наш эксперт в ${city.ru.nameLocative}` },
   { Icon: BadgeCheck, text: countryCode === 'de'
       ? 'Проверка DEKRA / TÜV по запросу'
       : 'Независимая техническая экспертиза по запросу' },
@@ -35,21 +36,21 @@ const WHY_CITY = [
 <ServicePageLayout
   {meta} {schema} {cases}
   title="Автоподбор"
-  titleHighlight={`в ${city.nameLocative}`}
-  description={`Подберём автомобиль в ${city.nameLocative} с полной проверкой. Работаем по всему региону ${country.name}.`}
+  titleHighlight={`в ${city.ru.nameLocative}`}
+  description={`Подберём автомобиль в ${city.ru.nameLocative} с полной проверкой. Работаем по всему региону ${country.ru.name}.`}
   ctaLabel="Оставить заявку"
   formService="autopodbor"
   currentCountry={countryCode!}
   currentService="autopodbor"
   city={city.slug}
-  casesHeading={`Кейсы из ${country.nameGenitive}`}
+  casesHeading={`Кейсы из ${country.ru.nameGenitive}`}
   breadcrumbs={[
-    { label: country.name, href: `/${locale}/${countryCode}/autopodbor/` },
-    { label: city.name },
+    { label: country.ru.name, href: `/${locale}/${countryCode}/autopodbor/` },
+    { label: city.ru.name },
   ]}
 >
   <div>
-    <h2 class="font-display text-xl font-bold mb-4 text-primary">Почему {city.name}</h2>
+    <h2 class="font-display text-xl font-bold mb-4 text-primary">Почему {city.ru.name}</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       {WHY_CITY.map(item => (
         <div class="flex items-center gap-3 p-4 rounded-sm border bg-surface border-default">
@@ -62,10 +63,10 @@ const WHY_CITY = [
     </div>
   </div>
   <ChipLinks
-    label={`Другие города в ${country.nameLocative}:`}
+    label={`Другие города в ${country.ru.nameLocative}:`}
     items={getCitiesForCountry(countryCode!)
       .filter(c => c.slug !== city.slug)
-      .map(c => ({ href: `/${locale}/${countryCode}/${c.slug}/autopodbor/`, text: c.name }))}
+      .map(c => ({ href: `/${locale}/${countryCode}/${c.slug}/autopodbor/`, text: c.ru.name }))}
   />
 
   <Fragment slot="extra">

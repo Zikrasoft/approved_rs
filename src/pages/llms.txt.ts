@@ -25,7 +25,7 @@ export const GET: APIRoute = async () => {
   lines.push('## Услуги по странам', '');
   for (const country of countries) {
     for (const s of SERVICES) {
-      lines.push(`- [${nav[s.slug]} в ${country.nameLocative}](${SITE_URL}/ru/${country.code}/${s.slug}/)`);
+      lines.push(`- [${nav[s.slug]} в ${country.ru.nameLocative}](${SITE_URL}/ru/${country.code}/${s.slug}/)`);
     }
   }
   lines.push('');
@@ -33,7 +33,7 @@ export const GET: APIRoute = async () => {
   lines.push('## Автоподбор по городам', '');
   for (const country of countries) {
     for (const city of getCitiesForCountry(country.code)) {
-      lines.push(`- [Автоподбор в ${city.nameLocative}](${SITE_URL}/ru/${country.code}/${city.slug}/autopodbor/)`);
+      lines.push(`- [Автоподбор в ${city.ru.nameLocative}](${SITE_URL}/ru/${country.code}/${city.slug}/autopodbor/)`);
     }
   }
   lines.push('');

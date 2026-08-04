@@ -42,7 +42,7 @@ const threadsChannel = import.meta.env.PUBLIC_THREADS_CHANNEL!;
 const schema = generateOrganizationSchema({
     url: SITE_URL,
     description: meta.description,
-    areaServed: countries.map((c) => c.name),
+    areaServed: countries.map((c) => c.ru.name),
     sameAs: [`https://t.me/${tgManager}`, `https://www.threads.com/@${threadsChannel}`],
     contactUrl: telegramLink(tgManager),
 });

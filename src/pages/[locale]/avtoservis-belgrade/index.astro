@@ -63,7 +63,7 @@ const WHAT_WE_DO = [
       </div>
     ))}
   </div>
-  <ChipLinks label="Также подбираем авто:" items={getActiveCountries().filter(c => c.code !== 'rs').map(c => ({ href: `/${locale}/${c.code}/autopodbor/`, text: c.name }))} />
+  <ChipLinks label="Также подбираем авто:" items={getActiveCountries().filter(c => c.code !== 'rs').map(c => ({ href: `/${locale}/${c.code}/autopodbor/`, text: c.ru.name }))} />
 
   <Fragment slot="extra">
     <section class="border-t border-default">
