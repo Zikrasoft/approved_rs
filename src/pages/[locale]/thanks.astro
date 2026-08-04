@@ -3,14 +3,16 @@ export const prerender = true;
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TelegramCTA from '../../components/TelegramCTA.astro';
 import { SITE_URL, SITE_NAME } from '../../utils/constants';
+import { getPagesContent } from '../../i18n/content/pages';
 import { withLocales } from '../../utils/paths';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const { locale } = Astro.params;
+const p = getPagesContent(locale).thanks;
 const meta = {
-  title: `Заявка принята — ${SITE_NAME}`,
-  description: 'Ваша заявка принята. Свяжемся с вами в ближайшее время.',
+  title: `${p.metaTitle} — ${SITE_NAME}`,
+  description: p.metaDescription,
   canonical: `${SITE_URL}/${locale}/thanks/`,
   noindex: true,
 };
@@ -35,26 +37,25 @@ const meta = {
       </div>
 
       <!-- Text -->
-      <p class="eyebrow justify-center thanks-item" style="--i:0">Заявка отправлена</p>
+      <p class="eyebrow justify-center thanks-item" style="--i:0">{p.eyebrow}</p>
       <h1 class="font-display text-[clamp(2.8rem,6vw,4.5rem)] font-bold leading-none tracking-[-0.03em] mb-5 thanks-item" style="--i:1">
-        Скоро свяжемся
+        {p.heading}
       </h1>
       <p class="text-base leading-relaxed max-w-sm mx-auto mb-10 text-muted thanks-item" style="--i:2">
-        Мы получили вашу заявку и свяжемся в течение&nbsp;2&nbsp;часов.
-        Если срочно&nbsp;— пишите в&nbsp;Telegram напрямую.
+        {p.body}
       </p>
 
       <!-- CTA -->
       <div class="thanks-item" style="--i:3">
-        <TelegramCTA label="Написать напрямую" />
+        <TelegramCTA label={p.ctaLabel} />
       </div>
 
       <!-- While you wait -->
       <div class="wait-card mt-14 p-6 rounded-sm border thanks-item" style="--i:4">
-        <p class="text-xs uppercase tracking-[0.16em] font-medium mb-4 text-muted">Пока ждёте</p>
+        <p class="text-xs uppercase tracking-[0.16em] font-medium mb-4 text-muted">{p.waitLabel}</p>
         <div class="flex flex-wrap justify-center gap-6">
-          <a href={`/${locale}/cases/autopodbor/`} class="wait-link">Наши кейсы →</a>
-          <a href={`/${locale}/de/autopodbor/`} class="wait-link">Автоподбор под ключ →</a>
+          <a href={`/${locale}/cases/autopodbor/`} class="wait-link">{p.waitCasesLink}</a>
+          <a href={`/${locale}/de/autopodbor/`} class="wait-link">{p.waitAutopodborLink}</a>
         </div>
       </div>
 

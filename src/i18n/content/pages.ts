@@ -1,0 +1,220 @@
+import type { Locale } from '../config';
+
+interface PagesContent {
+  contacts: {
+    metaTitle: string;
+    metaDescription: string;
+    heroTitle: string;
+    heroSubtitle: string;
+    info: { label: string; value: string }[];
+    workEyebrow: string;
+    steps: { n: string; text: string }[];
+  };
+  privacy: {
+    metaTitle: string;
+    metaDescription: (siteName: string) => string;
+    heading: string;
+    lastUpdated: string;
+    sections: { title: string; text: string }[];
+    contactTitle: string;
+    contactBefore: string;
+    contactLinkText: string;
+  };
+  thanks: {
+    metaTitle: string;
+    metaDescription: string;
+    eyebrow: string;
+    heading: string;
+    body: string;
+    ctaLabel: string;
+    waitLabel: string;
+    waitCasesLink: string;
+    waitAutopodborLink: string;
+  };
+  casesAutopodbor: { metaTitle: string; metaDescription: string };
+  casesAutoservice: { metaTitle: string; metaDescription: string };
+  casesShared: { heroSubtitle: string; emptyState: string };
+}
+
+const ru: PagesContent = {
+  contacts: {
+    metaTitle: 'Контакты',
+    metaDescription: 'Свяжитесь с нами в Telegram. Автоподбор, доставка, выкуп авто из Европы.',
+    heroTitle: 'Контакты',
+    heroSubtitle: 'Работаем через Telegram — быстро и удобно',
+    info: [
+      { label: 'Время ответа', value: 'В течение 2 часов' },
+      { label: 'Режим работы', value: 'Круглосуточно, без выходных' },
+      { label: 'Языки', value: 'Русский, English' },
+      { label: 'Страны', value: 'Германия, Испания, Сербия, Швейцария и др.' },
+    ],
+    workEyebrow: 'Как мы работаем',
+    steps: [
+      { n: '01', text: 'Пишете в Telegram или оставляете заявку на сайте' },
+      { n: '02', text: 'Обсуждаем ваш запрос, уточняем детали и критерии' },
+      { n: '03', text: 'Начинаем работу — находим, проверяем, привозим' },
+    ],
+  },
+  privacy: {
+    metaTitle: 'Политика конфиденциальности',
+    metaDescription: (siteName) => `Политика конфиденциальности и обработки персональных данных сайта ${siteName}.`,
+    heading: 'Политика конфиденциальности',
+    lastUpdated: 'Последнее обновление: июнь 2026',
+    sections: [
+      { title: 'Какие данные мы собираем', text: 'При отправке заявки мы собираем имя и контактные данные (Telegram/телефон), которые вы вводите в форму. Мы также фиксируем страницу, с которой отправлена заявка.' },
+      { title: 'Как мы используем данные', text: 'Собранные данные используются исключительно для обратной связи по вашей заявке. Мы не передаём данные третьим лицам и не используем их для рекламы.' },
+      { title: 'Хранение данных', text: 'Данные хранятся на защищённых серверах Neon (PostgreSQL). Вы можете запросить удаление ваших данных в любое время, написав нам в Telegram.' },
+      { title: 'Cookies', text: 'Сайт использует технические cookies, необходимые для работы сайта, а также аналитические cookies Google Analytics — но только после вашего согласия. При первом визите вы можете принять или отклонить использование аналитических cookies в баннере внизу экрана; ваш выбор сохраняется в браузере.' },
+    ],
+    contactTitle: 'Контакт',
+    contactBefore: 'По вопросам конфиденциальности обратитесь к нам через ',
+    contactLinkText: 'Telegram',
+  },
+  thanks: {
+    metaTitle: 'Заявка принята',
+    metaDescription: 'Ваша заявка принята. Свяжемся с вами в ближайшее время.',
+    eyebrow: 'Заявка отправлена',
+    heading: 'Скоро свяжемся',
+    body: 'Мы получили вашу заявку и свяжемся в течение 2 часов. Если срочно — пишите в Telegram напрямую.',
+    ctaLabel: 'Написать напрямую',
+    waitLabel: 'Пока ждёте',
+    waitCasesLink: 'Наши кейсы →',
+    waitAutopodborLink: 'Автоподбор под ключ →',
+  },
+  casesAutopodbor: {
+    metaTitle: 'Кейсы автоподбора — реальные автомобили клиентов',
+    metaDescription: 'Реальные кейсы автоподбора, доставки, выкупа и проверки автомобилей из Германии, Испании, Сербии и Швейцарии. Машина, цена, история сделки.',
+  },
+  casesAutoservice: {
+    metaTitle: 'Кейсы автосервиса в Белграде — примеры работ',
+    metaDescription: 'Реальные кейсы ремонта и обслуживания автомобилей в нашем автосервисе в Белграде: диагностика, ТО, ремонт подвески, двигателя и трансмиссии.',
+  },
+  casesShared: {
+    heroSubtitle: 'Реальные автомобили, реальные цены, реальные истории',
+    emptyState: 'Кейсы скоро появятся.',
+  },
+};
+
+const en: PagesContent = {
+  contacts: {
+    metaTitle: 'Contacts',
+    metaDescription: 'Reach us on Telegram. Car sourcing, delivery, and buyout from Europe.',
+    heroTitle: 'Contacts',
+    heroSubtitle: 'We work through Telegram — fast and easy',
+    info: [
+      { label: 'Response time', value: 'Within 2 hours' },
+      { label: 'Hours', value: '24/7, every day' },
+      { label: 'Languages', value: 'Russian, English' },
+      { label: 'Countries', value: 'Germany, Spain, Serbia, Switzerland, and more' },
+    ],
+    workEyebrow: 'How we work',
+    steps: [
+      { n: '01', text: 'Message us on Telegram or submit a request on the site' },
+      { n: '02', text: 'We discuss your request and confirm the details and criteria' },
+      { n: '03', text: 'We get to work — finding, inspecting, delivering' },
+    ],
+  },
+  privacy: {
+    metaTitle: 'Privacy Policy',
+    metaDescription: (siteName) => `Privacy policy and personal data handling for ${siteName}.`,
+    heading: 'Privacy Policy',
+    lastUpdated: 'Last updated: June 2026',
+    sections: [
+      { title: 'What data we collect', text: 'When you submit a request, we collect the name and contact details (Telegram/phone) you enter in the form. We also record which page the request was sent from.' },
+      { title: 'How we use your data', text: 'The data we collect is used solely to respond to your request. We do not share it with third parties or use it for advertising.' },
+      { title: 'Data storage', text: 'Data is stored on secure Neon (PostgreSQL) servers. You can request deletion of your data at any time by messaging us on Telegram.' },
+      { title: 'Cookies', text: 'The site uses technical cookies required for it to function, as well as Google Analytics cookies — but only with your consent. On your first visit you can accept or decline analytics cookies in the banner at the bottom of the screen; your choice is saved in your browser.' },
+    ],
+    contactTitle: 'Contact',
+    contactBefore: 'For privacy questions, reach us on ',
+    contactLinkText: 'Telegram',
+  },
+  thanks: {
+    metaTitle: 'Request Received',
+    metaDescription: "Your request has been received. We'll be in touch shortly.",
+    eyebrow: 'Request sent',
+    heading: "We'll be in touch soon",
+    body: "We've received your request and will reach out within 2 hours. If it's urgent, message us directly on Telegram.",
+    ctaLabel: 'Message us directly',
+    waitLabel: 'While you wait',
+    waitCasesLink: 'Our cases →',
+    waitAutopodborLink: 'Full-Service Car Sourcing →',
+  },
+  casesAutopodbor: {
+    metaTitle: 'Car Sourcing Case Studies — Real Client Cars',
+    metaDescription: 'Real case studies of car sourcing, delivery, buyout, and inspection from Germany, Spain, Serbia, and Switzerland. The car, the price, the story behind the deal.',
+  },
+  casesAutoservice: {
+    metaTitle: 'Auto Service Case Studies in Belgrade — Our Work',
+    metaDescription: 'Real examples of car repair and maintenance at our Belgrade service center: diagnostics, scheduled maintenance, suspension, engine, and transmission repair.',
+  },
+  casesShared: {
+    heroSubtitle: 'Real cars, real prices, real stories',
+    emptyState: 'Cases coming soon.',
+  },
+};
+
+const sr: PagesContent = {
+  contacts: {
+    metaTitle: 'Kontakt',
+    metaDescription: 'Kontaktirajte nas putem Telegrama. Odabir, dostava i otkup vozila iz Evrope.',
+    heroTitle: 'Kontakt',
+    heroSubtitle: 'Radimo preko Telegrama — brzo i jednostavno',
+    info: [
+      { label: 'Vreme odgovora', value: 'U roku od 2 sata' },
+      { label: 'Radno vreme', value: '24/7, bez slobodnih dana' },
+      { label: 'Jezici', value: 'Ruski, engleski' },
+      { label: 'Zemlje', value: 'Nemačka, Španija, Srbija, Švajcarska i druge' },
+    ],
+    workEyebrow: 'Kako radimo',
+    steps: [
+      { n: '01', text: 'Pišete na Telegramu ili ostavljate zahtev na sajtu' },
+      { n: '02', text: 'Razgovaramo o vašem zahtevu i preciziramo detalje i kriterijume' },
+      { n: '03', text: 'Počinjemo rad — pronalazimo, proveravamo, dovozimo' },
+    ],
+  },
+  privacy: {
+    metaTitle: 'Politika privatnosti',
+    metaDescription: (siteName) => `Politika privatnosti i obrade ličnih podataka sajta ${siteName}.`,
+    heading: 'Politika privatnosti',
+    lastUpdated: 'Poslednje ažuriranje: jun 2026.',
+    sections: [
+      { title: 'Koje podatke prikupljamo', text: 'Prilikom slanja zahteva prikupljamo ime i kontakt podatke (Telegram/telefon) koje unosite u formular. Takođe beležimo stranicu sa koje je zahtev poslat.' },
+      { title: 'Kako koristimo podatke', text: 'Prikupljeni podaci koriste se isključivo za odgovor na vaš zahtev. Ne delimo podatke sa trećim licima niti ih koristimo za oglašavanje.' },
+      { title: 'Čuvanje podataka', text: 'Podaci se čuvaju na zaštićenim Neon (PostgreSQL) serverima. U svakom trenutku možete zatražiti brisanje svojih podataka tako što ćete nam pisati na Telegramu.' },
+      { title: 'Kolačići', text: 'Sajt koristi tehničke kolačiće neophodne za rad sajta, kao i analitičke Google Analytics kolačiće — ali samo uz vašu saglasnost. Prilikom prve posete možete prihvatiti ili odbiti korišćenje analitičkih kolačića u baneru na dnu ekrana; vaš izbor se čuva u pregledaču.' },
+    ],
+    contactTitle: 'Kontakt',
+    contactBefore: 'Za pitanja o privatnosti obratite nam se putem ',
+    contactLinkText: 'Telegrama',
+  },
+  thanks: {
+    metaTitle: 'Zahtev primljen',
+    metaDescription: 'Vaš zahtev je primljen. Javićemo vam se uskoro.',
+    eyebrow: 'Zahtev poslat',
+    heading: 'Uskoro se javljamo',
+    body: 'Primili smo vaš zahtev i javićemo vam se u roku od 2 sata. Ako je hitno — pišite nam direktno na Telegramu.',
+    ctaLabel: 'Pišite nam direktno',
+    waitLabel: 'Dok čekate',
+    waitCasesLink: 'Naši primeri →',
+    waitAutopodborLink: 'Kompletan odabir vozila →',
+  },
+  casesAutopodbor: {
+    metaTitle: 'Primeri odabira vozila — stvarni automobili klijenata',
+    metaDescription: 'Stvarni primeri odabira, dostave, otkupa i provere vozila iz Nemačke, Španije, Srbije i Švajcarske. Vozilo, cena, tok posla.',
+  },
+  casesAutoservice: {
+    metaTitle: 'Primeri radova auto servisa u Beogradu',
+    metaDescription: 'Stvarni primeri popravke i održavanja vozila u našem auto servisu u Beogradu: dijagnostika, redovno servisiranje, popravka vešanja, motora i menjača.',
+  },
+  casesShared: {
+    heroSubtitle: 'Stvarna vozila, stvarne cene, stvarne priče',
+    emptyState: 'Primeri uskoro stižu.',
+  },
+};
+
+const content: Record<Locale, PagesContent> = { ru, en, sr };
+
+export function getPagesContent(locale: Locale): PagesContent {
+  return content[locale];
+}
