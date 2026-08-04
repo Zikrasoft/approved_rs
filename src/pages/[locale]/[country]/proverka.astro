@@ -7,7 +7,7 @@ import { getCountryPaths, withLocales } from '../../../utils/paths';
 import { getCountry } from '../../../utils/geo';
 import { generateMeta, generateServiceSchema } from '../../../utils/seo';
 import { SITE_URL } from '../../../utils/constants';
-import { FAQ_PROVERKA } from '../../../utils/faq';
+import { getFaq } from '../../../i18n/content/faq';
 import type { Locale } from '../../../i18n/config';
 
 export const getStaticPaths = () => withLocales(getCountryPaths());
@@ -44,6 +44,6 @@ const schema = generateServiceSchema(`Проверка авто в ${country.ru.
   </p>
 
   <Fragment slot="extra">
-    <Faq items={FAQ_PROVERKA} />
+    <Faq items={getFaq(locale).proverka} />
   </Fragment>
 </ServicePageLayout>

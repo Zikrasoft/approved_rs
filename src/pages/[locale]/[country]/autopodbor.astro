@@ -5,7 +5,7 @@ import StepsList from '../../../components/StepsList.astro';
 import ChipLinks from '../../../components/ChipLinks.astro';
 import CountryPill from '../../../components/CountryPill.astro';
 import Faq from '../../../components/Faq.astro';
-import { FAQ_AUTOPODBOR } from '../../../utils/faq';
+import { getFaq } from '../../../i18n/content/faq';
 import { getCountryPaths, withLocales } from '../../../utils/paths';
 import { getCountry, getActiveCountries, getCitiesForCountry } from '../../../utils/geo';
 import { generateMeta, generateServiceSchema } from '../../../utils/seo';
@@ -53,6 +53,6 @@ const schema = generateServiceSchema(`Автоподбор в ${country.ru.nameL
   </div>
 
   <Fragment slot="extra">
-    <Faq items={FAQ_AUTOPODBOR} />
+    <Faq items={getFaq(locale).autopodbor} />
   </Fragment>
 </ServicePageLayout>

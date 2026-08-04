@@ -8,7 +8,7 @@ import { getCountry, getCitiesForCountry } from '../../../../utils/geo';
 import { generateMeta, generateServiceSchema } from '../../../../utils/seo';
 import { getCollection } from 'astro:content';
 import { SITE_URL } from '../../../../utils/constants';
-import { FAQ_AUTOPODBOR, FAQ_CITY_EXPERT } from '../../../../utils/faq';
+import { getFaq } from '../../../../i18n/content/faq';
 import { TrendingUp, History, UserCheck, BadgeCheck } from '@lucide/astro';
 import type { Locale } from '../../../../i18n/config';
 
@@ -70,6 +70,6 @@ const WHY_CITY = [
   />
 
   <Fragment slot="extra">
-    <Faq items={[...FAQ_AUTOPODBOR, FAQ_CITY_EXPERT]} />
+    <Faq items={[...getFaq(locale).autopodbor, getFaq(locale).cityExpert]} />
   </Fragment>
 </ServicePageLayout>

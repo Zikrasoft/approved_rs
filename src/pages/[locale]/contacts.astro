@@ -5,7 +5,7 @@ import TelegramCTA from '../../components/TelegramCTA.astro';
 import PageHero from '../../components/PageHero.astro';
 import Faq from '../../components/Faq.astro';
 import { SITE_URL, SITE_NAME } from '../../utils/constants';
-import { FAQ_GENERAL } from '../../utils/faq';
+import { getFaq } from '../../i18n/content/faq';
 import { withLocales } from '../../utils/paths';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
@@ -65,6 +65,6 @@ const steps = [
     </div>
   </section>
 
-  <Faq items={FAQ_GENERAL} />
+  <Faq items={getFaq(locale).general} />
 
 </BaseLayout>

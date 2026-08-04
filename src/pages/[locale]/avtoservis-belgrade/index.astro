@@ -13,7 +13,7 @@ import { toAutoserviceCaseItem } from '../../../utils/cases';
 import { getPublishedAutoserviceCases } from '../../../utils/casesQueries';
 import { getActiveCountries } from '../../../utils/geo';
 import Faq from '../../../components/Faq.astro';
-import { FAQ_AUTOSERVICE } from '../../../utils/faq';
+import { getFaq } from '../../../i18n/content/faq';
 import { withLocales } from '../../../utils/paths';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
@@ -104,7 +104,7 @@ const WHAT_WE_DO = [
   </Fragment>
 
   <Fragment slot="extra">
-    <Faq items={FAQ_AUTOSERVICE} />
+    <Faq items={getFaq(locale).autoservice} />
   </Fragment>
 
   <Fragment slot="cases">
