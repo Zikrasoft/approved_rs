@@ -22,12 +22,14 @@ import { generateOrganizationSchema } from "../../utils/seo";
 import { telegramLink } from "../../utils/telegramLink";
 import StatBlock from "../../components/StatBlock.astro";
 import { toCaseItem } from "../../utils/cases";
+import { getHomeContent } from "../../i18n/content/home";
+import type { Locale } from "../../i18n/config";
 
 const { locale } = Astro.params;
+const h = getHomeContent(locale as Locale);
 const meta = {
-    title: `Автоподбор и доставка авто из Европы | ${SITE_NAME}`,
-    description:
-        "Подберём и привезём автомобиль из Германии, Испании, Сербии и Швейцарии. Проверка, выкуп, доставка. Работаем для русскоязычных по всему миру.",
+    title: `${h.metaTitle} | ${SITE_NAME}`,
+    description: h.metaDescription,
     canonical: `${SITE_URL}/${locale}/`,
 };
 
@@ -54,29 +56,29 @@ const journey = [
     {
         href: `/${locale}/de/autopodbor/`,
         Icon: Search,
-        title: "Подбор",
-        desc: "Находим, проверяем и доставляем автомобиль под ваш бюджет — под ключ, в Германии, Испании, Сербии и Швейцарии.",
+        title: h.journey[0].title,
+        desc: h.journey[0].desc,
     },
     {
         href: `/${locale}/de/proverka/`,
         Icon: ClipboardCheck,
-        title: "Проверка",
-        desc: "Независимый эксперт осматривает автомобиль перед покупкой — по 100+ пунктам с видео.",
-        note: "Нашли машину сами? Закажем проверку отдельно",
+        title: h.journey[1].title,
+        desc: h.journey[1].desc,
+        note: h.journey[1].note,
     },
     {
         href: `/${locale}/de/vykup/`,
         Icon: Banknote,
-        title: "Выкуп",
-        desc: "Оформляем выкуп и растаможку автомобиля на иностранных номерах.",
-        note: "Машина уже за границей? Поможем её оформить",
+        title: h.journey[2].title,
+        desc: h.journey[2].desc,
+        note: h.journey[2].note,
     },
     {
         href: `/${locale}/avtoservis-belgrade/`,
         Icon: Wrench,
-        title: "Автосервис",
-        desc: "Ремонт и обслуживание автомобиля в Белграде — с гарантией качества.",
-        note: "Машина уже ваша? Тоже беремся",
+        title: h.journey[3].title,
+        desc: h.journey[3].desc,
+        note: h.journey[3].note,
     },
 ];
 ---
@@ -100,15 +102,15 @@ const journey = [
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
                 <div class="lg:col-span-3">
                     <span class="eyebrow fade-up fade-up-1"
-                        >Один путь: авто из Европы</span
+                        >{h.heroEyebrow}</span
                     >
                     <h1
                         class="hero-headline font-display font-bold leading-none mb-8 fade-up fade-up-2 text-primary tracking-[-0.03em]"
                     >
-                        Найдено.<br />
-                        Проверено.<br />
+                        {h.heroLine1}<br />
+                        {h.heroLine2}<br />
                         <span class="stamp-row inline-flex items-center gap-3 flex-wrap">
-                            <em class="text-accent italic">Одобрено.</em>
+                            <em class="text-accent italic">{h.heroLine3}</em>
                             <svg
                                 class="stamp-svg shrink-0"
                                 viewBox="0 0 200 200"
@@ -123,7 +125,7 @@ const journey = [
                                 <circle cx="100" cy="100" r="94" fill="none" stroke="var(--color-stamp-ink)" stroke-width="2.5"></circle>
                                 <circle cx="100" cy="100" r="82" fill="none" stroke="var(--color-stamp-ink)" stroke-width="1.5" stroke-dasharray="2 4"></circle>
                                 <text font-family="var(--font-sans)" font-size="10" letter-spacing="2" fill="var(--color-stamp-ink)">
-                                    <textPath href="#stampArc" startOffset="2%">ПРОВЕРЕНО · ОДОБРЕНО · ПРОВЕРЕНО · ОДОБРЕНО ·</textPath>
+                                    <textPath href="#stampArc" startOffset="2%">{h.stampText}</textPath>
                                 </text>
                                 <path
                                     d="M70,102 l20,20 l40,-45"
@@ -139,9 +141,7 @@ const journey = [
                     <p
                         class="text-base leading-relaxed mb-10 max-w-md fade-up fade-up-3 text-muted"
                     >
-                        Подберём, проверим, оформим и привезём автомобиль из
-                        Германии, Испании или Сербии — а потом обслужим его в
-                        своём автосервисе. Один путь, одна команда.
+                        {h.heroSubtext}
                     </p>
                     <div class="fade-up fade-up-4">
                         <TelegramCTA />
@@ -149,9 +149,9 @@ const journey = [
                     <div
                         class="grid grid-cols-3 gap-3 sm:gap-6 mt-8 pt-8 border-t fade-up fade-up-5 border-default"
                     >
-                        <StatBlock value="200+" label="клиентов" />
-                        <StatBlock value="4" label="страны" />
-                        <StatBlock value="5 лет" label="на рынке" />
+                        <StatBlock value={h.statClients.value} label={h.statClients.label} />
+                        <StatBlock value={h.statCountries.value} label={h.statCountries.label} />
+                        <StatBlock value={h.statYears.value} label={h.statYears.label} />
                     </div>
                 </div>
 
@@ -166,12 +166,10 @@ const journey = [
     <section class="border-b border-default">
         <div class="max-w-6xl mx-auto px-6 py-20">
             <div class="mb-4">
-                <SectionHeading title="Один путь: от поиска до сервиса" />
+                <SectionHeading title={h.journeyHeading} />
             </div>
             <p class="text-base max-w-xl mb-14 leading-relaxed text-muted">
-                Автоподбор, проверка, выкуп и автосервис — не 4 разных
-                услуги, а этапы одного пути вашего автомобиля. Войти можно с
-                любого шага.
+                {h.journeySubtext}
             </p>
 
             <div
@@ -208,7 +206,7 @@ const journey = [
                                     </p>
                                 )}
                                 <span class="inline-flex items-center gap-1 mt-5 text-xs font-medium text-accent">
-                                    Подробнее
+                                    {h.journeyMoreLabel}
                                     <span class="journey-arrow transition-transform duration-200">
                                         →
                                     </span>
@@ -220,7 +218,7 @@ const journey = [
             </div>
 
             <!-- Country strip -->
-            <p class="text-xs tracking-widest uppercase mt-14 mb-3 font-medium text-muted">Автоподбор по странам:</p>
+            <p class="text-xs tracking-widest uppercase mt-14 mb-3 font-medium text-muted">{h.countryStripLabel}</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {countries.map((c) => <CountryPill country={c} locale={locale!} />)}
             </div>
@@ -237,7 +235,7 @@ const journey = [
     <!-- ─── Cases ─────────────────────────────────────────── -->
     <CasesGrid
         items={items}
-        heading="Последние кейсы"
+        heading={h.latestCasesHeading}
         headingSize="xl"
         viewAllHref={`/${locale}/cases/autopodbor/`}
     />
@@ -246,10 +244,9 @@ const journey = [
     <section class="border-b border-default">
         <div class="max-w-6xl mx-auto px-6 py-20">
             <div class="mb-14">
-                <SectionHeading title="Почему выбирают нас" />
+                <SectionHeading title={h.whyUsHeading} />
                 <p class="text-base max-w-md text-muted mt-3 leading-relaxed">
-                    Покупка авто из другой страны вызывает вопросы. Вот как мы
-                    их снимаем.
+                    {h.whyUsSubtext}
                 </p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -265,12 +262,10 @@ const journey = [
                     <h3
                         class="font-display text-xl font-bold mb-3 text-primary"
                     >
-                        Полная прозрачность
+                        {h.trustCards[0].title}
                     </h3>
                     <p class="text-sm leading-relaxed text-muted">
-                        Высылаем подробный чек-лист (100+ пунктов) и видео
-                        каждого нюанса: кузов, салон, ходовая. Вы видите
-                        автомобиль так, как будто стоите рядом.
+                        {h.trustCards[0].text}
                     </p>
                 </div>
 
@@ -286,12 +281,10 @@ const journey = [
                     <h3
                         class="font-display text-xl font-bold mb-3 text-primary"
                     >
-                        Безопасность сделки
+                        {h.trustCards[1].title}
                     </h3>
                     <p class="text-sm leading-relaxed text-muted">
-                        Поэтапная оплата и понятные условия. Сопровождаем
-                        документы на всех этапах: оформление, растаможка,
-                        регистрация — без сюрпризов.
+                        {h.trustCards[1].text}
                     </p>
                 </div>
 
@@ -307,12 +300,10 @@ const journey = [
                     <h3
                         class="font-display text-xl font-bold mb-3 text-primary"
                     >
-                        Локальная экспертиза
+                        {h.trustCards[2].title}
                     </h3>
                     <p class="text-sm leading-relaxed text-muted">
-                        Знаем специфику каждого рынка: автобанные пробеги
-                        Германии, особенности кузова испанских авто, нюансы
-                        оформления на иностранные номера в Сербии.
+                        {h.trustCards[2].text}
                     </p>
                 </div>
             </div>
@@ -323,7 +314,7 @@ const journey = [
     <section class="border-b border-default">
         <div class="max-w-6xl mx-auto px-6 py-20">
             <div class="mb-14">
-                <SectionHeading title="Что говорят клиенты" />
+                <SectionHeading title={h.testimonialsHeading} />
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <figure
@@ -333,9 +324,7 @@ const journey = [
                     <blockquote
                         class="text-sm leading-relaxed text-secondary flex-1"
                     >
-                        «Привезли BMW 3 серии из Мюнхена в Белград. Всё чётко —
-                        от осмотра до постановки на учёт. Сэкономили кучу нервов
-                        на оформлении.»
+                        {h.testimonials[0].quote}
                     </blockquote>
                     <figcaption class="flex items-center gap-3">
                         <div
@@ -345,10 +334,10 @@ const journey = [
                         </div>
                         <div>
                             <p class="text-sm font-medium text-primary">
-                                Александр
+                                {h.testimonials[0].name}
                             </p>
                             <p class="text-xs text-muted">
-                                BMW 320d, Германия → Сербия
+                                {h.testimonials[0].caption}
                             </p>
                         </div>
                     </figcaption>
@@ -361,9 +350,7 @@ const journey = [
                     <blockquote
                         class="text-sm leading-relaxed text-secondary flex-1"
                     >
-                        «Долго искал Skoda Octavia в хорошем состоянии. Ребята
-                        нашли вариант в Испании, проверили независимым экспертом
-                        — всё совпало с описанием.»
+                        {h.testimonials[1].quote}
                     </blockquote>
                     <figcaption class="flex items-center gap-3">
                         <div
@@ -373,10 +360,10 @@ const journey = [
                         </div>
                         <div>
                             <p class="text-sm font-medium text-primary">
-                                Михаил
+                                {h.testimonials[1].name}
                             </p>
                             <p class="text-xs text-muted">
-                                Skoda Octavia, Испания → Россия
+                                {h.testimonials[1].caption}
                             </p>
                         </div>
                     </figcaption>
@@ -389,9 +376,7 @@ const journey = [
                     <blockquote
                         class="text-sm leading-relaxed text-secondary flex-1"
                     >
-                        «Оформление на иностранные номера казалось сложным.
-                        Команда провела через каждый шаг — и через месяц я уже
-                        ездил. Рекомендую.»
+                        {h.testimonials[2].quote}
                     </blockquote>
                     <figcaption class="flex items-center gap-3">
                         <div
@@ -401,10 +386,10 @@ const journey = [
                         </div>
                         <div>
                             <p class="text-sm font-medium text-primary">
-                                Дмитрий
+                                {h.testimonials[2].name}
                             </p>
                             <p class="text-xs text-muted">
-                                VW Passat, Германия → Сербия
+                                {h.testimonials[2].caption}
                             </p>
                         </div>
                     </figcaption>
@@ -425,28 +410,28 @@ const journey = [
             </div>
             <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-0">
                 <div class="p-10 md:p-16">
-                    <span class="eyebrow">Готовы начать?</span>
+                    <span class="eyebrow">{h.ctaEyebrow}</span>
                     <h2
                         class="font-display font-bold mb-4 leading-[1.1] tracking-[-0.025em]"
                         style="font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 800;"
                     >
-                        Расскажите нам<br />о своём<br /><em
-                            class="text-accent italic">автомобиле</em
+                        {h.ctaHeading.line1}<br />{h.ctaHeading.line2}<br /><em
+                            class="text-accent italic">{h.ctaHeading.accentWord}</em
                         >
                     </h2>
                     <p class="text-base mb-2 max-w-sm text-muted leading-[1.7]">
-                        Отвечаем в течение 2 часов. Консультация бесплатна.
+                        {h.ctaSubtext}
                     </p>
-                    <TelegramCTA label="Написать в Telegram" />
+                    <TelegramCTA label={h.ctaTelegramLabel} />
                 </div>
                 <div
                     class="cta-aside hidden lg:flex items-end justify-end p-10 md:p-16"
                 >
                     <div class="grid grid-cols-2 gap-6">
-                        <StatBlock value="200+" label="клиентов" />
-                        <StatBlock value="4" label="страны" />
-                        <StatBlock value="5 лет" label="опыт" />
-                        <StatBlock value="2 ч" label="ответ" />
+                        <StatBlock value={h.ctaStatClients.value} label={h.ctaStatClients.label} />
+                        <StatBlock value={h.ctaStatCountries.value} label={h.ctaStatCountries.label} />
+                        <StatBlock value={h.ctaStatYears.value} label={h.ctaStatYears.label} />
+                        <StatBlock value={h.ctaStatResponse.value} label={h.ctaStatResponse.label} />
                     </div>
                 </div>
             </div>
