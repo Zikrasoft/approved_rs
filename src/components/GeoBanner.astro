@@ -10,11 +10,14 @@ interface Props {
 const { detected } = Astro.props;
 const options = getActiveCountries();
 const locale = (Astro.currentLocale ?? 'ru') as Locale;
+
+const WHERE_FROM: Record<Locale, string> = { ru: 'Откуда вы?', en: 'Where are you from?', sr: 'Odakle ste?' };
+const OTHER_COUNTRY: Record<Locale, string> = { ru: 'Другая страна', en: 'Other country', sr: 'Druga zemlja' };
 ---
 
 <div id="geo-banner" class="geo-banner border-b border-default bg-accent-subtle">
   <div class="max-w-6xl mx-auto px-6 py-3 flex items-center gap-3 flex-wrap">
-    <p class="text-sm text-secondary shrink-0">Откуда вы?</p>
+    <p class="text-sm text-secondary shrink-0">{WHERE_FROM[locale]}</p>
     <div class="flex items-center gap-2 flex-wrap">
       {options.map(c => (
         <a
@@ -35,7 +38,7 @@ const locale = (Astro.currentLocale ?? 'ru') as Locale;
         data-geo-skip
         class="geo-pill px-3 py-1.5 rounded-sm text-xs font-medium border border-default bg-transparent text-muted"
       >
-        Другая страна
+        {OTHER_COUNTRY[locale]}
       </button>
     </div>
   </div>

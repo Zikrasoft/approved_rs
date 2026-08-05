@@ -28,6 +28,8 @@ export const ru = {
   common: {
     otherServicesLabel: 'Другие услуги:',
     alsoWorkingInLabel: 'Также работаем в:',
+    homeLabel: 'Главная',
+    faqHeading: 'Частые вопросы',
   },
 };
 

@@ -1,5 +1,32 @@
 ---
-const locale = Astro.currentLocale ?? 'ru';
+import type { Locale } from '../i18n/config';
+
+const locale = (Astro.currentLocale ?? 'ru') as Locale;
+
+const COOKIE_TEXT: Record<Locale, { notice: string; more: string; policyLink: string; accept: string; decline: string }> = {
+  ru: {
+    notice: 'Мы используем аналитические cookies (Google Analytics), чтобы понимать, как посетители используют сайт.',
+    more: 'Подробнее в',
+    policyLink: 'политике конфиденциальности',
+    accept: 'Принять',
+    decline: 'Отклонить',
+  },
+  en: {
+    notice: 'We use analytics cookies (Google Analytics) to understand how visitors use the site.',
+    more: 'Learn more in our',
+    policyLink: 'privacy policy',
+    accept: 'Accept',
+    decline: 'Decline',
+  },
+  sr: {
+    notice: 'Koristimo analitičke kolačiće (Google Analytics) da bismo razumeli kako posetioci koriste sajt.',
+    more: 'Više informacija u',
+    policyLink: 'politici privatnosti',
+    accept: 'Prihvati',
+    decline: 'Odbij',
+  },
+};
+const cc = COOKIE_TEXT[locale];
 ---
 
 <div
@@ -9,22 +36,22 @@ const locale = Astro.currentLocale ?? 'ru';
   style="background: var(--color-surface);"
 >
   <p class="text-sm leading-relaxed text-secondary mb-4">
-    Мы используем аналитические cookies (Google Analytics), чтобы понимать, как посетители используют сайт.
-    Подробнее в{' '}
-    <a href={`/${locale}/privacy/`} class="underline text-accent">политике конфиденциальности</a>.
+    {cc.notice}
+    {' '}{cc.more}{' '}
+    <a href={`/${locale}/privacy/`} class="underline text-accent">{cc.policyLink}</a>.
   </p>
   <div class="flex gap-3">
     <button
       id="cookie-accept"
       class="px-4 py-2 rounded-sm text-xs font-medium border border-accent-border text-accent"
     >
-      Принять
+      {cc.accept}
     </button>
     <button
       id="cookie-decline"
       class="px-4 py-2 rounded-sm text-xs font-medium text-muted"
     >
-      Отклонить
+      {cc.decline}
     </button>
   </div>
 </div>

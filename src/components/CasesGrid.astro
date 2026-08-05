@@ -2,6 +2,7 @@
 import CaseCard from './CaseCard.astro';
 import SectionHeading from './SectionHeading.astro';
 import type { CaseCardProps } from './CaseCard.astro';
+import type { Locale } from '../i18n/config';
 
 interface Props {
   items: CaseCardProps[];
@@ -13,6 +14,8 @@ interface Props {
 }
 
 const { items, heading, headingSize = 'lg', viewAllHref, topBorder = false, class: className } = Astro.props;
+const locale = (Astro.currentLocale ?? 'ru') as Locale;
+const VIEW_ALL_LABEL: Record<Locale, string> = { ru: 'Все кейсы', en: 'All cases', sr: 'Svi primeri' };
 ---
 
 {items.length > 0 && (
@@ -24,7 +27,7 @@ const { items, heading, headingSize = 'lg', viewAllHref, topBorder = false, clas
         </div>
         {viewAllHref && (
           <a href={viewAllHref} class="cases-more hidden sm:flex items-center gap-1 text-sm font-medium no-underline text-accent">
-            Все кейсы <span class="arrow transition-transform duration-200">→</span>
+            {VIEW_ALL_LABEL[locale]} <span class="arrow transition-transform duration-200">→</span>
           </a>
         )}
       </div>
@@ -33,7 +36,7 @@ const { items, heading, headingSize = 'lg', viewAllHref, topBorder = false, clas
       </div>
       {viewAllHref && (
         <div class="mt-8 sm:hidden">
-          <a href={viewAllHref} class="text-sm font-medium text-accent">Все кейсы →</a>
+          <a href={viewAllHref} class="text-sm font-medium text-accent">{VIEW_ALL_LABEL[locale]} →</a>
         </div>
       )}
     </div>

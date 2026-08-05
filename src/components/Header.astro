@@ -35,24 +35,29 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
 ---
 
 <header class="sticky top-0 z-50 border-b bg-header-glass border-default backdrop-blur-[16px]">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-8">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 lg:gap-6">
 
     <SiteLogo />
 
     <!-- Desktop Nav -->
-    <nav class="hidden lg:flex items-center gap-2 text-sm font-sans font-normal header-nav flex-1 justify-center">
+    <nav class="hidden lg:flex items-center gap-0.5 xl:gap-2 text-sm font-sans font-normal header-nav flex-1 justify-center min-w-0">
       {navItems.map(item => (
-        <a href={item.href} class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-muted" aria-current={item.active ? 'page' : undefined}>
-          {item.Icon && <item.Icon size={14} />}
+        <a href={item.href} class="flex items-center gap-1.5 px-1.5 xl:px-2.5 py-1.5 rounded-sm text-muted whitespace-nowrap" aria-current={item.active ? 'page' : undefined}>
           {item.label}
         </a>
       ))}
-      <a href={`/${locale}/cases/autopodbor/`} class="px-2.5 py-1.5 text-muted" aria-current={Astro.url.pathname.includes('/cases/') ? 'page' : undefined}>{dict.nav.cases}</a>
-      <a href={`/${locale}/contacts/`} class="px-2.5 py-1.5 text-muted" aria-current={Astro.url.pathname === `/${locale}/contacts/` ? 'page' : undefined}>{dict.nav.contacts}</a>
-      <LanguageSwitcher />
+      <a href={`/${locale}/cases/autopodbor/`} class="px-1.5 xl:px-2.5 py-1.5 text-muted whitespace-nowrap" aria-current={Astro.url.pathname.includes('/cases/') ? 'page' : undefined}>{dict.nav.cases}</a>
+      <a href={`/${locale}/contacts/`} class="px-1.5 xl:px-2.5 py-1.5 text-muted whitespace-nowrap" aria-current={Astro.url.pathname === `/${locale}/contacts/` ? 'page' : undefined}>{dict.nav.contacts}</a>
     </nav>
 
-    <div class="flex items-center gap-2 shrink-0">
+    <div class="flex items-center gap-1.5 xl:gap-2 shrink-0">
+      <!-- Language switcher: desktop only, grouped with theme toggle (both are
+           preference controls, not nav destinations) — mobile gets its own
+           row inside #mobile-menu -->
+      <div class="hidden lg:block">
+        <LanguageSwitcher />
+      </div>
+
       <!-- Theme toggle: desktop only — mobile gets its own row inside #mobile-menu -->
       <button
         class="theme-toggle-btn theme-btn hidden lg:flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong bg-surface text-muted"
@@ -65,11 +70,13 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
         <span class="theme-icon-moon"><Moon size={16} /></span>
       </button>
 
-      <!-- CTA: always visible, text shortens below the lg breakpoint -->
-      <Button type="button" data-open-lead-modal class="px-3 lg:px-4 py-2">
+      <!-- CTA: always visible, full text only once there's room (xl) —
+           the lg breakpoint is where desktop nav first turns on and is
+           already tight with 6 nav links + lang switcher + theme toggle. -->
+      <Button type="button" data-open-lead-modal class="px-3 xl:px-4 py-2">
         <Send size={13} />
-        <span class="lg:hidden">{dict.header.ctaShort}</span>
-        <span class="hidden lg:inline">{dict.header.ctaLong}</span>
+        <span class="xl:hidden">{dict.header.ctaShort}</span>
+        <span class="hidden xl:inline">{dict.header.ctaLong}</span>
       </Button>
 
       <!-- Mobile burger -->
@@ -104,7 +111,7 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
         </div>
         <a href={`/${locale}/cases/autopodbor/`} class="text-secondary">{dict.nav.cases}</a>
         <a href={`/${locale}/contacts/`} class="text-secondary">{dict.nav.contacts}</a>
-        <div class="py-3"><LanguageSwitcher /></div>
+        <div class="py-3"><LanguageSwitcher variant="inline" /></div>
         <button type="button" class="theme-toggle-btn flex items-center gap-2 w-full py-[0.85rem] text-secondary">
           <span class="theme-icon-sun hidden"><Sun size={16} /></span>
           <span class="theme-icon-moon"><Moon size={16} /></span>

@@ -1,24 +1,145 @@
 ---
+import { ChevronDown, Check } from '@lucide/astro';
 import { SUPPORTED_LOCALES, type Locale } from '../i18n/config';
+import { FLAGS } from '../utils/constants';
+
+interface Props {
+  // 'dropdown' (default): compact trigger + popover — for the desktop header,
+  // where there's room for an absolutely-positioned panel.
+  // 'inline': flat row of all locales, no popover — for the mobile menu,
+  // whose collapsible wrapper has `overflow: hidden` for its open/close
+  // animation and would clip a popover instead of just letting it show.
+  variant?: 'dropdown' | 'inline';
+}
+const { variant = 'dropdown' } = Astro.props;
 
 const currentLocale = (Astro.currentLocale ?? 'ru') as Locale;
 const segments = Astro.url.pathname.split('/').filter(Boolean);
 const rest = segments.slice(1).join('/');
 
-const LABELS: Record<Locale, string> = { ru: 'RU', en: 'EN', sr: 'SR' };
+const LOCALE_META: Record<Locale, { code: string; native: string }> = {
+  ru: { code: 'RU', native: 'Русский' },
+  en: { code: 'EN', native: 'English' },
+  sr: { code: 'SR', native: 'Srpski' },
+};
+const current = LOCALE_META[currentLocale];
 ---
 
-<div class="lang-switcher flex items-center gap-1 text-xs font-medium">
-  {SUPPORTED_LOCALES.map(locale => (
-    <a
-      href={`/${locale}/${rest}`}
-      aria-current={locale === currentLocale ? 'page' : undefined}
-      class="px-1.5 py-1 rounded-sm text-muted"
-    >{LABELS[locale]}</a>
-  ))}
-</div>
+{variant === 'inline' ? (
+  <div class="lang-switcher-inline flex items-center gap-1.5">
+    {SUPPORTED_LOCALES.map(locale => {
+      const meta = LOCALE_META[locale];
+      const active = locale === currentLocale;
+      return (
+        <a href={`/${locale}/${rest}`} class:list={['lang-option flex items-center gap-1.5 px-3 py-2 rounded-sm text-sm', { 'lang-option-active': active }]}>
+          <span class="text-sm leading-none">{FLAGS[locale]}</span>
+          <span>{meta.code}</span>
+        </a>
+      );
+    })}
+  </div>
+) : (
+  <div class="lang-switcher relative">
+    <button type="button" class="lang-trigger flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-muted" aria-haspopup="listbox" aria-expanded="false">
+      <span class="text-sm leading-none">{FLAGS[currentLocale]}</span>
+      <span class="text-sm">{current.code}</span>
+      <ChevronDown size={13} class="lang-chevron" />
+    </button>
+
+    <ul class="lang-menu" role="listbox" aria-hidden="true">
+      {SUPPORTED_LOCALES.map(locale => {
+        const meta = LOCALE_META[locale];
+        const active = locale === currentLocale;
+        return (
+          <li role="option" aria-selected={active}>
+            <a href={`/${locale}/${rest}`} class:list={['lang-option flex items-center gap-2.5 px-3 py-2 rounded-sm text-sm', { 'lang-option-active': active }]}>
+              <span class="text-base leading-none">{FLAGS[locale]}</span>
+              <span class="flex-1">{meta.native}</span>
+              {active && <Check size={14} class="text-accent shrink-0" />}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+)}
 
 <style>
-  .lang-switcher a[aria-current="page"] { color: var(--color-text) !important; font-weight: 600; }
-  .lang-switcher a:hover { color: var(--color-text) !important; }
+  .lang-option { color: var(--color-muted); text-decoration: none; transition: background-color 0.15s, color 0.15s; }
+  .lang-option:hover { background: var(--color-surface-2); color: var(--color-text) !important; }
+  .lang-option-active { color: var(--color-accent) !important; font-weight: 500; background: var(--color-accent-subtle); }
+
+  .lang-trigger { transition: color 0.2s; }
+  .lang-trigger:hover,
+  .lang-trigger[aria-expanded="true"] { color: var(--color-text) !important; }
+
+  .lang-chevron { transition: transform 0.25s var(--ease-spring); }
+  .lang-trigger[aria-expanded="true"] .lang-chevron { transform: rotate(180deg); }
+
+  .lang-menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    z-index: 20;
+    min-width: 9.5rem;
+    padding: 0.35rem;
+    margin: 0;
+    list-style: none;
+    border-radius: var(--radius-sm, 0.375rem);
+    border: 1px solid var(--color-border-strong);
+    background: var(--color-surface);
+    box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+    transform-origin: top right;
+    pointer-events: none;
+    transition: opacity 0.2s var(--ease-spring), transform 0.2s var(--ease-spring);
+  }
+  .lang-switcher.lang-open .lang-menu {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lang-menu, .lang-chevron { transition: none; }
+  }
 </style>
+
+<script>
+  function initLanguageSwitchers() {
+    document.querySelectorAll<HTMLElement>('.lang-switcher').forEach(root => {
+      if (root.dataset.langInit) return;
+      root.dataset.langInit = '1';
+
+      const trigger = root.querySelector<HTMLButtonElement>('.lang-trigger');
+      const menu = root.querySelector<HTMLElement>('.lang-menu');
+      if (!trigger || !menu) return;
+
+      const close = () => {
+        root.classList.remove('lang-open');
+        trigger.setAttribute('aria-expanded', 'false');
+        menu.setAttribute('aria-hidden', 'true');
+      };
+      const open = () => {
+        root.classList.add('lang-open');
+        trigger.setAttribute('aria-expanded', 'true');
+        menu.setAttribute('aria-hidden', 'false');
+      };
+
+      trigger.addEventListener('click', e => {
+        e.stopPropagation();
+        root.classList.contains('lang-open') ? close() : open();
+      });
+
+      document.addEventListener('click', e => {
+        if (!root.contains(e.target as Node)) close();
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') close();
+      });
+    });
+  }
+
+  initLanguageSwitchers();
+</script>

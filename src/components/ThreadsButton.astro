@@ -1,11 +1,14 @@
 ---
 import Button from './Button.astro';
+import type { Locale } from '../i18n/config';
 
 const channel = import.meta.env.PUBLIC_THREADS_CHANNEL!;
+const locale = (Astro.currentLocale ?? 'ru') as Locale;
+const CHANNEL_LABEL: Record<Locale, string> = { ru: 'Наш канал', en: 'Our channel', sr: 'Naš kanal' };
 ---
 
 <Button variant="secondary" href={`https://www.threads.com/@${channel}`} target="_blank" rel="noopener" class="tg-channel px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center">
-  Наш канал
+  {CHANNEL_LABEL[locale]}
   <span class="tg-arrow text-[0.85em] transition-transform duration-200">→</span>
 </Button>
 

@@ -30,5 +30,7 @@ export const en: Dictionary = {
   common: {
     otherServicesLabel: 'Other services:',
     alsoWorkingInLabel: 'Also serving:',
+    homeLabel: 'Home',
+    faqHeading: 'Frequently Asked Questions',
   },
 };

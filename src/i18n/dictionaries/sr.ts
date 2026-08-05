@@ -30,5 +30,7 @@ export const sr: Dictionary = {
   common: {
     otherServicesLabel: 'Ostale usluge:',
     alsoWorkingInLabel: 'Takođe radimo u:',
+    homeLabel: 'Početna',
+    faqHeading: 'Česta pitanja',
   },
 };

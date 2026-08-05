@@ -14,3 +14,13 @@ export const DELIVERY_DESTINATIONS_ACCUSATIVE = [
   'Россию', 'Казахстан', 'Кыргызстан', 'Украину', 'Беларусь',
   'Боснию и Герцеговину', 'Хорватию', 'Северную Македонию', 'Турцию',
 ];
+
+// Single source of truth for flag emoji — keyed lowercase by whatever 2-letter
+// code is in play (delivery country, locale, or phone-country ISO). `sr`
+// (Serbian locale) and `rs` (Serbia country) are different keys that happen
+// to share a flag — not an error, both are kept explicit.
+export const FLAGS: Record<string, string> = {
+  de: '🇩🇪', rs: '🇷🇸', es: '🇪🇸', ch: '🇨🇭',
+  ru: '🇷🇺', en: '🇬🇧', sr: '🇷🇸',
+  ua: '🇺🇦', by: '🇧🇾', kz: '🇰🇿', ba: '🇧🇦', hr: '🇭🇷', me: '🇲🇪', mk: '🇲🇰', tr: '🇹🇷',
+};
