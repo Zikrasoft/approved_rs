@@ -20,7 +20,11 @@ const LEGACY_PATH_REWRITES: Record<string, string> = {
 // No trailing slash on '/keystatic': the CMS admin's own root route is the
 // bare path (no trailing slash) before Keystatic does its own internal
 // routing, so a trailing-slash prefix would miss it.
-const UNLOCALIZED_PREFIXES = ['/api/', '/keystatic'];
+// '/_image' is Astro's built-in on-demand image-transform endpoint (used in
+// dev always, and in prod for any non-prerendered route) — locale-prefixing
+// it breaks every <Image> on the site, since the endpoint only exists at
+// the bare path.
+const UNLOCALIZED_PREFIXES = ['/api/', '/keystatic', '/_image'];
 const UNLOCALIZED_EXACT = ['/llms.txt'];
 // @astrojs/sitemap generates these as real routes (not static files under
 // public/), so they pass through this middleware like any other page and
