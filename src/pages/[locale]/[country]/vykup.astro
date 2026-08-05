@@ -32,8 +32,8 @@ const cases = (await getCollection("cases"))
     )
     .slice(0, 3);
 const schema = generateServiceSchema(
-    `Выкуп авто в ${country.ru.nameLocative}`,
-    country.ru.name,
+    `${sc.title} ${location}`,
+    country[locale as Locale].name,
     meta.canonical,
 );
 const isSerbia = countryCode === "rs";

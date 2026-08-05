@@ -22,7 +22,7 @@ import { getCollection } from "astro:content";
 import { getActiveCountries } from "../../utils/geo";
 import { SITE_URL, SITE_NAME } from "../../utils/constants";
 import { generateOrganizationSchema } from "../../utils/seo";
-import { telegramLink } from "../../utils/telegramLink";
+import { telegramLink, DEFAULT_TG_MESSAGE } from "../../utils/telegramLink";
 import StatBlock from "../../components/StatBlock.astro";
 import { toCaseItem } from "../../utils/cases";
 import { getHomeContent } from "../../i18n/content/home";
@@ -47,9 +47,9 @@ const threadsChannel = import.meta.env.PUBLIC_THREADS_CHANNEL!;
 const schema = generateOrganizationSchema({
     url: SITE_URL,
     description: meta.description,
-    areaServed: countries.map((c) => c.ru.name),
+    areaServed: countries.map((c) => c[locale as Locale].name),
     sameAs: [`https://t.me/${tgManager}`, `https://www.threads.com/@${threadsChannel}`],
-    contactUrl: telegramLink(tgManager),
+    contactUrl: telegramLink(tgManager, DEFAULT_TG_MESSAGE[locale as Locale]),
 });
 
 // One connected story instead of a flat service list — each stop is a real

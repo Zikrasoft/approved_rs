@@ -17,7 +17,7 @@ const country = getCountry(countryCode!)!;
 const sc = getServicesContent(locale as Locale).proverka;
 const location = buildLocation(locale as Locale, country);
 const meta = generateMeta('proverka', { country, baseUrl: SITE_URL, path: `/${locale}/${countryCode}/proverka/`, locale: locale as Locale });
-const schema = generateServiceSchema(`Проверка авто в ${country.ru.nameLocative}`, country.ru.name, meta.canonical);
+const schema = generateServiceSchema(`${sc.title} ${location}`, country[locale as Locale].name, meta.canonical);
 ---
 
 <ServicePageLayout

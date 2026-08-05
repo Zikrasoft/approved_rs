@@ -2,7 +2,7 @@
 import { Send } from '@lucide/astro';
 import Button from './Button.astro';
 import ThreadsButton from './ThreadsButton.astro';
-import { telegramLink } from '../utils/telegramLink';
+import { telegramLink, DEFAULT_TG_MESSAGE } from '../utils/telegramLink';
 import { getServicesContent } from '../i18n/content/services';
 import { getLocale } from '../i18n/config';
 
@@ -25,7 +25,7 @@ const {
 <div class="flex flex-col sm:flex-row gap-3 my-8">
   <Button
     data-open-page-lead-modal={openModal ? true : undefined}
-    href={openModal ? undefined : telegramLink(manager, text)}
+    href={openModal ? undefined : telegramLink(manager, text ?? DEFAULT_TG_MESSAGE[locale])}
     target={openModal ? undefined : '_blank'}
     rel={openModal ? undefined : 'noopener'}
     class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center"

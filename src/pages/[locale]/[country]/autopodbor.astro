@@ -21,7 +21,7 @@ const sc = getServicesContent(locale as Locale).autopodbor;
 const location = buildLocation(locale as Locale, country);
 const meta = generateMeta('autopodbor', { country, baseUrl: SITE_URL, path: `/${locale}/${countryCode}/autopodbor/`, locale: locale as Locale });
 const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === countryCode && c.data.service === 'autopodbor').slice(0, 3);
-const schema = generateServiceSchema(`Автоподбор в ${country.ru.nameLocative}`, country.ru.name, meta.canonical);
+const schema = generateServiceSchema(`${sc.title} ${location}`, country[locale as Locale].name, meta.canonical);
 ---
 
 <ServicePageLayout

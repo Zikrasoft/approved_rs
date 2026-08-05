@@ -5,11 +5,11 @@ import CasesGrid from '../../../components/CasesGrid.astro';
 import ChipLinks from '../../../components/ChipLinks.astro';
 import SectionHeading from '../../../components/SectionHeading.astro';
 import Button from '../../../components/Button.astro';
-import { generateServiceSchema } from '../../../utils/seo';
+import { generateServiceSchema, OG_SUFFIX } from '../../../utils/seo';
 import { SITE_URL, SITE_NAME } from '../../../utils/constants';
 import { toAutoserviceCaseItem } from '../../../utils/cases';
 import { getPublishedAutoserviceCases } from '../../../utils/casesQueries';
-import { getActiveCountries } from '../../../utils/geo';
+import { getActiveCountries, getCountry } from '../../../utils/geo';
 import Faq from '../../../components/Faq.astro';
 import { getFaq } from '../../../i18n/content/faq';
 import { getServicesContent } from '../../../i18n/content/services';
@@ -24,9 +24,9 @@ const meta = {
   title: `${bc.metaTitle} | ${SITE_NAME}`,
   description: bc.metaDescription,
   canonical: `${SITE_URL}/${locale}/avtoservis-belgrade/`,
-  ogImage: `${SITE_URL}/og/autoservice.png`,
+  ogImage: `${SITE_URL}/og/autoservice${OG_SUFFIX[locale as Locale]}.png`,
 };
-const schema = generateServiceSchema('Автосервис в Белграде', 'Сербия', meta.canonical);
+const schema = generateServiceSchema(`${bc.title} ${bc.titleHighlight}`, getCountry('rs')![locale as Locale].name, meta.canonical);
 
 const items = (await getPublishedAutoserviceCases()).map((c) => toAutoserviceCaseItem(c, locale));
 

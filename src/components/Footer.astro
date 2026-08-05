@@ -5,7 +5,7 @@ import { getNavItems } from '../utils/labels';
 import { getI18n } from '../i18n/getI18n';
 import { getLocale } from '../i18n/config';
 import { SITE_NAME, DEFAULT_COUNTRY } from '../utils/constants';
-import { telegramLink } from '../utils/telegramLink';
+import { telegramLink, DEFAULT_TG_MESSAGE } from '../utils/telegramLink';
 const year = new Date().getFullYear();
 const TG_MANAGER = import.meta.env.PUBLIC_TG_MANAGER!;
 const THREADS_CHANNEL = import.meta.env.PUBLIC_THREADS_CHANNEL!;
@@ -26,7 +26,7 @@ const t = getI18n(locale);
           {t.footer.tagline}
         </p>
         <a
-          href={telegramLink(TG_MANAGER)}
+          href={telegramLink(TG_MANAGER, DEFAULT_TG_MESSAGE[locale])}
           target="_blank"
           rel="noopener"
           class="footer-tg inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline border border-accent-border text-accent"
