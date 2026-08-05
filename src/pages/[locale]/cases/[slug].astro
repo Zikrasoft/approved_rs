@@ -22,15 +22,26 @@ export async function getStaticPaths() {
 const { locale } = Astro.params;
 const cc = getServicesContent(locale as Locale).caseChrome;
 const { case: c } = Astro.props;
-const { Content } = await render(c);
-const geoBanner = await marked.parseInline(GEO_BANNERS[Math.floor(Math.random() * GEO_BANNERS.length)]);
 
-const hook = excerptFromMarkdown(c.body ?? '');
+// Case bodies are written in ru; en/sr get a separate, optional translation
+// entry (title + body only — car/year/price/images stay shared). No
+// translation yet for this case → fall back to the ru original rather than
+// leaving the page half-broken.
+const translation = locale === 'ru'
+  ? null
+  : (await getCollection('caseTranslations', t => t.data.caseSlug === c.id && t.data.locale === locale))[0] ?? null;
+
+const title = translation?.data.title ?? c.data.title;
+const { Content } = await render(translation ?? c);
+const banners = GEO_BANNERS[locale as Locale];
+const geoBanner = await marked.parseInline(banners[Math.floor(Math.random() * banners.length)]);
+
+const hook = excerptFromMarkdown((translation ?? c).body ?? '');
 const canonical = `${SITE_URL}/${locale}/cases/${c.id}/`;
 const imageUrl = c.data.image ? `${SITE_URL}${c.data.image.src}` : undefined;
 
 const meta = {
-  title: `${c.data.title} | ${SITE_NAME}`,
+  title: `${title} | ${SITE_NAME}`,
   description: hook ? `${hook} ${c.data.car} ${c.data.year}, ${c.data.price.value} ${c.data.price.currency ?? ''}.`.trim() : `${c.data.car} ${c.data.year}, ${c.data.price.value}. ${cc.realCaseFallback}`,
   canonical,
   // Real car photo makes a more compelling share preview than the generic template.
@@ -40,7 +51,7 @@ const meta = {
 };
 
 const schema = generateArticleSchema({
-  headline: c.data.title,
+  headline: title,
   description: meta.description,
   image: imageUrl,
   datePublished: c.data.date,
@@ -60,7 +71,7 @@ const schema = generateArticleSchema({
           <span class="text-xs text-muted">{c.data.country?.toUpperCase()}</span>
         </div>
 
-        <h1 class="font-display text-4xl md:text-5xl font-bold mb-6 fade-up fade-up-1">{c.data.title}</h1>
+        <h1 class="font-display text-4xl md:text-5xl font-bold mb-6 fade-up fade-up-1">{title}</h1>
 
         <div class="grid grid-cols-3 gap-6 max-w-sm">
           <div>

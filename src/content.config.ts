@@ -33,4 +33,19 @@ const autoserviceCases = defineCollection({
   }),
 });
 
-export const collections = { cases, autoserviceCases };
+// EN/SR translations of `cases` entries. A separate collection instead of
+// extra fields on `cases` itself: title/body are the only parts that differ
+// per locale (car/year/price/images are shared), and Astro's `render()`
+// needs a real markdown body per locale to produce a <Content /> component.
+// One optional file per (case, locale) — a case with no translation yet
+// just falls back to the ru original, never a broken page.
+const caseTranslations = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/case-translations' }),
+  schema: z.object({
+    caseSlug: z.string(),
+    locale: z.enum(['en', 'sr']),
+    title: z.string(),
+  }),
+});
+
+export const collections = { cases, autoserviceCases, caseTranslations };
