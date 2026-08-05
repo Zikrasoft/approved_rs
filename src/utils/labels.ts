@@ -55,14 +55,6 @@ export const SERVICE_LABELS: Record<string, string> = {
 
 export const AUTOSERVICE_SERVICES = ['diagnostics', 'maintenance', 'suspension', 'engine', 'prepurchase'] as const;
 
-export const AUTOSERVICE_LABELS: Record<(typeof AUTOSERVICE_SERVICES)[number], string> = {
-  diagnostics: 'Компьютерная диагностика',
-  maintenance: 'Техническое обслуживание',
-  suspension: 'Подвеска и тормоза',
-  engine: 'Двигатель и трансмиссия',
-  prepurchase: 'Проверка перед покупкой',
-};
-
 export const STATUS_LABELS: Record<string, string> = {
   in_progress: '✅ В работу',
   closed:      '❌ Закрыт',

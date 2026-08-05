@@ -6,11 +6,50 @@ import Button from '../components/Button.astro';
 import UtilityPageShell from '../components/UtilityPageShell.astro';
 import { MapPin, X } from '@lucide/astro';
 import { SITE_URL, SITE_NAME } from '../utils/constants';
+import { isLocale, DEFAULT_LOCALE, type Locale } from '../i18n/config';
 
-const locale = Astro.currentLocale ?? 'ru';
+// Astro serves this un-prefixed route for any unmatched path in any locale;
+// Astro.currentLocale isn't set here (outside the [locale] tree), so derive
+// intent from the URL the visitor actually requested.
+const firstSegment = Astro.url.pathname.split('/').filter(Boolean)[0] ?? '';
+const locale: Locale = isLocale(firstSegment) ? firstSegment : DEFAULT_LOCALE;
+
+const NOT_FOUND: Record<Locale, {
+  eyebrow: string; title: string; description: string; heading: string; body: string; home: string; cta: string;
+}> = {
+  ru: {
+    eyebrow: 'Ошибка · 404',
+    title: `Страница не найдена — ${SITE_NAME}`,
+    description: 'Запрошенная страница не существует.',
+    heading: 'Свернули не туда',
+    body: 'Такой страницы нет — возможно, адрес изменился. Вернитесь на главную или напишите нам: подскажем, куда ехать.',
+    home: '← На главную',
+    cta: 'Написать нам',
+  },
+  en: {
+    eyebrow: 'Error · 404',
+    title: `Page Not Found — ${SITE_NAME}`,
+    description: 'The page you requested doesn\'t exist.',
+    heading: 'Wrong turn',
+    body: 'This page doesn\'t exist — the link may be outdated. Head back home or write to us: we\'ll point you the right way.',
+    home: '← Back home',
+    cta: 'Message us',
+  },
+  sr: {
+    eyebrow: 'Greška · 404',
+    title: `Stranica nije pronađena — ${SITE_NAME}`,
+    description: 'Tražena stranica ne postoji.',
+    heading: 'Pogrešno skretanje',
+    body: 'Ova stranica ne postoji — možda je adresa zastarela. Vratite se na početnu ili nam pišite: pokazaćemo vam pravi put.',
+    home: '← Na početnu',
+    cta: 'Pišite nam',
+  },
+};
+const nf = NOT_FOUND[locale];
+
 const meta = {
-  title: `Страница не найдена — ${SITE_NAME}`,
-  description: 'Запрошенная страница не существует.',
+  title: nf.title,
+  description: nf.description,
   canonical: `${SITE_URL}/404/`,
 };
 ---
@@ -18,7 +57,7 @@ const meta = {
 <BaseLayout {...meta}>
   <section class="hero-grid relative overflow-hidden">
     <UtilityPageShell minHeight="75vh">
-      <span class="eyebrow fade-up fade-up-1">Ошибка · 404</span>
+      <span class="eyebrow fade-up fade-up-1">{nf.eyebrow}</span>
 
       <!-- Signature: a route that never reaches its pin -->
       <div class="route-wrap fade-up fade-up-2" aria-hidden="true">
@@ -37,16 +76,16 @@ const meta = {
         </span>
       </div>
 
-      <h1 class="font-display text-4xl font-bold mb-4 fade-up fade-up-3">Свернули не туда</h1>
+      <h1 class="font-display text-4xl font-bold mb-4 fade-up fade-up-3">{nf.heading}</h1>
       <p class="text-base text-muted max-w-sm mb-8 fade-up fade-up-4">
-        Такой страницы нет — возможно, адрес изменился. Вернитесь на главную или напишите нам: подскажем, куда ехать.
+        {nf.body}
       </p>
 
       <div class="flex flex-col sm:flex-row sm:items-center gap-4 fade-up fade-up-5">
         <Button variant="secondary" href={`/${locale}/`} class="px-6 py-3 justify-center">
-          ← На главную
+          {nf.home}
         </Button>
-        <TelegramCTA label="Написать нам" />
+        <TelegramCTA label={nf.cta} />
       </div>
     </UtilityPageShell>
   </section>
