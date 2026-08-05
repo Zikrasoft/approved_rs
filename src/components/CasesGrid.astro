@@ -3,7 +3,7 @@ import CaseCard from './CaseCard.astro';
 import SectionHeading from './SectionHeading.astro';
 import type { CaseCardProps } from './CaseCard.astro';
 import { getLocale } from '../i18n/config';
-import { getDictionary } from '../i18n/getDictionary';
+import { getI18n } from '../i18n/getI18n';
 
 interface Props {
   items: CaseCardProps[];
@@ -16,7 +16,7 @@ interface Props {
 
 const { items, heading, headingSize = 'lg', viewAllHref, topBorder = false, class: className } = Astro.props;
 const locale = getLocale(Astro.currentLocale);
-const viewAllLabel = getDictionary(locale).common.viewAllCasesLabel;
+const viewAllLabel = getI18n(locale).common.viewAllCasesLabel;
 ---
 
 {items.length > 0 && (

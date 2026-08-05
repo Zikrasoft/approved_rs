@@ -1,5 +1,5 @@
 ---
-import { getDictionary } from '../i18n/getDictionary';
+import { getI18n } from '../i18n/getI18n';
 import { getLocale } from '../i18n/config';
 
 interface Props {
@@ -10,11 +10,11 @@ interface Props {
 
 const { active, autopodborCount, autoserviceCount } = Astro.props;
 const locale = getLocale(Astro.currentLocale);
-const dict = getDictionary(locale);
+const t = getI18n(locale);
 
 const tabs = [
-  { id: 'autopodbor', href: `/${locale}/cases/autopodbor/`, label: dict.nav.autopodbor, count: autopodborCount },
-  { id: 'autoservice', href: `/${locale}/cases/autoservice/`, label: dict.nav.autoservice, count: autoserviceCount },
+  { id: 'autopodbor', href: `/${locale}/cases/autopodbor/`, label: t.nav.autopodbor, count: autopodborCount },
+  { id: 'autoservice', href: `/${locale}/cases/autoservice/`, label: t.nav.autoservice, count: autoserviceCount },
 ] as const;
 ---
 

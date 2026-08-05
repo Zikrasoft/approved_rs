@@ -2,7 +2,7 @@
 import { X } from '@lucide/astro';
 import LeadForm from './LeadForm.astro';
 import { getLocale } from '../i18n/config';
-import { getDictionary } from '../i18n/getDictionary';
+import { getI18n } from '../i18n/getI18n';
 
 interface Props {
   id: string;
@@ -14,7 +14,7 @@ interface Props {
 
 const { id, triggerAttr, service = '', country = '', city = '' } = Astro.props;
 const locale = getLocale(Astro.currentLocale);
-const closeLabel = getDictionary(locale).common.closeLabel;
+const closeLabel = getI18n(locale).common.closeLabel;
 ---
 
 <dialog id={id} class="lead-modal">

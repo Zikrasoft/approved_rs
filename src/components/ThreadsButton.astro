@@ -1,11 +1,11 @@
 ---
 import Button from './Button.astro';
 import { getLocale } from '../i18n/config';
-import { getDictionary } from '../i18n/getDictionary';
+import { getI18n } from '../i18n/getI18n';
 
 const channel = import.meta.env.PUBLIC_THREADS_CHANNEL!;
 const locale = getLocale(Astro.currentLocale);
-const channelLabel = getDictionary(locale).common.channelLabel;
+const channelLabel = getI18n(locale).common.channelLabel;
 ---
 
 <Button variant="secondary" href={`https://www.threads.com/@${channel}`} target="_blank" rel="noopener" class="tg-channel px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center">

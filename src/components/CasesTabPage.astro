@@ -5,7 +5,7 @@ import CaseCategoryTabs from './CaseCategoryTabs.astro';
 import PageHero from './PageHero.astro';
 import type { CaseCardProps } from './CaseCard.astro';
 import { getPagesContent } from '../i18n/content/pages';
-import { getDictionary } from '../i18n/getDictionary';
+import { getI18n } from '../i18n/getI18n';
 import { getLocale } from '../i18n/config';
 
 interface Props {
@@ -20,11 +20,11 @@ const autopodborCount = active === 'autopodbor' ? items.length : otherCount;
 const autoserviceCount = active === 'autoservice' ? items.length : otherCount;
 const locale = getLocale(Astro.currentLocale);
 const cs = getPagesContent(locale).casesShared;
-const dict = getDictionary(locale);
+const t = getI18n(locale);
 ---
 
 <BaseLayout {...meta}>
-  <PageHero decoWord="CASES" title={dict.nav.cases} subtitle={cs.heroSubtitle} />
+  <PageHero decoWord="CASES" title={t.nav.cases} subtitle={cs.heroSubtitle} />
 
   <section class="max-w-6xl mx-auto px-6 py-16">
     <CaseCategoryTabs {active} {autopodborCount} {autoserviceCount} />

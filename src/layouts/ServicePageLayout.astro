@@ -12,7 +12,7 @@ import { SITE_NAME } from '../utils/constants';
 import { getActiveCountries } from '../utils/geo';
 import { SERVICES } from '../utils/labels';
 import { toCaseItem } from '../utils/cases';
-import { getDictionary } from '../i18n/getDictionary';
+import { getI18n } from '../i18n/getI18n';
 import { getLocale } from '../i18n/config';
 
 interface Props {
@@ -44,7 +44,7 @@ const {
 
 const locale = getLocale(Astro.currentLocale);
 const items = cases.map(c => toCaseItem(c, locale));
-const dict = getDictionary(locale);
+const t = getI18n(locale);
 ---
 
 <BaseLayout {...meta} schema={schema}>
@@ -81,9 +81,9 @@ const dict = getDictionary(locale);
 
   <div class="max-w-6xl mx-auto px-6 pb-16 pt-4">
     {showCountryCrossLinks && (
-      <ChipLinks label={dict.common.alsoWorkingInLabel} items={getActiveCountries().filter(c => c.code !== currentCountry).map(c => ({ href: `/${locale}/${c.code}/${currentService}/`, text: c[locale].name }))} />
+      <ChipLinks label={t.common.alsoWorkingInLabel} items={getActiveCountries().filter(c => c.code !== currentCountry).map(c => ({ href: `/${locale}/${c.code}/${currentService}/`, text: c[locale].name }))} />
     )}
-    <ChipLinks label={dict.common.otherServicesLabel} items={SERVICES.filter(s => s.slug !== currentService).map(s => ({ href: `/${locale}/${currentCountry}/${s.slug}/`, text: dict.nav[s.slug] }))} />
+    <ChipLinks label={t.common.otherServicesLabel} items={SERVICES.filter(s => s.slug !== currentService).map(s => ({ href: `/${locale}/${currentCountry}/${s.slug}/`, text: t.nav[s.slug] }))} />
   </div>
 
 </BaseLayout>

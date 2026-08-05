@@ -1,4 +1,4 @@
-import { getDictionary } from '../i18n/getDictionary';
+import { getI18n } from '../i18n/getI18n';
 import type { Locale } from '../i18n/config';
 
 export const SERVICES: { slug: 'autopodbor' | 'vykup' | 'proverka' }[] = [
@@ -14,7 +14,7 @@ export const getNavItems = (
   locale: Locale,
   countryCode: string
 ): { href: string; label: string; slug: string }[] => {
-  const nav = getDictionary(locale).nav;
+  const nav = getI18n(locale).nav;
   return [
     { href: `/${locale}/${countryCode}/autopodbor/`, label: nav.autopodbor, slug: 'autopodbor' },
     { href: `/${locale}/avtoservis-belgrade/`, label: nav.autoservice, slug: 'autoservice' },

@@ -2,7 +2,7 @@
 import SiteLogo from './SiteLogo.astro';
 import { Send } from '@lucide/astro';
 import { getNavItems } from '../utils/labels';
-import { getDictionary } from '../i18n/getDictionary';
+import { getI18n } from '../i18n/getI18n';
 import { getLocale } from '../i18n/config';
 import { SITE_NAME, DEFAULT_COUNTRY } from '../utils/constants';
 import { telegramLink } from '../utils/telegramLink';
@@ -10,7 +10,7 @@ const year = new Date().getFullYear();
 const TG_MANAGER = import.meta.env.PUBLIC_TG_MANAGER!;
 const THREADS_CHANNEL = import.meta.env.PUBLIC_THREADS_CHANNEL!;
 const locale = getLocale(Astro.currentLocale);
-const dict = getDictionary(locale);
+const t = getI18n(locale);
 ---
 
 <footer class="mt-24 border-t border-default">
@@ -23,7 +23,7 @@ const dict = getDictionary(locale);
           <SiteLogo size="sm" />
         </div>
         <p class="text-sm leading-relaxed max-w-xs mb-6 text-muted">
-          {dict.footer.tagline}
+          {t.footer.tagline}
         </p>
         <a
           href={telegramLink(TG_MANAGER)}
@@ -32,13 +32,13 @@ const dict = getDictionary(locale);
           class="footer-tg inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline border border-accent-border text-accent"
         >
           <Send size={13} />
-          {dict.footer.contactManagerLabel}
+          {t.footer.contactManagerLabel}
         </a>
       </div>
 
       <!-- Services -->
       <div>
-        <p class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted">{dict.footer.servicesHeading}</p>
+        <p class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted">{t.footer.servicesHeading}</p>
         <nav class="flex flex-col gap-2.5 text-sm footer-nav text-secondary">
           {getNavItems(locale, DEFAULT_COUNTRY).map(item => (
             <a href={item.href}>{item.label}</a>
@@ -48,15 +48,15 @@ const dict = getDictionary(locale);
 
       <!-- Company -->
       <div>
-        <p class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted">{dict.footer.companyHeading}</p>
+        <p class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted">{t.footer.companyHeading}</p>
         <nav class="flex flex-col gap-2.5 text-sm footer-nav text-secondary">
-          <a href={`/${locale}/cases/autopodbor/`}>{dict.nav.cases}</a>
-          <a href={`/${locale}/contacts/`}>{dict.nav.contacts}</a>
-          <a href={`/${locale}/privacy/`}>{dict.footer.privacyLabel}</a>
+          <a href={`/${locale}/cases/autopodbor/`}>{t.nav.cases}</a>
+          <a href={`/${locale}/contacts/`}>{t.nav.contacts}</a>
+          <a href={`/${locale}/privacy/`}>{t.footer.privacyLabel}</a>
         </nav>
         <div class="mt-6 space-y-1.5">
-          <p class="text-xs text-muted">{dict.footer.coverageLine}</p>
-          <p class="text-xs text-muted">{dict.footer.hoursLine}</p>
+          <p class="text-xs text-muted">{t.footer.coverageLine}</p>
+          <p class="text-xs text-muted">{t.footer.hoursLine}</p>
         </div>
       </div>
 
@@ -64,14 +64,14 @@ const dict = getDictionary(locale);
 
     <!-- Bottom -->
     <div class="pt-6 border-t border-default flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-      <p class="text-xs text-muted">© {year} {SITE_NAME} — {dict.footer.copyrightSuffix}</p>
+      <p class="text-xs text-muted">© {year} {SITE_NAME} — {t.footer.copyrightSuffix}</p>
       <a
         href={`https://www.threads.com/@${THREADS_CHANNEL}`}
         target="_blank"
         rel="noopener"
         class="footer-channel text-xs no-underline text-muted"
       >
-        {dict.footer.channelLinkLabel}
+        {t.footer.channelLinkLabel}
       </a>
     </div>
   </div>

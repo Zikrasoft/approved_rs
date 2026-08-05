@@ -1,9 +1,9 @@
 ---
 import { getLocale } from '../i18n/config';
-import { getDictionary } from '../i18n/getDictionary';
+import { getI18n } from '../i18n/getI18n';
 
 const locale = getLocale(Astro.currentLocale);
-const cc = getDictionary(locale).common.cookie;
+const cc = getI18n(locale).common.cookie;
 ---
 
 <div

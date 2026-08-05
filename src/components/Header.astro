@@ -5,13 +5,13 @@ import Button from './Button.astro';
 import LeadFormModal from './LeadFormModal.astro';
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import { getNavItems, isNavItemActive } from '../utils/labels';
-import { getDictionary } from '../i18n/getDictionary';
+import { getI18n } from '../i18n/getI18n';
 import { getLocale } from '../i18n/config';
 import { DEFAULT_COUNTRY } from '../utils/constants';
 import { getActiveCountries } from '../utils/geo';
 
 const locale = getLocale(Astro.currentLocale);
-const dict = getDictionary(locale);
+const t = getI18n(locale);
 const urlCountry = Astro.url.pathname.split('/')[2];
 const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCountry : DEFAULT_COUNTRY;
 const isHome = Astro.url.pathname === `/${locale}/` || Astro.url.pathname === `/${locale}`;
@@ -46,8 +46,8 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
           {item.label}
         </a>
       ))}
-      <a href={`/${locale}/cases/autopodbor/`} class="px-1.5 xl:px-2.5 py-1.5 text-muted whitespace-nowrap" aria-current={Astro.url.pathname.includes('/cases/') ? 'page' : undefined}>{dict.nav.cases}</a>
-      <a href={`/${locale}/contacts/`} class="px-1.5 xl:px-2.5 py-1.5 text-muted whitespace-nowrap" aria-current={Astro.url.pathname === `/${locale}/contacts/` ? 'page' : undefined}>{dict.nav.contacts}</a>
+      <a href={`/${locale}/cases/autopodbor/`} class="px-1.5 xl:px-2.5 py-1.5 text-muted whitespace-nowrap" aria-current={Astro.url.pathname.includes('/cases/') ? 'page' : undefined}>{t.nav.cases}</a>
+      <a href={`/${locale}/contacts/`} class="px-1.5 xl:px-2.5 py-1.5 text-muted whitespace-nowrap" aria-current={Astro.url.pathname === `/${locale}/contacts/` ? 'page' : undefined}>{t.nav.contacts}</a>
     </nav>
 
     <div class="flex items-center gap-1.5 xl:gap-2 shrink-0">
@@ -61,8 +61,8 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
       <!-- Theme toggle: desktop only — mobile gets its own row inside #mobile-menu -->
       <button
         class="theme-toggle-btn theme-btn hidden lg:flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong bg-surface text-muted"
-        aria-label={dict.header.themeToggleLabel}
-        title={dict.header.themeToggleLabel}
+        aria-label={t.header.themeToggleLabel}
+        title={t.header.themeToggleLabel}
       >
         <!-- Sun: shown when dark (click → light) -->
         <span class="theme-icon-sun hidden"><Sun size={16} /></span>
@@ -75,15 +75,15 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
            already tight with 6 nav links + lang switcher + theme toggle. -->
       <Button type="button" data-open-lead-modal class="px-3 xl:px-4 py-2">
         <Send size={13} />
-        <span class="xl:hidden">{dict.header.ctaShort}</span>
-        <span class="hidden xl:inline">{dict.header.ctaLong}</span>
+        <span class="xl:hidden">{t.header.ctaShort}</span>
+        <span class="hidden xl:inline">{t.header.ctaLong}</span>
       </Button>
 
       <!-- Mobile burger -->
       <button
         id="burger"
         class="lg:hidden flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong text-secondary"
-        aria-label={dict.header.menuLabel}
+        aria-label={t.header.menuLabel}
         aria-expanded={isHome ? 'true' : 'false'}
       >
         <span id="burger-open" class:list={{ hidden: isHome }}><Menu size={18} /></span>
@@ -109,13 +109,13 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
             </a>
           ))}
         </div>
-        <a href={`/${locale}/cases/autopodbor/`} class="text-secondary">{dict.nav.cases}</a>
-        <a href={`/${locale}/contacts/`} class="text-secondary">{dict.nav.contacts}</a>
+        <a href={`/${locale}/cases/autopodbor/`} class="text-secondary">{t.nav.cases}</a>
+        <a href={`/${locale}/contacts/`} class="text-secondary">{t.nav.contacts}</a>
         <div class="py-3"><LanguageSwitcher variant="inline" /></div>
         <button type="button" class="theme-toggle-btn flex items-center gap-2 w-full py-[0.85rem] text-secondary">
           <span class="theme-icon-sun hidden"><Sun size={16} /></span>
           <span class="theme-icon-moon"><Moon size={16} /></span>
-          {dict.header.themeToggleMobileLabel}
+          {t.header.themeToggleMobileLabel}
         </button>
       </nav>
     </div>

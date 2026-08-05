@@ -2,7 +2,7 @@
 import { getActiveCountries, getCountryFlag } from '../utils/geo';
 import type { Country } from '../utils/geo';
 import { getLocale } from '../i18n/config';
-import { getDictionary } from '../i18n/getDictionary';
+import { getI18n } from '../i18n/getI18n';
 
 interface Props {
   detected: Country;
@@ -11,12 +11,12 @@ interface Props {
 const { detected } = Astro.props;
 const options = getActiveCountries();
 const locale = getLocale(Astro.currentLocale);
-const dict = getDictionary(locale).common;
+const common = getI18n(locale).common;
 ---
 
 <div id="geo-banner" class="geo-banner border-b border-default bg-accent-subtle">
   <div class="max-w-6xl mx-auto px-6 py-3 flex items-center gap-3 flex-wrap">
-    <p class="text-sm text-secondary shrink-0">{dict.whereFromLabel}</p>
+    <p class="text-sm text-secondary shrink-0">{common.whereFromLabel}</p>
     <div class="flex items-center gap-2 flex-wrap">
       {options.map(c => (
         <a
@@ -37,7 +37,7 @@ const dict = getDictionary(locale).common;
         data-geo-skip
         class="geo-pill px-3 py-1.5 rounded-sm text-xs font-medium border border-default bg-transparent text-muted"
       >
-        {dict.otherCountryLabel}
+        {common.otherCountryLabel}
       </button>
     </div>
   </div>

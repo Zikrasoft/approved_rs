@@ -5,6 +5,6 @@ import { sr } from './dictionaries/sr';
 
 const dictionaries = { ru, en, sr };
 
-export function getDictionary(locale: Locale) {
+export function getI18n(locale: Locale) {
   return dictionaries[locale];
 }
