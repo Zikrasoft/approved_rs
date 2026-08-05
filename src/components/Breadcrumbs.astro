@@ -1,13 +1,13 @@
 ---
 import { SITE_URL } from '../utils/constants';
 import { getDictionary } from '../i18n/getDictionary';
-import type { Locale } from '../i18n/config';
+import { getLocale } from '../i18n/config';
 
 interface Crumb { label: string; href?: string }
 interface Props { items: Crumb[] }
 
 const { items } = Astro.props;
-const locale = (Astro.currentLocale ?? 'ru') as Locale;
+const locale = getLocale(Astro.currentLocale);
 const trail: Crumb[] = [{ label: getDictionary(locale).common.homeLabel, href: `/${locale}/` }, ...items];
 
 const schema = {

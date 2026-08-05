@@ -4,7 +4,7 @@ import Button from './Button.astro';
 import { Send, Phone, ChevronDown } from '@lucide/astro';
 import { FLAGS } from '../utils/constants';
 import { getLeadFormContent } from '../i18n/content/leadForm';
-import type { Locale } from '../i18n/config';
+import { getLocale } from '../i18n/config';
 
 interface Props {
   service?: string;
@@ -14,7 +14,7 @@ interface Props {
 
 const { service = '', country = '', city = '' } = Astro.props;
 const sourceUrl = Astro.url.href;
-const locale = (Astro.currentLocale ?? 'ru') as Locale;
+const locale = getLocale(Astro.currentLocale);
 const lf = getLeadFormContent(locale);
 
 // ponytail: curated list covering the site's own markets + common client

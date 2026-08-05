@@ -1,32 +1,9 @@
 ---
-import type { Locale } from '../i18n/config';
+import { getLocale } from '../i18n/config';
+import { getDictionary } from '../i18n/getDictionary';
 
-const locale = (Astro.currentLocale ?? 'ru') as Locale;
-
-const COOKIE_TEXT: Record<Locale, { notice: string; more: string; policyLink: string; accept: string; decline: string }> = {
-  ru: {
-    notice: 'Мы используем аналитические cookies (Google Analytics), чтобы понимать, как посетители используют сайт.',
-    more: 'Подробнее в',
-    policyLink: 'политике конфиденциальности',
-    accept: 'Принять',
-    decline: 'Отклонить',
-  },
-  en: {
-    notice: 'We use analytics cookies (Google Analytics) to understand how visitors use the site.',
-    more: 'Learn more in our',
-    policyLink: 'privacy policy',
-    accept: 'Accept',
-    decline: 'Decline',
-  },
-  sr: {
-    notice: 'Koristimo analitičke kolačiće (Google Analytics) da bismo razumeli kako posetioci koriste sajt.',
-    more: 'Više informacija u',
-    policyLink: 'politici privatnosti',
-    accept: 'Prihvati',
-    decline: 'Odbij',
-  },
-};
-const cc = COOKIE_TEXT[locale];
+const locale = getLocale(Astro.currentLocale);
+const cc = getDictionary(locale).common.cookie;
 ---
 
 <div

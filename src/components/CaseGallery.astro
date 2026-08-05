@@ -3,7 +3,8 @@ import Button from './Button.astro';
 import { Image } from 'astro:assets';
 import { X, ChevronLeft, ChevronRight } from '@lucide/astro';
 import type { ImageMetadata } from 'astro';
-import type { Locale } from '../i18n/config';
+import { getLocale } from '../i18n/config';
+import { getDictionary } from '../i18n/getDictionary';
 
 interface Props {
   images: ImageMetadata[];
@@ -12,46 +13,10 @@ interface Props {
 
 const { images, name } = Astro.props;
 const VISIBLE = 6;
-const locale = (Astro.currentLocale ?? 'ru') as Locale;
-
-const GALLERY: Record<Locale, {
-  morePhotos: string;
-  alt: (name: string, i: number) => string;
-  openAria: (i: number, total: number) => string;
-  showMore: (n: number) => string;
-  close: string;
-  prev: string;
-  next: string;
-}> = {
-  ru: {
-    morePhotos: 'Больше фото',
-    alt: (name, i) => `${name}, фото ${i + 1}`,
-    openAria: (i, total) => `Открыть фото ${i + 1} из ${total}`,
-    showMore: n => `Показать ещё (${n})`,
-    close: 'Закрыть',
-    prev: 'Предыдущее фото',
-    next: 'Следующее фото',
-  },
-  en: {
-    morePhotos: 'More photos',
-    alt: (name, i) => `${name}, photo ${i + 1}`,
-    openAria: (i, total) => `Open photo ${i + 1} of ${total}`,
-    showMore: n => `Show more (${n})`,
-    close: 'Close',
-    prev: 'Previous photo',
-    next: 'Next photo',
-  },
-  sr: {
-    morePhotos: 'Više fotografija',
-    alt: (name, i) => `${name}, fotografija ${i + 1}`,
-    openAria: (i, total) => `Otvori fotografiju ${i + 1} od ${total}`,
-    showMore: n => `Prikaži još (${n})`,
-    close: 'Zatvori',
-    prev: 'Prethodna fotografija',
-    next: 'Sledeća fotografija',
-  },
-};
-const g = GALLERY[locale];
+const locale = getLocale(Astro.currentLocale);
+const dict = getDictionary(locale);
+const g = dict.common.gallery;
+const closeLabel = dict.common.closeLabel;
 ---
 
 {images.length > 0 && (
@@ -59,7 +24,7 @@ const g = GALLERY[locale];
     <p class="text-xs tracking-widest uppercase mb-6 font-medium text-accent">{g.morePhotos}</p>
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
       {images.map((img, i) => {
-        const alt = g.alt(name, i);
+        const alt = g.altTemplate(name, i);
         return (
           <button
             type="button"
@@ -69,7 +34,7 @@ const g = GALLERY[locale];
             ]}
             data-src={img.src}
             data-alt={alt}
-            aria-label={g.openAria(i, images.length)}
+            aria-label={g.openAriaTemplate(i, images.length)}
           >
             <Image
               src={img}
@@ -87,12 +52,12 @@ const g = GALLERY[locale];
 
     {images.length > VISIBLE && (
       <Button data-more variant="secondary" class="mt-5 px-5 py-2.5 text-xs tracking-widest uppercase">
-        {g.showMore(images.length - VISIBLE)}
+        {g.showMoreTemplate(images.length - VISIBLE)}
       </Button>
     )}
 
     <dialog class="gallery-dialog">
-      <button type="button" data-close aria-label={g.close} class="gallery-btn gallery-close"><X size={16} /></button>
+      <button type="button" data-close aria-label={closeLabel} class="gallery-btn gallery-close"><X size={16} /></button>
       <button type="button" data-prev aria-label={g.prev} class="gallery-btn gallery-nav gallery-prev"><ChevronLeft size={20} /></button>
       <img data-dialog-img alt="" />
       <button type="button" data-next aria-label={g.next} class="gallery-btn gallery-nav gallery-next"><ChevronRight size={20} /></button>

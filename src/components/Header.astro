@@ -6,11 +6,11 @@ import LeadFormModal from './LeadFormModal.astro';
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import { getNavItems, isNavItemActive } from '../utils/labels';
 import { getDictionary } from '../i18n/getDictionary';
-import type { Locale } from '../i18n/config';
+import { getLocale } from '../i18n/config';
 import { DEFAULT_COUNTRY } from '../utils/constants';
 import { getActiveCountries } from '../utils/geo';
 
-const locale = (Astro.currentLocale ?? 'ru') as Locale;
+const locale = getLocale(Astro.currentLocale);
 const dict = getDictionary(locale);
 const urlCountry = Astro.url.pathname.split('/')[2];
 const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCountry : DEFAULT_COUNTRY;

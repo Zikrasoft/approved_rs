@@ -2,14 +2,14 @@
 import { ChevronDown } from '@lucide/astro';
 import SectionHeading from './SectionHeading.astro';
 import { getDictionary } from '../i18n/getDictionary';
-import type { Locale } from '../i18n/config';
+import { getLocale } from '../i18n/config';
 
 interface Props {
   heading?: string;
   items: { q: string; a: string }[];
 }
 
-const locale = (Astro.currentLocale ?? 'ru') as Locale;
+const locale = getLocale(Astro.currentLocale);
 const { heading = getDictionary(locale).common.faqHeading, items } = Astro.props;
 
 const schema = {

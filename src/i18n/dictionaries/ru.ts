@@ -30,6 +30,26 @@ export const ru = {
     alsoWorkingInLabel: 'Также работаем в:',
     homeLabel: 'Главная',
     faqHeading: 'Частые вопросы',
+    whereFromLabel: 'Откуда вы?',
+    otherCountryLabel: 'Другая страна',
+    viewAllCasesLabel: 'Все кейсы',
+    closeLabel: 'Закрыть',
+    channelLabel: 'Наш канал',
+    cookie: {
+      notice: 'Мы используем аналитические cookies (Google Analytics), чтобы понимать, как посетители используют сайт.',
+      more: 'Подробнее в',
+      policyLink: 'политике конфиденциальности',
+      accept: 'Принять',
+      decline: 'Отклонить',
+    },
+    gallery: {
+      morePhotos: 'Больше фото',
+      prev: 'Предыдущее фото',
+      next: 'Следующее фото',
+      altTemplate: (name: string, i: number) => `${name}, фото ${i + 1}`,
+      openAriaTemplate: (i: number, total: number) => `Открыть фото ${i + 1} из ${total}`,
+      showMoreTemplate: (n: number) => `Показать ещё (${n})`,
+    },
   },
 };
 

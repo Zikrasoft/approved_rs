@@ -5,7 +5,7 @@ import type { Locale } from '../i18n/config';
 
 interface Props {
   country: Country;
-  locale: string;
+  locale: Locale;
 }
 
 const { country, locale } = Astro.props;
@@ -20,7 +20,7 @@ const { country, locale } = Astro.props;
       {getCountryFlag(country.code)}
     </span>
     <span class="text-sm font-medium text-primary truncate">
-      {country[locale as Locale].name}
+      {country[locale].name}
     </span>
   </span>
   <span class="country-arrow text-xs text-accent shrink-0 transition-transform duration-200">

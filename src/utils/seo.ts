@@ -26,6 +26,10 @@ const OG_IMAGE_BY_SERVICE: Record<string, string> = {
   proverka: 'proverka',
 };
 
+// Assumes every current country/city takes the Serbian preposition "u"
+// (locative-in). None of the 4 countries / 11 cities in countries.json /
+// cities.json need "na" instead — if a future place does (e.g. an island or
+// region), this needs a per-place preposition field, not a hardcoded one.
 export function buildLocation(locale: Locale, country?: Country, city?: City): string {
   if (locale === 'en') {
     const name = city ? city.en.name : country!.en.name;

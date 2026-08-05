@@ -1,6 +1,6 @@
 ---
 import { ChevronDown, Check } from '@lucide/astro';
-import { SUPPORTED_LOCALES, type Locale } from '../i18n/config';
+import { SUPPORTED_LOCALES, getLocale, type Locale } from '../i18n/config';
 import { FLAGS } from '../utils/constants';
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 }
 const { variant = 'dropdown' } = Astro.props;
 
-const currentLocale = (Astro.currentLocale ?? 'ru') as Locale;
+const currentLocale = getLocale(Astro.currentLocale);
 const segments = Astro.url.pathname.split('/').filter(Boolean);
 const rest = segments.slice(1).join('/');
 

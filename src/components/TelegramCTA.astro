@@ -4,7 +4,7 @@ import Button from './Button.astro';
 import ThreadsButton from './ThreadsButton.astro';
 import { telegramLink } from '../utils/telegramLink';
 import { getServicesContent } from '../i18n/content/services';
-import type { Locale } from '../i18n/config';
+import { getLocale } from '../i18n/config';
 
 interface Props {
   manager?: string;
@@ -13,7 +13,7 @@ interface Props {
   text?: string;
 }
 
-const locale = (Astro.currentLocale ?? 'ru') as Locale;
+const locale = getLocale(Astro.currentLocale);
 const {
   manager = import.meta.env.PUBLIC_TG_MANAGER!,
   label = getServicesContent(locale).caseChrome.ctaButtonLabel,

@@ -3,13 +3,13 @@ import SiteLogo from './SiteLogo.astro';
 import { Send } from '@lucide/astro';
 import { getNavItems } from '../utils/labels';
 import { getDictionary } from '../i18n/getDictionary';
-import type { Locale } from '../i18n/config';
+import { getLocale } from '../i18n/config';
 import { SITE_NAME, DEFAULT_COUNTRY } from '../utils/constants';
 import { telegramLink } from '../utils/telegramLink';
 const year = new Date().getFullYear();
 const TG_MANAGER = import.meta.env.PUBLIC_TG_MANAGER!;
 const THREADS_CHANNEL = import.meta.env.PUBLIC_THREADS_CHANNEL!;
-const locale = (Astro.currentLocale ?? 'ru') as Locale;
+const locale = getLocale(Astro.currentLocale);
 const dict = getDictionary(locale);
 ---
 

@@ -8,6 +8,7 @@ import SpeedInsights from '@vercel/speed-insights/astro';
 import '../styles/global.css';
 import { SITE_URL, SITE_NAME } from '../utils/constants';
 import { getAlternateLinks } from '../i18n/hreflang';
+import { getLocale } from '../i18n/config';
 // Logo/heading font: preload so it's ready before first paint (avoids the
 // fallback→webfont width jump on every navigation, most visible on the logo).
 import logoFontUrl from '@fontsource/playfair-display/files/playfair-display-latin-700-normal.woff2?url';
@@ -28,7 +29,7 @@ const {
   ogImageHeight = 630,
 } = Astro.props;
 
-const locale = Astro.currentLocale ?? 'ru';
+const locale = getLocale(Astro.currentLocale);
 const OG_LOCALE_MAP: Record<string, string> = { ru: 'ru_RU', en: 'en_US', sr: 'sr_RS' };
 const alternateLinks = getAlternateLinks(Astro.url.pathname);
 ---
