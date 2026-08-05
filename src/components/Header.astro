@@ -238,8 +238,16 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
     var open   = document.getElementById('burger-open');
     var close  = document.getElementById('burger-close');
 
+    // The menu's own grid-rows open animation (750ms, see <style> below)
+    // nudges the browser's scroll-anchoring by a few px with no real user
+    // scroll involved — ignoreScrollCloseUntil tells the scroll listener
+    // below to sit out that window instead of treating it as a real scroll
+    // and closing the menu it was just asked to open.
+    let ignoreScrollCloseUntil = 0;
+
     function openMenu() {
       if (!menu || !burger) return;
+      ignoreScrollCloseUntil = Date.now() + 900;
       menu.classList.add('menu-open');
       menu.removeAttribute('aria-hidden');
       menu.inert = false;
@@ -296,7 +304,15 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
       // page where the burger was opened by hand). Checks the live
       // aria-expanded state each time rather than closing once and
       // detaching, so it keeps working for every open on every page.
+      //
+      // The mobile menu's own open animation triggers a 'scroll' event or
+      // two on its own (scroll-anchoring compensating for the layout
+      // change, not real user scrolling) — without the guard below, opening
+      // the menu while already scrolled past the threshold made this
+      // handler close it again almost immediately, so the menu looked
+      // impossible to open once scrolled down.
       window.addEventListener('scroll', function () {
+        if (Date.now() < ignoreScrollCloseUntil) return;
         if (window.scrollY <= 60) return;
         if (burger.getAttribute('aria-expanded') === 'true') closeMenu();
       }, { passive: true });
