@@ -64,6 +64,7 @@ interface ServicesContent {
     alsoSourcingLabel: string;
     howToFindHeading: string;
     addressLabel: string;
+    streetAddress: string;
     cityCountryLine: string;
     mapButtonLabel: string;
     mapIframeTitle: string;
@@ -159,7 +160,8 @@ const ru: ServicesContent = {
     alsoSourcingLabel: 'Также подбираем авто:',
     howToFindHeading: 'Как нас найти',
     addressLabel: 'Адрес автосервиса',
-    cityCountryLine: 'Београд, Сербия',
+    streetAddress: 'Пека Павловића 39',
+    cityCountryLine: 'Белград, Сербия',
     mapButtonLabel: 'Открыть в Google Maps',
     mapIframeTitle: 'Автосервис на карте — Пека Павловића 39, Белград',
     worksHeading: 'Примеры работ',
@@ -254,6 +256,7 @@ const en: ServicesContent = {
     alsoSourcingLabel: 'Also sourcing cars in:',
     howToFindHeading: 'How to Find Us',
     addressLabel: 'Service Address',
+    streetAddress: 'Peka Pavlovića 39',
     cityCountryLine: 'Belgrade, Serbia',
     mapButtonLabel: 'Open in Google Maps',
     mapIframeTitle: 'Auto service on the map — Peka Pavlovića 39, Belgrade',
@@ -349,6 +352,7 @@ const sr: ServicesContent = {
     alsoSourcingLabel: 'Takođe pronalazimo vozila i u:',
     howToFindHeading: 'Kako nas pronaći',
     addressLabel: 'Adresa servisa',
+    streetAddress: 'Peka Pavlovića 39',
     cityCountryLine: 'Beograd, Srbija',
     mapButtonLabel: 'Otvorite u Google mapama',
     mapIframeTitle: 'Auto servis na mapi — Peka Pavlovića 39, Beograd',
