@@ -2,6 +2,13 @@ import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { AUTOSERVICE_SERVICES } from './utils/labels';
 
+// EN/SR translation of this case's title + body, filled in right on the
+// same Keystatic entry (not a separate collection) — everything else
+// (photo, price, year, country) is shared across locales and stays
+// RU-only. Missing/empty → the page falls back to the ru original instead
+// of breaking.
+const caseTranslation = z.object({ title: z.string(), body: z.string() }).optional();
+
 const cases = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/cases' }),
   schema: ({ image }) => z.object({
@@ -15,6 +22,7 @@ const cases = defineCollection({
     gallery: z.array(image()).default([]),
     date: z.coerce.date(),
     published: z.boolean().default(true),
+    translations: z.object({ en: caseTranslation, sr: caseTranslation }).optional(),
   }),
 });
 
@@ -33,19 +41,4 @@ const autoserviceCases = defineCollection({
   }),
 });
 
-// EN/SR translations of `cases` entries. A separate collection instead of
-// extra fields on `cases` itself: title/body are the only parts that differ
-// per locale (car/year/price/images are shared), and Astro's `render()`
-// needs a real markdown body per locale to produce a <Content /> component.
-// One optional file per (case, locale) — a case with no translation yet
-// just falls back to the ru original, never a broken page.
-const caseTranslations = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/case-translations' }),
-  schema: z.object({
-    caseSlug: z.string(),
-    locale: z.enum(['en', 'sr']),
-    title: z.string(),
-  }),
-});
-
-export const collections = { cases, autoserviceCases, caseTranslations };
+export const collections = { cases, autoserviceCases };

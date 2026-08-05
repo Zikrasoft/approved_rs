@@ -23,20 +23,21 @@ const { locale } = Astro.params;
 const cc = getServicesContent(locale as Locale).caseChrome;
 const { case: c } = Astro.props;
 
-// Case bodies are written in ru; en/sr get a separate, optional translation
-// entry (title + body only — car/year/price/images stay shared). No
-// translation yet for this case → fall back to the ru original rather than
-// leaving the page half-broken.
-const translation = locale === 'ru'
-  ? null
-  : (await getCollection('caseTranslations', t => t.data.caseSlug === c.id && t.data.locale === locale))[0] ?? null;
+// Case bodies are written in ru; en/sr get an optional title+body
+// translation right on the same case entry's `translations` field (filled
+// in via Keystatic, plain markdown text — not a second markdoc body, since
+// Keystatic only supports one real document body per file). No translation
+// yet for this case → fall back to the ru original rather than leaving the
+// page half-broken.
+const translation = locale === 'en' ? c.data.translations?.en : locale === 'sr' ? c.data.translations?.sr : undefined;
 
-const title = translation?.data.title ?? c.data.title;
-const { Content } = await render(translation ?? c);
+const title = translation?.title ?? c.data.title;
+const { Content } = await render(c);
+const translatedHtml = translation ? await marked.parse(translation.body) : null;
 const banners = GEO_BANNERS[locale as Locale];
 const geoBanner = await marked.parseInline(banners[Math.floor(Math.random() * banners.length)]);
 
-const hook = excerptFromMarkdown((translation ?? c).body ?? '');
+const hook = excerptFromMarkdown(translation?.body ?? c.body ?? '');
 const canonical = `${SITE_URL}/${locale}/cases/${c.id}/`;
 const imageUrl = c.data.image ? `${SITE_URL}${c.data.image.src}` : undefined;
 
@@ -103,9 +104,10 @@ const schema = generateArticleSchema({
 
     <!-- Content -->
     <div class="py-12 prose-custom">
-      <div class="leading-relaxed text-base text-primary [&>p]:mb-5 [&>p:last-child]:mb-0">
-        <Content />
-      </div>
+      {translatedHtml
+        ? <div class="leading-relaxed text-base text-primary [&>p]:mb-5 [&>p:last-child]:mb-0" set:html={translatedHtml} />
+        : <div class="leading-relaxed text-base text-primary [&>p]:mb-5 [&>p:last-child]:mb-0"><Content /></div>
+      }
     </div>
 
     <!-- More photos -->

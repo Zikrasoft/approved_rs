@@ -7,6 +7,20 @@ import { config, collection, fields } from '@keystatic/core';
 // time, not a public/ URL string.
 const caseImage = () => fields.image({ label: 'Фото' });
 
+// EN/SR translation of this case's title + body, right on the same entry —
+// everything else (photo, price, year, country) is shared across locales
+// and stays ru-only. `markdoc.inline()` (not the plain `markdoc()` used for
+// the ru `content` field below) gives the same rich-text toolbar but stores
+// the result as a plain markdown string alongside the other fields, since
+// only one field per file can be the real document body (format.contentField
+// below) — the site parses this string with `marked` at render time. Leave
+// blank on a case that isn't translated yet; the site falls back to the ru
+// original.
+const translationField = (label: string) => fields.object({
+  title: fields.text({ label: 'Заголовок' }),
+  body: fields.markdoc.inline({ label: 'Текст' }),
+}, { label });
+
 export default config({
   storage: { kind: 'github', repo: 'Zikrasoft/approved_rs' },
 
@@ -58,7 +72,11 @@ export default config({
         gallery: fields.array(caseImage(), { label: 'Больше фото', itemLabel: props => props.value || 'Фото' }),
         date: fields.date({ label: 'Дата' }),
         published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
-        content: fields.markdoc({ label: 'Описание', extension: 'md' }),
+        translations: fields.object({
+          en: translationField('English'),
+          sr: translationField('Srpski'),
+        }, { label: 'Переводы' }),
+        content: fields.markdoc({ label: 'Описание (RU)', extension: 'md' }),
       },
     }),
     autoserviceCases: collection({

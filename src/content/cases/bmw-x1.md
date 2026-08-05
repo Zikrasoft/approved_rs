@@ -4,12 +4,37 @@ car: BMW X1
 year: 2019
 price:
   value: '18500'
-  currency: '€'
+  currency: €
 country: rs
 service: autopodbor
 image: ./bmw-x1/image.jpg
 date: 2026-07-24
 published: true
+translations:
+  en:
+    title: BMW X1
+    body: |
+      **Car sourcing in Serbia — the right decision comes from experience, not emotion.**
+
+      Viktor came to us before he'd even received his Serbian residence permit. We told him upfront that the car could only be registered in his name once the permit came through, so the search had to wait a little. A few months later, in July 2026, once the paperwork was sorted, we got to work finding him a car.
+
+      In the meantime, what he was looking for had changed. Viktor originally had his eye on a **Peugeot**, but after weighing the pros and cons, he decided a more reliable option made more sense — a **BMW X1**.
+
+      Because we run **official BMW ISTA dealer diagnostics**, the car got a thorough check. Everything came back clean: **timing chain**, **injectors**, **EGR system**, and the rest of the parameters all within spec. The car runs the reliable **2.0-liter B47 diesel** paired with an **8-speed Aisin automatic** — one of the strongest combinations in its class.
+
+      Viktor walked away with a fully inspected car, a clean history, and no hidden technical issues.
+  sr:
+    title: BMW X1
+    body: |
+      **Odabir vozila u Srbiji — pravo rešenje dolazi iz iskustva, ne iz emocija.**
+
+      Viktor nam se obratio još pre nego što je dobio boravišnu dozvolu u Srbiji. Odmah smo ga upozorili da vozilo može da se registruje na njegovo ime tek nakon dobijanja dozvole, pa je potraga morala malo da sačeka. Nekoliko meseci kasnije, već u julu 2026. godine, nakon što je dobio dokumenta, krenuli smo u potragu za automobilom.
+
+      U međuvremenu su se promenili i njegovi zahtevi. Viktor je u početku razmatrao **Peugeot**, ali je posle razmatranja svih prednosti i mana odlučio da se okrene pouzdanijoj opciji — **BMW X1**.
+
+      Zahvaljujući tome što koristimo **zvaničnu BMW ISTA diliersku dijagnostiku**, vozilo je detaljno provereno. Dijagnostika je pokazala odlično stanje motora: **lanac razvoda**, **brizgaljke**, **EGR sistem** i ostali parametri su bili u granicama normale. Vozilo poseduje pouzdan **2,0-litarski dizel motor B47** i **8-stepeni automatski menjač Aisin**, koji se smatraju jednim od najboljih rešenja u svojoj klasi.
+
+      Na kraju je Viktor dobio potpuno provereno vozilo sa transparentnom istorijom i bez skrivenih tehničkih problema.
 ---
 **Автоподбор в Сербии — когда правильное решение приходит с опытом, а не с эмоциями.**
 
