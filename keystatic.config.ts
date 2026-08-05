@@ -13,16 +13,27 @@ const caseImage = () => fields.image({ label: 'Фото' });
 // the ru `content` field below) gives the same rich-text toolbar but stores
 // the result as a plain markdown string alongside the other fields, since
 // only one field per file can be the real document body (format.contentField
-// below) — the site parses this string with `marked` at render time. Leave
-// blank on a case that isn't translated yet; the site falls back to the ru
-// original.
-const translationField = (label: string) => fields.object({
-  title: fields.text({ label: 'Заголовок' }),
-  body: fields.markdoc.inline({ label: 'Текст' }),
+// below) — the site parses this string with `marked` at render time.
+// Required: every new case ships translated in all 3 languages from day
+// one, not RU-only "for now" (see CLAUDE.md). The title field enforces this
+// (validation.isRequired); markdoc.inline has no such option — Keystatic
+// will let a case save with an empty translated body, so this is an
+// editorial rule to follow, not one the form can fully enforce. The site's
+// own fallback to the ru original still exists as a safety net for
+// anything published before this rule, not as an intended workflow.
+const translationField = (label: string, suffix: string) => fields.object({
+  title: fields.text({ label: `Заголовок (${suffix})`, validation: { isRequired: true } }),
+  body: fields.markdoc.inline({ label: `Текст (${suffix})` }),
 }, { label });
 
 export default config({
-  storage: { kind: 'github', repo: 'Zikrasoft/approved_rs' },
+  // Local dev reads/writes the working tree directly — no GitHub OAuth,
+  // and edits show up immediately without a commit+push round trip. On
+  // Vercel the filesystem is ephemeral, so production has to go through
+  // GitHub's API to actually persist anything.
+  storage: import.meta.env.PROD
+    ? { kind: 'github', repo: 'Zikrasoft/approved_rs' }
+    : { kind: 'local' },
 
   collections: {
     cases: collection({
@@ -30,8 +41,22 @@ export default config({
       slugField: 'title',
       path: 'src/content/cases/*',
       format: { contentField: 'content' },
+      // Plain stacked form, full width for every field: this entry has
+      // three real rich-text bodies (ru/en/sr), and Keystatic's 'content'
+      // layout only gives one of them the wide main pane — the other two
+      // get squeezed into the narrow metadata sidebar, worse for
+      // translating, not better. Fields stay top-level (content.config.ts's
+      // schema and every reader of c.data.* expects that shape) — reordered
+      // so title → translations → ru text come first, ahead of the
+      // car/photo/publish metadata, since translating an existing case is
+      // the common edit.
       schema: {
         title: fields.slug({ name: { label: 'Заголовок' } }),
+        translations: fields.object({
+          en: translationField('English', 'EN'),
+          sr: translationField('Srpski', 'SR'),
+        }, { label: 'Переводы' }),
+        content: fields.markdoc({ label: 'Текст (RU)', extension: 'md' }),
         car: fields.text({ label: 'Автомобиль' }),
         year: fields.integer({ label: 'Год' }),
         price: fields.object(
@@ -72,11 +97,6 @@ export default config({
         gallery: fields.array(caseImage(), { label: 'Больше фото', itemLabel: props => props.value || 'Фото' }),
         date: fields.date({ label: 'Дата' }),
         published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
-        translations: fields.object({
-          en: translationField('English'),
-          sr: translationField('Srpski'),
-        }, { label: 'Переводы' }),
-        content: fields.markdoc({ label: 'Описание (RU)', extension: 'md' }),
       },
     }),
     autoserviceCases: collection({
@@ -86,6 +106,11 @@ export default config({
       format: { contentField: 'content' },
       schema: {
         title: fields.slug({ name: { label: 'Заголовок' } }),
+        translations: fields.object({
+          en: translationField('English', 'EN'),
+          sr: translationField('Srpski', 'SR'),
+        }, { label: 'Переводы' }),
+        content: fields.markdoc({ label: 'Текст (RU)', extension: 'md' }),
         car: fields.text({ label: 'Автомобиль' }),
         year: fields.integer({ label: 'Год' }),
         price: fields.object(
@@ -117,7 +142,6 @@ export default config({
         gallery: fields.array(caseImage(), { label: 'Больше фото', itemLabel: props => props.value || 'Фото' }),
         date: fields.date({ label: 'Дата' }),
         published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
-        content: fields.markdoc({ label: 'Описание', extension: 'md' }),
       },
     }),
   },

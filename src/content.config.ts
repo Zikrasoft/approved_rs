@@ -38,6 +38,7 @@ const autoserviceCases = defineCollection({
     gallery: z.array(image()).default([]),
     date: z.coerce.date(),
     published: z.boolean().default(true),
+    translations: z.object({ en: caseTranslation, sr: caseTranslation }).optional(),
   }),
 });
 
