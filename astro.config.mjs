@@ -8,7 +8,11 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   site: "https://approved.rs",
-  output: "server",
+  // Static by default — 14 of 15 pages are fully static; the two API routes
+  // and the homepage (needs Astro.locals.suggestedCountry from middleware
+  // for the geo banner) opt into SSR individually via `prerender = false`
+  // instead of every static page opting in via `prerender = true`.
+  output: "static",
   adapter: vercel(),
   i18n: {
     locales: ["ru", "en", "sr"],

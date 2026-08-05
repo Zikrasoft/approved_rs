@@ -1,5 +1,3 @@
-export const prerender = true;
-
 import type { APIRoute } from 'astro';
 import { SITE_URL, SITE_NAME } from '../utils/constants';
 import { SERVICES } from '../utils/labels';

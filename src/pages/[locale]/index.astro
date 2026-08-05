@@ -1,4 +1,7 @@
 ---
+// No getStaticPaths — resolved per-request so it can read
+// Astro.locals.suggestedCountry (set by middleware) for the geo banner.
+export const prerender = false;
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import GeoBanner from "../../components/GeoBanner.astro";
 import TelegramCTA from "../../components/TelegramCTA.astro";
