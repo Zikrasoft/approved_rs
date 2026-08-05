@@ -160,10 +160,10 @@ const ru: ServicesContent = {
     alsoSourcingLabel: 'Также подбираем авто:',
     howToFindHeading: 'Как нас найти',
     addressLabel: 'Адрес автосервиса',
-    streetAddress: 'Пека Павловића 39',
+    streetAddress: 'Пека Павловича 39',
     cityCountryLine: 'Белград, Сербия',
     mapButtonLabel: 'Открыть в Google Maps',
-    mapIframeTitle: 'Автосервис на карте — Пека Павловића 39, Белград',
+    mapIframeTitle: 'Автосервис на карте — Пека Павловича 39, Белград',
     worksHeading: 'Примеры работ',
   },
   caseChrome: {
