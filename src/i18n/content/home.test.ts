@@ -1,9 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { getHomeContent } from './home';
+import { SUPPORTED_LOCALES } from '@/i18n/config';
 
 describe('getHomeContent', () => {
   it('returns all sections with the right array lengths for every locale', () => {
-    for (const locale of ['ru', 'en', 'sr'] as const) {
+    for (const locale of SUPPORTED_LOCALES) {
       const h = getHomeContent(locale);
       expect(h.journey.length).toBe(4);
       expect(h.trustCards.length).toBe(3);

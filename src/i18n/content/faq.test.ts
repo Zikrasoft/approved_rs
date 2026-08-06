@@ -1,9 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { getFaq } from './faq';
+import { SUPPORTED_LOCALES } from '@/i18n/config';
 
 describe('getFaq', () => {
   it('returns all 5 groups plus cityExpert for every locale', () => {
-    for (const locale of ['ru', 'en', 'sr'] as const) {
+    for (const locale of SUPPORTED_LOCALES) {
       const faq = getFaq(locale);
       expect(faq.autopodbor.length).toBe(6);
       expect(faq.vykup.length).toBe(4);

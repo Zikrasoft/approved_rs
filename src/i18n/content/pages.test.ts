@@ -1,10 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { getPagesContent } from './pages';
-import { SITE_NAME } from '../../utils/constants';
+import { SITE_NAME } from '@/utils/constants';
+import { SUPPORTED_LOCALES } from '@/i18n/config';
 
 describe('getPagesContent', () => {
   it('returns all sections for every locale', () => {
-    for (const locale of ['ru', 'en', 'sr'] as const) {
+    for (const locale of SUPPORTED_LOCALES) {
       const p = getPagesContent(locale);
       expect(p.contacts.steps.length).toBe(3);
       expect(p.privacy.sections.length).toBe(4);

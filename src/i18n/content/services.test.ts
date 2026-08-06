@@ -1,9 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { getServicesContent } from './services';
+import { SUPPORTED_LOCALES } from '@/i18n/config';
 
 describe('getServicesContent', () => {
   it('every locale produces all top-level sections', () => {
-    for (const locale of ['ru', 'en', 'sr'] as const) {
+    for (const locale of SUPPORTED_LOCALES) {
       const s = getServicesContent(locale);
       expect(s.autopodbor.stepsFor('X').length).toBe(5);
       expect(s.autopodbor.deliveryDestinations.length).toBe(9);
