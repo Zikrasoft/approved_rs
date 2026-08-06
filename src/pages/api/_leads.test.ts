@@ -5,7 +5,7 @@ vi.mock('../../lib/telegram', () => ({
 }));
 
 import { POST } from "./leads";
-import { sendLeadNotification } from "../../lib/telegram";
+import { sendLeadNotification } from "@/lib/telegram";
 
 function makeCtx(fields: Record<string, string>) {
   const formData = new FormData();
@@ -44,7 +44,7 @@ describe('POST /api/leads', () => {
   });
 
   it('calls sendLeadNotification with parsed form fields', async () => {
-    const ctx = makeCtx({ name: 'Иван', contact: '@ivan', service: 'vykup', country: 'de', source_url: '/de/vykup/' });
+    const ctx = makeCtx({ name: 'Иван', contact: '@ivan', service: 'vykup', country: 'de', source_url: '/ru/vykup/de/' });
     await POST(ctx);
     expect(sendLeadNotification).toHaveBeenCalledWith(expect.objectContaining({
       name: 'Иван', contact: '@ivan', service: 'vykup', country: 'de',
