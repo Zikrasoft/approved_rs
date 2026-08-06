@@ -25,7 +25,7 @@ export const en: Dictionary = {
     coverageLine: 'Germany · Spain · Serbia · Switzerland',
     hoursLine: '24/7, no days off',
     copyrightSuffix: 'Car sourcing, service, and delivery from Europe',
-    channelLinkLabel: 'Our channel →',
+    channelLinkLabel: 'Our channel',
   },
   common: {
     otherServicesLabel: 'Other services:',

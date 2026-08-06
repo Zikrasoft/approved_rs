@@ -23,7 +23,7 @@ export const ru = {
     coverageLine: 'Германия · Испания · Сербия · Швейцария',
     hoursLine: 'Круглосуточно, без выходных',
     copyrightSuffix: 'Автоподбор, сервис и доставка авто из Европы',
-    channelLinkLabel: 'Наш канал →',
+    channelLinkLabel: 'Наш канал',
   },
   common: {
     otherServicesLabel: 'Другие услуги:',

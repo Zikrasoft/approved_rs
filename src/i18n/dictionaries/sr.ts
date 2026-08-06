@@ -25,7 +25,7 @@ export const sr: Dictionary = {
     coverageLine: 'Nemačka · Španija · Srbija · Švajcarska',
     hoursLine: 'Non-stop, bez slobodnih dana',
     copyrightSuffix: 'Odabir, servis i dostava vozila iz Evrope',
-    channelLinkLabel: 'Naš kanal →',
+    channelLinkLabel: 'Naš kanal',
   },
   common: {
     otherServicesLabel: 'Ostale usluge:',

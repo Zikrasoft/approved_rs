@@ -1,11 +1,11 @@
 ---
 import SiteLogo from './SiteLogo.astro';
 import { Send } from '@lucide/astro';
-import { getNavItems } from '../utils/labels';
-import { getI18n } from '../i18n/getI18n';
-import { getLocale } from '../i18n/config';
-import { SITE_NAME, DEFAULT_COUNTRY } from '../utils/constants';
-import { telegramLink, DEFAULT_TG_MESSAGE } from '../utils/telegramLink';
+import { getNavItems } from '@/utils/labels';
+import { getI18n } from '@/i18n/getI18n';
+import { getLocale } from '@/i18n/config';
+import { SITE_NAME, DEFAULT_COUNTRY } from '@/utils/constants';
+import { telegramLink, DEFAULT_TG_MESSAGE } from '@/utils/telegramLink';
 const year = new Date().getFullYear();
 const TG_MANAGER = import.meta.env.PUBLIC_TG_MANAGER!;
 const THREADS_CHANNEL = import.meta.env.PUBLIC_THREADS_CHANNEL!;
@@ -72,6 +72,7 @@ const t = getI18n(locale);
         class="footer-channel text-xs no-underline text-muted"
       >
         {t.footer.channelLinkLabel}
+        <span class="footer-channel-arrow inline-block text-[0.85em] transition-transform duration-200">→</span>
       </a>
     </div>
   </div>
@@ -86,4 +87,5 @@ const t = getI18n(locale);
 
   .footer-channel { transition: color 0.2s; }
   .footer-channel:hover { color: var(--color-accent) !important; }
+  .footer-channel:hover .footer-channel-arrow { transform: translateX(3px); }
 </style>

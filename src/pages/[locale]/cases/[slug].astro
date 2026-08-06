@@ -1,17 +1,17 @@
 ---
-import BaseLayout from '../../../layouts/BaseLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
 import { MapPin } from '@lucide/astro';
-import TelegramCTA from '../../../components/TelegramCTA.astro';
-import Price from '../../../components/Price.astro';
-import CaseGallery from '../../../components/CaseGallery.astro';
+import TelegramCTA from '@/components/TelegramCTA.astro';
+import Price from '@/components/Price.astro';
+import CaseGallery from '@/components/CaseGallery.astro';
 import { getCollection, render } from 'astro:content';
-import { SITE_URL, SITE_NAME } from '../../../utils/constants';
-import { GEO_BANNERS } from '../../../data/geo-banners';
-import { excerptFromMarkdown, generateArticleSchema } from '../../../utils/seo';
-import { withLocales } from '../../../utils/paths';
-import { getServicesContent } from '../../../i18n/content/services';
-import type { Locale } from '../../../i18n/config';
+import { SITE_URL, SITE_NAME } from '@/utils/constants';
+import { getGeoBanners } from '@/i18n/content/geoBanners';
+import { excerptFromMarkdown, generateArticleSchema } from '@/utils/seo';
+import { withLocales } from '@/utils/paths';
+import { getServicesContent } from '@/i18n/content/services';
+import type { Locale } from '@/i18n/config';
 import { marked } from 'marked';
 
 export async function getStaticPaths() {
@@ -34,7 +34,7 @@ const translation = locale === 'en' ? c.data.translations?.en : locale === 'sr' 
 const title = translation?.title ?? c.data.title;
 const { Content } = await render(c);
 const translatedHtml = translation ? await marked.parse(translation.body) : null;
-const banners = GEO_BANNERS[locale as Locale];
+const banners = getGeoBanners(locale as Locale);
 const geoBanner = await marked.parseInline(banners[Math.floor(Math.random() * banners.length)]);
 
 const hook = excerptFromMarkdown(translation?.body ?? c.body ?? '');

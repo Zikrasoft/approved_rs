@@ -1,6 +1,10 @@
-import type { Locale } from '../i18n/config';
+import type { Locale } from '@/i18n/config';
 
-export const GEO_BANNERS: Record<Locale, string[]> = {
+// SEO-keyword-dense banner shown on case-detail pages ("where we work") —
+// one of these is picked at random per page render. City names are spelled
+// out explicitly (not just "Serbia") because that's what people actually
+// search for.
+const banners: Record<Locale, string[]> = {
   ru: [
     'Если вам нужен **автоподбор в Белграде, Нови-Саде, Панчево, Суботице и по всей Сербии**, поможем найти действительно достойный автомобиль, проверив его историю, техническое состояние и юридическую чистоту.',
     'Если вам нужен **автоподбор в Сербии**, **автоподбор в Белграде**, **Нови-Саде**, **Нише**, **Суботице**, **Панчево**, **Крагуеваце**, **Чачаке**, **Ужице**, **Валево**, **Зренянине**, **Шабаце**, **Сомборе** или любом другом городе Сербии — мы проверим историю автомобиля, проведем профессиональную диагностику и поможем купить действительно достойный экземпляр.',
@@ -38,3 +42,7 @@ export const GEO_BANNERS: Record<Locale, string[]> = {
     'Za **odabir vozila u Srbiji** — **Beogradu**, **Novom Sadu**, **Nišu**, **Kragujevcu**, **Čačku**, **Subotici**, **Pančevu** ili bilo kom drugom gradu u Srbiji — pomoći ćemo vam da pronađete zaista dobar automobil, proveriti njegovu istoriju i tehničko stanje, i bezbedno sprovesti kupovinu.',
   ],
 };
+
+export function getGeoBanners(locale: Locale): string[] {
+  return banners[locale];
+}
