@@ -1,0 +1,11 @@
+---
+// Exists purely so Vercel's adapter registers a function route for the
+// literal '/' path — without a page matching it exactly, middleware.ts's
+// rewrite-'/'-to-locale logic never runs in production (static output only
+// routes '/' through middleware if some Astro page actually claims it).
+// Middleware always intercepts and rewrites before this ever renders; the
+// redirect below is just a defensive fallback if that ever fails.
+export const prerender = false;
+import { DEFAULT_LOCALE } from '@/i18n/config';
+return Astro.redirect(`/${DEFAULT_LOCALE}/`);
+---
