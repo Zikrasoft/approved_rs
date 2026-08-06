@@ -1,12 +1,12 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
 import CaseCard from './CaseCard.astro';
 import CaseCategoryTabs from './CaseCategoryTabs.astro';
 import PageHero from './PageHero.astro';
 import type { CaseCardProps } from './CaseCard.astro';
-import { getPagesContent } from '../i18n/content/pages';
-import { getI18n } from '../i18n/getI18n';
-import { getLocale } from '../i18n/config';
+import { getPagesContent } from '@/i18n/content/pages';
+import { getI18n } from '@/i18n/getI18n';
+import { getLocale } from '@/i18n/config';
 
 interface Props {
   active: 'autopodbor' | 'autoservice';

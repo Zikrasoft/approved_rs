@@ -1,5 +1,5 @@
 import { getActiveCountries, getCitiesForCountry } from './geo';
-import { SUPPORTED_LOCALES, type Locale } from '../i18n/config';
+import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 
 export function getCountryPaths() {
   return getActiveCountries().map(c => ({ params: { country: c.code } }));

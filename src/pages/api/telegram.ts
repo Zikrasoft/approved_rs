@@ -1,8 +1,8 @@
 export const prerender = false;
 
 import type { APIContext } from 'astro';
-import { editGroupMessage, answerCallbackQuery } from '../../lib/telegram';
-import { ACTION_TO_STATUS } from '../../utils/labels';
+import { editGroupMessage, answerCallbackQuery } from '@/lib/telegram';
+import { ACTION_TO_STATUS } from '@/utils/labels';
 
 export async function POST({ request }: APIContext): Promise<Response> {
   const secret = request.headers.get('x-telegram-bot-api-secret-token');

@@ -1,4 +1,4 @@
-import type { Locale } from '../i18n/config';
+import type { Locale } from '@/i18n/config';
 
 // No single default: the prefilled greeting depends on the visitor's locale,
 // so every caller resolves DEFAULT_TG_MESSAGE[locale] itself and passes it

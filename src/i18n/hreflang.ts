@@ -1,5 +1,5 @@
 import { SUPPORTED_LOCALES, DEFAULT_LOCALE } from './config';
-import { SITE_URL } from '../utils/constants';
+import { SITE_URL } from '@/utils/constants';
 
 export function getAlternateLinks(pathname: string): { hreflang: string; href: string }[] {
   const segments = pathname.split('/').filter(Boolean);

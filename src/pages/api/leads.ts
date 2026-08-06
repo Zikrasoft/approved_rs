@@ -1,8 +1,8 @@
 export const prerender = false;
 
 import type { APIContext } from 'astro';
-import { sendLeadNotification } from '../../lib/telegram';
-import { isLocale, type Locale } from '../../i18n/config';
+import { sendLeadNotification } from '@/lib/telegram';
+import { isLocale, type Locale } from '@/i18n/config';
 
 // Only reached if a visitor bypasses the client-side validation (JS
 // disabled, direct POST) — but the cookie-based locale is already right

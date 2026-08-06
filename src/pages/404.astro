@@ -1,11 +1,11 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import TelegramCTA from '../components/TelegramCTA.astro';
-import Button from '../components/Button.astro';
-import UtilityPageShell from '../components/UtilityPageShell.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import TelegramCTA from '@/components/TelegramCTA.astro';
+import Button from '@/components/Button.astro';
+import UtilityPageShell from '@/components/UtilityPageShell.astro';
 import { MapPin, X } from '@lucide/astro';
-import { SITE_URL, SITE_NAME } from '../utils/constants';
-import { isLocale, DEFAULT_LOCALE, type Locale } from '../i18n/config';
+import { SITE_URL, SITE_NAME } from '@/utils/constants';
+import { isLocale, DEFAULT_LOCALE, type Locale } from '@/i18n/config';
 
 // Astro serves this un-prefixed route for any unmatched path in any locale;
 // Astro.currentLocale isn't set here (outside the [locale] tree), so derive

@@ -1,12 +1,12 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import TelegramCTA from '../../components/TelegramCTA.astro';
-import PageHero from '../../components/PageHero.astro';
-import Faq from '../../components/Faq.astro';
-import { SITE_URL, SITE_NAME } from '../../utils/constants';
-import { getFaq } from '../../i18n/content/faq';
-import { getPagesContent } from '../../i18n/content/pages';
-import { withLocales } from '../../utils/paths';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import TelegramCTA from '@/components/TelegramCTA.astro';
+import PageHero from '@/components/PageHero.astro';
+import Faq from '@/components/Faq.astro';
+import { SITE_URL, SITE_NAME } from '@/utils/constants';
+import { getFaq } from '@/i18n/content/faq';
+import { getPagesContent } from '@/i18n/content/pages';
+import { withLocales } from '@/utils/paths';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 

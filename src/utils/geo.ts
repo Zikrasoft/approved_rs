@@ -1,5 +1,5 @@
-import countriesData from '../data/countries.json';
-import citiesData from '../data/cities.json';
+import countriesData from '@/data/countries.json';
+import citiesData from '@/data/cities.json';
 import { FLAGS } from './constants';
 
 interface CountryNames {

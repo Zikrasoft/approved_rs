@@ -1,7 +1,7 @@
 import type { CollectionEntry } from 'astro:content';
-import type { CaseCardProps } from '../components/CaseCard.astro';
-import { getServicesContent } from '../i18n/content/services';
-import type { Locale } from '../i18n/config';
+import type { CaseCardProps } from '@/components/CaseCard.astro';
+import { getServicesContent } from '@/i18n/content/services';
+import type { Locale } from '@/i18n/config';
 
 export const toCaseItem = (c: CollectionEntry<'cases'>, locale: Locale): CaseCardProps => {
   const badgeMap = getServicesContent(locale).caseChrome.serviceBadges;

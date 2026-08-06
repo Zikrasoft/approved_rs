@@ -1,4 +1,4 @@
-import type { Locale } from '../config';
+import type { Locale } from '@/i18n/config';
 
 interface JourneyStep {
   title: string;
