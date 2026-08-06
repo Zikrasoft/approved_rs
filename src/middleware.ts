@@ -49,6 +49,29 @@ export const onRequest = defineMiddleware((context, next) => {
     return next();
   }
 
+  // Bare '/' serves the detected locale's homepage directly (content of
+  // /ru/, /en/, etc.) instead of a 301 to it — the URL bar stays on '/'.
+  // The page's own canonical tag still points at /<locale>/, so crawlers
+  // see one canonical URL and there's no duplicate-content problem; this
+  // is purely for visitors who don't want to see the prefix hop.
+  if (pathname === '/') {
+    const locale = detectLocale(
+      context.request.headers.get('accept-language'),
+      context.cookies.get(LOCALE_COOKIE)?.value
+    );
+    context.cookies.set(LOCALE_COOKIE, locale, { path: '/', maxAge: ONE_YEAR_SECONDS });
+
+    if (!context.cookies.has(GEO_DISMISS_COOKIE)) {
+      const ipCountry = context.request.headers.get('x-vercel-ip-country') ?? '';
+      const siteCode = GEO_MAP[ipCountry.toUpperCase()];
+      if (siteCode) {
+        context.locals.suggestedCountry = getCountry(siteCode);
+      }
+    }
+
+    return context.rewrite(`/${locale}/${search}`);
+  }
+
   const rewritten = LEGACY_PATH_REWRITES[pathname] ?? pathname;
 
   if (rewritten === pathname && requestHasLocale(context)) {
