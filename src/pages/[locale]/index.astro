@@ -2,13 +2,13 @@
 // No getStaticPaths — resolved per-request so it can read
 // Astro.locals.suggestedCountry (set by middleware) for the geo banner.
 export const prerender = false;
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import GeoBanner from "../../components/GeoBanner.astro";
-import TelegramCTA from "../../components/TelegramCTA.astro";
-import CasesGrid from "../../components/CasesGrid.astro";
-import SectionHeading from "../../components/SectionHeading.astro";
-import CountryPill from "../../components/CountryPill.astro";
-import LeadForm from "../../components/LeadForm.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import GeoBanner from "@/components/GeoBanner.astro";
+import TelegramCTA from "@/components/TelegramCTA.astro";
+import CasesGrid from "@/components/CasesGrid.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
+import CountryPill from "@/components/CountryPill.astro";
+import LeadForm from "@/components/LeadForm.astro";
 import {
     Search,
     Wrench,
@@ -19,14 +19,14 @@ import {
     MapPin,
 } from "@lucide/astro";
 import { getCollection } from "astro:content";
-import { getActiveCountries } from "../../utils/geo";
-import { SITE_URL, SITE_NAME } from "../../utils/constants";
-import { generateOrganizationSchema } from "../../utils/seo";
-import { telegramLink, DEFAULT_TG_MESSAGE } from "../../utils/telegramLink";
-import StatBlock from "../../components/StatBlock.astro";
-import { toCaseItem } from "../../utils/cases";
-import { getHomeContent } from "../../i18n/content/home";
-import type { Locale } from "../../i18n/config";
+import { getActiveCountries } from "@/utils/geo";
+import { SITE_URL, SITE_NAME } from "@/utils/constants";
+import { generateOrganizationSchema } from "@/utils/seo";
+import { telegramLink, DEFAULT_TG_MESSAGE } from "@/utils/telegramLink";
+import StatBlock from "@/components/StatBlock.astro";
+import { toCaseItem } from "@/utils/cases";
+import { getHomeContent } from "@/i18n/content/home";
+import type { Locale } from "@/i18n/config";
 
 const { locale } = Astro.params;
 const h = getHomeContent(locale as Locale);
@@ -57,20 +57,20 @@ const schema = generateOrganizationSchema({
 // jump in if you're not starting from zero).
 const journey = [
     {
-        href: `/${locale}/de/autopodbor/`,
+        href: `/${locale}/autopodbor/de/`,
         Icon: Search,
         title: h.journey[0].title,
         desc: h.journey[0].desc,
     },
     {
-        href: `/${locale}/de/proverka/`,
+        href: `/${locale}/proverka/de/`,
         Icon: ClipboardCheck,
         title: h.journey[1].title,
         desc: h.journey[1].desc,
         note: h.journey[1].note,
     },
     {
-        href: `/${locale}/de/vykup/`,
+        href: `/${locale}/vykup/de/`,
         Icon: Banknote,
         title: h.journey[2].title,
         desc: h.journey[2].desc,

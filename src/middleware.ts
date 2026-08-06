@@ -12,9 +12,9 @@ const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
 // resolve in a single 301, not two.
 const LEGACY_PATH_REWRITES: Record<string, string> = {
   '/cases/': '/cases/autopodbor',
-  '/de/combined/': '/de/autopodbor',
-  '/rs/combined/': '/rs/autopodbor',
-  '/es/combined/': '/es/autopodbor',
+  '/de/combined/': '/autopodbor/de',
+  '/rs/combined/': '/autopodbor/rs',
+  '/es/combined/': '/autopodbor/es',
 };
 
 // No trailing slash on '/keystatic': the CMS admin's own root route is the

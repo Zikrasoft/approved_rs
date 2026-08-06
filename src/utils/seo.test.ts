@@ -20,19 +20,19 @@ const berlin: City = {
 
 describe('generateMeta', () => {
   it('generates autopodbor meta for country', () => {
-    const meta = generateMeta('autopodbor', { country: de, baseUrl: 'https://approved.rs', path: '/de/autopodbor/', locale: 'ru' });
+    const meta = generateMeta('autopodbor', { country: de, baseUrl: 'https://approved.rs', path: '/autopodbor/de/', locale: 'ru' });
     expect(meta.title).toContain('Германии');
     expect(meta.title).toContain('Автоподбор');
-    expect(meta.canonical).toBe('https://approved.rs/de/autopodbor/');
+    expect(meta.canonical).toBe('https://approved.rs/autopodbor/de/');
   });
 
   it('generates autopodbor meta for city', () => {
-    const meta = generateMeta('autopodbor', { country: de, city: berlin, baseUrl: 'https://approved.rs', path: '/de/berlin/autopodbor/', locale: 'ru' });
+    const meta = generateMeta('autopodbor', { country: de, city: berlin, baseUrl: 'https://approved.rs', path: '/autopodbor/de/berlin/', locale: 'ru' });
     expect(meta.title).toContain('Берлине');
   });
 
   it('generates vykup meta', () => {
-    const meta = generateMeta('vykup', { country: de, baseUrl: 'https://approved.rs', path: '/de/vykup/', locale: 'ru' });
+    const meta = generateMeta('vykup', { country: de, baseUrl: 'https://approved.rs', path: '/vykup/de/', locale: 'ru' });
     expect(meta.title).toContain('Выкуп');
     expect(meta.description.length).toBeGreaterThan(50);
   });

@@ -4,16 +4,22 @@ import SiteLogo from './SiteLogo.astro';
 import Button from './Button.astro';
 import LeadFormModal from './LeadFormModal.astro';
 import LanguageSwitcher from './LanguageSwitcher.astro';
-import { getNavItems, isNavItemActive } from '../utils/labels';
-import { getI18n } from '../i18n/getI18n';
-import { getLocale } from '../i18n/config';
-import { DEFAULT_COUNTRY } from '../utils/constants';
-import { getActiveCountries } from '../utils/geo';
+import { getNavItems, isNavItemActive, SERVICES } from '@/utils/labels';
+import { getI18n } from '@/i18n/getI18n';
+import { getLocale } from '@/i18n/config';
+import { DEFAULT_COUNTRY } from '@/utils/constants';
+import { getActiveCountries } from '@/utils/geo';
 
 const locale = getLocale(Astro.currentLocale);
 const t = getI18n(locale);
-const urlCountry = Astro.url.pathname.split('/')[2];
-const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCountry : DEFAULT_COUNTRY;
+// Country only sits at a fixed position (segment 2) on the 3 country-scoped
+// service pages (/ru/autopodbor/de/...) — everywhere else (contacts, cases,
+// the home page) there's no country in the URL at all, so fall back to the
+// default rather than misreading an unrelated segment as a country code.
+const pathSegments = Astro.url.pathname.split('/').filter(Boolean);
+const isServicePage = SERVICES.some(s => s.slug === pathSegments[1]);
+const urlCountry = isServicePage ? pathSegments[2] : undefined;
+const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCountry! : DEFAULT_COUNTRY;
 const isHome = Astro.url.pathname === `/${locale}/` || Astro.url.pathname === `/${locale}`;
 
 // Record (not `as const` + cast) so a slug added to labels.ts without a

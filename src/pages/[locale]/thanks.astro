@@ -1,9 +1,9 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import TelegramCTA from '../../components/TelegramCTA.astro';
-import { SITE_URL, SITE_NAME } from '../../utils/constants';
-import { getPagesContent } from '../../i18n/content/pages';
-import { withLocales } from '../../utils/paths';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import TelegramCTA from '@/components/TelegramCTA.astro';
+import { SITE_URL, SITE_NAME } from '@/utils/constants';
+import { getPagesContent } from '@/i18n/content/pages';
+import { withLocales } from '@/utils/paths';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
@@ -54,7 +54,7 @@ const meta = {
         <p class="text-xs uppercase tracking-[0.16em] font-medium mb-4 text-muted">{p.waitLabel}</p>
         <div class="flex flex-wrap justify-center gap-6">
           <a href={`/${locale}/cases/autopodbor/`} class="wait-link">{p.waitCasesLink}</a>
-          <a href={`/${locale}/de/autopodbor/`} class="wait-link">{p.waitAutopodborLink}</a>
+          <a href={`/${locale}/autopodbor/de/`} class="wait-link">{p.waitAutopodborLink}</a>
         </div>
       </div>
 

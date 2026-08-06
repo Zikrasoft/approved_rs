@@ -1,15 +1,15 @@
 ---
-import ServicePageLayout from "../../../layouts/ServicePageLayout.astro";
-import StepsList from "../../../components/StepsList.astro";
-import Faq from "../../../components/Faq.astro";
-import { getCountryPaths, withLocales } from "../../../utils/paths";
-import { getCountry } from "../../../utils/geo";
-import { generateMeta, generateServiceSchema, buildLocation } from "../../../utils/seo";
+import ServicePageLayout from "@/layouts/ServicePageLayout.astro";
+import StepsList from "@/components/StepsList.astro";
+import Faq from "@/components/Faq.astro";
+import { getCountryPaths, withLocales } from "@/utils/paths";
+import { getCountry } from "@/utils/geo";
+import { generateMeta, generateServiceSchema, buildLocation } from "@/utils/seo";
 import { getCollection } from "astro:content";
-import { SITE_URL } from "../../../utils/constants";
-import { getFaq } from "../../../i18n/content/faq";
-import { getServicesContent } from "../../../i18n/content/services";
-import type { Locale } from "../../../i18n/config";
+import { SITE_URL } from "@/utils/constants";
+import { getFaq } from "@/i18n/content/faq";
+import { getServicesContent } from "@/i18n/content/services";
+import type { Locale } from "@/i18n/config";
 
 export const getStaticPaths = () => withLocales(getCountryPaths());
 
@@ -20,7 +20,7 @@ const location = buildLocation(locale as Locale, country);
 const meta = generateMeta("vykup", {
     country,
     baseUrl: SITE_URL,
-    path: `/${locale}/${countryCode}/vykup/`,
+    path: `/${locale}/vykup/${countryCode}/`,
     locale: locale as Locale,
 });
 const cases = (await getCollection("cases"))
@@ -55,7 +55,7 @@ const description = isSerbia
     currentService="vykup"
     casesHeading={sc.casesHeading}
     breadcrumbs={[
-        { label: country[locale as Locale].name, href: `/${locale}/${countryCode}/autopodbor/` },
+        { label: country[locale as Locale].name, href: `/${locale}/autopodbor/${countryCode}/` },
         { label: sc.breadcrumbLabel },
     ]}
 >

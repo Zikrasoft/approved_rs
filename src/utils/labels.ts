@@ -1,5 +1,5 @@
-import { getI18n } from '../i18n/getI18n';
-import type { Locale } from '../i18n/config';
+import { getI18n } from '@/i18n/getI18n';
+import type { Locale } from '@/i18n/config';
 
 export const SERVICES: { slug: 'autopodbor' | 'vykup' | 'proverka' }[] = [
   { slug: 'autopodbor' },
@@ -16,32 +16,30 @@ export const getNavItems = (
 ): { href: string; label: string; slug: string }[] => {
   const nav = getI18n(locale).nav;
   return [
-    { href: `/${locale}/${countryCode}/autopodbor/`, label: nav.autopodbor, slug: 'autopodbor' },
+    { href: `/${locale}/autopodbor/${countryCode}/`, label: nav.autopodbor, slug: 'autopodbor' },
     { href: `/${locale}/avtoservis-belgrade/`, label: nav.autoservice, slug: 'autoservice' },
     ...SERVICES.filter(s => s.slug !== 'autopodbor').map(s => ({
-      href: `/${locale}/${countryCode}/${s.slug}/`,
+      href: `/${locale}/${s.slug}/${countryCode}/`,
       label: nav[s.slug],
       slug: s.slug,
     })),
   ];
 };
 
-// Country-scoped items (autopodbor/vykup/proverka) can sit under a city
-// segment too (/ru/de/berlin/autopodbor/), so match the slug anywhere after
-// the leading locale+country segments — but require those leading segments
-// to actually be locale+country, otherwise unrelated routes that happen to
-// contain the same word (e.g. /ru/cases/autopodbor/) would false-match.
+// Country-scoped items (autopodbor/vykup/proverka) put the service right
+// after the locale (/ru/autopodbor/de/), with country next — including when
+// autopodbor sits under a city segment too (/ru/autopodbor/de/berlin/), so
+// checking segments[1]/[2] handles both without a separate city fallback.
 export function isNavItemActive(
-  item: { href: string },
+  item: { href: string; slug: string },
   locale: Locale,
   navCountry: string,
   pathname: string
 ): boolean {
-  const isCountryScoped = item.href.startsWith(`/${locale}/${navCountry}/`);
+  const isCountryScoped = SERVICES.some(s => s.slug === item.slug);
   if (!isCountryScoped) return pathname.startsWith(item.href);
   const segments = pathname.split('/').filter(Boolean);
-  const slug = item.href.replace(/^\/|\/$/g, '').split('/').pop();
-  return segments[0] === locale && segments[1] === navCountry && segments.includes(slug!);
+  return segments[0] === locale && segments[1] === item.slug && segments[2] === navCountry;
 }
 
 // Keyed by form/Telegram service value — internal/ops-facing (Telegram bot

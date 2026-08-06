@@ -1,19 +1,19 @@
 ---
 import BaseLayout from './BaseLayout.astro';
-import Breadcrumbs from '../components/Breadcrumbs.astro';
-import LeadForm from '../components/LeadForm.astro';
-import LeadFormModal from '../components/LeadFormModal.astro';
-import TelegramCTA from '../components/TelegramCTA.astro';
-import CasesGrid from '../components/CasesGrid.astro';
-import ChipLinks from '../components/ChipLinks.astro';
-import type { MetaProps } from '../utils/seo';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import LeadForm from '@/components/LeadForm.astro';
+import LeadFormModal from '@/components/LeadFormModal.astro';
+import TelegramCTA from '@/components/TelegramCTA.astro';
+import CasesGrid from '@/components/CasesGrid.astro';
+import ChipLinks from '@/components/ChipLinks.astro';
+import type { MetaProps } from '@/utils/seo';
 import type { CollectionEntry } from 'astro:content';
-import { SITE_NAME } from '../utils/constants';
-import { getActiveCountries } from '../utils/geo';
-import { SERVICES } from '../utils/labels';
-import { toCaseItem } from '../utils/cases';
-import { getI18n } from '../i18n/getI18n';
-import { getLocale } from '../i18n/config';
+import { SITE_NAME } from '@/utils/constants';
+import { getActiveCountries } from '@/utils/geo';
+import { SERVICES } from '@/utils/labels';
+import { toCaseItem } from '@/utils/cases';
+import { getI18n } from '@/i18n/getI18n';
+import { getLocale } from '@/i18n/config';
 
 interface Props {
   meta: MetaProps;
@@ -81,9 +81,9 @@ const t = getI18n(locale);
 
   <div class="max-w-6xl mx-auto px-6 pb-16 pt-4">
     {showCountryCrossLinks && (
-      <ChipLinks label={t.common.alsoWorkingInLabel} items={getActiveCountries().filter(c => c.code !== currentCountry).map(c => ({ href: `/${locale}/${c.code}/${currentService}/`, text: c[locale].name }))} />
+      <ChipLinks label={t.common.alsoWorkingInLabel} items={getActiveCountries().filter(c => c.code !== currentCountry).map(c => ({ href: `/${locale}/${currentService}/${c.code}/`, text: c[locale].name }))} />
     )}
-    <ChipLinks label={t.common.otherServicesLabel} items={SERVICES.filter(s => s.slug !== currentService).map(s => ({ href: `/${locale}/${currentCountry}/${s.slug}/`, text: t.nav[s.slug] }))} />
+    <ChipLinks label={t.common.otherServicesLabel} items={SERVICES.filter(s => s.slug !== currentService).map(s => ({ href: `/${locale}/${s.slug}/${currentCountry}/`, text: t.nav[s.slug] }))} />
   </div>
 
 </BaseLayout>

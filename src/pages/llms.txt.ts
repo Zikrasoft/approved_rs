@@ -1,9 +1,9 @@
 import type { APIRoute } from 'astro';
-import { SITE_URL, SITE_NAME } from '../utils/constants';
-import { SERVICES } from '../utils/labels';
-import { getI18n } from '../i18n/getI18n';
-import { getActiveCountries, getCitiesForCountry } from '../utils/geo';
-import { getPublishedCases, getPublishedAutoserviceCases } from '../utils/casesQueries';
+import { SITE_URL, SITE_NAME } from '@/utils/constants';
+import { SERVICES } from '@/utils/labels';
+import { getI18n } from '@/i18n/getI18n';
+import { getActiveCountries, getCitiesForCountry } from '@/utils/geo';
+import { getPublishedCases, getPublishedAutoserviceCases } from '@/utils/casesQueries';
 
 export const GET: APIRoute = async () => {
   const countries = getActiveCountries();
@@ -23,7 +23,7 @@ export const GET: APIRoute = async () => {
   lines.push('## Услуги по странам', '');
   for (const country of countries) {
     for (const s of SERVICES) {
-      lines.push(`- [${nav[s.slug]} в ${country.ru.nameLocative}](${SITE_URL}/ru/${country.code}/${s.slug}/)`);
+      lines.push(`- [${nav[s.slug]} в ${country.ru.nameLocative}](${SITE_URL}/ru/${s.slug}/${country.code}/)`);
     }
   }
   lines.push('');
@@ -31,7 +31,7 @@ export const GET: APIRoute = async () => {
   lines.push('## Автоподбор по городам', '');
   for (const country of countries) {
     for (const city of getCitiesForCountry(country.code)) {
-      lines.push(`- [Автоподбор в ${city.ru.nameLocative}](${SITE_URL}/ru/${country.code}/${city.slug}/autopodbor/)`);
+      lines.push(`- [Автоподбор в ${city.ru.nameLocative}](${SITE_URL}/ru/autopodbor/${country.code}/${city.slug}/)`);
     }
   }
   lines.push('');
