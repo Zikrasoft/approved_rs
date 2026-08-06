@@ -1,14 +1,16 @@
 ---
-import { SITE_BRAND, SITE_TLD } from '../utils/constants';
+import { SITE_BRAND, SITE_TLD } from '@/utils/constants';
+import { getLocale } from '@/i18n/config';
 
 interface Props {
   size?: 'sm' | 'md';
 }
 const { size = 'md' } = Astro.props;
 const textClass = size === 'sm' ? 'text-lg' : 'text-base sm:text-xl';
+const locale = getLocale(Astro.currentLocale);
 ---
 
-<a href="/" class="flex items-baseline no-underline shrink-0">
+<a href={`/${locale}/`} class="flex items-baseline no-underline shrink-0">
   <span class={`font-display font-bold ${textClass} tracking-tight text-primary`}>{SITE_BRAND}</span>
   <span class={`font-display font-bold ${textClass} tracking-tight text-accent`}>{SITE_TLD}</span>
 </a>

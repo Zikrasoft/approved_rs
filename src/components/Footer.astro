@@ -1,12 +1,16 @@
 ---
 import SiteLogo from './SiteLogo.astro';
 import { Send } from '@lucide/astro';
-import { getNavItems } from '../utils/labels';
-import { SITE_NAME, DEFAULT_COUNTRY } from '../utils/constants';
-import { telegramLink } from '../utils/telegramLink';
+import { getNavItems } from '@/utils/labels';
+import { getI18n } from '@/i18n/getI18n';
+import { getLocale } from '@/i18n/config';
+import { SITE_NAME, DEFAULT_COUNTRY } from '@/utils/constants';
+import { telegramLink, DEFAULT_TG_MESSAGE } from '@/utils/telegramLink';
 const year = new Date().getFullYear();
 const TG_MANAGER = import.meta.env.PUBLIC_TG_MANAGER!;
 const THREADS_CHANNEL = import.meta.env.PUBLIC_THREADS_CHANNEL!;
+const locale = getLocale(Astro.currentLocale);
+const t = getI18n(locale);
 ---
 
 <footer class="mt-24 border-t border-default">
@@ -19,24 +23,24 @@ const THREADS_CHANNEL = import.meta.env.PUBLIC_THREADS_CHANNEL!;
           <SiteLogo size="sm" />
         </div>
         <p class="text-sm leading-relaxed max-w-xs mb-6 text-muted">
-          Подберём, проверим и доставим автомобиль из Европы. Берём на себя весь процесс — от поиска до доставки.
+          {t.footer.tagline}
         </p>
         <a
-          href={telegramLink(TG_MANAGER)}
+          href={telegramLink(TG_MANAGER, DEFAULT_TG_MESSAGE[locale])}
           target="_blank"
           rel="noopener"
           class="footer-tg inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline border border-accent-border text-accent"
         >
           <Send size={13} />
-          Написать менеджеру
+          {t.footer.contactManagerLabel}
         </a>
       </div>
 
       <!-- Services -->
       <div>
-        <p class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted">Услуги</p>
+        <p class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted">{t.footer.servicesHeading}</p>
         <nav class="flex flex-col gap-2.5 text-sm footer-nav text-secondary">
-          {getNavItems(DEFAULT_COUNTRY).map(item => (
+          {getNavItems(locale, DEFAULT_COUNTRY).map(item => (
             <a href={item.href}>{item.label}</a>
           ))}
         </nav>
@@ -44,15 +48,15 @@ const THREADS_CHANNEL = import.meta.env.PUBLIC_THREADS_CHANNEL!;
 
       <!-- Company -->
       <div>
-        <p class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted">Компания</p>
+        <p class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted">{t.footer.companyHeading}</p>
         <nav class="flex flex-col gap-2.5 text-sm footer-nav text-secondary">
-          <a href="/cases/autopodbor/">Кейсы</a>
-          <a href="/contacts/">Контакты</a>
-          <a href="/privacy/">Конфиденциальность</a>
+          <a href={`/${locale}/cases/autopodbor/`}>{t.nav.cases}</a>
+          <a href={`/${locale}/contacts/`}>{t.nav.contacts}</a>
+          <a href={`/${locale}/privacy/`}>{t.footer.privacyLabel}</a>
         </nav>
         <div class="mt-6 space-y-1.5">
-          <p class="text-xs text-muted">Германия · Испания · Сербия · Швейцария</p>
-          <p class="text-xs text-muted">Круглосуточно, без выходных</p>
+          <p class="text-xs text-muted">{t.footer.coverageLine}</p>
+          <p class="text-xs text-muted">{t.footer.hoursLine}</p>
         </div>
       </div>
 
@@ -60,14 +64,15 @@ const THREADS_CHANNEL = import.meta.env.PUBLIC_THREADS_CHANNEL!;
 
     <!-- Bottom -->
     <div class="pt-6 border-t border-default flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-      <p class="text-xs text-muted">© {year} {SITE_NAME} — Автоподбор, сервис и доставка авто из Европы</p>
+      <p class="text-xs text-muted">© {year} {SITE_NAME} — {t.footer.copyrightSuffix}</p>
       <a
         href={`https://www.threads.com/@${THREADS_CHANNEL}`}
         target="_blank"
         rel="noopener"
         class="footer-channel text-xs no-underline text-muted"
       >
-        Наш канал →
+        {t.footer.channelLinkLabel}
+        <span class="footer-channel-arrow inline-block text-[0.85em] transition-transform duration-200">→</span>
       </a>
     </div>
   </div>
@@ -82,4 +87,5 @@ const THREADS_CHANNEL = import.meta.env.PUBLIC_THREADS_CHANNEL!;
 
   .footer-channel { transition: color 0.2s; }
   .footer-channel:hover { color: var(--color-accent) !important; }
+  .footer-channel:hover .footer-channel-arrow { transform: translateX(3px); }
 </style>

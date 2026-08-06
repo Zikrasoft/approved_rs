@@ -1,0 +1,56 @@
+export const ru = {
+  nav: {
+    autopodbor: 'Автоподбор',
+    autoservice: 'Автосервис',
+    vykup: 'Выкуп',
+    proverka: 'Проверка',
+    cases: 'Кейсы',
+    contacts: 'Контакты',
+  },
+  header: {
+    menuLabel: 'Меню',
+    themeToggleLabel: 'Переключить тему',
+    themeToggleMobileLabel: 'Сменить тему',
+    ctaShort: 'Заявка',
+    ctaLong: 'Оставить заявку',
+  },
+  footer: {
+    servicesHeading: 'Услуги',
+    companyHeading: 'Компания',
+    privacyLabel: 'Конфиденциальность',
+    tagline: 'Подберём, проверим и доставим автомобиль из Европы. Берём на себя весь процесс — от поиска до доставки.',
+    contactManagerLabel: 'Написать менеджеру',
+    coverageLine: 'Германия · Испания · Сербия · Швейцария',
+    hoursLine: 'Круглосуточно, без выходных',
+    copyrightSuffix: 'Автоподбор, сервис и доставка авто из Европы',
+    channelLinkLabel: 'Наш канал',
+  },
+  common: {
+    otherServicesLabel: 'Другие услуги:',
+    alsoWorkingInLabel: 'Также работаем в:',
+    homeLabel: 'Главная',
+    faqHeading: 'Частые вопросы',
+    whereFromLabel: 'Откуда вы?',
+    otherCountryLabel: 'Другая страна',
+    viewAllCasesLabel: 'Все кейсы',
+    closeLabel: 'Закрыть',
+    channelLabel: 'Наш канал',
+    cookie: {
+      notice: 'Мы используем аналитические cookies (Google Analytics), чтобы понимать, как посетители используют сайт.',
+      more: 'Подробнее в',
+      policyLink: 'политике конфиденциальности',
+      accept: 'Принять',
+      decline: 'Отклонить',
+    },
+    gallery: {
+      morePhotos: 'Больше фото',
+      prev: 'Предыдущее фото',
+      next: 'Следующее фото',
+      altTemplate: (name: string, i: number) => `${name}, фото ${i + 1}`,
+      openAriaTemplate: (i: number, total: number) => `Открыть фото ${i + 1} из ${total}`,
+      showMoreTemplate: (n: number) => `Показать ещё (${n})`,
+    },
+  },
+};
+
+export type Dictionary = typeof ru;

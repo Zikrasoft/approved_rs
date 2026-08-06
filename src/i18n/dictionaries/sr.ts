@@ -1,0 +1,56 @@
+import type { Dictionary } from './ru';
+
+export const sr: Dictionary = {
+  nav: {
+    autopodbor: 'Odabir',
+    autoservice: 'Servis',
+    vykup: 'Otkup',
+    proverka: 'Provera',
+    cases: 'Primeri',
+    contacts: 'Kontakt',
+  },
+  header: {
+    menuLabel: 'Meni',
+    themeToggleLabel: 'Promeni temu',
+    themeToggleMobileLabel: 'Promeni temu',
+    ctaShort: 'Zahtev',
+    ctaLong: 'Ostavite zahtev',
+  },
+  footer: {
+    servicesHeading: 'Usluge',
+    companyHeading: 'Kompanija',
+    privacyLabel: 'Privatnost',
+    tagline: 'Pronalazimo, proveravamo i dostavljamo vozilo iz Evrope. Preuzimamo ceo proces — od pretrage do isporuke.',
+    contactManagerLabel: 'Pišite menadžeru',
+    coverageLine: 'Nemačka · Španija · Srbija · Švajcarska',
+    hoursLine: 'Non-stop, bez slobodnih dana',
+    copyrightSuffix: 'Odabir, servis i dostava vozila iz Evrope',
+    channelLinkLabel: 'Naš kanal',
+  },
+  common: {
+    otherServicesLabel: 'Ostale usluge:',
+    alsoWorkingInLabel: 'Takođe radimo u:',
+    homeLabel: 'Početna',
+    faqHeading: 'Česta pitanja',
+    whereFromLabel: 'Odakle ste?',
+    otherCountryLabel: 'Druga zemlja',
+    viewAllCasesLabel: 'Svi primeri',
+    closeLabel: 'Zatvori',
+    channelLabel: 'Naš kanal',
+    cookie: {
+      notice: 'Koristimo analitičke kolačiće (Google Analytics) da bismo razumeli kako posetioci koriste sajt.',
+      more: 'Više informacija u',
+      policyLink: 'politici privatnosti',
+      accept: 'Prihvati',
+      decline: 'Odbij',
+    },
+    gallery: {
+      morePhotos: 'Više fotografija',
+      prev: 'Prethodna fotografija',
+      next: 'Sledeća fotografija',
+      altTemplate: (name: string, i: number) => `${name}, fotografija ${i + 1}`,
+      openAriaTemplate: (i: number, total: number) => `Otvori fotografiju ${i + 1} od ${total}`,
+      showMoreTemplate: (n: number) => `Prikaži još (${n})`,
+    },
+  },
+};

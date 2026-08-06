@@ -1,0 +1,74 @@
+---
+import ServicePageLayout from "@/layouts/ServicePageLayout.astro";
+import StepsList from "@/components/StepsList.astro";
+import Faq from "@/components/Faq.astro";
+import { getCountryPaths, withLocales } from "@/utils/paths";
+import { getCountry } from "@/utils/geo";
+import { generateMeta, generateServiceSchema, buildLocation } from "@/utils/seo";
+import { getCollection } from "astro:content";
+import { SITE_URL } from "@/utils/constants";
+import { getFaq } from "@/i18n/content/faq";
+import { getServicesContent } from "@/i18n/content/services";
+import type { Locale } from "@/i18n/config";
+
+export const getStaticPaths = () => withLocales(getCountryPaths());
+
+const { locale, country: countryCode } = Astro.params;
+const country = getCountry(countryCode!)!;
+const sc = getServicesContent(locale as Locale).vykup;
+const location = buildLocation(locale as Locale, country);
+const meta = generateMeta("vykup", {
+    country,
+    baseUrl: SITE_URL,
+    path: `/${locale}/vykup/${countryCode}/`,
+    locale: locale as Locale,
+});
+const cases = (await getCollection("cases"))
+    .filter(
+        (c) =>
+            c.data.published &&
+            c.data.country === countryCode &&
+            c.data.service === "buyout",
+    )
+    .slice(0, 3);
+const schema = generateServiceSchema(
+    `${sc.title} ${location}`,
+    country[locale as Locale].name,
+    meta.canonical,
+);
+const isSerbia = countryCode === "rs";
+const description = isSerbia
+    ? sc.descriptionSerbia
+    : sc.descriptionOtherFor((country[locale as Locale] as { nameAccusative?: string; name: string }).nameAccusative ?? country[locale as Locale].name);
+---
+
+<ServicePageLayout
+    {meta}
+    {schema}
+    {cases}
+    title={sc.title}
+    titleHighlight={location}
+    {description}
+    ctaLabel={sc.ctaLabel}
+    formService="buyout"
+    currentCountry={countryCode!}
+    currentService="vykup"
+    casesHeading={sc.casesHeading}
+    breadcrumbs={[
+        { label: country[locale as Locale].name, href: `/${locale}/autopodbor/${countryCode}/` },
+        { label: sc.breadcrumbLabel },
+    ]}
+>
+    <StepsList
+        steps={[
+            { n: "01", text: sc.step1 },
+            { n: "02", text: sc.step2 },
+            { n: "03", text: isSerbia ? sc.step3Serbia : sc.step3Other },
+            { n: "04", text: sc.step4 },
+        ]}
+    />
+
+    <Fragment slot="extra">
+        <Faq items={getFaq(locale).vykup} />
+    </Fragment>
+</ServicePageLayout>

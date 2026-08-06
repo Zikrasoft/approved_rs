@@ -1,0 +1,23 @@
+---
+import CasesTabPage from '@/components/CasesTabPage.astro';
+import { SITE_URL, SITE_NAME } from '@/utils/constants';
+import { toCaseItem } from '@/utils/cases';
+import { getPublishedCases, getPublishedAutoserviceCases } from '@/utils/casesQueries';
+import { getPagesContent } from '@/i18n/content/pages';
+import { withLocales } from '@/utils/paths';
+
+export const getStaticPaths = () => withLocales([{ params: {} }]);
+
+const { locale } = Astro.params;
+const p = getPagesContent(locale).casesAutopodbor;
+const meta = {
+  title: `${p.metaTitle} | ${SITE_NAME}`,
+  description: p.metaDescription,
+  canonical: `${SITE_URL}/${locale}/cases/autopodbor/`,
+};
+
+const items = (await getPublishedCases()).map((c) => toCaseItem(c, locale));
+const otherCount = (await getPublishedAutoserviceCases()).length;
+---
+
+<CasesTabPage active="autopodbor" {items} {otherCount} {meta} />

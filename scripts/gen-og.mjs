@@ -9,7 +9,7 @@ const PUBLIC = join(__dirname, '../public');
 const W = 1200;
 const H = 630;
 
-function renderSvg({ tagline, subtagline }) {
+function renderSvg({ eyebrow, tagline, subtagline }) {
   return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
 
   <!-- Background -->
@@ -34,7 +34,7 @@ function renderSvg({ tagline, subtagline }) {
   <text x="96" y="122"
     font-family="Arial, Helvetica, sans-serif"
     font-size="12" font-weight="600" fill="#6B7280"
-    letter-spacing="4">АВТОПОДБОР · ДОСТАВКА · ЕВРОПА</text>
+    letter-spacing="4">${eyebrow}</text>
 
   <!-- Brand: APPROVED -->
   <text x="90" y="290"
@@ -87,21 +87,64 @@ async function renderOg(outPath, options) {
   console.log(`✓ saved (${(buf.length / 1024).toFixed(0)} KB) → ${outPath.replace(PUBLIC, 'public')}`);
 }
 
-const DEFAULT_SUB = 'Германия · Испания · Сербия · Полностью удалённо, через Telegram';
+// Locale suffix on the filename: none for ru (default/backward-compatible
+// path referenced as a fallback), '-en'/'-sr' for the others.
+const LOCALE_SUFFIX = { ru: '', en: '-en', sr: '-sr' };
 
-const SERVICE_VARIANTS = {
-  autopodbor: 'Подберём, проверим и доставим автомобиль под ключ',
-  vykup: 'Срочный выкуп авто на иностранных номерах',
-  proverka: 'Независимая проверка перед покупкой',
-  autoservice: 'Ремонт и обслуживание автомобилей в Белграде',
+const EYEBROW = {
+  ru: 'АВТОПОДБОР · ДОСТАВКА · ЕВРОПА',
+  en: 'CAR SOURCING · DELIVERY · EUROPE',
+  sr: 'ODABIR VOZILA · DOSTAVA · EVROPA',
 };
 
-await renderOg(join(PUBLIC, 'og.png'), {
-  tagline: 'Подберём и доставим автомобиль из Европы',
-  subtagline: DEFAULT_SUB,
-});
+const DEFAULT_SUB = {
+  ru: 'Германия · Испания · Сербия · Полностью удалённо, через Telegram',
+  en: 'Germany · Spain · Serbia · Fully remote, over Telegram',
+  sr: 'Nemačka · Španija · Srbija · Potpuno na daljinu, preko Telegrama',
+};
 
-mkdirSync(join(PUBLIC, 'og'), { recursive: true });
-for (const [service, tagline] of Object.entries(SERVICE_VARIANTS)) {
-  await renderOg(join(PUBLIC, 'og', `${service}.png`), { tagline, subtagline: DEFAULT_SUB });
+const DEFAULT_TAGLINE = {
+  ru: 'Подберём и доставим автомобиль из Европы',
+  en: "We'll source and deliver your car from Europe",
+  sr: 'Pronaći ćemo i dovesti vaše vozilo iz Evrope',
+};
+
+const SERVICE_VARIANTS = {
+  ru: {
+    autopodbor: 'Подберём, проверим и доставим автомобиль под ключ',
+    vykup: 'Срочный выкуп авто на иностранных номерах',
+    proverka: 'Независимая проверка перед покупкой',
+    autoservice: 'Ремонт и обслуживание автомобилей в Белграде',
+  },
+  en: {
+    autopodbor: "We'll source, inspect, and deliver your car, fully turnkey",
+    vykup: 'Urgent car buyout on foreign plates',
+    proverka: 'Independent inspection before you buy',
+    autoservice: 'Car repair and maintenance in Belgrade',
+  },
+  sr: {
+    autopodbor: 'Pronalazimo, proveravamo i dovozimo vozilo, ključ u ruke',
+    vykup: 'Hitan otkup vozila na stranim tablicama',
+    proverka: 'Nezavisna provera pre kupovine',
+    autoservice: 'Popravka i održavanje vozila u Beogradu',
+  },
+};
+
+for (const locale of ['ru', 'en', 'sr']) {
+  const suffix = LOCALE_SUFFIX[locale];
+
+  await renderOg(join(PUBLIC, `og${suffix}.png`), {
+    eyebrow: EYEBROW[locale],
+    tagline: DEFAULT_TAGLINE[locale],
+    subtagline: DEFAULT_SUB[locale],
+  });
+
+  mkdirSync(join(PUBLIC, 'og'), { recursive: true });
+  for (const [service, tagline] of Object.entries(SERVICE_VARIANTS[locale])) {
+    await renderOg(join(PUBLIC, 'og', `${service}${suffix}.png`), {
+      eyebrow: EYEBROW[locale],
+      tagline,
+      subtagline: DEFAULT_SUB[locale],
+    });
+  }
 }

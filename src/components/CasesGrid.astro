@@ -2,6 +2,8 @@
 import CaseCard from './CaseCard.astro';
 import SectionHeading from './SectionHeading.astro';
 import type { CaseCardProps } from './CaseCard.astro';
+import { getLocale } from '@/i18n/config';
+import { getI18n } from '@/i18n/getI18n';
 
 interface Props {
   items: CaseCardProps[];
@@ -13,6 +15,8 @@ interface Props {
 }
 
 const { items, heading, headingSize = 'lg', viewAllHref, topBorder = false, class: className } = Astro.props;
+const locale = getLocale(Astro.currentLocale);
+const viewAllLabel = getI18n(locale).common.viewAllCasesLabel;
 ---
 
 {items.length > 0 && (
@@ -24,7 +28,7 @@ const { items, heading, headingSize = 'lg', viewAllHref, topBorder = false, clas
         </div>
         {viewAllHref && (
           <a href={viewAllHref} class="cases-more hidden sm:flex items-center gap-1 text-sm font-medium no-underline text-accent">
-            Все кейсы <span class="arrow transition-transform duration-200">→</span>
+            {viewAllLabel} <span class="arrow transition-transform duration-200">→</span>
           </a>
         )}
       </div>
@@ -33,7 +37,7 @@ const { items, heading, headingSize = 'lg', viewAllHref, topBorder = false, clas
       </div>
       {viewAllHref && (
         <div class="mt-8 sm:hidden">
-          <a href={viewAllHref} class="text-sm font-medium text-accent">Все кейсы →</a>
+          <a href={viewAllHref} class="text-sm font-medium text-accent">{viewAllLabel} →</a>
         </div>
       )}
     </div>

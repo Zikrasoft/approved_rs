@@ -13,7 +13,7 @@ const mockLead: LeadData = {
   service: 'autopodbor',
   comment: 'BMW X5',
   country: 'de',
-  source_url: '/de/autopodbor/',
+  source_url: '/ru/autopodbor/de/',
 };
 
 function mockFetchOk(result: unknown = { message_id: 999 }) {

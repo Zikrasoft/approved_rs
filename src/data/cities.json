@@ -1,13 +1,13 @@
 [
-  { "slug": "berlin", "name": "Берлин", "nameLocative": "Берлине", "country": "de", "active": true },
-  { "slug": "munich", "name": "Мюнхен", "nameLocative": "Мюнхене", "country": "de", "active": true },
-  { "slug": "hamburg", "name": "Гамбург", "nameLocative": "Гамбурге", "country": "de", "active": true },
-  { "slug": "belgrade", "name": "Белград", "nameLocative": "Белграде", "country": "rs", "active": true },
-  { "slug": "novi-sad", "name": "Нови-Сад", "nameLocative": "Нови-Саде", "country": "rs", "active": true },
-  { "slug": "pancevo", "name": "Панчево", "nameLocative": "Панчеве", "country": "rs", "active": true },
-  { "slug": "subotica", "name": "Суботица", "nameLocative": "Суботице", "country": "rs", "active": true },
-  { "slug": "madrid", "name": "Мадрид", "nameLocative": "Мадриде", "country": "es", "active": true },
-  { "slug": "barcelona", "name": "Барселона", "nameLocative": "Барселоне", "country": "es", "active": true },
-  { "slug": "zurich", "name": "Цюрих", "nameLocative": "Цюрихе", "country": "ch", "active": true },
-  { "slug": "geneva", "name": "Женева", "nameLocative": "Женеве", "country": "ch", "active": true }
+  { "slug": "berlin",    "ru": { "name": "Берлин",     "nameLocative": "Берлине" },     "en": { "name": "Berlin" },    "sr": { "name": "Berlin",    "nameLocative": "Berlinu" },   "country": "de", "active": true },
+  { "slug": "munich",    "ru": { "name": "Мюнхен",     "nameLocative": "Мюнхене" },     "en": { "name": "Munich" },    "sr": { "name": "Minhen",    "nameLocative": "Minhenu" },   "country": "de", "active": true },
+  { "slug": "hamburg",   "ru": { "name": "Гамбург",    "nameLocative": "Гамбурге" },    "en": { "name": "Hamburg" },   "sr": { "name": "Hamburg",   "nameLocative": "Hamburgu" },  "country": "de", "active": true },
+  { "slug": "belgrade",  "ru": { "name": "Белград",    "nameLocative": "Белграде" },    "en": { "name": "Belgrade" },  "sr": { "name": "Beograd",   "nameLocative": "Beogradu" },  "country": "rs", "active": true },
+  { "slug": "novi-sad",  "ru": { "name": "Нови-Сад",   "nameLocative": "Нови-Саде" },   "en": { "name": "Novi Sad" },  "sr": { "name": "Novi Sad",  "nameLocative": "Novom Sadu" },"country": "rs", "active": true },
+  { "slug": "pancevo",   "ru": { "name": "Панчево",    "nameLocative": "Панчеве" },     "en": { "name": "Pančevo" },   "sr": { "name": "Pančevo",   "nameLocative": "Pančevu" },   "country": "rs", "active": true },
+  { "slug": "subotica",  "ru": { "name": "Суботица",   "nameLocative": "Суботице" },    "en": { "name": "Subotica" },  "sr": { "name": "Subotica",  "nameLocative": "Subotici" },  "country": "rs", "active": true },
+  { "slug": "madrid",    "ru": { "name": "Мадрид",     "nameLocative": "Мадриде" },     "en": { "name": "Madrid" },    "sr": { "name": "Madrid",    "nameLocative": "Madridu" },   "country": "es", "active": true },
+  { "slug": "barcelona", "ru": { "name": "Барселона",  "nameLocative": "Барселоне" },   "en": { "name": "Barcelona" }, "sr": { "name": "Barselona", "nameLocative": "Barseloni" }, "country": "es", "active": true },
+  { "slug": "zurich",    "ru": { "name": "Цюрих",      "nameLocative": "Цюрихе" },      "en": { "name": "Zurich" },    "sr": { "name": "Cirih",     "nameLocative": "Cirihu" },    "country": "ch", "active": true },
+  { "slug": "geneva",    "ru": { "name": "Женева",     "nameLocative": "Женеве" },      "en": { "name": "Geneva" },    "sr": { "name": "Ženeva",    "nameLocative": "Ženevi" },    "country": "ch", "active": true }
 ]

@@ -1,6 +1,8 @@
 ---
-import { getActiveCountries, getCountryFlag } from '../utils/geo';
-import type { Country } from '../utils/geo';
+import { getActiveCountries, getCountryFlag } from '@/utils/geo';
+import type { Country } from '@/utils/geo';
+import { getLocale } from '@/i18n/config';
+import { getI18n } from '@/i18n/getI18n';
 
 interface Props {
   detected: Country;
@@ -8,15 +10,17 @@ interface Props {
 
 const { detected } = Astro.props;
 const options = getActiveCountries();
+const locale = getLocale(Astro.currentLocale);
+const common = getI18n(locale).common;
 ---
 
 <div id="geo-banner" class="geo-banner border-b border-default bg-accent-subtle">
   <div class="max-w-6xl mx-auto px-6 py-3 flex items-center gap-3 flex-wrap">
-    <p class="text-sm text-secondary shrink-0">Откуда вы?</p>
+    <p class="text-sm text-secondary shrink-0">{common.whereFromLabel}</p>
     <div class="flex items-center gap-2 flex-wrap">
       {options.map(c => (
         <a
-          href={`/${c.code}/autopodbor/`}
+          href={`/${locale}/autopodbor/${c.code}/`}
           data-geo-choice
           class:list={[
             'geo-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium no-underline border',
@@ -25,7 +29,7 @@ const options = getActiveCountries();
               : 'border-default bg-surface text-secondary',
           ]}
         >
-          <span class="leading-none">{getCountryFlag(c.code)}</span>{c.name}
+          <span class="leading-none">{getCountryFlag(c.code)}</span>{c[locale].name}
         </a>
       ))}
       <button
@@ -33,7 +37,7 @@ const options = getActiveCountries();
         data-geo-skip
         class="geo-pill px-3 py-1.5 rounded-sm text-xs font-medium border border-default bg-transparent text-muted"
       >
-        Другая страна
+        {common.otherCountryLabel}
       </button>
     </div>
   </div>

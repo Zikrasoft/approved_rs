@@ -1,9 +1,19 @@
 export const prerender = false;
 
 import type { APIContext } from 'astro';
-import { sendLeadNotification } from '../../lib/telegram';
+import { sendLeadNotification } from '@/lib/telegram';
+import { isLocale, type Locale } from '@/i18n/config';
 
-export async function POST({ request, redirect }: APIContext): Promise<Response> {
+// Only reached if a visitor bypasses the client-side validation (JS
+// disabled, direct POST) — but the cookie-based locale is already right
+// there for the redirect below, so there's no excuse for an RU-only body.
+const MISSING_FIELDS_MESSAGE: Record<Locale, string> = {
+  ru: 'Имя и контакт обязательны',
+  en: 'Name and contact are required',
+  sr: 'Ime i kontakt su obavezni',
+};
+
+export async function POST({ request, redirect, cookies }: APIContext): Promise<Response> {
   const form = await request.formData();
 
   const name    = form.get('name')?.toString().trim() ?? '';
@@ -13,8 +23,11 @@ export async function POST({ request, redirect }: APIContext): Promise<Response>
   const country = form.get('country')?.toString() || null;
   const source_url = form.get('source_url')?.toString() || null;
 
+  const cookieLocale = cookies.get('lang')?.value;
+  const locale: Locale = cookieLocale && isLocale(cookieLocale) ? cookieLocale : 'ru';
+
   if (!name || !contact) {
-    return new Response('Имя и контакт обязательны', { status: 400 });
+    return new Response(MISSING_FIELDS_MESSAGE[locale], { status: 400 });
   }
 
   try {
@@ -23,5 +36,5 @@ export async function POST({ request, redirect }: APIContext): Promise<Response>
     console.error('[leads] Telegram notification failed:', err);
   }
 
-  return redirect('/thanks/', 302);
+  return redirect(`/${locale}/thanks/`, 302);
 }

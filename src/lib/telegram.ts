@@ -1,4 +1,4 @@
-import { SERVICE_LABELS, STATUS_LABELS } from '../utils/labels';
+import { SERVICE_LABELS, STATUS_LABELS } from '@/utils/labels';
 
 const BOT_TOKEN = import.meta.env.TELEGRAM_BOT_TOKEN!;
 const GROUP_ID = import.meta.env.TELEGRAM_GROUP_ID!;

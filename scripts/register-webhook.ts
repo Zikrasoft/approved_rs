@@ -1,6 +1,8 @@
 // Одноразовый скрипт — запускать через:
 // mise exec -- node --env-file=.env.local --experimental-strip-types scripts/register-webhook.ts
 
+export {};
+
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 const SECRET = process.env.TELEGRAM_WEBHOOK_SECRET!;
 const SITE = process.env.SITE!;

@@ -1,0 +1,56 @@
+import type { Dictionary } from './ru';
+
+export const en: Dictionary = {
+  nav: {
+    autopodbor: 'Sourcing',
+    autoservice: 'Service',
+    vykup: 'Buyout',
+    proverka: 'Inspection',
+    cases: 'Cases',
+    contacts: 'Contacts',
+  },
+  header: {
+    menuLabel: 'Menu',
+    themeToggleLabel: 'Toggle theme',
+    themeToggleMobileLabel: 'Change theme',
+    ctaShort: 'Request',
+    ctaLong: 'Leave a Request',
+  },
+  footer: {
+    servicesHeading: 'Services',
+    companyHeading: 'Company',
+    privacyLabel: 'Privacy',
+    tagline: 'We source, inspect, and deliver your car from Europe. We handle the entire process — from search to delivery.',
+    contactManagerLabel: 'Message a Manager',
+    coverageLine: 'Germany · Spain · Serbia · Switzerland',
+    hoursLine: '24/7, no days off',
+    copyrightSuffix: 'Car sourcing, service, and delivery from Europe',
+    channelLinkLabel: 'Our channel',
+  },
+  common: {
+    otherServicesLabel: 'Other services:',
+    alsoWorkingInLabel: 'Also serving:',
+    homeLabel: 'Home',
+    faqHeading: 'Frequently Asked Questions',
+    whereFromLabel: 'Where are you from?',
+    otherCountryLabel: 'Other country',
+    viewAllCasesLabel: 'All cases',
+    closeLabel: 'Close',
+    channelLabel: 'Our channel',
+    cookie: {
+      notice: 'We use analytics cookies (Google Analytics) to understand how visitors use the site.',
+      more: 'Learn more in our',
+      policyLink: 'privacy policy',
+      accept: 'Accept',
+      decline: 'Decline',
+    },
+    gallery: {
+      morePhotos: 'More photos',
+      prev: 'Previous photo',
+      next: 'Next photo',
+      altTemplate: (name: string, i: number) => `${name}, photo ${i + 1}`,
+      openAriaTemplate: (i: number, total: number) => `Open photo ${i + 1} of ${total}`,
+      showMoreTemplate: (n: number) => `Show more (${n})`,
+    },
+  },
+};

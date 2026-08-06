@@ -17,7 +17,7 @@ describe('getActiveCountries', () => {
 describe('getCountry', () => {
   it('returns country by code', () => {
     const result = getCountry('de');
-    expect(result?.name).toBe('Германия');
+    expect(result?.ru.name).toBe('Германия');
   });
 
   it('returns undefined for unknown code', () => {

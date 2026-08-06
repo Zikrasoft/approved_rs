@@ -1,4 +1,7 @@
 ---
+import { getI18n } from '@/i18n/getI18n';
+import { getLocale } from '@/i18n/config';
+
 interface Props {
   active: 'autopodbor' | 'autoservice';
   autopodborCount: number;
@@ -6,10 +9,12 @@ interface Props {
 }
 
 const { active, autopodborCount, autoserviceCount } = Astro.props;
+const locale = getLocale(Astro.currentLocale);
+const t = getI18n(locale);
 
 const tabs = [
-  { id: 'autopodbor', href: '/cases/autopodbor/', label: 'Автоподбор', count: autopodborCount },
-  { id: 'autoservice', href: '/cases/autoservice/', label: 'Автосервис', count: autoserviceCount },
+  { id: 'autopodbor', href: `/${locale}/cases/autopodbor/`, label: t.nav.autopodbor, count: autopodborCount },
+  { id: 'autoservice', href: `/${locale}/cases/autoservice/`, label: t.nav.autoservice, count: autoserviceCount },
 ] as const;
 ---
 

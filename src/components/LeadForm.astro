@@ -2,6 +2,9 @@
 import FormField from './FormField.astro';
 import Button from './Button.astro';
 import { Send, Phone, ChevronDown } from '@lucide/astro';
+import { FLAGS } from '@/utils/constants';
+import { getLeadFormContent } from '@/i18n/content/leadForm';
+import { getLocale } from '@/i18n/config';
 
 interface Props {
   service?: string;
@@ -11,6 +14,8 @@ interface Props {
 
 const { service = '', country = '', city = '' } = Astro.props;
 const sourceUrl = Astro.url.href;
+const locale = getLocale(Astro.currentLocale);
+const lf = getLeadFormContent(locale);
 
 // ponytail: curated list covering the site's own markets + common client
 // origins (Balkans/CIS). Not exhaustive — extend PHONE_COUNTRIES if leads
@@ -20,18 +25,18 @@ const sourceUrl = Astro.url.href;
 // script refines this to the visitor's real region via timezone, falling
 // back to this same default (RS) when that can't be determined.
 const PHONE_COUNTRIES = [
-  { iso: 'RS', dial: '381', label: 'Сербия',              flag: '🇷🇸' },
-  { iso: 'DE', dial: '49',  label: 'Германия',             flag: '🇩🇪' },
-  { iso: 'ES', dial: '34',  label: 'Испания',              flag: '🇪🇸' },
-  { iso: 'RU', dial: '7',   label: 'Россия',               flag: '🇷🇺' },
-  { iso: 'UA', dial: '380', label: 'Украина',              flag: '🇺🇦' },
-  { iso: 'BY', dial: '375', label: 'Беларусь',             flag: '🇧🇾' },
-  { iso: 'KZ', dial: '7',   label: 'Казахстан',            flag: '🇰🇿' },
-  { iso: 'BA', dial: '387', label: 'Босния и Герцеговина', flag: '🇧🇦' },
-  { iso: 'HR', dial: '385', label: 'Хорватия',             flag: '🇭🇷' },
-  { iso: 'ME', dial: '382', label: 'Черногория',           flag: '🇲🇪' },
-  { iso: 'MK', dial: '389', label: 'Северная Македония',   flag: '🇲🇰' },
-  { iso: 'TR', dial: '90',  label: 'Турция',                flag: '🇹🇷' },
+  { iso: 'RS', dial: '381', label: 'Сербия' },
+  { iso: 'DE', dial: '49',  label: 'Германия' },
+  { iso: 'ES', dial: '34',  label: 'Испания' },
+  { iso: 'RU', dial: '7',   label: 'Россия' },
+  { iso: 'UA', dial: '380', label: 'Украина' },
+  { iso: 'BY', dial: '375', label: 'Беларусь' },
+  { iso: 'KZ', dial: '7',   label: 'Казахстан' },
+  { iso: 'BA', dial: '387', label: 'Босния и Герцеговина' },
+  { iso: 'HR', dial: '385', label: 'Хорватия' },
+  { iso: 'ME', dial: '382', label: 'Черногория' },
+  { iso: 'MK', dial: '389', label: 'Северная Македония' },
+  { iso: 'TR', dial: '90',  label: 'Турция' },
 ];
 const defaultPhoneCountry = 'RS';
 
@@ -42,31 +47,37 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
 
   <div class="mb-6">
     <h3 class="font-display text-2xl leading-snug text-primary mb-1">
-      Свяжемся с вами<br/><em>в течение 2 часов</em>
+      {lf.headingLine1}<br/><em>{lf.headingEmphasis}</em>
     </h3>
-    <p class="text-xs text-muted">Бесплатная консультация</p>
+    <p class="text-xs text-muted">{lf.subtext}</p>
   </div>
 
-  <form method="POST" action="/api/leads" novalidate>
+  <form method="POST" action="/api/leads" novalidate
+    data-err-name={lf.errorNameRequired}
+    data-err-tg-required={lf.errorTelegramRequired}
+    data-err-tg-format={lf.errorTelegramFormat}
+    data-err-phone-required={lf.errorPhoneRequired}
+    data-err-phone-invalid={lf.errorPhoneInvalid}
+  >
     <input type="hidden" name="service" value={service} />
     <input type="hidden" name="country" value={country} />
     <input type="hidden" name="city" value={city} />
     <input type="hidden" name="source_url" value={sourceUrl} />
 
-    <FormField name="name" label="Ваше имя" placeholder="Иван" required />
+    <FormField name="name" label={lf.nameLabel} placeholder={lf.namePlaceholder} required />
 
     <div class="mb-5 contact-field">
       <label class="block text-xs font-medium mb-2 tracking-[0.14em] uppercase text-muted">
-        Как с вами связаться<span class="text-accent ml-0.5">*</span>
+        {lf.contactLabel}<span class="text-accent ml-0.5">*</span>
       </label>
 
       <div class="contact-tabs relative inline-flex gap-1 p-1 mb-2 rounded-sm bg-page border border-border-strong" role="tablist">
         <span class="pill-tab-track" aria-hidden="true"></span>
         <button type="button" data-tab="telegram" class="pill-tab relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium cursor-pointer text-on-accent" role="tab" aria-selected="true" aria-controls="contact-panel-telegram">
-          <Send size={13} /> Telegram
+          <Send size={13} /> {lf.telegramTab}
         </button>
         <button type="button" data-tab="phone" class="pill-tab relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium cursor-pointer text-muted" role="tab" aria-selected="false" aria-controls="contact-panel-phone">
-          <Phone size={13} /> Телефон
+          <Phone size={13} /> {lf.phoneTab}
         </button>
       </div>
 
@@ -88,7 +99,7 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
               class={`${fieldClass} w-full pl-2 pr-6 appearance-none cursor-pointer`}
             >
               {PHONE_COUNTRIES.map(c => (
-                <option value={c.iso} selected={c.iso === defaultPhoneCountry}>{c.flag} +{c.dial}</option>
+                <option value={c.iso} selected={c.iso === defaultPhoneCountry}>{FLAGS[c.iso.toLowerCase()]} +{c.dial}</option>
               ))}
             </select>
             <ChevronDown size={14} class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-muted" />
@@ -106,7 +117,7 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
       <input type="hidden" name="contact" />
     </div>
 
-    <FormField name="comment" label="Марка, модель, бюджет" placeholder="BMW 3, 2020–2022, до €25 000…" type="textarea" />
+    <FormField name="comment" label={lf.commentLabel} placeholder={lf.commentPlaceholder} type="textarea" />
 
     <label class="flex items-start gap-3 mb-5 cursor-pointer text-muted consent-label">
       <input
@@ -115,13 +126,13 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
         class="mt-0.5 shrink-0 w-4 h-4 cursor-pointer accent-accent"
       />
       <span class="text-xs leading-relaxed">
-        Согласен с <a href="/privacy/" target="_blank" class="underline text-accent">политикой конфиденциальности</a>
+        {lf.consentBefore}<a href={`/${locale}/privacy/`} target="_blank" class="underline text-accent">{lf.consentLinkText}</a>
       </span>
     </label>
-    <p class="field-error consent-error mb-4" style="display:none">Необходимо ваше согласие</p>
+    <p class="field-error consent-error mb-4" style="display:none">{lf.consentError}</p>
 
     <Button type="submit" class="lead-btn w-full py-3.5 justify-center tracking-[0.06em]">
-      Рассчитать стоимость
+      {lf.submitLabel}
     </Button>
   </form>
 </div>
@@ -144,6 +155,12 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
   initAllLeadForms();
 
   function initLeadForm(form: HTMLFormElement) {
+    const errName = form.dataset.errName!;
+    const errTgRequired = form.dataset.errTgRequired!;
+    const errTgFormat = form.dataset.errTgFormat!;
+    const errPhoneRequired = form.dataset.errPhoneRequired!;
+    const errPhoneInvalid = form.dataset.errPhoneInvalid!;
+
     function fieldWrap(input: HTMLElement) { return input.closest('.mb-5') || input.parentElement!; }
 
     function setError(input: HTMLElement, msg: string) {
@@ -308,15 +325,15 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
       const name = form.querySelector<HTMLInputElement>('[name="name"]')!;
 
       if (!name.value.trim()) {
-        setError(name, 'Введите ваше имя'); ok = false;
+        setError(name, errName); ok = false;
       } else clearError(name);
 
       if (activeTab === 'telegram') {
         const v = tgInput.value.trim();
         if (!v) {
-          setError(tgInput, 'Введите Telegram'); ok = false;
+          setError(tgInput, errTgRequired); ok = false;
         } else if (!/^@?\w{3,}$/.test(v)) {
-          setError(tgInput, 'Формат: @username'); ok = false;
+          setError(tgInput, errTgFormat); ok = false;
         } else {
           if (!v.startsWith('@')) tgInput.value = '@' + v;
           clearError(tgInput);
@@ -324,9 +341,9 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
       } else {
         const parsed = parsedPhone();
         if (!phoneNumber.value.trim()) {
-          setError(phoneNumber, 'Введите номер телефона'); ok = false;
+          setError(phoneNumber, errPhoneRequired); ok = false;
         } else if (!parsed || !parsed.isValid()) {
-          setError(phoneNumber, 'Проверьте номер телефона'); ok = false;
+          setError(phoneNumber, errPhoneInvalid); ok = false;
         } else clearError(phoneNumber);
       }
       syncContact();

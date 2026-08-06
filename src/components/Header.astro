@@ -3,13 +3,24 @@ import { Menu, X, Send, Sun, Moon, Search, Wrench, Banknote, ClipboardCheck } fr
 import SiteLogo from './SiteLogo.astro';
 import Button from './Button.astro';
 import LeadFormModal from './LeadFormModal.astro';
-import { getNavItems, isNavItemActive } from '../utils/labels';
-import { DEFAULT_COUNTRY } from '../utils/constants';
-import { getActiveCountries } from '../utils/geo';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import { getNavItems, isNavItemActive, SERVICES } from '@/utils/labels';
+import { getI18n } from '@/i18n/getI18n';
+import { getLocale } from '@/i18n/config';
+import { DEFAULT_COUNTRY } from '@/utils/constants';
+import { getActiveCountries } from '@/utils/geo';
 
-const urlCountry = Astro.url.pathname.split('/')[1];
-const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCountry : DEFAULT_COUNTRY;
-const isHome = Astro.url.pathname === '/';
+const locale = getLocale(Astro.currentLocale);
+const t = getI18n(locale);
+// Country only sits at a fixed position (segment 2) on the 3 country-scoped
+// service pages (/ru/autopodbor/de/...) — everywhere else (contacts, cases,
+// the home page) there's no country in the URL at all, so fall back to the
+// default rather than misreading an unrelated segment as a country code.
+const pathSegments = Astro.url.pathname.split('/').filter(Boolean);
+const isServicePage = SERVICES.some(s => s.slug === pathSegments[1]);
+const urlCountry = isServicePage ? pathSegments[2] : undefined;
+const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCountry! : DEFAULT_COUNTRY;
+const isHome = Astro.url.pathname === `/${locale}/` || Astro.url.pathname === `/${locale}`;
 
 // Record (not `as const` + cast) so a slug added to labels.ts without a
 // matching entry here degrades to a missing icon instead of a broken build.
@@ -22,36 +33,42 @@ const SERVICE_ICONS: Record<string, typeof Search> = {
 
 // Computed once and shared by the desktop and mobile nav below (both used
 // to call getNavItems()/isNavItemActive() separately for the same country).
-const navItems = getNavItems(navCountry).map(item => ({
+const navItems = getNavItems(locale, navCountry).map(item => ({
   ...item,
   Icon: SERVICE_ICONS[item.slug],
-  active: isNavItemActive(item, navCountry, Astro.url.pathname),
+  active: isNavItemActive(item, locale, navCountry, Astro.url.pathname),
 }));
 ---
 
 <header class="sticky top-0 z-50 border-b bg-header-glass border-default backdrop-blur-[16px]">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-8">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 lg:gap-6">
 
     <SiteLogo />
 
     <!-- Desktop Nav -->
-    <nav class="hidden lg:flex items-center gap-2 text-sm font-sans font-normal header-nav flex-1 justify-center">
+    <nav class="hidden lg:flex items-center gap-0.5 xl:gap-2 text-sm font-sans font-normal header-nav flex-1 justify-center min-w-0">
       {navItems.map(item => (
-        <a href={item.href} class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-muted" aria-current={item.active ? 'page' : undefined}>
-          {item.Icon && <item.Icon size={14} />}
+        <a href={item.href} class="flex items-center gap-1.5 px-1.5 xl:px-2.5 py-1.5 rounded-sm text-muted whitespace-nowrap" aria-current={item.active ? 'page' : undefined}>
           {item.label}
         </a>
       ))}
-      <a href="/cases/autopodbor/" class="px-2.5 py-1.5 text-muted" aria-current={Astro.url.pathname.startsWith('/cases/') ? 'page' : undefined}>Кейсы</a>
-      <a href="/contacts/" class="px-2.5 py-1.5 text-muted" aria-current={Astro.url.pathname === '/contacts/' ? 'page' : undefined}>Контакты</a>
+      <a href={`/${locale}/cases/autopodbor/`} class="px-1.5 xl:px-2.5 py-1.5 text-muted whitespace-nowrap" aria-current={Astro.url.pathname.includes('/cases/') ? 'page' : undefined}>{t.nav.cases}</a>
+      <a href={`/${locale}/contacts/`} class="px-1.5 xl:px-2.5 py-1.5 text-muted whitespace-nowrap" aria-current={Astro.url.pathname === `/${locale}/contacts/` ? 'page' : undefined}>{t.nav.contacts}</a>
     </nav>
 
-    <div class="flex items-center gap-2 shrink-0">
+    <div class="flex items-center gap-1.5 xl:gap-2 shrink-0">
+      <!-- Language switcher: desktop only, grouped with theme toggle (both are
+           preference controls, not nav destinations) — mobile gets its own
+           row inside #mobile-menu -->
+      <div class="hidden lg:block">
+        <LanguageSwitcher />
+      </div>
+
       <!-- Theme toggle: desktop only — mobile gets its own row inside #mobile-menu -->
       <button
         class="theme-toggle-btn theme-btn hidden lg:flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong bg-surface text-muted"
-        aria-label="Переключить тему"
-        title="Переключить тему"
+        aria-label={t.header.themeToggleLabel}
+        title={t.header.themeToggleLabel}
       >
         <!-- Sun: shown when dark (click → light) -->
         <span class="theme-icon-sun hidden"><Sun size={16} /></span>
@@ -59,18 +76,20 @@ const navItems = getNavItems(navCountry).map(item => ({
         <span class="theme-icon-moon"><Moon size={16} /></span>
       </button>
 
-      <!-- CTA: always visible, text shortens below the lg breakpoint -->
-      <Button type="button" data-open-lead-modal class="px-3 lg:px-4 py-2">
+      <!-- CTA: always visible, full text only once there's room (xl) —
+           the lg breakpoint is where desktop nav first turns on and is
+           already tight with 6 nav links + lang switcher + theme toggle. -->
+      <Button type="button" data-open-lead-modal class="px-3 xl:px-4 py-2">
         <Send size={13} />
-        <span class="lg:hidden">Заявка</span>
-        <span class="hidden lg:inline">Оставить заявку</span>
+        <span class="xl:hidden">{t.header.ctaShort}</span>
+        <span class="hidden xl:inline">{t.header.ctaLong}</span>
       </Button>
 
       <!-- Mobile burger -->
       <button
         id="burger"
         class="lg:hidden flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong text-secondary"
-        aria-label="Меню"
+        aria-label={t.header.menuLabel}
         aria-expanded={isHome ? 'true' : 'false'}
       >
         <span id="burger-open" class:list={{ hidden: isHome }}><Menu size={18} /></span>
@@ -96,12 +115,13 @@ const navItems = getNavItems(navCountry).map(item => ({
             </a>
           ))}
         </div>
-        <a href="/cases/autopodbor/" class="text-secondary">Кейсы</a>
-        <a href="/contacts/" class="text-secondary">Контакты</a>
+        <a href={`/${locale}/cases/autopodbor/`} class="text-secondary">{t.nav.cases}</a>
+        <a href={`/${locale}/contacts/`} class="text-secondary">{t.nav.contacts}</a>
+        <div class="py-3"><LanguageSwitcher variant="inline" /></div>
         <button type="button" class="theme-toggle-btn flex items-center gap-2 w-full py-[0.85rem] text-secondary">
           <span class="theme-icon-sun hidden"><Sun size={16} /></span>
           <span class="theme-icon-moon"><Moon size={16} /></span>
-          Сменить тему
+          {t.header.themeToggleMobileLabel}
         </button>
       </nav>
     </div>
@@ -224,8 +244,16 @@ const navItems = getNavItems(navCountry).map(item => ({
     var open   = document.getElementById('burger-open');
     var close  = document.getElementById('burger-close');
 
+    // The menu's own grid-rows open animation (750ms, see <style> below)
+    // nudges the browser's scroll-anchoring by a few px with no real user
+    // scroll involved — ignoreScrollCloseUntil tells the scroll listener
+    // below to sit out that window instead of treating it as a real scroll
+    // and closing the menu it was just asked to open.
+    let ignoreScrollCloseUntil = 0;
+
     function openMenu() {
       if (!menu || !burger) return;
+      ignoreScrollCloseUntil = Date.now() + 900;
       menu.classList.add('menu-open');
       menu.removeAttribute('aria-hidden');
       menu.inert = false;
@@ -282,7 +310,15 @@ const navItems = getNavItems(navCountry).map(item => ({
       // page where the burger was opened by hand). Checks the live
       // aria-expanded state each time rather than closing once and
       // detaching, so it keeps working for every open on every page.
+      //
+      // The mobile menu's own open animation triggers a 'scroll' event or
+      // two on its own (scroll-anchoring compensating for the layout
+      // change, not real user scrolling) — without the guard below, opening
+      // the menu while already scrolled past the threshold made this
+      // handler close it again almost immediately, so the menu looked
+      // impossible to open once scrolled down.
       window.addEventListener('scroll', function () {
+        if (Date.now() < ignoreScrollCloseUntil) return;
         if (window.scrollY <= 60) return;
         if (burger.getAttribute('aria-expanded') === 'true') closeMenu();
       }, { passive: true });

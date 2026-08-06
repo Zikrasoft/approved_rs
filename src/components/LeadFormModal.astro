@@ -1,6 +1,8 @@
 ---
 import { X } from '@lucide/astro';
 import LeadForm from './LeadForm.astro';
+import { getLocale } from '@/i18n/config';
+import { getI18n } from '@/i18n/getI18n';
 
 interface Props {
   id: string;
@@ -11,10 +13,12 @@ interface Props {
 }
 
 const { id, triggerAttr, service = '', country = '', city = '' } = Astro.props;
+const locale = getLocale(Astro.currentLocale);
+const closeLabel = getI18n(locale).common.closeLabel;
 ---
 
 <dialog id={id} class="lead-modal">
-  <button type="button" data-close aria-label="Закрыть" class="lead-modal-close">
+  <button type="button" data-close aria-label={closeLabel} class="lead-modal-close">
     <X size={16} />
   </button>
   <LeadForm service={service} country={country} city={city} />

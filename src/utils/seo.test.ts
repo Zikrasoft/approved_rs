@@ -1,24 +1,38 @@
 import { describe, it, expect } from 'vitest';
 import { generateMeta } from './seo';
+import type { Country, City } from './geo';
 
-const de = { name: 'Германия', nameGenitive: 'Германии', nameLocative: 'Германии' };
-const berlin = { name: 'Берлин', nameLocative: 'Берлине' };
+const de: Country = {
+  code: 'de',
+  ru: { name: 'Германия', nameGenitive: 'Германии', nameLocative: 'Германии', nameAccusative: 'Германию' },
+  en: { name: 'Germany' },
+  sr: { name: 'Nemačka', nameGenitive: 'Nemačke', nameLocative: 'Nemačkoj', nameAccusative: 'Nemačku' },
+  active: true,
+};
+const berlin: City = {
+  slug: 'berlin',
+  ru: { name: 'Берлин', nameLocative: 'Берлине' },
+  en: { name: 'Berlin' },
+  sr: { name: 'Berlin', nameLocative: 'Berlinu' },
+  country: 'de',
+  active: true,
+};
 
 describe('generateMeta', () => {
   it('generates autopodbor meta for country', () => {
-    const meta = generateMeta('autopodbor', { country: de, baseUrl: 'https://approved.rs', path: '/de/autopodbor/' });
+    const meta = generateMeta('autopodbor', { country: de, baseUrl: 'https://approved.rs', path: '/autopodbor/de/', locale: 'ru' });
     expect(meta.title).toContain('Германии');
     expect(meta.title).toContain('Автоподбор');
-    expect(meta.canonical).toBe('https://approved.rs/de/autopodbor/');
+    expect(meta.canonical).toBe('https://approved.rs/autopodbor/de/');
   });
 
   it('generates autopodbor meta for city', () => {
-    const meta = generateMeta('autopodbor', { country: de, city: berlin, baseUrl: 'https://approved.rs', path: '/de/berlin/autopodbor/' });
+    const meta = generateMeta('autopodbor', { country: de, city: berlin, baseUrl: 'https://approved.rs', path: '/autopodbor/de/berlin/', locale: 'ru' });
     expect(meta.title).toContain('Берлине');
   });
 
   it('generates vykup meta', () => {
-    const meta = generateMeta('vykup', { country: de, baseUrl: 'https://approved.rs', path: '/de/vykup/' });
+    const meta = generateMeta('vykup', { country: de, baseUrl: 'https://approved.rs', path: '/vykup/de/', locale: 'ru' });
     expect(meta.title).toContain('Выкуп');
     expect(meta.description.length).toBeGreaterThan(50);
   });

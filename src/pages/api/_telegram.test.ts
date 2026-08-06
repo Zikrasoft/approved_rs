@@ -6,7 +6,7 @@ vi.mock('../../lib/telegram', () => ({
 }));
 
 import { POST } from './telegram';
-import { editGroupMessage, answerCallbackQuery } from '../../lib/telegram';
+import { editGroupMessage, answerCallbackQuery } from '@/lib/telegram';
 
 const SECRET = 'test-webhook-secret';
 

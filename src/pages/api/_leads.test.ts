@@ -5,7 +5,7 @@ vi.mock('../../lib/telegram', () => ({
 }));
 
 import { POST } from "./leads";
-import { sendLeadNotification } from "../../lib/telegram";
+import { sendLeadNotification } from "@/lib/telegram";
 
 function makeCtx(fields: Record<string, string>) {
   const formData = new FormData();
@@ -16,6 +16,7 @@ function makeCtx(fields: Record<string, string>) {
   return {
     request: new Request('http://localhost/api/leads', { method: 'POST', body: formData }),
     redirect: redirectFn,
+    cookies: { get: () => undefined },
   } as any;
 }
 
@@ -24,10 +25,10 @@ describe('POST /api/leads', () => {
     vi.mocked(sendLeadNotification).mockResolvedValue(undefined);
   });
 
-  it('redirects to /thanks/ on valid data', async () => {
+  it('redirects to /ru/thanks/ on valid data', async () => {
     const ctx = makeCtx({ name: 'Иван', contact: '@ivan', service: 'autopodbor' });
     await POST(ctx);
-    expect(ctx.redirect).toHaveBeenCalledWith('/thanks/', 302);
+    expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
   });
 
   it('returns 400 when name is empty', async () => {
@@ -43,7 +44,7 @@ describe('POST /api/leads', () => {
   });
 
   it('calls sendLeadNotification with parsed form fields', async () => {
-    const ctx = makeCtx({ name: 'Иван', contact: '@ivan', service: 'vykup', country: 'de', source_url: '/de/vykup/' });
+    const ctx = makeCtx({ name: 'Иван', contact: '@ivan', service: 'vykup', country: 'de', source_url: '/ru/vykup/de/' });
     await POST(ctx);
     expect(sendLeadNotification).toHaveBeenCalledWith(expect.objectContaining({
       name: 'Иван', contact: '@ivan', service: 'vykup', country: 'de',
@@ -54,6 +55,6 @@ describe('POST /api/leads', () => {
     vi.mocked(sendLeadNotification).mockRejectedValueOnce(new Error('TG down'));
     const ctx = makeCtx({ name: 'Иван', contact: '@ivan', service: 'autopodbor' });
     await POST(ctx);
-    expect(ctx.redirect).toHaveBeenCalledWith('/thanks/', 302);
+    expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
   });
 });
