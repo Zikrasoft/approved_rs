@@ -25,7 +25,12 @@ const LEGACY_PATH_REWRITES: Record<string, string> = {
 // it breaks every <Image> on the site, since the endpoint only exists at
 // the bare path.
 const UNLOCALIZED_PREFIXES = ['/api/', '/keystatic', '/_image'];
-const UNLOCALIZED_EXACT = ['/llms.txt'];
+// '/404' is Astro's special not-found route — it's baked verbatim into
+// dist/client/404.html, the file every static host (Vercel included) falls
+// back to for ANY unmatched path. Redirecting it here corrupts that single
+// file into a "Redirecting to /ru/404/" stub, breaking 404 handling
+// sitewide instead of just for literal /404 visits.
+const UNLOCALIZED_EXACT = ['/llms.txt', '/404', '/404/'];
 // @astrojs/sitemap generates these as real routes (not static files under
 // public/), so they pass through this middleware like any other page and
 // would otherwise get wrongly redirected to a locale-prefixed 404.
