@@ -39,7 +39,7 @@ export default config({
     cases: collection({
       label: 'Кейсы автоподбора',
       slugField: 'title',
-      path: 'src/content/cases/*',
+      path: 'src/content/cases/*/',
       format: { contentField: 'content' },
       // Plain stacked form, full width for every field: this entry has
       // three real rich-text bodies (ru/en/sr), and Keystatic's 'content'
@@ -102,7 +102,7 @@ export default config({
     autoserviceCases: collection({
       label: 'Кейсы автосервиса',
       slugField: 'title',
-      path: 'src/content/autoservice-cases/*',
+      path: 'src/content/autoservice-cases/*/',
       format: { contentField: 'content' },
       schema: {
         title: fields.slug({ name: { label: 'Заголовок' } }),
@@ -113,21 +113,6 @@ export default config({
         content: fields.markdoc({ label: 'Текст (RU)', extension: 'md' }),
         car: fields.text({ label: 'Автомобиль' }),
         year: fields.integer({ label: 'Год' }),
-        price: fields.object(
-          {
-            value: fields.text({ label: 'Цена' }),
-            currency: fields.select({
-              label: 'Валюта',
-              options: [
-                { label: '€', value: '€' },
-                { label: '$', value: '$' },
-                { label: 'дин.', value: 'дин.' },
-              ],
-              defaultValue: '€',
-            }),
-          },
-          { layout: [8, 4] }
-        ),
         servicesApplied: fields.multiselect({
           label: 'Выполненные услуги',
           options: [

@@ -7,7 +7,7 @@ price:
   currency: €
 country: rs
 service: buyout
-image: ./bmw-320/image.jpg
+image: ./image.jpg
 date: 2025-09-20
 published: true
 translations:

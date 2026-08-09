@@ -95,8 +95,6 @@ translations:
       #AutoServisSrbija
 car: Mercedes-Benz C-Class
 year: 2018
-price:
-  currency: €
 servicesApplied:
   - diagnostics
   - maintenance

@@ -101,8 +101,6 @@ translations:
       #servisautomobila #Beograd #Srbija
 car: ALFA ROMEO GIULIA
 year: 2021
-price:
-  currency: €
 servicesApplied:
   - diagnostics
   - maintenance

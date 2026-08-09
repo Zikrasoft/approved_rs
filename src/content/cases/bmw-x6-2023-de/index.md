@@ -7,7 +7,7 @@ price:
   currency: €
 country: rs
 service: autopodbor
-image: ./bmw-x6-2023-de/image.jpg
+image: ./image.jpg
 date: 2026-03-10
 published: true
 translations:

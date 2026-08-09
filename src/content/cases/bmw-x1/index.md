@@ -7,7 +7,7 @@ price:
   currency: €
 country: rs
 service: autopodbor
-image: ./bmw-x1/image.jpg
+image: ./image.jpg
 date: 2026-07-24
 published: true
 translations:

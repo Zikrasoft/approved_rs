@@ -7,7 +7,7 @@ price:
   currency: €
 country: rs
 service: autopodbor
-image: ./mini-cooper-s/image.jpg
+image: ./image.jpg
 date: 2025-12-20
 published: true
 translations:

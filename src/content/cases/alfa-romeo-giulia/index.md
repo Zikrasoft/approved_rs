@@ -7,7 +7,7 @@ price:
   currency: €
 country: rs
 service: autopodbor
-image: ./alfa-romeo-giulia/image.jpg
+image: ./image.jpg
 date: 2026-07-15
 published: true
 translations:

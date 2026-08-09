@@ -7,7 +7,7 @@ price:
   currency: €
 country: rs
 service: autopodbor
-image: ./skoda-superb-dlya-anatoliya/image.jpg
+image: ./image.jpg
 date: 2025-12-12
 published: true
 translations:

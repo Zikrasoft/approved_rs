@@ -7,7 +7,7 @@ price:
   currency: €
 country: rs
 service: autopodbor
-image: ./mini-one/image.jpg
+image: ./image.jpg
 date: 2026-03-02
 published: true
 translations:

@@ -7,7 +7,7 @@ price:
   currency: €
 country: rs
 service: autopodbor
-image: ./bmw-520-f10/image.jpg
+image: ./image.jpg
 date: 2026-01-20
 published: true
 translations:
