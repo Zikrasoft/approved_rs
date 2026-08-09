@@ -32,7 +32,6 @@ const autoserviceCases = defineCollection({
     title: z.string(),
     car: z.string(),
     year: z.coerce.number(),
-    price: z.object({ value: z.string(), currency: z.string().optional() }),
     servicesApplied: z.array(z.enum(AUTOSERVICE_SERVICES)),
     image: image().optional(),
     gallery: z.array(image()).default([]),

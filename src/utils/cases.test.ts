@@ -34,7 +34,6 @@ describe('toAutoserviceCaseItem', () => {
         servicesApplied: ['diagnostics', 'engine', 'unknown-service'],
         car: 'BMW 320',
         year: 2018,
-        price,
         image: undefined,
       },
     } as unknown as CollectionEntry<'autoserviceCases'>;

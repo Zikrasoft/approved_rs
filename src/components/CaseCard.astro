@@ -11,7 +11,7 @@ interface Props {
   badges: string[];
   car: string;
   year: number;
-  price: { value: string; currency?: string };
+  price?: { value: string; currency?: string };
 }
 export type CaseCardProps = Props;
 
@@ -54,7 +54,7 @@ const { href, image, imageAlt, badges, car, year, price } = Astro.props;
     <h3 class="font-display text-lg mt-1 mb-2 leading-snug text-primary">
       {car} <span class="text-muted">{year}</span>
     </h3>
-    <Price price={price} class="font-display text-xl font-bold text-accent" />
+    {price && <Price price={price} class="font-display text-xl font-bold text-accent" />}
   </div>
 </a>
 

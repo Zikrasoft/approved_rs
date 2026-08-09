@@ -25,6 +25,5 @@ export const toAutoserviceCaseItem = (c: CollectionEntry<'autoserviceCases'>, lo
     badges: c.data.servicesApplied.map(s => workLabels[s] ?? s),
     car: c.data.car,
     year: c.data.year,
-    price: c.data.price,
   };
 };
