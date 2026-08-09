@@ -10,7 +10,7 @@ interface Props {
   imageAlt: string;
   badges: string[];
   car: string;
-  year: number;
+  year?: number;
   price?: { value: string; currency?: string };
 }
 export type CaseCardProps = Props;
@@ -20,7 +20,7 @@ const { href, image, imageAlt, badges, car, year, price } = Astro.props;
 
 <a
   href={href}
-  class="case-card group block rounded-sm overflow-hidden no-underline glow-border bg-surface border border-default"
+  class="case-card group flex h-full flex-col rounded-sm overflow-hidden no-underline glow-border bg-surface border border-default"
 >
   {image
     ? <div class="overflow-hidden h-52">
@@ -42,7 +42,7 @@ const { href, image, imageAlt, badges, car, year, price } = Astro.props;
       </div>
   }
 
-  <div class="p-5">
+  <div class="p-5 flex flex-col flex-1">
     <div class="flex items-center justify-between mb-2">
       <div class="flex flex-wrap gap-1.5">
         {badges.map(badge => (
@@ -52,9 +52,11 @@ const { href, image, imageAlt, badges, car, year, price } = Astro.props;
       <span class="case-arrow text-xs text-muted">→</span>
     </div>
     <h3 class="font-display text-lg mt-1 mb-2 leading-snug text-primary">
-      {car} <span class="text-muted">{year}</span>
+      {car} {year && <span class="text-muted">{year}</span>}
     </h3>
-    {price && <Price price={price} class="font-display text-xl font-bold text-accent" />}
+    <div class="mt-auto">
+      {price && <Price price={price} class="font-display text-xl font-bold text-accent" />}
+    </div>
   </div>
 </a>
 

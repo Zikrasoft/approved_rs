@@ -30,8 +30,8 @@ const autoserviceCases = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/autoservice-cases' }),
   schema: ({ image }) => z.object({
     title: z.string(),
-    car: z.string(),
-    year: z.coerce.number(),
+    car: z.string().optional(),
+    year: z.coerce.number().optional(),
     servicesApplied: z.array(z.enum(AUTOSERVICE_SERVICES)),
     image: image().optional(),
     gallery: z.array(image()).default([]),

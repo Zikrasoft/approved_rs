@@ -5,7 +5,7 @@ import { config, collection, fields } from '@keystatic/core';
 // relative path) — required by content.config.ts's `image()` schema, which
 // needs a locally-resolvable path to optimize via astro:assets at build
 // time, not a public/ URL string.
-const caseImage = () => fields.image({ label: 'Фото' });
+const caseImage = () => fields.image({ label: 'Фото', validation: { isRequired: true } });
 
 // EN/SR translation of this case's title + body, right on the same entry —
 // everything else (photo, price, year, country) is shared across locales
@@ -51,17 +51,17 @@ export default config({
       // car/photo/publish metadata, since translating an existing case is
       // the common edit.
       schema: {
-        title: fields.slug({ name: { label: 'Заголовок' } }),
+        title: fields.slug({ name: { label: 'Заголовок', validation: { isRequired: true } } }),
         translations: fields.object({
           en: translationField('English', 'EN'),
           sr: translationField('Srpski', 'SR'),
         }, { label: 'Переводы' }),
         content: fields.markdoc({ label: 'Текст (RU)', extension: 'md' }),
-        car: fields.text({ label: 'Автомобиль' }),
-        year: fields.integer({ label: 'Год' }),
+        car: fields.text({ label: 'Автомобиль', validation: { isRequired: true } }),
+        year: fields.integer({ label: 'Год', validation: { isRequired: true } }),
         price: fields.object(
           {
-            value: fields.text({ label: 'Цена' }),
+            value: fields.text({ label: 'Цена', validation: { isRequired: true } }),
             currency: fields.select({
               label: 'Валюта',
               options: [
@@ -95,7 +95,7 @@ export default config({
         }),
         image: caseImage(),
         gallery: fields.array(caseImage(), { label: 'Больше фото', itemLabel: props => props.value?.filename || 'Фото' }),
-        date: fields.date({ label: 'Дата' }),
+        date: fields.date({ label: 'Дата', validation: { isRequired: true } }),
         published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
       },
     }),
@@ -105,7 +105,7 @@ export default config({
       path: 'src/content/autoservice-cases/*/',
       format: { contentField: 'content' },
       schema: {
-        title: fields.slug({ name: { label: 'Заголовок' } }),
+        title: fields.slug({ name: { label: 'Заголовок', validation: { isRequired: true } } }),
         translations: fields.object({
           en: translationField('English', 'EN'),
           sr: translationField('Srpski', 'SR'),
@@ -125,7 +125,7 @@ export default config({
         }),
         image: caseImage(),
         gallery: fields.array(caseImage(), { label: 'Больше фото', itemLabel: props => props.value?.filename || 'Фото' }),
-        date: fields.date({ label: 'Дата' }),
+        date: fields.date({ label: 'Дата', validation: { isRequired: true } }),
         published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
       },
     }),

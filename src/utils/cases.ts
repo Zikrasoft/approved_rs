@@ -18,12 +18,14 @@ export const toCaseItem = (c: CollectionEntry<'cases'>, locale: Locale): CaseCar
 
 export const toAutoserviceCaseItem = (c: CollectionEntry<'autoserviceCases'>, locale: Locale): CaseCardProps => {
   const workLabels = Object.fromEntries(getServicesContent(locale).avtoservisBelgrade.whatWeDo.map(w => [w.key, w.label]));
+  const car = c.data.car ?? c.data.title;
   return {
     href: `/${locale}/avtoservis-belgrade/${c.id}/`,
     image: c.data.image,
-    imageAlt: c.data.car,
+    imageAlt: car,
     badges: c.data.servicesApplied.map(s => workLabels[s] ?? s),
-    car: c.data.car,
-    year: c.data.year,
+    car,
+    // Year is the car's model year — meaningless to show without the car.
+    year: c.data.car ? c.data.year : undefined,
   };
 };
