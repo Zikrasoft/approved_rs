@@ -24,7 +24,7 @@ const t = getI18n(locale);
 ---
 
 <BaseLayout {...meta}>
-  <PageHero decoWord="CASES" title={t.nav.cases} subtitle={cs.heroSubtitle} />
+  <PageHero decoWord="CASES" title={t.nav.cases} subtitle={cs.heroSubtitle} breadcrumbs={[{ label: t.nav.cases }]} />
 
   <section class="max-w-6xl mx-auto px-6 py-16">
     <CaseCategoryTabs {active} {autopodborCount} {autoserviceCount} />

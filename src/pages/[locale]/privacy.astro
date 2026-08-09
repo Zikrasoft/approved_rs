@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { telegramLink } from '@/utils/telegramLink';
 import { getPagesContent } from '@/i18n/content/pages';
@@ -21,6 +22,7 @@ const sections = p.sections;
 <BaseLayout {...meta}>
   <section class="border-b border-default">
     <div class="max-w-6xl mx-auto px-6 py-16">
+      <Breadcrumbs items={[{ label: p.heading }]} />
       <span class="accent-line"></span>
       <h1 class="font-display text-5xl font-bold mb-3">{p.heading}</h1>
       <p class="text-sm text-muted">{p.lastUpdated}</p>

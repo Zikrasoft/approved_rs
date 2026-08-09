@@ -6,12 +6,14 @@ import Faq from '@/components/Faq.astro';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { getFaq } from '@/i18n/content/faq';
 import { getPagesContent } from '@/i18n/content/pages';
+import { getI18n } from '@/i18n/getI18n';
 import { withLocales } from '@/utils/paths';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const { locale } = Astro.params;
 const p = getPagesContent(locale).contacts;
+const t = getI18n(locale);
 const meta = {
   title: `${p.metaTitle} | ${SITE_NAME}`,
   description: p.metaDescription,
@@ -24,7 +26,7 @@ const steps = p.steps;
 
 <BaseLayout {...meta}>
 
-  <PageHero decoWord="CONTACT" title={p.heroTitle} subtitle={p.heroSubtitle} />
+  <PageHero decoWord="CONTACT" title={p.heroTitle} subtitle={p.heroSubtitle} breadcrumbs={[{ label: t.nav.contacts }]} />
 
   <section class="max-w-6xl mx-auto px-6 py-16">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
