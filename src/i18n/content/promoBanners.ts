@@ -3,8 +3,9 @@ import type { Locale } from '@/i18n/config';
 // SEO-keyword-dense banner shown on case-detail pages ("where we work") —
 // one of these is picked at random per page render. City names are spelled
 // out explicitly (not just "Serbia") because that's what people actually
-// search for.
-const banners: Record<Locale, string[]> = {
+// search for. Two separate sets: autopodbor cases talk about sourcing/buyout
+// across all of Serbia, autoservice cases talk about the Belgrade repair shop.
+const autopodborBanners: Record<Locale, string[]> = {
   ru: [
     'Если вам нужен **автоподбор в Белграде, Нови-Саде, Панчево, Суботице и по всей Сербии**, поможем найти действительно достойный автомобиль, проверив его историю, техническое состояние и юридическую чистоту.',
     'Если вам нужен **автоподбор в Сербии**, **автоподбор в Белграде**, **Нови-Саде**, **Нише**, **Суботице**, **Панчево**, **Крагуеваце**, **Чачаке**, **Ужице**, **Валево**, **Зренянине**, **Шабаце**, **Сомборе** или любом другом городе Сербии — мы проверим историю автомобиля, проведем профессиональную диагностику и поможем купить действительно достойный экземпляр.',
@@ -43,6 +44,33 @@ const banners: Record<Locale, string[]> = {
   ],
 };
 
-export function getGeoBanners(locale: Locale): string[] {
-  return banners[locale];
+const autoserviceBanners: Record<Locale, string[]> = {
+  ru: [
+    'Если вам нужна **компьютерная диагностика автомобиля в Белграде**, оперативно найдем причину неисправности и предложим оптимальное решение по ремонту.',
+    'Если вам нужно **техническое обслуживание автомобиля в Белграде** — замена масла и фильтров, плановое ТО по регламенту производителя — обращайтесь в наш автосервис.',
+    'Если вам нужен **ремонт подвески и тормозной системы в Белграде**, проверим состояние дисков, колодок, амортизаторов и рычагов и устраним причину вибраций или стуков.',
+    'Если вам нужна **диагностика и ремонт двигателя или трансмиссии в Белграде**, найдем причину неисправности с помощью официального дилерского оборудования и выполним ремонт качественно.',
+    'Если вам нужна **проверка автомобиля перед покупкой в Белграде**, проведем независимую техническую диагностику и покажем реальное состояние машины до сделки.',
+    'Если вам нужен **автосервис в Белграде** — диагностика, ТО, ремонт подвески, тормозов, двигателя и трансмиссии — обращайтесь, работаем с любыми марками.',
+  ],
+  en: [
+    'Need **computer diagnostics for your car in Belgrade**? We\'ll quickly find the cause of the issue and suggest the best repair solution.',
+    'Need **scheduled maintenance in Belgrade** — oil and filter changes, manufacturer-schedule service? Get in touch with our auto service.',
+    'Need **suspension and brake system repair in Belgrade**? We\'ll check the discs, pads, shocks and control arms and fix the cause of vibrations or noise.',
+    'Need **engine or transmission diagnostics and repair in Belgrade**? We\'ll pinpoint the issue with official dealer-grade equipment and repair it properly.',
+    'Need a **pre-purchase car inspection in Belgrade**? We\'ll run an independent technical check and show you the car\'s real condition before you buy.',
+    'Need an **auto service in Belgrade** — diagnostics, maintenance, suspension, brake, engine and transmission repair? Get in touch, we work with any make.',
+  ],
+  sr: [
+    'Treba vam **kompjuterska dijagnostika vozila u Beogradu**? Brzo ćemo pronaći uzrok kvara i predložiti najbolje rešenje za popravku.',
+    'Treba vam **redovno održavanje vozila u Beogradu** — zamena ulja i filtera, servis po planu proizvođača? Javite se našem auto-servisu.',
+    'Treba vam **popravka trapa i kočionog sistema u Beogradu**? Proverićemo diskove, pločice, amortizere i rukavice i otkloniti uzrok vibracija ili zvukova.',
+    'Treba vam **dijagnostika i popravka motora ili menjača u Beogradu**? Uzrok kvara ćemo pronaći zvaničnom dilerskom opremom i kvalitetno ga otkloniti.',
+    'Treba vam **provera vozila pre kupovine u Beogradu**? Obavićemo nezavisnu tehničku dijagnostiku i pokazati vam realno stanje vozila pre kupovine.',
+    'Treba vam **auto-servis u Beogradu** — dijagnostika, redovno održavanje, popravka trapa, kočnica, motora i menjača? Javite se, radimo sa svim markama.',
+  ],
+};
+
+export function getPromoBanners(locale: Locale, kind: 'autopodbor' | 'autoservice' = 'autopodbor'): string[] {
+  return kind === 'autoservice' ? autoserviceBanners[locale] : autopodborBanners[locale];
 }

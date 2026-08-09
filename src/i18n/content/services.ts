@@ -78,7 +78,7 @@ interface ServicesContent {
     ctaEyebrow: string;
     ctaHeading: string;
     ctaButtonLabel: string;
-    geoWorkLabel: string;
+    usefulInfoLabel: string;
     serviceBadges: Record<'autopodbor' | 'buyout' | 'inspection' | 'autoservice', string>;
   };
 }
@@ -174,7 +174,7 @@ const ru: ServicesContent = {
     ctaEyebrow: 'Нужна такая же услуга?',
     ctaHeading: 'Обсудим ваш автомобиль',
     ctaButtonLabel: 'Написать в Telegram',
-    geoWorkLabel: 'География работы',
+    usefulInfoLabel: 'Полезная информация',
     serviceBadges: { autopodbor: 'Автоподбор', buyout: 'Выкуп', inspection: 'Проверка', autoservice: 'Автосервис' },
   },
 };
@@ -270,7 +270,7 @@ const en: ServicesContent = {
     ctaEyebrow: 'Need the same service?',
     ctaHeading: "Let's talk about your car",
     ctaButtonLabel: 'Message on Telegram',
-    geoWorkLabel: 'Where We Work',
+    usefulInfoLabel: 'Useful Information',
     serviceBadges: { autopodbor: 'Sourcing', buyout: 'Buyout', inspection: 'Inspection', autoservice: 'Service' },
   },
 };
@@ -366,7 +366,7 @@ const sr: ServicesContent = {
     ctaEyebrow: 'Treba vam ista usluga?',
     ctaHeading: 'Razgovarajmo o vašem vozilu',
     ctaButtonLabel: 'Pišite nam na Telegramu',
-    geoWorkLabel: 'Gde radimo',
+    usefulInfoLabel: 'Korisne informacije',
     serviceBadges: { autopodbor: 'Odabir', buyout: 'Otkup', inspection: 'Provera', autoservice: 'Servis' },
   },
 };
