@@ -15,6 +15,15 @@ const LEGACY_PATH_REWRITES: Record<string, string> = {
   '/de/combined/': '/autopodbor/de',
   '/rs/combined/': '/autopodbor/rs',
   '/es/combined/': '/autopodbor/es',
+  // Old per-country delivery pages, content merged into /autopodbor/<country>.
+  '/rs/dostavka/': '/autopodbor/rs',
+  '/es/dostavka/': '/autopodbor/es',
+  // Old case slugs, content no longer exists — send to the cases list instead of 404.
+  '/cases/mercedes-c-2021-de/': '/cases/autopodbor',
+  '/cases/ford-focus-2020-rs/': '/cases/autopodbor',
+  '/cases/vw-golf-2022-rs/': '/cases/autopodbor',
+  '/cases/bmw-x5-2023-de/': '/cases/autopodbor',
+  '/cases/audi-a4-2022-de/': '/cases/autopodbor',
 };
 
 // No trailing slash on '/keystatic': the CMS admin's own root route is the
