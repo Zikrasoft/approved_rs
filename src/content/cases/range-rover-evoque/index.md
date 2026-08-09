@@ -14,7 +14,7 @@ translations:
   en:
     title: Range Rover Evoque
     body: |
-      **Bringing cars in from Germany to Serbia — not just delivery, but full support all the way to a great result.**
+      ## Bringing cars in from Germany to Serbia — not just delivery, but full support all the way to a great result.
 
       A client came to us wanting a **Range Rover Evoque from Germany**. We sourced a suitable car, had it professionally inspected before purchase, and immediately caught an issue typical of this engine — a **stretched timing chain**. The client was told about every detail upfront, but given the car's overall condition, spec, and attractive price, he decided to go ahead anyway.
 
@@ -24,7 +24,7 @@ translations:
   sr:
     title: Range Rover Evoque
     body: |
-      **Dovoženje vozila iz Nemačke u Srbiju — ne samo transport, već potpuna podrška do odličnog rezultata.**
+      ## Dovoženje vozila iz Nemačke u Srbiju — ne samo transport, već potpuna podrška do odličnog rezultata.
 
       Klijent nam se obratio sa željom za **Range Rover Evoque iz Nemačke**. Pronašli smo odgovarajuće vozilo, izvršili profesionalan pregled pre kupovine i odmah otkrili problem tipičan za ovaj motor — **istegnut lanac razvoda**. Klijent je unapred bio upoznat sa svim detaljima, ali je, uzimajući u obzir stanje vozila, opremu i povoljnu cenu, odlučio da se ipak odluči baš za ovaj primerak.
 
@@ -32,7 +32,7 @@ translations:
 
       Klijent je na kraju dobio potpuno servisirano i pouzdano vozilo, spremno za vožnju bez neprijatnih iznenađenja.
 ---
-**Пригон автомобилей из Германии в Сербию — не просто доставка, а полное сопровождение до идеального результата.**
+## Пригон автомобилей из Германии в Сербию — не просто доставка, а полное сопровождение до идеального результата.
 
 К нам обратился клиент за **Range Rover Evoque из Германии**. Мы подобрали подходящий автомобиль, провели профессиональный осмотр еще до покупки и сразу обнаружили характерную для этого двигателя проблему — **растянутую цепь ГРМ**. Клиент был заранее предупрежден обо всех нюансах, но с учетом состояния автомобиля, комплектации и привлекательной цены решил остановиться именно на этом варианте.
 

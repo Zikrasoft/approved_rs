@@ -4,7 +4,7 @@ translations:
   en:
     title: BMW X4
     body: >
-      # Buying a 2019 BMW X4 in Serbia – Professional Car Selection and
+      ## Buying a 2019 BMW X4 in Serbia – Professional Car Selection and
       Inspection
 
 
@@ -106,7 +106,7 @@ translations:
   sr:
     title: BMW X4
     body: >
-      # Kupovina BMW X4 2019. godišta u Srbiji – profesionalni auto izbor i
+      ## Kupovina BMW X4 2019. godišta u Srbiji – profesionalni auto izbor i
       provera
 
 
@@ -214,7 +214,7 @@ gallery: []
 date: 2026-03-12
 published: true
 ---
-# Покупка BMW X4 2019 года в Сербии — автоподбор автомобиля с проверкой
+## Покупка BMW X4 2019 года в Сербии — автоподбор автомобиля с проверкой
 
 К нам обратились Алексей и его супруга с задачей найти **BMW в Сербии** в отличном техническом и визуальном состоянии. Бюджет на покупку автомобиля составлял до **35 000 евро**.
 

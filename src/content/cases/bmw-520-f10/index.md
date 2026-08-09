@@ -14,7 +14,7 @@ translations:
   en:
     title: BMW 520 F10
     body: |
-      **Car sourcing in Serbia — the right choice starts with the right inspection.**
+      ## Car sourcing in Serbia — the right choice starts with the right inspection.
 
       Alexey came to us looking for a **BMW 420** or a **BMW 520 in the F10 body**. Right from the first conversation about his criteria, we explained we'd only consider cars from **2015 onward** — that's when BMW switched to the **B47** engine, which in our view is a much better bet than the earlier **N47**. Its main weak points, including the timing chain issue, were significantly reworked.
 
@@ -30,7 +30,7 @@ translations:
   sr:
     title: BMW 520 F10
     body: |
-      **Odabir vozila u Srbiji — pravi izbor automobila počinje pravom proverom.**
+      ## Odabir vozila u Srbiji — pravi izbor automobila počinje pravom proverom.
 
       Aleksej nam se obratio sa zahtevom za **BMW 420** ili **BMW 520 u F10 karoseriji**. Već na početku, prilikom dogovora oko kriterijuma, objasnili smo da ćemo razmatrati samo vozila proizvedena posle **2015. godine** — upravo u tom periodu BMW je počeo masovnije da koristi motor **B47**, koji je, po našem mišljenju, znatno bolje rešenje od prethodnog **N47**. Glavne slabe tačke, uključujući problem sa lancem razvoda, su tada značajno unapređene.
 
@@ -44,7 +44,7 @@ translations:
 
       Na kraju je Aleksej dobio tačno onaj automobil koji je tražio — negovan BMW sa dobrom istorijom i bez neprijatnih iznenađenja.
 ---
-**Автоподбор в Сербии — правильный выбор автомобиля начинается с правильной проверки.**
+## Автоподбор в Сербии — правильный выбор автомобиля начинается с правильной проверки.
 
 К нам обратился Алексей с запросом на **BMW 420** или **BMW 520 в кузове F10**. Сразу при обсуждении критериев мы объяснили, что будем рассматривать автомобили только после **2015 года**, так как именно в этот период BMW начали активно использовать двигатель **B47**, который, на наш взгляд, является более удачным решением по сравнению с предыдущим **N47**. В нем были значительно доработаны основные слабые места, включая проблему с цепью ГРМ.
 

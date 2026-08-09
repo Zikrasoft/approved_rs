@@ -14,7 +14,7 @@ translations:
   en:
     title: BMW X1
     body: |
-      **Car sourcing in Serbia — the right decision comes from experience, not emotion.**
+      ## Car sourcing in Serbia — the right decision comes from experience, not emotion.
 
       Viktor came to us before he'd even received his Serbian residence permit. We told him upfront that the car could only be registered in his name once the permit came through, so the search had to wait a little. A few months later, in July 2026, once the paperwork was sorted, we got to work finding him a car.
 
@@ -26,7 +26,7 @@ translations:
   sr:
     title: BMW X1
     body: |
-      **Odabir vozila u Srbiji — pravo rešenje dolazi iz iskustva, ne iz emocija.**
+      ## Odabir vozila u Srbiji — pravo rešenje dolazi iz iskustva, ne iz emocija.
 
       Viktor nam se obratio još pre nego što je dobio boravišnu dozvolu u Srbiji. Odmah smo ga upozorili da vozilo može da se registruje na njegovo ime tek nakon dobijanja dozvole, pa je potraga morala malo da sačeka. Nekoliko meseci kasnije, već u julu 2026. godine, nakon što je dobio dokumenta, krenuli smo u potragu za automobilom.
 
@@ -36,7 +36,7 @@ translations:
 
       Na kraju je Viktor dobio potpuno provereno vozilo sa transparentnom istorijom i bez skrivenih tehničkih problema.
 ---
-**Автоподбор в Сербии — когда правильное решение приходит с опытом, а не с эмоциями.**
+## Автоподбор в Сербии — когда правильное решение приходит с опытом, а не с эмоциями.
 
 К нам обратился Виктор еще до получения ВНЖ в Сербии. Мы сразу предупредили, что оформить автомобиль на себя можно только после получения ВНЖ, поэтому подбор пришлось ненадолго отложить. Спустя несколько месяцев, уже в июле 2026 года, после получения документов мы приступили к поиску автомобиля.
 

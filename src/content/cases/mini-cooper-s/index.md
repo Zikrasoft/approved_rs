@@ -14,7 +14,7 @@ translations:
   en:
     title: MINI COOPER S
     body: |
-      **Car sourcing in Serbia — when you want to find not just a car, but "the one."**
+      ## Car sourcing in Serbia — when you want to find not just a car, but "the one."
 
       Anastasia came to us with a clear brief: a **Mini Cooper S**. The family already had a daily driver, so this Mini was meant to be something else entirely — a fun, emotional car to enjoy on every drive.
 
@@ -24,7 +24,7 @@ translations:
   sr:
     title: MINI COOPER S
     body: |
-      **Odabir vozila u Srbiji — kada želite da pronađete ne bilo koji automobil, već baš "taj pravi".**
+      ## Odabir vozila u Srbiji — kada želite da pronađete ne bilo koji automobil, već baš "taj pravi".
 
       Anastasija nam se obratila sa jasnim zahtevom — **Mini Cooper S**. Porodica već ima glavno vozilo, pa je ovaj Mini trebalo da bude nešto sasvim drugo — živ, emotivan automobil za uživanje u svakoj vožnji.
 
@@ -32,7 +32,7 @@ translations:
 
       Pronađen je **Mini Cooper S iz 2023. godine** sa svega **30.000 km**, kompletnom istorijom i **garancijom od godinu dana na motor i pripadajuću opremu**. Tačno onakav automobil kakav je klijentkinja i tražila.
 ---
-**Автоподбор в Сербии — когда хочется найти не просто автомобиль, а именно "тот самый".**
+## Автоподбор в Сербии — когда хочется найти не просто автомобиль, а именно "тот самый".
 
 Анастасия обратилась к нам с четким запросом — **Mini Cooper S**. В семье уже есть основной автомобиль, поэтому этот Mini должен был стать яркой, эмоциональной машиной для удовольствия от каждой поездки.
 

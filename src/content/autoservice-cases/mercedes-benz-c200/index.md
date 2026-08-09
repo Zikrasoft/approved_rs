@@ -2,7 +2,7 @@
 title: Mercedes-Benz C200
 translations:
   en:
-    title: '## Mercedes-Benz C-Class — service and maintenance in Belgrade'
+    title: 'Mercedes-Benz C-Class — service and maintenance in Belgrade'
     body: >
       ## Mercedes-Benz C-Class — service and maintenance in Belgrade
 
@@ -14,17 +14,17 @@ translations:
       As part of the **Mercedes-Benz minor service**, we carried out:
 
 
-      🔧 engine oil replacement;\
+      - engine oil replacement;
 
-      🔧 oil filter replacement;\
+      - oil filter replacement;
 
-      🔧 engine air filter replacement;\
+      - engine air filter replacement;
 
-      🔧 cabin air filter replacement;\
+      - cabin air filter replacement;
 
-      🔧 replacement of all brake pads;\
+      - replacement of all brake pads;
 
-      🔧 inspection and servicing of the complete braking system.
+      - inspection and servicing of the complete braking system.
 
 
       We paid special attention to the braking system. **Brake pads are one of
@@ -38,17 +38,13 @@ translations:
       keeps the vehicle reliable and ensures safe everyday driving.
 
 
-      📍 **Mercedes-Benz service in Belgrade**\
+      **Mercedes-Benz service in Belgrade**\
 
       Diagnostics, routine maintenance, oil and filter replacement, brake
       service and Mercedes-Benz repairs.
 
-
-      \#MercedesBenz #MercedesW205 #MercedesService #MercedesBelgrade
-      #MercedesBenzService #CarServiceBelgrade #MercedesRepair #BrakeService
-      #CarServiceSerbia
   sr:
-    title: '## Mercedes-Benz C-Class — servis i održavanje u Beogradu'
+    title: 'Mercedes-Benz C-Class — servis i održavanje u Beogradu'
     body: >
       ## Mercedes-Benz C-Class — servis i održavanje u Beogradu
 
@@ -60,17 +56,17 @@ translations:
       U okviru **malog servisa Mercedes-Benz** urađeno je:
 
 
-      🔧 zamena motornog ulja;\
+      - zamena motornog ulja;
 
-      🔧 zamena filtera ulja;\
+      - zamena filtera ulja;
 
-      🔧 zamena filtera vazduha motora;\
+      - zamena filtera vazduha motora;
 
-      🔧 zamena filtera kabine;\
+      - zamena filtera kabine;
 
-      🔧 zamena svih kočionih pločica;\
+      - zamena svih kočionih pločica;
 
-      🔧 kompletna kontrola i servis kočionog sistema.
+      - kompletna kontrola i servis kočionog sistema.
 
 
       Posebnu pažnju posvetili smo kočnicama. **Kočioni sistem je jedan od
@@ -84,15 +80,11 @@ translations:
       kvarovi, produži vek trajanja komponenti i obezbedi sigurna vožnja.
 
 
-      📍 **Mercedes-Benz servis u Beogradu**\
+      **Mercedes-Benz servis u Beogradu**\
 
       Dijagnostika, mali servis, zamena ulja i filtera, servis kočnica i
       popravka Mercedes-Benz vozila.
 
-
-      \#MercedesBenz #MercedesW205 #MercedesServis #MercedesBeograd
-      #AutoServisBeograd #MercedesBenzServis #MaliServis #ServisKocnica
-      #AutoServisSrbija
 car: Mercedes-Benz C-Class
 year: 2018
 servicesApplied:
@@ -110,18 +102,16 @@ published: true
 
 В рамках **малого ТО Mercedes-Benz** выполнили:
 
-🔧 замену моторного масла;\
-🔧 замену масляного фильтра;\
-🔧 замену воздушного фильтра двигателя;\
-🔧 замену салонного фильтра;\
-🔧 замену всех тормозных колодок;\
-🔧 обслуживание и проверку тормозной системы.
+- замену моторного масла;
+- замену масляного фильтра;
+- замену воздушного фильтра двигателя;
+- замену салонного фильтра;
+- замену всех тормозных колодок;
+- обслуживание и проверку тормозной системы.
 
 Отдельное внимание уделили тормозам. **Тормозные колодки — один из ключевых элементов безопасности автомобиля**, поэтому их состояние необходимо регулярно контролировать. При замене важно проверить не только сами колодки, но и состояние тормозных дисков, суппортов и направляющих, чтобы тормозная система работала корректно и равномерно.
 
 Регулярное техническое обслуживание помогает сохранить надежность Mercedes-Benz, избежать более серьезных неисправностей и обеспечить безопасную эксплуатацию автомобиля.
 
-📍 **Обслуживание Mercedes-Benz в Белграде**\
+**Обслуживание Mercedes-Benz в Белграде**\
 Диагностика, ТО, замена масла и фильтров, обслуживание тормозной системы и ремонт автомобилей Mercedes-Benz.
-
-\#MercedesBenz #MercedesW205 #MercedesService #MercedesBelgrade #MercedesBenzService #АвтосервисБелград #МерседесБелград #ТОМерседес #ОбслуживаниеМерседес #РемонтМерседес #АвтосервисСербия

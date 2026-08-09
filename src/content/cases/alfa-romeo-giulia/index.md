@@ -14,7 +14,7 @@ translations:
   en:
     title: ALFA ROMEO GIULIA
     body: |
-      **Sourcing in Serbia — finding a rare, genuinely engaging car is possible.**
+      ## Sourcing in Serbia — finding a rare, genuinely engaging car is possible.
 
       Dmitry came to us with a clear goal: an **Alfa Romeo Giulia**. He initially wanted the **280 hp** version and sent over a few listings he liked. We checked each car's dealer history and ran a **CarVertical** report. As expected, a good chunk of them turned out to have accident history — the powerful versions tend to get driven hard, and a genuinely good example isn't easy to find.
 
@@ -26,7 +26,7 @@ translations:
   sr:
     title: ALFA ROMEO GIULIA
     body: |
-      **Odabir vozila u Srbiji — moguće je pronaći redak i zaista živ automobil.**
+      ## Odabir vozila u Srbiji — moguće je pronaći redak i zaista živ automobil.
 
       Dmitrij nam se obratio sa konkretnim ciljem — kupovina **Alfa Romeo Giulie**. U početku je želeo verziju od **280 KS** i poslao nam je nekoliko oglasa koji su mu se dopali. Proverili smo svaki automobil po dilerskoj istoriji i **CarVertical** izveštaju. Kao što smo i očekivali, veliki deo vozila je imao tragove udesa — jače verzije se često agresivno voze, pa je zaista dobar primerak teško pronaći.
 
@@ -36,7 +36,7 @@ translations:
 
       Na kraju je Dmitrij dobio potpuno servisiranu **Alfa Romeo Giuliu** koja pruža pravo zadovoljstvo u vožnji, bez neprijatnih iznenađenja.
 ---
-**Автоподбор в Сербии — найти редкий и действительно живой автомобиль возможно.**
+## Автоподбор в Сербии — найти редкий и действительно живой автомобиль возможно.
 
 К нам обратился Дмитрий с конкретной целью — приобрести **Alfa Romeo Giulia**. Изначально он хотел версию **280 л.с.** и прислал несколько понравившихся вариантов. Мы проверили каждый автомобиль по дилерской истории и **CarVertical**. Как и ожидалось, значительная часть автомобилей оказалась после ДТП. К сожалению, мощные версии нередко эксплуатируются очень активно, и найти действительно хороший экземпляр непросто.
 

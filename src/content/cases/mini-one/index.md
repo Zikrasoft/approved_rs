@@ -14,7 +14,7 @@ translations:
   en:
     title: Mini One — For Stanislav
     body: |
-      **Car sourcing in Serbia — another successful search for our client.**
+      ## Car sourcing in Serbia — another successful search for our client.
 
       Stanislav came to us with an interesting challenge. Despite being **195 cm** tall, after trying out a range of cars it turned out a **Mini** actually suited him best for seating position and comfort. The main requirement was low mileage and good technical condition.
 
@@ -24,7 +24,7 @@ translations:
   sr:
     title: Mini One — za Stanislava
     body: |
-      **Odabir vozila u Srbiji — još jedna uspešna potraga za našeg klijenta!**
+      ## Odabir vozila u Srbiji — još jedna uspešna potraga za našeg klijenta!
 
       Stanislav nam se obratio sa zanimljivim zadatkom. Uprkos visini od **195 cm**, nakon isprobavanja različitih automobila ispostavilo se da mu upravo **Mini** najbolje odgovara po položaju sedenja i udobnosti. Glavni uslov bio je mala kilometraža i dobro tehničko stanje.
 
@@ -32,7 +32,7 @@ translations:
 
       Jedini nedostatak bila je veoma prljava unutrašnjost — prethodna vlasnica nije previše vodila računa o čistoći vozila. Nakon profesionalnog hemijskog čišćenja, koje je Stanislav uradio samostalno, Mini je potpuno preobražen: enterijer izgleda kao nov, prijatno miriše, a automobil sada svakodnevno raduje vlasnika.
 ---
-**Автоподбор в Сербии — еще один удачный поиск автомобиля для нашего клиента!**
+## Автоподбор в Сербии — еще один удачный поиск автомобиля для нашего клиента!
 
 К нам обратился Станислав с интересной задачей. Несмотря на рост **195 см**, после примерки разных автомобилей оказалось, что именно **Mini** подходит ему лучше всего по посадке и комфорту. Главным условием был небольшой пробег и хорошее техническое состояние.
 

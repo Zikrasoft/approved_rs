@@ -4,7 +4,7 @@ translations:
   en:
     title: MINI Cooper SD
     body: >
-      # Car Buyout in Serbia — Fast and Hassle-Free
+      ## Car Buyout in Serbia — Fast and Hassle-Free
 
 
       Dragan contacted us looking for a fast and convenient way to sell his
@@ -58,7 +58,7 @@ translations:
   sr:
     title: MINI Cooper SD
     body: >
-      # Otkup automobila u Srbiji — brzo i bez komplikacija
+      ## Otkup automobila u Srbiji — brzo i bez komplikacija
 
 
       Obratio nam se Dragan, vlasnik automobila **MINI Cooper SD iz 2017.
@@ -120,7 +120,7 @@ gallery:
 date: 2026-07-25
 published: true
 ---
-# Выкуп автомобиля в Сербии — быстро и без лишних хлопот
+## Выкуп автомобиля в Сербии — быстро и без лишних хлопот
 
 К нам обратился Драган — владелец **MINI Cooper SD 2017 года** с пробегом около **130 000 км**. Автомобиль находился в городе **Ягодина**, был зарегистрирован в Белграде и имел сербские регистрационные номера.
 
