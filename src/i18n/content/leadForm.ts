@@ -8,6 +8,8 @@ interface LeadFormContent {
   namePlaceholder: string;
   contactLabel: string;
   telegramTab: string;
+  whatsappTab: string;
+  viberTab: string;
   phoneTab: string;
   commentLabel: string;
   commentPlaceholder: string;
@@ -30,6 +32,8 @@ const ru: LeadFormContent = {
   namePlaceholder: 'Иван',
   contactLabel: 'Как с вами связаться',
   telegramTab: 'Telegram',
+  whatsappTab: 'WhatsApp',
+  viberTab: 'Viber',
   phoneTab: 'Телефон',
   commentLabel: 'Марка, модель, бюджет',
   commentPlaceholder: 'BMW 3, 2020–2022, до €25 000…',
@@ -52,6 +56,8 @@ const en: LeadFormContent = {
   namePlaceholder: 'John',
   contactLabel: 'How to reach you',
   telegramTab: 'Telegram',
+  whatsappTab: 'WhatsApp',
+  viberTab: 'Viber',
   phoneTab: 'Phone',
   commentLabel: 'Make, model, budget',
   commentPlaceholder: 'BMW 3, 2020–2022, up to €25,000…',
@@ -74,6 +80,8 @@ const sr: LeadFormContent = {
   namePlaceholder: 'Marko',
   contactLabel: 'Kako da vas kontaktiramo',
   telegramTab: 'Telegram',
+  whatsappTab: 'WhatsApp',
+  viberTab: 'Viber',
   phoneTab: 'Telefon',
   commentLabel: 'Marka, model, budžet',
   commentPlaceholder: 'BMW 3, 2020–2022, do €25.000…',

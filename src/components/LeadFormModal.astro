@@ -69,11 +69,25 @@ const closeLabel = getI18n(locale).common.closeLabel;
   function initLeadFormModal() {
     var modal = document.getElementById(id);
     if (!modal) return;
-    document.querySelectorAll('[' + triggerAttr + ']').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        document.documentElement.classList.add('modal-open');
-        modal.showModal();
-      });
+    // Delegated on document (not queried+bound at init time): this script is
+    // forced is:inline by define:vars, so it runs synchronously wherever it
+    // sits in the HTML (inside Header, near the top of <body>) — a direct
+    // querySelectorAll here would miss trigger buttons that appear later in
+    // the document and haven't been parsed yet. Delegation sidesteps DOM
+    // order entirely.
+    document.addEventListener('click', function (e) {
+      var btn = e.target instanceof Element ? e.target.closest('[' + triggerAttr + ']') : null;
+      if (!btn) return;
+      // trigger's attribute value ("phone") preselects that LeadForm tab by
+      // replaying a real click on it — reuses LeadForm's own tab-switch
+      // logic instead of duplicating it here.
+      var tab = btn.getAttribute(triggerAttr);
+      if (tab) {
+        var tabBtn = modal.querySelector('.pill-tab[data-tab="' + tab + '"]');
+        if (tabBtn) tabBtn.click();
+      }
+      document.documentElement.classList.add('modal-open');
+      modal.showModal();
     });
     var closeBtn = modal.querySelector('[data-close]');
     if (closeBtn) closeBtn.addEventListener('click', function () { modal.close(); });

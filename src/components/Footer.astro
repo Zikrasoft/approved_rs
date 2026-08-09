@@ -1,16 +1,18 @@
 ---
 import SiteLogo from './SiteLogo.astro';
-import { Send } from '@lucide/astro';
+import ContactIcon from './ContactIcon.astro';
 import { getNavItems } from '@/utils/labels';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
-import { SITE_NAME, DEFAULT_COUNTRY } from '@/utils/constants';
+import { getServicesContent } from '@/i18n/content/services';
+import { SITE_NAME, DEFAULT_COUNTRY, TG_MANAGER, WHATSAPP_NUMBER, VIBER_NUMBER, THREADS_CHANNEL } from '@/utils/constants';
 import { telegramLink, DEFAULT_TG_MESSAGE } from '@/utils/telegramLink';
+import { whatsappLink, viberLink } from '@/utils/contactLinks';
 const year = new Date().getFullYear();
-const TG_MANAGER = import.meta.env.PUBLIC_TG_MANAGER!;
-const THREADS_CHANNEL = import.meta.env.PUBLIC_THREADS_CHANNEL!;
 const locale = getLocale(Astro.currentLocale);
 const t = getI18n(locale);
+const cc = getServicesContent(locale).caseChrome;
+const message = DEFAULT_TG_MESSAGE[locale];
 ---
 
 <footer class="mt-24 border-t border-default">
@@ -25,15 +27,38 @@ const t = getI18n(locale);
         <p class="text-sm leading-relaxed max-w-xs mb-6 text-muted">
           {t.footer.tagline}
         </p>
-        <a
-          href={telegramLink(TG_MANAGER, DEFAULT_TG_MESSAGE[locale])}
-          target="_blank"
-          rel="noopener"
-          class="footer-tg inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline border border-accent-border text-accent"
-        >
-          <Send size={13} />
-          {t.footer.contactManagerLabel}
-        </a>
+        <div class="flex flex-wrap gap-2">
+          <a
+            data-contact-channel="telegram"
+            href={telegramLink(TG_MANAGER, message)}
+            target="_blank"
+            rel="noopener"
+            class="footer-tg inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline border border-accent-border text-accent"
+          >
+            <ContactIcon channel="telegram" size={14} />
+            {t.footer.contactManagerLabel}
+          </a>
+          <a
+            data-contact-channel="whatsapp"
+            href={whatsappLink(WHATSAPP_NUMBER, message)}
+            target="_blank"
+            rel="noopener"
+            aria-label={cc.whatsappButtonLabel}
+            class="footer-tg inline-flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-accent-border text-accent"
+          >
+            <ContactIcon channel="whatsapp" size={14} />
+          </a>
+          <a
+            data-contact-channel="viber"
+            href={viberLink(VIBER_NUMBER)}
+            target="_blank"
+            rel="noopener"
+            aria-label={cc.viberButtonLabel}
+            class="footer-tg inline-flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-accent-border text-accent"
+          >
+            <ContactIcon channel="viber" size={14} />
+          </a>
+        </div>
       </div>
 
       <!-- Services -->

@@ -78,7 +78,18 @@ interface ServicesContent {
     ctaEyebrow: string;
     ctaHeading: string;
     ctaButtonLabel: string;
+    whatsappButtonLabel: string;
+    viberButtonLabel: string;
+    callbackButtonLabel: string;
+    // Short form for compact chips (icon-row cells) sitting next to single-
+    // word brand names (Telegram/WhatsApp/Viber) — the full phrase is a
+    // two-word outlier there and wraps awkwardly in a narrow grid cell.
+    callbackShortLabel: string;
+    callButtonLabel: string;
     usefulInfoLabel: string;
+    channelBannerTitle: string;
+    channelBannerText: string;
+    channelBannerCta: string;
     serviceBadges: Record<'autopodbor' | 'buyout' | 'inspection' | 'autoservice', string>;
   };
 }
@@ -174,6 +185,14 @@ const ru: ServicesContent = {
     ctaEyebrow: 'Нужна такая же услуга?',
     ctaHeading: 'Обсудим ваш автомобиль',
     ctaButtonLabel: 'Написать в Telegram',
+    whatsappButtonLabel: 'Написать в WhatsApp',
+    viberButtonLabel: 'Написать в Viber',
+    callbackButtonLabel: 'Заказать звонок',
+    callbackShortLabel: 'Звонок',
+    callButtonLabel: 'Позвонить',
+    channelBannerTitle: 'Ещё больше кейсов',
+    channelBannerText: 'Публикуем новые кейсы, процесс подбора и полезные советы.',
+    channelBannerCta: 'Подписаться',
     usefulInfoLabel: 'Полезная информация',
     serviceBadges: { autopodbor: 'Автоподбор', buyout: 'Выкуп', inspection: 'Проверка', autoservice: 'Автосервис' },
   },
@@ -270,6 +289,14 @@ const en: ServicesContent = {
     ctaEyebrow: 'Need the same service?',
     ctaHeading: "Let's talk about your car",
     ctaButtonLabel: 'Message on Telegram',
+    whatsappButtonLabel: 'Message on WhatsApp',
+    viberButtonLabel: 'Message on Viber',
+    callbackButtonLabel: 'Request a Callback',
+    callbackShortLabel: 'Callback',
+    callButtonLabel: 'Call Us',
+    channelBannerTitle: 'More Real Cases',
+    channelBannerText: 'We post new case studies, the sourcing process, and useful tips.',
+    channelBannerCta: 'Subscribe',
     usefulInfoLabel: 'Useful Information',
     serviceBadges: { autopodbor: 'Sourcing', buyout: 'Buyout', inspection: 'Inspection', autoservice: 'Service' },
   },
@@ -366,6 +393,14 @@ const sr: ServicesContent = {
     ctaEyebrow: 'Treba vam ista usluga?',
     ctaHeading: 'Razgovarajmo o vašem vozilu',
     ctaButtonLabel: 'Pišite nam na Telegramu',
+    whatsappButtonLabel: 'Pišite nam na WhatsAppu',
+    viberButtonLabel: 'Pišite nam na Viberu',
+    callbackButtonLabel: 'Zakažite poziv',
+    callbackShortLabel: 'Poziv',
+    callButtonLabel: 'Pozovite nas',
+    channelBannerTitle: 'Još primera iz prakse',
+    channelBannerText: 'Objavljujemo nove primere, proces odabira i korisne savete.',
+    channelBannerCta: 'Pratite nas',
     usefulInfoLabel: 'Korisne informacije',
     serviceBadges: { autopodbor: 'Odabir', buyout: 'Otkup', inspection: 'Provera', autoservice: 'Servis' },
   },

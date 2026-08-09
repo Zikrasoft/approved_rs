@@ -19,6 +19,7 @@ export async function POST({ request, redirect, cookies }: APIContext): Promise<
   const name    = form.get('name')?.toString().trim() ?? '';
   const contact = form.get('contact')?.toString().trim() ?? '';
   const service = form.get('service')?.toString().trim() ?? '';
+  const contactChannel = form.get('contact_channel')?.toString().trim() || null;
   const comment = form.get('comment')?.toString().trim() || null;
   const country = form.get('country')?.toString() || null;
   const source_url = form.get('source_url')?.toString() || null;
@@ -31,7 +32,7 @@ export async function POST({ request, redirect, cookies }: APIContext): Promise<
   }
 
   try {
-    await sendLeadNotification({ id: Date.now(), name, contact, service, comment, country, source_url });
+    await sendLeadNotification({ id: Date.now(), name, contact, service, contactChannel, comment, country, source_url });
   } catch (err) {
     console.error('[leads] Telegram notification failed:', err);
   }

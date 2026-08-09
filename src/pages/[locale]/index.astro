@@ -4,7 +4,7 @@
 export const prerender = false;
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import GeoBanner from "@/components/GeoBanner.astro";
-import TelegramCTA from "@/components/TelegramCTA.astro";
+import ContactCTA from "@/components/ContactCTA.astro";
 import CasesGrid from "@/components/CasesGrid.astro";
 import SectionHeading from "@/components/SectionHeading.astro";
 import CountryPill from "@/components/CountryPill.astro";
@@ -20,7 +20,7 @@ import {
 } from "@lucide/astro";
 import { getCollection } from "astro:content";
 import { getActiveCountries } from "@/utils/geo";
-import { SITE_URL, SITE_NAME } from "@/utils/constants";
+import { SITE_URL, SITE_NAME, TG_MANAGER, THREADS_CHANNEL } from "@/utils/constants";
 import { generateOrganizationSchema } from "@/utils/seo";
 import { telegramLink, DEFAULT_TG_MESSAGE } from "@/utils/telegramLink";
 import StatBlock from "@/components/StatBlock.astro";
@@ -41,15 +41,12 @@ const latestCases = allCases.filter((c) => c.data.published).slice(0, 3);
 const items = latestCases.map((c) => toCaseItem(c, (locale ?? 'ru') as Locale));
 const countries = getActiveCountries();
 
-const tgManager = import.meta.env.PUBLIC_TG_MANAGER!;
-const threadsChannel = import.meta.env.PUBLIC_THREADS_CHANNEL!;
-
 const schema = generateOrganizationSchema({
     url: SITE_URL,
     description: meta.description,
     areaServed: countries.map((c) => c[locale as Locale].name),
-    sameAs: [`https://t.me/${tgManager}`, `https://www.threads.com/@${threadsChannel}`],
-    contactUrl: telegramLink(tgManager, DEFAULT_TG_MESSAGE[locale as Locale]),
+    sameAs: [`https://t.me/${TG_MANAGER}`, `https://www.threads.com/@${THREADS_CHANNEL}`],
+    contactUrl: telegramLink(TG_MANAGER, DEFAULT_TG_MESSAGE[locale as Locale]),
 });
 
 // One connected story instead of a flat service list — each stop is a real
@@ -147,7 +144,7 @@ const journey = [
                         {h.heroSubtext}
                     </p>
                     <div class="fade-up fade-up-4">
-                        <TelegramCTA />
+                        <ContactCTA compact />
                     </div>
                     <div
                         class="grid grid-cols-3 gap-3 sm:gap-6 mt-8 pt-8 border-t fade-up fade-up-5 border-default"
@@ -176,7 +173,7 @@ const journey = [
             </p>
 
             <div
-                class="journey-strip grid grid-cols-1 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-default rounded-sm border border-default bg-surface overflow-hidden anim-inline"
+                class="journey-strip grid grid-cols-1 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-border rounded-sm border border-default bg-surface overflow-hidden anim-inline"
                 style="--anim-delay: 0.1s"
             >
                 {
@@ -425,7 +422,7 @@ const journey = [
                     <p class="text-base mb-2 max-w-sm text-muted leading-[1.7]">
                         {h.ctaSubtext}
                     </p>
-                    <TelegramCTA label={h.ctaTelegramLabel} />
+                    <ContactCTA label={h.ctaTelegramLabel} />
                 </div>
                 <div
                     class="cta-aside hidden lg:flex items-end justify-end p-10 md:p-16"

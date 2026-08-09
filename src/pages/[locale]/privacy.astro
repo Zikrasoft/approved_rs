@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
-import { SITE_URL, SITE_NAME } from '@/utils/constants';
+import { SITE_URL, SITE_NAME, TG_MANAGER } from '@/utils/constants';
 import { telegramLink } from '@/utils/telegramLink';
 import { getPagesContent } from '@/i18n/content/pages';
 import { withLocales } from '@/utils/paths';
@@ -43,7 +43,7 @@ const sections = p.sections;
         <p class="text-base leading-relaxed text-muted">
           {p.contactBefore}
           <a
-            href={telegramLink(import.meta.env.PUBLIC_TG_MANAGER!, null)}
+            href={telegramLink(TG_MANAGER, null)}
             class="underline transition-colors text-accent"
           >
             {p.contactLinkText}

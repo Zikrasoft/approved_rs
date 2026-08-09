@@ -3,7 +3,7 @@ import BaseLayout from './BaseLayout.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
 import LeadForm from '@/components/LeadForm.astro';
 import LeadFormModal from '@/components/LeadFormModal.astro';
-import TelegramCTA from '@/components/TelegramCTA.astro';
+import ContactCTA from '@/components/ContactCTA.astro';
 import CasesGrid from '@/components/CasesGrid.astro';
 import ChipLinks from '@/components/ChipLinks.astro';
 import type { MetaProps } from '@/utils/seo';
@@ -63,7 +63,7 @@ const t = getI18n(locale);
             {title}{titleHighlight && <><br /><em class="text-accent italic">{titleHighlight}</em></>}
           </h1>
           <p class="text-base max-w-lg mb-2 leading-relaxed fade-up fade-up-3 text-muted">{description}</p>
-          <div class="fade-up fade-up-4"><TelegramCTA label={ctaLabel} openModal /></div>
+          <div class="fade-up fade-up-4"><ContactCTA label={ctaLabel} openModal compact /></div>
           <div class="fade-up fade-up-5 pt-2"><slot /></div>
         </div>
         <div class="lg:col-span-2 fade-up fade-up-3">

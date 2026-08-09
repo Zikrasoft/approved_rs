@@ -1,0 +1,84 @@
+---
+import { Send } from '@lucide/astro';
+import { getServicesContent } from '@/i18n/content/services';
+import { getLocale } from '@/i18n/config';
+import { THREADS_CHANNEL } from '@/utils/constants';
+
+const locale = getLocale(Astro.currentLocale);
+const cc = getServicesContent(locale).caseChrome;
+---
+
+<a href={`https://www.threads.com/@${THREADS_CHANNEL}`} target="_blank" rel="noopener" class="channel-banner">
+  <span class="channel-banner-icon"><Send size={18} /></span>
+  <span class="channel-banner-copy">
+    <strong>{cc.channelBannerTitle}</strong>
+    <span>{cc.channelBannerText}</span>
+  </span>
+  <span class="channel-banner-cta">{cc.channelBannerCta} <span class="arrow">→</span></span>
+</a>
+
+<style>
+  .channel-banner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    margin: 2.5rem 0;
+    border: 1px solid var(--color-border);
+    border-radius: 2px;
+    background-color: var(--color-surface-2);
+    text-decoration: none;
+    transition: border-color 0.2s, background-color 0.2s;
+  }
+  .channel-banner:hover {
+    border-color: var(--color-accent-mid);
+    background-color: var(--color-accent-subtle);
+  }
+  .channel-banner-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+  .channel-banner-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    flex: 1;
+    min-width: 0;
+  }
+  .channel-banner-copy strong {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+  .channel-banner-copy span {
+    font-size: 0.8125rem;
+    color: var(--color-text-2);
+    line-height: 1.4;
+  }
+  .channel-banner-cta {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-shrink: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    white-space: nowrap;
+  }
+  .channel-banner-cta .arrow {
+    transition: transform 0.2s;
+  }
+  .channel-banner:hover .channel-banner-cta .arrow {
+    transform: translateX(3px);
+  }
+  @media (max-width: 420px) {
+    .channel-banner-copy span:not(:first-child) { display: none; }
+  }
+</style>

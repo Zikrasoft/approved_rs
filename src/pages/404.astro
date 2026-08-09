@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import TelegramCTA from '@/components/TelegramCTA.astro';
+import ContactCTA from '@/components/ContactCTA.astro';
 import Button from '@/components/Button.astro';
 import UtilityPageShell from '@/components/UtilityPageShell.astro';
 import { MapPin, X } from '@lucide/astro';
@@ -84,7 +84,7 @@ const meta = {
         <Button variant="secondary" href={`/${locale}/`} class="px-6 py-3 justify-center">
           {nf.home}
         </Button>
-        <TelegramCTA label={nf.cta} />
+        <ContactCTA label={nf.cta} />
       </div>
     </UtilityPageShell>
   </section>

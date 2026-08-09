@@ -2,9 +2,10 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
-import TelegramCTA from '@/components/TelegramCTA.astro';
+import ContactCTA from '@/components/ContactCTA.astro';
 import CaseGallery from '@/components/CaseGallery.astro';
 import PromoBanner from '@/components/PromoBanner.astro';
+import ChannelBanner from '@/components/ChannelBanner.astro';
 import { getCollection, render } from 'astro:content';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { excerptFromMarkdown, generateArticleSchema } from '@/utils/seo';
@@ -128,11 +129,14 @@ const schema = generateArticleSchema({
     <!-- SEO banner -->
     <PromoBanner label={cc.usefulInfoLabel} {banners} />
 
+    <!-- Channel promo -->
+    <ChannelBanner />
+
     <!-- CTA -->
     <div class="py-10 border-t mb-16 border-default">
       <p class="text-xs tracking-widest uppercase mb-2 font-medium text-accent">{cc.ctaEyebrow}</p>
       <h2 class="font-display text-3xl font-bold mb-6">{cc.ctaHeading}</h2>
-      <TelegramCTA label={cc.ctaButtonLabel} />
+      <ContactCTA label={cc.ctaButtonLabel} />
     </div>
   </div>
 </BaseLayout>

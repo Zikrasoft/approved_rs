@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import TelegramCTA from '@/components/TelegramCTA.astro';
+import ContactCTA from '@/components/ContactCTA.astro';
 import PageHero from '@/components/PageHero.astro';
 import Faq from '@/components/Faq.astro';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
@@ -32,7 +32,7 @@ const steps = p.steps;
     <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
 
       <div class="fade-up fade-up-1">
-        <TelegramCTA />
+        <ContactCTA />
         <div class="mt-8">
           {info.map((item, i) => (
             <div class="flex justify-between items-center py-4 border-b border-default anim-inline" style={`--anim-delay: ${0.15 + i * 0.08}s`}>
