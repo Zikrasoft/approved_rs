@@ -25,6 +25,7 @@ function formatLeadText(lead: LeadData): string {
   if (lead.country) lines.push(`Страна: ${lead.country.toUpperCase()}`);
   if (lead.comment) lines.push(`Комментарий: ${lead.comment}`);
   if (lead.source_url) lines.push(`Страница: ${lead.source_url}`);
+  lines.push(``, `#заявка`);
   return lines.join('\n');
 }
 
