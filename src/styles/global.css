@@ -361,6 +361,75 @@ h1, h2, h3, h4 {
   font-family: var(--font-sans);
 }
 
+/* ─── Case/article body content (Markdown-rendered) ────────
+   Tailwind's preflight zeroes list-style/margin/padding, so raw <ul>/<li>
+   from parsed Markdown render as bare stacked lines with no marker at all —
+   this restores real bullets, tinted with the site's own accent color
+   instead of the browser default or ad-hoc emoji in the source content. */
+/* The site's global h1-h4 rule only sets font/weight/color, never size —
+   every other heading on the site sizes itself with a Tailwind class, but
+   Markdown-rendered headings here have no such class, so they'd otherwise
+   inherit the body's 1rem and look identical to a bold paragraph. */
+.prose-custom h1 { font-size: 1.75rem; }
+.prose-custom h2 { font-size: 1.5rem; }
+.prose-custom h3 { font-size: 1.25rem; }
+.prose-custom h4 { font-size: 1.125rem; }
+.prose-custom h1, .prose-custom h2, .prose-custom h3, .prose-custom h4 {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+.prose-custom h1:first-child, .prose-custom h2:first-child,
+.prose-custom h3:first-child, .prose-custom h4:first-child {
+  margin-top: 0;
+}
+/* Content already wraps key terms in **bold** — give <strong> the accent
+   color so those terms actually stand out instead of just being black-bold,
+   breaking up long runs of text for scanning. */
+.prose-custom strong, .prose-custom b {
+  color: var(--color-accent);
+  font-weight: 700;
+}
+.prose-custom ul, .prose-custom ol {
+  margin: 1rem 0 1.5rem;
+}
+.prose-custom ol {
+  padding-left: 1.25rem;
+  list-style: decimal;
+}
+.prose-custom ol li::marker {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+.prose-custom li {
+  margin-bottom: 0.5rem;
+}
+/* Unordered items get a small wrench glyph (matches the site's Lucide icon
+   set, e.g. Header.astro's "Автосервис" nav item) instead of a plain dot —
+   a CSS mask so it inherits the accent color and needs no extra markup. */
+.prose-custom ul {
+  list-style: none;
+  padding-left: 0;
+}
+.prose-custom ul li {
+  position: relative;
+  padding-left: 1.75rem;
+}
+.prose-custom ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.15em;
+  width: 1.1em;
+  height: 1.1em;
+  background-color: var(--color-accent);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M14.7%206.3a1%201%200%200%200%200%201.4l1.6%201.6a1%201%200%200%200%201.4%200l3.106-3.105c.32-.322.863-.22.983.218a6%206%200%200%201-8.259%207.057l-7.91%207.91a1%201%200%200%201-2.999-3l7.91-7.91a6%206%200%200%201%207.057-8.259c.438.12.54.662.219.984z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M14.7%206.3a1%201%200%200%200%200%201.4l1.6%201.6a1%201%200%200%200%201.4%200l3.106-3.105c.32-.322.863-.22.983.218a6%206%200%200%201-8.259%207.057l-7.91%207.91a1%201%200%200%201-2.999-3l7.91-7.91a6%206%200%200%201%207.057-8.259c.438.12.54.662.219.984z'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
 /* ─── Divider ────────────────────────────────────────────── */
 .divider {
   width: 100%;
