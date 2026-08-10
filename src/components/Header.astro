@@ -1,10 +1,10 @@
 ---
-import { Menu, X, Send, Sun, Moon, Search, Wrench, Banknote, ClipboardCheck } from '@lucide/astro';
+import { Menu, X, Send, Sun, Moon, Search, Wrench, Banknote, ClipboardCheck, Globe } from '@lucide/astro';
 import SiteLogo from './SiteLogo.astro';
 import Button from './Button.astro';
 import LeadFormModal from './LeadFormModal.astro';
 import LanguageSwitcher from './LanguageSwitcher.astro';
-import { getNavItems, isNavItemActive, SERVICES } from '@/utils/labels';
+import { getNavItems, isNavItemActive, SERVICES, SERVICE_ICON_SLUGS } from '@/utils/labels';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
 import { DEFAULT_COUNTRY } from '@/utils/constants';
@@ -22,10 +22,12 @@ const urlCountry = isServicePage ? pathSegments[2] : undefined;
 const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCountry! : DEFAULT_COUNTRY;
 const isHome = Astro.url.pathname === `/${locale}/` || Astro.url.pathname === `/${locale}`;
 
-// Record (not `as const` + cast) so a slug added to labels.ts without a
-// matching entry here degrades to a missing icon instead of a broken build.
-const SERVICE_ICONS: Record<string, typeof Search> = {
+// Keyed by the exact slug union from labels.ts (not a loose Record<string,...>)
+// — a slug added to getNavItems() without a matching icon here is now a
+// compile error, not a silently-missing icon at runtime.
+const SERVICE_ICONS: Record<(typeof SERVICE_ICON_SLUGS)[number], typeof Search> = {
   autopodbor: Search,
+  privoz: Globe,
   autoservice: Wrench,
   vykup: Banknote,
   proverka: ClipboardCheck,
@@ -35,7 +37,7 @@ const SERVICE_ICONS: Record<string, typeof Search> = {
 // to call getNavItems()/isNavItemActive() separately for the same country).
 const navItems = getNavItems(locale, navCountry).map(item => ({
   ...item,
-  Icon: SERVICE_ICONS[item.slug],
+  Icon: SERVICE_ICONS[item.slug as (typeof SERVICE_ICON_SLUGS)[number]],
   active: isNavItemActive(item, locale, navCountry, Astro.url.pathname),
 }));
 ---
@@ -53,7 +55,6 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
         </a>
       ))}
       <a href={`/${locale}/cases/autopodbor/`} class="px-1.5 xl:px-2.5 py-1.5 text-muted whitespace-nowrap" aria-current={Astro.url.pathname.includes('/cases/') ? 'page' : undefined}>{t.nav.cases}</a>
-      <a href={`/${locale}/contacts/`} class="px-1.5 xl:px-2.5 py-1.5 text-muted whitespace-nowrap" aria-current={Astro.url.pathname === `/${locale}/contacts/` ? 'page' : undefined}>{t.nav.contacts}</a>
     </nav>
 
     <div class="flex items-center gap-1.5 xl:gap-2 shrink-0">
@@ -116,7 +117,6 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
           ))}
         </div>
         <a href={`/${locale}/cases/autopodbor/`} class="text-secondary">{t.nav.cases}</a>
-        <a href={`/${locale}/contacts/`} class="text-secondary">{t.nav.contacts}</a>
         <div class="py-3"><LanguageSwitcher variant="inline" /></div>
         <button type="button" class="theme-toggle-btn flex items-center gap-2 w-full py-[0.85rem] text-secondary">
           <span class="theme-icon-sun hidden"><Sun size={16} /></span>

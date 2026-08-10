@@ -1,0 +1,68 @@
+---
+import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
+import Faq from '@/components/Faq.astro';
+import { getFaq } from '@/i18n/content/faq';
+import { getServicesContent } from '@/i18n/content/services';
+import { withLocales } from '@/utils/paths';
+import { getCountry } from '@/utils/geo';
+import { generateServiceSchema, placeholderOgImage } from '@/utils/seo';
+import { SITE_URL, SITE_NAME, CHINA_NAME, PRIVOZ_EU_SOURCE_CODES } from '@/utils/constants';
+import type { Locale } from '@/i18n/config';
+
+export const getStaticPaths = () => withLocales([{ params: {} }]);
+
+const { locale } = Astro.params;
+const pc = getServicesContent(locale as Locale).privoz.hub;
+const meta = {
+  title: `${pc.metaTitle} | ${SITE_NAME}`,
+  description: pc.metaDescription,
+  canonical: `${SITE_URL}/${locale}/privoz/`,
+  ogImage: placeholderOgImage(SITE_URL, locale as Locale),
+};
+// Explicit — every real spoke this hub fans out to (Germany + the EU
+// whitelist + China), not "every active country" — countries.json can grow
+// with destination-only markets (e.g. Portugal) that aren't sourcing spokes.
+const sourceNames = [
+  getCountry('de')![locale as Locale].name,
+  ...PRIVOZ_EU_SOURCE_CODES.map(code => getCountry(code)![locale as Locale].name),
+  CHINA_NAME[locale as Locale],
+];
+const schema = generateServiceSchema(`${pc.title} ${pc.titleHighlight}`, sourceNames, meta.canonical);
+
+const cards = [
+  { slug: 'de', title: pc.deCardTitle, text: pc.deCardText },
+  { slug: 'eu', title: pc.euCardTitle, text: pc.euCardText },
+  { slug: 'china', title: pc.chinaCardTitle, text: pc.chinaCardText },
+];
+---
+
+<ServicePageLayout
+  {meta} {schema}
+  title={pc.title}
+  titleHighlight={pc.titleHighlight}
+  description={pc.description}
+  formService="privoz"
+  currentCountry="rs"
+  currentService="privoz"
+  showCountryCrossLinks={false}
+  breadcrumbs={[{ label: pc.breadcrumbLabel }]}
+>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
+    {cards.map(card => (
+      <a href={`/${locale}/privoz/${card.slug}/`} class="privoz-card glow-border flex flex-col p-6 rounded-sm border bg-surface border-default no-underline">
+        <p class="font-display text-xl font-bold mb-2 text-primary">{card.title}</p>
+        <p class="text-sm leading-relaxed mb-4 text-muted">{card.text}</p>
+        <span class="mt-auto text-xs font-medium tracking-wide uppercase text-accent">{pc.exploreLabel} →</span>
+      </a>
+    ))}
+  </div>
+
+  <Fragment slot="extra">
+    <Faq items={getFaq(locale as Locale).privoz} />
+  </Fragment>
+</ServicePageLayout>
+
+<style>
+  .privoz-card { transition: background-color 0.2s, border-color 0.2s; }
+  .privoz-card:hover { background-color: var(--color-surface-2); border-color: var(--color-accent) !important; }
+</style>

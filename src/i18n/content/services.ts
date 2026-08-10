@@ -17,6 +17,10 @@ interface ServicesContent {
     deliveryDestinations: string[];
     citiesLabel: string;
     alsoInLabel: string;
+    // Cross-sell into privoz — only rendered on the handful of country pages
+    // that match a real corridor (see [country]/index.astro), not a nav-wide
+    // label, so it's generic enough to sit above any of the privoz spokes.
+    crossSellLabel: string;
   };
   vykup: {
     title: string;
@@ -30,6 +34,67 @@ interface ServicesContent {
     step3Serbia: string;
     step3Other: string;
     step4: string;
+  };
+  privoz: {
+    hub: {
+      metaTitle: string;
+      metaDescription: string;
+      title: string;
+      titleHighlight: string;
+      description: string;
+      breadcrumbLabel: string;
+      deCardTitle: string;
+      deCardText: string;
+      euCardTitle: string;
+      euCardText: string;
+      chinaCardTitle: string;
+      chinaCardText: string;
+      exploreLabel: string;
+    };
+    de: {
+      metaTitle: string;
+      metaDescription: string;
+      title: string;
+      titleHighlight: string;
+      description: string;
+      ctaLabel: string;
+      breadcrumbLabel: string;
+      casesHeading: string;
+      steps: StepItem[];
+      // Names the actual corridor (Serbia/Spain/Portugal) instead of the
+      // generic CIS-country list autopodbor's deliveryLineFor reuses
+      // elsewhere — that list doesn't include any of this page's real
+      // destinations, so it would misrepresent the corridor.
+      destinationsNote: string;
+      chinaCrossLabel: string;
+    };
+    eu: {
+      metaTitle: string;
+      metaDescription: string;
+      title: string;
+      titleHighlight: string;
+      description: string;
+      ctaLabel: string;
+      breadcrumbLabel: string;
+      casesHeading: string;
+      steps: StepItem[];
+      sourceCountriesLabel: string;
+      sourceMoreLabel: string;
+      destinationsNote: string;
+    };
+    china: {
+      metaTitle: string;
+      metaDescription: string;
+      title: string;
+      titleHighlight: string;
+      description: string;
+      ctaLabel: string;
+      breadcrumbLabel: string;
+      casesHeading: string;
+      steps: StepItem[];
+      deCrossLabel: string;
+      destinationsNote: string;
+    };
   };
   proverka: {
     title: string;
@@ -94,10 +159,17 @@ interface ServicesContent {
   };
 }
 
+// Step 01 (submit the request) and the final customs/handover step read
+// identically across all 3 privoz spokes (de/eu/china) — only the sourcing
+// step(s) in between differ per spoke. Shared per-locale instead of the
+// same literal string repeated 3x.
+const PRIVOZ_STEP_REQUEST_RU = { n: '01', text: 'Оставляете заявку с требованиями — бюджет, марка, пробег' };
+const PRIVOZ_STEP_HANDOVER_RU = { n: '05', text: 'Растаможка и передача автомобиля вам — под ключ' };
+
 const ru: ServicesContent = {
   autopodbor: {
     title: 'Автоподбор под ключ',
-    descriptionFor: (location) => `Подберём автомобиль ${location} с полной проверкой, оформим сделку и привезём до вашего города под ключ — включая растаможку.`,
+    descriptionFor: (location) => `Подберём автомобиль ${location} — среди авто, которые уже в этой стране, без ввоза из-за рубежа. Полная проверка, сопровождение сделки и доставка до вашего города — под ключ, включая растаможку.`,
     ctaLabel: 'Оставить заявку',
     casesHeadingFor: (location) => `Кейсы: автоподбор ${location}`,
     breadcrumbLabelFor: (location) => `Автоподбор ${location}`,
@@ -112,6 +184,7 @@ const ru: ServicesContent = {
     deliveryDestinations: ['Россию', 'Казахстан', 'Кыргызстан', 'Украину', 'Беларусь', 'Боснию и Герцеговину', 'Хорватию', 'Северную Македонию', 'Турцию'],
     citiesLabel: 'Города:',
     alsoInLabel: 'Также подбираем в:',
+    crossSellLabel: 'Нужен не местный автомобиль?',
   },
   vykup: {
     title: 'Выкуп авто',
@@ -125,6 +198,81 @@ const ru: ServicesContent = {
     step3Serbia: 'Встречаемся на осмотр — русские номера (в любой стране Европы) или сербские номера (Сербия, Черногория)',
     step3Other: 'Встречаемся на осмотр — русские номера, машина может быть в любой стране Европы',
     step4: 'Оформляем сделку, деньги в день подписания',
+  },
+  privoz: {
+    hub: {
+      metaTitle: 'Привоз авто из Европы и Китая под ключ',
+      metaDescription: 'Привозим автомобили из Германии, Испании, Швейцарии и Китая в любую страну — подбор, проверка, доставка и растаможка под ключ.',
+      title: 'Привоз авто',
+      titleHighlight: 'из Европы и Китая',
+      description: 'Машина — в Европе или Китае, вы — где угодно. Подбираем, проверяем и привозим её к вам под ключ, включая растаможку.',
+      breadcrumbLabel: 'Привоз авто',
+      deCardTitle: 'Из Германии',
+      deCardText: 'Прямой источник — подбор и привоз из Германии в любую точку.',
+      euCardTitle: 'Из Европы',
+      euCardText: 'Испания, Швейцария и другие страны — подбор и доставка в любую точку.',
+      chinaCardTitle: 'Из Китая',
+      chinaCardText: 'Новые и подержанные автомобили из Китая — доставка через проверенного партнёра.',
+      exploreLabel: 'Подробнее',
+    },
+    de: {
+      metaTitle: 'Авто из Германии под ключ — подбор и привоз',
+      metaDescription: 'Подберём и привезём автомобиль из Германии — проверка, оформление и растаможка под ключ. Доставляли в Сербию, Испанию и Португалию.',
+      title: 'Авто из Германии',
+      titleHighlight: 'под ключ',
+      description: 'Подбираем машину из Германии и привозим к вам, где бы вы ни находились: проверка, оформление и растаможка под ключ.',
+      ctaLabel: 'Оставить заявку',
+      breadcrumbLabel: 'Авто из Германии',
+      casesHeading: 'Кейсы: авто из Германии',
+      steps: [
+        PRIVOZ_STEP_REQUEST_RU,
+        { n: '02', text: 'Подбираем авто из Германии по вашим критериям' },
+        { n: '03', text: 'Независимый эксперт осматривает и проверяет автомобиль на месте' },
+        { n: '04', text: 'Оформляем экспортные документы и организуем доставку до вашего города' },
+        PRIVOZ_STEP_HANDOVER_RU,
+      ],
+      destinationsNote: 'Доставляем в Сербию, Испанию и Португалию — и в любую другую страну, обсудим при заявке.',
+      chinaCrossLabel: 'Рассматриваете привоз из Китая?',
+    },
+    eu: {
+      metaTitle: 'Авто из Европы под ключ — подбор и привоз',
+      metaDescription: 'Подберём и привезём автомобиль из любой страны ЕС — Германия, Испания, Швейцария и другие — проверка, оформление и растаможка под ключ.',
+      title: 'Авто из Европы',
+      titleHighlight: 'под ключ',
+      description: 'Подбираем машину из Европы — Германия, Испания, Швейцария и другие страны ЕС — и привозим к вам, где бы вы ни находились: проверка, оформление и растаможка под ключ.',
+      ctaLabel: 'Оставить заявку',
+      breadcrumbLabel: 'Авто из Европы',
+      casesHeading: 'Кейсы: авто из Европы',
+      steps: [
+        PRIVOZ_STEP_REQUEST_RU,
+        { n: '02', text: 'Подбираем авто из Европы — Германия, Испания, Швейцария и другие страны ЕС' },
+        { n: '03', text: 'Независимый эксперт осматривает и проверяет автомобиль на месте' },
+        { n: '04', text: 'Оформляем экспортные документы и организуем доставку до вашего города' },
+        PRIVOZ_STEP_HANDOVER_RU,
+      ],
+      sourceCountriesLabel: 'Привозим из:',
+      sourceMoreLabel: 'и другие страны ЕС',
+      destinationsNote: 'Доставляем в Сербию, Испанию и Португалию — и в любую другую страну, обсудим при заявке.',
+    },
+    china: {
+      metaTitle: 'Авто из Китая под ключ — подбор и привоз',
+      metaDescription: 'Организуем привоз автомобиля из Китая в любую страну через проверенного партнёра по логистике — подбор, оформление и растаможка под ключ.',
+      title: 'Авто из Китая',
+      titleHighlight: 'под ключ',
+      description: 'Подбираем машину из Китая и привозим к вам, где бы вы ни находились, — напрямую через проверенного партнёра по логистике, под ключ, включая растаможку.',
+      ctaLabel: 'Оставить заявку',
+      breadcrumbLabel: 'Авто из Китая',
+      casesHeading: 'Кейсы: авто из Китая',
+      steps: [
+        PRIVOZ_STEP_REQUEST_RU,
+        { n: '02', text: 'Подбираем авто из Китая по вашим критериям' },
+        { n: '03', text: 'Проверяем автомобиль и оформляем экспортные документы' },
+        { n: '04', text: 'Организуем доставку до вашего города через партнёра по логистике' },
+        PRIVOZ_STEP_HANDOVER_RU,
+      ],
+      deCrossLabel: 'Ищете авто из Германии?',
+      destinationsNote: 'Доставляем в Сербию и Германию — и в любую другую страну, обсудим при заявке.',
+    },
   },
   proverka: {
     title: 'Проверка авто',
@@ -198,10 +346,13 @@ const ru: ServicesContent = {
   },
 };
 
+const PRIVOZ_STEP_REQUEST_EN = { n: '01', text: 'Submit your requirements — budget, make, mileage' };
+const PRIVOZ_STEP_HANDOVER_EN = { n: '05', text: 'Customs clearance and handover — fully turnkey' };
+
 const en: ServicesContent = {
   autopodbor: {
     title: 'Full-Service Car Sourcing',
-    descriptionFor: (location) => `We'll find your car ${location} with a full inspection, handle the paperwork, and deliver it to your city — fully turnkey, customs clearance included.`,
+    descriptionFor: (location) => `We'll find your car ${location} — sourced from cars already in the country, not shipped in from abroad. Full inspection, deal support, and delivery to your city — fully turnkey, customs clearance included.`,
     ctaLabel: 'Submit a Request',
     casesHeadingFor: (location) => `Case Studies: Car Sourcing ${location}`,
     breadcrumbLabelFor: (location) => `Car Sourcing ${location}`,
@@ -216,6 +367,7 @@ const en: ServicesContent = {
     deliveryDestinations: ['Russia', 'Kazakhstan', 'Kyrgyzstan', 'Ukraine', 'Belarus', 'Bosnia and Herzegovina', 'Croatia', 'North Macedonia', 'Turkey'],
     citiesLabel: 'Cities:',
     alsoInLabel: 'Also sourcing in:',
+    crossSellLabel: 'Need a car that isn\'t local?',
   },
   vykup: {
     title: 'Car Buyout',
@@ -229,6 +381,81 @@ const en: ServicesContent = {
     step3Serbia: 'We meet for inspection — Russian plates (anywhere in Europe) or Serbian plates (Serbia, Montenegro)',
     step3Other: 'We meet for inspection — Russian plates, the car can be anywhere in Europe',
     step4: 'We complete the deal — you get paid the day you sign',
+  },
+  privoz: {
+    hub: {
+      metaTitle: 'Turnkey Car Import from Europe and China',
+      metaDescription: 'We import cars from Germany, Spain, Switzerland, and China to any country — sourcing, inspection, delivery, and customs clearance, fully turnkey.',
+      title: 'Car Import',
+      titleHighlight: 'from Europe and China',
+      description: "The car is in Europe or China — you can be anywhere. We source it, inspect it, and bring it to you, fully turnkey, customs clearance included.",
+      breadcrumbLabel: 'Car Import',
+      deCardTitle: 'From Germany',
+      deCardText: 'Direct source — sourced and delivered from Germany, wherever you are.',
+      euCardTitle: 'From Europe',
+      euCardText: 'Spain, Switzerland, and more — sourced and delivered wherever you are.',
+      chinaCardTitle: 'From China',
+      chinaCardText: 'New and used cars from China, delivered through a trusted logistics partner.',
+      exploreLabel: 'Learn more',
+    },
+    de: {
+      metaTitle: 'Cars from Germany — Turnkey Import',
+      metaDescription: 'We source and deliver cars from Germany — inspection, paperwork, and customs clearance, fully turnkey. Delivered to Serbia, Spain, and Portugal.',
+      title: 'Cars from Germany',
+      titleHighlight: 'Turnkey',
+      description: "We source the car from Germany and deliver it to you, wherever you are: inspection, paperwork, and customs clearance, fully turnkey.",
+      ctaLabel: 'Submit a Request',
+      breadcrumbLabel: 'Cars from Germany',
+      casesHeading: 'Case Studies: Cars from Germany',
+      steps: [
+        PRIVOZ_STEP_REQUEST_EN,
+        { n: '02', text: 'We search for a match from Germany to your criteria' },
+        { n: '03', text: 'An independent expert inspects the car on site' },
+        { n: '04', text: 'We handle export paperwork and arrange delivery to your city' },
+        PRIVOZ_STEP_HANDOVER_EN,
+      ],
+      destinationsNote: "We deliver to Serbia, Spain, and Portugal — and anywhere else, just ask when you submit a request.",
+      chinaCrossLabel: 'Considering a car from China?',
+    },
+    eu: {
+      metaTitle: 'Cars from Europe — Turnkey Import',
+      metaDescription: 'We source and deliver cars from any EU country — Germany, Spain, Switzerland, and more — inspection, paperwork, and customs clearance, fully turnkey.',
+      title: 'Cars from Europe',
+      titleHighlight: 'Turnkey',
+      description: "We source the car from Europe — Germany, Spain, Switzerland, and other EU countries — and deliver it to you, wherever you are: inspection, paperwork, and customs clearance, fully turnkey.",
+      ctaLabel: 'Submit a Request',
+      breadcrumbLabel: 'Cars from Europe',
+      casesHeading: 'Case Studies: Cars from Europe',
+      steps: [
+        PRIVOZ_STEP_REQUEST_EN,
+        { n: '02', text: 'We search for a match from Europe — Germany, Spain, Switzerland, and other EU countries' },
+        { n: '03', text: 'An independent expert inspects the car on site' },
+        { n: '04', text: 'We handle export paperwork and arrange delivery to your city' },
+        PRIVOZ_STEP_HANDOVER_EN,
+      ],
+      sourceCountriesLabel: 'We source from:',
+      sourceMoreLabel: 'and other EU countries',
+      destinationsNote: 'We deliver to Serbia, Spain, and Portugal — and anywhere else, just ask when you submit a request.',
+    },
+    china: {
+      metaTitle: 'Cars from China — Turnkey Import',
+      metaDescription: 'We arrange car import from China to any country through a trusted logistics partner — sourcing, paperwork, and customs clearance, fully turnkey.',
+      title: 'Cars from China',
+      titleHighlight: 'Turnkey',
+      description: "We source the car from China and deliver it to you, wherever you are, directly through a trusted logistics partner, fully turnkey, customs clearance included.",
+      ctaLabel: 'Submit a Request',
+      breadcrumbLabel: 'Cars from China',
+      casesHeading: 'Case Studies: Cars from China',
+      steps: [
+        PRIVOZ_STEP_REQUEST_EN,
+        { n: '02', text: 'We search for a match from China to your criteria' },
+        { n: '03', text: 'We inspect the car and handle export paperwork' },
+        { n: '04', text: 'We arrange delivery to your city through our logistics partner' },
+        PRIVOZ_STEP_HANDOVER_EN,
+      ],
+      deCrossLabel: 'Looking for a car from Germany?',
+      destinationsNote: 'We deliver to Serbia and Germany — and anywhere else, just ask when you submit a request.',
+    },
   },
   proverka: {
     title: 'Car Inspection',
@@ -302,10 +529,13 @@ const en: ServicesContent = {
   },
 };
 
+const PRIVOZ_STEP_REQUEST_SR = { n: '01', text: 'Ostavljate zahtev sa kriterijumima — budžet, marka, kilometraža' };
+const PRIVOZ_STEP_HANDOVER_SR = { n: '05', text: 'Carinjenje i predaja vozila — sve na ključ' };
+
 const sr: ServicesContent = {
   autopodbor: {
     title: 'Kompletan odabir vozila',
-    descriptionFor: (location) => `Pronaći ćemo vozilo ${location} uz potpunu proveru, sklopiti posao i dovesti ga do vašeg grada — sve na ključ, uključujući carinjenje.`,
+    descriptionFor: (location) => `Pronaći ćemo vozilo ${location} — biramo među vozilima koja su već u zemlji, ne dovozimo ih iz inostranstva. Potpuna provera, podrška tokom kupovine i dovoz do vašeg grada — sve na ključ, uključujući carinjenje.`,
     ctaLabel: 'Pošaljite zahtev',
     casesHeadingFor: (location) => `Primeri: odabir vozila ${location}`,
     breadcrumbLabelFor: (location) => `Odabir vozila ${location}`,
@@ -320,6 +550,7 @@ const sr: ServicesContent = {
     deliveryDestinations: ['Rusiju', 'Kazahstan', 'Kirgistan', 'Ukrajinu', 'Belorusiju', 'Bosnu i Hercegovinu', 'Hrvatsku', 'Severnu Makedoniju', 'Tursku'],
     citiesLabel: 'Gradovi:',
     alsoInLabel: 'Takođe pronalazimo vozila i u:',
+    crossSellLabel: 'Treba vam vozilo koje nije lokalno?',
   },
   vykup: {
     title: 'Otkup vozila',
@@ -333,6 +564,81 @@ const sr: ServicesContent = {
     step3Serbia: 'Dogovaramo pregled — ruske tablice (bilo gde u Evropi) ili srpske tablice (Srbija, Crna Gora)',
     step3Other: 'Dogovaramo pregled — ruske tablice, vozilo može biti bilo gde u Evropi',
     step4: 'Sklapamo posao — novac dobijate na dan potpisivanja',
+  },
+  privoz: {
+    hub: {
+      metaTitle: 'Uvoz vozila iz Evrope i Kine na ključ',
+      metaDescription: 'Uvozimo vozila iz Nemačke, Španije, Švajcarske i Kine u bilo koju zemlju — odabir, provera, dovoz i carinjenje na ključ.',
+      title: 'Uvoz vozila',
+      titleHighlight: 'iz Evrope i Kine',
+      description: 'Vozilo je u Evropi ili Kini, vi ste bilo gde. Biramo ga, proveravamo i dovozimo do vas na ključ, uključujući carinjenje.',
+      breadcrumbLabel: 'Uvoz vozila',
+      deCardTitle: 'Iz Nemačke',
+      deCardText: 'Direktan izvor — odabir i dovoz iz Nemačke bilo gde da ste.',
+      euCardTitle: 'Iz Evrope',
+      euCardText: 'Španija, Švajcarska i druge zemlje — odabir i dovoz bilo gde.',
+      chinaCardTitle: 'Iz Kine',
+      chinaCardText: 'Nova i polovna vozila iz Kine — dovoz preko proverenog partnera.',
+      exploreLabel: 'Saznajte više',
+    },
+    de: {
+      metaTitle: 'Vozila iz Nemačke — uvoz na ključ',
+      metaDescription: 'Biramo i dovozimo vozila iz Nemačke — provera, papirologija i carinjenje na ključ. Dovozili smo u Srbiju, Španiju i Portugaliju.',
+      title: 'Vozila iz Nemačke',
+      titleHighlight: 'na ključ',
+      description: 'Vozilo biramo iz Nemačke i dovozimo do vas, gde god da ste: provera, papirologija i carinjenje na ključ.',
+      ctaLabel: 'Pošaljite zahtev',
+      breadcrumbLabel: 'Vozila iz Nemačke',
+      casesHeading: 'Primeri: vozila iz Nemačke',
+      steps: [
+        PRIVOZ_STEP_REQUEST_SR,
+        { n: '02', text: 'Tražimo vozilo iz Nemačke prema vašim kriterijumima' },
+        { n: '03', text: 'Nezavisni stručnjak pregleda vozilo na licu mesta' },
+        { n: '04', text: 'Sređujemo izvoznu dokumentaciju i organizujemo dovoz do vašeg grada' },
+        PRIVOZ_STEP_HANDOVER_SR,
+      ],
+      destinationsNote: 'Već smo dovozili u Srbiju, Španiju i Portugaliju — dovozimo i u bilo koju drugu zemlju, dogovorite prilikom slanja zahteva.',
+      chinaCrossLabel: 'Razmatrate uvoz iz Kine?',
+    },
+    eu: {
+      metaTitle: 'Vozila iz Evrope — uvoz na ključ',
+      metaDescription: 'Biramo i dovozimo vozila iz bilo koje zemlje EU — Nemačka, Španija, Švajcarska i druge — provera, papirologija i carinjenje na ključ.',
+      title: 'Vozila iz Evrope',
+      titleHighlight: 'na ključ',
+      description: 'Vozilo biramo iz Evrope — Nemačka, Španija, Švajcarska i druge zemlje EU — i dovozimo do vas, gde god da ste: provera, papirologija i carinjenje na ključ.',
+      ctaLabel: 'Pošaljite zahtev',
+      breadcrumbLabel: 'Vozila iz Evrope',
+      casesHeading: 'Primeri: vozila iz Evrope',
+      steps: [
+        PRIVOZ_STEP_REQUEST_SR,
+        { n: '02', text: 'Tražimo vozilo iz Evrope — Nemačka, Španija, Švajcarska i druge zemlje EU' },
+        { n: '03', text: 'Nezavisni stručnjak pregleda vozilo na licu mesta' },
+        { n: '04', text: 'Sređujemo izvoznu dokumentaciju i organizujemo dovoz do vašeg grada' },
+        PRIVOZ_STEP_HANDOVER_SR,
+      ],
+      sourceCountriesLabel: 'Dovozimo iz:',
+      sourceMoreLabel: 'i druge zemlje EU',
+      destinationsNote: 'Dovozimo u Srbiju, Španiju i Portugaliju — i u bilo koju drugu zemlju, dogovorite prilikom slanja zahteva.',
+    },
+    china: {
+      metaTitle: 'Vozila iz Kine — uvoz na ključ',
+      metaDescription: 'Organizujemo uvoz vozila iz Kine u bilo koju zemlju preko proverenog logističkog partnera — odabir, papirologija i carinjenje na ključ.',
+      title: 'Vozila iz Kine',
+      titleHighlight: 'na ključ',
+      description: 'Vozilo biramo iz Kine i dovozimo do vas, gde god da ste, direktno preko proverenog logističkog partnera, na ključ, uključujući carinjenje.',
+      ctaLabel: 'Pošaljite zahtev',
+      breadcrumbLabel: 'Vozila iz Kine',
+      casesHeading: 'Primeri: vozila iz Kine',
+      steps: [
+        PRIVOZ_STEP_REQUEST_SR,
+        { n: '02', text: 'Tražimo vozilo iz Kine prema vašim kriterijumima' },
+        { n: '03', text: 'Proveravamo vozilo i sređujemo izvoznu dokumentaciju' },
+        { n: '04', text: 'Organizujemo dovoz do vašeg grada preko logističkog partnera' },
+        PRIVOZ_STEP_HANDOVER_SR,
+      ],
+      deCrossLabel: 'Tražite vozilo iz Nemačke?',
+      destinationsNote: 'Dovozimo u Srbiju i Nemačku — i u bilo koju drugu zemlju, dogovorite prilikom slanja zahteva.',
+    },
   },
   proverka: {
     title: 'Provera vozila',

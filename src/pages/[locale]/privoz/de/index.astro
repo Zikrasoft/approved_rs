@@ -1,0 +1,34 @@
+---
+import PrivozSpokeLayout from '@/layouts/PrivozSpokeLayout.astro';
+import { getServicesContent } from '@/i18n/content/services';
+import { withLocales } from '@/utils/paths';
+import { getCountry } from '@/utils/geo';
+import type { Locale } from '@/i18n/config';
+
+export const getStaticPaths = () => withLocales([{ params: {} }]);
+
+const { locale } = Astro.params as { locale: Locale };
+const sc = getServicesContent(locale);
+const pc = sc.privoz.de;
+---
+
+<PrivozSpokeLayout
+  {locale}
+  slug="de"
+  metaTitle={pc.metaTitle}
+  metaDescription={pc.metaDescription}
+  title={pc.title}
+  titleHighlight={pc.titleHighlight}
+  description={pc.description}
+  ctaLabel={pc.ctaLabel}
+  breadcrumbLabel={pc.breadcrumbLabel}
+  hubBreadcrumbLabel={sc.privoz.hub.breadcrumbLabel}
+  casesHeading={pc.casesHeading}
+  steps={pc.steps}
+  destinationsNote={pc.destinationsNote}
+  areaServed={getCountry('de')![locale].name}
+>
+  <p class="mt-4 text-sm">
+    <a href={`/${locale}/privoz/china/`} class="text-accent no-underline hover:underline">{pc.chinaCrossLabel} →</a>
+  </p>
+</PrivozSpokeLayout>

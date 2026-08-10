@@ -3,6 +3,7 @@ import type { Dictionary } from './ru';
 export const en: Dictionary = {
   nav: {
     autopodbor: 'Sourcing',
+    privoz: 'Import',
     autoservice: 'Service',
     vykup: 'Buyout',
     proverka: 'Inspection',
@@ -22,7 +23,6 @@ export const en: Dictionary = {
     privacyLabel: 'Privacy',
     tagline: 'We source, inspect, and deliver your car from Europe. We handle the entire process — from search to delivery.',
     contactManagerLabel: 'Message a Manager',
-    coverageLine: 'Germany · Spain · Serbia · Switzerland',
     hoursLine: '24/7, no days off',
     copyrightSuffix: 'Car sourcing, service, and delivery from Europe',
     channelLinkLabel: 'Our channel',

@@ -7,6 +7,7 @@ export interface FaqItem {
 
 interface FaqContent {
   autopodbor: FaqItem[];
+  privoz: FaqItem[];
   vykup: FaqItem[];
   proverka: FaqItem[];
   autoservice: FaqItem[];
@@ -22,6 +23,11 @@ const ru: FaqContent = {
     { q: 'Какая гарантия на найденный автомобиль?', a: 'Формальной гарантии производителя, как на новый автомобиль, нет — это вторичный рынок. Ваша защита — независимая техническая проверка перед покупкой: машину осматривает эксперт, а не вы «вслепую».' },
     { q: 'Даёте ли фото- или видеоотчёт по машине до принятия решения?', a: 'Да, полный отчёт с фото по машине — до того, как вы принимаете решение о покупке.' },
     { q: 'Есть компенсация, если сроки сорваны по вашей вине?', a: 'Фиксированной неустойки нет — срок сделки часто зависит не только от нас (переговоры с продавцом, растаможка). Но называем реалистичный срок сразу и не тянем время.' },
+  ],
+  privoz: [
+    { q: 'Чем привоз отличается от автоподбора?', a: 'Автоподбор — когда вы находитесь в той же стране, что и автомобиль. Привоз — когда машина едет к вам в Сербию из Европы или Китая.' },
+    { q: 'Сколько занимает доставка из Европы или Китая?', a: 'Срок зависит от конкретного автомобиля и логистики — точный срок назовём при заявке.' },
+    { q: 'Растаможка входит в стоимость?', a: 'Да, сопровождаем растаможку в Сербии и включаем её в расчёт — итоговую сумму называем до сделки.' },
   ],
   vykup: [
     { q: 'За сколько дней можно продать машину, если она ещё не растаможена или не переоформлена?', a: 'Обычно 1–2 дня, даже если машина ещё не растаможена или не переоформлена на вас.' },
@@ -54,6 +60,11 @@ const en: FaqContent = {
     { q: 'Do you send a photo or video report before I decide?', a: 'Yes — a full photo report on the car, before you make any purchase decision.' },
     { q: 'Is there compensation if deadlines slip on your end?', a: "There's no fixed penalty — the timeline often depends on more than just us (negotiating with the seller, customs clearance). But we give you a realistic estimate upfront and don't waste time." },
   ],
+  privoz: [
+    { q: 'How is import different from car sourcing?', a: "Sourcing is when you're in the same country as the car. Import is when the car travels to you in Serbia from Europe or China." },
+    { q: 'How long does delivery from Europe or China take?', a: "Timing depends on the specific car and logistics — we'll give you an exact timeframe when you submit a request." },
+    { q: 'Is customs clearance included in the price?', a: 'Yes — we handle customs clearance in Serbia and include it in the quote, given to you before the deal.' },
+  ],
   vykup: [
     { q: "How fast can I sell the car if it's not customs-cleared or re-registered yet?", a: "Usually 1–2 days, even if the car isn't customs-cleared or registered to you yet." },
     { q: 'Do you buy cars that are financed or pledged as collateral?', a: 'No — we only buy cars free of an active loan or lien.' },
@@ -84,6 +95,11 @@ const sr: FaqContent = {
     { q: 'Kakva garancija važi za pronađeno vozilo?', a: 'Zvanične garancije proizvođača, kao kod novog vozila, nema — reč je o tržištu polovnih automobila. Vaša zaštita je nezavisna tehnička provera pre kupovine: vozilo pregleda stručnjak, ne kupujete „naslepo“.' },
     { q: 'Da li dobijam foto ili video izveštaj o vozilu pre odluke?', a: 'Da, dobijate potpun izveštaj sa fotografijama pre nego što donesete odluku o kupovini.' },
     { q: 'Postoji li nadoknada ako rokovi kasne vašom krivicom?', a: 'Fiksne naknade nema — rok sklapanja posla često ne zavisi samo od nas (pregovori sa prodavcem, carinjenje). Ali odmah dajemo realan rok i ne odugovlačimo.' },
+  ],
+  privoz: [
+    { q: 'Po čemu se uvoz razlikuje od odabira vozila?', a: 'Odabir vozila znači da ste u istoj zemlji kao i vozilo. Uvoz znači da vozilo putuje do vas u Srbiju iz Evrope ili Kine.' },
+    { q: 'Koliko traje dovoz iz Evrope ili Kine?', a: 'Rok zavisi od konkretnog vozila i logistike — tačan rok dajemo uz zahtev.' },
+    { q: 'Da li je carinjenje uključeno u cenu?', a: 'Da, sređujemo carinjenje u Srbiji i uključujemo ga u ponudu — konačan iznos dajemo pre dogovora.' },
   ],
   vykup: [
     { q: 'Za koliko dana mogu da prodam vozilo ako još nije rastarinjeno ili prepisano?', a: 'Obično 1–2 dana, čak i ako vozilo još nije rastarinjeno ili prepisano na vas.' },

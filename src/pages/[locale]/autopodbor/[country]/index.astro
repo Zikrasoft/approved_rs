@@ -9,6 +9,7 @@ import { getServicesContent } from '@/i18n/content/services';
 import { getCountryPaths, withLocales } from '@/utils/paths';
 import { getCountry, getActiveCountries, getCitiesForCountry } from '@/utils/geo';
 import { generateMeta, generateServiceSchema, buildLocation } from '@/utils/seo';
+import { getPrivozCrossSellSpokes } from '@/utils/privozCrossSell';
 import { getCollection } from 'astro:content';
 import { SITE_URL } from '@/utils/constants';
 import type { Locale } from '@/i18n/config';
@@ -22,6 +23,13 @@ const location = buildLocation(locale as Locale, country);
 const meta = generateMeta('autopodbor', { country, baseUrl: SITE_URL, path: `/${locale}/autopodbor/${countryCode}/`, locale: locale as Locale });
 const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === countryCode && c.data.service === 'autopodbor').slice(0, 3);
 const schema = generateServiceSchema(`${sc.title} ${location}`, country[locale as Locale].name, meta.canonical);
+
+// Link text reuses each spoke's own title instead of new strings.
+const privozContent = getServicesContent(locale as Locale).privoz;
+const privozLinks = getPrivozCrossSellSpokes(countryCode!).map(slug => ({
+  href: `/${locale}/privoz/${slug}/`,
+  text: privozContent[slug].title,
+}));
 ---
 
 <ServicePageLayout
@@ -41,6 +49,7 @@ const schema = generateServiceSchema(`${sc.title} ${location}`, country[locale a
     {sc.deliveryLineFor(sc.deliveryDestinations.join(', '))}
   </p>
   <ChipLinks label={sc.citiesLabel} items={getCitiesForCountry(countryCode!).map(city => ({ href: `/${locale}/autopodbor/${countryCode}/${city.slug}/`, text: city[locale as Locale].name }))} />
+  <ChipLinks label={sc.crossSellLabel} items={privozLinks} />
   <div class="mt-12 pt-8 border-t border-default">
     <p class="text-xs tracking-widest uppercase mb-4 font-medium text-muted">{sc.alsoInLabel}</p>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

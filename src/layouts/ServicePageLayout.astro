@@ -24,6 +24,14 @@ interface Props {
   ctaLabel?: string;
   formService: string;
   currentCountry: string;
+  // The "deal identity" shown in the hero watermark and sent as the lead's
+  // country field — defaults to currentCountry, but privoz pages need to
+  // diverge: currentCountry stays a real country code (so the "other
+  // services" cross-links below still resolve to a valid /autopodbor/{cc}/
+  // etc.), while leadCountry carries the actual corridor ('de'/'eu'/'china')
+  // so sales sees the right source in the Telegram notification instead of
+  // a misleading "RS" on every privoz lead.
+  leadCountry?: string;
   currentService: string;
   cases?: CollectionEntry<'cases'>[];
   casesHeading?: string;
@@ -36,7 +44,7 @@ interface Props {
 
 const {
   meta, schema, title, titleHighlight, description, ctaLabel,
-  formService, currentCountry, currentService,
+  formService, currentCountry, leadCountry = currentCountry, currentService,
   cases = [], casesHeading, city,
   showCountryCrossLinks = true,
   breadcrumbs,
@@ -51,7 +59,7 @@ const t = getI18n(locale);
 
   <section class="hero-grid relative border-b overflow-hidden border-default">
     <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 50% 60% at 0% 50%, var(--color-ambient-glow) 0%, transparent 60%), radial-gradient(ellipse 40% 50% at 100% 0%, var(--color-accent-subtle) 0%, transparent 55%);"></div>
-    <span class="deco-word" style="font-size: clamp(7rem, 18vw, 16rem); bottom: -1rem; right: -1%; opacity: 0.8;">{currentCountry.toUpperCase()}</span>
+    <span class="deco-word" style="font-size: clamp(7rem, 18vw, 16rem); bottom: -1rem; right: -1%; opacity: 0.8;">{leadCountry.toUpperCase()}</span>
 
     <div class="relative max-w-6xl mx-auto px-6 py-16 md:py-24">
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-start">
@@ -67,7 +75,7 @@ const t = getI18n(locale);
           <div class="fade-up fade-up-5 pt-2"><slot /></div>
         </div>
         <div class="lg:col-span-2 fade-up fade-up-3">
-          <LeadForm service={formService} country={currentCountry} city={city} />
+          <LeadForm service={formService} country={leadCountry} city={city} />
         </div>
       </div>
     </div>
@@ -75,7 +83,7 @@ const t = getI18n(locale);
 
   <slot name="extra" />
 
-  <LeadFormModal id="page-lead-modal" triggerAttr="data-open-page-lead-modal" service={formService} country={currentCountry} city={city} />
+  <LeadFormModal id="page-lead-modal" triggerAttr="data-open-page-lead-modal" service={formService} country={leadCountry} city={city} />
 
   <slot name="cases"><CasesGrid {items} heading={casesHeading ?? ''} /></slot>
 

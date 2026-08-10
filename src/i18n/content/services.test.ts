@@ -11,6 +11,19 @@ describe('getServicesContent', () => {
       expect(s.proverka.steps.length).toBe(5);
       expect(s.avtoservisBelgrade.whatWeDo.length).toBe(5);
       expect(Object.keys(s.caseChrome.serviceBadges).length).toBe(4);
+      expect(s.privoz.de.steps.length).toBe(5);
+      expect(s.privoz.eu.steps.length).toBe(5);
+      expect(s.privoz.china.steps.length).toBe(5);
+    }
+  });
+
+  it('privoz spokes each have real, distinct destination/source copy (not left blank or copy-pasted)', () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      const { de, eu, china } = getServicesContent(locale).privoz;
+      expect(de.destinationsNote).toBeTruthy();
+      expect(eu.destinationsNote).toBeTruthy();
+      expect(china.destinationsNote).toBeTruthy();
+      expect(eu.destinationsNote).not.toBe(china.destinationsNote);
     }
   });
 
@@ -22,5 +35,7 @@ describe('getServicesContent', () => {
   it('en and sr differ from ru', () => {
     expect(getServicesContent('en').autopodbor.title).not.toBe(getServicesContent('ru').autopodbor.title);
     expect(getServicesContent('sr').vykup.title).not.toBe(getServicesContent('ru').vykup.title);
+    expect(getServicesContent('en').privoz.de.title).not.toBe(getServicesContent('ru').privoz.de.title);
+    expect(getServicesContent('sr').privoz.de.title).not.toBe(getServicesContent('ru').privoz.de.title);
   });
 });

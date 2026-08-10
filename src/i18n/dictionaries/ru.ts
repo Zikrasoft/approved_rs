@@ -1,6 +1,7 @@
 export const ru = {
   nav: {
     autopodbor: 'Автоподбор',
+    privoz: 'Привоз авто',
     autoservice: 'Автосервис',
     vykup: 'Выкуп',
     proverka: 'Проверка',
@@ -20,7 +21,6 @@ export const ru = {
     privacyLabel: 'Конфиденциальность',
     tagline: 'Подберём, проверим и доставим автомобиль из Европы. Берём на себя весь процесс — от поиска до доставки.',
     contactManagerLabel: 'Написать менеджеру',
-    coverageLine: 'Германия · Испания · Сербия · Швейцария',
     hoursLine: 'Круглосуточно, без выходных',
     copyrightSuffix: 'Автоподбор, сервис и доставка авто из Европы',
     channelLinkLabel: 'Наш канал',

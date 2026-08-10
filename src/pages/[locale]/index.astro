@@ -11,6 +11,7 @@ import CountryPill from "@/components/CountryPill.astro";
 import LeadForm from "@/components/LeadForm.astro";
 import {
     Search,
+    Globe,
     Wrench,
     Banknote,
     ClipboardCheck,
@@ -20,7 +21,7 @@ import {
 } from "@lucide/astro";
 import { getCollection } from "astro:content";
 import { getActiveCountries } from "@/utils/geo";
-import { SITE_URL, SITE_NAME, TG_MANAGER, THREADS_CHANNEL } from "@/utils/constants";
+import { SITE_URL, SITE_NAME, TG_MANAGER, THREADS_CHANNEL, CHINA_NAME } from "@/utils/constants";
 import { generateOrganizationSchema } from "@/utils/seo";
 import { telegramLink, DEFAULT_TG_MESSAGE } from "@/utils/telegramLink";
 import StatBlock from "@/components/StatBlock.astro";
@@ -44,7 +45,9 @@ const countries = getActiveCountries();
 const schema = generateOrganizationSchema({
     url: SITE_URL,
     description: meta.description,
-    areaServed: countries.map((c) => c[locale as Locale].name),
+    // Autopodbor's own markets plus China — privoz sources cars from there
+    // too, even though it's not a countries.json market in its own right.
+    areaServed: [...countries.map((c) => c[locale as Locale].name), CHINA_NAME[locale as Locale]],
     sameAs: [`https://t.me/${TG_MANAGER}`, `https://www.threads.com/@${THREADS_CHANNEL}`],
     contactUrl: telegramLink(TG_MANAGER, DEFAULT_TG_MESSAGE[locale as Locale]),
 });
@@ -60,25 +63,31 @@ const journey = [
         desc: h.journey[0].desc,
     },
     {
-        href: `/${locale}/proverka/de/`,
-        Icon: ClipboardCheck,
+        href: `/${locale}/privoz/`,
+        Icon: Globe,
         title: h.journey[1].title,
         desc: h.journey[1].desc,
-        note: h.journey[1].note,
     },
     {
-        href: `/${locale}/vykup/de/`,
-        Icon: Banknote,
+        href: `/${locale}/proverka/de/`,
+        Icon: ClipboardCheck,
         title: h.journey[2].title,
         desc: h.journey[2].desc,
         note: h.journey[2].note,
     },
     {
-        href: `/${locale}/avtoservis-belgrade/`,
-        Icon: Wrench,
+        href: `/${locale}/vykup/de/`,
+        Icon: Banknote,
         title: h.journey[3].title,
         desc: h.journey[3].desc,
         note: h.journey[3].note,
+    },
+    {
+        href: `/${locale}/avtoservis-belgrade/`,
+        Icon: Wrench,
+        title: h.journey[4].title,
+        desc: h.journey[4].desc,
+        note: h.journey[4].note,
     },
 ];
 ---
@@ -150,7 +159,7 @@ const journey = [
                         class="grid grid-cols-3 gap-3 sm:gap-6 mt-8 pt-8 border-t fade-up fade-up-5 border-default"
                     >
                         <StatBlock value={h.statClients.value} label={h.statClients.label} />
-                        <StatBlock value={h.statCountries.value} label={h.statCountries.label} />
+                        <StatBlock value={String(countries.length)} label={h.statCountries.label} />
                         <StatBlock value={h.statYears.value} label={h.statYears.label} />
                     </div>
                 </div>
@@ -173,7 +182,7 @@ const journey = [
             </p>
 
             <div
-                class="journey-strip grid grid-cols-1 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-border rounded-sm border border-default bg-surface overflow-hidden anim-inline"
+                class="journey-strip grid grid-cols-1 lg:grid-cols-5 divide-y lg:divide-y-0 lg:divide-x divide-border rounded-sm border border-default bg-surface overflow-hidden anim-inline"
                 style="--anim-delay: 0.1s"
             >
                 {
@@ -429,7 +438,7 @@ const journey = [
                 >
                     <div class="grid grid-cols-2 gap-6">
                         <StatBlock value={h.ctaStatClients.value} label={h.ctaStatClients.label} />
-                        <StatBlock value={h.ctaStatCountries.value} label={h.ctaStatCountries.label} />
+                        <StatBlock value={String(countries.length)} label={h.ctaStatCountries.label} />
                         <StatBlock value={h.ctaStatYears.value} label={h.ctaStatYears.label} />
                         <StatBlock value={h.ctaStatResponse.value} label={h.ctaStatResponse.label} />
                     </div>

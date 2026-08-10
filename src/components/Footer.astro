@@ -8,11 +8,15 @@ import { getServicesContent } from '@/i18n/content/services';
 import { SITE_NAME, DEFAULT_COUNTRY, TG_MANAGER, WHATSAPP_NUMBER, VIBER_NUMBER, THREADS_CHANNEL } from '@/utils/constants';
 import { telegramLink, DEFAULT_TG_MESSAGE } from '@/utils/telegramLink';
 import { whatsappLink, viberLink } from '@/utils/contactLinks';
+import { getActiveCountries } from '@/utils/geo';
 const year = new Date().getFullYear();
 const locale = getLocale(Astro.currentLocale);
 const t = getI18n(locale);
 const cc = getServicesContent(locale).caseChrome;
 const message = DEFAULT_TG_MESSAGE[locale];
+// Derived live from countries.json, not a hardcoded string — the literal
+// list went stale the moment Portugal was added as a 5th active country.
+const coverageLine = getActiveCountries().map(c => c[locale].name).join(' · ');
 ---
 
 <footer class="mt-24 border-t border-default">
@@ -80,7 +84,7 @@ const message = DEFAULT_TG_MESSAGE[locale];
           <a href={`/${locale}/privacy/`}>{t.footer.privacyLabel}</a>
         </nav>
         <div class="mt-6 space-y-1.5">
-          <p class="text-xs text-muted">{t.footer.coverageLine}</p>
+          <p class="text-xs text-muted">{coverageLine}</p>
           <p class="text-xs text-muted">{t.footer.hoursLine}</p>
         </div>
       </div>

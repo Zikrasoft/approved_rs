@@ -3,6 +3,7 @@ import type { Dictionary } from './ru';
 export const sr: Dictionary = {
   nav: {
     autopodbor: 'Odabir',
+    privoz: 'Uvoz',
     autoservice: 'Servis',
     vykup: 'Otkup',
     proverka: 'Provera',
@@ -22,7 +23,6 @@ export const sr: Dictionary = {
     privacyLabel: 'Privatnost',
     tagline: 'Pronalazimo, proveravamo i dostavljamo vozilo iz Evrope. Preuzimamo ceo proces — od pretrage do isporuke.',
     contactManagerLabel: 'Pišite menadžeru',
-    coverageLine: 'Nemačka · Španija · Srbija · Švajcarska',
     hoursLine: 'Non-stop, bez slobodnih dana',
     copyrightSuffix: 'Odabir, servis i dostava vozila iz Evrope',
     channelLinkLabel: 'Naš kanal',

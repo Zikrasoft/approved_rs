@@ -1,25 +1,25 @@
 import { describe, it, expect } from 'vitest';
-import { getNavItems, isNavItemActive } from './labels';
+import { getNavItems, isNavItemActive, SERVICE_ICON_SLUGS } from './labels';
 
 describe('getNavItems', () => {
-  it('orders Автоподбор first, Автосервис second, then the rest of SERVICES', () => {
+  it('orders Автоподбор first, Привоз second, Автосервис third, then the rest of SERVICES', () => {
     const result = getNavItems('ru', 'de');
-    expect(result.map(i => i.label)).toEqual(['Автоподбор', 'Автосервис', 'Выкуп', 'Проверка']);
+    expect(result.map(i => i.label)).toEqual(['Автоподбор', 'Привоз авто', 'Автосервис', 'Выкуп', 'Проверка']);
   });
 
-  it('builds per-locale, per-country hrefs for country-scoped items and a fixed href for Автосервис', () => {
+  it('builds per-locale, per-country hrefs for country-scoped items and fixed hrefs for Привоз/Автосервис', () => {
     const result = getNavItems('ru', 'rs');
     expect(result).toEqual([
       { href: '/ru/autopodbor/rs/', label: 'Автоподбор', slug: 'autopodbor' },
+      { href: '/ru/privoz/', label: 'Привоз авто', slug: 'privoz' },
       { href: '/ru/avtoservis-belgrade/', label: 'Автосервис', slug: 'autoservice' },
       { href: '/ru/vykup/rs/', label: 'Выкуп', slug: 'vykup' },
       { href: '/ru/proverka/rs/', label: 'Проверка', slug: 'proverka' },
     ]);
   });
 
-  it('every slug has an icon mapping in Header.astro\'s SERVICE_ICONS', () => {
-    const knownSlugs = ['autopodbor', 'autoservice', 'vykup', 'proverka'];
-    getNavItems('ru', 'de').forEach(item => expect(knownSlugs).toContain(item.slug));
+  it('every slug is covered by SERVICE_ICON_SLUGS (Header.astro\'s SERVICE_ICONS is typed against this exact union, so a mismatch is a compile error there too)', () => {
+    getNavItems('ru', 'de').forEach(item => expect(SERVICE_ICON_SLUGS as readonly string[]).toContain(item.slug));
   });
 });
 

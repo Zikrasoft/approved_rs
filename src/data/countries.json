@@ -26,5 +26,12 @@
     "en": { "name": "Switzerland" },
     "sr": { "name": "Švajcarska", "nameGenitive": "Švajcarske", "nameLocative": "Švajcarskoj", "nameAccusative": "Švajcarsku" },
     "active": true
+  },
+  {
+    "code": "pt",
+    "ru": { "name": "Португалия", "nameGenitive": "Португалии", "nameLocative": "Португалии", "nameAccusative": "Португалию" },
+    "en": { "name": "Portugal" },
+    "sr": { "name": "Portugalija", "nameGenitive": "Portugalije", "nameLocative": "Portugaliji", "nameAccusative": "Portugaliju" },
+    "active": true
   }
 ]

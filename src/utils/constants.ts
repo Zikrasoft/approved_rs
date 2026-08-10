@@ -1,3 +1,5 @@
+import type { Locale } from '@/i18n/config';
+
 export const SITE_URL   = import.meta.env.SITE ?? 'https://approved.rs';
 export const SITE_NAME  = 'Approved.rs';
 export const SITE_BRAND = 'APPROVED';
@@ -27,7 +29,20 @@ export const BRAND_COLORS = {
 // (Serbian locale) and `rs` (Serbia country) are different keys that happen
 // to share a flag — not an error, both are kept explicit.
 export const FLAGS: Record<string, string> = {
-  de: '🇩🇪', rs: '🇷🇸', es: '🇪🇸', ch: '🇨🇭',
+  de: '🇩🇪', rs: '🇷🇸', es: '🇪🇸', ch: '🇨🇭', pt: '🇵🇹',
   ru: '🇷🇺', en: '🇬🇧', sr: '🇷🇸',
   ua: '🇺🇦', by: '🇧🇾', kz: '🇰🇿', ba: '🇧🇦', hr: '🇭🇷', me: '🇲🇪', mk: '🇲🇰', tr: '🇹🇷',
 };
+
+// China isn't in countries.json (no autopodbor market there, no per-country
+// name-case data needed) but privoz sources cars from it — one shared name
+// constant instead of the same inline locale map duplicated in every place
+// that needs to mention it (schema areaServed on 2+ privoz pages).
+export const CHINA_NAME: Record<Locale, string> = { ru: 'Китай', en: 'China', sr: 'Kina' };
+
+// Explicit, not "every active country except rs/de" — countries.json's
+// active list can grow for reasons that have nothing to do with where
+// privoz sources cars from (e.g. Portugal, added as a destination-only
+// autopodbor market). Deriving this by exclusion would silently claim new
+// destination-only countries as EU sourcing markets too.
+export const PRIVOZ_EU_SOURCE_CODES = ['es', 'ch'] as const;

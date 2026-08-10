@@ -7,6 +7,14 @@ export const SERVICES: { slug: 'autopodbor' | 'vykup' | 'proverka' }[] = [
   { slug: 'proverka' },
 ];
 
+// The nav slugs every getNavItems() result can produce — Header.astro's
+// SERVICE_ICONS map (icon components, can't be imported into plain-Node
+// vitest without Astro's Vite plugin, which this project's vitest.config.ts
+// doesn't load) must have an entry for each of these. Kept here as the
+// single list both Header.astro and labels.test.ts check against, instead
+// of the icon values themselves.
+export const SERVICE_ICON_SLUGS = ['autopodbor', 'privoz', 'autoservice', 'vykup', 'proverka'] as const;
+
 // Primary nav order: Автоподбор first, then the single-page Автосервис
 // (Belgrade only, not per-country like the rest), then the remaining
 // per-country SERVICES. Shared by Header (desktop + mobile) and Footer.
@@ -17,6 +25,7 @@ export const getNavItems = (
   const nav = getI18n(locale).nav;
   return [
     { href: `/${locale}/autopodbor/${countryCode}/`, label: nav.autopodbor, slug: 'autopodbor' },
+    { href: `/${locale}/privoz/`, label: nav.privoz, slug: 'privoz' },
     { href: `/${locale}/avtoservis-belgrade/`, label: nav.autoservice, slug: 'autoservice' },
     ...SERVICES.filter(s => s.slug !== 'autopodbor').map(s => ({
       href: `/${locale}/${s.slug}/${countryCode}/`,
@@ -49,6 +58,10 @@ export const SERVICE_LABELS: Record<string, string> = {
   buyout:     'Выкуп',
   inspection: 'Проверка',
   autoservice: 'Автосервис',
+  'privoz-de': 'Привоз из Германии',
+  'privoz-eu': 'Привоз из Европы',
+  'privoz-china': 'Привоз из Китая',
+  privoz: 'Привоз авто',
 };
 
 export const AUTOSERVICE_SERVICES = ['diagnostics', 'maintenance', 'suspension', 'engine', 'prepurchase'] as const;

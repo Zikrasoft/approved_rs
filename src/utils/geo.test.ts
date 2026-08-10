@@ -35,6 +35,12 @@ describe('getCitiesForCountry', () => {
   it('returns empty array for unknown country', () => {
     expect(getCitiesForCountry('xx')).toEqual([]);
   });
+
+  it('returns empty array for a real, active country with no cities yet (e.g. Portugal)', () => {
+    expect(getCountry('pt')).toBeDefined();
+    expect(getCountry('pt')?.active).toBe(true);
+    expect(getCitiesForCountry('pt')).toEqual([]);
+  });
 });
 
 describe('getCountryFlag', () => {
