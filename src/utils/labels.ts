@@ -56,7 +56,7 @@ export const getNavItems = (
 ): { href: string; label: string; slug: string }[] => {
   const nav = getI18n(locale).nav;
   return [
-    { href: PathBuilder.service(locale, SLUG.SOURCING, countryCode), label: nav[SLUG.SOURCING], slug: SLUG.SOURCING },
+    { href: PathBuilder.vehicleSourcingHub(locale), label: nav[SLUG.SOURCING], slug: SLUG.SOURCING },
     { href: PathBuilder.vehicleImportHub(locale), label: nav[SLUG.IMPORT], slug: SLUG.IMPORT },
     { href: PathBuilder.autoServiceBelgrade(locale), label: nav[SLUG.AUTO_SERVICE], slug: SLUG.AUTO_SERVICE },
     ...SERVICES.filter(s => s.slug !== SLUG.SOURCING).map(s => ({
@@ -81,7 +81,11 @@ export function isNavItemActive(
   const isCountryScoped = SERVICES.some(s => s.slug === item.slug);
   if (!isCountryScoped) return pathname.startsWith(item.href);
   const segments = pathname.split('/').filter(Boolean);
-  return segments[0] === locale && segments[1] === item.slug && segments[2] === navCountry;
+  if (segments[0] !== locale || segments[1] !== item.slug) return false;
+  // No country segment at all (the bare hub, e.g. /ru/vehicle-sourcing/)
+  // still counts as active — only buyback/inspection lack a hub page, so
+  // segments[2] is never actually undefined for those in practice.
+  return segments[2] === navCountry || segments[2] === undefined;
 }
 
 // Keyed by form/Telegram service value — internal/ops-facing (Telegram bot

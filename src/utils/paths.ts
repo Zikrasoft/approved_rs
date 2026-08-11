@@ -12,6 +12,7 @@ export const PathBuilder = {
   home: (locale: Locale) => `/${locale}/`,
   service: (locale: Locale, slug: CountryScopedServiceSlug, countryCode: string) =>
     `/${locale}/${slug}/${countryCode}/`,
+  vehicleSourcingHub: (locale: Locale) => `/${locale}/vehicle-sourcing/`,
   vehicleSourcingCity: (locale: Locale, countryCode: string, citySlug: string) =>
     `/${locale}/vehicle-sourcing/${countryCode}/${citySlug}/`,
   vehicleImportHub: (locale: Locale) => `/${locale}/vehicle-import/`,

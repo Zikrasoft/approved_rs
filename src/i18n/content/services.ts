@@ -25,6 +25,19 @@ interface EuCountrySpokeContent {
 
 interface ServicesContent {
   'vehicle-sourcing': {
+    // Bare /vehicle-sourcing/ (no country) — a country-picker landing page,
+    // same role as vehicle-import's hub, so an unprefixed or otherwise
+    // country-less visit has somewhere real to land instead of a 404.
+    hub: {
+      metaTitle: string;
+      metaDescription: string;
+      title: string;
+      titleHighlight: string;
+      description: string;
+      breadcrumbLabel: string;
+      casesHeading: string;
+      chooseCountryLabel: string;
+    };
     title: string;
     descriptionFor: (location: string) => string;
     ctaLabel: string;
@@ -181,6 +194,16 @@ const vehicleImportStep02RU = (countryGenitive: string) => ({ n: '02', text: `П
 
 const ru: ServicesContent = {
   'vehicle-sourcing': {
+    hub: {
+      metaTitle: 'Автоподбор под ключ — выберите страну',
+      metaDescription: 'Подбираем автомобиль в Германии, Сербии, Испании и Португалии — полная проверка, сопровождение сделки и доставка под ключ. Выберите страну поиска.',
+      title: 'Автоподбор',
+      titleHighlight: 'под ключ',
+      description: 'Подбираем автомобиль в стране, где вы находитесь или планируете покупку, — полная проверка, сопровождение сделки и доставка под ключ. Выберите страну, чтобы увидеть детали.',
+      breadcrumbLabel: 'Автоподбор',
+      casesHeading: 'Кейсы автоподбора',
+      chooseCountryLabel: 'Выберите страну:',
+    },
     title: 'Автоподбор под ключ',
     descriptionFor: (location) => `Подберём автомобиль ${location} — среди авто, которые уже в этой стране, без ввоза из-за рубежа. Полная проверка, сопровождение сделки и доставка до вашего города — под ключ, включая растаможку.`,
     ctaLabel: 'Оставить заявку',
@@ -405,6 +428,16 @@ const vehicleImportStep02EN = (countryName: string) => ({ n: '02', text: `We sea
 
 const en: ServicesContent = {
   'vehicle-sourcing': {
+    hub: {
+      metaTitle: 'Full-Service Car Sourcing — Choose a Country',
+      metaDescription: 'We source cars in Germany, Serbia, Spain, and Portugal — full inspection, deal support, and delivery, fully turnkey. Choose a country to see details.',
+      title: 'Car Sourcing',
+      titleHighlight: 'Fully Turnkey',
+      description: "We source cars in the country you're in or looking to buy from — full inspection, deal support, and delivery, fully turnkey. Choose a country to see details.",
+      breadcrumbLabel: 'Car Sourcing',
+      casesHeading: 'Sourcing Case Studies',
+      chooseCountryLabel: 'Choose a country:',
+    },
     title: 'Full-Service Car Sourcing',
     descriptionFor: (location) => `We'll find your car ${location} — sourced from cars already in the country, not shipped in from abroad. Full inspection, deal support, and delivery to your city — fully turnkey, customs clearance included.`,
     ctaLabel: 'Submit a Request',
@@ -629,6 +662,16 @@ const vehicleImportStep02SR = (countryGenitive: string) => ({ n: '02', text: `Tr
 
 const sr: ServicesContent = {
   'vehicle-sourcing': {
+    hub: {
+      metaTitle: 'Kompletan odabir vozila na ključ — izaberite zemlju',
+      metaDescription: 'Biramo vozilo u Nemačkoj, Srbiji, Španiji i Portugalu — potpuna provera, podrška tokom kupovine i dovoz na ključ. Izaberite zemlju da vidite detalje.',
+      title: 'Odabir vozila',
+      titleHighlight: 'na ključ',
+      description: 'Biramo vozilo u zemlji u kojoj se nalazite ili planirate kupovinu — potpuna provera, podrška tokom kupovine i dovoz na ključ. Izaberite zemlju da vidite detalje.',
+      breadcrumbLabel: 'Odabir vozila',
+      casesHeading: 'Primeri odabira vozila',
+      chooseCountryLabel: 'Izaberite zemlju:',
+    },
     title: 'Kompletan odabir vozila',
     descriptionFor: (location) => `Pronaći ćemo vozilo ${location} — biramo među vozilima koja su već u zemlji, ne dovozimo ih iz inostranstva. Potpuna provera, podrška tokom kupovine i dovoz do vašeg grada — sve na ključ, uključujući carinjenje.`,
     ctaLabel: 'Pošaljite zahtev',

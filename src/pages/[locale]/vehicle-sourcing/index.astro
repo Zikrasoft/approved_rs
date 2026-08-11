@@ -1,0 +1,52 @@
+---
+import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
+import CountryPill from '@/components/CountryPill.astro';
+import Faq from '@/components/Faq.astro';
+import { getFaq } from '@/i18n/content/faq';
+import { getServicesContent } from '@/i18n/content/services';
+import { withLocales, PathBuilder } from '@/utils/paths';
+import { getActiveCountries } from '@/utils/geo';
+import { generateServiceSchema, placeholderOgImage } from '@/utils/seo';
+import { getCollection } from 'astro:content';
+import { SITE_URL, SITE_NAME } from '@/utils/constants';
+import type { Locale } from '@/i18n/config';
+
+export const getStaticPaths = () => withLocales([{ params: {} }]);
+
+const { locale } = Astro.params as { locale: Locale };
+const pc = getServicesContent(locale)['vehicle-sourcing'].hub;
+const countries = getActiveCountries();
+const meta = {
+  title: `${pc.metaTitle} | ${SITE_NAME}`,
+  description: pc.metaDescription,
+  canonical: `${SITE_URL}${PathBuilder.vehicleSourcingHub(locale)}`,
+  ogImage: placeholderOgImage(SITE_URL, locale),
+};
+const schema = generateServiceSchema(pc.title, countries.map(c => c[locale].name), meta.canonical);
+
+const cases = (await getCollection('cases'))
+  .filter(c => c.data.published && c.data.service === 'vehicle-sourcing')
+  .slice(0, 6);
+---
+
+<ServicePageLayout
+  {meta} {schema} {cases}
+  title={pc.title}
+  titleHighlight={pc.titleHighlight}
+  description={pc.description}
+  formService="vehicle-sourcing"
+  currentCountry="rs"
+  currentService="vehicle-sourcing"
+  showCountryCrossLinks={false}
+  casesHeading={pc.casesHeading}
+  breadcrumbs={[{ label: pc.breadcrumbLabel }]}
+>
+  <p class="text-xs tracking-widest uppercase mb-4 font-medium text-muted">{pc.chooseCountryLabel}</p>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+    {countries.map(c => <CountryPill country={c} locale={locale} />)}
+  </div>
+
+  <Fragment slot="extra">
+    <Faq items={getFaq(locale)['vehicle-sourcing']} />
+  </Fragment>
+</ServicePageLayout>

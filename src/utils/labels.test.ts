@@ -7,10 +7,10 @@ describe('getNavItems', () => {
     expect(result.map(i => i.label)).toEqual(['Автоподбор', 'Привоз авто', 'Автосервис', 'Выкуп', 'Проверка']);
   });
 
-  it('builds per-locale, per-country hrefs for country-scoped items and fixed hrefs for Привоз/Автосервис', () => {
+  it('builds per-locale, per-country hrefs for Выкуп/Проверка, fixed hub hrefs for Автоподбор/Привоз/Автосервис', () => {
     const result = getNavItems('ru', 'rs');
     expect(result).toEqual([
-      { href: '/ru/vehicle-sourcing/rs/', label: 'Автоподбор', slug: 'vehicle-sourcing' },
+      { href: '/ru/vehicle-sourcing/', label: 'Автоподбор', slug: 'vehicle-sourcing' },
       { href: '/ru/vehicle-import/', label: 'Привоз авто', slug: 'vehicle-import' },
       { href: '/ru/auto-service-belgrade/', label: 'Автосервис', slug: 'auto-service-belgrade' },
       { href: '/ru/vehicle-buyback/rs/', label: 'Выкуп', slug: 'vehicle-buyback' },
@@ -24,7 +24,7 @@ describe('getNavItems', () => {
 });
 
 describe('isNavItemActive', () => {
-  const sourcing = { href: '/ru/vehicle-sourcing/de/', slug: 'vehicle-sourcing' };
+  const sourcing = { href: '/ru/vehicle-sourcing/', slug: 'vehicle-sourcing' };
   const autoservice = { href: '/ru/auto-service-belgrade/', slug: 'auto-service-belgrade' };
 
   it('matches a country-scoped item on its exact path', () => {
@@ -33,6 +33,10 @@ describe('isNavItemActive', () => {
 
   it('matches a country-scoped item nested under a city segment', () => {
     expect(isNavItemActive(sourcing, 'ru', 'de', '/ru/vehicle-sourcing/de/berlin/')).toBe(true);
+  });
+
+  it('matches the bare hub page regardless of navCountry', () => {
+    expect(isNavItemActive(sourcing, 'ru', 'de', '/ru/vehicle-sourcing/')).toBe(true);
   });
 
   it('does not false-match an unrelated route sharing the same slug', () => {

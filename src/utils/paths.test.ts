@@ -4,6 +4,7 @@ import { withLocales, PathBuilder } from './paths';
 describe('PathBuilder', () => {
   it('builds every fixed route for a given locale', () => {
     expect(PathBuilder.home('ru')).toBe('/ru/');
+    expect(PathBuilder.vehicleSourcingHub('en')).toBe('/en/vehicle-sourcing/');
     expect(PathBuilder.vehicleImportHub('en')).toBe('/en/vehicle-import/');
     expect(PathBuilder.autoServiceBelgrade('sr')).toBe('/sr/auto-service-belgrade/');
     expect(PathBuilder.casesVehicleSourcing('ru')).toBe('/ru/cases/vehicle-sourcing/');
