@@ -28,11 +28,13 @@ export const SLUG = {
   INSPECTION: 'vehicle-inspection',
 } as const satisfies Record<string, ServiceSlug>;
 
-// The 2 kinds shown on the /cases/ tab switcher. Shared by CaseCategoryTabs'
+// The 5 kinds shown on the /cases/ tab switcher — one per service, 'auto-service'
+// instead of 'auto-service-belgrade' since it's a separate content collection
+// (autoserviceCases), not a service enum value. Shared by CaseCategoryTabs'
 // `active` prop, CasesTabPage's prop it's threaded through from, and
 // getPromoBanners()'s `kind` param — one definition instead of the same
 // literal union retyped in 3 files.
-export type CasesTabKind = 'vehicle-sourcing' | 'auto-service';
+export type CasesTabKind = 'vehicle-sourcing' | 'vehicle-buyback' | 'vehicle-inspection' | 'vehicle-import' | 'auto-service';
 
 // `slug` is both the URL path segment AND the internal identifier
 // (dictionary/content keys, formService, SERVICE_LABELS) — fully unified

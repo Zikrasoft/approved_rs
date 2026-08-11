@@ -2,7 +2,7 @@ import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { SERVICES } from '@/utils/labels';
 import { getI18n } from '@/i18n/getI18n';
 import { getActiveCountries, getCitiesForCountry } from '@/utils/geo';
-import { getPublishedCases, getPublishedAutoserviceCases } from '@/utils/casesQueries';
+import { getPublishedCasesByService, getPublishedAutoserviceCases } from '@/utils/casesQueries';
 import { getServicesContent } from '@/i18n/content/services';
 import { getHomeContent } from '@/i18n/content/home';
 import { buildLocation } from '@/utils/seo';
@@ -34,7 +34,7 @@ const CASE_COUNT_LABELS: Record<Locale, { 'vehicle-sourcing': (n: number) => str
 
 export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const countries = getActiveCountries();
-  const cases = await getPublishedCases();
+  const cases = await getPublishedCasesByService('vehicle-sourcing');
   const autoserviceCases = await getPublishedAutoserviceCases();
   const t = getI18n(locale);
   const nav = t.nav;

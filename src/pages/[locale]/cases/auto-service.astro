@@ -2,7 +2,7 @@
 import CasesTabPage from '@/components/CasesTabPage.astro';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { toAutoserviceCaseItem } from '@/utils/cases';
-import { getPublishedCases, getPublishedAutoserviceCases } from '@/utils/casesQueries';
+import { getPublishedAutoserviceCases, getCasesTabCounts } from '@/utils/casesQueries';
 import { getPagesContent } from '@/i18n/content/pages';
 import { withLocales, PathBuilder } from '@/utils/paths';
 
@@ -17,7 +17,7 @@ const meta = {
 };
 
 const items = (await getPublishedAutoserviceCases()).map((c) => toAutoserviceCaseItem(c, locale));
-const otherCount = (await getPublishedCases()).length;
+const counts = await getCasesTabCounts();
 ---
 
-<CasesTabPage active="auto-service" {items} {otherCount} {meta} />
+<CasesTabPage active="auto-service" {items} {counts} {meta} />

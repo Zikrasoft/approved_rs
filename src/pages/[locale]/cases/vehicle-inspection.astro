@@ -9,15 +9,15 @@ import { withLocales, PathBuilder } from '@/utils/paths';
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const { locale } = Astro.params;
-const p = getPagesContent(locale).casesVehicleSourcing;
+const p = getPagesContent(locale).casesVehicleInspection;
 const meta = {
   title: `${p.metaTitle} | ${SITE_NAME}`,
   description: p.metaDescription,
-  canonical: `${SITE_URL}${PathBuilder.casesVehicleSourcing(locale)}`,
+  canonical: `${SITE_URL}${PathBuilder.casesVehicleInspection(locale)}`,
 };
 
-const items = (await getPublishedCasesByService('vehicle-sourcing')).map((c) => toCaseItem(c, locale));
+const items = (await getPublishedCasesByService('vehicle-inspection')).map((c) => toCaseItem(c, locale));
 const counts = await getCasesTabCounts();
 ---
 
-<CasesTabPage active="vehicle-sourcing" {items} {counts} {meta} />
+<CasesTabPage active="vehicle-inspection" {items} {counts} {meta} />

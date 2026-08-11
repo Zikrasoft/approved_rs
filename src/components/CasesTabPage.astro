@@ -12,13 +12,11 @@ import type { CasesTabKind } from '@/utils/labels';
 interface Props {
   active: CasesTabKind;
   items: CaseCardProps[];
-  otherCount: number;
+  counts: Record<CasesTabKind, number>;
   meta: { title: string; description: string; canonical: string };
 }
 
-const { active, items, otherCount, meta } = Astro.props;
-const sourcingCount = active === 'vehicle-sourcing' ? items.length : otherCount;
-const autoserviceCount = active === 'auto-service' ? items.length : otherCount;
+const { active, items, counts, meta } = Astro.props;
 const locale = getLocale(Astro.currentLocale);
 const cs = getPagesContent(locale).casesShared;
 const t = getI18n(locale);
@@ -28,7 +26,7 @@ const t = getI18n(locale);
   <PageHero decoWord="CASES" title={t.nav.cases} subtitle={cs.heroSubtitle} breadcrumbs={[{ label: t.nav.cases }]} />
 
   <section class="max-w-6xl mx-auto px-6 py-16">
-    <CaseCategoryTabs {active} {sourcingCount} {autoserviceCount} />
+    <CaseCategoryTabs {active} {counts} />
 
     {items.length > 0
       ? <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">

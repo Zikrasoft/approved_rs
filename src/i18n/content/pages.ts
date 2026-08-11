@@ -32,6 +32,9 @@ interface PagesContent {
     waitSourcingLink: string;
   };
   casesVehicleSourcing: { metaTitle: string; metaDescription: string };
+  casesVehicleBuyback: { metaTitle: string; metaDescription: string };
+  casesVehicleInspection: { metaTitle: string; metaDescription: string };
+  casesVehicleImport: { metaTitle: string; metaDescription: string };
   casesAutoService: { metaTitle: string; metaDescription: string };
   casesShared: { heroSubtitle: string; emptyState: string };
 }
@@ -84,6 +87,18 @@ const ru: PagesContent = {
   casesVehicleSourcing: {
     metaTitle: 'Кейсы автоподбора — реальные автомобили клиентов',
     metaDescription: 'Реальные кейсы автоподбора, доставки, выкупа и проверки автомобилей из Германии, Испании, Сербии и Швейцарии. Машина, цена, история сделки.',
+  },
+  casesVehicleBuyback: {
+    metaTitle: 'Кейсы выкупа авто — реальные сделки',
+    metaDescription: 'Реальные кейсы выкупа автомобилей: машина, цена и история сделки.',
+  },
+  casesVehicleInspection: {
+    metaTitle: 'Кейсы проверки авто — реальные отчёты',
+    metaDescription: 'Реальные кейсы проверки автомобилей перед покупкой: машина, цена и результат осмотра.',
+  },
+  casesVehicleImport: {
+    metaTitle: 'Кейсы привоза авто — реальные автомобили клиентов',
+    metaDescription: 'Реальные кейсы привоза автомобилей из Европы и Китая: машина, цена и история сделки.',
   },
   casesAutoService: {
     metaTitle: 'Кейсы автосервиса в Белграде — примеры работ',
@@ -144,6 +159,18 @@ const en: PagesContent = {
     metaTitle: 'Car Sourcing Case Studies — Real Client Cars',
     metaDescription: 'Real case studies of car sourcing, delivery, buyback, and inspection from Germany, Spain, Serbia, and Switzerland. The car, the price, the story behind the deal.',
   },
+  casesVehicleBuyback: {
+    metaTitle: 'Car Buyback Case Studies — Real Deals',
+    metaDescription: 'Real car buyback case studies: the car, the price, and the story behind the deal.',
+  },
+  casesVehicleInspection: {
+    metaTitle: 'Car Inspection Case Studies — Real Reports',
+    metaDescription: 'Real pre-purchase car inspection case studies: the car, the price, and the inspection result.',
+  },
+  casesVehicleImport: {
+    metaTitle: 'Car Import Case Studies — Real Client Cars',
+    metaDescription: 'Real case studies of cars imported from Europe and China: the car, the price, and the story behind the deal.',
+  },
   casesAutoService: {
     metaTitle: 'Auto Service Case Studies in Belgrade — Our Work',
     metaDescription: 'Real examples of car repair and maintenance at our Belgrade service center: diagnostics, scheduled maintenance, suspension, engine, and transmission repair.',
@@ -202,6 +229,18 @@ const sr: PagesContent = {
   casesVehicleSourcing: {
     metaTitle: 'Primeri odabira vozila — stvarni automobili klijenata',
     metaDescription: 'Stvarni primeri odabira, dostave, otkupa i provere vozila iz Nemačke, Španije, Srbije i Švajcarske. Vozilo, cena, tok posla.',
+  },
+  casesVehicleBuyback: {
+    metaTitle: 'Primeri otkupa vozila — stvarne transakcije',
+    metaDescription: 'Stvarni primeri otkupa vozila: vozilo, cena i tok posla.',
+  },
+  casesVehicleInspection: {
+    metaTitle: 'Primeri provere vozila — stvarni izveštaji',
+    metaDescription: 'Stvarni primeri provere vozila pre kupovine: vozilo, cena i rezultat pregleda.',
+  },
+  casesVehicleImport: {
+    metaTitle: 'Primeri uvoza vozila — stvarni automobili klijenata',
+    metaDescription: 'Stvarni primeri uvoza vozila iz Evrope i Kine: vozilo, cena i tok posla.',
   },
   casesAutoService: {
     metaTitle: 'Primeri radova auto servisa u Beogradu',

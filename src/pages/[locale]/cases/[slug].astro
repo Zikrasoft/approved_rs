@@ -8,12 +8,15 @@ import CaseGallery from '@/components/CaseGallery.astro';
 import PromoBanner from '@/components/PromoBanner.astro';
 import ChannelBanner from '@/components/ChannelBanner.astro';
 import { getCollection, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { getPromoBanners } from '@/i18n/content/promoBanners';
 import { excerptFromMarkdown, generateArticleSchema } from '@/utils/seo';
 import { withLocales, PathBuilder } from '@/utils/paths';
 import { getServicesContent } from '@/i18n/content/services';
 import { getI18n } from '@/i18n/getI18n';
+import { getCountry } from '@/utils/geo';
+import { CHINA_NAME, CHINA_COUNTRY_CODE } from '@/utils/constants';
 import { marked } from 'marked';
 
 export async function getStaticPaths() {
@@ -38,6 +41,22 @@ const title = translation?.title ?? c.data.title;
 const { Content } = await render(c);
 const translatedHtml = translation ? await marked.parse(translation.body) : null;
 const banners = getPromoBanners(locale, 'vehicle-sourcing');
+
+const CASES_TAB_PATH: Record<CollectionEntry<'cases'>['data']['service'], string> = {
+  'vehicle-sourcing': PathBuilder.casesVehicleSourcing(locale),
+  'vehicle-buyback': PathBuilder.casesVehicleBuyback(locale),
+  'vehicle-inspection': PathBuilder.casesVehicleInspection(locale),
+  'vehicle-import': PathBuilder.casesVehicleImport(locale),
+};
+
+// China isn't in countries.json (it's a vehicle-import-only source, not a
+// full active market with its own [country] page) — same special case the
+// vehicle-import china spoke already handles via CHINA_COUNTRY_CODE.
+const countryName = c.data.country
+  ? c.data.country === CHINA_COUNTRY_CODE
+    ? CHINA_NAME[locale]
+    : (getCountry(c.data.country)?.[locale].name ?? c.data.country.toUpperCase())
+  : undefined;
 
 const hook = excerptFromMarkdown(translation?.body ?? c.body ?? '');
 const canonical = `${SITE_URL}${PathBuilder.case(locale, c.id)}`;
@@ -68,7 +87,7 @@ const schema = generateArticleSchema({
     <span class="deco-word" style="font-size: clamp(7rem, 18vw, 16rem); bottom: -1rem; right: -1%; opacity: 0.8;">CASE</span>
 
     <div class="relative max-w-6xl mx-auto px-6 py-16 md:py-24">
-      <Breadcrumbs items={[{ label: t.nav.cases, href: PathBuilder.casesVehicleSourcing(locale) }, { label: title }]} />
+      <Breadcrumbs items={[{ label: t.nav.cases, href: CASES_TAB_PATH[c.data.service] }, { label: title }]} />
 
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
         <div class="lg:col-span-3">
@@ -76,7 +95,7 @@ const schema = generateArticleSchema({
             <span class="text-xs tracking-widest uppercase font-medium px-3 py-1 rounded-sm border text-accent border-accent">
               {cc.serviceBadges[c.data.service as keyof typeof cc.serviceBadges] ?? c.data.service}
             </span>
-            <span class="text-xs text-muted">{c.data.country?.toUpperCase()}</span>
+            {countryName && <span class="text-xs text-muted">{countryName}</span>}
           </div>
 
           <span class="eyebrow fade-up fade-up-1">{SITE_NAME}</span>
