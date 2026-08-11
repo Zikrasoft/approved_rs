@@ -10,7 +10,7 @@ describe('getFaq', () => {
       expect(faq['vehicle-import'].length).toBe(2);
       expect(faq['vehicle-buyback'].length).toBe(4);
       expect(faq['vehicle-inspection'].length).toBe(3);
-      expect(faq.autoservice.length).toBe(2);
+      expect(faq.autoServiceBelgrade.length).toBe(2);
       expect(faq.general.length).toBe(2);
       expect(faq.cityExpert.q).toBeTruthy();
     }

@@ -199,7 +199,7 @@ const ru: ServicesContent = {
   'vehicle-sourcing': {
     hub: {
       metaTitle: 'Автоподбор под ключ — выберите страну',
-      metaDescription: 'Подбираем автомобиль в Германии, Сербии, Испании и Португалии — полная проверка, сопровождение сделки и доставка под ключ. Выберите страну поиска.',
+      metaDescription: 'Подбираем автомобиль в Германии, Сербии, Испании, Швейцарии и Португалии — полная проверка, сопровождение сделки и доставка под ключ. Выберите страну поиска.',
       title: 'Автоподбор',
       titleHighlight: 'под ключ',
       description: 'Подбираем автомобиль в стране, где вы находитесь или планируете покупку, — полная проверка, сопровождение сделки и доставка под ключ. Выберите страну, чтобы увидеть детали.',
@@ -433,7 +433,7 @@ const en: ServicesContent = {
   'vehicle-sourcing': {
     hub: {
       metaTitle: 'Full-Service Car Sourcing — Choose a Country',
-      metaDescription: 'We source cars in Germany, Serbia, Spain, and Portugal — full inspection, deal support, and delivery, fully turnkey. Choose a country to see details.',
+      metaDescription: 'We source cars in Germany, Serbia, Spain, Switzerland, and Portugal — full inspection, deal support, and delivery, fully turnkey. Choose a country to see details.',
       title: 'Car Sourcing',
       titleHighlight: 'Fully Turnkey',
       description: "We source cars in the country you're in or looking to buy from — full inspection, deal support, and delivery, fully turnkey. Choose a country to see details.",
@@ -667,7 +667,7 @@ const sr: ServicesContent = {
   'vehicle-sourcing': {
     hub: {
       metaTitle: 'Kompletan odabir vozila na ključ — izaberite zemlju',
-      metaDescription: 'Biramo vozilo u Nemačkoj, Srbiji, Španiji i Portugalu — potpuna provera, podrška tokom kupovine i dovoz na ključ. Izaberite zemlju da vidite detalje.',
+      metaDescription: 'Biramo vozilo u Nemačkoj, Srbiji, Španiji, Švajcarskoj i Portugalu — potpuna provera, podrška tokom kupovine i dovoz na ključ. Izaberite zemlju da vidite detalje.',
       title: 'Odabir vozila',
       titleHighlight: 'na ključ',
       description: 'Biramo vozilo u zemlji u kojoj se nalazite ili planirate kupovinu — potpuna provera, podrška tokom kupovine i dovoz na ključ. Izaberite zemlju da vidite detalje.',

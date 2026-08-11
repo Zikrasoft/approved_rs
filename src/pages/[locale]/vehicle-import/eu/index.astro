@@ -4,7 +4,7 @@ import ChipLinks from '@/components/ChipLinks.astro';
 import { getServicesContent } from '@/i18n/content/services';
 import { withLocales, PathBuilder } from '@/utils/paths';
 import { getCountry } from '@/utils/geo';
-import { PRIVOZ_EU_SOURCE_CODES } from '@/utils/constants';
+import { VEHICLE_IMPORT_EU_SOURCE_CODES } from '@/utils/constants';
 import { getCollection } from 'astro:content';
 import type { Locale } from '@/i18n/config';
 
@@ -14,15 +14,15 @@ const { locale } = Astro.params as { locale: Locale };
 const sc = getServicesContent(locale);
 const pc = sc['vehicle-import'].eu;
 const cases = (await getCollection('cases'))
-  .filter(c => c.data.published && c.data.service === 'vehicle-import' && (PRIVOZ_EU_SOURCE_CODES as readonly string[]).includes(c.data.country))
+  .filter(c => c.data.published && c.data.service === 'vehicle-import' && (VEHICLE_IMPORT_EU_SOURCE_CODES as readonly string[]).includes(c.data.country))
   .slice(0, 3);
 
-// Explicit whitelist (PRIVOZ_EU_SOURCE_CODES), not "every active country
+// Explicit whitelist (VEHICLE_IMPORT_EU_SOURCE_CODES), not "every active country
 // except rs/de" — each of these (like de) is its own dedicated spoke now
 // (distinct search intent per country, confirmed by SEO research), and
 // deriving this list by exclusion would silently pull in any future
 // destination-only country (e.g. Portugal) as a claimed EU sourcing market.
-const sourceCountries = PRIVOZ_EU_SOURCE_CODES.map(code => getCountry(code)!);
+const sourceCountries = VEHICLE_IMPORT_EU_SOURCE_CODES.map(code => getCountry(code)!);
 const areaServed = sourceCountries.map(c => c[locale].name);
 ---
 
@@ -47,7 +47,7 @@ const areaServed = sourceCountries.map(c => c[locale].name);
     label={pc.sourceCountriesLabel}
     items={[
       { href: PathBuilder.vehicleImportSpoke(locale, 'de'), text: getCountry('de')![locale].name },
-      ...PRIVOZ_EU_SOURCE_CODES.map(code => ({ href: PathBuilder.vehicleImportSpoke(locale, code), text: getCountry(code)![locale].name })),
+      ...VEHICLE_IMPORT_EU_SOURCE_CODES.map(code => ({ href: PathBuilder.vehicleImportSpoke(locale, code), text: getCountry(code)![locale].name })),
       { text: pc.sourceMoreLabel },
     ]}
   />

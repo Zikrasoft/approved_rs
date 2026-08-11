@@ -30,7 +30,7 @@ const common = getI18n(locale).common;
               : 'border-default bg-surface text-secondary',
           ]}
         >
-          <span class="leading-none">{getCountryFlag(c.code)}</span>{c[locale].name}
+          <span class="leading-none" set:html={getCountryFlag(c.code)} />{c[locale].name}
         </a>
       ))}
       <button

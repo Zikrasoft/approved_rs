@@ -81,6 +81,7 @@ export default config({
             { label: 'Сербия', value: 'rs' },
             { label: 'Испания', value: 'es' },
             { label: 'Швейцария', value: 'ch' },
+            { label: 'Португалия', value: 'pt' },
             // Not a real sourcing/delivery country in countries.json — used
             // only to tag vehicle-import cases sourced from China so the
             // /vehicle-import/china/ page can filter for them.

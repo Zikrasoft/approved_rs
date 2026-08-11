@@ -10,7 +10,7 @@ interface FaqContent {
   'vehicle-import': FaqItem[];
   'vehicle-buyback': FaqItem[];
   'vehicle-inspection': FaqItem[];
-  autoservice: FaqItem[];
+  autoServiceBelgrade: FaqItem[];
   general: FaqItem[];
   cityExpert: FaqItem;
 }
@@ -39,7 +39,7 @@ const ru: FaqContent = {
     { q: 'Можно заказать проверку, если вас физически нет в этой стране?', a: 'Да, ваше присутствие не обязательно — отчёт и решение получаете удалённо.' },
     { q: 'В каком виде отчёт?', a: 'Фото и подробное текстовое описание по итогам осмотра.' },
   ],
-  autoservice: [
+  autoServiceBelgrade: [
     { q: 'Работаете без предварительной записи?', a: 'На первую встречу можно просто позвонить и договориться о времени — предварительная запись не обязательна.' },
     { q: 'Даёте гарантию на ремонт?', a: 'Отдельной гарантии на выполненный ремонт нет — но диагностику проводим перед началом работ, и вы всегда знаете, за что платите.' },
   ],
@@ -74,7 +74,7 @@ const en: FaqContent = {
     { q: "Can I order an inspection if I'm not physically in the country?", a: "Yes, you don't need to be there — you get the report and make the decision remotely." },
     { q: 'What form does the report take?', a: 'Photos plus a detailed written summary of the inspection.' },
   ],
-  autoservice: [
+  autoServiceBelgrade: [
     { q: 'Can I come without an appointment?', a: "For your first visit, just call and agree on a time — booking ahead isn't required." },
     { q: 'Do you guarantee the repair work?', a: "There's no separate warranty on completed repairs — but we run diagnostics before starting any work, so you always know what you're paying for." },
   ],
@@ -109,7 +109,7 @@ const sr: FaqContent = {
     { q: 'Da li mogu da naručim proveru ako fizički nisam u toj zemlji?', a: 'Da, vaše prisustvo nije neophodno — izveštaj i odluku dobijate na daljinu.' },
     { q: 'U kom obliku dobijam izveštaj?', a: 'Fotografije i detaljan tekstualni opis nakon pregleda.' },
   ],
-  autoservice: [
+  autoServiceBelgrade: [
     { q: 'Da li radite bez prethodnog zakazivanja?', a: 'Za prvi dolazak dovoljno je da pozovete i dogovorite termin — zakazivanje unapred nije obavezno.' },
     { q: 'Da li dajete garanciju na izvršenu popravku?', a: 'Posebne garancije na obavljenu popravku nema — ali dijagnostiku radimo pre početka radova, tako da uvek znate za šta plaćate.' },
   ],
