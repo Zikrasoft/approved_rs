@@ -50,6 +50,11 @@ describe('moveGermanySpoke', () => {
     expect(moveGermanySpoke('/en/vehicle-import/eu/')).toBeNull();
   });
 
+  it('matches even without a trailing slash (trailingSlash is "ignore")', () => {
+    expect(moveGermanySpoke('/vehicle-import/de')).toBe('/vehicle-import/eu/de/');
+    expect(moveGermanySpoke('/en/vehicle-import/de')).toBe('/en/vehicle-import/eu/de/');
+  });
+
   it('chains after a slug rename, so very old /privoz/de/ links reach the new path in one hop', () => {
     const renamed = renameSlugSegments('/privoz/de/');
     expect(renamed).toBe('/vehicle-import/de/');

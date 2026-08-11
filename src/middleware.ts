@@ -57,8 +57,12 @@ const OLD_DE_SPOKE_PATH = '/vehicle-import/de/';
 const NEW_DE_SPOKE_PATH = '/vehicle-import/eu/de/';
 
 export function moveGermanySpoke(pathname: string): string | null {
-  return pathname.endsWith(OLD_DE_SPOKE_PATH)
-    ? pathname.slice(0, -OLD_DE_SPOKE_PATH.length) + NEW_DE_SPOKE_PATH
+  // Normalize a missing trailing slash before matching — trailingSlash is
+  // "ignore" (astro.config.mjs), so `/en/vehicle-import/de` (no slash) is a
+  // real, reachable URL too, not just `/en/vehicle-import/de/`.
+  const normalized = pathname.endsWith('/') ? pathname : `${pathname}/`;
+  return normalized.endsWith(OLD_DE_SPOKE_PATH)
+    ? normalized.slice(0, -OLD_DE_SPOKE_PATH.length) + NEW_DE_SPOKE_PATH
     : null;
 }
 
