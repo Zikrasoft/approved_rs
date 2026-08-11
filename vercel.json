@@ -5,5 +5,59 @@
   "installCommand": "pnpm install",
   "env": {
     "SITE": "https://approved.rs"
-  }
+  },
+  "redirects": [
+    { "source": "/:locale(ru|en|sr)/privoz/de/:path*", "destination": "/:locale/vehicle-import/eu/de/:path*", "permanent": true },
+    { "source": "/privoz/de/:path*", "destination": "/ru/vehicle-import/eu/de/:path*", "permanent": true },
+    { "source": "/:locale(ru|en|sr)/vehicle-import/de/:path*", "destination": "/:locale/vehicle-import/eu/de/:path*", "permanent": true },
+    { "source": "/vehicle-import/de/:path*", "destination": "/ru/vehicle-import/eu/de/:path*", "permanent": true },
+
+    { "source": "/:locale(ru|en|sr)/cases/autopodbor", "destination": "/:locale/cases/vehicle-sourcing", "permanent": true },
+    { "source": "/cases/autopodbor", "destination": "/ru/cases/vehicle-sourcing", "permanent": true },
+    { "source": "/:locale(ru|en|sr)/cases/autoservice", "destination": "/:locale/cases/auto-service", "permanent": true },
+    { "source": "/cases/autoservice", "destination": "/ru/cases/auto-service", "permanent": true },
+
+    { "source": "/:locale(ru|en|sr)/autopodbor/:path*", "destination": "/:locale/vehicle-sourcing/:path*", "permanent": true },
+    { "source": "/autopodbor/:path*", "destination": "/ru/vehicle-sourcing/:path*", "permanent": true },
+    { "source": "/:locale(ru|en|sr)/privoz/:path*", "destination": "/:locale/vehicle-import/:path*", "permanent": true },
+    { "source": "/privoz/:path*", "destination": "/ru/vehicle-import/:path*", "permanent": true },
+    { "source": "/:locale(ru|en|sr)/vykup/:path*", "destination": "/:locale/vehicle-buyback/:path*", "permanent": true },
+    { "source": "/vykup/:path*", "destination": "/ru/vehicle-buyback/:path*", "permanent": true },
+    { "source": "/:locale(ru|en|sr)/proverka/:path*", "destination": "/:locale/vehicle-inspection/:path*", "permanent": true },
+    { "source": "/proverka/:path*", "destination": "/ru/vehicle-inspection/:path*", "permanent": true },
+    { "source": "/:locale(ru|en|sr)/avtoservis-belgrade/:path*", "destination": "/:locale/auto-service-belgrade/:path*", "permanent": true },
+    { "source": "/avtoservis-belgrade/:path*", "destination": "/ru/auto-service-belgrade/:path*", "permanent": true },
+
+    { "source": "/cases/", "destination": "/ru/cases/vehicle-sourcing", "permanent": true },
+    { "source": "/de/combined", "destination": "/ru/vehicle-sourcing/de", "permanent": true },
+    { "source": "/de/combined/", "destination": "/ru/vehicle-sourcing/de", "permanent": true },
+    { "source": "/rs/combined", "destination": "/ru/vehicle-sourcing/rs", "permanent": true },
+    { "source": "/rs/combined/", "destination": "/ru/vehicle-sourcing/rs", "permanent": true },
+    { "source": "/es/combined", "destination": "/ru/vehicle-sourcing/es", "permanent": true },
+    { "source": "/es/combined/", "destination": "/ru/vehicle-sourcing/es", "permanent": true },
+    { "source": "/rs/dostavka", "destination": "/ru/vehicle-sourcing/rs", "permanent": true },
+    { "source": "/rs/dostavka/", "destination": "/ru/vehicle-sourcing/rs", "permanent": true },
+    { "source": "/es/dostavka", "destination": "/ru/vehicle-sourcing/es", "permanent": true },
+    { "source": "/es/dostavka/", "destination": "/ru/vehicle-sourcing/es", "permanent": true },
+    { "source": "/cases/mercedes-c-2021-de", "destination": "/ru/cases/vehicle-sourcing", "permanent": true },
+    { "source": "/cases/mercedes-c-2021-de/", "destination": "/ru/cases/vehicle-sourcing", "permanent": true },
+    { "source": "/cases/ford-focus-2020-rs", "destination": "/ru/cases/vehicle-sourcing", "permanent": true },
+    { "source": "/cases/ford-focus-2020-rs/", "destination": "/ru/cases/vehicle-sourcing", "permanent": true },
+    { "source": "/cases/vw-golf-2022-rs", "destination": "/ru/cases/vehicle-sourcing", "permanent": true },
+    { "source": "/cases/vw-golf-2022-rs/", "destination": "/ru/cases/vehicle-sourcing", "permanent": true },
+    { "source": "/cases/bmw-x5-2023-de", "destination": "/ru/cases/vehicle-sourcing", "permanent": true },
+    { "source": "/cases/bmw-x5-2023-de/", "destination": "/ru/cases/vehicle-sourcing", "permanent": true },
+    { "source": "/cases/audi-a4-2022-de", "destination": "/ru/cases/vehicle-sourcing", "permanent": true },
+    { "source": "/cases/audi-a4-2022-de/", "destination": "/ru/cases/vehicle-sourcing", "permanent": true },
+
+    { "source": "/vehicle-sourcing/:path*", "destination": "/ru/vehicle-sourcing/:path*", "permanent": true },
+    { "source": "/vehicle-import/:path*", "destination": "/ru/vehicle-import/:path*", "permanent": true },
+    { "source": "/vehicle-buyback/:path*", "destination": "/ru/vehicle-buyback/:path*", "permanent": true },
+    { "source": "/vehicle-inspection/:path*", "destination": "/ru/vehicle-inspection/:path*", "permanent": true },
+    { "source": "/auto-service-belgrade/:path*", "destination": "/ru/auto-service-belgrade/:path*", "permanent": true },
+    { "source": "/cases/:path*", "destination": "/ru/cases/:path*", "permanent": true },
+    { "source": "/contacts/:path*", "destination": "/ru/contacts/:path*", "permanent": true },
+    { "source": "/privacy/:path*", "destination": "/ru/privacy/:path*", "permanent": true },
+    { "source": "/thanks/:path*", "destination": "/ru/thanks/:path*", "permanent": true }
+  ]
 }

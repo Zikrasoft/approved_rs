@@ -1,10 +1,14 @@
 ---
 import FormField from './FormField.astro';
 import Button from './Button.astro';
-import { Send, Phone, ChevronDown } from '@lucide/astro';
-import { FLAGS } from '@/utils/constants';
+import TelegramIcon from './icons/TelegramIcon.astro';
+import WhatsAppIcon from './icons/WhatsAppIcon.astro';
+import ViberIcon from './icons/ViberIcon.astro';
+import { Phone, ChevronDown } from '@lucide/astro';
+import { FLAGS, BRAND_COLORS } from '@/utils/constants';
 import { getLeadFormContent } from '@/i18n/content/leadForm';
 import { getLocale } from '@/i18n/config';
+import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   service?: string;
@@ -28,6 +32,7 @@ const PHONE_COUNTRIES = [
   { iso: 'RS', dial: '381', label: 'Сербия' },
   { iso: 'DE', dial: '49',  label: 'Германия' },
   { iso: 'ES', dial: '34',  label: 'Испания' },
+  { iso: 'PT', dial: '351', label: 'Португалия' },
   { iso: 'RU', dial: '7',   label: 'Россия' },
   { iso: 'UA', dial: '380', label: 'Украина' },
   { iso: 'BY', dial: '375', label: 'Беларусь' },
@@ -71,13 +76,19 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
         {lf.contactLabel}<span class="text-accent ml-0.5">*</span>
       </label>
 
-      <div class="contact-tabs relative inline-flex gap-1 p-1 mb-2 rounded-sm bg-page border border-border-strong" role="tablist">
+      <div class="contact-tabs relative flex gap-1 p-1 mb-2 rounded-sm bg-page border border-border-strong" role="tablist">
         <span class="pill-tab-track" aria-hidden="true"></span>
-        <button type="button" data-tab="telegram" class="pill-tab relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium cursor-pointer text-on-accent" role="tab" aria-selected="true" aria-controls="contact-panel-telegram">
-          <Send size={13} /> {lf.telegramTab}
+        <button type="button" data-tab="telegram" data-panel="telegram" title={lf.telegramTab} aria-label={lf.telegramTab} class="pill-tab relative z-10 flex items-center justify-center flex-1 py-2 rounded-sm cursor-pointer" role="tab" aria-selected="true" aria-controls="contact-panel-telegram">
+          <TelegramIcon size={16} color={BRAND_COLORS.telegram} />
         </button>
-        <button type="button" data-tab="phone" class="pill-tab relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium cursor-pointer text-muted" role="tab" aria-selected="false" aria-controls="contact-panel-phone">
-          <Phone size={13} /> {lf.phoneTab}
+        <button type="button" data-tab="whatsapp" data-panel="phone" title={lf.whatsappTab} aria-label={lf.whatsappTab} class="pill-tab relative z-10 flex items-center justify-center flex-1 py-2 rounded-sm cursor-pointer" role="tab" aria-selected="false" aria-controls="contact-panel-phone">
+          <WhatsAppIcon size={16} color={BRAND_COLORS.whatsapp} />
+        </button>
+        <button type="button" data-tab="viber" data-panel="phone" title={lf.viberTab} aria-label={lf.viberTab} class="pill-tab relative z-10 flex items-center justify-center flex-1 py-2 rounded-sm cursor-pointer" role="tab" aria-selected="false" aria-controls="contact-panel-phone">
+          <ViberIcon size={16} color={BRAND_COLORS.viber} />
+        </button>
+        <button type="button" data-tab="phone" data-panel="phone" title={lf.phoneTab} aria-label={lf.phoneTab} class="pill-tab relative z-10 flex items-center justify-center flex-1 py-2 rounded-sm cursor-pointer text-muted" role="tab" aria-selected="false" aria-controls="contact-panel-phone">
+          <Phone size={15} />
         </button>
       </div>
 
@@ -115,6 +126,7 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
       </div>
 
       <input type="hidden" name="contact" />
+      <input type="hidden" name="contact_channel" value="telegram" />
     </div>
 
     <FormField name="comment" label={lf.commentLabel} placeholder={lf.commentPlaceholder} type="textarea" />
@@ -126,7 +138,7 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
         class="mt-0.5 shrink-0 w-4 h-4 cursor-pointer accent-accent"
       />
       <span class="text-xs leading-relaxed">
-        {lf.consentBefore}<a href={`/${locale}/privacy/`} target="_blank" class="underline text-accent">{lf.consentLinkText}</a>
+        {lf.consentBefore}<a href={PathBuilder.privacy(locale)} target="_blank" class="underline text-accent">{lf.consentLinkText}</a>
       </span>
     </label>
     <p class="field-error consent-error mb-4" style="display:none">{lf.consentError}</p>
@@ -183,6 +195,7 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
     const panels = contactField.querySelectorAll<HTMLElement>('.contact-panel');
     const pill = contactField.querySelector<HTMLElement>('.pill-tab-track')!;
     const hiddenContact = form.querySelector<HTMLInputElement>('input[type="hidden"][name="contact"]')!;
+    const hiddenChannel = form.querySelector<HTMLInputElement>('input[type="hidden"][name="contact_channel"]')!;
     const tgInput = contactField.querySelector<HTMLInputElement>('#contact-telegram')!;
     const phoneCountry = contactField.querySelector<HTMLSelectElement>('#contact-phone-country')!;
     const phoneNumber = contactField.querySelector<HTMLInputElement>('#contact-phone-number')!;
@@ -200,12 +213,21 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
       return Array.from(phoneCountry.options).some(o => o.value === iso);
     }
 
-    let activeTab: 'telegram' | 'phone' = 'telegram';
+    // WhatsApp/Viber/phone-call all collect the same shape of data (a phone
+    // number) — they share the "phone" panel and its validation, and only
+    // differ in which channel gets recorded for staff to reach back out on.
+    const PANEL_FOR: Record<string, 'telegram' | 'phone'> = {
+      telegram: 'telegram', whatsapp: 'phone', viber: 'phone', phone: 'phone',
+    };
+    let activeTab: 'telegram' | 'whatsapp' | 'viber' | 'phone' = 'telegram';
     let activeTabButton: HTMLButtonElement = tabs[0];
 
+    // translate on both axes: on narrow screens the 4 tabs wrap to 2 rows,
+    // so the sliding pill needs offsetTop too, not just offsetLeft.
     function movePill(tab: HTMLElement) {
       pill.style.width = tab.offsetWidth + 'px';
-      pill.style.transform = `translateX(${tab.offsetLeft}px)`;
+      pill.style.height = tab.offsetHeight + 'px';
+      pill.style.transform = `translate(${tab.offsetLeft}px, ${tab.offsetTop}px)`;
     }
     movePill(tabs[0]);
 
@@ -277,6 +299,7 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
     }
 
     function syncContact() {
+      hiddenChannel.value = activeTab;
       if (activeTab === 'telegram') {
         hiddenContact.value = tgInput.value.trim();
       } else {
@@ -287,7 +310,7 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
 
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
-        activeTab = tab.dataset.tab as 'telegram' | 'phone';
+        activeTab = tab.dataset.tab as 'telegram' | 'whatsapp' | 'viber' | 'phone';
         activeTabButton = tab;
         movePill(tab);
         tabs.forEach(t => {
@@ -296,11 +319,12 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
           t.classList.toggle('text-muted', !isActive);
           t.setAttribute('aria-selected', String(isActive));
         });
-        panels.forEach(p => p.classList.toggle('hidden', p.dataset.panel !== activeTab));
+        const panel = PANEL_FOR[activeTab];
+        panels.forEach(p => p.classList.toggle('hidden', p.dataset.panel !== panel));
         clearError(tgInput);
         clearError(phoneNumber);
         syncContact();
-        (activeTab === 'telegram' ? tgInput : phoneNumber).focus();
+        (panel === 'telegram' ? tgInput : phoneNumber).focus();
       });
     });
 
@@ -363,4 +387,16 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
     syncContact();
   }
 </script>
+
+<style>
+  /* Shared .pill-tab-track (global.css) assumes a single row via a
+     top/bottom stretch — this form has 4 tabs that wrap to 2 rows on
+     narrow screens, so JS drives height/position here instead (see
+     movePill in the script above). Scoped so CaseCategoryTabs' own
+     single-row pill (same shared class) is unaffected. */
+  .contact-tabs :global(.pill-tab-track) {
+    top: 0;
+    bottom: auto;
+  }
+</style>
 

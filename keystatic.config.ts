@@ -81,17 +81,25 @@ export default config({
             { label: 'Сербия', value: 'rs' },
             { label: 'Испания', value: 'es' },
             { label: 'Швейцария', value: 'ch' },
+            { label: 'Португалия', value: 'pt' },
+            // Not a real sourcing/delivery country in countries.json — used
+            // only to tag vehicle-import cases sourced from China so the
+            // /vehicle-import/china/ page can filter for them.
+            { label: 'Китай', value: 'cn' },
           ],
           defaultValue: 'de',
         }),
+        // Keep in sync with the `service` z.enum in src/content.config.ts —
+        // can't import it here (that file pulls in Astro-coupled code).
         service: fields.select({
           label: 'Услуга',
           options: [
-            { label: 'Автоподбор', value: 'autopodbor' },
-            { label: 'Выкуп', value: 'buyout' },
-            { label: 'Проверка', value: 'inspection' },
+            { label: 'Автоподбор', value: 'vehicle-sourcing' },
+            { label: 'Выкуп', value: 'vehicle-buyback' },
+            { label: 'Проверка', value: 'vehicle-inspection' },
+            { label: 'Привоз авто', value: 'vehicle-import' },
           ],
-          defaultValue: 'autopodbor',
+          defaultValue: 'vehicle-sourcing',
         }),
         image: caseImage(),
         gallery: fields.array(caseImage(), { label: 'Больше фото', itemLabel: props => props.value?.filename || 'Фото' }),

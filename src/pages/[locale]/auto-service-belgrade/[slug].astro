@@ -2,17 +2,17 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
-import TelegramCTA from '@/components/TelegramCTA.astro';
+import ContactCTA from '@/components/ContactCTA.astro';
 import CaseGallery from '@/components/CaseGallery.astro';
 import PromoBanner from '@/components/PromoBanner.astro';
+import ChannelBanner from '@/components/ChannelBanner.astro';
 import { getCollection, render } from 'astro:content';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { excerptFromMarkdown, generateArticleSchema } from '@/utils/seo';
-import { withLocales } from '@/utils/paths';
+import { withLocales, PathBuilder } from '@/utils/paths';
 import { getPromoBanners } from '@/i18n/content/promoBanners';
 import { getServicesContent } from '@/i18n/content/services';
 import { getI18n } from '@/i18n/getI18n';
-import type { Locale } from '@/i18n/config';
 import { marked } from 'marked';
 
 export async function getStaticPaths() {
@@ -21,8 +21,8 @@ export async function getStaticPaths() {
 }
 
 const { locale } = Astro.params;
-const cc = getServicesContent(locale as Locale).caseChrome;
-const workLabels = Object.fromEntries(getServicesContent(locale as Locale).avtoservisBelgrade.whatWeDo.map(w => [w.key, w.label]));
+const cc = getServicesContent(locale).caseChrome;
+const workLabels = Object.fromEntries(getServicesContent(locale).autoServiceBelgrade.whatWeDo.map(w => [w.key, w.label]));
 const t = getI18n(locale);
 const { case: c } = Astro.props;
 
@@ -37,10 +37,10 @@ const year = c.data.car ? c.data.year : undefined;
 const carYear = [car, year].filter(Boolean).join(' ');
 const { Content } = await render(c);
 const translatedHtml = translation ? await marked.parse(translation.body) : null;
-const banners = getPromoBanners(locale as Locale, 'autoservice');
+const banners = getPromoBanners(locale, 'auto-service');
 
 const hook = excerptFromMarkdown(translation?.body ?? c.body ?? '');
-const canonical = `${SITE_URL}/${locale}/avtoservis-belgrade/${c.id}/`;
+const canonical = `${SITE_URL}${PathBuilder.autoServiceCase(locale, c.id)}`;
 const imageUrl = c.data.image ? `${SITE_URL}${c.data.image.src}` : undefined;
 
 const meta = {
@@ -68,7 +68,7 @@ const schema = generateArticleSchema({
     <span class="deco-word" style="font-size: clamp(7rem, 18vw, 16rem); bottom: -1rem; right: -1%; opacity: 0.8;">SERVICE</span>
 
     <div class="relative max-w-6xl mx-auto px-6 py-16 md:py-24">
-      <Breadcrumbs items={[{ label: t.nav.autoservice, href: `/${locale}/avtoservis-belgrade/` }, { label: title }]} />
+      <Breadcrumbs items={[{ label: t.nav['auto-service-belgrade'], href: PathBuilder.autoServiceBelgrade(locale) }, { label: title }]} />
 
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
         <div class="lg:col-span-3">
@@ -128,11 +128,14 @@ const schema = generateArticleSchema({
     <!-- SEO banner -->
     <PromoBanner label={cc.usefulInfoLabel} {banners} />
 
+    <!-- Channel promo -->
+    <ChannelBanner />
+
     <!-- CTA -->
     <div class="py-10 border-t mb-16 border-default">
       <p class="text-xs tracking-widest uppercase mb-2 font-medium text-accent">{cc.ctaEyebrow}</p>
       <h2 class="font-display text-3xl font-bold mb-6">{cc.ctaHeading}</h2>
-      <TelegramCTA label={cc.ctaButtonLabel} />
+      <ContactCTA label={cc.ctaButtonLabel} />
     </div>
   </div>
 </BaseLayout>

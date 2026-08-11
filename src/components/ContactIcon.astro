@@ -1,0 +1,22 @@
+---
+// Single source of truth for "which icon + brand color goes with which
+// channel" — ContactCTA's bar, its compact buttons, the floating widget's
+// panel, and the footer's pills all need this exact lookup, with otherwise
+// unrelated wrapper markup (Button chrome vs bar cell vs footer pill).
+import TelegramIcon from './icons/TelegramIcon.astro';
+import WhatsAppIcon from './icons/WhatsAppIcon.astro';
+import ViberIcon from './icons/ViberIcon.astro';
+import { Phone } from '@lucide/astro';
+import { BRAND_COLORS } from '@/utils/constants';
+
+interface Props {
+  channel: 'telegram' | 'whatsapp' | 'viber' | 'phone';
+  size?: number;
+}
+
+const ICONS = { telegram: TelegramIcon, whatsapp: WhatsAppIcon, viber: ViberIcon, phone: Phone };
+const { channel, size = 16 } = Astro.props;
+const Icon = ICONS[channel];
+---
+
+{channel === 'phone' ? <Icon size={size} /> : <Icon size={size} color={BRAND_COLORS[channel]} />}

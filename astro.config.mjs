@@ -29,10 +29,15 @@ export default defineConfig({
       },
     }),
   ],
-  // Legacy-slug + locale-prefix redirects now live in src/middleware.ts
-  // (Task 6) — a single redirect handles both concerns in one hop instead
-  // of this static config redirecting to an unprefixed path that the
-  // middleware would then have to redirect again.
+  // Legacy-slug + locale-prefix redirects live in src/middleware.ts for
+  // requests that reach it — but on Vercel's static output, middleware only
+  // runs for paths matching a real Astro route (see src/pages/index.astro's
+  // comment for the same caveat re: '/'). Deleted old-slug pages have no
+  // route left to match, so those 301s are duplicated in vercel.json, which
+  // Vercel evaluates at the edge before routing — the only place they still
+  // fire once the page is gone. middleware.ts's copy stays for local dev
+  // (vercel.json redirects aren't read by `astro dev`) and as the source of
+  // truth `vercel.json` was hand-derived from.
   vite: {
     plugins: [tailwindcss()],
   },

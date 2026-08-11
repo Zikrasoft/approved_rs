@@ -1,0 +1,23 @@
+---
+import CasesTabPage from '@/components/CasesTabPage.astro';
+import { SITE_URL, SITE_NAME } from '@/utils/constants';
+import { toCaseItem } from '@/utils/cases';
+import { getPublishedCasesByService, getCasesTabCounts } from '@/utils/casesQueries';
+import { getPagesContent } from '@/i18n/content/pages';
+import { withLocales, PathBuilder } from '@/utils/paths';
+
+export const getStaticPaths = () => withLocales([{ params: {} }]);
+
+const { locale } = Astro.params;
+const p = getPagesContent(locale).casesVehicleInspection;
+const meta = {
+  title: `${p.metaTitle} | ${SITE_NAME}`,
+  description: p.metaDescription,
+  canonical: `${SITE_URL}${PathBuilder.casesVehicleInspection(locale)}`,
+};
+
+const items = (await getPublishedCasesByService('vehicle-inspection')).map((c) => toCaseItem(c, locale));
+const counts = await getCasesTabCounts();
+---
+
+<CasesTabPage active="vehicle-inspection" {items} {counts} {meta} />

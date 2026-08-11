@@ -6,7 +6,7 @@ describe('getHomeContent', () => {
   it('returns all sections with the right array lengths for every locale', () => {
     for (const locale of SUPPORTED_LOCALES) {
       const h = getHomeContent(locale);
-      expect(h.journey.length).toBe(4);
+      expect(h.journey.length).toBe(5);
       expect(h.trustCards.length).toBe(3);
       expect(h.testimonials.length).toBe(3);
     }

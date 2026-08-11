@@ -3,17 +3,18 @@ import BaseLayout from './BaseLayout.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
 import LeadForm from '@/components/LeadForm.astro';
 import LeadFormModal from '@/components/LeadFormModal.astro';
-import TelegramCTA from '@/components/TelegramCTA.astro';
+import ContactCTA from '@/components/ContactCTA.astro';
 import CasesGrid from '@/components/CasesGrid.astro';
 import ChipLinks from '@/components/ChipLinks.astro';
 import type { MetaProps } from '@/utils/seo';
 import type { CollectionEntry } from 'astro:content';
 import { SITE_NAME } from '@/utils/constants';
 import { getActiveCountries } from '@/utils/geo';
-import { SERVICES } from '@/utils/labels';
+import { SERVICES, isCountryScopedServiceSlug, type ServiceSlug } from '@/utils/labels';
 import { toCaseItem } from '@/utils/cases';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
+import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   meta: MetaProps;
@@ -24,7 +25,15 @@ interface Props {
   ctaLabel?: string;
   formService: string;
   currentCountry: string;
-  currentService: string;
+  // The "deal identity" shown in the hero watermark and sent as the lead's
+  // country field — defaults to currentCountry, but vehicle-import pages need to
+  // diverge: currentCountry stays a real country code (so the "other
+  // services" cross-links below still resolve to a valid /vehicle-sourcing/{cc}/
+  // etc.), while leadCountry carries the actual corridor ('de'/'eu'/'china')
+  // so sales sees the right source in the Telegram notification instead of
+  // a misleading "RS" on every vehicle-import lead.
+  leadCountry?: string;
+  currentService: ServiceSlug;
   cases?: CollectionEntry<'cases'>[];
   casesHeading?: string;
   city?: string;
@@ -36,7 +45,7 @@ interface Props {
 
 const {
   meta, schema, title, titleHighlight, description, ctaLabel,
-  formService, currentCountry, currentService,
+  formService, currentCountry, leadCountry = currentCountry, currentService,
   cases = [], casesHeading, city,
   showCountryCrossLinks = true,
   breadcrumbs,
@@ -51,7 +60,7 @@ const t = getI18n(locale);
 
   <section class="hero-grid relative border-b overflow-hidden border-default">
     <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 50% 60% at 0% 50%, var(--color-ambient-glow) 0%, transparent 60%), radial-gradient(ellipse 40% 50% at 100% 0%, var(--color-accent-subtle) 0%, transparent 55%);"></div>
-    <span class="deco-word" style="font-size: clamp(7rem, 18vw, 16rem); bottom: -1rem; right: -1%; opacity: 0.8;">{currentCountry.toUpperCase()}</span>
+    <span class="deco-word" style="font-size: clamp(7rem, 18vw, 16rem); bottom: -1rem; right: -1%; opacity: 0.8;">{leadCountry.toUpperCase()}</span>
 
     <div class="relative max-w-6xl mx-auto px-6 py-16 md:py-24">
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-start">
@@ -63,11 +72,11 @@ const t = getI18n(locale);
             {title}{titleHighlight && <><br /><em class="text-accent italic">{titleHighlight}</em></>}
           </h1>
           <p class="text-base max-w-lg mb-2 leading-relaxed fade-up fade-up-3 text-muted">{description}</p>
-          <div class="fade-up fade-up-4"><TelegramCTA label={ctaLabel} openModal /></div>
+          <div class="fade-up fade-up-4"><ContactCTA label={ctaLabel} openModal compact /></div>
           <div class="fade-up fade-up-5 pt-2"><slot /></div>
         </div>
         <div class="lg:col-span-2 fade-up fade-up-3">
-          <LeadForm service={formService} country={currentCountry} city={city} />
+          <LeadForm service={formService} country={leadCountry} city={city} />
         </div>
       </div>
     </div>
@@ -75,15 +84,15 @@ const t = getI18n(locale);
 
   <slot name="extra" />
 
-  <LeadFormModal id="page-lead-modal" triggerAttr="data-open-page-lead-modal" service={formService} country={currentCountry} city={city} />
+  <LeadFormModal id="page-lead-modal" triggerAttr="data-open-page-lead-modal" service={formService} country={leadCountry} city={city} />
 
   <slot name="cases"><CasesGrid {items} heading={casesHeading ?? ''} /></slot>
 
   <div class="max-w-6xl mx-auto px-6 pb-16 pt-4">
-    {showCountryCrossLinks && (
-      <ChipLinks label={t.common.alsoWorkingInLabel} items={getActiveCountries().filter(c => c.code !== currentCountry).map(c => ({ href: `/${locale}/${currentService}/${c.code}/`, text: c[locale].name }))} />
+    {showCountryCrossLinks && isCountryScopedServiceSlug(currentService) && (
+      <ChipLinks label={t.common.alsoWorkingInLabel} items={getActiveCountries().filter(c => c.code !== currentCountry).map(c => ({ href: PathBuilder.service(locale, currentService, c.code), text: c[locale].name }))} />
     )}
-    <ChipLinks label={t.common.otherServicesLabel} items={SERVICES.filter(s => s.slug !== currentService).map(s => ({ href: `/${locale}/${s.slug}/${currentCountry}/`, text: t.nav[s.slug] }))} />
+    <ChipLinks label={t.common.otherServicesLabel} items={SERVICES.filter(s => s.slug !== currentService).map(s => ({ href: PathBuilder.service(locale, s.slug, currentCountry), text: t.nav[s.slug] }))} />
   </div>
 
 </BaseLayout>

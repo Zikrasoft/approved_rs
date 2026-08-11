@@ -1,6 +1,6 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
-import { AUTOSERVICE_SERVICES } from './utils/labels';
+import { AUTOSERVICE_SERVICES, COUNTRY_SCOPED_SERVICE_SLUGS } from './utils/labels';
 
 // EN/SR translation of this case's title + body, filled in right on the
 // same Keystatic entry (not a separate collection) — everything else
@@ -17,7 +17,9 @@ const cases = defineCollection({
     year: z.coerce.number(),
     price: z.object({ value: z.string(), currency: z.string().optional() }),
     country: z.string(),
-    service: z.enum(['autopodbor', 'buyout', 'inspection']),
+    // Keep in sync with the `service` select options in keystatic.config.ts —
+    // Keystatic can't import this (Astro-coupled), so it's hand-duplicated there.
+    service: z.enum([...COUNTRY_SCOPED_SERVICE_SLUGS, 'vehicle-import']),
     image: image().optional(),
     gallery: z.array(image()).default([]),
     date: z.coerce.date(),

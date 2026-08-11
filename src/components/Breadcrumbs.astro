@@ -2,13 +2,14 @@
 import { SITE_URL } from '@/utils/constants';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
+import { PathBuilder } from '@/utils/paths';
 
 interface Crumb { label: string; href?: string }
 interface Props { items: Crumb[] }
 
 const { items } = Astro.props;
 const locale = getLocale(Astro.currentLocale);
-const trail: Crumb[] = [{ label: getI18n(locale).common.homeLabel, href: `/${locale}/` }, ...items];
+const trail: Crumb[] = [{ label: getI18n(locale).common.homeLabel, href: PathBuilder.home(locale) }, ...items];
 
 const schema = {
   '@context': 'https://schema.org',

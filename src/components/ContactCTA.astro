@@ -1,0 +1,152 @@
+---
+import Button from './Button.astro';
+import ContactIcon from './ContactIcon.astro';
+import { telegramLink, DEFAULT_TG_MESSAGE } from '@/utils/telegramLink';
+import { whatsappLink, viberLink } from '@/utils/contactLinks';
+import { getServicesContent } from '@/i18n/content/services';
+import { getLocale } from '@/i18n/config';
+import { TG_MANAGER, WHATSAPP_NUMBER, VIBER_NUMBER, PHONE_NUMBER } from '@/utils/constants';
+
+interface Props {
+  manager?: string;
+  label?: string;
+  openModal?: boolean;
+  text?: string;
+  // Cold placements (page hero, first fold) get a single action instead of
+  // the full channel picker — asking someone to choose a messenger before
+  // they've even read the pitch is friction the warm/closing CTAs don't
+  // have. WhatsApp/Viber/callback stay one tap away via the floating widget.
+  compact?: boolean;
+}
+
+const locale = getLocale(Astro.currentLocale);
+const cc = getServicesContent(locale).caseChrome;
+const {
+  manager = TG_MANAGER,
+  label = cc.ctaButtonLabel,
+  openModal = false,
+  text,
+  compact = false,
+} = Astro.props;
+
+const message = text ?? DEFAULT_TG_MESSAGE[locale];
+
+// Callback should land in whichever modal is actually in scope on this page:
+// the page-local one (ServicePageLayout) when the Telegram button also uses
+// it, otherwise the header's global modal — same rule `openModal` already
+// applies to the Telegram button above.
+const callbackTrigger = openModal ? 'data-open-page-lead-modal' : 'data-open-lead-modal';
+---
+
+<div class="flex flex-col gap-3 my-8">
+  {compact ? (
+    <div class="flex flex-col sm:flex-row gap-3">
+      <Button
+        data-contact-channel="telegram"
+        data-open-page-lead-modal={openModal ? true : undefined}
+        href={openModal ? undefined : telegramLink(manager, message)}
+        target={openModal ? undefined : '_blank'}
+        rel={openModal ? undefined : 'noopener'}
+        class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center"
+      >
+        <ContactIcon channel="telegram" size={16} />
+        {label}
+      </Button>
+      <Button
+        variant="secondary"
+        href={`tel:+${PHONE_NUMBER}`}
+        data-call-track
+        data-contact-channel="phone"
+        class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center bg-surface"
+      >
+        <ContactIcon channel="phone" size={15} />
+        {cc.callButtonLabel}
+      </Button>
+    </div>
+  ) : (
+    <>
+      <div class="contact-bar">
+        <a
+          data-contact-channel="telegram"
+          data-open-page-lead-modal={openModal ? true : undefined}
+          href={openModal ? undefined : telegramLink(manager, message)}
+          target={openModal ? undefined : '_blank'}
+          rel={openModal ? undefined : 'noopener'}
+          aria-label={label}
+          class="contact-cell"
+        >
+          <ContactIcon channel="telegram" size={17} />
+          <span>Telegram</span>
+        </a>
+
+        <a data-contact-channel="whatsapp" href={whatsappLink(WHATSAPP_NUMBER, message)} target="_blank" rel="noopener" aria-label={cc.whatsappButtonLabel} class="contact-cell">
+          <ContactIcon channel="whatsapp" size={17} />
+          <span>WhatsApp</span>
+        </a>
+
+        <a data-contact-channel="viber" href={viberLink(VIBER_NUMBER)} target="_blank" rel="noopener" aria-label={cc.viberButtonLabel} class="contact-cell">
+          <ContactIcon channel="viber" size={17} />
+          <span>Viber</span>
+        </a>
+
+        <button type="button" data-contact-channel="callback" aria-label={cc.callbackButtonLabel} {...{ [callbackTrigger]: 'phone' }} class="contact-cell">
+          <ContactIcon channel="phone" size={16} />
+          <span>{cc.callbackShortLabel}</span>
+        </button>
+      </div>
+
+      <Button
+        variant="secondary"
+        href={`tel:+${PHONE_NUMBER}`}
+        data-call-track
+        data-contact-channel="phone"
+        class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full justify-center bg-surface"
+      >
+        <ContactIcon channel="phone" size={15} />
+        {cc.callButtonLabel}
+      </Button>
+    </>
+  )}
+</div>
+
+<style>
+  .contact-bar {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background-color: var(--color-border);
+    border: 1px solid var(--color-border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  @media (min-width: 640px) {
+    .contact-bar { grid-template-columns: repeat(4, 1fr); }
+  }
+  .contact-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.9rem 0.75rem;
+    background-color: var(--color-surface);
+    color: var(--color-text-2);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    text-decoration: none;
+    text-align: center;
+    line-height: 1.2;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .contact-cell:hover,
+  .contact-cell:focus-visible {
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+  .contact-cell:focus-visible {
+    outline: 2px solid var(--color-on-accent);
+    outline-offset: -3px;
+  }
+</style>

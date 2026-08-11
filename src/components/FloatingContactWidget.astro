@@ -1,0 +1,143 @@
+---
+import { MessageCircle, X } from '@lucide/astro';
+import ContactIcon from './ContactIcon.astro';
+import { telegramLink, DEFAULT_TG_MESSAGE } from '@/utils/telegramLink';
+import { whatsappLink, viberLink } from '@/utils/contactLinks';
+import { getServicesContent } from '@/i18n/content/services';
+import { getLocale } from '@/i18n/config';
+import { TG_MANAGER, WHATSAPP_NUMBER, VIBER_NUMBER, PHONE_NUMBER } from '@/utils/constants';
+
+const locale = getLocale(Astro.currentLocale);
+const cc = getServicesContent(locale).caseChrome;
+const message = DEFAULT_TG_MESSAGE[locale];
+---
+
+<div class="floating-contact" data-floating-contact>
+  <div class="floating-panel" role="menu" data-panel hidden>
+    <a data-contact-channel="telegram" href={telegramLink(TG_MANAGER, message)} target="_blank" rel="noopener" role="menuitem" class="floating-cell" aria-label={cc.ctaButtonLabel}>
+      <ContactIcon channel="telegram" size={17} /> <span>Telegram</span>
+    </a>
+    <a data-contact-channel="whatsapp" href={whatsappLink(WHATSAPP_NUMBER, message)} target="_blank" rel="noopener" role="menuitem" class="floating-cell" aria-label={cc.whatsappButtonLabel}>
+      <ContactIcon channel="whatsapp" size={17} /> <span>WhatsApp</span>
+    </a>
+    <a data-contact-channel="viber" href={viberLink(VIBER_NUMBER)} target="_blank" rel="noopener" role="menuitem" class="floating-cell" aria-label={cc.viberButtonLabel}>
+      <ContactIcon channel="viber" size={17} /> <span>Viber</span>
+    </a>
+    <button type="button" role="menuitem" data-contact-channel="callback" aria-label={cc.callbackButtonLabel} data-open-lead-modal="phone" class="floating-cell">
+      <ContactIcon channel="phone" size={16} /> <span>{cc.callbackShortLabel}</span>
+    </button>
+    <a data-contact-channel="phone" data-call-track href={`tel:+${PHONE_NUMBER}`} role="menuitem" class="floating-cell">
+      <ContactIcon channel="phone" size={16} /> <span>{cc.callButtonLabel}</span>
+    </a>
+  </div>
+
+  <button type="button" class="floating-toggle" data-toggle aria-haspopup="true" aria-expanded="false" aria-label={cc.ctaButtonLabel}>
+    <span data-icon-open><MessageCircle size={22} /></span>
+    <span data-icon-close hidden><X size={22} /></span>
+  </button>
+</div>
+
+<style>
+  .floating-contact {
+    position: fixed;
+    right: 1rem;
+    bottom: 1.25rem;
+    z-index: var(--z-sticky);
+  }
+  @media (min-width: 640px) {
+    .floating-contact { right: 1.5rem; }
+  }
+
+  .floating-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
+    box-shadow: 0 4px 20px var(--color-accent-glow);
+    transition: background-color 0.2s, transform 0.15s;
+  }
+  .floating-toggle:hover { background-color: var(--color-accent-hover); }
+  .floating-toggle:active { transform: scale(0.96); }
+  .floating-toggle:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .floating-panel {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 0.75rem);
+    display: flex;
+    flex-direction: column;
+    width: 13rem;
+    border: 1px solid var(--color-border);
+    border-radius: 2px;
+    overflow: hidden;
+    background-color: var(--color-surface);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  }
+  .floating-panel[hidden] { display: none; }
+
+  .floating-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.75rem 0.9rem;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-2);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    text-decoration: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .floating-cell:last-child { border-bottom: none; }
+  .floating-cell:hover,
+  .floating-cell:focus-visible {
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+  .floating-cell:focus-visible { outline: none; }
+</style>
+
+<script>
+  function initFloatingContact() {
+    const root = document.querySelector<HTMLElement>('[data-floating-contact]');
+    if (!root) return;
+    const toggle = root.querySelector<HTMLButtonElement>('[data-toggle]')!;
+    const panel = root.querySelector<HTMLElement>('[data-panel]')!;
+    const iconOpen = toggle.querySelector('[data-icon-open]')!;
+    const iconClose = toggle.querySelector('[data-icon-close]')!;
+
+    function setOpen(open: boolean) {
+      panel.hidden = !open;
+      toggle.setAttribute('aria-expanded', String(open));
+      iconOpen.toggleAttribute('hidden', open);
+      iconClose.toggleAttribute('hidden', !open);
+    }
+
+    toggle.addEventListener('click', () => setOpen(panel.hidden));
+    document.addEventListener('click', (e) => {
+      if (!panel.hidden && !root.contains(e.target as Node)) setOpen(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !panel.hidden) setOpen(false);
+    });
+    // menu items either navigate away or open the lead modal — either way,
+    // collapse back to the closed icon so it's not left open underneath.
+    panel.querySelectorAll('.floating-cell').forEach((cell) => {
+      cell.addEventListener('click', () => setOpen(false));
+    });
+  }
+  initFloatingContact();
+</script>

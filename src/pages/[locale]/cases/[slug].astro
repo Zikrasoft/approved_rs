@@ -2,18 +2,21 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
-import TelegramCTA from '@/components/TelegramCTA.astro';
+import ContactCTA from '@/components/ContactCTA.astro';
 import Price from '@/components/Price.astro';
 import CaseGallery from '@/components/CaseGallery.astro';
 import PromoBanner from '@/components/PromoBanner.astro';
+import ChannelBanner from '@/components/ChannelBanner.astro';
 import { getCollection, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { getPromoBanners } from '@/i18n/content/promoBanners';
 import { excerptFromMarkdown, generateArticleSchema } from '@/utils/seo';
-import { withLocales } from '@/utils/paths';
+import { withLocales, PathBuilder } from '@/utils/paths';
 import { getServicesContent } from '@/i18n/content/services';
 import { getI18n } from '@/i18n/getI18n';
-import type { Locale } from '@/i18n/config';
+import { getCountry } from '@/utils/geo';
+import { CHINA_NAME, CHINA_COUNTRY_CODE } from '@/utils/constants';
 import { marked } from 'marked';
 
 export async function getStaticPaths() {
@@ -22,8 +25,8 @@ export async function getStaticPaths() {
 }
 
 const { locale } = Astro.params;
-const cc = getServicesContent(locale as Locale).caseChrome;
-const t = getI18n(locale as Locale);
+const cc = getServicesContent(locale).caseChrome;
+const t = getI18n(locale);
 const { case: c } = Astro.props;
 
 // Case bodies are written in ru; en/sr get an optional title+body
@@ -37,10 +40,26 @@ const translation = locale === 'en' ? c.data.translations?.en : locale === 'sr' 
 const title = translation?.title ?? c.data.title;
 const { Content } = await render(c);
 const translatedHtml = translation ? await marked.parse(translation.body) : null;
-const banners = getPromoBanners(locale as Locale, 'autopodbor');
+const banners = getPromoBanners(locale, 'vehicle-sourcing');
+
+const CASES_TAB_PATH: Record<CollectionEntry<'cases'>['data']['service'], string> = {
+  'vehicle-sourcing': PathBuilder.casesVehicleSourcing(locale),
+  'vehicle-buyback': PathBuilder.casesVehicleBuyback(locale),
+  'vehicle-inspection': PathBuilder.casesVehicleInspection(locale),
+  'vehicle-import': PathBuilder.casesVehicleImport(locale),
+};
+
+// China isn't in countries.json (it's a vehicle-import-only source, not a
+// full active market with its own [country] page) — same special case the
+// vehicle-import china spoke already handles via CHINA_COUNTRY_CODE.
+const countryName = c.data.country
+  ? c.data.country === CHINA_COUNTRY_CODE
+    ? CHINA_NAME[locale]
+    : (getCountry(c.data.country)?.[locale].name ?? c.data.country.toUpperCase())
+  : undefined;
 
 const hook = excerptFromMarkdown(translation?.body ?? c.body ?? '');
-const canonical = `${SITE_URL}/${locale}/cases/${c.id}/`;
+const canonical = `${SITE_URL}${PathBuilder.case(locale, c.id)}`;
 const imageUrl = c.data.image ? `${SITE_URL}${c.data.image.src}` : undefined;
 
 const meta = {
@@ -68,7 +87,7 @@ const schema = generateArticleSchema({
     <span class="deco-word" style="font-size: clamp(7rem, 18vw, 16rem); bottom: -1rem; right: -1%; opacity: 0.8;">CASE</span>
 
     <div class="relative max-w-6xl mx-auto px-6 py-16 md:py-24">
-      <Breadcrumbs items={[{ label: t.nav.cases, href: `/${locale}/cases/autopodbor/` }, { label: title }]} />
+      <Breadcrumbs items={[{ label: t.nav.cases, href: CASES_TAB_PATH[c.data.service] }, { label: title }]} />
 
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
         <div class="lg:col-span-3">
@@ -76,7 +95,7 @@ const schema = generateArticleSchema({
             <span class="text-xs tracking-widest uppercase font-medium px-3 py-1 rounded-sm border text-accent border-accent">
               {cc.serviceBadges[c.data.service as keyof typeof cc.serviceBadges] ?? c.data.service}
             </span>
-            <span class="text-xs text-muted">{c.data.country?.toUpperCase()}</span>
+            {countryName && <span class="text-xs text-muted">{countryName}</span>}
           </div>
 
           <span class="eyebrow fade-up fade-up-1">{SITE_NAME}</span>
@@ -127,11 +146,14 @@ const schema = generateArticleSchema({
     <!-- SEO banner -->
     <PromoBanner label={cc.usefulInfoLabel} {banners} />
 
+    <!-- Channel promo -->
+    <ChannelBanner />
+
     <!-- CTA -->
     <div class="py-10 border-t mb-16 border-default">
       <p class="text-xs tracking-widest uppercase mb-2 font-medium text-accent">{cc.ctaEyebrow}</p>
       <h2 class="font-display text-3xl font-bold mb-6">{cc.ctaHeading}</h2>
-      <TelegramCTA label={cc.ctaButtonLabel} />
+      <ContactCTA label={cc.ctaButtonLabel} />
     </div>
   </div>
 </BaseLayout>

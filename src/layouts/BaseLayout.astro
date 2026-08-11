@@ -3,6 +3,7 @@ import type { MetaProps } from '@/utils/seo';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
 import CookieConsent from '@/components/CookieConsent.astro';
+import FloatingContactWidget from '@/components/FloatingContactWidget.astro';
 import Analytics from '@vercel/analytics/astro';
 import SpeedInsights from '@vercel/speed-insights/astro';
 import '../styles/global.css';
@@ -111,6 +112,7 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
       <slot />
     </main>
     <Footer />
+    <FloatingContactWidget />
     <CookieConsent />
     <Analytics />
     <SpeedInsights />
@@ -124,6 +126,32 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
           el.style.animation = 'none';
         });
       }, 1600);
+    </script>
+    <script>
+      // Clicking a tel: link is a real navigation (opens the dialer) — can't
+      // await a fetch first, so this fires a beacon instead of blocking. Same
+      // lead-notification pipeline as the form, so staff see it the same way
+      // and can call back if they miss the incoming call. Global (not owned
+      // by any one component) since call buttons appear in several places.
+      document.querySelectorAll<HTMLAnchorElement>('[data-call-track]').forEach((el) => {
+        el.addEventListener('click', () => {
+          const body = new FormData();
+          body.set('source_url', location.href);
+          navigator.sendBeacon('/api/call-click', body);
+        });
+      });
+    </script>
+    <script>
+      // Which contact channel people actually pick, site-wide — every
+      // Telegram/WhatsApp/Viber/callback/call touchpoint carries
+      // data-contact-channel, tracked here once instead of per component.
+      // gtag() only queues into dataLayer; the real GA script (and any
+      // network call) still waits on cookie consent, same as everywhere else.
+      document.querySelectorAll<HTMLElement>('[data-contact-channel]').forEach((el) => {
+        el.addEventListener('click', () => {
+          (window as any).gtag?.('event', 'contact_click', { channel: el.dataset.contactChannel });
+        });
+      });
     </script>
   </body>
 </html>

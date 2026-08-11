@@ -1,0 +1,48 @@
+---
+import VehicleImportSpokeLayout from '@/layouts/VehicleImportSpokeLayout.astro';
+import { getServicesContent } from '@/i18n/content/services';
+import { withLocales, PathBuilder } from '@/utils/paths';
+import { getCountry } from '@/utils/geo';
+import { getCollection } from 'astro:content';
+import type { Locale } from '@/i18n/config';
+
+// The 3 single-country EU source spokes (de/es/ch) — one dynamic route
+// instead of 3 near-identical page files, matching the [country].astro
+// pattern already used for vehicle-buyback/vehicle-inspection. Inlined
+// (not a shared top-level const) — Astro's getStaticPaths extraction
+// doesn't reliably keep a module-scope const it's the only reader of.
+type EuSpokeCountry = 'de' | 'es' | 'ch';
+
+export const getStaticPaths = () =>
+  withLocales((['de', 'es', 'ch'] as const).map(country => ({ params: { country } })));
+
+const { locale, country } = Astro.params as { locale: Locale; country: EuSpokeCountry };
+const sc = getServicesContent(locale);
+const pc = sc['vehicle-import'][country];
+const cases = (await getCollection('cases'))
+  .filter(c => c.data.published && c.data.service === 'vehicle-import' && c.data.country === country)
+  .slice(0, 3);
+---
+
+<VehicleImportSpokeLayout
+  {locale}
+  slug={country}
+  metaTitle={pc.metaTitle}
+  metaDescription={pc.metaDescription}
+  title={pc.title}
+  titleHighlight={pc.titleHighlight}
+  description={pc.description}
+  ctaLabel={pc.ctaLabel}
+  breadcrumbLabel={pc.breadcrumbLabel}
+  hubBreadcrumbLabel={sc['vehicle-import'].hub.breadcrumbLabel}
+  parentBreadcrumb={{ label: sc['vehicle-import'].eu.breadcrumbLabel, href: PathBuilder.vehicleImportSpoke(locale, 'eu') }}
+  casesHeading={pc.casesHeading}
+  {cases}
+  steps={pc.steps}
+  destinationsNote={pc.destinationsNote}
+  areaServed={getCountry(country)![locale].name}
+>
+  <p class="mt-4 text-sm">
+    <a href={PathBuilder.vehicleImportSpoke(locale, 'china')} class="text-accent no-underline hover:underline">{pc.chinaCrossLabel} →</a>
+  </p>
+</VehicleImportSpokeLayout>

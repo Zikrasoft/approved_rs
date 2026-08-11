@@ -2,22 +2,22 @@
 import CasesTabPage from '@/components/CasesTabPage.astro';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { toAutoserviceCaseItem } from '@/utils/cases';
-import { getPublishedCases, getPublishedAutoserviceCases } from '@/utils/casesQueries';
+import { getPublishedAutoserviceCases, getCasesTabCounts } from '@/utils/casesQueries';
 import { getPagesContent } from '@/i18n/content/pages';
-import { withLocales } from '@/utils/paths';
+import { withLocales, PathBuilder } from '@/utils/paths';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const { locale } = Astro.params;
-const p = getPagesContent(locale).casesAutoservice;
+const p = getPagesContent(locale).casesAutoService;
 const meta = {
   title: `${p.metaTitle} | ${SITE_NAME}`,
   description: p.metaDescription,
-  canonical: `${SITE_URL}/${locale}/cases/autoservice/`,
+  canonical: `${SITE_URL}${PathBuilder.casesAutoService(locale)}`,
 };
 
 const items = (await getPublishedAutoserviceCases()).map((c) => toAutoserviceCaseItem(c, locale));
-const otherCount = (await getPublishedCases()).length;
+const counts = await getCasesTabCounts();
 ---
 
-<CasesTabPage active="autoservice" {items} {otherCount} {meta} />
+<CasesTabPage active="auto-service" {items} {counts} {meta} />

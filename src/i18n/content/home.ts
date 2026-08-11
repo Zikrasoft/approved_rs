@@ -22,10 +22,17 @@ interface StatItem {
   label: string;
 }
 
+// Country count is derived live from countries.json (getActiveCountries().length)
+// at the call site — a hardcoded value here would go stale the moment a
+// country is added or removed, as it silently did when Portugal was added.
+interface CountStatItem {
+  label: string;
+}
+
 interface HomeContent {
   metaTitle: string;
   metaDescription: string;
-  journey: [JourneyStep, JourneyStep, JourneyStep, JourneyStep];
+  journey: [JourneyStep, JourneyStep, JourneyStep, JourneyStep, JourneyStep];
   heroEyebrow: string;
   heroLine1: string;
   heroLine2: string;
@@ -33,7 +40,7 @@ interface HomeContent {
   stampText: string;
   heroSubtext: string;
   statClients: StatItem;
-  statCountries: StatItem;
+  statCountries: CountStatItem;
   statYears: StatItem;
   journeyHeading: string;
   journeySubtext: string;
@@ -50,16 +57,17 @@ interface HomeContent {
   ctaSubtext: string;
   ctaTelegramLabel: string;
   ctaStatClients: StatItem;
-  ctaStatCountries: StatItem;
+  ctaStatCountries: CountStatItem;
   ctaStatYears: StatItem;
   ctaStatResponse: StatItem;
 }
 
 const ru: HomeContent = {
-  metaTitle: 'Автоподбор и доставка авто из Европы',
-  metaDescription: 'Подберём и привезём автомобиль из Германии, Испании, Сербии и Швейцарии. Проверка, выкуп, доставка. Работаем для русскоязычных по всему миру.',
+  metaTitle: 'Автоподбор и привоз авто под ключ',
+  metaDescription: 'Автоподбор в своей стране или привоз авто из Европы и Китая — под ключ. Проверка, выкуп, автосервис. Работаем для русскоязычных по всему миру.',
   journey: [
     { title: 'Подбор', desc: 'Находим, проверяем и доставляем автомобиль под ваш бюджет — под ключ, в Германии, Испании, Сербии и Швейцарии.' },
+    { title: 'Привоз', desc: 'Машина не в вашей стране? Подберём и привезём её из Германии, Европы или Китая — под ключ, включая растаможку.' },
     { title: 'Проверка', desc: 'Независимый эксперт осматривает автомобиль перед покупкой — по 100+ пунктам с видео.', note: 'Нашли машину сами? Закажем проверку отдельно' },
     { title: 'Выкуп', desc: 'Оформляем выкуп и растаможку автомобиля на иностранных номерах.', note: 'Машина уже за границей? Поможем её оформить' },
     { title: 'Автосервис', desc: 'Ремонт и обслуживание автомобиля в Белграде — с гарантией качества.', note: 'Машина уже ваша? Тоже беремся' },
@@ -71,10 +79,10 @@ const ru: HomeContent = {
   stampText: 'ПРОВЕРЕНО · ОДОБРЕНО · ПРОВЕРЕНО · ОДОБРЕНО ·',
   heroSubtext: 'Подберём, проверим, оформим и привезём автомобиль из Германии, Испании или Сербии — а потом обслужим его в своём автосервисе. Один путь, одна команда.',
   statClients: { value: '200+', label: 'клиентов' },
-  statCountries: { value: '4', label: 'страны' },
+  statCountries: { label: 'страны' },
   statYears: { value: '5 лет', label: 'на рынке' },
   journeyHeading: 'Один путь: от поиска до сервиса',
-  journeySubtext: 'Автоподбор, проверка, выкуп и автосервис — не 4 разных услуги, а этапы одного пути вашего автомобиля. Войти можно с любого шага.',
+  journeySubtext: 'Автоподбор, привоз, проверка, выкуп и автосервис — не разные услуги, а этапы одного пути вашего автомобиля. Войти можно с любого шага.',
   journeyMoreLabel: 'Подробнее',
   countryStripLabel: 'Автоподбор по странам:',
   latestCasesHeading: 'Последние кейсы',
@@ -96,18 +104,19 @@ const ru: HomeContent = {
   ctaSubtext: 'Отвечаем в течение 2 часов. Консультация бесплатна.',
   ctaTelegramLabel: 'Написать в Telegram',
   ctaStatClients: { value: '200+', label: 'клиентов' },
-  ctaStatCountries: { value: '4', label: 'страны' },
+  ctaStatCountries: { label: 'страны' },
   ctaStatYears: { value: '5 лет', label: 'опыт' },
   ctaStatResponse: { value: '2 ч', label: 'ответ' },
 };
 
 const en: HomeContent = {
-  metaTitle: 'Car Sourcing and Delivery from Europe',
-  metaDescription: 'We source and deliver cars from Germany, Spain, Serbia, and Switzerland. Inspection, buyout, delivery. Serving Russian-speaking clients worldwide.',
+  metaTitle: 'Car Sourcing and Import, Fully Turnkey',
+  metaDescription: 'Car sourcing in your own country, or import from Europe and China — fully turnkey. Inspection, buyback, auto service. Serving Russian-speaking clients worldwide.',
   journey: [
     { title: 'Sourcing', desc: 'We find, inspect, and deliver a car that fits your budget — fully turnkey, in Germany, Spain, Serbia, and Switzerland.' },
+    { title: 'Import', desc: "Car isn't in your country? We'll source it and bring it from Germany, Europe, or China — fully turnkey, customs clearance included." },
     { title: 'Inspection', desc: 'An independent expert inspects the car before purchase — 100+ checkpoints, with video.', note: 'Already found a car yourself? We can inspect it separately' },
-    { title: 'Buyout', desc: 'We handle the buyout and customs clearance for cars on foreign plates.', note: "Already have the car abroad? We'll help register it" },
+    { title: 'Buyback', desc: 'We handle the buyback and customs clearance for cars on foreign plates.', note: "Already have the car abroad? We'll help register it" },
     { title: 'Auto Service', desc: 'Car repair and maintenance in Belgrade — with a quality guarantee.', note: 'Already own the car? We handle that too' },
   ],
   heroEyebrow: 'One path: cars from Europe',
@@ -117,10 +126,10 @@ const en: HomeContent = {
   stampText: 'INSPECTED · APPROVED · INSPECTED · APPROVED ·',
   heroSubtext: 'We source, inspect, register, and deliver your car from Germany, Spain, or Serbia — then service it at our own shop. One path, one team.',
   statClients: { value: '200+', label: 'clients' },
-  statCountries: { value: '4', label: 'countries' },
+  statCountries: { label: 'countries' },
   statYears: { value: '5 yrs', label: 'on the market' },
   journeyHeading: 'One Path: From Search to Service',
-  journeySubtext: "Sourcing, inspection, buyout, and auto service aren't 4 separate services — they're stages of one journey for your car. Jump in at any step.",
+  journeySubtext: "Sourcing, import, inspection, buyback, and auto service aren't separate services — they're stages of one journey for your car. Jump in at any step.",
   journeyMoreLabel: 'Learn more',
   countryStripLabel: 'Car sourcing by country:',
   latestCasesHeading: 'Latest Cases',
@@ -142,16 +151,17 @@ const en: HomeContent = {
   ctaSubtext: 'We reply within 2 hours. Consultation is free.',
   ctaTelegramLabel: 'Message on Telegram',
   ctaStatClients: { value: '200+', label: 'clients' },
-  ctaStatCountries: { value: '4', label: 'countries' },
+  ctaStatCountries: { label: 'countries' },
   ctaStatYears: { value: '5 yrs', label: 'experience' },
   ctaStatResponse: { value: '2 hrs', label: 'response' },
 };
 
 const sr: HomeContent = {
-  metaTitle: 'Odabir i dostava vozila iz Evrope',
-  metaDescription: 'Pronalazimo i dovozimo vozila iz Nemačke, Španije, Srbije i Švajcarske. Provera, otkup, dostava. Radimo za ruskojezično tržište širom sveta.',
+  metaTitle: 'Odabir i uvoz vozila na ključ',
+  metaDescription: 'Odabir vozila u vašoj zemlji ili uvoz iz Evrope i Kine — sve na ključ. Provera, otkup, auto servis. Radimo za rusko govorno tržište širom sveta.',
   journey: [
     { title: 'Odabir', desc: 'Pronalazimo, proveravamo i dovozimo vozilo prema vašem budžetu — sve na ključ, u Nemačkoj, Španiji, Srbiji i Švajcarskoj.' },
+    { title: 'Uvoz', desc: 'Vozilo nije u vašoj zemlji? Pronaći ćemo ga i dovesti iz Nemačke, Evrope ili Kine — sve na ključ, uključujući carinjenje.' },
     { title: 'Provera', desc: 'Nezavisni stručnjak pregleda vozilo pre kupovine — po više od 100 stavki, sa video snimkom.', note: 'Sami ste pronašli vozilo? Proveru radimo i posebno' },
     { title: 'Otkup', desc: 'Sređujemo otkup i carinjenje vozila na stranim tablicama.', note: 'Vozilo je već u inostranstvu? Pomažemo da ga registrujete' },
     { title: 'Auto servis', desc: 'Popravka i održavanje vozila u Beogradu — uz garanciju kvaliteta.', note: 'Vozilo je već vaše? I to radimo' },
@@ -163,10 +173,10 @@ const sr: HomeContent = {
   stampText: 'PROVERENO · ODOBRENO · PROVERENO · ODOBRENO ·',
   heroSubtext: 'Pronalazimo, proveravamo, registrujemo i dovozimo vaše vozilo iz Nemačke, Španije ili Srbije — a zatim ga servisiramo u sopstvenom servisu. Jedan put, jedan tim.',
   statClients: { value: '200+', label: 'klijenata' },
-  statCountries: { value: '4', label: 'zemlje' },
+  statCountries: { label: 'zemlje' },
   statYears: { value: '5 god.', label: 'na tržištu' },
   journeyHeading: 'Jedan put: od pretrage do servisa',
-  journeySubtext: 'Odabir, provera, otkup i auto servis nisu 4 različite usluge, već faze jednog puta vašeg vozila. Možete se uključiti u bilo kom koraku.',
+  journeySubtext: 'Odabir, uvoz, provera, otkup i auto servis nisu različite usluge, već faze jednog puta vašeg vozila. Možete se uključiti u bilo kom koraku.',
   journeyMoreLabel: 'Saznajte više',
   countryStripLabel: 'Odabir vozila po zemljama:',
   latestCasesHeading: 'Poslednji primeri',
@@ -188,7 +198,7 @@ const sr: HomeContent = {
   ctaSubtext: 'Odgovaramo u roku od 2 sata. Konsultacija je besplatna.',
   ctaTelegramLabel: 'Pišite nam na Telegramu',
   ctaStatClients: { value: '200+', label: 'klijenata' },
-  ctaStatCountries: { value: '4', label: 'zemlje' },
+  ctaStatCountries: { label: 'zemlje' },
   ctaStatYears: { value: '5 god.', label: 'iskustva' },
   ctaStatResponse: { value: '2 h', label: 'odgovor' },
 };

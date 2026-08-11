@@ -4,11 +4,11 @@ import { SITE_URL } from '@/utils/constants';
 
 describe('getAlternateLinks', () => {
   it('builds one link per locale plus x-default, preserving the path after the locale segment', () => {
-    expect(getAlternateLinks('/en/autopodbor/de/')).toEqual([
-      { hreflang: 'ru', href: `${SITE_URL}/ru/autopodbor/de/` },
-      { hreflang: 'en', href: `${SITE_URL}/en/autopodbor/de/` },
-      { hreflang: 'sr', href: `${SITE_URL}/sr/autopodbor/de/` },
-      { hreflang: 'x-default', href: `${SITE_URL}/ru/autopodbor/de/` },
+    expect(getAlternateLinks('/en/vehicle-sourcing/de/')).toEqual([
+      { hreflang: 'ru', href: `${SITE_URL}/ru/vehicle-sourcing/de/` },
+      { hreflang: 'en', href: `${SITE_URL}/en/vehicle-sourcing/de/` },
+      { hreflang: 'sr', href: `${SITE_URL}/sr/vehicle-sourcing/de/` },
+      { hreflang: 'x-default', href: `${SITE_URL}/ru/vehicle-sourcing/de/` },
     ]);
   });
 

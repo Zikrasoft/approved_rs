@@ -111,22 +111,22 @@ const DEFAULT_TAGLINE = {
 
 const SERVICE_VARIANTS = {
   ru: {
-    autopodbor: 'Подберём, проверим и доставим автомобиль под ключ',
-    vykup: 'Срочный выкуп авто на иностранных номерах',
-    proverka: 'Независимая проверка перед покупкой',
-    autoservice: 'Ремонт и обслуживание автомобилей в Белграде',
+    'vehicle-sourcing': 'Подберём, проверим и доставим автомобиль под ключ',
+    'vehicle-buyback': 'Срочный выкуп авто на иностранных номерах',
+    'vehicle-inspection': 'Независимая проверка перед покупкой',
+    'auto-service-belgrade': 'Ремонт и обслуживание автомобилей в Белграде',
   },
   en: {
-    autopodbor: "We'll source, inspect, and deliver your car, fully turnkey",
-    vykup: 'Urgent car buyout on foreign plates',
-    proverka: 'Independent inspection before you buy',
-    autoservice: 'Car repair and maintenance in Belgrade',
+    'vehicle-sourcing': "We'll source, inspect, and deliver your car, fully turnkey",
+    'vehicle-buyback': 'Urgent car buyback on foreign plates',
+    'vehicle-inspection': 'Independent inspection before you buy',
+    'auto-service-belgrade': 'Car repair and maintenance in Belgrade',
   },
   sr: {
-    autopodbor: 'Pronalazimo, proveravamo i dovozimo vozilo, ključ u ruke',
-    vykup: 'Hitan otkup vozila na stranim tablicama',
-    proverka: 'Nezavisna provera pre kupovine',
-    autoservice: 'Popravka i održavanje vozila u Beogradu',
+    'vehicle-sourcing': 'Pronalazimo, proveravamo i dovozimo vozilo, ključ u ruke',
+    'vehicle-buyback': 'Hitan otkup vozila na stranim tablicama',
+    'vehicle-inspection': 'Nezavisna provera pre kupovine',
+    'auto-service-belgrade': 'Popravka i održavanje vozila u Beogradu',
   },
 };
 

@@ -10,8 +10,8 @@ describe('getPagesContent', () => {
       expect(p.contacts.steps.length).toBe(3);
       expect(p.privacy.sections.length).toBe(4);
       expect(p.thanks.heading).toBeTruthy();
-      expect(p.casesAutopodbor.metaTitle).toBeTruthy();
-      expect(p.casesAutoservice.metaTitle).toBeTruthy();
+      expect(p.casesVehicleSourcing.metaTitle).toBeTruthy();
+      expect(p.casesAutoService.metaTitle).toBeTruthy();
     }
   });
 

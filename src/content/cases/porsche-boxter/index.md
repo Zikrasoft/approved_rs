@@ -103,7 +103,7 @@ price:
   value: '63000'
   currency: €
 country: de
-service: autopodbor
+service: vehicle-sourcing
 image: image.jpg
 gallery: []
 date: 2026-07-07

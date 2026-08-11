@@ -6,7 +6,7 @@ price:
   value: '18600'
   currency: €
 country: rs
-service: autopodbor
+service: vehicle-sourcing
 image: ./image.jpg
 date: 2025-12-12
 published: true

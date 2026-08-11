@@ -1,9 +1,10 @@
 export const ru = {
   nav: {
-    autopodbor: 'Автоподбор',
-    autoservice: 'Автосервис',
-    vykup: 'Выкуп',
-    proverka: 'Проверка',
+    'vehicle-sourcing': 'Автоподбор',
+    'vehicle-import': 'Привоз авто',
+    'auto-service-belgrade': 'Автосервис',
+    'vehicle-buyback': 'Выкуп',
+    'vehicle-inspection': 'Проверка',
     cases: 'Кейсы',
     contacts: 'Контакты',
   },
@@ -20,7 +21,6 @@ export const ru = {
     privacyLabel: 'Конфиденциальность',
     tagline: 'Подберём, проверим и доставим автомобиль из Европы. Берём на себя весь процесс — от поиска до доставки.',
     contactManagerLabel: 'Написать менеджеру',
-    coverageLine: 'Германия · Испания · Сербия · Швейцария',
     hoursLine: 'Круглосуточно, без выходных',
     copyrightSuffix: 'Автоподбор, сервис и доставка авто из Европы',
     channelLinkLabel: 'Наш канал',
