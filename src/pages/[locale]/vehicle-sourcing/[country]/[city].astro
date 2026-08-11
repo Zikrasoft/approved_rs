@@ -45,6 +45,7 @@ const WHY_CITY = [
   city={city.slug}
   casesHeading={sc.casesHeadingFor((country[locale] as { nameGenitive?: string; name: string }).nameGenitive ?? country[locale].name)}
   breadcrumbs={[
+    { label: getServicesContent(locale)['vehicle-sourcing'].hub.breadcrumbLabel, href: PathBuilder.vehicleSourcingHub(locale) },
     { label: country[locale].name, href: PathBuilder.service(locale, 'vehicle-sourcing', countryCode!) },
     { label: city[locale].name },
   ]}

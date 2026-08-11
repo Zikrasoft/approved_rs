@@ -42,6 +42,9 @@ interface ServicesContent {
     descriptionFor: (location: string) => string;
     ctaLabel: string;
     casesHeadingFor: (location: string) => string;
+    // Breadcrumb leaf under the hub crumb (Автоподбор / {this}) — "Авто
+    // {location}" not "Автоподбор {location}", since the parent crumb
+    // already says Автоподбор; repeating it in the leaf too read oddly.
     breadcrumbLabelFor: (location: string) => string;
     stepsFor: (location: string) => StepItem[];
     deliveryLineFor: (destinations: string) => string;
@@ -208,7 +211,7 @@ const ru: ServicesContent = {
     descriptionFor: (location) => `Подберём автомобиль ${location} — среди авто, которые уже в этой стране, без ввоза из-за рубежа. Полная проверка, сопровождение сделки и доставка до вашего города — под ключ, включая растаможку.`,
     ctaLabel: 'Оставить заявку',
     casesHeadingFor: (location) => `Кейсы: автоподбор ${location}`,
-    breadcrumbLabelFor: (location) => `Автоподбор ${location}`,
+    breadcrumbLabelFor: (location) => `Авто ${location}`,
     stepsFor: (location) => [
       { n: '01', text: 'Оставляете заявку с требованиями — бюджет, марка, пробег' },
       { n: '02', text: `Ищем варианты ${location} по вашим критериям` },
@@ -442,7 +445,7 @@ const en: ServicesContent = {
     descriptionFor: (location) => `We'll find your car ${location} — sourced from cars already in the country, not shipped in from abroad. Full inspection, deal support, and delivery to your city — fully turnkey, customs clearance included.`,
     ctaLabel: 'Submit a Request',
     casesHeadingFor: (location) => `Case Studies: Car Sourcing ${location}`,
-    breadcrumbLabelFor: (location) => `Car Sourcing ${location}`,
+    breadcrumbLabelFor: (location) => `Cars ${location}`,
     stepsFor: (location) => [
       { n: '01', text: 'Submit your requirements — budget, make, mileage' },
       { n: '02', text: `We search for matches ${location} based on your criteria` },
@@ -676,7 +679,7 @@ const sr: ServicesContent = {
     descriptionFor: (location) => `Pronaći ćemo vozilo ${location} — biramo među vozilima koja su već u zemlji, ne dovozimo ih iz inostranstva. Potpuna provera, podrška tokom kupovine i dovoz do vašeg grada — sve na ključ, uključujući carinjenje.`,
     ctaLabel: 'Pošaljite zahtev',
     casesHeadingFor: (location) => `Primeri: odabir vozila ${location}`,
-    breadcrumbLabelFor: (location) => `Odabir vozila ${location}`,
+    breadcrumbLabelFor: (location) => `Vozila ${location}`,
     stepsFor: (location) => [
       { n: '01', text: 'Ostavljate zahtev sa kriterijumima — budžet, marka, kilometraža' },
       { n: '02', text: `Tražimo ponude ${location} prema vašim kriterijumima` },

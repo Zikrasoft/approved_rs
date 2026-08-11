@@ -41,7 +41,10 @@ const vehicleImportCrossSellLinks = getVehicleImportCrossSellSpokes(countryCode!
   currentCountry={countryCode!}
   currentService="vehicle-sourcing"
   casesHeading={sc.casesHeadingFor(location)}
-  breadcrumbs={[{ label: sc.breadcrumbLabelFor(location) }]}
+  breadcrumbs={[
+    { label: sc.hub.breadcrumbLabel, href: PathBuilder.vehicleSourcingHub(locale) },
+    { label: sc.breadcrumbLabelFor(location) },
+  ]}
 >
   <StepsList steps={sc.stepsFor(location)} />
   <p class="mt-6 text-sm leading-relaxed text-muted">
