@@ -29,10 +29,10 @@ interface PagesContent {
     ctaLabel: string;
     waitLabel: string;
     waitCasesLink: string;
-    waitAutopodborLink: string;
+    waitSourcingLink: string;
   };
-  casesAutopodbor: { metaTitle: string; metaDescription: string };
-  casesAutoservice: { metaTitle: string; metaDescription: string };
+  casesVehicleSourcing: { metaTitle: string; metaDescription: string };
+  casesAutoService: { metaTitle: string; metaDescription: string };
   casesShared: { heroSubtitle: string; emptyState: string };
 }
 
@@ -79,13 +79,13 @@ const ru: PagesContent = {
     ctaLabel: 'Написать напрямую',
     waitLabel: 'Пока ждёте',
     waitCasesLink: 'Наши кейсы →',
-    waitAutopodborLink: 'Автоподбор под ключ →',
+    waitSourcingLink: 'Автоподбор под ключ →',
   },
-  casesAutopodbor: {
+  casesVehicleSourcing: {
     metaTitle: 'Кейсы автоподбора — реальные автомобили клиентов',
     metaDescription: 'Реальные кейсы автоподбора, доставки, выкупа и проверки автомобилей из Германии, Испании, Сербии и Швейцарии. Машина, цена, история сделки.',
   },
-  casesAutoservice: {
+  casesAutoService: {
     metaTitle: 'Кейсы автосервиса в Белграде — примеры работ',
     metaDescription: 'Реальные кейсы ремонта и обслуживания автомобилей в нашем автосервисе в Белграде: диагностика, ТО, ремонт подвески, двигателя и трансмиссии.',
   },
@@ -98,7 +98,7 @@ const ru: PagesContent = {
 const en: PagesContent = {
   contacts: {
     metaTitle: 'Contacts',
-    metaDescription: 'Reach us on Telegram. Car sourcing, delivery, and buyout from Europe.',
+    metaDescription: 'Reach us on Telegram. Car sourcing, delivery, and buyback from Europe.',
     heroTitle: 'Contacts',
     heroSubtitle: 'We work through Telegram — fast and easy',
     info: [
@@ -138,13 +138,13 @@ const en: PagesContent = {
     ctaLabel: 'Message us directly',
     waitLabel: 'While you wait',
     waitCasesLink: 'Our cases →',
-    waitAutopodborLink: 'Full-Service Car Sourcing →',
+    waitSourcingLink: 'Full-Service Car Sourcing →',
   },
-  casesAutopodbor: {
+  casesVehicleSourcing: {
     metaTitle: 'Car Sourcing Case Studies — Real Client Cars',
-    metaDescription: 'Real case studies of car sourcing, delivery, buyout, and inspection from Germany, Spain, Serbia, and Switzerland. The car, the price, the story behind the deal.',
+    metaDescription: 'Real case studies of car sourcing, delivery, buyback, and inspection from Germany, Spain, Serbia, and Switzerland. The car, the price, the story behind the deal.',
   },
-  casesAutoservice: {
+  casesAutoService: {
     metaTitle: 'Auto Service Case Studies in Belgrade — Our Work',
     metaDescription: 'Real examples of car repair and maintenance at our Belgrade service center: diagnostics, scheduled maintenance, suspension, engine, and transmission repair.',
   },
@@ -197,13 +197,13 @@ const sr: PagesContent = {
     ctaLabel: 'Pišite nam direktno',
     waitLabel: 'Dok čekate',
     waitCasesLink: 'Naši primeri →',
-    waitAutopodborLink: 'Kompletan odabir vozila →',
+    waitSourcingLink: 'Kompletan odabir vozila →',
   },
-  casesAutopodbor: {
+  casesVehicleSourcing: {
     metaTitle: 'Primeri odabira vozila — stvarni automobili klijenata',
     metaDescription: 'Stvarni primeri odabira, dostave, otkupa i provere vozila iz Nemačke, Španije, Srbije i Švajcarske. Vozilo, cena, tok posla.',
   },
-  casesAutoservice: {
+  casesAutoService: {
     metaTitle: 'Primeri radova auto servisa u Beogradu',
     metaDescription: 'Stvarni primeri popravke i održavanja vozila u našem auto servisu u Beogradu: dijagnostika, redovno servisiranje, popravka vešanja, motora i menjača.',
   },

@@ -3,7 +3,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import ContactCTA from '@/components/ContactCTA.astro';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { getPagesContent } from '@/i18n/content/pages';
-import { withLocales } from '@/utils/paths';
+import { withLocales, PathBuilder } from '@/utils/paths';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
@@ -12,7 +12,7 @@ const p = getPagesContent(locale).thanks;
 const meta = {
   title: `${p.metaTitle} — ${SITE_NAME}`,
   description: p.metaDescription,
-  canonical: `${SITE_URL}/${locale}/thanks/`,
+  canonical: `${SITE_URL}${PathBuilder.thanks(locale)}`,
   noindex: true,
 };
 ---
@@ -53,8 +53,8 @@ const meta = {
       <div class="wait-card mt-14 p-6 rounded-sm border thanks-item" style="--i:4">
         <p class="text-xs uppercase tracking-[0.16em] font-medium mb-4 text-muted">{p.waitLabel}</p>
         <div class="flex flex-wrap justify-center gap-6">
-          <a href={`/${locale}/cases/autopodbor/`} class="wait-link">{p.waitCasesLink}</a>
-          <a href={`/${locale}/autopodbor/de/`} class="wait-link">{p.waitAutopodborLink}</a>
+          <a href={PathBuilder.casesVehicleSourcing(locale)} class="wait-link">{p.waitCasesLink}</a>
+          <a href={PathBuilder.service(locale, 'vehicle-sourcing', 'de')} class="wait-link">{p.waitSourcingLink}</a>
         </div>
       </div>
 

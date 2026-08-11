@@ -11,10 +11,9 @@ import { getCollection, render } from 'astro:content';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { getPromoBanners } from '@/i18n/content/promoBanners';
 import { excerptFromMarkdown, generateArticleSchema } from '@/utils/seo';
-import { withLocales } from '@/utils/paths';
+import { withLocales, PathBuilder } from '@/utils/paths';
 import { getServicesContent } from '@/i18n/content/services';
 import { getI18n } from '@/i18n/getI18n';
-import type { Locale } from '@/i18n/config';
 import { marked } from 'marked';
 
 export async function getStaticPaths() {
@@ -23,8 +22,8 @@ export async function getStaticPaths() {
 }
 
 const { locale } = Astro.params;
-const cc = getServicesContent(locale as Locale).caseChrome;
-const t = getI18n(locale as Locale);
+const cc = getServicesContent(locale).caseChrome;
+const t = getI18n(locale);
 const { case: c } = Astro.props;
 
 // Case bodies are written in ru; en/sr get an optional title+body
@@ -38,10 +37,10 @@ const translation = locale === 'en' ? c.data.translations?.en : locale === 'sr' 
 const title = translation?.title ?? c.data.title;
 const { Content } = await render(c);
 const translatedHtml = translation ? await marked.parse(translation.body) : null;
-const banners = getPromoBanners(locale as Locale, 'autopodbor');
+const banners = getPromoBanners(locale, 'vehicle-sourcing');
 
 const hook = excerptFromMarkdown(translation?.body ?? c.body ?? '');
-const canonical = `${SITE_URL}/${locale}/cases/${c.id}/`;
+const canonical = `${SITE_URL}${PathBuilder.case(locale, c.id)}`;
 const imageUrl = c.data.image ? `${SITE_URL}${c.data.image.src}` : undefined;
 
 const meta = {
@@ -69,7 +68,7 @@ const schema = generateArticleSchema({
     <span class="deco-word" style="font-size: clamp(7rem, 18vw, 16rem); bottom: -1rem; right: -1%; opacity: 0.8;">CASE</span>
 
     <div class="relative max-w-6xl mx-auto px-6 py-16 md:py-24">
-      <Breadcrumbs items={[{ label: t.nav.cases, href: `/${locale}/cases/autopodbor/` }, { label: title }]} />
+      <Breadcrumbs items={[{ label: t.nav.cases, href: PathBuilder.casesVehicleSourcing(locale) }, { label: title }]} />
 
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
         <div class="lg:col-span-3">

@@ -6,7 +6,7 @@ describe('getMetaTemplates', () => {
   it('interpolates the location string into title and description for every locale/service', () => {
     for (const locale of SUPPORTED_LOCALES) {
       const templates = getMetaTemplates(locale);
-      for (const service of ['autopodbor', 'vykup', 'proverka'] as const) {
+      for (const service of ['vehicle-sourcing', 'vehicle-buyback', 'vehicle-inspection'] as const) {
         const result = templates[service]('__LOC__');
         expect(result.title).toContain('__LOC__');
         expect(result.description).toContain('__LOC__');
@@ -15,7 +15,7 @@ describe('getMetaTemplates', () => {
   });
 
   it('en and sr produce different text than ru', () => {
-    expect(getMetaTemplates('en').autopodbor('X').title).not.toBe(getMetaTemplates('ru').autopodbor('X').title);
-    expect(getMetaTemplates('sr').autopodbor('X').title).not.toBe(getMetaTemplates('ru').autopodbor('X').title);
+    expect(getMetaTemplates('en')['vehicle-sourcing']('X').title).not.toBe(getMetaTemplates('ru')['vehicle-sourcing']('X').title);
+    expect(getMetaTemplates('sr')['vehicle-sourcing']('X').title).not.toBe(getMetaTemplates('ru')['vehicle-sourcing']('X').title);
   });
 });

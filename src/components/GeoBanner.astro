@@ -3,6 +3,7 @@ import { getActiveCountries, getCountryFlag } from '@/utils/geo';
 import type { Country } from '@/utils/geo';
 import { getLocale } from '@/i18n/config';
 import { getI18n } from '@/i18n/getI18n';
+import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   detected: Country;
@@ -20,7 +21,7 @@ const common = getI18n(locale).common;
     <div class="flex items-center gap-2 flex-wrap">
       {options.map(c => (
         <a
-          href={`/${locale}/autopodbor/${c.code}/`}
+          href={PathBuilder.service(locale, 'vehicle-sourcing', c.code)}
           data-geo-choice
           class:list={[
             'geo-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium no-underline border',

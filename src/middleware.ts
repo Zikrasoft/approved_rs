@@ -26,6 +26,42 @@ const LEGACY_PATH_REWRITES: Record<string, string> = {
   '/cases/audi-a4-2022-de/': '/cases/autopodbor',
 };
 
+// Service-slug English migration (was Russian-transliterated). Unlike
+// LEGACY_PATH_REWRITES above (exact, unprefixed-path match, written for
+// pre-i18n URLs that never had a locale segment), these old URLs already
+// carry a locale prefix and have dynamic country/city/case-slug tails — so
+// this is a generic per-segment rename instead of enumerating every path.
+const SLUG_RENAMES: Record<string, string> = {
+  autopodbor: 'vehicle-sourcing',
+  privoz: 'vehicle-import',
+  vykup: 'vehicle-buyback',
+  proverka: 'vehicle-inspection',
+  'avtoservis-belgrade': 'auto-service-belgrade',
+  autoservice: 'auto-service',
+};
+
+export function renameSlugSegments(pathname: string): string | null {
+  let changed = false;
+  const renamed = pathname.split('/').map(seg => {
+    if (seg in SLUG_RENAMES) { changed = true; return SLUG_RENAMES[seg]; }
+    return seg;
+  });
+  return changed ? renamed.join('/') : null;
+}
+
+// The Germany vehicle-import spoke moved under the EU one (/vehicle-import/eu/de/,
+// was /vehicle-import/de/) — an inserted segment, not a 1-for-1 rename, so it
+// doesn't fit SLUG_RENAMES above. Suffix match (not exact) so it also catches
+// the path post-slug-rename (see onRequest) without needing its own locale handling.
+const OLD_DE_SPOKE_PATH = '/vehicle-import/de/';
+const NEW_DE_SPOKE_PATH = '/vehicle-import/eu/de/';
+
+export function moveGermanySpoke(pathname: string): string | null {
+  return pathname.endsWith(OLD_DE_SPOKE_PATH)
+    ? pathname.slice(0, -OLD_DE_SPOKE_PATH.length) + NEW_DE_SPOKE_PATH
+    : null;
+}
+
 // No trailing slash on '/keystatic': the CMS admin's own root route is the
 // bare path (no trailing slash) before Keystatic does its own internal
 // routing, so a trailing-slash prefix would miss it.
@@ -87,6 +123,25 @@ export const onRequest = defineMiddleware((context, next) => {
   }
 
   const rewritten = LEGACY_PATH_REWRITES[pathname] ?? pathname;
+
+  // Checked separately from the block below: an already-locale-prefixed old
+  // URL (e.g. /en/autopodbor/de/) must keep that exact locale — re-running
+  // detectLocale() here and prepending its result on top of the existing
+  // prefix would double it up (/ru/en/vehicle-sourcing/de/) whenever the
+  // visitor's current browser/cookie locale differs from the one baked
+  // into the stale link they clicked.
+  const slugRenamed = renameSlugSegments(rewritten);
+  const restructured = moveGermanySpoke(slugRenamed ?? rewritten) ?? slugRenamed;
+  if (restructured) {
+    if (requestHasLocale(context)) {
+      return context.redirect(`${restructured}${search}`, 301);
+    }
+    const locale = detectLocale(
+      context.request.headers.get('accept-language'),
+      context.cookies.get(LOCALE_COOKIE)?.value
+    );
+    return context.redirect(`/${locale}${restructured}${search}`, 301);
+  }
 
   if (rewritten === pathname && requestHasLocale(context)) {
     const locale = pathname.split('/')[1];

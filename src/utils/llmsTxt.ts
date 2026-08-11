@@ -6,28 +6,29 @@ import { getPublishedCases, getPublishedAutoserviceCases } from '@/utils/casesQu
 import { getServicesContent } from '@/i18n/content/services';
 import { getHomeContent } from '@/i18n/content/home';
 import { buildLocation } from '@/utils/seo';
+import { PathBuilder } from '@/utils/paths';
 import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 
 // 'cases' isn't here — it's byte-identical to the existing nav.cases
 // dictionary entry, reused directly below instead of duplicating it.
-const SECTION_HEADINGS: Record<Locale, Record<'countries' | 'cities' | 'privoz' | 'other' | 'languages', string>> = {
-  ru: { countries: 'Услуги по странам', cities: 'Автоподбор по городам', privoz: 'Привоз авто', other: 'Прочее', languages: 'Другие языки' },
-  en: { countries: 'Services by Country', cities: 'Car Sourcing by City', privoz: 'Car Import', other: 'Other', languages: 'Other Languages' },
-  sr: { countries: 'Usluge po zemljama', cities: 'Odabir vozila po gradovima', privoz: 'Uvoz vozila', other: 'Ostalo', languages: 'Drugi jezici' },
+const SECTION_HEADINGS: Record<Locale, Record<'countries' | 'cities' | 'vehicleImport' | 'other' | 'languages', string>> = {
+  ru: { countries: 'Услуги по странам', cities: 'Автоподбор по городам', vehicleImport: 'Привоз авто', other: 'Прочее', languages: 'Другие языки' },
+  en: { countries: 'Services by Country', cities: 'Car Sourcing by City', vehicleImport: 'Car Import', other: 'Other', languages: 'Other Languages' },
+  sr: { countries: 'Usluge po zemljama', cities: 'Odabir vozila po gradovima', vehicleImport: 'Uvoz vozila', other: 'Ostalo', languages: 'Drugi jezici' },
 };
 
-const CASE_COUNT_LABELS: Record<Locale, { autopodbor: (n: number) => string; autoservice: (n: number) => string }> = {
+const CASE_COUNT_LABELS: Record<Locale, { 'vehicle-sourcing': (n: number) => string; 'auto-service-belgrade': (n: number) => string }> = {
   ru: {
-    autopodbor: (n) => `${n} реализованных подборов с автомобилем, страной и ценой`,
-    autoservice: (n) => `${n} примеров ремонта и обслуживания в Белграде`,
+    'vehicle-sourcing': (n) => `${n} реализованных подборов с автомобилем, страной и ценой`,
+    'auto-service-belgrade': (n) => `${n} примеров ремонта и обслуживания в Белграде`,
   },
   en: {
-    autopodbor: (n) => `${n} completed sourcing cases with car, country, and price`,
-    autoservice: (n) => `${n} repair and maintenance examples in Belgrade`,
+    'vehicle-sourcing': (n) => `${n} completed sourcing cases with car, country, and price`,
+    'auto-service-belgrade': (n) => `${n} repair and maintenance examples in Belgrade`,
   },
   sr: {
-    autopodbor: (n) => `${n} realizovanih primera odabira sa vozilom, zemljom i cenom`,
-    autoservice: (n) => `${n} primera popravke i održavanja u Beogradu`,
+    'vehicle-sourcing': (n) => `${n} realizovanih primera odabira sa vozilom, zemljom i cenom`,
+    'auto-service-belgrade': (n) => `${n} primera popravke i održavanja u Beogradu`,
   },
 };
 
@@ -50,7 +51,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   lines.push(`## ${s.countries}`, '');
   for (const country of countries) {
     for (const service of SERVICES) {
-      lines.push(`- [${nav[service.slug]} ${buildLocation(locale, country)}](${SITE_URL}/${locale}/${service.slug}/${country.code}/)`);
+      lines.push(`- [${nav[service.slug]} ${buildLocation(locale, country)}](${SITE_URL}${PathBuilder.service(locale, service.slug, country.code)})`);
     }
   }
   lines.push('');
@@ -58,26 +59,28 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   lines.push(`## ${s.cities}`, '');
   for (const country of countries) {
     for (const city of getCitiesForCountry(country.code)) {
-      lines.push(`- [${nav.autopodbor} ${buildLocation(locale, undefined, city)}](${SITE_URL}/${locale}/autopodbor/${country.code}/${city.slug}/)`);
+      lines.push(`- [${nav['vehicle-sourcing']} ${buildLocation(locale, undefined, city)}](${SITE_URL}${PathBuilder.vehicleSourcingCity(locale, country.code, city.slug)})`);
     }
   }
   lines.push('');
 
-  lines.push(`## ${s.privoz}`, '');
-  lines.push(`- [${sc.privoz.hub.title}](${SITE_URL}/${locale}/privoz/)`);
-  lines.push(`- [${sc.privoz.de.title}](${SITE_URL}/${locale}/privoz/de/)`);
-  lines.push(`- [${sc.privoz.eu.title}](${SITE_URL}/${locale}/privoz/eu/)`);
-  lines.push(`- [${sc.privoz.china.title}](${SITE_URL}/${locale}/privoz/china/)`);
+  lines.push(`## ${s.vehicleImport}`, '');
+  lines.push(`- [${sc['vehicle-import'].hub.title}](${SITE_URL}${PathBuilder.vehicleImportHub(locale)})`);
+  lines.push(`- [${sc['vehicle-import'].de.title}](${SITE_URL}${PathBuilder.vehicleImportSpoke(locale, 'de')})`);
+  lines.push(`- [${sc['vehicle-import'].es.title}](${SITE_URL}${PathBuilder.vehicleImportSpoke(locale, 'es')})`);
+  lines.push(`- [${sc['vehicle-import'].ch.title}](${SITE_URL}${PathBuilder.vehicleImportSpoke(locale, 'ch')})`);
+  lines.push(`- [${sc['vehicle-import'].eu.title}](${SITE_URL}${PathBuilder.vehicleImportSpoke(locale, 'eu')})`);
+  lines.push(`- [${sc['vehicle-import'].china.title}](${SITE_URL}${PathBuilder.vehicleImportSpoke(locale, 'china')})`);
   lines.push('');
 
   lines.push(`## ${nav.cases}`, '');
-  lines.push(`- [${nav.cases}](${SITE_URL}/${locale}/cases/autopodbor/) — ${cc.autopodbor(cases.length)}`);
-  lines.push(`- [${sc.avtoservisBelgrade.worksHeading}](${SITE_URL}/${locale}/cases/autoservice/) — ${cc.autoservice(autoserviceCases.length)}`);
+  lines.push(`- [${nav.cases}](${SITE_URL}${PathBuilder.casesVehicleSourcing(locale)}) — ${cc['vehicle-sourcing'](cases.length)}`);
+  lines.push(`- [${sc.autoServiceBelgrade.worksHeading}](${SITE_URL}${PathBuilder.casesAutoService(locale)}) — ${cc['auto-service-belgrade'](autoserviceCases.length)}`);
   lines.push('');
 
   lines.push(`## ${s.other}`, '');
-  lines.push(`- [${t.common.homeLabel}](${SITE_URL}/${locale}/)`);
-  lines.push(`- [${nav.contacts}](${SITE_URL}/${locale}/contacts/)`);
+  lines.push(`- [${t.common.homeLabel}](${SITE_URL}${PathBuilder.home(locale)})`);
+  lines.push(`- [${nav.contacts}](${SITE_URL}${PathBuilder.contacts(locale)})`);
   lines.push('');
 
   lines.push(`## ${s.languages}`, '');

@@ -34,15 +34,19 @@ export const FLAGS: Record<string, string> = {
   ua: '🇺🇦', by: '🇧🇾', kz: '🇰🇿', ba: '🇧🇦', hr: '🇭🇷', me: '🇲🇪', mk: '🇲🇰', tr: '🇹🇷',
 };
 
-// China isn't in countries.json (no autopodbor market there, no per-country
-// name-case data needed) but privoz sources cars from it — one shared name
+// China isn't in countries.json (no vehicle sourcing market there, no per-country
+// name-case data needed) but vehicle-import sources cars from it — one shared name
 // constant instead of the same inline locale map duplicated in every place
-// that needs to mention it (schema areaServed on 2+ privoz pages).
+// that needs to mention it (schema areaServed on 2+ vehicle-import pages).
 export const CHINA_NAME: Record<Locale, string> = { ru: 'Китай', en: 'China', sr: 'Kina' };
+// Not in countries.json (see above) — used as the `country` value on
+// vehicle-import cases sourced from China, so the china spoke page can filter
+// for them the same way de/eu do.
+export const CHINA_COUNTRY_CODE = 'cn';
 
 // Explicit, not "every active country except rs/de" — countries.json's
 // active list can grow for reasons that have nothing to do with where
-// privoz sources cars from (e.g. Portugal, added as a destination-only
-// autopodbor market). Deriving this by exclusion would silently claim new
+// vehicle-import sources cars from (e.g. Portugal, added as a destination-only
+// vehicle sourcing market). Deriving this by exclusion would silently claim new
 // destination-only countries as EU sourcing markets too.
 export const PRIVOZ_EU_SOURCE_CODES = ['es', 'ch'] as const;

@@ -111,12 +111,12 @@ const ru: HomeContent = {
 
 const en: HomeContent = {
   metaTitle: 'Car Sourcing and Import, Fully Turnkey',
-  metaDescription: 'Car sourcing in your own country, or import from Europe and China — fully turnkey. Inspection, buyout, auto service. Serving Russian-speaking clients worldwide.',
+  metaDescription: 'Car sourcing in your own country, or import from Europe and China — fully turnkey. Inspection, buyback, auto service. Serving Russian-speaking clients worldwide.',
   journey: [
     { title: 'Sourcing', desc: 'We find, inspect, and deliver a car that fits your budget — fully turnkey, in Germany, Spain, Serbia, and Switzerland.' },
     { title: 'Import', desc: "Car isn't in your country? We'll source it and bring it from Germany, Europe, or China — fully turnkey, customs clearance included." },
     { title: 'Inspection', desc: 'An independent expert inspects the car before purchase — 100+ checkpoints, with video.', note: 'Already found a car yourself? We can inspect it separately' },
-    { title: 'Buyout', desc: 'We handle the buyout and customs clearance for cars on foreign plates.', note: "Already have the car abroad? We'll help register it" },
+    { title: 'Buyback', desc: 'We handle the buyback and customs clearance for cars on foreign plates.', note: "Already have the car abroad? We'll help register it" },
     { title: 'Auto Service', desc: 'Car repair and maintenance in Belgrade — with a quality guarantee.', note: 'Already own the car? We handle that too' },
   ],
   heroEyebrow: 'One path: cars from Europe',
@@ -129,7 +129,7 @@ const en: HomeContent = {
   statCountries: { label: 'countries' },
   statYears: { value: '5 yrs', label: 'on the market' },
   journeyHeading: 'One Path: From Search to Service',
-  journeySubtext: "Sourcing, import, inspection, buyout, and auto service aren't separate services — they're stages of one journey for your car. Jump in at any step.",
+  journeySubtext: "Sourcing, import, inspection, buyback, and auto service aren't separate services — they're stages of one journey for your car. Jump in at any step.",
   journeyMoreLabel: 'Learn more',
   countryStripLabel: 'Car sourcing by country:',
   latestCasesHeading: 'Latest Cases',

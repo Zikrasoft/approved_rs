@@ -1,6 +1,7 @@
 ---
 import { getLocale } from '@/i18n/config';
 import { getI18n } from '@/i18n/getI18n';
+import { PathBuilder } from '@/utils/paths';
 
 const locale = getLocale(Astro.currentLocale);
 const cc = getI18n(locale).common.cookie;
@@ -15,7 +16,7 @@ const cc = getI18n(locale).common.cookie;
   <p class="text-sm leading-relaxed text-secondary mb-4">
     {cc.notice}
     {' '}{cc.more}{' '}
-    <a href={`/${locale}/privacy/`} class="underline text-accent">{cc.policyLink}</a>.
+    <a href={PathBuilder.privacy(locale)} class="underline text-accent">{cc.policyLink}</a>.
   </p>
   <div class="flex gap-3">
     <button

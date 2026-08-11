@@ -13,19 +13,21 @@ const { generateLlmsTxt } = await import('./llmsTxt');
 const { SUPPORTED_LOCALES } = await import('@/i18n/config');
 
 describe('generateLlmsTxt', () => {
-  it('includes the hub and all 3 privoz spokes for every locale', async () => {
+  it('includes the hub and all 5 vehicle-import spokes for every locale', async () => {
     for (const locale of SUPPORTED_LOCALES) {
       const body = await generateLlmsTxt(locale);
-      expect(body).toContain(`/${locale}/privoz/)`);
-      expect(body).toContain(`/${locale}/privoz/de/)`);
-      expect(body).toContain(`/${locale}/privoz/eu/)`);
-      expect(body).toContain(`/${locale}/privoz/china/)`);
+      expect(body).toContain(`/${locale}/vehicle-import/)`);
+      expect(body).toContain(`/${locale}/vehicle-import/eu/de/)`);
+      expect(body).toContain(`/${locale}/vehicle-import/eu/es/)`);
+      expect(body).toContain(`/${locale}/vehicle-import/eu/ch/)`);
+      expect(body).toContain(`/${locale}/vehicle-import/eu/)`);
+      expect(body).toContain(`/${locale}/vehicle-import/china/)`);
     }
   });
 
   it('includes the Portugal country entry (added after this file was first written)', async () => {
     const body = await generateLlmsTxt('ru');
-    expect(body).toContain('/ru/autopodbor/pt/)');
+    expect(body).toContain('/ru/vehicle-sourcing/pt/)');
   });
 
   it('"other languages" section links to the other 2 locales, not the current one', async () => {

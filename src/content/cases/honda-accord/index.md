@@ -181,7 +181,7 @@ price:
   value: '33000'
   currency: €
 country: rs
-service: inspection
+service: vehicle-inspection
 image: image.jpg
 gallery: []
 date: 2025-12-12

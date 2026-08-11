@@ -1,11 +1,13 @@
 import type { Locale } from '@/i18n/config';
+import type { CasesTabKind } from '@/utils/labels';
 
 // SEO-keyword-dense banner shown on case-detail pages ("where we work") —
 // one of these is picked at random per page render. City names are spelled
 // out explicitly (not just "Serbia") because that's what people actually
-// search for. Two separate sets: autopodbor cases talk about sourcing/buyout
-// across all of Serbia, autoservice cases talk about the Belgrade repair shop.
-const autopodborBanners: Record<Locale, string[]> = {
+// search for. Two separate sets: vehicle-sourcing cases talk about sourcing/
+// buyback across all of Serbia, autoservice cases talk about the Belgrade
+// repair shop.
+const sourcingBanners: Record<Locale, string[]> = {
   ru: [
     'Если вам нужен **автоподбор в Белграде, Нови-Саде, Панчево, Суботице и по всей Сербии**, поможем найти действительно достойный автомобиль, проверив его историю, техническое состояние и юридическую чистоту.',
     'Если вам нужен **автоподбор в Сербии**, **автоподбор в Белграде**, **Нови-Саде**, **Нише**, **Суботице**, **Панчево**, **Крагуеваце**, **Чачаке**, **Ужице**, **Валево**, **Зренянине**, **Шабаце**, **Сомборе** или любом другом городе Сербии — мы проверим историю автомобиля, проведем профессиональную диагностику и поможем купить действительно достойный экземпляр.',
@@ -21,7 +23,7 @@ const autopodborBanners: Record<Locale, string[]> = {
   en: [
     'Looking for **car sourcing in Belgrade, Novi Sad, Pančevo, Subotica, or anywhere in Serbia**? We\'ll help you find a genuinely worthy car, checking its history, technical condition, and legal standing.',
     'Whether you need **car sourcing in Serbia** — in **Belgrade**, **Novi Sad**, **Niš**, **Subotica**, **Pančevo**, **Kragujevac**, **Čačak**, **Užice**, **Valjevo**, **Zrenjanin**, **Šabac**, **Sombor**, or any other Serbian city — we\'ll check the car\'s history, run professional diagnostics, and help you buy a genuinely solid example.',
-    'Need a **car buyout in Serbia** — an **urgent buyout in Belgrade**, **Novi Sad**, **Niš**, **Subotica**, **Pančevo**, **Kragujevac**, **Čačak**, **Užice**, **Valjevo**, **Zrenjanin**, or anywhere else in Serbia? We\'ll evaluate the car fast, offer a fair price, handle all the paperwork, and pay out right away.',
+    'Need a **car buyback in Serbia** — an **urgent buyback in Belgrade**, **Novi Sad**, **Niš**, **Subotica**, **Pančevo**, **Kragujevac**, **Čačak**, **Užice**, **Valjevo**, **Zrenjanin**, or anywhere else in Serbia? We\'ll evaluate the car fast, offer a fair price, handle all the paperwork, and pay out right away.',
     'For **car sourcing in Serbia** — **Belgrade**, **Novi Sad**, **Niš**, **Subotica**, **Pančevo**, **Kragujevac**, **Čačak**, **Užice**, **Valjevo**, **Zrenjanin**, **Šabac**, **Sombor**, or any other city — we run a professional check, study the car\'s history, and help you buy safely.',
     'Need **car sourcing in Serbia** — in **Belgrade**, **Novi Sad**, **Niš**, **Subotica**, **Pančevo**, **Kragujevac**, **Čačak**, **Užice**, **Valjevo**, **Zrenjanin**, **Sombor**, **Šabac**, or any other Serbian city? We inspect the car with professional equipment, assess its technical condition, and help you buy a genuinely worthy one.',
     'Need a **car brought in from Germany to Serbia** — a **BMW X6 from Germany**, sourcing, inspection, delivery, and customs clearance, fully turnkey? Get in touch!',
@@ -71,6 +73,6 @@ const autoserviceBanners: Record<Locale, string[]> = {
   ],
 };
 
-export function getPromoBanners(locale: Locale, kind: 'autopodbor' | 'autoservice' = 'autopodbor'): string[] {
-  return kind === 'autoservice' ? autoserviceBanners[locale] : autopodborBanners[locale];
+export function getPromoBanners(locale: Locale, kind: CasesTabKind = 'vehicle-sourcing'): string[] {
+  return kind === 'auto-service' ? autoserviceBanners[locale] : sourcingBanners[locale];
 }

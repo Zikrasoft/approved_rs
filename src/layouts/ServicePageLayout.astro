@@ -10,10 +10,11 @@ import type { MetaProps } from '@/utils/seo';
 import type { CollectionEntry } from 'astro:content';
 import { SITE_NAME } from '@/utils/constants';
 import { getActiveCountries } from '@/utils/geo';
-import { SERVICES } from '@/utils/labels';
+import { SERVICES, isCountryScopedServiceSlug, type ServiceSlug } from '@/utils/labels';
 import { toCaseItem } from '@/utils/cases';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
+import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   meta: MetaProps;
@@ -25,14 +26,14 @@ interface Props {
   formService: string;
   currentCountry: string;
   // The "deal identity" shown in the hero watermark and sent as the lead's
-  // country field — defaults to currentCountry, but privoz pages need to
+  // country field — defaults to currentCountry, but vehicle-import pages need to
   // diverge: currentCountry stays a real country code (so the "other
-  // services" cross-links below still resolve to a valid /autopodbor/{cc}/
+  // services" cross-links below still resolve to a valid /vehicle-sourcing/{cc}/
   // etc.), while leadCountry carries the actual corridor ('de'/'eu'/'china')
   // so sales sees the right source in the Telegram notification instead of
-  // a misleading "RS" on every privoz lead.
+  // a misleading "RS" on every vehicle-import lead.
   leadCountry?: string;
-  currentService: string;
+  currentService: ServiceSlug;
   cases?: CollectionEntry<'cases'>[];
   casesHeading?: string;
   city?: string;
@@ -88,10 +89,10 @@ const t = getI18n(locale);
   <slot name="cases"><CasesGrid {items} heading={casesHeading ?? ''} /></slot>
 
   <div class="max-w-6xl mx-auto px-6 pb-16 pt-4">
-    {showCountryCrossLinks && (
-      <ChipLinks label={t.common.alsoWorkingInLabel} items={getActiveCountries().filter(c => c.code !== currentCountry).map(c => ({ href: `/${locale}/${currentService}/${c.code}/`, text: c[locale].name }))} />
+    {showCountryCrossLinks && isCountryScopedServiceSlug(currentService) && (
+      <ChipLinks label={t.common.alsoWorkingInLabel} items={getActiveCountries().filter(c => c.code !== currentCountry).map(c => ({ href: PathBuilder.service(locale, currentService, c.code), text: c[locale].name }))} />
     )}
-    <ChipLinks label={t.common.otherServicesLabel} items={SERVICES.filter(s => s.slug !== currentService).map(s => ({ href: `/${locale}/${s.slug}/${currentCountry}/`, text: t.nav[s.slug] }))} />
+    <ChipLinks label={t.common.otherServicesLabel} items={SERVICES.filter(s => s.slug !== currentService).map(s => ({ href: PathBuilder.service(locale, s.slug, currentCountry), text: t.nav[s.slug] }))} />
   </div>
 
 </BaseLayout>

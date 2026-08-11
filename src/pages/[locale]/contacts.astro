@@ -7,7 +7,7 @@ import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { getFaq } from '@/i18n/content/faq';
 import { getPagesContent } from '@/i18n/content/pages';
 import { getI18n } from '@/i18n/getI18n';
-import { withLocales } from '@/utils/paths';
+import { withLocales, PathBuilder } from '@/utils/paths';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
@@ -17,7 +17,7 @@ const t = getI18n(locale);
 const meta = {
   title: `${p.metaTitle} | ${SITE_NAME}`,
   description: p.metaDescription,
-  canonical: `${SITE_URL}/${locale}/contacts/`,
+  canonical: `${SITE_URL}${PathBuilder.contacts(locale)}`,
 };
 
 const info = p.info;

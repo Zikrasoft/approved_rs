@@ -27,29 +27,30 @@ import { telegramLink, DEFAULT_TG_MESSAGE } from "@/utils/telegramLink";
 import StatBlock from "@/components/StatBlock.astro";
 import { toCaseItem } from "@/utils/cases";
 import { getHomeContent } from "@/i18n/content/home";
-import type { Locale } from "@/i18n/config";
+import { PathBuilder } from "@/utils/paths";
+import { getLocale } from "@/i18n/config";
 
-const { locale } = Astro.params;
-const h = getHomeContent(locale as Locale);
+const locale = getLocale(Astro.params.locale);
+const h = getHomeContent(locale);
 const meta = {
     title: `${h.metaTitle} | ${SITE_NAME}`,
     description: h.metaDescription,
-    canonical: `${SITE_URL}/${locale}/`,
+    canonical: `${SITE_URL}${PathBuilder.home(locale)}`,
 };
 
 const allCases = await getCollection("cases");
 const latestCases = allCases.filter((c) => c.data.published).slice(0, 3);
-const items = latestCases.map((c) => toCaseItem(c, (locale ?? 'ru') as Locale));
+const items = latestCases.map((c) => toCaseItem(c, locale));
 const countries = getActiveCountries();
 
 const schema = generateOrganizationSchema({
     url: SITE_URL,
     description: meta.description,
-    // Autopodbor's own markets plus China — privoz sources cars from there
+    // Autopodbor's own markets plus China — vehicle-import sources cars from there
     // too, even though it's not a countries.json market in its own right.
-    areaServed: [...countries.map((c) => c[locale as Locale].name), CHINA_NAME[locale as Locale]],
+    areaServed: [...countries.map((c) => c[locale].name), CHINA_NAME[locale]],
     sameAs: [`https://t.me/${TG_MANAGER}`, `https://www.threads.com/@${THREADS_CHANNEL}`],
-    contactUrl: telegramLink(TG_MANAGER, DEFAULT_TG_MESSAGE[locale as Locale]),
+    contactUrl: telegramLink(TG_MANAGER, DEFAULT_TG_MESSAGE[locale]),
 });
 
 // One connected story instead of a flat service list — each stop is a real
@@ -57,33 +58,33 @@ const schema = generateOrganizationSchema({
 // jump in if you're not starting from zero).
 const journey = [
     {
-        href: `/${locale}/autopodbor/de/`,
+        href: PathBuilder.service(locale, 'vehicle-sourcing', 'de'),
         Icon: Search,
         title: h.journey[0].title,
         desc: h.journey[0].desc,
     },
     {
-        href: `/${locale}/privoz/`,
+        href: PathBuilder.vehicleImportHub(locale),
         Icon: Globe,
         title: h.journey[1].title,
         desc: h.journey[1].desc,
     },
     {
-        href: `/${locale}/proverka/de/`,
+        href: PathBuilder.service(locale, 'vehicle-inspection', 'de'),
         Icon: ClipboardCheck,
         title: h.journey[2].title,
         desc: h.journey[2].desc,
         note: h.journey[2].note,
     },
     {
-        href: `/${locale}/vykup/de/`,
+        href: PathBuilder.service(locale, 'vehicle-buyback', 'de'),
         Icon: Banknote,
         title: h.journey[3].title,
         desc: h.journey[3].desc,
         note: h.journey[3].note,
     },
     {
-        href: `/${locale}/avtoservis-belgrade/`,
+        href: PathBuilder.autoServiceBelgrade(locale),
         Icon: Wrench,
         title: h.journey[4].title,
         desc: h.journey[4].desc,
@@ -229,7 +230,7 @@ const journey = [
             <!-- Country strip -->
             <p class="text-xs tracking-widest uppercase mt-14 mb-3 font-medium text-muted">{h.countryStripLabel}</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {countries.map((c) => <CountryPill country={c} locale={locale as Locale} />)}
+                {countries.map((c) => <CountryPill country={c} locale={locale} />)}
             </div>
 
             <!-- Mobile-only lead form: desktop keeps it in the hero sidebar,
@@ -246,7 +247,7 @@ const journey = [
         items={items}
         heading={h.latestCasesHeading}
         headingSize="xl"
-        viewAllHref={`/${locale}/cases/autopodbor/`}
+        viewAllHref={PathBuilder.casesVehicleSourcing(locale)}
     />
 
     <!-- ─── Why us ───────────────────────────────────────── -->

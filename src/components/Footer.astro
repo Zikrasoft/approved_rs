@@ -9,6 +9,7 @@ import { SITE_NAME, DEFAULT_COUNTRY, TG_MANAGER, WHATSAPP_NUMBER, VIBER_NUMBER, 
 import { telegramLink, DEFAULT_TG_MESSAGE } from '@/utils/telegramLink';
 import { whatsappLink, viberLink } from '@/utils/contactLinks';
 import { getActiveCountries } from '@/utils/geo';
+import { PathBuilder } from '@/utils/paths';
 const year = new Date().getFullYear();
 const locale = getLocale(Astro.currentLocale);
 const t = getI18n(locale);
@@ -79,9 +80,9 @@ const coverageLine = getActiveCountries().map(c => c[locale].name).join(' · ');
       <div>
         <p class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted">{t.footer.companyHeading}</p>
         <nav class="flex flex-col gap-2.5 text-sm footer-nav text-secondary">
-          <a href={`/${locale}/cases/autopodbor/`}>{t.nav.cases}</a>
-          <a href={`/${locale}/contacts/`}>{t.nav.contacts}</a>
-          <a href={`/${locale}/privacy/`}>{t.footer.privacyLabel}</a>
+          <a href={PathBuilder.casesVehicleSourcing(locale)}>{t.nav.cases}</a>
+          <a href={PathBuilder.contacts(locale)}>{t.nav.contacts}</a>
+          <a href={PathBuilder.privacy(locale)}>{t.footer.privacyLabel}</a>
         </nav>
         <div class="mt-6 space-y-1.5">
           <p class="text-xs text-muted">{coverageLine}</p>

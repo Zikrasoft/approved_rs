@@ -1,10 +1,10 @@
 export const ru = {
   nav: {
-    autopodbor: 'Автоподбор',
-    privoz: 'Привоз авто',
-    autoservice: 'Автосервис',
-    vykup: 'Выкуп',
-    proverka: 'Проверка',
+    'vehicle-sourcing': 'Автоподбор',
+    'vehicle-import': 'Привоз авто',
+    'auto-service-belgrade': 'Автосервис',
+    'vehicle-buyback': 'Выкуп',
+    'vehicle-inspection': 'Проверка',
     cases: 'Кейсы',
     contacts: 'Контакты',
   },

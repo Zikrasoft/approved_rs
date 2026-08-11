@@ -249,7 +249,7 @@ price:
   value: '13500'
   currency: €
 country: rs
-service: autopodbor
+service: vehicle-sourcing
 image: image.jpg
 gallery: []
 date: 2025-10-10

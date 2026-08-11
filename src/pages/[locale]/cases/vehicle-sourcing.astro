@@ -4,20 +4,20 @@ import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { toCaseItem } from '@/utils/cases';
 import { getPublishedCases, getPublishedAutoserviceCases } from '@/utils/casesQueries';
 import { getPagesContent } from '@/i18n/content/pages';
-import { withLocales } from '@/utils/paths';
+import { withLocales, PathBuilder } from '@/utils/paths';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const { locale } = Astro.params;
-const p = getPagesContent(locale).casesAutopodbor;
+const p = getPagesContent(locale).casesVehicleSourcing;
 const meta = {
   title: `${p.metaTitle} | ${SITE_NAME}`,
   description: p.metaDescription,
-  canonical: `${SITE_URL}/${locale}/cases/autopodbor/`,
+  canonical: `${SITE_URL}${PathBuilder.casesVehicleSourcing(locale)}`,
 };
 
 const items = (await getPublishedCases()).map((c) => toCaseItem(c, locale));
 const otherCount = (await getPublishedAutoserviceCases()).length;
 ---
 
-<CasesTabPage active="autopodbor" {items} {otherCount} {meta} />
+<CasesTabPage active="vehicle-sourcing" {items} {otherCount} {meta} />

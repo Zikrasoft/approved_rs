@@ -5,7 +5,7 @@ import CasesGrid from '@/components/CasesGrid.astro';
 import ChipLinks from '@/components/ChipLinks.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
 import Button from '@/components/Button.astro';
-import { generateServiceSchema, OG_SUFFIX } from '@/utils/seo';
+import { generateServiceSchema, ogImageFor } from '@/utils/seo';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { toAutoserviceCaseItem } from '@/utils/cases';
 import { getPublishedAutoserviceCases } from '@/utils/casesQueries';
@@ -13,20 +13,19 @@ import { getActiveCountries, getCountry } from '@/utils/geo';
 import Faq from '@/components/Faq.astro';
 import { getFaq } from '@/i18n/content/faq';
 import { getServicesContent } from '@/i18n/content/services';
-import { withLocales } from '@/utils/paths';
-import type { Locale } from '@/i18n/config';
+import { withLocales, PathBuilder } from '@/utils/paths';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const { locale } = Astro.params;
-const bc = getServicesContent(locale as Locale).avtoservisBelgrade;
+const bc = getServicesContent(locale).autoServiceBelgrade;
 const meta = {
   title: `${bc.metaTitle} | ${SITE_NAME}`,
   description: bc.metaDescription,
-  canonical: `${SITE_URL}/${locale}/avtoservis-belgrade/`,
-  ogImage: `${SITE_URL}/og/autoservice${OG_SUFFIX[locale as Locale]}.png`,
+  canonical: `${SITE_URL}${PathBuilder.autoServiceBelgrade(locale)}`,
+  ogImage: ogImageFor(SITE_URL, 'auto-service-belgrade', locale),
 };
-const schema = generateServiceSchema(`${bc.title} ${bc.titleHighlight}`, getCountry('rs')![locale as Locale].name, meta.canonical);
+const schema = generateServiceSchema(`${bc.title} ${bc.titleHighlight}`, getCountry('rs')![locale].name, meta.canonical);
 
 const items = (await getPublishedAutoserviceCases()).map((c) => toAutoserviceCaseItem(c, locale));
 
@@ -40,9 +39,9 @@ const WHAT_WE_DO = bc.whatWeDo.map(item => ({ ...item, Icon: ICONS[item.key] }))
   titleHighlight={bc.titleHighlight}
   description={bc.description}
   ctaLabel={bc.ctaLabel}
-  formService="autoservice"
+  formService="auto-service-belgrade"
   currentCountry="rs"
-  currentService="autoservice"
+  currentService="auto-service-belgrade"
   city="belgrade"
   showCountryCrossLinks={false}
   breadcrumbs={[{ label: bc.breadcrumbLabel }]}
@@ -59,7 +58,7 @@ const WHAT_WE_DO = bc.whatWeDo.map(item => ({ ...item, Icon: ICONS[item.key] }))
       </div>
     ))}
   </div>
-  <ChipLinks label={bc.alsoSourcingLabel} items={getActiveCountries().filter(c => c.code !== 'rs').map(c => ({ href: `/${locale}/autopodbor/${c.code}/`, text: c[locale as Locale].name }))} />
+  <ChipLinks label={bc.alsoSourcingLabel} items={getActiveCountries().filter(c => c.code !== 'rs').map(c => ({ href: PathBuilder.service(locale, 'vehicle-sourcing', c.code), text: c[locale].name }))} />
 
   <Fragment slot="extra">
     <section class="border-t border-default">

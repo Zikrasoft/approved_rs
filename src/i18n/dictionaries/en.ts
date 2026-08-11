@@ -2,11 +2,11 @@ import type { Dictionary } from './ru';
 
 export const en: Dictionary = {
   nav: {
-    autopodbor: 'Sourcing',
-    privoz: 'Import',
-    autoservice: 'Service',
-    vykup: 'Buyout',
-    proverka: 'Inspection',
+    'vehicle-sourcing': 'Sourcing',
+    'vehicle-import': 'Import',
+    'auto-service-belgrade': 'Service',
+    'vehicle-buyback': 'Buyback',
+    'vehicle-inspection': 'Inspection',
     cases: 'Cases',
     contacts: 'Contacts',
   },

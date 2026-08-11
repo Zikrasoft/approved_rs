@@ -1,20 +1,22 @@
 ---
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
+import { PathBuilder } from '@/utils/paths';
+import type { CasesTabKind } from '@/utils/labels';
 
 interface Props {
-  active: 'autopodbor' | 'autoservice';
-  autopodborCount: number;
+  active: CasesTabKind;
+  sourcingCount: number;
   autoserviceCount: number;
 }
 
-const { active, autopodborCount, autoserviceCount } = Astro.props;
+const { active, sourcingCount, autoserviceCount } = Astro.props;
 const locale = getLocale(Astro.currentLocale);
 const t = getI18n(locale);
 
 const tabs = [
-  { id: 'autopodbor', href: `/${locale}/cases/autopodbor/`, label: t.nav.autopodbor, count: autopodborCount },
-  { id: 'autoservice', href: `/${locale}/cases/autoservice/`, label: t.nav.autoservice, count: autoserviceCount },
+  { id: 'vehicle-sourcing', href: PathBuilder.casesVehicleSourcing(locale), label: t.nav['vehicle-sourcing'], count: sourcingCount },
+  { id: 'auto-service', href: PathBuilder.casesAutoService(locale), label: t.nav['auto-service-belgrade'], count: autoserviceCount },
 ] as const;
 ---
 

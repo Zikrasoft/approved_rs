@@ -8,7 +8,7 @@ describe('toCaseItem', () => {
   it('maps a known service to its Russian label', () => {
     const entry = {
       id: 'bmw-x1',
-      data: { service: 'autopodbor', car: 'BMW X1', year: 2020, price, image: undefined },
+      data: { service: 'vehicle-sourcing', car: 'BMW X1', year: 2020, price, image: undefined },
     } as unknown as CollectionEntry<'cases'>;
 
     const item = toCaseItem(entry, 'ru');
@@ -39,7 +39,7 @@ describe('toAutoserviceCaseItem', () => {
     } as unknown as CollectionEntry<'autoserviceCases'>;
 
     const item = toAutoserviceCaseItem(entry, 'ru');
-    expect(item.href).toBe('/ru/avtoservis-belgrade/bmw-320/');
+    expect(item.href).toBe('/ru/auto-service-belgrade/bmw-320/');
     expect(item.badges).toEqual(['Компьютерная диагностика', 'Двигатель и трансмиссия', 'unknown-service']);
   });
 });

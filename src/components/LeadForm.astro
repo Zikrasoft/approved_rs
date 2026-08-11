@@ -8,6 +8,7 @@ import { Phone, ChevronDown } from '@lucide/astro';
 import { FLAGS, BRAND_COLORS } from '@/utils/constants';
 import { getLeadFormContent } from '@/i18n/content/leadForm';
 import { getLocale } from '@/i18n/config';
+import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   service?: string;
@@ -137,7 +138,7 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
         class="mt-0.5 shrink-0 w-4 h-4 cursor-pointer accent-accent"
       />
       <span class="text-xs leading-relaxed">
-        {lf.consentBefore}<a href={`/${locale}/privacy/`} target="_blank" class="underline text-accent">{lf.consentLinkText}</a>
+        {lf.consentBefore}<a href={PathBuilder.privacy(locale)} target="_blank" class="underline text-accent">{lf.consentLinkText}</a>
       </span>
     </label>
     <p class="field-error consent-error mb-4" style="display:none">{lf.consentError}</p>

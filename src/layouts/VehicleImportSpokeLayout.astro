@@ -1,20 +1,23 @@
 ---
-// Shared shell for the 3 privoz spokes (de/eu/china) — same meta shape,
-// schema wrapping, ServicePageLayout props, and StepsList/destinationsNote/
-// Faq structure on all three; only the source data and one slot's worth of
-// page-specific content (a cross-link paragraph, or the EU source chips)
-// actually differ per spoke.
+// Shared shell for the 5 vehicle-import spokes (de/es/ch/eu/china) — same
+// meta shape, schema wrapping, ServicePageLayout props, and StepsList/
+// destinationsNote/Faq structure on all of them; only the source data and
+// one slot's worth of page-specific content (a cross-link paragraph, or the
+// EU source chips) actually differs per spoke.
 import ServicePageLayout from './ServicePageLayout.astro';
 import StepsList from '@/components/StepsList.astro';
 import Faq from '@/components/Faq.astro';
 import { getFaq } from '@/i18n/content/faq';
 import { generateServiceSchema, placeholderOgImage } from '@/utils/seo';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
+import { PathBuilder } from '@/utils/paths';
 import type { Locale } from '@/i18n/config';
+import type { VehicleImportSpoke } from '@/utils/vehicleImportCrossSell';
+import type { CollectionEntry } from 'astro:content';
 
 interface Props {
   locale: Locale;
-  slug: 'de' | 'eu' | 'china';
+  slug: VehicleImportSpoke;
   metaTitle: string;
   metaDescription: string;
   title: string;
@@ -23,7 +26,11 @@ interface Props {
   ctaLabel: string;
   breadcrumbLabel: string;
   hubBreadcrumbLabel: string;
+  // Only the nested 'de' page (under /vehicle-import/eu/) needs a 3rd
+  // breadcrumb level between the hub and itself; eu/china stay 2-level.
+  parentBreadcrumb?: { label: string; href: string };
   casesHeading: string;
+  cases?: CollectionEntry<'cases'>[];
   steps: { n: string; text: string }[];
   destinationsNote: string;
   areaServed: string | string[];
@@ -31,13 +38,13 @@ interface Props {
 
 const {
   locale, slug, metaTitle, metaDescription, title, titleHighlight, description,
-  ctaLabel, breadcrumbLabel, hubBreadcrumbLabel, casesHeading, steps, destinationsNote, areaServed,
+  ctaLabel, breadcrumbLabel, hubBreadcrumbLabel, parentBreadcrumb, casesHeading, cases, steps, destinationsNote, areaServed,
 } = Astro.props;
 
 const meta = {
   title: `${metaTitle} | ${SITE_NAME}`,
   description: metaDescription,
-  canonical: `${SITE_URL}/${locale}/privoz/${slug}/`,
+  canonical: `${SITE_URL}${PathBuilder.vehicleImportSpoke(locale, slug)}`,
   ogImage: placeholderOgImage(SITE_URL, locale),
 };
 const schema = generateServiceSchema(`${title} ${titleHighlight}`, areaServed, meta.canonical);
@@ -46,19 +53,23 @@ const schema = generateServiceSchema(`${title} ${titleHighlight}`, areaServed, m
 <ServicePageLayout
   {meta} {schema}
   {title} {titleHighlight} {description} {ctaLabel}
-  formService={`privoz-${slug}`}
+  formService={`vehicle-import-${slug}`}
   currentCountry="rs"
   leadCountry={slug}
-  currentService="privoz"
+  currentService="vehicle-import"
   showCountryCrossLinks={false}
-  {casesHeading}
-  breadcrumbs={[{ label: hubBreadcrumbLabel, href: `/${locale}/privoz/` }, { label: breadcrumbLabel }]}
+  {casesHeading} {cases}
+  breadcrumbs={[
+    { label: hubBreadcrumbLabel, href: PathBuilder.vehicleImportHub(locale) },
+    ...(parentBreadcrumb ? [parentBreadcrumb] : []),
+    { label: breadcrumbLabel },
+  ]}
 >
   <StepsList {steps} />
   <p class="mt-6 text-sm leading-relaxed text-muted">{destinationsNote}</p>
   <slot />
 
   <Fragment slot="extra">
-    <Faq items={getFaq(locale).privoz} />
+    <Faq items={getFaq(locale)['vehicle-import']} />
   </Fragment>
 </ServicePageLayout>

@@ -3,6 +3,7 @@ export const prerender = false;
 import type { APIContext } from 'astro';
 import { sendLeadNotification } from '@/lib/telegram';
 import { isLocale, type Locale } from '@/i18n/config';
+import { PathBuilder } from '@/utils/paths';
 
 // Only reached if a visitor bypasses the client-side validation (JS
 // disabled, direct POST) — but the cookie-based locale is already right
@@ -37,5 +38,5 @@ export async function POST({ request, redirect, cookies }: APIContext): Promise<
     console.error('[leads] Telegram notification failed:', err);
   }
 
-  return redirect(`/${locale}/thanks/`, 302);
+  return redirect(PathBuilder.thanks(locale), 302);
 }

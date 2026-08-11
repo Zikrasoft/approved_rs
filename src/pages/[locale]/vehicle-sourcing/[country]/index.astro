@@ -6,29 +6,28 @@ import CountryPill from '@/components/CountryPill.astro';
 import Faq from '@/components/Faq.astro';
 import { getFaq } from '@/i18n/content/faq';
 import { getServicesContent } from '@/i18n/content/services';
-import { getCountryPaths, withLocales } from '@/utils/paths';
+import { getCountryPaths, withLocales, PathBuilder } from '@/utils/paths';
 import { getCountry, getActiveCountries, getCitiesForCountry } from '@/utils/geo';
 import { generateMeta, generateServiceSchema, buildLocation } from '@/utils/seo';
-import { getPrivozCrossSellSpokes } from '@/utils/privozCrossSell';
+import { getVehicleImportCrossSellSpokes } from '@/utils/vehicleImportCrossSell';
 import { getCollection } from 'astro:content';
 import { SITE_URL } from '@/utils/constants';
-import type { Locale } from '@/i18n/config';
 
 export const getStaticPaths = () => withLocales(getCountryPaths());
 
 const { locale, country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
-const sc = getServicesContent(locale as Locale).autopodbor;
-const location = buildLocation(locale as Locale, country);
-const meta = generateMeta('autopodbor', { country, baseUrl: SITE_URL, path: `/${locale}/autopodbor/${countryCode}/`, locale: locale as Locale });
-const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === countryCode && c.data.service === 'autopodbor').slice(0, 3);
-const schema = generateServiceSchema(`${sc.title} ${location}`, country[locale as Locale].name, meta.canonical);
+const sc = getServicesContent(locale)['vehicle-sourcing'];
+const location = buildLocation(locale, country);
+const meta = generateMeta('vehicle-sourcing', { country, baseUrl: SITE_URL, path: PathBuilder.service(locale, 'vehicle-sourcing', countryCode!), locale: locale });
+const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === countryCode && c.data.service === 'vehicle-sourcing').slice(0, 3);
+const schema = generateServiceSchema(`${sc.title} ${location}`, country[locale].name, meta.canonical);
 
 // Link text reuses each spoke's own title instead of new strings.
-const privozContent = getServicesContent(locale as Locale).privoz;
-const privozLinks = getPrivozCrossSellSpokes(countryCode!).map(slug => ({
-  href: `/${locale}/privoz/${slug}/`,
-  text: privozContent[slug].title,
+const vehicleImportContent = getServicesContent(locale)['vehicle-import'];
+const vehicleImportCrossSellLinks = getVehicleImportCrossSellSpokes(countryCode!).map(slug => ({
+  href: PathBuilder.vehicleImportSpoke(locale, slug),
+  text: vehicleImportContent[slug].title,
 }));
 ---
 
@@ -38,9 +37,9 @@ const privozLinks = getPrivozCrossSellSpokes(countryCode!).map(slug => ({
   titleHighlight={location}
   description={sc.descriptionFor(location)}
   ctaLabel={sc.ctaLabel}
-  formService="autopodbor"
+  formService="vehicle-sourcing"
   currentCountry={countryCode!}
-  currentService="autopodbor"
+  currentService="vehicle-sourcing"
   casesHeading={sc.casesHeadingFor(location)}
   breadcrumbs={[{ label: sc.breadcrumbLabelFor(location) }]}
 >
@@ -48,16 +47,16 @@ const privozLinks = getPrivozCrossSellSpokes(countryCode!).map(slug => ({
   <p class="mt-6 text-sm leading-relaxed text-muted">
     {sc.deliveryLineFor(sc.deliveryDestinations.join(', '))}
   </p>
-  <ChipLinks label={sc.citiesLabel} items={getCitiesForCountry(countryCode!).map(city => ({ href: `/${locale}/autopodbor/${countryCode}/${city.slug}/`, text: city[locale as Locale].name }))} />
-  <ChipLinks label={sc.crossSellLabel} items={privozLinks} />
+  <ChipLinks label={sc.citiesLabel} items={getCitiesForCountry(countryCode!).map(city => ({ href: PathBuilder.vehicleSourcingCity(locale, countryCode!, city.slug), text: city[locale].name }))} />
+  <ChipLinks label={sc.crossSellLabel} items={vehicleImportCrossSellLinks} />
   <div class="mt-12 pt-8 border-t border-default">
     <p class="text-xs tracking-widest uppercase mb-4 font-medium text-muted">{sc.alsoInLabel}</p>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-      {getActiveCountries().filter(c => c.code !== countryCode).map(c => <CountryPill country={c} locale={locale as Locale} />)}
+      {getActiveCountries().filter(c => c.code !== countryCode).map(c => <CountryPill country={c} locale={locale} />)}
     </div>
   </div>
 
   <Fragment slot="extra">
-    <Faq items={getFaq(locale).autopodbor} />
+    <Faq items={getFaq(locale)['vehicle-sourcing']} />
   </Fragment>
 </ServicePageLayout>

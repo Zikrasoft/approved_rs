@@ -7,5 +7,6 @@
 // redirect below is just a defensive fallback if that ever fails.
 export const prerender = false;
 import { DEFAULT_LOCALE } from '@/i18n/config';
-return Astro.redirect(`/${DEFAULT_LOCALE}/`);
+import { PathBuilder } from '@/utils/paths';
+return Astro.redirect(PathBuilder.home(DEFAULT_LOCALE));
 ---

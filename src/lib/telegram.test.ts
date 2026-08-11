@@ -10,10 +10,10 @@ const mockLead: LeadData = {
   id: 42,
   name: 'Иван',
   contact: '@ivan',
-  service: 'autopodbor',
+  service: 'vehicle-sourcing',
   comment: 'BMW X5',
   country: 'de',
-  source_url: '/ru/autopodbor/de/',
+  source_url: '/ru/vehicle-sourcing/de/',
 };
 
 function mockFetchOk(result: unknown = { message_id: 999 }) {

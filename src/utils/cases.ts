@@ -1,12 +1,13 @@
 import type { CollectionEntry } from 'astro:content';
 import type { CaseCardProps } from '@/components/CaseCard.astro';
 import { getServicesContent } from '@/i18n/content/services';
+import { PathBuilder } from '@/utils/paths';
 import type { Locale } from '@/i18n/config';
 
 export const toCaseItem = (c: CollectionEntry<'cases'>, locale: Locale): CaseCardProps => {
   const badgeMap = getServicesContent(locale).caseChrome.serviceBadges;
   return {
-    href: `/${locale}/cases/${c.id}/`,
+    href: PathBuilder.case(locale, c.id),
     image: c.data.image,
     imageAlt: c.data.car,
     badges: [badgeMap[c.data.service as keyof typeof badgeMap] ?? c.data.service],
@@ -17,10 +18,10 @@ export const toCaseItem = (c: CollectionEntry<'cases'>, locale: Locale): CaseCar
 };
 
 export const toAutoserviceCaseItem = (c: CollectionEntry<'autoserviceCases'>, locale: Locale): CaseCardProps => {
-  const workLabels = Object.fromEntries(getServicesContent(locale).avtoservisBelgrade.whatWeDo.map(w => [w.key, w.label]));
+  const workLabels = Object.fromEntries(getServicesContent(locale).autoServiceBelgrade.whatWeDo.map(w => [w.key, w.label]));
   const car = c.data.car ?? c.data.title;
   return {
-    href: `/${locale}/avtoservis-belgrade/${c.id}/`,
+    href: PathBuilder.autoServiceCase(locale, c.id),
     image: c.data.image,
     imageAlt: car,
     badges: c.data.servicesApplied.map(s => workLabels[s] ?? s),

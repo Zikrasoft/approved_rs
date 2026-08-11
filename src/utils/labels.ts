@@ -1,19 +1,51 @@
 import { getI18n } from '@/i18n/getI18n';
+import { PathBuilder } from '@/utils/paths';
 import type { Locale } from '@/i18n/config';
 
-export const SERVICES: { slug: 'autopodbor' | 'vykup' | 'proverka' }[] = [
-  { slug: 'autopodbor' },
-  { slug: 'vykup' },
-  { slug: 'proverka' },
-];
+// Two source-of-truth slug lists everything else in this file (and
+// content.config.ts, PathBuilder, generateMeta, Header.astro, faq.ts/
+// services.ts) derives from — one shared typo surface instead of the same
+// literals retyped per consumer.
+//
+// The 3 services with a [country] route (vehicle-import and
+// auto-service-belgrade don't have one):
+export const COUNTRY_SCOPED_SERVICE_SLUGS = ['vehicle-sourcing', 'vehicle-buyback', 'vehicle-inspection'] as const;
+export type CountryScopedServiceSlug = (typeof COUNTRY_SCOPED_SERVICE_SLUGS)[number];
 
-// The nav slugs every getNavItems() result can produce — Header.astro's
-// SERVICE_ICONS map (icon components, can't be imported into plain-Node
-// vitest without Astro's Vite plugin, which this project's vitest.config.ts
-// doesn't load) must have an entry for each of these. Kept here as the
-// single list both Header.astro and labels.test.ts check against, instead
-// of the icon values themselves.
-export const SERVICE_ICON_SLUGS = ['autopodbor', 'privoz', 'autoservice', 'vykup', 'proverka'] as const;
+// Every service slug, country-scoped or not:
+export const SERVICE_SLUGS = [...COUNTRY_SCOPED_SERVICE_SLUGS, 'vehicle-import', 'auto-service-belgrade'] as const;
+export type ServiceSlug = (typeof SERVICE_SLUGS)[number];
+
+// Named handles for each slug, used below in getNavItems (nav[SLUG.SOURCING],
+// PathBuilder.service(locale, SLUG.SOURCING, cc)) instead of the magic string
+// 'vehicle-sourcing'. `satisfies` ties every value back to ServiceSlug
+// without re-listing the slugs a second time.
+export const SLUG = {
+  SOURCING: 'vehicle-sourcing',
+  IMPORT: 'vehicle-import',
+  AUTO_SERVICE: 'auto-service-belgrade',
+  BUYBACK: 'vehicle-buyback',
+  INSPECTION: 'vehicle-inspection',
+} as const satisfies Record<string, ServiceSlug>;
+
+// The 2 kinds shown on the /cases/ tab switcher. Shared by CaseCategoryTabs'
+// `active` prop, CasesTabPage's prop it's threaded through from, and
+// getPromoBanners()'s `kind` param — one definition instead of the same
+// literal union retyped in 3 files.
+export type CasesTabKind = 'vehicle-sourcing' | 'auto-service';
+
+// `slug` is both the URL path segment AND the internal identifier
+// (dictionary/content keys, formService, SERVICE_LABELS) — fully unified
+// after the site-wide English-slug migration, no more decoupling needed.
+export const SERVICES: { slug: CountryScopedServiceSlug }[] = COUNTRY_SCOPED_SERVICE_SLUGS.map(slug => ({ slug }));
+
+// Type guard instead of an unchecked `as CountryScopedServiceSlug` cast —
+// narrows a page's broader `currentService: ServiceSlug` down to the 3 that
+// actually have a [country] route, so a page passing e.g. 'vehicle-import'
+// just skips the country cross-links instead of building a broken href.
+export function isCountryScopedServiceSlug(slug: string): slug is CountryScopedServiceSlug {
+  return (COUNTRY_SCOPED_SERVICE_SLUGS as readonly string[]).includes(slug);
+}
 
 // Primary nav order: Автоподбор first, then the single-page Автосервис
 // (Belgrade only, not per-country like the rest), then the remaining
@@ -24,21 +56,22 @@ export const getNavItems = (
 ): { href: string; label: string; slug: string }[] => {
   const nav = getI18n(locale).nav;
   return [
-    { href: `/${locale}/autopodbor/${countryCode}/`, label: nav.autopodbor, slug: 'autopodbor' },
-    { href: `/${locale}/privoz/`, label: nav.privoz, slug: 'privoz' },
-    { href: `/${locale}/avtoservis-belgrade/`, label: nav.autoservice, slug: 'autoservice' },
-    ...SERVICES.filter(s => s.slug !== 'autopodbor').map(s => ({
-      href: `/${locale}/${s.slug}/${countryCode}/`,
+    { href: PathBuilder.service(locale, SLUG.SOURCING, countryCode), label: nav[SLUG.SOURCING], slug: SLUG.SOURCING },
+    { href: PathBuilder.vehicleImportHub(locale), label: nav[SLUG.IMPORT], slug: SLUG.IMPORT },
+    { href: PathBuilder.autoServiceBelgrade(locale), label: nav[SLUG.AUTO_SERVICE], slug: SLUG.AUTO_SERVICE },
+    ...SERVICES.filter(s => s.slug !== SLUG.SOURCING).map(s => ({
+      href: PathBuilder.service(locale, s.slug, countryCode),
       label: nav[s.slug],
       slug: s.slug,
     })),
   ];
 };
 
-// Country-scoped items (autopodbor/vykup/proverka) put the service right
-// after the locale (/ru/autopodbor/de/), with country next — including when
-// autopodbor sits under a city segment too (/ru/autopodbor/de/berlin/), so
-// checking segments[1]/[2] handles both without a separate city fallback.
+// Country-scoped items (vehicle-sourcing/vehicle-buyback/vehicle-inspection)
+// put the service right after the locale (/ru/vehicle-sourcing/de/), with
+// country next — including when vehicle-sourcing sits under a city segment
+// too (/ru/vehicle-sourcing/de/berlin/), so checking segments[1]/[2]
+// handles both without a separate city fallback.
 export function isNavItemActive(
   item: { href: string; slug: string },
   locale: Locale,
@@ -54,14 +87,16 @@ export function isNavItemActive(
 // Keyed by form/Telegram service value — internal/ops-facing (Telegram bot
 // messages), not part of the public site's i18n scope.
 export const SERVICE_LABELS: Record<string, string> = {
-  autopodbor: 'Автоподбор',
-  buyout:     'Выкуп',
-  inspection: 'Проверка',
-  autoservice: 'Автосервис',
-  'privoz-de': 'Привоз из Германии',
-  'privoz-eu': 'Привоз из Европы',
-  'privoz-china': 'Привоз из Китая',
-  privoz: 'Привоз авто',
+  'vehicle-sourcing': 'Автоподбор',
+  'vehicle-buyback': 'Выкуп',
+  'vehicle-inspection': 'Проверка',
+  'auto-service-belgrade': 'Автосервис',
+  'vehicle-import-de': 'Привоз из Германии',
+  'vehicle-import-es': 'Привоз из Испании',
+  'vehicle-import-ch': 'Привоз из Швейцарии',
+  'vehicle-import-eu': 'Привоз из Европы',
+  'vehicle-import-china': 'Привоз из Китая',
+  'vehicle-import': 'Привоз авто',
 };
 
 export const AUTOSERVICE_SERVICES = ['diagnostics', 'maintenance', 'suspension', 'engine', 'prepurchase'] as const;
