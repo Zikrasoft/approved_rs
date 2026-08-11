@@ -4,7 +4,7 @@ translations:
   en:
     title: MINI Cooper SD
     body: >
-      ## Car Buyout in Serbia — Fast and Hassle-Free
+      ## Car Buyback in Serbia — Fast and Hassle-Free
 
 
       Dragan contacted us looking for a fast and convenient way to sell his
@@ -20,7 +20,7 @@ translations:
       inspections.
 
 
-      We handled the entire vehicle buyout process. We travelled from Belgrade
+      We handled the entire vehicle buyback process. We travelled from Belgrade
       to Jagodina with a trailer, inspected the vehicle, completed the purchase,
       **paid Dragan for the car**, took the MINI Cooper and transported it to
       Belgrade.
@@ -34,10 +34,10 @@ translations:
       arranging transportation.
 
 
-      ## Car Buyout in Serbia and Montenegro
+      ## Car Buyback in Serbia and Montenegro
 
 
-      We provide **car buyout services in Serbia** and organize the complete
+      We provide **car buyback services in Serbia** and organize the complete
       process regardless of where the vehicle is located.
 
 
@@ -46,7 +46,7 @@ translations:
       plates**.
 
 
-      We also provide **car buyout services in Montenegro**.
+      We also provide **car buyback services in Montenegro**.
 
 
       If you need to sell your car quickly in Serbia or Montenegro, contact us.
@@ -54,7 +54,7 @@ translations:
       transportation.
 
 
-      **Car buyout in Serbia — fast, convenient and secure.**
+      **Car buyback in Serbia — fast, convenient and secure.**
   sr:
     title: MINI Cooper SD
     body: >
@@ -112,7 +112,7 @@ price:
   value: '13000'
   currency: €
 country: rs
-service: buyout
+service: vehicle-buyback
 image: image.jpg
 gallery:
   - gallery/0.jpg

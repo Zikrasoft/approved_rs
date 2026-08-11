@@ -6,7 +6,7 @@ price:
   value: '32500'
   currency: €
 country: rs
-service: buyout
+service: vehicle-buyback
 image: ./image.jpg
 date: 2025-09-20
 published: true
@@ -14,7 +14,7 @@ translations:
   en:
     title: BMW 320
     body: |
-      ## Urgent car buyout in Serbia — fast, safe, and hassle-free.
+      ## Urgent car buyback in Serbia — fast, safe, and hassle-free.
 
       A client came to us needing to **sell her car urgently** before moving abroad. She had no time for listings, showings, haggling, or paperwork.
 
