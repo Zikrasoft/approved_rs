@@ -4,7 +4,7 @@ import Faq from '@/components/Faq.astro';
 import { getFaq } from '@/i18n/content/faq';
 import { getServicesContent } from '@/i18n/content/services';
 import { withLocales, PathBuilder } from '@/utils/paths';
-import { getCountry } from '@/utils/geo';
+import { getCountry, getCountryFlag } from '@/utils/geo';
 import { generateServiceSchema, placeholderOgImage } from '@/utils/seo';
 import { getCollection } from 'astro:content';
 import { SITE_URL, SITE_NAME, CHINA_NAME, PRIVOZ_EU_SOURCE_CODES } from '@/utils/constants';
@@ -37,9 +37,9 @@ const cases = (await getCollection('cases'))
 // Germany isn't its own hub card anymore — it lives one level down, inside
 // the Europe spoke's source-country chips (see eu/index.astro) — since the
 // /eu/de/ URL move already nests it under "Europe" there.
-const cards: { slug: VehicleImportSpoke; title: string; text: string }[] = [
-  { slug: 'eu', title: pc.euCardTitle, text: pc.euCardText },
-  { slug: 'china', title: pc.chinaCardTitle, text: pc.chinaCardText },
+const cards: { slug: VehicleImportSpoke; title: string; text: string; flag: string }[] = [
+  { slug: 'eu', title: pc.euCardTitle, text: pc.euCardText, flag: getCountryFlag('eu') },
+  { slug: 'china', title: pc.chinaCardTitle, text: pc.chinaCardText, flag: getCountryFlag('cn') },
 ];
 ---
 
@@ -58,7 +58,7 @@ const cards: { slug: VehicleImportSpoke; title: string; text: string }[] = [
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
     {cards.map(card => (
       <a href={PathBuilder.vehicleImportSpoke(locale, card.slug)} class="import-card glow-border flex flex-col p-6 rounded-sm border bg-surface border-default no-underline">
-        <p class="font-display text-xl font-bold mb-2 text-primary">{card.title}</p>
+        <p class="font-display text-xl font-bold mb-2 text-primary">{card.flag} {card.title}</p>
         <p class="text-sm leading-relaxed mb-4 text-muted">{card.text}</p>
         <span class="mt-auto text-xs font-medium tracking-wide uppercase text-accent">{pc.exploreLabel} →</span>
       </a>

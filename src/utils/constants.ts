@@ -32,6 +32,9 @@ export const FLAGS: Record<string, string> = {
   de: '🇩🇪', rs: '🇷🇸', es: '🇪🇸', ch: '🇨🇭', pt: '🇵🇹',
   ru: '🇷🇺', en: '🇬🇧', sr: '🇷🇸',
   ua: '🇺🇦', by: '🇧🇾', kz: '🇰🇿', ba: '🇧🇦', hr: '🇭🇷', me: '🇲🇪', mk: '🇲🇰', tr: '🇹🇷',
+  // Not real countries.json entries (no per-country page) — just the
+  // vehicle-import hub cards' "Europe"/"China" groupings.
+  eu: '🇪🇺', cn: '🇨🇳',
 };
 
 // China isn't in countries.json (no vehicle sourcing market there, no per-country

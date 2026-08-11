@@ -24,7 +24,7 @@ const tabs = [
 
 <div class="case-tabs relative flex flex-wrap gap-1 p-1 mb-10 rounded-sm bg-surface border border-border-strong" role="tablist">
   <span class="pill-tab-track" aria-hidden="true"></span>
-  {tabs.map(tab => (
+  {tabs.filter(tab => counts[tab.id] > 0 || tab.id === active).map(tab => (
     <a
       href={tab.href}
       class:list={[
