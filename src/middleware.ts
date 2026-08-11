@@ -162,6 +162,14 @@ export const onRequest = defineMiddleware((context, next) => {
     return next();
   }
 
+  // Same production caveat as the legacy-slug redirects above: this branch
+  // only fires for requests that reach this middleware at all. On Vercel,
+  // an unprefixed path to a real content page (e.g. /vehicle-sourcing/rs/)
+  // has no matching route either, so it 404s at the edge before ever
+  // getting here — vercel.json's catch-all redirects (one per top-level
+  // route) are the ones that actually fire in production for that case;
+  // this stays for local dev and Accept-Language-aware detection (Vercel's
+  // static redirects always fall back to the default locale, this doesn't).
   const locale = detectLocale(
     context.request.headers.get('accept-language'),
     context.cookies.get(LOCALE_COOKIE)?.value
