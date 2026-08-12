@@ -1,7 +1,7 @@
 export const ru = {
   nav: {
     'vehicle-sourcing': 'Автоподбор',
-    'vehicle-import': 'Привоз авто',
+    'vehicle-import': 'Авто из ЕС и Китая',
     'auto-service-belgrade': 'Автосервис',
     'vehicle-buyback': 'Выкуп',
     'vehicle-inspection': 'Проверка',

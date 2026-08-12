@@ -3,7 +3,7 @@ import type { Dictionary } from './ru';
 export const sr: Dictionary = {
   nav: {
     'vehicle-sourcing': 'Odabir',
-    'vehicle-import': 'Uvoz',
+    'vehicle-import': 'Vozila iz EU i Kine',
     'auto-service-belgrade': 'Servis',
     'vehicle-buyback': 'Otkup',
     'vehicle-inspection': 'Provera',

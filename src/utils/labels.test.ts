@@ -4,14 +4,14 @@ import { getNavItems, isNavItemActive, isCountryScopedServiceSlug, SERVICE_SLUGS
 describe('getNavItems', () => {
   it('orders Автоподбор first, Привоз second, Автосервис third, then the rest of SERVICES', () => {
     const result = getNavItems('ru', 'de');
-    expect(result.map(i => i.label)).toEqual(['Автоподбор', 'Привоз авто', 'Автосервис', 'Выкуп', 'Проверка']);
+    expect(result.map(i => i.label)).toEqual(['Автоподбор', 'Авто из ЕС и Китая', 'Автосервис', 'Выкуп', 'Проверка']);
   });
 
   it('builds per-locale, per-country hrefs for Выкуп/Проверка, fixed hub hrefs for Автоподбор/Привоз/Автосервис', () => {
     const result = getNavItems('ru', 'rs');
     expect(result).toEqual([
       { href: '/ru/vehicle-sourcing/', label: 'Автоподбор', slug: 'vehicle-sourcing' },
-      { href: '/ru/vehicle-import/', label: 'Привоз авто', slug: 'vehicle-import' },
+      { href: '/ru/vehicle-import/', label: 'Авто из ЕС и Китая', slug: 'vehicle-import' },
       { href: '/ru/auto-service-belgrade/', label: 'Автосервис', slug: 'auto-service-belgrade' },
       { href: '/ru/vehicle-buyback/rs/', label: 'Выкуп', slug: 'vehicle-buyback' },
       { href: '/ru/vehicle-inspection/rs/', label: 'Проверка', slug: 'vehicle-inspection' },
