@@ -18,6 +18,11 @@ const LEGACY_PATH_REWRITES: Record<string, string> = {
   // Old per-country delivery pages, content merged into /autopodbor/<country>.
   '/rs/dostavka/': '/autopodbor/rs',
   '/es/dostavka/': '/autopodbor/es',
+  // Old country-first sourcing pages (word order was <country>/autopodbor/,
+  // not today's <service>/<country>/) — same destination as combined/dostavka above.
+  '/de/autopodbor/': '/autopodbor/de',
+  '/rs/autopodbor/': '/autopodbor/rs',
+  '/es/autopodbor/': '/autopodbor/es',
   // Old case slugs, content no longer exists — send to the cases list instead of 404.
   '/cases/mercedes-c-2021-de/': '/cases/autopodbor',
   '/cases/ford-focus-2020-rs/': '/cases/autopodbor',

@@ -36,6 +36,9 @@ describe('renameSlugSegments', () => {
     // '/cases/' rewrites to '/cases/autopodbor' in LEGACY_PATH_REWRITES,
     // which must then still get slug-renamed to the current route.
     expect(renameSlugSegments('/cases/autopodbor')).toBe('/cases/vehicle-sourcing');
+    // Same for the old country-first pages: '/rs/autopodbor/' rewrites to
+    // '/autopodbor/rs' in LEGACY_PATH_REWRITES, which then still needs renaming.
+    expect(renameSlugSegments('/autopodbor/rs')).toBe('/vehicle-sourcing/rs');
   });
 });
 
