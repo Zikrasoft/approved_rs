@@ -14,6 +14,7 @@ const mockLead: LeadData = {
   comment: 'BMW X5',
   country: 'de',
   source_url: '/ru/vehicle-sourcing/de/',
+  locale: 'ru',
 };
 
 function mockFetchOk(result: unknown = { message_id: 999 }) {

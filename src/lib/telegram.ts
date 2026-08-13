@@ -1,4 +1,7 @@
 import { SERVICE_LABELS, STATUS_LABELS } from '@/utils/labels';
+import type { LeadData } from './leadTypes';
+
+export type { LeadData };
 
 const BOT_TOKEN = import.meta.env.TELEGRAM_BOT_TOKEN!;
 const GROUP_ID = import.meta.env.TELEGRAM_GROUP_ID!;
@@ -14,17 +17,6 @@ const CONTACT_CHANNEL_LABELS: Record<string, string> = {
   viber: 'Viber',
   phone: 'звонок',
 };
-
-export interface LeadData {
-  id: number;
-  name: string;
-  contact: string;
-  service: string;
-  contactChannel?: string | null;
-  comment?: string | null;
-  country?: string | null;
-  source_url?: string | null;
-}
 
 function formatLeadText(lead: LeadData): string {
   const service = SERVICE_LABELS[lead.service] ?? lead.service;
