@@ -18,8 +18,8 @@ const mockLead: LeadData = {
   locale: 'ru',
 };
 
-function mockFetchOk() {
-  mockFetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ ok: true }) });
+function mockFetchOk(rowUrl = 'https://docs.google.com/spreadsheets/d/abc/edit#gid=0&range=A2') {
+  mockFetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ ok: true, rowUrl }) });
 }
 
 describe('sendLeadToSheet', () => {
@@ -58,5 +58,23 @@ describe('sendLeadToSheet', () => {
   it('throws when the webapp returns a non-OK response', async () => {
     mockFetch.mockResolvedValue({ ok: false, status: 403 });
     await expect(sendLeadToSheet(mockLead)).rejects.toThrow();
+  });
+
+  it('returns the rowUrl from the Apps Script response', async () => {
+    mockFetchOk('https://docs.google.com/spreadsheets/d/abc/edit#gid=0&range=A5');
+    const result = await sendLeadToSheet(mockLead);
+    expect(result).toBe('https://docs.google.com/spreadsheets/d/abc/edit#gid=0&range=A5');
+  });
+
+  it('returns null when the response has no rowUrl', async () => {
+    mockFetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ ok: true }) });
+    const result = await sendLeadToSheet(mockLead);
+    expect(result).toBeNull();
+  });
+
+  it('returns null when the response body is not valid JSON', async () => {
+    mockFetch.mockResolvedValue({ ok: true, json: () => Promise.reject(new Error('bad json')) });
+    const result = await sendLeadToSheet(mockLead);
+    expect(result).toBeNull();
   });
 });

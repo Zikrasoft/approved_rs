@@ -1,6 +1,7 @@
 export const prerender = false;
 
 import type { APIContext } from 'astro';
+import { waitUntil } from '@vercel/functions';
 import { notifyLead } from '@/lib/notifyLead';
 
 // Fired via navigator.sendBeacon when a visitor taps a tel: call button —
@@ -24,7 +25,7 @@ export async function POST({ request }: APIContext): Promise<Response> {
     kind: 'call_click' as const,
   };
 
-  await notifyLead(lead, '[call-click]');
+  waitUntil(notifyLead(lead, '[call-click]'));
 
   // sendBeacon ignores the response body/status either way — 204 is just
   // the honest "accepted, nothing to return" code.

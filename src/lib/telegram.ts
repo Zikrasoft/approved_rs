@@ -18,7 +18,7 @@ const CONTACT_CHANNEL_LABELS: Record<string, string> = {
   phone: 'звонок',
 };
 
-function formatLeadText(lead: LeadData): string {
+function formatLeadText(lead: LeadData, rowUrl?: string | null): string {
   const service = SERVICE_LABELS[lead.service] ?? lead.service;
   const channelLabel = lead.contactChannel ? CONTACT_CHANNEL_LABELS[lead.contactChannel] : undefined;
   const contactLine = channelLabel ? `${lead.contact} (${channelLabel})` : lead.contact;
@@ -31,6 +31,9 @@ function formatLeadText(lead: LeadData): string {
   if (lead.country) lines.push(`Страна: ${lead.country.toUpperCase()}`);
   if (lead.comment) lines.push(`Комментарий: ${lead.comment}`);
   if (lead.source_url) lines.push(`Страница: ${lead.source_url}`);
+  // Plain URL, same as Страница above — Telegram auto-linkifies it, no
+  // parse_mode needed. Absent when the Sheets call failed/returned no link.
+  if (rowUrl) lines.push(`Таблица: ${rowUrl}`);
   lines.push(``, `#заявка`);
   return lines.join('\n');
 }
@@ -48,8 +51,8 @@ async function tgPost(method: string, body: object): Promise<unknown> {
   return data.result;
 }
 
-export async function sendLeadNotification(lead: LeadData): Promise<void> {
-  const text = formatLeadText(lead);
+export async function sendLeadNotification(lead: LeadData, rowUrl?: string | null): Promise<void> {
+  const text = formatLeadText(lead, rowUrl);
 
   await tgPost('sendMessage', {
     chat_id: GROUP_ID,

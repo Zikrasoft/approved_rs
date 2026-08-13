@@ -46,7 +46,17 @@ function doPost(e) {
     'Новая',
   ]);
 
-  return jsonResponse({ ok: true });
+  // Deep link straight to the row just written, so the Telegram notification
+  // can carry a "open this row" link instead of just "open the sheet" —
+  // getLastRow() right after appendRow is safe, Apps Script executions for
+  // a single deployment run one at a time.
+  var rowNum = sheet.getLastRow();
+  var spreadsheetId = SpreadsheetApp.getActiveSpreadsheet().getId();
+  var gid = sheet.getSheetId();
+  var rowUrl = 'https://docs.google.com/spreadsheets/d/' + spreadsheetId +
+    '/edit#gid=' + gid + '&range=A' + rowNum;
+
+  return jsonResponse({ ok: true, rowUrl: rowUrl });
 }
 
 function jsonResponse(body) {

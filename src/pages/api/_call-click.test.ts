@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('../../lib/telegram', () => ({
-  sendLeadNotification: vi.fn().mockResolvedValue(undefined),
+vi.mock('@vercel/functions', () => ({
+  waitUntil: vi.fn(),
 }));
-vi.mock('../../lib/sheets', () => ({
-  sendLeadToSheet: vi.fn().mockResolvedValue(undefined),
+vi.mock('../../lib/notifyLead', () => ({
+  notifyLead: vi.fn().mockResolvedValue(undefined),
 }));
 
 import { POST } from './call-click';
-import { sendLeadNotification } from '@/lib/telegram';
-import { sendLeadToSheet } from '@/lib/sheets';
+import { waitUntil } from '@vercel/functions';
+import { notifyLead } from '@/lib/notifyLead';
 
 function makeCtx(fields: Record<string, string>) {
   const formData = new FormData();
@@ -21,8 +21,8 @@ function makeCtx(fields: Record<string, string>) {
 
 describe('POST /api/call-click', () => {
   beforeEach(() => {
-    vi.mocked(sendLeadNotification).mockResolvedValue(undefined);
-    vi.mocked(sendLeadToSheet).mockResolvedValue(undefined);
+    vi.mocked(notifyLead).mockResolvedValue(undefined);
+    vi.mocked(waitUntil).mockReset();
   });
 
   it('returns 204', async () => {
@@ -30,23 +30,22 @@ describe('POST /api/call-click', () => {
     expect(res.status).toBe(204);
   });
 
-  it('calls sendLeadToSheet with kind call_click and an empty name', async () => {
+  it('dispatches notifyLead via waitUntil with kind call_click and an empty name', async () => {
     await POST(makeCtx({ source_url: '/ru/vehicle-sourcing/de/' }));
-    expect(sendLeadToSheet).toHaveBeenCalledWith(expect.objectContaining({
-      kind: 'call_click',
-      name: '',
-    }));
+    expect(waitUntil).toHaveBeenCalledTimes(1);
+    expect(notifyLead).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'call_click', name: '' }),
+      '[call-click]'
+    );
   });
 
-  it('still returns 204 when sendLeadToSheet throws', async () => {
-    vi.mocked(sendLeadToSheet).mockRejectedValueOnce(new Error('Sheets down'));
-    const res = await POST(makeCtx({ source_url: '/ru/vehicle-sourcing/de/' }));
-    expect(res.status).toBe(204);
-  });
+  it('returns 204 without waiting for notifyLead to resolve', async () => {
+    let resolveNotify!: () => void;
+    vi.mocked(notifyLead).mockReturnValue(new Promise(resolve => { resolveNotify = resolve; }));
 
-  it('still returns 204 when sendLeadNotification throws', async () => {
-    vi.mocked(sendLeadNotification).mockRejectedValueOnce(new Error('TG down'));
     const res = await POST(makeCtx({ source_url: '/ru/vehicle-sourcing/de/' }));
+
     expect(res.status).toBe(204);
+    resolveNotify();
   });
 });
