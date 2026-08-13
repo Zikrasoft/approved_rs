@@ -1,4 +1,7 @@
-import { SERVICE_LABELS, STATUS_LABELS } from '@/utils/labels';
+import { SERVICE_LABELS } from '@/utils/labels';
+import type { LeadData } from './leadTypes';
+
+export type { LeadData };
 
 const BOT_TOKEN = import.meta.env.TELEGRAM_BOT_TOKEN!;
 const GROUP_ID = import.meta.env.TELEGRAM_GROUP_ID!;
@@ -14,17 +17,6 @@ const CONTACT_CHANNEL_LABELS: Record<string, string> = {
   viber: 'Viber',
   phone: 'звонок',
 };
-
-export interface LeadData {
-  id: number;
-  name: string;
-  contact: string;
-  service: string;
-  contactChannel?: string | null;
-  comment?: string | null;
-  country?: string | null;
-  source_url?: string | null;
-}
 
 function formatLeadText(lead: LeadData): string {
   const service = SERVICE_LABELS[lead.service] ?? lead.service;
@@ -62,31 +54,5 @@ export async function sendLeadNotification(lead: LeadData): Promise<void> {
   await tgPost('sendMessage', {
     chat_id: GROUP_ID,
     text,
-    reply_markup: {
-      inline_keyboard: [[
-        { text: '✅ В работу', callback_data: `accept:${lead.id}` },
-        { text: '❌ Закрыт',  callback_data: `close:${lead.id}` },
-        { text: '🚫 Спам',   callback_data: `spam:${lead.id}` },
-      ]],
-    },
   });
-}
-
-export async function editGroupMessage(
-  messageId: number,
-  originalText: string,
-  handledBy: string,
-  status: string
-): Promise<void> {
-  const label = STATUS_LABELS[status] ?? status;
-  await tgPost('editMessageText', {
-    chat_id: GROUP_ID,
-    message_id: messageId,
-    text: `${originalText}\n\n${label} — @${handledBy}`,
-    reply_markup: { inline_keyboard: [] },
-  });
-}
-
-export async function answerCallbackQuery(callbackQueryId: string): Promise<void> {
-  await tgPost('answerCallbackQuery', { callback_query_id: callbackQueryId });
 }

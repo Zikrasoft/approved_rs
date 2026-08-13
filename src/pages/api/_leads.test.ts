@@ -3,9 +3,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('../../lib/telegram', () => ({
   sendLeadNotification: vi.fn().mockResolvedValue(undefined),
 }));
+vi.mock('../../lib/sheets', () => ({
+  sendLeadToSheet: vi.fn().mockResolvedValue(undefined),
+}));
 
 import { POST } from "./leads";
 import { sendLeadNotification } from "@/lib/telegram";
+import { sendLeadToSheet } from "@/lib/sheets";
 
 function makeCtx(fields: Record<string, string>) {
   const formData = new FormData();
@@ -23,6 +27,7 @@ function makeCtx(fields: Record<string, string>) {
 describe('POST /api/leads', () => {
   beforeEach(() => {
     vi.mocked(sendLeadNotification).mockResolvedValue(undefined);
+    vi.mocked(sendLeadToSheet).mockResolvedValue(undefined);
   });
 
   it('redirects to /ru/thanks/ on valid data', async () => {
@@ -53,6 +58,21 @@ describe('POST /api/leads', () => {
 
   it('still redirects when Telegram notification throws', async () => {
     vi.mocked(sendLeadNotification).mockRejectedValueOnce(new Error('TG down'));
+    const ctx = makeCtx({ name: 'Иван', contact: '@ivan', service: 'vehicle-sourcing' });
+    await POST(ctx);
+    expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
+  });
+
+  it('calls sendLeadToSheet with parsed form fields and locale', async () => {
+    const ctx = makeCtx({ name: 'Иван', contact: '@ivan', service: 'vehicle-buyback', country: 'de', source_url: '/ru/vehicle-buyback/de/' });
+    await POST(ctx);
+    expect(sendLeadToSheet).toHaveBeenCalledWith(expect.objectContaining({
+      name: 'Иван', contact: '@ivan', service: 'vehicle-buyback', country: 'de', locale: 'ru',
+    }));
+  });
+
+  it('still redirects when the Google Sheets call throws', async () => {
+    vi.mocked(sendLeadToSheet).mockRejectedValueOnce(new Error('Sheets down'));
     const ctx = makeCtx({ name: 'Иван', contact: '@ivan', service: 'vehicle-sourcing' });
     await POST(ctx);
     expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
