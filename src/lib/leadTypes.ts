@@ -10,4 +10,5 @@ export interface LeadData {
   country?: string | null;
   source_url?: string | null;
   locale: Locale;
+  kind?: 'lead' | 'call_click';
 }
