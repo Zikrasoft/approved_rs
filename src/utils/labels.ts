@@ -106,15 +106,3 @@ export const SERVICE_LABELS: Record<string, string> = {
 };
 
 export const AUTOSERVICE_SERVICES = ['diagnostics', 'maintenance', 'suspension', 'engine', 'prepurchase'] as const;
-
-export const STATUS_LABELS: Record<string, string> = {
-  in_progress: '✅ В работу',
-  closed:      '❌ Закрыт',
-  spam:        '🚫 Спам',
-};
-
-export const ACTION_TO_STATUS: Record<string, 'in_progress' | 'closed' | 'spam'> = {
-  accept: 'in_progress',
-  close:  'closed',
-  spam:   'spam',
-};
