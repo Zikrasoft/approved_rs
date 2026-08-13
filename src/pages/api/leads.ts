@@ -2,12 +2,10 @@ export const prerender = false;
 
 import type { APIContext } from 'astro';
 import { sendLeadNotification } from '@/lib/telegram';
+import { sendLeadToSheet } from '@/lib/sheets';
 import { isLocale, type Locale } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 
-// Only reached if a visitor bypasses the client-side validation (JS
-// disabled, direct POST) — but the cookie-based locale is already right
-// there for the redirect below, so there's no excuse for an RU-only body.
 const MISSING_FIELDS_MESSAGE: Record<Locale, string> = {
   ru: 'Имя и контакт обязательны',
   en: 'Name and contact are required',
@@ -32,10 +30,18 @@ export async function POST({ request, redirect, cookies }: APIContext): Promise<
     return new Response(MISSING_FIELDS_MESSAGE[locale], { status: 400 });
   }
 
+  const lead = { id: Date.now(), name, contact, service, contactChannel, comment, country, source_url, locale };
+
   try {
-    await sendLeadNotification({ id: Date.now(), name, contact, service, contactChannel, comment, country, source_url });
+    await sendLeadNotification(lead);
   } catch (err) {
     console.error('[leads] Telegram notification failed:', err);
+  }
+
+  try {
+    await sendLeadToSheet(lead);
+  } catch (err) {
+    console.error('[leads] Google Sheets append failed:', err);
   }
 
   return redirect(PathBuilder.thanks(locale), 302);
