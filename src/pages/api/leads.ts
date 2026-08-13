@@ -1,8 +1,7 @@
 export const prerender = false;
 
 import type { APIContext } from 'astro';
-import { sendLeadNotification } from '@/lib/telegram';
-import { sendLeadToSheet } from '@/lib/sheets';
+import { notifyLead } from '@/lib/notifyLead';
 import { isLocale, type Locale } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 
@@ -35,17 +34,7 @@ export async function POST({ request, redirect, cookies }: APIContext): Promise<
 
   const lead = { id: Date.now(), name, contact, service, contactChannel, comment, country, source_url, locale };
 
-  try {
-    await sendLeadNotification(lead);
-  } catch (err) {
-    console.error('[leads] Telegram notification failed:', err);
-  }
-
-  try {
-    await sendLeadToSheet(lead);
-  } catch (err) {
-    console.error('[leads] Google Sheets append failed:', err);
-  }
+  await notifyLead(lead, '[leads]');
 
   return redirect(PathBuilder.thanks(locale), 302);
 }

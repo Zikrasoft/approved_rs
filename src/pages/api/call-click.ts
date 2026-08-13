@@ -1,8 +1,7 @@
 export const prerender = false;
 
 import type { APIContext } from 'astro';
-import { sendLeadNotification } from '@/lib/telegram';
-import { sendLeadToSheet } from '@/lib/sheets';
+import { notifyLead } from '@/lib/notifyLead';
 
 // Fired via navigator.sendBeacon when a visitor taps a tel: call button —
 // not a real lead form, so it's routed through the same notification
@@ -25,17 +24,7 @@ export async function POST({ request }: APIContext): Promise<Response> {
     kind: 'call_click' as const,
   };
 
-  try {
-    await sendLeadNotification(lead);
-  } catch (err) {
-    console.error('[call-click] Telegram notification failed:', err);
-  }
-
-  try {
-    await sendLeadToSheet(lead);
-  } catch (err) {
-    console.error('[call-click] Google Sheets append failed:', err);
-  }
+  await notifyLead(lead, '[call-click]');
 
   // sendBeacon ignores the response body/status either way — 204 is just
   // the honest "accepted, nothing to return" code.
