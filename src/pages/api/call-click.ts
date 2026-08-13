@@ -19,7 +19,6 @@ export async function POST({ request }: APIContext): Promise<Response> {
       service: 'Звонок с сайта',
       comment: 'Посетитель нажал кнопку звонка на сайте. Если пропустили — перезвоните.',
       source_url,
-      locale: 'ru',
     });
   } catch (err) {
     console.error('[call-click] Telegram notification failed:', err);

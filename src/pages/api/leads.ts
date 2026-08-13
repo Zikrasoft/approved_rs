@@ -6,6 +6,9 @@ import { sendLeadToSheet } from '@/lib/sheets';
 import { isLocale, type Locale } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 
+// Only reached if a visitor bypasses the client-side validation (JS
+// disabled, direct POST) — but the cookie-based locale is already right
+// there for the redirect below, so there's no excuse for an RU-only body.
 const MISSING_FIELDS_MESSAGE: Record<Locale, string> = {
   ru: 'Имя и контакт обязательны',
   en: 'Name and contact are required',
