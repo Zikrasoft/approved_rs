@@ -23,11 +23,17 @@ function doPost(e) {
 
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
 
-  // Only the auto-populated columns (A–K) — the manual/business columns
+  // kind distinguishes a real form submission (leads.ts) from a call-button
+  // tap (call-click.ts, no form — name/contact arrive empty on purpose,
+  // staff fill those in by hand once they've actually spoken to the caller).
+  var typeLabel = data.kind === 'call_click' ? 'Звонок' : 'Заявка';
+
+  // Only the auto-populated columns (A–L) — the manual/business columns
   // (Сколько заработал, Моя доля, Оплачено мне) are left blank; staff fill
   // those in by hand, and "Моя доля" is an ARRAYFORMULA in its header cell.
   sheet.appendRow([
     new Date(),
+    typeLabel,
     data.id || '',
     data.name || '',
     data.contact || '',
