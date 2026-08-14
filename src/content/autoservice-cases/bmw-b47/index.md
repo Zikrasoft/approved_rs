@@ -32,19 +32,20 @@ translations:
       and repairing BMWs and other cars.
 
 
-      Come to us for:\
+      Come to us for:
 
-      • coolant and antifreeze replacement\
 
-      • cooling system servicing\
+      - coolant and antifreeze replacement
 
-      • radiator cleaning\
+      - cooling system servicing
 
-      • intake system cleaning\
+      - radiator cleaning
 
-      • swirl flap cleaning\
+      - intake system cleaning
 
-      • diagnostics and full BMW servicing
+      - swirl flap cleaning
+
+      - diagnostics and full BMW servicing
 
 
       We'd be happy to help service your car!
@@ -79,19 +80,20 @@ translations:
       Posetite naš servis u Beogradu za održavanje i popravku BMW vozila.
 
 
-      Radimo:\
+      Radimo:
 
-      • zamenu rashladne tečnosti\
 
-      • servis rashladnog sistema\
+      - zamenu rashladne tečnosti
 
-      • čišćenje hladnjaka\
+      - servis rashladnog sistema
 
-      • čišćenje usisnog sistema\
+      - čišćenje hladnjaka
 
-      • čišćenje swirl klapni\
+      - čišćenje usisnog sistema
 
-      • dijagnostiku i kompletan servis BMW vozila
+      - čišćenje swirl klapni
+
+      - dijagnostiku i kompletan servis BMW vozila
 
 
       Biće nam zadovoljstvo da servisiramo vaše vozilo!
@@ -121,12 +123,13 @@ published: true
 
 Наш **русский автосервис в Белграде** специализируется на обслуживании и ремонте BMW и других автомобилей.
 
-К нам можно приехать для:\
-• замены антифриза и охлаждающей жидкости\
-• обслуживания системы охлаждения\
-• чистки радиаторов\
-• чистки впускной системы\
-• чистки вихревых заслонок\
-• диагностики и комплексного обслуживания BMW
+К нам можно приехать для:
+
+- замены антифриза и охлаждающей жидкости
+- обслуживания системы охлаждения
+- чистки радиаторов
+- чистки впускной системы
+- чистки вихревых заслонок
+- диагностики и комплексного обслуживания BMW
 
 Будем рады помочь с обслуживанием вашего автомобиля!

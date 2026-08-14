@@ -4,37 +4,35 @@ translations:
   en:
     title: BMW X3
     body: >
-      ### Выкуп автомобилей на РФ номерах в Сербии и Черногории
+      ### Buying Cars on Russian Plates in Serbia and Montenegro
 
 
-      К нам обратился клиент, которому нужно было **максимально оперативно
-      продать автомобиль на российских номерах**. Мы предложили выкупить
-      автомобиль самостоятельно, организовать его доставку в Россию и дальнейшую
-      реализацию.
+      A client came to us needing to **sell a car on Russian plates as
+      quickly as possible**. We offered to buy the car ourselves, arrange
+      its delivery to Russia, and handle the resale there.
 
 
-      Речь шла о **BMW X3**, который мы выкупили за **33 000 €**.
+      The car in question was a **BMW X3**, which we bought for **€33,000**.
 
 
-      Но самое интересное — параллельно клиент обратился к нам за услугой
-      **автоподбора в Сербии**. В результате он решил не просто продать свой
-      автомобиль, а сразу подобрать себе следующий — и в итоге выбрал **BMW X4
-      вместо BMW X3**.
+      But here's the interesting part — at the same time, the client also
+      asked us for our **car sourcing service in Serbia**. In the end, he
+      decided not just to sell his car but to pick out his next one right
+      away — and settled on a **BMW X4 instead of the BMW X3**.
 
 
-      Получился удобный вариант: мы быстро выкупили его автомобиль на
-      РФ-номерах, взяли на себя дальнейшую логистику и продажу в России, а
-      клиент спокойно пересел на новый для себя BMW X4.
+      It worked out well for everyone: we quickly bought his car on Russian
+      plates, took care of the logistics and resale in Russia, and the
+      client smoothly moved into his new BMW X4.
 
 
-      Мы занимаемся **выкупом автомобилей на российских номерах в Сербии и
-      Черногории**, а также автоподбором и сопровождением покупки автомобилей в
-      Сербии.
+      We handle **buying cars on Russian plates in Serbia and Montenegro**,
+      as well as car sourcing and purchase support in Serbia.
 
 
-      Если вам необходимо **срочно продать автомобиль на РФ-номерах**,
-      обращайтесь — оценим автомобиль, предложим вариант выкупа и организуем
-      дальнейшие действия.
+      If you need to **sell a car on Russian plates urgently**, get in
+      touch — we'll appraise the car, offer a buyback deal, and arrange
+      everything from there.
   sr:
     title: BMW X3
     body: >
