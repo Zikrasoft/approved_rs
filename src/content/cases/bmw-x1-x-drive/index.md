@@ -31,7 +31,7 @@ translations:
       Another successful car purchase inspection completed in Serbia.
 
 
-      We wish Damir many safe and happy kilometres on Serbian roads! 🚗🇷🇸
+      We wish Damir many safe and happy kilometres on Serbian roads!
   sr:
     title: BMW X1
     body: >
@@ -58,10 +58,10 @@ translations:
       čišćenje usisnog sistema na **2.0 dizel motoru B47**.
 
 
-      Još jedan automobil je pronađen i proveren uz našu pomoć. 🚗
+      Još jedan automobil je pronađen i proveren uz našu pomoć.
 
 
-      Damiru želimo puno sreće i bezbednih kilometara na putevima Srbije! 🇷🇸
+      Damiru želimo puno sreće i bezbednih kilometara na putevima Srbije!
 car: BMW X1
 year: 2016
 price:
@@ -87,7 +87,6 @@ published: true
 
 В результате Дамир получил автомобиль, который прошёл полноценную проверку перед покупкой, а мы — ещё одного довольного клиента по рекомендации.
 
-Желаем Дамиру удачи на дорогах Сербии! 🚗🇷🇸\
-Тра-ля-ля, тру-лю-лю — пусть BMW только радует! 😎
+Желаем Дамиру удачи на дорогах Сербии!
 
 **Автоподбор в Белграде и Сербии** — проверка автомобилей перед покупкой, диагностика, проверка истории, пробега и технического состояния. Работаем по всей Сербии: Белград, Нови-Сад, Панчево, Суботица, Крагуевац, Ниш, Чачак и другие города.

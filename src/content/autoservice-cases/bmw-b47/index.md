@@ -4,59 +4,51 @@ translations:
   en:
     title: BMW B47
     body: >
-      # Обслуживание системы охлаждения и чистка вихревых заслонок BMW в
-      Белграде
+      # Cooling System Service and Swirl Flap Cleaning for a BMW in Belgrade
 
 
-      В наш **русский автосервис в Белграде** приехала BMW на обслуживание
-      системы охлаждения и профилактические работы по двигателю.
+      A BMW came into our **Russian-run auto service in Belgrade** for
+      cooling system maintenance and preventive engine work.
 
 
-      🔧 Выполнили частичную замену охлаждающей жидкости. На двигателях BMW
-      **B47** при частичной замене, как правило, требуется около **5–7 литров**
-      охлаждающей жидкости.
+      We carried out a partial coolant change. For BMW **B47** engines, a
+      partial change typically takes around **5–7 litres** of coolant.
 
 
-      В данном случае использовали **зелёную охлаждающую жидкость HT-12 от
-      Valvoline**.
+      In this case we used **Valvoline's green HT-12 coolant**.
 
 
-      Также выполнили **чистку вихревых заслонок и впускной системы**. Со
-      временем на дизельных двигателях во впуске и на заслонках скапливается
-      большое количество загрязнений и нагара, что может негативно влиять на
-      работу двигателя.
+      We also cleaned the **swirl flaps and intake system**. Over time,
+      diesel engines build up significant deposits and carbon on the intake
+      and flaps, which can affect engine performance.
 
 
-      Регулярное обслуживание системы охлаждения и впускной системы помогает
-      поддерживать стабильную работу двигателя и предотвращать более серьёзные
-      неисправности.
+      Regular servicing of the cooling and intake systems helps keep the
+      engine running smoothly and prevents more serious faults down the
+      line.
 
 
-      📍 Наш **русский автосервис в Белграде** специализируется на обслуживании
-      и ремонте BMW и других автомобилей.
+      Our **Russian-run auto service in Belgrade** specialises in servicing
+      and repairing BMWs and other cars.
 
 
-      К нам можно приехать для:\
+      Come to us for:\
 
-      • замены антифриза и охлаждающей жидкости\
+      • coolant and antifreeze replacement\
 
-      • обслуживания системы охлаждения\
+      • cooling system servicing\
 
-      • чистки радиаторов\
+      • radiator cleaning\
 
-      • чистки впускной системы\
+      • intake system cleaning\
 
-      • чистки вихревых заслонок\
+      • swirl flap cleaning\
 
-      • диагностики и комплексного обслуживания BMW
-
-
-      Будем рады помочь с обслуживанием вашего автомобиля!
+      • diagnostics and full BMW servicing
 
 
-      \#АвтосервисБелград #РусскийАвтосервисБелград #BMWБелград #BMWСервис
-      #АвтосервисСербия #РемонтBMW #BMWB47 #ОбслуживаниеBMW #ЗаменаАнтифриза
-      #СистемаОхлаждения #ВихревыеЗаслонки #ЧисткаРадиаторов #Белград #Сербия
+      We'd be happy to help service your car!
+
   sr:
     title: BMW B47
     body: >
@@ -67,7 +59,7 @@ translations:
       preventivno održavanje motora.
 
 
-      🔧 Izvršili smo **delimičnu zamenu rashladne tečnosti**. Kod BMW motora
+      Izvršili smo **delimičnu zamenu rashladne tečnosti**. Kod BMW motora
       **B47** za delimičnu zamenu je najčešće potrebno oko **5–7 litara**
       rashladne tečnosti.
 
@@ -84,7 +76,7 @@ translations:
       stabilnijem radu motora.
 
 
-      📍 Posetite naš servis u Beogradu za održavanje i popravku BMW vozila.
+      Posetite naš servis u Beogradu za održavanje i popravku BMW vozila.
 
 
       Radimo:\
@@ -104,9 +96,6 @@ translations:
 
       Biće nam zadovoljstvo da servisiramo vaše vozilo!
 
-
-      \#BMW #BMWB47 #BMWServis #AutoServisBeograd #ServisBeograd #Srbija
-      #RashladniSistem #Antifriz #Valvoline #HT12 #SwirlKlapne #CiscenjeUsisa
 car: BMW
 year: 2020
 servicesApplied:
@@ -122,7 +111,7 @@ published: true
 
 В наш **русский автосервис в Белграде** приехала BMW на обслуживание системы охлаждения и профилактические работы по двигателю.
 
-🔧 Выполнили частичную замену охлаждающей жидкости. На двигателях BMW **B47** при частичной замене, как правило, требуется около **5–7 литров** охлаждающей жидкости.
+Выполнили частичную замену охлаждающей жидкости. На двигателях BMW **B47** при частичной замене, как правило, требуется около **5–7 литров** охлаждающей жидкости.
 
 В данном случае использовали **зелёную охлаждающую жидкость HT-12 от Valvoline**.
 
@@ -130,7 +119,7 @@ published: true
 
 Регулярное обслуживание системы охлаждения и впускной системы помогает поддерживать стабильную работу двигателя и предотвращать более серьёзные неисправности.
 
-📍 Наш **русский автосервис в Белграде** специализируется на обслуживании и ремонте BMW и других автомобилей.
+Наш **русский автосервис в Белграде** специализируется на обслуживании и ремонте BMW и других автомобилей.
 
 К нам можно приехать для:\
 • замены антифриза и охлаждающей жидкости\
@@ -141,5 +130,3 @@ published: true
 • диагностики и комплексного обслуживания BMW
 
 Будем рады помочь с обслуживанием вашего автомобиля!
-
-\#АвтосервисБелград #РусскийАвтосервисБелград #BMWБелград #BMWСервис #АвтосервисСербия #РемонтBMW #BMWB47 #ОбслуживаниеBMW #ЗаменаАнтифриза #СистемаОхлаждения #ВихревыеЗаслонки #ЧисткаРадиаторов #Белград #Сербия
