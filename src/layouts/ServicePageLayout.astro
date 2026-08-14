@@ -15,6 +15,7 @@ import { toCaseItem } from '@/utils/cases';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
+import { DATA_OPEN_PAGE_LEAD_MODAL } from '@/utils/contactChannel';
 
 interface Props {
   meta: MetaProps;
@@ -84,7 +85,7 @@ const t = getI18n(locale);
 
   <slot name="extra" />
 
-  <LeadFormModal id="page-lead-modal" triggerAttr="data-open-page-lead-modal" service={formService} country={leadCountry} city={city} />
+  <LeadFormModal id="page-lead-modal" triggerAttr={DATA_OPEN_PAGE_LEAD_MODAL} service={formService} country={leadCountry} city={city} />
 
   <slot name="cases"><CasesGrid {items} heading={casesHeading ?? ''} /></slot>
 

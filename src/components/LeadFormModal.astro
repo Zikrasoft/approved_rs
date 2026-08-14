@@ -3,10 +3,11 @@ import { X } from '@lucide/astro';
 import LeadForm from './LeadForm.astro';
 import { getLocale } from '@/i18n/config';
 import { getI18n } from '@/i18n/getI18n';
+import type { DATA_OPEN_LEAD_MODAL, DATA_OPEN_PAGE_LEAD_MODAL } from '@/utils/contactChannel';
 
 interface Props {
   id: string;
-  triggerAttr: string;
+  triggerAttr: typeof DATA_OPEN_LEAD_MODAL | typeof DATA_OPEN_PAGE_LEAD_MODAL;
   service?: string;
   country?: string;
   city?: string;

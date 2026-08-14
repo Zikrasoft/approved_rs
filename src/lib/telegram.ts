@@ -1,4 +1,5 @@
 import { SERVICE_LABELS } from '@/utils/labels';
+import { isTrackedContactChannel, type TrackedContactChannel } from '@/utils/contactChannel';
 import type { LeadData } from './leadTypes';
 
 export type { LeadData };
@@ -11,7 +12,7 @@ const API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 // contactChannel says which app the visitor actually wants to be reached on
 // — WhatsApp/Viber/phone share the same phone-number input in the form, so
 // without this staff would have to guess which app to open.
-const CONTACT_CHANNEL_LABELS: Record<string, string> = {
+const CONTACT_CHANNEL_LABELS: Record<TrackedContactChannel, string> = {
   telegram: 'Telegram',
   whatsapp: 'WhatsApp',
   viber: 'Viber',
@@ -20,7 +21,11 @@ const CONTACT_CHANNEL_LABELS: Record<string, string> = {
 
 function formatLeadText(lead: LeadData, rowUrl?: string | null): string {
   const service = SERVICE_LABELS[lead.service] ?? lead.service;
-  const channelLabel = lead.contactChannel ? CONTACT_CHANNEL_LABELS[lead.contactChannel] : undefined;
+  // lead.contactChannel is a plain string at this point (from a form field
+  // or the contact-click beacon, either of which could carry an arbitrary
+  // value) — isTrackedContactChannel guards the lookup the same way
+  // contact-click.ts's CHANNEL_COPY lookup does, not a raw `obj[input]`.
+  const channelLabel = isTrackedContactChannel(lead.contactChannel) ? CONTACT_CHANNEL_LABELS[lead.contactChannel] : undefined;
   const contactLine = channelLabel ? `${lead.contact} (${channelLabel})` : lead.contact;
   const lines: string[] = [
     `🚗 Заявка #${lead.id} — ${service}`,

@@ -151,6 +151,7 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
 
 <script>
   import { AsYouType, parsePhoneNumberFromString, type CountryCode } from 'libphonenumber-js/min';
+  import { isTrackedContactChannel, type TrackedContactChannel } from '@/utils/contactChannel';
 
   // A page can have more than one LeadForm instance (e.g. a page-level form
   // plus the header's "Оставить заявку" modal) — Astro only emits this
@@ -216,10 +217,10 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
     // WhatsApp/Viber/phone-call all collect the same shape of data (a phone
     // number) — they share the "phone" panel and its validation, and only
     // differ in which channel gets recorded for staff to reach back out on.
-    const PANEL_FOR: Record<string, 'telegram' | 'phone'> = {
+    const PANEL_FOR: Record<TrackedContactChannel, 'telegram' | 'phone'> = {
       telegram: 'telegram', whatsapp: 'phone', viber: 'phone', phone: 'phone',
     };
-    let activeTab: 'telegram' | 'whatsapp' | 'viber' | 'phone' = 'telegram';
+    let activeTab: TrackedContactChannel = 'telegram';
     let activeTabButton: HTMLButtonElement = tabs[0];
 
     // translate on both axes: on narrow screens the 4 tabs wrap to 2 rows,
@@ -310,7 +311,7 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
 
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
-        activeTab = tab.dataset.tab as 'telegram' | 'whatsapp' | 'viber' | 'phone';
+        activeTab = isTrackedContactChannel(tab.dataset.tab) ? tab.dataset.tab : 'telegram';
         activeTabButton = tab;
         movePill(tab);
         tabs.forEach(t => {

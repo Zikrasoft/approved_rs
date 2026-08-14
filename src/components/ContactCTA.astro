@@ -6,6 +6,7 @@ import { whatsappLink, viberLink } from '@/utils/contactLinks';
 import { getServicesContent } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
 import { TG_MANAGER, WHATSAPP_NUMBER, VIBER_NUMBER, PHONE_NUMBER } from '@/utils/constants';
+import { DATA_OPEN_LEAD_MODAL, DATA_OPEN_PAGE_LEAD_MODAL } from '@/utils/contactChannel';
 
 interface Props {
   manager?: string;
@@ -35,7 +36,7 @@ const message = text ?? DEFAULT_TG_MESSAGE[locale];
 // the page-local one (ServicePageLayout) when the Telegram button also uses
 // it, otherwise the header's global modal — same rule `openModal` already
 // applies to the Telegram button above.
-const callbackTrigger = openModal ? 'data-open-page-lead-modal' : 'data-open-lead-modal';
+const callbackTrigger = openModal ? DATA_OPEN_PAGE_LEAD_MODAL : DATA_OPEN_LEAD_MODAL;
 ---
 
 <div class="flex flex-col gap-3 my-8">
@@ -43,7 +44,7 @@ const callbackTrigger = openModal ? 'data-open-page-lead-modal' : 'data-open-lea
     <div class="flex flex-col sm:flex-row gap-3">
       <Button
         data-contact-channel="telegram"
-        data-open-page-lead-modal={openModal ? true : undefined}
+        {...{ [DATA_OPEN_PAGE_LEAD_MODAL]: openModal ? true : undefined }}
         href={openModal ? undefined : telegramLink(manager, message)}
         target={openModal ? undefined : '_blank'}
         rel={openModal ? undefined : 'noopener'}
@@ -67,7 +68,7 @@ const callbackTrigger = openModal ? 'data-open-page-lead-modal' : 'data-open-lea
       <div class="contact-bar">
         <a
           data-contact-channel="telegram"
-          data-open-page-lead-modal={openModal ? true : undefined}
+          {...{ [DATA_OPEN_PAGE_LEAD_MODAL]: openModal ? true : undefined }}
           href={openModal ? undefined : telegramLink(manager, message)}
           target={openModal ? undefined : '_blank'}
           rel={openModal ? undefined : 'noopener'}

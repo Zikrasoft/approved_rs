@@ -128,6 +128,8 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
       }, 1600);
     </script>
     <script>
+      import { isTrackedContactChannel, DATA_CONTACT_CHANNEL, DATA_OPEN_LEAD_MODAL, DATA_OPEN_PAGE_LEAD_MODAL } from '@/utils/contactChannel';
+
       // Which contact channel people actually pick, site-wide — every
       // Telegram/WhatsApp/Viber/callback/call touchpoint carries
       // data-contact-channel, tracked here once instead of per component.
@@ -146,13 +148,12 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
       // gtag label in that case), so it's excluded exactly like 'callback' is.
       // Clicking tel:/https: links is a real navigation, can't await a fetch
       // first, so this fires a beacon instead of blocking.
-      const TRACKED_CONTACT_CHANNELS = new Set(['phone', 'telegram', 'whatsapp', 'viber']);
-      document.querySelectorAll<HTMLElement>('[data-contact-channel]').forEach((el) => {
+      document.querySelectorAll<HTMLElement>(`[${DATA_CONTACT_CHANNEL}]`).forEach((el) => {
         el.addEventListener('click', () => {
-          const channel = el.dataset.contactChannel!;
+          const channel = el.dataset.contactChannel;
           (window as any).gtag?.('event', 'contact_click', { channel });
-          const opensLeadModal = el.hasAttribute('data-open-lead-modal') || el.hasAttribute('data-open-page-lead-modal');
-          if (TRACKED_CONTACT_CHANNELS.has(channel) && !opensLeadModal) {
+          const opensLeadModal = el.hasAttribute(DATA_OPEN_LEAD_MODAL) || el.hasAttribute(DATA_OPEN_PAGE_LEAD_MODAL);
+          if (isTrackedContactChannel(channel) && !opensLeadModal) {
             const body = new FormData();
             body.set('channel', channel);
             body.set('source_url', location.href);

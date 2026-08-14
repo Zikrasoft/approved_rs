@@ -10,6 +10,7 @@ import { getLocale } from '@/i18n/config';
 import { DEFAULT_COUNTRY } from '@/utils/constants';
 import { getActiveCountries } from '@/utils/geo';
 import { PathBuilder } from '@/utils/paths';
+import { DATA_OPEN_LEAD_MODAL } from '@/utils/contactChannel';
 
 const locale = getLocale(Astro.currentLocale);
 const t = getI18n(locale);
@@ -81,7 +82,7 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
       <!-- CTA: always visible, full text only once there's room (xl) —
            the lg breakpoint is where desktop nav first turns on and is
            already tight with 6 nav links + lang switcher + theme toggle. -->
-      <Button type="button" data-open-lead-modal class="px-3 xl:px-4 py-2">
+      <Button type="button" {...{ [DATA_OPEN_LEAD_MODAL]: true }} class="px-3 xl:px-4 py-2">
         <Send size={13} />
         <span class="xl:hidden">{t.header.ctaShort}</span>
         <span class="hidden xl:inline">{t.header.ctaLong}</span>
@@ -128,7 +129,7 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
     </div>
   </div>
 
-  <LeadFormModal id="lead-modal" triggerAttr="data-open-lead-modal" />
+  <LeadFormModal id="lead-modal" triggerAttr={DATA_OPEN_LEAD_MODAL} />
 </header>
 
 <style>
@@ -204,7 +205,7 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
   }
 </style>
 
-<script is:inline>
+<script is:inline define:vars={{ DATA_OPEN_LEAD_MODAL }}>
   function updateThemeIcons() {
     var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     document.querySelectorAll('.theme-icon-sun').forEach(function (el) { el.classList.toggle('hidden', !isDark); });
@@ -291,7 +292,7 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
       // Close the mobile menu when the "Оставить заявку" button opens the
       // lead modal (LeadFormModal.astro owns the modal itself, this just
       // keeps the burger menu from staying open behind it).
-      document.querySelectorAll('[data-open-lead-modal]').forEach(function (btn) {
+      document.querySelectorAll('[' + DATA_OPEN_LEAD_MODAL + ']').forEach(function (btn) {
         btn.addEventListener('click', function () {
           if (burger.getAttribute('aria-expanded') === 'true') closeMenu();
         });

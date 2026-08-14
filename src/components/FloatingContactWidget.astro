@@ -6,6 +6,7 @@ import { whatsappLink, viberLink } from '@/utils/contactLinks';
 import { getServicesContent } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
 import { TG_MANAGER, WHATSAPP_NUMBER, VIBER_NUMBER, PHONE_NUMBER } from '@/utils/constants';
+import { DATA_OPEN_LEAD_MODAL } from '@/utils/contactChannel';
 
 const locale = getLocale(Astro.currentLocale);
 const cc = getServicesContent(locale).caseChrome;
@@ -23,7 +24,7 @@ const message = DEFAULT_TG_MESSAGE[locale];
     <a data-contact-channel="viber" href={viberLink(VIBER_NUMBER)} target="_blank" rel="noopener" role="menuitem" class="floating-cell" aria-label={cc.viberButtonLabel}>
       <ContactIcon channel="viber" size={17} /> <span>Viber</span>
     </a>
-    <button type="button" role="menuitem" data-contact-channel="callback" aria-label={cc.callbackButtonLabel} data-open-lead-modal="phone" class="floating-cell">
+    <button type="button" role="menuitem" data-contact-channel="callback" aria-label={cc.callbackButtonLabel} {...{ [DATA_OPEN_LEAD_MODAL]: 'phone' }} class="floating-cell">
       <ContactIcon channel="phone" size={16} /> <span>{cc.callbackShortLabel}</span>
     </button>
     <a data-contact-channel="phone" href={`tel:+${PHONE_NUMBER}`} role="menuitem" class="floating-cell">

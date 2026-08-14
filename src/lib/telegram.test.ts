@@ -66,4 +66,17 @@ describe('sendLeadNotification', () => {
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).not.toContain('Таблица:');
   });
+
+  it('appends the channel label to the contact line for a tracked channel', async () => {
+    await sendLeadNotification({ ...mockLead, contactChannel: 'whatsapp' });
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('Контакт: @ivan (WhatsApp)');
+  });
+
+  it('drops the channel label for an untracked/prototype-key contactChannel instead of leaking it', async () => {
+    await sendLeadNotification({ ...mockLead, contactChannel: 'constructor' });
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('Контакт: @ivan');
+    expect(body.text).not.toMatch(/Контакт: @ivan \(/);
+  });
 });
