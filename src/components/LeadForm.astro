@@ -375,7 +375,27 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
       if (consentErr) consentErr.style.display = consent.checked ? 'none' : '';
       if (!consent.checked) ok = false;
 
-      if (!ok) e.preventDefault();
+      if (!ok) {
+        e.preventDefault();
+        return;
+      }
+
+      // Native form submit → full-page navigation to /thanks/ once the
+      // server redirects, so there's no "success" handler to clear this —
+      // the button just leaves the page. The timeout is only a safety net
+      // for the rare case the browser never navigates (e.g. offline).
+      const submitBtn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      submitBtn?.classList.add('is-loading');
+      submitBtn?.setAttribute('disabled', 'true');
+      // is-loading hides the label visually (see global.css) — aria-busy is
+      // what actually tells a screen reader the button is doing something,
+      // since the hidden label alone drops it from the accessible name.
+      submitBtn?.setAttribute('aria-busy', 'true');
+      setTimeout(() => {
+        submitBtn?.classList.remove('is-loading');
+        submitBtn?.removeAttribute('disabled');
+        submitBtn?.removeAttribute('aria-busy');
+      }, 10000);
     });
 
     if (consentErr) {

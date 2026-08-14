@@ -128,28 +128,36 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
       }, 1600);
     </script>
     <script>
-      // Clicking a tel: link is a real navigation (opens the dialer) — can't
-      // await a fetch first, so this fires a beacon instead of blocking. Same
-      // lead-notification pipeline as the form, so staff see it the same way
-      // and can call back if they miss the incoming call. Global (not owned
-      // by any one component) since call buttons appear in several places.
-      document.querySelectorAll<HTMLAnchorElement>('[data-call-track]').forEach((el) => {
-        el.addEventListener('click', () => {
-          const body = new FormData();
-          body.set('source_url', location.href);
-          navigator.sendBeacon('/api/call-click', body);
-        });
-      });
-    </script>
-    <script>
       // Which contact channel people actually pick, site-wide — every
       // Telegram/WhatsApp/Viber/callback/call touchpoint carries
       // data-contact-channel, tracked here once instead of per component.
       // gtag() only queues into dataLayer; the real GA script (and any
       // network call) still waits on cookie consent, same as everywhere else.
+      //
+      // Channels that leave the site to actually contact someone also get
+      // logged server-side via a beacon — same lead-notification pipeline as
+      // the form, so staff see these the same way and can follow up if the
+      // visitor doesn't message/call first. 'callback' is excluded: it just
+      // opens the lead-request modal, which becomes a real заявка through
+      // /api/leads.ts if submitted — beaconing the click too would double-count it.
+      // Same reason for the data-open-*-lead-modal check below: ContactCTA's
+      // "Telegram" button sometimes opens that same modal instead of actually
+      // linking to Telegram (its data-contact-channel is only there for the
+      // gtag label in that case), so it's excluded exactly like 'callback' is.
+      // Clicking tel:/https: links is a real navigation, can't await a fetch
+      // first, so this fires a beacon instead of blocking.
+      const TRACKED_CONTACT_CHANNELS = new Set(['phone', 'telegram', 'whatsapp', 'viber']);
       document.querySelectorAll<HTMLElement>('[data-contact-channel]').forEach((el) => {
         el.addEventListener('click', () => {
-          (window as any).gtag?.('event', 'contact_click', { channel: el.dataset.contactChannel });
+          const channel = el.dataset.contactChannel!;
+          (window as any).gtag?.('event', 'contact_click', { channel });
+          const opensLeadModal = el.hasAttribute('data-open-lead-modal') || el.hasAttribute('data-open-page-lead-modal');
+          if (TRACKED_CONTACT_CHANNELS.has(channel) && !opensLeadModal) {
+            const body = new FormData();
+            body.set('channel', channel);
+            body.set('source_url', location.href);
+            navigator.sendBeacon('/api/contact-click', body);
+          }
         });
       });
     </script>

@@ -189,6 +189,42 @@ h1, h2, h3, h4 {
 .fade-up-5 { animation-delay: 0.56s; }
 .fade-up-6 { animation-delay: 0.72s; }
 
+/* ─── Button loading state ──────────────────────────────────
+   Shared by every Button.astro instance — toggle `.is-loading` on the
+   button element (via JS, wherever a click triggers something the user
+   has to wait on) and this handles hiding the label / showing the spinner.
+   Nothing to build per call site. */
+@keyframes btnSpin {
+  to { transform: rotate(360deg); }
+}
+.btn { position: relative; }
+.btn-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-spinner {
+  display: none;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 1.1em;
+  height: 1.1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: btnSpin 0.6s linear infinite;
+}
+.btn.is-loading {
+  pointer-events: none;
+}
+.btn.is-loading .btn-label {
+  visibility: hidden;
+}
+.btn.is-loading .btn-spinner {
+  display: block;
+}
+
 /* Staggered entrance for inline-animated elements (delay via --anim-delay var) */
 .anim-inline      { animation: fadeUp 0.75s var(--anim-delay, 0s) var(--ease-spring) both; }
 .anim-inline-fast { animation: fadeUp 0.5s  var(--anim-delay, 0s) var(--ease-spring) both; }

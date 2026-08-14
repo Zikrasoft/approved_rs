@@ -26,7 +26,7 @@ const message = DEFAULT_TG_MESSAGE[locale];
     <button type="button" role="menuitem" data-contact-channel="callback" aria-label={cc.callbackButtonLabel} data-open-lead-modal="phone" class="floating-cell">
       <ContactIcon channel="phone" size={16} /> <span>{cc.callbackShortLabel}</span>
     </button>
-    <a data-contact-channel="phone" data-call-track href={`tel:+${PHONE_NUMBER}`} role="menuitem" class="floating-cell">
+    <a data-contact-channel="phone" href={`tel:+${PHONE_NUMBER}`} role="menuitem" class="floating-cell">
       <ContactIcon channel="phone" size={16} /> <span>{cc.callButtonLabel}</span>
     </a>
   </div>
