@@ -1,5 +1,5 @@
-export function whatsappLink(number: string, text: string | null): string {
-  return text ? `https://wa.me/${number}?text=${encodeURIComponent(text)}` : `https://wa.me/${number}`;
+export function whatsappLink(number: string): string {
+  return `https://wa.me/${number}`;
 }
 
 // Viber's deep-link scheme has no reliable prefilled-text param, unlike tg/wa.

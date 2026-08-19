@@ -23,7 +23,7 @@ import { getCollection } from "astro:content";
 import { getActiveCountries } from "@/utils/geo";
 import { SITE_URL, SITE_NAME, TG_MANAGER, THREADS_CHANNEL, CHINA_NAME } from "@/utils/constants";
 import { generateOrganizationSchema } from "@/utils/seo";
-import { telegramLink, DEFAULT_TG_MESSAGE } from "@/utils/telegramLink";
+import { telegramLink } from "@/utils/telegramLink";
 import StatBlock from "@/components/StatBlock.astro";
 import { toCaseItem } from "@/utils/cases";
 import { getHomeContent } from "@/i18n/content/home";
@@ -50,7 +50,7 @@ const schema = generateOrganizationSchema({
     // too, even though it's not a countries.json market in its own right.
     areaServed: [...countries.map((c) => c[locale].name), CHINA_NAME[locale]],
     sameAs: [`https://t.me/${TG_MANAGER}`, `https://www.threads.com/@${THREADS_CHANNEL}`],
-    contactUrl: telegramLink(TG_MANAGER, DEFAULT_TG_MESSAGE[locale]),
+    contactUrl: telegramLink(TG_MANAGER),
 });
 
 // One connected story instead of a flat service list — each stop is a real

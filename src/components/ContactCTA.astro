@@ -1,7 +1,7 @@
 ---
 import Button from './Button.astro';
 import ContactIcon from './ContactIcon.astro';
-import { telegramLink, DEFAULT_TG_MESSAGE } from '@/utils/telegramLink';
+import { telegramLink } from '@/utils/telegramLink';
 import { whatsappLink, viberLink } from '@/utils/contactLinks';
 import { getServicesContent } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
@@ -12,7 +12,6 @@ interface Props {
   manager?: string;
   label?: string;
   openModal?: boolean;
-  text?: string;
   // Cold placements (page hero, first fold) get a single action instead of
   // the full channel picker — asking someone to choose a messenger before
   // they've even read the pitch is friction the warm/closing CTAs don't
@@ -26,11 +25,8 @@ const {
   manager = TG_MANAGER,
   label = cc.ctaButtonLabel,
   openModal = false,
-  text,
   compact = false,
 } = Astro.props;
-
-const message = text ?? DEFAULT_TG_MESSAGE[locale];
 
 // Callback should land in whichever modal is actually in scope on this page:
 // the page-local one (ServicePageLayout) when the Telegram button also uses
@@ -45,7 +41,7 @@ const callbackTrigger = openModal ? DATA_OPEN_PAGE_LEAD_MODAL : DATA_OPEN_LEAD_M
       <Button
         data-contact-channel="telegram"
         {...{ [DATA_OPEN_PAGE_LEAD_MODAL]: openModal ? true : undefined }}
-        href={openModal ? undefined : telegramLink(manager, message)}
+        href={openModal ? undefined : telegramLink(manager)}
         target={openModal ? undefined : '_blank'}
         rel={openModal ? undefined : 'noopener'}
         class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center"
@@ -69,7 +65,7 @@ const callbackTrigger = openModal ? DATA_OPEN_PAGE_LEAD_MODAL : DATA_OPEN_LEAD_M
         <a
           data-contact-channel="telegram"
           {...{ [DATA_OPEN_PAGE_LEAD_MODAL]: openModal ? true : undefined }}
-          href={openModal ? undefined : telegramLink(manager, message)}
+          href={openModal ? undefined : telegramLink(manager)}
           target={openModal ? undefined : '_blank'}
           rel={openModal ? undefined : 'noopener'}
           aria-label={label}
@@ -79,7 +75,7 @@ const callbackTrigger = openModal ? DATA_OPEN_PAGE_LEAD_MODAL : DATA_OPEN_LEAD_M
           <span>Telegram</span>
         </a>
 
-        <a data-contact-channel="whatsapp" href={whatsappLink(WHATSAPP_NUMBER, message)} target="_blank" rel="noopener" aria-label={cc.whatsappButtonLabel} class="contact-cell">
+        <a data-contact-channel="whatsapp" href={whatsappLink(WHATSAPP_NUMBER)} target="_blank" rel="noopener" aria-label={cc.whatsappButtonLabel} class="contact-cell">
           <ContactIcon channel="whatsapp" size={17} />
           <span>WhatsApp</span>
         </a>
