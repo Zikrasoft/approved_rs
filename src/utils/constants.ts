@@ -1,5 +1,9 @@
 import type { Locale } from '@/i18n/config';
 
+// Single source for the Yandex.Metrika counter — referenced by BaseLayout's
+// tag init, LeadFormModal's lead_modal_open goal, and the contact_click goal.
+export const YM_COUNTER_ID = 111800377;
+
 export const SITE_URL   = import.meta.env.SITE ?? 'https://approved.rs';
 export const SITE_NAME  = 'Approved.rs';
 export const SITE_BRAND = 'APPROVED';

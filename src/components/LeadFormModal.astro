@@ -89,6 +89,7 @@ const closeLabel = getI18n(locale).common.closeLabel;
       }
       document.documentElement.classList.add('modal-open');
       modal.showModal();
+      if (window.ymReachGoal) window.ymReachGoal('lead_modal_open', { tab: tab || 'default' });
     });
     var closeBtn = modal.querySelector('[data-close]');
     if (closeBtn) closeBtn.addEventListener('click', function () { modal.close(); });

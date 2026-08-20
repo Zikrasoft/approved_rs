@@ -7,7 +7,7 @@ import FloatingContactWidget from '@/components/FloatingContactWidget.astro';
 import Analytics from '@vercel/analytics/astro';
 import SpeedInsights from '@vercel/speed-insights/astro';
 import '../styles/global.css';
-import { SITE_URL, SITE_NAME } from '@/utils/constants';
+import { SITE_URL, SITE_NAME, YM_COUNTER_ID } from '@/utils/constants';
 import { getAlternateLinks } from '@/i18n/hreflang';
 import { getLocale } from '@/i18n/config';
 // Logo/heading font: preload so it's ready before first paint (avoids the
@@ -70,22 +70,39 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
       <script type="application/ld+json" set:html={JSON.stringify(schema)} />
     )}
 
-    <!-- Google tag (gtag.js) — loaded only after cookie consent, see CookieConsent.astro -->
-    <script is:inline>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      window.loadAnalytics = function () {
-        if (window.__gaLoaded) return;
-        window.__gaLoaded = true;
+    <!-- Google tag (gtag.js) + Yandex.Metrika — both loaded only after cookie consent, see CookieConsent.astro -->
+    <script>
+      import { YM_COUNTER_ID } from '@/utils/constants';
+      import { ymReachGoal } from '@/utils/metrika';
+
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      function gtag(...args: unknown[]) { (window as any).dataLayer.push(args); }
+      // Module scripts don't leak top-level declarations onto `window` the
+      // way classic/inline scripts do — explicit assignment needed so other
+      // scripts (e.g. the contact-click tracker below) can still call it.
+      (window as any).gtag = gtag;
+      (window as any).ymReachGoal = ymReachGoal;
+
+      (window as any).loadAnalytics = function () {
+        if ((window as any).__gaLoaded) return;
+        (window as any).__gaLoaded = true;
         var s = document.createElement('script');
         s.async = true;
         s.src = 'https://www.googletagmanager.com/gtag/js?id=G-M17GZT849M';
         document.head.appendChild(s);
         gtag('js', new Date());
         gtag('config', 'G-M17GZT849M');
+
+        (function(m: any,e: Document,t: string,r: string,i: string,k?: any,a?: any){
+          m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+          m[i].l=Date.now();
+          for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+          k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=' + YM_COUNTER_ID, 'ym');
+        (window as any).ym(YM_COUNTER_ID, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
       };
       try {
-        if (localStorage.getItem('cookie_consent') === 'granted') window.loadAnalytics();
+        if (localStorage.getItem('cookie_consent') === 'granted') (window as any).loadAnalytics();
       } catch (e) {}
     </script>
 
@@ -129,6 +146,7 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
     </script>
     <script>
       import { isTrackedContactChannel, DATA_CONTACT_CHANNEL, DATA_OPEN_LEAD_MODAL, DATA_OPEN_PAGE_LEAD_MODAL } from '@/utils/contactChannel';
+      import { ymReachGoal } from '@/utils/metrika';
 
       // Which contact channel people actually pick, site-wide — every
       // Telegram/WhatsApp/Viber/callback/call touchpoint carries
@@ -152,6 +170,7 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
         el.addEventListener('click', () => {
           const channel = el.dataset.contactChannel;
           (window as any).gtag?.('event', 'contact_click', { channel });
+          ymReachGoal('contact_click', { channel });
           const opensLeadModal = el.hasAttribute(DATA_OPEN_LEAD_MODAL) || el.hasAttribute(DATA_OPEN_PAGE_LEAD_MODAL);
           if (isTrackedContactChannel(channel) && !opensLeadModal) {
             const body = new FormData();

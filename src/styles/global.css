@@ -161,6 +161,7 @@ h1, h2, h3, h4 {
 
 @layer base {
   a { color: inherit; text-decoration: none; }
+  button:not(:disabled), [role="button"]:not([aria-disabled="true"]) { cursor: pointer; }
 }
 
 ::selection { background: var(--color-accent); color: var(--color-bg); }
