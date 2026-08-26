@@ -28,9 +28,24 @@ describe('sendLeadNotification', () => {
   beforeEach(() => mockFetchOk());
   afterEach(() => mockFetch.mockReset());
 
-  it('makes exactly 1 fetch call (group only)', async () => {
+  it('makes exactly 2 fetch calls (send + pin)', async () => {
     await sendLeadNotification(mockLead);
-    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('pins the sent message', async () => {
+    await sendLeadNotification(mockLead);
+    const pinBody = JSON.parse(mockFetch.mock.calls[1][1].body);
+    expect(mockFetch.mock.calls[1][0]).toContain('/pinChatMessage');
+    expect(pinBody.chat_id).toBe('-1009876543210');
+    expect(pinBody.message_id).toBe(999);
+  });
+
+  it('still sends the notification if pinning fails', async () => {
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ result: { message_id: 999 } }) })
+      .mockResolvedValueOnce({ ok: false, status: 400, json: () => Promise.resolve({ description: 'Bad Request' }) });
+    await expect(sendLeadNotification(mockLead)).resolves.toBeUndefined();
   });
 
   it('sends a plain notification with no inline keyboard', async () => {
@@ -53,18 +68,6 @@ describe('sendLeadNotification', () => {
   it('throws when Telegram returns ok: false', async () => {
     mockFetch.mockResolvedValue({ ok: false, status: 400, json: () => Promise.resolve({ description: 'Bad Request' }) });
     await expect(sendLeadNotification(mockLead)).rejects.toThrow();
-  });
-
-  it('includes the row link in the message when a rowUrl is given', async () => {
-    await sendLeadNotification(mockLead, 'https://docs.google.com/spreadsheets/d/abc/edit#gid=0&range=A5');
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.text).toContain('Таблица: https://docs.google.com/spreadsheets/d/abc/edit#gid=0&range=A5');
-  });
-
-  it('omits the row link line when no rowUrl is given', async () => {
-    await sendLeadNotification(mockLead);
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.text).not.toContain('Таблица:');
   });
 
   it('appends the channel label to the contact line for a tracked channel', async () => {

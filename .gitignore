@@ -29,3 +29,6 @@ npm-debug.log*
 .superpowers/
 docs/superpowers/
 .playwright-mcp
+
+# graphify (generated, rebuild locally)
+graphify-out/

@@ -19,7 +19,7 @@ const CONTACT_CHANNEL_LABELS: Record<TrackedContactChannel, string> = {
   phone: 'звонок',
 };
 
-function formatLeadText(lead: LeadData, rowUrl?: string | null): string {
+function formatLeadText(lead: LeadData): string {
   const service = SERVICE_LABELS[lead.service] ?? lead.service;
   // lead.contactChannel is a plain string at this point (from a form field
   // or the contact-click beacon, either of which could carry an arbitrary
@@ -36,9 +36,6 @@ function formatLeadText(lead: LeadData, rowUrl?: string | null): string {
   if (lead.country) lines.push(`Страна: ${lead.country.toUpperCase()}`);
   if (lead.comment) lines.push(`Комментарий: ${lead.comment}`);
   if (lead.source_url) lines.push(`Страница: ${lead.source_url}`);
-  // Plain URL, same as Страница above — Telegram auto-linkifies it, no
-  // parse_mode needed. Absent when the Sheets call failed/returned no link.
-  if (rowUrl) lines.push(`Таблица: ${rowUrl}`);
   lines.push(``, `#заявка`);
   return lines.join('\n');
 }
@@ -56,11 +53,23 @@ async function tgPost(method: string, body: object): Promise<unknown> {
   return data.result;
 }
 
-export async function sendLeadNotification(lead: LeadData, rowUrl?: string | null): Promise<void> {
-  const text = formatLeadText(lead, rowUrl);
+export async function sendLeadNotification(lead: LeadData): Promise<void> {
+  const text = formatLeadText(lead);
 
-  await tgPost('sendMessage', {
+  const sent = await tgPost('sendMessage', {
     chat_id: GROUP_ID,
     text,
-  });
+  }) as { message_id: number };
+
+  // No Sheets row to fall back on anymore — pinning is how staff find new
+  // leads in a busy group, so a pin failure shouldn't sink the notification.
+  try {
+    await tgPost('pinChatMessage', {
+      chat_id: GROUP_ID,
+      message_id: sent.message_id,
+      disable_notification: true,
+    });
+  } catch (err) {
+    console.error('[telegram] pinChatMessage failed', { error: err, messageId: sent.message_id });
+  }
 }
