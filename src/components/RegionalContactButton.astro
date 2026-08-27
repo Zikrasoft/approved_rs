@@ -64,22 +64,11 @@ const {
 </div>
 
 <script>
-  import { detectVisitorCountry } from '@/utils/visitorCountry';
-  import { getPreferredChannel } from '@/utils/contactChannel';
-
-  // Astro emits this script once per page no matter how many
-  // RegionalContactButton instances render — querySelectorAll below
-  // handles all of them the same way LeadForm.astro's initAllLeadForms() does.
-  function initRegionalContactButtons() {
-    const channel = getPreferredChannel(detectVisitorCountry());
-    if (channel === 'telegram') return;
-    document.querySelectorAll<HTMLElement>('[data-primary-contact]').forEach(group => {
-      const preferred = group.querySelector<HTMLElement>(`[data-primary-channel="${channel}"]`);
-      const fallback = group.querySelector<HTMLElement>('[data-primary-channel="telegram"]');
-      if (!preferred || !fallback) return;
-      fallback.hidden = true;
-      preferred.hidden = false;
-    });
-  }
-  initRegionalContactButtons();
+  // Shared with Footer.astro's own [data-primary-contact] row — one
+  // detector+toggle instead of each component reimplementing it. Astro
+  // emits this script once per page no matter how many
+  // RegionalContactButton instances render; the function itself handles
+  // every matching group on the page in one pass.
+  import { applyRegionalContactPreference } from '@/utils/regionalContact';
+  applyRegionalContactPreference();
 </script>
