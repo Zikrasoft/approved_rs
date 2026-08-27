@@ -68,6 +68,7 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
     <input type="hidden" name="country" value={country} />
     <input type="hidden" name="city" value={city} />
     <input type="hidden" name="source_url" value={sourceUrl} />
+    <input type="hidden" name="visitor_id" />
 
     <FormField name="name" label={lf.nameLabel} placeholder={lf.namePlaceholder} required />
 
@@ -152,6 +153,7 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
 <script>
   import { AsYouType, parsePhoneNumberFromString, type CountryCode } from 'libphonenumber-js/min';
   import { isTrackedContactChannel, type TrackedContactChannel } from '@/utils/contactChannel';
+  import { getOrCreateVisitorId } from '@/utils/visitorId';
 
   // A page can have more than one LeadForm instance (e.g. a page-level form
   // plus the header's "Оставить заявку" modal) — Astro only emits this
@@ -168,6 +170,9 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
   initAllLeadForms();
 
   function initLeadForm(form: HTMLFormElement) {
+    const visitorIdInput = form.querySelector<HTMLInputElement>('input[type="hidden"][name="visitor_id"]');
+    if (visitorIdInput) visitorIdInput.value = getOrCreateVisitorId();
+
     const errName = form.dataset.errName!;
     const errTgRequired = form.dataset.errTgRequired!;
     const errTgFormat = form.dataset.errTgFormat!;

@@ -9,6 +9,7 @@ export interface LeadData {
   comment?: string | null;
   country?: string | null;
   source_url?: string | null;
+  visitorId?: string | null;
   locale: Locale;
   kind?: 'lead' | 'call_click';
 }

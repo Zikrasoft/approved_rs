@@ -88,4 +88,16 @@ describe('sendLeadNotification', () => {
     expect(body.text).toContain('Контакт: @ivan');
     expect(body.text).not.toMatch(/Контакт: @ivan \(/);
   });
+
+  it('includes the visitor ID line when present', async () => {
+    await sendLeadNotification({ ...mockLead, visitorId: 'abc-123' });
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('ID посетителя: abc-123');
+  });
+
+  it('omits the visitor ID line when absent', async () => {
+    await sendLeadNotification(mockLead);
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).not.toContain('ID посетителя');
+  });
 });

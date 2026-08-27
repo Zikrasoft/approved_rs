@@ -35,6 +35,7 @@ const CHANNEL_COPY: Record<TrackedContactChannel, { service: string; comment: st
 export async function POST({ request }: APIContext): Promise<Response> {
   const form = await request.formData();
   const source_url = form.get('source_url')?.toString() || null;
+  const visitorId = form.get('visitor_id')?.toString() || null;
 
   // `channel` comes straight from a public, unauthenticated POST body —
   // isTrackedContactChannel is a real allowlist check, not just a fallback:
@@ -56,6 +57,7 @@ export async function POST({ request }: APIContext): Promise<Response> {
     contactChannel: channel,
     comment: copy.comment,
     source_url,
+    visitorId,
     locale: 'ru' as const,
     kind: 'call_click' as const,
   };

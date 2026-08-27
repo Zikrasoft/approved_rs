@@ -147,6 +147,7 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
     <script>
       import { isTrackedContactChannel, DATA_CONTACT_CHANNEL, DATA_OPEN_LEAD_MODAL, DATA_OPEN_PAGE_LEAD_MODAL } from '@/utils/contactChannel';
       import { ymReachGoal } from '@/utils/metrika';
+      import { getOrCreateVisitorId } from '@/utils/visitorId';
 
       // Which contact channel people actually pick, site-wide — every
       // Telegram/WhatsApp/Viber/callback/call touchpoint carries
@@ -176,6 +177,7 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
             const body = new FormData();
             body.set('channel', channel);
             body.set('source_url', location.href);
+            body.set('visitor_id', getOrCreateVisitorId());
             navigator.sendBeacon('/api/contact-click', body);
           }
         });
