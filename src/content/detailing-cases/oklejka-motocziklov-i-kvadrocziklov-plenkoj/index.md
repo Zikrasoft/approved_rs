@@ -2,7 +2,7 @@
 title: '## Оклейка мотоциклов и квадроциклов пленкой'
 translations:
   en:
-    title: '## Motorcycle & ATV Wrapping '
+    title: 'Motorcycle & ATV Wrapping '
     body: >
       ## Motorcycle & ATV Wrapping in Belgrade, Serbia
 
