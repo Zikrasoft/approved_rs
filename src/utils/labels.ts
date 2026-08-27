@@ -13,7 +13,7 @@ export const COUNTRY_SCOPED_SERVICE_SLUGS = ['vehicle-sourcing', 'vehicle-buybac
 export type CountryScopedServiceSlug = (typeof COUNTRY_SCOPED_SERVICE_SLUGS)[number];
 
 // Every service slug, country-scoped or not:
-export const SERVICE_SLUGS = [...COUNTRY_SCOPED_SERVICE_SLUGS, 'vehicle-import', 'auto-service-belgrade'] as const;
+export const SERVICE_SLUGS = [...COUNTRY_SCOPED_SERVICE_SLUGS, 'vehicle-import', 'auto-service-belgrade', 'wrapping-belgrade'] as const;
 export type ServiceSlug = (typeof SERVICE_SLUGS)[number];
 
 // Named handles for each slug, used below in getNavItems (nav[SLUG.SOURCING],
@@ -24,6 +24,7 @@ export const SLUG = {
   SOURCING: 'vehicle-sourcing',
   IMPORT: 'vehicle-import',
   AUTO_SERVICE: 'auto-service-belgrade',
+  WRAP: 'wrapping-belgrade',
   BUYBACK: 'vehicle-buyback',
   INSPECTION: 'vehicle-inspection',
 } as const satisfies Record<string, ServiceSlug>;
@@ -49,9 +50,9 @@ export function isCountryScopedServiceSlug(slug: string): slug is CountryScopedS
   return (COUNTRY_SCOPED_SERVICE_SLUGS as readonly string[]).includes(slug);
 }
 
-// Primary nav order: Автоподбор first, then the single-page Автосервис
-// (Belgrade only, not per-country like the rest), then the remaining
-// per-country SERVICES. Shared by Header (desktop + mobile) and Footer.
+// Primary nav order: Автоподбор first, then the single-page Автосервис/
+// Оклейка (Belgrade only, not per-country like the rest), then the
+// remaining per-country SERVICES. Shared by Header (desktop + mobile) and Footer.
 export const getNavItems = (
   locale: Locale,
   countryCode: string
@@ -61,6 +62,7 @@ export const getNavItems = (
     { href: PathBuilder.vehicleSourcingHub(locale), label: nav[SLUG.SOURCING], slug: SLUG.SOURCING },
     { href: PathBuilder.vehicleImportHub(locale), label: nav[SLUG.IMPORT], slug: SLUG.IMPORT },
     { href: PathBuilder.autoServiceBelgrade(locale), label: nav[SLUG.AUTO_SERVICE], slug: SLUG.AUTO_SERVICE },
+    { href: PathBuilder.wrappingBelgrade(locale), label: nav[SLUG.WRAP], slug: SLUG.WRAP },
     ...SERVICES.filter(s => s.slug !== SLUG.SOURCING).map(s => ({
       href: PathBuilder.service(locale, s.slug, countryCode),
       label: nav[s.slug],
@@ -97,6 +99,7 @@ export const SERVICE_LABELS: Record<string, string> = {
   'vehicle-buyback': 'Выкуп',
   'vehicle-inspection': 'Проверка',
   'auto-service-belgrade': 'Автосервис',
+  'wrapping-belgrade': 'Оклейка плёнкой',
   'vehicle-import-de': 'Привоз из Германии',
   'vehicle-import-es': 'Привоз из Испании',
   'vehicle-import-ch': 'Привоз из Швейцарии',

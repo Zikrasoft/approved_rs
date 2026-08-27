@@ -1,5 +1,5 @@
 ---
-import { Menu, X, Send, Sun, Moon, Search, Wrench, Banknote, ClipboardCheck, Globe } from '@lucide/astro';
+import { Menu, X, Send, Sun, Moon, Search, Wrench, Banknote, ClipboardCheck, Globe, Sticker } from '@lucide/astro';
 import SiteLogo from './SiteLogo.astro';
 import Button from './Button.astro';
 import LeadFormModal from './LeadFormModal.astro';
@@ -31,6 +31,7 @@ const SERVICE_ICONS: Record<ServiceSlug, typeof Search> = {
   'vehicle-sourcing': Search,
   'vehicle-import': Globe,
   'auto-service-belgrade': Wrench,
+  'wrapping-belgrade': Sticker,
   'vehicle-buyback': Banknote,
   'vehicle-inspection': ClipboardCheck,
 };

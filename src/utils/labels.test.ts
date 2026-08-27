@@ -2,17 +2,18 @@ import { describe, it, expect } from 'vitest';
 import { getNavItems, isNavItemActive, isCountryScopedServiceSlug, SERVICE_SLUGS } from './labels';
 
 describe('getNavItems', () => {
-  it('orders Автоподбор first, Привоз second, Автосервис third, then the rest of SERVICES', () => {
+  it('orders Автоподбор first, Привоз second, Автосервис third, Оклейка fourth, then the rest of SERVICES', () => {
     const result = getNavItems('ru', 'de');
-    expect(result.map(i => i.label)).toEqual(['Автоподбор', 'Авто из ЕС и Китая', 'Автосервис', 'Выкуп', 'Проверка']);
+    expect(result.map(i => i.label)).toEqual(['Автоподбор', 'Авто из ЕС и Китая', 'Автосервис', 'Оклейка плёнкой', 'Выкуп', 'Проверка']);
   });
 
-  it('builds per-locale, per-country hrefs for Выкуп/Проверка, fixed hub hrefs for Автоподбор/Привоз/Автосервис', () => {
+  it('builds per-locale, per-country hrefs for Выкуп/Проверка, fixed hub hrefs for Автоподбор/Привоз/Автосервис/Оклейка', () => {
     const result = getNavItems('ru', 'rs');
     expect(result).toEqual([
       { href: '/ru/vehicle-sourcing/', label: 'Автоподбор', slug: 'vehicle-sourcing' },
       { href: '/ru/vehicle-import/', label: 'Авто из ЕС и Китая', slug: 'vehicle-import' },
       { href: '/ru/auto-service-belgrade/', label: 'Автосервис', slug: 'auto-service-belgrade' },
+      { href: '/ru/wrapping-belgrade/', label: 'Оклейка плёнкой', slug: 'wrapping-belgrade' },
       { href: '/ru/vehicle-buyback/rs/', label: 'Выкуп', slug: 'vehicle-buyback' },
       { href: '/ru/vehicle-inspection/rs/', label: 'Проверка', slug: 'vehicle-inspection' },
     ]);
@@ -66,5 +67,6 @@ describe('isCountryScopedServiceSlug', () => {
   it('is false for services without a [country] route', () => {
     expect(isCountryScopedServiceSlug('vehicle-import')).toBe(false);
     expect(isCountryScopedServiceSlug('auto-service-belgrade')).toBe(false);
+    expect(isCountryScopedServiceSlug('wrapping-belgrade')).toBe(false);
   });
 });

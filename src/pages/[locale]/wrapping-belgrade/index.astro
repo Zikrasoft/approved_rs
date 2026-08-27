@@ -1,0 +1,57 @@
+---
+import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
+import { Car, Bike, Motorbike, Sailboat } from '@lucide/astro';
+import ChipLinks from '@/components/ChipLinks.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import { generateServiceSchema, ogImageFor } from '@/utils/seo';
+import { SITE_URL, SITE_NAME } from '@/utils/constants';
+import { getActiveCountries, getCountry } from '@/utils/geo';
+import { getServicesContent } from '@/i18n/content/services';
+import { withLocales, PathBuilder } from '@/utils/paths';
+
+export const getStaticPaths = () => withLocales([{ params: {} }]);
+
+const { locale } = Astro.params;
+const wb = getServicesContent(locale).wrappingBelgrade;
+const meta = {
+  title: `${wb.metaTitle} | ${SITE_NAME}`,
+  description: wb.metaDescription,
+  canonical: `${SITE_URL}${PathBuilder.wrappingBelgrade(locale)}`,
+  // ponytail: no dedicated OG asset yet (gen-og.mjs has no wrapping-belgrade
+  // variant) — reuses auto-service-belgrade's image as a placeholder, same
+  // Belgrade-service visual category. Swap once a real asset exists.
+  ogImage: ogImageFor(SITE_URL, 'auto-service-belgrade', locale),
+};
+const schema = generateServiceSchema(`${wb.title} ${wb.titleHighlight}`, getCountry('rs')![locale].name, meta.canonical);
+
+const ICONS = { car: Car, motorcycle: Motorbike, bicycle: Bike, yacht: Sailboat } as const;
+const WHAT_WE_DO = wb.whatWeDo.map(item => ({ ...item, Icon: ICONS[item.key] }));
+---
+
+<ServicePageLayout
+  {meta} {schema}
+  title={wb.title}
+  titleHighlight={wb.titleHighlight}
+  description={wb.description}
+  ctaLabel={wb.ctaLabel}
+  formService="wrapping-belgrade"
+  currentCountry="rs"
+  currentService="wrapping-belgrade"
+  city="belgrade"
+  showCountryCrossLinks={false}
+  breadcrumbs={[{ label: wb.breadcrumbLabel }]}
+>
+  <SectionHeading title={wb.whatWeDoHeading} size="lg" class="mb-8 mt-6" />
+  <div class="space-y-4">
+    {WHAT_WE_DO.map(item => (
+      <div class="flex gap-4 p-4 rounded-sm border bg-surface border-default">
+        <item.Icon size={20} class="shrink-0 text-accent" />
+        <div>
+          <p class="text-sm font-medium mb-0.5 text-primary">{item.label}</p>
+          <p class="text-xs leading-relaxed text-muted">{item.desc}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+  <ChipLinks label={wb.alsoSourcingLabel} items={getActiveCountries().filter(c => c.code !== 'rs').map(c => ({ href: PathBuilder.service(locale, 'vehicle-sourcing', c.code), text: c[locale].name }))} />
+</ServicePageLayout>

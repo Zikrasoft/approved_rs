@@ -5,6 +5,7 @@ export const en: Dictionary = {
     'vehicle-sourcing': 'Sourcing',
     'vehicle-import': 'Cars from EU and China',
     'auto-service-belgrade': 'Service',
+    'wrapping-belgrade': 'Vinyl Wrapping',
     'vehicle-buyback': 'Buyback',
     'vehicle-inspection': 'Inspection',
     cases: 'Cases',

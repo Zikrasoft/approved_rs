@@ -3,6 +3,7 @@ export const ru = {
     'vehicle-sourcing': 'Автоподбор',
     'vehicle-import': 'Авто из ЕС и Китая',
     'auto-service-belgrade': 'Автосервис',
+    'wrapping-belgrade': 'Оклейка плёнкой',
     'vehicle-buyback': 'Выкуп',
     'vehicle-inspection': 'Проверка',
     cases: 'Кейсы',

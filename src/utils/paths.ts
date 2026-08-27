@@ -25,6 +25,7 @@ export const PathBuilder = {
       : `/${locale}/vehicle-import/${slug}/`,
   autoServiceBelgrade: (locale: Locale) => `/${locale}/auto-service-belgrade/`,
   autoServiceCase: (locale: Locale, caseId: string) => `/${locale}/auto-service-belgrade/${caseId}/`,
+  wrappingBelgrade: (locale: Locale) => `/${locale}/wrapping-belgrade/`,
   case: (locale: Locale, caseId: string) => `/${locale}/cases/${caseId}/`,
   casesVehicleSourcing: (locale: Locale) => `/${locale}/cases/vehicle-sourcing/`,
   casesVehicleBuyback: (locale: Locale) => `/${locale}/cases/vehicle-buyback/`,
