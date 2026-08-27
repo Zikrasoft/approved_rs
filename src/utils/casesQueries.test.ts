@@ -18,6 +18,7 @@ const autoserviceCases = [
 ];
 const detailingCases = [
   { data: { published: true, date: new Date('2024-01-01') } },
+  { data: { published: false, date: new Date('2024-02-01') } },
 ];
 
 vi.mock('astro:content', () => ({

@@ -1,5 +1,5 @@
 import type { Locale } from '@/i18n/config';
-import type { ServiceSlug } from '@/utils/labels';
+import type { ServiceSlug, AUTOSERVICE_SERVICES, DETAILING_SERVICES } from '@/utils/labels';
 
 interface StepItem {
   n: string;
@@ -149,7 +149,7 @@ interface ServicesContent {
     ctaLabel: string;
     breadcrumbLabel: string;
     whatWeDoHeading: string;
-    whatWeDo: { key: 'diagnostics' | 'maintenance' | 'suspension' | 'engine' | 'prepurchase'; label: string; desc: string }[];
+    whatWeDo: { key: (typeof AUTOSERVICE_SERVICES)[number]; label: string; desc: string }[];
     alsoSourcingLabel: string;
     howToFindHeading: string;
     addressLabel: string;
@@ -172,7 +172,7 @@ interface ServicesContent {
     // live detailing service. Only 'wrap' exists today; add siblings here
     // (and to DETAILING_SERVICES + keystatic.config.ts) as the client adds
     // more (ceramic, anti-gravel film, etc.).
-    whatWeDo: { key: 'wrap'; label: string; desc: string }[];
+    whatWeDo: { key: (typeof DETAILING_SERVICES)[number]; label: string; desc: string }[];
     alsoSourcingLabel: string;
     worksHeading: string;
   };

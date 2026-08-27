@@ -28,34 +28,26 @@ const cases = defineCollection({
   }),
 });
 
-const autoserviceCases = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/autoservice-cases' }),
-  schema: ({ image }) => z.object({
-    title: z.string(),
-    car: z.string().optional(),
-    year: z.coerce.number().optional(),
-    servicesApplied: z.array(z.enum(AUTOSERVICE_SERVICES)),
-    image: image().optional(),
-    gallery: z.array(image()).default([]),
-    date: z.coerce.date(),
-    published: z.boolean().default(true),
-    translations: z.object({ en: caseTranslation, sr: caseTranslation }).optional(),
-  }),
-});
+// Shared by autoserviceCases/detailingCases below — identical shape, only
+// the source directory and the servicesApplied enum differ per service.
+function serviceCaseCollection<T extends readonly [string, ...string[]]>(base: string, services: T) {
+  return defineCollection({
+    loader: glob({ pattern: '**/*.md', base }),
+    schema: ({ image }) => z.object({
+      title: z.string(),
+      car: z.string().optional(),
+      year: z.coerce.number().optional(),
+      servicesApplied: z.array(z.enum(services)),
+      image: image().optional(),
+      gallery: z.array(image()).default([]),
+      date: z.coerce.date(),
+      published: z.boolean().default(true),
+      translations: z.object({ en: caseTranslation, sr: caseTranslation }).optional(),
+    }),
+  });
+}
 
-const detailingCases = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/detailing-cases' }),
-  schema: ({ image }) => z.object({
-    title: z.string(),
-    car: z.string().optional(),
-    year: z.coerce.number().optional(),
-    servicesApplied: z.array(z.enum(DETAILING_SERVICES)),
-    image: image().optional(),
-    gallery: z.array(image()).default([]),
-    date: z.coerce.date(),
-    published: z.boolean().default(true),
-    translations: z.object({ en: caseTranslation, sr: caseTranslation }).optional(),
-  }),
-});
+const autoserviceCases = serviceCaseCollection('./src/content/autoservice-cases', AUTOSERVICE_SERVICES);
+const detailingCases = serviceCaseCollection('./src/content/detailing-cases', DETAILING_SERVICES);
 
 export const collections = { cases, autoserviceCases, detailingCases };

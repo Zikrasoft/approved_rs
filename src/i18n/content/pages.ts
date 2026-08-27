@@ -256,7 +256,7 @@ const sr: PagesContent = {
     metaDescription: 'Stvarni primeri popravke i održavanja vozila u našem auto servisu u Beogradu: dijagnostika, redovno servisiranje, popravka vešanja, motora i menjača.',
   },
   casesDetailing: {
-    metaTitle: 'Primeri detailing radova u Beogradu',
+    metaTitle: 'Primeri radova detailinga u Beogradu',
     metaDescription: 'Stvarni primeri detailinga u Beogradu: folijacija automobila, motocikala, bicikala i jahti.',
   },
   casesShared: {
