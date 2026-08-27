@@ -37,6 +37,16 @@ export const PathBuilder = {
   thanks: (locale: Locale) => `/${locale}/thanks/`,
 };
 
+// Shared by auto-service-belgrade and wrapping-belgrade's "also sourcing
+// cars in" ChipLinks — both are Belgrade-only pages that cross-sell
+// vehicle-sourcing in every other active country.
+export function sourcingChipItems(locale: Locale) {
+  return getActiveCountries().filter(c => c.code !== 'rs').map(c => ({
+    href: PathBuilder.service(locale, 'vehicle-sourcing', c.code),
+    text: c[locale].name,
+  }));
+}
+
 export function getCountryPaths() {
   return getActiveCountries().map(c => ({ params: { country: c.code } }));
 }

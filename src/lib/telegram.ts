@@ -59,17 +59,22 @@ export async function sendLeadNotification(lead: LeadData): Promise<void> {
   const sent = await tgPost('sendMessage', {
     chat_id: GROUP_ID,
     text,
-  }) as { message_id: number };
+  });
+  const messageId = (sent as { message_id?: unknown } | null)?.message_id;
+  if (typeof messageId !== 'number') {
+    console.error('[telegram] sendMessage response missing message_id, skipping pin', { sent });
+    return;
+  }
 
   // No Sheets row to fall back on anymore — pinning is how staff find new
   // leads in a busy group, so a pin failure shouldn't sink the notification.
   try {
     await tgPost('pinChatMessage', {
       chat_id: GROUP_ID,
-      message_id: sent.message_id,
+      message_id: messageId,
       disable_notification: true,
     });
   } catch (err) {
-    console.error('[telegram] pinChatMessage failed', { error: err, messageId: sent.message_id });
+    console.error('[telegram] pinChatMessage failed', { error: err, messageId });
   }
 }

@@ -4,16 +4,17 @@ import { SearchCheck, Droplet, Wrench, Cog, ClipboardCheck, MapPin } from '@luci
 import CasesGrid from '@/components/CasesGrid.astro';
 import ChipLinks from '@/components/ChipLinks.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
+import WhatWeDoList from '@/components/WhatWeDoList.astro';
 import Button from '@/components/Button.astro';
 import { generateServiceSchema, ogImageFor } from '@/utils/seo';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { toAutoserviceCaseItem } from '@/utils/cases';
 import { getPublishedAutoserviceCases } from '@/utils/casesQueries';
-import { getActiveCountries, getCountry } from '@/utils/geo';
+import { getCountry } from '@/utils/geo';
 import Faq from '@/components/Faq.astro';
 import { getFaq } from '@/i18n/content/faq';
 import { getServicesContent } from '@/i18n/content/services';
-import { withLocales, PathBuilder } from '@/utils/paths';
+import { withLocales, PathBuilder, sourcingChipItems } from '@/utils/paths';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
@@ -47,18 +48,8 @@ const WHAT_WE_DO = bc.whatWeDo.map(item => ({ ...item, Icon: ICONS[item.key] }))
   breadcrumbs={[{ label: bc.breadcrumbLabel }]}
 >
   <SectionHeading title={bc.whatWeDoHeading} size="lg" class="mb-8 mt-6" />
-  <div class="space-y-4">
-    {WHAT_WE_DO.map(item => (
-      <div class="flex gap-4 p-4 rounded-sm border bg-surface border-default">
-        <item.Icon size={20} class="shrink-0 text-accent" />
-        <div>
-          <p class="text-sm font-medium mb-0.5 text-primary">{item.label}</p>
-          <p class="text-xs leading-relaxed text-muted">{item.desc}</p>
-        </div>
-      </div>
-    ))}
-  </div>
-  <ChipLinks label={bc.alsoSourcingLabel} items={getActiveCountries().filter(c => c.code !== 'rs').map(c => ({ href: PathBuilder.service(locale, 'vehicle-sourcing', c.code), text: c[locale].name }))} />
+  <WhatWeDoList items={WHAT_WE_DO} />
+  <ChipLinks label={bc.alsoSourcingLabel} items={sourcingChipItems(locale)} />
 
   <Fragment slot="extra">
     <section class="border-t border-default">

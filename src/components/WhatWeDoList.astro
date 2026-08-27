@@ -1,0 +1,26 @@
+---
+// Shared "what we do" card list — identical markup was duplicated between
+// auto-service-belgrade and wrapping-belgrade's index pages before this.
+// `typeof Search` is just a stand-in to type "any lucide icon component" —
+// same trick Header.astro's SERVICE_ICONS uses, every lucide icon shares
+// this signature.
+import type { Search } from '@lucide/astro';
+
+interface Props {
+  items: { label: string; desc: string; Icon: typeof Search }[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="space-y-4">
+  {items.map(item => (
+    <div class="flex gap-4 p-4 rounded-sm border bg-surface border-default">
+      <item.Icon size={20} class="shrink-0 text-accent" />
+      <div>
+        <p class="text-sm font-medium mb-0.5 text-primary">{item.label}</p>
+        <p class="text-xs leading-relaxed text-muted">{item.desc}</p>
+      </div>
+    </div>
+  ))}
+</div>

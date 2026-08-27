@@ -48,6 +48,12 @@ describe('sendLeadNotification', () => {
     await expect(sendLeadNotification(mockLead)).resolves.toBeUndefined();
   });
 
+  it('skips pinning without throwing when sendMessage response has no message_id', async () => {
+    mockFetchOk({});
+    await expect(sendLeadNotification(mockLead)).resolves.toBeUndefined();
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
   it('sends a plain notification with no inline keyboard', async () => {
     await sendLeadNotification(mockLead);
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
