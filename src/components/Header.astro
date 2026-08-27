@@ -46,31 +46,31 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
 ---
 
 <header class="sticky top-0 z-50 border-b bg-header-glass border-default backdrop-blur-[16px]">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 lg:gap-6">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 xl:gap-4">
 
     <SiteLogo />
 
     <!-- Desktop Nav -->
-    <nav class="hidden lg:flex items-center gap-0.5 xl:gap-2 text-sm font-sans font-normal header-nav flex-1 justify-center min-w-0">
+    <nav class="hidden xl:flex items-center gap-0.5 text-[13px] font-sans font-normal header-nav flex-1 justify-center min-w-0">
       {navItems.map(item => (
-        <a href={item.href} class="flex items-center gap-1.5 px-1.5 xl:px-2.5 py-1.5 rounded-sm text-muted whitespace-nowrap" aria-current={item.active ? 'page' : undefined}>
+        <a href={item.href} class="flex items-center gap-1.5 px-2 py-1.5 rounded-sm text-muted whitespace-nowrap" aria-current={item.active ? 'page' : undefined}>
           {item.label}
         </a>
       ))}
-      <a href={PathBuilder.casesVehicleSourcing(locale)} class="px-1.5 xl:px-2.5 py-1.5 text-muted whitespace-nowrap" aria-current={Astro.url.pathname.includes('/cases/') ? 'page' : undefined}>{t.nav.cases}</a>
+      <a href={PathBuilder.casesVehicleSourcing(locale)} class="px-2 py-1.5 text-muted whitespace-nowrap" aria-current={Astro.url.pathname.includes('/cases/') ? 'page' : undefined}>{t.nav.cases}</a>
     </nav>
 
-    <div class="flex items-center gap-1.5 xl:gap-2 shrink-0">
+    <div class="flex items-center gap-1.5 shrink-0">
       <!-- Language switcher: desktop only, grouped with theme toggle (both are
            preference controls, not nav destinations) — mobile gets its own
            row inside #mobile-menu -->
-      <div class="hidden lg:block">
+      <div class="hidden xl:block">
         <LanguageSwitcher />
       </div>
 
       <!-- Theme toggle: desktop only — mobile gets its own row inside #mobile-menu -->
       <button
-        class="theme-toggle-btn theme-btn hidden lg:flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong bg-surface text-muted"
+        class="theme-toggle-btn theme-btn hidden xl:flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong bg-surface text-muted"
         aria-label={t.header.themeToggleLabel}
         title={t.header.themeToggleLabel}
       >
@@ -80,9 +80,7 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
         <span class="theme-icon-moon"><Moon size={16} /></span>
       </button>
 
-      <!-- CTA: always visible, full text only once there's room (xl) —
-           the lg breakpoint is where desktop nav first turns on and is
-           already tight with 6 nav links + lang switcher + theme toggle. -->
+      <!-- CTA: always visible -->
       <Button type="button" {...{ [DATA_OPEN_LEAD_MODAL]: true }} class="px-3 xl:px-4 py-2">
         <Send size={13} />
         <span class="xl:hidden">{t.header.ctaShort}</span>
@@ -92,7 +90,7 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
       <!-- Mobile burger -->
       <button
         id="burger"
-        class="lg:hidden flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong text-secondary"
+        class="xl:hidden flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong text-secondary"
         aria-label={t.header.menuLabel}
         aria-expanded={isHome ? 'true' : 'false'}
       >
@@ -105,7 +103,7 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
   <!-- Mobile Menu: open by default on the homepage -->
   <div
     id="mobile-menu"
-    class:list={['lg:hidden border-t bg-header-mobile border-default', { 'menu-open': isHome }]}
+    class:list={['xl:hidden border-t bg-header-mobile border-default', { 'menu-open': isHome }]}
     aria-hidden={isHome ? undefined : 'true'}
     inert={isHome ? undefined : true}
   >
@@ -183,9 +181,9 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
 
   /* Grid-rows collapse: animates real layout height (not just a visual
      clip), so closing actually shrinks the sticky header smoothly instead
-     of snapping via display:none. Scoped under lg's breakpoint so it never
-     fights the lg:hidden utility's display:none on desktop. */
-  @media (max-width: 1023px) {
+     of snapping via display:none. Scoped under xl's breakpoint so it never
+     fights the xl:hidden utility's display:none on desktop. */
+  @media (max-width: 1279px) {
     #mobile-menu {
       display: grid;
       grid-template-rows: 0fr;
@@ -302,7 +300,7 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
       // Reset menu state if the viewport grows into desktop, so it doesn't
       // reappear pre-opened if the user shrinks back to mobile later.
       try {
-        window.matchMedia('(min-width: 1024px)').addEventListener('change', function (e) {
+        window.matchMedia('(min-width: 1280px)').addEventListener('change', function (e) {
           if (e.matches) closeMenu();
         });
       } catch (e) {}
