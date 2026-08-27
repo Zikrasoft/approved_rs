@@ -46,3 +46,24 @@ export const DATA_CONTACT_CHANNEL = 'data-contact-channel';
 // other for the modal to actually open, with nothing enforcing that.
 export const DATA_OPEN_LEAD_MODAL = 'data-open-lead-modal';
 export const DATA_OPEN_PAGE_LEAD_MODAL = 'data-open-page-lead-modal';
+
+// Which messenger a visitor from this country most likely already has
+// installed — Telegram dominates Russia/CIS, WhatsApp dominates the Balkans
+// and Western/Southern Europe. Used to pick a sensible default (the lead
+// form's active contact tab, the homepage hero's primary CTA channel) —
+// the visitor can always switch by hand, this only picks where they land.
+// Countries not listed here (and detection failing entirely) fall back to
+// 'telegram', the site's global default channel.
+// A Map, not a plain object literal — same reason isTrackedContactChannel
+// above doesn't do a raw `obj[value]` lookup: a country code like
+// "constructor" or "toString" would otherwise resolve an inherited
+// Object.prototype member instead of `undefined`.
+const PREFERRED_CHANNEL_BY_COUNTRY = new Map<string, TrackedContactChannel>([
+  ['rs', 'whatsapp'], ['ba', 'whatsapp'], ['hr', 'whatsapp'], ['me', 'whatsapp'], ['mk', 'whatsapp'], ['tr', 'whatsapp'],
+  ['de', 'whatsapp'], ['es', 'whatsapp'], ['pt', 'whatsapp'], ['ch', 'whatsapp'],
+  ['ru', 'telegram'], ['ua', 'telegram'], ['by', 'telegram'], ['kz', 'telegram'],
+]);
+
+export function getPreferredChannel(countryCode: string | undefined): TrackedContactChannel {
+  return (countryCode && PREFERRED_CHANNEL_BY_COUNTRY.get(countryCode.toLowerCase())) || 'telegram';
+}

@@ -1,6 +1,7 @@
 ---
 import Button from './Button.astro';
 import ContactIcon from './ContactIcon.astro';
+import RegionalContactButton from './RegionalContactButton.astro';
 import { telegramLink } from '@/utils/telegramLink';
 import { whatsappLink, viberLink } from '@/utils/contactLinks';
 import { getServicesContent } from '@/i18n/content/services';
@@ -38,17 +39,13 @@ const callbackTrigger = openModal ? DATA_OPEN_PAGE_LEAD_MODAL : DATA_OPEN_LEAD_M
 <div class="flex flex-col gap-3 my-8">
   {compact ? (
     <div class="flex flex-col sm:flex-row gap-3">
-      <Button
-        data-contact-channel="telegram"
-        {...{ [DATA_OPEN_PAGE_LEAD_MODAL]: openModal ? true : undefined }}
-        href={openModal ? undefined : telegramLink(manager)}
-        target={openModal ? undefined : '_blank'}
-        rel={openModal ? undefined : 'noopener'}
+      <RegionalContactButton
+        telegramLabel={label}
+        whatsappLabel={openModal ? label : cc.whatsappButtonLabel}
+        {manager}
+        {openModal}
         class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center"
-      >
-        <ContactIcon channel="telegram" size={16} />
-        {label}
-      </Button>
+      />
       <Button
         variant="secondary"
         href={`tel:+${PHONE_NUMBER}`}

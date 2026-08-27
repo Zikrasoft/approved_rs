@@ -386,6 +386,11 @@ h1, h2, h3, h4 {
   }
 }
 
+/* ─── Form fields ───────────────────────────────────────── */
+/* iOS Safari auto-zooms the viewport on focus when an input's font-size is
+   under 16px — text-sm (14px) on .form-field triggered it on every phone. */
+.form-field { font-size: 16px !important; }
+
 /* ─── Form validation ───────────────────────────────────── */
 .form-field.has-error {
   border-color: #dc2626 !important;

@@ -1,0 +1,74 @@
+---
+// Single "primary contact" button that defaults to Telegram and swaps to
+// whichever channel dominates the visitor's region client-side (see
+// contactChannel.ts's getPreferredChannel) — for anywhere a page needs ONE
+// prominent contact action instead of ContactCTA's full multi-channel
+// picker. Two real elements under the hood (one hidden, toggled by the
+// script below), not DOM rewriting — the two channels have genuinely
+// different icons, and pre-rendering both is what lets this work with the
+// SSR default (Telegram) intact for no-JS visitors.
+import Button from './Button.astro';
+import ContactIcon from './ContactIcon.astro';
+import { telegramLink } from '@/utils/telegramLink';
+import { whatsappLink } from '@/utils/contactLinks';
+import { TG_MANAGER, WHATSAPP_NUMBER } from '@/utils/constants';
+import { DATA_OPEN_PAGE_LEAD_MODAL } from '@/utils/contactChannel';
+
+interface Props {
+  telegramLabel: string;
+  whatsappLabel: string;
+  manager?: string;
+  // When set, both variants open the same lead-modal trigger instead of
+  // linking out — the icon still swaps by region so it doesn't look broken
+  // next to the modal's own region-aware tab default (LeadForm.astro does
+  // the same detection independently).
+  openModal?: boolean;
+  class?: string;
+}
+
+const {
+  telegramLabel,
+  whatsappLabel,
+  manager = TG_MANAGER,
+  openModal = false,
+  class: className,
+} = Astro.props;
+---
+
+<div data-primary-contact class="contents">
+  <Button
+    data-primary-channel="telegram"
+    data-contact-channel="telegram"
+    {...{ [DATA_OPEN_PAGE_LEAD_MODAL]: openModal ? true : undefined }}
+    href={openModal ? undefined : telegramLink(manager)}
+    target={openModal ? undefined : '_blank'}
+    rel={openModal ? undefined : 'noopener'}
+    class={className}
+  >
+    <ContactIcon channel="telegram" size={16} />
+    {telegramLabel}
+  </Button>
+  <Button
+    data-primary-channel="whatsapp"
+    data-contact-channel="whatsapp"
+    {...{ [DATA_OPEN_PAGE_LEAD_MODAL]: openModal ? true : undefined }}
+    href={openModal ? undefined : whatsappLink(WHATSAPP_NUMBER)}
+    target={openModal ? undefined : '_blank'}
+    rel={openModal ? undefined : 'noopener'}
+    hidden
+    class={className}
+  >
+    <ContactIcon channel="whatsapp" size={16} />
+    {whatsappLabel}
+  </Button>
+</div>
+
+<script>
+  // Shared with Footer.astro's own [data-primary-contact] row — one
+  // detector+toggle instead of each component reimplementing it. Astro
+  // emits this script once per page no matter how many
+  // RegionalContactButton instances render; the function itself handles
+  // every matching group on the page in one pass.
+  import { applyRegionalContactPreference } from '@/utils/regionalContact';
+  applyRegionalContactPreference();
+</script>

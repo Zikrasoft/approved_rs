@@ -11,6 +11,7 @@ interface FaqContent {
   'vehicle-buyback': FaqItem[];
   'vehicle-inspection': FaqItem[];
   autoServiceBelgrade: FaqItem[];
+  detailingBelgrade: FaqItem[];
   general: FaqItem[];
   cityExpert: FaqItem;
 }
@@ -42,6 +43,14 @@ const ru: FaqContent = {
   autoServiceBelgrade: [
     { q: 'Работаете без предварительной записи?', a: 'На первую встречу можно просто позвонить и договориться о времени — предварительная запись не обязательна.' },
     { q: 'Даёте гарантию на ремонт?', a: 'Отдельной гарантии на выполненный ремонт нет — но диагностику проводим перед началом работ, и вы всегда знаете, за что платите.' },
+  ],
+  detailingBelgrade: [
+    { q: 'Зачем оклеивать автомобиль плёнкой?', a: 'Оклейка защищает лакокрасочное покрытие от сколов, царапин и выцветания, а также позволяет изменить цвет автомобиля без покраски.' },
+    { q: 'Портит ли плёнка заводскую краску?', a: 'Нет — при качественном материале и профессиональном монтаже и демонтаже заводское лакокрасочное покрытие под плёнкой не повреждается.' },
+    { q: 'Можно ли снять плёнку и вернуть авто в исходный вид?', a: 'Да, плёнку можно снять в любой момент — под ней остаётся оригинальная краска.' },
+    { q: 'Как ухаживать за автомобилем после оклейки?', a: 'Первое время после оклейки лучше мыть вручную или на бесконтактной мойке — избегайте жёстких щёток и агрессивной химии.' },
+    { q: 'Нужно ли записываться заранее?', a: 'Да, лучше согласовать время заранее, чтобы подготовить материал под ваш автомобиль, мотоцикл, велосипед или яхту.' },
+    { q: 'Работаете с любыми автомобилями и мотоциклами?', a: 'Да, оклеиваем любые марки и модели — автомобили, мотоциклы, велосипеды и яхты.' },
   ],
   general: [
     { q: 'Как оплачивается работа?', a: 'Оплата наличными в день сделки — вы не переводите деньги вперёд.' },
@@ -78,6 +87,14 @@ const en: FaqContent = {
     { q: 'Can I come without an appointment?', a: "For your first visit, just call and agree on a time — booking ahead isn't required." },
     { q: 'Do you guarantee the repair work?', a: "There's no separate warranty on completed repairs — but we run diagnostics before starting any work, so you always know what you're paying for." },
   ],
+  detailingBelgrade: [
+    { q: 'Why wrap a car with vinyl?', a: "Wrapping protects the paint from chips, scratches, and fading, and lets you change the car's color without repainting." },
+    { q: 'Does the film damage the factory paint?', a: "No — with quality material and professional installation and removal, the factory paint underneath isn't damaged." },
+    { q: "Can the wrap be removed and the car returned to its original look?", a: 'Yes, the wrap can be removed at any time — the original paint is still there underneath.' },
+    { q: 'How do I care for a wrapped car?', a: 'For the first while after wrapping, hand-wash it or use a touchless car wash — avoid stiff brushes and harsh chemicals.' },
+    { q: 'Do I need to book in advance?', a: "Yes, it's best to agree on a time beforehand so we can prepare the material for your car, motorcycle, bicycle, or yacht." },
+    { q: 'Do you work with any car or motorcycle?', a: 'Yes — we wrap any make and model: cars, motorcycles, bicycles, and yachts.' },
+  ],
   general: [
     { q: 'How do I pay for the service?', a: 'Cash on the day of the deal — you never send money upfront.' },
     { q: 'Can I reach you somewhere other than Telegram?', a: 'Yes — besides Telegram, phone calls and WhatsApp both work.' },
@@ -112,6 +129,14 @@ const sr: FaqContent = {
   autoServiceBelgrade: [
     { q: 'Da li radite bez prethodnog zakazivanja?', a: 'Za prvi dolazak dovoljno je da pozovete i dogovorite termin — zakazivanje unapred nije obavezno.' },
     { q: 'Da li dajete garanciju na izvršenu popravku?', a: 'Posebne garancije na obavljenu popravku nema — ali dijagnostiku radimo pre početka radova, tako da uvek znate za šta plaćate.' },
+  ],
+  detailingBelgrade: [
+    { q: 'Zašto folirati automobil?', a: 'Folijacija štiti lak od kamenčića, ogrebotina i bleđenja, i omogućava promenu boje vozila bez ličenja.' },
+    { q: 'Da li folija oštećuje fabrički lak?', a: 'Ne — uz kvalitetan materijal i profesionalnu ugradnju i skidanje, fabrički lak ispod folije ostaje neoštećen.' },
+    { q: 'Da li se folija može skinuti i vratiti vozilo u originalni izgled?', a: 'Da, folija se može skinuti u bilo kom trenutku — originalni lak ostaje ispod nje.' },
+    { q: 'Kako da negujem vozilo posle folijacije?', a: 'Prvo vreme posle folijacije perite ručno ili na beskontaktnoj auto-perionici — izbegavajte tvrde četke i agresivnu hemiju.' },
+    { q: 'Da li je potrebno zakazivanje unapred?', a: 'Da, najbolje je unapred dogovoriti termin kako bismo pripremili materijal za vaš automobil, motocikl, bicikl ili jahtu.' },
+    { q: 'Da li radite sa svim automobilima i motociklima?', a: 'Da, folijamo sve marke i modele — automobile, motocikle, bicikle i jahte.' },
   ],
   general: [
     { q: 'Kako se plaća usluga?', a: 'Plaćanje u gotovini na dan realizacije posla — novac ne šaljete unapred.' },

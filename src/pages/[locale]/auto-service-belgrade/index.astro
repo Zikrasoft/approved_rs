@@ -1,19 +1,20 @@
 ---
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
-import { SearchCheck, Droplet, Wrench, Cog, ClipboardCheck, MapPin } from '@lucide/astro';
+import { SearchCheck, Droplet, Wrench, Cog, ClipboardCheck } from '@lucide/astro';
 import CasesGrid from '@/components/CasesGrid.astro';
 import ChipLinks from '@/components/ChipLinks.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
-import Button from '@/components/Button.astro';
+import WhatWeDoList from '@/components/WhatWeDoList.astro';
+import HowToFindUs from '@/components/HowToFindUs.astro';
 import { generateServiceSchema, ogImageFor } from '@/utils/seo';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { toAutoserviceCaseItem } from '@/utils/cases';
 import { getPublishedAutoserviceCases } from '@/utils/casesQueries';
-import { getActiveCountries, getCountry } from '@/utils/geo';
+import { getCountry } from '@/utils/geo';
 import Faq from '@/components/Faq.astro';
 import { getFaq } from '@/i18n/content/faq';
 import { getServicesContent } from '@/i18n/content/services';
-import { withLocales, PathBuilder } from '@/utils/paths';
+import { withLocales, PathBuilder, sourcingChipItems } from '@/utils/paths';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
@@ -31,6 +32,9 @@ const items = (await getPublishedAutoserviceCases()).map((c) => toAutoserviceCas
 
 const ICONS = { diagnostics: SearchCheck, maintenance: Droplet, suspension: Wrench, engine: Cog, prepurchase: ClipboardCheck } as const;
 const WHAT_WE_DO = bc.whatWeDo.map(item => ({ ...item, Icon: ICONS[item.key] }));
+
+// Native-script address for Google Maps to geocode — see HowToFindUs.astro.
+const MAP_QUERY = 'Пека Павловића 39, Београд';
 ---
 
 <ServicePageLayout
@@ -47,55 +51,19 @@ const WHAT_WE_DO = bc.whatWeDo.map(item => ({ ...item, Icon: ICONS[item.key] }))
   breadcrumbs={[{ label: bc.breadcrumbLabel }]}
 >
   <SectionHeading title={bc.whatWeDoHeading} size="lg" class="mb-8 mt-6" />
-  <div class="space-y-4">
-    {WHAT_WE_DO.map(item => (
-      <div class="flex gap-4 p-4 rounded-sm border bg-surface border-default">
-        <item.Icon size={20} class="shrink-0 text-accent" />
-        <div>
-          <p class="text-sm font-medium mb-0.5 text-primary">{item.label}</p>
-          <p class="text-xs leading-relaxed text-muted">{item.desc}</p>
-        </div>
-      </div>
-    ))}
-  </div>
-  <ChipLinks label={bc.alsoSourcingLabel} items={getActiveCountries().filter(c => c.code !== 'rs').map(c => ({ href: PathBuilder.service(locale, 'vehicle-sourcing', c.code), text: c[locale].name }))} />
+  <WhatWeDoList items={WHAT_WE_DO} />
+  <ChipLinks label={bc.alsoSourcingLabel} items={sourcingChipItems(locale)} />
 
   <Fragment slot="extra">
-    <section class="border-t border-default">
-      <div class="max-w-6xl mx-auto px-6 py-16">
-        <SectionHeading title={bc.howToFindHeading} size="lg" class="mb-10" />
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
-          <div class="lg:col-span-2 glow-border flex flex-col h-72 lg:h-[26rem] p-7 rounded-sm border bg-surface border-default">
-            <span class="flex items-center justify-center w-11 h-11 rounded-sm mb-5 shrink-0 bg-accent-subtle text-accent">
-              <MapPin size={20} />
-            </span>
-            <p class="text-xs tracking-[0.16em] uppercase font-medium mb-2 text-muted">{bc.addressLabel}</p>
-            <p class="font-display text-xl font-bold leading-snug text-primary">{bc.streetAddress}</p>
-            <p class="text-sm text-muted">{bc.cityCountryLine}</p>
-            <Button
-              href="https://share.google/PmmBqmEvqnLCQK4i6"
-              target="_blank"
-              rel="noopener"
-              variant="secondary"
-              class="mt-auto w-fit px-4 py-2.5 text-xs"
-            >
-              {bc.mapButtonLabel}
-            </Button>
-          </div>
-          <div class="lg:col-span-3 map-embed glow-border h-72 lg:h-[26rem] rounded-sm overflow-hidden border border-default">
-            <iframe
-              src={`https://www.google.com/maps?q=${encodeURIComponent('Пека Павловића 39, Београд')}&output=embed`}
-              width="100%"
-              height="100%"
-              class="border-0 block"
-              loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"
-              title={bc.mapIframeTitle}
-            ></iframe>
-          </div>
-        </div>
-      </div>
-    </section>
+    <HowToFindUs
+      heading={bc.howToFindHeading}
+      addressLabel={bc.addressLabel}
+      streetAddress={bc.streetAddress}
+      cityCountryLine={bc.cityCountryLine}
+      mapButtonLabel={bc.mapButtonLabel}
+      mapIframeTitle={bc.mapIframeTitle}
+      mapQuery={MAP_QUERY}
+    />
   </Fragment>
 
   <Fragment slot="extra">
@@ -106,15 +74,3 @@ const WHAT_WE_DO = bc.whatWeDo.map(item => ({ ...item, Icon: ICONS[item.key] }))
     <CasesGrid {items} heading={bc.worksHeading} topBorder />
   </Fragment>
 </ServicePageLayout>
-
-<style>
-  /* Google's classic embed iframe has no style API — desaturate it so the
-     stock red/green basemap doesn't clash with the site's muted navy palette,
-     and roughly invert it in dark mode. ponytail: CSS filter hack, not pixel
-     perfect (the pin drifts slightly off pure red), good enough without a
-     Maps API key + JS SDK. */
-  .map-embed iframe { filter: saturate(0.4) brightness(0.95) contrast(0.95); }
-  :global(html[data-theme="dark"]) .map-embed iframe {
-    filter: invert(92%) hue-rotate(180deg) saturate(0.4) brightness(0.95) contrast(0.9);
-  }
-</style>

@@ -68,6 +68,7 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
     <input type="hidden" name="country" value={country} />
     <input type="hidden" name="city" value={city} />
     <input type="hidden" name="source_url" value={sourceUrl} />
+    <input type="hidden" name="visitor_id" />
 
     <FormField name="name" label={lf.nameLabel} placeholder={lf.namePlaceholder} required />
 
@@ -151,7 +152,9 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
 
 <script>
   import { AsYouType, parsePhoneNumberFromString, type CountryCode } from 'libphonenumber-js/min';
-  import { isTrackedContactChannel, type TrackedContactChannel } from '@/utils/contactChannel';
+  import { isTrackedContactChannel, getPreferredChannel, type TrackedContactChannel } from '@/utils/contactChannel';
+  import { getOrCreateVisitorId } from '@/utils/visitorId';
+  import { detectVisitorCountry } from '@/utils/visitorCountry';
 
   // A page can have more than one LeadForm instance (e.g. a page-level form
   // plus the header's "Оставить заявку" modal) — Astro only emits this
@@ -168,6 +171,9 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
   initAllLeadForms();
 
   function initLeadForm(form: HTMLFormElement) {
+    const visitorIdInput = form.querySelector<HTMLInputElement>('input[type="hidden"][name="visitor_id"]');
+    if (visitorIdInput) visitorIdInput.value = getOrCreateVisitorId();
+
     const errName = form.dataset.errName!;
     const errTgRequired = form.dataset.errTgRequired!;
     const errTgFormat = form.dataset.errTgFormat!;
@@ -242,31 +248,11 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
       });
     }
 
-    // ponytail: timezone → country lookup covers our curated list only;
-    // falls back to the static Serbia default when the visitor's zone isn't
-    // one of these (no network call, no IP-geolocation dependency). Values
-    // here must stay a subset of PHONE_COUNTRIES' `iso` codes above — this
-    // map is keyed by IANA timezone (many-to-one), so it can't be generated
-    // from that list automatically.
-    const TIMEZONE_COUNTRY: Record<string, string> = {
-      'Europe/Belgrade': 'RS',
-      'Europe/Berlin': 'DE',
-      'Europe/Madrid': 'ES',
-      'Europe/Moscow': 'RU',
-      'Europe/Kyiv': 'UA', 'Europe/Kiev': 'UA',
-      'Europe/Minsk': 'BY',
-      'Asia/Almaty': 'KZ', 'Asia/Aqtobe': 'KZ', 'Asia/Qyzylorda': 'KZ',
-      'Europe/Sarajevo': 'BA',
-      'Europe/Zagreb': 'HR',
-      'Europe/Podgorica': 'ME',
-      'Europe/Skopje': 'MK',
-      'Europe/Istanbul': 'TR',
-    };
-    try {
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const detected = TIMEZONE_COUNTRY[tz];
-      if (detected) phoneCountry.value = detected;
-    } catch {}
+    // Values from detectVisitorCountry() are a subset of PHONE_COUNTRIES'
+    // `iso` codes above, just lowercased (shared with contactChannel.ts's
+    // country-keyed maps) — this <select>'s <option value> is uppercase.
+    const detectedCountry = detectVisitorCountry();
+    if (detectedCountry) phoneCountry.value = detectedCountry.toUpperCase();
 
     function parsedPhone() {
       return parsePhoneNumberFromString(phoneNumber.value, phoneCountry.value as CountryCode);
@@ -309,25 +295,42 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
       }
     }
 
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        activeTab = isTrackedContactChannel(tab.dataset.tab) ? tab.dataset.tab : 'telegram';
-        activeTabButton = tab;
-        movePill(tab);
-        tabs.forEach(t => {
-          const isActive = t === tab;
-          t.classList.toggle('text-on-accent', isActive);
-          t.classList.toggle('text-muted', !isActive);
-          t.setAttribute('aria-selected', String(isActive));
-        });
-        const panel = PANEL_FOR[activeTab];
-        panels.forEach(p => p.classList.toggle('hidden', p.dataset.panel !== panel));
-        clearError(tgInput);
-        clearError(phoneNumber);
-        syncContact();
-        (panel === 'telegram' ? tgInput : phoneNumber).focus();
+    // Shared by the click handler below and the region-based auto-select
+    // right after it — same tab-activation work either way, only whether
+    // focus jumps into the newly-shown field differs (auto-selecting on
+    // page load shouldn't steal focus or pop the mobile keyboard the way a
+    // real click should).
+    function selectTab(tab: HTMLButtonElement, focusField: boolean) {
+      activeTab = isTrackedContactChannel(tab.dataset.tab) ? tab.dataset.tab : 'telegram';
+      activeTabButton = tab;
+      movePill(tab);
+      tabs.forEach(t => {
+        const isActive = t === tab;
+        t.classList.toggle('text-on-accent', isActive);
+        t.classList.toggle('text-muted', !isActive);
+        t.setAttribute('aria-selected', String(isActive));
       });
+      const panel = PANEL_FOR[activeTab];
+      panels.forEach(p => p.classList.toggle('hidden', p.dataset.panel !== panel));
+      clearError(tgInput);
+      clearError(phoneNumber);
+      syncContact();
+      if (focusField) (panel === 'telegram' ? tgInput : phoneNumber).focus();
+    }
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => selectTab(tab, true));
     });
+
+    // Region-based default: e.g. a Balkan visitor lands on the WhatsApp tab
+    // instead of Telegram (see contactChannel.ts's getPreferredChannel).
+    // 'telegram' is already the tabs[0] default, so there's nothing to do
+    // for it or for a country/detection that isn't recognized.
+    const preferredChannel = getPreferredChannel(detectedCountry);
+    if (preferredChannel !== 'telegram') {
+      const preferredTab = Array.from(tabs).find(t => t.dataset.tab === preferredChannel);
+      if (preferredTab) selectTab(preferredTab, false);
+    }
 
     tgInput.addEventListener('input', () => { clearError(tgInput); syncContact(); });
     tgInput.addEventListener('blur', () => {

@@ -137,5 +137,36 @@ export default config({
         published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
       },
     }),
+    detailingCases: collection({
+      label: 'Кейсы детейлинга',
+      slugField: 'title',
+      path: 'src/content/detailing-cases/*/',
+      format: { contentField: 'content' },
+      schema: {
+        title: fields.slug({ name: { label: 'Заголовок', validation: { isRequired: true } } }),
+        translations: fields.object({
+          en: translationField('English', 'EN'),
+          sr: translationField('Srpski', 'SR'),
+        }, { label: 'Переводы' }),
+        content: fields.markdoc({ label: 'Текст (RU)', extension: 'md' }),
+        car: fields.text({ label: 'Автомобиль' }),
+        year: fields.integer({ label: 'Год' }),
+        // Keep in sync with DETAILING_SERVICES in src/utils/labels.ts — can't
+        // import it here (that file pulls in Astro-coupled code). One car can
+        // get several detailing services at once (e.g. wrap + ceramic), same
+        // multiselect-tag shape as autoserviceCases.servicesApplied above.
+        // Only 'Оклейка плёнкой' is live; add options here as new services launch.
+        servicesApplied: fields.multiselect({
+          label: 'Выполненные услуги',
+          options: [
+            { label: 'Оклейка плёнкой', value: 'wrap' },
+          ],
+        }),
+        image: caseImage(),
+        gallery: fields.array(caseImage(), { label: 'Больше фото', itemLabel: props => props.value?.filename || 'Фото' }),
+        date: fields.date({ label: 'Дата', validation: { isRequired: true } }),
+        published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
+      },
+    }),
   },
 });

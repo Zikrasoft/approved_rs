@@ -1,0 +1,77 @@
+---
+// Shared by every Belgrade-based service page (auto-service, detailing) —
+// each has its own physical address, so the caller passes `mapQuery` (the
+// address Google Maps should geocode) rather than this component assuming
+// they're all the same office.
+import { MapPin } from '@lucide/astro';
+import Button from '@/components/Button.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+
+interface Props {
+  heading: string;
+  addressLabel: string;
+  streetAddress: string;
+  cityCountryLine: string;
+  mapButtonLabel: string;
+  mapIframeTitle: string;
+  // Native-script address string for Google Maps to geocode — not shown to
+  // visitors directly (streetAddress/cityCountryLine are), so it doesn't
+  // need per-locale translation, just accurate spelling.
+  mapQuery: string;
+}
+
+const { heading, addressLabel, streetAddress, cityCountryLine, mapButtonLabel, mapIframeTitle, mapQuery } = Astro.props;
+
+// A plain Maps search URL works for any address without needing a
+// per-location share.google shortlink (which can't be generated without
+// visiting Maps by hand).
+const mapsSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`;
+---
+
+<section class="border-t border-default">
+  <div class="max-w-6xl mx-auto px-6 py-16">
+    <SectionHeading title={heading} size="lg" class="mb-10" />
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+      <div class="lg:col-span-2 glow-border flex flex-col h-72 lg:h-[26rem] p-7 rounded-sm border bg-surface border-default">
+        <span class="flex items-center justify-center w-11 h-11 rounded-sm mb-5 shrink-0 bg-accent-subtle text-accent">
+          <MapPin size={20} />
+        </span>
+        <p class="text-xs tracking-[0.16em] uppercase font-medium mb-2 text-muted">{addressLabel}</p>
+        <p class="font-display text-xl font-bold leading-snug text-primary">{streetAddress}</p>
+        <p class="text-sm text-muted">{cityCountryLine}</p>
+        <Button
+          href={mapsSearchUrl}
+          target="_blank"
+          rel="noopener"
+          variant="secondary"
+          class="mt-auto w-fit px-4 py-2.5 text-xs"
+        >
+          {mapButtonLabel}
+        </Button>
+      </div>
+      <div class="lg:col-span-3 map-embed glow-border h-72 lg:h-[26rem] rounded-sm overflow-hidden border border-default">
+        <iframe
+          src={`https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`}
+          width="100%"
+          height="100%"
+          class="border-0 block"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title={mapIframeTitle}
+        ></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Google's classic embed iframe has no style API — desaturate it so the
+     stock red/green basemap doesn't clash with the site's muted navy palette,
+     and roughly invert it in dark mode. ponytail: CSS filter hack, not pixel
+     perfect (the pin drifts slightly off pure red), good enough without a
+     Maps API key + JS SDK. */
+  .map-embed iframe { filter: saturate(0.4) brightness(0.95) contrast(0.95); }
+  :global(html[data-theme="dark"]) .map-embed iframe {
+    filter: invert(92%) hue-rotate(180deg) saturate(0.4) brightness(0.95) contrast(0.9);
+  }
+</style>

@@ -19,7 +19,44 @@ const CONTACT_CHANNEL_LABELS: Record<TrackedContactChannel, string> = {
   phone: 'звонок',
 };
 
-function formatLeadText(lead: LeadData, rowUrl?: string | null): string {
+// Status lives entirely in the Telegram message itself (text + inline
+// keyboard) — no database. Clicking a button (telegram-webhook.ts) rewrites
+// the "Статус: …" line in place and re-renders this same keyboard with the
+// active choice checked, so staff never leave Telegram to track a lead.
+export const LEAD_STATUSES = [
+  { key: 'in_progress', emoji: '🔵', label: 'В работе' },
+  { key: 'won', emoji: '✅', label: 'Успешно' },
+  { key: 'lost', emoji: '❌', label: 'Отказ' },
+] as const;
+export type LeadStatusKey = (typeof LEAD_STATUSES)[number]['key'];
+
+export function isLeadStatusKey(key: string): key is LeadStatusKey {
+  return LEAD_STATUSES.some(s => s.key === key);
+}
+
+export function statusLabel(key?: string | null): string {
+  if (!key || key === 'new') return 'Новая';
+  return LEAD_STATUSES.find(s => s.key === key)?.label ?? key;
+}
+
+export function buildStatusKeyboard(activeKey?: string | null) {
+  return {
+    inline_keyboard: [
+      LEAD_STATUSES.map(s => ({
+        text: s.key === activeKey ? `${s.emoji} ${s.label} ✓` : `${s.emoji} ${s.label}`,
+        callback_data: `st:${s.key}`,
+      })),
+    ],
+  };
+}
+
+// One literal, used by both the line-builder (formatLeadText) and the
+// line-parser (updateLeadStatus) — kept in sync by construction instead of
+// as two independent hardcoded strings.
+const STATUS_PREFIX = 'Статус: ';
+const STATUS_LINE_RE = new RegExp(`^${STATUS_PREFIX}.*`, 'm');
+
+function formatLeadText(lead: LeadData): string {
   const service = SERVICE_LABELS[lead.service] ?? lead.service;
   // lead.contactChannel is a plain string at this point (from a form field
   // or the contact-click beacon, either of which could carry an arbitrary
@@ -29,6 +66,7 @@ function formatLeadText(lead: LeadData, rowUrl?: string | null): string {
   const contactLine = channelLabel ? `${lead.contact} (${channelLabel})` : lead.contact;
   const lines: string[] = [
     `🚗 Заявка #${lead.id} — ${service}`,
+    `${STATUS_PREFIX}${statusLabel()}`,
     ``,
     `Имя: ${lead.name}`,
     `Контакт: ${contactLine}`,
@@ -36,9 +74,7 @@ function formatLeadText(lead: LeadData, rowUrl?: string | null): string {
   if (lead.country) lines.push(`Страна: ${lead.country.toUpperCase()}`);
   if (lead.comment) lines.push(`Комментарий: ${lead.comment}`);
   if (lead.source_url) lines.push(`Страница: ${lead.source_url}`);
-  // Plain URL, same as Страница above — Telegram auto-linkifies it, no
-  // parse_mode needed. Absent when the Sheets call failed/returned no link.
-  if (rowUrl) lines.push(`Таблица: ${rowUrl}`);
+  if (lead.visitorId) lines.push(`ID посетителя: ${lead.visitorId.slice(0, 100)}`);
   lines.push(``, `#заявка`);
   return lines.join('\n');
 }
@@ -49,18 +85,77 @@ async function tgPost(method: string, body: object): Promise<unknown> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
+  const data = await response.json() as { result: unknown; description?: string };
   if (!response.ok) {
-    throw new Error(`Telegram ${method} failed: ${response.status}`);
+    throw new Error(`Telegram ${method} failed: ${response.status} ${data.description ?? ''}`.trim());
   }
-  const data = await response.json() as { result: unknown };
   return data.result;
 }
 
-export async function sendLeadNotification(lead: LeadData, rowUrl?: string | null): Promise<void> {
-  const text = formatLeadText(lead, rowUrl);
+export async function sendLeadNotification(lead: LeadData): Promise<void> {
+  const text = formatLeadText(lead);
 
-  await tgPost('sendMessage', {
+  const sent = await tgPost('sendMessage', {
     chat_id: GROUP_ID,
     text,
+    reply_markup: buildStatusKeyboard(),
   });
+  const messageId = (sent as { message_id?: unknown } | null)?.message_id;
+  if (typeof messageId !== 'number') {
+    console.error('[telegram] sendMessage response missing message_id, skipping pin', { sent });
+    return;
+  }
+
+  // No Sheets row to fall back on anymore — pinning is how staff find new
+  // leads in a busy group, so a pin failure shouldn't sink the notification.
+  try {
+    await tgPost('pinChatMessage', {
+      chat_id: GROUP_ID,
+      message_id: messageId,
+      disable_notification: true,
+    });
+  } catch (err) {
+    console.error('[telegram] pinChatMessage failed', { error: err, messageId });
+  }
+}
+
+// Called by telegram-webhook.ts when staff tap a status button — rewrites
+// just the "Статус: …" line of the existing message text rather than
+// rebuilding it from a LeadData object, since none is persisted anywhere
+// once the message has been sent.
+export async function updateLeadStatus(
+  chatId: string | number,
+  messageId: number,
+  currentText: string,
+  newStatusKey: string,
+): Promise<void> {
+  // The webhook's secret_token only proves the request came from Telegram,
+  // not which chat it's about — a bot ever added to a second chat could
+  // otherwise edit messages there too. Enforce the one group we actually
+  // manage leads in, here, so every caller gets this for free.
+  if (String(chatId) !== String(GROUP_ID)) return;
+
+  const newText = STATUS_LINE_RE.test(currentText)
+    ? currentText.replace(STATUS_LINE_RE, `${STATUS_PREFIX}${statusLabel(newStatusKey)}`)
+    : currentText;
+  try {
+    await tgPost('editMessageText', {
+      chat_id: chatId,
+      message_id: messageId,
+      text: newText,
+      reply_markup: buildStatusKeyboard(newStatusKey),
+    });
+  } catch (err) {
+    // Double-tapping the same status button re-sends identical text+keyboard
+    // — Telegram rejects that no-op edit with "message is not modified",
+    // which isn't a real failure, just a race the caller shouldn't surface.
+    if (err instanceof Error && err.message.includes('message is not modified')) return;
+    throw err;
+  }
+}
+
+// Telegram requires every callback_query to be acknowledged, or the
+// tapped button's loading spinner never clears on the client's phone.
+export async function answerCallback(callbackQueryId: string, text?: string): Promise<void> {
+  await tgPost('answerCallbackQuery', { callback_query_id: callbackQueryId, text });
 }

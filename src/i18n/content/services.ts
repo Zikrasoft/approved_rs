@@ -1,5 +1,5 @@
 import type { Locale } from '@/i18n/config';
-import type { ServiceSlug } from '@/utils/labels';
+import type { ServiceSlug, AUTOSERVICE_SERVICES, DETAILING_SERVICES } from '@/utils/labels';
 
 interface StepItem {
   n: string;
@@ -23,7 +23,7 @@ interface EuCountrySpokeContent {
   chinaCrossLabel: string;
 }
 
-interface ServicesContent {
+export interface ServicesContent {
   'vehicle-sourcing': {
     // Bare /vehicle-sourcing/ (no country) — a country-picker landing page,
     // same role as vehicle-import's hub, so an unprefixed or otherwise
@@ -149,7 +149,30 @@ interface ServicesContent {
     ctaLabel: string;
     breadcrumbLabel: string;
     whatWeDoHeading: string;
-    whatWeDo: { key: 'diagnostics' | 'maintenance' | 'suspension' | 'engine' | 'prepurchase'; label: string; desc: string }[];
+    whatWeDo: { key: (typeof AUTOSERVICE_SERVICES)[number]; label: string; desc: string }[];
+    alsoSourcingLabel: string;
+    howToFindHeading: string;
+    addressLabel: string;
+    streetAddress: string;
+    cityCountryLine: string;
+    mapButtonLabel: string;
+    mapIframeTitle: string;
+    worksHeading: string;
+  };
+  detailingBelgrade: {
+    metaTitle: string;
+    metaDescription: string;
+    title: string;
+    titleHighlight: string;
+    description: string;
+    ctaLabel: string;
+    breadcrumbLabel: string;
+    whatWeDoHeading: string;
+    // Keyed by DETAILING_SERVICES (src/utils/labels.ts) — one entry per
+    // live detailing service. Only 'wrap' exists today; add siblings here
+    // (and to DETAILING_SERVICES + keystatic.config.ts) as the client adds
+    // more (ceramic, anti-gravel film, etc.).
+    whatWeDo: { key: (typeof DETAILING_SERVICES)[number]; label: string; desc: string }[];
     alsoSourcingLabel: string;
     howToFindHeading: string;
     addressLabel: string;
@@ -402,6 +425,27 @@ const ru: ServicesContent = {
     mapIframeTitle: 'Автосервис на карте — Пека Павловича 39, Белград',
     worksHeading: 'Примеры работ',
   },
+  detailingBelgrade: {
+    metaTitle: 'Детейлинг в Белграде — оклейка плёнкой авто, мото, вело, яхт',
+    metaDescription: 'Детейлинг в Белграде: оклейка плёнкой автомобилей, мотоциклов, велосипедов и яхт.',
+    title: 'Детейлинг',
+    titleHighlight: 'в Белграде',
+    description: 'Профессиональный детейлинг в Белграде: оклейка плёнкой автомобилей, мотоциклов, велосипедов и яхт.',
+    ctaLabel: 'Оставить заявку',
+    breadcrumbLabel: 'Детейлинг в Белграде',
+    whatWeDoHeading: 'Наши услуги',
+    whatWeDo: [
+      { key: 'wrap', label: 'Оклейка плёнкой', desc: 'Полная и частичная оклейка кузова автомобилей, мотоциклов, велосипедов и яхт защитной или декоративной плёнкой' },
+    ],
+    alsoSourcingLabel: 'Также подбираем авто:',
+    howToFindHeading: 'Как нас найти',
+    addressLabel: 'Адрес',
+    streetAddress: 'Паштровичева 8',
+    cityCountryLine: 'Белград, Сербия',
+    mapButtonLabel: 'Открыть в Google Maps',
+    mapIframeTitle: 'Детейлинг на карте — Паштровичева 8, Белград',
+    worksHeading: 'Примеры работ',
+  },
   caseChrome: {
     autoLabel: 'Авто',
     yearLabel: 'Год',
@@ -419,7 +463,7 @@ const ru: ServicesContent = {
     channelBannerText: 'Публикуем новые кейсы, процесс подбора и полезные советы.',
     channelBannerCta: 'Подписаться',
     usefulInfoLabel: 'Полезная информация',
-    serviceBadges: { 'vehicle-sourcing': 'Автоподбор', 'vehicle-buyback': 'Выкуп', 'vehicle-inspection': 'Проверка', 'vehicle-import': 'Привоз', 'auto-service-belgrade': 'Автосервис' },
+    serviceBadges: { 'vehicle-sourcing': 'Автоподбор', 'vehicle-buyback': 'Выкуп', 'vehicle-inspection': 'Проверка', 'vehicle-import': 'Привоз', 'auto-service-belgrade': 'Автосервис', 'detailing-belgrade': 'Детейлинг' },
   },
 };
 
@@ -636,6 +680,27 @@ const en: ServicesContent = {
     mapIframeTitle: 'Auto service on the map — Peka Pavlovića 39, Belgrade',
     worksHeading: 'Our Work',
   },
+  detailingBelgrade: {
+    metaTitle: 'Detailing in Belgrade — Vinyl Wrapping for Cars, Motorcycles, Bicycles, Yachts',
+    metaDescription: 'Detailing in Belgrade: vinyl wrapping for cars, motorcycles, bicycles, and yachts.',
+    title: 'Detailing',
+    titleHighlight: 'in Belgrade',
+    description: 'Professional detailing in Belgrade: vinyl wrapping for cars, motorcycles, bicycles, and yachts.',
+    ctaLabel: 'Leave a Request',
+    breadcrumbLabel: 'Detailing in Belgrade',
+    whatWeDoHeading: 'Our Services',
+    whatWeDo: [
+      { key: 'wrap', label: 'Vinyl Wrapping', desc: 'Full and partial body wrapping for cars, motorcycles, bicycles, and yachts with protective or decorative vinyl' },
+    ],
+    alsoSourcingLabel: 'Also sourcing cars in:',
+    howToFindHeading: 'How to Find Us',
+    addressLabel: 'Address',
+    streetAddress: 'Paštrovićeva 8',
+    cityCountryLine: 'Belgrade, Serbia',
+    mapButtonLabel: 'Open in Google Maps',
+    mapIframeTitle: 'Detailing on the map — Paštrovićeva 8, Belgrade',
+    worksHeading: 'Our Work',
+  },
   caseChrome: {
     autoLabel: 'Car',
     yearLabel: 'Year',
@@ -653,7 +718,7 @@ const en: ServicesContent = {
     channelBannerText: 'We post new case studies, the sourcing process, and useful tips.',
     channelBannerCta: 'Subscribe',
     usefulInfoLabel: 'Useful Information',
-    serviceBadges: { 'vehicle-sourcing': 'Sourcing', 'vehicle-buyback': 'Buyback', 'vehicle-inspection': 'Inspection', 'vehicle-import': 'Import', 'auto-service-belgrade': 'Service' },
+    serviceBadges: { 'vehicle-sourcing': 'Sourcing', 'vehicle-buyback': 'Buyback', 'vehicle-inspection': 'Inspection', 'vehicle-import': 'Import', 'auto-service-belgrade': 'Service', 'detailing-belgrade': 'Detailing' },
   },
 };
 
@@ -870,6 +935,27 @@ const sr: ServicesContent = {
     mapIframeTitle: 'Auto servis na mapi — Peka Pavlovića 39, Beograd',
     worksHeading: 'Primeri radova',
   },
+  detailingBelgrade: {
+    metaTitle: 'Detailing u Beogradu — folijacija automobila, motocikala, bicikala, jahti',
+    metaDescription: 'Detailing u Beogradu: folijacija automobila, motocikala, bicikala i jahti.',
+    title: 'Detailing',
+    titleHighlight: 'u Beogradu',
+    description: 'Profesionalni detailing u Beogradu: folijacija automobila, motocikala, bicikala i jahti.',
+    ctaLabel: 'Pošaljite zahtev',
+    breadcrumbLabel: 'Detailing u Beogradu',
+    whatWeDoHeading: 'Naše usluge',
+    whatWeDo: [
+      { key: 'wrap', label: 'Folijacija', desc: 'Potpuna i delimična folijacija karoserije automobila, motocikala, bicikala i jahti zaštitnom ili dekorativnom folijom' },
+    ],
+    alsoSourcingLabel: 'Takođe pronalazimo vozila i u:',
+    howToFindHeading: 'Kako nas pronaći',
+    addressLabel: 'Adresa',
+    streetAddress: 'Paštrovićeva 8',
+    cityCountryLine: 'Beograd, Srbija',
+    mapButtonLabel: 'Otvorite u Google mapama',
+    mapIframeTitle: 'Detailing na mapi — Paštrovićeva 8, Beograd',
+    worksHeading: 'Primeri radova',
+  },
   caseChrome: {
     autoLabel: 'Vozilo',
     yearLabel: 'Godište',
@@ -887,7 +973,7 @@ const sr: ServicesContent = {
     channelBannerText: 'Objavljujemo nove primere, proces odabira i korisne savete.',
     channelBannerCta: 'Pratite nas',
     usefulInfoLabel: 'Korisne informacije',
-    serviceBadges: { 'vehicle-sourcing': 'Odabir', 'vehicle-buyback': 'Otkup', 'vehicle-inspection': 'Provera', 'vehicle-import': 'Uvoz', 'auto-service-belgrade': 'Servis' },
+    serviceBadges: { 'vehicle-sourcing': 'Odabir', 'vehicle-buyback': 'Otkup', 'vehicle-inspection': 'Provera', 'vehicle-import': 'Uvoz', 'auto-service-belgrade': 'Servis', 'detailing-belgrade': 'Detailing' },
   },
 };
 

@@ -60,6 +60,15 @@ describe('POST /api/leads', () => {
     );
   });
 
+  it('passes visitor_id through as visitorId', async () => {
+    const ctx = makeCtx({ name: 'Иван', contact: '@ivan', service: 'vehicle-sourcing', visitor_id: 'abc-123' });
+    await POST(ctx);
+    expect(notifyLead).toHaveBeenCalledWith(
+      expect.objectContaining({ visitorId: 'abc-123' }),
+      '[leads]'
+    );
+  });
+
   it('redirects without waiting for notifyLead to resolve', async () => {
     let resolveNotify!: () => void;
     vi.mocked(notifyLead).mockReturnValue(new Promise(resolve => { resolveNotify = resolve; }));

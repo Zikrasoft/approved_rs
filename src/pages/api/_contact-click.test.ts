@@ -70,6 +70,14 @@ describe('POST /api/contact-click', () => {
     }
   );
 
+  it('passes visitor_id through as visitorId', async () => {
+    await POST(makeCtx({ channel: 'phone', source_url: '/ru/', visitor_id: 'abc-123' }));
+    expect(notifyLead).toHaveBeenCalledWith(
+      expect.objectContaining({ visitorId: 'abc-123' }),
+      '[contact-click]'
+    );
+  });
+
   it('returns 204 without waiting for notifyLead to resolve', async () => {
     let resolveNotify!: () => void;
     vi.mocked(notifyLead).mockReturnValue(new Promise(resolve => { resolveNotify = resolve; }));

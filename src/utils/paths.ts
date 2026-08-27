@@ -25,16 +25,29 @@ export const PathBuilder = {
       : `/${locale}/vehicle-import/${slug}/`,
   autoServiceBelgrade: (locale: Locale) => `/${locale}/auto-service-belgrade/`,
   autoServiceCase: (locale: Locale, caseId: string) => `/${locale}/auto-service-belgrade/${caseId}/`,
+  detailingBelgrade: (locale: Locale) => `/${locale}/detailing-belgrade/`,
+  detailingCase: (locale: Locale, caseId: string) => `/${locale}/detailing-belgrade/${caseId}/`,
   case: (locale: Locale, caseId: string) => `/${locale}/cases/${caseId}/`,
   casesVehicleSourcing: (locale: Locale) => `/${locale}/cases/vehicle-sourcing/`,
   casesVehicleBuyback: (locale: Locale) => `/${locale}/cases/vehicle-buyback/`,
   casesVehicleInspection: (locale: Locale) => `/${locale}/cases/vehicle-inspection/`,
   casesVehicleImport: (locale: Locale) => `/${locale}/cases/vehicle-import/`,
   casesAutoService: (locale: Locale) => `/${locale}/cases/auto-service/`,
+  casesDetailing: (locale: Locale) => `/${locale}/cases/detailing/`,
   contacts: (locale: Locale) => `/${locale}/contacts/`,
   privacy: (locale: Locale) => `/${locale}/privacy/`,
   thanks: (locale: Locale) => `/${locale}/thanks/`,
 };
+
+// Shared by auto-service-belgrade and detailing-belgrade's "also sourcing
+// cars in" ChipLinks — both are Belgrade-only pages that cross-sell
+// vehicle-sourcing in every other active country.
+export function sourcingChipItems(locale: Locale) {
+  return getActiveCountries().filter(c => c.code !== 'rs').map(c => ({
+    href: PathBuilder.service(locale, 'vehicle-sourcing', c.code),
+    text: c[locale].name,
+  }));
+}
 
 export function getCountryPaths() {
   return getActiveCountries().map(c => ({ params: { country: c.code } }));
