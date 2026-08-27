@@ -26,8 +26,8 @@
 | `PUBLIC_TG_MANAGER` | Username Telegram менеджера (без @) | — |
 | `PUBLIC_THREADS_CHANNEL` | Username Threads-канала (без @) | — |
 | `TELEGRAM_BOT_TOKEN` | Токен бота для приёма заявок | [@BotFather](https://t.me/BotFather) |
-| `TELEGRAM_CHANNEL_ID` | ID канала/группы куда слать заявки | `@username` или `-100...` |
-| `DATABASE_URL` | Строка подключения Neon Postgres | [neon.tech](https://neon.tech) |
+| `TELEGRAM_GROUP_ID` | ID группы куда слать заявки | `@username` или `-100...` |
+| `TELEGRAM_WEBHOOK_SECRET` | Секрет для проверки запросов к `/api/telegram-webhook` | Придумать самим, любая случайная строка |
 
 > `PUBLIC_*` переменные доступны в браузере — не класть в них секреты.
 
@@ -58,10 +58,14 @@ Vercel автоматически запустит деплой при пуше 
 
 ## Telegram webhook
 
-После первого деплоя нужно зарегистрировать webhook бота:
+Заявки в группе идут со статус-кнопками («В работе» / «Успешно» / «Отказ») —
+нажатие правит текст того же сообщения через `/api/telegram-webhook`, без
+базы данных и отдельного бот-сервера. После первого деплоя нужно
+зарегистрировать webhook, задав `secret_token` (то же значение, что в
+`TELEGRAM_WEBHOOK_SECRET`) — без него эндпоинт отвечает 401 на любой запрос:
 
 ```bash
-curl "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook?url=https://approved.rs/api/telegram"
+curl "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook?url=https://approved.rs/api/telegram-webhook&secret_token=<TELEGRAM_WEBHOOK_SECRET>"
 ```
 
 Проверить:

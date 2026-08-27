@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
-import { sendLeadNotification } from './telegram';
+import { sendLeadNotification, statusLabel, buildStatusKeyboard, updateLeadStatus, answerCallback } from './telegram';
 import type { LeadData } from './telegram';
 
 const mockLead: LeadData = {
@@ -54,14 +54,15 @@ describe('sendLeadNotification', () => {
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
-  it('sends a plain notification with no inline keyboard', async () => {
+  it('sends the notification with the status keyboard attached, no active status yet', async () => {
     await sendLeadNotification(mockLead);
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.chat_id).toBe('-1009876543210');
-    expect(body.reply_markup).toBeUndefined();
+    expect(body.reply_markup.inline_keyboard[0]).toHaveLength(3);
+    expect(body.reply_markup.inline_keyboard[0].every((btn: { text: string }) => !btn.text.includes('✓'))).toBe(true);
   });
 
-  it('message text contains lead id, service label, name, contact', async () => {
+  it('message text contains lead id, service label, name, contact, and the default status', async () => {
     await sendLeadNotification(mockLead);
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.chat_id).toBe('-1009876543210');
@@ -69,6 +70,7 @@ describe('sendLeadNotification', () => {
     expect(body.text).toContain('Автоподбор');
     expect(body.text).toContain('Иван');
     expect(body.text).toContain('@ivan');
+    expect(body.text).toContain('Статус: Новая');
   });
 
   it('throws when Telegram returns ok: false', async () => {
@@ -99,5 +101,73 @@ describe('sendLeadNotification', () => {
     await sendLeadNotification(mockLead);
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).not.toContain('ID посетителя');
+  });
+});
+
+describe('statusLabel', () => {
+  it('defaults to "Новая" for undefined/null/"new"', () => {
+    expect(statusLabel()).toBe('Новая');
+    expect(statusLabel(null)).toBe('Новая');
+    expect(statusLabel('new')).toBe('Новая');
+  });
+
+  it('maps known status keys to their Russian label', () => {
+    expect(statusLabel('in_progress')).toBe('В работе');
+    expect(statusLabel('won')).toBe('Успешно');
+    expect(statusLabel('lost')).toBe('Отказ');
+  });
+
+  it('falls back to the raw key for an unknown status', () => {
+    expect(statusLabel('bogus')).toBe('bogus');
+  });
+});
+
+describe('buildStatusKeyboard', () => {
+  it('marks the active status with a checkmark and leaves the others plain', () => {
+    const kb = buildStatusKeyboard('won');
+    const buttons = kb.inline_keyboard[0];
+    expect(buttons.find(b => b.callback_data === 'st:won')!.text).toContain('✓');
+    expect(buttons.find(b => b.callback_data === 'st:lost')!.text).not.toContain('✓');
+  });
+
+  it('checks nothing when no status is active', () => {
+    const kb = buildStatusKeyboard();
+    expect(kb.inline_keyboard[0].every(b => !b.text.includes('✓'))).toBe(true);
+  });
+});
+
+describe('updateLeadStatus', () => {
+  beforeEach(() => mockFetchOk());
+  afterEach(() => mockFetch.mockReset());
+
+  it('replaces the Статус line and re-renders the keyboard with the new active status', async () => {
+    const original = '🚗 Заявка #42 — Автоподбор\nСтатус: Новая\n\nИмя: Иван';
+    await updateLeadStatus(-1009876543210, 555, original, 'won');
+
+    expect(mockFetch.mock.calls[0][0]).toContain('/editMessageText');
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.chat_id).toBe(-1009876543210);
+    expect(body.message_id).toBe(555);
+    expect(body.text).toContain('Статус: Успешно');
+    expect(body.text).toContain('Имя: Иван');
+    expect(body.reply_markup.inline_keyboard[0].find((b: { callback_data: string }) => b.callback_data === 'st:won').text).toContain('✓');
+  });
+
+  it('leaves text untouched if no Статус line is found (defensive, should not happen in practice)', async () => {
+    await updateLeadStatus(-1, 1, 'no status line here', 'won');
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toBe('no status line here');
+  });
+});
+
+describe('answerCallback', () => {
+  beforeEach(() => mockFetchOk());
+  afterEach(() => mockFetch.mockReset());
+
+  it('posts to answerCallbackQuery with the callback id and optional text', async () => {
+    await answerCallback('cb-1', 'Статус обновлён');
+    expect(mockFetch.mock.calls[0][0]).toContain('/answerCallbackQuery');
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body).toEqual({ callback_query_id: 'cb-1', text: 'Статус обновлён' });
   });
 });

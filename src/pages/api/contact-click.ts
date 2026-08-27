@@ -43,7 +43,7 @@ export async function POST({ request }: APIContext): Promise<Response> {
   // channel="constructor") resolves inherited Object.prototype members
   // instead of undefined, so a plain `?? CHANNEL_COPY.phone` wouldn't have
   // caught it. The normalized value below also becomes contactChannel, so
-  // it can never disagree with leads-webhook.gs's own channel→label mapping
+  // it can never disagree with telegram.ts's own channel→label mapping
   // downstream.
   const rawChannel = form.get('channel')?.toString();
   const channel: TrackedContactChannel = isTrackedContactChannel(rawChannel) ? rawChannel : 'phone';
