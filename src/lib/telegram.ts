@@ -30,6 +30,10 @@ export const LEAD_STATUSES = [
 ] as const;
 export type LeadStatusKey = (typeof LEAD_STATUSES)[number]['key'];
 
+export function isLeadStatusKey(key: string): key is LeadStatusKey {
+  return LEAD_STATUSES.some(s => s.key === key);
+}
+
 export function statusLabel(key?: string | null): string {
   if (!key || key === 'new') return 'Новая';
   return LEAD_STATUSES.find(s => s.key === key)?.label ?? key;
@@ -46,7 +50,11 @@ export function buildStatusKeyboard(activeKey?: string | null) {
   };
 }
 
-const STATUS_LINE_RE = /^Статус: .*/m;
+// One literal, used by both the line-builder (formatLeadText) and the
+// line-parser (updateLeadStatus) — kept in sync by construction instead of
+// as two independent hardcoded strings.
+const STATUS_PREFIX = 'Статус: ';
+const STATUS_LINE_RE = new RegExp(`^${STATUS_PREFIX}.*`, 'm');
 
 function formatLeadText(lead: LeadData): string {
   const service = SERVICE_LABELS[lead.service] ?? lead.service;
@@ -58,7 +66,7 @@ function formatLeadText(lead: LeadData): string {
   const contactLine = channelLabel ? `${lead.contact} (${channelLabel})` : lead.contact;
   const lines: string[] = [
     `🚗 Заявка #${lead.id} — ${service}`,
-    `Статус: ${statusLabel()}`,
+    `${STATUS_PREFIX}${statusLabel()}`,
     ``,
     `Имя: ${lead.name}`,
     `Контакт: ${contactLine}`,
@@ -122,7 +130,7 @@ export async function updateLeadStatus(
   newStatusKey: string,
 ): Promise<void> {
   const newText = STATUS_LINE_RE.test(currentText)
-    ? currentText.replace(STATUS_LINE_RE, `Статус: ${statusLabel(newStatusKey)}`)
+    ? currentText.replace(STATUS_LINE_RE, `${STATUS_PREFIX}${statusLabel(newStatusKey)}`)
     : currentText;
   await tgPost('editMessageText', {
     chat_id: chatId,

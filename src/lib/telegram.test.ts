@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
-import { sendLeadNotification, statusLabel, buildStatusKeyboard, updateLeadStatus, answerCallback } from './telegram';
+import { sendLeadNotification, statusLabel, isLeadStatusKey, buildStatusKeyboard, updateLeadStatus, answerCallback } from './telegram';
 import type { LeadData } from './telegram';
 
 const mockLead: LeadData = {
@@ -119,6 +119,20 @@ describe('statusLabel', () => {
 
   it('falls back to the raw key for an unknown status', () => {
     expect(statusLabel('bogus')).toBe('bogus');
+  });
+});
+
+describe('isLeadStatusKey', () => {
+  it('is true only for the 3 known status keys', () => {
+    expect(isLeadStatusKey('in_progress')).toBe(true);
+    expect(isLeadStatusKey('won')).toBe(true);
+    expect(isLeadStatusKey('lost')).toBe(true);
+  });
+
+  it('is false for anything else, including "new"', () => {
+    expect(isLeadStatusKey('new')).toBe(false);
+    expect(isLeadStatusKey('bogus')).toBe(false);
+    expect(isLeadStatusKey('')).toBe(false);
   });
 });
 

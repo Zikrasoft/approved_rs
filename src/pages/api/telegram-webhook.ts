@@ -1,7 +1,7 @@
 export const prerender = false;
 
 import type { APIContext } from 'astro';
-import { updateLeadStatus, answerCallback } from '@/lib/telegram';
+import { updateLeadStatus, answerCallback, isLeadStatusKey } from '@/lib/telegram';
 
 const WEBHOOK_SECRET = import.meta.env.TELEGRAM_WEBHOOK_SECRET;
 
@@ -28,18 +28,20 @@ export async function POST({ request }: APIContext): Promise<Response> {
 
   const update = await request.json() as TelegramUpdate;
   const cb = update.callback_query;
+  const status = cb?.data?.startsWith('st:') ? cb.data.slice('st:'.length) : undefined;
 
-  if (cb?.data?.startsWith('st:') && cb.message) {
-    const status = cb.data.slice('st:'.length);
+  if (cb?.message && status && isLeadStatusKey(status)) {
+    const message = cb.message;
     try {
-      await updateLeadStatus(cb.message.chat.id, cb.message.message_id, cb.message.text ?? '', status);
+      await updateLeadStatus(message.chat.id, message.message_id, message.text ?? '', status);
       await answerCallback(cb.id, 'Статус обновлён');
     } catch (err) {
       console.error('[telegram-webhook] failed to update lead status', { error: err, status });
       await answerCallback(cb.id, 'Ошибка, попробуйте ещё раз').catch(() => {});
     }
   } else if (cb) {
-    // Unrecognized callback shape — still ack it so the button stops spinning.
+    // Unrecognized/invalid callback (unknown status, missing message, etc.)
+    // — still ack it so the button stops spinning.
     await answerCallback(cb.id).catch(() => {});
   }
 

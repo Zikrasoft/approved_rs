@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('@/lib/telegram', () => ({
   updateLeadStatus: vi.fn().mockResolvedValue(undefined),
   answerCallback: vi.fn().mockResolvedValue(undefined),
+  isLeadStatusKey: (key: string) => ['in_progress', 'won', 'lost'].includes(key),
 }));
 
 import { POST } from './telegram-webhook';
@@ -69,6 +70,26 @@ describe('POST /api/telegram-webhook', () => {
     expect(res.status).toBe(200);
     expect(updateLeadStatus).not.toHaveBeenCalled();
     expect(answerCallback).toHaveBeenCalledWith('cb-3');
+  });
+
+  it('acks without updating when the status prefix is valid but the key is not an allowlisted status', async () => {
+    const res = await POST(makeCtx({
+      callback_query: { id: 'cb-4', data: 'st:bogus', message: { message_id: 1, text: 'Статус: Новая', chat: { id: 1 } } },
+    }));
+
+    expect(res.status).toBe(200);
+    expect(updateLeadStatus).not.toHaveBeenCalled();
+    expect(answerCallback).toHaveBeenCalledWith('cb-4');
+  });
+
+  it('acks without updating when a valid status is sent with no message attached', async () => {
+    const res = await POST(makeCtx({
+      callback_query: { id: 'cb-5', data: 'st:won' },
+    }));
+
+    expect(res.status).toBe(200);
+    expect(updateLeadStatus).not.toHaveBeenCalled();
+    expect(answerCallback).toHaveBeenCalledWith('cb-5');
   });
 
   it('returns 200 for updates with no callback_query (e.g. plain messages)', async () => {
