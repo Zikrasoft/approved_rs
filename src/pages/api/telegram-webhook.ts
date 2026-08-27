@@ -1,9 +1,21 @@
 export const prerender = false;
 
+import { timingSafeEqual } from 'node:crypto';
 import type { APIContext } from 'astro';
 import { updateLeadStatus, answerCallback, isLeadStatusKey } from '@/lib/telegram';
 
 const WEBHOOK_SECRET = import.meta.env.TELEGRAM_WEBHOOK_SECRET;
+
+// Plain `!==` leaks timing info on a security boundary; pad both sides to
+// equal length first since timingSafeEqual throws on a length mismatch
+// instead of just returning false.
+function secretMatches(header: string | null): boolean {
+  if (!WEBHOOK_SECRET || !header) return false;
+  const a = Buffer.from(header);
+  const b = Buffer.from(WEBHOOK_SECRET);
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+}
 
 interface TelegramUpdate {
   callback_query?: {
@@ -22,11 +34,18 @@ export async function POST({ request }: APIContext): Promise<Response> {
   // is registered with a secret_token (see docs/deploy.md) — the only way
   // to confirm a request actually came from Telegram and not a public POST
   // to a guessable URL. Fail closed if it's missing or wrong.
-  if (!WEBHOOK_SECRET || request.headers.get('x-telegram-bot-api-secret-token') !== WEBHOOK_SECRET) {
+  if (!secretMatches(request.headers.get('x-telegram-bot-api-secret-token'))) {
     return new Response(null, { status: 401 });
   }
 
-  const update = await request.json() as TelegramUpdate;
+  let update: TelegramUpdate;
+  try {
+    update = await request.json() as TelegramUpdate;
+  } catch {
+    // Malformed body after a valid secret — ack with 200 so Telegram stops
+    // retrying instead of hammering this endpoint forever on a bad payload.
+    return new Response(null, { status: 200 });
+  }
   const cb = update.callback_query;
   const status = cb?.data?.startsWith('st:') ? cb.data.slice('st:'.length) : undefined;
 

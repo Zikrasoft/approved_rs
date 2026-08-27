@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { APIContext } from 'astro';
 
 vi.mock('@/lib/telegram', () => ({
   updateLeadStatus: vi.fn().mockResolvedValue(undefined),
@@ -18,7 +19,17 @@ function makeCtx(body: unknown, headers: Record<string, string> = { 'x-telegram-
       headers,
       body: JSON.stringify(body),
     }),
-  } as any;
+  } as Pick<APIContext, 'request'> as APIContext;
+}
+
+function makeRawCtx(rawBody: string) {
+  return {
+    request: new Request('http://localhost/api/telegram-webhook', {
+      method: 'POST',
+      headers: { 'x-telegram-bot-api-secret-token': SECRET },
+      body: rawBody,
+    }),
+  } as Pick<APIContext, 'request'> as APIContext;
 }
 
 describe('POST /api/telegram-webhook', () => {
@@ -95,6 +106,13 @@ describe('POST /api/telegram-webhook', () => {
   it('returns 200 for updates with no callback_query (e.g. plain messages)', async () => {
     const res = await POST(makeCtx({ message: { text: 'hi' } }));
     expect(res.status).toBe(200);
+    expect(answerCallback).not.toHaveBeenCalled();
+  });
+
+  it('acks with 200 on a malformed JSON body instead of throwing, so Telegram stops retrying', async () => {
+    const res = await POST(makeRawCtx('not json'));
+    expect(res.status).toBe(200);
+    expect(updateLeadStatus).not.toHaveBeenCalled();
     expect(answerCallback).not.toHaveBeenCalled();
   });
 });

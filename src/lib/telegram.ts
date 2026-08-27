@@ -74,7 +74,7 @@ function formatLeadText(lead: LeadData): string {
   if (lead.country) lines.push(`Страна: ${lead.country.toUpperCase()}`);
   if (lead.comment) lines.push(`Комментарий: ${lead.comment}`);
   if (lead.source_url) lines.push(`Страница: ${lead.source_url}`);
-  if (lead.visitorId) lines.push(`ID посетителя: ${lead.visitorId}`);
+  if (lead.visitorId) lines.push(`ID посетителя: ${lead.visitorId.slice(0, 100)}`);
   lines.push(``, `#заявка`);
   return lines.join('\n');
 }
@@ -85,10 +85,10 @@ async function tgPost(method: string, body: object): Promise<unknown> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
+  const data = await response.json() as { result: unknown; description?: string };
   if (!response.ok) {
-    throw new Error(`Telegram ${method} failed: ${response.status}`);
+    throw new Error(`Telegram ${method} failed: ${response.status} ${data.description ?? ''}`.trim());
   }
-  const data = await response.json() as { result: unknown };
   return data.result;
 }
 
@@ -129,15 +129,29 @@ export async function updateLeadStatus(
   currentText: string,
   newStatusKey: string,
 ): Promise<void> {
+  // The webhook's secret_token only proves the request came from Telegram,
+  // not which chat it's about — a bot ever added to a second chat could
+  // otherwise edit messages there too. Enforce the one group we actually
+  // manage leads in, here, so every caller gets this for free.
+  if (String(chatId) !== String(GROUP_ID)) return;
+
   const newText = STATUS_LINE_RE.test(currentText)
     ? currentText.replace(STATUS_LINE_RE, `${STATUS_PREFIX}${statusLabel(newStatusKey)}`)
     : currentText;
-  await tgPost('editMessageText', {
-    chat_id: chatId,
-    message_id: messageId,
-    text: newText,
-    reply_markup: buildStatusKeyboard(newStatusKey),
-  });
+  try {
+    await tgPost('editMessageText', {
+      chat_id: chatId,
+      message_id: messageId,
+      text: newText,
+      reply_markup: buildStatusKeyboard(newStatusKey),
+    });
+  } catch (err) {
+    // Double-tapping the same status button re-sends identical text+keyboard
+    // — Telegram rejects that no-op edit with "message is not modified",
+    // which isn't a real failure, just a race the caller shouldn't surface.
+    if (err instanceof Error && err.message.includes('message is not modified')) return;
+    throw err;
+  }
 }
 
 // Telegram requires every callback_query to be acknowledged, or the

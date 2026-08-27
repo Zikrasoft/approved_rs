@@ -102,6 +102,13 @@ describe('sendLeadNotification', () => {
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).not.toContain('ID посетителя');
   });
+
+  it('caps an oversized visitor ID instead of letting it blow past the message limit', async () => {
+    await sendLeadNotification({ ...mockLead, visitorId: 'x'.repeat(500) });
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    const line = body.text.split('\n').find((l: string) => l.startsWith('ID посетителя: '));
+    expect(line.length).toBe('ID посетителя: '.length + 100);
+  });
 });
 
 describe('statusLabel', () => {
@@ -168,9 +175,28 @@ describe('updateLeadStatus', () => {
   });
 
   it('leaves text untouched if no Статус line is found (defensive, should not happen in practice)', async () => {
-    await updateLeadStatus(-1, 1, 'no status line here', 'won');
+    await updateLeadStatus(-1009876543210, 1, 'no status line here', 'won');
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).toBe('no status line here');
+  });
+
+  it('does nothing for a chat id other than the managed group', async () => {
+    await updateLeadStatus(-1, 1, 'Статус: Новая', 'won');
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('resolves without throwing when Telegram rejects a no-op double-tap edit', async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 400,
+      json: () => Promise.resolve({ description: 'Bad Request: message is not modified: specified new message content and reply markup are exactly the same' }),
+    });
+    await expect(updateLeadStatus(-1009876543210, 555, 'Статус: Успешно', 'won')).resolves.toBeUndefined();
+  });
+
+  it('still throws on a genuine editMessageText failure', async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 400, json: () => Promise.resolve({ description: 'Bad Request: message to edit not found' }) });
+    await expect(updateLeadStatus(-1009876543210, 555, 'Статус: Новая', 'won')).rejects.toThrow();
   });
 });
 

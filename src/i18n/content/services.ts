@@ -23,7 +23,7 @@ interface EuCountrySpokeContent {
   chinaCrossLabel: string;
 }
 
-interface ServicesContent {
+export interface ServicesContent {
   'vehicle-sourcing': {
     // Bare /vehicle-sourcing/ (no country) — a country-picker landing page,
     // same role as vehicle-import's hub, so an unprefixed or otherwise

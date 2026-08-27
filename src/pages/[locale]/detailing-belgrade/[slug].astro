@@ -1,28 +1,14 @@
 ---
 import CaseDetailPage from '@/components/CaseDetailPage.astro';
 import { getCollection } from 'astro:content';
-import { SITE_URL } from '@/utils/constants';
-import { withLocales, PathBuilder } from '@/utils/paths';
-import { getServicesContent } from '@/i18n/content/services';
-import { getI18n } from '@/i18n/getI18n';
+import { withLocales } from '@/utils/paths';
 
 export async function getStaticPaths() {
   const cases = await getCollection('detailingCases', c => c.data.published);
   return withLocales(cases.map(c => ({ params: { slug: c.id }, props: { case: c } })));
 }
 
-const { locale } = Astro.params;
-const workLabels = Object.fromEntries(getServicesContent(locale).detailingBelgrade.whatWeDo.map(w => [w.key, w.label]));
-const t = getI18n(locale);
 const { case: c } = Astro.props;
 ---
 
-<CaseDetailPage
-  case={c}
-  {workLabels}
-  promoKind="detailing"
-  decoWord="DETAILING"
-  breadcrumbLabel={t.nav['detailing-belgrade']}
-  breadcrumbHref={PathBuilder.detailingBelgrade(locale)}
-  canonical={`${SITE_URL}${PathBuilder.detailingCase(locale, c.id)}`}
-/>
+<CaseDetailPage case={c} promoKind="detailing" />

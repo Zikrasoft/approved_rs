@@ -1,8 +1,10 @@
 ---
 // Shared by auto-service-belgrade/[slug].astro and detailing-belgrade/[slug].astro
 // — same layout, translation-fallback logic, gallery, promo/channel banners,
-// and CTA; only the collection, workLabels source, promo kind, decorative
-// word, breadcrumb, and canonical path differ per caller.
+// and CTA. The two kinds only differ in a handful of derived values (deco
+// word, breadcrumb, canonical path, which "what we do" list feeds the work
+// badges) — CASE_DETAIL_CONFIG below is the single place that mapping lives,
+// so callers just pass `promoKind` instead of re-deriving all of it.
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
@@ -14,24 +16,53 @@ import { render, type CollectionEntry } from 'astro:content';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { excerptFromMarkdown, generateArticleSchema } from '@/utils/seo';
 import { getPromoBanners } from '@/i18n/content/promoBanners';
-import { getServicesContent } from '@/i18n/content/services';
-import { getLocale } from '@/i18n/config';
-import type { CasesTabKind } from '@/utils/labels';
+import { getServicesContent, type ServicesContent } from '@/i18n/content/services';
+import { getLocale, type Locale } from '@/i18n/config';
+import { getI18n } from '@/i18n/getI18n';
+import { PathBuilder } from '@/utils/paths';
 import { marked } from 'marked';
+
+type CaseDetailKind = 'auto-service' | 'detailing';
+
+const CASE_DETAIL_CONFIG: Record<CaseDetailKind, {
+  decoWord: string;
+  navKey: 'auto-service-belgrade' | 'detailing-belgrade';
+  hub: (locale: Locale) => string;
+  buildCanonical: (locale: Locale, caseId: string) => string;
+  whatWeDo: (sc: ServicesContent) => { key: string; label: string }[];
+}> = {
+  'auto-service': {
+    decoWord: 'SERVICE',
+    navKey: 'auto-service-belgrade',
+    hub: PathBuilder.autoServiceBelgrade,
+    buildCanonical: PathBuilder.autoServiceCase,
+    whatWeDo: sc => sc.autoServiceBelgrade.whatWeDo,
+  },
+  detailing: {
+    decoWord: 'DETAILING',
+    navKey: 'detailing-belgrade',
+    hub: PathBuilder.detailingBelgrade,
+    buildCanonical: PathBuilder.detailingCase,
+    whatWeDo: sc => sc.detailingBelgrade.whatWeDo,
+  },
+};
 
 interface Props {
   case: CollectionEntry<'autoserviceCases'> | CollectionEntry<'detailingCases'>;
-  workLabels: Record<string, string>;
-  promoKind: CasesTabKind;
-  decoWord: string;
-  breadcrumbLabel: string;
-  breadcrumbHref: string;
-  canonical: string;
+  promoKind: CaseDetailKind;
 }
 
-const { case: c, workLabels, promoKind, decoWord, breadcrumbLabel, breadcrumbHref, canonical } = Astro.props;
+const { case: c, promoKind } = Astro.props;
 const locale = getLocale(Astro.currentLocale);
-const cc = getServicesContent(locale).caseChrome;
+const t = getI18n(locale);
+const sc = getServicesContent(locale);
+const cc = sc.caseChrome;
+const config = CASE_DETAIL_CONFIG[promoKind];
+const workLabels = Object.fromEntries(config.whatWeDo(sc).map(w => [w.key, w.label]));
+const decoWord = config.decoWord;
+const breadcrumbLabel = t.nav[config.navKey];
+const breadcrumbHref = config.hub(locale);
+const canonical = `${SITE_URL}${config.buildCanonical(locale, c.id)}`;
 
 // Body is written in ru; en/sr get an optional title+body translation right
 // on the same entry's `translations` field. No translation yet → fall back
