@@ -4,7 +4,10 @@ import { Sticker } from '@lucide/astro';
 import ChipLinks from '@/components/ChipLinks.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
 import WhatWeDoList from '@/components/WhatWeDoList.astro';
+import HowToFindUs from '@/components/HowToFindUs.astro';
 import CasesGrid from '@/components/CasesGrid.astro';
+import Faq from '@/components/Faq.astro';
+import { getFaq } from '@/i18n/content/faq';
 import { generateServiceSchema, ogImageFor } from '@/utils/seo';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { getCountry } from '@/utils/geo';
@@ -34,6 +37,10 @@ const ICONS = { wrap: Sticker } as const;
 const WHAT_WE_DO = db.whatWeDo.map(item => ({ ...item, Icon: ICONS[item.key] }));
 
 const items = (await getPublishedDetailingCases()).map((c) => toDetailingCaseItem(c, locale));
+
+// Different shop from auto-service-belgrade — its own address. Native-script
+// string for Google Maps to geocode, see HowToFindUs.astro.
+const MAP_QUERY = 'Паштровићева 8, Београд';
 ---
 
 <ServicePageLayout
@@ -52,6 +59,22 @@ const items = (await getPublishedDetailingCases()).map((c) => toDetailingCaseIte
   <SectionHeading title={db.whatWeDoHeading} size="lg" class="mb-8 mt-6" />
   <WhatWeDoList items={WHAT_WE_DO} />
   <ChipLinks label={db.alsoSourcingLabel} items={sourcingChipItems(locale)} />
+
+  <Fragment slot="extra">
+    <HowToFindUs
+      heading={db.howToFindHeading}
+      addressLabel={db.addressLabel}
+      streetAddress={db.streetAddress}
+      cityCountryLine={db.cityCountryLine}
+      mapButtonLabel={db.mapButtonLabel}
+      mapIframeTitle={db.mapIframeTitle}
+      mapQuery={MAP_QUERY}
+    />
+  </Fragment>
+
+  <Fragment slot="extra">
+    <Faq items={getFaq(locale).detailingBelgrade} />
+  </Fragment>
 
   <Fragment slot="cases">
     <CasesGrid {items} heading={db.worksHeading} topBorder />

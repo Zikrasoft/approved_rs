@@ -85,6 +85,8 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
 
   lines.push(`## ${s.other}`, '');
   lines.push(`- [${t.common.homeLabel}](${SITE_URL}${PathBuilder.home(locale)})`);
+  lines.push(`- [${sc.autoServiceBelgrade.title} ${sc.autoServiceBelgrade.titleHighlight}](${SITE_URL}${PathBuilder.autoServiceBelgrade(locale)})`);
+  lines.push(`- [${sc.detailingBelgrade.title} ${sc.detailingBelgrade.titleHighlight}](${SITE_URL}${PathBuilder.detailingBelgrade(locale)})`);
   lines.push(`- [${nav.contacts}](${SITE_URL}${PathBuilder.contacts(locale)})`);
   lines.push('');
 

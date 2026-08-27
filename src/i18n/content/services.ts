@@ -174,6 +174,12 @@ interface ServicesContent {
     // more (ceramic, anti-gravel film, etc.).
     whatWeDo: { key: (typeof DETAILING_SERVICES)[number]; label: string; desc: string }[];
     alsoSourcingLabel: string;
+    howToFindHeading: string;
+    addressLabel: string;
+    streetAddress: string;
+    cityCountryLine: string;
+    mapButtonLabel: string;
+    mapIframeTitle: string;
     worksHeading: string;
   };
   caseChrome: {
@@ -432,6 +438,12 @@ const ru: ServicesContent = {
       { key: 'wrap', label: 'Оклейка плёнкой', desc: 'Полная и частичная оклейка кузова автомобилей, мотоциклов, велосипедов и яхт защитной или декоративной плёнкой' },
     ],
     alsoSourcingLabel: 'Также подбираем авто:',
+    howToFindHeading: 'Как нас найти',
+    addressLabel: 'Адрес',
+    streetAddress: 'Паштровичева 8',
+    cityCountryLine: 'Белград, Сербия',
+    mapButtonLabel: 'Открыть в Google Maps',
+    mapIframeTitle: 'Детейлинг на карте — Паштровичева 8, Белград',
     worksHeading: 'Примеры работ',
   },
   caseChrome: {
@@ -681,6 +693,12 @@ const en: ServicesContent = {
       { key: 'wrap', label: 'Vinyl Wrapping', desc: 'Full and partial body wrapping for cars, motorcycles, bicycles, and yachts with protective or decorative vinyl' },
     ],
     alsoSourcingLabel: 'Also sourcing cars in:',
+    howToFindHeading: 'How to Find Us',
+    addressLabel: 'Address',
+    streetAddress: 'Paštrovićeva 8',
+    cityCountryLine: 'Belgrade, Serbia',
+    mapButtonLabel: 'Open in Google Maps',
+    mapIframeTitle: 'Detailing on the map — Paštrovićeva 8, Belgrade',
     worksHeading: 'Our Work',
   },
   caseChrome: {
@@ -930,6 +948,12 @@ const sr: ServicesContent = {
       { key: 'wrap', label: 'Folijacija', desc: 'Potpuna i delimična folijacija karoserije automobila, motocikala, bicikala i jahti zaštitnom ili dekorativnom folijom' },
     ],
     alsoSourcingLabel: 'Takođe pronalazimo vozila i u:',
+    howToFindHeading: 'Kako nas pronaći',
+    addressLabel: 'Adresa',
+    streetAddress: 'Paštrovićeva 8',
+    cityCountryLine: 'Beograd, Srbija',
+    mapButtonLabel: 'Otvorite u Google mapama',
+    mapIframeTitle: 'Detailing na mapi — Paštrovićeva 8, Beograd',
     worksHeading: 'Primeri radova',
   },
   caseChrome: {

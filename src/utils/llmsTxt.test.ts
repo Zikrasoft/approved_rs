@@ -30,6 +30,12 @@ describe('generateLlmsTxt', () => {
     expect(body).toContain('/ru/vehicle-sourcing/pt/)');
   });
 
+  it('links directly to the auto-service and detailing service pages, not just their case listings', async () => {
+    const body = await generateLlmsTxt('ru');
+    expect(body).toContain('/ru/auto-service-belgrade/)');
+    expect(body).toContain('/ru/detailing-belgrade/)');
+  });
+
   it('"other languages" section links to the other 2 locales, not the current one', async () => {
     const body = await generateLlmsTxt('ru');
     expect(body).toContain('https://approved.rs/en/llms.txt');
