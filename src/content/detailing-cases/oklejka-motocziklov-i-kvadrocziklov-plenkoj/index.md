@@ -1,5 +1,5 @@
 ---
-title: '## Оклейка мотоциклов и квадроциклов пленкой'
+title: Оклейка мотоциклов и квадроциклов пленкой
 translations:
   en:
     title: 'Motorcycle & ATV Wrapping '
