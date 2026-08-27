@@ -14,9 +14,14 @@ interface Props {
   service?: string;
   country?: string;
   city?: string;
+  // Overrides the default "Марка, модель, бюджет" (written for vehicle-
+  // sourcing) — auto-service/detailing pages pass their own copy since the
+  // visitor already owns the car and isn't shopping within a budget.
+  commentLabel?: string;
+  commentPlaceholder?: string;
 }
 
-const { service = '', country = '', city = '' } = Astro.props;
+const { service = '', country = '', city = '', commentLabel, commentPlaceholder } = Astro.props;
 const sourceUrl = Astro.url.href;
 const locale = getLocale(Astro.currentLocale);
 const lf = getLeadFormContent(locale);
@@ -130,7 +135,7 @@ const fieldClass = 'form-field py-3 rounded-sm text-sm outline-none bg-page bord
       <input type="hidden" name="contact_channel" value="telegram" />
     </div>
 
-    <FormField name="comment" label={lf.commentLabel} placeholder={lf.commentPlaceholder} type="textarea" />
+    <FormField name="comment" label={commentLabel ?? lf.commentLabel} placeholder={commentPlaceholder ?? lf.commentPlaceholder} type="textarea" />
 
     <label class="flex items-start gap-3 mb-5 cursor-pointer text-muted consent-label">
       <input

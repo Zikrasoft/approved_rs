@@ -11,9 +11,11 @@ interface Props {
   service?: string;
   country?: string;
   city?: string;
+  commentLabel?: string;
+  commentPlaceholder?: string;
 }
 
-const { id, triggerAttr, service = '', country = '', city = '' } = Astro.props;
+const { id, triggerAttr, service = '', country = '', city = '', commentLabel, commentPlaceholder } = Astro.props;
 const locale = getLocale(Astro.currentLocale);
 const closeLabel = getI18n(locale).common.closeLabel;
 ---
@@ -22,7 +24,7 @@ const closeLabel = getI18n(locale).common.closeLabel;
   <button type="button" data-close aria-label={closeLabel} class="lead-modal-close">
     <X size={16} />
   </button>
-  <LeadForm service={service} country={country} city={city} />
+  <LeadForm service={service} country={country} city={city} {commentLabel} {commentPlaceholder} />
 </dialog>
 
 <style>

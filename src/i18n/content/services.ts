@@ -150,6 +150,11 @@ export interface ServicesContent {
     breadcrumbLabel: string;
     whatWeDoHeading: string;
     whatWeDo: { key: (typeof AUTOSERVICE_SERVICES)[number]; label: string; desc: string }[];
+    // The visitor already owns the car and wants a repair, not a purchase
+    // within a budget — overrides LeadForm's default "Марка, модель, бюджет"
+    // (see leadForm.ts), which is written for vehicle-sourcing.
+    commentLabel: string;
+    commentPlaceholder: string;
     alsoSourcingLabel: string;
     howToFindHeading: string;
     addressLabel: string;
@@ -173,6 +178,10 @@ export interface ServicesContent {
     // (and to DETAILING_SERVICES + keystatic.config.ts) as the client adds
     // more (ceramic, anti-gravel film, etc.).
     whatWeDo: { key: (typeof DETAILING_SERVICES)[number]; label: string; desc: string }[];
+    // Same override as autoServiceBelgrade.commentLabel — visitor already
+    // owns the car, describing the work needed, not a purchase budget.
+    commentLabel: string;
+    commentPlaceholder: string;
     alsoSourcingLabel: string;
     howToFindHeading: string;
     addressLabel: string;
@@ -416,6 +425,8 @@ const ru: ServicesContent = {
       { key: 'engine', label: 'Двигатель и трансмиссия', desc: 'Ремонт двигателя, трансмиссии и навесного оборудования' },
       { key: 'prepurchase', label: 'Проверка перед покупкой', desc: 'Комплексная проверка автомобиля перед покупкой или дальней поездкой' },
     ],
+    commentLabel: 'Марка, модель, что нужно сделать',
+    commentPlaceholder: 'BMW 320i, 2018, стук в подвеске…',
     alsoSourcingLabel: 'Также подбираем авто:',
     howToFindHeading: 'Как нас найти',
     addressLabel: 'Адрес автосервиса',
@@ -437,6 +448,8 @@ const ru: ServicesContent = {
     whatWeDo: [
       { key: 'wrap', label: 'Оклейка плёнкой', desc: 'Полная и частичная оклейка кузова автомобилей, мотоциклов, велосипедов и яхт защитной или декоративной плёнкой' },
     ],
+    commentLabel: 'Марка, модель, что нужно сделать',
+    commentPlaceholder: 'BMW X5, 2019, оклейка плёнкой…',
     alsoSourcingLabel: 'Также подбираем авто:',
     howToFindHeading: 'Как нас найти',
     addressLabel: 'Адрес',
@@ -671,6 +684,8 @@ const en: ServicesContent = {
       { key: 'engine', label: 'Engine & Transmission', desc: 'Engine, transmission, and ancillary equipment repair' },
       { key: 'prepurchase', label: 'Pre-Purchase Inspection', desc: 'A full inspection before you buy a car or take it on a long trip' },
     ],
+    commentLabel: 'Make, model, what needs doing',
+    commentPlaceholder: 'BMW 320i, 2018, suspension noise…',
     alsoSourcingLabel: 'Also sourcing cars in:',
     howToFindHeading: 'How to Find Us',
     addressLabel: 'Service Address',
@@ -692,6 +707,8 @@ const en: ServicesContent = {
     whatWeDo: [
       { key: 'wrap', label: 'Vinyl Wrapping', desc: 'Full and partial body wrapping for cars, motorcycles, bicycles, and yachts with protective or decorative vinyl' },
     ],
+    commentLabel: 'Make, model, what needs doing',
+    commentPlaceholder: 'BMW X5, 2019, vinyl wrap…',
     alsoSourcingLabel: 'Also sourcing cars in:',
     howToFindHeading: 'How to Find Us',
     addressLabel: 'Address',
@@ -926,6 +943,8 @@ const sr: ServicesContent = {
       { key: 'engine', label: 'Motor i transmisija', desc: 'Popravka motora, transmisije i prateće opreme' },
       { key: 'prepurchase', label: 'Provera pre kupovine', desc: 'Kompletna provera vozila pre kupovine ili duže vožnje' },
     ],
+    commentLabel: 'Marka, model, šta treba uraditi',
+    commentPlaceholder: 'BMW 320i, 2018, kucanje u vešanju…',
     alsoSourcingLabel: 'Takođe pronalazimo vozila i u:',
     howToFindHeading: 'Kako nas pronaći',
     addressLabel: 'Adresa servisa',
@@ -947,6 +966,8 @@ const sr: ServicesContent = {
     whatWeDo: [
       { key: 'wrap', label: 'Folijacija', desc: 'Potpuna i delimična folijacija karoserije automobila, motocikala, bicikala i jahti zaštitnom ili dekorativnom folijom' },
     ],
+    commentLabel: 'Marka, model, šta treba uraditi',
+    commentPlaceholder: 'BMW X5, 2019, folijacija…',
     alsoSourcingLabel: 'Takođe pronalazimo vozila i u:',
     howToFindHeading: 'Kako nas pronaći',
     addressLabel: 'Adresa',
