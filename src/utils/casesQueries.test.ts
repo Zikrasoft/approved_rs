@@ -16,11 +16,15 @@ const autoserviceCases = [
   { data: { published: true, date: new Date('2024-01-01') } },
   { data: { published: false, date: new Date('2024-02-01') } },
 ];
+const detailingCases = [
+  { data: { published: true, date: new Date('2024-01-01') } },
+];
 
 vi.mock('astro:content', () => ({
-  getCollection: vi.fn((name: 'cases' | 'autoserviceCases', filter: (c: { data: { published: boolean } }) => boolean) =>
-    Promise.resolve((name === 'cases' ? cases : autoserviceCases).filter(filter))
-  ),
+  getCollection: vi.fn((name: 'cases' | 'autoserviceCases' | 'detailingCases', filter: (c: { data: { published: boolean } }) => boolean) => {
+    const byName = { cases, autoserviceCases, detailingCases };
+    return Promise.resolve(byName[name].filter(filter));
+  }),
 }));
 
 const { getPublishedCasesByService, getCasesTabCounts } = await import('./casesQueries');
@@ -47,6 +51,7 @@ describe('getCasesTabCounts', () => {
       'vehicle-inspection': 1,
       'vehicle-import': 1,
       'auto-service': 1,
+      'detailing': 1,
     });
   });
 });

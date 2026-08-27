@@ -2,7 +2,7 @@ import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { SERVICES } from '@/utils/labels';
 import { getI18n } from '@/i18n/getI18n';
 import { getActiveCountries, getCitiesForCountry } from '@/utils/geo';
-import { getPublishedCasesByService, getPublishedAutoserviceCases } from '@/utils/casesQueries';
+import { getPublishedCasesByService, getPublishedAutoserviceCases, getPublishedDetailingCases } from '@/utils/casesQueries';
 import { getServicesContent } from '@/i18n/content/services';
 import { getHomeContent } from '@/i18n/content/home';
 import { buildLocation } from '@/utils/seo';
@@ -17,18 +17,21 @@ const SECTION_HEADINGS: Record<Locale, Record<'countries' | 'cities' | 'vehicleI
   sr: { countries: 'Usluge po zemljama', cities: 'Odabir vozila po gradovima', vehicleImport: 'Uvoz vozila', other: 'Ostalo', languages: 'Drugi jezici' },
 };
 
-const CASE_COUNT_LABELS: Record<Locale, { 'vehicle-sourcing': (n: number) => string; 'auto-service-belgrade': (n: number) => string }> = {
+const CASE_COUNT_LABELS: Record<Locale, { 'vehicle-sourcing': (n: number) => string; 'auto-service-belgrade': (n: number) => string; 'detailing-belgrade': (n: number) => string }> = {
   ru: {
     'vehicle-sourcing': (n) => `${n} реализованных подборов с автомобилем, страной и ценой`,
     'auto-service-belgrade': (n) => `${n} примеров ремонта и обслуживания в Белграде`,
+    'detailing-belgrade': (n) => `${n} примеров детейлинга в Белграде`,
   },
   en: {
     'vehicle-sourcing': (n) => `${n} completed sourcing cases with car, country, and price`,
     'auto-service-belgrade': (n) => `${n} repair and maintenance examples in Belgrade`,
+    'detailing-belgrade': (n) => `${n} detailing examples in Belgrade`,
   },
   sr: {
     'vehicle-sourcing': (n) => `${n} realizovanih primera odabira sa vozilom, zemljom i cenom`,
     'auto-service-belgrade': (n) => `${n} primera popravke i održavanja u Beogradu`,
+    'detailing-belgrade': (n) => `${n} primera detailinga u Beogradu`,
   },
 };
 
@@ -36,6 +39,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const countries = getActiveCountries();
   const cases = await getPublishedCasesByService('vehicle-sourcing');
   const autoserviceCases = await getPublishedAutoserviceCases();
+  const detailingCases = await getPublishedDetailingCases();
   const t = getI18n(locale);
   const nav = t.nav;
   const sc = getServicesContent(locale);
@@ -76,6 +80,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   lines.push(`## ${nav.cases}`, '');
   lines.push(`- [${nav.cases}](${SITE_URL}${PathBuilder.casesVehicleSourcing(locale)}) — ${cc['vehicle-sourcing'](cases.length)}`);
   lines.push(`- [${sc.autoServiceBelgrade.worksHeading}](${SITE_URL}${PathBuilder.casesAutoService(locale)}) — ${cc['auto-service-belgrade'](autoserviceCases.length)}`);
+  lines.push(`- [${sc.detailingBelgrade.worksHeading}](${SITE_URL}${PathBuilder.casesDetailing(locale)}) — ${cc['detailing-belgrade'](detailingCases.length)}`);
   lines.push('');
 
   lines.push(`## ${s.other}`, '');

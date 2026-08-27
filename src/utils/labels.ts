@@ -13,7 +13,7 @@ export const COUNTRY_SCOPED_SERVICE_SLUGS = ['vehicle-sourcing', 'vehicle-buybac
 export type CountryScopedServiceSlug = (typeof COUNTRY_SCOPED_SERVICE_SLUGS)[number];
 
 // Every service slug, country-scoped or not:
-export const SERVICE_SLUGS = [...COUNTRY_SCOPED_SERVICE_SLUGS, 'vehicle-import', 'auto-service-belgrade', 'wrapping-belgrade'] as const;
+export const SERVICE_SLUGS = [...COUNTRY_SCOPED_SERVICE_SLUGS, 'vehicle-import', 'auto-service-belgrade', 'detailing-belgrade'] as const;
 export type ServiceSlug = (typeof SERVICE_SLUGS)[number];
 
 // Named handles for each slug, used below in getNavItems (nav[SLUG.SOURCING],
@@ -24,18 +24,18 @@ export const SLUG = {
   SOURCING: 'vehicle-sourcing',
   IMPORT: 'vehicle-import',
   AUTO_SERVICE: 'auto-service-belgrade',
-  WRAP: 'wrapping-belgrade',
+  DETAILING: 'detailing-belgrade',
   BUYBACK: 'vehicle-buyback',
   INSPECTION: 'vehicle-inspection',
 } as const satisfies Record<string, ServiceSlug>;
 
-// The 5 kinds shown on the /cases/ tab switcher — one per service, 'auto-service'
-// instead of 'auto-service-belgrade' since it's a separate content collection
-// (autoserviceCases), not a service enum value. Shared by CaseCategoryTabs'
-// `active` prop, CasesTabPage's prop it's threaded through from, and
-// getPromoBanners()'s `kind` param — one definition instead of the same
-// literal union retyped in 3 files.
-export type CasesTabKind = 'vehicle-sourcing' | 'vehicle-buyback' | 'vehicle-inspection' | 'vehicle-import' | 'auto-service';
+// The 6 kinds shown on the /cases/ tab switcher — one per service, 'auto-service'/
+// 'detailing' instead of 'auto-service-belgrade'/'detailing-belgrade' since each is
+// a separate content collection (autoserviceCases/detailingCases), not a service
+// enum value. Shared by CaseCategoryTabs' `active` prop, CasesTabPage's prop it's
+// threaded through from, and getPromoBanners()'s `kind` param — one definition
+// instead of the same literal union retyped in 3 files.
+export type CasesTabKind = 'vehicle-sourcing' | 'vehicle-buyback' | 'vehicle-inspection' | 'vehicle-import' | 'auto-service' | 'detailing';
 
 // `slug` is both the URL path segment AND the internal identifier
 // (dictionary/content keys, formService, SERVICE_LABELS) — fully unified
@@ -62,7 +62,7 @@ export const getNavItems = (
     { href: PathBuilder.vehicleSourcingHub(locale), label: nav[SLUG.SOURCING], slug: SLUG.SOURCING },
     { href: PathBuilder.vehicleImportHub(locale), label: nav[SLUG.IMPORT], slug: SLUG.IMPORT },
     { href: PathBuilder.autoServiceBelgrade(locale), label: nav[SLUG.AUTO_SERVICE], slug: SLUG.AUTO_SERVICE },
-    { href: PathBuilder.wrappingBelgrade(locale), label: nav[SLUG.WRAP], slug: SLUG.WRAP },
+    { href: PathBuilder.detailingBelgrade(locale), label: nav[SLUG.DETAILING], slug: SLUG.DETAILING },
     ...SERVICES.filter(s => s.slug !== SLUG.SOURCING).map(s => ({
       href: PathBuilder.service(locale, s.slug, countryCode),
       label: nav[s.slug],
@@ -99,7 +99,7 @@ export const SERVICE_LABELS: Record<string, string> = {
   'vehicle-buyback': 'Выкуп',
   'vehicle-inspection': 'Проверка',
   'auto-service-belgrade': 'Автосервис',
-  'wrapping-belgrade': 'Оклейка плёнкой',
+  'detailing-belgrade': 'Детейлинг',
   'vehicle-import-de': 'Привоз из Германии',
   'vehicle-import-es': 'Привоз из Испании',
   'vehicle-import-ch': 'Привоз из Швейцарии',
@@ -109,3 +109,10 @@ export const SERVICE_LABELS: Record<string, string> = {
 };
 
 export const AUTOSERVICE_SERVICES = ['diagnostics', 'maintenance', 'suspension', 'engine', 'prepurchase'] as const;
+
+// Detailing services a case can be tagged with — a case can carry several
+// at once (e.g. wrap + ceramic on the same car), same array-tag shape as
+// AUTOSERVICE_SERVICES above. Only 'wrap' is live today; the client plans
+// to add more (anti-gravel film, ceramic coating, etc.) later — add new
+// values here, they need nothing else structural to slot in.
+export const DETAILING_SERVICES = ['wrap'] as const;

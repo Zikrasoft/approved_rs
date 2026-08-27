@@ -30,3 +30,16 @@ export const toAutoserviceCaseItem = (c: CollectionEntry<'autoserviceCases'>, lo
     year: c.data.car ? c.data.year : undefined,
   };
 };
+
+export const toDetailingCaseItem = (c: CollectionEntry<'detailingCases'>, locale: Locale): CaseCardProps => {
+  const workLabels = Object.fromEntries(getServicesContent(locale).detailingBelgrade.whatWeDo.map(w => [w.key, w.label]));
+  const car = c.data.car ?? c.data.title;
+  return {
+    href: PathBuilder.detailingCase(locale, c.id),
+    image: c.data.image,
+    imageAlt: car,
+    badges: c.data.servicesApplied.map(s => workLabels[s] ?? s),
+    car,
+    year: c.data.car ? c.data.year : undefined,
+  };
+};

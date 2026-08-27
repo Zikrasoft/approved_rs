@@ -10,7 +10,7 @@ describe('getServicesContent', () => {
       expect(s['vehicle-sourcing'].deliveryDestinations.length).toBe(9);
       expect(s['vehicle-inspection'].steps.length).toBe(5);
       expect(s.autoServiceBelgrade.whatWeDo.length).toBe(5);
-      expect(s.wrappingBelgrade.whatWeDo.length).toBe(4);
+      expect(s.detailingBelgrade.whatWeDo.length).toBe(1);
       expect(Object.keys(s.caseChrome.serviceBadges).length).toBe(6);
       expect(s['vehicle-import'].de.steps.length).toBe(5);
       expect(s['vehicle-import'].eu.steps.length).toBe(5);

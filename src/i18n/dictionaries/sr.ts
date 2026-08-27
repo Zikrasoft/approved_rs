@@ -5,7 +5,7 @@ export const sr: Dictionary = {
     'vehicle-sourcing': 'Odabir',
     'vehicle-import': 'Vozila iz EU i Kine',
     'auto-service-belgrade': 'Servis',
-    'wrapping-belgrade': 'Folijacija',
+    'detailing-belgrade': 'Detailing',
     'vehicle-buyback': 'Otkup',
     'vehicle-inspection': 'Provera',
     cases: 'Primeri',

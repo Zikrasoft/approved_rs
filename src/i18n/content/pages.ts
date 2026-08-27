@@ -36,6 +36,7 @@ interface PagesContent {
   casesVehicleInspection: { metaTitle: string; metaDescription: string };
   casesVehicleImport: { metaTitle: string; metaDescription: string };
   casesAutoService: { metaTitle: string; metaDescription: string };
+  casesDetailing: { metaTitle: string; metaDescription: string };
   casesShared: { heroSubtitle: string; emptyState: string };
 }
 
@@ -103,6 +104,10 @@ const ru: PagesContent = {
   casesAutoService: {
     metaTitle: 'Кейсы автосервиса в Белграде — примеры работ',
     metaDescription: 'Реальные кейсы ремонта и обслуживания автомобилей в нашем автосервисе в Белграде: диагностика, ТО, ремонт подвески, двигателя и трансмиссии.',
+  },
+  casesDetailing: {
+    metaTitle: 'Кейсы детейлинга в Белграде — примеры работ',
+    metaDescription: 'Реальные кейсы детейлинга в Белграде: оклейка плёнкой автомобилей, мотоциклов, велосипедов и яхт.',
   },
   casesShared: {
     heroSubtitle: 'Реальные автомобили, реальные цены, реальные истории',
@@ -175,6 +180,10 @@ const en: PagesContent = {
     metaTitle: 'Auto Service Case Studies in Belgrade — Our Work',
     metaDescription: 'Real examples of car repair and maintenance at our Belgrade service center: diagnostics, scheduled maintenance, suspension, engine, and transmission repair.',
   },
+  casesDetailing: {
+    metaTitle: 'Detailing Case Studies in Belgrade — Our Work',
+    metaDescription: 'Real detailing case studies in Belgrade: vinyl wrapping for cars, motorcycles, bicycles, and yachts.',
+  },
   casesShared: {
     heroSubtitle: 'Real cars, real prices, real stories',
     emptyState: 'Cases coming soon.',
@@ -245,6 +254,10 @@ const sr: PagesContent = {
   casesAutoService: {
     metaTitle: 'Primeri radova auto servisa u Beogradu',
     metaDescription: 'Stvarni primeri popravke i održavanja vozila u našem auto servisu u Beogradu: dijagnostika, redovno servisiranje, popravka vešanja, motora i menjača.',
+  },
+  casesDetailing: {
+    metaTitle: 'Primeri detailing radova u Beogradu',
+    metaDescription: 'Stvarni primeri detailinga u Beogradu: folijacija automobila, motocikala, bicikala i jahti.',
   },
   casesShared: {
     heroSubtitle: 'Stvarna vozila, stvarne cene, stvarne priče',

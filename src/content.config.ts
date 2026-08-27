@@ -1,6 +1,6 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
-import { AUTOSERVICE_SERVICES, COUNTRY_SCOPED_SERVICE_SLUGS } from './utils/labels';
+import { AUTOSERVICE_SERVICES, DETAILING_SERVICES, COUNTRY_SCOPED_SERVICE_SLUGS } from './utils/labels';
 
 // EN/SR translation of this case's title + body, filled in right on the
 // same Keystatic entry (not a separate collection) — everything else
@@ -43,4 +43,19 @@ const autoserviceCases = defineCollection({
   }),
 });
 
-export const collections = { cases, autoserviceCases };
+const detailingCases = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/detailing-cases' }),
+  schema: ({ image }) => z.object({
+    title: z.string(),
+    car: z.string().optional(),
+    year: z.coerce.number().optional(),
+    servicesApplied: z.array(z.enum(DETAILING_SERVICES)),
+    image: image().optional(),
+    gallery: z.array(image()).default([]),
+    date: z.coerce.date(),
+    published: z.boolean().default(true),
+    translations: z.object({ en: caseTranslation, sr: caseTranslation }).optional(),
+  }),
+});
+
+export const collections = { cases, autoserviceCases, detailingCases };

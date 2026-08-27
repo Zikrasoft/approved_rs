@@ -159,7 +159,7 @@ interface ServicesContent {
     mapIframeTitle: string;
     worksHeading: string;
   };
-  wrappingBelgrade: {
+  detailingBelgrade: {
     metaTitle: string;
     metaDescription: string;
     title: string;
@@ -168,8 +168,13 @@ interface ServicesContent {
     ctaLabel: string;
     breadcrumbLabel: string;
     whatWeDoHeading: string;
-    whatWeDo: { key: 'car' | 'motorcycle' | 'bicycle' | 'yacht'; label: string; desc: string }[];
+    // Keyed by DETAILING_SERVICES (src/utils/labels.ts) — one entry per
+    // live detailing service. Only 'wrap' exists today; add siblings here
+    // (and to DETAILING_SERVICES + keystatic.config.ts) as the client adds
+    // more (ceramic, anti-gravel film, etc.).
+    whatWeDo: { key: 'wrap'; label: string; desc: string }[];
     alsoSourcingLabel: string;
+    worksHeading: string;
   };
   caseChrome: {
     autoLabel: string;
@@ -414,22 +419,20 @@ const ru: ServicesContent = {
     mapIframeTitle: 'Автосервис на карте — Пека Павловича 39, Белград',
     worksHeading: 'Примеры работ',
   },
-  wrappingBelgrade: {
-    metaTitle: 'Оклейка плёнкой в Белграде — авто, мотоциклы, велосипеды, яхты',
-    metaDescription: 'Оклейка плёнкой автомобилей, мотоциклов, велосипедов и яхт в Белграде.',
-    title: 'Оклейка',
-    titleHighlight: 'плёнкой',
-    description: 'Оклеиваем плёнкой автомобили, мотоциклы, велосипеды и яхты в Белграде.',
+  detailingBelgrade: {
+    metaTitle: 'Детейлинг в Белграде — оклейка плёнкой авто, мото, вело, яхт',
+    metaDescription: 'Детейлинг в Белграде: оклейка плёнкой автомобилей, мотоциклов, велосипедов и яхт.',
+    title: 'Детейлинг',
+    titleHighlight: 'в Белграде',
+    description: 'Профессиональный детейлинг в Белграде: оклейка плёнкой автомобилей, мотоциклов, велосипедов и яхт.',
     ctaLabel: 'Оставить заявку',
-    breadcrumbLabel: 'Оклейка плёнкой в Белграде',
-    whatWeDoHeading: 'Что мы оклеиваем',
+    breadcrumbLabel: 'Детейлинг в Белграде',
+    whatWeDoHeading: 'Наши услуги',
     whatWeDo: [
-      { key: 'car', label: 'Автомобили', desc: 'Полная и частичная оклейка кузова защитной или декоративной плёнкой' },
-      { key: 'motorcycle', label: 'Мотоциклы', desc: 'Оклейка мотоциклов плёнкой' },
-      { key: 'bicycle', label: 'Велосипеды', desc: 'Оклейка велосипедных рам плёнкой' },
-      { key: 'yacht', label: 'Яхты', desc: 'Оклейка яхт плёнкой' },
+      { key: 'wrap', label: 'Оклейка плёнкой', desc: 'Полная и частичная оклейка кузова автомобилей, мотоциклов, велосипедов и яхт защитной или декоративной плёнкой' },
     ],
     alsoSourcingLabel: 'Также подбираем авто:',
+    worksHeading: 'Примеры работ',
   },
   caseChrome: {
     autoLabel: 'Авто',
@@ -448,7 +451,7 @@ const ru: ServicesContent = {
     channelBannerText: 'Публикуем новые кейсы, процесс подбора и полезные советы.',
     channelBannerCta: 'Подписаться',
     usefulInfoLabel: 'Полезная информация',
-    serviceBadges: { 'vehicle-sourcing': 'Автоподбор', 'vehicle-buyback': 'Выкуп', 'vehicle-inspection': 'Проверка', 'vehicle-import': 'Привоз', 'auto-service-belgrade': 'Автосервис', 'wrapping-belgrade': 'Оклейка' },
+    serviceBadges: { 'vehicle-sourcing': 'Автоподбор', 'vehicle-buyback': 'Выкуп', 'vehicle-inspection': 'Проверка', 'vehicle-import': 'Привоз', 'auto-service-belgrade': 'Автосервис', 'detailing-belgrade': 'Детейлинг' },
   },
 };
 
@@ -665,22 +668,20 @@ const en: ServicesContent = {
     mapIframeTitle: 'Auto service on the map — Peka Pavlovića 39, Belgrade',
     worksHeading: 'Our Work',
   },
-  wrappingBelgrade: {
-    metaTitle: 'Vinyl Wrapping in Belgrade — Cars, Motorcycles, Bicycles, Yachts',
-    metaDescription: 'Vinyl wrapping for cars, motorcycles, bicycles, and yachts in Belgrade.',
-    title: 'Vinyl',
-    titleHighlight: 'Wrapping',
-    description: 'We wrap cars, motorcycles, bicycles, and yachts in Belgrade.',
+  detailingBelgrade: {
+    metaTitle: 'Detailing in Belgrade — Vinyl Wrapping for Cars, Motorcycles, Bicycles, Yachts',
+    metaDescription: 'Detailing in Belgrade: vinyl wrapping for cars, motorcycles, bicycles, and yachts.',
+    title: 'Detailing',
+    titleHighlight: 'in Belgrade',
+    description: 'Professional detailing in Belgrade: vinyl wrapping for cars, motorcycles, bicycles, and yachts.',
     ctaLabel: 'Leave a Request',
-    breadcrumbLabel: 'Vinyl Wrapping in Belgrade',
-    whatWeDoHeading: 'What We Wrap',
+    breadcrumbLabel: 'Detailing in Belgrade',
+    whatWeDoHeading: 'Our Services',
     whatWeDo: [
-      { key: 'car', label: 'Cars', desc: 'Full and partial body wrapping with protective or decorative vinyl' },
-      { key: 'motorcycle', label: 'Motorcycles', desc: 'Vinyl wrapping for motorcycles' },
-      { key: 'bicycle', label: 'Bicycles', desc: 'Vinyl wrapping for bicycle frames' },
-      { key: 'yacht', label: 'Yachts', desc: 'Vinyl wrapping for yachts' },
+      { key: 'wrap', label: 'Vinyl Wrapping', desc: 'Full and partial body wrapping for cars, motorcycles, bicycles, and yachts with protective or decorative vinyl' },
     ],
     alsoSourcingLabel: 'Also sourcing cars in:',
+    worksHeading: 'Our Work',
   },
   caseChrome: {
     autoLabel: 'Car',
@@ -699,7 +700,7 @@ const en: ServicesContent = {
     channelBannerText: 'We post new case studies, the sourcing process, and useful tips.',
     channelBannerCta: 'Subscribe',
     usefulInfoLabel: 'Useful Information',
-    serviceBadges: { 'vehicle-sourcing': 'Sourcing', 'vehicle-buyback': 'Buyback', 'vehicle-inspection': 'Inspection', 'vehicle-import': 'Import', 'auto-service-belgrade': 'Service', 'wrapping-belgrade': 'Wrapping' },
+    serviceBadges: { 'vehicle-sourcing': 'Sourcing', 'vehicle-buyback': 'Buyback', 'vehicle-inspection': 'Inspection', 'vehicle-import': 'Import', 'auto-service-belgrade': 'Service', 'detailing-belgrade': 'Detailing' },
   },
 };
 
@@ -916,22 +917,20 @@ const sr: ServicesContent = {
     mapIframeTitle: 'Auto servis na mapi — Peka Pavlovića 39, Beograd',
     worksHeading: 'Primeri radova',
   },
-  wrappingBelgrade: {
-    metaTitle: 'Folijacija vozila u Beogradu — automobili, motocikli, bicikli, jahte',
-    metaDescription: 'Folijacija automobila, motocikala, bicikala i jahti u Beogradu.',
-    title: 'Folijacija',
-    titleHighlight: 'vozila',
-    description: 'Folijamo automobile, motocikle, bicikle i jahte u Beogradu.',
+  detailingBelgrade: {
+    metaTitle: 'Detailing u Beogradu — folijacija automobila, motocikala, bicikala, jahti',
+    metaDescription: 'Detailing u Beogradu: folijacija automobila, motocikala, bicikala i jahti.',
+    title: 'Detailing',
+    titleHighlight: 'u Beogradu',
+    description: 'Profesionalni detailing u Beogradu: folijacija automobila, motocikala, bicikala i jahti.',
     ctaLabel: 'Pošaljite zahtev',
-    breadcrumbLabel: 'Folijacija vozila u Beogradu',
-    whatWeDoHeading: 'Šta radimo',
+    breadcrumbLabel: 'Detailing u Beogradu',
+    whatWeDoHeading: 'Naše usluge',
     whatWeDo: [
-      { key: 'car', label: 'Automobili', desc: 'Potpuna i delimična folijacija karoserije zaštitnom ili dekorativnom folijom' },
-      { key: 'motorcycle', label: 'Motocikli', desc: 'Folijacija motocikala' },
-      { key: 'bicycle', label: 'Bicikli', desc: 'Folijacija rama bicikla' },
-      { key: 'yacht', label: 'Jahte', desc: 'Folijacija jahti' },
+      { key: 'wrap', label: 'Folijacija', desc: 'Potpuna i delimična folijacija karoserije automobila, motocikala, bicikala i jahti zaštitnom ili dekorativnom folijom' },
     ],
     alsoSourcingLabel: 'Takođe pronalazimo vozila i u:',
+    worksHeading: 'Primeri radova',
   },
   caseChrome: {
     autoLabel: 'Vozilo',
@@ -950,7 +949,7 @@ const sr: ServicesContent = {
     channelBannerText: 'Objavljujemo nove primere, proces odabira i korisne savete.',
     channelBannerCta: 'Pratite nas',
     usefulInfoLabel: 'Korisne informacije',
-    serviceBadges: { 'vehicle-sourcing': 'Odabir', 'vehicle-buyback': 'Otkup', 'vehicle-inspection': 'Provera', 'vehicle-import': 'Uvoz', 'auto-service-belgrade': 'Servis', 'wrapping-belgrade': 'Folijacija' },
+    serviceBadges: { 'vehicle-sourcing': 'Odabir', 'vehicle-buyback': 'Otkup', 'vehicle-inspection': 'Provera', 'vehicle-import': 'Uvoz', 'auto-service-belgrade': 'Servis', 'detailing-belgrade': 'Detailing' },
   },
 };
 

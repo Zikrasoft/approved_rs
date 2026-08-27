@@ -4,9 +4,9 @@ import type { CasesTabKind } from '@/utils/labels';
 // SEO-keyword-dense banner shown on case-detail pages ("where we work") —
 // one of these is picked at random per page render. City names are spelled
 // out explicitly (not just "Serbia") because that's what people actually
-// search for. Two separate sets: vehicle-sourcing cases talk about sourcing/
-// buyback across all of Serbia, autoservice cases talk about the Belgrade
-// repair shop.
+// search for. Three separate sets: vehicle-sourcing cases talk about sourcing/
+// buyback across all of Serbia, autoservice/detailing cases each talk about
+// their own Belgrade-only shop.
 const sourcingBanners: Record<Locale, string[]> = {
   ru: [
     'Если вам нужен **автоподбор в Белграде, Нови-Саде, Панчево, Суботице и по всей Сербии**, поможем найти действительно достойный автомобиль, проверив его историю, техническое состояние и юридическую чистоту.',
@@ -73,6 +73,23 @@ const autoserviceBanners: Record<Locale, string[]> = {
   ],
 };
 
+const detailingBanners: Record<Locale, string[]> = {
+  ru: [
+    'Если вам нужна **оклейка автомобиля плёнкой в Белграде**, поможем защитить кузов от сколов или изменить цвет — работаем с легковыми, мотоциклами, велосипедами и яхтами.',
+    'Если вам нужен **детейлинг в Белграде** — оклейка защитной или декоративной плёнкой — обращайтесь, расскажем что подойдёт именно вашему транспорту.',
+  ],
+  en: [
+    'Need **vinyl wrapping in Belgrade**? We\'ll help protect your paint from chips or change up the color — for cars, motorcycles, bicycles, and yachts.',
+    'Looking for **detailing in Belgrade** — protective or decorative vinyl wrap? Get in touch, we\'ll advise on what suits your vehicle.',
+  ],
+  sr: [
+    'Treba vam **folijacija vozila u Beogradu**? Pomoći ćemo da zaštitite lak od kamenčića ili promenite boju — radimo sa automobilima, motociklima, biciklima i jahtama.',
+    'Tražite **detailing u Beogradu** — zaštitnu ili dekorativnu foliju? Javite se, savetovaćemo šta odgovara vašem vozilu.',
+  ],
+};
+
 export function getPromoBanners(locale: Locale, kind: CasesTabKind = 'vehicle-sourcing'): string[] {
-  return kind === 'auto-service' ? autoserviceBanners[locale] : sourcingBanners[locale];
+  if (kind === 'auto-service') return autoserviceBanners[locale];
+  if (kind === 'detailing') return detailingBanners[locale];
+  return sourcingBanners[locale];
 }
