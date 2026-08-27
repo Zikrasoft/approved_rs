@@ -39,6 +39,11 @@ export function statusLabel(key?: string | null): string {
   return LEAD_STATUSES.find(s => s.key === key)?.label ?? key;
 }
 
+function statusEmoji(key?: string | null): string {
+  if (!key || key === 'new') return '🆕';
+  return LEAD_STATUSES.find(s => s.key === key)?.emoji ?? '⚪';
+}
+
 export function buildStatusKeyboard(activeKey?: string | null) {
   return {
     inline_keyboard: [
@@ -50,11 +55,27 @@ export function buildStatusKeyboard(activeKey?: string | null) {
   };
 }
 
-// One literal, used by both the line-builder (formatLeadText) and the
+// One literal, used by both the line-builder (statusLine) and the
 // line-parser (updateLeadStatus) — kept in sync by construction instead of
 // as two independent hardcoded strings.
 const STATUS_PREFIX = 'Статус: ';
 const STATUS_LINE_RE = new RegExp(`^${STATUS_PREFIX}.*`, 'm');
+
+// Bold + an emoji so the status actually stands out in a busy group instead
+// of reading like every other line. Sent with parse_mode: 'HTML' — Telegram
+// strips the tags back out of message.text once rendered, so the webhook's
+// re-edit only ever sees plain "Статус: …" text to match against; only the
+// text we're actively sending needs the markup.
+function statusLine(key?: string | null): string {
+  return `<b>${STATUS_PREFIX}${statusEmoji(key)} ${statusLabel(key)}</b>`;
+}
+
+// Escapes the 3 characters HTML parse_mode treats specially. Required for
+// every field that isn't a string literal we wrote ourselves — lead.name/
+// contact/comment/etc. come straight from a public form.
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 function formatLeadText(lead: LeadData): string {
   const service = SERVICE_LABELS[lead.service] ?? lead.service;
@@ -65,16 +86,16 @@ function formatLeadText(lead: LeadData): string {
   const channelLabel = isTrackedContactChannel(lead.contactChannel) ? CONTACT_CHANNEL_LABELS[lead.contactChannel] : undefined;
   const contactLine = channelLabel ? `${lead.contact} (${channelLabel})` : lead.contact;
   const lines: string[] = [
-    `🚗 Заявка #${lead.id} — ${service}`,
-    `${STATUS_PREFIX}${statusLabel()}`,
+    `🚗 Заявка #${lead.id} — ${escapeHtml(service)}`,
+    statusLine(),
     ``,
-    `Имя: ${lead.name}`,
-    `Контакт: ${contactLine}`,
+    `Имя: ${escapeHtml(lead.name)}`,
+    `Контакт: ${escapeHtml(contactLine)}`,
   ];
-  if (lead.country) lines.push(`Страна: ${lead.country.toUpperCase()}`);
-  if (lead.comment) lines.push(`Комментарий: ${lead.comment}`);
-  if (lead.source_url) lines.push(`Страница: ${lead.source_url}`);
-  if (lead.visitorId) lines.push(`ID посетителя: ${lead.visitorId.slice(0, 100)}`);
+  if (lead.country) lines.push(`Страна: ${escapeHtml(lead.country.toUpperCase())}`);
+  if (lead.comment) lines.push(`Комментарий: ${escapeHtml(lead.comment)}`);
+  if (lead.source_url) lines.push(`Страница: ${escapeHtml(lead.source_url)}`);
+  if (lead.visitorId) lines.push(`ID посетителя: ${escapeHtml(lead.visitorId.slice(0, 100))}`);
   lines.push(``, `#заявка`);
   return lines.join('\n');
 }
@@ -98,6 +119,7 @@ export async function sendLeadNotification(lead: LeadData): Promise<void> {
   const sent = await tgPost('sendMessage', {
     chat_id: GROUP_ID,
     text,
+    parse_mode: 'HTML',
     reply_markup: buildStatusKeyboard(),
   });
   const messageId = (sent as { message_id?: unknown } | null)?.message_id;
@@ -135,14 +157,21 @@ export async function updateLeadStatus(
   // manage leads in, here, so every caller gets this for free.
   if (String(chatId) !== String(GROUP_ID)) return;
 
-  const newText = STATUS_LINE_RE.test(currentText)
-    ? currentText.replace(STATUS_LINE_RE, `${STATUS_PREFIX}${statusLabel(newStatusKey)}`)
-    : currentText;
+  // currentText is Telegram's own rendering of the message we sent last time
+  // — plain text, tags already stripped back out, entities decoded. It has
+  // to be escaped fresh before going back out as HTML, otherwise a decoded
+  // "&" or "<" anywhere in it (from a lead's comment, say) breaks parsing on
+  // the way back in.
+  const escaped = escapeHtml(currentText);
+  const newText = STATUS_LINE_RE.test(escaped)
+    ? escaped.replace(STATUS_LINE_RE, statusLine(newStatusKey))
+    : escaped;
   try {
     await tgPost('editMessageText', {
       chat_id: chatId,
       message_id: messageId,
       text: newText,
+      parse_mode: 'HTML',
       reply_markup: buildStatusKeyboard(newStatusKey),
     });
   } catch (err) {

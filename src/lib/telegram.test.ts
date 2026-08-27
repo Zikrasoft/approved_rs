@@ -70,7 +70,19 @@ describe('sendLeadNotification', () => {
     expect(body.text).toContain('Автоподбор');
     expect(body.text).toContain('Иван');
     expect(body.text).toContain('@ivan');
-    expect(body.text).toContain('Статус: Новая');
+    expect(body.text).toContain('<b>Статус: 🆕 Новая</b>');
+  });
+
+  it('sends the message with parse_mode HTML so the status line renders bold', async () => {
+    await sendLeadNotification(mockLead);
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.parse_mode).toBe('HTML');
+  });
+
+  it('HTML-escapes a comment containing special characters', async () => {
+    await sendLeadNotification({ ...mockLead, comment: 'Цена < 5000 & срочно' });
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('Цена &lt; 5000 &amp; срочно');
   });
 
   it('throws when Telegram returns ok: false', async () => {
@@ -169,9 +181,17 @@ describe('updateLeadStatus', () => {
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.chat_id).toBe(-1009876543210);
     expect(body.message_id).toBe(555);
-    expect(body.text).toContain('Статус: Успешно');
+    expect(body.parse_mode).toBe('HTML');
+    expect(body.text).toContain('<b>Статус: ✅ Успешно</b>');
     expect(body.text).toContain('Имя: Иван');
     expect(body.reply_markup.inline_keyboard[0].find((b: { callback_data: string }) => b.callback_data === 'st:won').text).toContain('✓');
+  });
+
+  it('re-escapes the rest of the message so a decoded special character surviving from before does not break HTML parsing', async () => {
+    const original = 'Статус: Новая\n\nКомментарий: Цена < 5000 & срочно';
+    await updateLeadStatus(-1009876543210, 555, original, 'won');
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('Цена &lt; 5000 &amp; срочно');
   });
 
   it('leaves text untouched if no Статус line is found (defensive, should not happen in practice)', async () => {
