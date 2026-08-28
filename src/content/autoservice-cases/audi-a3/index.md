@@ -7,9 +7,9 @@ translations:
       # Audi A3 1.5 TFSI 150 HP Major Service in Belgrade
 
 
-      Our car service in Belgrade completed comprehensive maintenance on an Audi
-      A3 equipped with the 1.5 TFSI 150 HP petrol engine and DQ200 dual-clutch
-      transmission.
+      Our car service in Belgrade completed comprehensive maintenance on an
+      **Audi A3** equipped with the **1.5 TFSI 150 HP** petrol engine and
+      **DQ200 dual-clutch transmission**.
 
 
       The vehicle received a major engine service, including timing belt
@@ -37,9 +37,9 @@ translations:
       gearbox and changed the fluid in the DQ200 mechatronics unit.
 
 
-      We recommend changing the DQ200 transmission oil and servicing the
-      mechatronics fluid at least every 60,000 km. Preventive maintenance can
-      help extend the transmission's service life and reduce the risk of
+      We recommend changing the **DQ200** transmission oil and servicing the
+      mechatronics fluid at least every **60,000 km**. Preventive maintenance
+      can help extend the transmission's service life and reduce the risk of
       expensive repairs.
 
 
@@ -50,22 +50,15 @@ translations:
 
       Car service in Belgrade for VAG vehicles: diagnostics, maintenance and
       professional repairs.
-
-
-      Keywords: car service Belgrade, Audi service Belgrade, Audi repair
-      Belgrade, Audi A3 1.5 TFSI service, Audi major service, Audi timing belt
-      replacement, Audi electric coolant pump, DQ200 service Belgrade, DQ200 oil
-      change, DQ200 mechatronics service, Volkswagen service Belgrade, VAG
-      service Belgrade.
   sr:
     title: AUDI A3
     body: >
       # Veliki servis Audi A3 1.5 TFSI 150 KS u Beogradu
 
 
-      Naš auto servis u Beogradu izvršio je kompletno održavanje vozila Audi A3
-      sa benzinskim motorom 1.5 TFSI snage 150 KS i DQ200 menjačem sa duplim
-      kvačilom.
+      Naš auto servis u Beogradu izvršio je kompletno održavanje vozila
+      **Audi A3** sa benzinskim motorom **1.5 TFSI** snage **150 KS** i
+      **DQ200 menjačem** sa duplim kvačilom.
 
 
       Na vozilu je urađen veliki servis motora sa zamenom zupčastog kaiša.
@@ -92,9 +85,10 @@ translations:
       menjača, kao i radna tečnost u DQ200 mehatronici.
 
 
-      Preporučujemo zamenu ulja u DQ200 menjaču i servis tečnosti mehatronike
-      najmanje jednom na 60.000 km. Redovno preventivno održavanje može
-      produžiti radni vek menjača i smanjiti rizik od skupih kvarova i popravki.
+      Preporučujemo zamenu ulja u **DQ200** menjaču i servis tečnosti
+      mehatronike najmanje jednom na **60.000 km**. Redovno preventivno
+      održavanje može produžiti radni vek menjača i smanjiti rizik od skupih
+      kvarova i popravki.
 
 
       Ako je vašem vozilu Audi, Volkswagen, Škoda ili SEAT potreban mali ili
@@ -104,13 +98,6 @@ translations:
 
       Auto servis Beograd za VAG vozila: dijagnostika, održavanje i
       profesionalna popravka.
-
-
-      Ključne reči: auto servis Beograd, Audi servis Beograd, Audi servis u
-      Beogradu, Audi A3 1.5 TFSI, veliki servis Audi, zamena zupčastog kaiša
-      Audi, električna pumpa Audi, pumpa rashladne tečnosti Audi, DSG servis
-      Beograd, DQ200 servis, zamena ulja DQ200, DQ200 mehatronika, Volkswagen
-      servis Beograd, VAG servis Beograd.
 car: AUDI A3
 year: 2019
 servicesApplied:
@@ -125,7 +112,7 @@ published: true
 ---
 # Большой сервис Audi A3 1.5 TFSI 150 л.с. в Белграде
 
-Русский автосервис в Белграде выполнил комплексное техническое обслуживание Audi A3 с бензиновым двигателем 1.5 TFSI мощностью 150 л.с. и роботизированной коробкой передач DQ200.
+Русский автосервис в Белграде выполнил комплексное техническое обслуживание **Audi A3** с бензиновым двигателем **1.5 TFSI** мощностью **150 л.с.** и роботизированной коробкой передач **DQ200**.
 
 На автомобиле был выполнен большой сервис двигателя с заменой зубчатого ремня ГРМ.
 
@@ -137,10 +124,8 @@ published: true
 
 Отдельное внимание уделили роботизированной коробке передач Volkswagen Group DQ200 с сухими сцеплениями. Выполнили замену масла в механической части коробки передач, а также замену рабочей жидкости в мехатронике DQ200.
 
-Мы рекомендуем менять масло в DQ200 и обслуживать мехатроник не реже одного раза в 60 000 км. Своевременное обслуживание помогает продлить ресурс агрегата и снизить вероятность дорогостоящего ремонта.
+Мы рекомендуем менять масло в **DQ200** и обслуживать мехатроник не реже одного раза в **60 000 км**. Своевременное обслуживание помогает продлить ресурс агрегата и снизить вероятность дорогостоящего ремонта.
 
 Если вашему Audi, Volkswagen, Škoda или SEAT требуется техническое обслуживание, диагностика, большой сервис, замена ремня ГРМ или обслуживание DSG DQ200 — обращайтесь в наш русский автосервис в Белграде.
 
 Автосервис в Белграде: диагностика, ремонт и техническое обслуживание автомобилей VAG.
-
-Ключевые слова: русский автосервис Белград, автосервис Белград, Audi сервис Белград, ремонт Audi Белград, Audi A3 1.5 TFSI, большой сервис Audi, замена ремня ГРМ Audi, электрическая помпа Audi, замена помпы Audi, обслуживание DSG Белград, DQ200 замена масла, DQ200 мехатроник, Volkswagen сервис Белград, VAG сервис Белград.

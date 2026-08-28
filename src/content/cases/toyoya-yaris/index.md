@@ -61,6 +61,10 @@ translations:
       car before you buy it.
 
 
+      This one-time inspection is especially convenient if the car is located
+      in another city in Serbia and you are unable to travel there yourself.
+
+
       We provide **pre-purchase car inspections** in **Belgrade, Novi Sad, Niš,
       Kragujevac, Subotica, Pančevo, Novi Pazar, Čačak, Zrenjanin, Smederevo,
       Kraljevo, Kruševac, Leskovac, Užice, Valjevo, Vranje, Šabac, Sombor,
@@ -131,6 +135,10 @@ translations:
       Ako ste automobil već sami pronašli, nije neophodno angažovati kompletnu
       uslugu **odabira automobila po principu „ključ u ruke“**. Možemo samo da
       izvršimo nezavisni pregled konkretnog vozila pre kupovine.
+
+
+      Usluga jednokratnog pregleda posebno je pogodna ako se automobil nalazi u
+      drugom gradu u Srbiji, a vi nemate mogućnost da sami odete na pregled.
 
 
       Preglede automobila radimo u **Beogradu, Novom Sadu, Nišu, Kragujevcu,

@@ -49,15 +49,13 @@ translations:
       The selected BMW X4 comes with a very attractive specification, including:
 
 
-      - panoramic roof;
-
-      - **BMW iDrive ID6** multimedia system;
-
-      - tow hitch;
-
-      - BMW B48 petrol engine;
-
-      - beautiful red exterior color.
+      <ul class="icon-check">
+      <li>panoramic roof</li>
+      <li>BMW iDrive ID6 multimedia system</li>
+      <li>tow hitch</li>
+      <li>BMW B48 petrol engine</li>
+      <li>beautiful red exterior color</li>
+      </ul>
 
 
       After the purchase, we also installed and configured **Apple CarPlay**,
@@ -151,15 +149,13 @@ translations:
       Odabrani BMW X4 poseduje veoma dobru opremu:
 
 
-      - panoramski krov;
-
-      - BMW iDrive multimedijalni sistem **ID6**;
-
-      - kuku za vuču;
-
-      - benzinski motor **B48**;
-
-      - atraktivnu crvenu boju karoserije.
+      <ul class="icon-check">
+      <li>panoramski krov</li>
+      <li>BMW iDrive multimedijalni sistem ID6</li>
+      <li>kuku za vuču</li>
+      <li>benzinski motor B48</li>
+      <li>atraktivnu crvenu boju karoserije</li>
+      </ul>
 
 
       Nakon kupovine dodatno smo ugradili i podesili **Apple CarPlay**, čime je
@@ -236,11 +232,13 @@ published: true
 
 Выбранный BMW X4 имеет востребованное оснащение:
 
-- панорамная крыша;
-- мультимедийная система **BMW iDrive ID6**;
-- фаркоп;
-- бензиновый двигатель **B48**;
-- эффектный красный цвет кузова.
+<ul class="icon-check">
+<li>панорамная крыша</li>
+<li>мультимедийная система BMW iDrive ID6</li>
+<li>фаркоп</li>
+<li>бензиновый двигатель B48</li>
+<li>эффектный красный цвет кузова</li>
+</ul>
 
 После покупки мы также установили и настроили **Apple CarPlay**, что сделало штатную мультимедийную систему значительно удобнее для ежедневного использования.
 

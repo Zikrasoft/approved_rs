@@ -65,11 +65,6 @@ translations:
       If you are planning to buy a used car in Spain, we can handle the search,
       communication with sellers, vehicle history checks, diagnostics and
       complete pre-purchase inspection.
-
-
-      Car sourcing Spain, car sourcing Barcelona, used car inspection Spain,
-      pre-purchase car inspection Barcelona, car buying service Madrid, used
-      cars Spain.
   sr:
     title: Seat LEON
     body: >
@@ -134,11 +129,6 @@ translations:
       Ako planirate kupovinu automobila u Španiji, možemo preuzeti potragu za
       odgovarajućim vozilom, komunikaciju sa prodavcima, proveru istorije,
       kompjutersku dijagnostiku i detaljan pregled pre kupovine.
-
-
-      Odabir automobila Španija, provera automobila Španija, polovni automobili
-      Barselona, kupovina automobila u Španiji, provera vozila pre kupovine,
-      odabir polovnih automobila Madrid.
 car: Seat LEON
 year: 2021
 price:
@@ -179,5 +169,3 @@ published: true
 Работаем с подбором и проверкой автомобилей в Барселоне, Мадриде, Валенсии, Аликанте, Малаге, Севилье, Сарагосе, Бильбао, Мурсии, Пальма-де-Майорке и других городах Испании.
 
 Если вы планируете купить автомобиль в Испании, мы можем взять на себя поиск подходящих вариантов, общение с продавцами, проверку истории, осмотр и диагностику автомобиля перед покупкой.
-
-Автоподбор в Испании, автоподбор в Барселоне, проверка автомобиля перед покупкой в Испании, подбор б/у авто в Испании, проверка авто в Мадриде, покупка автомобиля в Испании.

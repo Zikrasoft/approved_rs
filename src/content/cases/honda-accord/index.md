@@ -8,8 +8,8 @@ translations:
 
 
       Yuri contacted us to carry out a one-time pre-purchase inspection of a
-      vehicle in Serbia. He was interested in a 2024 Honda Accord with
-      approximately 30,000 kilometers on the odometer.
+      vehicle in Serbia. He was interested in a **2024 Honda Accord** with
+      approximately **30,000 kilometers** on the odometer.
 
 
       Before the purchase, we performed a comprehensive technical and visual
@@ -61,7 +61,7 @@ translations:
       Special attention was paid to whether the declared mileage was consistent
       with the actual condition of the vehicle. We also carefully assessed the
       condition of the bodywork, interior, engine, suspension and other major
-      components of the Honda Accord.
+      components of the **Honda Accord**.
 
 
       Based on the inspection results, Yuri received an objective assessment of
@@ -79,7 +79,7 @@ translations:
       technically sound before making the payment.
 
 
-      We provide professional car inspections in Belgrade and other cities
+      We provide professional car inspections in **Belgrade** and other cities
       across Serbia. Depending on the vehicle, the inspection can include
       computer diagnostics, paint and body inspection, technical inspection,
       road testing and a detailed assessment of the vehicle before purchase.
@@ -96,8 +96,8 @@ translations:
 
 
       Javio nam se Jurij sa zahtevom da izvršimo jednokratni pregled automobila
-      pre kupovine u Srbiji. Bio je zainteresovan za Hondu Accord, 2024.
-      godište, sa kilometražom od oko 30.000 kilometara.
+      pre kupovine u Srbiji. Bio je zainteresovan za **Hondu Accord, 2024.
+      godište**, sa kilometražom od oko **30.000 kilometara**.
 
 
       Pre kupovine smo izvršili detaljan tehnički i vizuelni pregled vozila kako
@@ -166,7 +166,7 @@ translations:
       kupovine.
 
 
-      Pregled automobila vršimo u Beogradu i drugim gradovima Srbije. Po potrebi
+      Pregled automobila vršimo u **Beogradu** i drugim gradovima Srbije. Po potrebi
       možemo organizovati kompjutersku dijagnostiku, proveru karoserije,
       tehnički pregled, probnu vožnju i detaljnu procenu vozila pre kupovine.
 
@@ -189,7 +189,7 @@ published: true
 ---
 # Разовая проверка автомобиля перед покупкой в Сербии — Honda Accord 2024
 
-К нам обратился Юрий с просьбой провести разовую проверку автомобиля перед покупкой в Сербии. Его интересовала Honda Accord 2024 года выпуска с пробегом около 30 000 километров.
+К нам обратился Юрий с просьбой провести разовую проверку автомобиля перед покупкой в Сербии. Его интересовала **Honda Accord 2024 года выпуска** с пробегом около **30 000 километров**.
 
 Перед покупкой автомобиля мы провели комплексную техническую и визуальную проверку, чтобы оценить реальное состояние Honda Accord и выявить возможные недостатки, которые не всегда заметны при обычном осмотре.
 
@@ -212,7 +212,7 @@ published: true
 - тестовую поездку для оценки работы двигателя, коробки передач, подвески и тормозов;
 - оценку общего технического состояния автомобиля и возможных вложений после покупки.
 
-Особое внимание уделили соответствию заявленного пробега фактическому состоянию автомобиля. При осмотре также оценивалось состояние кузова, салона, двигателя, ходовой части и других основных узлов Honda Accord.
+Особое внимание уделили соответствию заявленного пробега фактическому состоянию автомобиля. При осмотре также оценивалось состояние кузова, салона, двигателя, ходовой части и других основных узлов **Honda Accord**.
 
 По результатам проверки Юрий получил объективную информацию о состоянии автомобиля и смог принять решение о покупке, основываясь не только на словах продавца, но и на результатах профессиональной диагностики.
 
@@ -220,6 +220,6 @@ published: true
 
 Разовая проверка автомобиля перед покупкой — это удобная услуга для тех, кто самостоятельно нашёл автомобиль в Сербии, но хочет убедиться в его техническом состоянии и юридической прозрачности перед передачей денег продавцу.
 
-Мы проводим проверку автомобилей в Белграде и других городах Сербии. При необходимости можем организовать компьютерную диагностику, проверку кузова, технический осмотр, тест-драйв и подробную оценку автомобиля перед покупкой.
+Мы проводим проверку автомобилей в **Белграде** и других городах Сербии. При необходимости можем организовать компьютерную диагностику, проверку кузова, технический осмотр, тест-драйв и подробную оценку автомобиля перед покупкой.
 
 Если вы нашли Honda, BMW, Mercedes-Benz, Volkswagen, Škoda, Toyota или автомобиль другой марки в Сербии, не спешите передавать деньги продавцу. Профессиональная разовая проверка поможет выявить скрытые недостатки и аргументированно провести торг.

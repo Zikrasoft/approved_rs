@@ -45,10 +45,6 @@ translations:
       inspection, diagnostics, history and mileage verification, negotiations
       with the seller, purchase, transportation, customs clearance and
       registration in Serbia.
-
-
-      **Car import from Germany to Serbia — Belgrade, Novi Sad and other cities
-      across Serbia.**
   sr:
     title: BMW X3
     body: >
@@ -87,10 +83,6 @@ translations:
       Ako planirate **kupovinu automobila u Nemačkoj i uvoz u Srbiju**, možemo
       organizovati kompletan proces — od pronalaska i pregleda automobila do
       dijagnostike, kupovine, transporta, carinjenja i registracije u Srbiji.
-
-
-      **Uvoz automobila iz Nemačke u Srbiju — Beograd, Novi Sad i drugi gradovi
-      Srbije.**
 car: BMW X3
 year: 2020
 price:
@@ -119,5 +111,3 @@ published: true
 В результате клиент получил технически проверенный автомобиль с подтверждённой историей, доставленный из Германии непосредственно в Сербию. Сейчас BMW X3 уже зарегистрирован в Белграде, а его владелец ездит и доволен покупкой.
 
 Если вы планируете **купить автомобиль в Германии и пригнать его в Сербию**, мы можем взять на себя весь процесс: поиск и подбор автомобиля, выезд специалиста на осмотр, диагностику, проверку истории и пробега, переговоры с продавцом, покупку, доставку, растаможку и регистрацию в Сербии.
-
-**Автоподбор и пригон автомобилей из Германии в Сербию — Белград, Нови-Сад и другие города Сербии.**

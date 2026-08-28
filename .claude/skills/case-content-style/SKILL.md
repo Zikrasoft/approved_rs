@@ -15,7 +15,12 @@ This skill is the checklist to bring one back in line.
 
 **Reference example:** `src/content/cases/bmw-x3-1/index.md` — real
 `<ul class="icon-check">` list, natural bold emphasis, no emoji, no keyword
-tail, all 3 locales complete. Read it once to see the target shape.
+tail, all 3 locales complete. Read it once to see the target shape. Note its
+bold density is on the light side (car spec + city name, not every
+paragraph) — for item 4 below, judge density against the other files in the
+*same* collection (cases / autoservice-cases / detailing-cases), not against
+this one file alone. A file with zero bold anywhere is the one case that's
+always wrong regardless of sibling density — add some.
 
 ## Checklist
 
@@ -46,13 +51,25 @@ others untouched.
    (one `<li>` per line, no markdown `-`).
 4. **Bold the key facts**, not everything. 1–3 `**bold**` spans per
    paragraph on the concrete, scannable bits: car spec, price/mileage
-   numbers, city names, service names. A paragraph with zero bold reads flat
-   next to ones that have it — check every paragraph got its pass, not just
-   the ones near a list.
-5. **Cut SEO keyword-dump tails.** A pipe- or bullet-separated line of
-   keywords at the end of a body (`Car Selection Serbia • Used car
-   inspection • Belgrade • Novi Sad • ...`) is not client-facing copy —
-   delete it entirely, all three locales.
+   numbers, city names, service names. Judge density by comparing against
+   sibling files in the same collection (see the reference-example note
+   above) — but a file with literally zero bold anywhere is wrong on any
+   comparison, always fix that one.
+5. **Cut SEO tails — judge by genericness, not punctuation.** These show up
+   two ways: (a) a bare comma/pipe/bullet-separated keyword list, sometimes
+   literally labeled `Keywords:`/`Ključne reči:`/`Ключевые слова:`
+   (`PPF Belgrade, paint protection film Belgrade, 190 micron PPF, ...`);
+   (b) a full sentence that *reads* like real copy but is generic
+   service-plus-city boilerplate ("**Car sourcing in Belgrade and Serbia**
+   — inspection, diagnostics... We work across Serbia: Belgrade, Novi Sad,
+   Čačak..."). The test for (b) isn't grammar, it's whether the sentence
+   references anything specific to *this* case (the actual car, client,
+   request) — if you could paste it unchanged onto a different case in the
+   same service category and nothing would read wrong, it's the same
+   keyword-dump disease wearing a verb. Delete both kinds entirely, all
+   three locales. Keep genuine narrative mentions of a city/service woven
+   into a sentence that's actually about this case's story — those aren't
+   tails, don't touch them (and per item 4, they're often worth bolding).
 6. **Fix wrong-register machine-translation artifacts** — e.g. a `большой
    сервис` mistranslated as `великий сервис` (that word means "great" as in
    "Peter the Great", not "big"). Read the RU body like a native speaker

@@ -73,12 +73,6 @@ translations:
       If you want to preserve your vehicle's original paintwork, a full-body PPF
       installation is one of the most effective solutions for protecting both
       new and used cars from typical everyday urban damage.
-
-
-      PPF Belgrade, paint protection film Belgrade, 190 micron PPF, car paint
-      protection, full body PPF, car protection film, protection against
-      scratches and stone chips, Toyota PPF, Toyota Yaris GR Sport PPF, used car
-      paint protection, full car PPF installation in Belgrade.
   sr:
     title: TOYOTA YARIS GR SPORT
     body: >
@@ -141,12 +135,6 @@ translations:
       Ako želite da sačuvate originalni lak svog automobila, kompletno oblaganje
       karoserije PPF zaštitnom folijom predstavlja jedan od najefikasnijih
       načina zaštite od tipičnih oštećenja tokom gradske eksploatacije.
-
-
-      PPF folija Beograd, zaštitna folija za auto, PPF folija 190 mikrona,
-      zaštita laka automobila, zaštita automobila od ogrebotina, zaštita od
-      kamenčića, kompletno oblaganje automobila PPF folijom, PPF zaštita Toyota,
-      Toyota Yaris GR Sport PPF, zaštita polovnog automobila u Beogradu.
 car: TOYOTA YARIS GR SPORT
 year: 2026
 servicesApplied:
@@ -177,5 +165,3 @@ Toyota Yaris GR Sport — компактный автомобиль, котор�
 Можно спокойно ездить по городу, парковаться возле магазинов и торговых центров и значительно меньше переживать за тех самых соседей по парковке, которые иногда открывают двери чуть шире, чем следовало бы.
 
 Если вы тоже хотите сохранить лакокрасочное покрытие своего автомобиля, полная оклейка кузова защитной PPF-плёнкой — один из наиболее эффективных способов защиты автомобиля от типичных повреждений при городской эксплуатации.
-
-Оклейка автомобиля защитной плёнкой в Белграде, PPF плёнка 190 микрон, защита кузова автомобиля, антигравийная плёнка, защита автомобиля от царапин и сколов, полная оклейка автомобиля PPF, защитная плёнка Toyota, оклейка Toyota Yaris GR Sport, защита нового и подержанного автомобиля.

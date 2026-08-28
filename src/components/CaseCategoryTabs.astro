@@ -23,13 +23,12 @@ const tabs = [
 ] as const satisfies { id: CasesTabKind; href: string; label: string }[];
 ---
 
-<div class="case-tabs relative flex flex-wrap gap-1 p-1 mb-10 rounded-sm bg-surface border border-border-strong" role="tablist">
-  <span class="pill-tab-track" aria-hidden="true"></span>
+<div class="case-tabs grid grid-cols-2 sm:flex sm:flex-nowrap gap-1 p-1 mb-10 rounded-sm bg-surface border border-border-strong" role="tablist">
   {tabs.filter(tab => counts[tab.id] > 0 || tab.id === active).map(tab => (
     <a
       href={tab.href}
       class:list={[
-        'pill-tab relative z-10 flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-medium no-underline',
+        'pill-tab flex items-center justify-between sm:justify-start gap-2 px-4 py-2 rounded-sm text-sm font-medium no-underline',
         tab.id === active ? 'text-on-accent' : 'text-muted',
       ]}
       role="tab"
@@ -43,6 +42,23 @@ const tabs = [
 </div>
 
 <style>
+  /* No sliding-pill track here on purpose — that pattern (see
+     .pill-tab-track in global.css, used by LeadForm's contact tabs) only
+     works for a single row of client-side-switched tabs: it's positioned
+     with left/width alone, so once tabs wrap onto multiple lines it stays
+     pinned to row 1 while translateX lands it under whatever happens to
+     share a column with the active tab in its real row — a tall bar
+     smeared across unrelated tabs. Each tab here is a real link that
+     reloads the page, so there's no slide animation to preserve anyway —
+     the active tab just gets a solid background directly, which is correct
+     at any wrap layout. */
+  /* global.css's shared `.pill-tab { background: transparent }` (for the
+     LeadForm sliding-track variant) otherwise beats the bg-accent utility
+     here — same specificity, later in the cascade. Astro scopes this rule
+     with a data-astro-cid attribute, which outranks it. */
+  .pill-tab[aria-selected="true"] {
+    background-color: var(--color-accent);
+  }
   .case-tab-count {
     padding: 0.05rem 0.4rem;
     border-radius: 999px;
@@ -52,13 +68,3 @@ const tabs = [
   }
   .pill-tab[aria-selected="true"] .case-tab-count { background: rgba(255, 255, 255, 0.18); }
 </style>
-
-<script>
-  document.querySelectorAll<HTMLElement>('.case-tabs').forEach(root => {
-    const pill = root.querySelector<HTMLElement>('.pill-tab-track');
-    const active = root.querySelector<HTMLElement>('[aria-selected="true"]');
-    if (!pill || !active) return;
-    pill.style.width = active.offsetWidth + 'px';
-    pill.style.transform = `translateX(${active.offsetLeft}px)`;
-  });
-</script>
