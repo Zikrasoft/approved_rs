@@ -37,6 +37,10 @@ export interface ServicesContent {
       breadcrumbLabel: string;
       casesHeading: string;
       chooseCountryLabel: string;
+      // Hub CTA opens the same lead modal as every other service page — needs
+      // its own action-oriented label since it has no single country/service
+      // context to fall back on (unlike the country pages' own ctaLabel below).
+      ctaLabel: string;
     };
     title: string;
     descriptionFor: (location: string) => string;
@@ -83,6 +87,8 @@ export interface ServicesContent {
       chinaCardTitle: string;
       chinaCardText: string;
       exploreLabel: string;
+      // Same rationale as vehicle-sourcing's hub.ctaLabel above.
+      ctaLabel: string;
     };
     // Names the actual corridor (Serbia/Spain/Portugal) instead of the
     // generic CIS-country list vehicle sourcing's deliveryLineFor reuses
@@ -238,6 +244,7 @@ const ru: ServicesContent = {
       breadcrumbLabel: 'Автоподбор',
       casesHeading: 'Кейсы автоподбора',
       chooseCountryLabel: 'Выберите страну:',
+      ctaLabel: 'Подобрать авто',
     },
     title: 'Автоподбор под ключ',
     descriptionFor: (location) => `Подберём автомобиль ${location} — среди авто, которые уже в этой стране, без ввоза из-за рубежа. Полная проверка, сопровождение сделки и доставка до вашего города — под ключ, включая растаможку.`,
@@ -284,6 +291,7 @@ const ru: ServicesContent = {
       chinaCardTitle: 'Из Китая',
       chinaCardText: 'Новые и подержанные автомобили из Китая — доставка через проверенного партнёра.',
       exploreLabel: 'Подробнее',
+      ctaLabel: 'Рассчитать привоз',
     },
     de: {
       metaTitle: 'Авто из Германии под ключ — подбор и привоз',
@@ -497,6 +505,7 @@ const en: ServicesContent = {
       breadcrumbLabel: 'Car Sourcing',
       casesHeading: 'Sourcing Case Studies',
       chooseCountryLabel: 'Choose a country:',
+      ctaLabel: 'Find My Car',
     },
     title: 'Full-Service Car Sourcing',
     descriptionFor: (location) => `We'll find your car ${location} — sourced from cars already in the country, not shipped in from abroad. Full inspection, deal support, and delivery to your city — fully turnkey, customs clearance included.`,
@@ -543,6 +552,7 @@ const en: ServicesContent = {
       chinaCardTitle: 'From China',
       chinaCardText: 'New and used cars from China, delivered through a trusted logistics partner.',
       exploreLabel: 'Learn more',
+      ctaLabel: 'Get an Import Quote',
     },
     de: {
       metaTitle: 'Cars from Germany — Turnkey Import',
@@ -756,6 +766,7 @@ const sr: ServicesContent = {
       breadcrumbLabel: 'Odabir vozila',
       casesHeading: 'Primeri odabira vozila',
       chooseCountryLabel: 'Izaberite zemlju:',
+      ctaLabel: 'Pronađite auto',
     },
     title: 'Kompletan odabir vozila',
     descriptionFor: (location) => `Pronaći ćemo vozilo ${location} — biramo među vozilima koja su već u zemlji, ne dovozimo ih iz inostranstva. Potpuna provera, podrška tokom kupovine i dovoz do vašeg grada — sve na ključ, uključujući carinjenje.`,
@@ -802,6 +813,7 @@ const sr: ServicesContent = {
       chinaCardTitle: 'Iz Kine',
       chinaCardText: 'Nova i polovna vozila iz Kine — dovoz preko proverenog partnera.',
       exploreLabel: 'Saznajte više',
+      ctaLabel: 'Zatražite ponudu za uvoz',
     },
     de: {
       metaTitle: 'Vozila iz Nemačke — uvoz na ključ',
