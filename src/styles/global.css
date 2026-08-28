@@ -445,12 +445,32 @@ h1, h2, h3, h4 {
 .prose-custom li {
   margin-bottom: 0.5rem;
 }
-/* Unordered items get a small wrench glyph (matches the site's Lucide icon
-   set, e.g. Header.astro's "Автосервис" nav item) instead of a plain dot —
-   a CSS mask so it inherits the accent color and needs no extra markup. */
+/* Unordered items get a small glyph instead of a plain dot — a CSS mask so
+   it inherits the accent color and needs no extra markup. Glyph varies by
+   --list-icon (wrench by default) so consecutive lists on one case page
+   don't all show the same icon; pick per list with .icon-check/-shield/-pin
+   depending on what the list actually enumerates (see class comments below). */
 .prose-custom ul {
   list-style: none;
   padding-left: 0;
+  --list-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M14.7%206.3a1%201%200%200%200%200%201.4l1.6%201.6a1%201%200%200%200%201.4%200l3.106-3.105c.32-.322.863-.22.983.218a6%206%200%200%201-8.259%207.057l-7.91%207.91a1%201%200%200%201-2.999-3l7.91-7.91a6%206%200%200%201%207.057-8.259c.438.12.54.662.219.984z'/%3E%3C/svg%3E");
+}
+/* Requirements/benefits/what's-included lists ("client wanted: automatic,
+   low mileage…", "package includes…"). */
+.prose-custom ul.icon-check {
+  --list-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M20%206%209%2017l-5-5'/%3E%3C/svg%3E");
+}
+/* Protection/PPF benefit lists (detailing wrap cases). stroke-width 2.5, not
+   2 like wrench/check above — shield's curved outline needs the extra
+   weight to stay a legible shape at this ~18px render size instead of
+   antialiasing into a blurry ring. */
+.prose-custom ul.icon-shield {
+  --list-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2.5'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M20%2013c0%205-3.5%207.5-7.66%208.95a1%201%200%200%201-.67-.01C7.5%2020.5%204%2018%204%2013V6a1%201%200%200%201%201-1c2%200%204.5-1.2%206.24-2.72a1.17%201.17%200%200%201%201.52%200C14.51%203.81%2017%205%2019%205a1%201%200%200%201%201%201z'/%3E%3C/svg%3E");
+}
+/* City/coverage lists ("Belgrade, Novi Sad, Čačak and other cities"). Same
+   stroke-width bump as icon-shield, same reason. */
+.prose-custom ul.icon-pin {
+  --list-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2.5'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M20%2010c0%204.993-5.539%2010.193-7.399%2011.799a1%201%200%200%201-1.202%200C9.539%2020.193%204%2014.993%204%2010a8%208%200%200%201%2016%200'/%3E%3Ccircle%20cx='12'%20cy='10'%20r='3'/%3E%3C/svg%3E");
 }
 .prose-custom ul li {
   position: relative;
@@ -464,8 +484,8 @@ h1, h2, h3, h4 {
   width: 1.1em;
   height: 1.1em;
   background-color: var(--color-accent);
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M14.7%206.3a1%201%200%200%200%200%201.4l1.6%201.6a1%201%200%200%200%201.4%200l3.106-3.105c.32-.322.863-.22.983.218a6%206%200%200%201-8.259%207.057l-7.91%207.91a1%201%200%200%201-2.999-3l7.91-7.91a6%206%200%200%201%207.057-8.259c.438.12.54.662.219.984z'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M14.7%206.3a1%201%200%200%200%200%201.4l1.6%201.6a1%201%200%200%200%201.4%200l3.106-3.105c.32-.322.863-.22.983.218a6%206%200%200%201-8.259%207.057l-7.91%207.91a1%201%200%200%201-2.999-3l7.91-7.91a6%206%200%200%201%207.057-8.259c.438.12.54.662.219.984z'/%3E%3C/svg%3E");
+  -webkit-mask-image: var(--list-icon);
+  mask-image: var(--list-icon);
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-size: contain;

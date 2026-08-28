@@ -13,8 +13,8 @@ translations:
       giving the SUV an elegant satin finish.
 
 
-      Together with the client, we selected a 190-micron satin protective film
-      and will perform a complete vehicle wrap.
+      Together with the client, we selected a **190-micron satin protective
+      film** and will perform a complete vehicle wrap.
 
 
       A full protective wrap helps preserve the original factory paint and
@@ -44,28 +44,21 @@ translations:
       Benefits of a full protective vehicle wrap include:
 
 
-      — protection against stone chips and minor scratches;\
-
-      — protection from road contamination and environmental exposure;\
-
-      — preservation of the original factory paint;\
-
-      — easier maintenance of the vehicle’s exterior;\
-
-      — individual damaged sections can be replaced when necessary;\
-
-      — long-term preservation of the vehicle’s appearance;\
-
-      — protection for a new vehicle from its first kilometres on the road;\
-
-      — better preservation of the bodywork, which can help maintain the
-      vehicle’s appeal when it is eventually sold;\
-
-      — premium satin appearance without repainting the vehicle.
+      <ul class="icon-shield">
+      <li>protection against stone chips and minor scratches</li>
+      <li>protection from road contamination and environmental exposure</li>
+      <li>preservation of the original factory paint</li>
+      <li>easier maintenance of the vehicle’s exterior</li>
+      <li>individual damaged sections can be replaced when necessary</li>
+      <li>long-term preservation of the vehicle’s appearance</li>
+      <li>protection for a new vehicle from its first kilometres on the road</li>
+      <li>better preservation of the bodywork, which can help maintain the vehicle’s appeal when it is eventually sold</li>
+      <li>premium satin appearance without repainting the vehicle</li>
+      </ul>
 
 
       We provide professional automotive PPF and protective film installation in
-      Serbia, at our location in Belgrade near Ada Mall.
+      Serbia, at our location in **Belgrade** near Ada Mall.
 
 
       Our clients come not only from Belgrade but also from Novi Sad, Niš,
@@ -74,8 +67,8 @@ translations:
 
 
       Whether you have a brand-new vehicle or a car already in use, we can help
-      select the appropriate protective film and provide either a complete body
-      wrap or protection for the most vulnerable individual areas.
+      select the appropriate protective film and provide either a **complete
+      body wrap** or protection for the most vulnerable individual areas.
 
 
       Professional paint protection film installation in Belgrade is an
@@ -97,8 +90,8 @@ translations:
       elegantan satenski izgled.
 
 
-      Zajedno sa klijentom izabrali smo zaštitnu satensku foliju debljine 190
-      mikrona i uradićemo kompletno oblepljivanje karoserije.
+      Zajedno sa klijentom izabrali smo **zaštitnu satensku foliju debljine 190
+      mikrona** i uradićemo kompletno oblepljivanje karoserije.
 
 
       Kompletna zaštita Mercedes-Benz GLS-a folijom pomaže u očuvanju fabričke
@@ -127,28 +120,21 @@ translations:
       Prednosti kompletnog oblepljivanja automobila zaštitnom folijom:
 
 
-      — zaštita fabričke boje i laka od kamenčića i sitnih ogrebotina;\
-
-      — zaštita od prljavštine i drugih uticaja sa puta;\
-
-      — očuvanje originalnog laka automobila;\
-
-      — jednostavnije održavanje karoserije;\
-
-      — mogućnost zamene folije samo na oštećenom delu;\
-
-      — dugotrajno očuvanje atraktivnog izgleda vozila;\
-
-      — zaštita novog automobila od prvih kilometara;\
-
-      — bolje očuvano stanje karoserije, što može doprineti atraktivnosti vozila
-      prilikom kasnije prodaje;\
-
-      — premium satenski izgled bez potrebe za farbanjem automobila.
+      <ul class="icon-shield">
+      <li>zaštita fabričke boje i laka od kamenčića i sitnih ogrebotina</li>
+      <li>zaštita od prljavštine i drugih uticaja sa puta</li>
+      <li>očuvanje originalnog laka automobila</li>
+      <li>jednostavnije održavanje karoserije</li>
+      <li>mogućnost zamene folije samo na oštećenom delu</li>
+      <li>dugotrajno očuvanje atraktivnog izgleda vozila</li>
+      <li>zaštita novog automobila od prvih kilometara</li>
+      <li>bolje očuvano stanje karoserije, što može doprineti atraktivnosti vozila prilikom kasnije prodaje</li>
+      <li>premium satenski izgled bez potrebe za farbanjem automobila</li>
+      </ul>
 
 
       Profesionalno oblepljivanje i zaštitu automobila PPF folijom radimo u
-      Srbiji, u Beogradu, u blizini Ada Mall-a.
+      Srbiji, u **Beogradu**, u blizini Ada Mall-a.
 
 
       Kod nas dolaze vlasnici automobila ne samo iz Beograda, već i iz Novog
@@ -157,8 +143,8 @@ translations:
 
 
       Ukoliko želite da zaštitite nov ili već korišćen automobil, možemo
-      odabrati odgovarajuću foliju i uraditi kompletno oblepljivanje karoserije
-      ili zaštitu pojedinačnih, najizloženijih delova vozila.
+      odabrati odgovarajuću foliju i uraditi **kompletno oblepljivanje
+      karoserije** ili zaštitu pojedinačnih, najizloženijih delova vozila.
 
 
       Zaštitna folija za automobil u Beogradu predstavlja ulaganje u očuvanje
@@ -180,7 +166,7 @@ Mercedes-Benz GLS 2026 — полная оклейка защитной сати
 
 К нам обратился владелец нового Mercedes-Benz GLS 2026 года с задачей максимально защитить кузов автомобиля и одновременно придать ему эффектный сатиновый внешний вид.
 
-Совместно с клиентом мы выбрали защитную сатиновую плёнку толщиной 190 микрон и выполним полную оклейку кузова автомобиля.
+Совместно с клиентом мы выбрали **защитную сатиновую плёнку толщиной 190 микрон** и выполним полную оклейку кузова автомобиля.
 
 Полная оклейка Mercedes-Benz GLS защитной плёнкой помогает сохранить заводское лакокрасочное покрытие и защищает кузов от мелких царапин, сколов от камней, следов насекомых, дорожных загрязнений, реагентов и других воздействий, с которыми автомобиль сталкивается при ежедневной эксплуатации.
 
@@ -192,21 +178,23 @@ Mercedes-Benz GLS 2026 — полная оклейка защитной сати
 
 Преимущества полной оклейки автомобиля защитной плёнкой:
 
-— защита заводского ЛКП от сколов и мелких царапин;\
-— защита от дорожных загрязнений и внешних воздействий;\
-— сохранение оригинального лакокрасочного покрытия;\
-— более простой уход за кузовом;\
-— возможность локальной замены повреждённой плёнки;\
-— сохранение привлекательного внешнего вида автомобиля;\
-— дополнительная защита нового автомобиля с первых километров эксплуатации;\
-— сохранение состояния кузова, что может положительно влиять на привлекательность автомобиля при последующей продаже;\
-— эффектный сатиновый внешний вид без необходимости перекрашивать автомобиль.
+<ul class="icon-shield">
+<li>защита заводского ЛКП от сколов и мелких царапин</li>
+<li>защита от дорожных загрязнений и внешних воздействий</li>
+<li>сохранение оригинального лакокрасочного покрытия</li>
+<li>более простой уход за кузовом</li>
+<li>возможность локальной замены повреждённой плёнки</li>
+<li>сохранение привлекательного внешнего вида автомобиля</li>
+<li>дополнительная защита нового автомобиля с первых километров эксплуатации</li>
+<li>сохранение состояния кузова, что может положительно влиять на привлекательность автомобиля при последующей продаже</li>
+<li>эффектный сатиновый внешний вид без необходимости перекрашивать автомобиль</li>
+</ul>
 
-Оклейку автомобилей защитной PPF-плёнкой выполняем в Сербии, в Белграде, недалеко от Ada Mall.
+Оклейку автомобилей защитной PPF-плёнкой выполняем в Сербии, в **Белграде**, недалеко от Ada Mall.
 
 К нам приезжают владельцы автомобилей не только из Белграда, но и из Нови-Сада, Ниша, Крагуеваца, Суботицы, Панчева, Нови-Пазара, Чачака, Зренянина, Кралево, Крушеваца и других городов Сербии.
 
-Если вы хотите защитить новый или уже эксплуатируемый автомобиль, мы можем подобрать подходящий вариант плёнки и выполнить как полную оклейку кузова, так и защиту отдельных наиболее уязвимых элементов.
+Если вы хотите защитить новый или уже эксплуатируемый автомобиль, мы можем подобрать подходящий вариант плёнки и выполнить как **полную оклейку кузова**, так и защиту отдельных наиболее уязвимых элементов.
 
 Защитная плёнка для автомобиля в Белграде — это инвестиция в сохранность заводского покрытия и внешний вид автомобиля на долгие годы.
 

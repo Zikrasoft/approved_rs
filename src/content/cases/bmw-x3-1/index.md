@@ -58,23 +58,17 @@ translations:
       Serbia:
 
 
-      vehicle sourcing and selection in Germany;\
-
-      vehicle history and technical checks;\
-
-      on-site inspection and test drive;\
-
-      purchase assistance;\
-
-      vehicle delivery from Germany to Serbia;\
-
-      customs clearance in Serbia;\
-
-      delivery to Belgrade;\
-
-      vehicle registration;\
-
-      maintenance at our service centre.
+      <ul class="icon-check">
+      <li>vehicle sourcing and selection in Germany</li>
+      <li>vehicle history and technical checks</li>
+      <li>on-site inspection and test drive</li>
+      <li>purchase assistance</li>
+      <li>vehicle delivery from Germany to Serbia</li>
+      <li>customs clearance in Serbia</li>
+      <li>delivery to Belgrade</li>
+      <li>vehicle registration</li>
+      <li>maintenance at our service centre</li>
+      </ul>
 
 
       If you are looking to buy a car in Germany and import it to Serbia without
@@ -82,7 +76,7 @@ translations:
       registration yourself, we can handle the entire process — from finding the
       right vehicle to handing you the keys.
   sr:
-    title: BMW X3v
+    title: BMW X3
     body: >
       **Izbor, kupovina i uvoz BMW X3 iz Nemačke u Srbiju – kompletna usluga**
 
@@ -133,23 +127,17 @@ translations:
       Nudimo kompletnu uslugu kupovine i uvoza automobila iz Nemačke u Srbiju:
 
 
-      pronalaženje i izbor automobila u Nemačkoj;\
-
-      provera istorije i tehničkog stanja;\
-
-      pregled vozila i test vožnja;\
-
-      pomoć pri kupovini;\
-
-      dovoz automobila iz Nemačke u Srbiju;\
-
-      carinjenje vozila u Srbiji;\
-
-      transport do Beograda;\
-
-      registracija automobila;\
-
-      redovno održavanje u našem servisu.
+      <ul class="icon-check">
+      <li>pronalaženje i izbor automobila u Nemačkoj</li>
+      <li>provera istorije i tehničkog stanja</li>
+      <li>pregled vozila i test vožnja</li>
+      <li>pomoć pri kupovini</li>
+      <li>dovoz automobila iz Nemačke u Srbiju</li>
+      <li>carinjenje vozila u Srbiji</li>
+      <li>transport do Beograda</li>
+      <li>registracija automobila</li>
+      <li>redovno održavanje u našem servisu</li>
+      </ul>
 
 
       Ako želite da kupite automobil u Nemačkoj i uvezete ga u Srbiju bez
@@ -189,14 +177,16 @@ published: true
 
 Мы предлагаем комплексную услугу по покупке и пригону автомобилей из Германии в Сербию:
 
-подбор автомобиля в Германии;\
-проверка истории и технического состояния;\
-осмотр автомобиля и тест-драйв;\
-помощь с покупкой;\
-пригон автомобиля из Германии в Сербию;\
-растаможка автомобиля в Сербии;\
-доставка в Белград;\
-постановка автомобиля на учёт;\
-техническое обслуживание в нашем сервисе.
+<ul class="icon-check">
+<li>подбор автомобиля в Германии</li>
+<li>проверка истории и технического состояния</li>
+<li>осмотр автомобиля и тест-драйв</li>
+<li>помощь с покупкой</li>
+<li>пригон автомобиля из Германии в Сербию</li>
+<li>растаможка автомобиля в Сербии</li>
+<li>доставка в Белград</li>
+<li>постановка автомобиля на учёт</li>
+<li>техническое обслуживание в нашем сервисе</li>
+</ul>
 
 Если вы хотите купить автомобиль в Германии и привезти его в Сербию без необходимости самостоятельно заниматься поиском, проверками, логистикой, таможней и регистрацией, мы можем взять весь процесс на себя — от подбора автомобиля до передачи ключей владельцу.

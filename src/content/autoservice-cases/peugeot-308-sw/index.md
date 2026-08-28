@@ -11,19 +11,14 @@ translations:
       workshop for a complete major service.
 
 
-      The work included:\
+      The work included:
 
-      — timing belt replacement;\
-
-      — water pump replacement;\
-
-      — coolant replacement;\
-
-      — engine oil replacement;\
-
-      — filter replacement;\
-
-      — inspection of all related components.
+      - timing belt replacement
+      - water pump replacement
+      - coolant replacement
+      - engine oil replacement
+      - filter replacement
+      - inspection of all related components
 
 
       Special attention should be paid to the camshaft chain on the 1.5 BlueHDi
@@ -62,19 +57,14 @@ translations:
       motorom. Urađen je kompletan veliki servis.
 
 
-      Tokom servisa izvršeni su:\
+      Tokom servisa izvršeni su:
 
-      — zamena zupčastog kaiša;\
-
-      — zamena vodene pumpe;\
-
-      — zamena antifriza;\
-
-      — zamena motornog ulja;\
-
-      — zamena filtera;\
-
-      — kontrola svih pratećih komponenti.
+      - zamena zupčastog kaiša
+      - zamena vodene pumpe
+      - zamena antifriza
+      - zamena motornog ulja
+      - zamena filtera
+      - kontrola svih pratećih komponenti
 
 
       Kod 1.5 BlueHDi motora posebnu pažnju treba obratiti na lanac bregastih
@@ -117,17 +107,18 @@ gallery:
 date: 2026-08-13
 published: true
 ---
-Великий сервис Peugeot 308 2024 года в русском автосервисе в Белграде
+Большой сервис Peugeot 308 2024 года в русском автосервисе в Белграде
 
-К нам на обслуживание приехал Peugeot 308 2024 года с дизельным двигателем 1.5 BlueHDi. Выполнили полный комплекс работ по великому сервису.
+К нам на обслуживание приехал Peugeot 308 2024 года с дизельным двигателем 1.5 BlueHDi. Выполнили полный комплекс работ по большому сервису.
 
-В рамках обслуживания были выполнены:\
-— замена ремня ГРМ;\
-— замена водяной помпы;\
-— замена антифриза;\
-— замена моторного масла;\
-— замена фильтров;\
-— проверка и обслуживание всех сопутствующих компонентов.
+В рамках обслуживания были выполнены:
+
+- замена ремня ГРМ;
+- замена водяной помпы;
+- замена антифриза;
+- замена моторного масла;
+- замена фильтров;
+- проверка и обслуживание всех сопутствующих компонентов.
 
 Отдельное внимание при работе с двигателем 1.5 BlueHDi необходимо уделять цепи привода распредвалов.
 
@@ -137,6 +128,6 @@ published: true
 
 На Peugeot 308 2023–2024 годов уже устанавливается цепь 8 мм.
 
-Поэтому при проведении великого сервиса важно учитывать не только состояние ремня ГРМ, но и состояние цепи распредвалов, а также все известные особенности конкретного двигателя.
+Поэтому при проведении большого сервиса важно учитывать не только состояние ремня ГРМ, но и состояние цепи распредвалов, а также все известные особенности конкретного двигателя.
 
 Русский автосервис в Белграде выполняет техническое обслуживание и ремонт Peugeot, Citroën, Opel и других автомобилей: диагностику, ТО, замену ГРМ, обслуживание двигателей и коробок передач.

@@ -4,7 +4,7 @@ translations:
   en:
     title: BMW 340i
     body: >
-      🔍 **Pre-purchase BMW M340 inspection in Serbia — because low mileage
+      **Pre-purchase BMW M340 inspection in Serbia — because low mileage
       doesn’t always mean perfect condition**
 
 
@@ -18,25 +18,19 @@ translations:
       inspection**.
 
 
-      📍 We inspect cars not only in **Belgrade**, but also in **Novi Sad, Čačak
+      We inspect cars not only in **Belgrade**, but also in **Novi Sad, Čačak
       and other cities across Serbia**. If you’ve already found a car you’re
       interested in, we can inspect it before you make the final decision.
 
 
       For this BMW M340 we checked:
 
-
-      🔧 engine and timing chain condition\
-
-      ⚙️ major vehicle systems\
-
-      📊 diagnostic data and operating parameters\
-
-      🕹 transmission adaptations\
-
-      🚗 full road test\
-
-      🔎 overall technical condition
+      - engine and timing chain condition
+      - major vehicle systems
+      - diagnostic data and operating parameters
+      - transmission adaptations
+      - full road test
+      - overall technical condition
 
 
       And this car was a perfect example of why **low mileage doesn’t
@@ -54,16 +48,15 @@ translations:
 
       If you’ve already found a car in Serbia and don’t need a complete car
       sourcing service, you can order a **one-time pre-purchase car
-      inspection**.
+      inspection** in:
 
 
-      📍 Belgrade\
-
-      📍 Novi Sad\
-
-      📍 Čačak\
-
-      📍 and other cities in Serbia
+      <ul class="icon-pin">
+      <li>Belgrade</li>
+      <li>Novi Sad</li>
+      <li>Čačak</li>
+      <li>and other cities in Serbia</li>
+      </ul>
 
 
       We’ll inspect the vehicle, run diagnostics, take it for a test drive and
@@ -71,7 +64,7 @@ translations:
   sr:
     title: BMW 340i
     body: >
-      🔍 **Jednokratni pregled BMW M340 pre kupovine u Srbiji — mala kilometraža
+      **Jednokratni pregled BMW M340 pre kupovine u Srbiji — mala kilometraža
       ne znači uvek i idealno stanje**
 
 
@@ -84,7 +77,7 @@ translations:
       kupovine**.
 
 
-      📍 Preglede vozila radimo ne samo u **Beogradu**, već i u **Novom Sadu,
+      Preglede vozila radimo ne samo u **Beogradu**, već i u **Novom Sadu,
       Čačku i drugim gradovima širom Srbije**. Ako ste sami pronašli automobil
       koji vas zanima, možemo da ga detaljno proverimo pre nego što donesete
       odluku o kupovini.
@@ -92,18 +85,12 @@ translations:
 
       Na ovom BMW M340 proverili smo:
 
-
-      🔧 stanje motora i lanca razvoda\
-
-      ⚙️ rad glavnih sistema automobila\
-
-      📊 dijagnostičke parametre vozila\
-
-      🕹 adaptacije menjača\
-
-      🚗 ponašanje automobila tokom test vožnje\
-
-      🔎 opšte tehničko stanje vozila
+      - stanje motora i lanca razvoda
+      - rad glavnih sistema automobila
+      - dijagnostičke parametre vozila
+      - adaptacije menjača
+      - ponašanje automobila tokom test vožnje
+      - opšte tehničko stanje vozila
 
 
       Ovaj automobil je odličan primer zašto **mala kilometraža nije garancija
@@ -122,16 +109,15 @@ translations:
 
       Ako ste sami pronašli automobil u Srbiji i nije vam potrebna kompletna
       usluga odabira vozila, možete naručiti **jednokratni pregled automobila
-      pre kupovine**.
+      pre kupovine** u:
 
 
-      📍 Beograd\
-
-      📍 Novi Sad\
-
-      📍 Čačak\
-
-      📍 i drugi gradovi Srbije
+      <ul class="icon-pin">
+      <li>Beogradu</li>
+      <li>Novom Sadu</li>
+      <li>Čačku</li>
+      <li>i drugim gradovima Srbije</li>
+      </ul>
 
 
       Proverićemo automobil, uraditi dijagnostiku i test vožnju i dati vam
@@ -151,30 +137,32 @@ gallery:
 date: 2026-08-20
 published: true
 ---
-🔍 **Разовый осмотр BMW M340 в Сербии — когда даже небольшой пробег не гарантирует идеальное состояние**
+**Разовый осмотр BMW M340 в Сербии — когда даже небольшой пробег не гарантирует идеальное состояние**
 
 К нам снова обратился наш старый клиент, которому ранее мы уже помогли подобрать автомобиль в рамках полного автоподбора. На этот раз задача была проще: клиент решил добавить еще одну «лошадку в конюшню» и самостоятельно присмотрел **BMW M340**. От нас требовался профессиональный разовый осмотр автомобиля перед покупкой.
 
-📍 Разовые проверки автомобилей мы проводим не только в **Белграде**, но и в **Нови-Саде, Чачке и других городах Сербии**. Если нашли интересный вариант — можем выехать, проверить автомобиль и помочь понять его реальное техническое состояние до покупки.
+Разовые проверки автомобилей мы проводим не только в **Белграде**, но и в **Нови-Саде, Чачке и других городах Сербии**. Если нашли интересный вариант — можем выехать, проверить автомобиль и помочь понять его реальное техническое состояние до покупки.
 
 Что проверили на BMW M340:
 
-🔧 состояние двигателя и цепи ГРМ\
-⚙️ работу основных систем автомобиля\
-📊 диагностику и фактические параметры работы узлов\
-🕹 адаптации коробки передач\
-🚗 провели полноценный тест-драйв\
-🔎 оценили общее техническое состояние автомобиля
+- состояние двигателя и цепи ГРМ
+- работу основных систем автомобиля
+- диагностику и фактические параметры работы узлов
+- адаптации коробки передач
+- полноценный тест-драйв
+- общее техническое состояние автомобиля
 
 И здесь как раз хороший пример того, почему **небольшой пробег — еще не гарантия отсутствия технических нюансов**.
 
 Диагностика показала, что **растяжение цепи ГРМ уже составило около 20%**. Именно такие моменты важно обнаружить до сделки, чтобы понимать реальное состояние машины, возможные будущие расходы и иметь дополнительные аргументы при принятии решения о покупке.
 
-Если вы самостоятельно нашли автомобиль в Сербии и вам не нужен полный автоподбор, можно заказать **разовый осмотр автомобиля перед покупкой**.
+Если вы самостоятельно нашли автомобиль в Сербии и вам не нужен полный автоподбор, можно заказать **разовый осмотр автомобиля перед покупкой** в:
 
-📍 Белград\
-📍 Нови-Сад\
-📍 Чачак\
-📍 и другие города Сербии
+<ul class="icon-pin">
+<li>Белграде</li>
+<li>Нови-Саде</li>
+<li>Чачке</li>
+<li>и других городах Сербии</li>
+</ul>
 
 Проверим автомобиль, проведем диагностику и тест-драйв и дадим объективную картину его состояния до того, как вы отдадите за него деньги.

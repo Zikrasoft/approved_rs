@@ -13,15 +13,13 @@ translations:
       requirements:
 
 
-      - the car should be as new as possible;
-
-      - automatic transmission;
-
-      - reliable and economical for everyday driving;
-
-      - engine power **up to 109 hp** due to their new driving licences;
-
-      - verified mileage and a transparent vehicle history.
+      <ul class="icon-check">
+      <li>the car should be as new as possible</li>
+      <li>automatic transmission</li>
+      <li>reliable and economical for everyday driving</li>
+      <li>engine power <strong>up to 109 hp</strong> due to their new driving licences</li>
+      <li>verified mileage and a transparent vehicle history</li>
+      </ul>
 
 
       Initially, the clients wanted to buy a **Peugeot 208 with an automatic
@@ -120,12 +118,6 @@ translations:
 
 
       Sometimes the best car is not the one you originally planned to buy.
-
-
-      **Car selection Serbia • Used car inspection Serbia • Pre-purchase car
-      inspection • Used cars Belgrade • Car sourcing Novi Sad • Vehicle history
-      and mileage check • Belgrade • Novi Sad • Niš • Kragujevac • Subotica •
-      Pančevo**
   sr:
     title: KIA STONIC
     body: >
@@ -137,15 +129,13 @@ translations:
       nekoliko važnih uslova:
 
 
-      - automobil treba da bude što novijeg godišta;
-
-      - automatski menjač;
-
-      - pouzdan i ekonomičan automobil za svakodnevnu vožnju;
-
-      - snaga motora **do 109 KS**, zbog novih vozačkih dozvola;
-
-      - proverena kilometraža i jasna istorija vozila.
+      <ul class="icon-check">
+      <li>automobil treba da bude što novijeg godišta</li>
+      <li>automatski menjač</li>
+      <li>pouzdan i ekonomičan automobil za svakodnevnu vožnju</li>
+      <li>snaga motora <strong>do 109 KS</strong>, zbog novih vozačkih dozvola</li>
+      <li>proverena kilometraža i jasna istorija vozila</li>
+      </ul>
 
 
       Klijenti su prvobitno želeli **Peugeot 208 sa automatskim menjačem**. Na
@@ -245,12 +235,6 @@ translations:
 
       Ponekad se najbolja kupovina ispostavi kao automobil koji u početku uopšte
       niste planirali da kupite.
-
-
-      **Autopodbor Srbija • Provera automobila pre kupovine • Kupovina polovnog
-      automobila u Srbiji • Provera kilometraže • Polovni automobili Beograd •
-      Autopodbor Novi Sad • Beograd • Novi Sad • Niš • Kragujevac • Subotica •
-      Pančevo • Čačak**
 car: KIA STONIC
 year: 2022
 price:
@@ -267,11 +251,13 @@ published: true
 
 К нам обратилась молодая пара с запросом на **подбор автомобиля в Сербии**. Бюджет — до **13 000 евро**, а требования к будущему автомобилю были достаточно конкретными:
 
-- максимально свежий год выпуска;
-- автоматическая коробка передач;
-- надежный и экономичный автомобиль для ежедневной эксплуатации;
-- мощность **до 109 л.с.**, поскольку у владельцев новые водительские права;
-- хороший пробег и прозрачная история без серьезных ДТП.
+<ul class="icon-check">
+<li>максимально свежий год выпуска</li>
+<li>автоматическая коробка передач</li>
+<li>надежный и экономичный автомобиль для ежедневной эксплуатации</li>
+<li>мощность <strong>до 109 л.с.</strong>, поскольку у владельцев новые водительские права</li>
+<li>хороший пробег и прозрачная история без серьезных ДТП</li>
+</ul>
 
 Изначально клиенты хотели купить **Peugeot 208 с автоматической коробкой передач**. На первый взгляд это действительно подходящий вариант: компактный городской автомобиль, современный дизайн и большой выбор предложений на вторичном рынке Сербии.
 
@@ -318,5 +304,3 @@ published: true
 Вы можете прийти к нам с конкретной моделью — или просто рассказать, какой автомобиль вам нужен и какой у вас бюджет.
 
 Иногда лучший автомобиль оказывается совсем не тем, который вы планировали купить изначально.
-
-**Автоподбор в Сербии • Проверка авто перед покупкой • Подбор подержанного автомобиля • Проверка пробега и истории • Белград • Нови-Сад • Ниш • Крагуевац • Суботица • Панчево • Чачак**
