@@ -95,13 +95,6 @@ async function handleStatusCallback(id: number, key: string, chatId: number, mes
       return;
     }
     if (key === 'won' && lead.dealAmount == null) {
-      // Same orphaned-prompt risk as claimpay's double-tap guard: a second
-      // tap before the first prompt is answered would silently overwrite
-      // it via setPendingPrompt, stranding the first prompt unanswered.
-      if (lead.pendingPrompt?.kind === 'deal_amount') {
-        await answerCallback(cbId, 'Уже ждём сумму — ответьте на предыдущее сообщение').catch(() => {});
-        return;
-      }
       const promptId = await sendForceReplyPrompt(chatId, '💰 Сколько ты заработал с этой заявки (в евро)? Не стоимость машины, а твоя прибыль.\n\nНапример: 300');
       await setPendingPrompt(id, { chatId, messageId: promptId, kind: 'deal_amount' });
       await answerCallback(cbId, 'Жду сумму');
@@ -147,13 +140,6 @@ async function handleClaimPayCallback(id: number, chatId: number, cbId: string):
     const { remaining, isPaidOff } = getCommission(lead);
     if (isPaidOff || lead.pendingCommissionClaim) {
       await answerCallback(cbId).catch(() => {});
-      return;
-    }
-    // A second tap before the first prompt is answered would otherwise
-    // silently orphan it (setPendingPrompt just overwrites) — block it with
-    // feedback instead of a reply to the first prompt vanishing later.
-    if (lead.pendingPrompt?.kind === 'commission_claim') {
-      await answerCallback(cbId, 'Уже ждём сумму — ответьте на предыдущее сообщение').catch(() => {});
       return;
     }
     const promptId = await sendForceReplyPrompt(chatId, `💸 Сколько отправили? Осталось: ${formatMoney(remaining)}`);

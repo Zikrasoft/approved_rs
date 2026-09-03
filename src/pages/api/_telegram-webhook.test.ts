@@ -181,7 +181,7 @@ describe('POST /api/telegram-webhook', () => {
       expect(answerCallback).toHaveBeenCalledWith('cb-2', 'Жду сумму');
     });
 
-    it('blocks a second "won" tap while a deal-amount prompt is already pending, instead of orphaning the first one', async () => {
+    it('resends a fresh deal-amount prompt on a second "won" tap, replacing a stale pending one', async () => {
       vi.mocked(getLead).mockResolvedValue(makeLead({
         id: 5, dealAmount: null,
         pendingPrompt: { chatId: DM_CHAT_ID, messageId: 500, kind: 'deal_amount' },
@@ -192,9 +192,9 @@ describe('POST /api/telegram-webhook', () => {
       }));
 
       expect(res.status).toBe(200);
-      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
-      expect(setPendingPrompt).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-2b', expect.stringContaining('Уже ждём'));
+      expect(sendForceReplyPrompt).toHaveBeenCalledWith(DM_CHAT_ID, expect.stringContaining('заработал'));
+      expect(setPendingPrompt).toHaveBeenCalledWith(5, { chatId: DM_CHAT_ID, messageId: 888, kind: 'deal_amount' });
+      expect(answerCallback).toHaveBeenCalledWith('cb-2b', 'Жду сумму');
     });
 
     it('does nothing when the lead is not found', async () => {
@@ -300,7 +300,7 @@ describe('POST /api/telegram-webhook', () => {
       expect(sendForceReplyPrompt).not.toHaveBeenCalled();
     });
 
-    it('blocks a second tap while a prompt is already pending, instead of orphaning the first one', async () => {
+    it('resends a fresh prompt on a second tap, replacing a stale pending one', async () => {
       vi.mocked(getLead).mockResolvedValue(makeLead({
         id: 9, status: 'won', dealAmount: 100000,
         pendingPrompt: { chatId: DM_CHAT_ID, messageId: 500, kind: 'commission_claim' },
@@ -312,9 +312,9 @@ describe('POST /api/telegram-webhook', () => {
       }));
 
       expect(res.status).toBe(200);
-      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
-      expect(setPendingPrompt).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-12b', expect.stringContaining('Уже ждём'));
+      expect(sendForceReplyPrompt).toHaveBeenCalled();
+      expect(setPendingPrompt).toHaveBeenCalledWith(9, { chatId: DM_CHAT_ID, messageId: 888, kind: 'commission_claim' });
+      expect(answerCallback).toHaveBeenCalledWith('cb-12b', 'Жду сумму');
     });
   });
 
