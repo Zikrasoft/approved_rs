@@ -159,6 +159,23 @@ describe('POST /api/telegram-webhook', () => {
   });
 
   describe('status callbacks (st:<id>:<key>)', () => {
+    it('admin cannot finalize (won) — only the owner knows the deal amount', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-won-admin', data: 'st:5:won', from: { id: ADMIN_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
+      expect(setStatus).not.toHaveBeenCalled();
+    });
+
+    it('admin cannot finalize (lost)', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-lost-admin', data: 'st:5:lost', from: { id: ADMIN_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(setStatus).not.toHaveBeenCalled();
+    });
+
     it('sets status directly for in_progress/lost and refreshes both surfaces', async () => {
       const res = await POST(makeCtx({
         callback_query: { id: 'cb-1', data: 'st:5:lost', from: { id: OWNER_ID }, message: { message_id: 555, chat: { id: DM_CHAT_ID } } },

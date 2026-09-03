@@ -82,16 +82,15 @@ function formatLeadText(lead: StoredLead): string {
   return lines.join('\n');
 }
 
-export function buildStatusKeyboard(lead: StoredLead): Keyboard {
+// Finalizing a lead (won/lost) is owner-only — only the owner knows the deal
+// amount and talks to the client directly, so admin gets no buttons past "В работу".
+export function buildStatusKeyboard(lead: StoredLead, role: Role): Keyboard {
   if (lead.status === 'new') {
-    return {
-      inline_keyboard: [[
-        { text: '🔵 В работу', callback_data: `st:${lead.id}:in_progress` },
-        { text: '❌ Отказ', callback_data: `st:${lead.id}:lost` },
-      ]],
-    };
+    const row: Btn[] = [{ text: '🔵 В работу', callback_data: `st:${lead.id}:in_progress` }];
+    if (role === 'owner') row.push({ text: '❌ Отказ', callback_data: `st:${lead.id}:lost` });
+    return { inline_keyboard: [row] };
   }
-  if (lead.status === 'in_progress') {
+  if (lead.status === 'in_progress' && role === 'owner') {
     return {
       inline_keyboard: [[
         { text: '✅ Завершить', callback_data: `st:${lead.id}:won` },
@@ -281,7 +280,7 @@ export function buildLeadDetail(lead: StoredLead, role: Role): { text: string; r
   const commission = lead.status === 'won' && lead.dealAmount != null ? getCommission(lead) : null;
   const lines = [formatLeadText(lead), ...(commission ? moneyStatusLines(lead, commission) : [])];
   const rows: Btn[][] = [
-    ...buildStatusKeyboard(lead).inline_keyboard,
+    ...buildStatusKeyboard(lead, role).inline_keyboard,
     [
       { text: '✏️ Имя', callback_data: `edit:${lead.id}:name` },
       { text: '✏️ Контакт', callback_data: `edit:${lead.id}:contact` },

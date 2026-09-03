@@ -148,19 +148,28 @@ describe('isLeadStatusKey', () => {
 });
 
 describe('buildStatusKeyboard', () => {
-  it('shows В работу/Отказ for a new lead, with the lead id embedded in callback_data', () => {
-    const kb = buildStatusKeyboard(makeLead({ id: 7, status: 'new' }));
+  it('owner: shows В работу/Отказ for a new lead, with the lead id embedded in callback_data', () => {
+    const kb = buildStatusKeyboard(makeLead({ id: 7, status: 'new' }), 'owner');
     expect(kb.inline_keyboard[0].map(b => b.callback_data)).toEqual(['st:7:in_progress', 'st:7:lost']);
   });
 
-  it('shows Завершить/Отказ for an in-progress lead', () => {
-    const kb = buildStatusKeyboard(makeLead({ id: 7, status: 'in_progress' }));
+  it('owner: shows Завершить/Отказ for an in-progress lead', () => {
+    const kb = buildStatusKeyboard(makeLead({ id: 7, status: 'in_progress' }), 'owner');
     expect(kb.inline_keyboard[0].map(b => b.callback_data)).toEqual(['st:7:won', 'st:7:lost']);
   });
 
-  it('has no buttons for a terminal (won/lost) lead', () => {
-    expect(buildStatusKeyboard(makeLead({ status: 'won' })).inline_keyboard).toEqual([]);
-    expect(buildStatusKeyboard(makeLead({ status: 'lost' })).inline_keyboard).toEqual([]);
+  it('owner: has no buttons for a terminal (won/lost) lead', () => {
+    expect(buildStatusKeyboard(makeLead({ status: 'won' }), 'owner').inline_keyboard).toEqual([]);
+    expect(buildStatusKeyboard(makeLead({ status: 'lost' }), 'owner').inline_keyboard).toEqual([]);
+  });
+
+  it('admin: only В работу for a new lead, no Отказ', () => {
+    const kb = buildStatusKeyboard(makeLead({ id: 7, status: 'new' }), 'admin');
+    expect(kb.inline_keyboard[0].map(b => b.callback_data)).toEqual(['st:7:in_progress']);
+  });
+
+  it('admin: no buttons at all for an in-progress lead — can\'t finalize', () => {
+    expect(buildStatusKeyboard(makeLead({ status: 'in_progress' }), 'admin').inline_keyboard).toEqual([]);
   });
 });
 

@@ -88,6 +88,7 @@ async function handleStatusCallback(id: number, key: string, chatId: number, mes
     await answerCallback(cbId).catch(() => {});
     return;
   }
+  if ((key === 'won' || key === 'lost') && !(await requireRole(role, 'owner', cbId))) return;
   await withErrorAck(cbId, { id, key }, async () => {
     const lead = await getLead(id);
     if (!lead) {
