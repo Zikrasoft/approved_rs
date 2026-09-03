@@ -157,6 +157,29 @@ describe('POST /api/telegram-webhook', () => {
     expect(getLead).not.toHaveBeenCalled();
   });
 
+  describe('duplicate delivery — same update_id is only processed once', () => {
+    it('skips a redelivered update_id instead of writing twice', async () => {
+      const body = {
+        update_id: 918273645,
+        callback_query: { id: 'cb-dup', data: 'st:5:lost', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      };
+      const first = await POST(makeCtx(body));
+      const second = await POST(makeCtx(body));
+
+      expect(first.status).toBe(200);
+      expect(second.status).toBe(200);
+      expect(setStatus).toHaveBeenCalledTimes(1);
+    });
+
+    it('processes updates with no update_id normally (field is optional)', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-noid', data: 'st:5:lost', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(setStatus).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('trust boundary — callbacks are gated on from.id, not chat', () => {
     it('rejects a status callback from someone who is neither owner nor admin', async () => {
       const res = await POST(makeCtx({

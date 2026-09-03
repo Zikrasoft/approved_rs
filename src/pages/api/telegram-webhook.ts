@@ -25,6 +25,7 @@ interface TelegramMessage {
 }
 
 interface TelegramUpdate {
+  update_id?: number;
   message?: TelegramMessage;
   callback_query?: {
     id: string;
@@ -35,6 +36,25 @@ interface TelegramUpdate {
 }
 
 const ACK = new Response(null, { status: 200 });
+
+// Telegram redelivers an update if our response takes too long — module-scope
+// state survives across invocations on the same warm instance, so a
+// redelivery landing there gets caught instead of writing to the leads blob
+// twice and racing itself for no reason.
+const SEEN_UPDATE_IDS_MAX = 500;
+const seenUpdateIds = new Set<number>();
+const seenUpdateIdsOrder: number[] = [];
+
+function alreadyProcessed(updateId: number): boolean {
+  if (seenUpdateIds.has(updateId)) return true;
+  seenUpdateIds.add(updateId);
+  seenUpdateIdsOrder.push(updateId);
+  if (seenUpdateIdsOrder.length > SEEN_UPDATE_IDS_MAX) {
+    const oldest = seenUpdateIdsOrder.shift();
+    if (oldest !== undefined) seenUpdateIds.delete(oldest);
+  }
+  return false;
+}
 
 function roleOf(id: number | undefined): Role | undefined {
   if (id == null) return undefined;
@@ -430,6 +450,10 @@ export async function POST({ request }: APIContext): Promise<Response> {
   } catch {
     // Malformed body after a valid secret — ack with 200 so Telegram stops
     // retrying instead of hammering this endpoint forever on a bad payload.
+    return ACK;
+  }
+
+  if (typeof update.update_id === 'number' && alreadyProcessed(update.update_id)) {
     return ACK;
   }
 
