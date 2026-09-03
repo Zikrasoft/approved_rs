@@ -27,7 +27,7 @@ vi.mock('@/lib/store', () => ({
   setStatus: vi.fn(),
   archiveLead: vi.fn(),
   unarchiveLead: vi.fn(),
-  toggleCustomerPaid: vi.fn(),
+  claimFullCommission: vi.fn(),
   confirmCommissionPayment: vi.fn(),
   rejectCommissionPayment: vi.fn(),
   setPendingPrompt: vi.fn(),
@@ -45,7 +45,7 @@ import {
   sendCommissionClaimToAdmin, sendCommissionResultToOwner, sendMessage, buildLeadDetail, editLeadDetailMessage,
 } from '@/lib/telegram';
 import {
-  getLead, setStatus, archiveLead, unarchiveLead, toggleCustomerPaid, confirmCommissionPayment,
+  getLead, setStatus, archiveLead, unarchiveLead, claimFullCommission, confirmCommissionPayment,
   rejectCommissionPayment, setPendingPrompt, findByPendingPrompt, resolvePendingPrompt, searchLeads,
   getOwedSummary, readLeads, getCommission,
 } from '@/lib/store';
@@ -75,7 +75,6 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     createdAt: '2026-01-01T00:00:00.000Z',
     pendingPrompt: null,
     archived: false,
-    customerPaidAt: null,
     pendingCommissionClaim: null,
     ...overrides,
   };
@@ -110,7 +109,7 @@ describe('POST /api/telegram-webhook', () => {
     vi.mocked(setStatus).mockReset().mockResolvedValue(makeLead({ status: 'lost' }));
     vi.mocked(archiveLead).mockReset().mockResolvedValue(makeLead({ archived: true }));
     vi.mocked(unarchiveLead).mockReset().mockResolvedValue(makeLead({ archived: false }));
-    vi.mocked(toggleCustomerPaid).mockReset().mockResolvedValue(makeLead({ customerPaidAt: '2026-01-02T00:00:00.000Z' }));
+    vi.mocked(claimFullCommission).mockReset().mockResolvedValue(makeLead({ status: 'won', dealAmount: 100000, pendingCommissionClaim: { amount: 10000, claimedAt: '2026-01-02T00:00:00.000Z' } }));
     vi.mocked(confirmCommissionPayment).mockReset().mockResolvedValue(makeLead({ status: 'won', dealAmount: 100000, paidAmount: 4000 }));
     vi.mocked(rejectCommissionPayment).mockReset().mockResolvedValue(makeLead({ status: 'won', dealAmount: 100000 }));
     vi.mocked(setPendingPrompt).mockReset().mockResolvedValue(makeLead());
@@ -264,40 +263,26 @@ describe('POST /api/telegram-webhook', () => {
     });
   });
 
-  describe('custpaid:<id> — owner only', () => {
-    it('owner can toggle', async () => {
-      const res = await POST(makeCtx({
-        callback_query: { id: 'cb-8', data: 'custpaid:5', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
-      }));
-      expect(res.status).toBe(200);
-      expect(toggleCustomerPaid).toHaveBeenCalledWith(5);
-    });
-
-    it('admin cannot', async () => {
-      const res = await POST(makeCtx({
-        callback_query: { id: 'cb-9', data: 'custpaid:5', from: { id: ADMIN_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
-      }));
-      expect(res.status).toBe(200);
-      expect(toggleCustomerPaid).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-9');
-    });
-  });
-
   describe('claimpay:<id> — owner only', () => {
-    it('owner starts a commission-claim prompt when a balance remains', async () => {
-      vi.mocked(getLead).mockResolvedValue(makeLead({ id: 9, status: 'won', dealAmount: 100000 }));
+    it('owner claims the full remaining balance immediately, no amount prompt', async () => {
+      const lead = makeLead({ id: 9, status: 'won', dealAmount: 100000 });
+      vi.mocked(getLead).mockResolvedValue(lead);
       vi.mocked(getCommission).mockReturnValue({ commission: 10000, remaining: 10000, isPaidOff: false });
+      const claimed = makeLead({ id: 9, status: 'won', dealAmount: 100000, pendingCommissionClaim: { amount: 10000, claimedAt: '2026-01-02T00:00:00.000Z' } });
+      vi.mocked(claimFullCommission).mockResolvedValue(claimed);
 
       const res = await POST(makeCtx({
         callback_query: { id: 'cb-10', data: 'claimpay:9', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
       }));
 
       expect(res.status).toBe(200);
-      expect(sendForceReplyPrompt).toHaveBeenCalledWith(DM_CHAT_ID, expect.stringContaining('10000'));
-      expect(setPendingPrompt).toHaveBeenCalledWith(9, { chatId: DM_CHAT_ID, messageId: 888, kind: 'commission_claim' });
+      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
+      expect(claimFullCommission).toHaveBeenCalledWith(9);
+      expect(sendCommissionClaimToAdmin).toHaveBeenCalledWith(claimed);
+      expect(answerCallback).toHaveBeenCalledWith('cb-10', expect.any(String));
     });
 
-    it('acks without a prompt once nothing remains', async () => {
+    it('acks without claiming once nothing remains', async () => {
       vi.mocked(getLead).mockResolvedValue(makeLead({ id: 9, status: 'won', dealAmount: 100000, paidAmount: 10000 }));
       vi.mocked(getCommission).mockReturnValue({ commission: 10000, remaining: 0, isPaidOff: true });
 
@@ -306,7 +291,7 @@ describe('POST /api/telegram-webhook', () => {
       }));
 
       expect(res.status).toBe(200);
-      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
+      expect(claimFullCommission).not.toHaveBeenCalled();
     });
 
     it('admin cannot claim', async () => {
@@ -314,13 +299,13 @@ describe('POST /api/telegram-webhook', () => {
         callback_query: { id: 'cb-12', data: 'claimpay:9', from: { id: ADMIN_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
       }));
       expect(res.status).toBe(200);
-      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
+      expect(claimFullCommission).not.toHaveBeenCalled();
     });
 
-    it('resends a fresh prompt on a second tap, replacing a stale pending one', async () => {
+    it('a second tap while a claim is already pending is a no-op, not a double-claim', async () => {
       vi.mocked(getLead).mockResolvedValue(makeLead({
         id: 9, status: 'won', dealAmount: 100000,
-        pendingPrompt: { chatId: DM_CHAT_ID, messageId: 500, kind: 'commission_claim' },
+        pendingCommissionClaim: { amount: 10000, claimedAt: '2026-01-01T00:00:00.000Z' },
       }));
       vi.mocked(getCommission).mockReturnValue({ commission: 10000, remaining: 10000, isPaidOff: false });
 
@@ -329,9 +314,7 @@ describe('POST /api/telegram-webhook', () => {
       }));
 
       expect(res.status).toBe(200);
-      expect(sendForceReplyPrompt).toHaveBeenCalled();
-      expect(setPendingPrompt).toHaveBeenCalledWith(9, { chatId: DM_CHAT_ID, messageId: 888, kind: 'commission_claim' });
-      expect(answerCallback).toHaveBeenCalledWith('cb-12b', 'Жду сумму');
+      expect(claimFullCommission).not.toHaveBeenCalled();
     });
   });
 
@@ -664,47 +647,6 @@ describe('POST /api/telegram-webhook', () => {
 
       expect(res.status).toBe(200);
       expect(resolvePendingPrompt).not.toHaveBeenCalled();
-    });
-
-    it('records a commission claim on a valid reply and notifies the admin', async () => {
-      const lead = makeLead({ id: 5, pendingPrompt: { chatId: DM_CHAT_ID, messageId: 888, kind: 'commission_claim' } });
-      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
-      mockResolveFromBase(lead);
-
-      const res = await POST(makeCtx({
-        message: { message_id: 2, text: '4000', chat: { id: DM_CHAT_ID, type: 'private' }, from: { id: OWNER_ID }, reply_to_message: { message_id: 888 } },
-      }));
-
-      expect(res.status).toBe(200);
-      const updated = vi.mocked(sendCommissionClaimToAdmin).mock.calls[0][0];
-      expect(updated.pendingCommissionClaim).toEqual({ amount: 4000, claimedAt: expect.any(String) });
-    });
-
-    it('rejects a commission claim larger than the actual remaining balance', async () => {
-      // beforeEach's default getCommission mock returns remaining: 10000
-      vi.mocked(findByPendingPrompt).mockResolvedValue(makeLead({ id: 5, pendingPrompt: { chatId: DM_CHAT_ID, messageId: 888, kind: 'commission_claim' } }));
-
-      const res = await POST(makeCtx({
-        message: { message_id: 2, text: '20000', chat: { id: DM_CHAT_ID, type: 'private' }, from: { id: OWNER_ID }, reply_to_message: { message_id: 888 } },
-      }));
-
-      expect(res.status).toBe(200);
-      expect(resolvePendingPrompt).not.toHaveBeenCalled();
-      expect(sendCommissionClaimToAdmin).not.toHaveBeenCalled();
-      expect(sendMessage).toHaveBeenCalledWith(DM_CHAT_ID, expect.stringContaining('остатка'));
-    });
-
-    it('accepts a claim exactly equal to the remaining balance', async () => {
-      const lead = makeLead({ id: 5, pendingPrompt: { chatId: DM_CHAT_ID, messageId: 888, kind: 'commission_claim' } });
-      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
-      mockResolveFromBase(lead);
-
-      const res = await POST(makeCtx({
-        message: { message_id: 2, text: '10000', chat: { id: DM_CHAT_ID, type: 'private' }, from: { id: OWNER_ID }, reply_to_message: { message_id: 888 } },
-      }));
-
-      expect(res.status).toBe(200);
-      expect(sendCommissionClaimToAdmin).toHaveBeenCalled();
     });
 
     it('edit:name reply updates the field, refreshes the card, and confirms', async () => {

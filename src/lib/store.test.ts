@@ -43,7 +43,7 @@ vi.mock('@vercel/blob', () => {
 import { put } from '@vercel/blob';
 import {
   insertLead, setStatus, setPendingPrompt, findByPendingPrompt, resolvePendingPrompt, archiveLead, unarchiveLead,
-  toggleCustomerPaid, confirmCommissionPayment, rejectCommissionPayment, markReminded, getStaleLeads,
+  claimFullCommission, confirmCommissionPayment, rejectCommissionPayment, markReminded, getStaleLeads,
   getOwedSummary, getCommission, searchLeads, getLead, readLeads, updateLeads, type StoredLead,
 } from './store';
 import type { LeadData } from './leadTypes';
@@ -93,7 +93,6 @@ describe('insertLead', () => {
     expect(lead.payments).toEqual([]);
     expect(lead.pendingPrompt).toBeNull();
     expect(lead.archived).toBe(false);
-    expect(lead.customerPaidAt).toBeNull();
     expect(lead.pendingCommissionClaim).toBeNull();
   });
 });
@@ -139,13 +138,15 @@ describe('archiveLead / unarchiveLead', () => {
   });
 });
 
-describe('toggleCustomerPaid', () => {
-  it('flips customerPaidAt between null and a timestamp', async () => {
+describe('claimFullCommission', () => {
+  it('claims the full remaining balance, not a hardcoded/typed one', async () => {
     const lead = await insertLead(baseData);
-    const marked = await toggleCustomerPaid(lead.id);
-    expect(marked?.customerPaidAt).not.toBeNull();
-    const unmarked = await toggleCustomerPaid(lead.id);
-    expect(unmarked?.customerPaidAt).toBeNull();
+    await forceComplete(lead.id, 100_000);
+    await forcePay(lead.id, 3000);
+
+    const claimed = await claimFullCommission(lead.id);
+
+    expect(claimed?.pendingCommissionClaim).toEqual({ amount: 7000, claimedAt: expect.any(String) });
   });
 });
 
@@ -385,7 +386,7 @@ describe('readLeads — schema validation on the way in', () => {
       id: 1, name: 'Иван', contact: '@ivan', service: 'vehicle-sourcing', locale: 'ru',
       statusChangedAt: '2026-01-01T00:00:00.000Z', createdAt: '2026-01-01T00:00:00.000Z',
       // status, dealAmount, commissionPercent, paidAmount, payments, archived,
-      // customerPaidAt, pendingCommissionClaim, pendingPrompt — all omitted,
+      // pendingCommissionClaim, pendingPrompt — all omitted,
       // as if written before this field existed.
     }]);
 
@@ -396,7 +397,6 @@ describe('readLeads — schema validation on the way in', () => {
     expect(lead.paidAmount).toBe(0);
     expect(lead.payments).toEqual([]);
     expect(lead.archived).toBe(false);
-    expect(lead.customerPaidAt).toBeNull();
     expect(lead.pendingCommissionClaim).toBeNull();
     expect(lead.pendingPrompt).toBeNull();
   });

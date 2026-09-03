@@ -264,7 +264,6 @@ export function buildStats(leads: StoredLead[], role: Role): string {
 function moneyStatusLines(lead: StoredLead, info: CommissionInfo): string[] {
   const lines = [
     '',
-    `🧾 Оплата клиента: ${lead.customerPaidAt ? '✅ отмечена' : '⏳ не отмечена'}`,
     `💰 Комиссия Zikrasoft: ${formatMoney(info.commission)} · ${info.isPaidOff ? '🟢 Оплачено' : `Осталось: ${formatMoney(info.remaining)}`}`,
   ];
   if (lead.pendingCommissionClaim) lines.push(`🕓 Ожидает подтверждения: ${formatMoney(lead.pendingCommissionClaim.amount)}`);
@@ -273,11 +272,10 @@ function moneyStatusLines(lead: StoredLead, info: CommissionInfo): string[] {
 
 function moneyActionRows(lead: StoredLead, role: Role, info: CommissionInfo): Btn[][] {
   if (role === 'owner') {
-    const rows: Btn[][] = [[{ text: lead.customerPaidAt ? '↩️ Клиент не оплатил' : '✅ Клиент оплатил', callback_data: `custpaid:${lead.id}` }]];
     if (!info.isPaidOff && !lead.pendingCommissionClaim) {
-      rows.push([{ text: '💸 Отметить оплату комиссии', callback_data: `claimpay:${lead.id}` }]);
+      return [[{ text: '💸 Отметить оплату комиссии', callback_data: `claimpay:${lead.id}` }]];
     }
-    return rows;
+    return [];
   }
   return lead.pendingCommissionClaim
     ? [[{ text: '✅ Подтвердить', callback_data: `confirmpay:${lead.id}` }, { text: '❌ Отклонить', callback_data: `rejectpay:${lead.id}` }]]

@@ -3,13 +3,13 @@ export const prerender = false;
 import type { APIContext } from 'astro';
 import { secretMatches } from '@/lib/verifySecret';
 import {
-  isLeadStatusKey, answerCallback, refreshLeadCard, sendForceReplyPrompt, formatMoney,
+  isLeadStatusKey, answerCallback, refreshLeadCard, sendForceReplyPrompt,
   sendDealNotificationToAdmin, sendCommissionClaimToAdmin, sendCommissionResultToOwner, sendMessage,
   buildOwedList, formatDealsList, formatSearchResults, buildMenu, buildLeadList, buildStats,
   buildLeadDetail, editLeadDetailMessage, type Role,
 } from '@/lib/telegram';
 import {
-  getLead, setStatus, archiveLead, unarchiveLead, toggleCustomerPaid, confirmCommissionPayment,
+  getLead, setStatus, archiveLead, unarchiveLead, confirmCommissionPayment, claimFullCommission,
   rejectCommissionPayment, setPendingPrompt, findByPendingPrompt, resolvePendingPrompt, searchLeads,
   getOwedSummary, readLeads, getCommission, type LeadStatus, type StoredLead,
 } from '@/lib/store';
@@ -123,29 +123,24 @@ async function handleUnarchiveCallback(id: number, chatId: number, messageId: nu
   });
 }
 
-async function handleCustPaidCallback(id: number, chatId: number, messageId: number, role: Role, cbId: string): Promise<void> {
-  await withErrorAck(cbId, { id }, async () => {
-    const updated = await toggleCustomerPaid(id);
-    await refreshBothSurfaces(updated, chatId, messageId, role);
-    await answerCallback(cbId);
-  });
-}
-
-async function handleClaimPayCallback(id: number, chatId: number, cbId: string): Promise<void> {
+async function handleClaimPayCallback(id: number, chatId: number, messageId: number, role: Role, cbId: string): Promise<void> {
   await withErrorAck(cbId, { id }, async () => {
     const lead = await getLead(id);
     if (!lead || lead.dealAmount == null) {
       await answerCallback(cbId).catch(() => {});
       return;
     }
-    const { remaining, isPaidOff } = getCommission(lead);
+    const { isPaidOff } = getCommission(lead);
     if (isPaidOff || lead.pendingCommissionClaim) {
       await answerCallback(cbId).catch(() => {});
       return;
     }
-    const promptId = await sendForceReplyPrompt(chatId, `💸 Сколько отправили? Осталось: ${formatMoney(remaining)}`);
-    await setPendingPrompt(id, { chatId, messageId: promptId, kind: 'commission_claim' });
-    await answerCallback(cbId, 'Жду сумму');
+    const updated = await claimFullCommission(id);
+    if (updated) {
+      await refreshBothSurfaces(updated, chatId, messageId, role);
+      await sendCommissionClaimToAdmin(updated);
+    }
+    await answerCallback(cbId, 'Отмечено — ждём подтверждения');
   });
 }
 
@@ -201,7 +196,6 @@ async function handleCallbackQuery(cb: NonNullable<TelegramUpdate['callback_quer
   const statusMatch = /^st:(\d+):(.+)$/.exec(data);
   const archMatch = /^arch:(\d+)$/.exec(data);
   const unarchMatch = /^unarch:(\d+)$/.exec(data);
-  const custPaidMatch = /^custpaid:(\d+)$/.exec(data);
   const claimPayMatch = /^claimpay:(\d+)$/.exec(data);
   const confirmPayMatch = /^confirmpay:(\d+)$/.exec(data);
   const rejectPayMatch = /^rejectpay:(\d+)$/.exec(data);
@@ -221,14 +215,9 @@ async function handleCallbackQuery(cb: NonNullable<TelegramUpdate['callback_quer
     await handleUnarchiveCallback(Number(unarchMatch[1]), chatId, messageId, role, cb.id);
     return;
   }
-  if (custPaidMatch) {
-    if (!(await requireRole(role, 'owner', cb.id))) return;
-    await handleCustPaidCallback(Number(custPaidMatch[1]), chatId, messageId, role, cb.id);
-    return;
-  }
   if (claimPayMatch) {
     if (!(await requireRole(role, 'owner', cb.id))) return;
-    await handleClaimPayCallback(Number(claimPayMatch[1]), chatId, cb.id);
+    await handleClaimPayCallback(Number(claimPayMatch[1]), chatId, messageId, role, cb.id);
     return;
   }
   if (confirmPayMatch) {
@@ -294,37 +283,21 @@ async function handlePromptReply(chatId: number, replyToMessageId: number, text:
   if (!pending?.pendingPrompt) return;
   const kind = pending.pendingPrompt.kind;
 
-  if (kind === 'deal_amount' || kind === 'commission_claim') {
+  if (kind === 'deal_amount') {
     const amount = parseAmount(text);
     if (amount == null) {
       await sendMessage(chatId, '⚠️ Нужно число больше нуля. Попробуйте ещё раз.');
       return;
     }
-    if (kind === 'deal_amount') {
-      const updated = await resolvePendingPrompt(chatId, replyToMessageId, () => ({
-        dealAmount: amount,
-        status: 'won',
-        statusChangedAt: new Date().toISOString(),
-        lastRemindedAt: null,
-      }));
-      if (updated) {
-        await refreshLeadCard(updated);
-        await sendDealNotificationToAdmin(updated);
-      }
-    } else {
-      // Guards against a fat-fingered typo (extra zero) silently "overpaying"
-      // — the claim can never exceed what's actually still owed as of this
-      // read. resolvePendingPrompt's own atomicity is what keeps the money
-      // state itself consistent; this is just input sanity on top of that.
-      const { remaining } = getCommission(pending);
-      if (amount > remaining) {
-        await sendMessage(chatId, `⚠️ Больше остатка (${formatMoney(remaining)}). Введите сумму не больше остатка.`);
-        return;
-      }
-      const updated = await resolvePendingPrompt(chatId, replyToMessageId, () => ({
-        pendingCommissionClaim: { amount, claimedAt: new Date().toISOString() },
-      }));
-      if (updated) await sendCommissionClaimToAdmin(updated);
+    const updated = await resolvePendingPrompt(chatId, replyToMessageId, () => ({
+      dealAmount: amount,
+      status: 'won',
+      statusChangedAt: new Date().toISOString(),
+      lastRemindedAt: null,
+    }));
+    if (updated) {
+      await refreshLeadCard(updated);
+      await sendDealNotificationToAdmin(updated);
     }
     return;
   }

@@ -43,7 +43,6 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     createdAt: '2026-01-01T00:00:00.000Z',
     pendingPrompt: null,
     archived: false,
-    customerPaidAt: null,
     pendingCommissionClaim: null,
     ...overrides,
   };

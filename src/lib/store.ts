@@ -8,7 +8,7 @@ export type LeadStatus = z.infer<typeof leadStatusSchema>;
 const pendingPromptSchema = z.object({
   chatId: z.number().int(),
   messageId: z.number().int(),
-  kind: z.enum(['deal_amount', 'edit_name', 'edit_contact', 'edit_comment', 'commission_claim']),
+  kind: z.enum(['deal_amount', 'edit_name', 'edit_contact', 'edit_comment']),
 });
 export type PendingPrompt = z.infer<typeof pendingPromptSchema>;
 
@@ -51,7 +51,6 @@ const storedLeadSchema = z.object({
   createdAt: z.string(),
   pendingPrompt: pendingPromptSchema.nullable().default(null),
   archived: z.boolean().default(false),
-  customerPaidAt: z.string().nullable().default(null),
   pendingCommissionClaim: pendingCommissionClaimSchema.nullable().default(null),
 });
 export type StoredLead = z.infer<typeof storedLeadSchema>;
@@ -198,8 +197,12 @@ export function unarchiveLead(id: number): Promise<StoredLead | undefined> {
   return updateOne(id, l => ({ ...l, archived: false }));
 }
 
-export function toggleCustomerPaid(id: number): Promise<StoredLead | undefined> {
-  return updateOne(id, l => ({ ...l, customerPaidAt: l.customerPaidAt ? null : new Date().toISOString() }));
+// Claiming means "I sent it all" — no separate amount prompt, always the full remaining balance.
+export function claimFullCommission(id: number): Promise<StoredLead | undefined> {
+  return updateOne(id, l => ({
+    ...l,
+    pendingCommissionClaim: { amount: getCommission(l).remaining, claimedAt: new Date().toISOString() },
+  }));
 }
 
 // Moves the claim into paidAmount/payments; returns undefined on a no-op.

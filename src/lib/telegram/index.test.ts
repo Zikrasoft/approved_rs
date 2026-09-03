@@ -33,7 +33,6 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     createdAt: '2026-01-01T00:00:00.000Z',
     pendingPrompt: null,
     archived: false,
-    customerPaidAt: null,
     pendingCommissionClaim: null,
     ...overrides,
   };
@@ -427,13 +426,11 @@ describe('buildLeadDetail', () => {
     expect(reply_markup.inline_keyboard[0].map(b => b.callback_data)).toEqual(['st:7:won', 'st:7:lost']);
   });
 
-  it('won lead, owner, no claim pending: customer-paid toggle + a claim button', () => {
+  it('won lead, owner, no claim pending: a claim button', () => {
     const lead = makeLead({ id: 7, status: 'won', dealAmount: 100000, paidAmount: 0 });
     const { text, reply_markup } = buildLeadDetail(lead, 'owner');
-    expect(text).toContain('🧾 Оплата клиента: ⏳ не отмечена');
     expect(text).toContain('Осталось:');
     const data = reply_markup.inline_keyboard.flat().map(b => b.callback_data);
-    expect(data).toContain('custpaid:7');
     expect(data).toContain('claimpay:7');
     expect(reply_markup.inline_keyboard[0].some(b => b.callback_data?.startsWith('st:'))).toBe(false);
   });
@@ -451,7 +448,6 @@ describe('buildLeadDetail', () => {
     const data = reply_markup.inline_keyboard.flat().map(b => b.callback_data);
     expect(data).not.toContain('confirmpay:7');
     expect(data).not.toContain('rejectpay:7');
-    expect(data).not.toContain('custpaid:7');
   });
 
   it('won lead, admin, claim pending: shows confirm/reject', () => {
@@ -468,9 +464,8 @@ describe('buildLeadDetail', () => {
   });
 
   it('lost lead: no money row regardless of role', () => {
-    const { text, reply_markup } = buildLeadDetail(makeLead({ id: 7, status: 'lost' }), 'admin');
+    const { text } = buildLeadDetail(makeLead({ id: 7, status: 'lost' }), 'admin');
     expect(text).not.toContain('Комиссия Zikrasoft');
-    expect(reply_markup.inline_keyboard.flat().map(b => b.callback_data)).not.toContain('custpaid:7');
   });
 
   it('archived lead: only a restore button, regardless of status/role', () => {
