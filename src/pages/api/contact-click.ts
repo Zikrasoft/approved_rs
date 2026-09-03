@@ -50,7 +50,6 @@ export async function POST({ request }: APIContext): Promise<Response> {
   const copy = CHANNEL_COPY[channel];
 
   const lead = {
-    id: Date.now(),
     name: '',
     contact: '—',
     service: copy.service,

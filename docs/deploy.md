@@ -28,6 +28,12 @@
 | `TELEGRAM_BOT_TOKEN` | Токен бота для приёма заявок | [@BotFather](https://t.me/BotFather) |
 | `TELEGRAM_GROUP_ID` | ID группы куда слать заявки | `@username` или `-100...` |
 | `TELEGRAM_WEBHOOK_SECRET` | Секрет для проверки запросов к `/api/telegram-webhook` | Придумать самим, любая случайная строка |
+| `TELEGRAM_OWNER_ID` | Telegram user id владельца (числовой, не @username) — доступ к личному меню бота | [@userinfobot](https://t.me/userinfobot) |
+| `TELEGRAM_ADMIN_ID` | Telegram user id админа/партнёра — доступ к финансовому меню бота | [@userinfobot](https://t.me/userinfobot) |
+| `TELEGRAM_BOT_USERNAME` | @username бота без `@`, для deep-link кнопки «Открыть в боте» в группе | [@BotFather](https://t.me/BotFather) или один раз `getMe` |
+| `CRON_SECRET` | Секрет для проверки запросов Vercel Cron к `/api/reminders` | Придумать самим, любая случайная строка |
+| `LEAD_STALE_DAYS` | Через сколько дней в статусе «В работе» слать напоминание | По умолчанию `5` |
+| `BLOB_READ_WRITE_TOKEN` | Доступ к Vercel Blob (хранилище заявок/сделок) | Автоматически, после подключения Blob store в Storage tab — руками не задавать |
 
 > `PUBLIC_*` переменные доступны в браузере — не класть в них секреты.
 
@@ -58,11 +64,15 @@ Vercel автоматически запустит деплой при пуше 
 
 ## Telegram webhook
 
-Заявки в группе идут со статус-кнопками («В работе» / «Успешно» / «Отказ») —
-нажатие правит текст того же сообщения через `/api/telegram-webhook`, без
-базы данных и отдельного бот-сервера. После первого деплоя нужно
-зарегистрировать webhook, задав `secret_token` (то же значение, что в
-`TELEGRAM_WEBHOOK_SECRET`) — без него эндпоинт отвечает 401 на любой запрос:
+Группа получает только короткий тизер заявки («#123 · Иван · Автоподбор ·
+статус») и кнопку-ссылку «Открыть в боте» — всё управление (статусы,
+редактирование, архив, деньги) происходит в личке с ботом. Заявки хранятся
+в Vercel Blob (`data/leads.json`, приватный доступ), без внешней БД.
+Владелец и админ должны один раз написать боту `/start`, прежде чем бот
+сможет слать им личные сообщения (в т.ч. напоминания по крону). После
+первого деплоя нужно зарегистрировать webhook, задав `secret_token` (то же
+значение, что в `TELEGRAM_WEBHOOK_SECRET`) — без него эндпоинт отвечает 401
+на любой запрос:
 
 ```bash
 curl "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook?url=https://approved.rs/api/telegram-webhook&secret_token=<TELEGRAM_WEBHOOK_SECRET>"

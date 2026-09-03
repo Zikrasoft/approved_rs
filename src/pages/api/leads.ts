@@ -34,7 +34,7 @@ export async function POST({ request, redirect, cookies }: APIContext): Promise<
     return new Response(MISSING_FIELDS_MESSAGE[locale], { status: 400 });
   }
 
-  const lead = { id: Date.now(), name, contact, service, contactChannel, comment, country, source_url, visitorId, locale };
+  const lead = { name, contact, service, contactChannel, comment, country, source_url, visitorId, locale };
 
   // Fire-and-forget after the response: the visitor doesn't wait on either
   // Telegram or Sheets, waitUntil keeps the function alive to finish them.
