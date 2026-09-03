@@ -6,7 +6,7 @@ import {
   isLeadStatusKey, answerCallback, refreshLeadCard, sendForceReplyPrompt, safeEditMessage,
   sendDealNotificationToAdmin, sendCommissionClaimToAdmin, sendCommissionResultToOwner, sendMessage,
   buildOwedList, formatDealsList, buildSearchResults, buildMenu, buildHelp, buildLeadList, buildStats,
-  buildLeadDetail, buildDeleteConfirm, editLeadDetailMessage, type Role,
+  buildLeadDetail, buildDeleteConfirm, editLeadDetailMessage, OWNER_IDS, ADMIN_IDS, type Role,
 } from '@/lib/telegram';
 import {
   getLead, setStatus, archiveLead, unarchiveLead, deleteLead, confirmCommissionPayment, claimFullCommission,
@@ -15,8 +15,6 @@ import {
 } from '@/lib/store';
 
 const WEBHOOK_SECRET = import.meta.env.TELEGRAM_WEBHOOK_SECRET;
-const OWNER_ID = Number(import.meta.env.TELEGRAM_OWNER_ID);
-const ADMIN_ID = Number(import.meta.env.TELEGRAM_ADMIN_ID);
 
 interface TelegramMessage {
   message_id: number;
@@ -39,8 +37,9 @@ interface TelegramUpdate {
 const ACK = new Response(null, { status: 200 });
 
 function roleOf(id: number | undefined): Role | undefined {
-  if (id === OWNER_ID) return 'owner';
-  if (id === ADMIN_ID) return 'admin';
+  if (id == null) return undefined;
+  if (OWNER_IDS.includes(id)) return 'owner';
+  if (ADMIN_IDS.includes(id)) return 'admin';
   return undefined;
 }
 

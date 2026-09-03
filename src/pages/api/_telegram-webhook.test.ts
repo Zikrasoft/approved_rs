@@ -23,6 +23,8 @@ vi.mock('@/lib/telegram', () => ({
   buildDeleteConfirm: vi.fn((lead: { id: number }) => ({ text: `DELCONFIRM_${lead.id}`, reply_markup: { inline_keyboard: [] } })),
   editLeadDetailMessage: vi.fn(),
   safeEditMessage: vi.fn(),
+  OWNER_IDS: [111],
+  ADMIN_IDS: [222],
 }));
 
 vi.mock('@/lib/store', () => ({

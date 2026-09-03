@@ -8,6 +8,8 @@ vi.mock('@/lib/store', () => ({
 }));
 vi.mock('@/lib/telegram', () => ({
   sendReminderMessage: vi.fn(),
+  OWNER_IDS: [111],
+  ADMIN_IDS: [222],
 }));
 
 import { GET } from './reminders';

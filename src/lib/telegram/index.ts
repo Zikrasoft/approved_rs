@@ -4,7 +4,7 @@ export {
   buildOwedList, formatDealsList, buildSearchResults, buildMenu, buildHelp, buildLeadList,
   buildStats, buildLeadDetail, buildDeleteConfirm,
 } from './format';
-export { sendMessage, sendForceReplyPrompt, answerCallback, safeEditMessage } from './client';
+export { sendMessage, sendForceReplyPrompt, answerCallback, safeEditMessage, OWNER_IDS, ADMIN_IDS } from './client';
 export {
   sendLeadNotification, refreshLeadCard, sendReminderMessage, sendDealNotificationToAdmin,
   sendCommissionClaimToAdmin, sendCommissionResultToOwner, editLeadDetailMessage,

@@ -3,11 +3,10 @@ export const prerender = false;
 import type { APIContext } from 'astro';
 import { secretMatches } from '@/lib/verifySecret';
 import { getStaleLeads, markReminded } from '@/lib/store';
-import { sendReminderMessage } from '@/lib/telegram';
+import { sendReminderMessage, OWNER_IDS, ADMIN_IDS } from '@/lib/telegram';
 
 const CRON_SECRET = import.meta.env.CRON_SECRET;
-const OWNER_ID = Number(import.meta.env.TELEGRAM_OWNER_ID);
-const ADMIN_ID = Number(import.meta.env.TELEGRAM_ADMIN_ID);
+const RECIPIENT_IDS = [...OWNER_IDS, ...ADMIN_IDS];
 const DEFAULT_STALE_DAYS = 5;
 
 // Vercel Cron sends `Authorization: Bearer $CRON_SECRET` automatically once
@@ -29,8 +28,9 @@ export async function GET({ request }: APIContext): Promise<Response> {
   let reminded = 0;
   for (const lead of stale) {
     try {
-      await sendReminderMessage(lead, OWNER_ID);
-      await sendReminderMessage(lead, ADMIN_ID);
+      for (const id of RECIPIENT_IDS) {
+        await sendReminderMessage(lead, id);
+      }
       await markReminded(lead.id);
       reminded++;
     } catch (err) {

@@ -233,7 +233,7 @@ describe('sendDealNotificationToAdmin', () => {
   it('computes commission from commissionPercent — informational only, no button', async () => {
     await sendDealNotificationToAdmin(makeLead({ id: 9, dealAmount: 100000, commissionPercent: 10 }));
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.chat_id).toBe('222');
+    expect(body.chat_id).toBe(222);
     expect(body.text).toContain(`Твоя комиссия (10%): ${money(10000)}`);
     expect(body.reply_markup).toBeUndefined();
   });
@@ -251,7 +251,7 @@ describe('sendCommissionClaimToAdmin', () => {
   it('notifies the admin with confirm/reject buttons for the claimed amount', async () => {
     await sendCommissionClaimToAdmin(makeLead({ id: 9, pendingCommissionClaim: { amount: 4000, claimedAt: '2026-01-01T00:00:00.000Z' } }));
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.chat_id).toBe('222');
+    expect(body.chat_id).toBe(222);
     expect(body.text).toContain(money(4000));
     const buttons = body.reply_markup.inline_keyboard[0];
     expect(buttons.map((b: { callback_data: string }) => b.callback_data)).toEqual(['confirmpay:9', 'rejectpay:9']);
@@ -270,7 +270,7 @@ describe('sendCommissionResultToOwner', () => {
   it('tells the owner the payment was confirmed', async () => {
     await sendCommissionResultToOwner(makeLead({ id: 9 }), true);
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.chat_id).toBe('111');
+    expect(body.chat_id).toBe(111);
     expect(body.text).toContain('подтверждена');
   });
 

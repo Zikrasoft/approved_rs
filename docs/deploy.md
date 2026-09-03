@@ -28,8 +28,8 @@
 | `TELEGRAM_BOT_TOKEN` | Токен бота для приёма заявок | [@BotFather](https://t.me/BotFather) |
 | `TELEGRAM_GROUP_ID` | ID группы куда слать заявки | `@username` или `-100...` |
 | `TELEGRAM_WEBHOOK_SECRET` | Секрет для проверки запросов к `/api/telegram-webhook` | Придумать самим, любая случайная строка |
-| `TELEGRAM_OWNER_ID` | Telegram user id владельца (числовой, не @username) — доступ к личному меню бота | [@userinfobot](https://t.me/userinfobot) |
-| `TELEGRAM_ADMIN_ID` | Telegram user id админа/партнёра — доступ к финансовому меню бота | [@userinfobot](https://t.me/userinfobot) |
+| `TELEGRAM_OWNER_ID` | Telegram user id владельца (числовой, не @username) — доступ к личному меню бота. Через запятую, если у человека несколько аккаунтов (`111,222`) | [@userinfobot](https://t.me/userinfobot) |
+| `TELEGRAM_ADMIN_ID` | Telegram user id админа/партнёра — доступ к финансовому меню бота. Тоже можно через запятую | [@userinfobot](https://t.me/userinfobot) |
 | `TELEGRAM_BOT_USERNAME` | @username бота без `@`, для deep-link кнопки «Открыть в боте» в группе | [@BotFather](https://t.me/BotFather) или один раз `getMe` |
 | `CRON_SECRET` | Секрет для проверки запросов Vercel Cron к `/api/reminders` | Придумать самим, любая случайная строка |
 | `LEAD_STALE_DAYS` | Через сколько дней в статусе «В работе» слать напоминание | По умолчанию `5` |

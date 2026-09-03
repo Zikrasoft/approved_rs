@@ -1,7 +1,7 @@
 // Send/edit orchestration for lead-lifecycle events. Builds nothing itself
 // — text/keyboards come from format.ts, delivery from client.ts.
 import type { StoredLead } from '../store';
-import { tgPost, expectMessageAndChatId, safeEditMessage, sendMessage, GROUP_ID, OWNER_ID, ADMIN_ID } from './client';
+import { tgPost, expectMessageAndChatId, safeEditMessage, sendMessage, GROUP_ID, OWNER_IDS, ADMIN_IDS } from './client';
 import {
   formatTeaser, deepLinkKeyboard, reminderText, dealNotificationText, commissionClaimText,
   commissionResultText, buildLeadDetail, type Role,
@@ -36,14 +36,19 @@ export async function sendReminderMessage(lead: StoredLead, chatId: number): Pro
   await tgPost('sendMessage', { chat_id: chatId, text: reminderText(lead), parse_mode: 'HTML', reply_markup: deepLinkKeyboard(lead.id) });
 }
 
+// One person, possibly several Telegram accounts — every id gets the message.
+async function sendToAll(ids: number[], text: string, extra?: object): Promise<void> {
+  await Promise.all(ids.map(id => sendMessage(id, text, extra)));
+}
+
 export async function sendDealNotificationToAdmin(lead: StoredLead): Promise<void> {
-  if (!ADMIN_ID || lead.dealAmount == null) return;
-  await sendMessage(ADMIN_ID, dealNotificationText({ ...lead, dealAmount: lead.dealAmount }));
+  if (lead.dealAmount == null) return;
+  await sendToAll(ADMIN_IDS, dealNotificationText({ ...lead, dealAmount: lead.dealAmount }));
 }
 
 export async function sendCommissionClaimToAdmin(lead: StoredLead): Promise<void> {
-  if (!ADMIN_ID || !lead.pendingCommissionClaim) return;
-  await sendMessage(ADMIN_ID, commissionClaimText({ ...lead, pendingCommissionClaim: lead.pendingCommissionClaim }), {
+  if (!lead.pendingCommissionClaim) return;
+  await sendToAll(ADMIN_IDS, commissionClaimText({ ...lead, pendingCommissionClaim: lead.pendingCommissionClaim }), {
     reply_markup: {
       inline_keyboard: [[
         { text: '✅ Подтвердить', callback_data: `confirmpay:${lead.id}` },
@@ -54,8 +59,7 @@ export async function sendCommissionClaimToAdmin(lead: StoredLead): Promise<void
 }
 
 export async function sendCommissionResultToOwner(lead: StoredLead, confirmed: boolean): Promise<void> {
-  if (!OWNER_ID) return;
-  await sendMessage(OWNER_ID, commissionResultText(lead.id, confirmed));
+  await sendToAll(OWNER_IDS, commissionResultText(lead.id, confirmed));
 }
 
 export async function editLeadDetailMessage(chatId: number, messageId: number, lead: StoredLead, role: Role): Promise<void> {
