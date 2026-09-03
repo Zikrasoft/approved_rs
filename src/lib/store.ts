@@ -59,8 +59,12 @@ const storedLeadSchema = z.object({
 export type StoredLead = z.infer<typeof storedLeadSchema>;
 
 const LEADS_PATH = 'data/leads.json';
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 5;
 const PAID_EPSILON = 0.005;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 export function roundMoney(n: number): number {
   return Math.round(n * 100) / 100;
@@ -104,6 +108,9 @@ async function writeLeadsRaw(leads: StoredLead[], etag: string | undefined): Pro
 export async function updateLeads(mutate: (leads: StoredLead[]) => StoredLead[]): Promise<StoredLead[]> {
   let lastErr: unknown;
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    // Jittered backoff before a retry — without it, two requests racing in
+    // lockstep can keep re-colliding on every attempt instead of one winning.
+    if (attempt > 0) await sleep(20 + Math.random() * 60);
     const { leads, etag } = await readLeadsRaw();
     const next = mutate(leads);
     // Validate before writing, not just on the next read — outside the
