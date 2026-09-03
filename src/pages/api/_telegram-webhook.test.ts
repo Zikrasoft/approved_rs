@@ -176,7 +176,7 @@ describe('POST /api/telegram-webhook', () => {
       }));
       expect(res.status).toBe(200);
       expect(setStatus).not.toHaveBeenCalled();
-      expect(sendForceReplyPrompt).toHaveBeenCalledWith(DM_CHAT_ID, expect.stringContaining('сумму'));
+      expect(sendForceReplyPrompt).toHaveBeenCalledWith(DM_CHAT_ID, expect.stringContaining('заработал'));
       expect(setPendingPrompt).toHaveBeenCalledWith(5, { chatId: DM_CHAT_ID, messageId: 888, kind: 'deal_amount' });
       expect(answerCallback).toHaveBeenCalledWith('cb-2', 'Жду сумму');
     });

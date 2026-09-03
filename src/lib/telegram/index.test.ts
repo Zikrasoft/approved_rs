@@ -226,7 +226,7 @@ describe('sendDealNotificationToAdmin', () => {
     await sendDealNotificationToAdmin(makeLead({ id: 9, dealAmount: 100000, commissionPercent: 10 }));
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.chat_id).toBe('222');
-    expect(body.text).toContain(`Комиссия (10%): ${money(10000)}`);
+    expect(body.text).toContain(`Твоя комиссия (10%): ${money(10000)}`);
     expect(body.reply_markup).toBeUndefined();
   });
 
@@ -378,7 +378,7 @@ describe('buildStats', () => {
     ];
     const text = buildStats(leads);
     expect(text).toContain('Всего заявок: 4 (+1 в архиве)');
-    expect(text).toContain(`💰 Оборот (сумма сделок): ${money(100000)}`);
+    expect(text).toContain(`💰 Заработано (доход владельца): ${money(100000)}`);
     expect(text).toContain(`Комиссия начислена: ${money(10000)}`);
     expect(text).toContain(`Оплачено: ${money(4000)}`);
     expect(text).toContain(`🔴 Осталось получить: ${money(6000)}`);

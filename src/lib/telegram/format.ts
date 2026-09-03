@@ -72,7 +72,7 @@ function formatLeadText(lead: StoredLead): string {
     `🚗 Заявка #${lead.id} — ${escapeHtml(serviceLabel(lead.service))}`,
     statusLine(lead.status),
   ];
-  if (lead.dealAmount != null) lines.push(`💰 Сумма сделки: ${formatMoney(lead.dealAmount)}`);
+  if (lead.dealAmount != null) lines.push(`💰 Твой доход с заявки: ${formatMoney(lead.dealAmount)}`);
   lines.push(``, `Имя: ${escapeHtml(lead.name)}`, `Контакт: ${escapeHtml(contactLine)}`);
   if (lead.country) lines.push(`Страна: ${escapeHtml(lead.country.toUpperCase())}`);
   if (lead.comment) lines.push(`Комментарий: ${escapeHtml(lead.comment)}`);
@@ -132,8 +132,8 @@ export function dealNotificationText(lead: StoredLead & { dealAmount: number }):
     ``,
     `#${lead.id} ${escapeHtml(lead.name)}`,
     ``,
-    `Сумма сделки: ${formatMoney(lead.dealAmount)}`,
-    `Комиссия (${lead.commissionPercent}%): ${formatMoney(commission)}`,
+    `Доход с заявки: ${formatMoney(lead.dealAmount)}`,
+    `Твоя комиссия (${lead.commissionPercent}%): ${formatMoney(commission)}`,
   ].join('\n');
 }
 
@@ -170,7 +170,7 @@ export function formatDealsList(leads: StoredLead[]): string {
   if (deals.length === 0) return '<b>💰 Все сделки</b>\n\nСделок пока нет.';
   const lines = deals.map(l => {
     const info = getCommission(l);
-    return `#${l.id} ${escapeHtml(l.name)}\n${formatMoney(l.dealAmount)} · комиссия ${formatMoney(info.commission)}\n${paidStatusMark(l, info)}`;
+    return `#${l.id} ${escapeHtml(l.name)}\nдоход ${formatMoney(l.dealAmount)} · комиссия ${formatMoney(info.commission)}\n${paidStatusMark(l, info)}`;
   });
   return ['<b>💰 Все сделки</b>', ...lines].join('\n\n');
 }
@@ -222,7 +222,7 @@ export function buildStats(leads: StoredLead[]): string {
   const archivedCount = leads.length - active.length;
   const count = (s: LeadStatus) => active.filter(l => l.status === s).length;
   const wonLeads = active.filter((l): l is StoredLead & { dealAmount: number } => l.status === 'won' && l.dealAmount != null);
-  const turnover = roundMoney(wonLeads.reduce((sum, l) => sum + l.dealAmount, 0));
+  const totalEarned = roundMoney(wonLeads.reduce((sum, l) => sum + l.dealAmount, 0));
   const commissionTotal = roundMoney(wonLeads.reduce((sum, l) => sum + getCommission(l).commission, 0));
   const paidTotal = roundMoney(wonLeads.reduce((sum, l) => sum + l.paidAmount, 0));
   const remainingTotal = roundMoney(wonLeads.reduce((sum, l) => sum + getCommission(l).remaining, 0));
@@ -233,7 +233,7 @@ export function buildStats(leads: StoredLead[]): string {
     `Всего заявок: ${active.length}${archivedCount ? ` (+${archivedCount} в архиве)` : ''}`,
     `🆕 Новые: ${count('new')}   🔵 В работе: ${count('in_progress')}   ✅ Завершено: ${count('won')}   ❌ Отказ: ${count('lost')}`,
     '',
-    `💰 Оборот (сумма сделок): ${formatMoney(turnover)}`,
+    `💰 Заработано (доход владельца): ${formatMoney(totalEarned)}`,
     `Комиссия начислена: ${formatMoney(commissionTotal)}`,
     `Оплачено: ${formatMoney(paidTotal)}`,
     `🔴 Осталось получить: ${formatMoney(remainingTotal)}`,

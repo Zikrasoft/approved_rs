@@ -102,7 +102,7 @@ async function handleStatusCallback(id: number, key: string, chatId: number, mes
         await answerCallback(cbId, 'Уже ждём сумму — ответьте на предыдущее сообщение').catch(() => {});
         return;
       }
-      const promptId = await sendForceReplyPrompt(chatId, '💰 Укажи сумму сделки в евро:\n\nНапример: 15000');
+      const promptId = await sendForceReplyPrompt(chatId, '💰 Сколько ты заработал с этой заявки (в евро)? Не стоимость машины, а твоя прибыль.\n\nНапример: 300');
       await setPendingPrompt(id, { chatId, messageId: promptId, kind: 'deal_amount' });
       await answerCallback(cbId, 'Жду сумму');
       return;
