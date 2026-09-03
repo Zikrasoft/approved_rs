@@ -1,16 +1,17 @@
 export const prerender = false;
 
 import type { APIContext } from 'astro';
+import { parse, isValid, isBefore, startOfDay, format, addDays } from 'date-fns';
 import { secretMatches } from '@/lib/verifySecret';
 import {
   isLeadStatusKey, answerCallback, refreshLeadCard, sendForceReplyPrompt, safeEditMessage,
   sendDealNotificationToAdmin, sendCommissionClaimToAdmin, sendCommissionResultToOwner, sendStatusChangeToAdmin, sendMessage,
-  buildOwedList, formatDealsList, buildSearchResults, buildMenu, buildHelp, buildLeadList, buildStats,
-  buildLeadDetail, buildDeleteConfirm, editLeadDetailMessage, OWNER_IDS, ADMIN_IDS, type Role,
+  buildOwedList, formatDealsList, buildSearchResults, buildMenu, buildHelp, buildLeadList, buildStats, formatDateRu,
+  buildLeadDetail, buildDeleteConfirm, buildRemindPicker, editLeadDetailMessage, OWNER_IDS, ADMIN_IDS, type Role,
 } from '@/lib/telegram';
 import {
   getLead, setStatus, archiveLead, unarchiveLead, deleteLead, confirmCommissionPayment, claimFullCommission,
-  rejectCommissionPayment, setPendingPrompt, findByPendingPrompt, resolvePendingPrompt, searchLeads,
+  rejectCommissionPayment, setPendingPrompt, findByPendingPrompt, resolvePendingPrompt, searchLeads, resumeLead, postponeLead, appendNote,
   getOwedSummary, readLeads, getCommission, type LeadStatus, type StoredLead,
 } from '@/lib/store';
 
@@ -71,6 +72,19 @@ function parseAmount(text: string): number | null {
   if (trimmed.startsWith('-')) return null;
   const amount = Number(trimmed.replace(/[^\d.,]/g, '').replace(',', '.'));
   return Number.isFinite(amount) && amount > 0 ? amount : null;
+}
+
+// ДД.ММ.ГГГГ -> ISO 'YYYY-MM-DD', rejecting impossible calendar dates
+// (date-fns' `parse` marks 31.02 etc. invalid rather than rolling over) and
+// any date before today — a reminder for the past makes no sense.
+function parseReminderDate(text: string): string | null {
+  const parsed = parse(text.trim(), 'dd.MM.yyyy', new Date());
+  if (!isValid(parsed) || isBefore(parsed, startOfDay(new Date()))) return null;
+  return format(parsed, 'yyyy-MM-dd');
+}
+
+function quickRemindDate(days: number): string {
+  return format(addDays(new Date(), days), 'yyyy-MM-dd');
 }
 
 // Every mutation touches two surfaces — the group teaser and whichever DM
@@ -140,6 +154,78 @@ async function handleUnarchiveCallback(id: number, chatId: number, messageId: nu
     const updated = await unarchiveLead(id);
     await refreshBothSurfaces(updated, chatId, messageId, role);
     await answerCallback(cbId, 'Восстановлено');
+  });
+}
+
+// Tapping "⏰ Отложить" opens the picker (quick presets / calendar / type it)
+// in place of the lead card, rather than jumping straight to a text prompt.
+async function handlePostponeCallback(id: number, chatId: number, messageId: number, cbId: string): Promise<void> {
+  await withErrorAck(cbId, { id }, async () => {
+    const lead = await getLead(id);
+    if (!lead) {
+      await answerCallback(cbId).catch(() => {});
+      return;
+    }
+    const { text, reply_markup } = buildRemindPicker(id);
+    await safeEditMessage(chatId, messageId, text, reply_markup);
+    await answerCallback(cbId);
+  });
+}
+
+// Shared by every date-picking path (quick preset, calendar day, typed
+// reply) once an actual ISO date has been settled on.
+async function applyPostpone(id: number, remindAt: string, chatId: number, messageId: number, role: Role, cbId: string): Promise<void> {
+  await withErrorAck(cbId, { id }, async () => {
+    // No pre-read here — postponeLead builds the comment note from the live
+    // lead inside its own CAS-protected write, and no-ops (returns
+    // undefined) if the lead isn't found or isn't 'in_progress' anymore
+    // (e.g. a stale button on an old message, already resolved elsewhere).
+    const updated = await postponeLead(id, remindAt, `Отложено до ${formatDateRu(remindAt)}`);
+    if (!updated) {
+      await answerCallback(cbId).catch(() => {});
+      return;
+    }
+    await refreshBothSurfaces(updated, chatId, messageId, role);
+    await sendStatusChangeToAdmin(updated);
+    await answerCallback(cbId, 'Отложено');
+  });
+}
+
+async function handleRemindTypeCallback(id: number, chatId: number, cbId: string): Promise<void> {
+  await withErrorAck(cbId, { id }, async () => {
+    const lead = await getLead(id);
+    if (!lead) {
+      await answerCallback(cbId).catch(() => {});
+      return;
+    }
+    const promptId = await sendForceReplyPrompt(chatId, '⏰ На какую дату напомнить? (ДД.ММ.ГГГГ)\n\nНапример: 20.10.2026');
+    await setPendingPrompt(id, { chatId, messageId: promptId, kind: 'postpone' });
+    await answerCallback(cbId, 'Жду дату');
+  });
+}
+
+async function handleRemindCancelCallback(id: number, chatId: number, messageId: number, role: Role, cbId: string): Promise<void> {
+  await withErrorAck(cbId, { id }, async () => {
+    const lead = await getLead(id);
+    if (lead) {
+      await editLeadDetailMessage(chatId, messageId, lead, role);
+    } else {
+      await safeEditMessage(chatId, messageId, 'Заявка не найдена.', { inline_keyboard: [] });
+    }
+    await answerCallback(cbId);
+  });
+}
+
+async function handleResumeCallback(id: number, chatId: number, messageId: number, role: Role, cbId: string): Promise<void> {
+  await withErrorAck(cbId, { id }, async () => {
+    const updated = await resumeLead(id);
+    if (!updated) {
+      await answerCallback(cbId).catch(() => {});
+      return;
+    }
+    await refreshBothSurfaces(updated, chatId, messageId, role);
+    await sendStatusChangeToAdmin(updated);
+    await answerCallback(cbId, 'Возобновлено');
   });
 }
 
@@ -256,8 +342,13 @@ async function handleCallbackQuery(cb: NonNullable<TelegramUpdate['callback_quer
   const confirmPayMatch = /^confirmpay:(\d+)$/.exec(data);
   const rejectPayMatch = /^rejectpay:(\d+)$/.exec(data);
   const editMatch = /^edit:(\d+):(name|contact|comment)$/.exec(data);
-  const listMatch = /^list:(new|in_progress|won|lost)$/.exec(data);
+  const listMatch = /^list:(new|in_progress|won|lost|postponed)$/.exec(data);
   const openMatch = /^open:(\d+)$/.exec(data);
+  const postponeMatch = /^postpone:(\d+)$/.exec(data);
+  const remindPickMatch = /^remindpick:(\d+):(\d+)$/.exec(data);
+  const remindTypeMatch = /^remindtype:(\d+)$/.exec(data);
+  const remindCancelMatch = /^remindcancel:(\d+)$/.exec(data);
+  const resumeMatch = /^resume:(\d+)$/.exec(data);
 
   if (statusMatch) {
     await handleStatusCallback(Number(statusMatch[1]), statusMatch[2], chatId, messageId, role, cb.id);
@@ -269,6 +360,30 @@ async function handleCallbackQuery(cb: NonNullable<TelegramUpdate['callback_quer
   }
   if (unarchMatch) {
     await handleUnarchiveCallback(Number(unarchMatch[1]), chatId, messageId, role, cb.id);
+    return;
+  }
+  if (postponeMatch) {
+    if (!(await requireRole(role, 'owner', cb.id))) return;
+    await handlePostponeCallback(Number(postponeMatch[1]), chatId, messageId, cb.id);
+    return;
+  }
+  if (remindPickMatch) {
+    if (!(await requireRole(role, 'owner', cb.id))) return;
+    await applyPostpone(Number(remindPickMatch[1]), quickRemindDate(Number(remindPickMatch[2])), chatId, messageId, role, cb.id);
+    return;
+  }
+  if (remindTypeMatch) {
+    if (!(await requireRole(role, 'owner', cb.id))) return;
+    await handleRemindTypeCallback(Number(remindTypeMatch[1]), chatId, cb.id);
+    return;
+  }
+  if (remindCancelMatch) {
+    if (!(await requireRole(role, 'owner', cb.id))) return;
+    await handleRemindCancelCallback(Number(remindCancelMatch[1]), chatId, messageId, role, cb.id);
+    return;
+  }
+  if (resumeMatch) {
+    await handleResumeCallback(Number(resumeMatch[1]), chatId, messageId, role, cb.id);
     return;
   }
   if (delMatch) {
@@ -364,11 +479,35 @@ async function handlePromptReply(chatId: number, replyToMessageId: number, text:
       dealAmount: amount,
       status: 'won',
       statusChangedAt: new Date().toISOString(),
-      lastRemindedAt: null,
     }));
     if (updated) {
       await refreshLeadCard(updated);
       await sendDealNotificationToAdmin(updated);
+    }
+    return;
+  }
+
+  if (kind === 'postpone') {
+    const remindAt = parseReminderDate(text);
+    if (remindAt == null) {
+      await sendMessage(chatId, '⚠️ Нужна дата в формате ДД.ММ.ГГГГ, не в прошлом. Попробуйте ещё раз.');
+      return;
+    }
+    // Same stale-guard as postponeLead — if the lead moved on (won/lost) via
+    // a different message while this prompt sat unanswered, no-op instead
+    // of postponing a lead that's no longer 'in_progress'.
+    const updated = await resolvePendingPrompt(chatId, replyToMessageId, lead => (lead.status !== 'in_progress' ? {} : {
+      status: 'postponed',
+      remindAt,
+      statusChangedAt: new Date().toISOString(),
+      comment: appendNote(lead.comment, `Отложено до ${formatDateRu(remindAt)}`),
+    }));
+    // resolvePendingPrompt returns the lead as soon as the prompt correlates
+    // — even when `apply` no-op'd with {} — so truthiness alone can't tell
+    // "postponed" from "guard blocked it"; check the field the guard controls.
+    if (updated?.status === 'postponed') {
+      await refreshLeadCard(updated);
+      await sendStatusChangeToAdmin(updated);
     }
     return;
   }

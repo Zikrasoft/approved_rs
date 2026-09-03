@@ -44,7 +44,7 @@ vi.mock('@vercel/blob', () => {
 import { put } from '@vercel/blob';
 import {
   insertLead, insertOrMergeLead, setStatus, setPendingPrompt, findByPendingPrompt, resolvePendingPrompt, archiveLead, unarchiveLead,
-  deleteLead, claimFullCommission, confirmCommissionPayment, rejectCommissionPayment, markReminded, getStaleLeads,
+  deleteLead, resumeLead, postponeLead, getDuePostponed, claimFullCommission, confirmCommissionPayment, rejectCommissionPayment,
   getOwedSummary, getCommission, searchLeads, getLead, readLeads, updateLeads, type StoredLead,
 } from './store';
 import type { LeadData } from './leadTypes';
@@ -216,6 +216,100 @@ describe('archiveLead / unarchiveLead', () => {
   });
 });
 
+describe('resumeLead', () => {
+  it('returns a postponed lead to in_progress and clears remindAt', async () => {
+    const lead = await insertLead(baseData);
+    await updateLeads(leads => leads.map(l => (l.id === lead.id ? { ...l, status: 'postponed' as const, remindAt: '2026-10-20' } : l)));
+
+    const resumed = await resumeLead(lead.id);
+
+    expect(resumed?.status).toBe('in_progress');
+    expect(resumed?.remindAt).toBeNull();
+  });
+
+  it('no-ops when the lead is not postponed (stale button, already finalized elsewhere)', async () => {
+    const lead = await insertLead(baseData);
+    await forceComplete(lead.id, 100_000); // status: 'won'
+
+    const resumed = await resumeLead(lead.id);
+
+    expect(resumed).toBeUndefined();
+    const after = await getLead(lead.id);
+    expect(after?.status).toBe('won');
+  });
+});
+
+describe('postponeLead', () => {
+  it('sets status/remindAt/comment on the given lead directly, no prompt correlation needed', async () => {
+    const lead = await insertLead(baseData);
+    await setStatus(lead.id, 'in_progress');
+
+    const postponed = await postponeLead(lead.id, '2026-10-20', 'Отложено до 20.10.2026');
+
+    expect(postponed?.status).toBe('postponed');
+    expect(postponed?.remindAt).toBe('2026-10-20');
+    expect(postponed?.comment).toBe('Отложено до 20.10.2026');
+  });
+
+  it('no-ops when the lead is not in_progress (stale button, already finalized elsewhere)', async () => {
+    const lead = await insertLead(baseData); // status: 'new'
+
+    const postponed = await postponeLead(lead.id, '2026-10-20', 'Отложено до 20.10.2026');
+
+    expect(postponed).toBeUndefined();
+    const after = await getLead(lead.id);
+    expect(after?.status).toBe('new');
+  });
+});
+
+describe('getDuePostponed', () => {
+  async function forcePostpone(id: number, remindAt: string): Promise<void> {
+    await updateLeads(leads => leads.map(l => (l.id === id ? { ...l, status: 'postponed' as const, remindAt } : l)));
+  }
+
+  it('finds a postponed lead whose remindAt is today or earlier', async () => {
+    const lead = await insertLead(baseData);
+    await forcePostpone(lead.id, '2000-01-01');
+
+    const due = await getDuePostponed();
+
+    expect(due.map(l => l.id)).toEqual([lead.id]);
+  });
+
+  it('excludes a postponed lead whose remindAt is still in the future', async () => {
+    const lead = await insertLead(baseData);
+    await forcePostpone(lead.id, '2999-01-01');
+
+    expect(await getDuePostponed()).toEqual([]);
+  });
+
+  it('includes a lead whose remindAt is exactly today (boundary, <=)', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-10-20T12:00:00.000Z'));
+    try {
+      const lead = await insertLead(baseData);
+      await forcePostpone(lead.id, '2026-10-20');
+
+      expect((await getDuePostponed()).map(l => l.id)).toEqual([lead.id]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('excludes an archived lead even if its date is due', async () => {
+    const lead = await insertLead(baseData);
+    await forcePostpone(lead.id, '2000-01-01');
+    await archiveLead(lead.id);
+
+    expect(await getDuePostponed()).toEqual([]);
+  });
+
+  it('excludes leads that are not postponed', async () => {
+    await insertLead(baseData);
+    expect(await getDuePostponed()).toEqual([]);
+  });
+});
+
 describe('deleteLead', () => {
   it('permanently removes the record, unlike archiveLead', async () => {
     const a = await insertLead(baseData);
@@ -324,43 +418,6 @@ describe('confirmCommissionPayment / rejectCommissionPayment', () => {
     const result = await rejectCommissionPayment(lead.id);
 
     expect(result).toBeUndefined();
-  });
-});
-
-describe('getStaleLeads', () => {
-  afterEach(() => vi.useRealTimers());
-
-  it('only returns in_progress leads older than the days cutoff', async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
-    const lead = await insertLead(baseData);
-    await setStatus(lead.id, 'in_progress');
-
-    vi.setSystemTime(new Date('2026-01-07T00:00:00.000Z')); // +6 days
-    expect(await getStaleLeads(5)).toHaveLength(1);
-    expect(await getStaleLeads(10)).toEqual([]);
-  });
-
-  it('excludes a lead already reminded since its last status change', async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
-    const lead = await insertLead(baseData);
-    await setStatus(lead.id, 'in_progress');
-    await markReminded(lead.id);
-
-    vi.setSystemTime(new Date('2026-01-10T00:00:00.000Z'));
-    expect(await getStaleLeads(5)).toEqual([]);
-  });
-
-  it('excludes an archived lead even if otherwise stale', async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
-    const lead = await insertLead(baseData);
-    await setStatus(lead.id, 'in_progress');
-    await archiveLead(lead.id);
-
-    vi.setSystemTime(new Date('2026-01-10T00:00:00.000Z'));
-    expect(await getStaleLeads(5)).toEqual([]);
   });
 });
 

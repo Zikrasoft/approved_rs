@@ -6,8 +6,8 @@ vi.stubGlobal('fetch', mockFetch);
 import {
   sendLeadNotification, statusLabel, isLeadStatusKey, buildStatusKeyboard, refreshLeadCard,
   answerCallback, sendForceReplyPrompt, sendDealNotificationToAdmin, sendCommissionClaimToAdmin,
-  sendCommissionResultToOwner, sendStatusChangeToAdmin, buildOwedList, formatDealsList, buildSearchResults, buildMenu, buildHelp,
-  buildLeadList, buildStats, buildLeadDetail, buildDeleteConfirm, editLeadDetailMessage,
+  sendCommissionResultToOwner, sendStatusChangeToAdmin, sendPostponeReminderToOwner, buildOwedList, formatDealsList, buildSearchResults, buildMenu, buildHelp,
+  buildLeadList, buildStats, buildLeadDetail, buildDeleteConfirm, buildRemindPicker, editLeadDetailMessage,
 } from './index';
 import type { StoredLead, LeadStatus } from '../store';
 
@@ -29,11 +29,11 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     telegramChatId: null,
     telegramMessageId: null,
     statusChangedAt: '2026-01-01T00:00:00.000Z',
-    lastRemindedAt: null,
     createdAt: '2026-01-01T00:00:00.000Z',
     pendingPrompt: null,
     archived: false,
     pendingCommissionClaim: null,
+    remindAt: null,
     ...overrides,
   };
 }
@@ -152,9 +152,9 @@ describe('buildStatusKeyboard', () => {
     expect(kb.inline_keyboard[0].map(b => b.callback_data)).toEqual(['st:7:in_progress', 'st:7:lost']);
   });
 
-  it('owner: shows Завершить/Отказ for an in-progress lead', () => {
+  it('owner: shows Завершить/Отказ/Отложить for an in-progress lead', () => {
     const kb = buildStatusKeyboard(makeLead({ id: 7, status: 'in_progress' }), 'owner');
-    expect(kb.inline_keyboard[0].map(b => b.callback_data)).toEqual(['st:7:won', 'st:7:lost']);
+    expect(kb.inline_keyboard.flat().map(b => b.callback_data)).toEqual(['st:7:won', 'st:7:lost', 'postpone:7']);
   });
 
   it('owner: has no buttons for a terminal (won/lost) lead', () => {
@@ -167,8 +167,13 @@ describe('buildStatusKeyboard', () => {
     expect(kb.inline_keyboard[0].map(b => b.callback_data)).toEqual(['st:7:in_progress']);
   });
 
-  it('admin: no buttons at all for an in-progress lead — can\'t finalize', () => {
+  it('admin: no buttons at all for an in-progress lead — can\'t finalize/postpone', () => {
     expect(buildStatusKeyboard(makeLead({ status: 'in_progress' }), 'admin').inline_keyboard).toEqual([]);
+  });
+
+  it('postponed: shows just Возобновить, for either role', () => {
+    expect(buildStatusKeyboard(makeLead({ id: 7, status: 'postponed' }), 'owner').inline_keyboard).toEqual([[{ text: '▶️ Возобновить', callback_data: 'resume:7' }]]);
+    expect(buildStatusKeyboard(makeLead({ id: 7, status: 'postponed' }), 'admin').inline_keyboard).toEqual([[{ text: '▶️ Возобновить', callback_data: 'resume:7' }]]);
   });
 });
 
@@ -281,6 +286,28 @@ describe('sendCommissionResultToOwner', () => {
   });
 });
 
+describe('sendPostponeReminderToOwner', () => {
+  beforeEach(() => mockFetchOk());
+  afterEach(() => mockFetch.mockReset());
+
+  it('sends the reminder to the owner with a deep-link button', async () => {
+    await sendPostponeReminderToOwner(makeLead({ id: 9 }));
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.chat_id).toBe(111);
+    expect(body.reply_markup.inline_keyboard[0][0].url).toContain('lead_9');
+  });
+
+  // Only one OWNER_ID in this test env, so "every send failed" and "the
+  // only send failed" are the same case here — still the behavior that
+  // matters: don't silently succeed when nobody actually got the reminder,
+  // so the cron's catch block keeps the lead 'due' for a retry.
+  it('throws when every owner send fails, so the cron keeps the lead due for retry', async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 400, json: () => Promise.resolve({ description: 'Bad Request' }) });
+    await expect(sendPostponeReminderToOwner(makeLead({ id: 9 }))).rejects.toThrow();
+  });
+});
+
 describe('sendStatusChangeToAdmin', () => {
   beforeEach(() => mockFetchOk());
   afterEach(() => mockFetch.mockReset());
@@ -366,7 +393,7 @@ describe('buildMenu', () => {
   it('gives the owner lead lists + stats + their own commission debt, no full deals ledger', () => {
     const menu = buildMenu('owner');
     const data = menu.reply_markup.inline_keyboard.flat().map(b => b.callback_data);
-    expect(data).toEqual(['list:new', 'list:in_progress', 'list:won', 'list:lost', 'menu:stats', 'menu:debt']);
+    expect(data).toEqual(['list:new', 'list:in_progress', 'list:won', 'list:lost', 'list:postponed', 'menu:stats', 'menu:debt']);
     const debtBtn = menu.reply_markup.inline_keyboard.flat().find(b => b.callback_data === 'menu:debt');
     expect(debtBtn?.text).toBe('🔴 Мой долг по комиссии');
   });
@@ -374,7 +401,7 @@ describe('buildMenu', () => {
   it('gives the admin the same lists plus debt (admin-framed label) and the full deals ledger', () => {
     const menu = buildMenu('admin');
     const data = menu.reply_markup.inline_keyboard.flat().map(b => b.callback_data);
-    expect(data).toEqual(['list:new', 'list:in_progress', 'list:won', 'list:lost', 'menu:stats', 'menu:debt', 'menu:deals']);
+    expect(data).toEqual(['list:new', 'list:in_progress', 'list:won', 'list:lost', 'list:postponed', 'menu:stats', 'menu:debt', 'menu:deals']);
     const debtBtn = menu.reply_markup.inline_keyboard.flat().find(b => b.callback_data === 'menu:debt');
     expect(debtBtn?.text).toBe('🔴 Мне должны');
   });
@@ -539,6 +566,17 @@ describe('buildDeleteConfirm', () => {
       { text: '✅ Да, удалить', callback_data: 'delconfirm:9' },
       { text: '↩️ Отмена', callback_data: 'delcancel:9' },
     ]]);
+  });
+});
+
+describe('buildRemindPicker', () => {
+  it('offers quick presets, manual entry, and a way back — all scoped to the lead id', () => {
+    const { reply_markup } = buildRemindPicker(9);
+    const data = reply_markup.inline_keyboard.flat().map(b => b.callback_data);
+    expect(data).toEqual([
+      'remindpick:9:1', 'remindpick:9:3', 'remindpick:9:7', 'remindpick:9:14', 'remindpick:9:30',
+      'remindtype:9', 'remindcancel:9',
+    ]);
   });
 });
 

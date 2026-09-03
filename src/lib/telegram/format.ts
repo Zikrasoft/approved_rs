@@ -1,5 +1,6 @@
 // Pure rendering: lead → text/keyboard. No network calls — notify.ts sends
 // what this module builds.
+import { format, parseISO } from 'date-fns';
 import { SERVICE_LABELS } from '@/utils/labels';
 import { isTrackedContactChannel, type TrackedContactChannel } from '@/utils/contactChannel';
 import { roundMoney, getCommission, MAX_LIST_ROWS, type StoredLead, type LeadStatus, type OwedRow, type CommissionInfo } from '../store';
@@ -31,10 +32,15 @@ export function isLeadStatusKey(key: string): key is LeadStatusKey {
 }
 
 const NEW_STATUS_META = { emoji: '🆕', label: 'Новая' } as const;
+// Deliberately not in LEAD_STATUSES — that list drives the generic `st:`
+// transition, and postponing must always go through the date prompt
+// (postpone:<id>), never a bare status flip.
+const POSTPONED_STATUS_META = { emoji: '⏸️', label: 'Отложена' } as const;
 const UNKNOWN_STATUS_META = { emoji: '⚪' };
 
 function statusMeta(status: LeadStatus): { emoji: string; label: string } {
   if (status === 'new') return NEW_STATUS_META;
+  if (status === 'postponed') return POSTPONED_STATUS_META;
   const found = LEAD_STATUSES.find(s => s.key === status);
   return found ?? { ...UNKNOWN_STATUS_META, label: status };
 }
@@ -60,6 +66,28 @@ export function formatMoney(n: number): string {
   return `${new Intl.NumberFormat('ru-RU').format(n)} €`;
 }
 
+// 'YYYY-MM-DD' (how remindAt is stored) -> 'ДД.ММ.ГГГГ' (how it's typed/shown).
+export function formatDateRu(iso: string): string {
+  return format(parseISO(iso), 'dd.MM.yyyy');
+}
+
+const QUICK_REMIND_DAYS = [
+  { label: 'Завтра', days: 1 },
+  { label: 'Через 3 дня', days: 3 },
+  { label: 'Через неделю', days: 7 },
+  { label: 'Через 2 недели', days: 14 },
+  { label: 'Через месяц', days: 30 },
+] as const;
+
+// The "⏰ Отложить" tap lands here first — quick presets or type a date,
+// instead of forcing a typed date up front.
+export function buildRemindPicker(id: number): { text: string; reply_markup: Keyboard } {
+  const rows: Btn[][] = QUICK_REMIND_DAYS.map(o => [{ text: o.label, callback_data: `remindpick:${id}:${o.days}` }]);
+  rows.push([{ text: '✍️ Своя дата', callback_data: `remindtype:${id}` }]);
+  rows.push([{ text: '◀️ Назад', callback_data: `remindcancel:${id}` }]);
+  return { text: '⏰ Когда напомнить?', reply_markup: { inline_keyboard: rows } };
+}
+
 function serviceLabel(service: string): string {
   return SERVICE_LABELS[service] ?? service;
 }
@@ -77,6 +105,7 @@ function formatLeadText(lead: StoredLead, role: Role): string {
       ? `💰 Твой доход с заявки: ${formatMoney(lead.dealAmount)}`
       : `💰 Доход владельца с заявки: ${formatMoney(lead.dealAmount)}`);
   }
+  if (lead.status === 'postponed' && lead.remindAt) lines.push(`⏰ Напомнить: ${formatDateRu(lead.remindAt)}`);
   lines.push(``, `Имя: ${escapeHtml(lead.name)}`, `Контакт: ${escapeHtml(contactLine)}`);
   if (lead.country) lines.push(`Страна: ${escapeHtml(lead.country.toUpperCase())}`);
   if (lead.comment) lines.push(`Комментарий: ${escapeHtml(lead.comment)}`);
@@ -96,11 +125,17 @@ export function buildStatusKeyboard(lead: StoredLead, role: Role): Keyboard {
   }
   if (lead.status === 'in_progress' && role === 'owner') {
     return {
-      inline_keyboard: [[
-        { text: '✅ Завершить', callback_data: `st:${lead.id}:won` },
-        { text: '❌ Отказ', callback_data: `st:${lead.id}:lost` },
-      ]],
+      inline_keyboard: [
+        [
+          { text: '✅ Завершить', callback_data: `st:${lead.id}:won` },
+          { text: '❌ Отказ', callback_data: `st:${lead.id}:lost` },
+        ],
+        [{ text: '⏰ Отложить', callback_data: `postpone:${lead.id}` }],
+      ],
     };
+  }
+  if (lead.status === 'postponed') {
+    return { inline_keyboard: [[{ text: '▶️ Возобновить', callback_data: `resume:${lead.id}` }]] };
   }
   // Explicit empty array — omitted reply_markup would keep the old keyboard.
   return { inline_keyboard: [] };
@@ -119,12 +154,12 @@ export function deepLinkKeyboard(id: number): Keyboard {
   return { inline_keyboard: [[{ text: '📂 Открыть в боте', url: deepLink(id) }]] };
 }
 
-export function reminderText(lead: StoredLead): string {
-  const days = Math.floor((Date.now() - new Date(lead.statusChangedAt).getTime()) / 86_400_000);
+export function postponeReminderText(lead: StoredLead): string {
   return [
-    `⚠️ Заявка #${lead.id} всё ещё в работе (${days} дн.)`,
+    `⏰ Напоминание по заявке #${lead.id}`,
     ``,
     `${escapeHtml(lead.name)} — ${escapeHtml(serviceLabel(lead.service))}`,
+    `Ты просил напомнить сегодня — заявка снова в работе.`,
   ].join('\n');
 }
 
@@ -210,6 +245,7 @@ export function buildMenu(role: Role): { text: string; reply_markup: Keyboard } 
     [{ text: '🔵 В работе', callback_data: 'list:in_progress' }],
     [{ text: '✅ Успешные', callback_data: 'list:won' }],
     [{ text: '❌ Отказы', callback_data: 'list:lost' }],
+    [{ text: '⏸ Отложенные', callback_data: 'list:postponed' }],
     [{ text: '📊 Статистика', callback_data: 'menu:stats' }],
   ];
   rows.push([{ text: role === 'owner' ? '🔴 Мой долг по комиссии' : '🔴 Мне должны', callback_data: 'menu:debt' }]);
@@ -229,6 +265,7 @@ export function buildHelp(role: Role): string {
       '',
       '<b>Заявки</b>',
       '🆕 Новая → 🔵 В работу → ✅ Завершить (укажи свою прибыль в €) или ❌ Отказ.',
+      'Не договорились сейчас? ⏰ Отложить — укажи дату (ДД.ММ.ГГГГ), заявка вернётся в работу сама в этот день, или жми ▶️ Возобновить раньше.',
       'В заявке можно поправить имя/контакт/комментарий или архивировать.',
       '',
       '<b>Комиссия (10% от прибыли)</b>',
@@ -294,7 +331,7 @@ export function buildStats(leads: StoredLead[], role: Role): string {
     '<b>📊 Статистика</b>',
     '',
     `Всего заявок: ${active.length}${archivedCount ? ` (+${archivedCount} в архиве)` : ''}`,
-    `🆕 Новые: ${count('new')}   🔵 В работе: ${count('in_progress')}   ✅ Завершено: ${count('won')}   ❌ Отказ: ${count('lost')}`,
+    `🆕 Новые: ${count('new')}   🔵 В работе: ${count('in_progress')}   ✅ Завершено: ${count('won')}   ❌ Отказ: ${count('lost')}   ⏸ Отложено: ${count('postponed')}`,
     '',
     ...moneyLines,
   ].join('\n');

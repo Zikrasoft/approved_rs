@@ -3,7 +3,7 @@
 import type { StoredLead } from '../store';
 import { tgPost, expectMessageAndChatId, safeEditMessage, sendMessage, GROUP_ID, OWNER_IDS, ADMIN_IDS } from './client';
 import {
-  formatTeaser, deepLinkKeyboard, reminderText, dealNotificationText, commissionClaimText,
+  formatTeaser, deepLinkKeyboard, postponeReminderText, dealNotificationText, commissionClaimText,
   commissionResultText, statusChangeText, buildLeadDetail, type Role,
 } from './format';
 
@@ -30,10 +30,6 @@ export async function refreshLeadCard(lead: StoredLead): Promise<void> {
   if (lead.telegramChatId == null || lead.telegramMessageId == null) return;
   if (String(lead.telegramChatId) !== String(GROUP_ID)) return;
   await safeEditMessage(lead.telegramChatId, lead.telegramMessageId, formatTeaser(lead), deepLinkKeyboard(lead.id));
-}
-
-export async function sendReminderMessage(lead: StoredLead, chatId: number): Promise<void> {
-  await tgPost('sendMessage', { chat_id: chatId, text: reminderText(lead), parse_mode: 'HTML', reply_markup: deepLinkKeyboard(lead.id) });
 }
 
 // One person, possibly several Telegram accounts — every id gets the message.
@@ -64,6 +60,21 @@ export async function sendCommissionResultToOwner(lead: StoredLead, confirmed: b
 
 export async function sendStatusChangeToAdmin(lead: StoredLead): Promise<void> {
   await sendToAll(ADMIN_IDS, statusChangeText(lead));
+}
+
+// The owner set the date ("Напомни мне X") — this is their own reminder, not
+// a general status ping, so only they get it (unlike sendStatusChangeToAdmin).
+// allSettled, not all — the owner can have several Telegram accounts, and
+// one account's send failing (e.g. they blocked the bot there) shouldn't
+// re-send to every OTHER account too on the next cron tick. Only reject
+// (so the caller keeps the lead 'due' and retries) if every send failed.
+export async function sendPostponeReminderToOwner(lead: StoredLead): Promise<void> {
+  const results = await Promise.allSettled(OWNER_IDS.map(id =>
+    tgPost('sendMessage', { chat_id: id, text: postponeReminderText(lead), parse_mode: 'HTML', reply_markup: deepLinkKeyboard(lead.id) }),
+  ));
+  if (results.length > 0 && results.every(r => r.status === 'rejected')) {
+    throw (results[0] as PromiseRejectedResult).reason;
+  }
 }
 
 export async function editLeadDetailMessage(chatId: number, messageId: number, lead: StoredLead, role: Role): Promise<void> {

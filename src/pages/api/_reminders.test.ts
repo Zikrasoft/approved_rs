@@ -3,22 +3,19 @@ import type { APIContext } from 'astro';
 import type { StoredLead } from '@/lib/store';
 
 vi.mock('@/lib/store', () => ({
-  getStaleLeads: vi.fn(),
-  markReminded: vi.fn(),
+  getDuePostponed: vi.fn(),
+  resumeLead: vi.fn(),
 }));
 vi.mock('@/lib/telegram', () => ({
-  sendReminderMessage: vi.fn(),
-  OWNER_IDS: [111],
-  ADMIN_IDS: [222],
+  sendPostponeReminderToOwner: vi.fn(),
+  refreshLeadCard: vi.fn(),
 }));
 
 import { GET } from './reminders';
-import { getStaleLeads, markReminded } from '@/lib/store';
-import { sendReminderMessage } from '@/lib/telegram';
+import { getDuePostponed, resumeLead } from '@/lib/store';
+import { sendPostponeReminderToOwner, refreshLeadCard } from '@/lib/telegram';
 
 const SECRET = 'test-cron-secret';
-const OWNER_ID = 111;
-const ADMIN_ID = 222;
 
 function makeCtx(headers: Record<string, string> = { authorization: `Bearer ${SECRET}` }) {
   return {
@@ -33,7 +30,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     contact: '@ivan',
     service: 'vehicle-sourcing',
     locale: 'ru',
-    status: 'in_progress',
+    status: 'postponed',
     dealAmount: null,
     commissionPercent: 10,
     paidAmount: 0,
@@ -41,26 +38,27 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     telegramChatId: -100123,
     telegramMessageId: 555,
     statusChangedAt: '2026-01-01T00:00:00.000Z',
-    lastRemindedAt: null,
     createdAt: '2026-01-01T00:00:00.000Z',
     pendingPrompt: null,
     archived: false,
     pendingCommissionClaim: null,
+    remindAt: '2026-01-01',
     ...overrides,
   };
 }
 
 describe('GET /api/reminders', () => {
   beforeEach(() => {
-    vi.mocked(getStaleLeads).mockReset().mockResolvedValue([]);
-    vi.mocked(markReminded).mockReset().mockResolvedValue(undefined as unknown as StoredLead);
-    vi.mocked(sendReminderMessage).mockReset().mockResolvedValue(undefined);
+    vi.mocked(getDuePostponed).mockReset().mockResolvedValue([]);
+    vi.mocked(resumeLead).mockReset().mockResolvedValue(undefined as unknown as StoredLead);
+    vi.mocked(sendPostponeReminderToOwner).mockReset().mockResolvedValue(undefined);
+    vi.mocked(refreshLeadCard).mockReset().mockResolvedValue(undefined);
   });
 
   it('rejects a request without a matching bearer token', async () => {
     const res = await GET(makeCtx({}));
     expect(res.status).toBe(401);
-    expect(getStaleLeads).not.toHaveBeenCalled();
+    expect(getDuePostponed).not.toHaveBeenCalled();
   });
 
   it('rejects the wrong bearer token', async () => {
@@ -71,7 +69,7 @@ describe('GET /api/reminders', () => {
   it('rejects a header missing the "Bearer " scheme entirely', async () => {
     const res = await GET(makeCtx({ authorization: SECRET }));
     expect(res.status).toBe(401);
-    expect(getStaleLeads).not.toHaveBeenCalled();
+    expect(getDuePostponed).not.toHaveBeenCalled();
   });
 
   it('rejects a different auth scheme (e.g. Basic)', async () => {
@@ -89,31 +87,40 @@ describe('GET /api/reminders', () => {
     expect(res.status).toBe(401);
   });
 
-  it('DMs both owner and admin per stale lead, then marks it, using LEAD_STALE_DAYS from env', async () => {
-    vi.mocked(getStaleLeads).mockResolvedValue([makeLead({ id: 7 })]);
+  it('sends the due-date reminder to the owner, resumes the lead, and refreshes its group card', async () => {
+    vi.mocked(getDuePostponed).mockResolvedValue([makeLead({ id: 9 })]);
+    const resumed = makeLead({ id: 9, status: 'in_progress', remindAt: null });
+    vi.mocked(resumeLead).mockResolvedValue(resumed);
 
     const res = await GET(makeCtx());
 
     expect(res.status).toBe(200);
-    expect(getStaleLeads).toHaveBeenCalledWith(5);
-    expect(sendReminderMessage).toHaveBeenCalledTimes(2);
-    expect(sendReminderMessage).toHaveBeenCalledWith(expect.objectContaining({ id: 7 }), OWNER_ID);
-    expect(sendReminderMessage).toHaveBeenCalledWith(expect.objectContaining({ id: 7 }), ADMIN_ID);
-    expect(markReminded).toHaveBeenCalledWith(7);
+    expect(sendPostponeReminderToOwner).toHaveBeenCalledWith(expect.objectContaining({ id: 9 }));
+    expect(resumeLead).toHaveBeenCalledWith(9);
+    expect(refreshLeadCard).toHaveBeenCalledWith(resumed);
+    expect(await res.json()).toEqual({ remindedPostponed: 1 });
   });
 
-  it('skips marking a lead whose send failed, but still processes the next lead, and reports only real successes', async () => {
-    vi.mocked(getStaleLeads).mockResolvedValue([makeLead({ id: 7 }), makeLead({ id: 8 })]);
-    vi.mocked(sendReminderMessage).mockRejectedValueOnce(new Error('down')); // lead 7's owner DM fails
+  it('does not try to refresh the card when resumeLead no-ops (e.g. lead already moved on)', async () => {
+    vi.mocked(getDuePostponed).mockResolvedValue([makeLead({ id: 9 })]);
+    vi.mocked(resumeLead).mockResolvedValue(undefined);
 
     const res = await GET(makeCtx());
 
     expect(res.status).toBe(200);
-    // lead 7: 1 attempted call (failed, aborts that lead's remaining sends+mark); lead 8: 2 calls
-    expect(sendReminderMessage).toHaveBeenCalledTimes(3);
-    expect(markReminded).toHaveBeenCalledTimes(1);
-    expect(markReminded).toHaveBeenCalledWith(8);
-    // reminded must reflect only lead 8's real success, not stale.length (2)
-    expect(await res.json()).toEqual({ reminded: 1 });
+    expect(refreshLeadCard).not.toHaveBeenCalled();
+    expect(await res.json()).toEqual({ remindedPostponed: 1 });
+  });
+
+  it('skips resuming a postponed lead whose reminder send failed, but still processes the next one', async () => {
+    vi.mocked(getDuePostponed).mockResolvedValue([makeLead({ id: 9 }), makeLead({ id: 10 })]);
+    vi.mocked(sendPostponeReminderToOwner).mockRejectedValueOnce(new Error('down'));
+
+    const res = await GET(makeCtx());
+
+    expect(res.status).toBe(200);
+    expect(resumeLead).toHaveBeenCalledTimes(1);
+    expect(resumeLead).toHaveBeenCalledWith(10);
+    expect(await res.json()).toEqual({ remindedPostponed: 1 });
   });
 });

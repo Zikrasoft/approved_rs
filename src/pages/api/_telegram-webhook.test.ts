@@ -8,6 +8,7 @@ vi.mock('@/lib/telegram', () => ({
   refreshLeadCard: vi.fn(),
   sendForceReplyPrompt: vi.fn(),
   formatMoney: (n: number) => `${n} €`,
+  formatDateRu: (iso: string) => { const [y, m, d] = iso.split('-'); return `${d}.${m}.${y}`; },
   sendDealNotificationToAdmin: vi.fn(),
   sendCommissionClaimToAdmin: vi.fn(),
   sendCommissionResultToOwner: vi.fn(),
@@ -22,6 +23,7 @@ vi.mock('@/lib/telegram', () => ({
   buildStats: vi.fn().mockReturnValue('STATS'),
   buildLeadDetail: vi.fn((lead: { id: number }, role: string) => ({ text: `DETAIL_${lead.id}_${role}`, reply_markup: { inline_keyboard: [] } })),
   buildDeleteConfirm: vi.fn((lead: { id: number }) => ({ text: `DELCONFIRM_${lead.id}`, reply_markup: { inline_keyboard: [] } })),
+  buildRemindPicker: vi.fn((id: number) => ({ text: `REMINDPICKER_${id}`, reply_markup: { inline_keyboard: [] } })),
   editLeadDetailMessage: vi.fn(),
   safeEditMessage: vi.fn(),
   OWNER_IDS: [111],
@@ -34,6 +36,9 @@ vi.mock('@/lib/store', () => ({
   archiveLead: vi.fn(),
   unarchiveLead: vi.fn(),
   deleteLead: vi.fn(),
+  resumeLead: vi.fn(),
+  postponeLead: vi.fn(),
+  appendNote: (comment: string | null | undefined, note: string) => (comment ? `${comment}\n${note}` : note),
   claimFullCommission: vi.fn(),
   confirmCommissionPayment: vi.fn(),
   rejectCommissionPayment: vi.fn(),
@@ -50,10 +55,10 @@ import { POST } from './telegram-webhook';
 import {
   answerCallback, refreshLeadCard, sendForceReplyPrompt, sendDealNotificationToAdmin,
   sendCommissionClaimToAdmin, sendCommissionResultToOwner, sendStatusChangeToAdmin, sendMessage, buildLeadDetail, editLeadDetailMessage,
-  safeEditMessage,
+  safeEditMessage, buildRemindPicker,
 } from '@/lib/telegram';
 import {
-  getLead, setStatus, archiveLead, unarchiveLead, deleteLead, claimFullCommission, confirmCommissionPayment,
+  getLead, setStatus, archiveLead, unarchiveLead, deleteLead, resumeLead, postponeLead, claimFullCommission, confirmCommissionPayment,
   rejectCommissionPayment, setPendingPrompt, findByPendingPrompt, resolvePendingPrompt, searchLeads,
   getOwedSummary, readLeads, getCommission,
 } from '@/lib/store';
@@ -79,11 +84,11 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     telegramChatId: -100123,
     telegramMessageId: 555,
     statusChangedAt: '2026-01-01T00:00:00.000Z',
-    lastRemindedAt: null,
     createdAt: '2026-01-01T00:00:00.000Z',
     pendingPrompt: null,
     archived: false,
     pendingCommissionClaim: null,
+    remindAt: null,
     ...overrides,
   };
 }
@@ -118,6 +123,8 @@ describe('POST /api/telegram-webhook', () => {
     vi.mocked(archiveLead).mockReset().mockResolvedValue(makeLead({ archived: true }));
     vi.mocked(unarchiveLead).mockReset().mockResolvedValue(makeLead({ archived: false }));
     vi.mocked(deleteLead).mockReset().mockResolvedValue(true);
+    vi.mocked(resumeLead).mockReset().mockResolvedValue(makeLead({ status: 'in_progress', remindAt: null }));
+    vi.mocked(postponeLead).mockReset().mockResolvedValue(makeLead({ status: 'postponed', remindAt: '2026-10-20' }));
     vi.mocked(claimFullCommission).mockReset().mockResolvedValue(makeLead({ status: 'won', dealAmount: 100000, pendingCommissionClaim: { amount: 10000, claimedAt: '2026-01-02T00:00:00.000Z' } }));
     vi.mocked(confirmCommissionPayment).mockReset().mockResolvedValue(makeLead({ status: 'won', dealAmount: 100000, paidAmount: 4000 }));
     vi.mocked(rejectCommissionPayment).mockReset().mockResolvedValue(makeLead({ status: 'won', dealAmount: 100000 }));
@@ -132,6 +139,7 @@ describe('POST /api/telegram-webhook', () => {
     vi.mocked(refreshLeadCard).mockReset().mockResolvedValue(undefined);
     vi.mocked(editLeadDetailMessage).mockReset().mockResolvedValue(undefined);
     vi.mocked(safeEditMessage).mockReset().mockResolvedValue(undefined);
+    vi.mocked(buildRemindPicker).mockClear();
     vi.mocked(sendForceReplyPrompt).mockReset().mockResolvedValue(888);
     vi.mocked(sendDealNotificationToAdmin).mockReset().mockResolvedValue(undefined);
     vi.mocked(sendCommissionClaimToAdmin).mockReset().mockResolvedValue(undefined);
@@ -296,6 +304,121 @@ describe('POST /api/telegram-webhook', () => {
       expect(res.status).toBe(200);
       expect(unarchiveLead).toHaveBeenCalledWith(5);
       expect(answerCallback).toHaveBeenCalledWith('cb-7', 'Восстановлено');
+    });
+  });
+
+  describe('postpone: — owner only, opens the picker in place of the card', () => {
+    it('replaces the card with the quick-pick/calendar/type menu', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-pp1', data: 'postpone:5', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(buildRemindPicker).toHaveBeenCalledWith(5);
+      expect(safeEditMessage).toHaveBeenCalledWith(DM_CHAT_ID, 1, 'REMINDPICKER_5', { inline_keyboard: [] });
+      expect(answerCallback).toHaveBeenCalledWith('cb-pp1');
+    });
+
+    it('admin cannot postpone', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-pp2', data: 'postpone:5', from: { id: ADMIN_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(buildRemindPicker).not.toHaveBeenCalled();
+    });
+
+    it('acks without opening the picker when the lead is not found', async () => {
+      vi.mocked(getLead).mockResolvedValue(undefined);
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-pp3', data: 'postpone:5', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(buildRemindPicker).not.toHaveBeenCalled();
+      expect(answerCallback).toHaveBeenCalledWith('cb-pp3');
+    });
+  });
+
+  describe('remindpick: — quick preset, applies immediately', () => {
+    it('postpones with a date N days out and refreshes both surfaces', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-rp1', data: 'remindpick:5:7', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(postponeLead).toHaveBeenCalledWith(5, expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/), expect.stringContaining('Отложено до'));
+      expect(refreshLeadCard).toHaveBeenCalled();
+      expect(sendStatusChangeToAdmin).toHaveBeenCalled();
+      expect(answerCallback).toHaveBeenCalledWith('cb-rp1', 'Отложено');
+    });
+
+    it('admin cannot use a quick pick', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-rp2', data: 'remindpick:5:7', from: { id: ADMIN_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(postponeLead).not.toHaveBeenCalled();
+    });
+
+    it('acks without refreshing anything when postponeLead no-ops (not found or stale status)', async () => {
+      vi.mocked(postponeLead).mockResolvedValueOnce(undefined);
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-rp3', data: 'remindpick:5:7', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(refreshLeadCard).not.toHaveBeenCalled();
+      expect(sendStatusChangeToAdmin).not.toHaveBeenCalled();
+      expect(answerCallback).toHaveBeenCalledWith('cb-rp3');
+    });
+  });
+
+  describe('remindtype: — falls back to the typed-date prompt', () => {
+    it('sends the date prompt and remembers it as a "postpone" pending prompt', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-rt1', data: 'remindtype:5', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(sendForceReplyPrompt).toHaveBeenCalledWith(DM_CHAT_ID, expect.stringContaining('ДД.ММ.ГГГГ'));
+      expect(setPendingPrompt).toHaveBeenCalledWith(5, { chatId: DM_CHAT_ID, messageId: 888, kind: 'postpone' });
+      expect(answerCallback).toHaveBeenCalledWith('cb-rt1', 'Жду дату');
+    });
+
+    it('acks without prompting when the lead is not found', async () => {
+      vi.mocked(getLead).mockResolvedValue(undefined);
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-rt2', data: 'remindtype:5', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
+      expect(answerCallback).toHaveBeenCalledWith('cb-rt2');
+    });
+  });
+
+  describe('remindcancel: — back out to the normal lead card', () => {
+    it('restores the detail view without postponing', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-rx1', data: 'remindcancel:5', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(postponeLead).not.toHaveBeenCalled();
+      expect(editLeadDetailMessage).toHaveBeenCalledWith(DM_CHAT_ID, 1, expect.objectContaining({ id: 5 }), 'owner');
+    });
+  });
+
+  describe('resume: — either role, returns a postponed lead to in_progress', () => {
+    it('owner can resume', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-rs1', data: 'resume:5', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(resumeLead).toHaveBeenCalledWith(5);
+      expect(sendStatusChangeToAdmin).toHaveBeenCalled();
+      expect(answerCallback).toHaveBeenCalledWith('cb-rs1', 'Возобновлено');
+    });
+
+    it('admin can resume too', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-rs2', data: 'resume:5', from: { id: ADMIN_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(resumeLead).toHaveBeenCalledWith(5);
     });
   });
 
@@ -466,6 +589,14 @@ describe('POST /api/telegram-webhook', () => {
       }));
       expect(res.status).toBe(200);
       expect(sendMessage).toHaveBeenCalledWith(DM_CHAT_ID, 'LIST_new', { reply_markup: { inline_keyboard: [] } });
+    });
+
+    it('list:postponed sends the filtered list too', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-17b', data: 'list:postponed', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(sendMessage).toHaveBeenCalledWith(DM_CHAT_ID, 'LIST_postponed', { reply_markup: { inline_keyboard: [] } });
     });
 
     it('open:<id> sends the detail view for the tapper\'s role', async () => {
@@ -697,6 +828,71 @@ describe('POST /api/telegram-webhook', () => {
       expect(updated.dealAmount).toBe(150000);
       expect(updated.status).toBe('won');
       expect(sendDealNotificationToAdmin).toHaveBeenCalled();
+    });
+
+    it('postpones with the given date, appends a comment note, and notifies the admin', async () => {
+      const lead = makeLead({ id: 5, comment: 'BMW X5', pendingPrompt: { chatId: DM_CHAT_ID, messageId: 888, kind: 'postpone' } });
+      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
+      mockResolveFromBase(lead);
+
+      const res = await POST(makeCtx({
+        message: { message_id: 2, text: '20.10.2026', chat: { id: DM_CHAT_ID, type: 'private' }, from: { id: OWNER_ID }, reply_to_message: { message_id: 888 } },
+      }));
+
+      expect(res.status).toBe(200);
+      const updated = vi.mocked(refreshLeadCard).mock.calls[0][0];
+      expect(updated.status).toBe('postponed');
+      expect(updated.remindAt).toBe('2026-10-20');
+      expect(updated.comment).toBe('BMW X5\nОтложено до 20.10.2026');
+      expect(sendStatusChangeToAdmin).toHaveBeenCalled();
+    });
+
+    it('does not postpone via typed reply if the lead moved on while the prompt sat unanswered (stale guard)', async () => {
+      const lead = makeLead({ id: 5, status: 'won', pendingPrompt: { chatId: DM_CHAT_ID, messageId: 888, kind: 'postpone' } });
+      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
+      mockResolveFromBase(lead);
+
+      const res = await POST(makeCtx({
+        message: { message_id: 2, text: '20.10.2026', chat: { id: DM_CHAT_ID, type: 'private' }, from: { id: OWNER_ID }, reply_to_message: { message_id: 888 } },
+      }));
+
+      expect(res.status).toBe(200);
+      expect(refreshLeadCard).not.toHaveBeenCalled();
+      expect(sendStatusChangeToAdmin).not.toHaveBeenCalled();
+    });
+
+    it('rejects a malformed date without resolving the prompt', async () => {
+      vi.mocked(findByPendingPrompt).mockResolvedValue(makeLead({ id: 5, pendingPrompt: { chatId: DM_CHAT_ID, messageId: 888, kind: 'postpone' } }));
+
+      const res = await POST(makeCtx({
+        message: { message_id: 2, text: 'завтра', chat: { id: DM_CHAT_ID, type: 'private' }, from: { id: OWNER_ID }, reply_to_message: { message_id: 888 } },
+      }));
+
+      expect(res.status).toBe(200);
+      expect(resolvePendingPrompt).not.toHaveBeenCalled();
+      expect(sendMessage).toHaveBeenCalledWith(DM_CHAT_ID, expect.stringContaining('ДД.ММ.ГГГГ'));
+    });
+
+    it('rejects a past date', async () => {
+      vi.mocked(findByPendingPrompt).mockResolvedValue(makeLead({ id: 5, pendingPrompt: { chatId: DM_CHAT_ID, messageId: 888, kind: 'postpone' } }));
+
+      const res = await POST(makeCtx({
+        message: { message_id: 2, text: '01.01.2020', chat: { id: DM_CHAT_ID, type: 'private' }, from: { id: OWNER_ID }, reply_to_message: { message_id: 888 } },
+      }));
+
+      expect(res.status).toBe(200);
+      expect(resolvePendingPrompt).not.toHaveBeenCalled();
+    });
+
+    it('rejects an impossible calendar date instead of silently rolling it over', async () => {
+      vi.mocked(findByPendingPrompt).mockResolvedValue(makeLead({ id: 5, pendingPrompt: { chatId: DM_CHAT_ID, messageId: 888, kind: 'postpone' } }));
+
+      const res = await POST(makeCtx({
+        message: { message_id: 2, text: '31.02.2026', chat: { id: DM_CHAT_ID, type: 'private' }, from: { id: OWNER_ID }, reply_to_message: { message_id: 888 } },
+      }));
+
+      expect(res.status).toBe(200);
+      expect(resolvePendingPrompt).not.toHaveBeenCalled();
     });
 
     it('rejects a non-numeric deal-amount reply without resolving the prompt', async () => {

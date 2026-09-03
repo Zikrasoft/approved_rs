@@ -19,7 +19,6 @@ export default defineConfig({
       TELEGRAM_ADMIN_ID: '222',
       TELEGRAM_BOT_USERNAME: 'approved_test_bot',
       CRON_SECRET: 'test-cron-secret',
-      LEAD_STALE_DAYS: '5',
     },
   },
 });

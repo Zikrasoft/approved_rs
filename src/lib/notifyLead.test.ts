@@ -33,11 +33,11 @@ const storedLead: StoredLead = {
   telegramChatId: null,
   telegramMessageId: null,
   statusChangedAt: '2026-01-01T00:00:00.000Z',
-  lastRemindedAt: null,
   createdAt: '2026-01-01T00:00:00.000Z',
   pendingPrompt: null,
   archived: false,
   pendingCommissionClaim: null,
+  remindAt: null,
 };
 
 describe('notifyLead', () => {

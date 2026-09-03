@@ -2,12 +2,10 @@ export const prerender = false;
 
 import type { APIContext } from 'astro';
 import { secretMatches } from '@/lib/verifySecret';
-import { getStaleLeads, markReminded } from '@/lib/store';
-import { sendReminderMessage, OWNER_IDS, ADMIN_IDS } from '@/lib/telegram';
+import { getDuePostponed, resumeLead } from '@/lib/store';
+import { sendPostponeReminderToOwner, refreshLeadCard } from '@/lib/telegram';
 
 const CRON_SECRET = import.meta.env.CRON_SECRET;
-const RECIPIENT_IDS = [...OWNER_IDS, ...ADMIN_IDS];
-const DEFAULT_STALE_DAYS = 5;
 
 // Vercel Cron sends `Authorization: Bearer $CRON_SECRET` automatically once
 // that env var is set on the project — same constant-time-compare pattern
@@ -22,23 +20,20 @@ export async function GET({ request }: APIContext): Promise<Response> {
     return new Response(null, { status: 401 });
   }
 
-  const days = Number(import.meta.env.LEAD_STALE_DAYS ?? DEFAULT_STALE_DAYS);
-  const stale = await getStaleLeads(Number.isFinite(days) && days > 0 ? days : DEFAULT_STALE_DAYS);
-
-  let reminded = 0;
-  for (const lead of stale) {
+  const due = await getDuePostponed();
+  let remindedPostponed = 0;
+  for (const lead of due) {
     try {
-      for (const id of RECIPIENT_IDS) {
-        await sendReminderMessage(lead, id);
-      }
-      await markReminded(lead.id);
-      reminded++;
+      await sendPostponeReminderToOwner(lead);
+      const resumed = await resumeLead(lead.id);
+      if (resumed) await refreshLeadCard(resumed);
+      remindedPostponed++;
     } catch (err) {
-      console.error('[reminders] failed to send/mark reminder', { error: err, leadId: lead.id });
+      console.error('[reminders] failed to send/resume a due postponed lead', { error: err, leadId: lead.id });
     }
   }
 
-  return new Response(JSON.stringify({ reminded }), {
+  return new Response(JSON.stringify({ remindedPostponed }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
   });

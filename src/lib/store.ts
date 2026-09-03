@@ -1,14 +1,15 @@
 import { z } from 'zod';
+import { format } from 'date-fns';
 import { get, head, put, BlobPreconditionFailedError } from '@vercel/blob';
 import type { LeadData } from './leadTypes';
 
-const leadStatusSchema = z.enum(['new', 'in_progress', 'won', 'lost']);
+const leadStatusSchema = z.enum(['new', 'in_progress', 'won', 'lost', 'postponed']);
 export type LeadStatus = z.infer<typeof leadStatusSchema>;
 
 const pendingPromptSchema = z.object({
   chatId: z.number().int(),
   messageId: z.number().int(),
-  kind: z.enum(['deal_amount', 'edit_name', 'edit_contact', 'edit_comment']),
+  kind: z.enum(['deal_amount', 'edit_name', 'edit_contact', 'edit_comment', 'postpone']),
 });
 export type PendingPrompt = z.infer<typeof pendingPromptSchema>;
 
@@ -47,7 +48,6 @@ const storedLeadSchema = z.object({
   telegramChatId: z.number().int().nullable().default(null),
   telegramMessageId: z.number().int().nullable().default(null),
   statusChangedAt: z.string(),
-  lastRemindedAt: z.string().nullable().default(null),
   createdAt: z.string(),
   // .catch(null) — this is transient UI state, not business data. A stale/legacy
   // shape here (e.g. a kind value retired by a later release) must not drop the
@@ -55,6 +55,8 @@ const storedLeadSchema = z.object({
   pendingPrompt: pendingPromptSchema.nullable().default(null).catch(null),
   archived: z.boolean().default(false),
   pendingCommissionClaim: pendingCommissionClaimSchema.nullable().default(null),
+  // Only meaningful while status is 'postponed' — ISO date (YYYY-MM-DD), no time.
+  remindAt: z.string().nullable().default(null),
 });
 export type StoredLead = z.infer<typeof storedLeadSchema>;
 
@@ -162,6 +164,24 @@ async function updateOne(id: number, apply: (lead: StoredLead) => StoredLead): P
   return updated;
 }
 
+// Same as updateOne, but a no-op (returns undefined, leaves the record
+// untouched) unless the lead is currently in requiredStatus — for
+// transitions where a stale button on an old message must not apply on top
+// of a lead that's moved on since.
+async function updateOneIfStatus(
+  id: number,
+  requiredStatus: LeadStatus,
+  apply: (lead: StoredLead) => StoredLead,
+): Promise<StoredLead | undefined> {
+  let updated: StoredLead | undefined;
+  await updateLeads(leads => leads.map(l => {
+    if (l.id !== id || l.status !== requiredStatus) return l;
+    updated = apply(l);
+    return updated;
+  }));
+  return updated;
+}
+
 // Defaults come from the schema — insertLead and notifyLead.ts's fallback both use this.
 export function newStoredLead(data: Omit<LeadData, 'id'>, id: number): StoredLead {
   const now = new Date().toISOString();
@@ -182,6 +202,12 @@ const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
 
 function isPlaceholderContact(contact: string): boolean {
   return contact === '' || contact === '—';
+}
+
+// Shared by every "stick a note on the comment, don't lose what's already
+// there" call site — insertOrMergeLead, postponeLead, the typed-date reply.
+export function appendNote(comment: string | null | undefined, note: string): string {
+  return comment ? `${comment}\n${note}` : note;
 }
 
 // Same visitor clicking Telegram, then WhatsApp, then the phone button in
@@ -208,13 +234,11 @@ export async function insertOrMergeLead(data: Omit<LeadData, 'id'>): Promise<{ l
       return [...leads, inserted];
     }
 
-    const attemptNote = `Также пробовал: ${data.service}`;
-    const comment = existing.comment ? `${existing.comment}\n${attemptNote}` : attemptNote;
     const upgradeContact = isPlaceholderContact(existing.contact) && !isPlaceholderContact(data.contact);
     const merged: StoredLead = {
       ...existing,
       ...(upgradeContact ? { name: data.name, contact: data.contact, service: data.service, kind: data.kind } : {}),
-      comment,
+      comment: appendNote(existing.comment, `Также пробовал: ${data.service}`),
     };
     outcome = { lead: merged, merged: true };
     return leads.map(l => (l.id === existing.id ? merged : l));
@@ -227,7 +251,7 @@ export function setTelegramMessage(id: number, chatId: number, messageId: number
 }
 
 export function setStatus(id: number, status: LeadStatus): Promise<StoredLead | undefined> {
-  return updateOne(id, l => ({ ...l, status, statusChangedAt: new Date().toISOString(), lastRemindedAt: null }));
+  return updateOne(id, l => ({ ...l, status, statusChangedAt: new Date().toISOString() }));
 }
 
 export function setPendingPrompt(id: number, prompt: PendingPrompt | null): Promise<StoredLead | undefined> {
@@ -261,6 +285,27 @@ export function archiveLead(id: number): Promise<StoredLead | undefined> {
 
 export function unarchiveLead(id: number): Promise<StoredLead | undefined> {
   return updateOne(id, l => ({ ...l, archived: false }));
+}
+
+// Manual early return from 'postponed' — the scheduled reminder (getDuePostponed)
+// does the same transition automatically once remindAt arrives. Guarded on
+// status: a stale "▶️ Возобновить" left on an old DM message (this bot
+// routinely has several live messages per lead) must not revert a lead that
+// moved on (won/lost) via a different message in the meantime.
+export function resumeLead(id: number): Promise<StoredLead | undefined> {
+  return updateOneIfStatus(id, 'postponed', l => ({ ...l, status: 'in_progress', remindAt: null, statusChangedAt: new Date().toISOString() }));
+}
+
+// Direct id-based postpone for the button-driven pickers (quick preset,
+// typed date) — no prompt correlation needed since the id is already known
+// from the tapped button's callback_data. Guarded on status for the same
+// stale-button reason as resumeLead. The comment note is appended inside
+// this CAS-protected closure (not pre-built by the caller) so a concurrent
+// edit to the comment can't be silently lost on a retry.
+export function postponeLead(id: number, remindAt: string, note: string): Promise<StoredLead | undefined> {
+  return updateOneIfStatus(id, 'in_progress', l => ({
+    ...l, status: 'postponed', remindAt, statusChangedAt: new Date().toISOString(), comment: appendNote(l.comment, note),
+  }));
 }
 
 // Permanent, unlike archiveLead — removes the record outright.
@@ -326,18 +371,15 @@ export async function searchLeads(query: string, limit = 10): Promise<StoredLead
     .slice(0, limit);
 }
 
-export async function getStaleLeads(days: number): Promise<StoredLead[]> {
-  const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
-  const leads = await readLeads();
-  return leads.filter(l =>
-    l.status === 'in_progress' &&
-    !l.archived &&
-    new Date(l.statusChangedAt).getTime() < cutoff &&
-    (!l.lastRemindedAt || new Date(l.lastRemindedAt).getTime() < new Date(l.statusChangedAt).getTime()));
+// 'YYYY-MM-DD', server-local date — matches the format remindAt is stored in.
+function todayISODate(): string {
+  return format(new Date(), 'yyyy-MM-dd');
 }
 
-export function markReminded(id: number): Promise<StoredLead | undefined> {
-  return updateOne(id, l => ({ ...l, lastRemindedAt: new Date().toISOString() }));
+export async function getDuePostponed(): Promise<StoredLead[]> {
+  const today = todayISODate();
+  const leads = await readLeads();
+  return leads.filter(l => l.status === 'postponed' && !l.archived && l.remindAt != null && l.remindAt <= today);
 }
 
 export interface CommissionInfo {
