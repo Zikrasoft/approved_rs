@@ -57,7 +57,7 @@ function escapeHtml(s: string): string {
 }
 
 export function formatMoney(n: number): string {
-  return `${new Intl.NumberFormat('ru-RU').format(n)} ₽`;
+  return `${new Intl.NumberFormat('ru-RU').format(n)} €`;
 }
 
 function serviceLabel(service: string): string {

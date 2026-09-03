@@ -43,7 +43,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
 // isn't a plain U+0020 space — build expectations from the same formatter
 // instead of hardcoding a literal that looks right but silently isn't.
 function money(n: number): string {
-  return `${new Intl.NumberFormat('ru-RU').format(n)} ₽`;
+  return `${new Intl.NumberFormat('ru-RU').format(n)} €`;
 }
 
 function mockFetchOk(result: unknown = { message_id: 999, chat: { id: -1009876543210 } }) {

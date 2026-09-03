@@ -7,7 +7,7 @@ vi.mock('@/lib/telegram', () => ({
   answerCallback: vi.fn(),
   refreshLeadCard: vi.fn(),
   sendForceReplyPrompt: vi.fn(),
-  formatMoney: (n: number) => `${n} ₽`,
+  formatMoney: (n: number) => `${n} €`,
   sendDealNotificationToAdmin: vi.fn(),
   sendCommissionClaimToAdmin: vi.fn(),
   sendCommissionResultToOwner: vi.fn(),
