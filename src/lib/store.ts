@@ -49,7 +49,10 @@ const storedLeadSchema = z.object({
   statusChangedAt: z.string(),
   lastRemindedAt: z.string().nullable().default(null),
   createdAt: z.string(),
-  pendingPrompt: pendingPromptSchema.nullable().default(null),
+  // .catch(null) — this is transient UI state, not business data. A stale/legacy
+  // shape here (e.g. a kind value retired by a later release) must not drop the
+  // whole lead; it just clears the dangling prompt instead.
+  pendingPrompt: pendingPromptSchema.nullable().default(null).catch(null),
   archived: z.boolean().default(false),
   pendingCommissionClaim: pendingCommissionClaimSchema.nullable().default(null),
 });

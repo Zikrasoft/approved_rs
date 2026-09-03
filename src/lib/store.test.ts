@@ -401,6 +401,20 @@ describe('readLeads — schema validation on the way in', () => {
     expect(lead.pendingPrompt).toBeNull();
   });
 
+  it('clears a stale pendingPrompt.kind retired by a later release instead of dropping the whole lead (production incident, 2026-09-03)', async () => {
+    seedRawBlob([{
+      id: 1, name: 'Test', contact: '@test', service: 'vehicle-sourcing', locale: 'ru',
+      status: 'won', dealAmount: 300, statusChangedAt: 'x', createdAt: 'x',
+      pendingPrompt: { chatId: 1, messageId: 1, kind: 'commission_claim' },
+    }]);
+
+    const [lead] = await readLeads();
+
+    expect(lead).toBeDefined();
+    expect(lead.dealAmount).toBe(300);
+    expect(lead.pendingPrompt).toBeNull();
+  });
+
   it('drops a record missing a required field, without losing the other valid leads', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     seedRawBlob([
