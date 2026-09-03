@@ -757,7 +757,11 @@ describe('POST /api/telegram-webhook', () => {
       expect(res.status).toBe(200);
       const updated = vi.mocked(refreshLeadCard).mock.calls[0][0];
       expect(updated.name).toBe('Новое Имя');
-      expect(sendMessage).toHaveBeenCalledWith(DM_CHAT_ID, '✅ Обновлено');
+      expect(sendMessage).toHaveBeenCalledWith(
+        DM_CHAT_ID,
+        `✅ Обновлено\n\nDETAIL_${updated.id}_owner`,
+        { reply_markup: { inline_keyboard: [] } },
+      );
     });
 
     it('rejects an empty edit value for name/contact', async () => {

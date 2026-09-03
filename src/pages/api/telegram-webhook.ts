@@ -383,7 +383,14 @@ async function handlePromptReply(chatId: number, replyToMessageId: number, text:
   const updated = await resolvePendingPrompt(chatId, replyToMessageId, () => ({ [field]: value || null }) as Partial<StoredLead>);
   if (updated) {
     await refreshLeadCard(updated);
-    await sendMessage(chatId, '✅ Обновлено');
+    // In a private chat, chat.id is the user's own id — safe to role-check directly.
+    const role = roleOf(chatId);
+    if (role) {
+      const { text: detailText, reply_markup } = buildLeadDetail(updated, role);
+      await sendMessage(chatId, `✅ Обновлено\n\n${detailText}`, { reply_markup });
+    } else {
+      await sendMessage(chatId, '✅ Обновлено');
+    }
   }
 }
 
@@ -453,24 +460,7 @@ export async function POST({ request }: APIContext): Promise<Response> {
     return ACK;
   }
 
-  // Temporary diagnostic for the recurring ETag-mismatch investigation —
-  // lets us correlate which updates are landing close together in time,
-  // including ones that get deduped below (previously invisible).
-  const diagCtx = {
-    update_id: update.update_id,
-    from: update.callback_query?.from?.id ?? update.message?.from?.id,
-    kind: update.callback_query
-      ? `callback:${update.callback_query.data}`
-      : update.message?.reply_to_message
-        ? 'reply'
-        : update.message
-          ? `message:${update.message.text}`
-          : 'unknown',
-  };
-  console.log('[telegram-webhook] update received', diagCtx);
-
   if (typeof update.update_id === 'number' && alreadyProcessed(update.update_id)) {
-    console.log('[telegram-webhook] duplicate update_id, skipping', diagCtx);
     return ACK;
   }
 
