@@ -280,8 +280,8 @@ describe('buildOwedSummary', () => {
     expect(text).toContain(`Итого: ${money(10000)}`);
   });
 
-  it('reports no debt when there are no rows', () => {
-    expect(buildOwedSummary([], 0)).toBe('🟢 Всё оплачено, долгов нет.');
+  it('reports no debt when there are no rows, with the same bold header as the non-empty case', () => {
+    expect(buildOwedSummary([], 0)).toBe('<b>🔴 Мне должны</b>\n\n🟢 Всё оплачено, долгов нет.');
   });
 });
 
@@ -303,11 +303,11 @@ describe('formatDealsList', () => {
 
   it('excludes archived deals', () => {
     const text = formatDealsList([makeLead({ id: 1, status: 'won', dealAmount: 100000, archived: true })]);
-    expect(text).toBe('Сделок пока нет.');
+    expect(text).toBe('<b>💰 Все сделки</b>\n\nСделок пока нет.');
   });
 
-  it('reports nothing when there are no deals', () => {
-    expect(formatDealsList([])).toBe('Сделок пока нет.');
+  it('reports nothing when there are no deals, with the same bold header as the non-empty case', () => {
+    expect(formatDealsList([])).toBe('<b>💰 Все сделки</b>\n\nСделок пока нет.');
   });
 
   it('caps at 20 deals, newest first', () => {

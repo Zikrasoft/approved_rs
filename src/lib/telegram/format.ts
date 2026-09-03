@@ -147,10 +147,13 @@ export function commissionResultText(leadId: number, confirmed: boolean): string
     : `❌ Оплата по заявке #${leadId} не подтверждена, свяжитесь с администратором.`;
 }
 
+// Bold header on every branch, including the empty state — consecutive
+// standalone bot replies (debt/deals/stats) show no visual gap in Telegram,
+// so a bold first line is what keeps them from reading as one wall of text.
 export function buildOwedSummary(rows: OwedRow[], total: number): string {
-  if (rows.length === 0) return '🟢 Всё оплачено, долгов нет.';
+  if (rows.length === 0) return '<b>🔴 Мне должны</b>\n\n🟢 Всё оплачено, долгов нет.';
   const lines = rows.map(r => `#${r.id} ${escapeHtml(r.name)} — ${formatMoney(r.remaining)}`);
-  return ['🔴 Мне должны', ``, ...lines, ``, `Итого: ${formatMoney(total)}`].join('\n');
+  return ['<b>🔴 Мне должны</b>', ``, ...lines, ``, `Итого: ${formatMoney(total)}`].join('\n');
 }
 
 function paidStatusMark(l: StoredLead & { dealAmount: number }, info: CommissionInfo): string {
@@ -164,13 +167,12 @@ export function formatDealsList(leads: StoredLead[]): string {
     .filter((l): l is StoredLead & { dealAmount: number } => l.status === 'won' && l.dealAmount != null && !l.archived)
     .sort((a, b) => b.id - a.id)
     .slice(0, MAX_LIST_ROWS);
-  if (deals.length === 0) return 'Сделок пока нет.';
-  return deals
-    .map(l => {
-      const info = getCommission(l);
-      return `#${l.id} ${escapeHtml(l.name)}\n${formatMoney(l.dealAmount)} · комиссия ${formatMoney(info.commission)}\n${paidStatusMark(l, info)}`;
-    })
-    .join('\n\n');
+  if (deals.length === 0) return '<b>💰 Все сделки</b>\n\nСделок пока нет.';
+  const lines = deals.map(l => {
+    const info = getCommission(l);
+    return `#${l.id} ${escapeHtml(l.name)}\n${formatMoney(l.dealAmount)} · комиссия ${formatMoney(info.commission)}\n${paidStatusMark(l, info)}`;
+  });
+  return ['<b>💰 Все сделки</b>', ...lines].join('\n\n');
 }
 
 export function formatSearchResults(leads: StoredLead[]): string {
@@ -226,7 +228,7 @@ export function buildStats(leads: StoredLead[]): string {
   const remainingTotal = roundMoney(wonLeads.reduce((sum, l) => sum + getCommission(l).remaining, 0));
 
   return [
-    '📊 Статистика',
+    '<b>📊 Статистика</b>',
     '',
     `Всего заявок: ${active.length}${archivedCount ? ` (+${archivedCount} в архиве)` : ''}`,
     `🆕 Новые: ${count('new')}   🔵 В работе: ${count('in_progress')}   ✅ Завершено: ${count('won')}   ❌ Отказ: ${count('lost')}`,

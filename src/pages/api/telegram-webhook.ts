@@ -352,18 +352,23 @@ async function handlePromptReply(chatId: number, replyToMessageId: number, text:
   }
 }
 
+async function sendMenuMessage(chatId: number, role: Role): Promise<void> {
+  const menu = buildMenu(role);
+  await sendMessage(chatId, menu.text, { reply_markup: menu.reply_markup });
+}
+
 async function handlePrivateMessage(msg: TelegramMessage): Promise<void> {
   const chatId = msg.chat.id;
   const role = roleOf(msg.from?.id);
   const text = (msg.text ?? '').trim();
 
   const startMatch = /^\/start(?:\s+(\S+))?$/.exec(text);
-  if (startMatch) {
+  if (startMatch || text === '/menu') {
     if (!role) {
       await sendMessage(chatId, '⛔ Доступ запрещён.');
       return;
     }
-    const payload = startMatch[1];
+    const payload = startMatch?.[1];
     const leadMatch = payload ? /^lead_(\d+)$/.exec(payload) : null;
     if (leadMatch) {
       const lead = await getLead(Number(leadMatch[1]));
@@ -373,8 +378,7 @@ async function handlePrivateMessage(msg: TelegramMessage): Promise<void> {
         return;
       }
     }
-    const menu = buildMenu(role);
-    await sendMessage(chatId, menu.text, { reply_markup: menu.reply_markup });
+    await sendMenuMessage(chatId, role);
     return;
   }
 

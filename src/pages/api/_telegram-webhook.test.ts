@@ -547,6 +547,26 @@ describe('POST /api/telegram-webhook', () => {
     });
   });
 
+  describe('/menu — same as bare /start, never takes a payload', () => {
+    it('shows the owner menu', async () => {
+      const res = await POST(makeCtx({ message: { message_id: 1, text: '/menu', chat: { id: OWNER_ID, type: 'private' }, from: { id: OWNER_ID } } }));
+      expect(res.status).toBe(200);
+      expect(sendMessage).toHaveBeenCalledWith(OWNER_ID, 'MENU_owner', { reply_markup: { inline_keyboard: [] } });
+    });
+
+    it('shows the admin menu', async () => {
+      const res = await POST(makeCtx({ message: { message_id: 1, text: '/menu', chat: { id: ADMIN_ID, type: 'private' }, from: { id: ADMIN_ID } } }));
+      expect(res.status).toBe(200);
+      expect(sendMessage).toHaveBeenCalledWith(ADMIN_ID, 'MENU_admin', { reply_markup: { inline_keyboard: [] } });
+    });
+
+    it('denies an unauthorized sender', async () => {
+      const res = await POST(makeCtx({ message: { message_id: 1, text: '/menu', chat: { id: OTHER_ID, type: 'private' }, from: { id: OTHER_ID } } }));
+      expect(res.status).toBe(200);
+      expect(sendMessage).toHaveBeenCalledWith(OTHER_ID, '⛔ Доступ запрещён.');
+    });
+  });
+
   describe('replying to a pending force_reply prompt', () => {
     it('completes the deal, refreshes the group card, and notifies the admin on a valid deal-amount reply', async () => {
       const lead = makeLead({ id: 5, pendingPrompt: { chatId: DM_CHAT_ID, messageId: 888, kind: 'deal_amount' } });
