@@ -101,7 +101,7 @@ describe('GET /api/reminders', () => {
     expect(markReminded).toHaveBeenCalledWith(7);
   });
 
-  it('skips marking a lead whose send failed, but still processes the next lead', async () => {
+  it('skips marking a lead whose send failed, but still processes the next lead, and reports only real successes', async () => {
     vi.mocked(getStaleLeads).mockResolvedValue([makeLead({ id: 7 }), makeLead({ id: 8 })]);
     vi.mocked(sendReminderMessage).mockRejectedValueOnce(new Error('down')); // lead 7's owner DM fails
 
@@ -112,5 +112,7 @@ describe('GET /api/reminders', () => {
     expect(sendReminderMessage).toHaveBeenCalledTimes(3);
     expect(markReminded).toHaveBeenCalledTimes(1);
     expect(markReminded).toHaveBeenCalledWith(8);
+    // reminded must reflect only lead 8's real success, not stale.length (2)
+    expect(await res.json()).toEqual({ reminded: 1 });
   });
 });

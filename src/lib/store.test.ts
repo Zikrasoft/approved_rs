@@ -8,6 +8,9 @@ let storedEtag: string | undefined;
 let etagCounter = 0;
 let forceConflictOnce = false;
 let forceConflictAlways = false;
+// Runs once, right before the forced conflict throws — lets a test simulate
+// a concurrent write landing between updateLeads's retry attempts.
+let onConflictSideEffect: (() => void) | null = null;
 
 vi.mock('@vercel/blob', () => {
   class BlobPreconditionFailedError extends Error {}
@@ -23,6 +26,8 @@ vi.mock('@vercel/blob', () => {
       }
       if (forceConflictOnce) {
         forceConflictOnce = false;
+        onConflictSideEffect?.();
+        onConflictSideEffect = null;
         throw new BlobPreconditionFailedError('precondition failed');
       }
       if (opts.ifMatch && opts.ifMatch !== storedEtag) {
@@ -68,6 +73,7 @@ beforeEach(() => {
   etagCounter = 0;
   forceConflictOnce = false;
   forceConflictAlways = false;
+  onConflictSideEffect = null;
   vi.mocked(put).mockClear();
 });
 
@@ -177,6 +183,29 @@ describe('confirmCommissionPayment / rejectCommissionPayment', () => {
     const result = await confirmCommissionPayment(lead.id);
 
     expect(result).toBeUndefined();
+  });
+
+  it('returns undefined if the claim was cleared by a concurrent write between retry attempts', async () => {
+    const lead = await insertLead(baseData);
+    await forceComplete(lead.id, 100_000);
+    await forceClaim(lead.id, 4000);
+
+    // Forces one write conflict on the first attempt; right before it
+    // throws, simulate another process (e.g. a duplicate webhook delivery)
+    // having already resolved and cleared the claim.
+    forceConflictOnce = true;
+    onConflictSideEffect = () => {
+      const leads = JSON.parse(storedContent!);
+      leads[0].pendingCommissionClaim = null;
+      storedContent = JSON.stringify(leads);
+      storedEtag = `etag-${++etagCounter}`;
+    };
+
+    const result = await confirmCommissionPayment(lead.id);
+
+    expect(result).toBeUndefined();
+    const after = await getLead(lead.id);
+    expect(after?.paidAmount).toBe(0);
   });
 
   it('reject clears the claim without moving any money', async () => {

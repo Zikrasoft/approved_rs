@@ -181,6 +181,22 @@ describe('POST /api/telegram-webhook', () => {
       expect(answerCallback).toHaveBeenCalledWith('cb-2', 'Жду сумму');
     });
 
+    it('blocks a second "won" tap while a deal-amount prompt is already pending, instead of orphaning the first one', async () => {
+      vi.mocked(getLead).mockResolvedValue(makeLead({
+        id: 5, dealAmount: null,
+        pendingPrompt: { chatId: DM_CHAT_ID, messageId: 500, kind: 'deal_amount' },
+      }));
+
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-2b', data: 'st:5:won', from: { id: OWNER_ID }, message: { message_id: 555, chat: { id: DM_CHAT_ID } } },
+      }));
+
+      expect(res.status).toBe(200);
+      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
+      expect(setPendingPrompt).not.toHaveBeenCalled();
+      expect(answerCallback).toHaveBeenCalledWith('cb-2b', expect.stringContaining('Уже ждём'));
+    });
+
     it('does nothing when the lead is not found', async () => {
       vi.mocked(getLead).mockResolvedValue(undefined);
       const res = await POST(makeCtx({

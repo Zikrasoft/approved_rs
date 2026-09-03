@@ -26,17 +26,19 @@ export async function GET({ request }: APIContext): Promise<Response> {
   const days = Number(import.meta.env.LEAD_STALE_DAYS ?? DEFAULT_STALE_DAYS);
   const stale = await getStaleLeads(Number.isFinite(days) && days > 0 ? days : DEFAULT_STALE_DAYS);
 
+  let reminded = 0;
   for (const lead of stale) {
     try {
       await sendReminderMessage(lead, OWNER_ID);
       await sendReminderMessage(lead, ADMIN_ID);
       await markReminded(lead.id);
+      reminded++;
     } catch (err) {
       console.error('[reminders] failed to send/mark reminder', { error: err, leadId: lead.id });
     }
   }
 
-  return new Response(JSON.stringify({ reminded: stale.length }), {
+  return new Response(JSON.stringify({ reminded }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
   });

@@ -206,6 +206,7 @@ export function toggleCustomerPaid(id: number): Promise<StoredLead | undefined> 
 export async function confirmCommissionPayment(id: number): Promise<StoredLead | undefined> {
   let acted = false;
   const updated = await updateOne(id, l => {
+    acted = false; // reset each attempt — updateLeads may retry this closure on a write conflict
     if (!l.pendingCommissionClaim) return l;
     acted = true;
     const { amount } = l.pendingCommissionClaim;
@@ -223,6 +224,7 @@ export async function confirmCommissionPayment(id: number): Promise<StoredLead |
 export async function rejectCommissionPayment(id: number): Promise<StoredLead | undefined> {
   let acted = false;
   const updated = await updateOne(id, l => {
+    acted = false; // reset each attempt — updateLeads may retry this closure on a write conflict
     if (!l.pendingCommissionClaim) return l;
     acted = true;
     return { ...l, pendingCommissionClaim: null };

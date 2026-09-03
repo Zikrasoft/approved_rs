@@ -95,6 +95,13 @@ async function handleStatusCallback(id: number, key: string, chatId: number, mes
       return;
     }
     if (key === 'won' && lead.dealAmount == null) {
+      // Same orphaned-prompt risk as claimpay's double-tap guard: a second
+      // tap before the first prompt is answered would silently overwrite
+      // it via setPendingPrompt, stranding the first prompt unanswered.
+      if (lead.pendingPrompt?.kind === 'deal_amount') {
+        await answerCallback(cbId, 'Уже ждём сумму — ответьте на предыдущее сообщение').catch(() => {});
+        return;
+      }
       const promptId = await sendForceReplyPrompt(chatId, '💰 Укажи сумму сделки в рублях:\n\nНапример: 150000');
       await setPendingPrompt(id, { chatId, messageId: promptId, kind: 'deal_amount' });
       await answerCallback(cbId, 'Жду сумму');
