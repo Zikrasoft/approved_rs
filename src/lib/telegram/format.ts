@@ -241,6 +241,9 @@ export function buildHelp(role: Role): string {
     '',
     '<b>Меню</b>',
     '📊 Статистика, 🔴 Мне должны (кто ещё не оплатил), 💰 Все сделки — полный список с суммами. Найти заявку — просто пришли имя, телефон или номер.',
+    '',
+    '<b>Удаление</b>',
+    '❌ Удалить навсегда — только у тебя, владелец такого не видит. Спросит подтверждение и стирает заявку без возврата (в отличие от 🗑 Архивировать).',
   ].join('\n');
 }
 
@@ -311,11 +314,26 @@ function moneyActionRows(lead: StoredLead, role: Role, info: CommissionInfo): Bt
     : [];
 }
 
+// Admin only — owner gets archive, never permanent delete.
+export function buildDeleteConfirm(lead: StoredLead): { text: string; reply_markup: Keyboard } {
+  return {
+    text: `❗ Удалить заявку #${lead.id} (${escapeHtml(lead.name)}) навсегда? Это нельзя отменить.`,
+    reply_markup: {
+      inline_keyboard: [[
+        { text: '✅ Да, удалить', callback_data: `delconfirm:${lead.id}` },
+        { text: '↩️ Отмена', callback_data: `delcancel:${lead.id}` },
+      ]],
+    },
+  };
+}
+
 export function buildLeadDetail(lead: StoredLead, role: Role): { text: string; reply_markup: Keyboard } {
+  const deleteRow: Btn[][] = role === 'admin' ? [[{ text: '❌ Удалить навсегда', callback_data: `del:${lead.id}` }]] : [];
+
   if (lead.archived) {
     return {
       text: `${formatLeadText(lead, role)}\n\n🗄 В архиве`,
-      reply_markup: { inline_keyboard: [[{ text: '♻️ Восстановить', callback_data: `unarch:${lead.id}` }]] },
+      reply_markup: { inline_keyboard: [[{ text: '♻️ Восстановить', callback_data: `unarch:${lead.id}` }], ...deleteRow] },
     };
   }
 
@@ -330,6 +348,7 @@ export function buildLeadDetail(lead: StoredLead, role: Role): { text: string; r
     ],
     ...(commission ? moneyActionRows(lead, role, commission) : []),
     [{ text: '🗑 Архивировать', callback_data: `arch:${lead.id}` }],
+    ...deleteRow,
   ];
 
   return { text: lines.join('\n'), reply_markup: { inline_keyboard: rows } };

@@ -3,13 +3,13 @@ export const prerender = false;
 import type { APIContext } from 'astro';
 import { secretMatches } from '@/lib/verifySecret';
 import {
-  isLeadStatusKey, answerCallback, refreshLeadCard, sendForceReplyPrompt,
+  isLeadStatusKey, answerCallback, refreshLeadCard, sendForceReplyPrompt, safeEditMessage,
   sendDealNotificationToAdmin, sendCommissionClaimToAdmin, sendCommissionResultToOwner, sendMessage,
   buildOwedList, formatDealsList, formatSearchResults, buildMenu, buildHelp, buildLeadList, buildStats,
-  buildLeadDetail, editLeadDetailMessage, type Role,
+  buildLeadDetail, buildDeleteConfirm, editLeadDetailMessage, type Role,
 } from '@/lib/telegram';
 import {
-  getLead, setStatus, archiveLead, unarchiveLead, confirmCommissionPayment, claimFullCommission,
+  getLead, setStatus, archiveLead, unarchiveLead, deleteLead, confirmCommissionPayment, claimFullCommission,
   rejectCommissionPayment, setPendingPrompt, findByPendingPrompt, resolvePendingPrompt, searchLeads,
   getOwedSummary, readLeads, getCommission, type LeadStatus, type StoredLead,
 } from '@/lib/store';
@@ -123,6 +123,39 @@ async function handleUnarchiveCallback(id: number, chatId: number, messageId: nu
   });
 }
 
+async function handleDeleteCallback(id: number, chatId: number, messageId: number, cbId: string): Promise<void> {
+  await withErrorAck(cbId, { id }, async () => {
+    const lead = await getLead(id);
+    if (!lead) {
+      await answerCallback(cbId).catch(() => {});
+      return;
+    }
+    const { text, reply_markup } = buildDeleteConfirm(lead);
+    await safeEditMessage(chatId, messageId, text, reply_markup);
+    await answerCallback(cbId);
+  });
+}
+
+async function handleDeleteConfirmCallback(id: number, chatId: number, messageId: number, cbId: string): Promise<void> {
+  await withErrorAck(cbId, { id }, async () => {
+    await deleteLead(id);
+    await safeEditMessage(chatId, messageId, '🗑 Заявка удалена.', { inline_keyboard: [] });
+    await answerCallback(cbId, 'Удалено');
+  });
+}
+
+async function handleDeleteCancelCallback(id: number, chatId: number, messageId: number, role: Role, cbId: string): Promise<void> {
+  await withErrorAck(cbId, { id }, async () => {
+    const lead = await getLead(id);
+    if (lead) {
+      await editLeadDetailMessage(chatId, messageId, lead, role);
+    } else {
+      await safeEditMessage(chatId, messageId, 'Заявка не найдена.', { inline_keyboard: [] });
+    }
+    await answerCallback(cbId);
+  });
+}
+
 async function handleClaimPayCallback(id: number, chatId: number, messageId: number, role: Role, cbId: string): Promise<void> {
   await withErrorAck(cbId, { id }, async () => {
     const lead = await getLead(id);
@@ -196,6 +229,9 @@ async function handleCallbackQuery(cb: NonNullable<TelegramUpdate['callback_quer
   const statusMatch = /^st:(\d+):(.+)$/.exec(data);
   const archMatch = /^arch:(\d+)$/.exec(data);
   const unarchMatch = /^unarch:(\d+)$/.exec(data);
+  const delMatch = /^del:(\d+)$/.exec(data);
+  const delConfirmMatch = /^delconfirm:(\d+)$/.exec(data);
+  const delCancelMatch = /^delcancel:(\d+)$/.exec(data);
   const claimPayMatch = /^claimpay:(\d+)$/.exec(data);
   const confirmPayMatch = /^confirmpay:(\d+)$/.exec(data);
   const rejectPayMatch = /^rejectpay:(\d+)$/.exec(data);
@@ -213,6 +249,21 @@ async function handleCallbackQuery(cb: NonNullable<TelegramUpdate['callback_quer
   }
   if (unarchMatch) {
     await handleUnarchiveCallback(Number(unarchMatch[1]), chatId, messageId, role, cb.id);
+    return;
+  }
+  if (delMatch) {
+    if (!(await requireRole(role, 'admin', cb.id))) return;
+    await handleDeleteCallback(Number(delMatch[1]), chatId, messageId, cb.id);
+    return;
+  }
+  if (delConfirmMatch) {
+    if (!(await requireRole(role, 'admin', cb.id))) return;
+    await handleDeleteConfirmCallback(Number(delConfirmMatch[1]), chatId, messageId, cb.id);
+    return;
+  }
+  if (delCancelMatch) {
+    if (!(await requireRole(role, 'admin', cb.id))) return;
+    await handleDeleteCancelCallback(Number(delCancelMatch[1]), chatId, messageId, role, cb.id);
     return;
   }
   if (claimPayMatch) {

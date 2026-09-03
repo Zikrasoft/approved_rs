@@ -43,7 +43,7 @@ vi.mock('@vercel/blob', () => {
 import { put } from '@vercel/blob';
 import {
   insertLead, setStatus, setPendingPrompt, findByPendingPrompt, resolvePendingPrompt, archiveLead, unarchiveLead,
-  claimFullCommission, confirmCommissionPayment, rejectCommissionPayment, markReminded, getStaleLeads,
+  deleteLead, claimFullCommission, confirmCommissionPayment, rejectCommissionPayment, markReminded, getStaleLeads,
   getOwedSummary, getCommission, searchLeads, getLead, readLeads, updateLeads, type StoredLead,
 } from './store';
 import type { LeadData } from './leadTypes';
@@ -135,6 +135,25 @@ describe('archiveLead / unarchiveLead', () => {
     expect(archived?.archived).toBe(true);
     const restored = await unarchiveLead(lead.id);
     expect(restored?.archived).toBe(false);
+  });
+});
+
+describe('deleteLead', () => {
+  it('permanently removes the record, unlike archiveLead', async () => {
+    const a = await insertLead(baseData);
+    const b = await insertLead(baseData);
+
+    const found = await deleteLead(a.id);
+
+    expect(found).toBe(true);
+    const leads = await readLeads();
+    expect(leads.map(l => l.id)).toEqual([b.id]);
+  });
+
+  it('returns false for an id that does not exist', async () => {
+    await insertLead(baseData);
+    const found = await deleteLead(999);
+    expect(found).toBe(false);
   });
 });
 

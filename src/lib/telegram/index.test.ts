@@ -7,7 +7,7 @@ import {
   sendLeadNotification, statusLabel, isLeadStatusKey, buildStatusKeyboard, refreshLeadCard,
   answerCallback, sendForceReplyPrompt, sendDealNotificationToAdmin, sendCommissionClaimToAdmin,
   sendCommissionResultToOwner, buildOwedList, formatDealsList, formatSearchResults, buildMenu, buildHelp,
-  buildLeadList, buildStats, buildLeadDetail, editLeadDetailMessage,
+  buildLeadList, buildStats, buildLeadDetail, buildDeleteConfirm, editLeadDetailMessage,
 } from './index';
 import type { StoredLead, LeadStatus } from '../store';
 
@@ -484,10 +484,24 @@ describe('buildLeadDetail', () => {
     expect(text).not.toContain('Комиссия Zikrasoft');
   });
 
-  it('archived lead: only a restore button, regardless of status/role', () => {
+  it('archived lead, owner: only a restore button, no delete', () => {
     const { text, reply_markup } = buildLeadDetail(makeLead({ id: 7, status: 'won', dealAmount: 100000, archived: true }), 'owner');
     expect(text).toContain('🗄 В архиве');
     expect(reply_markup.inline_keyboard).toEqual([[{ text: '♻️ Восстановить', callback_data: 'unarch:7' }]]);
+  });
+
+  it('archived lead, admin: restore button plus permanent delete', () => {
+    const { reply_markup } = buildLeadDetail(makeLead({ id: 7, status: 'won', dealAmount: 100000, archived: true }), 'admin');
+    const data = reply_markup.inline_keyboard.flat().map(b => b.callback_data);
+    expect(data).toEqual(['unarch:7', 'del:7']);
+  });
+
+  it('active lead: admin gets a permanent-delete row, owner does not', () => {
+    const lead = makeLead({ id: 7, status: 'new' });
+    const ownerData = buildLeadDetail(lead, 'owner').reply_markup.inline_keyboard.flat().map(b => b.callback_data);
+    const adminData = buildLeadDetail(lead, 'admin').reply_markup.inline_keyboard.flat().map(b => b.callback_data);
+    expect(ownerData).not.toContain('del:7');
+    expect(adminData).toContain('del:7');
   });
 
   it('reuses the full card body — name/contact/comment/deal amount present', () => {
@@ -496,6 +510,18 @@ describe('buildLeadDetail', () => {
     expect(text).toContain('@ivan (WhatsApp)');
     expect(text).toContain('BMW X5');
     expect(text).toContain(money(50000));
+  });
+});
+
+describe('buildDeleteConfirm', () => {
+  it('asks for confirmation with confirm/cancel buttons scoped to the lead id', () => {
+    const { text, reply_markup } = buildDeleteConfirm(makeLead({ id: 9, name: 'Test' }));
+    expect(text).toContain('#9');
+    expect(text).toContain('Test');
+    expect(reply_markup.inline_keyboard).toEqual([[
+      { text: '✅ Да, удалить', callback_data: 'delconfirm:9' },
+      { text: '↩️ Отмена', callback_data: 'delcancel:9' },
+    ]]);
   });
 });
 

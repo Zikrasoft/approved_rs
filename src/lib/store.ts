@@ -200,6 +200,17 @@ export function unarchiveLead(id: number): Promise<StoredLead | undefined> {
   return updateOne(id, l => ({ ...l, archived: false }));
 }
 
+// Permanent, unlike archiveLead — removes the record outright.
+export async function deleteLead(id: number): Promise<boolean> {
+  let found = false;
+  await updateLeads(leads => {
+    const next = leads.filter(l => l.id !== id);
+    found = next.length !== leads.length;
+    return next;
+  });
+  return found;
+}
+
 // Claiming means "I sent it all" — no separate amount prompt, always the full remaining balance.
 export function claimFullCommission(id: number): Promise<StoredLead | undefined> {
   return updateOne(id, l => ({

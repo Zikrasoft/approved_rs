@@ -20,7 +20,9 @@ vi.mock('@/lib/telegram', () => ({
   buildLeadList: vi.fn((_leads: unknown[], status: string) => ({ text: `LIST_${status}`, reply_markup: { inline_keyboard: [] } })),
   buildStats: vi.fn().mockReturnValue('STATS'),
   buildLeadDetail: vi.fn((lead: { id: number }, role: string) => ({ text: `DETAIL_${lead.id}_${role}`, reply_markup: { inline_keyboard: [] } })),
+  buildDeleteConfirm: vi.fn((lead: { id: number }) => ({ text: `DELCONFIRM_${lead.id}`, reply_markup: { inline_keyboard: [] } })),
   editLeadDetailMessage: vi.fn(),
+  safeEditMessage: vi.fn(),
 }));
 
 vi.mock('@/lib/store', () => ({
@@ -28,6 +30,7 @@ vi.mock('@/lib/store', () => ({
   setStatus: vi.fn(),
   archiveLead: vi.fn(),
   unarchiveLead: vi.fn(),
+  deleteLead: vi.fn(),
   claimFullCommission: vi.fn(),
   confirmCommissionPayment: vi.fn(),
   rejectCommissionPayment: vi.fn(),
@@ -44,9 +47,10 @@ import { POST } from './telegram-webhook';
 import {
   answerCallback, refreshLeadCard, sendForceReplyPrompt, sendDealNotificationToAdmin,
   sendCommissionClaimToAdmin, sendCommissionResultToOwner, sendMessage, buildLeadDetail, editLeadDetailMessage,
+  safeEditMessage,
 } from '@/lib/telegram';
 import {
-  getLead, setStatus, archiveLead, unarchiveLead, claimFullCommission, confirmCommissionPayment,
+  getLead, setStatus, archiveLead, unarchiveLead, deleteLead, claimFullCommission, confirmCommissionPayment,
   rejectCommissionPayment, setPendingPrompt, findByPendingPrompt, resolvePendingPrompt, searchLeads,
   getOwedSummary, readLeads, getCommission,
 } from '@/lib/store';
@@ -110,6 +114,7 @@ describe('POST /api/telegram-webhook', () => {
     vi.mocked(setStatus).mockReset().mockResolvedValue(makeLead({ status: 'lost' }));
     vi.mocked(archiveLead).mockReset().mockResolvedValue(makeLead({ archived: true }));
     vi.mocked(unarchiveLead).mockReset().mockResolvedValue(makeLead({ archived: false }));
+    vi.mocked(deleteLead).mockReset().mockResolvedValue(true);
     vi.mocked(claimFullCommission).mockReset().mockResolvedValue(makeLead({ status: 'won', dealAmount: 100000, pendingCommissionClaim: { amount: 10000, claimedAt: '2026-01-02T00:00:00.000Z' } }));
     vi.mocked(confirmCommissionPayment).mockReset().mockResolvedValue(makeLead({ status: 'won', dealAmount: 100000, paidAmount: 4000 }));
     vi.mocked(rejectCommissionPayment).mockReset().mockResolvedValue(makeLead({ status: 'won', dealAmount: 100000 }));
@@ -123,6 +128,7 @@ describe('POST /api/telegram-webhook', () => {
     vi.mocked(answerCallback).mockReset().mockResolvedValue(undefined);
     vi.mocked(refreshLeadCard).mockReset().mockResolvedValue(undefined);
     vi.mocked(editLeadDetailMessage).mockReset().mockResolvedValue(undefined);
+    vi.mocked(safeEditMessage).mockReset().mockResolvedValue(undefined);
     vi.mocked(sendForceReplyPrompt).mockReset().mockResolvedValue(888);
     vi.mocked(sendDealNotificationToAdmin).mockReset().mockResolvedValue(undefined);
     vi.mocked(sendCommissionClaimToAdmin).mockReset().mockResolvedValue(undefined);
@@ -261,6 +267,52 @@ describe('POST /api/telegram-webhook', () => {
       expect(res.status).toBe(200);
       expect(unarchiveLead).toHaveBeenCalledWith(5);
       expect(answerCallback).toHaveBeenCalledWith('cb-7', 'Восстановлено');
+    });
+  });
+
+  describe('del: / delconfirm: / delcancel: — admin only, permanent delete', () => {
+    it('del:<id> shows a confirm prompt in place, does not delete yet', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-del1', data: 'del:5', from: { id: ADMIN_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(deleteLead).not.toHaveBeenCalled();
+      expect(safeEditMessage).toHaveBeenCalledWith(DM_CHAT_ID, 1, 'DELCONFIRM_5', { inline_keyboard: [] });
+    });
+
+    it('owner cannot even open the confirm prompt', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-del2', data: 'del:5', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(safeEditMessage).not.toHaveBeenCalled();
+    });
+
+    it('delconfirm:<id> actually deletes and clears the message', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-del3', data: 'delconfirm:5', from: { id: ADMIN_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(deleteLead).toHaveBeenCalledWith(5);
+      expect(safeEditMessage).toHaveBeenCalledWith(DM_CHAT_ID, 1, '🗑 Заявка удалена.', { inline_keyboard: [] });
+      expect(answerCallback).toHaveBeenCalledWith('cb-del3', 'Удалено');
+    });
+
+    it('owner cannot confirm a delete', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-del4', data: 'delconfirm:5', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(deleteLead).not.toHaveBeenCalled();
+    });
+
+    it('delcancel:<id> restores the normal detail view without deleting', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-del5', data: 'delcancel:5', from: { id: ADMIN_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(deleteLead).not.toHaveBeenCalled();
+      expect(editLeadDetailMessage).toHaveBeenCalledWith(DM_CHAT_ID, 1, expect.objectContaining({ id: 5 }), 'admin');
     });
   });
 
