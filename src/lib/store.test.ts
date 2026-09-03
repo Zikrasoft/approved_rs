@@ -483,6 +483,6 @@ describe('updateLeads conflict retry', () => {
 
     await expect(updateLeads((leads: StoredLead[]) => leads.map(l => ({ ...l, name: 'Пётр' }))))
       .rejects.toThrow('precondition failed');
-    expect(vi.mocked(put)).toHaveBeenCalledTimes(5); // MAX_RETRIES, no more
+    expect(vi.mocked(put)).toHaveBeenCalledTimes(6); // MAX_RETRIES, no more
   });
 });

@@ -59,11 +59,19 @@ const storedLeadSchema = z.object({
 export type StoredLead = z.infer<typeof storedLeadSchema>;
 
 const LEADS_PATH = 'data/leads.json';
-const MAX_RETRIES = 5;
+const MAX_RETRIES = 6;
 const PAID_EPSILON = 0.005;
 
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Exponential, not flat — two writers retrying in lockstep (e.g. a bot edit
+// racing a real website lead submission) stay desynced only if each round
+// widens the window, not if every retry waits the same ~fixed amount.
+function backoffDelay(attempt: number): number {
+  const base = 25 * 2 ** attempt;
+  return base + Math.random() * base;
 }
 
 export function roundMoney(n: number): number {
@@ -110,7 +118,7 @@ export async function updateLeads(mutate: (leads: StoredLead[]) => StoredLead[])
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     // Jittered backoff before a retry — without it, two requests racing in
     // lockstep can keep re-colliding on every attempt instead of one winning.
-    if (attempt > 0) await sleep(20 + Math.random() * 60);
+    if (attempt > 0) await sleep(backoffDelay(attempt - 1));
     const { leads, etag } = await readLeadsRaw();
     const next = mutate(leads);
     // Validate before writing, not just on the next read — outside the
