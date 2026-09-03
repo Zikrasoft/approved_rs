@@ -5,7 +5,7 @@ import { secretMatches } from '@/lib/verifySecret';
 import {
   isLeadStatusKey, answerCallback, refreshLeadCard, sendForceReplyPrompt, safeEditMessage,
   sendDealNotificationToAdmin, sendCommissionClaimToAdmin, sendCommissionResultToOwner, sendMessage,
-  buildOwedList, formatDealsList, formatSearchResults, buildMenu, buildHelp, buildLeadList, buildStats,
+  buildOwedList, formatDealsList, buildSearchResults, buildMenu, buildHelp, buildLeadList, buildStats,
   buildLeadDetail, buildDeleteConfirm, editLeadDetailMessage, type Role,
 } from '@/lib/telegram';
 import {
@@ -411,7 +411,8 @@ async function handlePrivateMessage(msg: TelegramMessage): Promise<void> {
   // in POST, before chat-type is even checked) — there's nothing else it
   // could mean, so treat it as a search query.
   const results = await searchLeads(text);
-  await sendMessage(chatId, formatSearchResults(results));
+  const { text: resultsText, reply_markup } = buildSearchResults(results);
+  await sendMessage(chatId, resultsText, { reply_markup });
 }
 
 export async function POST({ request }: APIContext): Promise<Response> {

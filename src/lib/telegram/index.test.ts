@@ -6,7 +6,7 @@ vi.stubGlobal('fetch', mockFetch);
 import {
   sendLeadNotification, statusLabel, isLeadStatusKey, buildStatusKeyboard, refreshLeadCard,
   answerCallback, sendForceReplyPrompt, sendDealNotificationToAdmin, sendCommissionClaimToAdmin,
-  sendCommissionResultToOwner, buildOwedList, formatDealsList, formatSearchResults, buildMenu, buildHelp,
+  sendCommissionResultToOwner, buildOwedList, formatDealsList, buildSearchResults, buildMenu, buildHelp,
   buildLeadList, buildStats, buildLeadDetail, buildDeleteConfirm, editLeadDetailMessage,
 } from './index';
 import type { StoredLead, LeadStatus } from '../store';
@@ -329,19 +329,21 @@ describe('formatDealsList', () => {
   });
 });
 
-describe('formatSearchResults', () => {
-  it('formats each match with status emoji, id, name, contact', () => {
-    const text = formatSearchResults([makeLead({ id: 5, name: 'Пётр', contact: '@petr', status: 'in_progress' })]);
-    expect(text).toBe('🔵 #5 Пётр — @petr');
+describe('buildSearchResults', () => {
+  it('renders each match as a tappable button: status emoji, id, name, contact', () => {
+    const { reply_markup } = buildSearchResults([makeLead({ id: 5, name: 'Пётр', contact: '@petr', status: 'in_progress' })]);
+    expect(reply_markup.inline_keyboard).toEqual([[{ text: '🔵 #5 Пётр — @petr', callback_data: 'open:5' }]]);
   });
 
   it('prefixes an archived match with 🗄', () => {
-    const text = formatSearchResults([makeLead({ id: 5, name: 'Пётр', contact: '@petr', archived: true })]);
-    expect(text).toBe('🗄 🆕 #5 Пётр — @petr');
+    const { reply_markup } = buildSearchResults([makeLead({ id: 5, name: 'Пётр', contact: '@petr', archived: true })]);
+    expect(reply_markup.inline_keyboard[0][0].text).toBe('🗄 🆕 #5 Пётр — @petr');
   });
 
-  it('reports nothing found for an empty list', () => {
-    expect(formatSearchResults([])).toBe('Ничего не найдено.');
+  it('reports nothing found for an empty list, no buttons', () => {
+    const { text, reply_markup } = buildSearchResults([]);
+    expect(text).toBe('Ничего не найдено.');
+    expect(reply_markup.inline_keyboard).toEqual([]);
   });
 });
 

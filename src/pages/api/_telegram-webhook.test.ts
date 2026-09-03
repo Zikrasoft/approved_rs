@@ -14,7 +14,7 @@ vi.mock('@/lib/telegram', () => ({
   sendMessage: vi.fn(),
   buildOwedList: vi.fn().mockReturnValue({ text: 'OWED_LIST', reply_markup: { inline_keyboard: [] } }),
   formatDealsList: vi.fn().mockReturnValue('DEALS_LIST'),
-  formatSearchResults: vi.fn().mockReturnValue('SEARCH_RESULTS'),
+  buildSearchResults: vi.fn().mockReturnValue({ text: 'SEARCH_RESULTS', reply_markup: { inline_keyboard: [] } }),
   buildMenu: vi.fn((role: string) => ({ text: `MENU_${role}`, reply_markup: { inline_keyboard: [] } })),
   buildHelp: vi.fn((role: string) => `HELP_${role}`),
   buildLeadList: vi.fn((_leads: unknown[], status: string) => ({ text: `LIST_${status}`, reply_markup: { inline_keyboard: [] } })),
@@ -767,7 +767,7 @@ describe('POST /api/telegram-webhook', () => {
       const res = await POST(makeCtx({ message: { message_id: 3, text: 'Иван', chat: { id: OWNER_ID, type: 'private' }, from: { id: OWNER_ID } } }));
       expect(res.status).toBe(200);
       expect(searchLeads).toHaveBeenCalledWith('Иван');
-      expect(sendMessage).toHaveBeenCalledWith(OWNER_ID, 'SEARCH_RESULTS');
+      expect(sendMessage).toHaveBeenCalledWith(OWNER_ID, 'SEARCH_RESULTS', { reply_markup: { inline_keyboard: [] } });
     });
 
     it('denies plain DM text from an unknown user', async () => {

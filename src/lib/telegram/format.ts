@@ -185,15 +185,15 @@ export function formatDealsList(leads: StoredLead[]): string {
   return ['<b>💰 Все сделки</b>', ...lines].join('\n\n');
 }
 
-export function formatSearchResults(leads: StoredLead[]): string {
-  if (leads.length === 0) return 'Ничего не найдено.';
-  return leads
-    .map(l => {
-      const amount = l.dealAmount != null ? ` — ${formatMoney(l.dealAmount)}` : '';
-      const archivedMark = l.archived ? '🗄 ' : '';
-      return `${archivedMark}${statusEmoji(l.status)} #${l.id} ${escapeHtml(l.name)} — ${escapeHtml(l.contact)}${amount}`;
-    })
-    .join('\n');
+export function buildSearchResults(leads: StoredLead[]): { text: string; reply_markup: Keyboard } {
+  if (leads.length === 0) return { text: 'Ничего не найдено.', reply_markup: { inline_keyboard: [] } };
+  const rows: Btn[][] = leads.slice(0, MAX_LIST_ROWS).map(l => {
+    const amount = l.dealAmount != null ? ` — ${formatMoney(l.dealAmount)}` : '';
+    const archivedMark = l.archived ? '🗄 ' : '';
+    const label = `${archivedMark}${statusEmoji(l.status)} #${l.id} ${l.name} — ${l.contact}${amount}`;
+    return [{ text: label, callback_data: `open:${l.id}` }];
+  });
+  return { text: 'Найдено:', reply_markup: { inline_keyboard: rows } };
 }
 
 // Owner's money view lives inside each lead's detail, not a menu item.
