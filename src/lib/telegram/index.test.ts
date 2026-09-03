@@ -6,7 +6,7 @@ vi.stubGlobal('fetch', mockFetch);
 import {
   sendLeadNotification, statusLabel, isLeadStatusKey, buildStatusKeyboard, refreshLeadCard,
   answerCallback, sendForceReplyPrompt, sendDealNotificationToAdmin, sendCommissionClaimToAdmin,
-  sendCommissionResultToOwner, buildOwedList, formatDealsList, buildSearchResults, buildMenu, buildHelp,
+  sendCommissionResultToOwner, sendStatusChangeToAdmin, buildOwedList, formatDealsList, buildSearchResults, buildMenu, buildHelp,
   buildLeadList, buildStats, buildLeadDetail, buildDeleteConfirm, editLeadDetailMessage,
 } from './index';
 import type { StoredLead, LeadStatus } from '../store';
@@ -278,6 +278,21 @@ describe('sendCommissionResultToOwner', () => {
     await sendCommissionResultToOwner(makeLead({ id: 9 }), false);
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).toContain('не подтверждена');
+  });
+});
+
+describe('sendStatusChangeToAdmin', () => {
+  beforeEach(() => mockFetchOk());
+  afterEach(() => mockFetch.mockReset());
+
+  it('notifies every admin id with the lead\'s current status', async () => {
+    await sendStatusChangeToAdmin(makeLead({ id: 9, name: 'Пётр', status: 'in_progress' }));
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.chat_id).toBe(222);
+    expect(body.text).toContain('#9');
+    expect(body.text).toContain('Пётр');
+    expect(body.text).toContain('🔵 В работе');
   });
 });
 

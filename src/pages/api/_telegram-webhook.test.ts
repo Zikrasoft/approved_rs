@@ -11,6 +11,7 @@ vi.mock('@/lib/telegram', () => ({
   sendDealNotificationToAdmin: vi.fn(),
   sendCommissionClaimToAdmin: vi.fn(),
   sendCommissionResultToOwner: vi.fn(),
+  sendStatusChangeToAdmin: vi.fn(),
   sendMessage: vi.fn(),
   buildOwedList: vi.fn().mockReturnValue({ text: 'OWED_LIST', reply_markup: { inline_keyboard: [] } }),
   formatDealsList: vi.fn().mockReturnValue('DEALS_LIST'),
@@ -48,7 +49,7 @@ vi.mock('@/lib/store', () => ({
 import { POST } from './telegram-webhook';
 import {
   answerCallback, refreshLeadCard, sendForceReplyPrompt, sendDealNotificationToAdmin,
-  sendCommissionClaimToAdmin, sendCommissionResultToOwner, sendMessage, buildLeadDetail, editLeadDetailMessage,
+  sendCommissionClaimToAdmin, sendCommissionResultToOwner, sendStatusChangeToAdmin, sendMessage, buildLeadDetail, editLeadDetailMessage,
   safeEditMessage,
 } from '@/lib/telegram';
 import {
@@ -135,6 +136,7 @@ describe('POST /api/telegram-webhook', () => {
     vi.mocked(sendDealNotificationToAdmin).mockReset().mockResolvedValue(undefined);
     vi.mocked(sendCommissionClaimToAdmin).mockReset().mockResolvedValue(undefined);
     vi.mocked(sendCommissionResultToOwner).mockReset().mockResolvedValue(undefined);
+    vi.mocked(sendStatusChangeToAdmin).mockReset().mockResolvedValue(undefined);
     vi.mocked(sendMessage).mockReset().mockResolvedValue(undefined);
   });
 
@@ -192,6 +194,7 @@ describe('POST /api/telegram-webhook', () => {
       expect(setStatus).toHaveBeenCalledWith(5, 'lost');
       expect(refreshLeadCard).toHaveBeenCalled();
       expect(editLeadDetailMessage).toHaveBeenCalledWith(DM_CHAT_ID, 555, expect.objectContaining({ status: 'lost' }), 'owner');
+      expect(sendStatusChangeToAdmin).toHaveBeenCalledWith(expect.objectContaining({ status: 'lost' }));
       expect(answerCallback).toHaveBeenCalledWith('cb-1', 'Статус обновлён');
     });
 
@@ -204,6 +207,7 @@ describe('POST /api/telegram-webhook', () => {
       expect(sendForceReplyPrompt).toHaveBeenCalledWith(DM_CHAT_ID, expect.stringContaining('заработал'));
       expect(setPendingPrompt).toHaveBeenCalledWith(5, { chatId: DM_CHAT_ID, messageId: 888, kind: 'deal_amount' });
       expect(answerCallback).toHaveBeenCalledWith('cb-2', 'Жду сумму');
+      expect(sendStatusChangeToAdmin).not.toHaveBeenCalled();
     });
 
     it('resends a fresh deal-amount prompt on a second "won" tap, replacing a stale pending one', async () => {

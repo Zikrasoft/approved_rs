@@ -150,6 +150,13 @@ export function commissionResultText(leadId: number, confirmed: boolean): string
     : `❌ Оплата по заявке #${leadId} не подтверждена, свяжитесь с администратором.`;
 }
 
+// 'won' isn't covered here — that transition gets its own richer notification
+// (dealNotificationText, sent once the deal amount is in).
+export function statusChangeText(lead: StoredLead): string {
+  const meta = statusMeta(lead.status);
+  return `🔔 Заявка #${lead.id} ${escapeHtml(lead.name)}: статус — ${meta.emoji} ${meta.label}`;
+}
+
 // Tappable, not a text block — shared by both owner and admin (whoever
 // still owes/is owed commission on a lead), each row opens that lead
 // directly. Neutral header ("Долг по комиссии") on purpose: "Мне должны"

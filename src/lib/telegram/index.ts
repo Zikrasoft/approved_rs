@@ -7,5 +7,5 @@ export {
 export { sendMessage, sendForceReplyPrompt, answerCallback, safeEditMessage, OWNER_IDS, ADMIN_IDS } from './client';
 export {
   sendLeadNotification, refreshLeadCard, sendReminderMessage, sendDealNotificationToAdmin,
-  sendCommissionClaimToAdmin, sendCommissionResultToOwner, editLeadDetailMessage,
+  sendCommissionClaimToAdmin, sendCommissionResultToOwner, sendStatusChangeToAdmin, editLeadDetailMessage,
 } from './notify';

@@ -4,7 +4,7 @@ import type { APIContext } from 'astro';
 import { secretMatches } from '@/lib/verifySecret';
 import {
   isLeadStatusKey, answerCallback, refreshLeadCard, sendForceReplyPrompt, safeEditMessage,
-  sendDealNotificationToAdmin, sendCommissionClaimToAdmin, sendCommissionResultToOwner, sendMessage,
+  sendDealNotificationToAdmin, sendCommissionClaimToAdmin, sendCommissionResultToOwner, sendStatusChangeToAdmin, sendMessage,
   buildOwedList, formatDealsList, buildSearchResults, buildMenu, buildHelp, buildLeadList, buildStats,
   buildLeadDetail, buildDeleteConfirm, editLeadDetailMessage, OWNER_IDS, ADMIN_IDS, type Role,
 } from '@/lib/telegram';
@@ -102,6 +102,7 @@ async function handleStatusCallback(id: number, key: string, chatId: number, mes
     }
     const updated = await setStatus(id, key);
     await refreshBothSurfaces(updated, chatId, messageId, role);
+    if (updated) await sendStatusChangeToAdmin(updated);
     await answerCallback(cbId, 'Статус обновлён');
   });
 }

@@ -4,7 +4,7 @@ import type { StoredLead } from '../store';
 import { tgPost, expectMessageAndChatId, safeEditMessage, sendMessage, GROUP_ID, OWNER_IDS, ADMIN_IDS } from './client';
 import {
   formatTeaser, deepLinkKeyboard, reminderText, dealNotificationText, commissionClaimText,
-  commissionResultText, buildLeadDetail, type Role,
+  commissionResultText, statusChangeText, buildLeadDetail, type Role,
 } from './format';
 
 export async function sendLeadNotification(lead: StoredLead): Promise<{ chatId: number; messageId: number }> {
@@ -60,6 +60,10 @@ export async function sendCommissionClaimToAdmin(lead: StoredLead): Promise<void
 
 export async function sendCommissionResultToOwner(lead: StoredLead, confirmed: boolean): Promise<void> {
   await sendToAll(OWNER_IDS, commissionResultText(lead.id, confirmed));
+}
+
+export async function sendStatusChangeToAdmin(lead: StoredLead): Promise<void> {
+  await sendToAll(ADMIN_IDS, statusChangeText(lead));
 }
 
 export async function editLeadDetailMessage(chatId: number, messageId: number, lead: StoredLead, role: Role): Promise<void> {
