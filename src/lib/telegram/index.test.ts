@@ -383,20 +383,31 @@ describe('buildLeadList', () => {
 });
 
 describe('buildStats', () => {
-  it('counts by status and sums money across won leads, excluding archived', () => {
-    const leads = [
-      makeLead({ id: 1, status: 'new' }),
-      makeLead({ id: 2, status: 'in_progress' }),
-      makeLead({ id: 3, status: 'won', dealAmount: 100000, paidAmount: 4000 }),
-      makeLead({ id: 4, status: 'lost' }),
-      makeLead({ id: 5, status: 'new', archived: true }),
-    ];
-    const text = buildStats(leads);
+  const leads = [
+    makeLead({ id: 1, status: 'new' }),
+    makeLead({ id: 2, status: 'in_progress' }),
+    makeLead({ id: 3, status: 'won', dealAmount: 100000, paidAmount: 4000 }),
+    makeLead({ id: 4, status: 'lost' }),
+    makeLead({ id: 5, status: 'new', archived: true }),
+  ];
+
+  it('admin: counts by status and sums money across won leads, excluding archived', () => {
+    const text = buildStats(leads, 'admin');
     expect(text).toContain('Всего заявок: 4 (+1 в архиве)');
     expect(text).toContain(`💰 Заработано (доход владельца): ${money(100000)}`);
     expect(text).toContain(`Комиссия начислена: ${money(10000)}`);
     expect(text).toContain(`Оплачено: ${money(4000)}`);
     expect(text).toContain(`🔴 Осталось получить: ${money(6000)}`);
+  });
+
+  it('owner: same totals, worded from the owner\'s side (what he still owes, not "receives")', () => {
+    const text = buildStats(leads, 'owner');
+    expect(text).toContain(`💰 Заработано: ${money(100000)}`);
+    expect(text).toContain(`Комиссия к оплате: ${money(10000)}`);
+    expect(text).toContain(`Оплачено: ${money(4000)}`);
+    expect(text).toContain(`🔴 Осталось оплатить: ${money(6000)}`);
+    expect(text).not.toContain('доход владельца');
+    expect(text).not.toContain('Осталось получить');
   });
 });
 

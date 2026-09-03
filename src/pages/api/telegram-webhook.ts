@@ -262,7 +262,7 @@ async function handleCallbackQuery(cb: NonNullable<TelegramUpdate['callback_quer
     return;
   }
   if (data === 'menu:stats') {
-    await sendMessage(chatId, buildStats(await readLeads()));
+    await sendMessage(chatId, buildStats(await readLeads(), role));
     await answerCallback(cb.id).catch(() => {});
     return;
   }

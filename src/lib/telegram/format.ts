@@ -223,7 +223,7 @@ export function buildLeadList(leads: StoredLead[], status: LeadStatus): { text: 
   };
 }
 
-export function buildStats(leads: StoredLead[]): string {
+export function buildStats(leads: StoredLead[], role: Role): string {
   const active = leads.filter(l => !l.archived);
   const archivedCount = leads.length - active.length;
   const count = (s: LeadStatus) => active.filter(l => l.status === s).length;
@@ -233,16 +233,27 @@ export function buildStats(leads: StoredLead[]): string {
   const paidTotal = roundMoney(wonLeads.reduce((sum, l) => sum + l.paidAmount, 0));
   const remainingTotal = roundMoney(wonLeads.reduce((sum, l) => sum + getCommission(l).remaining, 0));
 
+  const moneyLines = role === 'owner'
+    ? [
+        `💰 Заработано: ${formatMoney(totalEarned)}`,
+        `Комиссия к оплате: ${formatMoney(commissionTotal)}`,
+        `Оплачено: ${formatMoney(paidTotal)}`,
+        `🔴 Осталось оплатить: ${formatMoney(remainingTotal)}`,
+      ]
+    : [
+        `💰 Заработано (доход владельца): ${formatMoney(totalEarned)}`,
+        `Комиссия начислена: ${formatMoney(commissionTotal)}`,
+        `Оплачено: ${formatMoney(paidTotal)}`,
+        `🔴 Осталось получить: ${formatMoney(remainingTotal)}`,
+      ];
+
   return [
     '<b>📊 Статистика</b>',
     '',
     `Всего заявок: ${active.length}${archivedCount ? ` (+${archivedCount} в архиве)` : ''}`,
     `🆕 Новые: ${count('new')}   🔵 В работе: ${count('in_progress')}   ✅ Завершено: ${count('won')}   ❌ Отказ: ${count('lost')}`,
     '',
-    `💰 Заработано (доход владельца): ${formatMoney(totalEarned)}`,
-    `Комиссия начислена: ${formatMoney(commissionTotal)}`,
-    `Оплачено: ${formatMoney(paidTotal)}`,
-    `🔴 Осталось получить: ${formatMoney(remainingTotal)}`,
+    ...moneyLines,
   ].join('\n');
 }
 
