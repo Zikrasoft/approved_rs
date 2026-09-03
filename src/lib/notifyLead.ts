@@ -1,6 +1,6 @@
 import type { LeadData } from './leadTypes';
-import { sendLeadNotification } from './telegram';
-import { insertLead, setTelegramMessage, newStoredLead, type StoredLead } from './store';
+import { sendLeadNotification, refreshLeadCard } from './telegram';
+import { insertOrMergeLead, setTelegramMessage, newStoredLead, type StoredLead } from './store';
 
 export async function notifyLead(
   data: Omit<LeadData, 'id'>,
@@ -11,8 +11,9 @@ export async function notifyLead(
   });
 
   let lead: StoredLead;
+  let merged = false;
   try {
-    lead = await insertLead(data);
+    ({ lead, merged } = await insertOrMergeLead(data));
   } catch (err) {
     // Blob write failed — degrade instead of losing the lead: still notify
     // Telegram with a synthetic id, just without CRM status tracking for
@@ -20,6 +21,21 @@ export async function notifyLead(
     // on, but staff at least see the lead).
     console.error(`${logPrefix} store insertLead failed, notifying without CRM tracking`, { error: err, lead: data });
     lead = newStoredLead(data, Date.now());
+  }
+
+  if (merged) {
+    // Same visitor already has an open lead — update its card in place
+    // instead of spamming a second Telegram message for the same person.
+    console.log(`${logPrefix} merged into an existing open lead`, { leadId: lead.id });
+    if (lead.telegramChatId != null && lead.telegramMessageId != null) {
+      try {
+        await refreshLeadCard(lead);
+      } catch (err) {
+        console.error(`${logPrefix} failed to refresh the merged lead's card`, { error: err, leadId: lead.id });
+      }
+    }
+    console.log(`${logPrefix} notifyLead finished`);
+    return;
   }
 
   try {

@@ -2,20 +2,21 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('./telegram', () => ({
   sendLeadNotification: vi.fn(),
+  refreshLeadCard: vi.fn(),
 }));
-// Only insertLead/setTelegramMessage need mocking (they touch the blob).
-// newStoredLead is pure (spread + Date.now-ish timestamps, no I/O) — pull
-// the real implementation through via importOriginal so the fallback-path
-// test exercises the actual default-fields shape instead of a hand-copied
-// mirror of it that could silently drift from the real one.
+// Only insertOrMergeLead/setTelegramMessage need mocking (they touch the
+// blob). newStoredLead is pure (spread + Date.now-ish timestamps, no I/O) —
+// pull the real implementation through via importOriginal so the
+// fallback-path test exercises the actual default-fields shape instead of a
+// hand-copied mirror of it that could silently drift from the real one.
 vi.mock('./store', async (importOriginal) => {
   const actual = await importOriginal<typeof import('./store')>();
-  return { ...actual, insertLead: vi.fn(), setTelegramMessage: vi.fn() };
+  return { ...actual, insertOrMergeLead: vi.fn(), setTelegramMessage: vi.fn() };
 });
 
 import { notifyLead } from './notifyLead';
-import { sendLeadNotification } from './telegram';
-import { insertLead, setTelegramMessage } from './store';
+import { sendLeadNotification, refreshLeadCard } from './telegram';
+import { insertOrMergeLead, setTelegramMessage } from './store';
 import type { LeadData } from './leadTypes';
 import type { StoredLead } from './store';
 
@@ -41,14 +42,15 @@ const storedLead: StoredLead = {
 
 describe('notifyLead', () => {
   beforeEach(() => {
-    vi.mocked(insertLead).mockReset().mockResolvedValue(storedLead);
+    vi.mocked(insertOrMergeLead).mockReset().mockResolvedValue({ lead: storedLead, merged: false });
     vi.mocked(sendLeadNotification).mockReset().mockResolvedValue({ chatId: -100, messageId: 999 });
     vi.mocked(setTelegramMessage).mockReset().mockResolvedValue(storedLead);
+    vi.mocked(refreshLeadCard).mockReset().mockResolvedValue(undefined);
   });
 
   it('inserts into the store, then notifies Telegram with the id-assigned lead', async () => {
     await notifyLead(baseData, '[test]');
-    expect(insertLead).toHaveBeenCalledWith(baseData);
+    expect(insertOrMergeLead).toHaveBeenCalledWith(baseData);
     expect(sendLeadNotification).toHaveBeenCalledWith(storedLead);
   });
 
@@ -63,7 +65,7 @@ describe('notifyLead', () => {
   });
 
   it('falls back to a synthetic untracked lead and still notifies Telegram when the store insert fails', async () => {
-    vi.mocked(insertLead).mockRejectedValueOnce(new Error('blob down'));
+    vi.mocked(insertOrMergeLead).mockRejectedValueOnce(new Error('blob down'));
 
     await notifyLead(baseData, '[test]');
 
@@ -72,5 +74,25 @@ describe('notifyLead', () => {
     expect(notified.name).toBe('Иван');
     expect(notified.status).toBe('new');
     expect(typeof notified.id).toBe('number');
+  });
+
+  it('when merged into an existing lead, refreshes its card instead of sending a new Telegram message', async () => {
+    const merged: StoredLead = { ...storedLead, telegramChatId: -100, telegramMessageId: 999 };
+    vi.mocked(insertOrMergeLead).mockResolvedValueOnce({ lead: merged, merged: true });
+
+    await notifyLead(baseData, '[test]');
+
+    expect(sendLeadNotification).not.toHaveBeenCalled();
+    expect(setTelegramMessage).not.toHaveBeenCalled();
+    expect(refreshLeadCard).toHaveBeenCalledWith(merged);
+  });
+
+  it('when merged but the existing lead has no Telegram message yet, skips the refresh instead of throwing', async () => {
+    vi.mocked(insertOrMergeLead).mockResolvedValueOnce({ lead: storedLead, merged: true });
+
+    await expect(notifyLead(baseData, '[test]')).resolves.toBeUndefined();
+
+    expect(refreshLeadCard).not.toHaveBeenCalled();
+    expect(sendLeadNotification).not.toHaveBeenCalled();
   });
 });

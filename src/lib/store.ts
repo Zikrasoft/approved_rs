@@ -178,6 +178,50 @@ export async function insertLead(data: Omit<LeadData, 'id'>): Promise<StoredLead
   return inserted;
 }
 
+const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
+
+function isPlaceholderContact(contact: string): boolean {
+  return contact === '' || contact === '—';
+}
+
+// Same visitor clicking Telegram, then WhatsApp, then the phone button in
+// one sitting shouldn't create 3 separate leads/notifications — merge into
+// whichever one is still 'new' instead. A real form submission upgrades a
+// placeholder click-lead's name/contact once we actually have them.
+export async function insertOrMergeLead(data: Omit<LeadData, 'id'>): Promise<{ lead: StoredLead; merged: boolean }> {
+  let outcome!: { lead: StoredLead; merged: boolean };
+  await updateLeads(leads => {
+    const now = Date.now();
+    const existing = data.visitorId
+      ? leads.find(l =>
+          l.visitorId === data.visitorId &&
+          l.status === 'new' &&
+          !l.archived &&
+          now - new Date(l.createdAt).getTime() < VISITOR_MERGE_WINDOW_MS,
+        )
+      : undefined;
+
+    if (!existing) {
+      const id = leads.reduce((max, l) => Math.max(max, l.id), 0) + 1;
+      const inserted = newStoredLead(data, id);
+      outcome = { lead: inserted, merged: false };
+      return [...leads, inserted];
+    }
+
+    const attemptNote = `Также пробовал: ${data.service}`;
+    const comment = existing.comment ? `${existing.comment}\n${attemptNote}` : attemptNote;
+    const upgradeContact = isPlaceholderContact(existing.contact) && !isPlaceholderContact(data.contact);
+    const merged: StoredLead = {
+      ...existing,
+      ...(upgradeContact ? { name: data.name, contact: data.contact, service: data.service, kind: data.kind } : {}),
+      comment,
+    };
+    outcome = { lead: merged, merged: true };
+    return leads.map(l => (l.id === existing.id ? merged : l));
+  });
+  return outcome;
+}
+
 export function setTelegramMessage(id: number, chatId: number, messageId: number): Promise<StoredLead | undefined> {
   return updateOne(id, l => ({ ...l, telegramChatId: chatId, telegramMessageId: messageId }));
 }

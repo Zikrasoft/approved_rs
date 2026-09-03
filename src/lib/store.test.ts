@@ -43,7 +43,7 @@ vi.mock('@vercel/blob', () => {
 
 import { put } from '@vercel/blob';
 import {
-  insertLead, setStatus, setPendingPrompt, findByPendingPrompt, resolvePendingPrompt, archiveLead, unarchiveLead,
+  insertLead, insertOrMergeLead, setStatus, setPendingPrompt, findByPendingPrompt, resolvePendingPrompt, archiveLead, unarchiveLead,
   deleteLead, claimFullCommission, confirmCommissionPayment, rejectCommissionPayment, markReminded, getStaleLeads,
   getOwedSummary, getCommission, searchLeads, getLead, readLeads, updateLeads, type StoredLead,
 } from './store';
@@ -95,6 +95,83 @@ describe('insertLead', () => {
     expect(lead.pendingPrompt).toBeNull();
     expect(lead.archived).toBe(false);
     expect(lead.pendingCommissionClaim).toBeNull();
+  });
+});
+
+describe('insertOrMergeLead', () => {
+  const clickData = (channel: string, visitorId = 'visitor-1'): Omit<LeadData, 'id'> => ({
+    name: '', contact: '—', service: `Клик ${channel} с сайта`, contactChannel: channel, visitorId, locale: 'ru', kind: 'call_click',
+  });
+
+  it('inserts as a new lead when the visitor has no open lead yet', async () => {
+    const { lead, merged } = await insertOrMergeLead(clickData('telegram'));
+    expect(merged).toBe(false);
+    expect(lead.id).toBe(1);
+  });
+
+  it('merges a second channel click from the same visitor into the still-open lead', async () => {
+    const first = await insertOrMergeLead(clickData('telegram'));
+    const { lead, merged } = await insertOrMergeLead(clickData('whatsapp'));
+
+    expect(merged).toBe(true);
+    expect(lead.id).toBe(first.lead.id);
+    const all = await readLeads();
+    expect(all).toHaveLength(1);
+    expect(lead.comment).toContain('Также пробовал: Клик whatsapp с сайта');
+  });
+
+  it('upgrades a placeholder contact once real name/contact data arrives for the same visitor', async () => {
+    const { lead: clicked } = await insertOrMergeLead(clickData('telegram'));
+    const { lead, merged } = await insertOrMergeLead({
+      name: 'Иван', contact: '@ivan', service: 'vehicle-sourcing', visitorId: 'visitor-1', locale: 'ru',
+    });
+
+    expect(merged).toBe(true);
+    expect(lead.id).toBe(clicked.id);
+    expect(lead.name).toBe('Иван');
+    expect(lead.contact).toBe('@ivan');
+    expect(lead.kind).toBeUndefined();
+  });
+
+  it('does not merge a different visitor — creates a separate lead', async () => {
+    await insertOrMergeLead(clickData('telegram', 'visitor-1'));
+    const { merged } = await insertOrMergeLead(clickData('telegram', 'visitor-2'));
+    expect(merged).toBe(false);
+    expect(await readLeads()).toHaveLength(2);
+  });
+
+  it('does not merge into a lead that is already being worked (status !== new)', async () => {
+    const { lead } = await insertOrMergeLead(clickData('telegram'));
+    await setStatus(lead.id, 'in_progress');
+
+    const { merged } = await insertOrMergeLead(clickData('whatsapp'));
+
+    expect(merged).toBe(false);
+    expect(await readLeads()).toHaveLength(2);
+  });
+
+  it('does not merge into an archived lead', async () => {
+    const { lead } = await insertOrMergeLead(clickData('telegram'));
+    await archiveLead(lead.id);
+
+    const { merged } = await insertOrMergeLead(clickData('whatsapp'));
+
+    expect(merged).toBe(false);
+  });
+
+  it('does not merge once the merge window has passed', async () => {
+    const { lead } = await insertOrMergeLead(clickData('telegram'));
+    await updateLeads(leads => leads.map(l => (l.id === lead.id ? { ...l, createdAt: '2000-01-01T00:00:00.000Z' } : l)));
+
+    const { merged } = await insertOrMergeLead(clickData('whatsapp'));
+
+    expect(merged).toBe(false);
+  });
+
+  it('never merges without a visitorId to correlate on', async () => {
+    await insertOrMergeLead({ ...clickData('telegram'), visitorId: null });
+    const { merged } = await insertOrMergeLead({ ...clickData('whatsapp'), visitorId: null });
+    expect(merged).toBe(false);
   });
 });
 
