@@ -7,6 +7,7 @@ let storedContent: string | undefined;
 let storedEtag: string | undefined;
 let etagCounter = 0;
 let forceConflictOnce = false;
+let forceConflictAlways = false;
 
 vi.mock('@vercel/blob', () => {
   class BlobPreconditionFailedError extends Error {}
@@ -17,6 +18,9 @@ vi.mock('@vercel/blob', () => {
       return { stream: new Response(storedContent).body, blob: { etag: storedEtag } };
     }),
     put: vi.fn(async (_path: string, body: string, opts: { ifMatch?: string }) => {
+      if (forceConflictAlways) {
+        throw new BlobPreconditionFailedError('precondition failed');
+      }
       if (forceConflictOnce) {
         forceConflictOnce = false;
         throw new BlobPreconditionFailedError('precondition failed');
@@ -33,7 +37,7 @@ vi.mock('@vercel/blob', () => {
 
 import { put } from '@vercel/blob';
 import {
-  insertLead, setStatus, setPendingPrompt, resolvePendingPrompt, archiveLead, unarchiveLead,
+  insertLead, setStatus, setPendingPrompt, findByPendingPrompt, resolvePendingPrompt, archiveLead, unarchiveLead,
   toggleCustomerPaid, confirmCommissionPayment, rejectCommissionPayment, markReminded, getStaleLeads,
   getOwedSummary, getCommission, searchLeads, getLead, updateLeads, type StoredLead,
 } from './store';
@@ -63,6 +67,7 @@ beforeEach(() => {
   storedEtag = undefined;
   etagCounter = 0;
   forceConflictOnce = false;
+  forceConflictAlways = false;
   vi.mocked(put).mockClear();
 });
 
@@ -275,6 +280,40 @@ describe('searchLeads', () => {
     const results = await searchLeads('Иван');
     expect(results.map(l => l.id)).toContain(lead.id);
   });
+
+  it('returns nothing for an empty query, without scanning/matching everything', async () => {
+    await insertLead(baseData);
+    expect(await searchLeads('')).toEqual([]);
+  });
+
+  it('returns nothing for a whitespace-only query', async () => {
+    await insertLead(baseData);
+    expect(await searchLeads('   ')).toEqual([]);
+  });
+
+  it('returns nothing when no lead matches', async () => {
+    await insertLead(baseData);
+    expect(await searchLeads('no-such-name-or-contact')).toEqual([]);
+  });
+});
+
+describe('getLead / findByPendingPrompt — not-found paths', () => {
+  it('getLead returns undefined for an id that does not exist', async () => {
+    await insertLead(baseData);
+    expect(await getLead(999)).toBeUndefined();
+  });
+
+  it('findByPendingPrompt returns undefined when no lead has a pending prompt at all', async () => {
+    await insertLead(baseData);
+    expect(await findByPendingPrompt(111, 999)).toBeUndefined();
+  });
+
+  it('findByPendingPrompt returns undefined for a chatId/messageId that does not match the pending one', async () => {
+    const lead = await insertLead(baseData);
+    await setPendingPrompt(lead.id, { chatId: 111, messageId: 555, kind: 'deal_amount' });
+    expect(await findByPendingPrompt(111, 556)).toBeUndefined(); // wrong messageId
+    expect(await findByPendingPrompt(222, 555)).toBeUndefined(); // wrong chatId
+  });
 });
 
 describe('getCommission', () => {
@@ -288,6 +327,12 @@ describe('getCommission', () => {
   it('treats a null dealAmount as zero', () => {
     const info = getCommission({ dealAmount: null, commissionPercent: 10, paidAmount: 0 });
     expect(info.commission).toBe(0);
+    expect(info.isPaidOff).toBe(true);
+  });
+
+  it('stays isPaidOff when overpaid (remaining goes negative) instead of flagging still-owed', () => {
+    const info = getCommission({ dealAmount: 100_000, commissionPercent: 10, paidAmount: 15_000 });
+    expect(info.remaining).toBe(-5000);
     expect(info.isPaidOff).toBe(true);
   });
 
@@ -307,5 +352,15 @@ describe('updateLeads conflict retry', () => {
 
     expect(result[0].name).toBe('Пётр');
     expect(vi.mocked(put)).toHaveBeenCalledTimes(2);
+  });
+
+  it('gives up and throws after exhausting all retries against a persistent conflict', async () => {
+    await insertLead(baseData);
+    vi.mocked(put).mockClear();
+    forceConflictAlways = true;
+
+    await expect(updateLeads((leads: StoredLead[]) => leads.map(l => ({ ...l, name: 'Пётр' }))))
+      .rejects.toThrow('precondition failed');
+    expect(vi.mocked(put)).toHaveBeenCalledTimes(3); // MAX_RETRIES, no more
   });
 });

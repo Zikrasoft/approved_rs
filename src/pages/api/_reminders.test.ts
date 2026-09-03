@@ -67,6 +67,27 @@ describe('GET /api/reminders', () => {
     expect(res.status).toBe(401);
   });
 
+  it('rejects a header missing the "Bearer " scheme entirely', async () => {
+    const res = await GET(makeCtx({ authorization: SECRET }));
+    expect(res.status).toBe(401);
+    expect(getStaleLeads).not.toHaveBeenCalled();
+  });
+
+  it('rejects a different auth scheme (e.g. Basic)', async () => {
+    const res = await GET(makeCtx({ authorization: `Basic ${SECRET}` }));
+    expect(res.status).toBe(401);
+  });
+
+  it('rejects an empty Authorization header', async () => {
+    const res = await GET(makeCtx({ authorization: '' }));
+    expect(res.status).toBe(401);
+  });
+
+  it('rejects "Bearer " with no token after it', async () => {
+    const res = await GET(makeCtx({ authorization: 'Bearer ' }));
+    expect(res.status).toBe(401);
+  });
+
   it('DMs both owner and admin per stale lead, then marks it, using LEAD_STALE_DAYS from env', async () => {
     vi.mocked(getStaleLeads).mockResolvedValue([makeLead({ id: 7 })]);
 

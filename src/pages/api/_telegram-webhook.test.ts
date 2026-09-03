@@ -432,6 +432,64 @@ describe('POST /api/telegram-webhook', () => {
     expect(answerCallback).toHaveBeenCalledWith('cb-24');
   });
 
+  describe('malformed callback_data — none of these should reach a handler', () => {
+    it('non-numeric id in st: falls through to unrecognized', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-25', data: 'st:abc:won', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(getLead).not.toHaveBeenCalled();
+      expect(setStatus).not.toHaveBeenCalled();
+      expect(answerCallback).toHaveBeenCalledWith('cb-25');
+    });
+
+    it('non-numeric id in arch: falls through to unrecognized', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-26', data: 'arch:xx', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(archiveLead).not.toHaveBeenCalled();
+      expect(answerCallback).toHaveBeenCalledWith('cb-26');
+    });
+
+    it('unlisted edit field falls through to unrecognized', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-27', data: 'edit:5:bogus', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
+      expect(answerCallback).toHaveBeenCalledWith('cb-27');
+    });
+
+    it('unlisted list status falls through to unrecognized', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-28', data: 'list:archived', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(readLeads).not.toHaveBeenCalled();
+      expect(answerCallback).toHaveBeenCalledWith('cb-28');
+    });
+
+    it('an empty callback_data string is unrecognized, not misparsed as any route', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-29', data: '', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(getLead).not.toHaveBeenCalled();
+      expect(answerCallback).toHaveBeenCalledWith('cb-29');
+    });
+
+    it('the retired pay: route (superseded by claimpay:/confirmpay:) no longer does anything', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-30', data: 'pay:5', from: { id: ADMIN_ID }, message: { message_id: 1, chat: { id: DM_CHAT_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(confirmCommissionPayment).not.toHaveBeenCalled();
+      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
+      expect(answerCallback).toHaveBeenCalledWith('cb-30');
+    });
+  });
+
   describe('/start in a private chat', () => {
     it('shows the owner menu to TELEGRAM_OWNER_ID', async () => {
       const res = await POST(makeCtx({ message: { message_id: 1, text: '/start', chat: { id: OWNER_ID, type: 'private' }, from: { id: OWNER_ID } } }));
@@ -508,6 +566,29 @@ describe('POST /api/telegram-webhook', () => {
 
       const res = await POST(makeCtx({
         message: { message_id: 2, text: '-500', chat: { id: DM_CHAT_ID, type: 'private' }, from: { id: OWNER_ID }, reply_to_message: { message_id: 888 } },
+      }));
+
+      expect(res.status).toBe(200);
+      expect(resolvePendingPrompt).not.toHaveBeenCalled();
+    });
+
+    it('rejects a zero amount (must be strictly positive)', async () => {
+      vi.mocked(findByPendingPrompt).mockResolvedValue(makeLead({ id: 5, pendingPrompt: { chatId: DM_CHAT_ID, messageId: 888, kind: 'deal_amount' } }));
+
+      const res = await POST(makeCtx({
+        message: { message_id: 2, text: '0', chat: { id: DM_CHAT_ID, type: 'private' }, from: { id: OWNER_ID }, reply_to_message: { message_id: 888 } },
+      }));
+
+      expect(res.status).toBe(200);
+      expect(resolvePendingPrompt).not.toHaveBeenCalled();
+      expect(sendMessage).toHaveBeenCalledWith(DM_CHAT_ID, expect.stringContaining('число'));
+    });
+
+    it('rejects empty/whitespace text as an amount reply', async () => {
+      vi.mocked(findByPendingPrompt).mockResolvedValue(makeLead({ id: 5, pendingPrompt: { chatId: DM_CHAT_ID, messageId: 888, kind: 'deal_amount' } }));
+
+      const res = await POST(makeCtx({
+        message: { message_id: 2, text: '   ', chat: { id: DM_CHAT_ID, type: 'private' }, from: { id: OWNER_ID }, reply_to_message: { message_id: 888 } },
       }));
 
       expect(res.status).toBe(200);
