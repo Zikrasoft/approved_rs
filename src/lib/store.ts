@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { get, put, BlobPreconditionFailedError } from '@vercel/blob';
+import { get, head, put, BlobPreconditionFailedError } from '@vercel/blob';
 import type { LeadData } from './leadTypes';
 
 const leadStatusSchema = z.enum(['new', 'in_progress', 'won', 'lost']);
@@ -84,10 +84,14 @@ async function readLeadsRaw(): Promise<{ leads: StoredLead[]; etag: string | und
   if (!result) return { leads: [], etag: undefined };
   const text = await new Response(result.stream).text();
   const parsedJson: unknown = JSON.parse(text);
+  // get()'s own blob.etag has been observed stuck on a stale weak value even
+  // with useCache:false (production incident, 2026-09-03) — head() is what
+  // Vercel's own docs use for ifMatch, and it isn't served from that cache.
+  const etag = (await head(LEADS_PATH)).etag;
   if (!Array.isArray(parsedJson)) {
     // Guards against a truncated write leaving the blob non-array-shaped.
     console.error('[store] leads blob is not an array — treating as empty', { type: typeof parsedJson });
-    return { leads: [], etag: result.blob.etag };
+    return { leads: [], etag };
   }
   // Per-record safeParse — one corrupted entry drops itself, not the rest.
   const leads = parsedJson.flatMap(entry => {
@@ -98,7 +102,7 @@ async function readLeadsRaw(): Promise<{ leads: StoredLead[]; etag: string | und
     }
     return [parsed.data];
   });
-  return { leads, etag: result.blob.etag };
+  return { leads, etag };
 }
 
 async function writeLeadsRaw(leads: StoredLead[], etag: string | undefined): Promise<void> {

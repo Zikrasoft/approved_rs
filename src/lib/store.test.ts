@@ -20,6 +20,7 @@ vi.mock('@vercel/blob', () => {
       if (storedContent === undefined) return null;
       return { stream: new Response(storedContent).body, blob: { etag: storedEtag } };
     }),
+    head: vi.fn(async () => ({ etag: storedEtag })),
     put: vi.fn(async (_path: string, body: string, opts: { ifMatch?: string }) => {
       if (forceConflictAlways) {
         throw new BlobPreconditionFailedError('precondition failed');
