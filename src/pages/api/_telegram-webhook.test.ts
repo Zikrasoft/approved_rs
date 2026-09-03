@@ -16,6 +16,7 @@ vi.mock('@/lib/telegram', () => ({
   formatDealsList: vi.fn().mockReturnValue('DEALS_LIST'),
   formatSearchResults: vi.fn().mockReturnValue('SEARCH_RESULTS'),
   buildMenu: vi.fn((role: string) => ({ text: `MENU_${role}`, reply_markup: { inline_keyboard: [] } })),
+  buildHelp: vi.fn((role: string) => `HELP_${role}`),
   buildLeadList: vi.fn((_leads: unknown[], status: string) => ({ text: `LIST_${status}`, reply_markup: { inline_keyboard: [] } })),
   buildStats: vi.fn().mockReturnValue('STATS'),
   buildLeadDetail: vi.fn((lead: { id: number }, role: string) => ({ text: `DETAIL_${lead.id}_${role}`, reply_markup: { inline_keyboard: [] } })),
@@ -580,6 +581,20 @@ describe('POST /api/telegram-webhook', () => {
 
     it('denies an unauthorized sender', async () => {
       const res = await POST(makeCtx({ message: { message_id: 1, text: '/menu', chat: { id: OTHER_ID, type: 'private' }, from: { id: OTHER_ID } } }));
+      expect(res.status).toBe(200);
+      expect(sendMessage).toHaveBeenCalledWith(OTHER_ID, '⛔ Доступ запрещён.');
+    });
+  });
+
+  describe('/help', () => {
+    it('shows role-specific help text', async () => {
+      const res = await POST(makeCtx({ message: { message_id: 1, text: '/help', chat: { id: OWNER_ID, type: 'private' }, from: { id: OWNER_ID } } }));
+      expect(res.status).toBe(200);
+      expect(sendMessage).toHaveBeenCalledWith(OWNER_ID, 'HELP_owner');
+    });
+
+    it('denies an unauthorized sender', async () => {
+      const res = await POST(makeCtx({ message: { message_id: 1, text: '/help', chat: { id: OTHER_ID, type: 'private' }, from: { id: OTHER_ID } } }));
       expect(res.status).toBe(200);
       expect(sendMessage).toHaveBeenCalledWith(OTHER_ID, '⛔ Доступ запрещён.');
     });

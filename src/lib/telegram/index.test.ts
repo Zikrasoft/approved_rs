@@ -6,7 +6,7 @@ vi.stubGlobal('fetch', mockFetch);
 import {
   sendLeadNotification, statusLabel, isLeadStatusKey, buildStatusKeyboard, refreshLeadCard,
   answerCallback, sendForceReplyPrompt, sendDealNotificationToAdmin, sendCommissionClaimToAdmin,
-  sendCommissionResultToOwner, buildOwedList, formatDealsList, formatSearchResults, buildMenu,
+  sendCommissionResultToOwner, buildOwedList, formatDealsList, formatSearchResults, buildMenu, buildHelp,
   buildLeadList, buildStats, buildLeadDetail, editLeadDetailMessage,
 } from './index';
 import type { StoredLead, LeadStatus } from '../store';
@@ -360,6 +360,22 @@ describe('buildMenu', () => {
     expect(data).toEqual(['list:new', 'list:in_progress', 'list:won', 'list:lost', 'menu:stats', 'menu:debt', 'menu:deals']);
     const debtBtn = menu.reply_markup.inline_keyboard.flat().find(b => b.callback_data === 'menu:debt');
     expect(debtBtn?.text).toBe('🔴 Мне должны');
+  });
+});
+
+describe('buildHelp', () => {
+  it('owner text explains finalizing and the one-tap full-balance claim', () => {
+    const text = buildHelp('owner');
+    expect(text).toContain('Завершить');
+    expect(text).toContain('Отметить оплату комиссии');
+    expect(text).not.toContain('Подтвердить');
+  });
+
+  it('admin text explains they cannot finalize and must confirm/reject claims', () => {
+    const text = buildHelp('admin');
+    expect(text).toContain('только владелец');
+    expect(text).toContain('Подтвердить');
+    expect(text).toContain('Все сделки');
   });
 });
 

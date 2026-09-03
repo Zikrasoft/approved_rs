@@ -5,7 +5,7 @@ import { secretMatches } from '@/lib/verifySecret';
 import {
   isLeadStatusKey, answerCallback, refreshLeadCard, sendForceReplyPrompt,
   sendDealNotificationToAdmin, sendCommissionClaimToAdmin, sendCommissionResultToOwner, sendMessage,
-  buildOwedList, formatDealsList, formatSearchResults, buildMenu, buildLeadList, buildStats,
+  buildOwedList, formatDealsList, formatSearchResults, buildMenu, buildHelp, buildLeadList, buildStats,
   buildLeadDetail, editLeadDetailMessage, type Role,
 } from '@/lib/telegram';
 import {
@@ -348,6 +348,11 @@ async function handlePrivateMessage(msg: TelegramMessage): Promise<void> {
 
   if (!role) {
     await sendMessage(chatId, '⛔ Доступ запрещён.');
+    return;
+  }
+
+  if (text === '/help') {
+    await sendMessage(chatId, buildHelp(role));
     return;
   }
 
