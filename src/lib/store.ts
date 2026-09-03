@@ -126,9 +126,16 @@ export async function updateLeads(mutate: (leads: StoredLead[]) => StoredLead[])
     next.forEach(lead => storedLeadSchema.parse(lead));
     try {
       await writeLeadsRaw(next, etag);
+      // Temporary diagnostic for the recurring ETag-mismatch investigation.
+      if (attempt > 0) console.log('[store] updateLeads succeeded after retry', { attempt, etag });
       return next;
     } catch (err) {
       if (err instanceof BlobPreconditionFailedError) {
+        console.log('[store] updateLeads CAS conflict', {
+          attempt,
+          etagUsed: etag,
+          errorMessage: err.message,
+        });
         lastErr = err;
         continue;
       }

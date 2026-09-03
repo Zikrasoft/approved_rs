@@ -453,13 +453,10 @@ export async function POST({ request }: APIContext): Promise<Response> {
     return ACK;
   }
 
-  if (typeof update.update_id === 'number' && alreadyProcessed(update.update_id)) {
-    return ACK;
-  }
-
   // Temporary diagnostic for the recurring ETag-mismatch investigation —
-  // lets us correlate which updates are landing close together in time.
-  console.log('[telegram-webhook] update received', {
+  // lets us correlate which updates are landing close together in time,
+  // including ones that get deduped below (previously invisible).
+  const diagCtx = {
     update_id: update.update_id,
     from: update.callback_query?.from?.id ?? update.message?.from?.id,
     kind: update.callback_query
@@ -469,7 +466,13 @@ export async function POST({ request }: APIContext): Promise<Response> {
         : update.message
           ? `message:${update.message.text}`
           : 'unknown',
-  });
+  };
+  console.log('[telegram-webhook] update received', diagCtx);
+
+  if (typeof update.update_id === 'number' && alreadyProcessed(update.update_id)) {
+    console.log('[telegram-webhook] duplicate update_id, skipping', diagCtx);
+    return ACK;
+  }
 
   try {
     if (update.callback_query) {
