@@ -6,7 +6,7 @@ vi.stubGlobal('fetch', mockFetch);
 import {
   sendLeadNotification, statusLabel, isLeadStatusKey, buildStatusKeyboard, refreshLeadCard,
   answerCallback, sendForceReplyPrompt, sendDealNotificationToAdmin, sendCommissionClaimToAdmin,
-  sendCommissionResultToOwner, buildOwedSummary, formatDealsList, formatSearchResults, buildMenu,
+  sendCommissionResultToOwner, buildOwedList, formatDealsList, formatSearchResults, buildMenu,
   buildLeadList, buildStats, buildLeadDetail, editLeadDetailMessage,
 } from './index';
 import type { StoredLead, LeadStatus } from '../store';
@@ -273,15 +273,17 @@ describe('sendCommissionResultToOwner', () => {
   });
 });
 
-describe('buildOwedSummary', () => {
-  it('lists each row with its remaining amount, plus a total', () => {
-    const text = buildOwedSummary([{ id: 1, name: 'Иван', dealAmount: 100000, commissionAmount: 10000, paidAmount: 0, remaining: 10000 }], 10000);
-    expect(text).toContain(`#1 Иван — ${money(10000)}`);
+describe('buildOwedList', () => {
+  it('renders each row as a tappable button opening that lead, plus a total', () => {
+    const { text, reply_markup } = buildOwedList([{ id: 1, name: 'Иван', dealAmount: 100000, commissionAmount: 10000, paidAmount: 0, remaining: 10000 }], 10000);
     expect(text).toContain(`Итого: ${money(10000)}`);
+    expect(reply_markup.inline_keyboard).toEqual([[{ text: `#1 Иван — ${money(10000)}`, callback_data: 'open:1' }]]);
   });
 
-  it('reports no debt when there are no rows, with the same bold header as the non-empty case', () => {
-    expect(buildOwedSummary([], 0)).toBe('<b>🔴 Мне должны</b>\n\n🟢 Всё оплачено, долгов нет.');
+  it('reports no debt when there are no rows, with no buttons', () => {
+    const { text, reply_markup } = buildOwedList([], 0);
+    expect(text).toBe('<b>🔴 Долг по комиссии</b>\n\n🟢 Всё оплачено, долгов нет.');
+    expect(reply_markup.inline_keyboard).toEqual([]);
   });
 });
 
@@ -336,16 +338,20 @@ describe('formatSearchResults', () => {
 });
 
 describe('buildMenu', () => {
-  it('gives the owner lead lists + stats, no debt/deals entries', () => {
+  it('gives the owner lead lists + stats + their own commission debt, no full deals ledger', () => {
     const menu = buildMenu('owner');
     const data = menu.reply_markup.inline_keyboard.flat().map(b => b.callback_data);
-    expect(data).toEqual(['list:new', 'list:in_progress', 'list:won', 'list:lost', 'menu:stats']);
+    expect(data).toEqual(['list:new', 'list:in_progress', 'list:won', 'list:lost', 'menu:stats', 'menu:debt']);
+    const debtBtn = menu.reply_markup.inline_keyboard.flat().find(b => b.callback_data === 'menu:debt');
+    expect(debtBtn?.text).toBe('🔴 Мой долг по комиссии');
   });
 
-  it('gives the admin the same lists plus debt/deals', () => {
+  it('gives the admin the same lists plus debt (admin-framed label) and the full deals ledger', () => {
     const menu = buildMenu('admin');
     const data = menu.reply_markup.inline_keyboard.flat().map(b => b.callback_data);
     expect(data).toEqual(['list:new', 'list:in_progress', 'list:won', 'list:lost', 'menu:stats', 'menu:debt', 'menu:deals']);
+    const debtBtn = menu.reply_markup.inline_keyboard.flat().find(b => b.callback_data === 'menu:debt');
+    expect(debtBtn?.text).toBe('🔴 Мне должны');
   });
 });
 

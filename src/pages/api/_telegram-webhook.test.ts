@@ -12,7 +12,7 @@ vi.mock('@/lib/telegram', () => ({
   sendCommissionClaimToAdmin: vi.fn(),
   sendCommissionResultToOwner: vi.fn(),
   sendMessage: vi.fn(),
-  buildOwedSummary: vi.fn().mockReturnValue('OWED_SUMMARY'),
+  buildOwedList: vi.fn().mockReturnValue({ text: 'OWED_LIST', reply_markup: { inline_keyboard: [] } }),
   formatDealsList: vi.fn().mockReturnValue('DEALS_LIST'),
   formatSearchResults: vi.fn().mockReturnValue('SEARCH_RESULTS'),
   buildMenu: vi.fn((role: string) => ({ text: `MENU_${role}`, reply_markup: { inline_keyboard: [] } })),
@@ -413,22 +413,40 @@ describe('POST /api/telegram-webhook', () => {
     });
   });
 
-  describe('admin-only money menus', () => {
-    it('shows the owed summary to the admin on menu:debt', async () => {
+  describe('menu:debt — both roles', () => {
+    it('shows the owed list to the admin', async () => {
       const res = await POST(makeCtx({
         callback_query: { id: 'cb-21', data: 'menu:debt', from: { id: ADMIN_ID }, message: { message_id: 1, chat: { id: ADMIN_ID } } },
       }));
       expect(res.status).toBe(200);
-      expect(sendMessage).toHaveBeenCalledWith(ADMIN_ID, 'OWED_SUMMARY');
+      expect(sendMessage).toHaveBeenCalledWith(ADMIN_ID, 'OWED_LIST', { reply_markup: { inline_keyboard: [] } });
     });
 
-    it('ignores menu:debt/menu:deals from the owner', async () => {
+    it('shows the same owed list to the owner', async () => {
       const res = await POST(makeCtx({
-        callback_query: { id: 'cb-22', data: 'menu:debt', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: OWNER_ID } } },
+        callback_query: { id: 'cb-21b', data: 'menu:debt', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: OWNER_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(sendMessage).toHaveBeenCalledWith(OWNER_ID, 'OWED_LIST', { reply_markup: { inline_keyboard: [] } });
+    });
+  });
+
+  describe('menu:deals — admin only', () => {
+    it('shows the deals list to the admin', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-22', data: 'menu:deals', from: { id: ADMIN_ID }, message: { message_id: 1, chat: { id: ADMIN_ID } } },
+      }));
+      expect(res.status).toBe(200);
+      expect(sendMessage).toHaveBeenCalledWith(ADMIN_ID, 'DEALS_LIST');
+    });
+
+    it('ignores menu:deals from the owner', async () => {
+      const res = await POST(makeCtx({
+        callback_query: { id: 'cb-22b', data: 'menu:deals', from: { id: OWNER_ID }, message: { message_id: 1, chat: { id: OWNER_ID } } },
       }));
       expect(res.status).toBe(200);
       expect(sendMessage).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-22');
+      expect(answerCallback).toHaveBeenCalledWith('cb-22b');
     });
   });
 

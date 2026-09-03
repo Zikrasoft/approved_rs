@@ -147,13 +147,20 @@ export function commissionResultText(leadId: number, confirmed: boolean): string
     : `❌ Оплата по заявке #${leadId} не подтверждена, свяжитесь с администратором.`;
 }
 
-// Bold header on every branch, including the empty state — consecutive
-// standalone bot replies (debt/deals/stats) show no visual gap in Telegram,
-// so a bold first line is what keeps them from reading as one wall of text.
-export function buildOwedSummary(rows: OwedRow[], total: number): string {
-  if (rows.length === 0) return '<b>🔴 Мне должны</b>\n\n🟢 Всё оплачено, долгов нет.';
-  const lines = rows.map(r => `#${r.id} ${escapeHtml(r.name)} — ${formatMoney(r.remaining)}`);
-  return ['<b>🔴 Мне должны</b>', ``, ...lines, ``, `Итого: ${formatMoney(total)}`].join('\n');
+// Tappable, not a text block — shared by both owner and admin (whoever
+// still owes/is owed commission on a lead), each row opens that lead
+// directly. Neutral header ("Долг по комиссии") on purpose: "Мне должны"
+// only reads correctly from the admin's side, "Ты должен" only from the
+// owner's — one wording that works for both instead of a role branch.
+export function buildOwedList(rows: OwedRow[], total: number): { text: string; reply_markup: Keyboard } {
+  if (rows.length === 0) {
+    return { text: '<b>🔴 Долг по комиссии</b>\n\n🟢 Всё оплачено, долгов нет.', reply_markup: { inline_keyboard: [] } };
+  }
+  const buttons: Btn[][] = rows.map(r => [{ text: `#${r.id} ${r.name} — ${formatMoney(r.remaining)}`, callback_data: `open:${r.id}` }]);
+  return {
+    text: `<b>🔴 Долг по комиссии</b>\n\nИтого: ${formatMoney(total)}`,
+    reply_markup: { inline_keyboard: buttons },
+  };
 }
 
 function paidStatusMark(l: StoredLead & { dealAmount: number }, info: CommissionInfo): string {
@@ -195,8 +202,8 @@ export function buildMenu(role: Role): { text: string; reply_markup: Keyboard } 
     [{ text: '❌ Отказы', callback_data: 'list:lost' }],
     [{ text: '📊 Статистика', callback_data: 'menu:stats' }],
   ];
+  rows.push([{ text: role === 'owner' ? '🔴 Мой долг по комиссии' : '🔴 Мне должны', callback_data: 'menu:debt' }]);
   if (role === 'admin') {
-    rows.push([{ text: '🔴 Мне должны', callback_data: 'menu:debt' }]);
     rows.push([{ text: '💰 Все сделки', callback_data: 'menu:deals' }]);
   }
   return {

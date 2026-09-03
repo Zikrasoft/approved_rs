@@ -5,7 +5,7 @@ import { secretMatches } from '@/lib/verifySecret';
 import {
   isLeadStatusKey, answerCallback, refreshLeadCard, sendForceReplyPrompt, formatMoney,
   sendDealNotificationToAdmin, sendCommissionClaimToAdmin, sendCommissionResultToOwner, sendMessage,
-  buildOwedSummary, formatDealsList, formatSearchResults, buildMenu, buildLeadList, buildStats,
+  buildOwedList, formatDealsList, formatSearchResults, buildMenu, buildLeadList, buildStats,
   buildLeadDetail, editLeadDetailMessage, type Role,
 } from '@/lib/telegram';
 import {
@@ -279,14 +279,18 @@ async function handleCallbackQuery(cb: NonNullable<TelegramUpdate['callback_quer
     await answerCallback(cb.id).catch(() => {});
     return;
   }
-  if (data === 'menu:debt' || data === 'menu:deals') {
+  if (data === 'menu:debt') {
+    // Both roles see this — whoever's asking, it's the same "who still
+    // owes/is owed commission" list, just framed differently in the text.
+    const { rows, total } = await getOwedSummary();
+    const { text, reply_markup } = buildOwedList(rows, total);
+    await sendMessage(chatId, text, { reply_markup });
+    await answerCallback(cb.id).catch(() => {});
+    return;
+  }
+  if (data === 'menu:deals') {
     if (!(await requireRole(role, 'admin', cb.id))) return;
-    if (data === 'menu:debt') {
-      const { rows, total } = await getOwedSummary();
-      await sendMessage(chatId, buildOwedSummary(rows, total));
-    } else {
-      await sendMessage(chatId, formatDealsList(await readLeads()));
-    }
+    await sendMessage(chatId, formatDealsList(await readLeads()));
     await answerCallback(cb.id).catch(() => {});
     return;
   }
