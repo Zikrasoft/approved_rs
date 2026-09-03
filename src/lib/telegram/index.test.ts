@@ -8,8 +8,8 @@ import {
   answerCallback, sendForceReplyPrompt, sendDealNotificationToAdmin, sendCommissionClaimToAdmin,
   sendCommissionResultToOwner, buildOwedSummary, formatDealsList, formatSearchResults, buildMenu,
   buildLeadList, buildStats, buildLeadDetail, editLeadDetailMessage,
-} from './telegram';
-import type { StoredLead, LeadStatus } from './store';
+} from './index';
+import type { StoredLead, LeadStatus } from '../store';
 
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
   return {

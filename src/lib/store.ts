@@ -6,41 +6,28 @@ const leadStatusSchema = z.enum(['new', 'in_progress', 'won', 'lost']);
 export type LeadStatus = z.infer<typeof leadStatusSchema>;
 
 const pendingPromptSchema = z.object({
-  chatId: z.number(),
-  messageId: z.number(),
+  chatId: z.number().int(),
+  messageId: z.number().int(),
   kind: z.enum(['deal_amount', 'edit_name', 'edit_contact', 'edit_comment', 'commission_claim']),
 });
 export type PendingPrompt = z.infer<typeof pendingPromptSchema>;
 
+// amount must be positive — mirrors the webhook's own parseAmount check.
 const paymentSchema = z.object({
-  amount: z.number(),
+  amount: z.number().positive(),
   at: z.string(),
 });
 export type Payment = z.infer<typeof paymentSchema>;
 
 const pendingCommissionClaimSchema = z.object({
-  amount: z.number(),
+  amount: z.number().positive(),
   claimedAt: z.string(),
 });
 export type PendingCommissionClaim = z.infer<typeof pendingCommissionClaimSchema>;
 
-// Everything the bot's menus/detail view need, on top of the raw form
-// submission (LeadData). One JSON blob holds the full array — see
-// updateLeads below for how concurrent writes stay safe without a real DB.
-//
-// This is also the backfill mechanism for schema growth: every `.default()`
-// below is a field this migration or a future one added after some leads
-// were already written. readLeadsRaw runs every record through this schema
-// on the way in, so an old blob record missing e.g. `archived` gets it
-// defaulted to `false` on read rather than surfacing as `undefined` and
-// silently misbehaving wherever the code assumes a real boolean. Fields with
-// no `.default()` (id, name, contact, service, locale, statusChangedAt,
-// createdAt) are exactly the ones that have been required since the first
-// lead was ever written — if one of those is missing, that's real
-// corruption, not a schema migration, so it should fail loudly instead of
-// being papered over with a guessed default.
+// Fields with .default() backfill old blob records on read; the rest have been required since day one.
 const storedLeadSchema = z.object({
-  id: z.number(),
+  id: z.number().int().positive(),
   name: z.string(),
   contact: z.string(),
   service: z.string(),
@@ -52,12 +39,13 @@ const storedLeadSchema = z.object({
   locale: z.enum(['ru', 'en', 'sr']),
   kind: z.enum(['lead', 'call_click']).optional(),
   status: leadStatusSchema.default('new'),
-  dealAmount: z.number().nullable().default(null),
-  commissionPercent: z.number().default(10),
-  paidAmount: z.number().default(0),
-  payments: z.array(paymentSchema).default([]),
-  telegramChatId: z.number().nullable().default(null),
-  telegramMessageId: z.number().nullable().default(null),
+  dealAmount: z.number().nonnegative().nullable().default(null),
+  commissionPercent: z.number().nonnegative().default(10),
+  paidAmount: z.number().nonnegative().default(0),
+  payments: z.array(paymentSchema).default(() => []),
+  // No sign constraint — Telegram group/supergroup ids are negative.
+  telegramChatId: z.number().int().nullable().default(null),
+  telegramMessageId: z.number().int().nullable().default(null),
   statusChangedAt: z.string(),
   lastRemindedAt: z.string().nullable().default(null),
   createdAt: z.string(),
@@ -77,19 +65,18 @@ export function roundMoney(n: number): number {
 }
 
 async function readLeadsRaw(): Promise<{ leads: StoredLead[]; etag: string | undefined }> {
-  // useCache: false — reads here feed straight into a conditional write, so a
-  // CDN-stale etag would just cause a spurious retry instead of a bug, but
-  // there's no reason to pay for the extra round trip when traffic is this low.
+  // useCache: false — feeds a conditional write, no reason to risk a stale etag.
   const result = await get(LEADS_PATH, { access: 'private', useCache: false });
   if (!result) return { leads: [], etag: undefined };
   const text = await new Response(result.stream).text();
-  const raw = JSON.parse(text) as unknown[];
-  // Per-record safeParse, not one array-wide parse — a single corrupted
-  // record (a bad manual edit, a future field type change) drops just
-  // itself with a loud log instead of taking every other lead down with it.
-  // For everything else this is where an old record missing a field this
-  // schema later added gets backfilled via .default() on the way in.
-  const leads = raw.flatMap(entry => {
+  const parsedJson: unknown = JSON.parse(text);
+  if (!Array.isArray(parsedJson)) {
+    // Guards against a truncated write leaving the blob non-array-shaped.
+    console.error('[store] leads blob is not an array — treating as empty', { type: typeof parsedJson });
+    return { leads: [], etag: result.blob.etag };
+  }
+  // Per-record safeParse — one corrupted entry drops itself, not the rest.
+  const leads = parsedJson.flatMap(entry => {
     const parsed = storedLeadSchema.safeParse(entry);
     if (!parsed.success) {
       console.error('[store] dropping a corrupt lead record on read', { entry, error: parsed.error.message });
@@ -106,22 +93,20 @@ async function writeLeadsRaw(leads: StoredLead[], etag: string | undefined): Pro
     allowOverwrite: true,
     contentType: 'application/json',
   };
-  // Omitted on the very first-ever write (no blob exists yet, so no etag to
-  // match) — only matters once, and a lost race on that single write is
-  // harmless (worst case: one of the two very first leads gets overwritten).
+  // Omitted only on the very first write (no blob yet, no etag to match).
   if (etag) options.ifMatch = etag;
   await put(LEADS_PATH, JSON.stringify(leads), options);
 }
 
-// The one seam that needs conflict handling — every mutator below goes
-// through this. On a concurrent write elsewhere, `put`'s ifMatch throws
-// BlobPreconditionFailedError; re-read the fresh state and re-apply the
-// mutation rather than silently losing whichever write lost the race.
+// CAS retry — a concurrent write's ifMatch conflict re-reads and re-applies.
 export async function updateLeads(mutate: (leads: StoredLead[]) => StoredLead[]): Promise<StoredLead[]> {
   let lastErr: unknown;
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     const { leads, etag } = await readLeadsRaw();
     const next = mutate(leads);
+    // Validate before writing, not just on the next read — outside the
+    // try/catch below since this is a programmer error, not a write conflict.
+    next.forEach(lead => storedLeadSchema.parse(lead));
     try {
       await writeLeadsRaw(next, etag);
       return next;
@@ -156,29 +141,10 @@ async function updateOne(id: number, apply: (lead: StoredLead) => StoredLead): P
   return updated;
 }
 
-// The one place a new lead's ~14 default fields get listed — insertLead and
-// notifyLead.ts's blob-failure fallback both call this instead of
-// duplicating the object literal.
+// Defaults come from the schema — insertLead and notifyLead.ts's fallback both use this.
 export function newStoredLead(data: Omit<LeadData, 'id'>, id: number): StoredLead {
   const now = new Date().toISOString();
-  return {
-    ...data,
-    id,
-    status: 'new',
-    dealAmount: null,
-    commissionPercent: 10,
-    paidAmount: 0,
-    payments: [],
-    telegramChatId: null,
-    telegramMessageId: null,
-    statusChangedAt: now,
-    lastRemindedAt: null,
-    createdAt: now,
-    pendingPrompt: null,
-    archived: false,
-    customerPaidAt: null,
-    pendingCommissionClaim: null,
-  };
+  return storedLeadSchema.parse({ ...data, id, statusChangedAt: now, createdAt: now });
 }
 
 export async function insertLead(data: Omit<LeadData, 'id'>): Promise<StoredLead> {
@@ -203,22 +169,13 @@ export function setPendingPrompt(id: number, prompt: PendingPrompt | null): Prom
   return updateOne(id, l => ({ ...l, pendingPrompt: prompt }));
 }
 
-// Read-only lookup used to know a prompt's `kind` before parsing/validating
-// the reply text (deciding "is this a number" needs no write). The actual
-// resolution is the atomic primitive below.
+// Read-only lookup, used to know a prompt's kind before parsing the reply.
 export async function findByPendingPrompt(chatId: number, messageId: number): Promise<StoredLead | undefined> {
   const leads = await readLeads();
   return leads.find(l => l.pendingPrompt?.chatId === chatId && l.pendingPrompt?.messageId === messageId);
 }
 
-// The one atomic "answer a force-reply prompt" primitive, reused for
-// deal-amount capture, the 3 edit-field prompts, and the commission claim —
-// find the lead by its pending prompt, apply the caller's patch, and clear
-// the prompt, all in a single updateLeads write. A duplicated Telegram
-// webhook delivery's second call re-reads fresh state, finds no lead still
-// pointing at {chatId,messageId} (the first call already cleared it), and
-// returns undefined — no double-apply, no bespoke locking needed beyond the
-// CAS retry updateLeads already does.
+// Atomic answer-a-prompt: find, apply patch, clear — duplicate deliveries find no match.
 export async function resolvePendingPrompt(
   chatId: number,
   messageId: number,
@@ -245,12 +202,7 @@ export function toggleCustomerPaid(id: number): Promise<StoredLead | undefined> 
   return updateOne(id, l => ({ ...l, customerPaidAt: l.customerPaidAt ? null : new Date().toISOString() }));
 }
 
-// Admin confirms the owner's claim: moves the claimed amount into
-// paidAmount/payments and clears the claim, in one write. A duplicate
-// confirm tap (or a retried webhook delivery) finds pendingCommissionClaim
-// already null on the fresh re-read — returns undefined rather than the
-// unchanged lead, so the webhook can tell "nothing to do" from "just
-// confirmed" and skip sending a second result DM to the owner.
+// Moves the claim into paidAmount/payments; returns undefined on a no-op.
 export async function confirmCommissionPayment(id: number): Promise<StoredLead | undefined> {
   let acted = false;
   const updated = await updateOne(id, l => {
@@ -267,7 +219,7 @@ export async function confirmCommissionPayment(id: number): Promise<StoredLead |
   return acted ? updated : undefined;
 }
 
-// Same undefined-on-no-op convention as confirmCommissionPayment above.
+// Same undefined-on-no-op convention as confirmCommissionPayment.
 export async function rejectCommissionPayment(id: number): Promise<StoredLead | undefined> {
   let acted = false;
   const updated = await updateOne(id, l => {
@@ -312,10 +264,7 @@ export interface CommissionInfo {
   isPaidOff: boolean;
 }
 
-// The one place the commission/remaining/"paid off" formula is computed —
-// getOwedSummary below, telegram.ts's deal notification/deals list/detail
-// view/stats, and the webhook's confirm-payment flow all call this instead
-// of re-deriving it.
+// Single source for the commission/remaining/"paid off" formula.
 export function getCommission(lead: Pick<StoredLead, 'dealAmount' | 'commissionPercent' | 'paidAmount'>): CommissionInfo {
   const commission = roundMoney(((lead.dealAmount ?? 0) * lead.commissionPercent) / 100);
   const remaining = roundMoney(commission - lead.paidAmount);
@@ -331,12 +280,8 @@ export interface OwedRow {
   remaining: number;
 }
 
-// total is summed over every owed lead, but the displayed rows are capped
-// (same reasoning as buildLeadList's cap in telegram.ts — Telegram's
-// message-length limit, not expected to matter at this scale) so the two
-// can only diverge once debt outgrows 20 open leads, which is itself worth
-// noticing.
-const MAX_OWED_ROWS = 20;
+// Shared cap for every list-rendering surface (here and in telegram.ts).
+export const MAX_LIST_ROWS = 20;
 
 export async function getOwedSummary(): Promise<{ rows: OwedRow[]; total: number }> {
   const leads = await readLeads();
@@ -349,5 +294,5 @@ export async function getOwedSummary(): Promise<{ rows: OwedRow[]; total: number
     .filter(row => row.remaining > PAID_EPSILON)
     .sort((a, b) => (a.remaining === b.remaining ? a.id - b.id : b.remaining - a.remaining));
   const total = roundMoney(rows.reduce((sum, r) => sum + r.remaining, 0));
-  return { rows: rows.slice(0, MAX_OWED_ROWS), total };
+  return { rows: rows.slice(0, MAX_LIST_ROWS), total };
 }
