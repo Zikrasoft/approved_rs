@@ -461,6 +461,12 @@ describe('buildLeadDetail', () => {
     expect(data).toEqual(expect.arrayContaining(['confirmpay:7', 'rejectpay:7']));
   });
 
+  it('deal-amount line is worded per role — owner sees "твой", admin sees "владельца"', () => {
+    const lead = makeLead({ id: 7, status: 'won', dealAmount: 100000, paidAmount: 0 });
+    expect(buildLeadDetail(lead, 'owner').text).toContain(`💰 Твой доход с заявки: ${money(100000)}`);
+    expect(buildLeadDetail(lead, 'admin').text).toContain(`💰 Доход владельца с заявки: ${money(100000)}`);
+  });
+
   it('lost lead: no money row regardless of role', () => {
     const { text, reply_markup } = buildLeadDetail(makeLead({ id: 7, status: 'lost' }), 'admin');
     expect(text).not.toContain('Комиссия Zikrasoft');

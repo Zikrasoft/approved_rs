@@ -65,14 +65,18 @@ function serviceLabel(service: string): string {
 }
 
 // Full card body — commission/paid lines live in buildLeadDetail instead.
-function formatLeadText(lead: StoredLead): string {
+function formatLeadText(lead: StoredLead, role: Role): string {
   const channelLabel = isTrackedContactChannel(lead.contactChannel) ? CONTACT_CHANNEL_LABELS[lead.contactChannel] : undefined;
   const contactLine = channelLabel ? `${lead.contact} (${channelLabel})` : lead.contact;
   const lines: string[] = [
     `🚗 Заявка #${lead.id} — ${escapeHtml(serviceLabel(lead.service))}`,
     statusLine(lead.status),
   ];
-  if (lead.dealAmount != null) lines.push(`💰 Твой доход с заявки: ${formatMoney(lead.dealAmount)}`);
+  if (lead.dealAmount != null) {
+    lines.push(role === 'owner'
+      ? `💰 Твой доход с заявки: ${formatMoney(lead.dealAmount)}`
+      : `💰 Доход владельца с заявки: ${formatMoney(lead.dealAmount)}`);
+  }
   lines.push(``, `Имя: ${escapeHtml(lead.name)}`, `Контакт: ${escapeHtml(contactLine)}`);
   if (lead.country) lines.push(`Страна: ${escapeHtml(lead.country.toUpperCase())}`);
   if (lead.comment) lines.push(`Комментарий: ${escapeHtml(lead.comment)}`);
@@ -283,13 +287,13 @@ function moneyActionRows(lead: StoredLead, role: Role, info: CommissionInfo): Bt
 export function buildLeadDetail(lead: StoredLead, role: Role): { text: string; reply_markup: Keyboard } {
   if (lead.archived) {
     return {
-      text: `${formatLeadText(lead)}\n\n🗄 В архиве`,
+      text: `${formatLeadText(lead, role)}\n\n🗄 В архиве`,
       reply_markup: { inline_keyboard: [[{ text: '♻️ Восстановить', callback_data: `unarch:${lead.id}` }]] },
     };
   }
 
   const commission = lead.status === 'won' && lead.dealAmount != null ? getCommission(lead) : null;
-  const lines = [formatLeadText(lead), ...(commission ? moneyStatusLines(lead, commission) : [])];
+  const lines = [formatLeadText(lead, role), ...(commission ? moneyStatusLines(lead, commission) : [])];
   const rows: Btn[][] = [
     ...buildStatusKeyboard(lead, role).inline_keyboard,
     [
