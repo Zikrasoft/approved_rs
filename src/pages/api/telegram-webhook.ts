@@ -457,6 +457,20 @@ export async function POST({ request }: APIContext): Promise<Response> {
     return ACK;
   }
 
+  // Temporary diagnostic for the recurring ETag-mismatch investigation —
+  // lets us correlate which updates are landing close together in time.
+  console.log('[telegram-webhook] update received', {
+    update_id: update.update_id,
+    from: update.callback_query?.from?.id ?? update.message?.from?.id,
+    kind: update.callback_query
+      ? `callback:${update.callback_query.data}`
+      : update.message?.reply_to_message
+        ? 'reply'
+        : update.message
+          ? `message:${update.message.text}`
+          : 'unknown',
+  });
+
   try {
     if (update.callback_query) {
       await handleCallbackQuery(update.callback_query);
