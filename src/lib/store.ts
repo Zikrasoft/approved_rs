@@ -1,43 +1,72 @@
+import { z } from 'zod';
 import { get, put, BlobPreconditionFailedError } from '@vercel/blob';
 import type { LeadData } from './leadTypes';
 
-export type LeadStatus = 'new' | 'in_progress' | 'won' | 'lost';
+const leadStatusSchema = z.enum(['new', 'in_progress', 'won', 'lost']);
+export type LeadStatus = z.infer<typeof leadStatusSchema>;
 
-export interface PendingPrompt {
-  chatId: number;
-  messageId: number;
-  kind: 'deal_amount' | 'edit_name' | 'edit_contact' | 'edit_comment' | 'commission_claim';
-}
+const pendingPromptSchema = z.object({
+  chatId: z.number(),
+  messageId: z.number(),
+  kind: z.enum(['deal_amount', 'edit_name', 'edit_contact', 'edit_comment', 'commission_claim']),
+});
+export type PendingPrompt = z.infer<typeof pendingPromptSchema>;
 
-export interface Payment {
-  amount: number;
-  at: string;
-}
+const paymentSchema = z.object({
+  amount: z.number(),
+  at: z.string(),
+});
+export type Payment = z.infer<typeof paymentSchema>;
 
-export interface PendingCommissionClaim {
-  amount: number;
-  claimedAt: string;
-}
+const pendingCommissionClaimSchema = z.object({
+  amount: z.number(),
+  claimedAt: z.string(),
+});
+export type PendingCommissionClaim = z.infer<typeof pendingCommissionClaimSchema>;
 
 // Everything the bot's menus/detail view need, on top of the raw form
 // submission (LeadData). One JSON blob holds the full array — see
 // updateLeads below for how concurrent writes stay safe without a real DB.
-export interface StoredLead extends LeadData {
-  status: LeadStatus;
-  dealAmount: number | null;
-  commissionPercent: number;
-  paidAmount: number;
-  payments: Payment[];
-  telegramChatId: number | null;
-  telegramMessageId: number | null;
-  statusChangedAt: string;
-  lastRemindedAt: string | null;
-  createdAt: string;
-  pendingPrompt: PendingPrompt | null;
-  archived: boolean;
-  customerPaidAt: string | null;
-  pendingCommissionClaim: PendingCommissionClaim | null;
-}
+//
+// This is also the backfill mechanism for schema growth: every `.default()`
+// below is a field this migration or a future one added after some leads
+// were already written. readLeadsRaw runs every record through this schema
+// on the way in, so an old blob record missing e.g. `archived` gets it
+// defaulted to `false` on read rather than surfacing as `undefined` and
+// silently misbehaving wherever the code assumes a real boolean. Fields with
+// no `.default()` (id, name, contact, service, locale, statusChangedAt,
+// createdAt) are exactly the ones that have been required since the first
+// lead was ever written — if one of those is missing, that's real
+// corruption, not a schema migration, so it should fail loudly instead of
+// being papered over with a guessed default.
+const storedLeadSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  contact: z.string(),
+  service: z.string(),
+  contactChannel: z.string().nullable().optional(),
+  comment: z.string().nullable().optional(),
+  country: z.string().nullable().optional(),
+  source_url: z.string().nullable().optional(),
+  visitorId: z.string().nullable().optional(),
+  locale: z.enum(['ru', 'en', 'sr']),
+  kind: z.enum(['lead', 'call_click']).optional(),
+  status: leadStatusSchema.default('new'),
+  dealAmount: z.number().nullable().default(null),
+  commissionPercent: z.number().default(10),
+  paidAmount: z.number().default(0),
+  payments: z.array(paymentSchema).default([]),
+  telegramChatId: z.number().nullable().default(null),
+  telegramMessageId: z.number().nullable().default(null),
+  statusChangedAt: z.string(),
+  lastRemindedAt: z.string().nullable().default(null),
+  createdAt: z.string(),
+  pendingPrompt: pendingPromptSchema.nullable().default(null),
+  archived: z.boolean().default(false),
+  customerPaidAt: z.string().nullable().default(null),
+  pendingCommissionClaim: pendingCommissionClaimSchema.nullable().default(null),
+});
+export type StoredLead = z.infer<typeof storedLeadSchema>;
 
 const LEADS_PATH = 'data/leads.json';
 const MAX_RETRIES = 3;
@@ -54,7 +83,21 @@ async function readLeadsRaw(): Promise<{ leads: StoredLead[]; etag: string | und
   const result = await get(LEADS_PATH, { access: 'private', useCache: false });
   if (!result) return { leads: [], etag: undefined };
   const text = await new Response(result.stream).text();
-  return { leads: JSON.parse(text) as StoredLead[], etag: result.blob.etag };
+  const raw = JSON.parse(text) as unknown[];
+  // Per-record safeParse, not one array-wide parse — a single corrupted
+  // record (a bad manual edit, a future field type change) drops just
+  // itself with a loud log instead of taking every other lead down with it.
+  // For everything else this is where an old record missing a field this
+  // schema later added gets backfilled via .default() on the way in.
+  const leads = raw.flatMap(entry => {
+    const parsed = storedLeadSchema.safeParse(entry);
+    if (!parsed.success) {
+      console.error('[store] dropping a corrupt lead record on read', { entry, error: parsed.error.message });
+      return [];
+    }
+    return [parsed.data];
+  });
+  return { leads, etag: result.blob.etag };
 }
 
 async function writeLeadsRaw(leads: StoredLead[], etag: string | undefined): Promise<void> {

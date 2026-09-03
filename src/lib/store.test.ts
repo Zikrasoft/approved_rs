@@ -39,7 +39,7 @@ import { put } from '@vercel/blob';
 import {
   insertLead, setStatus, setPendingPrompt, findByPendingPrompt, resolvePendingPrompt, archiveLead, unarchiveLead,
   toggleCustomerPaid, confirmCommissionPayment, rejectCommissionPayment, markReminded, getStaleLeads,
-  getOwedSummary, getCommission, searchLeads, getLead, updateLeads, type StoredLead,
+  getOwedSummary, getCommission, searchLeads, getLead, readLeads, updateLeads, type StoredLead,
 } from './store';
 import type { LeadData } from './leadTypes';
 
@@ -339,6 +339,66 @@ describe('getCommission', () => {
   it('is paid off within the rounding epsilon', () => {
     const info = getCommission({ dealAmount: 100_000, commissionPercent: 10, paidAmount: 9999.999 });
     expect(info.isPaidOff).toBe(true);
+  });
+});
+
+// Writes raw JSON directly into the fake blob, bypassing insertLead — the
+// only way to simulate a legacy record written before a schema field
+// existed, or a genuinely malformed one.
+function seedRawBlob(records: unknown[]): void {
+  storedContent = JSON.stringify(records);
+  storedEtag = `etag-${++etagCounter}`;
+}
+
+describe('readLeads — schema validation on the way in', () => {
+  it('backfills fields a legacy record predates with their defaults', async () => {
+    seedRawBlob([{
+      id: 1, name: 'Иван', contact: '@ivan', service: 'vehicle-sourcing', locale: 'ru',
+      statusChangedAt: '2026-01-01T00:00:00.000Z', createdAt: '2026-01-01T00:00:00.000Z',
+      // status, dealAmount, commissionPercent, paidAmount, payments, archived,
+      // customerPaidAt, pendingCommissionClaim, pendingPrompt — all omitted,
+      // as if written before this field existed.
+    }]);
+
+    const [lead] = await readLeads();
+
+    expect(lead.status).toBe('new');
+    expect(lead.commissionPercent).toBe(10);
+    expect(lead.paidAmount).toBe(0);
+    expect(lead.payments).toEqual([]);
+    expect(lead.archived).toBe(false);
+    expect(lead.customerPaidAt).toBeNull();
+    expect(lead.pendingCommissionClaim).toBeNull();
+    expect(lead.pendingPrompt).toBeNull();
+  });
+
+  it('drops a record missing a required field, without losing the other valid leads', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    seedRawBlob([
+      { id: 1, name: 'Иван', contact: '@ivan', service: 'vehicle-sourcing', locale: 'ru', statusChangedAt: 'x', createdAt: 'x' },
+      { id: 2, name: 'Пётр', /* contact missing — genuinely corrupt */ service: 'vehicle-sourcing', locale: 'ru', statusChangedAt: 'x', createdAt: 'x' },
+      { id: 3, name: 'Олег', contact: '@oleg', service: 'vehicle-sourcing', locale: 'ru', statusChangedAt: 'x', createdAt: 'x' },
+    ]);
+
+    const leads = await readLeads();
+
+    expect(leads.map(l => l.id)).toEqual([1, 3]);
+    expect(errorSpy).toHaveBeenCalledWith(
+      '[store] dropping a corrupt lead record on read',
+      expect.objectContaining({ entry: expect.objectContaining({ id: 2 }) }),
+    );
+    errorSpy.mockRestore();
+  });
+
+  it('rejects a wrong-type value on a field that does exist, rather than coercing it', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    seedRawBlob([
+      { id: 1, name: 'Иван', contact: '@ivan', service: 'vehicle-sourcing', locale: 'ru', statusChangedAt: 'x', createdAt: 'x', paidAmount: '5000' },
+    ]);
+
+    expect(await readLeads()).toEqual([]);
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
   });
 });
 
