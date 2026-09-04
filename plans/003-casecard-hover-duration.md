@@ -11,8 +11,10 @@
 The case card image zoom on hover uses `duration-700` (700ms). This is a hover effect triggered tens of times per day — AUDIT.md budget for hover effects is 200–300ms. At 700ms the zoom feels sluggish and lags behind the cursor intent, making the site feel slow.
 
 **src/components/CaseCard.astro:21 — current**
+
 ```astro
-class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+class="w-full h-full object-cover transition-transform duration-700 ease-out
+group-hover:scale-105"
 ```
 
 ## Target
@@ -20,7 +22,8 @@ class="w-full h-full object-cover transition-transform duration-700 ease-out gro
 Reduce to 400ms — long enough to be a smooth image zoom, short enough to feel responsive:
 
 ```astro
-class="w-full h-full object-cover transition-transform duration-400 ease-out group-hover:scale-105"
+class="w-full h-full object-cover transition-transform duration-400 ease-out
+group-hover:scale-105"
 ```
 
 `duration-400` is a standard Tailwind duration value (`400ms`). No new tokens needed.
@@ -31,16 +34,23 @@ class="w-full h-full object-cover transition-transform duration-400 ease-out gro
 - The card lift transition is set in the component's `<style>` block at 0.3s — the image zoom at 0.4s is a deliberate choice to make the zoom feel slightly softer than the card lift.
 
 Exemplar:
+
 ```css
 /* CaseCard.astro <style> block */
-.case-card { transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s; }
+.case-card {
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s,
+    transform 0.3s;
+}
 ```
 
 ## Steps
 
 1. **src/components/CaseCard.astro:21** — Change `duration-700` to `duration-400`:
    ```astro
-   class="w-full h-full object-cover transition-transform duration-400 ease-out group-hover:scale-105"
+   class="w-full h-full object-cover transition-transform duration-400 ease-out
+   group-hover:scale-105"
    ```
 
 ## Boundaries

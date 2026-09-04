@@ -14,36 +14,66 @@ interface Props {
   class?: string;
 }
 
-const { items, heading, headingSize = 'lg', viewAllHref, topBorder = false, class: className } = Astro.props;
+const {
+  items,
+  heading,
+  headingSize = 'lg',
+  viewAllHref,
+  topBorder = false,
+  class: className,
+} = Astro.props;
 const locale = getLocale(Astro.currentLocale);
 const viewAllLabel = getI18n(locale).common.viewAllCasesLabel;
 ---
 
-{items.length > 0 && (
-  <section class:list={[topBorder ? 'border-t' : 'border-b', 'border-default', className]}>
-    <div class="max-w-6xl mx-auto px-6 py-16">
-      <div class:list={['mb-10', viewAllHref && 'flex items-end justify-between']}>
-        <div>
-          <SectionHeading title={heading} size={headingSize} />
+{
+  items.length > 0 && (
+    <section
+      class:list={[
+        topBorder ? 'border-t' : 'border-b',
+        'border-default',
+        className,
+      ]}
+    >
+      <div class="max-w-6xl mx-auto px-6 py-16">
+        <div
+          class:list={[
+            'mb-10',
+            viewAllHref && 'flex items-end justify-between',
+          ]}
+        >
+          <div>
+            <SectionHeading title={heading} size={headingSize} />
+          </div>
+          {viewAllHref && (
+            <a
+              href={viewAllHref}
+              class="cases-more hidden sm:flex items-center gap-1 text-sm font-medium no-underline text-accent"
+            >
+              {viewAllLabel}{' '}
+              <span class="arrow transition-transform duration-200">→</span>
+            </a>
+          )}
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {items.map((item) => (
+            <CaseCard {...item} />
+          ))}
         </div>
         {viewAllHref && (
-          <a href={viewAllHref} class="cases-more hidden sm:flex items-center gap-1 text-sm font-medium no-underline text-accent">
-            {viewAllLabel} <span class="arrow transition-transform duration-200">→</span>
-          </a>
+          <div class="mt-8 sm:hidden">
+            <a href={viewAllHref} class="text-sm font-medium text-accent">
+              {viewAllLabel} →
+            </a>
+          </div>
         )}
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {items.map(item => <CaseCard {...item} />)}
-      </div>
-      {viewAllHref && (
-        <div class="mt-8 sm:hidden">
-          <a href={viewAllHref} class="text-sm font-medium text-accent">{viewAllLabel} →</a>
-        </div>
-      )}
-    </div>
-  </section>
-)}
+    </section>
+  )
+}
 
 <style>
-  .cases-more:hover .arrow { transform: translateX(4px); }
+  .cases-more:hover .arrow {
+    transform: translateX(4px);
+  }
 </style>

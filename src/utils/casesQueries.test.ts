@@ -6,11 +6,41 @@ import { describe, it, expect, vi } from 'vitest';
 // (standard vitest technique for virtual modules) rather than pulling
 // Astro's Vite plugin into the test config for one file.
 const cases = [
-  { data: { published: true, service: 'vehicle-sourcing', date: new Date('2024-01-01') } },
-  { data: { published: true, service: 'vehicle-buyback', date: new Date('2024-03-01') } },
-  { data: { published: true, service: 'vehicle-inspection', date: new Date('2024-02-01') } },
-  { data: { published: true, service: 'vehicle-import', date: new Date('2024-04-01') } },
-  { data: { published: false, service: 'vehicle-sourcing', date: new Date('2024-05-01') } },
+  {
+    data: {
+      published: true,
+      service: 'vehicle-sourcing',
+      date: new Date('2024-01-01'),
+    },
+  },
+  {
+    data: {
+      published: true,
+      service: 'vehicle-buyback',
+      date: new Date('2024-03-01'),
+    },
+  },
+  {
+    data: {
+      published: true,
+      service: 'vehicle-inspection',
+      date: new Date('2024-02-01'),
+    },
+  },
+  {
+    data: {
+      published: true,
+      service: 'vehicle-import',
+      date: new Date('2024-04-01'),
+    },
+  },
+  {
+    data: {
+      published: false,
+      service: 'vehicle-sourcing',
+      date: new Date('2024-05-01'),
+    },
+  },
 ];
 const autoserviceCases = [
   { data: { published: true, date: new Date('2024-01-01') } },
@@ -22,13 +52,19 @@ const detailingCases = [
 ];
 
 vi.mock('astro:content', () => ({
-  getCollection: vi.fn((name: 'cases' | 'autoserviceCases' | 'detailingCases', filter: (c: { data: { published: boolean } }) => boolean) => {
-    const byName = { cases, autoserviceCases, detailingCases };
-    return Promise.resolve(byName[name].filter(filter));
-  }),
+  getCollection: vi.fn(
+    (
+      name: 'cases' | 'autoserviceCases' | 'detailingCases',
+      filter: (c: { data: { published: boolean } }) => boolean,
+    ) => {
+      const byName = { cases, autoserviceCases, detailingCases };
+      return Promise.resolve(byName[name].filter(filter));
+    },
+  ),
 }));
 
-const { getPublishedCasesByService, getCasesTabCounts } = await import('./casesQueries');
+const { getPublishedCasesByService, getCasesTabCounts } =
+  await import('./casesQueries');
 
 describe('getPublishedCasesByService', () => {
   it('returns only published cases for the given service', async () => {
@@ -52,7 +88,7 @@ describe('getCasesTabCounts', () => {
       'vehicle-inspection': 1,
       'vehicle-import': 1,
       'auto-service': 1,
-      'detailing': 1,
+      detailing: 1,
     });
   });
 });

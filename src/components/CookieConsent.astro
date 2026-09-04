@@ -16,7 +16,9 @@ const cc = getI18n(locale).common.cookie;
   <p class="text-sm leading-relaxed text-secondary mb-4">
     {cc.notice}
     {' '}{cc.more}{' '}
-    <a href={PathBuilder.privacy(locale)} class="underline text-accent">{cc.policyLink}</a>.
+    <a href={PathBuilder.privacy(locale)} class="underline text-accent"
+      >{cc.policyLink}</a
+    >.
   </p>
   <div class="flex gap-3">
     <button
@@ -36,24 +38,34 @@ const cc = getI18n(locale).common.cookie;
 
 <script is:inline>
   function initCookieConsent() {
-    var consent;
-    try { consent = localStorage.getItem('cookie_consent'); } catch (e) {}
+    let consent;
+    try {
+      consent = localStorage.getItem('cookie_consent');
+    } catch (e) {}
     if (consent) return;
 
-    var el = document.getElementById('cookie-consent');
+    const el = document.getElementById('cookie-consent');
     if (!el) return;
     el.hidden = false;
 
-    document.getElementById('cookie-accept').addEventListener('click', function () {
-      try { localStorage.setItem('cookie_consent', 'granted'); } catch (e) {}
-      if (window.loadAnalytics) window.loadAnalytics();
-      el.hidden = true;
-    });
+    document
+      .getElementById('cookie-accept')
+      .addEventListener('click', function () {
+        try {
+          localStorage.setItem('cookie_consent', 'granted');
+        } catch (e) {}
+        if (window.loadAnalytics) window.loadAnalytics();
+        el.hidden = true;
+      });
 
-    document.getElementById('cookie-decline').addEventListener('click', function () {
-      try { localStorage.setItem('cookie_consent', 'denied'); } catch (e) {}
-      el.hidden = true;
-    });
+    document
+      .getElementById('cookie-decline')
+      .addEventListener('click', function () {
+        try {
+          localStorage.setItem('cookie_consent', 'denied');
+        } catch (e) {}
+        el.hidden = true;
+      });
   }
   initCookieConsent();
 </script>

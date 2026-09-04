@@ -5,8 +5,12 @@ import type { CaseCardProps } from '@/components/CaseCard.astro';
 import type { Locale } from '@/i18n/config';
 
 type CasesTabPageContentKey =
-  | 'casesVehicleSourcing' | 'casesVehicleBuyback' | 'casesVehicleInspection'
-  | 'casesVehicleImport' | 'casesAutoService' | 'casesDetailing';
+  | 'casesVehicleSourcing'
+  | 'casesVehicleBuyback'
+  | 'casesVehicleInspection'
+  | 'casesVehicleImport'
+  | 'casesAutoService'
+  | 'casesDetailing';
 
 // Shared by every /cases/<tab>.astro page — each one only differs in which
 // PagesContent block/canonical path/item-fetching it uses; the meta-building
@@ -23,6 +27,9 @@ export async function buildCasesTabPageData(
     description: p.metaDescription,
     canonical: `${SITE_URL}${canonicalPath}`,
   };
-  const [items, counts] = await Promise.all([fetchItems(), getCasesTabCounts()]);
+  const [items, counts] = await Promise.all([
+    fetchItems(),
+    getCasesTabCounts(),
+  ]);
   return { meta, items, counts };
 }

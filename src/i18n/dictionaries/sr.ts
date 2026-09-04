@@ -24,7 +24,8 @@ export const sr: Dictionary = {
     servicesHeading: 'Usluge',
     companyHeading: 'Kompanija',
     privacyLabel: 'Privatnost',
-    tagline: 'Pronalazimo, proveravamo i dostavljamo vozilo iz Evrope. Preuzimamo ceo proces — od pretrage do isporuke.',
+    tagline:
+      'Pronalazimo, proveravamo i dostavljamo vozilo iz Evrope. Preuzimamo ceo proces — od pretrage do isporuke.',
     contactManagerLabel: 'Pišite menadžeru',
     hoursLine: 'Non-stop, bez slobodnih dana',
     copyrightSuffix: 'Odabir, servis i dostava vozila iz Evrope',
@@ -41,7 +42,8 @@ export const sr: Dictionary = {
     closeLabel: 'Zatvori',
     channelLabel: 'Naš kanal',
     cookie: {
-      notice: 'Koristimo analitičke kolačiće (Google Analytics) da bismo razumeli kako posetioci koriste sajt.',
+      notice:
+        'Koristimo analitičke kolačiće (Google Analytics) da bismo razumeli kako posetioci koriste sajt.',
       more: 'Više informacija u',
       policyLink: 'politici privatnosti',
       accept: 'Prihvati',
@@ -52,7 +54,8 @@ export const sr: Dictionary = {
       prev: 'Prethodna fotografija',
       next: 'Sledeća fotografija',
       altTemplate: (name: string, i: number) => `${name}, fotografija ${i + 1}`,
-      openAriaTemplate: (i: number, total: number) => `Otvori fotografiju ${i + 1} od ${total}`,
+      openAriaTemplate: (i: number, total: number) =>
+        `Otvori fotografiju ${i + 1} od ${total}`,
       showMoreTemplate: (n: number) => `Prikaži još (${n})`,
     },
   },

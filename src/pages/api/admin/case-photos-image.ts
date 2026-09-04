@@ -3,7 +3,12 @@ export const prerender = false;
 import type { APIContext } from 'astro';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { isKnownCaseDir, isValidSlug, KEYSTATIC_AUTH_COOKIE, SAFE_GALLERY_FILENAME } from '@/utils/adminGallery';
+import {
+  isKnownCaseDir,
+  isValidSlug,
+  KEYSTATIC_AUTH_COOKIE,
+  SAFE_GALLERY_FILENAME,
+} from '@/utils/adminGallery';
 import { getGithubFileBuffer, GithubApiError } from '@/lib/githubContents';
 
 const MIME_BY_EXT: Record<string, string> = {
@@ -24,7 +29,11 @@ export async function GET({ request, cookies }: APIContext): Promise<Response> {
   const slug = url.searchParams.get('slug') ?? '';
   const file = url.searchParams.get('file') ?? '';
 
-  if (!isKnownCaseDir(dir) || !isValidSlug(slug) || !SAFE_GALLERY_FILENAME.test(file)) {
+  if (
+    !isKnownCaseDir(dir) ||
+    !isValidSlug(slug) ||
+    !SAFE_GALLERY_FILENAME.test(file)
+  ) {
     return new Response('Bad request', { status: 400 });
   }
   const ext = file.slice(file.lastIndexOf('.') + 1);
@@ -42,7 +51,12 @@ export async function GET({ request, cookies }: APIContext): Promise<Response> {
     }
     try {
       const buffer = await getGithubFileBuffer(token, relPath);
-      return new Response(new Uint8Array(buffer), { headers: { 'Content-Type': contentType, 'Cache-Control': 'private, max-age=300' } });
+      return new Response(new Uint8Array(buffer), {
+        headers: {
+          'Content-Type': contentType,
+          'Cache-Control': 'private, max-age=300',
+        },
+      });
     } catch (err) {
       if (err instanceof GithubApiError && err.status === 404) {
         return new Response('Not found', { status: 404 });
@@ -53,7 +67,12 @@ export async function GET({ request, cookies }: APIContext): Promise<Response> {
 
   try {
     const buffer = await readFile(path.join(process.cwd(), relPath));
-    return new Response(new Uint8Array(buffer), { headers: { 'Content-Type': contentType, 'Cache-Control': 'private, max-age=300' } });
+    return new Response(new Uint8Array(buffer), {
+      headers: {
+        'Content-Type': contentType,
+        'Cache-Control': 'private, max-age=300',
+      },
+    });
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
       return new Response('Not found', { status: 404 });

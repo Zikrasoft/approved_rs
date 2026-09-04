@@ -3,7 +3,10 @@ export const prerender = false;
 import type { APIContext } from 'astro';
 import { waitUntil } from '@vercel/functions';
 import { notifyLead } from '@/lib/notifyLead';
-import { isTrackedContactChannel, type TrackedContactChannel } from '@/utils/contactChannel';
+import {
+  isTrackedContactChannel,
+  type TrackedContactChannel,
+} from '@/utils/contactChannel';
 
 // Fired via navigator.sendBeacon when a visitor taps a phone/Telegram/
 // WhatsApp/Viber contact link — not a real lead form (they just left the
@@ -13,22 +16,29 @@ import { isTrackedContactChannel, type TrackedContactChannel } from '@/utils/con
 // here, so staff fill those in by hand once they've actually connected.
 // Record<TrackedContactChannel, ...> — the compiler now enforces this stays
 // in sync with the shared channel list, not just this endpoint's own guess.
-const CHANNEL_COPY: Record<TrackedContactChannel, { service: string; comment: string }> = {
+const CHANNEL_COPY: Record<
+  TrackedContactChannel,
+  { service: string; comment: string }
+> = {
   phone: {
     service: 'Звонок с сайта',
-    comment: 'Посетитель нажал кнопку звонка на сайте. Если пропустили — перезвоните.',
+    comment:
+      'Посетитель нажал кнопку звонка на сайте. Если пропустили — перезвоните.',
   },
   telegram: {
     service: 'Клик Telegram с сайта',
-    comment: 'Посетитель нажал кнопку Telegram на сайте. Если не написал первым — напишите сами.',
+    comment:
+      'Посетитель нажал кнопку Telegram на сайте. Если не написал первым — напишите сами.',
   },
   whatsapp: {
     service: 'Клик WhatsApp с сайта',
-    comment: 'Посетитель нажал кнопку WhatsApp на сайте. Если не написал первым — напишите сами.',
+    comment:
+      'Посетитель нажал кнопку WhatsApp на сайте. Если не написал первым — напишите сами.',
   },
   viber: {
     service: 'Клик Viber с сайта',
-    comment: 'Посетитель нажал кнопку Viber на сайте. Если не написал первым — напишите сами.',
+    comment:
+      'Посетитель нажал кнопку Viber на сайте. Если не написал первым — напишите сами.',
   },
 };
 
@@ -46,7 +56,9 @@ export async function POST({ request }: APIContext): Promise<Response> {
   // it can never disagree with telegram.ts's own channel→label mapping
   // downstream.
   const rawChannel = form.get('channel')?.toString();
-  const channel: TrackedContactChannel = isTrackedContactChannel(rawChannel) ? rawChannel : 'phone';
+  const channel: TrackedContactChannel = isTrackedContactChannel(rawChannel)
+    ? rawChannel
+    : 'phone';
   const copy = CHANNEL_COPY[channel];
 
   const lead = {

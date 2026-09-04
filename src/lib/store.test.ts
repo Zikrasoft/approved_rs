@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Fake blob storage: a single in-memory slot standing in for the real Blob
 // store, plus a switch to force one precondition-failed write so
@@ -18,54 +18,105 @@ vi.mock('@vercel/blob', () => {
     BlobPreconditionFailedError,
     get: vi.fn(async () => {
       if (storedContent === undefined) return null;
-      return { stream: new Response(storedContent).body, blob: { etag: storedEtag } };
+      return {
+        stream: new Response(storedContent).body,
+        blob: { etag: storedEtag },
+      };
     }),
     head: vi.fn(async () => ({ etag: storedEtag })),
-    put: vi.fn(async (_path: string, body: string, opts: { ifMatch?: string }) => {
-      if (forceConflictAlways) {
-        throw new BlobPreconditionFailedError('precondition failed');
-      }
-      if (forceConflictOnce) {
-        forceConflictOnce = false;
-        onConflictSideEffect?.();
-        onConflictSideEffect = null;
-        throw new BlobPreconditionFailedError('precondition failed');
-      }
-      if (opts.ifMatch && opts.ifMatch !== storedEtag) {
-        throw new BlobPreconditionFailedError('precondition failed');
-      }
-      storedContent = body;
-      storedEtag = `etag-${++etagCounter}`;
-      return { etag: storedEtag };
-    }),
+    put: vi.fn(
+      async (_path: string, body: string, opts: { ifMatch?: string }) => {
+        if (forceConflictAlways) {
+          throw new BlobPreconditionFailedError('precondition failed');
+        }
+        if (forceConflictOnce) {
+          forceConflictOnce = false;
+          onConflictSideEffect?.();
+          onConflictSideEffect = null;
+          throw new BlobPreconditionFailedError('precondition failed');
+        }
+        if (opts.ifMatch && opts.ifMatch !== storedEtag) {
+          throw new BlobPreconditionFailedError('precondition failed');
+        }
+        storedContent = body;
+        storedEtag = `etag-${++etagCounter}`;
+        return { etag: storedEtag };
+      },
+    ),
   };
 });
 
 import { put } from '@vercel/blob';
 import {
-  insertLead, insertOrMergeLead, setStatus, setPendingPrompt, findByPendingPrompt, resolvePendingPrompt, archiveLead, unarchiveLead,
-  deleteLead, resumeLead, postponeLead, getDuePostponed, claimFullCommission, confirmCommissionPayment, rejectCommissionPayment,
-  getOwedSummary, getCommission, searchLeads, getLead, readLeads, updateLeads, type StoredLead,
+  insertLead,
+  insertOrMergeLead,
+  setStatus,
+  setPendingPrompt,
+  findByPendingPrompt,
+  resolvePendingPrompt,
+  archiveLead,
+  unarchiveLead,
+  deleteLead,
+  resumeLead,
+  postponeLead,
+  getDuePostponed,
+  claimFullCommission,
+  confirmCommissionPayment,
+  rejectCommissionPayment,
+  getOwedSummary,
+  getCommission,
+  searchLeads,
+  getLead,
+  readLeads,
+  updateLeads,
+  type StoredLead,
 } from './store';
 import type { LeadData } from './leadTypes';
 
-const baseData: Omit<LeadData, 'id'> = { name: 'Иван', contact: '@ivan', service: 'vehicle-sourcing', locale: 'ru' };
+const baseData: Omit<LeadData, 'id'> = {
+  name: 'Иван',
+  contact: '@ivan',
+  service: 'vehicle-sourcing',
+  locale: 'ru',
+};
 
 // Test-only fixture helpers — write directly via updateLeads to arrange a
 // won/paid lead without going through the real force-reply flow, which is
 // exercised on its own terms by the resolvePendingPrompt/confirm tests below.
 async function forceComplete(id: number, dealAmount: number): Promise<void> {
-  await updateLeads(leads => leads.map(l => (l.id === id ? { ...l, dealAmount, status: 'won' as const } : l)));
+  await updateLeads((leads) =>
+    leads.map((l) =>
+      l.id === id ? { ...l, dealAmount, status: 'won' as const } : l,
+    ),
+  );
 }
 async function forcePay(id: number, amount: number): Promise<void> {
-  await updateLeads(leads => leads.map(l => (l.id === id
-    ? { ...l, paidAmount: l.paidAmount + amount, payments: [...l.payments, { amount, at: new Date().toISOString() }] }
-    : l)));
+  await updateLeads((leads) =>
+    leads.map((l) =>
+      l.id === id
+        ? {
+            ...l,
+            paidAmount: l.paidAmount + amount,
+            payments: [...l.payments, { amount, at: new Date().toISOString() }],
+          }
+        : l,
+    ),
+  );
 }
 async function forceClaim(id: number, amount: number): Promise<void> {
-  await updateLeads(leads => leads.map(l => (l.id === id
-    ? { ...l, pendingCommissionClaim: { amount, claimedAt: new Date().toISOString() } }
-    : l)));
+  await updateLeads((leads) =>
+    leads.map((l) =>
+      l.id === id
+        ? {
+            ...l,
+            pendingCommissionClaim: {
+              amount,
+              claimedAt: new Date().toISOString(),
+            },
+          }
+        : l,
+    ),
+  );
 }
 
 beforeEach(() => {
@@ -99,8 +150,17 @@ describe('insertLead', () => {
 });
 
 describe('insertOrMergeLead', () => {
-  const clickData = (channel: string, visitorId = 'visitor-1'): Omit<LeadData, 'id'> => ({
-    name: '', contact: '—', service: `Клик ${channel} с сайта`, contactChannel: channel, visitorId, locale: 'ru', kind: 'call_click',
+  const clickData = (
+    channel: string,
+    visitorId = 'visitor-1',
+  ): Omit<LeadData, 'id'> => ({
+    name: '',
+    contact: '—',
+    service: `Клик ${channel} с сайта`,
+    contactChannel: channel,
+    visitorId,
+    locale: 'ru',
+    kind: 'call_click',
   });
 
   it('inserts as a new lead when the visitor has no open lead yet', async () => {
@@ -123,7 +183,11 @@ describe('insertOrMergeLead', () => {
   it('upgrades a placeholder contact once real name/contact data arrives for the same visitor', async () => {
     const { lead: clicked } = await insertOrMergeLead(clickData('telegram'));
     const { lead, merged } = await insertOrMergeLead({
-      name: 'Иван', contact: '@ivan', service: 'vehicle-sourcing', visitorId: 'visitor-1', locale: 'ru',
+      name: 'Иван',
+      contact: '@ivan',
+      service: 'vehicle-sourcing',
+      visitorId: 'visitor-1',
+      locale: 'ru',
     });
 
     expect(merged).toBe(true);
@@ -135,7 +199,9 @@ describe('insertOrMergeLead', () => {
 
   it('does not merge a different visitor — creates a separate lead', async () => {
     await insertOrMergeLead(clickData('telegram', 'visitor-1'));
-    const { merged } = await insertOrMergeLead(clickData('telegram', 'visitor-2'));
+    const { merged } = await insertOrMergeLead(
+      clickData('telegram', 'visitor-2'),
+    );
     expect(merged).toBe(false);
     expect(await readLeads()).toHaveLength(2);
   });
@@ -161,7 +227,11 @@ describe('insertOrMergeLead', () => {
 
   it('does not merge once the merge window has passed', async () => {
     const { lead } = await insertOrMergeLead(clickData('telegram'));
-    await updateLeads(leads => leads.map(l => (l.id === lead.id ? { ...l, createdAt: '2000-01-01T00:00:00.000Z' } : l)));
+    await updateLeads((leads) =>
+      leads.map((l) =>
+        l.id === lead.id ? { ...l, createdAt: '2000-01-01T00:00:00.000Z' } : l,
+      ),
+    );
 
     const { merged } = await insertOrMergeLead(clickData('whatsapp'));
 
@@ -170,7 +240,10 @@ describe('insertOrMergeLead', () => {
 
   it('never merges without a visitorId to correlate on', async () => {
     await insertOrMergeLead({ ...clickData('telegram'), visitorId: null });
-    const { merged } = await insertOrMergeLead({ ...clickData('whatsapp'), visitorId: null });
+    const { merged } = await insertOrMergeLead({
+      ...clickData('whatsapp'),
+      visitorId: null,
+    });
     expect(merged).toBe(false);
   });
 });
@@ -178,9 +251,16 @@ describe('insertOrMergeLead', () => {
 describe('resolvePendingPrompt', () => {
   it('applies the patch and clears the pending prompt in one write', async () => {
     const lead = await insertLead(baseData);
-    await setPendingPrompt(lead.id, { chatId: 111, messageId: 999, kind: 'deal_amount' });
+    await setPendingPrompt(lead.id, {
+      chatId: 111,
+      messageId: 999,
+      kind: 'deal_amount',
+    });
 
-    const resolved = await resolvePendingPrompt(111, 999, () => ({ dealAmount: 5000, status: 'won' }));
+    const resolved = await resolvePendingPrompt(111, 999, () => ({
+      dealAmount: 5000,
+      status: 'won',
+    }));
 
     expect(resolved?.dealAmount).toBe(5000);
     expect(resolved?.status).toBe('won');
@@ -189,10 +269,20 @@ describe('resolvePendingPrompt', () => {
 
   it('is a no-op on a duplicate delivery once the prompt is already cleared (TOCTOU regression)', async () => {
     const lead = await insertLead(baseData);
-    await setPendingPrompt(lead.id, { chatId: 111, messageId: 999, kind: 'deal_amount' });
-    await resolvePendingPrompt(111, 999, () => ({ dealAmount: 5000, status: 'won' }));
+    await setPendingPrompt(lead.id, {
+      chatId: 111,
+      messageId: 999,
+      kind: 'deal_amount',
+    });
+    await resolvePendingPrompt(111, 999, () => ({
+      dealAmount: 5000,
+      status: 'won',
+    }));
 
-    const second = await resolvePendingPrompt(111, 999, () => ({ dealAmount: 9999, status: 'won' }));
+    const second = await resolvePendingPrompt(111, 999, () => ({
+      dealAmount: 9999,
+      status: 'won',
+    }));
 
     expect(second).toBeUndefined();
     const after = await getLead(lead.id);
@@ -201,7 +291,9 @@ describe('resolvePendingPrompt', () => {
 
   it('returns undefined when no lead has a matching pending prompt', async () => {
     await insertLead(baseData);
-    const resolved = await resolvePendingPrompt(1, 1, () => ({ dealAmount: 1 }));
+    const resolved = await resolvePendingPrompt(1, 1, () => ({
+      dealAmount: 1,
+    }));
     expect(resolved).toBeUndefined();
   });
 });
@@ -219,7 +311,13 @@ describe('archiveLead / unarchiveLead', () => {
 describe('resumeLead', () => {
   it('returns a postponed lead to in_progress and clears remindAt', async () => {
     const lead = await insertLead(baseData);
-    await updateLeads(leads => leads.map(l => (l.id === lead.id ? { ...l, status: 'postponed' as const, remindAt: '2026-10-20' } : l)));
+    await updateLeads((leads) =>
+      leads.map((l) =>
+        l.id === lead.id
+          ? { ...l, status: 'postponed' as const, remindAt: '2026-10-20' }
+          : l,
+      ),
+    );
 
     const resumed = await resumeLead(lead.id);
 
@@ -244,7 +342,11 @@ describe('postponeLead', () => {
     const lead = await insertLead(baseData);
     await setStatus(lead.id, 'in_progress');
 
-    const postponed = await postponeLead(lead.id, '2026-10-20', 'Отложено до 20.10.2026');
+    const postponed = await postponeLead(
+      lead.id,
+      '2026-10-20',
+      'Отложено до 20.10.2026',
+    );
 
     expect(postponed?.status).toBe('postponed');
     expect(postponed?.remindAt).toBe('2026-10-20');
@@ -254,7 +356,11 @@ describe('postponeLead', () => {
   it('no-ops when the lead is not in_progress (stale button, already finalized elsewhere)', async () => {
     const lead = await insertLead(baseData); // status: 'new'
 
-    const postponed = await postponeLead(lead.id, '2026-10-20', 'Отложено до 20.10.2026');
+    const postponed = await postponeLead(
+      lead.id,
+      '2026-10-20',
+      'Отложено до 20.10.2026',
+    );
 
     expect(postponed).toBeUndefined();
     const after = await getLead(lead.id);
@@ -264,7 +370,11 @@ describe('postponeLead', () => {
 
 describe('getDuePostponed', () => {
   async function forcePostpone(id: number, remindAt: string): Promise<void> {
-    await updateLeads(leads => leads.map(l => (l.id === id ? { ...l, status: 'postponed' as const, remindAt } : l)));
+    await updateLeads((leads) =>
+      leads.map((l) =>
+        l.id === id ? { ...l, status: 'postponed' as const, remindAt } : l,
+      ),
+    );
   }
 
   it('finds a postponed lead whose remindAt is today or earlier', async () => {
@@ -273,7 +383,7 @@ describe('getDuePostponed', () => {
 
     const due = await getDuePostponed();
 
-    expect(due.map(l => l.id)).toEqual([lead.id]);
+    expect(due.map((l) => l.id)).toEqual([lead.id]);
   });
 
   it('excludes a postponed lead whose remindAt is still in the future', async () => {
@@ -290,7 +400,7 @@ describe('getDuePostponed', () => {
       const lead = await insertLead(baseData);
       await forcePostpone(lead.id, '2026-10-20');
 
-      expect((await getDuePostponed()).map(l => l.id)).toEqual([lead.id]);
+      expect((await getDuePostponed()).map((l) => l.id)).toEqual([lead.id]);
     } finally {
       vi.useRealTimers();
     }
@@ -319,7 +429,7 @@ describe('deleteLead', () => {
 
     expect(found).toBe(true);
     const leads = await readLeads();
-    expect(leads.map(l => l.id)).toEqual([b.id]);
+    expect(leads.map((l) => l.id)).toEqual([b.id]);
   });
 
   it('returns false for an id that does not exist', async () => {
@@ -337,7 +447,10 @@ describe('claimFullCommission', () => {
 
     const claimed = await claimFullCommission(lead.id);
 
-    expect(claimed?.pendingCommissionClaim).toEqual({ amount: 7000, claimedAt: expect.any(String) });
+    expect(claimed?.pendingCommissionClaim).toEqual({
+      amount: 7000,
+      claimedAt: expect.any(String),
+    });
   });
 });
 
@@ -350,7 +463,9 @@ describe('confirmCommissionPayment / rejectCommissionPayment', () => {
     const confirmed = await confirmCommissionPayment(lead.id);
 
     expect(confirmed?.paidAmount).toBe(4000);
-    expect(confirmed?.payments).toEqual([{ amount: 4000, at: expect.any(String) }]);
+    expect(confirmed?.payments).toEqual([
+      { amount: 4000, at: expect.any(String) },
+    ]);
     expect(confirmed?.pendingCommissionClaim).toBeNull();
   });
 
@@ -430,7 +545,9 @@ describe('getOwedSummary', () => {
     await forcePay(b.id, 5000); // fully paid — excluded
 
     const { rows, total } = await getOwedSummary();
-    expect(rows).toEqual([expect.objectContaining({ id: a.id, remaining: 10_000 })]);
+    expect(rows).toEqual([
+      expect.objectContaining({ id: a.id, remaining: 10_000 }),
+    ]);
     expect(total).toBe(10_000);
   });
 
@@ -462,7 +579,7 @@ describe('searchLeads', () => {
     const lead = await insertLead(baseData);
     await archiveLead(lead.id);
     const results = await searchLeads('Иван');
-    expect(results.map(l => l.id)).toContain(lead.id);
+    expect(results.map((l) => l.id)).toContain(lead.id);
   });
 
   it('returns nothing for an empty query, without scanning/matching everything', async () => {
@@ -494,7 +611,11 @@ describe('getLead / findByPendingPrompt — not-found paths', () => {
 
   it('findByPendingPrompt returns undefined for a chatId/messageId that does not match the pending one', async () => {
     const lead = await insertLead(baseData);
-    await setPendingPrompt(lead.id, { chatId: 111, messageId: 555, kind: 'deal_amount' });
+    await setPendingPrompt(lead.id, {
+      chatId: 111,
+      messageId: 555,
+      kind: 'deal_amount',
+    });
     expect(await findByPendingPrompt(111, 556)).toBeUndefined(); // wrong messageId
     expect(await findByPendingPrompt(222, 555)).toBeUndefined(); // wrong chatId
   });
@@ -502,26 +623,42 @@ describe('getLead / findByPendingPrompt — not-found paths', () => {
 
 describe('getCommission', () => {
   it('computes commission and remaining from dealAmount/commissionPercent/paidAmount', () => {
-    const info = getCommission({ dealAmount: 100_000, commissionPercent: 10, paidAmount: 3000 });
+    const info = getCommission({
+      dealAmount: 100_000,
+      commissionPercent: 10,
+      paidAmount: 3000,
+    });
     expect(info.commission).toBe(10_000);
     expect(info.remaining).toBe(7000);
     expect(info.isPaidOff).toBe(false);
   });
 
   it('treats a null dealAmount as zero', () => {
-    const info = getCommission({ dealAmount: null, commissionPercent: 10, paidAmount: 0 });
+    const info = getCommission({
+      dealAmount: null,
+      commissionPercent: 10,
+      paidAmount: 0,
+    });
     expect(info.commission).toBe(0);
     expect(info.isPaidOff).toBe(true);
   });
 
   it('stays isPaidOff when overpaid (remaining goes negative) instead of flagging still-owed', () => {
-    const info = getCommission({ dealAmount: 100_000, commissionPercent: 10, paidAmount: 15_000 });
+    const info = getCommission({
+      dealAmount: 100_000,
+      commissionPercent: 10,
+      paidAmount: 15_000,
+    });
     expect(info.remaining).toBe(-5000);
     expect(info.isPaidOff).toBe(true);
   });
 
   it('is paid off within the rounding epsilon', () => {
-    const info = getCommission({ dealAmount: 100_000, commissionPercent: 10, paidAmount: 9999.999 });
+    const info = getCommission({
+      dealAmount: 100_000,
+      commissionPercent: 10,
+      paidAmount: 9999.999,
+    });
     expect(info.isPaidOff).toBe(true);
   });
 });
@@ -536,13 +673,20 @@ function seedRawBlob(records: unknown[]): void {
 
 describe('readLeads — schema validation on the way in', () => {
   it('backfills fields a legacy record predates with their defaults', async () => {
-    seedRawBlob([{
-      id: 1, name: 'Иван', contact: '@ivan', service: 'vehicle-sourcing', locale: 'ru',
-      statusChangedAt: '2026-01-01T00:00:00.000Z', createdAt: '2026-01-01T00:00:00.000Z',
-      // status, dealAmount, commissionPercent, paidAmount, payments, archived,
-      // pendingCommissionClaim, pendingPrompt — all omitted,
-      // as if written before this field existed.
-    }]);
+    seedRawBlob([
+      {
+        id: 1,
+        name: 'Иван',
+        contact: '@ivan',
+        service: 'vehicle-sourcing',
+        locale: 'ru',
+        statusChangedAt: '2026-01-01T00:00:00.000Z',
+        createdAt: '2026-01-01T00:00:00.000Z',
+        // status, dealAmount, commissionPercent, paidAmount, payments, archived,
+        // pendingCommissionClaim, pendingPrompt — all omitted,
+        // as if written before this field existed.
+      },
+    ]);
 
     const [lead] = await readLeads();
 
@@ -556,11 +700,20 @@ describe('readLeads — schema validation on the way in', () => {
   });
 
   it('clears a stale pendingPrompt.kind retired by a later release instead of dropping the whole lead (production incident, 2026-09-03)', async () => {
-    seedRawBlob([{
-      id: 1, name: 'Test', contact: '@test', service: 'vehicle-sourcing', locale: 'ru',
-      status: 'won', dealAmount: 300, statusChangedAt: 'x', createdAt: 'x',
-      pendingPrompt: { chatId: 1, messageId: 1, kind: 'commission_claim' },
-    }]);
+    seedRawBlob([
+      {
+        id: 1,
+        name: 'Test',
+        contact: '@test',
+        service: 'vehicle-sourcing',
+        locale: 'ru',
+        status: 'won',
+        dealAmount: 300,
+        statusChangedAt: 'x',
+        createdAt: 'x',
+        pendingPrompt: { chatId: 1, messageId: 1, kind: 'commission_claim' },
+      },
+    ]);
 
     const [lead] = await readLeads();
 
@@ -572,14 +725,37 @@ describe('readLeads — schema validation on the way in', () => {
   it('drops a record missing a required field, without losing the other valid leads', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     seedRawBlob([
-      { id: 1, name: 'Иван', contact: '@ivan', service: 'vehicle-sourcing', locale: 'ru', statusChangedAt: 'x', createdAt: 'x' },
-      { id: 2, name: 'Пётр', /* contact missing — genuinely corrupt */ service: 'vehicle-sourcing', locale: 'ru', statusChangedAt: 'x', createdAt: 'x' },
-      { id: 3, name: 'Олег', contact: '@oleg', service: 'vehicle-sourcing', locale: 'ru', statusChangedAt: 'x', createdAt: 'x' },
+      {
+        id: 1,
+        name: 'Иван',
+        contact: '@ivan',
+        service: 'vehicle-sourcing',
+        locale: 'ru',
+        statusChangedAt: 'x',
+        createdAt: 'x',
+      },
+      {
+        id: 2,
+        name: 'Пётр',
+        /* contact missing — genuinely corrupt */ service: 'vehicle-sourcing',
+        locale: 'ru',
+        statusChangedAt: 'x',
+        createdAt: 'x',
+      },
+      {
+        id: 3,
+        name: 'Олег',
+        contact: '@oleg',
+        service: 'vehicle-sourcing',
+        locale: 'ru',
+        statusChangedAt: 'x',
+        createdAt: 'x',
+      },
     ]);
 
     const leads = await readLeads();
 
-    expect(leads.map(l => l.id)).toEqual([1, 3]);
+    expect(leads.map((l) => l.id)).toEqual([1, 3]);
     expect(errorSpy).toHaveBeenCalledWith(
       '[store] dropping a corrupt lead record on read',
       expect.objectContaining({ entry: expect.objectContaining({ id: 2 }) }),
@@ -590,7 +766,16 @@ describe('readLeads — schema validation on the way in', () => {
   it('rejects a wrong-type value on a field that does exist, rather than coercing it', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     seedRawBlob([
-      { id: 1, name: 'Иван', contact: '@ivan', service: 'vehicle-sourcing', locale: 'ru', statusChangedAt: 'x', createdAt: 'x', paidAmount: '5000' },
+      {
+        id: 1,
+        name: 'Иван',
+        contact: '@ivan',
+        service: 'vehicle-sourcing',
+        locale: 'ru',
+        statusChangedAt: 'x',
+        createdAt: 'x',
+        paidAmount: '5000',
+      },
     ]);
 
     expect(await readLeads()).toEqual([]);
@@ -605,7 +790,9 @@ describe('updateLeads conflict retry', () => {
     vi.mocked(put).mockClear();
     forceConflictOnce = true;
 
-    const result = await updateLeads((leads: StoredLead[]) => leads.map(l => ({ ...l, name: 'Пётр' })));
+    const result = await updateLeads((leads: StoredLead[]) =>
+      leads.map((l) => ({ ...l, name: 'Пётр' })),
+    );
 
     expect(result[0].name).toBe('Пётр');
     expect(vi.mocked(put)).toHaveBeenCalledTimes(2);
@@ -616,8 +803,11 @@ describe('updateLeads conflict retry', () => {
     vi.mocked(put).mockClear();
     forceConflictAlways = true;
 
-    await expect(updateLeads((leads: StoredLead[]) => leads.map(l => ({ ...l, name: 'Пётр' }))))
-      .rejects.toThrow('precondition failed');
+    await expect(
+      updateLeads((leads: StoredLead[]) =>
+        leads.map((l) => ({ ...l, name: 'Пётр' })),
+      ),
+    ).rejects.toThrow('precondition failed');
     expect(vi.mocked(put)).toHaveBeenCalledTimes(6); // MAX_RETRIES, no more
   });
 });

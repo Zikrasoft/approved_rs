@@ -1,0 +1,3 @@
+# Prettier already reads .gitignore by default (dist/.astro/.vercel/node_modules/graphify-out) —
+# this file only needs entries .gitignore doesn't cover.
+pnpm-lock.yaml

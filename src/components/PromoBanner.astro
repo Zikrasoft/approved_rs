@@ -8,13 +8,20 @@ interface Props {
 }
 
 const { label, banners } = Astro.props;
-const banner = await marked.parseInline(banners[Math.floor(Math.random() * banners.length)]);
+const banner = await marked.parseInline(
+  banners[Math.floor(Math.random() * banners.length)],
+);
 ---
 
 <div class="py-10 border-t border-default">
-  <p class="flex items-center gap-2 text-xs tracking-widest uppercase mb-3 font-medium text-accent">
+  <p
+    class="flex items-center gap-2 text-xs tracking-widest uppercase mb-3 font-medium text-accent"
+  >
     <Info size={14} class="shrink-0" />
     {label}
   </p>
-  <p class="leading-relaxed text-sm text-secondary [&_strong]:text-primary [&_strong]:font-semibold" set:html={banner} />
+  <p
+    class="leading-relaxed text-sm text-secondary [&_strong]:text-primary [&_strong]:font-semibold"
+    set:html={banner}
+  />
 </div>

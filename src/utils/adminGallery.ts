@@ -22,12 +22,20 @@ export const KEYSTATIC_AUTH_COOKIE = 'keystatic-gh-access-token';
 // route writes into. One list, so the two never drift apart.
 export const CASE_COLLECTIONS = [
   { collection: 'cases', dir: 'src/content/cases', label: 'Автоподбор' },
-  { collection: 'autoserviceCases', dir: 'src/content/autoservice-cases', label: 'Автосервис' },
-  { collection: 'detailingCases', dir: 'src/content/detailing-cases', label: 'Детейлинг' },
+  {
+    collection: 'autoserviceCases',
+    dir: 'src/content/autoservice-cases',
+    label: 'Автосервис',
+  },
+  {
+    collection: 'detailingCases',
+    dir: 'src/content/detailing-cases',
+    label: 'Детейлинг',
+  },
 ] as const;
 
 export function isKnownCaseDir(dir: string): boolean {
-  return CASE_COLLECTIONS.some(c => c.dir === dir);
+  return CASE_COLLECTIONS.some((c) => c.dir === dir);
 }
 
 // Slugs here are always Keystatic-generated folder names (title -> slug),
@@ -52,8 +60,15 @@ export function sanitizeFilename(originalName: string): string {
   const dot = base.lastIndexOf('.');
   const hasExt = dot > 0; // dot===0 is a dotfile like ".jpg" — no real name part
   const name = hasExt ? base.slice(0, dot) : '';
-  const ext = (dot >= 0 ? base.slice(dot + 1) : '').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
-  const safeName = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'photo';
+  const ext =
+    (dot >= 0 ? base.slice(dot + 1) : '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '') || 'jpg';
+  const safeName =
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'photo';
   return `${safeName}.${ext}`;
 }
 
@@ -75,10 +90,11 @@ export function dedupeFilename(filename: string, taken: Set<string>): string {
 // case file at all.
 export function appendGalleryEntries(raw: string, newPaths: string[]): string {
   const lines = raw.split('\n');
-  const imageIdx = lines.findIndex(l => l.startsWith('image:'));
-  if (imageIdx === -1) throw new Error('appendGalleryEntries: no `image:` line found');
+  const imageIdx = lines.findIndex((l) => l.startsWith('image:'));
+  if (imageIdx === -1)
+    throw new Error('appendGalleryEntries: no `image:` line found');
 
-  const entries = newPaths.map(p => `  - ${p}`);
+  const entries = newPaths.map((p) => `  - ${p}`);
   let insertAt = imageIdx + 1;
   if (lines[insertAt] === 'gallery: []') {
     // Keystatic writes an empty gallery as inline `gallery: []`, not a bare

@@ -27,4 +27,5 @@ translations:
     body: Ein weiterer erfolgreicher **Autoauswahl in Serbien** für unseren Kunden Sergey. Die Aufgabe wurde bereits nach der Begutachtung von **2-3 Fahrzeugen** erfüllt – unter den ersten Optionen haben wir einen BMW gefunden, der alle Anforderungen vollständig erfüllte. Das Fahrzeug hat eine Laufleistung von **94.000 km**, ist hervorragend ausgestattet und verfügt über ein offizielles **Chiptuning von BMW** auf **320D**, das beim Händler durchgeführt wurde und die Garantie erhält.
 translatedFrom: 378c0c45407f23c2
 ---
+
 Ещё один успешный **автоподбор в Сербии** для нашего клиента Сергея. Задача была выполнена всего за осмотр **2–3 автомобилей** — уже среди первых вариантов нашли BMW, которая полностью соответствовала всем требованиям. Автомобиль с пробегом **94 000 км**, в отличной комплектации и с официальным **чип-тюнингом BMW** до **320D**, выполненным у дилера с сохранением гарантии.

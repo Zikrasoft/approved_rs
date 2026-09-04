@@ -1,12 +1,29 @@
 ---
-import { Menu, X, Send, Sun, Moon, Search, Wrench, Banknote, ClipboardCheck, Globe, Sparkles } from '@lucide/astro';
+import {
+  Menu,
+  X,
+  Send,
+  Sun,
+  Moon,
+  Search,
+  Wrench,
+  Banknote,
+  ClipboardCheck,
+  Globe,
+  Sparkles,
+} from '@lucide/astro';
 import SiteLogo from './SiteLogo.astro';
 import Button from './Button.astro';
 import LeadFormModal from './LeadFormModal.astro';
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import HeaderDesktopNav from './HeaderDesktopNav.astro';
 import HeaderMobileMenu from './HeaderMobileMenu.astro';
-import { getNavItems, isNavItemActive, SERVICES, type ServiceSlug } from '@/utils/labels';
+import {
+  getNavItems,
+  isNavItemActive,
+  SERVICES,
+  type ServiceSlug,
+} from '@/utils/labels';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
 import { DEFAULT_COUNTRY } from '@/utils/constants';
@@ -21,10 +38,14 @@ const t = getI18n(locale);
 // the home page) there's no country in the URL at all, so fall back to the
 // default rather than misreading an unrelated segment as a country code.
 const pathSegments = Astro.url.pathname.split('/').filter(Boolean);
-const isServicePage = SERVICES.some(s => s.slug === pathSegments[1]);
+const isServicePage = SERVICES.some((s) => s.slug === pathSegments[1]);
 const urlCountry = isServicePage ? pathSegments[2] : undefined;
-const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCountry! : DEFAULT_COUNTRY;
-const isHome = Astro.url.pathname === PathBuilder.home(locale) || Astro.url.pathname === `/${locale}`;
+const navCountry = getActiveCountries().some((c) => c.code === urlCountry)
+  ? urlCountry!
+  : DEFAULT_COUNTRY;
+const isHome =
+  Astro.url.pathname === PathBuilder.home(locale) ||
+  Astro.url.pathname === `/${locale}`;
 const casesHref = PathBuilder.casesVehicleSourcing(locale);
 const casesActive = Astro.url.pathname.includes('/cases/');
 
@@ -42,19 +63,28 @@ const SERVICE_ICONS: Record<ServiceSlug, typeof Search> = {
 
 // Computed once and shared by HeaderDesktopNav (which further splits it into
 // primary/"more services") and HeaderMobileMenu (which shows it as-is).
-const navItems = getNavItems(locale, navCountry).map(item => ({
+const navItems = getNavItems(locale, navCountry).map((item) => ({
   ...item,
   Icon: SERVICE_ICONS[item.slug as ServiceSlug],
   active: isNavItemActive(item, locale, navCountry, Astro.url.pathname),
 }));
 ---
 
-<header class="sticky top-0 z-50 border-b bg-header-glass border-default backdrop-blur-[16px]">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 xl:gap-4">
-
+<header
+  class="sticky top-0 z-50 border-b bg-header-glass border-default backdrop-blur-[16px]"
+>
+  <div
+    class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 xl:gap-4"
+  >
     <SiteLogo />
 
-    <HeaderDesktopNav navItems={navItems} moreLabel={t.nav.moreServices} casesHref={casesHref} casesLabel={t.nav.cases} casesActive={casesActive} />
+    <HeaderDesktopNav
+      navItems={navItems}
+      moreLabel={t.nav.moreServices}
+      casesHref={casesHref}
+      casesLabel={t.nav.cases}
+      casesActive={casesActive}
+    />
 
     <div class="flex items-center gap-1.5 shrink-0">
       <!-- Language switcher: desktop only, grouped with theme toggle (both are
@@ -77,7 +107,11 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
       </button>
 
       <!-- CTA: always visible -->
-      <Button type="button" {...{ [DATA_OPEN_LEAD_MODAL]: true }} class="px-3 xl:px-4 py-2">
+      <Button
+        type="button"
+        {...{ [DATA_OPEN_LEAD_MODAL]: true }}
+        class="px-3 xl:px-4 py-2"
+      >
         <Send size={13} />
         <span class="xl:hidden">{t.header.ctaShort}</span>
         <span class="hidden xl:inline">{t.header.ctaLong}</span>
@@ -90,19 +124,35 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
         aria-label={t.header.menuLabel}
         aria-expanded={isHome ? 'true' : 'false'}
       >
-        <span id="burger-open" class:list={{ hidden: isHome }}><Menu size={18} /></span>
-        <span id="burger-close" class:list={{ hidden: !isHome }}><X size={18} /></span>
+        <span id="burger-open" class:list={{ hidden: isHome }}
+          ><Menu size={18} /></span
+        >
+        <span id="burger-close" class:list={{ hidden: !isHome }}
+          ><X size={18} /></span
+        >
       </button>
     </div>
   </div>
 
-  <HeaderMobileMenu navItems={navItems} casesHref={casesHref} casesLabel={t.nav.cases} languageLabel={t.header.languageLabel} themeToggleLabel={t.header.themeToggleMobileLabel} isHome={isHome} />
+  <HeaderMobileMenu
+    navItems={navItems}
+    casesHref={casesHref}
+    casesLabel={t.nav.cases}
+    languageLabel={t.header.languageLabel}
+    themeToggleLabel={t.header.themeToggleMobileLabel}
+    isHome={isHome}
+  />
 
   <LeadFormModal id="lead-modal" triggerAttr={DATA_OPEN_LEAD_MODAL} />
 </header>
 
 <style>
-  .theme-btn { transition: border-color 0.2s, color 0.2s, background-color 0.2s; }
+  .theme-btn {
+    transition:
+      border-color 0.2s,
+      color 0.2s,
+      background-color 0.2s;
+  }
   .theme-btn:hover {
     border-color: var(--color-accent) !important;
     color: var(--color-accent) !important;
@@ -111,9 +161,14 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
 
 <script is:inline define:vars={{ DATA_OPEN_LEAD_MODAL }}>
   function updateThemeIcons() {
-    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    document.querySelectorAll('.theme-icon-sun').forEach(function (el) { el.classList.toggle('hidden', !isDark); });
-    document.querySelectorAll('.theme-icon-moon').forEach(function (el) { el.classList.toggle('hidden', isDark); });
+    const isDark =
+      document.documentElement.getAttribute('data-theme') === 'dark';
+    document.querySelectorAll('.theme-icon-sun').forEach(function (el) {
+      el.classList.toggle('hidden', !isDark);
+    });
+    document.querySelectorAll('.theme-icon-moon').forEach(function (el) {
+      el.classList.toggle('hidden', isDark);
+    });
   }
 
   function initHeader() {
@@ -132,23 +187,28 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
     updateThemeIcons();
     document.querySelectorAll('.theme-toggle-btn').forEach(function (toggle) {
       toggle.addEventListener('click', function () {
-        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const isDark =
+          document.documentElement.getAttribute('data-theme') === 'dark';
         if (isDark) {
           document.documentElement.removeAttribute('data-theme');
-          try { localStorage.setItem('theme', 'light'); } catch (e) {}
+          try {
+            localStorage.setItem('theme', 'light');
+          } catch (e) {}
         } else {
           document.documentElement.setAttribute('data-theme', 'dark');
-          try { localStorage.setItem('theme', 'dark'); } catch (e) {}
+          try {
+            localStorage.setItem('theme', 'dark');
+          } catch (e) {}
         }
         updateThemeIcons();
       });
     });
 
     /* ── Mobile burger — toggles HeaderMobileMenu's #mobile-menu panel ── */
-    var burger = document.getElementById('burger');
-    var menu   = document.getElementById('mobile-menu');
-    var open   = document.getElementById('burger-open');
-    var close  = document.getElementById('burger-close');
+    const burger = document.getElementById('burger');
+    const menu = document.getElementById('mobile-menu');
+    const open = document.getElementById('burger-open');
+    const close = document.getElementById('burger-close');
 
     // The menu's own grid-rows open animation (750ms, see HeaderMobileMenu's
     // <style>) nudges the browser's scroll-anchoring by a few px with no real
@@ -164,7 +224,7 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
       menu.removeAttribute('aria-hidden');
       menu.inert = false;
       burger.setAttribute('aria-expanded', 'true');
-      open  && open.classList.add('hidden');
+      open && open.classList.add('hidden');
       close && close.classList.remove('hidden');
     }
 
@@ -175,39 +235,50 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
       menu.setAttribute('aria-hidden', 'true');
       menu.inert = true;
       burger.setAttribute('aria-expanded', 'false');
-      open  && open.classList.remove('hidden');
+      open && open.classList.remove('hidden');
       close && close.classList.add('hidden');
       if (instant) {
         // Force the closed state to paint before re-enabling the
         // transition, so it doesn't animate a state that was never visible.
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions -- reading offsetHeight forces a reflow
         menu.offsetHeight;
-        requestAnimationFrame(function () { menu.classList.remove('no-anim'); });
+        requestAnimationFrame(function () {
+          menu.classList.remove('no-anim');
+        });
       }
     }
 
     if (burger && menu) {
       burger.addEventListener('click', function () {
-        burger.getAttribute('aria-expanded') === 'true' ? closeMenu() : openMenu();
+        burger.getAttribute('aria-expanded') === 'true'
+          ? closeMenu()
+          : openMenu();
       });
       menu.querySelectorAll('a').forEach(function (a) {
-        a.addEventListener('click', function () { closeMenu(); });
+        a.addEventListener('click', function () {
+          closeMenu();
+        });
       });
 
       // Close the mobile menu when the "Оставить заявку" button opens the
       // lead modal (LeadFormModal.astro owns the modal itself, this just
       // keeps the burger menu from staying open behind it).
-      document.querySelectorAll('[' + DATA_OPEN_LEAD_MODAL + ']').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          if (burger.getAttribute('aria-expanded') === 'true') closeMenu();
+      document
+        .querySelectorAll('[' + DATA_OPEN_LEAD_MODAL + ']')
+        .forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            if (burger.getAttribute('aria-expanded') === 'true') closeMenu();
+          });
         });
-      });
 
       // Reset menu state if the viewport grows into desktop, so it doesn't
       // reappear pre-opened if the user shrinks back to mobile later.
       try {
-        window.matchMedia('(min-width: 1280px)').addEventListener('change', function (e) {
-          if (e.matches) closeMenu();
-        });
+        window
+          .matchMedia('(min-width: 1280px)')
+          .addEventListener('change', function (e) {
+            if (e.matches) closeMenu();
+          });
       } catch (e) {}
 
       // Header is sticky, so a menu left open pins to the top and eats the
@@ -223,11 +294,15 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
       // the menu while already scrolled past the threshold made this
       // handler close it again almost immediately, so the menu looked
       // impossible to open once scrolled down.
-      window.addEventListener('scroll', function () {
-        if (Date.now() < ignoreScrollCloseUntil) return;
-        if (window.scrollY <= 60) return;
-        if (burger.getAttribute('aria-expanded') === 'true') closeMenu();
-      }, { passive: true });
+      window.addEventListener(
+        'scroll',
+        function () {
+          if (Date.now() < ignoreScrollCloseUntil) return;
+          if (window.scrollY <= 60) return;
+          if (burger.getAttribute('aria-expanded') === 'true') closeMenu();
+        },
+        { passive: true },
+      );
 
       // Browsers restore the previous scroll position on reload — if that
       // lands us already past the threshold, the menu (pre-opened by SSR)
@@ -237,7 +312,11 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
       // scroll position, so the check may fire too soon and miss — a
       // same-frame backstop catches that case too.
       function correctForRestoredScroll() {
-        if (window.scrollY > 60 && burger.getAttribute('aria-expanded') === 'true') closeMenu(true);
+        if (
+          window.scrollY > 60 &&
+          burger.getAttribute('aria-expanded') === 'true'
+        )
+          closeMenu(true);
       }
       correctForRestoredScroll();
       requestAnimationFrame(correctForRestoredScroll);
@@ -245,12 +324,15 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
 
     // Follow OS theme changes live, but only while the user hasn't picked one explicitly.
     try {
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
-        if (localStorage.getItem('theme')) return;
-        if (e.matches) document.documentElement.setAttribute('data-theme', 'dark');
-        else document.documentElement.removeAttribute('data-theme');
-        updateThemeIcons();
-      });
+      window
+        .matchMedia('(prefers-color-scheme: dark)')
+        .addEventListener('change', function (e) {
+          if (localStorage.getItem('theme')) return;
+          if (e.matches)
+            document.documentElement.setAttribute('data-theme', 'dark');
+          else document.documentElement.removeAttribute('data-theme');
+          updateThemeIcons();
+        });
     } catch (e) {}
   }
 

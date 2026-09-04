@@ -4,8 +4,13 @@ import { getCollection } from 'astro:content';
 import { withLocales } from '@/utils/paths';
 
 export async function getStaticPaths() {
-  const cases = await getCollection('autoserviceCases', c => c.data.published);
-  return withLocales(cases.map(c => ({ params: { slug: c.id }, props: { case: c } })));
+  const cases = await getCollection(
+    'autoserviceCases',
+    (c) => c.data.published,
+  );
+  return withLocales(
+    cases.map((c) => ({ params: { slug: c.id }, props: { case: c } })),
+  );
 }
 
 const { case: c } = Astro.props;

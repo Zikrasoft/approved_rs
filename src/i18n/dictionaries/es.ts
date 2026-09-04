@@ -24,7 +24,8 @@ export const es: Dictionary = {
     servicesHeading: 'Servicios',
     companyHeading: 'Empresa',
     privacyLabel: 'Privacidad',
-    tagline: 'Buscamos, inspeccionamos y entregamos tu auto desde Europa. Nos encargamos de todo el proceso, desde la búsqueda hasta la entrega.',
+    tagline:
+      'Buscamos, inspeccionamos y entregamos tu auto desde Europa. Nos encargamos de todo el proceso, desde la búsqueda hasta la entrega.',
     contactManagerLabel: 'Escribir a un asesor',
     hoursLine: 'Disponibles 24/7, todos los días',
     copyrightSuffix: 'Búsqueda, mantenimiento y entrega de autos desde Europa',
@@ -41,7 +42,8 @@ export const es: Dictionary = {
     closeLabel: 'Cerrar',
     channelLabel: 'Nuestro canal',
     cookie: {
-      notice: 'Usamos cookies analíticas (Google Analytics) para entender cómo los visitantes usan el sitio.',
+      notice:
+        'Usamos cookies analíticas (Google Analytics) para entender cómo los visitantes usan el sitio.',
       more: 'Más información en nuestra',
       policyLink: 'política de privacidad',
       accept: 'Aceptar',
@@ -52,7 +54,8 @@ export const es: Dictionary = {
       prev: 'Foto anterior',
       next: 'Foto siguiente',
       altTemplate: (name: string, i: number) => `${name}, foto ${i + 1}`,
-      openAriaTemplate: (i: number, total: number) => `Abrir foto ${i + 1} de ${total}`,
+      openAriaTemplate: (i: number, total: number) =>
+        `Abrir foto ${i + 1} de ${total}`,
       showMoreTemplate: (n: number) => `Ver más (${n})`,
     },
   },

@@ -24,7 +24,8 @@ export const de: Dictionary = {
     servicesHeading: 'Leistungen',
     companyHeading: 'Unternehmen',
     privacyLabel: 'Datenschutz',
-    tagline: 'Wir suchen, prüfen und liefern Ihr Auto aus Europa. Wir übernehmen den gesamten Prozess — von der Suche bis zur Lieferung.',
+    tagline:
+      'Wir suchen, prüfen und liefern Ihr Auto aus Europa. Wir übernehmen den gesamten Prozess — von der Suche bis zur Lieferung.',
     contactManagerLabel: 'Berater kontaktieren',
     hoursLine: 'Rund um die Uhr, ohne Ruhetage',
     copyrightSuffix: 'Fahrzeugbeschaffung, Service und Lieferung aus Europa',
@@ -41,7 +42,8 @@ export const de: Dictionary = {
     closeLabel: 'Schließen',
     channelLabel: 'Unser Kanal',
     cookie: {
-      notice: 'Wir verwenden Analyse-Cookies (Google Analytics), um zu verstehen, wie Besucher die Website nutzen.',
+      notice:
+        'Wir verwenden Analyse-Cookies (Google Analytics), um zu verstehen, wie Besucher die Website nutzen.',
       more: 'Mehr dazu in unserer',
       policyLink: 'Datenschutzerklärung',
       accept: 'Akzeptieren',
@@ -52,7 +54,8 @@ export const de: Dictionary = {
       prev: 'Vorheriges Foto',
       next: 'Nächstes Foto',
       altTemplate: (name: string, i: number) => `${name}, Foto ${i + 1}`,
-      openAriaTemplate: (i: number, total: number) => `Foto ${i + 1} von ${total} öffnen`,
+      openAriaTemplate: (i: number, total: number) =>
+        `Foto ${i + 1} von ${total} öffnen`,
       showMoreTemplate: (n: number) => `Mehr anzeigen (${n})`,
     },
   },

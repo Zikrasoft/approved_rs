@@ -18,7 +18,9 @@ describe('secretMatches', () => {
   });
 
   it('rejects a longer received value', () => {
-    expect(secretMatches('correct-secret-and-then-some', 'correct-secret')).toBe(false);
+    expect(
+      secretMatches('correct-secret-and-then-some', 'correct-secret'),
+    ).toBe(false);
   });
 
   it('rejects when received is a prefix of expected', () => {

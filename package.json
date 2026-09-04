@@ -9,7 +9,20 @@
     "preview": "astro preview",
     "astro": "astro",
     "test": "vitest run --passWithNoTests",
-    "gen:og": "node scripts/gen-og.mjs"
+    "gen:og": "node scripts/gen-og.mjs",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,mjs,ts,tsx,astro}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@astrojs/react": "6.0.5",
@@ -34,10 +47,22 @@
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
+    "@eslint/js": "10.0.1",
     "@tailwindcss/vite": "4.3.3",
+    "astro-eslint-parser": "3.1.0",
+    "eslint": "10.9.1",
+    "eslint-config-flat-gitignore": "2.4.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-astro": "3.1.0",
+    "globals": "17.12.0",
+    "husky": "9.1.7",
+    "lint-staged": "17.4.1",
+    "prettier": "3.9.6",
+    "prettier-plugin-astro": "0.14.1",
     "sharp": "0.35.4",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
+    "typescript-eslint": "8.69.0",
     "vitest": "3.2.6",
     "yaml": "2.9.0"
   },

@@ -126,6 +126,7 @@ date: 2026-05-05
 published: true
 translatedFrom: 62404b84407bec57
 ---
+
 ## Mercedes-Benz C-Class — обслуживание в нашем сервисе в Белграде
 
 В нашем автосервисе в Белграде провели комплексное техническое обслуживание **Mercedes-Benz C-Class W205**.

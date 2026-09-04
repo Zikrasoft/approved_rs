@@ -10,7 +10,11 @@ import type { MetaProps } from '@/utils/seo';
 import type { CollectionEntry } from 'astro:content';
 import { SITE_NAME } from '@/utils/constants';
 import { getActiveCountries } from '@/utils/geo';
-import { SERVICES, isCountryScopedServiceSlug, type ServiceSlug } from '@/utils/labels';
+import {
+  SERVICES,
+  isCountryScopedServiceSlug,
+  type ServiceSlug,
+} from '@/utils/labels';
 import { toCaseItem } from '@/utils/cases';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
@@ -49,40 +53,81 @@ interface Props {
 }
 
 const {
-  meta, schema, title, titleHighlight, description, ctaLabel,
-  formService, currentCountry, leadCountry = currentCountry, currentService,
-  cases = [], casesHeading, city,
+  meta,
+  schema,
+  title,
+  titleHighlight,
+  description,
+  ctaLabel,
+  formService,
+  currentCountry,
+  leadCountry = currentCountry,
+  currentService,
+  cases = [],
+  casesHeading,
+  city,
   showCountryCrossLinks = true,
   breadcrumbs,
-  commentLabel, commentPlaceholder,
+  commentLabel,
+  commentPlaceholder,
 } = Astro.props;
 
 const locale = getLocale(Astro.currentLocale);
-const items = cases.map(c => toCaseItem(c, locale));
+const items = cases.map((c) => toCaseItem(c, locale));
 const t = getI18n(locale);
 ---
 
 <BaseLayout {...meta} schema={schema}>
-
   <section class="hero-grid relative border-b overflow-hidden border-default">
-    <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 50% 60% at 0% 50%, var(--color-ambient-glow) 0%, transparent 60%), radial-gradient(ellipse 40% 50% at 100% 0%, var(--color-accent-subtle) 0%, transparent 55%);"></div>
-    <span class="deco-word" style="font-size: clamp(7rem, 18vw, 16rem); bottom: -1rem; right: -1%; opacity: 0.8;">{leadCountry.toUpperCase()}</span>
+    <div
+      class="absolute inset-0 pointer-events-none"
+      style="background: radial-gradient(ellipse 50% 60% at 0% 50%, var(--color-ambient-glow) 0%, transparent 60%), radial-gradient(ellipse 40% 50% at 100% 0%, var(--color-accent-subtle) 0%, transparent 55%);"
+    >
+    </div>
+    <span
+      class="deco-word"
+      style="font-size: clamp(7rem, 18vw, 16rem); bottom: -1rem; right: -1%; opacity: 0.8;"
+      >{leadCountry.toUpperCase()}</span
+    >
 
     <div class="relative max-w-6xl mx-auto px-6 py-16 md:py-24">
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-start">
         <div class="lg:col-span-3">
           {breadcrumbs && <Breadcrumbs items={breadcrumbs} />}
           <span class="eyebrow fade-up fade-up-1">{SITE_NAME}</span>
-          <h1 class="font-display font-bold mb-5 leading-none fade-up fade-up-2 tracking-[-0.03em] text-primary"
-            style="font-size: clamp(3rem, 6.5vw, 5.2rem); font-weight: 800;">
-            {title}{titleHighlight && <><br /><em class="text-accent italic">{titleHighlight}</em></>}
+          <h1
+            class="font-display font-bold mb-5 leading-none fade-up fade-up-2 tracking-[-0.03em] text-primary"
+            style="font-size: clamp(3rem, 6.5vw, 5.2rem); font-weight: 800;"
+          >
+            {title}{
+              titleHighlight && (
+                <>
+                  <>
+                    <br />
+                    <em class="text-accent italic">{titleHighlight}</em>
+                  </>
+                </>
+              )
+            }
           </h1>
-          <p class="text-base max-w-lg mb-2 leading-relaxed fade-up fade-up-3 text-muted">{description}</p>
-          <div class="fade-up fade-up-4"><ContactCTA label={ctaLabel} openModal compact /></div>
+          <p
+            class="text-base max-w-lg mb-2 leading-relaxed fade-up fade-up-3 text-muted"
+          >
+            {description}
+          </p>
+          <div class="fade-up fade-up-4">
+            <ContactCTA label={ctaLabel} openModal compact />
+          </div>
           <div class="fade-up fade-up-5 pt-2"><slot /></div>
         </div>
         <div class="lg:col-span-2 fade-up fade-up-3">
-          <LeadForm service={formService} country={leadCountry} city={city} {commentLabel} {commentPlaceholder} />
+          <LeadForm
+            service={formService}
+            country={leadCountry}
+            city={city}
+            {commentLabel}
+            {commentPlaceholder}
+          />
         </div>
       </div>
     </div>
@@ -90,15 +135,38 @@ const t = getI18n(locale);
 
   <slot name="extra" />
 
-  <LeadFormModal id="page-lead-modal" triggerAttr={DATA_OPEN_PAGE_LEAD_MODAL} service={formService} country={leadCountry} city={city} {commentLabel} {commentPlaceholder} />
+  <LeadFormModal
+    id="page-lead-modal"
+    triggerAttr={DATA_OPEN_PAGE_LEAD_MODAL}
+    service={formService}
+    country={leadCountry}
+    city={city}
+    {commentLabel}
+    {commentPlaceholder}
+  />
 
   <slot name="cases"><CasesGrid {items} heading={casesHeading ?? ''} /></slot>
 
   <div class="max-w-6xl mx-auto px-6 pb-16 pt-4">
-    {showCountryCrossLinks && isCountryScopedServiceSlug(currentService) && (
-      <ChipLinks label={t.common.alsoWorkingInLabel} items={getActiveCountries().filter(c => c.code !== currentCountry).map(c => ({ href: PathBuilder.service(locale, currentService, c.code), text: c[locale].name }))} />
-    )}
-    <ChipLinks label={t.common.otherServicesLabel} items={SERVICES.filter(s => s.slug !== currentService).map(s => ({ href: PathBuilder.service(locale, s.slug, currentCountry), text: t.nav[s.slug] }))} />
+    {
+      showCountryCrossLinks && isCountryScopedServiceSlug(currentService) && (
+        <ChipLinks
+          label={t.common.alsoWorkingInLabel}
+          items={getActiveCountries()
+            .filter((c) => c.code !== currentCountry)
+            .map((c) => ({
+              href: PathBuilder.service(locale, currentService, c.code),
+              text: c[locale].name,
+            }))}
+        />
+      )
+    }
+    <ChipLinks
+      label={t.common.otherServicesLabel}
+      items={SERVICES.filter((s) => s.slug !== currentService).map((s) => ({
+        href: PathBuilder.service(locale, s.slug, currentCountry),
+        text: t.nav[s.slug],
+      }))}
+    />
   </div>
-
 </BaseLayout>

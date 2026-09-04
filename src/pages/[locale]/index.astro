@@ -2,514 +2,546 @@
 // No getStaticPaths — resolved per-request so it can read
 // Astro.locals.suggestedCountry (set by middleware) for the geo banner.
 export const prerender = false;
-import BaseLayout from "@/layouts/BaseLayout.astro";
-import GeoBanner from "@/components/GeoBanner.astro";
-import ContactCTA from "@/components/ContactCTA.astro";
-import CasesGrid from "@/components/CasesGrid.astro";
-import SectionHeading from "@/components/SectionHeading.astro";
-import CountryPill from "@/components/CountryPill.astro";
-import LeadForm from "@/components/LeadForm.astro";
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import GeoBanner from '@/components/GeoBanner.astro';
+import ContactCTA from '@/components/ContactCTA.astro';
+import CasesGrid from '@/components/CasesGrid.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import CountryPill from '@/components/CountryPill.astro';
+import LeadForm from '@/components/LeadForm.astro';
 import {
-    Search,
-    Globe,
-    Wrench,
-    Banknote,
-    ClipboardCheck,
-    Eye,
-    Shield,
-    MapPin,
-} from "@lucide/astro";
-import { getCollection } from "astro:content";
-import { getActiveCountries } from "@/utils/geo";
-import { SITE_URL, SITE_NAME, TG_MANAGER, THREADS_CHANNEL, CHINA_NAME } from "@/utils/constants";
-import { generateOrganizationSchema } from "@/utils/seo";
-import { telegramLink } from "@/utils/telegramLink";
-import StatBlock from "@/components/StatBlock.astro";
-import { toCaseItem } from "@/utils/cases";
-import { getHomeContent } from "@/i18n/content/home";
-import { PathBuilder } from "@/utils/paths";
-import { getLocale } from "@/i18n/config";
+  Search,
+  Globe,
+  Wrench,
+  Banknote,
+  ClipboardCheck,
+  Eye,
+  Shield,
+  MapPin,
+} from '@lucide/astro';
+import { getCollection } from 'astro:content';
+import { getActiveCountries } from '@/utils/geo';
+import {
+  SITE_URL,
+  SITE_NAME,
+  TG_MANAGER,
+  THREADS_CHANNEL,
+  CHINA_NAME,
+} from '@/utils/constants';
+import { generateOrganizationSchema } from '@/utils/seo';
+import { telegramLink } from '@/utils/telegramLink';
+import StatBlock from '@/components/StatBlock.astro';
+import { toCaseItem } from '@/utils/cases';
+import { getHomeContent } from '@/i18n/content/home';
+import { PathBuilder } from '@/utils/paths';
+import { getLocale } from '@/i18n/config';
 
 const locale = getLocale(Astro.params.locale);
 const h = getHomeContent(locale);
 const meta = {
-    title: `${h.metaTitle} | ${SITE_NAME}`,
-    description: h.metaDescription,
-    canonical: `${SITE_URL}${PathBuilder.home(locale)}`,
+  title: `${h.metaTitle} | ${SITE_NAME}`,
+  description: h.metaDescription,
+  canonical: `${SITE_URL}${PathBuilder.home(locale)}`,
 };
 
-const allCases = await getCollection("cases");
+const allCases = await getCollection('cases');
 const latestCases = allCases.filter((c) => c.data.published).slice(0, 3);
 const items = latestCases.map((c) => toCaseItem(c, locale));
 const countries = getActiveCountries();
 
 const schema = generateOrganizationSchema({
-    url: SITE_URL,
-    description: meta.description,
-    // Autopodbor's own markets plus China — vehicle-import sources cars from there
-    // too, even though it's not a countries.json market in its own right.
-    areaServed: [...countries.map((c) => c[locale].name), CHINA_NAME[locale]],
-    sameAs: [`https://t.me/${TG_MANAGER}`, `https://www.threads.com/@${THREADS_CHANNEL}`],
-    contactUrl: telegramLink(TG_MANAGER),
+  url: SITE_URL,
+  description: meta.description,
+  // Autopodbor's own markets plus China — vehicle-import sources cars from there
+  // too, even though it's not a countries.json market in its own right.
+  areaServed: [...countries.map((c) => c[locale].name), CHINA_NAME[locale]],
+  sameAs: [
+    `https://t.me/${TG_MANAGER}`,
+    `https://www.threads.com/@${THREADS_CHANNEL}`,
+  ],
+  contactUrl: telegramLink(TG_MANAGER),
 });
 
 // One connected story instead of a flat service list — each stop is a real
 // page, but the copy makes clear this is one journey (and where you can
 // jump in if you're not starting from zero).
 const journey = [
-    {
-        href: PathBuilder.service(locale, 'vehicle-sourcing', 'de'),
-        Icon: Search,
-        title: h.journey[0].title,
-        desc: h.journey[0].desc,
-    },
-    {
-        href: PathBuilder.vehicleImportHub(locale),
-        Icon: Globe,
-        title: h.journey[1].title,
-        desc: h.journey[1].desc,
-    },
-    {
-        href: PathBuilder.service(locale, 'vehicle-inspection', 'de'),
-        Icon: ClipboardCheck,
-        title: h.journey[2].title,
-        desc: h.journey[2].desc,
-        note: h.journey[2].note,
-    },
-    {
-        href: PathBuilder.service(locale, 'vehicle-buyback', 'de'),
-        Icon: Banknote,
-        title: h.journey[3].title,
-        desc: h.journey[3].desc,
-        note: h.journey[3].note,
-    },
-    {
-        href: PathBuilder.autoServiceBelgrade(locale),
-        Icon: Wrench,
-        title: h.journey[4].title,
-        desc: h.journey[4].desc,
-        note: h.journey[4].note,
-    },
+  {
+    href: PathBuilder.service(locale, 'vehicle-sourcing', 'de'),
+    Icon: Search,
+    title: h.journey[0].title,
+    desc: h.journey[0].desc,
+  },
+  {
+    href: PathBuilder.vehicleImportHub(locale),
+    Icon: Globe,
+    title: h.journey[1].title,
+    desc: h.journey[1].desc,
+  },
+  {
+    href: PathBuilder.service(locale, 'vehicle-inspection', 'de'),
+    Icon: ClipboardCheck,
+    title: h.journey[2].title,
+    desc: h.journey[2].desc,
+    note: h.journey[2].note,
+  },
+  {
+    href: PathBuilder.service(locale, 'vehicle-buyback', 'de'),
+    Icon: Banknote,
+    title: h.journey[3].title,
+    desc: h.journey[3].desc,
+    note: h.journey[3].note,
+  },
+  {
+    href: PathBuilder.autoServiceBelgrade(locale),
+    Icon: Wrench,
+    title: h.journey[4].title,
+    desc: h.journey[4].desc,
+    note: h.journey[4].note,
+  },
 ];
 ---
 
 <BaseLayout {...meta} schema={schema}>
-    {
-        Astro.locals.suggestedCountry && (
-            <GeoBanner detected={Astro.locals.suggestedCountry} />
-        )
-    }
+  {
+    Astro.locals.suggestedCountry && (
+      <GeoBanner detected={Astro.locals.suggestedCountry} />
+    )
+  }
 
-    <!-- ─── Hero ──────────────────────────────────────────── -->
-    <section class="hero-grid relative border-b overflow-hidden border-default">
-        <div
-            class="absolute inset-0 pointer-events-none"
-            style="background: radial-gradient(ellipse 55% 60% at 10% 55%, var(--color-ambient-glow) 0%, transparent 65%), radial-gradient(ellipse 45% 40% at 90% 15%, var(--color-accent-subtle) 0%, transparent 60%);"
-        >
+  <!-- ─── Hero ──────────────────────────────────────────── -->
+  <section class="hero-grid relative border-b overflow-hidden border-default">
+    <div
+      class="absolute inset-0 pointer-events-none"
+      style="background: radial-gradient(ellipse 55% 60% at 10% 55%, var(--color-ambient-glow) 0%, transparent 65%), radial-gradient(ellipse 45% 40% at 90% 15%, var(--color-accent-subtle) 0%, transparent 60%);"
+    >
+    </div>
+
+    <div class="relative max-w-6xl mx-auto px-6 py-20 md:py-28">
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
+        <div class="lg:col-span-3">
+          <span class="eyebrow fade-up fade-up-1">{h.heroEyebrow}</span>
+          <h1
+            class="hero-headline font-display font-bold leading-none mb-8 fade-up fade-up-2 text-primary tracking-[-0.03em]"
+          >
+            {h.heroLine1}<br />
+            {h.heroLine2}<br />
+            <span class="stamp-row inline-flex items-center gap-3 flex-wrap">
+              <em class="text-accent italic">{h.heroLine3}</em>
+              <svg
+                class="stamp-svg shrink-0"
+                viewBox="0 0 200 200"
+                aria-hidden="true"
+              >
+                <defs>
+                  <path
+                    id="stampArc"
+                    d="M 100,100 m -80,0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0"
+                  ></path>
+                </defs>
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="94"
+                  fill="none"
+                  stroke="var(--color-stamp-ink)"
+                  stroke-width="2.5"></circle>
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="82"
+                  fill="none"
+                  stroke="var(--color-stamp-ink)"
+                  stroke-width="1.5"
+                  stroke-dasharray="2 4"></circle>
+                <text
+                  font-family="var(--font-sans)"
+                  font-size="10"
+                  letter-spacing="2"
+                  fill="var(--color-stamp-ink)"
+                >
+                  <textPath href="#stampArc" startOffset="2%"
+                    >{h.stampText}</textPath
+                  >
+                </text>
+                <path
+                  d="M70,102 l20,20 l40,-45"
+                  fill="none"
+                  stroke="var(--color-stamp-ink)"
+                  stroke-width="9"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"></path>
+              </svg>
+            </span>
+          </h1>
+          <p
+            class="text-base leading-relaxed mb-10 max-w-md fade-up fade-up-3 text-muted"
+          >
+            {h.heroSubtext}
+          </p>
+          <div class="fade-up fade-up-4">
+            <ContactCTA compact />
+          </div>
+          <div
+            class="grid grid-cols-3 gap-3 sm:gap-6 mt-8 pt-8 border-t fade-up fade-up-5 border-default"
+          >
+            <StatBlock
+              value={h.statClients.value}
+              label={h.statClients.label}
+            />
+            <StatBlock
+              value={String(countries.length)}
+              label={h.statCountries.label}
+            />
+            <StatBlock value={h.statYears.value} label={h.statYears.label} />
+          </div>
         </div>
 
-        <div class="relative max-w-6xl mx-auto px-6 py-20 md:py-28">
-            <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
-                <div class="lg:col-span-3">
-                    <span class="eyebrow fade-up fade-up-1"
-                        >{h.heroEyebrow}</span
-                    >
-                    <h1
-                        class="hero-headline font-display font-bold leading-none mb-8 fade-up fade-up-2 text-primary tracking-[-0.03em]"
-                    >
-                        {h.heroLine1}<br />
-                        {h.heroLine2}<br />
-                        <span class="stamp-row inline-flex items-center gap-3 flex-wrap">
-                            <em class="text-accent italic">{h.heroLine3}</em>
-                            <svg
-                                class="stamp-svg shrink-0"
-                                viewBox="0 0 200 200"
-                                aria-hidden="true"
-                            >
-                                <defs>
-                                    <path
-                                        id="stampArc"
-                                        d="M 100,100 m -80,0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0"
-                                    ></path>
-                                </defs>
-                                <circle cx="100" cy="100" r="94" fill="none" stroke="var(--color-stamp-ink)" stroke-width="2.5"></circle>
-                                <circle cx="100" cy="100" r="82" fill="none" stroke="var(--color-stamp-ink)" stroke-width="1.5" stroke-dasharray="2 4"></circle>
-                                <text font-family="var(--font-sans)" font-size="10" letter-spacing="2" fill="var(--color-stamp-ink)">
-                                    <textPath href="#stampArc" startOffset="2%">{h.stampText}</textPath>
-                                </text>
-                                <path
-                                    d="M70,102 l20,20 l40,-45"
-                                    fill="none"
-                                    stroke="var(--color-stamp-ink)"
-                                    stroke-width="9"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                ></path>
-                            </svg>
-                        </span>
-                    </h1>
-                    <p
-                        class="text-base leading-relaxed mb-10 max-w-md fade-up fade-up-3 text-muted"
-                    >
-                        {h.heroSubtext}
-                    </p>
-                    <div class="fade-up fade-up-4">
-                        <ContactCTA compact />
-                    </div>
-                    <div
-                        class="grid grid-cols-3 gap-3 sm:gap-6 mt-8 pt-8 border-t fade-up fade-up-5 border-default"
-                    >
-                        <StatBlock value={h.statClients.value} label={h.statClients.label} />
-                        <StatBlock value={String(countries.length)} label={h.statCountries.label} />
-                        <StatBlock value={h.statYears.value} label={h.statYears.label} />
-                    </div>
-                </div>
-
-                <div class="hidden lg:block lg:col-span-2 fade-up fade-up-3">
-                    <LeadForm />
-                </div>
-            </div>
+        <div class="hidden lg:block lg:col-span-2 fade-up fade-up-3">
+          <LeadForm />
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <!-- ─── Journey (services + process, as one story) ─────── -->
-    <section class="border-b border-default">
-        <div class="max-w-6xl mx-auto px-6 py-20">
-            <div class="mb-4">
-                <SectionHeading title={h.journeyHeading} />
-            </div>
-            <p class="text-base max-w-xl mb-14 leading-relaxed text-muted">
-                {h.journeySubtext}
-            </p>
+  <!-- ─── Journey (services + process, as one story) ─────── -->
+  <section class="border-b border-default">
+    <div class="max-w-6xl mx-auto px-6 py-20">
+      <div class="mb-4">
+        <SectionHeading title={h.journeyHeading} />
+      </div>
+      <p class="text-base max-w-xl mb-14 leading-relaxed text-muted">
+        {h.journeySubtext}
+      </p>
 
-            <div
-                class="journey-strip grid grid-cols-1 lg:grid-cols-5 divide-y lg:divide-y-0 lg:divide-x divide-border rounded-sm border border-default bg-surface overflow-hidden anim-inline"
-                style="--anim-delay: 0.1s"
-            >
-                {
-                    journey.map((step, i) => {
-                        const Icon = step.Icon;
-                        const idx = String(i + 1).padStart(2, "0");
-                        return (
-                            <a
-                                href={step.href}
-                                class="journey-stop group flex flex-col no-underline p-7 anim-inline"
-                                style={`--anim-delay: ${0.3 + i * 0.1}s`}
-                            >
-                                <div class="flex items-center gap-3 mb-5">
-                                    <span class="step-circle step-circle-sm">
-                                        {idx}
-                                    </span>
-                                    <span class="flex items-center justify-center w-9 h-9 rounded-sm shrink-0 bg-accent-subtle text-accent">
-                                        <Icon size={16} />
-                                    </span>
-                                </div>
-                                <h3 class="font-display text-xl font-bold mb-2 text-primary">
-                                    {step.title}
-                                </h3>
-                                <p class="text-sm leading-relaxed flex-1 text-muted">
-                                    {step.desc}
-                                </p>
-                                {step.note && (
-                                    <p class="text-xs italic mt-3 text-muted">
-                                        {step.note}
-                                    </p>
-                                )}
-                                <span class="inline-flex items-center gap-1 mt-5 text-xs font-medium text-accent">
-                                    {h.journeyMoreLabel}
-                                    <span class="journey-arrow transition-transform duration-200">
-                                        →
-                                    </span>
-                                </span>
-                            </a>
-                        );
-                    })
-                }
-            </div>
+      <div
+        class="journey-strip grid grid-cols-1 lg:grid-cols-5 divide-y lg:divide-y-0 lg:divide-x divide-border rounded-sm border border-default bg-surface overflow-hidden anim-inline"
+        style="--anim-delay: 0.1s"
+      >
+        {
+          journey.map((step, i) => {
+            const Icon = step.Icon;
+            const idx = String(i + 1).padStart(2, '0');
+            return (
+              <a
+                href={step.href}
+                class="journey-stop group flex flex-col no-underline p-7 anim-inline"
+                style={`--anim-delay: ${0.3 + i * 0.1}s`}
+              >
+                <div class="flex items-center gap-3 mb-5">
+                  <span class="step-circle step-circle-sm">{idx}</span>
+                  <span class="flex items-center justify-center w-9 h-9 rounded-sm shrink-0 bg-accent-subtle text-accent">
+                    <Icon size={16} />
+                  </span>
+                </div>
+                <h3 class="font-display text-xl font-bold mb-2 text-primary">
+                  {step.title}
+                </h3>
+                <p class="text-sm leading-relaxed flex-1 text-muted">
+                  {step.desc}
+                </p>
+                {step.note && (
+                  <p class="text-xs italic mt-3 text-muted">{step.note}</p>
+                )}
+                <span class="inline-flex items-center gap-1 mt-5 text-xs font-medium text-accent">
+                  {h.journeyMoreLabel}
+                  <span class="journey-arrow transition-transform duration-200">
+                    →
+                  </span>
+                </span>
+              </a>
+            );
+          })
+        }
+      </div>
 
-            <!-- Country strip -->
-            <p class="text-xs tracking-widest uppercase mt-14 mb-3 font-medium text-muted">{h.countryStripLabel}</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {countries.map((c) => <CountryPill country={c} locale={locale} />)}
-            </div>
+      <!-- Country strip -->
+      <p
+        class="text-xs tracking-widest uppercase mt-14 mb-3 font-medium text-muted"
+      >
+        {h.countryStripLabel}
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {countries.map((c) => <CountryPill country={c} locale={locale} />)}
+      </div>
 
-            <!-- Mobile-only lead form: desktop keeps it in the hero sidebar,
+      <!-- Mobile-only lead form: desktop keeps it in the hero sidebar,
                  mobile moves it here so the path explains the business
                  before asking for contact details. -->
-            <div class="lg:hidden mt-10">
-                <LeadForm />
-            </div>
-        </div>
-    </section>
+      <div class="lg:hidden mt-10">
+        <LeadForm />
+      </div>
+    </div>
+  </section>
 
-    <!-- ─── Cases ─────────────────────────────────────────── -->
-    <CasesGrid
-        items={items}
-        heading={h.latestCasesHeading}
-        headingSize="xl"
-        viewAllHref={PathBuilder.casesVehicleSourcing(locale)}
-    />
+  <!-- ─── Cases ─────────────────────────────────────────── -->
+  <CasesGrid
+    items={items}
+    heading={h.latestCasesHeading}
+    headingSize="xl"
+    viewAllHref={PathBuilder.casesVehicleSourcing(locale)}
+  />
 
-    <!-- ─── Why us ───────────────────────────────────────── -->
-    <section class="border-b border-default">
-        <div class="max-w-6xl mx-auto px-6 py-20">
-            <div class="mb-14">
-                <SectionHeading title={h.whyUsHeading} />
-                <p class="text-base max-w-md text-muted mt-3 leading-relaxed">
-                    {h.whyUsSubtext}
-                </p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div
-                    class="trust-card glow-border bg-surface border border-default rounded-sm p-8 anim-inline"
-                    style="--anim-delay: 0.08s"
-                >
-                    <div
-                        class="flex items-center justify-center w-11 h-11 rounded-sm mb-6 bg-accent-subtle text-accent"
-                    >
-                        <Eye size={20} />
-                    </div>
-                    <h3
-                        class="font-display text-xl font-bold mb-3 text-primary"
-                    >
-                        {h.trustCards[0].title}
-                    </h3>
-                    <p class="text-sm leading-relaxed text-muted">
-                        {h.trustCards[0].text}
-                    </p>
-                </div>
-
-                <div
-                    class="trust-card glow-border bg-surface border border-default rounded-sm p-8 anim-inline"
-                    style="--anim-delay: 0.16s"
-                >
-                    <div
-                        class="flex items-center justify-center w-11 h-11 rounded-sm mb-6 bg-accent-subtle text-accent"
-                    >
-                        <Shield size={20} />
-                    </div>
-                    <h3
-                        class="font-display text-xl font-bold mb-3 text-primary"
-                    >
-                        {h.trustCards[1].title}
-                    </h3>
-                    <p class="text-sm leading-relaxed text-muted">
-                        {h.trustCards[1].text}
-                    </p>
-                </div>
-
-                <div
-                    class="trust-card glow-border bg-surface border border-default rounded-sm p-8 anim-inline"
-                    style="--anim-delay: 0.24s"
-                >
-                    <div
-                        class="flex items-center justify-center w-11 h-11 rounded-sm mb-6 bg-accent-subtle text-accent"
-                    >
-                        <MapPin size={20} />
-                    </div>
-                    <h3
-                        class="font-display text-xl font-bold mb-3 text-primary"
-                    >
-                        {h.trustCards[2].title}
-                    </h3>
-                    <p class="text-sm leading-relaxed text-muted">
-                        {h.trustCards[2].text}
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ─── Social proof ──────────────────────────────────── -->
-    <section class="border-b border-default">
-        <div class="max-w-6xl mx-auto px-6 py-20">
-            <div class="mb-14">
-                <SectionHeading title={h.testimonialsHeading} />
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <figure
-                    class="review-card glow-border bg-surface border border-default rounded-sm p-7 flex flex-col gap-5 anim-inline"
-                    style="--anim-delay: 0.08s"
-                >
-                    <blockquote
-                        class="text-sm leading-relaxed text-secondary flex-1"
-                    >
-                        {h.testimonials[0].quote}
-                    </blockquote>
-                    <figcaption class="flex items-center gap-3">
-                        <div
-                            class="w-9 h-9 rounded-full bg-accent-subtle flex items-center justify-center text-accent font-display font-bold text-sm"
-                        >
-                            А
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-primary">
-                                {h.testimonials[0].name}
-                            </p>
-                            <p class="text-xs text-muted">
-                                {h.testimonials[0].caption}
-                            </p>
-                        </div>
-                    </figcaption>
-                </figure>
-
-                <figure
-                    class="review-card glow-border bg-surface border border-default rounded-sm p-7 flex flex-col gap-5 anim-inline"
-                    style="--anim-delay: 0.16s"
-                >
-                    <blockquote
-                        class="text-sm leading-relaxed text-secondary flex-1"
-                    >
-                        {h.testimonials[1].quote}
-                    </blockquote>
-                    <figcaption class="flex items-center gap-3">
-                        <div
-                            class="w-9 h-9 rounded-full bg-accent-subtle flex items-center justify-center text-accent font-display font-bold text-sm"
-                        >
-                            М
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-primary">
-                                {h.testimonials[1].name}
-                            </p>
-                            <p class="text-xs text-muted">
-                                {h.testimonials[1].caption}
-                            </p>
-                        </div>
-                    </figcaption>
-                </figure>
-
-                <figure
-                    class="review-card glow-border bg-surface border border-default rounded-sm p-7 flex flex-col gap-5 anim-inline"
-                    style="--anim-delay: 0.24s"
-                >
-                    <blockquote
-                        class="text-sm leading-relaxed text-secondary flex-1"
-                    >
-                        {h.testimonials[2].quote}
-                    </blockquote>
-                    <figcaption class="flex items-center gap-3">
-                        <div
-                            class="w-9 h-9 rounded-full bg-accent-subtle flex items-center justify-center text-accent font-display font-bold text-sm"
-                        >
-                            Д
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-primary">
-                                {h.testimonials[2].name}
-                            </p>
-                            <p class="text-xs text-muted">
-                                {h.testimonials[2].caption}
-                            </p>
-                        </div>
-                    </figcaption>
-                </figure>
-            </div>
-        </div>
-    </section>
-
-    <!-- ─── CTA ───────────────────────────────────────────── -->
-    <section class="max-w-6xl mx-auto px-6 py-20">
+  <!-- ─── Why us ───────────────────────────────────────── -->
+  <section class="border-b border-default">
+    <div class="max-w-6xl mx-auto px-6 py-20">
+      <div class="mb-14">
+        <SectionHeading title={h.whyUsHeading} />
+        <p class="text-base max-w-md text-muted mt-3 leading-relaxed">
+          {h.whyUsSubtext}
+        </p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div
-            class="cta-card relative rounded-sm overflow-hidden bg-surface border border-border-strong"
+          class="trust-card glow-border bg-surface border border-default rounded-sm p-8 anim-inline"
+          style="--anim-delay: 0.08s"
         >
-            <div
-                class="absolute inset-0 pointer-events-none"
-                style="background: radial-gradient(ellipse 80% 120% at -5% 50%, var(--color-accent-soft) 0%, transparent 55%), radial-gradient(ellipse 50% 60% at 100% 100%, var(--color-ambient-glow) 0%, transparent 60%);"
-            >
-            </div>
-            <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-0">
-                <div class="p-10 md:p-16">
-                    <span class="eyebrow">{h.ctaEyebrow}</span>
-                    <h2
-                        class="font-display font-bold mb-4 leading-[1.1] tracking-[-0.025em]"
-                        style="font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 800;"
-                    >
-                        {h.ctaHeading.line1}<br />{h.ctaHeading.line2}<br /><em
-                            class="text-accent italic">{h.ctaHeading.accentWord}</em
-                        >
-                    </h2>
-                    <p class="text-base mb-2 max-w-sm text-muted leading-[1.7]">
-                        {h.ctaSubtext}
-                    </p>
-                    <ContactCTA label={h.ctaTelegramLabel} />
-                </div>
-                <div
-                    class="cta-aside hidden lg:flex items-end justify-end p-10 md:p-16"
-                >
-                    <div class="grid grid-cols-2 gap-6">
-                        <StatBlock value={h.ctaStatClients.value} label={h.ctaStatClients.label} />
-                        <StatBlock value={String(countries.length)} label={h.ctaStatCountries.label} />
-                        <StatBlock value={h.ctaStatYears.value} label={h.ctaStatYears.label} />
-                        <StatBlock value={h.ctaStatResponse.value} label={h.ctaStatResponse.label} />
-                    </div>
-                </div>
-            </div>
+          <div
+            class="flex items-center justify-center w-11 h-11 rounded-sm mb-6 bg-accent-subtle text-accent"
+          >
+            <Eye size={20} />
+          </div>
+          <h3 class="font-display text-xl font-bold mb-3 text-primary">
+            {h.trustCards[0].title}
+          </h3>
+          <p class="text-sm leading-relaxed text-muted">
+            {h.trustCards[0].text}
+          </p>
         </div>
-    </section>
+
+        <div
+          class="trust-card glow-border bg-surface border border-default rounded-sm p-8 anim-inline"
+          style="--anim-delay: 0.16s"
+        >
+          <div
+            class="flex items-center justify-center w-11 h-11 rounded-sm mb-6 bg-accent-subtle text-accent"
+          >
+            <Shield size={20} />
+          </div>
+          <h3 class="font-display text-xl font-bold mb-3 text-primary">
+            {h.trustCards[1].title}
+          </h3>
+          <p class="text-sm leading-relaxed text-muted">
+            {h.trustCards[1].text}
+          </p>
+        </div>
+
+        <div
+          class="trust-card glow-border bg-surface border border-default rounded-sm p-8 anim-inline"
+          style="--anim-delay: 0.24s"
+        >
+          <div
+            class="flex items-center justify-center w-11 h-11 rounded-sm mb-6 bg-accent-subtle text-accent"
+          >
+            <MapPin size={20} />
+          </div>
+          <h3 class="font-display text-xl font-bold mb-3 text-primary">
+            {h.trustCards[2].title}
+          </h3>
+          <p class="text-sm leading-relaxed text-muted">
+            {h.trustCards[2].text}
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Social proof ──────────────────────────────────── -->
+  <section class="border-b border-default">
+    <div class="max-w-6xl mx-auto px-6 py-20">
+      <div class="mb-14">
+        <SectionHeading title={h.testimonialsHeading} />
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <figure
+          class="review-card glow-border bg-surface border border-default rounded-sm p-7 flex flex-col gap-5 anim-inline"
+          style="--anim-delay: 0.08s"
+        >
+          <blockquote class="text-sm leading-relaxed text-secondary flex-1">
+            {h.testimonials[0].quote}
+          </blockquote>
+          <figcaption class="flex items-center gap-3">
+            <div
+              class="w-9 h-9 rounded-full bg-accent-subtle flex items-center justify-center text-accent font-display font-bold text-sm"
+            >
+              А
+            </div>
+            <div>
+              <p class="text-sm font-medium text-primary">
+                {h.testimonials[0].name}
+              </p>
+              <p class="text-xs text-muted">
+                {h.testimonials[0].caption}
+              </p>
+            </div>
+          </figcaption>
+        </figure>
+
+        <figure
+          class="review-card glow-border bg-surface border border-default rounded-sm p-7 flex flex-col gap-5 anim-inline"
+          style="--anim-delay: 0.16s"
+        >
+          <blockquote class="text-sm leading-relaxed text-secondary flex-1">
+            {h.testimonials[1].quote}
+          </blockquote>
+          <figcaption class="flex items-center gap-3">
+            <div
+              class="w-9 h-9 rounded-full bg-accent-subtle flex items-center justify-center text-accent font-display font-bold text-sm"
+            >
+              М
+            </div>
+            <div>
+              <p class="text-sm font-medium text-primary">
+                {h.testimonials[1].name}
+              </p>
+              <p class="text-xs text-muted">
+                {h.testimonials[1].caption}
+              </p>
+            </div>
+          </figcaption>
+        </figure>
+
+        <figure
+          class="review-card glow-border bg-surface border border-default rounded-sm p-7 flex flex-col gap-5 anim-inline"
+          style="--anim-delay: 0.24s"
+        >
+          <blockquote class="text-sm leading-relaxed text-secondary flex-1">
+            {h.testimonials[2].quote}
+          </blockquote>
+          <figcaption class="flex items-center gap-3">
+            <div
+              class="w-9 h-9 rounded-full bg-accent-subtle flex items-center justify-center text-accent font-display font-bold text-sm"
+            >
+              Д
+            </div>
+            <div>
+              <p class="text-sm font-medium text-primary">
+                {h.testimonials[2].name}
+              </p>
+              <p class="text-xs text-muted">
+                {h.testimonials[2].caption}
+              </p>
+            </div>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CTA ───────────────────────────────────────────── -->
+  <section class="max-w-6xl mx-auto px-6 py-20">
+    <div
+      class="cta-card relative rounded-sm overflow-hidden bg-surface border border-border-strong"
+    >
+      <div
+        class="absolute inset-0 pointer-events-none"
+        style="background: radial-gradient(ellipse 80% 120% at -5% 50%, var(--color-accent-soft) 0%, transparent 55%), radial-gradient(ellipse 50% 60% at 100% 100%, var(--color-ambient-glow) 0%, transparent 60%);"
+      >
+      </div>
+      <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-0">
+        <div class="p-10 md:p-16">
+          <span class="eyebrow">{h.ctaEyebrow}</span>
+          <h2
+            class="font-display font-bold mb-4 leading-[1.1] tracking-[-0.025em]"
+            style="font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 800;"
+          >
+            {h.ctaHeading.line1}<br />{h.ctaHeading.line2}<br /><em
+              class="text-accent italic">{h.ctaHeading.accentWord}</em
+            >
+          </h2>
+          <p class="text-base mb-2 max-w-sm text-muted leading-[1.7]">
+            {h.ctaSubtext}
+          </p>
+          <ContactCTA label={h.ctaTelegramLabel} />
+        </div>
+        <div
+          class="cta-aside hidden lg:flex items-end justify-end p-10 md:p-16"
+        >
+          <div class="grid grid-cols-2 gap-6">
+            <StatBlock
+              value={h.ctaStatClients.value}
+              label={h.ctaStatClients.label}
+            />
+            <StatBlock
+              value={String(countries.length)}
+              label={h.ctaStatCountries.label}
+            />
+            <StatBlock
+              value={h.ctaStatYears.value}
+              label={h.ctaStatYears.label}
+            />
+            <StatBlock
+              value={h.ctaStatResponse.value}
+              label={h.ctaStatResponse.label}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </BaseLayout>
 
 <style>
+  .hero-headline {
+    font-size: clamp(3rem, 6.5vw, 5.2rem);
+    font-weight: 800;
+  }
+  .stamp-svg {
+    display: inline-block;
+    pointer-events: none;
+    opacity: 0.85;
+    transform: rotate(-8deg) scale(1);
+    animation: stampHit 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.9s both;
+    width: clamp(48px, 6vw, 84px);
+    aspect-ratio: 1 / 1;
+  }
+  @media (max-width: 380px) {
     .hero-headline {
-        font-size: clamp(3rem, 6.5vw, 5.2rem);
-        font-weight: 800;
+      font-size: 2.5rem;
+    }
+    .stamp-row {
+      gap: 0.5rem;
     }
     .stamp-svg {
-        display: inline-block;
-        pointer-events: none;
-        opacity: 0.85;
-        transform: rotate(-8deg) scale(1);
-        animation: stampHit 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.9s both;
-        width: clamp(48px, 6vw, 84px);
-        aspect-ratio: 1 / 1;
+      width: 36px;
     }
-    @media (max-width: 380px) {
-        .hero-headline {
-            font-size: 2.5rem;
-        }
-        .stamp-row {
-            gap: 0.5rem;
-        }
-        .stamp-svg {
-            width: 36px;
-        }
+  }
+  @keyframes stampHit {
+    0% {
+      opacity: 0;
+      transform: rotate(-24deg) scale(1.5);
     }
-    @keyframes stampHit {
-        0% {
-            opacity: 0;
-            transform: rotate(-24deg) scale(1.5);
-        }
-        60% {
-            opacity: 0.85;
-        }
-        100% {
-            opacity: 0.85;
-            transform: rotate(-8deg) scale(1);
-        }
+    60% {
+      opacity: 0.85;
     }
-    @media (prefers-reduced-motion: reduce) {
-        .stamp-svg {
-            animation: none;
-            opacity: 0.85;
-            transform: rotate(-8deg) scale(1);
-        }
+    100% {
+      opacity: 0.85;
+      transform: rotate(-8deg) scale(1);
     }
-    .journey-stop {
-        transition: background-color 0.25s;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stamp-svg {
+      animation: none;
+      opacity: 0.85;
+      transform: rotate(-8deg) scale(1);
     }
-    .journey-stop:hover {
-        background-color: var(--color-surface-2);
-    }
-    .journey-stop:hover .journey-arrow {
-        transform: translateX(4px);
-    }
-    .trust-card {
-        transition: background-color 0.25s;
-    }
-    .trust-card:hover {
-        background-color: var(--color-surface-2) !important;
-    }
-    .review-card {
-        transition: background-color 0.25s;
-    }
+  }
+  .journey-stop {
+    transition: background-color 0.25s;
+  }
+  .journey-stop:hover {
+    background-color: var(--color-surface-2);
+  }
+  .journey-stop:hover .journey-arrow {
+    transform: translateX(4px);
+  }
+  .trust-card {
+    transition: background-color 0.25s;
+  }
+  .trust-card:hover {
+    background-color: var(--color-surface-2) !important;
+  }
+  .review-card {
+    transition: background-color 0.25s;
+  }
 </style>

@@ -20,7 +20,12 @@ import { insertOrMergeLead, setTelegramMessage } from './store';
 import type { LeadData } from './leadTypes';
 import type { StoredLead } from './store';
 
-const baseData: Omit<LeadData, 'id'> = { name: 'Иван', contact: '@ivan', service: 'vehicle-sourcing', locale: 'ru' };
+const baseData: Omit<LeadData, 'id'> = {
+  name: 'Иван',
+  contact: '@ivan',
+  service: 'vehicle-sourcing',
+  locale: 'ru',
+};
 
 const storedLead: StoredLead = {
   ...baseData,
@@ -42,8 +47,12 @@ const storedLead: StoredLead = {
 
 describe('notifyLead', () => {
   beforeEach(() => {
-    vi.mocked(insertOrMergeLead).mockReset().mockResolvedValue({ lead: storedLead, merged: false });
-    vi.mocked(sendLeadNotification).mockReset().mockResolvedValue({ chatId: -100, messageId: 999 });
+    vi.mocked(insertOrMergeLead)
+      .mockReset()
+      .mockResolvedValue({ lead: storedLead, merged: false });
+    vi.mocked(sendLeadNotification)
+      .mockReset()
+      .mockResolvedValue({ chatId: -100, messageId: 999 });
     vi.mocked(setTelegramMessage).mockReset().mockResolvedValue(storedLead);
     vi.mocked(refreshLeadCard).mockReset().mockResolvedValue(undefined);
   });
@@ -77,8 +86,15 @@ describe('notifyLead', () => {
   });
 
   it('when merged into an existing lead, refreshes its card instead of sending a new Telegram message', async () => {
-    const merged: StoredLead = { ...storedLead, telegramChatId: -100, telegramMessageId: 999 };
-    vi.mocked(insertOrMergeLead).mockResolvedValueOnce({ lead: merged, merged: true });
+    const merged: StoredLead = {
+      ...storedLead,
+      telegramChatId: -100,
+      telegramMessageId: 999,
+    };
+    vi.mocked(insertOrMergeLead).mockResolvedValueOnce({
+      lead: merged,
+      merged: true,
+    });
 
     await notifyLead(baseData, '[test]');
 
@@ -88,7 +104,10 @@ describe('notifyLead', () => {
   });
 
   it('when merged but the existing lead has no Telegram message yet, skips the refresh instead of throwing', async () => {
-    vi.mocked(insertOrMergeLead).mockResolvedValueOnce({ lead: storedLead, merged: true });
+    vi.mocked(insertOrMergeLead).mockResolvedValueOnce({
+      lead: storedLead,
+      merged: true,
+    });
 
     await expect(notifyLead(baseData, '[test]')).resolves.toBeUndefined();
 

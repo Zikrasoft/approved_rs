@@ -16,7 +16,12 @@ function extractBearer(header: string | null): string | null {
 }
 
 export async function GET({ request }: APIContext): Promise<Response> {
-  if (!secretMatches(extractBearer(request.headers.get('authorization')), CRON_SECRET)) {
+  if (
+    !secretMatches(
+      extractBearer(request.headers.get('authorization')),
+      CRON_SECRET,
+    )
+  ) {
     return new Response(null, { status: 401 });
   }
 
@@ -29,7 +34,10 @@ export async function GET({ request }: APIContext): Promise<Response> {
       if (resumed) await refreshLeadCard(resumed);
       remindedPostponed++;
     } catch (err) {
-      console.error('[reminders] failed to send/resume a due postponed lead', { error: err, leadId: lead.id });
+      console.error('[reminders] failed to send/resume a due postponed lead', {
+        error: err,
+        leadId: lead.id,
+      });
     }
   }
 

@@ -11,11 +11,15 @@ const { getPreferredChannel } = await import('./contactChannel');
 // only calls document.querySelectorAll twice (groups, then per-group elements)
 // and reads/writes `.hidden`/`.dataset`, so a hand-rolled stub covers it without
 // pulling in a whole DOM implementation for one test file.
-interface StubEl { dataset: { primaryChannel?: string }; hidden: boolean }
+interface StubEl {
+  dataset: { primaryChannel?: string };
+  hidden: boolean;
+}
 
 function stubDocument(groups: StubEl[][]) {
   vi.stubGlobal('document', {
-    querySelectorAll: () => groups.map(els => ({ querySelectorAll: () => els })),
+    querySelectorAll: () =>
+      groups.map((els) => ({ querySelectorAll: () => els })),
   });
 }
 
@@ -29,8 +33,14 @@ describe('applyRegionalContactPreference', () => {
   it('shows only the element matching the preferred channel within each group', () => {
     vi.mocked(detectVisitorCountry).mockReturnValue('rs');
     vi.mocked(getPreferredChannel).mockReturnValue('whatsapp');
-    const telegram: StubEl = { dataset: { primaryChannel: 'telegram' }, hidden: false };
-    const whatsapp: StubEl = { dataset: { primaryChannel: 'whatsapp' }, hidden: true };
+    const telegram: StubEl = {
+      dataset: { primaryChannel: 'telegram' },
+      hidden: false,
+    };
+    const whatsapp: StubEl = {
+      dataset: { primaryChannel: 'whatsapp' },
+      hidden: true,
+    };
     stubDocument([[telegram, whatsapp]]);
 
     applyRegionalContactPreference();
@@ -42,8 +52,14 @@ describe('applyRegionalContactPreference', () => {
   it('applies the same channel across every [data-primary-contact] group on the page', () => {
     vi.mocked(detectVisitorCountry).mockReturnValue(undefined);
     vi.mocked(getPreferredChannel).mockReturnValue('telegram');
-    const groupA: StubEl[] = [{ dataset: { primaryChannel: 'telegram' }, hidden: true }, { dataset: { primaryChannel: 'whatsapp' }, hidden: false }];
-    const groupB: StubEl[] = [{ dataset: { primaryChannel: 'whatsapp' }, hidden: false }, { dataset: { primaryChannel: 'telegram' }, hidden: true }];
+    const groupA: StubEl[] = [
+      { dataset: { primaryChannel: 'telegram' }, hidden: true },
+      { dataset: { primaryChannel: 'whatsapp' }, hidden: false },
+    ];
+    const groupB: StubEl[] = [
+      { dataset: { primaryChannel: 'whatsapp' }, hidden: false },
+      { dataset: { primaryChannel: 'telegram' }, hidden: true },
+    ];
     stubDocument([groupA, groupB]);
 
     applyRegionalContactPreference();

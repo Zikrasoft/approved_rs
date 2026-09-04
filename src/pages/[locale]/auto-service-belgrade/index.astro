@@ -1,6 +1,12 @@
 ---
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
-import { SearchCheck, Droplet, Wrench, Cog, ClipboardCheck } from '@lucide/astro';
+import {
+  SearchCheck,
+  Droplet,
+  Wrench,
+  Cog,
+  ClipboardCheck,
+} from '@lucide/astro';
 import CasesGrid from '@/components/CasesGrid.astro';
 import ChipLinks from '@/components/ChipLinks.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
@@ -26,19 +32,35 @@ const meta = {
   canonical: `${SITE_URL}${PathBuilder.autoServiceBelgrade(locale)}`,
   ogImage: ogImageFor(SITE_URL, 'auto-service-belgrade', locale),
 };
-const schema = generateServiceSchema(`${bc.title} ${bc.titleHighlight}`, getCountry('rs')![locale].name, meta.canonical);
+const schema = generateServiceSchema(
+  `${bc.title} ${bc.titleHighlight}`,
+  getCountry('rs')![locale].name,
+  meta.canonical,
+);
 
-const items = (await getPublishedAutoserviceCases()).map((c) => toAutoserviceCaseItem(c, locale));
+const items = (await getPublishedAutoserviceCases()).map((c) =>
+  toAutoserviceCaseItem(c, locale),
+);
 
-const ICONS = { diagnostics: SearchCheck, maintenance: Droplet, suspension: Wrench, engine: Cog, prepurchase: ClipboardCheck } as const;
-const WHAT_WE_DO = bc.whatWeDo.map(item => ({ ...item, Icon: ICONS[item.key] }));
+const ICONS = {
+  diagnostics: SearchCheck,
+  maintenance: Droplet,
+  suspension: Wrench,
+  engine: Cog,
+  prepurchase: ClipboardCheck,
+} as const;
+const WHAT_WE_DO = bc.whatWeDo.map((item) => ({
+  ...item,
+  Icon: ICONS[item.key],
+}));
 
 // Native-script address for Google Maps to geocode — see HowToFindUs.astro.
 const MAP_QUERY = 'Пека Павловића 39, Београд';
 ---
 
 <ServicePageLayout
-  {meta} {schema}
+  {meta}
+  {schema}
   title={bc.title}
   titleHighlight={bc.titleHighlight}
   description={bc.description}

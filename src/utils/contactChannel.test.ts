@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { isTrackedContactChannel, TRACKED_CONTACT_CHANNELS, getPreferredChannel } from './contactChannel';
+import {
+  isTrackedContactChannel,
+  TRACKED_CONTACT_CHANNELS,
+  getPreferredChannel,
+} from './contactChannel';
 
 describe('isTrackedContactChannel', () => {
   it('is true for every tracked channel', () => {

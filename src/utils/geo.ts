@@ -44,12 +44,12 @@ const countries = countriesData as Country[];
 const cities = citiesData as City[];
 
 export const getActiveCountries = (): Country[] =>
-  countries.filter(c => c.active);
+  countries.filter((c) => c.active);
 
 export const getCountry = (code: string): Country | undefined =>
-  countries.find(c => c.code === code);
+  countries.find((c) => c.code === code);
 
 export const getCitiesForCountry = (countryCode: string): City[] =>
-  cities.filter(c => c.country === countryCode && c.active);
+  cities.filter((c) => c.country === countryCode && c.active);
 
 export const getCountryFlag = (code: string): string => FLAGS[code] ?? '🏳️';

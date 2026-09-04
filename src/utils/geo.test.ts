@@ -9,7 +9,7 @@ import {
 describe('getActiveCountries', () => {
   it('returns only active countries', () => {
     const result = getActiveCountries();
-    expect(result.every(c => c.active)).toBe(true);
+    expect(result.every((c) => c.active)).toBe(true);
     expect(result.length).toBeGreaterThan(0);
   });
 });
@@ -28,7 +28,7 @@ describe('getCountry', () => {
 describe('getCitiesForCountry', () => {
   it('returns only cities for given country', () => {
     const result = getCitiesForCountry('de');
-    expect(result.every(c => c.country === 'de')).toBe(true);
+    expect(result.every((c) => c.country === 'de')).toBe(true);
     expect(result.length).toBeGreaterThan(0);
   });
 
@@ -52,4 +52,3 @@ describe('getCountryFlag', () => {
     expect(getCountryFlag('xx')).toBe('🏳️');
   });
 });
-

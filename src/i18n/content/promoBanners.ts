@@ -45,16 +45,16 @@ const sourcingBanners: Record<Locale, string[]> = {
     'Für **Fahrzeugbeschaffung in Serbien** — **Belgrad**, **Novi Sad**, **Niš**, **Kragujevac**, **Čačak**, **Subotica**, **Pančevo** oder jede andere serbische Stadt — helfen wir Ihnen, ein wirklich gutes Auto zu finden, prüfen Historie und technischen Zustand und wickeln den Kauf sicher ab.',
   ],
   en: [
-    'Looking for **car sourcing in Belgrade, Novi Sad, Pančevo, Subotica, or anywhere in Serbia**? We\'ll help you find a genuinely worthy car, checking its history, technical condition, and legal standing.',
-    'Whether you need **car sourcing in Serbia** — in **Belgrade**, **Novi Sad**, **Niš**, **Subotica**, **Pančevo**, **Kragujevac**, **Čačak**, **Užice**, **Valjevo**, **Zrenjanin**, **Šabac**, **Sombor**, or any other Serbian city — we\'ll check the car\'s history, run professional diagnostics, and help you buy a genuinely solid example.',
-    'Need a **car buyback in Serbia** — an **urgent buyback in Belgrade**, **Novi Sad**, **Niš**, **Subotica**, **Pančevo**, **Kragujevac**, **Čačak**, **Užice**, **Valjevo**, **Zrenjanin**, or anywhere else in Serbia? We\'ll evaluate the car fast, offer a fair price, handle all the paperwork, and pay out right away.',
-    'For **car sourcing in Serbia** — **Belgrade**, **Novi Sad**, **Niš**, **Subotica**, **Pančevo**, **Kragujevac**, **Čačak**, **Užice**, **Valjevo**, **Zrenjanin**, **Šabac**, **Sombor**, or any other city — we run a professional check, study the car\'s history, and help you buy safely.',
+    "Looking for **car sourcing in Belgrade, Novi Sad, Pančevo, Subotica, or anywhere in Serbia**? We'll help you find a genuinely worthy car, checking its history, technical condition, and legal standing.",
+    "Whether you need **car sourcing in Serbia** — in **Belgrade**, **Novi Sad**, **Niš**, **Subotica**, **Pančevo**, **Kragujevac**, **Čačak**, **Užice**, **Valjevo**, **Zrenjanin**, **Šabac**, **Sombor**, or any other Serbian city — we'll check the car's history, run professional diagnostics, and help you buy a genuinely solid example.",
+    "Need a **car buyback in Serbia** — an **urgent buyback in Belgrade**, **Novi Sad**, **Niš**, **Subotica**, **Pančevo**, **Kragujevac**, **Čačak**, **Užice**, **Valjevo**, **Zrenjanin**, or anywhere else in Serbia? We'll evaluate the car fast, offer a fair price, handle all the paperwork, and pay out right away.",
+    "For **car sourcing in Serbia** — **Belgrade**, **Novi Sad**, **Niš**, **Subotica**, **Pančevo**, **Kragujevac**, **Čačak**, **Užice**, **Valjevo**, **Zrenjanin**, **Šabac**, **Sombor**, or any other city — we run a professional check, study the car's history, and help you buy safely.",
     'Need **car sourcing in Serbia** — in **Belgrade**, **Novi Sad**, **Niš**, **Subotica**, **Pančevo**, **Kragujevac**, **Čačak**, **Užice**, **Valjevo**, **Zrenjanin**, **Sombor**, **Šabac**, or any other Serbian city? We inspect the car with professional equipment, assess its technical condition, and help you buy a genuinely worthy one.',
     'Need a **car brought in from Germany to Serbia** — a **BMW X6 from Germany**, sourcing, inspection, delivery, and customs clearance, fully turnkey? Get in touch!',
-    'For **car sourcing in Serbia** — **Belgrade**, **Novi Sad**, **Niš**, **Subotica**, **Pančevo**, **Kragujevac**, **Čačak**, **Užice**, **Valjevo**, **Zrenjanin**, or any other Serbian city — we\'ll help you find a genuinely worthy car, check its history and technical condition, and steer you clear of a bad purchase.',
-    'For **car sourcing in Serbia** — **Belgrade**, **Novi Sad**, **Niš**, **Subotica**, **Pančevo**, **Kragujevac**, **Čačak**, **Užice**, **Valjevo**, **Zrenjanin**, or any other Serbian city — we\'ll source the car, thoroughly check its history and technical condition, and help you buy a genuinely worthy one.',
+    "For **car sourcing in Serbia** — **Belgrade**, **Novi Sad**, **Niš**, **Subotica**, **Pančevo**, **Kragujevac**, **Čačak**, **Užice**, **Valjevo**, **Zrenjanin**, or any other Serbian city — we'll help you find a genuinely worthy car, check its history and technical condition, and steer you clear of a bad purchase.",
+    "For **car sourcing in Serbia** — **Belgrade**, **Novi Sad**, **Niš**, **Subotica**, **Pančevo**, **Kragujevac**, **Čačak**, **Užice**, **Valjevo**, **Zrenjanin**, or any other Serbian city — we'll source the car, thoroughly check its history and technical condition, and help you buy a genuinely worthy one.",
     'Need a **car brought in from Germany to Serbia** — help sourcing it, a professional pre-purchase inspection, delivery, customs clearance, and full turnkey prep? Get in touch. We catch every flaw upfront, work out the real costs ahead of time, and help you buy a genuinely good car.',
-    'For **car sourcing in Serbia** — **Belgrade**, **Novi Sad**, **Niš**, **Kragujevac**, **Čačak**, **Subotica**, **Pančevo**, or any other Serbian city — we\'ll help you find a genuinely good car, check its history and technical condition, and close the deal safely.',
+    "For **car sourcing in Serbia** — **Belgrade**, **Novi Sad**, **Niš**, **Kragujevac**, **Čačak**, **Subotica**, **Pančevo**, or any other Serbian city — we'll help you find a genuinely good car, check its history and technical condition, and close the deal safely.",
   ],
   sr: [
     'Da li vam je potreban **odabir vozila u Beogradu, Novom Sadu, Pančevu, Subotici ili bilo gde u Srbiji**? Pomoći ćemo vam da pronađete zaista vredan automobil, proverivši njegovu istoriju, tehničko stanje i pravnu ispravnost.',
@@ -80,11 +80,11 @@ const autoserviceBanners: Record<Locale, string[]> = {
     'Если вам нужен **автосервис в Белграде** — диагностика, ТО, ремонт подвески, тормозов, двигателя и трансмиссии — обращайтесь, работаем с любыми марками.',
   ],
   en: [
-    'Need **computer diagnostics for your car in Belgrade**? We\'ll quickly find the cause of the issue and suggest the best repair solution.',
+    "Need **computer diagnostics for your car in Belgrade**? We'll quickly find the cause of the issue and suggest the best repair solution.",
     'Need **scheduled maintenance in Belgrade** — oil and filter changes, manufacturer-schedule service? Get in touch with our auto service.',
-    'Need **suspension and brake system repair in Belgrade**? We\'ll check the discs, pads, shocks and control arms and fix the cause of vibrations or noise.',
-    'Need **engine or transmission diagnostics and repair in Belgrade**? We\'ll pinpoint the issue with official dealer-grade equipment and repair it properly.',
-    'Need a **pre-purchase car inspection in Belgrade**? We\'ll run an independent technical check and show you the car\'s real condition before you buy.',
+    "Need **suspension and brake system repair in Belgrade**? We'll check the discs, pads, shocks and control arms and fix the cause of vibrations or noise.",
+    "Need **engine or transmission diagnostics and repair in Belgrade**? We'll pinpoint the issue with official dealer-grade equipment and repair it properly.",
+    "Need a **pre-purchase car inspection in Belgrade**? We'll run an independent technical check and show you the car's real condition before you buy.",
     'Need an **auto service in Belgrade** — diagnostics, maintenance, suspension, brake, engine and transmission repair? Get in touch, we work with any make.',
   ],
   sr: [
@@ -119,8 +119,8 @@ const detailingBanners: Record<Locale, string[]> = {
     'Если вам нужен **детейлинг в Белграде** — оклейка защитной или декоративной плёнкой — обращайтесь, расскажем что подойдёт именно вашему транспорту.',
   ],
   en: [
-    'Need **vinyl wrapping in Belgrade**? We\'ll help protect your paint from chips or change up the color — for cars, motorcycles, bicycles, and yachts.',
-    'Looking for **detailing in Belgrade** — protective or decorative vinyl wrap? Get in touch, we\'ll advise on what suits your vehicle.',
+    "Need **vinyl wrapping in Belgrade**? We'll help protect your paint from chips or change up the color — for cars, motorcycles, bicycles, and yachts.",
+    "Looking for **detailing in Belgrade** — protective or decorative vinyl wrap? Get in touch, we'll advise on what suits your vehicle.",
   ],
   sr: [
     'Treba vam **folijacija vozila u Beogradu**? Pomoći ćemo da zaštitite lak od kamenčića ili promenite boju — radimo sa automobilima, motociklima, biciklima i jahtama.',
@@ -136,7 +136,10 @@ const detailingBanners: Record<Locale, string[]> = {
   ],
 };
 
-export function getPromoBanners(locale: Locale, kind: CasesTabKind = 'vehicle-sourcing'): string[] {
+export function getPromoBanners(
+  locale: Locale,
+  kind: CasesTabKind = 'vehicle-sourcing',
+): string[] {
   if (kind === 'auto-service') return autoserviceBanners[locale];
   if (kind === 'detailing') return detailingBanners[locale];
   return sourcingBanners[locale];

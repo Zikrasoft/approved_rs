@@ -16,7 +16,12 @@
 // attribute (it opens the lead-request modal instead) but isn't part of
 // this set, and nothing in the codebase currently needs to type-check
 // against the full 5-value domain, so there's no separate export for it.
-export const TRACKED_CONTACT_CHANNELS = ['phone', 'telegram', 'whatsapp', 'viber'] as const;
+export const TRACKED_CONTACT_CHANNELS = [
+  'phone',
+  'telegram',
+  'whatsapp',
+  'viber',
+] as const;
 export type TrackedContactChannel = (typeof TRACKED_CONTACT_CHANNELS)[number];
 
 // Runtime guard for values that only ever arrive as plain strings (DOM
@@ -25,8 +30,12 @@ export type TrackedContactChannel = (typeof TRACKED_CONTACT_CHANNELS)[number];
 // value as an object key (an unvalidated string key on a plain object
 // literal resolves inherited Object.prototype members instead of
 // `undefined`, e.g. `obj['constructor']`).
-export function isTrackedContactChannel(value: string | null | undefined): value is TrackedContactChannel {
-  return !!value && (TRACKED_CONTACT_CHANNELS as readonly string[]).includes(value);
+export function isTrackedContactChannel(
+  value: string | null | undefined,
+): value is TrackedContactChannel {
+  return (
+    !!value && (TRACKED_CONTACT_CHANNELS as readonly string[]).includes(value)
+  );
 }
 
 // The attribute every contact touchpoint carries (data-contact-channel="...")
@@ -59,11 +68,28 @@ export const DATA_OPEN_PAGE_LEAD_MODAL = 'data-open-page-lead-modal';
 // "constructor" or "toString" would otherwise resolve an inherited
 // Object.prototype member instead of `undefined`.
 const PREFERRED_CHANNEL_BY_COUNTRY = new Map<string, TrackedContactChannel>([
-  ['rs', 'whatsapp'], ['ba', 'whatsapp'], ['hr', 'whatsapp'], ['me', 'whatsapp'], ['mk', 'whatsapp'], ['tr', 'whatsapp'],
-  ['de', 'whatsapp'], ['es', 'whatsapp'], ['pt', 'whatsapp'], ['ch', 'whatsapp'],
-  ['ru', 'telegram'], ['ua', 'telegram'], ['by', 'telegram'], ['kz', 'telegram'],
+  ['rs', 'whatsapp'],
+  ['ba', 'whatsapp'],
+  ['hr', 'whatsapp'],
+  ['me', 'whatsapp'],
+  ['mk', 'whatsapp'],
+  ['tr', 'whatsapp'],
+  ['de', 'whatsapp'],
+  ['es', 'whatsapp'],
+  ['pt', 'whatsapp'],
+  ['ch', 'whatsapp'],
+  ['ru', 'telegram'],
+  ['ua', 'telegram'],
+  ['by', 'telegram'],
+  ['kz', 'telegram'],
 ]);
 
-export function getPreferredChannel(countryCode: string | undefined): TrackedContactChannel {
-  return (countryCode && PREFERRED_CHANNEL_BY_COUNTRY.get(countryCode.toLowerCase())) || 'telegram';
+export function getPreferredChannel(
+  countryCode: string | undefined,
+): TrackedContactChannel {
+  return (
+    (countryCode &&
+      PREFERRED_CHANNEL_BY_COUNTRY.get(countryCode.toLowerCase())) ||
+    'telegram'
+  );
 }

@@ -17,12 +17,17 @@ const { country, locale } = Astro.props;
   class="country-pill group flex items-center justify-between gap-2.5 px-4 py-2.5 rounded-sm no-underline glow-border bg-surface border border-default"
 >
   <span class="flex items-center gap-2.5 min-w-0">
-    <span class="text-lg leading-none shrink-0" set:html={getCountryFlag(country.code)} />
+    <span
+      class="text-lg leading-none shrink-0"
+      set:html={getCountryFlag(country.code)}
+    />
     <span class="text-sm font-medium text-primary truncate">
       {country[locale].name}
     </span>
   </span>
-  <span class="country-arrow text-xs text-accent shrink-0 transition-transform duration-200">
+  <span
+    class="country-arrow text-xs text-accent shrink-0 transition-transform duration-200"
+  >
     →
   </span>
 </a>

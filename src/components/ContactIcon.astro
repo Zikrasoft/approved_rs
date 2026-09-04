@@ -14,9 +14,20 @@ interface Props {
   size?: number;
 }
 
-const ICONS = { telegram: TelegramIcon, whatsapp: WhatsAppIcon, viber: ViberIcon, phone: Phone };
+const ICONS = {
+  telegram: TelegramIcon,
+  whatsapp: WhatsAppIcon,
+  viber: ViberIcon,
+  phone: Phone,
+};
 const { channel, size = 16 } = Astro.props;
 const Icon = ICONS[channel];
 ---
 
-{channel === 'phone' ? <Icon size={size} /> : <Icon size={size} color={BRAND_COLORS[channel]} />}
+{
+  channel === 'phone' ? (
+    <Icon size={size} />
+  ) : (
+    <Icon size={size} color={BRAND_COLORS[channel]} />
+  )
+}

@@ -4,8 +4,20 @@ import type { APIContext } from 'astro';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { isKnownCaseDir, isValidSlug, sanitizeFilename, dedupeFilename, appendGalleryEntries, KEYSTATIC_AUTH_COOKIE } from '@/utils/adminGallery';
-import { listGithubDir, getGithubFile, commitGalleryPhotos, GithubApiError } from '@/lib/githubContents';
+import {
+  isKnownCaseDir,
+  isValidSlug,
+  sanitizeFilename,
+  dedupeFilename,
+  appendGalleryEntries,
+  KEYSTATIC_AUTH_COOKIE,
+} from '@/utils/adminGallery';
+import {
+  listGithubDir,
+  getGithubFile,
+  commitGalleryPhotos,
+  GithubApiError,
+} from '@/lib/githubContents';
 
 // Guards against an accidentally-huge upload wedging the serverless
 // function (base64-encoded whole into one JSON POST body before GitHub's
@@ -14,15 +26,29 @@ import { listGithubDir, getGithubFile, commitGalleryPhotos, GithubApiError } fro
 // this is the only real check.
 const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
 
-function backToForm(request: Request, dir: string, slug: string, extra: Record<string, string>): Response {
-  return Response.redirect(new URL(`/admin/case-photos?${new URLSearchParams({ dir, slug, ...extra })}`, request.url), 303);
+function backToForm(
+  request: Request,
+  dir: string,
+  slug: string,
+  extra: Record<string, string>,
+): Response {
+  return Response.redirect(
+    new URL(
+      `/admin/case-photos?${new URLSearchParams({ dir, slug, ...extra })}`,
+      request.url,
+    ),
+    303,
+  );
 }
 
 // Dev writes straight to disk (same as Keystatic's own local storage mode);
 // prod commits via GitHub's API instead (src/lib/githubContents.ts) — see
 // admin/case-photos.astro's doc comment for why, and for the auth-cookie
 // gate this shares with the page.
-export async function POST({ request, cookies }: APIContext): Promise<Response> {
+export async function POST({
+  request,
+  cookies,
+}: APIContext): Promise<Response> {
   const token = cookies.get(KEYSTATIC_AUTH_COOKIE)?.value;
   if (import.meta.env.PROD && !token) {
     return new Response('Открой эту страницу через Keystatic', { status: 401 });
@@ -31,12 +57,14 @@ export async function POST({ request, cookies }: APIContext): Promise<Response> 
   const form = await request.formData();
   const dir = form.get('dir')?.toString() ?? '';
   const slug = form.get('slug')?.toString() ?? '';
-  const files = form.getAll('photos').filter((f): f is File => f instanceof File && f.size > 0);
+  const files = form
+    .getAll('photos')
+    .filter((f): f is File => f instanceof File && f.size > 0);
 
   if (!isKnownCaseDir(dir) || !isValidSlug(slug)) {
     return new Response('Bad collection/slug', { status: 400 });
   }
-  if (files.some(f => f.size > MAX_PHOTO_BYTES)) {
+  if (files.some((f) => f.size > MAX_PHOTO_BYTES)) {
     return new Response('File too large', { status: 413 });
   }
   if (files.length === 0) {
@@ -94,7 +122,10 @@ export async function POST({ request, cookies }: APIContext): Promise<Response> 
   for (const file of files) {
     const filename = dedupeFilename(sanitizeFilename(file.name), taken);
     taken.add(filename);
-    await writeFile(path.join(galleryDir, filename), Buffer.from(await file.arrayBuffer()));
+    await writeFile(
+      path.join(galleryDir, filename),
+      Buffer.from(await file.arrayBuffer()),
+    );
     newRelPaths.push(`gallery/${filename}`);
   }
 

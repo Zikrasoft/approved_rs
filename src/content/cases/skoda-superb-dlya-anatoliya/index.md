@@ -45,6 +45,7 @@ translations:
       Im Rahmen unseres Fahrzeugchecks haben wir vier Autos inspiziert und schließlich die nahezu perfekte Wahl gefunden – **Skoda Superb 2020** mit nur **98.000 km** Laufleistung. Das Fahrzeug hatte **einen Vorbesitzer in Serbien**, eine vollständige Servicehistorie bei einem offiziellen Händler und befand sich in ausgezeichnetem technischen sowie kosmetischen Zustand.
 translatedFrom: a372fbabdc7e20a3
 ---
+
 ## Еще один успешный автоподбор в Сербии!
 
 Клиент Анатолий обратился к нам в поисках надежного семейного автомобиля. В качестве основных вариантов рассматривались **Skoda Superb, Skoda Kodiaq** и **Volkswagen Passat**.

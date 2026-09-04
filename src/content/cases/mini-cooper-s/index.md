@@ -53,6 +53,7 @@ translations:
       Schließlich wurde ein **Mini Cooper S aus dem Jahr 2023** mit nur **30.000 km** Laufleistung, vollständiger Historie und **1 Jahr Garantie auf Motor und Ausstattung** entdeckt. Genau solch ein Fahrzeug entsprach voll und ganz den Erwartungen der Kundin.
 translatedFrom: 3c36ac244f0cbc89
 ---
+
 ## Автоподбор в Сербии — когда хочется найти не просто автомобиль, а именно "тот самый".
 
 Анастасия обратилась к нам с четким запросом — **Mini Cooper S**. В семье уже есть основной автомобиль, поэтому этот Mini должен был стать яркой, эмоциональной машиной для удовольствия от каждой поездки.

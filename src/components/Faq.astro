@@ -15,7 +15,7 @@ const { heading = getI18n(locale).common.faqHeading, items } = Astro.props;
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  mainEntity: items.map(item => ({
+  mainEntity: items.map((item) => ({
     '@type': 'Question',
     name: item.q,
     acceptedAnswer: { '@type': 'Answer', text: item.a },
@@ -29,21 +29,29 @@ const schema = {
   <div class="max-w-6xl mx-auto px-6 py-16">
     <SectionHeading title={heading} size="lg" class="mb-8" />
     <div class="space-y-3 max-w-3xl">
-      {items.map(item => (
-        <details class="faq-item group rounded-sm border bg-surface border-default">
-          <summary class="flex items-center justify-between gap-4 p-4 cursor-pointer list-none text-sm font-medium text-primary">
-            {item.q}
-            <ChevronDown size={16} class="faq-chevron shrink-0 text-muted" />
-          </summary>
-          <p class="px-4 pb-4 text-sm leading-relaxed text-muted">{item.a}</p>
-        </details>
-      ))}
+      {
+        items.map((item) => (
+          <details class="faq-item group rounded-sm border bg-surface border-default">
+            <summary class="flex items-center justify-between gap-4 p-4 cursor-pointer list-none text-sm font-medium text-primary">
+              {item.q}
+              <ChevronDown size={16} class="faq-chevron shrink-0 text-muted" />
+            </summary>
+            <p class="px-4 pb-4 text-sm leading-relaxed text-muted">{item.a}</p>
+          </details>
+        ))
+      }
     </div>
   </div>
 </section>
 
 <style>
-  .faq-item summary::-webkit-details-marker { display: none; }
-  .faq-chevron { transition: transform 0.2s; }
-  .faq-item[open] .faq-chevron { transform: rotate(180deg); }
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq-chevron {
+    transition: transform 0.2s;
+  }
+  .faq-item[open] .faq-chevron {
+    transform: rotate(180deg);
+  }
 </style>

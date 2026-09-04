@@ -1,12 +1,12 @@
-@import "tailwindcss";
-@import "@fontsource/outfit/300.css";
-@import "@fontsource/outfit/400.css";
-@import "@fontsource/outfit/500.css";
-@import "@fontsource/outfit/600.css";
-@import "@fontsource/outfit/700.css";
-@import "@fontsource/playfair-display/700.css";
-@import "@fontsource/playfair-display/700-italic.css";
-@import "@fontsource/playfair-display/800.css";
+@import 'tailwindcss';
+@import '@fontsource/outfit/300.css';
+@import '@fontsource/outfit/400.css';
+@import '@fontsource/outfit/500.css';
+@import '@fontsource/outfit/600.css';
+@import '@fontsource/outfit/700.css';
+@import '@fontsource/playfair-display/700.css';
+@import '@fontsource/playfair-display/700-italic.css';
+@import '@fontsource/playfair-display/800.css';
 
 /* Logo/header text (APPROVED + .RS badge): font-display: swap always paints the
    fallback first, then swaps and reflows since the fallback has different
@@ -20,113 +20,137 @@
   font-style: normal;
   font-weight: 700;
   font-display: optional;
-  src: url('../../node_modules/@fontsource/playfair-display/files/playfair-display-latin-700-normal.woff2') format('woff2'),
-       url('../../node_modules/@fontsource/playfair-display/files/playfair-display-latin-700-normal.woff') format('woff');
-  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+  src:
+    url('../../node_modules/@fontsource/playfair-display/files/playfair-display-latin-700-normal.woff2')
+      format('woff2'),
+    url('../../node_modules/@fontsource/playfair-display/files/playfair-display-latin-700-normal.woff')
+      format('woff');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
   font-family: 'Outfit';
   font-style: normal;
   font-weight: 600;
   font-display: optional;
-  src: url('../../node_modules/@fontsource/outfit/files/outfit-latin-600-normal.woff2') format('woff2'),
-       url('../../node_modules/@fontsource/outfit/files/outfit-latin-600-normal.woff') format('woff');
-  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+  src:
+    url('../../node_modules/@fontsource/outfit/files/outfit-latin-600-normal.woff2')
+      format('woff2'),
+    url('../../node_modules/@fontsource/outfit/files/outfit-latin-600-normal.woff')
+      format('woff');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
 }
 
 @theme {
   /* ── Light default palette ── */
-  --color-bg:            #F4F6FA;
-  --color-surface:       #FFFFFF;
-  --color-surface-2:     #EAECF4;
-  --color-border:        #D8DCE8;
-  --color-border-strong: #C4C9D8;
-  --color-text:          #0D0F14;
-  --color-text-2:        #2D3448;
-  --color-muted:         #6B7280;
-  --color-accent:        #1E3A5F;
-  --color-accent-hover:  #142E50;
-  --color-accent-glow:   rgba(30, 58, 95, 0.18);
-  --color-on-accent:     #ffffff;
+  --color-bg: #f4f6fa;
+  --color-surface: #ffffff;
+  --color-surface-2: #eaecf4;
+  --color-border: #d8dce8;
+  --color-border-strong: #c4c9d8;
+  --color-text: #0d0f14;
+  --color-text-2: #2d3448;
+  --color-muted: #6b7280;
+  --color-accent: #1e3a5f;
+  --color-accent-hover: #142e50;
+  --color-accent-glow: rgba(30, 58, 95, 0.18);
+  --color-on-accent: #ffffff;
 
   /* ── Semantic alpha tokens (light defaults) ── */
-  --color-accent-subtle:  rgba(30, 58, 95, 0.06);
-  --color-accent-soft:    rgba(30, 58, 95, 0.10);
-  --color-accent-border:  rgba(30, 58, 95, 0.22);
-  --color-accent-mid:     rgba(30, 58, 95, 0.30);
-  --color-surface-glass:  rgba(255, 255, 255, 0.95);
-  --color-header-glass:   rgba(244, 246, 250, 0.90);
-  --color-header-mobile:  rgba(244, 246, 250, 0.99);
+  --color-accent-subtle: rgba(30, 58, 95, 0.06);
+  --color-accent-soft: rgba(30, 58, 95, 0.1);
+  --color-accent-border: rgba(30, 58, 95, 0.22);
+  --color-accent-mid: rgba(30, 58, 95, 0.3);
+  --color-surface-glass: rgba(255, 255, 255, 0.95);
+  --color-header-glass: rgba(244, 246, 250, 0.9);
+  --color-header-mobile: rgba(244, 246, 250, 0.99);
 
   --font-display: 'Playfair Display', Georgia, serif;
-  --font-sans:    'Outfit', system-ui, sans-serif;
+  --font-sans: 'Outfit', system-ui, sans-serif;
 
   /* Ink-stamp accent — used only by the hero "approved" seal, nowhere else. */
-  --color-stamp-ink: #B23A2E;
+  --color-stamp-ink: #b23a2e;
 }
 
 /* ── Non-class tokens (only used in CSS rules / inline gradients) ── */
 :root {
-  --color-grid-line:    rgba(59, 79, 110, 0.06);
-  --color-deco-stroke:  rgba(59, 79, 110, 0.05);
+  --color-grid-line: rgba(59, 79, 110, 0.06);
+  --color-deco-stroke: rgba(59, 79, 110, 0.05);
   --color-ambient-glow: rgba(59, 79, 110, 0.05);
-  --grain-opacity:      0.012;
-  --ease-spring:        cubic-bezier(0.16, 1, 0.3, 1);
+  --grain-opacity: 0.012;
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Semantic z-index scale */
-  --z-base:    0;
-  --z-raised:  10;
-  --z-sticky:  40;
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 40;
   --z-overlay: 50;
-  --z-modal:   60;
-  --z-grain:   70;
-  --z-toast:   80;
+  --z-modal: 60;
+  --z-grain: 70;
+  --z-toast: 80;
 }
 
 /* ── Dark theme overrides ── */
-[data-theme="dark"] {
-  --color-bg:            #0D0F14;
-  --color-surface:       #14171F;
-  --color-surface-2:     #1B1F2A;
-  --color-border:        #22273A;
-  --color-border-strong: #2D3448;
-  --color-text:          #F1F3F9;
-  --color-text-2:        #C8D0E0;
-  --color-muted:         #8892A4;
-  --color-accent:        #94A3B8;
-  --color-accent-hover:  #CBD5E1;
-  --color-accent-glow:   rgba(148, 163, 184, 0.2);
-  --color-on-accent:     #0D0F14;
+[data-theme='dark'] {
+  --color-bg: #0d0f14;
+  --color-surface: #14171f;
+  --color-surface-2: #1b1f2a;
+  --color-border: #22273a;
+  --color-border-strong: #2d3448;
+  --color-text: #f1f3f9;
+  --color-text-2: #c8d0e0;
+  --color-muted: #8892a4;
+  --color-accent: #94a3b8;
+  --color-accent-hover: #cbd5e1;
+  --color-accent-glow: rgba(148, 163, 184, 0.2);
+  --color-on-accent: #0d0f14;
 
-  --color-accent-subtle:  rgba(148, 163, 184, 0.07);
-  --color-accent-soft:    rgba(148, 163, 184, 0.12);
-  --color-accent-border:  rgba(148, 163, 184, 0.22);
-  --color-accent-mid:     rgba(148, 163, 184, 0.36);
-  --color-surface-glass:  rgba(20, 23, 31, 0.92);
-  --color-header-glass:   rgba(13, 15, 20, 0.88);
-  --color-header-mobile:  rgba(13, 15, 20, 0.98);
+  --color-accent-subtle: rgba(148, 163, 184, 0.07);
+  --color-accent-soft: rgba(148, 163, 184, 0.12);
+  --color-accent-border: rgba(148, 163, 184, 0.22);
+  --color-accent-mid: rgba(148, 163, 184, 0.36);
+  --color-surface-glass: rgba(20, 23, 31, 0.92);
+  --color-header-glass: rgba(13, 15, 20, 0.88);
+  --color-header-mobile: rgba(13, 15, 20, 0.98);
 
-  --color-grid-line:    rgba(148, 163, 184, 0.05);
-  --color-deco-stroke:  rgba(148, 163, 184, 0.07);
+  --color-grid-line: rgba(148, 163, 184, 0.05);
+  --color-deco-stroke: rgba(148, 163, 184, 0.07);
   --color-ambient-glow: rgba(148, 163, 184, 0.06);
-  --grain-opacity:      0.03;
+  --grain-opacity: 0.03;
 
-  --color-stamp-ink: #D9695A;
+  --color-stamp-ink: #d9695a;
 }
 
 /* ── Readable aliases for Tailwind's auto-generated names ──────────── */
 /* Tailwind v4 generates bg-surface, text-muted, border-border etc.    */
 /* These aliases make common patterns more readable.                    */
 @layer utilities {
-  .text-primary   { color: var(--color-text); }
-  .text-secondary { color: var(--color-text-2); }
-  .text-on-accent { color: var(--color-on-accent); }
-  .bg-page        { background-color: var(--color-bg); }
-  .border-default { border-color: var(--color-border); }
+  .text-primary {
+    color: var(--color-text);
+  }
+  .text-secondary {
+    color: var(--color-text-2);
+  }
+  .text-on-accent {
+    color: var(--color-on-accent);
+  }
+  .bg-page {
+    background-color: var(--color-bg);
+  }
+  .border-default {
+    border-color: var(--color-border);
+  }
 }
 
 /* ─── Base ─────────────────────────────────────────────── */
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+}
 
 body {
   background-color: var(--color-bg);
@@ -135,15 +159,16 @@ body {
   font-weight: 400;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.3s, color 0.3s;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
 }
 
 body::after {
   content: '';
   position: fixed;
   inset: 0;
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
   opacity: var(--grain-opacity);
   pointer-events: none;
   z-index: var(--z-grain);
@@ -151,7 +176,10 @@ body::after {
   transition: opacity 0.3s;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: var(--font-display);
   font-weight: 700;
   line-height: 1.15;
@@ -160,35 +188,79 @@ h1, h2, h3, h4 {
 }
 
 @layer base {
-  a { color: inherit; text-decoration: none; }
-  button:not(:disabled), [role="button"]:not([aria-disabled="true"]) { cursor: pointer; }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']) {
+    cursor: pointer;
+  }
 }
 
-::selection { background: var(--color-accent); color: var(--color-bg); }
+::selection {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
 
-::-webkit-scrollbar       { width: 4px; }
-::-webkit-scrollbar-track { background: var(--color-bg); }
-::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
 
 /* ─── Animations ─────────────────────────────────────────── */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(22px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @keyframes slideRight {
-  from { transform: scaleX(0); opacity: 0; }
-  to   { transform: scaleX(1); opacity: 1; }
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
 }
 
-.fade-up { animation: fadeUp 0.75s var(--ease-spring) both; }
-.fade-up-1 { animation-delay: 0.06s; }
-.fade-up-2 { animation-delay: 0.16s; }
-.fade-up-3 { animation-delay: 0.28s; }
-.fade-up-4 { animation-delay: 0.42s; }
-.fade-up-5 { animation-delay: 0.56s; }
-.fade-up-6 { animation-delay: 0.72s; }
+.fade-up {
+  animation: fadeUp 0.75s var(--ease-spring) both;
+}
+.fade-up-1 {
+  animation-delay: 0.06s;
+}
+.fade-up-2 {
+  animation-delay: 0.16s;
+}
+.fade-up-3 {
+  animation-delay: 0.28s;
+}
+.fade-up-4 {
+  animation-delay: 0.42s;
+}
+.fade-up-5 {
+  animation-delay: 0.56s;
+}
+.fade-up-6 {
+  animation-delay: 0.72s;
+}
 
 /* ─── Button loading state ──────────────────────────────────
    Shared by every Button.astro instance — toggle `.is-loading` on the
@@ -196,9 +268,13 @@ h1, h2, h3, h4 {
    has to wait on) and this handles hiding the label / showing the spinner.
    Nothing to build per call site. */
 @keyframes btnSpin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
-.btn { position: relative; }
+.btn {
+  position: relative;
+}
 .btn-label {
   display: inline-flex;
   align-items: center;
@@ -227,8 +303,12 @@ h1, h2, h3, h4 {
 }
 
 /* Staggered entrance for inline-animated elements (delay via --anim-delay var) */
-.anim-inline      { animation: fadeUp 0.75s var(--anim-delay, 0s) var(--ease-spring) both; }
-.anim-inline-fast { animation: fadeUp 0.5s  var(--anim-delay, 0s) var(--ease-spring) both; }
+.anim-inline {
+  animation: fadeUp 0.75s var(--anim-delay, 0s) var(--ease-spring) both;
+}
+.anim-inline-fast {
+  animation: fadeUp 0.5s var(--anim-delay, 0s) var(--ease-spring) both;
+}
 
 /* ─── Eyebrow label ──────────────────────────────────────── */
 .eyebrow {
@@ -347,11 +427,17 @@ h1, h2, h3, h4 {
 
 /* ─── Glow hover card ────────────────────────────────────── */
 .glow-border {
-  transition: border-color 0.3s, box-shadow 0.3s, background-color 0.25s, transform 0.25s;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s,
+    background-color 0.25s,
+    transform 0.25s;
 }
 .glow-border:hover {
   border-color: var(--color-accent-mid) !important;
-  box-shadow: 0 0 0 1px var(--color-accent-subtle), 0 8px 40px var(--color-ambient-glow);
+  box-shadow:
+    0 0 0 1px var(--color-accent-subtle),
+    0 8px 40px var(--color-ambient-glow);
 }
 
 /* ─── Sliding pill tab switcher (shared visual: LeadForm contact tabs,
@@ -364,24 +450,41 @@ h1, h2, h3, h4 {
   left: 0;
   border-radius: 2px;
   background: var(--color-accent);
-  transition: transform 0.35s var(--ease-spring), width 0.35s var(--ease-spring);
+  transition:
+    transform 0.35s var(--ease-spring),
+    width 0.35s var(--ease-spring);
   will-change: transform, width;
 }
-.pill-tab { transition: color 0.2s; background: transparent; border: none; }
+.pill-tab {
+  transition: color 0.2s;
+  background: transparent;
+  border: none;
+}
 
 /* ─── Reduced motion ─────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .fade-up, .fade-up-1, .fade-up-2, .fade-up-3,
-  .fade-up-4, .fade-up-5, .fade-up-6,
-  .anim-inline, .anim-inline-fast {
+  .fade-up,
+  .fade-up-1,
+  .fade-up-2,
+  .fade-up-3,
+  .fade-up-4,
+  .fade-up-5,
+  .fade-up-6,
+  .anim-inline,
+  .anim-inline-fast {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
-  .eyebrow::before { animation: none; }
+  .eyebrow::before {
+    animation: none;
+  }
   /* Suppress movement; preserve color/opacity/shadow feedback */
-  *, *::before, *::after {
-    transition-property: color, background-color, border-color, box-shadow, outline-color !important;
+  *,
+  *::before,
+  *::after {
+    transition-property:
+      color, background-color, border-color, box-shadow, outline-color !important;
     transition-duration: 0.2s !important;
   }
 }
@@ -389,12 +492,14 @@ h1, h2, h3, h4 {
 /* ─── Form fields ───────────────────────────────────────── */
 /* iOS Safari auto-zooms the viewport on focus when an input's font-size is
    under 16px — text-sm (14px) on .form-field triggered it on every phone. */
-.form-field { font-size: 16px !important; }
+.form-field {
+  font-size: 16px !important;
+}
 
 /* ─── Form validation ───────────────────────────────────── */
 .form-field.has-error {
   border-color: #dc2626 !important;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.10) !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
 }
 .field-error {
   color: #dc2626;
@@ -412,26 +517,41 @@ h1, h2, h3, h4 {
    every other heading on the site sizes itself with a Tailwind class, but
    Markdown-rendered headings here have no such class, so they'd otherwise
    inherit the body's 1rem and look identical to a bold paragraph. */
-.prose-custom h1 { font-size: 1.75rem; }
-.prose-custom h2 { font-size: 1.5rem; }
-.prose-custom h3 { font-size: 1.25rem; }
-.prose-custom h4 { font-size: 1.125rem; }
-.prose-custom h1, .prose-custom h2, .prose-custom h3, .prose-custom h4 {
+.prose-custom h1 {
+  font-size: 1.75rem;
+}
+.prose-custom h2 {
+  font-size: 1.5rem;
+}
+.prose-custom h3 {
+  font-size: 1.25rem;
+}
+.prose-custom h4 {
+  font-size: 1.125rem;
+}
+.prose-custom h1,
+.prose-custom h2,
+.prose-custom h3,
+.prose-custom h4 {
   margin-top: 2rem;
   margin-bottom: 0.75rem;
 }
-.prose-custom h1:first-child, .prose-custom h2:first-child,
-.prose-custom h3:first-child, .prose-custom h4:first-child {
+.prose-custom h1:first-child,
+.prose-custom h2:first-child,
+.prose-custom h3:first-child,
+.prose-custom h4:first-child {
   margin-top: 0;
 }
 /* Content already wraps key terms in **bold** — give <strong> the accent
    color so those terms actually stand out instead of just being black-bold,
    breaking up long runs of text for scanning. */
-.prose-custom strong, .prose-custom b {
+.prose-custom strong,
+.prose-custom b {
   color: var(--color-accent);
   font-weight: 700;
 }
-.prose-custom ul, .prose-custom ol {
+.prose-custom ul,
+.prose-custom ol {
   margin: 1rem 0 1.5rem;
 }
 .prose-custom ol {
@@ -496,7 +616,12 @@ h1, h2, h3, h4 {
 .divider {
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-border),
+    transparent
+  );
 }
 
 /* ─── Dropdown (src/components/Dropdown.astro) ──────────────
@@ -504,13 +629,21 @@ h1, h2, h3, h4 {
    <slot> content that the *consumer* provides (LanguageSwitcher.astro,
    Header.astro's services menu), and Astro's scoped-style attribute is
    never applied to slotted children — only global CSS can reach them. */
-.dropdown-trigger { transition: color 0.2s; }
+.dropdown-trigger {
+  transition: color 0.2s;
+}
 .dropdown-trigger:hover,
-.dropdown-trigger[aria-expanded="true"],
-.dropdown-trigger-active { color: var(--color-text) !important; }
+.dropdown-trigger[aria-expanded='true'],
+.dropdown-trigger-active {
+  color: var(--color-text) !important;
+}
 
-.dropdown-chevron { transition: transform 0.25s var(--ease-spring); }
-.dropdown-trigger[aria-expanded="true"] .dropdown-chevron { transform: rotate(180deg); }
+.dropdown-chevron {
+  transition: transform 0.25s var(--ease-spring);
+}
+.dropdown-trigger[aria-expanded='true'] .dropdown-chevron {
+  transform: rotate(180deg);
+}
 
 .dropdown-menu {
   position: absolute;
@@ -526,10 +659,18 @@ h1, h2, h3, h4 {
   opacity: 0;
   transform: translateY(-4px) scale(0.97);
   pointer-events: none;
-  transition: opacity 0.2s var(--ease-spring), transform 0.2s var(--ease-spring);
+  transition:
+    opacity 0.2s var(--ease-spring),
+    transform 0.2s var(--ease-spring);
 }
-.dropdown-menu[data-align="right"] { right: 0; transform-origin: top right; }
-.dropdown-menu[data-align="left"] { left: 0; transform-origin: top left; }
+.dropdown-menu[data-align='right'] {
+  right: 0;
+  transform-origin: top right;
+}
+.dropdown-menu[data-align='left'] {
+  left: 0;
+  transform-origin: top left;
+}
 .dropdown.dropdown-open .dropdown-menu {
   opacity: 1;
   transform: translateY(0) scale(1);
@@ -541,11 +682,23 @@ h1, h2, h3, h4 {
   align-items: center;
   color: var(--color-muted);
   text-decoration: none;
-  transition: background-color 0.15s, color 0.15s;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
 }
-.dropdown-option:hover { background: var(--color-surface-2); color: var(--color-text) !important; }
-.dropdown-option-active { color: var(--color-accent) !important; font-weight: 500; background: var(--color-accent-subtle); }
+.dropdown-option:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text) !important;
+}
+.dropdown-option-active {
+  color: var(--color-accent) !important;
+  font-weight: 500;
+  background: var(--color-accent-subtle);
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .dropdown-menu, .dropdown-chevron { transition: none; }
+  .dropdown-menu,
+  .dropdown-chevron {
+    transition: none;
+  }
 }

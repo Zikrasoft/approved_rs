@@ -11,11 +11,13 @@
 The mobile menu currently appears and disappears instantly via a `hidden` class toggle in JavaScript. This abrupt show/hide feels low-quality relative to the rest of the site's motion vocabulary.
 
 **src/components/Header.astro — current JS (burger click handler)**
+
 ```js
 menu.classList.toggle('hidden');
 ```
 
 **src/components/Header.astro — current CSS**
+
 ```css
 /* No transition on #mobile-menu */
 ```
@@ -48,14 +50,14 @@ burger.addEventListener('click', function () {
   var expanded = burger.getAttribute('aria-expanded') === 'true';
   burger.setAttribute('aria-expanded', String(!expanded));
   menu.classList.toggle('menu-open');
-  open  && open.classList.toggle('hidden');
+  open && open.classList.toggle('hidden');
   close && close.classList.toggle('hidden');
 });
 
 menu.querySelectorAll('a').forEach(function (a) {
   a.addEventListener('click', function () {
     menu.classList.remove('menu-open');
-    open  && open.classList.remove('hidden');
+    open && open.classList.remove('hidden');
     close && close.classList.add('hidden');
     burger.setAttribute('aria-expanded', 'false');
   });
@@ -63,14 +65,24 @@ menu.querySelectorAll('a').forEach(function (a) {
 ```
 
 Remove `hidden` from the initial HTML so CSS controls visibility:
+
 ```astro
 <!-- current -->
-<div id="mobile-menu" class="hidden md:hidden border-t bg-header-mobile border-default">
-<!-- target -->
-<div id="mobile-menu" class="md:hidden border-t bg-header-mobile border-default">
+<div
+  id="mobile-menu"
+  class="hidden md:hidden border-t bg-header-mobile border-default"
+>
+  <!-- target -->
+  <div
+    id="mobile-menu"
+    class="md:hidden border-t bg-header-mobile border-default"
+  >
+  </div>
+</div>
 ```
 
 Reduced-motion variant (in the existing `@media (prefers-reduced-motion: reduce)` block in global.css):
+
 ```css
 #mobile-menu {
   transition: opacity 0.15s ease;

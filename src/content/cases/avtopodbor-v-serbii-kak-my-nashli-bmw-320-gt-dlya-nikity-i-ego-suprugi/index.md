@@ -180,7 +180,7 @@ translations:
 
       **Rezultat ovog auto podbora:** BMW 320 GT sa N47 motorom od 184 KS, kompletnom servisnom istorijom iz ovlašćenog BMW servisa, poreklom iz Nemačke, oko četiri godine eksploatacije u Srbiji, proverenim stanjem lanca razvoda i dva kompleta točkova.
   es:
-    title: "Selección de Autos en Serbia: cómo encontramos un BMW 320 GT para Nikita y su esposa"
+    title: 'Selección de Autos en Serbia: cómo encontramos un BMW 320 GT para Nikita y su esposa'
     body: |-
       La compra de un automóvil de segunda mano en Serbia es una tarea que requiere mucho más que simplemente revisar anuncios y hacer una breve prueba de manejo. Especialmente cuando se trata de un BMW, donde es crucial verificar no solo la carrocería y el estado técnico, sino también el historial de mantenimiento, el kilometraje real y el estado de los componentes específicos del motor.
 
@@ -241,7 +241,7 @@ translations:
 
       Esta es la tarea de la selección profesional de autos: encontrar no solo un automóvil, sino el ejemplar específico adecuado y minimizar los riesgos al comprar un vehículo de segunda mano en Serbia.
   de:
-    title: "Autoauswahl in Serbien: Wie wir einen BMW 320 GT für Nikita und seine Frau fanden"
+    title: 'Autoauswahl in Serbien: Wie wir einen BMW 320 GT für Nikita und seine Frau fanden'
     body: |-
       Der Kauf eines Gebrauchtwagens in Serbien erfordert viel mehr Aufmerksamkeit als nur das Durchsehen von Kleinanzeigen und eine kurze Probefahrt. Besonders wenn es um BMW geht, ist es wichtig, nicht nur das Karosserie und den technischen Zustand zu prüfen, sondern auch die Wartungsgeschichte, den tatsächlichen Kilometerstand und den Zustand der spezifischen Motorbauteile.
 
@@ -314,6 +314,7 @@ date: 2025-10-10
 published: true
 translatedFrom: 16d2b30ddece723e
 ---
+
 Покупка автомобиля с пробегом в Сербии — задача, которая требует гораздо большего внимания, чем просто просмотр объявлений и короткая поездка на тест-драйв. Особенно если речь идёт о BMW, где важно проверить не только кузов и техническое состояние, но и историю обслуживания, реальный пробег и состояние узлов, характерных для конкретного двигателя.
 
 В рамках **автоподбора в Сербии** мы помогли Никите и его супруге подобрать BMW 320 GT — автомобиль, который соответствовал их требованиям по комфорту, практичности и техническому состоянию.

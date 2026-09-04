@@ -9,11 +9,21 @@ import type { Locale } from '@/i18n/config';
 //
 // The 3 services with a [country] route (vehicle-import and
 // auto-service-belgrade don't have one):
-export const COUNTRY_SCOPED_SERVICE_SLUGS = ['vehicle-sourcing', 'vehicle-buyback', 'vehicle-inspection'] as const;
-export type CountryScopedServiceSlug = (typeof COUNTRY_SCOPED_SERVICE_SLUGS)[number];
+export const COUNTRY_SCOPED_SERVICE_SLUGS = [
+  'vehicle-sourcing',
+  'vehicle-buyback',
+  'vehicle-inspection',
+] as const;
+export type CountryScopedServiceSlug =
+  (typeof COUNTRY_SCOPED_SERVICE_SLUGS)[number];
 
 // Every service slug, country-scoped or not:
-export const SERVICE_SLUGS = [...COUNTRY_SCOPED_SERVICE_SLUGS, 'vehicle-import', 'auto-service-belgrade', 'detailing-belgrade'] as const;
+export const SERVICE_SLUGS = [
+  ...COUNTRY_SCOPED_SERVICE_SLUGS,
+  'vehicle-import',
+  'auto-service-belgrade',
+  'detailing-belgrade',
+] as const;
 export type ServiceSlug = (typeof SERVICE_SLUGS)[number];
 
 // Named handles for each slug, used below in getNavItems (nav[SLUG.SOURCING],
@@ -35,18 +45,27 @@ export const SLUG = {
 // enum value. Shared by CaseCategoryTabs' `active` prop, CasesTabPage's prop it's
 // threaded through from, and getPromoBanners()'s `kind` param — one definition
 // instead of the same literal union retyped in 3 files.
-export type CasesTabKind = 'vehicle-sourcing' | 'vehicle-buyback' | 'vehicle-inspection' | 'vehicle-import' | 'auto-service' | 'detailing';
+export type CasesTabKind =
+  | 'vehicle-sourcing'
+  | 'vehicle-buyback'
+  | 'vehicle-inspection'
+  | 'vehicle-import'
+  | 'auto-service'
+  | 'detailing';
 
 // `slug` is both the URL path segment AND the internal identifier
 // (dictionary/content keys, formService, SERVICE_LABELS) — fully unified
 // after the site-wide English-slug migration, no more decoupling needed.
-export const SERVICES: { slug: CountryScopedServiceSlug }[] = COUNTRY_SCOPED_SERVICE_SLUGS.map(slug => ({ slug }));
+export const SERVICES: { slug: CountryScopedServiceSlug }[] =
+  COUNTRY_SCOPED_SERVICE_SLUGS.map((slug) => ({ slug }));
 
 // Type guard instead of an unchecked `as CountryScopedServiceSlug` cast —
 // narrows a page's broader `currentService: ServiceSlug` down to the 3 that
 // actually have a [country] route, so a page passing e.g. 'vehicle-import'
 // just skips the country cross-links instead of building a broken href.
-export function isCountryScopedServiceSlug(slug: string): slug is CountryScopedServiceSlug {
+export function isCountryScopedServiceSlug(
+  slug: string,
+): slug is CountryScopedServiceSlug {
   return (COUNTRY_SCOPED_SERVICE_SLUGS as readonly string[]).includes(slug);
 }
 
@@ -55,15 +74,31 @@ export function isCountryScopedServiceSlug(slug: string): slug is CountryScopedS
 // remaining per-country SERVICES. Shared by Header (desktop + mobile) and Footer.
 export const getNavItems = (
   locale: Locale,
-  countryCode: string
+  countryCode: string,
 ): { href: string; label: string; slug: string }[] => {
   const nav = getI18n(locale).nav;
   return [
-    { href: PathBuilder.vehicleSourcingHub(locale), label: nav[SLUG.SOURCING], slug: SLUG.SOURCING },
-    { href: PathBuilder.vehicleImportHub(locale), label: nav[SLUG.IMPORT], slug: SLUG.IMPORT },
-    { href: PathBuilder.autoServiceBelgrade(locale), label: nav[SLUG.AUTO_SERVICE], slug: SLUG.AUTO_SERVICE },
-    { href: PathBuilder.detailingBelgrade(locale), label: nav[SLUG.DETAILING], slug: SLUG.DETAILING },
-    ...SERVICES.filter(s => s.slug !== SLUG.SOURCING).map(s => ({
+    {
+      href: PathBuilder.vehicleSourcingHub(locale),
+      label: nav[SLUG.SOURCING],
+      slug: SLUG.SOURCING,
+    },
+    {
+      href: PathBuilder.vehicleImportHub(locale),
+      label: nav[SLUG.IMPORT],
+      slug: SLUG.IMPORT,
+    },
+    {
+      href: PathBuilder.autoServiceBelgrade(locale),
+      label: nav[SLUG.AUTO_SERVICE],
+      slug: SLUG.AUTO_SERVICE,
+    },
+    {
+      href: PathBuilder.detailingBelgrade(locale),
+      label: nav[SLUG.DETAILING],
+      slug: SLUG.DETAILING,
+    },
+    ...SERVICES.filter((s) => s.slug !== SLUG.SOURCING).map((s) => ({
       href: PathBuilder.service(locale, s.slug, countryCode),
       label: nav[s.slug],
       slug: s.slug,
@@ -80,9 +115,9 @@ export function isNavItemActive(
   item: { href: string; slug: string },
   locale: Locale,
   navCountry: string,
-  pathname: string
+  pathname: string,
 ): boolean {
-  const isCountryScoped = SERVICES.some(s => s.slug === item.slug);
+  const isCountryScoped = SERVICES.some((s) => s.slug === item.slug);
   if (!isCountryScoped) return pathname.startsWith(item.href);
   const segments = pathname.split('/').filter(Boolean);
   if (segments[0] !== locale || segments[1] !== item.slug) return false;
@@ -108,7 +143,13 @@ export const SERVICE_LABELS: Record<string, string> = {
   'vehicle-import': 'Привоз авто',
 };
 
-export const AUTOSERVICE_SERVICES = ['diagnostics', 'maintenance', 'suspension', 'engine', 'prepurchase'] as const;
+export const AUTOSERVICE_SERVICES = [
+  'diagnostics',
+  'maintenance',
+  'suspension',
+  'engine',
+  'prepurchase',
+] as const;
 
 // Detailing services a case can be tagged with — a case can carry several
 // at once (e.g. wrap + ceramic on the same car), same array-tag shape as

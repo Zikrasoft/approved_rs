@@ -20,19 +20,19 @@
 
 В Vercel Dashboard → Settings → Environment Variables добавить:
 
-| Переменная | Описание | Где взять |
-|---|---|---|
-| `SITE` | Публичный URL сайта, напр. `https://approved.rs` | Домен проекта |
-| `PUBLIC_TG_MANAGER` | Username Telegram менеджера (без @) | — |
-| `PUBLIC_THREADS_CHANNEL` | Username Threads-канала (без @) | — |
-| `TELEGRAM_BOT_TOKEN` | Токен бота для приёма заявок | [@BotFather](https://t.me/BotFather) |
-| `TELEGRAM_GROUP_ID` | ID группы куда слать заявки | `@username` или `-100...` |
-| `TELEGRAM_WEBHOOK_SECRET` | Секрет для проверки запросов к `/api/telegram-webhook` | Придумать самим, любая случайная строка |
-| `TELEGRAM_OWNER_ID` | Telegram user id владельца (числовой, не @username) — доступ к личному меню бота. Через запятую, если у человека несколько аккаунтов (`111,222`) | [@userinfobot](https://t.me/userinfobot) |
-| `TELEGRAM_ADMIN_ID` | Telegram user id админа/партнёра — доступ к финансовому меню бота. Тоже можно через запятую | [@userinfobot](https://t.me/userinfobot) |
-| `TELEGRAM_BOT_USERNAME` | @username бота без `@`, для deep-link кнопки «Открыть в боте» в группе | [@BotFather](https://t.me/BotFather) или один раз `getMe` |
-| `CRON_SECRET` | Секрет для проверки запросов Vercel Cron к `/api/reminders` (шлёт владельцу отложенные «напомни мне» напоминания в срок) | Придумать самим, любая случайная строка |
-| `BLOB_READ_WRITE_TOKEN` | Доступ к Vercel Blob (хранилище заявок/сделок) | Автоматически, после подключения Blob store в Storage tab — руками не задавать |
+| Переменная                | Описание                                                                                                                                         | Где взять                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| `SITE`                    | Публичный URL сайта, напр. `https://approved.rs`                                                                                                 | Домен проекта                                                                  |
+| `PUBLIC_TG_MANAGER`       | Username Telegram менеджера (без @)                                                                                                              | —                                                                              |
+| `PUBLIC_THREADS_CHANNEL`  | Username Threads-канала (без @)                                                                                                                  | —                                                                              |
+| `TELEGRAM_BOT_TOKEN`      | Токен бота для приёма заявок                                                                                                                     | [@BotFather](https://t.me/BotFather)                                           |
+| `TELEGRAM_GROUP_ID`       | ID группы куда слать заявки                                                                                                                      | `@username` или `-100...`                                                      |
+| `TELEGRAM_WEBHOOK_SECRET` | Секрет для проверки запросов к `/api/telegram-webhook`                                                                                           | Придумать самим, любая случайная строка                                        |
+| `TELEGRAM_OWNER_ID`       | Telegram user id владельца (числовой, не @username) — доступ к личному меню бота. Через запятую, если у человека несколько аккаунтов (`111,222`) | [@userinfobot](https://t.me/userinfobot)                                       |
+| `TELEGRAM_ADMIN_ID`       | Telegram user id админа/партнёра — доступ к финансовому меню бота. Тоже можно через запятую                                                      | [@userinfobot](https://t.me/userinfobot)                                       |
+| `TELEGRAM_BOT_USERNAME`   | @username бота без `@`, для deep-link кнопки «Открыть в боте» в группе                                                                           | [@BotFather](https://t.me/BotFather) или один раз `getMe`                      |
+| `CRON_SECRET`             | Секрет для проверки запросов Vercel Cron к `/api/reminders` (шлёт владельцу отложенные «напомни мне» напоминания в срок)                         | Придумать самим, любая случайная строка                                        |
+| `BLOB_READ_WRITE_TOKEN`   | Доступ к Vercel Blob (хранилище заявок/сделок)                                                                                                   | Автоматически, после подключения Blob store в Storage tab — руками не задавать |
 
 > `PUBLIC_*` переменные доступны в браузере — не класть в них секреты.
 
@@ -91,8 +91,8 @@ it against the whole branch name and `feature/x` never matches a bare `*`)
 Нужен один секрет в GitHub (Settings → Secrets and variables → Actions,
 **не** тот же файл, что `.env` на Vercel):
 
-| Секрет | Описание |
-|---|---|
+| Секрет           | Описание                                                                  |
+| ---------------- | ------------------------------------------------------------------------- |
 | `OPENAI_API_KEY` | Ключ OpenAI (можно тот же, что уже используется где-то ещё, если он есть) |
 
 Без него джоба просто упадёт на шаге перевода — существующий контент кейсов
@@ -130,12 +130,12 @@ curl "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/getWebhookInfo"
 
 `middleware.ts` в корне перехватывает запросы к `/` и редиректит по стране:
 
-| Страна | Редирект |
-|---|---|
-| DE | `/de/autopodbor/` |
-| RS | `/rs/autopodbor/` |
-| ES | `/es/autopodbor/` |
-| Остальные | Без редиректа |
+| Страна    | Редирект          |
+| --------- | ----------------- |
+| DE        | `/de/autopodbor/` |
+| RS        | `/rs/autopodbor/` |
+| ES        | `/es/autopodbor/` |
+| Остальные | Без редиректа     |
 
 Использует заголовок `x-vercel-ip-country` — доступен только на Vercel Edge.  
 Локально middleware не работает.
@@ -161,7 +161,7 @@ Vercel определяет версию pnpm по `lockfileVersion` в `pnpm-lo
 Локально можно использовать pnpm любой версии. Конфиг совместимости в `pnpm-workspace.yaml`:
 
 ```yaml
-allowBuilds:          # pnpm v11
+allowBuilds: # pnpm v11
   esbuild: true
   sharp: true
 onlyBuiltDependencies: # pnpm v9/v10 (Vercel)

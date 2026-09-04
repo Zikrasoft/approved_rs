@@ -1,34 +1,40 @@
 // astro.config.mjs
-import { defineConfig } from "astro/config";
-import vercel from "@astrojs/vercel";
-import react from "@astrojs/react";
-import keystatic from "@keystatic/astro";
-import sitemap from "@astrojs/sitemap";
-import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from 'astro/config';
+import vercel from '@astrojs/vercel';
+import react from '@astrojs/react';
+import keystatic from '@keystatic/astro';
+import sitemap from '@astrojs/sitemap';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  site: "https://approved.rs",
+  site: 'https://approved.rs',
   // Static by default — 14 of 15 pages are fully static; the two API routes
   // and the homepage (needs Astro.locals.suggestedCountry from middleware
   // for the geo banner) opt into SSR individually via `prerender = false`
   // instead of every static page opting in via `prerender = true`.
-  output: "static",
+  output: 'static',
   adapter: vercel(),
   i18n: {
-    locales: ["ru", "en", "sr", "es", "de"],
-    defaultLocale: "ru",
-    routing: "manual",
+    locales: ['ru', 'en', 'sr', 'es', 'de'],
+    defaultLocale: 'ru',
+    routing: 'manual',
   },
   integrations: [
     react(),
     keystatic(),
     sitemap({
       i18n: {
-        defaultLocale: "ru",
-        locales: { ru: "ru-RU", en: "en-US", sr: "sr-RS", es: "es-ES", de: "de-DE" },
+        defaultLocale: 'ru',
+        locales: {
+          ru: 'ru-RU',
+          en: 'en-US',
+          sr: 'sr-RS',
+          es: 'es-ES',
+          de: 'de-DE',
+        },
       },
       // Internal admin tool (see pages/admin/case-photos.astro), not a public page.
-      filter: (page) => !page.includes("/admin/case-photos"),
+      filter: (page) => !page.includes('/admin/case-photos'),
     }),
   ],
   // Legacy-slug + locale-prefix redirects live in src/middleware.ts for

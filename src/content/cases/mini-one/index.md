@@ -53,6 +53,7 @@ translations:
       Der einzige Nachteil war ein sehr schmutziges Interieur — die vorherige Besitzerin hatte nicht besonders auf die Sauberkeit des Fahrzeugs geachtet. Nach einer professionellen Innenreinigung, die Stanislav selbst durchgeführt hat, erstrahlt der Mini nun in neuem Glanz: Das Interieur sieht aus wie neu, riecht angenehm und bereitet dem Besitzer jeden Tag Freude.
 translatedFrom: 8b4b267aae141eef
 ---
+
 ## Автоподбор в Сербии — еще один удачный поиск автомобиля для нашего клиента!
 
 К нам обратился Станислав с интересной задачей. Несмотря на рост **195 см**, после примерки разных автомобилей оказалось, что именно **Mini** подходит ему лучше всего по посадке и комфорту. Главным условием был небольшой пробег и хорошее техническое состояние.

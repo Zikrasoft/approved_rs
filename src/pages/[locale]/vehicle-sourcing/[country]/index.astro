@@ -7,8 +7,16 @@ import Faq from '@/components/Faq.astro';
 import { getFaq } from '@/i18n/content/faq';
 import { getServicesContent } from '@/i18n/content/services';
 import { getCountryPaths, withLocales, PathBuilder } from '@/utils/paths';
-import { getCountry, getActiveCountries, getCitiesForCountry } from '@/utils/geo';
-import { generateMeta, generateServiceSchema, buildLocation } from '@/utils/seo';
+import {
+  getCountry,
+  getActiveCountries,
+  getCitiesForCountry,
+} from '@/utils/geo';
+import {
+  generateMeta,
+  generateServiceSchema,
+  buildLocation,
+} from '@/utils/seo';
 import { getVehicleImportCrossSellSpokes } from '@/utils/vehicleImportCrossSell';
 import { getCollection } from 'astro:content';
 import { SITE_URL } from '@/utils/constants';
@@ -19,20 +27,40 @@ const { locale, country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
 const sc = getServicesContent(locale)['vehicle-sourcing'];
 const location = buildLocation(locale, country);
-const meta = generateMeta('vehicle-sourcing', { country, baseUrl: SITE_URL, path: PathBuilder.service(locale, 'vehicle-sourcing', countryCode!), locale: locale });
-const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === countryCode && c.data.service === 'vehicle-sourcing').slice(0, 3);
-const schema = generateServiceSchema(`${sc.title} ${location}`, country[locale].name, meta.canonical);
+const meta = generateMeta('vehicle-sourcing', {
+  country,
+  baseUrl: SITE_URL,
+  path: PathBuilder.service(locale, 'vehicle-sourcing', countryCode!),
+  locale: locale,
+});
+const cases = (await getCollection('cases'))
+  .filter(
+    (c) =>
+      c.data.published &&
+      c.data.country === countryCode &&
+      c.data.service === 'vehicle-sourcing',
+  )
+  .slice(0, 3);
+const schema = generateServiceSchema(
+  `${sc.title} ${location}`,
+  country[locale].name,
+  meta.canonical,
+);
 
 // Link text reuses each spoke's own title instead of new strings.
 const vehicleImportContent = getServicesContent(locale)['vehicle-import'];
-const vehicleImportCrossSellLinks = getVehicleImportCrossSellSpokes(countryCode!).map(slug => ({
+const vehicleImportCrossSellLinks = getVehicleImportCrossSellSpokes(
+  countryCode!,
+).map((slug) => ({
   href: PathBuilder.vehicleImportSpoke(locale, slug),
   text: vehicleImportContent[slug].title,
 }));
 ---
 
 <ServicePageLayout
-  {meta} {schema} {cases}
+  {meta}
+  {schema}
+  {cases}
   title={sc.title}
   titleHighlight={location}
   description={sc.descriptionFor(location)}
@@ -42,7 +70,10 @@ const vehicleImportCrossSellLinks = getVehicleImportCrossSellSpokes(countryCode!
   currentService="vehicle-sourcing"
   casesHeading={sc.casesHeadingFor(location)}
   breadcrumbs={[
-    { label: sc.hub.breadcrumbLabel, href: PathBuilder.vehicleSourcingHub(locale) },
+    {
+      label: sc.hub.breadcrumbLabel,
+      href: PathBuilder.vehicleSourcingHub(locale),
+    },
     { label: sc.breadcrumbLabelFor(location) },
   ]}
 >
@@ -50,12 +81,24 @@ const vehicleImportCrossSellLinks = getVehicleImportCrossSellSpokes(countryCode!
   <p class="mt-6 text-sm leading-relaxed text-muted">
     {sc.deliveryLineFor(sc.deliveryDestinations.join(', '))}
   </p>
-  <ChipLinks label={sc.citiesLabel} items={getCitiesForCountry(countryCode!).map(city => ({ href: PathBuilder.vehicleSourcingCity(locale, countryCode!, city.slug), text: city[locale].name }))} />
+  <ChipLinks
+    label={sc.citiesLabel}
+    items={getCitiesForCountry(countryCode!).map((city) => ({
+      href: PathBuilder.vehicleSourcingCity(locale, countryCode!, city.slug),
+      text: city[locale].name,
+    }))}
+  />
   <ChipLinks label={sc.crossSellLabel} items={vehicleImportCrossSellLinks} />
   <div class="mt-12 pt-8 border-t border-default">
-    <p class="text-xs tracking-widest uppercase mb-4 font-medium text-muted">{sc.alsoInLabel}</p>
+    <p class="text-xs tracking-widest uppercase mb-4 font-medium text-muted">
+      {sc.alsoInLabel}
+    </p>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-      {getActiveCountries().filter(c => c.code !== countryCode).map(c => <CountryPill country={c} locale={locale} />)}
+      {
+        getActiveCountries()
+          .filter((c) => c.code !== countryCode)
+          .map((c) => <CountryPill country={c} locale={locale} />)
+      }
     </div>
   </div>
 

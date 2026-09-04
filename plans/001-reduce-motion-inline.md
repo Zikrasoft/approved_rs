@@ -11,34 +11,50 @@
 Inline `style="animation: fadeUp ..."` attributes bypass the `@media (prefers-reduced-motion: reduce)` CSS guard in `src/styles/global.css`. The guard targets named classes (`.fade-up`, `.fade-up-1`, etc.) but not inline style attributes, so users who have set "Reduce Motion" in their OS still see all page animations.
 
 **src/pages/index.astro:109** (service cards)
+
 ```astro
-style={`animation: fadeUp 0.75s ${0.08 + i * 0.08}s cubic-bezier(0.16,1,0.3,1) both;`}
+style={
+  `animation: fadeUp 0.75s ${0.08 + i * 0.08}s cubic-bezier(0.16,1,0.3,1) both;`
+}
 ```
 
 **src/pages/index.astro:152** (step items)
+
 ```astro
-style={`animation: fadeUp 0.75s ${0.1 + i * 0.1}s cubic-bezier(0.16,1,0.3,1) both;`}
+style={
+  `animation: fadeUp 0.75s ${0.1 + i * 0.1}s cubic-bezier(0.16,1,0.3,1) both;`
+}
 ```
 
 **src/pages/contacts.astro:39**
+
 ```astro
-style={`animation: fadeUp 0.75s ${0.15 + i * 0.08}s cubic-bezier(0.16,1,0.3,1) both;`}
+style={
+  `animation: fadeUp 0.75s ${0.15 + i * 0.08}s cubic-bezier(0.16,1,0.3,1) both;`
+}
 ```
 
 **src/pages/contacts.astro:51**
+
 ```astro
-style={`animation: fadeUp 0.75s ${0.2 + i * 0.1}s cubic-bezier(0.16,1,0.3,1) both;`}
+style={
+  `animation: fadeUp 0.75s ${0.2 + i * 0.1}s cubic-bezier(0.16,1,0.3,1) both;`
+}
 ```
 
 **src/pages/privacy.astro:44**
+
 ```astro
 style={`animation: fadeUp 0.5s ${0.1 + i * 0.1}s both`}
 ```
 
 Additionally, the current reduced-motion guard in global.css nukes ALL transitions including focus rings and color feedback:
+
 ```css
 /* src/styles/global.css:290 — current (too broad) */
-* { transition-duration: 0.01ms !important; }
+* {
+  transition-duration: 0.01ms !important;
+}
 ```
 
 ## Target
@@ -48,19 +64,27 @@ Replace the catch-all `* { transition-duration: 0.01ms }` with a precise overrid
 ```css
 /* target — @media block in global.css */
 @media (prefers-reduced-motion: reduce) {
-  .fade-up, .fade-up-1, .fade-up-2, .fade-up-3,
-  .fade-up-4, .fade-up-5, .fade-up-6,
+  .fade-up,
+  .fade-up-1,
+  .fade-up-2,
+  .fade-up-3,
+  .fade-up-4,
+  .fade-up-5,
+  .fade-up-6,
   .anim-inline {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
-  .eyebrow::before { animation: none; }
+  .eyebrow::before {
+    animation: none;
+  }
   /* Suppress position/size/scale transitions only; keep color/opacity */
   *,
   *::before,
   *::after {
-    transition-property: color, background-color, border-color, box-shadow, outline-color !important;
+    transition-property:
+      color, background-color, border-color, box-shadow, outline-color !important;
     transition-duration: 0.2s !important;
   }
 }
@@ -72,21 +96,23 @@ For each inline-animated element, swap the `style="animation: fadeUp..."` for a 
 <!-- target pattern — service card in index.astro -->
 <a
   class:list={['service-card ... anim-inline']}
-  style={`--anim-delay: ${0.08 + i * 0.08}s`}
->
+  style={`--anim-delay: ${0.08 + i * 0.08}s`}></a>
 ```
 
 ```css
 /* add to global.css */
 .anim-inline {
-  animation: fadeUp 0.75s var(--anim-delay, 0s) cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: fadeUp 0.75s var(--anim-delay, 0s) cubic-bezier(0.16, 1, 0.3, 1)
+    both;
 }
 ```
 
 Privacy page items use 0.5s instead of 0.75s — add a `.anim-inline-fast` variant:
+
 ```css
 .anim-inline-fast {
-  animation: fadeUp 0.5s var(--anim-delay, 0s) cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: fadeUp 0.5s var(--anim-delay, 0s) cubic-bezier(0.16, 1, 0.3, 1)
+    both;
 }
 ```
 
@@ -97,6 +123,7 @@ Privacy page items use 0.5s instead of 0.75s — add a `.anim-inline-fast` varia
 - `style` attribute is used only for dynamic CSS variables (e.g. `--anim-delay`) — not for full animation declarations
 
 Exemplar (existing, correct pattern):
+
 ```astro
 <!-- src/pages/index.astro hero section — uses .fade-up class correctly -->
 <span class="eyebrow fade-up fade-up-1">...</span>
@@ -106,39 +133,64 @@ Exemplar (existing, correct pattern):
 ## Steps
 
 1. **global.css** — Add `.anim-inline` and `.anim-inline-fast` utilities after the `@keyframes slideRight` block:
+
    ```css
-   .anim-inline      { animation: fadeUp 0.75s var(--anim-delay, 0s) cubic-bezier(0.16, 1, 0.3, 1) both; }
-   .anim-inline-fast { animation: fadeUp 0.5s  var(--anim-delay, 0s) cubic-bezier(0.16, 1, 0.3, 1) both; }
+   .anim-inline {
+     animation: fadeUp 0.75s var(--anim-delay, 0s) cubic-bezier(0.16, 1, 0.3, 1)
+       both;
+   }
+   .anim-inline-fast {
+     animation: fadeUp 0.5s var(--anim-delay, 0s) cubic-bezier(0.16, 1, 0.3, 1)
+       both;
+   }
    ```
 
 2. **global.css** — Replace the existing `@media (prefers-reduced-motion: reduce)` block with the precise version from the Target section above.
 
 3. **src/pages/index.astro:109** — Remove `style="animation: ..."` from service card, add class + delay var:
+
    ```astro
    <a
-     class:list={['service-card group ... anim-inline', featured ? 'lg:col-span-2 p-9' : 'p-7']}
-     style={`--anim-delay: ${0.08 + i * 0.08}s`}
-   >
+     class:list={[
+       'service-card group ... anim-inline',
+       featured ? 'lg:col-span-2 p-9' : 'p-7',
+     ]}
+     style={`--anim-delay: ${0.08 + i * 0.08}s`}></a>
    ```
 
 4. **src/pages/index.astro:152** — Same for step items:
+
    ```astro
-   <div class="anim-inline" style={`--anim-delay: ${0.1 + i * 0.1}s`}>
+   <div class="anim-inline" style={`--anim-delay: ${0.1 + i * 0.1}s`}></div>
    ```
 
 5. **src/pages/contacts.astro:39** — Replace inline animation style:
+
    ```astro
-   <div class="flex justify-between items-center py-4 border-b border-default anim-inline" style={`--anim-delay: ${0.15 + i * 0.08}s`}>
+   <div
+     class="flex justify-between items-center py-4 border-b border-default anim-inline"
+     style={`--anim-delay: ${0.15 + i * 0.08}s`}
+   >
+   </div>
    ```
 
 6. **src/pages/contacts.astro:51** — Replace inline animation style:
+
    ```astro
-   <div class="flex gap-4 anim-inline" style={`--anim-delay: ${0.2 + i * 0.1}s`}>
+   <div
+     class="flex gap-4 anim-inline"
+     style={`--anim-delay: ${0.2 + i * 0.1}s`}
+   >
+   </div>
    ```
 
 7. **src/pages/privacy.astro:44** — Replace inline animation style (use `anim-inline-fast`):
    ```astro
-   <div class="pb-10 border-b border-default anim-inline-fast" style={`--anim-delay: ${0.1 + i * 0.1}s`}>
+   <div
+     class="pb-10 border-b border-default anim-inline-fast"
+     style={`--anim-delay: ${0.1 + i * 0.1}s`}
+   >
+   </div>
    ```
 
 ## Boundaries

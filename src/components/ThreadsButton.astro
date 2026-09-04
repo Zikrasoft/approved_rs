@@ -8,11 +8,20 @@ const locale = getLocale(Astro.currentLocale);
 const channelLabel = getI18n(locale).common.channelLabel;
 ---
 
-<Button variant="secondary" href={`https://www.threads.com/@${THREADS_CHANNEL}`} target="_blank" rel="noopener" class="tg-channel px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center">
+<Button
+  variant="secondary"
+  href={`https://www.threads.com/@${THREADS_CHANNEL}`}
+  target="_blank"
+  rel="noopener"
+  class="tg-channel px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center"
+>
   {channelLabel}
-  <span class="tg-arrow text-[0.85em] transition-transform duration-200">→</span>
+  <span class="tg-arrow text-[0.85em] transition-transform duration-200">→</span
+  >
 </Button>
 
 <style>
-  .tg-channel:hover .tg-arrow { transform: translateX(3px); }
+  .tg-channel:hover .tg-arrow {
+    transform: translateX(3px);
+  }
 </style>

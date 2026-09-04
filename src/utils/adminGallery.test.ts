@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { isValidSlug, sanitizeFilename, dedupeFilename, appendGalleryEntries } from './adminGallery';
+import {
+  isValidSlug,
+  sanitizeFilename,
+  dedupeFilename,
+  appendGalleryEntries,
+} from './adminGallery';
 
 describe('isValidSlug', () => {
   it('accepts lowercase-digit-dash slugs, rejects anything with a path separator or unsafe char', () => {
@@ -32,15 +37,46 @@ describe('dedupeFilename', () => {
 
 describe('appendGalleryEntries', () => {
   it('inserts a new gallery: block right after image: when none exists', () => {
-    const raw = ['title: BMW', 'image: ./image.jpg', 'date: 2026-01-01', ''].join('\n');
-    const result = appendGalleryEntries(raw, ['gallery/0.jpg', 'gallery/1.jpg']);
-    expect(result).toBe(['title: BMW', 'image: ./image.jpg', 'gallery:', '  - gallery/0.jpg', '  - gallery/1.jpg', 'date: 2026-01-01', ''].join('\n'));
+    const raw = [
+      'title: BMW',
+      'image: ./image.jpg',
+      'date: 2026-01-01',
+      '',
+    ].join('\n');
+    const result = appendGalleryEntries(raw, [
+      'gallery/0.jpg',
+      'gallery/1.jpg',
+    ]);
+    expect(result).toBe(
+      [
+        'title: BMW',
+        'image: ./image.jpg',
+        'gallery:',
+        '  - gallery/0.jpg',
+        '  - gallery/1.jpg',
+        'date: 2026-01-01',
+        '',
+      ].join('\n'),
+    );
   });
 
   it('appends after existing gallery entries without disturbing later fields', () => {
-    const raw = ['image: ./image.jpg', 'gallery:', '  - gallery/0.jpg', 'date: 2026-01-01'].join('\n');
+    const raw = [
+      'image: ./image.jpg',
+      'gallery:',
+      '  - gallery/0.jpg',
+      'date: 2026-01-01',
+    ].join('\n');
     const result = appendGalleryEntries(raw, ['gallery/1.jpg']);
-    expect(result).toBe(['image: ./image.jpg', 'gallery:', '  - gallery/0.jpg', '  - gallery/1.jpg', 'date: 2026-01-01'].join('\n'));
+    expect(result).toBe(
+      [
+        'image: ./image.jpg',
+        'gallery:',
+        '  - gallery/0.jpg',
+        '  - gallery/1.jpg',
+        'date: 2026-01-01',
+      ].join('\n'),
+    );
   });
 
   it('throws when there is no image: line (not a case file)', () => {

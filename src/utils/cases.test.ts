@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import type { CollectionEntry } from 'astro:content';
-import { toCaseItem, toAutoserviceCaseItem, toDetailingCaseItem, getCaseTranslation } from './cases';
+import {
+  toCaseItem,
+  toAutoserviceCaseItem,
+  toDetailingCaseItem,
+  getCaseTranslation,
+} from './cases';
 
 const price = { value: '5000', currency: 'EUR' };
 
@@ -8,7 +13,13 @@ describe('toCaseItem', () => {
   it('maps a known service to its Russian label', () => {
     const entry = {
       id: 'bmw-x1',
-      data: { service: 'vehicle-sourcing', car: 'BMW X1', year: 2020, price, image: undefined },
+      data: {
+        service: 'vehicle-sourcing',
+        car: 'BMW X1',
+        year: 2020,
+        price,
+        image: undefined,
+      },
     } as unknown as CollectionEntry<'cases'>;
 
     const item = toCaseItem(entry, 'ru');
@@ -19,7 +30,13 @@ describe('toCaseItem', () => {
   it('falls back to the raw slug for an unknown service', () => {
     const entry = {
       id: 'mystery',
-      data: { service: 'unknown-service', car: 'Skoda Superb', year: 2019, price, image: undefined },
+      data: {
+        service: 'unknown-service',
+        car: 'Skoda Superb',
+        year: 2019,
+        price,
+        image: undefined,
+      },
     } as unknown as CollectionEntry<'cases'>;
 
     expect(toCaseItem(entry, 'ru').badges).toEqual(['unknown-service']);
@@ -40,7 +57,11 @@ describe('toAutoserviceCaseItem', () => {
 
     const item = toAutoserviceCaseItem(entry, 'ru');
     expect(item.href).toBe('/ru/auto-service-belgrade/bmw-320/');
-    expect(item.badges).toEqual(['Компьютерная диагностика', 'Двигатель и трансмиссия', 'unknown-service']);
+    expect(item.badges).toEqual([
+      'Компьютерная диагностика',
+      'Двигатель и трансмиссия',
+      'unknown-service',
+    ]);
   });
 });
 
@@ -74,7 +95,10 @@ describe('getCaseTranslation', () => {
   });
 
   it('returns the stored translation for a locale that has one', () => {
-    expect(getCaseTranslation(data, 'en')).toEqual({ title: 'BMW X1', body: 'English body' });
+    expect(getCaseTranslation(data, 'en')).toEqual({
+      title: 'BMW X1',
+      body: 'English body',
+    });
   });
 
   it('returns undefined for a locale with no translation yet, so the caller falls back to ru', () => {

@@ -12,7 +12,10 @@ const { meta, items, counts } = await buildCasesTabPageData(
   locale,
   'casesVehicleSourcing',
   PathBuilder.casesVehicleSourcing(locale),
-  async () => (await getPublishedCasesByService('vehicle-sourcing')).map((c) => toCaseItem(c, locale)),
+  async () =>
+    (await getPublishedCasesByService('vehicle-sourcing')).map((c) =>
+      toCaseItem(c, locale),
+    ),
 );
 ---
 

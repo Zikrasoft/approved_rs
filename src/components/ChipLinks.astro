@@ -9,24 +9,38 @@ interface Props {
 const { label, items } = Astro.props;
 ---
 
-{items.length > 0 && (
-  <div class="mt-12 pt-8 border-t border-default">
-    <p class="text-xs tracking-widest uppercase mb-4 font-medium text-muted">{label}</p>
-    <div class="flex flex-wrap gap-2">
-      {items.map(item => {
-        const Tag = item.href ? 'a' : 'span';
-        return (
-          <Tag href={item.href} class:list={['chip-link px-4 py-1.5 rounded-sm text-xs font-medium no-underline border border-default text-muted', { 'chip-link-static': !item.href }]}>
-            {item.text}
-          </Tag>
-        );
-      })}
+{
+  items.length > 0 && (
+    <div class="mt-12 pt-8 border-t border-default">
+      <p class="text-xs tracking-widest uppercase mb-4 font-medium text-muted">
+        {label}
+      </p>
+      <div class="flex flex-wrap gap-2">
+        {items.map((item) => {
+          const Tag = item.href ? 'a' : 'span';
+          return (
+            <Tag
+              href={item.href}
+              class:list={[
+                'chip-link px-4 py-1.5 rounded-sm text-xs font-medium no-underline border border-default text-muted',
+                { 'chip-link-static': !item.href },
+              ]}
+            >
+              {item.text}
+            </Tag>
+          );
+        })}
+      </div>
     </div>
-  </div>
-)}
+  )
+}
 
 <style>
-  .chip-link { transition: border-color 0.2s, color 0.2s; }
+  .chip-link {
+    transition:
+      border-color 0.2s,
+      color 0.2s;
+  }
   .chip-link:not(.chip-link-static):hover {
     border-color: var(--color-accent) !important;
     color: var(--color-accent) !important;

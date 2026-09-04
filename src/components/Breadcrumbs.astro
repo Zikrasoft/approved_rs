@@ -4,12 +4,20 @@ import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 
-interface Crumb { label: string; href?: string }
-interface Props { items: Crumb[] }
+interface Crumb {
+  label: string;
+  href?: string;
+}
+interface Props {
+  items: Crumb[];
+}
 
 const { items } = Astro.props;
 const locale = getLocale(Astro.currentLocale);
-const trail: Crumb[] = [{ label: getI18n(locale).common.homeLabel, href: PathBuilder.home(locale) }, ...items];
+const trail: Crumb[] = [
+  { label: getI18n(locale).common.homeLabel, href: PathBuilder.home(locale) },
+  ...items,
+];
 
 const schema = {
   '@context': 'https://schema.org',
@@ -26,18 +34,28 @@ const schema = {
 <script type="application/ld+json" set:html={JSON.stringify(schema)} />
 <nav aria-label="breadcrumb" class="mb-6">
   <ol class="flex flex-wrap items-center gap-1.5 text-xs text-muted">
-    {trail.map((item, i) => (
-      <li class="flex items-center gap-1.5">
-        {i > 0 && <span aria-hidden="true">/</span>}
-        {item.href && i < trail.length - 1
-          ? <a href={item.href} class="breadcrumb-link">{item.label}</a>
-          : <span class="text-primary">{item.label}</span>}
-      </li>
-    ))}
+    {
+      trail.map((item, i) => (
+        <li class="flex items-center gap-1.5">
+          {i > 0 && <span aria-hidden="true">/</span>}
+          {item.href && i < trail.length - 1 ? (
+            <a href={item.href} class="breadcrumb-link">
+              {item.label}
+            </a>
+          ) : (
+            <span class="text-primary">{item.label}</span>
+          )}
+        </li>
+      ))
+    }
   </ol>
 </nav>
 
 <style>
-  .breadcrumb-link { transition: color 0.2s; }
-  .breadcrumb-link:hover { color: var(--color-accent); }
+  .breadcrumb-link {
+    transition: color 0.2s;
+  }
+  .breadcrumb-link:hover {
+    color: var(--color-accent);
+  }
 </style>

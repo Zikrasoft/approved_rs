@@ -17,7 +17,9 @@ import { sendPostponeReminderToOwner, refreshLeadCard } from '@/lib/telegram';
 
 const SECRET = 'test-cron-secret';
 
-function makeCtx(headers: Record<string, string> = { authorization: `Bearer ${SECRET}` }) {
+function makeCtx(
+  headers: Record<string, string> = { authorization: `Bearer ${SECRET}` },
+) {
   return {
     request: new Request('http://localhost/api/reminders', { headers }),
   } as Pick<APIContext, 'request'> as APIContext;
@@ -50,8 +52,12 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
 describe('GET /api/reminders', () => {
   beforeEach(() => {
     vi.mocked(getDuePostponed).mockReset().mockResolvedValue([]);
-    vi.mocked(resumeLead).mockReset().mockResolvedValue(undefined as unknown as StoredLead);
-    vi.mocked(sendPostponeReminderToOwner).mockReset().mockResolvedValue(undefined);
+    vi.mocked(resumeLead)
+      .mockReset()
+      .mockResolvedValue(undefined as unknown as StoredLead);
+    vi.mocked(sendPostponeReminderToOwner)
+      .mockReset()
+      .mockResolvedValue(undefined);
     vi.mocked(refreshLeadCard).mockReset().mockResolvedValue(undefined);
   });
 
@@ -95,7 +101,9 @@ describe('GET /api/reminders', () => {
     const res = await GET(makeCtx());
 
     expect(res.status).toBe(200);
-    expect(sendPostponeReminderToOwner).toHaveBeenCalledWith(expect.objectContaining({ id: 9 }));
+    expect(sendPostponeReminderToOwner).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 9 }),
+    );
     expect(resumeLead).toHaveBeenCalledWith(9);
     expect(refreshLeadCard).toHaveBeenCalledWith(resumed);
     expect(await res.json()).toEqual({ remindedPostponed: 1 });
@@ -113,8 +121,13 @@ describe('GET /api/reminders', () => {
   });
 
   it('skips resuming a postponed lead whose reminder send failed, but still processes the next one', async () => {
-    vi.mocked(getDuePostponed).mockResolvedValue([makeLead({ id: 9 }), makeLead({ id: 10 })]);
-    vi.mocked(sendPostponeReminderToOwner).mockRejectedValueOnce(new Error('down'));
+    vi.mocked(getDuePostponed).mockResolvedValue([
+      makeLead({ id: 9 }),
+      makeLead({ id: 10 }),
+    ]);
+    vi.mocked(sendPostponeReminderToOwner).mockRejectedValueOnce(
+      new Error('down'),
+    );
 
     const res = await GET(makeCtx());
 

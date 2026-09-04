@@ -22,7 +22,8 @@ export const ru = {
     servicesHeading: 'Услуги',
     companyHeading: 'Компания',
     privacyLabel: 'Конфиденциальность',
-    tagline: 'Подберём, проверим и доставим автомобиль из Европы. Берём на себя весь процесс — от поиска до доставки.',
+    tagline:
+      'Подберём, проверим и доставим автомобиль из Европы. Берём на себя весь процесс — от поиска до доставки.',
     contactManagerLabel: 'Написать менеджеру',
     hoursLine: 'Круглосуточно, без выходных',
     copyrightSuffix: 'Автоподбор, сервис и доставка авто из Европы',
@@ -39,7 +40,8 @@ export const ru = {
     closeLabel: 'Закрыть',
     channelLabel: 'Наш канал',
     cookie: {
-      notice: 'Мы используем аналитические cookies (Google Analytics), чтобы понимать, как посетители используют сайт.',
+      notice:
+        'Мы используем аналитические cookies (Google Analytics), чтобы понимать, как посетители используют сайт.',
       more: 'Подробнее в',
       policyLink: 'политике конфиденциальности',
       accept: 'Принять',
@@ -50,7 +52,8 @@ export const ru = {
       prev: 'Предыдущее фото',
       next: 'Следующее фото',
       altTemplate: (name: string, i: number) => `${name}, фото ${i + 1}`,
-      openAriaTemplate: (i: number, total: number) => `Открыть фото ${i + 1} из ${total}`,
+      openAriaTemplate: (i: number, total: number) =>
+        `Открыть фото ${i + 1} из ${total}`,
       showMoreTemplate: (n: number) => `Показать ещё (${n})`,
     },
   },

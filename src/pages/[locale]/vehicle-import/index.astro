@@ -7,7 +7,12 @@ import { withLocales, PathBuilder } from '@/utils/paths';
 import { getCountry, getCountryFlag } from '@/utils/geo';
 import { generateServiceSchema, placeholderOgImage } from '@/utils/seo';
 import { getCollection } from 'astro:content';
-import { SITE_URL, SITE_NAME, CHINA_NAME, VEHICLE_IMPORT_EU_SOURCE_CODES } from '@/utils/constants';
+import {
+  SITE_URL,
+  SITE_NAME,
+  CHINA_NAME,
+  VEHICLE_IMPORT_EU_SOURCE_CODES,
+} from '@/utils/constants';
 import type { VehicleImportSpoke } from '@/utils/vehicleImportCrossSell';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
@@ -25,26 +30,49 @@ const meta = {
 // with destination-only markets (e.g. Portugal) that aren't sourcing spokes.
 const sourceNames = [
   getCountry('de')![locale].name,
-  ...VEHICLE_IMPORT_EU_SOURCE_CODES.map(code => getCountry(code)![locale].name),
+  ...VEHICLE_IMPORT_EU_SOURCE_CODES.map(
+    (code) => getCountry(code)![locale].name,
+  ),
   CHINA_NAME[locale],
 ];
-const schema = generateServiceSchema(`${pc.title} ${pc.titleHighlight}`, sourceNames, meta.canonical);
+const schema = generateServiceSchema(
+  `${pc.title} ${pc.titleHighlight}`,
+  sourceNames,
+  meta.canonical,
+);
 
 const cases = (await getCollection('cases'))
-  .filter(c => c.data.published && c.data.service === 'vehicle-import')
+  .filter((c) => c.data.published && c.data.service === 'vehicle-import')
   .slice(0, 6);
 
 // Germany isn't its own hub card anymore — it lives one level down, inside
 // the Europe spoke's source-country chips (see eu/index.astro) — since the
 // /eu/de/ URL move already nests it under "Europe" there.
-const cards: { slug: VehicleImportSpoke; title: string; text: string; flag: string }[] = [
-  { slug: 'eu', title: pc.euCardTitle, text: pc.euCardText, flag: getCountryFlag('eu') },
-  { slug: 'china', title: pc.chinaCardTitle, text: pc.chinaCardText, flag: getCountryFlag('cn') },
+const cards: {
+  slug: VehicleImportSpoke;
+  title: string;
+  text: string;
+  flag: string;
+}[] = [
+  {
+    slug: 'eu',
+    title: pc.euCardTitle,
+    text: pc.euCardText,
+    flag: getCountryFlag('eu'),
+  },
+  {
+    slug: 'china',
+    title: pc.chinaCardTitle,
+    text: pc.chinaCardText,
+    flag: getCountryFlag('cn'),
+  },
 ];
 ---
 
 <ServicePageLayout
-  {meta} {schema} {cases}
+  {meta}
+  {schema}
+  {cases}
   title={pc.title}
   titleHighlight={pc.titleHighlight}
   description={pc.description}
@@ -57,13 +85,22 @@ const cards: { slug: VehicleImportSpoke; title: string; text: string; flag: stri
   breadcrumbs={[{ label: pc.breadcrumbLabel }]}
 >
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
-    {cards.map(card => (
-      <a href={PathBuilder.vehicleImportSpoke(locale, card.slug)} class="import-card glow-border flex flex-col p-6 rounded-sm border bg-surface border-default no-underline">
-        <p class="font-display text-xl font-bold mb-2 text-primary"><span set:html={card.flag} /> {card.title}</p>
-        <p class="text-sm leading-relaxed mb-4 text-muted">{card.text}</p>
-        <span class="mt-auto text-xs font-medium tracking-wide uppercase text-accent">{pc.exploreLabel} →</span>
-      </a>
-    ))}
+    {
+      cards.map((card) => (
+        <a
+          href={PathBuilder.vehicleImportSpoke(locale, card.slug)}
+          class="import-card glow-border flex flex-col p-6 rounded-sm border bg-surface border-default no-underline"
+        >
+          <p class="font-display text-xl font-bold mb-2 text-primary">
+            <span set:html={card.flag} /> {card.title}
+          </p>
+          <p class="text-sm leading-relaxed mb-4 text-muted">{card.text}</p>
+          <span class="mt-auto text-xs font-medium tracking-wide uppercase text-accent">
+            {pc.exploreLabel} →
+          </span>
+        </a>
+      ))
+    }
   </div>
 
   <Fragment slot="extra">
@@ -72,6 +109,13 @@ const cards: { slug: VehicleImportSpoke; title: string; text: string; flag: stri
 </ServicePageLayout>
 
 <style>
-  .import-card { transition: background-color 0.2s, border-color 0.2s; }
-  .import-card:hover { background-color: var(--color-surface-2); border-color: var(--color-accent) !important; }
+  .import-card {
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
+  }
+  .import-card:hover {
+    background-color: var(--color-surface-2);
+    border-color: var(--color-accent) !important;
+  }
 </style>

@@ -5,7 +5,8 @@ import { config, collection, fields } from '@keystatic/core';
 // relative path) — required by content.config.ts's `image()` schema, which
 // needs a locally-resolvable path to optimize via astro:assets at build
 // time, not a public/ URL string.
-const caseImage = () => fields.image({ label: 'Фото', validation: { isRequired: true } });
+const caseImage = () =>
+  fields.image({ label: 'Фото', validation: { isRequired: true } });
 
 // EN/SR/ES/DE translation of this case's title + body, written by
 // .github/workflows/translate-cases.yml (scripts/translate-cases.ts) after
@@ -53,14 +54,25 @@ export default config({
       // Fields stay top-level (content.config.ts's schema and every reader
       // of c.data.* expects that shape).
       schema: {
-        title: fields.slug({ name: { label: 'Заголовок', validation: { isRequired: true } } }),
+        title: fields.slug({
+          name: { label: 'Заголовок', validation: { isRequired: true } },
+        }),
         translations: translationsField(),
         content: fields.markdoc({ label: 'Текст (RU)', extension: 'md' }),
-        car: fields.text({ label: 'Автомобиль', validation: { isRequired: true } }),
-        year: fields.integer({ label: 'Год', validation: { isRequired: true } }),
+        car: fields.text({
+          label: 'Автомобиль',
+          validation: { isRequired: true },
+        }),
+        year: fields.integer({
+          label: 'Год',
+          validation: { isRequired: true },
+        }),
         price: fields.object(
           {
-            value: fields.text({ label: 'Цена', validation: { isRequired: true } }),
+            value: fields.text({
+              label: 'Цена',
+              validation: { isRequired: true },
+            }),
             currency: fields.select({
               label: 'Валюта',
               options: [
@@ -71,7 +83,7 @@ export default config({
               defaultValue: '€',
             }),
           },
-          { layout: [8, 4] }
+          { layout: [8, 4] },
         ),
         country: fields.select({
           label: 'Страна',
@@ -101,9 +113,15 @@ export default config({
           defaultValue: 'vehicle-sourcing',
         }),
         image: caseImage(),
-        gallery: fields.array(caseImage(), { label: 'Больше фото', itemLabel: props => props.value?.filename || 'Фото' }),
+        gallery: fields.array(caseImage(), {
+          label: 'Больше фото',
+          itemLabel: (props) => props.value?.filename || 'Фото',
+        }),
         date: fields.date({ label: 'Дата', validation: { isRequired: true } }),
-        published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
+        published: fields.checkbox({
+          label: 'Опубликован',
+          defaultValue: true,
+        }),
         translatedFrom: translatedFromField(),
       },
     }),
@@ -111,10 +129,13 @@ export default config({
       label: 'Кейсы автосервиса',
       slugField: 'title',
       path: 'src/content/autoservice-cases/*/',
-      previewUrl: '/admin/case-photos?dir=src/content/autoservice-cases&slug={slug}',
+      previewUrl:
+        '/admin/case-photos?dir=src/content/autoservice-cases&slug={slug}',
       format: { contentField: 'content' },
       schema: {
-        title: fields.slug({ name: { label: 'Заголовок', validation: { isRequired: true } } }),
+        title: fields.slug({
+          name: { label: 'Заголовок', validation: { isRequired: true } },
+        }),
         translations: translationsField(),
         content: fields.markdoc({ label: 'Текст (RU)', extension: 'md' }),
         car: fields.text({ label: 'Автомобиль' }),
@@ -130,9 +151,15 @@ export default config({
           ],
         }),
         image: caseImage(),
-        gallery: fields.array(caseImage(), { label: 'Больше фото', itemLabel: props => props.value?.filename || 'Фото' }),
+        gallery: fields.array(caseImage(), {
+          label: 'Больше фото',
+          itemLabel: (props) => props.value?.filename || 'Фото',
+        }),
         date: fields.date({ label: 'Дата', validation: { isRequired: true } }),
-        published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
+        published: fields.checkbox({
+          label: 'Опубликован',
+          defaultValue: true,
+        }),
         translatedFrom: translatedFromField(),
       },
     }),
@@ -140,10 +167,13 @@ export default config({
       label: 'Кейсы детейлинга',
       slugField: 'title',
       path: 'src/content/detailing-cases/*/',
-      previewUrl: '/admin/case-photos?dir=src/content/detailing-cases&slug={slug}',
+      previewUrl:
+        '/admin/case-photos?dir=src/content/detailing-cases&slug={slug}',
       format: { contentField: 'content' },
       schema: {
-        title: fields.slug({ name: { label: 'Заголовок', validation: { isRequired: true } } }),
+        title: fields.slug({
+          name: { label: 'Заголовок', validation: { isRequired: true } },
+        }),
         translations: translationsField(),
         content: fields.markdoc({ label: 'Текст (RU)', extension: 'md' }),
         car: fields.text({ label: 'Автомобиль' }),
@@ -155,14 +185,18 @@ export default config({
         // Only 'Оклейка плёнкой' is live; add options here as new services launch.
         servicesApplied: fields.multiselect({
           label: 'Выполненные услуги',
-          options: [
-            { label: 'Оклейка плёнкой', value: 'wrap' },
-          ],
+          options: [{ label: 'Оклейка плёнкой', value: 'wrap' }],
         }),
         image: caseImage(),
-        gallery: fields.array(caseImage(), { label: 'Больше фото', itemLabel: props => props.value?.filename || 'Фото' }),
+        gallery: fields.array(caseImage(), {
+          label: 'Больше фото',
+          itemLabel: (props) => props.value?.filename || 'Фото',
+        }),
         date: fields.date({ label: 'Дата', validation: { isRequired: true } }),
-        published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
+        published: fields.checkbox({
+          label: 'Опубликован',
+          defaultValue: true,
+        }),
         translatedFrom: translatedFromField(),
       },
     }),

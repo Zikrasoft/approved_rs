@@ -29,18 +29,40 @@ describe('getServicesContent', () => {
   });
 
   it('template functions interpolate their argument', () => {
-    expect(getServicesContent('en')['vehicle-sourcing'].descriptionFor('__LOC__')).toContain('__LOC__');
-    expect(getServicesContent('sr').cityVehicleSourcing.whyCityHeadingFor('__CITY__')).toContain('__CITY__');
+    expect(
+      getServicesContent('en')['vehicle-sourcing'].descriptionFor('__LOC__'),
+    ).toContain('__LOC__');
+    expect(
+      getServicesContent('sr').cityVehicleSourcing.whyCityHeadingFor(
+        '__CITY__',
+      ),
+    ).toContain('__CITY__');
   });
 
   it('en, sr, es and de differ from ru', () => {
-    expect(getServicesContent('en')['vehicle-sourcing'].title).not.toBe(getServicesContent('ru')['vehicle-sourcing'].title);
-    expect(getServicesContent('sr')['vehicle-buyback'].title).not.toBe(getServicesContent('ru')['vehicle-buyback'].title);
-    expect(getServicesContent('es')['vehicle-sourcing'].title).not.toBe(getServicesContent('ru')['vehicle-sourcing'].title);
-    expect(getServicesContent('de')['vehicle-buyback'].title).not.toBe(getServicesContent('ru')['vehicle-buyback'].title);
-    expect(getServicesContent('en')['vehicle-import'].de.title).not.toBe(getServicesContent('ru')['vehicle-import'].de.title);
-    expect(getServicesContent('sr')['vehicle-import'].de.title).not.toBe(getServicesContent('ru')['vehicle-import'].de.title);
-    expect(getServicesContent('es')['vehicle-import'].de.title).not.toBe(getServicesContent('ru')['vehicle-import'].de.title);
-    expect(getServicesContent('de')['vehicle-import'].de.title).not.toBe(getServicesContent('ru')['vehicle-import'].de.title);
+    expect(getServicesContent('en')['vehicle-sourcing'].title).not.toBe(
+      getServicesContent('ru')['vehicle-sourcing'].title,
+    );
+    expect(getServicesContent('sr')['vehicle-buyback'].title).not.toBe(
+      getServicesContent('ru')['vehicle-buyback'].title,
+    );
+    expect(getServicesContent('es')['vehicle-sourcing'].title).not.toBe(
+      getServicesContent('ru')['vehicle-sourcing'].title,
+    );
+    expect(getServicesContent('de')['vehicle-buyback'].title).not.toBe(
+      getServicesContent('ru')['vehicle-buyback'].title,
+    );
+    expect(getServicesContent('en')['vehicle-import'].de.title).not.toBe(
+      getServicesContent('ru')['vehicle-import'].de.title,
+    );
+    expect(getServicesContent('sr')['vehicle-import'].de.title).not.toBe(
+      getServicesContent('ru')['vehicle-import'].de.title,
+    );
+    expect(getServicesContent('es')['vehicle-import'].de.title).not.toBe(
+      getServicesContent('ru')['vehicle-import'].de.title,
+    );
+    expect(getServicesContent('de')['vehicle-import'].de.title).not.toBe(
+      getServicesContent('ru')['vehicle-import'].de.title,
+    );
   });
 });

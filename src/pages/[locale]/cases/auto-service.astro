@@ -12,7 +12,10 @@ const { meta, items, counts } = await buildCasesTabPageData(
   locale,
   'casesAutoService',
   PathBuilder.casesAutoService(locale),
-  async () => (await getPublishedAutoserviceCases()).map((c) => toAutoserviceCaseItem(c, locale)),
+  async () =>
+    (await getPublishedAutoserviceCases()).map((c) =>
+      toAutoserviceCaseItem(c, locale),
+    ),
 );
 ---
 

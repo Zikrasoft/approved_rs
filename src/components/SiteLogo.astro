@@ -11,7 +11,15 @@ const textClass = size === 'sm' ? 'text-lg' : 'text-base sm:text-xl';
 const locale = getLocale(Astro.currentLocale);
 ---
 
-<a href={PathBuilder.home(locale)} class="flex items-baseline no-underline shrink-0">
-  <span class={`font-display font-bold ${textClass} tracking-tight text-primary`}>{SITE_BRAND}</span>
-  <span class={`font-display font-bold ${textClass} tracking-tight text-accent`}>{SITE_TLD}</span>
+<a
+  href={PathBuilder.home(locale)}
+  class="flex items-baseline no-underline shrink-0"
+>
+  <span
+    class={`font-display font-bold ${textClass} tracking-tight text-primary`}
+    >{SITE_BRAND}</span
+  >
+  <span class={`font-display font-bold ${textClass} tracking-tight text-accent`}
+    >{SITE_TLD}</span
+  >
 </a>

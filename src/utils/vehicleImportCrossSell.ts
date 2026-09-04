@@ -10,6 +10,8 @@ const VEHICLE_IMPORT_CROSS_SELL: Record<string, VehicleImportSpoke[]> = {
   de: ['china'],
 };
 
-export function getVehicleImportCrossSellSpokes(countryCode: string): VehicleImportSpoke[] {
+export function getVehicleImportCrossSellSpokes(
+  countryCode: string,
+): VehicleImportSpoke[] {
   return VEHICLE_IMPORT_CROSS_SELL[countryCode] ?? [];
 }

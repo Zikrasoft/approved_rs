@@ -6,8 +6,16 @@ import { telegramLink } from '@/utils/telegramLink';
 import { whatsappLink, viberLink } from '@/utils/contactLinks';
 import { getServicesContent } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
-import { TG_MANAGER, WHATSAPP_NUMBER, VIBER_NUMBER, PHONE_NUMBER } from '@/utils/constants';
-import { DATA_OPEN_LEAD_MODAL, DATA_OPEN_PAGE_LEAD_MODAL } from '@/utils/contactChannel';
+import {
+  TG_MANAGER,
+  WHATSAPP_NUMBER,
+  VIBER_NUMBER,
+  PHONE_NUMBER,
+} from '@/utils/constants';
+import {
+  DATA_OPEN_LEAD_MODAL,
+  DATA_OPEN_PAGE_LEAD_MODAL,
+} from '@/utils/contactChannel';
 
 interface Props {
   manager?: string;
@@ -33,72 +41,96 @@ const {
 // the page-local one (ServicePageLayout) when the Telegram button also uses
 // it, otherwise the header's global modal — same rule `openModal` already
 // applies to the Telegram button above.
-const callbackTrigger = openModal ? DATA_OPEN_PAGE_LEAD_MODAL : DATA_OPEN_LEAD_MODAL;
+const callbackTrigger = openModal
+  ? DATA_OPEN_PAGE_LEAD_MODAL
+  : DATA_OPEN_LEAD_MODAL;
 ---
 
 <div class="flex flex-col gap-3 my-8">
-  {compact ? (
-    <div class="flex flex-col sm:flex-row gap-3">
-      <RegionalContactButton
-        telegramLabel={label}
-        whatsappLabel={openModal ? label : cc.whatsappButtonLabel}
-        {manager}
-        {openModal}
-        class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center"
-      />
-      <Button
-        variant="secondary"
-        href={`tel:+${PHONE_NUMBER}`}
-        data-contact-channel="phone"
-        class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center bg-surface"
-      >
-        <ContactIcon channel="phone" size={15} />
-        {cc.callButtonLabel}
-      </Button>
-    </div>
-  ) : (
-    <>
-      <div class="contact-bar">
-        <a
-          data-contact-channel="telegram"
-          {...{ [DATA_OPEN_PAGE_LEAD_MODAL]: openModal ? true : undefined }}
-          href={openModal ? undefined : telegramLink(manager)}
-          target={openModal ? undefined : '_blank'}
-          rel={openModal ? undefined : 'noopener'}
-          aria-label={label}
-          class="contact-cell"
+  {
+    compact ? (
+      <div class="flex flex-col sm:flex-row gap-3">
+        <RegionalContactButton
+          telegramLabel={label}
+          whatsappLabel={openModal ? label : cc.whatsappButtonLabel}
+          {manager}
+          {openModal}
+          class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center"
+        />
+        <Button
+          variant="secondary"
+          href={`tel:+${PHONE_NUMBER}`}
+          data-contact-channel="phone"
+          class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center bg-surface"
         >
-          <ContactIcon channel="telegram" size={17} />
-          <span>Telegram</span>
-        </a>
-
-        <a data-contact-channel="whatsapp" href={whatsappLink(WHATSAPP_NUMBER)} target="_blank" rel="noopener" aria-label={cc.whatsappButtonLabel} class="contact-cell">
-          <ContactIcon channel="whatsapp" size={17} />
-          <span>WhatsApp</span>
-        </a>
-
-        <a data-contact-channel="viber" href={viberLink(VIBER_NUMBER)} target="_blank" rel="noopener" aria-label={cc.viberButtonLabel} class="contact-cell">
-          <ContactIcon channel="viber" size={17} />
-          <span>Viber</span>
-        </a>
-
-        <button type="button" data-contact-channel="callback" aria-label={cc.callbackButtonLabel} {...{ [callbackTrigger]: 'phone' }} class="contact-cell">
-          <ContactIcon channel="phone" size={16} />
-          <span>{cc.callbackShortLabel}</span>
-        </button>
+          <ContactIcon channel="phone" size={15} />
+          {cc.callButtonLabel}
+        </Button>
       </div>
+    ) : (
+      <>
+        <div class="contact-bar">
+          <a
+            data-contact-channel="telegram"
+            {...{ [DATA_OPEN_PAGE_LEAD_MODAL]: openModal ? true : undefined }}
+            href={openModal ? undefined : telegramLink(manager)}
+            target={openModal ? undefined : '_blank'}
+            rel={openModal ? undefined : 'noopener'}
+            aria-label={label}
+            class="contact-cell"
+          >
+            <ContactIcon channel="telegram" size={17} />
+            <span>Telegram</span>
+          </a>
 
-      <Button
-        variant="secondary"
-        href={`tel:+${PHONE_NUMBER}`}
-        data-contact-channel="phone"
-        class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full justify-center bg-surface"
-      >
-        <ContactIcon channel="phone" size={15} />
-        {cc.callButtonLabel}
-      </Button>
-    </>
-  )}
+          <a
+            data-contact-channel="whatsapp"
+            href={whatsappLink(WHATSAPP_NUMBER)}
+            target="_blank"
+            rel="noopener"
+            aria-label={cc.whatsappButtonLabel}
+            class="contact-cell"
+          >
+            <ContactIcon channel="whatsapp" size={17} />
+            <span>WhatsApp</span>
+          </a>
+
+          <a
+            data-contact-channel="viber"
+            href={viberLink(VIBER_NUMBER)}
+            target="_blank"
+            rel="noopener"
+            aria-label={cc.viberButtonLabel}
+            class="contact-cell"
+          >
+            <ContactIcon channel="viber" size={17} />
+            <span>Viber</span>
+          </a>
+
+          <button
+            type="button"
+            data-contact-channel="callback"
+            aria-label={cc.callbackButtonLabel}
+            {...{ [callbackTrigger]: 'phone' }}
+            class="contact-cell"
+          >
+            <ContactIcon channel="phone" size={16} />
+            <span>{cc.callbackShortLabel}</span>
+          </button>
+        </div>
+
+        <Button
+          variant="secondary"
+          href={`tel:+${PHONE_NUMBER}`}
+          data-contact-channel="phone"
+          class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full justify-center bg-surface"
+        >
+          <ContactIcon channel="phone" size={15} />
+          {cc.callButtonLabel}
+        </Button>
+      </>
+    )
+  }
 </div>
 
 <style>
@@ -112,7 +144,9 @@ const callbackTrigger = openModal ? DATA_OPEN_PAGE_LEAD_MODAL : DATA_OPEN_LEAD_M
     overflow: hidden;
   }
   @media (min-width: 640px) {
-    .contact-bar { grid-template-columns: repeat(4, 1fr); }
+    .contact-bar {
+      grid-template-columns: repeat(4, 1fr);
+    }
   }
   .contact-cell {
     display: flex;
@@ -130,7 +164,9 @@ const callbackTrigger = openModal ? DATA_OPEN_PAGE_LEAD_MODAL : DATA_OPEN_LEAD_M
     line-height: 1.2;
     border: none;
     cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
+    transition:
+      background-color 0.2s,
+      color 0.2s;
   }
   .contact-cell:hover,
   .contact-cell:focus-visible {

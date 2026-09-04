@@ -4,7 +4,11 @@ import ChipLinks from '@/components/ChipLinks.astro';
 import Faq from '@/components/Faq.astro';
 import { getCityPaths, withLocales, PathBuilder } from '@/utils/paths';
 import { getCountry, getCitiesForCountry } from '@/utils/geo';
-import { generateMeta, generateServiceSchema, buildLocation } from '@/utils/seo';
+import {
+  generateMeta,
+  generateServiceSchema,
+  buildLocation,
+} from '@/utils/seo';
 import { getCollection } from 'astro:content';
 import { SITE_URL } from '@/utils/constants';
 import { getFaq } from '@/i18n/content/faq';
@@ -19,58 +23,102 @@ const country = getCountry(countryCode!)!;
 const sc = getServicesContent(locale).cityVehicleSourcing;
 const cityLocation = buildLocation(locale, undefined, city);
 const countryLocation = buildLocation(locale, country);
-const meta = generateMeta('vehicle-sourcing', { country, city, baseUrl: SITE_URL, path: PathBuilder.vehicleSourcingCity(locale, countryCode!, city.slug), locale: locale });
-const cases = (await getCollection('cases')).filter(c => c.data.published && c.data.country === countryCode && c.data.service === 'vehicle-sourcing').slice(0, 3);
-const schema = generateServiceSchema(`${sc.title} ${cityLocation}`, city[locale].name, meta.canonical);
+const meta = generateMeta('vehicle-sourcing', {
+  country,
+  city,
+  baseUrl: SITE_URL,
+  path: PathBuilder.vehicleSourcingCity(locale, countryCode!, city.slug),
+  locale: locale,
+});
+const cases = (await getCollection('cases'))
+  .filter(
+    (c) =>
+      c.data.published &&
+      c.data.country === countryCode &&
+      c.data.service === 'vehicle-sourcing',
+  )
+  .slice(0, 3);
+const schema = generateServiceSchema(
+  `${sc.title} ${cityLocation}`,
+  city[locale].name,
+  meta.canonical,
+);
 
 // DEKRA/TÜV are German-specific certification bodies — only true for country: 'de'.
 // Other countries get the generic claim instead of an invented local equivalent.
 const WHY_CITY = [
   { Icon: TrendingUp, text: sc.reason1 },
-  { Icon: History,    text: sc.reason2 },
-  { Icon: UserCheck,  text: sc.reason3For(cityLocation) },
-  { Icon: BadgeCheck, text: countryCode === 'de' ? sc.reason4Dekra : sc.reason4Generic },
+  { Icon: History, text: sc.reason2 },
+  { Icon: UserCheck, text: sc.reason3For(cityLocation) },
+  {
+    Icon: BadgeCheck,
+    text: countryCode === 'de' ? sc.reason4Dekra : sc.reason4Generic,
+  },
 ];
 ---
 
 <ServicePageLayout
-  {meta} {schema} {cases}
+  {meta}
+  {schema}
+  {cases}
   title={sc.title}
   titleHighlight={cityLocation}
-  description={sc.descriptionFor(cityLocation, (country[locale] as { nameGenitive?: string; name: string }).nameGenitive ?? country[locale].name)}
+  description={sc.descriptionFor(
+    cityLocation,
+    (country[locale] as { nameGenitive?: string; name: string }).nameGenitive ??
+      country[locale].name,
+  )}
   ctaLabel={getServicesContent(locale)['vehicle-sourcing'].ctaLabel}
   formService="vehicle-sourcing"
   currentCountry={countryCode!}
   currentService="vehicle-sourcing"
   city={city.slug}
-  casesHeading={sc.casesHeadingFor((country[locale] as { nameGenitive?: string; name: string }).nameGenitive ?? country[locale].name)}
+  casesHeading={sc.casesHeadingFor(
+    (country[locale] as { nameGenitive?: string; name: string }).nameGenitive ??
+      country[locale].name,
+  )}
   breadcrumbs={[
-    { label: getServicesContent(locale)['vehicle-sourcing'].hub.breadcrumbLabel, href: PathBuilder.vehicleSourcingHub(locale) },
-    { label: country[locale].name, href: PathBuilder.service(locale, 'vehicle-sourcing', countryCode!) },
+    {
+      label: getServicesContent(locale)['vehicle-sourcing'].hub.breadcrumbLabel,
+      href: PathBuilder.vehicleSourcingHub(locale),
+    },
+    {
+      label: country[locale].name,
+      href: PathBuilder.service(locale, 'vehicle-sourcing', countryCode!),
+    },
     { label: city[locale].name },
   ]}
 >
   <div>
-    <h2 class="font-display text-xl font-bold mb-4 text-primary">{sc.whyCityHeadingFor(city[locale].name)}</h2>
+    <h2 class="font-display text-xl font-bold mb-4 text-primary">
+      {sc.whyCityHeadingFor(city[locale].name)}
+    </h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      {WHY_CITY.map(item => (
-        <div class="flex items-center gap-3 p-4 rounded-sm border bg-surface border-default">
-          <span class="flex items-center justify-center w-9 h-9 rounded-sm shrink-0 bg-accent-subtle text-accent">
-            <item.Icon size={18} />
-          </span>
-          <p class="text-sm leading-relaxed text-muted">{item.text}</p>
-        </div>
-      ))}
+      {
+        WHY_CITY.map((item) => (
+          <div class="flex items-center gap-3 p-4 rounded-sm border bg-surface border-default">
+            <span class="flex items-center justify-center w-9 h-9 rounded-sm shrink-0 bg-accent-subtle text-accent">
+              <item.Icon size={18} />
+            </span>
+            <p class="text-sm leading-relaxed text-muted">{item.text}</p>
+          </div>
+        ))
+      }
     </div>
   </div>
   <ChipLinks
     label={sc.otherCitiesLabelFor(countryLocation)}
     items={getCitiesForCountry(countryCode!)
-      .filter(c => c.slug !== city.slug)
-      .map(c => ({ href: PathBuilder.vehicleSourcingCity(locale, countryCode!, c.slug), text: c[locale].name }))}
+      .filter((c) => c.slug !== city.slug)
+      .map((c) => ({
+        href: PathBuilder.vehicleSourcingCity(locale, countryCode!, c.slug),
+        text: c[locale].name,
+      }))}
   />
 
   <Fragment slot="extra">
-    <Faq items={[...getFaq(locale)['vehicle-sourcing'], getFaq(locale).cityExpert]} />
+    <Faq
+      items={[...getFaq(locale)['vehicle-sourcing'], getFaq(locale).cityExpert]}
+    />
   </Fragment>
 </ServicePageLayout>

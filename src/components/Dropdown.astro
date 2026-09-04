@@ -23,13 +23,22 @@ interface Props {
   active?: boolean;
 }
 
-const { align = 'left', minWidth = '9.5rem', menuRole = 'menu', triggerClass = '', active = false } = Astro.props;
+const {
+  align = 'left',
+  minWidth = '9.5rem',
+  menuRole = 'menu',
+  triggerClass = '',
+  active = false,
+} = Astro.props;
 ---
 
 <div class="dropdown relative">
   <button
     type="button"
-    class:list={[`dropdown-trigger flex items-center gap-1 rounded-sm text-muted ${triggerClass}`, { 'dropdown-trigger-active': active }]}
+    class:list={[
+      `dropdown-trigger flex items-center gap-1 rounded-sm text-muted ${triggerClass}`,
+      { 'dropdown-trigger-active': active },
+    ]}
     aria-haspopup="true"
     aria-expanded="false"
   >
@@ -37,18 +46,25 @@ const { align = 'left', minWidth = '9.5rem', menuRole = 'menu', triggerClass = '
     <ChevronDown size={13} class="dropdown-chevron" />
   </button>
 
-  <ul class="dropdown-menu" style={`min-width:${minWidth}`} data-align={align} role={menuRole} aria-hidden="true">
+  <ul
+    class="dropdown-menu"
+    style={`min-width:${minWidth}`}
+    data-align={align}
+    role={menuRole}
+    aria-hidden="true"
+  >
     <slot />
   </ul>
 </div>
 
 <script>
   function initDropdowns() {
-    document.querySelectorAll<HTMLElement>('.dropdown').forEach(root => {
+    document.querySelectorAll<HTMLElement>('.dropdown').forEach((root) => {
       if (root.dataset.dropdownInit) return;
       root.dataset.dropdownInit = '1';
 
-      const trigger = root.querySelector<HTMLButtonElement>('.dropdown-trigger');
+      const trigger =
+        root.querySelector<HTMLButtonElement>('.dropdown-trigger');
       const menu = root.querySelector<HTMLElement>('.dropdown-menu');
       if (!trigger || !menu) return;
 
@@ -63,15 +79,15 @@ const { align = 'left', minWidth = '9.5rem', menuRole = 'menu', triggerClass = '
         menu.setAttribute('aria-hidden', 'false');
       };
 
-      trigger.addEventListener('click', e => {
+      trigger.addEventListener('click', (e) => {
         e.stopPropagation();
         root.classList.contains('dropdown-open') ? close() : open();
       });
 
-      document.addEventListener('click', e => {
+      document.addEventListener('click', (e) => {
         if (!root.contains(e.target as Node)) close();
       });
-      document.addEventListener('keydown', e => {
+      document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') close();
       });
     });

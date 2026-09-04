@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { APIContext } from 'astro';
 
 vi.mock('@vercel/functions', () => ({
   waitUntil: vi.fn(),
@@ -7,21 +8,25 @@ vi.mock('../../lib/notifyLead', () => ({
   notifyLead: vi.fn().mockResolvedValue(undefined),
 }));
 
-import { POST } from "./leads";
+import { POST } from './leads';
 import { waitUntil } from '@vercel/functions';
 import { notifyLead } from '@/lib/notifyLead';
 
 function makeCtx(fields: Record<string, string>) {
   const formData = new FormData();
   Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
-  const redirectFn = vi.fn((url: string, status: number) =>
-    new Response(null, { status, headers: { Location: url } })
+  const redirectFn = vi.fn(
+    (url: string, status: number) =>
+      new Response(null, { status, headers: { Location: url } }),
   );
   return {
-    request: new Request('http://localhost/api/leads', { method: 'POST', body: formData }),
+    request: new Request('http://localhost/api/leads', {
+      method: 'POST',
+      body: formData,
+    }),
     redirect: redirectFn,
     cookies: { get: () => undefined },
-  } as any;
+  } as unknown as APIContext;
 }
 
 describe('POST /api/leads', () => {
@@ -31,13 +36,21 @@ describe('POST /api/leads', () => {
   });
 
   it('redirects to /ru/thanks/ on valid data', async () => {
-    const ctx = makeCtx({ name: 'Иван', contact: '@ivan', service: 'vehicle-sourcing' });
+    const ctx = makeCtx({
+      name: 'Иван',
+      contact: '@ivan',
+      service: 'vehicle-sourcing',
+    });
     await POST(ctx);
     expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
   });
 
   it('returns 400 when name is empty', async () => {
-    const ctx = makeCtx({ name: '', contact: '@ivan', service: 'vehicle-sourcing' });
+    const ctx = makeCtx({
+      name: '',
+      contact: '@ivan',
+      service: 'vehicle-sourcing',
+    });
     const res = await POST(ctx);
     expect(res.status).toBe(400);
   });
@@ -49,30 +62,53 @@ describe('POST /api/leads', () => {
   });
 
   it('dispatches notifyLead via waitUntil with parsed form fields and locale', async () => {
-    const ctx = makeCtx({ name: 'Иван', contact: '@ivan', service: 'vehicle-buyback', country: 'de', source_url: '/ru/vehicle-buyback/de/' });
+    const ctx = makeCtx({
+      name: 'Иван',
+      contact: '@ivan',
+      service: 'vehicle-buyback',
+      country: 'de',
+      source_url: '/ru/vehicle-buyback/de/',
+    });
     await POST(ctx);
     expect(waitUntil).toHaveBeenCalledTimes(1);
     expect(notifyLead).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'Иван', contact: '@ivan', service: 'vehicle-buyback', country: 'de', locale: 'ru',
+        name: 'Иван',
+        contact: '@ivan',
+        service: 'vehicle-buyback',
+        country: 'de',
+        locale: 'ru',
       }),
-      '[leads]'
+      '[leads]',
     );
   });
 
   it('passes visitor_id through as visitorId', async () => {
-    const ctx = makeCtx({ name: 'Иван', contact: '@ivan', service: 'vehicle-sourcing', visitor_id: 'abc-123' });
+    const ctx = makeCtx({
+      name: 'Иван',
+      contact: '@ivan',
+      service: 'vehicle-sourcing',
+      visitor_id: 'abc-123',
+    });
     await POST(ctx);
     expect(notifyLead).toHaveBeenCalledWith(
       expect.objectContaining({ visitorId: 'abc-123' }),
-      '[leads]'
+      '[leads]',
     );
   });
 
   it('redirects without waiting for notifyLead to resolve', async () => {
     let resolveNotify!: () => void;
-    vi.mocked(notifyLead).mockReturnValue(new Promise(resolve => { resolveNotify = resolve; }));
-    const ctx = makeCtx({ name: 'Иван', contact: '@ivan', service: 'vehicle-sourcing' });
+    vi.mocked(notifyLead).mockReturnValue(
+      new Promise((resolve) => {
+        resolveNotify = resolve;
+      }),
+    );
+    const ctx = makeCtx({
+      name: 'Иван',
+      contact: '@ivan',
+      service: 'vehicle-sourcing',
+    });
 
     await POST(ctx);
 

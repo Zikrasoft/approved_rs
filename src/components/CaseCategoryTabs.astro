@@ -14,31 +14,62 @@ const locale = getLocale(Astro.currentLocale);
 const t = getI18n(locale);
 
 const tabs = [
-  { id: 'vehicle-sourcing', href: PathBuilder.casesVehicleSourcing(locale), label: t.nav['vehicle-sourcing'] },
-  { id: 'vehicle-buyback', href: PathBuilder.casesVehicleBuyback(locale), label: t.nav['vehicle-buyback'] },
-  { id: 'vehicle-inspection', href: PathBuilder.casesVehicleInspection(locale), label: t.nav['vehicle-inspection'] },
-  { id: 'vehicle-import', href: PathBuilder.casesVehicleImport(locale), label: t.nav['vehicle-import'] },
-  { id: 'auto-service', href: PathBuilder.casesAutoService(locale), label: t.nav['auto-service-belgrade'] },
-  { id: 'detailing', href: PathBuilder.casesDetailing(locale), label: t.nav['detailing-belgrade'] },
+  {
+    id: 'vehicle-sourcing',
+    href: PathBuilder.casesVehicleSourcing(locale),
+    label: t.nav['vehicle-sourcing'],
+  },
+  {
+    id: 'vehicle-buyback',
+    href: PathBuilder.casesVehicleBuyback(locale),
+    label: t.nav['vehicle-buyback'],
+  },
+  {
+    id: 'vehicle-inspection',
+    href: PathBuilder.casesVehicleInspection(locale),
+    label: t.nav['vehicle-inspection'],
+  },
+  {
+    id: 'vehicle-import',
+    href: PathBuilder.casesVehicleImport(locale),
+    label: t.nav['vehicle-import'],
+  },
+  {
+    id: 'auto-service',
+    href: PathBuilder.casesAutoService(locale),
+    label: t.nav['auto-service-belgrade'],
+  },
+  {
+    id: 'detailing',
+    href: PathBuilder.casesDetailing(locale),
+    label: t.nav['detailing-belgrade'],
+  },
 ] as const satisfies { id: CasesTabKind; href: string; label: string }[];
 ---
 
-<div class="case-tabs grid grid-cols-2 sm:flex sm:flex-nowrap gap-1 p-1 mb-10 rounded-sm bg-surface border border-border-strong" role="tablist">
-  {tabs.filter(tab => counts[tab.id] > 0 || tab.id === active).map(tab => (
-    <a
-      href={tab.href}
-      class:list={[
-        'pill-tab flex items-center justify-between sm:justify-start gap-2 px-4 py-2 rounded-sm text-sm font-medium no-underline',
-        tab.id === active ? 'text-on-accent' : 'text-muted',
-      ]}
-      role="tab"
-      aria-selected={tab.id === active ? 'true' : 'false'}
-      aria-current={tab.id === active ? 'page' : undefined}
-    >
-      {tab.label}
-      <span class="case-tab-count text-xs">{counts[tab.id]}</span>
-    </a>
-  ))}
+<div
+  class="case-tabs grid grid-cols-2 sm:flex sm:flex-nowrap gap-1 p-1 mb-10 rounded-sm bg-surface border border-border-strong"
+  role="tablist"
+>
+  {
+    tabs
+      .filter((tab) => counts[tab.id] > 0 || tab.id === active)
+      .map((tab) => (
+        <a
+          href={tab.href}
+          class:list={[
+            'pill-tab flex items-center justify-between sm:justify-start gap-2 px-4 py-2 rounded-sm text-sm font-medium no-underline',
+            tab.id === active ? 'text-on-accent' : 'text-muted',
+          ]}
+          role="tab"
+          aria-selected={tab.id === active ? 'true' : 'false'}
+          aria-current={tab.id === active ? 'page' : undefined}
+        >
+          {tab.label}
+          <span class="case-tab-count text-xs">{counts[tab.id]}</span>
+        </a>
+      ))
+  }
 </div>
 
 <style>
@@ -56,7 +87,7 @@ const tabs = [
      LeadForm sliding-track variant) otherwise beats the bg-accent utility
      here — same specificity, later in the cascade. Astro scopes this rule
      with a data-astro-cid attribute, which outranks it. */
-  .pill-tab[aria-selected="true"] {
+  .pill-tab[aria-selected='true'] {
     background-color: var(--color-accent);
   }
   .case-tab-count {
@@ -66,5 +97,7 @@ const tabs = [
     color: inherit;
     opacity: 0.75;
   }
-  .pill-tab[aria-selected="true"] .case-tab-count { background: rgba(255, 255, 255, 0.18); }
+  .pill-tab[aria-selected='true'] .case-tab-count {
+    background: rgba(255, 255, 255, 0.18);
+  }
 </style>

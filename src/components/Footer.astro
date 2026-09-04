@@ -5,7 +5,14 @@ import { getNavItems } from '@/utils/labels';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
 import { getServicesContent } from '@/i18n/content/services';
-import { SITE_NAME, DEFAULT_COUNTRY, TG_MANAGER, WHATSAPP_NUMBER, VIBER_NUMBER, THREADS_CHANNEL } from '@/utils/constants';
+import {
+  SITE_NAME,
+  DEFAULT_COUNTRY,
+  TG_MANAGER,
+  WHATSAPP_NUMBER,
+  VIBER_NUMBER,
+  THREADS_CHANNEL,
+} from '@/utils/constants';
 import { telegramLink } from '@/utils/telegramLink';
 import { whatsappLink, viberLink } from '@/utils/contactLinks';
 import { getActiveCountries } from '@/utils/geo';
@@ -17,13 +24,14 @@ const t = getI18n(locale);
 const cc = getServicesContent(locale).caseChrome;
 // Derived live from countries.json, not a hardcoded string — the literal
 // list went stale the moment Portugal was added as a 5th active country.
-const coverageLine = getActiveCountries().map(c => c[locale].name).join(' · ');
+const coverageLine = getActiveCountries()
+  .map((c) => c[locale].name)
+  .join(' · ');
 ---
 
 <footer class="mt-24 border-t border-default">
   <div class="max-w-6xl mx-auto px-6 pt-14 pb-10">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
-
       <!-- Brand -->
       <div class="lg:col-span-2">
         <div class="mb-3">
@@ -33,7 +41,8 @@ const coverageLine = getActiveCountries().map(c => c[locale].name).join(' · ');
           {t.footer.tagline}
         </p>
         <div class="flex flex-wrap gap-2">
-          {/*
+          {
+            /*
             Region-preferred channel gets the labeled slot, the other one
             demotes to an icon-only chip instead of disappearing — same
             regionalContact.ts detection as RegionalContactButton.astro,
@@ -41,7 +50,8 @@ const coverageLine = getActiveCountries().map(c => c[locale].name).join(' · ');
             below is intentionally keyed by the OPPOSITE channel value: it
             should show when that channel is NOT the preferred one, i.e.
             when it's time for it to be the demoted icon.
-          */}
+          */
+          }
           <div data-primary-contact class="contents">
             <a
               data-primary-channel="telegram"
@@ -107,17 +117,27 @@ const coverageLine = getActiveCountries().map(c => c[locale].name).join(' · ');
 
       <!-- Services -->
       <div>
-        <p class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted">{t.footer.servicesHeading}</p>
+        <p
+          class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted"
+        >
+          {t.footer.servicesHeading}
+        </p>
         <nav class="flex flex-col gap-2.5 text-sm footer-nav text-secondary">
-          {getNavItems(locale, DEFAULT_COUNTRY).map(item => (
-            <a href={item.href}>{item.label}</a>
-          ))}
+          {
+            getNavItems(locale, DEFAULT_COUNTRY).map((item) => (
+              <a href={item.href}>{item.label}</a>
+            ))
+          }
         </nav>
       </div>
 
       <!-- Company -->
       <div>
-        <p class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted">{t.footer.companyHeading}</p>
+        <p
+          class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted"
+        >
+          {t.footer.companyHeading}
+        </p>
         <nav class="flex flex-col gap-2.5 text-sm footer-nav text-secondary">
           <a href={PathBuilder.casesVehicleSourcing(locale)}>{t.nav.cases}</a>
           <a href={PathBuilder.contacts(locale)}>{t.nav.contacts}</a>
@@ -128,12 +148,16 @@ const coverageLine = getActiveCountries().map(c => c[locale].name).join(' · ');
           <p class="text-xs text-muted">{t.footer.hoursLine}</p>
         </div>
       </div>
-
     </div>
 
     <!-- Bottom -->
-    <div class="pt-6 border-t border-default flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-      <p class="text-xs text-muted">© {year} {SITE_NAME} — {t.footer.copyrightSuffix}</p>
+    <div
+      class="pt-6 border-t border-default flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+    >
+      <p class="text-xs text-muted">
+        © {year}
+        {SITE_NAME} — {t.footer.copyrightSuffix}
+      </p>
       <a
         href={`https://www.threads.com/@${THREADS_CHANNEL}`}
         target="_blank"
@@ -141,22 +165,42 @@ const coverageLine = getActiveCountries().map(c => c[locale].name).join(' · ');
         class="footer-channel text-xs no-underline text-muted"
       >
         {t.footer.channelLinkLabel}
-        <span class="footer-channel-arrow inline-block text-[0.85em] transition-transform duration-200">→</span>
+        <span
+          class="footer-channel-arrow inline-block text-[0.85em] transition-transform duration-200"
+          >→</span
+        >
       </a>
     </div>
   </div>
 </footer>
 
 <style>
-  .footer-nav a { transition: color 0.2s; }
-  .footer-nav a:hover { color: var(--color-text) !important; }
+  .footer-nav a {
+    transition: color 0.2s;
+  }
+  .footer-nav a:hover {
+    color: var(--color-text) !important;
+  }
 
-  .footer-tg { transition: background-color 0.2s, border-color 0.2s; }
-  .footer-tg:hover { background-color: var(--color-accent-subtle); border-color: var(--color-accent) !important; }
+  .footer-tg {
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
+  }
+  .footer-tg:hover {
+    background-color: var(--color-accent-subtle);
+    border-color: var(--color-accent) !important;
+  }
 
-  .footer-channel { transition: color 0.2s; }
-  .footer-channel:hover { color: var(--color-accent) !important; }
-  .footer-channel:hover .footer-channel-arrow { transform: translateX(3px); }
+  .footer-channel {
+    transition: color 0.2s;
+  }
+  .footer-channel:hover {
+    color: var(--color-accent) !important;
+  }
+  .footer-channel:hover .footer-channel-arrow {
+    transform: translateX(3px);
+  }
 </style>
 
 <script>

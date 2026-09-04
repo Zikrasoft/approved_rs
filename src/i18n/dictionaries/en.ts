@@ -24,7 +24,8 @@ export const en: Dictionary = {
     servicesHeading: 'Services',
     companyHeading: 'Company',
     privacyLabel: 'Privacy',
-    tagline: 'We source, inspect, and deliver your car from Europe. We handle the entire process — from search to delivery.',
+    tagline:
+      'We source, inspect, and deliver your car from Europe. We handle the entire process — from search to delivery.',
     contactManagerLabel: 'Message a Manager',
     hoursLine: '24/7, no days off',
     copyrightSuffix: 'Car sourcing, service, and delivery from Europe',
@@ -41,7 +42,8 @@ export const en: Dictionary = {
     closeLabel: 'Close',
     channelLabel: 'Our channel',
     cookie: {
-      notice: 'We use analytics cookies (Google Analytics) to understand how visitors use the site.',
+      notice:
+        'We use analytics cookies (Google Analytics) to understand how visitors use the site.',
       more: 'Learn more in our',
       policyLink: 'privacy policy',
       accept: 'Accept',
@@ -52,7 +54,8 @@ export const en: Dictionary = {
       prev: 'Previous photo',
       next: 'Next photo',
       altTemplate: (name: string, i: number) => `${name}, photo ${i + 1}`,
-      openAriaTemplate: (i: number, total: number) => `Open photo ${i + 1} of ${total}`,
+      openAriaTemplate: (i: number, total: number) =>
+        `Open photo ${i + 1} of ${total}`,
       showMoreTemplate: (n: number) => `Show more (${n})`,
     },
   },

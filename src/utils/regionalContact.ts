@@ -11,9 +11,13 @@ import { getPreferredChannel } from './contactChannel';
 // Safe to call once per page regardless of how many groups are present.
 export function applyRegionalContactPreference(): void {
   const channel = getPreferredChannel(detectVisitorCountry());
-  document.querySelectorAll<HTMLElement>('[data-primary-contact]').forEach(group => {
-    group.querySelectorAll<HTMLElement>('[data-primary-channel]').forEach(el => {
-      el.hidden = el.dataset.primaryChannel !== channel;
+  document
+    .querySelectorAll<HTMLElement>('[data-primary-contact]')
+    .forEach((group) => {
+      group
+        .querySelectorAll<HTMLElement>('[data-primary-channel]')
+        .forEach((el) => {
+          el.hidden = el.dataset.primaryChannel !== channel;
+        });
     });
-  });
 }

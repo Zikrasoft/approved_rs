@@ -13,7 +13,10 @@ import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { parseDocument, isMap, type YAMLMap } from 'yaml';
-import { TRANSLATABLE_LOCALES, type TranslatableLocale } from '../src/i18n/config.ts';
+import {
+  TRANSLATABLE_LOCALES,
+  type TranslatableLocale,
+} from '../src/i18n/config.ts';
 
 const API_KEY = process.env.OPENAI_API_KEY;
 if (!API_KEY) {
@@ -21,7 +24,11 @@ if (!API_KEY) {
   process.exit(1);
 }
 
-const CASE_DIRS = ['src/content/cases', 'src/content/autoservice-cases', 'src/content/detailing-cases'];
+const CASE_DIRS = [
+  'src/content/cases',
+  'src/content/autoservice-cases',
+  'src/content/detailing-cases',
+];
 const TARGET_LOCALES = TRANSLATABLE_LOCALES;
 const TARGET_LANGUAGE_NAME: Record<TranslatableLocale, string> = {
   en: 'English',
@@ -39,10 +46,16 @@ interface CaseTranslation {
 // button" this duplicates; Keystatic has no field type that can call an
 // API from inside its own form (see keystatic.config.ts), which is why
 // this script exists at all.
-async function translateCase(source: CaseTranslation, targetLocale: TranslatableLocale): Promise<CaseTranslation> {
+async function translateCase(
+  source: CaseTranslation,
+  targetLocale: TranslatableLocale,
+): Promise<CaseTranslation> {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${API_KEY}` },
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${API_KEY}`,
+    },
     body: JSON.stringify({
       model: 'gpt-4o-mini',
       response_format: { type: 'json_object' },
@@ -57,13 +70,22 @@ async function translateCase(source: CaseTranslation, targetLocale: Translatable
             'bold, lists) intact. Keep car makes/models, prices, and place names as they would normally appear ' +
             'in the target language. Respond with a JSON object: {"title": string, "body": string}.',
         },
-        { role: 'user', content: `Title: ${source.title}\n\nBody:\n${source.body}` },
+        {
+          role: 'user',
+          content: `Title: ${source.title}\n\nBody:\n${source.body}`,
+        },
       ],
     }),
   });
 
-  const data = await response.json() as { choices?: { message?: { content?: string } }[]; error?: { message?: string } };
-  if (!response.ok) throw new Error(`OpenAI translate failed: ${response.status} ${data.error?.message ?? ''}`.trim());
+  const data = (await response.json()) as {
+    choices?: { message?: { content?: string } }[];
+    error?: { message?: string };
+  };
+  if (!response.ok)
+    throw new Error(
+      `OpenAI translate failed: ${response.status} ${data.error?.message ?? ''}`.trim(),
+    );
 
   const content = data.choices?.[0]?.message?.content;
   if (!content) throw new Error('translate response missing content');
@@ -86,7 +108,10 @@ function splitFrontmatter(raw: string): { frontmatter: string; body: string } {
 // are still good" from "ru changed, redo all four" without re-translating
 // on every single push.
 function hashSource(source: CaseTranslation): string {
-  return createHash('sha256').update(`${source.title}\n${source.body}`).digest('hex').slice(0, 16);
+  return createHash('sha256')
+    .update(`${source.title}\n${source.body}`)
+    .digest('hex')
+    .slice(0, 16);
 }
 
 type Action =
@@ -113,7 +138,7 @@ function decideAction(params: {
   // undefined as stale would overwrite perfectly good existing
   // translations with fresh AI output the very first time this ran.
   const ruChanged = storedHash !== undefined && storedHash !== currentHash;
-  const missingLocales = TARGET_LOCALES.filter(l => !hasReal(l));
+  const missingLocales = TARGET_LOCALES.filter((l) => !hasReal(l));
   const localesToTranslate = ruChanged ? TARGET_LOCALES : missingLocales;
 
   if (localesToTranslate.length === 0) {
@@ -128,8 +153,14 @@ function selfCheckDecideAction(): void {
   const hasAll = () => true;
   const hasNone = () => false;
 
-  assert.deepStrictEqual(decideAction({ storedHash: 'a', currentHash: 'a', hasReal: hasAll }), { kind: 'skip' });
-  assert.deepStrictEqual(decideAction({ storedHash: undefined, currentHash: 'a', hasReal: hasAll }), { kind: 'backfill' });
+  assert.deepStrictEqual(
+    decideAction({ storedHash: 'a', currentHash: 'a', hasReal: hasAll }),
+    { kind: 'skip' },
+  );
+  assert.deepStrictEqual(
+    decideAction({ storedHash: undefined, currentHash: 'a', hasReal: hasAll }),
+    { kind: 'backfill' },
+  );
   assert.deepStrictEqual(
     decideAction({ storedHash: undefined, currentHash: 'a', hasReal: hasNone }),
     { kind: 'translate', locales: TARGET_LOCALES },
@@ -145,13 +176,20 @@ function selfCheckDecideAction(): void {
   );
 }
 
-function hasRealTranslation(translationsNode: YAMLMap, locale: TranslatableLocale): boolean {
+function hasRealTranslation(
+  translationsNode: YAMLMap,
+  locale: TranslatableLocale,
+): boolean {
   const entry = translationsNode.get(locale, true);
   if (!isMap(entry)) return false;
   const title = entry.get('title');
   const body = entry.get('body');
-  return typeof title === 'string' && title.trim().length > 0
-    && typeof body === 'string' && body.trim().length > 0;
+  return (
+    typeof title === 'string' &&
+    title.trim().length > 0 &&
+    typeof body === 'string' &&
+    body.trim().length > 0
+  );
 }
 
 // Unlike decideAction, this one does touch a real (if tiny) parsed YAML
@@ -168,12 +206,26 @@ function selfCheckHasRealTranslation(): void {
   const translations = fixture.get('translations', true);
   assert.ok(isMap(translations));
   assert.strictEqual(hasRealTranslation(translations, 'en'), true);
-  assert.strictEqual(hasRealTranslation(translations, 'sr'), false, 'blank title/body must not count as translated');
-  assert.strictEqual(hasRealTranslation(translations, 'es'), false, 'missing body must not count as translated');
-  assert.strictEqual(hasRealTranslation(translations, 'de'), false, 'a locale absent entirely must not count as translated');
+  assert.strictEqual(
+    hasRealTranslation(translations, 'sr'),
+    false,
+    'blank title/body must not count as translated',
+  );
+  assert.strictEqual(
+    hasRealTranslation(translations, 'es'),
+    false,
+    'missing body must not count as translated',
+  );
+  assert.strictEqual(
+    hasRealTranslation(translations, 'de'),
+    false,
+    'a locale absent entirely must not count as translated',
+  );
 }
 
-async function processFile(path: string): Promise<'translated' | 'backfilled' | 'skipped'> {
+async function processFile(
+  path: string,
+): Promise<'translated' | 'backfilled' | 'skipped'> {
   const raw = readFileSync(path, 'utf-8');
   const { frontmatter, body } = splitFrontmatter(raw);
   const doc = parseDocument(frontmatter);
@@ -183,7 +235,8 @@ async function processFile(path: string): Promise<'translated' | 'backfilled' | 
     doc.set('translations', doc.createNode({}));
     translationsNode = doc.get('translations', true);
   }
-  if (!isMap(translationsNode)) throw new Error(`${path}: "translations" is not a map`);
+  if (!isMap(translationsNode))
+    throw new Error(`${path}: "translations" is not a map`);
 
   const title = String(doc.get('title'));
   const source: CaseTranslation = { title, body: body.trim() };
@@ -193,7 +246,7 @@ async function processFile(path: string): Promise<'translated' | 'backfilled' | 
   const action = decideAction({
     storedHash,
     currentHash,
-    hasReal: locale => hasRealTranslation(translationsNode, locale),
+    hasReal: (locale) => hasRealTranslation(translationsNode, locale),
   });
 
   if (action.kind === 'skip') return 'skipped';
@@ -203,7 +256,10 @@ async function processFile(path: string): Promise<'translated' | 'backfilled' | 
     // hash-tracking. Record the hash so future runs have a real baseline,
     // without touching any translation.
     doc.set('translatedFrom', currentHash);
-    writeFileSync(path, `---\n${doc.toString({ lineWidth: 0 }).trimEnd()}\n---\n${body}`);
+    writeFileSync(
+      path,
+      `---\n${doc.toString({ lineWidth: 0 }).trimEnd()}\n---\n${body}`,
+    );
     return 'backfilled';
   }
 
@@ -251,11 +307,15 @@ async function main() {
       }
     } catch (err) {
       failed++;
-      console.error(`✗ ${file}: ${err instanceof Error ? err.message : String(err)}`);
+      console.error(
+        `✗ ${file}: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
 
-  console.log(`\nDone: ${translated} translated, ${backfilled} backfilled, ${skipped} skipped, ${failed} failed.`);
+  console.log(
+    `\nDone: ${translated} translated, ${backfilled} backfilled, ${skipped} skipped, ${failed} failed.`,
+  );
   if (failed > 0) process.exit(1);
 }
 

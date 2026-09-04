@@ -7,7 +7,7 @@ import FloatingContactWidget from '@/components/FloatingContactWidget.astro';
 import Analytics from '@vercel/analytics/astro';
 import SpeedInsights from '@vercel/speed-insights/astro';
 import '../styles/global.css';
-import { SITE_URL, SITE_NAME, YM_COUNTER_ID } from '@/utils/constants';
+import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { getAlternateLinks } from '@/i18n/hreflang';
 import { getLocale } from '@/i18n/config';
 // Logo/heading font: preload so it's ready before first paint (avoids the
@@ -26,29 +26,53 @@ interface Props extends MetaProps {
 const locale = getLocale(Astro.currentLocale);
 
 const {
-  title, description, canonical, noindex, schema,
+  title,
+  description,
+  canonical,
+  noindex,
+  schema,
   ogImage = `${SITE_URL}/og${OG_SUFFIX[locale]}.png`,
   ogImageWidth = 1200,
   ogImageHeight = 630,
 } = Astro.props;
 
-const OG_LOCALE_MAP: Record<string, string> = { ru: 'ru_RU', en: 'en_US', sr: 'sr_RS', es: 'es_ES', de: 'de_DE' };
+const OG_LOCALE_MAP: Record<string, string> = {
+  ru: 'ru_RU',
+  en: 'en_US',
+  sr: 'sr_RS',
+  es: 'es_ES',
+  de: 'de_DE',
+};
 const alternateLinks = getAlternateLinks(Astro.url.pathname);
 ---
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang={locale}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preload" as="font" type="font/woff2" href={logoFontUrl} crossorigin />
-    <link rel="preload" as="font" type="font/woff2" href={tldFontUrl} crossorigin />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href={logoFontUrl}
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href={tldFontUrl}
+      crossorigin
+    />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    {alternateLinks.map(link => (
-      <link rel="alternate" hreflang={link.hreflang} href={link.href} />
-    ))}
+    {
+      alternateLinks.map((link) => (
+        <link rel="alternate" hreflang={link.hreflang} href={link.href} />
+      ))
+    }
     {noindex && <meta name="robots" content="noindex" />}
 
     <meta property="og:site_name" content={SITE_NAME} />
@@ -63,44 +87,84 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={ogImage} />
 
-    {schema && (
-      <script type="application/ld+json" set:html={JSON.stringify(schema)} />
-    )}
+    {
+      schema && (
+        <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+      )
+    }
 
     <!-- Google tag (gtag.js) + Yandex.Metrika — both loaded only after cookie consent, see CookieConsent.astro -->
     <script>
       import { YM_COUNTER_ID } from '@/utils/constants';
       import { ymReachGoal } from '@/utils/metrika';
 
-      (window as any).dataLayer = (window as any).dataLayer || [];
-      function gtag(...args: unknown[]) { (window as any).dataLayer.push(args); }
+      window.dataLayer = window.dataLayer || [];
+      function gtag(...args: unknown[]) {
+        window.dataLayer.push(args);
+      }
       // Module scripts don't leak top-level declarations onto `window` the
       // way classic/inline scripts do — explicit assignment needed so other
       // scripts (e.g. the contact-click tracker below) can still call it.
-      (window as any).gtag = gtag;
-      (window as any).ymReachGoal = ymReachGoal;
+      window.gtag = gtag;
+      window.ymReachGoal = ymReachGoal;
 
-      (window as any).loadAnalytics = function () {
-        if ((window as any).__gaLoaded) return;
-        (window as any).__gaLoaded = true;
-        var s = document.createElement('script');
+      window.loadAnalytics = function () {
+        if (window.__gaLoaded) return;
+        window.__gaLoaded = true;
+        const s = document.createElement('script');
         s.async = true;
         s.src = 'https://www.googletagmanager.com/gtag/js?id=G-M17GZT849M';
         document.head.appendChild(s);
         gtag('js', new Date());
         gtag('config', 'G-M17GZT849M');
 
-        (function(m: any,e: Document,t: string,r: string,i: string,k?: any,a?: any){
-          m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-          m[i].l=Date.now();
-          for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-          k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=' + YM_COUNTER_ID, 'ym');
-        (window as any).ym(YM_COUNTER_ID, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
+        /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-expressions, prefer-rest-params -- verbatim Yandex.Metrika install snippet, keep as shipped */
+        (function (
+          m: any,
+          e: Document,
+          t: string,
+          r: string,
+          i: string,
+          k?: any,
+          a?: any,
+        ) {
+          m[i] =
+            m[i] ||
+            function () {
+              (m[i].a = m[i].a || []).push(arguments);
+            };
+          m[i].l = Date.now();
+          for (let j = 0; j < document.scripts.length; j++) {
+            if (document.scripts[j].src === r) {
+              return;
+            }
+          }
+          ((k = e.createElement(t)),
+            (a = e.getElementsByTagName(t)[0]),
+            (k.async = 1),
+            (k.src = r),
+            a.parentNode.insertBefore(k, a));
+        })(
+          window,
+          document,
+          'script',
+          'https://mc.yandex.ru/metrika/tag.js?id=' + YM_COUNTER_ID,
+          'ym',
+        );
+        /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-expressions, prefer-rest-params */
+        window.ym!(YM_COUNTER_ID, 'init', {
+          ssr: true,
+          webvisor: true,
+          clickmap: true,
+          ecommerce: 'dataLayer',
+          accurateTrackBounce: true,
+          trackLinks: true,
+        });
       };
       try {
-        if (localStorage.getItem('cookie_consent') === 'granted') (window as any).loadAnalytics();
-      } catch (e) {}
+        if (localStorage.getItem('cookie_consent') === 'granted')
+          window.loadAnalytics();
+      } catch {}
     </script>
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -113,9 +177,12 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
          <html> before anything renders. -->
     <script is:inline>
       try {
-        var stored = localStorage.getItem('theme');
-        var wantsDark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (wantsDark) document.documentElement.setAttribute('data-theme', 'dark');
+        const stored = localStorage.getItem('theme');
+        const wantsDark = stored
+          ? stored === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (wantsDark)
+          document.documentElement.setAttribute('data-theme', 'dark');
         else document.documentElement.removeAttribute('data-theme');
       } catch (e) {}
     </script>
@@ -134,15 +201,22 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
       // Safety net: if CSS animations fail to run (slow connection, power-save mode),
       // force all animated elements visible after 1.6s (covers longest fade-up-6 delay).
       setTimeout(function () {
-        document.querySelectorAll('.fade-up,.anim-inline,.anim-inline-fast').forEach(function (el) {
-          el.style.opacity = '1';
-          el.style.transform = 'none';
-          el.style.animation = 'none';
-        });
+        document
+          .querySelectorAll('.fade-up,.anim-inline,.anim-inline-fast')
+          .forEach(function (el) {
+            el.style.opacity = '1';
+            el.style.transform = 'none';
+            el.style.animation = 'none';
+          });
       }, 1600);
     </script>
     <script>
-      import { isTrackedContactChannel, DATA_CONTACT_CHANNEL, DATA_OPEN_LEAD_MODAL, DATA_OPEN_PAGE_LEAD_MODAL } from '@/utils/contactChannel';
+      import {
+        isTrackedContactChannel,
+        DATA_CONTACT_CHANNEL,
+        DATA_OPEN_LEAD_MODAL,
+        DATA_OPEN_PAGE_LEAD_MODAL,
+      } from '@/utils/contactChannel';
       import { ymReachGoal } from '@/utils/metrika';
       import { getOrCreateVisitorId } from '@/utils/visitorId';
 
@@ -164,21 +238,25 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
       // gtag label in that case), so it's excluded exactly like 'callback' is.
       // Clicking tel:/https: links is a real navigation, can't await a fetch
       // first, so this fires a beacon instead of blocking.
-      document.querySelectorAll<HTMLElement>(`[${DATA_CONTACT_CHANNEL}]`).forEach((el) => {
-        el.addEventListener('click', () => {
-          const channel = el.dataset.contactChannel;
-          (window as any).gtag?.('event', 'contact_click', { channel });
-          ymReachGoal('contact_click', { channel });
-          const opensLeadModal = el.hasAttribute(DATA_OPEN_LEAD_MODAL) || el.hasAttribute(DATA_OPEN_PAGE_LEAD_MODAL);
-          if (isTrackedContactChannel(channel) && !opensLeadModal) {
-            const body = new FormData();
-            body.set('channel', channel);
-            body.set('source_url', location.href);
-            body.set('visitor_id', getOrCreateVisitorId());
-            navigator.sendBeacon('/api/contact-click', body);
-          }
+      document
+        .querySelectorAll<HTMLElement>(`[${DATA_CONTACT_CHANNEL}]`)
+        .forEach((el) => {
+          el.addEventListener('click', () => {
+            const channel = el.dataset.contactChannel;
+            window.gtag?.('event', 'contact_click', { channel });
+            ymReachGoal('contact_click', { channel });
+            const opensLeadModal =
+              el.hasAttribute(DATA_OPEN_LEAD_MODAL) ||
+              el.hasAttribute(DATA_OPEN_PAGE_LEAD_MODAL);
+            if (isTrackedContactChannel(channel) && !opensLeadModal) {
+              const body = new FormData();
+              body.set('channel', channel);
+              body.set('source_url', location.href);
+              body.set('visitor_id', getOrCreateVisitorId());
+              navigator.sendBeacon('/api/contact-click', body);
+            }
+          });
         });
-      });
     </script>
   </body>
 </html>

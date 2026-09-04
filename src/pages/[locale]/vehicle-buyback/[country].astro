@@ -4,7 +4,11 @@ import StepsList from '@/components/StepsList.astro';
 import Faq from '@/components/Faq.astro';
 import { getCountryPaths, withLocales, PathBuilder } from '@/utils/paths';
 import { getCountry } from '@/utils/geo';
-import { generateMeta, generateServiceSchema, buildLocation } from '@/utils/seo';
+import {
+  generateMeta,
+  generateServiceSchema,
+  buildLocation,
+} from '@/utils/seo';
 import { getCollection } from 'astro:content';
 import { SITE_URL } from '@/utils/constants';
 import { getFaq } from '@/i18n/content/faq';
@@ -23,17 +27,31 @@ const meta = generateMeta('vehicle-buyback', {
   locale: locale,
 });
 const cases = (await getCollection('cases'))
-  .filter(c => c.data.published && c.data.country === countryCode && c.data.service === 'vehicle-buyback')
+  .filter(
+    (c) =>
+      c.data.published &&
+      c.data.country === countryCode &&
+      c.data.service === 'vehicle-buyback',
+  )
   .slice(0, 3);
-const schema = generateServiceSchema(`${sc.title} ${location}`, country[locale].name, meta.canonical);
+const schema = generateServiceSchema(
+  `${sc.title} ${location}`,
+  country[locale].name,
+  meta.canonical,
+);
 const isSerbia = countryCode === 'rs';
 const description = isSerbia
   ? sc.descriptionSerbia
-  : sc.descriptionOtherFor((country[locale] as { nameAccusative?: string; name: string }).nameAccusative ?? country[locale].name);
+  : sc.descriptionOtherFor(
+      (country[locale] as { nameAccusative?: string; name: string })
+        .nameAccusative ?? country[locale].name,
+    );
 ---
 
 <ServicePageLayout
-  {meta} {schema} {cases}
+  {meta}
+  {schema}
+  {cases}
   title={sc.title}
   titleHighlight={location}
   {description}
@@ -43,7 +61,10 @@ const description = isSerbia
   currentService="vehicle-buyback"
   casesHeading={sc.casesHeading}
   breadcrumbs={[
-    { label: country[locale].name, href: PathBuilder.service(locale, 'vehicle-sourcing', countryCode!) },
+    {
+      label: country[locale].name,
+      href: PathBuilder.service(locale, 'vehicle-sourcing', countryCode!),
+    },
     { label: sc.breadcrumbLabel },
   ]}
 >

@@ -47,8 +47,11 @@ const SLUG_RENAMES: Record<string, string> = {
 
 export function renameSlugSegments(pathname: string): string | null {
   let changed = false;
-  const renamed = pathname.split('/').map(seg => {
-    if (seg in SLUG_RENAMES) { changed = true; return SLUG_RENAMES[seg]; }
+  const renamed = pathname.split('/').map((seg) => {
+    if (seg in SLUG_RENAMES) {
+      changed = true;
+      return SLUG_RENAMES[seg];
+    }
     return seg;
   });
   return changed ? renamed.join('/') : null;
@@ -81,7 +84,12 @@ export function moveGermanySpoke(pathname: string): string | null {
 // '/admin/case-photos' is the gallery-upload admin tool (see
 // pages/admin/case-photos.astro) — same reasoning as '/keystatic', it's a tool
 // page outside the [locale] tree, not a translated site page.
-const UNLOCALIZED_PREFIXES = ['/api/', '/keystatic', '/_image', '/admin/case-photos'];
+const UNLOCALIZED_PREFIXES = [
+  '/api/',
+  '/keystatic',
+  '/_image',
+  '/admin/case-photos',
+];
 // '/404' is Astro's special not-found route — it's baked verbatim into
 // dist/client/404.html, the file every static host (Vercel included) falls
 // back to for ANY unmatched path. Redirecting it here corrupts that single
@@ -105,7 +113,7 @@ export const onRequest = defineMiddleware((context, next) => {
 
   if (
     UNLOCALIZED_EXACT.includes(pathname) ||
-    UNLOCALIZED_PREFIXES.some(p => pathname.startsWith(p)) ||
+    UNLOCALIZED_PREFIXES.some((p) => pathname.startsWith(p)) ||
     UNLOCALIZED_PATTERN.test(pathname)
   ) {
     return next();
@@ -119,12 +127,16 @@ export const onRequest = defineMiddleware((context, next) => {
   if (pathname === '/') {
     const locale = detectLocale(
       context.request.headers.get('accept-language'),
-      context.cookies.get(LOCALE_COOKIE)?.value
+      context.cookies.get(LOCALE_COOKIE)?.value,
     );
-    context.cookies.set(LOCALE_COOKIE, locale, { path: '/', maxAge: ONE_YEAR_SECONDS });
+    context.cookies.set(LOCALE_COOKIE, locale, {
+      path: '/',
+      maxAge: ONE_YEAR_SECONDS,
+    });
 
     if (!context.cookies.has(GEO_DISMISS_COOKIE)) {
-      const ipCountry = context.request.headers.get('x-vercel-ip-country') ?? '';
+      const ipCountry =
+        context.request.headers.get('x-vercel-ip-country') ?? '';
       const siteCode = GEO_MAP[ipCountry.toUpperCase()];
       if (siteCode) {
         context.locals.suggestedCountry = getCountry(siteCode);
@@ -143,14 +155,15 @@ export const onRequest = defineMiddleware((context, next) => {
   // visitor's current browser/cookie locale differs from the one baked
   // into the stale link they clicked.
   const slugRenamed = renameSlugSegments(rewritten);
-  const restructured = moveGermanySpoke(slugRenamed ?? rewritten) ?? slugRenamed;
+  const restructured =
+    moveGermanySpoke(slugRenamed ?? rewritten) ?? slugRenamed;
   if (restructured) {
     if (requestHasLocale(context)) {
       return context.redirect(`${restructured}${search}`, 301);
     }
     const locale = detectLocale(
       context.request.headers.get('accept-language'),
-      context.cookies.get(LOCALE_COOKIE)?.value
+      context.cookies.get(LOCALE_COOKIE)?.value,
     );
     return context.redirect(`/${locale}${restructured}${search}`, 301);
   }
@@ -164,7 +177,8 @@ export const onRequest = defineMiddleware((context, next) => {
 
     const isHome = pathname === `/${locale}/` || pathname === `/${locale}`;
     if (isHome && !context.cookies.has(GEO_DISMISS_COOKIE)) {
-      const ipCountry = context.request.headers.get('x-vercel-ip-country') ?? '';
+      const ipCountry =
+        context.request.headers.get('x-vercel-ip-country') ?? '';
       const siteCode = GEO_MAP[ipCountry.toUpperCase()];
       if (siteCode) {
         context.locals.suggestedCountry = getCountry(siteCode);
@@ -184,7 +198,7 @@ export const onRequest = defineMiddleware((context, next) => {
   // static redirects always fall back to the default locale, this doesn't).
   const locale = detectLocale(
     context.request.headers.get('accept-language'),
-    context.cookies.get(LOCALE_COOKIE)?.value
+    context.cookies.get(LOCALE_COOKIE)?.value,
   );
   return context.redirect(`/${locale}${rewritten}${search}`, 301);
 });

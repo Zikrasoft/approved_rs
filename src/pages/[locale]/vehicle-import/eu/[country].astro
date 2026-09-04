@@ -14,13 +14,23 @@ import type { Locale } from '@/i18n/config';
 type EuSpokeCountry = 'de' | 'es' | 'ch';
 
 export const getStaticPaths = () =>
-  withLocales((['de', 'es', 'ch'] as const).map(country => ({ params: { country } })));
+  withLocales(
+    (['de', 'es', 'ch'] as const).map((country) => ({ params: { country } })),
+  );
 
-const { locale, country } = Astro.params as { locale: Locale; country: EuSpokeCountry };
+const { locale, country } = Astro.params as {
+  locale: Locale;
+  country: EuSpokeCountry;
+};
 const sc = getServicesContent(locale);
 const pc = sc['vehicle-import'][country];
 const cases = (await getCollection('cases'))
-  .filter(c => c.data.published && c.data.service === 'vehicle-import' && c.data.country === country)
+  .filter(
+    (c) =>
+      c.data.published &&
+      c.data.service === 'vehicle-import' &&
+      c.data.country === country,
+  )
   .slice(0, 3);
 ---
 
@@ -35,7 +45,10 @@ const cases = (await getCollection('cases'))
   ctaLabel={pc.ctaLabel}
   breadcrumbLabel={pc.breadcrumbLabel}
   hubBreadcrumbLabel={sc['vehicle-import'].hub.breadcrumbLabel}
-  parentBreadcrumb={{ label: sc['vehicle-import'].eu.breadcrumbLabel, href: PathBuilder.vehicleImportSpoke(locale, 'eu') }}
+  parentBreadcrumb={{
+    label: sc['vehicle-import'].eu.breadcrumbLabel,
+    href: PathBuilder.vehicleImportSpoke(locale, 'eu'),
+  }}
   casesHeading={pc.casesHeading}
   {cases}
   steps={pc.steps}
@@ -43,6 +56,9 @@ const cases = (await getCollection('cases'))
   areaServed={getCountry(country)![locale].name}
 >
   <p class="mt-4 text-sm">
-    <a href={PathBuilder.vehicleImportSpoke(locale, 'china')} class="text-accent no-underline hover:underline">{pc.chinaCrossLabel} →</a>
+    <a
+      href={PathBuilder.vehicleImportSpoke(locale, 'china')}
+      class="text-accent no-underline hover:underline">{pc.chinaCrossLabel} →</a
+    >
   </p>
 </VehicleImportSpokeLayout>

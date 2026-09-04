@@ -37,8 +37,22 @@ interface Props {
 }
 
 const {
-  locale, slug, metaTitle, metaDescription, title, titleHighlight, description,
-  ctaLabel, breadcrumbLabel, hubBreadcrumbLabel, parentBreadcrumb, casesHeading, cases, steps, destinationsNote, areaServed,
+  locale,
+  slug,
+  metaTitle,
+  metaDescription,
+  title,
+  titleHighlight,
+  description,
+  ctaLabel,
+  breadcrumbLabel,
+  hubBreadcrumbLabel,
+  parentBreadcrumb,
+  casesHeading,
+  cases,
+  steps,
+  destinationsNote,
+  areaServed,
 } = Astro.props;
 
 const meta = {
@@ -47,18 +61,27 @@ const meta = {
   canonical: `${SITE_URL}${PathBuilder.vehicleImportSpoke(locale, slug)}`,
   ogImage: placeholderOgImage(SITE_URL, locale),
 };
-const schema = generateServiceSchema(`${title} ${titleHighlight}`, areaServed, meta.canonical);
+const schema = generateServiceSchema(
+  `${title} ${titleHighlight}`,
+  areaServed,
+  meta.canonical,
+);
 ---
 
 <ServicePageLayout
-  {meta} {schema}
-  {title} {titleHighlight} {description} {ctaLabel}
+  {meta}
+  {schema}
+  {title}
+  {titleHighlight}
+  {description}
+  {ctaLabel}
   formService={`vehicle-import-${slug}`}
   currentCountry="rs"
   leadCountry={slug}
   currentService="vehicle-import"
   showCountryCrossLinks={false}
-  {casesHeading} {cases}
+  {casesHeading}
+  {cases}
   breadcrumbs={[
     { label: hubBreadcrumbLabel, href: PathBuilder.vehicleImportHub(locale) },
     ...(parentBreadcrumb ? [parentBreadcrumb] : []),

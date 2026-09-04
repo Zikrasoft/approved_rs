@@ -10,11 +10,17 @@ import type { VehicleImportSpoke } from './vehicleImportCrossSell';
 // their own fixed shape.
 export const PathBuilder = {
   home: (locale: Locale) => `/${locale}/`,
-  service: (locale: Locale, slug: CountryScopedServiceSlug, countryCode: string) =>
-    `/${locale}/${slug}/${countryCode}/`,
+  service: (
+    locale: Locale,
+    slug: CountryScopedServiceSlug,
+    countryCode: string,
+  ) => `/${locale}/${slug}/${countryCode}/`,
   vehicleSourcingHub: (locale: Locale) => `/${locale}/vehicle-sourcing/`,
-  vehicleSourcingCity: (locale: Locale, countryCode: string, citySlug: string) =>
-    `/${locale}/vehicle-sourcing/${countryCode}/${citySlug}/`,
+  vehicleSourcingCity: (
+    locale: Locale,
+    countryCode: string,
+    citySlug: string,
+  ) => `/${locale}/vehicle-sourcing/${countryCode}/${citySlug}/`,
   vehicleImportHub: (locale: Locale) => `/${locale}/vehicle-import/`,
   // 'de'/'es'/'ch' nest under 'eu' (each reads as part of the Europe
   // grouping instead of a parallel top-level spoke) — still their own
@@ -24,13 +30,17 @@ export const PathBuilder = {
       ? `/${locale}/vehicle-import/eu/${slug}/`
       : `/${locale}/vehicle-import/${slug}/`,
   autoServiceBelgrade: (locale: Locale) => `/${locale}/auto-service-belgrade/`,
-  autoServiceCase: (locale: Locale, caseId: string) => `/${locale}/auto-service-belgrade/${caseId}/`,
+  autoServiceCase: (locale: Locale, caseId: string) =>
+    `/${locale}/auto-service-belgrade/${caseId}/`,
   detailingBelgrade: (locale: Locale) => `/${locale}/detailing-belgrade/`,
-  detailingCase: (locale: Locale, caseId: string) => `/${locale}/detailing-belgrade/${caseId}/`,
+  detailingCase: (locale: Locale, caseId: string) =>
+    `/${locale}/detailing-belgrade/${caseId}/`,
   case: (locale: Locale, caseId: string) => `/${locale}/cases/${caseId}/`,
-  casesVehicleSourcing: (locale: Locale) => `/${locale}/cases/vehicle-sourcing/`,
+  casesVehicleSourcing: (locale: Locale) =>
+    `/${locale}/cases/vehicle-sourcing/`,
   casesVehicleBuyback: (locale: Locale) => `/${locale}/cases/vehicle-buyback/`,
-  casesVehicleInspection: (locale: Locale) => `/${locale}/cases/vehicle-inspection/`,
+  casesVehicleInspection: (locale: Locale) =>
+    `/${locale}/cases/vehicle-inspection/`,
   casesVehicleImport: (locale: Locale) => `/${locale}/cases/vehicle-import/`,
   casesAutoService: (locale: Locale) => `/${locale}/cases/auto-service/`,
   casesDetailing: (locale: Locale) => `/${locale}/cases/detailing/`,
@@ -43,29 +53,33 @@ export const PathBuilder = {
 // cars in" ChipLinks — both are Belgrade-only pages that cross-sell
 // vehicle-sourcing in every other active country.
 export function sourcingChipItems(locale: Locale) {
-  return getActiveCountries().filter(c => c.code !== 'rs').map(c => ({
-    href: PathBuilder.service(locale, 'vehicle-sourcing', c.code),
-    text: c[locale].name,
-  }));
+  return getActiveCountries()
+    .filter((c) => c.code !== 'rs')
+    .map((c) => ({
+      href: PathBuilder.service(locale, 'vehicle-sourcing', c.code),
+      text: c[locale].name,
+    }));
 }
 
 export function getCountryPaths() {
-  return getActiveCountries().map(c => ({ params: { country: c.code } }));
+  return getActiveCountries().map((c) => ({ params: { country: c.code } }));
 }
 
 export function getCityPaths() {
-  return getActiveCountries().flatMap(country =>
-    getCitiesForCountry(country.code).map(city => ({
+  return getActiveCountries().flatMap((country) =>
+    getCitiesForCountry(country.code).map((city) => ({
       params: { country: country.code, city: city.slug },
       props: { city },
-    }))
+    })),
   );
 }
 
-export function withLocales<T extends { params: Record<string, string | undefined> }>(
-  paths: T[]
+export function withLocales<
+  T extends { params: Record<string, string | undefined> },
+>(
+  paths: T[],
 ): (Omit<T, 'params'> & { params: T['params'] & { locale: Locale } })[] {
-  return SUPPORTED_LOCALES.flatMap(locale =>
-    paths.map(p => ({ ...p, params: { locale, ...p.params } }))
+  return SUPPORTED_LOCALES.flatMap((locale) =>
+    paths.map((p) => ({ ...p, params: { locale, ...p.params } })),
   );
 }

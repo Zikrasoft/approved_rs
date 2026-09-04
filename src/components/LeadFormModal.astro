@@ -3,7 +3,10 @@ import { X } from '@lucide/astro';
 import LeadForm from './LeadForm.astro';
 import { getLocale } from '@/i18n/config';
 import { getI18n } from '@/i18n/getI18n';
-import type { DATA_OPEN_LEAD_MODAL, DATA_OPEN_PAGE_LEAD_MODAL } from '@/utils/contactChannel';
+import type {
+  DATA_OPEN_LEAD_MODAL,
+  DATA_OPEN_PAGE_LEAD_MODAL,
+} from '@/utils/contactChannel';
 
 interface Props {
   id: string;
@@ -15,16 +18,35 @@ interface Props {
   commentPlaceholder?: string;
 }
 
-const { id, triggerAttr, service = '', country = '', city = '', commentLabel, commentPlaceholder } = Astro.props;
+const {
+  id,
+  triggerAttr,
+  service = '',
+  country = '',
+  city = '',
+  commentLabel,
+  commentPlaceholder,
+} = Astro.props;
 const locale = getLocale(Astro.currentLocale);
 const closeLabel = getI18n(locale).common.closeLabel;
 ---
 
 <dialog id={id} class="lead-modal">
-  <button type="button" data-close aria-label={closeLabel} class="lead-modal-close">
+  <button
+    type="button"
+    data-close
+    aria-label={closeLabel}
+    class="lead-modal-close"
+  >
     <X size={16} />
   </button>
-  <LeadForm service={service} country={country} city={city} {commentLabel} {commentPlaceholder} />
+  <LeadForm
+    service={service}
+    country={country}
+    city={city}
+    {commentLabel}
+    {commentPlaceholder}
+  />
 </dialog>
 
 <style>
@@ -44,7 +66,10 @@ const closeLabel = getI18n(locale).common.closeLabel;
     overscroll-behavior: contain;
     margin: auto;
   }
-  .lead-modal::backdrop { background: rgba(13, 15, 20, 0.6); backdrop-filter: blur(4px); }
+  .lead-modal::backdrop {
+    background: rgba(13, 15, 20, 0.6);
+    backdrop-filter: blur(4px);
+  }
   .lead-modal-close {
     position: absolute;
     top: 1.25rem;
@@ -60,9 +85,14 @@ const closeLabel = getI18n(locale).common.closeLabel;
     background: var(--color-surface);
     color: var(--color-muted);
     cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
+    transition:
+      border-color 0.2s,
+      color 0.2s;
   }
-  .lead-modal-close:hover { border-color: var(--color-accent) !important; color: var(--color-accent) !important; }
+  .lead-modal-close:hover {
+    border-color: var(--color-accent) !important;
+    color: var(--color-accent) !important;
+  }
 </style>
 
 <script define:vars={{ id, triggerAttr }}>
@@ -70,7 +100,7 @@ const closeLabel = getI18n(locale).common.closeLabel;
   // multiple independent modals (header's generic one, a page's contextual
   // one) can coexist without colliding.
   function initLeadFormModal() {
-    var modal = document.getElementById(id);
+    const modal = document.getElementById(id);
     if (!modal) return;
     // Delegated on document (not queried+bound at init time): this script is
     // forced is:inline by define:vars, so it runs synchronously wherever it
@@ -79,22 +109,29 @@ const closeLabel = getI18n(locale).common.closeLabel;
     // the document and haven't been parsed yet. Delegation sidesteps DOM
     // order entirely.
     document.addEventListener('click', function (e) {
-      var btn = e.target instanceof Element ? e.target.closest('[' + triggerAttr + ']') : null;
+      const btn =
+        e.target instanceof Element
+          ? e.target.closest('[' + triggerAttr + ']')
+          : null;
       if (!btn) return;
       // trigger's attribute value ("phone") preselects that LeadForm tab by
       // replaying a real click on it — reuses LeadForm's own tab-switch
       // logic instead of duplicating it here.
-      var tab = btn.getAttribute(triggerAttr);
+      const tab = btn.getAttribute(triggerAttr);
       if (tab) {
-        var tabBtn = modal.querySelector('.pill-tab[data-tab="' + tab + '"]');
+        const tabBtn = modal.querySelector('.pill-tab[data-tab="' + tab + '"]');
         if (tabBtn) tabBtn.click();
       }
       document.documentElement.classList.add('modal-open');
       modal.showModal();
-      if (window.ymReachGoal) window.ymReachGoal('lead_modal_open', { tab: tab || 'default' });
+      if (window.ymReachGoal)
+        window.ymReachGoal('lead_modal_open', { tab: tab || 'default' });
     });
-    var closeBtn = modal.querySelector('[data-close]');
-    if (closeBtn) closeBtn.addEventListener('click', function () { modal.close(); });
+    const closeBtn = modal.querySelector('[data-close]');
+    if (closeBtn)
+      closeBtn.addEventListener('click', function () {
+        modal.close();
+      });
     modal.addEventListener('click', function (e) {
       if (e.target === modal) modal.close();
     });

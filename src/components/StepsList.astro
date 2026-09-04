@@ -8,12 +8,14 @@ const { steps } = Astro.props;
 <div class="steps-list mt-8 relative">
   <div class="steps-line" aria-hidden="true"></div>
   <div class="space-y-6">
-    {steps.map(step => (
-      <div class="flex gap-4 items-center relative">
-        <span class="step-circle step-circle-sm">{step.n}</span>
-        <p class="text-sm leading-relaxed text-muted">{step.text}</p>
-      </div>
-    ))}
+    {
+      steps.map((step) => (
+        <div class="flex gap-4 items-center relative">
+          <span class="step-circle step-circle-sm">{step.n}</span>
+          <p class="text-sm leading-relaxed text-muted">{step.text}</p>
+        </div>
+      ))
+    }
   </div>
 </div>
 
@@ -24,6 +26,11 @@ const { steps } = Astro.props;
     bottom: 1.125rem;
     left: 1.125rem;
     width: 1px;
-    background: linear-gradient(to bottom, var(--color-accent-border), var(--color-accent-border) 92%, transparent);
+    background: linear-gradient(
+      to bottom,
+      var(--color-accent-border),
+      var(--color-accent-border) 92%,
+      transparent
+    );
   }
 </style>

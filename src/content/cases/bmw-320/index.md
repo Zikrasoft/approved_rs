@@ -45,6 +45,7 @@ translations:
       Wir haben das Auto schnell begutachtet, ein **fairen Marktpreis** angeboten, der die Eigentümerin vollkommen zufrieden stellte, und den Kauf **zügig abgeschlossen**. Nur wenige Stunden später war das Auto verkauft, das Geld überwiesen, und die Kundin konnte entspannt in ihr neues Land reisen, ohne sich um den Verkauf sorgen zu müssen.
 translatedFrom: ec6e35b6db4f988c
 ---
+
 ## Срочный выкуп автомобиля в Сербии — быстро, безопасно и без лишних хлопот.
 
 К нам обратилась девушка, которой нужно было **срочно продать автомобиль** перед переездом в другую страну. Времени заниматься объявлениями, показами, торгом и оформлением документов у нее не было.

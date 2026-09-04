@@ -12,7 +12,12 @@ const { locale } = Astro.params as { locale: Locale };
 const sc = getServicesContent(locale);
 const pc = sc['vehicle-import'].china;
 const cases = (await getCollection('cases'))
-  .filter(c => c.data.published && c.data.service === 'vehicle-import' && c.data.country === CHINA_COUNTRY_CODE)
+  .filter(
+    (c) =>
+      c.data.published &&
+      c.data.service === 'vehicle-import' &&
+      c.data.country === CHINA_COUNTRY_CODE,
+  )
   .slice(0, 3);
 ---
 
@@ -34,6 +39,9 @@ const cases = (await getCollection('cases'))
   areaServed={CHINA_NAME[locale]}
 >
   <p class="mt-4 text-sm">
-    <a href={PathBuilder.vehicleImportSpoke(locale, 'de')} class="text-accent no-underline hover:underline">{pc.deCrossLabel} →</a>
+    <a
+      href={PathBuilder.vehicleImportSpoke(locale, 'de')}
+      class="text-accent no-underline hover:underline">{pc.deCrossLabel} →</a
+    >
   </p>
 </VehicleImportSpokeLayout>

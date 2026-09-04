@@ -33,23 +33,40 @@ function authHeaders(token: string): HeadersInit {
 // Carries the HTTP status so callers can distinguish "not found" from a
 // real failure without regex-sniffing the error message.
 export class GithubApiError extends Error {
-  constructor(public status: number, path: string, body: string) {
+  constructor(
+    public status: number,
+    path: string,
+    body: string,
+  ) {
     super(`GitHub API ${path} failed: ${status} ${body}`);
   }
 }
 
-async function ghFetch(token: string, path: string, init?: RequestInit): Promise<unknown> {
-  const res = await fetch(`${API}${path}`, { ...init, headers: { ...authHeaders(token), ...init?.headers } });
+async function ghFetch(
+  token: string,
+  path: string,
+  init?: RequestInit,
+): Promise<unknown> {
+  const res = await fetch(`${API}${path}`, {
+    ...init,
+    headers: { ...authHeaders(token), ...init?.headers },
+  });
   if (!res.ok) throw new GithubApiError(res.status, path, await res.text());
   return res.json();
 }
 
 // 404 means the directory doesn't exist yet (case has no gallery/ folder
 // committed yet) — that's "no files", not an error.
-export async function listGithubDir(token: string, dirPath: string): Promise<string[]> {
+export async function listGithubDir(
+  token: string,
+  dirPath: string,
+): Promise<string[]> {
   try {
-    const entries = await ghFetch(token, `/repos/${REPO}/contents/${dirPath}?ref=${BRANCH}`) as { name: string }[];
-    return entries.map(e => e.name);
+    const entries = (await ghFetch(
+      token,
+      `/repos/${REPO}/contents/${dirPath}?ref=${BRANCH}`,
+    )) as { name: string }[];
+    return entries.map((e) => e.name);
   } catch (err) {
     if (err instanceof GithubApiError && err.status === 404) return [];
     throw err;
@@ -65,7 +82,10 @@ export async function listGithubDir(token: string, dirPath: string): Promise<str
 // propagating. Not used by case-photos-upload.ts, whose dev branch also
 // needs to mkdir the gallery/ dir before writing into it — a different job
 // than this read-only listing.
-export async function listGalleryFiles(token: string | undefined, relDir: string): Promise<string[]> {
+export async function listGalleryFiles(
+  token: string | undefined,
+  relDir: string,
+): Promise<string[]> {
   if (import.meta.env.PROD) {
     try {
       return await listGithubDir(token!, relDir);
@@ -78,48 +98,80 @@ export async function listGalleryFiles(token: string | undefined, relDir: string
   return existsSync(dir) ? await readdir(dir) : [];
 }
 
-export async function getGithubFileBuffer(token: string, filePath: string): Promise<Buffer> {
-  const data = await ghFetch(token, `/repos/${REPO}/contents/${filePath}?ref=${BRANCH}`) as { content: string };
+export async function getGithubFileBuffer(
+  token: string,
+  filePath: string,
+): Promise<Buffer> {
+  const data = (await ghFetch(
+    token,
+    `/repos/${REPO}/contents/${filePath}?ref=${BRANCH}`,
+  )) as { content: string };
   return Buffer.from(data.content, 'base64');
 }
 
-export async function getGithubFile(token: string, filePath: string): Promise<string> {
+export async function getGithubFile(
+  token: string,
+  filePath: string,
+): Promise<string> {
   return (await getGithubFileBuffer(token, filePath)).toString('utf-8');
 }
 
-export async function commitGalleryPhotos(token: string, opts: {
-  photos: { path: string; base64: string }[];
-  indexPath: string;
-  indexContent: string;
-  message: string;
-}): Promise<void> {
-  const ref = await ghFetch(token, `/repos/${REPO}/git/ref/heads/${BRANCH}`) as { object: { sha: string } };
+export async function commitGalleryPhotos(
+  token: string,
+  opts: {
+    photos: { path: string; base64: string }[];
+    indexPath: string;
+    indexContent: string;
+    message: string;
+  },
+): Promise<void> {
+  const ref = (await ghFetch(
+    token,
+    `/repos/${REPO}/git/ref/heads/${BRANCH}`,
+  )) as { object: { sha: string } };
   const baseCommitSha = ref.object.sha;
-  const baseCommit = await ghFetch(token, `/repos/${REPO}/git/commits/${baseCommitSha}`) as { tree: { sha: string } };
+  const baseCommit = (await ghFetch(
+    token,
+    `/repos/${REPO}/git/commits/${baseCommitSha}`,
+  )) as { tree: { sha: string } };
 
   // Binary content (photos) needs its own blob first — Git's tree API only
   // accepts inline `content` for UTF-8 text, which index.md's new content
   // (below) qualifies for directly, skipping a blob call for it.
-  const photoEntries = await Promise.all(opts.photos.map(async photo => {
-    const blob = await ghFetch(token, `/repos/${REPO}/git/blobs`, {
-      method: 'POST',
-      body: JSON.stringify({ content: photo.base64, encoding: 'base64' }),
-    }) as { sha: string };
-    return { path: photo.path, mode: '100644', type: 'blob', sha: blob.sha };
-  }));
+  const photoEntries = await Promise.all(
+    opts.photos.map(async (photo) => {
+      const blob = (await ghFetch(token, `/repos/${REPO}/git/blobs`, {
+        method: 'POST',
+        body: JSON.stringify({ content: photo.base64, encoding: 'base64' }),
+      })) as { sha: string };
+      return { path: photo.path, mode: '100644', type: 'blob', sha: blob.sha };
+    }),
+  );
 
-  const tree = await ghFetch(token, `/repos/${REPO}/git/trees`, {
+  const tree = (await ghFetch(token, `/repos/${REPO}/git/trees`, {
     method: 'POST',
     body: JSON.stringify({
       base_tree: baseCommit.tree.sha,
-      tree: [...photoEntries, { path: opts.indexPath, mode: '100644', type: 'blob', content: opts.indexContent }],
+      tree: [
+        ...photoEntries,
+        {
+          path: opts.indexPath,
+          mode: '100644',
+          type: 'blob',
+          content: opts.indexContent,
+        },
+      ],
     }),
-  }) as { sha: string };
+  })) as { sha: string };
 
-  const commit = await ghFetch(token, `/repos/${REPO}/git/commits`, {
+  const commit = (await ghFetch(token, `/repos/${REPO}/git/commits`, {
     method: 'POST',
-    body: JSON.stringify({ message: opts.message, tree: tree.sha, parents: [baseCommitSha] }),
-  }) as { sha: string };
+    body: JSON.stringify({
+      message: opts.message,
+      tree: tree.sha,
+      parents: [baseCommitSha],
+    }),
+  })) as { sha: string };
 
   await ghFetch(token, `/repos/${REPO}/git/refs/heads/${BRANCH}`, {
     method: 'PATCH',

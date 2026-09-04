@@ -5,4 +5,7 @@ interface Props {
 }
 const { price, class: className } = Astro.props;
 ---
-<p class={className}>{price.value}{price.value && price.currency ? ` ${price.currency}` : ''}</p>
+
+<p class={className}>
+  {price.value}{price.value && price.currency ? ` ${price.currency}` : ''}
+</p>
