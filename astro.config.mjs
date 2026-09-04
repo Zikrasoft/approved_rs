@@ -27,7 +27,7 @@ export default defineConfig({
         defaultLocale: "ru",
         locales: { ru: "ru-RU", en: "en-US", sr: "sr-RS", es: "es-ES", de: "de-DE" },
       },
-      // Internal dev-only tool, not a real page (see pages/admin/case-photos.astro).
+      // Internal admin tool (see pages/admin/case-photos.astro), not a public page.
       filter: (page) => !page.includes("/admin/case-photos"),
     }),
   ],

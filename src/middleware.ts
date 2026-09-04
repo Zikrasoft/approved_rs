@@ -78,7 +78,7 @@ export function moveGermanySpoke(pathname: string): string | null {
 // dev always, and in prod for any non-prerendered route) — locale-prefixing
 // it breaks every <Image> on the site, since the endpoint only exists at
 // the bare path.
-// '/admin/case-photos' is the dev-only gallery-upload prototype (see
+// '/admin/case-photos' is the gallery-upload admin tool (see
 // pages/admin/case-photos.astro) — same reasoning as '/keystatic', it's a tool
 // page outside the [locale] tree, not a translated site page.
 const UNLOCALIZED_PREFIXES = ['/api/', '/keystatic', '/_image', '/admin/case-photos'];
