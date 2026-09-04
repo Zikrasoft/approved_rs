@@ -20,6 +20,10 @@ on:
       - 'src/content/cases/**/index.md'
       - 'src/content/autoservice-cases/**/index.md'
       - 'src/content/detailing-cases/**/index.md'
+  # Manual escape hatch — e.g. after adding a new locale, to backfill it
+  # across every existing case without needing to touch each file's content
+  # (which is what the push trigger above requires).
+  workflow_dispatch: {}
 
 # Scoped per-branch (github.ref), not one global group — a push to one
 # branch shouldn't queue behind an unrelated run on another. Two case saves

@@ -76,7 +76,9 @@ Vercel автоматически запустит деплой при пуше 
 
 Это безопасно гонять на всех ветках, потому что `vercel.json`'s
 `git.deploymentEnabled` разрешает реальный Vercel-деплой только для `main`
-(`"*": false, "main": true`) — коммит с переводом на фиче-ветке не запускает
+(`"**": false, "main": true` — plain `"*"` doesn't cross `/`, minimatch matches
+it against the whole branch name and `feature/x` never matches a bare `*`)
+— коммит с переводом на фиче-ветке не запускает
 лишний preview-билд. Если вообще не пользуетесь Vercel preview — это и есть
 причина такой настройки, а не только защита от лишних коммитов джобы.
 
