@@ -3,6 +3,7 @@
   "buildCommand": "pnpm run build",
   "outputDirectory": "dist",
   "installCommand": "pnpm install",
+  "ignoreCommand": "bash scripts/vercel-ignore-build.sh",
   "env": {
     "SITE": "https://approved.rs"
   },
