@@ -35,6 +35,31 @@ translations:
       Zahvaljujući tome što koristimo **zvaničnu BMW ISTA diliersku dijagnostiku**, vozilo je detaljno provereno. Dijagnostika je pokazala odlično stanje motora: **lanac razvoda**, **brizgaljke**, **EGR sistem** i ostali parametri su bili u granicama normale. Vozilo poseduje pouzdan **2,0-litarski dizel motor B47** i **8-stepeni automatski menjač Aisin**, koji se smatraju jednim od najboljih rešenja u svojoj klasi.
 
       Na kraju je Viktor dobio potpuno provereno vozilo sa transparentnom istorijom i bez skrivenih tehničkih problema.
+  es:
+    title: BMW X1
+    body: |-
+      ## Selección de autos en Serbia: cuando la decisión correcta proviene de la experiencia y no de las emociones.
+
+      Victor se puso en contacto con nosotros incluso antes de recibir su permiso de residencia en Serbia. Desde el principio, le advertimos que no podría registrar un automóvil a su nombre hasta que obtuviera el permiso, por lo que la búsqueda tuvo que posponerse temporalmente. Pasados unos meses, en julio de 2026, después de recibir la documentación, comenzamos la búsqueda del automóvil.
+
+      Durante ese tiempo, los requisitos para el futuro vehículo cambiaron. Inicialmente, Victor estaba considerando un **Peugeot**, pero tras discutir todos los pros y contras, decidió centrarse en una opción más confiable: el **BMW X1**.
+
+      Gracias a que utilizamos el **diagnóstico oficial del concesionario BMW ISTA**, el automóvil fue revisado de manera exhaustiva. El diagnóstico reveló que el motor estaba en excelente estado: la **cadena de distribución**, los **inyectores**, el **sistema EGR** y otros parámetros estaban dentro de los límites normales. El vehículo está equipado con un fiable **motor diésel de 2.0 litros B47** y una **transmisión automática de 8 velocidades Aisin**, que se han ganado una reputación como uno de los mejores en su categoría.
+
+      Como resultado, Victor obtuvo un automóvil completamente revisado, con un historial transparente y sin problemas técnicos ocultos.
+  de:
+    title: BMW X1
+    body: |-
+      ## Autoauswahl in Serbien – wenn die richtige Entscheidung aus Erfahrung und nicht aus Emotionen kommt.
+
+      Viktor wandte sich noch vor dem Erhalt seiner Aufenthaltsgenehmigung in Serbien an uns. Wir haben ihn sofort darüber informiert, dass ein Auto erst nach Erhalt der Genehmigung auf seinen Namen zugelassen werden kann, weshalb die Suche vorübergehend aufgeschoben werden musste. Im Juli 2026, nach Erhalt der Dokumente, begannen wir mit der Autosuche.
+
+      In der Zwischenzeit hatten sich die Anforderungen an das zukünftige Fahrzeug geändert. Ursprünglich dachte Viktor an einen **Peugeot**, aber nach Abwägung aller Vor- und Nachteile entschied er sich für eine zuverlässigere Option – den **BMW X1**.
+
+      Dank unserer Nutzung der **offiziellen BMW ISTA-Diagnose** wurde das Fahrzeug ausführlich geprüft. Die Diagnose ergab, dass der Motor in einem einwandfreien Zustand ist: **Steuerkette**, **Einspritzdüsen**, **EGR-System** und weitere Parameter lagen im normalen Bereich. Das Auto ist mit einem robusten **2,0-Liter-Dieselmotor B47** und einem **8-Gang-Automatikgetriebe von Aisin** ausgestattet, die sich in ihrer Klasse als besonders zuverlässig erwiesen haben.
+
+      Letztendlich erhielt Viktor ein vollständig geprüftes Fahrzeug mit transparenter Historie und ohne versteckte technische Probleme.
+translatedFrom: d0d7770c53f24a35
 ---
 ## Автоподбор в Сербии — когда правильное решение приходит с опытом, а не с эмоциями.
 

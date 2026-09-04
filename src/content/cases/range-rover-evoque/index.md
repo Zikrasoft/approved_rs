@@ -31,6 +31,27 @@ translations:
       Nakon kupovine organizovali smo transport vozila u Srbiju, izvršili carinjenje i obavili kompletnu tehničku pripremu u našem servisu. Zamenjen je **lanac razvoda**, izvršena je **popravka turbine**, obavljeno je kompletno tehničko servisiranje, uključujući zamenu ulja u motoru i **zamenu ulja u 9-stepenom menjaču ZF 9HP**.
 
       Klijent je na kraju dobio potpuno servisirano i pouzdano vozilo, spremno za vožnju bez neprijatnih iznenađenja.
+  es:
+    title: Range Rover Evoque
+    body: |-
+      ## Importación de automóviles desde Alemania a Serbia: más que una simple entrega, es un acompañamiento completo hasta lograr el resultado perfecto.
+
+      Un cliente nos contactó para adquirir un **Range Rover Evoque de Alemania**. Seleccionamos el vehículo adecuado, realizamos una inspección profesional antes de la compra y detectamos de inmediato un problema característico de este motor: **la cadena de distribución estirada**. El cliente fue informado previamente sobre todas las peculiaridades, pero teniendo en cuenta el estado del automóvil, su equipamiento y el precio atractivo, decidió optar por esta opción en particular.
+
+      Después de la compra, organizamos la entrega del vehículo a Serbia, realizamos el trámite de aduana y llevamos a cabo una completa preparación técnica en nuestro taller. Se reemplazó la **cadena de distribución**, se realizó la **reparación del turbocompresor**, y se llevó a cabo un mantenimiento técnico integral, que incluyó el cambio de aceite del motor y **el cambio de aceite en la caja de cambios ZF 9HP de 9 velocidades**.
+
+      Como resultado, el cliente recibió un automóvil completamente revisado y confiable, listo para su uso sin sorpresas desagradables.
+  de:
+    title: Range Rover Evoque
+    body: |-
+      ## Autosourcing aus Deutschland nach Serbien – mehr als nur Lieferung, sondern umfassende Unterstützung bis zum perfekten Ergebnis.
+
+      Ein Kunde wandte sich an uns wegen eines **Range Rover Evoque aus Deutschland**. Wir fanden ein passendes Fahrzeug, führten eine professionelle Prüfung vor dem Kauf durch und entdeckten sofort ein typisches Problem für diesen Motortyp – **eine gedehnte Steuerkette**. Der Kunde wurde im Voraus über alle Besonderheiten informiert, entschied sich jedoch aufgrund des Fahrzeugzustands, der Ausstattung und des attraktiven Preises für genau dieses Modell.
+
+      Nach dem Kauf organisierten wir den Transport des Fahrzeugs nach Serbien, erledigten die Zollformalitäten und führten eine umfassende technische Vorbereitung in unserem Servicezentrum durch. Die **Steuerkette** wurde ersetzt, die **Turbolader-Reparatur** durchgeführt und eine komplette Wartung vorgenommen, die den Ölwechsel im Motor und die **Ölwechsel der 9-Gang ZF 9HP Automatikgetriebe** umfasste.
+
+      Am Ende erhielt der Kunde ein voll gewartetes und zuverlässiges Fahrzeug, bereit für den Einsatz ohne unangenehme Überraschungen.
+translatedFrom: ed0ed88800068f11
 ---
 ## Пригон автомобилей из Германии в Сербию — не просто доставка, а полное сопровождение до идеального результата.
 

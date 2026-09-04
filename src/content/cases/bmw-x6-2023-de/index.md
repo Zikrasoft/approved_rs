@@ -31,6 +31,27 @@ translations:
       Obavili smo profesionalan pregled vozila u Nemačkoj (cena provere je **od 300 do 500 €** po automobilu), organizovali transport auto-vozom do Subotice, izvršili carinjenje i predali vlasniku **potpuno spremno vozilo**, već u Srbiji.
 
       Klijent je na poklon dobio i **profesionalno poliranje karoserije**.
+  es:
+    title: BMW X6 2023 — selección en Alemania
+    body: |-
+      ## Importación de un BMW X6 de Alemania a Serbia — ¡otro cliente satisfecho!  
+
+      El cliente se puso en contacto con nosotros ya habiendo elegido un **BMW X6** en Alemania. Analizamos el mercado y le presentamos varias alternativas más interesantes con menor kilometraje, ayudándole a seleccionar la mejor opción.  
+
+      Realizamos una inspección profesional del vehículo en Alemania (costo de la inspección — **de 300 a 500 €** por vehículo), organizamos el transporte en camión hacia Subotica, llevamos a cabo los trámites de aduana y entregamos al propietario el **vehículo completamente listo** aquí en Serbia.  
+
+      Como obsequio, el cliente recibió una **pulida profesional de la carrocería**.
+  de:
+    title: BMW X6 2023 — Beschaffung in Deutschland
+    body: |-
+      ## BMW X6 aus Deutschland nach Serbien — ein weiterer zufriedener Kunde!
+
+      Der Kunde trat mit uns in Kontakt, nachdem er bereits einen **BMW X6** in Deutschland ausgewählt hatte. Wir haben den Markt analysiert, einige interessantere Alternativen mit niedrigeren Laufleistungen vorgeschlagen und geholfen, die beste Option zu wählen.
+
+      Wir führten eine professionelle Inspektion des Fahrzeugs in Deutschland durch (Kosten für die Prüfung — **von 300 bis 500 €** pro Fahrzeug), organisierten den Transport mit einem Autofrachter nach Subotica, erledigten die Zollabwicklung und übergaben dem Kunden einen **vollständig einsatzbereiten Wagen** in Serbien.
+
+      Als Geschenk erhielt der Kunde eine **professionelle Fahrzeuglackierung**.
+translatedFrom: 0fb5f6f725424f75
 ---
 ## Пригон BMW X6 из Германии в Сербию — еще один довольный клиент!
 
