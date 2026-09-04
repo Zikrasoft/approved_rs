@@ -156,6 +156,8 @@ image: image.jpg
 gallery:
   - gallery/0.jpg
   - gallery/1.jpg
+  - gallery/icon-192.png
+  - gallery/icon.png
 date: 2026-08-05
 published: true
 translatedFrom: 6bb1bfb729adcdf6
