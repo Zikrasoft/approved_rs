@@ -13,6 +13,10 @@
 // KEYSTATIC_AUTH_COOKIE) after a manager logs into Keystatic — same token,
 // same GitHub App permissions Keystatic's own commits already use.
 
+import { existsSync } from 'node:fs';
+import { readdir } from 'node:fs/promises';
+import path from 'node:path';
+
 const REPO = 'Zikrasoft/approved_rs'; // keep in sync with keystatic.config.ts's storage.repo
 const BRANCH = 'main'; // keep in sync with vercel.json's git.deploymentEnabled
 const API = 'https://api.github.com';
@@ -52,9 +56,35 @@ export async function listGithubDir(token: string, dirPath: string): Promise<str
   }
 }
 
-export async function getGithubFile(token: string, filePath: string): Promise<string> {
+// Dev/prod branch for "what's already in this case's gallery/" — used by
+// case-photos.astro's thumbnail grid, which only reads and must never 500
+// the whole admin page just because a preview grid couldn't load: unlike
+// listGithubDir (which only treats 404 as "empty"), a stale-but-present auth
+// cookie can fail here with a real GitHub error (401/403/5xx), so any
+// failure — not just 404 — degrades to "nothing to show" instead of
+// propagating. Not used by case-photos-upload.ts, whose dev branch also
+// needs to mkdir the gallery/ dir before writing into it — a different job
+// than this read-only listing.
+export async function listGalleryFiles(token: string | undefined, relDir: string): Promise<string[]> {
+  if (import.meta.env.PROD) {
+    try {
+      return await listGithubDir(token!, relDir);
+    } catch (err) {
+      console.error('listGalleryFiles: failed to list', relDir, err);
+      return [];
+    }
+  }
+  const dir = path.join(process.cwd(), relDir);
+  return existsSync(dir) ? await readdir(dir) : [];
+}
+
+export async function getGithubFileBuffer(token: string, filePath: string): Promise<Buffer> {
   const data = await ghFetch(token, `/repos/${REPO}/contents/${filePath}?ref=${BRANCH}`) as { content: string };
-  return Buffer.from(data.content, 'base64').toString('utf-8');
+  return Buffer.from(data.content, 'base64');
+}
+
+export async function getGithubFile(token: string, filePath: string): Promise<string> {
+  return (await getGithubFileBuffer(token, filePath)).toString('utf-8');
 }
 
 export async function commitGalleryPhotos(token: string, opts: {

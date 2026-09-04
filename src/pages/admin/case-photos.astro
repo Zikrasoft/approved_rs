@@ -16,7 +16,8 @@ export const prerender = false;
 // storage and never sets this cookie — same no-auth trust model as
 // Keystatic's own local mode (see keystatic.config.ts's storage split).
 import { getCollection } from 'astro:content';
-import { CASE_COLLECTIONS, KEYSTATIC_AUTH_COOKIE } from '@/utils/adminGallery';
+import { CASE_COLLECTIONS, KEYSTATIC_AUTH_COOKIE, SAFE_GALLERY_FILENAME } from '@/utils/adminGallery';
+import { listGalleryFiles } from '@/lib/githubContents';
 import '@/styles/global.css';
 
 if (import.meta.env.PROD && !Astro.cookies.has(KEYSTATIC_AUTH_COOKIE)) {
@@ -43,6 +44,11 @@ const error = params.get('error');
 const preselected = groups
   .find(g => g.dir === selectedDir)
   ?.entries.find(e => e.id === selectedSlug);
+
+const existingPhotos: string[] = preselected
+  ? (await listGalleryFiles(Astro.cookies.get(KEYSTATIC_AUTH_COOKIE)?.value, `${selectedDir}/${selectedSlug}/gallery`))
+      .filter(file => SAFE_GALLERY_FILENAME.test(file))
+  : [];
 ---
 
 <html lang="ru">
@@ -87,10 +93,27 @@ const preselected = groups
       <input type="hidden" name="dir" id="dir-input" value={preselected ? selectedDir : ''} />
       <input type="hidden" name="slug" id="slug-input" value={preselected ? selectedSlug : ''} />
 
+      {existingPhotos.length > 0 && (
+        <div class="flex flex-col gap-1 text-sm">
+          <span>Уже в галерее ({existingPhotos.length})</span>
+          <div class="grid grid-cols-4 gap-2">
+            {existingPhotos.map(file => (
+              <img
+                src={`/api/admin/case-photos-image?${new URLSearchParams({ dir: selectedDir, slug: selectedSlug, file }).toString()}`}
+                alt={file}
+                class="w-full aspect-square object-cover rounded-sm border"
+                loading="lazy"
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       <label class="flex flex-col gap-1 text-sm">
         Фото (можно выбрать сразу несколько)
-        <input type="file" name="photos" accept="image/*" multiple required class="border rounded-sm px-2 py-1.5" />
+        <input type="file" name="photos" accept="image/*" multiple required class="border rounded-sm px-2 py-1.5" id="photos-input" />
       </label>
+      <div class="grid grid-cols-4 gap-2" id="new-photos-preview"></div>
 
       <button type="submit" class="bg-neutral-900 text-white rounded-sm px-4 py-2 text-sm">Загрузить</button>
     </form>
@@ -114,6 +137,23 @@ const preselected = groups
       select.addEventListener('change', sync);
       sync();
     }
+
+    // Client-side preview of files picked but not yet uploaded — object
+    // URLs, revoked on every change so a big multi-select doesn't leak
+    // memory across repeated picks.
+    const photosInput = document.getElementById('photos-input') as HTMLInputElement;
+    const preview = document.getElementById('new-photos-preview') as HTMLDivElement;
+    let previewUrls: string[] = [];
+    photosInput.addEventListener('change', () => {
+      previewUrls.forEach(url => URL.revokeObjectURL(url));
+      previewUrls = [...(photosInput.files ?? [])].map(file => URL.createObjectURL(file));
+      preview.replaceChildren(...previewUrls.map(url => {
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = 'w-full aspect-square object-cover rounded-sm border border-dashed';
+        return img;
+      }));
+    });
   </script>
 </body>
 </html>

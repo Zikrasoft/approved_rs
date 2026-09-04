@@ -7,33 +7,25 @@ import { config, collection, fields } from '@keystatic/core';
 // time, not a public/ URL string.
 const caseImage = () => fields.image({ label: 'Фото', validation: { isRequired: true } });
 
-// EN/SR/ES/DE translation of this case's title + body, right on the same
-// entry — everything else (photo, price, year, country) is shared across
-// locales and stays ru-only. `markdoc.inline()` (not the plain `markdoc()`
-// used for the ru `content` field below) gives the same rich-text toolbar
-// but stores the result as a plain markdown string alongside the other
-// fields, since only one field per file can be the real document body
-// (format.contentField below) — the site parses this string with `marked`
-// at render time.
-//
-// The admin only ever writes the ru fields (title/content above). None of
-// these four are required: Keystatic has no field type that can run an API
-// call from inside its own form (confirmed against 0.6.9, the latest
-// release — same fixed field list as our 0.5.50), so there's no "Translate"
-// button that could belong on this form. Instead,
-// .github/workflows/translate-cases.yml runs scripts/translate-cases.ts
-// after every push that touches a case file and commits back whatever
-// en/sr/es/de is still missing.
-const translationField = (label: string, suffix: string) => fields.object({
-  title: fields.text({ label: `Заголовок (${suffix})` }),
-  body: fields.markdoc.inline({ label: `Текст (${suffix})` }),
-}, { label });
+// EN/SR/ES/DE translation of this case's title + body, written by
+// .github/workflows/translate-cases.yml (scripts/translate-cases.ts) after
+// every push that touches a case file — never by hand. Keystatic has no
+// field type that can run an API call from inside its own form (confirmed
+// against 0.6.9, the latest release — same fixed field list as our 0.5.50),
+// so there was never a "Translate" button here to begin with.
+// `fields.ignored()` keeps the whole nested en/sr/es/de object out of the
+// form (nothing to accidentally hand-edit and fight the bot over) while
+// round-tripping it untouched on save, same reasoning as translatedFrom
+// below.
+const translationsField = () => fields.ignored();
 
-// Written by translate-cases.ts (see comment on translationField above), not
+// Written by translate-cases.ts (see comment on translationsField above), not
 // by hand — Keystatic's schema rejects unknown frontmatter keys, so this has
-// to be declared even though the admin never touches it. Editing it by hand
-// just makes the bot redo a translation it already has.
-const translatedFromField = () => fields.text({ label: 'Хэш перевода (не трогать)', validation: { isRequired: false } });
+// to be declared even though the admin never touches it. `fields.ignored()`
+// renders no input at all (not just disabled) and passes the stored value
+// through untouched on save, so the bot's hash can't be edited or nuked by
+// hand and doesn't clutter the form.
+const translatedFromField = () => fields.ignored();
 
 export default config({
   // Local dev reads/writes the working tree directly — no GitHub OAuth,
@@ -55,23 +47,14 @@ export default config({
       // one photo at a time (see caseImage() above).
       previewUrl: '/admin/case-photos?dir=src/content/cases&slug={slug}',
       format: { contentField: 'content' },
-      // Plain stacked form, full width for every field: this entry has
-      // five real rich-text bodies (ru/en/sr/es/de), and Keystatic's
-      // 'content' layout only gives one of them the wide main pane — the
-      // rest get squeezed into the narrow metadata sidebar, worse for
-      // translating, not better. Fields stay top-level (content.config.ts's
-      // schema and every reader of c.data.* expects that shape) — reordered
-      // so title → translations → ru text come first, ahead of the
-      // car/photo/publish metadata, since translating an existing case is
-      // the common edit.
+      // Plain stacked form, full width for every field: the ru `content`
+      // body is still a real rich-text field and gets squeezed into the
+      // narrow metadata sidebar under Keystatic's default 'content' layout.
+      // Fields stay top-level (content.config.ts's schema and every reader
+      // of c.data.* expects that shape).
       schema: {
         title: fields.slug({ name: { label: 'Заголовок', validation: { isRequired: true } } }),
-        translations: fields.object({
-          en: translationField('English', 'EN'),
-          sr: translationField('Srpski', 'SR'),
-          es: translationField('Español', 'ES'),
-          de: translationField('Deutsch', 'DE'),
-        }, { label: 'Переводы' }),
+        translations: translationsField(),
         content: fields.markdoc({ label: 'Текст (RU)', extension: 'md' }),
         car: fields.text({ label: 'Автомобиль', validation: { isRequired: true } }),
         year: fields.integer({ label: 'Год', validation: { isRequired: true } }),
@@ -132,12 +115,7 @@ export default config({
       format: { contentField: 'content' },
       schema: {
         title: fields.slug({ name: { label: 'Заголовок', validation: { isRequired: true } } }),
-        translations: fields.object({
-          en: translationField('English', 'EN'),
-          sr: translationField('Srpski', 'SR'),
-          es: translationField('Español', 'ES'),
-          de: translationField('Deutsch', 'DE'),
-        }, { label: 'Переводы' }),
+        translations: translationsField(),
         content: fields.markdoc({ label: 'Текст (RU)', extension: 'md' }),
         car: fields.text({ label: 'Автомобиль' }),
         year: fields.integer({ label: 'Год' }),
@@ -166,12 +144,7 @@ export default config({
       format: { contentField: 'content' },
       schema: {
         title: fields.slug({ name: { label: 'Заголовок', validation: { isRequired: true } } }),
-        translations: fields.object({
-          en: translationField('English', 'EN'),
-          sr: translationField('Srpski', 'SR'),
-          es: translationField('Español', 'ES'),
-          de: translationField('Deutsch', 'DE'),
-        }, { label: 'Переводы' }),
+        translations: translationsField(),
         content: fields.markdoc({ label: 'Текст (RU)', extension: 'md' }),
         car: fields.text({ label: 'Автомобиль' }),
         year: fields.integer({ label: 'Год' }),

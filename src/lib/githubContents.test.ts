@@ -3,7 +3,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
-import { listGithubDir, getGithubFile, commitGalleryPhotos, GithubApiError } from './githubContents';
+vi.mock('node:fs', () => ({ existsSync: vi.fn() }));
+vi.mock('node:fs/promises', () => ({ readdir: vi.fn() }));
+
+import { listGithubDir, getGithubFile, getGithubFileBuffer, listGalleryFiles, commitGalleryPhotos, GithubApiError } from './githubContents';
+import { existsSync } from 'node:fs';
+import { readdir } from 'node:fs/promises';
 
 function okJson(body: unknown) {
   return { ok: true, status: 200, json: () => Promise.resolve(body) };
@@ -53,6 +58,53 @@ describe('getGithubFile', () => {
   it('base64-decodes the contents API response to text', async () => {
     mockFetch.mockResolvedValue(okJson({ content: Buffer.from('title: BMW').toString('base64') }));
     expect(await getGithubFile('tok', 'src/content/cases/bmw/index.md')).toBe('title: BMW');
+  });
+});
+
+describe('getGithubFileBuffer', () => {
+  afterEach(() => mockFetch.mockReset());
+
+  it('returns raw bytes without a lossy utf-8 round-trip', async () => {
+    const raw = Buffer.from([0xff, 0xd8, 0xff, 0xe0]); // JPEG magic bytes, invalid utf-8
+    mockFetch.mockResolvedValue(okJson({ content: raw.toString('base64') }));
+    expect(await getGithubFileBuffer('tok', 'x/gallery/0.jpg')).toEqual(raw);
+  });
+});
+
+describe('listGalleryFiles', () => {
+  const originalProd = import.meta.env.PROD;
+
+  afterEach(() => {
+    import.meta.env.PROD = originalProd;
+    mockFetch.mockReset();
+    vi.mocked(existsSync).mockReset();
+    vi.mocked(readdir).mockReset();
+  });
+
+  it('prod: delegates to listGithubDir', async () => {
+    import.meta.env.PROD = true;
+    mockFetch.mockResolvedValue(okJson([{ name: '0.jpg' }]));
+    expect(await listGalleryFiles('tok', 'x/gallery')).toEqual(['0.jpg']);
+  });
+
+  it('prod: a non-404 GitHub failure degrades to empty instead of throwing', async () => {
+    import.meta.env.PROD = true;
+    mockFetch.mockResolvedValue({ ok: false, status: 401, text: () => Promise.resolve('bad token') });
+    await expect(listGalleryFiles('stale-tok', 'x/gallery')).resolves.toEqual([]);
+  });
+
+  it('dev: reads the directory off disk when it exists', async () => {
+    import.meta.env.PROD = false;
+    vi.mocked(existsSync).mockReturnValue(true);
+    vi.mocked(readdir).mockResolvedValue(['0.jpg'] as never);
+    expect(await listGalleryFiles(undefined, 'src/content/cases/bmw/gallery')).toEqual(['0.jpg']);
+  });
+
+  it('dev: returns empty when the gallery dir does not exist yet', async () => {
+    import.meta.env.PROD = false;
+    vi.mocked(existsSync).mockReturnValue(false);
+    expect(await listGalleryFiles(undefined, 'src/content/cases/bmw/gallery')).toEqual([]);
+    expect(readdir).not.toHaveBeenCalled();
   });
 });
 

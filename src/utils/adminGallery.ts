@@ -37,6 +37,13 @@ export function isValidSlug(slug: string): boolean {
   return /^[a-z0-9-]+$/.test(slug);
 }
 
+// Exactly what sanitizeFilename/dedupeFilename below ever produce — shared
+// by case-photos-image.ts (path-traversal guard on the `file` query param)
+// and case-photos.astro (filters a raw directory listing before turning
+// entries into <img> tags, so a stray .DS_Store or hand-committed file with
+// a weird name doesn't render as a broken thumbnail).
+export const SAFE_GALLERY_FILENAME = /^[a-z0-9-]+\.[a-z0-9]+$/;
+
 // Original upload name, stripped to something safe to use as a filename:
 // basename only (no directory components), lowercased extension kept,
 // everything else collapsed to [a-z0-9-].
