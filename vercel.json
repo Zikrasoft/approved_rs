@@ -9,6 +9,12 @@
   "crons": [
     { "path": "/api/reminders", "schedule": "0 8 * * *" }
   ],
+  "git": {
+    "deploymentEnabled": {
+      "*": false,
+      "main": true
+    }
+  },
   "redirects": [
     { "source": "/:locale(ru|en|sr)/privoz/de/:path*", "destination": "/:locale/vehicle-import/eu/de/:path*", "permanent": true },
     { "source": "/privoz/de/:path*", "destination": "/ru/vehicle-import/eu/de/:path*", "permanent": true },

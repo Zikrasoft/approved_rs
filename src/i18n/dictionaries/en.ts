@@ -14,6 +14,7 @@ export const en: Dictionary = {
   },
   header: {
     menuLabel: 'Menu',
+    languageLabel: 'Language',
     themeToggleLabel: 'Toggle theme',
     themeToggleMobileLabel: 'Change theme',
     ctaShort: 'Request',

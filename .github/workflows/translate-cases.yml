@@ -1,26 +1,34 @@
 name: Auto-translate cases
 
 # Runs after a case is saved in Keystatic (which commits straight to main —
-# see keystatic.config.ts's storage config, no PR step). The admin only ever
-# writes the ru title/content; this job fills in en/sr/es/de and re-fills
-# them whenever ru changes (scripts/translate-cases.ts tracks a hash of the
-# ru source per case to tell the two cases apart), then pushes the result
-# back. Keystatic has no field type that can call an API from inside its own
-# form (see keystatic.config.ts), so there's no "Translate" button to click —
-# this job is what replaces it.
+# see keystatic.config.ts's storage config, no PR step) AND on any other
+# branch that happens to touch a case file — so a feature branch already
+# has en/sr/es/de by the time it merges, instead of only getting translated
+# once the merge lands on main. Safe to run this broadly: vercel.json's
+# git.deploymentEnabled means only main triggers an actual Vercel build, so
+# a translation commit on a feature branch doesn't burn a wasted deploy.
+#
+# The admin only ever writes the ru title/content; this job fills in
+# en/sr/es/de and re-fills them whenever ru changes (scripts/translate-cases.ts
+# tracks a hash of the ru source per case to tell the two cases apart), then
+# pushes the result back. Keystatic has no field type that can call an API
+# from inside its own form (see keystatic.config.ts), so there's no
+# "Translate" button to click — this job is what replaces it.
 on:
   push:
-    branches: [main]
     paths:
       - 'src/content/cases/**/index.md'
       - 'src/content/autoservice-cases/**/index.md'
       - 'src/content/detailing-cases/**/index.md'
 
-# Two case saves in quick succession would otherwise run this job twice in
-# parallel; whichever pushes second gets a non-fast-forward rejection and
-# silently loses that run's translations. Queue instead of racing.
+# Scoped per-branch (github.ref), not one global group — a push to one
+# branch shouldn't queue behind an unrelated run on another. Two case saves
+# on the *same* branch in quick succession would otherwise run this job
+# twice in parallel; whichever pushes second gets a non-fast-forward
+# rejection and silently loses that run's translations. Queue instead of
+# racing.
 concurrency:
-  group: translate-cases
+  group: translate-cases-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:

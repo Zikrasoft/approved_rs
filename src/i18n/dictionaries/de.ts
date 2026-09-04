@@ -14,6 +14,7 @@ export const de: Dictionary = {
   },
   header: {
     menuLabel: 'Menü',
+    languageLabel: 'Sprache',
     themeToggleLabel: 'Design wechseln',
     themeToggleMobileLabel: 'Design wechseln',
     ctaShort: 'Anfrage',

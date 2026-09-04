@@ -14,6 +14,7 @@ export const sr: Dictionary = {
   },
   header: {
     menuLabel: 'Meni',
+    languageLabel: 'Jezik',
     themeToggleLabel: 'Promeni temu',
     themeToggleMobileLabel: 'Promeni temu',
     ctaShort: 'Zahtev',

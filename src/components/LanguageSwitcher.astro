@@ -29,12 +29,12 @@ const current = LOCALE_META[currentLocale];
 ---
 
 {variant === 'inline' ? (
-  <div class="lang-switcher-inline flex items-center gap-1.5">
+  <div class="lang-switcher-inline flex items-center gap-1.5 flex-wrap">
     {SUPPORTED_LOCALES.map(locale => {
       const meta = LOCALE_META[locale];
       const active = locale === currentLocale;
       return (
-        <a href={`/${locale}/${rest}`} class:list={['dropdown-option gap-1.5 px-3 py-2 rounded-sm text-sm', { 'dropdown-option-active': active }]}>
+        <a href={`/${locale}/${rest}`} class:list={['dropdown-option lang-chip gap-1.5 px-3 py-2 rounded-sm text-sm', { 'dropdown-option-active': active }]}>
           <span class="text-sm leading-none">{FLAGS[locale]}</span>
           <span>{meta.code}</span>
         </a>
@@ -62,3 +62,12 @@ const current = LOCALE_META[currentLocale];
     })}
   </Dropdown>
 )}
+
+<style>
+  /* Inline variant only: .dropdown-option is transparent until hover/active,
+     which is fine inside a popover (the trigger already announced "this is
+     a menu") but not on its own in a flat row — without a border each
+     locale reads as plain flag+code text, not a pressable choice. */
+  .lang-chip { border: 1px solid var(--color-border); }
+  .lang-chip.dropdown-option-active { border-color: var(--color-accent-border); }
+</style>

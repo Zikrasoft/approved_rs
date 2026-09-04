@@ -49,9 +49,9 @@ const moreNavItems = navItems.filter(item => !visiblePrimarySlugs.includes(item.
 const moreNavActive = moreNavItems.some(item => item.active);
 ---
 
-<nav class="hidden xl:flex items-center gap-0 text-sm font-sans font-normal header-nav flex-1 justify-center min-w-0">
+<nav class="hidden xl:flex items-center gap-1 text-sm font-sans font-normal header-nav flex-1 justify-center min-w-0">
   {primaryNavItems.map(item => (
-    <a href={item.href} class="flex items-center px-1 py-1.5 rounded-sm text-muted whitespace-nowrap" aria-current={item.active ? 'page' : undefined}>
+    <a href={item.href} class="flex items-center px-1.5 py-1.5 rounded-sm text-muted whitespace-nowrap" aria-current={item.active ? 'page' : undefined}>
       {item.label}
     </a>
   ))}

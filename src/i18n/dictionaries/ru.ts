@@ -12,6 +12,7 @@ export const ru = {
   },
   header: {
     menuLabel: 'Меню',
+    languageLabel: 'Язык',
     themeToggleLabel: 'Переключить тему',
     themeToggleMobileLabel: 'Сменить тему',
     ctaShort: 'Заявка',
