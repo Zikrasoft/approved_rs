@@ -145,7 +145,93 @@ const sr: FaqContent = {
   cityExpert: { q: 'Da li u svakom gradu postoji poseban stručnjak?', a: 'U različitim gradovima rade različiti naši stručnjaci; u pojedinim slučajevima stručnjak dolazi i u susedni grad u regionu.' },
 };
 
-const content: Record<Locale, FaqContent> = { ru, en, sr };
+const es: FaqContent = {
+  'vehicle-sourcing': [
+    { q: '¿Cuánto dura todo el proceso, desde la solicitud hasta tener el coche?', a: 'Normalmente entre 3 y 14 días, según lo rápido que encontremos la opción adecuada en el mercado.' },
+    { q: 'Si el coche que encuentran no me convence, ¿siguen buscando gratis?', a: 'Sí, seguimos buscando sin coste adicional hasta encontrar el que te convenga.' },
+    { q: '¿Tengo que ir a ver el coche en persona?', a: 'No, no es necesario: podemos gestionar todo el proceso sin que estés presente. Si prefieres ir a verlo tú mismo, también es posible.' },
+    { q: '¿Qué garantía tiene el coche encontrado?', a: 'No hay garantía de fábrica como en un coche nuevo: es mercado de segunda mano. Tu protección es la inspección técnica independiente antes de la compra: un experto revisa el coche, así que nunca compras a ciegas.' },
+    { q: '¿Me envían un informe con fotos o vídeo antes de decidir?', a: 'Sí, recibes un informe completo con fotos del coche antes de tomar cualquier decisión de compra.' },
+    { q: '¿Hay alguna compensación si los plazos se retrasan por su culpa?', a: 'No hay una penalización fija: el plazo de la operación a menudo no depende solo de nosotros (negociación con el vendedor, trámites aduaneros). Pero te damos un plazo realista desde el principio y no perdemos el tiempo.' },
+  ],
+  'vehicle-import': [
+    { q: '¿En qué se diferencia la importación de la búsqueda de vehículos?', a: 'La búsqueda es cuando estás en el mismo país que el coche. La importación es cuando el coche viaja hasta ti en Serbia desde Europa o China.' },
+    { q: '¿El despacho de aduana está incluido en el precio?', a: 'Sí, gestionamos el despacho de aduana en Serbia y lo incluimos en el presupuesto, que te damos antes de cerrar el trato.' },
+  ],
+  'vehicle-buyback': [
+    { q: '¿En cuántos días puedo vender el coche si aún no está desaduanado o traspasado?', a: 'Normalmente en 1 o 2 días, aunque el coche todavía no esté desaduanado ni registrado a tu nombre.' },
+    { q: '¿Compran coches con crédito o en prenda?', a: 'No, solo compramos coches sin crédito activo ni gravamen.' },
+    { q: '¿Con qué rapidez llega el dinero tras la inspección?', a: 'En menos de 24 horas después de la inspección.' },
+    { q: '¿Hay restricciones de marca, año o kilometraje?', a: 'Sí: no consideramos coches en mal estado técnico ni marcas francesas.' },
+  ],
+  'vehicle-inspection': [
+    { q: '¿Cuánto cuesta la inspección y es el mismo precio en todos los países?', a: 'El precio varía según el país y depende del alcance de la inspección; te damos la cifra exacta al recibir tu solicitud.' },
+    { q: '¿Puedo pedir una inspección si no estoy físicamente en ese país?', a: 'Sí, no hace falta que estés presente: recibes el informe y decides de forma remota.' },
+    { q: '¿En qué formato viene el informe?', a: 'Fotos junto con una descripción detallada por escrito tras la inspección.' },
+  ],
+  autoServiceBelgrade: [
+    { q: '¿Atienden sin cita previa?', a: 'Para la primera visita basta con llamar y acordar una hora; no es necesario reservar con antelación.' },
+    { q: '¿Dan garantía sobre la reparación?', a: 'No hay una garantía aparte sobre la reparación realizada, pero hacemos un diagnóstico antes de empezar cualquier trabajo, así que siempre sabes por qué pagas.' },
+  ],
+  detailingBelgrade: [
+    { q: '¿Para qué sirve forrar el coche con vinilo?', a: 'El forrado protege la pintura de golpes de piedra, arañazos y decoloración, y además permite cambiar el color del coche sin pintarlo.' },
+    { q: '¿El vinilo daña la pintura original?', a: 'No: con un material de calidad y una instalación y retirada profesionales, la pintura de fábrica que queda debajo no sufre ningún daño.' },
+    { q: '¿Se puede quitar el vinilo y dejar el coche como estaba?', a: 'Sí, el vinilo se puede retirar en cualquier momento; debajo queda la pintura original.' },
+    { q: '¿Cómo cuido el coche después de forrarlo?', a: 'Durante el primer tiempo tras el forrado, es mejor lavarlo a mano o con un túnel sin contacto; evita cepillos duros y productos químicos agresivos.' },
+    { q: '¿Hay que reservar con antelación?', a: 'Sí, es mejor acordar la hora con antelación para preparar el material adecuado para tu coche, moto, bicicleta o yate.' },
+    { q: '¿Trabajan con cualquier coche o moto?', a: 'Sí, forramos cualquier marca y modelo: coches, motos, bicicletas y yates.' },
+  ],
+  general: [
+    { q: '¿Cómo se paga el servicio?', a: 'En efectivo el día de la operación; nunca tienes que enviar dinero por adelantado.' },
+    { q: '¿Puedo escribirles fuera de Telegram?', a: 'Sí, además de Telegram también puedes llamar o escribir por WhatsApp.' },
+  ],
+  cityExpert: { q: '¿Hay un experto dedicado en cada ciudad?', a: 'En cada ciudad trabajan especialistas distintos de nuestro equipo; en algunos casos un experto se desplaza a una ciudad cercana de la región.' },
+};
+
+const de: FaqContent = {
+  'vehicle-sourcing': [
+    { q: 'Wie lange dauert der gesamte Prozess – von der Anfrage bis zum eigenen Auto?', a: 'Meist 3 bis 14 Tage, je nachdem, wie schnell wir das passende Fahrzeug auf dem Markt finden.' },
+    { q: 'Wenn das gefundene Auto nicht passt, suchen Sie dann kostenlos weiter?', a: 'Ja, wir suchen ohne Aufpreis weiter, bis wir das richtige Auto für Sie gefunden haben.' },
+    { q: 'Muss ich das Auto persönlich besichtigen?', a: 'Nein, das ist nicht nötig – wir können den gesamten Kauf auch ohne Ihre Anwesenheit abwickeln. Wenn Sie es sich lieber selbst ansehen möchten, ist das ebenfalls kein Problem.' },
+    { q: 'Welche Garantie gilt für das gefundene Fahrzeug?', a: 'Eine Herstellergarantie wie bei einem Neuwagen gibt es nicht – es handelt sich um den Gebrauchtwagenmarkt. Ihr Schutz ist die unabhängige technische Prüfung vor dem Kauf: Ein Experte begutachtet das Auto, sodass Sie nicht „blind" kaufen.' },
+    { q: 'Erhalte ich vor der Entscheidung einen Foto- oder Videobericht?', a: 'Ja, Sie erhalten einen vollständigen Bericht mit Fotos zum Fahrzeug, bevor Sie sich zum Kauf entscheiden.' },
+    { q: 'Gibt es eine Entschädigung, wenn sich der Termin durch Ihr Verschulden verzögert?', a: 'Eine feste Vertragsstrafe gibt es nicht – der Zeitrahmen hängt oft nicht nur von uns ab (Verhandlungen mit dem Verkäufer, Zollabfertigung). Wir nennen Ihnen aber von Anfang an einen realistischen Termin und ziehen die Sache nicht in die Länge.' },
+  ],
+  'vehicle-import': [
+    { q: 'Worin unterscheidet sich der Import von der Fahrzeugbeschaffung?', a: 'Bei der Fahrzeugbeschaffung befinden Sie sich im selben Land wie das Auto. Beim Import kommt das Auto aus Europa oder China zu Ihnen nach Serbien.' },
+    { q: 'Ist die Zollabfertigung im Preis enthalten?', a: 'Ja, wir übernehmen die Zollabfertigung in Serbien und rechnen sie mit ein – den Gesamtbetrag nennen wir Ihnen vor Vertragsabschluss.' },
+  ],
+  'vehicle-buyback': [
+    { q: 'In wie vielen Tagen kann ich das Auto verkaufen, wenn es noch nicht verzollt oder umgemeldet ist?', a: 'In der Regel 1–2 Tage, auch wenn das Auto noch nicht verzollt oder auf Sie umgemeldet ist.' },
+    { q: 'Kaufen Sie Fahrzeuge an, die noch finanziert oder verpfändet sind?', a: 'Nein, wir kaufen nur Fahrzeuge ohne laufenden Kredit oder Pfandrecht an.' },
+    { q: 'Wie schnell kommt das Geld nach der Besichtigung an?', a: 'Innerhalb von 24 Stunden nach der Besichtigung.' },
+    { q: 'Gibt es Einschränkungen bei Marke, Baujahr oder Laufleistung?', a: 'Ja – wir übernehmen keine Fahrzeuge in schlechtem technischem Zustand und keine französischen Marken.' },
+  ],
+  'vehicle-inspection': [
+    { q: 'Was kostet die Prüfung, und ist der Preis in allen Ländern gleich?', a: 'Der Preis variiert je nach Land und Umfang der Prüfung – die genaue Summe nennen wir Ihnen bei Ihrer Anfrage.' },
+    { q: 'Kann ich eine Prüfung beauftragen, wenn ich mich nicht selbst im Land befinde?', a: 'Ja, Ihre Anwesenheit ist nicht erforderlich – Sie erhalten den Bericht und treffen die Entscheidung aus der Ferne.' },
+    { q: 'In welcher Form erhalte ich den Bericht?', a: 'Fotos sowie eine ausführliche schriftliche Beschreibung nach der Besichtigung.' },
+  ],
+  autoServiceBelgrade: [
+    { q: 'Arbeiten Sie ohne vorherige Terminvereinbarung?', a: 'Für den ersten Besuch reicht ein Anruf, um eine Uhrzeit zu vereinbaren – eine Voranmeldung ist nicht erforderlich.' },
+    { q: 'Geben Sie eine Garantie auf die Reparatur?', a: 'Eine gesonderte Garantie auf die ausgeführte Reparatur gibt es nicht – wir führen aber vor Arbeitsbeginn eine Diagnose durch, sodass Sie immer wissen, wofür Sie bezahlen.' },
+  ],
+  detailingBelgrade: [
+    { q: 'Wofür wird ein Auto mit Folie beklebt?', a: 'Die Folierung schützt den Lack vor Steinschlag, Kratzern und Ausbleichen und ermöglicht außerdem einen Farbwechsel ohne Lackierung.' },
+    { q: 'Beschädigt die Folie den Werkslack?', a: 'Nein – bei hochwertigem Material sowie professioneller Anbringung und Entfernung bleibt der Werkslack unter der Folie unbeschädigt.' },
+    { q: 'Kann die Folie entfernt und das Auto in den Originalzustand zurückversetzt werden?', a: 'Ja, die Folie kann jederzeit entfernt werden – darunter bleibt der Originallack erhalten.' },
+    { q: 'Wie pflege ich das Auto nach der Folierung?', a: 'In der ersten Zeit nach der Folierung sollten Sie das Auto besser von Hand oder in einer berührungslosen Waschanlage waschen – vermeiden Sie harte Bürsten und aggressive Chemikalien.' },
+    { q: 'Muss ich vorab einen Termin vereinbaren?', a: 'Ja, am besten vereinbaren Sie den Termin im Voraus, damit wir das passende Material für Ihr Auto, Motorrad, Fahrrad oder Ihre Yacht vorbereiten können.' },
+    { q: 'Arbeiten Sie mit allen Autos und Motorrädern?', a: 'Ja, wir folieren jede Marke und jedes Modell – Autos, Motorräder, Fahrräder und Yachten.' },
+  ],
+  general: [
+    { q: 'Wie erfolgt die Bezahlung?', a: 'Bar am Tag des Geschäfts – Sie überweisen nie Geld im Voraus.' },
+    { q: 'Kann ich Sie auch außerhalb von Telegram erreichen?', a: 'Ja, neben Telegram erreichen Sie uns auch per Anruf oder WhatsApp.' },
+  ],
+  cityExpert: { q: 'Gibt es in jeder Stadt einen eigenen Experten?', a: 'In den verschiedenen Städten sind unterschiedliche Spezialisten unseres Teams tätig; in einzelnen Fällen fährt ein Experte auch in eine benachbarte Stadt der Region.' },
+};
+
+const content: Record<Locale, FaqContent> = { ru, en, sr, es, de };
 
 export function getFaq(locale: Locale): FaqContent {
   return content[locale];

@@ -1,0 +1,99 @@
+---
+// Desktop-only nav row — extracted out of Header.astro since it carries its
+// own non-trivial piece of logic (the primary/"more services" swap below)
+// that doesn't belong mixed into the header's layout markup. Mobile has its
+// own component (HeaderMobileMenu.astro) and doesn't need this swap at all
+// — its grid shows all services at once, nothing to make room for.
+import type { Search } from '@lucide/astro';
+import { SLUG } from '@/utils/labels';
+import Dropdown from './Dropdown.astro';
+
+export interface NavItem {
+  href: string;
+  label: string;
+  slug: string;
+  Icon: typeof Search;
+  active: boolean;
+}
+
+interface Props {
+  navItems: NavItem[];
+  moreLabel: string;
+  casesHref: string;
+  casesLabel: string;
+  casesActive: boolean;
+}
+
+const { navItems, moreLabel, casesHref, casesLabel, casesActive } = Astro.props;
+
+// The 3 highest-priority services get a direct link; the rest collapse into
+// the "more services" dropdown (see Dropdown.astro) — 6 links + Cases never
+// fit the header's fixed content width once labels run long in any
+// language (es/de were the tipping point, see git history).
+const PRIMARY_SLUGS: readonly string[] = [SLUG.SOURCING, SLUG.IMPORT, SLUG.BUYBACK];
+
+// If the page the visitor is actually on is one of the dropdown's services,
+// showing 3 *other* links as "primary" while the real current page hides
+// inside a closed dropdown is confusing — swap it into the visible row in
+// place of whichever primary slot it displaces, and demote that slot into
+// the dropdown instead. Sourcing/Import never get displaced (they're the
+// two constants); only the 3rd primary slot moves.
+const activeItem = navItems.find(item => item.active);
+const activeIsInDropdown = activeItem !== undefined && !PRIMARY_SLUGS.includes(activeItem.slug);
+const visiblePrimarySlugs: readonly string[] = activeIsInDropdown
+  ? [SLUG.SOURCING, SLUG.IMPORT, activeItem!.slug]
+  : PRIMARY_SLUGS;
+
+const primaryNavItems = navItems.filter(item => visiblePrimarySlugs.includes(item.slug));
+const moreNavItems = navItems.filter(item => !visiblePrimarySlugs.includes(item.slug));
+const moreNavActive = moreNavItems.some(item => item.active);
+---
+
+<nav class="hidden xl:flex items-center gap-0 text-sm font-sans font-normal header-nav flex-1 justify-center min-w-0">
+  {primaryNavItems.map(item => (
+    <a href={item.href} class="flex items-center px-1 py-1.5 rounded-sm text-muted whitespace-nowrap" aria-current={item.active ? 'page' : undefined}>
+      {item.label}
+    </a>
+  ))}
+
+  <Dropdown align="left" minWidth="12rem" triggerClass="px-1.5 pt-1.5 pb-0.5 whitespace-nowrap" active={moreNavActive}>
+    <Fragment slot="trigger">{moreLabel}</Fragment>
+    {moreNavItems.map(item => (
+      <li role="none">
+        <a role="menuitem" href={item.href} class:list={['dropdown-option gap-2.5 px-3 py-2 rounded-sm text-sm whitespace-nowrap', { 'dropdown-option-active': item.active }]}>
+          {item.Icon && <item.Icon size={15} class="shrink-0" />}
+          {item.label}
+        </a>
+      </li>
+    ))}
+  </Dropdown>
+
+  <a href={casesHref} class="px-1.5 py-1.5 text-muted whitespace-nowrap" aria-current={casesActive ? 'page' : undefined}>{casesLabel}</a>
+</nav>
+
+<style>
+  /* Direct children only — excludes the dropdown-option links nested
+     inside the "more services" Dropdown, which get their own hover
+     treatment (see global.css) instead of this underline. */
+  .header-nav > a {
+    position: relative;
+    padding-bottom: 2px;
+    transition: color 0.2s;
+  }
+  .header-nav > a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s var(--ease-spring);
+  }
+  .header-nav > a:hover { color: var(--color-text) !important; }
+  .header-nav > a:hover::after { transform: scaleX(1); }
+  .header-nav > a[aria-current="page"] { color: var(--color-text) !important; }
+  .header-nav > a[aria-current="page"]::after { transform: scaleX(1); }
+</style>

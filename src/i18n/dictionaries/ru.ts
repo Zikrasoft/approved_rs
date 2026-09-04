@@ -8,6 +8,7 @@ export const ru = {
     'vehicle-inspection': 'Проверка',
     cases: 'Кейсы',
     contacts: 'Контакты',
+    moreServices: 'Ещё услуги',
   },
   header: {
     menuLabel: 'Меню',

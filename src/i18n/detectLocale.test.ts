@@ -19,7 +19,12 @@ describe('detectLocale', () => {
   });
 
   it('falls back to the default locale when nothing matches', () => {
-    expect(detectLocale('fr-FR,de-DE', undefined)).toBe('ru');
+    expect(detectLocale('fr-FR,it-IT', undefined)).toBe('ru');
+  });
+
+  it('matches German and Spanish now that they are supported locales', () => {
+    expect(detectLocale('de-DE,en;q=0.8', undefined)).toBe('de');
+    expect(detectLocale('es-ES,en;q=0.8', undefined)).toBe('es');
   });
 
   it('falls back to the default locale when there is no header and no cookie', () => {

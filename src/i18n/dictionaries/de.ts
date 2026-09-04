@@ -1,0 +1,58 @@
+import type { Dictionary } from './ru';
+
+export const de: Dictionary = {
+  nav: {
+    'vehicle-sourcing': 'Fahrzeugbeschaffung',
+    'vehicle-import': 'Autos aus der EU und China',
+    'auto-service-belgrade': 'Autowerkstatt',
+    'detailing-belgrade': 'Detailing',
+    'vehicle-buyback': 'Fahrzeugankauf',
+    'vehicle-inspection': 'Fahrzeugprüfung',
+    cases: 'Referenzen',
+    contacts: 'Kontakt',
+    moreServices: 'Weitere Leistungen',
+  },
+  header: {
+    menuLabel: 'Menü',
+    themeToggleLabel: 'Design wechseln',
+    themeToggleMobileLabel: 'Design wechseln',
+    ctaShort: 'Anfrage',
+    ctaLong: 'Anfrage stellen',
+  },
+  footer: {
+    servicesHeading: 'Leistungen',
+    companyHeading: 'Unternehmen',
+    privacyLabel: 'Datenschutz',
+    tagline: 'Wir suchen, prüfen und liefern Ihr Auto aus Europa. Wir übernehmen den gesamten Prozess — von der Suche bis zur Lieferung.',
+    contactManagerLabel: 'Berater kontaktieren',
+    hoursLine: 'Rund um die Uhr, ohne Ruhetage',
+    copyrightSuffix: 'Fahrzeugbeschaffung, Service und Lieferung aus Europa',
+    channelLinkLabel: 'Unser Kanal',
+  },
+  common: {
+    otherServicesLabel: 'Weitere Leistungen:',
+    alsoWorkingInLabel: 'Wir sind auch tätig in:',
+    homeLabel: 'Startseite',
+    faqHeading: 'Häufig gestellte Fragen',
+    whereFromLabel: 'Woher kommen Sie?',
+    otherCountryLabel: 'Anderes Land',
+    viewAllCasesLabel: 'Alle Referenzen',
+    closeLabel: 'Schließen',
+    channelLabel: 'Unser Kanal',
+    cookie: {
+      notice: 'Wir verwenden Analyse-Cookies (Google Analytics), um zu verstehen, wie Besucher die Website nutzen.',
+      more: 'Mehr dazu in unserer',
+      policyLink: 'Datenschutzerklärung',
+      accept: 'Akzeptieren',
+      decline: 'Ablehnen',
+    },
+    gallery: {
+      morePhotos: 'Weitere Fotos',
+      prev: 'Vorheriges Foto',
+      next: 'Nächstes Foto',
+      altTemplate: (name: string, i: number) => `${name}, Foto ${i + 1}`,
+      openAriaTemplate: (i: number, total: number) => `Foto ${i + 1} von ${total} öffnen`,
+      showMoreTemplate: (n: number) => `Mehr anzeigen (${n})`,
+    },
+  },
+};

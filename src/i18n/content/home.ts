@@ -203,7 +203,101 @@ const sr: HomeContent = {
   ctaStatResponse: { value: '2 h', label: 'odgovor' },
 };
 
-const content: Record<Locale, HomeContent> = { ru, en, sr };
+const es: HomeContent = {
+  metaTitle: 'Búsqueda e importación de coches, llave en mano',
+  metaDescription: 'Búsqueda de coches en tu propio país o importación desde Europa y China, todo llave en mano. Inspección, recompra, taller mecánico. Atendemos a clientes de habla rusa en todo el mundo.',
+  journey: [
+    { title: 'Búsqueda', desc: 'Buscamos, inspeccionamos y entregamos el coche que se ajusta a tu presupuesto, todo llave en mano, en Alemania, España, Serbia y Suiza.' },
+    { title: 'Importación', desc: '¿El coche no está en tu país? Lo buscamos y lo traemos desde Alemania, Europa o China, todo llave en mano, incluido el despacho de aduanas.' },
+    { title: 'Inspección', desc: 'Un perito independiente inspecciona el coche antes de la compra: más de 100 puntos de control, con vídeo.', note: '¿Ya encontraste el coche por tu cuenta? Podemos hacer la inspección por separado' },
+    { title: 'Recompra', desc: 'Gestionamos la recompra y el despacho de aduanas de coches con matrícula extranjera.', note: '¿El coche ya está en el extranjero? Te ayudamos a tramitarlo' },
+    { title: 'Taller mecánico', desc: 'Reparación y mantenimiento del coche en Belgrado, con garantía de calidad.', note: '¿El coche ya es tuyo? También nos encargamos' },
+  ],
+  heroEyebrow: 'Un solo camino: coches desde Europa',
+  heroLine1: 'Encontrado.',
+  heroLine2: 'Inspeccionado.',
+  heroLine3: 'Aprobado.',
+  stampText: 'INSPECCIONADO · APROBADO · INSPECCIONADO · APROBADO ·',
+  heroSubtext: 'Buscamos, inspeccionamos, tramitamos y traemos tu coche desde Alemania, España o Serbia, y luego lo mantenemos en nuestro propio taller. Un solo camino, un solo equipo.',
+  statClients: { value: '200+', label: 'clientes' },
+  statCountries: { label: 'países' },
+  statYears: { value: '5 años', label: 'en el mercado' },
+  journeyHeading: 'Un solo camino: de la búsqueda al taller',
+  journeySubtext: 'Búsqueda, importación, inspección, recompra y taller mecánico no son servicios independientes, sino etapas de un mismo camino para tu coche. Puedes entrar en cualquier etapa.',
+  journeyMoreLabel: 'Más información',
+  countryStripLabel: 'Búsqueda de coches por país:',
+  latestCasesHeading: 'Últimos casos',
+  whyUsHeading: 'Por qué nos eligen',
+  whyUsSubtext: 'Comprar un coche en otro país genera dudas. Así es como las resolvemos.',
+  trustCards: [
+    { title: 'Transparencia total', text: 'Te enviamos una lista de verificación detallada (más de 100 puntos) y un vídeo de cada detalle: carrocería, interior, mecánica. Ves el coche como si estuvieras allí mismo.' },
+    { title: 'Seguridad en la operación', text: 'Pago por etapas y condiciones claras. Te acompañamos con la documentación en cada fase: trámites, aduana, matriculación, sin sorpresas.' },
+    { title: 'Experiencia local', text: 'Conocemos las particularidades de cada mercado: el kilometraje de autopista alemán, las características de la carrocería de los coches españoles, los detalles de matricular vehículos con placas extranjeras en Serbia.' },
+  ],
+  testimonialsHeading: 'Lo que dicen nuestros clientes',
+  testimonials: [
+    { quote: '«Trajeron un BMW Serie 3 desde Múnich a Belgrado. Todo salió perfecto, desde la inspección hasta la matriculación. Me ahorraron muchos dolores de cabeza con el papeleo.»', name: 'Александр', caption: 'BMW 320d, Alemania → Serbia' },
+    { quote: '«Llevaba tiempo buscando un Škoda Octavia en buen estado. El equipo encontró uno en España y lo revisó un perito independiente: todo coincidía con la descripción.»', name: 'Михаил', caption: 'Škoda Octavia, España → Rusia' },
+    { quote: '«Matricular el coche con placas extranjeras parecía complicado. El equipo me guió en cada paso y, un mes después, ya estaba conduciendo. Lo recomiendo.»', name: 'Дмитрий', caption: 'VW Passat, Alemania → Serbia' },
+  ],
+  ctaEyebrow: '¿Listo para empezar?',
+  ctaHeading: { line1: 'Cuéntanos', line2: 'sobre tu', accentWord: 'coche' },
+  ctaSubtext: 'Respondemos en menos de 2 horas. La consulta es gratuita.',
+  ctaTelegramLabel: 'Escríbenos por Telegram',
+  ctaStatClients: { value: '200+', label: 'clientes' },
+  ctaStatCountries: { label: 'países' },
+  ctaStatYears: { value: '5 años', label: 'de experiencia' },
+  ctaStatResponse: { value: '2 h', label: 'respuesta' },
+};
+
+const de: HomeContent = {
+  metaTitle: 'Fahrzeugbeschaffung und -import, schlüsselfertig',
+  metaDescription: 'Fahrzeugbeschaffung in Ihrem eigenen Land oder Import aus Europa und China – alles schlüsselfertig. Inspektion, Ankauf, Autowerkstatt. Wir betreuen russischsprachige Kunden weltweit.',
+  journey: [
+    { title: 'Beschaffung', desc: 'Wir finden, prüfen und liefern das Fahrzeug passend zu Ihrem Budget – schlüsselfertig, in Deutschland, Spanien, Serbien und der Schweiz.' },
+    { title: 'Import', desc: 'Das Fahrzeug befindet sich nicht in Ihrem Land? Wir beschaffen und bringen es aus Deutschland, Europa oder China – schlüsselfertig, inklusive Verzollung.' },
+    { title: 'Inspektion', desc: 'Ein unabhängiger Gutachter prüft das Fahrzeug vor dem Kauf – anhand von über 100 Prüfpunkten, mit Video.', note: 'Sie haben das Fahrzeug bereits selbst gefunden? Wir übernehmen die Prüfung auch separat' },
+    { title: 'Ankauf', desc: 'Wir übernehmen den Ankauf und die Verzollung von Fahrzeugen mit ausländischen Kennzeichen.', note: 'Das Fahrzeug befindet sich bereits im Ausland? Wir helfen bei der Anmeldung' },
+    { title: 'Autowerkstatt', desc: 'Reparatur und Wartung Ihres Fahrzeugs in Belgrad – mit Qualitätsgarantie.', note: 'Das Fahrzeug gehört Ihnen bereits? Auch dafür sind wir da' },
+  ],
+  heroEyebrow: 'Ein Weg: Fahrzeuge aus Europa',
+  heroLine1: 'Gefunden.',
+  heroLine2: 'Geprüft.',
+  heroLine3: 'Freigegeben.',
+  stampText: 'GEPRÜFT · FREIGEGEBEN · GEPRÜFT · FREIGEGEBEN ·',
+  heroSubtext: 'Wir beschaffen, prüfen, melden an und liefern Ihr Fahrzeug aus Deutschland, Spanien oder Serbien – und warten es anschließend in unserer eigenen Werkstatt. Ein Weg, ein Team.',
+  statClients: { value: '200+', label: 'Kunden' },
+  statCountries: { label: 'Länder' },
+  statYears: { value: '5 Jahre', label: 'am Markt' },
+  journeyHeading: 'Ein Weg: von der Suche bis zum Service',
+  journeySubtext: 'Beschaffung, Import, Inspektion, Ankauf und Autowerkstatt sind keine getrennten Leistungen, sondern Etappen eines einzigen Weges für Ihr Fahrzeug. Sie können an jedem Schritt einsteigen.',
+  journeyMoreLabel: 'Mehr erfahren',
+  countryStripLabel: 'Fahrzeugbeschaffung nach Ländern:',
+  latestCasesHeading: 'Aktuelle Projekte',
+  whyUsHeading: 'Warum Sie uns wählen',
+  whyUsSubtext: 'Der Kauf eines Fahrzeugs aus einem anderen Land wirft Fragen auf. So gehen wir damit um.',
+  trustCards: [
+    { title: 'Volle Transparenz', text: 'Wir senden Ihnen eine detaillierte Checkliste (über 100 Punkte) und ein Video zu jedem Detail: Karosserie, Innenraum, Fahrwerk. Sie sehen das Fahrzeug, als stünden Sie direkt daneben.' },
+    { title: 'Sichere Abwicklung', text: 'Zahlung in Etappen und klare Bedingungen. Wir begleiten die Unterlagen in jeder Phase – Anmeldung, Verzollung, Zulassung – ohne Überraschungen.' },
+    { title: 'Lokale Expertise', text: 'Wir kennen die Besonderheiten jedes Marktes: Autobahnkilometer in Deutschland, die Karosseriemerkmale spanischer Fahrzeuge, die Feinheiten der Zulassung ausländischer Kennzeichen in Serbien.' },
+  ],
+  testimonialsHeading: 'Was unsere Kunden sagen',
+  testimonials: [
+    { quote: '„Sie haben einen BMW 3er von München nach Belgrad gebracht. Alles lief reibungslos – von der Prüfung bis zur Zulassung. Das hat mir bei der Abwicklung viel Nerven erspart.“', name: 'Александр', caption: 'BMW 320d, Deutschland → Serbien' },
+    { quote: '„Ich habe lange nach einem Škoda Octavia in gutem Zustand gesucht. Das Team hat ein Fahrzeug in Spanien gefunden und von einem unabhängigen Gutachter prüfen lassen – alles stimmte mit der Beschreibung überein.“', name: 'Михаил', caption: 'Škoda Octavia, Spanien → Russland' },
+    { quote: '„Die Anmeldung mit ausländischen Kennzeichen schien kompliziert. Das Team hat mich durch jeden Schritt begleitet – einen Monat später bin ich schon gefahren. Sehr zu empfehlen.“', name: 'Дмитрий', caption: 'VW Passat, Deutschland → Serbien' },
+  ],
+  ctaEyebrow: 'Bereit anzufangen?',
+  ctaHeading: { line1: 'Erzählen Sie uns', line2: 'von Ihrem', accentWord: 'Fahrzeug' },
+  ctaSubtext: 'Wir antworten innerhalb von 2 Stunden. Die Beratung ist kostenlos.',
+  ctaTelegramLabel: 'Auf Telegram schreiben',
+  ctaStatClients: { value: '200+', label: 'Kunden' },
+  ctaStatCountries: { label: 'Länder' },
+  ctaStatYears: { value: '5 Jahre', label: 'Erfahrung' },
+  ctaStatResponse: { value: '2 Std.', label: 'Antwortzeit' },
+};
+
+const content: Record<Locale, HomeContent> = { ru, en, sr, es, de };
 
 export function getHomeContent(locale: Locale): HomeContent {
   return content[locale];

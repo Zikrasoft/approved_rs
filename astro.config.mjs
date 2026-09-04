@@ -15,7 +15,7 @@ export default defineConfig({
   output: "static",
   adapter: vercel(),
   i18n: {
-    locales: ["ru", "en", "sr"],
+    locales: ["ru", "en", "sr", "es", "de"],
     defaultLocale: "ru",
     routing: "manual",
   },
@@ -25,7 +25,7 @@ export default defineConfig({
     sitemap({
       i18n: {
         defaultLocale: "ru",
-        locales: { ru: "ru-RU", en: "en-US", sr: "sr-RS" },
+        locales: { ru: "ru-RU", en: "en-US", sr: "sr-RS", es: "es-ES", de: "de-DE" },
       },
     }),
   ],

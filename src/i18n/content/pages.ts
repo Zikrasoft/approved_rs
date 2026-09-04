@@ -265,7 +265,157 @@ const sr: PagesContent = {
   },
 };
 
-const content: Record<Locale, PagesContent> = { ru, en, sr };
+const es: PagesContent = {
+  contacts: {
+    metaTitle: 'Contacto',
+    metaDescription: 'Contáctanos por Telegram. Búsqueda, importación y compra de coches en Europa.',
+    heroTitle: 'Contacto',
+    heroSubtitle: 'Trabajamos por Telegram — rápido y sencillo',
+    info: [
+      { label: 'Tiempo de respuesta', value: 'En un plazo de 2 horas' },
+      { label: 'Horario', value: '24/7, todos los días' },
+      { label: 'Idiomas', value: 'Ruso, inglés' },
+      { label: 'Países', value: 'Alemania, España, Serbia, Suiza y otros' },
+    ],
+    workEyebrow: 'Cómo trabajamos',
+    steps: [
+      { n: '01', text: 'Escríbenos por Telegram o deja una solicitud en el sitio' },
+      { n: '02', text: 'Hablamos sobre tu solicitud y precisamos los detalles y criterios' },
+      { n: '03', text: 'Nos ponemos manos a la obra: buscamos, revisamos y entregamos' },
+    ],
+  },
+  privacy: {
+    metaTitle: 'Política de privacidad',
+    metaDescription: (siteName) => `Política de privacidad y tratamiento de datos personales del sitio ${siteName}.`,
+    heading: 'Política de privacidad',
+    lastUpdated: 'Última actualización: junio de 2026',
+    sections: [
+      { title: 'Qué datos recopilamos', text: 'Al enviar una solicitud, recopilamos el nombre y los datos de contacto (Telegram/teléfono) que introduces en el formulario. También registramos la página desde la que se envió la solicitud.' },
+      { title: 'Cómo usamos los datos', text: 'Los datos recopilados se utilizan exclusivamente para responder a tu solicitud. No compartimos los datos con terceros ni los utilizamos con fines publicitarios.' },
+      { title: 'Almacenamiento de datos', text: 'Los datos se almacenan en servidores seguros de Neon (PostgreSQL). Puedes solicitar la eliminación de tus datos en cualquier momento escribiéndonos por Telegram.' },
+      { title: 'Cookies', text: 'El sitio utiliza cookies técnicas necesarias para su funcionamiento, así como cookies analíticas de Google Analytics, pero solo con tu consentimiento. En tu primera visita puedes aceptar o rechazar el uso de cookies analíticas en el banner situado en la parte inferior de la pantalla; tu elección se guarda en el navegador.' },
+    ],
+    contactTitle: 'Contacto',
+    contactBefore: 'Para consultas sobre privacidad, contáctanos por ',
+    contactLinkText: 'Telegram',
+  },
+  thanks: {
+    metaTitle: 'Solicitud recibida',
+    metaDescription: 'Tu solicitud ha sido recibida. Nos pondremos en contacto contigo muy pronto.',
+    eyebrow: 'Solicitud enviada',
+    heading: 'Nos pondremos en contacto pronto',
+    body: 'Hemos recibido tu solicitud y te contactaremos en un plazo de 2 horas. Si es urgente, escríbenos directamente por Telegram.',
+    ctaLabel: 'Escribir directamente',
+    waitLabel: 'Mientras esperas',
+    waitCasesLink: 'Nuestros casos →',
+    waitSourcingLink: 'Búsqueda de coches llave en mano →',
+  },
+  casesVehicleSourcing: {
+    metaTitle: 'Casos de búsqueda de coches — vehículos reales de clientes',
+    metaDescription: 'Casos reales de búsqueda, importación, compra y revisión de coches desde Alemania, España, Serbia y Suiza. El coche, el precio, la historia de la operación.',
+  },
+  casesVehicleBuyback: {
+    metaTitle: 'Casos de compra de coches — operaciones reales',
+    metaDescription: 'Casos reales de compra de coches: el vehículo, el precio y la historia de la operación.',
+  },
+  casesVehicleInspection: {
+    metaTitle: 'Casos de revisión de coches — informes reales',
+    metaDescription: 'Casos reales de revisión de coches antes de la compra: el vehículo, el precio y el resultado de la inspección.',
+  },
+  casesVehicleImport: {
+    metaTitle: 'Casos de importación de coches — vehículos reales de clientes',
+    metaDescription: 'Casos reales de importación de coches desde Europa y China: el vehículo, el precio y la historia de la operación.',
+  },
+  casesAutoService: {
+    metaTitle: 'Casos del taller mecánico en Belgrado — ejemplos de trabajos',
+    metaDescription: 'Casos reales de reparación y mantenimiento de coches en nuestro taller de Belgrado: diagnóstico, mantenimiento, reparación de suspensión, motor y transmisión.',
+  },
+  casesDetailing: {
+    metaTitle: 'Casos de detailing en Belgrado — ejemplos de trabajos',
+    metaDescription: 'Casos reales de detailing en Belgrado: envolturas de vinilo para coches, motocicletas, bicicletas y yates.',
+  },
+  casesShared: {
+    heroSubtitle: 'Coches reales, precios reales, historias reales',
+    emptyState: 'Los casos estarán disponibles pronto.',
+  },
+};
+
+const de: PagesContent = {
+  contacts: {
+    metaTitle: 'Kontakt',
+    metaDescription: 'Kontaktieren Sie uns über Telegram. Fahrzeugbeschaffung, Import und Ankauf von Autos aus Europa.',
+    heroTitle: 'Kontakt',
+    heroSubtitle: 'Wir arbeiten über Telegram — schnell und unkompliziert',
+    info: [
+      { label: 'Antwortzeit', value: 'Innerhalb von 2 Stunden' },
+      { label: 'Öffnungszeiten', value: 'Rund um die Uhr, jeden Tag' },
+      { label: 'Sprachen', value: 'Russisch, Englisch' },
+      { label: 'Länder', value: 'Deutschland, Spanien, Serbien, Schweiz und weitere' },
+    ],
+    workEyebrow: 'So arbeiten wir',
+    steps: [
+      { n: '01', text: 'Schreiben Sie uns auf Telegram oder hinterlassen Sie eine Anfrage auf der Website' },
+      { n: '02', text: 'Wir besprechen Ihre Anfrage und klären Details und Kriterien' },
+      { n: '03', text: 'Wir beginnen mit der Arbeit — wir finden, prüfen und liefern' },
+    ],
+  },
+  privacy: {
+    metaTitle: 'Datenschutzerklärung',
+    metaDescription: (siteName) => `Datenschutzerklärung und Informationen zur Verarbeitung personenbezogener Daten der Website ${siteName}.`,
+    heading: 'Datenschutzerklärung',
+    lastUpdated: 'Letzte Aktualisierung: Juni 2026',
+    sections: [
+      { title: 'Welche Daten wir erheben', text: 'Beim Absenden einer Anfrage erheben wir den Namen und die Kontaktdaten (Telegram/Telefon), die Sie in das Formular eingeben. Außerdem erfassen wir die Seite, von der aus die Anfrage gesendet wurde.' },
+      { title: 'Wie wir die Daten verwenden', text: 'Die erhobenen Daten werden ausschließlich zur Beantwortung Ihrer Anfrage verwendet. Wir geben die Daten nicht an Dritte weiter und nutzen sie nicht für Werbezwecke.' },
+      { title: 'Datenspeicherung', text: 'Die Daten werden auf gesicherten Neon-Servern (PostgreSQL) gespeichert. Sie können die Löschung Ihrer Daten jederzeit beantragen, indem Sie uns auf Telegram schreiben.' },
+      { title: 'Cookies', text: 'Die Website verwendet technische Cookies, die für ihren Betrieb notwendig sind, sowie analytische Cookies von Google Analytics — jedoch nur mit Ihrer Einwilligung. Bei Ihrem ersten Besuch können Sie die Verwendung analytischer Cookies im Banner am unteren Bildschirmrand akzeptieren oder ablehnen; Ihre Wahl wird im Browser gespeichert.' },
+    ],
+    contactTitle: 'Kontakt',
+    contactBefore: 'Bei Fragen zum Datenschutz erreichen Sie uns über ',
+    contactLinkText: 'Telegram',
+  },
+  thanks: {
+    metaTitle: 'Anfrage eingegangen',
+    metaDescription: 'Ihre Anfrage ist eingegangen. Wir melden uns in Kürze bei Ihnen.',
+    eyebrow: 'Anfrage gesendet',
+    heading: 'Wir melden uns bald',
+    body: 'Wir haben Ihre Anfrage erhalten und melden uns innerhalb von 2 Stunden. Bei dringenden Anliegen schreiben Sie uns direkt auf Telegram.',
+    ctaLabel: 'Direkt schreiben',
+    waitLabel: 'Während Sie warten',
+    waitCasesLink: 'Unsere Fallstudien →',
+    waitSourcingLink: 'Fahrzeugbeschaffung im Komplettpaket →',
+  },
+  casesVehicleSourcing: {
+    metaTitle: 'Fallstudien zur Fahrzeugbeschaffung — echte Kundenfahrzeuge',
+    metaDescription: 'Echte Fallstudien zur Fahrzeugbeschaffung, zum Import, Ankauf und zur Fahrzeugprüfung aus Deutschland, Spanien, Serbien und der Schweiz. Das Fahrzeug, der Preis, die Geschichte des Geschäfts.',
+  },
+  casesVehicleBuyback: {
+    metaTitle: 'Fallstudien zum Autoankauf — echte Geschäfte',
+    metaDescription: 'Echte Fallstudien zum Autoankauf: das Fahrzeug, der Preis und die Geschichte des Geschäfts.',
+  },
+  casesVehicleInspection: {
+    metaTitle: 'Fallstudien zur Fahrzeugprüfung — echte Berichte',
+    metaDescription: 'Echte Fallstudien zur Fahrzeugprüfung vor dem Kauf: das Fahrzeug, der Preis und das Ergebnis der Besichtigung.',
+  },
+  casesVehicleImport: {
+    metaTitle: 'Fallstudien zum Fahrzeugimport — echte Kundenfahrzeuge',
+    metaDescription: 'Echte Fallstudien zum Import von Fahrzeugen aus Europa und China: das Fahrzeug, der Preis und die Geschichte des Geschäfts.',
+  },
+  casesAutoService: {
+    metaTitle: 'Fallstudien unserer Autowerkstatt in Belgrad — Arbeitsbeispiele',
+    metaDescription: 'Echte Fallstudien zu Reparatur und Wartung von Fahrzeugen in unserer Werkstatt in Belgrad: Diagnose, Wartung, Reparatur von Fahrwerk, Motor und Getriebe.',
+  },
+  casesDetailing: {
+    metaTitle: 'Fallstudien zum Detailing in Belgrad — Arbeitsbeispiele',
+    metaDescription: 'Echte Fallstudien zum Detailing in Belgrad: Folierung von Autos, Motorrädern, Fahrrädern und Yachten.',
+  },
+  casesShared: {
+    heroSubtitle: 'Echte Fahrzeuge, echte Preise, echte Geschichten',
+    emptyState: 'Fallstudien folgen in Kürze.',
+  },
+};
+
+const content: Record<Locale, PagesContent> = { ru, en, sr, es, de };
 
 export function getPagesContent(locale: Locale): PagesContent {
   return content[locale];

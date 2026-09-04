@@ -1,0 +1,101 @@
+---
+// Mobile-only nav panel, toggled by Header.astro's burger button (via the
+// #mobile-menu id — the burger stays in Header.astro, so this component
+// owns only the panel it opens/closes, not the button itself). No primary/
+// "more services" swap here unlike HeaderDesktopNav — the 2-column grid
+// shows all services at once, so there's nothing to make room for.
+import type { Search } from '@lucide/astro';
+import { Sun, Moon } from '@lucide/astro';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+
+interface NavItem {
+  href: string;
+  label: string;
+  slug: string;
+  Icon: typeof Search;
+  active: boolean;
+}
+
+interface Props {
+  navItems: NavItem[];
+  casesHref: string;
+  casesLabel: string;
+  themeToggleLabel: string;
+  isHome: boolean;
+}
+
+const { navItems, casesHref, casesLabel, themeToggleLabel, isHome } = Astro.props;
+---
+
+<!-- Open by default on the homepage -->
+<div
+  id="mobile-menu"
+  class:list={['xl:hidden border-t bg-header-mobile border-default', { 'menu-open': isHome }]}
+  aria-hidden={isHome ? undefined : 'true'}
+  inert={isHome ? undefined : true}
+>
+  <div class="overflow-hidden">
+    <nav class="max-w-6xl mx-auto px-6 py-5 flex flex-col gap-0 mobile-nav">
+      <div class="grid grid-cols-2 gap-2 mb-4">
+        {navItems.map(item => (
+          <a href={item.href} class="mobile-service-card flex flex-col items-center justify-center gap-2 py-5 rounded-sm border border-default text-secondary" aria-current={item.active ? 'page' : undefined}>
+            {item.Icon && <item.Icon size={20} />}
+            <span class="text-sm">{item.label}</span>
+          </a>
+        ))}
+      </div>
+      <a href={casesHref} class="text-secondary">{casesLabel}</a>
+      <div class="py-3"><LanguageSwitcher variant="inline" /></div>
+      <button type="button" class="theme-toggle-btn flex items-center gap-2 w-full py-[0.85rem] text-secondary">
+        <span class="theme-icon-sun hidden"><Sun size={16} /></span>
+        <span class="theme-icon-moon"><Moon size={16} /></span>
+        {themeToggleLabel}
+      </button>
+    </nav>
+  </div>
+</div>
+
+<style>
+  .mobile-nav > a {
+    display: block;
+    padding: 0.85rem 0;
+    font-size: 1rem;
+    font-weight: 400;
+    border-bottom: 1px solid var(--color-border);
+    transition: color 0.2s, transform 0.2s;
+  }
+  .mobile-nav > a:last-of-type { border-bottom: none; }
+  .mobile-nav > a:hover { color: var(--color-text) !important; transform: translateX(0.5rem); }
+
+  .mobile-service-card { transition: background-color 0.2s, border-color 0.2s; }
+  .mobile-service-card:active,
+  .mobile-service-card[aria-current="page"] {
+    background-color: var(--color-accent-subtle);
+    border-color: var(--color-accent-border);
+    color: var(--color-accent) !important;
+  }
+
+  /* Grid-rows collapse: animates real layout height (not just a visual
+     clip), so closing actually shrinks the sticky header smoothly instead
+     of snapping via display:none. Scoped under xl's breakpoint so it never
+     fights the xl:hidden utility's display:none on desktop. */
+  @media (max-width: 1279px) {
+    #mobile-menu {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transition:
+        grid-template-rows 750ms var(--ease-spring),
+        opacity 650ms var(--ease-spring);
+      pointer-events: none;
+    }
+    #mobile-menu.menu-open {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #mobile-menu.no-anim {
+      transition: none;
+    }
+  }
+</style>

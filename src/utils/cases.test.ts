@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { CollectionEntry } from 'astro:content';
-import { toCaseItem, toAutoserviceCaseItem, toDetailingCaseItem } from './cases';
+import { toCaseItem, toAutoserviceCaseItem, toDetailingCaseItem, getCaseTranslation } from './cases';
 
 const price = { value: '5000', currency: 'EUR' };
 
@@ -59,5 +59,34 @@ describe('toDetailingCaseItem', () => {
     const item = toDetailingCaseItem(entry, 'ru');
     expect(item.href).toBe('/ru/detailing-belgrade/bmw-x5-wrap/');
     expect(item.badges).toEqual(['Оклейка плёнкой', 'unknown-service']);
+  });
+});
+
+describe('getCaseTranslation', () => {
+  const data = {
+    translations: {
+      en: { title: 'BMW X1', body: 'English body' },
+    },
+  };
+
+  it('always returns undefined for ru — the source language, not a translation target', () => {
+    expect(getCaseTranslation(data, 'ru')).toBeUndefined();
+  });
+
+  it('returns the stored translation for a locale that has one', () => {
+    expect(getCaseTranslation(data, 'en')).toEqual({ title: 'BMW X1', body: 'English body' });
+  });
+
+  it('returns undefined for a locale with no translation yet, so the caller falls back to ru', () => {
+    expect(getCaseTranslation(data, 'de')).toBeUndefined();
+  });
+
+  it('returns undefined when the entry has no translations field at all', () => {
+    expect(getCaseTranslation({}, 'en')).toBeUndefined();
+  });
+
+  it('returns undefined for a blank stored translation (Keystatic saves unfilled fields as "", not omitted)', () => {
+    const blank = { translations: { es: { title: '', body: '' } } };
+    expect(getCaseTranslation(blank, 'es')).toBeUndefined();
   });
 });

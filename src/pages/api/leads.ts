@@ -13,6 +13,8 @@ const MISSING_FIELDS_MESSAGE: Record<Locale, string> = {
   ru: 'Имя и контакт обязательны',
   en: 'Name and contact are required',
   sr: 'Ime i kontakt su obavezni',
+  es: 'El nombre y el contacto son obligatorios',
+  de: 'Name und Kontakt sind erforderlich',
 };
 
 export async function POST({ request, redirect, cookies }: APIContext): Promise<Response> {

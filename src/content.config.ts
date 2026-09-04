@@ -2,12 +2,22 @@ import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { AUTOSERVICE_SERVICES, DETAILING_SERVICES, COUNTRY_SCOPED_SERVICE_SLUGS } from './utils/labels';
 
-// EN/SR translation of this case's title + body, filled in right on the
-// same Keystatic entry (not a separate collection) — everything else
+// EN/SR/ES/DE translation of this case's title + body, filled in right on
+// the same Keystatic entry (not a separate collection) — everything else
 // (photo, price, year, country) is shared across locales and stays
 // RU-only. Missing/empty → the page falls back to the ru original instead
 // of breaking.
 const caseTranslation = z.object({ title: z.string(), body: z.string() }).optional();
+
+// Same optional-per-locale shape for every non-ru locale — one schema
+// object reused by both collections below instead of hand-duplicating the
+// key list (and forgetting to add a language to one of the two).
+const caseTranslations = z.object({
+  en: caseTranslation,
+  sr: caseTranslation,
+  es: caseTranslation,
+  de: caseTranslation,
+}).optional();
 
 const cases = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/cases' }),
@@ -24,7 +34,7 @@ const cases = defineCollection({
     gallery: z.array(image()).default([]),
     date: z.coerce.date(),
     published: z.boolean().default(true),
-    translations: z.object({ en: caseTranslation, sr: caseTranslation }).optional(),
+    translations: caseTranslations,
   }),
 });
 
@@ -42,7 +52,7 @@ function serviceCaseCollection<T extends readonly [string, ...string[]]>(base: s
       gallery: z.array(image()).default([]),
       date: z.coerce.date(),
       published: z.boolean().default(true),
-      translations: z.object({ en: caseTranslation, sr: caseTranslation }).optional(),
+      translations: caseTranslations,
     }),
   });
 }

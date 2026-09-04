@@ -14,8 +14,10 @@ describe('getMetaTemplates', () => {
     }
   });
 
-  it('en and sr produce different text than ru', () => {
+  it('en, sr, es and de produce different text than ru', () => {
     expect(getMetaTemplates('en')['vehicle-sourcing']('X').title).not.toBe(getMetaTemplates('ru')['vehicle-sourcing']('X').title);
     expect(getMetaTemplates('sr')['vehicle-sourcing']('X').title).not.toBe(getMetaTemplates('ru')['vehicle-sourcing']('X').title);
+    expect(getMetaTemplates('es')['vehicle-sourcing']('X').title).not.toBe(getMetaTemplates('ru')['vehicle-sourcing']('X').title);
+    expect(getMetaTemplates('de')['vehicle-sourcing']('X').title).not.toBe(getMetaTemplates('ru')['vehicle-sourcing']('X').title);
   });
 });

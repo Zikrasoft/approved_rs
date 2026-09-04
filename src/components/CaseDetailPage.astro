@@ -20,6 +20,7 @@ import { getServicesContent, type ServicesContent } from '@/i18n/content/service
 import { getLocale, type Locale } from '@/i18n/config';
 import { getI18n } from '@/i18n/getI18n';
 import { PathBuilder } from '@/utils/paths';
+import { getCaseTranslation } from '@/utils/cases';
 import { marked } from 'marked';
 
 type CaseDetailKind = 'auto-service' | 'detailing';
@@ -64,10 +65,10 @@ const breadcrumbLabel = t.nav[config.navKey];
 const breadcrumbHref = config.hub(locale);
 const canonical = `${SITE_URL}${config.buildCanonical(locale, c.id)}`;
 
-// Body is written in ru; en/sr get an optional title+body translation right
-// on the same entry's `translations` field. No translation yet → fall back
-// to the ru original rather than leaving the page half-broken.
-const translation = locale === 'en' ? c.data.translations?.en : locale === 'sr' ? c.data.translations?.sr : undefined;
+// No translation yet for this locale → fall back to the ru original rather
+// than leaving the page half-broken (see getCaseTranslation for why this
+// goes through a helper rather than an inline `as` cast).
+const translation = getCaseTranslation(c.data, locale);
 
 const title = translation?.title ?? c.data.title;
 const car = c.data.car ?? title;

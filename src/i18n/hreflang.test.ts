@@ -8,6 +8,8 @@ describe('getAlternateLinks', () => {
       { hreflang: 'ru', href: `${SITE_URL}/ru/vehicle-sourcing/de/` },
       { hreflang: 'en', href: `${SITE_URL}/en/vehicle-sourcing/de/` },
       { hreflang: 'sr', href: `${SITE_URL}/sr/vehicle-sourcing/de/` },
+      { hreflang: 'es', href: `${SITE_URL}/es/vehicle-sourcing/de/` },
+      { hreflang: 'de', href: `${SITE_URL}/de/vehicle-sourcing/de/` },
       { hreflang: 'x-default', href: `${SITE_URL}/ru/vehicle-sourcing/de/` },
     ]);
   });
@@ -17,6 +19,8 @@ describe('getAlternateLinks', () => {
       { hreflang: 'ru', href: `${SITE_URL}/ru/` },
       { hreflang: 'en', href: `${SITE_URL}/en/` },
       { hreflang: 'sr', href: `${SITE_URL}/sr/` },
+      { hreflang: 'es', href: `${SITE_URL}/es/` },
+      { hreflang: 'de', href: `${SITE_URL}/de/` },
       { hreflang: 'x-default', href: `${SITE_URL}/ru/` },
     ]);
   });

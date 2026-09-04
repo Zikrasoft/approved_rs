@@ -15,6 +15,8 @@ const SECTION_HEADINGS: Record<Locale, Record<'countries' | 'cities' | 'vehicleI
   ru: { countries: 'Услуги по странам', cities: 'Автоподбор по городам', vehicleImport: 'Привоз авто', other: 'Прочее', languages: 'Другие языки' },
   en: { countries: 'Services by Country', cities: 'Car Sourcing by City', vehicleImport: 'Car Import', other: 'Other', languages: 'Other Languages' },
   sr: { countries: 'Usluge po zemljama', cities: 'Odabir vozila po gradovima', vehicleImport: 'Uvoz vozila', other: 'Ostalo', languages: 'Drugi jezici' },
+  es: { countries: 'Servicios por país', cities: 'Búsqueda de autos por ciudad', vehicleImport: 'Importación de autos', other: 'Otros', languages: 'Otros idiomas' },
+  de: { countries: 'Leistungen nach Land', cities: 'Fahrzeugbeschaffung nach Stadt', vehicleImport: 'Fahrzeugimport', other: 'Sonstiges', languages: 'Weitere Sprachen' },
 };
 
 const CASE_COUNT_LABELS: Record<Locale, { 'vehicle-sourcing': (n: number) => string; 'auto-service-belgrade': (n: number) => string; 'detailing-belgrade': (n: number) => string }> = {
@@ -32,6 +34,16 @@ const CASE_COUNT_LABELS: Record<Locale, { 'vehicle-sourcing': (n: number) => str
     'vehicle-sourcing': (n) => `${n} realizovanih primera odabira sa vozilom, zemljom i cenom`,
     'auto-service-belgrade': (n) => `${n} primera popravke i održavanja u Beogradu`,
     'detailing-belgrade': (n) => `${n} primera detailinga u Beogradu`,
+  },
+  es: {
+    'vehicle-sourcing': (n) => `${n} búsquedas completadas con auto, país y precio`,
+    'auto-service-belgrade': (n) => `${n} ejemplos de reparación y mantenimiento en Belgrado`,
+    'detailing-belgrade': (n) => `${n} ejemplos de detailing en Belgrado`,
+  },
+  de: {
+    'vehicle-sourcing': (n) => `${n} abgeschlossene Beschaffungen mit Auto, Land und Preis`,
+    'auto-service-belgrade': (n) => `${n} Beispiele für Reparatur und Wartung in Belgrad`,
+    'detailing-belgrade': (n) => `${n} Detailing-Beispiele in Belgrad`,
   },
 };
 

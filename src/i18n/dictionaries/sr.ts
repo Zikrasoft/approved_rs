@@ -10,6 +10,7 @@ export const sr: Dictionary = {
     'vehicle-inspection': 'Provera',
     cases: 'Primeri',
     contacts: 'Kontakt',
+    moreServices: 'Još usluga',
   },
   header: {
     menuLabel: 'Meni',

@@ -498,3 +498,54 @@ h1, h2, h3, h4 {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--color-border), transparent);
 }
+
+/* ─── Dropdown (src/components/Dropdown.astro) ──────────────
+   Global, not scoped in the component: .dropdown-option below styles
+   <slot> content that the *consumer* provides (LanguageSwitcher.astro,
+   Header.astro's services menu), and Astro's scoped-style attribute is
+   never applied to slotted children — only global CSS can reach them. */
+.dropdown-trigger { transition: color 0.2s; }
+.dropdown-trigger:hover,
+.dropdown-trigger[aria-expanded="true"],
+.dropdown-trigger-active { color: var(--color-text) !important; }
+
+.dropdown-chevron { transition: transform 0.25s var(--ease-spring); }
+.dropdown-trigger[aria-expanded="true"] .dropdown-chevron { transform: rotate(180deg); }
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  z-index: 20;
+  padding: 0.35rem;
+  margin: 0;
+  list-style: none;
+  border-radius: var(--radius-sm, 0.375rem);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  transform: translateY(-4px) scale(0.97);
+  pointer-events: none;
+  transition: opacity 0.2s var(--ease-spring), transform 0.2s var(--ease-spring);
+}
+.dropdown-menu[data-align="right"] { right: 0; transform-origin: top right; }
+.dropdown-menu[data-align="left"] { left: 0; transform-origin: top left; }
+.dropdown.dropdown-open .dropdown-menu {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.dropdown-option {
+  display: flex;
+  align-items: center;
+  color: var(--color-muted);
+  text-decoration: none;
+  transition: background-color 0.15s, color 0.15s;
+}
+.dropdown-option:hover { background: var(--color-surface-2); color: var(--color-text) !important; }
+.dropdown-option-active { color: var(--color-accent) !important; font-weight: 500; background: var(--color-accent-subtle); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dropdown-menu, .dropdown-chevron { transition: none; }
+}

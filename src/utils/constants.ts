@@ -53,7 +53,7 @@ export const FLAGS: Record<string, string> = {
 // name-case data needed) but vehicle-import sources cars from it — one shared name
 // constant instead of the same inline locale map duplicated in every place
 // that needs to mention it (schema areaServed on 2+ vehicle-import pages).
-export const CHINA_NAME: Record<Locale, string> = { ru: 'Китай', en: 'China', sr: 'Kina' };
+export const CHINA_NAME: Record<Locale, string> = { ru: 'Китай', en: 'China', sr: 'Kina', es: 'China', de: 'China' };
 // Not in countries.json (see above) — used as the `country` value on
 // vehicle-import cases sourced from China, so the china spoke page can filter
 // for them the same way de/eu do.
