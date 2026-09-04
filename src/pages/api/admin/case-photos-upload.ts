@@ -5,7 +5,18 @@ import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { isKnownCaseDir, isValidSlug, sanitizeFilename, dedupeFilename, appendGalleryEntries, KEYSTATIC_AUTH_COOKIE } from '@/utils/adminGallery';
-import { listGithubDir, getGithubFile, commitGalleryPhotos } from '@/lib/githubContents';
+import { listGithubDir, getGithubFile, commitGalleryPhotos, GithubApiError } from '@/lib/githubContents';
+
+// Guards against an accidentally-huge upload wedging the serverless
+// function (base64-encoded whole into one JSON POST body before GitHub's
+// blob API gets a chance to reject it) — not a hard content limit, just a
+// sanity cap. `accept="image/*"` on the client is trivially bypassable, so
+// this is the only real check.
+const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
+
+function backToForm(request: Request, dir: string, slug: string, extra: Record<string, string>): Response {
+  return Response.redirect(new URL(`/admin/case-photos?${new URLSearchParams({ dir, slug, ...extra })}`, request.url), 303);
+}
 
 // Dev writes straight to disk (same as Keystatic's own local storage mode);
 // prod commits via GitHub's API instead (src/lib/githubContents.ts) — see
@@ -25,8 +36,11 @@ export async function POST({ request, cookies }: APIContext): Promise<Response> 
   if (!isKnownCaseDir(dir) || !isValidSlug(slug)) {
     return new Response('Bad collection/slug', { status: 400 });
   }
+  if (files.some(f => f.size > MAX_PHOTO_BYTES)) {
+    return new Response('File too large', { status: 413 });
+  }
   if (files.length === 0) {
-    return Response.redirect(new URL(`/admin/case-photos?dir=${encodeURIComponent(dir)}&slug=${encodeURIComponent(slug)}&error=no-files`, request.url), 303);
+    return backToForm(request, dir, slug, { error: 'no-files' });
   }
 
   const indexRelPath = `${dir}/${slug}/index.md`;
@@ -50,7 +64,7 @@ export async function POST({ request, cookies }: APIContext): Promise<Response> 
     } catch (err) {
       // Only a real 404 means "no such case" — an auth/network/5xx failure
       // here must propagate instead of being reported as "not found".
-      if (err instanceof Error && /\b404\b/.test(err.message)) {
+      if (err instanceof GithubApiError && err.status === 404) {
         return new Response('Case not found', { status: 404 });
       }
       throw err;
@@ -63,7 +77,7 @@ export async function POST({ request, cookies }: APIContext): Promise<Response> 
       message: `Add ${newRelPaths.length} gallery photo(s) to ${slug}`,
     });
 
-    return Response.redirect(new URL(`/admin/case-photos?dir=${encodeURIComponent(dir)}&slug=${encodeURIComponent(slug)}&ok=${newRelPaths.length}`, request.url), 303);
+    return backToForm(request, dir, slug, { ok: String(newRelPaths.length) });
   }
 
   const caseDir = path.join(process.cwd(), dir, slug);
@@ -87,5 +101,5 @@ export async function POST({ request, cookies }: APIContext): Promise<Response> 
   const raw = await readFile(indexPath, 'utf-8');
   await writeFile(indexPath, appendGalleryEntries(raw, newRelPaths));
 
-  return Response.redirect(new URL(`/admin/case-photos?dir=${encodeURIComponent(dir)}&slug=${encodeURIComponent(slug)}&ok=${newRelPaths.length}`, request.url), 303);
+  return backToForm(request, dir, slug, { ok: String(newRelPaths.length) });
 }

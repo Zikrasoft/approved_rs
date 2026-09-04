@@ -29,6 +29,12 @@ const translationField = (label: string, suffix: string) => fields.object({
   body: fields.markdoc.inline({ label: `Текст (${suffix})` }),
 }, { label });
 
+// Written by translate-cases.ts (see comment on translationField above), not
+// by hand — Keystatic's schema rejects unknown frontmatter keys, so this has
+// to be declared even though the admin never touches it. Editing it by hand
+// just makes the bot redo a translation it already has.
+const translatedFromField = () => fields.text({ label: 'Хэш перевода (не трогать)', validation: { isRequired: false } });
+
 export default config({
   // Local dev reads/writes the working tree directly — no GitHub OAuth,
   // and edits show up immediately without a commit+push round trip. On
@@ -115,12 +121,7 @@ export default config({
         gallery: fields.array(caseImage(), { label: 'Больше фото', itemLabel: props => props.value?.filename || 'Фото' }),
         date: fields.date({ label: 'Дата', validation: { isRequired: true } }),
         published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
-        // Written by translate-cases.ts (see comment on translationField
-        // above), not by hand — Keystatic's schema rejects unknown
-        // frontmatter keys, so this has to be declared even though the
-        // admin never touches it. Editing it by hand just makes the bot
-        // redo a translation it already has.
-        translatedFrom: fields.text({ label: 'Хэш перевода (не трогать)', validation: { isRequired: false } }),
+        translatedFrom: translatedFromField(),
       },
     }),
     autoserviceCases: collection({
@@ -154,12 +155,7 @@ export default config({
         gallery: fields.array(caseImage(), { label: 'Больше фото', itemLabel: props => props.value?.filename || 'Фото' }),
         date: fields.date({ label: 'Дата', validation: { isRequired: true } }),
         published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
-        // Written by translate-cases.ts (see comment on translationField
-        // above), not by hand — Keystatic's schema rejects unknown
-        // frontmatter keys, so this has to be declared even though the
-        // admin never touches it. Editing it by hand just makes the bot
-        // redo a translation it already has.
-        translatedFrom: fields.text({ label: 'Хэш перевода (не трогать)', validation: { isRequired: false } }),
+        translatedFrom: translatedFromField(),
       },
     }),
     detailingCases: collection({
@@ -194,12 +190,7 @@ export default config({
         gallery: fields.array(caseImage(), { label: 'Больше фото', itemLabel: props => props.value?.filename || 'Фото' }),
         date: fields.date({ label: 'Дата', validation: { isRequired: true } }),
         published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
-        // Written by translate-cases.ts (see comment on translationField
-        // above), not by hand — Keystatic's schema rejects unknown
-        // frontmatter keys, so this has to be declared even though the
-        // admin never touches it. Editing it by hand just makes the bot
-        // redo a translation it already has.
-        translatedFrom: fields.text({ label: 'Хэш перевода (не трогать)', validation: { isRequired: false } }),
+        translatedFrom: translatedFromField(),
       },
     }),
   },

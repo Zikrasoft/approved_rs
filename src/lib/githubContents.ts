@@ -26,20 +26,30 @@ function authHeaders(token: string): HeadersInit {
   };
 }
 
+// Carries the HTTP status so callers can distinguish "not found" from a
+// real failure without regex-sniffing the error message.
+export class GithubApiError extends Error {
+  constructor(public status: number, path: string, body: string) {
+    super(`GitHub API ${path} failed: ${status} ${body}`);
+  }
+}
+
 async function ghFetch(token: string, path: string, init?: RequestInit): Promise<unknown> {
   const res = await fetch(`${API}${path}`, { ...init, headers: { ...authHeaders(token), ...init?.headers } });
-  if (!res.ok) throw new Error(`GitHub API ${path} failed: ${res.status} ${await res.text()}`);
+  if (!res.ok) throw new GithubApiError(res.status, path, await res.text());
   return res.json();
 }
 
 // 404 means the directory doesn't exist yet (case has no gallery/ folder
 // committed yet) — that's "no files", not an error.
 export async function listGithubDir(token: string, dirPath: string): Promise<string[]> {
-  const res = await fetch(`${API}/repos/${REPO}/contents/${dirPath}?ref=${BRANCH}`, { headers: authHeaders(token) });
-  if (res.status === 404) return [];
-  if (!res.ok) throw new Error(`GitHub API contents ${dirPath} failed: ${res.status} ${await res.text()}`);
-  const entries = await res.json() as { name: string }[];
-  return entries.map(e => e.name);
+  try {
+    const entries = await ghFetch(token, `/repos/${REPO}/contents/${dirPath}?ref=${BRANCH}`) as { name: string }[];
+    return entries.map(e => e.name);
+  } catch (err) {
+    if (err instanceof GithubApiError && err.status === 404) return [];
+    throw err;
+  }
 }
 
 export async function getGithubFile(token: string, filePath: string): Promise<string> {

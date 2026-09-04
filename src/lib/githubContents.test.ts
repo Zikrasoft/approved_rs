@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
-import { listGithubDir, getGithubFile, commitGalleryPhotos } from './githubContents';
+import { listGithubDir, getGithubFile, commitGalleryPhotos, GithubApiError } from './githubContents';
 
 function okJson(body: unknown) {
   return { ok: true, status: 200, json: () => Promise.resolve(body) };
@@ -25,6 +25,25 @@ describe('listGithubDir', () => {
   it('throws on other errors instead of silently returning empty', async () => {
     mockFetch.mockResolvedValue({ ok: false, status: 500, text: () => Promise.resolve('boom') });
     await expect(listGithubDir('tok', 'x')).rejects.toThrow(/500/);
+  });
+});
+
+describe('GithubApiError', () => {
+  afterEach(() => mockFetch.mockReset());
+
+  it('carries the HTTP status so callers can branch on it without parsing the message', async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 404, text: () => Promise.resolve('not found') });
+    await expect(getGithubFile('tok', 'x/index.md')).rejects.toMatchObject({ status: 404 });
+  });
+
+  it('is thrown as a real GithubApiError instance', async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 500, text: () => Promise.resolve('boom') });
+    try {
+      await getGithubFile('tok', 'x/index.md');
+      expect.unreachable();
+    } catch (err) {
+      expect(err).toBeInstanceOf(GithubApiError);
+    }
   });
 });
 
