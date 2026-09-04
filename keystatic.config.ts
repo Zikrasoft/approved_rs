@@ -29,6 +29,12 @@ const translationField = (label: string, suffix: string) => fields.object({
   body: fields.markdoc.inline({ label: `Текст (${suffix})` }),
 }, { label });
 
+// Written by translate-cases.ts (see comment on translationField above), not
+// by hand — Keystatic's schema rejects unknown frontmatter keys, so this has
+// to be declared even though the admin never touches it. Editing it by hand
+// just makes the bot redo a translation it already has.
+const translatedFromField = () => fields.text({ label: 'Хэш перевода (не трогать)', validation: { isRequired: false } });
+
 export default config({
   // Local dev reads/writes the working tree directly — no GitHub OAuth,
   // and edits show up immediately without a commit+push round trip. On
@@ -43,6 +49,11 @@ export default config({
       label: 'Кейсы автоподбора',
       slugField: 'title',
       path: 'src/content/cases/*/',
+      // "Preview" button in the entry editor — points at the multi-photo
+      // upload prototype (src/pages/admin/case-photos.astro), preselected to
+      // this exact case, since Keystatic's own gallery field only accepts
+      // one photo at a time (see caseImage() above).
+      previewUrl: '/admin/case-photos?dir=src/content/cases&slug={slug}',
       format: { contentField: 'content' },
       // Plain stacked form, full width for every field: this entry has
       // five real rich-text bodies (ru/en/sr/es/de), and Keystatic's
@@ -110,12 +121,14 @@ export default config({
         gallery: fields.array(caseImage(), { label: 'Больше фото', itemLabel: props => props.value?.filename || 'Фото' }),
         date: fields.date({ label: 'Дата', validation: { isRequired: true } }),
         published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
+        translatedFrom: translatedFromField(),
       },
     }),
     autoserviceCases: collection({
       label: 'Кейсы автосервиса',
       slugField: 'title',
       path: 'src/content/autoservice-cases/*/',
+      previewUrl: '/admin/case-photos?dir=src/content/autoservice-cases&slug={slug}',
       format: { contentField: 'content' },
       schema: {
         title: fields.slug({ name: { label: 'Заголовок', validation: { isRequired: true } } }),
@@ -142,12 +155,14 @@ export default config({
         gallery: fields.array(caseImage(), { label: 'Больше фото', itemLabel: props => props.value?.filename || 'Фото' }),
         date: fields.date({ label: 'Дата', validation: { isRequired: true } }),
         published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
+        translatedFrom: translatedFromField(),
       },
     }),
     detailingCases: collection({
       label: 'Кейсы детейлинга',
       slugField: 'title',
       path: 'src/content/detailing-cases/*/',
+      previewUrl: '/admin/case-photos?dir=src/content/detailing-cases&slug={slug}',
       format: { contentField: 'content' },
       schema: {
         title: fields.slug({ name: { label: 'Заголовок', validation: { isRequired: true } } }),
@@ -175,6 +190,7 @@ export default config({
         gallery: fields.array(caseImage(), { label: 'Больше фото', itemLabel: props => props.value?.filename || 'Фото' }),
         date: fields.date({ label: 'Дата', validation: { isRequired: true } }),
         published: fields.checkbox({ label: 'Опубликован', defaultValue: true }),
+        translatedFrom: translatedFromField(),
       },
     }),
   },

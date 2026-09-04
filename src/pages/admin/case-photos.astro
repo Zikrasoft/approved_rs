@@ -1,0 +1,119 @@
+---
+export const prerender = false;
+
+// Multi-photo gallery upload, working around Keystatic's gallery field (one
+// file picker per photo — see keystatic.config.ts). Writes straight to disk
+// in dev (same as Keystatic's own local storage mode) and via GitHub's API
+// in prod (src/lib/githubContents.ts) — Vercel's filesystem isn't
+// persistent there, same reason Keystatic itself doesn't use local storage
+// in prod either.
+//
+// No login form of its own: in prod, only requests carrying Keystatic's own
+// GitHub session cookie (KEYSTATIC_AUTH_COOKIE) are let through — that
+// cookie only exists after a real GitHub OAuth login to Keystatic, so
+// arriving without it means someone hit this URL directly rather than via
+// Keystatic's "Preview" button on a case. In dev, Keystatic uses local
+// storage and never sets this cookie — same no-auth trust model as
+// Keystatic's own local mode (see keystatic.config.ts's storage split).
+import { getCollection } from 'astro:content';
+import { CASE_COLLECTIONS, KEYSTATIC_AUTH_COOKIE } from '@/utils/adminGallery';
+import '@/styles/global.css';
+
+if (import.meta.env.PROD && !Astro.cookies.has(KEYSTATIC_AUTH_COOKIE)) {
+  return new Response('Открой эту страницу через кнопку "Preview" на кейсе в Keystatic.', { status: 403 });
+}
+
+const groups = await Promise.all(CASE_COLLECTIONS.map(async ({ collection, dir, label }) => ({
+  dir,
+  label,
+  entries: (await getCollection(collection as 'cases' | 'autoserviceCases' | 'detailingCases'))
+    .map(e => ({ id: e.id, title: 'car' in e.data && e.data.car ? e.data.car : e.data.title }))
+    .sort((a, b) => a.title.localeCompare(b.title)),
+})));
+
+const params = Astro.url.searchParams;
+const selectedDir = params.get('dir') ?? '';
+const selectedSlug = params.get('slug') ?? '';
+const ok = params.get('ok');
+const error = params.get('error');
+
+// Arrived via Keystatic's "Preview" button (keystatic.config.ts's
+// previewUrl, one per collection) — dir+slug already name a real case, so
+// skip the picker entirely instead of making the admin find it again.
+const preselected = groups
+  .find(g => g.dir === selectedDir)
+  ?.entries.find(e => e.id === selectedSlug);
+---
+
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Фото кейса — dev</title>
+</head>
+<body class="min-h-screen bg-neutral-50 text-neutral-900 font-sans p-6">
+  <div class="max-w-lg mx-auto">
+    <h1 class="text-xl font-semibold mb-1">Фото в галерею кейса</h1>
+    <p class="text-sm text-neutral-500 mb-6">Несколько фото за раз. Обычные поля кейса — по-прежнему в Keystatic.</p>
+
+    {ok && <p class="mb-4 rounded-sm bg-green-100 text-green-800 px-3 py-2 text-sm">Добавлено фото: {ok}</p>}
+    {error === 'no-files' && <p class="mb-4 rounded-sm bg-red-100 text-red-800 px-3 py-2 text-sm">Файлы не выбраны.</p>}
+
+    <form method="post" action="/api/admin/case-photos-upload" enctype="multipart/form-data" class="flex flex-col gap-4">
+      {preselected ? (
+        <div class="flex flex-col gap-1 text-sm">
+          Кейс
+          <div class="flex items-center justify-between border rounded-sm px-2 py-1.5 bg-neutral-100">
+            <span>{preselected.title}</span>
+            <a href="/admin/case-photos" class="text-xs text-neutral-500 underline">сменить</a>
+          </div>
+        </div>
+      ) : (
+        <label class="flex flex-col gap-1 text-sm">
+          Кейс
+          <select name="case" required class="border rounded-sm px-2 py-1.5" id="case-select">
+            <option value="">— выбрать —</option>
+            {groups.map(g => (
+              <optgroup label={g.label}>
+                {g.entries.map(e => (
+                  <option value={`${g.dir}::${e.id}`}>{e.title}</option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+        </label>
+      )}
+      <input type="hidden" name="dir" id="dir-input" value={preselected ? selectedDir : ''} />
+      <input type="hidden" name="slug" id="slug-input" value={preselected ? selectedSlug : ''} />
+
+      <label class="flex flex-col gap-1 text-sm">
+        Фото (можно выбрать сразу несколько)
+        <input type="file" name="photos" accept="image/*" multiple required class="border rounded-sm px-2 py-1.5" />
+      </label>
+
+      <button type="submit" class="bg-neutral-900 text-white rounded-sm px-4 py-2 text-sm">Загрузить</button>
+    </form>
+  </div>
+
+  <script>
+    // `case` select carries "dir::slug" so one field can name both — split
+    // it into the two hidden inputs the API route reads, instead of parsing
+    // a compound value server-side. Not present when a case arrived
+    // preselected (see `preselected` above) — hidden inputs already carry
+    // the right values from the server in that case.
+    const select = document.getElementById('case-select') as HTMLSelectElement | null;
+    if (select) {
+      const dirInput = document.getElementById('dir-input') as HTMLInputElement;
+      const slugInput = document.getElementById('slug-input') as HTMLInputElement;
+      const sync = () => {
+        const [dir, slug] = select.value.split('::');
+        dirInput.value = dir ?? '';
+        slugInput.value = slug ?? '';
+      };
+      select.addEventListener('change', sync);
+      sync();
+    }
+  </script>
+</body>
+</html>
