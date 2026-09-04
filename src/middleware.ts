@@ -78,7 +78,10 @@ export function moveGermanySpoke(pathname: string): string | null {
 // dev always, and in prod for any non-prerendered route) — locale-prefixing
 // it breaks every <Image> on the site, since the endpoint only exists at
 // the bare path.
-const UNLOCALIZED_PREFIXES = ['/api/', '/keystatic', '/_image'];
+// '/admin/case-photos' is the dev-only gallery-upload prototype (see
+// pages/admin/case-photos.astro) — same reasoning as '/keystatic', it's a tool
+// page outside the [locale] tree, not a translated site page.
+const UNLOCALIZED_PREFIXES = ['/api/', '/keystatic', '/_image', '/admin/case-photos'];
 // '/404' is Astro's special not-found route — it's baked verbatim into
 // dist/client/404.html, the file every static host (Vercel included) falls
 // back to for ANY unmatched path. Redirecting it here corrupts that single

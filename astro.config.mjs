@@ -27,6 +27,8 @@ export default defineConfig({
         defaultLocale: "ru",
         locales: { ru: "ru-RU", en: "en-US", sr: "sr-RS", es: "es-ES", de: "de-DE" },
       },
+      // Internal dev-only tool, not a real page (see pages/admin/case-photos.astro).
+      filter: (page) => !page.includes("/admin/case-photos"),
     }),
   ],
   // Legacy-slug + locale-prefix redirects live in src/middleware.ts for
