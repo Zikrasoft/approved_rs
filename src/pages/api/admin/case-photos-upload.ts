@@ -47,8 +47,13 @@ export async function POST({ request, cookies }: APIContext): Promise<Response> 
     let indexContent: string;
     try {
       indexContent = await getGithubFile(token!, indexRelPath);
-    } catch {
-      return new Response('Case not found', { status: 404 });
+    } catch (err) {
+      // Only a real 404 means "no such case" — an auth/network/5xx failure
+      // here must propagate instead of being reported as "not found".
+      if (err instanceof Error && /\b404\b/.test(err.message)) {
+        return new Response('Case not found', { status: 404 });
+      }
+      throw err;
     }
 
     await commitGalleryPhotos(token!, {
@@ -69,7 +74,7 @@ export async function POST({ request, cookies }: APIContext): Promise<Response> 
 
   const galleryDir = path.join(caseDir, 'gallery');
   await mkdir(galleryDir, { recursive: true });
-  const taken = new Set(existsSync(galleryDir) ? await readdir(galleryDir) : []);
+  const taken = new Set(await readdir(galleryDir));
 
   const newRelPaths: string[] = [];
   for (const file of files) {

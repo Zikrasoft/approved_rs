@@ -73,7 +73,13 @@ export function appendGalleryEntries(raw: string, newPaths: string[]): string {
 
   const entries = newPaths.map(p => `  - ${p}`);
   let insertAt = imageIdx + 1;
-  if (lines[insertAt]?.startsWith('gallery:')) {
+  if (lines[insertAt] === 'gallery: []') {
+    // Keystatic writes an empty gallery as inline `gallery: []`, not a bare
+    // `gallery:` header — turn it into block form before appending, or the
+    // `  - ` entries below end up dangling after the inline `[]`.
+    lines[insertAt] = 'gallery:';
+    insertAt++;
+  } else if (lines[insertAt]?.startsWith('gallery:')) {
     insertAt++;
     while (lines[insertAt]?.startsWith('  - ')) insertAt++;
   } else {
