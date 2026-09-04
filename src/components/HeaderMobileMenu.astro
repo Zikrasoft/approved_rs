@@ -1,0 +1,116 @@
+---
+// Mobile-only nav panel, toggled by Header.astro's burger button (via the
+// #mobile-menu id — the burger stays in Header.astro, so this component
+// owns only the panel it opens/closes, not the button itself). No primary/
+// "more services" swap here unlike HeaderDesktopNav — the 2-column grid
+// shows all services at once, so there's nothing to make room for.
+import type { Search } from '@lucide/astro';
+import { Sun, Moon, LayoutGrid, ChevronRight, Globe } from '@lucide/astro';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+
+interface NavItem {
+  href: string;
+  label: string;
+  slug: string;
+  Icon: typeof Search;
+  active: boolean;
+}
+
+interface Props {
+  navItems: NavItem[];
+  casesHref: string;
+  casesLabel: string;
+  languageLabel: string;
+  themeToggleLabel: string;
+  isHome: boolean;
+}
+
+const { navItems, casesHref, casesLabel, languageLabel, themeToggleLabel, isHome } = Astro.props;
+---
+
+<!-- Open by default on the homepage -->
+<div
+  id="mobile-menu"
+  class:list={['xl:hidden border-t bg-header-mobile border-default', { 'menu-open': isHome }]}
+  aria-hidden={isHome ? undefined : 'true'}
+  inert={isHome ? undefined : true}
+>
+  <div class="overflow-hidden">
+    <nav class="max-w-6xl mx-auto px-6 py-5 flex flex-col gap-4 mobile-nav">
+      <div class="grid grid-cols-2 gap-2">
+        {navItems.map(item => (
+          <a href={item.href} class="mobile-service-card flex flex-col items-center justify-center gap-2 py-5 rounded-sm border border-default text-secondary" aria-current={item.active ? 'page' : undefined}>
+            {item.Icon && <item.Icon size={20} />}
+            <span class="text-sm">{item.label}</span>
+          </a>
+        ))}
+      </div>
+
+      <!-- Same row shape/border as a service card above, so it reads as one
+           more tappable destination — not a stray line of text. -->
+      <a href={casesHref} class="mobile-list-row flex items-center gap-3 py-3.5 px-4 rounded-sm border border-default text-secondary">
+        <LayoutGrid size={18} class="shrink-0 text-muted" />
+        <span class="flex-1 text-sm">{casesLabel}</span>
+        <ChevronRight size={16} class="shrink-0 text-muted" />
+      </a>
+
+      <!-- Language + theme are settings, not destinations — grouped in one
+           tinted block (mirrors how the desktop header keeps them together,
+           apart from the nav links) instead of two stray rows. The "Язык"
+           label makes the flag row's job explicit; flags alone read as
+           decoration, not as a control. -->
+      <div class="prefs-group flex flex-col gap-3 p-4 rounded-sm bg-surface-2">
+        <div class="flex items-center gap-2 text-xs font-medium text-muted">
+          <Globe size={14} />
+          {languageLabel}
+        </div>
+        <LanguageSwitcher variant="inline" />
+        <div class="prefs-divider"></div>
+        <button type="button" class="theme-toggle-btn flex items-center gap-2 text-sm text-secondary">
+          <span class="theme-icon-sun hidden"><Sun size={16} /></span>
+          <span class="theme-icon-moon"><Moon size={16} /></span>
+          {themeToggleLabel}
+        </button>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<style>
+  .mobile-list-row { transition: background-color 0.2s, border-color 0.2s, transform 0.2s; }
+  .mobile-list-row:active { background-color: var(--color-accent-subtle); border-color: var(--color-accent-border); transform: translateX(0.25rem); }
+
+  .mobile-service-card { transition: background-color 0.2s, border-color 0.2s; }
+  .mobile-service-card:active,
+  .mobile-service-card[aria-current="page"] {
+    background-color: var(--color-accent-subtle);
+    border-color: var(--color-accent-border);
+    color: var(--color-accent) !important;
+  }
+
+  .prefs-divider { height: 1px; background: var(--color-border); }
+
+  /* Grid-rows collapse: animates real layout height (not just a visual
+     clip), so closing actually shrinks the sticky header smoothly instead
+     of snapping via display:none. Scoped under xl's breakpoint so it never
+     fights the xl:hidden utility's display:none on desktop. */
+  @media (max-width: 1279px) {
+    #mobile-menu {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transition:
+        grid-template-rows 750ms var(--ease-spring),
+        opacity 650ms var(--ease-spring);
+      pointer-events: none;
+    }
+    #mobile-menu.menu-open {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #mobile-menu.no-anim {
+      transition: none;
+    }
+  }
+</style>

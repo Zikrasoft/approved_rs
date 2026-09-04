@@ -31,6 +31,27 @@ translations:
       Potraga nije bila jednostavna. Pregledali smo veliki broj ponuda i obišli **6–7 automobila**. Zaista dobri primerci **Mini Cooper S-a** su retki: većina ima tragove udesa, delimično farbanje ili neku drugu manu. Razmatrali smo i dovoženje iz Nemačke, ali se na kraju najbolji automobil našao baš u Beogradu.
 
       Pronađen je **Mini Cooper S iz 2023. godine** sa svega **30.000 km**, kompletnom istorijom i **garancijom od godinu dana na motor i pripadajuću opremu**. Tačno onakav automobil kakav je klijentkinja i tražila.
+  es:
+    title: MINI COOPER S
+    body: |-
+      ## Búsqueda de coches en Serbia — cuando deseas encontrar no solo un automóvil, sino "el adecuado".
+
+      Anastasia se puso en contacto con nosotros con una solicitud clara: **Mini Cooper S**. Ya había un coche principal en la familia, por lo que este Mini debía ser un automóvil vibrante y emocional, para disfrutar de cada viaje.
+
+      La búsqueda resultó ser todo un reto. Pasamos por numerosas ofertas y revisamos **6–7 coches**. Los **Mini Cooper S** realmente buenos son difíciles de encontrar: la mayoría tiene huellas de accidentes, repintados o otros detalles problemáticos. También consideramos opciones de importación desde Alemania, pero al final, el mejor coche resultó estar en Belgrado.
+
+      Al final, encontramos un **Mini Cooper S 2023** con solo **30,000 km** de recorrido, con historial completo y **1 año de garantía en el motor y piezas**. Este coche cumplía con todas las expectativas del cliente.
+  de:
+    title: MINI COOPER S
+    body: |-
+      ## Autowahl in Serbien — wenn man nicht nur ein Auto, sondern genau "das eine" finden möchte.
+
+      Anastasia wandte sich mit einem klaren Wunsch an uns — einen **Mini Cooper S**. In der Familie gibt es bereits ein Hauptfahrzeug, weshalb dieser Mini ein lebendiger, emotionaler Wagen für den Fahrspaß sein sollte.
+
+      Die Suche gestaltete sich als herausfordernd. Wir durchforsteten zahlreiche Angebote und besichtigten **6–7 Fahrzeuge**. Wirklich gute **Mini Cooper S** sind selten: Die meisten haben Unfallspuren, einen nachlackierten Lack oder andere unerfreuliche Mängel. Auch Optionen mit Import aus Deutschland wurden in Betracht gezogen, aber letztendlich fand sich das beste Auto in Belgrad.
+
+      Schließlich wurde ein **Mini Cooper S aus dem Jahr 2023** mit nur **30.000 km** Laufleistung, vollständiger Historie und **1 Jahr Garantie auf Motor und Ausstattung** entdeckt. Genau solch ein Fahrzeug entsprach voll und ganz den Erwartungen der Kundin.
+translatedFrom: 3c36ac244f0cbc89
 ---
 ## Автоподбор в Сербии — когда хочется найти не просто автомобиль, а именно "тот самый".
 

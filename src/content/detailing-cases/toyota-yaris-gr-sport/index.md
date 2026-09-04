@@ -4,137 +4,125 @@ translations:
   en:
     title: TOYOTA YARIS GR SPORT
     body: >
-      ## Toyota Yaris GR Sport — Full Body Protection with 190-Micron PPF in
-      Belgrade
+      ## Toyota Yaris GR Sport — Full Body Protection with 190-Micron PPF in Belgrade
 
 
-      This beautiful Toyota Yaris GR Sport belongs to one of our clients from
-      Belgrade. She recently purchased the car used, and because it was still in
-      excellent condition, she decided not to wait for the first signs of
-      everyday city wear and tear. Instead, she chose to protect the entire body
-      with high-quality 190-micron paint protection film.
+      This beautiful Toyota Yaris GR Sport belongs to one of our clients from Belgrade. She recently purchased the car used, and because it was still in excellent condition, she decided not to wait for the first signs of everyday city wear and tear. Instead, she chose to protect the entire body with high-quality 190-micron paint protection film.
 
 
-      The Toyota Yaris GR Sport is a fantastic compact car for urban driving.
-      Unfortunately, city life can be surprisingly tough on automotive
-      paintwork.
+      The Toyota Yaris GR Sport is a fantastic compact car for urban driving. Unfortunately, city life can be surprisingly tough on automotive paintwork.
 
 
-      Tight parking spaces outside supermarkets and shopping centres,
-      neighbouring cars, carelessly opened doors, shopping carts, branches, road
-      debris, small stones and everyday parking contact can quickly leave
-      scratches, scuffs and chips on an otherwise beautiful car.
+      Tight parking spaces outside supermarkets and shopping centres, neighbouring cars, carelessly opened doors, shopping carts, branches, road debris, small stones and everyday parking contact can quickly leave scratches, scuffs and chips on an otherwise beautiful car.
 
 
-      Few things are more frustrating than returning to your car and discovering
-      a mark on the door simply because someone parked next to you opened their
-      door a little too far.
+      Few things are more frustrating than returning to your car and discovering a mark on the door simply because someone parked next to you opened their door a little too far.
 
 
-      That is exactly why our client decided to have her Toyota Yaris GR Sport
-      fully wrapped in transparent 190-micron PPF.
+      That is exactly why our client decided to have her Toyota Yaris GR Sport fully wrapped in transparent 190-micron PPF.
 
 
-      Paint Protection Film creates a durable transparent protective layer over
-      the vehicle's original paintwork. Instead of the clear coat taking the
-      abuse of everyday driving, the PPF becomes the first line of defence
-      against minor scratches, scuffs, light parking contact, road sand and
-      small stone impacts.
+      Paint Protection Film creates a durable transparent protective layer over the vehicle's original paintwork. Instead of the clear coat taking the abuse of everyday driving, the PPF becomes the first line of defence against minor scratches, scuffs, light parking contact, road sand and small stone impacts.
 
 
-      This type of protection is particularly useful for doors, bumpers,
-      fenders, mirrors and other areas that are constantly exposed during
-      everyday urban driving and parking.
+      This type of protection is particularly useful for doors, bumpers, fenders, mirrors and other areas that are constantly exposed during everyday urban driving and parking.
 
 
-      High-quality transparent PPF is also designed to preserve the original
-      appearance of the vehicle. The colour remains visible, the paint retains
-      its gloss, and the protective film is barely noticeable when
-      professionally installed.
+      High-quality transparent PPF is also designed to preserve the original appearance of the vehicle. The colour remains visible, the paint retains its gloss, and the protective film is barely noticeable when professionally installed.
 
 
-      Of course, PPF does not make a car indestructible. It cannot prevent every
-      dent or protect the body from a serious impact. What it can do is
-      significantly reduce the risk of many small everyday paint defects that
-      gradually affect the appearance and condition of a vehicle.
+      Of course, PPF does not make a car indestructible. It cannot prevent every dent or protect the body from a serious impact. What it can do is significantly reduce the risk of many small everyday paint defects that gradually affect the appearance and condition of a vehicle.
 
 
-      The result is exactly what our client wanted: her Toyota Yaris GR Sport
-      still looks beautifully original, but its paintwork now has an additional
-      layer of protection for everyday life in Belgrade.
+      The result is exactly what our client wanted: her Toyota Yaris GR Sport still looks beautifully original, but its paintwork now has an additional layer of protection for everyday life in Belgrade.
 
 
-      She can enjoy driving around the city, parking outside supermarkets and
-      leaving the car in busy shopping centre car parks with considerably less
-      concern about the neighbour who might open their door just a little too
-      enthusiastically.
+      She can enjoy driving around the city, parking outside supermarkets and leaving the car in busy shopping centre car parks with considerably less concern about the neighbour who might open their door just a little too enthusiastically.
 
 
-      If you want to preserve your vehicle's original paintwork, a full-body PPF
-      installation is one of the most effective solutions for protecting both
-      new and used cars from typical everyday urban damage.
+      If you want to preserve your vehicle's original paintwork, a full-body PPF installation is one of the most effective solutions for protecting both new and used cars from typical everyday urban damage.
   sr:
     title: TOYOTA YARIS GR SPORT
     body: >
-      ## Toyota Yaris GR Sport — kompletna zaštita karoserije PPF folijom od 190
-      mikrona u Beogradu
+      ## Toyota Yaris GR Sport — kompletna zaštita karoserije PPF folijom od 190 mikrona u Beogradu
 
 
-      Kod nas je stigao prelepi Toyota Yaris GR Sport naše klijentkinje iz
-      Beograda. Automobil je kupljen kao polovan, ali je u odličnom stanju, pa
-      je nova vlasnica odlučila da ne čeka prve tragove gradske vožnje, već da
-      odmah zaštiti karoseriju.
+      Kod nas je stigao prelepi Toyota Yaris GR Sport naše klijentkinje iz Beograda. Automobil je kupljen kao polovan, ali je u odličnom stanju, pa je nova vlasnica odlučila da ne čeka prve tragove gradske vožnje, već da odmah zaštiti karoseriju.
 
 
-      Toyota Yaris GR Sport je kompaktan automobil koji je odličan za
-      svakodnevnu vožnju po gradu. Međutim, upravo gradska vožnja i parkiranje
-      donose veliki broj sitnih rizika za lak i karoseriju: uska parking mesta
-      ispred prodavnica i tržnih centara, susedni automobili, neoprezno
-      otvaranje vrata, kolica iz supermarketa, grane, sitno kamenje, ogrebotine
-      i različiti manji kontakti na parkingu.
+      Toyota Yaris GR Sport je kompaktan automobil koji je odličan za svakodnevnu vožnju po gradu. Međutim, upravo gradska vožnja i parkiranje donose veliki broj sitnih rizika za lak i karoseriju: uska parking mesta ispred prodavnica i tržnih centara, susedni automobili, neoprezno otvaranje vrata, kolica iz supermarketa, grane, sitno kamenje, ogrebotine i različiti manji kontakti na parkingu.
 
 
-      Posebno je neprijatno kada na svom omiljenom automobilu pronađete trag ili
-      oštećenje laka samo zato što je neko na susednom parking mestu previše
-      otvorio vrata.
+      Posebno je neprijatno kada na svom omiljenom automobilu pronađete trag ili oštećenje laka samo zato što je neko na susednom parking mestu previše otvorio vrata.
 
 
-      Zato je vlasnica odlučila da kompletan Toyota Yaris GR Sport zaštitimo
-      kvalitetnom providnom PPF folijom debljine 190 mikrona.
+      Zato je vlasnica odlučila da kompletan Toyota Yaris GR Sport zaštitimo kvalitetnom providnom PPF folijom debljine 190 mikrona.
 
 
-      PPF zaštitna folija formira izdržljiv providni sloj preko originalnog laka
-      automobila. Folija preuzima na sebe veliki deo sitnih ogrebotina, tragova
-      trenja, lakših kontakata na parkingu, kao i uticaj peska i sitnog kamenja
-      sa puta. Ovakva zaštita je posebno korisna na vratima, branicima,
-      blatobranima, retrovizorima i drugim delovima automobila koji su
-      svakodnevno izloženi riziku.
+      PPF zaštitna folija formira izdržljiv providni sloj preko originalnog laka automobila. Folija preuzima na sebe veliki deo sitnih ogrebotina, tragova trenja, lakših kontakata na parkingu, kao i uticaj peska i sitnog kamenja sa puta. Ovakva zaštita je posebno korisna na vratima, branicima, blatobranima, retrovizorima i drugim delovima automobila koji su svakodnevno izloženi riziku.
 
 
-      Kvalitetna providna PPF folija je pritom praktično neprimetna na
-      automobilu. Originalna boja ostaje vidljiva, karoserija zadržava svoj
-      sjaj, a lak dobija dodatni zaštitni sloj.
+      Kvalitetna providna PPF folija je pritom praktično neprimetna na automobilu. Originalna boja ostaje vidljiva, karoserija zadržava svoj sjaj, a lak dobija dodatni zaštitni sloj.
 
 
-      Naravno, PPF folija ne može da zaštiti automobil od svakog jakog udarca
-      ili ozbiljnog udubljenja. Njena najveća prednost je zaštita od brojnih
-      sitnih oštećenja koja nastaju tokom svakodnevne gradske vožnje i koja
-      vremenom mogu značajno da naruše izgled automobila.
+      Naravno, PPF folija ne može da zaštiti automobil od svakog jakog udarca ili ozbiljnog udubljenja. Njena najveća prednost je zaštita od brojnih sitnih oštećenja koja nastaju tokom svakodnevne gradske vožnje i koja vremenom mogu značajno da naruše izgled automobila.
 
 
-      Rezultat je upravo ono što je naša klijentkinja želela: njen Toyota Yaris
-      GR Sport zadržao je originalan izgled, ali je sada mnogo bolje pripremljen
-      za svakodnevnu vožnju i parkiranje po Beogradu.
+      Rezultat je upravo ono što je naša klijentkinja želela: njen Toyota Yaris GR Sport zadržao je originalan izgled, ali je sada mnogo bolje pripremljen za svakodnevnu vožnju i parkiranje po Beogradu.
 
 
-      Sada može bez mnogo razmišljanja da ga vozi po gradu, ostavlja na parkingu
-      ispred prodavnice ili tržnog centra i manje brine o tome koliko će široko
-      neko pored nje otvoriti vrata svog automobila.
+      Sada može bez mnogo razmišljanja da ga vozi po gradu, ostavlja na parkingu ispred prodavnice ili tržnog centra i manje brine o tome koliko će široko neko pored nje otvoriti vrata svog automobila.
 
 
-      Ako želite da sačuvate originalni lak svog automobila, kompletno oblaganje
-      karoserije PPF zaštitnom folijom predstavlja jedan od najefikasnijih
-      načina zaštite od tipičnih oštećenja tokom gradske eksploatacije.
+      Ako želite da sačuvate originalni lak svog automobila, kompletno oblaganje karoserije PPF zaštitnom folijom predstavlja jedan od najefikasnijih načina zaštite od tipičnih oštećenja tokom gradske eksploatacije.
+  es:
+    title: TOYOTA YARIS GR SPORT
+    body: |-
+      ## Toyota Yaris GR Sport — protección completa de la carrocería con película de 190 micrones en Belgrado
+
+      Recibimos un magnífico Toyota Yaris GR Sport de nuestra cliente en Belgrado. El automóvil fue comprado de segunda mano, pero se encuentra en excelentes condiciones, y su nueva propietaria decidió no esperar a que aparecieran las primeras marcas de uso urbano para proteger la carrocería de inmediato.
+
+      El Toyota Yaris GR Sport es un coche compacto que se adapta perfectamente a la ciudad. Sin embargo, precisamente en entornos urbanos, la carrocería se enfrenta a diario a numerosos peligros menores: estrechos aparcamientos cerca de tiendas y centros comerciales, vehículos vecinos, puertas abiertas de forma imprudente, carritos de supermercado, ramas, pequeñas piedras, rayones y constantes contactos en los aparcamientos.
+
+      Es especialmente frustrante descubrir una abolladura o un raspón en tu coche favorito, solo porque alguien en el espacio de estacionamiento contiguo abrió la puerta demasiado lejos.
+
+      Por ello, la propietaria optó por cubrir completamente su Toyota Yaris GR Sport con una película protectora de poliuretano de 190 micrones de grosor.
+
+      Esta película PPF crea una capa protectora transparente y resistente sobre la pintura del vehículo. Absorbe rayones menores, desgastes, marcas de ligeros contactos en los aparcamientos, así como la abrasión del polvo y pequeñas piedras de la carretera. Este tipo de protección es especialmente útil para las puertas, guardabarros, parachoques, espejos y otros elementos que están constantemente en riesgo en el uso urbano.
+
+      Además, una película protectora transparente de alta calidad es prácticamente invisible en el coche y permite mantener el color original, el brillo y la apariencia de la carrocería.
+
+      Por supuesto, el PPF no convierte al coche en un vehículo blindado y no protegerá la carrocería de un impacto serio o una abolladura significativa. Pero realmente ayuda a prevenir numerosos daños urbanos comunes que poco a poco deterioran la pintura del vehículo.
+
+      Como resultado, nuestra clienta obtuvo exactamente lo que quería: su hermoso Toyota Yaris GR Sport mantuvo su apariencia original, y su carrocería está ahora mucho mejor preparada para la vida diaria en Belgrado.
+
+      Se puede conducir por la ciudad con tranquilidad, aparcar cerca de tiendas y centros comerciales y preocuparse mucho menos por esos vecinos de aparcamiento que a veces abren las puertas un poco más de lo que deberían.
+
+      Si tú también quieres preservar la pintura de tu coche, la cobertura completa de la carrocería con película PPF protectora es una de las maneras más efectivas de proteger el vehículo de los daños típicos del uso urbano.
+  de:
+    title: TOYOTA YARIS GR SPORT
+    body: |-
+      ## Toyota Yaris GR Sport – Vollständiger Schutz des Karosserielacks mit einer 190 Mikron Folie in Belgrad
+
+      Ein prachtvoller Toyota Yaris GR Sport unserer Kundin aus Belgrad kam zu uns. Obwohl das Auto gebraucht gekauft wurde, ist es in ausgezeichnetem Zustand und die neue Eigentümerin wollte nicht auf die ersten unangenehmen Spuren der Stadtbenutzung warten, sondern sofort den Karosserielack schützen.
+
+      Der Toyota Yaris GR Sport ist ein kompakter Wagen, der sich perfekt für die Stadt eignet. Doch gerade in der Stadt sieht sich die Karosserie täglich einer Vielzahl kleiner Gefahren ausgesetzt: Enge Parklücken vor Geschäften und Einkaufszentren, benachbarte Autos, unachtsam geöffnete Türen, Einkaufswagen, Äste, kleine Steine, Kratzer und ständige Kontakte auf Parkplätzen.
+
+      Es ist besonders ärgerlich, eine Delle oder einen Lackabplatzer an seinem Lieblingsauto festzustellen, nur weil jemand auf dem benachbarten Parkplatz die Tür zu weit aufgeschlossen hat.
+
+      Deshalb entschied sich die Besitzerin, ihren Toyota Yaris GR Sport vollständig mit einer 190 Mikron dicken schützenden Polyurethanfolie zu bekleben.
+
+      Solche PPF-Folien schaffen eine strapazierfähige, durchsichtige Schutzschicht auf dem Lack. Sie absorbieren kleine Kratzer, Abnutzungen, Spuren leichter Parkkontakte sowie die Einwirkung von Straßensand und kleinen Steinen. Insbesondere für Türen, Kotflügel, Stoßstangen, Spiegel und andere Teile, die im städtischen Betrieb ständig einem Risiko ausgesetzt sind, ist dieser Schutz besonders wichtig.
+
+      Zudem ist eine hochwertige, transparente Schutzfolie am Fahrzeug fast unsichtbar und bewahrt die ursprüngliche Farbe, den Glanz und das Aussehen der Karosserie.
+
+      Natürlich verwandelt PPF das Auto nicht in einen Panzer und schützt nicht vor schweren Stößen oder großen Dellen. Aber sie hilft wirklich, viele typische städtische Beschädigungen zu vermeiden, die den Lack nach und nach beeinträchtigen.
+
+      Das Ergebnis ist, dass unsere Kundin genau das erhalten hat, was sie wollte: Ihr schöner Toyota Yaris GR Sport hat sein ursprüngliches Aussehen bewahrt und ist jetzt viel besser auf das tägliche Leben in Belgrad vorbereitet.
+
+      Man kann sorglos durch die Stadt fahren, in der Nähe von Geschäften und Einkaufszentren parken und sich viel weniger um jene Nachbarn auf dem Parkplatz sorgen, die manchmal ihre Türen etwas weiter öffnen als nötig.
+
+      Wenn Sie auch den Lack Ihres Fahrzeugs erhalten möchten, ist die vollständige Beklebung der Karosserie mit einer PPF-Folie eine der effektivsten Methoden, um Ihr Auto vor typischen Schäden im urbanen Einsatz zu schützen.
 car: TOYOTA YARIS GR SPORT
 year: 2026
 servicesApplied:
@@ -143,6 +131,7 @@ image: image.jpg
 gallery: []
 date: 2026-08-15
 published: true
+translatedFrom: 4af5eae9e8f8ce9f
 ---
 ## Toyota Yaris GR Sport — полная защита кузова плёнкой 190 микрон в Белграде
 

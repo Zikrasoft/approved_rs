@@ -56,7 +56,37 @@ const sr: MetaTemplates = {
   }),
 };
 
-const templates: Record<Locale, MetaTemplates> = { ru, en, sr };
+const es: MetaTemplates = {
+  'vehicle-sourcing': (location) => ({
+    title: `Búsqueda de Vehículos Llave en Mano ${location}`,
+    description: `Búsqueda de vehículos llave en mano ${location}: localización, inspección independiente, gestión de la compra y entrega en tu ciudad. Envía tu solicitud — te contactamos por Telegram.`,
+  }),
+  'vehicle-buyback': (location) => ({
+    title: `Compra Urgente de Coches ${location} — Cualquier Matrícula Extranjera`,
+    description: `Compra urgente de coches ${location} con cualquier matrícula: extranjera, rusa o serbia. Valoración online, trámites en 1 día, pago el mismo día del acuerdo.`,
+  }),
+  'vehicle-inspection': (location) => ({
+    title: `Inspección de Vehículos Antes de Comprar ${location}`,
+    description: `Inspección independiente de vehículos ${location}. Visita de un experto, revisión de carrocería y mecánica, e informe. Protégete de comprar un coche accidentado.`,
+  }),
+};
+
+const de: MetaTemplates = {
+  'vehicle-sourcing': (location) => ({
+    title: `Kompletter Fahrzeugankauf ${location}`,
+    description: `Kompletter Fahrzeugankauf ${location}: Fahrzeugsuche, unabhängige Prüfung, Begleitung des Kaufs und Lieferung in Ihre Stadt. Senden Sie eine Anfrage — wir melden uns bei Telegram.`,
+  }),
+  'vehicle-buyback': (location) => ({
+    title: `Dringender Autoankauf ${location} — Alle Ausländischen Kennzeichen`,
+    description: `Dringender Autoankauf ${location} mit jedem Kennzeichen — ausländisch, russisch oder serbisch. Online-Bewertung, Abwicklung in 1 Tag, Auszahlung am Tag des Geschäfts.`,
+  }),
+  'vehicle-inspection': (location) => ({
+    title: `Fahrzeugprüfung vor dem Kauf ${location}`,
+    description: `Unabhängige Fahrzeugprüfung ${location}. Ein Experte vor Ort prüft Karosserie und Fahrwerk und erstellt einen Bericht. Schützen Sie sich vor dem Kauf eines Unfallwagens.`,
+  }),
+};
+
+const templates: Record<Locale, MetaTemplates> = { ru, en, sr, es, de };
 
 export function getMetaTemplates(locale: Locale): MetaTemplates {
   return templates[locale];

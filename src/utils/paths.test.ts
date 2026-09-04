@@ -48,13 +48,17 @@ describe('withLocales', () => {
       { params: { locale: 'en', country: 'rs' } },
       { params: { locale: 'sr', country: 'de' } },
       { params: { locale: 'sr', country: 'rs' } },
+      { params: { locale: 'es', country: 'de' } },
+      { params: { locale: 'es', country: 'rs' } },
+      { params: { locale: 'de', country: 'de' } },
+      { params: { locale: 'de', country: 'rs' } },
     ]);
   });
 
   it('preserves props alongside params', () => {
     const result = withLocales([{ params: {}, props: { foo: 'bar' } }]);
     expect(result.every(p => p.props?.foo === 'bar')).toBe(true);
-    expect(result).toHaveLength(3);
+    expect(result).toHaveLength(5);
   });
 
   it('handles a single empty-params entry (page with no other dynamic segments)', () => {
@@ -62,6 +66,8 @@ describe('withLocales', () => {
       { params: { locale: 'ru' } },
       { params: { locale: 'en' } },
       { params: { locale: 'sr' } },
+      { params: { locale: 'es' } },
+      { params: { locale: 'de' } },
     ]);
   });
 });

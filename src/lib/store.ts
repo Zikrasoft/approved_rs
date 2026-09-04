@@ -37,7 +37,7 @@ const storedLeadSchema = z.object({
   country: z.string().nullable().optional(),
   source_url: z.string().nullable().optional(),
   visitorId: z.string().nullable().optional(),
-  locale: z.enum(['ru', 'en', 'sr']),
+  locale: z.enum(['ru', 'en', 'sr', 'es', 'de']),
   kind: z.enum(['lead', 'call_click']).optional(),
   status: leadStatusSchema.default('new'),
   dealAmount: z.number().nonnegative().nullable().default(null),

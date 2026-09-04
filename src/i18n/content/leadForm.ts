@@ -96,7 +96,55 @@ const sr: LeadFormContent = {
   errorPhoneInvalid: 'Proverite broj telefona',
 };
 
-const content: Record<Locale, LeadFormContent> = { ru, en, sr };
+const es: LeadFormContent = {
+  headingLine1: 'Nos pondremos en contacto contigo',
+  headingEmphasis: 'en menos de 2 horas',
+  subtext: 'Consulta gratuita',
+  nameLabel: 'Tu nombre',
+  namePlaceholder: 'Juan',
+  contactLabel: 'Cómo prefieres que te contactemos',
+  telegramTab: 'Telegram',
+  whatsappTab: 'WhatsApp',
+  viberTab: 'Viber',
+  phoneTab: 'Teléfono',
+  commentLabel: 'Marca, modelo, presupuesto',
+  commentPlaceholder: 'BMW Serie 3, 2020–2022, hasta 25.000 €…',
+  consentBefore: 'Acepto la ',
+  consentLinkText: 'política de privacidad',
+  consentError: 'Tu consentimiento es necesario',
+  submitLabel: 'Calcular el precio',
+  errorNameRequired: 'Introduce tu nombre',
+  errorTelegramRequired: 'Introduce tu Telegram',
+  errorTelegramFormat: 'Formato: @usuario',
+  errorPhoneRequired: 'Introduce tu número de teléfono',
+  errorPhoneInvalid: 'Revisa tu número de teléfono',
+};
+
+const de: LeadFormContent = {
+  headingLine1: 'Wir melden uns bei Ihnen',
+  headingEmphasis: 'innerhalb von 2 Stunden',
+  subtext: 'Kostenlose Beratung',
+  nameLabel: 'Ihr Name',
+  namePlaceholder: 'Max',
+  contactLabel: 'Wie können wir Sie erreichen',
+  telegramTab: 'Telegram',
+  whatsappTab: 'WhatsApp',
+  viberTab: 'Viber',
+  phoneTab: 'Telefon',
+  commentLabel: 'Marke, Modell, Budget',
+  commentPlaceholder: 'BMW 3er, 2020–2022, bis 25.000 €…',
+  consentBefore: 'Ich akzeptiere die ',
+  consentLinkText: 'Datenschutzerklärung',
+  consentError: 'Ihre Zustimmung ist erforderlich',
+  submitLabel: 'Preis berechnen',
+  errorNameRequired: 'Bitte geben Sie Ihren Namen ein',
+  errorTelegramRequired: 'Bitte geben Sie Ihren Telegram-Namen ein',
+  errorTelegramFormat: 'Format: @username',
+  errorPhoneRequired: 'Bitte geben Sie Ihre Telefonnummer ein',
+  errorPhoneInvalid: 'Bitte überprüfen Sie Ihre Telefonnummer',
+};
+
+const content: Record<Locale, LeadFormContent> = { ru, en, sr, es, de };
 
 export function getLeadFormContent(locale: Locale): LeadFormContent {
   return content[locale];

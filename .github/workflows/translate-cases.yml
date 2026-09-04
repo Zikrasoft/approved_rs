@@ -1,0 +1,83 @@
+name: Auto-translate cases
+
+# Runs after a case is saved in Keystatic (which commits straight to main —
+# see keystatic.config.ts's storage config, no PR step) AND on any other
+# branch that happens to touch a case file — so a feature branch already
+# has en/sr/es/de by the time it merges, instead of only getting translated
+# once the merge lands on main. Safe to run this broadly: vercel.json's
+# git.deploymentEnabled means only main triggers an actual Vercel build, so
+# a translation commit on a feature branch doesn't burn a wasted deploy.
+#
+# The admin only ever writes the ru title/content; this job fills in
+# en/sr/es/de and re-fills them whenever ru changes (scripts/translate-cases.ts
+# tracks a hash of the ru source per case to tell the two cases apart), then
+# pushes the result back. Keystatic has no field type that can call an API
+# from inside its own form (see keystatic.config.ts), so there's no
+# "Translate" button to click — this job is what replaces it.
+on:
+  push:
+    paths:
+      - 'src/content/cases/**/index.md'
+      - 'src/content/autoservice-cases/**/index.md'
+      - 'src/content/detailing-cases/**/index.md'
+  # Manual escape hatch — e.g. after adding a new locale, to backfill it
+  # across every existing case without needing to touch each file's content
+  # (which is what the push trigger above requires).
+  workflow_dispatch: {}
+
+# Scoped per-branch (github.ref), not one global group — a push to one
+# branch shouldn't queue behind an unrelated run on another. Two case saves
+# on the *same* branch in quick succession would otherwise run this job
+# twice in parallel; whichever pushes second gets a non-fast-forward
+# rejection and silently loses that run's translations. Queue instead of
+# racing.
+concurrency:
+  group: translate-cases-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    # Default GITHUB_TOKEN is read-only on repos created after Feb 2023
+    # unless a workflow opts in — without this, the push step below 403s.
+    permissions:
+      contents: write
+    # Belt-and-suspenders: GitHub already suppresses new workflow runs
+    # triggered by a push made with the default GITHUB_TOKEN (which is what
+    # the push step below uses), so this job's own commit shouldn't retrigger
+    # it. Kept anyway as an explicit second guard against the infinite-loop
+    # failure mode, in case that suppression ever doesn't apply.
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Translate any case missing or stale en/sr/es/de
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: node --experimental-strip-types scripts/translate-cases.ts
+
+      - name: Commit and push translations, if any
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/content
+          git diff --cached --quiet && exit 0
+          git commit -m "Auto-translate case(s)"
+          # The concurrency group above only serializes runs of this
+          # workflow — an unrelated commit landing on main mid-run (outside
+          # this job's control) still causes a plain non-fast-forward
+          # rejection here. The job is idempotent (hash-based), so a rebase
+          # retry is safe: worst case this run's translations land a few
+          # seconds later than they would have.
+          git pull --rebase && git push

@@ -21,8 +21,10 @@ describe('getPagesContent', () => {
     expect(getPagesContent('sr').privacy.metaDescription(SITE_NAME)).toContain(SITE_NAME);
   });
 
-  it('en and sr differ from ru', () => {
+  it('en, sr, es and de differ from ru', () => {
     expect(getPagesContent('en').contacts.heroTitle).not.toBe(getPagesContent('ru').contacts.heroTitle);
     expect(getPagesContent('sr').contacts.heroTitle).not.toBe(getPagesContent('ru').contacts.heroTitle);
+    expect(getPagesContent('es').contacts.heroTitle).not.toBe(getPagesContent('ru').contacts.heroTitle);
+    expect(getPagesContent('de').contacts.heroTitle).not.toBe(getPagesContent('ru').contacts.heroTitle);
   });
 });

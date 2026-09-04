@@ -1,0 +1,81 @@
+---
+// Shared trigger+popover shell for the header's dropdowns (language switcher,
+// "more services") — one open/close implementation and one visual language
+// instead of a copy per dropdown. Styling lives in global.css, not a scoped
+// <style> here, since Astro never applies component-scoping to slotted
+// content and both call sites slot in their own menu items.
+import { ChevronDown } from '@lucide/astro';
+
+interface Props {
+  // Which side of the trigger the menu hangs from.
+  align?: 'left' | 'right';
+  minWidth?: string;
+  // 'menu'/'menuitem' for navigation destinations, 'listbox'/'option' for
+  // picking one value from a set (matches the ARIA pattern each caller's
+  // items actually are) — callers set the matching role on their own <li>.
+  menuRole?: 'menu' | 'listbox';
+  // Extra classes for the trigger button — callers own their own padding/
+  // gap since a dropdown sitting in a text-link row (nav) and one sitting
+  // beside icon buttons (header controls) need different box models.
+  triggerClass?: string;
+  // Highlights the trigger the same way an active nav link would — for a
+  // dropdown whose menu contains the current page.
+  active?: boolean;
+}
+
+const { align = 'left', minWidth = '9.5rem', menuRole = 'menu', triggerClass = '', active = false } = Astro.props;
+---
+
+<div class="dropdown relative">
+  <button
+    type="button"
+    class:list={[`dropdown-trigger flex items-center gap-1 rounded-sm text-muted ${triggerClass}`, { 'dropdown-trigger-active': active }]}
+    aria-haspopup="true"
+    aria-expanded="false"
+  >
+    <slot name="trigger" />
+    <ChevronDown size={13} class="dropdown-chevron" />
+  </button>
+
+  <ul class="dropdown-menu" style={`min-width:${minWidth}`} data-align={align} role={menuRole} aria-hidden="true">
+    <slot />
+  </ul>
+</div>
+
+<script>
+  function initDropdowns() {
+    document.querySelectorAll<HTMLElement>('.dropdown').forEach(root => {
+      if (root.dataset.dropdownInit) return;
+      root.dataset.dropdownInit = '1';
+
+      const trigger = root.querySelector<HTMLButtonElement>('.dropdown-trigger');
+      const menu = root.querySelector<HTMLElement>('.dropdown-menu');
+      if (!trigger || !menu) return;
+
+      const close = () => {
+        root.classList.remove('dropdown-open');
+        trigger.setAttribute('aria-expanded', 'false');
+        menu.setAttribute('aria-hidden', 'true');
+      };
+      const open = () => {
+        root.classList.add('dropdown-open');
+        trigger.setAttribute('aria-expanded', 'true');
+        menu.setAttribute('aria-hidden', 'false');
+      };
+
+      trigger.addEventListener('click', e => {
+        e.stopPropagation();
+        root.classList.contains('dropdown-open') ? close() : open();
+      });
+
+      document.addEventListener('click', e => {
+        if (!root.contains(e.target as Node)) close();
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') close();
+      });
+    });
+  }
+
+  initDropdowns();
+</script>

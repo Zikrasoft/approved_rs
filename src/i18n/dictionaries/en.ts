@@ -10,9 +10,11 @@ export const en: Dictionary = {
     'vehicle-inspection': 'Inspection',
     cases: 'Cases',
     contacts: 'Contacts',
+    moreServices: 'More services',
   },
   header: {
     menuLabel: 'Menu',
+    languageLabel: 'Language',
     themeToggleLabel: 'Toggle theme',
     themeToggleMobileLabel: 'Change theme',
     ctaShort: 'Request',

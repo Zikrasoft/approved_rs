@@ -24,6 +24,8 @@ export interface Country {
   ru: CountryNames;
   en: CountryNamesEn;
   sr: CountryNames;
+  es: CountryNamesEn;
+  de: CountryNamesEn;
   active: boolean;
 }
 
@@ -32,6 +34,8 @@ export interface City {
   ru: CityNames;
   en: CityNamesEn;
   sr: CityNames;
+  es: CityNamesEn;
+  de: CityNamesEn;
   country: string;
   active: boolean;
 }

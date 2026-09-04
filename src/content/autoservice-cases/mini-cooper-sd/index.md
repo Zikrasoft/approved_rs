@@ -7,9 +7,7 @@ translations:
       # Car Service in Belgrade — MINI Cooper SD 2.0 B47 Service
 
 
-      Our **car service in Belgrade** recently completed comprehensive
-      maintenance on a **MINI Cooper SD** equipped with a **2.0 B47 diesel
-      engine producing 170 hp**.
+      Our **car service in Belgrade** recently completed comprehensive maintenance on a **MINI Cooper SD** equipped with a **2.0 B47 diesel engine producing 170 hp**.
 
 
       The following work was carried out:
@@ -28,39 +26,26 @@ translations:
       - inspection and diagnostics of the intake system.
 
 
-      Special attention was paid to the **fuel filter**. On diesel vehicles,
-      regular fuel filter replacement is particularly important. We recommend
-      replacing the fuel filter **at least every 20,000 km** to help protect the
-      fuel system and maintain reliable engine operation.
+      Special attention was paid to the **fuel filter**. On diesel vehicles, regular fuel filter replacement is particularly important. We recommend replacing the fuel filter **at least every 20,000 km** to help protect the fuel system and maintain reliable engine operation.
 
 
-      During computer diagnostics and inspection of the intake system, we found
-      that the **swirl flaps were heavily contaminated**. A thick layer of soot
-      and carbon deposits had accumulated on them.
+      During computer diagnostics and inspection of the intake system, we found that the **swirl flaps were heavily contaminated**. A thick layer of soot and carbon deposits had accumulated on them.
 
 
-      We recommended cleaning the intake system to the customer, and he agreed.
-      The intake system was thoroughly cleaned and the accumulated deposits were
-      removed.
+      We recommended cleaning the intake system to the customer, and he agreed. The intake system was thoroughly cleaned and the accumulated deposits were removed.
 
 
-      Regular maintenance of the **BMW/MINI B47 diesel engine**, timely
-      replacement of oil and filters, servicing of the Aisin automatic
-      transmission, and regular inspection of the intake system can help prevent
-      expensive repairs in the future.
+      Regular maintenance of the **BMW/MINI B47 diesel engine**, timely replacement of oil and filters, servicing of the Aisin automatic transmission, and regular inspection of the intake system can help prevent expensive repairs in the future.
 
 
-      If you are looking for a **car service in Belgrade for MINI, BMW or
-      another vehicle**, contact us for regular maintenance, computer
-      diagnostics, repairs and preventive servicing.
+      If you are looking for a **car service in Belgrade for MINI, BMW or another vehicle**, contact us for regular maintenance, computer diagnostics, repairs and preventive servicing.
   sr:
     title: Mini Cooper SD
     body: >
       # Auto servis u Beogradu — servis MINI Cooper SD 2.0 B47
 
 
-      U našem **auto servisu u Beogradu** obavljen je kompletan servis
-      automobila **MINI Cooper SD** sa dizel motorom **2.0 B47 i 170 KS**.
+      U našem **auto servisu u Beogradu** obavljen je kompletan servis automobila **MINI Cooper SD** sa dizel motorom **2.0 B47 i 170 KS**.
 
 
       Tokom servisa urađeni su:
@@ -79,28 +64,69 @@ translations:
       - kontrola i dijagnostika usisnog sistema.
 
 
-      Posebno je važno obratiti pažnju na **filter goriva kod dizel
-      automobila**. Preporučujemo da se filter goriva menja **najkasnije na
-      svakih 20.000 kilometara**, jer njegovo stanje direktno utiče na rad i
-      zaštitu sistema goriva.
+      Posebno je važno obratiti pažnju na **filter goriva kod dizel automobila**. Preporučujemo da se filter goriva menja **najkasnije na svakih 20.000 kilometara**, jer njegovo stanje direktno utiče na rad i zaštitu sistema goriva.
 
 
-      Tokom dijagnostike ustanovljeno je da su **usisne vrtložne klapne** bile
-      značajno zaprljane. Na njima se formirao debeo sloj čađi i naslaga.
+      Tokom dijagnostike ustanovljeno je da su **usisne vrtložne klapne** bile značajno zaprljane. Na njima se formirao debeo sloj čađi i naslaga.
 
 
-      Vlasniku smo preporučili čišćenje usisnog sistema, što je on prihvatio.
-      Nakon toga je kompletan usis očišćen od nagomilanih naslaga.
+      Vlasniku smo preporučili čišćenje usisnog sistema, što je on prihvatio. Nakon toga je kompletan usis očišćen od nagomilanih naslaga.
 
 
-      Redovno održavanje dizel motora **BMW/MINI B47**, pravovremena zamena ulja
-      i filtera, servis automatskog menjača Aisin i kontrola usisnog sistema
-      mogu značajno smanjiti rizik od skupih kvarova.
+      Redovno održavanje dizel motora **BMW/MINI B47**, pravovremena zamena ulja i filtera, servis automatskog menjača Aisin i kontrola usisnog sistema mogu značajno smanjiti rizik od skupih kvarova.
 
 
-      Ako vam je potreban **auto servis u Beogradu za MINI, BMW ili drugo
-      vozilo**, možete nam se obratiti za redovan servis, kompjutersku
-      dijagnostiku, popravke i preventivno održavanje.
+      Ako vam je potreban **auto servis u Beogradu za MINI, BMW ili drugo vozilo**, možete nam se obratiti za redovan servis, kompjutersku dijagnostiku, popravke i preventivno održavanje.
+  es:
+    title: Mini Cooper SD
+    body: |-
+      # Taller de Automóviles en Belgrado — Mantenimiento del MINI Cooper SD 2.0 B47
+
+      En nuestro taller de automóviles en Belgrado, hemos llevado a cabo un servicio técnico integral para el **MINI Cooper SD** con motor diésel **2.0 B47 de 170 hp**.
+
+      Durante el mantenimiento se realizaron las siguientes tareas:
+
+      - Cambio de aceite de motor;
+      - Reemplazo de todos los filtros;
+      - Cambio del filtro de combustible;
+      - Cambio de aceite en la transmisión automática de 8 velocidades **Aisin**;
+      - Diagnóstico computarizado del motor y de los sistemas electrónicos del vehículo;
+      - Inspección del sistema de admisión.
+
+      Se prestó especial atención al **filtro de combustible**. Para un vehículo diésel, su estado es crucial, por lo que recomendamos cambiar el filtro de combustible **al menos una vez cada 20,000 km**. Esto ayuda a proteger el sistema de combustible y asegurar un funcionamiento estable del motor diésel.
+
+      Durante el diagnóstico computarizado y la revisión del estado de la admisión, se detectó una significativa contaminación en las **válvulas de turbulencia**. Éstas presentaban una gruesa capa de hollín y suciedad, que se asemejaba a un verdadero "abrigo" de depósitos.
+
+      Sugerimos al propietario realizar una limpieza del sistema de admisión. El cliente aceptó, y tras ello, el sistema de admisión fue completamente despejado de las impurezas acumuladas.
+
+      Un mantenimiento regular del motor diésel **BMW/MINI B47**, el cambio oportuno de aceite y filtros, el servicio de la transmisión automática Aisin, y el control del estado del sistema de admisión son prácticas que permiten disminuir considerablemente el riesgo de costosas reparaciones en el futuro.
+
+      Si buscas un **taller de automóviles en Belgrado para MINI, BMW u otro vehículo**, contáctanos. Realizamos mantenimiento técnico, diagnóstico computarizado, reparaciones y trabajos preventivos.
+  de:
+    title: Mini Cooper SD
+    body: |-
+      # Fahrzeugservice in Belgrad – Wartung eines MINI Cooper SD 2.0 B47
+
+      In unserer Werkstatt in Belgrad haben wir eine umfassende technische Wartung des **MINI Cooper SD** mit Dieselaggregat **2.0 B47** und einer Leistung von **170 PS** durchgeführt.
+
+      Im Rahmen der Wartung wurden folgende Arbeiten erledigt:
+
+      - Austausch des Motoröls;
+      - Austausch aller Filter;
+      - Austausch des Kraftstofffilters;
+      - Ölwechsel in dem 8-Gang-Automatikgetriebe **Aisin**;
+      - Computerdiagnose des Motors und der elektronischen Systeme des Fahrzeugs;
+      - Diagnose des Ansaugsystems.
+
+      Besondere Aufmerksamkeit haben wir dem **Kraftstofffilter** gewidmet. Für Dieselautos ist der Zustand des Filters von großer Bedeutung, daher empfehlen wir, den Kraftstofffilter **mindestens alle 20.000 km** auszutauschen. Dies hilft, das Kraftstoffsystem zu schützen und einen stabilen Betrieb des Dieselmotors zu gewährleisten.
+
+      Während der Computerdiagnose und der Überprüfung des Ansaugtrakt wurde eine erhebliche Verschmutzung der **Durchflussregelklappen** festgestellt. Eine dichte Schicht aus Ruß und Ablagerungen hatte sich gebildet – eine wahre "Schicht" aus Rückständen.
+
+      Wir haben dem Eigentümer vorgeschlagen, das Ansaugsystem zu reinigen. Der Kunde stimmte zu, woraufhin das Ansaugsystem vollständig von den angesammelten Verunreinigungen befreit wurde.
+
+      Regelmäßige Wartung des Dieselmotors **BMW/MINI B47**, der rechtzeitige Öl- und Filterwechsel, die Pflege des Automatikgetriebes Aisin sowie die Kontrolle des Zustands des Ansaugsystems tragen erheblich dazu bei, das Risiko kostspieliger Reparaturen in der Zukunft zu minimieren.
+
+      Wenn Sie einen **Fahrzeugservice in Belgrad für MINI, BMW oder ein anderes Auto** benötigen, wenden Sie sich gerne an uns. Wir bieten technische Wartungen, Computerdiagnosen, Reparaturen und präventive Arbeiten an.
 car: Mini Cooper SD
 year: 2019
 servicesApplied:
@@ -114,6 +140,7 @@ gallery:
   - gallery/1.jpg
 date: 2026-08-11
 published: true
+translatedFrom: 69336befbd0abb4f
 ---
 # Автосервис в Белграде — обслуживание MINI Cooper SD 2.0 B47
 

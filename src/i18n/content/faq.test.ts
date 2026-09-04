@@ -17,10 +17,14 @@ describe('getFaq', () => {
     }
   });
 
-  it('en and sr contain different text than ru (real translations, not copies)', () => {
+  it('en, sr, es and de contain different text than ru (real translations, not copies)', () => {
     expect(getFaq('en')['vehicle-sourcing'][0].q).not.toBe(getFaq('ru')['vehicle-sourcing'][0].q);
     expect(getFaq('sr')['vehicle-sourcing'][0].q).not.toBe(getFaq('ru')['vehicle-sourcing'][0].q);
+    expect(getFaq('es')['vehicle-sourcing'][0].q).not.toBe(getFaq('ru')['vehicle-sourcing'][0].q);
+    expect(getFaq('de')['vehicle-sourcing'][0].q).not.toBe(getFaq('ru')['vehicle-sourcing'][0].q);
     expect(getFaq('en')['vehicle-import'][0].q).not.toBe(getFaq('ru')['vehicle-import'][0].q);
     expect(getFaq('sr')['vehicle-import'][0].q).not.toBe(getFaq('ru')['vehicle-import'][0].q);
+    expect(getFaq('es')['vehicle-import'][0].q).not.toBe(getFaq('ru')['vehicle-import'][0].q);
+    expect(getFaq('de')['vehicle-import'][0].q).not.toBe(getFaq('ru')['vehicle-import'][0].q);
   });
 });

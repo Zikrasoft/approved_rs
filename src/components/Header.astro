@@ -4,6 +4,8 @@ import SiteLogo from './SiteLogo.astro';
 import Button from './Button.astro';
 import LeadFormModal from './LeadFormModal.astro';
 import LanguageSwitcher from './LanguageSwitcher.astro';
+import HeaderDesktopNav from './HeaderDesktopNav.astro';
+import HeaderMobileMenu from './HeaderMobileMenu.astro';
 import { getNavItems, isNavItemActive, SERVICES, type ServiceSlug } from '@/utils/labels';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
@@ -23,6 +25,8 @@ const isServicePage = SERVICES.some(s => s.slug === pathSegments[1]);
 const urlCountry = isServicePage ? pathSegments[2] : undefined;
 const navCountry = getActiveCountries().some(c => c.code === urlCountry) ? urlCountry! : DEFAULT_COUNTRY;
 const isHome = Astro.url.pathname === PathBuilder.home(locale) || Astro.url.pathname === `/${locale}`;
+const casesHref = PathBuilder.casesVehicleSourcing(locale);
+const casesActive = Astro.url.pathname.includes('/cases/');
 
 // Keyed by the exact slug union from labels.ts (not a loose Record<string,...>)
 // — a slug added to getNavItems() without a matching icon here is now a
@@ -36,8 +40,8 @@ const SERVICE_ICONS: Record<ServiceSlug, typeof Search> = {
   'vehicle-inspection': ClipboardCheck,
 };
 
-// Computed once and shared by the desktop and mobile nav below (both used
-// to call getNavItems()/isNavItemActive() separately for the same country).
+// Computed once and shared by HeaderDesktopNav (which further splits it into
+// primary/"more services") and HeaderMobileMenu (which shows it as-is).
 const navItems = getNavItems(locale, navCountry).map(item => ({
   ...item,
   Icon: SERVICE_ICONS[item.slug as ServiceSlug],
@@ -50,25 +54,17 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
 
     <SiteLogo />
 
-    <!-- Desktop Nav -->
-    <nav class="hidden xl:flex items-center gap-0.5 text-[13px] font-sans font-normal header-nav flex-1 justify-center min-w-0">
-      {navItems.map(item => (
-        <a href={item.href} class="flex items-center gap-1.5 px-2 py-1.5 rounded-sm text-muted whitespace-nowrap" aria-current={item.active ? 'page' : undefined}>
-          {item.label}
-        </a>
-      ))}
-      <a href={PathBuilder.casesVehicleSourcing(locale)} class="px-2 py-1.5 text-muted whitespace-nowrap" aria-current={Astro.url.pathname.includes('/cases/') ? 'page' : undefined}>{t.nav.cases}</a>
-    </nav>
+    <HeaderDesktopNav navItems={navItems} moreLabel={t.nav.moreServices} casesHref={casesHref} casesLabel={t.nav.cases} casesActive={casesActive} />
 
     <div class="flex items-center gap-1.5 shrink-0">
       <!-- Language switcher: desktop only, grouped with theme toggle (both are
            preference controls, not nav destinations) — mobile gets its own
-           row inside #mobile-menu -->
+           row inside HeaderMobileMenu -->
       <div class="hidden xl:block">
         <LanguageSwitcher />
       </div>
 
-      <!-- Theme toggle: desktop only — mobile gets its own row inside #mobile-menu -->
+      <!-- Theme toggle: desktop only — mobile gets its own row inside HeaderMobileMenu -->
       <button
         class="theme-toggle-btn theme-btn hidden xl:flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong bg-surface text-muted"
         aria-label={t.header.themeToggleLabel}
@@ -87,7 +83,7 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
         <span class="hidden xl:inline">{t.header.ctaLong}</span>
       </Button>
 
-      <!-- Mobile burger -->
+      <!-- Mobile burger — toggles HeaderMobileMenu's #mobile-menu panel below -->
       <button
         id="burger"
         class="xl:hidden flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong text-secondary"
@@ -100,107 +96,16 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
     </div>
   </div>
 
-  <!-- Mobile Menu: open by default on the homepage -->
-  <div
-    id="mobile-menu"
-    class:list={['xl:hidden border-t bg-header-mobile border-default', { 'menu-open': isHome }]}
-    aria-hidden={isHome ? undefined : 'true'}
-    inert={isHome ? undefined : true}
-  >
-    <div class="overflow-hidden">
-      <nav class="max-w-6xl mx-auto px-6 py-5 flex flex-col gap-0 mobile-nav">
-        <div class="grid grid-cols-2 gap-2 mb-4">
-          {navItems.map(item => (
-            <a href={item.href} class="mobile-service-card flex flex-col items-center justify-center gap-2 py-5 rounded-sm border border-default text-secondary" aria-current={item.active ? 'page' : undefined}>
-              {item.Icon && <item.Icon size={20} />}
-              <span class="text-sm">{item.label}</span>
-            </a>
-          ))}
-        </div>
-        <a href={PathBuilder.casesVehicleSourcing(locale)} class="text-secondary">{t.nav.cases}</a>
-        <div class="py-3"><LanguageSwitcher variant="inline" /></div>
-        <button type="button" class="theme-toggle-btn flex items-center gap-2 w-full py-[0.85rem] text-secondary">
-          <span class="theme-icon-sun hidden"><Sun size={16} /></span>
-          <span class="theme-icon-moon"><Moon size={16} /></span>
-          {t.header.themeToggleMobileLabel}
-        </button>
-      </nav>
-    </div>
-  </div>
+  <HeaderMobileMenu navItems={navItems} casesHref={casesHref} casesLabel={t.nav.cases} languageLabel={t.header.languageLabel} themeToggleLabel={t.header.themeToggleMobileLabel} isHome={isHome} />
 
   <LeadFormModal id="lead-modal" triggerAttr={DATA_OPEN_LEAD_MODAL} />
 </header>
 
 <style>
-  .header-nav a {
-    position: relative;
-    padding-bottom: 2px;
-    transition: color 0.2s;
-  }
-  .header-nav a::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--color-accent);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.25s var(--ease-spring);
-  }
-  .header-nav a:hover { color: var(--color-text) !important; }
-  .header-nav a:hover::after { transform: scaleX(1); }
-  .header-nav a[aria-current="page"] { color: var(--color-text) !important; }
-  .header-nav a[aria-current="page"]::after { transform: scaleX(1); }
-
   .theme-btn { transition: border-color 0.2s, color 0.2s, background-color 0.2s; }
   .theme-btn:hover {
     border-color: var(--color-accent) !important;
     color: var(--color-accent) !important;
-  }
-
-  .mobile-nav > a {
-    display: block;
-    padding: 0.85rem 0;
-    font-size: 1rem;
-    font-weight: 400;
-    border-bottom: 1px solid var(--color-border);
-    transition: color 0.2s, transform 0.2s;
-  }
-  .mobile-nav > a:last-of-type { border-bottom: none; }
-  .mobile-nav > a:hover { color: var(--color-text) !important; transform: translateX(0.5rem); }
-
-  .mobile-service-card { transition: background-color 0.2s, border-color 0.2s; }
-  .mobile-service-card:active,
-  .mobile-service-card[aria-current="page"] {
-    background-color: var(--color-accent-subtle);
-    border-color: var(--color-accent-border);
-    color: var(--color-accent) !important;
-  }
-
-  /* Grid-rows collapse: animates real layout height (not just a visual
-     clip), so closing actually shrinks the sticky header smoothly instead
-     of snapping via display:none. Scoped under xl's breakpoint so it never
-     fights the xl:hidden utility's display:none on desktop. */
-  @media (max-width: 1279px) {
-    #mobile-menu {
-      display: grid;
-      grid-template-rows: 0fr;
-      opacity: 0;
-      transition:
-        grid-template-rows 750ms var(--ease-spring),
-        opacity 650ms var(--ease-spring);
-      pointer-events: none;
-    }
-    #mobile-menu.menu-open {
-      grid-template-rows: 1fr;
-      opacity: 1;
-      pointer-events: auto;
-    }
-    #mobile-menu.no-anim {
-      transition: none;
-    }
   }
 </style>
 
@@ -239,15 +144,15 @@ const navItems = getNavItems(locale, navCountry).map(item => ({
       });
     });
 
-    /* ── Mobile burger ── */
+    /* ── Mobile burger — toggles HeaderMobileMenu's #mobile-menu panel ── */
     var burger = document.getElementById('burger');
     var menu   = document.getElementById('mobile-menu');
     var open   = document.getElementById('burger-open');
     var close  = document.getElementById('burger-close');
 
-    // The menu's own grid-rows open animation (750ms, see <style> below)
-    // nudges the browser's scroll-anchoring by a few px with no real user
-    // scroll involved — ignoreScrollCloseUntil tells the scroll listener
+    // The menu's own grid-rows open animation (750ms, see HeaderMobileMenu's
+    // <style>) nudges the browser's scroll-anchoring by a few px with no real
+    // user scroll involved — ignoreScrollCloseUntil tells the scroll listener
     // below to sit out that window instead of treating it as a real scroll
     // and closing the menu it was just asked to open.
     let ignoreScrollCloseUntil = 0;

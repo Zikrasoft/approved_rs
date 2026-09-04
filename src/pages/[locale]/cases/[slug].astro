@@ -17,6 +17,7 @@ import { getServicesContent } from '@/i18n/content/services';
 import { getI18n } from '@/i18n/getI18n';
 import { getCountry } from '@/utils/geo';
 import { CHINA_NAME, CHINA_COUNTRY_CODE } from '@/utils/constants';
+import { getCaseTranslation } from '@/utils/cases';
 import { marked } from 'marked';
 
 export async function getStaticPaths() {
@@ -29,13 +30,10 @@ const cc = getServicesContent(locale).caseChrome;
 const t = getI18n(locale);
 const { case: c } = Astro.props;
 
-// Case bodies are written in ru; en/sr get an optional title+body
-// translation right on the same case entry's `translations` field (filled
-// in via Keystatic, plain markdown text — not a second markdoc body, since
-// Keystatic only supports one real document body per file). No translation
-// yet for this case → fall back to the ru original rather than leaving the
-// page half-broken.
-const translation = locale === 'en' ? c.data.translations?.en : locale === 'sr' ? c.data.translations?.sr : undefined;
+// No translation yet for this case/locale → fall back to the ru original
+// rather than leaving the page half-broken (see getCaseTranslation for why
+// this goes through a helper rather than an inline `as` cast).
+const translation = getCaseTranslation(c.data, locale);
 
 const title = translation?.title ?? c.data.title;
 const { Content } = await render(c);

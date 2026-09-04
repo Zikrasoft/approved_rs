@@ -88,25 +88,31 @@ async function renderOg(outPath, options) {
 }
 
 // Locale suffix on the filename: none for ru (default/backward-compatible
-// path referenced as a fallback), '-en'/'-sr' for the others.
-const LOCALE_SUFFIX = { ru: '', en: '-en', sr: '-sr' };
+// path referenced as a fallback), '-en'/'-sr'/'-es'/'-de' for the others.
+const LOCALE_SUFFIX = { ru: '', en: '-en', sr: '-sr', es: '-es', de: '-de' };
 
 const EYEBROW = {
   ru: 'АВТОПОДБОР · ДОСТАВКА · ЕВРОПА',
   en: 'CAR SOURCING · DELIVERY · EUROPE',
   sr: 'ODABIR VOZILA · DOSTAVA · EVROPA',
+  es: 'BÚSQUEDA DE AUTOS · ENTREGA · EUROPA',
+  de: 'FAHRZEUGBESCHAFFUNG · LIEFERUNG · EUROPA',
 };
 
 const DEFAULT_SUB = {
   ru: 'Германия · Испания · Сербия · Полностью удалённо, через Telegram',
   en: 'Germany · Spain · Serbia · Fully remote, over Telegram',
   sr: 'Nemačka · Španija · Srbija · Potpuno na daljinu, preko Telegrama',
+  es: 'Alemania · España · Serbia · Totalmente remoto, por Telegram',
+  de: 'Deutschland · Spanien · Serbien · Komplett aus der Ferne, über Telegram',
 };
 
 const DEFAULT_TAGLINE = {
   ru: 'Подберём и доставим автомобиль из Европы',
   en: "We'll source and deliver your car from Europe",
   sr: 'Pronaći ćemo i dovesti vaše vozilo iz Evrope',
+  es: 'Buscamos y te entregamos tu auto desde Europa',
+  de: 'Wir suchen und liefern Ihr Auto aus Europa',
 };
 
 const SERVICE_VARIANTS = {
@@ -128,9 +134,21 @@ const SERVICE_VARIANTS = {
     'vehicle-inspection': 'Nezavisna provera pre kupovine',
     'auto-service-belgrade': 'Popravka i održavanje vozila u Beogradu',
   },
+  es: {
+    'vehicle-sourcing': 'Buscamos, inspeccionamos y entregamos tu auto, todo incluido',
+    'vehicle-buyback': 'Compra urgente de autos con matrícula extranjera',
+    'vehicle-inspection': 'Inspección independiente antes de comprar',
+    'auto-service-belgrade': 'Reparación y mantenimiento de autos en Belgrado',
+  },
+  de: {
+    'vehicle-sourcing': 'Wir suchen, prüfen und liefern Ihr Auto — schlüsselfertig',
+    'vehicle-buyback': 'Dringender Ankauf von Autos mit ausländischem Kennzeichen',
+    'vehicle-inspection': 'Unabhängige Prüfung vor dem Kauf',
+    'auto-service-belgrade': 'Reparatur und Wartung von Autos in Belgrad',
+  },
 };
 
-for (const locale of ['ru', 'en', 'sr']) {
+for (const locale of ['ru', 'en', 'sr', 'es', 'de']) {
   const suffix = LOCALE_SUFFIX[locale];
 
   await renderOg(join(PUBLIC, `og${suffix}.png`), {

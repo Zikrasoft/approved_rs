@@ -17,9 +17,11 @@ describe('getHomeContent', () => {
     expect(getHomeContent('sr').testimonials[0].name).toBe('Александр');
   });
 
-  it('en and sr differ from ru', () => {
+  it('en, sr, es and de differ from ru', () => {
     expect(getHomeContent('en').heroLine1).not.toBe(getHomeContent('ru').heroLine1);
     expect(getHomeContent('sr').heroLine1).not.toBe(getHomeContent('ru').heroLine1);
+    expect(getHomeContent('es').heroLine1).not.toBe(getHomeContent('ru').heroLine1);
+    expect(getHomeContent('de').heroLine1).not.toBe(getHomeContent('ru').heroLine1);
     expect(getHomeContent('en').ctaHeading.accentWord).not.toBe(getHomeContent('ru').ctaHeading.accentWord);
   });
 });
