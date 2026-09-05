@@ -1,4 +1,5 @@
 // @ts-check
+import { defineConfig } from 'eslint/config';
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import astro from 'eslint-plugin-astro';
@@ -6,7 +7,7 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 import gitignore from 'eslint-config-flat-gitignore';
 import globals from 'globals';
 
-export default tseslint.config(
+export default defineConfig(
   gitignore(),
   js.configs.recommended,
   ...tseslint.configs.recommended,

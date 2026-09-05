@@ -5,8 +5,12 @@ name: Auto-translate cases
 # branch that happens to touch a case file — so a feature branch already
 # has en/sr/es/de by the time it merges, instead of only getting translated
 # once the merge lands on main. Safe to run this broadly: vercel.json's
-# git.deploymentEnabled means only main triggers an actual Vercel build, so
-# a translation commit on a feature branch doesn't burn a wasted deploy.
+# git.deploymentEnabled is false for every branch (deploy only happens via
+# ci.yml's `deploy` job, gated to main), so a translation commit on a
+# feature branch can't burn a wasted deploy either way. ci.yml also listens
+# for this workflow's completion (`workflow_run`) to redeploy main once
+# translation is done — see its `gate` job for why a case-content push
+# doesn't deploy directly from here.
 #
 # The admin only ever writes the ru title/content; this job fills in
 # en/sr/es/de and re-fills them whenever ru changes (scripts/translate-cases.ts
@@ -50,19 +54,7 @@ jobs:
     if: github.actor != 'github-actions[bot]'
     steps:
       - uses: actions/checkout@v4
-
-      # No `version:` — reads packageManager from package.json, the single
-      # source of truth (this was hardcoded to a different pnpm major than
-      # ci.yml's, which broke action-setup's "multiple versions specified"
-      # check the moment package.json's packageManager didn't match either).
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-pnpm
 
       - name: Translate any case missing or stale en/sr/es/de
         env:
