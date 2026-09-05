@@ -16,8 +16,9 @@ interface StubEl {
   hidden: boolean;
 }
 
-function stubDocument(groups: StubEl[][]) {
+function stubDocument(groups: StubEl[][], lang = 'ru') {
   vi.stubGlobal('document', {
+    documentElement: { lang },
     querySelectorAll: () =>
       groups.map((els) => ({ querySelectorAll: () => els })),
   });
@@ -68,5 +69,15 @@ describe('applyRegionalContactPreference', () => {
     expect(groupA[1].hidden).toBe(true);
     expect(groupB[0].hidden).toBe(true);
     expect(groupB[1].hidden).toBe(false);
+  });
+
+  it('passes the page language through to getPreferredChannel', () => {
+    vi.mocked(detectVisitorCountry).mockReturnValue('rs');
+    vi.mocked(getPreferredChannel).mockReturnValue('telegram');
+    stubDocument([[]], 'ru');
+
+    applyRegionalContactPreference();
+
+    expect(getPreferredChannel).toHaveBeenCalledWith('rs', 'ru');
   });
 });

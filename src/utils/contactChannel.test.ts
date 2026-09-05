@@ -55,4 +55,14 @@ describe('getPreferredChannel', () => {
     expect(getPreferredChannel('constructor')).toBe('telegram');
     expect(getPreferredChannel('toString')).toBe('telegram');
   });
+
+  it('forces Telegram for the Russian locale regardless of country', () => {
+    expect(getPreferredChannel('rs', 'ru')).toBe('telegram');
+    expect(getPreferredChannel('de', 'ru')).toBe('telegram');
+  });
+
+  it('falls back to the country lookup for any other locale', () => {
+    expect(getPreferredChannel('rs', 'en')).toBe('whatsapp');
+    expect(getPreferredChannel('ru', 'sr')).toBe('telegram');
+  });
 });
