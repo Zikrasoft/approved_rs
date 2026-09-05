@@ -1,8 +1,27 @@
+# Not a real monorepo — this file exists only for the settings below. pnpm
+# 10 (what a Vercel-container build resolves — the manual/dashboard deploy
+# path only, not the real one: see docs/deploy.md's "Pnpm на Vercel", real
+# deploys build via GitHub Actions' own pnpm 11 instead) errors with
+# "packages field missing or empty" if this key is absent entirely; pnpm 11
+# made it optional. '.' declares the root itself as the sole package, a
+# no-op beyond satisfying that check.
+packages:
+  - '.'
+
 # pnpm v11 format
 allowBuilds:
   esbuild: true
   sharp: true
   '@parcel/watcher': true
+# Glob, not exact-versioned entries — pnpm auto-generated this list pinned
+# to the versions resolved at the time `vercel` was added; a future `vercel`
+# bump changes every one of those versions, and an exact-pinned list would
+# silently go stale and reintroduce the same "install hard-fails" bug this
+# file's `packages:` fix above addresses (pnpm docs use this exact glob
+# form, e.g. '@myorg/*', for "allow all packages from one source").
+minimumReleaseAgeExclude:
+  - '@vercel/*'
+  - vercel
 # pnpm v9/v10 format (for Vercel, which supports up to pnpm 10)
 onlyBuiltDependencies:
   - esbuild
