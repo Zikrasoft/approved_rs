@@ -60,6 +60,9 @@ export const casesCollection = collection({
         { label: 'Испания', value: 'es' },
         { label: 'Швейцария', value: 'ch' },
         { label: 'Португалия', value: 'pt' },
+        { label: 'Франция', value: 'fr' },
+        { label: 'Италия', value: 'it' },
+        { label: 'Польша', value: 'pl' },
         // Not a real sourcing/delivery country in countries.json — used
         // only to tag vehicle-import cases sourced from China so the
         // /vehicle-import/china/ page can filter for them.

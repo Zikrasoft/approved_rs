@@ -1,0 +1,18 @@
+name: Setup pnpm
+description: Install pnpm/Node and project dependencies — the identical setup every job in this repo's workflows needs after checking out. Does NOT check out the repo itself — a local composite action can only be referenced once the caller has already checked out, so the caller must run actions/checkout@v4 before this.
+
+runs:
+  using: composite
+  steps:
+    # No `version:` — reads packageManager from package.json, the single
+    # source of truth (a hardcoded version here previously drifted out of
+    # sync between workflow files, breaking pnpm/action-setup outright).
+    - uses: pnpm/action-setup@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: pnpm
+
+    - run: pnpm install --frozen-lockfile
+      shell: bash

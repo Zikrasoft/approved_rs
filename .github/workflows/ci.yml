@@ -3,25 +3,146 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch: {}
+  # Fires when translate.yml finishes on main — its bot commit
+  # (pushed with the default GITHUB_TOKEN) can't trigger this workflow's
+  # own `push` trigger (GitHub's anti-recursion rule for the default
+  # token), and this is also what lets `deploy` below defer to a run gated
+  # on translation actually being done, instead of deploying pre-
+  # translation content. `branches: [main]` matters: for `workflow_run`,
+  # `github.ref`/`github.sha` always resolve to the repo's default branch —
+  # NOT the branch the triggering run was on — so without this filter, a
+  # translate run on a feature branch would fire this trigger and, from
+  # inside, look indistinguishable from a real main-branch completion.
+  workflow_run:
+    workflows: ['Auto-translate content']
+    types: [completed]
+    branches: [main]
+
+# Same ref can get a direct push run and a workflow_run-triggered run close
+# together (see the `gate` job below) — queue instead of letting them race
+# main's deploy out of order. Different branches/PRs get their own group
+# (keyed by ref), so unrelated work never queues behind this. GitHub only
+# holds one pending run per group — a 3rd trigger landing while 2 are
+# already queued/running bumps the oldest pending one out entirely instead
+# of extending the queue. Same accepted-risk class as the 20-commit payload
+# cap below: real at this repo's push volume only in theory.
+concurrency:
+  group: ci-deploy-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
-
-      # No `version:` — reads packageManager from package.json, the single
-      # source of truth (a hardcoded version here silently drifted out of
-      # sync with translate.yml's own hardcoded version before).
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-pnpm
       - run: pnpm exec eslint .
       - run: pnpm exec prettier --check .
       - run: pnpm exec astro check
       - run: pnpm test
+
+  # A push touching a case file or an i18n dictionary yaml (see translate.yml's
+  # path filter) gets a translation run right after it — deploying now would
+  # ship pre-translation content and then deploy again moments later once
+  # that run completes and workflow_run fires. Skip this run's deploy in
+  # that case; the workflow_run-triggered run (gated below to a real,
+  # successful main-branch completion — translation commit or not) is the
+  # one that actually ships.
+  gate:
+    needs: check
+    # needs.check.result is required explicitly, not just the ref/event
+    # checks: a custom `if:` replaces the default implicit "skip if a
+    # needed job failed" check (same gotcha `deploy`'s own `if:` below
+    # already accounts for) — without this, a failing `check` wouldn't
+    # block `gate`/`deploy` at all. The workflow_run conclusion check is
+    # NOT redundant with the trigger's `types: [completed]` — that fires on
+    # failure/cancelled too, not just success, so without this clause a
+    # failed translation run would still deploy main's unchanged content.
+    if: >-
+      needs.check.result == 'success' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      skip_deploy: ${{ steps.decide.outputs.skip }}
+    steps:
+      # No checkout: the push event payload already lists every changed
+      # path per commit, so there's nothing here that needs the repo on
+      # disk (previously did a full clone + `git diff` for the same
+      # answer, including a hand-rolled first-push zero-SHA case that this
+      # sidesteps entirely). `github.event.commits` is capped at 20 entries
+      # by GitHub's own payload limit — a single push bundling more commits
+      # than that could miss a case-file change; a non-issue at this
+      # 2-person repo's push volume.
+      #
+      # Two levels of null-guard, both confirmed in production, not just
+      # theorized: `commits` itself can be `null` instead of `[]` (seen on
+      # the PR #10 merge commit — outer `(. // [])` guard), AND a merge
+      # commit's individual `added`/`removed`/`modified` fields can each be
+      # `null` instead of `[]` — GitHub doesn't compute a full diff for
+      # merge commits (seen on the very next push, PR #11's own merge —
+      # first fix wasn't enough on its own). `null + null` in jq is `null`,
+      # not `[]`, so each field needs its own `// []` before combining.
+      # jq verified locally against: a case-file commit (match), a non-case
+      # commit (no match), an empty commits array (no match), a null
+      # commits array (no match), a commit with all-null added/removed/
+      # modified (no match), and a push mixing a null-fields merge commit
+      # alongside a real case-file commit (match) — all exit 0/1 as
+      # intended, never jq's own runtime-error exit 5. Same reasoning
+      # applies to the i18n yaml alternation below — translate.yml runs on
+      # both path sets in one job, so either one triggers the same
+      # pre-translation-content deploy that this gate needs to skip.
+      - id: decide
+        env:
+          COMMITS_JSON: ${{ toJson(github.event.commits) }}
+        run: |
+          if [ "${{ github.event_name }}" = "push" ] && echo "$COMMITS_JSON" | jq -e '
+            (. // []) as $commits
+            | [$commits[] | ((.added // []) + (.removed // []) + (.modified // []))[]]
+            | any(
+                test("^src/content/(cases|autoservice-cases|detailing-cases)/.*/index\\.md$")
+                or test("^src/content/i18n/.*\\.yaml$")
+              )
+          ' > /dev/null; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # Runs only after `check` passes, replacing Vercel's git-integration
+  # auto-deploy (see vercel.json's git.deploymentEnabled) — deploying
+  # straight from a passed CI run means the exact commit that got
+  # lint/typecheck/test-checked is the one that ships, instead of Vercel
+  # independently re-running the same checks itself (scripts/vercel-ignore-
+  # build.sh, removed) in a separate container that can drift out of sync
+  # (see the pnpm-version mismatch this replaced).
+  deploy:
+    needs: gate
+    # A skipped or failed `gate` never sets its output, so this is false in
+    # every case except an explicit "false" — no separate needs.gate.result
+    # check required (empty string never equals the literal 'false').
+    if: needs.gate.outputs.skip_deploy == 'false'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-pnpm
+
+      # --debug is temporary — vercel pull's generic "remove .vercel and
+      # retry" error hides the real cause (usually a 403 from Vercel's API);
+      # --debug prints the actual rejected request/reason. Drop this flag
+      # once the underlying secret/permission issue is found and fixed.
+      - run: pnpm exec vercel pull --yes --environment=production --debug
+      - run: pnpm exec vercel build --prod
+      - run: pnpm exec vercel deploy --prebuilt --prod --archive=tgz

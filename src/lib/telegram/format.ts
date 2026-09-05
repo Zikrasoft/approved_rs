@@ -321,10 +321,14 @@ export function buildMenu(role: Role): {
 } {
   const rows: Btn[][] = [
     [{ text: '🆕 Новые', callback_data: 'list:new' }],
-    [{ text: '🔵 В работе', callback_data: 'list:in_progress' }],
+    [
+      {
+        text: '🔵 В работе / Отложенные',
+        callback_data: 'list:in_progress+postponed',
+      },
+    ],
     [{ text: '✅ Успешные', callback_data: 'list:won' }],
     [{ text: '❌ Отказы', callback_data: 'list:lost' }],
-    [{ text: '⏸ Отложенные', callback_data: 'list:postponed' }],
     [{ text: '📊 Статистика', callback_data: 'menu:stats' }],
   ];
   rows.push([
@@ -377,10 +381,11 @@ export function buildHelp(role: Role): string {
 
 export function buildLeadList(
   leads: StoredLead[],
-  status: LeadStatus,
+  status: LeadStatus | LeadStatus[],
 ): { text: string; reply_markup: Keyboard } {
+  const statuses = Array.isArray(status) ? status : [status];
   const rows: Btn[][] = leads
-    .filter((l) => l.status === status && !l.archived)
+    .filter((l) => statuses.includes(l.status) && !l.archived)
     .sort((a, b) => b.id - a.id)
     .slice(0, MAX_LIST_ROWS)
     .map((l) => [

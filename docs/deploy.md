@@ -3,7 +3,8 @@
 ## Стек
 
 - **Astro v7** — статический сайт + Edge middleware
-- **pnpm v11** локально, **pnpm v10** на Vercel (по lockfile `v9.0`)
+- **pnpm v11** везде — локально и в GitHub Actions, где теперь происходит вся
+  сборка и деплой (см. «Настроить деплой из GitHub Actions» ниже)
 - **Vercel** — хостинг, Edge Middleware для geo-таргетинга
 
 ---
@@ -49,15 +50,62 @@
 }
 ```
 
-Менять не нужно.
+Менять не нужно. `git.deploymentEnabled: false` там же отключает
+собственный git-триггер Vercel — деплой теперь целиком идёт через
+`.github/workflows/ci.yml` (см. ниже), не через пуш напрямую в Vercel.
 
-### 4. Задеплоить
+### 4. Настроить деплой из GitHub Actions
+
+Деплой на `main` запускает `.github/workflows/ci.yml`: джоба `check`
+(lint/prettier/typecheck/test) → джоба `gate` → джоба `deploy` (`vercel
+pull` → `vercel build --prod` → `vercel deploy --prebuilt --prod`), каждая
+только если предыдущая прошла. Раньше это делал сам Vercel через
+git-интеграцию (`ignoreCommand`, `scripts/vercel-ignore-build.sh`) — но так
+проверки гонялись дважды (в GitHub Actions и заново в контейнере Vercel), и
+несовпадение версии pnpm между ними однажды привело к тому, что реальные
+деплои с новым контентом молча пропускались («Canceled by Ignored Build
+Step», без явной ошибки). Теперь проверка ровно одна, и деплоится именно
+тот коммит, который её прошёл.
+
+`gate` решает, стоит ли деплоить прямо сейчас: если пуш тронул файл кейса,
+следом придёт коммит с переводом от `translate-cases.yml`, и как только та
+джоба **успешно** завершится на `main` — `ci.yml` перезапустится сам
+(`workflow_run`, с фильтром `branches: [main]` — без него `github.ref`
+в workflow_run-запуске всегда указывает на дефолтную ветку независимо от
+того, на какой ветке реально прошёл перевод, так что фильтр обязателен,
+а не опционален) и задеплоит уже с переводами. `gate` в этом случае деплой
+на первом проходе пропускает, чтобы не деплоить дважды (RU-only, потом
+с переводами).
+
+Ручной запуск (`workflow_dispatch`) деплоит немедленно, не дожидаясь
+перевода — это осознанно (ручной запуск = человек и так хочет задеплоить
+прямо сейчас), но если запустить его сразу после пуша кейса, есть шанс
+уйти в прод без свежего перевода этого кейса.
+
+`environment: production` в джобе `deploy` — обычный GitHub Environment,
+создаётся сам при первом запуске, без правил защиты. Если когда-нибудь
+захочется добавить туда required reviewers — учтите, что деплой после
+автоперевода запускается без участия человека (`workflow_run`), и повиснет
+в ожидании ревью, если такое правило появится.
+
+Нужны 3 секрета в GitHub (Settings → Secrets and variables → Actions):
+
+| Секрет              | Описание                          | Где взять                                                                               |
+| ------------------- | --------------------------------- | --------------------------------------------------------------------------------------- |
+| `VERCEL_TOKEN`      | Личный токен доступа к Vercel API | [vercel.com/account/tokens](https://vercel.com/account/tokens)                          |
+| `VERCEL_ORG_ID`     | ID организации/аккаунта в Vercel  | `vercel link` в корне проекта локально → `.vercel/project.json` → `orgId`               |
+| `VERCEL_PROJECT_ID` | ID этого проекта в Vercel         | Тот же `.vercel/project.json` → `projectId`, либо Project Settings → General в дашборде |
+
+Без них джоба `deploy` упадёт на первом же шаге (`vercel pull`) — джоба
+`check` при этом всё равно отработает как обычный CI-гейт.
+
+### 5. Задеплоить
 
 ```bash
 git push origin main
 ```
 
-Vercel автоматически запустит деплой при пуше в `main`.
+`ci.yml` запустится сам; смотреть прогресс — вкладка Actions в GitHub.
 
 ---
 
@@ -74,13 +122,12 @@ Vercel автоматически запустит деплой при пуше 
 переводы уже есть в фиче-ветке к моменту мержа, а не появляются только
 после него.
 
-Это безопасно гонять на всех ветках, потому что `vercel.json`'s
-`git.deploymentEnabled` разрешает реальный Vercel-деплой только для `main`
-(`"**": false, "main": true` — plain `"*"` doesn't cross `/`, minimatch matches
-it against the whole branch name and `feature/x` never matches a bare `*`)
-— коммит с переводом на фиче-ветке не запускает
-лишний preview-билд. Если вообще не пользуетесь Vercel preview — это и есть
-причина такой настройки, а не только защита от лишних коммитов джобы.
+Это безопасно гонять на всех ветках: `vercel.json`'s `git.deploymentEnabled`
+теперь `false` целиком (Vercel больше не деплоит по git-пушу ни для одной
+ветки, см. раздел про CI/деплой выше) — коммит с переводом на фиче-ветке в
+принципе не может запустить лишний билд. На `main` завершение этой джобы
+само перезапускает `ci.yml` (`workflow_run`, см. его `gate` job) — и именно
+тот прогон деплоит, независимо от того, был ли реально запушен перевод.
 
 Скрипт умеет отличать «перевода ещё нет» от «RU-текст изменился»: хэш
 исходного RU-текста хранится в самом файле кейса (`translatedFrom`), и все
@@ -153,14 +200,29 @@ curl "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/getWebhookInfo"
 
 ## Pnpm на Vercel
 
+Реальный деплой (`git push origin main` → `ci.yml`) больше не касается этого
+вообще: `vercel build`/`vercel deploy` запускаются из GitHub Actions, где
+`pnpm/action-setup` уже поставил pnpm 11.22.0 (из `packageManager` в
+`package.json`) — `vercel build` собирает `installCommand`/`buildCommand` тем
+же процессом, а не в отдельном Vercel-контейнере со своей версией pnpm.
+
+Ниже актуально только для ручного деплоя из дашборда Vercel (кнопка
+Redeploy) или git-триггера, если `git.deploymentEnabled` в `vercel.json`
+когда-нибудь снова включат — в обоих случаях сборку выполняет сам Vercel,
+а не GitHub Actions:
+
 Vercel определяет версию pnpm по `lockfileVersion` в `pnpm-lock.yaml`:
 
 - `lockfileVersion: 9.0` → pnpm 9 или 10 (не 11)
 - pnpm v11 официально не поддерживается Vercel
 
-Локально можно использовать pnpm любой версии. Конфиг совместимости в `pnpm-workspace.yaml`:
+Конфиг совместимости в `pnpm-workspace.yaml` (нужен `packages: ['.']` —
+без него pnpm 10 падает с «packages field missing or empty», см. комментарий
+в самом файле):
 
 ```yaml
+packages:
+  - '.'
 allowBuilds: # pnpm v11
   esbuild: true
   sharp: true

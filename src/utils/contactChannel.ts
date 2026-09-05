@@ -78,6 +78,9 @@ const PREFERRED_CHANNEL_BY_COUNTRY = new Map<string, TrackedContactChannel>([
   ['es', 'whatsapp'],
   ['pt', 'whatsapp'],
   ['ch', 'whatsapp'],
+  ['fr', 'whatsapp'],
+  ['it', 'whatsapp'],
+  ['pl', 'whatsapp'],
   ['ru', 'telegram'],
   ['ua', 'telegram'],
   ['by', 'telegram'],
@@ -86,7 +89,10 @@ const PREFERRED_CHANNEL_BY_COUNTRY = new Map<string, TrackedContactChannel>([
 
 export function getPreferredChannel(
   countryCode: string | undefined,
+  locale?: string,
 ): TrackedContactChannel {
+  if (locale === 'ru') return 'telegram';
+
   return (
     (countryCode &&
       PREFERRED_CHANNEL_BY_COUNTRY.get(countryCode.toLowerCase())) ||

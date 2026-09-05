@@ -30,7 +30,7 @@ const current = LOCALE_META[currentLocale];
 
 {
   variant === 'inline' ? (
-    <div class="lang-switcher-inline flex items-center gap-1.5 flex-wrap">
+    <div class="lang-switcher-inline grid grid-cols-3 gap-1.5">
       {SUPPORTED_LOCALES.map((locale) => {
         const meta = LOCALE_META[locale];
         const active = locale === currentLocale;
@@ -38,12 +38,12 @@ const current = LOCALE_META[currentLocale];
           <a
             href={`/${locale}/${rest}`}
             class:list={[
-              'dropdown-option lang-chip gap-1.5 px-3 py-2 rounded-sm text-sm',
+              'dropdown-option lang-chip justify-center gap-1.5 px-3 py-2 rounded-sm text-sm',
               { 'dropdown-option-active': active },
             ]}
           >
             <span class="text-sm leading-none">{FLAGS[locale]}</span>
-            <span>{meta.code}</span>
+            <span>{meta.native}</span>
           </a>
         );
       })}

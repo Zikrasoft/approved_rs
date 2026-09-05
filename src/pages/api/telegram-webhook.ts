@@ -530,7 +530,10 @@ async function handleCallbackQuery(
   const confirmPayMatch = /^confirmpay:(\d+)$/.exec(data);
   const rejectPayMatch = /^rejectpay:(\d+)$/.exec(data);
   const editMatch = /^edit:(\d+):(name|contact|comment)$/.exec(data);
-  const listMatch = /^list:(new|in_progress|won|lost|postponed)$/.exec(data);
+  const listMatch =
+    /^list:(new|in_progress|won|lost|postponed|in_progress\+postponed)$/.exec(
+      data,
+    );
   const openMatch = /^open:(\d+)$/.exec(data);
   const postponeMatch = /^postpone:(\d+)$/.exec(data);
   const remindPickMatch = /^remindpick:(\d+):(\d+)$/.exec(data);
@@ -687,10 +690,8 @@ async function handleCallbackQuery(
   }
   if (listMatch) {
     const leads = await readLeads();
-    const { text, reply_markup } = buildLeadList(
-      leads,
-      listMatch[1] as LeadStatus,
-    );
+    const statuses = listMatch[1].split('+') as LeadStatus[];
+    const { text, reply_markup } = buildLeadList(leads, statuses);
     await sendMessage(chatId, text, { reply_markup });
     await answerCallback(cb.id).catch(() => {});
     return;

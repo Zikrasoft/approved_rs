@@ -17,259 +17,259 @@ translations:
   en:
     title: VW Tiguan
     body: |-
-      # Car Sourcing Volkswagen Tiguan in Serbia: Inspection of a 2018 2.0 TDI 4Motion Tiguan
+      # Car Sourcing for Volkswagen Tiguan in Serbia: Inspection of a 2018 2.0 TDI 4Motion Tiguan
 
-      Another example of comprehensive car sourcing in Serbia is a 2018 Volkswagen Tiguan featuring a 2.0 TDI diesel engine, 4Motion all-wheel drive, and a 7-speed DSG automatic transmission with a wet clutch. The car had a mileage of approximately 180,000 km at the time of inspection.
+      Another exemplary case of comprehensive car sourcing in Serbia is the 2018 Volkswagen Tiguan equipped with a 2.0 TDI diesel engine, 4Motion all-wheel drive, and a 7-speed DSG dual-clutch transmission with wet clutches. The car had a mileage of around 180,000 km at the time of inspection.
 
-      When purchasing a used Volkswagen Tiguan in Serbia, it’s crucial to go beyond a simple visual inspection and a brief test drive. This is especially true for a diesel Tiguan with all-wheel drive and DSG. Therefore, before making a decision, we conducted a thorough assessment of the vehicle, which included checking its history, body condition, electronic systems, technical status, and an underneath inspection.
+      When buying a used Volkswagen Tiguan in Serbia, it’s crucial not to rely solely on a cursory visual inspection and a brief test drive. This is especially true for the diesel Tiguan with all-wheel drive and DSG. Therefore, before making a decision, we conducted a thorough assessment of the vehicle, including its history, exterior, electronic systems, technical condition, and an undercarriage inspection.
 
-      ## Vehicle History Check for Volkswagen Tiguan Before Purchase
+      ## Checking the History of Volkswagen Tiguan Before Purchase
 
-      The first step in our car sourcing process was to verify the car's history. We ordered a CarVertical report and obtained the service and dealer history separately from Volkswagen.
+      The first step in the sourcing process was to verify the vehicle's history. We ordered a CarVertical report and additionally obtained the service and dealership history of Volkswagen.
 
-      This check helps to correlate the stated mileage with existing records, review the car's maintenance history, and gather additional information about its usage prior to the sale.
+      This verification allows us to compare the stated mileage with existing records, review the vehicle’s service history, and gather more details about its usage prior to sale.
 
-      For vehicles with around 180,000 km on the clock, the service history is particularly significant. A vehicle's appealing exterior gives no indication of how well the engine, DSG transmission, and all-wheel drive system have been serviced.
+      For vehicles with a mileage close to 180,000 km, the service history is particularly important. A car may look great on the outside, but that doesn’t necessarily reflect how well the engine, DSG transmission, and all-wheel drive system have been maintained.
 
-      ## Body Inspection with a Thickness Gauge
+      ## Body Inspection with Thickness Gauge
 
-      The next step involved a detailed body inspection. All body panels of the Volkswagen Tiguan were examined using a professional thickness gauge.
+      The next step was a detailed inspection of the body. All exterior panels of the Volkswagen Tiguan were checked using a professional thickness gauge.
 
-      The diagnostics revealed no signs of any repainted areas. The body maintained its original factory paint job. We also checked the gaps between body elements, fastenings, the state of openings, and other indications of possible body repairs.
+      The diagnostics revealed no signs of re-spraying. The car's body was intact with its original paint. We also examined the gaps between body elements, fastenings, the condition of openings, and any other signs that might indicate previous body repairs.
 
-      A thickness gauge is an essential tool when sourcing a used vehicle. Even if the car looks excellent visually, using this device can help identify repainted or repaired parts.
+      A thickness gauge is an essential tool when sourcing a used vehicle. Even if the car looks visually appealing, instrument checks can uncover repainted or repaired parts.
 
-      ## Computer Diagnostics of the Volkswagen Tiguan
+      ## Computer Diagnostics of Volkswagen Tiguan
 
-      A complete computer diagnostics assessment is a required part of our car sourcing service in Serbia.
+      A mandatory part of our car sourcing process in Serbia includes a full computer diagnostic of the vehicle.
 
-      For the Volkswagen Tiguan, we checked the electronic control units, the presence of current and stored errors, as well as the performance of the engine, DSG transmission, all-wheel drive system, and other electronic systems of the vehicle.
+      For the Volkswagen Tiguan, we checked the electronic control units, identified any current or stored errors, and assessed the performance of the engine, DSG transmission, all-wheel drive system, and other electronic systems.
 
-      It's crucial to not only check if error lights appear on the dashboard. Modern cars may not show any warnings to the driver, yet there could be errors or data stored in the electronic control units that require attention.
+      It’s important not only to check if warning lights are illuminated on the dashboard. A modern car might not show any alerts to the driver, yet there could be errors or data stored in the memory of the electronic control units that require attention.
 
-      During the diagnostics, we evaluate the actual performance parameters of the car’s systems. Combined with the service history and test drive results, this provides much more insight into the vehicle's real technical condition.
+      During diagnostics, we also evaluate the actual operational parameters of the vehicle’s systems. Combined with the service history and test drive results, this provides significantly more information on the car's real technical condition.
 
-      ## 2.0 TDI Engine, 4Motion All-Wheel Drive, and 7-Speed DSG
+      ## Engine 2.0 TDI, 4Motion and 7-Speed DSG
 
-      The inspected Volkswagen Tiguan is equipped with a 2.0 TDI diesel engine, 4Motion all-wheel drive system, and a 7-speed DSG with wet clutches. This combination of engine, all-wheel drive, and 7-speed DSG was indeed available for this generation of the Tiguan.
+      The inspected Volkswagen Tiguan is equipped with a 2.0 TDI diesel engine, 4Motion all-wheel drive, and a 7-speed DSG with wet clutches. This combination of engine, all-wheel drive, and 7-speed DSG was indeed offered for this generation of Tiguan.
 
-      When sourcing such a vehicle, significant attention needs to be paid not just to the engine, but also to the performance of the transmission and all-wheel drive. The behavior of the DSG is assessed during acceleration, gear shifts, maneuvering, and under load during a full test drive.
+      When sourcing such a vehicle, it’s important to pay attention not only to the engine performance but also to the operation of the transmission and all-wheel drive system. The behavior of the DSG is checked during acceleration, gear shifts, maneuvering, driving under load, and during a full test drive.
 
-      A mileage of 180,000 km alone isn't a reason to reject a vehicle. The actual condition of the specific car, validated by its service history and comprehensive diagnostics results, is far more important.
+      A mileage of 180,000 km in itself is not a reason to dismiss the car. What matters much more is the actual condition of the specific vehicle, confirmed by its service history and the results of a comprehensive diagnostic.
 
-      ## Underbody Inspection and Floor Check
+      ## Undercarriage Inspection and Condition Check
 
-      Separately, the Volkswagen Tiguan was inspected from beneath. We assessed the condition of the underbody, suspension components, connections, protections, aggregates, and checked for any leaks or mechanical damages.
+      Additionally, the Volkswagen Tiguan was inspected from underneath. We checked the condition of the undercarriage, suspension components, connections, protections, aggregates, and looked for any possible leaks or mechanical damages.
 
-      The inspection revealed no significant concerns regarding the state of the vehicle's lower parts.
+      The inspection revealed no serious concerns regarding the condition of the car's lower part.
 
-      Inspecting the car from underneath is particularly vital when sourcing a vehicle. Some expensive issues might not be easily visible during a standard inspection at the seller's parking lot.
+      An undercarriage inspection is particularly important during the sourcing process. Some costly issues can’t be adequately assessed during a standard visual inspection in the seller's parking lot.
 
       ## Results of the Volkswagen Tiguan Inspection
 
-      Following our comprehensive diagnostics, the vehicle was found to be in good condition. The body showed no signs of repainting, and the history was verified through CarVertical, service, and dealer records; computer diagnostics were conducted, and the functionality of the engine, 7-speed DSG, and 4Motion all-wheel drive was confirmed. The underbody inspection also showed no significant faults.
+      Following the comprehensive diagnostics, the vehicle was found to be in good condition. The body showed no signs of re-spraying, the history was further verified through CarVertical, and service and dealership data were checked. The computer diagnostics confirmed the functionality of the engine, 7-speed DSG, and 4Motion all-wheel drive. The undercarriage inspection revealed no significant issues.
 
-      These steps should be part of a professional car sourcing process for a Volkswagen Tiguan in Serbia: document and history checks, body diagnostics with a thickness gauge, computer diagnostics, technical inspection, underbody examination, and a mandatory test drive.
+      This is what a professional car sourcing process for a Volkswagen Tiguan in Serbia should look like: checking documents and vehicle history, body thickness gauge diagnostics, computer diagnostics, technical inspection, undercarriage condition assessment, and a mandatory test drive.
 
-      ## Car Sourcing Throughout Serbia
+      ## Car Sourcing Services Throughout Serbia
 
-      We specialize in sourcing and inspecting used cars in Serbia. We can travel to review the Volkswagen Tiguan and other vehicles in Belgrade, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Zrenjanin, Čačak, Kraljevo, and other cities in Serbia.
+      We specialize in sourcing and inspecting used vehicles across Serbia. We can arrange inspections for the Volkswagen Tiguan and other cars in Belgrade, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Zrenjanin, Čačak, Kraljevo, and other cities in Serbia.
 
-      If you're planning to buy a Volkswagen Tiguan in Serbia, especially the 2.0 TDI diesel with DSG and 4Motion, it's advisable to have the vehicle inspected before transferring any money to the seller. Comprehensive car sourcing enables you to obtain the most objective information about the car’s body, mileage, service history, electronic systems, and overall technical condition ahead of time.
+      If you are planning to buy a Volkswagen Tiguan in Serbia, particularly the diesel 2.0 TDI with DSG and 4Motion all-wheel drive, it’s wise to have the car examined thoroughly before handing over any money to the seller. Comprehensive car sourcing provides you with the most objective information about the body, mileage, service history, electronic systems, and overall technical condition of the specific vehicle.
 
-      **Car sourcing in Serbia means inspecting the vehicle before purchase, not seeking problems afterward.**
+      **Car sourcing in Serbia is about verifying the vehicle before purchase, not uncovering issues after the fact.**
   sr:
     title: VW Tiguan
     body: |-
-      # Automobilski pregled Volkswagen Tiguan u Srbiji: Provera Tiguan 2.0 TDI 4Motion iz 2018. godine
+      # Odabir automobila Volkswagen Tiguan u Srbiji: inspekcija Tiguan 2.0 TDI 4Motion iz 2018. godine
 
-      Još jedan primer sveobuhvatnog odabira automobila u Srbiji — Volkswagen Tiguan iz 2018. godine sa dizel motorom 2.0 TDI, pogonom na sva četiri točka 4Motion i 7-stepenom automatskom menjačkom kutijom DSG sa mokrim kuplungom. Pređenih kilometara na automobilu u trenutku provere bilo je oko 180 000 km.
+      Jedan od primera sveobuhvatnog odabira automobila u Srbiji je Volkswagen Tiguan iz 2018. godine, koji ima dizel motor 2.0 TDI, pogon na sve točkove 4Motion i 7-stepenu automatizovanu transmisiju DSG sa mokrim spojnicama. Pređašnji pređeni kilometri automobila u trenutku inspekcije iznosili su oko 180.000 km.
 
-      Prilikom kupovine polovnog Volkswagen Tiguan-a u Srbiji, važno je ne ograničavati se samo na uobičajeni pregled automobila i kratak test vožnje. Ovo je posebno važnije kada je u pitanju dizel Tiguan sa pogonom na sva četiri točka i DSG menjačem. Stoga smo pre donošenja odluke sproveli potpunu proveru automobila, uključujući istoriju, limariju, elektronske sisteme, tehničko stanje i pregled ispod vozila.
+      Prilikom kupovine polovanog Volkswagen Tiguan-a u Srbiji, važno je da ne ostanete samo na običnom pregledu automobila i kratkom probnom vožnji. Ovo posebno važi za dizel Tiguan sa pogonom na sve točkove i DSG. Pre donošenja odluke izvršena je sveobuhvatna provera automobila, koja je obuhvatila istoriju, stanje karoserije, elektronske sisteme, tehničko stanje i inspekciju donjeg dela vozila.
 
       ## Provera istorije Volkswagen Tiguan-a pre kupovine
 
-      Prvi korak u izboru automobila bila je provera istorije vozila. Naručili smo izveštaj CarVertical, kao i dodatno dobili servisnu i dilersku istoriju Volkswagen-a.
+      Prvi korak odabira bio je provera istorije automobila. Zatražili smo izveštaj iz CarVertical-a, a takođe smo dobili i servisnu i istoriju od ovlašćenog dilera Volkswagen-a.
 
-      Ova provera omogućava poređenje navedenog pređenog broja kilometara sa dostupnim evidencijama, proučavanje servisa automobila i dobijanje dodatnih informacija o njegovom korišćenju pre prodaje.
+      Ova provera omogućava upoređivanje naznačenog kilometraže sa dostupnim zapisima, proučavanje održavanja automobila i dobijanje dodatnih informacija o njegovoj eksploataciji pre prodaje.
 
-      Za automobile sa pređenih 180 000 km, istorija servisa je posebno važna. Lep izgled vozila ne govori ništa o tome kako su motor, DSG menjač i sistem pogona na sva četiri točka održavani.
+      Za automobile sa pređenih oko 180.000 km, istorija servisa je posebno važna. Lep izgled automobila ne govori mnogo o kvalitetu održavanja motora, DSG menjača i sistema pogona na sve točkove.
 
-      ## Provera limarije debljinomerom
+      ## Provera karoserije mjeračem debljine
 
-      Sledeći korak — detaljna provera limarije. Svi limarijski elementi Volkswagen Tiguan-a su provereni profesionalnim debljinomerom.
+      Sledeći korak je detaljna provera karoserije. Svi karoserijski elementi Volkswagen Tiguan-a su provereni profesionalnim mjeračem debljine.
 
-      Na osnovu dijagnostike nisu pronađeni tragovi sekundarnog farbanja. Limarija je očuvana u fabričkom lakiranju. Dodatno su provereni razmaci između limarijskih elemenata, pričvršćenja, stanje otvora i drugi znakovi mogućih popravki limarije.
+      Prema rezultatima dijagnostike, nisu otkriveni tragovi ponovnog farbanja. Karoserija je zadržala fabrički sloj boje. Dodatno su provereni razmaci između karoserijskih elemenata, pričvršćenja, stanje otvora i drugi znaci mogućih karoserijskih popravki.
 
-      Debljinomer je obavezan alat prilikom odabira automobila sa pređenim kilometražom. Čak i ako vizuelno vozilo izgleda odlično, merenje pomaže u otkrivanju prefarbanih ili popravljanih elemenata.
+      Mjerač debljine je obavezan alat prilikom odabira automobila sa pređenim kilometrima. Čak i kada vozilo izgleda odlično, uređaj pomaže da se otkriju prefarbani ili popravljeni delovi.
 
       ## Računarska dijagnostika Volkswagen Tiguan-a
 
-      Obavezni deo našeg automobilskog pregleda u Srbiji — sveobuhvatna računarska dijagnostika automobila.
+      Obavezni deo našeg odabira automobila u Srbiji je sveobuhvatna računarska dijagnostika vozila.
 
-      Na Volkswagen Tiguan-u provereni su elektronski kontrolni blokovi, prisustvo trenutnih i sačuvanih grešaka, rad motora, DSG menjača, sistema pogona na sva četiri točka i drugih elektronskih sistema vozila.
+      Na Volkswagen Tiguan-u provereni su elektronski kontrolni moduli, prisustvo trenutnih i sačuvanih grešaka, rad motora, DSG menjača, sistema pogona na sve točkove i ostalih elektronskih sistema vozila.
 
-      Važno je ne samo proveriti da li se greške prikazuju na instrument tabli. Savremeno vozilo može ne pokazivati nikakva upozorenja vozaču, dok u memoriji elektronskih blokova mogu postojati greške ili podaci koji zahtevaju dodatnu pažnju.
+      Važno je ne samo proveriti da li se greške prikazuju na instrument tabli. Savremeno vozilo može da ne pokazuje nikakva upozorenja vozaču, dok u memoriji elektronskih modula mogu ostati greške ili podaci koji zahtevaju dodatnu pažnju.
 
-      Takođe, tokom dijagnostike ocenjuju se stvarni parametri rada sistema vozila. U kombinaciji sa servisnom istorijom i test vožnjom to daje mnogo više informacija o stvarnom tehničkom stanju automobila.
+      Takođe, tokom dijagnostike procenjuju se stvarni parametri rada sistema automobila. U kombinaciji sa servisnom istorijom i probnom vožnjom, to donosi znatno više informacija o realnom tehničkom stanju vozila.
 
-      ## Motor 2.0 TDI, pogon na sva četiri točka 4Motion i 7-stepena DSG
+      ## Motor 2.0 TDI, 4Motion pogon i 7-stepeni DSG
 
-      Provereni Volkswagen Tiguan je opremljen dizel motorom 2.0 TDI, sistemom pogona na sva četiri točka 4Motion i 7-stepenom DSG sa mokrim kuplungovima. Ova kombinacija motora, pogona na sva četiri točka i 7-stepene DSG menjačke kutije zaista je bila dostupna za Tiguan ovog generacije.
+      Provereni Volkswagen Tiguan je opremljen dizel motorom 2.0 TDI, 4Motion pogonom i 7-stepenom DSG sa mokrim spojnicama. Ova kombinacija motora, pogona na sve točkove i 7-stepene DSG zaista je bila dostupna za Tiguan ove generacije.
 
-      Prilikom odabira takvog automobila, velika pažnja se mora posvetiti ne samo motoru, već i radu menjača i pogona na sva četiri točka. Proverava se kako se DSG ponaša prilikom pokretanja, prilikom menjanja brzina, manevarisanjem, vožnjom pod opterećenjem i tokom potpune test vožnje.
+      Pri odabiru takvog automobila, veliku pažnju treba posvetiti ne samo motoru, već i funkcionisanju menjača i pogona. Proverava se ponašanje DSG prilikom kretanja, prebacivanja brzina, manevrisanja, vožnje pod opterećenjem i tokom pune probne vožnje.
 
-      Pređenih 180 000 km sam po sebi nije razlog za odbijanje automobila. Mnogo je važnije stvarno stanje konkretnog vozila, potvrđeno servisnom istorijom i rezultatima sveobuhvatne dijagnostike.
+      Pređašnji pređeni kilometri od 180.000 km sami po sebi nisu razlog za odustajanje od automobila. Daleko važnije je stvarno stanje konkretnog vozila, potvrđeno servisom i rezultatima sveobuhvatne dijagnostike.
 
-      ## Pregled automobila sa dna i provera karoserije
+      ## Provera automobila sa donje strane i inspekcija dna
 
-      Posebno je Volkswagen Tiguan pregledan s dna. Provereno je stanje donjeg dela vozila, delova šasije, spojeva, zaštita, agregata i prisustvo mogućih curenja ili mehaničkih oštećenja.
+      Posebno je Volkswagen Tiguan pregledan sa donje strane. Provereno je stanje dna, elemenata ovSuspension, spojeva, zaštita, sklopova i postojanje eventualnih curenja ili mehaničkih oštećenja.
 
-      Na osnovu pregleda nisu otkrivene ozbiljne primedbe na stanje donjeg dela automobila.
+      Na osnovu inspekcije, nisu zabeležene ozbiljne primedbe na stanje donjeg dela vozila.
 
-      Pregled vozila sa dna je posebno važan tokom odabira automobila. Neke skupe probleme je nemoguće dobro uočiti prilikom uobičajenog pregleda automobila na parkingu prodavca.
+      Pregled automobila sa donje strane je posebno važan prilikom odabira automobila. Neke skupocenije probleme nije moguće normalno prozreti tokom običnog pregleda vozila na parkingu prodavca.
 
       ## Rezultat provere Volkswagen Tiguan-a
 
-      Na kraju sveobuhvatne dijagnostike, automobil je pokazao dobro stanje. Limarija bez sekundarnih farbanja, istorija je dodatno proverena putem CarVertical-a, servisnim i dilerskim podacima, izvođena je računarska dijagnostika, provereni su rad motora, 7-stepena DSG i pogon na sva četiri točka 4Motion. Pregled donjeg dela takođe nije pokazao suštinske primedbe.
+      Na osnovu sveobuhvatne dijagnostike, automobil je pokazao dobro stanje. Karoserija bez ponovnih farbanja, istorija je dodatno proverena preko CarVertical-a, servisnih i podataka dilera, obavljena je računarska dijagnostika, provereno je funkcionisanje motora, 7-stepene DSG i 4Motion pogona. Inspekcija dna takođe nije otkrila značajne primedbe.
 
-      Ovo su koraci koje bi profesionalni automobilski pregled Volkswagen Tiguan-a u Srbiji trebao da obuhvati: provera dokumenata i istorije, dijagnostika limarije debljinomerom, računska dijagnostika, tehnički pregled, provera automobila sa dna i obavezna test vožnja.
+      Baš ovakvi koraci čine profesionalni odabir Volkswagen Tiguan-a u Srbiji: provera dokumenata i istorije, dijagnostika karoserije mjeračem debljine, računarska dijagnostika, tehnički pregled, inspekcija automobila sa donje strane i obavezna probna vožnja.
 
-      ## Automobilski izbor u celoj Srbiji
+      ## Odabir automobila širom Srbije
 
-      Bavimo se odabirom i proverom automobila sa pređenim kilometražom u Srbiji. Moguće je obaviti pregled Volkswagen Tiguan-a i drugih automobila u Beogradu, Novom Sadu, Nišu, Kragujevcu, Subotici, Pančevu, Zrenjaninu, Čačku, Kraljevu i drugim gradovima Srbije.
+      Bavimo se odabirom i proverom polovnih automobila u Srbiji. Moguće je izvršiti pregled Volkswagen Tiguan-a i drugih automobila u Beogradu, Novom Sadu, Nišu, Kragujevcu, Subotici, Pančevu, Zrenjaninu, Čačku, Kraljevu i drugim gradovima u Srbiji.
 
-      Ako planirate kupovinu Volkswagen Tiguan-a u Srbiji, posebno dizel 2.0 TDI sa DSG i pogonom na sva četiri točka 4Motion, najbolje je proveriti automobil pre nego što predate novac prodavcu. Sveobuhvatan automobilski pregled omogucava da unapred dobijete maksimalno objektivne informacije o limariji, pređenim kilometrima, istoriji servisa, elektronskim sistemima i opštem tehničkom stanju konkretnog automobila.
+      Ako planirate da kupite Volkswagen Tiguan u Srbiji, posebno dizel 2.0 TDI sa DSG i pogonom na sve točkove 4Motion, najbolje je da proverite auto pre nego što predate novac prodavcu. Sveobuhvatan odabir omogućava unapred dobijanje maksimalno objektivnih informacija o karoseriji, pređenim kilometrima, istoriji servisa, elektronskim sistemima i opštem tehničkom stanju konkretnog automobila.
 
-      **Automobilski odabir u Srbiji — to je provera automobila pre kupovine, a ne pronalaženje problema nakon njenog završetka.**
+      **Odabir automobila u Srbiji je provera pre kupovine, a ne traženje problema nakon nje.**
   es:
     title: VW Tiguan
     body: |-
-      # Selección de automóvil Volkswagen Tiguan en Serbia: revisión del Tiguan 2.0 TDI 4Motion 2018
+      # Selección de vehículos Volkswagen Tiguan en Serbia: revisión del Tiguan 2.0 TDI 4Motion del 2018
 
-      Un ejemplo más de la selección integral de vehículos en Serbia es el Volkswagen Tiguan del año 2018, con motor diésel 2.0 TDI, tracción integral 4Motion y caja de cambios DSG de 7 velocidades con embragues húmedos. El kilometraje del automóvil al momento de la revisión era de aproximadamente 180,000 km.
+      Un nuevo ejemplo del extenso proceso de selección de automóviles en Serbia es el Volkswagen Tiguan del 2018, equipado con un motor diésel 2.0 TDI, tracción integral 4Motion y una caja de cambios automatizada DSG de 7 velocidades con embrague húmedo. En el momento de la revisión, el vehículo tenía un kilometraje de aproximadamente 180,000 km.
 
-      Al comprar un Volkswagen Tiguan de segunda mano en Serbia, es crucial no limitarse a una simple inspección visual y un breve paseo de prueba. Esto es especialmente cierto cuando se trata de un Tiguan diésel con tracción integral y DSG. Por lo tanto, antes de tomar una decisión, realizamos una inspección exhaustiva del vehículo, que incluyó su historia, la carrocería, los sistemas electrónicos, el estado técnico y la inspección inferior.
+      Al comprar un Volkswagen Tiguan de segunda mano en Serbia, es fundamental no limitarse a una inspección superficial y un breve test drive. Esto es especialmente cierto para un Tiguan diésel con tracción integral y DSG. Por ello, antes de tomar una decisión, llevamos a cabo una revisión exhaustiva del vehículo, incluyendo su historial, carrocería, sistemas electrónicos, estado técnico y una inspección por debajo del coche.
 
-      ## Verificación de la historia del Volkswagen Tiguan antes de la compra
+      ## Revisión del historial del Volkswagen Tiguan antes de la compra
 
-      La primera etapa de la selección del automóvil fue la revisión de la historia del vehículo. Solicitamos un informe de CarVertical y además recibimos por separado el historial de servicios y de concesionarios de Volkswagen.
+      El primer paso en el proceso de selección fue verificar el historial del vehículo. Solicitar un informe de CarVertical, así como obtener por separado el historial de servicio y del concesionario de Volkswagen fue crucial.
 
-      Este tipo de revisión permite comparar el kilometraje declarado con los registros existentes, examinar el mantenimiento del vehículo y obtener información adicional sobre su uso antes de la venta.
+      Dicha verificación permite comparar el kilometraje declarado con los registros disponibles, analizar el mantenimiento del vehículo y obtener información adicional sobre su uso previo a la venta.
 
-      Para vehículos con un kilometraje alrededor de 180,000 km, el historial de mantenimiento es especialmente importante. Un buen aspecto exterior no garantiza que el motor, la caja DSG y el sistema de tracción integral hayan sido mantenidos adecuadamente.
+      Para los automóviles con un kilometraje cercano a los 180,000 km, la historia de mantenimiento es particularmente relevante. Un aspecto físico atractivo no indica necesariamente que el motor, la caja DSG o el sistema de tracción integral hayan sido bien cuidados.
 
-      ## Inspección de la carrocería con un medidor de espesor
+      ## Inspección de la carrocería con un medidor de grosor
 
-      La siguiente etapa fue la revisión detallada de la carrocería. Todos los elementos de la carrocería del Volkswagen Tiguan fueron revisados con un medidor de espesor profesional.
+      El siguiente paso fue una revisión detallada de la carrocería. Todos los elementos de la carrocería del Volkswagen Tiguan fueron analizados con un medidor de grosor profesional.
 
-      Los resultados de la diagnosis no mostraron signos de repintado. La carrocería se conservó con la pintura de fábrica. Adicionalmente, revisamos los espacios entre los elementos de la carrocería, los sujetadores, el estado de los umbrales y otros signos de posibles reparaciones de carrocería.
+      Los resultados de la prueba no mostraron señales de repintado. La carrocería se mantuvo en su pintura original de fábrica. Además, se verificaron las holguras entre los elementos de la carrocería, la fijación, el estado de los huecos y otros signos de posibles reparaciones.
 
-      El medidor de espesor es una herramienta esencial al seleccionar un automóvil usado. Incluso si el coche se ve bien visualmente, la verificación con el dispositivo ayuda a descubrir elementos repintados o que han sido reparados.
+      El medidor de grosor es una herramienta imprescindible al seleccionar un automovil usado. Incluso si visualmente el auto parece en perfecto estado, el uso de este instrumento ayuda a detectar elementos que han sido repintados o reparados.
 
       ## Diagnóstico informático del Volkswagen Tiguan
 
-      Una parte obligatoria de nuestra selección de automóviles en Serbia es el diagnóstico informático completo del vehículo.
+      Una parte obligatoria de nuestro proceso de selección en Serbia es realizar un diagnóstico informático completo del vehículo.
 
-      En el Volkswagen Tiguan, revisamos las unidades de control electrónico, la presencia de errores actuales y almacenados, el funcionamiento del motor, de la caja DSG, del sistema de tracción integral y de otros sistemas electrónicos del automóvil.
+      Se revisaron los módulos electrónicos del Volkswagen Tiguan, identificando errores actuales y almacenados, y evaluando el funcionamiento del motor, la caja de cambios DSG, el sistema de tracción integral y otros sistemas electrónicos del coche.
 
-      Es importante no solo observar si se encenderán errores en el tablero. Un automóvil moderno puede no mostrar ninguna advertencia al conductor, mientras que en la memoria de las unidades de control podrían existir errores o datos que requieran atención adicional.
+      Es importante no solo observar si hay alertas en el tablero de instrumentos. Un automóvil moderno puede no presentar ningún aviso al conductor, mientras que en la memoria de los módulos electrónicos pueden existir errores o datos que necesiten atención adicional.
 
-      También durante el diagnóstico se evalúan los parámetros reales de funcionamiento de los sistemas del automóvil. Junto con el historial de servicios y el chequeo en carretera, esto proporciona mucha más información sobre el verdadero estado técnico del vehículo.
+      Durante el diagnóstico, también se valoran los parámetros reales de funcionamiento de los sistemas del vehículo. Combinado con el historial de servicio y el test drive, esto ofrece una visión mucho más clara del estado técnico real del automóvil.
 
       ## Motor 2.0 TDI, tracción integral 4Motion y DSG de 7 velocidades
 
-      El Volkswagen Tiguan revisado está equipado con un motor diésel 2.0 TDI, sistema de tracción integral 4Motion y una DSG de 7 velocidades con embragues húmedos. Esta combinación de motor, tracción integral y DSG efectivamente estaba disponible para el Tiguan de esta generación.
+      El Volkswagen Tiguan que revisamos está equipado con un motor diésel 2.0 TDI, un sistema de tracción integral 4Motion y una caja de cambios DSG de 7 velocidades con embragues húmedos. Esta combinación de motor, tracción integral y DSG se ofreció realmente en el Tiguan de esta generación.
 
-      Al seleccionar un automóvil como este, es necesario prestar atención no solo al motor, sino también al funcionamiento de la caja de cambios y de la tracción integral. Se revisa el comportamiento de la DSG al arrancar, en los cambios hacia arriba y hacia abajo, en maniobras, al conducir bajo carga y durante una prueba de conducción completa.
+      Al seleccionar un vehículo de este tipo, se debe prestar especial atención no solo al motor, sino también al funcionamiento de la caja de cambios y del sistema de tracción integral. Se evalúa el comportamiento de la DSG al iniciar el movimiento, en los cambios de marcha, en maniobras, bajo carga y durante un test drive completo.
 
-      Un kilometraje de 180,000 km no es en sí mismo un motivo para rechazar el vehículo. Lo que realmente importa es el estado real de este automóvil en particular, respaldado por el mantenimiento y los resultados de un diagnóstico integral.
+      El kilometraje de 180,000 km por sí solo no debe ser motivo para rechazar el vehículo. Lo que realmente importa es el estado concreto del automóvil, respaldado por el mantenimiento y los resultados del diagnóstico exhaustivo.
 
-      ## Inspección del automóvil por abajo y verificación del chasis
+      ## Inspección del vehículo por debajo y revisión del chasis
 
-      Por separado, se inspeccionó el Volkswagen Tiguan desde abajo. Verificamos el estado del chasis, los elementos de la suspensión, las uniones, las protecciones, los componentes y la presencia de posibles fugas o daños mecánicos.
+      El Volkswagen Tiguan fue inspeccionado desde abajo de manera específica. Se evaluó el estado del chasis, los elementos de la suspensión, las conexiones, las protecciones, los agregados y la presencia de posibles fugas o daños mecánicos.
 
-      Los resultados de la inspección no revelaron preocupaciones serias sobre el estado de la parte inferior del automóvil.
+      Los resultados de la inspección no revelaron ninguna observación seria sobre la condición de la parte inferior del automóvil.
 
-      La revisión del vehículo desde abajo es especialmente importante en la selección de automóviles. Algunos problemas costosos son difíciles de detectar durante una inspección visual normal del automóvil en el estacionamiento del vendedor.
+      La revisión del vehículo desde abajo es especialmente crucial durante el proceso de selección. Algunos problemas costosos son difíciles de visualizar en una revisión convencional en el aparcamiento del vendedor.
 
       ## Resultado de la revisión del Volkswagen Tiguan
 
-      Al final del diagnóstico integral, el automóvil mostró un buen estado. La carrocería sin repintados, el historial fue verificado adicionalmente a través de CarVertical, así como con datos de servicios y concesionarios, realizamos un diagnóstico informático, verificamos el funcionamiento del motor, la DSG de 7 velocidades y el sistema de tracción integral 4Motion. La revisión del chasis también no reveló objeciones significativas.
+      Tras la evaluación exhaustiva, el automóvil mostró un buen estado general. La carrocería no presentaba repintados, el historial fue verificado adicionalmente a través de CarVertical, datos de servicio y concesionario, se llevó a cabo un diagnóstico informático, y se revisó el funcionamiento del motor, de la DSG de 7 velocidades y de la tracción integral 4Motion. La revisión del chasis también estuvo libre de quejas significativas.
 
-      Así es como debe llevarse a cabo una selección profesional de Volkswagen Tiguan en Serbia: verificación de documentos e historial, diagnóstico de la carrocería con un medidor de espesor, diagnóstico informático, inspección técnica, revisión del automóvil por debajo y prueba de manejo obligatoria.
+      Este es el conjunto de etapas que debe componer un proceso profesional de selección del Volkswagen Tiguan en Serbia: verificación de documentos y del historial, diagnóstico de carrocería con un medidor de grosor, diagnóstico informático, revisión técnica, inspección del vehículo por debajo y un test drive necesario.
 
-      ## Selección de automóviles en toda Serbia
+      ## Selección de vehículos en toda Serbia
 
-      Nos especializamos en la selección y revisión de automóviles de segunda mano en Serbia. Es posible realizar una visita para revisar el Volkswagen Tiguan y otros vehículos en Belgrado, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Zrenjanin, Čačak, Kraljevo y otras ciudades de Serbia.
+      Nos dedicamos a la selección y revisión de automóviles usados en Serbia. Es posible programar una revisión del Volkswagen Tiguan y de otros vehículos en Belgrado, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Zrenjanin, Čačak, Kraljevo y otras ciudades de Serbia.
 
-      Si planea comprar un Volkswagen Tiguan en Serbia, especialmente el diésel 2.0 TDI con DSG y tracción integral 4Motion, es mejor verificar el automóvil antes de entregarle el dinero al vendedor. Una selección integral de automóviles permite obtener de antemano la información más objetiva sobre la carrocería, el kilometraje, el historial de mantenimiento, los sistemas electrónicos y el estado técnico general de este vehículo específico.
+      Si planeas comprar un Volkswagen Tiguan en Serbia, especialmente un diésel 2.0 TDI con DSG y tracción integral 4Motion, es recomendable verificar el automóvil antes de entregar dinero al vendedor. Un proceso de selección integral permite obtener de antemano información lo más objetiva posible sobre la carrocería, el kilometraje, el historial de servicio, los sistemas electrónicos y el estado técnico general del vehículo específico.
 
       **La selección de automóviles en Serbia es la verificación del vehículo antes de la compra, no la búsqueda de problemas después de ella.**
   de:
     title: VW Tiguan
     body: |-
-      # Autoauswahl Volkswagen Tiguan in Serbien: Überprüfung des Tiguan 2.0 TDI 4Motion Baujahr 2018
+      # Fahrzeugauswahl Volkswagen Tiguan in Serbien: Inspektion des Tiguan 2.0 TDI 4Motion Baujahr 2018
 
-      Ein weiteres Beispiel für eine umfassende Autoauswahl in Serbien ist der Volkswagen Tiguan aus dem Jahr 2018, ausgestattet mit einem 2.0 TDI Dieselmotor, dem 4Motion Allradantrieb und dem 7-Gang DSG-Getriebe mit Nasskupplung. Der Kilometerstand des Fahrzeugs betrug zum Zeitpunkt der Überprüfung etwa 180.000 km.
+      Ein weiteres Beispiel für die umfassende Fahrzeugauswahl in Serbien – der Volkswagen Tiguan aus dem Jahr 2018 mit einem 2.0 TDI Dieselmotor, dem 4Motion-Allradantrieb und einem 7-Gang DSG-Doppelkupplungsgetriebe mit nassem Kupplungssystem. Der Kilometerstand des Fahrzeugs betrug zum Zeitpunkt der Inspektion etwa 180.000 km.
 
-      Beim Kauf eines gebrauchten Volkswagen Tiguan in Serbien ist es wichtig, sich nicht nur auf die gewöhnliche Fahrzeugbesichtigung und eine kurze Probefahrt zu beschränken. Dies gilt insbesondere für den Dieseltiguan mit Allradantrieb und DSG. Daher haben wir vor der endgültigen Entscheidung eine vollständige Überprüfung des Fahrzeugs durchgeführt, einschließlich der Historie, des Karosseriezustands, der elektronischen Systeme, des technischen Zustands und einer Unterbodeninspektion.
+      Beim Kauf eines gebrauchten Volkswagen Tiguan in Serbien ist es wichtig, sich nicht nur auf eine oberflächliche Inspektion und eine kurze Probefahrt zu beschränken. Dies gilt insbesondere für einen Diesel-Tiguan mit Allradantrieb und DSG. Daher haben wir vor einer Entscheidung eine vollständige Prüfung des Fahrzeugs durchgeführt, die die Historie, die Karosserie, die Elektroniksysteme, den technischen Zustand und eine Unterbodeninspektion beinhaltete.
 
-      ## Überprüfung der Fahrzeughistorie des Volkswagen Tiguan vor dem Kauf
+      ## Überprüfung der Fahrzeughistorie vor dem Kauf des Volkswagen Tiguan
 
-      Der erste Schritt bei der Autoauswahl war die Überprüfung der Fahrzeughistorie. Wir haben einen CarVertical-Bericht angefordert und zusätzlich die Service- und Händlerhistorie von Volkswagen erhalten.
+      Der erste Schritt bei der Fahrzeugauswahl war die Überprüfung der Fahrzeughistorie. Wir haben einen Bericht von CarVertical angefordert und zusätzlich die Service- und Händlerhistorie von Volkswagen erhalten.
 
-      Eine solche Überprüfung ermöglicht es, den angegebenen Kilometerstand mit den vorhandenen Aufzeichnungen zu vergleichen, den Wartungsverlauf des Fahrzeugs zu studieren und zusätzliche Informationen über seine Nutzung vor dem Verkauf zu erhalten.
+      Eine solche Überprüfung ermöglicht es, den angegebenen Kilometerstand mit den vorhandenen Aufzeichnungen abzugleichen, den Wartungsverlauf des Fahrzeugs zu analysieren und zusätzliche Informationen über die Nutzung vor dem Verkauf zu erhalten.
 
-      Für Fahrzeuge mit einem Kilometerstand von rund 180.000 km ist die Wartungshistorie besonders wichtig. Ein ansehnliches Äußeres sagt noch nichts darüber aus, wie gut Motor, DSG-Getriebe und Allradantrieb gewartet wurden.
+      Für Fahrzeuge mit einem Kilometerstand von etwa 180.000 km ist die Wartungshistorie besonders wichtig. Ein ansprechendes Äußeres sagt nichts darüber aus, wie gut der Motor, das DSG-Getriebe und das Allradantriebssystem gewartet wurden.
 
-      ## Karosserietest mit einem Lackdickenmessgerät
+      ## Karosserieprüfung mit einem Messgerät
 
-      Der nächste Schritt war die detaillierte Überprüfung der Karosserie. Alle Karosserieteile des Volkswagen Tiguan wurden mit einem professionellen Lackdickenmessgerät überprüft.
+      Der nächste Schritt war die detaillierte Überprüfung der Karosserie. Alle Karosserieteile des Volkswagen Tiguan wurden mit einem professionellen Messgerät untersucht.
 
-      Die Diagnoseresultate zeigten keine Anzeichen von Nachlackierungen. Die Karosserie befand sich im Original-Lackzustand. Zusätzlich überprüften wir die Spaltmaße zwischen den Karosserieteilen, die Befestigungen, den Zustand der Öffnungen und andere Anzeichen möglicher Karosseriereparaturen.
+      Die Diagnoseresultate zeigten keine Spuren einer Nachlackierung. Die Karosserie war im Werkslack erhalten. Zusätzlich haben wir die Spalten zwischen den Karosserieteilen, die Befestigungen, den Zustand der Türöffnungen und andere Anzeichen möglicher Karosseriereparaturen überprüft.
 
-      Ein Lackdickenmessgerät ist ein unverzichtbares Werkzeug bei der Auswahl eines Gebrauchtwagens. Selbst wenn das Fahrzeug äußerlich großartig aussieht, kann die Messung helfen, neu lackierte oder reparierte Teile zu entdecken.
+      Ein Messgerät ist ein unverzichtbares Werkzeug bei der Auswahl eines Fahrzeugs mit hoher Laufleistung. Auch wenn das Auto äußerlich gut aussieht, hilft eine Messprüfung, nachlackierte oder reparierte Teile zu entdecken.
 
       ## Computerdiagnose des Volkswagen Tiguan
 
-      Ein wesentlicher Bestandteil unserer Autoauswahl in Serbien ist die umfassende Computerdiagnose des Fahrzeugs.
+      Ein fester Bestandteil unserer Fahrzeugauswahl in Serbien ist eine umfassende Computerdiagnose des Fahrzeugs.
 
-      Beim Volkswagen Tiguan wurden die elektronischen Steuergeräte, vorhandene und gespeicherte Fehlercodes, die Motorleistung, das DSG-Getriebe, der Allradantrieb und andere elektronische Systeme des Fahrzeugs überprüft.
+      Am Volkswagen Tiguan wurden die Steuergeräte, vorhandene Fehler, die Funktionsweise des Motors, des DSG-Getriebes, des Allradantriebssystems und anderer elektronischer Systeme überprüft.
 
-      Es reicht nicht aus, nur zu sehen, ob Fehlerleuchten auf dem Armaturenbrett erscheinen. Ein modernes Fahrzeug kann dem Fahrer keine Warnungen anzeigen, während möglicherweise Fehler oder Daten in den Steuergeräten gespeichert sind, die zusätzliche Aufmerksamkeit erfordern.
+      Es ist wichtig, nicht nur darauf zu achten, ob Warnmeldungen auf dem Armaturenbrett angezeigt werden. Ein modernes Auto kann dem Fahrer signalisieren, dass alles in Ordnung ist, während in den Steuergeräten Fehler oder Daten gespeichert sein können, die zusätzliche Aufmerksamkeit erfordern.
 
-      Zudem werden während der Diagnose die tatsächlichen Parameter des Betriebs der Systeme des Fahrzeugs bewertet. In Kombination mit der Servicehistorie und der Probefahrt bietet dies deutlich mehr Informationen über den tatsächlichen technischen Zustand des Fahrzeugs.
+      Während der Diagnose werden auch die tatsächlichen Betriebsparameter der Systeme des Fahrzeugs bewertet. In Kombination mit der Servicehistorie und der Probefahrt ergibt dies deutlich mehr Informationen über den tatsächlichen technischen Zustand des Fahrzeugs.
 
-      ## 2.0 TDI-Motor, 4Motion Allradantrieb und 7-Gang DSG
+      ## Motor 2.0 TDI, Allradantrieb 4Motion und 7-Gang DSG
 
-      Der überprüfte Volkswagen Tiguan ist mit einem 2.0 TDI Dieselmotor, dem 4Motion Allradantrieb und dem 7-Gang DSG mit Nasskupplungen ausgestattet. Diese Kombination aus Motor, Allradantrieb und 7-Gang DSG wurde tatsächlich für den Tiguan dieser Generation angeboten.
+      Der geprüfte Volkswagen Tiguan ist mit einem 2.0 TDI Dieselmotor, dem 4Motion-Allradantrieb und einem 7-Gang-DSG-Getriebe mit nassen Kupplungen ausgestattet. Diese Kombination aus Motor, Allradantrieb und 7-Gang-DSG wurde tatsächlich für diesen Tiguan angeboten.
 
-      Bei der Auswahl eines solchen Fahrzeugs sollte besonderes Augenmerk nicht nur auf den Motor, sondern auch auf die Funktion des Getriebes und des Allradantriebs gelegt werden. Das Verhalten des DSG beim Anfahren, den Gangwechseln nach oben und unten, beim Manövrieren, während der Belastung und bei einer vollständigen Probefahrt wird überprüft.
+      Bei der Auswahl eines solchen Fahrzeugs ist es wichtig, nicht nur auf den Motor, sondern auch auf die Funktionsweise des Getriebes und des Allradantriebs zu achten. Es werden das Ansprechverhalten des DSG beim Anfahren, der Wechsel zwischen den Gängen, sowie das Manövrieren, Fahren unter Last und während einer vollständigen Probefahrt überprüft.
 
-      Ein Kilometerstand von 180.000 km ist an sich kein Grund, von einem Fahrzeug abzusehen. Viel wichtiger ist der tatsächliche Zustand des spezifischen Fahrzeugs, das durch die Wartung und die Ergebnisse der umfassenden Diagnose bestätigt wird.
+      Ein Kilometerstand von 180.000 km allein ist kein Grund, von dem Fahrzeug Abstand zu nehmen. Weitaus wichtiger ist der tatsächliche Zustand des spezifischen Fahrzeugs, das durch Wartung und die Ergebnisse der umfassenden Diagnose bestätigt wird.
 
-      ## Unterbodeninspektion und Überprüfung des Fahrgestells
+      ## Inspektion des Fahrzeugs von unten und Überprüfung des Unterbodens
 
-      Zusätzlich wurde der Volkswagen Tiguan von unten inspiziert. Der Zustand des Unterbodens, der Aufhängungsteile, Verbindungen, Schutzvorrichtungen, Aggregaten und mögliche Leckagen oder mechanische Schäden wurden überprüft.
+      Zusätzlich wurde der Volkswagen Tiguan von unten inspiziert. Der Zustand des Unterbodens, der Aufhängungsteile, der Verbindungen, der Schutzvorrichtungen, der Aggregate sowie das Vorhandensein von möglichen Leckagen oder mechanischen Beschädigungen wurden überprüft.
 
-      Die Ergebnisse der Sichtprüfung ergaben keine wesentlichen Beanstandungen bezüglich des Zustands der Unterseite des Fahrzeugs.
+      Die Inspektion ergab keine wesentlichen Mängel am Zustand des Unterbodens des Fahrzeugs.
 
-      Die Inspektion des Fahrzeugs von unten ist besonders wichtig bei der Autoauswahl. Einige kostspielige Probleme sind bei einer normalen Besichtigung des Fahrzeugs auf dem Parkplatz des Verkäufers nicht zu erkennen.
+      Die Inspektion des Fahrzeugs von unten ist besonders wichtig bei der Fahrzeugauswahl. Einige kostenintensive Probleme sind bei einer normalen Besichtigung des Fahrzeugs auf dem Parkplatz des Verkäufers nicht gut zu erkennen.
 
       ## Ergebnis der Überprüfung des Volkswagen Tiguan
 
-      Nach der umfassenden Diagnose zeigte das Fahrzeug einen guten Zustand. Die Karosserie wies keine Nachlackierungen auf, die Historie wurde zusätzlich über CarVertical sowie durch Service- und Händlerdaten überprüft, die Computerdiagnose erfolgte, die Funktion des Motors, des 7-Gang DSG und des 4Motion-Allradantriebs wurde getestet. Auch die Unterbodeninspektion ergab keine wesentlichen Beanstandungen.
+      Nach der umfassenden Diagnose präsentierte sich das Fahrzeug in gutem Zustand. Die Karosserie hatte keine nachlackierten Stellen, die Historie wurde zusätzlich mit CarVertical, den Service- und Händlerdaten überprüft, die Computerdiagnose durchgeführt und die Funktion von Motor, 7-Gang-DSG und 4Motion-Allradantrieb überprüft. Auch die Unterbodeninspektion ergab keinen wesentlichen Beanstandungen.
 
-      Gerade solche Schritte sollten Teil einer professionellen Autoauswahl für den Volkswagen Tiguan in Serbien sein: Überprüfung von Dokumenten und Historie, Karosseriediagnose mit einem Lackdickenmessgerät, Computerdiagnose, technische Inspektion, Überprüfung des Fahrzeugs von unten und obligatorische Probefahrt.
+      Diese Schritte sollten Teil einer professionellen Fahrzeugauswahl für den Volkswagen Tiguan in Serbien sein: Überprüfung der Dokumente und Historie, Karosseriediagnose mit einem Messgerät, Computerdiagnose, technische Inspektion, Überprüfung des Fahrzeugs von unten und die obligatorische Probefahrt.
 
-      ## Autoauswahl für Fahrzeuge in ganz Serbien
+      ## Fahrzeugauswahl für Autos in ganz Serbien
 
-      Wir sind auf die Auswahl und Prüfung von Gebrauchtwagen in Serbien spezialisiert. Eine Besichtigung des Volkswagen Tiguan und anderer Fahrzeuge in Belgrad, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Zrenjanin, Čačak, Kraljevo und anderen Städten in Serbien ist möglich.
+      Wir sind darauf spezialisiert, Fahrzeuge mit Kilometerständen in Serbien auszuwählen und zu prüfen. Eine Besichtigung des Volkswagen Tiguan und anderer Fahrzeuge in Belgrad, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Zrenjanin, Čačak, Kraljevo und anderen Städten in Serbien ist möglich.
 
-      Wenn Sie planen, einen Volkswagen Tiguan in Serbien zu kaufen, insbesondere einen 2.0 TDI Diesel mit DSG und 4Motion Allradantrieb, ist es ratsam, das Fahrzeug vor der Zahlung an den Verkäufer zu überprüfen. Eine umfassende Autoauswahl ermöglicht es Ihnen, im Voraus die objektivsten Informationen über die Karosserie, den Kilometerstand, die Wartungshistorie, die elektronischen Systeme und den allgemeinen technischen Zustand des spezifischen Fahrzeugs zu erhalten.
+      Wenn Sie planen, einen Volkswagen Tiguan in Serbien zu kaufen, insbesondere den 2.0 TDI Diesel mit DSG und 4Motion-Allradantrieb, ist es besser, das Fahrzeug vor der Zahlung an den Verkäufer zu überprüfen. Eine umfassende Fahrzeugauswahl ermöglicht es Ihnen, im Voraus die möglichst objektiven Informationen über Karosserie, Kilometerstand, Wartungshistorie, elektronische Systeme und den allgemeinen technischen Zustand des spezifischen Fahrzeugs zu erhalten.
 
-      **Die Autoauswahl in Serbien bedeutet, das Fahrzeug vor dem Kauf zu überprüfen, nicht Probleme danach zu suchen.**
+      **Die Fahrzeugauswahl in Serbien ist eine Inspektion des Fahrzeugs vor dem Kauf, nicht die Suche nach Problemen danach.**
 translatedFrom: 500181d2168c284b
 ---
 # Автоподбор Volkswagen Tiguan в Сербии: проверка Tiguan 2.0 TDI 4Motion 2018 года

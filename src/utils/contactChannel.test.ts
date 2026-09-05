@@ -34,6 +34,9 @@ describe('getPreferredChannel', () => {
     expect(getPreferredChannel('rs')).toBe('whatsapp');
     expect(getPreferredChannel('de')).toBe('whatsapp');
     expect(getPreferredChannel('es')).toBe('whatsapp');
+    expect(getPreferredChannel('fr')).toBe('whatsapp');
+    expect(getPreferredChannel('it')).toBe('whatsapp');
+    expect(getPreferredChannel('pl')).toBe('whatsapp');
   });
 
   it('prefers Telegram for Russia/CIS', () => {
@@ -47,12 +50,22 @@ describe('getPreferredChannel', () => {
   });
 
   it('defaults to Telegram for an unlisted or missing country', () => {
-    expect(getPreferredChannel('fr')).toBe('telegram');
+    expect(getPreferredChannel('gr')).toBe('telegram');
     expect(getPreferredChannel(undefined)).toBe('telegram');
   });
 
   it('is false for Object.prototype member names used as a country code — no accidental lookup hit', () => {
     expect(getPreferredChannel('constructor')).toBe('telegram');
     expect(getPreferredChannel('toString')).toBe('telegram');
+  });
+
+  it('forces Telegram for the Russian locale regardless of country', () => {
+    expect(getPreferredChannel('rs', 'ru')).toBe('telegram');
+    expect(getPreferredChannel('de', 'ru')).toBe('telegram');
+  });
+
+  it('falls back to the country lookup for any other locale', () => {
+    expect(getPreferredChannel('rs', 'en')).toBe('whatsapp');
+    expect(getPreferredChannel('ru', 'sr')).toBe('telegram');
   });
 });

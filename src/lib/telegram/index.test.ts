@@ -556,10 +556,9 @@ describe('buildMenu', () => {
       .map((b) => b.callback_data);
     expect(data).toEqual([
       'list:new',
-      'list:in_progress',
+      'list:in_progress+postponed',
       'list:won',
       'list:lost',
-      'list:postponed',
       'menu:stats',
       'menu:debt',
     ]);
@@ -576,10 +575,9 @@ describe('buildMenu', () => {
       .map((b) => b.callback_data);
     expect(data).toEqual([
       'list:new',
-      'list:in_progress',
+      'list:in_progress+postponed',
       'list:won',
       'list:lost',
-      'list:postponed',
       'menu:stats',
       'menu:debt',
       'menu:deals',
@@ -624,6 +622,19 @@ describe('buildLeadList', () => {
 
   it('reports an empty bucket', () => {
     expect(buildLeadList([], 'new').text).toBe('Пусто.');
+  });
+
+  it('accepts multiple statuses and merges them into one list', () => {
+    const leads = [
+      makeLead({ id: 1, status: 'in_progress' }),
+      makeLead({ id: 2, status: 'postponed' }),
+      makeLead({ id: 3, status: 'won' }),
+    ];
+    const list = buildLeadList(leads, ['in_progress', 'postponed']);
+    const data = list.reply_markup.inline_keyboard.map(
+      (row) => row[0].callback_data,
+    );
+    expect(data).toEqual(['open:2', 'open:1']);
   });
 });
 

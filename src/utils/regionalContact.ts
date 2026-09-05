@@ -10,7 +10,10 @@ import { getPreferredChannel } from './contactChannel';
 // instead of each component re-implementing its own version of this.
 // Safe to call once per page regardless of how many groups are present.
 export function applyRegionalContactPreference(): void {
-  const channel = getPreferredChannel(detectVisitorCountry());
+  const channel = getPreferredChannel(
+    detectVisitorCountry(),
+    document.documentElement.lang,
+  );
   document
     .querySelectorAll<HTMLElement>('[data-primary-contact]')
     .forEach((group) => {

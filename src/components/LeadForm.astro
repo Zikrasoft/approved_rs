@@ -467,7 +467,10 @@ const fieldClass =
     // instead of Telegram (see contactChannel.ts's getPreferredChannel).
     // 'telegram' is already the tabs[0] default, so there's nothing to do
     // for it or for a country/detection that isn't recognized.
-    const preferredChannel = getPreferredChannel(detectedCountry);
+    const preferredChannel = getPreferredChannel(
+      detectedCountry,
+      document.documentElement.lang,
+    );
     if (preferredChannel !== 'telegram') {
       const preferredTab = Array.from(tabs).find(
         (t) => t.dataset.tab === preferredChannel,

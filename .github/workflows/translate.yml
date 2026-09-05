@@ -4,9 +4,12 @@ name: Auto-translate content
 # *.yaml files is hand-edited (both commit straight to main — no PR step),
 # AND on any other branch that happens to touch one of these paths — so a
 # feature branch already has en/sr/es/de by the time it merges. Safe to run
-# broadly: vercel.json's git.deploymentEnabled means
-# only main triggers an actual Vercel build, so a translation commit on a
-# feature branch doesn't burn a wasted deploy.
+# broadly: vercel.json's git.deploymentEnabled is false for every branch
+# (deploy only happens via ci.yml's `deploy` job, gated to main), so a
+# translation commit on a feature branch can't burn a wasted deploy either
+# way. ci.yml also listens for this workflow's completion (`workflow_run`)
+# to redeploy main once translation is done — see its `gate` job for why a
+# case/i18n-content push doesn't deploy directly from here.
 #
 # One job for both concerns (cases + i18n sections) rather than two workflow
 # files — same checkout/pnpm/node/install steps for both, no reason to pay
@@ -51,15 +54,7 @@ jobs:
     if: github.actor != 'github-actions[bot]'
     steps:
       - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-pnpm
 
       # decideAction/hasRealTranslation used to get a runtime self-check on
       # every real invocation; that guard now lives only in *.test.ts files

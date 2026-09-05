@@ -3,16 +3,12 @@
   "buildCommand": "pnpm run build",
   "outputDirectory": "dist",
   "installCommand": "pnpm install",
-  "ignoreCommand": "bash scripts/vercel-ignore-build.sh",
   "env": {
     "SITE": "https://approved.rs"
   },
   "crons": [{ "path": "/api/reminders", "schedule": "0 8 * * *" }],
   "git": {
-    "deploymentEnabled": {
-      "**": false,
-      "main": true
-    }
+    "deploymentEnabled": false
   },
   "redirects": [
     {
