@@ -10,6 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # No `version:` — reads packageManager from package.json, the single
+      # source of truth (a hardcoded version here silently drifted out of
+      # sync with translate.yml's own hardcoded version before).
       - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4
