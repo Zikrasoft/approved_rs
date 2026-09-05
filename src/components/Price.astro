@@ -1,11 +1,28 @@
 ---
+import { getLocale } from '@/i18n/config';
+
 interface Props {
   price: { value: string; currency?: string };
   class?: string;
 }
 const { price, class: className } = Astro.props;
+
+// Thousands separator per locale (e.g. "10 000" for ru, "10,000" for en) —
+// same BCP-47 tags astro.config.mjs's sitemap i18n block already uses.
+const LOCALE_TAG: Record<string, string> = {
+  ru: 'ru-RU',
+  en: 'en-US',
+  sr: 'sr-RS',
+  es: 'es-ES',
+  de: 'de-DE',
+};
+const locale = getLocale(Astro.currentLocale);
+const numericValue = Number(price.value);
+const displayValue = Number.isFinite(numericValue)
+  ? new Intl.NumberFormat(LOCALE_TAG[locale]).format(numericValue)
+  : price.value;
 ---
 
 <p class={className}>
-  {price.value}{price.value && price.currency ? ` ${price.currency}` : ''}
+  {displayValue}{price.value && price.currency ? ` ${price.currency}` : ''}
 </p>

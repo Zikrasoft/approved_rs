@@ -53,8 +53,8 @@ const { href, image, imageAlt, badges, car, year, price } = Astro.props;
     )
   }
 
-  <div class="p-5 flex flex-col flex-1">
-    <div class="flex items-center justify-between mb-2">
+  <div class="p-6 flex flex-col flex-1 gap-3">
+    <div class="flex items-center justify-between">
       <div class="flex flex-wrap gap-1.5">
         {
           badges.map((badge) => (
@@ -66,11 +66,15 @@ const { href, image, imageAlt, badges, car, year, price } = Astro.props;
       </div>
       <span class="case-arrow text-xs text-muted">→</span>
     </div>
-    <h3 class="font-display text-lg mt-1 mb-2 leading-snug text-primary">
+    <h3 class="font-display text-lg leading-snug text-primary">
       {car}
-      {year && <span class="text-muted">{year}</span>}
+      {
+        year && (
+          <span class="ml-1.5 text-sm font-normal text-muted">{year}</span>
+        )
+      }
     </h3>
-    <div class="mt-auto">
+    <div class="mt-auto pt-1">
       {
         price && (
           <Price
