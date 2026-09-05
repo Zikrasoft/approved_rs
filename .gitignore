@@ -32,3 +32,5 @@ docs/superpowers/
 
 # graphify (generated, rebuild locally)
 graphify-out/
+.vercel
+.env*
