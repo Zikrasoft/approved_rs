@@ -78,16 +78,21 @@ jobs:
       # sidesteps entirely). `github.event.commits` is capped at 20 entries
       # by GitHub's own payload limit — a single push bundling more commits
       # than that could miss a case-file change; a non-issue at this
-      # 2-person repo's push volume. jq filter verified locally against a
-      # commit touching src/content/cases/<slug>/index.md (matches), one
-      # touching only docs/package files (no match), and an empty commits
-      # array (no match, exit 1).
+      # 2-person repo's push volume. `. // []` guards a real, observed case:
+      # GitHub's push payload can carry `commits: null` (confirmed in
+      # production on the PR #10 merge commit) instead of `[]` — jq errors
+      # ("Cannot iterate over null") without the guard. jq filter verified
+      # locally against a commit touching src/content/cases/<slug>/index.md
+      # (matches), one touching only docs/package files (no match), an
+      # empty commits array (no match, exit 1), and literal `null` (no
+      # match, exit 1 — not jq's own runtime-error exit 5).
       - id: decide
         env:
           COMMITS_JSON: ${{ toJson(github.event.commits) }}
         run: |
           if [ "${{ github.event_name }}" = "push" ] && echo "$COMMITS_JSON" | jq -e '
-            [.[] | (.added + .removed + .modified)[]]
+            (. // []) as $commits
+            | [$commits[] | (.added + .removed + .modified)[]]
             | any(test("^src/content/(cases|autoservice-cases|detailing-cases)/.*/index\\.md$"))
           ' > /dev/null; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
