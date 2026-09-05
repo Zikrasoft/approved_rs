@@ -1,3 +1,9 @@
 # Prettier already reads .gitignore by default (dist/.astro/.vercel/node_modules/graphify-out) —
 # this file only needs entries .gitignore doesn't cover.
 pnpm-lock.yaml
+
+# Admin-authored case-study content (Keystatic-managed Markdown, not code) —
+# prettier reformatting these isn't wanted and shouldn't gate CI.
+src/content/cases/**/*.md
+src/content/autoservice-cases/**/*.md
+src/content/detailing-cases/**/*.md

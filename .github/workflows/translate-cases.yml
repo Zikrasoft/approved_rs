@@ -51,9 +51,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # No `version:` — reads packageManager from package.json, the single
+      # source of truth (this was hardcoded to a different pnpm major than
+      # ci.yml's, which broke action-setup's "multiple versions specified"
+      # check the moment package.json's packageManager didn't match either).
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - uses: actions/setup-node@v4
         with:
