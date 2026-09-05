@@ -105,7 +105,14 @@ const UNLOCALIZED_PATTERN = /^\/sitemap[\w-]*\.xml$/;
 // you're in Germany, see our DE page" suggestion banner. Countries we don't
 // serve are intentionally left unmapped — those visitors just get the
 // default homepage.
-const GEO_MAP: Record<string, string> = { DE: 'de', RS: 'rs', ES: 'es' };
+const GEO_MAP: Record<string, string> = {
+  DE: 'de',
+  RS: 'rs',
+  ES: 'es',
+  FR: 'fr',
+  IT: 'it',
+  PL: 'pl',
+};
 const GEO_DISMISS_COOKIE = 'geo-banner-dismissed';
 
 export const onRequest = defineMiddleware((context, next) => {

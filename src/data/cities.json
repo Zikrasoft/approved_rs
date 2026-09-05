@@ -108,5 +108,65 @@
     "de": { "name": "Genf" },
     "country": "ch",
     "active": true
+  },
+  {
+    "slug": "paris",
+    "ru": { "name": "Париж", "nameLocative": "Париже" },
+    "en": { "name": "Paris" },
+    "sr": { "name": "Pariz", "nameLocative": "Parizu" },
+    "es": { "name": "París" },
+    "de": { "name": "Paris" },
+    "country": "fr",
+    "active": true
+  },
+  {
+    "slug": "lyon",
+    "ru": { "name": "Лион", "nameLocative": "Лионе" },
+    "en": { "name": "Lyon" },
+    "sr": { "name": "Lion", "nameLocative": "Lionu" },
+    "es": { "name": "Lyon" },
+    "de": { "name": "Lyon" },
+    "country": "fr",
+    "active": true
+  },
+  {
+    "slug": "milan",
+    "ru": { "name": "Милан", "nameLocative": "Милане" },
+    "en": { "name": "Milan" },
+    "sr": { "name": "Milano", "nameLocative": "Milanu" },
+    "es": { "name": "Milán" },
+    "de": { "name": "Mailand" },
+    "country": "it",
+    "active": true
+  },
+  {
+    "slug": "rome",
+    "ru": { "name": "Рим", "nameLocative": "Риме" },
+    "en": { "name": "Rome" },
+    "sr": { "name": "Rim", "nameLocative": "Rimu" },
+    "es": { "name": "Roma" },
+    "de": { "name": "Rom" },
+    "country": "it",
+    "active": true
+  },
+  {
+    "slug": "warsaw",
+    "ru": { "name": "Варшава", "nameLocative": "Варшаве" },
+    "en": { "name": "Warsaw" },
+    "sr": { "name": "Varšava", "nameLocative": "Varšavi" },
+    "es": { "name": "Varsovia" },
+    "de": { "name": "Warschau" },
+    "country": "pl",
+    "active": true
+  },
+  {
+    "slug": "krakow",
+    "ru": { "name": "Краков", "nameLocative": "Кракове" },
+    "en": { "name": "Kraków" },
+    "sr": { "name": "Krakov", "nameLocative": "Krakovu" },
+    "es": { "name": "Cracovia" },
+    "de": { "name": "Krakau" },
+    "country": "pl",
+    "active": true
   }
 ]

@@ -34,6 +34,9 @@ describe('getPreferredChannel', () => {
     expect(getPreferredChannel('rs')).toBe('whatsapp');
     expect(getPreferredChannel('de')).toBe('whatsapp');
     expect(getPreferredChannel('es')).toBe('whatsapp');
+    expect(getPreferredChannel('fr')).toBe('whatsapp');
+    expect(getPreferredChannel('it')).toBe('whatsapp');
+    expect(getPreferredChannel('pl')).toBe('whatsapp');
   });
 
   it('prefers Telegram for Russia/CIS', () => {
@@ -47,7 +50,7 @@ describe('getPreferredChannel', () => {
   });
 
   it('defaults to Telegram for an unlisted or missing country', () => {
-    expect(getPreferredChannel('fr')).toBe('telegram');
+    expect(getPreferredChannel('gr')).toBe('telegram');
     expect(getPreferredChannel(undefined)).toBe('telegram');
   });
 

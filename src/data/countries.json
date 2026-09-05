@@ -93,5 +93,62 @@
     "es": { "name": "Portugal" },
     "de": { "name": "Portugal" },
     "active": true
+  },
+  {
+    "code": "fr",
+    "ru": {
+      "name": "Франция",
+      "nameGenitive": "Франции",
+      "nameLocative": "Франции",
+      "nameAccusative": "Францию"
+    },
+    "en": { "name": "France" },
+    "sr": {
+      "name": "Francuska",
+      "nameGenitive": "Francuske",
+      "nameLocative": "Francuskoj",
+      "nameAccusative": "Francusku"
+    },
+    "es": { "name": "Francia" },
+    "de": { "name": "Frankreich" },
+    "active": true
+  },
+  {
+    "code": "it",
+    "ru": {
+      "name": "Италия",
+      "nameGenitive": "Италии",
+      "nameLocative": "Италии",
+      "nameAccusative": "Италию"
+    },
+    "en": { "name": "Italy" },
+    "sr": {
+      "name": "Italija",
+      "nameGenitive": "Italije",
+      "nameLocative": "Italiji",
+      "nameAccusative": "Italiju"
+    },
+    "es": { "name": "Italia" },
+    "de": { "name": "Italien" },
+    "active": true
+  },
+  {
+    "code": "pl",
+    "ru": {
+      "name": "Польша",
+      "nameGenitive": "Польши",
+      "nameLocative": "Польше",
+      "nameAccusative": "Польшу"
+    },
+    "en": { "name": "Poland" },
+    "sr": {
+      "name": "Poljska",
+      "nameGenitive": "Poljske",
+      "nameLocative": "Poljskoj",
+      "nameAccusative": "Poljsku"
+    },
+    "es": { "name": "Polonia" },
+    "de": { "name": "Polen" },
+    "active": true
   }
 ]
