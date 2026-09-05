@@ -9,7 +9,7 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'],
     env: {
       TELEGRAM_BOT_TOKEN: 'test-bot-token',
       TELEGRAM_CHANNEL_ID: '-1001234567890',

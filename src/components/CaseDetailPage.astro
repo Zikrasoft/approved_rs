@@ -24,7 +24,7 @@ import { getLocale, type Locale } from '@/i18n/config';
 import { getI18n } from '@/i18n/getI18n';
 import { PathBuilder } from '@/utils/paths';
 import { getCaseTranslation } from '@/utils/cases';
-import { marked } from 'marked';
+import { safeMarkdown } from '@/lib/safeMarked';
 
 type CaseDetailKind = 'auto-service' | 'detailing';
 
@@ -83,9 +83,7 @@ const car = c.data.car ?? title;
 const year = c.data.car ? c.data.year : undefined;
 const carYear = [car, year].filter(Boolean).join(' ');
 const { Content } = await render(c);
-const translatedHtml = translation
-  ? await marked.parse(translation.body)
-  : null;
+const translatedHtml = translation ? safeMarkdown(translation.body) : null;
 const banners = getPromoBanners(locale, promoKind);
 
 const hook = excerptFromMarkdown(translation?.body ?? c.body ?? '');

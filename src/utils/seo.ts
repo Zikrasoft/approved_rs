@@ -14,6 +14,7 @@ interface MetaOptions {
   locale: Locale;
 }
 
+import { marked } from 'marked';
 import type { Country, City } from './geo';
 import type { Locale } from '@/i18n/config';
 import type { CountryScopedServiceSlug } from './labels';
@@ -135,13 +136,21 @@ export function generateOrganizationSchema(options: {
   };
 }
 
+const inlineParser = new marked.Parser();
+const textRenderer = new marked.TextRenderer();
+
 // Case bodies open with a hand-written, case-specific hook line — use it instead
 // of a templated description so each case page reads as unique, not boilerplate.
+// marked's TextRenderer strips every markdown construct down to plain text —
+// unlike a hand-rolled regex, it also handles a link's `[text](url)` syntax
+// (a regex-only version left the raw `(url)` in the SEO description). The
+// top-level `marked.parseInline()` convenience function only accepts a full
+// Renderer, not a TextRenderer, so this goes through Lexer/Parser directly.
 export function excerptFromMarkdown(markdown: string, maxLen = 140): string {
   const firstParagraph = markdown.trim().split(/\n\s*\n/)[0] ?? '';
-  const plain = firstParagraph
-    .replace(/\*\*(.+?)\*\*/g, '$1')
-    .replace(/[*_`]/g, '')
+  const tokens = marked.Lexer.lexInline(firstParagraph);
+  const plain = inlineParser
+    .parseInline(tokens, textRenderer)
     .replace(/\s+/g, ' ')
     .trim();
   if (plain.length <= maxLen) return plain;

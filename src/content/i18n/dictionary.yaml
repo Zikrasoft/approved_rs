@@ -1,0 +1,238 @@
+nav:
+  vehicle-sourcing: Автоподбор
+  vehicle-import: Авто из ЕС и Китая
+  auto-service-belgrade: Автосервис
+  detailing-belgrade: Детейлинг
+  vehicle-buyback: Выкуп
+  vehicle-inspection: Проверка
+  cases: Кейсы
+  contacts: Контакты
+  moreServices: Ещё услуги
+header:
+  menuLabel: Меню
+  languageLabel: Язык
+  themeToggleLabel: Переключить тему
+  themeToggleMobileLabel: Сменить тему
+  ctaShort: Заявка
+  ctaLong: Оставить заявку
+footer:
+  servicesHeading: Услуги
+  companyHeading: Компания
+  privacyLabel: Конфиденциальность
+  tagline: >-
+    Подберём, проверим и доставим автомобиль из Европы. Берём на себя весь процесс — от поиска до доставки.
+  contactManagerLabel: Написать менеджеру
+  hoursLine: Круглосуточно, без выходных
+  copyrightSuffix: Автоподбор, сервис и доставка авто из Европы
+  channelLinkLabel: Наш канал
+common:
+  otherServicesLabel: 'Другие услуги:'
+  alsoWorkingInLabel: 'Также работаем в:'
+  homeLabel: Главная
+  faqHeading: Частые вопросы
+  whereFromLabel: Откуда вы?
+  otherCountryLabel: Другая страна
+  viewAllCasesLabel: Все кейсы
+  closeLabel: Закрыть
+  channelLabel: Наш канал
+  cookie:
+    notice: >-
+      Мы используем аналитические cookies (Google Analytics), чтобы понимать, как посетители используют сайт.
+    more: Подробнее в
+    policyLink: политике конфиденциальности
+    accept: Принять
+    decline: Отклонить
+  gallery:
+    morePhotos: Больше фото
+    prev: Предыдущее фото
+    next: Следующее фото
+translations:
+  en:
+    nav:
+      vehicle-sourcing: Vehicle Sourcing
+      vehicle-import: Cars from the EU and China
+      auto-service-belgrade: Auto Service
+      detailing-belgrade: Detailing
+      vehicle-buyback: Buyback
+      vehicle-inspection: Inspection
+      cases: Cases
+      contacts: Contacts
+      moreServices: More Services
+    header:
+      menuLabel: Menu
+      languageLabel: Language
+      themeToggleLabel: Toggle Theme
+      themeToggleMobileLabel: Switch Theme
+      ctaShort: Request
+      ctaLong: Submit a Request
+    footer:
+      servicesHeading: Services
+      companyHeading: Company
+      privacyLabel: Privacy
+      tagline: We source, inspect, and deliver cars from Europe. We handle the entire process — from search to delivery.
+      contactManagerLabel: Message Manager
+      hoursLine: 24/7, no weekends
+      copyrightSuffix: Car sourcing, service, and delivery from Europe
+      channelLinkLabel: Our Channel
+    common:
+      otherServicesLabel: 'Other Services:'
+      alsoWorkingInLabel: 'Also operating in:'
+      homeLabel: Home
+      faqHeading: Frequently Asked Questions
+      whereFromLabel: Where are you from?
+      otherCountryLabel: Another Country
+      viewAllCasesLabel: View All Cases
+      closeLabel: Close
+      channelLabel: Our Channel
+      cookie:
+        notice: We use analytical cookies (Google Analytics) to understand how visitors use the site.
+        more: Learn more in
+        policyLink: our privacy policy
+        accept: Accept
+        decline: Decline
+      gallery:
+        morePhotos: More Photos
+        prev: Previous Photo
+        next: Next Photo
+  sr:
+    nav:
+      vehicle-sourcing: Autopodbor
+      vehicle-import: Automobili iz EU i Kine
+      auto-service-belgrade: Autoservis
+      detailing-belgrade: Detaljiranje
+      vehicle-buyback: Otkupljenje
+      vehicle-inspection: Inspekcija
+      cases: Studije slučaja
+      contacts: Kontakti
+      moreServices: Ostale usluge
+    header:
+      menuLabel: Meni
+      languageLabel: Jezik
+      themeToggleLabel: Prebaci temu
+      themeToggleMobileLabel: Promeni temu
+      ctaShort: Prijava
+      ctaLong: Predajte prijavu
+    footer:
+      servicesHeading: Usluge
+      companyHeading: Kompanija
+      privacyLabel: Privatnost
+      tagline: Pronaći ćemo, proveriti i dostaviti automobil iz Evrope. Preuzimamo celu proceduru — od pretrage do dostave.
+      contactManagerLabel: Kontaktirajte menadžera
+      hoursLine: 24/7, bez pauza
+      copyrightSuffix: Autopodbor, servis i dostava automobila iz Evrope
+      channelLinkLabel: Naš kanal
+    common:
+      otherServicesLabel: 'Druge usluge:'
+      alsoWorkingInLabel: 'Takođe radimo u:'
+      homeLabel: Početna
+      faqHeading: Česta pitanja
+      whereFromLabel: Odakle ste?
+      otherCountryLabel: Druga zemlja
+      viewAllCasesLabel: Sve studije slučaja
+      closeLabel: Zatvori
+      channelLabel: Naš kanal
+      cookie:
+        notice: Koristimo analitičke kolačiće (Google Analytics) kako bismo razumeli kako posetioci koriste sajt.
+        more: Više informacija u
+        policyLink: politici privatnosti
+        accept: Prihvatam
+        decline: Odbijam
+      gallery:
+        morePhotos: Više fotografija
+        prev: Prethodna fotografija
+        next: Sledeća fotografija
+  es:
+    nav:
+      vehicle-sourcing: Selección de Vehículos
+      vehicle-import: Importación de Autos de la UE y China
+      auto-service-belgrade: Servicio de Autos
+      detailing-belgrade: Detailing
+      vehicle-buyback: Compra de Vehículos
+      vehicle-inspection: Inspección
+      cases: Casos
+      contacts: Contactos
+      moreServices: Más Servicios
+    header:
+      menuLabel: Menú
+      languageLabel: Idioma
+      themeToggleLabel: Cambiar Tema
+      themeToggleMobileLabel: Cambiar Tema
+      ctaShort: Solicitud
+      ctaLong: Enviar Solicitud
+    footer:
+      servicesHeading: Servicios
+      companyHeading: Empresa
+      privacyLabel: Privacidad
+      tagline: Seleccionamos, inspeccionamos y entregamos auto de Europa. Nos encargamos de todo el proceso, desde la búsqueda hasta la entrega.
+      contactManagerLabel: Escribir al gerente
+      hoursLine: 24 horas al día, sin días libres
+      copyrightSuffix: Selección de autos, servicio y entrega de autos de Europa
+      channelLinkLabel: Nuestro canal
+    common:
+      otherServicesLabel: 'Otros servicios:'
+      alsoWorkingInLabel: 'También trabajamos en:'
+      homeLabel: Inicio
+      faqHeading: Preguntas Frecuentes
+      whereFromLabel: ¿De dónde eres?
+      otherCountryLabel: Otro país
+      viewAllCasesLabel: Todos los casos
+      closeLabel: Cerrar
+      channelLabel: Nuestro canal
+      cookie:
+        notice: Utilizamos cookies analíticas (Google Analytics) para entender cómo los visitantes utilizan el sitio.
+        more: Más información en
+        policyLink: la política de privacidad
+        accept: Aceptar
+        decline: Rechazar
+      gallery:
+        morePhotos: Más fotos
+        prev: Foto anterior
+        next: Foto siguiente
+  de:
+    nav:
+      vehicle-sourcing: Fahrzeugbeschaffung
+      vehicle-import: Autos aus der EU und China
+      auto-service-belgrade: Autoservice
+      detailing-belgrade: Detailing
+      vehicle-buyback: Rückkauf
+      vehicle-inspection: Inspektion
+      cases: Fälle
+      contacts: Kontakte
+      moreServices: Weitere Dienstleistungen
+    header:
+      menuLabel: Menü
+      languageLabel: Sprache
+      themeToggleLabel: Theme wechseln
+      themeToggleMobileLabel: Theme ändern
+      ctaShort: Anfrage
+      ctaLong: Anfrage senden
+    footer:
+      servicesHeading: Dienstleistungen
+      companyHeading: Unternehmen
+      privacyLabel: Datenschutz
+      tagline: Wir suchen, überprüfen und liefern Autos aus Europa. Wir übernehmen den gesamten Prozess — von der Suche bis zur Lieferung.
+      contactManagerLabel: Manager kontaktieren
+      hoursLine: Rund um die Uhr, ohne Feiertage
+      copyrightSuffix: Fahrzeugbeschaffung, Service und Lieferung von Autos aus Europa
+      channelLinkLabel: Unser Kanal
+    common:
+      otherServicesLabel: 'Weitere Dienstleistungen:'
+      alsoWorkingInLabel: 'Wir sind auch tätig in:'
+      homeLabel: Startseite
+      faqHeading: Häufige Fragen
+      whereFromLabel: Woher kommen Sie?
+      otherCountryLabel: Anderes Land
+      viewAllCasesLabel: Alle Fälle
+      closeLabel: Schließen
+      channelLabel: Unser Kanal
+      cookie:
+        notice: Wir verwenden analytische Cookies (Google Analytics), um zu verstehen, wie Besucher die Website nutzen.
+        more: Mehr dazu in der
+        policyLink: Datenschutzrichtlinie
+        accept: Akzeptieren
+        decline: Ablehnen
+      gallery:
+        morePhotos: Mehr Fotos
+        prev: Vorheriges Foto
+        next: Nächstes Foto
+translatedFrom: e830d752962c6c5a

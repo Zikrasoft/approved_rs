@@ -1,6 +1,6 @@
 ---
 import { Info } from '@lucide/astro';
-import { marked } from 'marked';
+import { safeMarkdownInline } from '@/lib/safeMarked';
 
 interface Props {
   label: string;
@@ -8,7 +8,7 @@ interface Props {
 }
 
 const { label, banners } = Astro.props;
-const banner = await marked.parseInline(
+const banner = safeMarkdownInline(
   banners[Math.floor(Math.random() * banners.length)],
 );
 ---

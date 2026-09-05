@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "packageManager": "pnpm@11.22.0",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "astro dev --force",
     "stop": "astro dev stop",
     "build": "astro build",
     "preview": "astro preview",
@@ -42,14 +42,17 @@
     "date-fns": "4.4.0",
     "libphonenumber-js": "1.13.12",
     "marked": "18.0.11",
+    "openai": "7.10.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "sanitize-html": "2.17.7",
     "zod": "4.5.4"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
     "@eslint/js": "10.0.1",
     "@tailwindcss/vite": "4.3.3",
+    "@types/sanitize-html": "2.16.1",
     "astro-eslint-parser": "3.1.0",
     "eslint": "10.9.1",
     "eslint-config-flat-gitignore": "2.4.0",
