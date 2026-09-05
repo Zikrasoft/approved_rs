@@ -1106,6 +1106,25 @@ describe('POST /api/telegram-webhook', () => {
       });
     });
 
+    it('list:in_progress+postponed merges both statuses into one list', async () => {
+      const res = await POST(
+        makeCtx({
+          callback_query: {
+            id: 'cb-17c',
+            data: 'list:in_progress+postponed',
+            from: { id: OWNER_ID },
+            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
+          },
+        }),
+      );
+      expect(res.status).toBe(200);
+      expect(sendMessage).toHaveBeenCalledWith(
+        DM_CHAT_ID,
+        'LIST_in_progress,postponed',
+        { reply_markup: { inline_keyboard: [] } },
+      );
+    });
+
     it("open:<id> sends the detail view for the tapper's role", async () => {
       const res = await POST(
         makeCtx({
