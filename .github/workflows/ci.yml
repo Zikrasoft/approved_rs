@@ -139,4 +139,4 @@ jobs:
       # once the underlying secret/permission issue is found and fixed.
       - run: pnpm exec vercel pull --yes --environment=production --debug
       - run: pnpm exec vercel build --prod
-      - run: pnpm exec vercel deploy --prebuilt --prod
+      - run: pnpm exec vercel deploy --prebuilt --prod --archive=tgz
