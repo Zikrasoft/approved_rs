@@ -10,7 +10,7 @@ type CaseTranslations = Partial<
 
 // Case bodies are written in ru; every other locale gets an optional
 // title+body translation right on the same entry's `translations` field
-// (filled in automatically by .github/workflows/translate-cases.yml). No
+// (filled in automatically by .github/workflows/translate.yml). No
 // translation yet for this locale → undefined, so callers fall back to the
 // ru original rather than leaving the page half-broken. A plain `locale`
 // index (rather than `locale as TranslatableLocale`) trips a real

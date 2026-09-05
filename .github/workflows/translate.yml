@@ -1,0 +1,107 @@
+name: Auto-translate content
+
+# Runs after a case is saved in Keystatic, or one of the src/content/i18n/
+# *.yaml files is hand-edited (both commit straight to main — no PR step),
+# AND on any other branch that happens to touch one of these paths — so a
+# feature branch already has en/sr/es/de by the time it merges. Safe to run
+# broadly: vercel.json's git.deploymentEnabled means
+# only main triggers an actual Vercel build, so a translation commit on a
+# feature branch doesn't burn a wasted deploy.
+#
+# One job for both concerns (cases + i18n sections) rather than two workflow
+# files — same checkout/pnpm/node/install steps for both, no reason to pay
+# that setup cost twice. Each translate step uses `if: always()` (not
+# continue-on-error) so a failure in one script doesn't skip the other or
+# the commit step below — but the job as a whole still reports failure if
+# either script did, so a real translation problem stays visible (this repo
+# gates Vercel deploys on CI status, so silently swallowing a failure here
+# would be a regression against that).
+on:
+  push:
+    paths:
+      - 'src/content/cases/**/index.md'
+      - 'src/content/autoservice-cases/**/index.md'
+      - 'src/content/detailing-cases/**/index.md'
+      - 'src/content/i18n/*.yaml'
+  # Manual escape hatch — e.g. after adding a new locale, to backfill it
+  # everywhere without needing a ru edit to trigger the push filter above.
+  workflow_dispatch: {}
+
+# Scoped per-branch (github.ref), not one global group — a push to one
+# branch shouldn't queue behind an unrelated run on another. Two saves on
+# the same branch in quick succession would otherwise run this job twice in
+# parallel; whichever pushes second gets a non-fast-forward rejection and
+# silently loses that run's translations. Queue instead of racing.
+concurrency:
+  group: translate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    # Default GITHUB_TOKEN is read-only on repos created after Feb 2023
+    # unless a workflow opts in — without this, the push step below 403s.
+    permissions:
+      contents: write
+    # Belt-and-suspenders: GitHub already suppresses new workflow runs
+    # triggered by a push made with the default GITHUB_TOKEN (which is what
+    # the push step below uses), so this job's own commit shouldn't retrigger
+    # it. Kept anyway as an explicit second guard against the infinite-loop
+    # failure mode, in case that suppression ever doesn't apply.
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # decideAction/hasRealTranslation used to get a runtime self-check on
+      # every real invocation; that guard now lives only in *.test.ts files
+      # (scripts/lib/*.test.ts). ci.yml's own `pnpm test` run doesn't gate
+      # this job (separate workflow, no `needs:` between them) — so without
+      # this step, a regression there could commit a bad translation to
+      # `main` before CI ever reports it. The two steps below run under
+      # `if: always()` (so a failure in one translate script doesn't skip
+      # the other or the commit step), which would otherwise also make them
+      # ignore *this* step's failure — `steps.test.outcome == 'success'`
+      # closes that gap.
+      - run: pnpm test
+        id: test
+
+      - name: Translate any case missing or stale en/sr/es/de
+        if: steps.test.outcome == 'success'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: node --experimental-strip-types scripts/translate-cases.ts
+
+      - name: Translate every i18n section (src/content/i18n/*.yaml) that changed
+        # do not drop `steps.test.outcome == 'success'` — always() alone
+        # ignores the pnpm test step's failure, see the comment above it
+        if: always() && steps.test.outcome == 'success'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: node --experimental-strip-types scripts/translate-i18n.ts
+
+      - name: Commit and push translations, if any
+        # do not drop `steps.test.outcome == 'success'` — always() alone
+        # ignores the pnpm test step's failure, see the comment above it
+        if: always() && steps.test.outcome == 'success'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/content
+          git diff --cached --quiet && exit 0
+          git commit -m "Auto-translate content"
+          # The concurrency group above only serializes runs of this
+          # workflow — an unrelated commit landing on main mid-run (outside
+          # this job's control) still causes a plain non-fast-forward
+          # rejection here. Both scripts are idempotent (hash-based), so a
+          # rebase retry is safe: worst case this run's translations land a
+          # few seconds later than they would have.
+          git pull --rebase && git push
