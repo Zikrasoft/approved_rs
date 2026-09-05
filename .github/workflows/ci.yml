@@ -133,6 +133,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-pnpm
 
-      - run: pnpm exec vercel pull --yes --environment=production
+      # --debug is temporary — vercel pull's generic "remove .vercel and
+      # retry" error hides the real cause (usually a 403 from Vercel's API);
+      # --debug prints the actual rejected request/reason. Drop this flag
+      # once the underlying secret/permission issue is found and fixed.
+      - run: pnpm exec vercel pull --yes --environment=production --debug
       - run: pnpm exec vercel build --prod
       - run: pnpm exec vercel deploy --prebuilt --prod
