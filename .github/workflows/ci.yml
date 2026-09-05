@@ -78,21 +78,29 @@ jobs:
       # sidesteps entirely). `github.event.commits` is capped at 20 entries
       # by GitHub's own payload limit — a single push bundling more commits
       # than that could miss a case-file change; a non-issue at this
-      # 2-person repo's push volume. `. // []` guards a real, observed case:
-      # GitHub's push payload can carry `commits: null` (confirmed in
-      # production on the PR #10 merge commit) instead of `[]` — jq errors
-      # ("Cannot iterate over null") without the guard. jq filter verified
-      # locally against a commit touching src/content/cases/<slug>/index.md
-      # (matches), one touching only docs/package files (no match), an
-      # empty commits array (no match, exit 1), and literal `null` (no
-      # match, exit 1 — not jq's own runtime-error exit 5).
+      # 2-person repo's push volume.
+      #
+      # Two levels of null-guard, both confirmed in production, not just
+      # theorized: `commits` itself can be `null` instead of `[]` (seen on
+      # the PR #10 merge commit — outer `(. // [])` guard), AND a merge
+      # commit's individual `added`/`removed`/`modified` fields can each be
+      # `null` instead of `[]` — GitHub doesn't compute a full diff for
+      # merge commits (seen on the very next push, PR #11's own merge —
+      # first fix wasn't enough on its own). `null + null` in jq is `null`,
+      # not `[]`, so each field needs its own `// []` before combining.
+      # jq verified locally against: a case-file commit (match), a non-case
+      # commit (no match), an empty commits array (no match), a null
+      # commits array (no match), a commit with all-null added/removed/
+      # modified (no match), and a push mixing a null-fields merge commit
+      # alongside a real case-file commit (match) — all exit 0/1 as
+      # intended, never jq's own runtime-error exit 5.
       - id: decide
         env:
           COMMITS_JSON: ${{ toJson(github.event.commits) }}
         run: |
           if [ "${{ github.event_name }}" = "push" ] && echo "$COMMITS_JSON" | jq -e '
             (. // []) as $commits
-            | [$commits[] | (.added + .removed + .modified)[]]
+            | [$commits[] | ((.added // []) + (.removed // []) + (.modified // []))[]]
             | any(test("^src/content/(cases|autoservice-cases|detailing-cases)/.*/index\\.md$"))
           ' > /dev/null; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
