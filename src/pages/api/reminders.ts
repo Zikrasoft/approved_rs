@@ -5,7 +5,7 @@ import { secretMatches } from '@/lib/verifySecret';
 import { getDuePostponed, resumeLead } from '@/lib/store';
 import { sendPostponeReminderToOwner, refreshLeadCard } from '@/lib/telegram';
 
-const CRON_SECRET = import.meta.env.CRON_SECRET;
+const CRON_SECRET = process.env.CRON_SECRET;
 
 // Vercel Cron sends `Authorization: Bearer $CRON_SECRET` automatically once
 // that env var is set on the project — same constant-time-compare pattern

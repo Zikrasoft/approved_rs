@@ -8,15 +8,15 @@ function requireEnv(name: string, value: string | undefined): string {
 
 export const BOT_TOKEN = requireEnv(
   'TELEGRAM_BOT_TOKEN',
-  import.meta.env.TELEGRAM_BOT_TOKEN,
+  process.env.TELEGRAM_BOT_TOKEN,
 );
 export const GROUP_ID = requireEnv(
   'TELEGRAM_GROUP_ID',
-  import.meta.env.TELEGRAM_GROUP_ID,
+  process.env.TELEGRAM_GROUP_ID,
 );
 export const BOT_USERNAME = requireEnv(
   'TELEGRAM_BOT_USERNAME',
-  import.meta.env.TELEGRAM_BOT_USERNAME,
+  process.env.TELEGRAM_BOT_USERNAME,
 );
 // Comma-separated — someone can have more than one Telegram account.
 export function parseIds(value: string | undefined): number[] {
@@ -29,8 +29,8 @@ export function parseIds(value: string | undefined): number[] {
     .filter(Number.isFinite);
 }
 
-export const OWNER_IDS = parseIds(import.meta.env.TELEGRAM_OWNER_ID);
-export const ADMIN_IDS = parseIds(import.meta.env.TELEGRAM_ADMIN_ID);
+export const OWNER_IDS = parseIds(process.env.TELEGRAM_OWNER_ID);
+export const ADMIN_IDS = parseIds(process.env.TELEGRAM_ADMIN_ID);
 
 const API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 

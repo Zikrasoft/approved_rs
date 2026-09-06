@@ -60,7 +60,7 @@ import {
   type StoredLead,
 } from '@/lib/store';
 
-const WEBHOOK_SECRET = import.meta.env.TELEGRAM_WEBHOOK_SECRET;
+const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
 
 interface TelegramMessage {
   message_id: number;
