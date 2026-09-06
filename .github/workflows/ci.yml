@@ -4,7 +4,7 @@ on:
   push:
   pull_request:
   workflow_dispatch: {}
-  # Fires when translate-cases.yml finishes on main — its bot commit
+  # Fires when translate.yml finishes on main — its bot commit
   # (pushed with the default GITHUB_TOKEN) can't trigger this workflow's
   # own `push` trigger (GitHub's anti-recursion rule for the default
   # token), and this is also what lets `deploy` below defer to a run gated
@@ -15,7 +15,7 @@ on:
   # translate run on a feature branch would fire this trigger and, from
   # inside, look indistinguishable from a real main-branch completion.
   workflow_run:
-    workflows: ['Auto-translate cases']
+    workflows: ['Auto-translate content']
     types: [completed]
     branches: [main]
 
@@ -44,13 +44,13 @@ jobs:
       - run: pnpm exec astro check
       - run: pnpm test
 
-  # A push touching a case file (see translate-cases.yml's path filter) gets
-  # a translation run right after it — deploying now would ship pre-
-  # translation content and then deploy again moments later once that run
-  # completes and workflow_run fires. Skip this run's deploy in that case;
-  # the workflow_run-triggered run (gated below to a real, successful
-  # main-branch completion — translation commit or not) is the one that
-  # actually ships.
+  # A push touching a case file or an i18n dictionary yaml (see translate.yml's
+  # path filter) gets a translation run right after it — deploying now would
+  # ship pre-translation content and then deploy again moments later once
+  # that run completes and workflow_run fires. Skip this run's deploy in
+  # that case; the workflow_run-triggered run (gated below to a real,
+  # successful main-branch completion — translation commit or not) is the
+  # one that actually ships.
   gate:
     needs: check
     # needs.check.result is required explicitly, not just the ref/event
@@ -93,7 +93,10 @@ jobs:
       # commits array (no match), a commit with all-null added/removed/
       # modified (no match), and a push mixing a null-fields merge commit
       # alongside a real case-file commit (match) — all exit 0/1 as
-      # intended, never jq's own runtime-error exit 5.
+      # intended, never jq's own runtime-error exit 5. Same reasoning
+      # applies to the i18n yaml alternation below — translate.yml runs on
+      # both path sets in one job, so either one triggers the same
+      # pre-translation-content deploy that this gate needs to skip.
       - id: decide
         env:
           COMMITS_JSON: ${{ toJson(github.event.commits) }}
@@ -101,7 +104,10 @@ jobs:
           if [ "${{ github.event_name }}" = "push" ] && echo "$COMMITS_JSON" | jq -e '
             (. // []) as $commits
             | [$commits[] | ((.added // []) + (.removed // []) + (.modified // []))[]]
-            | any(test("^src/content/(cases|autoservice-cases|detailing-cases)/.*/index\\.md$"))
+            | any(
+                test("^src/content/(cases|autoservice-cases|detailing-cases)/.*/index\\.md$")
+                or test("^src/content/i18n/.*\\.yaml$")
+              )
           ' > /dev/null; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else

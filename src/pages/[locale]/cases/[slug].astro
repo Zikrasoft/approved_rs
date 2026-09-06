@@ -18,7 +18,7 @@ import { getI18n } from '@/i18n/getI18n';
 import { getCountry } from '@/utils/geo';
 import { CHINA_NAME, CHINA_COUNTRY_CODE } from '@/utils/constants';
 import { getCaseTranslation } from '@/utils/cases';
-import { marked } from 'marked';
+import { safeMarkdown } from '@/lib/safeMarked';
 
 export async function getStaticPaths() {
   const cases = await getCollection('cases', (c) => c.data.published);
@@ -39,9 +39,7 @@ const translation = getCaseTranslation(c.data, locale);
 
 const title = translation?.title ?? c.data.title;
 const { Content } = await render(c);
-const translatedHtml = translation
-  ? await marked.parse(translation.body)
-  : null;
+const translatedHtml = translation ? safeMarkdown(translation.body) : null;
 const banners = getPromoBanners(locale, 'vehicle-sourcing');
 
 const CASES_TAB_PATH: Record<
