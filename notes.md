@@ -1,3 +1,4 @@
+0. we have to know about customers everything
 1. we have to add checkboxes with services on the autoservice/detailing pages.
 2. remove icon from Оставить заявку
 3. use ZOD for whole project
