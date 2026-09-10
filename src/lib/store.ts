@@ -5,6 +5,7 @@ import type { LeadData } from './leadTypes';
 
 const leadStatusSchema = z.enum([
   'new',
+  'negotiations',
   'in_progress',
   'won',
   'lost',

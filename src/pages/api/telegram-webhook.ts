@@ -531,7 +531,7 @@ async function handleCallbackQuery(
   const rejectPayMatch = /^rejectpay:(\d+)$/.exec(data);
   const editMatch = /^edit:(\d+):(name|contact|comment)$/.exec(data);
   const listMatch =
-    /^list:(new|in_progress|won|lost|postponed|in_progress\+postponed)$/.exec(
+    /^list:(new|negotiations|in_progress|won|lost|postponed|in_progress\+postponed)$/.exec(
       data,
     );
   const openMatch = /^open:(\d+)$/.exec(data);

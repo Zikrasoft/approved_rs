@@ -32,6 +32,7 @@ const CONTACT_CHANNEL_LABELS: Record<TrackedContactChannel, string> = {
 
 // Status transitions are state-dependent — see buildStatusKeyboard.
 export const LEAD_STATUSES = [
+  { key: 'negotiations', emoji: '🗣', label: 'Переговоры' },
   { key: 'in_progress', emoji: '🔵', label: 'В работе' },
   { key: 'won', emoji: '✅', label: 'Успешно' },
   { key: 'lost', emoji: '❌', label: 'Отказ' },
@@ -151,6 +152,14 @@ function formatLeadText(lead: StoredLead, role: Role): string {
 // amount and talks to the client directly, so admin gets no buttons past "В работу".
 export function buildStatusKeyboard(lead: StoredLead, role: Role): Keyboard {
   if (lead.status === 'new') {
+    const row: Btn[] = [
+      { text: '🗣 Переговоры', callback_data: `st:${lead.id}:negotiations` },
+    ];
+    if (role === 'owner')
+      row.push({ text: '❌ Отказ', callback_data: `st:${lead.id}:lost` });
+    return { inline_keyboard: [row] };
+  }
+  if (lead.status === 'negotiations') {
     const row: Btn[] = [
       { text: '🔵 В работу', callback_data: `st:${lead.id}:in_progress` },
     ];
@@ -321,6 +330,7 @@ export function buildMenu(role: Role): {
 } {
   const rows: Btn[][] = [
     [{ text: '🆕 Новые', callback_data: 'list:new' }],
+    [{ text: '🗣 Переговоры', callback_data: 'list:negotiations' }],
     [
       {
         text: '🔵 В работе / Отложенные',
@@ -352,7 +362,7 @@ export function buildHelp(role: Role): string {
       '<b>❓ Как пользоваться</b>',
       '',
       '<b>Заявки</b>',
-      '🆕 Новая → 🔵 В работу → ✅ Завершить (укажи свою прибыль в €) или ❌ Отказ.',
+      '🆕 Новая → 🗣 Переговоры → 🔵 В работу → ✅ Завершить (укажи свою прибыль в €) или ❌ Отказ.',
       'Не договорились сейчас? ⏰ Отложить — укажи дату (ДД.ММ.ГГГГ), заявка вернётся в работу сама в этот день, или жми ▶️ Возобновить раньше.',
       'В заявке можно поправить имя/контакт/комментарий или архивировать.',
       '',
@@ -440,7 +450,7 @@ export function buildStats(leads: StoredLead[], role: Role): string {
     '<b>📊 Статистика</b>',
     '',
     `Всего заявок: ${active.length}${archivedCount ? ` (+${archivedCount} в архиве)` : ''}`,
-    `🆕 Новые: ${count('new')}   🔵 В работе: ${count('in_progress')}   ✅ Завершено: ${count('won')}   ❌ Отказ: ${count('lost')}   ⏸ Отложено: ${count('postponed')}`,
+    `🆕 Новые: ${count('new')}   🗣 Переговоры: ${count('negotiations')}   🔵 В работе: ${count('in_progress')}   ✅ Завершено: ${count('won')}   ❌ Отказ: ${count('lost')}   ⏸ Отложено: ${count('postponed')}`,
     '',
     ...moneyLines,
   ].join('\n');

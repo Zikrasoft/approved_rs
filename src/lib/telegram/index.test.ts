@@ -162,6 +162,7 @@ describe('statusLabel', () => {
   });
 
   it('maps known status keys to their Russian label', () => {
+    expect(statusLabel('negotiations')).toBe('Переговоры');
     expect(statusLabel('in_progress')).toBe('В работе');
     expect(statusLabel('won')).toBe('Успешно');
     expect(statusLabel('lost')).toBe('Отказ');
@@ -173,7 +174,8 @@ describe('statusLabel', () => {
 });
 
 describe('isLeadStatusKey', () => {
-  it('is true only for the 3 known status keys', () => {
+  it('is true only for the 4 known status keys', () => {
+    expect(isLeadStatusKey('negotiations')).toBe(true);
     expect(isLeadStatusKey('in_progress')).toBe(true);
     expect(isLeadStatusKey('won')).toBe(true);
     expect(isLeadStatusKey('lost')).toBe(true);
@@ -187,8 +189,19 @@ describe('isLeadStatusKey', () => {
 });
 
 describe('buildStatusKeyboard', () => {
-  it('owner: shows В работу/Отказ for a new lead, with the lead id embedded in callback_data', () => {
+  it('owner: shows Переговоры/Отказ for a new lead, with the lead id embedded in callback_data', () => {
     const kb = buildStatusKeyboard(makeLead({ id: 7, status: 'new' }), 'owner');
+    expect(kb.inline_keyboard[0].map((b) => b.callback_data)).toEqual([
+      'st:7:negotiations',
+      'st:7:lost',
+    ]);
+  });
+
+  it('owner: shows В работу/Отказ for a lead in negotiations', () => {
+    const kb = buildStatusKeyboard(
+      makeLead({ id: 7, status: 'negotiations' }),
+      'owner',
+    );
     expect(kb.inline_keyboard[0].map((b) => b.callback_data)).toEqual([
       'st:7:in_progress',
       'st:7:lost',
@@ -217,8 +230,18 @@ describe('buildStatusKeyboard', () => {
     ).toEqual([]);
   });
 
-  it('admin: only В работу for a new lead, no Отказ', () => {
+  it('admin: only Переговоры for a new lead, no Отказ', () => {
     const kb = buildStatusKeyboard(makeLead({ id: 7, status: 'new' }), 'admin');
+    expect(kb.inline_keyboard[0].map((b) => b.callback_data)).toEqual([
+      'st:7:negotiations',
+    ]);
+  });
+
+  it('admin: only В работу for a lead in negotiations, no Отказ', () => {
+    const kb = buildStatusKeyboard(
+      makeLead({ id: 7, status: 'negotiations' }),
+      'admin',
+    );
     expect(kb.inline_keyboard[0].map((b) => b.callback_data)).toEqual([
       'st:7:in_progress',
     ]);
@@ -556,6 +579,7 @@ describe('buildMenu', () => {
       .map((b) => b.callback_data);
     expect(data).toEqual([
       'list:new',
+      'list:negotiations',
       'list:in_progress+postponed',
       'list:won',
       'list:lost',
@@ -575,6 +599,7 @@ describe('buildMenu', () => {
       .map((b) => b.callback_data);
     expect(data).toEqual([
       'list:new',
+      'list:negotiations',
       'list:in_progress+postponed',
       'list:won',
       'list:lost',
@@ -677,7 +702,7 @@ describe('buildLeadDetail', () => {
     expect(text).not.toContain('Комиссия Zikrasoft');
     const rows = reply_markup.inline_keyboard;
     expect(rows[0].map((b) => b.callback_data)).toEqual([
-      'st:7:in_progress',
+      'st:7:negotiations',
       'st:7:lost',
     ]);
     expect(rows[1].map((b) => b.callback_data)).toEqual([
