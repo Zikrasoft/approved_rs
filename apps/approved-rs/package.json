@@ -22,6 +22,7 @@
     "@keystatic/astro": "6.0.0",
     "@keystatic/core": "0.6.9",
     "@lucide/astro": "1.39.0",
+    "@podbor/i18n": "workspace:*",
     "@podbor/lead-crm": "workspace:*",
     "@vercel/blob": "2.8.0",
     "@vercel/functions": "3.9.5",
