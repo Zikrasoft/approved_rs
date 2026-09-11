@@ -2,6 +2,7 @@ import sharp from 'sharp';
 import { writeFileSync, mkdirSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { localeConfig } from '../src/i18n/config.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(__dirname, '../public');
@@ -155,7 +156,23 @@ const SERVICE_VARIANTS = {
   },
 };
 
-for (const locale of ['ru', 'en', 'sr', 'es', 'de']) {
+for (const [name, map] of Object.entries({
+  LOCALE_SUFFIX,
+  EYEBROW,
+  DEFAULT_SUB,
+  DEFAULT_TAGLINE,
+})) {
+  const missing = localeConfig.locales.filter(
+    (locale) => !Object.hasOwn(map, locale),
+  );
+  if (missing.length) {
+    throw new Error(
+      `gen-og: ${name} has no copy for ${missing.join(', ')} — add it before generating OG images`,
+    );
+  }
+}
+
+for (const locale of localeConfig.locales) {
   const suffix = LOCALE_SUFFIX[locale];
 
   await renderOg(join(PUBLIC, `og${suffix}.png`), {

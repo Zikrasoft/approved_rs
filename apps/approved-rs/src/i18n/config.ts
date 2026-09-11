@@ -18,3 +18,11 @@ export const {
 
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
 export type TranslatableLocale = Exclude<Locale, typeof DEFAULT_LOCALE>;
+
+export const BCP47_BY_LOCALE: Record<Locale, string> = {
+  ru: 'ru-RU',
+  en: 'en-US',
+  sr: 'sr-RS',
+  es: 'es-ES',
+  de: 'de-DE',
+};
