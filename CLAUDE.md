@@ -8,14 +8,40 @@ pnpm workspace + Turborepo. Apps live in `apps/*`, shared packages in `packages/
 
 ```
 apps/approved-rs/     the approved.rs site (Astro) — everything below describes it
+packages/lead-crm/    lead store + Telegram bot, shared by every brand site
+packages/i18n/        locale set, YAML/zod section loader, withPlaceholder
 ```
 
 The app owns its own `astro.config.mjs`, `keystatic.config.ts`, `vercel.json`,
 `tsconfig.json`, `vitest.config.ts` and `.env*`. Lint/format configs and the
-lockfile stay at the repo root and cover every workspace.
+lockfile stay at the repo root and cover every workspace. The root
+`vercel.json` exists only to hold `git.deploymentEnabled: false` — Vercel's git
+integration looks there, not in the app, and without it every branch push
+triggers a failing preview build.
 
 Paths in this document are app-relative: `src/lib/store.ts` means
 `apps/approved-rs/src/lib/store.ts`.
+
+**Why packages exist:** this repo is becoming a portfolio of deliberately
+independent brand sites (see `docs/open-questions.md` and the split plan). The
+shared code is the machinery — lead capture, i18n — never the visual identity.
+Two sites must not be recognizable as relatives from their HTML, so design
+systems and components stay per-app on purpose.
+
+**Package rules:**
+
+- Every `packages/*` carries its own test suite at **100% coverage**
+  (statements/functions/lines; branches too where achievable). The `test`
+  script runs `vitest run --coverage`, so the threshold is enforced by CI
+  rather than being decorative.
+- Packages are configured per business, never per hardcoded assumption:
+  the commission rate, the locale list, the storage key and the service labels
+  are all config. Operator-facing Russian bot copy is _not_ — it is the same
+  for every brand and lives in the package.
+- The app binds a package through a thin re-export file (`src/lib/store.ts`,
+  `src/lib/telegram/index.ts`, `src/i18n/config.ts`). That keeps the ~950 lines
+  of API-route call sites and ~190 `.astro` i18n call sites free of churn when
+  a package's internals move. Wire new packages the same way.
 
 ## Commands
 
@@ -66,16 +92,20 @@ Husky + lint-staged run eslint --fix/prettier on staged files on commit — a co
 
 **Stack:** Astro v7, `output: 'static'` (prerendered) with the Vercel adapter — most pages are static; a page opts into SSR individually via `export const prerender = false` (used by the two `/api/*` routes and the homepage, which needs `Astro.locals.suggestedCountry` from middleware). There is no global SSR mode.
 
-**i18n routing (`src/middleware.ts` + `src/i18n/`):** 5 locales (`ru` default, `en`, `sr`, `es`, `de`), `routing: 'manual'` in `astro.config.mjs`. The middleware is the single place that: detects locale from cookie/Accept-Language (`detectLocale.ts`), rewrites bare `/` to the detected locale without a visible redirect, and 301s a long list of legacy pre-i18n slugs (`LEGACY_PATH_REWRITES`, `SLUG_RENAMES`, `moveGermanySpoke`) to their current locale-prefixed URLs. On Vercel's static output, middleware only runs for requests matching a real Astro route — unprefixed paths to real content pages 404 at the edge before reaching it, so `vercel.json` duplicates the same redirects as edge-level static rules for production; `middleware.ts` stays authoritative for local dev and is the source those were hand-derived from. Don't edit one without checking the other.
+**i18n routing (`src/middleware.ts` + `src/i18n/`):** 5 locales (`ru` default, `en`, `sr`, `es`, `de`), `routing: 'manual'` in `astro.config.mjs`. The middleware is the single place that: detects locale from cookie/Accept-Language (`detectLocale.ts`, backed by `@podbor/i18n`'s `createLocaleSet`; the five locales are declared once as `localeConfig` in `src/i18n/config.ts`), rewrites bare `/` to the detected locale without a visible redirect, and 301s a long list of legacy pre-i18n slugs (`LEGACY_PATH_REWRITES`, `SLUG_RENAMES`, `moveGermanySpoke`) to their current locale-prefixed URLs. On Vercel's static output, middleware only runs for requests matching a real Astro route — unprefixed paths to real content pages 404 at the edge before reaching it, so `vercel.json` duplicates the same redirects as edge-level static rules for production; `middleware.ts` stays authoritative for local dev and is the source those were hand-derived from. Don't edit one without checking the other.
 
 **Content model — two different systems by design:**
 
 - **Case studies** (`src/content/{cases,autoservice-cases,detailing-cases}`, schemas in `src/content.config.ts`) are Keystatic-managed Markdown collections. Admin writes `title`/`car`/`price`/etc. and the RU `title`/`body` only; a `translations: { en, sr, es, de }` field on the same entry (not a separate collection) holds the other four locales, each optional — missing/failed falls back to RU rather than breaking the page.
-- **UI/site copy** (`src/content/i18n/*.yaml`: `dictionary`, `faq`, `home`, `pages`, `meta`, `leadForm`, `promoBanners`, `services`) is flat YAML, read via `src/i18n/content/*.ts` + a matching `*ContentSchema.ts` (zod), all going through the shared `loadI18nSection()` helper (`src/i18n/loadI18nSection.ts`) — it parses the YAML once at module load, validates RU against the schema (throws loudly on a bad file instead of failing at render time), and falls back to RU per-locale if a translation fails validation. `getI18n()` (`src/i18n/getI18n.ts`) additionally merges in `src/i18n/dictionaries/templates.ts` — the handful of interpolation functions (e.g. gallery alt-text templates) that can't be represented as static YAML strings.
+- **UI/site copy** (`src/content/i18n/*.yaml`: `dictionary`, `faq`, `home`, `pages`, `meta`, `leadForm`, `promoBanners`, `services`) is flat YAML, read via `src/i18n/content/*.ts` + a matching `*ContentSchema.ts` (zod), all going through the shared `loadI18nSection()` helper (`src/i18n/loadI18nSection.ts`, a thin binding over `@podbor/i18n`'s `createSectionLoader`) — it parses the YAML once at module load, validates RU against the schema (throws loudly on a bad file instead of failing at render time), and falls back to RU per-locale if a translation fails validation. `getI18n()` (`src/i18n/getI18n.ts`) additionally merges in `src/i18n/dictionaries/templates.ts` — the handful of interpolation functions (e.g. gallery alt-text templates) that can't be represented as static YAML strings.
 
 **Both content systems share one auto-translate mechanism:** admin/dev only ever hand-writes RU. `.github/workflows/translate.yml` runs `scripts/translate-cases.ts` and `scripts/translate-i18n.ts` on every push touching the relevant files (any branch, so translations land in a feature branch before merge, not after) and commits the result back. Each script hashes the RU source and stores that hash (`translatedFrom`) alongside the translations, so a rerun only retranslates locales whose RU actually changed — everything else is left untouched. Both call through `scripts/lib/openaiChat.ts` (official `openai` SDK) and validate the AI's response with `scripts/lib/assertSafeTranslation.ts`, which rejects a translation that introduces HTML the RU source didn't already have (a stored-XSS guard on an otherwise-unreviewed auto-commit path — case bodies are rendered as markdown via `src/lib/safeMarked.ts`, which itself sanitizes with `sanitize-html`). Needs `OPENAI_API_KEY` as a GitHub Actions secret (separate from Vercel's env vars); without it the job fails at the translate step but doesn't touch already-translated content.
 
-**Lead capture pipeline (`src/lib/store.ts`, `src/lib/telegram/`, `src/pages/api/`):** form submissions (`api/leads.ts`) and call-button clicks (`api/contact-click.ts`) both funnel through `notifyLead.ts`, which stores the lead and notifies Telegram via `waitUntil()` (fire-and-forget after the response redirects). Leads live in a single JSON blob on Vercel Blob (`data/leads.json`, `src/lib/store.ts`), not a database — every mutation goes through `updateLeads()`, a compare-and-swap loop keyed on the blob's `etag` with jittered exponential backoff (`backoffDelay`) so two concurrent writers (e.g. a bot button edit racing a new form submission) desync instead of retry-colliding. `api/telegram-webhook.ts` handles the bot side (status changes, deal-amount/commission prompts, postpone/remind flow) driven by the same store. `api/reminders.ts` is a Vercel Cron job (needs `CRON_SECRET`) that pushes due `postponed` leads back to the owner.
+**Lead capture pipeline (`@podbor/lead-crm`, bound in `src/lib/crm.ts` + `src/lib/crmBot.ts`):** form submissions (`api/leads.ts`) and call-button clicks (`api/contact-click.ts`) both funnel through `notifyLead`, which stores the lead and notifies Telegram via `waitUntil()` (fire-and-forget after the response redirects). Leads live in a single JSON blob on Vercel Blob (`data/leads.json`), not a database — every mutation goes through `updateLeads()`, a compare-and-swap loop with jittered exponential backoff so two concurrent writers (e.g. a bot button edit racing a new form submission) desync instead of retry-colliding. Storage sits behind a `LeadStorage` interface, so moving to Postgres later is one adapter rather than a rewrite. `api/telegram-webhook.ts` handles the bot side (status changes, deal-amount/commission prompts, postpone/remind flow) driven by the same store. `api/reminders.ts` is a Vercel Cron job (needs `CRON_SECRET`) that pushes due `postponed` leads back to the owner.
+
+The binding is split in two on purpose: `src/lib/crm.ts` builds the store and needs no Telegram credentials, while `src/lib/crmBot.ts` builds the bot and reads `TELEGRAM_*` at module load. Importing the store therefore cannot fail a build over a missing bot token. `src/lib/store.ts`, `src/lib/telegram/index.ts` and `src/lib/notifyLead.ts` are thin re-exports over those two.
+
+The commission rate is per business (`DEFAULT_COMMISSION_PERCENT` in `src/lib/crm.ts`), and a lead stores the rate it was created with, so changing the default never rewrites history.
 
 **Keystatic admin (`keystatic.config.ts`):** local dev reads/writes the working tree directly (`storage: { kind: 'local' }`); production (`import.meta.env.PROD`) goes through GitHub's API (`storage: { kind: 'github' }`) since Vercel's filesystem is ephemeral. Service-slug enums are hand-duplicated between `keystatic.config.ts` and `src/content.config.ts`/`src/utils/labels.ts` because Keystatic's config can't import Astro-coupled modules — keep both in sync when adding a service.
 
