@@ -552,31 +552,4 @@ const journey = [
   body:has(#mobile-menu.menu-open) #quick-links-band {
     display: none;
   }
-  html,
-  body {
-    overflow-anchor: none;
-  }
 </style>
-
-<script>
-  const band = document.getElementById('quick-links-band');
-  const menu = document.getElementById('mobile-menu');
-  if (band) {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry || entry.isIntersecting) return;
-      if (menu && menu.classList.contains('menu-open')) return;
-      const compensation = Math.min(
-        band.getBoundingClientRect().height,
-        window.scrollY,
-      );
-      band.remove();
-      window.scrollBy(0, -compensation);
-      observer.disconnect();
-    });
-    observer.observe(band);
-  }
-
-  window.addEventListener('pageshow', (event) => {
-    if (event.persisted) location.reload();
-  });
-</script>
