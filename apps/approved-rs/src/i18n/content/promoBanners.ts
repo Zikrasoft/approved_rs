@@ -1,4 +1,4 @@
-import promoBannersYaml from '../../content/i18n/promoBanners.yaml?raw';
+import promoBannersYaml from '@/content/i18n/promoBanners.yaml?raw';
 import type { Locale } from '@/i18n/config';
 import { loadI18nSection } from '@/i18n/loadI18nSection';
 import type { CasesTabKind } from '@/utils/labels';

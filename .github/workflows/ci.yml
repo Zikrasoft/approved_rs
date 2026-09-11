@@ -39,9 +39,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-pnpm
-      - run: pnpm exec eslint .
+      - run: pnpm lint
       - run: pnpm exec prettier --check .
-      - run: pnpm exec astro check
+      - run: pnpm typecheck
       - run: pnpm test
 
   # A push touching a case file or an i18n dictionary yaml (see translate.yml's
@@ -105,8 +105,8 @@ jobs:
             (. // []) as $commits
             | [$commits[] | ((.added // []) + (.removed // []) + (.modified // []))[]]
             | any(
-                test("^src/content/(cases|autoservice-cases|detailing-cases)/.*/index\\.md$")
-                or test("^src/content/i18n/.*\\.yaml$")
+                test("^apps/approved-rs/src/content/(cases|autoservice-cases|detailing-cases)/.*/index\\.md$")
+                or test("^apps/approved-rs/src/content/i18n/.*\\.yaml$")
               )
           ' > /dev/null; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
@@ -135,6 +135,12 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    # Vercel CLI resolves the project from its working directory (vercel.json,
+    # .vercel/, and the build output all live inside the app, not the repo
+    # root) — every step below must run from there, not from the monorepo root.
+    defaults:
+      run:
+        working-directory: apps/approved-rs
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-pnpm

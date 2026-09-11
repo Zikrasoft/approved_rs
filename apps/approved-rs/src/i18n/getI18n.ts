@@ -1,4 +1,4 @@
-import dictionaryYaml from '../content/i18n/dictionary.yaml?raw';
+import dictionaryYaml from '@/content/i18n/dictionary.yaml?raw';
 import type { Locale } from './config';
 import { loadI18nSection } from './loadI18nSection';
 import {

@@ -25,6 +25,9 @@ npm-debug.log*
 .vscode/
 .idea/
 
+# Turborepo
+.turbo/
+
 # SDD scratch (not needed in repo)
 .superpowers/
 docs/superpowers/

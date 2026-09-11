@@ -4,6 +4,6 @@ pnpm-lock.yaml
 
 # Admin-authored case-study content (Keystatic-managed Markdown, not code) —
 # prettier reformatting these isn't wanted and shouldn't gate CI.
-src/content/cases/**/*.md
-src/content/autoservice-cases/**/*.md
-src/content/detailing-cases/**/*.md
+apps/approved-rs/src/content/cases/**/*.md
+apps/approved-rs/src/content/autoservice-cases/**/*.md
+apps/approved-rs/src/content/detailing-cases/**/*.md

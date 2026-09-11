@@ -14,7 +14,7 @@ import {
   type LeadStatus,
   type OwedRow,
   type CommissionInfo,
-} from '../store';
+} from '@/lib/store';
 import { BOT_USERNAME } from './client';
 
 export type Role = 'owner' | 'admin';

@@ -1,4 +1,4 @@
-import pagesYaml from '../../content/i18n/pages.yaml?raw';
+import pagesYaml from '@/content/i18n/pages.yaml?raw';
 import type { Locale } from '@/i18n/config';
 import { loadI18nSection } from '@/i18n/loadI18nSection';
 import { withPlaceholder } from '@/i18n/withPlaceholder';

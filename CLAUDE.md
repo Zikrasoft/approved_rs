@@ -2,25 +2,63 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Monorepo layout
+
+pnpm workspace + Turborepo. Apps live in `apps/*`, shared packages in `packages/*`.
+
+```
+apps/approved-rs/     the approved.rs site (Astro) — everything below describes it
+```
+
+The app owns its own `astro.config.mjs`, `keystatic.config.ts`, `vercel.json`,
+`tsconfig.json`, `vitest.config.ts` and `.env*`. Lint/format configs and the
+lockfile stay at the repo root and cover every workspace.
+
+Paths in this document are app-relative: `src/lib/store.ts` means
+`apps/approved-rs/src/lib/store.ts`.
+
 ## Commands
 
+Run from the repo root — turbo fans them out to every workspace:
+
 ```bash
-pnpm dev              # astro dev --force (check first if one is already running — see feedback_check_before_dev_server)
-pnpm build            # astro build → dist/
-pnpm preview          # preview the built output
-pnpm test             # vitest run (src/**/*.test.ts + scripts/**/*.test.ts)
-pnpm exec vitest run path/to/file.test.ts        # single test file
-pnpm exec vitest run -t "test name substring"    # single test by name
-pnpm exec astro check # type-check .astro files + the zod/TS schemas
-pnpm lint             # eslint .
+pnpm dev              # turbo run dev (check first if one is already running — see feedback_check_before_dev_server)
+pnpm build            # turbo run build → apps/*/dist/
+pnpm test             # turbo run test
+pnpm typecheck        # turbo run typecheck (astro check: .astro files + zod/TS schemas)
+pnpm lint             # eslint . (root, covers all workspaces)
 pnpm lint:fix
 pnpm format           # prettier --write . (never --write in a review pass — see review-local skill)
 pnpm exec prettier --check .
+```
+
+Scoped to one app — either `--filter` from the root, or run inside the app dir:
+
+```bash
+pnpm --filter @podbor/approved-rs dev
+pnpm --filter @podbor/approved-rs exec vitest run path/to/file.test.ts   # single test file
+pnpm --filter @podbor/approved-rs exec vitest run -t "name substring"    # single test by name
+```
+
+The translate scripts resolve content paths relative to the process's working
+directory, so they must run from inside the app:
+
+```bash
+cd apps/approved-rs
 node --experimental-strip-types scripts/translate-i18n.ts   # dry-run i18n YAML translation (needs OPENAI_API_KEY)
 node --experimental-strip-types scripts/translate-cases.ts  # dry-run case-study translation
 ```
 
-`pnpm build` finishes rendering every page and only then fails at the `@astrojs/vercel` "astro:build:done" hook locally with a `sharp` binary `ENOENT` — that's a local-machine artifact unrelated to code changes, not a real build failure; check the page-rendering output above it, not the final exit code.
+`pnpm build` may finish rendering every page and only then fail at the
+`@astrojs/vercel` "astro:build:done" hook locally with a `sharp` binary `ENOENT`
+— that's a local-machine artifact unrelated to code changes, not a real build
+failure; check the page-rendering output above it, not the final exit code.
+
+`astro dev` does not put unprefixed `.env` variables into `process.env`, and the
+Telegram client reads them from there — so `/api/*` routes fail locally with
+"TELEGRAM_BOT_TOKEN is not set" unless the env is exported into the shell first
+(`set -a; . apps/approved-rs/.env.local; set +a`). Pre-existing behaviour, not a
+monorepo artifact.
 
 Husky + lint-staged run eslint --fix/prettier on staged files on commit — a commit can silently reformat what you staged, so `git status`/`git diff` after committing if that matters.
 
