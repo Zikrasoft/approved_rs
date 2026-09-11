@@ -1,66 +1,29 @@
 ---
-// Mobile-only nav panel, toggled by Header.astro's burger button (via the
-// #mobile-menu id — the burger stays in Header.astro, so this component
-// owns only the panel it opens/closes, not the button itself). No primary/
-// "more services" swap here unlike HeaderDesktopNav — the 2-column grid
-// shows all services at once, so there's nothing to make room for.
-import type { Search } from '@lucide/astro';
 import { Sun, Moon, LayoutGrid, ChevronRight, Globe } from '@lucide/astro';
 import LanguageSwitcher from './LanguageSwitcher.astro';
-
-interface NavItem {
-  href: string;
-  label: string;
-  slug: string;
-  Icon: typeof Search;
-  active: boolean;
-}
+import ServiceQuickLinks from './ServiceQuickLinks.astro';
 
 interface Props {
-  navItems: NavItem[];
+  countryCode: string;
   casesHref: string;
   casesLabel: string;
   languageLabel: string;
   themeToggleLabel: string;
-  isHome: boolean;
 }
 
-const {
-  navItems,
-  casesHref,
-  casesLabel,
-  languageLabel,
-  themeToggleLabel,
-  isHome,
-} = Astro.props;
+const { countryCode, casesHref, casesLabel, languageLabel, themeToggleLabel } =
+  Astro.props;
 ---
 
-<!-- Open by default on the homepage -->
 <div
   id="mobile-menu"
-  class:list={[
-    'xl:hidden border-t bg-header-mobile border-default',
-    { 'menu-open': isHome },
-  ]}
-  aria-hidden={isHome ? undefined : 'true'}
-  inert={isHome ? undefined : true}
+  class="xl:hidden border-t bg-header-mobile border-default"
+  aria-hidden="true"
+  inert
 >
   <div class="overflow-hidden">
     <nav class="max-w-6xl mx-auto px-6 py-5 flex flex-col gap-4 mobile-nav">
-      <div class="grid grid-cols-2 gap-2">
-        {
-          navItems.map((item) => (
-            <a
-              href={item.href}
-              class="mobile-service-card flex flex-col items-center justify-center gap-2 py-5 rounded-sm border border-default text-secondary"
-              aria-current={item.active ? 'page' : undefined}
-            >
-              {item.Icon && <item.Icon size={20} />}
-              <span class="text-sm">{item.label}</span>
-            </a>
-          ))
-        }
-      </div>
+      <ServiceQuickLinks countryCode={countryCode} />
 
       <!-- Same row shape/border as a service card above, so it reads as one
            more tappable destination — not a stray line of text. -->
@@ -109,18 +72,6 @@ const {
     background-color: var(--color-accent-subtle);
     border-color: var(--color-accent-border);
     transform: translateX(0.25rem);
-  }
-
-  .mobile-service-card {
-    transition:
-      background-color 0.2s,
-      border-color 0.2s;
-  }
-  .mobile-service-card:active,
-  .mobile-service-card[aria-current='page'] {
-    background-color: var(--color-accent-subtle);
-    border-color: var(--color-accent-border);
-    color: var(--color-accent) !important;
   }
 
   .prefs-divider {

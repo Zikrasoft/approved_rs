@@ -9,6 +9,7 @@ import {
 } from '@/utils/casesQueries';
 import { getServicesContent } from '@/i18n/content/services';
 import { getHomeContent } from '@/i18n/content/home';
+import { getFaq } from '@/i18n/content/faq';
 import { buildLocation } from '@/utils/seo';
 import { PathBuilder } from '@/utils/paths';
 import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
@@ -18,11 +19,17 @@ import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 const SECTION_HEADINGS: Record<
   Locale,
   Record<
-    'countries' | 'cities' | 'vehicleImport' | 'other' | 'languages',
+    | 'keyFacts'
+    | 'countries'
+    | 'cities'
+    | 'vehicleImport'
+    | 'other'
+    | 'languages',
     string
   >
 > = {
   ru: {
+    keyFacts: 'Ключевые факты',
     countries: 'Услуги по странам',
     cities: 'Автоподбор по городам',
     vehicleImport: 'Привоз авто',
@@ -30,6 +37,7 @@ const SECTION_HEADINGS: Record<
     languages: 'Другие языки',
   },
   en: {
+    keyFacts: 'Key Facts',
     countries: 'Services by Country',
     cities: 'Car Sourcing by City',
     vehicleImport: 'Car Import',
@@ -37,6 +45,7 @@ const SECTION_HEADINGS: Record<
     languages: 'Other Languages',
   },
   sr: {
+    keyFacts: 'Ključne činjenice',
     countries: 'Usluge po zemljama',
     cities: 'Odabir vozila po gradovima',
     vehicleImport: 'Uvoz vozila',
@@ -44,6 +53,7 @@ const SECTION_HEADINGS: Record<
     languages: 'Drugi jezici',
   },
   es: {
+    keyFacts: 'Datos clave',
     countries: 'Servicios por país',
     cities: 'Búsqueda de autos por ciudad',
     vehicleImport: 'Importación de autos',
@@ -51,6 +61,7 @@ const SECTION_HEADINGS: Record<
     languages: 'Otros idiomas',
   },
   de: {
+    keyFacts: 'Wichtige Fakten',
     countries: 'Leistungen nach Land',
     cities: 'Fahrzeugbeschaffung nach Stadt',
     vehicleImport: 'Fahrzeugimport',
@@ -120,6 +131,15 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
 
   lines.push(`# ${SITE_NAME}`, '');
   lines.push(`> ${h.metaDescription}`, '');
+
+  lines.push(`## ${s.keyFacts}`, '');
+  lines.push(
+    `- ${h.statClients.value} ${h.statClients.label}, ${countries.length} ${h.statCountries.label}, ${h.statYears.value} ${h.statYears.label}.`,
+  );
+  const paymentFaq = getFaq(locale).general[0];
+  if (paymentFaq) lines.push(`- ${paymentFaq.a}`);
+  lines.push(`- ${h.ctaSubtext}`);
+  lines.push('');
 
   lines.push(`## ${s.countries}`, '');
   for (const country of countries) {

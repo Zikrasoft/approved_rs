@@ -17,7 +17,17 @@
       "permanent": true
     },
     {
+      "source": "/:locale(ru|en|sr)/privoz/de/:path*/",
+      "destination": "/:locale/vehicle-import/eu/de/:path*",
+      "permanent": true
+    },
+    {
       "source": "/privoz/de/:path*",
+      "destination": "/ru/vehicle-import/eu/de/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/privoz/de/:path*/",
       "destination": "/ru/vehicle-import/eu/de/:path*",
       "permanent": true
     },
@@ -27,7 +37,17 @@
       "permanent": true
     },
     {
+      "source": "/:locale(ru|en|sr)/vehicle-import/de/:path*/",
+      "destination": "/:locale/vehicle-import/eu/de/:path*",
+      "permanent": true
+    },
+    {
       "source": "/vehicle-import/de/:path*",
+      "destination": "/ru/vehicle-import/eu/de/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/vehicle-import/de/:path*/",
       "destination": "/ru/vehicle-import/eu/de/:path*",
       "permanent": true
     },
@@ -59,7 +79,17 @@
       "permanent": true
     },
     {
+      "source": "/:locale(ru|en|sr)/autopodbor/:path*/",
+      "destination": "/:locale/vehicle-sourcing/:path*",
+      "permanent": true
+    },
+    {
       "source": "/autopodbor/:path*",
+      "destination": "/ru/vehicle-sourcing/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/autopodbor/:path*/",
       "destination": "/ru/vehicle-sourcing/:path*",
       "permanent": true
     },
@@ -69,7 +99,17 @@
       "permanent": true
     },
     {
+      "source": "/:locale(ru|en|sr)/privoz/:path*/",
+      "destination": "/:locale/vehicle-import/:path*",
+      "permanent": true
+    },
+    {
       "source": "/privoz/:path*",
+      "destination": "/ru/vehicle-import/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/privoz/:path*/",
       "destination": "/ru/vehicle-import/:path*",
       "permanent": true
     },
@@ -79,7 +119,17 @@
       "permanent": true
     },
     {
+      "source": "/:locale(ru|en|sr)/vykup/:path*/",
+      "destination": "/:locale/vehicle-buyback/:path*",
+      "permanent": true
+    },
+    {
       "source": "/vykup/:path*",
+      "destination": "/ru/vehicle-buyback/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/vykup/:path*/",
       "destination": "/ru/vehicle-buyback/:path*",
       "permanent": true
     },
@@ -89,7 +139,17 @@
       "permanent": true
     },
     {
+      "source": "/:locale(ru|en|sr)/proverka/:path*/",
+      "destination": "/:locale/vehicle-inspection/:path*",
+      "permanent": true
+    },
+    {
       "source": "/proverka/:path*",
+      "destination": "/ru/vehicle-inspection/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/proverka/:path*/",
       "destination": "/ru/vehicle-inspection/:path*",
       "permanent": true
     },
@@ -99,7 +159,17 @@
       "permanent": true
     },
     {
+      "source": "/:locale(ru|en|sr)/avtoservis-belgrade/:path*/",
+      "destination": "/:locale/auto-service-belgrade/:path*",
+      "permanent": true
+    },
+    {
       "source": "/avtoservis-belgrade/:path*",
+      "destination": "/ru/auto-service-belgrade/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/avtoservis-belgrade/:path*/",
       "destination": "/ru/auto-service-belgrade/:path*",
       "permanent": true
     },
@@ -246,7 +316,17 @@
       "permanent": true
     },
     {
+      "source": "/vehicle-sourcing/:path*/",
+      "destination": "/ru/vehicle-sourcing/:path*",
+      "permanent": true
+    },
+    {
       "source": "/vehicle-import/:path*",
+      "destination": "/ru/vehicle-import/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/vehicle-import/:path*/",
       "destination": "/ru/vehicle-import/:path*",
       "permanent": true
     },
@@ -256,7 +336,17 @@
       "permanent": true
     },
     {
+      "source": "/vehicle-buyback/:path*/",
+      "destination": "/ru/vehicle-buyback/:path*",
+      "permanent": true
+    },
+    {
       "source": "/vehicle-inspection/:path*",
+      "destination": "/ru/vehicle-inspection/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/vehicle-inspection/:path*/",
       "destination": "/ru/vehicle-inspection/:path*",
       "permanent": true
     },
@@ -266,7 +356,17 @@
       "permanent": true
     },
     {
+      "source": "/auto-service-belgrade/:path*/",
+      "destination": "/ru/auto-service-belgrade/:path*",
+      "permanent": true
+    },
+    {
       "source": "/cases/:path*",
+      "destination": "/ru/cases/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/cases/:path*/",
       "destination": "/ru/cases/:path*",
       "permanent": true
     },
@@ -276,12 +376,27 @@
       "permanent": true
     },
     {
+      "source": "/contacts/:path*/",
+      "destination": "/ru/contacts/:path*",
+      "permanent": true
+    },
+    {
       "source": "/privacy/:path*",
       "destination": "/ru/privacy/:path*",
       "permanent": true
     },
     {
+      "source": "/privacy/:path*/",
+      "destination": "/ru/privacy/:path*",
+      "permanent": true
+    },
+    {
       "source": "/thanks/:path*",
+      "destination": "/ru/thanks/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/thanks/:path*/",
       "destination": "/ru/thanks/:path*",
       "permanent": true
     }

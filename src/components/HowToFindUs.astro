@@ -6,6 +6,7 @@
 import { MapPin } from '@lucide/astro';
 import Button from '@/components/Button.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
+import LazyMapEmbed from '@/components/LazyMapEmbed.astro';
 
 interface Props {
   heading: string;
@@ -67,33 +68,11 @@ const mapsSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeU
           {mapButtonLabel}
         </Button>
       </div>
-      <div
-        class="lg:col-span-3 map-embed glow-border h-72 lg:h-[26rem] rounded-sm overflow-hidden border border-default"
-      >
-        <iframe
-          src={`https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`}
-          width="100%"
-          height="100%"
-          class="border-0 block"
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"
-          title={mapIframeTitle}></iframe>
-      </div>
+      <LazyMapEmbed
+        mapQuery={mapQuery}
+        title={mapIframeTitle}
+        class="lg:col-span-3 glow-border h-72 lg:h-[26rem] rounded-sm overflow-hidden border border-default bg-surface-2"
+      />
     </div>
   </div>
 </section>
-
-<style>
-  /* Google's classic embed iframe has no style API — desaturate it so the
-     stock red/green basemap doesn't clash with the site's muted navy palette,
-     and roughly invert it in dark mode. ponytail: CSS filter hack, not pixel
-     perfect (the pin drifts slightly off pure red), good enough without a
-     Maps API key + JS SDK. */
-  .map-embed iframe {
-    filter: saturate(0.4) brightness(0.95) contrast(0.95);
-  }
-  :global(html[data-theme='dark']) .map-embed iframe {
-    filter: invert(92%) hue-rotate(180deg) saturate(0.4) brightness(0.95)
-      contrast(0.9);
-  }
-</style>

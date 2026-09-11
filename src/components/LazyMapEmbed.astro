@@ -1,0 +1,50 @@
+---
+interface Props {
+  mapQuery: string;
+  title: string;
+  class?: string;
+}
+
+const { mapQuery, title, class: className } = Astro.props;
+const src = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`;
+---
+
+<lazy-map-embed data-src={src} data-title={title} class={className}
+></lazy-map-embed>
+
+<script>
+  class LazyMapEmbed extends HTMLElement {
+    connectedCallback() {
+      const observer = new IntersectionObserver(
+        ([entry], obs) => {
+          if (!entry?.isIntersecting) return;
+          const iframe = document.createElement('iframe');
+          iframe.src = this.dataset.src!;
+          iframe.title = this.dataset.title!;
+          iframe.width = '100%';
+          iframe.height = '100%';
+          iframe.className = 'border-0 block';
+          iframe.referrerPolicy = 'no-referrer-when-downgrade';
+          this.replaceChildren(iframe);
+          obs.disconnect();
+        },
+        { rootMargin: '200px' },
+      );
+      observer.observe(this);
+    }
+  }
+  customElements.define('lazy-map-embed', LazyMapEmbed);
+</script>
+
+<style>
+  lazy-map-embed {
+    display: block;
+  }
+  :global(lazy-map-embed iframe) {
+    filter: saturate(0.4) brightness(0.95) contrast(0.95);
+  }
+  :global(html[data-theme='dark']) :global(lazy-map-embed iframe) {
+    filter: invert(92%) hue-rotate(180deg) saturate(0.4) brightness(0.95)
+      contrast(0.9);
+  }
+</style>

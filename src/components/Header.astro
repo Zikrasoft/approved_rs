@@ -43,9 +43,6 @@ const urlCountry = isServicePage ? pathSegments[2] : undefined;
 const navCountry = getActiveCountries().some((c) => c.code === urlCountry)
   ? urlCountry!
   : DEFAULT_COUNTRY;
-const isHome =
-  Astro.url.pathname === PathBuilder.home(locale) ||
-  Astro.url.pathname === `/${locale}`;
 const casesHref = PathBuilder.casesVehicleSourcing(locale);
 const casesActive = Astro.url.pathname.includes('/cases/');
 
@@ -61,8 +58,6 @@ const SERVICE_ICONS: Record<ServiceSlug, typeof Search> = {
   'vehicle-inspection': ClipboardCheck,
 };
 
-// Computed once and shared by HeaderDesktopNav (which further splits it into
-// primary/"more services") and HeaderMobileMenu (which shows it as-is).
 const navItems = getNavItems(locale, navCountry).map((item) => ({
   ...item,
   Icon: SERVICE_ICONS[item.slug as ServiceSlug],
@@ -122,25 +117,20 @@ const navItems = getNavItems(locale, navCountry).map((item) => ({
         id="burger"
         class="xl:hidden flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong text-secondary"
         aria-label={t.header.menuLabel}
-        aria-expanded={isHome ? 'true' : 'false'}
+        aria-expanded="false"
       >
-        <span id="burger-open" class:list={{ hidden: isHome }}
-          ><Menu size={18} /></span
-        >
-        <span id="burger-close" class:list={{ hidden: !isHome }}
-          ><X size={18} /></span
-        >
+        <span id="burger-open"><Menu size={18} /></span>
+        <span id="burger-close" class="hidden"><X size={18} /></span>
       </button>
     </div>
   </div>
 
   <HeaderMobileMenu
-    navItems={navItems}
+    countryCode={navCountry}
     casesHref={casesHref}
     casesLabel={t.nav.cases}
     languageLabel={t.header.languageLabel}
     themeToggleLabel={t.header.themeToggleMobileLabel}
-    isHome={isHome}
   />
 
   <LeadFormModal id="lead-modal" triggerAttr={DATA_OPEN_LEAD_MODAL} />
@@ -281,45 +271,21 @@ const navItems = getNavItems(locale, navCountry).map((item) => ({
           });
       } catch (e) {}
 
-      // Header is sticky, so a menu left open pins to the top and eats the
-      // viewport — close it whenever it's open and the user scrolls past a
-      // small threshold (the home page's default-open state, but also any
-      // page where the burger was opened by hand). Checks the live
-      // aria-expanded state each time rather than closing once and
-      // detaching, so it keeps working for every open on every page.
-      //
-      // The mobile menu's own open animation triggers a 'scroll' event or
-      // two on its own (scroll-anchoring compensating for the layout
-      // change, not real user scrolling) — without the guard below, opening
-      // the menu while already scrolled past the threshold made this
-      // handler close it again almost immediately, so the menu looked
-      // impossible to open once scrolled down.
+      let scrollCheckScheduled = false;
       window.addEventListener(
         'scroll',
         function () {
-          if (Date.now() < ignoreScrollCloseUntil) return;
-          if (window.scrollY <= 60) return;
-          if (burger.getAttribute('aria-expanded') === 'true') closeMenu();
+          if (scrollCheckScheduled) return;
+          scrollCheckScheduled = true;
+          requestAnimationFrame(function () {
+            scrollCheckScheduled = false;
+            if (Date.now() < ignoreScrollCloseUntil) return;
+            if (burger.getAttribute('aria-expanded') === 'true')
+              closeMenu(true);
+          });
         },
         { passive: true },
       );
-
-      // Browsers restore the previous scroll position on reload — if that
-      // lands us already past the threshold, the menu (pre-opened by SSR)
-      // would otherwise flash open for a frame and then visibly snap shut.
-      // Correct it instantly, before that ever paints. This script runs
-      // early (top of <body>), before some browsers finish restoring the
-      // scroll position, so the check may fire too soon and miss — a
-      // same-frame backstop catches that case too.
-      function correctForRestoredScroll() {
-        if (
-          window.scrollY > 60 &&
-          burger.getAttribute('aria-expanded') === 'true'
-        )
-          closeMenu(true);
-      }
-      correctForRestoredScroll();
-      requestAnimationFrame(correctForRestoredScroll);
     }
 
     // Follow OS theme changes live, but only while the user hasn't picked one explicitly.

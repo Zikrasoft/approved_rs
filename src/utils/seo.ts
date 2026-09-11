@@ -106,6 +106,33 @@ export function generateServiceSchema(
   };
 }
 
+export function generateLocalBusinessSchema(options: {
+  type: 'AutoRepair' | 'AutomotiveBusiness';
+  name: string;
+  url: string;
+  streetAddress: string;
+  cityCountryLine: string;
+  areaServed: string | string[];
+}) {
+  const { type, name, url, streetAddress, cityCountryLine, areaServed } =
+    options;
+  const addressLocality = cityCountryLine.split(',')[0]!.trim();
+  return {
+    '@context': 'https://schema.org',
+    '@type': type,
+    name,
+    url,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress,
+      addressLocality,
+      addressCountry: 'RS',
+    },
+    areaServed,
+    parentOrganization: { '@type': 'Organization', name: SITE_NAME },
+  };
+}
+
 // Homepage/business-entity schema. Organization (not LocalBusiness — no address,
 // no fixed service location) with sameAs pointing at the actual public profiles
 // and a contactPoint for the real (Telegram-only) contact channel, instead of

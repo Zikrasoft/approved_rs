@@ -12,7 +12,7 @@ import ChipLinks from '@/components/ChipLinks.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
 import WhatWeDoList from '@/components/WhatWeDoList.astro';
 import HowToFindUs from '@/components/HowToFindUs.astro';
-import { generateServiceSchema, ogImageFor } from '@/utils/seo';
+import { generateLocalBusinessSchema, ogImageFor } from '@/utils/seo';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { toAutoserviceCaseItem } from '@/utils/cases';
 import { getPublishedAutoserviceCases } from '@/utils/casesQueries';
@@ -32,11 +32,14 @@ const meta = {
   canonical: `${SITE_URL}${PathBuilder.autoServiceBelgrade(locale)}`,
   ogImage: ogImageFor(SITE_URL, 'auto-service-belgrade', locale),
 };
-const schema = generateServiceSchema(
-  `${bc.title} ${bc.titleHighlight}`,
-  getCountry('rs')![locale].name,
-  meta.canonical,
-);
+const schema = generateLocalBusinessSchema({
+  type: 'AutoRepair',
+  name: `${SITE_NAME} — ${bc.title} ${bc.titleHighlight}`,
+  url: meta.canonical,
+  streetAddress: bc.streetAddress,
+  cityCountryLine: bc.cityCountryLine,
+  areaServed: getCountry('rs')![locale].name,
+});
 
 const items = (await getPublishedAutoserviceCases()).map((c) =>
   toAutoserviceCaseItem(c, locale),

@@ -62,6 +62,11 @@ const countryName = c.data.country
       c.data.country.toUpperCase())
   : undefined;
 
+const serviceHref =
+  c.data.service === 'vehicle-import'
+    ? PathBuilder.vehicleImportHub(locale)
+    : PathBuilder.service(locale, c.data.service, c.data.country);
+
 const hook = excerptFromMarkdown(translation?.body ?? c.body ?? '');
 const canonical = `${SITE_URL}${PathBuilder.case(locale, c.id)}`;
 const imageUrl = c.data.image ? `${SITE_URL}${c.data.image.src}` : undefined;
@@ -164,6 +169,8 @@ const schema = generateArticleSchema({
               />
             </div>
           </div>
+
+          <ContactCTA label={cc.ctaButtonLabel} compact />
         </div>
 
         {
@@ -213,7 +220,14 @@ const schema = generateArticleSchema({
       <p class="text-xs tracking-widest uppercase mb-2 font-medium text-accent">
         {cc.ctaEyebrow}
       </p>
-      <h2 class="font-display text-3xl font-bold mb-6">{cc.ctaHeading}</h2>
+      <h2 class="font-display text-3xl font-bold mb-3">{cc.ctaHeading}</h2>
+      <a
+        href={serviceHref}
+        class="group inline-flex items-center gap-1.5 text-sm font-semibold mb-6 text-accent"
+      >
+        {t.nav[c.data.service]}
+        <span class="transition-transform group-hover:translate-x-0.5">→</span>
+      </a>
       <ContactCTA label={cc.ctaButtonLabel} />
     </div>
   </div>

@@ -4,6 +4,7 @@
 export const prerender = false;
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import GeoBanner from '@/components/GeoBanner.astro';
+import ServiceQuickLinks from '@/components/ServiceQuickLinks.astro';
 import ContactCTA from '@/components/ContactCTA.astro';
 import CasesGrid from '@/components/CasesGrid.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
@@ -25,8 +26,9 @@ import {
   SITE_URL,
   SITE_NAME,
   TG_MANAGER,
-  THREADS_CHANNEL,
+  SOCIAL_SAME_AS,
   CHINA_NAME,
+  DEFAULT_COUNTRY,
 } from '@/utils/constants';
 import { generateOrganizationSchema } from '@/utils/seo';
 import { telegramLink } from '@/utils/telegramLink';
@@ -55,10 +57,7 @@ const schema = generateOrganizationSchema({
   // Autopodbor's own markets plus China — vehicle-import sources cars from there
   // too, even though it's not a countries.json market in its own right.
   areaServed: [...countries.map((c) => c[locale].name), CHINA_NAME[locale]],
-  sameAs: [
-    `https://t.me/${TG_MANAGER}`,
-    `https://www.threads.com/@${THREADS_CHANNEL}`,
-  ],
+  sameAs: SOCIAL_SAME_AS,
   contactUrl: telegramLink(TG_MANAGER),
 });
 
@@ -103,6 +102,12 @@ const journey = [
 ---
 
 <BaseLayout {...meta} schema={schema}>
+  <section id="quick-links-band" class="xl:hidden border-b border-default">
+    <div class="max-w-6xl mx-auto px-6 py-5">
+      <ServiceQuickLinks countryCode={DEFAULT_COUNTRY} />
+    </div>
+  </section>
+
   {
     Astro.locals.suggestedCountry && (
       <GeoBanner detected={Astro.locals.suggestedCountry} />
@@ -544,4 +549,31 @@ const journey = [
   .review-card {
     transition: background-color 0.25s;
   }
+  body:has(#mobile-menu.menu-open) #quick-links-band {
+    display: none;
+  }
 </style>
+
+<script>
+  const band = document.getElementById('quick-links-band');
+  const header = document.querySelector('header');
+  const menu = document.getElementById('mobile-menu');
+  if (band && header) {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry || entry.isIntersecting) return;
+        if (menu && menu.classList.contains('menu-open')) return;
+        band.remove();
+        observer.disconnect();
+      },
+      {
+        rootMargin: `-${header.getBoundingClientRect().height + 24}px 0px 0px 0px`,
+      },
+    );
+    observer.observe(band);
+  }
+
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) location.reload();
+  });
+</script>

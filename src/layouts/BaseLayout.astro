@@ -4,8 +4,6 @@ import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
 import CookieConsent from '@/components/CookieConsent.astro';
 import FloatingContactWidget from '@/components/FloatingContactWidget.astro';
-import Analytics from '@vercel/analytics/astro';
-import SpeedInsights from '@vercel/speed-insights/astro';
 import '../styles/global.css';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { getAlternateLinks } from '@/i18n/hreflang';
@@ -195,8 +193,6 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
     <Footer />
     <FloatingContactWidget />
     <CookieConsent />
-    <Analytics />
-    <SpeedInsights />
     <script is:inline>
       // Safety net: if CSS animations fail to run (slow connection, power-save mode),
       // force all animated elements visible after 1.6s (covers longest fade-up-6 delay).

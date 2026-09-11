@@ -3,11 +3,19 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import ContactCTA from '@/components/ContactCTA.astro';
 import PageHero from '@/components/PageHero.astro';
 import Faq from '@/components/Faq.astro';
-import { SITE_URL, SITE_NAME } from '@/utils/constants';
+import {
+  SITE_URL,
+  SITE_NAME,
+  PHONE_NUMBER,
+  TG_MANAGER,
+  SOCIAL_SAME_AS,
+} from '@/utils/constants';
 import { getFaq } from '@/i18n/content/faq';
 import { getPagesContent } from '@/i18n/content/pages';
 import { getI18n } from '@/i18n/getI18n';
 import { withLocales, PathBuilder } from '@/utils/paths';
+import { generateOrganizationSchema } from '@/utils/seo';
+import { telegramLink } from '@/utils/telegramLink';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
@@ -22,9 +30,20 @@ const meta = {
 
 const info = p.info;
 const steps = p.steps;
+
+const schema = {
+  ...generateOrganizationSchema({
+    url: SITE_URL,
+    description: p.metaDescription,
+    areaServed: [],
+    sameAs: SOCIAL_SAME_AS,
+    contactUrl: telegramLink(TG_MANAGER),
+  }),
+  telephone: `+${PHONE_NUMBER}`,
+};
 ---
 
-<BaseLayout {...meta}>
+<BaseLayout {...meta} {schema}>
   <PageHero
     decoWord="CONTACT"
     title={p.heroTitle}

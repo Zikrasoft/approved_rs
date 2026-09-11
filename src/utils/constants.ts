@@ -19,6 +19,11 @@ export const VIBER_NUMBER = import.meta.env.PUBLIC_VIBER_NUMBER!;
 // diverge later (e.g. a dedicated landline).
 export const PHONE_NUMBER = import.meta.env.PUBLIC_WHATSAPP_NUMBER!;
 
+export const SOCIAL_SAME_AS = [
+  `https://t.me/${TG_MANAGER}`,
+  `https://www.threads.com/@${THREADS_CHANNEL}`,
+];
+
 // Official brand colors — kept true regardless of theme/hover state so the
 // icons stay instantly recognizable (that's the whole point of a brand
 // mark), unlike the site's own UI chrome which follows light/dark tokens.
