@@ -165,6 +165,15 @@ monorepo artifact.
 
 Husky + lint-staged run eslint --fix/prettier on staged files on commit — a commit can silently reformat what you staged, so `git status`/`git diff` after committing if that matters.
 
+**Run the `review-local` skill with fixes applied before every commit.** It is
+the only pass that reads the diff against this file's conventions, and it costs
+minutes against a bug reaching production. Skip it only for a change small
+enough that the diff carries no judgement — a typo, a version bump, a copy
+tweak. Anything touching logic, money, the lead pipeline or a public route goes
+through it. This is not enforced by a git hook on purpose: a hook can block a
+commit but cannot run the review, and it cannot tell a one-word fix from a
+refactor.
+
 ## Architecture
 
 **Stack:** Astro v7, `output: 'static'` (prerendered) with the Vercel adapter — most pages are static; a page opts into SSR individually via `export const prerender = false` (used by the two `/api/*` routes and the homepage, which needs `Astro.locals.suggestedCountry` from middleware). There is no global SSR mode.
