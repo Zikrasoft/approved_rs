@@ -1,5 +1,3 @@
-export {};
-
 import { createCaseTranslator } from '@podbor/i18n/translate';
 import { TRANSLATABLE_LOCALES } from '../src/i18n/config.ts';
 import {
