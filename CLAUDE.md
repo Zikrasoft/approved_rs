@@ -75,6 +75,17 @@ node --experimental-strip-types scripts/translate-i18n.ts   # dry-run i18n YAML 
 node --experimental-strip-types scripts/translate-cases.ts  # dry-run case-study translation
 ```
 
+Dev-only filesystem code in an SSR route must sit inside an
+`if (import.meta.env.DEV)` block with its `node:fs`/`node:path` imports done
+dynamically inside it, never as the fall-through of an
+`if (import.meta.env.PROD) { … return }` branch. Vite only folds away a
+literal `if (false)`, so the fall-through form survives into the bundle, and
+`@vercel/nft` then resolves its `process.cwd()` + dynamic path to "every file
+under the workspace root" — which the Vercel adapter copies verbatim into the
+deployed function (`.git`, `.env*` and every other app included; it was 353 MB
+before this was fixed, 32 MB after). See `src/pages/api/admin/case-photos-*.ts`
+for the shape.
+
 `pnpm build` may finish rendering every page and only then fail at the
 `@astrojs/vercel` "astro:build:done" hook locally with a `sharp` binary `ENOENT`
 — that's a local-machine artifact unrelated to code changes, not a real build
