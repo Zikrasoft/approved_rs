@@ -17,7 +17,12 @@ import {
   publishedProducts,
 } from '@/utils/products';
 import { safeMarkdown } from '@podbor/site-kit';
-import { CURRENCY, CURRENCY_SYMBOL, SITE_URL } from '@/utils/constants';
+import {
+  CURRENCY,
+  CURRENCY_SYMBOL,
+  SITE_NAME,
+  SITE_URL,
+} from '@/utils/constants';
 
 export async function getStaticPaths() {
   const products = publishedProducts(await getCollection('products'));
@@ -77,7 +82,7 @@ const specs = [
 ---
 
 <Shell
-  title={`${title} — ${shop.productMetaSuffix} — AUTOHUB`}
+  title={`${title} — ${shop.productMetaSuffix} — ${SITE_NAME}`}
   description={`${title}. ${shop.metaDescription}`}
   jsonLd={[productSchema]}
 >
@@ -139,7 +144,7 @@ const specs = [
         data-added-label={shop.inCart}
       >
         <Icon name="cart" />
-        {shop.addToCart}
+        <span data-add-to-cart-label>{shop.addToCart}</span>
       </button>
 
       <p class="text-sm text-muted">{shop.installNote}</p>

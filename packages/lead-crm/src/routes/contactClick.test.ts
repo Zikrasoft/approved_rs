@@ -7,6 +7,7 @@ const waitUntil = vi.fn();
 const POST = createContactClickRoute({
   notifyLead,
   waitUntil,
+  isLocale: (v: string) => ['ru', 'sr', 'en'].includes(v),
   defaultLocale: 'ru',
 });
 

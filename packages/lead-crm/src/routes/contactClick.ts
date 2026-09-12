@@ -34,12 +34,27 @@ const CHANNEL_COPY: Record<
 export interface ContactClickRouteOptions {
   notifyLead: NotifyLead;
   waitUntil: (promise: Promise<unknown>) => void;
+  isLocale: (value: string) => boolean;
   defaultLocale: string;
+}
+
+export function localeFromUrl(
+  url: string | null,
+  isLocale: (value: string) => boolean,
+): string | null {
+  if (!url) return null;
+  try {
+    const first = new URL(url).pathname.split('/').filter(Boolean)[0];
+    return first && isLocale(first) ? first : null;
+  } catch {
+    return null;
+  }
 }
 
 export function createContactClickRoute({
   notifyLead,
   waitUntil,
+  isLocale,
   defaultLocale,
 }: ContactClickRouteOptions) {
   return async function POST({
@@ -55,6 +70,7 @@ export function createContactClickRoute({
       ? rawChannel
       : 'phone';
     const copy = CHANNEL_COPY[channel];
+    const sourceUrl = field('source_url', MAX_URL_LENGTH);
 
     waitUntil(
       notifyLead(
@@ -64,9 +80,9 @@ export function createContactClickRoute({
           service: copy.service,
           contactChannel: channel,
           comment: copy.comment,
-          source_url: field('source_url', MAX_URL_LENGTH),
+          source_url: sourceUrl,
           visitorId: visitorId(form.get('visitor_id')?.toString().trim() ?? ''),
-          locale: defaultLocale,
+          locale: localeFromUrl(sourceUrl, isLocale) ?? defaultLocale,
           kind: 'call_click',
         },
         '[contact-click]',

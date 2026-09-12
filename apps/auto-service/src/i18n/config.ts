@@ -21,8 +21,14 @@ export type TranslatableLocale = Exclude<Locale, typeof DEFAULT_LOCALE>;
 
 export const BCP47_BY_LOCALE: Record<Locale, string> = {
   ru: 'ru-RS',
-  sr: 'sr-RS',
+  sr: 'sr-Latn-RS',
   en: 'en-RS',
+};
+
+export const OG_LOCALE: Record<Locale, string> = {
+  ru: 'ru_RU',
+  sr: 'sr_RS',
+  en: 'en_US',
 };
 
 export const LOCALE_NAME: Record<Locale, string> = {

@@ -1,6 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
+import { SERVICE_SLUGS } from './utils/services';
 
 const translationSchema = z
   .object({ title: z.string(), body: z.string() })
@@ -55,7 +56,7 @@ const works = defineCollection({
         .optional(),
       car: z.string(),
       year: z.number().optional(),
-      servicesApplied: z.array(z.string()).default([]),
+      servicesApplied: z.array(z.enum(SERVICE_SLUGS)).default([]),
       image: image(),
       gallery: z.array(image()).default([]),
       date: z.coerce.date(),

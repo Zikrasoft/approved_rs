@@ -4,7 +4,7 @@ import react from '@astrojs/react';
 import keystatic from '@keystatic/astro';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
-import { BCP47_BY_LOCALE, localeConfig } from './src/i18n/config.ts';
+import { localeConfig } from './src/i18n/config.ts';
 
 export default defineConfig({
   site: 'https://autohub.rs',
@@ -24,7 +24,7 @@ export default defineConfig({
         !['/thanks/', '/cart/'].some((s) => page.includes(s)),
       i18n: {
         defaultLocale: localeConfig.defaultLocale,
-        locales: BCP47_BY_LOCALE,
+        locales: Object.fromEntries(localeConfig.locales.map((l) => [l, l])),
       },
     }),
   ],

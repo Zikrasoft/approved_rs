@@ -8,7 +8,7 @@ import {
 } from '@podbor/lead-crm';
 import { getServicesContent } from '@/i18n/content/services';
 import { isServiceSlug } from '@/utils/services';
-import { BRAND, DEFAULT_COMMISSION_PERCENT, leadStore } from './crm';
+import { BRAND, leadStore } from './crm';
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -26,7 +26,6 @@ const client = createTelegramClient(requireEnv('TELEGRAM_BOT_TOKEN'));
 const formatter = createFormatter({
   serviceLabel: (slug) => (isServiceSlug(slug) ? ruServices[slug].name : slug),
   botUsername: requireEnv('TELEGRAM_BOT_USERNAME'),
-  defaultCommissionPercent: DEFAULT_COMMISSION_PERCENT,
   contactChannelLabels: {
     telegram: 'Telegram',
     whatsapp: 'WhatsApp',

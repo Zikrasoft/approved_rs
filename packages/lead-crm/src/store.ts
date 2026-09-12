@@ -17,6 +17,7 @@ export const MAX_LIST_ROWS = 20;
 export interface OwedRow {
   id: number;
   name: string;
+  brand: string;
   dealAmount: number;
   commissionAmount: number;
   paidAmount: number;
@@ -52,7 +53,7 @@ export function appendNote(
   note: string,
 ): string {
   const next = comment ? `${comment}\n${note}` : note;
-  return next.slice(0, MAX_STORED_COMMENT_LENGTH);
+  return next.slice(-MAX_STORED_COMMENT_LENGTH);
 }
 
 export function createLeadStore({ storage, schema }: LeadStoreOptions) {
@@ -404,6 +405,7 @@ export function createLeadStore({ storage, schema }: LeadStoreOptions) {
           return {
             id: l.id,
             name: l.name,
+            brand: l.brand,
             dealAmount: l.dealAmount,
             commissionAmount: commission,
             paidAmount: l.paidAmount,

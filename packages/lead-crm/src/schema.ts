@@ -40,17 +40,19 @@ export type PendingCommissionClaim = z.infer<
   typeof pendingCommissionClaimSchema
 >;
 
+export const LEGACY_BRAND = 'Approved.rs';
+
 const baseStoredLeadSchema = z.object({
   id: z.number().int().positive(),
-  brand: z.string().max(80),
-  name: z.string().max(200),
-  contact: z.string().max(200),
-  service: z.string().max(200),
-  contactChannel: z.string().max(200).nullable().optional(),
-  comment: z.string().max(4000).nullable().optional(),
-  country: z.string().max(200).nullable().optional(),
-  source_url: z.string().max(500).nullable().optional(),
-  visitorId: z.string().max(200).nullable().optional(),
+  brand: z.string().default(LEGACY_BRAND),
+  name: z.string(),
+  contact: z.string(),
+  service: z.string(),
+  contactChannel: z.string().nullable().optional(),
+  comment: z.string().nullable().optional(),
+  country: z.string().nullable().optional(),
+  source_url: z.string().nullable().optional(),
+  visitorId: z.string().nullable().optional(),
   locale: z.string(),
   kind: z.enum(['lead', 'call_click']).optional(),
   status: leadStatusSchema.default('new'),
@@ -88,30 +90,18 @@ export type LeadInput = Pick<
 export type LeadSubmission = Omit<LeadInput, 'brand'>;
 
 export interface LeadSchemaOptions {
-  locales: readonly string[];
   defaultCommissionPercent: number;
-  defaultBrand: string;
 }
 
 export type StoredLeadSchema = z.ZodType<StoredLead, unknown>;
 
 export function createLeadSchema({
-  locales,
   defaultCommissionPercent,
-  defaultBrand,
 }: LeadSchemaOptions): StoredLeadSchema {
-  if (locales.length === 0) {
-    throw new Error('[lead-crm] locales must not be empty');
-  }
   if (defaultCommissionPercent < 0) {
     throw new Error('[lead-crm] defaultCommissionPercent must not be negative');
   }
-  if (!defaultBrand) {
-    throw new Error('[lead-crm] defaultBrand must not be empty');
-  }
   return baseStoredLeadSchema.extend({
-    brand: z.string().default(defaultBrand),
-    locale: z.enum(locales as readonly [string, ...string[]]),
     commissionPercent: z
       .number()
       .nonnegative()

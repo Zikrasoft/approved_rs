@@ -51,7 +51,7 @@ const site = getSiteContent(locale);
       style="left:var(--split)"
       aria-hidden="true"></span>
     <span
-      class="pointer-events-none absolute top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-chalk/40 bg-void/70 backdrop-blur-md"
+      class="pointer-events-none absolute top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-chalk/40 bg-void/70 backdrop-blur-md group-has-[input:focus-visible]:border-champagne group-has-[input:focus-visible]:ring-2 group-has-[input:focus-visible]:ring-champagne"
       style="left:var(--split)"
       aria-hidden="true"
     >
@@ -76,7 +76,7 @@ const site = getSiteContent(locale);
       min="0"
       max="100"
       value="50"
-      step="0.1"
+      step="1"
       aria-label={site.common.dragHint}
       class="absolute inset-0 h-full w-full cursor-ew-resize appearance-none bg-transparent opacity-0"
       data-compare-input

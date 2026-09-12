@@ -7,7 +7,7 @@ import {
 } from '@podbor/lead-crm';
 import type { TrackedContactChannel } from '@/utils/contactChannel';
 import { SERVICE_LABELS } from '@/utils/labels';
-import { BRAND, DEFAULT_COMMISSION_PERCENT, leadStore } from './crm';
+import { BRAND, leadStore } from './crm';
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -25,7 +25,6 @@ export const client = createTelegramClient(requireEnv('TELEGRAM_BOT_TOKEN'));
 export const formatter = createFormatter({
   serviceLabel: (slug) => SERVICE_LABEL_BY_SLUG.get(slug) ?? slug,
   botUsername: requireEnv('TELEGRAM_BOT_USERNAME'),
-  defaultCommissionPercent: DEFAULT_COMMISSION_PERCENT,
   contactChannelLabels: {
     telegram: 'Telegram',
     whatsapp: 'WhatsApp',

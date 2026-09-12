@@ -198,6 +198,11 @@ const links = [
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') setOpen(false);
   });
+  window
+    .matchMedia('(min-width: 1024px)')
+    .addEventListener('change', (event) => {
+      if (event.matches) setOpen(false);
+    });
 </script>
 
 <script>

@@ -11,7 +11,6 @@ export type Keyboard = { inline_keyboard: Btn[][] };
 export interface FormatterOptions {
   serviceLabel: (slug: string) => string;
   botUsername: string;
-  defaultCommissionPercent: number;
   contactChannelLabels: Record<string, string>;
 }
 
@@ -205,7 +204,7 @@ export function buildOwedList(
   }
   const buttons: Btn[][] = rows.map((r) => [
     {
-      text: `#${r.id} ${r.name} — ${formatMoney(r.remaining)}`,
+      text: `#${r.id} ${r.name} · ${r.brand} — ${formatMoney(r.remaining)}`,
       callback_data: `open:${r.id}`,
     },
   ]);
@@ -354,7 +353,6 @@ export function dealNotificationText(
 export function createFormatter({
   serviceLabel,
   botUsername,
-  defaultCommissionPercent,
   contactChannelLabels,
 }: FormatterOptions) {
   const channelLabels = new Map(Object.entries(contactChannelLabels));
@@ -474,7 +472,8 @@ export function createFormatter({
           'Не договорились сейчас? ⏰ Отложить — укажи дату (ДД.ММ.ГГГГ), заявка вернётся в работу сама в этот день, или жми ▶️ Возобновить раньше.',
           'В заявке можно поправить имя/контакт/комментарий или архивировать.',
           '',
-          `<b>Комиссия (${defaultCommissionPercent}% от прибыли)</b>`,
+          '<b>Комиссия</b>',
+          'Ставка указана в самой заявке — она своя у каждого бизнеса.',
           'На завершённой заявке — 💸 Отметить оплату комиссии. Считается, что отправил остаток целиком, сумму вводить не надо. Админ подтвердит или отклонит.',
           '',
           '<b>Меню</b>',

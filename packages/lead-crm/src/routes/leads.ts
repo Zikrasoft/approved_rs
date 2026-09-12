@@ -37,10 +37,6 @@ export function createLeadsRoute<L extends string>({
   thanksPath,
   missingFieldsMessage,
 }: LeadsRouteOptions<L>) {
-  const messages = new Map<string, string>(
-    Object.entries<string>(missingFieldsMessage),
-  );
-
   return async function POST({
     request,
     redirect,
@@ -62,9 +58,7 @@ export function createLeadsRoute<L extends string>({
     }
 
     if (!name || !contact) {
-      return new Response(messages.get(locale) ?? messages.get(defaultLocale), {
-        status: 400,
-      });
+      return new Response(missingFieldsMessage[locale], { status: 400 });
     }
 
     const car = field('car');

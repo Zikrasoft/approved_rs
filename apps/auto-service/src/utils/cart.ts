@@ -74,15 +74,18 @@ export function cartCount(cart: CartLine[]): number {
   return cart.reduce((sum, l) => sum + l.quantity, 0);
 }
 
+function lineTotal(line: CartLine): number {
+  return Math.round(line.price * line.quantity * 100) / 100;
+}
+
 export function cartTotal(cart: CartLine[]): number {
-  return cart.reduce((sum, l) => sum + l.price * l.quantity, 0);
+  return Math.round(cart.reduce((sum, l) => sum + lineTotal(l), 0) * 100) / 100;
 }
 
 export function describeCart(cart: CartLine[]): string {
   return cart
     .map(
-      (l) =>
-        `${l.title} × ${l.quantity} — ${l.price * l.quantity} ${CURRENCY_SYMBOL}`,
+      (l) => `${l.title} × ${l.quantity} — ${lineTotal(l)} ${CURRENCY_SYMBOL}`,
     )
     .join('\n');
 }

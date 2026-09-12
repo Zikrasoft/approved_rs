@@ -46,9 +46,10 @@ export function createLocaleSet<L extends string, D extends L>({
           const [tag, qPart] = part.trim().split(';q=');
           return {
             primary: tag.trim().toLowerCase().split('-')[0],
-            q: qPart ? parseFloat(qPart) : 1,
+            q: qPart ? Number(qPart) || 0 : 1,
           };
         })
+        .filter(({ q }) => q > 0)
         .sort((a, b) => b.q - a.q);
 
       for (const { primary } of ranked) {

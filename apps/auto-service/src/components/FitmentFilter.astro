@@ -2,7 +2,7 @@
 import SelectField from './SelectField.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getShopContent } from '@/i18n/content/shop';
-import type { FitmentIndex } from '@/utils/products';
+import type { FitmentIndex } from '@/utils/fitment';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
 
 interface Props {
@@ -70,7 +70,7 @@ const fields = [
     fitmentMatches,
     type FitmentEntry,
     type FitmentIndex,
-  } from '@/utils/products';
+  } from '@/utils/fitment';
   import { pluralLabel, type PluralForms } from '@/utils/plural';
 
   const root = document.querySelector<HTMLElement>('[data-fitment-filter]');

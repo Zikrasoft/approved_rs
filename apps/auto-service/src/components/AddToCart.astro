@@ -19,13 +19,16 @@
     writeCart(addLine(readCart(), { slug, title, price }));
 
     const label = button.dataset.addedLabel;
-    if (!label) return;
-    button.dataset.idleLabel ??= button.textContent ?? '';
+    const labelEl = button.querySelector<HTMLElement>(
+      '[data-add-to-cart-label]',
+    );
+    if (!label || !labelEl) return;
+    labelEl.dataset.idleLabel ??= labelEl.textContent ?? '';
     window.clearTimeout(Number(button.dataset.resetTimer));
-    button.textContent = label;
+    labelEl.textContent = label;
     button.dataset.resetTimer = String(
       window.setTimeout(() => {
-        button.textContent = button.dataset.idleLabel ?? '';
+        labelEl.textContent = labelEl.dataset.idleLabel ?? '';
       }, 1600),
     );
   });

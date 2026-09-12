@@ -99,7 +99,7 @@ const links = [
   data-menu
   data-close-label={site.header.menuCloseLabel}
   hidden
-  class="fixed inset-0 z-20 flex flex-col justify-between bg-void/90 px-6 pb-10 pt-28 backdrop-blur-3xl"
+  class="fixed inset-0 z-20 flex flex-col justify-between bg-void/90 px-6 pb-10 pt-28 backdrop-blur-3xl lg:hidden"
 >
   <nav class="flex flex-col gap-1" aria-label={site.header.mobileNavLabel}>
     {
@@ -152,8 +152,11 @@ const links = [
   const openLabel = toggle?.getAttribute('aria-label') ?? '';
   const closeLabel = menu?.dataset.closeLabel ?? openLabel;
 
+  let closeTimer = 0;
+
   function setOpen(open: boolean) {
     if (!toggle || !menu) return;
+    window.clearTimeout(closeTimer);
     toggle.setAttribute('aria-expanded', String(open));
     toggle.setAttribute('aria-label', open ? closeLabel : openLabel);
     document.body.style.overflow = open ? 'hidden' : '';
@@ -178,7 +181,7 @@ const links = [
         el.style.opacity = '';
         el.style.transform = '';
       });
-      window.setTimeout(() => {
+      closeTimer = window.setTimeout(() => {
         menu.hidden = true;
       }, 320);
     }
@@ -194,4 +197,9 @@ const links = [
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') setOpen(false);
   });
+  window
+    .matchMedia('(min-width: 1024px)')
+    .addEventListener('change', (event) => {
+      if (event.matches) setOpen(false);
+    });
 </script>

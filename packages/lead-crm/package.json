@@ -2,6 +2,7 @@
   "name": "@podbor/lead-crm",
   "type": "module",
   "private": true,
+  "sideEffects": false,
   "version": "0.0.1",
   "exports": {
     ".": "./src/index.ts",

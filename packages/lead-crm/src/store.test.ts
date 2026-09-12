@@ -61,11 +61,7 @@ beforeEach(() => {
   storage = createMemoryStorage();
   store = createLeadStore({
     storage,
-    schema: createLeadSchema({
-      locales: ['ru', 'en', 'sr', 'es', 'de'],
-      defaultCommissionPercent: 10,
-      defaultBrand: 'Test',
-    }),
+    schema: createLeadSchema({ defaultCommissionPercent: 10 }),
   });
 });
 
@@ -85,6 +81,21 @@ describe('appendNote', () => {
     });
     expect(merged.merged).toBe(true);
     expect(merged.lead.comment!.length).toBeLessThanOrEqual(4000);
+  });
+
+  it('keeps the newest note when the cap forces something out', async () => {
+    await store.insertOrMergeLead({
+      ...baseData,
+      visitorId: 'visitor-1',
+      comment: 'x'.repeat(3990),
+    });
+
+    const merged = await store.insertOrMergeLead({
+      ...baseData,
+      visitorId: 'visitor-1',
+      service: 'newest-service',
+    });
+    expect(merged.lead.comment).toContain('newest-service');
   });
 });
 
@@ -867,11 +878,7 @@ describe('updateLeads — failures that are not write conflicts', () => {
     };
     const brokenStore = createLeadStore({
       storage: failing,
-      schema: createLeadSchema({
-        locales: ['ru'],
-        defaultCommissionPercent: 10,
-        defaultBrand: 'Test',
-      }),
+      schema: createLeadSchema({ defaultCommissionPercent: 10 }),
     });
 
     await expect(brokenStore.updateLeads((leads) => leads)).rejects.toBe(boom);
@@ -910,11 +917,7 @@ describe('per-business store defaults', () => {
   it('stamps new leads with the business own commission rate', async () => {
     const detailingStore = createLeadStore({
       storage: createMemoryStorage(),
-      schema: createLeadSchema({
-        locales: ['ru'],
-        defaultCommissionPercent: 50,
-        defaultBrand: 'Test',
-      }),
+      schema: createLeadSchema({ defaultCommissionPercent: 50 }),
     });
 
     const lead = await detailingStore.insertLead(baseData);

@@ -90,7 +90,7 @@ describe('buildFitmentIndex', () => {
         ],
       }),
     ]);
-    expect(index.makes).toEqual(['Volkswagen', 'Škoda']);
+    expect(index.makes).toEqual(['Škoda', 'Volkswagen']);
     expect(index.modelsByMake.Volkswagen).toEqual(['Golf']);
     expect(index.yearsByModel['Volkswagen|Golf']).toContain(2021);
     expect(new Set(index.yearsByModel['Volkswagen|Golf']).size).toBe(

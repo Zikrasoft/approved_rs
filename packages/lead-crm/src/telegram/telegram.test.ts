@@ -36,7 +36,6 @@ const client = createTelegramClient('test-bot-token');
 const formatter = createFormatter({
   serviceLabel: (slug) => SERVICE_LABELS[slug] ?? slug,
   botUsername: 'approved_test_bot',
-  defaultCommissionPercent: 10,
   contactChannelLabels: {
     telegram: 'Telegram',
     whatsapp: 'WhatsApp',
@@ -507,6 +506,7 @@ describe('buildOwedList', () => {
         {
           id: 1,
           name: 'Иван',
+          brand: 'Approved.rs',
           dealAmount: 100000,
           commissionAmount: 10000,
           paidAmount: 0,
@@ -517,7 +517,12 @@ describe('buildOwedList', () => {
     );
     expect(text).toContain(`Итого: ${money(10000)}`);
     expect(reply_markup.inline_keyboard).toEqual([
-      [{ text: `#1 Иван — ${money(10000)}`, callback_data: 'open:1' }],
+      [
+        {
+          text: `#1 Иван · Approved.rs — ${money(10000)}`,
+          callback_data: 'open:1',
+        },
+      ],
     ]);
   });
 
@@ -1006,13 +1011,13 @@ describe('per-business formatter config', () => {
   const detailingFormatter = createFormatter({
     serviceLabel: () => 'Оклейка плёнкой',
     botUsername: 'detailing_bot',
-    defaultCommissionPercent: 50,
     contactChannelLabels: {},
   });
 
-  it('quotes the business own commission rate in the help text, not a fixed 10%', () => {
-    expect(detailingFormatter.buildHelp('owner')).toContain('50%');
-    expect(detailingFormatter.buildHelp('owner')).not.toContain('10%');
+  it('does not quote one business rate in help text a shared bot shows every brand', () => {
+    expect(detailingFormatter.buildHelp('owner')).not.toMatch(
+      /\d+% от прибыли/,
+    );
   });
 
   it('computes the money line from the rate stored on the lead', () => {

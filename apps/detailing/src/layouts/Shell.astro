@@ -5,7 +5,7 @@ import '@/styles/global.css';
 import SiteHeader from '@/components/SiteHeader.astro';
 import SiteFooter from '@/components/SiteFooter.astro';
 import LeadModal from '@/components/LeadModal.astro';
-import { BCP47_BY_LOCALE, localeSet } from '@/i18n/config';
+import { BCP47_BY_LOCALE, OG_LOCALE, localeSet } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
 import {
   SITE_NAME,
@@ -99,7 +99,7 @@ const businessSchema = {
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
-    <meta property="og:locale" content={BCP47_BY_LOCALE[locale]} />
+    <meta property="og:locale" content={OG_LOCALE[locale]} />
     <meta name="twitter:card" content="summary_large_image" />
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

@@ -14,11 +14,7 @@ const refreshLeadCard = vi.fn();
 // hand-copied mirror that could silently drift from it.
 const realStore = createLeadStore({
   storage: createMemoryStorage(),
-  schema: createLeadSchema({
-    locales: ['ru', 'en', 'sr', 'es', 'de'],
-    defaultCommissionPercent: 10,
-    defaultBrand: 'Test',
-  }),
+  schema: createLeadSchema({ defaultCommissionPercent: 10 }),
 });
 
 const store = {
@@ -168,7 +164,7 @@ describe('notifyLead — lead that cannot be validated at all', () => {
     insertOrMergeLead.mockRejectedValue(new Error('storage down'));
 
     await expect(
-      notifyLead({ ...baseData, locale: 'not-a-locale' }, '[test]'),
+      notifyLead({ ...baseData, name: 42 as unknown as string }, '[test]'),
     ).resolves.toBeUndefined();
 
     expect(errorSpy).toHaveBeenCalledWith(

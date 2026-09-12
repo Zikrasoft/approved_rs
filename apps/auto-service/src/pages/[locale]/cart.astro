@@ -134,9 +134,12 @@ const shop = getShopContent(locale);
 
     form?.addEventListener('submit', () => {
       if (!comment) return;
-      comment.value = [describeCart(readCart()), comment.value.trim()]
+      const ordered = readCart();
+      if (ordered.length === 0) return;
+      comment.value = [describeCart(ordered), comment.value.trim()]
         .filter(Boolean)
         .join('\n\n');
+      writeCart([]);
     });
 
     const renderLine = (line: ReturnType<typeof readCart>[number]) => {

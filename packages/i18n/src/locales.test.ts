@@ -77,6 +77,14 @@ describe('detectLocale', () => {
     expect(set.detectLocale('fr;q=0.9,de;q=1.0', undefined)).toBe('de');
   });
 
+  it('honours q=0 as a refusal rather than a weak preference', () => {
+    expect(set.detectLocale('fr,sr;q=0', undefined)).toBe('ru');
+  });
+
+  it('treats an unparseable q as a refusal instead of ranking on NaN', () => {
+    expect(set.detectLocale('sr;q=x,en', undefined)).toBe('en');
+  });
+
   it('matches on the primary subtag, so en-GB counts as en', () => {
     expect(set.detectLocale('en-GB', undefined)).toBe('en');
   });

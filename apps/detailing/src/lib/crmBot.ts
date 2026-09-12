@@ -8,7 +8,7 @@ import {
 } from '@podbor/lead-crm';
 import { getServicesContent } from '@/i18n/content/services';
 import { isServiceSlug } from '@/utils/services';
-import { BRAND, DEFAULT_COMMISSION_PERCENT, leadStore } from './crm';
+import { BRAND, leadStore } from './crm';
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -18,15 +18,14 @@ function requireEnv(name: string): string {
 
 const ruServices = getServicesContent('ru');
 
-export const OWNER_IDS = parseIds(process.env.TELEGRAM_OWNER_ID);
-export const ADMIN_IDS = parseIds(process.env.TELEGRAM_ADMIN_ID);
+const OWNER_IDS = parseIds(process.env.TELEGRAM_OWNER_ID);
+const ADMIN_IDS = parseIds(process.env.TELEGRAM_ADMIN_ID);
 
-export const client = createTelegramClient(requireEnv('TELEGRAM_BOT_TOKEN'));
+const client = createTelegramClient(requireEnv('TELEGRAM_BOT_TOKEN'));
 
-export const formatter = createFormatter({
+const formatter = createFormatter({
   serviceLabel: (slug) => (isServiceSlug(slug) ? ruServices[slug].name : slug),
   botUsername: requireEnv('TELEGRAM_BOT_USERNAME'),
-  defaultCommissionPercent: DEFAULT_COMMISSION_PERCENT,
   contactChannelLabels: {
     telegram: 'Telegram',
     whatsapp: 'WhatsApp',
@@ -35,7 +34,7 @@ export const formatter = createFormatter({
   } satisfies Record<TrackedContactChannel, string>,
 });
 
-export const notifier = createNotifier({
+const notifier = createNotifier({
   client,
   formatter,
   groupId: requireEnv('TELEGRAM_GROUP_ID'),
