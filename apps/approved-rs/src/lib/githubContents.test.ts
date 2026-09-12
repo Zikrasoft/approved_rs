@@ -154,6 +154,14 @@ describe('listGalleryFiles', () => {
 describe('commitGalleryPhotos', () => {
   beforeEach(() => mockFetch.mockReset());
 
+  it('prefixes every content path with the app root — the repo holds several apps', async () => {
+    mockFetch.mockResolvedValueOnce(okJson([{ name: '0.jpg' }]));
+    await listGithubDir('tok', 'src/content/cases/bmw/gallery');
+    expect(String(mockFetch.mock.calls[0][0])).toContain(
+      '/contents/apps/approved-rs/src/content/cases/bmw/gallery',
+    );
+  });
+
   it('does exactly one blob call per photo, then one tree/commit/ref-update call each — a single atomic commit', async () => {
     mockFetch
       .mockResolvedValueOnce(okJson({ object: { sha: 'base-commit-sha' } })) // get ref
@@ -182,19 +190,19 @@ describe('commitGalleryPhotos', () => {
     expect(treeBody.base_tree).toBe('base-tree-sha');
     expect(treeBody.tree).toEqual([
       {
-        path: 'src/content/cases/bmw/gallery/0.jpg',
+        path: 'apps/approved-rs/src/content/cases/bmw/gallery/0.jpg',
         mode: '100644',
         type: 'blob',
         sha: 'blob-sha-1',
       },
       {
-        path: 'src/content/cases/bmw/gallery/1.jpg',
+        path: 'apps/approved-rs/src/content/cases/bmw/gallery/1.jpg',
         mode: '100644',
         type: 'blob',
         sha: 'blob-sha-2',
       },
       {
-        path: 'src/content/cases/bmw/index.md',
+        path: 'apps/approved-rs/src/content/cases/bmw/index.md',
         mode: '100644',
         type: 'blob',
         content: 'title: BMW\ngallery:\n  - gallery/0.jpg\n  - gallery/1.jpg\n',
