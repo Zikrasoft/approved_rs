@@ -2,6 +2,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { requestHasLocale } from 'astro:i18n';
 import { detectLocale } from './i18n/detectLocale';
+import { SUPPORTED_LOCALES } from './i18n/config';
 import { getCountry } from './utils/geo';
 
 const LOCALE_COOKIE = 'lang';
@@ -41,8 +42,6 @@ const SLUG_RENAMES: Record<string, string> = {
   privoz: 'vehicle-import',
   vykup: 'vehicle-buyback',
   proverka: 'vehicle-inspection',
-  'avtoservis-belgrade': 'auto-service-belgrade',
-  autoservice: 'auto-service',
 };
 
 export function renameSlugSegments(pathname: string): string | null {
@@ -55,6 +54,45 @@ export function renameSlugSegments(pathname: string): string | null {
     return seg;
   });
   return changed ? renamed.join('/') : null;
+}
+
+// Автосервис and детейлинг are separate businesses on their own domains now
+// — every old approved.rs URL for them 301s across. Slugs carried over
+// unchanged, so a case link keeps landing on the same case. es/de visitors
+// get 'en': the brand sites only run ru/sr/en. vercel.json carries the same
+// rules as edge-level statics; this is what fires in local dev.
+const BRAND_SITES: Record<string, string> = {
+  'auto-service-belgrade': 'https://autohub.rs',
+  'avtoservis-belgrade': 'https://autohub.rs',
+  'detailing-belgrade': 'https://prizma.rs',
+};
+const BRAND_CASE_TABS: Record<string, string> = {
+  'auto-service': 'https://autohub.rs',
+  autoservice: 'https://autohub.rs',
+  detailing: 'https://prizma.rs',
+};
+const BRAND_LOCALES = ['ru', 'sr', 'en'];
+
+export function movedBrandUrl(pathname: string): string | null {
+  const segments = pathname.split('/').filter(Boolean);
+  const hasLocale = (SUPPORTED_LOCALES as readonly string[]).includes(
+    segments[0],
+  );
+  const locale = hasLocale ? segments[0] : 'ru';
+  const path = hasLocale ? segments.slice(1) : segments;
+  const target = BRAND_LOCALES.includes(locale) ? locale : 'en';
+
+  const host = BRAND_SITES[path[0]];
+  if (host) {
+    const rest = path.slice(1);
+    return rest.length
+      ? `${host}/${target}/works/${rest.join('/')}/`
+      : `${host}/${target}/`;
+  }
+  if (path.length === 2 && path[0] === 'cases' && BRAND_CASE_TABS[path[1]]) {
+    return `${BRAND_CASE_TABS[path[1]]}/${target}/works/`;
+  }
+  return null;
 }
 
 // The Germany vehicle-import spoke moved under the EU one (/vehicle-import/eu/de/,
@@ -125,6 +163,9 @@ export const onRequest = defineMiddleware((context, next) => {
   ) {
     return next();
   }
+
+  const movedBrand = movedBrandUrl(pathname);
+  if (movedBrand) return context.redirect(movedBrand, 301);
 
   // Bare '/' serves the detected locale's homepage directly (content of
   // /ru/, /en/, etc.) instead of a 301 to it — the URL bar stays on '/'.

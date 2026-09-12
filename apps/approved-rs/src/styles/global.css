@@ -580,15 +580,7 @@ h4 {
 .prose-custom ul.icon-check {
   --list-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M20%206%209%2017l-5-5'/%3E%3C/svg%3E");
 }
-/* Protection/PPF benefit lists (detailing wrap cases). stroke-width 2.5, not
-   2 like wrench/check above — shield's curved outline needs the extra
-   weight to stay a legible shape at this ~18px render size instead of
-   antialiasing into a blurry ring. */
-.prose-custom ul.icon-shield {
-  --list-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2.5'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M20%2013c0%205-3.5%207.5-7.66%208.95a1%201%200%200%201-.67-.01C7.5%2020.5%204%2018%204%2013V6a1%201%200%200%201%201-1c2%200%204.5-1.2%206.24-2.72a1.17%201.17%200%200%201%201.52%200C14.51%203.81%2017%205%2019%205a1%201%200%200%201%201%201z'/%3E%3C/svg%3E");
-}
-/* City/coverage lists ("Belgrade, Novi Sad, Čačak and other cities"). Same
-   stroke-width bump as icon-shield, same reason. */
+/* City/coverage lists ("Belgrade, Novi Sad, Čačak and other cities"). */
 .prose-custom ul.icon-pin {
   --list-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2.5'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M20%2010c0%204.993-5.539%2010.193-7.399%2011.799a1%201%200%200%201-1.202%200C9.539%2020.193%204%2014.993%204%2010a8%208%200%200%201%2016%200'/%3E%3Ccircle%20cx='12'%20cy='10'%20r='3'/%3E%3C/svg%3E");
 }

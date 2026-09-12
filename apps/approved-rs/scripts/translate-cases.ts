@@ -5,11 +5,7 @@ import {
   TARGET_LANGUAGE_NAME,
 } from '../src/i18n/translateConfig.ts';
 
-export const CASE_DIRS = [
-  'src/content/cases',
-  'src/content/autoservice-cases',
-  'src/content/detailing-cases',
-];
+export const CASE_DIRS = ['src/content/cases'];
 
 const { run } = createCaseTranslator({
   targetLocales: TRANSLATABLE_LOCALES,

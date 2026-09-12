@@ -8,13 +8,11 @@ type CasesTabPageContentKey =
   | 'casesVehicleSourcing'
   | 'casesVehicleBuyback'
   | 'casesVehicleInspection'
-  | 'casesVehicleImport'
-  | 'casesAutoService'
-  | 'casesDetailing';
+  | 'casesVehicleImport';
 
 // Shared by every /cases/<tab>.astro page — each one only differs in which
 // PagesContent block/canonical path/item-fetching it uses; the meta-building
-// and tab-counts wiring was identical across all 6 before this.
+// and tab-counts wiring was identical across all of them before this.
 export async function buildCasesTabPageData(
   locale: Locale,
   contentKey: CasesTabPageContentKey,

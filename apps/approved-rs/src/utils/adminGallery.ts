@@ -22,16 +22,6 @@ export const KEYSTATIC_AUTH_COOKIE = 'keystatic-gh-access-token';
 // route writes into. One list, so the two never drift apart.
 export const CASE_COLLECTIONS = [
   { collection: 'cases', dir: 'src/content/cases', label: 'Автоподбор' },
-  {
-    collection: 'autoserviceCases',
-    dir: 'src/content/autoservice-cases',
-    label: 'Автосервис',
-  },
-  {
-    collection: 'detailingCases',
-    dir: 'src/content/detailing-cases',
-    label: 'Детейлинг',
-  },
 ] as const;
 
 export function isKnownCaseDir(dir: string): boolean {

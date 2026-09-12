@@ -34,16 +34,6 @@ const tabs = [
     href: PathBuilder.casesVehicleImport(locale),
     label: t.nav['vehicle-import'],
   },
-  {
-    id: 'auto-service',
-    href: PathBuilder.casesAutoService(locale),
-    label: t.nav['auto-service-belgrade'],
-  },
-  {
-    id: 'detailing',
-    href: PathBuilder.casesDetailing(locale),
-    label: t.nav['detailing-belgrade'],
-  },
 ] as const satisfies { id: CasesTabKind; href: string; label: string }[];
 ---
 

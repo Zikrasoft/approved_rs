@@ -60,8 +60,6 @@ export const pagesContentSchema = z
     casesVehicleBuyback: pageMetaSchema,
     casesVehicleInspection: pageMetaSchema,
     casesVehicleImport: pageMetaSchema,
-    casesAutoService: pageMetaSchema,
-    casesDetailing: pageMetaSchema,
     casesShared: z
       .object({ heroSubtitle: z.string(), emptyState: z.string() })
       .strict(),

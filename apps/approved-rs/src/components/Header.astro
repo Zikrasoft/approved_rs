@@ -6,11 +6,9 @@ import {
   Sun,
   Moon,
   Search,
-  Wrench,
   Banknote,
   ClipboardCheck,
   Globe,
-  Sparkles,
 } from '@lucide/astro';
 import SiteLogo from './SiteLogo.astro';
 import Button from './Button.astro';
@@ -52,8 +50,6 @@ const casesActive = Astro.url.pathname.includes('/cases/');
 const SERVICE_ICONS: Record<ServiceSlug, typeof Search> = {
   'vehicle-sourcing': Search,
   'vehicle-import': Globe,
-  'auto-service-belgrade': Wrench,
-  'detailing-belgrade': Sparkles,
   'vehicle-buyback': Banknote,
   'vehicle-inspection': ClipboardCheck,
 };
@@ -75,7 +71,6 @@ const navItems = getNavItems(locale, navCountry).map((item) => ({
 
     <HeaderDesktopNav
       navItems={navItems}
-      moreLabel={t.nav.moreServices}
       casesHref={casesHref}
       casesLabel={t.nav.cases}
       casesActive={casesActive}

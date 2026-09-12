@@ -1,13 +1,10 @@
 nav:
   vehicle-sourcing: Автоподбор
   vehicle-import: Авто из ЕС и Китая
-  auto-service-belgrade: Автосервис
-  detailing-belgrade: Детейлинг
   vehicle-buyback: Выкуп
   vehicle-inspection: Проверка
   cases: Кейсы
   contacts: Контакты
-  moreServices: Ещё услуги
 header:
   menuLabel: Меню
   languageLabel: Язык
@@ -51,13 +48,10 @@ translations:
     nav:
       vehicle-sourcing: Vehicle Sourcing
       vehicle-import: Cars from the EU and China
-      auto-service-belgrade: Auto Service
-      detailing-belgrade: Detailing
       vehicle-buyback: Buyback
       vehicle-inspection: Inspection
       cases: Cases
       contacts: Contacts
-      moreServices: More Services
     header:
       menuLabel: Menu
       languageLabel: Language
@@ -98,13 +92,10 @@ translations:
     nav:
       vehicle-sourcing: Autopodbor
       vehicle-import: Automobili iz EU i Kine
-      auto-service-belgrade: Autoservis
-      detailing-belgrade: Detaljiranje
       vehicle-buyback: Otkupljenje
       vehicle-inspection: Inspekcija
       cases: Studije slučaja
       contacts: Kontakti
-      moreServices: Ostale usluge
     header:
       menuLabel: Meni
       languageLabel: Jezik
@@ -145,13 +136,10 @@ translations:
     nav:
       vehicle-sourcing: Selección de Vehículos
       vehicle-import: Importación de Autos de la UE y China
-      auto-service-belgrade: Servicio de Autos
-      detailing-belgrade: Detailing
       vehicle-buyback: Compra de Vehículos
       vehicle-inspection: Inspección
       cases: Casos
       contacts: Contactos
-      moreServices: Más Servicios
     header:
       menuLabel: Menú
       languageLabel: Idioma
@@ -192,13 +180,10 @@ translations:
     nav:
       vehicle-sourcing: Fahrzeugbeschaffung
       vehicle-import: Autos aus der EU und China
-      auto-service-belgrade: Autoservice
-      detailing-belgrade: Detailing
       vehicle-buyback: Rückkauf
       vehicle-inspection: Inspektion
       cases: Fälle
       contacts: Kontakte
-      moreServices: Weitere Dienstleistungen
     header:
       menuLabel: Menü
       languageLabel: Sprache

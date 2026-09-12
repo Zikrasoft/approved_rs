@@ -6,7 +6,12 @@
   "env": {
     "SITE": "https://approved.rs"
   },
-  "crons": [{ "path": "/api/reminders", "schedule": "0 8 * * *" }],
+  "crons": [
+    {
+      "path": "/api/reminders",
+      "schedule": "0 8 * * *"
+    }
+  ],
   "git": {
     "deploymentEnabled": false
   },
@@ -51,7 +56,6 @@
       "destination": "/ru/vehicle-import/eu/de/:path*",
       "permanent": true
     },
-
     {
       "source": "/:locale(ru|en|sr)/cases/autopodbor",
       "destination": "/:locale/cases/vehicle-sourcing",
@@ -62,17 +66,6 @@
       "destination": "/ru/cases/vehicle-sourcing",
       "permanent": true
     },
-    {
-      "source": "/:locale(ru|en|sr)/cases/autoservice",
-      "destination": "/:locale/cases/auto-service",
-      "permanent": true
-    },
-    {
-      "source": "/cases/autoservice",
-      "destination": "/ru/cases/auto-service",
-      "permanent": true
-    },
-
     {
       "source": "/:locale(ru|en|sr)/autopodbor/:path*",
       "destination": "/:locale/vehicle-sourcing/:path*",
@@ -153,27 +146,6 @@
       "destination": "/ru/vehicle-inspection/:path*",
       "permanent": true
     },
-    {
-      "source": "/:locale(ru|en|sr)/avtoservis-belgrade/:path*",
-      "destination": "/:locale/auto-service-belgrade/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|en|sr)/avtoservis-belgrade/:path*/",
-      "destination": "/:locale/auto-service-belgrade/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/avtoservis-belgrade/:path*",
-      "destination": "/ru/auto-service-belgrade/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/avtoservis-belgrade/:path*/",
-      "destination": "/ru/auto-service-belgrade/:path*",
-      "permanent": true
-    },
-
     {
       "source": "/cases/",
       "destination": "/ru/cases/vehicle-sourcing",
@@ -309,7 +281,6 @@
       "destination": "/ru/cases/vehicle-sourcing",
       "permanent": true
     },
-
     {
       "source": "/vehicle-sourcing/:path*",
       "destination": "/ru/vehicle-sourcing/:path*",
@@ -351,16 +322,6 @@
       "permanent": true
     },
     {
-      "source": "/auto-service-belgrade/:path*",
-      "destination": "/ru/auto-service-belgrade/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/auto-service-belgrade/:path*/",
-      "destination": "/ru/auto-service-belgrade/:path*",
-      "permanent": true
-    },
-    {
       "source": "/cases/:path*",
       "destination": "/ru/cases/:path*",
       "permanent": true
@@ -398,6 +359,276 @@
     {
       "source": "/thanks/:path*/",
       "destination": "/ru/thanks/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|sr|en)/auto-service-belgrade/",
+      "destination": "https://autohub.rs/:locale/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|sr|en)/auto-service-belgrade",
+      "destination": "https://autohub.rs/:locale/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|sr|en)/auto-service-belgrade/:slug+/",
+      "destination": "https://autohub.rs/:locale/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|sr|en)/auto-service-belgrade/:slug+",
+      "destination": "https://autohub.rs/:locale/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(es|de)/auto-service-belgrade/",
+      "destination": "https://autohub.rs/en/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(es|de)/auto-service-belgrade",
+      "destination": "https://autohub.rs/en/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(es|de)/auto-service-belgrade/:slug+/",
+      "destination": "https://autohub.rs/en/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(es|de)/auto-service-belgrade/:slug+",
+      "destination": "https://autohub.rs/en/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/auto-service-belgrade/",
+      "destination": "https://autohub.rs/ru/",
+      "permanent": true
+    },
+    {
+      "source": "/auto-service-belgrade",
+      "destination": "https://autohub.rs/ru/",
+      "permanent": true
+    },
+    {
+      "source": "/auto-service-belgrade/:slug+/",
+      "destination": "https://autohub.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/auto-service-belgrade/:slug+",
+      "destination": "https://autohub.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|sr|en)/avtoservis-belgrade/",
+      "destination": "https://autohub.rs/:locale/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|sr|en)/avtoservis-belgrade",
+      "destination": "https://autohub.rs/:locale/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|sr|en)/avtoservis-belgrade/:slug+/",
+      "destination": "https://autohub.rs/:locale/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|sr|en)/avtoservis-belgrade/:slug+",
+      "destination": "https://autohub.rs/:locale/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(es|de)/avtoservis-belgrade/",
+      "destination": "https://autohub.rs/en/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(es|de)/avtoservis-belgrade",
+      "destination": "https://autohub.rs/en/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(es|de)/avtoservis-belgrade/:slug+/",
+      "destination": "https://autohub.rs/en/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(es|de)/avtoservis-belgrade/:slug+",
+      "destination": "https://autohub.rs/en/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/avtoservis-belgrade/",
+      "destination": "https://autohub.rs/ru/",
+      "permanent": true
+    },
+    {
+      "source": "/avtoservis-belgrade",
+      "destination": "https://autohub.rs/ru/",
+      "permanent": true
+    },
+    {
+      "source": "/avtoservis-belgrade/:slug+/",
+      "destination": "https://autohub.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/avtoservis-belgrade/:slug+",
+      "destination": "https://autohub.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|sr|en)/detailing-belgrade/",
+      "destination": "https://prizma.rs/:locale/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|sr|en)/detailing-belgrade",
+      "destination": "https://prizma.rs/:locale/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|sr|en)/detailing-belgrade/:slug+/",
+      "destination": "https://prizma.rs/:locale/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|sr|en)/detailing-belgrade/:slug+",
+      "destination": "https://prizma.rs/:locale/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(es|de)/detailing-belgrade/",
+      "destination": "https://prizma.rs/en/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(es|de)/detailing-belgrade",
+      "destination": "https://prizma.rs/en/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(es|de)/detailing-belgrade/:slug+/",
+      "destination": "https://prizma.rs/en/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(es|de)/detailing-belgrade/:slug+",
+      "destination": "https://prizma.rs/en/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/detailing-belgrade/",
+      "destination": "https://prizma.rs/ru/",
+      "permanent": true
+    },
+    {
+      "source": "/detailing-belgrade",
+      "destination": "https://prizma.rs/ru/",
+      "permanent": true
+    },
+    {
+      "source": "/detailing-belgrade/:slug+/",
+      "destination": "https://prizma.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/detailing-belgrade/:slug+",
+      "destination": "https://prizma.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|sr|en)/cases/auto-service/",
+      "destination": "https://autohub.rs/:locale/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|sr|en)/cases/auto-service",
+      "destination": "https://autohub.rs/:locale/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(es|de)/cases/auto-service/",
+      "destination": "https://autohub.rs/en/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(es|de)/cases/auto-service",
+      "destination": "https://autohub.rs/en/works/",
+      "permanent": true
+    },
+    {
+      "source": "/cases/auto-service/",
+      "destination": "https://autohub.rs/ru/works/",
+      "permanent": true
+    },
+    {
+      "source": "/cases/auto-service",
+      "destination": "https://autohub.rs/ru/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|sr|en)/cases/autoservice/",
+      "destination": "https://autohub.rs/:locale/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|sr|en)/cases/autoservice",
+      "destination": "https://autohub.rs/:locale/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(es|de)/cases/autoservice/",
+      "destination": "https://autohub.rs/en/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(es|de)/cases/autoservice",
+      "destination": "https://autohub.rs/en/works/",
+      "permanent": true
+    },
+    {
+      "source": "/cases/autoservice/",
+      "destination": "https://autohub.rs/ru/works/",
+      "permanent": true
+    },
+    {
+      "source": "/cases/autoservice",
+      "destination": "https://autohub.rs/ru/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|sr|en)/cases/detailing/",
+      "destination": "https://prizma.rs/:locale/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|sr|en)/cases/detailing",
+      "destination": "https://prizma.rs/:locale/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(es|de)/cases/detailing/",
+      "destination": "https://prizma.rs/en/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(es|de)/cases/detailing",
+      "destination": "https://prizma.rs/en/works/",
+      "permanent": true
+    },
+    {
+      "source": "/cases/detailing/",
+      "destination": "https://prizma.rs/ru/works/",
+      "permanent": true
+    },
+    {
+      "source": "/cases/detailing",
+      "destination": "https://prizma.rs/ru/works/",
       "permanent": true
     }
   ]

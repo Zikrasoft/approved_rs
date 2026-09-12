@@ -14,13 +14,10 @@ export const dictionaryContentSchema = z
       .object({
         'vehicle-sourcing': z.string(),
         'vehicle-import': z.string(),
-        'auto-service-belgrade': z.string(),
-        'detailing-belgrade': z.string(),
         'vehicle-buyback': z.string(),
         'vehicle-inspection': z.string(),
         cases: z.string(),
         contacts: z.string(),
-        moreServices: z.string(),
       })
       .strict(),
     header: z

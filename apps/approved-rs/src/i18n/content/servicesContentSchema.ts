@@ -14,26 +14,16 @@ import { z } from 'zod';
 // these literals, so a typo or a stale value fails loudly instead of
 // mismapping.
 //
-// Mirrors src/utils/labels.ts's AUTOSERVICE_SERVICES/DETAILING_SERVICES/
-// SERVICE_SLUGS, duplicated as plain literals rather than imported: this
+// Mirrors src/utils/labels.ts's SERVICE_SLUGS, duplicated as plain
+// literals rather than imported: this
 // schema must stay runnable standalone via `node --experimental-strip-types
 // scripts/translate-i18n.ts`, and labels.ts pulls in getI18n.ts's Vite-only
 // `?raw` YAML import, which plain Node can't resolve. Keep in sync by hand.
-const AUTOSERVICE_KEYS = [
-  'diagnostics',
-  'maintenance',
-  'suspension',
-  'engine',
-  'prepurchase',
-] as const;
-const DETAILING_KEYS = ['wrap'] as const;
 const SERVICE_SLUG_KEYS = [
   'vehicle-sourcing',
   'vehicle-buyback',
   'vehicle-inspection',
   'vehicle-import',
-  'auto-service-belgrade',
-  'detailing-belgrade',
 ] as const;
 
 const stepItemSchema = z.object({ n: z.string(), text: z.string() }).strict();
@@ -53,43 +43,6 @@ const euCountrySpokeSchema = z
     chinaCrossLabel: z.string(),
   })
   .strict();
-
-const whatWeDoItemSchema = <T extends readonly [string, ...string[]]>(
-  keys: T,
-) =>
-  z.object({ key: z.enum(keys), label: z.string(), desc: z.string() }).strict();
-
-// autoServiceBelgrade and detailingBelgrade are identical apart from which
-// (and how many) whatWeDo keys they carry — one factory instead of two
-// hand-copied 20-field object schemas.
-const belgradeServiceSchema = <T extends readonly [string, ...string[]]>(
-  whatWeDoKeys: T,
-) =>
-  z
-    .object({
-      metaTitle: z.string(),
-      metaDescription: z.string(),
-      title: z.string(),
-      titleHighlight: z.string(),
-      description: z.string(),
-      ctaLabel: z.string(),
-      breadcrumbLabel: z.string(),
-      whatWeDoHeading: z.string(),
-      whatWeDo: z
-        .array(whatWeDoItemSchema(whatWeDoKeys))
-        .length(whatWeDoKeys.length),
-      commentLabel: z.string(),
-      commentPlaceholder: z.string(),
-      alsoSourcingLabel: z.string(),
-      howToFindHeading: z.string(),
-      addressLabel: z.string(),
-      streetAddress: z.string(),
-      cityCountryLine: z.string(),
-      mapButtonLabel: z.string(),
-      mapIframeTitle: z.string(),
-      worksHeading: z.string(),
-    })
-    .strict();
 
 export const servicesContentSchema = z
   .object({
@@ -216,8 +169,6 @@ export const servicesContentSchema = z
         otherCitiesLabelFor: z.string(),
       })
       .strict(),
-    autoServiceBelgrade: belgradeServiceSchema(AUTOSERVICE_KEYS),
-    detailingBelgrade: belgradeServiceSchema(DETAILING_KEYS),
     caseChrome: z
       .object({
         autoLabel: z.string(),

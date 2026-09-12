@@ -11,7 +11,6 @@ describe('getPagesContent', () => {
       expect(p.privacy.sections.length).toBe(4);
       expect(p.thanks.heading).toBeTruthy();
       expect(p.casesVehicleSourcing.metaTitle).toBeTruthy();
-      expect(p.casesAutoService.metaTitle).toBeTruthy();
     }
   });
 

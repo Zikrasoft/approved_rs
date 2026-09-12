@@ -59,12 +59,6 @@ casesVehicleInspection:
 casesVehicleImport:
   metaTitle: Кейсы привоза авто — реальные автомобили клиентов
   metaDescription: 'Реальные кейсы привоза автомобилей из Европы и Китая: машина, цена и история сделки.'
-casesAutoService:
-  metaTitle: Кейсы автосервиса в Белграде — примеры работ
-  metaDescription: 'Реальные кейсы ремонта и обслуживания автомобилей в нашем автосервисе в Белграде: диагностика, ТО, ремонт подвески, двигателя и трансмиссии.'
-casesDetailing:
-  metaTitle: Кейсы детейлинга в Белграде — примеры работ
-  metaDescription: 'Реальные кейсы детейлинга в Белграде: оклейка плёнкой автомобилей, мотоциклов, велосипедов и яхт.'
 casesShared:
   heroSubtitle: Реальные автомобили, реальные цены, реальные истории
   emptyState: Кейсы скоро появятся.
@@ -131,12 +125,6 @@ translations:
     casesVehicleImport:
       metaTitle: Car Import Case Studies — Real Client Cars
       metaDescription: 'Real case studies of cars imported from Europe and China: the car, the price, and the story behind the deal.'
-    casesAutoService:
-      metaTitle: Auto Service Case Studies in Belgrade — Our Work
-      metaDescription: 'Real examples of car repair and maintenance at our Belgrade service center: diagnostics, scheduled maintenance, suspension, engine, and transmission repair.'
-    casesDetailing:
-      metaTitle: Detailing Case Studies in Belgrade — Our Work
-      metaDescription: 'Real detailing case studies in Belgrade: vinyl wrapping for cars, motorcycles, bicycles, and yachts.'
     casesShared:
       heroSubtitle: Real cars, real prices, real stories
       emptyState: Cases coming soon.
@@ -202,12 +190,6 @@ translations:
     casesVehicleImport:
       metaTitle: Primeri uvoza vozila — stvarni automobili klijenata
       metaDescription: 'Stvarni primeri uvoza vozila iz Evrope i Kine: vozilo, cena i tok posla.'
-    casesAutoService:
-      metaTitle: Primeri radova auto servisa u Beogradu
-      metaDescription: 'Stvarni primeri popravke i održavanja vozila u našem auto servisu u Beogradu: dijagnostika, redovno servisiranje, popravka vešanja, motora i menjača.'
-    casesDetailing:
-      metaTitle: Primeri radova detailinga u Beogradu
-      metaDescription: 'Stvarni primeri detailinga u Beogradu: folijacija automobila, motocikala, bicikala i jahti.'
     casesShared:
       heroSubtitle: Stvarna vozila, stvarne cene, stvarne priče
       emptyState: Primeri uskoro stižu.
@@ -273,12 +255,6 @@ translations:
     casesVehicleImport:
       metaTitle: Casos de importación de coches — vehículos reales de clientes
       metaDescription: 'Casos reales de importación de coches desde Europa y China: el vehículo, el precio y la historia de la operación.'
-    casesAutoService:
-      metaTitle: Casos del taller mecánico en Belgrado — ejemplos de trabajos
-      metaDescription: 'Casos reales de reparación y mantenimiento de coches en nuestro taller de Belgrado: diagnóstico, mantenimiento, reparación de suspensión, motor y transmisión.'
-    casesDetailing:
-      metaTitle: Casos de detailing en Belgrado — ejemplos de trabajos
-      metaDescription: 'Casos reales de detailing en Belgrado: envolturas de vinilo para coches, motocicletas, bicicletas y yates.'
     casesShared:
       heroSubtitle: Coches reales, precios reales, historias reales
       emptyState: Los casos estarán disponibles pronto.
@@ -344,12 +320,6 @@ translations:
     casesVehicleImport:
       metaTitle: Fallstudien zum Fahrzeugimport — echte Kundenfahrzeuge
       metaDescription: 'Echte Fallstudien zum Import von Fahrzeugen aus Europa und China: das Fahrzeug, der Preis und die Geschichte des Geschäfts.'
-    casesAutoService:
-      metaTitle: Fallstudien unserer Autowerkstatt in Belgrad — Arbeitsbeispiele
-      metaDescription: 'Echte Fallstudien zu Reparatur und Wartung von Fahrzeugen in unserer Werkstatt in Belgrad: Diagnose, Wartung, Reparatur von Fahrwerk, Motor und Getriebe.'
-    casesDetailing:
-      metaTitle: Fallstudien zum Detailing in Belgrad — Arbeitsbeispiele
-      metaDescription: 'Echte Fallstudien zum Detailing in Belgrad: Folierung von Autos, Motorrädern, Fahrrädern und Yachten.'
     casesShared:
       heroSubtitle: Echte Fahrzeuge, echte Preise, echte Geschichten
       emptyState: Fallstudien folgen in Kürze.

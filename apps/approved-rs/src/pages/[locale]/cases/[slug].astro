@@ -40,7 +40,7 @@ const translation = getCaseTranslation(c.data, locale);
 const title = translation?.title ?? c.data.title;
 const { Content } = await render(c);
 const translatedHtml = translation ? safeMarkdown(translation.body) : null;
-const banners = getPromoBanners(locale, 'vehicle-sourcing');
+const banners = getPromoBanners(locale);
 
 const CASES_TAB_PATH: Record<
   CollectionEntry<'cases'>['data']['service'],

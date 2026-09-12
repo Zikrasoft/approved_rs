@@ -27,8 +27,6 @@ export const SECTIONS: readonly Section[] = [
       'vehicle-import',
       'vehicle-buyback',
       'vehicle-inspection',
-      'autoServiceBelgrade',
-      'detailingBelgrade',
       'general',
       'cityExpert',
     ],
@@ -74,7 +72,7 @@ export const SECTIONS: readonly Section[] = [
     fields: servicesContentSchema.keyof().options,
     schema: servicesContentSchema,
     promptSubject:
-      'service page copy (sourcing/buyback/import/inspection/auto-service/detailing) — many strings contain literal placeholder tokens like {location}, {cityLocation}, {countryName}, {destinations}, {name}, {countryLocation}, {countryGenitiveOrName}',
+      'service page copy (sourcing/buyback/import/inspection) — many strings contain literal placeholder tokens like {location}, {cityLocation}, {countryName}, {destinations}, {name}, {countryLocation}, {countryGenitiveOrName}',
   },
 ];
 
