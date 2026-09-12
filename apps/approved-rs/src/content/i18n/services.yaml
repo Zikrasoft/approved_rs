@@ -196,64 +196,6 @@ cityVehicleSourcing:
   reason4Dekra: Проверка DEKRA / TÜV по запросу
   reason4Generic: Независимая техническая экспертиза по запросу
   otherCitiesLabelFor: 'Другие города {countryLocation}:'
-autoServiceBelgrade:
-  metaTitle: Автосервис в Белграде — ремонт и обслуживание
-  metaDescription: Профессиональный ремонт и обслуживание автомобилей в Белграде с гарантией качества. Диагностика, ТО, ремонт подвески, двигателя и трансмиссии.
-  title: Автосервис
-  titleHighlight: в Белграде
-  description: Профессиональный ремонт и обслуживание автомобилей в Белграде с гарантией качества.
-  ctaLabel: Записаться на сервис
-  breadcrumbLabel: Автосервис в Белграде
-  whatWeDoHeading: Что мы делаем
-  whatWeDo:
-    - key: diagnostics
-      label: Компьютерная диагностика
-      desc: Поиск неисправностей современным диагностическим оборудованием
-    - key: maintenance
-      label: Техническое обслуживание
-      desc: Замена масел, фильтров и технических жидкостей
-    - key: suspension
-      label: Подвеска и тормоза
-      desc: Диагностика и ремонт подвески, тормозной системы и рулевого управления
-    - key: engine
-      label: Двигатель и трансмиссия
-      desc: Ремонт двигателя, трансмиссии и навесного оборудования
-    - key: prepurchase
-      label: Проверка перед покупкой
-      desc: Комплексная проверка автомобиля перед покупкой или дальней поездкой
-  commentLabel: Марка, модель, что нужно сделать
-  commentPlaceholder: BMW 320i, 2018, стук в подвеске…
-  alsoSourcingLabel: 'Также подбираем авто:'
-  howToFindHeading: Как нас найти
-  addressLabel: Адрес автосервиса
-  streetAddress: Пека Павловича 39
-  cityCountryLine: Белград, Сербия
-  mapButtonLabel: Открыть в Google Maps
-  mapIframeTitle: Автосервис на карте — Пека Павловича 39, Белград
-  worksHeading: Примеры работ
-detailingBelgrade:
-  metaTitle: Детейлинг в Белграде — оклейка плёнкой авто, мото, вело, яхт
-  metaDescription: 'Детейлинг в Белграде: оклейка плёнкой автомобилей, мотоциклов, велосипедов и яхт.'
-  title: Детейлинг
-  titleHighlight: в Белграде
-  description: 'Профессиональный детейлинг в Белграде: оклейка плёнкой автомобилей, мотоциклов, велосипедов и яхт.'
-  ctaLabel: Оставить заявку
-  breadcrumbLabel: Детейлинг в Белграде
-  whatWeDoHeading: Наши услуги
-  whatWeDo:
-    - key: wrap
-      label: Оклейка плёнкой
-      desc: Полная и частичная оклейка кузова автомобилей, мотоциклов, велосипедов и яхт защитной или декоративной плёнкой
-  commentLabel: Марка, модель, что нужно сделать
-  commentPlaceholder: BMW X5, 2019, оклейка плёнкой…
-  alsoSourcingLabel: 'Также подбираем авто:'
-  howToFindHeading: Как нас найти
-  addressLabel: Адрес
-  streetAddress: Паштровичева 8
-  cityCountryLine: Белград, Сербия
-  mapButtonLabel: Открыть в Google Maps
-  mapIframeTitle: Детейлинг на карте — Паштровичева 8, Белград
-  worksHeading: Примеры работ
 caseChrome:
   autoLabel: Авто
   yearLabel: Год
@@ -280,10 +222,6 @@ caseChrome:
       label: Проверка
     - slug: vehicle-import
       label: Привоз
-    - slug: auto-service-belgrade
-      label: Автосервис
-    - slug: detailing-belgrade
-      label: Детейлинг
 translations:
   en:
     vehicle-sourcing:
@@ -484,64 +422,6 @@ translations:
       reason4Dekra: DEKRA / TÜV inspection available on request
       reason4Generic: Independent technical inspection available on request
       otherCitiesLabelFor: 'Other cities {countryLocation}:'
-    autoServiceBelgrade:
-      metaTitle: Auto Service in Belgrade — Repair and Maintenance
-      metaDescription: Professional car repair and maintenance in Belgrade with a quality guarantee. Diagnostics, scheduled maintenance, suspension, engine, and transmission repair.
-      title: Auto Service
-      titleHighlight: in Belgrade
-      description: Professional car repair and maintenance in Belgrade with a quality guarantee.
-      ctaLabel: Book a Service
-      breadcrumbLabel: Auto Service in Belgrade
-      whatWeDoHeading: What We Do
-      whatWeDo:
-        - key: diagnostics
-          label: Computer Diagnostics
-          desc: Finding faults with modern diagnostic equipment
-        - key: maintenance
-          label: Scheduled Maintenance
-          desc: Oil, filter, and fluid changes
-        - key: suspension
-          label: Suspension & Brakes
-          desc: Diagnostics and repair of the suspension, brakes, and steering
-        - key: engine
-          label: Engine & Transmission
-          desc: Engine, transmission, and ancillary equipment repair
-        - key: prepurchase
-          label: Pre-Purchase Inspection
-          desc: A full inspection before you buy a car or take it on a long trip
-      commentLabel: Make, model, what needs doing
-      commentPlaceholder: BMW 320i, 2018, suspension noise…
-      alsoSourcingLabel: 'Also sourcing cars in:'
-      howToFindHeading: How to Find Us
-      addressLabel: Service Address
-      streetAddress: Peka Pavlovića 39
-      cityCountryLine: Belgrade, Serbia
-      mapButtonLabel: Open in Google Maps
-      mapIframeTitle: Auto service on the map — Peka Pavlovića 39, Belgrade
-      worksHeading: Our Work
-    detailingBelgrade:
-      metaTitle: Detailing in Belgrade — Vinyl Wrapping for Cars, Motorcycles, Bicycles, Yachts
-      metaDescription: 'Detailing in Belgrade: vinyl wrapping for cars, motorcycles, bicycles, and yachts.'
-      title: Detailing
-      titleHighlight: in Belgrade
-      description: 'Professional detailing in Belgrade: vinyl wrapping for cars, motorcycles, bicycles, and yachts.'
-      ctaLabel: Leave a Request
-      breadcrumbLabel: Detailing in Belgrade
-      whatWeDoHeading: Our Services
-      whatWeDo:
-        - key: wrap
-          label: Vinyl Wrapping
-          desc: Full and partial body wrapping for cars, motorcycles, bicycles, and yachts with protective or decorative vinyl
-      commentLabel: Make, model, what needs doing
-      commentPlaceholder: BMW X5, 2019, vinyl wrap…
-      alsoSourcingLabel: 'Also sourcing cars in:'
-      howToFindHeading: How to Find Us
-      addressLabel: Address
-      streetAddress: Paštrovićeva 8
-      cityCountryLine: Belgrade, Serbia
-      mapButtonLabel: Open in Google Maps
-      mapIframeTitle: Detailing on the map — Paštrovićeva 8, Belgrade
-      worksHeading: Our Work
     caseChrome:
       autoLabel: Car
       yearLabel: Year
@@ -568,10 +448,6 @@ translations:
           label: Inspection
         - slug: vehicle-import
           label: Import
-        - slug: auto-service-belgrade
-          label: Service
-        - slug: detailing-belgrade
-          label: Detailing
   sr:
     vehicle-sourcing:
       hub:
@@ -771,64 +647,6 @@ translations:
       reason4Dekra: DEKRA / TÜV provera na zahtev
       reason4Generic: Nezavisna tehnička provera na zahtev
       otherCitiesLabelFor: 'Drugi gradovi {countryLocation}:'
-    autoServiceBelgrade:
-      metaTitle: Auto servis u Beogradu — popravka i održavanje
-      metaDescription: Profesionalna popravka i održavanje vozila u Beogradu uz garanciju kvaliteta. Dijagnostika, redovno servisiranje, popravka vešanja, motora i transmisije.
-      title: Auto servis
-      titleHighlight: u Beogradu
-      description: Profesionalna popravka i održavanje vozila u Beogradu uz garanciju kvaliteta.
-      ctaLabel: Zakažite servis
-      breadcrumbLabel: Auto servis u Beogradu
-      whatWeDoHeading: Šta radimo
-      whatWeDo:
-        - key: diagnostics
-          label: Kompjuterska dijagnostika
-          desc: Pronalaženje kvarova savremenom dijagnostičkom opremom
-        - key: maintenance
-          label: Redovno servisiranje
-          desc: Zamena ulja, filtera i tehničkih tečnosti
-        - key: suspension
-          label: Vešanje i kočnice
-          desc: Dijagnostika i popravka vešanja, kočionog sistema i upravljača
-        - key: engine
-          label: Motor i transmisija
-          desc: Popravka motora, transmisije i prateće opreme
-        - key: prepurchase
-          label: Provera pre kupovine
-          desc: Kompletna provera vozila pre kupovine ili duže vožnje
-      commentLabel: Marka, model, šta treba uraditi
-      commentPlaceholder: BMW 320i, 2018, kucanje u vešanju…
-      alsoSourcingLabel: 'Takođe pronalazimo vozila i u:'
-      howToFindHeading: Kako nas pronaći
-      addressLabel: Adresa servisa
-      streetAddress: Peka Pavlovića 39
-      cityCountryLine: Beograd, Srbija
-      mapButtonLabel: Otvorite u Google mapama
-      mapIframeTitle: Auto servis na mapi — Peka Pavlovića 39, Beograd
-      worksHeading: Primeri radova
-    detailingBelgrade:
-      metaTitle: Detailing u Beogradu — folijacija automobila, motocikala, bicikala, jahti
-      metaDescription: 'Detailing u Beogradu: folijacija automobila, motocikala, bicikala i jahti.'
-      title: Detailing
-      titleHighlight: u Beogradu
-      description: 'Profesionalni detailing u Beogradu: folijacija automobila, motocikala, bicikala i jahti.'
-      ctaLabel: Pošaljite zahtev
-      breadcrumbLabel: Detailing u Beogradu
-      whatWeDoHeading: Naše usluge
-      whatWeDo:
-        - key: wrap
-          label: Folijacija
-          desc: Potpuna i delimična folijacija karoserije automobila, motocikala, bicikala i jahti zaštitnom ili dekorativnom folijom
-      commentLabel: Marka, model, šta treba uraditi
-      commentPlaceholder: BMW X5, 2019, folijacija…
-      alsoSourcingLabel: 'Takođe pronalazimo vozila i u:'
-      howToFindHeading: Kako nas pronaći
-      addressLabel: Adresa
-      streetAddress: Paštrovićeva 8
-      cityCountryLine: Beograd, Srbija
-      mapButtonLabel: Otvorite u Google mapama
-      mapIframeTitle: Detailing na mapi — Paštrovićeva 8, Beograd
-      worksHeading: Primeri radova
     caseChrome:
       autoLabel: Vozilo
       yearLabel: Godište
@@ -855,10 +673,6 @@ translations:
           label: Provera
         - slug: vehicle-import
           label: Uvoz
-        - slug: auto-service-belgrade
-          label: Servis
-        - slug: detailing-belgrade
-          label: Detailing
   es:
     vehicle-sourcing:
       hub:
@@ -1058,64 +872,6 @@ translations:
       reason4Dekra: Inspección DEKRA / TÜV disponible bajo petición
       reason4Generic: Inspección técnica independiente disponible bajo petición
       otherCitiesLabelFor: 'Otras ciudades {countryLocation}:'
-    autoServiceBelgrade:
-      metaTitle: Taller mecánico en Belgrado — reparación y mantenimiento
-      metaDescription: Reparación y mantenimiento profesional de coches en Belgrado con garantía de calidad. Diagnóstico, mantenimiento, reparación de suspensión, motor y transmisión.
-      title: Taller mecánico
-      titleHighlight: en Belgrado
-      description: Reparación y mantenimiento profesional de coches en Belgrado con garantía de calidad.
-      ctaLabel: Reservar cita
-      breadcrumbLabel: Taller mecánico en Belgrado
-      whatWeDoHeading: Qué hacemos
-      whatWeDo:
-        - key: diagnostics
-          label: Diagnóstico computarizado
-          desc: Localización de averías con equipos de diagnóstico modernos
-        - key: maintenance
-          label: Mantenimiento programado
-          desc: Cambio de aceites, filtros y líquidos técnicos
-        - key: suspension
-          label: Suspensión y frenos
-          desc: Diagnóstico y reparación de suspensión, sistema de frenos y dirección
-        - key: engine
-          label: Motor y transmisión
-          desc: Reparación de motor, transmisión y equipos auxiliares
-        - key: prepurchase
-          label: Inspección previa a la compra
-          desc: Revisión completa del coche antes de comprarlo o de un viaje largo
-      commentLabel: Marca, modelo, qué necesitas
-      commentPlaceholder: BMW 320i, 2018, ruido en la suspensión…
-      alsoSourcingLabel: 'También buscamos coches en:'
-      howToFindHeading: Cómo encontrarnos
-      addressLabel: Dirección del taller
-      streetAddress: Peka Pavlovića 39
-      cityCountryLine: Belgrado, Serbia
-      mapButtonLabel: Abrir en Google Maps
-      mapIframeTitle: Taller mecánico en el mapa — Peka Pavlovića 39, Belgrado
-      worksHeading: Ejemplos de trabajos
-    detailingBelgrade:
-      metaTitle: Detailing en Belgrado — vinilos para coches, motos, bicicletas y yates
-      metaDescription: 'Detailing en Belgrado: vinilos para coches, motos, bicicletas y yates.'
-      title: Detailing
-      titleHighlight: en Belgrado
-      description: 'Detailing profesional en Belgrado: vinilos para coches, motos, bicicletas y yates.'
-      ctaLabel: Enviar solicitud
-      breadcrumbLabel: Detailing en Belgrado
-      whatWeDoHeading: Nuestros servicios
-      whatWeDo:
-        - key: wrap
-          label: Vinilado
-          desc: Vinilado total o parcial de la carrocería de coches, motos, bicicletas y yates con láminas protectoras o decorativas
-      commentLabel: Marca, modelo, qué necesitas
-      commentPlaceholder: BMW X5, 2019, vinilado…
-      alsoSourcingLabel: 'También buscamos coches en:'
-      howToFindHeading: Cómo encontrarnos
-      addressLabel: Dirección
-      streetAddress: Paštrovićeva 8
-      cityCountryLine: Belgrado, Serbia
-      mapButtonLabel: Abrir en Google Maps
-      mapIframeTitle: Detailing en el mapa — Paštrovićeva 8, Belgrado
-      worksHeading: Ejemplos de trabajos
     caseChrome:
       autoLabel: Coche
       yearLabel: Año
@@ -1142,10 +898,6 @@ translations:
           label: Inspección
         - slug: vehicle-import
           label: Importación
-        - slug: auto-service-belgrade
-          label: Taller
-        - slug: detailing-belgrade
-          label: Detailing
   de:
     vehicle-sourcing:
       hub:
@@ -1345,64 +1097,6 @@ translations:
       reason4Dekra: DEKRA- / TÜV-Prüfung auf Anfrage
       reason4Generic: Unabhängige technische Prüfung auf Anfrage
       otherCitiesLabelFor: 'Weitere Städte {countryLocation}:'
-    autoServiceBelgrade:
-      metaTitle: Autowerkstatt in Belgrad — Reparatur und Wartung
-      metaDescription: Professionelle Reparatur und Wartung von Fahrzeugen in Belgrad mit Qualitätsgarantie. Diagnose, Wartung, Reparatur von Fahrwerk, Motor und Getriebe.
-      title: Autowerkstatt
-      titleHighlight: in Belgrad
-      description: Professionelle Reparatur und Wartung von Fahrzeugen in Belgrad mit Qualitätsgarantie.
-      ctaLabel: Termin vereinbaren
-      breadcrumbLabel: Autowerkstatt in Belgrad
-      whatWeDoHeading: Was wir tun
-      whatWeDo:
-        - key: diagnostics
-          label: Computerdiagnose
-          desc: Fehlersuche mit moderner Diagnosetechnik
-        - key: maintenance
-          label: Wartung
-          desc: Wechsel von Öl, Filtern und Betriebsflüssigkeiten
-        - key: suspension
-          label: Fahrwerk und Bremsen
-          desc: Diagnose und Reparatur von Fahrwerk, Bremsanlage und Lenkung
-        - key: engine
-          label: Motor und Getriebe
-          desc: Reparatur von Motor, Getriebe und Nebenaggregaten
-        - key: prepurchase
-          label: Kaufprüfung
-          desc: Umfassende Prüfung des Fahrzeugs vor dem Kauf oder einer längeren Fahrt
-      commentLabel: Marke, Modell, was zu erledigen ist
-      commentPlaceholder: BMW 320i, 2018, Geräusch im Fahrwerk…
-      alsoSourcingLabel: 'Wir suchen auch Fahrzeuge in:'
-      howToFindHeading: So finden Sie uns
-      addressLabel: Adresse der Werkstatt
-      streetAddress: Peka Pavlovića 39
-      cityCountryLine: Belgrad, Serbien
-      mapButtonLabel: In Google Maps öffnen
-      mapIframeTitle: Autowerkstatt auf der Karte — Peka Pavlovića 39, Belgrad
-      worksHeading: Beispiele unserer Arbeit
-    detailingBelgrade:
-      metaTitle: Detailing in Belgrad — Folierung für Autos, Motorräder, Fahrräder und Yachten
-      metaDescription: 'Detailing in Belgrad: Folierung von Autos, Motorrädern, Fahrrädern und Yachten.'
-      title: Detailing
-      titleHighlight: in Belgrad
-      description: 'Professionelles Detailing in Belgrad: Folierung von Autos, Motorrädern, Fahrrädern und Yachten.'
-      ctaLabel: Anfrage senden
-      breadcrumbLabel: Detailing in Belgrad
-      whatWeDoHeading: Unsere Leistungen
-      whatWeDo:
-        - key: wrap
-          label: Folierung
-          desc: Vollständige und teilweise Folierung der Karosserie von Autos, Motorrädern, Fahrrädern und Yachten mit Schutz- oder Designfolie
-      commentLabel: Marke, Modell, was zu erledigen ist
-      commentPlaceholder: BMW X5, 2019, Folierung…
-      alsoSourcingLabel: 'Wir suchen auch Fahrzeuge in:'
-      howToFindHeading: So finden Sie uns
-      addressLabel: Adresse
-      streetAddress: Paštrovićeva 8
-      cityCountryLine: Belgrad, Serbien
-      mapButtonLabel: In Google Maps öffnen
-      mapIframeTitle: Detailing auf der Karte — Paštrovićeva 8, Belgrad
-      worksHeading: Beispiele unserer Arbeit
     caseChrome:
       autoLabel: Fahrzeug
       yearLabel: Baujahr
@@ -1429,8 +1123,4 @@ translations:
           label: Prüfung
         - slug: vehicle-import
           label: Import
-        - slug: auto-service-belgrade
-          label: Werkstatt
-        - slug: detailing-belgrade
-          label: Detailing
-translatedFrom: 388b99eb50b9e134
+translatedFrom: b806e4da2a91a48c

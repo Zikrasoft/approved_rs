@@ -1,0 +1,53 @@
+---
+import Icon from './Icon.astro';
+import LeadForm from './LeadForm.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+---
+
+<dialog
+  data-lead-modal
+  aria-label={site.form.modalTitle}
+  class="m-auto w-[min(34rem,calc(100vw-2rem))] rounded-block border border-line bg-card p-0 text-ink backdrop:bg-ink/50"
+>
+  <div class="flex flex-col gap-5 p-6">
+    <div class="flex items-start justify-between gap-6">
+      <div class="flex flex-col gap-1.5">
+        <h2 class="text-block font-semibold">{site.form.heading}</h2>
+        <p class="text-sm leading-relaxed text-muted">{site.form.subheading}</p>
+      </div>
+      <button
+        type="button"
+        data-modal-close
+        aria-label={site.common.closeLabel}
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-block border border-line text-muted transition-colors duration-150 hover:border-ink hover:text-ink"
+      >
+        <Icon name="close" />
+      </button>
+    </div>
+    <LeadForm compact />
+  </div>
+</dialog>
+
+<script>
+  const modal = document.querySelector<HTMLDialogElement>('[data-lead-modal]');
+  if (modal) {
+    document.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement;
+      if (target.closest('[data-open-lead-modal]')) {
+        event.preventDefault();
+        modal.showModal();
+        modal.querySelector<HTMLInputElement>('input[name="name"]')?.focus();
+        return;
+      }
+      if (target.closest('[data-modal-close]')) modal.close();
+    });
+
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) modal.close();
+    });
+  }
+</script>

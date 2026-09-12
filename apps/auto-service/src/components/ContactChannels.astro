@@ -1,0 +1,63 @@
+---
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+import { CONTACT_LINKS, formatPhone } from '@/utils/contactLinks';
+import { PHONE_NUMBER, TG_MANAGER } from '@/utils/constants';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+
+const channels = [
+  {
+    href: CONTACT_LINKS.phone,
+    label: site.channels.call,
+    value: formatPhone(PHONE_NUMBER),
+    track: 'phone',
+  },
+  {
+    href: CONTACT_LINKS.whatsapp,
+    label: site.channels.whatsapp,
+    value: site.channels.write,
+    track: 'whatsapp',
+  },
+  {
+    href: CONTACT_LINKS.viber,
+    label: site.channels.viber,
+    value: site.channels.write,
+    track: 'viber',
+  },
+  {
+    href: CONTACT_LINKS.telegram,
+    label: site.channels.telegram,
+    value: `@${TG_MANAGER}`,
+    track: 'telegram',
+  },
+] as const;
+---
+
+<ul class={`grid gap-2 sm:grid-cols-2 ${className}`}>
+  {
+    channels.map((channel) => (
+      <li>
+        <a
+          href={channel.href}
+          data-contact-channel={channel.track}
+          rel="noopener"
+          class="flex items-center justify-between gap-4 rounded-block border border-line bg-card px-4 py-3 transition-colors duration-150 hover:border-ink"
+        >
+          <span class="flex flex-col">
+            <span class="text-xs text-muted">{channel.label}</span>
+            <span class="spec text-sm text-ink">{channel.value}</span>
+          </span>
+          <Icon name="arrowRight" class="text-muted" />
+        </a>
+      </li>
+    ))
+  }
+</ul>

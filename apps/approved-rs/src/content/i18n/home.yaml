@@ -1,5 +1,5 @@
 metaTitle: Автоподбор и привоз авто под ключ
-metaDescription: Автоподбор в своей стране или привоз авто из Европы и Китая — под ключ. Проверка, выкуп, автосервис. Работаем для русскоязычных по всему миру.
+metaDescription: Автоподбор в своей стране или привоз авто из Европы и Китая — под ключ. Проверка и выкуп. Работаем для русскоязычных по всему миру.
 journey:
   - title: Подбор
     desc: Находим, проверяем и доставляем автомобиль под ваш бюджет — под ключ, в Германии, Испании, Сербии и Швейцарии.
@@ -11,15 +11,12 @@ journey:
   - title: Выкуп
     desc: Оформляем выкуп и растаможку автомобиля на иностранных номерах.
     note: Машина уже за границей? Поможем её оформить
-  - title: Автосервис
-    desc: Ремонт и обслуживание автомобиля в Белграде — с гарантией качества.
-    note: Машина уже ваша? Тоже беремся
 heroEyebrow: 'Один путь: авто из Европы'
 heroLine1: Найдено.
 heroLine2: Проверено.
 heroLine3: Одобрено.
 stampText: ПРОВЕРЕНО · ОДОБРЕНО · ПРОВЕРЕНО · ОДОБРЕНО ·
-heroSubtext: Подберём, проверим, оформим и привезём автомобиль из Германии, Испании или Сербии — а потом обслужим его в своём автосервисе. Один путь, одна команда.
+heroSubtext: Подберём, проверим, оформим и привезём автомобиль из Германии, Испании или Сербии. Один путь, одна команда.
 statClients:
   value: 200+
   label: клиентов
@@ -28,8 +25,8 @@ statCountries:
 statYears:
   value: 5 лет
   label: на рынке
-journeyHeading: 'Один путь: от поиска до сервиса'
-journeySubtext: Автоподбор, привоз, проверка, выкуп и автосервис — не разные услуги, а этапы одного пути вашего автомобиля. Войти можно с любого шага.
+journeyHeading: 'Один путь: от поиска до ключей'
+journeySubtext: Автоподбор, привоз, проверка и выкуп — не разные услуги, а этапы одного пути вашего автомобиля. Войти можно с любого шага.
 journeyMoreLabel: Подробнее
 countryStripLabel: 'Автоподбор по странам:'
 latestCasesHeading: Последние кейсы
@@ -86,9 +83,6 @@ translations:
       - title: Buyback
         desc: We handle the buyback and customs clearance for cars on foreign plates.
         note: Already have the car abroad? We'll help register it
-      - title: Auto Service
-        desc: Car repair and maintenance in Belgrade — with a quality guarantee.
-        note: Already own the car? We handle that too
     heroEyebrow: 'One path: cars from Europe'
     heroLine1: Found.
     heroLine2: Inspected.
@@ -160,9 +154,6 @@ translations:
       - title: Otkup
         desc: Sređujemo otkup i carinjenje vozila na stranim tablicama.
         note: Vozilo je već u inostranstvu? Pomažemo da ga registrujete
-      - title: Auto servis
-        desc: Popravka i održavanje vozila u Beogradu — uz garanciju kvaliteta.
-        note: Vozilo je već vaše? I to radimo
     heroEyebrow: 'Jedan put: vozila iz Evrope'
     heroLine1: Pronađeno.
     heroLine2: Provereno.
@@ -234,9 +225,6 @@ translations:
       - title: Recompra
         desc: Gestionamos la recompra y el despacho de aduanas de coches con matrícula extranjera.
         note: ¿El coche ya está en el extranjero? Te ayudamos a tramitarlo
-      - title: Taller mecánico
-        desc: Reparación y mantenimiento del coche en Belgrado, con garantía de calidad.
-        note: ¿El coche ya es tuyo? También nos encargamos
     heroEyebrow: 'Un solo camino: coches desde Europa'
     heroLine1: Encontrado.
     heroLine2: Inspeccionado.
@@ -308,9 +296,6 @@ translations:
       - title: Ankauf
         desc: Wir übernehmen den Ankauf und die Verzollung von Fahrzeugen mit ausländischen Kennzeichen.
         note: Das Fahrzeug befindet sich bereits im Ausland? Wir helfen bei der Anmeldung
-      - title: Autowerkstatt
-        desc: Reparatur und Wartung Ihres Fahrzeugs in Belgrad – mit Qualitätsgarantie.
-        note: Das Fahrzeug gehört Ihnen bereits? Auch dafür sind wir da
     heroEyebrow: 'Ein Weg: Fahrzeuge aus Europa'
     heroLine1: Gefunden.
     heroLine2: Geprüft.

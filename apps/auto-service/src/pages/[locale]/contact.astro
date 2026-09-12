@@ -1,0 +1,115 @@
+---
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import LeadForm from '@/components/LeadForm.astro';
+import ContactChannels from '@/components/ContactChannels.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getPagesContent } from '@/i18n/content/pages';
+import { getSiteContent } from '@/i18n/content/site';
+import { localePaths, PathBuilder } from '@/utils/paths';
+import { GARAGE_ADDRESS } from '@/utils/constants';
+
+export function getStaticPaths() {
+  return localePaths();
+}
+
+const locale = localeFrom(Astro.url.pathname);
+const pages = getPagesContent(locale);
+const site = getSiteContent(locale);
+
+const mapQuery = encodeURIComponent(
+  `${GARAGE_ADDRESS.street}, ${GARAGE_ADDRESS.city}`,
+);
+const mapSrc = `https://www.google.com/maps?q=${mapQuery}&output=embed`;
+const mapLink = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
+---
+
+<Shell
+  title={pages.contact.metaTitle}
+  description={pages.contact.metaDescription}
+>
+  <PageHero
+    eyebrow={pages.contact.eyebrow}
+    heading={pages.contact.heading}
+    lead={pages.contact.lead}
+    crumbs={[{ href: PathBuilder.contact(locale), label: site.nav.contact }]}
+  />
+
+  <section
+    class="wrap grid gap-6 py-band md:py-band-lg lg:grid-cols-[1fr_1.1fr]"
+  >
+    <div class="flex flex-col gap-4">
+      <div class="card flex flex-col gap-4 p-5">
+        <div class="flex flex-col gap-1">
+          <span class="text-xs text-muted">{pages.contact.addressLabel}</span>
+          <address class="text-base not-italic leading-relaxed text-ink">
+            {GARAGE_ADDRESS.street}<br />{
+              `${GARAGE_ADDRESS.postalCode} ${GARAGE_ADDRESS.city}`
+            }
+          </address>
+        </div>
+        <div class="h-px bg-line"></div>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs text-muted">{pages.contact.hoursLabel}</span>
+          <span class="text-base text-ink">{site.footer.hours}</span>
+        </div>
+      </div>
+
+      <ContactChannels />
+
+      <div class="card flex flex-col gap-3 p-5">
+        <h2 class="text-base font-semibold text-ink">
+          {pages.contact.arrivalHeading}
+        </h2>
+        <ul class="flex flex-col gap-2">
+          {
+            pages.contact.arrival.map((item) => (
+              <li class="flex gap-2.5 text-sm leading-relaxed text-ink-2">
+                <span
+                  class="mt-2 h-1.5 w-1.5 shrink-0 bg-signal"
+                  aria-hidden="true"
+                />
+                {item}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <div class="card flex flex-col gap-4 p-5 sm:p-6">
+        <div class="flex flex-col gap-1.5">
+          <h2 class="text-block font-semibold">{site.form.heading}</h2>
+          <p class="text-sm leading-relaxed text-muted">
+            {site.form.subheading}
+          </p>
+        </div>
+        <LeadForm />
+      </div>
+
+      <div class="card overflow-hidden">
+        <div class="flex flex-col gap-1 p-5">
+          <h2 class="text-base font-semibold text-ink">
+            {pages.contact.mapHeading}
+          </h2>
+          <p class="text-sm text-muted">{pages.contact.mapNote}</p>
+        </div>
+        <iframe
+          src={mapSrc}
+          title={pages.contact.mapHeading}
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          class="block h-64 w-full border-0"></iframe>
+        <a
+          href={mapLink}
+          target="_blank"
+          rel="noopener"
+          class="block p-5 text-sm text-signal transition-colors duration-150 hover:text-ink"
+        >
+          {GARAGE_ADDRESS.street}, {GARAGE_ADDRESS.city}
+        </a>
+      </div>
+    </div>
+  </section>
+</Shell>

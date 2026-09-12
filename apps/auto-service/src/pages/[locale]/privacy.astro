@@ -1,0 +1,58 @@
+---
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getPagesContent } from '@/i18n/content/pages';
+import { getSiteContent } from '@/i18n/content/site';
+import { localePaths, PathBuilder } from '@/utils/paths';
+
+export function getStaticPaths() {
+  return localePaths();
+}
+
+const locale = localeFrom(Astro.url.pathname);
+const pages = getPagesContent(locale);
+const site = getSiteContent(locale);
+---
+
+<Shell
+  title={pages.privacy.metaTitle}
+  description={pages.privacy.metaDescription}
+>
+  <PageHero
+    eyebrow={site.footer.privacyLabel}
+    heading={pages.privacy.heading}
+    lead={pages.privacy.lastUpdated}
+    crumbs={[
+      { href: PathBuilder.privacy(locale), label: site.footer.privacyLabel },
+    ]}
+  />
+
+  <section class="wrap py-band md:py-band-lg">
+    <div class="max-w-3xl divide-y divide-line border-y border-line">
+      {
+        pages.privacy.sections.map((section) => (
+          <div class="flex flex-col gap-2 py-6">
+            <h2 class="text-base font-semibold text-ink">{section.title}</h2>
+            <p class="text-sm leading-relaxed text-muted sm:text-base">
+              {section.text}
+            </p>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="mt-8 flex max-w-3xl flex-col gap-2">
+      <h2 class="text-base font-semibold text-ink">
+        {pages.privacy.contactTitle}
+      </h2>
+      <p class="text-sm leading-relaxed text-muted">
+        {pages.privacy.contactBefore}{' '}
+        <a
+          href={PathBuilder.contact(locale)}
+          class="text-signal underline underline-offset-2">{site.nav.contact}</a
+        >.
+      </p>
+    </div>
+  </section>
+</Shell>

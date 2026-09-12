@@ -1,12 +1,5 @@
 ---
-import {
-  Search,
-  Globe,
-  Wrench,
-  Banknote,
-  ClipboardCheck,
-  Sparkles,
-} from '@lucide/astro';
+import { Search, Globe, Banknote, ClipboardCheck } from '@lucide/astro';
 import type { Search as IconType } from '@lucide/astro';
 import { getNavItems, isNavItemActive, type ServiceSlug } from '@/utils/labels';
 import { getLocale } from '@/i18n/config';
@@ -21,8 +14,6 @@ const locale = getLocale(Astro.currentLocale);
 const SERVICE_ICONS: Record<ServiceSlug, typeof IconType> = {
   'vehicle-sourcing': Search,
   'vehicle-import': Globe,
-  'auto-service-belgrade': Wrench,
-  'detailing-belgrade': Sparkles,
   'vehicle-buyback': Banknote,
   'vehicle-inspection': ClipboardCheck,
 };

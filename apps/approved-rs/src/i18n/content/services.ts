@@ -2,11 +2,7 @@ import servicesYaml from '@/content/i18n/services.yaml?raw';
 import type { Locale } from '@/i18n/config';
 import { loadI18nSection } from '@/i18n/loadI18nSection';
 import { withPlaceholder } from '@/i18n/withPlaceholder';
-import {
-  AUTOSERVICE_SERVICES,
-  DETAILING_SERVICES,
-  type ServiceSlug,
-} from '@/utils/labels';
+import { type ServiceSlug } from '@/utils/labels';
 import {
   servicesContentSchema,
   type ServicesContentData,
@@ -143,56 +139,6 @@ export interface ServicesContent {
     reason4Generic: string;
     otherCitiesLabelFor: (countryLocation: string) => string;
   };
-  autoServiceBelgrade: {
-    metaTitle: string;
-    metaDescription: string;
-    title: string;
-    titleHighlight: string;
-    description: string;
-    ctaLabel: string;
-    breadcrumbLabel: string;
-    whatWeDoHeading: string;
-    whatWeDo: {
-      key: (typeof AUTOSERVICE_SERVICES)[number];
-      label: string;
-      desc: string;
-    }[];
-    commentLabel: string;
-    commentPlaceholder: string;
-    alsoSourcingLabel: string;
-    howToFindHeading: string;
-    addressLabel: string;
-    streetAddress: string;
-    cityCountryLine: string;
-    mapButtonLabel: string;
-    mapIframeTitle: string;
-    worksHeading: string;
-  };
-  detailingBelgrade: {
-    metaTitle: string;
-    metaDescription: string;
-    title: string;
-    titleHighlight: string;
-    description: string;
-    ctaLabel: string;
-    breadcrumbLabel: string;
-    whatWeDoHeading: string;
-    whatWeDo: {
-      key: (typeof DETAILING_SERVICES)[number];
-      label: string;
-      desc: string;
-    }[];
-    commentLabel: string;
-    commentPlaceholder: string;
-    alsoSourcingLabel: string;
-    howToFindHeading: string;
-    addressLabel: string;
-    streetAddress: string;
-    cityCountryLine: string;
-    mapButtonLabel: string;
-    mapIframeTitle: string;
-    worksHeading: string;
-  };
   caseChrome: {
     autoLabel: string;
     yearLabel: string;
@@ -287,8 +233,6 @@ function toServicesContent(data: ServicesContentData): ServicesContent {
           countryLocation,
         ),
     },
-    autoServiceBelgrade: data.autoServiceBelgrade,
-    detailingBelgrade: data.detailingBelgrade,
     caseChrome: {
       ...data.caseChrome,
       serviceBadges: Object.fromEntries(

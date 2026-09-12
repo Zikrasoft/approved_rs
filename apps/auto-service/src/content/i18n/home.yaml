@@ -1,0 +1,253 @@
+meta:
+  title: 'AUTOHUB — автосервис в Белграде: диагностика, ремонт, кузов'
+  description: Автосервис в Белграде. Компьютерная диагностика, плановое ТО, тормоза и подвеска, двигатель, кузовной ремонт после ДТП и покраска. Запчасти и аккумуляторы на месте.
+hero:
+  eyebrow: Автосервис · Белград
+  heading: Чиним так, чтобы не возвращались с тем же
+  lead: Диагностика, плановое ТО, ходовая, двигатель, кузов после ДТП. Говорим, что действительно нужно, а что подождёт — до того, как вы согласились платить.
+  ctaPrimary: Записаться в сервис
+  ctaSecondary: Посмотреть услуги
+  badges:
+    - Смета до начала работ
+    - Гарантия 12 месяцев
+    - Работаем со страховыми
+trust:
+  - value: 12 мес
+    label: гарантия на работы и запчасти
+  - value: 1 день
+    label: обычный срок планового ТО
+  - value: '0 €'
+    label: стоимость первичного осмотра
+servicesHead:
+  eyebrow: Услуги
+  heading: Что мы делаем
+  body: От замены масла до восстановления геометрии кузова после удара. Всё в одном месте — не нужно возить машину по трём адресам.
+why:
+  eyebrow: Почему к нам
+  heading: Автосервис без сюрприза в счёте
+  body: Главная проблема с сервисами — не цена, а непредсказуемость. Мы её убираем.
+  points:
+    - title: Смета до работ
+      text: Сначала диагностика и письменная смета, потом ваше «да», и только потом ключи в работу.
+    - title: Старые детали возвращаем
+      text: Всё, что сняли с машины, отдаём в коробке. Хотите — проверяйте, действительно ли деталь была изношена.
+    - title: Не навязываем
+      text: Если можно доехать до следующего ТО — скажем об этом, а не продадим замену сегодня.
+    - title: Пишем в карту
+      text: Что меняли, какой пробег, какие запчасти. На следующем визите не начинаем с нуля.
+process:
+  eyebrow: Как работаем
+  heading: Четыре шага без нервов
+  body: Никаких «оставьте машину, потом позвоним». Вы знаете, что происходит, на каждом этапе.
+  steps:
+    - title: Заявка и запись
+      text: Описываете проблему по телефону или в мессенджере. Подбираем время, чтобы машина не стояла в очереди.
+    - title: Диагностика
+      text: Находим причину, а не симптом. Показываем на машине, что именно не так.
+    - title: Смета и согласование
+      text: Присылаем список работ и запчастей с ценами. Работы начинаются только после вашего подтверждения.
+    - title: Работа и выдача
+      text: Делаем, проверяем на ходу, отдаём машину со старыми деталями и записью в сервисной карте.
+shopTeaser:
+  eyebrow: Запчасти
+  heading: Аккумуляторы в наличии, с установкой за 20 минут
+  body: Подбираем по марке, модели и году — не по «примерно такой же». Ставим на месте, старый забираем на утилизацию.
+  cta: Подобрать аккумулятор
+accident:
+  eyebrow: После ДТП
+  heading: Кузовной ремонт и покраска
+  body: Восстанавливаем геометрию, правим и красим с подбором цвета по коду и по факту выгорания. Работаем со страховыми — помогаем собрать документы.
+  points:
+    - Стапель и замер геометрии кузова
+    - Подбор краски по коду и компьютерным спектром
+    - Полировка перехода, чтобы не было видно границы
+    - Помощь с документами для страховой
+  cta: Оценить ремонт
+faq:
+  - q: Сколько стоит диагностика?
+    a: Первичный осмотр и считывание ошибок — бесплатно. Платной становится только углублённая диагностика, когда нужно разбирать узел или ставить машину на стенд; о цене предупреждаем заранее.
+  - q: Можно приехать со своими запчастями?
+    a: Можно. В этом случае гарантия распространяется только на нашу работу, а не на деталь — это честно и работает в обе стороны.
+  - q: Вы работаете со страховыми компаниями?
+    a: Да, по кузовному ремонту. Поможем оформить документы и согласовать смету, а если страховая покрывает не всё — сразу скажем, сколько останется на вас.
+  - q: Как быстро можно попасть на ТО?
+    a: Обычно в течение двух-трёх рабочих дней, а на замену масла или аккумулятора часто удаётся взять в тот же день. Позвоните — скажем точно.
+  - q: Даёте ли вы гарантию?
+    a: 'Двенадцать месяцев на выполненные работы и на установленные нами запчасти. Гарантийный случай разбираем без споров: если это наша ошибка, переделываем бесплатно.'
+  - q: Машина на иностранных номерах — это проблема?
+    a: Нет. Для ремонта документы о регистрации не нужны, приезжайте как есть.
+finalCta:
+  eyebrow: Записаться
+  heading: Расскажите, что с машиной
+  body: Перезвоним в рабочее время, уточним детали и подберём время. Если вопрос срочный — просто позвоните.
+  cta: Оставить заявку
+translations:
+  sr:
+    meta:
+      title: 'AUTOHUB — auto servis u Beogradu: dijagnostika, popravke, limarija'
+      description: Auto servis u Beogradu. Kompjuterska dijagnostika, redovni servis, kočnice i vešanje, motor, limarija posle udesa i farbanje. Delovi i akumulatori na licu mesta.
+    hero:
+      eyebrow: Auto servis · Beograd
+      heading: Popravljamo tako da se ne vraćate sa istim kvarom
+      lead: Dijagnostika, redovni servis, trap, motor, limarija posle udesa. Kažemo šta zaista treba, a šta može da sačeka — pre nego što pristanete da platite.
+      ctaPrimary: Zakažite servis
+      ctaSecondary: Pogledajte usluge
+      badges:
+        - Predračun pre početka radova
+        - Garancija 12 meseci
+        - Radimo sa osiguranjem
+    trust:
+      - value: 12 mes
+        label: garancije na radove i delove
+      - value: 1 dan
+        label: uobičajeno trajanje redovnog servisa
+      - value: '0 €'
+        label: cena prvog pregleda
+    servicesHead:
+      eyebrow: Usluge
+      heading: Šta radimo
+      body: Od zamene ulja do vraćanja geometrije karoserije posle udarca. Sve na jednom mestu — ne morate da vozite auto na tri adrese.
+    why:
+      eyebrow: Zašto kod nas
+      heading: Auto servis bez iznenađenja na računu
+      body: Glavni problem sa servisima nije cena, nego nepredvidivost. Nju uklanjamo.
+      points:
+        - title: Predračun pre radova
+          text: Prvo dijagnostika i pisani predračun, pa vaše „da“, i tek onda ključevi u posao.
+        - title: Stare delove vraćamo
+          text: Sve što smo skinuli sa auta vraćamo u kutiji. Ako želite, proverite da li je deo zaista bio istrošen.
+        - title: Ne namećemo
+          text: Ako može da izdrži do sledećeg servisa, reći ćemo vam to umesto da vam danas prodamo zamenu.
+        - title: Vodimo servisnu istoriju
+          text: Šta je menjano, na kojoj kilometraži, koji delovi. Na sledećem dolasku ne krećemo iz početka.
+    process:
+      eyebrow: Kako radimo
+      heading: Četiri koraka bez nerviranja
+      body: Nema „ostavite auto, javićemo se“. Znate šta se dešava u svakoj fazi.
+      steps:
+        - title: Zahtev i termin
+          text: Opišete kvar telefonom ili preko poruka. Biramo termin tako da auto ne stoji u redu.
+        - title: Dijagnostika
+          text: Tražimo uzrok, ne simptom. Pokažemo vam na autu šta tačno nije u redu.
+        - title: Predračun i potvrda
+          text: Šaljemo spisak radova i delova sa cenama. Radovi počinju tek posle vaše potvrde.
+        - title: Rad i predaja
+          text: Uradimo, proverimo u vožnji i predamo auto zajedno sa starim delovima i upisom u servisnu knjigu.
+    shopTeaser:
+      eyebrow: Delovi
+      heading: Akumulatori na stanju, sa ugradnjom za 20 minuta
+      body: Biramo po marki, modelu i godištu — ne po principu „otprilike isti“. Ugrađujemo na licu mesta, stari nosimo na reciklažu.
+      cta: Izaberite akumulator
+    accident:
+      eyebrow: Posle udesa
+      heading: Limarija i farbanje
+      body: Vraćamo geometriju, ispravljamo i farbamo uz nijansiranje po kodu i po stvarnom izbledelosti laka. Radimo sa osiguravajućim kućama i pomažemo oko papira.
+      points:
+        - Ravnalica i merenje geometrije karoserije
+        - Nijansiranje boje po kodu i spektrofotometrom
+        - Poliranje prelaza, da se granica ne vidi
+        - Pomoć oko dokumentacije za osiguranje
+      cta: Procenite popravku
+    faq:
+      - q: Koliko košta dijagnostika?
+        a: Prvi pregled i očitavanje grešaka su besplatni. Naplaćuje se samo dubinska dijagnostika, kada treba rasklapati sklop ili staviti auto na liniju; cenu kažemo unapred.
+      - q: Mogu li da donesem svoje delove?
+        a: Možete. U tom slučaju garancija pokriva samo naš rad, ne i deo — to je pošteno i važi u oba smera.
+      - q: Radite li sa osiguravajućim kućama?
+        a: Da, kod limarije. Pomoći ćemo oko papira i usaglašavanja predračuna, a ako osiguranje ne pokriva sve, odmah ćemo vam reći koliko ostaje na vama.
+      - q: Koliko brzo mogu da dođem na servis?
+        a: Obično u roku od dva do tri radna dana, a zamenu ulja ili akumulatora često stignemo istog dana. Pozovite i reći ćemo tačno.
+      - q: Dajete li garanciju?
+        a: 'Dvanaest meseci na izvedene radove i na delove koje smo mi ugradili. Reklamaciju rešavamo bez rasprave: ako je naša greška, ponovo radimo bez naplate.'
+      - q: Auto je na stranim tablicama — je li to problem?
+        a: Nije. Za popravku papiri o registraciji nisu potrebni, dođite kakvi jeste.
+    finalCta:
+      eyebrow: Zakazivanje
+      heading: Recite nam šta je sa autom
+      body: Javićemo se u radno vreme, proverimo detalje i dogovorimo termin. Ako je hitno — samo pozovite.
+      cta: Ostavite zahtev
+  en:
+    meta:
+      title: 'AUTOHUB — car service in Belgrade: diagnostics, repairs, bodywork'
+      description: A car service in Belgrade. Computer diagnostics, scheduled servicing, brakes and suspension, engine work, accident repair and respraying. Parts and batteries in stock.
+    hero:
+      eyebrow: Car service · Belgrade
+      heading: We fix it so the same fault does not bring you back
+      lead: Diagnostics, scheduled servicing, running gear, engines, accident repair. We tell you what genuinely needs doing and what can wait — before you agree to pay for anything.
+      ctaPrimary: Book the workshop
+      ctaSecondary: See the services
+      badges:
+        - A quote before any work starts
+        - 12 month warranty
+        - We work with insurers
+    trust:
+      - value: 12 mo
+        label: warranty on labour and parts
+      - value: 1 day
+        label: typical turnaround for a service
+      - value: '€0'
+        label: cost of the first inspection
+    servicesHead:
+      eyebrow: Services
+      heading: What we do
+      body: From an oil change to pulling a body straight after an impact. All in one place — no driving the car to three different addresses.
+    why:
+      eyebrow: Why us
+      heading: A workshop with no surprise on the invoice
+      body: The real problem with garages is not the price, it is the unpredictability. We take that away.
+      points:
+        - title: A quote before the work
+          text: Diagnostics and a written quote first, then your yes, and only then do the keys go into the job.
+        - title: You get the old parts back
+          text: Everything we take off the car goes in a box for you. Check for yourself whether a part really was worn.
+        - title: No upselling
+          text: If it will last until the next service, we say so instead of selling you a replacement today.
+        - title: We keep the history
+          text: What was changed, at what mileage, which parts. Next visit does not start from scratch.
+    process:
+      eyebrow: How it works
+      heading: Four steps, no stress
+      body: None of that "leave the car, we will call you". You know what is happening at every stage.
+      steps:
+        - title: Request and slot
+          text: Describe the fault by phone or message. We pick a slot so the car is not sitting in a queue.
+        - title: Diagnostics
+          text: We look for the cause, not the symptom, and show you on the car exactly what is wrong.
+        - title: Quote and sign-off
+          text: We send the list of work and parts with prices. Nothing starts until you confirm it.
+        - title: The work and handover
+          text: We do it, road-test it, and hand the car back with the old parts and an entry in the service record.
+    shopTeaser:
+      eyebrow: Parts
+      heading: Batteries in stock, fitted in twenty minutes
+      body: Matched by make, model and year — not by "roughly the same one". Fitted on the spot, and we take the old one for recycling.
+      cta: Find your battery
+    accident:
+      eyebrow: After an accident
+      heading: Bodywork and respraying
+      body: We pull the geometry back, straighten and respray with the colour matched both to the paint code and to how far the car has actually faded. We work with insurers and help with the paperwork.
+      points:
+        - Jig work and body geometry measurement
+        - Colour matched by code and by spectrophotometer
+        - The blend polished so the join does not show
+        - Help with the insurance paperwork
+      cta: Get the repair assessed
+    faq:
+      - q: What does diagnostics cost?
+        a: The first inspection and fault-code read are free. Only deep diagnostics is charged — when a assembly has to come apart or the car goes on the rig — and we tell you the price beforehand.
+      - q: Can I bring my own parts?
+        a: You can. In that case the warranty covers our labour but not the part itself, which is fair and cuts both ways.
+      - q: Do you work with insurance companies?
+        a: Yes, for bodywork. We help with the paperwork and getting the estimate approved, and if the insurer will not cover everything we tell you straight away what is left for you.
+      - q: How soon can I get a service booking?
+        a: Usually within two or three working days, and an oil or battery change often fits in the same day. Call us and we will tell you exactly.
+      - q: Do you give a warranty?
+        a: 'Twelve months on the work we do and on the parts we fit. We settle claims without arguing: if it was our mistake, we redo it at no charge.'
+      - q: My car is on foreign plates — is that a problem?
+        a: No. Repairs need no registration paperwork, just bring the car as it is.
+    finalCta:
+      eyebrow: Booking
+      heading: Tell us what the car is doing
+      body: We call back during working hours, confirm the details and find you a slot. If it is urgent, just ring us.
+      cta: Send a request
+translatedFrom: b301dc5509a32b69

@@ -1,0 +1,27 @@
+---
+import Shell from '@/layouts/Shell.astro';
+import Cta from '@/components/Cta.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getPagesContent } from '@/i18n/content/pages';
+import { PathBuilder } from '@/utils/paths';
+
+const locale = localeFrom(Astro.url.pathname);
+const pages = getPagesContent(locale);
+---
+
+<Shell
+  title={pages.notFound.metaTitle}
+  description={pages.notFound.body}
+  noindex
+>
+  <section class="wrap flex min-h-[70vh] flex-col justify-center gap-6 pt-36">
+    <span class="text-mega font-display leading-none text-white/10">404</span>
+    <h1 class="text-giant">{pages.notFound.heading}</h1>
+    <p class="max-w-xl text-base leading-relaxed text-mute">
+      {pages.notFound.body}
+    </p>
+    <div>
+      <Cta label={pages.notFound.cta} href={PathBuilder.home(locale)} />
+    </div>
+  </section>
+</Shell>

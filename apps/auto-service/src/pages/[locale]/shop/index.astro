@@ -1,0 +1,63 @@
+---
+import { getCollection } from 'astro:content';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import FitmentFilter from '@/components/FitmentFilter.astro';
+import ProductCard from '@/components/ProductCard.astro';
+import AddToCart from '@/components/AddToCart.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getShopContent } from '@/i18n/content/shop';
+import { getSiteContent } from '@/i18n/content/site';
+import { getHomeContent } from '@/i18n/content/home';
+import { localePaths, PathBuilder } from '@/utils/paths';
+import { buildFitmentIndex, publishedProducts } from '@/utils/products';
+
+export function getStaticPaths() {
+  return localePaths();
+}
+
+const locale = localeFrom(Astro.url.pathname);
+const shop = getShopContent(locale);
+const site = getSiteContent(locale);
+const home = getHomeContent(locale);
+const products = publishedProducts(await getCollection('products'));
+const index = buildFitmentIndex(products);
+---
+
+<Shell title={shop.metaTitle} description={shop.metaDescription}>
+  <PageHero
+    eyebrow={shop.eyebrow}
+    heading={shop.heading}
+    lead={shop.lead}
+    crumbs={[{ href: PathBuilder.shop(locale), label: site.nav.shop }]}
+  />
+
+  <section class="wrap py-band md:py-band-lg">
+    {
+      products.length === 0 ? (
+        <p class="card p-6 text-base text-muted">{shop.emptyCatalog}</p>
+      ) : (
+        <>
+          <FitmentFilter index={index} />
+          <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {products.map((product, i) => (
+              <li>
+                <ProductCard product={product} eager={i < 4} />
+              </li>
+            ))}
+          </ul>
+          <p class="mt-6 text-sm text-muted">{shop.installNote}</p>
+        </>
+      )
+    }
+  </section>
+
+  <AddToCart />
+
+  <FinalCta
+    eyebrow={home.shopTeaser.eyebrow}
+    heading={home.shopTeaser.heading}
+    body={home.shopTeaser.body}
+  />
+</Shell>

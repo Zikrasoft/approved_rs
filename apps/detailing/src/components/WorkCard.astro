@@ -1,0 +1,57 @@
+---
+import { Image } from 'astro:assets';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getServicesContent } from '@/i18n/content/services';
+import { PathBuilder } from '@/utils/paths';
+import { localizedWork, type Work } from '@/utils/works';
+
+interface Props {
+  work: Work;
+  eager?: boolean;
+  class?: string;
+}
+
+const { work, eager = false, class: className = '' } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const services = getServicesContent(locale);
+const { title } = localizedWork(work, locale);
+---
+
+<a href={PathBuilder.work(locale, work.id)} class={`shell group ${className}`}>
+  <article class="core flex h-full flex-col overflow-hidden">
+    <div class="relative aspect-[4/3] overflow-hidden">
+      <Image
+        src={work.data.image}
+        alt={title}
+        widths={[400, 720, 1100]}
+        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+        loading={eager ? 'eager' : 'lazy'}
+        class="h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
+      />
+      <div
+        class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-transparent to-transparent opacity-80"
+        aria-hidden="true"
+      >
+      </div>
+    </div>
+    <div class="flex flex-1 flex-col gap-3 p-6">
+      <div class="flex flex-wrap gap-2">
+        {
+          work.data.servicesApplied.map((slug) => (
+            <span class="rounded-full border border-line px-2.5 py-1 text-[0.625rem] uppercase tracking-[0.16em] text-mute-2">
+              {services[slug].name}
+            </span>
+          ))
+        }
+      </div>
+      <h3
+        class="text-lg font-display tracking-tight transition-colors duration-500 group-hover:text-champagne"
+      >
+        {title}
+      </h3>
+      <span class="mt-auto text-xs text-mute-2">
+        {work.data.car}{work.data.year ? ` · ${work.data.year}` : ''}
+      </span>
+    </div>
+  </article>
+</a>

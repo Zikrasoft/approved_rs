@@ -1,0 +1,243 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+
+  --color-paper: #f5f4f1;
+  --color-card: #ffffff;
+  --color-shade: #eceae4;
+  --color-ink: #17191c;
+  --color-ink-2: #3d424a;
+  --color-muted: #656b74;
+  --color-line: #dcd9d2;
+  --color-line-strong: #c3bfb5;
+  --color-signal: #cc4a16;
+  --color-signal-dark: #a93a0f;
+  --color-go: #1f6f4a;
+
+  --radius-block: 0.75rem;
+
+  --text-hero: clamp(2rem, 4.6vw, 3.5rem);
+  --text-section: clamp(1.625rem, 3vw, 2.375rem);
+  --text-block: clamp(1.25rem, 1.9vw, 1.5rem);
+
+  /* One named vertical rhythm for content bands, so a section is never
+     py-10 on one page and py-14 on the next. Hero and footer keep their
+     own spacing on purpose. */
+  --spacing-band: 3.5rem;
+  --spacing-band-lg: 5rem;
+}
+
+@layer base {
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  summary,
+  label:has(input:is([type='checkbox'], [type='radio'])) {
+    cursor: pointer;
+  }
+
+  /* Apple HIG asks for a 44pt minimum hit area. Applied only to coarse
+     pointers so mouse layouts keep their compact controls. */
+  @media (pointer: coarse) {
+    button,
+    [role='button'],
+    summary,
+    select,
+    input:not([type='hidden'], [type='checkbox'], [type='radio']) {
+      min-height: 44px;
+    }
+  }
+
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: var(--color-signal);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-signal);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@utility wrap {
+  width: 100%;
+  max-width: 74rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+@utility card {
+  border-radius: var(--radius-block);
+  border: 1px solid var(--color-line);
+  background-color: var(--color-card);
+}
+
+@utility eyebrow {
+  display: inline-block;
+  width: fit-content;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-signal);
+}
+
+@utility spec {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: var(--radius-block);
+    padding: 0.8125rem 1.375rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1;
+    transition:
+      background-color 160ms ease-out,
+      border-color 160ms ease-out,
+      color 160ms ease-out;
+  }
+
+  .btn-primary {
+    background-color: var(--color-signal);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-signal-dark);
+  }
+
+  .btn-secondary {
+    border: 1px solid var(--color-line-strong);
+    background-color: var(--color-card);
+    color: var(--color-ink);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--color-ink);
+  }
+
+  .btn:active {
+    transform: translateY(1px);
+  }
+
+  .field {
+    width: 100%;
+    border-radius: var(--radius-block);
+    border: 1px solid var(--color-line-strong);
+    background-color: var(--color-card);
+    padding: 0.75rem 0.875rem;
+    font-size: 0.9375rem;
+    color: var(--color-ink);
+  }
+
+  .field::placeholder {
+    color: var(--color-muted);
+  }
+
+  .field:focus {
+    border-color: var(--color-signal);
+    outline: none;
+  }
+
+  .field-label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-ink-2);
+  }
+
+  .prose-shop {
+    max-width: 42rem;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--color-ink-2);
+  }
+
+  .prose-shop > * + * {
+    margin-top: 1.1em;
+  }
+
+  .prose-shop strong {
+    color: var(--color-ink);
+  }
+
+  .prose-shop h2,
+  .prose-shop h3 {
+    color: var(--color-ink);
+    font-size: 1.25rem;
+    margin-top: 1.8em;
+  }
+
+  .prose-shop ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .prose-shop li {
+    position: relative;
+    padding-left: 1.25rem;
+  }
+
+  .prose-shop li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.65em;
+    width: 0.375rem;
+    height: 0.375rem;
+    background: var(--color-signal);
+  }
+
+  .prose-shop a {
+    color: var(--color-signal);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+}

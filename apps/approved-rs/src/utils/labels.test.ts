@@ -7,19 +7,17 @@ import {
 } from './labels';
 
 describe('getNavItems', () => {
-  it('orders Автоподбор first, Привоз second, Автосервис third, Детейлинг fourth, then the rest of SERVICES', () => {
+  it('orders Автоподбор first, Привоз second, then the rest of SERVICES', () => {
     const result = getNavItems('ru', 'de');
     expect(result.map((i) => i.label)).toEqual([
       'Автоподбор',
       'Авто из ЕС и Китая',
-      'Автосервис',
-      'Детейлинг',
       'Выкуп',
       'Проверка',
     ]);
   });
 
-  it('builds per-locale, per-country hrefs for Выкуп/Проверка, fixed hub hrefs for Автоподбор/Привоз/Автосервис/Детейлинг', () => {
+  it('builds per-locale, per-country hrefs for Выкуп/Проверка, fixed hub hrefs for Автоподбор/Привоз', () => {
     const result = getNavItems('ru', 'rs');
     expect(result).toEqual([
       {
@@ -31,16 +29,6 @@ describe('getNavItems', () => {
         href: '/ru/vehicle-import/',
         label: 'Авто из ЕС и Китая',
         slug: 'vehicle-import',
-      },
-      {
-        href: '/ru/auto-service-belgrade/',
-        label: 'Автосервис',
-        slug: 'auto-service-belgrade',
-      },
-      {
-        href: '/ru/detailing-belgrade/',
-        label: 'Детейлинг',
-        slug: 'detailing-belgrade',
       },
       {
         href: '/ru/vehicle-buyback/rs/',
@@ -64,9 +52,9 @@ describe('getNavItems', () => {
 
 describe('isNavItemActive', () => {
   const sourcing = { href: '/ru/vehicle-sourcing/', slug: 'vehicle-sourcing' };
-  const autoservice = {
-    href: '/ru/auto-service-belgrade/',
-    slug: 'auto-service-belgrade',
+  const vehicleImport = {
+    href: '/ru/vehicle-import/',
+    slug: 'vehicle-import',
   };
 
   it('matches a country-scoped item on its exact path', () => {
@@ -107,12 +95,7 @@ describe('isNavItemActive', () => {
 
   it('matches a fixed (non-country-scoped) item by prefix', () => {
     expect(
-      isNavItemActive(
-        autoservice,
-        'ru',
-        'de',
-        '/ru/auto-service-belgrade/bmw-x1/',
-      ),
+      isNavItemActive(vehicleImport, 'ru', 'de', '/ru/vehicle-import/eu/de/'),
     ).toBe(true);
   });
 });
@@ -126,7 +109,5 @@ describe('isCountryScopedServiceSlug', () => {
 
   it('is false for services without a [country] route', () => {
     expect(isCountryScopedServiceSlug('vehicle-import')).toBe(false);
-    expect(isCountryScopedServiceSlug('auto-service-belgrade')).toBe(false);
-    expect(isCountryScopedServiceSlug('detailing-belgrade')).toBe(false);
   });
 });

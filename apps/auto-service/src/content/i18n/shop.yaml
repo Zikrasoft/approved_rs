@@ -1,0 +1,151 @@
+metaTitle: Аккумуляторы для авто в Белграде — подбор и установка — AUTOHUB
+metaDescription: Аккумуляторы в наличии в Белграде. Подбор по марке, модели и году, установка за 20 минут, утилизация старого. Цены с НДС, гарантия производителя.
+eyebrow: Запчасти
+heading: Аккумуляторы с подбором по вашей машине
+lead: Выберите марку, модель и год — покажем только то, что физически встанет на место и хватит по пусковому току. Установка входит в цену.
+fitmentHeading: Подбор по автомобилю
+makeLabel: Марка
+modelLabel: Модель
+yearLabel: Год выпуска
+anyOption: Не важно
+resetLabel: Сбросить
+matchCount:
+  one: подходит {count} аккумулятор
+  few: подходит {count} аккумулятора
+  many: подходит {count} аккумуляторов
+  other: подходит {count} аккумулятора
+noMatches: Под эти параметры в наличии ничего нет
+noMatchesHint: Напишите нам — привезём под заказ обычно за один-два дня.
+emptyCatalog: Каталог скоро наполнится. Пока что позвоните — скажем, что есть в наличии сегодня.
+capacityLabel: Ёмкость
+crankingLabel: Пусковой ток
+polarityLabel: Полярность
+dimensionsLabel: Габариты
+dimensionsUnit: мм
+polarityLeft: обратная (минус слева)
+polarityRight: прямая (плюс слева)
+warrantyLabel: Гарантия
+warrantyUnit: мес.
+fitsLabel: Подходит для
+inStock: В наличии
+onOrder: Под заказ
+addToCart: В корзину
+inCart: В корзине
+installNote: Установка и утилизация старого аккумулятора — бесплатно при покупке у нас.
+productMetaSuffix: аккумулятор в Белграде
+cart:
+  metaTitle: Корзина — AUTOHUB
+  metaDescription: Ваш заказ запчастей. Оформление без предоплаты — оплата при получении в сервисе.
+  eyebrow: Корзина
+  heading: Ваш заказ
+  lead: Предоплаты нет. Мы подтвердим наличие, отложим товар и назовём время — оплата в сервисе при получении.
+  empty: В корзине пока пусто.
+  emptyCta: Перейти к каталогу
+  quantityLabel: Количество
+  removeLabel: Убрать
+  totalLabel: Итого
+  totalNote: Цены с НДС. Установка аккумулятора входит в стоимость.
+  orderHeading: Оформить заказ
+  orderNote: Мы перезвоним, подтвердим наличие и договоримся о времени.
+  badgeLabel: товаров в корзине
+translations:
+  sr:
+    metaTitle: Akumulatori za auto u Beogradu — izbor i ugradnja — AUTOHUB
+    metaDescription: Akumulatori na stanju u Beogradu. Izbor po marki, modelu i godištu, ugradnja za 20 minuta, odnošenje starog. Cene sa PDV-om, garancija proizvođača.
+    eyebrow: Delovi
+    heading: Akumulatori izabrani po vašem automobilu
+    lead: Izaberite marku, model i godište — prikazaćemo samo ono što fizički staje i ima dovoljno struje za paljenje. Ugradnja je u ceni.
+    fitmentHeading: Izbor po automobilu
+    makeLabel: Marka
+    modelLabel: Model
+    yearLabel: Godište
+    anyOption: Svejedno
+    resetLabel: Poništi
+    matchCount:
+      one: odgovara {count} akumulator
+      few: odgovaraju {count} akumulatora
+      other: odgovara {count} akumulatora
+    noMatches: Za ove parametre trenutno nemamo ništa na stanju
+    noMatchesHint: Pišite nam — poručujemo obično za dan ili dva.
+    emptyCatalog: Katalog se uskoro puni. Do tada nas pozovite — reći ćemo šta imamo danas.
+    capacityLabel: Kapacitet
+    crankingLabel: Struja paljenja
+    polarityLabel: Polaritet
+    dimensionsLabel: Dimenzije
+    dimensionsUnit: mm
+    polarityLeft: obrnuti (minus levo)
+    polarityRight: standardni (plus levo)
+    warrantyLabel: Garancija
+    warrantyUnit: mes.
+    fitsLabel: Odgovara za
+    inStock: Na stanju
+    onOrder: Po porudžbini
+    addToCart: U korpu
+    inCart: U korpi
+    installNote: Ugradnja i odnošenje starog akumulatora su besplatni uz kupovinu kod nas.
+    productMetaSuffix: akumulator u Beogradu
+    cart:
+      metaTitle: Korpa — AUTOHUB
+      metaDescription: Vaša porudžbina delova. Bez avansa — plaća se pri preuzimanju u servisu.
+      eyebrow: Korpa
+      heading: Vaša porudžbina
+      lead: Avansa nema. Potvrdićemo stanje, odvojiti robu i reći termin — plaćanje u servisu pri preuzimanju.
+      empty: Korpa je za sada prazna.
+      emptyCta: Idi na katalog
+      quantityLabel: Količina
+      removeLabel: Ukloni
+      totalLabel: Ukupno
+      totalNote: Cene su sa PDV-om. Ugradnja akumulatora je uključena.
+      orderHeading: Pošalji porudžbinu
+      orderNote: Pozvaćemo vas, potvrditi stanje i dogovoriti termin.
+      badgeLabel: artikala u korpi
+  en:
+    metaTitle: Car batteries in Belgrade — matched and fitted — AUTOHUB
+    metaDescription: Car batteries in stock in Belgrade. Matched by make, model and year, fitted in twenty minutes, old one recycled. VAT included, manufacturer warranty.
+    eyebrow: Parts
+    heading: Batteries matched to your car
+    lead: Pick the make, model and year — we only show what physically fits and has enough cranking current. Fitting is included in the price.
+    fitmentHeading: Match to your car
+    makeLabel: Make
+    modelLabel: Model
+    yearLabel: Year
+    anyOption: Any
+    resetLabel: Reset
+    matchCount:
+      one: '{count} battery fits'
+      other: '{count} batteries fit'
+    noMatches: Nothing in stock matches those details
+    noMatchesHint: Message us — we usually get one in within a day or two.
+    emptyCatalog: The catalogue is filling up shortly. Until then give us a call and we will tell you what is on the shelf today.
+    capacityLabel: Capacity
+    crankingLabel: Cranking current
+    polarityLabel: Polarity
+    dimensionsLabel: Dimensions
+    dimensionsUnit: mm
+    polarityLeft: reversed (negative on the left)
+    polarityRight: standard (positive on the left)
+    warrantyLabel: Warranty
+    warrantyUnit: months
+    fitsLabel: Fits
+    inStock: In stock
+    onOrder: To order
+    addToCart: Add to basket
+    inCart: In basket
+    installNote: Fitting and recycling your old battery are free when you buy from us.
+    productMetaSuffix: car battery in Belgrade
+    cart:
+      metaTitle: Basket — AUTOHUB
+      metaDescription: Your parts order. No prepayment — you pay when you collect at the workshop.
+      eyebrow: Basket
+      heading: Your order
+      lead: No deposit. We confirm availability, set the item aside and give you a time — you pay at the workshop on collection.
+      empty: Your basket is empty for now.
+      emptyCta: Go to the catalogue
+      quantityLabel: Quantity
+      removeLabel: Remove
+      totalLabel: Total
+      totalNote: Prices include VAT. Battery fitting is included.
+      orderHeading: Send the order
+      orderNote: We call you back, confirm availability and agree a time.
+      badgeLabel: items in the basket
+translatedFrom: 95c9a0fa1bcde47c

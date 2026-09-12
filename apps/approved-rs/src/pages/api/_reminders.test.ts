@@ -8,12 +8,12 @@ vi.mock('@/lib/store', () => ({
 }));
 vi.mock('@/lib/telegram', () => ({
   sendPostponeReminderToOwner: vi.fn(),
-  refreshLeadCard: vi.fn(),
+  ensureLeadCard: vi.fn(),
 }));
 
 import { GET } from './reminders';
 import { getDuePostponed, resumeLead } from '@/lib/store';
-import { sendPostponeReminderToOwner, refreshLeadCard } from '@/lib/telegram';
+import { sendPostponeReminderToOwner, ensureLeadCard } from '@/lib/telegram';
 
 const SECRET = 'test-cron-secret';
 
@@ -28,6 +28,7 @@ function makeCtx(
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
   return {
     id: 1,
+    brand: 'Approved.rs',
     name: 'Иван',
     contact: '@ivan',
     service: 'vehicle-sourcing',
@@ -58,7 +59,7 @@ describe('GET /api/reminders', () => {
     vi.mocked(sendPostponeReminderToOwner)
       .mockReset()
       .mockResolvedValue(undefined);
-    vi.mocked(refreshLeadCard).mockReset().mockResolvedValue(undefined);
+    vi.mocked(ensureLeadCard).mockReset().mockResolvedValue(undefined);
   });
 
   it('rejects a request without a matching bearer token', async () => {
@@ -105,7 +106,7 @@ describe('GET /api/reminders', () => {
       expect.objectContaining({ id: 9 }),
     );
     expect(resumeLead).toHaveBeenCalledWith(9);
-    expect(refreshLeadCard).toHaveBeenCalledWith(resumed);
+    expect(ensureLeadCard).toHaveBeenCalledWith(resumed);
     expect(await res.json()).toEqual({ remindedPostponed: 1 });
   });
 
@@ -116,7 +117,7 @@ describe('GET /api/reminders', () => {
     const res = await GET(makeCtx());
 
     expect(res.status).toBe(200);
-    expect(refreshLeadCard).not.toHaveBeenCalled();
+    expect(ensureLeadCard).not.toHaveBeenCalled();
     expect(await res.json()).toEqual({ remindedPostponed: 1 });
   });
 

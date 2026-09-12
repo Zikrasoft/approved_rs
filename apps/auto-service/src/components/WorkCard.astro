@@ -1,0 +1,52 @@
+---
+import { Image } from 'astro:assets';
+import { localeFrom } from '@/i18n/currentLocale';
+import { PathBuilder } from '@/utils/paths';
+import { localizedWork, type Work } from '@/utils/works';
+import { getServicesContent } from '@/i18n/content/services';
+import { isServiceSlug } from '@/utils/services';
+
+interface Props {
+  work: Work;
+  eager?: boolean;
+}
+
+const { work, eager = false } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const { title } = localizedWork(work, locale);
+const services = getServicesContent(locale);
+const applied = work.data.servicesApplied
+  .filter(isServiceSlug)
+  .map((slug) => services[slug].name);
+---
+
+<a
+  href={PathBuilder.work(locale, work.id)}
+  class="card group flex h-full flex-col overflow-hidden transition-colors duration-150 hover:border-ink"
+>
+  <Image
+    src={work.data.image}
+    alt={title}
+    widths={[400, 720]}
+    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+    loading={eager ? 'eager' : 'lazy'}
+    class="aspect-[4/3] w-full object-cover"
+  />
+  <div class="flex flex-1 flex-col gap-2 border-t border-line p-4">
+    <h3 class="text-base font-semibold leading-snug text-ink">{title}</h3>
+    <span class="spec text-xs text-muted">
+      {work.data.car}{work.data.year ? ` · ${work.data.year}` : ''}
+    </span>
+    {
+      applied.length > 0 && (
+        <ul class="mt-auto flex flex-wrap gap-1.5 pt-2">
+          {applied.map((name) => (
+            <li class="spec rounded-block border border-line px-2 py-0.5 text-[0.6875rem] text-muted">
+              {name}
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</a>

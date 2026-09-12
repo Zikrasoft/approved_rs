@@ -1,11 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { CollectionEntry } from 'astro:content';
-import {
-  toCaseItem,
-  toAutoserviceCaseItem,
-  toDetailingCaseItem,
-  getCaseTranslation,
-} from './cases';
+import { toCaseItem, getCaseTranslation } from './cases';
 
 const price = { value: '5000', currency: 'EUR' };
 
@@ -40,46 +35,6 @@ describe('toCaseItem', () => {
     } as unknown as CollectionEntry<'cases'>;
 
     expect(toCaseItem(entry, 'ru').badges).toEqual(['unknown-service']);
-  });
-});
-
-describe('toAutoserviceCaseItem', () => {
-  it('maps each applied service to its own badge, falling back to the raw slug for unknown ones', () => {
-    const entry = {
-      id: 'bmw-320',
-      data: {
-        servicesApplied: ['diagnostics', 'engine', 'unknown-service'],
-        car: 'BMW 320',
-        year: 2018,
-        image: undefined,
-      },
-    } as unknown as CollectionEntry<'autoserviceCases'>;
-
-    const item = toAutoserviceCaseItem(entry, 'ru');
-    expect(item.href).toBe('/ru/auto-service-belgrade/bmw-320/');
-    expect(item.badges).toEqual([
-      'Компьютерная диагностика',
-      'Двигатель и трансмиссия',
-      'unknown-service',
-    ]);
-  });
-});
-
-describe('toDetailingCaseItem', () => {
-  it('maps each applied service to its own badge, falling back to the raw slug for unknown ones', () => {
-    const entry = {
-      id: 'bmw-x5-wrap',
-      data: {
-        servicesApplied: ['wrap', 'unknown-service'],
-        car: 'BMW X5',
-        year: 2021,
-        image: undefined,
-      },
-    } as unknown as CollectionEntry<'detailingCases'>;
-
-    const item = toDetailingCaseItem(entry, 'ru');
-    expect(item.href).toBe('/ru/detailing-belgrade/bmw-x5-wrap/');
-    expect(item.badges).toEqual(['Оклейка плёнкой', 'unknown-service']);
   });
 });
 

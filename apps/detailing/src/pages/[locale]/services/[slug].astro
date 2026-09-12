@@ -1,0 +1,179 @@
+---
+import Icon from '@/components/Icon.astro';
+import { getCollection } from 'astro:content';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import WorkGrid from '@/components/WorkGrid.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getServicesContent } from '@/i18n/content/services';
+import { getPagesContent } from '@/i18n/content/pages';
+import { getSiteContent } from '@/i18n/content/site';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import { SERVICE_SLUGS } from '@/utils/services';
+import { publishedWorks } from '@/utils/works';
+import { safeMarkdown } from '@podbor/site-kit';
+import { SITE_URL } from '@/utils/constants';
+
+export function getStaticPaths() {
+  return withLocales(
+    SERVICE_SLUGS.map((slug) => ({ params: { slug }, props: { slug } })),
+  );
+}
+
+const { slug } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const services = getServicesContent(locale);
+const pages = getPagesContent(locale);
+const site = getSiteContent(locale);
+const service = services[slug];
+
+const related = publishedWorks(await getCollection('works'))
+  .filter((w) => w.data.servicesApplied.includes(slug))
+  .slice(0, 3);
+
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: service.name,
+  serviceType: service.name,
+  description: service.metaDescription,
+  provider: { '@id': `${SITE_URL}/#studio` },
+  areaServed: { '@type': 'City', name: 'Beograd' },
+  url: new URL(PathBuilder.service(locale, slug), SITE_URL).href,
+};
+
+const specs = [
+  { label: services.specsPriceLabel, value: service.priceFrom },
+  { label: services.specsDurationLabel, value: service.duration },
+  { label: services.specsWarrantyLabel, value: service.warranty },
+];
+---
+
+<Shell
+  title={service.metaTitle}
+  description={service.metaDescription}
+  jsonLd={[serviceSchema]}
+>
+  <PageHero
+    eyebrow={service.heroEyebrow}
+    heading={service.heroTitle}
+    lead={service.heroLead}
+    crumbs={[
+      { href: PathBuilder.services(locale), label: site.nav.services },
+      { href: PathBuilder.service(locale, slug), label: service.name },
+    ]}
+  />
+
+  <section class="wrap mt-12">
+    <div class="grid gap-4 sm:grid-cols-3">
+      {
+        specs.map((spec, i) => (
+          <div class="shell" data-reveal data-reveal-delay={i * 80}>
+            <div class="core flex flex-col gap-2 p-6">
+              <span class="text-[0.6875rem] uppercase tracking-[0.2em] text-mute-2">
+                {spec.label}
+              </span>
+              <span class="font-display text-lg tracking-tight text-champagne">
+                {spec.value}
+              </span>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="wrap mt-28 sm:mt-32">
+    <div class="grid gap-14 lg:grid-cols-[1.2fr_1fr]">
+      <div class="flex flex-col gap-8">
+        <h2 class="text-big" data-reveal>{service.bodyHeading}</h2>
+        <div
+          class="prose-studio"
+          data-reveal
+          data-reveal-delay="80"
+          set:html={safeMarkdown(service.body)}
+        />
+      </div>
+
+      <aside class="flex flex-col gap-4">
+        <div class="shell" data-reveal data-reveal-delay="120">
+          <div class="core flex flex-col gap-5 p-7">
+            <h3 class="text-lg font-display tracking-tight">
+              {service.includesHeading}
+            </h3>
+            <ul class="flex flex-col gap-3">
+              {
+                service.includes.map((item) => (
+                  <li class="flex gap-3 text-sm leading-relaxed text-mute">
+                    <Icon
+                      name="check"
+                      class="mt-1 shrink-0 text-champagne-dim"
+                    />
+                    {item}
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+        </div>
+
+        <div class="shell" data-reveal data-reveal-delay="180">
+          <div class="core flex flex-col gap-5 p-7">
+            <h3 class="text-lg font-display tracking-tight">
+              {service.forWhomHeading}
+            </h3>
+            <ul class="flex flex-col gap-3">
+              {
+                service.forWhom.map((item) => (
+                  <li class="flex gap-3 text-sm leading-relaxed text-mute">
+                    <span
+                      class="mt-2 h-1 w-1 shrink-0 rounded-full bg-champagne-dim"
+                      aria-hidden="true"
+                    />
+                    {item}
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="wrap mt-24">
+    <div class="shell" data-reveal>
+      <div
+        class="core flex flex-col gap-4 border-l-2 border-champagne-dim p-8 sm:p-10"
+      >
+        <h3 class="text-lg font-display tracking-tight text-champagne">
+          {service.honestHeading}
+        </h3>
+        <p class="max-w-3xl text-sm leading-relaxed text-mute sm:text-base">
+          {service.honest}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {
+    related.length > 0 && (
+      <section class="wrap mt-32 sm:mt-40">
+        <SectionHead
+          eyebrow={pages.works.eyebrow}
+          heading={pages.works.heading}
+        />
+        <WorkGrid works={related} />
+      </section>
+    )
+  }
+
+  <FinalCta
+    eyebrow={pages.works.detailCtaHeading}
+    heading={service.name}
+    body={pages.works.detailCtaBody}
+    service={slug}
+  />
+</Shell>

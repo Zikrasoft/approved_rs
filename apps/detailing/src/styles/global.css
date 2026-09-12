@@ -1,0 +1,289 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-display:
+    'Unbounded Variable', 'Unbounded', ui-sans-serif, system-ui, sans-serif;
+  --font-sans:
+    'Manrope Variable', 'Manrope', ui-sans-serif, system-ui, sans-serif;
+
+  --color-void: #060608;
+  --color-ink: #0c0c11;
+  --color-ink-2: #14141b;
+  --color-chalk: #f2f0ec;
+  --color-mute: #8e8e99;
+  --color-mute-2: #62626d;
+  --color-champagne: #e3c08a;
+  --color-champagne-dim: #b8965f;
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-strong: rgba(255, 255, 255, 0.18);
+
+  --radius-shell: 2rem;
+  --radius-core: 1.625rem;
+
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --text-mega: clamp(2.5rem, 6.6vw, 5.5rem);
+  --text-giant: clamp(1.875rem, 4vw, 3.25rem);
+  --text-big: clamp(1.5rem, 2.6vw, 2.125rem);
+}
+
+@layer base {
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  summary,
+  label:has(input:is([type='checkbox'], [type='radio'])) {
+    cursor: pointer;
+  }
+
+  /* Apple HIG asks for a 44pt minimum hit area. Applied only to coarse
+     pointers so mouse layouts keep their compact controls. */
+  @media (pointer: coarse) {
+    button,
+    [role='button'],
+    summary,
+    select,
+    input:not([type='hidden'], [type='checkbox'], [type='radio']) {
+      min-height: 44px;
+    }
+  }
+
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    background-color: var(--color-void);
+    color: var(--color-chalk);
+    font-family: var(--font-sans);
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: var(--color-champagne);
+    color: var(--color-void);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-champagne);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 0.98;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@utility grain {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* The brand is a prism, so the accent line is a spectrum — but a metallic
+   one: brushed steel through champagne into warm gold. The earlier violet
+   and cyan read as software, not as a finished panel under a lamp. */
+@utility text-iridescent {
+  background-image: linear-gradient(
+    100deg,
+    #9aa3b2 0%,
+    #d8cbb4 26%,
+    var(--color-champagne) 58%,
+    #c08f4f 82%,
+    var(--color-chalk) 100%
+  );
+  background-clip: text;
+  color: transparent;
+}
+
+@utility shell {
+  border-radius: var(--radius-shell);
+  border: 1px solid var(--color-line);
+  background-color: rgba(255, 255, 255, 0.025);
+  padding: 0.375rem;
+}
+
+@utility core {
+  border-radius: var(--radius-core);
+  background-color: var(--color-ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+@utility wrap {
+  width: 100%;
+  max-width: 78rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+@utility eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-line);
+  padding: 0.3125rem 0.75rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-champagne);
+}
+
+@layer components {
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(1.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .rise {
+    animation: rise 600ms var(--ease-expo) both;
+    animation-delay: var(--rise-delay, 0ms);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rise {
+      animation: none;
+    }
+  }
+
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(2.5rem);
+    filter: blur(6px);
+    transition:
+      opacity 900ms var(--ease-expo),
+      transform 900ms var(--ease-expo),
+      filter 900ms var(--ease-expo);
+  }
+
+  [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      opacity: 1;
+      transform: none;
+      filter: none;
+      transition: none;
+    }
+  }
+
+  .hairline {
+    height: 1px;
+    width: 100%;
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-line-strong) 12%,
+      var(--color-line-strong) 88%,
+      transparent
+    );
+  }
+
+  .prose-studio {
+    max-width: 44rem;
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: var(--color-mute);
+  }
+
+  .prose-studio > * + * {
+    margin-top: 1.25em;
+  }
+
+  .prose-studio strong {
+    color: var(--color-chalk);
+    font-weight: 600;
+  }
+
+  .prose-studio h2,
+  .prose-studio h3 {
+    color: var(--color-chalk);
+    font-size: 1.375rem;
+    margin-top: 2em;
+  }
+
+  .prose-studio ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .prose-studio li {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+
+  .prose-studio li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.7em;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 9999px;
+    background: var(--color-champagne-dim);
+  }
+
+  .prose-studio a {
+    color: var(--color-champagne);
+    text-underline-offset: 0.25em;
+    text-decoration: underline;
+  }
+
+  .marquee-track {
+    animation: marquee 42s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+      animation: none;
+    }
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}

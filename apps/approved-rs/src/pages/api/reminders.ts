@@ -3,7 +3,7 @@ export const prerender = false;
 import type { APIContext } from 'astro';
 import { secretMatches } from '@/lib/verifySecret';
 import { getDuePostponed, resumeLead } from '@/lib/store';
-import { sendPostponeReminderToOwner, refreshLeadCard } from '@/lib/telegram';
+import { sendPostponeReminderToOwner, ensureLeadCard } from '@/lib/telegram';
 
 const CRON_SECRET = process.env.CRON_SECRET;
 
@@ -31,7 +31,7 @@ export async function GET({ request }: APIContext): Promise<Response> {
     try {
       await sendPostponeReminderToOwner(lead);
       const resumed = await resumeLead(lead.id);
-      if (resumed) await refreshLeadCard(resumed);
+      if (resumed) await ensureLeadCard(resumed);
       remindedPostponed++;
     } catch (err) {
       console.error('[reminders] failed to send/resume a due postponed lead', {

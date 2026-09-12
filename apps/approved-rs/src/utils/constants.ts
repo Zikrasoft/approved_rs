@@ -6,6 +6,10 @@ export const YM_COUNTER_ID = 111800377;
 
 export const SITE_URL = import.meta.env.SITE ?? 'https://approved.rs';
 export const SITE_NAME = 'Approved.rs';
+
+// Bump when the cookie/privacy policy changes materially — every visitor is
+// then asked again instead of carrying an answer given to the old text.
+export const COOKIE_POLICY_VERSION = '2026-09-12';
 export const SITE_BRAND = 'APPROVED';
 export const SITE_TLD = '.rs';
 export const DEFAULT_COUNTRY = 'rs';

@@ -1,0 +1,186 @@
+---
+import Shell from '@/layouts/Shell.astro';
+import Icon from '@/components/Icon.astro';
+import PageHero from '@/components/PageHero.astro';
+import LeadForm from '@/components/LeadForm.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getShopContent } from '@/i18n/content/shop';
+import { localePaths, PathBuilder } from '@/utils/paths';
+import { SHOP_SERVICE } from '@/utils/services';
+import { MAX_LINE_QUANTITY } from '@/utils/cart';
+
+export function getStaticPaths() {
+  return localePaths();
+}
+
+const locale = localeFrom(Astro.url.pathname);
+const shop = getShopContent(locale);
+---
+
+<Shell
+  title={shop.cart.metaTitle}
+  description={shop.cart.metaDescription}
+  noindex
+>
+  <PageHero
+    eyebrow={shop.cart.eyebrow}
+    heading={shop.cart.heading}
+    lead={shop.cart.lead}
+    crumbs={[{ href: PathBuilder.cart(locale), label: shop.cart.heading }]}
+  />
+
+  <section
+    class="wrap grid gap-8 py-band md:py-band-lg lg:grid-cols-[1.2fr_1fr]"
+    data-cart-page
+  >
+    <div class="flex flex-col gap-4">
+      <ul class="flex flex-col gap-3" data-cart-lines></ul>
+
+      <div
+        class="card flex flex-col items-start gap-3 p-6"
+        data-cart-empty
+        hidden
+      >
+        <p class="text-base text-muted">{shop.cart.empty}</p>
+        <a href={PathBuilder.shop(locale)} class="btn btn-secondary">
+          {shop.cart.emptyCta}
+          <Icon name="arrowRight" />
+        </a>
+      </div>
+
+      <div
+        class="card flex items-center justify-between gap-4 p-5"
+        data-cart-summary
+        hidden
+      >
+        <span class="text-base font-semibold text-ink">
+          {shop.cart.totalLabel}
+        </span>
+        <span class="spec text-2xl font-semibold text-ink" data-cart-total
+        ></span>
+      </div>
+      <p class="text-xs text-muted" data-cart-note hidden>
+        {shop.cart.totalNote}
+      </p>
+    </div>
+
+    <div class="card flex flex-col gap-4 p-6" data-cart-order hidden>
+      <div class="flex flex-col gap-1.5">
+        <h2 class="text-block font-semibold">{shop.cart.orderHeading}</h2>
+        <p class="text-sm leading-relaxed text-muted">{shop.cart.orderNote}</p>
+      </div>
+      <LeadForm compact fixedService service={SHOP_SERVICE} />
+    </div>
+  </section>
+
+  <template data-cart-line>
+    <li class="card flex flex-wrap items-center justify-between gap-4 p-4">
+      <span class="flex min-w-[10rem] flex-1 flex-col gap-1">
+        <span class="text-base font-semibold text-ink" data-line-title></span>
+        <span class="spec text-sm text-muted" data-line-price></span>
+      </span>
+      <span class="flex items-center gap-3">
+        <label class="flex items-center gap-2">
+          <span class="text-xs text-muted">{shop.cart.quantityLabel}</span>
+          <input
+            type="number"
+            min="1"
+            max={MAX_LINE_QUANTITY}
+            class="field spec w-20 py-1.5 text-center"
+            data-line-quantity
+          />
+        </label>
+        <button
+          type="button"
+          class="text-xs text-muted underline underline-offset-2 hover:text-signal"
+          data-line-remove
+        >
+          {shop.cart.removeLabel}
+        </button>
+      </span>
+    </li>
+  </template>
+</Shell>
+
+<script>
+  import {
+    cartTotal,
+    describeCart,
+    readCart,
+    removeLine,
+    setQuantity,
+    writeCart,
+    onCartChange,
+  } from '@/utils/cart';
+  import { CURRENCY_SYMBOL } from '@/utils/constants';
+
+  const page = document.querySelector<HTMLElement>('[data-cart-page]');
+  const list = page?.querySelector<HTMLElement>('[data-cart-lines]');
+  const template =
+    document.querySelector<HTMLTemplateElement>('[data-cart-line]');
+
+  if (page && list && template) {
+    const panel = (name: string) =>
+      page.querySelector<HTMLElement>(`[data-cart-${name}]`);
+    const empty = panel('empty');
+    const summary = panel('summary');
+    const note = panel('note');
+    const order = panel('order');
+    const totalEl = panel('total');
+    const form = page.querySelector<HTMLFormElement>('[data-lead-form]');
+    const comment = form?.querySelector<HTMLTextAreaElement>(
+      'textarea[name="comment"]',
+    );
+
+    form?.addEventListener('submit', () => {
+      if (!comment) return;
+      const ordered = readCart();
+      if (ordered.length === 0) return;
+      comment.value = [describeCart(ordered), comment.value.trim()]
+        .filter(Boolean)
+        .join('\n\n');
+      writeCart([]);
+    });
+
+    const renderLine = (line: ReturnType<typeof readCart>[number]) => {
+      const item = template.content.firstElementChild!.cloneNode(
+        true,
+      ) as HTMLElement;
+      item.querySelector('[data-line-title]')!.textContent = line.title;
+      item.querySelector('[data-line-price]')!.textContent =
+        `${line.price} ${CURRENCY_SYMBOL}`;
+
+      const input = item.querySelector<HTMLInputElement>(
+        '[data-line-quantity]',
+      )!;
+      input.value = String(line.quantity);
+      input.addEventListener('change', () =>
+        writeCart(setQuantity(readCart(), line.slug, Number(input.value))),
+      );
+
+      item
+        .querySelector<HTMLButtonElement>('[data-line-remove]')!
+        .addEventListener('click', () =>
+          writeCart(removeLine(readCart(), line.slug)),
+        );
+
+      return item;
+    };
+
+    const render = () => {
+      const cart = readCart();
+      list.replaceChildren(...cart.map(renderLine));
+
+      const filled = cart.length > 0;
+      empty?.toggleAttribute('hidden', filled);
+      summary?.toggleAttribute('hidden', !filled);
+      note?.toggleAttribute('hidden', !filled);
+      order?.toggleAttribute('hidden', !filled);
+      if (totalEl)
+        totalEl.textContent = `${cartTotal(cart)} ${CURRENCY_SYMBOL}`;
+    };
+
+    render();
+    onCartChange(render);
+  }
+</script>

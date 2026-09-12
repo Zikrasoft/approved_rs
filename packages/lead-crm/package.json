@@ -1,0 +1,29 @@
+{
+  "name": "@podbor/lead-crm",
+  "type": "module",
+  "private": true,
+  "sideEffects": false,
+  "version": "0.0.1",
+  "exports": {
+    ".": "./src/index.ts",
+    "./storage/vercel-blob": "./src/storage/vercelBlob.ts",
+    "./contact-channel": "./src/contactChannel.ts"
+  },
+  "scripts": {
+    "test": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "date-fns": "4.4.0",
+    "zod": "4.5.4"
+  },
+  "peerDependencies": {
+    "@vercel/blob": "2.8.0"
+  },
+  "devDependencies": {
+    "@vercel/blob": "2.8.0",
+    "@vitest/coverage-v8": "3.2.6",
+    "typescript": "5.9.3",
+    "vitest": "3.2.6"
+  }
+}

@@ -1,0 +1,187 @@
+nav:
+  services: Услуги
+  shop: Запчасти
+  works: Примеры работ
+  process: Как работаем
+  about: О сервисе
+  contact: Контакты
+header:
+  menuOpenLabel: Меню
+  menuCloseLabel: Закрыть меню
+  languageLabel: Язык
+  cta: Записаться
+  phoneLabel: Позвонить
+footer:
+  tagline: Автосервис в Белграде. Диагностика, ремонт, кузов и покраска, запчасти.
+  servicesHeading: Услуги
+  companyHeading: Сервис
+  contactHeading: Контакты
+  hoursHeading: Часы работы
+  hours: Пн–Пт 08:00–18:00 · Сб 09:00–14:00
+  privacyLabel: Политика конфиденциальности
+  rightsSuffix: Все права защищены.
+common:
+  homeLabel: Главная
+  skipToContent: К содержанию
+  breadcrumbLabel: Хлебные крошки
+  primaryNavLabel: Основная навигация
+  mobileNavLabel: Мобильное меню
+  readMore: Подробнее
+  faqHeading: Частые вопросы
+  closeLabel: Закрыть
+  fromPrice: от
+  priceOnRequest: по запросу
+  allServices: Все услуги
+  backToShop: Все запчасти
+  allWorks: Все примеры работ
+  emptyWorks: Примеры работ скоро появятся. Пока что позвоните — расскажем, что делали на похожих машинах.
+channels:
+  call: Позвонить
+  whatsapp: WhatsApp
+  viber: Viber
+  telegram: Telegram
+  write: Написать
+form:
+  heading: Записаться в сервис
+  subheading: Опишите, что с машиной. Перезвоним, уточним детали и назовём время и цену.
+  nameLabel: Имя
+  namePlaceholder: Как к вам обращаться
+  contactLabel: Телефон
+  contactPlaceholder: +381 11 000 0000
+  serviceLabel: Что нужно
+  servicePlaceholder: Выберите услугу
+  carLabel: Автомобиль
+  carPlaceholder: Марка, модель, год
+  commentLabel: Что беспокоит
+  commentPlaceholder: Стук на неровностях, горит чек, нужно ТО…
+  submit: Отправить заявку
+  submitting: Отправляем…
+  privacyNote: Отправляя форму, вы соглашаетесь с
+  privacyLinkText: политикой конфиденциальности
+  modalTitle: Записаться в сервис
+translations:
+  sr:
+    nav:
+      services: Usluge
+      shop: Delovi
+      works: Primeri radova
+      process: Kako radimo
+      about: O servisu
+      contact: Kontakt
+    header:
+      menuOpenLabel: Meni
+      menuCloseLabel: Zatvori meni
+      languageLabel: Jezik
+      cta: Zakaži termin
+      phoneLabel: Pozovite
+    footer:
+      tagline: Auto servis u Beogradu. Dijagnostika, popravke, limarija i farbanje, delovi.
+      servicesHeading: Usluge
+      companyHeading: Servis
+      contactHeading: Kontakt
+      hoursHeading: Radno vreme
+      hours: Pon–Pet 08:00–18:00 · Sub 09:00–14:00
+      privacyLabel: Politika privatnosti
+      rightsSuffix: Sva prava zadržana.
+    common:
+      homeLabel: Početna
+      skipToContent: Na sadržaj
+      breadcrumbLabel: Putanja
+      primaryNavLabel: Glavna navigacija
+      mobileNavLabel: Mobilni meni
+      readMore: Detaljnije
+      faqHeading: Česta pitanja
+      closeLabel: Zatvori
+      fromPrice: od
+      priceOnRequest: na upit
+      allServices: Sve usluge
+      backToShop: Svi delovi
+      allWorks: Svi primeri radova
+      emptyWorks: Primeri radova uskoro stižu. Do tada nas pozovite — reći ćemo šta smo radili na sličnim automobilima.
+    channels:
+      call: Pozovite
+      whatsapp: WhatsApp
+      viber: Viber
+      telegram: Telegram
+      write: Pišite nam
+    form:
+      heading: Zakažite servis
+      subheading: Opišite šta je sa autom. Pozvaćemo vas da proverimo detalje i damo vam termin i cenu.
+      nameLabel: Ime
+      namePlaceholder: Kako da vam se obratimo
+      contactLabel: Telefon
+      contactPlaceholder: +381 11 000 0000
+      serviceLabel: Šta vam treba
+      servicePlaceholder: Izaberite uslugu
+      carLabel: Automobil
+      carPlaceholder: Marka, model, godište
+      commentLabel: Šta vas muči
+      commentPlaceholder: Lupa preko neravnina, upalila se lampica, treba servis…
+      submit: Pošalji zahtev
+      submitting: Šaljemo…
+      privacyNote: Slanjem forme prihvatate
+      privacyLinkText: politiku privatnosti
+      modalTitle: Zakažite servis
+  en:
+    nav:
+      services: Services
+      shop: Parts
+      works: Recent jobs
+      process: How it works
+      about: About
+      contact: Contact
+    header:
+      menuOpenLabel: Menu
+      menuCloseLabel: Close menu
+      languageLabel: Language
+      cta: Book a slot
+      phoneLabel: Call us
+    footer:
+      tagline: A car service in Belgrade. Diagnostics, repairs, bodywork and respraying, parts.
+      servicesHeading: Services
+      companyHeading: Workshop
+      contactHeading: Contact
+      hoursHeading: Opening hours
+      hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
+      privacyLabel: Privacy policy
+      rightsSuffix: All rights reserved.
+    common:
+      homeLabel: Home
+      skipToContent: Skip to content
+      breadcrumbLabel: Breadcrumb
+      primaryNavLabel: Primary navigation
+      mobileNavLabel: Mobile menu
+      readMore: More detail
+      faqHeading: Frequently asked
+      closeLabel: Close
+      fromPrice: from
+      priceOnRequest: on request
+      allServices: All services
+      backToShop: All parts
+      allWorks: All recent jobs
+      emptyWorks: Recent jobs will show up here shortly. Until then give us a call — we will tell you what we have done on similar cars.
+    channels:
+      call: Call us
+      whatsapp: WhatsApp
+      viber: Viber
+      telegram: Telegram
+      write: Message us
+    form:
+      heading: Book the workshop
+      subheading: Tell us what the car is doing. We call back, confirm the details, and give you a time and a price.
+      nameLabel: Name
+      namePlaceholder: What should we call you
+      contactLabel: Phone
+      contactPlaceholder: +381 11 000 0000
+      serviceLabel: What you need
+      servicePlaceholder: Pick a service
+      carLabel: Car
+      carPlaceholder: Make, model, year
+      commentLabel: What is wrong
+      commentPlaceholder: Knocking over bumps, check engine light, service due…
+      submit: Send request
+      submitting: Sending…
+      privacyNote: By sending this form you agree to our
+      privacyLinkText: privacy policy
+      modalTitle: Book the workshop
+translatedFrom: 49bcc710e184b657

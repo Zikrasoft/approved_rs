@@ -1,0 +1,177 @@
+---
+import { getCollection } from 'astro:content';
+import Shell from '@/layouts/Shell.astro';
+import Hero from '@/components/Hero.astro';
+import Marquee from '@/components/Marquee.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import ServiceBento from '@/components/ServiceBento.astro';
+import CompareSlider from '@/components/CompareSlider.astro';
+import ProcessTimeline from '@/components/ProcessTimeline.astro';
+import PriceCards from '@/components/PriceCards.astro';
+import WorkGrid from '@/components/WorkGrid.astro';
+import EmptyState from '@/components/EmptyState.astro';
+import Faq from '@/components/Faq.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import Cta from '@/components/Cta.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getHomeContent } from '@/i18n/content/home';
+import { getSiteContent } from '@/i18n/content/site';
+import { PathBuilder, localePaths } from '@/utils/paths';
+import { localizedWork, publishedWorks } from '@/utils/works';
+
+export function getStaticPaths() {
+  return localePaths();
+}
+
+const locale = localeFrom(Astro.url.pathname);
+const home = getHomeContent(locale);
+const site = getSiteContent(locale);
+
+const works = publishedWorks(await getCollection('works'));
+const featured = works.slice(0, 3);
+const comparable = works.find((w) => w.data.beforeImage);
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: home.faq.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a },
+  })),
+};
+---
+
+<Shell
+  title={home.meta.title}
+  description={home.meta.description}
+  jsonLd={[faqSchema]}
+>
+  <Hero />
+
+  <Marquee items={home.marquee} />
+
+  <section class="wrap mt-28 sm:mt-36">
+    <SectionHead
+      eyebrow={home.intro.eyebrow}
+      heading={home.intro.heading}
+      body={home.intro.body}
+    />
+    <div class="mt-14 grid gap-4 md:grid-cols-3">
+      {
+        home.intro.points.map((point, i) => (
+          <div class="shell" data-reveal data-reveal-delay={i * 90}>
+            <div class="core flex h-full flex-col gap-4 p-7">
+              <span class="h-px w-10 bg-champagne/60" aria-hidden="true" />
+              <h3 class="text-lg font-display tracking-tight">{point.title}</h3>
+              <p class="text-sm leading-relaxed text-mute">{point.text}</p>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section id="services" class="wrap mt-32 scroll-mt-28 sm:mt-40">
+    <SectionHead
+      eyebrow={home.servicesHead.eyebrow}
+      heading={home.servicesHead.heading}
+      body={home.servicesHead.body}
+    />
+    <ServiceBento />
+  </section>
+
+  {
+    comparable?.data.beforeImage && (
+      <section class="wrap mt-32 sm:mt-40">
+        <div class="grid items-center gap-12 lg:grid-cols-[1fr_1.25fr]">
+          <SectionHead
+            eyebrow={home.compare.eyebrow}
+            heading={home.compare.heading}
+            body={home.compare.body}
+          />
+          <CompareSlider
+            before={comparable.data.beforeImage}
+            after={comparable.data.image}
+            alt={localizedWork(comparable, locale).title}
+          />
+        </div>
+      </section>
+    )
+  }
+
+  <section id="process" class="wrap mt-32 scroll-mt-28 sm:mt-40">
+    <SectionHead
+      eyebrow={home.process.eyebrow}
+      heading={home.process.heading}
+      body={home.process.body}
+    />
+    <ProcessTimeline steps={home.process.steps} />
+  </section>
+
+  <section class="wrap mt-32 sm:mt-40">
+    <div class="grid gap-12 lg:grid-cols-[1fr_1fr] lg:items-end">
+      <SectionHead
+        eyebrow={home.materials.eyebrow}
+        heading={home.materials.heading}
+        body={home.materials.body}
+      />
+      <div class="flex flex-wrap gap-2.5" data-reveal data-reveal-delay="120">
+        {
+          home.materials.brands.map((brand) => (
+            <span class="rounded-full border border-line bg-white/[0.02] px-5 py-2.5 font-display text-xs uppercase tracking-[0.2em] text-mute">
+              {brand}
+            </span>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section id="prices" class="wrap mt-32 scroll-mt-28 sm:mt-40">
+    <SectionHead
+      eyebrow={home.prices.eyebrow}
+      heading={home.prices.heading}
+      body={home.prices.body}
+    />
+    <PriceCards plans={home.prices.plans} note={home.prices.note} />
+  </section>
+
+  <section class="wrap mt-32 sm:mt-40">
+    <div class="flex flex-wrap items-end justify-between gap-8">
+      <SectionHead
+        eyebrow={home.worksHead.eyebrow}
+        heading={home.worksHead.heading}
+        body={home.worksHead.body}
+      />
+      {
+        featured.length > 0 && (
+          <Cta
+            label={site.common.allWorks}
+            href={PathBuilder.works(locale)}
+            variant="ghost"
+            class="mb-1"
+          />
+        )
+      }
+    </div>
+    {
+      featured.length > 0 ? (
+        <WorkGrid works={featured} eager={1} />
+      ) : (
+        <EmptyState />
+      )
+    }
+  </section>
+
+  <section class="wrap mt-32 sm:mt-40">
+    <SectionHead eyebrow="FAQ" heading={site.common.faqHeading} />
+    <Faq items={home.faq} />
+  </section>
+
+  <FinalCta
+    eyebrow={home.finalCta.eyebrow}
+    heading={home.finalCta.heading}
+    body={home.finalCta.body}
+  />
+</Shell>

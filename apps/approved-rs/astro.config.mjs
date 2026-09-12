@@ -5,6 +5,7 @@ import react from '@astrojs/react';
 import keystatic from '@keystatic/astro';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
+import { BCP47_BY_LOCALE, localeConfig } from './src/i18n/config.ts';
 
 export default defineConfig({
   site: 'https://approved.rs',
@@ -15,8 +16,8 @@ export default defineConfig({
   output: 'static',
   adapter: vercel(),
   i18n: {
-    locales: ['ru', 'en', 'sr', 'es', 'de'],
-    defaultLocale: 'ru',
+    locales: [...localeConfig.locales],
+    defaultLocale: localeConfig.defaultLocale,
     routing: 'manual',
   },
   integrations: [
@@ -24,14 +25,8 @@ export default defineConfig({
     keystatic(),
     sitemap({
       i18n: {
-        defaultLocale: 'ru',
-        locales: {
-          ru: 'ru-RU',
-          en: 'en-US',
-          sr: 'sr-RS',
-          es: 'es-ES',
-          de: 'de-DE',
-        },
+        defaultLocale: localeConfig.defaultLocale,
+        locales: BCP47_BY_LOCALE,
       },
       // Internal admin tool (see pages/admin/case-photos.astro), not a public page.
       filter: (page) => !page.includes('/admin/case-photos'),

@@ -1,0 +1,146 @@
+---
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+import { getServicesContent } from '@/i18n/content/services';
+import { PathBuilder } from '@/utils/paths';
+import { SERVICE_SLUGS, type ServiceSlug } from '@/utils/services';
+
+interface Props {
+  service?: ServiceSlug;
+  compact?: boolean;
+  class?: string;
+}
+
+const { service, compact = false, class: className = '' } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+const services = getServicesContent(locale);
+
+const field =
+  'w-full rounded-2xl border border-line bg-white/[0.03] px-4 py-3.5 text-sm text-chalk placeholder:text-mute-2 transition-colors duration-400 focus:border-champagne focus:outline-none';
+const label =
+  'mb-2 block text-[0.6875rem] uppercase tracking-[0.18em] text-mute-2';
+---
+
+<form
+  method="POST"
+  action="/api/leads"
+  data-lead-form
+  data-submitting-label={site.form.submitting}
+  class={`flex flex-col gap-4 ${className}`}
+>
+  <input type="hidden" name="locale" value={locale} />
+  <div class="hidden" aria-hidden="true">
+    <label>
+      website
+      <input type="text" name="website" tabindex="-1" autocomplete="off" />
+    </label>
+  </div>
+
+  <input type="hidden" name="source_url" data-source-url />
+  <input type="hidden" name="visitor_id" data-visitor-id />
+
+  <div class={compact ? 'flex flex-col gap-4' : 'grid gap-4 sm:grid-cols-2'}>
+    <label class="block">
+      <span class={label}>{site.form.nameLabel}</span>
+      <input
+        name="name"
+        type="text"
+        required
+        autocomplete="name"
+        placeholder={site.form.namePlaceholder}
+        class={field}
+      />
+    </label>
+    <label class="block">
+      <span class={label}>{site.form.contactLabel}</span>
+      <input
+        name="contact"
+        type="text"
+        required
+        autocomplete="tel"
+        placeholder={site.form.contactPlaceholder}
+        class={field}
+      />
+    </label>
+  </div>
+
+  <label class="block">
+    <span class={label}>{site.form.serviceLabel}</span>
+    <div class="relative">
+      <select
+        name="service"
+        class={`${field} appearance-none pr-11 [&>option]:bg-ink [&>option]:text-chalk`}
+      >
+        <option value="">{site.form.servicePlaceholder}</option>
+        {
+          SERVICE_SLUGS.map((slug) => (
+            <option value={slug} selected={slug === service}>
+              {services[slug].name}
+            </option>
+          ))
+        }
+      </select>
+      <Icon
+        name="chevronDown"
+        size={12}
+        class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-mute-2"
+      />
+    </div>
+  </label>
+
+  <label class="block">
+    <span class={label}>{site.form.commentLabel}</span>
+    <textarea
+      name="comment"
+      rows={compact ? 2 : 3}
+      placeholder={site.form.commentPlaceholder}
+      class={`${field} resize-none`}></textarea>
+  </label>
+
+  <button
+    type="submit"
+    class="group mt-1 inline-flex items-center justify-center gap-3 rounded-full bg-chalk py-3.5 pl-6 pr-2.5 text-sm font-semibold text-void transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-champagne active:scale-[0.98]"
+  >
+    <span data-submit-label>{site.form.submit}</span>
+    <span
+      class="flex h-8 w-8 items-center justify-center rounded-full bg-void/10 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5 group-hover:-translate-y-px"
+      aria-hidden="true"
+    >
+      <Icon name="arrow" />
+    </span>
+  </button>
+
+  <p class="text-xs leading-relaxed text-mute-2">
+    {site.form.privacyNote}{' '}
+    <a
+      href={PathBuilder.privacy(locale)}
+      class="text-mute underline underline-offset-4 transition-colors duration-400 hover:text-champagne"
+      >{site.form.privacyLinkText}</a
+    >.
+  </p>
+</form>
+
+<script>
+  import { getOrCreateVisitorId } from '@podbor/site-kit/browser';
+
+  document
+    .querySelectorAll<HTMLFormElement>('[data-lead-form]')
+    .forEach((form) => {
+      const source = form.querySelector<HTMLInputElement>('[data-source-url]');
+      const visitor = form.querySelector<HTMLInputElement>('[data-visitor-id]');
+      if (source) source.value = location.href;
+      if (visitor) visitor.value = getOrCreateVisitorId();
+
+      form.addEventListener('submit', () => {
+        const button = form.querySelector<HTMLButtonElement>(
+          'button[type="submit"]',
+        );
+        const labelEl = form.querySelector<HTMLElement>('[data-submit-label]');
+        const submitting = form.dataset.submittingLabel;
+        if (button) button.disabled = true;
+        if (labelEl && submitting) labelEl.textContent = submitting;
+      });
+    });
+</script>

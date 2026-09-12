@@ -8,7 +8,8 @@ import { describe, it, expect, vi } from 'vitest';
 vi.mock('astro:middleware', () => ({ defineMiddleware: (fn: unknown) => fn }));
 vi.mock('astro:i18n', () => ({ requestHasLocale: () => false }));
 
-const { renameSlugSegments, moveGermanySpoke } = await import('./middleware');
+const { renameSlugSegments, moveGermanySpoke, movedBrandUrl } =
+  await import('./middleware');
 
 describe('renameSlugSegments', () => {
   it('renames a single old service-slug segment', () => {
@@ -25,12 +26,6 @@ describe('renameSlugSegments', () => {
     expect(renameSlugSegments('/privoz/')).toBe('/vehicle-import/');
     expect(renameSlugSegments('/vykup/de/')).toBe('/vehicle-buyback/de/');
     expect(renameSlugSegments('/proverka/de/')).toBe('/vehicle-inspection/de/');
-    expect(renameSlugSegments('/avtoservis-belgrade/')).toBe(
-      '/auto-service-belgrade/',
-    );
-    expect(renameSlugSegments('/cases/autoservice/')).toBe(
-      '/cases/auto-service/',
-    );
   });
 
   it('returns null when no segment matches (no redirect needed)', () => {
@@ -78,5 +73,49 @@ describe('moveGermanySpoke', () => {
     const renamed = renameSlugSegments('/privoz/de/');
     expect(renamed).toBe('/vehicle-import/de/');
     expect(moveGermanySpoke(renamed!)).toBe('/vehicle-import/eu/de/');
+  });
+});
+
+describe('movedBrandUrl', () => {
+  it('sends a service hub to the brand site that owns it now', () => {
+    expect(movedBrandUrl('/ru/auto-service-belgrade/')).toBe(
+      'https://autohub.rs/ru/',
+    );
+    expect(movedBrandUrl('/sr/detailing-belgrade/')).toBe(
+      'https://prizma.rs/sr/',
+    );
+  });
+
+  it('keeps the case slug, which moved across unchanged', () => {
+    expect(movedBrandUrl('/ru/auto-service-belgrade/bmw-x3/')).toBe(
+      'https://autohub.rs/ru/works/bmw-x3/',
+    );
+  });
+
+  it('falls back to en for locales the brand sites do not run', () => {
+    expect(movedBrandUrl('/de/detailing-belgrade/bmw-x5/')).toBe(
+      'https://prizma.rs/en/works/bmw-x5/',
+    );
+  });
+
+  it('treats an unprefixed path as ru', () => {
+    expect(movedBrandUrl('/avtoservis-belgrade/')).toBe(
+      'https://autohub.rs/ru/',
+    );
+  });
+
+  it('sends a case-tab URL to the brand site works listing', () => {
+    expect(movedBrandUrl('/en/cases/auto-service')).toBe(
+      'https://autohub.rs/en/works/',
+    );
+    expect(movedBrandUrl('/cases/detailing')).toBe(
+      'https://prizma.rs/ru/works/',
+    );
+  });
+
+  it('leaves every path that did not move alone', () => {
+    expect(movedBrandUrl('/ru/vehicle-sourcing/de/')).toBeNull();
+    expect(movedBrandUrl('/ru/cases/vehicle-import/')).toBeNull();
+    expect(movedBrandUrl('/')).toBeNull();
   });
 });

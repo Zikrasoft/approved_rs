@@ -1,0 +1,110 @@
+import { z } from 'zod';
+
+export const LEAD_STATUSES = [
+  'new',
+  'negotiations',
+  'in_progress',
+  'won',
+  'lost',
+  'postponed',
+] as const;
+const leadStatusSchema = z.enum(LEAD_STATUSES);
+export type LeadStatus = z.infer<typeof leadStatusSchema>;
+
+export const PROMPT_KINDS = [
+  'deal_amount',
+  'edit_name',
+  'edit_contact',
+  'edit_comment',
+  'postpone',
+] as const;
+
+const pendingPromptSchema = z.object({
+  chatId: z.number().int(),
+  messageId: z.number().int(),
+  kind: z.enum(PROMPT_KINDS),
+});
+export type PendingPrompt = z.infer<typeof pendingPromptSchema>;
+
+const paymentSchema = z.object({
+  amount: z.number().positive(),
+  at: z.string(),
+});
+export type Payment = z.infer<typeof paymentSchema>;
+
+const pendingCommissionClaimSchema = z.object({
+  amount: z.number().positive(),
+  claimedAt: z.string(),
+});
+export type PendingCommissionClaim = z.infer<
+  typeof pendingCommissionClaimSchema
+>;
+
+export const LEGACY_BRAND = 'Approved.rs';
+
+const baseStoredLeadSchema = z.object({
+  id: z.number().int().positive(),
+  brand: z.string().default(LEGACY_BRAND),
+  name: z.string(),
+  contact: z.string(),
+  service: z.string(),
+  contactChannel: z.string().nullable().optional(),
+  comment: z.string().nullable().optional(),
+  country: z.string().nullable().optional(),
+  source_url: z.string().nullable().optional(),
+  visitorId: z.string().nullable().optional(),
+  locale: z.string(),
+  kind: z.enum(['lead', 'call_click']).optional(),
+  status: leadStatusSchema.default('new'),
+  dealAmount: z.number().nonnegative().nullable().default(null),
+  commissionPercent: z.number().nonnegative(),
+  paidAmount: z.number().nonnegative().default(0),
+  payments: z.array(paymentSchema).default(() => []),
+  telegramChatId: z.number().int().nullable().default(null),
+  telegramMessageId: z.number().int().nullable().default(null),
+  statusChangedAt: z.string(),
+  createdAt: z.string(),
+  pendingPrompt: pendingPromptSchema.nullable().default(null).catch(null),
+  archived: z.boolean().default(false),
+  pendingCommissionClaim: pendingCommissionClaimSchema.nullable().default(null),
+  remindAt: z.string().nullable().default(null),
+});
+
+export type StoredLead = z.infer<typeof baseStoredLeadSchema>;
+
+export type LeadInput = Pick<
+  StoredLead,
+  | 'brand'
+  | 'name'
+  | 'contact'
+  | 'service'
+  | 'contactChannel'
+  | 'comment'
+  | 'country'
+  | 'source_url'
+  | 'visitorId'
+  | 'locale'
+  | 'kind'
+>;
+
+export type LeadSubmission = Omit<LeadInput, 'brand'>;
+
+export interface LeadSchemaOptions {
+  defaultCommissionPercent: number;
+}
+
+export type StoredLeadSchema = z.ZodType<StoredLead, unknown>;
+
+export function createLeadSchema({
+  defaultCommissionPercent,
+}: LeadSchemaOptions): StoredLeadSchema {
+  if (defaultCommissionPercent < 0) {
+    throw new Error('[lead-crm] defaultCommissionPercent must not be negative');
+  }
+  return baseStoredLeadSchema.extend({
+    commissionPercent: z
+      .number()
+      .nonnegative()
+      .default(defaultCommissionPercent),
+  });
+}

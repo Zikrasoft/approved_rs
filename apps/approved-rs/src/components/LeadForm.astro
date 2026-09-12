@@ -14,9 +14,6 @@ interface Props {
   service?: string;
   country?: string;
   city?: string;
-  // Overrides the default "Марка, модель, бюджет" (written for vehicle-
-  // sourcing) — auto-service/detailing pages pass their own copy since the
-  // visitor already owns the car and isn't shopping within a budget.
   commentLabel?: string;
   commentPlaceholder?: string;
 }
@@ -80,6 +77,13 @@ const fieldClass =
     data-err-phone-required={lf.errorPhoneRequired}
     data-err-phone-invalid={lf.errorPhoneInvalid}
   >
+    <input type="hidden" name="locale" value={locale} />
+    <div class="hidden" aria-hidden="true">
+      <label>
+        website
+        <input type="text" name="website" tabindex="-1" autocomplete="off" />
+      </label>
+    </div>
     <input type="hidden" name="service" value={service} />
     <input type="hidden" name="country" value={country} />
     <input type="hidden" name="city" value={city} />

@@ -8,8 +8,6 @@ vi.mock('@/utils/casesQueries', () => ({
     'vehicle-buyback': 0,
     'vehicle-inspection': 0,
     'vehicle-import': 0,
-    'auto-service': 0,
-    detailing: 0,
   }),
 }));
 
@@ -34,8 +32,8 @@ describe('buildCasesTabPageData', () => {
     ];
     const result = await buildCasesTabPageData(
       'ru',
-      'casesAutoService',
-      '/ru/auto-service-belgrade/',
+      'casesVehicleSourcing',
+      '/ru/cases/vehicle-import/',
       async () => items,
     );
     expect(result.items).toBe(items);

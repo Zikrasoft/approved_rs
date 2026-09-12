@@ -1,0 +1,46 @@
+---
+import { getCollection } from 'astro:content';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import WorkGrid from '@/components/WorkGrid.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getPagesContent } from '@/i18n/content/pages';
+import { getSiteContent } from '@/i18n/content/site';
+import { localePaths, PathBuilder } from '@/utils/paths';
+import { publishedWorks } from '@/utils/works';
+
+export function getStaticPaths() {
+  return localePaths();
+}
+
+const locale = localeFrom(Astro.url.pathname);
+const pages = getPagesContent(locale);
+const site = getSiteContent(locale);
+const works = publishedWorks(await getCollection('works'));
+---
+
+<Shell title={pages.works.metaTitle} description={pages.works.metaDescription}>
+  <PageHero
+    eyebrow={pages.works.eyebrow}
+    heading={pages.works.heading}
+    lead={pages.works.lead}
+    crumbs={[{ href: PathBuilder.works(locale), label: site.nav.works }]}
+  />
+
+  <section class="wrap py-band md:py-band-lg">
+    {
+      works.length === 0 ? (
+        <p class="card p-6 text-base text-muted">{site.common.emptyWorks}</p>
+      ) : (
+        <WorkGrid works={works} eager={3} class="mt-0" />
+      )
+    }
+  </section>
+
+  <FinalCta
+    eyebrow={pages.works.eyebrow}
+    heading={pages.works.detailCtaHeading}
+    body={pages.works.detailCtaBody}
+  />
+</Shell>

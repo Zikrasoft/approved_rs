@@ -6,13 +6,9 @@ describe('PathBuilder', () => {
     expect(PathBuilder.home('ru')).toBe('/ru/');
     expect(PathBuilder.vehicleSourcingHub('en')).toBe('/en/vehicle-sourcing/');
     expect(PathBuilder.vehicleImportHub('en')).toBe('/en/vehicle-import/');
-    expect(PathBuilder.autoServiceBelgrade('sr')).toBe(
-      '/sr/auto-service-belgrade/',
-    );
     expect(PathBuilder.casesVehicleSourcing('ru')).toBe(
       '/ru/cases/vehicle-sourcing/',
     );
-    expect(PathBuilder.casesAutoService('ru')).toBe('/ru/cases/auto-service/');
     expect(PathBuilder.contacts('en')).toBe('/en/contacts/');
     expect(PathBuilder.privacy('en')).toBe('/en/privacy/');
     expect(PathBuilder.thanks('sr')).toBe('/sr/thanks/');
@@ -56,9 +52,6 @@ describe('PathBuilder', () => {
 
   it('builds case detail routes', () => {
     expect(PathBuilder.case('ru', 'bmw-x1')).toBe('/ru/cases/bmw-x1/');
-    expect(PathBuilder.autoServiceCase('en', 'bmw-320')).toBe(
-      '/en/auto-service-belgrade/bmw-320/',
-    );
   });
 });
 

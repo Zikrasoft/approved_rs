@@ -1,0 +1,42 @@
+---
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import ServiceCards from '@/components/ServiceCards.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getServicesContent } from '@/i18n/content/services';
+import { getHomeContent } from '@/i18n/content/home';
+import { getSiteContent } from '@/i18n/content/site';
+import { localePaths, PathBuilder } from '@/utils/paths';
+
+export function getStaticPaths() {
+  return localePaths();
+}
+
+const locale = localeFrom(Astro.url.pathname);
+const services = getServicesContent(locale);
+const home = getHomeContent(locale);
+const site = getSiteContent(locale);
+---
+
+<Shell
+  title={services.indexMetaTitle}
+  description={services.indexMetaDescription}
+>
+  <PageHero
+    eyebrow={services.indexEyebrow}
+    heading={services.indexHeading}
+    lead={services.indexLead}
+    crumbs={[{ href: PathBuilder.services(locale), label: site.nav.services }]}
+  />
+
+  <section class="wrap py-band md:py-band-lg">
+    <ServiceCards />
+  </section>
+
+  <FinalCta
+    eyebrow={home.finalCta.eyebrow}
+    heading={home.finalCta.heading}
+    body={home.finalCta.body}
+  />
+</Shell>

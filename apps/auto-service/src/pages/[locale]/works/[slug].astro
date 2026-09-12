@@ -1,0 +1,127 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import WorkGrid from '@/components/WorkGrid.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getPagesContent } from '@/i18n/content/pages';
+import { getSiteContent } from '@/i18n/content/site';
+import { BCP47_BY_LOCALE } from '@/i18n/config';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import { localizedWork, publishedWorks } from '@/utils/works';
+import { safeMarkdown } from '@podbor/site-kit';
+import { SITE_URL } from '@/utils/constants';
+
+export async function getStaticPaths() {
+  const works = publishedWorks(await getCollection('works'));
+  return withLocales(
+    works.map((work) => ({
+      params: { slug: work.id },
+      props: {
+        work,
+        related: works.filter((other) => other.id !== work.id).slice(0, 3),
+      },
+    })),
+  );
+}
+
+const { work, related } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const pages = getPagesContent(locale);
+const site = getSiteContent(locale);
+const { title, body } = localizedWork(work, locale);
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: title,
+  datePublished: work.data.date.toISOString(),
+  author: { '@id': `${SITE_URL}/#workshop` },
+  publisher: { '@id': `${SITE_URL}/#workshop` },
+  mainEntityOfPage: new URL(PathBuilder.work(locale, work.id), SITE_URL).href,
+};
+
+const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
+  year: 'numeric',
+  month: 'long',
+}).format(work.data.date);
+---
+
+<Shell
+  title={`${title} — ${pages.works.detailMetaSuffix}`}
+  description={`${work.data.car}. ${pages.works.metaDescription}`}
+  jsonLd={[articleSchema]}
+>
+  <PageHero
+    eyebrow={work.data.car}
+    heading={title}
+    crumbs={[
+      { href: PathBuilder.works(locale), label: site.nav.works },
+      { href: PathBuilder.work(locale, work.id), label: title },
+    ]}
+  />
+
+  <section class="wrap py-band">
+    <p class="spec text-xs text-muted">
+      {work.data.year ? `${work.data.year} · ` : ''}{dateLabel}
+    </p>
+    <Image
+      src={work.data.image}
+      alt={title}
+      widths={[720, 1200]}
+      sizes="(min-width: 1024px) 70vw, 100vw"
+      loading="eager"
+      class="card mt-4 w-full object-cover"
+    />
+  </section>
+
+  {
+    body.trim() && (
+      <section class="wrap pb-8">
+        <div class="prose-shop" set:html={safeMarkdown(body)} />
+      </section>
+    )
+  }
+
+  {
+    work.data.gallery.length > 0 && (
+      <section class="wrap pb-8">
+        <ul class="grid gap-4 sm:grid-cols-2">
+          {work.data.gallery.map((image, i) => (
+            <li>
+              <Image
+                src={image}
+                alt={`${title} — ${i + 1}`}
+                widths={[480, 900]}
+                sizes="(min-width: 640px) 45vw, 100vw"
+                loading="lazy"
+                class="card w-full object-cover"
+              />
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {
+    related.length > 0 && (
+      <section class="wrap pb-12">
+        <SectionHead
+          eyebrow={pages.works.eyebrow}
+          heading={site.common.allWorks}
+        />
+        <WorkGrid works={related} />
+      </section>
+    )
+  }
+
+  <FinalCta
+    eyebrow={pages.works.eyebrow}
+    heading={pages.works.detailCtaHeading}
+    body={pages.works.detailCtaBody}
+  />
+</Shell>

@@ -1,0 +1,215 @@
+---
+import { getCollection } from 'astro:content';
+import Shell from '@/layouts/Shell.astro';
+import Icon from '@/components/Icon.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import ServiceCards from '@/components/ServiceCards.astro';
+import Faq from '@/components/Faq.astro';
+import WorkGrid from '@/components/WorkGrid.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getHomeContent } from '@/i18n/content/home';
+import { getSiteContent } from '@/i18n/content/site';
+import { getPagesContent } from '@/i18n/content/pages';
+import { publishedWorks } from '@/utils/works';
+import { localePaths, PathBuilder } from '@/utils/paths';
+
+export function getStaticPaths() {
+  return localePaths();
+}
+
+const locale = localeFrom(Astro.url.pathname);
+const home = getHomeContent(locale);
+const site = getSiteContent(locale);
+const pages = getPagesContent(locale);
+const latestWorks = publishedWorks(await getCollection('works')).slice(0, 3);
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: home.faq.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a },
+  })),
+};
+---
+
+<Shell
+  title={home.meta.title}
+  description={home.meta.description}
+  jsonLd={[faqSchema]}
+>
+  <section class="border-b border-line bg-card">
+    <div
+      class="wrap grid gap-10 py-band md:py-band-lg lg:grid-cols-[1.2fr_1fr]"
+    >
+      <div class="flex flex-col gap-5">
+        <span class="eyebrow">{home.hero.eyebrow}</span>
+        <h1 class="text-hero max-w-2xl">{home.hero.heading}</h1>
+        <p class="max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+          {home.hero.lead}
+        </p>
+        <div class="flex flex-wrap gap-3 pt-1">
+          <button type="button" data-open-lead-modal class="btn btn-primary">
+            {home.hero.ctaPrimary}
+            <Icon name="arrowRight" />
+          </button>
+          <a href={PathBuilder.services(locale)} class="btn btn-secondary">
+            {home.hero.ctaSecondary}
+          </a>
+        </div>
+        <ul class="flex flex-wrap gap-x-5 gap-y-2 pt-2">
+          {
+            home.hero.badges.map((badge) => (
+              <li class="flex items-center gap-1.5 text-sm text-ink-2">
+                <Icon name="check" size={12} class="text-go" />
+                {badge}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <ul class="grid gap-3 self-center sm:grid-cols-3 lg:grid-cols-1">
+        {
+          home.trust.map((item) => (
+            <li class="card flex items-baseline justify-between gap-4 p-4">
+              <span class="spec text-2xl font-semibold text-ink">
+                {item.value}
+              </span>
+              <span class="max-w-[10rem] text-right text-xs leading-snug text-muted">
+                {item.label}
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section id="services" class="wrap scroll-mt-20 py-band md:py-band-lg">
+    <SectionHead
+      eyebrow={home.servicesHead.eyebrow}
+      heading={home.servicesHead.heading}
+      body={home.servicesHead.body}
+    />
+    <ServiceCards />
+  </section>
+
+  <section class="border-y border-line bg-card">
+    <div class="wrap py-band md:py-band-lg">
+      <SectionHead
+        eyebrow={home.why.eyebrow}
+        heading={home.why.heading}
+        body={home.why.body}
+      />
+      <ul class="mt-8 grid gap-4 sm:grid-cols-2">
+        {
+          home.why.points.map((point) => (
+            <li class="flex gap-3">
+              <Icon name="check" size={16} class="mt-1 shrink-0 text-go" />
+              <div class="flex flex-col gap-1">
+                <h3 class="text-base font-semibold text-ink">{point.title}</h3>
+                <p class="text-sm leading-relaxed text-muted">{point.text}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section id="process" class="wrap scroll-mt-20 py-band md:py-band-lg">
+    <SectionHead
+      eyebrow={home.process.eyebrow}
+      heading={home.process.heading}
+      body={home.process.body}
+    />
+    <ol class="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      {
+        home.process.steps.map((step, i) => (
+          <li class="card flex flex-col gap-2 p-5">
+            <span class="spec text-sm font-semibold text-signal">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <h3 class="text-base font-semibold text-ink">{step.title}</h3>
+            <p class="text-sm leading-relaxed text-muted">{step.text}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section class="wrap pb-band md:pb-band-lg">
+    <div class="card grid gap-6 p-6 lg:grid-cols-2 lg:p-8">
+      <div class="flex flex-col gap-3">
+        <span class="eyebrow">{home.shopTeaser.eyebrow}</span>
+        <h2 class="text-section">{home.shopTeaser.heading}</h2>
+        <p class="text-base leading-relaxed text-muted">
+          {home.shopTeaser.body}
+        </p>
+        <a href={PathBuilder.shop(locale)} class="btn btn-primary mt-2 w-fit">
+          {home.shopTeaser.cta}
+          <Icon name="arrowRight" />
+        </a>
+      </div>
+      <div
+        class="flex flex-col gap-3 border-t border-line pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0"
+      >
+        <span class="eyebrow">{home.accident.eyebrow}</span>
+        <h2 class="text-section">{home.accident.heading}</h2>
+        <p class="text-base leading-relaxed text-muted">{home.accident.body}</p>
+        <ul class="flex flex-col gap-1.5 pt-1">
+          {
+            home.accident.points.map((point) => (
+              <li class="flex gap-2 text-sm text-ink-2">
+                <Icon name="check" size={12} class="mt-1 shrink-0 text-go" />
+                {point}
+              </li>
+            ))
+          }
+        </ul>
+        <a
+          href={PathBuilder.service(locale, 'bodywork-painting')}
+          class="btn btn-secondary mt-2 w-fit"
+        >
+          {home.accident.cta}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {
+    latestWorks.length > 0 && (
+      <section class="border-t border-line bg-card">
+        <div class="wrap py-band md:py-band-lg">
+          <div class="flex flex-wrap items-end justify-between gap-4">
+            <SectionHead
+              eyebrow={pages.works.eyebrow}
+              heading={pages.works.heading}
+            />
+            <a href={PathBuilder.works(locale)} class="btn btn-secondary w-fit">
+              {site.common.allWorks}
+              <Icon name="arrowRight" />
+            </a>
+          </div>
+          <WorkGrid works={latestWorks} />
+        </div>
+      </section>
+    )
+  }
+
+  <section class="border-t border-line bg-card">
+    <div class="wrap py-band md:py-band-lg">
+      <SectionHead eyebrow="FAQ" heading={site.common.faqHeading} />
+      <Faq items={home.faq} />
+    </div>
+  </section>
+
+  <FinalCta
+    eyebrow={home.finalCta.eyebrow}
+    heading={home.finalCta.heading}
+    body={home.finalCta.body}
+  />
+</Shell>

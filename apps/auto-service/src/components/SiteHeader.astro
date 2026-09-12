@@ -1,0 +1,224 @@
+---
+import Icon from './Icon.astro';
+import Wordmark from './Wordmark.astro';
+import { SUPPORTED_LOCALES, LOCALE_NAME } from '@/i18n/config';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+import { getShopContent } from '@/i18n/content/shop';
+import { PathBuilder, swapLocale } from '@/utils/paths';
+import { CONTACT_LINKS, formatPhone } from '@/utils/contactLinks';
+import { PHONE_NUMBER } from '@/utils/constants';
+
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+const shop = getShopContent(locale);
+const pathname = Astro.url.pathname;
+
+const links = [
+  { href: PathBuilder.services(locale), label: site.nav.services },
+  { href: PathBuilder.works(locale), label: site.nav.works },
+  { href: PathBuilder.shop(locale), label: site.nav.shop },
+  { href: `${PathBuilder.home(locale)}#process`, label: site.nav.process },
+  { href: PathBuilder.contact(locale), label: site.nav.contact },
+];
+---
+
+<header
+  class="sticky top-0 z-30 border-b border-line bg-paper/95 backdrop-blur"
+>
+  <div class="wrap flex h-16 items-center justify-between gap-4">
+    <a
+      href={PathBuilder.home(locale)}
+      class="shrink-0"
+      aria-label={site.common.homeLabel}
+    >
+      <Wordmark />
+    </a>
+
+    <nav
+      class="hidden items-center gap-6 md:flex"
+      aria-label={site.common.primaryNavLabel}
+    >
+      {
+        links.map((link) => (
+          <a
+            href={link.href}
+            class="text-sm font-medium text-ink-2 transition-colors duration-150 hover:text-signal"
+          >
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <div class="hidden items-center gap-1 lg:flex">
+        {
+          SUPPORTED_LOCALES.map((code) => (
+            <a
+              href={swapLocale(pathname, code)}
+              hreflang={code}
+              title={LOCALE_NAME[code]}
+              aria-current={code === locale ? 'true' : undefined}
+              class:list={[
+                'spec rounded px-2 py-1 text-[0.6875rem] uppercase tracking-widest transition-colors duration-150',
+                code === locale
+                  ? 'bg-shade text-ink'
+                  : 'text-muted hover:text-ink',
+              ]}
+            >
+              {code}
+            </a>
+          ))
+        }
+      </div>
+
+      <a
+        href={PathBuilder.cart(locale)}
+        class="relative flex h-10 items-center gap-2 rounded-block border border-line-strong px-3 text-sm font-medium text-ink transition-colors duration-150 hover:border-ink"
+        aria-label={shop.cart.heading}
+      >
+        <Icon name="cart" />
+        <span
+          class="spec hidden text-xs tabular-nums"
+          data-cart-count
+          data-cart-label={shop.cart.badgeLabel}>0</span
+        >
+      </a>
+
+      <a
+        href={CONTACT_LINKS.phone}
+        data-contact-channel="phone"
+        class="btn btn-secondary hidden h-10 py-0 lg:inline-flex"
+      >
+        <Icon name="phone" />
+        <span class="spec text-xs">{formatPhone(PHONE_NUMBER)}</span>
+      </a>
+
+      <button
+        type="button"
+        data-open-lead-modal
+        class="btn btn-primary h-10 py-0"
+      >
+        {site.header.cta}
+      </button>
+
+      <button
+        type="button"
+        data-menu-toggle
+        aria-expanded="false"
+        aria-controls="site-menu"
+        aria-label={site.header.menuOpenLabel}
+        class="flex h-10 w-10 items-center justify-center rounded-block border border-line-strong text-ink md:hidden"
+      >
+        <span class="relative block h-3 w-4" aria-hidden="true">
+          <span
+            class="absolute left-0 top-0 h-0.5 w-full bg-current transition-transform duration-200"
+            data-bar="top"></span>
+          <span
+            class="absolute bottom-0 left-0 h-0.5 w-full bg-current transition-transform duration-200"
+            data-bar="bottom"></span>
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <nav
+    id="site-menu"
+    data-menu
+    data-close-label={site.header.menuCloseLabel}
+    hidden
+    class="border-t border-line bg-card md:hidden"
+    aria-label={site.common.mobileNavLabel}
+  >
+    <div class="wrap flex flex-col py-2">
+      {
+        links.map((link) => (
+          <a
+            href={link.href}
+            class="border-b border-line py-3.5 text-base font-medium text-ink last:border-b-0"
+          >
+            {link.label}
+          </a>
+        ))
+      }
+      <div class="flex items-center gap-2 py-3">
+        <span class="text-xs text-muted">{site.header.languageLabel}</span>
+        {
+          SUPPORTED_LOCALES.map((code) => (
+            <a
+              href={swapLocale(pathname, code)}
+              hreflang={code}
+              class:list={[
+                'spec rounded px-2.5 py-1 text-xs uppercase tracking-widest',
+                code === locale
+                  ? 'bg-shade text-ink'
+                  : 'text-muted hover:text-ink',
+              ]}
+            >
+              {code}
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </nav>
+</header>
+
+<script>
+  const toggle =
+    document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
+  const top = toggle?.querySelector<HTMLElement>('[data-bar="top"]');
+  const bottom = toggle?.querySelector<HTMLElement>('[data-bar="bottom"]');
+  const openLabel = toggle?.getAttribute('aria-label') ?? '';
+  const closeLabel = menu?.dataset.closeLabel ?? openLabel;
+
+  function setOpen(open: boolean) {
+    if (!toggle || !menu) return;
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? closeLabel : openLabel);
+    menu.hidden = !open;
+    if (top && bottom) {
+      top.style.transform = open
+        ? 'translateY(5px) rotate(45deg)'
+        : 'translateY(0) rotate(0)';
+      bottom.style.transform = open
+        ? 'translateY(-5px) rotate(-45deg)'
+        : 'translateY(0) rotate(0)';
+    }
+  }
+
+  toggle?.addEventListener('click', () =>
+    setOpen(toggle.getAttribute('aria-expanded') !== 'true'),
+  );
+  menu?.addEventListener('click', (event) => {
+    if ((event.target as HTMLElement).closest('a')) setOpen(false);
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') setOpen(false);
+  });
+  window
+    .matchMedia('(min-width: 1024px)')
+    .addEventListener('change', (event) => {
+      if (event.matches) setOpen(false);
+    });
+</script>
+
+<script>
+  import { readCart, cartCount, onCartChange } from '@/utils/cart';
+
+  const badge = document.querySelector<HTMLElement>('[data-cart-count]');
+  const render = () => {
+    if (!badge) return;
+    const count = cartCount(readCart());
+    badge.textContent = String(count);
+    badge.classList.toggle('hidden', count === 0);
+    badge.parentElement?.setAttribute(
+      'aria-label',
+      `${badge.dataset.cartLabel ?? ''}: ${count}`,
+    );
+  };
+  render();
+  onCartChange(render);
+</script>

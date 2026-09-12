@@ -1,0 +1,159 @@
+---
+import '@fontsource/ibm-plex-sans/400.css';
+import '@fontsource/ibm-plex-sans/500.css';
+import '@fontsource/ibm-plex-sans/600.css';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+import '@/styles/global.css';
+import SiteHeader from '@/components/SiteHeader.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
+import LeadModal from '@/components/LeadModal.astro';
+import StickyContactBar from '@/components/StickyContactBar.astro';
+import { BCP47_BY_LOCALE, OG_LOCALE, localeSet } from '@/i18n/config';
+import { localeFrom } from '@/i18n/currentLocale';
+import {
+  GARAGE_ADDRESS,
+  PHONE_NUMBER,
+  SITE_LEGAL_NAME,
+  SITE_NAME,
+  SITE_URL,
+  SOCIAL_SAME_AS,
+} from '@/utils/constants';
+import { getSiteContent } from '@/i18n/content/site';
+
+interface Props {
+  title: string;
+  description: string;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown>[];
+}
+
+const { title, description, noindex = false, jsonLd = [] } = Astro.props;
+
+const jsonLdText = (schema: Record<string, unknown>) =>
+  JSON.stringify(schema).replace(/</g, '\\u003c');
+
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+const canonical = new URL(Astro.url.pathname, SITE_URL).href;
+const alternates = localeSet.getAlternateLinks(SITE_URL, Astro.url.pathname);
+const ogImage = new URL('/og.png', SITE_URL).href;
+
+const businessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'AutoRepair',
+  '@id': `${SITE_URL}/#workshop`,
+  name: SITE_NAME,
+  legalName: SITE_LEGAL_NAME,
+  url: SITE_URL,
+  image: ogImage,
+  description: site.footer.tagline,
+  telephone: `+${PHONE_NUMBER}`,
+  priceRange: '€€',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: GARAGE_ADDRESS.street,
+    addressLocality: GARAGE_ADDRESS.city,
+    postalCode: GARAGE_ADDRESS.postalCode,
+    addressCountry: GARAGE_ADDRESS.country,
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: GARAGE_ADDRESS.lat,
+    longitude: GARAGE_ADDRESS.lon,
+  },
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: '08:00',
+      closes: '18:00',
+    },
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Saturday'],
+      opens: '09:00',
+      closes: '14:00',
+    },
+  ],
+  sameAs: SOCIAL_SAME_AS,
+};
+---
+
+<!doctype html>
+<html lang={BCP47_BY_LOCALE[locale]}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f4f1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {
+      alternates.map((alt) => (
+        <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
+      ))
+    }
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content={OG_LOCALE[locale]} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={jsonLdText(businessSchema)}
+    />
+    {
+      jsonLd.map((schema) => (
+        <script
+          type="application/ld+json"
+          is:inline
+          set:html={jsonLdText(schema)}
+        />
+      ))
+    }
+  </head>
+  <body class="flex min-h-screen flex-col pb-14 lg:pb-0">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-signal focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+      >{site.common.skipToContent}</a
+    >
+    <SiteHeader />
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+    <SiteFooter />
+    <StickyContactBar />
+    <LeadModal />
+
+    <script>
+      import { isTrackedContactChannel } from '@podbor/lead-crm/contact-channel';
+      import { getOrCreateVisitorId } from '@podbor/site-kit/browser';
+
+      document
+        .querySelectorAll<HTMLElement>('[data-contact-channel]')
+        .forEach((el) => {
+          el.addEventListener('click', () => {
+            const channel = el.dataset.contactChannel;
+            if (!isTrackedContactChannel(channel)) return;
+            const body = new FormData();
+            body.set('channel', channel);
+            body.set('source_url', location.href);
+            body.set('visitor_id', getOrCreateVisitorId());
+            navigator.sendBeacon('/api/contact-click', body);
+          });
+        });
+    </script>
+  </body>
+</html>

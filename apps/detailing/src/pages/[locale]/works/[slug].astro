@@ -1,0 +1,146 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import Gallery from '@/components/Gallery.astro';
+import CompareSlider from '@/components/CompareSlider.astro';
+import WorkGrid from '@/components/WorkGrid.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { BCP47_BY_LOCALE } from '@/i18n/config';
+import { getPagesContent } from '@/i18n/content/pages';
+import { getServicesContent } from '@/i18n/content/services';
+import { getSiteContent } from '@/i18n/content/site';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import { localizedWork, publishedWorks } from '@/utils/works';
+import { safeMarkdown } from '@podbor/site-kit';
+import { SITE_URL } from '@/utils/constants';
+
+export async function getStaticPaths() {
+  const works = publishedWorks(await getCollection('works'));
+  return withLocales(
+    works.map((work) => ({
+      params: { slug: work.id },
+      props: {
+        work,
+        related: works.filter((other) => other.id !== work.id).slice(0, 3),
+      },
+    })),
+  );
+}
+
+const { work, related } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const pages = getPagesContent(locale);
+const services = getServicesContent(locale);
+const site = getSiteContent(locale);
+const { title, body } = localizedWork(work, locale);
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: title,
+  datePublished: work.data.date.toISOString(),
+  author: { '@id': `${SITE_URL}/#studio` },
+  publisher: { '@id': `${SITE_URL}/#studio` },
+  mainEntityOfPage: new URL(PathBuilder.work(locale, work.id), SITE_URL).href,
+};
+
+const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
+  year: 'numeric',
+  month: 'long',
+}).format(work.data.date);
+---
+
+<Shell
+  title={`${title} — ${pages.works.detailMetaSuffix}`}
+  description={`${work.data.car}. ${pages.works.metaDescription}`}
+  jsonLd={[articleSchema]}
+>
+  <PageHero
+    eyebrow={work.data.car}
+    heading={title}
+    crumbs={[
+      { href: PathBuilder.works(locale), label: site.nav.works },
+      { href: PathBuilder.work(locale, work.id), label: title },
+    ]}
+  />
+
+  <section class="wrap mt-10">
+    <div class="flex flex-wrap items-center gap-2" data-reveal>
+      {
+        work.data.servicesApplied.map((slug) => (
+          <a
+            href={PathBuilder.service(locale, slug)}
+            class="rounded-full border border-line px-3.5 py-1.5 text-[0.6875rem] uppercase tracking-[0.16em] text-mute transition-colors duration-400 hover:border-champagne hover:text-champagne"
+          >
+            {services[slug].name}
+          </a>
+        ))
+      }
+      <span class="text-xs text-mute-2">
+        {work.data.year ? `${work.data.year} · ` : ''}{dateLabel}
+      </span>
+    </div>
+  </section>
+
+  <section class="wrap mt-10">
+    {
+      work.data.beforeImage ? (
+        <CompareSlider
+          before={work.data.beforeImage}
+          after={work.data.image}
+          alt={title}
+        />
+      ) : (
+        <div class="shell" data-reveal>
+          <Image
+            src={work.data.image}
+            alt={title}
+            widths={[720, 1200, 1800]}
+            sizes="(min-width: 1024px) 80vw, 100vw"
+            loading="eager"
+            class="core block w-full object-cover"
+          />
+        </div>
+      )
+    }
+  </section>
+
+  {
+    body.trim() && (
+      <section class="wrap mt-20">
+        <div class="prose-studio" data-reveal set:html={safeMarkdown(body)} />
+      </section>
+    )
+  }
+
+  {
+    work.data.gallery.length > 0 && (
+      <section class="wrap mt-20">
+        <Gallery images={work.data.gallery} alt={title} />
+      </section>
+    )
+  }
+
+  {
+    related.length > 0 && (
+      <section class="wrap mt-32 sm:mt-40">
+        <SectionHead
+          eyebrow={pages.works.eyebrow}
+          heading={site.common.backToWorks}
+        />
+        <WorkGrid works={related} />
+      </section>
+    )
+  }
+
+  <FinalCta
+    eyebrow={pages.works.eyebrow}
+    heading={pages.works.detailCtaHeading}
+    body={pages.works.detailCtaBody}
+    service={work.data.servicesApplied[0]}
+  />
+</Shell>

@@ -1,0 +1,161 @@
+---
+import SelectField from './SelectField.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getShopContent } from '@/i18n/content/shop';
+import type { FitmentIndex } from '@/utils/fitment';
+import { BCP47_BY_LOCALE } from '@/i18n/config';
+
+interface Props {
+  index: FitmentIndex;
+}
+
+const { index } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const shop = getShopContent(locale);
+
+const fields = [
+  { name: 'make', label: shop.makeLabel, options: index.makes },
+  { name: 'model', label: shop.modelLabel, options: [] as string[] },
+  { name: 'year', label: shop.yearLabel, options: [] as number[] },
+];
+---
+
+<section
+  class="card p-5"
+  data-fitment-filter
+  data-index={JSON.stringify(index)}
+  data-plural-locale={BCP47_BY_LOCALE[locale]}
+  data-plural-forms={JSON.stringify(shop.matchCount)}
+>
+  <h2 class="text-block mb-4 font-semibold">{shop.fitmentHeading}</h2>
+
+  <div class="grid gap-3 sm:grid-cols-3">
+    {
+      fields.map((field) => (
+        <SelectField
+          name={field.name}
+          filter={field.name}
+          label={field.label}
+          placeholder={shop.anyOption}
+          options={field.options}
+          disabled={field.options.length === 0}
+        />
+      ))
+    }
+  </div>
+
+  <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+    <p class="spec text-sm text-muted" data-match-count aria-live="polite"></p>
+    <button
+      type="button"
+      class="btn btn-secondary px-3 py-2 text-sm"
+      data-filter-reset
+    >
+      {shop.resetLabel}
+    </button>
+  </div>
+</section>
+
+<div
+  class="card mt-4 flex flex-col gap-2 p-6 text-center"
+  data-no-matches
+  hidden
+>
+  <p class="font-medium text-ink">{shop.noMatches}</p>
+  <p class="text-sm text-muted">{shop.noMatchesHint}</p>
+</div>
+
+<script>
+  import {
+    fitmentMatches,
+    type FitmentEntry,
+    type FitmentIndex,
+  } from '@/utils/fitment';
+  import { pluralLabel, type PluralForms } from '@/utils/plural';
+
+  const root = document.querySelector<HTMLElement>('[data-fitment-filter]');
+  const cards = [...document.querySelectorAll<HTMLElement>('[data-product]')];
+  const empty = document.querySelector<HTMLElement>('[data-no-matches]');
+
+  if (root && cards.length > 0) {
+    const index = JSON.parse(root.dataset.index ?? '{}') as FitmentIndex;
+    const entries = cards.map((card) => ({
+      card,
+      fitment: JSON.parse(card.dataset.fitment ?? '[]') as FitmentEntry[],
+    }));
+    const pluralLocale = root.dataset.pluralLocale ?? 'ru';
+    const forms = JSON.parse(root.dataset.pluralForms ?? '{}') as PluralForms;
+    const matchLabel = (count: number) =>
+      pluralLabel(forms, pluralLocale, count);
+
+    const select = (name: string) =>
+      root.querySelector<HTMLSelectElement>(`[data-filter="${name}"]`);
+    const makeEl = select('make');
+    const modelEl = select('model');
+    const yearEl = select('year');
+    const countEl = root.querySelector<HTMLElement>('[data-match-count]');
+    const anyLabel = makeEl?.options[0]?.text ?? '';
+
+    const fill = (
+      el: HTMLSelectElement | null,
+      values: (string | number)[],
+    ) => {
+      if (!el) return;
+      el.innerHTML = '';
+      const any = document.createElement('option');
+      any.value = '';
+      any.textContent = anyLabel;
+      el.append(any);
+      values.forEach((value) => {
+        const option = document.createElement('option');
+        option.value = String(value);
+        option.textContent = String(value);
+        el.append(option);
+      });
+      el.disabled = values.length === 0;
+    };
+
+    const apply = () => {
+      const filter = {
+        make: makeEl?.value || undefined,
+        model: modelEl?.value || undefined,
+        year: yearEl?.value ? Number(yearEl.value) : undefined,
+      };
+
+      let matches = 0;
+      entries.forEach(({ card, fitment }) => {
+        const visible = fitmentMatches(fitment, filter);
+        card.parentElement?.toggleAttribute('hidden', !visible);
+        if (visible) matches += 1;
+      });
+
+      if (countEl) countEl.textContent = matchLabel(matches);
+      empty?.toggleAttribute('hidden', matches > 0);
+    };
+
+    makeEl?.addEventListener('change', () => {
+      fill(modelEl, index.modelsByMake[makeEl.value] ?? []);
+      fill(yearEl, []);
+      apply();
+    });
+
+    modelEl?.addEventListener('change', () => {
+      const key = `${makeEl?.value}|${modelEl.value}`;
+      fill(yearEl, index.yearsByModel[key] ?? []);
+      apply();
+    });
+
+    yearEl?.addEventListener('change', apply);
+
+    root
+      .querySelector<HTMLButtonElement>('[data-filter-reset]')
+      ?.addEventListener('click', () => {
+        if (makeEl) makeEl.value = '';
+        fill(modelEl, []);
+        fill(yearEl, []);
+        apply();
+      });
+
+    apply();
+  }
+</script>

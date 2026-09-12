@@ -1,0 +1,150 @@
+---
+import { getCollection } from 'astro:content';
+import Shell from '@/layouts/Shell.astro';
+import Icon from '@/components/Icon.astro';
+import PageHero from '@/components/PageHero.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import WorkGrid from '@/components/WorkGrid.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getServicesContent } from '@/i18n/content/services';
+import { getSiteContent } from '@/i18n/content/site';
+import { getPagesContent } from '@/i18n/content/pages';
+import { publishedWorks } from '@/utils/works';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import { SERVICE_SLUGS } from '@/utils/services';
+import { safeMarkdown } from '@podbor/site-kit';
+import { SITE_URL } from '@/utils/constants';
+
+export function getStaticPaths() {
+  return withLocales(
+    SERVICE_SLUGS.map((slug) => ({ params: { slug }, props: { slug } })),
+  );
+}
+
+const { slug } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const services = getServicesContent(locale);
+const site = getSiteContent(locale);
+const service = services[slug];
+const pages = getPagesContent(locale);
+const related = publishedWorks(await getCollection('works')).filter((work) =>
+  work.data.servicesApplied.includes(slug),
+);
+
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: service.name,
+  serviceType: service.name,
+  description: service.metaDescription,
+  provider: { '@id': `${SITE_URL}/#workshop` },
+  areaServed: { '@type': 'City', name: 'Beograd' },
+  url: new URL(PathBuilder.service(locale, slug), SITE_URL).href,
+};
+
+const specs = [
+  { label: services.specsPriceLabel, value: service.priceFrom },
+  { label: services.specsDurationLabel, value: service.duration },
+  { label: services.specsWarrantyLabel, value: service.warranty },
+];
+---
+
+<Shell
+  title={service.metaTitle}
+  description={service.metaDescription}
+  jsonLd={[serviceSchema]}
+>
+  <PageHero
+    eyebrow={service.heroEyebrow}
+    heading={service.heroTitle}
+    lead={service.heroLead}
+    crumbs={[
+      { href: PathBuilder.services(locale), label: site.nav.services },
+      { href: PathBuilder.service(locale, slug), label: service.name },
+    ]}
+  />
+
+  <section class="wrap py-band md:py-band-lg">
+    <dl class="grid gap-3 sm:grid-cols-3">
+      {
+        specs.map((spec) => (
+          <div class="card flex flex-col gap-1 p-4">
+            <dt class="text-xs text-muted">{spec.label}</dt>
+            <dd class="spec text-base font-semibold text-ink">{spec.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <section class="wrap grid gap-10 pb-12 lg:grid-cols-[1.2fr_1fr]">
+    <div class="flex flex-col gap-5">
+      <h2 class="text-section">{service.bodyHeading}</h2>
+      <div class="prose-shop" set:html={safeMarkdown(service.body)} />
+    </div>
+
+    <aside class="flex flex-col gap-4">
+      <div class="card flex flex-col gap-3 p-5">
+        <h2 class="text-base font-semibold text-ink">
+          {service.includesHeading}
+        </h2>
+        <ul class="flex flex-col gap-2">
+          {
+            service.includes.map((item) => (
+              <li class="flex gap-2.5 text-sm leading-relaxed text-ink-2">
+                <Icon name="check" size={13} class="mt-1 shrink-0 text-go" />
+                {item}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="card flex flex-col gap-3 p-5">
+        <h2 class="text-base font-semibold text-ink">{service.signsHeading}</h2>
+        <ul class="flex flex-col gap-2">
+          {
+            service.signs.map((item) => (
+              <li class="flex gap-2.5 text-sm leading-relaxed text-ink-2">
+                <span
+                  class="mt-2 h-1.5 w-1.5 shrink-0 bg-signal"
+                  aria-hidden="true"
+                />
+                {item}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </aside>
+  </section>
+
+  <section class="wrap pb-4">
+    <div class="card border-l-4 border-l-signal p-6">
+      <h2 class="mb-2 text-base font-semibold text-signal">
+        {service.honestHeading}
+      </h2>
+      <p class="max-w-3xl text-sm leading-relaxed text-ink-2 sm:text-base">
+        {service.honest}
+      </p>
+    </div>
+  </section>
+
+  {
+    related.length > 0 && (
+      <section class="wrap mt-band">
+        <h2 class="text-xl font-semibold text-ink sm:text-2xl">
+          {pages.works.eyebrow}
+        </h2>
+        <WorkGrid works={related.slice(0, 3)} />
+      </section>
+    )
+  }
+
+  <FinalCta
+    eyebrow={services.indexEyebrow}
+    heading={service.name}
+    body={service.heroLead}
+    service={slug}
+  />
+</Shell>

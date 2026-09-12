@@ -30,7 +30,7 @@ export const homeContentSchema = z
   .object({
     metaTitle: z.string(),
     metaDescription: z.string(),
-    journey: z.array(journeyStepSchema).length(5),
+    journey: z.array(journeyStepSchema).length(4),
     heroEyebrow: z.string(),
     heroLine1: z.string(),
     heroLine2: z.string(),

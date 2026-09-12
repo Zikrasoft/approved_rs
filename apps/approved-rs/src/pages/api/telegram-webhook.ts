@@ -13,7 +13,7 @@ import { secretMatches } from '@/lib/verifySecret';
 import {
   isLeadStatusKey,
   answerCallback,
-  refreshLeadCard,
+  ensureLeadCard,
   sendForceReplyPrompt,
   safeEditMessage,
   sendDealNotificationToAdmin,
@@ -141,7 +141,7 @@ async function refreshBothSurfaces(
   role: Role,
 ): Promise<void> {
   if (!updated) return;
-  await refreshLeadCard(updated);
+  await ensureLeadCard(updated);
   await editLeadDetailMessage(chatId, messageId, updated, role);
 }
 
@@ -761,7 +761,7 @@ async function handlePromptReply(
       }),
     );
     if (updated) {
-      await refreshLeadCard(updated);
+      await ensureLeadCard(updated);
       await sendDealNotificationToAdmin(updated);
     }
     return;
@@ -799,7 +799,7 @@ async function handlePromptReply(
     // — even when `apply` no-op'd with {} — so truthiness alone can't tell
     // "postponed" from "guard blocked it"; check the field the guard controls.
     if (updated?.status === 'postponed') {
-      await refreshLeadCard(updated);
+      await ensureLeadCard(updated);
       await sendStatusChangeToAdmin(updated);
     }
     return;
@@ -821,7 +821,7 @@ async function handlePromptReply(
     () => ({ [field]: value || null }) as Partial<StoredLead>,
   );
   if (updated) {
-    await refreshLeadCard(updated);
+    await ensureLeadCard(updated);
     // In a private chat, chat.id is the user's own id — safe to role-check directly.
     const role = roleOf(chatId);
     if (role) {

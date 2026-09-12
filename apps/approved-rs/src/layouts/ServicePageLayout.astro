@@ -46,8 +46,6 @@ interface Props {
   // undefined for pages happy with LeadForm's sourcing-flavored default.
   commentLabel?: string;
   commentPlaceholder?: string;
-  // Belgrade-only Автосервис isn't offered in the other countries — showing
-  // "Также работаем в: {other countries}" there would be a false claim.
   showCountryCrossLinks?: boolean;
   breadcrumbs?: { label: string; href?: string }[];
 }
@@ -90,7 +88,7 @@ const t = getI18n(locale);
       >{leadCountry.toUpperCase()}</span
     >
 
-    <div class="relative max-w-6xl mx-auto px-6 py-16 md:py-24">
+    <div class="relative max-w-6xl mx-auto px-6 py-band md:py-band-lg">
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-start">
         <div class="lg:col-span-3">
           {breadcrumbs && <Breadcrumbs items={breadcrumbs} />}

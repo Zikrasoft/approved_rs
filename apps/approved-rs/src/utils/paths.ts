@@ -6,8 +6,7 @@ import type { VehicleImportSpoke } from './vehicleImportCrossSell';
 // Single source of truth for every internal href the site links to — no
 // page/component should build one with a raw template literal. Country-
 // scoped services (the 3 with a [country] route) share one method; the
-// rest (vehicle-import, auto-service-belgrade, cases, static pages) have
-// their own fixed shape.
+// rest (vehicle-import, cases, static pages) have their own fixed shape.
 export const PathBuilder = {
   home: (locale: Locale) => `/${locale}/`,
   service: (
@@ -29,12 +28,6 @@ export const PathBuilder = {
     slug === 'de' || slug === 'es' || slug === 'ch'
       ? `/${locale}/vehicle-import/eu/${slug}/`
       : `/${locale}/vehicle-import/${slug}/`,
-  autoServiceBelgrade: (locale: Locale) => `/${locale}/auto-service-belgrade/`,
-  autoServiceCase: (locale: Locale, caseId: string) =>
-    `/${locale}/auto-service-belgrade/${caseId}/`,
-  detailingBelgrade: (locale: Locale) => `/${locale}/detailing-belgrade/`,
-  detailingCase: (locale: Locale, caseId: string) =>
-    `/${locale}/detailing-belgrade/${caseId}/`,
   case: (locale: Locale, caseId: string) => `/${locale}/cases/${caseId}/`,
   casesVehicleSourcing: (locale: Locale) =>
     `/${locale}/cases/vehicle-sourcing/`,
@@ -42,24 +35,10 @@ export const PathBuilder = {
   casesVehicleInspection: (locale: Locale) =>
     `/${locale}/cases/vehicle-inspection/`,
   casesVehicleImport: (locale: Locale) => `/${locale}/cases/vehicle-import/`,
-  casesAutoService: (locale: Locale) => `/${locale}/cases/auto-service/`,
-  casesDetailing: (locale: Locale) => `/${locale}/cases/detailing/`,
   contacts: (locale: Locale) => `/${locale}/contacts/`,
   privacy: (locale: Locale) => `/${locale}/privacy/`,
   thanks: (locale: Locale) => `/${locale}/thanks/`,
 };
-
-// Shared by auto-service-belgrade and detailing-belgrade's "also sourcing
-// cars in" ChipLinks — both are Belgrade-only pages that cross-sell
-// vehicle-sourcing in every other active country.
-export function sourcingChipItems(locale: Locale) {
-  return getActiveCountries()
-    .filter((c) => c.code !== 'rs')
-    .map((c) => ({
-      href: PathBuilder.service(locale, 'vehicle-sourcing', c.code),
-      text: c[locale].name,
-    }));
-}
 
 export function getCountryPaths() {
   return getActiveCountries().map((c) => ({ params: { country: c.code } }));
