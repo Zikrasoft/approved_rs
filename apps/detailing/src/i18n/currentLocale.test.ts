@@ -6,7 +6,7 @@ describe('localeFrom', () => {
   it.each(SUPPORTED_LOCALES)(
     'reads %s off the first path segment',
     (locale) => {
-      expect(localeFrom(`/${locale}/usluge/`)).toBe(locale);
+      expect(localeFrom(`/${locale}/services/`)).toBe(locale);
     },
   );
 
@@ -23,7 +23,7 @@ describe('localeFrom', () => {
   });
 
   it('falls back to the default locale for an unsupported language', () => {
-    expect(localeFrom('/zh/usluge/')).toBe('ru');
+    expect(localeFrom('/zh/services/')).toBe('ru');
   });
 
   it('falls back to the default locale for a prototype key', () => {

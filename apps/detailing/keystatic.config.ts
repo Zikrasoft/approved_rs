@@ -34,10 +34,10 @@ export default config({
         servicesApplied: fields.multiselect({
           label: 'Выполненные услуги',
           options: [
-            { label: 'Защитная плёнка (PPF)', value: 'zastitna-folija' },
-            { label: 'Смена цвета плёнкой', value: 'promena-boje' },
-            { label: 'Полировка и керамика', value: 'poliranje-keramika' },
-            { label: 'Реставрация руля', value: 'restauracija-volana' },
+            { label: 'Защитная плёнка (PPF)', value: 'paint-protection-film' },
+            { label: 'Смена цвета плёнкой', value: 'colour-change-wrap' },
+            { label: 'Полировка и керамика', value: 'polishing-ceramic' },
+            { label: 'Реставрация руля', value: 'steering-wheel-restoration' },
           ],
         }),
         image: workImage(),

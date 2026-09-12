@@ -117,6 +117,24 @@ export function createSectionTranslator<L extends string>({
     return 'translated';
   }
 
+  function recordHashes(sections: readonly Section[]): number {
+    let rewritten = 0;
+    for (const section of sections) {
+      const doc = parseDocument(readFileSync(section.path, 'utf-8'));
+      const plain = doc.toJS() as SectionData;
+      const rawSource: SectionData = {};
+      for (const field of section.fields) {
+        if (plain[field] !== undefined) rawSource[field] = plain[field];
+      }
+      const next = hashSource(section.schema.parse(rawSource) as SectionData);
+      if (doc.get('translatedFrom') === next) continue;
+      doc.set('translatedFrom', next);
+      writeFileSync(section.path, doc.toString({ lineWidth: 0 }));
+      rewritten += 1;
+    }
+    return rewritten;
+  }
+
   async function run(sections: readonly Section[]): Promise<number> {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
@@ -145,5 +163,5 @@ export function createSectionTranslator<L extends string>({
     return failed > 0 ? 1 : 0;
   }
 
-  return { translateSection, processSection, run };
+  return { translateSection, processSection, recordHashes, run };
 }

@@ -8,7 +8,7 @@ describe('PathBuilder', () => {
     const paths = [
       PathBuilder.home('sr'),
       PathBuilder.services('sr'),
-      PathBuilder.service('sr', 'zastitna-folija'),
+      PathBuilder.service('sr', 'paint-protection-film'),
       PathBuilder.works('sr'),
       PathBuilder.work('sr', 'bmw-x5'),
       PathBuilder.contact('sr'),
@@ -22,14 +22,14 @@ describe('PathBuilder', () => {
   });
 
   it.each(SERVICE_SLUGS)('builds a service URL for %s', (slug) => {
-    expect(PathBuilder.service('ru', slug)).toBe(`/ru/usluge/${slug}/`);
+    expect(PathBuilder.service('ru', slug)).toBe(`/ru/services/${slug}/`);
   });
 });
 
 describe('swapLocale', () => {
   it('replaces the locale segment and keeps the rest of the path', () => {
-    expect(swapLocale('/ru/usluge/zastitna-folija/', 'en')).toBe(
-      '/en/usluge/zastitna-folija/',
+    expect(swapLocale('/ru/services/paint-protection-film/', 'en')).toBe(
+      '/en/services/paint-protection-film/',
     );
   });
 
@@ -38,12 +38,12 @@ describe('swapLocale', () => {
   });
 
   it('handles a path with no trailing slash', () => {
-    expect(swapLocale('/ru/kontakt', 'en')).toBe('/en/kontakt/');
+    expect(swapLocale('/ru/contact', 'en')).toBe('/en/contact/');
   });
 
   it('never produces a doubled locale prefix', () => {
-    const swapped = swapLocale('/en/radovi/bmw/', 'ru');
-    expect(swapped).toBe('/ru/radovi/bmw/');
+    const swapped = swapLocale('/en/works/bmw/', 'ru');
+    expect(swapped).toBe('/ru/works/bmw/');
     expect(swapped.split('/').filter(Boolean)[0]).toBe('ru');
   });
 });
