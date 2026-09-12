@@ -2,6 +2,7 @@ import {
   ADMIN_IDS as adminIds,
   OWNER_IDS as ownerIds,
   client,
+  ensureLeadCard,
   formatter,
   notifier,
 } from '@/lib/crmBot';
@@ -13,9 +14,10 @@ export const {
   safeEditMessage,
 } = client;
 
+export { ensureLeadCard };
+
 export const {
   sendLeadNotification,
-  refreshLeadCard,
   sendPostponeReminderToOwner,
   sendDealNotificationToAdmin,
   sendCommissionClaimToAdmin,

@@ -6,7 +6,7 @@ vi.mock('@/lib/telegram', () => ({
   isLeadStatusKey: (key: string) =>
     ['in_progress', 'won', 'lost'].includes(key),
   answerCallback: vi.fn(),
-  refreshLeadCard: vi.fn(),
+  ensureLeadCard: vi.fn(),
   sendForceReplyPrompt: vi.fn(),
   formatMoney: (n: number) => `${n} €`,
   formatDateRu: (iso: string) => {
@@ -80,7 +80,7 @@ vi.mock('@/lib/store', () => ({
 import { POST } from './telegram-webhook';
 import {
   answerCallback,
-  refreshLeadCard,
+  ensureLeadCard,
   sendForceReplyPrompt,
   sendDealNotificationToAdmin,
   sendCommissionClaimToAdmin,
@@ -233,7 +233,7 @@ describe('POST /api/telegram-webhook', () => {
       isPaidOff: false,
     });
     vi.mocked(answerCallback).mockReset().mockResolvedValue(undefined);
-    vi.mocked(refreshLeadCard).mockReset().mockResolvedValue(undefined);
+    vi.mocked(ensureLeadCard).mockReset().mockResolvedValue(undefined);
     vi.mocked(editLeadDetailMessage).mockReset().mockResolvedValue(undefined);
     vi.mocked(safeEditMessage).mockReset().mockResolvedValue(undefined);
     vi.mocked(buildRemindPicker).mockClear();
@@ -368,7 +368,7 @@ describe('POST /api/telegram-webhook', () => {
       );
       expect(res.status).toBe(200);
       expect(setStatus).toHaveBeenCalledWith(5, 'lost');
-      expect(refreshLeadCard).toHaveBeenCalled();
+      expect(ensureLeadCard).toHaveBeenCalled();
       expect(editLeadDetailMessage).toHaveBeenCalledWith(
         DM_CHAT_ID,
         555,
@@ -511,7 +511,7 @@ describe('POST /api/telegram-webhook', () => {
       );
       expect(res.status).toBe(200);
       expect(archiveLead).toHaveBeenCalledWith(5);
-      expect(refreshLeadCard).toHaveBeenCalled();
+      expect(ensureLeadCard).toHaveBeenCalled();
       expect(answerCallback).toHaveBeenCalledWith('cb-6', 'Архивировано');
     });
 
@@ -606,7 +606,7 @@ describe('POST /api/telegram-webhook', () => {
         expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
         expect.stringContaining('Отложено до'),
       );
-      expect(refreshLeadCard).toHaveBeenCalled();
+      expect(ensureLeadCard).toHaveBeenCalled();
       expect(sendStatusChangeToAdmin).toHaveBeenCalled();
       expect(answerCallback).toHaveBeenCalledWith('cb-rp1', 'Отложено');
     });
@@ -639,7 +639,7 @@ describe('POST /api/telegram-webhook', () => {
         }),
       );
       expect(res.status).toBe(200);
-      expect(refreshLeadCard).not.toHaveBeenCalled();
+      expect(ensureLeadCard).not.toHaveBeenCalled();
       expect(sendStatusChangeToAdmin).not.toHaveBeenCalled();
       expect(answerCallback).toHaveBeenCalledWith('cb-rp3');
     });
@@ -1026,7 +1026,7 @@ describe('POST /api/telegram-webhook', () => {
       );
       expect(res.status).toBe(200);
       expect(sendCommissionResultToOwner).not.toHaveBeenCalled();
-      expect(refreshLeadCard).not.toHaveBeenCalled();
+      expect(ensureLeadCard).not.toHaveBeenCalled();
     });
 
     it('does not notify the owner a second time when reject is a no-op (duplicate delivery)', async () => {
@@ -1043,7 +1043,7 @@ describe('POST /api/telegram-webhook', () => {
       );
       expect(res.status).toBe(200);
       expect(sendCommissionResultToOwner).not.toHaveBeenCalled();
-      expect(refreshLeadCard).not.toHaveBeenCalled();
+      expect(ensureLeadCard).not.toHaveBeenCalled();
     });
   });
 
@@ -1596,7 +1596,7 @@ describe('POST /api/telegram-webhook', () => {
         888,
         expect.any(Function),
       );
-      const updated = vi.mocked(refreshLeadCard).mock.calls[0][0];
+      const updated = vi.mocked(ensureLeadCard).mock.calls[0][0];
       expect(updated.dealAmount).toBe(150000);
       expect(updated.status).toBe('won');
       expect(sendDealNotificationToAdmin).toHaveBeenCalled();
@@ -1624,7 +1624,7 @@ describe('POST /api/telegram-webhook', () => {
       );
 
       expect(res.status).toBe(200);
-      const updated = vi.mocked(refreshLeadCard).mock.calls[0][0];
+      const updated = vi.mocked(ensureLeadCard).mock.calls[0][0];
       expect(updated.status).toBe('postponed');
       expect(updated.remindAt).toBe('2026-10-20');
       expect(updated.comment).toBe('BMW X5\nОтложено до 20.10.2026');
@@ -1653,7 +1653,7 @@ describe('POST /api/telegram-webhook', () => {
       );
 
       expect(res.status).toBe(200);
-      expect(refreshLeadCard).not.toHaveBeenCalled();
+      expect(ensureLeadCard).not.toHaveBeenCalled();
       expect(sendStatusChangeToAdmin).not.toHaveBeenCalled();
     });
 
@@ -1891,7 +1891,7 @@ describe('POST /api/telegram-webhook', () => {
       );
 
       expect(res.status).toBe(200);
-      const updated = vi.mocked(refreshLeadCard).mock.calls[0][0];
+      const updated = vi.mocked(ensureLeadCard).mock.calls[0][0];
       expect(updated.name).toBe('Новое Имя');
       expect(sendMessage).toHaveBeenCalledWith(
         DM_CHAT_ID,

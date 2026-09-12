@@ -312,7 +312,7 @@ describe('refreshLeadCard', () => {
       telegramChatId: -1009876543210,
       telegramMessageId: 555,
     });
-    await refreshLeadCard(lead);
+    await expect(refreshLeadCard(lead)).resolves.toBe(true);
 
     expect(mockFetch.mock.calls[0][0]).toContain('/editMessageText');
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
@@ -324,18 +324,39 @@ describe('refreshLeadCard', () => {
     );
   });
 
-  it('does nothing when the lead has no Telegram message on file yet', async () => {
-    await refreshLeadCard(
-      makeLead({ telegramChatId: null, telegramMessageId: null }),
-    );
+  it('reports no card when the lead has no Telegram message on file yet', async () => {
+    await expect(
+      refreshLeadCard(
+        makeLead({ telegramChatId: null, telegramMessageId: null }),
+      ),
+    ).resolves.toBe(false);
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it('does nothing for a chat id other than the managed group', async () => {
-    await refreshLeadCard(
-      makeLead({ telegramChatId: -1, telegramMessageId: 1 }),
-    );
-    expect(mockFetch).not.toHaveBeenCalled();
+  // TELEGRAM_GROUP_ID may be an @username (see docs/deploy.md), which never
+  // equals the numeric chat.id Telegram reports back. Matching the two was
+  // what stopped cards updating at all, so the edit goes by stored id alone.
+  it('edits by the stored chat id without matching it against the configured group', async () => {
+    await expect(
+      refreshLeadCard(makeLead({ telegramChatId: -1, telegramMessageId: 1 })),
+    ).resolves.toBe(true);
+    expect(JSON.parse(mockFetch.mock.calls[0][1].body).chat_id).toBe(-1);
+  });
+
+  it.each([
+    'Bad Request: message to edit not found',
+    "Bad Request: message can't be edited",
+  ])('reports no card when Telegram answers "%s"', async (description) => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 400,
+      json: () => Promise.resolve({ description }),
+    });
+    await expect(
+      refreshLeadCard(
+        makeLead({ telegramChatId: -1009876543210, telegramMessageId: 555 }),
+      ),
+    ).resolves.toBe(false);
   });
 
   it('resolves without throwing when Telegram rejects a no-op double-tap edit', async () => {
@@ -352,7 +373,7 @@ describe('refreshLeadCard', () => {
       refreshLeadCard(
         makeLead({ telegramChatId: -1009876543210, telegramMessageId: 555 }),
       ),
-    ).resolves.toBeUndefined();
+    ).resolves.toBe(true);
   });
 
   it('still throws on a genuine editMessageText failure', async () => {
@@ -361,7 +382,7 @@ describe('refreshLeadCard', () => {
       status: 400,
       json: () =>
         Promise.resolve({
-          description: 'Bad Request: message to edit not found',
+          description: 'Bad Request: chat not found',
         }),
     });
     await expect(

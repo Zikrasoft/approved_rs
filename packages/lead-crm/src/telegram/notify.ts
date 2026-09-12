@@ -60,15 +60,27 @@ export function createNotifier({
       return { chatId, messageId };
     },
 
-    async refreshLeadCard(lead: StoredLead): Promise<void> {
-      if (lead.telegramChatId == null || lead.telegramMessageId == null) return;
-      if (String(lead.telegramChatId) !== String(groupId)) return;
-      await client.safeEditMessage(
-        lead.telegramChatId,
-        lead.telegramMessageId,
-        formatter.formatTeaser(lead),
-        formatter.deepLinkKeyboard(lead.id),
-      );
+    async refreshLeadCard(lead: StoredLead): Promise<boolean> {
+      if (lead.telegramChatId == null || lead.telegramMessageId == null)
+        return false;
+      try {
+        await client.safeEditMessage(
+          lead.telegramChatId,
+          lead.telegramMessageId,
+          formatter.formatTeaser(lead),
+          formatter.deepLinkKeyboard(lead.id),
+        );
+      } catch (err) {
+        // Telegram refuses the edit outright once the message is deleted or
+        // too old to touch — there is no card left to refresh.
+        if (
+          err instanceof Error &&
+          /message to edit not found|message can't be edited/.test(err.message)
+        )
+          return false;
+        throw err;
+      }
+      return true;
     },
 
     async sendDealNotificationToAdmin(lead: StoredLead): Promise<void> {

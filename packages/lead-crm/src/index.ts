@@ -55,7 +55,7 @@ export type {
 export { createNotifier } from './telegram/notify.ts';
 export type { Notifier } from './telegram/notify.ts';
 
-export { createNotifyLead } from './notifyLead.ts';
+export { createEnsureLeadCard, createNotifyLead } from './notifyLead.ts';
 export type { NotifyLead, NotifyLeadOptions } from './notifyLead.ts';
 
 export {

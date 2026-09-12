@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createNotifyLead } from './notifyLead.ts';
+import { createEnsureLeadCard, createNotifyLead } from './notifyLead.ts';
 import { createLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
 import { createLeadStore } from './store.ts';
 import { createMemoryStorage } from './storage/memory.testing.ts';
@@ -63,7 +63,8 @@ beforeEach(() => {
     messageId: 999,
   });
   setTelegramMessage.mockReset().mockResolvedValue(storedLead);
-  refreshLeadCard.mockReset().mockResolvedValue(undefined);
+  // Mirrors the stored lead below: no card on file, so nothing to edit.
+  refreshLeadCard.mockReset().mockResolvedValue(false);
 });
 
 describe('notifyLead', () => {
@@ -105,6 +106,7 @@ describe('notifyLead', () => {
       lead: merged,
       merged: true,
     });
+    refreshLeadCard.mockResolvedValueOnce(true);
 
     await notifyLead(baseData, '[test]');
 
@@ -113,16 +115,67 @@ describe('notifyLead', () => {
     expect(refreshLeadCard).toHaveBeenCalledWith(merged);
   });
 
-  it('when merged but the existing lead has no Telegram message yet, skips the refresh instead of throwing', async () => {
+  it('posts nothing when a repeat submission merges into a lead that has no card', async () => {
     vi.mocked(insertOrMergeLead).mockResolvedValueOnce({
       lead: storedLead,
       merged: true,
     });
 
-    await expect(notifyLead(baseData, '[test]')).resolves.toBeUndefined();
+    await notifyLead(baseData, '[test]');
 
-    expect(refreshLeadCard).not.toHaveBeenCalled();
     expect(sendLeadNotification).not.toHaveBeenCalled();
+  });
+});
+
+describe('ensureLeadCard', () => {
+  const ensureLeadCard = createEnsureLeadCard({ store, notifier });
+
+  it('edits the existing card and posts nothing new', async () => {
+    refreshLeadCard.mockResolvedValueOnce(true);
+    await ensureLeadCard(storedLead);
+
+    expect(refreshLeadCard).toHaveBeenCalledWith(storedLead);
+    expect(sendLeadNotification).not.toHaveBeenCalled();
+    expect(setTelegramMessage).not.toHaveBeenCalled();
+  });
+
+  it('posts a replacement card and stores its id when there is nothing left to edit', async () => {
+    await ensureLeadCard(storedLead);
+
+    expect(sendLeadNotification).toHaveBeenCalledWith(storedLead);
+    expect(setTelegramMessage).toHaveBeenCalledWith(42, -100, 999);
+  });
+
+  it('leaves an archived lead without a card — deleting it is how it was retired', async () => {
+    await ensureLeadCard({ ...storedLead, archived: true });
+
+    expect(sendLeadNotification).not.toHaveBeenCalled();
+  });
+
+  it('keeps the posted card when its id cannot be stored', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    setTelegramMessage.mockRejectedValueOnce(new Error('storage down'));
+
+    await expect(ensureLeadCard(storedLead)).resolves.toBeUndefined();
+
+    expect(errorSpy).toHaveBeenCalledWith(
+      '[lead-crm] failed to persist the group card id',
+      expect.objectContaining({ leadId: 42 }),
+    );
+    errorSpy.mockRestore();
+  });
+
+  it('reports a lead row that vanished before its card id could be stored', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    setTelegramMessage.mockResolvedValueOnce(undefined);
+
+    await ensureLeadCard(storedLead);
+
+    expect(errorSpy).toHaveBeenCalledWith(
+      '[lead-crm] no lead row to attach the group card to',
+      expect.objectContaining({ leadId: 42 }),
+    );
+    errorSpy.mockRestore();
   });
 });
 
