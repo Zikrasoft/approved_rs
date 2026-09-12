@@ -123,28 +123,24 @@ const SERVICE_VARIANTS = {
     'vehicle-sourcing': 'Подберём, проверим и доставим автомобиль под ключ',
     'vehicle-buyback': 'Срочный выкуп авто на иностранных номерах',
     'vehicle-inspection': 'Независимая проверка перед покупкой',
-    'auto-service-belgrade': 'Ремонт и обслуживание автомобилей в Белграде',
   },
   en: {
     'vehicle-sourcing':
       "We'll source, inspect, and deliver your car, fully turnkey",
     'vehicle-buyback': 'Urgent car buyback on foreign plates',
     'vehicle-inspection': 'Independent inspection before you buy',
-    'auto-service-belgrade': 'Car repair and maintenance in Belgrade',
   },
   sr: {
     'vehicle-sourcing':
       'Pronalazimo, proveravamo i dovozimo vozilo, ključ u ruke',
     'vehicle-buyback': 'Hitan otkup vozila na stranim tablicama',
     'vehicle-inspection': 'Nezavisna provera pre kupovine',
-    'auto-service-belgrade': 'Popravka i održavanje vozila u Beogradu',
   },
   es: {
     'vehicle-sourcing':
       'Buscamos, inspeccionamos y entregamos tu auto, todo incluido',
     'vehicle-buyback': 'Compra urgente de autos con matrícula extranjera',
     'vehicle-inspection': 'Inspección independiente antes de comprar',
-    'auto-service-belgrade': 'Reparación y mantenimiento de autos en Belgrado',
   },
   de: {
     'vehicle-sourcing':
@@ -152,7 +148,6 @@ const SERVICE_VARIANTS = {
     'vehicle-buyback':
       'Dringender Ankauf von Autos mit ausländischem Kennzeichen',
     'vehicle-inspection': 'Unabhängige Prüfung vor dem Kauf',
-    'auto-service-belgrade': 'Reparatur und Wartung von Autos in Belgrad',
   },
 };
 

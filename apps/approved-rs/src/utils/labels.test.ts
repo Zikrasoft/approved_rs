@@ -17,7 +17,7 @@ describe('getNavItems', () => {
     ]);
   });
 
-  it('builds per-locale, per-country hrefs for Выкуп/Проверка, fixed hub hrefs for Автоподбор/Привоз/Автосервис/Детейлинг', () => {
+  it('builds per-locale, per-country hrefs for Выкуп/Проверка, fixed hub hrefs for Автоподбор/Привоз', () => {
     const result = getNavItems('ru', 'rs');
     expect(result).toEqual([
       {
