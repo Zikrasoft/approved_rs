@@ -62,12 +62,7 @@ const faqSchema = {
         home.intro.points.map((point, i) => (
           <div class="shell" data-reveal data-reveal-delay={i * 90}>
             <div class="core flex h-full flex-col gap-4 p-7">
-              <span
-                class="flex h-8 w-8 items-center justify-center rounded-full border border-line-strong text-[0.6875rem] tracking-widest text-champagne"
-                aria-hidden="true"
-              >
-                {String(i + 1).padStart(2, '0')}
-              </span>
+              <span class="h-px w-10 bg-champagne/60" aria-hidden="true" />
               <h3 class="text-lg font-display tracking-tight">{point.title}</h3>
               <p class="text-sm leading-relaxed text-mute">{point.text}</p>
             </div>

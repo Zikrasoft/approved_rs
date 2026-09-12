@@ -24,6 +24,25 @@
 }
 
 @layer base {
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  summary,
+  label:has(input:is([type='checkbox'], [type='radio'])) {
+    cursor: pointer;
+  }
+
+  /* Apple HIG asks for a 44pt minimum hit area. Applied only to coarse
+     pointers so mouse layouts keep their compact controls. */
+  @media (pointer: coarse) {
+    button,
+    [role='button'],
+    summary,
+    select,
+    input:not([type='hidden'], [type='checkbox'], [type='radio']) {
+      min-height: 44px;
+    }
+  }
+
   :root {
     color-scheme: light;
   }

@@ -29,6 +29,25 @@
 }
 
 @layer base {
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  summary,
+  label:has(input:is([type='checkbox'], [type='radio'])) {
+    cursor: pointer;
+  }
+
+  /* Apple HIG asks for a 44pt minimum hit area. Applied only to coarse
+     pointers so mouse layouts keep their compact controls. */
+  @media (pointer: coarse) {
+    button,
+    [role='button'],
+    summary,
+    select,
+    input:not([type='hidden'], [type='checkbox'], [type='radio']) {
+      min-height: 44px;
+    }
+  }
+
   :root {
     color-scheme: dark;
   }
@@ -88,12 +107,16 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* The brand is a prism, so the accent line is a spectrum — but a metallic
+   one: brushed steel through champagne into warm gold. The earlier violet
+   and cyan read as software, not as a finished panel under a lamp. */
 @utility text-iridescent {
   background-image: linear-gradient(
     100deg,
-    #9b8cff 0%,
-    #6fd3e8 32%,
-    var(--color-champagne) 66%,
+    #9aa3b2 0%,
+    #d8cbb4 26%,
+    var(--color-champagne) 58%,
+    #c08f4f 82%,
     var(--color-chalk) 100%
   );
   background-clip: text;
