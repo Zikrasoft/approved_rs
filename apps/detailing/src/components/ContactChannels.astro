@@ -1,0 +1,68 @@
+---
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+import { CONTACT_LINKS, formatPhone } from '@/utils/contactLinks';
+import { PHONE_NUMBER, TG_MANAGER } from '@/utils/constants';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+
+const channels = [
+  {
+    href: CONTACT_LINKS.phone,
+    label: site.channels.call,
+    value: formatPhone(PHONE_NUMBER),
+    track: 'phone',
+  },
+  {
+    href: CONTACT_LINKS.whatsapp,
+    label: site.channels.whatsapp,
+    value: site.channels.write,
+    track: 'whatsapp',
+  },
+  {
+    href: CONTACT_LINKS.viber,
+    label: site.channels.viber,
+    value: site.channels.write,
+    track: 'viber',
+  },
+  {
+    href: CONTACT_LINKS.telegram,
+    label: site.channels.telegram,
+    value: `@${TG_MANAGER}`,
+    track: 'telegram',
+  },
+] as const;
+---
+
+<div class={`grid gap-2 sm:grid-cols-2 lg:grid-cols-1 ${className}`}>
+  {
+    channels.map((channel) => (
+      <a
+        href={channel.href}
+        data-contact-channel={channel.track}
+        rel="noopener"
+        class="group flex items-center justify-between gap-4 rounded-2xl border border-line bg-white/[0.02] px-4 py-3 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-line-strong hover:bg-white/[0.05]"
+      >
+        <span class="flex flex-col">
+          <span class="text-[0.6875rem] uppercase tracking-[0.18em] text-mute-2">
+            {channel.label}
+          </span>
+          <span class="text-sm text-chalk">{channel.value}</span>
+        </span>
+        <span
+          class="text-mute-2 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5 group-hover:-translate-y-px group-hover:text-champagne"
+          aria-hidden="true"
+        >
+          <Icon name="arrow" />
+        </span>
+      </a>
+    ))
+  }
+</div>

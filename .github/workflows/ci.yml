@@ -107,6 +107,8 @@ jobs:
             | any(
                 test("^apps/approved-rs/src/content/(cases|autoservice-cases|detailing-cases)/.*/index\\.md$")
                 or test("^apps/approved-rs/src/content/i18n/.*\\.yaml$")
+                or test("^apps/detailing/src/content/works/.*/index\\.md$")
+                or test("^apps/detailing/src/content/i18n/.*\\.yaml$")
               )
           ' > /dev/null; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
@@ -152,3 +154,38 @@ jobs:
       - run: pnpm exec vercel pull --yes --environment=production --debug
       - run: pnpm exec vercel build --prod
       - run: pnpm exec vercel deploy --prebuilt --prod --archive=tgz
+
+  deploy-detailing:
+    needs: gate
+    if: needs.gate.outputs.skip_deploy == 'false'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DETAILING }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    defaults:
+      run:
+        working-directory: apps/detailing
+    steps:
+      - id: guard
+        working-directory: .
+        run: |
+          if [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "VERCEL_PROJECT_ID_DETAILING is not set — skipping the detailing deploy."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.guard.outputs.configured == 'true'
+      - uses: ./.github/actions/setup-pnpm
+        if: steps.guard.outputs.configured == 'true'
+      - run: pnpm exec vercel pull --yes --environment=production
+        if: steps.guard.outputs.configured == 'true'
+      - run: pnpm exec vercel build --prod
+        if: steps.guard.outputs.configured == 'true'
+      - run: pnpm exec vercel deploy --prebuilt --prod --archive=tgz
+        if: steps.guard.outputs.configured == 'true'

@@ -69,6 +69,25 @@ beforeEach(() => {
   });
 });
 
+describe('appendNote', () => {
+  it('caps a comment that keeps getting appended to', async () => {
+    const { lead } = await store.insertOrMergeLead({
+      ...baseData,
+      visitorId: 'visitor-1',
+      comment: 'x'.repeat(3990),
+    });
+    expect(lead.comment).toBeTruthy();
+
+    const merged = await store.insertOrMergeLead({
+      ...baseData,
+      visitorId: 'visitor-1',
+      service: 'y'.repeat(500),
+    });
+    expect(merged.merged).toBe(true);
+    expect(merged.lead.comment!.length).toBeLessThanOrEqual(4000);
+  });
+});
+
 describe('insertLead', () => {
   it('assigns sequential ids starting at 1', async () => {
     const a = await store.insertLead(baseData);

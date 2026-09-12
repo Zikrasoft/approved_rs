@@ -1,0 +1,35 @@
+{
+  "framework": "astro",
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "dist",
+  "installCommand": "pnpm install",
+  "env": {
+    "SITE": "https://prizma.rs"
+  },
+  "redirects": [
+    {
+      "source": "/usluge/:path*",
+      "destination": "/ru/usluge/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/radovi/:path*",
+      "destination": "/ru/radovi/:path*",
+      "permanent": true
+    },
+    { "source": "/kontakt", "destination": "/ru/kontakt/", "permanent": true },
+    { "source": "/kontakt/", "destination": "/ru/kontakt/", "permanent": true },
+    { "source": "/hvala", "destination": "/ru/hvala/", "permanent": true },
+    { "source": "/hvala/", "destination": "/ru/hvala/", "permanent": true },
+    {
+      "source": "/privatnost",
+      "destination": "/ru/privatnost/",
+      "permanent": true
+    },
+    {
+      "source": "/privatnost/",
+      "destination": "/ru/privatnost/",
+      "permanent": true
+    }
+  ]
+}

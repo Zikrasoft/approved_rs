@@ -5,7 +5,8 @@
   "version": "0.0.1",
   "exports": {
     ".": "./src/index.ts",
-    "./storage/vercel-blob": "./src/storage/vercelBlob.ts"
+    "./storage/vercel-blob": "./src/storage/vercelBlob.ts",
+    "./contact-channel": "./src/contactChannel.ts"
   },
   "scripts": {
     "test": "vitest run --coverage",

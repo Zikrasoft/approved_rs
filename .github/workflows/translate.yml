@@ -26,6 +26,8 @@ on:
       - 'apps/approved-rs/src/content/autoservice-cases/**/index.md'
       - 'apps/approved-rs/src/content/detailing-cases/**/index.md'
       - 'apps/approved-rs/src/content/i18n/*.yaml'
+      - 'apps/detailing/src/content/works/**/index.md'
+      - 'apps/detailing/src/content/i18n/*.yaml'
   # Manual escape hatch — e.g. after adding a new locale, to backfill it
   # everywhere without needing a ru edit to trigger the push filter above.
   workflow_dispatch: {}
@@ -88,6 +90,20 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: node --experimental-strip-types scripts/translate-i18n.ts
 
+      - name: Translate detailing works
+        if: always() && steps.test.outcome == 'success'
+        working-directory: apps/detailing
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: node --experimental-strip-types scripts/translate-works.ts
+
+      - name: Translate detailing i18n sections
+        if: always() && steps.test.outcome == 'success'
+        working-directory: apps/detailing
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: node --experimental-strip-types scripts/translate-i18n.ts
+
       - name: Commit and push translations, if any
         # do not drop `steps.test.outcome == 'success'` — always() alone
         # ignores the pnpm test step's failure, see the comment above it
@@ -95,7 +111,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add apps/approved-rs/src/content
+          git add apps/approved-rs/src/content apps/detailing/src/content
           git diff --cached --quiet && exit 0
           git commit -m "Auto-translate content"
           # The concurrency group above only serializes runs of this

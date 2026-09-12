@@ -1,0 +1,46 @@
+---
+import Icon from './Icon.astro';
+interface Props {
+  href?: string;
+  label: string;
+  variant?: 'solid' | 'ghost';
+  openModal?: boolean;
+  class?: string;
+}
+
+const {
+  href,
+  label,
+  variant = 'solid',
+  openModal = false,
+  class: className = '',
+} = Astro.props;
+
+const base =
+  'group relative inline-flex items-center gap-3 rounded-full pl-6 pr-2 py-2 text-sm font-semibold tracking-tight transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98]';
+const skin =
+  variant === 'solid'
+    ? 'bg-chalk text-void hover:bg-champagne'
+    : 'border border-line-strong text-chalk hover:border-champagne hover:text-champagne';
+const knob =
+  variant === 'solid'
+    ? 'bg-void/10 text-void'
+    : 'bg-white/5 text-current group-hover:bg-champagne/15';
+
+const Tag = href ? 'a' : 'button';
+---
+
+<Tag
+  href={href}
+  type={href ? undefined : 'button'}
+  class={`${base} ${skin} ${className}`}
+  data-open-lead-modal={openModal ? '' : undefined}
+>
+  <span>{label}</span>
+  <span
+    class={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5 group-hover:-translate-y-px group-hover:scale-105 ${knob}`}
+    aria-hidden="true"
+  >
+    <Icon name="arrow" />
+  </span>
+</Tag>

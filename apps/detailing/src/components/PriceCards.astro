@@ -1,0 +1,44 @@
+---
+import Icon from './Icon.astro';
+import Cta from './Cta.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+
+interface Props {
+  plans: { name: string; price: string; unit: string; features: string[] }[];
+  note: string;
+}
+const { plans, note } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+---
+
+<div class="mt-14 grid gap-4 lg:grid-cols-3">
+  {
+    plans.map((plan, i) => (
+      <div class="shell" data-reveal data-reveal-delay={i * 90}>
+        <div class="core flex h-full flex-col gap-7 p-7 sm:p-8">
+          <div class="flex flex-col gap-3">
+            <h3 class="text-lg font-display tracking-tight">{plan.name}</h3>
+            <span class="font-display text-3xl tracking-tight text-champagne">
+              {plan.price}
+            </span>
+            <span class="text-xs text-mute-2">{plan.unit}</span>
+          </div>
+          <div class="hairline" />
+          <ul class="flex flex-1 flex-col gap-3">
+            {plan.features.map((feature) => (
+              <li class="flex gap-3 text-sm leading-relaxed text-mute">
+                <Icon name="check" class="mt-1 shrink-0 text-champagne-dim" />
+                {feature}
+              </li>
+            ))}
+          </ul>
+          <Cta label={site.header.cta} openModal variant="ghost" />
+        </div>
+      </div>
+    ))
+  }
+</div>
+
+<p class="mt-6 max-w-2xl text-xs leading-relaxed text-mute-2">{note}</p>

@@ -1,0 +1,108 @@
+---
+import { getCollection } from 'astro:content';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import WorkGrid from '@/components/WorkGrid.astro';
+import EmptyState from '@/components/EmptyState.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getPagesContent } from '@/i18n/content/pages';
+import { getServicesContent } from '@/i18n/content/services';
+import { getSiteContent } from '@/i18n/content/site';
+import { PathBuilder, localePaths } from '@/utils/paths';
+import { SERVICE_SLUGS } from '@/utils/services';
+import { publishedWorks } from '@/utils/works';
+
+export function getStaticPaths() {
+  return localePaths();
+}
+
+const locale = localeFrom(Astro.url.pathname);
+const pages = getPagesContent(locale);
+const services = getServicesContent(locale);
+const site = getSiteContent(locale);
+const works = publishedWorks(await getCollection('works'));
+
+const usedSlugs = SERVICE_SLUGS.filter((slug) =>
+  works.some((w) => w.data.servicesApplied.includes(slug)),
+);
+---
+
+<Shell title={pages.works.metaTitle} description={pages.works.metaDescription}>
+  <PageHero
+    eyebrow={pages.works.eyebrow}
+    heading={pages.works.heading}
+    lead={pages.works.lead}
+    crumbs={[{ href: PathBuilder.works(locale), label: site.nav.works }]}
+  />
+
+  {
+    works.length === 0 ? (
+      <section class="wrap">
+        <EmptyState />
+      </section>
+    ) : (
+      <section class="wrap mt-12">
+        {usedSlugs.length > 1 && (
+          <div
+            class="flex flex-wrap gap-2"
+            role="group"
+            aria-label={pages.works.eyebrow}
+            data-reveal
+          >
+            <button
+              type="button"
+              data-filter="all"
+              aria-pressed="true"
+              class="rounded-full border border-line-strong bg-white/10 px-4 py-2 text-xs tracking-tight text-chalk transition-colors duration-400"
+            >
+              {pages.works.filterAll}
+            </button>
+            {usedSlugs.map((slug) => (
+              <button
+                type="button"
+                data-filter={slug}
+                aria-pressed="false"
+                class="rounded-full border border-line px-4 py-2 text-xs tracking-tight text-mute transition-colors duration-400 hover:border-line-strong hover:text-chalk"
+              >
+                {services[slug].name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <WorkGrid works={works} eager={3} class="mt-10" />
+      </section>
+    )
+  }
+
+  <FinalCta
+    eyebrow={pages.works.eyebrow}
+    heading={pages.works.detailCtaHeading}
+    body={pages.works.detailCtaBody}
+  />
+</Shell>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+  const cards = document.querySelectorAll<HTMLElement>('[data-work]');
+
+  buttons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const wanted = button.dataset.filter ?? 'all';
+      buttons.forEach((other) => {
+        const active = other === button;
+        other.setAttribute('aria-pressed', String(active));
+        other.classList.toggle('bg-white/10', active);
+        other.classList.toggle('text-chalk', active);
+        other.classList.toggle('border-line-strong', active);
+        other.classList.toggle('text-mute', !active);
+        other.classList.toggle('border-line', !active);
+      });
+      cards.forEach((card) => {
+        const applied = (card.dataset.services ?? '').split(' ');
+        card.hidden = wanted !== 'all' && !applied.includes(wanted);
+      });
+    });
+  });
+</script>

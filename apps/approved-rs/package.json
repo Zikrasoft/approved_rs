@@ -24,6 +24,7 @@
     "@lucide/astro": "1.39.0",
     "@podbor/i18n": "workspace:*",
     "@podbor/lead-crm": "workspace:*",
+    "@podbor/site-kit": "workspace:*",
     "@vercel/blob": "2.8.0",
     "@vercel/functions": "3.9.5",
     "astro": "7.2.10",

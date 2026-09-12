@@ -1,0 +1,17 @@
+---
+import Cta from './Cta.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+---
+
+<div class="shell mt-14" data-reveal>
+  <div class="core flex flex-col items-start gap-6 p-10 sm:p-14">
+    <p class="max-w-xl text-base leading-relaxed text-mute">
+      {site.common.emptyWorks}
+    </p>
+    <Cta label={site.header.cta} openModal />
+  </div>
+</div>

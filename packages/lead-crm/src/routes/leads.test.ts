@@ -68,6 +68,40 @@ describe('createLeadsRoute', () => {
     expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
   });
 
+  it('prefers the locale the form carries over the cookie', async () => {
+    const ctx = makeCtx({ name: 'Ivan', contact: '@ivan', locale: 'en' }, 'ru');
+    await POST(ctx);
+    expect(ctx.redirect).toHaveBeenCalledWith('/en/thanks/', 302);
+    expect(notifyLead).toHaveBeenCalledWith(
+      expect.objectContaining({ locale: 'en' }),
+      '[leads]',
+    );
+  });
+
+  it('ignores a form locale outside the locale set', async () => {
+    const ctx = makeCtx({ name: 'Ivan', contact: '@ivan', locale: 'zh' }, 'sr');
+    await POST(ctx);
+    expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
+  });
+
+  it('truncates an oversized field instead of storing it whole', async () => {
+    await POST(
+      makeCtx({
+        name: 'a'.repeat(5000),
+        contact: 'b'.repeat(5000),
+        comment: 'c'.repeat(9000),
+        source_url: `/ru/${'d'.repeat(9000)}`,
+        visitor_id: 'e'.repeat(5000),
+      }),
+    );
+    const lead = notifyLead.mock.calls.at(-1)![0];
+    expect(lead.name).toHaveLength(200);
+    expect(lead.contact).toHaveLength(200);
+    expect(lead.comment).toHaveLength(2000);
+    expect(lead.source_url).toHaveLength(500);
+    expect(lead.visitorId).toHaveLength(200);
+  });
+
   it('returns 400 when name is empty', async () => {
     const res = await POST(makeCtx({ name: '', contact: '@ivan' }));
     expect(res.status).toBe(400);

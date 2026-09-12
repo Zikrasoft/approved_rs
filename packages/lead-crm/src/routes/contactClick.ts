@@ -3,6 +3,7 @@ import {
   type TrackedContactChannel,
 } from '../contactChannel.ts';
 import type { NotifyLead } from '../notifyLead.ts';
+import { MAX_FIELD_LENGTH, MAX_URL_LENGTH } from './leads.ts';
 
 const CHANNEL_COPY: Record<
   TrackedContactChannel,
@@ -47,6 +48,8 @@ export function createContactClickRoute({
     request: Request;
   }): Promise<Response> {
     const form = await request.formData();
+    const field = (key: string, max: number) =>
+      form.get(key)?.toString().trim().slice(0, max) || null;
     const rawChannel = form.get('channel')?.toString();
     const channel: TrackedContactChannel = isTrackedContactChannel(rawChannel)
       ? rawChannel
@@ -61,8 +64,8 @@ export function createContactClickRoute({
           service: copy.service,
           contactChannel: channel,
           comment: copy.comment,
-          source_url: form.get('source_url')?.toString() || null,
-          visitorId: form.get('visitor_id')?.toString() || null,
+          source_url: field('source_url', MAX_URL_LENGTH),
+          visitorId: field('visitor_id', MAX_FIELD_LENGTH),
           locale: defaultLocale,
           kind: 'call_click',
         },

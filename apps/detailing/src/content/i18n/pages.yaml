@@ -1,0 +1,181 @@
+works:
+  metaTitle: Наши работы — детейлинг в Белграде — PRIZMA
+  metaDescription: 'Реальные работы студии PRIZMA: оклейка плёнкой, смена цвета, полировка с керамикой, реставрация руля. Фотографии до и после по каждому автомобилю.'
+  eyebrow: Работы
+  heading: Машины, которые прошли через наш бокс
+  lead: Никаких стоковых кадров. Каждая карточка — автомобиль, который стоял у нас, с фотографиями до и после в одинаковом свете.
+  filterAll: Все
+  detailMetaSuffix: работа студии PRIZMA
+  detailCtaHeading: Хотите так же?
+  detailCtaBody: Приезжайте на осмотр или пришлите фото своей машины — посчитаем и назовём срок.
+contact:
+  metaTitle: Контакты студии детейлинга в Белграде — PRIZMA
+  metaDescription: Адрес, часы работы и телефон студии детейлинга PRIZMA в Белграде. Запись на осмотр по телефону, в WhatsApp, Viber или Telegram.
+  eyebrow: Контакты
+  heading: Приезжайте посмотреть бокс
+  lead: 'Мы не продаём по телефону. Лучший способ — заехать на пятнадцать минут: посмотрим машину вместе и скажем, что ей действительно нужно.'
+  addressLabel: Адрес
+  hoursLabel: Часы работы
+  phoneLabel: Телефон
+  mapHeading: Как нас найти
+  mapNote: Заезд со двора, ворота с вывеской. Парковка перед боксом.
+  arrivalHeading: Перед приездом
+  arrival:
+    - Машину мыть не нужно — мы всё равно моем сами перед работой.
+    - 'Если есть время, приезжайте днём: лак честнее видно при дневном свете.'
+    - Возьмите с собой ключи от всех замков, включая секретки на колёсах.
+thanks:
+  metaTitle: Заявка отправлена — PRIZMA
+  metaDescription: Спасибо за заявку. Мы свяжемся в рабочее время и договоримся об осмотре.
+  eyebrow: Готово
+  heading: Заявка у нас
+  body: Мы свяжемся с вами в рабочее время — обычно в течение часа. Если вопрос срочный, напишите в мессенджер, там отвечаем быстрее.
+  note: Если ответа нет дольше рабочего дня, значит сообщение потерялось. Напишите ещё раз, мы не обидимся.
+  cta: Вернуться на главную
+privacy:
+  metaTitle: Политика конфиденциальности — PRIZMA
+  metaDescription: Какие данные собирает сайт студии детейлинга PRIZMA, зачем и как долго они хранятся.
+  heading: Политика конфиденциальности
+  lastUpdated: Обновлено 12 сентября 2026
+  sections:
+    - title: 'Какие данные мы собираем'
+      text: Только то, что вы сами вводите в форму заявки — имя, контакт и комментарий, — а также адрес страницы, с которой заявка отправлена, и анонимный идентификатор браузера. Этот идентификатор случайный, хранится в вашем браузере и нужен лишь для того, чтобы мы не завели три карточки на один и тот же запрос.
+    - title: 'Зачем нам эти данные'
+      text: Чтобы связаться с вами по заявке и вести историю обращения. Мы не используем их для рассылок и не передаём третьим лицам в рекламных целях.
+    - title: 'Где они хранятся'
+      text: Заявки хранятся в зашифрованном хранилище нашего хостинг-провайдера и дублируются в наш внутренний рабочий чат. Доступ есть только у сотрудников студии.
+    - title: 'Сколько мы их храним'
+      text: До двух лет с момента последнего контакта. По вашему запросу удалим раньше.
+    - title: 'Куки'
+      text: Сайт использует одну техническую куку — выбранный язык интерфейса. Рекламных и аналитических кук, которые следят за вами на других сайтах, здесь нет.
+    - title: 'Ваши права'
+      text: Вы можете запросить копию своих данных, их исправление или удаление. Достаточно написать нам в любой из мессенджеров или позвонить.
+  contactTitle: Вопросы по данным
+  contactBefore: Напишите или позвоните нам, контакты есть на странице
+notFound:
+  metaTitle: Страница не найдена — PRIZMA
+  heading: Такой страницы нет
+  body: Возможно, ссылка устарела или в адресе опечатка. Загляните на главную или посмотрите работы.
+  cta: На главную
+translations:
+  sr:
+    works:
+      metaTitle: Naši radovi — detailing u Beogradu — PRIZMA
+      metaDescription: 'Stvarni radovi studija PRIZMA: folije, promena boje, poliranje sa keramikom, restauracija volana. Fotografije pre i posle za svaki automobil.'
+      eyebrow: Radovi
+      heading: Automobili koji su prošli kroz naš boks
+      lead: Bez stok fotografija. Svaka kartica je auto koji je stajao kod nas, sa snimcima pre i posle pri istom svetlu.
+      filterAll: Sve
+      detailMetaSuffix: rad studija PRIZMA
+      detailCtaHeading: Želite isto?
+      detailCtaBody: Dođite na pregled ili pošaljite fotografije svog automobila — izračunaćemo cenu i rok.
+    contact:
+      metaTitle: Kontakt detailing studija u Beogradu — PRIZMA
+      metaDescription: Adresa, radno vreme i telefon detailing studija PRIZMA u Beogradu. Zakazivanje pregleda telefonom, preko WhatsApp-a, Viber-a ili Telegram-a.
+      eyebrow: Kontakt
+      heading: Svratite da vidite boks
+      lead: 'Ne prodajemo preko telefona. Najbolje je da svratite na petnaest minuta: pogledaćemo auto zajedno i reći šta mu stvarno treba.'
+      addressLabel: Adresa
+      hoursLabel: Radno vreme
+      phoneLabel: Telefon
+      mapHeading: Kako do nas
+      mapNote: Ulaz iz dvorišta, kapija sa natpisom. Parking je ispred boksa.
+      arrivalHeading: Pre dolaska
+      arrival:
+        - Ne morate da perete auto — mi ionako peremo sami pre rada.
+        - 'Ako stignete, dođite po danu: lak se najiskrenije vidi po dnevnom svetlu.'
+        - Ponesite ključeve za sve brave, uključujući i sigurnosne na felnama.
+    thanks:
+      metaTitle: Zahtev je poslat — PRIZMA
+      metaDescription: Hvala na zahtevu. Javićemo se u radno vreme i dogovoriti pregled.
+      eyebrow: Gotovo
+      heading: Zahtev je kod nas
+      body: Javićemo vam se u radno vreme — obično u roku od sat vremena. Ako je hitno, pišite nam preko poruka, tamo odgovaramo brže.
+      note: Ako odgovora nema duže od jednog radnog dana, znači da se poruka izgubila. Pišite ponovo, nećemo se naljutiti.
+      cta: Nazad na početnu
+    privacy:
+      metaTitle: Politika privatnosti — PRIZMA
+      metaDescription: Koje podatke prikuplja sajt detailing studija PRIZMA, zašto i koliko dugo se čuvaju.
+      heading: Politika privatnosti
+      lastUpdated: Ažurirano 12. septembra 2026.
+      sections:
+        - title: 'Koje podatke prikupljamo'
+          text: Samo ono što sami unesete u formu — ime, kontakt i komentar — kao i adresu stranice sa koje je zahtev poslat i anoniman identifikator pregledača. Taj identifikator je nasumičan, čuva se u vašem pregledaču i služi samo da ne otvorimo tri kartice za isti upit.
+        - title: 'Zašto nam trebaju'
+          text: Da bismo vam se javili povodom zahteva i vodili istoriju kontakta. Ne koristimo ih za newsletter i ne prosleđujemo ih trećim licima u reklamne svrhe.
+        - title: 'Gde se čuvaju'
+          text: Zahtevi se čuvaju u šifrovanom skladištu našeg hosting provajdera i dupliraju u naš interni radni čet. Pristup imaju samo zaposleni u studiju.
+        - title: 'Koliko ih čuvamo'
+          text: Do dve godine od poslednjeg kontakta. Na vaš zahtev brišemo i ranije.
+        - title: 'Kolačići'
+          text: Sajt koristi jedan tehnički kolačić — izabrani jezik interfejsa. Reklamnih i analitičkih kolačića koji vas prate po drugim sajtovima ovde nema.
+        - title: 'Vaša prava'
+          text: Možete tražiti kopiju svojih podataka, njihovu ispravku ili brisanje. Dovoljno je da nam pišete preko bilo koje poruke ili pozovete.
+      contactTitle: Pitanja o podacima
+      contactBefore: Pišite nam ili nas pozovite, kontakti se nalaze na stranici
+    notFound:
+      metaTitle: Stranica nije pronađena — PRIZMA
+      heading: Ovakve stranice nema
+      body: Možda je link zastareo ili se potkrala greška u adresi. Svratite na početnu ili pogledajte radove.
+      cta: Na početnu
+  en:
+    works:
+      metaTitle: Our work — detailing in Belgrade — PRIZMA
+      metaDescription: 'Real jobs from PRIZMA studio: paint protection film, colour changes, polishing with ceramic, steering-wheel restoration. Before and after photos for every car.'
+      eyebrow: Our work
+      heading: Cars that came through the bay
+      lead: No stock photography. Every card is a car that stood in our bay, with before and after shots taken in the same light.
+      filterAll: All
+      detailMetaSuffix: a PRIZMA studio job
+      detailCtaHeading: Want the same?
+      detailCtaBody: Come by for an inspection or send photos of your car — we will quote it and give you a date.
+    contact:
+      metaTitle: Contact the detailing studio in Belgrade — PRIZMA
+      metaDescription: Address, opening hours and phone number for PRIZMA detailing studio in Belgrade. Book an inspection by phone, WhatsApp, Viber or Telegram.
+      eyebrow: Contact
+      heading: Come and see the bay
+      lead: 'We do not sell over the phone. The best way is to drop in for fifteen minutes: we look at the car together and tell you what it genuinely needs.'
+      addressLabel: Address
+      hoursLabel: Opening hours
+      phoneLabel: Phone
+      mapHeading: Finding us
+      mapNote: Entrance from the courtyard, the gate with our sign. Parking right in front of the bay.
+      arrivalHeading: Before you come
+      arrival:
+        - No need to wash the car — we wash it ourselves before any work anyway.
+        - 'If you can, come during the day: paint tells the truth in daylight.'
+        - Bring keys for every lock, wheel locking nuts included.
+    thanks:
+      metaTitle: Request sent — PRIZMA
+      metaDescription: Thank you for your request. We will get in touch during working hours and arrange an inspection.
+      eyebrow: Done
+      heading: We have your request
+      body: We will get back to you during working hours — usually within the hour. If it is urgent, message us instead, we answer faster there.
+      note: If you hear nothing for more than a working day, the message got lost. Send it again, we will not mind.
+      cta: Back to the homepage
+    privacy:
+      metaTitle: Privacy policy — PRIZMA
+      metaDescription: What the PRIZMA detailing studio website collects, why, and how long it is kept.
+      heading: Privacy policy
+      lastUpdated: Updated 12 September 2026
+      sections:
+        - title: 'What we collect'
+          text: Only what you type into the form — your name, a contact, and a comment — plus the address of the page the request came from and an anonymous browser identifier. That identifier is random, lives in your browser, and exists only so that we do not open three tickets for the same enquiry.
+        - title: 'Why we need it'
+          text: To get back to you about your request and keep a history of the conversation. We do not use it for newsletters and we do not pass it to third parties for advertising.
+        - title: 'Where it is stored'
+          text: Requests are kept in our hosting provider's encrypted storage and mirrored into our internal work chat. Only studio staff have access.
+        - title: 'How long we keep it'
+          text: Up to two years from the last contact. We will delete it sooner if you ask.
+        - title: 'Cookies'
+          text: 'The site uses one technical cookie: your chosen interface language. There are no advertising or analytics cookies following you across other sites.'
+        - title: 'Your rights'
+          text: You can ask for a copy of your data, a correction, or its deletion. Message us on any channel or give us a call.
+      contactTitle: Questions about your data
+      contactBefore: Write or call us, the details are on the page
+    notFound:
+      metaTitle: Page not found — PRIZMA
+      heading: There is no such page
+      body: The link may be out of date, or there is a typo in the address. Try the homepage, or have a look at our work.
+      cta: Go to the homepage
+translatedFrom: 19a7e15c9666f1d3
