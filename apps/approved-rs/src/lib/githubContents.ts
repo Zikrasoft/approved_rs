@@ -18,6 +18,10 @@ import { readdir } from 'node:fs/promises';
 import path from 'node:path';
 
 const REPO = 'Zikrasoft/approved_rs'; // keep in sync with keystatic.config.ts's storage.repo
+// This app lives in a subdirectory of the repo; GitHub's contents API paths
+// are repo-root relative, so every app-relative path needs this prefix.
+const APP_ROOT = 'apps/approved-rs/';
+const repoPath = (relPath: string) => `${APP_ROOT}${relPath}`;
 const BRANCH = 'main'; // keep in sync with vercel.json's git.deploymentEnabled
 const API = 'https://api.github.com';
 
@@ -64,7 +68,7 @@ export async function listGithubDir(
   try {
     const entries = (await ghFetch(
       token,
-      `/repos/${REPO}/contents/${dirPath}?ref=${BRANCH}`,
+      `/repos/${REPO}/contents/${repoPath(dirPath)}?ref=${BRANCH}`,
     )) as { name: string }[];
     return entries.map((e) => e.name);
   } catch (err) {
@@ -104,7 +108,7 @@ export async function getGithubFileBuffer(
 ): Promise<Buffer> {
   const data = (await ghFetch(
     token,
-    `/repos/${REPO}/contents/${filePath}?ref=${BRANCH}`,
+    `/repos/${REPO}/contents/${repoPath(filePath)}?ref=${BRANCH}`,
   )) as { content: string };
   return Buffer.from(data.content, 'base64');
 }
@@ -144,7 +148,12 @@ export async function commitGalleryPhotos(
         method: 'POST',
         body: JSON.stringify({ content: photo.base64, encoding: 'base64' }),
       })) as { sha: string };
-      return { path: photo.path, mode: '100644', type: 'blob', sha: blob.sha };
+      return {
+        path: repoPath(photo.path),
+        mode: '100644',
+        type: 'blob',
+        sha: blob.sha,
+      };
     }),
   );
 
@@ -155,7 +164,7 @@ export async function commitGalleryPhotos(
       tree: [
         ...photoEntries,
         {
-          path: opts.indexPath,
+          path: repoPath(opts.indexPath),
           mode: '100644',
           type: 'blob',
           content: opts.indexContent,
