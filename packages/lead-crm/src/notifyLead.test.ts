@@ -17,6 +17,7 @@ const realStore = createLeadStore({
   schema: createLeadSchema({
     locales: ['ru', 'en', 'sr', 'es', 'de'],
     defaultCommissionPercent: 10,
+    defaultBrand: 'Test',
   }),
 });
 
@@ -28,9 +29,10 @@ const store = {
 
 const notifier = { sendLeadNotification, refreshLeadCard };
 
-const notifyLead = createNotifyLead({ store, notifier });
+const notifyLead = createNotifyLead({ store, notifier, brand: 'Test' });
 
 const baseData: LeadInput = {
+  brand: 'Test',
   name: 'Иван',
   contact: '@ivan',
   service: 'vehicle-sourcing',

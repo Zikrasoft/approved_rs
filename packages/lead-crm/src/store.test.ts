@@ -11,6 +11,7 @@ let storage: MemoryStorage;
 let store: LeadStore;
 
 const baseData: LeadInput = {
+  brand: 'Test',
   name: 'Иван',
   contact: '@ivan',
   service: 'vehicle-sourcing',
@@ -63,6 +64,7 @@ beforeEach(() => {
     schema: createLeadSchema({
       locales: ['ru', 'en', 'sr', 'es', 'de'],
       defaultCommissionPercent: 10,
+      defaultBrand: 'Test',
     }),
   });
 });
@@ -89,6 +91,7 @@ describe('insertLead', () => {
 
 describe('insertOrMergeLead', () => {
   const clickData = (channel: string, visitorId = 'visitor-1'): LeadInput => ({
+    brand: 'Test',
     name: '',
     contact: '—',
     service: `Клик ${channel} с сайта`,
@@ -124,6 +127,7 @@ describe('insertOrMergeLead', () => {
       clickData('telegram'),
     );
     const { lead, merged } = await store.insertOrMergeLead({
+      brand: 'Test',
       name: 'Иван',
       contact: '@ivan',
       service: 'vehicle-sourcing',
@@ -143,6 +147,17 @@ describe('insertOrMergeLead', () => {
     const { merged } = await store.insertOrMergeLead(
       clickData('telegram', 'visitor-2'),
     );
+    expect(merged).toBe(false);
+    expect(await store.readLeads()).toHaveLength(2);
+  });
+
+  it('does not merge across brands — one store, three businesses, separate leads', async () => {
+    await store.insertOrMergeLead(clickData('telegram'));
+    const { merged } = await store.insertOrMergeLead({
+      ...clickData('telegram'),
+      brand: 'PRIZMA',
+    });
+
     expect(merged).toBe(false);
     expect(await store.readLeads()).toHaveLength(2);
   });
@@ -816,6 +831,7 @@ describe('updateLeads — failures that are not write conflicts', () => {
       schema: createLeadSchema({
         locales: ['ru'],
         defaultCommissionPercent: 10,
+        defaultBrand: 'Test',
       }),
     });
 
@@ -858,6 +874,7 @@ describe('per-business store defaults', () => {
       schema: createLeadSchema({
         locales: ['ru'],
         defaultCommissionPercent: 50,
+        defaultBrand: 'Test',
       }),
     });
 

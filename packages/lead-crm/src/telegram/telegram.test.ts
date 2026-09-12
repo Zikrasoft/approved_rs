@@ -68,6 +68,7 @@ const {
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
   return {
     id: 42,
+    brand: 'Approved.rs',
     name: 'Иван',
     contact: '@ivan',
     service: 'vehicle-sourcing',
@@ -586,7 +587,7 @@ describe('buildSearchResults', () => {
       }),
     ]);
     expect(reply_markup.inline_keyboard).toEqual([
-      [{ text: '🔵 #5 Пётр — @petr', callback_data: 'open:5' }],
+      [{ text: '🔵 #5 Approved.rs Пётр — @petr', callback_data: 'open:5' }],
     ]);
   });
 
@@ -595,7 +596,7 @@ describe('buildSearchResults', () => {
       makeLead({ id: 5, name: 'Пётр', contact: '@petr', archived: true }),
     ]);
     expect(reply_markup.inline_keyboard[0][0].text).toBe(
-      '🗄 🆕 #5 Пётр — @petr',
+      '🗄 🆕 #5 Approved.rs Пётр — @petr',
     );
   });
 
@@ -1036,5 +1037,65 @@ describe('per-business formatter config', () => {
     expect(detailingFormatter.formatTeaser(makeLead())).toContain(
       'Оклейка плёнкой',
     );
+  });
+});
+
+describe('brand attribution — one bot, one chat, several businesses', () => {
+  it('names the brand on the lead card, so the owner knows which business the lead is for', () => {
+    const text = buildLeadDetail(makeLead({ brand: 'PRIZMA' }), 'owner').text;
+    expect(text).toContain('🏷 PRIZMA');
+  });
+
+  it('escapes a brand name containing HTML rather than injecting it into the card', () => {
+    const text = buildLeadDetail(
+      makeLead({ brand: '<b>oops</b>' }),
+      'owner',
+    ).text;
+    expect(text).toContain('&lt;b&gt;oops&lt;/b&gt;');
+    expect(text).not.toContain('<b>oops</b>');
+  });
+
+  it('names the brand on every triage list row', () => {
+    const { reply_markup } = buildLeadList(
+      [makeLead({ id: 3, name: 'Petar', brand: 'AutoHub' })],
+      'new',
+    );
+    expect(reply_markup.inline_keyboard[0][0].text).toContain('AutoHub');
+  });
+
+  it('names the brand on every deal line', () => {
+    const text = formatDealsList([
+      makeLead({ status: 'won', dealAmount: 1000, brand: 'PRIZMA' }),
+    ]);
+    expect(text).toContain('PRIZMA');
+  });
+
+  it('breaks the stats down per brand once more than one business has leads', () => {
+    const text = buildStats(
+      [
+        makeLead({ id: 1, brand: 'Approved.rs' }),
+        makeLead({ id: 2, brand: 'PRIZMA' }),
+        makeLead({ id: 3, brand: 'PRIZMA' }),
+      ],
+      'owner',
+    );
+    expect(text).toContain('По брендам: Approved.rs — 1 · PRIZMA — 2');
+  });
+
+  it('omits the per-brand breakdown for a single-business store', () => {
+    const text = buildStats([makeLead({ brand: 'Approved.rs' })], 'owner');
+    expect(text).not.toContain('По брендам');
+  });
+
+  it('counts only active leads in the per-brand breakdown', () => {
+    const text = buildStats(
+      [
+        makeLead({ id: 1, brand: 'Approved.rs' }),
+        makeLead({ id: 2, brand: 'PRIZMA' }),
+        makeLead({ id: 3, brand: 'PRIZMA', archived: true }),
+      ],
+      'owner',
+    );
+    expect(text).toContain('По брендам: Approved.rs — 1 · PRIZMA — 1');
   });
 });

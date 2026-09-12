@@ -196,6 +196,7 @@ export function createLeadStore({ storage, schema }: LeadStoreOptions) {
           ? leads.find(
               (l) =>
                 l.visitorId === data.visitorId &&
+                l.brand === data.brand &&
                 l.status === 'new' &&
                 !l.archived &&
                 now - new Date(l.createdAt).getTime() < VISITOR_MERGE_WINDOW_MS,
