@@ -14,7 +14,9 @@ const pages = getPagesContent(locale);
   description={pages.notFound.body}
   noindex
 >
-  <section class="wrap flex min-h-[60vh] flex-col justify-center gap-4 py-16">
+  <section
+    class="wrap flex min-h-[60vh] flex-col justify-center gap-4 py-band md:py-band-lg"
+  >
     <span class="spec text-5xl font-semibold text-line-strong">404</span>
     <h1 class="text-hero">{pages.notFound.heading}</h1>
     <p class="max-w-xl text-base leading-relaxed text-muted">

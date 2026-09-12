@@ -21,6 +21,12 @@
   --text-hero: clamp(2rem, 4.6vw, 3.5rem);
   --text-section: clamp(1.625rem, 3vw, 2.375rem);
   --text-block: clamp(1.25rem, 1.9vw, 1.5rem);
+
+  /* One named vertical rhythm for content bands, so a section is never
+     py-10 on one page and py-14 on the next. Hero and footer keep their
+     own spacing on purpose. */
+  --spacing-band: 3.5rem;
+  --spacing-band-lg: 5rem;
 }
 
 @layer base {

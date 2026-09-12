@@ -28,7 +28,7 @@ const works = publishedWorks(await getCollection('works'));
     crumbs={[{ href: PathBuilder.works(locale), label: site.nav.works }]}
   />
 
-  <section class="wrap py-12">
+  <section class="wrap py-band md:py-band-lg">
     {
       works.length === 0 ? (
         <p class="card p-6 text-base text-muted">{site.common.emptyWorks}</p>

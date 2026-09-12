@@ -41,7 +41,9 @@ const faqSchema = {
   jsonLd={[faqSchema]}
 >
   <section class="border-b border-line bg-card">
-    <div class="wrap grid gap-10 py-12 lg:grid-cols-[1.2fr_1fr] lg:py-16">
+    <div
+      class="wrap grid gap-10 py-band md:py-band-lg lg:grid-cols-[1.2fr_1fr]"
+    >
       <div class="flex flex-col gap-5">
         <span class="eyebrow">{home.hero.eyebrow}</span>
         <h1 class="text-hero max-w-2xl">{home.hero.heading}</h1>
@@ -86,7 +88,7 @@ const faqSchema = {
     </div>
   </section>
 
-  <section id="services" class="wrap scroll-mt-20 py-14">
+  <section id="services" class="wrap scroll-mt-20 py-band md:py-band-lg">
     <SectionHead
       eyebrow={home.servicesHead.eyebrow}
       heading={home.servicesHead.heading}
@@ -96,7 +98,7 @@ const faqSchema = {
   </section>
 
   <section class="border-y border-line bg-card">
-    <div class="wrap py-14">
+    <div class="wrap py-band md:py-band-lg">
       <SectionHead
         eyebrow={home.why.eyebrow}
         heading={home.why.heading}
@@ -118,7 +120,7 @@ const faqSchema = {
     </div>
   </section>
 
-  <section id="process" class="wrap scroll-mt-20 py-14">
+  <section id="process" class="wrap scroll-mt-20 py-band md:py-band-lg">
     <SectionHead
       eyebrow={home.process.eyebrow}
       heading={home.process.heading}
@@ -139,7 +141,7 @@ const faqSchema = {
     </ol>
   </section>
 
-  <section class="wrap pb-14">
+  <section class="wrap pb-band md:pb-band-lg">
     <div class="card grid gap-6 p-6 lg:grid-cols-2 lg:p-8">
       <div class="flex flex-col gap-3">
         <span class="eyebrow">{home.shopTeaser.eyebrow}</span>
@@ -181,7 +183,7 @@ const faqSchema = {
   {
     latestWorks.length > 0 && (
       <section class="border-t border-line bg-card">
-        <div class="wrap py-14">
+        <div class="wrap py-band md:py-band-lg">
           <div class="flex flex-wrap items-end justify-between gap-4">
             <SectionHead
               eyebrow={pages.works.eyebrow}
@@ -199,7 +201,7 @@ const faqSchema = {
   }
 
   <section class="border-t border-line bg-card">
-    <div class="wrap py-14">
+    <div class="wrap py-band md:py-band-lg">
       <SectionHead eyebrow="FAQ" heading={site.common.faqHeading} />
       <Faq items={home.faq} />
     </div>
