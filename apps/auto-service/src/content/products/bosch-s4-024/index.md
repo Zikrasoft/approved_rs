@@ -25,6 +25,14 @@ fitment:
     yearFrom: 2014
     yearTo: 2019
 published: true
+translations:
+  sr:
+    title: Bosch S4 024
+    body: Obrnuta polarnost za japanske modele. Klemna neće dosegnuti ako uzmete evropsku verziju — to je najčešća greška prilikom samostalne kupovine.
+  en:
+    title: Bosch S4 024
+    body: This battery features reversed polarity for Japanese models. The terminal won't reach if you opt for the European version, which is a common mistake many make when purchasing on their own.
+translatedFrom: c2be4bdeaa22ef6d
 ---
 
 Обратная полярность под японские модели. Клемма не дотянется, если взять европейскую версию — это самая частая ошибка при самостоятельной покупке.
