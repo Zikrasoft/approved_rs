@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+import heroImage from '@/content/works/mersedes-benz-gls/image.jpg';
 import Cta from './Cta.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getHomeContent } from '@/i18n/content/home';
@@ -16,14 +18,18 @@ const site = getSiteContent(locale);
     aria-hidden="true"
     data-hero-bg
   >
+    <Image
+      src={heroImage}
+      alt=""
+      widths={[640, 1024, 1600]}
+      sizes="100vw"
+      loading="eager"
+      fetchpriority="high"
+      class="h-full w-full object-cover opacity-40"
+    />
     <div
-      class="absolute -right-[22%] top-[-18%] h-[42rem] w-[42rem] rounded-full opacity-[0.22] blur-[120px]"
-      style="background:radial-gradient(circle at 30% 30%, #9B8CFF, transparent 62%)"
-    >
-    </div>
-    <div
-      class="absolute -left-[18%] top-[18%] h-[34rem] w-[34rem] rounded-full opacity-[0.18] blur-[130px]"
-      style="background:radial-gradient(circle at 60% 40%, #6FD3E8, transparent 60%)"
+      class="absolute inset-0"
+      style="background:linear-gradient(180deg, rgba(6,6,8,0.62) 0%, rgba(6,6,8,0.86) 55%, #060608 100%)"
     >
     </div>
     <div
@@ -36,34 +42,30 @@ const site = getSiteContent(locale);
   <div class="wrap">
     <div class="grid items-end gap-14 lg:grid-cols-[1.35fr_1fr]">
       <div class="flex flex-col gap-8">
-        <span class="eyebrow" data-reveal>{hero.eyebrow}</span>
+        <span class="eyebrow rise">{hero.eyebrow}</span>
 
         <h1 class="text-mega">
-          <span class="block" data-reveal data-reveal-delay="60"
+          <span class="rise block" style="--rise-delay:60ms"
             >{hero.titleTop}</span
           >
-          <span
-            class="text-iridescent block"
-            data-reveal
-            data-reveal-delay="140">{hero.titleAccent}</span
+          <span class="text-iridescent rise block" style="--rise-delay:120ms"
+            >{hero.titleAccent}</span
           >
-          <span class="block" data-reveal data-reveal-delay="220"
+          <span class="rise block" style="--rise-delay:180ms"
             >{hero.titleBottom}</span
           >
         </h1>
 
         <p
-          class="max-w-xl text-base leading-relaxed text-mute sm:text-lg"
-          data-reveal
-          data-reveal-delay="300"
+          class="rise max-w-xl text-base leading-relaxed text-mute sm:text-lg"
+          style="--rise-delay:240ms"
         >
           {hero.lead}
         </p>
 
         <div
-          class="flex flex-wrap items-center gap-3"
-          data-reveal
-          data-reveal-delay="360"
+          class="rise flex flex-wrap items-center gap-3"
+          style="--rise-delay:300ms"
         >
           <Cta label={hero.ctaPrimary} openModal />
           <Cta
@@ -74,7 +76,7 @@ const site = getSiteContent(locale);
         </div>
       </div>
 
-      <div class="shell" data-reveal data-reveal-delay="420">
+      <div class="shell rise" style="--rise-delay:360ms">
         <div class="core flex flex-col divide-y divide-line">
           {
             hero.stats.map((stat) => (
@@ -93,9 +95,8 @@ const site = getSiteContent(locale);
     </div>
 
     <div
-      class="mt-20 flex items-center gap-3 text-[0.6875rem] uppercase tracking-[0.22em] text-mute-2"
-      data-reveal
-      data-reveal-delay="500"
+      class="rise mt-20 flex items-center gap-3 text-[0.6875rem] uppercase tracking-[0.22em] text-mute-2"
+      style="--rise-delay:420ms"
     >
       <span
         class="block h-8 w-px bg-gradient-to-b from-transparent via-line-strong to-transparent"

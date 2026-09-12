@@ -136,6 +136,28 @@
 }
 
 @layer components {
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(1.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .rise {
+    animation: rise 600ms var(--ease-expo) both;
+    animation-delay: var(--rise-delay, 0ms);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rise {
+      animation: none;
+    }
+  }
+
   [data-reveal] {
     opacity: 0;
     transform: translateY(2.5rem);
