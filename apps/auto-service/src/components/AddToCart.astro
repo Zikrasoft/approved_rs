@@ -1,0 +1,32 @@
+---
+
+---
+
+<script>
+  import { readCart, writeCart, addLine } from '@/utils/cart';
+
+  document.addEventListener('click', (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>(
+      '[data-add-to-cart]',
+    );
+    if (!button) return;
+
+    const slug = button.dataset.slug;
+    const title = button.dataset.title;
+    const price = Number(button.dataset.price);
+    if (!slug || !title || !Number.isFinite(price)) return;
+
+    writeCart(addLine(readCart(), { slug, title, price }));
+
+    const label = button.dataset.addedLabel;
+    if (!label) return;
+    button.dataset.idleLabel ??= button.textContent ?? '';
+    window.clearTimeout(Number(button.dataset.resetTimer));
+    button.textContent = label;
+    button.dataset.resetTimer = String(
+      window.setTimeout(() => {
+        button.textContent = button.dataset.idleLabel ?? '';
+      }, 1600),
+    );
+  });
+</script>

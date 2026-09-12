@@ -9,6 +9,7 @@ import WorkGrid from '@/components/WorkGrid.astro';
 import SectionHead from '@/components/SectionHead.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/currentLocale';
+import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { getPagesContent } from '@/i18n/content/pages';
 import { getServicesContent } from '@/i18n/content/services';
 import { getSiteContent } from '@/i18n/content/site';
@@ -20,19 +21,22 @@ import { SITE_URL } from '@/utils/constants';
 export async function getStaticPaths() {
   const works = publishedWorks(await getCollection('works'));
   return withLocales(
-    works.map((work) => ({ params: { slug: work.id }, props: { work } })),
+    works.map((work) => ({
+      params: { slug: work.id },
+      props: {
+        work,
+        related: works.filter((other) => other.id !== work.id).slice(0, 3),
+      },
+    })),
   );
 }
 
-const { work } = Astro.props;
+const { work, related } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const pages = getPagesContent(locale);
 const services = getServicesContent(locale);
 const site = getSiteContent(locale);
 const { title, body } = localizedWork(work, locale);
-
-const all = publishedWorks(await getCollection('works'));
-const related = all.filter((w) => w.id !== work.id).slice(0, 3);
 
 const articleSchema = {
   '@context': 'https://schema.org',
@@ -44,7 +48,7 @@ const articleSchema = {
   mainEntityOfPage: new URL(PathBuilder.work(locale, work.id), SITE_URL).href,
 };
 
-const dateLabel = new Intl.DateTimeFormat(locale, {
+const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
   year: 'numeric',
   month: 'long',
 }).format(work.data.date);

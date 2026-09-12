@@ -1,0 +1,181 @@
+works:
+  metaTitle: Примеры работ автосервиса в Белграде — AUTOHUB
+  metaDescription: Реальные работы сервиса AUTOHUB — что было, что сделали и сколько это заняло. Диагностика, ходовая, двигатель, кузов после ДТП.
+  eyebrow: Примеры работ
+  heading: Что мы делали и чем это закончилось
+  lead: 'Здесь не витрина, а разбор конкретных случаев: с чем приехала машина, что нашли на диагностике, что сделали и сколько времени это заняло.'
+  detailMetaSuffix: работа сервиса AUTOHUB
+  detailCtaHeading: Похожая проблема?
+  detailCtaBody: Опишите симптомы — скажем, на что это похоже и сколько будет стоить диагностика.
+contact:
+  metaTitle: Контакты автосервиса в Белграде — AUTOHUB
+  metaDescription: Адрес, часы работы и телефон автосервиса AUTOHUB в Белграде. Запись на диагностику и ремонт по телефону, в WhatsApp, Viber или Telegram.
+  eyebrow: Контакты
+  heading: Приезжайте — посмотрим машину вместе
+  lead: Первичный осмотр бесплатный и занимает минут пятнадцать. Этого обычно хватает, чтобы понять, что с машиной и сколько будет стоить ремонт.
+  addressLabel: Адрес
+  hoursLabel: Часы работы
+  mapHeading: Как доехать
+  mapNote: Въезд с Zrenjaninski put, синие ворота с вывеской. Есть парковка для клиентов.
+  arrivalHeading: Что взять с собой
+  arrival:
+    - Сервисную книжку, если она есть — это экономит время на диагностике.
+    - Ключ от секреток на колёсах, если ставили.
+    - Если проблема плавающая — приезжайте на «холодной» машине, так её проще поймать.
+thanks:
+  metaTitle: Заявка принята — AUTOHUB
+  metaDescription: Спасибо за заявку. Перезвоним в рабочее время и согласуем время визита.
+  eyebrow: Готово
+  heading: Заявка у нас
+  body: Перезвоним в рабочее время — обычно в течение часа. Если машина не на ходу, напишите об этом в мессенджер, подскажем по эвакуатору.
+  note: Если мы не дозвонились дважды, то напишем в мессенджер — не теряйтесь.
+  cta: Вернуться на главную
+privacy:
+  metaTitle: Политика конфиденциальности — AUTOHUB
+  metaDescription: Какие данные собирает сайт автосервиса AUTOHUB, зачем и как долго они хранятся.
+  heading: Политика конфиденциальности
+  lastUpdated: Обновлено 12 сентября 2026
+  sections:
+    - title: Какие данные мы собираем
+      text: Только то, что вы сами вводите в форму — имя, телефон, описание проблемы и данные автомобиля, — а также адрес страницы, с которой отправлена заявка, и анонимный идентификатор браузера. Идентификатор случайный, хранится в вашем браузере и нужен, чтобы одна и та же заявка не превратилась в три карточки.
+    - title: Зачем нам эти данные
+      text: Чтобы перезвонить по заявке, согласовать время и вести историю обслуживания вашей машины. Мы не используем их для рассылок и не передаём третьим лицам в рекламных целях.
+    - title: Где они хранятся
+      text: В зашифрованном хранилище нашего хостинг-провайдера и в закрытом рабочем чате сервиса. Доступ есть только у сотрудников.
+    - title: Сколько мы их храним
+      text: До трёх лет с момента последнего визита — сервисная история помогает при следующем ремонте. По вашему запросу удалим раньше.
+    - title: Заказы запчастей
+      text: Состав заказа из корзины уходит вместе с заявкой, чтобы мы понимали, что готовить. Платёжных данных мы не собираем — оплата происходит в сервисе.
+    - title: Куки
+      text: Сайт использует две технические куки — выбранный язык и содержимое корзины. Рекламных и аналитических кук здесь нет.
+    - title: Ваши права
+      text: Вы можете запросить копию своих данных, их исправление или удаление. Достаточно позвонить или написать нам в любой мессенджер.
+  contactTitle: Вопросы по данным
+  contactBefore: Позвоните или напишите, контакты есть на странице
+notFound:
+  metaTitle: Страница не найдена — AUTOHUB
+  heading: Такой страницы нет
+  body: Возможно, ссылка устарела или в адресе опечатка. Посмотрите услуги или напишите нам — подскажем.
+  cta: На главную
+translations:
+  sr:
+    works:
+      metaTitle: Primeri radova auto servisa u Beogradu — AUTOHUB
+      metaDescription: Stvarni radovi servisa AUTOHUB — šta je bilo, šta smo uradili i koliko je trajalo. Dijagnostika, trap, motor, limarija posle udesa.
+      eyebrow: Primeri radova
+      heading: Šta smo radili i kako se to završilo
+      lead: 'Ovo nije izlog nego razrada konkretnih slučajeva: sa čim je auto došao, šta smo našli na dijagnostici, šta smo uradili i koliko je to trajalo.'
+      detailMetaSuffix: rad servisa AUTOHUB
+      detailCtaHeading: Sličan problem?
+      detailCtaBody: Opišite simptome — reći ćemo na šta liči i koliko košta dijagnostika.
+    contact:
+      metaTitle: Kontakt auto servisa u Beogradu — AUTOHUB
+      metaDescription: Adresa, radno vreme i telefon auto servisa AUTOHUB u Beogradu. Zakazivanje dijagnostike i popravke telefonom, preko WhatsApp-a, Viber-a ili Telegram-a.
+      eyebrow: Kontakt
+      heading: Dođite — pogledaćemo auto zajedno
+      lead: Prvi pregled je besplatan i traje petnaestak minuta. To je obično dovoljno da se vidi šta je sa autom i koliko će popravka koštati.
+      addressLabel: Adresa
+      hoursLabel: Radno vreme
+      mapHeading: Kako do nas
+      mapNote: Ulaz sa Zrenjaninskog puta, plava kapija sa natpisom. Ima parking za mušterije.
+      arrivalHeading: Šta da ponesete
+      arrival:
+        - Servisnu knjižicu ako je imate — štedi vreme na dijagnostici.
+        - Ključ za sigurnosne šrafove na felnama, ako su ugrađeni.
+        - Ako je kvar povremen, dođite sa hladnim motorom — tako se lakše uhvati.
+    thanks:
+      metaTitle: Zahtev je primljen — AUTOHUB
+      metaDescription: Hvala na zahtevu. Pozvaćemo vas u radno vreme i dogovoriti termin.
+      eyebrow: Gotovo
+      heading: Zahtev je kod nas
+      body: Pozvaćemo vas u radno vreme — obično u roku od sat vremena. Ako auto nije u voznom stanju, napišite nam to u poruci, posavetovaćemo vas oko šlep službe.
+      note: Ako vas ne dobijemo iz dva pokušaja, pisaćemo vam poruku — nećete nam se izgubiti.
+      cta: Nazad na početnu
+    privacy:
+      metaTitle: Politika privatnosti — AUTOHUB
+      metaDescription: Koje podatke prikuplja sajt auto servisa AUTOHUB, zašto i koliko dugo se čuvaju.
+      heading: Politika privatnosti
+      lastUpdated: Ažurirano 12. septembra 2026.
+      sections:
+        - title: Koje podatke prikupljamo
+          text: Samo ono što sami unesete u formu — ime, telefon, opis kvara i podatke o automobilu — kao i adresu stranice sa koje je zahtev poslat i anoniman identifikator pregledača. Identifikator je nasumičan, čuva se u vašem pregledaču i služi da se isti zahtev ne pretvori u tri kartice.
+        - title: Zašto nam trebaju
+          text: Da vas pozovemo povodom zahteva, dogovorimo termin i vodimo istoriju održavanja vašeg auta. Ne koristimo ih za newsletter i ne prosleđujemo ih trećim licima u reklamne svrhe.
+        - title: Gde se čuvaju
+          text: U šifrovanom skladištu našeg hosting provajdera i u zatvorenom radnom četu servisa. Pristup imaju samo zaposleni.
+        - title: Koliko ih čuvamo
+          text: Do tri godine od poslednjeg dolaska — servisna istorija pomaže kod sledeće popravke. Na vaš zahtev brišemo i ranije.
+        - title: Porudžbine delova
+          text: Sadržaj korpe stiže zajedno sa zahtevom, da bismo znali šta da pripremimo. Podatke o plaćanju ne prikupljamo — plaća se u servisu.
+        - title: Kolačići
+          text: Sajt koristi dva tehnička kolačića — izabrani jezik i sadržaj korpe. Reklamnih i analitičkih kolačića ovde nema.
+        - title: Vaša prava
+          text: Možete tražiti kopiju svojih podataka, njihovu ispravku ili brisanje. Dovoljno je da nas pozovete ili napišete poruku.
+      contactTitle: Pitanja o podacima
+      contactBefore: Pozovite nas ili nam pišite, kontakti se nalaze na stranici
+    notFound:
+      metaTitle: Stranica nije pronađena — AUTOHUB
+      heading: Ovakve stranice nema
+      body: Možda je link zastareo ili se potkrala greška u adresi. Pogledajte usluge ili nam pišite — uputićemo vas.
+      cta: Na početnu
+  en:
+    works:
+      metaTitle: Recent jobs from the car service in Belgrade — AUTOHUB
+      metaDescription: Real jobs from AUTOHUB — what came in, what we did, and how long it took. Diagnostics, running gear, engines, accident repair.
+      eyebrow: Recent jobs
+      heading: What we worked on and how it turned out
+      lead: 'This is not a showroom but a walk-through of specific cases: what the car came in with, what diagnostics found, what we did, and how long it took.'
+      detailMetaSuffix: a job at AUTOHUB
+      detailCtaHeading: Similar problem?
+      detailCtaBody: Describe the symptoms and we will tell you what it sounds like and what diagnostics will cost.
+    contact:
+      metaTitle: Contact the car service in Belgrade — AUTOHUB
+      metaDescription: Address, opening hours and phone number for AUTOHUB car service in Belgrade. Book diagnostics or a repair by phone, WhatsApp, Viber or Telegram.
+      eyebrow: Contact
+      heading: Come by — we will look at the car together
+      lead: The first inspection is free and takes about fifteen minutes. That is usually enough to know what is wrong and what the repair will cost.
+      addressLabel: Address
+      hoursLabel: Opening hours
+      mapHeading: Getting here
+      mapNote: Entrance from Zrenjaninski put, the blue gate with our sign. Customer parking on site.
+      arrivalHeading: What to bring
+      arrival:
+        - The service book if you have one — it saves time on diagnostics.
+        - The key for your locking wheel nuts, if the car has them.
+        - If the fault is intermittent, come with a cold engine — it is easier to catch that way.
+    thanks:
+      metaTitle: Request received — AUTOHUB
+      metaDescription: Thank you for your request. We will call back during working hours and agree a time.
+      eyebrow: Done
+      heading: We have your request
+      body: We will call you back during working hours — usually within the hour. If the car is not driveable, say so in a message and we will advise on recovery.
+      note: If we cannot reach you after two attempts, we will send a message instead — you will not get lost.
+      cta: Back to the homepage
+    privacy:
+      metaTitle: Privacy policy — AUTOHUB
+      metaDescription: What the AUTOHUB car service website collects, why, and how long it is kept.
+      heading: Privacy policy
+      lastUpdated: Updated 12 September 2026
+      sections:
+        - title: What we collect
+          text: Only what you type into the form — your name, phone number, a description of the fault and the car's details — plus the address of the page the request came from and an anonymous browser identifier. That identifier is random, lives in your browser, and stops one enquiry turning into three tickets.
+        - title: Why we need it
+          text: To call you back, agree a time, and keep a service history for your car. We do not use it for newsletters and we do not pass it to third parties for advertising.
+        - title: Where it is stored
+          text: In our hosting provider's encrypted storage and in the workshop's private work chat. Only staff have access.
+        - title: How long we keep it
+          text: Up to three years from your last visit — service history helps with the next repair. We will delete it sooner if you ask.
+        - title: Parts orders
+          text: The contents of your basket travel with the request so we know what to prepare. We collect no payment details — you pay at the workshop.
+        - title: Cookies
+          text: The site uses two technical cookies — your chosen language and the contents of your basket. There are no advertising or analytics cookies.
+        - title: Your rights
+          text: You can ask for a copy of your data, a correction, or its deletion. Call us or send a message on any channel.
+      contactTitle: Questions about your data
+      contactBefore: Call or message us, the details are on the page
+    notFound:
+      metaTitle: Page not found — AUTOHUB
+      heading: There is no such page
+      body: The link may be out of date, or there is a typo in the address. Have a look at the services, or message us and we will point you the right way.
+      cta: Go to the homepage
+translatedFrom: 5ec123a641a3959f

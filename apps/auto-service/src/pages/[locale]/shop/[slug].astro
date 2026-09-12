@@ -1,0 +1,188 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Shell from '@/layouts/Shell.astro';
+import Icon from '@/components/Icon.astro';
+import PageHero from '@/components/PageHero.astro';
+import AddToCart from '@/components/AddToCart.astro';
+import ProductCard from '@/components/ProductCard.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getShopContent } from '@/i18n/content/shop';
+import { getSiteContent } from '@/i18n/content/site';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import {
+  formatDimensions,
+  localizedProduct,
+  publishedProducts,
+} from '@/utils/products';
+import { safeMarkdown } from '@podbor/site-kit';
+import { CURRENCY, CURRENCY_SYMBOL, SITE_URL } from '@/utils/constants';
+
+export async function getStaticPaths() {
+  const products = publishedProducts(await getCollection('products'));
+  return withLocales(
+    products.map((product) => ({
+      params: { slug: product.id },
+      props: {
+        product,
+        related: products
+          .filter((other) => other.id !== product.id)
+          .slice(0, 4),
+      },
+    })),
+  );
+}
+
+const { product, related } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const shop = getShopContent(locale);
+const site = getSiteContent(locale);
+const { title, body } = localizedProduct(product, locale);
+
+const productSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: title,
+  brand: { '@type': 'Brand', name: product.data.brand },
+  description: shop.metaDescription,
+  offers: {
+    '@type': 'Offer',
+    price: product.data.price,
+    priceCurrency: CURRENCY,
+    availability: product.data.inStock
+      ? 'https://schema.org/InStock'
+      : 'https://schema.org/PreOrder',
+    url: new URL(PathBuilder.product(locale, product.id), SITE_URL).href,
+  },
+};
+
+const specs = [
+  { label: shop.capacityLabel, value: `${product.data.capacityAh} Ah` },
+  { label: shop.crankingLabel, value: `${product.data.crankingA} A` },
+  {
+    label: shop.polarityLabel,
+    value:
+      product.data.polarity === 'left' ? shop.polarityLeft : shop.polarityRight,
+  },
+  {
+    label: shop.dimensionsLabel,
+    value: `${formatDimensions(product.data)} ${shop.dimensionsUnit}`,
+  },
+  {
+    label: shop.warrantyLabel,
+    value: `${product.data.warrantyMonths} ${shop.warrantyUnit}`,
+  },
+];
+---
+
+<Shell
+  title={`${title} — ${shop.productMetaSuffix} — AUTOHUB`}
+  description={`${title}. ${shop.metaDescription}`}
+  jsonLd={[productSchema]}
+>
+  <PageHero
+    eyebrow={product.data.brand}
+    heading={title}
+    crumbs={[
+      { href: PathBuilder.shop(locale), label: site.nav.shop },
+      { href: PathBuilder.product(locale, product.id), label: title },
+    ]}
+  />
+
+  <section class="wrap grid gap-8 py-10 lg:grid-cols-[1fr_1fr]">
+    <div class="card flex items-center justify-center bg-shade p-8">
+      <Image
+        src={product.data.image}
+        alt={title}
+        widths={[420, 800]}
+        sizes="(min-width: 1024px) 45vw, 100vw"
+        loading="eager"
+        class="max-h-80 w-auto object-contain"
+      />
+    </div>
+
+    <div class="flex flex-col gap-5">
+      <div class="flex items-center gap-3">
+        <span class="spec text-3xl font-semibold text-ink">
+          {product.data.price}
+          {CURRENCY_SYMBOL}
+        </span>
+        <span
+          class:list={[
+            'spec rounded px-2 py-1 text-xs',
+            product.data.inStock ? 'bg-go/10 text-go' : 'bg-shade text-muted',
+          ]}
+        >
+          {product.data.inStock ? shop.inStock : shop.onOrder}
+        </span>
+      </div>
+
+      <dl class="card divide-y divide-line">
+        {
+          specs.map((spec) => (
+            <div class="flex items-center justify-between gap-4 px-4 py-3">
+              <dt class="text-sm text-muted">{spec.label}</dt>
+              <dd class="spec text-sm text-ink">{spec.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <button
+        type="button"
+        class="btn btn-primary w-full sm:w-auto"
+        data-add-to-cart
+        data-slug={product.id}
+        data-title={title}
+        data-price={product.data.price}
+        data-added-label={shop.inCart}
+      >
+        <Icon name="cart" />
+        {shop.addToCart}
+      </button>
+
+      <p class="text-sm text-muted">{shop.installNote}</p>
+
+      {
+        product.data.fitment.length > 0 && (
+          <div class="flex flex-col gap-2">
+            <h2 class="text-sm font-semibold text-ink">{shop.fitsLabel}</h2>
+            <ul class="flex flex-wrap gap-2">
+              {product.data.fitment.map((entry) => (
+                <li class="spec rounded border border-line bg-card px-2.5 py-1 text-xs text-ink-2">
+                  {`${entry.make} ${entry.model} ${entry.yearFrom}–${entry.yearTo}`}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  {
+    body.trim() && (
+      <section class="wrap pb-10">
+        <div class="prose-shop" set:html={safeMarkdown(body)} />
+      </section>
+    )
+  }
+
+  {
+    related.length > 0 && (
+      <section class="wrap pb-14">
+        <SectionHead eyebrow={shop.eyebrow} heading={site.common.backToShop} />
+        <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {related.map((item) => (
+            <li>
+              <ProductCard product={item} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <AddToCart />
+</Shell>

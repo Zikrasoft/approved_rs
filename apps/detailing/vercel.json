@@ -17,10 +17,26 @@
       "destination": "/ru/works/:path*",
       "permanent": true
     },
-    { "source": "/contact", "destination": "/ru/contact/", "permanent": true },
-    { "source": "/contact/", "destination": "/ru/contact/", "permanent": true },
-    { "source": "/thanks", "destination": "/ru/thanks/", "permanent": true },
-    { "source": "/thanks/", "destination": "/ru/thanks/", "permanent": true },
+    {
+      "source": "/contact",
+      "destination": "/ru/contact/",
+      "permanent": true
+    },
+    {
+      "source": "/contact/",
+      "destination": "/ru/contact/",
+      "permanent": true
+    },
+    {
+      "source": "/thanks",
+      "destination": "/ru/thanks/",
+      "permanent": true
+    },
+    {
+      "source": "/thanks/",
+      "destination": "/ru/thanks/",
+      "permanent": true
+    },
     {
       "source": "/privacy",
       "destination": "/ru/privacy/",
@@ -30,6 +46,17 @@
       "source": "/privacy/",
       "destination": "/ru/privacy/",
       "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "frame-ancestors 'self'"
+        }
+      ]
     }
   ]
 }
