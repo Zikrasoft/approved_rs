@@ -227,7 +227,7 @@ export function createLeadStore({ storage, schema }: LeadStoreOptions) {
             : {}),
           comment: appendNote(
             existing.comment,
-            `Также пробовал: ${data.service}`,
+            data.comment?.trim() || `Также пробовал: ${data.service}`,
           ),
         };
         outcome = { lead: merged, merged: true };

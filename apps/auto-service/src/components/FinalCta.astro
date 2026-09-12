@@ -1,0 +1,25 @@
+---
+import LeadForm from './LeadForm.astro';
+import ContactChannels from './ContactChannels.astro';
+import type { ServiceSlug } from '@/utils/services';
+
+interface Props {
+  eyebrow: string;
+  heading: string;
+  body: string;
+  service?: ServiceSlug;
+}
+const { eyebrow, heading, body, service } = Astro.props;
+---
+
+<section id="lead" class="wrap mt-16">
+  <div class="card grid gap-8 p-6 lg:grid-cols-[1fr_1.1fr] lg:gap-12 lg:p-10">
+    <div class="flex flex-col gap-4">
+      <span class="eyebrow">{eyebrow}</span>
+      <h2 class="text-section">{heading}</h2>
+      <p class="max-w-md text-base leading-relaxed text-muted">{body}</p>
+      <ContactChannels class="mt-2" />
+    </div>
+    <LeadForm service={service} />
+  </div>
+</section>

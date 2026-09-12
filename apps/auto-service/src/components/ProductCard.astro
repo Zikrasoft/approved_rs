@@ -1,0 +1,83 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getShopContent } from '@/i18n/content/shop';
+import { PathBuilder } from '@/utils/paths';
+import { localizedProduct, type Product } from '@/utils/products';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
+
+interface Props {
+  product: Product;
+  eager?: boolean;
+}
+
+const { product, eager = false } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const shop = getShopContent(locale);
+const { title } = localizedProduct(product, locale);
+const href = PathBuilder.product(locale, product.id);
+---
+
+<article
+  class="card flex h-full flex-col overflow-hidden"
+  data-product
+  data-fitment={JSON.stringify(product.data.fitment)}
+>
+  <a href={href} class="block bg-shade">
+    <Image
+      src={product.data.image}
+      alt={title}
+      widths={[280, 520]}
+      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+      loading={eager ? 'eager' : 'lazy'}
+      class="aspect-[4/3] w-full object-contain p-5"
+    />
+  </a>
+
+  <div class="flex flex-1 flex-col gap-3 border-t border-line p-4">
+    <div class="flex items-start justify-between gap-3">
+      <a href={href} class="text-base font-semibold leading-snug text-ink">
+        {title}
+      </a>
+      <span
+        class:list={[
+          'spec shrink-0 rounded px-2 py-0.5 text-[0.6875rem]',
+          product.data.inStock ? 'bg-go/10 text-go' : 'bg-shade text-muted',
+        ]}
+      >
+        {product.data.inStock ? shop.inStock : shop.onOrder}
+      </span>
+    </div>
+
+    <dl class="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-muted">
+      <div class="flex justify-between gap-2">
+        <dt>{shop.capacityLabel}</dt>
+        <dd class="spec text-ink">{product.data.capacityAh} Ah</dd>
+      </div>
+      <div class="flex justify-between gap-2">
+        <dt>{shop.crankingLabel}</dt>
+        <dd class="spec text-ink">{product.data.crankingA} A</dd>
+      </div>
+    </dl>
+
+    <div class="mt-auto flex items-center justify-between gap-3 pt-2">
+      <span class="spec text-lg font-semibold text-ink">
+        {product.data.price}
+        {CURRENCY_SYMBOL}
+      </span>
+      <button
+        type="button"
+        class="btn btn-primary px-3.5 py-2 text-sm"
+        data-add-to-cart
+        data-slug={product.id}
+        data-title={title}
+        data-price={product.data.price}
+        data-added-label={shop.inCart}
+      >
+        <Icon name="cart" />
+        {shop.addToCart}
+      </button>
+    </div>
+  </div>
+</article>

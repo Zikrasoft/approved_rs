@@ -20,19 +20,22 @@ import { SITE_URL } from '@/utils/constants';
 export async function getStaticPaths() {
   const works = publishedWorks(await getCollection('works'));
   return withLocales(
-    works.map((work) => ({ params: { slug: work.id }, props: { work } })),
+    works.map((work) => ({
+      params: { slug: work.id },
+      props: {
+        work,
+        related: works.filter((other) => other.id !== work.id).slice(0, 3),
+      },
+    })),
   );
 }
 
-const { work } = Astro.props;
+const { work, related } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const pages = getPagesContent(locale);
 const services = getServicesContent(locale);
 const site = getSiteContent(locale);
 const { title, body } = localizedWork(work, locale);
-
-const all = publishedWorks(await getCollection('works'));
-const related = all.filter((w) => w.id !== work.id).slice(0, 3);
 
 const articleSchema = {
   '@context': 'https://schema.org',

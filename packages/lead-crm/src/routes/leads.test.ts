@@ -91,7 +91,7 @@ describe('createLeadsRoute', () => {
         contact: 'b'.repeat(5000),
         comment: 'c'.repeat(9000),
         source_url: `/ru/${'d'.repeat(9000)}`,
-        visitor_id: 'e'.repeat(5000),
+        visitor_id: '9f1c2b7e-4a3d-4c9e-8b21-6f0d5a7c3e11',
       }),
     );
     const lead = notifyLead.mock.calls.at(-1)![0];
@@ -99,7 +99,50 @@ describe('createLeadsRoute', () => {
     expect(lead.contact).toHaveLength(200);
     expect(lead.comment).toHaveLength(2000);
     expect(lead.source_url).toHaveLength(500);
-    expect(lead.visitorId).toHaveLength(200);
+  });
+
+  it('drops a visitor id that is not one this site could have issued', async () => {
+    await POST(
+      makeCtx({ name: 'Ivan', contact: '@ivan', visitor_id: 'a'.repeat(5000) }),
+    );
+    expect(notifyLead).toHaveBeenCalledWith(
+      expect.objectContaining({ visitorId: null }),
+      '[leads]',
+    );
+  });
+
+  it('silently thanks a bot that filled the hidden field, without storing anything', async () => {
+    const ctx = makeCtx({
+      name: 'Ivan',
+      contact: '@ivan',
+      website: 'http://spam.example',
+    });
+    await POST(ctx);
+    expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
+    expect(notifyLead).not.toHaveBeenCalled();
+  });
+
+  it('folds an optional car field into the comment the operator reads', async () => {
+    await POST(
+      makeCtx({
+        name: 'Ivan',
+        contact: '+381',
+        car: 'BMW X5 2019',
+        comment: 'Стучит спереди',
+      }),
+    );
+    expect(notifyLead).toHaveBeenCalledWith(
+      expect.objectContaining({ comment: 'BMW X5 2019\nСтучит спереди' }),
+      '[leads]',
+    );
+  });
+
+  it('sends the car alone when there is no comment', async () => {
+    await POST(makeCtx({ name: 'Ivan', contact: '+381', car: 'Golf 7' }));
+    expect(notifyLead).toHaveBeenCalledWith(
+      expect.objectContaining({ comment: 'Golf 7' }),
+      '[leads]',
+    );
   });
 
   it('returns 400 when name is empty', async () => {
@@ -132,7 +175,7 @@ describe('createLeadsRoute', () => {
         comment: 'BMW X5',
         country: 'de',
         source_url: '/ru/vehicle-buyback/de/',
-        visitor_id: 'abc-123',
+        visitor_id: '9f1c2b7e-4a3d-4c9e-8b21-6f0d5a7c3e11',
       }),
     );
     expect(waitUntil).toHaveBeenCalledTimes(1);
@@ -145,7 +188,7 @@ describe('createLeadsRoute', () => {
         comment: 'BMW X5',
         country: 'de',
         source_url: '/ru/vehicle-buyback/de/',
-        visitorId: 'abc-123',
+        visitorId: '9f1c2b7e-4a3d-4c9e-8b21-6f0d5a7c3e11',
         locale: 'ru',
       },
       '[leads]',

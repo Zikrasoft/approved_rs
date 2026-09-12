@@ -170,6 +170,25 @@ describe('insertOrMergeLead', () => {
     expect(await store.readLeads()).toHaveLength(2);
   });
 
+  it('keeps what the second submission actually said, not just the service name', async () => {
+    await store.insertOrMergeLead(clickData('telegram'));
+    const { lead, merged } = await store.insertOrMergeLead({
+      ...baseData,
+      visitorId: 'visitor-1',
+      comment: 'Аккумулятор 60 Ah × 1 — 95 €',
+    });
+
+    expect(merged).toBe(true);
+    expect(lead.comment).toContain('Аккумулятор 60 Ah × 1 — 95 €');
+  });
+
+  it('falls back to naming the service when the second submission carried no comment', async () => {
+    await store.insertOrMergeLead(clickData('telegram'));
+    const { lead } = await store.insertOrMergeLead(clickData('whatsapp'));
+
+    expect(lead.comment).toContain('Также пробовал: Клик whatsapp с сайта');
+  });
+
   it('does not merge across brands — one store, three businesses, separate leads', async () => {
     await store.insertOrMergeLead(clickData('telegram'));
     const { merged } = await store.insertOrMergeLead({

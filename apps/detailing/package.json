@@ -37,7 +37,8 @@
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
     "vercel": "59.11.7",
-    "vitest": "3.2.6"
+    "vitest": "3.2.6",
+    "yaml": "2.9.0"
   },
   "engines": {
     "node": ">=22.12.0"

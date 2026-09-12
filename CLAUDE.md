@@ -7,20 +7,41 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 pnpm workspace + Turborepo. Apps live in `apps/*`, shared packages in `packages/*`.
 
 ```
-apps/approved-rs/     the approved.rs site (Astro) — everything below describes it
-packages/lead-crm/    lead store + Telegram bot, shared by every brand site
-packages/i18n/        locale set, YAML/zod section loader, withPlaceholder
+apps/approved-rs/     the approved.rs site (Astro) — most of this document describes it
+apps/detailing/       PRIZMA, the detailing studio site (placeholder brand)
+apps/auto-service/    AUTOHUB, the car service site + parts shop (placeholder brand)
+packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click routes
+packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
+packages/site-kit/    brand-agnostic mechanics: safeMarkdown, formatPhone, visitor id
 ```
 
-The app owns its own `astro.config.mjs`, `keystatic.config.ts`, `vercel.json`,
+Each app owns its own `astro.config.mjs`, `keystatic.config.ts`, `vercel.json`,
 `tsconfig.json`, `vitest.config.ts` and `.env*`. Lint/format configs and the
 lockfile stay at the repo root and cover every workspace. The root
 `vercel.json` exists only to hold `git.deploymentEnabled: false` — Vercel's git
 integration looks there, not in the app, and without it every branch push
 triggers a failing preview build.
 
-Paths in this document are app-relative: `src/lib/store.ts` means
-`apps/approved-rs/src/lib/store.ts`.
+Unqualified paths in this document are relative to `apps/approved-rs/`:
+`src/lib/store.ts` means `apps/approved-rs/src/lib/store.ts`.
+
+**Brand names are placeholders.** PRIZMA and AUTOHUB (and their `prizma.rs` /
+`autohub.rs` domains) stand in until the client picks real ones. The rule they
+have to satisfy: no shared brand root between the three sites, and nothing
+carrying Approved's trust/verification semantics.
+
+**One bot, one chat, one lead store, three brands.** Telegram allows a single
+webhook URL per bot, so `api/telegram-webhook.ts` and `api/reminders.ts` are
+deployed only by `apps/approved-rs`; the other two apps ship just `/api/leads`
+and `/api/contact-click`. All three write to the same `data/leads.json` on the
+same Vercel Blob store and are separated by the lead's `brand` field, which the
+app's `createNotifyLead({ brand })` stamps on — a visitor can never set it.
+Connect the same Blob store to all three Vercel projects.
+
+**Cross-site URLs would leak the relationship.** A brand site must never call
+another brand's origin from the browser: the request shows up in the network
+tab and ties the two together. Each site writes leads through its own
+server-side route.
 
 **Why packages exist:** this repo is becoming a portfolio of deliberately
 independent brand sites (see `docs/open-questions.md` and the split plan). The
@@ -42,6 +63,51 @@ systems and components stay per-app on purpose.
   `src/lib/telegram/index.ts`, `src/i18n/config.ts`). That keeps the ~950 lines
   of API-route call sites and ~190 `.astro` i18n call sites free of churn when
   a package's internals move. Wire new packages the same way.
+- `packages/site-kit` is mechanics only, never visual. `safeMarkdown` is the
+  XSS boundary for auto-translated content, `formatPhone` and the visitor id
+  are pure helpers. A component or a design token must not go in here — that is
+  exactly what would make two brand sites recognizable as relatives.
+- Client-side imports go through a narrow subpath export
+  (`@podbor/lead-crm/contact-channel`, `@podbor/site-kit/browser`), never the
+  package root: the root barrel pulls zod, date-fns and the Telegram client
+  into the browser bundle.
+
+## House style for a brand site
+
+Both new apps follow the same shape, and a third should too:
+
+- **URL segments and slugs are English**, never transliterated Serbian:
+  `/sr/services/brakes-suspension/`, not `/sr/usluge/kocnice-i-vesanje/`. Build
+  every internal href through the app's `PathBuilder` (`src/utils/paths.ts`);
+  no page or component writes a locale-prefixed URL by hand.
+- **Locale comes from the path**, via `localeFrom(Astro.url.pathname)`. Do not
+  use `Astro.currentLocale` (it reads request headers and warns on prerendered
+  pages) and do not use `Astro.params` (it is empty on `404.astro`, which would
+  serve a Russian 404 to every visitor).
+- **`/` redirects, it does not rewrite.** Astro forbids rewriting from an
+  on-demand route to a prerendered one, and `src/pages/[locale]/index.astro` is
+  prerendered in both new apps — a rewrite returns a 500 for every hit on the
+  site root. `src/pages/index.astro` still has to exist with
+  `prerender = false` so Vercel routes `/` through middleware at all.
+- **The lead form carries its own `locale`** in a hidden input. Middleware never
+  runs for a prerendered page on Vercel's static output, so the `lang` cookie
+  may not exist — without the field, every non-Russian visitor lands on
+  `/ru/thanks/` and the lead is stored as `locale: 'ru'`.
+- **Form controls nest their label** instead of using `id`/`for`. The lead form
+  renders two or three times per page (inline, in the modal, on the contact
+  page), and duplicate ids make every label focus the first form.
+- **Keystatic content paths need the app prefix in production.** GitHub's
+  contents API resolves from the repo root, so a collection path is
+  `` `${APP_ROOT}src/content/...` `` with
+  `const APP_ROOT = import.meta.env.PROD ? 'apps/<app>/' : ''`. Local storage
+  mode resolves from the app directory, hence the empty string in dev. The same
+  applies to `src/lib/githubContents.ts` in approved-rs.
+- Empty content directories need a `.gitkeep` — git does not track them, and
+  both the glob loader and the registry test fail on a fresh clone without it.
+- After hand-editing any `src/content/i18n/*.yaml`, run
+  `node --experimental-strip-types scripts/translate-i18n.ts --record-hashes`.
+  Without a current `translatedFrom` hash the next CI translate run hands the
+  hand-written Serbian back to the model and commits the result.
 
 ## Commands
 
