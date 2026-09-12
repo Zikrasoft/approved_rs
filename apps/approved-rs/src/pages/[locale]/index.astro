@@ -46,7 +46,10 @@ const meta = {
 };
 
 const allCases = await getCollection('cases');
-const latestCases = allCases.filter((c) => c.data.published).slice(0, 3);
+const latestCases = allCases
+  .filter((c) => c.data.published)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
 const items = latestCases.map((c) => toCaseItem(c, locale));
 const countries = getActiveCountries();
 
@@ -212,7 +215,7 @@ const journey = [
       </p>
 
       <div
-        class="journey-strip grid grid-cols-1 lg:grid-cols-5 divide-y lg:divide-y-0 lg:divide-x divide-border rounded-sm border border-default bg-surface overflow-hidden anim-inline"
+        class="journey-strip grid grid-cols-1 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-border rounded-sm border border-default bg-surface overflow-hidden anim-inline"
         style="--anim-delay: 0.1s"
       >
         {

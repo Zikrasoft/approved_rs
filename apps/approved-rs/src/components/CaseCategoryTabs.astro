@@ -37,29 +37,31 @@ const tabs = [
 ] as const satisfies { id: CasesTabKind; href: string; label: string }[];
 ---
 
-<div
-  class="case-tabs grid grid-cols-2 sm:flex sm:flex-nowrap gap-1 p-1 mb-10 rounded-sm bg-surface border border-border-strong"
-  role="tablist"
->
-  {
-    tabs
-      .filter((tab) => counts[tab.id] > 0 || tab.id === active)
-      .map((tab) => (
-        <a
-          href={tab.href}
-          class:list={[
-            'pill-tab flex items-center justify-between sm:justify-start gap-2 px-4 py-2 rounded-sm text-sm font-medium no-underline',
-            tab.id === active ? 'text-on-accent' : 'text-muted',
-          ]}
-          role="tab"
-          aria-selected={tab.id === active ? 'true' : 'false'}
-          aria-current={tab.id === active ? 'page' : undefined}
-        >
-          {tab.label}
-          <span class="case-tab-count text-xs">{counts[tab.id]}</span>
-        </a>
-      ))
-  }
+<div class="mb-10 sm:flex">
+  <div
+    class="case-tabs grid grid-cols-2 gap-1 p-1 rounded-sm bg-surface border border-border-strong sm:inline-flex sm:flex-nowrap"
+    role="tablist"
+  >
+    {
+      tabs
+        .filter((tab) => counts[tab.id] > 0 || tab.id === active)
+        .map((tab) => (
+          <a
+            href={tab.href}
+            class:list={[
+              'pill-tab flex items-center justify-between sm:justify-start gap-2 px-4 py-2 rounded-sm text-sm font-medium no-underline',
+              tab.id === active ? 'text-on-accent' : 'text-muted',
+            ]}
+            role="tab"
+            aria-selected={tab.id === active ? 'true' : 'false'}
+            aria-current={tab.id === active ? 'page' : undefined}
+          >
+            {tab.label}
+            <span class="case-tab-count text-xs">{counts[tab.id]}</span>
+          </a>
+        ))
+    }
+  </div>
 </div>
 
 <style>
