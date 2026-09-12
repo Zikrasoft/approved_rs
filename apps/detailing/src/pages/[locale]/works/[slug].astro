@@ -9,6 +9,7 @@ import WorkGrid from '@/components/WorkGrid.astro';
 import SectionHead from '@/components/SectionHead.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/currentLocale';
+import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { getPagesContent } from '@/i18n/content/pages';
 import { getServicesContent } from '@/i18n/content/services';
 import { getSiteContent } from '@/i18n/content/site';
@@ -47,7 +48,7 @@ const articleSchema = {
   mainEntityOfPage: new URL(PathBuilder.work(locale, work.id), SITE_URL).href,
 };
 
-const dateLabel = new Intl.DateTimeFormat(locale, {
+const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
   year: 'numeric',
   month: 'long',
 }).format(work.data.date);
