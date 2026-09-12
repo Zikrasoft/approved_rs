@@ -37,3 +37,6 @@ docs/superpowers/
 graphify-out/
 .vercel
 .env*
+
+# vitest --coverage output
+coverage/
