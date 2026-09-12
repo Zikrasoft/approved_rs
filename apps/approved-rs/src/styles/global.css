@@ -75,6 +75,12 @@
 
   /* Ink-stamp accent — used only by the hero "approved" seal, nowhere else. */
   --color-stamp-ink: #b23a2e;
+
+  /* One named vertical rhythm for content bands. The scale is wider than
+     the sister sites' on purpose: this layout runs large display type and
+     needs the air to carry it. */
+  --spacing-band: 4rem;
+  --spacing-band-lg: 7rem;
 }
 
 /* ── Non-class tokens (only used in CSS rules / inline gradients) ── */
