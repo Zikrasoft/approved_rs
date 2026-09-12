@@ -1,0 +1,35 @@
+---
+import LeadForm from './LeadForm.astro';
+import ContactChannels from './ContactChannels.astro';
+import type { ServiceSlug } from '@/utils/services';
+
+interface Props {
+  eyebrow: string;
+  heading: string;
+  body: string;
+  service?: ServiceSlug;
+}
+const { eyebrow, heading, body, service } = Astro.props;
+---
+
+<section id="lead" class="wrap mt-32 sm:mt-40">
+  <div class="shell relative overflow-hidden" data-reveal>
+    <div
+      class="pointer-events-none absolute inset-0 opacity-60"
+      style="background-image:radial-gradient(120% 140% at 15% 0%, rgba(155,140,255,0.16), transparent 55%), radial-gradient(100% 120% at 90% 100%, rgba(227,192,138,0.16), transparent 55%)"
+      aria-hidden="true"
+    >
+    </div>
+    <div
+      class="core relative grid gap-12 p-8 sm:p-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16"
+    >
+      <div class="flex flex-col gap-6">
+        <span class="eyebrow w-fit">{eyebrow}</span>
+        <h2 class="text-giant">{heading}</h2>
+        <p class="max-w-md text-base leading-relaxed text-mute">{body}</p>
+        <ContactChannels class="mt-2" />
+      </div>
+      <LeadForm service={service} />
+    </div>
+  </div>
+</section>

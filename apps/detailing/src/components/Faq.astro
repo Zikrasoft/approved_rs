@@ -1,0 +1,33 @@
+---
+import Icon from './Icon.astro';
+interface Props {
+  items: { q: string; a: string }[];
+}
+const { items } = Astro.props;
+---
+
+<div class="mt-12 flex flex-col divide-y divide-line border-y border-line">
+  {
+    items.map((item, i) => (
+      <details
+        name="faq"
+        class="group px-1 py-6"
+        data-reveal
+        data-reveal-delay={i * 60}
+      >
+        <summary class="flex cursor-pointer list-none items-start justify-between gap-6 text-base font-medium tracking-tight text-chalk marker:hidden sm:text-lg">
+          {item.q}
+          <span
+            class="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-line text-mute transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-open:rotate-45 group-open:border-champagne group-open:text-champagne"
+            aria-hidden="true"
+          >
+            <Icon name="plus" size={10} />
+          </span>
+        </summary>
+        <p class="mt-4 max-w-3xl pr-12 text-sm leading-relaxed text-mute sm:text-base">
+          {item.a}
+        </p>
+      </details>
+    ))
+  }
+</div>

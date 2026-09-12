@@ -105,6 +105,19 @@ describe('createContactClickRoute', () => {
     );
   });
 
+  it('truncates an oversized source_url and visitor_id', async () => {
+    await POST(
+      makeCtx({
+        channel: 'phone',
+        source_url: `/ru/${'a'.repeat(9000)}`,
+        visitor_id: 'b'.repeat(5000),
+      }),
+    );
+    const lead = notifyLead.mock.calls.at(-1)![0];
+    expect(lead.source_url).toHaveLength(500);
+    expect(lead.visitorId).toHaveLength(200);
+  });
+
   it('returns 204 without waiting for notifyLead to resolve', async () => {
     let resolveNotify!: () => void;
     notifyLead.mockReturnValue(

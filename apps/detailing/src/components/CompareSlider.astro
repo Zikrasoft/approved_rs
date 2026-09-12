@@ -1,0 +1,95 @@
+---
+import Icon from './Icon.astro';
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+
+interface Props {
+  before: ImageMetadata;
+  after: ImageMetadata;
+  alt: string;
+  class?: string;
+}
+
+const { before, after, alt, class: className = '' } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+---
+
+<div class={`shell ${className}`}>
+  <div
+    class="core group relative isolate overflow-hidden"
+    style="--split:50%"
+    data-compare
+  >
+    <Image
+      src={after}
+      alt={`${alt} — ${site.common.afterLabel}`}
+      widths={[640, 1024, 1600]}
+      sizes="(min-width: 1024px) 60vw, 100vw"
+      class="block h-full w-full object-cover"
+      loading="lazy"
+    />
+    <div
+      class="absolute inset-0"
+      style="clip-path:inset(0 calc(100% - var(--split)) 0 0)"
+      data-compare-before
+    >
+      <Image
+        src={before}
+        alt={`${alt} — ${site.common.beforeLabel}`}
+        widths={[640, 1024, 1600]}
+        sizes="(min-width: 1024px) 60vw, 100vw"
+        class="block h-full w-full object-cover"
+        loading="lazy"
+      />
+    </div>
+
+    <span
+      class="pointer-events-none absolute inset-y-0 w-px bg-chalk/80"
+      style="left:var(--split)"
+      aria-hidden="true"></span>
+    <span
+      class="pointer-events-none absolute top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-chalk/40 bg-void/70 backdrop-blur-md"
+      style="left:var(--split)"
+      aria-hidden="true"
+    >
+      <Icon name="compare" size={18} class="text-chalk" />
+    </span>
+
+    <span
+      class="pointer-events-none absolute left-4 top-4 rounded-full border border-line bg-void/60 px-3 py-1 text-[0.625rem] uppercase tracking-[0.2em] text-chalk backdrop-blur-md"
+      >{site.common.beforeLabel}</span
+    >
+    <span
+      class="pointer-events-none absolute right-4 top-4 rounded-full border border-line bg-void/60 px-3 py-1 text-[0.625rem] uppercase tracking-[0.2em] text-chalk backdrop-blur-md"
+      >{site.common.afterLabel}</span
+    >
+    <span
+      class="pointer-events-none absolute inset-x-0 bottom-4 text-center text-[0.625rem] uppercase tracking-[0.2em] text-chalk/60 opacity-100 transition-opacity duration-500 group-hover:opacity-0"
+      >{site.common.dragHint}</span
+    >
+
+    <input
+      type="range"
+      min="0"
+      max="100"
+      value="50"
+      step="0.1"
+      aria-label={site.common.dragHint}
+      class="absolute inset-0 h-full w-full cursor-ew-resize appearance-none bg-transparent opacity-0"
+      data-compare-input
+    />
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-compare]').forEach((root) => {
+    const input = root.querySelector<HTMLInputElement>('[data-compare-input]');
+    if (!input) return;
+    const apply = () => root.style.setProperty('--split', `${input.value}%`);
+    input.addEventListener('input', apply);
+    apply();
+  });
+</script>

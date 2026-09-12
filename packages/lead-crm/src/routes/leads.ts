@@ -1,5 +1,9 @@
 import type { NotifyLead } from '../notifyLead.ts';
 
+export const MAX_FIELD_LENGTH = 200;
+export const MAX_COMMENT_LENGTH = 2000;
+export const MAX_URL_LENGTH = 500;
+
 export interface RouteRequestContext {
   request: Request;
   cookies: { get(name: string): { value: string } | undefined };
@@ -36,13 +40,14 @@ export function createLeadsRoute<L extends string>({
   }: RouteRequestContext): Promise<Response> {
     const form = await request.formData();
 
-    const field = (key: string) => form.get(key)?.toString().trim() ?? '';
+    const field = (key: string, max = MAX_FIELD_LENGTH) =>
+      form.get(key)?.toString().trim().slice(0, max) ?? '';
     const name = field('name');
     const contact = field('contact');
 
-    const cookieLocale = cookies.get(localeCookie)?.value;
+    const requested = field('locale') || cookies.get(localeCookie)?.value;
     const locale: L =
-      cookieLocale && isLocale(cookieLocale) ? cookieLocale : defaultLocale;
+      requested && isLocale(requested) ? requested : defaultLocale;
 
     if (!name || !contact) {
       return new Response(messages.get(locale) ?? messages.get(defaultLocale), {
@@ -57,10 +62,10 @@ export function createLeadsRoute<L extends string>({
           contact,
           service: field('service'),
           contactChannel: field('contact_channel') || null,
-          comment: field('comment') || null,
-          country: form.get('country')?.toString() || null,
-          source_url: form.get('source_url')?.toString() || null,
-          visitorId: form.get('visitor_id')?.toString() || null,
+          comment: field('comment', MAX_COMMENT_LENGTH) || null,
+          country: field('country') || null,
+          source_url: field('source_url', MAX_URL_LENGTH) || null,
+          visitorId: field('visitor_id') || null,
           locale,
         },
         '[leads]',

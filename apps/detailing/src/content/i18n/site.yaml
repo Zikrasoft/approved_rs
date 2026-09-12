@@ -1,0 +1,193 @@
+nav:
+  services: Услуги
+  works: Работы
+  process: Как работаем
+  prices: Цены
+  contact: Контакты
+header:
+  primaryNavLabel: Основная навигация
+  mobileNavLabel: Мобильное меню
+  menuOpenLabel: Меню
+  menuCloseLabel: Закрыть меню
+  languageLabel: Язык
+  cta: Записаться
+footer:
+  tagline: Студия детейлинга в Белграде. Плёнка, полировка, керамика, кожа.
+  navHeading: Разделы
+  contactHeading: Связаться
+  hoursHeading: Часы работы
+  hours: Пн–Сб, 09:00–19:00
+  privacyLabel: Политика конфиденциальности
+  rightsSuffix: Все права защищены.
+common:
+  homeLabel: Главная
+  skipToContent: К содержанию
+  breadcrumbLabel: Хлебные крошки
+  readMore: Подробнее
+  backToWorks: Все работы
+  allWorks: Смотреть все работы
+  faqHeading: Частые вопросы
+  beforeLabel: До
+  afterLabel: После
+  dragHint: Потяните, чтобы сравнить
+  closeLabel: Закрыть
+  prevLabel: Предыдущее фото
+  nextLabel: Следующее фото
+  scrollHint: Листайте вниз
+  fromPrice: от
+  perCar: за автомобиль
+  emptyWorks: Скоро здесь появятся работы. Пока что напишите нам — расскажем и покажем вживую.
+channels:
+  call: Позвонить
+  whatsapp: WhatsApp
+  viber: Viber
+  telegram: Telegram
+  instagram: Instagram
+  write: Написать
+form:
+  heading: Записаться на консультацию
+  subheading: Посмотрим машину, честно скажем, что ей действительно нужно, и назовём точную цену.
+  nameLabel: Как вас зовут
+  namePlaceholder: Имя
+  contactLabel: Телефон или ник
+  contactPlaceholder: +381 60 000 0000
+  serviceLabel: Что интересует
+  servicePlaceholder: Выберите услугу
+  commentLabel: Комментарий
+  commentPlaceholder: Марка, модель, год — и что хотите сделать
+  submit: Отправить заявку
+  submitting: Отправляем…
+  privacyNote: Отправляя форму, вы соглашаетесь с
+  privacyLinkText: политикой конфиденциальности
+  requiredError: Заполните имя и контакт
+  modalTitle: Оставить заявку
+translations:
+  sr:
+    nav:
+      services: Usluge
+      works: Radovi
+      process: Kako radimo
+      prices: Cene
+      contact: Kontakt
+    header:
+      primaryNavLabel: Glavna navigacija
+      mobileNavLabel: Mobilni meni
+      menuOpenLabel: Meni
+      menuCloseLabel: Zatvori meni
+      languageLabel: Jezik
+      cta: Zakaži termin
+    footer:
+      tagline: Detailing studio u Beogradu. Folije, poliranje, keramika, koža.
+      navHeading: Sekcije
+      contactHeading: Kontakt
+      hoursHeading: Radno vreme
+      hours: Pon–Sub, 09:00–19:00
+      privacyLabel: Politika privatnosti
+      rightsSuffix: Sva prava zadržana.
+    common:
+      homeLabel: Početna
+      skipToContent: Na sadržaj
+      breadcrumbLabel: Putanja
+      readMore: Saznaj više
+      backToWorks: Svi radovi
+      allWorks: Pogledaj sve radove
+      faqHeading: Česta pitanja
+      beforeLabel: Pre
+      afterLabel: Posle
+      dragHint: Povucite da uporedite
+      closeLabel: Zatvori
+      prevLabel: Prethodna fotografija
+      nextLabel: Sledeća fotografija
+      scrollHint: Skrolujte nadole
+      fromPrice: od
+      perCar: po automobilu
+      emptyWorks: Radovi uskoro stižu ovde. Do tada nam pišite — rado ćemo vam sve pokazati uživo.
+    channels:
+      call: Pozovite nas
+      whatsapp: WhatsApp
+      viber: Viber
+      telegram: Telegram
+      instagram: Instagram
+      write: Pišite nam
+    form:
+      heading: Zakažite konsultaciju
+      subheading: Pogledaćemo auto, iskreno reći šta mu stvarno treba i dati tačnu cenu.
+      nameLabel: Kako se zovete
+      namePlaceholder: Ime
+      contactLabel: Telefon ili nadimak
+      contactPlaceholder: +381 60 000 0000
+      serviceLabel: Šta vas zanima
+      servicePlaceholder: Izaberite uslugu
+      commentLabel: Komentar
+      commentPlaceholder: Marka, model, godište — i šta želite da uradimo
+      submit: Pošalji zahtev
+      submitting: Šaljemo…
+      privacyNote: Slanjem forme prihvatate
+      privacyLinkText: politiku privatnosti
+      requiredError: Unesite ime i kontakt
+      modalTitle: Ostavite zahtev
+  en:
+    nav:
+      services: Services
+      works: Work
+      process: How it works
+      prices: Pricing
+      contact: Contact
+    header:
+      primaryNavLabel: Primary navigation
+      mobileNavLabel: Mobile menu
+      menuOpenLabel: Menu
+      menuCloseLabel: Close menu
+      languageLabel: Language
+      cta: Book a slot
+    footer:
+      tagline: A detailing studio in Belgrade. Film, polishing, ceramic, leather.
+      navHeading: Sections
+      contactHeading: Get in touch
+      hoursHeading: Opening hours
+      hours: Mon–Sat, 09:00–19:00
+      privacyLabel: Privacy policy
+      rightsSuffix: All rights reserved.
+    common:
+      homeLabel: Home
+      skipToContent: Skip to content
+      breadcrumbLabel: Breadcrumb
+      readMore: Read more
+      backToWorks: All work
+      allWorks: See all our work
+      faqHeading: Frequently asked
+      beforeLabel: Before
+      afterLabel: After
+      dragHint: Drag to compare
+      closeLabel: Close
+      prevLabel: Previous photo
+      nextLabel: Next photo
+      scrollHint: Scroll down
+      fromPrice: from
+      perCar: per car
+      emptyWorks: Our work will show up here shortly. In the meantime, message us — we are happy to show you in person.
+    channels:
+      call: Call us
+      whatsapp: WhatsApp
+      viber: Viber
+      telegram: Telegram
+      instagram: Instagram
+      write: Message us
+    form:
+      heading: Book a consultation
+      subheading: We look at the car, tell you honestly what it actually needs, and quote an exact price.
+      nameLabel: Your name
+      namePlaceholder: Name
+      contactLabel: Phone or handle
+      contactPlaceholder: +381 60 000 0000
+      serviceLabel: What are you after
+      servicePlaceholder: Pick a service
+      commentLabel: Anything to add
+      commentPlaceholder: Make, model, year — and what you would like done
+      submit: Send request
+      submitting: Sending…
+      privacyNote: By sending this form you agree to our
+      privacyLinkText: privacy policy
+      requiredError: Please fill in your name and contact
+      modalTitle: Send a request
+translatedFrom: 4f356fc6cc29352b

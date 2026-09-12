@@ -1,0 +1,195 @@
+---
+import '@fontsource-variable/unbounded';
+import '@fontsource-variable/manrope';
+import '@/styles/global.css';
+import SiteHeader from '@/components/SiteHeader.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
+import LeadModal from '@/components/LeadModal.astro';
+import { BCP47_BY_LOCALE, localeSet } from '@/i18n/config';
+import { localeFrom } from '@/i18n/currentLocale';
+import {
+  SITE_NAME,
+  SITE_LEGAL_NAME,
+  SITE_URL,
+  SOCIAL_SAME_AS,
+  STUDIO_ADDRESS,
+  PHONE_NUMBER,
+} from '@/utils/constants';
+import { getSiteContent } from '@/i18n/content/site';
+
+interface Props {
+  title: string;
+  description: string;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown>[];
+}
+
+const { title, description, noindex = false, jsonLd = [] } = Astro.props;
+
+const jsonLdText = (schema: Record<string, unknown>) =>
+  JSON.stringify(schema).replace(/</g, '\\u003c');
+
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+const canonical = new URL(Astro.url.pathname, SITE_URL).href;
+const alternates = localeSet.getAlternateLinks(SITE_URL, Astro.url.pathname);
+const ogImage = new URL('/og.png', SITE_URL).href;
+
+const businessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'AutoDetailing',
+  '@id': `${SITE_URL}/#studio`,
+  name: SITE_NAME,
+  legalName: SITE_LEGAL_NAME,
+  url: SITE_URL,
+  image: ogImage,
+  description: site.footer.tagline,
+  telephone: `+${PHONE_NUMBER}`,
+  priceRange: '€€€',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: STUDIO_ADDRESS.street,
+    addressLocality: STUDIO_ADDRESS.city,
+    postalCode: STUDIO_ADDRESS.postalCode,
+    addressCountry: STUDIO_ADDRESS.country,
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: STUDIO_ADDRESS.lat,
+    longitude: STUDIO_ADDRESS.lon,
+  },
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+      ],
+      opens: '09:00',
+      closes: '19:00',
+    },
+  ],
+  sameAs: SOCIAL_SAME_AS,
+};
+---
+
+<!doctype html>
+<html lang={BCP47_BY_LOCALE[locale]}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#060608" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {
+      alternates.map((alt) => (
+        <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
+      ))
+    }
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content={BCP47_BY_LOCALE[locale]} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={jsonLdText(businessSchema)}
+    />
+    {
+      jsonLd.map((schema) => (
+        <script
+          type="application/ld+json"
+          is:inline
+          set:html={jsonLdText(schema)}
+        />
+      ))
+    }
+    <noscript>
+      <style>
+        [data-reveal] {
+          opacity: 1;
+          transform: none;
+          filter: none;
+        }
+      </style>
+    </noscript>
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-full focus:bg-champagne focus:px-5 focus:py-2 focus:text-sm focus:font-semibold focus:text-void"
+      >{site.common.skipToContent}</a
+    >
+    <SiteHeader />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter />
+    <LeadModal />
+
+    <script>
+      const reduced = window.matchMedia(
+        '(prefers-reduced-motion: reduce)',
+      ).matches;
+      const targets = document.querySelectorAll<HTMLElement>('[data-reveal]');
+
+      if (reduced || !('IntersectionObserver' in window)) {
+        targets.forEach((el) => el.classList.add('is-in'));
+      } else {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              const el = entry.target as HTMLElement;
+              const delay = Number(el.dataset.revealDelay ?? 0);
+              window.setTimeout(() => el.classList.add('is-in'), delay);
+              observer.unobserve(el);
+            });
+          },
+          { rootMargin: '0px 0px -12% 0px', threshold: 0.05 },
+        );
+        targets.forEach((el) => observer.observe(el));
+
+        window.setTimeout(() => {
+          if (document.querySelector('[data-reveal].is-in')) return;
+          targets.forEach((el) => el.classList.add('is-in'));
+        }, 2000);
+      }
+    </script>
+
+    <script>
+      import { isTrackedContactChannel } from '@podbor/lead-crm/contact-channel';
+      import { getOrCreateVisitorId } from '@podbor/site-kit/browser';
+
+      document
+        .querySelectorAll<HTMLElement>('[data-contact-channel]')
+        .forEach((el) => {
+          el.addEventListener('click', () => {
+            const channel = el.dataset.contactChannel;
+            if (!isTrackedContactChannel(channel)) return;
+            const body = new FormData();
+            body.set('channel', channel);
+            body.set('source_url', location.href);
+            body.set('visitor_id', getOrCreateVisitorId());
+            navigator.sendBeacon('/api/contact-click', body);
+          });
+        });
+    </script>
+  </body>
+</html>

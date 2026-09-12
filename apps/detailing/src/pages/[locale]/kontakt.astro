@@ -1,0 +1,131 @@
+---
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import LeadForm from '@/components/LeadForm.astro';
+import ContactChannels from '@/components/ContactChannels.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getPagesContent } from '@/i18n/content/pages';
+import { getSiteContent } from '@/i18n/content/site';
+import { PathBuilder, localePaths } from '@/utils/paths';
+import { STUDIO_ADDRESS } from '@/utils/constants';
+
+export function getStaticPaths() {
+  return localePaths();
+}
+
+const locale = localeFrom(Astro.url.pathname);
+const pages = getPagesContent(locale);
+const site = getSiteContent(locale);
+
+const mapQuery = encodeURIComponent(
+  `${STUDIO_ADDRESS.street}, ${STUDIO_ADDRESS.city}`,
+);
+const mapSrc = `https://www.google.com/maps?q=${mapQuery}&output=embed`;
+const mapLink = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
+---
+
+<Shell
+  title={pages.contact.metaTitle}
+  description={pages.contact.metaDescription}
+>
+  <PageHero
+    eyebrow={pages.contact.eyebrow}
+    heading={pages.contact.heading}
+    lead={pages.contact.lead}
+    crumbs={[{ href: PathBuilder.contact(locale), label: site.nav.contact }]}
+  />
+
+  <section class="wrap mt-14">
+    <div class="grid gap-4 lg:grid-cols-[1fr_1.15fr]">
+      <div class="flex flex-col gap-4">
+        <div class="shell" data-reveal>
+          <div class="core flex flex-col gap-6 p-7">
+            <div class="flex flex-col gap-1.5">
+              <span
+                class="text-[0.6875rem] uppercase tracking-[0.2em] text-mute-2"
+                >{pages.contact.addressLabel}</span
+              >
+              <address class="text-base not-italic leading-relaxed text-chalk">
+                {STUDIO_ADDRESS.street}<br />{
+                  `${STUDIO_ADDRESS.postalCode} ${STUDIO_ADDRESS.city}`
+                }
+              </address>
+            </div>
+            <div class="hairline"></div>
+            <div class="flex flex-col gap-1.5">
+              <span
+                class="text-[0.6875rem] uppercase tracking-[0.2em] text-mute-2"
+                >{pages.contact.hoursLabel}</span
+              >
+              <span class="text-base text-chalk">{site.footer.hours}</span>
+            </div>
+          </div>
+        </div>
+
+        <div data-reveal>
+          <ContactChannels />
+        </div>
+
+        <div class="shell" data-reveal data-reveal-delay="80">
+          <div class="core flex flex-col gap-4 p-7">
+            <h2 class="text-lg font-display tracking-tight">
+              {pages.contact.arrivalHeading}
+            </h2>
+            <ul class="flex flex-col gap-3">
+              {
+                pages.contact.arrival.map((item) => (
+                  <li class="flex gap-3 text-sm leading-relaxed text-mute">
+                    <span
+                      class="mt-2 h-1 w-1 shrink-0 rounded-full bg-champagne-dim"
+                      aria-hidden="true"
+                    />
+                    {item}
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <div class="shell" data-reveal data-reveal-delay="60">
+          <div class="core flex flex-col gap-6 p-7 sm:p-9">
+            <div class="flex flex-col gap-2">
+              <h2 class="text-big">{site.form.heading}</h2>
+              <p class="text-sm leading-relaxed text-mute">
+                {site.form.subheading}
+              </p>
+            </div>
+            <LeadForm />
+          </div>
+        </div>
+
+        <div class="shell" data-reveal data-reveal-delay="120">
+          <div class="core overflow-hidden">
+            <h2 class="px-7 pt-7 text-lg font-display tracking-tight">
+              {pages.contact.mapHeading}
+            </h2>
+            <p class="px-7 pb-5 pt-2 text-sm text-mute">
+              {pages.contact.mapNote}
+            </p>
+            <iframe
+              src={mapSrc}
+              title={pages.contact.mapHeading}
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              class="block h-72 w-full border-0 grayscale"></iframe>
+            <a
+              href={mapLink}
+              target="_blank"
+              rel="noopener"
+              class="block px-7 py-5 text-sm text-champagne transition-colors duration-400 hover:text-chalk"
+            >
+              {STUDIO_ADDRESS.street}, {STUDIO_ADDRESS.city}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Shell>

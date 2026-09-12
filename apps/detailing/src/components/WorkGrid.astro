@@ -1,0 +1,27 @@
+---
+import WorkCard from './WorkCard.astro';
+import type { Work } from '@/utils/works';
+
+interface Props {
+  works: Work[];
+  eager?: number;
+  class?: string;
+}
+
+const { works, eager = 0, class: className = 'mt-14' } = Astro.props;
+---
+
+<div class={`${className} grid gap-4 md:grid-cols-2 lg:grid-cols-3`}>
+  {
+    works.map((work, i) => (
+      <div
+        data-reveal
+        data-reveal-delay={(i % 3) * 90}
+        data-work
+        data-services={work.data.servicesApplied.join(' ')}
+      >
+        <WorkCard work={work} eager={i < eager} class="h-full" />
+      </div>
+    ))
+  }
+</div>

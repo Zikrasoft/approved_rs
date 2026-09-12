@@ -1,0 +1,106 @@
+---
+import Cta from './Cta.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getHomeContent } from '@/i18n/content/home';
+import { getSiteContent } from '@/i18n/content/site';
+import { PathBuilder } from '@/utils/paths';
+
+const locale = localeFrom(Astro.url.pathname);
+const { hero } = getHomeContent(locale);
+const site = getSiteContent(locale);
+---
+
+<section class="relative overflow-hidden pb-20 pt-36 sm:pb-28 sm:pt-44">
+  <div
+    class="pointer-events-none absolute inset-0 -z-10"
+    aria-hidden="true"
+    data-hero-bg
+  >
+    <div
+      class="absolute -right-[22%] top-[-18%] h-[42rem] w-[42rem] rounded-full opacity-[0.22] blur-[120px]"
+      style="background:radial-gradient(circle at 30% 30%, #9B8CFF, transparent 62%)"
+    >
+    </div>
+    <div
+      class="absolute -left-[18%] top-[18%] h-[34rem] w-[34rem] rounded-full opacity-[0.18] blur-[130px]"
+      style="background:radial-gradient(circle at 60% 40%, #6FD3E8, transparent 60%)"
+    >
+    </div>
+    <div
+      class="absolute bottom-[-24%] left-[32%] h-[36rem] w-[36rem] rounded-full opacity-[0.16] blur-[140px]"
+      style="background:radial-gradient(circle at 50% 50%, #E3C08A, transparent 62%)"
+    >
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="grid items-end gap-14 lg:grid-cols-[1.35fr_1fr]">
+      <div class="flex flex-col gap-8">
+        <span class="eyebrow" data-reveal>{hero.eyebrow}</span>
+
+        <h1 class="text-mega">
+          <span class="block" data-reveal data-reveal-delay="60"
+            >{hero.titleTop}</span
+          >
+          <span
+            class="text-iridescent block"
+            data-reveal
+            data-reveal-delay="140">{hero.titleAccent}</span
+          >
+          <span class="block" data-reveal data-reveal-delay="220"
+            >{hero.titleBottom}</span
+          >
+        </h1>
+
+        <p
+          class="max-w-xl text-base leading-relaxed text-mute sm:text-lg"
+          data-reveal
+          data-reveal-delay="300"
+        >
+          {hero.lead}
+        </p>
+
+        <div
+          class="flex flex-wrap items-center gap-3"
+          data-reveal
+          data-reveal-delay="360"
+        >
+          <Cta label={hero.ctaPrimary} openModal />
+          <Cta
+            label={hero.ctaSecondary}
+            href={PathBuilder.works(locale)}
+            variant="ghost"
+          />
+        </div>
+      </div>
+
+      <div class="shell" data-reveal data-reveal-delay="420">
+        <div class="core flex flex-col divide-y divide-line">
+          {
+            hero.stats.map((stat) => (
+              <div class="flex items-baseline justify-between gap-6 px-6 py-6">
+                <span class="font-display text-3xl tracking-tight text-chalk sm:text-4xl">
+                  {stat.value}
+                </span>
+                <span class="max-w-[11rem] text-right text-xs leading-snug text-mute">
+                  {stat.label}
+                </span>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="mt-20 flex items-center gap-3 text-[0.6875rem] uppercase tracking-[0.22em] text-mute-2"
+      data-reveal
+      data-reveal-delay="500"
+    >
+      <span
+        class="block h-8 w-px bg-gradient-to-b from-transparent via-line-strong to-transparent"
+        aria-hidden="true"></span>
+      {site.common.scrollHint}
+    </div>
+  </div>
+</section>

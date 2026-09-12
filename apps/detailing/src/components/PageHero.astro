@@ -1,0 +1,67 @@
+---
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+import { PathBuilder } from '@/utils/paths';
+
+interface Props {
+  eyebrow: string;
+  heading: string;
+  lead?: string;
+  crumbs?: { href: string; label: string }[];
+}
+
+const { eyebrow, heading, lead, crumbs = [] } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+const trail = [
+  { href: PathBuilder.home(locale), label: site.common.homeLabel },
+  ...crumbs,
+];
+---
+
+<section class="relative overflow-hidden pb-4 pt-36 sm:pt-44">
+  <div
+    class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[28rem] opacity-25"
+    style="background-image:radial-gradient(60% 100% at 70% 0%, rgba(155,140,255,0.5), transparent 65%), radial-gradient(50% 90% at 10% 10%, rgba(227,192,138,0.35), transparent 65%);filter:blur(90px)"
+    aria-hidden="true"
+  >
+  </div>
+
+  <div class="wrap flex flex-col gap-8">
+    <nav aria-label={site.common.breadcrumbLabel} data-reveal>
+      <ol class="flex flex-wrap items-center gap-2 text-xs text-mute-2">
+        {
+          trail.map((crumb, i) => (
+            <li class="flex items-center gap-2">
+              {i > 0 && <span aria-hidden="true">·</span>}
+              <a
+                href={crumb.href}
+                class="transition-colors duration-400 hover:text-chalk"
+              >
+                {crumb.label}
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+
+    <span class="eyebrow w-fit" data-reveal data-reveal-delay="60"
+      >{eyebrow}</span
+    >
+    <h1 class="text-giant max-w-4xl" data-reveal data-reveal-delay="120">
+      {heading}
+    </h1>
+    {
+      lead && (
+        <p
+          class="max-w-2xl text-base leading-relaxed text-mute sm:text-lg"
+          data-reveal
+          data-reveal-delay="200"
+        >
+          {lead}
+        </p>
+      )
+    }
+  </div>
+</section>
