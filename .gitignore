@@ -28,6 +28,9 @@ npm-debug.log*
 # Turborepo
 .turbo/
 
+# Coverage reports
+coverage/
+
 # SDD scratch (not needed in repo)
 .superpowers/
 docs/superpowers/

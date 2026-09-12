@@ -4,31 +4,66 @@ const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
 import {
-  sendLeadNotification,
+  createTelegramClient,
+  expectMessageAndChatId,
+  expectMessageId,
+} from './client.ts';
+import { createFormatter } from './format.ts';
+import { createNotifier } from './notify.ts';
+import type { LeadStatus, StoredLead } from '../schema.ts';
+
+// Free functions — no per-business config, so they are imported directly.
+import {
   statusLabel,
   isLeadStatusKey,
   buildStatusKeyboard,
+  buildOwedList,
+  formatDealsList,
+  buildSearchResults,
+  buildMenu,
+  buildLeadList,
+  buildStats,
+  buildDeleteConfirm,
+  buildRemindPicker,
+  formatDateRu,
+} from './format.ts';
+
+const SERVICE_LABELS: Record<string, string> = {
+  'vehicle-sourcing': 'Автоподбор',
+};
+
+const client = createTelegramClient('test-bot-token');
+const formatter = createFormatter({
+  serviceLabel: (slug) => SERVICE_LABELS[slug] ?? slug,
+  botUsername: 'approved_test_bot',
+  defaultCommissionPercent: 10,
+  contactChannelLabels: {
+    telegram: 'Telegram',
+    whatsapp: 'WhatsApp',
+    viber: 'Viber',
+    phone: 'звонок',
+  },
+});
+const notifier = createNotifier({
+  client,
+  formatter,
+  groupId: '-1009876543210',
+  ownerIds: [111],
+  adminIds: [222],
+});
+
+const { answerCallback, sendForceReplyPrompt } = client;
+const { buildHelp, buildLeadDetail } = formatter;
+const {
+  sendLeadNotification,
   refreshLeadCard,
-  answerCallback,
-  sendForceReplyPrompt,
   sendDealNotificationToAdmin,
   sendCommissionClaimToAdmin,
   sendCommissionResultToOwner,
   sendStatusChangeToAdmin,
   sendPostponeReminderToOwner,
-  buildOwedList,
-  formatDealsList,
-  buildSearchResults,
-  buildMenu,
-  buildHelp,
-  buildLeadList,
-  buildStats,
-  buildLeadDetail,
-  buildDeleteConfirm,
-  buildRemindPicker,
   editLeadDetailMessage,
-} from './index';
-import type { StoredLead, LeadStatus } from '@/lib/store';
+} = notifier;
 
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
   return {
@@ -929,5 +964,77 @@ describe('answerCallback', () => {
       callback_query_id: 'cb-1',
       text: 'Статус обновлён',
     });
+  });
+});
+
+describe('formatDateRu', () => {
+  it('renders a stored ISO date the way the owner types it', () => {
+    expect(formatDateRu('2026-03-09')).toBe('09.03.2026');
+  });
+});
+
+describe('expectMessageId', () => {
+  it('names the context when Telegram answers without a message_id', () => {
+    expect(() => expectMessageId({}, 'force-reply prompt')).toThrow(
+      'force-reply prompt response missing message_id',
+    );
+  });
+
+  it('names the context when Telegram answers without a chat id', () => {
+    expect(() =>
+      expectMessageAndChatId({ message_id: 1 }, 'sendMessage'),
+    ).toThrow('sendMessage response missing chat.id');
+  });
+});
+
+describe('tgPost error reporting', () => {
+  it('falls back to bare status when Telegram sends no description', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      json: async () => ({}),
+    });
+
+    await expect(client.tgPost('sendMessage', {})).rejects.toThrow(
+      'Telegram sendMessage failed: 500',
+    );
+  });
+});
+
+describe('per-business formatter config', () => {
+  const detailingFormatter = createFormatter({
+    serviceLabel: () => 'Оклейка плёнкой',
+    botUsername: 'detailing_bot',
+    defaultCommissionPercent: 50,
+    contactChannelLabels: {},
+  });
+
+  it('quotes the business own commission rate in the help text, not a fixed 10%', () => {
+    expect(detailingFormatter.buildHelp('owner')).toContain('50%');
+    expect(detailingFormatter.buildHelp('owner')).not.toContain('10%');
+  });
+
+  it('computes the money line from the rate stored on the lead', () => {
+    const lead = makeLead({
+      status: 'won',
+      dealAmount: 1000,
+      commissionPercent: 50,
+    });
+
+    expect(detailingFormatter.buildLeadDetail(lead, 'owner').text).toContain(
+      '500',
+    );
+  });
+
+  it('builds its deep link from its own bot username', () => {
+    expect(
+      detailingFormatter.deepLinkKeyboard(7).inline_keyboard[0][0].url,
+    ).toBe('https://t.me/detailing_bot?start=lead_7');
+  });
+
+  it('renders its own service label', () => {
+    expect(detailingFormatter.formatTeaser(makeLead())).toContain(
+      'Оклейка плёнкой',
+    );
   });
 });
