@@ -80,7 +80,7 @@ const links = [
       >
         <Icon name="cart" />
         <span
-          class="spec hidden text-xs tabular-nums sm:inline"
+          class="spec hidden text-xs tabular-nums"
           data-cart-count
           data-cart-label={shop.cart.badgeLabel}>0</span
         >
@@ -213,6 +213,7 @@ const links = [
     if (!badge) return;
     const count = cartCount(readCart());
     badge.textContent = String(count);
+    badge.classList.toggle('hidden', count === 0);
     badge.parentElement?.setAttribute(
       'aria-label',
       `${badge.dataset.cartLabel ?? ''}: ${count}`,

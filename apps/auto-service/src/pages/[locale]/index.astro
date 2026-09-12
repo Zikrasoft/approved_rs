@@ -1,13 +1,17 @@
 ---
+import { getCollection } from 'astro:content';
 import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
 import SectionHead from '@/components/SectionHead.astro';
 import ServiceCards from '@/components/ServiceCards.astro';
 import Faq from '@/components/Faq.astro';
+import WorkGrid from '@/components/WorkGrid.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getHomeContent } from '@/i18n/content/home';
 import { getSiteContent } from '@/i18n/content/site';
+import { getPagesContent } from '@/i18n/content/pages';
+import { publishedWorks } from '@/utils/works';
 import { localePaths, PathBuilder } from '@/utils/paths';
 
 export function getStaticPaths() {
@@ -17,6 +21,8 @@ export function getStaticPaths() {
 const locale = localeFrom(Astro.url.pathname);
 const home = getHomeContent(locale);
 const site = getSiteContent(locale);
+const pages = getPagesContent(locale);
+const latestWorks = publishedWorks(await getCollection('works')).slice(0, 3);
 
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -171,6 +177,26 @@ const faqSchema = {
       </div>
     </div>
   </section>
+
+  {
+    latestWorks.length > 0 && (
+      <section class="border-t border-line bg-card">
+        <div class="wrap py-14">
+          <div class="flex flex-wrap items-end justify-between gap-4">
+            <SectionHead
+              eyebrow={pages.works.eyebrow}
+              heading={pages.works.heading}
+            />
+            <a href={PathBuilder.works(locale)} class="btn btn-secondary w-fit">
+              {site.common.allWorks}
+              <Icon name="arrowRight" />
+            </a>
+          </div>
+          <WorkGrid works={latestWorks} />
+        </div>
+      </section>
+    )
+  }
 
   <section class="border-t border-line bg-card">
     <div class="wrap py-14">

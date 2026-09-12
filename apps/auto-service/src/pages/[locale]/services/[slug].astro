@@ -1,11 +1,15 @@
 ---
+import { getCollection } from 'astro:content';
 import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
 import PageHero from '@/components/PageHero.astro';
 import FinalCta from '@/components/FinalCta.astro';
+import WorkGrid from '@/components/WorkGrid.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getServicesContent } from '@/i18n/content/services';
 import { getSiteContent } from '@/i18n/content/site';
+import { getPagesContent } from '@/i18n/content/pages';
+import { publishedWorks } from '@/utils/works';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { safeMarkdown } from '@podbor/site-kit';
@@ -22,6 +26,10 @@ const locale = localeFrom(Astro.url.pathname);
 const services = getServicesContent(locale);
 const site = getSiteContent(locale);
 const service = services[slug];
+const pages = getPagesContent(locale);
+const related = publishedWorks(await getCollection('works')).filter((work) =>
+  work.data.servicesApplied.includes(slug),
+);
 
 const serviceSchema = {
   '@context': 'https://schema.org',
@@ -121,6 +129,17 @@ const specs = [
       </p>
     </div>
   </section>
+
+  {
+    related.length > 0 && (
+      <section class="wrap mt-16">
+        <h2 class="text-xl font-semibold text-ink sm:text-2xl">
+          {pages.works.eyebrow}
+        </h2>
+        <WorkGrid works={related.slice(0, 3)} />
+      </section>
+    )
+  }
 
   <FinalCta
     eyebrow={services.indexEyebrow}

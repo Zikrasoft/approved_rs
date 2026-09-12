@@ -8,6 +8,7 @@ import '@/styles/global.css';
 import SiteHeader from '@/components/SiteHeader.astro';
 import SiteFooter from '@/components/SiteFooter.astro';
 import LeadModal from '@/components/LeadModal.astro';
+import StickyContactBar from '@/components/StickyContactBar.astro';
 import { BCP47_BY_LOCALE, OG_LOCALE, localeSet } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
 import {
@@ -122,7 +123,7 @@ const businessSchema = {
       ))
     }
   </head>
-  <body class="flex min-h-screen flex-col">
+  <body class="flex min-h-screen flex-col pb-14 lg:pb-0">
     <a
       href="#main"
       class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-signal focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
@@ -133,6 +134,7 @@ const businessSchema = {
       <slot />
     </main>
     <SiteFooter />
+    <StickyContactBar />
     <LeadModal />
 
     <script>
