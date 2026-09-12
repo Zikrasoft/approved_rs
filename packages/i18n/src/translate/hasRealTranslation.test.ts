@@ -79,4 +79,12 @@ describe('hasRealTranslation', () => {
     );
     expect(hasRealTranslation(blankBody, 'en', ['title', 'body'])).toBe(false);
   });
+
+  it('counts a non-string scalar leaf as translated, and a null one as not', () => {
+    const numeric = translationsNode('translations:\n  en:\n    count: 3\n');
+    expect(hasRealTranslation(numeric, 'en', ['count'])).toBe(true);
+
+    const empty = translationsNode('translations:\n  en:\n    count: null\n');
+    expect(hasRealTranslation(empty, 'en', ['count'])).toBe(false);
+  });
 });

@@ -81,4 +81,10 @@ describe('assertSafeTranslation', () => {
       ),
     ).toThrow('body');
   });
+
+  it('reports "no items" when the response replaced a list with something else entirely', () => {
+    expect(() =>
+      assertSafeTranslation({ general: ['а', 'б'] }, { general: 'nope' }, ''),
+    ).toThrow('has no items, expected 2');
+  });
 });
