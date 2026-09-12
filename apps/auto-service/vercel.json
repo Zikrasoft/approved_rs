@@ -1,0 +1,77 @@
+{
+  "framework": "astro",
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "dist",
+  "installCommand": "pnpm install",
+  "env": {
+    "SITE": "https://autohub.rs"
+  },
+  "redirects": [
+    {
+      "source": "/services/:path*",
+      "destination": "/ru/services/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/works/:path*",
+      "destination": "/ru/works/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/shop/:path*",
+      "destination": "/ru/shop/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/cart",
+      "destination": "/ru/cart/",
+      "permanent": true
+    },
+    {
+      "source": "/cart/",
+      "destination": "/ru/cart/",
+      "permanent": true
+    },
+    {
+      "source": "/contact",
+      "destination": "/ru/contact/",
+      "permanent": true
+    },
+    {
+      "source": "/contact/",
+      "destination": "/ru/contact/",
+      "permanent": true
+    },
+    {
+      "source": "/thanks",
+      "destination": "/ru/thanks/",
+      "permanent": true
+    },
+    {
+      "source": "/thanks/",
+      "destination": "/ru/thanks/",
+      "permanent": true
+    },
+    {
+      "source": "/privacy",
+      "destination": "/ru/privacy/",
+      "permanent": true
+    },
+    {
+      "source": "/privacy/",
+      "destination": "/ru/privacy/",
+      "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "frame-ancestors 'self'"
+        }
+      ]
+    }
+  ]
+}

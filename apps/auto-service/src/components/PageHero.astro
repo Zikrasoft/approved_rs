@@ -1,0 +1,51 @@
+---
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+import { PathBuilder } from '@/utils/paths';
+
+interface Props {
+  eyebrow: string;
+  heading: string;
+  lead?: string;
+  crumbs?: { href: string; label: string }[];
+}
+
+const { eyebrow, heading, lead, crumbs = [] } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+const trail = [
+  { href: PathBuilder.home(locale), label: site.common.homeLabel },
+  ...crumbs,
+];
+---
+
+<section class="border-b border-line bg-card">
+  <div class="wrap flex flex-col gap-4 py-10 sm:py-14">
+    <nav aria-label={site.common.breadcrumbLabel}>
+      <ol class="flex flex-wrap items-center gap-2 text-xs text-muted">
+        {
+          trail.map((crumb, i) => (
+            <li class="flex items-center gap-2">
+              {i > 0 && <span aria-hidden="true">/</span>}
+              <a
+                href={crumb.href}
+                class="transition-colors duration-150 hover:text-signal"
+              >
+                {crumb.label}
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+    <span class="eyebrow">{eyebrow}</span>
+    <h1 class="text-hero max-w-3xl">{heading}</h1>
+    {
+      lead && (
+        <p class="max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
+          {lead}
+        </p>
+      )
+    }
+  </div>
+</section>

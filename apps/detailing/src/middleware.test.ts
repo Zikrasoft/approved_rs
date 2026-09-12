@@ -1,9 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-
-let hasLocale = false;
+import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('astro:middleware', () => ({ defineMiddleware: (fn: unknown) => fn }));
-vi.mock('astro:i18n', () => ({ requestHasLocale: () => hasLocale }));
 
 const { isUnlocalized, onRequest } = await import('./middleware');
 
@@ -59,10 +56,6 @@ describe('isUnlocalized', () => {
 });
 
 describe('onRequest', () => {
-  beforeEach(() => {
-    hasLocale = false;
-  });
-
   it('passes an unlocalized path straight through without touching cookies', () => {
     const context = makeContext('/api/leads');
     const next = vi.fn(() => 'next');
@@ -73,7 +66,6 @@ describe('onRequest', () => {
   });
 
   it('continues to a localized page and remembers the locale in a cookie', () => {
-    hasLocale = true;
     const context = makeContext('/sr/services/');
     const next = vi.fn(() => 'next');
     expect(run(context, next)).toBe('next');
@@ -108,17 +100,23 @@ describe('onRequest', () => {
     expect(context.redirect).toHaveBeenCalledWith('/sr/?utm_source=ig', 302);
   });
 
-  it('301s an unprefixed content path onto the detected locale, query string included', () => {
+  it('sends an unprefixed content path to the detected locale with a temporary redirect, query string included', () => {
     const context = makeContext('/services/paint-protection-film/?ref=x', 'sr');
     run(context);
     expect(context.redirect).toHaveBeenCalledWith(
       '/sr/services/paint-protection-film/?ref=x',
-      301,
+      302,
     );
   });
 
+  it('treats a locale segment deeper in the path as unprefixed rather than trusting it', () => {
+    const context = makeContext('/anything/ru/');
+    run(context);
+    expect(context.cookies.set).not.toHaveBeenCalled();
+    expect(context.redirect).toHaveBeenCalledWith('/ru/anything/ru/', 302);
+  });
+
   it('does not double the locale prefix on an already-prefixed path', () => {
-    hasLocale = true;
     const context = makeContext('/en/contact/');
     run(context);
     expect(context.redirect).not.toHaveBeenCalled();

@@ -45,14 +45,14 @@ function isPlaceholderContact(contact: string): boolean {
   return contact === '' || contact === '—';
 }
 
-export const MAX_COMMENT_LENGTH = 4000;
+const MAX_STORED_COMMENT_LENGTH = 4000;
 
 export function appendNote(
   comment: string | null | undefined,
   note: string,
 ): string {
   const next = comment ? `${comment}\n${note}` : note;
-  return next.slice(0, MAX_COMMENT_LENGTH);
+  return next.slice(0, MAX_STORED_COMMENT_LENGTH);
 }
 
 export function createLeadStore({ storage, schema }: LeadStoreOptions) {
@@ -227,7 +227,9 @@ export function createLeadStore({ storage, schema }: LeadStoreOptions) {
             : {}),
           comment: appendNote(
             existing.comment,
-            `Также пробовал: ${data.service}`,
+            [`Также пробовал: ${data.service}`, data.comment?.trim()]
+              .filter(Boolean)
+              .join('\n'),
           ),
         };
         outcome = { lead: merged, merged: true };

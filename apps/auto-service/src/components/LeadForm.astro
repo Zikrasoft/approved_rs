@@ -1,0 +1,152 @@
+---
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+import { getServicesContent } from '@/i18n/content/services';
+import Icon from './Icon.astro';
+import SelectField from './SelectField.astro';
+import { PathBuilder } from '@/utils/paths';
+import {
+  SERVICE_SLUGS,
+  SHOP_SERVICE,
+  type ServiceSlug,
+} from '@/utils/services';
+
+interface Props {
+  service?: ServiceSlug | typeof SHOP_SERVICE;
+  fixedService?: boolean;
+  compact?: boolean;
+  comment?: string;
+  class?: string;
+}
+
+const {
+  service,
+  fixedService = false,
+  compact = false,
+  comment = '',
+  class: className = '',
+} = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+const services = getServicesContent(locale);
+---
+
+<form
+  method="POST"
+  action="/api/leads"
+  data-lead-form
+  data-submitting-label={site.form.submitting}
+  class={`flex flex-col gap-4 ${className}`}
+>
+  <input type="hidden" name="locale" value={locale} />
+  <div class="hidden" aria-hidden="true">
+    <label>
+      website
+      <input type="text" name="website" tabindex="-1" autocomplete="off" />
+    </label>
+  </div>
+
+  <input type="hidden" name="source_url" data-source-url />
+  <input type="hidden" name="visitor_id" data-visitor-id />
+
+  <div class={compact ? 'flex flex-col gap-4' : 'grid gap-4 sm:grid-cols-2'}>
+    <label class="block">
+      <span class="field-label">{site.form.nameLabel}</span>
+      <input
+        name="name"
+        type="text"
+        required
+        autocomplete="name"
+        placeholder={site.form.namePlaceholder}
+        class="field"
+      />
+    </label>
+    <label class="block">
+      <span class="field-label">{site.form.contactLabel}</span>
+      <input
+        name="contact"
+        type="tel"
+        required
+        autocomplete="tel"
+        placeholder={site.form.contactPlaceholder}
+        class="field"
+      />
+    </label>
+  </div>
+
+  {fixedService && <input type="hidden" name="service" value={service} />}
+
+  <div class={compact ? 'flex flex-col gap-4' : 'grid gap-4 sm:grid-cols-2'}>
+    {
+      !fixedService && (
+        <SelectField
+          name="service"
+          label={site.form.serviceLabel}
+          placeholder={site.form.servicePlaceholder}
+        >
+          {SERVICE_SLUGS.map((slug) => (
+            <option value={slug} selected={slug === service}>
+              {services[slug].name}
+            </option>
+          ))}
+        </SelectField>
+      )
+    }
+    <label class="block">
+      <span class="field-label">{site.form.carLabel}</span>
+      <input
+        name="car"
+        type="text"
+        placeholder={site.form.carPlaceholder}
+        class="field"
+      />
+    </label>
+  </div>
+
+  <label class="block">
+    <span class="field-label">{site.form.commentLabel}</span>
+    <textarea
+      name="comment"
+      rows={compact ? 2 : 3}
+      placeholder={site.form.commentPlaceholder}
+      class="field resize-none">{comment}</textarea
+    >
+  </label>
+
+  <button type="submit" class="btn btn-primary mt-1 w-full sm:w-auto">
+    <span data-submit-label>{site.form.submit}</span>
+    <Icon name="arrowRight" />
+  </button>
+
+  <p class="text-xs leading-relaxed text-muted">
+    {site.form.privacyNote}{' '}
+    <a
+      href={PathBuilder.privacy(locale)}
+      class="underline underline-offset-2 transition-colors duration-150 hover:text-signal"
+      >{site.form.privacyLinkText}</a
+    >.
+  </p>
+</form>
+
+<script>
+  import { getOrCreateVisitorId } from '@podbor/site-kit/browser';
+
+  document
+    .querySelectorAll<HTMLFormElement>('[data-lead-form]')
+    .forEach((form) => {
+      const source = form.querySelector<HTMLInputElement>('[data-source-url]');
+      const visitor = form.querySelector<HTMLInputElement>('[data-visitor-id]');
+      if (source) source.value = location.href;
+      if (visitor) visitor.value = getOrCreateVisitorId();
+
+      form.addEventListener('submit', () => {
+        const button = form.querySelector<HTMLButtonElement>(
+          'button[type="submit"]',
+        );
+        const labelEl = form.querySelector<HTMLElement>('[data-submit-label]');
+        const submitting = form.dataset.submittingLabel;
+        if (button) button.disabled = true;
+        if (labelEl && submitting) labelEl.textContent = submitting;
+      });
+    });
+</script>

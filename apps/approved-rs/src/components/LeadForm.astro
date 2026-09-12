@@ -81,6 +81,12 @@ const fieldClass =
     data-err-phone-invalid={lf.errorPhoneInvalid}
   >
     <input type="hidden" name="locale" value={locale} />
+    <div class="hidden" aria-hidden="true">
+      <label>
+        website
+        <input type="text" name="website" tabindex="-1" autocomplete="off" />
+      </label>
+    </div>
     <input type="hidden" name="service" value={service} />
     <input type="hidden" name="country" value={country} />
     <input type="hidden" name="city" value={city} />

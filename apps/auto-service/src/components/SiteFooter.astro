@@ -1,0 +1,104 @@
+---
+import Wordmark from './Wordmark.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+import { getServicesContent } from '@/i18n/content/services';
+import { PathBuilder } from '@/utils/paths';
+import { SERVICE_SLUGS } from '@/utils/services';
+import { GARAGE_ADDRESS, PHONE_NUMBER, SITE_NAME } from '@/utils/constants';
+import { CONTACT_LINKS, formatPhone } from '@/utils/contactLinks';
+
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+const services = getServicesContent(locale);
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-20 border-t border-line bg-card">
+  <div class="wrap grid gap-10 py-12 md:grid-cols-4">
+    <div class="flex flex-col gap-4">
+      <Wordmark />
+      <p class="max-w-xs text-sm leading-relaxed text-muted">
+        {site.footer.tagline}
+      </p>
+    </div>
+
+    <nav class="flex flex-col gap-2.5" aria-label={site.footer.servicesHeading}>
+      <span
+        class="spec text-[0.6875rem] uppercase tracking-[0.16em] text-muted"
+      >
+        {site.footer.servicesHeading}
+      </span>
+      {
+        SERVICE_SLUGS.map((slug) => (
+          <a
+            href={PathBuilder.service(locale, slug)}
+            class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal"
+          >
+            {services[slug].name}
+          </a>
+        ))
+      }
+    </nav>
+
+    <nav class="flex flex-col gap-2.5" aria-label={site.footer.companyHeading}>
+      <span
+        class="spec text-[0.6875rem] uppercase tracking-[0.16em] text-muted"
+      >
+        {site.footer.companyHeading}
+      </span>
+      <a
+        href={PathBuilder.works(locale)}
+        class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal"
+        >{site.nav.works}</a
+      >
+      <a
+        href={PathBuilder.shop(locale)}
+        class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal"
+        >{site.nav.shop}</a
+      >
+      <a
+        href={PathBuilder.contact(locale)}
+        class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal"
+        >{site.nav.contact}</a
+      >
+      <a
+        href={PathBuilder.privacy(locale)}
+        class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal"
+        >{site.footer.privacyLabel}</a
+      >
+    </nav>
+
+    <div class="flex flex-col gap-2.5">
+      <span
+        class="spec text-[0.6875rem] uppercase tracking-[0.16em] text-muted"
+      >
+        {site.footer.contactHeading}
+      </span>
+      <a
+        href={CONTACT_LINKS.phone}
+        data-contact-channel="phone"
+        class="spec text-sm font-medium text-ink transition-colors duration-150 hover:text-signal"
+      >
+        {formatPhone(PHONE_NUMBER)}
+      </a>
+      <address class="text-sm not-italic leading-relaxed text-muted">
+        {GARAGE_ADDRESS.street}<br />{
+          `${GARAGE_ADDRESS.postalCode} ${GARAGE_ADDRESS.city}`
+        }
+      </address>
+      <span
+        class="spec text-[0.6875rem] uppercase tracking-[0.16em] text-muted"
+      >
+        {site.footer.hoursHeading}
+      </span>
+      <span class="text-sm text-muted">{site.footer.hours}</span>
+    </div>
+  </div>
+
+  <div class="border-t border-line">
+    <p class="wrap py-5 text-xs text-muted">
+      {`© ${year} ${SITE_NAME}. ${site.footer.rightsSuffix}`}
+    </p>
+  </div>
+</footer>

@@ -1,8 +1,16 @@
 import type { NotifyLead } from '../notifyLead.ts';
 
 export const MAX_FIELD_LENGTH = 200;
+export const HONEYPOT_FIELD = 'website';
 export const MAX_COMMENT_LENGTH = 2000;
 export const MAX_URL_LENGTH = 500;
+
+const VISITOR_ID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+export function visitorId(value: string): string | null {
+  return VISITOR_ID.test(value) ? value : null;
+}
 
 export interface RouteRequestContext {
   request: Request;
@@ -49,11 +57,19 @@ export function createLeadsRoute<L extends string>({
     const locale: L =
       requested && isLocale(requested) ? requested : defaultLocale;
 
+    if (field(HONEYPOT_FIELD)) {
+      return redirect(thanksPath(locale), 302);
+    }
+
     if (!name || !contact) {
       return new Response(messages.get(locale) ?? messages.get(defaultLocale), {
         status: 400,
       });
     }
+
+    const car = field('car');
+    const note = field('comment', MAX_COMMENT_LENGTH);
+    const comment = [car, note].filter(Boolean).join('\n');
 
     waitUntil(
       notifyLead(
@@ -62,10 +78,10 @@ export function createLeadsRoute<L extends string>({
           contact,
           service: field('service'),
           contactChannel: field('contact_channel') || null,
-          comment: field('comment', MAX_COMMENT_LENGTH) || null,
+          comment: comment || null,
           country: field('country') || null,
           source_url: field('source_url', MAX_URL_LENGTH) || null,
-          visitorId: field('visitor_id') || null,
+          visitorId: visitorId(field('visitor_id')),
           locale,
         },
         '[leads]',

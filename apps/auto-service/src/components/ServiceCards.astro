@@ -1,0 +1,45 @@
+---
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getServicesContent } from '@/i18n/content/services';
+import { getSiteContent } from '@/i18n/content/site';
+import { PathBuilder } from '@/utils/paths';
+import { SERVICE_SLUGS } from '@/utils/services';
+
+const locale = localeFrom(Astro.url.pathname);
+const services = getServicesContent(locale);
+const site = getSiteContent(locale);
+---
+
+<ul class="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+  {
+    SERVICE_SLUGS.map((slug) => {
+      const service = services[slug];
+      return (
+        <li>
+          <a
+            href={PathBuilder.service(locale, slug)}
+            class="card group flex h-full flex-col gap-3 p-5 transition-colors duration-150 hover:border-ink"
+          >
+            <span class="flex h-9 w-9 items-center justify-center rounded-block bg-shade text-signal">
+              <Icon name="wrench" size={16} />
+            </span>
+            <h3 class="text-base font-semibold text-ink">{service.name}</h3>
+            <p class="text-sm leading-relaxed text-muted">{service.short}</p>
+            <div class="mt-auto flex items-center justify-between gap-3 pt-3">
+              <span class="spec text-sm text-ink">{service.priceFrom}</span>
+              <span class="flex items-center gap-1.5 text-xs font-medium text-signal">
+                {site.common.readMore}
+                <Icon
+                  name="arrowRight"
+                  size={12}
+                  class="transition-transform duration-150 group-hover:translate-x-0.5"
+                />
+              </span>
+            </div>
+          </a>
+        </li>
+      );
+    })
+  }
+</ul>

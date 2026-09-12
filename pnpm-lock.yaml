@@ -144,6 +144,82 @@ importers:
         specifier: 3.2.6
         version: 3.2.6(@edge-runtime/vm@3.2.0)(@types/debug@4.1.13)(@types/node@24.13.2)(@vitest/ui@3.2.6)(jiti@2.7.0)(lightningcss@1.32.0)(supports-color@7.2.0)(tsx@4.21.0)(yaml@2.9.0)
 
+  apps/auto-service:
+    dependencies:
+      '@astrojs/react':
+        specifier: 6.0.5
+        version: 6.0.5(@types/node@24.13.2)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(esbuild@0.28.1)(jiti@2.7.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)(tsx@4.21.0)(yaml@2.9.0)
+      '@astrojs/sitemap':
+        specifier: 3.7.4
+        version: 3.7.4
+      '@astrojs/vercel':
+        specifier: 11.0.9
+        version: 11.0.9(astro@7.2.10(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.2)(@vercel/blob@2.8.0)(@vercel/functions@3.9.5(ws@8.21.3))(idb-keyval@6.2.6)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(react@19.2.8)(rollup@4.62.2)(supports-color@7.2.0)(ws@8.21.3)
+      '@fontsource/ibm-plex-mono':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@fontsource/ibm-plex-sans':
+        specifier: 5.3.0
+        version: 5.3.0
+      '@keystatic/astro':
+        specifier: 6.0.0
+        version: 6.0.0(@keystatic/core@0.6.9(@keystar/ui@0.10.0(react-aria@3.50.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react-stately@3.48.0(react@19.2.8))(react@19.2.8))(react-aria@3.50.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react-stately@3.48.0(react@19.2.8))(react@19.2.8)(supports-color@7.2.0))(astro@7.2.10(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.2)(@vercel/blob@2.8.0)(@vercel/functions@3.9.5(ws@8.21.3))(idb-keyval@6.2.6)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@keystatic/core':
+        specifier: 0.6.9
+        version: 0.6.9(@keystar/ui@0.10.0(react-aria@3.50.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react-stately@3.48.0(react@19.2.8))(react@19.2.8))(react-aria@3.50.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react-stately@3.48.0(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)
+      '@podbor/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
+      '@podbor/lead-crm':
+        specifier: workspace:*
+        version: link:../../packages/lead-crm
+      '@podbor/site-kit':
+        specifier: workspace:*
+        version: link:../../packages/site-kit
+      '@vercel/blob':
+        specifier: 2.8.0
+        version: 2.8.0
+      '@vercel/functions':
+        specifier: 3.9.5
+        version: 3.9.5(ws@8.21.3)
+      astro:
+        specifier: 7.2.10
+        version: 7.2.10(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.2)(@vercel/blob@2.8.0)(@vercel/functions@3.9.5(ws@8.21.3))(idb-keyval@6.2.6)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0)
+      react:
+        specifier: 19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: 19.2.8
+        version: 19.2.8(react@19.2.8)
+      zod:
+        specifier: 4.5.4
+        version: 4.5.4
+    devDependencies:
+      '@astrojs/check':
+        specifier: 0.9.10
+        version: 0.9.10(prettier-plugin-astro@0.14.1)(prettier@3.9.6)(typescript@5.9.3)
+      '@tailwindcss/vite':
+        specifier: 4.3.3
+        version: 4.3.3(vite@8.1.2(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))
+      sharp:
+        specifier: 0.35.4
+        version: 0.35.4(@types/node@24.13.2)
+      tailwindcss:
+        specifier: 4.3.3
+        version: 4.3.3
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vercel:
+        specifier: 59.11.7
+        version: 59.11.7(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(rollup@4.62.2)(supports-color@7.2.0)
+      vitest:
+        specifier: 3.2.6
+        version: 3.2.6(@edge-runtime/vm@3.2.0)(@types/debug@4.1.13)(@types/node@24.13.2)(@vitest/ui@3.2.6)(jiti@2.7.0)(lightningcss@1.32.0)(supports-color@7.2.0)(tsx@4.21.0)(yaml@2.9.0)
+      yaml:
+        specifier: 2.9.0
+        version: 2.9.0
+
   apps/detailing:
     dependencies:
       '@astrojs/react':
@@ -216,6 +292,9 @@ importers:
       vitest:
         specifier: 3.2.6
         version: 3.2.6(@edge-runtime/vm@3.2.0)(@types/debug@4.1.13)(@types/node@24.13.2)(@vitest/ui@3.2.6)(jiti@2.7.0)(lightningcss@1.32.0)(supports-color@7.2.0)(tsx@4.21.0)(yaml@2.9.0)
+      yaml:
+        specifier: 2.9.0
+        version: 2.9.0
 
   packages/i18n:
     dependencies:
@@ -1201,6 +1280,12 @@ packages:
 
   '@fontsource-variable/unbounded@5.3.0':
     resolution: {integrity: sha512-ea565Ncn4r7gPdBEHcmaF31V11hDfkL7b/JCklLobQbMfbu2ZZQrVWNgdeEFWFLqNh36yhieZWOgxdAnMTzrLg==}
+
+  '@fontsource/ibm-plex-mono@5.3.0':
+    resolution: {integrity: sha512-eTgnZjZEGk1QtD3ZstF+Vclo2HLAni8YMy34/DxllwZvyz1lR/1RF/xTiAquOBO7MvqBx8D2Ig2WCPMVfdZu7Q==}
+
+  '@fontsource/ibm-plex-sans@5.3.0':
+    resolution: {integrity: sha512-CbE4CbbEEZJX860XyUiRpsksXIQR8Rp2XDva2VO53NJox9tVNtusrysd2x5YkUEY3ErQ66W1IiiQL8/wihhw5w==}
 
   '@fontsource/outfit@5.3.0':
     resolution: {integrity: sha512-0AVHzTTVJSxWDOxPKSfMeHhZeBFDU3cmgrcOb76ZEyhGo0+xgyG3GsLF3h9+X8w0IX7G4jzjJgFQEBiWdX6VgA==}
@@ -6432,6 +6517,10 @@ snapshots:
   '@fontsource-variable/manrope@5.3.0': {}
 
   '@fontsource-variable/unbounded@5.3.0': {}
+
+  '@fontsource/ibm-plex-mono@5.3.0': {}
+
+  '@fontsource/ibm-plex-sans@5.3.0': {}
 
   '@fontsource/outfit@5.3.0': {}
 

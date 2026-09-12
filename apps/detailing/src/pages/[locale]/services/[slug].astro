@@ -11,18 +11,18 @@ import { getServicesContent } from '@/i18n/content/services';
 import { getPagesContent } from '@/i18n/content/pages';
 import { getSiteContent } from '@/i18n/content/site';
 import { PathBuilder, withLocales } from '@/utils/paths';
-import { SERVICE_SLUGS, isServiceSlug } from '@/utils/services';
+import { SERVICE_SLUGS } from '@/utils/services';
 import { publishedWorks } from '@/utils/works';
 import { safeMarkdown } from '@podbor/site-kit';
 import { SITE_URL } from '@/utils/constants';
 
 export function getStaticPaths() {
-  return withLocales(SERVICE_SLUGS.map((slug) => ({ params: { slug } })));
+  return withLocales(
+    SERVICE_SLUGS.map((slug) => ({ params: { slug }, props: { slug } })),
+  );
 }
 
-const rawSlug = Astro.params.slug ?? '';
-if (!isServiceSlug(rawSlug)) return Astro.rewrite('/404');
-const slug = rawSlug;
+const { slug } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const services = getServicesContent(locale);
 const pages = getPagesContent(locale);

@@ -89,10 +89,16 @@ describe('createContactClickRoute', () => {
 
   it('passes visitor_id through as visitorId', async () => {
     await POST(
-      makeCtx({ channel: 'phone', source_url: '/ru/', visitor_id: 'abc-123' }),
+      makeCtx({
+        channel: 'phone',
+        source_url: '/ru/',
+        visitor_id: '9f1c2b7e-4a3d-4c9e-8b21-6f0d5a7c3e11',
+      }),
     );
     expect(notifyLead).toHaveBeenCalledWith(
-      expect.objectContaining({ visitorId: 'abc-123' }),
+      expect.objectContaining({
+        visitorId: '9f1c2b7e-4a3d-4c9e-8b21-6f0d5a7c3e11',
+      }),
       '[contact-click]',
     );
   });
@@ -105,17 +111,22 @@ describe('createContactClickRoute', () => {
     );
   });
 
-  it('truncates an oversized source_url and visitor_id', async () => {
+  it('truncates an oversized source_url', async () => {
     await POST(
       makeCtx({
         channel: 'phone',
         source_url: `/ru/${'a'.repeat(9000)}`,
-        visitor_id: 'b'.repeat(5000),
       }),
     );
-    const lead = notifyLead.mock.calls.at(-1)![0];
-    expect(lead.source_url).toHaveLength(500);
-    expect(lead.visitorId).toHaveLength(200);
+    expect(notifyLead.mock.calls.at(-1)![0].source_url).toHaveLength(500);
+  });
+
+  it('drops a visitor id that is not one this site could have issued', async () => {
+    await POST(makeCtx({ channel: 'phone', visitor_id: 'b'.repeat(5000) }));
+    expect(notifyLead).toHaveBeenCalledWith(
+      expect.objectContaining({ visitorId: null }),
+      '[contact-click]',
+    );
   });
 
   it('returns 204 without waiting for notifyLead to resolve', async () => {
