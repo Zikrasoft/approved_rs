@@ -5,10 +5,12 @@ import {
   translatedFromField,
 } from './sharedFields';
 
+const APP_ROOT = import.meta.env.PROD ? 'apps/approved-rs/' : '';
+
 export const casesCollection = collection({
   label: 'Кейсы автоподбора',
   slugField: 'title',
-  path: 'src/content/cases/*/',
+  path: `${APP_ROOT}src/content/cases/*/`,
   // "Preview" button in the entry editor — points at the multi-photo
   // upload prototype (src/pages/admin/case-photos.astro), preselected to
   // this exact case, since Keystatic's own gallery field only accepts
@@ -99,7 +101,7 @@ export const casesCollection = collection({
 export const autoserviceCasesCollection = collection({
   label: 'Кейсы автосервиса',
   slugField: 'title',
-  path: 'src/content/autoservice-cases/*/',
+  path: `${APP_ROOT}src/content/autoservice-cases/*/`,
   previewUrl:
     '/admin/case-photos?dir=src/content/autoservice-cases&slug={slug}',
   format: { contentField: 'content' },
@@ -138,7 +140,7 @@ export const autoserviceCasesCollection = collection({
 export const detailingCasesCollection = collection({
   label: 'Кейсы детейлинга',
   slugField: 'title',
-  path: 'src/content/detailing-cases/*/',
+  path: `${APP_ROOT}src/content/detailing-cases/*/`,
   previewUrl: '/admin/case-photos?dir=src/content/detailing-cases&slug={slug}',
   format: { contentField: 'content' },
   schema: {
