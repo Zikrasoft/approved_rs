@@ -2,6 +2,7 @@
 import { getLocale } from '@/i18n/config';
 import { getI18n } from '@/i18n/getI18n';
 import { PathBuilder } from '@/utils/paths';
+import { COOKIE_POLICY_VERSION } from '@/utils/constants';
 
 const locale = getLocale(Astro.currentLocale);
 const cc = getI18n(locale).common.cookie;
@@ -9,6 +10,7 @@ const cc = getI18n(locale).common.cookie;
 
 <div
   id="cookie-consent"
+  data-policy-version={COOKIE_POLICY_VERSION}
   hidden
   class="fixed bottom-4 left-4 right-4 sm:right-auto sm:max-w-sm z-50 rounded-sm border border-default p-5 shadow-lg"
   style="background: var(--color-surface);"
@@ -36,36 +38,44 @@ const cc = getI18n(locale).common.cookie;
   </div>
 </div>
 
-<script is:inline>
-  function initCookieConsent() {
-    let consent;
-    try {
-      consent = localStorage.getItem('cookie_consent');
-    } catch (e) {}
-    if (consent) return;
+<script>
+  import { readConsent, saveConsent } from '@podbor/site-kit/browser';
 
-    const el = document.getElementById('cookie-consent');
-    if (!el) return;
-    el.hidden = false;
+  const el = document.getElementById('cookie-consent');
+  const version = el?.dataset.policyVersion ?? '';
+
+  function answer(analytics: boolean) {
+    saveConsent(analytics, version);
+    if (analytics) window.loadAnalytics?.();
+    if (el) el.hidden = true;
+  }
+
+  function open() {
+    if (el) el.hidden = false;
+  }
+
+  if (el) {
+    const stored = readConsent(version);
+    if (stored) {
+      if (stored.analytics) window.loadAnalytics?.();
+    } else {
+      open();
+    }
 
     document
       .getElementById('cookie-accept')
-      .addEventListener('click', function () {
-        try {
-          localStorage.setItem('cookie_consent', 'granted');
-        } catch (e) {}
-        if (window.loadAnalytics) window.loadAnalytics();
-        el.hidden = true;
-      });
-
+      ?.addEventListener('click', () => answer(true));
     document
       .getElementById('cookie-decline')
-      .addEventListener('click', function () {
-        try {
-          localStorage.setItem('cookie_consent', 'denied');
-        } catch (e) {}
-        el.hidden = true;
-      });
+      ?.addEventListener('click', () => answer(false));
+
+    document.addEventListener('click', (event) => {
+      const trigger = (event.target as Element | null)?.closest(
+        '[data-cookie-settings]',
+      );
+      if (!trigger) return;
+      event.preventDefault();
+      open();
+    });
   }
-  initCookieConsent();
 </script>

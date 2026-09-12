@@ -142,6 +142,9 @@ const coverageLine = getActiveCountries()
           <a href={PathBuilder.casesVehicleSourcing(locale)}>{t.nav.cases}</a>
           <a href={PathBuilder.contacts(locale)}>{t.nav.contacts}</a>
           <a href={PathBuilder.privacy(locale)}>{t.footer.privacyLabel}</a>
+          <button type="button" data-cookie-settings class="w-fit text-left">
+            {t.footer.cookieSettingsLabel}
+          </button>
         </nav>
         <div class="mt-6 space-y-1.5">
           <p class="text-xs text-muted">{coverageLine}</p>

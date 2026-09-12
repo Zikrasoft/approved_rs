@@ -20,7 +20,8 @@ footer:
     Подберём, проверим и доставим автомобиль из Европы. Берём на себя весь процесс — от поиска до доставки.
   contactManagerLabel: Написать менеджеру
   hoursLine: Круглосуточно, без выходных
-  copyrightSuffix: Автоподбор, сервис и доставка авто из Европы
+  copyrightSuffix: Автоподбор, проверка и доставка авто из Европы
+  cookieSettingsLabel: Настройки cookie
   channelLinkLabel: Наш канал
 common:
   otherServicesLabel: 'Другие услуги:'
@@ -66,7 +67,8 @@ translations:
       tagline: We source, inspect, and deliver cars from Europe. We handle the entire process — from search to delivery.
       contactManagerLabel: Message Manager
       hoursLine: 24/7, no weekends
-      copyrightSuffix: Car sourcing, service, and delivery from Europe
+      copyrightSuffix: Car sourcing, inspection and delivery from Europe
+      cookieSettingsLabel: Cookie settings
       channelLinkLabel: Our Channel
     common:
       otherServicesLabel: 'Other Services:'
@@ -110,7 +112,8 @@ translations:
       tagline: Pronaći ćemo, proveriti i dostaviti automobil iz Evrope. Preuzimamo celu proceduru — od pretrage do dostave.
       contactManagerLabel: Kontaktirajte menadžera
       hoursLine: 24/7, bez pauza
-      copyrightSuffix: Autopodbor, servis i dostava automobila iz Evrope
+      copyrightSuffix: Odabir, provera i dostava automobila iz Evrope
+      cookieSettingsLabel: Podešavanja kolačića
       channelLinkLabel: Naš kanal
     common:
       otherServicesLabel: 'Druge usluge:'
@@ -154,7 +157,8 @@ translations:
       tagline: Seleccionamos, inspeccionamos y entregamos auto de Europa. Nos encargamos de todo el proceso, desde la búsqueda hasta la entrega.
       contactManagerLabel: Escribir al gerente
       hoursLine: 24 horas al día, sin días libres
-      copyrightSuffix: Selección de autos, servicio y entrega de autos de Europa
+      copyrightSuffix: Búsqueda, inspección y entrega de autos desde Europa
+      cookieSettingsLabel: Configuración de cookies
       channelLinkLabel: Nuestro canal
     common:
       otherServicesLabel: 'Otros servicios:'
@@ -198,7 +202,8 @@ translations:
       tagline: Wir suchen, überprüfen und liefern Autos aus Europa. Wir übernehmen den gesamten Prozess — von der Suche bis zur Lieferung.
       contactManagerLabel: Manager kontaktieren
       hoursLine: Rund um die Uhr, ohne Feiertage
-      copyrightSuffix: Fahrzeugbeschaffung, Service und Lieferung von Autos aus Europa
+      copyrightSuffix: Fahrzeugbeschaffung, Prüfung und Lieferung aus Europa
+      cookieSettingsLabel: Cookie-Einstellungen
       channelLinkLabel: Unser Kanal
     common:
       otherServicesLabel: 'Weitere Dienstleistungen:'

@@ -39,6 +39,7 @@ export const dictionaryContentSchema = z
         contactManagerLabel: z.string(),
         hoursLine: z.string(),
         copyrightSuffix: z.string(),
+        cookieSettingsLabel: z.string(),
         channelLinkLabel: z.string(),
       })
       .strict(),
