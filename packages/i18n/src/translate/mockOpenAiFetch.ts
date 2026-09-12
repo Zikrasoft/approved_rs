@@ -1,9 +1,5 @@
 import { vi } from 'vitest';
 
-// The OpenAI SDK reads real Response semantics (`.headers`, single-read
-// body) off whatever global `fetch` returns — a plain `{ ok, json() }` mock
-// object throws inside the SDK's own response handling. Shared by every
-// translate-*.test.ts that stubs fetch to fake a chat-completion response.
 export function openAiChatResponse(contentObj: unknown): Response {
   return new Response(
     JSON.stringify({
@@ -20,9 +16,6 @@ export function openAiErrorResponse(message: string, status = 500): Response {
   });
 }
 
-// Stubs global fetch to return a fixed chat-completion response, once per
-// test — the common case (translate-cases.test.ts's/translate-i18n.test.ts's
-// `mockResponse`).
 export function stubOpenAiResponse(contentObj: unknown): void {
   vi.stubGlobal(
     'fetch',
@@ -30,9 +23,6 @@ export function stubOpenAiResponse(contentObj: unknown): void {
   );
 }
 
-// Stubs global fetch to echo back whatever `transform` returns for the
-// request's user-message content — simulates "OpenAI translated the
-// source" without a real API call.
 export function stubOpenAiFetch(
   transform: (userContent: string) => unknown,
 ): void {

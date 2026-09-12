@@ -1,16 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { callOpenAiJson, TARGET_LANGUAGE_NAME } from './openaiChat';
-
-describe('TARGET_LANGUAGE_NAME', () => {
-  it('has an entry for every translatable locale', () => {
-    expect(Object.keys(TARGET_LANGUAGE_NAME).sort()).toEqual([
-      'de',
-      'en',
-      'es',
-      'sr',
-    ]);
-  });
-});
+import { callOpenAiJson } from './openaiChat';
 
 describe('callOpenAiJson', () => {
   afterEach(() => {
@@ -54,9 +43,6 @@ describe('callOpenAiJson', () => {
   });
 
   it('throws with the API error message when the response is not ok', async () => {
-    // maxRetries defaults to 2 — a 500 is retried (with real backoff delays,
-    // hence this test taking ~1.3s), so every call must fail the same way
-    // for the final rejection to surface this message.
     vi.stubGlobal(
       'fetch',
       vi

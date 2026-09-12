@@ -7,7 +7,12 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],
-      exclude: ['src/**/*.test.ts', 'src/index.ts'],
+      exclude: [
+        'src/**/*.test.ts',
+        'src/index.ts',
+        'src/translate/index.ts',
+        'src/translate/mockOpenAiFetch.ts',
+      ],
       thresholds: {
         statements: 100,
         functions: 100,

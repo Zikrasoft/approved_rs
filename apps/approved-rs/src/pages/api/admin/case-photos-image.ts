@@ -1,8 +1,6 @@
 export const prerender = false;
 
 import type { APIContext } from 'astro';
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
 import {
   isKnownCaseDir,
   isValidSlug,
@@ -65,18 +63,30 @@ export async function GET({ request, cookies }: APIContext): Promise<Response> {
     }
   }
 
-  try {
-    const buffer = await readFile(path.join(process.cwd(), relPath));
-    return new Response(new Uint8Array(buffer), {
-      headers: {
-        'Content-Type': contentType,
-        'Cache-Control': 'private, max-age=300',
-      },
-    });
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
-      return new Response('Not found', { status: 404 });
+  return readLocalPhoto(relPath, contentType);
+}
+
+async function readLocalPhoto(
+  relPath: string,
+  contentType: string,
+): Promise<Response> {
+  if (import.meta.env.DEV) {
+    const { readFile } = await import('node:fs/promises');
+    const path = await import('node:path');
+    try {
+      const buffer = await readFile(path.join(process.cwd(), relPath));
+      return new Response(new Uint8Array(buffer), {
+        headers: {
+          'Content-Type': contentType,
+          'Cache-Control': 'private, max-age=300',
+        },
+      });
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+        return new Response('Not found', { status: 404 });
+      }
+      throw err;
     }
-    throw err;
   }
+  return new Response('Not found', { status: 404 });
 }
