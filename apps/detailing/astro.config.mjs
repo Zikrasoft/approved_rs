@@ -19,7 +19,7 @@ export default defineConfig({
     react(),
     keystatic(),
     sitemap({
-      filter: (page) => !page.includes('/hvala/'),
+      filter: (page) => !page.includes('/thanks/'),
       i18n: {
         defaultLocale: localeConfig.defaultLocale,
         locales: BCP47_BY_LOCALE,

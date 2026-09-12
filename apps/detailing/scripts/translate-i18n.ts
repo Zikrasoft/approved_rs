@@ -42,12 +42,16 @@ export const SECTIONS: readonly Section[] = [
   },
 ];
 
-const { run } = createSectionTranslator({
+const { run, recordHashes } = createSectionTranslator({
   targetLocales: TRANSLATABLE_LOCALES,
   languageName: TARGET_LANGUAGE_NAME,
   businessDescription: BUSINESS_DESCRIPTION,
 });
 
 if (import.meta.url === `file://${process.argv[1]}`) {
+  if (process.argv.includes('--record-hashes')) {
+    console.log(`rehashed ${recordHashes(SECTIONS)} section(s)`);
+    process.exit(0);
+  }
   process.exit(await run(SECTIONS));
 }
