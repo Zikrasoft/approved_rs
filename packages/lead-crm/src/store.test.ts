@@ -170,7 +170,7 @@ describe('insertOrMergeLead', () => {
     expect(await store.readLeads()).toHaveLength(2);
   });
 
-  it('keeps what the second submission actually said, not just the service name', async () => {
+  it('keeps both the service name and what the second submission actually said', async () => {
     await store.insertOrMergeLead(clickData('telegram'));
     const { lead, merged } = await store.insertOrMergeLead({
       ...baseData,
@@ -180,6 +180,7 @@ describe('insertOrMergeLead', () => {
 
     expect(merged).toBe(true);
     expect(lead.comment).toContain('Аккумулятор 60 Ah × 1 — 95 €');
+    expect(lead.comment).toContain(`Также пробовал: ${baseData.service}`);
   });
 
   it('falls back to naming the service when the second submission carried no comment', async () => {
