@@ -7,7 +7,7 @@ import {
 } from '@podbor/lead-crm';
 import type { TrackedContactChannel } from '@/utils/contactChannel';
 import { SERVICE_LABELS } from '@/utils/labels';
-import { DEFAULT_COMMISSION_PERCENT, leadStore } from './crm';
+import { BRAND, DEFAULT_COMMISSION_PERCENT, leadStore } from './crm';
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -42,4 +42,8 @@ export const notifier = createNotifier({
   adminIds: ADMIN_IDS,
 });
 
-export const notifyLead = createNotifyLead({ store: leadStore, notifier });
+export const notifyLead = createNotifyLead({
+  store: leadStore,
+  notifier,
+  brand: BRAND,
+});

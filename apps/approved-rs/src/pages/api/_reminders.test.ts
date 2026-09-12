@@ -28,6 +28,7 @@ function makeCtx(
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
   return {
     id: 1,
+    brand: 'Approved.rs',
     name: 'Иван',
     contact: '@ivan',
     service: 'vehicle-sourcing',

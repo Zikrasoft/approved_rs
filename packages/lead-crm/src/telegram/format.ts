@@ -151,7 +151,7 @@ export function buildLeadList(
     .slice(0, MAX_LIST_ROWS)
     .map((l) => [
       {
-        text: `#${l.id} ${l.name || '—'} · ${statusEmoji(l.status)}`,
+        text: `#${l.id} ${l.name || '—'} · ${l.brand} · ${statusEmoji(l.status)}`,
         callback_data: `open:${l.id}`,
       },
     ]);
@@ -236,7 +236,7 @@ export function formatDealsList(leads: StoredLead[]): string {
   if (deals.length === 0) return '<b>💰 Все сделки</b>\n\nСделок пока нет.';
   const lines = deals.map((l) => {
     const info = getCommission(l);
-    return `#${l.id} ${escapeHtml(l.name)}\nдоход ${formatMoney(l.dealAmount)} · комиссия ${formatMoney(info.commission)}\n${paidStatusMark(l, info)}`;
+    return `#${l.id} ${escapeHtml(l.name)} · ${escapeHtml(l.brand)}\nдоход ${formatMoney(l.dealAmount)} · комиссия ${formatMoney(info.commission)}\n${paidStatusMark(l, info)}`;
   });
   return ['<b>💰 Все сделки</b>', ...lines].join('\n\n');
 }
@@ -254,7 +254,7 @@ export function buildSearchResults(leads: StoredLead[]): {
     const amount =
       l.dealAmount != null ? ` — ${formatMoney(l.dealAmount)}` : '';
     const archivedMark = l.archived ? '🗄 ' : '';
-    const label = `${archivedMark}${statusEmoji(l.status)} #${l.id} ${l.name} — ${l.contact}${amount}`;
+    const label = `${archivedMark}${statusEmoji(l.status)} #${l.id} ${l.brand} ${l.name} — ${l.contact}${amount}`;
     return [{ text: label, callback_data: `open:${l.id}` }];
   });
   return { text: 'Найдено:', reply_markup: { inline_keyboard: rows } };
@@ -291,11 +291,25 @@ export function buildStats(leads: StoredLead[], role: Role): string {
           `🔴 Осталось получить: ${formatMoney(remainingTotal)}`,
         ];
 
+  const brands = [...new Set(active.map((l) => l.brand))].sort();
+  const brandLines =
+    brands.length > 1
+      ? [
+          `По брендам: ${brands
+            .map(
+              (b) =>
+                `${escapeHtml(b)} — ${active.filter((l) => l.brand === b).length}`,
+            )
+            .join(' · ')}`,
+        ]
+      : [];
+
   return [
     '<b>📊 Статистика</b>',
     '',
     `Всего заявок: ${active.length}${archivedCount ? ` (+${archivedCount} в архиве)` : ''}`,
     `🆕 Новые: ${count('new')}   🗣 Переговоры: ${count('negotiations')}   🔵 В работе: ${count('in_progress')}   ✅ Завершено: ${count('won')}   ❌ Отказ: ${count('lost')}   ⏸ Отложено: ${count('postponed')}`,
+    ...brandLines,
     '',
     ...moneyLines,
   ].join('\n');
@@ -354,6 +368,7 @@ export function createFormatter({
       : lead.contact;
     const lines: string[] = [
       `🚗 Заявка #${lead.id} — ${escapeHtml(serviceLabel(lead.service))}`,
+      `🏷 ${escapeHtml(lead.brand)}`,
       statusLine(lead.status),
     ];
     if (lead.dealAmount != null) {

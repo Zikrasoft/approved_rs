@@ -1,16 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { APIContext } from 'astro';
+import { createContactClickRoute } from './contactClick.ts';
 
-vi.mock('@vercel/functions', () => ({
-  waitUntil: vi.fn(),
-}));
-vi.mock('../../lib/notifyLead', () => ({
-  notifyLead: vi.fn().mockResolvedValue(undefined),
-}));
+const notifyLead = vi.fn().mockResolvedValue(undefined);
+const waitUntil = vi.fn();
 
-import { POST } from './contact-click';
-import { waitUntil } from '@vercel/functions';
-import { notifyLead } from '@/lib/notifyLead';
+const POST = createContactClickRoute({
+  notifyLead,
+  waitUntil,
+  defaultLocale: 'ru',
+});
 
 function makeCtx(fields: Record<string, string>) {
   const formData = new FormData();
@@ -20,44 +18,42 @@ function makeCtx(fields: Record<string, string>) {
       method: 'POST',
       body: formData,
     }),
-  } as unknown as APIContext;
+  };
 }
 
-describe('POST /api/contact-click', () => {
+describe('createContactClickRoute', () => {
   beforeEach(() => {
-    vi.mocked(notifyLead).mockResolvedValue(undefined);
-    vi.mocked(waitUntil).mockReset();
+    notifyLead.mockReset().mockResolvedValue(undefined);
+    waitUntil.mockReset();
   });
 
   it('returns 204', async () => {
-    const res = await POST(
-      makeCtx({ channel: 'phone', source_url: '/ru/vehicle-sourcing/de/' }),
-    );
+    const res = await POST(makeCtx({ channel: 'phone', source_url: '/ru/' }));
     expect(res.status).toBe(204);
   });
 
   it('defaults to phone wording when no channel is given', async () => {
-    await POST(makeCtx({ source_url: '/ru/vehicle-sourcing/de/' }));
+    await POST(makeCtx({ source_url: '/ru/' }));
     expect(notifyLead).toHaveBeenCalledWith(
       expect.objectContaining({
         contactChannel: 'phone',
         service: 'Звонок с сайта',
         kind: 'call_click',
         name: '',
+        locale: 'ru',
       }),
       '[contact-click]',
     );
   });
 
-  it('dispatches notifyLead via waitUntil with the clicked channel and an empty name', async () => {
-    await POST(
-      makeCtx({ channel: 'telegram', source_url: '/ru/vehicle-sourcing/de/' }),
-    );
+  it('dispatches notifyLead via waitUntil with the clicked channel', async () => {
+    await POST(makeCtx({ channel: 'telegram', source_url: '/ru/' }));
     expect(waitUntil).toHaveBeenCalledTimes(1);
     expect(notifyLead).toHaveBeenCalledWith(
       expect.objectContaining({
         kind: 'call_click',
         name: '',
+        contact: '—',
         contactChannel: 'telegram',
         service: 'Клик Telegram с сайта',
       }),
@@ -69,7 +65,7 @@ describe('POST /api/contact-click', () => {
     'builds channel-specific wording for %s',
     async (channel) => {
       await POST(makeCtx({ channel, source_url: '/ru/' }));
-      const call = vi.mocked(notifyLead).mock.calls.at(-1)![0];
+      const call = notifyLead.mock.calls.at(-1)![0];
       expect(call.contactChannel).toBe(channel);
       expect(call.service).toContain(
         channel === 'whatsapp' ? 'WhatsApp' : 'Viber',
@@ -101,17 +97,23 @@ describe('POST /api/contact-click', () => {
     );
   });
 
+  it('sends null for a missing source_url rather than an empty string', async () => {
+    await POST(makeCtx({ channel: 'phone' }));
+    expect(notifyLead).toHaveBeenCalledWith(
+      expect.objectContaining({ source_url: null, visitorId: null }),
+      '[contact-click]',
+    );
+  });
+
   it('returns 204 without waiting for notifyLead to resolve', async () => {
     let resolveNotify!: () => void;
-    vi.mocked(notifyLead).mockReturnValue(
-      new Promise((resolve) => {
+    notifyLead.mockReturnValue(
+      new Promise<void>((resolve) => {
         resolveNotify = resolve;
       }),
     );
 
-    const res = await POST(
-      makeCtx({ channel: 'phone', source_url: '/ru/vehicle-sourcing/de/' }),
-    );
+    const res = await POST(makeCtx({ channel: 'phone', source_url: '/ru/' }));
 
     expect(res.status).toBe(204);
     resolveNotify();

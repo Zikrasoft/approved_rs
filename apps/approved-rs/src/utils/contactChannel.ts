@@ -16,27 +16,12 @@
 // attribute (it opens the lead-request modal instead) but isn't part of
 // this set, and nothing in the codebase currently needs to type-check
 // against the full 5-value domain, so there's no separate export for it.
-export const TRACKED_CONTACT_CHANNELS = [
-  'phone',
-  'telegram',
-  'whatsapp',
-  'viber',
-] as const;
-export type TrackedContactChannel = (typeof TRACKED_CONTACT_CHANNELS)[number];
-
-// Runtime guard for values that only ever arrive as plain strings (DOM
-// dataset, FormData, JSON bodies) — narrows without an unchecked `as`
-// assertion, and doubles as the allowlist check needed before using the
-// value as an object key (an unvalidated string key on a plain object
-// literal resolves inherited Object.prototype members instead of
-// `undefined`, e.g. `obj['constructor']`).
-export function isTrackedContactChannel(
-  value: string | null | undefined,
-): value is TrackedContactChannel {
-  return (
-    !!value && (TRACKED_CONTACT_CHANNELS as readonly string[]).includes(value)
-  );
-}
+export {
+  TRACKED_CONTACT_CHANNELS,
+  isTrackedContactChannel,
+  type TrackedContactChannel,
+} from '@podbor/lead-crm';
+import type { TrackedContactChannel } from '@podbor/lead-crm';
 
 // The attribute every contact touchpoint carries (data-contact-channel="...")
 // — one querySelector/dataset read in BaseLayout.astro, but centralized
