@@ -1,6 +1,7 @@
 export { createLeadSchema } from './schema.ts';
 export type {
   LeadInput,
+  LeadSubmission,
   LeadSchemaOptions,
   LeadStatus,
   PendingCommissionClaim,
@@ -55,3 +56,16 @@ export { createNotifier } from './telegram/notify.ts';
 export type { Notifier } from './telegram/notify.ts';
 
 export { createNotifyLead } from './notifyLead.ts';
+export type { NotifyLead, NotifyLeadOptions } from './notifyLead.ts';
+
+export {
+  isTrackedContactChannel,
+  TRACKED_CONTACT_CHANNELS,
+} from './contactChannel.ts';
+export type { TrackedContactChannel } from './contactChannel.ts';
+
+export { createLeadsRoute } from './routes/leads.ts';
+export type { LeadsRouteOptions, RouteRequestContext } from './routes/leads.ts';
+
+export { createContactClickRoute } from './routes/contactClick.ts';
+export type { ContactClickRouteOptions } from './routes/contactClick.ts';

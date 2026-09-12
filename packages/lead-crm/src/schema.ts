@@ -42,6 +42,7 @@ export type PendingCommissionClaim = z.infer<
 
 const baseStoredLeadSchema = z.object({
   id: z.number().int().positive(),
+  brand: z.string(),
   name: z.string(),
   contact: z.string(),
   service: z.string(),
@@ -71,6 +72,7 @@ export type StoredLead = z.infer<typeof baseStoredLeadSchema>;
 
 export type LeadInput = Pick<
   StoredLead,
+  | 'brand'
   | 'name'
   | 'contact'
   | 'service'
@@ -83,9 +85,12 @@ export type LeadInput = Pick<
   | 'kind'
 >;
 
+export type LeadSubmission = Omit<LeadInput, 'brand'>;
+
 export interface LeadSchemaOptions {
   locales: readonly string[];
   defaultCommissionPercent: number;
+  defaultBrand: string;
 }
 
 export type StoredLeadSchema = z.ZodType<StoredLead, unknown>;
@@ -93,6 +98,7 @@ export type StoredLeadSchema = z.ZodType<StoredLead, unknown>;
 export function createLeadSchema({
   locales,
   defaultCommissionPercent,
+  defaultBrand,
 }: LeadSchemaOptions): StoredLeadSchema {
   if (locales.length === 0) {
     throw new Error('[lead-crm] locales must not be empty');
@@ -100,7 +106,11 @@ export function createLeadSchema({
   if (defaultCommissionPercent < 0) {
     throw new Error('[lead-crm] defaultCommissionPercent must not be negative');
   }
+  if (!defaultBrand) {
+    throw new Error('[lead-crm] defaultBrand must not be empty');
+  }
   return baseStoredLeadSchema.extend({
+    brand: z.string().default(defaultBrand),
     locale: z.enum(locales as readonly [string, ...string[]]),
     commissionPercent: z
       .number()

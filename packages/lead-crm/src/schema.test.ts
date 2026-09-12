@@ -14,14 +14,54 @@ const base = {
 describe('createLeadSchema options', () => {
   it('rejects an empty locale list rather than accepting any locale', () => {
     expect(() =>
-      createLeadSchema({ locales: [], defaultCommissionPercent: 10 }),
+      createLeadSchema({
+        locales: [],
+        defaultCommissionPercent: 10,
+        defaultBrand: 'Test',
+      }),
     ).toThrow('locales must not be empty');
   });
 
   it('rejects a negative commission rate', () => {
     expect(() =>
-      createLeadSchema({ locales: ['ru'], defaultCommissionPercent: -1 }),
+      createLeadSchema({
+        locales: ['ru'],
+        defaultCommissionPercent: -1,
+        defaultBrand: 'Test',
+      }),
     ).toThrow('defaultCommissionPercent must not be negative');
+  });
+});
+
+describe('per-business brand', () => {
+  it('rejects an empty brand', () => {
+    expect(() =>
+      createLeadSchema({
+        locales: ['ru'],
+        defaultCommissionPercent: 10,
+        defaultBrand: '',
+      }),
+    ).toThrow('defaultBrand must not be empty');
+  });
+
+  it('stamps the business own brand on a lead that carries none', () => {
+    const schema = createLeadSchema({
+      locales: ['ru'],
+      defaultCommissionPercent: 50,
+      defaultBrand: 'PRIZMA',
+    });
+
+    expect(schema.parse(base).brand).toBe('PRIZMA');
+  });
+
+  it('keeps the brand already stored on the lead, so one store can hold several businesses', () => {
+    const schema = createLeadSchema({
+      locales: ['ru'],
+      defaultCommissionPercent: 10,
+      defaultBrand: 'Approved.rs',
+    });
+
+    expect(schema.parse({ ...base, brand: 'PRIZMA' }).brand).toBe('PRIZMA');
   });
 });
 
@@ -32,6 +72,7 @@ describe('per-business commission default', () => {
     const schema = createLeadSchema({
       locales: ['ru'],
       defaultCommissionPercent: 50,
+      defaultBrand: 'Test',
     });
 
     expect(schema.parse(base).commissionPercent).toBe(50);
@@ -41,6 +82,7 @@ describe('per-business commission default', () => {
     const schema = createLeadSchema({
       locales: ['ru'],
       defaultCommissionPercent: 50,
+      defaultBrand: 'Test',
     });
 
     expect(
@@ -52,6 +94,7 @@ describe('per-business commission default', () => {
     const schema = createLeadSchema({
       locales: ['ru'],
       defaultCommissionPercent: 50,
+      defaultBrand: 'Test',
     });
 
     expect(
@@ -65,6 +108,7 @@ describe('locale validation', () => {
     const schema = createLeadSchema({
       locales: ['ru', 'sr'],
       defaultCommissionPercent: 10,
+      defaultBrand: 'Test',
     });
 
     expect(schema.parse({ ...base, locale: 'sr' }).locale).toBe('sr');
@@ -74,6 +118,7 @@ describe('locale validation', () => {
     const schema = createLeadSchema({
       locales: ['ru', 'sr'],
       defaultCommissionPercent: 10,
+      defaultBrand: 'Test',
     });
 
     expect(() => schema.parse({ ...base, locale: 'de' })).toThrow();

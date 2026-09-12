@@ -1,4 +1,4 @@
-import type { LeadInput, StoredLead } from './schema.ts';
+import type { LeadSubmission, StoredLead } from './schema.ts';
 import type { LeadStore } from './store.ts';
 import type { Notifier } from './telegram/notify.ts';
 
@@ -8,13 +8,21 @@ export interface NotifyLeadOptions {
     'insertOrMergeLead' | 'setTelegramMessage' | 'newStoredLead'
   >;
   notifier: Pick<Notifier, 'sendLeadNotification' | 'refreshLeadCard'>;
+  brand: string;
 }
 
-export function createNotifyLead({ store, notifier }: NotifyLeadOptions) {
-  return async function notifyLead(
-    data: LeadInput,
-    logPrefix: string,
-  ): Promise<void> {
+export type NotifyLead = (
+  data: LeadSubmission,
+  logPrefix: string,
+) => Promise<void>;
+
+export function createNotifyLead({
+  store,
+  notifier,
+  brand,
+}: NotifyLeadOptions): NotifyLead {
+  return async function notifyLead(submission, logPrefix) {
+    const data = { ...submission, brand };
     console.log(`${logPrefix} notifyLead started`, { lead: data });
 
     let lead: StoredLead;

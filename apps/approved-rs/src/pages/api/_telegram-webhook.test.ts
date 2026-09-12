@@ -121,6 +121,7 @@ const DM_CHAT_ID = 111; // a DM chat — prompts/detail views only ever live her
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
   return {
     id: 5,
+    brand: 'Approved.rs',
     name: 'Иван',
     contact: '@ivan',
     service: 'vehicle-sourcing',
