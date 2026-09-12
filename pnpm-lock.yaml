@@ -79,6 +79,9 @@ importers:
       '@lucide/astro':
         specifier: 1.39.0
         version: 1.39.0(astro@7.2.10(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.2)(@vercel/blob@2.8.0)(@vercel/functions@3.9.5(ws@8.21.3))(idb-keyval@6.2.6)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))
+      '@podbor/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@podbor/lead-crm':
         specifier: workspace:*
         version: link:../../packages/lead-crm
@@ -143,6 +146,25 @@ importers:
       yaml:
         specifier: 2.9.0
         version: 2.9.0
+
+  packages/i18n:
+    dependencies:
+      yaml:
+        specifier: 2.9.0
+        version: 2.9.0
+      zod:
+        specifier: 4.5.4
+        version: 4.5.4
+    devDependencies:
+      '@vitest/coverage-v8':
+        specifier: 3.2.6
+        version: 3.2.6(supports-color@7.2.0)(vitest@3.2.6)
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 3.2.6
+        version: 3.2.6(@edge-runtime/vm@3.2.0)(@types/debug@4.1.13)(@types/node@24.13.2)(@vitest/ui@3.2.6)(jiti@2.7.0)(lightningcss@1.32.0)(supports-color@7.2.0)(tsx@4.21.0)(yaml@2.9.0)
 
   packages/lead-crm:
     dependencies:

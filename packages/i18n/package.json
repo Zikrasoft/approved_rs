@@ -1,0 +1,22 @@
+{
+  "name": "@podbor/i18n",
+  "type": "module",
+  "private": true,
+  "version": "0.0.1",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "yaml": "2.9.0",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "3.2.6",
+    "typescript": "5.9.3",
+    "vitest": "3.2.6"
+  }
+}
