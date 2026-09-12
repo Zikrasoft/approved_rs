@@ -1,4 +1,4 @@
-import faqYaml from '../../content/i18n/faq.yaml?raw';
+import faqYaml from '@/content/i18n/faq.yaml?raw';
 import { loadI18nSection } from '@/i18n/loadI18nSection';
 import { faqContentSchema } from './faqContentSchema';
 

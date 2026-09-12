@@ -1,6 +1,6 @@
 // Send/edit orchestration for lead-lifecycle events. Builds nothing itself
 // — text/keyboards come from format.ts, delivery from client.ts.
-import type { StoredLead } from '../store';
+import type { StoredLead } from '@/lib/store';
 import {
   tgPost,
   expectMessageAndChatId,

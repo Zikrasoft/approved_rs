@@ -1,4 +1,4 @@
-import leadFormYaml from '../../content/i18n/leadForm.yaml?raw';
+import leadFormYaml from '@/content/i18n/leadForm.yaml?raw';
 import { loadI18nSection } from '@/i18n/loadI18nSection';
 import { leadFormContentSchema } from './leadFormContentSchema';
 

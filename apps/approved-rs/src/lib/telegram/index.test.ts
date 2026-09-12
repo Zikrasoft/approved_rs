@@ -28,7 +28,7 @@ import {
   buildRemindPicker,
   editLeadDetailMessage,
 } from './index';
-import type { StoredLead, LeadStatus } from '../store';
+import type { StoredLead, LeadStatus } from '@/lib/store';
 
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
   return {

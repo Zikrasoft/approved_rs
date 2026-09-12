@@ -1,16 +1,13 @@
 {
   "name": "podbor",
+  "private": true,
   "type": "module",
-  "version": "0.0.1",
   "packageManager": "pnpm@11.22.0",
   "scripts": {
-    "dev": "astro dev --force",
-    "stop": "astro dev stop",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro",
-    "test": "vitest run --passWithNoTests",
-    "gen:og": "node scripts/gen-og.mjs",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -25,32 +22,8 @@
       "prettier --write"
     ]
   },
-  "dependencies": {
-    "@astrojs/react": "6.0.5",
-    "@astrojs/sitemap": "3.7.4",
-    "@astrojs/vercel": "11.0.9",
-    "@fontsource/outfit": "5.3.0",
-    "@fontsource/playfair-display": "5.3.0",
-    "@keystatic/astro": "6.0.0",
-    "@keystatic/core": "0.6.9",
-    "@lucide/astro": "1.39.0",
-    "@vercel/blob": "2.8.0",
-    "@vercel/functions": "3.9.5",
-    "astro": "7.2.10",
-    "date-fns": "4.4.0",
-    "libphonenumber-js": "1.13.12",
-    "marked": "18.0.11",
-    "openai": "7.10.0",
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "sanitize-html": "2.17.7",
-    "zod": "4.5.4"
-  },
   "devDependencies": {
-    "@astrojs/check": "0.9.10",
     "@eslint/js": "10.0.1",
-    "@tailwindcss/vite": "4.3.3",
-    "@types/sanitize-html": "2.16.1",
     "astro-eslint-parser": "3.1.0",
     "eslint": "10.9.1",
     "eslint-config-flat-gitignore": "2.4.0",
@@ -61,13 +34,9 @@
     "lint-staged": "17.4.1",
     "prettier": "3.9.6",
     "prettier-plugin-astro": "0.14.1",
-    "sharp": "0.35.4",
-    "tailwindcss": "4.3.3",
+    "turbo": "2.10.11",
     "typescript": "5.9.3",
-    "typescript-eslint": "8.69.0",
-    "vercel": "59.11.7",
-    "vitest": "3.2.6",
-    "yaml": "2.9.0"
+    "typescript-eslint": "8.69.0"
   },
   "engines": {
     "node": ">=22.12.0"
