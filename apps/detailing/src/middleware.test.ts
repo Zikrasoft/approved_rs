@@ -46,7 +46,7 @@ describe('isUnlocalized', () => {
     expect(isUnlocalized(pathname)).toBe(true);
   });
 
-  it.each(['/', '/ru/', '/usluge/', '/sr/radovi/bmw-x5/', '/kontakt'])(
+  it.each(['/', '/ru/', '/services/', '/sr/works/bmw-x5/', '/contact'])(
     'routes %s through locale handling',
     (pathname) => {
       expect(isUnlocalized(pathname)).toBe(false);
@@ -54,7 +54,7 @@ describe('isUnlocalized', () => {
   );
 
   it('does not treat a content page merely containing "api" as unlocalized', () => {
-    expect(isUnlocalized('/ru/radovi/mapi/')).toBe(false);
+    expect(isUnlocalized('/ru/works/mapi/')).toBe(false);
   });
 });
 
@@ -74,7 +74,7 @@ describe('onRequest', () => {
 
   it('continues to a localized page and remembers the locale in a cookie', () => {
     hasLocale = true;
-    const context = makeContext('/sr/usluge/');
+    const context = makeContext('/sr/services/');
     const next = vi.fn(() => 'next');
     expect(run(context, next)).toBe('next');
     expect(context.cookies.set).toHaveBeenCalledWith(
@@ -109,17 +109,17 @@ describe('onRequest', () => {
   });
 
   it('301s an unprefixed content path onto the detected locale, query string included', () => {
-    const context = makeContext('/usluge/zastitna-folija/?ref=x', 'sr');
+    const context = makeContext('/services/paint-protection-film/?ref=x', 'sr');
     run(context);
     expect(context.redirect).toHaveBeenCalledWith(
-      '/sr/usluge/zastitna-folija/?ref=x',
+      '/sr/services/paint-protection-film/?ref=x',
       301,
     );
   });
 
   it('does not double the locale prefix on an already-prefixed path', () => {
     hasLocale = true;
-    const context = makeContext('/en/kontakt/');
+    const context = makeContext('/en/contact/');
     run(context);
     expect(context.redirect).not.toHaveBeenCalled();
   });

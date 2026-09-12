@@ -15,11 +15,12 @@ import {
   openAiErrorResponse,
 } from './mockOpenAiFetch.ts';
 
-const { translateSection, processSection, run } = createSectionTranslator({
-  targetLocales: ['en', 'sr'] as const,
-  languageName: { en: 'English', sr: 'Serbian (Latin script)' },
-  businessDescription: 'a test business',
-});
+const { translateSection, processSection, recordHashes, run } =
+  createSectionTranslator({
+    targetLocales: ['en', 'sr'] as const,
+    languageName: { en: 'English', sr: 'Serbian (Latin script)' },
+    businessDescription: 'a test business',
+  });
 
 const navSchema = z
   .object({
@@ -326,5 +327,54 @@ describe('run', () => {
     expect(
       parseDocument(readFileSync(good, 'utf-8')).get('translatedFrom'),
     ).toBeTruthy();
+  });
+});
+
+describe('recordHashes', () => {
+  let dir: string;
+  let file: string;
+
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), 'i18n-rehash-test-'));
+    file = join(dir, 'section.yaml');
+  });
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('stamps the current hash without calling the API', () => {
+    writeFileSync(
+      file,
+      stringify({
+        ...RU_NAV,
+        translations: { en: upper(RU_NAV), sr: upper(RU_NAV) },
+      }),
+    );
+
+    expect(recordHashes([{ ...NAV_SECTION, path: file }])).toBe(1);
+    expect(
+      parseDocument(readFileSync(file, 'utf-8')).get('translatedFrom'),
+    ).toBe(hashSource(RU_NAV));
+  });
+
+  it('leaves a file whose hash is already current untouched', () => {
+    writeFileSync(
+      file,
+      stringify({
+        ...RU_NAV,
+        translations: {},
+        translatedFrom: hashSource(RU_NAV),
+      }),
+    );
+    const before = readFileSync(file, 'utf-8');
+
+    expect(recordHashes([{ ...NAV_SECTION, path: file }])).toBe(0);
+    expect(readFileSync(file, 'utf-8')).toBe(before);
+  });
+
+  it('throws instead of stamping a hash over malformed ru content', () => {
+    writeFileSync(file, 'nav:\n  home: Главная\ntranslations: {}\n');
+    expect(() => recordHashes([{ ...NAV_SECTION, path: file }])).toThrow();
   });
 });

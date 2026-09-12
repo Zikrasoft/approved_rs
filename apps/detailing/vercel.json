@@ -8,27 +8,27 @@
   },
   "redirects": [
     {
-      "source": "/usluge/:path*",
-      "destination": "/ru/usluge/:path*",
+      "source": "/services/:path*",
+      "destination": "/ru/services/:path*",
       "permanent": true
     },
     {
-      "source": "/radovi/:path*",
-      "destination": "/ru/radovi/:path*",
+      "source": "/works/:path*",
+      "destination": "/ru/works/:path*",
       "permanent": true
     },
-    { "source": "/kontakt", "destination": "/ru/kontakt/", "permanent": true },
-    { "source": "/kontakt/", "destination": "/ru/kontakt/", "permanent": true },
-    { "source": "/hvala", "destination": "/ru/hvala/", "permanent": true },
-    { "source": "/hvala/", "destination": "/ru/hvala/", "permanent": true },
+    { "source": "/contact", "destination": "/ru/contact/", "permanent": true },
+    { "source": "/contact/", "destination": "/ru/contact/", "permanent": true },
+    { "source": "/thanks", "destination": "/ru/thanks/", "permanent": true },
+    { "source": "/thanks/", "destination": "/ru/thanks/", "permanent": true },
     {
-      "source": "/privatnost",
-      "destination": "/ru/privatnost/",
+      "source": "/privacy",
+      "destination": "/ru/privacy/",
       "permanent": true
     },
     {
-      "source": "/privatnost/",
-      "destination": "/ru/privatnost/",
+      "source": "/privacy/",
+      "destination": "/ru/privacy/",
       "permanent": true
     }
   ]

@@ -3,13 +3,14 @@ import type { ServiceSlug } from './services';
 
 export const PathBuilder = {
   home: (locale: Locale) => `/${locale}/`,
-  services: (locale: Locale) => `/${locale}/usluge/`,
-  service: (locale: Locale, slug: ServiceSlug) => `/${locale}/usluge/${slug}/`,
-  works: (locale: Locale) => `/${locale}/radovi/`,
-  work: (locale: Locale, slug: string) => `/${locale}/radovi/${slug}/`,
-  contact: (locale: Locale) => `/${locale}/kontakt/`,
-  thanks: (locale: Locale) => `/${locale}/hvala/`,
-  privacy: (locale: Locale) => `/${locale}/privatnost/`,
+  services: (locale: Locale) => `/${locale}/services/`,
+  service: (locale: Locale, slug: ServiceSlug) =>
+    `/${locale}/services/${slug}/`,
+  works: (locale: Locale) => `/${locale}/works/`,
+  work: (locale: Locale, slug: string) => `/${locale}/works/${slug}/`,
+  contact: (locale: Locale) => `/${locale}/contact/`,
+  thanks: (locale: Locale) => `/${locale}/thanks/`,
+  privacy: (locale: Locale) => `/${locale}/privacy/`,
 };
 
 export function swapLocale(pathname: string, locale: Locale): string {

@@ -1,8 +1,8 @@
 export const SERVICE_SLUGS = [
-  'zastitna-folija',
-  'promena-boje',
-  'poliranje-keramika',
-  'restauracija-volana',
+  'paint-protection-film',
+  'colour-change-wrap',
+  'polishing-ceramic',
+  'steering-wheel-restoration',
 ] as const;
 
 export type ServiceSlug = (typeof SERVICE_SLUGS)[number];

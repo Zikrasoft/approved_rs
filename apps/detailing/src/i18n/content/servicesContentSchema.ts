@@ -33,10 +33,10 @@ export const servicesContentSchema = z
     specsPriceLabel: z.string(),
     specsDurationLabel: z.string(),
     specsWarrantyLabel: z.string(),
-    'zastitna-folija': serviceSchema,
-    'promena-boje': serviceSchema,
-    'poliranje-keramika': serviceSchema,
-    'restauracija-volana': serviceSchema,
+    'paint-protection-film': serviceSchema,
+    'colour-change-wrap': serviceSchema,
+    'polishing-ceramic': serviceSchema,
+    'steering-wheel-restoration': serviceSchema,
   })
   .strict();
 
