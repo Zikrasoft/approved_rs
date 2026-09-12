@@ -2,7 +2,6 @@ name: CI
 
 on:
   push:
-  pull_request:
   workflow_dispatch: {}
 
 concurrency:
@@ -26,7 +25,6 @@ jobs:
     needs: check
     if: >-
       needs.check.result == 'success' &&
-      github.event_name != 'pull_request' &&
       github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     permissions:
