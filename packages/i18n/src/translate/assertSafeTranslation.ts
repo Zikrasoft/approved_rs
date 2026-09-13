@@ -1,4 +1,16 @@
 const HTML_TAG = /<[a-zA-Z/!]/;
+const TAG_NAME = /<\/?([a-zA-Z][a-zA-Z0-9]*)/g;
+
+function tagNamesOf(text: string): Set<string> {
+  return new Set(
+    [...text.matchAll(TAG_NAME)].map((match) => match[1].toLowerCase()),
+  );
+}
+
+function introducedTags(source: string, translated: string): string[] {
+  const known = tagNamesOf(source);
+  return [...tagNamesOf(translated)].filter((tag) => !known.has(tag));
+}
 
 export function assertSafeTranslation(
   source: unknown,
@@ -25,6 +37,12 @@ export function assertSafeTranslation(
     if (HTML_TAG.test(translated) && !HTML_TAG.test(source)) {
       throw new Error(
         `translated response for "${path}" contains raw HTML-looking content the source didn't have: ${translated}`,
+      );
+    }
+    const introduced = introducedTags(source, translated);
+    if (introduced.length > 0) {
+      throw new Error(
+        `translated response for "${path}" introduces HTML tags the source didn't have (${introduced.map((tag) => `<${tag}>`).join(' ')}): ${translated}`,
       );
     }
     return;

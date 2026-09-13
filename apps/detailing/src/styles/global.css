@@ -280,22 +280,45 @@
   .prose-studio ul {
     list-style: none;
     padding-left: 0;
+    --list-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='1.5'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M12%203l1.9%205.1L19%2010l-5.1%201.9L12%2017l-1.9-5.1L5%2010l5.1-1.9z'/%3E%3C/svg%3E");
   }
 
-  .prose-studio li {
+  .prose-studio ul.icon-check {
+    --list-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='1.5'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M20%206%209%2017l-5-5'/%3E%3C/svg%3E");
+  }
+
+  .prose-studio ul.icon-shield {
+    --list-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='1.5'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M20%2013c0%205-3.5%207.5-7.66%208.95a1%201%200%200%201-.67-.01C7.5%2020.5%204%2018%204%2013V6a1%201%200%200%201%201-1c2%200%204.5-1.2%206.24-2.72a1.17%201.17%200%200%201%201.52%200C14.51%203.81%2017%205%2019%205a1%201%200%200%201%201%201z'/%3E%3C/svg%3E");
+  }
+
+  .prose-studio ul.icon-pin {
+    --list-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='1.5'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M20%2010c0%204.993-5.539%2010.193-7.399%2011.799a1%201%200%200%201-1.202%200C9.539%2020.193%204%2014.993%204%2010a8%208%200%200%201%2016%200'/%3E%3Ccircle%20cx='12'%20cy='10'%20r='3'/%3E%3C/svg%3E");
+  }
+
+  .prose-studio ol {
+    list-style: decimal;
+    padding-left: 1.25rem;
+  }
+
+  .prose-studio ul li {
     position: relative;
-    padding-left: 1.5rem;
+    padding-left: 1.75rem;
   }
 
-  .prose-studio li::before {
+  .prose-studio ul li::before {
     content: '';
     position: absolute;
     left: 0;
-    top: 0.7em;
-    width: 0.4rem;
-    height: 0.4rem;
-    border-radius: 9999px;
-    background: var(--color-champagne-dim);
+    top: 0.2em;
+    width: 1.05em;
+    height: 1.05em;
+    background-color: var(--color-champagne-dim);
+    -webkit-mask-image: var(--list-icon);
+    mask-image: var(--list-icon);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-size: contain;
   }
 
   .prose-studio a {

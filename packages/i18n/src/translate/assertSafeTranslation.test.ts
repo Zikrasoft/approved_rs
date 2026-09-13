@@ -82,6 +82,38 @@ describe('assertSafeTranslation', () => {
     ).toThrow('body');
   });
 
+  it('throws when the translation smuggles a new tag into a body that already had markup', () => {
+    expect(() =>
+      assertSafeTranslation(
+        { body: '<ul class="icon-check"><li>Плёнка</li></ul>' },
+        {
+          body: '<ul class="icon-check"><li>Film</li></ul><img src="https://tracker.example/px.png">',
+        },
+        '',
+      ),
+    ).toThrow(/<img>/);
+  });
+
+  it('accepts a translation that drops a tag the source had', () => {
+    expect(() =>
+      assertSafeTranslation(
+        { body: '<ul><li>Один</li></ul>' },
+        { body: 'One' },
+        '',
+      ),
+    ).not.toThrow();
+  });
+
+  it('ignores tag-name casing when comparing', () => {
+    expect(() =>
+      assertSafeTranslation(
+        { body: '<UL><LI>Один</LI></UL>' },
+        { body: '<ul><li>One</li></ul>' },
+        '',
+      ),
+    ).not.toThrow();
+  });
+
   it('reports "no items" when the response replaced a list with something else entirely', () => {
     expect(() =>
       assertSafeTranslation({ general: ['а', 'б'] }, { general: 'nope' }, ''),

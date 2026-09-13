@@ -1,7 +1,7 @@
 import { getImage } from 'astro:assets';
 import heroSource from '@/content/works/mersedes-benz-gls/image.jpg';
 
-export const HERO_SIZES = '100vw';
+export const HERO_SIZES = '(min-width: 640px) 100vw, 135vw';
 
 export const HERO_WIDTH = heroSource.width;
 export const HERO_HEIGHT = heroSource.height;
