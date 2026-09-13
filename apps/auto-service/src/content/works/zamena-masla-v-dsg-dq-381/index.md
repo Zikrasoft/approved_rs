@@ -14,33 +14,27 @@ translations:
   en:
     title: Oil Change for DSG DQ381
     body: |-
-      Changing the oil in the DSG DQ381 is a crucial part of maintaining the transmission, and it’s definitely not something to overlook.
-
-      This time, we performed a scheduled oil change for the DQ381 transmission. The client chose MEYLE oil — we changed the oil and carried out the necessary servicing.
-
-      The DQ381 is a modern 7-speed DSG automated transmission equipped with "wet" clutches, found in many vehicles from Volkswagen, Audi, Škoda, and SEAT. With timely maintenance, these transmissions can operate for a long time without serious issues.
-
-      The same applies to other common DSG variants like the DQ250 and DQ200. Despite differences in design and maintenance schedules, the condition of the oil and timely servicing have a direct impact on the lifespan of the transmission, as well as the performance of the mechatronics, clutches, and other components.
-
-      We recommend not to delay DSG maintenance and to consider not only the formal service schedule but also the actual driving conditions of the vehicle. If the service history is unknown, it is advisable not to run the transmission on the same oil for 100,000 to 150,000 kilometers. At a minimum, it’s worth checking the maintenance history after every 100,000 kilometers, and for the DQ381 and DQ250, an oil change is typically warranted much earlier.
-
-      Fresh, high-quality oil helps the transmission operate correctly across various temperatures and loads, ensuring adequate lubrication and heat dissipation. Timely servicing significantly reduces the likelihood of expensive repairs down the line.
-
-      If you're purchasing a used vehicle and aren't sure when the DSG DQ381, DQ250, or DQ200 was last serviced, it’s best to check the condition of the transmission and the service history in advance.
-
-      Oil changes for DSG in Serbia. Maintenance for DQ381, DQ250, and DQ200. Diagnostics and servicing for DSG transmissions from Volkswagen, Audi, Škoda, and SEAT.
+      Changing the oil in the DSG DQ381 is an essential part of the transmission servicing that should never be overlooked.
+      This time, we carried out a scheduled oil change for the DQ381 transmission. The client opted for MEYLE oil — we replaced the oil and performed the necessary maintenance.
+      The DQ381 is a modern 7-speed dual-clutch transmission with "wet" clutches, commonly found in many Volkswagen, Audi, Škoda, and SEAT vehicles. With timely maintenance, these transmissions can operate for a long time without serious issues.
+      The same applies to other popular DSGs — DQ250 and DQ200. Despite differences in design and service regulations, the condition of the oil and regular servicing directly influence the lifespan of the transmission, the performance of the mechatronics, clutches, and other components.
+      We recommend not to delay servicing your DSG and to consider not just the formal schedule, but also the actual driving conditions of the vehicle. If the service history is unknown, it’s advisable not to run on the same oil for 100,000 to 150,000 kilometers. At least once every 100,000 km, it’s worth checking when and how the transmission was serviced, particularly for the DQ381 and DQ250, where an oil change typically makes sense to perform significantly earlier.
+      Fresh, high-quality oil helps the transmission function properly under various temperatures and loads, providing necessary lubrication and heat dissipation, while timely servicing reduces the risk of costly repairs in the future.
+      If you purchased a used vehicle and are unsure when the DSG DQ381, DQ250, or DQ200 was last serviced, it's best to check the condition of the transmission and its service history in advance.
+      Oil change for DSG in Serbia. Maintenance for DQ381, DQ250, and DQ200. Diagnostics and servicing for Volkswagen, Audi, Škoda, and SEAT dual-clutch transmissions.
+    car: Skoda Octavia
   sr:
     title: Zamena ulja u DSG DQ381
     body: |-
-      Zamena ulja u DSG DQ381 je važan deo održavanja menjača, kojem sigurno ne treba prilaziti olako. 
-      Ovaj put smo obavili planiranu zamenu ulja u menjaču DQ381. Klijent se opredelio za MEYLE ulje — zamenili smo ulje i obavili neophodno održavanje. 
-      DQ381 je moderna 7-stepena robotizovana menjačka kutija DSG sa „mokrim“ kvačilima, koja se instalira na mnogim automobilima Volkswagen, Audi, Škoda i SEAT. Uz pravovremeno održavanje, ovi menjači su sposobni da dugo rade bez ozbiljnih problema. 
-      Isto važi i za druge popularne DSG modele — DQ250 i DQ200. Iako postoje razlike u konstrukciji i planu održavanja, stanje ulja i pravovremeno tehničko održavanje direktno utiču na životni vek menjača, rad mehatronike, kvačila i drugih komponenti. 
-      Preporučujemo da se ne odugovlači sa održavanjem DSG i da se ne oslanja samo na formalne smernice, već i na stvarne uslove korišćenja vozila. Ako istorija održavanja nije poznata, najbolje je ne voziti na istom ulju 100–150 hiljada kilometara. Bar jednom na 100 000 km trebalo bi proveriti kada i kako je menjač održavan, a za DQ381 i DQ250 zamenu ulja uglavnom ima smisla uraditi znatno ranije. 
-      Sveže, kvalitetno ulje pomaže menjaču da ispravno funkcioniše pri različitim temperaturama i opterećenjima, obezbeđuje potrebnu podmazivanje i odvođenje toplote, dok pravovremeno održavanje smanjuje verovatnoću skupe popravke u budućnosti. 
-      Ako ste kupili polovan automobil i ne znate kada je poslednji put održavana DSG DQ381, DQ250 ili DQ200 — najbolje je unapred proveriti stanje menjača i istoriju održavanja. 
-      Zamena ulja DSG u Srbiji. Održavanje DQ381, DQ250 i DQ200. Dijagnostika i održavanje robotizovanih menjačkih kutija Volkswagen, Audi, Škoda i SEAT.
-translatedFrom: 2cc83ece20f74467
+      Zamena ulja u DSG DQ381 je važan deo održavanja ovog menjača, kojeg nikako ne treba zanemariti. 
+      Ovog puta smo izvršili planiranu zamenu ulja u menjaču DQ381. Klijent je izabrao MEYLE ulje — zamenili smo ulje i obavili neophodno održavanje. 
+      DQ381 je savremeni 7-stepeni robotski menjač DSG sa "vlažnim" spojkama, koji se montira na mnoge automobile marke Volkswagen, Audi, Škoda i SEAT. Uz redovno održavanje, ovi menjači mogu raditi dugo i bez ozbiljnih problema. 
+      Isto važi i za druge uobičajene DSG menjače — DQ250 i DQ200. Iako postoje razlike u konstrukciji i pravilima održavanja, stanje ulja i pravovremeno tehničko održavanje direktno utiču na vijek trajanja menjača, rad mehatronike, spojki i drugih komponenti. 
+      Preporučujemo da ne odlažete održavanje DSG i da se vodite ne samo formalnim pravilnikom, već i realnim uslovima korišćenja automobila. Ako je istorija održavanja nepoznata, najbolje je ne juriti sa jednim uljem 100–150 hiljada kilometara. Bar jednom na 100.000 km treba proveriti kada i kako je menjač servisiran, a za DQ381 i DQ250 zamena ulja obično ima smisla obaviti znatno ranije. 
+      Sveže kvalitetno ulje pomaže menjaču da ispravno funkcioniše pri različitim temperaturama i opterećenjima, obezbeđuje potrebnu podmazivanje i odvođenje toplote, a pravovremeno održavanje smanjuje verovatnoću skupog popravka u budućnosti. 
+      Ako ste kupili polovni automobil i ne znate kada je poslednji put servisiran DSG DQ381, DQ250 ili DQ200 — najbolje je unapred proveriti stanje menjača i istoriju održavanja.
+    car: Skoda Octavia
+translatedFrom: 574ca052793c17ee
 ---
 
 Замена масла в DSG DQ381 — важная часть обслуживания коробки, которой точно не стоит пренебрегать.\

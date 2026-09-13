@@ -2,81 +2,57 @@
 title: Mini Cooper SD
 translations:
   en:
-    title: Mini Cooper SD
-    body: >
-      # Car Service in Belgrade — MINI Cooper SD 2.0 B47 Service
+    title: MINI Cooper SD
+    body: |-
+      # Car Service in Belgrade — Servicing the MINI Cooper SD 2.0 B47
 
+      At our car service in Belgrade, we carried out comprehensive maintenance on the **MINI Cooper SD** with a **2.0 B47 diesel engine** delivering 170 hp.
 
-      Our **car service in Belgrade** recently completed comprehensive maintenance on a **MINI Cooper SD** equipped with a **2.0 B47 diesel engine producing 170 hp**.
+      The service included the following tasks:
 
-
-      The following work was carried out:
-
-
-      - engine oil replacement;
-
+      - oil change;
       - replacement of all filters;
-
       - fuel filter replacement;
+      - oil change in the **Aisin** 8-speed automatic transmission;
+      - computer diagnostics of the engine and the car's electronic systems;
+      - intake system diagnostics.
 
-      - oil replacement in the 8-speed **Aisin automatic transmission**;
+      We paid special attention to the **fuel filter**. Its condition is crucial for diesel vehicles, which is why we recommend replacing the fuel filter **at least once every 20,000 km**. This helps protect the fuel system and ensures the stable operation of the diesel engine.
 
-      - computer diagnostics of the engine and electronic systems;
+      During the computer diagnostics and intake check, we discovered significant contamination on the **swirl flaps**. They had developed a thick layer of soot and deposits — a true “coat” of residue.
 
-      - inspection and diagnostics of the intake system.
+      We advised the owner to proceed with cleaning the intake system. The client agreed, and as a result, the intake was thoroughly cleaned of accumulated dirt.
 
+      Regular servicing of the **BMW/MINI B47** diesel engine, timely oil and filter changes, maintenance of the Aisin automatic transmission, and monitoring of the intake system's condition can significantly reduce the risk of costly repairs in the future.
 
-      Special attention was paid to the **fuel filter**. On diesel vehicles, regular fuel filter replacement is particularly important. We recommend replacing the fuel filter **at least every 20,000 km** to help protect the fuel system and maintain reliable engine operation.
-
-
-      During computer diagnostics and inspection of the intake system, we found that the **swirl flaps were heavily contaminated**. A thick layer of soot and carbon deposits had accumulated on them.
-
-
-      We recommended cleaning the intake system to the customer, and he agreed. The intake system was thoroughly cleaned and the accumulated deposits were removed.
-
-
-      Regular maintenance of the **BMW/MINI B47 diesel engine**, timely replacement of oil and filters, servicing of the Aisin automatic transmission, and regular inspection of the intake system can help prevent expensive repairs in the future.
-
-
-      If you are looking for a **car service in Belgrade for MINI, BMW or another vehicle**, contact us for regular maintenance, computer diagnostics, repairs and preventive servicing.
+      If you need a **car service in Belgrade for MINI, BMW, or any other vehicle**, reach out to us. We provide technical maintenance, computer diagnostics, repairs, and preventive services.
+    car: Mini Cooper SD
   sr:
     title: Mini Cooper SD
-    body: >
-      # Auto servis u Beogradu — servis MINI Cooper SD 2.0 B47
+    body: |-
+      # Autoservis u Beogradu — servisiranje MINI Cooper SD 2.0 B47
 
+      U našem autoservisu u Beogradu obavili smo sveobuhvatno tehničko održavanje **MINI Cooper SD** sa dizel motorom **2.0 B47 snage 170 ks**.
 
-      U našem **auto servisu u Beogradu** obavljen je kompletan servis automobila **MINI Cooper SD** sa dizel motorom **2.0 B47 i 170 KS**.
+      U okviru servisa izvedeni su sledeći radovi:
 
-
-      Tokom servisa urađeni su:
-
-
-      - zamena motornog ulja;
-
+      - zamena motornih ulja;
       - zamena svih filtera;
+      - zamena rezervoarskog filtera;
+      - zamena ulja u 8-stepenoj automatskoj transmisiji **Aisin**;
+      - računarska dijagnostika motora i elektronskih sistema vozila;
+      - dijagnostika usisnog sistema.
 
-      - zamena filtera goriva;
+      Posebnu pažnju posvetili smo **rezervoarskom filteru**. Za dizel vozila njegovo stanje je od suštinske važnosti, stoga preporučujemo njegovu zamenu **najmanje jednom na 20 000 km**. Ovo pomaže u zaštiti gorivnog sistema i obezbeđuje stabilan rad dizel motora.
 
-      - zamena ulja u 8-stepenom automatskom menjaču **Aisin**;
+      Tokom računarske dijagnostike i provere stanja usisa otkriveno je značajno zagađenje **vortex klapni**. Na njima se stvorila debela naslaga čađi i naslaga — prava „bunda“ od depozita.
 
-      - kompjuterska dijagnostika motora i elektronskih sistema;
+      Predložili smo vlasniku da izvrši čišćenje usisnog sistema. Klijent se složio, nakon čega je usis potpuno očišćen od nagomilanih zagađenja.
 
-      - kontrola i dijagnostika usisnog sistema.
+      Redovno održavanje dizel motora **BMW/MINI B47**, pravovremena zamena ulja i filtera, servisiranje automatske transmisije Aisin i kontrola stanja usisnog sistema mogu značajno smanjiti rizik od skupih popravki u budućnosti.
 
-
-      Posebno je važno obratiti pažnju na **filter goriva kod dizel automobila**. Preporučujemo da se filter goriva menja **najkasnije na svakih 20.000 kilometara**, jer njegovo stanje direktno utiče na rad i zaštitu sistema goriva.
-
-
-      Tokom dijagnostike ustanovljeno je da su **usisne vrtložne klapne** bile značajno zaprljane. Na njima se formirao debeo sloj čađi i naslaga.
-
-
-      Vlasniku smo preporučili čišćenje usisnog sistema, što je on prihvatio. Nakon toga je kompletan usis očišćen od nagomilanih naslaga.
-
-
-      Redovno održavanje dizel motora **BMW/MINI B47**, pravovremena zamena ulja i filtera, servis automatskog menjača Aisin i kontrola usisnog sistema mogu značajno smanjiti rizik od skupih kvarova.
-
-
-      Ako vam je potreban **auto servis u Beogradu za MINI, BMW ili drugo vozilo**, možete nam se obratiti za redovan servis, kompjutersku dijagnostiku, popravke i preventivno održavanje.
+      Ako vam je potreban **autoservis u Beogradu za MINI, BMW ili drugo vozilo**, obratite nam se. Izvršavamo tehničko održavanje, računarsku dijagnostiku, popravku i preventivne radove.
+    car: Mini Cooper SD
 car: Mini Cooper SD
 year: 2019
 servicesApplied:
@@ -90,7 +66,7 @@ gallery:
   - gallery/1.jpg
 date: 2026-08-11
 published: true
-translatedFrom: 69336befbd0abb4f
+translatedFrom: ba8fed29adef07d6
 ---
 
 # Автосервис в Белграде — обслуживание MINI Cooper SD 2.0 B47

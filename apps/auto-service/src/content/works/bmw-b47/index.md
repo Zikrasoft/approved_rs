@@ -3,87 +3,61 @@ title: BMW B47
 translations:
   en:
     title: BMW B47
-    body: >
-      # Cooling System Service and Swirl Flap Cleaning for a BMW in Belgrade
+    body: |-
+      # Cooling System Service and Cleaning of Swirl Flaps for BMW in Belgrade
 
+      A BMW came into our **CarLab in Belgrade** for cooling system maintenance and preventive engine work.
 
-      A BMW came into our **Russian-run auto service in Belgrade** for cooling system maintenance and preventive engine work.
+      We performed a partial coolant replacement. For the **B47** engines, this typically requires around **5–7 liters** of coolant.
 
+      In this case, we used **HT-12 green coolant from Valvoline**.
 
-      We carried out a partial coolant change. For BMW **B47** engines, a partial change typically takes around **5–7 litres** of coolant.
+      We also completed a **cleaning of the swirl flaps and intake system**. Over time, diesel engines accumulate a significant amount of debris and carbon deposits in the intake and on the flaps, which can negatively impact engine performance.
 
+      Regular maintenance of the cooling system and intake system helps ensure stable engine operation and prevents more serious issues from arising.
 
-      In this case we used **Valvoline's green HT-12 coolant**.
+      Our **CarLab in Belgrade** specializes in servicing and repairing BMWs and other vehicles.
 
+      You can visit us for:
 
-      We also cleaned the **swirl flaps and intake system**. Over time, diesel engines build up significant deposits and carbon on the intake and flaps, which can affect engine performance.
-
-
-      Regular servicing of the cooling and intake systems helps keep the engine running smoothly and prevents more serious faults down the line.
-
-
-      Our **Russian-run auto service in Belgrade** specialises in servicing and repairing BMWs and other cars.
-
-
-      Come to us for:
-
-
-      - coolant and antifreeze replacement
-
-      - cooling system servicing
-
+      - antifreeze and coolant replacement
+      - cooling system maintenance
       - radiator cleaning
-
       - intake system cleaning
-
       - swirl flap cleaning
+      - diagnostics and comprehensive maintenance for BMW
 
-      - diagnostics and full BMW servicing
-
-
-      We'd be happy to help service your car!
+      We would be happy to assist with the maintenance of your vehicle!
+    car: BMW
 
   sr:
     title: BMW B47
-    body: >
-      # Servis rashladnog sistema i čišćenje swirl klapni na BMW-u
+    body: |-
+      # Održavanje sistema hlađenja i čišćenje vimentičnih zaklopki BMW u Beogradu
 
+      U naš **ruski auto servis u Beogradu** stigla je BMW na održavanje sistema hlađenja i preventivne radove na motoru.
 
-      U naš servis u Beogradu stigao je BMW na servis rashladnog sistema i preventivno održavanje motora.
+      Obavili smo delimičnu zamenu rashladne tečnosti. Na motorima BMW **B47** obično je potrebno oko **5–7 litara** rashladne tečnosti prilikom delimične zamene.
 
+      U ovom slučaju korišćena je **zelena rashladna tečnost HT-12 od Valvoline**.
 
-      Izvršili smo **delimičnu zamenu rashladne tečnosti**. Kod BMW motora **B47** za delimičnu zamenu je najčešće potrebno oko **5–7 litara** rashladne tečnosti.
+      Takođe smo izvršili **čišćenje vimentičnih zaklopki i usisnog sistema**. Tokom vremena, na dizel motorima u usisnom sistemu i na zaklopkama se nakuplja velika količina nečistoća i čađi, što može negativno uticati na rad motora.
 
+      Redovno održavanje sistema hlađenja i usisnog sistema pomaže u održavanju stabilnog rada motora i sprečavanju ozbiljnijih kvarova.
 
-      U ovom slučaju korišćena je **zelena Valvoline HT-12 rashladna tečnost**.
+      Naš **ruski auto servis u Beogradu** specijalizovan je za održavanje i popravku BMW i drugih automobila.
 
+      Možete nas posetiti za:
 
-      Takođe smo izvršili **čišćenje usisnog sistema i swirl klapni**. Vremenom se na dizel motorima u usisnom sistemu i na klapnama nakupljaju naslage i čađ, što može negativno uticati na rad motora.
-
-
-      Redovno održavanje rashladnog i usisnog sistema doprinosi pouzdanijem i stabilnijem radu motora.
-
-
-      Posetite naš servis u Beogradu za održavanje i popravku BMW vozila.
-
-
-      Radimo:
-
-
-      - zamenu rashladne tečnosti
-
-      - servis rashladnog sistema
-
-      - čišćenje hladnjaka
-
+      - zamenu antifriza i rashladne tečnosti
+      - održavanje sistema hlađenja
+      - čišćenje radiatora
       - čišćenje usisnog sistema
+      - čišćenje vimentičnih zaklopki
+      - dijagnostiku i sveobuhvatno održavanje BMW-a
 
-      - čišćenje swirl klapni
-
-      - dijagnostiku i kompletan servis BMW vozila
-
-
-      Biće nam zadovoljstvo da servisiramo vaše vozilo!
+      Biće nam drago da pomognemo sa održavanjem vašeg automobila!
+    car: BMW
 car: BMW
 year: 2020
 servicesApplied:
@@ -94,7 +68,7 @@ gallery:
   - gallery/0.jpg
 date: 2026-08-12
 published: true
-translatedFrom: 6d614b91ec9d8bef
+translatedFrom: eca7099c6a19b8a7
 ---
 
 # Обслуживание системы охлаждения и чистка вихревых заслонок BMW в Белграде

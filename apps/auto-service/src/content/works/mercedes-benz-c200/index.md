@@ -2,74 +2,52 @@
 title: Mercedes-Benz C200
 translations:
   en:
-    title: 'Mercedes-Benz C-Class — service and maintenance in Belgrade'
-    body: >
-      ## Mercedes-Benz C-Class — service and maintenance in Belgrade
+    title: Mercedes-Benz C-Class Service in Our Belgrade Garage
+    body: |-
+      ## Mercedes-Benz C-Class — Service at Our Garage in Belgrade
 
+      We conducted a comprehensive service on the **Mercedes-Benz C-Class W205** at our Belgrade auto service.
 
-      Our auto service in Belgrade recently completed a full maintenance service on a **Mercedes-Benz C-Class W205**.
+      As part of the **minor service for Mercedes-Benz**, we carried out the following tasks:
 
+      - Oil change;
+      - Oil filter replacement;
+      - Engine air filter replacement;
+      - Cabin filter replacement;
+      - Replacement of all brake pads;
+      - Brake system servicing and inspection.
 
-      As part of the **Mercedes-Benz minor service**, we carried out:
+      We paid special attention to the brakes. **Brake pads are one of the key safety components of a vehicle**, so it’s essential to monitor their condition regularly. During the replacement, it's vital to check not only the pads but also the state of the brake discs, calipers, and guides to ensure that the braking system functions properly and evenly.
 
+      Regular maintenance helps maintain the reliability of your Mercedes-Benz, avoids more serious malfunctions, and ensures a safe driving experience.
 
-      - engine oil replacement;
-
-      - oil filter replacement;
-
-      - engine air filter replacement;
-
-      - cabin air filter replacement;
-
-      - replacement of all brake pads;
-
-      - inspection and servicing of the complete braking system.
-
-
-      We paid special attention to the braking system. **Brake pads are one of the most important safety components of any vehicle**, so regular inspection and timely replacement are essential. During brake service, it is important to inspect not only the pads but also the brake discs, calipers and guides to ensure proper and even braking.
-
-
-      Regular Mercedes-Benz maintenance helps prevent more expensive repairs, keeps the vehicle reliable and ensures safe everyday driving.
-
-
-      **Mercedes-Benz service in Belgrade**\
-
-      Diagnostics, routine maintenance, oil and filter replacement, brake service and Mercedes-Benz repairs.
+      **Mercedes-Benz Service in Belgrade**\
+      Diagnostics, maintenance, oil and filter changes, brake system servicing, and repair of Mercedes-Benz vehicles.
+    car: Mercedes-Benz C-Class
 
   sr:
-    title: 'Mercedes-Benz C-Class — servis i održavanje u Beogradu'
-    body: >
-      ## Mercedes-Benz C-Class — servis i održavanje u Beogradu
+    title: Mercedes-Benz C200
+    body: |-
+      ## Mercedes-Benz C-Class — servis u našem servisu u Beogradu
 
+      U našem auto servisu u Beogradu obavili smo sveobuhvatno tehničko održavanje **Mercedes-Benz C-Class W205**.
 
-      U našem auto-servisu u Beogradu obavili smo kompletan servis na **Mercedes-Benz C-Class W205**.
+      U okviru **malog TO za Mercedes-Benz** izvršena su:
 
-
-      U okviru **malog servisa Mercedes-Benz** urađeno je:
-
-
-      - zamena motornog ulja;
-
-      - zamena filtera ulja;
-
-      - zamena filtera vazduha motora;
-
+      - zamena motorog ulja;
+      - zamena uljnog filertra;
+      - zamena vazdušnog filtera motora;
       - zamena filtera kabine;
-
       - zamena svih kočionih pločica;
+      - servis i provera kočionog sistema.
 
-      - kompletna kontrola i servis kočionog sistema.
+      Posebnu pažnju posvetili smo kočnicama. **Kočione pločice su jedan od ključnih elemenata bezbednosti automobila**, stoga je njihovo stanje potrebno redovno pratiti. Prilikom zamene važno je proveriti ne samo same pločice, već i stanje kočionih diskova, čeljusti i vodiča, kako bi kočioni sistem funkcionišao ispravno i ravnomerno.
 
+      Redovno tehničko održavanje pomaže u očuvanju pouzdanosti Mercedes-Benz-a, izbegavanju ozbiljnijih kvarova i obezbeđivanju bezbedne upotrebe vozila.
 
-      Posebnu pažnju posvetili smo kočnicama. **Kočioni sistem je jedan od najvažnijih sistema za bezbednost vozila**, zato je njegova redovna kontrola veoma važna. Prilikom zamene pločica potrebno je proveriti i stanje diskova, čeljusti i vođica kako bi kočenje bilo pravilno i ravnomerno.
-
-
-      Redovno održavanje Mercedes-Benz vozila pomaže da se spreče ozbiljniji kvarovi, produži vek trajanja komponenti i obezbedi sigurna vožnja.
-
-
-      **Mercedes-Benz servis u Beogradu**\
-
-      Dijagnostika, mali servis, zamena ulja i filtera, servis kočnica i popravka Mercedes-Benz vozila.
+      **Održavanje Mercedes-Benz u Beogradu**
+      Dijagnostika, TO, zamena ulja i filtera, servis kočionog sistema i popravke automobila Mercedes-Benz.
+    car: Mercedes-Benz C-Class
 car: Mercedes-Benz C-Class
 year: 2018
 servicesApplied:
@@ -80,7 +58,7 @@ image: image.jpg
 gallery: []
 date: 2026-05-05
 published: true
-translatedFrom: 62404b84407bec57
+translatedFrom: 798d1634d339b143
 ---
 
 ## Mercedes-Benz C-Class — обслуживание в нашем сервисе в Белграде

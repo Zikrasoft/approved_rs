@@ -17,44 +17,46 @@ translations:
   en:
     title: BMW 118D
     body: |-
-      **BMW 118d N47 — Comprehensive Post-Purchase Vehicle Service in Belgrade**
+      BMW 118d N47 – Comprehensive Post-Purchase Service in Belgrade
 
-      A BMW 118d with a diesel N47 engine and an odometer reading of approximately 380,000 km recently arrived at our service center in Belgrade. The new owner had just purchased the vehicle, imported from Denmark, and it was a wise decision to commence its use with thorough technical servicing and addressing identified issues.
+      A BMW 118d with a diesel engine N47 and a mileage of approximately 380,000 km arrived at our service center in Belgrade. The owner recently purchased the vehicle, which was imported from Denmark, and wisely decided to start with a thorough technical inspection and address any existing issues right after the purchase.
 
-      The first step involved a complete minor service for the BMW 118d. We replaced the engine oil along with all essential filters: the oil filter, air filter, cabin filter, and the fuel filter. Timely replacement of the fuel filter is particularly crucial for the diesel N47 engine, as the condition of the fuel system directly affects engine stability and the longevity of its components.
+      The first step involved performing a complete minor service for the BMW 118d. We changed the engine oil along with all necessary filters: oil filter, air filter, cabin filter, and the fuel filter. For the N47 diesel engine, timely replacement of the fuel filter is crucial, as the state of the fuel system directly influences the engine's performance and the longevity of its components.
 
-      Next, we focused on the suspension and braking systems. We replaced the rubber boots, along with the brake discs and pads. When purchasing a used vehicle with high mileage, it’s vital to check the braking system first and foremost. In this case, worn components were replaced to ensure safe operation of the car moving forward.
+      Next, we focused on the suspension and braking system. We replaced the flexible bellows, as well as the brake discs and brake pads. When purchasing a used vehicle with high mileage, the braking system is one of the components that should be prioritized. In this case, worn-out parts were replaced to ensure the vehicle could be operated safely.
 
-      We also identified the need for repairs on the rear differential. As part of the service, we replaced the seal on the rear differential, eliminating the oil leak and preventing further loss of lubrication. For high-mileage vehicles, the condition of the differential, seals, and other transmission elements requires particular attention.
+      We also identified the need for repair of the rear differential. As part of the service, we replaced the rear differential seal, eliminating an oil leak and preventing further loss of lubrication. For high-mileage vehicles, the condition of the differential, seals, and other transmission components requires special attention.
 
-      With this BMW 118d having traveled around 380,000 km, the list of necessary works certainly does not end here. The vehicle will gradually be brought into excellent technical condition. This is precisely the approach we recommend after purchasing a used car: conduct a comprehensive diagnosis, prioritize necessary repairs, and systematically service the engine, braking system, suspension, and transmission.
+      With a mileage of around 380,000 km, the list of necessary work does not end here. The vehicle will be gradually brought into good technical condition. We recommend taking this approach after buying a used car: conduct a full diagnosis, identify priority tasks, and systematically service the engine, braking system, suspension, and transmission.
 
-      Our specialists are well-acquainted with BMW vehicles equipped with the diesel N47 engine. With proper servicing, even a high-mileage car can continue to function reliably; however, it’s especially important not to delay addressing identified issues and to adhere to maintenance intervals.
+      Our specialists are well-acquainted with BMWs equipped with the N47 diesel engine. With proper maintenance, even a high-mileage vehicle can continue to be reliably used, but it is especially important not to delay addressing identified issues and to adhere to maintenance intervals.
 
-      If you’ve recently bought a BMW in Serbia or imported a vehicle from Europe, visit us for diagnostics and technical servicing in Belgrade. We offer minor servicing, oil and filter changes, brake system maintenance, suspension repairs, oil leak remedies, transmission work, and other types of BMW repairs.
+      If you recently purchased a BMW in Serbia or brought a vehicle from Europe, visit us for diagnosis and technical servicing in Belgrade. We perform minor services, oil and filter changes, brake system maintenance, suspension repair, oil leak remedy, transmission work, and other types of BMW repairs.
 
-      **BMW Service Center in Belgrade — Diagnostics, Technical Maintenance, and Repair for Gasoline and Diesel Engines.**
+      BMW Service Center in Belgrade – diagnostics, maintenance, and repair of cars with gasoline and diesel engines.
+    car: BMW 118D
   sr:
     title: BMW 118D
     body: |-
-      BMW 118d N47 — sveobuhvatna usluga automobila nakon kupovine u Beogradu
+      BMW 118d N47 — sveobuhvatno održavanje vozila posle kupovine u Beogradu
 
-      U naš servis u Beogradu stigla je BMW 118d sa dizel motorom N47 i pređenih oko 380.000 km. Vlasnik je nedavno kupio automobil, koji je dopremljen iz Danske, pa je nakon kupovine donesena prava odluka — započeti korišćenje uz sveobuhvatno tehničko održavanje i otklanjanje već uočenih nedostataka.
+      U naš servis u Beogradu stigla je BMW 118d sa dizel motorom N47 i pređenih oko 380.000 km. Vlasnik je nedavno kupio automobil koji je dopremljen iz Danske, pa je posle kupovine doneta ispravna odluka — započeti korišćenje sa sveobuhvatnim tehničkim održavanjem i otklanjanjem već uočenih kvarova.
 
-      Prvi korak bio je izvršavanje kompletnog malog servisa za BMW 118d. Zamenili smo motorno ulje i sve neophodne filtere: uljni, vazdušni, kabinski, kao i filter za gorivo. Za dizel motor N47 pravovremena zamena filtera za gorivo je posebno važna, jer stanje gorivne sisteme direktno utiče na stabilnost rada motora i životni vek njegovih komponenti.
+      Prvi korak je bio kompletan mali servis za BMW 118d. Zamenili smo motorno ulje i sve potrebne filtre: uljni, vazdušni, kabinski, kao i filter goriva. Za dizel motor N47, pravovremena zamena filtera goriva je posebno važna, jer stanje gorivnog sistema direktno utiče na stabilnost rada motora i trajnost njegovih komponenti.
 
-      Sledeći korak je bio fokusiranje na vešanje i kočioni sistem. Zamenili smo elastične manžete, kao i kočione discove i kočione obloge. Prilikom kupovine polovnog automobila sa velikim pređenim kilometrima, kočioni sistem je jedna od komponenti koju je potrebno proveravati kao prioritet. U ovom slučaju, istrošene komponente su zamenjene, kako bi se automobil mogao sigurno koristiti dalje.
+      Sledeći korak je bio da se pozabavimo podvozjem i kočionim sistemom. Zamenjeni su elastični zaptivači, kao i kočioni diskovi i kočione obloge. Prilikom kupovine polovnog automobila sa velikim pređenim kilometrima, kočioni sistem je jedan od onih delova čije stanje treba proveriti u prvom redu. U ovom slučaju, istrošeni delovi su zamenjeni kako bi se automobil mogao bezbedno koristiti dalje.
 
-      Takođe smo uočili potrebu za popravkom zadnjeg diferencijala. Tokom održavanja zamenili smo semering zadnjeg diferencijala, čime smo otklonili curenje ulja i sprečili dalje gubitke podmazivanja. Za automobile sa velikim pređenim kilometrima, stanje diferencijala, zaptivača i drugih elemenata transmisije zahteva posebnu pažnju.
+      Takođe je otkrivena potreba za popravkom zadnjeg reduktora. U okviru održavanja, zamenili smo zaptivku zadnjeg reduktora, otklonivši curenje ulja i sprečavajući dalju izgubljenu podmazivanje. Za automobile sa velikim pređenim kilometrima, stanje reduktora, zaptivki i drugih delova prenosa zahteva posebnu pažnju.
 
-      S obzirom na to da ova BMW 118d ima oko 380.000 km, lista potrebnih radova ovde se ne završava. Automobil će postepeno biti doveden u dobro tehničko stanje. Ovakav pristup preporučujemo nakon kupovine polovnog automobila: izvršiti kompletnu dijagnostiku, odrediti prioritetne radove i postupno servisirati motor, kočioni sistem, vešanje i transmisiju.
+      Pređeni kilometri ovog BMW-a 118d iznose oko 380.000 km, pa popis potrebnih radova ovde ne prestaje. Automobil će postepeno biti doveden u dobro tehničko stanje. Upravo takav pristup preporučujemo nakon kupovine polovnog automobila: izvršiti potpunu dijagnostiku, odrediti prioritetne radove i sistematski održavati motor, kočioni sistem, vešanje i prenos.
 
-      BMW sa dizel motorom N47 su dobro poznati našim stručnjacima. Pravilnim održavanjem čak i automobil sa velikim pređenim kilometrima može nastaviti da se normalno koristi, ali ovde je posebno važno ne odlagati otkrivene nedostatke i pridržavati se intervala tehničkog održavanja.
+      BMW sa dizel motorom N47 su dobro poznati našim stručnjacima. Uz pravilno održavanje, čak i automobil sa velikim pređenim kilometrima može nastaviti da se normalno koristi, ali ovde je posebno važno ne odlagati otkrivene kvarove i pridržavati se intervala tehničkog održavanja.
 
-      Ako ste nedavno kupili BMW u Srbiji ili doveli automobil iz Evrope, dođite kod nas na dijagnostiku i tehničko održavanje u Beogradu. Izvršavamo mali servis, zamenu ulja i filtera, održavanje kočionog sistema, popravku vešanja, otklanjanje curenja ulja, radove na transmisiji i druge vrste popravki BMW-a.
+      Ako ste nedavno kupili BMW u Srbiji ili dopremili automobil iz Evrope, dođite kod nas na dijagnostiku i tehničko održavanje u Beogradu. Izvršavamo mali servis, zamenu ulja i filtera, održavanje kočionog sistema, popravku podvozja, otklanjanje curenja ulja, radove sa prenosom i druge vrste popravki BMW-a.
 
-      Servis BMW-a u Beogradu — dijagnostika, tehničko održavanje i popravka automobila sa benzinskim i dizel motorima.
-translatedFrom: be59e276101ca46a
+      Servis BMW u Beogradu — dijagnostika, tehničko održavanje i popravka automobila sa benzinskim i dizel motorima.
+    car: BMW 118D
+translatedFrom: 9c98d448404a7a97
 ---
 
 BMW 118d N47 — комплексное обслуживание автомобиля после покупки в Белграде

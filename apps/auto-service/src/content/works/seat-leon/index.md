@@ -3,78 +3,54 @@ title: SEAT LEON
 translations:
   en:
     title: SEAT LEON
-    body: >
-      A **Seat Leon** with **190,000 km** on the odometer came to our **car service in Belgrade** for comprehensive scheduled maintenance and a major service.
+    body: |-
+      A **SEAT Leon** with a mileage of **190,000 km** arrived at our **Russian car service in Belgrade** for a major scheduled maintenance — known as the **big service**.
 
+      At this mileage, it is particularly crucial to service the key components of the vehicle on time, which is why we carried out a comprehensive set of necessary tasks for the Seat Leon.
 
-      At this mileage, timely maintenance of the vehicle’s key components is particularly important, so we carried out a complete range of necessary service work.
-
-
-      ### Work performed
-
+      ### What was done
 
       - Timing belt kit replacement.
-
       - Water pump replacement.
-
-      - Coolant replacement.
-
-      - Engine oil replacement.
-
-      - Replacement of all required filters.
-
+      - Antifreeze replacement.
+      - Engine oil change.
+      - Replacement of all necessary filters.
       - Rear shock absorber replacement.
+      - Gearbox oil change for **DSG DQ250**.
 
-      - **DSG DQ250** transmission oil change.
+      The big service is an essential part of the maintenance for **Seat, Volkswagen, Škoda, and Audi** vehicles. Timely replacement of the timing belt, pump, fluids, and other consumables helps keep the car in good condition and reduces the risk of serious and costly breakdowns.
 
+      Special attention was given to the **DSG DQ250** gearbox — a six-speed automated transmission with wet clutches. To ensure its reliable operation, it is important to adhere to the schedule and timely change the transmission oil.
 
-      A major service is an important part of maintaining **Seat, Volkswagen, Škoda and Audi** vehicles. Timely replacement of the timing belt, water pump, fluids and consumable parts helps keep the vehicle reliable and reduces the risk of serious and expensive repairs.
+      If you're looking for a **Russian car service in Belgrade**, we provide maintenance and repair for vehicles: both minor and major services, timing belt replacements, DSG servicing, diagnostics, oil and filter changes, suspension repairs, and other work.
 
-
-      Special attention was also given to the **DSG DQ250** — a six-speed dual-clutch transmission with wet clutches. Following the correct maintenance intervals and changing the transmission oil on time are essential for reliable and long-term operation.
-
-
-      If you are looking for a professional **car service in Belgrade**, we provide scheduled maintenance, major and minor services, timing belt replacement, DSG servicing, diagnostics, oil and filter changes, suspension repairs and other automotive services.
-
-
-      **Car service in Belgrade — professional maintenance and repair for Seat, Volkswagen, Škoda, Audi and other vehicle brands.**
+      **Car service in Belgrade — professional maintenance for Seat, Volkswagen, Škoda, Audi, and vehicles of other brands.**
+    car: SEAT LEON
   sr:
     title: SEAT LEON
-    body: >
-      U naš **auto servis u Beogradu** stigao je **Seat Leon** sa pređenih **190.000 km** radi kompletnog redovnog održavanja i velikog servisa.
+    body: |-
+      U našu **nezavisnu automehaničarsku radionicu u Beogradu** stigao je **Seat Leon** sa pređenih **190 000 km** radi velikog planiranog tehničkog održavanja - poznatog kao **veliki servis**.
 
-
-      Na ovoj kilometraži posebno je važno pravovremeno servisirati ključne komponente automobila, pa je na ovom Seat Leonu urađen kompletan paket potrebnih radova.
-
+      Na ovakvom broju pređenih kilometara posebno je važno pravovremeno servisirati ključne delove automobila, tako da smo za Seat Leon obavili niz neophodnih radova.
 
       ### Šta je urađeno
 
-
-      - Zamena kompleta zupčastog kaiša.
-
+      - Zamena kompletnog seta zupčastog remena.
       - Zamena vodene pumpe.
-
       - Zamena antifriza.
-
       - Zamena motornog ulja.
-
       - Zamena svih potrebnih filtera.
-
       - Zamena zadnjih amortizera.
+      - Zamena ulja u menjaču **DSG DQ250**.
 
-      - Zamena ulja u **DSG DQ250** menjaču.
+      Veliki servis je ključni deo održavanja automobila **Seat, Volkswagen, Škoda i Audi**. Pravovremena zamena zupčastog remena, pumpe, tehničkih tečnosti i potrošnog materijala pomaže u održavanju automobila u ispravnom stanju i smanjuje rizik od ozbiljnih i skupih kvarova.
 
+      Posebnu pažnju smo posvetili menjaču **DSG DQ250** - šestostepenoj robotizovanoj transmisiji sa mokrim kuplungom. Za njegovu pouzdanu radnju važno je pridržavati se propisa i pravovremeno menjati transmisiono ulje.
 
-      Veliki servis predstavlja jedan od najvažnijih delova održavanja vozila **Seat, Volkswagen, Škoda i Audi**. Pravovremena zamena zupčastog kaiša, vodene pumpe, tečnosti i potrošnog materijala doprinosi pouzdanosti automobila i smanjuje rizik od ozbiljnih i skupih kvarova.
+      Ako vam je potreban **nezavisan automehaničarski servis u Beogradu**, vršimo tehničko održavanje i popravke automobila: mali i veliki servis, zamena zupčastog remena, održavanje DSG, dijagnostiku, zamenu ulja i filtera, popravku vešanja i druge radove.
 
-
-      Posebna pažnja posvećena je **DSG DQ250** menjaču — šestostepenom robotizovanom menjaču sa mokrim kvačilima. Za njegov pouzdan i dugotrajan rad veoma je važno poštovati servisne intervale i redovno menjati ulje u menjaču.
-
-
-      Ako tražite pouzdan **auto servis u Beogradu**, radimo mali i veliki servis, zamenu zupčastog kaiša, servis DSG menjača, dijagnostiku, zamenu ulja i filtera, popravku vešanja i druge servisne radove.
-
-
-      **Auto servis u Beogradu — profesionalno održavanje vozila Seat, Volkswagen, Škoda, Audi i drugih marki.**
+      **Auto servis u Beogradu - profesionalno održavanje Seat, Volkswagen, Škoda, Audi i drugih marki automobila.**
+    car: SEAT LEON
 car: SEAT LEON
 year: 2019
 servicesApplied:
@@ -88,7 +64,7 @@ gallery:
   - gallery/1.jpg
 date: 2026-08-20
 published: true
-translatedFrom: 70cef40daa3356ac
+translatedFrom: caaeb423b3a7eca9
 ---
 
 К нам в **русский автосервис в Белграде** приехал **Seat Leon** с пробегом **190 000 км** для проведения большого планового технического обслуживания — так называемого **большого сервиса**.
