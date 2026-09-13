@@ -6,10 +6,10 @@ import WhatsAppIcon from './icons/WhatsAppIcon.astro';
 import ViberIcon from './icons/ViberIcon.astro';
 import { Phone, ChevronDown } from '@lucide/astro';
 import { HONEYPOT_FIELD } from '@podbor/lead-crm';
-import { PHONE_COUNTRIES } from '@podbor/lead-crm/phone';
-import { FLAGS, BRAND_COLORS } from '@/utils/constants';
+import { phoneCountryOptions } from '@podbor/lead-crm/phone';
+import { BRAND_COLORS } from '@/utils/constants';
 import { getLeadFormContent } from '@/i18n/content/leadForm';
-import { getLocale } from '@/i18n/config';
+import { getLocale, DISPLAY_LOCALE } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 
 interface Props {
@@ -32,6 +32,7 @@ const locale = getLocale(Astro.currentLocale);
 const lf = getLeadFormContent(locale);
 
 const defaultPhoneCountry = 'RS';
+const countryOptions = phoneCountryOptions(DISPLAY_LOCALE[locale]);
 
 const fieldClass =
   'form-field py-3 rounded-sm text-sm outline-none bg-page border border-border-strong text-primary font-sans';
@@ -170,18 +171,20 @@ const fieldClass =
         role="tabpanel"
       >
         <div class="flex gap-2">
-          <div class="relative shrink-0 w-[6.5rem]">
+          <div class="relative min-w-0 max-w-[14rem] shrink-0">
             <select
               id="contact-phone-country"
-              class={`${fieldClass} w-full pl-2 pr-6 appearance-none cursor-pointer`}
+              class={`${fieldClass} max-w-full pl-2 pr-6 appearance-none cursor-pointer overflow-hidden text-ellipsis`}
             >
               {
-                PHONE_COUNTRIES.map((c) => (
+                countryOptions.map((c) => (
                   <option
                     value={c.iso}
+                    data-dial={c.dial}
+                    data-dial-primary={c.primary ? '' : undefined}
                     selected={c.iso === defaultPhoneCountry}
                   >
-                    {FLAGS[c.iso.toLowerCase()]} +{c.dial}
+                    {c.flag} +{c.dial} {c.name}
                   </option>
                 ))
               }
@@ -196,7 +199,7 @@ const fieldClass =
             id="contact-phone-number"
             inputmode="tel"
             placeholder="060 123 4567"
-            class={`${fieldClass} flex-1 min-w-0 px-4`}
+            class={`${fieldClass} min-w-0 flex-1 px-4`}
           />
         </div>
       </div>
@@ -212,32 +215,34 @@ const fieldClass =
       type="textarea"
     />
 
-    <label
-      class="flex items-start gap-3 mb-5 cursor-pointer text-muted consent-label"
-    >
-      <input
-        type="checkbox"
-        name="consent"
-        class="mt-0.5 shrink-0 w-4 h-4 cursor-pointer accent-accent"
-      />
-      <span class="text-xs leading-relaxed">
-        {lf.consentBefore}<a
-          href={PathBuilder.privacy(locale)}
-          target="_blank"
-          class="underline text-accent">{lf.consentLinkText}</a
-        >
-      </span>
-    </label>
-    <p class="field-error consent-error mb-4" style="display:none">
-      {lf.consentError}
-    </p>
+    <div class="lead-submit">
+      <label
+        class="flex items-start gap-3 mb-3 cursor-pointer text-muted consent-label"
+      >
+        <input
+          type="checkbox"
+          name="consent"
+          class="mt-0.5 shrink-0 w-4 h-4 cursor-pointer accent-accent"
+        />
+        <span class="text-xs leading-relaxed">
+          {lf.consentBefore}<a
+            href={PathBuilder.privacy(locale)}
+            target="_blank"
+            class="underline text-accent">{lf.consentLinkText}</a
+          >
+        </span>
+      </label>
+      <p class="field-error consent-error mb-3" style="display:none">
+        {lf.consentError}
+      </p>
 
-    <Button
-      type="submit"
-      class="lead-btn w-full py-3.5 justify-center tracking-[0.06em]"
-    >
-      {lf.submitLabel}
-    </Button>
+      <Button
+        type="submit"
+        class="lead-btn w-full py-3.5 justify-center tracking-[0.06em]"
+      >
+        {lf.submitLabel}
+      </Button>
+    </div>
   </form>
 </div>
 
@@ -248,6 +253,7 @@ const fieldClass =
     type CountryCode,
   } from 'libphonenumber-js/min';
   import { isValidContact } from '@podbor/lead-crm/phone';
+  import { bindPhoneCountry } from '@podbor/lead-crm/phone-input';
   import {
     isTrackedContactChannel,
     getPreferredChannel,
@@ -335,10 +341,6 @@ const fieldClass =
     // otherwise the two same-named fields would collide on submit.
     tgInput.removeAttribute('name');
 
-    function isSupportedCountry(iso: string) {
-      return Array.from(phoneCountry.options).some((o) => o.value === iso);
-    }
-
     // WhatsApp/Viber/phone-call all collect the same shape of data (a phone
     // number) — they share the "phone" panel and its validation, and only
     // differ in which channel gets recorded for staff to reach back out on.
@@ -373,6 +375,8 @@ const fieldClass =
     const detectedCountry = detectVisitorCountry();
     if (detectedCountry) phoneCountry.value = detectedCountry.toUpperCase();
 
+    bindPhoneCountry(phoneCountry, phoneNumber);
+
     function parsedPhone() {
       return parsePhoneNumberFromString(
         phoneNumber.value,
@@ -385,22 +389,8 @@ const fieldClass =
     function formatPhone() {
       const value = phoneNumber.value;
       if (value.trim().startsWith('+')) {
-        // pasted/typed as international — detect the country, then show the
-        // properly grouped national format so the dial code isn't shown twice.
-        // If the detected country isn't one of our <option>s, assigning it to
-        // the <select> would clear the selection (value becomes ""), which
-        // then breaks parsing — so keep the full "+..." text instead, which
-        // parses fine on its own regardless of the <select>'s value.
         const digits = '+' + value.replace(/[^\d]/g, '');
-        const ayt = new AsYouType();
-        const formatted = ayt.input(digits);
-        const num = ayt.getNumber();
-        if (num?.country && isSupportedCountry(num.country)) {
-          phoneCountry.value = num.country;
-          phoneNumber.value = num.formatNational();
-        } else {
-          phoneNumber.value = formatted;
-        }
+        phoneNumber.value = new AsYouType().input(digits);
         return;
       }
       const raw = value.replace(/[^\d]/g, '');
@@ -481,14 +471,14 @@ const fieldClass =
       clearError(phoneNumber);
       syncContact();
     });
-    phoneCountry.addEventListener('change', () => {
+    phoneCountry.addEventListener('change', (event) => {
       // if the field holds international "+..." text, the user picking a
       // different country is overriding the auto-detect — drop the stale
       // text instead of silently re-showing a number for the old country.
       if (phoneNumber.value.trim().startsWith('+')) phoneNumber.value = '';
       formatPhone();
       syncContact();
-      phoneNumber.focus();
+      if (event.isTrusted) phoneNumber.focus();
     });
 
     form.addEventListener('submit', (e) => {

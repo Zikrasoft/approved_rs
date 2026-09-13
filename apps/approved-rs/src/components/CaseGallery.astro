@@ -63,33 +63,35 @@ const closeLabel = t.common.closeLabel;
         </Button>
       )}
 
-      <dialog class="gallery-dialog">
-        <button
-          type="button"
-          data-close
-          aria-label={closeLabel}
-          class="gallery-btn gallery-close"
-        >
-          <X size={16} />
-        </button>
-        <button
-          type="button"
-          data-prev
-          aria-label={gallery.prev}
-          class="gallery-btn gallery-nav gallery-prev"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <img data-dialog-img alt="" />
-        <button
-          type="button"
-          data-next
-          aria-label={gallery.next}
-          class="gallery-btn gallery-nav gallery-next"
-        >
-          <ChevronRight size={20} />
-        </button>
-      </dialog>
+      <approved-modal>
+        <dialog class="gallery-dialog">
+          <button
+            type="button"
+            data-modal-close
+            aria-label={closeLabel}
+            class="gallery-btn gallery-close"
+          >
+            <X size={16} />
+          </button>
+          <button
+            type="button"
+            data-prev
+            aria-label={gallery.prev}
+            class="gallery-btn gallery-nav gallery-prev"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <img data-dialog-img alt="" />
+          <button
+            type="button"
+            data-next
+            aria-label={gallery.next}
+            class="gallery-btn gallery-nav gallery-next"
+          >
+            <ChevronRight size={20} />
+          </button>
+        </dialog>
+      </approved-modal>
     </div>
   )
 }
@@ -153,9 +155,16 @@ const closeLabel = t.common.closeLabel;
   .gallery-next {
     right: 0.75rem;
   }
+  approved-modal {
+    display: contents;
+  }
 </style>
 
 <script>
+  import { defineModalDialog } from '@podbor/site-kit/browser';
+
+  defineModalDialog('approved-modal');
+
   document.querySelectorAll<HTMLElement>('.case-gallery').forEach((root) => {
     root.querySelector('[data-more]')?.addEventListener('click', (e) => {
       root
@@ -189,17 +198,11 @@ const closeLabel = t.common.closeLabel;
         }),
       );
       dialog
-        .querySelector('[data-close]')
-        ?.addEventListener('click', () => dialog.close());
-      dialog
         .querySelector('[data-prev]')
         ?.addEventListener('click', () => show(current - 1));
       dialog
         .querySelector('[data-next]')
         ?.addEventListener('click', () => show(current + 1));
-      dialog.addEventListener('click', (e) => {
-        if (e.target === dialog) dialog.close();
-      });
       dialog.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowRight') show(current + 1);
         if (e.key === 'ArrowLeft') show(current - 1);

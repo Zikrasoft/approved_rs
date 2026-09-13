@@ -1,5 +1,6 @@
 ---
 import { localeFrom } from '@/i18n/currentLocale';
+import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { getSiteContent } from '@/i18n/content/site';
 import { getServicesContent } from '@/i18n/content/services';
 import Icon from './Icon.astro';
@@ -9,7 +10,7 @@ import {
   SHOP_SERVICE,
   type ServiceSlug,
 } from '@/utils/services';
-import { PHONE_COUNTRIES } from '@podbor/lead-crm/phone';
+import { phoneCountryOptions } from '@podbor/lead-crm/phone';
 import { HONEYPOT_FIELD } from '@podbor/lead-crm';
 import { TELEGRAM_ENABLED } from '@/utils/constants';
 
@@ -35,8 +36,7 @@ const services = getServicesContent(locale);
 const DEFAULT_COUNTRY = 'RS';
 const uid = crypto.randomUUID().slice(0, 8);
 
-const flag = (iso: string) =>
-  String.fromCodePoint(...[...iso].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65));
+const countryOptions = phoneCountryOptions(BCP47_BY_LOCALE[locale]);
 
 // TODO: with JS off and the Telegram tab picked, the required name="contact" phone
 // input is display:none and blocks submit unfocusably. Solve before TELEGRAM_ENABLED
@@ -122,7 +122,14 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
   <fieldset class="group m-0 border-0 p-0">
     <legend class="field-label p-0">{site.form.contactChannelLabel}</legend>
 
-    <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+    <div
+      class:list={[
+        'grid gap-2',
+        channels.length === 4
+          ? 'grid-cols-2 sm:grid-cols-4'
+          : 'grid-cols-3 sm:grid-cols-3',
+      ]}
+    >
       {
         channels.map((channel, index) => (
           <label class="block">
@@ -167,20 +174,21 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
 
     <div class="mt-3 hidden group-has-[.ch-ph:checked]:block">
       <div class="flex gap-2">
-        <div class="relative shrink-0">
+        <div class="relative min-w-0 max-w-[14rem] shrink-0">
           <select
             aria-label={site.form.countryLabel}
-            class="field spec w-[7.5rem] appearance-none pr-8"
+            class="field spec max-w-full appearance-none overflow-hidden text-ellipsis pr-8"
             data-country
           >
             {
-              PHONE_COUNTRIES.map((country) => (
+              countryOptions.map((country) => (
                 <option
                   value={country.iso}
                   data-dial={country.dial}
+                  data-dial-primary={country.primary ? '' : undefined}
                   selected={country.iso === DEFAULT_COUNTRY}
                 >
-                  {flag(country.iso)} +{country.dial}
+                  {country.flag} +{country.dial} {country.name}
                 </option>
               ))
             }
@@ -222,9 +230,20 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
 
   {
     !fixedService && (
-      <fieldset class="m-0 border-0 p-0">
-        <legend class="field-label p-0">{site.form.serviceLabel}</legend>
-        <div class="flex flex-wrap gap-2">
+      <details class="group/svc" open={!compact}>
+        <summary class="field flex cursor-pointer list-none items-center justify-between gap-2 [&::-webkit-details-marker]:hidden">
+          {site.form.serviceLabel}
+          <Icon
+            name="chevronDown"
+            size={14}
+            class="shrink-0 text-muted transition-transform duration-150 group-open/svc:rotate-180"
+          />
+        </summary>
+        <div
+          class="mt-2 flex flex-wrap gap-2"
+          role="group"
+          aria-label={site.form.serviceLabel}
+        >
           {SERVICE_SLUGS.map((slug) => (
             <label class="block">
               <input
@@ -239,7 +258,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
           ))}
         </div>
         <p class="mt-2 text-xs text-muted">{site.form.servicePlaceholder}</p>
-      </fieldset>
+      </details>
     )
   }
 
@@ -253,52 +272,55 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     >
   </label>
 
-  <div>
-    <label class="flex min-h-11 items-start gap-3 py-1.5">
-      <input
-        type="checkbox"
-        name="consent"
-        value="1"
-        required
-        aria-describedby={`consent-error-${uid}`}
-        class="peer sr-only"
-        data-consent
-      />
-      <span
-        class="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-[3px] border border-line-field bg-card text-white transition-colors duration-150 peer-checked:border-signal peer-checked:bg-signal peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100"
+  <div class="lead-submit">
+    <div>
+      <label class="flex min-h-11 items-start gap-3 py-1.5">
+        <input
+          type="checkbox"
+          name="consent"
+          value="1"
+          required
+          aria-describedby={`consent-error-${uid}`}
+          class="peer sr-only"
+          data-consent
+        />
+        <span
+          class="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-[3px] border border-line-field bg-card text-white transition-colors duration-150 peer-checked:border-signal peer-checked:bg-signal peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100"
+        >
+          <Icon name="check" size={10} />
+        </span>
+        <span class="text-xs leading-relaxed text-muted">
+          {site.form.privacyNote}{' '}
+          <a
+            href={PathBuilder.privacy(locale)}
+            target="_blank"
+            class="underline underline-offset-2 transition-colors duration-150 hover:text-signal"
+            >{site.form.privacyLinkText}</a
+          >.
+        </span>
+      </label>
+      <p
+        id={`consent-error-${uid}`}
+        class={errorText}
+        aria-live="polite"
+        data-error-consent
+        hidden
       >
-        <Icon name="check" size={10} />
-      </span>
-      <span class="text-xs leading-relaxed text-muted">
-        {site.form.privacyNote}{' '}
-        <a
-          href={PathBuilder.privacy(locale)}
-          target="_blank"
-          class="underline underline-offset-2 transition-colors duration-150 hover:text-signal"
-          >{site.form.privacyLinkText}</a
-        >.
-      </span>
-    </label>
-    <p
-      id={`consent-error-${uid}`}
-      class={errorText}
-      aria-live="polite"
-      data-error-consent
-      hidden
-    >
-      {site.form.errorConsent}
-    </p>
-  </div>
+        {site.form.errorConsent}
+      </p>
+    </div>
 
-  <button type="submit" class="btn btn-primary mt-1 w-full sm:w-auto">
-    <span data-submit-label>{site.form.submit}</span>
-    <Icon name="arrowRight" />
-  </button>
+    <button type="submit" class="btn btn-primary w-full sm:w-auto">
+      <span data-submit-label>{site.form.submit}</span>
+      <Icon name="arrowRight" />
+    </button>
+  </div>
 </form>
 
 <script>
   import { getOrCreateVisitorId } from '@podbor/site-kit/browser';
   import { composeE164 } from '@podbor/lead-crm/compose-e164';
+  import { bindPhoneCountry } from '@podbor/lead-crm/phone-input';
   import type { CountryCode } from 'libphonenumber-js/min';
   import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 
@@ -355,6 +377,8 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     const country = pick<HTMLSelectElement>('[data-country]');
     const phone = pick<HTMLInputElement>('[data-phone]');
     const consent = pick<HTMLInputElement>('[data-consent]');
+
+    bindPhoneCountry(country, phone);
 
     const fields: Record<string, [HTMLElement, HTMLElement]> = {
       name: [pick('[data-error-name]'), name],

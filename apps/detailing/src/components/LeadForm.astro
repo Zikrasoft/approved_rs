@@ -1,12 +1,13 @@
 ---
 import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/currentLocale';
+import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { getSiteContent } from '@/i18n/content/site';
 import { getServicesContent } from '@/i18n/content/services';
 import { PathBuilder } from '@/utils/paths';
 import { CONTACT_LINKS } from '@/utils/contactLinks';
 import { SERVICE_SLUGS, type ServiceSlug } from '@/utils/services';
-import { PHONE_COUNTRIES } from '@podbor/lead-crm/phone';
+import { phoneCountryOptions } from '@podbor/lead-crm/phone';
 import { HONEYPOT_FIELD } from '@podbor/lead-crm';
 
 interface Props {
@@ -29,8 +30,7 @@ const errorId = {
   consent: `${uid}-consent`,
 };
 
-const flag = (iso: string) =>
-  String.fromCodePoint(...[...iso].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65));
+const countryOptions = phoneCountryOptions(BCP47_BY_LOCALE[locale]);
 
 const channels = [
   { value: 'whatsapp', icon: 'whatsapp', label: 'WhatsApp', panel: 'ph' },
@@ -40,7 +40,7 @@ const channels = [
 ] as const;
 
 const field =
-  'w-full rounded-2xl border border-white/35 bg-void px-4 py-3.5 text-sm text-chalk shadow-[inset_0_-1px_0_rgba(255,255,255,0.06)] placeholder:text-mute transition-colors duration-400 focus:border-champagne';
+  'w-full rounded-2xl border border-white/35 bg-void px-4 py-3 text-base text-chalk shadow-[inset_0_-1px_0_rgba(255,255,255,0.06)] placeholder:text-mute transition-colors duration-400 focus:border-champagne';
 const label =
   'mb-2 block text-[0.6875rem] uppercase tracking-[0.18em] text-mute-2';
 const chip =
@@ -58,7 +58,7 @@ const noscriptLink =
   novalidate
   data-lead-form
   data-submitting-label={site.form.submitting}
-  class={`flex flex-col gap-5 ${className}`}
+  class={`flex flex-col ${compact ? 'gap-4' : 'gap-5'} ${className}`}
 >
   <input type="hidden" name="locale" value={locale} />
   <div class="hidden" aria-hidden="true">
@@ -167,20 +167,21 @@ const noscriptLink =
 
     <div class="mt-3 hidden group-has-[.ch-ph:checked]:block">
       <div class="flex gap-2">
-        <div class="relative shrink-0">
+        <div class="relative min-w-0 max-w-[14rem] shrink-0">
           <select
             aria-label={site.form.countryLabel}
-            class={`${field} w-[7rem] appearance-none px-3 pr-8 [&>option]:bg-ink [&>option]:text-chalk`}
+            class={`${field} max-w-full appearance-none overflow-hidden text-ellipsis px-3 pr-8 [&>option]:bg-ink [&>option]:text-chalk`}
             data-country
           >
             {
-              PHONE_COUNTRIES.map((country) => (
+              countryOptions.map((country) => (
                 <option
                   value={country.iso}
                   data-dial={country.dial}
+                  data-dial-primary={country.primary ? '' : undefined}
                   selected={country.iso === DEFAULT_COUNTRY}
                 >
-                  {flag(country.iso)} +{country.dial}
+                  {country.flag} +{country.dial} {country.name}
                 </option>
               ))
             }
@@ -216,9 +217,22 @@ const noscriptLink =
     </div>
   </fieldset>
 
-  <fieldset class="m-0 border-0 p-0">
-    <legend class={`${label} p-0`}>{site.form.serviceLabel}</legend>
-    <div class="flex flex-wrap gap-2">
+  <details class="group/svc" open={!compact}>
+    <summary
+      class={`${field} flex cursor-pointer list-none items-center justify-between gap-2 [&::-webkit-details-marker]:hidden`}
+    >
+      {site.form.serviceLabel}
+      <Icon
+        name="chevronDown"
+        size={14}
+        class="shrink-0 transition-transform duration-400 group-open/svc:rotate-180"
+      />
+    </summary>
+    <div
+      class="mt-2 flex flex-wrap gap-2"
+      role="group"
+      aria-label={site.form.serviceLabel}
+    >
       {
         SERVICE_SLUGS.map((slug) => (
           <label class="block">
@@ -235,7 +249,7 @@ const noscriptLink =
       }
     </div>
     <p class="mt-2 text-xs text-mute-2">{site.form.servicePlaceholder}</p>
-  </fieldset>
+  </details>
 
   <label class="block">
     <span class={label}>{site.form.commentLabel}</span>
@@ -246,59 +260,62 @@ const noscriptLink =
       class={`${field} resize-none`}></textarea>
   </label>
 
-  <div>
-    <label class="flex items-start gap-3 py-1.5">
-      <input
-        type="checkbox"
-        name="consent"
-        value="1"
-        aria-describedby={errorId.consent}
-        class="peer sr-only"
-        data-consent
-      />
-      <span
-        class="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-white/35 text-void transition-colors duration-400 peer-checked:border-champagne peer-checked:bg-champagne peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-champagne [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100"
-      >
-        <Icon name="check" size={10} />
-      </span>
-      <span class="text-xs leading-relaxed text-mute">
-        {site.form.privacyNote}{' '}
-        <a
-          href={PathBuilder.privacy(locale)}
-          target="_blank"
-          class="text-mute underline underline-offset-4 transition-colors duration-400 hover:text-champagne"
-          >{site.form.privacyLinkText}</a
+  <div class="lead-submit">
+    <div>
+      <label class="flex items-start gap-3 py-1.5">
+        <input
+          type="checkbox"
+          name="consent"
+          value="1"
+          aria-describedby={errorId.consent}
+          class="peer sr-only"
+          data-consent
+        />
+        <span
+          class="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-white/35 text-void transition-colors duration-400 peer-checked:border-champagne peer-checked:bg-champagne peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-champagne [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100"
         >
-      </span>
-    </label>
-    <p
-      id={errorId.consent}
-      class={errorText}
-      aria-live="polite"
-      data-error-consent
-      hidden
-    >
-      {site.form.errorConsent}
-    </p>
-  </div>
+          <Icon name="check" size={10} />
+        </span>
+        <span class="text-xs leading-relaxed text-mute">
+          {site.form.privacyNote}{' '}
+          <a
+            href={PathBuilder.privacy(locale)}
+            target="_blank"
+            class="text-mute underline underline-offset-4 transition-colors duration-400 hover:text-champagne"
+            >{site.form.privacyLinkText}</a
+          >
+        </span>
+      </label>
+      <p
+        id={errorId.consent}
+        class={errorText}
+        aria-live="polite"
+        data-error-consent
+        hidden
+      >
+        {site.form.errorConsent}
+      </p>
+    </div>
 
-  <button
-    type="submit"
-    class="group/btn mt-1 inline-flex items-center justify-center gap-3 rounded-full bg-chalk py-3.5 pl-6 pr-2.5 text-sm font-semibold text-void transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-champagne active:scale-[0.98] disabled:opacity-60"
-  >
-    <span data-submit-label>{site.form.submit}</span>
-    <span
-      class="flex h-8 w-8 items-center justify-center rounded-full bg-void/10 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-px"
-      aria-hidden="true"
+    <button
+      type="submit"
+      class="group/btn inline-flex items-center justify-center gap-3 rounded-full bg-chalk py-3.5 pl-6 pr-2.5 text-sm font-semibold text-void transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-champagne active:scale-[0.98] disabled:opacity-60"
     >
-      <Icon name="arrow" />
-    </span>
-  </button>
+      <span data-submit-label>{site.form.submit}</span>
+      <span
+        class="flex h-8 w-8 items-center justify-center rounded-full bg-void/10 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-px"
+        aria-hidden="true"
+      >
+        <Icon name="arrow" />
+      </span>
+    </button>
+  </div>
 </form>
 
 <script>
   import { getOrCreateVisitorId } from '@podbor/site-kit/browser';
   import { composeE164 } from '@podbor/lead-crm/compose-e164';
+  import { bindPhoneCountry } from '@podbor/lead-crm/phone-input';
   import type { CountryCode } from 'libphonenumber-js/min';
   import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 
@@ -347,6 +364,8 @@ const noscriptLink =
     const country = pick<HTMLSelectElement>('[data-country]');
     const phone = pick<HTMLInputElement>('[data-phone]');
     const consent = pick<HTMLInputElement>('[data-consent]');
+
+    bindPhoneCountry(country, phone);
 
     const errors = {
       name: pick('[data-error-name]'),
