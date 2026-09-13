@@ -11,8 +11,10 @@ import { getLocale } from '@/i18n/config';
 // Logo/heading font: preload so it's ready before first paint (avoids the
 // fallback→webfont width jump on every navigation, most visible on the logo).
 import logoFontUrl from '@fontsource/playfair-display/files/playfair-display-latin-700-normal.woff2?url';
-// ".RS" badge next to the logo uses this weight — same swap-jump issue.
-import tldFontUrl from '@fontsource/outfit/files/outfit-latin-600-normal.woff2?url';
+// Header nav links (400) and the CTA button (500) — same swap-jump issue, and
+// the nav is flex-centred, so a swap slides the whole row sideways.
+import navFontUrl from '@fontsource/outfit/files/outfit-latin-400-normal.woff2?url';
+import navCtaFontUrl from '@fontsource/outfit/files/outfit-latin-500-normal.woff2?url';
 
 interface Props extends MetaProps {
   schema?: object;
@@ -60,7 +62,14 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
       rel="preload"
       as="font"
       type="font/woff2"
-      href={tldFontUrl}
+      href={navFontUrl}
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href={navCtaFontUrl}
       crossorigin
     />
     <title>{title}</title>

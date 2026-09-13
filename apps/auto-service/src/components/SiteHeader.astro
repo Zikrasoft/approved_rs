@@ -208,7 +208,7 @@ const links = [
     if (event.key === 'Escape') setOpen(false);
   });
   window
-    .matchMedia('(min-width: 1024px)')
+    .matchMedia('(min-width: 768px)')
     .addEventListener('change', (event) => {
       if (event.matches) setOpen(false);
     });

@@ -28,3 +28,11 @@ export const BCP47_BY_LOCALE: Record<Locale, string> = {
   es: 'es-ES',
   de: 'de-DE',
 };
+
+// Separate from BCP47_BY_LOCALE on purpose: that one feeds sitemap hreflang,
+// where a script subtag is not wanted. This one drives Intl formatting, where
+// bare "sr" resolves to Cyrillic while the site is written in Latin.
+export const DISPLAY_LOCALE: Record<Locale, string> = {
+  ...BCP47_BY_LOCALE,
+  sr: 'sr-Latn-RS',
+};

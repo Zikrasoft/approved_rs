@@ -170,7 +170,11 @@ const links = [
 </div>
 
 <script>
-  import { defineLocaleChoice } from '@podbor/site-kit/browser';
+  import {
+    defineLocaleChoice,
+    lockScroll,
+    unlockScroll,
+  } from '@podbor/site-kit/browser';
 
   defineLocaleChoice('details-lang');
 
@@ -184,13 +188,18 @@ const links = [
   const closeLabel = menu?.dataset.closeLabel ?? openLabel;
 
   let closeTimer = 0;
+  let menuOpen = false;
 
   function setOpen(open: boolean) {
     if (!toggle || !menu) return;
     window.clearTimeout(closeTimer);
+    if (open !== menuOpen) {
+      menuOpen = open;
+      if (open) lockScroll();
+      else unlockScroll();
+    }
     toggle.setAttribute('aria-expanded', String(open));
     toggle.setAttribute('aria-label', open ? closeLabel : openLabel);
-    document.body.style.overflow = open ? 'hidden' : '';
     if (top && bottom) {
       top.style.transform = open
         ? 'translateY(5.5px) rotate(45deg)'

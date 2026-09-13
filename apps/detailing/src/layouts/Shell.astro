@@ -3,6 +3,9 @@ import '@/styles/global.css';
 import displayLatinUrl from '@fontsource-variable/unbounded/files/unbounded-latin-wght-normal.woff2?url';
 import displayLatinExtUrl from '@fontsource-variable/unbounded/files/unbounded-latin-ext-wght-normal.woff2?url';
 import displayCyrillicUrl from '@fontsource-variable/unbounded/files/unbounded-cyrillic-wght-normal.woff2?url';
+import bodyLatinUrl from '@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2?url';
+import bodyLatinExtUrl from '@fontsource-variable/manrope/files/manrope-latin-ext-wght-normal.woff2?url';
+import bodyCyrillicUrl from '@fontsource-variable/manrope/files/manrope-cyrillic-wght-normal.woff2?url';
 import SiteHeader from '@/components/SiteHeader.astro';
 import SiteFooter from '@/components/SiteFooter.astro';
 import LeadModal from '@/components/LeadModal.astro';
@@ -34,12 +37,12 @@ const jsonLdText = (schema: Record<string, unknown>) =>
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
 
-const DISPLAY_FONT_URLS: Record<typeof locale, string[]> = {
-  ru: [displayLatinUrl, displayCyrillicUrl],
-  sr: [displayLatinUrl, displayLatinExtUrl],
-  en: [displayLatinUrl],
+const FONT_URLS: Record<typeof locale, string[]> = {
+  ru: [displayLatinUrl, displayCyrillicUrl, bodyLatinUrl, bodyCyrillicUrl],
+  sr: [displayLatinUrl, displayLatinExtUrl, bodyLatinUrl, bodyLatinExtUrl],
+  en: [displayLatinUrl, bodyLatinUrl],
 };
-const displayFontUrls = DISPLAY_FONT_URLS[locale];
+const fontUrls = FONT_URLS[locale];
 const canonical = new URL(Astro.url.pathname, SITE_URL).href;
 const alternates = localeSet.getAlternateLinks(SITE_URL, Astro.url.pathname);
 const ogImage = new URL(OG_IMAGE[locale], SITE_URL).href;
@@ -86,10 +89,8 @@ const businessSchema = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#060608" />
-    <slot name="head" />
     {
-      displayFontUrls.map((href) => (
+      fontUrls.map((href) => (
         <link
           rel="preload"
           as="font"
@@ -99,6 +100,8 @@ const businessSchema = {
         />
       ))
     }
+    <meta name="theme-color" content="#060608" />
+    <slot name="head" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
