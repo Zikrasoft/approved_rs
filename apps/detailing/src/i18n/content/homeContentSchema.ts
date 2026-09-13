@@ -8,6 +8,10 @@ const sectionHeadSchema = z
   })
   .strict();
 
+const titleTextList = z.array(
+  z.object({ title: z.string(), text: z.string() }).strict(),
+);
+
 export const homeContentSchema = z
   .object({
     meta: z.object({ title: z.string(), description: z.string() }).strict(),
@@ -26,18 +30,30 @@ export const homeContentSchema = z
       })
       .strict(),
     marquee: z.array(z.string()),
-    intro: sectionHeadSchema.extend({
-      points: z.array(
-        z.object({ title: z.string(), text: z.string() }).strict(),
-      ),
+    intro: sectionHeadSchema.extend({ points: titleTextList }),
+    protocol: sectionHeadSchema.extend({
+      sheetTitle: z.string(),
+      sample: z.string(),
+      unit: z.string(),
+      thinLabel: z.string(),
+      verdictOk: z.string(),
+      verdictStop: z.string(),
+      rows: z
+        .array(
+          z
+            .object({
+              panel: z.string(),
+              value: z.number().positive(),
+              thin: z.boolean().optional(),
+            })
+            .strict(),
+        )
+        .min(1),
     }),
     servicesHead: sectionHeadSchema,
     compare: sectionHeadSchema,
-    process: sectionHeadSchema.extend({
-      steps: z.array(
-        z.object({ title: z.string(), text: z.string() }).strict(),
-      ),
-    }),
+    process: sectionHeadSchema.extend({ steps: titleTextList }),
+    honest: sectionHeadSchema.extend({ items: titleTextList }),
     materials: sectionHeadSchema.extend({
       brands: z.array(
         z

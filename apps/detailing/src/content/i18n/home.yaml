@@ -35,6 +35,30 @@ intro:
       text: Перед полировкой замеряем лак по всем панелям. Если запаса нет — скажем прямо и не будем рисковать вашей краской.
     - title: 'Фотоотчёт по каждому этапу'
       text: Вы видите, что происходило с машиной, даже если не приезжали смотреть.
+protocol:
+  eyebrow: Замеры
+  heading: Толщиномер знает про вашу краску больше, чем вы
+  body: Перед полировкой замеряем лак по каждой панели и записываем результат. Протокол остаётся у вас — вместе с решением, какую панель мы трогать не будем.
+  sheetTitle: Протокол замеров
+  sample: 'BMW 530i, 2019'
+  unit: мкм
+  thinLabel: Тонко
+  verdictOk: Полировка в два прохода
+  verdictStop: Крышу не режем
+  rows:
+    - panel: Капот
+      value: 132
+    - panel: Крыша
+      value: 78
+      thin: true
+    - panel: Переднее крыло
+      value: 124
+    - panel: Передняя дверь
+      value: 141
+    - panel: Задняя дверь
+      value: 146
+    - panel: Крышка багажника
+      value: 128
 servicesHead:
   eyebrow: Что мы делаем
   heading: Четыре направления, в каждом — до конца
@@ -56,6 +80,19 @@ process:
       text: Мойка в два этапа, глина, обезжиривание. Пропустить этот шаг — значит запечатать грязь под плёнкой.
     - title: 'Работа и выдача'
       text: Плёнка, полировка, керамика — по плану. Отдаём машину при дневном свете и показываем результат вместе с вами.
+honest:
+  eyebrow: Честно
+  heading: Иногда правильный ответ — не браться
+  body: Отказ от работы — тоже результат осмотра. Эти случаи мы называем до того, как вы заплатите, а не после.
+  items:
+    - title: 'Лак на пределе'
+      text: Если толщиномер показывает критично тонкий лак, полировать нельзя — можно протереть до грунта. Предложим мягкий вариант без съёма или только защитное покрытие и покажем замеры, на которых это видно.
+    - title: 'Машина уже перекрашена'
+      text: 'На дешёвый ремонтный лак плёнку класть нельзя: при снятии она заберёт покрытие с собой. Сначала приводим лак в порядок, потом возвращаемся к плёнке.'
+    - title: 'Вмятины и волны на панелях'
+      text: Плёнка не прячет геометрию кузова, а матовая подчёркивает её сильнее глянца. Сначала кузовной ремонт, потом цвет.
+    - title: 'Руль со сработавшей подушкой'
+      text: 'Без сервисной истории мы за такой руль не беремся. Это вопрос вашей безопасности, а не косметики: сначала сервис, потом мы.'
 materials:
   eyebrow: Материалы
   heading: Работаем только с тем, что переживает сербское лето
@@ -164,6 +201,30 @@ translations:
           text: Pre poliranja merimo lak na svim panelima. Ako nema rezervi — reći ćemo otvoreno i nećemo rizikovati vašu boju.
         - title: Fotodokumentacija svakog koraka
           text: Vidite šta se dešavalo sa automobilom, čak i ako niste došli da pogledate.
+    protocol:
+      eyebrow: Merenja
+      heading: Debljinomer zna o vašem laku više nego vi
+      body: Pre poliranja merimo lak na svakom panelu i zapisujemo rezultat. Protokol ostaje kod vas — zajedno sa odlukom koji panel nećemo dirati.
+      sheetTitle: Protokol merenja
+      sample: 'BMW 530i, 2019'
+      unit: µm
+      thinLabel: Tanko
+      verdictOk: Poliranje u dva prolaza
+      verdictStop: Krov ne diramo
+      rows:
+        - panel: Hauba
+          value: 132
+        - panel: Krov
+          value: 78
+          thin: true
+        - panel: Prednji blatobran
+          value: 124
+        - panel: Prednja vrata
+          value: 141
+        - panel: Zadnja vrata
+          value: 146
+        - panel: Poklopac gepeka
+          value: 128
     servicesHead:
       eyebrow: Šta radimo
       heading: Četiri pravca, u svakom — do kraja
@@ -185,6 +246,19 @@ translations:
           text: Pranje u dva koraka, glina, odmašćivanje. Preskočiti ovaj korak znači zatvoriti prljavštinu pod folijom.
         - title: Rad i predaja
           text: Folija, poliranje, keramika — prema planu. Predajemo automobil na svetlosti dana i prikazujemo rezultat zajedno s vama.
+    honest:
+      eyebrow: Iskreno
+      heading: Ponekad je pravi odgovor — ne prihvatiti posao
+      body: Odbijanje posla je takođe rezultat pregleda. Ove slučajeve kažemo pre nego što platite, a ne posle.
+      items:
+        - title: Lak na granici
+          text: Ako debljinomer pokaže kritično tanak lak, poliranje ne dolazi u obzir — može se probiti do prajmera. Predložićemo blagu varijantu bez skidanja ili samo zaštitni premaz i pokazaćemo merenja na kojima se to vidi.
+        - title: Automobil je već prefarban
+          text: 'Na jeftin reparaturni lak folija ne sme: pri skidanju će povući premaz sa sobom. Prvo dovodimo lak u red, pa se tek onda vraćamo na foliju.'
+        - title: Udubljenja i talasi na panelima
+          text: Folija ne skriva geometriju karoserije, a mat je naglašava jače nego sjaj. Prvo limarija, pa onda boja.
+        - title: Volan sa aktiviranim vazdušnim jastukom
+          text: 'Bez servisne istorije takav volan ne prihvatamo. To je pitanje vaše bezbednosti, a ne kozmetike: prvo servis, pa onda mi.'
     materials:
       eyebrow: Materijali
       heading: Radimo samo s onim što izdrži srpsko leto
@@ -292,6 +366,30 @@ translations:
           text: Before polishing, we measure the paint thickness on all panels. If there's not enough clear coat, we will tell you honestly and won’t risk damaging your paint.
         - title: Photo report of each stage
           text: You can see what’s happening with your car, even if you don’t come in to check.
+    protocol:
+      eyebrow: Measurements
+      heading: A paint gauge knows more about your clear coat than you do
+      body: Before any polishing we measure the clear coat on every panel and write the result down. The protocol stays with you — along with the decision about which panel we are leaving alone.
+      sheetTitle: Measurement protocol
+      sample: 'BMW 530i, 2019'
+      unit: µm
+      thinLabel: Thin
+      verdictOk: Two-stage correction
+      verdictStop: Roof left alone
+      rows:
+        - panel: Bonnet
+          value: 132
+        - panel: Roof
+          value: 78
+          thin: true
+        - panel: Front wing
+          value: 124
+        - panel: Front door
+          value: 141
+        - panel: Rear door
+          value: 146
+        - panel: Boot lid
+          value: 128
     servicesHead:
       eyebrow: What We Do
       heading: Four services, fully delivered
@@ -313,6 +411,19 @@ translations:
           text: Two-stage washing, claying, and degreasing. Skipping this step means sealing dirt under the film.
         - title: Work and Handover
           text: Film application, polishing, ceramic coating — according to plan. We hand over the car in daylight and review the results together with you.
+    honest:
+      eyebrow: Honestly
+      heading: Sometimes the right answer is not to take the job
+      body: Turning work down is also a result of the inspection. We name these cases before you pay, not after.
+      items:
+        - title: Clear coat at its limit
+          text: If the gauge shows critically thin clear coat, polishing is off the table — it can burn through to primer. We will offer a light, non-abrasive option or coating only, and show you the measurements that say so.
+        - title: The car has already been resprayed
+          text: 'Film must not go on cheap repair lacquer: it will lift the coating when it comes off. We sort the paint out first and come back to film after.'
+        - title: Dents and waves in the panels
+          text: Film does not hide body geometry, and matte makes it more obvious than gloss does. Bodywork first, colour second.
+        - title: A wheel with a deployed airbag
+          text: 'Without service history we will not take that wheel on. It is a safety question, not a cosmetic one: service first, us second.'
     materials:
       eyebrow: Materials
       heading: We only work with products that withstand Serbian summers
@@ -382,4 +493,4 @@ translations:
       heading: Show us your car — it gets easier from there
       body: Come in for an inspection or send us photos via messenger. We’ll be honest about what’s necessary and what can be skipped.
       cta: Submit Your Request
-translatedFrom: 0ba7fb2618a97ebc
+translatedFrom: 0bde1d16101101d4
