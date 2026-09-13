@@ -36,7 +36,7 @@ const channels = contactChannels(site);
         SERVICE_SLUGS.map((slug) => (
           <a
             href={PathBuilder.service(locale, slug)}
-            class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal"
+            class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal-ink"
           >
             {services[slug].name}
           </a>
@@ -52,14 +52,14 @@ const channels = contactChannels(site);
       </span>
       <a
         href={PathBuilder.works(locale)}
-        class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal"
+        class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal-ink"
         >{site.nav.works}</a
       >
       {
         SHOP_ENABLED && (
           <a
             href={PathBuilder.shop(locale)}
-            class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal"
+            class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal-ink"
           >
             {site.nav.shop}
           </a>
@@ -67,12 +67,12 @@ const channels = contactChannels(site);
       }
       <a
         href={PathBuilder.contact(locale)}
-        class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal"
+        class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal-ink"
         >{site.nav.contact}</a
       >
       <a
         href={PathBuilder.privacy(locale)}
-        class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal"
+        class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal-ink"
         >{site.footer.privacyLabel}</a
       >
     </nav>
@@ -91,7 +91,7 @@ const channels = contactChannels(site);
                 href={channel.href}
                 data-contact-channel={channel.track}
                 rel="noopener"
-                class="group flex min-h-11 items-center gap-2.5 text-sm text-ink-2 transition-colors duration-150 hover:text-signal"
+                class="group flex min-h-11 items-center gap-2.5 text-sm text-ink-2 transition-colors duration-150 hover:text-signal-ink"
               >
                 <Icon
                   name={channel.icon}

@@ -1,20 +1,35 @@
 @import 'tailwindcss';
-@import '@fontsource/ibm-plex-sans/400.css';
-@import '@fontsource/ibm-plex-sans/500.css';
-@import '@fontsource/ibm-plex-sans/600.css';
-@import '@fontsource/ibm-plex-mono/400.css';
-@import '@fontsource/ibm-plex-mono/500.css';
 
 @font-face {
-  font-family: 'IBM Plex Mono';
+  font-family: 'Onest';
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url('../../node_modules/@fontsource/onest/files/onest-latin-400-normal.woff2')
+    format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Onest';
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url('../../node_modules/@fontsource/onest/files/onest-cyrillic-400-normal.woff2')
+    format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: 'Onest';
   font-style: normal;
   font-weight: 500;
   font-display: optional;
-  src:
-    url('../../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff2')
-      format('woff2'),
-    url('../../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff')
-      format('woff');
+  src: url('../../node_modules/@fontsource/onest/files/onest-latin-500-normal.woff2')
+    format('woff2');
   unicode-range:
     U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
     U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
@@ -22,15 +37,22 @@
 }
 
 @font-face {
-  font-family: 'IBM Plex Sans';
+  font-family: 'Onest';
+  font-style: normal;
+  font-weight: 500;
+  font-display: optional;
+  src: url('../../node_modules/@fontsource/onest/files/onest-cyrillic-500-normal.woff2')
+    format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: 'Onest';
   font-style: normal;
   font-weight: 600;
   font-display: optional;
-  src:
-    url('../../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-600-normal.woff2')
-      format('woff2'),
-    url('../../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-600-normal.woff')
-      format('woff');
+  src: url('../../node_modules/@fontsource/onest/files/onest-latin-600-normal.woff2')
+    format('woff2');
   unicode-range:
     U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
     U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
@@ -38,40 +60,64 @@
 }
 
 @font-face {
-  font-family: 'IBM Plex Sans';
+  font-family: 'Onest';
   font-style: normal;
   font-weight: 600;
   font-display: optional;
-  src:
-    url('../../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-cyrillic-600-normal.woff2')
-      format('woff2'),
-    url('../../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-cyrillic-600-normal.woff')
-      format('woff');
+  src: url('../../node_modules/@fontsource/onest/files/onest-cyrillic-600-normal.woff2')
+    format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: 'Onest';
+  font-style: normal;
+  font-weight: 800;
+  font-display: optional;
+  src: url('../../node_modules/@fontsource/onest/files/onest-latin-800-normal.woff2')
+    format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Onest';
+  font-style: normal;
+  font-weight: 800;
+  font-display: optional;
+  src: url('../../node_modules/@fontsource/onest/files/onest-cyrillic-800-normal.woff2')
+    format('woff2');
   unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
 
 @theme {
-  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  --font-sans: 'Onest', ui-sans-serif, system-ui, sans-serif;
 
-  --color-paper: #f5f4f1;
+  --color-paper: #ffffff;
   --color-card: #ffffff;
-  --color-shade: #eceae4;
-  --color-ink: #17191c;
-  --color-ink-2: #3d424a;
-  --color-muted: #656b74;
-  --color-line: #dcd9d2;
-  --color-line-strong: #c3bfb5;
-  --color-line-field: #857f73;
-  --color-signal: #cc4a16;
+  --color-shade: #f3f4f6;
+  --color-panel: #1e2128;
+  --color-panel-2: #2a2e37;
+  --color-panel-ink: #a8adb8;
+  --color-ink: #14161a;
+  --color-ink-2: #3b4149;
+  --color-muted: #6d7280;
+  --color-line: #e3e5e9;
+  --color-line-strong: #d2d6dd;
+  --color-line-field: #c3c7cf;
+  --color-signal: #f4661e;
+  --color-signal-ink: #c94a09;
   --color-signal-dark: #a93a0f;
-  --color-go: #1f6f4a;
+  --color-go: #1a8a52;
 
-  --radius-block: 0.625rem;
-  --radius-control: 0.25rem;
+  --radius-block: 1.375rem;
+  --radius-control: 999px;
+  --radius-field: 0.625rem;
 
   --text-hero: clamp(2rem, 4.6vw, 3.5rem);
-  --text-section: clamp(1.625rem, 3vw, 2.375rem);
+  --text-section: clamp(1.5rem, 3vw, 2.3rem);
   --text-block: clamp(1.25rem, 1.9vw, 1.5rem);
 
   --spacing-band: 3.5rem;
@@ -121,7 +167,7 @@
   }
 
   ::selection {
-    background: var(--color-signal);
+    background: var(--color-signal-ink);
     color: #fff;
   }
 
@@ -132,11 +178,17 @@
   }
 
   h1,
-  h2,
+  h2 {
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.06;
+    text-wrap: balance;
+  }
+
   h3 {
     font-weight: 600;
-    letter-spacing: -0.02em;
-    line-height: 1.08;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
     text-wrap: balance;
   }
 
@@ -159,27 +211,16 @@
 }
 
 @utility eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
   width: fit-content;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
+  border-radius: var(--radius-control);
+  background-color: var(--color-shade);
+  padding: 0.3125rem 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 500;
-  letter-spacing: 0.01em;
   color: var(--color-ink-2);
-
-  &::before {
-    content: '';
-    flex: none;
-    width: 1.25rem;
-    height: 0.125rem;
-    background-color: var(--color-signal);
-  }
 }
 
 @utility spec {
-  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 
@@ -216,7 +257,7 @@
     justify-content: center;
     gap: 0.5rem;
     border-radius: var(--radius-control);
-    padding: 0.8125rem 1.375rem;
+    padding: 0.875rem 1.625rem;
     font-size: 0.9375rem;
     font-weight: 600;
     line-height: 1;
@@ -227,7 +268,7 @@
   }
 
   .btn-primary {
-    background-color: var(--color-signal);
+    background-color: var(--color-signal-ink);
     color: #fff;
   }
 
@@ -243,6 +284,18 @@
 
   .btn-secondary:hover {
     border-color: var(--color-ink);
+    background-color: var(--color-shade);
+  }
+
+  .btn-on-panel {
+    border: 1px solid #4a505c;
+    background-color: transparent;
+    color: #fff;
+  }
+
+  .btn-on-panel:hover {
+    border-color: #6b7280;
+    background-color: var(--color-panel-2);
   }
 
   .btn:active {
@@ -251,7 +304,7 @@
 
   .field {
     width: 100%;
-    border-radius: var(--radius-control);
+    border-radius: var(--radius-field);
     border: 1px solid var(--color-line-field);
     background-color: var(--color-card);
     padding: 0.75rem 0.875rem;
@@ -265,6 +318,32 @@
 
   .field:focus {
     border-color: var(--color-signal);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius-control);
+    background-color: var(--color-shade);
+    padding: 0.5rem 1rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--color-ink);
+    white-space: nowrap;
+    transition: background-color 160ms ease-out;
+  }
+
+  .chip:hover {
+    background-color: #e7e9ed;
+  }
+
+  .chip-current {
+    background-color: var(--color-signal-ink);
+    color: #fff;
+  }
+
+  .chip-current:hover {
+    background-color: var(--color-signal-dark);
   }
 
   .field-label {

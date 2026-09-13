@@ -2,16 +2,14 @@ meta:
   title: 'CarLab — автосервис в Белграде: диагностика, ремонт, кузов'
   description: Автосервис в Белграде. Компьютерная диагностика, плановое ТО, тормоза и подвеска, двигатель, кузовной ремонт после ДТП и покраска. Запчасти и аккумуляторы на месте.
 hero:
-  eyebrow: Автосервис в Белграде
-  heading: Чиним так, чтобы не возвращались с тем же
-  lead: Диагностика, плановое ТО, ходовая, двигатель, кузов после ДТП. Говорим, что действительно нужно, а что подождёт — до того, как вы согласились платить.
+  heading: Сначала цена, потом ремонт
+  lead: Диагностика бесплатно, письменная смета до начала работ, гарантия 12 месяцев. Говорим, что нужно делать сейчас, а что спокойно подождёт.
   ctaPrimary: Записаться в сервис
   ctaSecondary: Посмотреть услуги
   badges:
     - Смета до начала работ
     - Гарантия 12 месяцев
     - Работаем со страховыми
-trustCaption: Коротко
 trust:
   - value: 12 мес
     label: гарантия на работы и запчасти
@@ -88,7 +86,6 @@ translations:
       title: 'CarLab — auto servis u Beogradu: dijagnostika, popravke, limarija'
       description: Auto servis u Beogradu. Kompjuterska dijagnostika, redovni servis, kočnice i vešanje, motor, limarija posle udesa i farbanje. Delovi i akumulatori na licu mesta.
     hero:
-      eyebrow: Auto servis u Beogradu
       heading: Popravljamo tako da se ne vraćate sa istim kvarom
       lead: Dijagnostika, redovni servis, trap, motor, limarija posle udesa. Kažemo šta zaista treba, a šta može da sačeka — pre nego što pristanete da platite.
       ctaPrimary: Zakažite servis
@@ -97,7 +94,6 @@ translations:
         - Predračun pre početka radova
         - Garancija 12 meseci
         - Radimo sa osiguranjem
-    trustCaption: Ukratko
     trust:
       - value: 12 mes
         label: garancije na radove i delove
@@ -173,7 +169,6 @@ translations:
       title: 'CarLab — car service in Belgrade: diagnostics, repairs, bodywork'
       description: A car service in Belgrade. Computer diagnostics, scheduled servicing, brakes and suspension, engine work, accident repair and respraying. Parts and batteries in stock.
     hero:
-      eyebrow: Car service in Belgrade
       heading: We fix it so the same fault does not bring you back
       lead: Diagnostics, scheduled servicing, running gear, engines, accident repair. We tell you what genuinely needs doing and what can wait — before you agree to pay for anything.
       ctaPrimary: Book the workshop
@@ -182,7 +177,6 @@ translations:
         - A quote before any work starts
         - 12 month warranty
         - We work with insurers
-    trustCaption: In short
     trust:
       - value: 12 mo
         label: warranty on labour and parts

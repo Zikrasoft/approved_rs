@@ -9,7 +9,6 @@ export const homeContentSchema = z
     meta: z.object({ title: z.string(), description: z.string() }).strict(),
     hero: z
       .object({
-        eyebrow: z.string(),
         heading: z.string(),
         lead: z.string(),
         ctaPrimary: z.string(),
@@ -17,7 +16,6 @@ export const homeContentSchema = z
         badges: z.array(z.string()),
       })
       .strict(),
-    trustCaption: z.string(),
     trust: z.array(z.object({ value: z.string(), label: z.string() }).strict()),
     servicesHead: sectionHeadSchema,
     why: sectionHeadSchema.extend({

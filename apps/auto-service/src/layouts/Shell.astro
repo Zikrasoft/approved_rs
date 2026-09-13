@@ -1,8 +1,8 @@
 ---
 import '@/styles/global.css';
-import wordmarkFontUrl from '@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff2?url';
-import headingLatinFontUrl from '@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-600-normal.woff2?url';
-import headingCyrillicFontUrl from '@fontsource/ibm-plex-sans/files/ibm-plex-sans-cyrillic-600-normal.woff2?url';
+import bodyFontUrl from '@fontsource/onest/files/onest-cyrillic-400-normal.woff2?url';
+import headingLatinFontUrl from '@fontsource/onest/files/onest-latin-800-normal.woff2?url';
+import headingCyrillicFontUrl from '@fontsource/onest/files/onest-cyrillic-800-normal.woff2?url';
 import SiteHeader from '@/components/SiteHeader.astro';
 import SiteFooter from '@/components/SiteFooter.astro';
 import LeadModal from '@/components/LeadModal.astro';
@@ -87,12 +87,12 @@ const businessSchema = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f5f4f1" />
+    <meta name="theme-color" content="#ffffff" />
     <link
       rel="preload"
       as="font"
       type="font/woff2"
-      href={wordmarkFontUrl}
+      href={bodyFontUrl}
       crossorigin
     />
     <link

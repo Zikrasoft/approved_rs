@@ -1,9 +1,12 @@
 ---
+import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
+import heroImage from '@/assets/hero-workshop.jpg';
 import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
 import SectionHead from '@/components/SectionHead.astro';
-import ServiceCards from '@/components/ServiceCards.astro';
+import ServiceChips from '@/components/ServiceChips.astro';
+import PriceTable from '@/components/PriceTable.astro';
 import Faq from '@/components/Faq.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import FinalCta from '@/components/FinalCta.astro';
@@ -41,30 +44,30 @@ const faqSchema = {
   description={home.meta.description}
   jsonLd={[faqSchema]}
 >
-  <section class="border-b border-line bg-card">
+  <ServiceChips />
+
+  <section class="wrap">
     <div
-      class="wrap grid gap-10 py-band md:py-band-lg lg:grid-cols-[1.2fr_1fr]"
+      class="grid overflow-hidden rounded-block bg-panel text-white lg:grid-cols-[1.3fr_0.7fr]"
     >
-      <div class="flex flex-col gap-5">
-        <span class="eyebrow">{home.hero.eyebrow}</span>
-        <h1 class="text-hero max-w-2xl">{home.hero.heading}</h1>
-        <p class="max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+      <div class="flex flex-col gap-5 p-6 sm:p-8 lg:p-12">
+        <h1 class="text-hero max-w-[16ch]">{home.hero.heading}</h1>
+        <p class="max-w-xl leading-relaxed text-panel-ink sm:text-lg">
           {home.hero.lead}
         </p>
         <div class="flex flex-wrap gap-3 pt-1">
           <button type="button" data-open-lead-modal class="btn btn-primary">
             {home.hero.ctaPrimary}
-            <Icon name="arrowRight" />
           </button>
-          <a href={PathBuilder.services(locale)} class="btn btn-secondary">
+          <a href={PathBuilder.services(locale)} class="btn btn-on-panel">
             {home.hero.ctaSecondary}
           </a>
         </div>
         <ul class="flex flex-wrap gap-x-5 gap-y-2 pt-2">
           {
             home.hero.badges.map((badge) => (
-              <li class="flex items-center gap-1.5 text-sm text-ink-2">
-                <Icon name="check" size={12} class="text-go" />
+              <li class="flex items-center gap-1.5 text-sm text-panel-ink">
+                <Icon name="check" size={12} class="text-signal" />
                 {badge}
               </li>
             ))
@@ -72,26 +75,29 @@ const faqSchema = {
         </ul>
       </div>
 
-      <div
-        class="flex flex-col justify-center gap-3 self-center lg:self-stretch lg:border-l lg:border-line lg:pl-10"
-      >
-        <span class="eyebrow">{home.trustCaption}</span>
-        <ul class="border-t border-line">
-          {
-            home.trust.map((item) => (
-              <li class="flex items-baseline gap-5 border-b border-line py-3.5">
-                <span class="spec w-[4.5rem] shrink-0 text-lg font-medium text-ink">
-                  {item.value}
-                </span>
-                <span class="text-sm leading-snug text-muted">
-                  {item.label}
-                </span>
-              </li>
-            ))
-          }
-        </ul>
-      </div>
+      <Image
+        src={heroImage}
+        alt={home.hero.heading}
+        widths={[480, 960]}
+        sizes="(min-width: 1024px) 35vw, 100vw"
+        loading="eager"
+        fetchpriority="high"
+        class="aspect-[16/10] w-full object-cover lg:aspect-auto lg:h-full"
+      />
     </div>
+
+    <ul class="mt-3 grid gap-3 sm:grid-cols-3">
+      {
+        home.trust.map((item) => (
+          <li class="flex flex-col gap-1 rounded-block bg-shade p-5">
+            <span class="spec text-2xl font-extrabold tracking-tight text-ink">
+              {item.value}
+            </span>
+            <span class="text-sm leading-snug text-muted">{item.label}</span>
+          </li>
+        ))
+      }
+    </ul>
   </section>
 
   <section id="services" class="wrap scroll-mt-20 py-band md:py-band-lg">
@@ -100,10 +106,10 @@ const faqSchema = {
       heading={home.servicesHead.heading}
       body={home.servicesHead.body}
     />
-    <ServiceCards />
+    <PriceTable />
   </section>
 
-  <section class="border-y border-line bg-card">
+  <section class="bg-shade">
     <div class="wrap py-band md:py-band-lg">
       <SectionHead
         eyebrow={home.why.eyebrow}
@@ -136,7 +142,7 @@ const faqSchema = {
       {
         home.process.steps.map((step, i) => (
           <li class="card flex flex-col gap-2 p-5">
-            <span class="spec text-sm font-medium text-signal">
+            <span class="spec text-sm font-medium text-signal-ink">
               {String(i + 1).padStart(2, '0')}
             </span>
             <h3 class="text-base font-semibold text-ink">{step.title}</h3>
@@ -167,7 +173,6 @@ const faqSchema = {
               class="btn btn-primary mt-2 w-fit"
             >
               {home.shopTeaser.cta}
-              <Icon name="arrowRight" />
             </a>
           </div>
         )
@@ -204,7 +209,7 @@ const faqSchema = {
 
   {
     latestWorks.length > 0 && (
-      <section class="border-t border-line bg-card">
+      <section class="bg-shade">
         <div class="wrap py-band md:py-band-lg">
           <div class="flex flex-wrap items-end justify-between gap-4">
             <SectionHead
@@ -213,7 +218,6 @@ const faqSchema = {
             />
             <a href={PathBuilder.works(locale)} class="btn btn-secondary w-fit">
               {site.common.allWorks}
-              <Icon name="arrowRight" />
             </a>
           </div>
           <WorkGrid works={latestWorks} />
@@ -222,7 +226,7 @@ const faqSchema = {
     )
   }
 
-  <section class="border-t border-line bg-card">
+  <section class="bg-shade">
     <div class="wrap py-band md:py-band-lg">
       <SectionHead eyebrow="FAQ" heading={site.common.faqHeading} />
       <Faq items={home.faq} />
