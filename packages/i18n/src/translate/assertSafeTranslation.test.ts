@@ -119,4 +119,30 @@ describe('assertSafeTranslation', () => {
       assertSafeTranslation({ general: ['а', 'б'] }, { general: 'nope' }, ''),
     ).toThrow('has no items, expected 2');
   });
+
+  it('does not throw when locale-invariant numbers and flags come back untouched', () => {
+    expect(() =>
+      assertSafeTranslation(
+        { rows: [{ panel: 'Крыша', value: 78, thin: true }], note: null },
+        { rows: [{ panel: 'Roof', value: 78, thin: true }], note: null },
+        '',
+      ),
+    ).not.toThrow();
+  });
+
+  it('throws when the translation rewrites a number (a unit conversion the model invented)', () => {
+    expect(() =>
+      assertSafeTranslation(
+        { rows: [{ panel: 'Крыша', value: 78 }] },
+        { rows: [{ panel: 'Roof', value: 3.1 }] },
+        '',
+      ),
+    ).toThrow('rows[0].value');
+  });
+
+  it('throws when the translation drops a boolean flag', () => {
+    expect(() => assertSafeTranslation({ thin: true }, {}, '')).toThrow(
+      'changed a non-text value: true -> undefined',
+    );
+  });
 });

@@ -47,13 +47,19 @@ export function assertSafeTranslation(
     }
     return;
   }
-  if (source !== null && typeof source === 'object') {
-    for (const key of Object.keys(source as Record<string, unknown>)) {
-      assertSafeTranslation(
-        (source as Record<string, unknown>)[key],
-        (translated as Record<string, unknown> | undefined)?.[key],
-        path ? `${path}.${key}` : key,
+  if (source === null || typeof source !== 'object') {
+    if (translated !== source) {
+      throw new Error(
+        `translated response for "${path}" changed a non-text value: ${String(source)} -> ${String(translated)}`,
       );
     }
+    return;
+  }
+  for (const key of Object.keys(source as Record<string, unknown>)) {
+    assertSafeTranslation(
+      (source as Record<string, unknown>)[key],
+      (translated as Record<string, unknown> | undefined)?.[key],
+      path ? `${path}.${key}` : key,
+    );
   }
 }
