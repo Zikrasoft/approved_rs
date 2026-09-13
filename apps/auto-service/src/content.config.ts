@@ -4,7 +4,11 @@ import { glob } from 'astro/loaders';
 import { SERVICE_SLUGS } from './utils/services';
 
 const translationSchema = z
-  .object({ title: z.string(), body: z.string() })
+  .object({
+    title: z.string(),
+    body: z.string(),
+    car: z.string().optional(),
+  })
   .optional();
 
 const products = defineCollection({

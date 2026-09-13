@@ -1,23 +1,32 @@
-export interface LocaleSetOptions<L extends string, D extends L> {
+export const SOURCE_LOCALE = 'ru';
+
+export type SourceLocale = typeof SOURCE_LOCALE;
+
+export interface LocaleSetOptions<L extends string, P extends L> {
   locales: readonly L[];
-  defaultLocale: D;
+  primaryLocale: P;
 }
 
-export function createLocaleSet<L extends string, D extends L>({
+export function createLocaleSet<L extends string, P extends L>({
   locales,
-  defaultLocale,
-}: LocaleSetOptions<L, D>) {
+  primaryLocale,
+}: LocaleSetOptions<L, P>) {
   if (locales.length === 0) {
     throw new Error('[i18n] locales must not be empty');
   }
-  if (!locales.includes(defaultLocale)) {
+  if (!locales.includes(primaryLocale)) {
     throw new Error(
-      `[i18n] defaultLocale "${defaultLocale}" is not in the locale list`,
+      `[i18n] primaryLocale "${primaryLocale}" is not in the locale list`,
+    );
+  }
+  if (!(locales as readonly string[]).includes(SOURCE_LOCALE)) {
+    throw new Error(
+      `[i18n] SOURCE_LOCALE "${SOURCE_LOCALE}" is not in the locale list`,
     );
   }
 
   const translatable = locales.filter(
-    (l): l is Exclude<L, D> => l !== defaultLocale,
+    (l): l is Exclude<L, SourceLocale> => l !== SOURCE_LOCALE,
   );
 
   const isLocale = (value: string): value is L =>
@@ -25,12 +34,12 @@ export function createLocaleSet<L extends string, D extends L>({
 
   return {
     SUPPORTED_LOCALES: locales,
-    DEFAULT_LOCALE: defaultLocale,
+    PRIMARY_LOCALE: primaryLocale,
     TRANSLATABLE_LOCALES: translatable,
     isLocale,
 
     getLocale(currentLocale: string | undefined): L {
-      return (currentLocale ?? defaultLocale) as L;
+      return (currentLocale ?? primaryLocale) as L;
     },
 
     detectLocale(
@@ -38,7 +47,7 @@ export function createLocaleSet<L extends string, D extends L>({
       cookieValue: string | undefined,
     ): L {
       if (cookieValue && isLocale(cookieValue)) return cookieValue;
-      if (!acceptLanguage) return defaultLocale;
+      if (!acceptLanguage) return primaryLocale;
 
       const ranked = acceptLanguage
         .split(',')
@@ -56,7 +65,7 @@ export function createLocaleSet<L extends string, D extends L>({
         const match = locales.find((l) => l === primary);
         if (match) return match;
       }
-      return defaultLocale;
+      return primaryLocale;
     },
 
     getAlternateLinks(
@@ -73,13 +82,13 @@ export function createLocaleSet<L extends string, D extends L>({
       }));
       links.push({
         hreflang: 'x-default',
-        href: `${siteUrl}/${defaultLocale}${suffix}`,
+        href: `${siteUrl}/${primaryLocale}${suffix}`,
       });
       return links;
     },
   };
 }
 
-export type LocaleSet<L extends string, D extends L> = ReturnType<
-  typeof createLocaleSet<L, D>
+export type LocaleSet<L extends string, P extends L> = ReturnType<
+  typeof createLocaleSet<L, P>
 >;

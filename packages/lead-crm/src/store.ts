@@ -216,19 +216,28 @@ export function createLeadStore({ storage, schema }: LeadStoreOptions) {
         const upgradeContact =
           isPlaceholderContact(existing.contact) &&
           !isPlaceholderContact(data.contact);
+        const triedLabel = data.services?.length
+          ? data.services.join(', ')
+          : data.service;
         const merged: StoredLead = {
           ...existing,
           ...(upgradeContact
             ? {
                 name: data.name,
                 contact: data.contact,
-                service: data.service,
+                service: data.service || existing.service,
+                services: data.services?.length
+                  ? data.services
+                  : existing.services,
                 kind: data.kind,
               }
             : {}),
           comment: appendNote(
             existing.comment,
-            [`Также пробовал: ${data.service}`, data.comment?.trim()]
+            [
+              triedLabel ? `Также пробовал: ${triedLabel}` : '',
+              data.comment?.trim(),
+            ]
               .filter(Boolean)
               .join('\n'),
           ),

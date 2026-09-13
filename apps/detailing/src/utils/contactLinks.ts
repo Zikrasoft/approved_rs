@@ -13,5 +13,3 @@ export const CONTACT_LINKS = {
   telegram: `https://t.me/${TG_MANAGER}`,
   instagram: `https://www.instagram.com/${INSTAGRAM}`,
 } as const;
-
-export { formatPhone } from '@podbor/site-kit';

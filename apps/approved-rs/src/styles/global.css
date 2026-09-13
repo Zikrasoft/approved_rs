@@ -1,5 +1,4 @@
 @import 'tailwindcss';
-@import '@fontsource/outfit/300.css';
 @import '@fontsource/outfit/400.css';
 @import '@fontsource/outfit/500.css';
 @import '@fontsource/outfit/600.css';
@@ -375,7 +374,7 @@ h4 {
 .deco-word {
   position: absolute;
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: 700;
   font-style: italic;
   letter-spacing: -0.04em;
   line-height: 1;

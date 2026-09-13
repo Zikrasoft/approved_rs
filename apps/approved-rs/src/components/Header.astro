@@ -16,12 +16,8 @@ import LeadFormModal from './LeadFormModal.astro';
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import HeaderDesktopNav from './HeaderDesktopNav.astro';
 import HeaderMobileMenu from './HeaderMobileMenu.astro';
-import {
-  getNavItems,
-  isNavItemActive,
-  SERVICES,
-  type ServiceSlug,
-} from '@/utils/labels';
+import { getNavItems, SERVICES, type ServiceSlug } from '@/utils/labels';
+import { navCurrent } from '@/utils/navState';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
 import { DEFAULT_COUNTRY } from '@/utils/constants';
@@ -42,7 +38,10 @@ const navCountry = getActiveCountries().some((c) => c.code === urlCountry)
   ? urlCountry!
   : DEFAULT_COUNTRY;
 const casesHref = PathBuilder.casesVehicleSourcing(locale);
-const casesActive = Astro.url.pathname.includes('/cases/');
+const casesCurrent = navCurrent(
+  Astro.url.pathname,
+  PathBuilder.sectionRoot(locale, 'cases'),
+);
 
 // Keyed by the exact slug union from labels.ts (not a loose Record<string,...>)
 // — a slug added to getNavItems() without a matching icon here is now a
@@ -57,7 +56,10 @@ const SERVICE_ICONS: Record<ServiceSlug, typeof Search> = {
 const navItems = getNavItems(locale, navCountry).map((item) => ({
   ...item,
   Icon: SERVICE_ICONS[item.slug as ServiceSlug],
-  active: isNavItemActive(item, locale, navCountry, Astro.url.pathname),
+  current: navCurrent(
+    Astro.url.pathname,
+    PathBuilder.sectionRoot(locale, item.slug),
+  ),
 }));
 ---
 
@@ -73,7 +75,7 @@ const navItems = getNavItems(locale, navCountry).map((item) => ({
       navItems={navItems}
       casesHref={casesHref}
       casesLabel={t.nav.cases}
-      casesActive={casesActive}
+      casesCurrent={casesCurrent}
     />
 
     <div class="flex items-center gap-1.5 shrink-0">
@@ -124,6 +126,7 @@ const navItems = getNavItems(locale, navCountry).map((item) => ({
     countryCode={navCountry}
     casesHref={casesHref}
     casesLabel={t.nav.cases}
+    casesCurrent={casesCurrent}
     languageLabel={t.header.languageLabel}
     themeToggleLabel={t.header.themeToggleMobileLabel}
   />

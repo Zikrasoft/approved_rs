@@ -1,3 +1,4 @@
+import { swapLocalePath } from '@podbor/site-kit';
 import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 import type { ServiceSlug } from './services';
 
@@ -20,11 +21,8 @@ export function localePaths(): { params: { locale: Locale } }[] {
   return SUPPORTED_LOCALES.map((locale) => ({ params: { locale } }));
 }
 
-export function swapLocale(pathname: string, locale: Locale): string {
-  const segments = pathname.split('/').filter(Boolean);
-  const rest = segments.slice(1).join('/');
-  return rest ? `/${locale}/${rest}/` : `/${locale}/`;
-}
+export const swapLocale = (pathname: string, locale: Locale): string =>
+  swapLocalePath(pathname, locale);
 
 export function withLocales<
   T extends { params: Record<string, string | undefined> },

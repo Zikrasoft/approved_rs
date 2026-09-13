@@ -14,6 +14,8 @@ export interface FormatterOptions {
   contactChannelLabels: Record<string, string>;
 }
 
+const MAX_SERVICES_LABEL = 200;
+
 export const LEAD_STATUS_ACTIONS = [
   { key: 'negotiations', emoji: '🗣', label: 'Переговоры' },
   { key: 'in_progress', emoji: '🔵', label: 'В работе' },
@@ -357,6 +359,11 @@ export function createFormatter({
 }: FormatterOptions) {
   const channelLabels = new Map(Object.entries(contactChannelLabels));
 
+  function servicesLabel(lead: StoredLead): string {
+    const slugs = lead.services.length > 0 ? lead.services : [lead.service];
+    return slugs.map(serviceLabel).join(' · ').slice(0, MAX_SERVICES_LABEL);
+  }
+
   function formatLeadText(lead: StoredLead, role: Role): string {
     const channelLabel = lead.contactChannel
       ? channelLabels.get(lead.contactChannel)
@@ -365,7 +372,7 @@ export function createFormatter({
       ? `${lead.contact} (${channelLabel})`
       : lead.contact;
     const lines: string[] = [
-      `🚗 Заявка #${lead.id} — ${escapeHtml(serviceLabel(lead.service))}`,
+      `🚗 Заявка #${lead.id} — ${escapeHtml(servicesLabel(lead))}`,
       `🏷 ${escapeHtml(lead.brand)}`,
       statusLine(lead.status),
     ];
@@ -437,7 +444,7 @@ export function createFormatter({
     formatLeadText,
 
     formatTeaser(lead: StoredLead): string {
-      return `🚗 Заявка #${lead.id} · ${escapeHtml(lead.name || '—')} · ${escapeHtml(serviceLabel(lead.service))} · ${statusEmoji(lead.status)} ${statusLabel(lead.status)}`;
+      return `🚗 Заявка #${lead.id} · ${escapeHtml(lead.name || '—')} · ${escapeHtml(servicesLabel(lead))} · ${statusEmoji(lead.status)} ${statusLabel(lead.status)}`;
     },
 
     deepLinkKeyboard(id: number): Keyboard {
@@ -457,7 +464,7 @@ export function createFormatter({
       return [
         `⏰ Напоминание по заявке #${lead.id}`,
         ``,
-        `${escapeHtml(lead.name)} — ${escapeHtml(serviceLabel(lead.service))}`,
+        `${escapeHtml(lead.name)} — ${escapeHtml(servicesLabel(lead))}`,
         `Ты просил напомнить сегодня — заявка снова в работе.`,
       ].join('\n');
     },

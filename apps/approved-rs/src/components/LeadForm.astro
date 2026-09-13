@@ -5,6 +5,8 @@ import TelegramIcon from './icons/TelegramIcon.astro';
 import WhatsAppIcon from './icons/WhatsAppIcon.astro';
 import ViberIcon from './icons/ViberIcon.astro';
 import { Phone, ChevronDown } from '@lucide/astro';
+import { HONEYPOT_FIELD } from '@podbor/lead-crm';
+import { PHONE_COUNTRIES } from '@podbor/lead-crm/phone';
 import { FLAGS, BRAND_COLORS } from '@/utils/constants';
 import { getLeadFormContent } from '@/i18n/content/leadForm';
 import { getLocale } from '@/i18n/config';
@@ -29,28 +31,6 @@ const sourceUrl = Astro.url.href;
 const locale = getLocale(Astro.currentLocale);
 const lf = getLeadFormContent(locale);
 
-// ponytail: curated list covering the site's own markets + common client
-// origins (Balkans/CIS). Not exhaustive — extend PHONE_COUNTRIES if leads
-// keep arriving from countries missing here.
-// Static default is always Serbia — the page's `country` prop is the deal's
-// country (e.g. "car coming from DE"), not the visitor's location. The client
-// script refines this to the visitor's real region via timezone, falling
-// back to this same default (RS) when that can't be determined.
-const PHONE_COUNTRIES = [
-  { iso: 'RS', dial: '381', label: 'Сербия' },
-  { iso: 'DE', dial: '49', label: 'Германия' },
-  { iso: 'ES', dial: '34', label: 'Испания' },
-  { iso: 'PT', dial: '351', label: 'Португалия' },
-  { iso: 'RU', dial: '7', label: 'Россия' },
-  { iso: 'UA', dial: '380', label: 'Украина' },
-  { iso: 'BY', dial: '375', label: 'Беларусь' },
-  { iso: 'KZ', dial: '7', label: 'Казахстан' },
-  { iso: 'BA', dial: '387', label: 'Босния и Герцеговина' },
-  { iso: 'HR', dial: '385', label: 'Хорватия' },
-  { iso: 'ME', dial: '382', label: 'Черногория' },
-  { iso: 'MK', dial: '389', label: 'Северная Македония' },
-  { iso: 'TR', dial: '90', label: 'Турция' },
-];
 const defaultPhoneCountry = 'RS';
 
 const fieldClass =
@@ -80,8 +60,13 @@ const fieldClass =
     <input type="hidden" name="locale" value={locale} />
     <div class="hidden" aria-hidden="true">
       <label>
-        website
-        <input type="text" name="website" tabindex="-1" autocomplete="off" />
+        {HONEYPOT_FIELD}
+        <input
+          type="text"
+          name={HONEYPOT_FIELD}
+          tabindex="-1"
+          autocomplete="off"
+        />
       </label>
     </div>
     <input type="hidden" name="service" value={service} />
@@ -262,6 +247,7 @@ const fieldClass =
     parsePhoneNumberFromString,
     type CountryCode,
   } from 'libphonenumber-js/min';
+  import { isValidContact } from '@podbor/lead-crm/phone';
   import {
     isTrackedContactChannel,
     getPreferredChannel,
@@ -384,9 +370,6 @@ const fieldClass =
       });
     }
 
-    // Values from detectVisitorCountry() are a subset of PHONE_COUNTRIES'
-    // `iso` codes above, just lowercased (shared with contactChannel.ts's
-    // country-keyed maps) — this <select>'s <option value> is uppercase.
     const detectedCountry = detectVisitorCountry();
     if (detectedCountry) phoneCountry.value = detectedCountry.toUpperCase();
 
@@ -517,29 +500,21 @@ const fieldClass =
         ok = false;
       } else clearError(name);
 
-      if (activeTab === 'telegram') {
-        const v = tgInput.value.trim();
-        if (!v) {
-          setError(tgInput, errTgRequired);
-          ok = false;
-        } else if (!/^@?\w{3,}$/.test(v)) {
-          setError(tgInput, errTgFormat);
-          ok = false;
-        } else {
-          if (!v.startsWith('@')) tgInput.value = '@' + v;
-          clearError(tgInput);
-        }
-      } else {
-        const parsed = parsedPhone();
-        if (!phoneNumber.value.trim()) {
-          setError(phoneNumber, errPhoneRequired);
-          ok = false;
-        } else if (!parsed || !parsed.isValid()) {
-          setError(phoneNumber, errPhoneInvalid);
-          ok = false;
-        } else clearError(phoneNumber);
+      const isTelegram = activeTab === 'telegram';
+      const contactInput = isTelegram ? tgInput : phoneNumber;
+      const typed = contactInput.value.trim();
+      if (isTelegram && typed && !typed.startsWith('@')) {
+        tgInput.value = '@' + typed;
       }
       syncContact();
+
+      if (!typed) {
+        setError(contactInput, isTelegram ? errTgRequired : errPhoneRequired);
+        ok = false;
+      } else if (!isValidContact(hiddenContact.value, activeTab)) {
+        setError(contactInput, isTelegram ? errTgFormat : errPhoneInvalid);
+        ok = false;
+      } else clearError(contactInput);
 
       if (consentErr) consentErr.style.display = consent.checked ? 'none' : '';
       if (!consent.checked) ok = false;

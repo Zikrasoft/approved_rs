@@ -1,4 +1,6 @@
 import { readOrCreateVisitorId } from './visitorId.ts';
+export { defineLazyMapEmbed, mapEmbedSrc } from './mapEmbed.ts';
+export { defineLocaleChoice } from './localeCookie.ts';
 import {
   STORAGE_KEY,
   newConsent,

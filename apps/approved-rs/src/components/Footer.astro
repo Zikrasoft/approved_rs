@@ -1,6 +1,7 @@
 ---
 import SiteLogo from './SiteLogo.astro';
 import ContactIcon from './ContactIcon.astro';
+import PartnerBrands from './PartnerBrands.astro';
 import { getNavItems } from '@/utils/labels';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
@@ -151,6 +152,10 @@ const coverageLine = getActiveCountries()
           <p class="text-xs text-muted">{t.footer.hoursLine}</p>
         </div>
       </div>
+    </div>
+
+    <div class="pt-8 mb-12 border-t border-default">
+      <PartnerBrands variant="footer" />
     </div>
 
     <!-- Bottom -->

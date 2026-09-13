@@ -40,7 +40,6 @@ export const siteContentSchema = z
         breadcrumbLabel: z.string(),
         primaryNavLabel: z.string(),
         mobileNavLabel: z.string(),
-        readMore: z.string(),
         faqHeading: z.string(),
         closeLabel: z.string(),
         fromPrice: z.string(),
@@ -57,7 +56,6 @@ export const siteContentSchema = z
         whatsapp: z.string(),
         viber: z.string(),
         telegram: z.string(),
-        write: z.string(),
       })
       .strict(),
     form: z
@@ -68,6 +66,9 @@ export const siteContentSchema = z
         namePlaceholder: z.string(),
         contactLabel: z.string(),
         contactPlaceholder: z.string(),
+        contactChannelLabel: z.string(),
+        channelPhone: z.string(),
+        countryLabel: z.string(),
         serviceLabel: z.string(),
         servicePlaceholder: z.string(),
         carLabel: z.string(),
@@ -79,6 +80,10 @@ export const siteContentSchema = z
         privacyNote: z.string(),
         privacyLinkText: z.string(),
         modalTitle: z.string(),
+        requiredError: z.string(),
+        errorPhone: z.string(),
+        errorTelegram: z.string(),
+        errorConsent: z.string(),
       })
       .strict(),
   })

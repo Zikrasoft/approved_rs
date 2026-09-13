@@ -5,6 +5,8 @@ import { SUPPORTED_LOCALES, LOCALE_NAME } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getSiteContent } from '@/i18n/content/site';
 import { PathBuilder, swapLocale } from '@/utils/paths';
+import { navCurrent } from '@/utils/navState';
+import { LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
@@ -14,9 +16,8 @@ const links = [
   { href: PathBuilder.services(locale), label: site.nav.services },
   { href: PathBuilder.works(locale), label: site.nav.works },
   { href: `${PathBuilder.home(locale)}#process`, label: site.nav.process },
-  { href: `${PathBuilder.home(locale)}#prices`, label: site.nav.prices },
   { href: PathBuilder.contact(locale), label: site.nav.contact },
-];
+].map((link) => ({ ...link, current: navCurrent(pathname, link.href) }));
 ---
 
 <header class="pointer-events-none fixed inset-x-0 top-0 z-30">
@@ -40,21 +41,34 @@ const links = [
           links.map((link) => (
             <a
               href={link.href}
-              class="text-[0.8125rem] font-medium tracking-tight text-mute transition-colors duration-400 hover:text-chalk"
+              aria-current={link.current}
+              class:list={[
+                'text-[0.8125rem] font-medium tracking-tight transition-colors duration-400',
+                link.current ? 'text-chalk' : 'text-mute hover:text-chalk',
+              ]}
             >
-              {link.label}
+              <span class="relative inline-block">
+                {link.label}
+                {link.current && (
+                  <span
+                    class="absolute -bottom-1.5 left-0 h-px w-full bg-champagne"
+                    aria-hidden="true"
+                  />
+                )}
+              </span>
             </a>
           ))
         }
       </nav>
 
       <div class="flex items-center gap-2">
-        <div class="hidden items-center gap-1 sm:flex" data-lang-switch>
+        <details-lang class="hidden items-center gap-1 sm:flex">
           {
             SUPPORTED_LOCALES.map((code) => (
               <a
                 href={swapLocale(pathname, code)}
                 hreflang={code}
+                {...{ [LOCALE_CHOICE_ATTRIBUTE]: code }}
                 aria-current={code === locale ? 'true' : undefined}
                 title={LOCALE_NAME[code]}
                 class:list={[
@@ -68,7 +82,7 @@ const links = [
               </a>
             ))
           }
-        </div>
+        </details-lang>
         <span class="hidden sm:block">
           <Cta label={site.header.cta} openModal />
         </span>
@@ -107,17 +121,29 @@ const links = [
         <a
           href={link.href}
           data-menu-item
+          aria-current={link.current}
           style={`transition-delay:${60 + i * 55}ms`}
-          class="translate-y-8 border-b border-line py-5 font-display text-3xl tracking-tight text-chalk opacity-0 transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          class:list={[
+            'translate-y-8 border-b border-line py-5 font-display text-3xl tracking-tight opacity-0 transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)]',
+            link.current ? 'text-chalk' : 'text-mute',
+          ]}
         >
-          {link.label}
+          <span class="relative inline-block">
+            {link.label}
+            {link.current && (
+              <span
+                class="absolute -bottom-1 left-0 h-px w-full bg-champagne"
+                aria-hidden="true"
+              />
+            )}
+          </span>
         </a>
       ))
     }
   </nav>
 
   <div class="flex flex-col gap-6">
-    <div class="flex items-center gap-2">
+    <details-lang class="flex items-center gap-2">
       <span class="text-[0.6875rem] uppercase tracking-[0.22em] text-mute-2"
         >{site.header.languageLabel}</span
       >
@@ -126,6 +152,7 @@ const links = [
           <a
             href={swapLocale(pathname, code)}
             hreflang={code}
+            {...{ [LOCALE_CHOICE_ATTRIBUTE]: code }}
             class:list={[
               'rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-widest transition-colors duration-400',
               code === locale
@@ -137,12 +164,16 @@ const links = [
           </a>
         ))
       }
-    </div>
+    </details-lang>
     <Cta label={site.header.cta} openModal class="self-start" />
   </div>
 </div>
 
 <script>
+  import { defineLocaleChoice } from '@podbor/site-kit/browser';
+
+  defineLocaleChoice('details-lang');
+
   const toggle =
     document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
   const menu = document.querySelector<HTMLElement>('[data-menu]');

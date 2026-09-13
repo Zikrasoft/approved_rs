@@ -1,7 +1,7 @@
 ---
 title: Varta Blue Dynamic E12
 brand: Varta
-price: 95
+price: 11090
 capacityAh: 74
 crankingA: 680
 polarity: right

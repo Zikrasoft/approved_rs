@@ -28,6 +28,7 @@ describe('localizedWork', () => {
     expect(localizedWork(work, 'ru')).toEqual({
       title: 'BMW X5 — замена сцепления',
       body: 'RU body',
+      car: 'BMW X5',
     });
   });
 
@@ -40,6 +41,7 @@ describe('localizedWork', () => {
     expect(localizedWork(work, 'en')).toEqual({
       title: 'BMW X5 clutch replacement',
       body: 'EN body',
+      car: 'BMW X5',
     });
   });
 
@@ -56,7 +58,37 @@ describe('localizedWork', () => {
     expect(localizedWork(work, 'sr')).toEqual({
       title: 'BMW X5 — замена сцепления',
       body: 'RU body',
+      car: 'BMW X5',
     });
+  });
+
+  it('prefers the translated car when the locale has one', () => {
+    const work = makeWork({
+      car: 'Обслуживание тормозной системы',
+      translations: {
+        sr: {
+          title: 'Servis kočionog sistema',
+          body: 'SR body',
+          car: 'Servis kočionog sistema',
+        },
+      },
+    });
+    expect(localizedWork(work, 'sr').car).toBe('Servis kočionog sistema');
+  });
+
+  it('falls back to the source car when the translation omits it', () => {
+    const work = makeWork({
+      translations: { sr: { title: 'SR title', body: 'SR body' } },
+    });
+    expect(localizedWork(work, 'sr')).toEqual({
+      title: 'SR title',
+      body: 'SR body',
+      car: 'BMW X5',
+    });
+  });
+
+  it('falls back to the source car when the whole translations block is absent', () => {
+    expect(localizedWork(makeWork(), 'sr').car).toBe('BMW X5');
   });
 });
 

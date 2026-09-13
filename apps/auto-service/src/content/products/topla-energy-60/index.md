@@ -1,7 +1,7 @@
 ---
 title: Topla Energy 60
 brand: Topla
-price: 78
+price: 9090
 capacityAh: 60
 crankingA: 600
 polarity: right

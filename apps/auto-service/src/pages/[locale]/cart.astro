@@ -8,9 +8,10 @@ import { getShopContent } from '@/i18n/content/shop';
 import { localePaths, PathBuilder } from '@/utils/paths';
 import { SHOP_SERVICE } from '@/utils/services';
 import { MAX_LINE_QUANTITY } from '@/utils/cart';
+import { SHOP_ENABLED } from '@/utils/constants';
 
 export function getStaticPaths() {
-  return localePaths();
+  return SHOP_ENABLED ? localePaths() : [];
 }
 
 const locale = localeFrom(Astro.url.pathname);
@@ -56,8 +57,7 @@ const shop = getShopContent(locale);
         <span class="text-base font-semibold text-ink">
           {shop.cart.totalLabel}
         </span>
-        <span class="spec text-2xl font-semibold text-ink" data-cart-total
-        ></span>
+        <span class="spec text-2xl font-medium text-ink" data-cart-total></span>
       </div>
       <p class="text-xs text-muted" data-cart-note hidden>
         {shop.cart.totalNote}
@@ -112,7 +112,7 @@ const shop = getShopContent(locale);
     writeCart,
     onCartChange,
   } from '@/utils/cart';
-  import { CURRENCY_SYMBOL } from '@/utils/constants';
+  import { CURRENCY } from '@/utils/constants';
 
   const page = document.querySelector<HTMLElement>('[data-cart-page]');
   const list = page?.querySelector<HTMLElement>('[data-cart-lines]');
@@ -148,7 +148,7 @@ const shop = getShopContent(locale);
       ) as HTMLElement;
       item.querySelector('[data-line-title]')!.textContent = line.title;
       item.querySelector('[data-line-price]')!.textContent =
-        `${line.price} ${CURRENCY_SYMBOL}`;
+        `${line.price} ${CURRENCY}`;
 
       const input = item.querySelector<HTMLInputElement>(
         '[data-line-quantity]',
@@ -176,8 +176,7 @@ const shop = getShopContent(locale);
       summary?.toggleAttribute('hidden', !filled);
       note?.toggleAttribute('hidden', !filled);
       order?.toggleAttribute('hidden', !filled);
-      if (totalEl)
-        totalEl.textContent = `${cartTotal(cart)} ${CURRENCY_SYMBOL}`;
+      if (totalEl) totalEl.textContent = `${cartTotal(cart)} ${CURRENCY}`;
     };
 
     render();

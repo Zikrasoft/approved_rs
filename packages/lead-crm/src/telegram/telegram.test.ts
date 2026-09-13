@@ -71,6 +71,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     name: 'Иван',
     contact: '@ivan',
     service: 'vehicle-sourcing',
+    services: [],
     comment: 'BMW X5',
     country: 'de',
     source_url: '/ru/vehicle-sourcing/de/',
@@ -1063,6 +1064,48 @@ describe('per-business formatter config', () => {
     expect(detailingFormatter.formatTeaser(makeLead())).toContain(
       'Оклейка плёнкой',
     );
+  });
+});
+
+describe('a lead that asked for several services at once', () => {
+  const multi = makeLead({
+    service: 'vehicle-sourcing',
+    services: ['vehicle-sourcing', 'vehicle-inspection'],
+    status: 'postponed',
+    remindAt: '2026-02-01T00:00:00.000Z',
+  });
+
+  it('names every service on the lead card', () => {
+    expect(buildLeadDetail(multi, 'owner').text).toContain(
+      'Автоподбор · vehicle-inspection',
+    );
+  });
+
+  it('names every service in the teaser', () => {
+    expect(formatter.formatTeaser(multi)).toContain(
+      'Автоподбор · vehicle-inspection',
+    );
+  });
+
+  it('names every service in the postpone reminder', () => {
+    expect(formatter.postponeReminderText(multi)).toContain(
+      'Автоподбор · vehicle-inspection',
+    );
+  });
+
+  it('falls back to the single stored service for a lead saved before multi-select', () => {
+    expect(formatter.formatTeaser(makeLead({ services: [] }))).toContain(
+      'Автоподбор',
+    );
+  });
+
+  it('keeps the card inside the Telegram length limit when the services are flooded', () => {
+    const flooded = makeLead({
+      services: Array.from({ length: 20 }, () => 'x'.repeat(200)),
+    });
+    expect(buildLeadDetail(flooded, 'owner').text.length).toBeLessThan(1000);
+    expect(formatter.formatTeaser(flooded).length).toBeLessThan(1000);
+    expect(formatter.postponeReminderText(flooded).length).toBeLessThan(1000);
   });
 });
 

@@ -1,11 +1,12 @@
 ---
-import '@fontsource-variable/unbounded';
-import '@fontsource-variable/manrope';
 import '@/styles/global.css';
+import displayLatinUrl from '@fontsource-variable/unbounded/files/unbounded-latin-wght-normal.woff2?url';
+import displayLatinExtUrl from '@fontsource-variable/unbounded/files/unbounded-latin-ext-wght-normal.woff2?url';
+import displayCyrillicUrl from '@fontsource-variable/unbounded/files/unbounded-cyrillic-wght-normal.woff2?url';
 import SiteHeader from '@/components/SiteHeader.astro';
 import SiteFooter from '@/components/SiteFooter.astro';
 import LeadModal from '@/components/LeadModal.astro';
-import { BCP47_BY_LOCALE, OG_LOCALE, localeSet } from '@/i18n/config';
+import { BCP47_BY_LOCALE, OG_IMAGE, OG_LOCALE, localeSet } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
 import {
   SITE_NAME,
@@ -13,6 +14,7 @@ import {
   SITE_URL,
   SOCIAL_SAME_AS,
   STUDIO_ADDRESS,
+  OPENING_HOURS,
   PHONE_NUMBER,
 } from '@/utils/constants';
 import { getSiteContent } from '@/i18n/content/site';
@@ -31,26 +33,33 @@ const jsonLdText = (schema: Record<string, unknown>) =>
 
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
+
+const DISPLAY_FONT_URLS: Record<typeof locale, string[]> = {
+  ru: [displayLatinUrl, displayCyrillicUrl],
+  sr: [displayLatinUrl, displayLatinExtUrl],
+  en: [displayLatinUrl],
+};
+const displayFontUrls = DISPLAY_FONT_URLS[locale];
 const canonical = new URL(Astro.url.pathname, SITE_URL).href;
 const alternates = localeSet.getAlternateLinks(SITE_URL, Astro.url.pathname);
-const ogImage = new URL('/og.png', SITE_URL).href;
+const ogImage = new URL(OG_IMAGE[locale], SITE_URL).href;
 
 const businessSchema = {
   '@context': 'https://schema.org',
-  '@type': 'AutoDetailing',
+  '@type': 'AutoWash',
   '@id': `${SITE_URL}/#studio`,
   name: SITE_NAME,
   legalName: SITE_LEGAL_NAME,
   url: SITE_URL,
   image: ogImage,
+  logo: new URL('/apple-touch-icon.png', SITE_URL).href,
   description: site.footer.tagline,
   telephone: `+${PHONE_NUMBER}`,
-  priceRange: '€€€',
   address: {
     '@type': 'PostalAddress',
     streetAddress: STUDIO_ADDRESS.street,
     addressLocality: STUDIO_ADDRESS.city,
-    postalCode: STUDIO_ADDRESS.postalCode,
+    addressRegion: STUDIO_ADDRESS.district,
     addressCountry: STUDIO_ADDRESS.country,
   },
   geo: {
@@ -58,19 +67,14 @@ const businessSchema = {
     latitude: STUDIO_ADDRESS.lat,
     longitude: STUDIO_ADDRESS.lon,
   },
+  areaServed: 'Beograd',
+  currenciesAccepted: 'RSD',
   openingHoursSpecification: [
     {
       '@type': 'OpeningHoursSpecification',
-      dayOfWeek: [
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday',
-      ],
-      opens: '09:00',
-      closes: '19:00',
+      dayOfWeek: [...OPENING_HOURS.days],
+      opens: OPENING_HOURS.opens,
+      closes: OPENING_HOURS.closes,
     },
   ],
   sameAs: SOCIAL_SAME_AS,
@@ -83,6 +87,18 @@ const businessSchema = {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#060608" />
+    <slot name="head" />
+    {
+      displayFontUrls.map((href) => (
+        <link
+          rel="preload"
+          as="font"
+          type="font/woff2"
+          href={href}
+          crossorigin
+        />
+      ))
+    }
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -104,6 +120,7 @@ const businessSchema = {
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
 
     <script
       type="application/ld+json"

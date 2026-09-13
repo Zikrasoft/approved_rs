@@ -1,5 +1,5 @@
 meta:
-  title: 'PRIZMA — детейлинг в Белграде: плёнка, полировка, керамика'
+  title: 'Details — детейлинг в Белграде: плёнка, полировка, керамика'
   description: Студия детейлинга в Белграде. Защитная плёнка PPF, смена цвета, полировка с керамикой, реставрация руля. Работаем на результат, который видно вблизи.
 hero:
   eyebrow: Детейлинг-студия · Белград
@@ -61,12 +61,18 @@ materials:
   heading: Работаем только с тем, что переживает сербское лето
   body: 'Плёнка и составы — расходник, на котором нельзя экономить: дешёвый материал желтеет за сезон и снимается вместе с лаком. Мы держим склад проверенных брендов и всегда говорим, что именно поставим на вашу машину.'
   brands:
-    - XPEL
-    - SunTek
-    - 3M
-    - Hexis
-    - Gtechniq
-    - Koch-Chemie
+    - name: XPEL
+      purpose: Защитная плёнка (PPF)
+    - name: SunTek
+      purpose: Защитная плёнка (PPF)
+    - name: 3M
+      purpose: Смена цвета плёнкой
+    - name: HEXIS
+      purpose: Смена цвета плёнкой
+    - name: Gtechniq
+      purpose: Керамическое покрытие
+    - name: Koch-Chemie
+      purpose: Химия для полировки
 prices:
   eyebrow: Цены
   heading: Понятные вилки, точная цена — после осмотра
@@ -122,7 +128,7 @@ finalCta:
 translations:
   sr:
     meta:
-      title: "PRIZMA — detailing u Beogradu: folija, poliranje, keramika"
+      title: 'Details — detailing u Beogradu: folija, poliranje, keramika'
       description: Studio za detailing u Beogradu. Zaštitna folija PPF, promena boje, poliranje sa keramikom, restauracija volana. Radimo na rezultatu koji se vidi izbliza.
     hero:
       eyebrow: Detailing studio · Beograd
@@ -133,7 +139,7 @@ translations:
       ctaPrimary: Zakaži pregled
       ctaSecondary: Pogledaj radove
       stats:
-        - value: "7"
+        - value: '7'
           label: godina sa folijom i keramikom
         - value: 100%
           label: radova sa fotkama pre i posle
@@ -165,7 +171,7 @@ translations:
     compare:
       eyebrow: Pre i posle
       heading: Razlika koju vidiš bez lampe
-      body: "Pomeri klizač. Levo — kako je došao, desno — kako je otišao. Nema retuširanja: isto mesto, ista svetlost, ista kamera."
+      body: 'Pomeri klizač. Levo — kako je došao, desno — kako je otišao. Nema retuširanja: isto mesto, ista svetlost, ista kamera.'
     process:
       eyebrow: Kako prolazi rad
       heading: Od pregleda do predaje
@@ -182,14 +188,20 @@ translations:
     materials:
       eyebrow: Materijali
       heading: Radimo samo s onim što izdrži srpsko leto
-      body: "Folija i sastavi — potrošni materijal na kojem se ne može štedeti: jeftini materijali žute tokom sezone i skidaju se zajedno s lakom. Držimo skladište proverenih brendova i uvek kažemo šta ćemo tačno postaviti na vaš automobil."
+      body: 'Folija i sastavi — potrošni materijal na kojem se ne može štedeti: jeftini materijali žute tokom sezone i skidaju se zajedno s lakom. Držimo skladište proverenih brendova i uvek kažemo šta ćemo tačno postaviti na vaš automobil.'
       brands:
-        - XPEL
-        - SunTek
-        - 3M
-        - Hexis
-        - Gtechniq
-        - Koch-Chemie
+        - name: XPEL
+          purpose: Zaštitna folija (PPF)
+        - name: SunTek
+          purpose: Zaštitna folija (PPF)
+        - name: 3M
+          purpose: Promena boje folijom
+        - name: HEXIS
+          purpose: Promena boje folijom
+        - name: Gtechniq
+          purpose: Keramička zaštita
+        - name: Koch-Chemie
+          purpose: Hemija za poliranje
     prices:
       eyebrow: Cene
       heading: Razumljive cene, tačna cena — nakon pregleda
@@ -228,9 +240,9 @@ translations:
       - q: Koliko će vremena auto biti kod vas?
         a: Poliranje sa keramikom — dva do tri dana. Prednji deo u foliji — dva dana. Kompletno oblepljenje karoserije — od pet dana. Tačan rok kažemo prilikom pregleda i držimo ga.
       - q: Da li folija kvari fabričku boju?
-        a: "Ne, ako je boja fabrička i folija se skida na vreme i pravilno. Uvek proveravamo debljinom, nije li auto farban: na svež ili jeftin reparat foliju ne možemo postaviti, i o tome ćemo vas obavestiti pre nego što započnemo rad."
+        a: 'Ne, ako je boja fabrička i folija se skida na vreme i pravilno. Uvek proveravamo debljinom, nije li auto farban: na svež ili jeftin reparat foliju ne možemo postaviti, i o tome ćemo vas obavestiti pre nego što započnemo rad.'
       - q: Može li se oblepiti samo hauba i branik?
-        a: "Može. Delimične zone — hauba, branik, krila, ogledala, stubovi, pragovi — najčešći izbor: pokriva onih 90% udaraca kamenjem koji se stvarno dešavaju na putu."
+        a: 'Može. Delimične zone — hauba, branik, krila, ogledala, stubovi, pragovi — najčešći izbor: pokriva onih 90% udaraca kamenjem koji se stvarno dešavaju na putu.'
       - q: Šta je s keramikom zimi i na pranjima?
         a: Keramika se ne boji soli i četki, ali duže traje na bezkontaktnoj pranja sa pH-neutralnom hemijom. Jednom godišnje dođite na besplatan pregled premaza — reći ćemo vam da li je potrebno osvežiti.
       - q: Da li radite restauraciju volana odvojeno od ostalog?
@@ -244,7 +256,7 @@ translations:
       cta: Ostavi zahtev
   en:
     meta:
-      title: "PRIZMA — Detailing in Belgrade: Film, Polishing, Ceramic"
+      title: 'Details — Detailing in Belgrade: Film, Polishing, Ceramic'
       description: A detailing studio in Belgrade. PPF, color change, polishing with ceramic coating, steering wheel restoration. We focus on results that are visible up close.
     hero:
       eyebrow: Detailing Studio · Belgrade
@@ -255,7 +267,7 @@ translations:
       ctaPrimary: Book a Consultation
       ctaSecondary: View Our Work
       stats:
-        - value: "7"
+        - value: '7'
           label: years with film and ceramic
         - value: 100%
           label: of jobs with before and after photos
@@ -287,7 +299,7 @@ translations:
     compare:
       eyebrow: Before and After
       heading: A visible difference, even without a light
-      body: "Slide the slider. On the left — how it arrived, on the right — how it left. No retouching: same spot, same light, same camera."
+      body: 'Slide the slider. On the left — how it arrived, on the right — how it left. No retouching: same spot, same light, same camera.'
     process:
       eyebrow: How We Work
       heading: From Inspection to Handover
@@ -304,14 +316,20 @@ translations:
     materials:
       eyebrow: Materials
       heading: We only work with products that withstand Serbian summers
-      body: "Film and coatings are consumables where cutting corners is not an option: cheap materials yellow over a season and peel off with the clear coat. We keep a stock of trusted brands and always inform you about what we will use on your car."
+      body: 'Film and coatings are consumables where cutting corners is not an option: cheap materials yellow over a season and peel off with the clear coat. We keep a stock of trusted brands and always inform you about what we will use on your car.'
       brands:
-        - XPEL
-        - SunTek
-        - 3M
-        - Hexis
-        - Gtechniq
-        - Koch-Chemie
+        - name: XPEL
+          purpose: Paint protection film (PPF)
+        - name: SunTek
+          purpose: Paint protection film (PPF)
+        - name: 3M
+          purpose: Colour change wrap
+        - name: HEXIS
+          purpose: Colour change wrap
+        - name: Gtechniq
+          purpose: Ceramic coating
+        - name: Koch-Chemie
+          purpose: Polishing chemistry
     prices:
       eyebrow: Pricing
       heading: Clear ranges, precise price — after inspection
@@ -350,9 +368,9 @@ translations:
       - q: How long will my car be with you?
         a: Ceramic polishing takes two to three days. Front PPF application takes two days. Full body wrap takes five days or more. We provide a precise timeline during the inspection and stick to it.
       - q: Will the film damage the factory paint?
-        a: "No, as long as the paint is factory and the film is removed in a timely and correct manner. We always check with a thickness gauge to ensure the car hasn’t been repainted: we won’t apply film to fresh or cheap repair paint, and we will inform you before starting work."
+        a: 'No, as long as the paint is factory and the film is removed in a timely and correct manner. We always check with a thickness gauge to ensure the car hasn’t been repainted: we won’t apply film to fresh or cheap repair paint, and we will inform you before starting work.'
       - q: Can I wrap just the hood and bumper?
-        a: "Yes. Partial areas — hood, bumper, fenders, mirrors, pillars, sills — are the most common options: covering the 90% of stone chips that truly occur on the road."
+        a: 'Yes. Partial areas — hood, bumper, fenders, mirrors, pillars, sills — are the most common options: covering the 90% of stone chips that truly occur on the road.'
       - q: What about ceramic coatings in winter and at car washes?
         a: Ceramics resist salt and brushes but last longer with touchless washes using pH-neutral chemicals. Come in once a year for a free coating check — we’ll advise if an update is needed.
       - q: Do you do steering wheel restoration separately?
@@ -364,4 +382,4 @@ translations:
       heading: Show us your car — it gets easier from there
       body: Come in for an inspection or send us photos via messenger. We’ll be honest about what’s necessary and what can be skipped.
       cta: Submit Your Request
-translatedFrom: 993b9e953536f2ae
+translatedFrom: 0ba7fb2618a97ebc

@@ -36,7 +36,7 @@ const locale = localeFrom(Astro.url.pathname);
 const pages = getPagesContent(locale);
 const services = getServicesContent(locale);
 const site = getSiteContent(locale);
-const { title, body } = localizedWork(work, locale);
+const { title, body, car } = localizedWork(work, locale);
 
 const articleSchema = {
   '@context': 'https://schema.org',
@@ -56,11 +56,11 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
 
 <Shell
   title={`${title} — ${pages.works.detailMetaSuffix}`}
-  description={`${work.data.car}. ${pages.works.metaDescription}`}
+  description={`${car}. ${pages.works.metaDescription}`}
   jsonLd={[articleSchema]}
 >
   <PageHero
-    eyebrow={work.data.car}
+    eyebrow={car}
     heading={title}
     crumbs={[
       { href: PathBuilder.works(locale), label: site.nav.works },

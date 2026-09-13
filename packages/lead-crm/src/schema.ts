@@ -48,6 +48,7 @@ const baseStoredLeadSchema = z.object({
   name: z.string(),
   contact: z.string(),
   service: z.string(),
+  services: z.array(z.string()).default([]),
   contactChannel: z.string().nullable().optional(),
   comment: z.string().nullable().optional(),
   country: z.string().nullable().optional(),
@@ -85,7 +86,8 @@ export type LeadInput = Pick<
   | 'visitorId'
   | 'locale'
   | 'kind'
->;
+> &
+  Partial<Pick<StoredLead, 'services'>>;
 
 export type LeadSubmission = Omit<LeadInput, 'brand'>;
 

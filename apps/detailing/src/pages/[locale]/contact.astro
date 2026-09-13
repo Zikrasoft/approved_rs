@@ -3,6 +3,7 @@ import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
 import ContactChannels from '@/components/ContactChannels.astro';
+import MapEmbed from '@/components/MapEmbed.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getPagesContent } from '@/i18n/content/pages';
 import { getSiteContent } from '@/i18n/content/site';
@@ -17,11 +18,7 @@ const locale = localeFrom(Astro.url.pathname);
 const pages = getPagesContent(locale);
 const site = getSiteContent(locale);
 
-const mapQuery = encodeURIComponent(
-  `${STUDIO_ADDRESS.street}, ${STUDIO_ADDRESS.city}`,
-);
-const mapSrc = `https://www.google.com/maps?q=${mapQuery}&output=embed`;
-const mapLink = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
+const mapLink = `https://www.google.com/maps/search/?api=1&query=${STUDIO_ADDRESS.lat},${STUDIO_ADDRESS.lon}`;
 ---
 
 <Shell
@@ -47,7 +44,7 @@ const mapLink = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
               >
               <address class="text-base not-italic leading-relaxed text-chalk">
                 {STUDIO_ADDRESS.street}<br />{
-                  `${STUDIO_ADDRESS.postalCode} ${STUDIO_ADDRESS.city}`
+                  `${STUDIO_ADDRESS.district}, ${STUDIO_ADDRESS.city}`
                 }
               </address>
             </div>
@@ -109,12 +106,7 @@ const mapLink = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
             <p class="px-7 pb-5 pt-2 text-sm text-mute">
               {pages.contact.mapNote}
             </p>
-            <iframe
-              src={mapSrc}
-              title={pages.contact.mapHeading}
-              loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"
-              class="block h-72 w-full border-0 grayscale"></iframe>
+            <MapEmbed title={pages.contact.mapHeading} />
             <a
               href={mapLink}
               target="_blank"

@@ -3,6 +3,7 @@ import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
 import ContactChannels from '@/components/ContactChannels.astro';
+import MapEmbed from '@/components/MapEmbed.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getPagesContent } from '@/i18n/content/pages';
 import { getSiteContent } from '@/i18n/content/site';
@@ -17,11 +18,7 @@ const locale = localeFrom(Astro.url.pathname);
 const pages = getPagesContent(locale);
 const site = getSiteContent(locale);
 
-const mapQuery = encodeURIComponent(
-  `${GARAGE_ADDRESS.street}, ${GARAGE_ADDRESS.city}`,
-);
-const mapSrc = `https://www.google.com/maps?q=${mapQuery}&output=embed`;
-const mapLink = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
+const mapLink = `https://www.google.com/maps/search/?api=1&query=${GARAGE_ADDRESS.lat},${GARAGE_ADDRESS.lon}`;
 ---
 
 <Shell
@@ -44,7 +41,7 @@ const mapLink = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
           <span class="text-xs text-muted">{pages.contact.addressLabel}</span>
           <address class="text-base not-italic leading-relaxed text-ink">
             {GARAGE_ADDRESS.street}<br />{
-              `${GARAGE_ADDRESS.postalCode} ${GARAGE_ADDRESS.city}`
+              `${GARAGE_ADDRESS.district}, ${GARAGE_ADDRESS.city}`
             }
           </address>
         </div>
@@ -95,19 +92,16 @@ const mapLink = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
           </h2>
           <p class="text-sm text-muted">{pages.contact.mapNote}</p>
         </div>
-        <iframe
-          src={mapSrc}
-          title={pages.contact.mapHeading}
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"
-          class="block h-64 w-full border-0"></iframe>
+        <MapEmbed title={pages.contact.mapHeading} />
         <a
           href={mapLink}
           target="_blank"
           rel="noopener"
           class="block p-5 text-sm text-signal transition-colors duration-150 hover:text-ink"
         >
-          {GARAGE_ADDRESS.street}, {GARAGE_ADDRESS.city}
+          {GARAGE_ADDRESS.street}, {GARAGE_ADDRESS.district}, {
+            GARAGE_ADDRESS.city
+          }
         </a>
       </div>
     </div>

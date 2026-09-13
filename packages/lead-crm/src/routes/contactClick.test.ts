@@ -57,6 +57,7 @@ describe('createContactClickRoute', () => {
         contact: '—',
         contactChannel: 'telegram',
         service: 'Клик Telegram с сайта',
+        services: ['Клик Telegram с сайта'],
       }),
       '[contact-click]',
     );
@@ -81,12 +82,36 @@ describe('createContactClickRoute', () => {
       expect(notifyLead).toHaveBeenCalledWith(
         expect.objectContaining({
           service: 'Звонок с сайта',
+          services: ['Звонок с сайта'],
           contactChannel: 'phone',
         }),
         '[contact-click]',
       );
     },
   );
+
+  it('takes the locale from the first segment of an absolute source_url', async () => {
+    await POST(
+      makeCtx({
+        channel: 'phone',
+        source_url: 'https://example.com/sr/usluge/',
+      }),
+    );
+    expect(notifyLead).toHaveBeenCalledWith(
+      expect.objectContaining({ locale: 'sr' }),
+      '[contact-click]',
+    );
+  });
+
+  it('falls back to the default locale for a source_url with no path at all', async () => {
+    await POST(
+      makeCtx({ channel: 'phone', source_url: 'https://example.com' }),
+    );
+    expect(notifyLead).toHaveBeenCalledWith(
+      expect.objectContaining({ locale: 'ru' }),
+      '[contact-click]',
+    );
+  });
 
   it('passes visitor_id through as visitorId', async () => {
     await POST(

@@ -1,7 +1,7 @@
 ---
 title: Bosch S5 008
 brand: Bosch
-price: 129
+price: 15090
 capacityAh: 77
 crankingA: 780
 polarity: right

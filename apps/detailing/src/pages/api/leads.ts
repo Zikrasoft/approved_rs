@@ -3,7 +3,7 @@ export const prerender = false;
 import { waitUntil } from '@vercel/functions';
 import { createLeadsRoute } from '@podbor/lead-crm';
 import { notifyLead } from '@/lib/crmBot';
-import { DEFAULT_LOCALE, isLocale, type Locale } from '@/i18n/config';
+import { PRIMARY_LOCALE, isLocale, type Locale } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 
 const MISSING_FIELDS_MESSAGE: Record<Locale, string> = {
@@ -16,7 +16,7 @@ export const POST = createLeadsRoute({
   notifyLead,
   waitUntil,
   isLocale,
-  defaultLocale: DEFAULT_LOCALE,
+  defaultLocale: PRIMARY_LOCALE,
   localeCookie: 'lang',
   thanksPath: PathBuilder.thanks,
   missingFieldsMessage: MISSING_FIELDS_MESSAGE,

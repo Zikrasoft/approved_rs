@@ -1,10 +1,21 @@
 import { parse as parseYaml } from 'yaml';
 import type { ZodObject, z } from 'zod';
-import type { LocaleSetOptions } from './locales.ts';
+import { SOURCE_LOCALE } from './locales.ts';
 
-export function createSectionLoader<L extends string, D extends L>({
-  defaultLocale,
-}: LocaleSetOptions<L, D>) {
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+function mergeOverSource(source: unknown, translation: unknown): unknown {
+  if (!isPlainObject(source) || !isPlainObject(translation)) return translation;
+
+  const merged = new Map(Object.entries(source));
+  for (const [key, value] of Object.entries(translation)) {
+    merged.set(key, mergeOverSource(merged.get(key), value));
+  }
+  return Object.fromEntries(merged);
+}
+
+export function createSectionLoader<L extends string>() {
   return function loadSection<S extends ZodObject>(
     schema: S,
     yamlText: string,
@@ -12,21 +23,33 @@ export function createSectionLoader<L extends string, D extends L>({
     type T = z.infer<S>;
     const fields = schema.keyof().options as readonly string[];
     const raw = parseYaml(yamlText) as Record<string, unknown>;
-    const source = schema.parse(
-      Object.fromEntries(fields.map((field) => [field, raw[field]])),
-    ) as T;
+    const rawSource = Object.fromEntries(
+      fields.map((field) => [field, raw[field]]),
+    );
+    const source = schema.parse(rawSource) as T;
 
     const translations = new Map<string, T>();
     const rawTranslations = raw.translations as
       Record<string, unknown> | undefined;
     if (rawTranslations) {
       for (const [locale, value] of Object.entries(rawTranslations)) {
-        const result = schema.safeParse(value);
+        const asWritten = schema.safeParse(value);
+        const result = asWritten.success
+          ? asWritten
+          : schema.safeParse(mergeOverSource(rawSource, value));
+        if (!asWritten.success && result.success) {
+          console.warn(
+            `[i18n] ${locale}: inheriting source values for`,
+            asWritten.error.issues
+              .map((issue) => issue.path.join('.'))
+              .join(', '),
+          );
+        }
         if (result.success) translations.set(locale, result.data as T);
       }
     }
 
     return (locale) =>
-      locale === defaultLocale ? source : (translations.get(locale) ?? source);
+      locale === SOURCE_LOCALE ? source : (translations.get(locale) ?? source);
   };
 }

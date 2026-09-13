@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
   getNavItems,
-  isNavItemActive,
   isCountryScopedServiceSlug,
   SERVICE_SLUGS,
 } from './labels';
@@ -47,56 +46,6 @@ describe('getNavItems', () => {
     getNavItems('ru', 'de').forEach((item) =>
       expect(SERVICE_SLUGS as readonly string[]).toContain(item.slug),
     );
-  });
-});
-
-describe('isNavItemActive', () => {
-  const sourcing = { href: '/ru/vehicle-sourcing/', slug: 'vehicle-sourcing' };
-  const vehicleImport = {
-    href: '/ru/vehicle-import/',
-    slug: 'vehicle-import',
-  };
-
-  it('matches a country-scoped item on its exact path', () => {
-    expect(
-      isNavItemActive(sourcing, 'ru', 'de', '/ru/vehicle-sourcing/de/'),
-    ).toBe(true);
-  });
-
-  it('matches a country-scoped item nested under a city segment', () => {
-    expect(
-      isNavItemActive(sourcing, 'ru', 'de', '/ru/vehicle-sourcing/de/berlin/'),
-    ).toBe(true);
-  });
-
-  it('matches the bare hub page regardless of navCountry', () => {
-    expect(isNavItemActive(sourcing, 'ru', 'de', '/ru/vehicle-sourcing/')).toBe(
-      true,
-    );
-  });
-
-  it('does not false-match an unrelated route sharing the same slug', () => {
-    expect(
-      isNavItemActive(sourcing, 'ru', 'de', '/ru/cases/vehicle-sourcing/'),
-    ).toBe(false);
-  });
-
-  it('does not match when the country segment differs', () => {
-    expect(
-      isNavItemActive(sourcing, 'ru', 'de', '/ru/vehicle-sourcing/rs/'),
-    ).toBe(false);
-  });
-
-  it('does not match when the locale segment differs', () => {
-    expect(
-      isNavItemActive(sourcing, 'ru', 'de', '/en/vehicle-sourcing/de/'),
-    ).toBe(false);
-  });
-
-  it('matches a fixed (non-country-scoped) item by prefix', () => {
-    expect(
-      isNavItemActive(vehicleImport, 'ru', 'de', '/ru/vehicle-import/eu/de/'),
-    ).toBe(true);
   });
 });
 

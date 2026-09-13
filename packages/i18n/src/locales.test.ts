@@ -1,25 +1,43 @@
 import { describe, it, expect } from 'vitest';
-import { createLocaleSet } from './locales.ts';
+import { createLocaleSet, SOURCE_LOCALE } from './locales.ts';
 
 const set = createLocaleSet({
   locales: ['ru', 'en', 'sr', 'es', 'de'] as const,
-  defaultLocale: 'ru',
+  primaryLocale: 'ru',
+});
+
+const srFirst = createLocaleSet({
+  locales: ['ru', 'sr', 'en'] as const,
+  primaryLocale: 'sr',
 });
 
 describe('createLocaleSet options', () => {
   it('rejects an empty locale list', () => {
     expect(() =>
-      // @ts-expect-error an empty list leaves no valid default — caught at
+      // @ts-expect-error an empty list leaves no valid primary — caught at
       // compile time too, this pins the runtime guard for untyped callers.
-      createLocaleSet({ locales: [] as const, defaultLocale: 'ru' }),
+      createLocaleSet({ locales: [] as const, primaryLocale: 'ru' }),
     ).toThrow('locales must not be empty');
   });
 
-  it('rejects a default that is not one of the locales', () => {
+  it('rejects a primary locale that is not one of the locales', () => {
     expect(() =>
       // @ts-expect-error same guard, one layer down from the type system.
-      createLocaleSet({ locales: ['ru', 'en'] as const, defaultLocale: 'de' }),
-    ).toThrow('is not in the locale list');
+      createLocaleSet({ locales: ['ru', 'en'] as const, primaryLocale: 'de' }),
+    ).toThrow('primaryLocale "de" is not in the locale list');
+  });
+
+  it('rejects a locale list that cannot hold the translation source', () => {
+    expect(() =>
+      createLocaleSet({ locales: ['sr', 'en'] as const, primaryLocale: 'sr' }),
+    ).toThrow(`SOURCE_LOCALE "${SOURCE_LOCALE}" is not in the locale list`);
+  });
+});
+
+describe('PRIMARY_LOCALE', () => {
+  it('is the routing default, independent of the translation source', () => {
+    expect(set.PRIMARY_LOCALE).toBe('ru');
+    expect(srFirst.PRIMARY_LOCALE).toBe('sr');
   });
 });
 
@@ -31,10 +49,14 @@ describe('TRANSLATABLE_LOCALES', () => {
   it('follows the configured locale list rather than a fixed one', () => {
     const small = createLocaleSet({
       locales: ['ru', 'sr'] as const,
-      defaultLocale: 'ru',
+      primaryLocale: 'ru',
     });
 
     expect(small.TRANSLATABLE_LOCALES).toEqual(['sr']);
+  });
+
+  it('still excludes only the source language when the primary is another one', () => {
+    expect(srFirst.TRANSLATABLE_LOCALES).toEqual(['sr', 'en']);
   });
 });
 
@@ -55,8 +77,9 @@ describe('getLocale', () => {
     expect(set.getLocale('en')).toBe('en');
   });
 
-  it('falls back to the default when the caller has none', () => {
+  it('falls back to the primary locale when the caller has none', () => {
     expect(set.getLocale(undefined)).toBe('ru');
+    expect(srFirst.getLocale(undefined)).toBe('sr');
   });
 });
 
@@ -69,8 +92,9 @@ describe('detectLocale', () => {
     expect(set.detectLocale('de', 'zz')).toBe('de');
   });
 
-  it('falls back to the default with no header and no cookie', () => {
+  it('falls back to the primary locale with no header and no cookie', () => {
     expect(set.detectLocale(null, undefined)).toBe('ru');
+    expect(srFirst.detectLocale(null, undefined)).toBe('sr');
   });
 
   it('picks the highest-q supported language, not the first listed', () => {
@@ -93,8 +117,9 @@ describe('detectLocale', () => {
     expect(set.detectLocale('fr,it,sr', undefined)).toBe('sr');
   });
 
-  it('falls back to the default when no listed language is served', () => {
+  it('falls back to the primary locale when no listed language is served', () => {
     expect(set.detectLocale('fr,it', undefined)).toBe('ru');
+    expect(srFirst.detectLocale('fr,it', undefined)).toBe('sr');
   });
 });
 
@@ -124,12 +149,21 @@ describe('getAlternateLinks', () => {
     });
   });
 
-  it('points x-default at the source language', () => {
+  it('points x-default at the primary locale', () => {
     const links = set.getAlternateLinks('https://approved.rs', '/sr/services/');
 
     expect(links.at(-1)).toEqual({
       hreflang: 'x-default',
       href: 'https://approved.rs/ru/services/',
+    });
+  });
+
+  it('points x-default at the primary locale, not the translation source', () => {
+    const links = srFirst.getAlternateLinks('https://details.rs', '/ru/works/');
+
+    expect(links.at(-1)).toEqual({
+      hreflang: 'x-default',
+      href: 'https://details.rs/sr/works/',
     });
   });
 });

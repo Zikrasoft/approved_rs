@@ -1,8 +1,10 @@
 ---
 import { Search, Globe, Banknote, ClipboardCheck } from '@lucide/astro';
 import type { Search as IconType } from '@lucide/astro';
-import { getNavItems, isNavItemActive, type ServiceSlug } from '@/utils/labels';
+import { getNavItems, type ServiceSlug } from '@/utils/labels';
+import { navCurrent } from '@/utils/navState';
 import { getLocale } from '@/i18n/config';
+import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   countryCode: string;
@@ -21,7 +23,10 @@ const SERVICE_ICONS: Record<ServiceSlug, typeof IconType> = {
 const items = getNavItems(locale, countryCode).map((item) => ({
   ...item,
   Icon: SERVICE_ICONS[item.slug as ServiceSlug],
-  active: isNavItemActive(item, locale, countryCode, Astro.url.pathname),
+  current: navCurrent(
+    Astro.url.pathname,
+    PathBuilder.sectionRoot(locale, item.slug),
+  ),
 }));
 ---
 
@@ -31,7 +36,7 @@ const items = getNavItems(locale, countryCode).map((item) => ({
       <a
         href={item.href}
         class="mobile-service-card flex flex-col items-center justify-center gap-2 py-5 rounded-sm border border-default text-secondary"
-        aria-current={item.active ? 'page' : undefined}
+        aria-current={item.current}
       >
         {item.Icon && <item.Icon size={20} />}
         <span class="text-sm">{item.label}</span>
@@ -46,10 +51,17 @@ const items = getNavItems(locale, countryCode).map((item) => ({
       background-color 0.2s,
       border-color 0.2s;
   }
-  .mobile-service-card:active,
-  .mobile-service-card[aria-current='page'] {
+  .mobile-service-card:active {
     background-color: var(--color-accent-subtle);
     border-color: var(--color-accent-border);
     color: var(--color-accent) !important;
+  }
+  .mobile-service-card[aria-current] {
+    background-color: var(--color-accent-subtle);
+    border-color: var(--color-accent-border);
+    color: var(--color-text) !important;
+  }
+  .mobile-service-card[aria-current] svg {
+    color: var(--color-accent);
   }
 </style>

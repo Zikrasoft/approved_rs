@@ -1,28 +1,47 @@
 ---
 import Wordmark from './Wordmark.astro';
+import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getSiteContent } from '@/i18n/content/site';
 import { getServicesContent } from '@/i18n/content/services';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
-import {
-  INSTAGRAM,
-  PHONE_NUMBER,
-  SITE_NAME,
-  STUDIO_ADDRESS,
-} from '@/utils/constants';
-import { CONTACT_LINKS, formatPhone } from '@/utils/contactLinks';
+import { INSTAGRAM, SITE_NAME, STUDIO_ADDRESS } from '@/utils/constants';
+import { CONTACT_LINKS } from '@/utils/contactLinks';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
 const services = getServicesContent(locale);
 const year = new Date().getFullYear();
+
+const columnHeading = 'font-display text-xs font-medium text-mute';
+
+const messengers = [
+  {
+    href: CONTACT_LINKS.whatsapp,
+    icon: 'whatsapp',
+    label: site.channels.whatsapp,
+    track: 'whatsapp',
+  },
+  {
+    href: CONTACT_LINKS.viber,
+    icon: 'viber',
+    label: site.channels.viber,
+    track: 'viber',
+  },
+  {
+    href: CONTACT_LINKS.telegram,
+    icon: 'telegram',
+    label: site.channels.telegram,
+    track: 'telegram',
+  },
+] as const;
 ---
 
 <footer class="mt-32 border-t border-line pb-10 pt-16 sm:mt-40">
   <div class="wrap">
     <div class="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
-      <div class="flex flex-col gap-5">
+      <div class="flex flex-col items-start gap-5">
         <Wordmark class="h-4 w-auto" />
         <p class="max-w-xs text-sm leading-relaxed text-mute">
           {site.footer.tagline}
@@ -31,14 +50,16 @@ const year = new Date().getFullYear();
           href={CONTACT_LINKS.instagram}
           rel="noopener"
           target="_blank"
-          class="inline-flex w-fit items-center gap-2 text-sm text-mute transition-colors duration-400 hover:text-champagne"
+          class="inline-flex min-h-11 items-center gap-2.5 text-sm text-mute transition-colors duration-400 hover:text-champagne"
         >
-          {site.channels.instagram} · @{INSTAGRAM}
+          <Icon name="instagram" size={16} class="shrink-0" />
+          <span class="sr-only">{site.channels.instagram}</span>
+          @{INSTAGRAM}
         </a>
       </div>
 
-      <nav class="flex flex-col gap-3" aria-label={site.footer.navHeading}>
-        <span class="text-[0.6875rem] uppercase tracking-[0.22em] text-mute-2">
+      <nav class="flex flex-col gap-3" aria-label={site.nav.services}>
+        <span class={columnHeading}>
           {site.nav.services}
         </span>
         {
@@ -54,7 +75,7 @@ const year = new Date().getFullYear();
       </nav>
 
       <nav class="flex flex-col gap-3" aria-label={site.footer.navHeading}>
-        <span class="text-[0.6875rem] uppercase tracking-[0.22em] text-mute-2">
+        <span class={columnHeading}>
           {site.footer.navHeading}
         </span>
         <a
@@ -74,26 +95,46 @@ const year = new Date().getFullYear();
         >
       </nav>
 
-      <div class="flex flex-col gap-3">
-        <span class="text-[0.6875rem] uppercase tracking-[0.22em] text-mute-2">
+      <div class="flex flex-col items-start gap-3">
+        <span class={columnHeading}>
           {site.footer.contactHeading}
         </span>
         <a
           href={CONTACT_LINKS.phone}
           data-contact-channel="phone"
-          class="text-sm text-chalk transition-colors duration-400 hover:text-champagne"
+          class="inline-flex min-h-11 items-center gap-2.5 text-sm text-chalk transition-colors duration-400 hover:text-champagne"
         >
-          {formatPhone(PHONE_NUMBER)}
+          <Icon name="phone" size={16} class="shrink-0" />
+          {site.channels.call}
         </a>
+        <ul class="-ml-3.5 flex flex-wrap items-center">
+          {
+            messengers.map((messenger) => (
+              <li>
+                <a
+                  href={messenger.href}
+                  data-contact-channel={messenger.track}
+                  rel="noopener"
+                  class="flex size-11 items-center justify-center text-mute transition-colors duration-400 hover:text-champagne"
+                >
+                  <Icon name={messenger.icon} size={16} />
+                  <span class="sr-only">{messenger.label}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
         <address class="text-sm not-italic leading-relaxed text-mute">
           {STUDIO_ADDRESS.street}<br />{
-            `${STUDIO_ADDRESS.postalCode} ${STUDIO_ADDRESS.city}`
+            `${STUDIO_ADDRESS.district}, ${STUDIO_ADDRESS.city}`
           }
         </address>
-        <span class="text-[0.6875rem] uppercase tracking-[0.22em] text-mute-2">
-          {site.footer.hoursHeading}
-        </span>
-        <span class="text-sm text-mute">{site.footer.hours}</span>
+        <p class="text-sm leading-relaxed text-mute">
+          <span class="block text-xs text-mute-2">
+            {site.footer.hoursHeading}
+          </span>
+          {site.footer.hours}
+        </p>
       </div>
     </div>
 

@@ -1,7 +1,7 @@
 ---
 title: Exide Start-Stop AGM EK950
 brand: Exide
-price: 215
+price: 25190
 capacityAh: 95
 crankingA: 850
 polarity: right

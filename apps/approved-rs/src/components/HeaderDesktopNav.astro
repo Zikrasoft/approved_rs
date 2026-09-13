@@ -6,17 +6,17 @@ export interface NavItem {
   label: string;
   slug: string;
   Icon: typeof Search;
-  active: boolean;
+  current?: 'page' | 'true';
 }
 
 interface Props {
   navItems: NavItem[];
   casesHref: string;
   casesLabel: string;
-  casesActive: boolean;
+  casesCurrent?: 'page' | 'true';
 }
 
-const { navItems, casesHref, casesLabel, casesActive } = Astro.props;
+const { navItems, casesHref, casesLabel, casesCurrent } = Astro.props;
 ---
 
 <nav
@@ -27,7 +27,7 @@ const { navItems, casesHref, casesLabel, casesActive } = Astro.props;
       <a
         href={item.href}
         class="flex items-center px-1.5 py-1.5 rounded-sm text-muted whitespace-nowrap"
-        aria-current={item.active ? 'page' : undefined}
+        aria-current={item.current}
       >
         {item.label}
       </a>
@@ -37,7 +37,7 @@ const { navItems, casesHref, casesLabel, casesActive } = Astro.props;
   <a
     href={casesHref}
     class="px-1.5 py-1.5 text-muted whitespace-nowrap"
-    aria-current={casesActive ? 'page' : undefined}>{casesLabel}</a
+    aria-current={casesCurrent}>{casesLabel}</a
   >
 </nav>
 
@@ -65,10 +65,10 @@ const { navItems, casesHref, casesLabel, casesActive } = Astro.props;
   .header-nav > a:hover::after {
     transform: scaleX(1);
   }
-  .header-nav > a[aria-current='page'] {
+  .header-nav > a[aria-current] {
     color: var(--color-text) !important;
   }
-  .header-nav > a[aria-current='page']::after {
+  .header-nav > a[aria-current]::after {
     transform: scaleX(1);
   }
 </style>

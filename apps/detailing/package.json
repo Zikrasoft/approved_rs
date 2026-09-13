@@ -10,7 +10,7 @@
     "astro": "astro",
     "test": "vitest run --passWithNoTests",
     "typecheck": "astro check",
-    "gen:og": "node scripts/gen-og.mjs"
+    "gen:og": "node --experimental-strip-types scripts/gen-og.mjs"
   },
   "dependencies": {
     "@astrojs/react": "6.0.5",
@@ -20,12 +20,14 @@
     "@fontsource-variable/unbounded": "5.3.0",
     "@keystatic/astro": "6.0.0",
     "@keystatic/core": "0.6.9",
+    "@podbor/brands": "workspace:*",
     "@podbor/i18n": "workspace:*",
     "@podbor/lead-crm": "workspace:*",
     "@podbor/site-kit": "workspace:*",
     "@vercel/blob": "2.8.0",
     "@vercel/functions": "3.9.5",
     "astro": "7.2.10",
+    "libphonenumber-js": "1.13.12",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "zod": "4.5.4"

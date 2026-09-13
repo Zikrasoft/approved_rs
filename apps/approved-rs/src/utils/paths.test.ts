@@ -1,5 +1,21 @@
 import { describe, it, expect } from 'vitest';
-import { withLocales, PathBuilder } from './paths';
+import { withLocales, PathBuilder, swapLocale } from './paths';
+
+describe('swapLocale', () => {
+  it('replaces the locale segment and keeps the rest of the path', () => {
+    expect(swapLocale('/ru/vehicle-sourcing/de/berlin/', 'en')).toBe(
+      '/en/vehicle-sourcing/de/berlin/',
+    );
+  });
+
+  it('maps a bare locale root to the other locale root', () => {
+    expect(swapLocale('/ru/', 'sr')).toBe('/sr/');
+  });
+
+  it('adds the trailing slash a missing one left off', () => {
+    expect(swapLocale('/ru/contacts', 'en')).toBe('/en/contacts/');
+  });
+});
 
 describe('PathBuilder', () => {
   it('builds every fixed route for a given locale', () => {

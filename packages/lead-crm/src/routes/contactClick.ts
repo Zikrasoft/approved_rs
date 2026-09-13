@@ -1,9 +1,12 @@
+import type { TrackedContactChannel } from '../contactChannel.ts';
 import {
-  isTrackedContactChannel,
-  type TrackedContactChannel,
-} from '../contactChannel.ts';
+  contactChannelSchema,
+  sourceUrlSchema,
+  visitorIdSchema,
+} from '../form.ts';
 import type { NotifyLead } from '../notifyLead.ts';
-import { MAX_URL_LENGTH, visitorId } from './leads.ts';
+
+const clickedChannelSchema = contactChannelSchema.catch('phone');
 
 const CHANNEL_COPY: Record<
   TrackedContactChannel,
@@ -63,14 +66,9 @@ export function createContactClickRoute({
     request: Request;
   }): Promise<Response> {
     const form = await request.formData();
-    const field = (key: string, max: number) =>
-      form.get(key)?.toString().trim().slice(0, max) || null;
-    const rawChannel = form.get('channel')?.toString();
-    const channel: TrackedContactChannel = isTrackedContactChannel(rawChannel)
-      ? rawChannel
-      : 'phone';
+    const channel = clickedChannelSchema.parse(form.get('channel'));
     const copy = CHANNEL_COPY[channel];
-    const sourceUrl = field('source_url', MAX_URL_LENGTH);
+    const sourceUrl = sourceUrlSchema.parse(form.get('source_url'));
 
     waitUntil(
       notifyLead(
@@ -78,10 +76,11 @@ export function createContactClickRoute({
           name: '',
           contact: '—',
           service: copy.service,
+          services: [copy.service],
           contactChannel: channel,
           comment: copy.comment,
           source_url: sourceUrl,
-          visitorId: visitorId(form.get('visitor_id')?.toString().trim() ?? ''),
+          visitorId: visitorIdSchema.parse(form.get('visitor_id')),
           locale: localeFromUrl(sourceUrl, isLocale) ?? defaultLocale,
           kind: 'call_click',
         },

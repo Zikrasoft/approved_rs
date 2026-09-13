@@ -3,4 +3,4 @@ Allow: /
 Disallow: /api/
 Disallow: /keystatic/
 
-Sitemap: https://autohub.rs/sitemap-index.xml
+Sitemap: https://carlab.rs/sitemap-index.xml

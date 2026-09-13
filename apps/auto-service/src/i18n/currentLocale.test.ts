@@ -14,19 +14,19 @@ describe('localeFrom', () => {
     expect(localeFrom('/sr/')).toBe('sr');
   });
 
-  it('falls back to the default locale at the site root', () => {
-    expect(localeFrom('/')).toBe('ru');
+  it('falls back to the primary locale at the site root', () => {
+    expect(localeFrom('/')).toBe('sr');
   });
 
-  it('falls back to the default locale outside the [locale] tree', () => {
-    expect(localeFrom('/404')).toBe('ru');
+  it('falls back to the primary locale outside the [locale] tree', () => {
+    expect(localeFrom('/404')).toBe('sr');
   });
 
-  it('falls back to the default locale for an unsupported language', () => {
-    expect(localeFrom('/zh/services/')).toBe('ru');
+  it('falls back to the primary locale for an unsupported language', () => {
+    expect(localeFrom('/zh/services/')).toBe('sr');
   });
 
-  it('falls back to the default locale for a prototype key', () => {
-    expect(localeFrom('/constructor/')).toBe('ru');
+  it('falls back to the primary locale for a prototype key', () => {
+    expect(localeFrom('/constructor/')).toBe('sr');
   });
 });

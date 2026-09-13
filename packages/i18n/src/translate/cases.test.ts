@@ -10,7 +10,11 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parseDocument } from 'yaml';
 import { createCaseTranslator, hashSource, splitFrontmatter } from './cases.ts';
-import { stubOpenAiResponse, stubOpenAiFetch } from './mockOpenAiFetch.ts';
+import {
+  stubOpenAiResponse,
+  stubOpenAiFetch,
+  openAiChatResponse,
+} from './mockOpenAiFetch.ts';
 
 const { translateCase, processFile, run } = createCaseTranslator({
   targetLocales: ['en', 'sr'] as const,
@@ -32,6 +36,16 @@ function caseFile(dir: string): string {
   return file;
 }
 
+const LEGACY_HASH = '504a66f98ac4d994';
+
+const LEGACY_SYSTEM_PROMPT =
+  'You translate car case studies from Russian into Serbian (Latin script) ' +
+  'for a test business. ' +
+  'Translate the MEANING naturally and idiomatically, the way a native speaker would actually write ' +
+  'this case study — never a literal word-for-word translation. Keep markdown formatting (headings, ' +
+  'bold, lists) intact. Keep car makes/models, prices, and place names as they would normally appear ' +
+  'in the target language. Respond with a JSON object: {"title": string, "body": string}.';
+
 describe('hashSource', () => {
   it('is stable for the same title/body', () => {
     expect(hashSource(RU_CASE)).toBe(hashSource({ ...RU_CASE }));
@@ -40,6 +54,21 @@ describe('hashSource', () => {
   it('changes when the body changes', () => {
     expect(hashSource(RU_CASE)).not.toBe(
       hashSource({ ...RU_CASE, body: 'Другой текст.' }),
+    );
+  });
+
+  it('matches the pre-extraFields hash when no extras are given', () => {
+    expect(hashSource(RU_CASE)).toBe(LEGACY_HASH);
+    expect(hashSource({ ...RU_CASE, car: 'Honda Accord' }, [])).toBe(
+      LEGACY_HASH,
+    );
+  });
+
+  it('changes when only an extra value changes', () => {
+    const source = { ...RU_CASE, car: 'Пригнан под заказ из Германии' };
+    expect(hashSource(source, ['car'])).not.toBe(LEGACY_HASH);
+    expect(hashSource(source, ['car'])).not.toBe(
+      hashSource({ ...source, car: 'Honda Accord' }, ['car']),
     );
   });
 });
@@ -99,6 +128,25 @@ describe('translateCase', () => {
     expect(body.messages[0].content).toContain('Serbian (Latin script)');
     expect(body.messages[0].content).toContain('a test business');
     expect(body.messages[0].content).toContain('car case studies');
+  });
+
+  it('builds the pre-extraFields prompt verbatim when no extras are given', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockImplementation(async () =>
+        openAiChatResponse({ title: 'X', body: 'Y' }),
+      );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await translateCase(RU_CASE, 'sr', 'test-key');
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body as string) as {
+      messages: { content: string }[];
+    };
+    expect(body.messages[0].content).toBe(LEGACY_SYSTEM_PROMPT);
+    expect(body.messages[1].content).toBe(
+      `Title: ${RU_CASE.title}\n\nBody:\n${RU_CASE.body}`,
+    );
   });
 
   it('throws when the response is missing title or body', async () => {
@@ -179,6 +227,179 @@ describe('processFile (file round-trip)', () => {
 
     await expect(processFile(file, 'test-key')).resolves.toBe('backfilled');
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('extraFields', () => {
+  const extra = createCaseTranslator({
+    targetLocales: ['en', 'sr'] as const,
+    languageName: { en: 'English', sr: 'Serbian (Latin script)' },
+    businessDescription: 'a test business',
+    subject: 'car case studies',
+    extraFields: ['car', 'subtitle'],
+  });
+
+  let dir: string;
+
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), 'cases-extra-test-'));
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+
+  function writeCase(name: string, frontmatter: string): string {
+    const caseDir = join(dir, name);
+    mkdirSync(caseDir, { recursive: true });
+    const file = join(caseDir, 'index.md');
+    writeFileSync(file, `---\n${frontmatter}\n---\n${RU_CASE.body}\n`);
+    return file;
+  }
+
+  function stubEchoFetch() {
+    stubOpenAiFetch((userContent) => ({
+      title: 'TITLE',
+      body: 'BODY',
+      car: `CAR:${/car: (.*)/.exec(userContent)?.[1] ?? ''}`,
+      subtitle: 'SUBTITLE',
+    }));
+  }
+
+  function frontmatterOf(file: string) {
+    return parseDocument(
+      splitFrontmatter(readFileSync(file, 'utf-8')).frontmatter,
+    );
+  }
+
+  it('translates an extra field and writes it into the translations node', async () => {
+    stubEchoFetch();
+    const file = writeCase(
+      'with-car',
+      `title: ${RU_CASE.title}\ncar: Пригнан под заказ из Германии\ntranslations: {}`,
+    );
+
+    await expect(extra.processFile(file, 'test-key')).resolves.toBe(
+      'translated',
+    );
+
+    const doc = frontmatterOf(file);
+    expect(doc.getIn(['translations', 'en', 'car'])).toBe(
+      'CAR:Пригнан под заказ из Германии',
+    );
+    expect(doc.getIn(['translations', 'sr', 'title'])).toBe('TITLE');
+    expect(doc.getIn(['translations', 'sr', 'subtitle'])).toBeUndefined();
+  });
+
+  it('asks for the extra fields and explains the car field in the prompt', async () => {
+    const fetchMock = vi.fn().mockImplementation(async () =>
+      openAiChatResponse({
+        title: 'T',
+        body: 'B',
+        car: 'C',
+        subtitle: 'S',
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await extra.translateCase(
+      { ...RU_CASE, car: 'Honda Accord', subtitle: 'Кузовной ремонт' },
+      'sr',
+      'test-key',
+      ['car', 'subtitle'],
+    );
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body as string) as {
+      messages: { content: string }[];
+    };
+    expect(body.messages[0].content).toContain(
+      '{"title": string, "body": string, "car": string, "subtitle": string}',
+    );
+    expect(body.messages[0].content).toContain('vehicle make and model');
+    expect(body.messages[1].content).toBe(
+      `Title: ${RU_CASE.title}\ncar: Honda Accord\nsubtitle: Кузовной ремонт\n\nBody:\n${RU_CASE.body}`,
+    );
+  });
+
+  it('skips extras a file does not have while a sibling file keeps them', async () => {
+    vi.stubEnv('OPENAI_API_KEY', 'test-key');
+    stubEchoFetch();
+    const withCar = writeCase(
+      'with-car',
+      `title: ${RU_CASE.title}\ncar: Honda Accord\ntranslations: {}`,
+    );
+    const withoutCar = writeCase(
+      'without-car',
+      `title: ${RU_CASE.title}\ntranslations: {}`,
+    );
+
+    await expect(extra.run([dir])).resolves.toBe(0);
+
+    expect(frontmatterOf(withCar).getIn(['translations', 'en', 'car'])).toBe(
+      'CAR:Honda Accord',
+    );
+    expect(
+      frontmatterOf(withoutCar).getIn(['translations', 'en', 'car']),
+    ).toBeUndefined();
+    expect(
+      frontmatterOf(withoutCar).getIn(['translations', 'en', 'title']),
+    ).toBe('TITLE');
+  });
+
+  it('ignores a blank extra value', async () => {
+    stubEchoFetch();
+    const file = writeCase(
+      'blank-car',
+      `title: ${RU_CASE.title}\ncar: '   '\ntranslations: {}`,
+    );
+
+    await expect(extra.processFile(file, 'test-key')).resolves.toBe(
+      'translated',
+    );
+    expect(
+      frontmatterOf(file).getIn(['translations', 'en', 'car']),
+    ).toBeUndefined();
+  });
+
+  it('re-translates an entry whose stored translation lacks the extra field', async () => {
+    stubEchoFetch();
+    const file = writeCase(
+      'stale',
+      `title: ${RU_CASE.title}\ncar: Honda Accord\ntranslatedFrom: ${hashSource(
+        { ...RU_CASE, car: 'Honda Accord' },
+        ['car'],
+      )}\ntranslations:\n  en:\n    title: A\n    body: B\n  sr:\n    title: C\n    body: D`,
+    );
+
+    await expect(extra.processFile(file, 'test-key')).resolves.toBe(
+      'translated',
+    );
+    expect(frontmatterOf(file).getIn(['translations', 'en', 'car'])).toBe(
+      'CAR:Honda Accord',
+    );
+  });
+
+  it('throws when the response omits an extra field', async () => {
+    stubOpenAiResponse({ title: 'T', body: 'B' });
+    await expect(
+      extra.translateCase({ ...RU_CASE, car: 'Honda Accord' }, 'en', 'k', [
+        'car',
+      ]),
+    ).rejects.toThrow(/missing car/);
+  });
+
+  it('rejects an extra field that introduces HTML the source did not have', async () => {
+    stubOpenAiResponse({ title: 'T', body: 'B', car: '<img src=x>' });
+    await expect(
+      extra.translateCase({ ...RU_CASE, car: 'Honda Accord' }, 'en', 'k', [
+        'car',
+      ]),
+    ).rejects.toThrow(/car/);
   });
 });
 

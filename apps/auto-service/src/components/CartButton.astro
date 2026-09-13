@@ -1,0 +1,40 @@
+---
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getShopContent } from '@/i18n/content/shop';
+import { PathBuilder } from '@/utils/paths';
+
+const locale = localeFrom(Astro.url.pathname);
+const shop = getShopContent(locale);
+---
+
+<a
+  href={PathBuilder.cart(locale)}
+  class="relative flex h-10 items-center gap-2 rounded-control border border-line-strong px-3 text-sm font-medium text-ink transition-colors duration-150 hover:border-ink"
+  aria-label={shop.cart.heading}
+>
+  <Icon name="cart" />
+  <span
+    class="spec hidden text-xs tabular-nums"
+    data-cart-count
+    data-cart-label={shop.cart.badgeLabel}>0</span
+  >
+</a>
+
+<script>
+  import { readCart, cartCount, onCartChange } from '@/utils/cart';
+
+  const badge = document.querySelector<HTMLElement>('[data-cart-count]');
+  const render = () => {
+    if (!badge) return;
+    const count = cartCount(readCart());
+    badge.textContent = String(count);
+    badge.classList.toggle('hidden', count === 0);
+    badge.parentElement?.setAttribute(
+      'aria-label',
+      `${badge.dataset.cartLabel ?? ''}: ${count}`,
+    );
+  };
+  render();
+  onCartChange(render);
+</script>

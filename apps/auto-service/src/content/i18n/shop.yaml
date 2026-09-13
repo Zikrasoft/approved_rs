@@ -1,4 +1,4 @@
-metaTitle: Аккумуляторы для авто в Белграде — подбор и установка — AUTOHUB
+metaTitle: Аккумуляторы для авто в Белграде — подбор и установка — CarLab
 metaDescription: Аккумуляторы в наличии в Белграде. Подбор по марке, модели и году, установка за 20 минут, утилизация старого. Цены с НДС, гарантия производителя.
 eyebrow: Запчасти
 heading: Аккумуляторы с подбором по вашей машине
@@ -34,7 +34,7 @@ inCart: В корзине
 installNote: Установка и утилизация старого аккумулятора — бесплатно при покупке у нас.
 productMetaSuffix: аккумулятор в Белграде
 cart:
-  metaTitle: Корзина — AUTOHUB
+  metaTitle: Корзина — CarLab
   metaDescription: Ваш заказ запчастей. Оформление без предоплаты — оплата при получении в сервисе.
   eyebrow: Корзина
   heading: Ваш заказ
@@ -50,7 +50,7 @@ cart:
   badgeLabel: товаров в корзине
 translations:
   sr:
-    metaTitle: Akumulatori za auto u Beogradu — izbor i ugradnja — AUTOHUB
+    metaTitle: Akumulatori za auto u Beogradu — izbor i ugradnja — CarLab
     metaDescription: Akumulatori na stanju u Beogradu. Izbor po marki, modelu i godištu, ugradnja za 20 minuta, odnošenje starog. Cene sa PDV-om, garancija proizvođača.
     eyebrow: Delovi
     heading: Akumulatori izabrani po vašem automobilu
@@ -85,7 +85,7 @@ translations:
     installNote: Ugradnja i odnošenje starog akumulatora su besplatni uz kupovinu kod nas.
     productMetaSuffix: akumulator u Beogradu
     cart:
-      metaTitle: Korpa — AUTOHUB
+      metaTitle: Korpa — CarLab
       metaDescription: Vaša porudžbina delova. Bez avansa — plaća se pri preuzimanju u servisu.
       eyebrow: Korpa
       heading: Vaša porudžbina
@@ -100,7 +100,7 @@ translations:
       orderNote: Pozvaćemo vas, potvrditi stanje i dogovoriti termin.
       badgeLabel: artikala u korpi
   en:
-    metaTitle: Car batteries in Belgrade — matched and fitted — AUTOHUB
+    metaTitle: Car batteries in Belgrade — matched and fitted — CarLab
     metaDescription: Car batteries in stock in Belgrade. Matched by make, model and year, fitted in twenty minutes, old one recycled. VAT included, manufacturer warranty.
     eyebrow: Parts
     heading: Batteries matched to your car
@@ -134,7 +134,7 @@ translations:
     installNote: Fitting and recycling your old battery are free when you buy from us.
     productMetaSuffix: car battery in Belgrade
     cart:
-      metaTitle: Basket — AUTOHUB
+      metaTitle: Basket — CarLab
       metaDescription: Your parts order. No prepayment — you pay when you collect at the workshop.
       eyebrow: Basket
       heading: Your order
@@ -148,4 +148,4 @@ translations:
       orderHeading: Send the order
       orderNote: We call you back, confirm availability and agree a time.
       badgeLabel: items in the basket
-translatedFrom: 95c9a0fa1bcde47c
+translatedFrom: a6de7247cdf82b91

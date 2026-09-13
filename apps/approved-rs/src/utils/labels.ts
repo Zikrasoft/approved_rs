@@ -44,9 +44,6 @@ export type CasesTabKind =
   | 'vehicle-inspection'
   | 'vehicle-import';
 
-// `slug` is both the URL path segment AND the internal identifier
-// (dictionary/content keys, formService, SERVICE_LABELS) — fully unified
-// after the site-wide English-slug migration, no more decoupling needed.
 export const SERVICES: { slug: CountryScopedServiceSlug }[] =
   COUNTRY_SCOPED_SERVICE_SLUGS.map((slug) => ({ slug }));
 
@@ -84,39 +81,4 @@ export const getNavItems = (
       slug: s.slug,
     })),
   ];
-};
-
-// Country-scoped items (vehicle-sourcing/vehicle-buyback/vehicle-inspection)
-// put the service right after the locale (/ru/vehicle-sourcing/de/), with
-// country next — including when vehicle-sourcing sits under a city segment
-// too (/ru/vehicle-sourcing/de/berlin/), so checking segments[1]/[2]
-// handles both without a separate city fallback.
-export function isNavItemActive(
-  item: { href: string; slug: string },
-  locale: Locale,
-  navCountry: string,
-  pathname: string,
-): boolean {
-  const isCountryScoped = SERVICES.some((s) => s.slug === item.slug);
-  if (!isCountryScoped) return pathname.startsWith(item.href);
-  const segments = pathname.split('/').filter(Boolean);
-  if (segments[0] !== locale || segments[1] !== item.slug) return false;
-  // No country segment at all (the bare hub, e.g. /ru/vehicle-sourcing/)
-  // still counts as active — only buyback/inspection lack a hub page, so
-  // segments[2] is never actually undefined for those in practice.
-  return segments[2] === navCountry || segments[2] === undefined;
-}
-
-// Keyed by form/Telegram service value — internal/ops-facing (Telegram bot
-// messages), not part of the public site's i18n scope.
-export const SERVICE_LABELS: Record<string, string> = {
-  'vehicle-sourcing': 'Автоподбор',
-  'vehicle-buyback': 'Выкуп',
-  'vehicle-inspection': 'Проверка',
-  'vehicle-import-de': 'Привоз из Германии',
-  'vehicle-import-es': 'Привоз из Испании',
-  'vehicle-import-ch': 'Привоз из Швейцарии',
-  'vehicle-import-eu': 'Привоз из Европы',
-  'vehicle-import-china': 'Привоз из Китая',
-  'vehicle-import': 'Привоз авто',
 };

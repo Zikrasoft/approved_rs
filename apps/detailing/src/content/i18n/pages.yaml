@@ -1,16 +1,16 @@
 works:
-  metaTitle: Наши работы — детейлинг в Белграде — PRIZMA
-  metaDescription: 'Реальные работы студии PRIZMA: оклейка плёнкой, смена цвета, полировка с керамикой, реставрация руля. Фотографии до и после по каждому автомобилю.'
+  metaTitle: Наши работы — детейлинг в Белграде — Details
+  metaDescription: 'Реальные работы студии Details: оклейка плёнкой, смена цвета, полировка с керамикой, реставрация руля. Фотографии до и после по каждому автомобилю.'
   eyebrow: Работы
   heading: Машины, которые прошли через наш бокс
   lead: Никаких стоковых кадров. Каждая карточка — автомобиль, который стоял у нас, с фотографиями до и после в одинаковом свете.
   filterAll: Все
-  detailMetaSuffix: работа студии PRIZMA
+  detailMetaSuffix: работа студии Details
   detailCtaHeading: Хотите так же?
   detailCtaBody: Приезжайте на осмотр или пришлите фото своей машины — посчитаем и назовём срок.
 contact:
-  metaTitle: Контакты студии детейлинга в Белграде — PRIZMA
-  metaDescription: Адрес, часы работы и телефон студии детейлинга PRIZMA в Белграде. Запись на осмотр по телефону, в WhatsApp, Viber или Telegram.
+  metaTitle: Контакты студии детейлинга в Белграде — Details
+  metaDescription: Адрес, часы работы и телефон студии детейлинга Details в Белграде. Запись на осмотр по телефону, в WhatsApp, Viber или Telegram.
   eyebrow: Контакты
   heading: Приезжайте посмотреть бокс
   lead: 'Мы не продаём по телефону. Лучший способ — заехать на пятнадцать минут: посмотрим машину вместе и скажем, что ей действительно нужно.'
@@ -25,7 +25,7 @@ contact:
     - 'Если есть время, приезжайте днём: лак честнее видно при дневном свете.'
     - Возьмите с собой ключи от всех замков, включая секретки на колёсах.
 thanks:
-  metaTitle: Заявка отправлена — PRIZMA
+  metaTitle: Заявка отправлена — Details
   metaDescription: Спасибо за заявку. Мы свяжемся в рабочее время и договоримся об осмотре.
   eyebrow: Готово
   heading: Заявка у нас
@@ -33,8 +33,8 @@ thanks:
   note: Если ответа нет дольше рабочего дня, значит сообщение потерялось. Напишите ещё раз, мы не обидимся.
   cta: Вернуться на главную
 privacy:
-  metaTitle: Политика конфиденциальности — PRIZMA
-  metaDescription: Какие данные собирает сайт студии детейлинга PRIZMA, зачем и как долго они хранятся.
+  metaTitle: Политика конфиденциальности — Details
+  metaDescription: Какие данные собирает сайт студии детейлинга Details, зачем и как долго они хранятся.
   heading: Политика конфиденциальности
   lastUpdated: Обновлено 12 сентября 2026
   sections:
@@ -53,25 +53,25 @@ privacy:
   contactTitle: Вопросы по данным
   contactBefore: Напишите или позвоните нам, контакты есть на странице
 notFound:
-  metaTitle: Страница не найдена — PRIZMA
+  metaTitle: Страница не найдена — Details
   heading: Такой страницы нет
   body: Возможно, ссылка устарела или в адресе опечатка. Загляните на главную или посмотрите работы.
   cta: На главную
 translations:
   sr:
     works:
-      metaTitle: Naši radovi — detailing u Beogradu — PRIZMA
-      metaDescription: 'Stvarni radovi studija PRIZMA: folije, promena boje, poliranje sa keramikom, restauracija volana. Fotografije pre i posle za svaki automobil.'
+      metaTitle: Naši radovi — detailing u Beogradu — Details
+      metaDescription: 'Stvarni radovi studija Details: folije, promena boje, poliranje sa keramikom, restauracija volana. Fotografije pre i posle za svaki automobil.'
       eyebrow: Radovi
       heading: Automobili koji su prošli kroz naš boks
       lead: Bez stok fotografija. Svaka kartica je auto koji je stajao kod nas, sa snimcima pre i posle pri istom svetlu.
       filterAll: Sve
-      detailMetaSuffix: rad studija PRIZMA
+      detailMetaSuffix: rad studija Details
       detailCtaHeading: Želite isto?
       detailCtaBody: Dođite na pregled ili pošaljite fotografije svog automobila — izračunaćemo cenu i rok.
     contact:
-      metaTitle: Kontakt detailing studija u Beogradu — PRIZMA
-      metaDescription: Adresa, radno vreme i telefon detailing studija PRIZMA u Beogradu. Zakazivanje pregleda telefonom, preko WhatsApp-a, Viber-a ili Telegram-a.
+      metaTitle: Kontakt detailing studija u Beogradu — Details
+      metaDescription: Adresa, radno vreme i telefon detailing studija Details u Beogradu. Zakazivanje pregleda telefonom, preko WhatsApp-a, Viber-a ili Telegram-a.
       eyebrow: Kontakt
       heading: Svratite da vidite boks
       lead: 'Ne prodajemo preko telefona. Najbolje je da svratite na petnaest minuta: pogledaćemo auto zajedno i reći šta mu stvarno treba.'
@@ -86,7 +86,7 @@ translations:
         - 'Ako stignete, dođite po danu: lak se najiskrenije vidi po dnevnom svetlu.'
         - Ponesite ključeve za sve brave, uključujući i sigurnosne na felnama.
     thanks:
-      metaTitle: Zahtev je poslat — PRIZMA
+      metaTitle: Zahtev je poslat — Details
       metaDescription: Hvala na zahtevu. Javićemo se u radno vreme i dogovoriti pregled.
       eyebrow: Gotovo
       heading: Zahtev je kod nas
@@ -94,8 +94,8 @@ translations:
       note: Ako odgovora nema duže od jednog radnog dana, znači da se poruka izgubila. Pišite ponovo, nećemo se naljutiti.
       cta: Nazad na početnu
     privacy:
-      metaTitle: Politika privatnosti — PRIZMA
-      metaDescription: Koje podatke prikuplja sajt detailing studija PRIZMA, zašto i koliko dugo se čuvaju.
+      metaTitle: Politika privatnosti — Details
+      metaDescription: Koje podatke prikuplja sajt detailing studija Details, zašto i koliko dugo se čuvaju.
       heading: Politika privatnosti
       lastUpdated: Ažurirano 12. septembra 2026.
       sections:
@@ -114,24 +114,24 @@ translations:
       contactTitle: Pitanja o podacima
       contactBefore: Pišite nam ili nas pozovite, kontakti se nalaze na stranici
     notFound:
-      metaTitle: Stranica nije pronađena — PRIZMA
+      metaTitle: Stranica nije pronađena — Details
       heading: Ovakve stranice nema
       body: Možda je link zastareo ili se potkrala greška u adresi. Svratite na početnu ili pogledajte radove.
       cta: Na početnu
   en:
     works:
-      metaTitle: Our work — detailing in Belgrade — PRIZMA
-      metaDescription: 'Real jobs from PRIZMA studio: paint protection film, colour changes, polishing with ceramic, steering-wheel restoration. Before and after photos for every car.'
+      metaTitle: Our work — detailing in Belgrade — Details
+      metaDescription: 'Real jobs from Details studio: paint protection film, colour changes, polishing with ceramic, steering-wheel restoration. Before and after photos for every car.'
       eyebrow: Our work
       heading: Cars that came through the bay
       lead: No stock photography. Every card is a car that stood in our bay, with before and after shots taken in the same light.
       filterAll: All
-      detailMetaSuffix: a PRIZMA studio job
+      detailMetaSuffix: a Details studio job
       detailCtaHeading: Want the same?
       detailCtaBody: Come by for an inspection or send photos of your car — we will quote it and give you a date.
     contact:
-      metaTitle: Contact the detailing studio in Belgrade — PRIZMA
-      metaDescription: Address, opening hours and phone number for PRIZMA detailing studio in Belgrade. Book an inspection by phone, WhatsApp, Viber or Telegram.
+      metaTitle: Contact the detailing studio in Belgrade — Details
+      metaDescription: Address, opening hours and phone number for Details detailing studio in Belgrade. Book an inspection by phone, WhatsApp, Viber or Telegram.
       eyebrow: Contact
       heading: Come and see the bay
       lead: 'We do not sell over the phone. The best way is to drop in for fifteen minutes: we look at the car together and tell you what it genuinely needs.'
@@ -146,7 +146,7 @@ translations:
         - 'If you can, come during the day: paint tells the truth in daylight.'
         - Bring keys for every lock, wheel locking nuts included.
     thanks:
-      metaTitle: Request sent — PRIZMA
+      metaTitle: Request sent — Details
       metaDescription: Thank you for your request. We will get in touch during working hours and arrange an inspection.
       eyebrow: Done
       heading: We have your request
@@ -154,8 +154,8 @@ translations:
       note: If you hear nothing for more than a working day, the message got lost. Send it again, we will not mind.
       cta: Back to the homepage
     privacy:
-      metaTitle: Privacy policy — PRIZMA
-      metaDescription: What the PRIZMA detailing studio website collects, why, and how long it is kept.
+      metaTitle: Privacy policy — Details
+      metaDescription: What the Details detailing studio website collects, why, and how long it is kept.
       heading: Privacy policy
       lastUpdated: Updated 12 September 2026
       sections:
@@ -174,8 +174,8 @@ translations:
       contactTitle: Questions about your data
       contactBefore: Write or call us, the details are on the page
     notFound:
-      metaTitle: Page not found — PRIZMA
+      metaTitle: Page not found — Details
       heading: There is no such page
       body: The link may be out of date, or there is a typo in the address. Try the homepage, or have a look at our work.
       cta: Go to the homepage
-translatedFrom: 19a7e15c9666f1d3
+translatedFrom: 98c46ca428797a17

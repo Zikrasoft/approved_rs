@@ -51,9 +51,21 @@ const thanksSchema = z
   })
   .strict();
 
+const partnersSchema = z
+  .object({
+    eyebrow: z.string(),
+    heading: z.string(),
+    intro: z.string(),
+    linkLabel: z.string(),
+    carlabDescription: z.string(),
+    detailsDescription: z.string(),
+  })
+  .strict();
+
 export const pagesContentSchema = z
   .object({
     contacts: contactsSchema,
+    partners: partnersSchema,
     privacy: privacySchema,
     thanks: thanksSchema,
     casesVehicleSourcing: pageMetaSchema,

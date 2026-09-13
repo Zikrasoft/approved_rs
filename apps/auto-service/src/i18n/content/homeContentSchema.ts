@@ -17,6 +17,7 @@ export const homeContentSchema = z
         badges: z.array(z.string()),
       })
       .strict(),
+    trustCaption: z.string(),
     trust: z.array(z.object({ value: z.string(), label: z.string() }).strict()),
     servicesHead: sectionHeadSchema,
     why: sectionHeadSchema.extend({

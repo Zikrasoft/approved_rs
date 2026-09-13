@@ -1,50 +1,61 @@
 ---
-import { Image } from 'astro:assets';
-import heroImage from '@/content/works/mersedes-benz-gls/image.jpg';
 import Cta from './Cta.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getHomeContent } from '@/i18n/content/home';
 import { getSiteContent } from '@/i18n/content/site';
 import { PathBuilder } from '@/utils/paths';
+import {
+  HERO_HEIGHT,
+  HERO_SIZES,
+  HERO_WIDTH,
+  getHeroPicture,
+} from '@/utils/heroImage';
 
 const locale = localeFrom(Astro.url.pathname);
 const { hero } = getHomeContent(locale);
 const site = getSiteContent(locale);
+const picture = await getHeroPicture();
 ---
 
-<section class="relative overflow-hidden pb-20 pt-36 sm:pb-28 sm:pt-44">
+<section
+  class="relative flex min-h-svh flex-col justify-end overflow-hidden pb-6 pt-24 sm:pb-10 sm:pt-28"
+>
   <div
-    class="pointer-events-none absolute inset-0 -z-10"
+    class="pointer-events-none absolute inset-0 -z-10 bg-[#282828]"
     aria-hidden="true"
     data-hero-bg
   >
-    <Image
-      src={heroImage}
+    <img
+      src={picture.src}
+      srcset={picture.srcSet.attribute}
+      sizes={HERO_SIZES}
+      width={HERO_WIDTH}
+      height={HERO_HEIGHT}
       alt=""
-      widths={[640, 1024, 1600]}
-      sizes="100vw"
       loading="eager"
       fetchpriority="high"
-      class="h-full w-full object-cover opacity-40"
+      class="h-full w-full object-cover object-[58%_32%]"
     />
     <div
-      class="absolute inset-0"
-      style="background:linear-gradient(180deg, rgba(6,6,8,0.62) 0%, rgba(6,6,8,0.86) 55%, #060608 100%)"
+      class="absolute inset-0 bg-gradient-to-b from-void/25 via-void/86 via-40% to-void"
     >
     </div>
     <div
-      class="absolute bottom-[-24%] left-[32%] h-[36rem] w-[36rem] rounded-full opacity-[0.16] blur-[140px]"
-      style="background:radial-gradient(circle at 50% 50%, #E3C08A, transparent 62%)"
+      class="absolute inset-0 bg-gradient-to-r from-void/60 via-void/30 via-70% to-transparent"
+    >
+    </div>
+    <div
+      class="absolute bottom-[-24%] left-[32%] h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle_at_50%_50%,#E3C08A,transparent_62%)] opacity-[0.16] blur-[140px]"
     >
     </div>
   </div>
 
   <div class="wrap">
-    <div class="grid items-end gap-14 lg:grid-cols-[1.35fr_1fr]">
-      <div class="flex flex-col gap-8">
+    <div class="grid items-end gap-8 lg:grid-cols-[1.35fr_1fr] lg:gap-14">
+      <div class="flex flex-col gap-4 sm:gap-7">
         <span class="eyebrow rise">{hero.eyebrow}</span>
 
-        <h1 class="text-mega">
+        <h1 class="text-[2rem] sm:text-mega">
           <span class="rise block" style="--rise-delay:60ms"
             >{hero.titleTop}</span
           >
@@ -57,7 +68,7 @@ const site = getSiteContent(locale);
         </h1>
 
         <p
-          class="rise max-w-xl text-base leading-relaxed text-mute sm:text-lg"
+          class="rise max-w-xl text-[0.9375rem] leading-relaxed text-mute sm:text-lg"
           style="--rise-delay:240ms"
         >
           {hero.lead}
@@ -77,14 +88,16 @@ const site = getSiteContent(locale);
       </div>
 
       <div class="shell rise" style="--rise-delay:360ms">
-        <div class="core flex flex-col divide-y divide-line">
+        <div
+          class="core grid grid-cols-3 divide-x divide-line lg:grid-cols-1 lg:divide-x-0 lg:divide-y"
+        >
           {
             hero.stats.map((stat) => (
-              <div class="flex items-baseline justify-between gap-6 px-6 py-6">
-                <span class="font-display text-3xl tracking-tight text-chalk sm:text-4xl">
+              <div class="flex flex-col gap-1 px-3 py-4 lg:flex-row lg:items-baseline lg:justify-between lg:gap-6 lg:px-6 lg:py-6">
+                <span class="font-display text-xl tracking-tight text-chalk sm:text-2xl lg:text-4xl">
                   {stat.value}
                 </span>
-                <span class="max-w-[11rem] text-right text-xs leading-snug text-mute">
+                <span class="text-[0.6875rem] leading-snug text-mute lg:max-w-[11rem] lg:text-right lg:text-xs">
                   {stat.label}
                 </span>
               </div>
@@ -95,7 +108,7 @@ const site = getSiteContent(locale);
     </div>
 
     <div
-      class="rise mt-20 flex items-center gap-3 text-[0.6875rem] uppercase tracking-[0.22em] text-mute-2"
+      class="rise mt-8 hidden items-center gap-3 text-[0.6875rem] uppercase tracking-[0.22em] text-mute-2 sm:flex"
       style="--rise-delay:420ms"
     >
       <span

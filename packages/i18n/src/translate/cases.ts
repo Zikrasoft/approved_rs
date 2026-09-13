@@ -12,11 +12,18 @@ import { errorMessage } from './errorMessage.ts';
 export interface CaseTranslation {
   title: string;
   body: string;
+  [field: string]: string;
 }
 
 export type CaseOutcome = 'translated' | 'backfilled' | 'skipped';
 
 const CASE_FIELDS = ['title', 'body'] as const;
+
+const FIELD_GUIDANCE: Record<string, string> = {
+  car:
+    'The "car" field holds a vehicle make and model: reproduce it verbatim, ' +
+    'and translate it only when the source is a descriptive phrase rather than a model name.',
+};
 
 export interface CaseTranslatorOptions<L extends string> {
   targetLocales: readonly L[];
@@ -24,6 +31,7 @@ export interface CaseTranslatorOptions<L extends string> {
   businessDescription: string;
   subject: string;
   model?: string;
+  extraFields?: readonly string[];
 }
 
 export function splitFrontmatter(raw: string): {
@@ -35,8 +43,12 @@ export function splitFrontmatter(raw: string): {
   return { frontmatter: match[1], body: match[2] };
 }
 
-export function hashSource(source: CaseTranslation): string {
-  return sha256Hex(`${source.title}\n${source.body}`);
+export function hashSource(
+  source: CaseTranslation,
+  extraFields: readonly string[] = [],
+): string {
+  const extras = extraFields.map((field) => `\n${field}: ${source[field]}`);
+  return sha256Hex(`${source.title}\n${source.body}${extras.join('')}`);
 }
 
 export function createCaseTranslator<L extends string>({
@@ -45,6 +57,7 @@ export function createCaseTranslator<L extends string>({
   businessDescription,
   subject,
   model,
+  extraFields = [],
 }: CaseTranslatorOptions<L>) {
   const names = new Map<string, string>(Object.entries<string>(languageName));
 
@@ -52,7 +65,20 @@ export function createCaseTranslator<L extends string>({
     source: CaseTranslation,
     targetLocale: L,
     apiKey: string,
+    extras: readonly string[] = [],
   ): Promise<CaseTranslation> {
+    const shape = [...CASE_FIELDS, ...extras]
+      .map((field) => `"${field}": string`)
+      .join(', ');
+    const guidance = extras
+      .map((field) => FIELD_GUIDANCE[field])
+      .filter(Boolean)
+      .map((sentence) => ` ${sentence}`)
+      .join('');
+    const extraLines = extras
+      .map((field) => `\n${field}: ${source[field]}`)
+      .join('');
+
     const raw = await callOpenAiJson({
       apiKey,
       model,
@@ -62,15 +88,24 @@ export function createCaseTranslator<L extends string>({
         'Translate the MEANING naturally and idiomatically, the way a native speaker would actually write ' +
         'this case study — never a literal word-for-word translation. Keep markdown formatting (headings, ' +
         'bold, lists) intact. Keep car makes/models, prices, and place names as they would normally appear ' +
-        'in the target language. Respond with a JSON object: {"title": string, "body": string}.',
-      userContent: `Title: ${source.title}\n\nBody:\n${source.body}`,
+        `in the target language.${guidance} Respond with a JSON object: {${shape}}.`,
+      userContent: `Title: ${source.title}${extraLines}\n\nBody:\n${source.body}`,
     });
 
     const parsed = raw as Partial<CaseTranslation>;
     if (!parsed.title?.trim() || !parsed.body?.trim()) {
       throw new Error('translate response missing title/body');
     }
-    const translation = { title: parsed.title, body: parsed.body };
+    const translation: CaseTranslation = {
+      title: parsed.title,
+      body: parsed.body,
+    };
+    for (const field of extras) {
+      if (!parsed[field]?.trim()) {
+        throw new Error(`translate response missing ${field}`);
+      }
+      translation[field] = parsed[field];
+    }
     assertSafeTranslation(source, translation, '');
     return translation;
   }
@@ -85,8 +120,14 @@ export function createCaseTranslator<L extends string>({
     const translationsNode = getOrCreateTranslationsMap(doc, path);
 
     const title = String(doc.get('title'));
+    const extras = extraFields.filter(
+      (field) =>
+        typeof doc.get(field) === 'string' && String(doc.get(field)).trim(),
+    );
     const source: CaseTranslation = { title, body: body.trim() };
-    const currentHash = hashSource(source);
+    for (const field of extras) source[field] = String(doc.get(field));
+
+    const currentHash = hashSource(source, extras);
     const storedHash = doc.get('translatedFrom') as string | undefined;
 
     const action = decideAction({
@@ -94,7 +135,10 @@ export function createCaseTranslator<L extends string>({
       storedHash,
       currentHash,
       hasReal: (locale) =>
-        hasRealTranslation(translationsNode, locale, CASE_FIELDS),
+        hasRealTranslation(translationsNode, locale, [
+          ...CASE_FIELDS,
+          ...extras,
+        ]),
     });
 
     if (action.kind === 'skip') return 'skipped';
@@ -109,7 +153,7 @@ export function createCaseTranslator<L extends string>({
     }
 
     for (const locale of action.locales) {
-      const translation = await translateCase(source, locale, apiKey);
+      const translation = await translateCase(source, locale, apiKey, extras);
       translationsNode.set(locale, translation);
     }
     doc.set('translatedFrom', currentHash);

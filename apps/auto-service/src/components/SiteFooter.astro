@@ -1,17 +1,20 @@
 ---
+import Icon from './Icon.astro';
 import Wordmark from './Wordmark.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getSiteContent } from '@/i18n/content/site';
 import { getServicesContent } from '@/i18n/content/services';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
-import { GARAGE_ADDRESS, PHONE_NUMBER, SITE_NAME } from '@/utils/constants';
-import { CONTACT_LINKS, formatPhone } from '@/utils/contactLinks';
+import { GARAGE_ADDRESS, SHOP_ENABLED, SITE_NAME } from '@/utils/constants';
+import { contactChannels } from '@/utils/contactLinks';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
 const services = getServicesContent(locale);
 const year = new Date().getFullYear();
+
+const channels = contactChannels(site);
 ---
 
 <footer class="mt-20 border-t border-line bg-card">
@@ -52,11 +55,16 @@ const year = new Date().getFullYear();
         class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal"
         >{site.nav.works}</a
       >
-      <a
-        href={PathBuilder.shop(locale)}
-        class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal"
-        >{site.nav.shop}</a
-      >
+      {
+        SHOP_ENABLED && (
+          <a
+            href={PathBuilder.shop(locale)}
+            class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal"
+          >
+            {site.nav.shop}
+          </a>
+        )
+      }
       <a
         href={PathBuilder.contact(locale)}
         class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal"
@@ -75,24 +83,36 @@ const year = new Date().getFullYear();
       >
         {site.footer.contactHeading}
       </span>
-      <a
-        href={CONTACT_LINKS.phone}
-        data-contact-channel="phone"
-        class="spec text-sm font-medium text-ink transition-colors duration-150 hover:text-signal"
-      >
-        {formatPhone(PHONE_NUMBER)}
-      </a>
-      <address class="text-sm not-italic leading-relaxed text-muted">
+      <ul class="flex flex-col">
+        {
+          channels.map((channel) => (
+            <li>
+              <a
+                href={channel.href}
+                data-contact-channel={channel.track}
+                rel="noopener"
+                class="group flex min-h-11 items-center gap-2.5 text-sm text-ink-2 transition-colors duration-150 hover:text-signal"
+              >
+                <Icon
+                  name={channel.icon}
+                  size={16}
+                  class="shrink-0 text-muted transition-colors duration-150 group-hover:text-signal group-focus-visible:text-signal"
+                />
+                <span class="spec">{channel.label}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <address class="mt-1.5 text-sm not-italic leading-relaxed text-muted">
         {GARAGE_ADDRESS.street}<br />{
-          `${GARAGE_ADDRESS.postalCode} ${GARAGE_ADDRESS.city}`
+          `${GARAGE_ADDRESS.district}, ${GARAGE_ADDRESS.city}`
         }
       </address>
-      <span
-        class="spec text-[0.6875rem] uppercase tracking-[0.16em] text-muted"
-      >
-        {site.footer.hoursHeading}
-      </span>
-      <span class="text-sm text-muted">{site.footer.hours}</span>
+      <p class="text-sm leading-relaxed text-muted">
+        <span class="block text-xs text-ink-2">{site.footer.hoursHeading}</span>
+        {site.footer.hours}
+      </p>
     </div>
   </div>
 

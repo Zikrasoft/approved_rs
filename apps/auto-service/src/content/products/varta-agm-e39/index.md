@@ -1,7 +1,7 @@
 ---
 title: Varta Silver Dynamic AGM E39
 brand: Varta
-price: 189
+price: 22090
 capacityAh: 70
 crankingA: 760
 polarity: right

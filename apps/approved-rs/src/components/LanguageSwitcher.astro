@@ -1,7 +1,9 @@
 ---
 import { Check } from '@lucide/astro';
+import { LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
 import { SUPPORTED_LOCALES, getLocale, type Locale } from '@/i18n/config';
 import { FLAGS } from '@/utils/constants';
+import { swapLocale } from '@/utils/paths';
 import Dropdown from './Dropdown.astro';
 
 interface Props {
@@ -15,8 +17,7 @@ interface Props {
 const { variant = 'dropdown' } = Astro.props;
 
 const currentLocale = getLocale(Astro.currentLocale);
-const segments = Astro.url.pathname.split('/').filter(Boolean);
-const rest = segments.slice(1).join('/');
+const pathname = Astro.url.pathname;
 
 const LOCALE_META: Record<Locale, { code: string; native: string }> = {
   ru: { code: 'RU', native: 'Русский' },
@@ -28,61 +29,69 @@ const LOCALE_META: Record<Locale, { code: string; native: string }> = {
 const current = LOCALE_META[currentLocale];
 ---
 
-{
-  variant === 'inline' ? (
-    <div class="lang-switcher-inline grid grid-cols-3 gap-1.5">
-      {SUPPORTED_LOCALES.map((locale) => {
-        const meta = LOCALE_META[locale];
-        const active = locale === currentLocale;
-        return (
-          <a
-            href={`/${locale}/${rest}`}
-            class:list={[
-              'dropdown-option lang-chip justify-center gap-1.5 px-3 py-2 rounded-sm text-sm',
-              { 'dropdown-option-active': active },
-            ]}
-          >
-            <span class="text-sm leading-none">{FLAGS[locale]}</span>
-            <span>{meta.native}</span>
-          </a>
-        );
-      })}
-    </div>
-  ) : (
-    <Dropdown
-      align="right"
-      minWidth="9.5rem"
-      menuRole="listbox"
-      triggerClass="px-2.5 py-1.5"
-    >
-      <Fragment slot="trigger">
-        <span class="text-sm leading-none">{FLAGS[currentLocale]}</span>
-        <span class="text-sm">{current.code}</span>
-      </Fragment>
-      {SUPPORTED_LOCALES.map((locale) => {
-        const meta = LOCALE_META[locale];
-        const active = locale === currentLocale;
-        return (
-          <li role="option" aria-selected={active}>
+<approved-locale-choice>
+  {
+    variant === 'inline' ? (
+      <div class="lang-switcher-inline grid grid-cols-3 gap-1.5">
+        {SUPPORTED_LOCALES.map((locale) => {
+          const meta = LOCALE_META[locale];
+          const active = locale === currentLocale;
+          return (
             <a
-              href={`/${locale}/${rest}`}
+              href={swapLocale(pathname, locale)}
+              {...{ [LOCALE_CHOICE_ATTRIBUTE]: locale }}
               class:list={[
-                'dropdown-option gap-2.5 px-3 py-2 rounded-sm text-sm',
+                'dropdown-option lang-chip justify-center gap-1.5 px-3 py-2 rounded-sm text-sm',
                 { 'dropdown-option-active': active },
               ]}
             >
-              <span class="text-base leading-none">{FLAGS[locale]}</span>
-              <span class="flex-1">{meta.native}</span>
-              {active && <Check size={14} class="text-accent shrink-0" />}
+              <span class="text-sm leading-none">{FLAGS[locale]}</span>
+              <span>{meta.native}</span>
             </a>
-          </li>
-        );
-      })}
-    </Dropdown>
-  )
-}
+          );
+        })}
+      </div>
+    ) : (
+      <Dropdown
+        align="right"
+        minWidth="9.5rem"
+        menuRole="listbox"
+        triggerClass="px-2.5 py-1.5"
+      >
+        <Fragment slot="trigger">
+          <span class="text-sm leading-none">{FLAGS[currentLocale]}</span>
+          <span class="text-sm">{current.code}</span>
+        </Fragment>
+        {SUPPORTED_LOCALES.map((locale) => {
+          const meta = LOCALE_META[locale];
+          const active = locale === currentLocale;
+          return (
+            <li role="option" aria-selected={active}>
+              <a
+                href={swapLocale(pathname, locale)}
+                {...{ [LOCALE_CHOICE_ATTRIBUTE]: locale }}
+                class:list={[
+                  'dropdown-option gap-2.5 px-3 py-2 rounded-sm text-sm',
+                  { 'dropdown-option-active': active },
+                ]}
+              >
+                <span class="text-base leading-none">{FLAGS[locale]}</span>
+                <span class="flex-1">{meta.native}</span>
+                {active && <Check size={14} class="text-accent shrink-0" />}
+              </a>
+            </li>
+          );
+        })}
+      </Dropdown>
+    )
+  }
+</approved-locale-choice>
 
 <style>
+  approved-locale-choice {
+    display: contents;
+  }
+
   /* Inline variant only: .dropdown-option is transparent until hover/active,
      which is fine inside a popover (the trigger already announced "this is
      a menu") but not on its own in a flat row — without a border each
@@ -94,3 +103,9 @@ const current = LOCALE_META[currentLocale];
     border-color: var(--color-accent-border);
   }
 </style>
+
+<script>
+  import { defineLocaleChoice } from '@podbor/site-kit/browser';
+
+  defineLocaleChoice('approved-locale-choice');
+</script>

@@ -1,8 +1,8 @@
 ---
-title: Mersedes-Benz GLS
+title: Mercedes-Benz GLS
 translations:
   en:
-    title: Mersedes-Benz GLS
+    title: Mercedes-Benz GLS
     body: >
       Mercedes-Benz GLS 2026 — Full Satin Paint Protection Film Installation in Belgrade, Serbia
 
@@ -45,7 +45,7 @@ translations:
 
       Mercedes-Benz GLS 2026 — the final result of the complete satin protective wrap is coming soon.
   sr:
-    title: Mersedes-Benz GLS
+    title: Mercedes-Benz GLS
     body: >
       Mercedes-Benz GLS 2026 — kompletno oblepljivanje zaštitnom satenskom folijom u Beogradu
 
@@ -87,7 +87,7 @@ translations:
 
 
       Mercedes-Benz GLS 2026 — uskoro pokazujemo rezultat kompletnog oblepljivanja satenskom zaštitnom folijom.
-car: Mersedes-Benz GLS
+car: Mercedes-Benz GLS
 year: 2026
 servicesApplied:
   - paint-protection-film

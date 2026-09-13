@@ -3,13 +3,15 @@ import { localeFrom } from '@/i18n/currentLocale';
 import { getSiteContent } from '@/i18n/content/site';
 import { getServicesContent } from '@/i18n/content/services';
 import Icon from './Icon.astro';
-import SelectField from './SelectField.astro';
 import { PathBuilder } from '@/utils/paths';
 import {
   SERVICE_SLUGS,
   SHOP_SERVICE,
   type ServiceSlug,
 } from '@/utils/services';
+import { PHONE_COUNTRIES } from '@podbor/lead-crm/phone';
+import { HONEYPOT_FIELD } from '@podbor/lead-crm';
+import { TELEGRAM_ENABLED } from '@/utils/constants';
 
 interface Props {
   service?: ServiceSlug | typeof SHOP_SERVICE;
@@ -29,6 +31,33 @@ const {
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
 const services = getServicesContent(locale);
+
+const DEFAULT_COUNTRY = 'RS';
+const uid = crypto.randomUUID().slice(0, 8);
+
+const flag = (iso: string) =>
+  String.fromCodePoint(...[...iso].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65));
+
+// TODO: with JS off and the Telegram tab picked, the required name="contact" phone
+// input is display:none and blocks submit unfocusably. Solve before TELEGRAM_ENABLED
+// goes true.
+const channels = (
+  [
+    {
+      value: 'phone',
+      icon: 'phone',
+      label: site.form.channelPhone,
+      panel: 'ph',
+    },
+    { value: 'whatsapp', icon: 'whatsapp', label: 'WhatsApp', panel: 'ph' },
+    { value: 'viber', icon: 'viber', label: 'Viber', panel: 'ph' },
+    { value: 'telegram', icon: 'telegram', label: 'Telegram', panel: 'tg' },
+  ] as const
+).filter((channel) => TELEGRAM_ENABLED || channel.value !== 'telegram');
+
+const chip =
+  'flex min-h-11 items-center justify-center gap-2 rounded-control border border-line-field bg-card px-3 text-center text-[0.8125rem] font-medium leading-tight text-ink-2 transition-colors duration-150 peer-hover:border-ink peer-checked:border-signal peer-checked:bg-signal peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal';
+const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
 ---
 
 <form
@@ -41,8 +70,13 @@ const services = getServicesContent(locale);
   <input type="hidden" name="locale" value={locale} />
   <div class="hidden" aria-hidden="true">
     <label>
-      website
-      <input type="text" name="website" tabindex="-1" autocomplete="off" />
+      {HONEYPOT_FIELD}
+      <input
+        type="text"
+        name={HONEYPOT_FIELD}
+        tabindex="-1"
+        autocomplete="off"
+      />
     </label>
   </div>
 
@@ -50,48 +84,30 @@ const services = getServicesContent(locale);
   <input type="hidden" name="visitor_id" data-visitor-id />
 
   <div class={compact ? 'flex flex-col gap-4' : 'grid gap-4 sm:grid-cols-2'}>
-    <label class="block">
-      <span class="field-label">{site.form.nameLabel}</span>
-      <input
-        name="name"
-        type="text"
-        required
-        autocomplete="name"
-        placeholder={site.form.namePlaceholder}
-        class="field"
-      />
-    </label>
-    <label class="block">
-      <span class="field-label">{site.form.contactLabel}</span>
-      <input
-        name="contact"
-        type="tel"
-        required
-        autocomplete="tel"
-        placeholder={site.form.contactPlaceholder}
-        class="field"
-      />
-    </label>
-  </div>
-
-  {fixedService && <input type="hidden" name="service" value={service} />}
-
-  <div class={compact ? 'flex flex-col gap-4' : 'grid gap-4 sm:grid-cols-2'}>
-    {
-      !fixedService && (
-        <SelectField
-          name="service"
-          label={site.form.serviceLabel}
-          placeholder={site.form.servicePlaceholder}
-        >
-          {SERVICE_SLUGS.map((slug) => (
-            <option value={slug} selected={slug === service}>
-              {services[slug].name}
-            </option>
-          ))}
-        </SelectField>
-      )
-    }
+    <div>
+      <label class="block">
+        <span class="field-label">{site.form.nameLabel}</span>
+        <input
+          name="name"
+          type="text"
+          required
+          autocomplete="name"
+          placeholder={site.form.namePlaceholder}
+          aria-describedby={`name-error-${uid}`}
+          class="field"
+          data-name
+        />
+      </label>
+      <p
+        id={`name-error-${uid}`}
+        class={errorText}
+        aria-live="polite"
+        data-error-name
+        hidden
+      >
+        {site.form.requiredError}
+      </p>
+    </div>
     <label class="block">
       <span class="field-label">{site.form.carLabel}</span>
       <input
@@ -103,6 +119,130 @@ const services = getServicesContent(locale);
     </label>
   </div>
 
+  <fieldset class="group m-0 border-0 p-0">
+    <legend class="field-label p-0">{site.form.contactChannelLabel}</legend>
+
+    <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      {
+        channels.map((channel, index) => (
+          <label class="block">
+            <input
+              type="radio"
+              name="contact_channel"
+              value={channel.value}
+              checked={index === 0}
+              class={`peer sr-only ch-${channel.panel}`}
+            />
+            <span class={chip}>
+              <Icon name={channel.icon} size={14} />
+              {channel.label}
+            </span>
+          </label>
+        ))
+      }
+    </div>
+
+    <div class="mt-3 hidden group-has-[.ch-tg:checked]:block">
+      <label class="block">
+        <span class="sr-only">Telegram</span>
+        <input
+          type="text"
+          autocomplete="username"
+          placeholder="@username"
+          aria-describedby={`telegram-error-${uid}`}
+          class="field"
+          data-telegram
+        />
+      </label>
+      <p
+        id={`telegram-error-${uid}`}
+        class={errorText}
+        aria-live="polite"
+        data-error-telegram
+        hidden
+      >
+        {site.form.errorTelegram}
+      </p>
+    </div>
+
+    <div class="mt-3 hidden group-has-[.ch-ph:checked]:block">
+      <div class="flex gap-2">
+        <div class="relative shrink-0">
+          <select
+            aria-label={site.form.countryLabel}
+            class="field spec w-[7.5rem] appearance-none pr-8"
+            data-country
+          >
+            {
+              PHONE_COUNTRIES.map((country) => (
+                <option
+                  value={country.iso}
+                  data-dial={country.dial}
+                  selected={country.iso === DEFAULT_COUNTRY}
+                >
+                  {flag(country.iso)} +{country.dial}
+                </option>
+              ))
+            }
+          </select>
+          <Icon
+            name="chevronDown"
+            size={12}
+            class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted"
+          />
+        </div>
+        <label class="min-w-0 flex-1">
+          <span class="sr-only">{site.form.contactLabel}</span>
+          <input
+            name="contact"
+            type="tel"
+            inputmode="tel"
+            required
+            autocomplete="tel-national"
+            placeholder={site.form.contactPlaceholder}
+            aria-describedby={`phone-error-${uid}`}
+            class="field"
+            data-phone
+          />
+        </label>
+      </div>
+      <p
+        id={`phone-error-${uid}`}
+        class={errorText}
+        aria-live="polite"
+        data-error-phone
+        hidden
+      >
+        {site.form.errorPhone}
+      </p>
+    </div>
+  </fieldset>
+
+  {fixedService && <input type="hidden" name="service" value={service} />}
+
+  {
+    !fixedService && (
+      <fieldset class="m-0 border-0 p-0">
+        <legend class="field-label p-0">{site.form.serviceLabel}</legend>
+        <div class="flex flex-wrap gap-2">
+          {SERVICE_SLUGS.map((slug) => (
+            <label class="block">
+              <input
+                type="checkbox"
+                name="service"
+                value={slug}
+                checked={slug === service}
+                class="peer sr-only"
+              />
+              <span class={chip}>{services[slug].name}</span>
+            </label>
+          ))}
+        </div>
+        <p class="mt-2 text-xs text-muted">{site.form.servicePlaceholder}</p>
+      </fieldset>
+    )
+  }
+
   <label class="block">
     <span class="field-label">{site.form.commentLabel}</span>
     <textarea
@@ -113,40 +253,174 @@ const services = getServicesContent(locale);
     >
   </label>
 
+  <div>
+    <label class="flex min-h-11 items-start gap-3 py-1.5">
+      <input
+        type="checkbox"
+        name="consent"
+        value="1"
+        required
+        aria-describedby={`consent-error-${uid}`}
+        class="peer sr-only"
+        data-consent
+      />
+      <span
+        class="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-[3px] border border-line-field bg-card text-white transition-colors duration-150 peer-checked:border-signal peer-checked:bg-signal peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100"
+      >
+        <Icon name="check" size={10} />
+      </span>
+      <span class="text-xs leading-relaxed text-muted">
+        {site.form.privacyNote}{' '}
+        <a
+          href={PathBuilder.privacy(locale)}
+          target="_blank"
+          class="underline underline-offset-2 transition-colors duration-150 hover:text-signal"
+          >{site.form.privacyLinkText}</a
+        >.
+      </span>
+    </label>
+    <p
+      id={`consent-error-${uid}`}
+      class={errorText}
+      aria-live="polite"
+      data-error-consent
+      hidden
+    >
+      {site.form.errorConsent}
+    </p>
+  </div>
+
   <button type="submit" class="btn btn-primary mt-1 w-full sm:w-auto">
     <span data-submit-label>{site.form.submit}</span>
     <Icon name="arrowRight" />
   </button>
-
-  <p class="text-xs leading-relaxed text-muted">
-    {site.form.privacyNote}{' '}
-    <a
-      href={PathBuilder.privacy(locale)}
-      class="underline underline-offset-2 transition-colors duration-150 hover:text-signal"
-      >{site.form.privacyLinkText}</a
-    >.
-  </p>
 </form>
 
 <script>
   import { getOrCreateVisitorId } from '@podbor/site-kit/browser';
+  import { composeE164 } from '@podbor/lead-crm/compose-e164';
+  import type { CountryCode } from 'libphonenumber-js/min';
+  import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
+
+  type PhoneKit = {
+    parse: typeof import('libphonenumber-js/min').parsePhoneNumberFromString;
+    isValidContact: typeof import('@podbor/lead-crm/phone').isValidContact;
+  };
+
+  let kit: PhoneKit | null = null;
+  let unavailable = false;
+  let loading: Promise<void> | null = null;
+
+  function loadPhoneKit() {
+    loading ??= Promise.all([
+      import('libphonenumber-js/min'),
+      import('@podbor/lead-crm/phone'),
+    ])
+      .then(([phone, crm]) => {
+        kit = {
+          parse: phone.parsePhoneNumberFromString,
+          isValidContact: crm.isValidContact,
+        };
+      })
+      .catch(() => {
+        unavailable = true;
+      });
+    return loading;
+  }
 
   document
     .querySelectorAll<HTMLFormElement>('[data-lead-form]')
-    .forEach((form) => {
-      const source = form.querySelector<HTMLInputElement>('[data-source-url]');
-      const visitor = form.querySelector<HTMLInputElement>('[data-visitor-id]');
-      if (source) source.value = location.href;
-      if (visitor) visitor.value = getOrCreateVisitorId();
+    .forEach(initLeadForm);
 
-      form.addEventListener('submit', () => {
-        const button = form.querySelector<HTMLButtonElement>(
-          'button[type="submit"]',
-        );
-        const labelEl = form.querySelector<HTMLElement>('[data-submit-label]');
-        const submitting = form.dataset.submittingLabel;
-        if (button) button.disabled = true;
-        if (labelEl && submitting) labelEl.textContent = submitting;
-      });
+  function setInvalid(
+    error: HTMLElement,
+    field: HTMLElement,
+    invalid: boolean,
+  ) {
+    error.hidden = !invalid;
+    if (invalid) field.setAttribute('aria-invalid', 'true');
+    else field.removeAttribute('aria-invalid');
+  }
+
+  function initLeadForm(form: HTMLFormElement) {
+    const pick = <T extends HTMLElement>(selector: string) =>
+      form.querySelector<T>(selector)!;
+
+    form.noValidate = true;
+    pick<HTMLInputElement>('[data-source-url]').value = location.href;
+    pick<HTMLInputElement>('[data-visitor-id]').value = getOrCreateVisitorId();
+
+    const name = pick<HTMLInputElement>('[data-name]');
+    const telegram = pick<HTMLInputElement>('[data-telegram]');
+    const country = pick<HTMLSelectElement>('[data-country]');
+    const phone = pick<HTMLInputElement>('[data-phone]');
+    const consent = pick<HTMLInputElement>('[data-consent]');
+
+    const fields: Record<string, [HTMLElement, HTMLElement]> = {
+      name: [pick('[data-error-name]'), name],
+      telegram: [pick('[data-error-telegram]'), telegram],
+      phone: [pick('[data-error-phone]'), phone],
+      consent: [pick('[data-error-consent]'), consent],
+    };
+
+    let awaitingKit = false;
+
+    form.addEventListener('focusin', loadPhoneKit, { once: true });
+    form.addEventListener('input', () => {
+      Object.values(fields).forEach(([error, field]) =>
+        setInvalid(error, field, false),
+      );
     });
+
+    form.addEventListener('submit', (event) => {
+      if (!kit && !unavailable) {
+        event.preventDefault();
+        if (awaitingKit) return;
+        awaitingKit = true;
+        loadPhoneKit().then(() => {
+          awaitingKit = false;
+          form.requestSubmit();
+        });
+        return;
+      }
+
+      const channel = pick<HTMLInputElement>('[name="contact_channel"]:checked')
+        .value as TrackedContactChannel;
+      const viaTelegram = channel === 'telegram';
+      const input = viaTelegram ? telegram : phone;
+      const typed = input.value.trim();
+      const dial = country.selectedOptions[0]?.dataset.dial ?? '';
+      const value = viaTelegram
+        ? typed.replace(/^@?/, '@')
+        : (kit?.parse(typed, country.value as CountryCode)?.number ??
+          composeE164(typed, dial));
+
+      const checks: [HTMLElement, HTMLElement, boolean][] = [
+        [...fields.name, name.value.trim().length === 0],
+        [
+          ...(viaTelegram ? fields.telegram : fields.phone),
+          typed.length === 0 || (!!kit && !kit.isValidContact(value, channel)),
+        ],
+        [...fields.consent, !consent.checked],
+      ];
+      checks.forEach(([error, field, invalid]) =>
+        setInvalid(error, field, invalid),
+      );
+
+      const firstInvalid = checks.find(([, , invalid]) => invalid);
+      if (firstInvalid) {
+        event.preventDefault();
+        firstInvalid[1].focus();
+        return;
+      }
+
+      phone.value = value;
+
+      const button = pick<HTMLButtonElement>('button[type="submit"]');
+      button.disabled = true;
+      if (form.dataset.submittingLabel) {
+        pick('[data-submit-label]').textContent = form.dataset.submittingLabel;
+      }
+    });
+  }
 </script>

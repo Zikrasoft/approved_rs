@@ -45,7 +45,6 @@ const serviceSchema = {
 };
 
 const specs = [
-  { label: services.specsPriceLabel, value: service.priceFrom },
   { label: services.specsDurationLabel, value: service.duration },
   { label: services.specsWarrantyLabel, value: service.warranty },
 ];
@@ -67,7 +66,7 @@ const specs = [
   />
 
   <section class="wrap mt-12">
-    <div class="grid gap-4 sm:grid-cols-3">
+    <div class="grid gap-4 sm:grid-cols-2">
       {
         specs.map((spec, i) => (
           <div class="shell" data-reveal data-reveal-delay={i * 80}>

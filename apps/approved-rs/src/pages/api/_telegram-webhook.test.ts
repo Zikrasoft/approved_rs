@@ -125,6 +125,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     name: 'Иван',
     contact: '@ivan',
     service: 'vehicle-sourcing',
+    services: ['vehicle-sourcing'],
     locale: 'ru',
     status: 'in_progress',
     dealAmount: null,

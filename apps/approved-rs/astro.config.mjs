@@ -17,7 +17,7 @@ export default defineConfig({
   adapter: vercel(),
   i18n: {
     locales: [...localeConfig.locales],
-    defaultLocale: localeConfig.defaultLocale,
+    defaultLocale: localeConfig.primaryLocale,
     routing: 'manual',
   },
   integrations: [
@@ -25,7 +25,7 @@ export default defineConfig({
     keystatic(),
     sitemap({
       i18n: {
-        defaultLocale: localeConfig.defaultLocale,
+        defaultLocale: localeConfig.primaryLocale,
         locales: BCP47_BY_LOCALE,
       },
       // Internal admin tool (see pages/admin/case-photos.astro), not a public page.

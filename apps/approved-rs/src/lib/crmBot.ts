@@ -6,8 +6,8 @@ import {
   createTelegramClient,
   parseIds,
 } from '@podbor/lead-crm';
+import { serviceLabel } from '@podbor/brands';
 import type { TrackedContactChannel } from '@/utils/contactChannel';
-import { SERVICE_LABELS } from '@/utils/labels';
 import { BRAND, leadStore } from './crm';
 
 function requireEnv(name: string): string {
@@ -16,15 +16,13 @@ function requireEnv(name: string): string {
   return value;
 }
 
-const SERVICE_LABEL_BY_SLUG = new Map(Object.entries(SERVICE_LABELS));
-
 export const OWNER_IDS = parseIds(process.env.TELEGRAM_OWNER_ID);
 export const ADMIN_IDS = parseIds(process.env.TELEGRAM_ADMIN_ID);
 
 export const client = createTelegramClient(requireEnv('TELEGRAM_BOT_TOKEN'));
 
 export const formatter = createFormatter({
-  serviceLabel: (slug) => SERVICE_LABEL_BY_SLUG.get(slug) ?? slug,
+  serviceLabel,
   botUsername: requireEnv('TELEGRAM_BOT_USERNAME'),
   contactChannelLabels: {
     telegram: 'Telegram',

@@ -1,26 +1,28 @@
 ---
 import Icon from './Icon.astro';
 import Wordmark from './Wordmark.astro';
+import CartButton from './CartButton.astro';
 import { SUPPORTED_LOCALES, LOCALE_NAME } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getSiteContent } from '@/i18n/content/site';
-import { getShopContent } from '@/i18n/content/shop';
 import { PathBuilder, swapLocale } from '@/utils/paths';
-import { CONTACT_LINKS, formatPhone } from '@/utils/contactLinks';
-import { PHONE_NUMBER } from '@/utils/constants';
+import { isActiveNavPath, LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
+import { CONTACT_LINKS } from '@/utils/contactLinks';
+import { SHOP_ENABLED } from '@/utils/constants';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
-const shop = getShopContent(locale);
 const pathname = Astro.url.pathname;
 
 const links = [
   { href: PathBuilder.services(locale), label: site.nav.services },
   { href: PathBuilder.works(locale), label: site.nav.works },
-  { href: PathBuilder.shop(locale), label: site.nav.shop },
+  ...(SHOP_ENABLED
+    ? [{ href: PathBuilder.shop(locale), label: site.nav.shop }]
+    : []),
   { href: `${PathBuilder.home(locale)}#process`, label: site.nav.process },
   { href: PathBuilder.contact(locale), label: site.nav.contact },
-];
+].map((link) => ({ ...link, current: isActiveNavPath(pathname, link.href) }));
 ---
 
 <header
@@ -43,7 +45,13 @@ const links = [
         links.map((link) => (
           <a
             href={link.href}
-            class="text-sm font-medium text-ink-2 transition-colors duration-150 hover:text-signal"
+            aria-current={link.current ? 'page' : undefined}
+            class:list={[
+              'relative text-sm font-medium transition-colors duration-150',
+              link.current
+                ? 'text-ink after:absolute after:inset-x-0 after:-bottom-1.5 after:h-0.5 after:bg-signal'
+                : 'text-muted hover:text-ink',
+            ]}
           >
             {link.label}
           </a>
@@ -52,16 +60,17 @@ const links = [
     </nav>
 
     <div class="flex items-center gap-2">
-      <div class="hidden items-center gap-1 lg:flex">
+      <carlab-lang class="hidden items-center gap-1 lg:flex">
         {
           SUPPORTED_LOCALES.map((code) => (
             <a
               href={swapLocale(pathname, code)}
               hreflang={code}
+              {...{ [LOCALE_CHOICE_ATTRIBUTE]: code }}
               title={LOCALE_NAME[code]}
               aria-current={code === locale ? 'true' : undefined}
               class:list={[
-                'spec rounded px-2 py-1 text-[0.6875rem] uppercase tracking-widest transition-colors duration-150',
+                'spec rounded-full px-2.5 py-1 text-[0.6875rem] uppercase tracking-widest transition-colors duration-150',
                 code === locale
                   ? 'bg-shade text-ink'
                   : 'text-muted hover:text-ink',
@@ -71,20 +80,9 @@ const links = [
             </a>
           ))
         }
-      </div>
+      </carlab-lang>
 
-      <a
-        href={PathBuilder.cart(locale)}
-        class="relative flex h-10 items-center gap-2 rounded-block border border-line-strong px-3 text-sm font-medium text-ink transition-colors duration-150 hover:border-ink"
-        aria-label={shop.cart.heading}
-      >
-        <Icon name="cart" />
-        <span
-          class="spec hidden text-xs tabular-nums"
-          data-cart-count
-          data-cart-label={shop.cart.badgeLabel}>0</span
-        >
-      </a>
+      {SHOP_ENABLED && <CartButton />}
 
       <a
         href={CONTACT_LINKS.phone}
@@ -92,7 +90,7 @@ const links = [
         class="btn btn-secondary hidden h-10 py-0 lg:inline-flex"
       >
         <Icon name="phone" />
-        <span class="spec text-xs">{formatPhone(PHONE_NUMBER)}</span>
+        <span class="spec text-xs">{site.header.phoneLabel}</span>
       </a>
 
       <button
@@ -109,7 +107,7 @@ const links = [
         aria-expanded="false"
         aria-controls="site-menu"
         aria-label={site.header.menuOpenLabel}
-        class="flex h-10 w-10 items-center justify-center rounded-block border border-line-strong text-ink md:hidden"
+        class="flex h-10 w-10 items-center justify-center rounded-control border border-line-strong text-ink md:hidden"
       >
         <span class="relative block h-3 w-4" aria-hidden="true">
           <span
@@ -136,21 +134,28 @@ const links = [
         links.map((link) => (
           <a
             href={link.href}
-            class="border-b border-line py-3.5 text-base font-medium text-ink last:border-b-0"
+            aria-current={link.current ? 'page' : undefined}
+            class:list={[
+              'relative border-b border-line py-3.5 text-base font-medium last:border-b-0',
+              link.current
+                ? 'text-ink after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:bg-signal'
+                : 'text-muted',
+            ]}
           >
             {link.label}
           </a>
         ))
       }
-      <div class="flex items-center gap-2 py-3">
+      <carlab-lang class="flex items-center gap-2 py-3">
         <span class="text-xs text-muted">{site.header.languageLabel}</span>
         {
           SUPPORTED_LOCALES.map((code) => (
             <a
               href={swapLocale(pathname, code)}
               hreflang={code}
+              {...{ [LOCALE_CHOICE_ATTRIBUTE]: code }}
               class:list={[
-                'spec rounded px-2.5 py-1 text-xs uppercase tracking-widest',
+                'spec rounded-full px-3 py-1 text-xs uppercase tracking-widest',
                 code === locale
                   ? 'bg-shade text-ink'
                   : 'text-muted hover:text-ink',
@@ -160,12 +165,16 @@ const links = [
             </a>
           ))
         }
-      </div>
+      </carlab-lang>
     </div>
   </nav>
 </header>
 
 <script>
+  import { defineLocaleChoice } from '@podbor/site-kit/browser';
+
+  defineLocaleChoice('carlab-lang');
+
   const toggle =
     document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
   const menu = document.querySelector<HTMLElement>('[data-menu]');
@@ -203,22 +212,4 @@ const links = [
     .addEventListener('change', (event) => {
       if (event.matches) setOpen(false);
     });
-</script>
-
-<script>
-  import { readCart, cartCount, onCartChange } from '@/utils/cart';
-
-  const badge = document.querySelector<HTMLElement>('[data-cart-count]');
-  const render = () => {
-    if (!badge) return;
-    const count = cartCount(readCart());
-    badge.textContent = String(count);
-    badge.classList.toggle('hidden', count === 0);
-    badge.parentElement?.setAttribute(
-      'aria-label',
-      `${badge.dataset.cartLabel ?? ''}: ${count}`,
-    );
-  };
-  render();
-  onCartChange(render);
 </script>

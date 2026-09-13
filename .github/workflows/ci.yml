@@ -56,6 +56,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          pnpm exec prettier --write apps/*/src/content
           git add apps/*/src/content
           if git diff --cached --quiet; then
             echo "sha=$GITHUB_SHA" >> "$GITHUB_OUTPUT"

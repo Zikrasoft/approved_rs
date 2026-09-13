@@ -11,7 +11,7 @@ export default config({
     : { kind: 'local' },
 
   ui: {
-    brand: { name: 'PRIZMA' },
+    brand: { name: 'Details' },
   },
 
   collections: {
@@ -28,6 +28,8 @@ export default config({
         content: fields.markdoc({ label: 'Текст (RU)', extension: 'md' }),
         car: fields.text({
           label: 'Автомобиль',
+          description:
+            'Марка и модель — «BMW X5». Если работа не про конкретную машину, короткая категория: «Мотоциклы и квадроциклы».',
           validation: { isRequired: true },
         }),
         year: fields.integer({ label: 'Год' }),

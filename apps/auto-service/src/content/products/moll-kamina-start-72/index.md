@@ -1,7 +1,7 @@
 ---
 title: Moll Kamina Start 72
 brand: Moll
-price: 118
+price: 13790
 capacityAh: 72
 crankingA: 720
 polarity: right

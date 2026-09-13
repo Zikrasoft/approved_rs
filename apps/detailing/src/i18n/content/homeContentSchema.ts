@@ -39,8 +39,19 @@ export const homeContentSchema = z
       ),
     }),
     materials: sectionHeadSchema.extend({
-      brands: z.array(z.string()),
+      brands: z.array(
+        z
+          .object({
+            name: z.string(),
+            purpose: z.string(),
+          })
+          .strict(),
+      ),
     }),
+    // TODO: 2026-09-13 — prices pulled from render ("убрать пока", not "навсегда").
+    // Kept on purpose until that decision is final: home.prices here,
+    // PriceCards.astro, nav.prices, services.priceFrom/specsPriceLabel.
+    // Delete all four together if prices are still unrendered by 2026-12-01.
     prices: sectionHeadSchema.extend({
       note: z.string(),
       plans: z.array(

@@ -12,9 +12,10 @@ import { getSiteContent } from '@/i18n/content/site';
 import { getHomeContent } from '@/i18n/content/home';
 import { localePaths, PathBuilder } from '@/utils/paths';
 import { buildFitmentIndex, publishedProducts } from '@/utils/products';
+import { SHOP_ENABLED } from '@/utils/constants';
 
 export function getStaticPaths() {
-  return localePaths();
+  return SHOP_ENABLED ? localePaths() : [];
 }
 
 const locale = localeFrom(Astro.url.pathname);

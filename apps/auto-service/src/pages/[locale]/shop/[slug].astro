@@ -17,14 +17,10 @@ import {
   publishedProducts,
 } from '@/utils/products';
 import { safeMarkdown } from '@podbor/site-kit';
-import {
-  CURRENCY,
-  CURRENCY_SYMBOL,
-  SITE_NAME,
-  SITE_URL,
-} from '@/utils/constants';
+import { CURRENCY, SHOP_ENABLED, SITE_NAME, SITE_URL } from '@/utils/constants';
 
 export async function getStaticPaths() {
+  if (!SHOP_ENABLED) return [];
   const products = publishedProducts(await getCollection('products'));
   return withLocales(
     products.map((product) => ({
@@ -109,13 +105,13 @@ const specs = [
 
     <div class="flex flex-col gap-5">
       <div class="flex items-center gap-3">
-        <span class="spec text-3xl font-semibold text-ink">
+        <span class="spec text-3xl font-medium text-ink">
           {product.data.price}
-          {CURRENCY_SYMBOL}
+          {CURRENCY}
         </span>
         <span
           class:list={[
-            'spec rounded px-2 py-1 text-xs',
+            'spec rounded-full px-2.5 py-1 text-xs',
             product.data.inStock ? 'bg-go/10 text-go' : 'bg-shade text-muted',
           ]}
         >
@@ -155,7 +151,7 @@ const specs = [
             <h2 class="text-sm font-semibold text-ink">{shop.fitsLabel}</h2>
             <ul class="flex flex-wrap gap-2">
               {product.data.fitment.map((entry) => (
-                <li class="spec rounded border border-line bg-card px-2.5 py-1 text-xs text-ink-2">
+                <li class="spec rounded-full border border-line bg-card px-3 py-1 text-xs text-ink-2">
                   {`${entry.make} ${entry.model} ${entry.yearFrom}–${entry.yearTo}`}
                 </li>
               ))}

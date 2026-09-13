@@ -9,7 +9,7 @@ type Handler = (context: unknown, next: () => unknown) => unknown;
 function makeContext(url: string, acceptLanguage = '', cookie?: string) {
   const set = vi.fn();
   return {
-    url: new URL(url, 'https://prizma.rs'),
+    url: new URL(url, 'https://details.rs'),
     request: {
       headers: {
         get: (name: string) =>
@@ -65,15 +65,17 @@ describe('onRequest', () => {
     expect(context.redirect).not.toHaveBeenCalled();
   });
 
-  it('continues to a localized page and remembers the locale in a cookie', () => {
+  it('continues to a localized page without recording it as a language choice', () => {
     const context = makeContext('/sr/services/');
     const next = vi.fn(() => 'next');
     expect(run(context, next)).toBe('next');
-    expect(context.cookies.set).toHaveBeenCalledWith(
-      'lang',
-      'sr',
-      expect.objectContaining({ path: '/' }),
-    );
+    expect(context.cookies.set).not.toHaveBeenCalled();
+  });
+
+  it('leaves the root redirect free to re-detect instead of pinning the guess', () => {
+    const context = makeContext('/', 'en-GB,en;q=0.9');
+    run(context);
+    expect(context.cookies.set).not.toHaveBeenCalled();
   });
 
   it('redirects the bare root to the detected locale rather than rewriting to a prerendered page', () => {
@@ -88,10 +90,10 @@ describe('onRequest', () => {
     expect(context.redirect).toHaveBeenCalledWith('/sr/', 302);
   });
 
-  it('falls back to the default locale at the root for an unserved language', () => {
+  it('falls back to the primary locale at the root for an unserved language', () => {
     const context = makeContext('/', 'zh-CN,zh;q=0.9');
     run(context);
-    expect(context.redirect).toHaveBeenCalledWith('/ru/', 302);
+    expect(context.redirect).toHaveBeenCalledWith('/sr/', 302);
   });
 
   it('keeps the query string when redirecting the root', () => {
@@ -113,7 +115,7 @@ describe('onRequest', () => {
     const context = makeContext('/anything/ru/');
     run(context);
     expect(context.cookies.set).not.toHaveBeenCalled();
-    expect(context.redirect).toHaveBeenCalledWith('/ru/anything/ru/', 302);
+    expect(context.redirect).toHaveBeenCalledWith('/sr/anything/ru/', 302);
   });
 
   it('does not double the locale prefix on an already-prefixed path', () => {

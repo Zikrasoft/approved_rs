@@ -1,4 +1,4 @@
-indexMetaTitle: Услуги автосервиса в Белграде — AUTOHUB
+indexMetaTitle: Услуги автосервиса в Белграде — CarLab
 indexMetaDescription: Диагностика, плановое ТО, тормоза и подвеска, двигатель и коробка, кузовной ремонт после ДТП, проверка перед покупкой. Цены, сроки и гарантия по каждой услуге.
 indexEyebrow: Услуги
 indexHeading: Всё, что нужно машине, в одном сервисе
@@ -9,7 +9,7 @@ specsWarrantyLabel: Гарантия
 diagnostics:
   name: Компьютерная диагностика
   short: Находим причину, а не просто считываем код ошибки.
-  metaTitle: Компьютерная диагностика автомобиля в Белграде — AUTOHUB
+  metaTitle: Компьютерная диагностика автомобиля в Белграде — CarLab
   metaDescription: Диагностика двигателя, подвески и электрики в Белграде. Считывание ошибок бесплатно, углублённая диагностика по согласованной цене. Показываем причину на машине.
   heroEyebrow: Диагностика
   heroTitle: Код ошибки — это симптом, а не диагноз
@@ -42,7 +42,7 @@ diagnostics:
 servicing:
   name: Плановое ТО
   short: Масло, фильтры, жидкости и осмотр — по регламенту, а не по наитию.
-  metaTitle: Плановое ТО и замена масла в Белграде — AUTOHUB
+  metaTitle: Плановое ТО и замена масла в Белграде — CarLab
   metaDescription: 'Техническое обслуживание автомобиля в Белграде: масло, фильтры, свечи, тормозная жидкость, антифриз. По регламенту производителя, с записью в сервисную карту.'
   heroEyebrow: Обслуживание
   heroTitle: Самая дешёвая починка — та, которой не случилось
@@ -74,7 +74,7 @@ servicing:
 brakes-suspension:
   name: Тормоза и подвеска
   short: Всё, что отвечает за то, остановится машина или нет.
-  metaTitle: Ремонт тормозов и подвески в Белграде — AUTOHUB
+  metaTitle: Ремонт тормозов и подвески в Белграде — CarLab
   metaDescription: Замена колодок и дисков, ремонт суппортов, стойки, рычаги, сайлентблоки и развал-схождение в Белграде. Замеры в миллиметрах, смета до работ, гарантия 12 месяцев.
   heroEyebrow: Ходовая
   heroTitle: Единственная система, отказ которой нельзя переждать
@@ -106,7 +106,7 @@ brakes-suspension:
 engine-gearbox:
   name: Двигатель и коробка
   short: От замены прокладки до ремонта с разбором — с понятной сметой.
-  metaTitle: Ремонт двигателя и коробки передач в Белграде — AUTOHUB
+  metaTitle: Ремонт двигателя и коробки передач в Белграде — CarLab
   metaDescription: 'Ремонт двигателя и трансмиссии в Белграде: ГРМ, прокладки, сцепление, замена масла в АКПП. Диагностика до разбора, смета до работ, гарантия 12 месяцев.'
   heroEyebrow: Силовой агрегат
   heroTitle: Самый дорогой ремонт — тот, который начали не с того конца
@@ -138,7 +138,7 @@ engine-gearbox:
 bodywork-painting:
   name: Кузов и покраска
   short: Восстановление после ДТП, правка геометрии и покраска с подбором цвета.
-  metaTitle: Кузовной ремонт и покраска после ДТП в Белграде — AUTOHUB
+  metaTitle: Кузовной ремонт и покраска после ДТП в Белграде — CarLab
   metaDescription: 'Кузовной ремонт в Белграде: стапель, замер геометрии, рихтовка, покраска с компьютерным подбором цвета. Работаем со страховыми, помогаем с документами.'
   heroEyebrow: После ДТП
   heroTitle: Чтобы машина не выглядела «после удара»
@@ -170,7 +170,7 @@ bodywork-painting:
 pre-purchase-inspection:
   name: Проверка перед покупкой
   short: Час в сервисе вместо года сожалений о покупке.
-  metaTitle: Проверка автомобиля перед покупкой в Белграде — AUTOHUB
+  metaTitle: Проверка автомобиля перед покупкой в Белграде — CarLab
   metaDescription: 'Техническая проверка перед покупкой в Белграде: толщиномер, подъёмник, диагностика ошибок, компрессия. Письменное заключение и торг в вашу пользу.'
   heroEyebrow: Перед сделкой
   heroTitle: Продавец показывает машину. Мы показываем её историю.
@@ -201,7 +201,7 @@ pre-purchase-inspection:
   honest: Мы честно скажем, что видим, но проверка не заменяет гарантию. Скрытый дефект, который не проявляется ни на подъёмнике, ни на диагностике, может всплыть позже — это ограничение метода, а не оговорка мелким шрифтом.
 translations:
   sr:
-    indexMetaTitle: Usluge auto servisa u Beogradu — AUTOHUB
+    indexMetaTitle: Usluge auto servisa u Beogradu — CarLab
     indexMetaDescription: Dijagnostika, redovni servis, kočnice i vešanje, motor i menjač, limarija posle udesa, pregled pre kupovine. Cene, rokovi i garancija za svaku uslugu.
     indexEyebrow: Usluge
     indexHeading: Sve što autu treba, na jednom mestu
@@ -212,7 +212,7 @@ translations:
     diagnostics:
       name: Kompjuterska dijagnostika
       short: Tražimo uzrok, ne čitamo samo kod greške.
-      metaTitle: Kompjuterska dijagnostika automobila u Beogradu — AUTOHUB
+      metaTitle: Kompjuterska dijagnostika automobila u Beogradu — CarLab
       metaDescription: Dijagnostika motora, vešanja i elektrike u Beogradu. Očitavanje grešaka besplatno, dubinska dijagnostika po dogovorenoj ceni. Uzrok pokazujemo na autu.
       heroEyebrow: Dijagnostika
       heroTitle: Kod greške je simptom, a ne dijagnoza
@@ -245,7 +245,7 @@ translations:
     servicing:
       name: Redovni servis
       short: Ulje, filteri, tečnosti i pregled — po propisu, a ne po osećaju.
-      metaTitle: Redovni servis i zamena ulja u Beogradu — AUTOHUB
+      metaTitle: Redovni servis i zamena ulja u Beogradu — CarLab
       metaDescription: 'Održavanje automobila u Beogradu: ulje, filteri, svećice, kočiona tečnost, antifriz. Po propisu proizvođača, uz upis u servisnu knjigu.'
       heroEyebrow: Održavanje
       heroTitle: Najjeftinija popravka je ona koja se nije desila
@@ -277,7 +277,7 @@ translations:
     brakes-suspension:
       name: Kočnice i vešanje
       short: Sve od čega zavisi da li će se auto zaustaviti.
-      metaTitle: Popravka kočnica i vešanja u Beogradu — AUTOHUB
+      metaTitle: Popravka kočnica i vešanja u Beogradu — CarLab
       metaDescription: Zamena pločica i diskova, popravka čeljusti, amortizeri, ramena, silen blokovi i geometrija u Beogradu. Merenja u milimetrima, predračun pre radova, garancija 12 meseci.
       heroEyebrow: Trap
       heroTitle: Jedini sistem čiji otkaz ne možete da odložite
@@ -309,7 +309,7 @@ translations:
     engine-gearbox:
       name: Motor i menjač
       short: Od zamene dihtunga do popravke sa rasklapanjem — uz jasan predračun.
-      metaTitle: Popravka motora i menjača u Beogradu — AUTOHUB
+      metaTitle: Popravka motora i menjača u Beogradu — CarLab
       metaDescription: 'Popravka motora i transmisije u Beogradu: zupčasti kaiš, dihtunzi, kvačilo, zamena ulja u automatiku. Dijagnostika pre rasklapanja, predračun pre radova, garancija 12 meseci.'
       heroEyebrow: Pogonski sklop
       heroTitle: Najskuplja popravka je ona koja je krenula sa pogrešnog kraja
@@ -341,7 +341,7 @@ translations:
     bodywork-painting:
       name: Limarija i farbanje
       short: Popravka posle udesa, ispravljanje geometrije i farbanje uz nijansiranje.
-      metaTitle: Limarija i farbanje posle udesa u Beogradu — AUTOHUB
+      metaTitle: Limarija i farbanje posle udesa u Beogradu — CarLab
       metaDescription: 'Limarija u Beogradu: ravnalica, merenje geometrije, ispravljanje, farbanje uz kompjutersko nijansiranje. Radimo sa osiguranjem i pomažemo oko papira.'
       heroEyebrow: Posle udesa
       heroTitle: Da auto ne izgleda „posle udara“
@@ -373,7 +373,7 @@ translations:
     pre-purchase-inspection:
       name: Pregled pre kupovine
       short: Sat vremena u servisu umesto godine kajanja zbog kupovine.
-      metaTitle: Pregled automobila pre kupovine u Beogradu — AUTOHUB
+      metaTitle: Pregled automobila pre kupovine u Beogradu — CarLab
       metaDescription: 'Tehnički pregled pre kupovine u Beogradu: merač debljine laka, dizalica, očitavanje grešaka, kompresija. Pisani nalaz i cenkanje u vašu korist.'
       heroEyebrow: Pre kupovine
       heroTitle: Prodavac pokazuje auto. Mi pokazujemo njegovu istoriju.
@@ -403,7 +403,7 @@ translations:
       honestHeading: Šta pregled ne daje
       honest: Reći ćemo iskreno šta vidimo, ali pregled ne zamenjuje garanciju. Skriveni kvar koji se ne javlja ni na dizalici ni na dijagnostici može da ispliva kasnije — to je ograničenje metode, a ne sitna slova.
   en:
-    indexMetaTitle: Car service in Belgrade — services — AUTOHUB
+    indexMetaTitle: Car service in Belgrade — services — CarLab
     indexMetaDescription: Diagnostics, scheduled servicing, brakes and suspension, engine and gearbox, accident repair, pre-purchase inspection. Prices, timelines and warranty for each.
     indexEyebrow: Services
     indexHeading: Everything the car needs, in one workshop
@@ -414,7 +414,7 @@ translations:
     diagnostics:
       name: Computer diagnostics
       short: We find the cause, not just read out a fault code.
-      metaTitle: Car diagnostics in Belgrade — AUTOHUB
+      metaTitle: Car diagnostics in Belgrade — CarLab
       metaDescription: Engine, suspension and electrical diagnostics in Belgrade. Fault-code reading is free, deep diagnostics at an agreed price. We show you the cause on the car.
       heroEyebrow: Diagnostics
       heroTitle: A fault code is a symptom, not a diagnosis
@@ -447,7 +447,7 @@ translations:
     servicing:
       name: Scheduled servicing
       short: Oil, filters, fluids and a check — to the schedule, not to a hunch.
-      metaTitle: Car servicing and oil change in Belgrade — AUTOHUB
+      metaTitle: Car servicing and oil change in Belgrade — CarLab
       metaDescription: "Vehicle servicing in Belgrade: oil, filters, plugs, brake fluid, coolant. To the manufacturer's schedule, with an entry in the service record."
       heroEyebrow: Servicing
       heroTitle: The cheapest repair is the one that never happened
@@ -479,7 +479,7 @@ translations:
     brakes-suspension:
       name: Brakes and suspension
       short: Everything that decides whether the car stops or not.
-      metaTitle: Brake and suspension repair in Belgrade — AUTOHUB
+      metaTitle: Brake and suspension repair in Belgrade — CarLab
       metaDescription: Pads and discs, caliper repair, shocks, arms, bushes and wheel alignment in Belgrade. Measured in millimetres, quoted before the work, 12 month warranty.
       heroEyebrow: Running gear
       heroTitle: The one system whose failure you cannot wait out
@@ -511,7 +511,7 @@ translations:
     engine-gearbox:
       name: Engine and gearbox
       short: From a gasket to a strip-down repair — with a quote you can read.
-      metaTitle: Engine and gearbox repair in Belgrade — AUTOHUB
+      metaTitle: Engine and gearbox repair in Belgrade — CarLab
       metaDescription: 'Engine and transmission work in Belgrade: timing belt, gaskets, clutch, automatic gearbox oil changes. Diagnosed before stripping, quoted before the work, 12 month warranty.'
       heroEyebrow: Drivetrain
       heroTitle: The priciest repair is the one that started at the wrong end
@@ -543,7 +543,7 @@ translations:
     bodywork-painting:
       name: Bodywork and respraying
       short: Accident repair, geometry correction and paint matched properly.
-      metaTitle: Accident repair and respraying in Belgrade — AUTOHUB
+      metaTitle: Accident repair and respraying in Belgrade — CarLab
       metaDescription: 'Bodywork in Belgrade: jig, geometry measurement, panel beating, respraying with computer colour matching. We work with insurers and help with the paperwork.'
       heroEyebrow: After an accident
       heroTitle: So the car does not look "post-accident"
@@ -575,7 +575,7 @@ translations:
     pre-purchase-inspection:
       name: Pre-purchase inspection
       short: An hour in the workshop instead of a year of regret.
-      metaTitle: Pre-purchase car inspection in Belgrade — AUTOHUB
+      metaTitle: Pre-purchase car inspection in Belgrade — CarLab
       metaDescription: 'Technical pre-purchase inspection in Belgrade: paint gauge, lift, fault codes, compression. A written report and leverage for the negotiation.'
       heroEyebrow: Before you buy
       heroTitle: The seller shows you the car. We show you its history.
@@ -604,4 +604,4 @@ translations:
         - The price is suspiciously below market
       honestHeading: What an inspection cannot do
       honest: We tell you honestly what we see, but an inspection is not a warranty. A hidden fault that shows neither on the lift nor on diagnostics can surface later — that is a limit of the method, not small print.
-translatedFrom: 1d5b861659f2fa09
+translatedFrom: a12411c581fbab0c

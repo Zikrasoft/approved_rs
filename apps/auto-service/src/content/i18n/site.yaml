@@ -26,7 +26,6 @@ common:
   breadcrumbLabel: Хлебные крошки
   primaryNavLabel: Основная навигация
   mobileNavLabel: Мобильное меню
-  readMore: Подробнее
   faqHeading: Частые вопросы
   closeLabel: Закрыть
   fromPrice: от
@@ -40,7 +39,6 @@ channels:
   whatsapp: WhatsApp
   viber: Viber
   telegram: Telegram
-  write: Написать
 form:
   heading: Записаться в сервис
   subheading: Опишите, что с машиной. Перезвоним, уточним детали и назовём время и цену.
@@ -48,8 +46,11 @@ form:
   namePlaceholder: Как к вам обращаться
   contactLabel: Телефон
   contactPlaceholder: +381 11 000 0000
+  contactChannelLabel: Как с вами связаться
+  channelPhone: Звонок
+  countryLabel: Код страны
   serviceLabel: Что нужно
-  servicePlaceholder: Выберите услугу
+  servicePlaceholder: Можно выбрать несколько
   carLabel: Автомобиль
   carPlaceholder: Марка, модель, год
   commentLabel: Что беспокоит
@@ -59,6 +60,10 @@ form:
   privacyNote: Отправляя форму, вы соглашаетесь с
   privacyLinkText: политикой конфиденциальности
   modalTitle: Записаться в сервис
+  requiredError: Заполните это поле
+  errorPhone: Проверьте номер — кажется, он введён не полностью
+  errorTelegram: Укажите ник в Telegram — минимум три символа
+  errorConsent: Без согласия мы не сможем отправить заявку
 translations:
   sr:
     nav:
@@ -89,7 +94,6 @@ translations:
       breadcrumbLabel: Putanja
       primaryNavLabel: Glavna navigacija
       mobileNavLabel: Mobilni meni
-      readMore: Detaljnije
       faqHeading: Česta pitanja
       closeLabel: Zatvori
       fromPrice: od
@@ -99,11 +103,10 @@ translations:
       allWorks: Svi primeri radova
       emptyWorks: Primeri radova uskoro stižu. Do tada nas pozovite — reći ćemo šta smo radili na sličnim automobilima.
     channels:
-      call: Pozovite
+      call: Pozovite nas
       whatsapp: WhatsApp
       viber: Viber
       telegram: Telegram
-      write: Pišite nam
     form:
       heading: Zakažite servis
       subheading: Opišite šta je sa autom. Pozvaćemo vas da proverimo detalje i damo vam termin i cenu.
@@ -111,8 +114,11 @@ translations:
       namePlaceholder: Kako da vam se obratimo
       contactLabel: Telefon
       contactPlaceholder: +381 11 000 0000
+      contactChannelLabel: Kako da vas kontaktiramo
+      channelPhone: Poziv
+      countryLabel: Pozivni broj države
       serviceLabel: Šta vam treba
-      servicePlaceholder: Izaberite uslugu
+      servicePlaceholder: Možete izabrati više usluga
       carLabel: Automobil
       carPlaceholder: Marka, model, godište
       commentLabel: Šta vas muči
@@ -122,6 +128,10 @@ translations:
       privacyNote: Slanjem forme prihvatate
       privacyLinkText: politiku privatnosti
       modalTitle: Zakažite servis
+      requiredError: Popunite ovo polje
+      errorPhone: Proverite broj — izgleda da nije potpun
+      errorTelegram: Unesite Telegram korisničko ime — najmanje tri znaka
+      errorConsent: Bez saglasnosti ne možemo da pošaljemo zahtev
   en:
     nav:
       services: Services
@@ -151,7 +161,6 @@ translations:
       breadcrumbLabel: Breadcrumb
       primaryNavLabel: Primary navigation
       mobileNavLabel: Mobile menu
-      readMore: More detail
       faqHeading: Frequently asked
       closeLabel: Close
       fromPrice: from
@@ -165,7 +174,6 @@ translations:
       whatsapp: WhatsApp
       viber: Viber
       telegram: Telegram
-      write: Message us
     form:
       heading: Book the workshop
       subheading: Tell us what the car is doing. We call back, confirm the details, and give you a time and a price.
@@ -173,8 +181,11 @@ translations:
       namePlaceholder: What should we call you
       contactLabel: Phone
       contactPlaceholder: +381 11 000 0000
+      contactChannelLabel: How should we reach you
+      channelPhone: Phone call
+      countryLabel: Country code
       serviceLabel: What you need
-      servicePlaceholder: Pick a service
+      servicePlaceholder: Pick one or more
       carLabel: Car
       carPlaceholder: Make, model, year
       commentLabel: What is wrong
@@ -184,4 +195,8 @@ translations:
       privacyNote: By sending this form you agree to our
       privacyLinkText: privacy policy
       modalTitle: Book the workshop
-translatedFrom: 49bcc710e184b657
+      requiredError: Please fill this in
+      errorPhone: Check the number — it looks incomplete
+      errorTelegram: Enter your Telegram handle — at least three characters
+      errorConsent: We need your consent before we can send this
+translatedFrom: bdd23fcc98a01ee4

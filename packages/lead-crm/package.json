@@ -7,7 +7,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./storage/vercel-blob": "./src/storage/vercelBlob.ts",
-    "./contact-channel": "./src/contactChannel.ts"
+    "./contact-channel": "./src/contactChannel.ts",
+    "./phone": "./src/phone.ts",
+    "./compose-e164": "./src/composeE164.ts"
   },
   "scripts": {
     "test": "vitest run --coverage",
@@ -15,6 +17,7 @@
   },
   "dependencies": {
     "date-fns": "4.4.0",
+    "libphonenumber-js": "1.13.12",
     "zod": "4.5.4"
   },
   "peerDependencies": {

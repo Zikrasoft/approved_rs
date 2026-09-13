@@ -1,4 +1,4 @@
-import { CURRENCY_SYMBOL } from './constants';
+import { CURRENCY } from './constants';
 
 export interface CartLine {
   slug: string;
@@ -7,8 +7,8 @@ export interface CartLine {
   quantity: number;
 }
 
-export const CART_STORAGE_KEY = 'autohub_cart';
-export const CART_EVENT = 'autohub:cart';
+export const CART_STORAGE_KEY = 'carlab_cart';
+export const CART_EVENT = 'carlab:cart';
 export const MAX_LINE_QUANTITY = 20;
 
 export function parseCart(raw: string | null): CartLine[] {
@@ -84,9 +84,7 @@ export function cartTotal(cart: CartLine[]): number {
 
 export function describeCart(cart: CartLine[]): string {
   return cart
-    .map(
-      (l) => `${l.title} × ${l.quantity} — ${lineTotal(l)} ${CURRENCY_SYMBOL}`,
-    )
+    .map((l) => `${l.title} × ${l.quantity} — ${lineTotal(l)} ${CURRENCY}`)
     .join('\n');
 }
 

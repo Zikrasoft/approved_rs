@@ -19,6 +19,25 @@ describe('createLeadSchema options', () => {
   });
 });
 
+describe('services on a lead', () => {
+  const schema = createLeadSchema({ defaultCommissionPercent: 10 });
+
+  it('reads a record written before multi-select as having no extra services', () => {
+    const lead = schema.parse(base);
+    expect(lead.service).toBe('detailing');
+    expect(lead.services).toEqual([]);
+  });
+
+  it('keeps every service a multi-select form sent', () => {
+    const lead = schema.parse({
+      ...base,
+      service: 'polishing',
+      services: ['polishing', 'ceramic-coating', 'ppf'],
+    });
+    expect(lead.services).toEqual(['polishing', 'ceramic-coating', 'ppf']);
+  });
+});
+
 describe('brand on a store shared by several businesses', () => {
   it('reads a record written before the brand field existed as the original business', () => {
     const schema = createLeadSchema({ defaultCommissionPercent: 50 });

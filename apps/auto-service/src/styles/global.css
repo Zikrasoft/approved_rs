@@ -1,4 +1,54 @@
 @import 'tailwindcss';
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: optional;
+  src:
+    url('../../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff2')
+      format('woff2'),
+    url('../../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff')
+      format('woff');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: optional;
+  src:
+    url('../../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-600-normal.woff2')
+      format('woff2'),
+    url('../../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-600-normal.woff')
+      format('woff');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: optional;
+  src:
+    url('../../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-cyrillic-600-normal.woff2')
+      format('woff2'),
+    url('../../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-cyrillic-600-normal.woff')
+      format('woff');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
 
 @theme {
   --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
@@ -12,19 +62,18 @@
   --color-muted: #656b74;
   --color-line: #dcd9d2;
   --color-line-strong: #c3bfb5;
+  --color-line-field: #857f73;
   --color-signal: #cc4a16;
   --color-signal-dark: #a93a0f;
   --color-go: #1f6f4a;
 
-  --radius-block: 0.75rem;
+  --radius-block: 0.625rem;
+  --radius-control: 0.25rem;
 
   --text-hero: clamp(2rem, 4.6vw, 3.5rem);
   --text-section: clamp(1.625rem, 3vw, 2.375rem);
   --text-block: clamp(1.25rem, 1.9vw, 1.5rem);
 
-  /* One named vertical rhythm for content bands, so a section is never
-     py-10 on one page and py-14 on the next. Hero and footer keep their
-     own spacing on purpose. */
   --spacing-band: 3.5rem;
   --spacing-band-lg: 5rem;
 }
@@ -37,8 +86,6 @@
     cursor: pointer;
   }
 
-  /* Apple HIG asks for a 44pt minimum hit area. Applied only to coarse
-     pointers so mouse layouts keep their compact controls. */
   @media (pointer: coarse) {
     button,
     [role='button'],
@@ -111,14 +158,23 @@
 }
 
 @utility eyebrow {
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
   width: fit-content;
   font-family: var(--font-mono);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-signal);
+  letter-spacing: 0.01em;
+  color: var(--color-ink-2);
+
+  &::before {
+    content: '';
+    flex: none;
+    width: 1.25rem;
+    height: 0.125rem;
+    background-color: var(--color-signal);
+  }
 }
 
 @utility spec {
@@ -132,7 +188,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    border-radius: var(--radius-block);
+    border-radius: var(--radius-control);
     padding: 0.8125rem 1.375rem;
     font-size: 0.9375rem;
     font-weight: 600;
@@ -168,8 +224,8 @@
 
   .field {
     width: 100%;
-    border-radius: var(--radius-block);
-    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-control);
+    border: 1px solid var(--color-line-field);
     background-color: var(--color-card);
     padding: 0.75rem 0.875rem;
     font-size: 0.9375rem;
@@ -182,7 +238,6 @@
 
   .field:focus {
     border-color: var(--color-signal);
-    outline: none;
   }
 
   .field-label {

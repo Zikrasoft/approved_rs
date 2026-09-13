@@ -7,7 +7,6 @@ import SectionHead from '@/components/SectionHead.astro';
 import ServiceBento from '@/components/ServiceBento.astro';
 import CompareSlider from '@/components/CompareSlider.astro';
 import ProcessTimeline from '@/components/ProcessTimeline.astro';
-import PriceCards from '@/components/PriceCards.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import EmptyState from '@/components/EmptyState.astro';
 import Faq from '@/components/Faq.astro';
@@ -18,6 +17,7 @@ import { getHomeContent } from '@/i18n/content/home';
 import { getSiteContent } from '@/i18n/content/site';
 import { PathBuilder, localePaths } from '@/utils/paths';
 import { localizedWork, publishedWorks } from '@/utils/works';
+import { HERO_SIZES, getHeroPicture } from '@/utils/heroImage';
 
 export function getStaticPaths() {
   return localePaths();
@@ -27,6 +27,7 @@ const locale = localeFrom(Astro.url.pathname);
 const home = getHomeContent(locale);
 const site = getSiteContent(locale);
 
+const heroPicture = await getHeroPicture();
 const works = publishedWorks(await getCollection('works'));
 const featured = works.slice(0, 3);
 const comparable = works.find((w) => w.data.beforeImage);
@@ -47,6 +48,17 @@ const faqSchema = {
   description={home.meta.description}
   jsonLd={[faqSchema]}
 >
+  <Fragment slot="head">
+    <link
+      rel="preload"
+      as="image"
+      href={heroPicture.src}
+      imagesrcset={heroPicture.srcSet.attribute}
+      imagesizes={HERO_SIZES}
+      fetchpriority="high"
+    />
+  </Fragment>
+
   <Hero />
 
   <Marquee items={home.marquee} />
@@ -110,31 +122,31 @@ const faqSchema = {
   </section>
 
   <section class="wrap mt-32 sm:mt-40">
-    <div class="grid gap-12 lg:grid-cols-[1fr_1fr] lg:items-end">
+    <div class="grid gap-12 lg:grid-cols-[1fr_1fr]">
       <SectionHead
         eyebrow={home.materials.eyebrow}
         heading={home.materials.heading}
         body={home.materials.body}
       />
-      <div class="flex flex-wrap gap-2.5" data-reveal data-reveal-delay="120">
+      <ul
+        class="grid gap-x-8 gap-y-7 sm:grid-cols-2"
+        data-reveal
+        data-reveal-delay="120"
+      >
         {
           home.materials.brands.map((brand) => (
-            <span class="rounded-full border border-line bg-white/[0.02] px-5 py-2.5 font-display text-xs uppercase tracking-[0.2em] text-mute">
-              {brand}
-            </span>
+            <li class="group border-t border-line pt-4">
+              <span class="block font-display text-base text-chalk transition-colors duration-500 ease-spring group-hover:text-champagne">
+                {brand.name}
+              </span>
+              <span class="mt-1.5 block text-sm leading-relaxed text-mute">
+                {brand.purpose}
+              </span>
+            </li>
           ))
         }
-      </div>
+      </ul>
     </div>
-  </section>
-
-  <section id="prices" class="wrap mt-32 scroll-mt-28 sm:mt-40">
-    <SectionHead
-      eyebrow={home.prices.eyebrow}
-      heading={home.prices.heading}
-      body={home.prices.body}
-    />
-    <PriceCards plans={home.prices.plans} note={home.prices.note} />
   </section>
 
   <section class="wrap mt-32 sm:mt-40">

@@ -5,7 +5,8 @@ import { localizedEntry, publishedEntries } from './localized';
 export type Work = CollectionEntry<'works'>;
 
 export function localizedWork(work: Work, locale: Locale) {
-  return localizedEntry(work, locale);
+  const { car, ...rest } = localizedEntry(work, locale);
+  return { ...rest, car: car ?? work.data.car };
 }
 
 export function publishedWorks(works: Work[]): Work[] {

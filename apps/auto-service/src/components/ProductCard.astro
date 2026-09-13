@@ -5,7 +5,7 @@ import { localeFrom } from '@/i18n/currentLocale';
 import { getShopContent } from '@/i18n/content/shop';
 import { PathBuilder } from '@/utils/paths';
 import { localizedProduct, type Product } from '@/utils/products';
-import { CURRENCY_SYMBOL } from '@/utils/constants';
+import { CURRENCY } from '@/utils/constants';
 
 interface Props {
   product: Product;
@@ -42,7 +42,7 @@ const href = PathBuilder.product(locale, product.id);
       </a>
       <span
         class:list={[
-          'spec shrink-0 rounded px-2 py-0.5 text-[0.6875rem]',
+          'spec shrink-0 rounded-full px-2.5 py-0.5 text-[0.6875rem]',
           product.data.inStock ? 'bg-go/10 text-go' : 'bg-shade text-muted',
         ]}
       >
@@ -62,9 +62,9 @@ const href = PathBuilder.product(locale, product.id);
     </dl>
 
     <div class="mt-auto flex items-center justify-between gap-3 pt-2">
-      <span class="spec text-lg font-semibold text-ink">
+      <span class="spec text-lg font-medium text-ink">
         {product.data.price}
-        {CURRENCY_SYMBOL}
+        {CURRENCY}
       </span>
       <button
         type="button"

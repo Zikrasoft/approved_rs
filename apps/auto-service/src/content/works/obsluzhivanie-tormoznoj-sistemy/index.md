@@ -4,6 +4,7 @@ car: Обслуживание тормозной системы
 translations:
   en:
     title: Brake System Service
+    car: Brake system service
     body: >
       ## Brake System Service and Brake Disc Replacement in Belgrade
 
@@ -50,6 +51,7 @@ translations:
       If your vehicle starts vibrating when braking or you notice any unusual brake-related symptoms, visit our auto service in Belgrade for a professional inspection.
   sr:
     title: Servis kočionog sistema
+    car: Servis kočionog sistema
     body: >
       ## Servis kočionog sistema i zamena kočionih diskova u Beogradu
 

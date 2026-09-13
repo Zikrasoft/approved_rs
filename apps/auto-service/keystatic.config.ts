@@ -1,4 +1,5 @@
 import { collection, config, fields } from '@keystatic/core';
+import { SITE_NAME } from './src/utils/constants';
 
 const APP_ROOT = import.meta.env.PROD ? 'apps/auto-service/' : '';
 
@@ -11,7 +12,7 @@ export default config({
     : { kind: 'local' },
 
   ui: {
-    brand: { name: 'AUTOHUB' },
+    brand: { name: SITE_NAME },
   },
 
   collections: {

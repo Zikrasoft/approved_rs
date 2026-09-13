@@ -170,6 +170,78 @@ describe('insertOrMergeLead', () => {
     expect(lead.name).toBe('Иван');
     expect(lead.contact).toBe('@ivan');
     expect(lead.kind).toBeUndefined();
+    expect(lead.services).toEqual([]);
+  });
+
+  it('replaces the call-click service list with every service the form carried', async () => {
+    await store.insertOrMergeLead(clickData('telegram'));
+    const { lead } = await store.insertOrMergeLead({
+      brand: 'Test',
+      name: 'Иван',
+      contact: '@ivan',
+      service: 'polishing',
+      services: ['polishing', 'ppf'],
+      visitorId: 'visitor-1',
+      locale: 'ru',
+    });
+
+    expect(lead.service).toBe('polishing');
+    expect(lead.services).toEqual(['polishing', 'ppf']);
+  });
+
+  it('keeps the clicked service when the form that upgrades the contact carried none', async () => {
+    await store.insertOrMergeLead({
+      ...clickData('whatsapp'),
+      services: ['Клик whatsapp с сайта'],
+    });
+    const { lead } = await store.insertOrMergeLead({
+      brand: 'Test',
+      name: 'Иван',
+      contact: '@ivan',
+      service: '',
+      services: [],
+      visitorId: 'visitor-1',
+      locale: 'ru',
+    });
+
+    expect(lead.service).toBe('Клик whatsapp с сайта');
+    expect(lead.services).toEqual(['Клик whatsapp с сайта']);
+  });
+
+  it('adds no empty "Также пробовал" note when the second submission named no service', async () => {
+    await store.insertOrMergeLead(clickData('telegram'));
+    const { lead } = await store.insertOrMergeLead({
+      brand: 'Test',
+      name: 'Иван',
+      contact: '@ivan',
+      service: '',
+      visitorId: 'visitor-1',
+      locale: 'ru',
+    });
+
+    expect(lead.comment).not.toContain('Также пробовал');
+  });
+
+  it('names every service of the second submission in the merge note', async () => {
+    await store.insertOrMergeLead({
+      brand: 'Test',
+      name: 'Иван',
+      contact: '@ivan',
+      service: 'polishing',
+      visitorId: 'visitor-1',
+      locale: 'ru',
+    });
+    const { lead } = await store.insertOrMergeLead({
+      brand: 'Test',
+      name: 'Иван',
+      contact: '@ivan',
+      service: 'ppf',
+      services: ['ppf', 'ceramic-coating'],
+      visitorId: 'visitor-1',
+      locale: 'ru',
+    });
+
+    expect(lead.comment).toContain('Также пробовал: ppf, ceramic-coating');
   });
 
   it('does not merge a different visitor — creates a separate lead', async () => {

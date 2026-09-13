@@ -4,15 +4,18 @@ import react from '@astrojs/react';
 import keystatic from '@keystatic/astro';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
+import { DETAILS } from '@podbor/brands';
 import { localeConfig } from './src/i18n/config.ts';
 
+const site = DETAILS.url;
+
 export default defineConfig({
-  site: 'https://prizma.rs',
+  site,
   output: 'static',
   adapter: vercel(),
   i18n: {
     locales: [...localeConfig.locales],
-    defaultLocale: localeConfig.defaultLocale,
+    defaultLocale: localeConfig.primaryLocale,
     routing: 'manual',
   },
   integrations: [
@@ -20,10 +23,9 @@ export default defineConfig({
     keystatic(),
     sitemap({
       filter: (page) =>
-        page !== 'https://prizma.rs/' &&
-        !['/thanks/'].some((s) => page.includes(s)),
+        page !== `${site}/` && !['/thanks/'].some((s) => page.includes(s)),
       i18n: {
-        defaultLocale: localeConfig.defaultLocale,
+        defaultLocale: localeConfig.primaryLocale,
         locales: Object.fromEntries(localeConfig.locales.map((l) => [l, l])),
       },
     }),

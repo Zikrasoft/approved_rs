@@ -1,0 +1,23 @@
+---
+import { mapEmbedSrc } from '@podbor/site-kit';
+import { GARAGE_ADDRESS } from '@/utils/constants';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const src = mapEmbedSrc({ lat: GARAGE_ADDRESS.lat, lon: GARAGE_ADDRESS.lon });
+---
+
+<carlab-map
+  class="block h-64 w-full bg-shade"
+  data-src={src}
+  data-title={title}
+  data-iframe-class="block h-full w-full border-0"></carlab-map>
+
+<script>
+  import { defineLazyMapEmbed } from '@podbor/site-kit/browser';
+
+  defineLazyMapEmbed('carlab-map');
+</script>

@@ -1,4 +1,5 @@
 import { getActiveCountries, getCitiesForCountry } from './geo';
+import { swapLocalePath } from '@podbor/site-kit';
 import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 import type { CountryScopedServiceSlug } from './labels';
 import type { VehicleImportSpoke } from './vehicleImportCrossSell';
@@ -9,6 +10,7 @@ import type { VehicleImportSpoke } from './vehicleImportCrossSell';
 // rest (vehicle-import, cases, static pages) have their own fixed shape.
 export const PathBuilder = {
   home: (locale: Locale) => `/${locale}/`,
+  sectionRoot: (locale: Locale, slug: string) => `/${locale}/${slug}/`,
   service: (
     locale: Locale,
     slug: CountryScopedServiceSlug,
@@ -52,6 +54,9 @@ export function getCityPaths() {
     })),
   );
 }
+
+export const swapLocale = (pathname: string, locale: Locale): string =>
+  swapLocalePath(pathname, locale);
 
 export function withLocales<
   T extends { params: Record<string, string | undefined> },

@@ -11,6 +11,9 @@ describe('getPagesContent', () => {
       expect(p.privacy.sections.length).toBe(4);
       expect(p.thanks.heading).toBeTruthy();
       expect(p.casesVehicleSourcing.metaTitle).toBeTruthy();
+      expect(p.partners.heading).toBeTruthy();
+      expect(p.partners.carlabDescription).toBeTruthy();
+      expect(p.partners.detailsDescription).toBeTruthy();
     }
   });
 

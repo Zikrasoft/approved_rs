@@ -1,23 +1,25 @@
-import { createLocaleSet } from '@podbor/i18n';
+import { createLocaleSet, SOURCE_LOCALE } from '@podbor/i18n';
 
 export const localeConfig = {
   locales: ['ru', 'sr', 'en'],
-  defaultLocale: 'ru',
+  primaryLocale: 'sr',
 } as const;
 
 export const localeSet = createLocaleSet(localeConfig);
 
 export const {
   SUPPORTED_LOCALES,
-  DEFAULT_LOCALE,
+  PRIMARY_LOCALE,
   TRANSLATABLE_LOCALES,
   isLocale,
   getLocale,
   detectLocale,
 } = localeSet;
 
+export { SOURCE_LOCALE };
+
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
-export type TranslatableLocale = Exclude<Locale, typeof DEFAULT_LOCALE>;
+export type TranslatableLocale = Exclude<Locale, typeof SOURCE_LOCALE>;
 
 export const BCP47_BY_LOCALE: Record<Locale, string> = {
   ru: 'ru-RS',
@@ -29,6 +31,12 @@ export const OG_LOCALE: Record<Locale, string> = {
   ru: 'ru_RU',
   sr: 'sr_RS',
   en: 'en_US',
+};
+
+export const OG_SUFFIX: Record<Locale, string> = {
+  sr: '',
+  ru: '-ru',
+  en: '-en',
 };
 
 export const LOCALE_NAME: Record<Locale, string> = {

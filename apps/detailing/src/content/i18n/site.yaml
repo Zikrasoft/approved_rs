@@ -39,28 +39,34 @@ common:
   emptyWorks: Скоро здесь появятся работы. Пока что напишите нам — расскажем и покажем вживую.
 channels:
   call: Позвонить
-  whatsapp: WhatsApp
-  viber: Viber
-  telegram: Telegram
+  whatsapp: Написать в WhatsApp
+  viber: Написать в Viber
+  telegram: Написать в Telegram
   instagram: Instagram
-  write: Написать
 form:
   heading: Записаться на консультацию
   subheading: Посмотрим машину, честно скажем, что ей действительно нужно, и назовём точную цену.
   nameLabel: Как вас зовут
   namePlaceholder: Имя
-  contactLabel: Телефон или ник
-  contactPlaceholder: +381 60 000 0000
+  contactChannelLabel: Как с вами связаться
+  channelPhone: Звонок
+  countryLabel: Код страны
+  contactLabel: Номер телефона
+  contactPlaceholder: 60 123 4567
   serviceLabel: Что интересует
-  servicePlaceholder: Выберите услугу
+  servicePlaceholder: Можно выбрать несколько
   commentLabel: Комментарий
   commentPlaceholder: Марка, модель, год — и что хотите сделать
   submit: Отправить заявку
   submitting: Отправляем…
-  privacyNote: Отправляя форму, вы соглашаетесь с
-  privacyLinkText: политикой конфиденциальности
-  requiredError: Заполните имя и контакт
+  privacyNote: Принимаю
+  privacyLinkText: политику конфиденциальности
+  requiredError: Введите имя
+  errorTelegram: Введите ник в Telegram — не меньше трёх символов
+  errorPhone: Введите корректный номер телефона
+  errorConsent: Отметьте согласие, чтобы отправить заявку
   modalTitle: Оставить заявку
+  noscriptNote: Форма работает только с включённым JavaScript. Если он выключен — свяжитесь с нами напрямую.
 translations:
   sr:
     nav:
@@ -104,28 +110,34 @@ translations:
       emptyWorks: Radovi uskoro stižu ovde. Do tada nam pišite — rado ćemo vam sve pokazati uživo.
     channels:
       call: Pozovite nas
-      whatsapp: WhatsApp
-      viber: Viber
-      telegram: Telegram
+      whatsapp: Pišite na WhatsApp
+      viber: Pišite na Viber
+      telegram: Pišite na Telegram
       instagram: Instagram
-      write: Pišite nam
     form:
       heading: Zakažite konsultaciju
       subheading: Pogledaćemo auto, iskreno reći šta mu stvarno treba i dati tačnu cenu.
       nameLabel: Kako se zovete
       namePlaceholder: Ime
-      contactLabel: Telefon ili nadimak
-      contactPlaceholder: +381 60 000 0000
+      contactChannelLabel: Kako da vas kontaktiramo
+      channelPhone: Poziv
+      countryLabel: Pozivni broj zemlje
+      contactLabel: Broj telefona
+      contactPlaceholder: 60 123 4567
       serviceLabel: Šta vas zanima
-      servicePlaceholder: Izaberite uslugu
+      servicePlaceholder: Možete izabrati više usluga
       commentLabel: Komentar
       commentPlaceholder: Marka, model, godište — i šta želite da uradimo
       submit: Pošalji zahtev
       submitting: Šaljemo…
-      privacyNote: Slanjem forme prihvatate
+      privacyNote: Prihvatam
       privacyLinkText: politiku privatnosti
-      requiredError: Unesite ime i kontakt
+      requiredError: Unesite ime
+      errorTelegram: Unesite Telegram nadimak — najmanje tri znaka
+      errorPhone: Unesite ispravan broj telefona
+      errorConsent: Označite saglasnost da biste poslali zahtev
       modalTitle: Ostavite zahtev
+      noscriptNote: Formular radi samo uz uključen JavaScript. Ako je isključen, javite nam se direktno.
   en:
     nav:
       services: Services
@@ -168,26 +180,32 @@ translations:
       emptyWorks: Our work will show up here shortly. In the meantime, message us — we are happy to show you in person.
     channels:
       call: Call us
-      whatsapp: WhatsApp
-      viber: Viber
-      telegram: Telegram
+      whatsapp: Message us on WhatsApp
+      viber: Message us on Viber
+      telegram: Message us on Telegram
       instagram: Instagram
-      write: Message us
     form:
       heading: Book a consultation
       subheading: We look at the car, tell you honestly what it actually needs, and quote an exact price.
       nameLabel: Your name
       namePlaceholder: Name
-      contactLabel: Phone or handle
-      contactPlaceholder: +381 60 000 0000
+      contactChannelLabel: How should we reach you
+      channelPhone: Phone call
+      countryLabel: Country code
+      contactLabel: Phone number
+      contactPlaceholder: 60 123 4567
       serviceLabel: What are you after
-      servicePlaceholder: Pick a service
+      servicePlaceholder: You can pick more than one
       commentLabel: Anything to add
       commentPlaceholder: Make, model, year — and what you would like done
       submit: Send request
       submitting: Sending…
-      privacyNote: By sending this form you agree to our
+      privacyNote: I accept the
       privacyLinkText: privacy policy
-      requiredError: Please fill in your name and contact
+      requiredError: Enter your name
+      errorTelegram: Enter your Telegram handle — at least three characters
+      errorPhone: Enter a valid phone number
+      errorConsent: Tick the consent box to send your request
       modalTitle: Send a request
-translatedFrom: 4f356fc6cc29352b
+      noscriptNote: The form only works with JavaScript enabled. If it is turned off, get in touch with us directly.
+translatedFrom: 4ab7b3c704dc3e6a

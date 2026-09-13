@@ -62,7 +62,6 @@ const channelsSchema = z
     viber: z.string(),
     telegram: z.string(),
     instagram: z.string(),
-    write: z.string(),
   })
   .strict();
 
@@ -72,6 +71,9 @@ const formSchema = z
     subheading: z.string(),
     nameLabel: z.string(),
     namePlaceholder: z.string(),
+    contactChannelLabel: z.string(),
+    channelPhone: z.string(),
+    countryLabel: z.string(),
     contactLabel: z.string(),
     contactPlaceholder: z.string(),
     serviceLabel: z.string(),
@@ -83,7 +85,11 @@ const formSchema = z
     privacyNote: z.string(),
     privacyLinkText: z.string(),
     requiredError: z.string(),
+    errorTelegram: z.string(),
+    errorPhone: z.string(),
+    errorConsent: z.string(),
     modalTitle: z.string(),
+    noscriptNote: z.string(),
   })
   .strict();
 

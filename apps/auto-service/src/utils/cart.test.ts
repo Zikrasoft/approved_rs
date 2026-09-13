@@ -145,7 +145,7 @@ describe('totals', () => {
 
   it('describes the order one line per row for the operator', () => {
     expect(describeCart([line({ quantity: 2 })])).toBe(
-      'Battery 60Ah × 2 — 180 €',
+      'Battery 60Ah × 2 — 180 RSD',
     );
   });
 });

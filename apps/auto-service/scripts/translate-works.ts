@@ -12,6 +12,7 @@ const { run } = createCaseTranslator({
   languageName: TARGET_LANGUAGE_NAME,
   businessDescription: BUSINESS_DESCRIPTION,
   subject: 'car repair write-ups and car part descriptions',
+  extraFields: ['car'],
 });
 
 if (import.meta.url === `file://${process.argv[1]}`) {

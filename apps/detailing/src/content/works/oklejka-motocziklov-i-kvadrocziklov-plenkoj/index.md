@@ -1,8 +1,9 @@
 ---
 title: Оклейка мотоциклов и квадроциклов пленкой
-car: Оклейка мотоциклов и квадроциклов пленкой
+car: Мотоциклы и квадроциклы
 translations:
   en:
+    car: Motorcycles & ATVs
     title: 'Motorcycle & ATV Wrapping '
     body: >
       ## Motorcycle & ATV Wrapping in Belgrade, Serbia
@@ -34,6 +35,7 @@ translations:
 
       Contact us to discuss wrapping your motorcycle, ATV or other powersports equipment in Belgrade or anywhere in Serbia.
   sr:
+    car: Motocikli i ATV vozila
     title: Foliranje motocikala i ATV
     body: >
       ## Foliranje motocikala i ATV vozila u Beogradu

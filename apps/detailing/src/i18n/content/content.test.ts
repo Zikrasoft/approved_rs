@@ -5,6 +5,9 @@ import { getHomeContent } from './home';
 import { getServicesContent } from './services';
 import { getPagesContent } from './pages';
 import { SERVICE_SLUGS } from '@/utils/services';
+import { OPENING_HOURS } from '@/utils/constants';
+
+const LAST_OPEN_DAY_LABEL = { ru: 'Сб', sr: 'Sub', en: 'Sat' };
 
 describe.each(SUPPORTED_LOCALES)('content for %s', (locale) => {
   it('loads and validates every section', () => {
@@ -67,6 +70,16 @@ describe.each(SUPPORTED_LOCALES)('content for %s', (locale) => {
       expect(description.length).toBeGreaterThan(70);
       expect(description.length).toBeLessThanOrEqual(200);
     });
+  });
+
+  it('states the same opening hours the JSON-LD does', () => {
+    const hours = getSiteContent(locale).footer.hours;
+    const [, opens, closes] =
+      hours.match(/(\d{2}:\d{2})\D+(\d{2}:\d{2})/) ?? [];
+    expect(opens).toBe(OPENING_HOURS.opens);
+    expect(closes).toBe(OPENING_HOURS.closes);
+    expect(OPENING_HOURS.days.at(-1)).toBe('Saturday');
+    expect(hours).toContain(LAST_OPEN_DAY_LABEL[locale]);
   });
 
   it('offers exactly one pricing tier per headline service group', () => {

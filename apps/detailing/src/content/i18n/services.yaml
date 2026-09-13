@@ -1,4 +1,4 @@
-indexMetaTitle: Услуги детейлинга в Белграде — PRIZMA
+indexMetaTitle: Услуги детейлинга в Белграде — Details
 indexMetaDescription: Защитная плёнка PPF, смена цвета, полировка с керамическим покрытием и реставрация руля. Цены, сроки и честные ограничения по каждой услуге.
 indexEyebrow: Услуги
 indexHeading: Четыре направления, в каждом — до конца
@@ -9,7 +9,7 @@ specsWarrantyLabel: Гарантия
 paint-protection-film:
   name: Защитная плёнка (PPF)
   short: Прозрачная полиуретановая броня против камней, песка и щёток на мойке.
-  metaTitle: Оклейка защитной плёнкой PPF в Белграде — PRIZMA
+  metaTitle: Оклейка защитной плёнкой PPF в Белграде — Details
   metaDescription: 'Оклейка кузова прозрачной защитной плёнкой в Белграде: перёд, полная оклейка, заворот кромок. Плёнки XPEL, SunTek, 3M. Гарантия до 10 лет.'
   heroEyebrow: Защита кузова
   heroTitle: Плёнка, которую не видно, и сколы, которых не будет
@@ -41,7 +41,7 @@ paint-protection-film:
 colour-change-wrap:
   name: Смена цвета плёнкой
   short: Новый цвет без покраски — и с возможностью вернуть заводской.
-  metaTitle: Смена цвета автомобиля плёнкой в Белграде — PRIZMA
+  metaTitle: Смена цвета автомобиля плёнкой в Белграде — Details
   metaDescription: 'Полная оклейка цветной плёнкой в Белграде: мат, сатин, глянец, текстуры. Обратимо, без перекраски, с сохранением заводского лака. Образцы на вашей машине.'
   heroEyebrow: Цвет
   heroTitle: Другой цвет. Тот же заводской лак под ним.
@@ -73,8 +73,8 @@ colour-change-wrap:
 polishing-ceramic:
   name: Полировка и керамика
   short: Снимаем риски и паутинку, закрываем результат керамикой на годы.
-  metaTitle: Полировка кузова и керамическое покрытие в Белграде — PRIZMA
-  metaDescription: Многоэтапная полировка с замером толщины лака и керамическое покрытие 2–5 лет. Фотоотчёт под лампой до и после. Студия PRIZMA, Белград.
+  metaTitle: Полировка кузова и керамическое покрытие в Белграде — Details
+  metaDescription: Многоэтапная полировка с замером толщины лака и керамическое покрытие 2–5 лет. Фотоотчёт под лампой до и после. Студия Details, Белград.
   heroEyebrow: Лак
   heroTitle: Сначала убрать риски. Только потом что-то наносить.
   heroLead: Керамика поверх непрополированного лака просто консервирует паутинку на несколько лет. Мы сначала выводим дефекты, а покрытие кладём уже на готовую поверхность.
@@ -105,7 +105,7 @@ polishing-ceramic:
 steering-wheel-restoration:
   name: Реставрация руля
   short: Затёртая кожа, лоснящийся обод и облезший пластик — в исходное состояние.
-  metaTitle: Реставрация руля и перетяжка кожи в Белграде — PRIZMA
+  metaTitle: Реставрация руля и перетяжка кожи в Белграде — Details
   metaDescription: 'Восстановление кожи руля в Белграде: перекраска, перетяжка, ремонт пластика и кнопок. Снимаем и ставим руль с подушкой безопасности. 2–3 дня.'
   heroEyebrow: Салон
   heroTitle: Первое, к чему прикасаются. И первое, что стареет.
@@ -136,7 +136,7 @@ steering-wheel-restoration:
   honest: Мы не беремся за рули со сработавшей подушкой безопасности или следами её замены без сервисной истории — это вопрос вашей безопасности, а не косметики. В таком случае сначала сервис, потом мы.
 translations:
   sr:
-    indexMetaTitle: Usluge detailinga u Beogradu — PRIZMA
+    indexMetaTitle: Usluge detailinga u Beogradu — Details
     indexMetaDescription: Zaštitna PPF folija, promena boje, poliranje sa keramičkom zaštitom i restauracija volana. Cene, rokovi i iskrena ograničenja za svaku uslugu.
     indexEyebrow: Usluge
     indexHeading: Četiri pravca, svaki do kraja
@@ -147,7 +147,7 @@ translations:
     paint-protection-film:
       name: Zaštitna folija (PPF)
       short: Providan poliuretanski oklop protiv kamenčića, peska i četki na perionici.
-      metaTitle: Zaštitna PPF folija u Beogradu — PRIZMA
+      metaTitle: Zaštitna PPF folija u Beogradu — Details
       metaDescription: 'Postavljanje providne zaštitne folije u Beogradu: prednji deo, cela karoserija, prepust preko ivica. Folije XPEL, SunTek, 3M. Garancija do 10 godina.'
       heroEyebrow: Zaštita karoserije
       heroTitle: Folija koja se ne vidi i ogrebotine kojih neće biti
@@ -179,7 +179,7 @@ translations:
     colour-change-wrap:
       name: Promena boje folijom
       short: Nova boja bez farbanja — uz mogućnost da se vrati fabrička.
-      metaTitle: Promena boje automobila folijom u Beogradu — PRIZMA
+      metaTitle: Promena boje automobila folijom u Beogradu — Details
       metaDescription: 'Potpuna promena boje folijom u Beogradu: mat, saten, sjaj, teksture. Reverzibilno, bez farbanja, uz očuvan fabrički lak. Uzorci na vašem automobilu.'
       heroEyebrow: Boja
       heroTitle: Druga boja. Isti fabrički lak ispod nje.
@@ -211,8 +211,8 @@ translations:
     polishing-ceramic:
       name: Poliranje i keramika
       short: Skidamo ogrebotine i paučinu, pa rezultat zatvaramo keramikom na godine.
-      metaTitle: Poliranje karoserije i keramička zaštita u Beogradu — PRIZMA
-      metaDescription: Višefazno poliranje sa merenjem debljine laka i keramička zaštita 2–5 godina. Foto-izveštaj pod lampom pre i posle. Studio PRIZMA, Beograd.
+      metaTitle: Poliranje karoserije i keramička zaštita u Beogradu — Details
+      metaDescription: Višefazno poliranje sa merenjem debljine laka i keramička zaštita 2–5 godina. Foto-izveštaj pod lampom pre i posle. Studio Details, Beograd.
       heroEyebrow: Lak
       heroTitle: Prvo skinuti ogrebotine. Tek onda bilo šta nanositi.
       heroLead: Keramika preko neispoliranog laka samo konzervira paučinu na nekoliko godina. Mi prvo izvučemo defekte, a premaz stavljamo na već gotovu površinu.
@@ -243,7 +243,7 @@ translations:
     steering-wheel-restoration:
       name: Restauracija volana
       short: Izlizana koža, sjajni obruč i oljušten plastika — nazad u prvobitno stanje.
-      metaTitle: Restauracija volana i presvlačenje kože u Beogradu — PRIZMA
+      metaTitle: Restauracija volana i presvlačenje kože u Beogradu — Details
       metaDescription: 'Obnova kože volana u Beogradu: prefarbavanje, presvlačenje, popravka plastike i tastera. Skidamo i vraćamo volan sa vazdušnim jastukom. 2–3 dana.'
       heroEyebrow: Enterijer
       heroTitle: Prvo čega se dotaknete. I prvo što ostari.
@@ -273,7 +273,7 @@ translations:
       honestHeading: Šta treba znati unapred
       honest: Ne prihvatamo volane sa aktiviranim vazdušnim jastukom ili tragovima njegove zamene bez servisne istorije — to je pitanje vaše bezbednosti, ne kozmetike. U tom slučaju prvo servis, pa onda mi.
   en:
-    indexMetaTitle: Detailing services in Belgrade — PRIZMA
+    indexMetaTitle: Detailing services in Belgrade — Details
     indexMetaDescription: Paint protection film, colour-change wraps, machine polishing with ceramic coating, and steering-wheel restoration. Prices, timelines and honest limits for each.
     indexEyebrow: Services
     indexHeading: Four things, each one properly
@@ -284,7 +284,7 @@ translations:
     paint-protection-film:
       name: Paint protection film (PPF)
       short: Clear polyurethane armour against stones, grit and car-wash brushes.
-      metaTitle: Paint protection film in Belgrade — PRIZMA
+      metaTitle: Paint protection film in Belgrade — Details
       metaDescription: 'Clear paint protection film in Belgrade: front end, full body, wrapped edges. XPEL, SunTek and 3M films. Manufacturer warranty up to 10 years.'
       heroEyebrow: Body protection
       heroTitle: Film you cannot see, chips you will not get
@@ -316,7 +316,7 @@ translations:
     colour-change-wrap:
       name: Colour change wrap
       short: A new colour without a respray — and the factory one still underneath.
-      metaTitle: Colour change car wrap in Belgrade — PRIZMA
+      metaTitle: Colour change car wrap in Belgrade — Details
       metaDescription: 'Full colour-change wraps in Belgrade: matte, satin, gloss and textured films. Reversible, no respray, factory paint preserved. Samples on your own car.'
       heroEyebrow: Colour
       heroTitle: A different colour. The same factory paint under it.
@@ -348,8 +348,8 @@ translations:
     polishing-ceramic:
       name: Polishing and ceramic
       short: Cut out the swirls and scratches, then lock the result in for years.
-      metaTitle: Paint correction and ceramic coating in Belgrade — PRIZMA
-      metaDescription: Multi-stage paint correction with clear-coat gauging and a 2–5 year ceramic coating. Before and after photos under the light. PRIZMA studio, Belgrade.
+      metaTitle: Paint correction and ceramic coating in Belgrade — Details
+      metaDescription: Multi-stage paint correction with clear-coat gauging and a 2–5 year ceramic coating. Before and after photos under the light. Details studio, Belgrade.
       heroEyebrow: Paint
       heroTitle: Cut the defects first. Only then coat anything.
       heroLead: Ceramic over uncorrected paint simply preserves the swirls for several years. We pull the defects out first and lay the coating on a finished surface.
@@ -380,7 +380,7 @@ translations:
     steering-wheel-restoration:
       name: Steering wheel restoration
       short: Worn leather, a shiny rim and flaking plastic, put back the way it was.
-      metaTitle: Steering wheel restoration and re-trim in Belgrade — PRIZMA
+      metaTitle: Steering wheel restoration and re-trim in Belgrade — Details
       metaDescription: 'Steering wheel leather restored in Belgrade: re-dyeing, re-trimming, plastic and button repair. We remove and refit the wheel with its airbag. 2–3 days.'
       heroEyebrow: Interior
       heroTitle: The first thing you touch. The first thing to age.
@@ -409,4 +409,4 @@ translations:
         - You want a different material, such as alcantara on the top section
       honestHeading: What to know upfront
       honest: We do not take on wheels with a deployed airbag, or signs of one being replaced without service history — that is a safety question, not a cosmetic one. Service first, us second.
-translatedFrom: fdcf7c59c7cbed0e
+translatedFrom: 49908c1269a3c0ca

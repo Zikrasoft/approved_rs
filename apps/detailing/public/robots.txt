@@ -3,4 +3,4 @@ Allow: /
 Disallow: /api/
 Disallow: /keystatic/
 
-Sitemap: https://prizma.rs/sitemap-index.xml
+Sitemap: https://details.rs/sitemap-index.xml

@@ -1,7 +1,7 @@
 ---
 title: Bosch S4 024
 brand: Bosch
-price: 96
+price: 11190
 capacityAh: 60
 crankingA: 540
 polarity: left

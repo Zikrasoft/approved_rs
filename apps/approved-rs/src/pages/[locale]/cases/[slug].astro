@@ -7,6 +7,7 @@ import Price from '@/components/Price.astro';
 import CaseGallery from '@/components/CaseGallery.astro';
 import PromoBanner from '@/components/PromoBanner.astro';
 import ChannelBanner from '@/components/ChannelBanner.astro';
+import PartnerBrands from '@/components/PartnerBrands.astro';
 import { getCollection, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
@@ -214,6 +215,8 @@ const schema = generateArticleSchema({
 
     <!-- Channel promo -->
     <ChannelBanner />
+
+    <PartnerBrands />
 
     <!-- CTA -->
     <div class="py-10 border-t mb-16 border-default">

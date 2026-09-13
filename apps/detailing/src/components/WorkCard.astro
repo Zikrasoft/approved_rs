@@ -14,7 +14,7 @@ interface Props {
 const { work, eager = false, class: className = '' } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const services = getServicesContent(locale);
-const { title } = localizedWork(work, locale);
+const { title, car } = localizedWork(work, locale);
 ---
 
 <a href={PathBuilder.work(locale, work.id)} class={`shell group ${className}`}>
@@ -50,7 +50,7 @@ const { title } = localizedWork(work, locale);
         {title}
       </h3>
       <span class="mt-auto text-xs text-mute-2">
-        {work.data.car}{work.data.year ? ` · ${work.data.year}` : ''}
+        {car}{work.data.year ? ` · ${work.data.year}` : ''}
       </span>
     </div>
   </article>

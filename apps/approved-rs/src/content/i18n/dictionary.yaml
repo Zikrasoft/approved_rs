@@ -71,8 +71,8 @@ translations:
       cookieSettingsLabel: Cookie Settings
       channelLinkLabel: Our Channel
     common:
-      otherServicesLabel: "Other Services:"
-      alsoWorkingInLabel: "We also operate in:"
+      otherServicesLabel: 'Other Services:'
+      alsoWorkingInLabel: 'We also operate in:'
       homeLabel: Home
       faqHeading: Frequently Asked Questions
       whereFromLabel: Where are you from?
@@ -116,8 +116,8 @@ translations:
       cookieSettingsLabel: Podešavanja kolačića
       channelLinkLabel: Naš kanal
     common:
-      otherServicesLabel: "Ostale usluge:"
-      alsoWorkingInLabel: "Takođe radimo u:"
+      otherServicesLabel: 'Ostale usluge:'
+      alsoWorkingInLabel: 'Takođe radimo u:'
       homeLabel: Početna
       faqHeading: Česta pitanja
       whereFromLabel: Odakle ste?
@@ -161,8 +161,8 @@ translations:
       cookieSettingsLabel: Configuración de cookies
       channelLinkLabel: Nuestro canal
     common:
-      otherServicesLabel: "Otros servicios:"
-      alsoWorkingInLabel: "También trabajamos en:"
+      otherServicesLabel: 'Otros servicios:'
+      alsoWorkingInLabel: 'También trabajamos en:'
       homeLabel: Inicio
       faqHeading: Preguntas frecuentes
       whereFromLabel: ¿De dónde eres?
@@ -193,7 +193,7 @@ translations:
       languageLabel: Sprache
       themeToggleLabel: Thema wechseln
       themeToggleMobileLabel: Thema ändern
-      ctaShort: " Antrag"
+      ctaShort: ' Antrag'
       ctaLong: Antrag stellen
     footer:
       servicesHeading: Dienstleistungen
@@ -206,8 +206,8 @@ translations:
       cookieSettingsLabel: Cookie-Einstellungen
       channelLinkLabel: Unser Kanal
     common:
-      otherServicesLabel: "Weitere Dienstleistungen:"
-      alsoWorkingInLabel: "Wir arbeiten auch in:"
+      otherServicesLabel: 'Weitere Dienstleistungen:'
+      alsoWorkingInLabel: 'Wir arbeiten auch in:'
       homeLabel: Startseite
       faqHeading: Häufig gestellte Fragen
       whereFromLabel: Woher kommen Sie?

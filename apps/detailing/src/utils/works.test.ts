@@ -28,6 +28,7 @@ describe('localizedWork', () => {
     expect(localizedWork(work, 'ru')).toEqual({
       title: 'BMW X5 в плёнке',
       body: 'RU body',
+      car: 'BMW X5',
     });
   });
 
@@ -38,11 +39,34 @@ describe('localizedWork', () => {
     expect(localizedWork(work, 'en')).toEqual({
       title: 'BMW X5 wrapped',
       body: 'EN body',
+      car: 'BMW X5',
     });
   });
 
   it('falls back to ru when the locale has no translation at all', () => {
     expect(localizedWork(makeWork(), 'sr').title).toBe('BMW X5 в плёнке');
+  });
+
+  it('returns the translated car when the entry carries one', () => {
+    const work = makeWork({
+      car: 'Оклейка мотоциклов плёнкой',
+      translations: {
+        sr: { title: 'SR', body: 'SR body', car: 'Motocikli i ATV vozila' },
+      },
+    });
+    expect(localizedWork(work, 'sr').car).toBe('Motocikli i ATV vozila');
+  });
+
+  it('falls back to the source car when the translation omits it', () => {
+    const work = makeWork({
+      translations: { sr: { title: 'SR', body: 'SR body' } },
+    });
+    expect(localizedWork(work, 'sr').car).toBe('BMW X5');
+  });
+
+  it('falls back to the source car when the whole translations block is absent', () => {
+    expect(localizedWork(makeWork(), 'sr').car).toBe('BMW X5');
+    expect(localizedWork(makeWork(), 'ru').car).toBe('BMW X5');
   });
 
   it('falls back to ru rather than rendering a half-written translation', () => {
@@ -52,6 +76,7 @@ describe('localizedWork', () => {
     expect(localizedWork(work, 'sr')).toEqual({
       title: 'BMW X5 в плёнке',
       body: 'RU body',
+      car: 'BMW X5',
     });
   });
 });

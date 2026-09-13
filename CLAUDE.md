@@ -7,28 +7,48 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 pnpm workspace + Turborepo. Apps live in `apps/*`, shared packages in `packages/*`.
 
 ```
-apps/approved-rs/     the approved.rs site (Astro) — most of this document describes it
-apps/detailing/       PRIZMA, the detailing studio site (placeholder brand)
-apps/auto-service/    AUTOHUB, the car service site + parts shop (placeholder brand)
+apps/approved-rs/     Approved.rs, the approved.rs site (Astro) — most of this document describes it
+apps/detailing/       Details, the detailing studio site — details.rs
+apps/auto-service/    CarLab, the car service site + parts shop — carlab.rs
 packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click routes
 packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
-packages/site-kit/    brand-agnostic mechanics: safeMarkdown, formatPhone, visitor id
+packages/site-kit/    brand-agnostic mechanics: safeMarkdown, formatPhone, visitor id, lazy map embed
+packages/brands/      the three brands: domains, display names, locale mapping, ops service labels
 ```
 
 Each app owns its own `astro.config.mjs`, `keystatic.config.ts`, `vercel.json`,
 `tsconfig.json`, `vitest.config.ts` and `.env*`. Lint/format configs and the
 lockfile stay at the repo root and cover every workspace. The root
-`vercel.json` exists only to hold `git.deploymentEnabled: false` — Vercel's git
-integration looks there, not in the app, and without it every branch push
-triggers a failing preview build.
+`vercel.json` holds `git.deploymentEnabled: false` — without it every branch
+push triggers a failing preview build. **The same block is now duplicated into
+all three apps' `vercel.json` on purpose.** Which file Vercel's git integration
+reads depends on a project's Root Directory setting, and this repo has three
+projects with three different roots; having it in both places is the only
+arrangement that is correct whatever that setting is. It costs three lines.
 
 Unqualified paths in this document are relative to `apps/approved-rs/`:
 `src/lib/store.ts` means `apps/approved-rs/src/lib/store.ts`.
 
-**Brand names are placeholders.** PRIZMA and AUTOHUB (and their `prizma.rs` /
-`autohub.rs` domains) stand in until the client picks real ones. The rule they
-have to satisfy: no shared brand root between the three sites, and nothing
-carrying Approved's trust/verification semantics.
+**Brand identity lives in `packages/brands`, never in a literal.** Per-brand
+constants (`APPROVED` / `CARLAB` / `DETAILS`) carry the domain, display name and
+legal name; `BRANDS` and `BRAND_SITES` aggregate them; `brandLocale()` maps
+approved.rs's five locales onto the brand sites' three (`es`/`de` fall to `en`).
+
+**Import your own brand's constant, never the aggregate.** `BRANDS` is a plain
+object, so reading one key keeps all three alive in any chunk that imports the
+module — a brand site whose `constants.ts` reaches a client script would then
+ship its siblings' domains and legal names. Each app pins its brand once
+(`export const BRAND = CARLAB`) in `src/utils/constants.ts`, and
+`astro.config.mjs` imports the same constant for `site:`. Only approved.rs may
+touch the aggregate, and only in the two places that genuinely need every brand:
+the cross-brand link builder and the legacy-redirect host map in `middleware.ts`.
+
+`vercel.json` cannot import anything, so the domains stay hand-duplicated there
+— and in `src/i18n/translateConfig.ts`, which the translate scripts load under
+bare node where `import.meta.env` does not exist.
+
+The brands were chosen to satisfy one rule: no shared brand root between the
+three sites, and nothing carrying Approved's trust/verification semantics.
 
 **One bot, one chat, one lead store, three brands.** Telegram allows a single
 webhook URL per bot, so `api/telegram-webhook.ts` and `api/reminders.ts` are
@@ -51,6 +71,21 @@ systems and components stay per-app on purpose.
 
 **Package rules:**
 
+- **The second copy is the signal.** The moment the same helper would exist in
+  two apps, it belongs in a package instead — and it moves together with its
+  tests, never ahead of them. What stays per-app is markup and styling, so two
+  brand sites never become recognisable as relatives; what moves is behaviour.
+- **An extraction is finished only when every call site uses it.** Wiring the
+  new package into the one app you were editing leaves the other copies alive
+  and the divergence intact, which is what the extraction was supposed to end.
+  The same holds for defects: a bug found in one app gets checked and fixed in
+  the other two in the same pass. Three copies of one nav helper with inverted
+  argument order, and a broken re-implementation of an already-extracted phone
+  helper, both reached review this way.
+- **Client behaviour is a vanilla custom element**, not an ad-hoc script or a
+  framework island. `defineLazyMapEmbed` and `defineLocaleChoice` in
+  `packages/site-kit/src` are the shape: idempotent `define(tagName?)`, no
+  auto-registration on import, no styles shipped, the app supplying the markup.
 - Every `packages/*` carries its own test suite at **100% coverage**
   (statements/functions/lines; branches too where achievable). The `test`
   script runs `vitest run --coverage`, so the threshold is enforced by CI
@@ -59,6 +94,16 @@ systems and components stay per-app on purpose.
   the commission rate, the locale list, the storage key and the service labels
   are all config. Operator-facing Russian bot copy is _not_ — it is the same
   for every brand and lives in the package.
+- **`SOURCE_LOCALE = 'ru'` in `packages/i18n` is a deliberate exception** to that
+  rule. It is the language content is authored in, not a locale a site serves,
+  and the whole auto-translate pipeline is built on every app writing Russian and
+  the `translate` job filling the rest. `createLocaleSet` throws if `'ru'` is
+  missing from the locale list. Which locale a site _presents_ by default is a
+  separate, per-app field — `primaryLocale`, required, driving `x-default` and
+  the `detectLocale` fallback. Do not conflate the two: swapping them silently
+  renders Serbian pages in Russian, and no test catches it. A future brand that
+  authors in another language turns `SOURCE_LOCALE` into config; until one
+  exists, that would be configuration for a single caller.
 - The app binds a package through a thin re-export file (`src/lib/store.ts`,
   `src/lib/telegram/index.ts`, `src/i18n/config.ts`). That keeps the ~950 lines
   of API-route call sites and ~190 `.astro` i18n call sites free of churn when
@@ -71,6 +116,13 @@ systems and components stay per-app on purpose.
   (`@podbor/lead-crm/contact-channel`, `@podbor/site-kit/browser`), never the
   package root: the root barrel pulls zod, date-fns and the Telegram client
   into the browser bundle.
+- **A helper a lazily-loaded path depends on must live in a module that imports
+  nothing heavy.** Rollup cannot code-split a module that is also statically
+  imported, so putting such a helper beside a static `libphonenumber-js` import
+  inlines the whole library into the eager chunk — measured at 3 KB → 185 KB on
+  the lead form, a 60× regression aimed squarely at slow connections. Hence
+  `@podbor/lead-crm/compose-e164`, a zero-import subpath, separate from
+  `/phone`. When extracting, check the emitted chunk, not the source.
 
 ## House style for a brand site
 
@@ -165,12 +217,15 @@ monorepo artifact.
 
 Husky + lint-staged run eslint --fix/prettier on staged files on commit — a commit can silently reformat what you staged, so `git status`/`git diff` after committing if that matters.
 
-**Run the `review-local` skill with fixes applied before every commit.** It is
-the only pass that reads the diff against this file's conventions, and it costs
-minutes against a bug reaching production. Skip it only for a change small
-enough that the diff carries no judgement — a typo, a version bump, a copy
-tweak. Anything touching logic, money, the lead pipeline or a public route goes
-through it. This is not enforced by a git hook on purpose: a hook can block a
+**Run the `review-local` skill with fixes applied before every commit, and after
+each significant block of work on a long task.** It is the only pass that reads
+the diff against this file's conventions, and it costs minutes against a bug
+reaching production. Skip it only for a change small enough that the diff
+carries no judgement — a typo, a version bump, a copy tweak. Anything touching
+logic, money, the lead pipeline or a public route goes through it. On work split
+across several agents or stages, review after each stage lands rather than once
+over the combined diff — a diff too large to judge is a review that finds
+nothing. This is not enforced by a git hook on purpose: a hook can block a
 commit but cannot run the review, and it cannot tell a one-word fix from a
 refactor.
 
@@ -211,6 +266,24 @@ This site supports 5 locales: `ru` (default), `en`, `sr`, `es`, `de`. Translatio
 - Store new strings in the existing i18n structure — `src/content/i18n/*.yaml` (dictionary, faq, home, pages, etc.), validated by the matching schema in `src/i18n/dictionaryContentSchema.ts`/`src/i18n/content/*ContentSchema.ts` and read via `src/i18n/getI18n.ts`/`src/i18n/content/*.ts` — reusing existing keys where possible (DRY) rather than a new inline literal per component. Admin hand-edits only the `ru` fields directly in the YAML; `scripts/translate-i18n.ts` (the `translate` job in `.github/workflows/ci.yml`) auto-fills en/sr/es/de on every push that touches one of those files.
 - Before considering any UI change done, verify no hardcoded RU-only text was left behind (e.g. `grep -rP '[а-яА-ЯёЁ]' src/components src/pages src/layouts` outside of comments/intentional RU-only surfaces).
 - Case-study content (`src/content/{cases,autoservice-cases,detailing-cases}`) is the one exception to "admin writes it by hand" that still goes through Keystatic: the admin only ever writes the `ru` fields there, and the `translate` job in `.github/workflows/ci.yml` auto-translates en/sr/es/de on every push that touches a case file.
+
+## Validation
+
+Anything that validates data uses **zod** — no hand-rolled `typeof` guards,
+regex checks, string slicing or bare `as` casts at a trust boundary. `zod` is
+already pinned at the same exact version in `packages/lead-crm`, `packages/i18n`
+and all three apps, and the content-schema loaders (`src/i18n/content/*ContentSchema.ts`
+through `createSectionLoader`) are the pattern to copy: `z.object({…}).strict()`,
+`parse` where a failure should be loud, `safeParse` where a fallback exists.
+
+Apply it **as you touch code**, not as a separate campaign — rewriting a module
+means the module leaves with a schema. The trust boundaries that matter most are
+inbound form data, external API and webhook payloads, and environment variables.
+
+One caveat: a module that browser code imports must not pull zod into the client
+bundle just to hold an enum. `packages/lead-crm/src/contactChannel.ts` is
+deliberately zod-free for that reason and is exported through its own narrow
+subpath — put the schema next to such a module, not inside it.
 
 ## Dependency versions
 

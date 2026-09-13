@@ -51,7 +51,7 @@ export const SECTIONS: readonly Section[] = [
     fields: pagesContentSchema.keyof().options,
     schema: pagesContentSchema,
     promptSubject:
-      'copy for the contacts/privacy-policy/thank-you/case-listing pages',
+      'copy for the contacts/privacy-policy/thank-you/case-listing pages and for the recommended-partner-brands block',
   },
   {
     path: 'src/content/i18n/promoBanners.yaml',

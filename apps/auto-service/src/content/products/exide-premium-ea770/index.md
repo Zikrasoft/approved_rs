@@ -1,7 +1,7 @@
 ---
 title: Exide Premium EA770
 brand: Exide
-price: 112
+price: 13090
 capacityAh: 77
 crankingA: 760
 polarity: right
