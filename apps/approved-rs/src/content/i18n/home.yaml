@@ -114,13 +114,13 @@ translations:
     testimonialsHeading: What Our Clients Say
     testimonials:
       - quote: “They brought a BMW 3 Series from Munich to Belgrade. Everything was smooth — from inspection to registration. Saved a lot of nerves on the paperwork.”
-        name: Alexander
+        name: Александр
         caption: BMW 320d, Germany → Serbia
       - quote: “I searched for a Skoda Octavia in good condition for a long time. The team found an option in Spain, checked it with an independent expert — everything matched the description.”
-        name: Mikhail
+        name: Михаил
         caption: Skoda Octavia, Spain → Russia
       - quote: “Registering foreign plates seemed complicated. The team guided me through every step — and after a month, I was already driving. I recommend.”
-        name: Dmitry
+        name: Дмитрий
         caption: VW Passat, Germany → Serbia
     ctaEyebrow: Ready to start?
     ctaHeading:
@@ -185,13 +185,13 @@ translations:
     testimonialsHeading: Šta kažu klijenti
     testimonials:
       - quote: «Dopremili su BMW 3 serije iz Minhena u Beograd. Sve je bilo tačno — od pregleda do registracije. Uštedeli smo hrpu živaca pri obradi.»
-        name: Aleksandar
+        name: Александр
         caption: BMW 320d, Nemačka → Srbija
       - quote: «Dugo sam tražio Škodu Octavia u dobrom stanju. Momci su pronašli opciju u Španiji, proverili nezavisnim stručnjakom — sve se poklopilo sa opisom.»
-        name: Mihail
+        name: Михаил
         caption: Škoda Octavia, Španija → Rusija
       - quote: «Obrada na strane registarske tablice je delovala komplikovano. Tim je prošao kroz svaki korak — i za mesec dana već sam vozio. Preporučujem.»
-        name: Dmitrij
+        name: Дмитрий
         caption: VW Passat, Nemačka → Srbija
     ctaEyebrow: Spremni da počnete?
     ctaHeading:
@@ -256,13 +256,13 @@ translations:
     testimonialsHeading: Qué dicen nuestros clientes
     testimonials:
       - quote: «Trajeron un BMW Serie 3 de Múnich a Belgrado. Todo claro — desde la inspección hasta el registro. Ahorramos un montón de nervios en la formalización.»
-        name: Aleksandr
+        name: Александр
         caption: BMW 320d, Alemania → Serbia
       - quote: «Busqué durante mucho tiempo una Skoda Octavia en buen estado. Los chicos encontraron una opción en España, la revisaron con un experto independiente — todo coincidió con la descripción.»
-        name: Mikhail
+        name: Михаил
         caption: Skoda Octavia, España → Rusia
       - quote: «La formalización de matrículas extranjeras parecía complicada. El equipo me guió en cada paso — y en un mes ya estaba conduciendo. Lo recomiendo.»
-        name: Dmitry
+        name: Дмитрий
         caption: VW Passat, Alemania → Serbia
     ctaEyebrow: ¿Listo para empezar?
     ctaHeading:
@@ -327,13 +327,13 @@ translations:
     testimonialsHeading: Was sagen unsere Kunden
     testimonials:
       - quote: „BMW 3er aus München nach Belgrad importiert. Alles lief reibungslos — von der Besichtigung bis zur Zulassung. Wir haben viel Stress bei der Abwicklung gespart.“
-        name: Alexander
+        name: Александр
         caption: BMW 320d, Deutschland → Serbien
       - quote: „Ich habe lange nach einem Skoda Octavia in gutem Zustand gesucht. Die Jungs fanden eine Option in Spanien und überprüften sie mit einem unabhängigen Experten — alles stimmte mit der Beschreibung überein.“
-        name: Mikhail
+        name: Михаил
         caption: Skoda Octavia, Spanien → Russland
       - quote: „Die Zulassung auf ausländische Nummern schien kompliziert. Das Team begleitete mich durch jeden Schritt — und nach einem Monat war ich bereits unterwegs. Ich empfehle es.“
-        name: Dmitriy
+        name: Дмитрий
         caption: VW Passat, Deutschland → Serbien
     ctaEyebrow: Bereit loszulegen?
     ctaHeading:

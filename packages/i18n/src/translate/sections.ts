@@ -54,7 +54,9 @@ export function createSectionTranslator<L extends string>({
         'Translate the MEANING naturally and idiomatically, the way a native speaker would actually write ' +
         'it — never a literal word-for-word translation. Keep any markdown formatting intact. If a string ' +
         'contains a placeholder token like {siteName} in curly braces, copy it into the translation exactly ' +
-        'as written, character for character — never translate, remove, or move it. Respond with a JSON ' +
+        'as written, character for character — never translate, remove, or move it. Copy personal names ' +
+        'exactly as written too, keeping their original script — never transliterate or localise them. ' +
+        'Respond with a JSON ' +
         'object that has EXACTLY the same nested key structure as the input — same keys, same nesting, same ' +
         'array lengths — with only the string values translated.',
       userContent: JSON.stringify(data),
