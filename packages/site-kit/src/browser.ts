@@ -1,6 +1,12 @@
 import { readOrCreateVisitorId } from './visitorId.ts';
 export { defineLazyMapEmbed, mapEmbedSrc } from './mapEmbed.ts';
 export { defineLocaleChoice } from './localeCookie.ts';
+export { lockScroll, unlockScroll } from './scrollLock.ts';
+export {
+  defineModalDialog,
+  MODAL_OPEN_EVENT,
+  type ModalOpenDetail,
+} from './modalDialog.ts';
 import {
   STORAGE_KEY,
   newConsent,
