@@ -1,25 +1,63 @@
-import { parsePhoneNumberFromString } from 'libphonenumber-js/min';
+import {
+  getCountries,
+  getCountryCallingCode,
+  parsePhoneNumberFromString,
+  type CountryCode,
+} from 'libphonenumber-js/min';
 import type { TrackedContactChannel } from './contactChannel.ts';
 
 export { composeE164 } from './composeE164.ts';
 
-export const PHONE_COUNTRIES = [
-  { iso: 'RS', dial: '381' },
-  { iso: 'DE', dial: '49' },
-  { iso: 'ES', dial: '34' },
-  { iso: 'PT', dial: '351' },
-  { iso: 'RU', dial: '7' },
-  { iso: 'UA', dial: '380' },
-  { iso: 'BY', dial: '375' },
-  { iso: 'KZ', dial: '7' },
-  { iso: 'BA', dial: '387' },
-  { iso: 'HR', dial: '385' },
-  { iso: 'ME', dial: '382' },
-  { iso: 'MK', dial: '389' },
-  { iso: 'TR', dial: '90' },
-] as const;
+export interface PhoneCountry {
+  iso: CountryCode;
+  dial: string;
+  primary: boolean;
+}
 
-export type PhoneCountry = (typeof PHONE_COUNTRIES)[number];
+export const DIAL_CODE_OWNER: Record<string, CountryCode> = {
+  '1': 'US',
+  '7': 'RU',
+  '39': 'IT',
+  '44': 'GB',
+  '47': 'NO',
+  '61': 'AU',
+  '212': 'MA',
+  '262': 'RE',
+  '290': 'SH',
+  '358': 'FI',
+  '590': 'GP',
+  '599': 'CW',
+};
+
+export const PHONE_COUNTRIES: readonly PhoneCountry[] = getCountries().map(
+  (iso) => {
+    const dial = getCountryCallingCode(iso);
+    return { iso, dial, primary: (DIAL_CODE_OWNER[dial] ?? iso) === iso };
+  },
+);
+
+export interface PhoneCountryOption extends PhoneCountry {
+  name: string;
+  flag: string;
+}
+
+const REGIONAL_INDICATOR_A = 0x1f1e6;
+
+const flagOf = (iso: string) =>
+  String.fromCodePoint(
+    ...[...iso].map(
+      (letter) => REGIONAL_INDICATOR_A + letter.charCodeAt(0) - 65,
+    ),
+  );
+
+export function phoneCountryOptions(locale: string): PhoneCountryOption[] {
+  const names = new Intl.DisplayNames([locale], { type: 'region' });
+  return PHONE_COUNTRIES.map((country) => ({
+    ...country,
+    flag: flagOf(country.iso),
+    name: String(names.of(country.iso)),
+  })).sort((a, b) => a.name.localeCompare(b.name, locale));
+}
 
 const TELEGRAM_HANDLE = /^@?\w{3,}$/;
 

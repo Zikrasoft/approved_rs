@@ -2,8 +2,12 @@ import { z } from 'zod';
 import { TRACKED_CONTACT_CHANNELS } from './contactChannel.ts';
 import { isValidContact } from './phone.ts';
 
-export { isValidContact, PHONE_COUNTRIES } from './phone.ts';
-export type { PhoneCountry } from './phone.ts';
+export {
+  isValidContact,
+  PHONE_COUNTRIES,
+  phoneCountryOptions,
+} from './phone.ts';
+export type { PhoneCountry, PhoneCountryOption } from './phone.ts';
 
 export const MAX_FIELD_LENGTH = 200;
 export const MAX_COMMENT_LENGTH = 2000;

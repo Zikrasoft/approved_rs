@@ -11,6 +11,7 @@ import {
   MAX_SERVICES,
   MAX_URL_LENGTH,
   PHONE_COUNTRIES,
+  phoneCountryOptions,
 } from './form.ts';
 import { TRACKED_CONTACT_CHANNELS } from './contactChannel.ts';
 
@@ -41,10 +42,38 @@ describe('contactChannelSchema', () => {
 
 describe('PHONE_COUNTRIES', () => {
   it('carries only the iso and dial code the select renders', () => {
-    expect(PHONE_COUNTRIES).toHaveLength(13);
+    expect(PHONE_COUNTRIES.length).toBeGreaterThan(200);
     PHONE_COUNTRIES.forEach((country) => {
-      expect(Object.keys(country).sort()).toEqual(['dial', 'iso']);
+      expect(Object.keys(country).sort()).toEqual(['dial', 'iso', 'primary']);
+      expect(country.dial).toMatch(/^\d+$/);
     });
+  });
+
+  it('covers a country the old curated list left out', () => {
+    expect(PHONE_COUNTRIES.find((c) => c.iso === 'KG')?.dial).toBe('996');
+  });
+});
+
+describe('phoneCountryOptions', () => {
+  it('labels every country in the requested language and sorts by that name', () => {
+    const options = phoneCountryOptions('ru');
+    const names = options.map((option) => option.name);
+
+    expect(options).toHaveLength(PHONE_COUNTRIES.length);
+    expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b, 'ru')));
+    expect(options.find((option) => option.iso === 'RS')?.name).toBe('Сербия');
+  });
+
+  it('follows the locale, so the same country reads natively', () => {
+    expect(phoneCountryOptions('sr').find((o) => o.iso === 'RS')?.name).toBe(
+      'Србија',
+    );
+  });
+
+  it('derives the flag from the iso code', () => {
+    expect(phoneCountryOptions('en').find((o) => o.iso === 'RS')?.flag).toBe(
+      '🇷🇸',
+    );
   });
 });
 

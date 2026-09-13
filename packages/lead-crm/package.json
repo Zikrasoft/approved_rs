@@ -9,7 +9,8 @@
     "./storage/vercel-blob": "./src/storage/vercelBlob.ts",
     "./contact-channel": "./src/contactChannel.ts",
     "./phone": "./src/phone.ts",
-    "./compose-e164": "./src/composeE164.ts"
+    "./compose-e164": "./src/composeE164.ts",
+    "./phone-input": "./src/phoneInput.ts"
   },
   "scripts": {
     "test": "vitest run --coverage",
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@vercel/blob": "2.8.0",
     "@vitest/coverage-v8": "3.2.6",
+    "jsdom": "30.0.1",
     "typescript": "5.9.3",
     "vitest": "3.2.6"
   }

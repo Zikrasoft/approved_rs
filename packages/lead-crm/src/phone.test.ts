@@ -1,5 +1,56 @@
 import { describe, it, expect } from 'vitest';
-import { composeE164, isValidContact } from './phone.ts';
+import {
+  Metadata,
+  getCountries,
+  getCountryCallingCode,
+} from 'libphonenumber-js/min';
+import {
+  composeE164,
+  isValidContact,
+  DIAL_CODE_OWNER,
+  PHONE_COUNTRIES,
+} from './phone.ts';
+
+describe('DIAL_CODE_OWNER', () => {
+  const sharedDials = [
+    ...getCountries()
+      .reduce((counts, iso) => {
+        const dial = getCountryCallingCode(iso);
+        return counts.set(dial, (counts.get(dial) ?? 0) + 1);
+      }, new Map<string, number>())
+      .entries(),
+  ]
+    .filter(([, count]) => count > 1)
+    .map(([dial]) => dial);
+
+  it('names an owner for every calling code more than one country shares', () => {
+    expect(Object.keys(DIAL_CODE_OWNER).sort()).toEqual(sharedDials.sort());
+  });
+
+  it('agrees with libphonenumber about who owns each of them', () => {
+    const metadata = new Metadata() as unknown as {
+      getCountryCodesForCallingCode(dial: string): string[];
+    };
+    for (const [dial, iso] of Object.entries(DIAL_CODE_OWNER)) {
+      expect(metadata.getCountryCodesForCallingCode(dial)[0], dial).toBe(iso);
+    }
+  });
+
+  it('marks exactly one country primary per calling code', () => {
+    const primariesByDial = new Map<string, number>();
+    for (const country of PHONE_COUNTRIES) {
+      if (country.primary)
+        primariesByDial.set(
+          country.dial,
+          (primariesByDial.get(country.dial) ?? 0) + 1,
+        );
+    }
+    expect([...primariesByDial.values()].every((n) => n === 1)).toBe(true);
+    expect(PHONE_COUNTRIES.find((c) => c.dial === '7' && c.primary)?.iso).toBe(
+      'RU',
+    );
+  });
+});
 
 describe('composeE164', () => {
   it('produces a number the server accepts when the phone parser never loads', () => {
