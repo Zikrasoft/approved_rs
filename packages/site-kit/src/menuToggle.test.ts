@@ -1,6 +1,15 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { defineMenuToggle } from './menuToggle.ts';
+import { defineMenuToggle, type MenuToggleElement } from './menuToggle.ts';
+import { lockScroll, unlockScroll } from './scrollLock.ts';
+
+vi.mock('./scrollLock.ts', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('./scrollLock.ts')>();
+  return {
+    lockScroll: vi.fn(actual.lockScroll),
+    unlockScroll: vi.fn(actual.unlockScroll),
+  };
+});
 
 const DESKTOP = '(min-width: 768px)';
 
@@ -26,6 +35,8 @@ function shrink() {
 }
 
 beforeEach(() => {
+  vi.mocked(lockScroll).mockClear();
+  vi.mocked(unlockScroll).mockClear();
   queries = [];
   listeners = [];
   media = {
@@ -52,7 +63,7 @@ afterEach(() => {
 let tagSeed = 0;
 
 function mount(
-  attributes = `data-desktop-media="${DESKTOP}"`,
+  attributes = `data-desktop-media="${DESKTOP}" data-lock-scroll`,
   menuMarkup = '<div data-menu><a href="/services"><svg></svg></a></div>',
 ) {
   const tagName = `menu-toggle-${++tagSeed}`;
@@ -125,7 +136,7 @@ describe('defineMenuToggle', () => {
 
   it('ignores clicks that miss the close selector', () => {
     const { host, button } = mount(
-      `data-desktop-media="${DESKTOP}"`,
+      `data-desktop-media="${DESKTOP}" data-lock-scroll`,
       '<div data-menu><span>текст</span></div>',
     );
     button.click();
@@ -138,7 +149,7 @@ describe('defineMenuToggle', () => {
 
   it('accepts a custom close selector', () => {
     const { host, button } = mount(
-      `data-desktop-media="${DESKTOP}" data-close-selector="a,[data-open-lead-modal]"`,
+      `data-desktop-media="${DESKTOP}" data-lock-scroll data-close-selector="a,[data-open-lead-modal]"`,
       '<div data-menu><button data-open-lead-modal>Записаться</button></div>',
     );
     button.click();
@@ -151,7 +162,7 @@ describe('defineMenuToggle', () => {
 
   it('does not close itself when the toggle button matches the close selector', () => {
     const { host, button } = mount(
-      `data-desktop-media="${DESKTOP}" data-close-selector="button"`,
+      `data-desktop-media="${DESKTOP}" data-lock-scroll data-close-selector="button"`,
       '<div data-menu></div>',
     );
     button.click();
@@ -176,6 +187,15 @@ describe('defineMenuToggle', () => {
     expect(document.documentElement.style.overflow).toBe('');
   });
 
+  it('closes when a modal opens anywhere on the page', () => {
+    const { host, button } = mount();
+    button.click();
+    document.dispatchEvent(new CustomEvent('modal:open', { bubbles: true }));
+
+    expect(host.hasAttribute('data-open')).toBe(false);
+    expect(document.documentElement.style.overflow).toBe('');
+  });
+
   it('stays open on any other key', () => {
     const { host, button } = mount();
     button.click();
@@ -185,7 +205,7 @@ describe('defineMenuToggle', () => {
   });
 
   it('watches the breakpoint the host asks for', () => {
-    mount('data-desktop-media="(min-width: 1024px)"');
+    mount('data-desktop-media="(min-width: 1024px)" data-lock-scroll');
 
     expect(queries).toEqual(['(min-width: 1024px)']);
   });
@@ -215,6 +235,90 @@ describe('defineMenuToggle', () => {
     grow();
 
     expect(document.documentElement.style.overflow).toBe('');
+  });
+
+  it('leaves the page scrollable when the host does not ask for a lock', () => {
+    const { host, button } = mount(`data-desktop-media="${DESKTOP}"`);
+    const menu = host.querySelector<HTMLElement>('[data-menu]')!;
+    button.click();
+
+    expect(host.hasAttribute('data-open')).toBe(true);
+    expect(menu.hasAttribute('inert')).toBe(false);
+    expect(lockScroll).not.toHaveBeenCalled();
+
+    button.click();
+    expect(menu.hasAttribute('inert')).toBe(true);
+    expect(unlockScroll).not.toHaveBeenCalled();
+  });
+
+  it('releases nothing on teardown when it never took the lock', () => {
+    const { host, button } = mount(`data-desktop-media="${DESKTOP}"`);
+    button.click();
+    host.remove();
+
+    expect(unlockScroll).not.toHaveBeenCalled();
+  });
+
+  it('ignores requests once the element is torn down', () => {
+    const { host, button } = mount();
+    button.click();
+    host.remove();
+    vi.mocked(unlockScroll).mockClear();
+
+    (host as MenuToggleElement).setMenuOpen(true);
+
+    expect(host.hasAttribute('data-open')).toBe(false);
+    expect(lockScroll).toHaveBeenCalledTimes(1);
+    expect(document.documentElement.style.overflow).toBe('');
+  });
+
+  it('marks the menu inert while it is closed', () => {
+    const { host, button } = mount();
+    const menu = host.querySelector<HTMLElement>('[data-menu]')!;
+
+    expect(menu.hasAttribute('inert')).toBe(true);
+
+    button.click();
+    expect(menu.hasAttribute('inert')).toBe(false);
+
+    button.click();
+    expect(menu.hasAttribute('inert')).toBe(true);
+  });
+
+  it('opens and closes on request from the host app', () => {
+    const { host, button } = mount();
+    const menu = host.querySelector<HTMLElement>('[data-menu]')!;
+    const api = host as MenuToggleElement;
+
+    api.setMenuOpen(true);
+    expect(host.hasAttribute('data-open')).toBe(true);
+    expect(button.getAttribute('aria-expanded')).toBe('true');
+
+    api.setMenuOpen(false);
+    expect(menu.hasAttribute('inert')).toBe(true);
+    expect(document.documentElement.style.overflow).toBe('');
+  });
+
+  it('ignores a request made before the element is wired', () => {
+    const tagName = `menu-toggle-${++tagSeed}`;
+    defineMenuToggle(tagName);
+    const host = document.createElement(tagName) as MenuToggleElement;
+
+    expect(() => host.setMenuOpen(true)).not.toThrow();
+    expect(host.hasAttribute('data-open')).toBe(false);
+  });
+
+  it('works without a menu element', () => {
+    const tagName = `menu-toggle-${++tagSeed}`;
+    defineMenuToggle(tagName);
+    document.body.innerHTML = `
+      <${tagName} data-desktop-media="${DESKTOP}">
+        <button data-menu-button aria-label="Меню"></button>
+      </${tagName}>`;
+    const host = document.querySelector(tagName)!;
+    host.querySelector('button')!.click();
+
+    expect(host.hasAttribute('data-open')).toBe(true);
   });
 
   it('does nothing without a toggle button', () => {

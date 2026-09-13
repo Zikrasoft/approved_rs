@@ -24,11 +24,11 @@ const {
 
 <div
   id="mobile-menu"
-  class="xl:hidden border-t bg-header-mobile border-default"
-  aria-hidden="true"
+  data-menu
+  class="xl:hidden invisible fixed inset-0 z-40 flex flex-col justify-between overflow-y-auto bg-header-mobile px-2 pb-10 pt-20 opacity-0 backdrop-blur-xl transition-[opacity,visibility] duration-200 group-data-[open]:visible group-data-[open]:opacity-100"
   inert
 >
-  <div class="overflow-hidden">
+  <div>
     <nav class="max-w-6xl mx-auto px-6 py-5 flex flex-col gap-4 mobile-nav">
       <ServiceQuickLinks countryCode={countryCode} />
 
@@ -93,29 +93,5 @@ const {
   .prefs-divider {
     height: 1px;
     background: var(--color-border);
-  }
-
-  /* Grid-rows collapse: animates real layout height (not just a visual
-     clip), so closing actually shrinks the sticky header smoothly instead
-     of snapping via display:none. Scoped under xl's breakpoint so it never
-     fights the xl:hidden utility's display:none on desktop. */
-  @media (max-width: 1279px) {
-    #mobile-menu {
-      display: grid;
-      grid-template-rows: 0fr;
-      opacity: 0;
-      transition:
-        grid-template-rows 750ms var(--ease-spring),
-        opacity 650ms var(--ease-spring);
-      pointer-events: none;
-    }
-    #mobile-menu.menu-open {
-      grid-template-rows: 1fr;
-      opacity: 1;
-      pointer-events: auto;
-    }
-    #mobile-menu.no-anim {
-      transition: none;
-    }
   }
 </style>

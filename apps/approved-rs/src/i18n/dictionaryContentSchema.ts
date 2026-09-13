@@ -23,6 +23,7 @@ export const dictionaryContentSchema = z
     header: z
       .object({
         menuLabel: z.string(),
+        menuCloseLabel: z.string(),
         languageLabel: z.string(),
         themeToggleLabel: z.string(),
         themeToggleMobileLabel: z.string(),

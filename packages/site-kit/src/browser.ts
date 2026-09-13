@@ -1,7 +1,7 @@
 import { readOrCreateVisitorId } from './visitorId.ts';
 export { defineLazyMapEmbed, mapEmbedSrc } from './mapEmbed.ts';
 export { defineLocaleChoice } from './localeCookie.ts';
-export { defineMenuToggle } from './menuToggle.ts';
+export { defineMenuToggle, type MenuToggleElement } from './menuToggle.ts';
 export { lockScroll, unlockScroll } from './scrollLock.ts';
 export {
   defineModalDialog,

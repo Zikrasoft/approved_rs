@@ -63,64 +63,73 @@ const navItems = getNavItems(locale, navCountry).map((item) => ({
 }));
 ---
 
-<header
-  class="sticky top-0 z-50 border-b bg-header-glass border-default backdrop-blur-[16px]"
+<approved-menu
+  class="group contents"
+  data-desktop-media="(min-width: 1280px)"
+  data-lock-scroll
 >
-  <div
-    class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 xl:gap-4"
+  <header
+    class="sticky top-0 z-50 border-b bg-header-glass border-default backdrop-blur-[16px]"
   >
-    <SiteLogo />
+    <div
+      class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 xl:gap-4"
+    >
+      <SiteLogo />
 
-    <HeaderDesktopNav
-      navItems={navItems}
-      casesHref={casesHref}
-      casesLabel={t.nav.cases}
-      casesCurrent={casesCurrent}
-    />
+      <HeaderDesktopNav
+        navItems={navItems}
+        casesHref={casesHref}
+        casesLabel={t.nav.cases}
+        casesCurrent={casesCurrent}
+      />
 
-    <div class="flex items-center gap-1.5 shrink-0">
-      <!-- Language switcher: desktop only, grouped with theme toggle (both are
+      <div class="flex items-center gap-1.5 shrink-0">
+        <!-- Language switcher: desktop only, grouped with theme toggle (both are
            preference controls, not nav destinations) — mobile gets its own
            row inside HeaderMobileMenu -->
-      <div class="hidden xl:block">
-        <LanguageSwitcher />
+        <div class="hidden xl:block">
+          <LanguageSwitcher />
+        </div>
+
+        <!-- Theme toggle: desktop only — mobile gets its own row inside HeaderMobileMenu -->
+        <button
+          class="theme-toggle-btn theme-btn hidden xl:flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong bg-surface text-muted"
+          aria-label={t.header.themeToggleLabel}
+          title={t.header.themeToggleLabel}
+        >
+          <!-- Sun: shown when dark (click → light) -->
+          <span class="theme-icon-sun hidden"><Sun size={16} /></span>
+          <!-- Moon: shown when light (click → dark) -->
+          <span class="theme-icon-moon"><Moon size={16} /></span>
+        </button>
+
+        <!-- CTA: always visible -->
+        <Button
+          type="button"
+          {...{ [DATA_OPEN_LEAD_MODAL]: true }}
+          class="px-3 xl:px-4 py-2"
+        >
+          <Send size={13} />
+          <span class="xl:hidden">{t.header.ctaShort}</span>
+          <span class="hidden xl:inline">{t.header.ctaLong}</span>
+        </Button>
+
+        <button
+          data-menu-button
+          class="xl:hidden flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong text-secondary"
+          aria-label={t.header.menuLabel}
+          data-close-label={t.header.menuCloseLabel}
+          aria-controls="mobile-menu"
+          aria-expanded="false"
+        >
+          <span class="group-data-[open]:hidden"><Menu size={18} /></span>
+          <span class="hidden group-data-[open]:block"><X size={18} /></span>
+        </button>
       </div>
-
-      <!-- Theme toggle: desktop only — mobile gets its own row inside HeaderMobileMenu -->
-      <button
-        class="theme-toggle-btn theme-btn hidden xl:flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong bg-surface text-muted"
-        aria-label={t.header.themeToggleLabel}
-        title={t.header.themeToggleLabel}
-      >
-        <!-- Sun: shown when dark (click → light) -->
-        <span class="theme-icon-sun hidden"><Sun size={16} /></span>
-        <!-- Moon: shown when light (click → dark) -->
-        <span class="theme-icon-moon"><Moon size={16} /></span>
-      </button>
-
-      <!-- CTA: always visible -->
-      <Button
-        type="button"
-        {...{ [DATA_OPEN_LEAD_MODAL]: true }}
-        class="px-3 xl:px-4 py-2"
-      >
-        <Send size={13} />
-        <span class="xl:hidden">{t.header.ctaShort}</span>
-        <span class="hidden xl:inline">{t.header.ctaLong}</span>
-      </Button>
-
-      <!-- Mobile burger — toggles HeaderMobileMenu's #mobile-menu panel below -->
-      <button
-        id="burger"
-        class="xl:hidden flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong text-secondary"
-        aria-label={t.header.menuLabel}
-        aria-expanded="false"
-      >
-        <span id="burger-open"><Menu size={18} /></span>
-        <span id="burger-close" class="hidden"><X size={18} /></span>
-      </button>
     </div>
-  </div>
+
+    <LeadFormModal triggerAttr={DATA_OPEN_LEAD_MODAL} />
+  </header>
 
   <HeaderMobileMenu
     countryCode={navCountry}
@@ -130,9 +139,7 @@ const navItems = getNavItems(locale, navCountry).map((item) => ({
     languageLabel={t.header.languageLabel}
     themeToggleLabel={t.header.themeToggleMobileLabel}
   />
-
-  <LeadFormModal triggerAttr={DATA_OPEN_LEAD_MODAL} />
-</header>
+</approved-menu>
 
 <style>
   .theme-btn {
@@ -147,7 +154,7 @@ const navItems = getNavItems(locale, navCountry).map((item) => ({
   }
 </style>
 
-<script is:inline define:vars={{ DATA_OPEN_LEAD_MODAL }}>
+<script is:inline>
   function updateThemeIcons() {
     const isDark =
       document.documentElement.getAttribute('data-theme') === 'dark';
@@ -192,100 +199,6 @@ const navItems = getNavItems(locale, navCountry).map((item) => ({
       });
     });
 
-    /* ── Mobile burger — toggles HeaderMobileMenu's #mobile-menu panel ── */
-    const burger = document.getElementById('burger');
-    const menu = document.getElementById('mobile-menu');
-    const open = document.getElementById('burger-open');
-    const close = document.getElementById('burger-close');
-
-    // The menu's own grid-rows open animation (750ms, see HeaderMobileMenu's
-    // <style>) nudges the browser's scroll-anchoring by a few px with no real
-    // user scroll involved — ignoreScrollCloseUntil tells the scroll listener
-    // below to sit out that window instead of treating it as a real scroll
-    // and closing the menu it was just asked to open.
-    let ignoreScrollCloseUntil = 0;
-
-    function openMenu() {
-      if (!menu || !burger) return;
-      ignoreScrollCloseUntil = Date.now() + 900;
-      menu.classList.add('menu-open');
-      menu.removeAttribute('aria-hidden');
-      menu.inert = false;
-      burger.setAttribute('aria-expanded', 'true');
-      open && open.classList.add('hidden');
-      close && close.classList.remove('hidden');
-    }
-
-    function closeMenu(instant) {
-      if (!menu || !burger) return;
-      if (instant) menu.classList.add('no-anim');
-      menu.classList.remove('menu-open');
-      menu.setAttribute('aria-hidden', 'true');
-      menu.inert = true;
-      burger.setAttribute('aria-expanded', 'false');
-      open && open.classList.remove('hidden');
-      close && close.classList.add('hidden');
-      if (instant) {
-        // Force the closed state to paint before re-enabling the
-        // transition, so it doesn't animate a state that was never visible.
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions -- reading offsetHeight forces a reflow
-        menu.offsetHeight;
-        requestAnimationFrame(function () {
-          menu.classList.remove('no-anim');
-        });
-      }
-    }
-
-    if (burger && menu) {
-      burger.addEventListener('click', function () {
-        burger.getAttribute('aria-expanded') === 'true'
-          ? closeMenu()
-          : openMenu();
-      });
-      menu.querySelectorAll('a').forEach(function (a) {
-        a.addEventListener('click', function () {
-          closeMenu();
-        });
-      });
-
-      // Close the mobile menu when the "Оставить заявку" button opens the
-      // lead modal (LeadFormModal.astro owns the modal itself, this just
-      // keeps the burger menu from staying open behind it).
-      document
-        .querySelectorAll('[' + DATA_OPEN_LEAD_MODAL + ']')
-        .forEach(function (btn) {
-          btn.addEventListener('click', function () {
-            if (burger.getAttribute('aria-expanded') === 'true') closeMenu();
-          });
-        });
-
-      // Reset menu state if the viewport grows into desktop, so it doesn't
-      // reappear pre-opened if the user shrinks back to mobile later.
-      try {
-        window
-          .matchMedia('(min-width: 1280px)')
-          .addEventListener('change', function (e) {
-            if (e.matches) closeMenu();
-          });
-      } catch (e) {}
-
-      let scrollCheckScheduled = false;
-      window.addEventListener(
-        'scroll',
-        function () {
-          if (scrollCheckScheduled) return;
-          scrollCheckScheduled = true;
-          requestAnimationFrame(function () {
-            scrollCheckScheduled = false;
-            if (Date.now() < ignoreScrollCloseUntil) return;
-            if (burger.getAttribute('aria-expanded') === 'true')
-              closeMenu(true);
-          });
-        },
-        { passive: true },
-      );
-    }
-
     // Follow OS theme changes live, but only while the user hasn't picked one explicitly.
     try {
       window
@@ -301,4 +214,10 @@ const navItems = getNavItems(locale, navCountry).map((item) => ({
   }
 
   initHeader();
+</script>
+
+<script>
+  import { defineMenuToggle } from '@podbor/site-kit/browser';
+
+  defineMenuToggle('approved-menu');
 </script>

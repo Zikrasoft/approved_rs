@@ -7,6 +7,7 @@ nav:
   contacts: Контакты
 header:
   menuLabel: Меню
+  menuCloseLabel: Закрыть меню
   languageLabel: Язык
   themeToggleLabel: Переключить тему
   themeToggleMobileLabel: Сменить тему
