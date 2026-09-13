@@ -30,9 +30,16 @@ interface Props {
   description: string;
   noindex?: boolean;
   jsonLd?: Record<string, unknown>[];
+  stickyContact?: boolean;
 }
 
-const { title, description, noindex = false, jsonLd = [] } = Astro.props;
+const {
+  title,
+  description,
+  noindex = false,
+  jsonLd = [],
+  stickyContact = true,
+} = Astro.props;
 
 const jsonLdText = (schema: Record<string, unknown>) =>
   JSON.stringify(schema).replace(/</g, '\\u003c');
@@ -133,7 +140,12 @@ const businessSchema = {
       ))
     }
   </head>
-  <body class="flex min-h-screen flex-col pb-[calc(3.5rem+1px)] lg:pb-0">
+  <body
+    class:list={[
+      'flex min-h-screen flex-col lg:pb-0',
+      stickyContact && 'pb-[calc(3.5rem+1px)]',
+    ]}
+  >
     <a
       href="#main"
       class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-signal focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
@@ -144,7 +156,7 @@ const businessSchema = {
       <slot />
     </main>
     <SiteFooter />
-    <StickyContactBar />
+    {stickyContact && <StickyContactBar />}
     <LeadModal />
 
     <script>

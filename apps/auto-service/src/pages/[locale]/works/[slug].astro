@@ -74,7 +74,7 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
       widths={[720, 1200]}
       sizes="(min-width: 1024px) 70vw, 100vw"
       loading="eager"
-      class="card mt-4 w-full object-cover"
+      class="card mt-4 aspect-[4/3] w-full object-cover sm:aspect-[16/10]"
     />
   </section>
 
@@ -98,7 +98,7 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
                 widths={[480, 900]}
                 sizes="(min-width: 640px) 45vw, 100vw"
                 loading="lazy"
-                class="card w-full object-cover"
+                class="card aspect-[4/3] w-full object-cover"
               />
             </li>
           ))}
