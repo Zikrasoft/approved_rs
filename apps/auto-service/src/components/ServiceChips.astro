@@ -14,7 +14,7 @@ const site = getSiteContent(locale);
   class="wrap flex gap-2 overflow-x-auto py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
   aria-label={site.nav.services}
 >
-  <a href={PathBuilder.services(locale)} class="chip chip-current">
+  <a href={PathBuilder.services(locale)} class="chip chip-accent">
     {site.common.allServices}
   </a>
   {

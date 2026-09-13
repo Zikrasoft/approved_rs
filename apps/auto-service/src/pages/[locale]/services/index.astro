@@ -1,7 +1,7 @@
 ---
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
-import ServiceCards from '@/components/ServiceCards.astro';
+import PriceTable from '@/components/PriceTable.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getServicesContent } from '@/i18n/content/services';
@@ -31,7 +31,7 @@ const site = getSiteContent(locale);
   />
 
   <section class="wrap py-band md:py-band-lg">
-    <ServiceCards />
+    <PriceTable />
   </section>
 
   <FinalCta

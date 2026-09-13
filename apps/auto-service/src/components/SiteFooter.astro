@@ -34,10 +34,7 @@ const channels = contactChannels(site);
       </span>
       {
         SERVICE_SLUGS.map((slug) => (
-          <a
-            href={PathBuilder.service(locale, slug)}
-            class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal-ink"
-          >
+          <a href={PathBuilder.service(locale, slug)} class="link-muted">
             {services[slug].name}
           </a>
         ))
@@ -50,29 +47,19 @@ const channels = contactChannels(site);
       >
         {site.footer.companyHeading}
       </span>
-      <a
-        href={PathBuilder.works(locale)}
-        class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal-ink"
-        >{site.nav.works}</a
+      <a href={PathBuilder.works(locale)} class="link-muted">{site.nav.works}</a
       >
       {
         SHOP_ENABLED && (
-          <a
-            href={PathBuilder.shop(locale)}
-            class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal-ink"
-          >
+          <a href={PathBuilder.shop(locale)} class="link-muted">
             {site.nav.shop}
           </a>
         )
       }
-      <a
-        href={PathBuilder.contact(locale)}
-        class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal-ink"
+      <a href={PathBuilder.contact(locale)} class="link-muted"
         >{site.nav.contact}</a
       >
-      <a
-        href={PathBuilder.privacy(locale)}
-        class="text-sm text-ink-2 transition-colors duration-150 hover:text-signal-ink"
+      <a href={PathBuilder.privacy(locale)} class="link-muted"
         >{site.footer.privacyLabel}</a
       >
     </nav>
@@ -91,7 +78,7 @@ const channels = contactChannels(site);
                 href={channel.href}
                 data-contact-channel={channel.track}
                 rel="noopener"
-                class="group flex min-h-11 items-center gap-2.5 text-sm text-ink-2 transition-colors duration-150 hover:text-signal-ink"
+                class="link-muted group flex min-h-11 items-center gap-2.5"
               >
                 <Icon
                   name={channel.icon}

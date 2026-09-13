@@ -71,10 +71,15 @@ systems and components stay per-app on purpose.
 
 **Package rules:**
 
+- **Read `packages/*` before writing anything new.** Scroll lock, modal dialog,
+  locale choice, lazy map embed, phone formatting, markdown sanitising and the
+  visitor id already live there; reach for the existing helper and adapt it
+  rather than growing a second implementation in an app.
 - **The second copy is the signal.** The moment the same helper would exist in
   two apps, it belongs in a package instead — and it moves together with its
   tests, never ahead of them. What stays per-app is markup and styling, so two
   brand sites never become recognisable as relatives; what moves is behaviour.
+  Spotting a shareable mechanism is reason enough to extract it now, not later.
 - **An extraction is finished only when every call site uses it.** Wiring the
   new package into the one app you were editing leaves the other copies alive
   and the divergence intact, which is what the extraction was supposed to end.

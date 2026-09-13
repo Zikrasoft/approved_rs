@@ -1,8 +1,7 @@
 ---
 import '@/styles/global.css';
-import bodyFontUrl from '@fontsource/onest/files/onest-cyrillic-400-normal.woff2?url';
-import headingLatinFontUrl from '@fontsource/onest/files/onest-latin-800-normal.woff2?url';
-import headingCyrillicFontUrl from '@fontsource/onest/files/onest-cyrillic-800-normal.woff2?url';
+import latinFontUrl from '@fontsource-variable/onest/files/onest-latin-wght-normal.woff2?url';
+import cyrillicFontUrl from '@fontsource-variable/onest/files/onest-cyrillic-wght-normal.woff2?url';
 import SiteHeader from '@/components/SiteHeader.astro';
 import SiteFooter from '@/components/SiteFooter.astro';
 import LeadModal from '@/components/LeadModal.astro';
@@ -49,8 +48,7 @@ const site = getSiteContent(locale);
 const canonical = new URL(Astro.url.pathname, SITE_URL).href;
 const alternates = localeSet.getAlternateLinks(SITE_URL, Astro.url.pathname);
 const ogImage = new URL(`/og${OG_SUFFIX[locale]}.png`, SITE_URL).href;
-const headingFontUrl =
-  locale === 'ru' ? headingCyrillicFontUrl : headingLatinFontUrl;
+const fontUrl = locale === 'ru' ? cyrillicFontUrl : latinFontUrl;
 
 const businessSchema = {
   '@context': 'https://schema.org',
@@ -92,14 +90,7 @@ const businessSchema = {
       rel="preload"
       as="font"
       type="font/woff2"
-      href={bodyFontUrl}
-      crossorigin
-    />
-    <link
-      rel="preload"
-      as="font"
-      type="font/woff2"
-      href={headingFontUrl}
+      href={fontUrl}
       crossorigin
     />
     <title>{title}</title>
