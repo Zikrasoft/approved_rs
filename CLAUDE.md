@@ -12,7 +12,7 @@ apps/detailing/       Details, the detailing studio site — details.rs
 apps/auto-service/    CarLab, the car service site + parts shop — carlab.rs
 packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click routes
 packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
-packages/site-kit/    brand-agnostic mechanics: safeMarkdown, formatPhone, visitor id, lazy map embed
+packages/site-kit/    brand-agnostic mechanics: safeMarkdown, formatPhone, visitor id, lazy map embed, scroll lock, modal dialog
 packages/brands/      the three brands: domains, display names, locale mapping, ops service labels
 ```
 
@@ -121,8 +121,10 @@ systems and components stay per-app on purpose.
   imported, so putting such a helper beside a static `libphonenumber-js` import
   inlines the whole library into the eager chunk — measured at 3 KB → 185 KB on
   the lead form, a 60× regression aimed squarely at slow connections. Hence
-  `@podbor/lead-crm/compose-e164`, a zero-import subpath, separate from
-  `/phone`. When extracting, check the emitted chunk, not the source.
+  `@podbor/lead-crm/compose-e164` and `/phone-input`, zero-import subpaths
+  separate from `/phone`. When extracting, check the emitted chunk, not the
+  source — `/phone-input` was measured at 4 KB eager with `libphonenumber-js`
+  still behind a dynamic import.
 
 ## House style for a brand site
 
@@ -217,17 +219,14 @@ monorepo artifact.
 
 Husky + lint-staged run eslint --fix/prettier on staged files on commit — a commit can silently reformat what you staged, so `git status`/`git diff` after committing if that matters.
 
-**Run the `review-local` skill with fixes applied before every commit, and after
-each significant block of work on a long task.** It is the only pass that reads
-the diff against this file's conventions, and it costs minutes against a bug
-reaching production. Skip it only for a change small enough that the diff
-carries no judgement — a typo, a version bump, a copy tweak. Anything touching
-logic, money, the lead pipeline or a public route goes through it. On work split
-across several agents or stages, review after each stage lands rather than once
-over the combined diff — a diff too large to judge is a review that finds
-nothing. This is not enforced by a git hook on purpose: a hook can block a
-commit but cannot run the review, and it cannot tell a one-word fix from a
-refactor.
+**Run `review-local --fix-all` before every commit, and after each significant
+block of work on a long task.** No exceptions — a typo and a refactor both go
+through it. It is the only pass that reads the diff against this file's
+conventions, and it costs minutes against a bug reaching production. On work
+split across several agents or stages, review after each stage lands rather
+than once over the combined diff — a diff too large to judge is a review that
+finds nothing. This is not enforced by a git hook on purpose: a hook can block
+a commit but cannot run the review itself.
 
 ## Architecture
 
