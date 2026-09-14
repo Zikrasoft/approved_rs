@@ -8,7 +8,8 @@ import IncludedGrid from '@/components/IncludedGrid.astro';
 import { getFaq } from '@/i18n/content/faq';
 import { getServicesContent } from '@/i18n/content/services';
 import { withLocales, PathBuilder } from '@/utils/paths';
-import { getCountry, getCountryFlag } from '@/utils/geo';
+import { getCountry } from '@/utils/geo';
+import CountryPlate from '@/components/CountryPlate.astro';
 import { generateServiceSchema, placeholderOgImage } from '@/utils/seo';
 import { getCollection } from 'astro:content';
 import {
@@ -57,19 +58,19 @@ const cards: {
   slug: VehicleImportSpoke;
   title: string;
   text: string;
-  flag: string;
+  code: string;
 }[] = [
   {
     slug: 'eu',
     title: pc.euCardTitle,
     text: pc.euCardText,
-    flag: getCountryFlag('eu'),
+    code: 'eu',
   },
   {
     slug: 'china',
     title: pc.chinaCardTitle,
     text: pc.chinaCardText,
-    flag: getCountryFlag('cn'),
+    code: 'cn',
   },
 ];
 ---
@@ -97,10 +98,11 @@ const cards: {
       cards.map((card) => (
         <a
           href={PathBuilder.vehicleImportSpoke(locale, card.slug)}
-          class="import-card glow-border flex flex-col p-6 rounded-sm border bg-surface border-default no-underline"
+          class="import-card group glow-border flex flex-col p-6 rounded-sm border bg-surface border-default no-underline"
         >
-          <p class="font-display text-xl font-bold mb-2 text-primary">
-            <span set:html={card.flag} /> {card.title}
+          <p class="font-display text-xl font-bold mb-2 text-primary flex items-center gap-2.5">
+            <CountryPlate code={card.code} size="md" />
+            {card.title}
           </p>
           <p class="text-sm leading-relaxed mb-4 text-muted">{card.text}</p>
           <span class="mt-auto text-xs font-medium tracking-wide uppercase text-accent">

@@ -1,6 +1,5 @@
 import countriesData from '@/data/countries.json';
 import citiesData from '@/data/cities.json';
-import { FLAGS } from './constants';
 
 interface CountryNames {
   name: string;
@@ -51,5 +50,3 @@ export const getCountry = (code: string): Country | undefined =>
 
 export const getCitiesForCountry = (countryCode: string): City[] =>
   cities.filter((c) => c.country === countryCode && c.active);
-
-export const getCountryFlag = (code: string): string => FLAGS[code] ?? '🏳️';

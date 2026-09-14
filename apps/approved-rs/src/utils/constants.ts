@@ -30,42 +30,6 @@ export const SOCIAL_SAME_AS = [
   `https://www.threads.com/@${THREADS_CHANNEL}`,
 ];
 
-// Single source of truth for flag emoji — keyed lowercase by whatever 2-letter
-// code is in play (delivery country, locale, or phone-country ISO). `sr`
-// (Serbian locale) and `rs` (Serbia country) are different keys that happen
-// to share a flag — not an error, both are kept explicit.
-// `ch` is an inline SVG, not the 🇨🇭 emoji: Switzerland's flag is the one
-// non-rectangular national flag, and several emoji fonts (notably on
-// Windows) fall back to a generic monochrome placeholder glyph for it while
-// every rectangular flag here renders fine — an SVG renders identically on
-// every platform. Consumers must render FLAGS/getCountryFlag output with
-// `set:html`, not as plain text, to support this.
-export const FLAGS: Record<string, string> = {
-  de: '🇩🇪',
-  rs: '🇷🇸',
-  es: '🇪🇸',
-  ch: '<svg viewBox="0 0 32 32" width="1em" height="1em" style="display:inline-block;vertical-align:-0.125em" xmlns="http://www.w3.org/2000/svg"><rect width="32" height="32" fill="#D52B1E"/><rect x="13" y="6" width="6" height="20" fill="#fff"/><rect x="6" y="13" width="20" height="6" fill="#fff"/></svg>',
-  pt: '🇵🇹',
-  fr: '🇫🇷',
-  it: '🇮🇹',
-  pl: '🇵🇱',
-  ru: '🇷🇺',
-  en: '🇬🇧',
-  sr: '🇷🇸',
-  ua: '🇺🇦',
-  by: '🇧🇾',
-  kz: '🇰🇿',
-  ba: '🇧🇦',
-  hr: '🇭🇷',
-  me: '🇲🇪',
-  mk: '🇲🇰',
-  tr: '🇹🇷',
-  // Not real countries.json entries (no per-country page) — just the
-  // vehicle-import hub cards' "Europe"/"China" groupings.
-  eu: '🇪🇺',
-  cn: '🇨🇳',
-};
-
 // China isn't in countries.json (no vehicle sourcing market there, no per-country
 // name-case data needed) but vehicle-import sources cars from it — one shared name
 // constant instead of the same inline locale map duplicated in every place

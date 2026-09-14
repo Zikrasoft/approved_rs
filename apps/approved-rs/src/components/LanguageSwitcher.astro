@@ -2,8 +2,8 @@
 import { Check } from '@lucide/astro';
 import { LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
 import { SUPPORTED_LOCALES, getLocale, type Locale } from '@/i18n/config';
-import { FLAGS } from '@/utils/constants';
 import { swapLocale } from '@/utils/paths';
+import CountryPlate from './CountryPlate.astro';
 import Dropdown from './Dropdown.astro';
 
 interface Props {
@@ -41,11 +41,11 @@ const current = LOCALE_META[currentLocale];
               href={swapLocale(pathname, locale)}
               {...{ [LOCALE_CHOICE_ATTRIBUTE]: locale }}
               class:list={[
-                'dropdown-option lang-chip justify-center gap-1.5 px-3 py-2 rounded-sm text-sm',
+                'dropdown-option lang-chip group justify-center gap-2 px-3 py-2 rounded-sm text-sm',
                 { 'dropdown-option-active': active },
               ]}
             >
-              <span class="text-sm leading-none">{FLAGS[locale]}</span>
+              <CountryPlate code={locale} />
               <span>{meta.native}</span>
             </a>
           );
@@ -59,7 +59,7 @@ const current = LOCALE_META[currentLocale];
         triggerClass="px-2.5 py-1.5"
       >
         <Fragment slot="trigger">
-          <span class="text-sm leading-none">{FLAGS[currentLocale]}</span>
+          <CountryPlate code={currentLocale} />
           <span class="text-sm">{current.code}</span>
         </Fragment>
         {SUPPORTED_LOCALES.map((locale) => {
@@ -71,11 +71,11 @@ const current = LOCALE_META[currentLocale];
                 href={swapLocale(pathname, locale)}
                 {...{ [LOCALE_CHOICE_ATTRIBUTE]: locale }}
                 class:list={[
-                  'dropdown-option gap-2.5 px-3 py-2 rounded-sm text-sm',
+                  'dropdown-option group gap-2.5 px-3 py-2 rounded-sm text-sm',
                   { 'dropdown-option-active': active },
                 ]}
               >
-                <span class="text-base leading-none">{FLAGS[locale]}</span>
+                <CountryPlate code={locale} />
                 <span class="flex-1">{meta.native}</span>
                 {active && <Check size={14} class="text-accent shrink-0" />}
               </a>

@@ -1,5 +1,5 @@
 ---
-import { getCountryFlag } from '@/utils/geo';
+import CountryPlate from './CountryPlate.astro';
 import { PathBuilder } from '@/utils/paths';
 import type { Country } from '@/utils/geo';
 import type { Locale } from '@/i18n/config';
@@ -19,10 +19,7 @@ const { country, locale, service = 'vehicle-sourcing' } = Astro.props;
   class="country-pill group flex items-center justify-between gap-2.5 px-4 py-2.5 rounded-sm no-underline glow-border bg-surface border border-default"
 >
   <span class="flex items-center gap-2.5 min-w-0">
-    <span
-      class="text-lg leading-none shrink-0"
-      set:html={getCountryFlag(country.code)}
-    />
+    <CountryPlate code={country.code} />
     <span class="text-sm font-medium text-primary truncate">
       {country[locale].name}
     </span>
