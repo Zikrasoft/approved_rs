@@ -33,6 +33,7 @@ export interface SectionTranslatorOptions<L extends string> {
 // enough to stay well under the cap; the merged result is still validated
 // against the section's full schema, so a dropped key still fails loudly.
 const MAX_REQUEST_CHARS = 8_000;
+const CHUNK_ATTEMPTS = 3;
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -123,13 +124,7 @@ export function createSectionTranslator<L extends string>({
 
     const merged: SectionData = {};
     for (const chunk of chunkByKey(data)) {
-      const raw = await callOpenAiJson({
-        apiKey,
-        model,
-        systemPrompt,
-        userContent: JSON.stringify(chunk),
-      });
-      mergeChunks(merged, raw as SectionData);
+      mergeChunks(merged, await translateChunk(chunk, apiKey, systemPrompt));
     }
 
     const parsed = section.schema.safeParse(merged);
@@ -140,6 +135,32 @@ export function createSectionTranslator<L extends string>({
     }
     assertSafeTranslation(data, parsed.data, '');
     return parsed.data as SectionData;
+  }
+
+  // The model garbles a word now and then — a Latin stem welded onto a
+  // Cyrillic ending, a dropped array. Sampling it again usually comes back
+  // clean, and one bad token should not cost a deploy.
+  async function translateChunk(
+    chunk: SectionData,
+    apiKey: string,
+    systemPrompt: string,
+  ): Promise<SectionData> {
+    let lastError: unknown;
+    for (let attempt = 0; attempt < CHUNK_ATTEMPTS; attempt++) {
+      const raw = await callOpenAiJson({
+        apiKey,
+        model,
+        systemPrompt,
+        userContent: JSON.stringify(chunk),
+      });
+      try {
+        assertSafeTranslation(chunk, raw, '');
+        return raw as SectionData;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError;
   }
 
   async function processSection(

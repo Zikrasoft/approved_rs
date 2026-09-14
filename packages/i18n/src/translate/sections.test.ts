@@ -217,6 +217,53 @@ describe('processSection (file round-trip)', () => {
     stubOpenAiFetch((userContent) => upper(JSON.parse(userContent)));
   }
 
+  function garbled(userContent: string) {
+    const out = upper(JSON.parse(userContent)) as {
+      nav: Record<string, string>;
+    };
+    out.nav.cases = 'Opишите';
+    return out;
+  }
+
+  it('asks again when the model garbles a word, and keeps the clean answer', async () => {
+    let calls = 0;
+    stubOpenAiFetch((userContent) => {
+      calls += 1;
+      return calls === 1
+        ? garbled(userContent)
+        : upper(JSON.parse(userContent));
+    });
+    writeFileSync(file, stringify({ ...RU_NAV, translations: {} }));
+
+    await expect(
+      processSection({ ...NAV_SECTION, path: file }, 'test-key'),
+    ).resolves.toBe('translated');
+
+    const doc = parseDocument(readFileSync(file, 'utf-8'));
+    expect(doc.getIn(['translations', 'en', 'nav', 'cases'])).toBe('КЕЙСЫ');
+  });
+
+  it('gives up once the model keeps garbling the same chunk', async () => {
+    stubOpenAiFetch(garbled);
+    writeFileSync(file, stringify({ ...RU_NAV, translations: {} }));
+
+    await expect(
+      processSection({ ...NAV_SECTION, path: file }, 'test-key'),
+    ).rejects.toThrow(/mixes Latin and Cyrillic/);
+  });
+
+  it('rejects a response that invented a key the schema does not allow', async () => {
+    stubOpenAiFetch((userContent) => ({
+      ...(upper(JSON.parse(userContent)) as object),
+      extra: 'не просили',
+    }));
+    writeFileSync(file, stringify({ ...RU_NAV, translations: {} }));
+
+    await expect(
+      processSection({ ...NAV_SECTION, path: file }, 'test-key'),
+    ).rejects.toThrow(/doesn't match the schema/);
+  });
+
   it('translates every target locale on first run and writes the hash back', async () => {
     stubTranslateFetch();
     writeFileSync(file, stringify({ ...RU_NAV, translations: {} }));
