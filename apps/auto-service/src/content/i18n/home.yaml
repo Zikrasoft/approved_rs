@@ -15,7 +15,7 @@ trust:
     label: гарантия на работы и запчасти
   - value: 1 день
     label: обычный срок планового ТО
-  - value: '0 RSD'
+  - value: бесплатно
     label: стоимость первичного осмотра
 servicesHead:
   eyebrow: Услуги
@@ -99,7 +99,7 @@ translations:
         label: garancija na radove i delove
       - value: 1 dan
         label: običan rok za redovno održavanje
-      - value: 0 RSD
+      - value: besplatno
         label: trošak inicijalnog pregleda
     servicesHead:
       eyebrow: Usluge
@@ -182,7 +182,7 @@ translations:
         label: warranty on work and parts
       - value: 1 day
         label: average time for routine maintenance
-      - value: 0 RSD
+      - value: free
         label: cost of initial inspection
     servicesHead:
       eyebrow: Services

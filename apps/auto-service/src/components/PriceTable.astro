@@ -15,7 +15,7 @@ const services = getServicesContent(locale);
       return (
         <a
           href={PathBuilder.service(locale, slug)}
-          class="grid gap-x-6 gap-y-1 border-b border-line p-5 transition-colors duration-150 last:border-b-0 odd:bg-shade/60 hover:bg-shade sm:grid-cols-[1.5fr_auto_auto] sm:items-baseline sm:px-6"
+          class="grid gap-x-6 gap-y-1 border-b border-line p-5 transition-colors duration-150 last:border-b-0 odd:bg-shade/60 hover:bg-shade sm:grid-cols-[1fr_auto] sm:items-baseline sm:px-6"
         >
           <div class="flex flex-col gap-1">
             <h3 class="text-base font-semibold text-ink">{service.name}</h3>
@@ -23,9 +23,6 @@ const services = getServicesContent(locale);
           </div>
           <span class="spec text-sm text-muted sm:w-28 sm:text-right">
             {service.duration}
-          </span>
-          <span class="spec text-base font-semibold text-ink sm:w-44 sm:text-right">
-            {service.priceFrom}
           </span>
         </a>
       );
