@@ -318,7 +318,13 @@ Settings → Secrets and variables → Actions:
 
 1. Vercel → Add New → Project → Import Git Repository → тот же репозиторий
    `Zikrasoft/approved_rs`
-2. **Root Directory** → `apps/auto-service` (или `apps/detailing`)
+2. **Root Directory** → оставить пустым (`./`), несмотря на то что Vercel
+   подставит туда путь приложения с экрана импорта. Деплоит GitHub Actions, а
+   джоба уже выполняется внутри `apps/<app>`; если проект добавит свой Root
+   Directory сверху, CLI будет искать `apps/detailing/apps/detailing` и
+   `vercel deploy` упадёт с «The provided path … does not exist». Сборка при
+   этом проходит зелёной — ломается только шаг deploy. Так же настроен и
+   проект approved.rs
 3. Framework Preset: **Astro**. Build/Install/Output Command не трогать —
    они уже заданы в `vercel.json` приложения и переопределят дашборд
 4. Environment Variables — по таблицам выше (публичные контакты, Telegram,
