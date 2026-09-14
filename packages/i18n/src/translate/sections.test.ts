@@ -6,6 +6,7 @@ import { parseDocument, stringify } from 'yaml';
 import { z } from 'zod';
 import {
   chunkByKey,
+  mergeChunks,
   createSectionTranslator,
   hashSource,
   type Section,
@@ -450,5 +451,55 @@ describe('chunkByKey boundary', () => {
     const exact =
       JSON.stringify({ a: 'xx' }).length + JSON.stringify({ b: 'yy' }).length;
     expect(chunkByKey(data, exact)).toEqual([data]);
+  });
+});
+
+describe('chunkByKey with a key bigger than the budget', () => {
+  it('splits that key by its own children instead of sending it whole', () => {
+    const big = {
+      de: { notes: 'x'.repeat(60) },
+      es: { notes: 'y'.repeat(60) },
+      ch: { notes: 'z'.repeat(60) },
+    };
+    const chunks = chunkByKey({ 'vehicle-import': big }, 100);
+
+    expect(chunks.length).toBeGreaterThan(1);
+    for (const chunk of chunks) {
+      expect(Object.keys(chunk)).toEqual(['vehicle-import']);
+      expect(JSON.stringify(chunk).length).toBeLessThanOrEqual(120);
+    }
+    expect(
+      chunks.reduce(
+        (all, chunk) => ({
+          ...all,
+          ...(chunk['vehicle-import'] as Record<string, unknown>),
+        }),
+        {},
+      ),
+    ).toEqual(big);
+  });
+
+  it('leaves an oversized leaf alone rather than losing it', () => {
+    const chunks = chunkByKey({ note: 'x'.repeat(200) }, 100);
+    expect(chunks).toEqual([{ note: 'x'.repeat(200) }]);
+  });
+});
+
+describe('mergeChunks', () => {
+  it('keeps both halves of a key that was split across requests', () => {
+    const merged = mergeChunks(
+      { 'vehicle-import': { de: { points: ['a'] } } },
+      { 'vehicle-import': { es: { points: ['b'] } } },
+    );
+
+    expect(merged).toEqual({
+      'vehicle-import': { de: { points: ['a'] }, es: { points: ['b'] } },
+    });
+  });
+
+  it('replaces an array rather than merging it index by index', () => {
+    expect(mergeChunks({ points: ['a', 'b'] }, { points: ['c'] })).toEqual({
+      points: ['c'],
+    });
   });
 });

@@ -32,7 +32,11 @@ export interface SectionTranslatorOptions<L extends string> {
 // timed out mid-generation. Top-level keys are translated in batches small
 // enough to stay well under the cap; the merged result is still validated
 // against the section's full schema, so a dropped key still fails loudly.
-const MAX_REQUEST_CHARS = 12_000;
+const MAX_REQUEST_CHARS = 8_000;
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
 
 export function chunkByKey(
   data: SectionData,
@@ -41,18 +45,42 @@ export function chunkByKey(
   const chunks: SectionData[] = [];
   let current: SectionData = {};
   let size = 0;
+
+  const flush = () => {
+    if (size > 0) chunks.push(current);
+    current = {};
+    size = 0;
+  };
+
   for (const [key, value] of Object.entries(data)) {
     const cost = JSON.stringify({ [key]: value }).length;
-    if (size > 0 && size + cost > maxChars) {
-      chunks.push(current);
-      current = {};
-      size = 0;
+    // A single key can outgrow the budget on its own, and asking for the whole
+    // thing back is how the model starts dropping nested arrays. Split it by
+    // its own children and let mergeChunks put the halves back together.
+    if (cost > maxChars && isPlainObject(value)) {
+      flush();
+      for (const part of chunkByKey(value as SectionData, maxChars)) {
+        chunks.push({ [key]: part });
+      }
+      continue;
     }
+    if (size > 0 && size + cost > maxChars) flush();
     current[key] = value;
     size += cost;
   }
-  if (size > 0) chunks.push(current);
+  flush();
   return chunks;
+}
+
+export function mergeChunks(into: SectionData, from: SectionData): SectionData {
+  for (const [key, value] of Object.entries(from)) {
+    const existing = into[key];
+    into[key] =
+      isPlainObject(existing) && isPlainObject(value)
+        ? mergeChunks(existing as SectionData, value as SectionData)
+        : value;
+  }
+  return into;
 }
 
 export function hashSource(data: SectionData): string {
@@ -101,7 +129,7 @@ export function createSectionTranslator<L extends string>({
         systemPrompt,
         userContent: JSON.stringify(chunk),
       });
-      Object.assign(merged, raw as SectionData);
+      mergeChunks(merged, raw as SectionData);
     }
 
     const parsed = section.schema.safeParse(merged);
