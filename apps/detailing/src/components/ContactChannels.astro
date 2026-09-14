@@ -3,6 +3,7 @@ import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getSiteContent } from '@/i18n/content/site';
 import { CONTACT_LINKS } from '@/utils/contactLinks';
+import { TELEGRAM_ENABLED } from '@/utils/constants';
 
 interface Props {
   class?: string;
@@ -31,12 +32,16 @@ const channels = [
     label: site.channels.viber,
     track: 'viber',
   },
-  {
-    href: CONTACT_LINKS.telegram,
-    icon: 'telegram',
-    label: site.channels.telegram,
-    track: 'telegram',
-  },
+  ...(TELEGRAM_ENABLED
+    ? ([
+        {
+          href: CONTACT_LINKS.telegram,
+          icon: 'telegram',
+          label: site.channels.telegram,
+          track: 'telegram',
+        },
+      ] as const)
+    : []),
 ] as const;
 ---
 

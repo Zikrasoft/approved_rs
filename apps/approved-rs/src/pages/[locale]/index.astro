@@ -333,31 +333,6 @@ const geoCells = countries.map((country) => ({
     </div>
   </section>
 
-  <section class="border-b border-default">
-    <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
-      <div class="mb-10">
-        <SectionHeading title={h.testimonialsHeading} />
-      </div>
-      <div class="grid gap-5 md:grid-cols-3">
-        {
-          h.testimonials.map((review) => (
-            <figure class="quote">
-              <blockquote class="text-[0.99rem] leading-relaxed text-primary">
-                {review.quote}
-              </blockquote>
-              <figcaption class="mt-5 pt-4 border-t border-default text-sm text-muted">
-                <span class="block font-medium text-primary">
-                  {review.name}
-                </span>
-                {review.caption}
-              </figcaption>
-            </figure>
-          ))
-        }
-      </div>
-    </div>
-  </section>
-
   <!-- Mobile-only lead form: desktop keeps it in the hero sidebar, mobile
        moves it here so the page explains the business before asking for
        contact details. -->
@@ -496,12 +471,5 @@ const geoCells = countries.map((country) => ({
   .term {
     border-top: 2px solid var(--color-accent);
     padding-top: 0.9rem;
-  }
-  .quote {
-    margin: 0;
-    padding: 1.4rem;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 2px;
   }
 </style>

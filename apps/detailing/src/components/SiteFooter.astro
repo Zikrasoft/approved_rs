@@ -6,7 +6,13 @@ import { getSiteContent } from '@/i18n/content/site';
 import { getServicesContent } from '@/i18n/content/services';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
-import { INSTAGRAM, SITE_NAME, STUDIO_ADDRESS } from '@/utils/constants';
+import {
+  INSTAGRAM,
+  INSTAGRAM_ENABLED,
+  SITE_NAME,
+  STUDIO_ADDRESS,
+  TELEGRAM_ENABLED,
+} from '@/utils/constants';
 import { CONTACT_LINKS } from '@/utils/contactLinks';
 
 const locale = localeFrom(Astro.url.pathname);
@@ -29,12 +35,16 @@ const messengers = [
     label: site.channels.viber,
     track: 'viber',
   },
-  {
-    href: CONTACT_LINKS.telegram,
-    icon: 'telegram',
-    label: site.channels.telegram,
-    track: 'telegram',
-  },
+  ...(TELEGRAM_ENABLED
+    ? ([
+        {
+          href: CONTACT_LINKS.telegram,
+          icon: 'telegram',
+          label: site.channels.telegram,
+          track: 'telegram',
+        },
+      ] as const)
+    : []),
 ] as const;
 ---
 
@@ -46,16 +56,19 @@ const messengers = [
         <p class="max-w-xs text-sm leading-relaxed text-mute">
           {site.footer.tagline}
         </p>
-        <a
-          href={CONTACT_LINKS.instagram}
-          rel="noopener"
-          target="_blank"
-          class="inline-flex min-h-11 items-center gap-2.5 text-sm text-mute transition-colors duration-400 hover:text-champagne"
-        >
-          <Icon name="instagram" size={16} class="shrink-0" />
-          <span class="sr-only">{site.channels.instagram}</span>
-          @{INSTAGRAM}
-        </a>
+        {
+          INSTAGRAM_ENABLED && (
+            <a
+              href={CONTACT_LINKS.instagram}
+              rel="noopener"
+              target="_blank"
+              class="inline-flex min-h-11 items-center gap-2.5 text-sm text-mute transition-colors duration-400 hover:text-champagne"
+            >
+              <Icon name="instagram" size={16} class="shrink-0" />
+              <span class="sr-only">{site.channels.instagram}</span>@{INSTAGRAM}
+            </a>
+          )
+        }
       </div>
 
       <nav class="flex flex-col gap-3" aria-label={site.nav.services}>

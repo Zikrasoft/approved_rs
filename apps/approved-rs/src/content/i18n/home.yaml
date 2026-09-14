@@ -34,17 +34,6 @@ trustCards:
     text: 'Поэтапная оплата и понятные условия. Сопровождаем документы на всех этапах: оформление, растаможка, регистрация — без сюрпризов.'
   - title: Локальная экспертиза
     text: 'Знаем специфику каждого рынка: автобанные пробеги Германии, особенности кузова испанских авто, нюансы оформления на иностранные номера в Сербии.'
-testimonialsHeading: Что говорят клиенты
-testimonials:
-  - quote: «Привезли BMW 3 серии из Мюнхена в Белград. Всё чётко — от осмотра до постановки на учёт. Сэкономили кучу нервов на оформлении.»
-    name: Александр
-    caption: BMW 320d, Германия → Сербия
-  - quote: «Долго искал Skoda Octavia в хорошем состоянии. Ребята нашли вариант в Испании, проверили независимым экспертом — всё совпало с описанием.»
-    name: Михаил
-    caption: Skoda Octavia, Испания → Россия
-  - quote: «Оформление на иностранные номера казалось сложным. Команда провела через каждый шаг — и через месяц я уже ездил. Рекомендую.»
-    name: Дмитрий
-    caption: VW Passat, Германия → Сербия
 ctaEyebrow: Готовы начать?
 ctaHeading:
   line1: Расскажите нам
@@ -165,17 +154,6 @@ translations:
         text: 'Payment in stages and clear conditions. We assist with all documentation throughout the process: registration, customs clearance, registration — no surprises.'
       - title: Local expertise
         text: 'We know the specifics of each market: the autobahn mileage of Germany, the nuances of Spanish car bodies, and the specifics of foreign plate registration in Serbia.'
-    testimonialsHeading: What clients say
-    testimonials:
-      - quote: “They brought my BMW 3 series from Munich to Belgrade. Everything was clear — from inspection to registration. Saved me tons of nerves during the paperwork.”
-        name: Александр
-        caption: BMW 320d, Germany → Serbia
-      - quote: “I spent a long time searching for a Skoda Octavia in good condition. The team found an option in Spain, inspected it with an independent expert — everything matched the description.”
-        name: Михаил
-        caption: Skoda Octavia, Spain → Russia
-      - quote: “Registering with foreign plates seemed complicated. The team guided me through every step — and within a month, I was already driving. Highly recommend.”
-        name: Дмитрий
-        caption: VW Passat, Germany → Serbia
     ctaEyebrow: Ready to get started?
     ctaHeading:
       line1: Tell us about
@@ -294,17 +272,6 @@ translations:
         text: 'Postepena uplata i jasni uslovi. Pratimo dokumentaciju na svim fazama: registracija, carinjenje, registracija - bez iznenađenja.'
       - title: Lokalna ekspertiza
         text: 'Znamo specifičnosti svakog tržišta: autobahnske pređene kilometre u Nemačkoj, karakteristike karoserije španskih automobila, nijanse registracije stranih brojeva u Srbiji.'
-    testimonialsHeading: Šta kažu klijenti
-    testimonials:
-      - quote: «Doveli su BMW serije 3 iz Minhena u Beograd. Sve jasno - od pregleda do registracije. Uštedeli smo mnogo živaca na registraciji.»
-        name: Александр
-        caption: BMW 320d, Nemačka → Srbija
-      - quote: «Dugo sam tražio Skodu Octaviju u dobrom stanju. Momci su pronašli opciju u Španiji, proverili sa nezavisnim ekspertom - sve se poklapalo sa opisom.»
-        name: Михаил
-        caption: Skoda Octavia, Španija → Rusija
-      - quote: «Registracija na strane brojeve činila se kompliciranom. Tim me vodio kroz svaki korak - i mesec dana kasnije sam već vozio. Preporučujem.»
-        name: Дмитрий
-        caption: VW Passat, Nemačka → Srbija
     ctaEyebrow: Spremni da počnete?
     ctaHeading:
       line1: Ispričajte nam
@@ -423,17 +390,6 @@ translations:
         text: 'Pago por etapas y condiciones claras. Acompañamos la documentación en todas las etapas: gestión, aduana, registro — sin sorpresas.'
       - title: Experticia local
         text: 'Conocemos la especificidad de cada mercado: los recorridos de autopista en Alemania, las particularidades de la carrocería de los autos españoles, los detalles del registro de matrículas extranjeras en Serbia.'
-    testimonialsHeading: Qué dicen los clientes
-    testimonials:
-      - quote: «Trajeron un BMW Serie 3 de Múnich a Belgrado. Todo claro — desde la inspección hasta el registro. Ahorré un montón de nervios en la gestión.»
-        name: Александр
-        caption: BMW 320d, Alemania → Serbia
-      - quote: «Busqué durante mucho tiempo un Skoda Octavia en buen estado. Los chicos encontraron una opción en España, la revisaron con un experto independiente — todo coincidió con la descripción.»
-        name: Михаил
-        caption: Skoda Octavia, España → Rusia
-      - quote: «El registro en matrículas extranjeras parecía complicado. El equipo me guió en cada paso — y en un mes ya estaba conduciendo. Recomiendo.»
-        name: Дмитрий
-        caption: VW Passat, Alemania → Serbia
     ctaEyebrow: ¿Listo para empezar?
     ctaHeading:
       line1: Cuéntanos
@@ -552,17 +508,6 @@ translations:
         text: 'Schrittweise Zahlung und klare Bedingungen. Wir begleiten die Dokumente in allen Phasen: Anmeldung, Zollabfertigung, Registrierung — ohne Überraschungen.'
       - title: Lokale Expertise
         text: 'Wir kennen die Besonderheiten jedes Marktes: Autobahnkilometer in Deutschland, Merkmale der Karosserie spanischer Autos, Besonderheiten der Anmeldung ausländischer Kennzeichen in Serbien.'
-    testimonialsHeading: Was Kunden sagen
-    testimonials:
-      - quote: „Wir haben einen BMW 3er aus München nach Belgrad geliefert bekommen. Alles lief reibungslos — von der Inspektion bis zur Zulassung. Wir haben eine Menge Nerven beim Papierkram gespart.“
-        name: Александр
-        caption: BMW 320d, Deutschland → Serbien
-      - quote: „Ich habe lange nach einer Skoda Octavia in gutem Zustand gesucht. Die Jungs haben eine Option in Spanien gefunden, von einem unabhängigen Experten prüfen lassen — alles war wie beschrieben.“
-        name: Михаил
-        caption: Skoda Octavia, Spanien → Russland
-      - quote: „Die Anmeldung auf ausländische Kennzeichen schien kompliziert. Das Team hat mir durch jeden Schritt geholfen — und nach einem Monat konnte ich schon fahren. Ich empfehle es.“
-        name: Дмитрий
-        caption: VW Passat, Deutschland → Serbien
     ctaEyebrow: Bereit anzufangen?
     ctaHeading:
       line1: Erzählen Sie uns

@@ -3,7 +3,7 @@ import { z } from 'zod';
 // Single source of truth for the home page's ru/translated shape — mirrors
 // dictionaryContentSchema.ts's role. The original hand-written HomeContent
 // interface used fixed-length tuples ([JourneyStep,JourneyStep,...]) for
-// journey/trustCards/testimonials; `.length(n)` gives the same "exactly n
+// journey/trustCards; `.length(n)` gives the same "exactly n
 // items" guarantee on a plain z.array().
 const journeyStepSchema = z
   .object({ title: z.string(), desc: z.string(), note: z.string().optional() })
@@ -11,10 +11,6 @@ const journeyStepSchema = z
 
 const trustCardSchema = z
   .object({ title: z.string(), text: z.string() })
-  .strict();
-
-const testimonialSchema = z
-  .object({ quote: z.string(), name: z.string(), caption: z.string() })
   .strict();
 
 const statItemSchema = z
@@ -52,8 +48,6 @@ export const homeContentSchema = z
     whyUsHeading: z.string(),
     whyUsSubtext: z.string(),
     trustCards: z.array(trustCardSchema).length(3),
-    testimonialsHeading: z.string(),
-    testimonials: z.array(testimonialSchema).length(3),
     ctaEyebrow: z.string(),
     ctaHeading: z
       .object({ line1: z.string(), line2: z.string(), accentWord: z.string() })
