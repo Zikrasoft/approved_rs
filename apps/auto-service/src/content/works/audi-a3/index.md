@@ -2,50 +2,30 @@
 title: Большой сервис Audi A3 1.5 TFSI в Белграде
 translations:
   en:
-    title: Major Service for AUDI A3 1.5 TFSI 150 HP in Belgrade
+    title: Major Service for Audi A3 1.5 TFSI in Belgrade
     body: |-
-      # Major Service for Audi A3 1.5 TFSI 150 HP in Belgrade
+      The Audi A3 with a 1.5 TFSI petrol engine producing 150 hp and a DQ200 automated gearbox arrived at our Russian car service in Belgrade for a major service. We replaced the timing belt. 
 
-      Our Russian car service in Belgrade carried out comprehensive maintenance on the **Audi A3** featuring a **1.5 TFSI** gasoline engine with **150 HP** and a **DQ200** automated gearbox.
+      Following diagnostics, we also replaced the electric cooling pump. This is a separate unit, and its replacement is not connected to the major service and the timing belt. However, diagnostics indicated that the pump had lost its efficiency and was no longer circulating the coolant properly. We decided not to wait for this to affect the engine's temperature control, so we installed new antifreeze after the work was completed.
 
-      A major engine service was performed, which included replacing the timing belt.
+      At the same time, we performed a minor service: changing the engine oil and all necessary filters.
 
-      Based on the diagnostic results, the electric water pump in the cooling system was replaced. It’s important to note that this electric pump operates as an independent unit, and its replacement is unrelated to the major service or the timing belt change. Diagnostics indicated a drop in pump performance — it was no longer providing the necessary coolant circulation. Therefore, we decided to replace it proactively, avoiding potential overheating issues down the line.
+      Next, we serviced the gearbox. The DQ200 is a robot with dry clutches, and we replaced the oil in the mechanical part and the working fluid in the mechatronic system. Our recommendation for this gearbox is straightforward: both the oil and mechatronic service should be performed every 60,000 km or sooner. Sticking to this interval prolongs the life of the unit and reduces the likelihood of costly repairs.
 
-      Additionally, the coolant was replaced after the work was completed.
-
-      We also performed a minor service on the Audi A3, which included changing the engine oil and all necessary filters.
-
-      Special attention was given to the Volkswagen Group DQ200 automated gearbox with dry clutches. We replaced the oil in the mechanical section of the gearbox, as well as the working fluid in the DQ200 mechatronics.
-
-      We recommend changing the oil in the **DQ200** and servicing the mechatronics at least once every **60,000 km**. Timely maintenance helps extend the life of the components and reduces the likelihood of costly repairs.
-
-      If your Audi, Volkswagen, Škoda, or SEAT needs maintenance, diagnostics, a major service, timing belt replacement, or DSG DQ200 servicing, feel free to reach out to our Russian car service in Belgrade.
-
-      Car service in Belgrade: diagnostics, repairs, and technical maintenance for VAG vehicles.
+      We provide maintenance, diagnostics, major services, timing belt replacements, and DSG DQ200 servicing for Audi, Volkswagen, Škoda, and SEAT vehicles in Belgrade.
     car: AUDI A3
   sr:
-    title: AUDI A3
+    title: Veliki servis Audi A3 1.5 TFSI u Beogradu
     body: |-
-      # Veliki servis Audi A3 1.5 TFSI 150 KS u Beogradu
+      Audi A3 sa benzinskim motorom 1.5 TFSI od 150 KS i robotizovanom menjačem DQ200 došao je u naš ruski servis u Beogradu na veliki servis. Zamenjen je zupčasti remen GSR.
 
-      Ruski autoservis u Beogradu je obavio sveobuhvatno tehničko održavanje **Audi A3** sa benzinskim motorom **1.5 TFSI** snage **150 KS** i robotizovanom menjačkom kutijom **DQ200**.
+      Na osnovu dijagnostike zamenjena je i električna pumpa sistema hlađenja. To je poseban deo, i njena zamena nije povezana sa velikim servisom niti sa zupčastim remenom. Dijagnostika je pokazala da je pumpa izgubila efikasnost i više ne pumpa rashladnu tečnost kako treba, a čekati da se to odrazi na temperaturni režim motora nismo želeli. Novi antifriz je stavljeni posle radova.
 
-      Na vozilu je izvršen veliki servis motora sa zamenom razvodnog remena.
+      Paralelno smo obavili i mali servis: motornu ulje i sve potrebne filtere.
 
-      Na osnovu rezultata dijagnostike, zamenjena je i električna pumpa sistema hlađenja. Važno je napomenuti da je ova električna pumpa poseban deo i njena zamena nije povezana sa velikim servisom ili zamenom razvodnog remena. Dijagnostika je pokazala smanjenje efikasnosti pumpe — više nije osiguravala potrebnu cirkulaciju rashladne tečnosti. Stoga je doneta odluka da se zameni pre nego što dođe do problema sa temperaturom motora.
+      Što se tiče menjača, DQ200 je robot sa suvim kvačilima, zamenjeno je ulje u mehaničkom delu i radna tečnost u mehatronici. Naša preporuka je jednostavna: ulje i mehatroniku servisirati ne ređe od jednog puta na 60 000 km. Na takvom intervalu agregat traje duže i ređe zahteva skupi popravak.
 
-      Nakon radova, zamenjen je i antifriz.
-
-      Pored toga, izvršen je i mali servis Audi A3: zamenjeno je motorno ulje i svi neophodni filteri.
-
-      Posebna pažnja posvećena je robotizovanoj menjačkoj kutiji Volkswagen Group DQ200 sa suvim spojkama. Izvršena je zamena ulja u mehaničkom delu menjačke kutije, kao i zamena radne tečnosti u mehatronici DQ200.
-
-      Preporučujemo da se ulje u **DQ200** menja i da se mehatronika servisira najmanje jednom na **60 000 km**. Redovno održavanje pomaže u produžavanju radnog veka agregata i smanjenju verovatnoće skupljih popravki.
-
-      Ako vašem Audiju, Volkswagenu, Škodi ili SEAT-u treba tehničko održavanje, dijagnostika, veliki servis, zamena razvodnog remena ili održavanje DSG DQ200 — obratite se našem ruskom autoservisu u Beogradu.
-
-      Autoservis u Beogradu: dijagnostika, popravka i tehničko održavanje vozila VAG.
+      Tehničko održavanje, dijagnostika, veliki servis, zamena zupčastog remena i servis DSG DQ200 za Audi, Volkswagen, Škoda i SEAT radimo u Beogradu.
     car: AUDI A3
 car: AUDI A3
 year: 2019
@@ -58,7 +38,7 @@ gallery:
   - gallery/1.jpg
 date: 2026-08-27
 published: true
-translatedFrom: 6744b2002ba46e10
+translatedFrom: 79592f08b0facc10
 ---
 
 Audi A3 с бензиновым 1.5 TFSI на 150 л.с. и роботизированной коробкой DQ200 приехала в наш русский автосервис в Белграде на большой сервис. Заменили зубчатый ремень ГРМ.

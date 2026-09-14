@@ -2,189 +2,141 @@
 title: Toyota Yaris
 translations:
   en:
-    title: TOYOYA YARIS
-    body: >
-      # One-Time Car Inspection Before Purchase in Serbia
+    title: Toyota Yaris
+    body: |-
+      ## One-Time Vehicle Inspection Before Purchase in Serbia
 
+      **Car Inspection Before Purchase in Belgrade and Other Cities in Serbia**
 
-      **Independent used car inspection in Belgrade and other cities in Serbia**
+      We were approached by a young couple seeking our help to inspect a car before buying it in Serbia. They had found the vehicle on their own and simply sent us the link to the listing. Our task was to conduct a **one-time inspection before purchase** and provide an objective assessment of its technical condition.
 
+      Before heading out, we requested the **VIN number of the vehicle** from the seller. Using the VIN, we conducted a vehicle history check through **CarVertical**, where we reviewed its available history, recorded mileage, and any past incidents. The mileage appeared credible, so we decided to proceed with a physical inspection of the car.
 
-      A young couple contacted us with a request to inspect a car before purchasing it in Serbia. They had found the vehicle themselves and simply sent us a link to the advertisement. Our task was to carry out an **independent pre-purchase car inspection** and determine the actual technical condition of the vehicle.
+      On site, we performed a comprehensive inspection before purchase:
 
-
-      Before visiting the seller, we requested the vehicle's **VIN number**. We used the VIN to check the car's history through **CarVertical**, including available mileage records and information about previous events. The mileage appeared consistent with the available history, so we proceeded with the physical inspection.
-
-
-      During the inspection, we carried out a comprehensive check of the vehicle:
-
-
-      - inspected the body and paintwork;
-
-      - identified several repainted body panels;
-
-      - inspected the engine;
-
-      - confirmed that the engine was dry with no obvious signs of oil or fluid leaks;
-
-      - checked the transmission;
-
-      - verified that the gears shifted smoothly;
-
+      - examined the body and paintwork;
+      - identified a few repainted elements;
+      - checked the engine condition;
+      - ensured the engine was dry with no obvious signs of leaks;
+      - tested the transmission;
+      - evaluated shifting in various modes;
       - checked the clutch operation;
-
-      - carried out a road test;
-
+      - conducted a test drive;
       - assessed the overall technical condition of the vehicle.
 
+      As a result, the buyers received an objective overview of the vehicle’s condition and an understanding of what aspects to consider prior to purchase.
 
-      As a result, the buyers received an independent assessment of the vehicle and a clear understanding of its actual condition before making the purchase.
+      ### One-Time Vehicle Inspection in Serbia
 
+      A full **car sourcing service** isn’t always necessary. If you’ve already found a car on your own, we can come out and perform an independent inspection before you buy.
 
-      ### One-Time Car Inspection in Serbia
+      The service of **one-time vehicle inspection** is especially convenient if the car is located in a different city in Serbia, and you can’t visit for a checkup yourself.
 
+      We conduct vehicle inspections in **Belgrade, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Novi Pazar, Čačak, Zrenjanin, Smederevo, Kraljevo, Kruševac, Leskovac, Užice, Valjevo, Vranje, Šabac, Sombor, Zaječar, Požarevac, Pirot, Bora, Sremska Mitrovica, Vršac, Jagodina, Kikinda** and many other cities across Serbia.
 
-      You do not always need a full **car selection service**. If you have already found a vehicle yourself, we can simply inspect that particular car before you buy it.
-
-
-      This one-time inspection is especially convenient if the car is located in another city in Serbia and you are unable to travel there yourself.
-
-
-      We provide **pre-purchase car inspections** in **Belgrade, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Novi Pazar, Čačak, Zrenjanin, Smederevo, Kraljevo, Kruševac, Leskovac, Užice, Valjevo, Vranje, Šabac, Sombor, Zaječar, Požarevac, Pirot, Bor, Sremska Mitrovica, Vršac, Jagodina, Kikinda** and other cities throughout Serbia.
-
-
-      If you have found a used car yourself, we can check its history, bodywork, engine, transmission, clutch, suspension and electronics, as well as carry out a road test.
-
-
-      **Don't buy a used car based on an advertisement alone. An independent pre-purchase car inspection in Serbia can help you make a safer and more informed decision.**
+      If you’ve found a car on your own — **there’s no need to buy it blindly**. You can order an independent inspection before making a purchase: VIN check and vehicle history, body, engine, transmission, suspension, diagnostics, and a test drive.
   sr:
-    title: TOYOYA YARIS
-    body: >
-      # Jednokratni pregled automobila pre kupovine u Srbiji
+    title: Toyota Yaris
+    body: |-
+      ## Jednokratna provera automobila pre kupovine u Srbiji
 
+      **Proveravanje automobila pre kupovine u Beogradu i drugim gradovima Srbije**
 
-      **Provera polovnog automobila pre kupovine u Beogradu i drugim gradovima Srbije**
+      Obratila nam se mlada par sa zahtevom da provere automobil pre kupovine u Srbiji. Automobil su pronašli sami i samo su nam poslali link na oglas. Naš zadatak je bio da izvršimo **jednokratnu proveru automobila pre kupovine** i objektivno ocenimo njegovo tehničko stanje.
 
+      Pre odlaska, zatražili smo od prodavca **VIN broj automobila**. Preko VIN-a smo izvršili proveru istorije automobila putem **CarVertical**: istražili dostupnu istoriju, zabeležene pređene kilometre i moguće događaje iz prošlosti. Pređeni kilometri su izgledali verovatno, stoga je donesena odluka da se ide na fizički pregled automobila.
 
-      Mlad bračni par nam se obratio sa zahtevom da proverimo automobil pre kupovine u Srbiji. Automobil su sami pronašli i poslali nam link do oglasa. Naš zadatak je bio da izvršimo **nezavisni pregled automobila pre kupovine** i utvrdimo njegovo stvarno tehničko stanje.
+      Na licu mesta izvršili smo sveobuhvatnu proveru automobila pre kupovine:
 
+      - pregled karoserije i lakirnog sloja;
+      - uočili smo nekoliko ofarbanih delova;
+      - proverili stanje motora;
+      - uverili se da je motor suv i bez očiglednih tragova curenja;
+      - proverili rad menjača;
+      - ocenili prešanje brzina u različitim režimima;
+      - proverili rad kvačila;
+      - izvršili test vožnje;
+      - ocenili ukupno tehničko stanje automobila.
 
-      Pre odlaska na pregled, od prodavca smo zatražili **VIN broj vozila**. Na osnovu VIN broja proverili smo istoriju automobila putem servisa **CarVertical**, uključujući dostupne podatke o kilometraži i prethodnim događajima. Kilometraža je prema dostupnim podacima delovala realno, pa smo otišli na pregled vozila.
-
-
-      Na licu mesta izvršili smo detaljnu proveru:
-
-
-      - pregled karoserije i laka;
-
-      - pronađeno je nekoliko lakiranih elemenata;
-
-      - proveren je motor;
-
-      - utvrđeno je da je motor suv i bez očiglednih tragova curenja;
-
-      - provereno je stanje menjača;
-
-      - provereno je glatko menjanje brzina;
-
-      - provereno je kvačilo;
-
-      - obavljena je probna vožnja;
-
-      - procenjeno je ukupno tehničko stanje automobila.
-
-
-      Na kraju su kupci dobili realnu i nezavisnu procenu automobila i jasnu sliku o tome na šta treba obratiti pažnju pre kupovine.
-
+      Kupci su na kraju dobili objektivnu sliku o stanju automobila i razumevanje o čemu treba da vode računa pre kupovine.
 
       ### Jednokratna provera automobila u Srbiji
 
+      Nije uvek potrebna kompletna **autopretraga po meri**. Ako ste već sami pronašli automobil, možemo doći i izvršiti njegovu nezavisnu proveru pre kupovine.
 
-      Ako ste automobil već sami pronašli, nije neophodno angažovati kompletnu uslugu **odabira automobila po principu „ključ u ruke“**. Možemo samo da izvršimo nezavisni pregled konkretnog vozila pre kupovine.
+      Usluga **jednokratnog pregleda automobila** je posebno pogodna ako se automobil nalazi u drugom gradu Srbije, a vi ne možete da odete na pregled.
 
+      Izvršavamo provere automobila u **Beogradu, Novom Sadu, Nišu, Kragujevcu, Subotici, Pančevu, Novom Pazaru, Čačku, Zrenjaninu, Smederevu, Kraljevu, Kruševcu, Leskovcu, Užicu, Valjevu, Vranju, Šapcu, Somboru, Zaјеčaru, Požarevcu, Pirotu, Boru, Sremskoj Mitrovici, Vršcu, Jagodini, Kikindi** i drugim gradovima Srbije.
 
-      Usluga jednokratnog pregleda posebno je pogodna ako se automobil nalazi u drugom gradu u Srbiji, a vi nemate mogućnost da sami odete na pregled.
-
-
-      Preglede automobila radimo u **Beogradu, Novom Sadu, Nišu, Kragujevcu, Subotici, Pančevu, Novom Pazaru, Čačku, Zrenjaninu, Smederevu, Kraljevu, Kruševcu, Leskovcu, Užicu, Valjevu, Vranju, Šapcu, Somboru, Zaječaru, Požarevcu, Pirotu, Boru, Sremskoj Mitrovici, Vršcu, Jagodini, Kikindi** i drugim gradovima širom Srbije.
-
-
-      Ako ste pronašli automobil koji želite da kupite, možemo proveriti njegovu istoriju, karoseriju, motor, menjač, kvačilo, vešanje, elektroniku i obaviti probnu vožnju.
-
-
-      **Ne kupujte polovan automobil samo na osnovu oglasa. Jednokratni pregled automobila pre kupovine može vam pomoći da donesete sigurniju i informisaniju odluku.**
+      Ako ste sami pronašli automobil — **nije obavezno kupovati ga slepo**. Pre kupovine možete naručiti nezavisnu proveru: VIN i istorija automobila, karoserija, motor, menjač, ovSuspension, dijagnostika i test vožnja.
   es:
-    title: TOYOTA YARIS
+    title: Toyota Yaris
     body: |-
-      # Inspección única del vehículo antes de la compra en Serbia
+      ## Inspección del vehículo antes de la compra en Serbia
 
-      **Inspección del automóvil antes de la compra en Belgrado y otras ciudades de Serbia**
+      **Verificación del automóvil antes de comprar en Belgrado y otras ciudades de Serbia**
 
-      Una joven pareja se puso en contacto con nosotros para solicitar una revisión de un automóvil antes de comprarlo en Serbia. Ellos encontraron el coche por su cuenta y simplemente nos enviaron el enlace del anuncio. Nuestra tarea era realizar una **inspección única del vehículo antes de la compra** y evaluar objetivamente su estado técnico.
+      Una joven pareja se puso en contacto con nosotros para solicitar una revisión de un automóvil antes de su compra en Serbia. Ellos encontraron el vehículo por su cuenta y simplemente nos enviaron el enlace del anuncio. Nuestra tarea era realizar una **inspección única del vehículo antes de la compra** y evaluar objetivamente su estado técnico.
 
-      Antes de desplazarnos, solicitamos al vendedor el **número VIN del vehículo**. Con este VIN, verificamos la historia del automóvil a través de **CarVertical**: revisamos la historia disponible, los kilometrajes registrados y posibles eventos pasados. El kilometraje resultó ser creíble, así que decidimos ir a realizar una inspección física del vehículo.
+      Antes de salir, solicitamos al vendedor el **número VIN del automóvil**. A través del VIN, realizamos una verificación de la historia del vehículo en **CarVertical**: revisamos la historia disponible, los kilometrajes registrados y posibles incidentes pasados. Después de evaluar los resultados, el kilometraje parecía creíble, por lo que decidimos ir a inspeccionar el automóvil físicamente.
 
-      En el lugar, llevamos a cabo una revisión completa del coche antes de la compra:
+      En el lugar, llevamos a cabo un chequeo exhaustivo del vehículo antes de la compra:
 
-      - inspección de la carrocería y la pintura;
-      - identificamos varios elementos repintados;
-      - revisamos el estado del motor;
-      - confirmamos que el motor estaba seco y sin señales evidentes de fugas;
-      - revisamos el funcionamiento de la caja de cambios;
-      - evaluamos los cambios de marcha en diferentes modos;
-      - revisamos el funcionamiento del embrague;
-      - realizamos una prueba de conducción;
-      - evaluamos el estado técnico general del automóvil.
+      - Inspección de la carrocería y la pintura;
+      - Identificamos varios elementos repintados;
+      - Verificamos el estado del motor;
+      - Nos aseguramos de que el motor estuviera seco y sin señales evidentes de fugas;
+      - Comprobamos el funcionamiento de la transmisión;
+      - Evaluamos los cambios de marcha en diferentes modos;
+      - Revisamos el funcionamiento del embrague;
+      - Realizamos una prueba de manejo;
+      - Evaluamos el estado técnico general del vehículo.
 
-      Como resultado, los compradores obtuvieron una visión objetiva del estado del vehículo y comprensión sobre los aspectos a considerar antes de la compra.
+      Como resultado, los compradores obtuvieron una visión objetiva del estado del automóvil y una comprensión de los aspectos a tener en cuenta antes de la compra.
 
       ### Inspección única del automóvil en Serbia
 
-      No siempre se requiere un **servicio de selección de automóviles a medida**. Si ya has encontrado el coche por tu cuenta, podemos desplazarnos para realizar una inspección independiente antes de la compra.
+      No siempre es necesario un **servicio de búsqueda de automóviles llave en mano**. Si ya has encontrado el automóvil por tu cuenta, podemos acudir y realizar una revisión independiente antes de la compra.
 
-      El servicio de **inspección única del vehículo** es especialmente útil si el automóvil está en otra ciudad de Serbia y no puedes desplazarte para verlo en persona.
+      El servicio de **inspección única del vehículo** es especialmente conveniente si el automóvil se encuentra en otra ciudad de Serbia y no puedes ir en persona para la revisión.
 
-      Realizamos inspecciones de vehículos en **Belgrado, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Novi Pazar, Čačak, Zrenjanin, Smederevo, Kraljevo, Kruševac, Leskovac, Užice, Valjevo, Vranje, Šabac, Sombor, Zaječar, Požarevac, Pirot, Bor, Sremska Mitrovica, Vršac, Jagodina, Kikinda** y otras ciudades de Serbia.
+      Realizamos inspecciones de automóviles en **Belgrado, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Novi Pazar, Čačak, Zrenjanin, Smederevo, Kraljevo, Kruševac, Leskovac, Užice, Valjevo, Vranje, Šabac, Sombor, Zaječar, Požarevac, Pirot, Bor, Sremska Mitrovica, Vršac, Jagodina, Kikinda** y otras ciudades de Serbia.
 
-      Si has encontrado un automóvil por tu cuenta, **no es necesario comprarlo a ciegas**. Antes de la compra, puedes solicitar una inspección independiente: VIN e historia del vehículo, carrocería, motor, caja de cambios, suspensión, diagnóstico y prueba de conducción.
-
-      **La inspección única del vehículo antes de la compra en Serbia es una manera de obtener una opinión independiente sobre el coche antes de entregar el dinero al vendedor.**
+      Si has encontrado un automóvil por tu cuenta, **no es necesario comprarlo a ciegas**. Antes de la compra, puedes solicitar una inspección independiente: VIN e historia del vehículo, carrocería, motor, transmisión, suspensión, diagnóstico y prueba de manejo.
   de:
-    title: TOYOTA YARIS
+    title: Toyota Yaris
     body: |-
-      # Einmalige Fahrzeugprüfung vor dem Kauf in Serbien
+      ## Einmalige Fahrzeugprüfung vor dem Kauf in Serbien
 
-      **Fahrzeugprüfung vor dem Kauf in Belgrad und anderen Städten Serbiens**
+      **Fahrzeuginspektion vor dem Kauf in Belgrad und anderen Städten Serbiens**
 
-      Ein junges Paar wandte sich an uns mit der Bitte, ein Fahrzeug vor dem Kauf in Serbien zu überprüfen. Das Auto hatten sie selbst gefunden und schickten uns einfach den Link zur Anzeige. Unsere Aufgabe war es, eine **einmalige Fahrzeugprüfung vor dem Kauf** durchzuführen und den technischen Zustand objektiv zu bewerten.
+      Ein junges Paar wandte sich an uns mit der Bitte, ein Auto vor dem Kauf in Serbien zu prüfen. Sie hatten das Fahrzeug selbst gefunden und uns lediglich den Link zu der Anzeige geschickt. Unsere Aufgabe bestand darin, eine **einmalige Fahrzeugprüfung vor dem Kauf** durchzuführen und den technischen Zustand objektiv zu bewerten.
 
-      Vor unserem Besuch forderten wir beim Verkäufer die **VIN-Nummer des Fahrzeugs** an. Mit der VIN führten wir eine Fahrzeughistorienprüfung über **CarVertical** durch: Wir analysierten die verfügbaren Informationen, den dokumentierten Kilometerstand und mögliche Ereignisse in der Vergangenheit. Der Kilometerstand schien nach der Überprüfung glaubwürdig, daher beschlossen wir, das Auto vor Ort zu inspizieren.
+      Vor unserem Besuch haben wir den Verkäufer um die **VIN-Nummer des Fahrzeugs** gebeten. Mithilfe der VIN haben wir die Fahrzeughistorie über **CarVertical** überprüft: Wir haben die verfügbaren Daten zur Geschichte, die festgestellten Kilometerstände und mögliche Ereignisse in der Vergangenheit betrachtet. Der Kilometerstand sah aufgrund der Überprüfung plausibel aus, sodass wir beschlossen haben, das Auto vor Ort zu besichtigen.
 
-      Vor Ort führten wir eine umfassende Prüfung des Fahrzeugs durch:
+      Vor Ort führten wir eine umfassende Fahrzeugprüfung vor dem Kauf durch:
 
-      - Überprüfung der Karosserie und der Lackierung;
-      - Identifikation mehrerer lackierter Teile;
-      - Zustand des Motors geprüft;
-      - sichergestellt, dass der Motor trocken ist und keine offensichtlichen Leckagen aufweist;
-      - Funktion des Getriebes getestet;
-      - Bewertung der Gangwechsel in verschiedenen Modi;
-      - Überprüfung der Kupplungsfunktion;
+      - Überprüfung der Karosserie und des Lackes;
+      - Erkennung mehrerer nachlackierter Teile;
+      - Überprüfung des Motorzustands;
+      - Sicherstellung, dass der Motor trocken ist und keine offensichtlichen Lecks aufweist;
+      - Überprüfung der Funktionsfähigkeit des Getriebes;
+      - Bewertung des Gangwechsels in verschiedenen Modi;
+      - Überprüfung der Kupplung;
       - Durchführung einer Probefahrt;
-      - allgemeiner technischer Zustand des Fahrzeugs bewertet.
+      - Bewertung des allgemeinen technischen Zustands des Fahrzeugs.
 
-      Insgesamt erhielten die Käufer einen objektiven Überblick über den Zustand des Fahrzeugs und ein Verständnis dafür, welche Punkte sie vor dem Kauf beachten sollten.
+      In der Folge erhielten die Käufer ein objektives Bild vom Zustand des Fahrzeugs und ein Verständnis davon, welche Punkte sie vor dem Kauf berücksichtigen sollten.
 
       ### Einmalige Fahrzeugprüfung in Serbien
 
-      Nicht immer ist eine vollständige **Fahrzeugbeschaffung mit Rundum-Service** erforderlich. Wenn Sie das Auto bereits selbst gefunden haben, können wir kommen und eine unabhängige Prüfung vor dem Kauf durchführen.
+      Nicht immer ist eine vollständige **Fahrzeugauswahl bis zur Übergabe** erforderlich. Wenn Sie das Auto bereits selbst gefunden haben, können wir vorbeikommen und eine unabhängige Prüfung vor dem Kauf durchführen.
 
-      Unser **einmaliger Fahrzeugcheck** ist besonders praktisch, wenn sich das Auto in einer anderen Stadt Serbiens befindet und Sie nicht in der Lage sind, selbst zur Besichtigung zu fahren.
+      Der Service der **einmaligen Fahrzeuginspektion** ist besonders praktisch, wenn sich das Auto in einer anderen Stadt Serbiens befindet und Sie nicht in der Lage sind, selbst zur Besichtigung zu fahren.
 
-      Wir führen Fahrzeugprüfungen in **Belgrad, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Novi Pazar, Čačak, Zrenjanin, Smederevo, Kraljevo, Kruševac, Leskovac, Užice, Valjevo, Vranje, Šabac, Sombor, Zaječar, Požarevac, Pirot, Bor, Sremska Mitrovica, Vršac, Jagodina, Kikinda** und anderen Städten Serbiens durch.
+      Wir führen Fahrzeugprüfungen in **Belgrad, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Novi Pazar, Čačak, Zrenjanin, Smederevo, Kraljevo, Kruševac, Leskovac, Užice, Valjevo, Vranje, Šabac, Sombor, Zaječar, Požarevac, Pirot, Bor, Sremska Mitrovica, Vrbas, Jagodina, Kikinda** und anderen Städten Serbiens durch.
 
-      Wenn Sie das Fahrzeug selbst gefunden haben — **müssen Sie es nicht blind kaufen**. Vor dem Kauf können Sie eine unabhängige Prüfung anfordern: VIN und Fahrzeughistorie, Karosserie, Motor, Getriebe, Fahrwerk, Diagnose und Probefahrt.
-
-      **Einmalige Fahrzeugprüfung vor dem Kauf in Serbien — eine Möglichkeit, eine unabhängige Meinung über das Auto zu erhalten, bevor Sie dem Verkäufer das Geld übergeben.**
+      Wenn Sie das Auto selbst gefunden haben, ist es **nicht notwendig, es blind zu kaufen**. Vor dem Kauf können Sie eine unabhängige Prüfung beauftragen: VIN und Fahrzeughistorie, Karosserie, Motor, Getriebe, Federung, Diagnose und Probefahrt.
 car: Toyota Yaris
 year: 2008
 price:
@@ -196,7 +148,7 @@ image: image.jpg
 gallery: []
 date: 2026-07-11
 published: true
-translatedFrom: eec29ba6bc15596a
+translatedFrom: ac6babf84e191401
 ---
 
 ## Разовая проверка автомобиля перед покупкой в Сербии

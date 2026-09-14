@@ -14,66 +14,67 @@ date: 2026-09-04
 published: true
 translations:
   en:
-    title: AUDI Q3
+    title: Audi Q3
     body: |-
-      Another vehicle has been successfully inspected, purchased, and delivered from Germany to Portugal. This time, we received a request from a client in Lisbon who needed assistance in finding, inspecting, and buying a car in Germany. After selecting a suitable option, we decided on an Audi Q3 with a mileage of 102,000 km.
+      Another vehicle has been successfully inspected, purchased, and delivered from Germany to Portugal. This time, a client from Lisbon reached out to us for assistance in finding, verifying, and purchasing a car in Germany. After evaluating various options, we settled on a used Audi Q3 with 102,000 km on the clock.
 
-      Before the purchase, the car underwent a thorough inspection: we evaluated its technical condition, service history, documentation, and ensured it matched the seller's claims. Once the client approved the vehicle, the Audi Q3 was purchased in Germany, registered, and sent to Portugal.
+      Before the purchase, the car underwent a thorough inspection: we assessed its technical condition, service history, documentation, and confirmed that it matched the seller's claims. Once the client approved the vehicle, we proceeded to buy the Audi Q3 in Germany, handle the paperwork, and arrange for its transport to Portugal.
 
-      As a result, the client received the chosen vehicle right in Portugal without the hassle of traveling to Germany, conducting inspections, negotiating with the seller, handling documentation, and organizing international shipping.
+      As a result, the client received their chosen vehicle already in Portugal, without the hassle of traveling to Germany, conducting viewings, negotiating with the seller, managing documentation, or organizing international shipping.
 
-      We assist with the search, inspection, purchase, and delivery of cars from Germany not only to Lisbon but also to other cities and regions in Portugal: Porto, Braga, Coimbra, Aveiro, Cascais, Sintra, Setúbal, Faro, Albufeira, Lagos, Leiria, Viseu, Guimarães, Évora, and more.
+      We assist with finding, inspecting, purchasing, and delivering cars from Germany not just to Lisbon, but to other cities and regions in Portugal as well: Porto, Braga, Coimbra, Aveiro, Cascais, Sintra, Setúbal, Faro, Albufeira, Lagos, Leiria, Viseu, Guimarães, Évora, and more.
 
-      If the right vehicle is not available in the local market of Portugal or if you are dissatisfied with the selection and prices, considering the purchase of a car from Germany is an excellent alternative. The large European market offers a wide range of brands, models, configurations, years of manufacture, and options with varying mileage.
+      If you can't find the right vehicle on the local market in Portugal, or if the options and prices don't meet your expectations, considering a purchase in Germany can be a great alternative. The vast European market offers a wide selection of brands, models, trims, production years, and various mileage options.
 
-      We take care of the entire process: searching for suitable options in Germany, conducting preliminary analysis of listings, inspecting the chosen vehicle, communicating with the seller, assisting with the transaction, preparing the necessary documents, and organizing delivery to Portugal.
+      We handle the entire process: sourcing suitable options in Germany, preliminary evaluation of listings, inspecting the selected vehicle, communicating with the seller, facilitating the transaction, managing necessary documentation, and organizing delivery to Portugal.
 
-      The Audi Q3 with a mileage of 102,000 km has already been delivered to its owner in Lisbon. Another car has successfully made the journey from selection in Germany to delivery to the client in Portugal.
+      The Audi Q3 with 102,000 km has already been delivered to its owner in Lisbon. Another car has successfully completed its journey from selection in Germany to delivery to the client in Portugal.
 
-      Car selection and inspection in Germany. Purchase and transaction support. Delivery of cars from Germany to Lisbon, Porto, Braga, Coimbra, Aveiro, Cascais, Sintra, Setúbal, Faro, Albufeira, Lagos, and other cities in Portugal.
+      Vehicle sourcing and inspection in Germany. Purchase and transaction support. Delivery of cars from Germany to Lisbon, Porto, Braga, Coimbra, Aveiro, Cascais, Sintra, Setúbal, Faro, Albufeira, Lagos, and other cities in Portugal.
   sr:
-    title: AUDI Q3
+    title: Audi Q3
     body: |-
-      Još jedno vozilo je uspešno provereno, kupljeno i isporučeno iz Nemačke u Portugal. 
-      Ovoga puta obratio nam se klijent iz Lisabona koji je tražio pomoć pri potrazi, proveri i kupovini automobila u Nemačkoj. Nakon što smo pronašli odgovarajući model, odlučili smo se za Audi Q3 sa pređenih 102.000 km. 
-      Pre kupovine, automobil je prošao detaljnu proveru: ocenili smo njegovo tehničko stanje, istoriju korišćenja, dokumentaciju i usklađenost sa podacima koje je dao prodavac. Nakon što smo se sa klijentom dogovorili o automobilu, Audi Q3 je kupljen u Nemačkoj, registrovan i poslat u Portugal. 
-      Na taj način, klijent je dobio izabrano vozilo u Portugalu bez potrebe da lično ide u Nemačku, vrši inspekcije, pregovara sa prodavcem, obezbeđuje dokumentaciju ili organizuje međunarodnu isporuku. 
-      Pomažemo u potrazi, proveri, kupovini i isporuci automobila iz Nemačke ne samo u Lisabon, već i u druge gradove i regione Portugala: Porto, Braga, Koimbra, Aveiro, Kaškais, Sintra, Setubal, Faro, Albufeira, Lagos, Leiriju, Vizeu, Gimaraeš, Évora i druge gradove u zemlji. 
-      Ako nema potrebnog automobila na lokalnom tržištu Portugala ili vas ne zadovoljavaju izbor i cene, možete razmotriti kupovinu vozila u Nemačkoj. Veliko evropsko tržište omogućava izbor među brojnim markama, modelima, konfiguracijama, godinama proizvodnje i verzijama sa različitim pređenim kilometrima. 
-      Preuzimamo ceo proces: traženje odgovarajućih opcija u Nemačkoj, preliminarna analiza oglasa, provere odabranog automobila, komunikaciju s prodavcem, praćenje transakcije, obezbeđivanje potrebne dokumentacije i organizaciju isporuke u Portugal. 
-      Audi Q3 sa pređenih 102.000 km je već isporučen svom vlasniku u Lisabonu. Još jedan automobil je prošao ceo put od izbora u Nemačkoj do predaje klijentu u Portugalu. 
-      Odabir i provere automobila u Nemačkoj. Kupovina i praćenje transakcije. Isporuka automobila iz Nemačke u Lisabon, Porto, Bragu, Koimbru, Aveiro, Kaškais, Sintru, Setubal, Faro, Albufeira, Lagos i druge gradove Portugala.
+      **Audi Q3**  
+      Još jedan automobil uspešno je proveren, kupljen i dostavljen iz Nemačke u Portugal.  
+      Ovoga puta, obratio nam se klijent iz Lisabona kojem je bila potrebna pomoć u pronalaženju, proveri i kupovini vozila u Nemačkoj. Nakon selekcije, odlučili smo se za Audi Q3 sa pređenih 102.000 km.  
+      Pre kupovine, automobil je prošao detaljnu proveru: ocenili smo njegovo tehničko stanje, istoriju korišćenja, dokumentaciju i usklađenost sa podacima koje je dao prodavac. Nakon što smo se dogovorili s klijentom, Audi Q3 je kupljen u Nemačkoj, zvanično registrovan i poslat u Portugal.  
+      Na kraju, klijent je primio izabrano vozilo već u Portugalu, bez potrebe da sam putuje u Nemačku, obavlja preglede, pregovara s prodavcem, sređuje papire i organizuje međunarodnu dostavu.  
+      Pomažemo u odabiru, proveri, kupovini i dostavi vozila iz Nemačke ne samo u Lisabon, već i u druge gradove i regione Portugala: Porto, Braga, Koimbra, Aveiro, Kaškais, Sintra, Setubal, Faro, Albufeira, Lagos, Leiria, Vizeu, Gimaraš, Évora i mnoge druge gradove.  
+      Ako traženo vozilo nije dostupno na lokalnom tržištu Portugala ili vas ne zadovoljava izbor i cene, razmislite o kupovini automobila u Nemačkoj. Veliko evropsko tržište pruža mogućnost izbora među brojnim markama, modelima, verzijama, godinama proizvodnje i različitih pređenih kilometara.  
+      Preuzimamo ceo proces: pronalaženje odgovarajućih opcija u Nemačkoj, preliminarna analiza oglasa, provere izabranog automobila, komunikacija s prodavcem, praćenje transakcije, sređivanje potrebne dokumentacije i organizacija dostave u Portugal.  
+      **Audi Q3** sa pređenih 102.000 km već je dostavljen svom vlasniku u Lisabonu. Još jedan automobil je prošao ceo put od odabira u Nemačkoj do predaje klijentu u Portugalu.  
+      Odabir i provere automobila u Nemačkoj. Kupovina i praćenje transakcije. Dostava automobila iz Nemačke u Lisabon, Porto, Bragu, Koimbru, Aveiro, Kaškais, Sintru, Setubal, Faro, Albufeira, Lagos i druge gradove Portugala.
   es:
-    title: AUDI Q3
+    title: Audi Q3
     body: |-
-      Otro vehículo ha sido exitosamente verificado, comprado y entregado desde Alemania a Portugal. 
-      Esta vez, un cliente de Lisboa se puso en contacto con nosotros para recibir ayuda en la búsqueda, verificación y adquisición de un automóvil en Alemania. Tras una selección cuidadosa, elegimos un Audi Q3 con un kilometraje de 102,000 km. 
-      Antes de la compra, el automóvil pasó por un exhaustivo chequeo: evaluamos su estado técnico, su historial de uso, los documentos y la veracidad de la información proporcionada por el vendedor. Después de confirmar el vehículo con el cliente, se adquirió el Audi Q3 en Alemania, se gestionaron los trámites y se envió a Portugal. 
-      Como resultado, el cliente recibió el automóvil seleccionado directamente en Portugal, sin necesidad de viajar a Alemania, hacerse cargo de las inspecciones, negociar con el vendedor, tramitar documentos ni organizar el transporte internacional. 
-      Brindamos asistencia en la búsqueda, verificación, compra y entrega de automóviles desde Alemania no solo en Lisboa, sino también en otras ciudades y regiones de Portugal: Oporto, Braga, Coímbra, Aveiro, Cascais, Sintra, Setúbal, Faro, Albufeira, Lagos, Leiria, Viseu, Guimarães, Évora y más lugares del país. 
-      Si el vehículo que buscas no está disponible en el mercado local de Portugal o si las opciones y precios no son satisfactorios, puedes considerar la compra de un automóvil en Alemania. El amplio mercado europeo permite elegir entre muchas marcas, modelos, versiones, años de fabricación y opciones con diferentes recorridos. 
-      Nos encargamos de todo el proceso: búsqueda de opciones adecuadas en Alemania, análisis preliminar de anuncios, verificación del automóvil elegido, comunicación con el vendedor, acompañamiento en la negociación, gestión de la documentación necesaria y organización de la entrega a Portugal. 
-      El Audi Q3 con un kilometraje de 102,000 km ya ha sido entregado a su propietario en Lisboa. Otro automóvil ha recorrido todo el trayecto, desde la selección en Alemania hasta la entrega al cliente en Portugal. 
-      Selección y verificación de automóviles en Alemania. Compra y acompañamiento en la transacción. Entrega de automóviles desde Alemania a Lisboa, Oporto, Braga, Coímbra, Aveiro, Cascais, Sintra, Setúbal, Faro, Albufeira, Lagos y otras ciudades de Portugal.
+      Otro automóvil ha sido verificado, comprado y entregado desde Alemania a Portugal. Esta vez, un cliente de Lisboa se puso en contacto con nosotros para solicitar ayuda en la búsqueda, verificación y compra de un automóvil en Alemania. Tras seleccionar la opción adecuada, nos decidimos por un Audi Q3 con un kilometraje de 102,000 km.
+
+      Antes de la compra, el vehículo pasó por una revisión: evaluamos su estado técnico, historial de uso, documentos y la conformidad de la información proporcionada por el vendedor. Después de acordar el vehículo con el cliente, el Audi Q3 fue adquirido en Alemania, procesado y enviado a Portugal.
+
+      Como resultado, el cliente recibió el automóvil seleccionado ya en Portugal, sin necesidad de viajar a Alemania para realizar inspecciones, negociar con el vendedor, gestionar documentos y organizar la entrega internacional.
+
+      Ayudamos en la selección, verificación, compra y entrega de vehículos desde Alemania, no solo en Lisboa, sino también en otras ciudades y regiones de Portugal: Oporto, Braga, Coimbra, Aveiro, Cascais, Sintra, Setúbal, Faro, Albufeira, Lagos, Leiria, Viseu, Guimarães, Évora y otras localidades del país.
+
+      Si no hay un automóvil adecuado en el mercado local de Portugal o si las opciones y precios no son satisfactorios, se puede considerar la compra de un vehículo en Alemania. El amplio mercado europeo permite elegir entre una gran variedad de marcas, modelos, configuraciones, años de fabricación y opciones con diferentes kilometrajes.
+
+      Nos ocupamos de todo el proceso: buscar las opciones adecuadas en Alemania, realizar un análisis preliminar de los anuncios, verificar el vehículo elegido, comunicarnos con el vendedor, acompañar la transacción, gestionar la documentación necesaria y organizar la entrega a Portugal.
+
+      El Audi Q3 con 102,000 km ya ha sido entregado a su propietario en Lisboa. Otro vehículo ha recorrido todo el camino desde su elección en Alemania hasta su entrega al cliente en Portugal.
+
+      Selección y verificación de automóviles en Alemania. Compra y seguimiento de transacciones. Entrega de automóviles desde Alemania a Lisboa, Oporto, Braga, Coimbra, Aveiro, Cascais, Sintra, Setúbal, Faro, Albufeira, Lagos y otras ciudades de Portugal.
   de:
-    title: AUDI Q3
+    title: Audi Q3
     body: |-
-      Ein weiteres Fahrzeug wurde erfolgreich überprüft, gekauft und von Deutschland nach Portugal geliefert. Diesmal wandte sich ein Kunde aus Lissabon an uns, der Hilfe bei der Suche, Überprüfung und dem Kauf eines Fahrzeugs in Deutschland benötigte. Nach der Auswahl eines passenden Modells entschieden wir uns für einen gebrauchten Audi Q3 mit einer Laufleistung von 102.000 km. 
-
-      Vor dem Kauf wurde das Fahrzeug einer gründlichen Prüfung unterzogen: wir bewerteten seinen technischen Zustand, die Nutzungshistorie, die Dokumente und die Übereinstimmung mit den Angaben des Verkäufers. Nach der Abstimmung des Fahrzeugs mit dem Kunden wurde der Audi Q3 in Deutschland gekauft, angemeldet und nach Portugal versendet. 
-
-      Infolgedessen erhielt der Kunde das ausgewählte Fahrzeug bereits in Portugal, ohne selbst nach Deutschland reisen zu müssen, um Besichtigungen, Verhandlungen mit dem Verkäufer, das Ausfüllen von Dokumenten und die Organisation des internationalen Transports zu erledigen. 
-
-      Wir unterstützen nicht nur bei der Auswahl, Überprüfung, dem Kauf und der Lieferung von Fahrzeugen aus Deutschland nach Lissabon, sondern auch in andere Städte und Regionen Portugals: Porto, Braga, Coimbra, Aveiro, Cascais, Sintra, Setúbal, Faro, Albufeira, Lagos, Leiria, Viseu, Guimarães, Évora und weitere Städte des Landes. 
-
-      Falls das gewünschte Fahrzeug nicht auf dem lokalen Markt in Portugal verfügbar ist oder die Auswahl und Preise Ihnen nicht zusagen, kann die Anschaffung eines Fahrzeugs in Deutschland in Betracht gezogen werden. Der große europäische Markt ermöglicht es, aus einer Vielzahl von Marken, Modellen, Ausstattungsvarianten, Baujahren und Fahrzeugen mit unterschiedlichen Kilometerständen zu wählen. 
-
-      Wir übernehmen den gesamten Prozess: die Suche nach passenden Optionen in Deutschland, die vorläufige Analyse von Anzeigen, die Überprüfung des ausgewählten Fahrzeugs, die Kommunikation mit dem Verkäufer, die Begleitung des Geschäfts, die Erstellung der notwendigen Dokumente und die Organisation der Lieferung nach Portugal. 
-
-      Der Audi Q3 mit einer Laufleistung von 102.000 km wurde bereits an seinen Besitzer in Lissabon geliefert. Ein weiteres Fahrzeug hat den gesamten Weg von der Auswahl in Deutschland bis zur Übergabe an den Kunden in Portugal zurückgelegt. 
-
-      Fahrzeugauswahl und -prüfung in Deutschland. Kauf und Begleitung des Geschäfts. Lieferung von Fahrzeugen aus Deutschland nach Lissabon, Porto, Braga, Coimbra, Aveiro, Cascais, Sintra, Setúbal, Faro, Albufeira, Lagos und weiteren Städten Portugals.
-translatedFrom: 587c29ba32f4edc4
+      Ein weiterer Wagen wurde erfolgreich geprüft, gekauft und aus Deutschland nach Portugal geliefert. 
+      Diesmal wandte sich ein Kunde aus Lissabon an uns, der Unterstützung bei der Suche, Prüfung und dem Kauf eines Fahrzeugs in Deutschland benötigte. Nach der Auswahl des passenden Angebots fiel die Wahl auf einen Audi Q3 mit einer Laufleistung von 102.000 km. 
+      Vor dem Kauf wurde das Auto einer umfassenden Prüfung unterzogen: Wir bewerteten den technischen Zustand, die Nutzungsüberwachung, die Dokumente und die Übereinstimmung mit den Angaben des Verkäufers. Nach der Abstimmung des Fahrzeugs mit dem Kunden wurde der Audi Q3 in Deutschland gekauft, angemeldet und nach Portugal verschickt. 
+      So erhielt der Kunde das gewählte Fahrzeug bereits in Portugal, ohne selbst nach Deutschland reisen, Besichtigungen durchführen, Verhandlungen mit dem Verkäufer führen, Dokumente bearbeiten und die internationale Lieferung organisieren zu müssen. 
+      Wir unterstützen bei der Auswahl, Prüfung, dem Kauf und der Lieferung von Autos aus Deutschland nicht nur nach Lissabon, sondern auch in andere Städte und Regionen Portugals: Porto, Braga, Coimbra, Aveiro, Cascais, Sintra, Setúbal, Faro, Albufeira, Lagos, Leiria, Viseu, Guimarães, Évora und viele weitere Orte des Landes. 
+      Falls das gewünschte Fahrzeug nicht auf dem lokalen Markt in Portugal verfügbar ist oder das Angebot und die Preise nicht zufriedenstellend sind, kann der Kauf eines Autos in Deutschland in Betracht gezogen werden. Der große europäische Markt ermöglicht die Auswahl aus einer Vielzahl von Marken, Modellen, Ausstattungen, Baujahren und Varianten mit unterschiedlicher Laufleistung. 
+      Wir übernehmen den gesamten Prozess: die Suche nach geeigneten Optionen in Deutschland, die vorläufige Analyse der Angebote, die Prüfung des ausgewählten Fahrzeugs, die Kommunikation mit dem Verkäufer, die Begleitung des Deals, die Bearbeitung der erforderlichen Dokumente und die Organisation der Lieferung nach Portugal. 
+      Der Audi Q3 mit einer Laufleistung von 102.000 km wurde bereits seinem neuen Eigentümer in Lissabon übergeben. Ein weiteres Fahrzeug hat den gesamten Weg von der Auswahl in Deutschland bis zur Übergabe an den Kunden in Portugal zurückgelegt. 
+      Fahrzeugsuche und -prüfung in Deutschland. Kauf und Begleitung des Deals. Lieferung von Fahrzeugen aus Deutschland nach Lissabon, Porto, Braga, Coimbra, Aveiro, Cascais, Sintra, Setúbal, Faro, Albufeira, Lagos und weitere Städte Portugals.
+translatedFrom: b0236a9f6d5243f2
 ---
 Очередной автомобиль успешно проверен, куплен и доставлен из Германии в Португалию.\
 На этот раз к нам обратился клиент из Лиссабона, которому требовалась помощь с поиском, проверкой и покупкой автомобиля в Германии. После подбора подходящего варианта остановились на Audi Q3 с пробегом 102 000 км.\

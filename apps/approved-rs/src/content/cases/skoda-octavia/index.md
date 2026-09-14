@@ -2,71 +2,61 @@
 title: Skoda Octavia
 translations:
   en:
-    title: Skoda Octavia
-    body: >
-      Roman contacted us for help finding a car in Serbia. He previously lived in Bishkek, and with his family growing, he wanted a spacious, reliable and practical vehicle for everyday use.
+    title: Škoda Octavia
+    body: |-
+      Roman reached out to us for assistance in finding a car in Serbia. He previously lived in Bishkek and is now expecting an expansion in his family, which necessitated finding a spacious, reliable, and practical vehicle.
 
+      We chose the **Škoda Octavia** as the primary option.
 
-      We focused on the **Škoda Octavia**.
+      We inspected three cars and ultimately found a truly remarkable one: a **2.0 TDI with a DSG DQ381 wet clutch and approximately 150,000 km on the clock**.
 
+      The car's trim level is quite basic, but the technical condition is virtually flawless. After selecting the vehicle, we took it to a lift for a thorough check. We examined the underside, suspension, shock absorbers, and main components — everything was in excellent condition, with no unpleasant surprises.
 
-      We inspected three cars before choosing the right one. The final car turned out to be an excellent example: **2.0 TDI engine, DQ381 wet DSG gearbox and approximately 150,000 km**.
+      In the end, Roman got exactly the car he was looking for: without overpaying for luxurious features, but with outstanding technical condition and a good reserve for the future.
 
-
-      The equipment level is quite basic, but the technical condition is almost perfect. After selecting the car, we also put it on a lift for a detailed inspection. The underbody, suspension, shock absorbers and other key components were checked — everything was in excellent condition.
-
-
-      In the end, Roman got exactly what he was looking for: no unnecessary overpayment for a high equipment level, but an exceptionally well-maintained car with excellent technical condition.
-
-
-      **Car selection in Belgrade and throughout Serbia — from finding the right car to a complete technical inspection.**
+      Car sourcing in Belgrade and throughout Serbia — from searching to complete vehicle inspection.
   sr:
-    title: Skoda Octavia
-    body: >
-      Roman nam se obratio za pomoć pri izboru automobila u Srbiji. Ranije je živeo u Biškeku, a sada planira proširenje porodice, pa mu je bio potreban prostran, pouzdan i praktičan automobil.
+    title: Škoda Octavia
+    body: |-
+      Roman se obratio našoj firmi za pomoć pri izboru automobila u Srbiji. Ranije je živeo u Biškeku, a sada mu se planira proširenje porodice — zbog čega je nastala potreba za prostranim, pouzdanim i praktičnim vozilom.
 
+      Kao glavni izbor, odlučili smo se za **Škoda Octavia**.
 
-      Kao glavni izbor odabrali smo **Škodu Octaviju**.
+      Pogledali smo tri automobila i na kraju pronašli zaista odličan primerak: **2.0 TDI, mokri automat DSG DQ381 i prešao je oko 150 000 km**.
 
+      Oprema automobila je prilično jednostavna, ali je tehničko stanje — gotovo savršeno. Nakon što smo izabrali automobil, dodatno smo ga podigli na dizalicu. Proverili smo dno, ovjes, amortizere i glavne elemente ispod — sve je bilo u odličnom stanju, bez neprijatnih iznenađenja.
 
-      Pregledali smo tri automobila i na kraju pronašli zaista odličan primerak: **2.0 TDI motor, mokri DSG menjač DQ381 i oko 150.000 km**.
+      Na kraju, Roman je dobio upravo onakav automobil kakav je tražio: bez preplate za bogatu opremu, ali sa odličnim tehničkim stanjem i dobrim resursima.
 
-
-      Oprema je prilično jednostavna, ali je zato tehničko stanje automobila gotovo idealno. Nakon izbora automobila, odvezli smo ga i na dizalicu. Pregledano je podvozje, vešanje, amortizeri i svi važni elementi sa donje strane — sve je u odličnom stanju.
-
-
-      Na kraju je Roman dobio upravo ono što je tražio — automobil bez nepotrebnog plaćanja bogate opreme, ali sa odličnim tehničkim stanjem i dobrim potencijalom za dugoročnu upotrebu.
-
-
-      **Autopodbor u Beogradu i širom Srbije — od pronalaska automobila do kompletne provere.**
+      Auto-sourcing u Beogradu i širom Srbije — od potrage do potpunog pregleda automobila.
   es:
     title: Škoda Octavia
     body: |-
-      Román se puso en contacto con nosotros para recibir ayuda en la búsqueda de un automóvil en Serbia. Anteriormente vivía en Bishkek, y ahora su familia está a punto de crecer, lo que le llevó a buscar un vehículo espacioso, confiable y práctico.
+      Róman se puso en contacto con nosotros para ayudarle a encontrar un automóvil en Serbia. Anteriormente vivía en Bishkek, y ahora está esperando la llegada de un nuevo miembro a su familia, lo que ha creado la necesidad de un vehículo espacioso, confiable y práctico.
 
-      Como opción principal, eligió la **Škoda Octavia**.
+      Elegimos como opción principal la **Škoda Octavia**.
 
-      Inspeccionamos tres automóviles y finalmente encontramos una verdadera joya: **2.0 TDI, con caja de cambios automática DSG DQ381 y un kilometraje de aproximadamente 150 000 km**.
+      Examinamos tres automóviles y, al final, encontramos una verdadera joya: **2.0 TDI, transmisión automática DSG DQ381 y un kilometraje de aproximadamente 150,000 km**.
 
-      La configuración del vehículo es bastante básica, ¡pero su estado técnico es prácticamente perfecto! Después de seleccionar el automóvil, lo llevamos a un elevador. Revisamos el chasis, la suspensión, los amortiguadores y los principales elementos inferiores: todo estaba en excelente condición, sin sorpresas desagradables.
+      La equipamiento del automóvil es bastante básico, pero su estado técnico es prácticamente perfecto. Después de escoger el vehículo, lo llevamos a un elevador. Verificamos el chasis, la suspensión, los amortiguadores y los componentes principales de abajo: todo en excelente estado, sin sorpresas desagradables.
 
-      Al final, Román obtuvo exactamente el automóvil que estaba buscando: sin sobreprecios por una configuración lujosa, pero con un estado técnico excepcional y un buen margen de durabilidad.
+      Al final, Róman recibió exactamente el automóvil que estaba buscando: sin pagar de más por un equipamiento lujoso, pero con un excelente estado técnico y un buen margen de uso.
 
-      **Selección de automóviles en Belgrado y en toda Serbia — desde la búsqueda hasta la inspección completa del vehículo.**
+      Servicio de selección de automóviles en Belgrado y en toda Serbia: desde la búsqueda hasta la verificación completa del vehículo.
   de:
     title: Škoda Octavia
     body: |-
-      Roman wandte sich an uns, um Unterstützung bei der Auswahl eines Fahrzeugs in Serbien zu erhalten. Zuvor lebte er in Bisjkek und plant jetzt, seine Familie zu vergrößern – daher bestand die Notwendigkeit, ein geräumiges, zuverlässiges und praktisches Auto zu finden.
+      Roman wandte sich an uns, um Unterstützung bei der Auswahl eines Autos in Serbien zu erhalten. Früher lebte er in Bischkek, und nun plant er eine Familienvergrößerung—daher die Notwendigkeit, ein geräumiges, zuverlässiges und praktisches Fahrzeug zu finden.
 
       Als Hauptoption wählten wir die **Škoda Octavia**.
 
-      Wir haben drei Fahrzeuge besichtigt und schließlich ein wirklich hervorragendes Exemplar gefunden: **2.0 TDI, DSG DQ381 Automatikgetriebe und rund 150.000 km** Laufleistung.
+      Wir haben drei Fahrzeuge besichtigt und schließlich ein wirklich hervorragendes Exemplar gefunden: **2.0 TDI, DQ381 DSG Automatikgetriebe und eine Laufleistung von etwa 150.000 km**.
 
-      Die Ausstattung des Fahrzeugs ist recht einfach, dafür ist der technische Zustand nahezu perfekt. Nach der Wahl des Fahrzeugs haben wir es zusätzlich auf die Hebebühne gebracht. Wir haben den Unterboden, die Aufhängung, die Stoßdämpfer und die wichtigsten Elemente darunter überprüft – alles in einem ausgezeichneten Zustand, ohne unangenehme Überraschungen.
+      Die Ausstattung des Fahrzeugs ist recht einfach, aber der technische Zustand ist nahezu perfekt. Nach der Auswahl des Fahrzeugs haben wir es zusätzlich auf die Hebebühne gefahren. Wir haben den Unterboden, die Aufhängung, die Stoßdämpfer und die wichtigsten Bauteile von unten überprüft—alles in einem ausgezeichneten Zustand, ohne unangenehme Überraschungen.
 
-      Am Ende erhielt Roman genau das Fahrzeug, das er gesucht hat: ohne Aufpreis für eine umfangreiche Ausstattung, aber mit einem hervorragenden technischen Zustand und einem guten Restwert.
+      Am Ende erhielt Roman genau das Fahrzeug, das er suchte: ohne Überzahlung für eine umfangreiche Ausstattung, aber mit ausgezeichnetem technischen Zustand und gutem Restwert.
 
-      **Fahrzeugbeschaffung in Belgrad und ganz Serbien – von der Suche bis zur vollständigen Überprüfung des Fahrzeugs.**
+      Autoauswahl in Belgrad und ganz Serbien—von der Suche bis zur vollständigen Überprüfung des Fahrzeugs.
 car: Skoda Octavia
 year: 2020
 price:
@@ -80,7 +70,7 @@ gallery:
   - gallery/1.jpg
 date: 2026-07-27
 published: true
-translatedFrom: 188fc8655135d5ef
+translatedFrom: bec329b2648ab9cd
 ---
 
 Роман обратился к нам за помощью в подборе автомобиля в Сербии. Раньше он жил в Бишкеке, а сейчас у него планируется увеличение семьи — поэтому появилась необходимость подобрать просторный, надежный и практичный автомобиль.

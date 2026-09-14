@@ -2,51 +2,41 @@
 title: Малое ТО Mercedes-Benz C-Class W205 в Белграде
 translations:
   en:
-    title: Mercedes-Benz C-Class Service in Our Belgrade Garage
+    title: Minor Service for Mercedes-Benz C-Class W205 in Belgrade
     body: |-
-      ## Mercedes-Benz C-Class — Service at Our Garage in Belgrade
+      The Mercedes-Benz C-Class W205 arrived at our workshop in Belgrade for a minor service.
 
-      We conducted a comprehensive service on the **Mercedes-Benz C-Class W205** at our Belgrade auto service.
+      We performed the following:
 
-      As part of the **minor service for Mercedes-Benz**, we carried out the following tasks:
+      - Replaced the engine oil;
+      - Changed the oil filter;
+      - Replaced the engine air filter;
+      - Changed the cabin filter;
+      - Replaced all brake pads;
+      - Maintained and inspected the braking system.
 
-      - Oil change;
-      - Oil filter replacement;
-      - Engine air filter replacement;
-      - Cabin filter replacement;
-      - Replacement of all brake pads;
-      - Brake system servicing and inspection.
+      A note on the brakes: brake pads are a crucial safety component, and they need to be monitored regularly. When changing the pads, we also check the discs, calipers, and guides; if any of these parts are rusted or worn, the car's braking will be uneven.
 
-      We paid special attention to the brakes. **Brake pads are one of the key safety components of a vehicle**, so it’s essential to monitor their condition regularly. During the replacement, it's vital to check not only the pads but also the state of the brake discs, calipers, and guides to ensure that the braking system functions properly and evenly.
-
-      Regular maintenance helps maintain the reliability of your Mercedes-Benz, avoids more serious malfunctions, and ensures a safe driving experience.
-
-      **Mercedes-Benz Service in Belgrade**\
-      Diagnostics, maintenance, oil and filter changes, brake system servicing, and repair of Mercedes-Benz vehicles.
+      We offer diagnostics, servicing, oil and filter changes, brake system maintenance, and Mercedes-Benz repairs in Belgrade.
     car: Mercedes-Benz C-Class
 
   sr:
-    title: Mercedes-Benz C200
+    title: Malo TO Mercedes-Benz C-Class W205 u Beogradu
     body: |-
-      ## Mercedes-Benz C-Class — servis u našem servisu u Beogradu
+      Mercedes-Benz C-Class W205 je stigao u naš autoservis u Beogradu na malo tehničko održavanje.
 
-      U našem auto servisu u Beogradu obavili smo sveobuhvatno tehničko održavanje **Mercedes-Benz C-Class W205**.
+      Odrađeno je:
 
-      U okviru **malog TO za Mercedes-Benz** izvršena su:
-
-      - zamena motorog ulja;
-      - zamena uljnog filertra;
+      - zamena motornog ulja;
+      - zamena uljnog filtera;
       - zamena vazdušnog filtera motora;
-      - zamena filtera kabine;
-      - zamena svih kočionih pločica;
+      - zamena kabinskog filtera;
+      - zamena svih kočionih obloga;
       - servis i provera kočionog sistema.
 
-      Posebnu pažnju posvetili smo kočnicama. **Kočione pločice su jedan od ključnih elemenata bezbednosti automobila**, stoga je njihovo stanje potrebno redovno pratiti. Prilikom zamene važno je proveriti ne samo same pločice, već i stanje kočionih diskova, čeljusti i vodiča, kako bi kočioni sistem funkcionišao ispravno i ravnomerno.
+      Posebno o kočnicama. Obloge su jedan od ključnih elemenata bezbednosti i potrebno ih je redovno proveravati. Prilikom menjanja obloga, uvek proveravamo diskove, klipove i vođice: ako je nešto od toga zahrđalo ili istrošeno, kočenje će biti neujednačeno.
 
-      Redovno tehničko održavanje pomaže u očuvanju pouzdanosti Mercedes-Benz-a, izbegavanju ozbiljnijih kvarova i obezbeđivanju bezbedne upotrebe vozila.
-
-      **Održavanje Mercedes-Benz u Beogradu**
-      Dijagnostika, TO, zamena ulja i filtera, servis kočionog sistema i popravke automobila Mercedes-Benz.
+      Dijagnostiku, TO, zamenu ulja i filtera, servis kočionog sistema i popravku Mercedes-Benz-a radimo u Beogradu.
     car: Mercedes-Benz C-Class
 car: Mercedes-Benz C-Class
 year: 2018
@@ -58,7 +48,7 @@ image: image.jpg
 gallery: []
 date: 2026-05-05
 published: true
-translatedFrom: 798d1634d339b143
+translatedFrom: ebb7dfe2cd1ed1cb
 ---
 
 Mercedes-Benz C-Class W205 приехал в наш автосервис в Белграде на малое ТО.

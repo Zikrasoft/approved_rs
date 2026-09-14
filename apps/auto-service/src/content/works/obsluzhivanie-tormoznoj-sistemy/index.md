@@ -3,67 +3,55 @@ title: Замена тормозных дисков и колодок в Бел�
 car: Обслуживание тормозной системы
 translations:
   en:
-    title: Brake System Maintenance
+    title: Brake Disc and Pad Replacement in Belgrade
     body: |-
-      ## Brake System Maintenance and Replacement of Brake Discs in Belgrade
+      A vehicle arrived at our workshop in Belgrade with a complaint of vibrations during braking: when the driver presses the pedal, the car shakes.
 
-      A vehicle arrived at our car service in Belgrade, Serbia, with a complaint of vibrations during braking. The driver noticed that when pressing the brake pedal, the car started to vibrate uncomfortably, prompting a decision for a comprehensive diagnosis.
+      We started with a wheel balancing check — this is the most common cause of such vibrations, and it’s the easiest to rule out. The balancing was fine, so we moved on to inspect the braking system.
 
-      Since braking vibrations can be associated with multiple factors, we began our diagnostics with a check of the wheel balancing. This step helped rule out one of the most common causes of such symptoms. The wheel balance was satisfactory, so we proceeded to examine the brake system.
+      At first glance, the discs and pads appeared to be in good condition, with no obvious signs of severe wear. However, upon closer inspection, we discovered that the left brake disc was deformed. This was the source of the vibrations.
 
-      At first glance, the brake discs and pads appeared to be in good condition with no obvious signs of significant wear. However, upon closer inspection, we discovered that **the left brake disc was deformed**. This condition was the root cause of the vibrations experienced during braking.
+      We showed the issue to the client and got approval for the repair. Here’s what we did:
 
-      We informed the client of the identified issue and proceeded to agree on further repairs.
+      - Diagnosed the braking system;
+      - Checked and balanced the wheels;
+      - Identified the deformation of the left brake disc;
+      - Replaced the brake discs;
+      - Replaced the brake pads;
+      - Rechecked the wheel balancing;
+      - Conducted a test drive post-repair.
 
-      The following work was carried out as part of the maintenance:
+      After these steps, the vibrations during braking completely disappeared. The vehicle was thoroughly inspected and returned to the owner.
 
-      - Diagnostic check of the brake system;
-      - Inspection and balancing of the wheels;
-      - Identification of the deformation in the left brake disc;
-      - Replacement of brake discs;
-      - Replacement of brake pads;
-      - Re-checking the wheel balance;
-      - Test drive after the repairs.
+      A disc may look normal but can still be warped — it's often difficult to detect such deformation with the naked eye. Therefore, if you notice steering wheel shaking, pedal vibrations, or body shake during braking, it’s best not to delay the diagnostics.
 
-      After completing all the work, the vibrations during braking completely disappeared. The vehicle was thoroughly checked and returned to the owner in proper working condition.
-
-      It's important to understand that **visually, brake discs and pads may seem perfectly fine**, yet a deformed brake disc can cause noticeable vibrations when braking. Therefore, if you experience steering wheel shaking, vibrations in the brake pedal, or the car body while braking, swift diagnostics is encouraged.
-
-      Our car service in Belgrade provides diagnostics and maintenance of brake systems, replacement of brake discs and pads, suspension checks, wheel balancing, and comprehensive vehicle servicing.
-
-      If your car has started vibrating during braking or if you notice any unusual sensations while using the brakes, bring it in for diagnostics at our car service in Belgrade.
+      We offer diagnostics and servicing for braking systems, disc and pad replacements, suspension checks, wheel balancing, and comprehensive maintenance in Belgrade.
     car: Обслуживание тормозной системы
   sr:
-    title: Servis kočionog sistema
+    title: Zamena kočionih diskova i pločica u Beogradu
     body: |-
-      ## Servis kočionog sistema i zamena kočionih diskova u Beogradu
+      U naš servis u Beogradu stiglo je vozilo sa pritužbom na vibraciju prilikom kočenja: vozač pritisne papučicu, a automobil počinje da se trese.
 
-      U naš servis u Beogradu, Srbija, došao je automobil sa pritužbom na vibracije pri kočenju. Vozač je primetio da pri pritisku na kočnicu automobil počinje neprijatno da vibrira, pa je donesena odluka o sprovođenju sveobuhvatne dijagnostike.
+      Počeli smo s balansiranjem točkova — to je najčešći uzrok ove vrste vibracije, a najlakše ga je isključiti. Balansiranje je bilo u redu, pa smo nastavili dalje sa kočionim sistemom.
 
-      S obzirom na to da vibracije prilikom kočenja mogu biti povezane ne samo sa kočionim sistemom, dijagnostiku smo počeli proverom balansiranja točkova. Ovo je omogućilo isključivanje jednog od najčešćih uzroka sličnih simptoma. Balansiranje točkova je bilo u redu, pa smo nastavili proveru kočionog sistema.
+      Na prvi pogled diskovi i pločice su bili u dobrom stanju, bez vidljivih tragova velikog trošenja. Međutim, pažljivom proverom otkriveno je da je levi kočioni disk deformisan. On je uzrokovao vibraciju.
 
-      Na prvi pogled kočioni diskovi i pločice su bili u dobrom stanju i nisu imale očigledne znakove jakog trošenja. Međutim, prilikom detaljnije dijagnostike otkrili smo da **levi kočioni disk nije bio u dobrom stanju**. Upravo je njegovo stanje bilo uzrok pojave vibracija prilikom kočenja.
-
-      Obavestili smo klijenta o otkrivenom problemu i usaglasili dalju popravku.
-
-      U okviru servisa izvršene su sledeće radnje:
+      Prikazali smo klijentu i saglasili se oko popravke. Šta smo uradili:
 
       - dijagnostika kočionog sistema;
-      - provere i balansiranje točkova;
+      - provera i balansiranje točkova;
       - otkrivanje deformacije levog kočionog diska;
       - zamena kočionih diskova;
       - zamena kočionih pločica;
       - ponovna provera balansiranja točkova;
       - kontrolna vožnja nakon popravke.
 
-      Nakon sprovođenja svih radova, vibracije pri kočenju su u potpunosti nestale. Automobil je proveren i vraćen vlasniku u ispravnom stanju.
+      Nakon svih ovih radnji, vibracija prilikom kočenja je potpuno nestala, vozilo je provereno i vraćeno vlasniku.
 
-      Važno je razumeti da **vizuelno kočioni diskovi i pločice mogu izgledati sasvim normalno**, ali istovremeno deformacija kočionog diska može izazvati primetne vibracije tokom kočenja. Stoga, pri pojavi zanošenja volana, vibracija na kočionoj pedali ili karoseriji automobila, preporučuje se ne odlagati dijagnostiku.
+      Disk može izgledati normalno, a da pritom bude kriv — ovakvu deformaciju je teško primetiti golim okom. Zato, ako se pojavi podrhtavanje volana, vibracija papučice ili karoserije pri kočenju, dijagnostiku nije dobro odlagati.
 
-      Naš servis u Beogradu vrši dijagnostiku i servis kočionih sistema, zamenu kočionih diskova i pločica, proveru vešanja, balansiranje točkova i sveobuhvatno tehničko održavanje vozila.
-
-      Ako vaš automobil počne da vibrira prilikom kočenja ili se jave drugi neobični osećaji prilikom rada kočnica, dođite na dijagnostiku u naš servis u Beogradu.
-    car: Servis kočionog sistema
+      Dijagnostiku i servis kočionih sistema, zamenu diskova i pločica, proveru vešanja, balansiranje točkova i kompleksno održavanje radimo u Beogradu.
+    car: Observacija kočionog sistema
 year: 2022
 servicesApplied:
   - brakes-suspension
@@ -71,7 +59,7 @@ image: image.jpg
 gallery: []
 date: 2026-06-06
 published: true
-translatedFrom: cd0275c480085823
+translatedFrom: ad62f9f7357aa78c
 ---
 
 В наш автосервис в Белграде приехала машина с жалобой на вибрацию при торможении: водитель нажимает педаль, и автомобиль начинает трясти.

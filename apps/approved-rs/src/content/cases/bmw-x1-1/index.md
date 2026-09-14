@@ -18,79 +18,79 @@ translations:
   en:
     title: BMW X1
     body: |-
-      # Hassle-Free Car Imports from Germany — Sourcing, Inspection, Purchase and Delivery
+      ## Turnkey Car Import from Germany — Sourcing, Inspection, Buyback, and Delivery
 
-      Are you looking to buy a quality car from Germany without the hassle of traveling, negotiating with dealerships, or dealing with payment, documentation, export, and delivery? We fully handle the purchase and import of the vehicle from Germany, ensuring a smooth, turnkey experience.
+      Are you looking to purchase a quality car from Germany without the hassle of trips, negotiations with German dealerships, and the complexities of payment, documentation, export, and delivery? We fully manage the purchase and import process of your car from Germany, tailored to your needs.
 
-      We work with clients from various countries and can arrange the delivery of cars from Germany to **Serbia, Russia, Spain, Portugal, France, and other European countries**.
+      We work with clients from various countries and can arrange for deliveries from Germany to **Serbia, Russia, Spain, Portugal, France, and other European countries**.
 
-      We guide you through the entire process: from finding the right car and initial negotiations with the seller, to inspection, purchase, document processing, transport, and finally handing over the vehicle to the client.
+      We supervise the entire process: from finding the right car and initial negotiations with the seller to inspection, buyback, documentation, transportation, and handing over the car to the client.
 
-      ## Car Sourcing in Germany
+      ## Sourcing Cars in Germany
 
-      The German car market offers a vast selection of vehicles from different brands, models, and configurations. However, a nice advertisement and good specifications don’t necessarily mean that a particular car is worth buying.
+      The German automotive market offers an extensive selection of vehicles from various brands, models, and configurations. However, an appealing listing and attractive features do not always mean that a particular car is worth purchasing.
 
-      That's why our work begins not with the payment for the vehicle but with its preliminary analysis.
+      Thus, our work begins long before payment — with a preliminary analysis of the vehicle.
 
-      We select options based on the client's requirements and budget, examining advertisements, specifications, the vehicle's history, and information about the seller. We then directly contact managers at German dealerships and showroom centers.
+      We select options that meet the client's requirements and budget, studying listings, configurations, the car's history, and information about the seller. After that, we directly contact managers at German dealerships.
 
-      We negotiate in German, clarifying the technical condition of the vehicle, service history, any damages and repairs, export sale conditions, documentation requirements, and the possibility for further negotiations.
+      We conduct negotiations in German, clarifying the car's technical condition, service history, any damages and repairs, export conditions, necessary documentation, and the possibility for additional bargaining.
 
-      Clients don't need to make calls to Germany or communicate with dealers themselves — we take care of all of this.
+      Clients do not need to make calls to Germany, exchange emails with the dealer, or navigate the intricacies of purchasing a car on the European market — we handle all of this.
 
-      ## Personal Inspection of the Vehicle Before Purchase
+      ## Personal Inspection Before Purchase
 
-      One of the most crucial stages is inspecting the vehicle directly in Germany.
+      One of the most critical stages is the vehicle inspection in Germany.
 
-      We do not buy a car solely based on the seller’s photos and description. Before making a purchase, our specialist personally visits the vehicle and conducts a comprehensive inspection.
+      We do not purchase a car based solely on the seller's photos and description. Before the buyback, our expert visits the vehicle for a comprehensive examination.
 
-      The car is checked on **over 200 parameters**.
+      The car is inspected **across more than 200 parameters**.
 
       The inspection includes:
 
-      - Body, paintwork, and signs of previous repairs;
-      - Condition of body elements and gaps;
-      - Signs of accidents and restoration work;
-      - Windows, optics, rims, and tires;
-      - Interior condition and wear relative to the claimed mileage;
-      - Engine and auxiliary equipment;
-      - Transmission;
-      - Suspension, braking system, and steering;
-      - Electrical systems and equipment;
-      - Computer diagnostics;
-      - Service history and documents;
-      - Actual vehicle configuration;
-      - Verification of identification data;
-      - Testing of main functions and systems;
-      - Assessment of overall technical condition.
+      - body and paint condition, signs of previous repairs;
+      - state of body elements and panel gaps;
+      - signs of accidents and restoration work;
+      - glasses, lights, wheels, and tires;
+      - interior condition and mileage consistency;
+      - engine and attachments;
+      - transmission;
+      - suspension, braking system, and steering;
+      - electronic systems and vehicle equipment;
+      - computer diagnostics;
+      - service history and documents;
+      - actual vehicle configuration;
+      - verification of vehicle identification data;
+      - testing of primary functions and systems;
+      - overall technical condition assessment.
 
-      Based on the inspection results, clients gain an objective understanding of the vehicle's condition **before making a purchase**.
+      Following the inspection, the client receives an objective understanding of the car's condition **before purchase**.
 
-      If serious flaws or concealed damages are found, or if the vehicle’s condition does not match what was stated by the seller, we do not recommend that option and continue the search.
+      If serious deficiencies, hidden damages, or a mismatch to the seller's description are discovered, we do not recommend that option and continue the search.
 
-      Our goal is not just to bring the chosen car but to find and purchase a genuinely worthy vehicle.
+      Our mission is to locate and acquire a truly worthy vehicle.
 
       ## Negotiating and Bargaining with the German Dealer
 
-      After the inspection, we discuss the vehicle again with the seller. If deficiencies are discovered during the inspection that justify a price revision, we use them in our negotiations.
+      After inspection, we reassess the vehicle with the seller. If any issues have emerged during the inspection that justify negotiating the price, we leverage them in discussions.
 
-      We agree on the final price, terms of purchase, documents, and export of the vehicle.
+      We agree on the final price, purchase conditions, documents, and export of the vehicle.
 
-      For the client, the entire process is handled by a single representative: there’s no need to separately look for someone for inspection, a company for payment, a transport service, or a customs representative and other intermediaries.
+      For the client, the entire process is managed through a single point of contact: there’s no need to find separate individuals for inspection, payment, transport, customs representation, and other intermediaries.
 
-      ## Purchasing the Vehicle Through Our Own Company
+      ## Purchasing the Vehicle Through Our Company
 
-      After finalizing the vehicle with the client, we organize the purchase.
+      Once the vehicle is approved with the client, we organize the buyback.
 
-      **Payment to the German seller is made through our own European company.**
+      **Payment for the car to the German seller is made through our own European company.**
 
-      This greatly simplifies work with German dealerships and allows us to independently oversee the transaction, control documents, and the subsequent export of the vehicle.
+      This significantly streamlines dealings with German dealerships and allows us to independently oversee the transaction, control documentation and further vehicle export.
 
-      Once payment is complete, we collect the vehicle from the seller and begin preparations for delivery to the destination country.
+      After payment, we collect the vehicle from the seller and begin preparations for delivery to the destination country.
 
-      ## Delivery of Vehicles from Germany
+      ## Delivery of Cars from Germany
 
-      We arrange the delivery of purchased vehicles from Germany to:
+      We organize the delivery of purchased vehicles from Germany to:
 
       **Serbia**  
       **Spain**  
@@ -99,258 +99,249 @@ translations:
 
       We can also consider delivering vehicles to other countries — routes and conditions are calculated individually.
 
-      So, no matter where you are, if you’ve found an interesting vehicle in Germany or want us to find one for you, we can organize the entire process of purchasing and delivery.
+      Therefore, it does not matter where you are located. If you have found an interesting car in Germany or wish for us to source it for you, we can manage the entire process of purchase and delivery.
 
-      ## Turnkey Solutions for Cars from Germany to Serbia
+      ## Turnkey Imports from Germany to Serbia
 
-      For clients in Serbia, we offer a complete cycle of car importation.
+      For clients in Serbia, we offer a complete vehicle import cycle.
 
-      We find the car in Germany, contact the seller, personally inspect the vehicle, conduct diagnostics, agree on the purchase, pay for the vehicle through our company, and collect it from the dealer.
+      We source the vehicle in Germany, contact the seller, personally inspect the car, perform diagnostics, agree on the purchase, pay for the vehicle through our company, and collect it from the dealer.
 
-      Then we organize the delivery of the vehicle to Serbia, handle all necessary import procedures and customs clearance, and finalize the registration of the vehicle.
+      After that, we arrange for the vehicle's delivery to Serbia, handle the necessary import procedures and customs clearance, and finally complete the vehicle registration process.
 
-      **As a result, clients receive a ready-to-drive vehicle with Serbian registration plates.**
+      **As a result, the client receives a ready-to-drive vehicle with Serbian license plates.**
 
-      There’s no need for you to travel to Germany, search for export plates, negotiate with the seller, organize transport, and undergo the entire import process alone.
+      There’s no need to travel to Germany, search for export plates, deal with the seller, arrange transportation, or manage the entire import process — these tasks are handled by us.
 
-      We take on these tasks.
+      ## A Real Example — BMW X1 from Germany to Serbia
 
-      ## Real Example — BMW X1 from Germany to Serbia
-
-      One of the cars we sourced and imported for a client is the **BMW X1**.
+      One of the vehicles we sourced and brought for a client is the **BMW X1**.
 
       **Price of the vehicle in Germany (Brutto): 39,860 €**
 
-      After purchase, inspection, delivery, documentation, and all necessary expenses:
+      After the purchase, inspection, delivery, documentation, and all necessary expenses:
 
-      **Final cost of the BMW X1 in Serbia turnkey — 46,000 €.**
+      **Final cost of the BMW X1 in Serbia, turnkey — 46,000 €.**
 
-      This means that the client was aware of the final budget upfront and ultimately received a fully prepared vehicle in Serbia.
+      This means that the client was aware of the final budget from the start and ultimately received a completely ready vehicle in Serbia.
 
-      This is a great example of why it’s important to consider not just the price in a German advertisement but also to calculate the **actual final cost of the vehicle on delivery in the destination country** in advance.
+      This is an excellent example of why it’s crucial to not only consider the price in a German listing but also to calculate the **true final cost of the vehicle delivered to the destination country** in advance.
 
-      ## Why You Should Order a Car from Germany Through Us
+      ## Why You Should Order Cars from Germany Through Us
 
-      We oversee the entire transaction and take responsibility for each step:
+      We oversee the entire transaction and take responsibility for every stage:
 
-      **Sourcing → negotiations with the dealer → personal inspection → over 200 parameter checks → diagnostics → agreement → purchase → documentation → export → delivery → customs clearance → registration.**
+      **Sourcing → Negotiations with Dealer → Personal Inspection → Evaluation Across 200+ Parameters → Diagnostics → Agreement → Purchase → Documentation → Export → Delivery → Customs Clearance → Registration.**
 
-      Clients get one representative and a clear process instead of needing to coordinate multiple companies and specialists across different countries.
+      In this way, clients receive a single point of contact and a clear process instead of having to coordinate multiple companies and specialists across different countries.
 
-      We pay special attention to thoroughly inspecting the vehicle before payment. It is crucial for us to understand what exactly we are buying and in what condition the vehicle will arrive to the client.
+      We pay particular attention to inspecting the vehicle before payment. It’s essential for us to understand exactly what we are buying and in what condition the car will arrive to the client.
 
       ## Interested in Buying a Car from Germany?
 
-      If you’re considering a **BMW, Mercedes-Benz, Audi, Porsche, Volkswagen, or any other brand from Germany**, send us your desired model, year of manufacture, specifications, and approximate budget.
+      If you’re considering a **BMW, Mercedes-Benz, Audi, Porsche, Volkswagen, or another brand from Germany**, send us the model, desired year, configuration, and approximate budget.
 
-      If you already have a specific listing on a German car website — just send us the link. We will review the vehicle and contact the seller.
+      If you already have a specific listing from a German car site — just send us the link. We will preliminarily evaluate the vehicle and contact the seller.
 
-      If there’s no specific option yet — we will find vehicles that fit your criteria.
+      If you don’t have a specific option yet — we can help source vehicles that meet your requirements.
 
-      **Sourcing and importing cars from Germany to Serbia, Russia, Spain, Portugal, and France.**
+      **Sourcing and importing cars from Germany turnkey to Serbia, Russia, Spain, Portugal, and France.**
 
-      We’ll find a car, negotiate, inspect it in Germany, purchase it, handle the documents, and arrange the delivery to the end client.
-
-      **You choose the car — we take care of the rest.**
+      We will find a vehicle, conduct negotiations, personally inspect it in Germany, buy it, document it, and arrange delivery to the end client.
   sr:
     title: BMW X1
     body: |-
-      # Automobili iz Nemačke po ključu — odabir, provera, otkup i dostava
+      ## Automobili iz Nemačke po sistemu "ključ u ruke" — izbor, provera, otkup i dostava
 
-      Želite da kupite dobar automobil iz Nemačke bez ličnih putovanja, pregovora sa nemačkim auto-salonima i komplikacija oko plaćanja, dokumenata, izvoza i dostave? Mi potpuno organizujemo kupovinu i dovođenje automobila iz Nemačke po ključu.
+      Želite da kupite dobar automobil iz Nemačke bez putovanja, pregovaranja s nemačkim salonskim predstavnicima i poteškoća s plaćanjem, dokumentima, izvozom i dostavom? Mi potpuno organizujemo kupovinu i dovoženje automobila iz Nemačke po sistemu "ključ u ruke".
 
-      Radimo sa klijentima iz raznih zemalja i možemo organizovati dostavu automobila iz Nemačke u **Srbija, Rusija, Španija, Portugal, Francuska i druge evropske zemlje**.
+      Radimo s klijentima iz različitih zemalja i možemo organizovati dostavu automobila iz Nemačke u **Srbiju, Rusiju, Španiju, Portugal, Francusku i druge evropske zemlje**.
 
-      Pratimo ceo proces: od pronalaženja odgovarajućeg automobila i prvih pregovora sa prodavcem do provere, otkupa, sređivanja dokumentacije, transporta i predaje automobila klijentu.
+      Pratimo ceo proces: od pretrage odgovarajućeg automobila i prvih pregovora s prodavcem, do provere, otkupa, formiranja dokumenata, transporta i predaje vozila klijentu.
 
-      ## Odabir automobila u Nemačkoj
+      ## Izbor automobila u Nemačkoj
 
-      Nemačko auto-tržište nudi ogroman izbor automobila različitih marki, modela i oprema. Ali atraktivno oglašavanje i dobra oprema ne znače da određeni automobil vredi kupiti.
+      Nemačko tržište automobila nudi ogroman izbor vozila raznih marki, modela i konfiguracija. No, lepo oglašavanje i dobra oprema još ne znače da je konkretan automobil vredan kupovine.
 
-      Zato naš posao počinje ne sa plaćanjem automobila, već sa njegovom preliminarnom analizom.
+      Zato rad započinje daleko pre nego što se izvrši uplata — s preliminarnom analize vozila.
 
-      Biramo opcije prema zahtevima i budžetu klijenta, proučavamo oglase, opremu, istoriju automobila i informacije o prodavcu. Nakon toga se direktno obraćamo menadžerima nemačkih auto-salona i prodajnih centara.
+      Biramo opcije u skladu s zahtevima i budžetom klijenta, proučavamo oglase, opremu, istoriju automobila i informacije o prodavcu. Nakon toga se direktno javljamo menadžerima nemačkih autosalona i dealerskih centara.
 
-      Pregovaramo na nemačkom jeziku, proveravamo tehničko stanje automobila, istoriju održavanja, prisustvo oštećenja i popravki, uslove prodaje za izvoz, set dokumenata i mogućnost dodatnog pregovora o ceni.
+      Samostalno vodimo pregovore na nemačkom jeziku, proveravamo tehničko stanje automobila, istoriju održavanja, postojanje oštećenja i popravljanja, uslove prodaje za izvoz, komplet dokumenata i mogućnost dodatne cene.
 
-      Klijentu nije potrebno da zove u Nemačku, dopisuje se sa trgovcima ili razume specifičnosti kupovine automobila na evropskom tržištu — taj posao preuzimamo mi.
+      Klijentu nije potrebno da samostalno zove u Nemačku, dopisuje se s dealerom ili se upušta u posebnosti kupovine automobila na evropskom tržištu — taj posao preuzimamo mi.
 
       ## Lična provera automobila pre kupovine
 
-      Jedan od najvažnijih koraka je provera automobila direktno u Nemačkoj.
+      Jedan od najvažnijih koraka — provera automobila direktno u Nemačkoj.
 
-      Ne kupujemo automobil oslanjajući se samo na fotografije prodavca i opis u oglasu. Pre otkupa, naš stručnjak lično dolazi do automobila i vrši sveobuhvatnu inspekciju.
+      Ne kupujemo automobil oslanjajući se samo na fotografije prodavca i opis u oglasu. Pre otkupa, naš stručnjak lično dolazi do automobila i vrši sveobuhvatnu procenu.
 
-      Automobil se proverava **na više od 200 parametara**.
+      Automobil se proverava **po više od 200 parametara**.
 
       Provera obuhvata:
 
-      - karoseriju, lak i tragove prethodnih popravki;
-      - stanje karoserijskih elemenata i razmaka;
-      - znake udesa i restauratorske radove;
-      - stakla, svetla, aluminijumske felne i gume;
-      - stanje unutrašnjosti i usklađenost istrošenosti sa navedenim pređenim kilometrima;
-      - motor i dodatnu opremu;
+      - karoserija, lakirna površina i tragovi prethodnih popravki;
+      - stanje karoserijskih elemenata i razmaci;
+      - znaci nesreća i restauracije;
+      - stakla, optika, točkovi i gume;
+      - stanje enterijera i usklađenost trošenja s navedenim pređenim kilometrima;
+      - motor i dodatna oprema;
       - menjač;
-      - suspenziju, kočioni sistem i upravljanje;
-      - elektronske sisteme i opremu automobila;
-      - računalnu dijagnostiku;
-      - servisnu istoriju i dokumenta;
-      - stvarnu opremu automobila;
-      - proveru identifikacionih podataka automobila;
+      - ovjes, kočioni sistem i upravljanje;
+      - elektronski sistemi i oprema automobila;
+      - računalna dijagnostika;
+      - servisna istorija i dokumenti;
+      - stvarna oprema automobila;
+      - provera identifikacionih podataka automobila;
       - testiranje osnovnih funkcija i sistema;
-      - ocenu opšteg tehničkog stanja.
+      - procena opšteg tehničkog stanja.
 
-      Na osnovu rezultata provere, klijent dobija objektivno razumevanje stanja automobila **pre nego što ga kupi**.
+      Na osnovu rezultata provere, klijent dobija objektivno razumevanje stanja automobila **pre njegove kupovine**.
 
-      Ukoliko se otkriju ozbiljni nedostaci, skrivene povrede ili stanje automobila ne odgovara onome što je navedeno od strane prodavca, ne preporučujemo takvu opciju i nastavljamo potragu.
+      Ako se otkriju ozbiljni nedostaci, skrivene štete ili stanje automobila ne odgovara onome koje je prodavac izjavio, ne preporučujemo takvu opciju i nastavljamo pretragu.
 
-      Naš cilj nije samo da dovedemo izabrani auto, već da pronađemo i kupimo zaista kvalitetan automobil.
+      Naš cilj je da pronađemo i kupimo zaista vredan automobil.
 
-      ## Vodimo pregovore i pregovaramo s nemačkim trgovcem
+      ## Pregovaramo i pregovaramo s nemačkim dealerom
 
-      Nakon inspekcije, ponovo razgovaramo s prodavcem o automobilu. Ako su u procesu provere otkriveni nedostaci, koje možemo argumentovati prilikom pregovaranja o ceni, koristimo ih u razgovorima.
+      Nakon pregleda ponovo razgovaramo o automobilu s prodavcem. Ako su prilikom provere otkriveni nedostaci koji omogućavaju argumentovano preispitivanje cene, koristimo ih u pregovorima.
 
-      Dogovaramo konačnu cenu, uslove kupovine, dokumentaciju i izvoz automobila.
+      Dogovaramo konačnu cenu, uslove kupovine, dokumente i izvoz automobila.
 
-      Za klijenta, ceo proces prolazi kroz jednog izvršioca: nije potrebno posebno tražiti osobu za pregled, kompaniju za plaćanje, prevoznika, carinskog zastupnika i druge posrednike.
+      Za klijenta celokupni proces odvija se kroz jednog izvršioca: nije potrebno posebno tražiti osobu za pregled, kompaniju za uplatu, prevoznika, carinika i druge posrednike.
 
       ## Otkup automobila preko naše kompanije
 
-      Nakon dogovora oko automobila sa klijentom, organizujemo njegov otkup.
+      Nakon dogovora o automobilu s klijentom, organizujemo njegov otkup.
 
-      **Plaćanje automobila nemačkom prodavcu vrši se preko naše vlastite evropske kompanije.**
+      **Uplata za automobil nemačkom prodavcu vrši se iz naše evropske kompanije.**  
+      To značajno pojednostavljuje rad s nemačkim salonima i omogućava nam da autonomno pratimo transakciju, kontrolišemo dokumente i dalji izvoz automobila.
 
-      To značajno olakšava saradnju sa nemačkim auto-salonima i omogućava nam da samostalno pratimo transakciju, kontrolišemo dokumentaciju i dalji izvoz automobila.
-
-      Nakon uplate, uzimamo automobil od prodavca i počinjemo pripreme za dostavu u zemlju odredišta.
+      Nakon uplate, preuzimamo automobil od prodavca i započinjemo pripremu za dostavu u zemlju odredišta.
 
       ## Dostava automobila iz Nemačke
 
       Organizujemo dostavu kupljenih automobila iz Nemačke u:
 
-      **Srbija**
-      **Španija**
-      **Portugal**
+      **Srbija**  
+      **Španija**  
+      **Portugal**  
       **Francuska**
 
-      Takođe možemo razmotriti dostavu automobila u druge zemlje — ruta i uslovi se odrađuju individualno.
+      Takođe možemo razmotriti dostavu automobila u druge zemlje — ruta i uslovi se računaju individualno.
 
-      Zato nije važno gde se nalazite. Ako ste našli zanimljiv automobil u Nemačkoj ili želite da ga mi pronađemo umesto vas, možemo organizovati ceo proces kupovine i dostave.
+      Zato nije važno gde se nalazite. Ako ste pronašli zanimljiv automobil u Nemačkoj ili želite da ga mi odaberemo za vas, možemo organizovati ceo proces kupovine i dostave.
 
-      ## Automobil iz Nemačke u Srbiju po ključu
+      ## Automobil iz Nemačke u Srbiju po sistemu "ključ u ruke"
 
-      Za klijente u Srbiji nudimo kompletan ciklus uvoza automobila.
+      Za klijente u Srbiji nudimo pun ciklus uvoza automobila.
 
-      Pronalazimo automobil u Nemačkoj, povezujemo se sa prodavcem, lično proveravamo auto, vršimo dijagnostiku, dogovaramo kupovinu, plaćamo automobil iz naše kompanije i uzimamo ga od trgovca.
+      Biramo automobil u Nemačkoj, kontaktiramo prodavca, lično proveravamo auto, vršimo dijagnostiku, dogovaramo kupovinu, plaćamo automobil iz svoje kompanije i preuzimamo ga od dilera.
 
-      Nakon toga organizujemo dostavu automobila u Srbiju, bavimo se neophodnim procedurama za uvoz i carinsko sređivanje, a zatim finalizujemo proces registracije automobila.
+      Nakon toga organizujemo dostavu automobila u Srbiju, obavljamo potrebne procedure u vezi s uvozom i carinjenjem, a zatim završavamo proces registracije automobila.
 
-      **Na kraju, klijent dobija spreman automobil sa srpskim registarskim oznakama.**
+      **Kao rezultat, klijent dobija gotov automobil već na srpskim registarskim tablicama.**
 
-      Nije potrebno lično putovati u Nemačku, tražiti izvozne oznake, rešavati se sa prodavcem, organizovati prevoz i prolaziti kroz ceo postupak uvoza samostalno.
+      Nije potrebno samostalno ići u Nemačku, tražiti izvozne tablice, razumevati se s prodavcem, organizovati prevoz ili proći ceo proces uvoza — te zadatke preuzimamo mi.
 
-      Mi preuzimamo te obaveze.
+      ## Stvaran primer — BMW X1 iz Nemačke u Srbiju
 
-      ## Realan primer — BMW X1 iz Nemačke u Srbiju
+      Jedan od automobila koji smo odabrali i doveli za klijenta je **BMW X1**.
 
-      Jedan od automobila koje smo pronašli i doveli za klijenta je **BMW X1**.
+      **Cena automobila u Nemačkoj (Brutto): 39 860 €**
 
-      **Cena automobila u Nemačkoj (Brutto): 39.860 €**
+      Nakon kupovine, provere, dostave, formiranja dokumenata i svih potrebnih troškova:
 
-      Nakon kupovine, provere, dostave, sređivanja i svih neophodnih troškova:
+      **Konačna cena BMW X1 u Srbiji po sistemu "ključ u ruke" — 46 000 €.**
 
-      **Konačna cena BMW X1 u Srbiji po ključu — 46.000 €.**
+      To jest, klijent je unapred znao ukupni budžet i kao rezultat dobio potpuno spreman automobil u Srbiji.
 
-      To znači da je klijent unapred znao konačni budžet i na kraju je dobio potpuno spreman automobil u Srbiji.
+      Ovo je dobar primer zašto je prilikom izbora automobila važno posmatrati ne samo cenu u nemačkom oglasu, već i unapred proračunati **stvarnu konačnu cenu automobila po sistemu "ključ u ruke" u zemlji odredišta**.
 
-      Ovo je dobar primer zašto je prilikom odabira automobila važno gledati ne samo na cenu u nemačkom oglasu, već i unapred izračunati **stvarnu konačnu cenu automobila po ključu u zemlji odredišta**.
+      ## Zašto je isplativo naručiti automobil iz Nemačke preko nas
 
-      ## Zašto naručiti automobil iz Nemačke preko nas
+      Pratimo celu transakciju i odgovaramo za svaki njen korak:
 
-      Mi pratimo transakciju u celini i odgovaramo za svaki njen korak:
+      **Izbor → pregovori s dealerom → lična provera → provera po 200+ parametara → dijagnostika → dogovor → otkup → dokumenti → izvoz → dostava → carinjenje → registracija.**
 
-      **Odabir → pregovori sa trgovcem → lična provera → provera na 200+ parametara → dijagnostika → dogovor → otkup → dokumenti → izvoz → dostava → carinsko sređivanje → registracija.**
+      Klijent pritom dobija jednog izvršioca i jasan proces umesto potrebe da samostalno koordinira nekoliko kompanija i stručnjaka iz različitih zemalja.
 
-      Klijent pritom dobija jednog izvršioca i jasan proces umesto potrebe da samostalno koordiniše nekoliko kompanija i stručnjaka iz različitih zemalja.
-
-      Posebnu pažnju posvećujemo pre provere automobila pre plaćanja. Važno nam je da shvatimo šta tačno kupujemo i kakvo stanje će automobil imati kada stigne do klijenta.
+      Posebnu pažnju posvećujemo proverenju automobila pre uplate. Važno nam je da razumemo šta zapravo kupujemo i u kakvom stanju će vozilo doći do klijenta.
 
       ## Želite li da kupite automobil iz Nemačke?
 
-      Ako razmatrate **BMW, Mercedes-Benz, Audi, Porsche, Volkswagen ili automobil druge marke iz Nemačke**, pošaljite nam model, željenu godinu proizvodnje, opremu i okvirni budžet.
+      Ako razmišljate o **BMW-u, Mercedes-Benz-u, Audiju, Porsheu, Volkswagenu ili automobilu druge marke iz Nemačke**, pošaljite nam model, željenu godinu proizvodnje, konfiguraciju i okvirni budžet.
 
-      Ako već imate konkretan oglas na nemačkom auto-sajtu — jednostavno pošaljite link. Mi ćemo preliminarno proučiti automobil i kontaktirati prodavca.
+      Ako već imate konkretan oglas na nemačkom automobilskom sajtu — samo pošaljite link. Mi ćemo prethodno proučiti automobil i kontaktirati prodavca.
 
-      Ako konkretne opcije još nema — pronaći ćemo automobile prema vašim zahtevima.
+      Ako konkretna opcija još nema — odabiraćemo automobile prema vašim zahtevima.
 
-      **Odabir i dovođenje automobila iz Nemačke po ključu u Srbiju, Rusiju, Španiju, Portugal i Francusku.**
+      **Izbor i dovoženje automobila iz Nemačke po sistemu "ključ u ruke" u Srbiju, Rusiju, Španiju, Portugal i Francusku.**
 
-      Pronaći ćemo automobil, sprovesti pregovore, lično ga proveriti u Nemačkoj, otkupiti, srediti dokumente i organizovati dostavu do krajnjeg klijenta.
-
-      **Vi birate automobil — sav ostali posao preuzimamo na sebe.**
+      Pronaći ćemo automobil, voditi pregovore, lično ga proveriti u Nemačkoj, otkupiti, obaviti dokumentaciju i organizovati dostavu do krajnjeg klijenta.
   es:
     title: BMW X1
     body: |-
-      # Automóviles desde Alemania llave en mano — selección, revisión, compra y entrega
+      ## Automóviles desde Alemania llave en mano — selección, inspección, compra y entrega
 
-      ¿Quieres comprar un buen automóvil de Alemania sin tener que viajar, negociar con concesionarios alemanes y lidiar con problemas de pago, documentación, exportación y entrega? Nosotros organizamos completamente la compra y el transporte del automóvil desde Alemania llave en mano.
+      ¿Deseas comprar un buen automóvil de Alemania sin tener que realizar viajes, negociar con concesionarios alemanes y lidiar con complicaciones de pago, documentos, exportación y entrega? Nosotros organizamos completamente la compra y el transporte de tu automóvil desde Alemania, todo en una solución llave en mano.
 
       Trabajamos con clientes de diferentes países y podemos organizar la entrega de automóviles desde Alemania a **Serbia, Rusia, España, Portugal, Francia y otros países de Europa**.
 
-      Acompañamos todo el proceso: desde la búsqueda del automóvil adecuado y las primeras negociaciones con el vendedor, hasta la revisión, compra, tramitación de documentos, transporte y entrega del automóvil al cliente.
+      Acompañamos todo el proceso: desde la búsqueda del automóvil adecuado y las primeras negociaciones con el vendedor, hasta la inspección, compra, documentación, transporte y entrega del automóvil al cliente.
 
-      ## Selección de automóviles en Alemania
+      ## Selección del automóvil en Alemania
 
-      El mercado automovilístico alemán ofrece una amplia gama de marcas, modelos y configuraciones. Pero un anuncio atractivo y una buena configuración no siempre significan que un automóvil específico valga la pena comprarlo.
+      El mercado automotriz alemán ofrece una enorme variedad de vehículos de diferentes marcas, modelos y equipamientos. Sin embargo, un anuncio atractivo y un buen equipamiento no garantizan que un automóvil específico valga la pena comprarlo.
 
-      Por ello, nuestro trabajo comienza no con el pago del automóvil, sino con su análisis preliminar.
+      Por eso, el trabajo comienza mucho antes del pago — con un análisis preliminar del automóvil.
 
-      Seleccionamos opciones según los requisitos y el presupuesto del cliente, estudiamos los anuncios, las configuraciones, el historial del automóvil y la información sobre el vendedor. Después de esto, nos ponemos en contacto directamente con los gerentes de concesionarios y centros de ventas en Alemania.
+      Buscamos opciones que se ajusten a los requisitos y presupuesto del cliente, examinamos anuncios, equipamiento, historia del vehículo e información sobre el vendedor. Luego, nos comunicamos directamente con los gerentes de los concesionarios y centros de distribución alemanes.
 
-      Llevamos a cabo las negociaciones en alemán, aclaramos el estado técnico del automóvil, el historial de servicio, la existencia de daños y reparaciones, las condiciones de venta para la exportación, la documentación requerida y la posibilidad de negociaciones adicionales.
+      Manejamos las negociaciones en alemán, aclaramos el estado técnico del automóvil, su historial de mantenimiento, la existencia de daños y reparaciones, las condiciones de venta para exportación, el conjunto de documentos y la posibilidad de un precio ajustado.
 
-      El cliente no necesita llamar a Alemania, intercambiar mensajes con el concesionario o entender las peculiaridades de la compra de un automóvil en el mercado europeo; nosotros nos encargamos de ese trabajo.
+      El cliente no necesita llamar a Alemania, intercambiar correos con el concesionario o entender las particularidades de la compra de un automóvil en el mercado europeo; nosotros nos encargamos de esa parte.
 
-      ## Inspeccionamos el automóvil antes de la compra
+      ## Inspección personal del automóvil antes de la compra
 
       Uno de los pasos más importantes es la verificación del automóvil en Alemania.
 
-      No compramos un automóvil basándonos solo en las fotos del vendedor y la descripción en el anuncio. Antes de la compra, un especialista visita personalmente el automóvil y realiza una inspección completa.
+      No compramos basándonos solo en las fotos del vendedor y la descripción del anuncio. Antes de la compra, un especialista visita el vehículo y realiza una inspección exhaustiva.
 
-      El automóvil se comprueba **en más de 200 parámetros**.
+      Se verifica el automóvil en **más de 200 parámetros**.
 
-      La revisión incluye:
+      La inspección incluye:
 
-      - carrocería, pintura y marcas de reparaciones anteriores;
+      - carrocería, pintura y signos de reparaciones anteriores;
       - estado de los elementos de la carrocería y los espacios;
       - signos de accidentes y trabajos de restauración;
       - cristales, óptica, llantas y neumáticos;
-      - estado del interior y desgaste en relación al kilometraje declarado;
-      - motor y equipamiento auxiliar;
+      - estado del interior y desgaste en relación con el kilometraje declarado;
+      - motor y equipo auxiliar;
       - caja de cambios;
       - suspensión, sistema de frenos y dirección;
       - sistemas y equipos electrónicos del automóvil;
       - diagnóstico computarizado;
       - historial de servicio y documentos;
-      - configuración real del automóvil;
+      - equipamiento real del vehículo;
       - verificación de datos de identificación del automóvil;
       - prueba de las funciones y sistemas principales;
       - evaluación del estado técnico general.
 
-      Como resultado de la inspección, el cliente obtiene una comprensión objetiva del estado del automóvil **antes de su compra**.
+      Como resultado de la inspección, el cliente recibe una comprensión objetiva del estado del automóvil **antes de su compra**.
 
-      Si se detectan defectos serios, daños ocultos o el estado del automóvil no coincide con lo declarado por el vendedor, no recomendamos esa opción y continuamos la búsqueda.
+      Si se encuentran defectos graves, daños ocultos o si el estado del vehículo no coincide con lo que dijo el vendedor, no recomendamos esa opción y continuamos buscando.
 
-      Nuestra tarea no es solo traer el automóvil elegido, sino encontrar y comprar un automóvil verdaderamente digno.
+      Nuestra tarea es encontrar y comprar un automóvil realmente digno.
 
-      ## Negociamos y discutimos con el concesionario alemán
+      ## Negociamos y hacemos ofertas al concesionario alemán
 
-      Después de la inspección, volvemos a discutir el automóvil con el vendedor. Si durante la verificación se encuentran defectos que justifican una reconsideración del precio, los utilizamos en las negociaciones.
+      Después de la inspección, volvemos a discutir el automóvil con el vendedor. Si se encuentran defectos durante la verificación que permitan justificar una revisión del precio, los utilizamos en las negociaciones.
 
-      Acordamos el precio final, las condiciones de compra, la documentación y la exportación del automóvil.
+      Concordamos el precio final, las condiciones de compra, los documentos y la exportación del automóvil.
 
-      Para el cliente, todo el proceso se realiza a través de un único operador: no es necesario buscar a alguien por separado para la inspección, una empresa para el pago, un transportista, un representante aduanero y otros intermediarios.
+      Para el cliente, todo el proceso pasa a través de un solo ejecutor: no es necesario buscar por separado a una persona para la inspección, una compañía para el pago, un transportista, un representante aduanero y otros intermediarios.
 
       ## Compramos el automóvil a través de nuestra propia empresa
 
@@ -358,209 +349,204 @@ translations:
 
       **El pago del automóvil al vendedor alemán se realiza desde nuestra propia empresa europea.**
 
-      Esto simplifica considerablemente el trabajo con los concesionarios alemanes y nos permite gestionar la transacción, controlar la documentación y la posterior exportación del automóvil.
+      Esto simplifica significativamente las transacciones con los concesionarios alemanes y nos permite acompañar la operación, controlar los documentos y la posterior exportación del automóvil.
 
-      Después del pago, recogemos el automóvil del vendedor y comenzamos la preparación para la entrega al país de destino.
+      Tras el pago, recogemos el automóvil del vendedor y comenzamos la preparación para la entrega al país de destino.
 
       ## Entrega de automóviles desde Alemania
 
       Organizamos la entrega de los automóviles comprados desde Alemania a:
 
-      **Serbia**\ **España**\ **Portugal**\ **Francia**
+      **Serbia**\
+      **España**\
+      **Portugal**\
+      **Francia**
 
-      También podemos considerar la entrega del automóvil a otros países; la ruta y las condiciones se calculan individualmente.
+      También podemos considerar la entrega de un automóvil a otros países — la ruta y las condiciones se calculan de manera individual.
 
-      Así que no importa dónde te encuentres. Si encontraste un automóvil interesante en Alemania o deseas que lo busquemos por ti, podemos organizar todo el proceso de compra y entrega.
+      Por lo tanto, no importa dónde te encuentres. Si has encontrado un automóvil interesante en Alemania o deseas que lo seleccionemos por ti, podemos organizar todo el proceso de compra y entrega.
 
-      ## Automóvil de Alemania a Serbia llave en mano
+      ## Automóvil desde Alemania a Serbia llave en mano
 
-      Para los clientes en Serbia, ofrecemos un ciclo completo de importación de automóviles.
+      Para los clientes en Serbia, ofrecemos un ciclo completo de importación de vehículos.
 
-      Seleccionamos un automóvil en Alemania, nos ponemos en contacto con el vendedor, verificamos el vehículo en persona, realizamos diagnósticos, acordamos la compra, pagamos el automóvil desde nuestra empresa y lo recogemos del concesionario.
+      Seleccionamos un automóvil en Alemania, nos comunicamos con el vendedor, inspeccionamos personalmente el vehículo, realizamos un diagnóstico, acordamos la compra, pagamos el automóvil desde nuestra empresa y lo recogemos del concesionario.
 
-      Después, organizamos la entrega del automóvil a Serbia, llevamos a cabo los procedimientos necesarios para la importación y la tramitación aduanera, y luego concluimos el proceso de registro del automóvil.
+      Después, organizamos la entrega del automóvil a Serbia, ocupándonos de los procedimientos necesarios para la importación y la aduana, y llevamos el proceso hasta el registro del vehículo.
 
-      **Como resultado, el cliente recibe un automóvil listo con placas de matrícula serbias.**
+      **Como resultado, el cliente recibe un automóvil listo con matrícula serbia.**
 
-      No es necesario viajar a Alemania, buscar números de exportación, discutir con el vendedor, organizar el transporte y pasar por todo el proceso de importación por su cuenta.
+      No es necesario viajar a Alemania, buscar matrículas de exportación, lidiar con el vendedor, organizar el transporte y seguir todo el proceso de importación; nos encargamos de todo eso.
 
-      Nosotros asumimos estas tareas.
+      ## Caso real — BMW X1 de Alemania a Serbia
 
-      ## Un ejemplo real — BMW X1 de Alemania a Serbia
+      Uno de los automóviles que seleccionamos y trajimos para un cliente es el **BMW X1**.
 
-      Uno de los vehículos que seleccionamos y trajimos para un cliente es **BMW X1**.
+      **Precio del automóvil en Alemania (Brutto): 39.860 €**
 
-      **Precio del automóvil en Alemania (Brutto): 39 860 €**
+      Después de la compra, inspección, entrega, documentación y todos los gastos necesarios:
 
-      Después de la compra, revisión, entrega, tramitación y todos los gastos necesarios:
+      **Precio final del BMW X1 en Serbia llave en mano — 46.000 €.**
 
-      **Costo final del BMW X1 en Serbia llave en mano — 46 000 €.**
+      Es decir, el cliente conocía de antemano el presupuesto total y, como resultado, obtuvo un automóvil completamente preparado en Serbia.
 
-      Es decir, el cliente entendía de antemano el presupuesto total y, como resultado, recibió un automóvil completamente listo en Serbia.
+      Este es un buen ejemplo de por qué, al elegir un automóvil, es importante observar no solo el precio en el anuncio alemán, sino también calcular de antemano **el costo real final del automóvil llave en mano en el país de destino**.
 
-      Este es un buen ejemplo de por qué al elegir un automóvil es importante no solo mirar el precio en el anuncio alemán, sino también calcular de antemano **el costo final real del automóvil llave en mano en el país de destino**.
+      ## ¿Por qué solicitar un automóvil desde Alemania a través de nosotros?
 
-      ## ¿Por qué deberías encargar un automóvil desde Alemania a través de nosotros?
+      Acompañamos la transacción en su totalidad y nos hacemos responsables de cada etapa:
 
-      Acompañamos la transacción en su totalidad y asumimos la responsabilidad de cada etapa:
+      **Selección → negociaciones con el concesionario → inspección personal → chequeo en más de 200 parámetros → diagnóstico → acuerdo → compra → documentos → exportación → entrega → procedimientos aduaneros → registro.**
 
-      **Selección → negociaciones con el concesionario → inspección personal → revisión en más de 200 parámetros → diagnóstico → acuerdo → compra → documentación → exportación → entrega → tramitación aduanera → registro.**
+      El cliente cuenta con un único ejecutor y un proceso claro, en lugar de tener que coordinar por sí mismo a varias empresas y especialistas en diferentes países.
 
-      El cliente recibe un solo operador y un proceso claro en lugar de tener que coordinar varias empresas y especialistas en diferentes países.
-
-      Ponemos especial énfasis en la verificación del automóvil antes del pago. Es importante para nosotros entender qué estamos comprando y en qué estado llegará el automóvil al cliente.
+      Ponemos especial énfasis en la verificación del automóvil antes del pago. Es importante para nosotros entender exactamente qué estamos comprando y en qué condiciones llegará el vehículo al cliente.
 
       ## ¿Quieres comprar un automóvil de Alemania?
 
-      Si estás considerando un **BMW, Mercedes-Benz, Audi, Porsche, Volkswagen o un automóvil de otra marca de Alemania**, envíanos el modelo, el año deseado de fabricación, la configuración y el presupuesto orientativo.
+      Si estás considerando un **BMW, Mercedes-Benz, Audi, Porsche, Volkswagen o cualquier otro automóvil de Alemania**, envíanos el modelo, el año deseado, la configuración y el presupuesto aproximado.
 
-      Si ya tienes un anuncio específico en un sitio web de automóviles alemán, simplemente envíanos el enlace. Estudiaremos el automóvil preliminarmente y nos pondremos en contacto con el vendedor.
+      Si ya tienes un anuncio específico en un sitio web alemán de automóviles, simplemente envíanos el enlace. Investigaremos el automóvil de antemano y nos pondremos en contacto con el vendedor.
 
-      Si aún no hay una opción específica, seleccionaremos automóviles según tus requisitos.
+      Si aún no tienes una opción concreta, seleccionaremos automóviles que cumplan con tus requisitos.
 
-      **Selección y traslado de automóviles desde Alemania llave en mano a Serbia, Rusia, España, Portugal y Francia.**
+      **Selección y transporte de automóviles desde Alemania llave en mano a Serbia, Rusia, España, Portugal y Francia.**
 
-      Encontraremos el automóvil, llevaremos a cabo las negociaciones, lo comprobaremos en persona en Alemania, lo compraremos, tramitaremos la documentación y organizaremos la entrega al cliente final.
-
-      **Tú eliges el automóvil — nosotros nos encargamos del resto.**
+      Encontraremos el automóvil, realizaremos negociaciones, lo inspeccionaremos personalmente en Alemania, lo compraremos, gestionaremos la documentación y organizaremos la entrega al cliente final.
   de:
     title: BMW X1
     body: |-
-      # Autos aus Deutschland schlüsselfertig — Auswahl, Prüfung, Ankauf und Lieferung
+      ## Autos aus Deutschland schlüsselfertig — Auswahl, Prüfung, Ankauf und Lieferung
 
-      Möchten Sie ein gutes Auto aus Deutschland kaufen, ohne selbst reisen zu müssen, mit deutschen Autohäusern verhandeln zu müssen und sich um Bezahlung, Dokumente, Export und Lieferung kümmern zu müssen? Wir organisieren den Kauf und die Anlieferung eines Fahrzeugs aus Deutschland schlüsselfertig.
+      Möchten Sie ein gutes Auto aus Deutschland kaufen, ohne selbst reisen, mit deutschen Autohäusern verhandeln und sich um Zahlung, Dokumente, Export und Lieferung kümmern zu müssen? Wir organisieren den Kauf und die Anlieferung des Fahrzeugs aus Deutschland schlüsselfertig.
 
-      Wir arbeiten mit Kunden aus verschiedenen Ländern und können die Lieferung von Autos aus Deutschland nach **Serbien, Russland, Spanien, Portugal, Frankreich und andere europäische Länder** organisieren.
+      Wir arbeiten mit Kunden aus verschiedenen Ländern zusammen und können die Lieferung von Autos aus Deutschland nach **Serbien, Russland, Spanien, Portugal, Frankreich und in andere europäische Länder** organisieren.
 
-      Wir begleiten den gesamten Prozess: von der Suche nach dem passenden Fahrzeug und den ersten Verhandlungen mit dem Verkäufer bis hin zur Prüfung, zum Ankauf, zur Dokumentation, zum Transport und zur Übergabe des Fahrzeugs an den Kunden.
+      Wir begleiten den gesamten Prozess: von der Suche nach dem passenden Fahrzeug und den ersten Verhandlungen mit dem Verkäufer bis hin zur Prüfung, dem Kauf, der Dokumentation, dem Transport und der Übergabe des Fahrzeugs an den Kunden.
 
       ## Fahrzeugauswahl in Deutschland
 
-      Der deutsche Automarkt bietet eine riesige Auswahl an Fahrzeugen verschiedener Marken, Modelle und Ausstattungen. Doch eine ansprechende Anzeige und eine gute Ausstattung bedeuten noch lange nicht, dass ein bestimmtes Fahrzeug tatsächlich gekauft werden sollte.
+      Der deutsche Automarkt bietet eine riesige Auswahl an Fahrzeugen verschiedener Marken, Modelle und Ausstattungen. Doch eine schöne Anzeige und eine gute Ausstattung bedeuten noch lange nicht, dass ein bestimmtes Auto tatsächlich ein Kauf wert ist.
 
-      Deshalb beginnt unsere Arbeit nicht mit der Bezahlung des Fahrzeugs, sondern mit einer ersten Analyse.
+      Daher beginnt unsere Arbeit lange vor der Bezahlung — mit einer ersten Analyse des Fahrzeugs.
 
-      Wir wählen Optionen gemäß den Anforderungen und dem Budget des Kunden aus, prüfen Anzeigen, Ausstattungen, die Fahrzeughistorie und Informationen über den Verkäufer. Anschließend setzen wir uns direkt mit den Managern der deutschen Autohäuser und Händler in Verbindung.
+      Wir suchen entsprechende Optionen, die den Anforderungen und dem Budget des Kunden entsprechen, studieren die Anzeigen, die Ausstattung, die Fahrzeughistorie und Informationen über den Verkäufer. Anschließend nehmen wir direkt Kontakt mit den Managern der deutschen Autohäuser und Händler auf.
 
-      Verhandlungen führen wir auf Deutsch, klären den technischen Zustand des Fahrzeugs, die Wartungshistorie, ob Schäden oder Reparaturen vorliegen, die Verkaufsbedingungen für den Export, die Dokumentenausstattung und die Möglichkeit von Preisverhandlungen.
+      Wir führen die Verhandlungen selbst auf Deutsch, klären den technischen Zustand des Fahrzeugs, die Wartungshistorie, eventuelle Schäden und Reparaturen, die Verkaufsbedingungen für den Export, die Dokumentation sowie die Möglichkeit von Preisverhandlungen.
 
-      Der Kunde muss nicht selbst nach Deutschland telefonieren, mit dem Händler korrespondieren oder sich in die Besonderheiten des Autokaufs auf dem europäischen Markt einarbeiten — diese Arbeit übernehmen wir.
+      Der Kunde muss nicht selbst nach Deutschland anrufen, mit dem Händler korrespondieren oder sich mit den Besonderheiten des Fahrzeugkaufs auf dem europäischen Markt auseinandersetzen - diese Aufgaben übernehmen wir für ihn.
 
-      ## Persönliche Besichtigung des Fahrzeugs vor dem Kauf
+      ## Persönliche Überprüfung des Fahrzeugs vor dem Kauf
 
-      Ein entscheidender Schritt ist die Überprüfung des Fahrzeugs direkt in Deutschland.
+      Ein weiterer wichtiger Schritt ist die direkte Überprüfung des Fahrzeugs in Deutschland.
 
-      Wir kaufen kein Fahrzeug, das nur auf Basis der Fotos des Verkäufers und der Beschreibung in der Anzeige bewertet wird. Vor dem Ankauf kommt ein Fachmann persönlich zum Fahrzeug und führt eine umfassende Inspektion durch.
+      Wir kaufen kein Auto, nur basierend auf den Fotos des Verkäufers und der Beschreibung in der Anzeige. Vor dem Kauf kommt ein Fachmann persönlich zum Fahrzeug und führt eine umfassende Inspektion durch.
 
-      Das Fahrzeug wird **in mehr als 200 Punkten** überprüft.
+      Das Fahrzeug wird **über mehr als 200 Parameter** geprüft.
 
-      Zu den Prüfungen gehören:
+      Die Prüfung umfasst:
 
       - Karosserie, Lackierung und Spuren früherer Reparaturen;
-      - Zustand der Karosserieteile und Spalten;
-      - Hinweise auf Unfälle und Renovierungsarbeiten;
+      - Zustand der Karosserieteile und Spaltmaße;
+      - Anzeichen für Unfälle und Instandhaltungsarbeiten;
       - Fenster, Beleuchtung, Felgen und Reifen;
-      - Zustand des Innenraums und die Übereinstimmung des Verschleißes mit der angegebenen Kilometerleistung;
-      - Motor und Anbauteile;
+      - Zustand des Innenraums und die Übereinstimmung des Verschleißes mit der angegebenen Laufleistung;
+      - Motor und Zusatzgeräte;
       - Getriebe;
-      - Federung, Bremssystem und Lenkung;
-      - elektronische Systeme und Ausstattungen des Fahrzeugs;
-      - computerdiagnostische Auswertung;
-      - Servicehistorie und Dokumente;
+      - Fahrwerk, Bremsanlage und Lenkung;
+      - elektronische Systeme und Fahrzeugequipment;
+      - Computerdiagnose;
+      - Wartungshistorie und Dokumente;
       - tatsächliche Ausstattung des Fahrzeugs;
       - Überprüfung der Identifikationsdaten des Fahrzeugs;
-      - Test grundlegender Funktionen und Systeme;
+      - Test der wichtigsten Funktionen und Systeme;
       - Bewertung des allgemeinen technischen Zustands.
 
-      Nach der Prüfung erhält der Kunde ein objektives Verständnis über den Zustand des Fahrzeugs **vor dem Kauf**.
+      Basierend auf den Prüfungsergebnissen erhält der Kunde ein objektives Bild über den Zustand des Fahrzeugs **vor dem Kauf**.
 
-      Wenn schwerwiegende Mängel, verdeckte Schäden oder ein Zustand des Fahrzeugs festgestellt werden, der nicht mit der vom Verkäufer angegebenen Beschreibung übereinstimmt, empfehlen wir diese Option nicht weiter und setzen die Suche fort.
+      Sollten schwerwiegende Mängel, versteckte Schäden oder ein Zustand des Fahrzeugs festgestellt werden, der nicht mit den Angaben des Verkäufers übereinstimmt, empfehlen wir diesen Wagen nicht und setzen die Suche fort.
 
-      Unsere Aufgabe ist es, nicht einfach das gewählte Fahrzeug zu bringen, sondern tatsächlich ein wertvolles Auto zu finden und zu kaufen.
+      Unsere Aufgabe ist es, tatsächlich ein wertvolles Auto zu finden und zu kaufen.
 
       ## Verhandlungen und Preisverhandlungen mit dem deutschen Händler
 
-      Nach der Besichtigung besprechen wir das Fahrzeug erneut mit dem Verkäufer. Wenn während der Prüfung Mängel entdeckt werden, die eine begründete Neubewertung des Preises ermöglichen, nutzen wir diese in den Verhandlungen.
+      Nach der Inspektion diskutieren wir das Auto erneut mit dem Verkäufer. Wenn während der Prüfung Mängel festgestellt wurden, die eine sachliche Neubewertung des Preises rechtfertigen, nutzen wir diese Informationen in unseren Verhandlungen.
 
-      Wir vereinbaren den endgültigen Preis, die Kaufbedingungen, die Dokumente und den Export des Fahrzeugs.
+      Wir einigen uns auf den Endpreis, die Kaufbedingungen, die Dokumentation und den Export des Fahrzeugs.
 
-      Für den Kunden läuft der gesamte Prozess über einen einzigen Ansprechpartner: Es ist nicht nötig, separat jemanden für die Besichtigung zu suchen, eine Firma zur Zahlung, einen Transporteur, einen Zollagenten und andere Vermittler zu beauftragen.
+      Für den Kunden erfolgt der gesamte Prozess über einen Dienstleister: er muss nicht gesondert nach einer Person für die Inspektion, einem Unternehmen für die Bezahlung, einem Transporteur, einem Zollvertreter und anderen Vermittlern suchen.
 
       ## Ankauf des Fahrzeugs über unser eigenes Unternehmen
 
-      Nach der Einigung mit dem Kunden über das Fahrzeug organisieren wir den Ankauf.
+      Nach der Einigung über das Fahrzeug mit dem Kunden organisieren wir den Kauf.
 
-      **Die Zahlung für das Fahrzeug an den deutschen Verkäufer erfolgt über unser eigenes europäisches Unternehmen.**
+      **Die Zahlung an den deutschen Verkäufer erfolgt über unser eigenes europäisches Unternehmen.**
 
-      Das vereinfacht die Zusammenarbeit mit deutschen Autohäusern erheblich und ermöglicht es uns, den gesamten Deal selbst zu betreuen, die Dokumente zu kontrollieren und den weiteren Export des Fahrzeugs zu begleiten.
+      Das erleichtert die Zusammenarbeit mit deutschen Autohäusern erheblich und ermöglicht es uns, die Transaktion selbst zu betreuen, die Dokumente zu kontrollieren und den weiteren Export des Fahrzeugs zu steuern.
 
-      Nach der Bezahlung holen wir das Fahrzeug beim Verkäufer ab und beginnen mit den Vorbereitungen zur Lieferung ins Bestimmungsland.
+      Nach der Zahlung holen wir das Auto vom Verkäufer ab und beginnen mit der Vorbereitung für die Lieferung in das Bestimmungsland.
 
       ## Lieferung von Fahrzeugen aus Deutschland
 
       Wir organisieren die Lieferung der gekauften Fahrzeuge aus Deutschland nach:
 
-      **Serbien**  
-      **Spanien**  
-      **Portugal**  
+      **Serbien**\
+      **Spanien**\
+      **Portugal**\
       **Frankreich**
 
-      Wir können auch eine Lieferung des Fahrzeugs in andere Länder in Betracht ziehen — Route und Bedingungen werden individuell kalkuliert.
+      Wir können auch die Lieferung des Fahrzeugs in andere Länder prüfen - die Route und die Bedingungen werden individuell kalkuliert.
 
-      Deshalb ist es egal, wo Sie sich befinden. Wenn Sie ein interessantes Fahrzeug in Deutschland gefunden haben oder möchten, dass wir es für Sie aussuchen, können wir den gesamten Kauf- und Lieferprozess organisieren.
+      Deshalb ist es egal, wo Sie sich befinden. Wenn Sie ein interessantes Auto in Deutschland gefunden haben oder möchten, dass wir es für Sie auswählen, können wir den gesamten Prozess des Kaufs und der Lieferung organisieren.
 
-      ## Schlüsselfertiges Fahrzeug aus Deutschland nach Serbien
+      ## Auto aus Deutschland nach Serbien schlüsselfertig
 
-      Für Kunden in Serbien bieten wir einen vollständigen Importzyklus für Fahrzeuge an.
+      Für Kunden in Serbien bieten wir einen vollständigen Importzyklus für das Fahrzeug an.
 
-      Wir wählen das Auto in Deutschland aus, nehmen Kontakt mit dem Verkäufer auf, prüfen das Fahrzeug persönlich, führen eine Diagnose durch, stimmen den Kauf ab, bezahlen das Fahrzeug über unsere Firma und holen es beim Händler ab.
+      Wir suchen das Auto in Deutschland, setzen uns mit dem Verkäufer in Verbindung, prüfen den Wagen persönlich, führen eine Diagnose durch, stimmen den Kauf ab, bezahlen das Fahrzeug über unser Unternehmen und holen es beim Händler ab.
 
-      Danach organisieren wir die Lieferung des Fahrzeugs nach Serbien, kümmern uns um alle notwendigen Import- und Zollverfahren und bringen den Vorgang bis zur Registrierung des Fahrzeugs zum Abschluss.
+      Anschließend organisieren wir die Lieferung des Fahrzeugs nach Serbien, kümmern uns um die notwendigen Import- und Zollformalitäten und bringen den Prozess bis zur Zulassung des Fahrzeugs voran.
 
-      **Das Ergebnis ist ein fahrbereites Fahrzeug mit serbischen Zulassungsnummern für den Kunden.**
+      **In Folge erhält der Kunde sein bereitgestelltes Fahrzeug bereits mit serbischen Nummernschildern.**
 
-      Es ist nicht nötig, selbst nach Deutschland zu reisen, Exportnummern zu besorgen, sich mit dem Verkäufer auseinanderzusetzen, den Transport zu organisieren und den gesamten Importprozess selbst zu durchlaufen.
+      Es ist nicht notwendig, selbst nach Deutschland zu fahren, Exportnummern zu besorgen, sich mit dem Verkäufer auseinanderzusetzen, den Transport zu organisieren und den gesamten Importprozess zu durchlaufen - diese Aufgaben übernehmen wir.
 
-      Wir übernehmen diese Aufgaben.
+      ## Ein konkretes Beispiel — BMW X1 aus Deutschland nach Serbien
 
-      ## Reales Beispiel — BMW X1 aus Deutschland nach Serbien
-
-      Eines der Fahrzeuge, das wir für einen Kunden ausgewählt und gebracht haben, ist der **BMW X1**.
+      Eines der Autos, das wir für einen Kunden ausgewählt und geliefert haben, ist der **BMW X1**.
 
       **Preis des Fahrzeugs in Deutschland (Brutto): 39.860 €**
 
-      Nach dem Kauf, der Prüfung, Lieferung, Dokumentation und allen notwendigen Ausgaben:
+      Nach dem Kauf, der Prüfung, der Lieferung, der Dokumentation und aller erforderlichen Kosten:
 
-      **Endpreis des BMW X1 in Serbien schlüsselfertig — 46.000 €.**
+      **Der Endpreis für den BMW X1 in Serbien schlüsselfertig — 46.000 €.**
 
-      Das bedeutet, dass der Kunde von Anfang an ein Verständnis für das endgültige Budget hatte und infolgedessen ein vollständig fahrbereites Fahrzeug in Serbien erhielt.
+      Das heißt, der Kunde wusste im Voraus, welches Budget am Ende anfallen würde, und erhielt schließlich ein voll einsatzbereites Auto in Serbien.
 
-      Dies ist ein gutes Beispiel dafür, warum es wichtig ist, beim Autokauf nicht nur den Preis in der deutschen Anzeige zu berücksichtigen, sondern auch die **tatsächlichen Endkosten des Fahrzeugs schlüsselfertig im Bestimmungsland** im Voraus zu kalkulieren.
+      Das ist ein gutes Beispiel dafür, warum es bei der Auswahl eines Fahrzeugs wichtig ist, nicht nur auf den Preis in der deutschen Anzeige zu achten, sondern auch **den tatsächlichen Endpreis des Fahrzeugs schlüsselfertig im Bestimmungsland** im Voraus zu kalkulieren.
 
-      ## Warum es sich lohnt, ein Fahrzeug aus Deutschland über uns zu bestellen
+      ## Warum es sich lohnt, ein Auto aus Deutschland über uns zu bestellen
 
-      Wir begleiten den gesamten Deal und sind für jeden einzelnen Schritt verantwortlich:
+      Wir begleiten den gesamten Verkaufsprozess und sind für jeden einzelnen Schritt verantwortlich:
 
-      **Auswahl → Verhandlungen mit dem Händler → persönliche Inspektion → Prüfung in 200+ Punkten → Diagnose → Einigung → Ankauf → Dokumentation → Export → Lieferung → Zollabwicklung → Registrierung.**
+      **Auswahl → Verhandlungen mit dem Händler → persönliche Besichtigung → Prüfung über 200+ Parameter → Diagnostik → Abstimmung → Ankauf → Dokumente → Export → Lieferung → Zollabwicklung → Zulassung.**
 
-      Der Kunde hat dabei einen Ansprechpartner und einen klaren Prozess, anstatt selbst mehrere Firmen und Spezialisten in verschiedenen Ländern koordinieren zu müssen.
+      Der Kunde erhält dabei einen Ansprechpartner und einen klaren Prozess, anstatt selbst mehrere Unternehmen und Spezialisten in verschiedenen Ländern koordinieren zu müssen.
 
-      Besonderes Augenmerk legen wir auf die Prüfung des Fahrzeugs vor der Bezahlung. Es ist uns wichtig zu verstehen, was genau wir kaufen und in welchem Zustand das Auto beim Kunden ankommt.
+      Besonders wichtig ist uns die Überprüfung des Fahrzeugs vor der Bezahlung. Es ist uns wichtig zu verstehen, was genau wir kaufen und in welchem Zustand das Auto beim Kunden ankommt.
 
-      ## Möchten Sie ein Fahrzeug aus Deutschland kaufen?
+      ## Möchten Sie ein Auto aus Deutschland kaufen?
 
-      Wenn Sie **BMW, Mercedes-Benz, Audi, Porsche, Volkswagen oder ein anderes Fahrzeug aus Deutschland** in Betracht ziehen, senden Sie uns das Modell, das gewünschte Baujahr, die Ausstattung und eine ungefähre Budgetvorstellung.
+      Wenn Sie **BMW, Mercedes-Benz, Audi, Porsche, Volkswagen oder ein anderes Markenfahrzeug aus Deutschland** in Betracht ziehen, senden Sie uns das Modell, das gewünschte Baujahr, die Ausstattung und das geschätzte Budget.
 
-      Wenn Sie bereits eine konkrete Anzeige auf einer deutschen Automobil-Website haben — senden Sie einfach den Link. Wir werden das Fahrzeug vorab prüfen und uns mit dem Verkäufer in Verbindung setzen.
+      Wenn Sie bereits eine konkrete Anzeige auf einer deutschen Automobil-Website haben — senden Sie uns einfach den Link. Wir werden das Fahrzeug vorab prüfen und uns mit dem Verkäufer in Verbindung setzen.
 
-      Wenn es derzeit noch keine konkrete Option gibt — rufen wir Fahrzeuge gemäß Ihren Anforderungen ab.
+      Wenn derzeit keine spezifische Option verfügbar ist — finden wir Autos, die Ihren Anforderungen entsprechen.
 
-      **Fahrzeugauswahl und -export aus Deutschland schlüsselfertig nach Serbien, Russland, Spanien, Portugal und Frankreich.**
+      **Auswahl und Lieferung von Fahrzeugen aus Deutschland schlüsselfertig nach Serbien, Russland, Spanien, Portugal und Frankreich.**
 
-      Wir finden das Fahrzeug, führen Verhandlungen, prüfen es persönlich in Deutschland, kaufen es, dokumentieren alles und organisieren die Lieferung an den Endkunden.
-
-      **Sie wählen das Fahrzeug — die restliche Arbeit übernehmen wir.**
-translatedFrom: 3186ce2d74961e07
+      Wir finden das Auto, führen Verhandlungen, überprüfen es persönlich in Deutschland, kaufen es, kümmern uns um die Dokumente und organisieren die Lieferung zum Endkunden.
+translatedFrom: f7ebcd3009e5af83
 ---
 ## Автомобили из Германии под ключ — подбор, проверка, выкуп и доставка
 

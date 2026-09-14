@@ -62,121 +62,123 @@ translations:
   sr:
     works:
       metaTitle: Primeri radova auto servisa u Beogradu — CarLab
-      metaDescription: Stvarni radovi servisa CarLab — šta je bilo, šta smo uradili i koliko je trajalo. Dijagnostika, trap, motor, limarija posle udesa.
+      metaDescription: Šta smo pronašli tokom dijagnostike, šta smo uradili i koliko je to trajalo. Pravi rad auto servisa CarLab u Beogradu.
       eyebrow: Primeri radova
-      heading: Šta smo radili i kako se to završilo
-      lead: 'Ovo nije izlog nego razrada konkretnih slučajeva: sa čim je auto došao, šta smo našli na dijagnostici, šta smo uradili i koliko je to trajalo.'
-      detailMetaSuffix: rad servisa CarLab
-      detailCtaHeading: Sličan problem?
-      detailCtaBody: Opišite simptome — reći ćemo na šta liči i koliko košta dijagnostika.
+      heading: Šta smo radili i kako se završilo
+      lead: 'Razmatranje konkretnih slučajeva našeg auto servisa u Beogradu: sa čime je došao automobil, šta smo pronašli tokom dijagnostike, šta smo uradili i koliko je to trajalo.'
+      detailMetaSuffix: CarLab
+      detailCtaHeading: Imate sličan problem?
+      detailCtaBody: Opisanite simptome — recite kako to izgleda i koliko će koštati dijagnostika.
     contact:
-      metaTitle: Kontakt auto servisa u Beogradu — CarLab
-      metaDescription: Adresa, radno vreme i telefon auto servisa CarLab u Beogradu. Zakazivanje dijagnostike i popravke telefonom, preko WhatsApp-a ili Viber-a.
-      eyebrow: Kontakt
-      heading: Dođite — pogledaćemo auto zajedno
-      lead: Prvi pregled je besplatan i traje petnaestak minuta. To je obično dovoljno da se vidi šta je sa autom i koliko će popravka koštati.
+      metaTitle: Kontakti auto servisa CarLab u Beogradu — adresa i telefon
+      metaDescription: Adresa, radno vreme i telefon auto servisa CarLab u Beogradu. Zakazivanje dijagnostike i popravki putem telefona, WhatsApp-a ili Viber-a.
+      eyebrow: Kontakti
+      heading: Dođite — pregledamo automobil zajedno
+      lead: Prvobitna proba je besplatna i traje oko petnaest minuta. Obično je to dovoljno da shvatimo šta je sa automobilom i koliko će koštati popravka.
       addressLabel: Adresa
       hoursLabel: Radno vreme
-      mapHeading: Kako do nas
-      mapNote: Ulaz sa Zrenjaninskog puta, plava kapija sa natpisom. Ima parking za mušterije.
-      arrivalHeading: Šta da ponesete
+      mapHeading: Kako doći
+      mapNote: Orijentišite se prema tački na karti — navigator vas dovodi do tačne lokacije. Postoji parking za klijente.
+      arrivalHeading: Šta poneti sa sobom
       arrival:
-        - Servisnu knjižicu ako je imate — štedi vreme na dijagnostici.
-        - Ključ za sigurnosne šrafove na felnama, ako su ugrađeni.
-        - Ako je kvar povremen, dođite sa hladnim motorom — tako se lakše uhvati.
+        - Servisnu knjižicu, ako je imate — to štedi vreme tokom dijagnostike.
+        - Ključ od zaštitnog zaključavanja na točkovima, ako je postavljen.
+        - Ako je problem povremen — dođite sa "hladnim" automobilom, tako će biti lakše da se uhvati.
     thanks:
-      metaTitle: Zahtev je primljen — CarLab
-      metaDescription: Hvala na zahtevu. Pozvaćemo vas u radno vreme i dogovoriti termin.
+      metaTitle: Zahtev primljen — CarLab
+      metaDescription: Hvala na zahtevu. Javićemo se u radno vreme i dogovoriti vreme posete.
       eyebrow: Gotovo
-      heading: Zahtev je kod nas
-      body: Pozvaćemo vas u radno vreme — obično u roku od sat vremena. Ako auto nije u voznom stanju, napišite nam to u poruci, posavetovaćemo vas oko šlep službe.
-      note: Ako vas ne dobijemo iz dva pokušaja, pisaćemo vam poruku — nećete nam se izgubiti.
-      cta: Nazad na početnu
+      heading: Imamo vaš zahtev
+      body: Javićemo se u radno vreme — obično u roku od sat vremena. Ako automobil nije u voznom stanju, javite nam to u poruci, pomoći ćemo oko vučne službe.
+      note: Ako se ne javimo dva puta, poslaćemo poruku — nemojte se gubiti.
+      cta: Vrati se na početnu stranu
     privacy:
       metaTitle: Politika privatnosti — CarLab
-      metaDescription: Koje podatke prikuplja sajt auto servisa CarLab, zašto i koliko dugo se čuvaju.
+      metaDescription: Koje podatke prikuplja sajt auto servisa CarLab, zašto i koliko dugo ih čuva.
       heading: Politika privatnosti
-      lastUpdated: Ažurirano 12. septembra 2026.
+      lastUpdated: Ažurirano 12. septembra 2026
       sections:
         - title: Koje podatke prikupljamo
-          text: Samo ono što sami unesete u formu — ime, telefon, opis kvara i podatke o automobilu — kao i adresu stranice sa koje je zahtev poslat i anoniman identifikator pregledača. Identifikator je nasumičan, čuva se u vašem pregledaču i služi da se isti zahtev ne pretvori u tri kartice.
-        - title: Zašto nam trebaju
-          text: Da vas pozovemo povodom zahteva, dogovorimo termin i vodimo istoriju održavanja vašeg auta. Ne koristimo ih za newsletter i ne prosleđujemo ih trećim licima u reklamne svrhe.
+          text: Samo ono što vi sami unosite u obrazac — ime, telefon, opis problema i podaci o vozilu, — kao i adresa stranice sa koje je poslat zahtev, i anonimni identifikator pretraživača. Identifikator je nasumičan, čuva se u vašem pretraživaču i potreban je da isti zahtev ne postane tri kartice.
+        - title: Zašto su nam ti podaci
+          text: Da bismo vam se javili u vezi sa zahtevom, dogovorili vreme i vodili evidenciju o servisiranju vašeg automobila. Ne koristimo ih za slanje obaveštenja i ne prenosimo ih trećim licima u reklamne svrhe.
         - title: Gde se čuvaju
-          text: U šifrovanom skladištu našeg hosting provajdera i u zatvorenom radnom četu servisa. Pristup imaju samo zaposleni.
+          text: U enkriptedom skladištu našeg hosting provajdera i u zatvorenom radnom četu servisa. Pristup imaju samo zaposleni.
         - title: Koliko ih čuvamo
-          text: Do tri godine od poslednjeg dolaska — servisna istorija pomaže kod sledeće popravke. Na vaš zahtev brišemo i ranije.
-        - title: Porudžbine delova
-          text: Sadržaj korpe stiže zajedno sa zahtevom, da bismo znali šta da pripremimo. Podatke o plaćanju ne prikupljamo — plaća se u servisu.
+          text: Do tri godine od poslednje posete — istorija servisa pomaže prilikom naredne popravke. Na vaš zahtev uklonićemo ih ranije.
         - title: Kolačići
-          text: Sajt koristi dva tehnička kolačića — izabrani jezik i sadržaj korpe. Reklamnih i analitičkih kolačića ovde nema.
+          text: Sajt postavlja jedan tehnički kolačić — izabrani jezik. Oglašivačkih i analitičkih kolačića ovde nema. Korpa i anonimni identifikator se čuvaju u memoriji pretraživača (localStorage) i sami po sebi ne odlaze na naš server.
         - title: Vaša prava
-          text: Možete tražiti kopiju svojih podataka, njihovu ispravku ili brisanje. Dovoljno je da nas pozovete ili napišete poruku.
+          text: Možete zatražiti kopiju svojih podataka, njihovo ispravljenje ili brisanje. Dovoljno je da nas pozovete ili pišete u bilo kojem messenger-u.
+      shopSections:
+        - title: Porudžbine rezervnih delova
+          text: Sadržaj porudžbine iz korpe odlazi zajedno sa zahtevom, kako bismo znali šta da pripremimo. Podatke o plaćanju ne prikupljamo — plaćanje se vrši u servisu.
       contactTitle: Pitanja o podacima
-      contactBefore: Pozovite nas ili nam pišite, kontakti se nalaze na stranici
+      contactBefore: Pozovite ili pišite, kontakti su na stranici
     notFound:
       metaTitle: Stranica nije pronađena — CarLab
-      heading: Ovakve stranice nema
-      body: Možda je link zastareo ili se potkrala greška u adresi. Pogledajte usluge ili nam pišite — uputićemo vas.
-      cta: Na početnu
+      heading: Ova stranica ne postoji
+      body: Možda je link zastareo ili je u adresi greška. Pogledajte usluge ili nam pišite — pomoći ćemo vam.
+      cta: Nazad na početnu
   en:
     works:
-      metaTitle: Recent jobs from the car service in Belgrade — CarLab
-      metaDescription: Real jobs from CarLab — what came in, what we did, and how long it took. Diagnostics, running gear, engines, accident repair.
-      eyebrow: Recent jobs
-      heading: What we worked on and how it turned out
-      lead: 'This is not a showroom but a walk-through of specific cases: what the car came in with, what diagnostics found, what we did, and how long it took.'
-      detailMetaSuffix: a job at CarLab
-      detailCtaHeading: Similar problem?
-      detailCtaBody: Describe the symptoms and we will tell you what it sounds like and what diagnostics will cost.
+      metaTitle: Examples of Car Service Work in Belgrade — CarLab
+      metaDescription: What we found during diagnostics, what we did, and how long it took. Real work from CarLab in Belgrade.
+      eyebrow: Work Examples
+      heading: What We've Done and the Outcome
+      lead: 'A breakdown of specific cases from our car service in Belgrade: what the car came in for, what we found during diagnostics, what was done, and how long it took.'
+      detailMetaSuffix: CarLab
+      detailCtaHeading: Have a Similar Problem?
+      detailCtaBody: Describe the symptoms — for example, what it feels like and how much the diagnostics might cost.
     contact:
-      metaTitle: Contact the car service in Belgrade — CarLab
-      metaDescription: Address, opening hours and phone number for CarLab car service in Belgrade. Book diagnostics or a repair by phone, WhatsApp or Viber.
+      metaTitle: Contact CarLab in Belgrade — Address and Phone
+      metaDescription: Address, working hours, and phone number for CarLab in Belgrade. Schedule diagnostics and repairs via phone, WhatsApp, or Viber.
       eyebrow: Contact
-      heading: Come by — we will look at the car together
-      lead: The first inspection is free and takes about fifteen minutes. That is usually enough to know what is wrong and what the repair will cost.
+      heading: Stop by — Let's Check the Car Together
+      lead: The initial inspection is free and takes about fifteen minutes. That's usually enough to understand what's wrong with the car and how much the repair will cost.
       addressLabel: Address
-      hoursLabel: Opening hours
-      mapHeading: Getting here
-      mapNote: Entrance from Zrenjaninski put, the blue gate with our sign. Customer parking on site.
-      arrivalHeading: What to bring
+      hoursLabel: Working Hours
+      mapHeading: How to Get Here
+      mapNote: Use the point on the map as your guide — the navigator will lead you to the location. There is parking available for clients.
+      arrivalHeading: What to Bring
       arrival:
-        - The service book if you have one — it saves time on diagnostics.
-        - The key for your locking wheel nuts, if the car has them.
-        - If the fault is intermittent, come with a cold engine — it is easier to catch that way.
+        - The service book, if you have one — it saves time on diagnostics.
+        - The key for wheel locks, if installed.
+        - If the issue is intermittent, come with the car cold, as it's easier to diagnose.
     thanks:
-      metaTitle: Request received — CarLab
-      metaDescription: Thank you for your request. We will call back during working hours and agree a time.
+      metaTitle: Application Received — CarLab
+      metaDescription: Thank you for your application. We will call you back during working hours to arrange your visit.
       eyebrow: Done
-      heading: We have your request
-      body: We will call you back during working hours — usually within the hour. If the car is not driveable, say so in a message and we will advise on recovery.
-      note: If we cannot reach you after two attempts, we will send a message instead — you will not get lost.
-      cta: Back to the homepage
+      heading: We Have Your Application
+      body: We will call you back during working hours — usually within an hour. If your car is not operational, please let us know via messenger, and we can advise on towing.
+      note: If we can't reach you after two attempts, we will message you — don't lose track of us.
+      cta: Return to the Homepage
     privacy:
-      metaTitle: Privacy policy — CarLab
-      metaDescription: What the CarLab car service website collects, why, and how long it is kept.
-      heading: Privacy policy
-      lastUpdated: Updated 12 September 2026
+      metaTitle: Privacy Policy — CarLab
+      metaDescription: What data the CarLab website collects, why, and how long it is stored.
+      heading: Privacy Policy
+      lastUpdated: Updated on September 12, 2026
       sections:
-        - title: What we collect
-          text: Only what you type into the form — your name, phone number, a description of the fault and the car's details — plus the address of the page the request came from and an anonymous browser identifier. That identifier is random, lives in your browser, and stops one enquiry turning into three tickets.
-        - title: Why we need it
-          text: To call you back, agree a time, and keep a service history for your car. We do not use it for newsletters and we do not pass it to third parties for advertising.
-        - title: Where it is stored
-          text: In our hosting provider's encrypted storage and in the workshop's private work chat. Only staff have access.
-        - title: How long we keep it
-          text: Up to three years from your last visit — service history helps with the next repair. We will delete it sooner if you ask.
-        - title: Parts orders
-          text: The contents of your basket travel with the request so we know what to prepare. We collect no payment details — you pay at the workshop.
+        - title: What Data We Collect
+          text: Only what you enter in the form — your name, phone number, problem description, and vehicle information — as well as the address of the page from which the application was submitted and an anonymous browser identifier. The identifier is random, stored in your browser, and needed to ensure the same application doesn't turn into three cards.
+        - title: Why We Need This Data
+          text: To call you back regarding your application, schedule an appointment, and maintain the service history of your vehicle. We do not use it for newsletters and do not share it with third parties for advertising purposes.
+        - title: Where It Is Stored
+          text: In the encrypted storage of our hosting provider and in a closed working chat of the service. Access is restricted to staff only.
+        - title: How Long We Store It
+          text: For up to three years from the date of the last visit — the service history helps with future repairs. We will delete it sooner upon your request.
         - title: Cookies
-          text: The site uses two technical cookies — your chosen language and the contents of your basket. There are no advertising or analytics cookies.
-        - title: Your rights
-          text: You can ask for a copy of your data, a correction, or its deletion. Call us or send a message on any channel.
-      contactTitle: Questions about your data
-      contactBefore: Call or message us, the details are on the page
+          text: The site sets one technical cookie — the chosen language. There are no advertising or analytical cookies here. The cart and the anonymous identifier are stored in the browser's memory (localStorage) and do not leave to our server by themselves.
+        - title: Your Rights
+          text: You can request a copy of your data, its correction, or deletion. Just call or write to us in any messenger.
+      shopSections:
+        - title: Spare Parts Orders
+          text: The order from the cart is sent along with the application so we know what to prepare. We do not collect payment data — payment is made at the service.
+      contactTitle: Questions About Data
+      contactBefore: Call or write to us, contact information is available on the page.
     notFound:
-      metaTitle: Page not found — CarLab
-      heading: There is no such page
-      body: The link may be out of date, or there is a typo in the address. Have a look at the services, or message us and we will point you the right way.
-      cta: Go to the homepage
-translatedFrom: 68ae6baa80e56de9
+      metaTitle: Page Not Found — CarLab
+      heading: This Page Does Not Exist
+      body: The link may be outdated or there may be a typo in the address. Check out our services or write to us — we can help.
+      cta: Go to Homepage
+translatedFrom: 7de0941affc473da

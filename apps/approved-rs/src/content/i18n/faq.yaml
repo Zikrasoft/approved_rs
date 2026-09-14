@@ -55,174 +55,222 @@ cityExpert:
 translations:
   en:
     vehicle-sourcing:
-      - q: How long does the whole process take — from request to having the car?
-        a: Usually 3–14 days, depending on how quickly we find the right match on the market.
-      - q: If the car we find isn't right, do you keep looking for free?
-        a: Yes — we keep searching at no extra cost until we find the right one for you.
-      - q: Do I need to come see the car myself?
-        a: No, not at all — we can handle the whole deal without you being there. If you'd rather come see it yourself, that works too.
-      - q: What warranty comes with the car?
-        a: "There's no manufacturer warranty like on a new car — this is the used market. Your protection is the independent inspection before purchase: an expert examines the car, so you're never buying blind."
-      - q: Do you send a photo or video report before I decide?
-        a: Yes — a full photo report on the car, before you make any purchase decision.
-      - q: Is there compensation if deadlines slip on your end?
-        a: There's no fixed penalty — the timeline often depends on more than just us (negotiating with the seller, customs clearance). But we give you a realistic estimate upfront and don't waste time.
+      - q: How long does the entire process take — from the request to the car being with the client?
+        a: On average, it takes 3–14 days — it depends on how quickly we can find a suitable option on the market.
+      - q: If the car found isn’t suitable, do you continue searching for free?
+        a: Yes, we continue the search at no extra charge until we find the right fit for you.
+      - q: Do I need to go see the car myself?
+        a: No, it’s not necessary — we can handle the entire transaction without your presence. If you want to come and inspect it yourself, that’s also no problem.
+      - q: What kind of warranty is there on the found vehicle?
+        a: "There’s no formal manufacturer's warranty like for a new car — this is the used car market. Your protection comes from an independent technical inspection before purchase: a professional will check the car, rather than you doing it 'blindly.'"
+      - q: Do you provide a photo or video report on the car before I make a decision?
+        a: Yes, we provide a complete report with photos of the car before you make a purchase decision.
+      - q: Is there compensation if deadlines are missed due to your fault?
+        a: There’s no fixed penalty — the transaction duration often depends on factors beyond our control (negotiations with the seller, customs clearance). However, we provide a realistic timeline upfront and don’t drag our feet.
     vehicle-import:
-      - q: How is import different from car sourcing?
-        a: Sourcing is when you're in the same country as the car. Import is when the car travels to you in Serbia from Europe or China.
+      - q: What’s the difference between sourcing and importing a car?
+        a: Sourcing is when you’re in the same country as the vehicle. Importing is when the car is coming to you in Serbia from Europe or China.
       - q: Is customs clearance included in the price?
-        a: Yes — we handle customs clearance in Serbia and include it in the quote, given to you before the deal.
+        a: Yes, we manage customs clearance in Serbia and include it in the calculations — we provide the total amount before the deal.
+      - q: How much more expensive is the ‘turnkey’ price compared to the listing price?
+        a: 'The difference depends on the country, the age of the car, and the presence of a EUR1 certificate — we calculate and fix the total amount before starting. For reference: in one of our cases, a BMW X1 cost €39,860 in Germany, while the ‘turnkey’ price in Serbia, including all expenses, delivery, customs clearance, and paperwork, came to €46,000.'
+      - q: What’s needed to register the imported car in Serbia?
+        a: You can only register the car in your name in Serbia after obtaining a residence permit, so it makes sense to start sourcing when you already have the documents. Customs clearance is done in Subotica, and after that, we deliver the car to your city and assist with the registration.
     vehicle-buyback:
-      - q: How fast can I sell the car if it's not customs-cleared or re-registered yet?
-        a: Usually 1–2 days, even if the car isn't customs-cleared or registered to you yet.
-      - q: Do you buy cars that are financed or pledged as collateral?
-        a: No — we only buy cars free of an active loan or lien.
-      - q: How quickly does the money arrive after inspection?
-        a: Within 24 hours of the inspection.
-      - q: Are there restrictions on make, year, or mileage?
-        a: Yes — we don't take cars in poor technical condition, or French makes.
+      - q: How many days does it take to sell the car if it’s not yet cleared or re-registered?
+        a: Usually 1–2 days, even if the car is not yet cleared or registered in your name.
+      - q: Do you buy cars that are under loan or collateral?
+        a: No, we only buy cars without an active loan or collateral.
+      - q: How quickly do I get paid after the inspection?
+        a: Within a day after the inspection.
+      - q: Are there restrictions on brand, year, or mileage?
+        a: Yes — we do not consider cars in poor technical condition or French brands.
+      - q: What happens to the car after I sell it?
+        a: 'After that, it’s our responsibility: we handle transportation and sale ourselves. Cars with Serbian plates usually get sold in the Belgrade market, while cars with Russian plates are exported and sold in Russia.'
     vehicle-inspection:
-      - q: How much does an inspection cost, and is the price the same everywhere?
-        a: The price varies by country and depends on the scope of the inspection — we'll give you an exact figure when you submit a request.
-      - q: Can I order an inspection if I'm not physically in the country?
-        a: Yes, you don't need to be there — you get the report and make the decision remotely.
-      - q: What form does the report take?
-        a: Photos plus a detailed written summary of the inspection.
+      - q: What’s the cost of the inspection, and is the price the same in all countries?
+        a: The cost varies by country and depends on the scope of the inspection — we’ll provide an exact figure upon request.
+      - q: Can I order an inspection if I'm not physically in that country?
+        a: Yes, your presence is not required — you’ll receive the report and decision remotely.
+      - q: What format is the report in?
+        a: It includes photos and a detailed written description based on the inspection results.
+      - q: What happens if the inspection shows the car isn't worth buying?
+        a: "You’ll receive a report with photos and a clear recommendation 'don’t buy' — and you lose only the inspection fee, not the money for the car. The report stays with you, and if you do decide to proceed with the purchase, the noted issues can be used as bargaining points: in one of our inspections in Serbia, this reduced the price by €700."
     general:
-      - q: How do I pay for the service?
-        a: Cash on the day of the deal — you never send money upfront.
-      - q: Can I reach you somewhere other than Telegram?
-        a: Yes — besides Telegram, phone calls and WhatsApp both work.
+      - q: How is your service paid for?
+        a: Payment is made in cash on the day of the transaction — you don’t need to transfer any money upfront.
+      - q: Can I reach out to you not via Telegram?
+        a: Yes, in addition to Telegram, calls and WhatsApp are also available.
+      - q: Where are you located?
+        a: Our base is in Belgrade, from where we operate across Serbia. In Germany, Spain, Switzerland, and other European countries, our specialists work on-site.
+      - q: Is the consultation fee-based?
+        a: No. We discuss the task and will honestly tell you if it’s feasible within your budget. We state the cost of our services before we start, and that price does not change.
     cityExpert:
-      q: Is there a dedicated expert in every city?
-      a: Different specialists cover different cities; in some cases an expert travels to a nearby city in the region.
+      q: Is there a dedicated expert in each city?
+      a: Different specialists from our team work in different cities; in certain cases, an expert may travel to a neighboring city in the region.
   sr:
     vehicle-sourcing:
-      - q: Koliko traje ceo proces — od zahteva do vozila kod klijenta?
-        a: U proseku 3–14 dana — zavisi koliko brzo se pronađe odgovarajuća ponuda na tržištu.
-      - q: Ako pronađeno vozilo ne odgovara, da li nastavljate potragu besplatno?
-        a: Da, nastavljamo potragu bez doplate dok ne pronađemo ono što vam odgovara.
-      - q: Da li je potrebno lično doći da vidite vozilo?
-        a: Ne, nije obavezno — celu kupovinu možemo obaviti bez vašeg prisustva. Ako želite sami da dođete i pogledate, nema problema.
-      - q: Kakva garancija važi za pronađeno vozilo?
-        a: 'Zvanične garancije proizvođača, kao kod novog vozila, nema — reč je o tržištu polovnih automobila. Vaša zaštita je nezavisna tehnička provera pre kupovine: vozilo pregleda stručnjak, ne kupujete „naslepo“.'
-      - q: Da li dobijam foto ili video izveštaj o vozilu pre odluke?
-        a: Da, dobijate potpun izveštaj sa fotografijama pre nego što donesete odluku o kupovini.
-      - q: Postoji li nadoknada ako rokovi kasne vašom krivicom?
-        a: Fiksne naknade nema — rok sklapanja posla često ne zavisi samo od nas (pregovori sa prodavcem, carinjenje). Ali odmah dajemo realan rok i ne odugovlačimo.
+      - q: Koliko traje ceo proces — od prijave do automobila kod klijenta?
+        a: U proseku 3–14 dana — zavisi od toga koliko brzo ćemo naći odgovarajuću opciju na tržištu.
+      - q: Ako pronađeni automobil ne odgovara, da li nastavite da tražite besplatno?
+        a: Da, nastavljamo potragu bez dodatnih troškova, sve dok ne nađemo ono što vama odgovara.
+      - q: Da li je potrebno da sami idete da pogledate automobil?
+        a: Ne, nije obavezno — možemo obaviti celu transakciju bez vašeg prisustva. Ako želite da dođete i pogledate sami — takođe bez problema.
+      - q: Kakva je garancija na pronađeni automobil?
+        a: "Formalne garancije proizvođača, kao za novi automobil, nema — ovo je sekundarno tržište. Vaša zaštita je nezavisna tehnička provera pre kupovine: automobil pregledava ekspert, a ne vi 'na slepo'."
+      - q: Da li šaljete foto- ili video izveštaj o automobilu pre donošenja odluke?
+        a: Da, šaljemo potpuni izveštaj sa fotografijama o automobilu — pre nego što donesete odluku o kupovini.
+      - q: Da li postoji naknada ako su rokovi probijeni zbog vaše krivice?
+        a: Nema fiksne naknade — trajanje posla često zavisi ne samo od nas (pregovori sa prodavcem, carinjenje). Ali odmah navodimo realan rok i ne odugovlačimo.
     vehicle-import:
-      - q: Po čemu se uvoz razlikuje od odabira vozila?
-        a: Odabir vozila znači da ste u istoj zemlji kao i vozilo. Uvoz znači da vozilo putuje do vas u Srbiju iz Evrope ili Kine.
-      - q: Da li je carinjenje uključeno u cenu?
-        a: Da, sređujemo carinjenje u Srbiji i uključujemo ga u ponudu — konačan iznos dajemo pre dogovora.
+      - q: Čime se razlikuje uvoz od auto pretrage?
+        a: Auto pretraga se vrši kada se nalazite u istoj zemlji gde je automobil. Uvoz je kada auto dolazi u Srbiju iz Evrope ili Kine.
+      - q: Da li je carina uključena u cenu?
+        a: Da, prateći carinu u Srbiji uključujemo je u obračun — konačnu sumu navodimo pre posla.
+      - q: Koliko je automobil 'ključ u ruke' skuplji od cene u oglasu?
+        a: "Razlika zavisi od zemlje, starosti automobila i prisustva EUR1 sertifikata — kompletnu sumu izračunavamo i fiktivamo pre početka. Za orijentaciju: u jednom od naših slučajeva, BMW X1 je koštao u Nemačkoj 39.860 €, a 'ključ u ruke' u Srbiji, sa svim troškovima, isporukom, carinjenjem i registracijom, iznosio je 46.000 €."
+      - q: Šta je potrebno da se registrovani uvezeni automobil u Srbiji?
+        a: Automobil može biti registrovan na vas u Srbiji samo nakon dobijanja boravišne dozvole, pa je smisleno započeti pretragu kada su dokumenti već u vašim rukama. Carinjenje se obavlja u Subotici, nakon čega dovozimo auto u vaš grad i pratimo registraciju.
     vehicle-buyback:
-      - q: Za koliko dana mogu da prodam vozilo ako još nije rastarinjeno ili prepisano?
-        a: Obično 1–2 dana, čak i ako vozilo još nije rastarinjeno ili prepisano na vas.
-      - q: Da li otkupljujete vozilo pod kreditom ili u zalozi?
-        a: Ne, otkupljujemo samo vozila bez aktivnog kredita ili zaloge.
-      - q: Koliko brzo stiže novac nakon pregleda?
-        a: U roku od 24 sata nakon pregleda.
-      - q: Postoje li ograničenja po marki, godištu ili kilometraži?
-        a: Da — ne razmatramo vozila u lošem tehničkom stanju i francuske marke.
+      - q: Za koliko dana se može prodati automobil, ako nije dobijena carina ili prebačena na vas?
+        a: Obično 1–2 dana, čak i ako automobil još nije carinjen ili prebačen na vas.
+      - q: Otkupljujete li automobile na kreditu ili založene?
+        a: Ne, otkupljujemo samo automobile bez aktivnog kredita ili zaloga.
+      - q: Kako brzo dolazi novac nakon pregleda?
+        a: Tokom 24 sata nakon pregleda.
+      - q: Postoje li ograničenja po marki, godini ili kilometraži?
+        a: Da — ne razmatramo automobile u lošem tehničkom stanju i francuske marke.
+      - q: Šta se dešava s automobilom nakon otkupa?
+        a: 'Dalje, to je naša briga: organizujemo transport i prodaju sami. Automobili sa srpskim registarskim oznakama obično se prodaju na tržištu u Beogradu, dok automobile sa ruskim registrom iznosimo i prodajemo u Rusiji.'
     vehicle-inspection:
-      - q: Koliko košta provera i da li je cena ista u svim zemljama?
-        a: Cena se razlikuje po zemljama i zavisi od obima provere — tačan iznos dajemo uz zahtev.
-      - q: Da li mogu da naručim proveru ako fizički nisam u toj zemlji?
-        a: Da, vaše prisustvo nije neophodno — izveštaj i odluku dobijate na daljinu.
-      - q: U kom obliku dobijam izveštaj?
+      - q: Koliko košta provera i da li je cena svuda ista?
+        a: Cena se razlikuje po zemljama i zavisi od obima provere — tačnu cifru navodimo prilikom prijave.
+      - q: Može li se naručiti provera ako fizički niste u toj zemlji?
+        a: Da, vaše prisustvo nije obavezno — izveštaj i odluku dobijate na daljinu.
+      - q: U kojem obliku je izveštaj?
         a: Fotografije i detaljan tekstualni opis nakon pregleda.
+      - q: Šta će se desiti ako provera pokaže da ne treba kupiti automobil?
+        a: "Dobijate izveštaj sa fotografijama i direktan odgovor 'ne kupujte' — i gubite samo cenu provere, a ne novac za auto. Izveštaj ostaje kod vas, a ako se ipak odlučite za kupovinu, pronađena zapažanja mogu poslužiti kao argument u pregovorima: kod jednog od naših pregleda u Srbiji, to je snizilo cenu za 700 evra."
     general:
       - q: Kako se plaća usluga?
-        a: Plaćanje u gotovini na dan realizacije posla — novac ne šaljete unapred.
-      - q: Mogu li da vas kontaktiram i van Telegrama?
-        a: Da, pored Telegrama dostupni su i pozivi i WhatsApp.
+        a: Plaćanje se vrši gotovinom na dan posla — ne morate unapred slati novac.
+      - q: Može li se pisati kad nije Telegram?
+        a: Da, osim preko Telegrama dostupni su pozivi i WhatsApp.
+      - q: Gde se nalazite?
+        a: Baza — Beograd, odakle radimo po celoj Srbiji. U Nemačkoj, Španiji, Švajcarskoj i drugim evropskim zemljama rade naši stručnjaci.
+      - q: Da li je konsultacija naplatna?
+        a: Ne. Razgovaraćemo o zadatku i iskreno reći da li je realno da se uklopite u svoj budžet. Cenu rada navodimo pre početka, i ona se kasnije ne menja.
     cityExpert:
-      q: Da li u svakom gradu postoji poseban stručnjak?
-      a: U različitim gradovima rade različiti naši stručnjaci; u pojedinim slučajevima stručnjak dolazi i u susedni grad u regionu.
+      q: Da li u svakom gradu postoji svoj istaknuti ekspert?
+      a: U različitim gradovima rade različiti naši stručnjaci; u pojedinim slučajevima, ekspert izlazi u obližnji grad regiona.
   es:
     vehicle-sourcing:
-      - q: ¿Cuánto dura todo el proceso, desde la solicitud hasta tener el coche?
-        a: Normalmente entre 3 y 14 días, según lo rápido que encontremos la opción adecuada en el mercado.
-      - q: Si el coche que encuentran no me convence, ¿siguen buscando gratis?
-        a: Sí, seguimos buscando sin coste adicional hasta encontrar el que te convenga.
-      - q: ¿Tengo que ir a ver el coche en persona?
-        a: 'No, no es necesario: podemos gestionar todo el proceso sin que estés presente. Si prefieres ir a verlo tú mismo, también es posible.'
-      - q: ¿Qué garantía tiene el coche encontrado?
-        a: 'No hay garantía de fábrica como en un coche nuevo: es mercado de segunda mano. Tu protección es la inspección técnica independiente antes de la compra: un experto revisa el coche, así que nunca compras a ciegas.'
-      - q: ¿Me envían un informe con fotos o vídeo antes de decidir?
-        a: Sí, recibes un informe completo con fotos del coche antes de tomar cualquier decisión de compra.
-      - q: ¿Hay alguna compensación si los plazos se retrasan por su culpa?
-        a: 'No hay una penalización fija: el plazo de la operación a menudo no depende solo de nosotros (negociación con el vendedor, trámites aduaneros). Pero te damos un plazo realista desde el principio y no perdemos el tiempo.'
+      - q: ¿Cuánto tiempo lleva todo el proceso, desde la solicitud hasta que el cliente recibe el coche?
+        a: En promedio de 3 a 14 días, dependiendo de qué tan rápido se encuentre una opción adecuada en el mercado.
+      - q: Si el coche encontrado no es adecuado, ¿continúan buscando de forma gratuita?
+        a: Sí, seguimos buscando sin costo adicional hasta que encontremos lo que le convenga.
+      - q: ¿Es necesario que uno mismo vaya a ver el coche?
+        a: No, no es obligatorio; podemos llevar a cabo toda la transacción sin su presencia. Si desea venir a verlo usted mismo, también es posible.
+      - q: ¿Qué garantía hay sobre el coche encontrado?
+        a: "No hay garantía formal del fabricante como en un coche nuevo; esto es un mercado secundario. Su protección es una inspección técnica independiente antes de la compra: el coche es revisado por un experto, no por usted 'a ciegas'."
+      - q: ¿Proporcionan un informe con fotos o video del coche antes de tomar una decisión?
+        a: Sí, se proporciona un informe completo con fotos del coche antes de que tome su decisión de compra.
+      - q: ¿Hay alguna compensación si los plazos se rompen por su culpa?
+        a: No hay una penalización fija; el plazo de la transacción a menudo depende no solo de nosotros (negociaciones con el vendedor, aduanas). Pero ofrecemos un plazo realista desde el principio y no dilatamos el tiempo.
     vehicle-import:
-      - q: ¿En qué se diferencia la importación de la búsqueda de vehículos?
-        a: La búsqueda es cuando estás en el mismo país que el coche. La importación es cuando el coche viaja hasta ti en Serbia desde Europa o China.
-      - q: ¿El despacho de aduana está incluido en el precio?
-        a: Sí, gestionamos el despacho de aduana en Serbia y lo incluimos en el presupuesto, que te damos antes de cerrar el trato.
+      - q: ¿Cuál es la diferencia entre la importación y la búsqueda de coches?
+        a: La búsqueda de coches es cuando usted se encuentra en el mismo país que el coche. La importación es cuando el coche viene a usted desde Europa o China.
+      - q: ¿La aduana está incluida en el costo?
+        a: Sí, acompañamos el proceso de aduana en Serbia e incluimos su costo en el cálculo; la suma total la indicamos antes de la transacción.
+      - q: ¿Cuánto más cara es la opción 'llave en mano' comparada con el precio en el anuncio?
+        a: 'La diferencia depende del país, la edad del coche y la disponibilidad del certificado EUR1; el costo total se calcula y se fija antes de comenzar. Para referencia: en uno de nuestros casos, un BMW X1 costaba 39,860 € en Alemania, mientras que la opción llave en mano en Serbia, con todos los gastos, transporte, aduanas y documentación, salió por 46,000 €.'
+      - q: ¿Qué se necesita para registrar el coche importado en Serbia?
+        a: El automóvil debe ser registrado a su nombre en Serbia solo después de recibir el permiso de residencia, por lo que tiene sentido comenzar la búsqueda cuando ya tenga los documentos. El proceso de aduana se realiza en Subotica, después de lo cual llevamos el coche a su ciudad y acompañamos el registro.
     vehicle-buyback:
-      - q: ¿En cuántos días puedo vender el coche si aún no está desaduanado o traspasado?
-        a: Normalmente en 1 o 2 días, aunque el coche todavía no esté desaduanado ni registrado a tu nombre.
-      - q: ¿Compran coches con crédito o en prenda?
-        a: No, solo compramos coches sin crédito activo ni gravamen.
-      - q: ¿Con qué rapidez llega el dinero tras la inspección?
-        a: En menos de 24 horas después de la inspección.
-      - q: ¿Hay restricciones de marca, año o kilometraje?
-        a: 'Sí: no consideramos coches en mal estado técnico ni marcas francesas.'
+      - q: ¿En cuántos días se puede vender un coche si aún no ha sido despachado o registrado a su nombre?
+        a: Normalmente 1 a 2 días, incluso si el coche aún no ha sido despachado o registrado a su nombre.
+      - q: ¿Compran coches que estén en crédito o con hipoteca?
+        a: No, solo compramos automóviles que no tengan crédito o hipoteca vigente.
+      - q: ¿Cuán rápido se recibe el dinero después de la inspección?
+        a: Dentro de las 24 horas después de la inspección.
+      - q: ¿Hay restricciones por marca, año o kilometraje?
+        a: Sí, no consideramos vehículos en mal estado técnico y tampoco marcas francesas.
+      - q: ¿Qué pasa con el coche después de la compra?
+        a: 'Después de la compra, es nuestra responsabilidad: organizamos el transporte y la venta. Los coches con matrícula serbia generalmente se venden en el mercado de Belgrado, mientras que los coches con matrícula rusa los exportamos y vendemos en Rusia.'
     vehicle-inspection:
-      - q: ¿Cuánto cuesta la inspección y es el mismo precio en todos los países?
-        a: El precio varía según el país y depende del alcance de la inspección; te damos la cifra exacta al recibir tu solicitud.
-      - q: ¿Puedo pedir una inspección si no estoy físicamente en ese país?
-        a: 'Sí, no hace falta que estés presente: recibes el informe y decides de forma remota.'
-      - q: ¿En qué formato viene el informe?
-        a: Fotos junto con una descripción detallada por escrito tras la inspección.
+      - q: ¿Cuánto cuesta la inspección y es el precio el mismo en todos los países?
+        a: El costo varía según el país y depende del volumen de la inspección; le daremos un número exacto al hacer la solicitud.
+      - q: ¿Se puede solicitar una inspección si físicamente no se está en ese país?
+        a: Sí, su presencia no es necesaria; recibirá el informe y la decisión de forma remota.
+      - q: ¿En qué formato se presenta el informe?
+        a: Fotos y una descripción detallada por escrito de los resultados de la inspección.
+      - q: ¿Qué sucede si la inspección muestra que no vale la pena adquirir el coche?
+        a: "Recibirá un informe con fotos y una respuesta directa de 'no lo compre', y pierde solo el costo de la inspección, no el dinero del coche. El informe se queda con usted, y si decide comprarlo de todos modos, los comentarios encontrados servirán como un argumento en la negociación: en una de nuestras inspecciones en Serbia, esto redujo el precio en 700 euros."
     general:
-      - q: ¿Cómo se paga el servicio?
-        a: En efectivo el día de la operación; nunca tienes que enviar dinero por adelantado.
-      - q: ¿Puedo escribirles fuera de Telegram?
-        a: Sí, además de Telegram también puedes llamar o escribir por WhatsApp.
+      - q: ¿Cómo se paga por el trabajo?
+        a: El pago se hace en efectivo el día de la transacción; no tiene que transferir dinero por adelantado.
+      - q: ¿Se puede escribir fuera de Telegram?
+        a: Sí, además de Telegram, se pueden hacer llamadas y WhatsApp.
+      - q: ¿Dónde están ubicados?
+        a: Nuestra base está en Belgrado, desde ahí viajamos por toda Serbia. En Alemania, España, Suiza y otros países de Europa, nuestros especialistas trabajan localmente.
+      - q: ¿La consulta es de pago?
+        a: No. Discutiremos su situación y le diremos honestamente si es posible ajustarse a su presupuesto. Indicamos el costo del trabajo antes de comenzar, y luego no cambia.
     cityExpert:
-      q: ¿Hay un experto dedicado en cada ciudad?
-      a: En cada ciudad trabajan especialistas distintos de nuestro equipo; en algunos casos un experto se desplaza a una ciudad cercana de la región.
+      q: ¿Hay un experto asignado en cada ciudad?
+      a: En diferentes ciudades trabajan distintos especialistas de nuestro equipo; en algunos casos, un experto puede viajar a una ciudad vecina de la región.
   de:
     vehicle-sourcing:
-      - q: Wie lange dauert der gesamte Prozess – von der Anfrage bis zum eigenen Auto?
-        a: Meist 3 bis 14 Tage, je nachdem, wie schnell wir das passende Fahrzeug auf dem Markt finden.
-      - q: Wenn das gefundene Auto nicht passt, suchen Sie dann kostenlos weiter?
-        a: Ja, wir suchen ohne Aufpreis weiter, bis wir das richtige Auto für Sie gefunden haben.
-      - q: Muss ich das Auto persönlich besichtigen?
-        a: Nein, das ist nicht nötig – wir können den gesamten Kauf auch ohne Ihre Anwesenheit abwickeln. Wenn Sie es sich lieber selbst ansehen möchten, ist das ebenfalls kein Problem.
-      - q: Welche Garantie gilt für das gefundene Fahrzeug?
-        a: 'Eine Herstellergarantie wie bei einem Neuwagen gibt es nicht – es handelt sich um den Gebrauchtwagenmarkt. Ihr Schutz ist die unabhängige technische Prüfung vor dem Kauf: Ein Experte begutachtet das Auto, sodass Sie nicht „blind" kaufen.'
-      - q: Erhalte ich vor der Entscheidung einen Foto- oder Videobericht?
-        a: Ja, Sie erhalten einen vollständigen Bericht mit Fotos zum Fahrzeug, bevor Sie sich zum Kauf entscheiden.
-      - q: Gibt es eine Entschädigung, wenn sich der Termin durch Ihr Verschulden verzögert?
-        a: Eine feste Vertragsstrafe gibt es nicht – der Zeitrahmen hängt oft nicht nur von uns ab (Verhandlungen mit dem Verkäufer, Zollabfertigung). Wir nennen Ihnen aber von Anfang an einen realistischen Termin und ziehen die Sache nicht in die Länge.
+      - q: Wie lange dauert der gesamte Prozess – von der Anfrage bis zum Auto beim Kunden?
+        a: Im Durchschnitt 3–14 Tage – es hängt davon ab, wie schnell ein passendes Angebot auf dem Markt gefunden wird.
+      - q: Wenn das gefundene Auto nicht passt, suchen Sie kostenlos weiter?
+        a: Ja, wir setzen die Suche ohne Aufpreis fort, bis wir das passende Fahrzeug für Sie finden.
+      - q: Muss ich selbst zum Auto fahren, um es zu besichtigen?
+        a: Nein, das ist nicht erforderlich – wir können den gesamten Kaufprozess ohne Ihre Anwesenheit durchführen. Wenn Sie jedoch gern selbst kommen und es anschauen möchten, ist das auch kein Problem.
+      - q: Welche Garantie gibt es für das gefundene Fahrzeug?
+        a: 'Es gibt keine formale Herstellergarantie wie bei einem Neuwagen – das ist der Gebrauchtwagenmarkt. Ihr Schutz besteht in einem unabhängigen technischen Gutachten vor dem Kauf: Das Auto wird von einem Experten geprüft, nicht von Ihnen „blind“. '
+      - q: Geben Sie einen Foto- oder Videobericht über das Auto vor der Entscheidungsfindung?
+        a: Ja, Sie erhalten einen vollständigen Bericht mit Fotos des Fahrzeugs, bevor Sie eine Kaufentscheidung treffen.
+      - q: Gibt es eine Entschädigung, wenn die Fristen aufgrund Ihres Verschuldens nicht eingehalten werden?
+        a: Es gibt keine feste Vertragsstrafe – die Dauer des Deals hängt oft nicht nur von uns ab (Verhandlungen mit dem Verkäufer, Zollabwicklung). Aber wir nennen sofort realistische Zeitrahmen und ziehen die Angelegenheit nicht in die Länge.
     vehicle-import:
-      - q: Worin unterscheidet sich der Import von der Fahrzeugbeschaffung?
-        a: Bei der Fahrzeugbeschaffung befinden Sie sich im selben Land wie das Auto. Beim Import kommt das Auto aus Europa oder China zu Ihnen nach Serbien.
-      - q: Ist die Zollabfertigung im Preis enthalten?
-        a: Ja, wir übernehmen die Zollabfertigung in Serbien und rechnen sie mit ein – den Gesamtbetrag nennen wir Ihnen vor Vertragsabschluss.
+      - q: Was ist der Unterschied zwischen Import und Fahrzeugsuche?
+        a: Fahrzeugsuche ist, wenn Sie sich im selben Land wie das Auto befinden. Import bedeutet, dass das Auto aus Europa oder China nach Serbien zu Ihnen kommt.
+      - q: Ist die Zollabwicklung im Preis enthalten?
+        a: Ja, wir begleiten die Zollabwicklung in Serbien und inkludieren sie in unsere Kalkulation – den endgültigen Betrag nennen wir vor dem Deal.
+      - q: Wie viel teurer wird das Auto „schlüsselfertig“ im Vergleich zur Anzeige?
+        a: 'Die Differenz hängt vom Land, dem Alter des Fahrzeugs und der Verfügbarkeit eines EUR1-Zertifikats ab – die Gesamtsumme berechnen wir und fixieren sie vor Beginn. Zum Vergleich: In einem unserer Fälle kostete ein BMW X1 in Deutschland 39.860 €, und schlüsselfertig in Serbien, inklusive aller Kosten, Lieferung, Zollabwicklung und Anmeldung, betrug der Preis 46.000 €.'
+      - q: Was ist nötig, um das importierte Auto in Serbien zuzulassen?
+        a: Sie können das Auto nur dann auf sich anmelden, wenn Sie eine Aufenthaltserlaubnis (VNZ) haben; daher macht es Sinn, mit der Suche zu beginnen, wenn alle Dokumente vorliegen. Die Zollabwicklung erfolgt in Subotica, danach bringen wir das Auto in Ihre Stadt und unterstützen Sie bei der Anmeldung.
     vehicle-buyback:
-      - q: In wie vielen Tagen kann ich das Auto verkaufen, wenn es noch nicht verzollt oder umgemeldet ist?
-        a: In der Regel 1–2 Tage, auch wenn das Auto noch nicht verzollt oder auf Sie umgemeldet ist.
-      - q: Kaufen Sie Fahrzeuge an, die noch finanziert oder verpfändet sind?
-        a: Nein, wir kaufen nur Fahrzeuge ohne laufenden Kredit oder Pfandrecht an.
-      - q: Wie schnell kommt das Geld nach der Besichtigung an?
-        a: Innerhalb von 24 Stunden nach der Besichtigung.
-      - q: Gibt es Einschränkungen bei Marke, Baujahr oder Laufleistung?
-        a: Ja – wir übernehmen keine Fahrzeuge in schlechtem technischem Zustand und keine französischen Marken.
+      - q: Wie viele Tage dauert es, ein Auto zu verkaufen, wenn es noch nicht verzollt oder umgeschrieben ist?
+        a: Normalerweise 1–2 Tage, auch wenn das Auto noch nicht verzollt oder auf Sie umgeschrieben ist.
+      - q: Kaufen Sie Autos mit laufendem Kredit oder Pfand?
+        a: Nein, wir kaufen nur Autos ohne aktiven Kredit oder Pfand.
+      - q: Wie schnell kommt das Geld nach der Begutachtung?
+        a: Innerhalb eines Tages nach der Begutachtung.
+      - q: Gibt es Einschränkungen bezüglich Marke, Baujahr oder Kilometerstand?
+        a: Ja – wir betrachten keine Autos in schlechtem technischen Zustand und französische Marken.
+      - q: Was passiert mit dem Auto nach dem Kauf?
+        a: 'Dann ist es unser Anliegen: Wir organisieren den Transport und den Verkauf selbst. Autos mit serbischen Kennzeichen werden normalerweise auf dem Markt in Belgrad verkauft, während wir Autos mit russischen Kennzeichen ins Ausland bringen und dort verkaufen.'
     vehicle-inspection:
-      - q: Was kostet die Prüfung, und ist der Preis in allen Ländern gleich?
-        a: Der Preis variiert je nach Land und Umfang der Prüfung – die genaue Summe nennen wir Ihnen bei Ihrer Anfrage.
-      - q: Kann ich eine Prüfung beauftragen, wenn ich mich nicht selbst im Land befinde?
-        a: Ja, Ihre Anwesenheit ist nicht erforderlich – Sie erhalten den Bericht und treffen die Entscheidung aus der Ferne.
-      - q: In welcher Form erhalte ich den Bericht?
-        a: Fotos sowie eine ausführliche schriftliche Beschreibung nach der Besichtigung.
+      - q: Wie viel kostet die Inspektion und ist der Preis in allen Ländern gleich?
+        a: Die Kosten variieren je nach Land und hängen vom Umfang der Inspektion ab – die genaue Zahl nennen wir bei Ihrer Anfrage.
+      - q: Kann ich eine Inspektion beauftragen, wenn ich physisch nicht in diesem Land bin?
+        a: Ja, Ihre Anwesenheit ist nicht erforderlich – den Bericht und die Entscheidung erhalten Sie remote.
+      - q: In welcher Form ist der Bericht?
+        a: Fotos und eine detaillierte schriftliche Beschreibung der Inspektionsergebnisse.
+      - q: Was passiert, wenn die Inspektion zeigt, dass das Auto nicht gekauft werden sollte?
+        a: 'Sie erhalten den Bericht mit Fotos und eine klare Antwort „nicht kaufen“ – und verlieren die Kosten für die Inspektion, nicht das Geld für das Auto. Der Bericht bleibt bei Ihnen, und wenn Sie sich trotzdem entscheiden, zu kaufen, können die festgestellten Mängel als Argument bei der Preisverhandlung genutzt werden: In einer unserer Besichtigungen in Serbien senkte das den Preis um 700 Euro.'
     general:
-      - q: Wie erfolgt die Bezahlung?
-        a: Bar am Tag des Geschäfts – Sie überweisen nie Geld im Voraus.
-      - q: Kann ich Sie auch außerhalb von Telegram erreichen?
-        a: Ja, neben Telegram erreichen Sie uns auch per Anruf oder WhatsApp.
+      - q: Wie wird die Arbeit bezahlt?
+        a: Bezahlung in bar am Tag des Deals – Sie überweisen kein Geld im Voraus.
+      - q: Kann ich auch außerhalb von Telegram schreiben?
+        a: Ja, neben Telegram sind auch Anrufe und WhatsApp möglich.
+      - q: Wo sind Sie ansässig?
+        a: Basis ist Belgrad, von dort aus fahren wir in ganz Serbien. In Deutschland, Spanien, der Schweiz und anderen europäischen Ländern arbeiten unsere Experten vor Ort.
+      - q: Ist die Beratung kostenpflichtig?
+        a: Nein. Wir besprechen das Anliegen und sagen ehrlich, ob es realistisch ist, in Ihr Budget zu passen. Die Kosten für die Arbeit nennen wir vor Beginn, und danach ändern sie sich nicht.
     cityExpert:
       q: Gibt es in jeder Stadt einen eigenen Experten?
-      a: In den verschiedenen Städten sind unterschiedliche Spezialisten unseres Teams tätig; in einzelnen Fällen fährt ein Experte auch in eine benachbarte Stadt der Region.
-translatedFrom: 22092c7f082cca26
+      a: In verschiedenen Städten arbeiten unterschiedliche unsere Spezialisten; in bestimmten Fällen kommt ein Experte in die benachbarte Stadt der Region.
+translatedFrom: 5cb1ea7c9e2c794a

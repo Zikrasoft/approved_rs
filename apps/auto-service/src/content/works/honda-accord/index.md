@@ -2,42 +2,38 @@
 title: 'ТО Honda Accord в Белграде: масло и фильтры'
 translations:
   en:
-    title: Honda Accord
+    title: 'Honda Accord Maintenance in Belgrade: Oil and Filters'
     body: |-
-      ## Honda Accord Service in Belgrade — Oil, Filter, Spark Plug, and Fluid Changes
+      A Honda Accord with a gasoline engine arrived at our auto service in Belgrade for scheduled maintenance.
 
-      A Honda Accord with a gasoline engine came to our service center in Belgrade for scheduled maintenance.  
+      We replaced the engine oil and the essential filters: air, oil, and cabin. New spark plugs were installed, as they are crucial for the smooth operation of the gasoline engine, its start-up performance, and fuel consumption.
 
-      As part of the comprehensive service for the Honda Accord, we carried out an oil change and replaced the primary filters: a new air filter, oil filter, and cabin filter were installed. We also replaced the spark plugs, which is crucial for the stable operation of the gasoline engine, proper starting, and optimal fuel consumption.
+      Additionally, we replaced the antifreeze and brake fluid, which are important for maintaining the engine's operating temperature and ensuring brake reliability.
 
-      Additionally, during the maintenance of the Honda Accord, we replaced the coolant and brake fluid. Timely replacement of fluids helps maintain the engine's normal operating temperature and the reliability of the braking system.
+      ### How Often Should You Change Oil in a Honda Accord?
 
-      ### How Often to Change Oil in a Honda Accord?
+      For a gasoline Accord, we recommend changing the oil approximately every 7,500 km. Oil gradually loses its properties, and at this interval, the engine can receive fresh oil before the old one stops performing adequately.
 
-      For the Honda Accord's gasoline engine, we recommend changing the motor oil approximately every 7,500 km. This interval helps keep the engine in good condition and ensures timely updates to the oil, which gradually loses its original properties during use.
+      In addition to oil, it’s worthwhile to check filters, spark plugs, antifreeze, brake fluid, and other consumables during maintenance.
 
-      Regular maintenance of the Honda Accord includes not just oil changes but also checking the condition of filters, spark plugs, coolant, brake fluid, and other vital components of the vehicle.
-
-      If you require Honda Accord service in Belgrade, such as oil, filter, spark plug changes, or fluid replacements, our service specialists will perform the necessary work and help you choose the optimal maintenance schedule for your vehicle.
+      If you need to service your Accord in Belgrade, replace oil, filters, spark plugs, or technical fluids — come by, and we’ll also customize a maintenance schedule for your car.
     car: Honda Accord
   sr:
-    title: Honda Accord
+    title: 'TO Honda Accord u Beogradu: ulje i filteri'
     body: |-
-      ## Servisiranje Honda Accord u Beogradu — zamena ulja, filtera, svećica i tehničkih tečnosti
+      Honda Accord sa benzinskim motorom došao je u naš auto servis u Beogradu na redovno tehničko održavanje.
 
-      U našu autoservis u Beogradu stigao je Honda Accord sa benzinskim motorom radi planiranog tehničkog servisa.
+      Zamenili smo motorno ulje i glavne filtire: vazdušni, uljni i filter za kabinu. Postavili smo nove svećice — od njih zavisi kako motor radi, kako se pali i koliko troši.
 
-      U okviru sveobuhvatnog servisiranja Honda Accord obavili smo zamenu motornog ulja i osnovnih filtera: postavili smo novi vazdušni filter, filter ulja i filter kabine. Takođe, zamenjene su svećice, što je posebno važno za stabilan rad benzinskog motora, pravilan start i optimalnu potrošnju goriva.
-
-      Dodatno, u okviru tehničkog održavanja Honda Accord izvršena je zamena antifriza i kočione tečnosti. Pravovremena zamena tehničkih tečnosti pomaže u očuvanju normalne radne temperature motora i pouzdanosti kočionog sistema.
+      Dodatno smo zamenili antifriz i kočionu tečnost: oni utiču na radnu temperaturu motora i pouzdanost kočnica.
 
       ### Koliko često menjati ulje u Honda Accord?
 
-      Za benzinski motor Honda Accord preporučujemo zamenu motornog ulja otprilike na svakih 7 500 km. Ovaj interval omogućava održavanje motora u dobrom stanju i pravovremeno obnavljanje ulja koje postepeno gubi svoja prvobitna svojstva tokom eksploatacije.
+      Za benzinski Accord preporučujemo interval od otprilike 7 500 km. Ulje gubi svoja svojstva postepeno, i na tom intervalu motor uspeva da dobije sveže pre nego što staro prestane da funkcioniše kako treba.
 
-      Redovno tehničko održavanje Honda Accord uključuje ne samo zamenu ulja, već i kontrolu stanja filtera, svećica, antifriza, kočione tečnosti i drugih važnih elemenata automobila.
+      Pored ulja, na održavanju je smisleno proveriti i filtre, svećice, antifriz, kočionu tečnost i ostale potrošne materijale.
 
-      Ukoliko vam je potrebno servisiranje Honda Accord u Beogradu, zamena ulja, filtera, svećica ili tehničkih tečnosti, stručnjaci našeg autoservisa izvršiće potrebne radove i pomoći vam da odredite optimalan režim održavanja za vaš automobil.
+      Ako treba da održite svoj Accord u Beogradu, zamenite ulje, filtre, svećice ili tehničke tečnosti — dođite, a mi ćemo vam pomoći da odaberemo redovni servis za vašu mašinu.
     car: Honda Accord
 car: Honda Accord
 servicesApplied:
@@ -49,7 +45,7 @@ image: image.jpg
 gallery: []
 date: 2026-04-15
 published: true
-translatedFrom: da865b56724479fc
+translatedFrom: e76d8800d9ec80b6
 ---
 
 Honda Accord с бензиновым двигателем приехала в наш автосервис в Белграде на плановое техническое обслуживание.

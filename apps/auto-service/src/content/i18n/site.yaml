@@ -72,18 +72,18 @@ translations:
       works: Primeri radova
       process: Kako radimo
       about: O servisu
-      contact: Kontakt
+      contact: Kontakti
     header:
       menuOpenLabel: Meni
       menuCloseLabel: Zatvori meni
       languageLabel: Jezik
-      cta: Zakaži termin
-      phoneLabel: Pozovite
+      cta: Zakazati
+      phoneLabel: Pozvati
     footer:
-      tagline: Auto servis u Beogradu. Dijagnostika, popravke, limarija i farbanje, delovi.
+      tagline: Autoservis u Beogradu. Dijagnostika, popravka, limarija i farbanje, izbor delova.
       servicesHeading: Usluge
       companyHeading: Servis
-      contactHeading: Kontakt
+      contactHeading: Kontakti
       hoursHeading: Radno vreme
       hours: Pon–Pet 08:00–18:00 · Sub 09:00–14:00
       privacyLabel: Politika privatnosti
@@ -97,106 +97,106 @@ translations:
       faqHeading: Česta pitanja
       closeLabel: Zatvori
       fromPrice: od
-      priceOnRequest: na upit
+      priceOnRequest: na zahtev
       allServices: Sve usluge
       backToShop: Svi delovi
       allWorks: Svi primeri radova
-      emptyWorks: Primeri radova uskoro stižu. Do tada nas pozovite — reći ćemo šta smo radili na sličnim automobilima.
+      emptyWorks: Primeri radova uskoro dolaze. Za sada nas pozovite — ispričaćemo vam šta smo radili na sličnim vozilima.
     channels:
-      call: Pozovite nas
+      call: Pozvati
       whatsapp: WhatsApp
       viber: Viber
       telegram: Telegram
     form:
-      heading: Zakažite servis
-      subheading: Opišite šta je sa autom. Pozvaćemo vas da proverimo detalje i damo vam termin i cenu.
+      heading: Zakazati u servis
+      subheading: Opisujte problem sa vozilom. Javićemo se nazad radi detalja i reći ćemo vreme i cenu.
       nameLabel: Ime
       namePlaceholder: Kako da vam se obratimo
       contactLabel: Telefon
       contactPlaceholder: +381 11 000 0000
       contactChannelLabel: Kako da vas kontaktiramo
       channelPhone: Poziv
-      countryLabel: Pozivni broj države
-      serviceLabel: Šta vam treba
-      servicePlaceholder: Možete izabrati više usluga
+      countryLabel: Kod zemlje
+      serviceLabel: Šta vam je potrebno
+      servicePlaceholder: Možete izabrati više opcija
       carLabel: Automobil
-      carPlaceholder: Marka, model, godište
+      carPlaceholder: Marka, model, godina
       commentLabel: Šta vas muči
-      commentPlaceholder: Lupa preko neravnina, upalila se lampica, treba servis…
+      commentPlaceholder: Kucanje na neravnom, svetli lampica, treba servis...
       submit: Pošalji zahtev
-      submitting: Šaljemo…
-      privacyNote: Slanjem forme prihvatate
+      submitting: Šaljemo...
+      privacyNote: Slanjem forme, pristajete na
       privacyLinkText: politiku privatnosti
-      modalTitle: Zakažite servis
+      modalTitle: Zakazati u servis
       requiredError: Popunite ovo polje
-      errorPhone: Proverite broj — izgleda da nije potpun
-      errorTelegram: Unesite Telegram korisničko ime — najmanje tri znaka
-      errorConsent: Bez saglasnosti ne možemo da pošaljemo zahtev
+      errorPhone: Proverite broj — izgleda da nije u potpunosti unet
+      errorTelegram: Unesite nadimak u Telegramu — najmanje tri karaktera
+      errorConsent: Bez saglasnosti ne možemo poslati zahtev
   en:
     nav:
       services: Services
       shop: Parts
-      works: Recent jobs
-      process: How it works
-      about: About
+      works: Work Examples
+      process: How We Work
+      about: About Us
       contact: Contact
     header:
       menuOpenLabel: Menu
-      menuCloseLabel: Close menu
+      menuCloseLabel: Close Menu
       languageLabel: Language
-      cta: Book a slot
-      phoneLabel: Call us
+      cta: Book Now
+      phoneLabel: Call Us
     footer:
-      tagline: A car service in Belgrade. Diagnostics, repairs, bodywork and respraying, parts.
+      tagline: Car service in Belgrade. Diagnostics, repairs, bodywork and painting, parts selection.
       servicesHeading: Services
-      companyHeading: Workshop
+      companyHeading: Service
       contactHeading: Contact
-      hoursHeading: Opening hours
+      hoursHeading: Business Hours
       hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
-      privacyLabel: Privacy policy
+      privacyLabel: Privacy Policy
       rightsSuffix: All rights reserved.
     common:
       homeLabel: Home
-      skipToContent: Skip to content
-      breadcrumbLabel: Breadcrumb
-      primaryNavLabel: Primary navigation
-      mobileNavLabel: Mobile menu
-      faqHeading: Frequently asked
+      skipToContent: Skip to Content
+      breadcrumbLabel: Breadcrumbs
+      primaryNavLabel: Main Navigation
+      mobileNavLabel: Mobile Menu
+      faqHeading: Frequently Asked Questions
       closeLabel: Close
       fromPrice: from
-      priceOnRequest: on request
-      allServices: All services
-      backToShop: All parts
-      allWorks: All recent jobs
-      emptyWorks: Recent jobs will show up here shortly. Until then give us a call — we will tell you what we have done on similar cars.
+      priceOnRequest: upon request
+      allServices: All Services
+      backToShop: All Parts
+      allWorks: All Work Examples
+      emptyWorks: Work examples will be available soon. In the meantime, give us a call — we’ll tell you what we’ve done on similar cars.
     channels:
-      call: Call us
+      call: Call
       whatsapp: WhatsApp
       viber: Viber
       telegram: Telegram
     form:
-      heading: Book the workshop
-      subheading: Tell us what the car is doing. We call back, confirm the details, and give you a time and a price.
+      heading: Book a Service
+      subheading: Describe what’s wrong with your car. We’ll call you back to clarify details and provide time and cost.
       nameLabel: Name
-      namePlaceholder: What should we call you
+      namePlaceholder: How should we address you
       contactLabel: Phone
       contactPlaceholder: +381 11 000 0000
-      contactChannelLabel: How should we reach you
-      channelPhone: Phone call
-      countryLabel: Country code
-      serviceLabel: What you need
-      servicePlaceholder: Pick one or more
+      contactChannelLabel: How to Contact You
+      channelPhone: Phone Call
+      countryLabel: Country Code
+      serviceLabel: What is Needed
+      servicePlaceholder: You can select multiple options
       carLabel: Car
       carPlaceholder: Make, model, year
-      commentLabel: What is wrong
-      commentPlaceholder: Knocking over bumps, check engine light, service due…
-      submit: Send request
+      commentLabel: What’s the Issue
+      commentPlaceholder: Noise on bumps, check engine light on, needs maintenance…
+      submit: Submit Request
       submitting: Sending…
-      privacyNote: By sending this form you agree to our
+      privacyNote: By submitting this form, you agree to our
       privacyLinkText: privacy policy
-      modalTitle: Book the workshop
-      requiredError: Please fill this in
-      errorPhone: Check the number — it looks incomplete
-      errorTelegram: Enter your Telegram handle — at least three characters
-      errorConsent: We need your consent before we can send this
-translatedFrom: bdd23fcc98a01ee4
+      modalTitle: Book a Service
+      requiredError: This field is required
+      errorPhone: Please check the number — it seems to be incomplete
+      errorTelegram: Please provide a Telegram username — at least three characters
+      errorConsent: Without consent, we cannot submit the request
+translatedFrom: 6368403691586bf9

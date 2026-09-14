@@ -169,21 +169,21 @@ finalCta:
 translations:
   sr:
     meta:
-      title: 'Details — detailing u Beogradu: folija, poliranje, keramika'
-      description: Studio za detailing u Beogradu. Zaštitna folija PPF, promena boje, poliranje sa keramikom, restauracija volana. Radimo na rezultatu koji se vidi izbliza.
+      title: 'Detaljiranje u Beogradu: folija, poliranje, keramika — Details'
+      description: Studio za detaljiranje u Beogradu. Zaštitna folija PPF, promena boje, poliranje sa keramikom, restauracija volana. Radimo na rezultatu koji se vidi iz close-up-a.
     hero:
-      eyebrow: Detailing studio · Beograd
-      titleTop: Auto koji
+      eyebrow: Studio za detaljiranje · Beograd
+      titleTop: Automobil koji
       titleAccent: nema sramote
-      titleBottom: da pokažeš izbliza
-      lead: Zaštitna folija, promena boje, poliranje sa keramikom i restauracija kože. Jedan boks, jedan majstor na automobilu, i nikakvog žurbe.
-      ctaPrimary: Zakaži pregled
-      ctaSecondary: Pogledaj radove
+      titleBottom: da se pokaže izbliza
+      lead: Zaštitna folija, promena boje, poliranje sa keramikom i restauracija kože. Jedan boks, jedan majstor za auto, i bez žurbe.
+      ctaPrimary: Zaključite termin za pregled
+      ctaSecondary: Pogledajte radove
       stats:
         - value: '7'
           label: godina sa folijom i keramikom
         - value: 100%
-          label: radova sa fotkama pre i posle
+          label: svojih fotografija, bez stockova
         - value: 10 godina
           label: garancija na foliju
     marquee:
@@ -193,80 +193,80 @@ translations:
       - Keramika
       - Restauracija volana
       - Antigravel
-      - Detailing enterijera
+      - Detaljiranje enterijera
     intro:
       eyebrow: Zašto mi
-      heading: Detailing nije pranje. To je rad sa površinom.
-      body: Između „oprano i izbruseno“ i pravog detaljinga razlika je u satima pod lampom. Merimo debljinu laka, uklanjamo rizike u nekoliko prolaza i zatvaramo rezultat tako da traje godine, a ne do prvog kišnog dana.
+      heading: Detaljiranje nije pranje. To je rad na površini.
+      body: Razlika između "oprano i polirano" i pravog detaljiranja je satima pod lampom. Merenjima debljine laka uklanjamo rizike u više prolaza i zatvaramo rezultat tako da traje godine, a ne do prvog kišnog dana.
       points:
-        - title: Jedan auto u isto vreme
-          text: Boks ne postaje proizvodna traka. Dok je vaš automobil kod nas, majstor se fokusira samo na njega.
-        - title: Merimo, ne ‘na oko’
-          text: Pre poliranja merimo lak na svim panelima. Ako nema rezervi — reći ćemo otvoreno i nećemo rizikovati vašu boju.
-        - title: Fotodokumentacija svakog koraka
-          text: Vidite šta se dešavalo sa automobilom, čak i ako niste došli da pogledate.
+        - title: Jedan auto u jednom trenutku
+          text: Boks se ne pretvara u traku. Dok je vaš automobil kod nas, majstor se bavi samo njim.
+        - title: Merač debljine, a ne "na oku"
+          text: Pre poliranja mjerimo lak na svim panelima. Ako nema rezerve — reći ćemo otvoreno i nećemo riskirati vašu boju.
+        - title: Izveštaj sa fotografijama za svaki korak
+          text: Vidite šta se dešava sa automobilom, čak i ako ne dolazite da gledate.
     protocol:
       eyebrow: Merenja
-      heading: Debljinomer zna o vašem laku više nego vi
-      body: Pre poliranja merimo lak na svakom panelu i zapisujemo rezultat. Protokol ostaje kod vas — zajedno sa odlukom koji panel nećemo dirati.
+      heading: Merač debljine zna više o vašem laku nego vi
+      body: Pre poliranja merimo lak na svakoj ploči i beležimo rezultate. Protokol ostaje kod vas — zajedno sa odlukom koju ploču nećemo dodirivati.
       sheetTitle: Protokol merenja
-      sample: 'BMW 530i, 2019'
-      unit: µm
-      thinLabel: Tanko
+      sample: BMW 530i, 2019
+      unit: μm
+      thinLabel: Tanki
       verdictOk: Poliranje u dva prolaza
-      verdictStop: Krov ne diramo
+      verdictStop: Krov ne režemo
       rows:
         - panel: Hauba
           value: 132
         - panel: Krov
           value: 78
           thin: true
-        - panel: Prednji blatobran
+        - panel: Prednje krilo
           value: 124
         - panel: Prednja vrata
           value: 141
         - panel: Zadnja vrata
           value: 146
-        - panel: Poklopac gepeka
+        - panel: Poklopac prtljažnika
           value: 128
     servicesHead:
       eyebrow: Šta radimo
       heading: Četiri pravca, u svakom — do kraja
-      body: Svesno ne uzimamo sve što nam dođe. Bolje je raditi četiri stvari na visokom nivou nego dvadeset ‘takođe umeš.’
+      body: Svesno ne uzimamo sve i svašta. Bolje je raditi četiri stvari na visokom nivou nego dvadeset "takođe znamo".
     compare:
       eyebrow: Pre i posle
-      heading: Razlika koju vidiš bez lampe
-      body: 'Pomeri klizač. Levo — kako je došao, desno — kako je otišao. Nema retuširanja: isto mesto, ista svetlost, ista kamera.'
+      heading: Razlika koju vidite bez lampe
+      body: 'Povucite klizač. Levo — kako je došlo, desno — kako je otišlo. Nema retuširanja: isto mesto, isto svetlo, ista kamera.'
     process:
-      eyebrow: Kako prolazi rad
-      heading: Od pregleda do predaje
-      body: Transparentno i bez iznenađenja na računu. Cenu dajemo nakon pregleda, a ne po telefonu na slepo.
+      eyebrow: Kako se odvija rad
+      heading: Od pregleda do isporuke
+      body: Jasno i bez iznenađenja na računu. Cenu nazivamo posle pregleda, a ne putem telefona nasumično.
       steps:
         - title: Pregled i merenja
-          text: Gledamo lak pod lampom, merimo debljinu, diskutujemo šta je stvarno potrebno, a šta su suvišne troškove.
+          text: Gledamo lak pod lampom, merimo debljinu, razgovaramo o tome šta je stvarno potrebno, a šta su suvišni troškovi.
         - title: Ponuda i rok
-          text: Fiksiramo obim radova, cenu i datum predaje. Kasnije, cena ne raste.
+          text: Fiksiramo obim radova, cenu i datum isporuke. Cena zatim ne raste.
         - title: Priprema
-          text: Pranje u dva koraka, glina, odmašćivanje. Preskočiti ovaj korak znači zatvoriti prljavštinu pod folijom.
-        - title: Rad i predaja
-          text: Folija, poliranje, keramika — prema planu. Predajemo automobil na svetlosti dana i prikazujemo rezultat zajedno s vama.
+          text: Pranje u dva koraka, glina, odmašćivanje. Preskočiti ovaj korak znači uhvatiti prljavštinu ispod folije.
+        - title: Rad i isporuka
+          text: Folija, poliranje, keramika — po planu. Predajemo auto na dnevnom svetlu i pokazujemo rezultat zajedno s vama.
     honest:
       eyebrow: Iskreno
-      heading: Ponekad je pravi odgovor — ne prihvatiti posao
-      body: Odbijanje posla je takođe rezultat pregleda. Ove slučajeve kažemo pre nego što platite, a ne posle.
+      heading: Ponekad je pravi odgovor — ne prihvatiti
+      body: Odbijanje posla je takođe rezultat pregleda. Ove slučajeve nazivamo pre nego što platite, a ne posle.
       items:
         - title: Lak na granici
-          text: Ako debljinomer pokaže kritično tanak lak, poliranje ne dolazi u obzir — može se probiti do prajmera. Predložićemo blagu varijantu bez skidanja ili samo zaštitni premaz i pokazaćemo merenja na kojima se to vidi.
-        - title: Automobil je već prefarban
-          text: 'Na jeftin reparaturni lak folija ne sme: pri skidanju će povući premaz sa sobom. Prvo dovodimo lak u red, pa se tek onda vraćamo na foliju.'
+          text: Ako merač debljine pokazuje kritično tanak lak, poliranje nije moguće — može se protreti do temelja. Predložićemo blažu opciju bez skidanju ili samo zaštitni premaz i pokažemo merenja koja to potvrđuju.
+        - title: Auto je već prefarban
+          text: 'Na jeftinom popravljenom laku ne može se stavljati folija: pri skidanju će uzeti i premaz sa sobom. Prvo dovedemo lak u red, pa se vraćamo na foliju.'
         - title: Udubljenja i talasi na panelima
-          text: Folija ne skriva geometriju karoserije, a mat je naglašava jače nego sjaj. Prvo limarija, pa onda boja.
-        - title: Volan sa aktiviranim vazdušnim jastukom
-          text: 'Bez servisne istorije takav volan ne prihvatamo. To je pitanje vaše bezbednosti, a ne kozmetike: prvo servis, pa onda mi.'
+          text: Folija ne prikriva geometriju karoserije, a mat više naglašava nego sjaj. Prvo karoserijske popravke, pa boja.
+        - title: Volan sa aktiviranom vazdušnom jastučićem
+          text: 'Bez servisne istorije ne pristajemo na takav volan. Ovo je pitanje vaše bezbednosti, a ne estetike: prvo servis, pa mi.'
     materials:
       eyebrow: Materijali
-      heading: Radimo samo s onim što izdrži srpsko leto
-      body: 'Folija i sastavi — potrošni materijal na kojem se ne može štedeti: jeftini materijali žute tokom sezone i skidaju se zajedno s lakom. Držimo skladište proverenih brendova i uvek kažemo šta ćemo tačno postaviti na vaš automobil.'
+      heading: Radimo samo sa onim što izdrži srpsko leto
+      body: 'Folija i sastavi su potrošni materijal, na kojem ne treba štedeti: jeftin materijal žuti tokom sezone i skida se zajedno sa lakom. Držimo skladište proverenih brendova i uvek govorimo šta ćemo staviti na vaš auto.'
       brands:
         - name: XPEL
           purpose: Zaštitna folija (PPF)
@@ -282,73 +282,77 @@ translations:
           purpose: Hemija za poliranje
     prices:
       eyebrow: Cene
-      heading: Razumljive cene, tačna cena — nakon pregleda
-      body: Ispod su realni opsezi u Beogradu. Konačna cena zavisi od stanja laka, veličine karoserije i koliko će biti potrebno da se ispravlja unapred, a ne nakon.
-      note: Cene su navedene s materijalima i radom. PDV je uključen. Tačnu ponudu dajemo nakon pregleda automobila.
+      heading: Razumljivi opsezi, tačna cena — nakon pregleda
+      body: Ispod su stvarni opsezi po Beogradu. Konačna cena zavisi od stanja laka, veličine karoserije i koliko će se ispraviti pre, a ne posle.
+      note: Cene su navedene sa materijalima i radom. PDV uključen. Tačnu ponudu dajemo nakon pregleda vozila.
       plans:
         - name: Zaštitna folija
           price: od 690 €
           unit: prednji deo · cela karoserija — od 2 400 €
           features:
             - Izrezivanje po vašoj karoseriji, bez šavova na vidnim mestima
-            - Preklapanje rubova gde je to moguće
+            - Zavrtanje ivica gde je to moguće
             - Sloj koji se samovraća
             - Garancija proizvođača do 10 godina
         - name: Poliranje i keramika
           price: od 450 €
           unit: po automobilu
           features:
-            - Merenje debljine laka na svim panelima
+            - Merenje debljine laka po svim panelima
             - Dvo- ili trofazno poliranje
             - Keramička zaštita 2–5 godina
-            - Fotodokumentacija pod lampom pre i posle
+            - Izveštaj sa fotografijama pod lampom pre i posle
         - name: Promena boje
           price: od 1 900 €
           unit: cela karoserija
           features:
-            - Mat, sjajne, satin i teksturirane folije
-            - Demontaža ručica, svetala i lajsni
-            - Skida se bez štete po fabričku boju
+            - Mat, sjajni, satinasti i teksturirani filmovi
+            - Rašmontiranje ručica, lampi i lajsni
+            - Skida se bez štete za fabricky lak
             - Uzorci boje na vašem automobilu pre početka
     worksHead:
       eyebrow: Radovi
       heading: Automobili koji su bili kod nas
-      body: Svaka kartica — pravi rad sa fotografijama pre i posle, bez stock fotografija i tuđih kadrova.
+      body: Svaka kartica — auto koji je bio kod nas u boksu. Svoje fotografije, bez stockova i tuđih kadrova.
     faq:
-      - q: Koliko će vremena auto biti kod vas?
-        a: Poliranje sa keramikom — dva do tri dana. Prednji deo u foliji — dva dana. Kompletno oblepljenje karoserije — od pet dana. Tačan rok kažemo prilikom pregleda i držimo ga.
+      - q: Koliko vremena će auto biti kod vas?
+        a: Poliranje s keramikom — dva do tri dana. Prednji deo u foliji — dva dana. Potpuno omotavanje karoserije — od pet dana. Tačno vreme kažemo prilikom pregleda i držimo se toga.
       - q: Da li folija kvari fabričku boju?
-        a: 'Ne, ako je boja fabrička i folija se skida na vreme i pravilno. Uvek proveravamo debljinom, nije li auto farban: na svež ili jeftin reparat foliju ne možemo postaviti, i o tome ćemo vas obavestiti pre nego što započnemo rad.'
-      - q: Može li se oblepiti samo hauba i branik?
-        a: 'Može. Delimične zone — hauba, branik, krila, ogledala, stubovi, pragovi — najčešći izbor: pokriva onih 90% udaraca kamenjem koji se stvarno dešavaju na putu.'
+        a: 'Ne, ako je boja fabrička i folija se skida na vreme i pravilno. Uvek proveravamo meračem debljine da li je auto farban: na svež ili jeftin repariran lak foliju staviti ne može, i o tome ćemo reći pre početka radova.'
+      - q: Može li se obaviti samo hauba i branik?
+        a: 'Može. Delimične zone — hauba, branik, krila, ogledala, stubovi, pragovi — najčešći izbor: pokriva onih 90% udaraca kamenčića koji se stvarno dešavaju na putu.'
       - q: Šta je s keramikom zimi i na pranjima?
-        a: Keramika se ne boji soli i četki, ali duže traje na bezkontaktnoj pranja sa pH-neutralnom hemijom. Jednom godišnje dođite na besplatan pregled premaza — reći ćemo vam da li je potrebno osvežiti.
+        a: Keramika se ne boji soli i četaka, ali duže traje na beskontaktnoj pranju sa pH-neutralnom hemijom. Jednom godišnje dolazite na besplatan pregled premaza — reći ćemo vam treba li obnova.
       - q: Da li radite restauraciju volana odvojeno od ostalog?
-        a: Da, to je samostalna usluga. Skidamo volan, prešivamo ili prefarbamo kožu, ponovo sklapamo sa vazdušnim jastuče. Obično traje dva do tri dana.
-      - q: Da li radite s automobilima na stranim tablicama?
-        a: Da, i prilično često. Nema dodatnih dokumenata za detailing — dođite kakvi jeste.
+        a: Da, to je samostalna usluga. Skidamo volan, presvlačimo ili farbamo kožu, ponovo sastavljamo sa vazdušnim jastučićem. Obično traje dva do tri dana.
+      - q: Od čega zavisi cena?
+        a: Od veličine karoserije, stanja laka i obima pripreme. Težinske cene pomeraju složeni branici, skidanje staklenih elemenata i oštećenja laka koja treba ukloniti pre folije. Opseg po vašem automobilu govorimo odmah prilikom pregleda, pre početka radova, i onda ona ne raste.
+      - q: Zaštitna folija ili promena boje — šta izabrati?
+        a: 'To su različiti zadaci. Providna PPF zadržava fabričku boju i uzima kamenje i ogrebotine na sebe — uzima se kada želite da auto ostane kao što jeste, ali ceo. Ob Color menja izgled: mat, satin, tekstura. Ona se takođe skida bez štete za fabričku lak, ali je skuplja i lepi se duže — 4–7 dana nasuprot 2–6. Postoje i boje folije sa zaštitnim slojem — satin, koji menja izgled i štiti lak.'
+      - q: Da li radite s mašinama sa stranim registracijama?
+        a: Da, i prilično često. Nema dodatnih dokumenata za detaljiranje — dođite kako jeste.
     finalCta:
-      eyebrow: Zakaži
-      heading: Pokažite nam auto — dalje je lakše
-      body: Dođite na pregled ili pošaljite fotografije u messenger. Reći ćemo vam iskreno šta je potrebno, a šta se može ne raditi.
-      cta: Ostavi zahtev
+      eyebrow: Zaključite termin
+      heading: Pokažite nam automobil — dalje je lakše
+      body: Dođite na pregled ili pošaljite fotografije u aplikaciju. Reći ćemo vam otvoreno šta je potrebno, a šta možete izostaviti.
+      cta: Ostavite zahtev
   en:
     meta:
-      title: 'Details — Detailing in Belgrade: Film, Polishing, Ceramic'
-      description: A detailing studio in Belgrade. PPF, color change, polishing with ceramic coating, steering wheel restoration. We focus on results that are visible up close.
+      title: 'Car Detailing in Belgrade: Film, Polishing, Ceramic — Details'
+      description: A detailing studio in Belgrade. Protective film PPF, color change, polishing with ceramic coating, steering wheel restoration. We focus on results that are visible up close.
     hero:
       eyebrow: Detailing Studio · Belgrade
-      titleTop: A car you
-      titleAccent: can be proud of
-      titleBottom: to show up close
-      lead: Protective film, color change, polishing with ceramic coating, and leather restoration. One box, one master per car, and no rush.
-      ctaPrimary: Book a Consultation
-      ctaSecondary: View Our Work
+      titleTop: A car that you
+      titleAccent: can show off
+      titleBottom: up close
+      lead: Protective film, color change, polishing with ceramic coating, and leather restoration. One box, one master per car, without any rush.
+      ctaPrimary: Schedule a consultation
+      ctaSecondary: View our work
       stats:
         - value: '7'
           label: years with film and ceramic
         - value: 100%
-          label: of jobs with before and after photos
+          label: our own photos, no stock images
         - value: 10 years
           label: warranty on film
     marquee:
@@ -361,140 +365,144 @@ translations:
       - Interior Detailing
     intro:
       eyebrow: Why Choose Us
-      heading: Detailing is not just a wash. It's surface work.
-      body: There's a world of difference between "washed and polished" and true detailing, often taking hours under the light. We measure the paint thickness, eliminate risks in several passes, and seal the result to last for years, not just until the first rain.
+      heading: Detailing is not just washing. It’s surface treatment.
+      body: There’s a world of difference between a simple wash and true detailing — hours under the lamp. We measure lacquer thickness, reduce risks through multiple passes, and seal results so they last for years, not just until the first rain.
       points:
         - title: One car at a time
-          text: Our box doesn’t turn into a conveyor belt. While your car is with us, the master is focused solely on it.
-        - title: Measuring tools, not guesswork
-          text: Before polishing, we measure the paint thickness on all panels. If there's not enough clear coat, we will tell you honestly and won’t risk damaging your paint.
-        - title: Photo report of each stage
-          text: You can see what’s happening with your car, even if you don’t come in to check.
+          text: The box doesn’t become a production line. While your car is with us, the master is focused solely on it.
+        - title: Thickness Gauge, not just 'by eye'
+          text: Before polishing, we measure the lacquer on all panels. If it’s too thin, we’ll be clear about it and won’t risk your paint.
+        - title: Photo report for every stage
+          text: You can see what happens to your car, even if you can’t come by to check.
     protocol:
       eyebrow: Measurements
-      heading: A paint gauge knows more about your clear coat than you do
-      body: Before any polishing we measure the clear coat on every panel and write the result down. The protocol stays with you — along with the decision about which panel we are leaving alone.
-      sheetTitle: Measurement protocol
-      sample: 'BMW 530i, 2019'
-      unit: µm
+      heading: The thickness gauge knows more about your paint than you do
+      body: Before polishing, we measure the lacquer on each panel and record the results. The protocol stays with you — along with the decision on which panel we won't touch.
+      sheetTitle: Measurement Protocol
+      sample: BMW 530i, 2019
+      unit: μm
       thinLabel: Thin
-      verdictOk: Two-stage correction
-      verdictStop: Roof left alone
+      verdictOk: Polishing in two passes
+      verdictStop: We won’t cut the roof
       rows:
-        - panel: Bonnet
+        - panel: Hood
           value: 132
         - panel: Roof
           value: 78
           thin: true
-        - panel: Front wing
+        - panel: Front Fender
           value: 124
-        - panel: Front door
+        - panel: Front Door
           value: 141
-        - panel: Rear door
+        - panel: Rear Door
           value: 146
-        - panel: Boot lid
+        - panel: Trunk Lid
           value: 128
     servicesHead:
       eyebrow: What We Do
-      heading: Four services, fully delivered
-      body: We intentionally don’t take on everything. It’s better to excel in four areas than to offer twenty services with mediocre quality.
+      heading: Four specialties, each executed to perfection
+      body: We intentionally don’t take on everything. It’s better to do four things at a high level than twenty things we only 'kind of' know how to do.
     compare:
       eyebrow: Before and After
-      heading: A visible difference, even without a light
-      body: 'Slide the slider. On the left — how it arrived, on the right — how it left. No retouching: same spot, same light, same camera.'
+      heading: A difference noticeable without the lamp
+      body: 'Slide the divider. On the left — how it arrived, on the right — how it left. No retouching: the same spot, the same light, the same camera.'
     process:
       eyebrow: How We Work
-      heading: From Inspection to Handover
-      body: Transparent and without surprises on the invoice. We provide the price after inspection, not a vague estimate over the phone.
+      heading: From inspection to delivery
+      body: Transparent and without surprises on the bill. We name the price after inspection, not based on a guess over the phone.
       steps:
         - title: Inspection and Measurements
-          text: We examine the paint under the light, measure its thickness, and discuss what’s really needed versus unnecessary expenses.
+          text: We inspect the lacquer under the lamp, measure the thickness, and discuss what’s truly needed and what might be unnecessary expense.
         - title: Estimate and Timeline
-          text: We finalize the scope of work, price, and delivery date. After that, the price doesn’t increase.
+          text: We confirm the scope of work, price, and delivery date. From then on, the price doesn't increase.
         - title: Preparation
-          text: Two-stage washing, claying, and degreasing. Skipping this step means sealing dirt under the film.
-        - title: Work and Handover
-          text: Film application, polishing, ceramic coating — according to plan. We hand over the car in daylight and review the results together with you.
+          text: Two-stage washing, clay bar treatment, and degreasing. Skipping this step means sealing dirt under the film.
+        - title: Execution and Delivery
+          text: Film, polishing, ceramic — all by plan. We hand over the car in daylight and showcase the results together with you.
     honest:
-      eyebrow: Honestly
-      heading: Sometimes the right answer is not to take the job
-      body: Turning work down is also a result of the inspection. We name these cases before you pay, not after.
+      eyebrow: Honesty
+      heading: Sometimes the right answer is to walk away
+      body: Declining work is also an outcome of inspection. We inform you of these cases before you pay, not after.
       items:
-        - title: Clear coat at its limit
-          text: If the gauge shows critically thin clear coat, polishing is off the table — it can burn through to primer. We will offer a light, non-abrasive option or coating only, and show you the measurements that say so.
-        - title: The car has already been resprayed
-          text: 'Film must not go on cheap repair lacquer: it will lift the coating when it comes off. We sort the paint out first and come back to film after.'
-        - title: Dents and waves in the panels
-          text: Film does not hide body geometry, and matte makes it more obvious than gloss does. Bodywork first, colour second.
-        - title: A wheel with a deployed airbag
-          text: 'Without service history we will not take that wheel on. It is a safety question, not a cosmetic one: service first, us second.'
+        - title: Lacquer at its limit
+          text: If the thickness gauge shows critically thin lacquer, polishing isn’t an option — we could sand down to the primer. We’ll suggest a gentle option without removal or just a protective coating and show you the measurements that demonstrate this.
+        - title: The car has already been repainted
+          text: 'You can’t apply film over cheap repair lacquer: removal will take the paint with it. First, we’ll restore the lacquer, then we can proceed with the film.'
+        - title: Dents and waves on panels
+          text: Film doesn't hide the geometry of the body, and matte finish emphasizes it more than gloss. First, body repair, then color.
+        - title: Steering wheel with deployed airbag
+          text: "Without service history, we won't work on such a wheel. This is a matter of your safety, not just cosmetics: first service, then we step in."
     materials:
       eyebrow: Materials
-      heading: We only work with products that withstand Serbian summers
-      body: 'Film and coatings are consumables where cutting corners is not an option: cheap materials yellow over a season and peel off with the clear coat. We keep a stock of trusted brands and always inform you about what we will use on your car.'
+      heading: We only work with what can withstand Serbian summers
+      body: 'Film and compounds are consumables where you can’t cut corners: cheap materials turn yellow in one season and come off with the lacquer. We maintain a stock of trusted brands and always specify exactly what we’ll put on your car.'
       brands:
         - name: XPEL
-          purpose: Paint protection film (PPF)
+          purpose: Protective Film (PPF)
         - name: SunTek
-          purpose: Paint protection film (PPF)
+          purpose: Protective Film (PPF)
         - name: 3M
-          purpose: Colour change wrap
+          purpose: Color Change Film
         - name: HEXIS
-          purpose: Colour change wrap
+          purpose: Color Change Film
         - name: Gtechniq
-          purpose: Ceramic coating
+          purpose: Ceramic Coating
         - name: Koch-Chemie
-          purpose: Polishing chemistry
+          purpose: Chemicals for Polishing
     prices:
-      eyebrow: Pricing
-      heading: Clear ranges, precise price — after inspection
-      body: Below are the real price ranges in Belgrade. The final cost depends on the condition of the paint, the size of the car, and how much correction is needed beforehand.
-      note: Prices include materials and labor. VAT is included. A precise estimate is provided after inspecting the vehicle.
+      eyebrow: Prices
+      heading: Clear ranges, exact price — after inspection
+      body: Below are the actual ranges for Belgrade. The final price depends on lacquer condition, body size, and how much needs fixing before, not after.
+      note: Prices include materials and labor. VAT is included. A precise estimate is provided after vehicle inspection.
       plans:
         - name: Protective Film
           price: from €690
-          unit: front · entire car — from €2,400
+          unit: front · whole car — from €2,400
           features:
-            - Custom cut for your car, with no seams in visible areas
+            - Custom cut for your vehicle, without seams in visible areas
             - Edge wrapping wherever possible
             - Self-healing layer
-            - Manufacturer warranty up to 10 years
+            - Manufacturer's warranty up to 10 years
         - name: Polishing and Ceramic
           price: from €450
           unit: per vehicle
           features:
-            - Paint thickness measurement on all panels
-            - Two- or three-step polishing
+            - Lacquer thickness measurement on all panels
+            - Two- or three-stage polishing
             - Ceramic coating lasting 2–5 years
-            - Photo report under the light before and after
+            - Photo report under the lamp before and after
         - name: Color Change
           price: from €1,900
-          unit: entire car
+          unit: for the whole car
           features:
             - Matte, glossy, satin, and textured films
-            - Disassembly of handles, lights, and moldings
-            - Can be removed without damaging the factory paint
+            - Disassembly of handles, lights, and trim
+            - Removable without damaging the factory paint
             - Color samples on your car before starting
     worksHead:
       eyebrow: Our Work
-      heading: Cars We've Worked On
-      body: Each card represents a real job with before and after photos, no stock or third-party images.
+      heading: Cars we’ve worked on
+      body: Each card represents a car that spent time in our box. Our own photographs, no stock or third-party images.
     faq:
       - q: How long will my car be with you?
-        a: Ceramic polishing takes two to three days. Front PPF application takes two days. Full body wrap takes five days or more. We provide a precise timeline during the inspection and stick to it.
+        a: Polishing with ceramic takes two to three days. Front protection film — two days. Full body wrap — from five days. We provide the exact timeline during the inspection and stick to it.
       - q: Will the film damage the factory paint?
-        a: 'No, as long as the paint is factory and the film is removed in a timely and correct manner. We always check with a thickness gauge to ensure the car hasn’t been repainted: we won’t apply film to fresh or cheap repair paint, and we will inform you before starting work.'
+        a: 'No, if the paint is factory and the film is removed on time and properly. We always check with a thickness gauge if the car has been repainted: film cannot be applied to fresh or cheap repair paint, and we’ll communicate this before starting work.'
       - q: Can I wrap just the hood and bumper?
-        a: 'Yes. Partial areas — hood, bumper, fenders, mirrors, pillars, sills — are the most common options: covering the 90% of stone chips that truly occur on the road.'
-      - q: What about ceramic coatings in winter and at car washes?
-        a: Ceramics resist salt and brushes but last longer with touchless washes using pH-neutral chemicals. Come in once a year for a free coating check — we’ll advise if an update is needed.
-      - q: Do you do steering wheel restoration separately?
-        a: Yes, it’s a standalone service. We remove the steering wheel, re-sew or repaint the leather, and reassemble it with the airbag. This usually takes two to three days.
-      - q: Do you work with cars registered abroad?
-        a: Yes, quite often. No additional documents are required for detailing — just come as you are.
+        a: 'Yes. Partial zones — hood, bumper, fenders, mirrors, pillars, sills — are the most common option: they cover about 90% of the stone chips that typically happen on the highway.'
+      - q: What about ceramic in winter and at washes?
+        a: Ceramic is not afraid of salt and brushes but lasts longer with touchless washes using pH-neutral chemicals. Come once a year for a free inspection of the coating — we’ll let you know if a refresh is needed.
+      - q: Do you offer steering wheel restoration separately?
+        a: Yes, it's a standalone service. We remove the wheel, reupholster or repaint the leather, and reassemble it with the airbag. Usually takes two to three days.
+      - q: What determines the price?
+        a: The size of the body, the condition of the lacquer, and the amount of preparation needed. Prices go up with complex bumpers, disassembly of optics, and lacquer defects that need fixing before applying the film. We provide a price range based on your car during the inspection, before any work begins, and that price remains fixed.
+      - q: Should I choose protective film or a color change?
+        a: "These serve different purposes. Clear PPF preserves the factory color and absorbs stone chips and scratches — it's chosen when you want to keep the car the way it is but intact. Colored film changes the look: matte, satin, texture. It can also be removed without damaging the factory paint, but it’s pricier and takes longer to apply — 4–7 days versus 2–6. There are colored films with a protective layer too — satin that changes the look and protects the lacquer."
+      - q: Do you work with cars with foreign plates?
+        a: Yes, and quite often. No additional documents are needed for detailing — come as you are.
     finalCta:
-      eyebrow: Book Now
-      heading: Show us your car — it gets easier from there
-      body: Come in for an inspection or send us photos via messenger. We’ll be honest about what’s necessary and what can be skipped.
-      cta: Submit Your Request
-translatedFrom: 0bde1d16101101d4
+      eyebrow: Get in Touch
+      heading: Show us your car — the rest is easy
+      body: Come for an inspection or send photos via messenger. We’ll be honest about what’s necessary and what can wait.
+      cta: Submit a request
+translatedFrom: ff3e7d5268efd554
