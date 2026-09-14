@@ -45,7 +45,26 @@ export function createSectionLoader<L extends string>() {
               .join(', '),
           );
         }
-        if (result.success) translations.set(locale, result.data as T);
+        if (result.success) {
+          translations.set(locale, result.data as T);
+        } else {
+          // Both parses failed, so this locale silently serves the source
+          // language on every page. The usual cause is a key deleted from the
+          // ru source and left behind in the translation block, which a strict
+          // schema rejects and mergeOverSource cannot remove.
+          console.warn(
+            `[i18n] ${locale}: dropped, falling back to ${SOURCE_LOCALE} —`,
+            result.error.issues
+              .map((issue) =>
+                // An unrecognized_keys issue carries an empty path — the
+                // offending names are the one thing worth printing here.
+                'keys' in issue
+                  ? (issue.keys as string[]).join(', ')
+                  : issue.path.join('.'),
+              )
+              .join(', '),
+          );
+        }
       }
     }
 

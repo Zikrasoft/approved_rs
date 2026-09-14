@@ -56,8 +56,6 @@ translations:
       menuLabel: Menu
       menuCloseLabel: Close Menu
       languageLabel: Language
-      themeToggleLabel: Toggle Theme
-      themeToggleMobileLabel: Change Theme
       ctaShort: Request
       ctaLong: Submit a Request
     footer:
@@ -102,8 +100,6 @@ translations:
       menuLabel: Meni
       menuCloseLabel: Zatvori meni
       languageLabel: Jezik
-      themeToggleLabel: Promeni temu
-      themeToggleMobileLabel: Promeni temu
       ctaShort: Prijava
       ctaLong: Podnesite prijavu
     footer:
@@ -148,8 +144,6 @@ translations:
       menuLabel: Menú
       menuCloseLabel: Cerrar menú
       languageLabel: Idioma
-      themeToggleLabel: Cambiar tema
-      themeToggleMobileLabel: Cambiar tema
       ctaShort: Solicitud
       ctaLong: Enviar solicitud
     footer:
@@ -194,8 +188,6 @@ translations:
       menuLabel: Menü
       menuCloseLabel: Menü schließen
       languageLabel: Sprache
-      themeToggleLabel: Thema wechseln
-      themeToggleMobileLabel: Thema ändern
       ctaShort: Anfrage
       ctaLong: Anfrage absenden
     footer:

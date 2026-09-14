@@ -1,11 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  localizedWork,
-  publishedWorks,
-  relatedWorks,
-  workExcerpt,
-  type Work,
-} from './works';
+import { localizedWork, publishedWorks, workExcerpt, type Work } from './works';
 
 function makeWork(
   overrides: Partial<Work['data']> = {},
@@ -138,44 +132,18 @@ describe('workExcerpt', () => {
   });
 });
 
-describe('relatedWorks', () => {
-  const ppf = makeWork({ servicesApplied: ['paint-protection-film'] });
-  const colour = {
-    ...makeWork({ servicesApplied: ['colour-change-wrap'] }),
-    id: 'gls',
-  } as Work;
-  const both = {
-    ...makeWork({
-      servicesApplied: ['paint-protection-film', 'colour-change-wrap'],
-    }),
-    id: 'moto',
-  } as Work;
+describe('workExcerpt edge cases', () => {
+  it('rejects a sentence break too early to fill the description', () => {
+    const body = `Кратко. ${'слово '.repeat(40)}конец.`;
+    const excerpt = workExcerpt(body);
 
-  it('puts works sharing a service first', () => {
-    expect(relatedWorks([ppf, colour, both], ppf)[0]!.id).toBe('moto');
+    expect(excerpt).not.toBe('Кратко.');
+    expect(excerpt.endsWith('…')).toBe(true);
   });
 
-  it('never returns the work itself', () => {
+  it('keeps the link text and drops the url', () => {
     expect(
-      relatedWorks([ppf, colour, both], ppf).map((w) => w.id),
-    ).not.toContain(ppf.id);
-  });
-
-  it('falls back to the rest when nothing shares a service', () => {
-    const orphan = {
-      ...makeWork({ servicesApplied: ['steering-wheel-restoration'] }),
-      id: 'wheel',
-    } as Work;
-    expect(relatedWorks([orphan, colour], orphan).map((w) => w.id)).toEqual([
-      'gls',
-    ]);
-  });
-
-  it('honours the limit', () => {
-    expect(relatedWorks([ppf, colour, both], ppf, 1)).toHaveLength(1);
-  });
-
-  it('returns nothing when there is only one work', () => {
-    expect(relatedWorks([ppf], ppf)).toEqual([]);
+      workExcerpt('Смотрите [наши работы](https://details.rs/works/) тут'),
+    ).toBe('Смотрите наши работы тут');
   });
 });

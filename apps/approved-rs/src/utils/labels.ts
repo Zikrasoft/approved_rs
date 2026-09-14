@@ -64,7 +64,7 @@ export function isCountryScopedServiceSlug(
 // with no inbound link on the whole site.
 export const getNavItems = (
   locale: Locale,
-): { href: string; label: string; slug: string }[] => {
+): { href: string; label: string; slug: ServiceSlug }[] => {
   const nav = getI18n(locale).nav;
   return [
     {

@@ -79,7 +79,7 @@ const SPOTS = [
                 <button
                   type="button"
                   data-zone={String(i)}
-                  aria-pressed="false"
+                  aria-pressed={i === 0 ? 'true' : 'false'}
                   aria-label={zone.title}
                   class:list={['spot', { finding: zone.finding }]}
                   style={`left:${SPOTS[i].left};top:${SPOTS[i].top}`}
@@ -97,7 +97,7 @@ const SPOTS = [
             content.zones.map((zone, i) => (
               <div
                 data-zone-panel={String(i)}
-                hidden
+                hidden={i !== 0}
                 class="rounded-sm border border-default bg-surface-2 p-6"
               >
                 <h3 class="font-display text-lg font-bold text-primary">

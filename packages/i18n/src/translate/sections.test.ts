@@ -113,6 +113,35 @@ describe('translateSection', () => {
     ).resolves.toEqual(translated);
   });
 
+  it('splits a section too large for one completion into several requests', async () => {
+    // The production budget, not a test-only one: a single request for this
+    // much copy is what came back with its tail key missing.
+    const big = Object.fromEntries(
+      Array.from({ length: 4 }, (_, i) => [`k${i}`, 'я'.repeat(4000)]),
+    );
+    const schema = z
+      .object(
+        Object.fromEntries(
+          Object.keys(big).map((k) => [k, z.string()]),
+        ) as Record<string, z.ZodString>,
+      )
+      .strict();
+    stubOpenAiFetch((userContent) => {
+      const chunk = JSON.parse(userContent) as Record<string, string>;
+      return Object.fromEntries(
+        Object.entries(chunk).map(([k, v]) => [k, v.toUpperCase()]),
+      );
+    });
+
+    const result = await translateSection(big, 'en', 'test-key', {
+      schema,
+      promptSubject: 'oversized copy',
+    });
+
+    expect(vi.mocked(fetch).mock.calls.length).toBeGreaterThan(1);
+    expect(Object.keys(result).sort()).toEqual(Object.keys(big).sort());
+  });
+
   it('names the target language in the prompt rather than the locale code', async () => {
     const fetchMock = vi.fn().mockImplementation(
       async () =>
@@ -406,5 +435,14 @@ describe('chunkByKey', () => {
 
   it('returns nothing for an empty section', () => {
     expect(chunkByKey({})).toEqual([]);
+  });
+});
+
+describe('chunkByKey boundary', () => {
+  it('keeps a key that exactly fills the remaining budget in the same chunk', () => {
+    const data = { a: 'xx', b: 'yy' };
+    const exact =
+      JSON.stringify({ a: 'xx' }).length + JSON.stringify({ b: 'yy' }).length;
+    expect(chunkByKey(data, exact)).toEqual([data]);
   });
 });

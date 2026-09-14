@@ -41,7 +41,7 @@ const { heading, lead, hint, pointsLabel, items } = Astro.props;
         items.map((item, i) => (
           <div
             data-zone-panel={String(i)}
-            hidden
+            hidden={i !== 0}
             class="rounded-sm border border-default bg-surface p-6 md:p-8"
           >
             <p class="text-base leading-relaxed text-primary max-w-2xl">

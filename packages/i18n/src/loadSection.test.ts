@@ -81,6 +81,27 @@ translations:
     warn.mockRestore();
   });
 
+  it('names the key that dropped a locale instead of failing silently', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const strict = createSectionLoader<'ru' | 'en'>()(
+      z.object({ title: z.string() }).strict(),
+      `
+title: Автоподбор
+translations:
+  en:
+    title: Vehicle sourcing
+    removedLastWeek: Orphan
+`,
+    );
+
+    expect(strict('en').title).toBe('Автоподбор');
+    expect(warn).toHaveBeenCalledWith(
+      '[i18n] en: dropped, falling back to ru —',
+      'removedLastWeek',
+    );
+    warn.mockRestore();
+  });
+
   it('stays quiet about a complete translation', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     loadSection(schema, yaml);

@@ -920,7 +920,6 @@ translations:
         - Croatia
         - North Macedonia
         - Turkey
-      citiesLabel: 'Cities:'
       alsoInLabel: 'Also sourcing in:'
       crossSellLabel: Need a car that isn't local?
     vehicle-buyback:
@@ -1145,7 +1144,6 @@ translations:
         - Hrvatsku
         - Severnu Makedoniju
         - Tursku
-      citiesLabel: 'Gradovi:'
       alsoInLabel: 'Takođe pronalazimo vozila i u:'
       crossSellLabel: Treba vam vozilo koje nije lokalno?
     vehicle-buyback:
@@ -1370,7 +1368,6 @@ translations:
         - Croacia
         - Macedonia del Norte
         - Turquía
-      citiesLabel: 'Ciudades:'
       alsoInLabel: 'También buscamos coches en:'
       crossSellLabel: ¿Necesitas un coche que no sea local?
     vehicle-buyback:
@@ -1595,7 +1592,6 @@ translations:
         - Kroatien
         - Nordmazedonien
         - Türkei
-      citiesLabel: 'Städte:'
       alsoInLabel: 'Wir suchen auch Fahrzeuge in:'
       crossSellLabel: Brauchen Sie ein Fahrzeug, das nicht lokal ist?
     vehicle-buyback:

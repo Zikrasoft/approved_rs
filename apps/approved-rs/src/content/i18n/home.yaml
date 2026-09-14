@@ -142,11 +142,9 @@ translations:
       - title: Buyback
         desc: We handle the buyback and customs clearance for vehicles with foreign plates.
         note: Is the car already abroad? We can help with the paperwork.
-    heroEyebrow: 'One Path: Cars from Europe'
     heroLine1: Found.
     heroLine2: Inspected.
     heroLine3: Approved.
-    stampText: INSPECTED · APPROVED · INSPECTED · APPROVED ·
     heroSubtext: We will source, inspect, process, and import a car from Germany, Spain, or Serbia. One path, one team.
     statClients:
       value: 200+
@@ -158,9 +156,6 @@ translations:
       label: in the market
     journeyHeading: 'One Path: From Search to Keys'
     journeySubtext: Car sourcing, import, inspection, and buyback — not separate services, but stages of the journey of your vehicle. You can start at any step.
-    journeyMoreLabel: Learn more
-    countryStripLabel: 'Car Sourcing by Country:'
-    latestCasesHeading: Latest Cases
     whyUsHeading: Why Choose Us
     whyUsSubtext: Buying a car from another country can raise questions. Here’s how we address them.
     trustCards:
@@ -213,11 +208,9 @@ translations:
       - title: Otkup
         desc: Obezbeđujemo otkup i carinjenje automobila na stranim registarskim tablicama.
         note: Automobil je već van zemlje? Pomoći ćemo da ga uobličite.
-    heroEyebrow: 'Jedan put: automobili iz Evrope'
     heroLine1: Pronađeno.
     heroLine2: Provereno.
     heroLine3: Odobreno.
-    stampText: PROVERENO · ODBRENO · PROVERENO · ODBRENO ·
     heroSubtext: Pronaći ćemo, proveriti, obraditi i dovesti automobil iz Nemačke, Španije ili Srbije. Jedan put, jedan tim.
     statClients:
       value: 200+
@@ -229,9 +222,6 @@ translations:
       label: na tržištu
     journeyHeading: 'Jedan put: od pretrage do ključeva'
     journeySubtext: Odabir automobila, uvoz, provera i otkup — nisu različite usluge, već koraci jednog puta vašeg automobila. Možete da počnete sa bilo kojeg koraka.
-    journeyMoreLabel: Više informacija
-    countryStripLabel: 'Odabir automobila po zemljama:'
-    latestCasesHeading: Poslednji slučajevi
     whyUsHeading: Zašto nas biraju
     whyUsSubtext: Kupovina automobila iz druge zemlje postavlja pitanja. Evo kako ih rešavamo.
     trustCards:
@@ -284,11 +274,9 @@ translations:
       - title: Recompra
         desc: Gestionamos la recompra y el despacho aduanero del automóvil con matrículas extranjeras.
         note: ¿El coche ya está en el extranjero? Le ayudamos a formalizarlo.
-    heroEyebrow: 'Un camino: coches desde Europa'
     heroLine1: Encontrado.
     heroLine2: Verificado.
     heroLine3: Aprobado.
-    stampText: VERIFICADO · APROBADO · VERIFICADO · APROBADO ·
     heroSubtext: Seleccionaremos, verificaremos, formalizaremos y traeremos su automóvil de Alemania, España o Serbia. Un camino, un equipo.
     statClients:
       value: 200+
@@ -300,9 +288,6 @@ translations:
       label: en el mercado
     journeyHeading: 'Un camino: de la búsqueda a las llaves'
     journeySubtext: Selección, transporte, inspección y recompra — no son servicios diferentes, sino etapas de un único camino para su automóvil. Puede entrar en cualquier paso.
-    journeyMoreLabel: Más detalles
-    countryStripLabel: 'Selección de automóviles por países:'
-    latestCasesHeading: Últimos casos
     whyUsHeading: Por qué nos eligen
     whyUsSubtext: Comprar un coche en otro país plantea preguntas. Así es como las resolvemos.
     trustCards:
@@ -355,11 +340,9 @@ translations:
       - title: Ankauf
         desc: Wir kümmern uns um den Ankauf und die Zollabwicklung von Fahrzeugen mit ausländischen Nummernschildern.
         note: Das Auto ist bereits im Ausland? Wir helfen bei der Abwicklung.
-    heroEyebrow: 'Ein Weg: Autos aus Europa'
     heroLine1: Gefunden.
     heroLine2: Geprüft.
     heroLine3: Genehmigt.
-    stampText: GEPRÜFT · GENEHMIGT · GEPRÜFT · GENEHMIGT ·
     heroSubtext: Wir suchen, prüfen, regeln und importieren Fahrzeuge aus Deutschland, Spanien oder Serbien. Ein Weg, ein Team.
     statClients:
       value: 200+
@@ -371,9 +354,6 @@ translations:
       label: auf dem Markt
     journeyHeading: 'Ein Weg: von der Suche bis zu den Schlüsseln'
     journeySubtext: Autoauswahl, Import, Überprüfung und Ankauf — keine getrennten Dienstleistungen, sondern Schritte eines einzigen Weges für Ihr Fahrzeug. Einstieg ist von jedem Schritt möglich.
-    journeyMoreLabel: Mehr erfahren
-    countryStripLabel: 'Autoauswahl nach Ländern:'
-    latestCasesHeading: Neueste Fälle
     whyUsHeading: Warum wählen Kunden uns?
     whyUsSubtext: Der Kauf eines Autos aus einem anderen Land wirft Fragen auf. So lösen wir diese.
     trustCards:

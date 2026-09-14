@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  localizedWork,
-  publishedWorks,
-  relatedWorks,
-  type Work,
-} from './works';
+import { localizedWork, publishedWorks, type Work } from './works';
 
 function makeWork(
   overrides: Partial<Work['data']> = {},
@@ -118,65 +113,5 @@ describe('publishedWorks', () => {
     const input = [older, newer];
     publishedWorks(input);
     expect(input[0]).toBe(older);
-  });
-});
-
-describe('relatedWorks', () => {
-  const brakes = makeWork({ servicesApplied: ['brakes-suspension'] });
-  const gearbox = {
-    ...makeWork({ servicesApplied: ['engine-gearbox'] }),
-    id: 'dsg',
-  } as Work;
-  const alsoBrakes = {
-    ...makeWork({ servicesApplied: ['brakes-suspension', 'servicing'] }),
-    id: 'discs',
-  } as Work;
-  const servicing = {
-    ...makeWork({ servicesApplied: ['servicing'] }),
-    id: 'oil',
-  } as Work;
-
-  it('puts works sharing a service first', () => {
-    const result = relatedWorks(
-      [brakes, gearbox, alsoBrakes, servicing],
-      brakes,
-    );
-    expect(result[0]!.id).toBe('discs');
-  });
-
-  it('never returns the work itself', () => {
-    const result = relatedWorks(
-      [brakes, gearbox, alsoBrakes, servicing],
-      brakes,
-    );
-    expect(result.map((w) => w.id)).not.toContain('bmw-x5');
-  });
-
-  it('fills the remaining slots with the rest', () => {
-    const result = relatedWorks(
-      [brakes, gearbox, alsoBrakes, servicing],
-      brakes,
-    );
-    expect(result.map((w) => w.id)).toEqual(['discs', 'dsg', 'oil']);
-  });
-
-  it('falls back to the rest when nothing shares a service', () => {
-    const orphan = {
-      ...makeWork({ servicesApplied: ['bodywork-painting'] }),
-      id: 'body',
-    } as Work;
-    expect(
-      relatedWorks([orphan, gearbox, servicing], orphan).map((w) => w.id),
-    ).toEqual(['dsg', 'oil']);
-  });
-
-  it('honours the limit', () => {
-    expect(
-      relatedWorks([brakes, gearbox, alsoBrakes, servicing], brakes, 1),
-    ).toHaveLength(1);
-  });
-
-  it('returns nothing when there is only one work', () => {
-    expect(relatedWorks([brakes], brakes)).toEqual([]);
   });
 });

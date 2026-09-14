@@ -66,9 +66,25 @@ jobs:
           git pull --rebase && git push
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-  deploy:
+  # The translate job pushes with GITHUB_TOKEN, which does not start a new
+  # workflow run, so nothing would ever test the translated tree. The content
+  # tests that stand down while a translation is pending run here instead.
+  verify:
     needs: translate
-    if: needs.translate.result == 'success' && github.ref == 'refs/heads/main'
+    if: needs.translate.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.translate.outputs.sha }}
+      - uses: ./.github/actions/setup-pnpm
+      - run: pnpm test
+
+  deploy:
+    needs: [translate, verify]
+    if: needs.verify.result == 'success' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: production
     permissions:
@@ -90,8 +106,8 @@ jobs:
       - run: pnpm exec vercel deploy --prebuilt --prod --archive=tgz
 
   deploy-brand-site:
-    needs: translate
-    if: needs.translate.result == 'success' && github.ref == 'refs/heads/main'
+    needs: [translate, verify]
+    if: needs.verify.result == 'success' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: production
     permissions:

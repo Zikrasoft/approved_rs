@@ -41,7 +41,7 @@ const SERVICE_ICONS: Record<ServiceSlug, typeof Search> = {
 
 const navItems = getNavItems(locale).map((item) => ({
   ...item,
-  Icon: SERVICE_ICONS[item.slug as ServiceSlug],
+  Icon: SERVICE_ICONS[item.slug],
   current: navCurrent(
     Astro.url.pathname,
     PathBuilder.sectionRoot(locale, item.slug),

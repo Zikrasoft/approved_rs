@@ -11,8 +11,8 @@ import { getServicesContent } from '@/i18n/content/services';
 import { getSiteContent } from '@/i18n/content/site';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { PathBuilder, withLocales } from '@/utils/paths';
-import { localizedWork, publishedWorks, relatedWorks } from '@/utils/works';
-import { safeMarkdown } from '@podbor/site-kit';
+import { localizedWork, publishedWorks } from '@/utils/works';
+import { safeMarkdown, relatedEntries } from '@podbor/site-kit';
 import { SITE_URL } from '@/utils/constants';
 
 export async function getStaticPaths() {
@@ -20,7 +20,7 @@ export async function getStaticPaths() {
   return withLocales(
     works.map((work) => ({
       params: { slug: work.id },
-      props: { work, related: relatedWorks(works, work) },
+      props: { work, related: relatedEntries(works, work) },
     })),
   );
 }

@@ -1,6 +1,7 @@
 export { safeMarkdown, safeMarkdownInline } from './safeMarkdown.ts';
 export { breadcrumbListSchema } from './breadcrumbSchema.ts';
 export { jsonLdText } from './jsonLd.ts';
+export { relatedEntries } from './relatedEntries.ts';
 export { formatPhone } from './formatPhone.ts';
 export { mapEmbedSrc } from './mapEmbed.ts';
 export {
