@@ -64,10 +64,10 @@ importers:
       '@astrojs/vercel':
         specifier: 11.0.9
         version: 11.0.9(astro@7.2.10(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.2)(@vercel/blob@2.8.0)(@vercel/functions@3.9.5(ws@8.21.3))(idb-keyval@6.2.6)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))(react@19.2.8)(rollup@4.62.2)(supports-color@7.2.0)(ws@8.21.3)
-      '@fontsource/outfit':
+      '@fontsource/golos-text':
         specifier: 5.3.0
         version: 5.3.0
-      '@fontsource/playfair-display':
+      '@fontsource/unbounded':
         specifier: 5.3.0
         version: 5.3.0
       '@keystatic/astro':
@@ -1374,11 +1374,11 @@ packages:
   '@fontsource-variable/unbounded@5.3.0':
     resolution: {integrity: sha512-ea565Ncn4r7gPdBEHcmaF31V11hDfkL7b/JCklLobQbMfbu2ZZQrVWNgdeEFWFLqNh36yhieZWOgxdAnMTzrLg==}
 
-  '@fontsource/outfit@5.3.0':
-    resolution: {integrity: sha512-0AVHzTTVJSxWDOxPKSfMeHhZeBFDU3cmgrcOb76ZEyhGo0+xgyG3GsLF3h9+X8w0IX7G4jzjJgFQEBiWdX6VgA==}
+  '@fontsource/golos-text@5.3.0':
+    resolution: {integrity: sha512-R+gM4qOZSrge4TtEGps0zTpU8X4e7e32L+3yy0J/2LnVB/IERlidEpXPWSZVGzTaL5QnPRVmoebRXSuVtjUIVg==}
 
-  '@fontsource/playfair-display@5.3.0':
-    resolution: {integrity: sha512-uJSABalvdWc10fEPppQjQocamT21LEyRfzzWfRfqbkPz+sRv+kKpYDKyluBUskvJREkJTos9epj1WjQROGu99Q==}
+  '@fontsource/unbounded@5.3.0':
+    resolution: {integrity: sha512-pPD6hsTnjoQRr6pCsqMHbHBfauB4LZygCNQEUJHu+CO2wzDFHqELEFSG7sTwo5Z5Gr4q3OK0fIILOXBJDv6lcw==}
 
   '@graphql-typed-document-node/core@3.2.0':
     resolution: {integrity: sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==}
@@ -6730,9 +6730,9 @@ snapshots:
 
   '@fontsource-variable/unbounded@5.3.0': {}
 
-  '@fontsource/outfit@5.3.0': {}
+  '@fontsource/golos-text@5.3.0': {}
 
-  '@fontsource/playfair-display@5.3.0': {}
+  '@fontsource/unbounded@5.3.0': {}
 
   '@graphql-typed-document-node/core@3.2.0(graphql@16.14.2)':
     dependencies:

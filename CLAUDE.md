@@ -66,8 +66,13 @@ server-side route.
 **Why packages exist:** this repo is becoming a portfolio of deliberately
 independent brand sites (see `docs/open-questions.md` and the split plan). The
 shared code is the machinery — lead capture, i18n — never the visual identity.
-Two sites must not be recognizable as relatives from their HTML, so design
-systems and components stay per-app on purpose.
+Design systems and components stay per-app because each brand gets its own
+look, not because the sites have to be unrecognisable as relatives. **Visual
+overlap between two sites is fine** — a shared typeface or a similar palette is
+not a finding. The separation that does matter is structural: no cross-site
+requests from the browser, no shared brand root, nothing carrying Approved's
+trust semantics. The three sites already share a phone number; a font is not
+what would give them away.
 
 **Package rules:**
 
@@ -77,8 +82,8 @@ systems and components stay per-app on purpose.
   rather than growing a second implementation in an app.
 - **The second copy is the signal.** The moment the same helper would exist in
   two apps, it belongs in a package instead — and it moves together with its
-  tests, never ahead of them. What stays per-app is markup and styling, so two
-  brand sites never become recognisable as relatives; what moves is behaviour.
+  tests, never ahead of them. What stays per-app is markup and styling — each
+  brand owns its own look; what moves is behaviour.
   Spotting a shareable mechanism is reason enough to extract it now, not later.
 - **An extraction is finished only when every call site uses it.** Wiring the
   new package into the one app you were editing leaves the other copies alive
@@ -115,8 +120,9 @@ systems and components stay per-app on purpose.
   a package's internals move. Wire new packages the same way.
 - `packages/site-kit` is mechanics only, never visual. `safeMarkdown` is the
   XSS boundary for auto-translated content, `formatPhone` and the visitor id
-  are pure helpers. A component or a design token must not go in here — that is
-  exactly what would make two brand sites recognizable as relatives.
+  are pure helpers. A component or a design token does not go in here — not
+  because two sites must not resemble each other, but because a shared token
+  makes every brand's look a change to one file, and each brand owns its own.
 - Client-side imports go through a narrow subpath export
   (`@podbor/lead-crm/contact-channel`, `@podbor/site-kit/browser`), never the
   package root: the root barrel pulls zod, date-fns and the Telegram client
