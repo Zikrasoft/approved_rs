@@ -4,6 +4,8 @@ import StepsList from '@/components/StepsList.astro';
 import ChipLinks from '@/components/ChipLinks.astro';
 import CountryPill from '@/components/CountryPill.astro';
 import Faq from '@/components/Faq.astro';
+import MarketNotes from '@/components/MarketNotes.astro';
+import CityCards from '@/components/CityCards.astro';
 import { getFaq } from '@/i18n/content/faq';
 import { getServicesContent } from '@/i18n/content/services';
 import { getCountryPaths, withLocales, PathBuilder } from '@/utils/paths';
@@ -27,6 +29,25 @@ const { locale, country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
 const sc = getServicesContent(locale)['vehicle-sourcing'];
 const location = buildLocation(locale, country);
+const countryNote = sc.countryNoteFor(countryCode!);
+const cvs = getServicesContent(locale).cityVehicleSourcing;
+const cityCards = getCitiesForCountry(countryCode!).flatMap((city) => {
+  const note = cvs.cityNoteFor(city.slug);
+  return note
+    ? [
+        {
+          name: city[locale].name,
+          href: PathBuilder.vehicleSourcingCity(
+            locale,
+            countryCode!,
+            city.slug,
+          ),
+          text: note.lead,
+          point: note.points[0],
+        },
+      ]
+    : [];
+});
 const meta = generateMeta('vehicle-sourcing', {
   country,
   baseUrl: SITE_URL,
@@ -76,18 +97,12 @@ const vehicleImportCrossSellLinks = getVehicleImportCrossSellSpokes(
     },
     { label: sc.breadcrumbLabelFor(location) },
   ]}
+  closing={sc.closing}
 >
   <StepsList steps={sc.stepsFor(location)} />
   <p class="mt-6 text-sm leading-relaxed text-muted">
     {sc.deliveryLineFor(sc.deliveryDestinations.join(', '))}
   </p>
-  <ChipLinks
-    label={sc.citiesLabel}
-    items={getCitiesForCountry(countryCode!).map((city) => ({
-      href: PathBuilder.vehicleSourcingCity(locale, countryCode!, city.slug),
-      text: city[locale].name,
-    }))}
-  />
   <ChipLinks label={sc.crossSellLabel} items={vehicleImportCrossSellLinks} />
   <div class="mt-12 pt-8 border-t border-default">
     <p class="text-xs tracking-widest uppercase mb-4 font-medium text-muted">
@@ -103,6 +118,24 @@ const vehicleImportCrossSellLinks = getVehicleImportCrossSellSpokes(
   </div>
 
   <Fragment slot="extra">
+    {
+      countryNote && (
+        <MarketNotes
+          heading={sc.countryNotesHeadingFor(location)}
+          pointsLabel={sc.countryNotesPointsLabel}
+          note={countryNote}
+        />
+      )
+    }
+    {
+      cityCards.length > 0 && (
+        <CityCards
+          heading={sc.citiesHeadingFor(location)}
+          lead={sc.citiesLead}
+          items={cityCards}
+        />
+      )
+    }
     <Faq items={getFaq(locale)['vehicle-sourcing']} />
   </Fragment>
 </ServicePageLayout>

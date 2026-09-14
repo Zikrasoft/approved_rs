@@ -6,7 +6,7 @@
 // Middleware always intercepts and rewrites before this ever renders; the
 // redirect below is just a defensive fallback if that ever fails.
 export const prerender = false;
-import { DEFAULT_LOCALE } from '@/i18n/config';
+import { PRIMARY_LOCALE } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
-return Astro.redirect(PathBuilder.home(DEFAULT_LOCALE));
+return Astro.redirect(PathBuilder.home(PRIMARY_LOCALE));
 ---

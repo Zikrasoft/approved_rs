@@ -12,8 +12,6 @@ export const faqContentSchema = z
     'vehicle-import': z.array(faqItemSchema),
     'vehicle-buyback': z.array(faqItemSchema),
     'vehicle-inspection': z.array(faqItemSchema),
-    autoServiceBelgrade: z.array(faqItemSchema),
-    detailingBelgrade: z.array(faqItemSchema),
     general: z.array(faqItemSchema),
     cityExpert: faqItemSchema,
   })

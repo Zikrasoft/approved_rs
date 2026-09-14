@@ -2,24 +2,18 @@
 // No getStaticPaths — resolved per-request so it can read
 // Astro.locals.suggestedCountry (set by middleware) for the geo banner.
 export const prerender = false;
+import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import GeoBanner from '@/components/GeoBanner.astro';
 import ServiceQuickLinks from '@/components/ServiceQuickLinks.astro';
 import ContactCTA from '@/components/ContactCTA.astro';
-import CasesGrid from '@/components/CasesGrid.astro';
+import CaseCatalogue from '@/components/CaseCatalogue.astro';
+import CountryPlate from '@/components/CountryPlate.astro';
+import InspectionMap from '@/components/InspectionMap.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
-import CountryPill from '@/components/CountryPill.astro';
 import LeadForm from '@/components/LeadForm.astro';
-import {
-  Search,
-  Globe,
-  Wrench,
-  Banknote,
-  ClipboardCheck,
-  Eye,
-  Shield,
-  MapPin,
-} from '@lucide/astro';
+import StatBlock from '@/components/StatBlock.astro';
+import ClosingBand from '@/components/ClosingBand.astro';
 import { getCollection } from 'astro:content';
 import { getActiveCountries } from '@/utils/geo';
 import {
@@ -28,18 +22,22 @@ import {
   TG_MANAGER,
   SOCIAL_SAME_AS,
   CHINA_NAME,
-  DEFAULT_COUNTRY,
 } from '@/utils/constants';
 import { generateOrganizationSchema } from '@/utils/seo';
 import { telegramLink } from '@/utils/telegramLink';
-import StatBlock from '@/components/StatBlock.astro';
-import { toCaseItem } from '@/utils/cases';
 import { getHomeContent } from '@/i18n/content/home';
+import { getI18n } from '@/i18n/getI18n';
 import { PathBuilder } from '@/utils/paths';
+import { SLUG } from '@/utils/labels';
+import { EU_SPOKE_COUNTRIES } from '@/utils/vehicleImportCrossSell';
 import { getLocale } from '@/i18n/config';
+import { formatPrice } from '@/utils/price';
+import heroImage from '@/assets/hero-delivery.jpg';
+import closingImage from '@/assets/closing.jpg';
 
 const locale = getLocale(Astro.params.locale);
 const h = getHomeContent(locale);
+const t = getI18n(locale);
 const meta = {
   title: `${h.metaTitle} | ${SITE_NAME}`,
   description: h.metaDescription,
@@ -47,9 +45,17 @@ const meta = {
 };
 
 const allCases = await getCollection('cases');
-const latestCases = allCases.filter((c) => c.data.published).slice(0, 3);
-const items = latestCases.map((c) => toCaseItem(c, locale));
+const published = allCases
+  .filter((c) => c.data.published)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const catalogueCases = published.slice(0, 6);
 const countries = getActiveCountries();
+
+// The hero photograph is a copy of this case's own image, so the caption under
+// it links to the case it came from. The case can be unpublished or renamed
+// without breaking the hero — the caption just disappears.
+const heroCase = published.find((c) => c.id === 'ineos-grenadier');
+const heroCountry = countries.find((c) => c.code === heroCase?.data.country);
 
 const schema = generateOrganizationSchema({
   url: SITE_URL,
@@ -66,45 +72,56 @@ const schema = generateOrganizationSchema({
 // jump in if you're not starting from zero).
 const journey = [
   {
-    href: PathBuilder.service(locale, 'vehicle-sourcing', 'de'),
-    Icon: Search,
+    href: PathBuilder.vehicleSourcingHub(locale),
     title: h.journey[0].title,
     desc: h.journey[0].desc,
+    aside: countries.map((c) => c[locale].name).join(' · '),
   },
   {
     href: PathBuilder.vehicleImportHub(locale),
-    Icon: Globe,
     title: h.journey[1].title,
     desc: h.journey[1].desc,
+    aside: CHINA_NAME[locale],
   },
   {
-    href: PathBuilder.service(locale, 'vehicle-inspection', 'de'),
-    Icon: ClipboardCheck,
+    href: PathBuilder.sectionRoot(locale, SLUG.INSPECTION),
     title: h.journey[2].title,
     desc: h.journey[2].desc,
-    note: h.journey[2].note,
+    aside: h.journey[2].note,
   },
   {
-    href: PathBuilder.service(locale, 'vehicle-buyback', 'de'),
-    Icon: Banknote,
+    href: PathBuilder.sectionRoot(locale, SLUG.BUYBACK),
     title: h.journey[3].title,
     desc: h.journey[3].desc,
-    note: h.journey[3].note,
-  },
-  {
-    href: PathBuilder.autoServiceBelgrade(locale),
-    Icon: Wrench,
-    title: h.journey[4].title,
-    desc: h.journey[4].desc,
-    note: h.journey[4].note,
+    aside: h.journey[3].note,
   },
 ];
+
+const euSources = EU_SPOKE_COUNTRIES.flatMap((code) => {
+  const country = countries.find((c) => c.code === code);
+  return country
+    ? [
+        {
+          name: country[locale].name,
+          href: PathBuilder.vehicleImportSpoke(locale, code),
+        },
+      ]
+    : [];
+});
+
+// Every country we work in, with the cases already closed there — the count is
+// derived, so a new case changes the number without anyone editing copy.
+const geoCells = countries.map((country) => ({
+  href: PathBuilder.service(locale, 'vehicle-sourcing', country.code),
+  name: country[locale].name,
+  cases: published.filter((c) => c.data.country === country.code).length,
+}));
 ---
 
 <BaseLayout {...meta} schema={schema}>
   <section id="quick-links-band" class="xl:hidden border-b border-default">
-    <div class="max-w-6xl mx-auto px-6 py-5">
-      <ServiceQuickLinks countryCode={DEFAULT_COUNTRY} />
+    <div class="max-w-6xl mx-auto px-6 py-3">
+      <ServiceQuickLinks variant="strip" />
     </div>
   </section>
 
@@ -114,73 +131,48 @@ const journey = [
     )
   }
 
-  <!-- ─── Hero ──────────────────────────────────────────── -->
-  <section class="hero-grid relative border-b overflow-hidden border-default">
-    <div
-      class="absolute inset-0 pointer-events-none"
-      style="background: radial-gradient(ellipse 55% 60% at 10% 55%, var(--color-ambient-glow) 0%, transparent 65%), radial-gradient(ellipse 45% 40% at 90% 15%, var(--color-accent-subtle) 0%, transparent 60%);"
-    >
+  <section class="photo-hero relative border-b border-default">
+    <div class="photo-hero-shot">
+      <Image
+        src={heroImage}
+        alt={h.heroPhotoAlt}
+        format="webp"
+        widths={[640, 1024, 1600]}
+        sizes="100vw"
+        loading="eager"
+        fetchpriority="high"
+        class="w-full h-full object-cover"
+      />
+      <span class="photo-hero-veil"></span>
     </div>
 
-    <div class="relative max-w-6xl mx-auto px-6 py-20 md:py-28">
+    <div class="photo-hero-body relative max-w-6xl mx-auto px-6">
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
         <div class="lg:col-span-3">
-          <span class="eyebrow fade-up fade-up-1">{h.heroEyebrow}</span>
-          <h1
-            class="hero-headline font-display font-bold leading-none mb-8 fade-up fade-up-2 text-primary tracking-[-0.03em]"
-          >
-            {h.heroLine1}<br />
-            {h.heroLine2}<br />
-            <span class="stamp-row inline-flex items-center gap-3 flex-wrap">
-              <em class="text-accent italic">{h.heroLine3}</em>
-              <svg
-                class="stamp-svg shrink-0"
-                viewBox="0 0 200 200"
-                aria-hidden="true"
+          {
+            heroCase && (
+              <a
+                href={PathBuilder.case(locale, heroCase.id)}
+                class="hero-tag fade-up fade-up-1"
               >
-                <defs>
-                  <path
-                    id="stampArc"
-                    d="M 100,100 m -80,0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0"
-                  ></path>
-                </defs>
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="94"
-                  fill="none"
-                  stroke="var(--color-stamp-ink)"
-                  stroke-width="2.5"></circle>
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="82"
-                  fill="none"
-                  stroke="var(--color-stamp-ink)"
-                  stroke-width="1.5"
-                  stroke-dasharray="2 4"></circle>
-                <text
-                  font-family="var(--font-sans)"
-                  font-size="10"
-                  letter-spacing="2"
-                  fill="var(--color-stamp-ink)"
-                >
-                  <textPath href="#stampArc" startOffset="2%"
-                    >{h.stampText}</textPath
-                  >
-                </text>
-                <path
-                  d="M70,102 l20,20 l40,-45"
-                  fill="none"
-                  stroke="var(--color-stamp-ink)"
-                  stroke-width="9"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"></path>
-              </svg>
-            </span>
+                {heroCase.data.car}
+                {heroCountry && <> · {heroCountry[locale].name}</>}
+                {heroCase.data.price.value && (
+                  <> · {formatPrice(heroCase.data.price, locale)}</>
+                )}{' '}
+                · {h.heroPhotoNote}
+              </a>
+            )
+          }
+          <h1
+            class="hero-headline font-display font-bold mb-8 fade-up fade-up-2 text-primary"
+          >
+            <span class="block">{h.heroLine1}</span>{' '}
+            <span class="block">{h.heroLine2}</span>{' '}
+            <span class="block text-accent">{h.heroLine3}</span>
           </h1>
           <p
-            class="text-base leading-relaxed mb-10 max-w-md fade-up fade-up-3 text-muted"
+            class="text-base leading-relaxed mb-10 max-w-md fade-up fade-up-3 text-secondary"
           >
             {h.heroSubtext}
           </p>
@@ -203,353 +195,288 @@ const journey = [
         </div>
 
         <div class="hidden lg:block lg:col-span-2 fade-up fade-up-3">
-          <LeadForm />
+          <div class="rounded-sm border border-border-strong bg-surface">
+            <LeadForm />
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ─── Journey (services + process, as one story) ─────── -->
   <section class="border-b border-default">
-    <div class="max-w-6xl mx-auto px-6 py-20">
-      <div class="mb-4">
-        <SectionHeading title={h.journeyHeading} />
-      </div>
-      <p class="text-base max-w-xl mb-14 leading-relaxed text-muted">
+    <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
+      <SectionHeading title={h.journeyHeading} />
+      <p class="text-base max-w-xl mt-4 mb-12 leading-relaxed text-muted">
         {h.journeySubtext}
       </p>
 
-      <div
-        class="journey-strip grid grid-cols-1 lg:grid-cols-5 divide-y lg:divide-y-0 lg:divide-x divide-border rounded-sm border border-default bg-surface overflow-hidden anim-inline"
-        style="--anim-delay: 0.1s"
-      >
+      <div class="border-t border-default">
         {
-          journey.map((step, i) => {
-            const Icon = step.Icon;
-            const idx = String(i + 1).padStart(2, '0');
-            return (
-              <a
-                href={step.href}
-                class="journey-stop group flex flex-col no-underline p-7 anim-inline"
-                style={`--anim-delay: ${0.3 + i * 0.1}s`}
-              >
-                <div class="flex items-center gap-3 mb-5">
-                  <span class="step-circle step-circle-sm">{idx}</span>
-                  <span class="flex items-center justify-center w-9 h-9 rounded-sm shrink-0 bg-accent-subtle text-accent">
-                    <Icon size={16} />
-                  </span>
-                </div>
-                <h3 class="font-display text-xl font-bold mb-2 text-primary">
-                  {step.title}
-                </h3>
-                <p class="text-sm leading-relaxed flex-1 text-muted">
-                  {step.desc}
-                </p>
-                {step.note && (
-                  <p class="text-xs italic mt-3 text-muted">{step.note}</p>
-                )}
-                <span class="inline-flex items-center gap-1 mt-5 text-xs font-medium text-accent">
-                  {h.journeyMoreLabel}
-                  <span class="journey-arrow transition-transform duration-200">
-                    →
-                  </span>
-                </span>
-              </a>
-            );
-          })
+          journey.map((step) => (
+            <a href={step.href} class="svc-row">
+              <span class="svc-name font-display font-bold text-primary">
+                {step.title}
+              </span>
+              <span class="text-[0.97rem] leading-relaxed text-muted max-w-[54ch]">
+                {step.desc}
+              </span>
+              <span class="svc-aside text-sm">{step.aside}</span>
+            </a>
+          ))
         }
       </div>
+    </div>
+  </section>
 
-      <!-- Country strip -->
-      <p
-        class="text-xs tracking-widest uppercase mt-14 mb-3 font-medium text-muted"
-      >
-        {h.countryStripLabel}
+  <section class="border-b border-default">
+    <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
+      <SectionHeading title={h.origin.heading} />
+      <p class="text-base max-w-xl mt-4 mb-10 leading-relaxed text-muted">
+        {h.origin.note}
       </p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {countries.map((c) => <CountryPill country={c} locale={locale} />)}
+
+      <div class="grid gap-5 md:grid-cols-2">
+        <article class="origin-card group">
+          <h3
+            class="origin-title font-display font-bold text-primary flex items-center gap-2.5"
+          >
+            <CountryPlate code="eu" size="md" />
+            {h.origin.euTitle}
+          </h3>
+          <p class="text-[0.97rem] leading-relaxed text-muted">
+            {h.origin.euText}
+          </p>
+          <p class="flex flex-wrap gap-2">
+            {
+              euSources.map((source) => (
+                <a href={source.href} class="chip">
+                  {source.name}
+                </a>
+              ))
+            }
+          </p>
+          <a
+            href={PathBuilder.vehicleImportSpoke(locale, 'eu')}
+            class="origin-cta text-accent">{h.origin.euCta}</a
+          >
+        </article>
+
+        <article class="origin-card group">
+          <h3
+            class="origin-title font-display font-bold text-primary flex items-center gap-2.5"
+          >
+            <CountryPlate code="cn" size="md" />
+            {h.origin.chinaTitle}
+          </h3>
+          <p class="text-[0.97rem] leading-relaxed text-muted">
+            {h.origin.chinaText}
+          </p>
+          <p class="flex flex-wrap gap-2">
+            {h.origin.chinaTags.map((tag) => <span class="chip">{tag}</span>)}
+          </p>
+          <a
+            href={PathBuilder.vehicleImportSpoke(locale, 'china')}
+            class="origin-cta text-accent">{h.origin.chinaCta}</a
+          >
+        </article>
       </div>
 
-      <!-- Mobile-only lead form: desktop keeps it in the hero sidebar,
-                 mobile moves it here so the path explains the business
-                 before asking for contact details. -->
-      <div class="lg:hidden mt-10">
-        <LeadForm />
+      <div class="geo-grid mt-5">
+        {
+          geoCells.map((cell) => (
+            <a href={cell.href} class="geo-cell">
+              <span class="font-display font-bold text-primary">
+                {cell.name}
+              </span>
+              {cell.cases > 0 && (
+                <span class="text-sm text-muted tabular-nums">
+                  {cell.cases} <span class="sr-only">{t.nav.cases}</span>
+                </span>
+              )}
+            </a>
+          ))
+        }
       </div>
     </div>
   </section>
 
-  <!-- ─── Cases ─────────────────────────────────────────── -->
-  <CasesGrid
-    items={items}
-    heading={h.latestCasesHeading}
-    headingSize="xl"
-    viewAllHref={PathBuilder.casesVehicleSourcing(locale)}
+  {
+    catalogueCases.length > 0 && (
+      <CaseCatalogue
+        cases={catalogueCases}
+        locale={locale}
+        content={h.catalogue}
+        viewAllHref={PathBuilder.casesVehicleSourcing(locale)}
+      />
+    )
+  }
+
+  <InspectionMap
+    content={h.inspection}
+    findingLabel={h.findingLabel}
+    ctaHref={PathBuilder.sectionRoot(locale, SLUG.INSPECTION)}
   />
 
-  <!-- ─── Why us ───────────────────────────────────────── -->
   <section class="border-b border-default">
-    <div class="max-w-6xl mx-auto px-6 py-20">
-      <div class="mb-14">
-        <SectionHeading title={h.whyUsHeading} />
-        <p class="text-base max-w-md text-muted mt-3 leading-relaxed">
-          {h.whyUsSubtext}
-        </p>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div
-          class="trust-card glow-border bg-surface border border-default rounded-sm p-8 anim-inline"
-          style="--anim-delay: 0.08s"
-        >
-          <div
-            class="flex items-center justify-center w-11 h-11 rounded-sm mb-6 bg-accent-subtle text-accent"
-          >
-            <Eye size={20} />
-          </div>
-          <h3 class="font-display text-xl font-bold mb-3 text-primary">
-            {h.trustCards[0].title}
-          </h3>
-          <p class="text-sm leading-relaxed text-muted">
-            {h.trustCards[0].text}
-          </p>
-        </div>
-
-        <div
-          class="trust-card glow-border bg-surface border border-default rounded-sm p-8 anim-inline"
-          style="--anim-delay: 0.16s"
-        >
-          <div
-            class="flex items-center justify-center w-11 h-11 rounded-sm mb-6 bg-accent-subtle text-accent"
-          >
-            <Shield size={20} />
-          </div>
-          <h3 class="font-display text-xl font-bold mb-3 text-primary">
-            {h.trustCards[1].title}
-          </h3>
-          <p class="text-sm leading-relaxed text-muted">
-            {h.trustCards[1].text}
-          </p>
-        </div>
-
-        <div
-          class="trust-card glow-border bg-surface border border-default rounded-sm p-8 anim-inline"
-          style="--anim-delay: 0.24s"
-        >
-          <div
-            class="flex items-center justify-center w-11 h-11 rounded-sm mb-6 bg-accent-subtle text-accent"
-          >
-            <MapPin size={20} />
-          </div>
-          <h3 class="font-display text-xl font-bold mb-3 text-primary">
-            {h.trustCards[2].title}
-          </h3>
-          <p class="text-sm leading-relaxed text-muted">
-            {h.trustCards[2].text}
-          </p>
-        </div>
+    <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
+      <SectionHeading title={h.whyUsHeading} />
+      <p class="text-base max-w-md text-muted mt-4 mb-12 leading-relaxed">
+        {h.whyUsSubtext}
+      </p>
+      <div class="grid gap-8 md:grid-cols-3 md:gap-10">
+        {
+          h.trustCards.map((card) => (
+            <div class="term">
+              <h3 class="font-display text-lg font-bold mb-2 text-primary">
+                {card.title}
+              </h3>
+              <p class="text-[0.95rem] leading-relaxed text-muted">
+                {card.text}
+              </p>
+            </div>
+          ))
+        }
       </div>
     </div>
   </section>
 
-  <!-- ─── Social proof ──────────────────────────────────── -->
-  <section class="border-b border-default">
-    <div class="max-w-6xl mx-auto px-6 py-20">
-      <div class="mb-14">
-        <SectionHeading title={h.testimonialsHeading} />
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <figure
-          class="review-card glow-border bg-surface border border-default rounded-sm p-7 flex flex-col gap-5 anim-inline"
-          style="--anim-delay: 0.08s"
-        >
-          <blockquote class="text-sm leading-relaxed text-secondary flex-1">
-            {h.testimonials[0].quote}
-          </blockquote>
-          <figcaption class="flex items-center gap-3">
-            <div
-              class="w-9 h-9 rounded-full bg-accent-subtle flex items-center justify-center text-accent font-display font-bold text-sm"
-            >
-              А
-            </div>
-            <div>
-              <p class="text-sm font-medium text-primary">
-                {h.testimonials[0].name}
-              </p>
-              <p class="text-xs text-muted">
-                {h.testimonials[0].caption}
-              </p>
-            </div>
-          </figcaption>
-        </figure>
-
-        <figure
-          class="review-card glow-border bg-surface border border-default rounded-sm p-7 flex flex-col gap-5 anim-inline"
-          style="--anim-delay: 0.16s"
-        >
-          <blockquote class="text-sm leading-relaxed text-secondary flex-1">
-            {h.testimonials[1].quote}
-          </blockquote>
-          <figcaption class="flex items-center gap-3">
-            <div
-              class="w-9 h-9 rounded-full bg-accent-subtle flex items-center justify-center text-accent font-display font-bold text-sm"
-            >
-              М
-            </div>
-            <div>
-              <p class="text-sm font-medium text-primary">
-                {h.testimonials[1].name}
-              </p>
-              <p class="text-xs text-muted">
-                {h.testimonials[1].caption}
-              </p>
-            </div>
-          </figcaption>
-        </figure>
-
-        <figure
-          class="review-card glow-border bg-surface border border-default rounded-sm p-7 flex flex-col gap-5 anim-inline"
-          style="--anim-delay: 0.24s"
-        >
-          <blockquote class="text-sm leading-relaxed text-secondary flex-1">
-            {h.testimonials[2].quote}
-          </blockquote>
-          <figcaption class="flex items-center gap-3">
-            <div
-              class="w-9 h-9 rounded-full bg-accent-subtle flex items-center justify-center text-accent font-display font-bold text-sm"
-            >
-              Д
-            </div>
-            <div>
-              <p class="text-sm font-medium text-primary">
-                {h.testimonials[2].name}
-              </p>
-              <p class="text-xs text-muted">
-                {h.testimonials[2].caption}
-              </p>
-            </div>
-          </figcaption>
-        </figure>
-      </div>
+  <!-- Mobile-only lead form: desktop keeps it in the hero sidebar, mobile
+       moves it here so the page explains the business before asking for
+       contact details. -->
+  <section class="lg:hidden border-b border-default">
+    <div class="max-w-6xl mx-auto px-6 py-band">
+      <LeadForm />
     </div>
   </section>
 
-  <!-- ─── CTA ───────────────────────────────────────────── -->
-  <section class="max-w-6xl mx-auto px-6 py-20">
-    <div
-      class="cta-card relative rounded-sm overflow-hidden bg-surface border border-border-strong"
-    >
-      <div
-        class="absolute inset-0 pointer-events-none"
-        style="background: radial-gradient(ellipse 80% 120% at -5% 50%, var(--color-accent-soft) 0%, transparent 55%), radial-gradient(ellipse 50% 60% at 100% 100%, var(--color-ambient-glow) 0%, transparent 60%);"
-      >
-      </div>
-      <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-0">
-        <div class="p-10 md:p-16">
-          <span class="eyebrow">{h.ctaEyebrow}</span>
-          <h2
-            class="font-display font-bold mb-4 leading-[1.1] tracking-[-0.025em]"
-            style="font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 800;"
-          >
-            {h.ctaHeading.line1}<br />{h.ctaHeading.line2}<br /><em
-              class="text-accent italic">{h.ctaHeading.accentWord}</em
-            >
-          </h2>
-          <p class="text-base mb-2 max-w-sm text-muted leading-[1.7]">
-            {h.ctaSubtext}
-          </p>
-          <ContactCTA label={h.ctaTelegramLabel} />
-        </div>
-        <div
-          class="cta-aside hidden lg:flex items-end justify-end p-10 md:p-16"
-        >
-          <div class="grid grid-cols-2 gap-6">
-            <StatBlock
-              value={h.ctaStatClients.value}
-              label={h.ctaStatClients.label}
-            />
-            <StatBlock
-              value={String(countries.length)}
-              label={h.ctaStatCountries.label}
-            />
-            <StatBlock
-              value={h.ctaStatYears.value}
-              label={h.ctaStatYears.label}
-            />
-            <StatBlock
-              value={h.ctaStatResponse.value}
-              label={h.ctaStatResponse.label}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <ClosingBand
+    image={closingImage}
+    imageAlt={h.ctaPhotoAlt}
+    eyebrow={h.ctaEyebrow}
+    line1={h.ctaHeading.line1}
+    line2={h.ctaHeading.line2}
+    accentWord={h.ctaHeading.accentWord}
+    text={h.ctaSubtext}
+    ctaLabel={h.ctaTelegramLabel}
+    stats={[
+      h.ctaStatClients,
+      { value: String(countries.length), label: h.ctaStatCountries.label },
+      h.ctaStatYears,
+      h.ctaStatResponse,
+    ]}
+  />
 </BaseLayout>
 
 <style>
   .hero-headline {
-    font-size: clamp(3rem, 6.5vw, 5.2rem);
-    font-weight: 800;
+    font-size: clamp(2.4rem, 6.5vw, 5rem);
+    line-height: 0.98;
+    letter-spacing: -0.045em;
   }
-  .stamp-svg {
-    display: inline-block;
-    pointer-events: none;
-    opacity: 0.85;
-    transform: rotate(-8deg) scale(1);
-    animation: stampHit 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.9s both;
-    width: clamp(48px, 6vw, 84px);
-    aspect-ratio: 1 / 1;
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1.2rem;
+    font-size: 0.82rem;
+    color: var(--color-text-2);
+    text-decoration: none;
+  }
+  .hero-tag:hover {
+    color: var(--color-text);
   }
   @media (max-width: 380px) {
     .hero-headline {
-      font-size: 2.5rem;
-    }
-    .stamp-row {
-      gap: 0.5rem;
-    }
-    .stamp-svg {
-      width: 36px;
+      font-size: 2.2rem;
     }
   }
-  @keyframes stampHit {
-    0% {
-      opacity: 0;
-      transform: rotate(-24deg) scale(1.5);
-    }
-    60% {
-      opacity: 0.85;
-    }
-    100% {
-      opacity: 0.85;
-      transform: rotate(-8deg) scale(1);
-    }
+
+  .svc-row {
+    display: grid;
+    gap: 0.3rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--color-border);
+    text-decoration: none;
   }
-  @media (prefers-reduced-motion: reduce) {
-    .stamp-svg {
-      animation: none;
-      opacity: 0.85;
-      transform: rotate(-8deg) scale(1);
+  @media (min-width: 860px) {
+    .svc-row {
+      grid-template-columns: 15rem 1fr 13rem;
+      gap: 2.4rem;
+      align-items: baseline;
     }
   }
-  .journey-stop {
-    transition: background-color 0.25s;
+  .svc-name {
+    font-size: clamp(1.3rem, 3.2vw, 1.8rem);
+    letter-spacing: -0.045em;
   }
-  .journey-stop:hover {
-    background-color: var(--color-surface-2);
+  .svc-row:hover .svc-name {
+    color: var(--color-accent);
   }
-  .journey-stop:hover .journey-arrow {
-    transform: translateX(4px);
+  .svc-aside {
+    color: var(--color-muted);
   }
-  .trust-card {
-    transition: background-color 0.25s;
+  @media (min-width: 860px) {
+    .svc-aside {
+      text-align: right;
+    }
   }
-  .trust-card:hover {
-    background-color: var(--color-surface-2) !important;
+
+  .origin-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.6rem 1.5rem;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 2px;
   }
-  .review-card {
-    transition: background-color 0.25s;
+  .origin-title {
+    font-size: clamp(1.3rem, 3.4vw, 1.6rem);
+    letter-spacing: -0.045em;
   }
-  body:has(#mobile-menu.menu-open) #quick-links-band {
-    display: none;
+  .origin-cta {
+    margin-top: auto;
+    padding-top: 0.6rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .origin-cta:hover {
+    text-decoration: underline;
+  }
+
+  .geo-grid {
+    display: grid;
+    gap: 1px;
+    background-color: var(--color-border);
+    border: 1px solid var(--color-border);
+  }
+  @media (min-width: 640px) {
+    .geo-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 960px) {
+    .geo-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  .geo-cell {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.05rem 1.2rem;
+    background-color: var(--color-bg);
+    text-decoration: none;
+    transition: background-color 0.2s;
+  }
+  .geo-cell:hover {
+    background-color: var(--color-surface);
+  }
+
+  .term {
+    border-top: 2px solid var(--color-accent);
+    padding-top: 0.9rem;
   }
 </style>

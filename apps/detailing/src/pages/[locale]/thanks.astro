@@ -1,0 +1,60 @@
+---
+import Shell from '@/layouts/Shell.astro';
+import Cta from '@/components/Cta.astro';
+import ContactChannels from '@/components/ContactChannels.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getPagesContent } from '@/i18n/content/pages';
+import { getSiteContent } from '@/i18n/content/site';
+import { PathBuilder, localePaths } from '@/utils/paths';
+
+export function getStaticPaths() {
+  return localePaths();
+}
+
+const locale = localeFrom(Astro.url.pathname);
+const pages = getPagesContent(locale);
+const site = getSiteContent(locale);
+---
+
+<Shell
+  title={pages.thanks.metaTitle}
+  description={pages.thanks.metaDescription}
+  noindex
+>
+  <section class="wrap flex min-h-[70vh] items-center pt-36 sm:pt-44">
+    <div class="grid w-full gap-12 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+      <div class="flex flex-col gap-6">
+        <span class="eyebrow w-fit" data-reveal>{pages.thanks.eyebrow}</span>
+        <h1 class="text-giant" data-reveal data-reveal-delay="60">
+          {pages.thanks.heading}
+        </h1>
+        <p
+          class="max-w-xl text-base leading-relaxed text-mute sm:text-lg"
+          data-reveal
+          data-reveal-delay="120"
+        >
+          {pages.thanks.body}
+        </p>
+        <p
+          class="max-w-xl text-sm text-mute-2"
+          data-reveal
+          data-reveal-delay="160"
+        >
+          {pages.thanks.note}
+        </p>
+        <div data-reveal data-reveal-delay="220">
+          <Cta label={pages.thanks.cta} href={PathBuilder.home(locale)} />
+        </div>
+      </div>
+
+      <div class="shell" data-reveal data-reveal-delay="260">
+        <div class="core flex flex-col gap-5 p-7">
+          <span class="text-[0.6875rem] uppercase tracking-[0.2em] text-mute-2">
+            {site.footer.contactHeading}
+          </span>
+          <ContactChannels />
+        </div>
+      </div>
+    </div>
+  </section>
+</Shell>

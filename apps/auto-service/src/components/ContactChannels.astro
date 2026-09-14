@@ -1,0 +1,38 @@
+---
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+import { contactChannels } from '@/utils/contactLinks';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+
+const channels = contactChannels(site);
+---
+
+<ul class={`grid gap-2 sm:grid-cols-2 ${className}`} data-contact-cta>
+  {
+    channels.map((channel) => (
+      <li>
+        <a
+          href={channel.href}
+          data-contact-channel={channel.track}
+          rel="noopener"
+          class="group flex min-h-11 items-center gap-3 rounded-control border border-line bg-card px-4 py-3 transition-colors duration-150 hover:border-ink"
+        >
+          <Icon
+            name={channel.icon}
+            size={18}
+            class="shrink-0 text-muted transition-colors duration-150 group-hover:text-signal group-focus-visible:text-signal"
+          />
+          <span class="spec text-sm text-ink">{channel.label}</span>
+        </a>
+      </li>
+    ))
+  }
+</ul>

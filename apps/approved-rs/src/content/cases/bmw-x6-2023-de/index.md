@@ -1,6 +1,6 @@
 ---
 title: BMW X6 2023 — подбор в Германии
-car: BMW X6 xDrive40D
+car: BMW X6 xDrive40d
 year: 2023
 price:
   value: 68 000
@@ -12,49 +12,49 @@ date: 2026-03-10
 published: true
 translations:
   en:
-    title: BMW X6 2023 — Sourced in Germany
-    body: |
-      ## Bringing a BMW X6 from Germany to Serbia — another happy client.
+    title: BMW X6 2023 — Sourcing in Germany
+    body: |-
+      ## Sourcing a BMW X6 from Germany to Serbia
 
-      The client came to us having already picked out a **BMW X6** in Germany. We analyzed the market, suggested a few better alternatives with lower mileage, and helped him land on the best option.
+      A client approached us after selecting a **BMW X6** in Germany. We analyzed the market, suggested several more appealing alternatives with lower mileage, and assisted in choosing the best option.  
 
-      We had the car professionally inspected in Germany (inspection cost runs **€300–500** per car), arranged transport by car carrier to Subotica, handled customs clearance, and delivered a **fully ready car** to the owner in Serbia.
+      We conducted a professional inspection of the vehicle in Germany (inspection cost — **from €300 to €500** for one car), organized the transport via car carrier to Subotica, handled customs clearance, and delivered the **fully prepared vehicle** to the owner in Serbia.  
 
-      As a bonus, the client got a **professional paint correction** on the body, on us.
+      As a bonus, the client received a **professional body polish**.
   sr:
-    title: BMW X6 2023 — Odabir u Nemačkoj
-    body: |
-      ## Dovoženje BMW X6 iz Nemačke u Srbiju — još jedan zadovoljan klijent!
+    title: BMW X6 2023 — nabavka iz Nemačke
+    body: |-
+      ## Uvoz BMW X6 iz Nemačke u Srbiju
 
-      Klijent nam se obratio sa već izabranim **BMW X6** u Nemačkoj. Analizirali smo tržište, predložili nekoliko boljih alternativa sa manjom kilometražom i pomogli mu da izabere najbolju opciju.
+      Klijent se obratio nama, jer je već pronašao **BMW X6** u Nemačkoj. Analizirali smo tržište, predložili nekoliko zanimljivijih alternativa sa manjim pređenim kilometrima i pomogli mu da izabere najbolju opciju.
 
-      Obavili smo profesionalan pregled vozila u Nemačkoj (cena provere je **od 300 do 500 €** po automobilu), organizovali transport auto-vozom do Subotice, izvršili carinjenje i predali vlasniku **potpuno spremno vozilo**, već u Srbiji.
+      Obavili smo profesionalnu inspekciju vozila u Nemačkoj (cena provere — **od 300 do 500 €** za jedno vozilo), organizovali transport kamionom do Subotice, izvršili carinjenje i predali **kompletno spremno vozilo** vlasniku već u Srbiji.
 
-      Klijent je na poklon dobio i **profesionalno poliranje karoserije**.
+      Kao poklon, klijent je dobio **profesionalnu polirku karoserije**.
   es:
     title: BMW X6 2023 — selección en Alemania
     body: |-
-      ## Importación de un BMW X6 de Alemania a Serbia — ¡otro cliente satisfecho!  
+      ## Importación de un BMW X6 de Alemania a Serbia
 
-      El cliente se puso en contacto con nosotros ya habiendo elegido un **BMW X6** en Alemania. Analizamos el mercado y le presentamos varias alternativas más interesantes con menor kilometraje, ayudándole a seleccionar la mejor opción.  
+      Nuestro cliente se puso en contacto con nosotros ya habiendo elegido un **BMW X6** en Alemania. Analizamos el mercado, presentamos varias alternativas más interesantes con menor kilometraje y ayudamos a seleccionar la mejor opción.
 
-      Realizamos una inspección profesional del vehículo en Alemania (costo de la inspección — **de 300 a 500 €** por vehículo), organizamos el transporte en camión hacia Subotica, llevamos a cabo los trámites de aduana y entregamos al propietario el **vehículo completamente listo** aquí en Serbia.  
+      Realizamos una inspección profesional del vehículo en Alemania (costo de la inspección — **de 300 a 500 €** por cada coche), organizamos el transporte en camión hacia Subotica, llevamos a cabo el despacho aduanero y entregamos al propietario un **automóvil completamente preparado** ya en Serbia.
 
-      Como obsequio, el cliente recibió una **pulida profesional de la carrocería**.
+      Como regalo, el cliente recibió una **pulida profesional de la carrocería**.
   de:
     title: BMW X6 2023 — Beschaffung in Deutschland
     body: |-
-      ## BMW X6 aus Deutschland nach Serbien — ein weiterer zufriedener Kunde!
+      ## BMW X6 aus Deutschland nach Serbien importieren
 
-      Der Kunde trat mit uns in Kontakt, nachdem er bereits einen **BMW X6** in Deutschland ausgewählt hatte. Wir haben den Markt analysiert, einige interessantere Alternativen mit niedrigeren Laufleistungen vorgeschlagen und geholfen, die beste Option zu wählen.
+      Der Kunde wandte sich an uns, da er bereits einen **BMW X6** in Deutschland ausgewählt hatte. Wir haben den Markt analysiert, einige interessante Alternativen mit geringerer Laufleistung vorgeschlagen und geholfen, die beste Option auszuwählen.
 
-      Wir führten eine professionelle Inspektion des Fahrzeugs in Deutschland durch (Kosten für die Prüfung — **von 300 bis 500 €** pro Fahrzeug), organisierten den Transport mit einem Autofrachter nach Subotica, erledigten die Zollabwicklung und übergaben dem Kunden einen **vollständig einsatzbereiten Wagen** in Serbien.
+      Wir führten eine professionelle Inspektion des Fahrzeugs in Deutschland durch (Kosten für die Überprüfung – **von 300 bis 500 €** pro Fahrzeug), organisierten den Transport per Autotransporter nach Subotica, erledigten die Zollabfertigung und übergaben dem Besitzer das **vollständig fahrbereite Auto** bereits in Serbien.
 
-      Als Geschenk erhielt der Kunde eine **professionelle Fahrzeuglackierung**.
-translatedFrom: 0fb5f6f725424f75
+      Als Geschenk erhielt der Kunde eine **professionelle Lackpolitur**.
+translatedFrom: b39f2f8b78170000
 ---
 
-## Пригон BMW X6 из Германии в Сербию — еще один довольный клиент!
+## Пригон BMW X6 из Германии в Сербию
 
 Клиент обратился к нам, уже выбрав **BMW X6** в Германии. Мы проанализировали рынок, предложили несколько более интересных альтернатив с меньшим пробегом и помогли выбрать лучший вариант.
 

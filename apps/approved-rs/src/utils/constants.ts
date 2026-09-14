@@ -1,11 +1,17 @@
+import { APPROVED } from '@podbor/brands';
 import type { Locale } from '@/i18n/config';
 
 // Single source for the Yandex.Metrika counter — referenced by BaseLayout's
 // tag init, LeadFormModal's lead_modal_open goal, and the contact_click goal.
 export const YM_COUNTER_ID = 111800377;
 
-export const SITE_URL = import.meta.env.SITE ?? 'https://approved.rs';
-export const SITE_NAME = 'Approved.rs';
+export const BRAND = APPROVED;
+export const SITE_URL = import.meta.env.SITE ?? BRAND.url;
+export const SITE_NAME = BRAND.name;
+
+// Bump when the cookie/privacy policy changes materially — every visitor is
+// then asked again instead of carrying an answer given to the old text.
+export const COOKIE_POLICY_VERSION = '2026-09-12';
 export const SITE_BRAND = 'APPROVED';
 export const SITE_TLD = '.rs';
 export const DEFAULT_COUNTRY = 'rs';
@@ -23,51 +29,6 @@ export const SOCIAL_SAME_AS = [
   `https://t.me/${TG_MANAGER}`,
   `https://www.threads.com/@${THREADS_CHANNEL}`,
 ];
-
-// Official brand colors — kept true regardless of theme/hover state so the
-// icons stay instantly recognizable (that's the whole point of a brand
-// mark), unlike the site's own UI chrome which follows light/dark tokens.
-export const BRAND_COLORS = {
-  telegram: '#26A5E4',
-  whatsapp: '#25D366',
-  viber: '#7360F2',
-} as const;
-
-// Single source of truth for flag emoji — keyed lowercase by whatever 2-letter
-// code is in play (delivery country, locale, or phone-country ISO). `sr`
-// (Serbian locale) and `rs` (Serbia country) are different keys that happen
-// to share a flag — not an error, both are kept explicit.
-// `ch` is an inline SVG, not the 🇨🇭 emoji: Switzerland's flag is the one
-// non-rectangular national flag, and several emoji fonts (notably on
-// Windows) fall back to a generic monochrome placeholder glyph for it while
-// every rectangular flag here renders fine — an SVG renders identically on
-// every platform. Consumers must render FLAGS/getCountryFlag output with
-// `set:html`, not as plain text, to support this.
-export const FLAGS: Record<string, string> = {
-  de: '🇩🇪',
-  rs: '🇷🇸',
-  es: '🇪🇸',
-  ch: '<svg viewBox="0 0 32 32" width="1em" height="1em" style="display:inline-block;vertical-align:-0.125em" xmlns="http://www.w3.org/2000/svg"><rect width="32" height="32" fill="#D52B1E"/><rect x="13" y="6" width="6" height="20" fill="#fff"/><rect x="6" y="13" width="20" height="6" fill="#fff"/></svg>',
-  pt: '🇵🇹',
-  fr: '🇫🇷',
-  it: '🇮🇹',
-  pl: '🇵🇱',
-  ru: '🇷🇺',
-  en: '🇬🇧',
-  sr: '🇷🇸',
-  ua: '🇺🇦',
-  by: '🇧🇾',
-  kz: '🇰🇿',
-  ba: '🇧🇦',
-  hr: '🇭🇷',
-  me: '🇲🇪',
-  mk: '🇲🇰',
-  tr: '🇹🇷',
-  // Not real countries.json entries (no per-country page) — just the
-  // vehicle-import hub cards' "Europe"/"China" groupings.
-  eu: '🇪🇺',
-  cn: '🇨🇳',
-};
 
 // China isn't in countries.json (no vehicle sourcing market there, no per-country
 // name-case data needed) but vehicle-import sources cars from it — one shared name

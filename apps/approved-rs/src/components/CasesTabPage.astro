@@ -3,6 +3,9 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import CaseCard from './CaseCard.astro';
 import CaseCategoryTabs from './CaseCategoryTabs.astro';
 import PageHero from './PageHero.astro';
+import ClosingBand from './ClosingBand.astro';
+import closingImage from '@/assets/closing.jpg';
+import { getHomeContent } from '@/i18n/content/home';
 import type { CaseCardProps } from './CaseCard.astro';
 import { getPagesContent } from '@/i18n/content/pages';
 import { getI18n } from '@/i18n/getI18n';
@@ -20,6 +23,8 @@ const { active, items, counts, meta } = Astro.props;
 const locale = getLocale(Astro.currentLocale);
 const cs = getPagesContent(locale).casesShared;
 const t = getI18n(locale);
+const h = getHomeContent(locale);
+const intro = cs.tabIntros[active];
 ---
 
 <BaseLayout {...meta}>
@@ -30,8 +35,16 @@ const t = getI18n(locale);
     breadcrumbs={[{ label: t.nav.cases }]}
   />
 
-  <section class="max-w-6xl mx-auto px-6 py-16">
+  <section class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
     <CaseCategoryTabs {active} {counts} />
+
+    {
+      intro && (
+        <p class="text-base max-w-2xl mt-8 mb-10 leading-relaxed text-muted">
+          {intro}
+        </p>
+      )
+    }
 
     {
       items.length > 0 ? (
@@ -49,4 +62,21 @@ const t = getI18n(locale);
       )
     }
   </section>
+
+  <ClosingBand
+    image={closingImage}
+    imageAlt={h.ctaPhotoAlt}
+    eyebrow={cs.closingHeading}
+    line1={cs.closingLine1}
+    line2={cs.closingLine2}
+    accentWord={cs.closingLine3}
+    text={cs.closingText}
+    ctaLabel={h.ctaTelegramLabel}
+    stats={[
+      h.ctaStatClients,
+      h.ctaStatYears,
+      h.ctaStatResponse,
+      { value: String(items.length), label: t.nav.cases.toLowerCase() },
+    ]}
+  />
 </BaseLayout>

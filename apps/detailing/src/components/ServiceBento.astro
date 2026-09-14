@@ -1,0 +1,104 @@
+---
+import { localeFrom } from '@/i18n/currentLocale';
+import { getServicesContent } from '@/i18n/content/services';
+import { PathBuilder } from '@/utils/paths';
+import { SERVICE_SLUGS } from '@/utils/services';
+
+const locale = localeFrom(Astro.url.pathname);
+const services = getServicesContent(locale);
+
+const FEATURED = 'paint-protection-film';
+
+const SPANS: Record<string, string> = {
+  'paint-protection-film': 'md:col-span-7 md:row-span-2',
+  'colour-change-wrap': 'md:col-span-5',
+  'polishing-ceramic': 'md:col-span-5',
+  'steering-wheel-restoration': 'md:col-span-12',
+};
+
+const GLOWS: Record<string, string> = {
+  'paint-protection-film':
+    'bg-[radial-gradient(120%_90%_at_85%_0%,rgba(155,140,255,0.22),transparent_62%)]',
+  'colour-change-wrap':
+    'bg-[radial-gradient(120%_120%_at_0%_0%,rgba(111,211,232,0.18),transparent_60%)]',
+  'polishing-ceramic':
+    'bg-[radial-gradient(120%_120%_at_100%_100%,rgba(227,192,138,0.2),transparent_60%)]',
+  'steering-wheel-restoration':
+    'bg-[radial-gradient(90%_220%_at_50%_120%,rgba(227,192,138,0.14),transparent_60%)]',
+};
+
+const specsOf = (slug: (typeof SERVICE_SLUGS)[number]) => [
+  { label: services.specsDurationLabel, value: services[slug].duration },
+  { label: services.specsWarrantyLabel, value: services[slug].warranty },
+];
+---
+
+<div class="mt-14 grid gap-4 md:grid-cols-12">
+  {
+    SERVICE_SLUGS.map((slug, i) => {
+      const service = services[slug];
+      const isFeatured = slug === FEATURED;
+      return (
+        <a
+          href={PathBuilder.service(locale, slug)}
+          class={`shell group block ${SPANS[slug]}`}
+          data-reveal
+          data-reveal-delay={i * 90}
+        >
+          <article class="core relative flex h-full flex-col gap-6 overflow-hidden p-7 sm:p-9">
+            <div
+              class={`pointer-events-none absolute inset-0 opacity-70 transition-opacity duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:opacity-100 ${GLOWS[slug]}`}
+              aria-hidden="true"
+            />
+            <div class="relative flex flex-col gap-4">
+              <h3
+                class={
+                  isFeatured
+                    ? 'text-big max-w-md'
+                    : 'text-2xl font-display tracking-tight'
+                }
+              >
+                {service.name}
+              </h3>
+              <p class="max-w-md text-sm leading-relaxed text-mute">
+                {service.short}
+              </p>
+            </div>
+
+            {isFeatured && (
+              <div class="relative flex flex-col gap-4">
+                <h4 class="text-[0.6875rem] uppercase tracking-[0.2em] text-mute-2">
+                  {service.includesHeading}
+                </h4>
+                <ul class="flex flex-col gap-2.5">
+                  {service.includes.map((item) => (
+                    <li class="flex gap-3 text-sm leading-relaxed text-mute">
+                      <span
+                        class="mt-[0.6em] h-1 w-1 shrink-0 rounded-full bg-champagne-dim"
+                        aria-hidden="true"
+                      />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <dl class="relative mt-auto flex flex-wrap gap-x-12 gap-y-5 border-t border-line pt-6">
+              {specsOf(slug).map((spec) => (
+                <div class="flex flex-col gap-1.5">
+                  <dt class="text-[0.6875rem] uppercase tracking-[0.2em] text-mute-2">
+                    {spec.label}
+                  </dt>
+                  <dd class="font-display text-sm tracking-tight text-champagne">
+                    {spec.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+        </a>
+      );
+    })
+  }
+</div>

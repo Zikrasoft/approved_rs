@@ -1,0 +1,29 @@
+---
+import PageSection from './PageSection.astro';
+import type { IncludedItem } from '@/i18n/content/services';
+
+interface Props {
+  heading: string;
+  lead?: string;
+  items: IncludedItem[];
+}
+
+const { heading, lead, items } = Astro.props;
+---
+
+<PageSection title={heading} {lead}>
+  <div
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px border border-default bg-border"
+  >
+    {
+      items.map((item) => (
+        <article class="bg-surface p-6 md:p-7">
+          <h3 class="font-display text-lg font-bold mb-2 text-primary">
+            {item.title}
+          </h3>
+          <p class="text-[0.95rem] leading-relaxed text-muted">{item.text}</p>
+        </article>
+      ))
+    }
+  </div>
+</PageSection>

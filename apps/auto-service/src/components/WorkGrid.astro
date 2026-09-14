@@ -1,0 +1,22 @@
+---
+import WorkCard from './WorkCard.astro';
+import type { Work } from '@/utils/works';
+
+interface Props {
+  works: Work[];
+  eager?: number;
+  class?: string;
+}
+
+const { works, eager = 0, class: className = 'mt-8' } = Astro.props;
+---
+
+<ul class={`${className} grid gap-4 md:grid-cols-2 lg:grid-cols-3`}>
+  {
+    works.map((work, i) => (
+      <li>
+        <WorkCard work={work} eager={i < eager} />
+      </li>
+    ))
+  }
+</ul>

@@ -5,18 +5,16 @@ import TelegramIcon from './icons/TelegramIcon.astro';
 import WhatsAppIcon from './icons/WhatsAppIcon.astro';
 import ViberIcon from './icons/ViberIcon.astro';
 import { Phone, ChevronDown } from '@lucide/astro';
-import { FLAGS, BRAND_COLORS } from '@/utils/constants';
+import { HONEYPOT_FIELD } from '@podbor/lead-crm';
+import { phoneCountryOptions } from '@podbor/lead-crm/phone';
 import { getLeadFormContent } from '@/i18n/content/leadForm';
-import { getLocale } from '@/i18n/config';
+import { getLocale, DISPLAY_LOCALE } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   service?: string;
   country?: string;
   city?: string;
-  // Overrides the default "Марка, модель, бюджет" (written for vehicle-
-  // sourcing) — auto-service/detailing pages pass their own copy since the
-  // visitor already owns the car and isn't shopping within a budget.
   commentLabel?: string;
   commentPlaceholder?: string;
 }
@@ -32,29 +30,8 @@ const sourceUrl = Astro.url.href;
 const locale = getLocale(Astro.currentLocale);
 const lf = getLeadFormContent(locale);
 
-// ponytail: curated list covering the site's own markets + common client
-// origins (Balkans/CIS). Not exhaustive — extend PHONE_COUNTRIES if leads
-// keep arriving from countries missing here.
-// Static default is always Serbia — the page's `country` prop is the deal's
-// country (e.g. "car coming from DE"), not the visitor's location. The client
-// script refines this to the visitor's real region via timezone, falling
-// back to this same default (RS) when that can't be determined.
-const PHONE_COUNTRIES = [
-  { iso: 'RS', dial: '381', label: 'Сербия' },
-  { iso: 'DE', dial: '49', label: 'Германия' },
-  { iso: 'ES', dial: '34', label: 'Испания' },
-  { iso: 'PT', dial: '351', label: 'Португалия' },
-  { iso: 'RU', dial: '7', label: 'Россия' },
-  { iso: 'UA', dial: '380', label: 'Украина' },
-  { iso: 'BY', dial: '375', label: 'Беларусь' },
-  { iso: 'KZ', dial: '7', label: 'Казахстан' },
-  { iso: 'BA', dial: '387', label: 'Босния и Герцеговина' },
-  { iso: 'HR', dial: '385', label: 'Хорватия' },
-  { iso: 'ME', dial: '382', label: 'Черногория' },
-  { iso: 'MK', dial: '389', label: 'Северная Македония' },
-  { iso: 'TR', dial: '90', label: 'Турция' },
-];
 const defaultPhoneCountry = 'RS';
+const countryOptions = phoneCountryOptions(DISPLAY_LOCALE[locale]);
 
 const fieldClass =
   'form-field py-3 rounded-sm text-sm outline-none bg-page border border-border-strong text-primary font-sans';
@@ -80,6 +57,18 @@ const fieldClass =
     data-err-phone-required={lf.errorPhoneRequired}
     data-err-phone-invalid={lf.errorPhoneInvalid}
   >
+    <input type="hidden" name="locale" value={locale} />
+    <div class="hidden" aria-hidden="true">
+      <label>
+        {HONEYPOT_FIELD}
+        <input
+          type="text"
+          name={HONEYPOT_FIELD}
+          tabindex="-1"
+          autocomplete="off"
+        />
+      </label>
+    </div>
     <input type="hidden" name="service" value={service} />
     <input type="hidden" name="country" value={country} />
     <input type="hidden" name="city" value={city} />
@@ -97,14 +86,13 @@ const fieldClass =
       <label
         class="block text-xs font-medium mb-2 tracking-[0.14em] uppercase text-muted"
       >
-        {lf.contactLabel}<span class="text-accent ml-0.5">*</span>
+        {lf.contactLabel}<span class="text-muted ml-0.5">*</span>
       </label>
 
       <div
         class="contact-tabs relative flex gap-1 p-1 mb-2 rounded-sm bg-page border border-border-strong"
         role="tablist"
       >
-        <span class="pill-tab-track" aria-hidden="true"></span>
         <button
           type="button"
           data-tab="telegram"
@@ -116,7 +104,8 @@ const fieldClass =
           aria-selected="true"
           aria-controls="contact-panel-telegram"
         >
-          <TelegramIcon size={16} color={BRAND_COLORS.telegram} />
+          <TelegramIcon size={16} />
+          <span class="pill-tab-label">{lf.telegramTab}</span>
         </button>
         <button
           type="button"
@@ -129,7 +118,8 @@ const fieldClass =
           aria-selected="false"
           aria-controls="contact-panel-phone"
         >
-          <WhatsAppIcon size={16} color={BRAND_COLORS.whatsapp} />
+          <WhatsAppIcon size={16} />
+          <span class="pill-tab-label">{lf.whatsappTab}</span>
         </button>
         <button
           type="button"
@@ -142,7 +132,8 @@ const fieldClass =
           aria-selected="false"
           aria-controls="contact-panel-phone"
         >
-          <ViberIcon size={16} color={BRAND_COLORS.viber} />
+          <ViberIcon size={16} />
+          <span class="pill-tab-label">{lf.viberTab}</span>
         </button>
         <button
           type="button"
@@ -150,12 +141,13 @@ const fieldClass =
           data-panel="phone"
           title={lf.phoneTab}
           aria-label={lf.phoneTab}
-          class="pill-tab relative z-10 flex items-center justify-center flex-1 py-2 rounded-sm cursor-pointer text-muted"
+          class="pill-tab relative z-10 flex items-center justify-center flex-1 py-2 rounded-sm cursor-pointer"
           role="tab"
           aria-selected="false"
           aria-controls="contact-panel-phone"
         >
           <Phone size={15} />
+          <span class="pill-tab-label">{lf.phoneTab}</span>
         </button>
       </div>
 
@@ -181,18 +173,20 @@ const fieldClass =
         role="tabpanel"
       >
         <div class="flex gap-2">
-          <div class="relative shrink-0 w-[6.5rem]">
+          <div class="relative min-w-0 max-w-[min(14rem,45%)] shrink-0">
             <select
               id="contact-phone-country"
-              class={`${fieldClass} w-full pl-2 pr-6 appearance-none cursor-pointer`}
+              class={`${fieldClass} max-w-full pl-2 pr-6 appearance-none cursor-pointer overflow-hidden text-ellipsis`}
             >
               {
-                PHONE_COUNTRIES.map((c) => (
+                countryOptions.map((c) => (
                   <option
                     value={c.iso}
+                    data-dial={c.dial}
+                    data-dial-primary={c.primary ? '' : undefined}
                     selected={c.iso === defaultPhoneCountry}
                   >
-                    {FLAGS[c.iso.toLowerCase()]} +{c.dial}
+                    {c.flag} +{c.dial} {c.name}
                   </option>
                 ))
               }
@@ -207,7 +201,7 @@ const fieldClass =
             id="contact-phone-number"
             inputmode="tel"
             placeholder="060 123 4567"
-            class={`${fieldClass} flex-1 min-w-0 px-4`}
+            class={`${fieldClass} min-w-0 flex-1 px-4`}
           />
         </div>
       </div>
@@ -223,41 +217,46 @@ const fieldClass =
       type="textarea"
     />
 
-    <label
-      class="flex items-start gap-3 mb-5 cursor-pointer text-muted consent-label"
-    >
-      <input
-        type="checkbox"
-        name="consent"
-        class="mt-0.5 shrink-0 w-4 h-4 cursor-pointer accent-accent"
-      />
-      <span class="text-xs leading-relaxed">
-        {lf.consentBefore}<a
-          href={PathBuilder.privacy(locale)}
-          target="_blank"
-          class="underline text-accent">{lf.consentLinkText}</a
-        >
-      </span>
-    </label>
-    <p class="field-error consent-error mb-4" style="display:none">
-      {lf.consentError}
-    </p>
+    <div class="lead-submit">
+      <label
+        class="flex items-start gap-3 mb-3 cursor-pointer text-muted consent-label"
+      >
+        <input
+          type="checkbox"
+          name="consent"
+          class="mt-0.5 shrink-0 w-4 h-4 cursor-pointer accent-accent"
+        />
+        <span class="text-xs leading-relaxed">
+          {lf.consentBefore}<a
+            href={PathBuilder.privacy(locale)}
+            target="_blank"
+            class="underline text-muted">{lf.consentLinkText}</a
+          >
+        </span>
+      </label>
+      <p class="field-error consent-error mb-3" style="display:none">
+        {lf.consentError}
+      </p>
 
-    <Button
-      type="submit"
-      class="lead-btn w-full py-3.5 justify-center tracking-[0.06em]"
-    >
-      {lf.submitLabel}
-    </Button>
+      <Button
+        type="submit"
+        class="lead-btn w-full py-3.5 justify-center tracking-[0.06em]"
+      >
+        {lf.submitLabel}
+      </Button>
+    </div>
   </form>
 </div>
 
 <script>
+  import type { CountryCode } from 'libphonenumber-js/min';
+  import { composeE164 } from '@podbor/lead-crm/compose-e164';
+  import { bindPhoneCountry } from '@podbor/lead-crm/phone-input';
   import {
-    AsYouType,
-    parsePhoneNumberFromString,
-    type CountryCode,
-  } from 'libphonenumber-js/min';
+    deferSubmitUntilKit,
+    loadPhoneKit,
+    phoneKit,
+  } from '@podbor/lead-crm/phone-kit';
   import {
     isTrackedContactChannel,
     getPreferredChannel,
@@ -286,7 +285,6 @@ const fieldClass =
     const visitorIdInput = form.querySelector<HTMLInputElement>(
       'input[type="hidden"][name="visitor_id"]',
     );
-    if (visitorIdInput) visitorIdInput.value = getOrCreateVisitorId();
 
     const errName = form.dataset.errName!;
     const errTgRequired = form.dataset.errTgRequired!;
@@ -320,7 +318,6 @@ const fieldClass =
     const contactField = form.querySelector('.contact-field')!;
     const tabs = contactField.querySelectorAll<HTMLButtonElement>('.pill-tab');
     const panels = contactField.querySelectorAll<HTMLElement>('.contact-panel');
-    const pill = contactField.querySelector<HTMLElement>('.pill-tab-track')!;
     const hiddenContact = form.querySelector<HTMLInputElement>(
       'input[type="hidden"][name="contact"]',
     )!;
@@ -345,10 +342,6 @@ const fieldClass =
     // otherwise the two same-named fields would collide on submit.
     tgInput.removeAttribute('name');
 
-    function isSupportedCountry(iso: string) {
-      return Array.from(phoneCountry.options).some((o) => o.value === iso);
-    }
-
     // WhatsApp/Viber/phone-call all collect the same shape of data (a phone
     // number) — they share the "phone" panel and its validation, and only
     // differ in which channel gets recorded for staff to reach back out on.
@@ -359,65 +352,29 @@ const fieldClass =
       phone: 'phone',
     };
     let activeTab: TrackedContactChannel = 'telegram';
-    let activeTabButton: HTMLButtonElement = tabs[0];
 
-    // translate on both axes: on narrow screens the 4 tabs wrap to 2 rows,
-    // so the sliding pill needs offsetTop too, not just offsetLeft.
-    function movePill(tab: HTMLElement) {
-      pill.style.width = tab.offsetWidth + 'px';
-      pill.style.height = tab.offsetHeight + 'px';
-      pill.style.transform = `translate(${tab.offsetLeft}px, ${tab.offsetTop}px)`;
-    }
-    movePill(tabs[0]);
-
-    // if this form lives inside a <dialog> (e.g. the header's lead modal),
-    // it's unrendered (zero size) at init time, so the pill above measured
-    // 0×0 — re-measure once the dialog actually becomes visible.
-    const dialogAncestor = form.closest('dialog');
-    if (dialogAncestor) {
-      dialogAncestor.addEventListener('toggle', (e) => {
-        if ((e as ToggleEvent).newState === 'open') movePill(activeTabButton);
-      });
-    }
-
-    // Values from detectVisitorCountry() are a subset of PHONE_COUNTRIES'
-    // `iso` codes above, just lowercased (shared with contactChannel.ts's
-    // country-keyed maps) — this <select>'s <option value> is uppercase.
     const detectedCountry = detectVisitorCountry();
     if (detectedCountry) phoneCountry.value = detectedCountry.toUpperCase();
 
-    function parsedPhone() {
-      return parsePhoneNumberFromString(
-        phoneNumber.value,
-        phoneCountry.value as CountryCode,
-      );
+    bindPhoneCountry(phoneCountry, phoneNumber);
+
+    function dialCode() {
+      return phoneCountry.selectedOptions[0]?.dataset.dial ?? '';
     }
 
     // ponytail: re-mask from raw digits on every keystroke instead of a
     // caret-aware stateful mask — simpler, good enough for a lead form.
     function formatPhone() {
+      const kit = phoneKit();
+      if (!kit) return;
       const value = phoneNumber.value;
       if (value.trim().startsWith('+')) {
-        // pasted/typed as international — detect the country, then show the
-        // properly grouped national format so the dial code isn't shown twice.
-        // If the detected country isn't one of our <option>s, assigning it to
-        // the <select> would clear the selection (value becomes ""), which
-        // then breaks parsing — so keep the full "+..." text instead, which
-        // parses fine on its own regardless of the <select>'s value.
         const digits = '+' + value.replace(/[^\d]/g, '');
-        const ayt = new AsYouType();
-        const formatted = ayt.input(digits);
-        const num = ayt.getNumber();
-        if (num?.country && isSupportedCountry(num.country)) {
-          phoneCountry.value = num.country;
-          phoneNumber.value = num.formatNational();
-        } else {
-          phoneNumber.value = formatted;
-        }
+        phoneNumber.value = new kit.AsYouType().input(digits);
         return;
       }
       const raw = value.replace(/[^\d]/g, '');
-      phoneNumber.value = new AsYouType(
+      phoneNumber.value = new kit.AsYouType(
         phoneCountry.value as CountryCode,
       ).input(raw);
     }
@@ -426,9 +383,14 @@ const fieldClass =
       hiddenChannel.value = activeTab;
       if (activeTab === 'telegram') {
         hiddenContact.value = tgInput.value.trim();
-      } else {
-        const parsed = parsedPhone();
+      } else if (phoneKit()) {
+        const parsed = phoneKit()!.parse(
+          phoneNumber.value,
+          phoneCountry.value as CountryCode,
+        );
         hiddenContact.value = parsed ? parsed.number : phoneNumber.value.trim();
+      } else {
+        hiddenContact.value = composeE164(phoneNumber.value.trim(), dialCode());
       }
     }
 
@@ -441,14 +403,7 @@ const fieldClass =
       activeTab = isTrackedContactChannel(tab.dataset.tab)
         ? tab.dataset.tab
         : 'telegram';
-      activeTabButton = tab;
-      movePill(tab);
-      tabs.forEach((t) => {
-        const isActive = t === tab;
-        t.classList.toggle('text-on-accent', isActive);
-        t.classList.toggle('text-muted', !isActive);
-        t.setAttribute('aria-selected', String(isActive));
-      });
+      tabs.forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
       const panel = PANEL_FOR[activeTab];
       panels.forEach((p) =>
         p.classList.toggle('hidden', p.dataset.panel !== panel),
@@ -494,17 +449,40 @@ const fieldClass =
       clearError(phoneNumber);
       syncContact();
     });
-    phoneCountry.addEventListener('change', () => {
+    phoneCountry.addEventListener('change', (event) => {
       // if the field holds international "+..." text, the user picking a
       // different country is overriding the auto-detect — drop the stale
       // text instead of silently re-showing a number for the old country.
       if (phoneNumber.value.trim().startsWith('+')) phoneNumber.value = '';
       formatPhone();
       syncContact();
-      phoneNumber.focus();
+      if (event.isTrusted) phoneNumber.focus();
     });
 
+    form.addEventListener(
+      'focusin',
+      () => {
+        loadPhoneKit().then(() => {
+          // Re-masking would rewrite the field and drop the caret to the end,
+          // and on the slow connection this lazy load exists for the visitor
+          // is already typing by now.
+          if (phoneNumber !== document.activeElement) formatPhone();
+          syncContact();
+        });
+      },
+      { once: true },
+    );
+
     form.addEventListener('submit', (e) => {
+      if (deferSubmitUntilKit(form)) {
+        e.preventDefault();
+        return;
+      }
+      const kit = phoneKit();
+      // Read at send time, not at init: a visitor who refuses after the page
+      // renders would otherwise still post the id baked into the field.
+      if (visitorIdInput) visitorIdInput.value = getOrCreateVisitorId();
+
       let ok = true;
       const name = form.querySelector<HTMLInputElement>('[name="name"]')!;
 
@@ -513,29 +491,21 @@ const fieldClass =
         ok = false;
       } else clearError(name);
 
-      if (activeTab === 'telegram') {
-        const v = tgInput.value.trim();
-        if (!v) {
-          setError(tgInput, errTgRequired);
-          ok = false;
-        } else if (!/^@?\w{3,}$/.test(v)) {
-          setError(tgInput, errTgFormat);
-          ok = false;
-        } else {
-          if (!v.startsWith('@')) tgInput.value = '@' + v;
-          clearError(tgInput);
-        }
-      } else {
-        const parsed = parsedPhone();
-        if (!phoneNumber.value.trim()) {
-          setError(phoneNumber, errPhoneRequired);
-          ok = false;
-        } else if (!parsed || !parsed.isValid()) {
-          setError(phoneNumber, errPhoneInvalid);
-          ok = false;
-        } else clearError(phoneNumber);
+      const isTelegram = activeTab === 'telegram';
+      const contactInput = isTelegram ? tgInput : phoneNumber;
+      const typed = contactInput.value.trim();
+      if (isTelegram && typed && !typed.startsWith('@')) {
+        tgInput.value = '@' + typed;
       }
       syncContact();
+
+      if (!typed) {
+        setError(contactInput, isTelegram ? errTgRequired : errPhoneRequired);
+        ok = false;
+      } else if (kit && !kit.isValidContact(hiddenContact.value, activeTab)) {
+        setError(contactInput, isTelegram ? errTgFormat : errPhoneInvalid);
+        ok = false;
+      } else clearError(contactInput);
 
       if (consentErr) consentErr.style.display = consent.checked ? 'none' : '';
       if (!consent.checked) ok = false;
@@ -576,13 +546,52 @@ const fieldClass =
 </script>
 
 <style>
-  /* Shared .pill-tab-track (global.css) assumes a single row via a
-     top/bottom stretch — this form has 4 tabs that wrap to 2 rows on
-     narrow screens, so JS drives height/position here instead (see
-     movePill in the script above). Scoped so CaseCategoryTabs' own
-     single-row pill (same shared class) is unaffected. */
-  .contact-tabs :global(.pill-tab-track) {
-    top: 0;
-    bottom: auto;
+  /* Tabs size to their own content, so growing the active tab's label is what
+     animates every width in the row — no measuring, no JS. */
+  .contact-tabs :global(.pill-tab) {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--color-muted);
+    transition:
+      color 0.25s,
+      background-color 0.25s;
+  }
+
+  .contact-tabs :global(.pill-tab[aria-selected='true']) {
+    color: var(--color-text);
+    background-color: var(--color-surface-2);
+    /* inset, not a border: a real border would change the row's height */
+    box-shadow: inset 0 -2px 0 var(--color-accent);
+  }
+
+  .contact-tabs :global(.pill-tab:hover:not([aria-selected='true'])) {
+    color: var(--color-text-2);
+  }
+
+  .pill-tab-label {
+    max-width: 0;
+    margin-left: 0;
+    overflow: hidden;
+    opacity: 0;
+    white-space: nowrap;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    transition:
+      max-width 0.32s var(--ease-spring),
+      margin-left 0.32s var(--ease-spring),
+      opacity 0.2s ease-out;
+  }
+
+  :global(.pill-tab[aria-selected='true']) .pill-tab-label {
+    max-width: 6rem;
+    margin-left: 0.5rem;
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .contact-tabs :global(.pill-tab),
+    .pill-tab-label {
+      transition: none;
+    }
   }
 </style>

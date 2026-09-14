@@ -1,0 +1,80 @@
+{
+  "framework": "astro",
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "dist",
+  "installCommand": "pnpm install",
+  "env": {
+    "SITE": "https://carlab.rs"
+  },
+  "git": {
+    "deploymentEnabled": false
+  },
+  "redirects": [
+    {
+      "source": "/services/:path*",
+      "destination": "/sr/services/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/works/:path*",
+      "destination": "/sr/works/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/shop/:path*",
+      "destination": "/sr/shop/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/cart",
+      "destination": "/sr/cart/",
+      "permanent": true
+    },
+    {
+      "source": "/cart/",
+      "destination": "/sr/cart/",
+      "permanent": true
+    },
+    {
+      "source": "/contact",
+      "destination": "/sr/contact/",
+      "permanent": true
+    },
+    {
+      "source": "/contact/",
+      "destination": "/sr/contact/",
+      "permanent": true
+    },
+    {
+      "source": "/thanks",
+      "destination": "/sr/thanks/",
+      "permanent": true
+    },
+    {
+      "source": "/thanks/",
+      "destination": "/sr/thanks/",
+      "permanent": true
+    },
+    {
+      "source": "/privacy",
+      "destination": "/sr/privacy/",
+      "permanent": true
+    },
+    {
+      "source": "/privacy/",
+      "destination": "/sr/privacy/",
+      "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "frame-ancestors 'self'"
+        }
+      ]
+    }
+  ]
+}

@@ -1,7 +1,13 @@
 import { describe, it, expect } from 'vitest';
+import { translationIsCurrent } from '@podbor/i18n';
+import servicesYaml from '@/content/i18n/services.yaml?raw';
 import { getServicesContent } from './services';
+import { servicesContentSchema } from './servicesContentSchema';
 import { SUPPORTED_LOCALES } from '@/i18n/config';
 import { SLUG } from '@/utils/labels';
+
+// See home.test.ts — the ru source moves ahead of CI's translate run.
+const translated = translationIsCurrent(servicesYaml, servicesContentSchema);
 
 describe('getServicesContent', () => {
   it('every locale produces all top-level sections', () => {
@@ -10,9 +16,7 @@ describe('getServicesContent', () => {
       expect(s['vehicle-sourcing'].stepsFor('X').length).toBe(5);
       expect(s['vehicle-sourcing'].deliveryDestinations.length).toBe(9);
       expect(s['vehicle-inspection'].steps.length).toBe(5);
-      expect(s.autoServiceBelgrade.whatWeDo.length).toBe(5);
-      expect(s.detailingBelgrade.whatWeDo.length).toBe(1);
-      expect(Object.keys(s.caseChrome.serviceBadges).length).toBe(6);
+      expect(Object.keys(s.caseChrome.serviceBadges).length).toBe(4);
       expect(s['vehicle-import'].de.steps.length).toBe(5);
       expect(s['vehicle-import'].eu.steps.length).toBe(5);
       expect(s['vehicle-import'].china.steps.length).toBe(5);
@@ -30,22 +34,6 @@ describe('getServicesContent', () => {
     expect(badges[SLUG.BUYBACK]).toBe('Выкуп');
     expect(badges[SLUG.INSPECTION]).toBe('Проверка');
     expect(badges[SLUG.IMPORT]).toBe('Привоз');
-    expect(badges[SLUG.AUTO_SERVICE]).toBe('Автосервис');
-    expect(badges[SLUG.DETAILING]).toBe('Детейлинг');
-  });
-
-  it('autoServiceBelgrade/detailingBelgrade.whatWeDo reads each keyed YAML entry onto the right service key', () => {
-    const s = getServicesContent('ru');
-    const byKey = Object.fromEntries(
-      s.autoServiceBelgrade.whatWeDo.map((item) => [item.key, item.label]),
-    );
-    expect(byKey.diagnostics).toBe('Компьютерная диагностика');
-    expect(byKey.maintenance).toBe('Техническое обслуживание');
-    expect(byKey.suspension).toBe('Подвеска и тормоза');
-    expect(byKey.engine).toBe('Двигатель и трансмиссия');
-    expect(byKey.prepurchase).toBe('Проверка перед покупкой');
-    expect(s.detailingBelgrade.whatWeDo[0].key).toBe('wrap');
-    expect(s.detailingBelgrade.whatWeDo[0].label).toBe('Оклейка плёнкой');
   });
 
   it('vehicle-import spokes each have real, distinct destination/source copy (not left blank or copy-pasted)', () => {
@@ -69,7 +57,7 @@ describe('getServicesContent', () => {
     ).toContain('__CITY__');
   });
 
-  it('en, sr, es and de differ from ru', () => {
+  it.skipIf(!translated)('en, sr, es and de differ from ru', () => {
     expect(getServicesContent('en')['vehicle-sourcing'].title).not.toBe(
       getServicesContent('ru')['vehicle-sourcing'].title,
     );

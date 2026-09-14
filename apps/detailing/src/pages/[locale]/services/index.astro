@@ -1,0 +1,80 @@
+---
+import { getCollection } from 'astro:content';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import ServiceBento from '@/components/ServiceBento.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import ProcessTimeline from '@/components/ProcessTimeline.astro';
+import WorkGrid from '@/components/WorkGrid.astro';
+import EmptyState from '@/components/EmptyState.astro';
+import Cta from '@/components/Cta.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import { publishedWorks } from '@/utils/works';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getServicesContent } from '@/i18n/content/services';
+import { getHomeContent } from '@/i18n/content/home';
+import { getSiteContent } from '@/i18n/content/site';
+import { PathBuilder, localePaths } from '@/utils/paths';
+
+export function getStaticPaths() {
+  return localePaths();
+}
+
+const locale = localeFrom(Astro.url.pathname);
+const services = getServicesContent(locale);
+const home = getHomeContent(locale);
+const site = getSiteContent(locale);
+const featured = publishedWorks(await getCollection('works')).slice(0, 3);
+---
+
+<Shell
+  title={services.indexMetaTitle}
+  description={services.indexMetaDescription}
+>
+  <PageHero
+    eyebrow={services.indexEyebrow}
+    heading={services.indexHeading}
+    lead={services.indexLead}
+    crumbs={[{ href: PathBuilder.services(locale), label: site.nav.services }]}
+  />
+
+  <section class="wrap mt-6">
+    <ServiceBento />
+  </section>
+
+  <section class="wrap mt-32 sm:mt-40">
+    <SectionHead
+      eyebrow={home.process.eyebrow}
+      heading={home.process.heading}
+      body={home.process.body}
+    />
+    <ProcessTimeline steps={home.process.steps} />
+  </section>
+
+  <section class="wrap mt-32 sm:mt-40">
+    <div class="flex flex-wrap items-end justify-between gap-8">
+      <SectionHead
+        eyebrow={home.worksHead.eyebrow}
+        heading={home.worksHead.heading}
+        body={home.worksHead.body}
+      />
+      {
+        featured.length > 0 && (
+          <Cta
+            label={site.common.allWorks}
+            href={PathBuilder.works(locale)}
+            variant="ghost"
+            class="mb-1"
+          />
+        )
+      }
+    </div>
+    {featured.length > 0 ? <WorkGrid works={featured} /> : <EmptyState />}
+  </section>
+
+  <FinalCta
+    eyebrow={home.finalCta.eyebrow}
+    heading={home.finalCta.heading}
+    body={home.finalCta.body}
+  />
+</Shell>

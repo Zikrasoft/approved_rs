@@ -1,4 +1,5 @@
 ---
+import { jsonLdText } from '@podbor/site-kit';
 import { ChevronDown } from '@lucide/astro';
 import SectionHeading from './SectionHeading.astro';
 import { getI18n } from '@/i18n/getI18n';
@@ -23,10 +24,10 @@ const schema = {
 };
 ---
 
-<script type="application/ld+json" set:html={JSON.stringify(schema)} />
+<script type="application/ld+json" set:html={jsonLdText(schema)} />
 
 <section class="border-t border-default">
-  <div class="max-w-6xl mx-auto px-6 py-16">
+  <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
     <SectionHeading title={heading} size="lg" class="mb-8" />
     <div class="space-y-3 max-w-3xl">
       {

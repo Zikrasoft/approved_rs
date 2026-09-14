@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { DEFAULT_LOCALE } from '@/i18n/config';
+import { PRIMARY_LOCALE } from '@/i18n/config';
 import { generateLlmsTxt } from '@/utils/llmsTxt';
 
 // Crawlers look for the well-known /llms.txt at the root. Serving the
@@ -8,7 +8,7 @@ import { generateLlmsTxt } from '@/utils/llmsTxt';
 // is the one well-known URI where that risk isn't worth taking. The
 // per-locale copies still exist at their own paths for locale-aware agents.
 export const GET: APIRoute = async () => {
-  const body = await generateLlmsTxt(DEFAULT_LOCALE);
+  const body = await generateLlmsTxt(PRIMARY_LOCALE);
   return new Response(body, {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
   });

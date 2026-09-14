@@ -1,0 +1,80 @@
+---
+import { BRANDS } from '@podbor/brands';
+import { brandHome } from '@/utils/brandLinks';
+import { getLocale } from '@/i18n/config';
+import { getPagesContent } from '@/i18n/content/pages';
+
+interface Props {
+  variant?: 'section' | 'footer';
+}
+
+const { variant = 'section' } = Astro.props;
+const locale = getLocale(Astro.currentLocale);
+const p = getPagesContent(locale).partners;
+
+const partners = [
+  { brand: BRANDS.carlab, description: p.carlabDescription },
+  { brand: BRANDS.details, description: p.detailsDescription },
+];
+---
+
+{
+  variant === 'footer' ? (
+    <div>
+      <p class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted">
+        {p.heading}
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5">
+        {partners.map(({ brand, description }) => (
+          <a
+            href={brandHome(brand.key, locale)}
+            target="_blank"
+            rel="noopener"
+            class="group block max-w-xs"
+          >
+            <span class="inline-flex items-center gap-1.5 text-sm font-semibold mb-1 text-accent">
+              {brand.name}
+              <span class="transition-transform group-hover:translate-x-0.5">
+                →
+              </span>
+            </span>
+            <span class="block text-xs leading-relaxed text-muted">
+              {description}
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  ) : (
+    <section class="py-10 border-t border-default">
+      <span class="eyebrow">{p.eyebrow}</span>
+      <h2 class="font-display text-3xl font-bold mb-3">{p.heading}</h2>
+      <p class="text-sm leading-relaxed mb-7 max-w-xl text-secondary">
+        {p.intro}
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {partners.map(({ brand, description }) => (
+          <a
+            href={brandHome(brand.key, locale)}
+            target="_blank"
+            rel="noopener"
+            class="group flex flex-col p-5 border rounded-sm no-underline bg-surface border-default transition-colors hover:border-accent-mid hover:bg-accent-subtle"
+          >
+            <span class="font-display text-xl font-bold mb-2 text-primary">
+              {brand.name}
+            </span>
+            <span class="text-sm leading-relaxed mb-5 flex-1 text-secondary">
+              {description}
+            </span>
+            <span class="inline-flex items-center gap-1.5 text-sm font-semibold text-accent">
+              {p.linkLabel}
+              <span class="transition-transform group-hover:translate-x-0.5">
+                →
+              </span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )
+}

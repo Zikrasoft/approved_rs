@@ -14,21 +14,17 @@ export const dictionaryContentSchema = z
       .object({
         'vehicle-sourcing': z.string(),
         'vehicle-import': z.string(),
-        'auto-service-belgrade': z.string(),
-        'detailing-belgrade': z.string(),
         'vehicle-buyback': z.string(),
         'vehicle-inspection': z.string(),
         cases: z.string(),
         contacts: z.string(),
-        moreServices: z.string(),
       })
       .strict(),
     header: z
       .object({
         menuLabel: z.string(),
+        menuCloseLabel: z.string(),
         languageLabel: z.string(),
-        themeToggleLabel: z.string(),
-        themeToggleMobileLabel: z.string(),
         ctaShort: z.string(),
         ctaLong: z.string(),
       })
@@ -42,6 +38,7 @@ export const dictionaryContentSchema = z
         contactManagerLabel: z.string(),
         hoursLine: z.string(),
         copyrightSuffix: z.string(),
+        cookieSettingsLabel: z.string(),
         channelLinkLabel: z.string(),
       })
       .strict(),

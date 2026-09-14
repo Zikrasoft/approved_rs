@@ -1,0 +1,23 @@
+---
+interface Props {
+  items: string[];
+}
+const { items } = Astro.props;
+const doubled = [...items, ...items];
+---
+
+<div
+  class="relative flex overflow-hidden border-y border-line py-5"
+  aria-hidden="true"
+>
+  <div class="marquee-track flex w-max shrink-0 items-center gap-10 pr-10">
+    {
+      doubled.map((item) => (
+        <span class="flex items-center gap-10 whitespace-nowrap font-display text-sm uppercase tracking-[0.28em] text-mute-2">
+          {item}
+          <span class="h-1 w-1 rounded-full bg-champagne-dim" />
+        </span>
+      ))
+    }
+  </div>
+</div>

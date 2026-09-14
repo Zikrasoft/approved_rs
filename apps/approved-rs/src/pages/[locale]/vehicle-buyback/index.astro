@@ -1,0 +1,93 @@
+---
+import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
+import PageSection from '@/components/PageSection.astro';
+import StepsList from '@/components/StepsList.astro';
+import IncludedGrid from '@/components/IncludedGrid.astro';
+import Faq from '@/components/Faq.astro';
+import ChipLinks from '@/components/ChipLinks.astro';
+import { getI18n } from '@/i18n/getI18n';
+import heroPhoto from '@/assets/service-buyback.jpg';
+import { getFaq } from '@/i18n/content/faq';
+import { getServicesContent } from '@/i18n/content/services';
+import { withLocales, PathBuilder } from '@/utils/paths';
+import { SLUG } from '@/utils/labels';
+import { getActiveCountries } from '@/utils/geo';
+import { generateServiceSchema, placeholderOgImage } from '@/utils/seo';
+import { getCollection } from 'astro:content';
+import { SITE_URL, SITE_NAME } from '@/utils/constants';
+import type { Locale } from '@/i18n/config';
+
+export const getStaticPaths = () => withLocales([{ params: {} }]);
+
+const { locale } = Astro.params as { locale: Locale };
+const sc = getServicesContent(locale)['vehicle-buyback'];
+const pc = sc.hub;
+const countries = getActiveCountries();
+const t = getI18n(locale);
+const meta = {
+  title: `${pc.metaTitle} | ${SITE_NAME}`,
+  description: pc.metaDescription,
+  canonical: `${SITE_URL}${PathBuilder.sectionRoot(locale, SLUG.BUYBACK)}`,
+  ogImage: placeholderOgImage(SITE_URL, locale),
+};
+const schema = generateServiceSchema(
+  pc.title,
+  countries.map((c) => c[locale].name),
+  meta.canonical,
+);
+
+const cases = (await getCollection('cases'))
+  .filter((c) => c.data.published && c.data.service === 'vehicle-buyback')
+  .slice(0, 6);
+---
+
+<ServicePageLayout
+  {meta}
+  {schema}
+  {cases}
+  title={pc.title}
+  titleHighlight={pc.titleHighlight}
+  description={pc.description}
+  ctaLabel={pc.ctaLabel}
+  formService="vehicle-buyback"
+  currentCountry="rs"
+  currentService="vehicle-buyback"
+  showCountryCrossLinks={false}
+  casesHeading={pc.casesHeading}
+  breadcrumbs={[{ label: pc.breadcrumbLabel }]}
+  image={heroPhoto}
+  imageAlt={pc.heroPhotoAlt}
+  closing={sc.closing}
+>
+  <p class="text-xs tracking-widest uppercase mb-3 font-medium text-muted">
+    {t.common.alsoWorkingInLabel}
+  </p>
+  <p class="text-[0.97rem] leading-relaxed text-muted">
+    {countries.map((c) => c[locale].name).join(' · ')}
+  </p>
+
+  <Fragment slot="extra">
+    <PageSection title={pc.processHeading} lead={pc.processLead}>
+      <StepsList steps={pc.processSteps} />
+    </PageSection>
+
+    <IncludedGrid
+      heading={pc.includedHeading}
+      lead={pc.includedLead}
+      items={pc.included}
+    />
+
+    <div class="max-w-6xl mx-auto px-6">
+      <ChipLinks
+        label={sc.serbiaLinkLabel}
+        items={[
+          {
+            href: PathBuilder.service(locale, 'vehicle-buyback', 'rs'),
+            text: countries.find((c) => c.code === 'rs')![locale].name,
+          },
+        ]}
+      />
+    </div>
+    <Faq items={getFaq(locale)['vehicle-buyback']} />
+  </Fragment>
+</ServicePageLayout>

@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  getActiveCountries,
-  getCountry,
-  getCitiesForCountry,
-  getCountryFlag,
-} from './geo';
+import { getActiveCountries, getCountry, getCitiesForCountry } from './geo';
 
 describe('getActiveCountries', () => {
   it('returns only active countries', () => {
@@ -40,15 +35,5 @@ describe('getCitiesForCountry', () => {
     expect(getCountry('pt')).toBeDefined();
     expect(getCountry('pt')?.active).toBe(true);
     expect(getCitiesForCountry('pt')).toEqual([]);
-  });
-});
-
-describe('getCountryFlag', () => {
-  it('returns flag for known country code', () => {
-    expect(getCountryFlag('de')).toBe('🇩🇪');
-  });
-
-  it('returns fallback flag for unknown code', () => {
-    expect(getCountryFlag('xx')).toBe('🏳️');
   });
 });

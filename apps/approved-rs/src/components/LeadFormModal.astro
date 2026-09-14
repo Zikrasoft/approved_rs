@@ -9,7 +9,6 @@ import type {
 } from '@/utils/contactChannel';
 
 interface Props {
-  id: string;
   triggerAttr: typeof DATA_OPEN_LEAD_MODAL | typeof DATA_OPEN_PAGE_LEAD_MODAL;
   service?: string;
   country?: string;
@@ -19,7 +18,6 @@ interface Props {
 }
 
 const {
-  id,
   triggerAttr,
   service = '',
   country = '',
@@ -31,29 +29,27 @@ const locale = getLocale(Astro.currentLocale);
 const closeLabel = getI18n(locale).common.closeLabel;
 ---
 
-<dialog id={id} class="lead-modal">
-  <button
-    type="button"
-    data-close
-    aria-label={closeLabel}
-    class="lead-modal-close"
-  >
-    <X size={16} />
-  </button>
-  <LeadForm
-    service={service}
-    country={country}
-    city={city}
-    {commentLabel}
-    {commentPlaceholder}
-  />
-</dialog>
+<approved-modal trigger={`[${triggerAttr}]`}>
+  <dialog class="lead-modal">
+    <button
+      type="button"
+      data-modal-close
+      aria-label={closeLabel}
+      class="lead-modal-close"
+    >
+      <X size={16} />
+    </button>
+    <LeadForm
+      service={service}
+      country={country}
+      city={city}
+      {commentLabel}
+      {commentPlaceholder}
+    />
+  </dialog>
+</approved-modal>
 
 <style>
-  :global(html.modal-open) {
-    overflow: hidden;
-    overscroll-behavior: none;
-  }
   .lead-modal {
     position: relative;
     background: transparent;
@@ -62,9 +58,39 @@ const closeLabel = getI18n(locale).common.closeLabel;
     max-width: 26rem;
     width: 90vw;
     max-height: 90vh;
+    overflow: hidden;
+    margin: auto;
+  }
+  .lead-modal[open] {
+    display: flex;
+    flex-direction: column;
+  }
+  .lead-modal :global(.lead-form-card) {
+    min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
-    margin: auto;
+  }
+  @media (max-width: 639px) {
+    .lead-modal {
+      width: 100%;
+      max-width: none;
+      height: 100dvh;
+      max-height: none;
+      margin: 0;
+    }
+    .lead-modal :global(.lead-form-card) {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      padding-bottom: 0;
+      border: none;
+      border-radius: 0;
+    }
+    .lead-modal :global(.lead-form-card form) {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+    }
   }
   .lead-modal::backdrop {
     background: rgba(13, 15, 20, 0.6);
@@ -95,50 +121,36 @@ const closeLabel = getI18n(locale).common.closeLabel;
   }
 </style>
 
-<script define:vars={{ id, triggerAttr }}>
-  // Own self-contained open/close wiring, keyed by `id`/`triggerAttr` so
-  // multiple independent modals (header's generic one, a page's contextual
-  // one) can coexist without colliding.
-  function initLeadFormModal() {
-    const modal = document.getElementById(id);
-    if (!modal) return;
-    // Delegated on document (not queried+bound at init time): this script is
-    // forced is:inline by define:vars, so it runs synchronously wherever it
-    // sits in the HTML (inside Header, near the top of <body>) — a direct
-    // querySelectorAll here would miss trigger buttons that appear later in
-    // the document and haven't been parsed yet. Delegation sidesteps DOM
-    // order entirely.
-    document.addEventListener('click', function (e) {
-      const btn =
-        e.target instanceof Element
-          ? e.target.closest('[' + triggerAttr + ']')
-          : null;
-      if (!btn) return;
-      // trigger's attribute value ("phone") preselects that LeadForm tab by
-      // replaying a real click on it — reuses LeadForm's own tab-switch
-      // logic instead of duplicating it here.
-      const tab = btn.getAttribute(triggerAttr);
-      if (tab) {
-        const tabBtn = modal.querySelector('.pill-tab[data-tab="' + tab + '"]');
-        if (tabBtn) tabBtn.click();
-      }
-      document.documentElement.classList.add('modal-open');
-      modal.showModal();
-      if (window.ymReachGoal)
-        window.ymReachGoal('lead_modal_open', { tab: tab || 'default' });
+<script>
+  import {
+    defineModalDialog,
+    MODAL_OPEN_EVENT,
+    type ModalOpenDetail,
+  } from '@podbor/site-kit/browser';
+  import {
+    DATA_OPEN_LEAD_MODAL,
+    DATA_OPEN_PAGE_LEAD_MODAL,
+  } from '@/utils/contactChannel';
+
+  defineModalDialog('approved-modal');
+
+  document.addEventListener(MODAL_OPEN_EVENT, (event) => {
+    const host = event.target as HTMLElement;
+    const { trigger } = (event as CustomEvent<ModalOpenDetail>).detail;
+    const tab =
+      trigger.getAttribute(DATA_OPEN_LEAD_MODAL) ??
+      trigger.getAttribute(DATA_OPEN_PAGE_LEAD_MODAL);
+    const tabButton = tab
+      ? host.querySelector<HTMLElement>(
+          `.pill-tab[data-tab="${CSS.escape(tab)}"]`,
+        )
+      : null;
+    if (tabButton) {
+      tabButton.click();
+      host.querySelector<HTMLElement>('[data-modal-close]')?.focus();
+    }
+    window.ymReachGoal?.('lead_modal_open', {
+      tab: tabButton ? tab : 'default',
     });
-    const closeBtn = modal.querySelector('[data-close]');
-    if (closeBtn)
-      closeBtn.addEventListener('click', function () {
-        modal.close();
-      });
-    modal.addEventListener('click', function (e) {
-      if (e.target === modal) modal.close();
-    });
-    // fires on every close path (button, backdrop click, Escape key)
-    modal.addEventListener('close', function () {
-      document.documentElement.classList.remove('modal-open');
-    });
-  }
-  initLeadFormModal();
+  });
 </script>

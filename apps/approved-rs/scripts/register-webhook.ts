@@ -1,6 +1,3 @@
-// Одноразовый скрипт — запускать через:
-// mise exec -- node --env-file=.env.local --experimental-strip-types scripts/register-webhook.ts
-
 export {};
 
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
@@ -14,7 +11,7 @@ if (!TOKEN || !SECRET || !SITE) {
   process.exit(1);
 }
 
-const webhookUrl = `${SITE}/api/telegram`;
+const webhookUrl = `${SITE}/api/telegram-webhook`;
 
 const response = await fetch(
   `https://api.telegram.org/bot${TOKEN}/setWebhook`,
@@ -24,7 +21,7 @@ const response = await fetch(
     body: JSON.stringify({
       url: webhookUrl,
       secret_token: SECRET,
-      allowed_updates: ['callback_query'],
+      allowed_updates: ['callback_query', 'message'],
       drop_pending_updates: true,
     }),
   },
@@ -33,7 +30,6 @@ const response = await fetch(
 const data = await response.json();
 console.log('setWebhook result:', JSON.stringify(data, null, 2));
 
-// Verify
 const info = await fetch(`https://api.telegram.org/bot${TOKEN}/getWebhookInfo`);
 const infoData = await info.json();
 console.log('Webhook info:', JSON.stringify(infoData.result, null, 2));

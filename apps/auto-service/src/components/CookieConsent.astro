@@ -1,0 +1,43 @@
+---
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+import { PathBuilder } from '@/utils/paths';
+import { COOKIE_POLICY_VERSION } from '@/utils/constants';
+
+const locale = localeFrom(Astro.url.pathname);
+const cookie = getSiteContent(locale).cookie;
+---
+
+<cookie-consent
+  data-policy-version={COOKIE_POLICY_VERSION}
+  hidden
+  class="fixed inset-x-3 bottom-3 z-40 rounded-lg border border-line bg-card p-5 shadow-xl sm:inset-x-auto sm:left-5 sm:bottom-5 sm:max-w-sm"
+>
+  <p class="text-sm leading-relaxed text-ink-2">
+    {cookie.notice}{' '}{cookie.more}{' '}
+    <a href={PathBuilder.privacy(locale)} class="link-muted underline"
+      >{cookie.policyLink}</a
+    >.
+  </p>
+  <div class="mt-4 flex gap-3">
+    <button
+      type="button"
+      data-consent-decline
+      class="btn btn-secondary px-4 py-2 text-sm"
+    >
+      {cookie.decline}
+    </button>
+    <button
+      type="button"
+      data-consent-accept
+      class="btn btn-primary px-4 py-2 text-sm"
+    >
+      {cookie.accept}
+    </button>
+  </div>
+</cookie-consent>
+
+<script>
+  import { defineCookieConsent } from '@podbor/site-kit/browser';
+  defineCookieConsent();
+</script>

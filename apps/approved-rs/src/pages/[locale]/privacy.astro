@@ -21,7 +21,7 @@ const sections = p.sections;
 
 <BaseLayout {...meta}>
   <section class="border-b border-default">
-    <div class="max-w-6xl mx-auto px-6 py-16">
+    <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
       <Breadcrumbs items={[{ label: p.heading }]} />
       <span class="accent-line"></span>
       <h1 class="font-display text-5xl font-bold mb-3">{p.heading}</h1>
@@ -29,7 +29,7 @@ const sections = p.sections;
     </div>
   </section>
 
-  <section class="max-w-3xl mx-auto px-6 py-16">
+  <section class="max-w-3xl mx-auto px-6 py-band md:py-band-lg">
     <div class="space-y-10">
       {
         sections.map((s, i) => (

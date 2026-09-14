@@ -1,11 +1,11 @@
-// src/middleware.ts
+import type { APIContext } from 'astro';
 import { defineMiddleware } from 'astro:middleware';
 import { requestHasLocale } from 'astro:i18n';
+import { BRAND_SITES, brandLocale } from '@podbor/brands';
+import { LOCALE_COOKIE } from '@podbor/site-kit';
 import { detectLocale } from './i18n/detectLocale';
+import { SUPPORTED_LOCALES } from './i18n/config';
 import { getCountry } from './utils/geo';
-
-const LOCALE_COOKIE = 'lang';
-const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
 
 // Pre-i18n legacy redirects (old service slugs). Kept here instead of
 // astro.config.mjs's `redirects` so the slug rewrite and the locale prefix
@@ -41,20 +41,56 @@ const SLUG_RENAMES: Record<string, string> = {
   privoz: 'vehicle-import',
   vykup: 'vehicle-buyback',
   proverka: 'vehicle-inspection',
-  'avtoservis-belgrade': 'auto-service-belgrade',
-  autoservice: 'auto-service',
 };
 
 export function renameSlugSegments(pathname: string): string | null {
   let changed = false;
   const renamed = pathname.split('/').map((seg) => {
-    if (seg in SLUG_RENAMES) {
+    if (Object.hasOwn(SLUG_RENAMES, seg)) {
       changed = true;
       return SLUG_RENAMES[seg];
     }
     return seg;
   });
   return changed ? renamed.join('/') : null;
+}
+
+const MOVED_BRAND_HOSTS: Record<string, string> = {
+  'auto-service-belgrade': BRAND_SITES.carlab,
+  'avtoservis-belgrade': BRAND_SITES.carlab,
+  'detailing-belgrade': BRAND_SITES.details,
+  'wrapping-belgrade': BRAND_SITES.details,
+};
+const MOVED_BRAND_CASE_TABS: Record<string, string> = {
+  'auto-service': BRAND_SITES.carlab,
+  autoservice: BRAND_SITES.carlab,
+  detailing: BRAND_SITES.details,
+};
+
+export function movedBrandUrl(pathname: string): string | null {
+  const segments = pathname.split('/').filter(Boolean);
+  const hasLocale = (SUPPORTED_LOCALES as readonly string[]).includes(
+    segments[0],
+  );
+  const locale = hasLocale ? segments[0] : 'ru';
+  const path = hasLocale ? segments.slice(1) : segments;
+  const target = brandLocale(locale);
+
+  if (Object.hasOwn(MOVED_BRAND_HOSTS, path[0] ?? '')) {
+    const host = MOVED_BRAND_HOSTS[path[0]];
+    const rest = path.slice(1);
+    return rest.length
+      ? `${host}/${target}/works/${rest.join('/')}/`
+      : `${host}/${target}/`;
+  }
+  if (
+    path.length === 2 &&
+    path[0] === 'cases' &&
+    Object.hasOwn(MOVED_BRAND_CASE_TABS, path[1])
+  ) {
+    return `${MOVED_BRAND_CASE_TABS[path[1]]}/${target}/works/`;
+  }
+  return null;
 }
 
 // The Germany vehicle-import spoke moved under the EU one (/vehicle-import/eu/de/,
@@ -71,6 +107,21 @@ export function moveGermanySpoke(pathname: string): string | null {
   const normalized = pathname.endsWith('/') ? pathname : `${pathname}/`;
   return normalized.endsWith(OLD_DE_SPOKE_PATH)
     ? normalized.slice(0, -OLD_DE_SPOKE_PATH.length) + NEW_DE_SPOKE_PATH
+    : null;
+}
+
+// Buyback ran a page per country whose only difference was a substituted
+// country name. Serbia keeps its page (Serbian plates are a different offer);
+// the rest collapse onto the hub.
+const BUYBACK_COLLAPSED_COUNTRIES = ['de', 'es', 'ch', 'pt', 'fr', 'it', 'pl'];
+
+export function collapseBuybackCountry(pathname: string): string | null {
+  const normalized = pathname.endsWith('/') ? pathname : `${pathname}/`;
+  const match = BUYBACK_COLLAPSED_COUNTRIES.find((code) =>
+    normalized.endsWith(`/vehicle-buyback/${code}/`),
+  );
+  return match
+    ? normalized.slice(0, -(match.length + 1)) // drop "<code>/"
     : null;
 }
 
@@ -115,6 +166,13 @@ const GEO_MAP: Record<string, string> = {
 };
 const GEO_DISMISS_COOKIE = 'geo-banner-dismissed';
 
+function applyGeoSuggestion(context: APIContext): void {
+  if (context.cookies.has(GEO_DISMISS_COOKIE)) return;
+  const ipCountry = context.request.headers.get('x-vercel-ip-country') ?? '';
+  const siteCode = GEO_MAP[ipCountry.toUpperCase()];
+  if (siteCode) context.locals.suggestedCountry = getCountry(siteCode);
+}
+
 export const onRequest = defineMiddleware((context, next) => {
   const { pathname, search } = context.url;
 
@@ -126,6 +184,9 @@ export const onRequest = defineMiddleware((context, next) => {
     return next();
   }
 
+  const movedBrand = movedBrandUrl(pathname);
+  if (movedBrand) return context.redirect(`${movedBrand}${search}`, 301);
+
   // Bare '/' serves the detected locale's homepage directly (content of
   // /ru/, /en/, etc.) instead of a 301 to it — the URL bar stays on '/'.
   // The page's own canonical tag still points at /<locale>/, so crawlers
@@ -136,19 +197,7 @@ export const onRequest = defineMiddleware((context, next) => {
       context.request.headers.get('accept-language'),
       context.cookies.get(LOCALE_COOKIE)?.value,
     );
-    context.cookies.set(LOCALE_COOKIE, locale, {
-      path: '/',
-      maxAge: ONE_YEAR_SECONDS,
-    });
-
-    if (!context.cookies.has(GEO_DISMISS_COOKIE)) {
-      const ipCountry =
-        context.request.headers.get('x-vercel-ip-country') ?? '';
-      const siteCode = GEO_MAP[ipCountry.toUpperCase()];
-      if (siteCode) {
-        context.locals.suggestedCountry = getCountry(siteCode);
-      }
-    }
+    applyGeoSuggestion(context);
 
     return context.rewrite(`/${locale}/${search}`);
   }
@@ -162,8 +211,11 @@ export const onRequest = defineMiddleware((context, next) => {
   // visitor's current browser/cookie locale differs from the one baked
   // into the stale link they clicked.
   const slugRenamed = renameSlugSegments(rewritten);
+  const afterSlugRename = slugRenamed ?? rewritten;
   const restructured =
-    moveGermanySpoke(slugRenamed ?? rewritten) ?? slugRenamed;
+    moveGermanySpoke(afterSlugRename) ??
+    collapseBuybackCountry(afterSlugRename) ??
+    slugRenamed;
   if (restructured) {
     if (requestHasLocale(context)) {
       return context.redirect(`${restructured}${search}`, 301);
@@ -177,20 +229,8 @@ export const onRequest = defineMiddleware((context, next) => {
 
   if (rewritten === pathname && requestHasLocale(context)) {
     const locale = pathname.split('/')[1];
-    context.cookies.set(LOCALE_COOKIE, locale, {
-      path: '/',
-      maxAge: ONE_YEAR_SECONDS,
-    });
-
     const isHome = pathname === `/${locale}/` || pathname === `/${locale}`;
-    if (isHome && !context.cookies.has(GEO_DISMISS_COOKIE)) {
-      const ipCountry =
-        context.request.headers.get('x-vercel-ip-country') ?? '';
-      const siteCode = GEO_MAP[ipCountry.toUpperCase()];
-      if (siteCode) {
-        context.locals.suggestedCountry = getCountry(siteCode);
-      }
-    }
+    if (isHome) applyGeoSuggestion(context);
 
     return next();
   }

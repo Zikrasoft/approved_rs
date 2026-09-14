@@ -51,19 +51,40 @@ const thanksSchema = z
   })
   .strict();
 
+const partnersSchema = z
+  .object({
+    eyebrow: z.string(),
+    heading: z.string(),
+    intro: z.string(),
+    linkLabel: z.string(),
+    carlabDescription: z.string(),
+    detailsDescription: z.string(),
+  })
+  .strict();
+
 export const pagesContentSchema = z
   .object({
     contacts: contactsSchema,
+    partners: partnersSchema,
     privacy: privacySchema,
     thanks: thanksSchema,
     casesVehicleSourcing: pageMetaSchema,
     casesVehicleBuyback: pageMetaSchema,
     casesVehicleInspection: pageMetaSchema,
     casesVehicleImport: pageMetaSchema,
-    casesAutoService: pageMetaSchema,
-    casesDetailing: pageMetaSchema,
     casesShared: z
-      .object({ heroSubtitle: z.string(), emptyState: z.string() })
+      .object({
+        heroSubtitle: z.string(),
+        emptyState: z.string(),
+        // Keyed by CasesTabKind, kept as a record so a new tab is a content
+        // edit rather than a schema edit; a missing key renders no intro.
+        tabIntros: z.record(z.string(), z.string()),
+        closingHeading: z.string(),
+        closingLine1: z.string(),
+        closingLine2: z.string(),
+        closingLine3: z.string(),
+        closingText: z.string(),
+      })
       .strict(),
   })
   .strict();

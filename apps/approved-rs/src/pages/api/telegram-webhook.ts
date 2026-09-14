@@ -13,13 +13,14 @@ import { secretMatches } from '@/lib/verifySecret';
 import {
   isLeadStatusKey,
   answerCallback,
-  refreshLeadCard,
+  ensureLeadCard,
   sendForceReplyPrompt,
   safeEditMessage,
   sendDealNotificationToAdmin,
   sendCommissionClaimToAdmin,
   sendCommissionResultToOwner,
   sendStatusChangeToAdmin,
+  sendFieldChangeToAdmin,
   sendMessage,
   buildOwedList,
   formatDealsList,
@@ -35,7 +36,9 @@ import {
   editLeadDetailMessage,
   OWNER_IDS,
   ADMIN_IDS,
+  EDIT_FIELD_LABELS,
   type Role,
+  type EditField,
 } from '@/lib/telegram';
 import {
   getLead,
@@ -141,7 +144,7 @@ async function refreshBothSurfaces(
   role: Role,
 ): Promise<void> {
   if (!updated) return;
-  await refreshLeadCard(updated);
+  await ensureLeadCard(updated);
   await editLeadDetailMessage(chatId, messageId, updated, role);
 }
 
@@ -471,13 +474,6 @@ async function handleRejectPayCallback(
   });
 }
 
-const EDIT_FIELD_LABELS = {
-  name: 'имя',
-  contact: 'контакт',
-  comment: 'комментарий',
-} as const;
-type EditField = keyof typeof EDIT_FIELD_LABELS;
-
 async function handleEditCallback(
   id: number,
   field: EditField,
@@ -761,7 +757,7 @@ async function handlePromptReply(
       }),
     );
     if (updated) {
-      await refreshLeadCard(updated);
+      await ensureLeadCard(updated);
       await sendDealNotificationToAdmin(updated);
     }
     return;
@@ -799,7 +795,7 @@ async function handlePromptReply(
     // — even when `apply` no-op'd with {} — so truthiness alone can't tell
     // "postponed" from "guard blocked it"; check the field the guard controls.
     if (updated?.status === 'postponed') {
-      await refreshLeadCard(updated);
+      await ensureLeadCard(updated);
       await sendStatusChangeToAdmin(updated);
     }
     return;
@@ -815,13 +811,18 @@ async function handlePromptReply(
     );
     return;
   }
+  let before: string | null | undefined;
   const updated = await resolvePendingPrompt(
     chatId,
     replyToMessageId,
-    () => ({ [field]: value || null }) as Partial<StoredLead>,
+    (lead) => {
+      before = lead[field];
+      return { [field]: value || null } as Partial<StoredLead>;
+    },
   );
   if (updated) {
-    await refreshLeadCard(updated);
+    await ensureLeadCard(updated);
+    await sendFieldChangeToAdmin(updated, field, before);
     // In a private chat, chat.id is the user's own id — safe to role-check directly.
     const role = roleOf(chatId);
     if (role) {

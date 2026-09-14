@@ -1,5 +1,6 @@
 ---
-import { getActiveCountries, getCountryFlag } from '@/utils/geo';
+import { getActiveCountries } from '@/utils/geo';
+import CountryPlate from './CountryPlate.astro';
 import type { Country } from '@/utils/geo';
 import { getLocale } from '@/i18n/config';
 import { getI18n } from '@/i18n/getI18n';
@@ -28,13 +29,13 @@ const common = getI18n(locale).common;
             href={PathBuilder.service(locale, 'vehicle-sourcing', c.code)}
             data-geo-choice
             class:list={[
-              'geo-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium no-underline border',
+              'geo-pill group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium no-underline border',
               c.code === detected.code
                 ? 'border-accent-border bg-surface text-accent'
                 : 'border-default bg-surface text-secondary',
             ]}
           >
-            <span class="leading-none" set:html={getCountryFlag(c.code)} />
+            <CountryPlate code={c.code} />
             {c[locale].name}
           </a>
         ))

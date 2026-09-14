@@ -2,21 +2,19 @@
 import VehicleImportSpokeLayout from '@/layouts/VehicleImportSpokeLayout.astro';
 import { getServicesContent } from '@/i18n/content/services';
 import { withLocales, PathBuilder } from '@/utils/paths';
+import {
+  EU_SPOKE_COUNTRIES,
+  type EuSpokeCountry,
+} from '@/utils/vehicleImportCrossSell';
 import { getCountry } from '@/utils/geo';
 import { getCollection } from 'astro:content';
 import type { Locale } from '@/i18n/config';
 
 // The 3 single-country EU source spokes (de/es/ch) — one dynamic route
 // instead of 3 near-identical page files, matching the [country].astro
-// pattern already used for vehicle-buyback/vehicle-inspection. Inlined
-// (not a shared top-level const) — Astro's getStaticPaths extraction
-// doesn't reliably keep a module-scope const it's the only reader of.
-type EuSpokeCountry = 'de' | 'es' | 'ch';
-
+// pattern already used for vehicle-buyback/vehicle-inspection.
 export const getStaticPaths = () =>
-  withLocales(
-    (['de', 'es', 'ch'] as const).map((country) => ({ params: { country } })),
-  );
+  withLocales(EU_SPOKE_COUNTRIES.map((country) => ({ params: { country } })));
 
 const { locale, country } = Astro.params as {
   locale: Locale;
@@ -54,6 +52,11 @@ const cases = (await getCollection('cases'))
   steps={pc.steps}
   destinationsNote={pc.destinationsNote}
   areaServed={getCountry(country)![locale].name}
+  notes={{
+    heading: pc.notesHeading,
+    pointsLabel: pc.notesPointsLabel,
+    note: pc.notes,
+  }}
 >
   <p class="mt-4 text-sm">
     <a

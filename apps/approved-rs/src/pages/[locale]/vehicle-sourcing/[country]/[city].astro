@@ -2,6 +2,7 @@
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import ChipLinks from '@/components/ChipLinks.astro';
 import Faq from '@/components/Faq.astro';
+import MarketNotes from '@/components/MarketNotes.astro';
 import { getCityPaths, withLocales, PathBuilder } from '@/utils/paths';
 import { getCountry, getCitiesForCountry } from '@/utils/geo';
 import {
@@ -22,6 +23,7 @@ const { city } = Astro.props;
 const country = getCountry(countryCode!)!;
 const sc = getServicesContent(locale).cityVehicleSourcing;
 const cityLocation = buildLocation(locale, undefined, city);
+const cityNote = sc.cityNoteFor(city.slug);
 const countryLocation = buildLocation(locale, country);
 const meta = generateMeta('vehicle-sourcing', {
   country,
@@ -88,6 +90,7 @@ const WHY_CITY = [
     },
     { label: city[locale].name },
   ]}
+  closing={getServicesContent(locale)['vehicle-sourcing'].closing}
 >
   <div>
     <h2 class="font-display text-xl font-bold mb-4 text-primary">
@@ -117,6 +120,15 @@ const WHY_CITY = [
   />
 
   <Fragment slot="extra">
+    {
+      cityNote && (
+        <MarketNotes
+          heading={sc.cityNotesHeadingFor(cityLocation)}
+          pointsLabel={sc.cityNotesPointsLabel}
+          note={cityNote}
+        />
+      )
+    }
     <Faq
       items={[...getFaq(locale)['vehicle-sourcing'], getFaq(locale).cityExpert]}
     />

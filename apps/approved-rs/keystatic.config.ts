@@ -1,9 +1,5 @@
 import { config } from '@keystatic/core';
-import {
-  casesCollection,
-  autoserviceCasesCollection,
-  detailingCasesCollection,
-} from './src/i18n/keystatic/caseCollections';
+import { casesCollection } from './src/i18n/keystatic/caseCollections';
 
 export default config({
   // Local dev reads/writes the working tree directly — no GitHub OAuth,
@@ -16,7 +12,5 @@ export default config({
 
   collections: {
     cases: casesCollection,
-    autoserviceCases: autoserviceCasesCollection,
-    detailingCases: detailingCasesCollection,
   },
 });

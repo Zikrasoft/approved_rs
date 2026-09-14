@@ -2,6 +2,7 @@
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import StepsList from '@/components/StepsList.astro';
 import Faq from '@/components/Faq.astro';
+import MarketNotes from '@/components/MarketNotes.astro';
 import { getCountryPaths, withLocales, PathBuilder } from '@/utils/paths';
 import { getCountry } from '@/utils/geo';
 import {
@@ -20,6 +21,7 @@ const { locale, country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
 const sc = getServicesContent(locale)['vehicle-inspection'];
 const location = buildLocation(locale, country);
+const countryNote = sc.countryNoteFor(country.code);
 const meta = generateMeta('vehicle-inspection', {
   country,
   baseUrl: SITE_URL,
@@ -60,6 +62,7 @@ const schema = generateServiceSchema(
     },
     { label: sc.breadcrumbLabel },
   ]}
+  closing={sc.closing}
 >
   <StepsList steps={sc.steps} />
   <p class="mt-6 text-sm leading-relaxed text-muted">
@@ -67,6 +70,15 @@ const schema = generateServiceSchema(
   </p>
 
   <Fragment slot="extra">
+    {
+      countryNote && (
+        <MarketNotes
+          heading={sc.countryNotesHeadingFor(location)}
+          pointsLabel={sc.countryNotesPointsLabel}
+          note={countryNote}
+        />
+      )
+    }
     <Faq items={getFaq(locale)['vehicle-inspection']} />
   </Fragment>
 </ServicePageLayout>

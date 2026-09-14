@@ -1,23 +1,38 @@
-export const DEFAULT_LOCALE: Locale = 'ru';
-export const SUPPORTED_LOCALES = ['ru', 'en', 'sr', 'es', 'de'] as const;
+import { createLocaleSet, SOURCE_LOCALE } from '@podbor/i18n';
+
+export const localeConfig = {
+  locales: ['ru', 'en', 'sr', 'es', 'de'],
+  primaryLocale: 'ru',
+} as const;
+
+export const localeSet = createLocaleSet(localeConfig);
+
+export const {
+  SUPPORTED_LOCALES,
+  PRIMARY_LOCALE,
+  TRANSLATABLE_LOCALES,
+  isLocale,
+  getLocale,
+  detectLocale,
+} = localeSet;
+
+export { SOURCE_LOCALE };
+
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
+export type TranslatableLocale = Exclude<Locale, typeof SOURCE_LOCALE>;
 
-// Every locale a case's `translations` field can hold a value for (ru is
-// the source language, not a translation target). Derived from
-// SUPPORTED_LOCALES so a future locale addition surfaces here automatically
-// instead of needing its own hand-spelled union in every consumer.
-export type TranslatableLocale = Exclude<Locale, typeof DEFAULT_LOCALE>;
-export const TRANSLATABLE_LOCALES = SUPPORTED_LOCALES.filter(
-  (l): l is TranslatableLocale => l !== DEFAULT_LOCALE,
-);
+export const BCP47_BY_LOCALE: Record<Locale, string> = {
+  ru: 'ru-RU',
+  en: 'en-US',
+  sr: 'sr-RS',
+  es: 'es-ES',
+  de: 'de-DE',
+};
 
-export function isLocale(value: string): value is Locale {
-  return (SUPPORTED_LOCALES as readonly string[]).includes(value);
-}
-
-// Single place for the "default to ru" fallback used by every component that
-// reads Astro.currentLocale — was previously duplicated as
-// `(Astro.currentLocale ?? 'ru') as Locale` verbatim in 15+ files.
-export function getLocale(currentLocale: string | undefined): Locale {
-  return (currentLocale ?? DEFAULT_LOCALE) as Locale;
-}
+// Separate from BCP47_BY_LOCALE on purpose: that one feeds sitemap hreflang,
+// where a script subtag is not wanted. This one drives Intl formatting, where
+// bare "sr" resolves to Cyrillic while the site is written in Latin.
+export const DISPLAY_LOCALE: Record<Locale, string> = {
+  ...BCP47_BY_LOCALE,
+  sr: 'sr-Latn-RS',
+};

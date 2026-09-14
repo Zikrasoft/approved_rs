@@ -1,0 +1,50 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  name: string;
+  label: string;
+  placeholder: string;
+  options?: (string | number)[];
+  selected?: string;
+  disabled?: boolean;
+  filter?: string;
+}
+
+const {
+  name,
+  label,
+  placeholder,
+  options = [],
+  selected,
+  disabled = false,
+  filter,
+} = Astro.props;
+---
+
+<label class="block">
+  <span class="field-label">{label}</span>
+  <div class="relative">
+    <select
+      name={name}
+      data-filter={filter}
+      disabled={disabled}
+      class="field appearance-none pr-10"
+    >
+      <option value="">{placeholder}</option>
+      {
+        options.map((option) => (
+          <option value={option} selected={String(option) === selected}>
+            {option}
+          </option>
+        ))
+      }
+      <slot />
+    </select>
+    <Icon
+      name="chevronDown"
+      size={12}
+      class="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-muted"
+    />
+  </div>
+</label>

@@ -42,22 +42,14 @@ const cases = [
     },
   },
 ];
-const autoserviceCases = [
-  { data: { published: true, date: new Date('2024-01-01') } },
-  { data: { published: false, date: new Date('2024-02-01') } },
-];
-const detailingCases = [
-  { data: { published: true, date: new Date('2024-01-01') } },
-  { data: { published: false, date: new Date('2024-02-01') } },
-];
 
 vi.mock('astro:content', () => ({
   getCollection: vi.fn(
     (
-      name: 'cases' | 'autoserviceCases' | 'detailingCases',
+      name: 'cases',
       filter: (c: { data: { published: boolean } }) => boolean,
     ) => {
-      const byName = { cases, autoserviceCases, detailingCases };
+      const byName = { cases };
       return Promise.resolve(byName[name].filter(filter));
     },
   ),
@@ -81,14 +73,12 @@ describe('getPublishedCasesByService', () => {
 });
 
 describe('getCasesTabCounts', () => {
-  it('counts published cases per service, plus published autoservice cases', async () => {
+  it('counts published cases per service', async () => {
     expect(await getCasesTabCounts()).toEqual({
       'vehicle-sourcing': 1,
       'vehicle-buyback': 1,
       'vehicle-inspection': 1,
       'vehicle-import': 1,
-      'auto-service': 1,
-      detailing: 1,
     });
   });
 });

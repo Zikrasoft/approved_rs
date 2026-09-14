@@ -1,14 +1,63 @@
 import { describe, it, expect, vi } from 'vitest';
+import { SUPPORTED_LOCALES } from './i18n/config';
 
-// middleware.ts imports Astro's virtual modules, only resolvable inside
-// Astro's own build pipeline, not in this project's plain-Node vitest
-// config — mocked here (same technique as llmsTxt.test.ts's astro:content
-// mock) rather than pulling Astro's Vite plugin into the test config for
-// the one pure function (renameSlugSegments) this file actually exercises.
 vi.mock('astro:middleware', () => ({ defineMiddleware: (fn: unknown) => fn }));
-vi.mock('astro:i18n', () => ({ requestHasLocale: () => false }));
+vi.mock('astro:i18n', () => ({
+  requestHasLocale: (context: { url: URL }) =>
+    (SUPPORTED_LOCALES as readonly string[]).includes(
+      context.url.pathname.split('/')[1],
+    ),
+}));
 
-const { renameSlugSegments, moveGermanySpoke } = await import('./middleware');
+const {
+  renameSlugSegments,
+  moveGermanySpoke,
+  collapseBuybackCountry,
+  movedBrandUrl,
+  onRequest,
+} = await import('./middleware');
+
+type Handler = (context: unknown, next: () => unknown) => unknown;
+
+function makeContext(
+  url: string,
+  {
+    acceptLanguage = '',
+    cookie,
+    country,
+    geoDismissed = false,
+  }: {
+    acceptLanguage?: string;
+    cookie?: string;
+    country?: string;
+    geoDismissed?: boolean;
+  } = {},
+) {
+  return {
+    url: new URL(url, 'https://approved.rs'),
+    locals: {} as { suggestedCountry?: { code: string } },
+    request: {
+      headers: {
+        get: (name: string) =>
+          name === 'accept-language'
+            ? acceptLanguage
+            : name === 'x-vercel-ip-country'
+              ? (country ?? null)
+              : null,
+      },
+    },
+    cookies: {
+      set: vi.fn(),
+      get: () => (cookie ? { value: cookie } : undefined),
+      has: () => geoDismissed,
+    },
+    redirect: vi.fn((path: string, status?: number) => ({ path, status })),
+    rewrite: vi.fn((path: string) => ({ path })),
+  };
+}
+
+const run = (context: unknown, next = vi.fn(() => 'next')) =>
+  (onRequest as unknown as Handler)(context, next);
 
 describe('renameSlugSegments', () => {
   it('renames a single old service-slug segment', () => {
@@ -25,12 +74,6 @@ describe('renameSlugSegments', () => {
     expect(renameSlugSegments('/privoz/')).toBe('/vehicle-import/');
     expect(renameSlugSegments('/vykup/de/')).toBe('/vehicle-buyback/de/');
     expect(renameSlugSegments('/proverka/de/')).toBe('/vehicle-inspection/de/');
-    expect(renameSlugSegments('/avtoservis-belgrade/')).toBe(
-      '/auto-service-belgrade/',
-    );
-    expect(renameSlugSegments('/cases/autoservice/')).toBe(
-      '/cases/auto-service/',
-    );
   });
 
   it('returns null when no segment matches (no redirect needed)', () => {
@@ -47,6 +90,32 @@ describe('renameSlugSegments', () => {
     // Same for the old country-first pages: '/rs/autopodbor/' rewrites to
     // '/autopodbor/rs' in LEGACY_PATH_REWRITES, which then still needs renaming.
     expect(renameSlugSegments('/autopodbor/rs')).toBe('/vehicle-sourcing/rs');
+  });
+});
+
+describe('collapseBuybackCountry', () => {
+  it('sends a collapsed country page to the buyback hub', () => {
+    expect(collapseBuybackCountry('/ru/vehicle-buyback/de/')).toBe(
+      '/ru/vehicle-buyback/',
+    );
+    expect(collapseBuybackCountry('/en/vehicle-buyback/pl/')).toBe(
+      '/en/vehicle-buyback/',
+    );
+  });
+
+  it('leaves Serbia alone — it kept its own page', () => {
+    expect(collapseBuybackCountry('/ru/vehicle-buyback/rs/')).toBeNull();
+  });
+
+  it('returns null for the hub itself and for other services', () => {
+    expect(collapseBuybackCountry('/ru/vehicle-buyback/')).toBeNull();
+    expect(collapseBuybackCountry('/ru/vehicle-sourcing/de/')).toBeNull();
+  });
+
+  it('matches even without a trailing slash (trailingSlash is "ignore")', () => {
+    expect(collapseBuybackCountry('/ru/vehicle-buyback/it')).toBe(
+      '/ru/vehicle-buyback/',
+    );
   });
 });
 
@@ -78,5 +147,151 @@ describe('moveGermanySpoke', () => {
     const renamed = renameSlugSegments('/privoz/de/');
     expect(renamed).toBe('/vehicle-import/de/');
     expect(moveGermanySpoke(renamed!)).toBe('/vehicle-import/eu/de/');
+  });
+});
+
+describe('movedBrandUrl', () => {
+  it('sends a service hub to the brand site that owns it now', () => {
+    expect(movedBrandUrl('/ru/auto-service-belgrade/')).toBe(
+      'https://carlab.rs/ru/',
+    );
+    expect(movedBrandUrl('/sr/detailing-belgrade/')).toBe(
+      'https://details.rs/sr/',
+    );
+  });
+
+  it('keeps the case slug, which moved across unchanged', () => {
+    expect(movedBrandUrl('/ru/auto-service-belgrade/bmw-x3/')).toBe(
+      'https://carlab.rs/ru/works/bmw-x3/',
+    );
+  });
+
+  it('redirects the pre-rename wrapping slug to the detailing brand', () => {
+    expect(movedBrandUrl('/ru/wrapping-belgrade/')).toBe(
+      'https://details.rs/ru/',
+    );
+    expect(movedBrandUrl('/ru/wrapping-belgrade/bmw-x5/')).toBe(
+      'https://details.rs/ru/works/bmw-x5/',
+    );
+  });
+
+  it('falls back to en for locales the brand sites do not run', () => {
+    expect(movedBrandUrl('/de/detailing-belgrade/bmw-x5/')).toBe(
+      'https://details.rs/en/works/bmw-x5/',
+    );
+  });
+
+  it('treats an unprefixed path as ru', () => {
+    expect(movedBrandUrl('/avtoservis-belgrade/')).toBe(
+      'https://carlab.rs/ru/',
+    );
+  });
+
+  it('sends a case-tab URL to the brand site works listing', () => {
+    expect(movedBrandUrl('/en/cases/auto-service')).toBe(
+      'https://carlab.rs/en/works/',
+    );
+    expect(movedBrandUrl('/cases/detailing')).toBe(
+      'https://details.rs/ru/works/',
+    );
+  });
+
+  it('leaves every path that did not move alone', () => {
+    expect(movedBrandUrl('/ru/vehicle-sourcing/de/')).toBeNull();
+    expect(movedBrandUrl('/ru/cases/vehicle-import/')).toBeNull();
+    expect(movedBrandUrl('/')).toBeNull();
+  });
+
+  it('does not read an inherited Object property as a moved host', () => {
+    expect(movedBrandUrl('/ru/constructor/')).toBeNull();
+    expect(movedBrandUrl('/ru/cases/toString/')).toBeNull();
+  });
+});
+
+describe('onRequest', () => {
+  it('passes an unlocalized path straight through', () => {
+    const context = makeContext('/api/leads');
+    const next = vi.fn(() => 'next');
+    expect(run(context, next)).toBe('next');
+    expect(context.redirect).not.toHaveBeenCalled();
+  });
+
+  it('serves a localized page without recording it as a language choice', () => {
+    const context = makeContext('/en/vehicle-sourcing/de/');
+    expect(run(context)).toBe('next');
+    expect(context.cookies.set).not.toHaveBeenCalled();
+    expect(context.redirect).not.toHaveBeenCalled();
+  });
+
+  it('rewrites the bare root to the detected locale without pinning it', () => {
+    const context = makeContext('/?utm_source=ig', {
+      acceptLanguage: 'en-US,en;q=0.9,ru;q=0.8',
+    });
+    run(context);
+    expect(context.rewrite).toHaveBeenCalledWith('/en/?utm_source=ig');
+    expect(context.cookies.set).not.toHaveBeenCalled();
+  });
+
+  it('falls back to the primary locale for a language the site does not serve', () => {
+    const context = makeContext('/', { acceptLanguage: 'zh-CN,zh;q=0.9' });
+    run(context);
+    expect(context.rewrite).toHaveBeenCalledWith('/ru/');
+  });
+
+  it('still prefers an existing cookie over Accept-Language', () => {
+    const context = makeContext('/', {
+      acceptLanguage: 'en-GB,en;q=0.9',
+      cookie: 'sr',
+    });
+    run(context);
+    expect(context.rewrite).toHaveBeenCalledWith('/sr/');
+  });
+
+  it('suggests the visitor country on a locale home page, unless dismissed', () => {
+    const context = makeContext('/de/', { country: 'de' });
+    run(context);
+    expect(context.locals.suggestedCountry?.code).toBe('de');
+
+    const dismissed = makeContext('/de/', {
+      country: 'de',
+      geoDismissed: true,
+    });
+    run(dismissed);
+    expect(dismissed.locals.suggestedCountry).toBeUndefined();
+  });
+
+  it('keeps the query string on the cross-brand 301', () => {
+    const context = makeContext('/ru/detailing-belgrade/?utm_source=ig');
+    run(context);
+    expect(context.redirect).toHaveBeenCalledWith(
+      'https://details.rs/ru/?utm_source=ig',
+      301,
+    );
+  });
+
+  it('does not redirect a path whose segment only exists on Object.prototype', () => {
+    const context = makeContext('/ru/constructor/');
+    expect(run(context)).toBe('next');
+    expect(context.redirect).not.toHaveBeenCalled();
+  });
+
+  it('301s a legacy slug while keeping the locale already in the URL', () => {
+    const context = makeContext('/en/autopodbor/de/?ref=x');
+    run(context);
+    expect(context.redirect).toHaveBeenCalledWith(
+      '/en/vehicle-sourcing/de/?ref=x',
+      301,
+    );
+  });
+
+  it('301s an unprefixed content path to the detected locale', () => {
+    const context = makeContext('/vehicle-sourcing/rs/', {
+      acceptLanguage: 'sr-RS,sr;q=0.9',
+    });
+    run(context);
+    expect(context.redirect).toHaveBeenCalledWith(
+      '/sr/vehicle-sourcing/rs/',
+      301,
+    );
   });
 });

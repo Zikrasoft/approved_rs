@@ -1,8 +1,8 @@
 // ponytail: timezone → country lookup, not IP geolocation — no network call,
 // no third-party dependency, good enough to pick a sensible default (phone
 // dial code, preferred contact channel) that the visitor can still change by
-// hand. Covers our curated list only (PHONE_COUNTRIES in LeadForm.astro);
-// falls back to nothing (caller decides the default) when the zone isn't
+// hand. Covers the zones worth guessing from, not every country; falls back
+// to nothing (caller decides the default) when the zone isn't
 // one of these. Shared by LeadForm.astro's phone-country default and
 // contactChannel.ts's region-based channel preference — one detector
 // instead of the same IANA-zone table duplicated per consumer.

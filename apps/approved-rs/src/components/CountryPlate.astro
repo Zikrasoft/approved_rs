@@ -1,0 +1,47 @@
+---
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  code: string;
+  size?: 'sm' | 'md';
+}
+
+const { code, size = 'sm' } = Astro.props;
+
+// Not a flag emoji: Chrome and Edge on Windows render none of them, and the
+// country cue is gone rather than merely plain there.
+
+const flags = import.meta.glob<{ default: ImageMetadata }>(
+  '../assets/flags/*.webp',
+  { eager: true },
+);
+const flag = flags[`../assets/flags/${code}.webp`]?.default;
+
+const plate =
+  'inline-flex shrink-0 items-center justify-center overflow-hidden rounded-[2px] shadow-[0_1px_2px_rgb(0_0_0/0.55)] ring-1 ring-inset ring-white/20 transition-shadow group-hover:ring-accent-mid';
+const box = size === 'sm' ? 'h-4 w-6' : 'h-6 w-9';
+---
+
+<span aria-hidden="true" class:list={[plate, box]}>
+  {
+    flag ? (
+      <img
+        src={flag.src}
+        width={flag.width}
+        height={flag.height}
+        alt=""
+        decoding="async"
+        class="h-full w-full object-cover"
+      />
+    ) : (
+      <span
+        class:list={[
+          'w-full bg-surface-2 text-center font-display font-bold uppercase leading-none text-secondary',
+          size === 'sm' ? 'text-[0.58rem]' : 'text-[0.78rem]',
+        ]}
+      >
+        {code.toUpperCase()}
+      </span>
+    )
+  }
+</span>

@@ -1,0 +1,67 @@
+---
+import Icon from '@/components/Icon.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+import { CONTACT_LINKS } from '@/utils/contactLinks';
+
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+---
+
+<cta-reveal
+  data-revealed="false"
+  class="sticky-contact fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper/95 backdrop-blur-sm lg:hidden"
+  watch="[data-contact-cta]"
+>
+  <div class="grid grid-cols-3 items-stretch">
+    <a
+      href={CONTACT_LINKS.phone}
+      data-contact-channel="phone"
+      class="flex min-h-14 flex-col items-center justify-center gap-1 border-r border-line text-ink"
+    >
+      <Icon name="phone" size={16} />
+      <span class="spec text-[0.6875rem]">{site.channels.call}</span>
+    </a>
+
+    <a
+      href={CONTACT_LINKS.viber}
+      data-contact-channel="viber"
+      class="flex min-h-14 flex-col items-center justify-center gap-1 border-r border-line text-ink"
+    >
+      <Icon name="viber" size={16} />
+      <span class="spec text-[0.6875rem]">{site.channels.viber}</span>
+    </a>
+
+    <button
+      type="button"
+      data-open-lead-modal
+      class="flex min-h-14 flex-col items-center justify-center gap-1 bg-signal text-paper"
+    >
+      <Icon name="calendar" />
+      <span class="spec text-[0.6875rem]">{site.header.cta}</span>
+    </button>
+  </div>
+</cta-reveal>
+
+<style>
+  .sticky-contact {
+    transition:
+      transform 0.25s,
+      visibility 0.25s;
+  }
+  .sticky-contact[data-revealed='false'] {
+    transform: translateY(100%);
+    visibility: hidden;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sticky-contact {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { defineCtaReveal } from '@podbor/site-kit/browser';
+
+  defineCtaReveal();
+</script>

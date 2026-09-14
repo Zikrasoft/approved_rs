@@ -2,6 +2,7 @@ import sharp from 'sharp';
 import { writeFileSync, mkdirSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { localeConfig } from '../src/i18n/config.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(__dirname, '../public');
@@ -122,28 +123,24 @@ const SERVICE_VARIANTS = {
     'vehicle-sourcing': 'Подберём, проверим и доставим автомобиль под ключ',
     'vehicle-buyback': 'Срочный выкуп авто на иностранных номерах',
     'vehicle-inspection': 'Независимая проверка перед покупкой',
-    'auto-service-belgrade': 'Ремонт и обслуживание автомобилей в Белграде',
   },
   en: {
     'vehicle-sourcing':
       "We'll source, inspect, and deliver your car, fully turnkey",
     'vehicle-buyback': 'Urgent car buyback on foreign plates',
     'vehicle-inspection': 'Independent inspection before you buy',
-    'auto-service-belgrade': 'Car repair and maintenance in Belgrade',
   },
   sr: {
     'vehicle-sourcing':
       'Pronalazimo, proveravamo i dovozimo vozilo, ključ u ruke',
     'vehicle-buyback': 'Hitan otkup vozila na stranim tablicama',
     'vehicle-inspection': 'Nezavisna provera pre kupovine',
-    'auto-service-belgrade': 'Popravka i održavanje vozila u Beogradu',
   },
   es: {
     'vehicle-sourcing':
       'Buscamos, inspeccionamos y entregamos tu auto, todo incluido',
     'vehicle-buyback': 'Compra urgente de autos con matrícula extranjera',
     'vehicle-inspection': 'Inspección independiente antes de comprar',
-    'auto-service-belgrade': 'Reparación y mantenimiento de autos en Belgrado',
   },
   de: {
     'vehicle-sourcing':
@@ -151,11 +148,26 @@ const SERVICE_VARIANTS = {
     'vehicle-buyback':
       'Dringender Ankauf von Autos mit ausländischem Kennzeichen',
     'vehicle-inspection': 'Unabhängige Prüfung vor dem Kauf',
-    'auto-service-belgrade': 'Reparatur und Wartung von Autos in Belgrad',
   },
 };
 
-for (const locale of ['ru', 'en', 'sr', 'es', 'de']) {
+for (const [name, map] of Object.entries({
+  LOCALE_SUFFIX,
+  EYEBROW,
+  DEFAULT_SUB,
+  DEFAULT_TAGLINE,
+})) {
+  const missing = localeConfig.locales.filter(
+    (locale) => !Object.hasOwn(map, locale),
+  );
+  if (missing.length) {
+    throw new Error(
+      `gen-og: ${name} has no copy for ${missing.join(', ')} — add it before generating OG images`,
+    );
+  }
+}
+
+for (const locale of localeConfig.locales) {
   const suffix = LOCALE_SUFFIX[locale];
 
   await renderOg(join(PUBLIC, `og${suffix}.png`), {

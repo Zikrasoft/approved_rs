@@ -1,0 +1,69 @@
+---
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+import { CONTACT_LINKS } from '@/utils/contactLinks';
+import { TELEGRAM_ENABLED } from '@/utils/constants';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+
+const channels = [
+  {
+    href: CONTACT_LINKS.phone,
+    icon: 'phone',
+    label: site.channels.call,
+    track: 'phone',
+  },
+  {
+    href: CONTACT_LINKS.whatsapp,
+    icon: 'whatsapp',
+    label: site.channels.whatsapp,
+    track: 'whatsapp',
+  },
+  {
+    href: CONTACT_LINKS.viber,
+    icon: 'viber',
+    label: site.channels.viber,
+    track: 'viber',
+  },
+  ...(TELEGRAM_ENABLED
+    ? ([
+        {
+          href: CONTACT_LINKS.telegram,
+          icon: 'telegram',
+          label: site.channels.telegram,
+          track: 'telegram',
+        },
+      ] as const)
+    : []),
+] as const;
+---
+
+<div
+  class={`grid gap-2 sm:grid-cols-2 lg:grid-cols-1 ${className}`}
+  data-contact-cta
+>
+  {
+    channels.map((channel) => (
+      <a
+        href={channel.href}
+        data-contact-channel={channel.track}
+        rel="noopener"
+        class="group flex min-h-11 items-center gap-3.5 rounded-2xl border border-line bg-white/[0.02] px-4 py-3 text-sm text-chalk transition-all duration-500 ease-spring hover:border-line-strong hover:bg-white/[0.05]"
+      >
+        <Icon
+          name={channel.icon}
+          size={18}
+          class="shrink-0 text-mute transition-colors duration-500 ease-spring group-hover:text-champagne group-focus-visible:text-champagne"
+        />
+        {channel.label}
+      </a>
+    ))
+  }
+</div>

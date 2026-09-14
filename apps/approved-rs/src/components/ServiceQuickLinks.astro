@@ -1,64 +1,94 @@
 ---
-import {
-  Search,
-  Globe,
-  Wrench,
-  Banknote,
-  ClipboardCheck,
-  Sparkles,
-} from '@lucide/astro';
+import { Search, Globe, Banknote, ClipboardCheck } from '@lucide/astro';
 import type { Search as IconType } from '@lucide/astro';
-import { getNavItems, isNavItemActive, type ServiceSlug } from '@/utils/labels';
+import { getNavItems, type ServiceSlug } from '@/utils/labels';
+import { navCurrent } from '@podbor/site-kit';
 import { getLocale } from '@/i18n/config';
+import { PathBuilder } from '@/utils/paths';
 
 interface Props {
-  countryCode: string;
+  // The burger menu has room for a 2x2 grid; the homepage band sits above the
+  // hero and must not cost it a third of the first screen.
+  variant?: 'grid' | 'strip';
 }
 
-const { countryCode } = Astro.props;
+const { variant = 'grid' } = Astro.props;
 const locale = getLocale(Astro.currentLocale);
 
 const SERVICE_ICONS: Record<ServiceSlug, typeof IconType> = {
   'vehicle-sourcing': Search,
   'vehicle-import': Globe,
-  'auto-service-belgrade': Wrench,
-  'detailing-belgrade': Sparkles,
   'vehicle-buyback': Banknote,
   'vehicle-inspection': ClipboardCheck,
 };
 
-const items = getNavItems(locale, countryCode).map((item) => ({
+const items = getNavItems(locale).map((item) => ({
   ...item,
-  Icon: SERVICE_ICONS[item.slug as ServiceSlug],
-  active: isNavItemActive(item, locale, countryCode, Astro.url.pathname),
+  Icon: SERVICE_ICONS[item.slug],
+  current: navCurrent(
+    Astro.url.pathname,
+    PathBuilder.sectionRoot(locale, item.slug),
+  ),
 }));
 ---
 
-<div class="grid grid-cols-2 gap-2">
-  {
-    items.map((item) => (
-      <a
-        href={item.href}
-        class="mobile-service-card flex flex-col items-center justify-center gap-2 py-5 rounded-sm border border-default text-secondary"
-        aria-current={item.active ? 'page' : undefined}
-      >
-        {item.Icon && <item.Icon size={20} />}
-        <span class="text-sm">{item.label}</span>
-      </a>
-    ))
-  }
-</div>
+{
+  variant === 'strip' ? (
+    <div class="service-strip flex gap-2 overflow-x-auto">
+      {items.map((item) => (
+        <a
+          href={item.href}
+          class="mobile-service-card inline-flex shrink-0 items-center gap-2 rounded-full border border-default px-3.5 py-2 text-secondary"
+          aria-current={item.current}
+        >
+          {item.Icon && <item.Icon size={16} />}
+          <span class="whitespace-nowrap text-sm">{item.label}</span>
+        </a>
+      ))}
+    </div>
+  ) : (
+    <div class="grid grid-cols-2 gap-2">
+      {items.map((item) => (
+        <a
+          href={item.href}
+          class="mobile-service-card flex flex-col items-center justify-center gap-2 py-5 rounded-sm border border-default text-secondary"
+          aria-current={item.current}
+        >
+          {item.Icon && <item.Icon size={20} />}
+          <span class="text-sm">{item.label}</span>
+        </a>
+      ))}
+    </div>
+  )
+}
 
 <style>
+  /* edge-to-edge scroll with the band's own padding preserved at both ends */
+  .service-strip {
+    scrollbar-width: none;
+    margin-inline: -1.5rem;
+    padding-inline: 1.5rem;
+  }
+  .service-strip::-webkit-scrollbar {
+    display: none;
+  }
+
   .mobile-service-card {
     transition:
       background-color 0.2s,
       border-color 0.2s;
   }
-  .mobile-service-card:active,
-  .mobile-service-card[aria-current='page'] {
+  .mobile-service-card:active {
     background-color: var(--color-accent-subtle);
     border-color: var(--color-accent-border);
     color: var(--color-accent) !important;
+  }
+  .mobile-service-card[aria-current] {
+    background-color: var(--color-accent-subtle);
+    border-color: var(--color-accent-border);
+    color: var(--color-text) !important;
+  }
+  .mobile-service-card[aria-current] svg {
+    color: var(--color-accent);
   }
 </style>

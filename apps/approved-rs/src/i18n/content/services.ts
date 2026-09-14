@@ -2,11 +2,7 @@ import servicesYaml from '@/content/i18n/services.yaml?raw';
 import type { Locale } from '@/i18n/config';
 import { loadI18nSection } from '@/i18n/loadI18nSection';
 import { withPlaceholder } from '@/i18n/withPlaceholder';
-import {
-  AUTOSERVICE_SERVICES,
-  DETAILING_SERVICES,
-  type ServiceSlug,
-} from '@/utils/labels';
+import { type ServiceSlug } from '@/utils/labels';
 import {
   servicesContentSchema,
   type ServicesContentData,
@@ -15,6 +11,46 @@ import {
 interface StepItem {
   n: string;
   text: string;
+}
+
+export interface CountryNote {
+  lead: string;
+  points: string[];
+}
+
+export interface IncludedItem {
+  title: string;
+  text: string;
+}
+
+export interface ServiceClosing {
+  eyebrow: string;
+  line1: string;
+  line2: string;
+  accentWord: string;
+  text: string;
+}
+
+interface HubSections {
+  heroPhotoAlt: string;
+  processHeading: string;
+  processLead: string;
+  processSteps: StepItem[];
+  includedHeading: string;
+  includedLead: string;
+  included: IncludedItem[];
+}
+
+interface ServiceHub extends HubSections {
+  metaTitle: string;
+  metaDescription: string;
+  title: string;
+  titleHighlight: string;
+  description: string;
+  breadcrumbLabel: string;
+  casesHeading: string;
+  chooseCountryLabel: string;
+  ctaLabel: string;
 }
 
 interface EuCountrySpokeContent {
@@ -29,6 +65,9 @@ interface EuCountrySpokeContent {
   steps: StepItem[];
   destinationsNote: string;
   chinaCrossLabel: string;
+  notesHeading: string;
+  notesPointsLabel: string;
+  notes: CountryNote;
 }
 
 // Same public shape the original hand-written ServicesContent interface
@@ -49,7 +88,11 @@ export interface ServicesContent {
       casesHeading: string;
       chooseCountryLabel: string;
       ctaLabel: string;
-    };
+      compareHeading: string;
+      compareLead: string;
+      compareHint: string;
+      compareLinkFor: (location: string) => string;
+    } & HubSections;
     title: string;
     descriptionFor: (location: string) => string;
     ctaLabel: string;
@@ -58,22 +101,30 @@ export interface ServicesContent {
     stepsFor: (location: string) => StepItem[];
     deliveryLineFor: (destinations: string) => string;
     deliveryDestinations: string[];
-    citiesLabel: string;
+    citiesHeadingFor: (countryLocation: string) => string;
+    citiesLead: string;
     alsoInLabel: string;
     crossSellLabel: string;
+    countryNotesHeadingFor: (location: string) => string;
+    countryNotesPointsLabel: string;
+    countryNoteFor: (countryCode: string) => CountryNote | undefined;
+    closing: ServiceClosing;
   };
   'vehicle-buyback': {
+    hub: ServiceHub;
     title: string;
     ctaLabel: string;
     casesHeading: string;
     breadcrumbLabel: string;
     descriptionSerbia: string;
     descriptionOtherFor: (name: string) => string;
+    serbiaLinkLabel: string;
     step1: string;
     step2: string;
     step3Serbia: string;
     step3Other: string;
     step4: string;
+    closing: ServiceClosing;
   };
   'vehicle-import': {
     hub: {
@@ -90,7 +141,7 @@ export interface ServicesContent {
       chinaCardText: string;
       exploreLabel: string;
       ctaLabel: string;
-    };
+    } & HubSections;
     de: EuCountrySpokeContent;
     es: EuCountrySpokeContent;
     ch: EuCountrySpokeContent;
@@ -107,6 +158,9 @@ export interface ServicesContent {
       sourceCountriesLabel: string;
       sourceMoreLabel: string;
       destinationsNote: string;
+      notesHeading: string;
+      notesPointsLabel: string;
+      notes: CountryNote;
     };
     china: {
       metaTitle: string;
@@ -120,7 +174,11 @@ export interface ServicesContent {
       steps: StepItem[];
       deCrossLabel: string;
       destinationsNote: string;
+      notesHeading: string;
+      notesPointsLabel: string;
+      notes: CountryNote;
     };
+    closing: ServiceClosing;
   };
   'vehicle-inspection': {
     title: string;
@@ -130,6 +188,18 @@ export interface ServicesContent {
     breadcrumbLabel: string;
     steps: StepItem[];
     extraLine: string;
+    hub: ServiceHub & {
+      mapHeading: string;
+      mapLead: string;
+      compareHeading: string;
+      compareLead: string;
+      compareHint: string;
+      compareLinkFor: (location: string) => string;
+    };
+    countryNotesHeadingFor: (location: string) => string;
+    countryNotesPointsLabel: string;
+    countryNoteFor: (countryCode: string) => CountryNote | undefined;
+    closing: ServiceClosing;
   };
   cityVehicleSourcing: {
     title: string;
@@ -142,62 +212,23 @@ export interface ServicesContent {
     reason4Dekra: string;
     reason4Generic: string;
     otherCitiesLabelFor: (countryLocation: string) => string;
-  };
-  autoServiceBelgrade: {
-    metaTitle: string;
-    metaDescription: string;
-    title: string;
-    titleHighlight: string;
-    description: string;
-    ctaLabel: string;
-    breadcrumbLabel: string;
-    whatWeDoHeading: string;
-    whatWeDo: {
-      key: (typeof AUTOSERVICE_SERVICES)[number];
-      label: string;
-      desc: string;
-    }[];
-    commentLabel: string;
-    commentPlaceholder: string;
-    alsoSourcingLabel: string;
-    howToFindHeading: string;
-    addressLabel: string;
-    streetAddress: string;
-    cityCountryLine: string;
-    mapButtonLabel: string;
-    mapIframeTitle: string;
-    worksHeading: string;
-  };
-  detailingBelgrade: {
-    metaTitle: string;
-    metaDescription: string;
-    title: string;
-    titleHighlight: string;
-    description: string;
-    ctaLabel: string;
-    breadcrumbLabel: string;
-    whatWeDoHeading: string;
-    whatWeDo: {
-      key: (typeof DETAILING_SERVICES)[number];
-      label: string;
-      desc: string;
-    }[];
-    commentLabel: string;
-    commentPlaceholder: string;
-    alsoSourcingLabel: string;
-    howToFindHeading: string;
-    addressLabel: string;
-    streetAddress: string;
-    cityCountryLine: string;
-    mapButtonLabel: string;
-    mapIframeTitle: string;
-    worksHeading: string;
+    cityNotesHeadingFor: (cityLocation: string) => string;
+    cityNotesPointsLabel: string;
+    cityNoteFor: (citySlug: string) => CountryNote | undefined;
   };
   caseChrome: {
     autoLabel: string;
     yearLabel: string;
     priceLabel: string;
     realCaseFallback: string;
+    metaOriginFor: (country: string) => string;
+    metaTitleFor: (parts: {
+      car: string;
+      year: string;
+      service: string;
+      location: string;
+      price: string;
+    }) => string;
     ctaEyebrow: string;
     ctaHeading: string;
     ctaButtonLabel: string;
@@ -217,11 +248,16 @@ export interface ServicesContent {
 function toServicesContent(data: ServicesContentData): ServicesContent {
   const vs = data['vehicle-sourcing'];
   const vb = data['vehicle-buyback'];
+  const vi = data['vehicle-inspection'];
   const cvs = data.cityVehicleSourcing;
 
   return {
     'vehicle-sourcing': {
-      hub: vs.hub,
+      hub: {
+        ...vs.hub,
+        compareLinkFor: (location) =>
+          withPlaceholder(vs.hub.compareLinkFor, 'location', location),
+      },
       title: vs.title,
       descriptionFor: (location) =>
         withPlaceholder(vs.descriptionFor, 'location', location),
@@ -238,11 +274,23 @@ function toServicesContent(data: ServicesContentData): ServicesContent {
       deliveryLineFor: (destinations) =>
         withPlaceholder(vs.deliveryLineFor, 'destinations', destinations),
       deliveryDestinations: vs.deliveryDestinations,
-      citiesLabel: vs.citiesLabel,
+      citiesHeadingFor: (countryLocation) =>
+        withPlaceholder(
+          vs.citiesHeadingFor,
+          'countryLocation',
+          countryLocation,
+        ),
+      citiesLead: vs.citiesLead,
       alsoInLabel: vs.alsoInLabel,
       crossSellLabel: vs.crossSellLabel,
+      countryNotesHeadingFor: (location) =>
+        withPlaceholder(vs.countryNotesHeadingFor, 'location', location),
+      countryNotesPointsLabel: vs.countryNotesPointsLabel,
+      countryNoteFor: (countryCode) => vs.countryNotes[countryCode],
+      closing: vs.closing,
     },
     'vehicle-buyback': {
+      hub: vb.hub,
       title: vb.title,
       ctaLabel: vb.ctaLabel,
       casesHeading: vb.casesHeading,
@@ -250,14 +298,26 @@ function toServicesContent(data: ServicesContentData): ServicesContent {
       descriptionSerbia: vb.descriptionSerbia,
       descriptionOtherFor: (name) =>
         withPlaceholder(vb.descriptionOtherFor, 'name', name),
+      serbiaLinkLabel: vb.serbiaLinkLabel,
       step1: vb.step1,
       step2: vb.step2,
       step3Serbia: vb.step3Serbia,
       step3Other: vb.step3Other,
       step4: vb.step4,
+      closing: vb.closing,
     },
     'vehicle-import': data['vehicle-import'],
-    'vehicle-inspection': data['vehicle-inspection'],
+    'vehicle-inspection': {
+      ...vi,
+      hub: {
+        ...vi.hub,
+        compareLinkFor: (location) =>
+          withPlaceholder(vi.hub.compareLinkFor, 'location', location),
+      },
+      countryNotesHeadingFor: (location) =>
+        withPlaceholder(vi.countryNotesHeadingFor, 'location', location),
+      countryNoteFor: (countryCode) => vi.countryNotes[countryCode],
+    },
     cityVehicleSourcing: {
       title: cvs.title,
       descriptionFor: (cityLocation, countryName) =>
@@ -286,11 +346,20 @@ function toServicesContent(data: ServicesContentData): ServicesContent {
           'countryLocation',
           countryLocation,
         ),
+      cityNotesHeadingFor: (cityLocation) =>
+        withPlaceholder(cvs.cityNotesHeadingFor, 'cityLocation', cityLocation),
+      cityNotesPointsLabel: cvs.cityNotesPointsLabel,
+      cityNoteFor: (citySlug) => cvs.cityNotes[citySlug],
     },
-    autoServiceBelgrade: data.autoServiceBelgrade,
-    detailingBelgrade: data.detailingBelgrade,
     caseChrome: {
       ...data.caseChrome,
+      metaOriginFor: (country) =>
+        withPlaceholder(data.caseChrome.metaOriginFor, 'country', country),
+      metaTitleFor: (parts) =>
+        Object.entries(parts).reduce(
+          (acc, [key, value]) => withPlaceholder(acc, key, value),
+          data.caseChrome.metaTitleFor,
+        ),
       serviceBadges: Object.fromEntries(
         data.caseChrome.serviceBadges.map(({ slug, label }) => [slug, label]),
       ) as Record<ServiceSlug, string>,

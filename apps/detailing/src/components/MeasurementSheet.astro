@@ -1,0 +1,68 @@
+---
+import type { HomeContent } from '@/i18n/content/home';
+
+interface Props {
+  sheet: HomeContent['protocol'];
+}
+
+const { sheet } = Astro.props;
+
+const peak = Math.max(...sheet.rows.map((row) => row.value));
+---
+
+<div class="shell" data-reveal data-reveal-delay="120">
+  <div class="core p-7">
+    <div class="flex flex-wrap items-baseline justify-between gap-3">
+      <h3 class="font-display text-base tracking-tight">{sheet.sheetTitle}</h3>
+      <span class="text-xs text-mute-2">
+        {sheet.sample}
+        <span aria-hidden="true">·</span>
+        {sheet.unit}
+      </span>
+    </div>
+
+    <dl class="mt-6 grid gap-4">
+      {
+        sheet.rows.map((row) => (
+          <div class="grid gap-1.5 sm:grid-cols-[10rem_1fr] sm:items-center sm:gap-3">
+            <dt class="text-sm leading-snug text-mute">{row.panel}</dt>
+            <dd class="grid grid-cols-[1fr_3.5rem] items-center gap-3">
+              <div
+                class="h-1.5 overflow-hidden rounded-full bg-line"
+                aria-hidden="true"
+              >
+                <div
+                  class={`h-full rounded-full ${row.thin ? 'bg-mute-2' : 'bg-champagne-dim'}`}
+                  style={`width:${Math.round((row.value / peak) * 100)}%`}
+                />
+              </div>
+              <span
+                class={`flex flex-col items-end leading-tight ${row.thin ? 'text-mute' : 'text-chalk'}`}
+              >
+                <span class="text-sm tabular-nums">{row.value}</span>
+                {row.thin && (
+                  <span class="text-[0.625rem] text-mute-2">
+                    {sheet.thinLabel}
+                  </span>
+                )}
+              </span>
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    <div class="mt-7 flex flex-wrap gap-2 border-t border-line pt-5">
+      <span
+        class="rounded-full border border-champagne-dim/40 px-3 py-1 text-xs text-champagne"
+      >
+        {sheet.verdictOk}
+      </span>
+      <span
+        class="rounded-full border border-line-strong px-3 py-1 text-xs text-mute"
+      >
+        {sheet.verdictStop}
+      </span>
+    </div>
+  </div>
+</div>

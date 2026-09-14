@@ -1,0 +1,216 @@
+---
+import { Image } from 'astro:assets';
+import carPhoto from '@/assets/inspection-car.jpg';
+import Button from './Button.astro';
+import SectionHeading from './SectionHeading.astro';
+import type { HomeContent } from '@/i18n/content/homeContentSchema';
+
+interface Props {
+  content: HomeContent['inspection'];
+  findingLabel: string;
+  // The inspection hub renders the same four zones the homepage does; without
+  // its own heading the two pages would compete on one h2.
+  heading?: string;
+  subtext?: string;
+  // Omitted on the inspection hub itself — the visitor is already there.
+  ctaHref?: string;
+}
+
+const {
+  content,
+  findingLabel,
+  heading = content.heading,
+  subtext = content.subtext,
+  ctaHref,
+} = Astro.props;
+
+// Percentages of the photo's own box, which is why the buttons sit inside
+// .canvas rather than in the panel around it. Keyed by position in the zones
+// array, never by a name from the YAML: every string in that file goes through
+// the translate job, so a zone named "engine" comes back as "двигатель" in four
+// locales and every hotspot lands in the middle of the car. Re-measure these
+// against the image whenever src/assets/inspection-car.jpg is recropped.
+const SPOTS = [
+  { left: '40%', top: '48%' },
+  { left: '88%', top: '42%' },
+  { left: '21%', top: '75%' },
+  { left: '66%', top: '30%' },
+];
+---
+
+<section class="border-b border-default">
+  <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
+    <div class="grid gap-10 lg:grid-cols-2 lg:gap-16 lg:items-start">
+      <div>
+        <SectionHeading title={heading} />
+        <p class="text-base max-w-md mt-4 leading-relaxed text-muted">
+          {subtext}
+        </p>
+        <p
+          class="flex flex-wrap gap-x-7 gap-y-2 mt-6 pt-5 border-t text-sm border-default text-muted"
+        >
+          <span class="font-medium text-primary">{content.pointsLabel}</span>
+          <span>{content.mediaLabel}</span>
+          <span>{content.reportLabel}</span>
+        </p>
+        {
+          ctaHref && (
+            <div class="mt-7">
+              <Button href={ctaHref} class="px-6 py-3">
+                {content.ctaLabel}
+              </Button>
+            </div>
+          )
+        }
+      </div>
+
+      <zone-map class="block">
+        <div class="rounded-sm border border-default bg-surface p-5">
+          <div class="canvas relative">
+            <Image
+              src={carPhoto}
+              alt={heading}
+              widths={[420, 720, 1080]}
+              sizes="(min-width: 1024px) 40vw, 92vw"
+              class="car w-full h-auto rounded-sm"
+            />
+            {
+              content.zones.map((zone, i) => (
+                <button
+                  type="button"
+                  data-zone={String(i)}
+                  aria-pressed={i === 0 ? 'true' : 'false'}
+                  aria-label={zone.title}
+                  class:list={['spot', { finding: zone.finding }]}
+                  style={`left:${SPOTS[i].left};top:${SPOTS[i].top}`}
+                >
+                  <span aria-hidden="true">{i + 1}</span>
+                </button>
+              ))
+            }
+          </div>
+          <p class="mt-3 text-center text-xs text-muted">{content.hint}</p>
+        </div>
+
+        <div class="mt-5">
+          {
+            content.zones.map((zone, i) => (
+              <div
+                data-zone-panel={String(i)}
+                hidden={i !== 0}
+                class="rounded-sm border border-default bg-surface-2 p-6"
+              >
+                <h3 class="font-display text-lg font-bold text-primary">
+                  {zone.title}
+                </h3>
+                <p class="mt-2 text-sm leading-relaxed text-muted">
+                  {zone.text}
+                </p>
+                <ul class="mt-4 grid gap-1 text-sm text-muted">
+                  {zone.points.map((point) => (
+                    <li class="pl-4 -indent-4">
+                      <span class="text-muted">—</span> {point}
+                    </li>
+                  ))}
+                </ul>
+                {zone.finding && (
+                  <p class="finding-note mt-5 px-4 py-3 text-sm text-primary">
+                    <strong class="font-medium">{findingLabel}</strong>{' '}
+                    {zone.finding}
+                  </p>
+                )}
+              </div>
+            ))
+          }
+        </div>
+      </zone-map>
+    </div>
+  </div>
+</section>
+
+<style>
+  .canvas {
+    container-type: inline-size;
+  }
+
+  /* Shot in daylight against warm brick — at full saturation it both blows out
+     the dark panel and puts a second orange next to the accent. */
+  .car {
+    filter: grayscale(0.85) brightness(0.72) contrast(1.06);
+  }
+
+  /* the walkthrough swaps panels on a timer, so the new one fades in rather
+     than snapping */
+  [data-zone-panel]:not([hidden]) {
+    animation: zone-in 0.32s ease-out both;
+  }
+
+  @keyframes zone-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.35rem);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-zone-panel]:not([hidden]) {
+      animation: none;
+    }
+  }
+
+  .spot {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: clamp(1.75rem, 10cqw, 2.25rem);
+    height: clamp(1.75rem, 10cqw, 2.25rem);
+    /* the coarse-pointer rule in global.css puts min-height:44px on every
+       button, which stretched these into ovals — the 44px target lives on
+       ::before instead */
+    min-height: 0;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-probe);
+    background-color: var(--color-bg);
+    box-shadow: 0 0 0 3px rgb(0 0 0 / 0.35);
+    color: var(--color-probe);
+    font-weight: 600;
+    font-size: clamp(0.8rem, 3.6cqw, 0.95rem);
+    font-variant-numeric: tabular-nums;
+    transition:
+      background-color 0.2s,
+      color 0.2s;
+  }
+  .spot::before {
+    content: '';
+    position: absolute;
+    inset: 50%;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+  }
+  .spot.finding {
+    border-color: var(--color-finding);
+    color: var(--color-finding);
+  }
+  .spot[aria-pressed='true'] {
+    background-color: var(--color-probe);
+    color: var(--color-bg);
+  }
+  .spot.finding[aria-pressed='true'] {
+    background-color: var(--color-finding);
+    color: var(--color-bg);
+  }
+  .finding-note {
+    background-color: var(--color-finding-soft);
+    border-left: 2px solid var(--color-finding);
+  }
+</style>
+
+<script>
+  import { defineZoneMap } from '@podbor/site-kit/browser';
+
+  defineZoneMap();
+</script>

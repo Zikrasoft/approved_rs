@@ -35,11 +35,7 @@ const groups = await Promise.all(
   CASE_COLLECTIONS.map(async ({ collection, dir, label }) => ({
     dir,
     label,
-    entries: (
-      await getCollection(
-        collection as 'cases' | 'autoserviceCases' | 'detailingCases',
-      )
-    )
+    entries: (await getCollection(collection as 'cases'))
       .map((e) => ({
         id: e.id,
         title: 'car' in e.data && e.data.car ? e.data.car : e.data.title,

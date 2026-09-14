@@ -1,13 +1,13 @@
 ---
 import SiteLogo from './SiteLogo.astro';
 import ContactIcon from './ContactIcon.astro';
+import PartnerBrands from './PartnerBrands.astro';
 import { getNavItems } from '@/utils/labels';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
 import { getServicesContent } from '@/i18n/content/services';
 import {
   SITE_NAME,
-  DEFAULT_COUNTRY,
   TG_MANAGER,
   WHATSAPP_NUMBER,
   VIBER_NUMBER,
@@ -59,7 +59,7 @@ const coverageLine = getActiveCountries()
               href={telegramLink(TG_MANAGER)}
               target="_blank"
               rel="noopener"
-              class="footer-tg inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline border border-accent-border text-accent"
+              class="footer-cta inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline bg-accent text-on-accent"
             >
               <ContactIcon channel="telegram" size={14} />
               {t.footer.contactManagerLabel}
@@ -71,7 +71,7 @@ const coverageLine = getActiveCountries()
               target="_blank"
               rel="noopener"
               hidden
-              class="footer-tg inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline border border-accent-border text-accent"
+              class="footer-cta inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline bg-accent text-on-accent"
             >
               <ContactIcon channel="whatsapp" size={14} />
               {cc.whatsappButtonLabel}
@@ -86,7 +86,7 @@ const coverageLine = getActiveCountries()
               rel="noopener"
               hidden
               aria-label={t.footer.contactManagerLabel}
-              class="footer-tg inline-flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-accent-border text-accent"
+              class="footer-channel-btn inline-flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-default text-muted"
             >
               <ContactIcon channel="telegram" size={14} />
             </a>
@@ -97,7 +97,7 @@ const coverageLine = getActiveCountries()
               target="_blank"
               rel="noopener"
               aria-label={cc.whatsappButtonLabel}
-              class="footer-tg inline-flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-accent-border text-accent"
+              class="footer-channel-btn inline-flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-default text-muted"
             >
               <ContactIcon channel="whatsapp" size={14} />
             </a>
@@ -108,7 +108,7 @@ const coverageLine = getActiveCountries()
             target="_blank"
             rel="noopener"
             aria-label={cc.viberButtonLabel}
-            class="footer-tg inline-flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-accent-border text-accent"
+            class="footer-channel-btn inline-flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-default text-muted"
           >
             <ContactIcon channel="viber" size={14} />
           </a>
@@ -124,7 +124,7 @@ const coverageLine = getActiveCountries()
         </p>
         <nav class="flex flex-col gap-2.5 text-sm footer-nav text-secondary">
           {
-            getNavItems(locale, DEFAULT_COUNTRY).map((item) => (
+            getNavItems(locale).map((item) => (
               <a href={item.href}>{item.label}</a>
             ))
           }
@@ -142,12 +142,19 @@ const coverageLine = getActiveCountries()
           <a href={PathBuilder.casesVehicleSourcing(locale)}>{t.nav.cases}</a>
           <a href={PathBuilder.contacts(locale)}>{t.nav.contacts}</a>
           <a href={PathBuilder.privacy(locale)}>{t.footer.privacyLabel}</a>
+          <button type="button" data-cookie-settings class="w-fit text-left">
+            {t.footer.cookieSettingsLabel}
+          </button>
         </nav>
         <div class="mt-6 space-y-1.5">
           <p class="text-xs text-muted">{coverageLine}</p>
           <p class="text-xs text-muted">{t.footer.hoursLine}</p>
         </div>
       </div>
+    </div>
+
+    <div class="pt-8 mb-12 border-t border-default">
+      <PartnerBrands variant="footer" />
     </div>
 
     <!-- Bottom -->
@@ -182,14 +189,21 @@ const coverageLine = getActiveCountries()
     color: var(--color-text) !important;
   }
 
-  .footer-tg {
+  .footer-cta {
+    transition: background-color 0.2s;
+  }
+  .footer-cta:hover {
+    background-color: var(--color-accent-hover);
+  }
+
+  .footer-channel-btn {
     transition:
-      background-color 0.2s,
+      color 0.2s,
       border-color 0.2s;
   }
-  .footer-tg:hover {
-    background-color: var(--color-accent-subtle);
-    border-color: var(--color-accent) !important;
+  .footer-channel-btn:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent-border);
   }
 
   .footer-channel {

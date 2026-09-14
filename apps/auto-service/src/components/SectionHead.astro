@@ -1,0 +1,16 @@
+---
+interface Props {
+  eyebrow: string;
+  heading: string;
+  body?: string;
+  class?: string;
+}
+
+const { eyebrow, heading, body, class: className = '' } = Astro.props;
+---
+
+<div class={`flex max-w-2xl flex-col gap-3 ${className}`}>
+  <span class="eyebrow">{eyebrow}</span>
+  <h2 class="text-section">{heading}</h2>
+  {body && <p class="text-base leading-relaxed text-muted">{body}</p>}
+</div>

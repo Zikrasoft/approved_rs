@@ -1,0 +1,116 @@
+---
+import Icon from './Icon.astro';
+import Wordmark from './Wordmark.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+import { getServicesContent } from '@/i18n/content/services';
+import { PathBuilder } from '@/utils/paths';
+import { SERVICE_SLUGS } from '@/utils/services';
+import { GARAGE_ADDRESS, SHOP_ENABLED, SITE_NAME } from '@/utils/constants';
+import { contactChannels } from '@/utils/contactLinks';
+
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+const services = getServicesContent(locale);
+const year = new Date().getFullYear();
+
+const channels = contactChannels(site);
+---
+
+<footer class="mt-20 border-t border-line bg-card">
+  <div class="wrap grid gap-10 py-band md:grid-cols-4">
+    <div class="flex flex-col gap-4">
+      <Wordmark />
+      <p class="max-w-xs text-sm leading-relaxed text-muted">
+        {site.footer.tagline}
+      </p>
+    </div>
+
+    <nav class="flex flex-col gap-2.5" aria-label={site.footer.servicesHeading}>
+      <span
+        class="spec text-[0.6875rem] uppercase tracking-[0.16em] text-muted"
+      >
+        {site.footer.servicesHeading}
+      </span>
+      {
+        SERVICE_SLUGS.map((slug) => (
+          <a href={PathBuilder.service(locale, slug)} class="link-muted">
+            {services[slug].name}
+          </a>
+        ))
+      }
+    </nav>
+
+    <nav class="flex flex-col gap-2.5" aria-label={site.footer.companyHeading}>
+      <span
+        class="spec text-[0.6875rem] uppercase tracking-[0.16em] text-muted"
+      >
+        {site.footer.companyHeading}
+      </span>
+      <a href={PathBuilder.works(locale)} class="link-muted">{site.nav.works}</a
+      >
+      {
+        SHOP_ENABLED && (
+          <a href={PathBuilder.shop(locale)} class="link-muted">
+            {site.nav.shop}
+          </a>
+        )
+      }
+      <a href={PathBuilder.contact(locale)} class="link-muted"
+        >{site.nav.contact}</a
+      >
+      <a href={PathBuilder.privacy(locale)} class="link-muted"
+        >{site.footer.privacyLabel}</a
+      >
+      <button
+        type="button"
+        data-cookie-settings
+        class="link-muted w-fit text-left">{site.cookie.settings}</button
+      >
+    </nav>
+
+    <div class="flex flex-col gap-2.5">
+      <span
+        class="spec text-[0.6875rem] uppercase tracking-[0.16em] text-muted"
+      >
+        {site.footer.contactHeading}
+      </span>
+      <ul class="flex flex-col">
+        {
+          channels.map((channel) => (
+            <li>
+              <a
+                href={channel.href}
+                data-contact-channel={channel.track}
+                rel="noopener"
+                class="link-muted group flex min-h-11 items-center gap-2.5"
+              >
+                <Icon
+                  name={channel.icon}
+                  size={16}
+                  class="shrink-0 text-muted transition-colors duration-150 group-hover:text-signal group-focus-visible:text-signal"
+                />
+                <span class="spec">{channel.label}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <address class="mt-1.5 text-sm not-italic leading-relaxed text-muted">
+        {GARAGE_ADDRESS.street}<br />{
+          `${GARAGE_ADDRESS.district}, ${GARAGE_ADDRESS.city}`
+        }
+      </address>
+      <p class="text-sm leading-relaxed text-muted">
+        <span class="block text-xs text-ink-2">{site.footer.hoursHeading}</span>
+        {site.footer.hours}
+      </p>
+    </div>
+  </div>
+
+  <div class="border-t border-line">
+    <p class="wrap py-5 text-xs text-muted">
+      {`© ${year} ${SITE_NAME}. ${site.footer.rightsSuffix}`}
+    </p>
+  </div>
+</footer>

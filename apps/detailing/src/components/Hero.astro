@@ -1,0 +1,121 @@
+---
+import Cta from './Cta.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getHomeContent } from '@/i18n/content/home';
+import { getSiteContent } from '@/i18n/content/site';
+import { PathBuilder } from '@/utils/paths';
+import {
+  HERO_HEIGHT,
+  HERO_SIZES,
+  HERO_WIDTH,
+  getHeroPicture,
+} from '@/utils/heroImage';
+
+const locale = localeFrom(Astro.url.pathname);
+const { hero } = getHomeContent(locale);
+const site = getSiteContent(locale);
+const picture = await getHeroPicture();
+---
+
+<section
+  class="relative flex min-h-svh flex-col justify-end overflow-hidden pb-6 pt-24 sm:pb-10 sm:pt-28"
+>
+  <div
+    class="pointer-events-none absolute inset-0 -z-10 bg-[#282828]"
+    aria-hidden="true"
+    data-hero-bg
+  >
+    <img
+      src={picture.src}
+      srcset={picture.srcSet.attribute}
+      sizes={HERO_SIZES}
+      width={HERO_WIDTH}
+      height={HERO_HEIGHT}
+      alt=""
+      loading="eager"
+      fetchpriority="high"
+      class="h-full w-full scale-[1.35] object-cover object-[58%_32%] sm:scale-100"
+    />
+    <div
+      class="absolute inset-0 bg-gradient-to-b from-void/10 via-void/72 via-56% to-void sm:from-void/25 sm:via-void/86 sm:via-40%"
+    >
+    </div>
+    <div
+      class="absolute inset-0 bg-gradient-to-r from-void/60 via-void/30 via-70% to-transparent"
+    >
+    </div>
+    <div
+      class="absolute bottom-[-24%] left-[32%] h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle_at_50%_50%,#E3C08A,transparent_62%)] opacity-[0.16] blur-[140px]"
+    >
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="grid items-end gap-8 lg:grid-cols-[1.35fr_1fr] lg:gap-14">
+      <div class="flex flex-col gap-4 sm:gap-7">
+        <span class="eyebrow rise">{hero.eyebrow}</span>
+
+        <h1 class="text-[2rem] sm:text-mega">
+          <span class="rise block" style="--rise-delay:60ms"
+            >{hero.titleTop}</span
+          >{' '}
+          <span class="text-iridescent rise block" style="--rise-delay:120ms"
+            >{hero.titleAccent}</span
+          >{' '}
+          <span class="rise block" style="--rise-delay:180ms"
+            >{hero.titleBottom}</span
+          >
+        </h1>
+
+        <p
+          class="rise max-w-xl text-[0.9375rem] leading-relaxed text-mute sm:text-lg"
+          style="--rise-delay:240ms"
+        >
+          {hero.lead}
+        </p>
+
+        <div
+          class="rise flex flex-wrap items-center gap-3"
+          style="--rise-delay:300ms"
+          data-contact-cta
+        >
+          <Cta label={hero.ctaPrimary} openModal />
+          <Cta
+            label={hero.ctaSecondary}
+            href={PathBuilder.works(locale)}
+            variant="ghost"
+          />
+        </div>
+      </div>
+
+      <div class="shell rise" style="--rise-delay:360ms">
+        <div
+          class="core grid grid-cols-3 divide-x divide-line lg:grid-cols-1 lg:divide-x-0 lg:divide-y"
+        >
+          {
+            hero.stats.map((stat) => (
+              <div class="flex flex-col gap-1 px-3 py-4 lg:flex-row lg:items-baseline lg:justify-between lg:gap-6 lg:px-6 lg:py-6">
+                <span class="font-display text-xl tracking-tight text-chalk sm:text-2xl lg:text-4xl">
+                  {stat.value}
+                </span>
+                <span class="text-[0.6875rem] leading-snug text-mute lg:max-w-[11rem] lg:text-right lg:text-xs">
+                  {stat.label}
+                </span>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="rise mt-8 hidden items-center gap-3 text-[0.6875rem] uppercase tracking-[0.22em] text-mute-2 sm:flex"
+      style="--rise-delay:420ms"
+    >
+      <span
+        class="block h-8 w-px bg-gradient-to-b from-transparent via-line-strong to-transparent"
+        aria-hidden="true"></span>
+      {site.common.scrollHint}
+    </div>
+  </div>
+</section>

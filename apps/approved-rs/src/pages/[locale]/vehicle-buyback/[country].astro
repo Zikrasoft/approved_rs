@@ -2,7 +2,8 @@
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import StepsList from '@/components/StepsList.astro';
 import Faq from '@/components/Faq.astro';
-import { getCountryPaths, withLocales, PathBuilder } from '@/utils/paths';
+import IncludedGrid from '@/components/IncludedGrid.astro';
+import { withLocales, PathBuilder } from '@/utils/paths';
 import { getCountry } from '@/utils/geo';
 import {
   generateMeta,
@@ -14,7 +15,12 @@ import { SITE_URL } from '@/utils/constants';
 import { getFaq } from '@/i18n/content/faq';
 import { getServicesContent } from '@/i18n/content/services';
 
-export const getStaticPaths = () => withLocales(getCountryPaths());
+// Only Serbia: everywhere else the page said nothing a reader could not read
+// on the hub, so the other seven 301 to it (see middleware.ts). Serbia keeps
+// its own page because Serbian plates are a different offer and every buyback
+// case is Serbian.
+export const getStaticPaths = () =>
+  withLocales([{ params: { country: 'rs' } }]);
 
 const { locale, country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
@@ -59,6 +65,7 @@ const description = isSerbia
   formService="vehicle-buyback"
   currentCountry={countryCode!}
   currentService="vehicle-buyback"
+  showCountryCrossLinks={false}
   casesHeading={sc.casesHeading}
   breadcrumbs={[
     {
@@ -67,6 +74,7 @@ const description = isSerbia
     },
     { label: sc.breadcrumbLabel },
   ]}
+  closing={sc.closing}
 >
   <StepsList
     steps={[
@@ -78,6 +86,11 @@ const description = isSerbia
   />
 
   <Fragment slot="extra">
+    <IncludedGrid
+      heading={sc.hub.includedHeading}
+      lead={sc.hub.includedLead}
+      items={sc.hub.included}
+    />
     <Faq items={getFaq(locale)['vehicle-buyback']} />
   </Fragment>
 </ServicePageLayout>

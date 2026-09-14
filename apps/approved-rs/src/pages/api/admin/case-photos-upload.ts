@@ -1,9 +1,6 @@
 export const prerender = false;
 
 import type { APIContext } from 'astro';
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
-import path from 'node:path';
 import {
   isKnownCaseDir,
   isValidSlug,
@@ -108,11 +105,28 @@ export async function POST({
     return backToForm(request, dir, slug, { ok: String(newRelPaths.length) });
   }
 
-  const caseDir = path.join(process.cwd(), dir, slug);
-  const indexPath = path.join(caseDir, 'index.md');
-  if (!existsSync(indexPath)) {
+  const written = await writeLocalPhotos(dir, slug, files);
+  if (written === null) {
     return new Response('Case not found', { status: 404 });
   }
+  return backToForm(request, dir, slug, { ok: String(written) });
+}
+
+async function writeLocalPhotos(
+  dir: string,
+  slug: string,
+  files: File[],
+): Promise<number | null> {
+  if (!import.meta.env.DEV) return null;
+
+  const { mkdir, readdir, readFile, writeFile } =
+    await import('node:fs/promises');
+  const { existsSync } = await import('node:fs');
+  const path = await import('node:path');
+
+  const caseDir = path.join(process.cwd(), dir, slug);
+  const indexPath = path.join(caseDir, 'index.md');
+  if (!existsSync(indexPath)) return null;
 
   const galleryDir = path.join(caseDir, 'gallery');
   await mkdir(galleryDir, { recursive: true });
@@ -132,5 +146,5 @@ export async function POST({
   const raw = await readFile(indexPath, 'utf-8');
   await writeFile(indexPath, appendGalleryEntries(raw, newRelPaths));
 
-  return backToForm(request, dir, slug, { ok: String(newRelPaths.length) });
+  return newRelPaths.length;
 }

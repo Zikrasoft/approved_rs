@@ -7,8 +7,6 @@ import { z } from 'zod';
 export const promoBannersContentSchema = z
   .object({
     sourcing: z.array(z.string()),
-    autoservice: z.array(z.string()),
-    detailing: z.array(z.string()),
   })
   .strict();
 

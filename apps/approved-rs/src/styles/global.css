@@ -1,29 +1,27 @@
 @import 'tailwindcss';
-@import '@fontsource/outfit/300.css';
-@import '@fontsource/outfit/400.css';
-@import '@fontsource/outfit/500.css';
-@import '@fontsource/outfit/600.css';
-@import '@fontsource/outfit/700.css';
-@import '@fontsource/playfair-display/700.css';
-@import '@fontsource/playfair-display/700-italic.css';
-@import '@fontsource/playfair-display/800.css';
+@import '@fontsource/unbounded/700.css';
+@import '@fontsource/golos-text/400.css';
+@import '@fontsource/golos-text/500.css';
+@import '@fontsource/golos-text/600.css';
 
-/* Logo/header text (APPROVED + .RS badge): font-display: swap always paints the
-   fallback first, then swaps and reflows since the fallback has different
-   letter widths — visible as a width "jump" on every navigation. These two
-   faces get font-display: optional instead: with the file preloaded (see
-   BaseLayout), the browser commits to the real font on first paint and never
-   swaps mid-render. Same family/weight/style/unicode-range as the @import
-   above, so this simply overrides font-display for the exact glyphs used. */
+/* Everything the header paints above the fold: the logo (Unbounded 700, always
+   latin — the wordmark is "Approved.rs") and the nav links and CTA (Golos Text
+   400 and 500, whose script follows the visitor's locale). font-display: swap
+   always paints the fallback first, then swaps and reflows since the fallback
+   has different letter widths — visible as a width "jump" on every navigation,
+   and the nav is centred with flex-1, so a swap there slides the whole row
+   sideways. These faces get font-display: optional instead: with the matching
+   file preloaded (see BaseLayout, which picks the subset by locale), the
+   browser commits to the real font on first paint and never swaps mid-render. */
 @font-face {
-  font-family: 'Playfair Display';
+  font-family: 'Unbounded';
   font-style: normal;
   font-weight: 700;
   font-display: optional;
   src:
-    url('../../node_modules/@fontsource/playfair-display/files/playfair-display-latin-700-normal.woff2')
+    url('../../node_modules/@fontsource/unbounded/files/unbounded-latin-700-normal.woff2')
       format('woff2'),
-    url('../../node_modules/@fontsource/playfair-display/files/playfair-display-latin-700-normal.woff')
+    url('../../node_modules/@fontsource/unbounded/files/unbounded-latin-700-normal.woff')
       format('woff');
   unicode-range:
     U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
@@ -31,15 +29,42 @@
     U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-  font-family: 'Outfit';
+  font-family: 'Golos Text';
   font-style: normal;
-  font-weight: 600;
+  font-weight: 400;
   font-display: optional;
-  src:
-    url('../../node_modules/@fontsource/outfit/files/outfit-latin-600-normal.woff2')
-      format('woff2'),
-    url('../../node_modules/@fontsource/outfit/files/outfit-latin-600-normal.woff')
-      format('woff');
+  src: url('../../node_modules/@fontsource/golos-text/files/golos-text-cyrillic-400-normal.woff2')
+    format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 500;
+  font-display: optional;
+  src: url('../../node_modules/@fontsource/golos-text/files/golos-text-cyrillic-500-normal.woff2')
+    format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url('../../node_modules/@fontsource/golos-text/files/golos-text-latin-400-normal.woff2')
+    format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 500;
+  font-display: optional;
+  src: url('../../node_modules/@fontsource/golos-text/files/golos-text-latin-500-normal.woff2')
+    format('woff2');
   unicode-range:
     U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
     U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
@@ -47,42 +72,57 @@
 }
 
 @theme {
-  /* ── Light default palette ── */
-  --color-bg: #f4f6fa;
-  --color-surface: #ffffff;
-  --color-surface-2: #eaecf4;
-  --color-border: #d8dce8;
-  --color-border-strong: #c4c9d8;
-  --color-text: #0d0f14;
-  --color-text-2: #2d3448;
-  --color-muted: #6b7280;
-  --color-accent: #1e3a5f;
-  --color-accent-hover: #142e50;
-  --color-accent-glow: rgba(30, 58, 95, 0.18);
+  /* ── Palette ──
+     One theme, deliberately dark: the pages are carried by photographs of
+     delivered cars, and a light ground washes them out. There is no light
+     variant and no toggle. */
+  --color-bg: #0a0b0c;
+  --color-surface: #161a1c;
+  --color-surface-2: #1e2325;
+  --color-border: #2a3033;
+  --color-border-strong: #3a4245;
+  --color-text: #f5f3ef;
+  --color-text-2: #c8cbca;
+  --color-muted: #8d9493;
+  --color-accent: #d8452b;
+  --color-accent-hover: #e8563c;
+  --color-accent-glow: rgba(216, 69, 43, 0.22);
   --color-on-accent: #ffffff;
 
-  /* ── Semantic alpha tokens (light defaults) ── */
-  --color-accent-subtle: rgba(30, 58, 95, 0.06);
-  --color-accent-soft: rgba(30, 58, 95, 0.1);
-  --color-accent-border: rgba(30, 58, 95, 0.22);
-  --color-accent-mid: rgba(30, 58, 95, 0.3);
-  --color-surface-glass: rgba(255, 255, 255, 0.95);
-  --color-header-glass: rgba(244, 246, 250, 0.9);
-  --color-header-mobile: rgba(244, 246, 250, 0.99);
+  /* ── Semantic alpha tokens ── */
+  --color-accent-subtle: rgba(216, 69, 43, 0.08);
+  --color-accent-soft: rgba(216, 69, 43, 0.14);
+  --color-accent-border: rgba(216, 69, 43, 0.32);
+  --color-accent-mid: rgba(216, 69, 43, 0.45);
+  --color-surface-glass: rgba(22, 26, 28, 0.94);
+  --color-header-glass: rgba(10, 11, 12, 0.82);
+  --color-header-mobile: rgba(10, 11, 12, 0.99);
 
-  --font-display: 'Playfair Display', Georgia, serif;
-  --font-sans: 'Outfit', system-ui, sans-serif;
+  /* Two colours the accent must not be asked to carry: "this is a control you
+     can press" and "this is a defect we found" have to stay distinguishable,
+     and red already means the first one. */
+  --color-probe: #7fbcc6;
+  --color-finding: #d9a15a;
+  --color-finding-soft: rgba(217, 161, 90, 0.1);
 
-  /* Ink-stamp accent — used only by the hero "approved" seal, nowhere else. */
-  --color-stamp-ink: #b23a2e;
+  --font-display: 'Unbounded', system-ui, sans-serif;
+  --font-sans: 'Golos Text', system-ui, sans-serif;
+
+  /* One named vertical rhythm for content bands. The scale is wider than
+     the sister sites' on purpose: this layout runs large display type and
+     needs the air to carry it. */
+  --spacing-band: 4rem;
+  --spacing-band-lg: 7rem;
 }
 
 /* ── Non-class tokens (only used in CSS rules / inline gradients) ── */
 :root {
-  --color-grid-line: rgba(59, 79, 110, 0.06);
-  --color-deco-stroke: rgba(59, 79, 110, 0.05);
-  --color-ambient-glow: rgba(59, 79, 110, 0.05);
-  --grain-opacity: 0.012;
+  /* The photo veils fade to the page ground, so they need it channel-wise. */
+  --color-bg-rgb: 10 11 12;
+  --color-grid-line: rgba(245, 243, 239, 0.04);
+  --color-deco-stroke: rgba(245, 243, 239, 0.06);
+  --color-ambient-glow: rgba(216, 69, 43, 0.07);
+  --grain-opacity: 0.03;
   --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Semantic z-index scale */
@@ -93,37 +133,6 @@
   --z-modal: 60;
   --z-grain: 70;
   --z-toast: 80;
-}
-
-/* ── Dark theme overrides ── */
-[data-theme='dark'] {
-  --color-bg: #0d0f14;
-  --color-surface: #14171f;
-  --color-surface-2: #1b1f2a;
-  --color-border: #22273a;
-  --color-border-strong: #2d3448;
-  --color-text: #f1f3f9;
-  --color-text-2: #c8d0e0;
-  --color-muted: #8892a4;
-  --color-accent: #94a3b8;
-  --color-accent-hover: #cbd5e1;
-  --color-accent-glow: rgba(148, 163, 184, 0.2);
-  --color-on-accent: #0d0f14;
-
-  --color-accent-subtle: rgba(148, 163, 184, 0.07);
-  --color-accent-soft: rgba(148, 163, 184, 0.12);
-  --color-accent-border: rgba(148, 163, 184, 0.22);
-  --color-accent-mid: rgba(148, 163, 184, 0.36);
-  --color-surface-glass: rgba(20, 23, 31, 0.92);
-  --color-header-glass: rgba(13, 15, 20, 0.88);
-  --color-header-mobile: rgba(13, 15, 20, 0.98);
-
-  --color-grid-line: rgba(148, 163, 184, 0.05);
-  --color-deco-stroke: rgba(148, 163, 184, 0.07);
-  --color-ambient-glow: rgba(148, 163, 184, 0.06);
-  --grain-opacity: 0.03;
-
-  --color-stamp-ink: #d9695a;
 }
 
 /* ── Readable aliases for Tailwind's auto-generated names ──────────── */
@@ -150,6 +159,7 @@
 /* ─── Base ─────────────────────────────────────────────── */
 html {
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -188,13 +198,35 @@ h4 {
 }
 
 @layer base {
+  /* Neither Unbounded nor Golos Text ships an italic, and a browser-synthesised
+     oblique on a geometric display face reads as a rendering fault. Emphasis
+     keeps its <em> semantics and shifts weight instead. */
+  em {
+    font-style: normal;
+    font-weight: 500;
+  }
+
   a {
     color: inherit;
     text-decoration: none;
   }
   button:not(:disabled),
-  [role='button']:not([aria-disabled='true']) {
+  [role='button']:not([aria-disabled='true']),
+  summary,
+  label:has(input:is([type='checkbox'], [type='radio'])) {
     cursor: pointer;
+  }
+
+  /* Apple HIG asks for a 44pt minimum hit area. Applied only to coarse
+     pointers so mouse layouts keep their compact controls. */
+  @media (pointer: coarse) {
+    button,
+    [role='button'],
+    summary,
+    select,
+    input:not([type='hidden'], [type='checkbox'], [type='radio']) {
+      min-height: 44px;
+    }
   }
 }
 
@@ -320,7 +352,7 @@ h4 {
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--color-accent);
+  color: var(--color-muted);
   margin-bottom: 1.25rem;
 }
 .eyebrow::before {
@@ -328,7 +360,7 @@ h4 {
   display: block;
   width: 22px;
   height: 1px;
-  background: var(--color-accent);
+  background: var(--color-border-strong);
   flex-shrink: 0;
   animation: slideRight 0.5s 0.1s var(--ease-spring) both;
   transform-origin: left;
@@ -351,12 +383,75 @@ h4 {
   background-size: 48px 48px;
 }
 
+/* ─── Photo hero (homepage + service pages) ──────────────────
+   Mobile keeps the photograph as its own block: a full-bleed image behind
+   the headline needs a veil heavy enough to read through, and at phone
+   width that veil leaves nothing of the car visible. */
+.photo-hero-shot {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+.photo-hero-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgb(var(--color-bg-rgb) / 0.72) 0%,
+    rgb(var(--color-bg-rgb) / 0) 26%,
+    rgb(var(--color-bg-rgb) / 0) 52%,
+    var(--color-bg) 99%
+  );
+}
+.photo-hero-body {
+  padding-top: 1rem;
+  padding-bottom: var(--spacing-band);
+}
+@media (min-width: 640px) {
+  .photo-hero-shot {
+    aspect-ratio: 21 / 9;
+  }
+}
+@media (min-width: 1024px) {
+  .photo-hero {
+    display: flex;
+    align-items: flex-end;
+    min-height: min(88vh, 46rem);
+    overflow: hidden;
+  }
+  .photo-hero-shot {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto;
+  }
+  .photo-hero-veil {
+    background:
+      linear-gradient(
+        90deg,
+        rgb(var(--color-bg-rgb) / 0.9) 0%,
+        rgb(var(--color-bg-rgb) / 0.62) 46%,
+        rgb(var(--color-bg-rgb) / 0.2) 74%
+      ),
+      linear-gradient(
+        180deg,
+        rgb(var(--color-bg-rgb) / 0.6) 0%,
+        rgb(var(--color-bg-rgb) / 0.22) 26%,
+        rgb(var(--color-bg-rgb) / 0.72) 70%,
+        var(--color-bg) 100%
+      );
+  }
+  .photo-hero-body {
+    width: 100%;
+    padding-top: var(--spacing-band);
+    padding-bottom: var(--spacing-band-lg);
+  }
+}
+
 /* ─── Decorative ghost word ──────────────────────────────── */
 .deco-word {
   position: absolute;
   font-family: var(--font-display);
-  font-weight: 800;
-  font-style: italic;
+  font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 1;
   color: transparent;
@@ -364,6 +459,34 @@ h4 {
   user-select: none;
   pointer-events: none;
   white-space: nowrap;
+}
+
+/* ─── Hairline point list (MarketNotes + MarketCompare) ──── */
+.market-points {
+  border-top: 1px solid var(--color-border);
+}
+.market-point {
+  position: relative;
+  padding: 1.05rem 0 1.05rem 1.6rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.market-point::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 1.6rem;
+  width: 0.6rem;
+  height: 1px;
+  background-color: var(--color-border-strong);
+}
+@media (min-width: 768px) {
+  .market-points {
+    column-count: 2;
+    column-gap: 3.5rem;
+  }
+  .market-point {
+    break-inside: avoid;
+  }
 }
 
 /* ─── Stat block ─────────────────────────────────────────── */
@@ -378,14 +501,18 @@ h4 {
   top: 0.15rem;
   bottom: 0.15rem;
   width: 2px;
-  background: linear-gradient(to bottom, var(--color-accent), transparent);
+  background: linear-gradient(
+    to bottom,
+    var(--color-border-strong),
+    transparent
+  );
   border-radius: 1px;
 }
 .stat-n {
   font-family: var(--font-display);
   font-size: clamp(1.5rem, 5.5vw, 2.4rem);
   font-weight: 700;
-  color: var(--color-accent);
+  color: var(--color-text);
   line-height: 1;
   letter-spacing: -0.03em;
 }
@@ -412,7 +539,6 @@ h4 {
   font-size: 0.8rem;
   line-height: 1;
   font-weight: 700;
-  font-style: italic;
   color: var(--color-accent);
   background: var(--color-bg);
   flex-shrink: 0;
@@ -440,21 +566,37 @@ h4 {
     0 8px 40px var(--color-ambient-glow);
 }
 
-/* ─── Sliding pill tab switcher (shared visual: LeadForm contact tabs,
-   cases page category tabs — same markup contract: a relatively-positioned
-   root with a `.pill-tab-track` sibling span and `.pill-tab` buttons) ── */
-.pill-tab-track {
-  position: absolute;
-  top: 0.25rem;
-  bottom: 0.25rem;
-  left: 0;
-  border-radius: 2px;
-  background: var(--color-accent);
+/* ─── Filter chip ────────────────────────────────────────
+   Shared by the home page's budget filter and the cases index's category
+   switcher: both are "pick one of these" controls sitting on the page
+   ground, so they read as the same control. */
+.chip {
+  padding: 0.42rem 0.95rem;
+  border-radius: 2rem;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-muted);
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-decoration: none;
   transition:
-    transform 0.35s var(--ease-spring),
-    width 0.35s var(--ease-spring);
-  will-change: transform, width;
+    color 0.2s,
+    border-color 0.2s,
+    background-color 0.2s;
 }
+.chip:hover {
+  color: var(--color-text);
+}
+.chip[aria-pressed='true'],
+.chip[aria-selected='true'] {
+  background-color: var(--color-text);
+  border-color: var(--color-text);
+  color: var(--color-bg);
+}
+.chip-count {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
 .pill-tab {
   transition: color 0.2s;
   background: transparent;
@@ -494,6 +636,21 @@ h4 {
    under 16px — text-sm (14px) on .form-field triggered it on every phone. */
 .form-field {
   font-size: 16px !important;
+}
+
+@media (max-width: 639px) {
+  dialog .lead-submit {
+    /* TODO: keep in step with .lead-form-card's p-7 in LeadForm.astro */
+    --form-pad: 1.75rem;
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    margin: auto calc(-1 * var(--form-pad)) 0;
+    padding: 1rem var(--form-pad)
+      calc(var(--form-pad) + env(safe-area-inset-bottom));
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+  }
 }
 
 /* ─── Form validation ───────────────────────────────────── */
@@ -580,17 +737,12 @@ h4 {
 .prose-custom ul.icon-check {
   --list-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M20%206%209%2017l-5-5'/%3E%3C/svg%3E");
 }
-/* Protection/PPF benefit lists (detailing wrap cases). stroke-width 2.5, not
-   2 like wrench/check above — shield's curved outline needs the extra
-   weight to stay a legible shape at this ~18px render size instead of
-   antialiasing into a blurry ring. */
-.prose-custom ul.icon-shield {
-  --list-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2.5'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M20%2013c0%205-3.5%207.5-7.66%208.95a1%201%200%200%201-.67-.01C7.5%2020.5%204%2018%204%2013V6a1%201%200%200%201%201-1c2%200%204.5-1.2%206.24-2.72a1.17%201.17%200%200%201%201.52%200C14.51%203.81%2017%205%2019%205a1%201%200%200%201%201%201z'/%3E%3C/svg%3E");
-}
-/* City/coverage lists ("Belgrade, Novi Sad, Čačak and other cities"). Same
-   stroke-width bump as icon-shield, same reason. */
+/* City/coverage lists ("Belgrade, Novi Sad, Čačak and other cities"). */
 .prose-custom ul.icon-pin {
   --list-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2.5'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M20%2010c0%204.993-5.539%2010.193-7.399%2011.799a1%201%200%200%201-1.202%200C9.539%2020.193%204%2014.993%204%2010a8%208%200%200%201%2016%200'/%3E%3Ccircle%20cx='12'%20cy='10'%20r='3'/%3E%3C/svg%3E");
+}
+.prose-custom ul.icon-shield {
+  --list-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M20%2013c0%205-3.5%207.5-7.66%208.95a1%201%200%200%201-.67-.01C7.5%2020.5%204%2018%204%2013V6a1%201%200%200%201%201-1c2%200%204.5-1.2%206.24-2.72a1.17%201.17%200%200%201%201.52%200C14.51%203.81%2017%205%2019%205a1%201%200%200%201%201%201z'/%3E%3C/svg%3E");
 }
 .prose-custom ul li {
   position: relative;
@@ -700,5 +852,70 @@ h4 {
   .dropdown-menu,
   .dropdown-chevron {
     transition: none;
+  }
+}
+
+@layer components {
+  /* ─── Modal motion ──────────────────────────────────────── */
+  dialog {
+    opacity: 0;
+    translate: 0 0.75rem;
+    pointer-events: none;
+    transition:
+      opacity 0.18s ease-out,
+      translate 0.18s ease-out,
+      display 0.18s,
+      overlay 0.18s;
+    transition-behavior: allow-discrete;
+  }
+  dialog[open] {
+    opacity: 1;
+    translate: 0 0;
+    pointer-events: auto;
+  }
+  @starting-style {
+    dialog[open] {
+      opacity: 0;
+      translate: 0 0.75rem;
+    }
+  }
+  dialog::backdrop {
+    opacity: 0;
+    transition:
+      opacity 0.18s ease-out,
+      display 0.18s,
+      overlay 0.18s;
+    transition-behavior: allow-discrete;
+  }
+  dialog[open]::backdrop {
+    opacity: 1;
+  }
+  @starting-style {
+    dialog[open]::backdrop {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    dialog,
+    dialog[open] {
+      translate: 0 0;
+    }
+    @starting-style {
+      dialog[open] {
+        translate: 0 0;
+      }
+    }
+  }
+
+  @media (max-width: 639px) {
+    dialog,
+    dialog[open] {
+      translate: 0 0;
+    }
+    @starting-style {
+      dialog[open] {
+        translate: 0 0;
+      }
+    }
   }
 }

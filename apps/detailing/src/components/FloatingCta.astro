@@ -1,0 +1,63 @@
+---
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+---
+
+<cta-reveal
+  data-revealed="false"
+  class="floating-cta"
+  watch="[data-contact-cta]"
+>
+  <button
+    type="button"
+    data-open-lead-modal
+    class="group inline-flex items-center gap-2.5 rounded-full bg-chalk py-2.5 pl-5 pr-2.5 text-sm font-semibold tracking-tight text-void transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-champagne active:scale-[0.98]"
+  >
+    <span>{site.header.cta}</span>
+    <span
+      class="flex h-7 w-7 items-center justify-center rounded-full bg-void/10"
+    >
+      <Icon name="arrow" size={14} />
+    </span>
+  </button>
+</cta-reveal>
+
+<style>
+  .floating-cta {
+    position: fixed;
+    right: 1rem;
+    bottom: 1.25rem;
+    z-index: 10;
+    transition:
+      opacity 0.4s var(--ease-expo),
+      transform 0.4s var(--ease-expo),
+      visibility 0.4s;
+  }
+  @media (min-width: 640px) {
+    .floating-cta {
+      right: 1.75rem;
+      bottom: 1.75rem;
+    }
+  }
+  .floating-cta[data-revealed='false'] {
+    opacity: 0;
+    transform: translateY(1rem);
+    visibility: hidden;
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .floating-cta {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { defineCtaReveal } from '@podbor/site-kit/browser';
+
+  defineCtaReveal();
+</script>

@@ -1,0 +1,26 @@
+---
+interface Props {
+  eyebrow: string;
+  heading: string;
+  body?: string;
+  class?: string;
+}
+
+const { eyebrow, heading, body, class: className = '' } = Astro.props;
+---
+
+<div class={`flex max-w-3xl flex-col items-start gap-5 ${className}`}>
+  <span class="eyebrow" data-reveal>{eyebrow}</span>
+  <h2 class="text-giant" data-reveal data-reveal-delay="80">{heading}</h2>
+  {
+    body && (
+      <p
+        class="max-w-2xl text-base leading-relaxed text-mute sm:text-lg"
+        data-reveal
+        data-reveal-delay="160"
+      >
+        {body}
+      </p>
+    )
+  }
+</div>

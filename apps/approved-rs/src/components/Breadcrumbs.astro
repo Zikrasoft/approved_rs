@@ -1,13 +1,10 @@
 ---
+import { breadcrumbListSchema, jsonLdText, type Crumb } from '@podbor/site-kit';
 import { SITE_URL } from '@/utils/constants';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 
-interface Crumb {
-  label: string;
-  href?: string;
-}
 interface Props {
   items: Crumb[];
 }
@@ -19,19 +16,10 @@ const trail: Crumb[] = [
   ...items,
 ];
 
-const schema = {
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: trail.map((item, i) => ({
-    '@type': 'ListItem',
-    position: i + 1,
-    name: item.label,
-    ...(item.href ? { item: `${SITE_URL}${item.href}` } : {}),
-  })),
-};
+const schema = breadcrumbListSchema(SITE_URL, trail);
 ---
 
-<script type="application/ld+json" set:html={JSON.stringify(schema)} />
+<script type="application/ld+json" set:html={jsonLdText(schema)} />
 <nav aria-label="breadcrumb" class="mb-6">
   <ol class="flex flex-wrap items-center gap-1.5 text-xs text-muted">
     {

@@ -1,0 +1,27 @@
+---
+import { localeFrom } from '@/i18n/currentLocale';
+import { getServicesContent } from '@/i18n/content/services';
+import { getSiteContent } from '@/i18n/content/site';
+import { PathBuilder } from '@/utils/paths';
+import { SERVICE_SLUGS } from '@/utils/services';
+
+const locale = localeFrom(Astro.url.pathname);
+const services = getServicesContent(locale);
+const site = getSiteContent(locale);
+---
+
+<nav
+  class="wrap flex gap-2 overflow-x-auto py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+  aria-label={site.nav.services}
+>
+  <a href={PathBuilder.services(locale)} class="chip chip-accent">
+    {site.common.allServices}
+  </a>
+  {
+    SERVICE_SLUGS.map((slug) => (
+      <a href={PathBuilder.service(locale, slug)} class="chip">
+        {services[slug].name}
+      </a>
+    ))
+  }
+</nav>
