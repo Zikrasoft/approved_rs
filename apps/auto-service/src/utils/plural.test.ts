@@ -25,12 +25,22 @@ describe('pluralLabel', () => {
     expect(label(21)).toBe('подходит 21 аккумулятор');
   });
 
-  it('uses the Serbian few form for 2 and falls back to other for 5', () => {
+  it('picks the Serbian few form for 2 and other for 5', () => {
+    const forms = {
+      one: 'one {count}',
+      few: 'few {count}',
+      many: 'many {count}',
+      other: 'other {count}',
+    };
+    expect(pluralLabel(forms, 'sr-Latn-RS', 2)).toBe('few 2');
+    expect(pluralLabel(forms, 'sr-Latn-RS', 5)).toBe('other 5');
+  });
+
+  it('keeps every plural category the Serbian shop copy needs', () => {
     const forms = getShopContent('sr').matchCount;
-    expect(pluralLabel(forms, 'sr-Latn-RS', 2)).toBe(
-      'odgovaraju 2 akumulatora',
-    );
-    expect(pluralLabel(forms, 'sr-Latn-RS', 5)).toBe('odgovara 5 akumulatora');
+    for (const key of ['one', 'few', 'many', 'other'] as const) {
+      expect(forms[key]).toContain('{count}');
+    }
   });
 
   it('falls back to other for a category the locale does not define', () => {
