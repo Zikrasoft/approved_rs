@@ -59,6 +59,7 @@ const {
   sendDealNotificationToAdmin,
   sendCommissionClaimToAdmin,
   sendCommissionResultToOwner,
+  sendQuarantinedLeadsToAdmin,
   sendStatusChangeToAdmin,
   sendFieldChangeToAdmin,
   sendPostponeReminderToOwner,
@@ -607,6 +608,38 @@ describe('sendStatusChangeToAdmin', () => {
     expect(body.text).toContain('#9');
     expect(body.text).toContain('Пётр');
     expect(body.text).toContain('🔵 В работе');
+  });
+});
+
+describe('sendQuarantinedLeadsToAdmin', () => {
+  beforeEach(() => mockFetchOk());
+  afterEach(() => mockFetch.mockReset());
+
+  it('tells every admin how many were copied, by whom and where', async () => {
+    await sendQuarantinedLeadsToAdmin(
+      3,
+      'data/leads-unreadable.json',
+      'CarLab',
+    );
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.chat_id).toBe(222);
+    expect(body.text).toBe(
+      [
+        '⚠️ Нечитаемых заявок: 3',
+        '',
+        'Нашёл сайт CarLab и скопировал в data/leads-unreadable.json.',
+        'Из data/leads.json ничего не убирал — удалить можно только руками.',
+      ].join('\n'),
+    );
+  });
+
+  it('escapes a path that carries markup', async () => {
+    await sendQuarantinedLeadsToAdmin(1, '<b>x</b>.json', '<i>Brand</i>');
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('&lt;b&gt;');
+    expect(body.text).toContain('&lt;i&gt;');
   });
 });
 

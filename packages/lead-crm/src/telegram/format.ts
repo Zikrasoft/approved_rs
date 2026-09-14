@@ -1,5 +1,6 @@
 import { format, parseISO } from 'date-fns';
 import { getCommission, roundMoney, type CommissionInfo } from '../money.ts';
+import { LEADS_PATH } from '../quarantine.ts';
 import type { LeadStatus, StoredLead } from '../schema.ts';
 import { MAX_LIST_ROWS, type OwedRow } from '../store.ts';
 
@@ -367,6 +368,19 @@ export function fieldChangeText(
     ``,
     `Было: ${fieldPreview(before)}`,
     `Стало: ${fieldPreview(lead[field])}`,
+  ].join('\n');
+}
+
+export function quarantinedLeadsText(
+  count: number,
+  path: string,
+  brand: string,
+): string {
+  return [
+    `⚠️ Нечитаемых заявок: ${count}`,
+    ``,
+    `Нашёл сайт ${escapeHtml(brand)} и скопировал в ${escapeHtml(path)}.`,
+    `Из ${escapeHtml(LEADS_PATH)} ничего не убирал — удалить можно только руками.`,
   ].join('\n');
 }
 

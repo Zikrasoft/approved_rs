@@ -5,6 +5,7 @@ import {
   commissionResultText,
   dealNotificationText,
   fieldChangeText,
+  quarantinedLeadsText,
   statusChangeText,
   type EditField,
   type Formatter,
@@ -133,6 +134,14 @@ export function createNotifier({
     ): Promise<void> {
       if ((before ?? '') === (lead[field] ?? '')) return;
       await sendToAll(adminIds, fieldChangeText(lead, field, before));
+    },
+
+    async sendQuarantinedLeadsToAdmin(
+      count: number,
+      path: string,
+      brand: string,
+    ): Promise<void> {
+      await sendToAll(adminIds, quarantinedLeadsText(count, path, brand));
     },
 
     async sendStatusChangeToAdmin(lead: StoredLead): Promise<void> {

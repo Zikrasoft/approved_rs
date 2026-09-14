@@ -5,6 +5,7 @@ import {
 } from './storage/memory.testing.ts';
 import { createLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
 import { createLeadStore, type LeadStore } from './store.ts';
+import { createQuarantine } from './quarantine.ts';
 import { getCommission } from './money.ts';
 
 let storage: MemoryStorage;
@@ -835,8 +836,7 @@ describe('readLeads — schema validation on the way in', () => {
     expect(lead.pendingPrompt).toBeNull();
   });
 
-  it('drops a record missing a required field, without losing the other valid leads', async () => {
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  it('hides a record missing a required field from callers', async () => {
     seedRawBlob([
       {
         id: 1,
@@ -869,15 +869,9 @@ describe('readLeads — schema validation on the way in', () => {
     const leads = await store.readLeads();
 
     expect(leads.map((l) => l.id)).toEqual([1, 3]);
-    expect(errorSpy).toHaveBeenCalledWith(
-      '[lead-crm] dropping a corrupt lead record on read',
-      expect.objectContaining({ entry: expect.objectContaining({ id: 2 }) }),
-    );
-    errorSpy.mockRestore();
   });
 
   it('rejects a wrong-type value on a field that does exist, rather than coercing it', async () => {
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     seedRawBlob([
       {
         id: 1,
@@ -892,8 +886,7 @@ describe('readLeads — schema validation on the way in', () => {
     ]);
 
     expect(await store.readLeads()).toEqual([]);
-    expect(errorSpy).toHaveBeenCalled();
-    errorSpy.mockRestore();
+    expect(storage.current()).toHaveLength(1);
   });
 });
 
@@ -977,28 +970,21 @@ describe('updateLeads — failures that are not write conflicts', () => {
 });
 
 describe('readLeads — a record that is not a list at all', () => {
-  it('treats a truncated, non-array payload as empty instead of throwing', async () => {
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  it('refuses to read a payload that is not a list', async () => {
     storage.seed({ oops: 'this is not a list of leads' });
 
-    await expect(store.readLeads()).resolves.toEqual([]);
-
-    expect(errorSpy).toHaveBeenCalledWith(
-      '[lead-crm] stored leads are not an array — treating as empty',
-      { type: 'object' },
+    await expect(store.readLeads()).rejects.toThrow(
+      /stored leads are object, not an array/,
     );
-    errorSpy.mockRestore();
   });
 
-  it('still accepts a write afterwards, so a corrupt record self-heals', async () => {
-    vi.spyOn(console, 'error').mockImplementation(() => {});
+  it('refuses to write over it too, rather than replacing it with a fresh list', async () => {
     storage.seed('garbage');
 
-    const lead = await store.insertLead(baseData);
-
-    expect(lead.id).toBe(1);
-    expect(await store.readLeads()).toHaveLength(1);
-    vi.restoreAllMocks();
+    await expect(store.insertLead(baseData)).rejects.toThrow(
+      /refusing to overwrite/,
+    );
+    expect(storage.current()).toBe('garbage');
   });
 });
 
@@ -1012,5 +998,123 @@ describe('per-business store defaults', () => {
     const lead = await detailingStore.insertLead(baseData);
 
     expect(lead.commissionPercent).toBe(50);
+  });
+});
+
+describe('quarantine — nothing leaves the blob on its own', () => {
+  const corrupt = { id: 7, name: 'Пётр', service: 'x', locale: 'ru' };
+
+  function guarded(quarantine: (entries: unknown[]) => Promise<void>) {
+    return createLeadStore({
+      storage,
+      schema: createLeadSchema({ defaultCommissionPercent: 10 }),
+      quarantine,
+    });
+  }
+
+  function seedOneGoodOneCorrupt(): void {
+    storage.seed([
+      {
+        id: 1,
+        name: 'Иван',
+        contact: '@ivan',
+        service: 'vehicle-sourcing',
+        locale: 'ru',
+        statusChangedAt: 'x',
+        createdAt: 'x',
+      },
+      corrupt,
+    ]);
+  }
+
+  beforeEach(() => vi.spyOn(console, 'error').mockImplementation(() => {}));
+
+  it('leaves the unreadable record in the main file after copying it out', async () => {
+    const quarantine = vi.fn().mockResolvedValue(undefined);
+    seedOneGoodOneCorrupt();
+
+    await guarded(quarantine).insertLead(baseData);
+
+    expect(quarantine).toHaveBeenCalledWith([corrupt]);
+    expect(storage.current()).toContainEqual(corrupt);
+  });
+
+  it('keeps it when the copy fails, and says so', async () => {
+    const quarantine = vi.fn().mockRejectedValue(new Error('blob down'));
+    seedOneGoodOneCorrupt();
+
+    await guarded(quarantine).insertLead(baseData);
+
+    expect(storage.current()).toContainEqual(corrupt);
+    expect(vi.mocked(console.error)).toHaveBeenCalledWith(
+      '[lead-crm] could not copy the unreadable records',
+      expect.objectContaining({ count: 1 }),
+    );
+  });
+
+  it('lands one copy and one notice across a retried write', async () => {
+    const quarantineStorage = createMemoryStorage();
+    const send = vi.fn().mockResolvedValue(undefined);
+    const withRealQuarantine = guarded(
+      createQuarantine({
+        storage: quarantineStorage,
+        brand: 'Test',
+        getNotifier: () =>
+          Promise.resolve({ notifier: { sendQuarantinedLeadsToAdmin: send } }),
+      }),
+    );
+    seedOneGoodOneCorrupt();
+    storage.failNextWrites(2);
+
+    await withRealQuarantine.insertLead(baseData);
+
+    expect(quarantineStorage.current()).toEqual([corrupt]);
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not reuse an id hiding in an unreadable record', async () => {
+    storage.seed([{ id: 41, name: 'Пётр', service: 'x', locale: 'ru' }]);
+
+    const lead = await store.insertLead(baseData);
+
+    expect(lead.id).toBe(42);
+  });
+
+  it('reserves that id on the form path too, not just direct inserts', async () => {
+    storage.seed([{ id: 41, name: 'Пётр', service: 'x', locale: 'ru' }]);
+
+    const { lead } = await store.insertOrMergeLead({
+      ...baseData,
+      visitorId: 'visitor-1',
+    });
+
+    expect(lead.id).toBe(42);
+  });
+
+  it('reads an id that was stored as a string', async () => {
+    storage.seed([{ id: '41', name: 'Пётр' }]);
+
+    expect((await store.insertLead(baseData)).id).toBe(42);
+  });
+
+  it('ignores ids it cannot use rather than blocking every insert', async () => {
+    storage.seed([
+      { id: 'сорок один' },
+      { id: 41.5 },
+      { id: -3 },
+      { id: Number.MAX_SAFE_INTEGER },
+      { nope: true },
+      null,
+    ]);
+
+    expect((await store.insertLead(baseData)).id).toBe(1);
+  });
+
+  it('leaves the quarantine alone when every record reads fine', async () => {
+    const quarantine = vi.fn().mockResolvedValue(undefined);
+
+    await guarded(quarantine).insertLead(baseData);
+
+    expect(quarantine).not.toHaveBeenCalled();
   });
 });

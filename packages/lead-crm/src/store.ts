@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { format } from 'date-fns';
 import { getCommission, roundMoney, PAID_EPSILON } from './money.ts';
 import type {
@@ -27,6 +28,7 @@ export interface OwedRow {
 export interface LeadStoreOptions {
   storage: LeadStorage;
   schema: StoredLeadSchema;
+  quarantine?: (entries: unknown[]) => Promise<void>;
 }
 
 function sleep(ms: number): Promise<void> {
@@ -56,7 +58,26 @@ export function appendNote(
   return next.slice(-MAX_STORED_COMMENT_LENGTH);
 }
 
-export function createLeadStore({ storage, schema }: LeadStoreOptions) {
+const unreadableId = z.object({
+  id: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(Number.MAX_SAFE_INTEGER - 1),
+});
+
+function unreadableIdFloor(entries: unknown[]): number {
+  return entries.reduce<number>((max, entry) => {
+    const parsed = unreadableId.safeParse(entry);
+    return parsed.success && parsed.data.id > max ? parsed.data.id : max;
+  }, 0);
+}
+
+export function createLeadStore({
+  storage,
+  schema,
+  quarantine,
+}: LeadStoreOptions) {
   function newStoredLead(data: LeadInput, id: number): StoredLead {
     const now = new Date().toISOString();
     return schema.parse({ ...data, id, statusChangedAt: now, createdAt: now });
@@ -64,46 +85,40 @@ export function createLeadStore({ storage, schema }: LeadStoreOptions) {
 
   async function readSnapshot(): Promise<{
     leads: StoredLead[];
+    unreadable: unknown[];
     version: string | undefined;
   }> {
     const { raw, version } = await storage.read();
-    if (raw === undefined) return { leads: [], version };
+    if (raw === undefined) return { leads: [], unreadable: [], version };
     if (!Array.isArray(raw)) {
-      console.error(
-        '[lead-crm] stored leads are not an array — treating as empty',
-        {
-          type: typeof raw,
-        },
+      throw new Error(
+        `[lead-crm] stored leads are ${typeof raw}, not an array — refusing to overwrite`,
       );
-      return { leads: [], version };
     }
-    const leads = raw.flatMap((entry) => {
+    const leads: StoredLead[] = [];
+    const unreadable: unknown[] = [];
+    for (const entry of raw) {
       const parsed = schema.safeParse(entry);
-      if (!parsed.success) {
-        console.error('[lead-crm] dropping a corrupt lead record on read', {
-          entry,
-          error: parsed.error.message,
-        });
-        return [];
-      }
-      return [parsed.data];
-    });
-    return { leads, version };
+      if (parsed.success) leads.push(parsed.data);
+      else unreadable.push(entry);
+    }
+    return { leads, unreadable, version };
   }
 
   async function updateLeads(
-    mutate: (leads: StoredLead[]) => StoredLead[],
+    mutate: (leads: StoredLead[], idFloor: number) => StoredLead[],
   ): Promise<StoredLead[]> {
     let lastErr = new StorageConflictError(
       'updateLeads: conflict retry limit exceeded',
     );
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       if (attempt > 0) await sleep(backoffDelay(attempt - 1));
-      const { leads, version } = await readSnapshot();
-      const next = mutate(leads);
+      const { leads, unreadable, version } = await readSnapshot();
+      const next = mutate(leads, unreadableIdFloor(unreadable));
       next.forEach((lead) => schema.parse(lead));
+      await copyToQuarantine(unreadable);
       try {
-        await storage.write(next, version);
+        await storage.write([...next, ...unreadable], version);
         return next;
       } catch (err) {
         if (err instanceof StorageConflictError) {
@@ -157,8 +172,20 @@ export function createLeadStore({ storage, schema }: LeadStoreOptions) {
     return updated;
   }
 
-  function nextId(leads: StoredLead[]): number {
-    return leads.reduce((max, l) => Math.max(max, l.id), 0) + 1;
+  async function copyToQuarantine(entries: unknown[]): Promise<void> {
+    if (entries.length === 0 || !quarantine) return;
+    try {
+      await quarantine(entries);
+    } catch (error) {
+      console.error('[lead-crm] could not copy the unreadable records', {
+        count: entries.length,
+        error,
+      });
+    }
+  }
+
+  function nextId(leads: StoredLead[], idFloor: number): number {
+    return leads.reduce((max, l) => Math.max(max, l.id), idFloor) + 1;
   }
 
   async function settleCommissionClaim(
@@ -183,8 +210,8 @@ export function createLeadStore({ storage, schema }: LeadStoreOptions) {
 
     async insertLead(data: LeadInput): Promise<StoredLead> {
       let inserted!: StoredLead;
-      await updateLeads((leads) => {
-        inserted = newStoredLead(data, nextId(leads));
+      await updateLeads((leads, idFloor) => {
+        inserted = newStoredLead(data, nextId(leads, idFloor));
         return [...leads, inserted];
       });
       return inserted;
@@ -194,7 +221,7 @@ export function createLeadStore({ storage, schema }: LeadStoreOptions) {
       data: LeadInput,
     ): Promise<{ lead: StoredLead; merged: boolean }> {
       let outcome!: { lead: StoredLead; merged: boolean };
-      await updateLeads((leads) => {
+      await updateLeads((leads, idFloor) => {
         const now = Date.now();
         const existing = data.visitorId
           ? leads.find(
@@ -208,7 +235,7 @@ export function createLeadStore({ storage, schema }: LeadStoreOptions) {
           : undefined;
 
         if (!existing) {
-          const inserted = newStoredLead(data, nextId(leads));
+          const inserted = newStoredLead(data, nextId(leads, idFloor));
           outcome = { lead: inserted, merged: false };
           return [...leads, inserted];
         }

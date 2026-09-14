@@ -1,4 +1,5 @@
 export { createLeadSchema } from './schema.ts';
+export { createQuarantine, LEADS_PATH, QUARANTINE_PATH } from './quarantine.ts';
 export type {
   LeadInput,
   LeadSubmission,

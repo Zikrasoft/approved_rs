@@ -34,7 +34,7 @@ const formatter = createFormatter({
   } satisfies Record<TrackedContactChannel, string>,
 });
 
-const notifier = createNotifier({
+export const notifier = createNotifier({
   client,
   formatter,
   groupId: requireEnv('TELEGRAM_GROUP_ID'),
