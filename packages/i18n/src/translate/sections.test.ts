@@ -164,6 +164,9 @@ describe('translateSection', () => {
     expect(body.messages[0].content).toMatch(
       /metaTitle and title at most 60 characters[\s\S]*at most 160/,
     );
+    expect(body.messages[0].content).toMatch(
+      /akumulator in Serbian[\s\S]*never baterija/,
+    );
   });
 
   it('throws when the response has a leaf of the wrong type', async () => {

@@ -85,6 +85,10 @@ export function createSectionTranslator<L extends string>({
       'metaDescription and description at most 160, counted on what you output. German and Spanish ' +
       'run longer than the Russian, so drop a detail rather than going over — but never drop a ' +
       'placeholder token to save room. ' +
+      'Use the trade word a mechanic or a driver would use, not the everyday one: ' +
+      'a car battery is akumulator in Serbian, Autobatterie in German, batería de coche in ' +
+      'Spanish — never baterija, Batterie or pila on their own. The same holds for the rest ' +
+      'of the workshop vocabulary: servicing, timing belt, suspension, customs clearance. ' +
       'Respond with a JSON ' +
       'object that has EXACTLY the same nested key structure as the input — same keys, same nesting, same ' +
       'array lengths — with only the string values translated.';
