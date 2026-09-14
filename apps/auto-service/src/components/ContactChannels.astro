@@ -15,7 +15,7 @@ const site = getSiteContent(locale);
 const channels = contactChannels(site);
 ---
 
-<ul class={`grid gap-2 sm:grid-cols-2 ${className}`}>
+<ul class={`grid gap-2 sm:grid-cols-2 ${className}`} data-contact-cta>
   {
     channels.map((channel) => (
       <li>

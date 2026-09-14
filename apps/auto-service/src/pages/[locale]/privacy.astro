@@ -5,6 +5,7 @@ import { localeFrom } from '@/i18n/currentLocale';
 import { getPagesContent } from '@/i18n/content/pages';
 import { getSiteContent } from '@/i18n/content/site';
 import { localePaths, PathBuilder } from '@/utils/paths';
+import { SHOP_ENABLED } from '@/utils/constants';
 
 export function getStaticPaths() {
   return localePaths();
@@ -13,6 +14,10 @@ export function getStaticPaths() {
 const locale = localeFrom(Astro.url.pathname);
 const pages = getPagesContent(locale);
 const site = getSiteContent(locale);
+const sections = [
+  ...pages.privacy.sections,
+  ...(SHOP_ENABLED ? pages.privacy.shopSections : []),
+];
 ---
 
 <Shell
@@ -31,7 +36,7 @@ const site = getSiteContent(locale);
   <section class="wrap py-band md:py-band-lg">
     <div class="max-w-3xl divide-y divide-line border-y border-line">
       {
-        pages.privacy.sections.map((section) => (
+        sections.map((section) => (
           <div class="flex flex-col gap-2 py-6">
             <h2 class="text-base font-semibold text-ink">{section.title}</h2>
             <p class="text-sm leading-relaxed text-muted sm:text-base">

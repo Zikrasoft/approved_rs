@@ -1,4 +1,5 @@
 ---
+import { jsonLdText } from '@podbor/site-kit';
 import '@/styles/global.css';
 import latinFontUrl from '@fontsource-variable/onest/files/onest-latin-wght-normal.woff2?url';
 import cyrillicFontUrl from '@fontsource-variable/onest/files/onest-cyrillic-wght-normal.woff2?url';
@@ -40,9 +41,6 @@ const {
   stickyContact = true,
 } = Astro.props;
 
-const jsonLdText = (schema: Record<string, unknown>) =>
-  JSON.stringify(schema).replace(/</g, '\\u003c');
-
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
 const canonical = new URL(Astro.url.pathname, SITE_URL).href;
@@ -62,7 +60,7 @@ const businessSchema = {
   description: site.footer.tagline,
   telephone: `+${PHONE_NUMBER}`,
   areaServed: 'Beograd',
-  currenciesAccepted: 'RSD',
+  currenciesAccepted: 'RSD, EUR',
   address: {
     '@type': 'PostalAddress',
     streetAddress: GARAGE_ADDRESS.street,

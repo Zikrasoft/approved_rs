@@ -4,14 +4,14 @@ import { Image } from 'astro:assets';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
-import SectionHead from '@/components/SectionHead.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getPagesContent } from '@/i18n/content/pages';
+import { getServicesContent } from '@/i18n/content/services';
 import { getSiteContent } from '@/i18n/content/site';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { PathBuilder, withLocales } from '@/utils/paths';
-import { localizedWork, publishedWorks } from '@/utils/works';
+import { localizedWork, publishedWorks, relatedWorks } from '@/utils/works';
 import { safeMarkdown } from '@podbor/site-kit';
 import { SITE_URL } from '@/utils/constants';
 
@@ -20,10 +20,7 @@ export async function getStaticPaths() {
   return withLocales(
     works.map((work) => ({
       params: { slug: work.id },
-      props: {
-        work,
-        related: works.filter((other) => other.id !== work.id).slice(0, 3),
-      },
+      props: { work, related: relatedWorks(works, work) },
     })),
   );
 }
@@ -32,6 +29,7 @@ const { work, related } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const pages = getPagesContent(locale);
 const site = getSiteContent(locale);
+const services = getServicesContent(locale);
 const { title, body, car } = localizedWork(work, locale);
 
 const articleSchema = {
@@ -52,7 +50,7 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
 
 <Shell
   title={`${title} — ${pages.works.detailMetaSuffix}`}
-  description={`${car}. ${pages.works.metaDescription}`}
+  description={`${title}. ${pages.works.metaDescription}`}
   jsonLd={[articleSchema]}
 >
   <PageHero
@@ -108,12 +106,34 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
   }
 
   {
+    work.data.servicesApplied.length > 0 && (
+      <section class="wrap pb-8">
+        <p class="spec text-xs text-muted">{site.nav.services}</p>
+        <ul class="mt-3 flex flex-wrap gap-2">
+          {work.data.servicesApplied.map((slug) => (
+            <li>
+              <a
+                href={PathBuilder.service(locale, slug)}
+                class="btn btn-secondary w-fit"
+              >
+                {services[slug].name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {
     related.length > 0 && (
       <section class="wrap pb-12">
-        <SectionHead
-          eyebrow={pages.works.eyebrow}
-          heading={site.common.allWorks}
-        />
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <span class="eyebrow">{pages.works.eyebrow}</span>
+          <a href={PathBuilder.works(locale)} class="btn btn-secondary w-fit">
+            {site.common.allWorks}
+          </a>
+        </div>
         <WorkGrid works={related} />
       </section>
     )

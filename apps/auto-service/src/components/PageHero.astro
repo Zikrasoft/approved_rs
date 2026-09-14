@@ -1,4 +1,6 @@
 ---
+import { breadcrumbListSchema, jsonLdText } from '@podbor/site-kit';
+import { SITE_URL } from '@/utils/constants';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getSiteContent } from '@/i18n/content/site';
 import { PathBuilder } from '@/utils/paths';
@@ -17,7 +19,10 @@ const trail = [
   { href: PathBuilder.home(locale), label: site.common.homeLabel },
   ...crumbs,
 ];
+const breadcrumbSchema = breadcrumbListSchema(SITE_URL, trail);
 ---
+
+<script type="application/ld+json" set:html={jsonLdText(breadcrumbSchema)} />
 
 <section class="border-b border-line bg-card">
   <div class="wrap flex flex-col gap-4 py-band md:py-band-lg">

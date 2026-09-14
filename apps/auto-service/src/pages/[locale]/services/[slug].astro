@@ -43,6 +43,7 @@ const serviceSchema = {
 };
 
 const specs = [
+  { label: services.specsPriceLabel, value: service.priceFrom },
   { label: services.specsDurationLabel, value: service.duration },
   { label: services.specsWarrantyLabel, value: service.warranty },
 ];
@@ -64,7 +65,7 @@ const specs = [
   />
 
   <section class="wrap py-band md:py-band-lg">
-    <dl class="grid gap-3 sm:grid-cols-2">
+    <dl class="grid gap-3 sm:grid-cols-3">
       {
         specs.map((spec) => (
           <div class="card flex flex-col gap-1 p-4">

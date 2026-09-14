@@ -5,6 +5,7 @@ import heroImage from '@/assets/hero-workshop.jpg';
 import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
 import SectionHead from '@/components/SectionHead.astro';
+import ProcessSteps from '@/components/ProcessSteps.astro';
 import ServiceChips from '@/components/ServiceChips.astro';
 import PriceTable from '@/components/PriceTable.astro';
 import Faq from '@/components/Faq.astro';
@@ -55,7 +56,7 @@ const faqSchema = {
         <p class="max-w-xl leading-relaxed text-panel-ink sm:text-lg">
           {home.hero.lead}
         </p>
-        <div class="flex flex-wrap gap-3 pt-1">
+        <div class="flex flex-wrap gap-3 pt-1" data-contact-cta>
           <button type="button" data-open-lead-modal class="btn btn-primary">
             {home.hero.ctaPrimary}
           </button>
@@ -138,19 +139,7 @@ const faqSchema = {
       heading={home.process.heading}
       body={home.process.body}
     />
-    <ol class="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-      {
-        home.process.steps.map((step, i) => (
-          <li class="card flex flex-col gap-2 p-5">
-            <span class="spec text-sm font-medium text-signal-ink">
-              {String(i + 1).padStart(2, '0')}
-            </span>
-            <h3 class="text-base font-semibold text-ink">{step.title}</h3>
-            <p class="text-sm leading-relaxed text-muted">{step.text}</p>
-          </li>
-        ))
-      }
-    </ol>
+    <ProcessSteps steps={home.process.steps} />
   </section>
 
   <section class="wrap pb-band md:pb-band-lg">

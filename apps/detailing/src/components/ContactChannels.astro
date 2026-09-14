@@ -40,7 +40,10 @@ const channels = [
 ] as const;
 ---
 
-<div class={`grid gap-2 sm:grid-cols-2 lg:grid-cols-1 ${className}`}>
+<div
+  class={`grid gap-2 sm:grid-cols-2 lg:grid-cols-1 ${className}`}
+  data-contact-cta
+>
   {
     channels.map((channel) => (
       <a

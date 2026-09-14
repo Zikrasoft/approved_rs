@@ -1,5 +1,9 @@
 import { z } from 'zod';
 
+const privacySectionSchema = z
+  .object({ title: z.string(), text: z.string() })
+  .strict();
+
 export const pagesContentSchema = z
   .object({
     works: z
@@ -46,9 +50,10 @@ export const pagesContentSchema = z
         metaDescription: z.string(),
         heading: z.string(),
         lastUpdated: z.string(),
-        sections: z.array(
-          z.object({ title: z.string(), text: z.string() }).strict(),
-        ),
+        sections: z.array(privacySectionSchema),
+        // Rendered only when SHOP_ENABLED: a separate list, so nothing depends
+        // on a shared array index or on a flag the translate job could drop.
+        shopSections: z.array(privacySectionSchema),
         contactTitle: z.string(),
         contactBefore: z.string(),
       })

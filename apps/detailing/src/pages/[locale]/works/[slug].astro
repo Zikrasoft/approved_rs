@@ -14,7 +14,12 @@ import { getPagesContent } from '@/i18n/content/pages';
 import { getServicesContent } from '@/i18n/content/services';
 import { getSiteContent } from '@/i18n/content/site';
 import { PathBuilder, withLocales } from '@/utils/paths';
-import { localizedWork, publishedWorks } from '@/utils/works';
+import {
+  localizedWork,
+  publishedWorks,
+  relatedWorks,
+  workExcerpt,
+} from '@/utils/works';
 import { safeMarkdown } from '@podbor/site-kit';
 import { SITE_URL } from '@/utils/constants';
 
@@ -25,7 +30,7 @@ export async function getStaticPaths() {
       params: { slug: work.id },
       props: {
         work,
-        related: works.filter((other) => other.id !== work.id).slice(0, 3),
+        related: relatedWorks(works, work),
       },
     })),
   );
@@ -56,7 +61,7 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
 
 <Shell
   title={`${title} — ${pages.works.detailMetaSuffix}`}
-  description={`${car}. ${pages.works.metaDescription}`}
+  description={workExcerpt(body)}
   jsonLd={[articleSchema]}
 >
   <PageHero
