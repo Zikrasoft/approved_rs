@@ -690,6 +690,16 @@
       "source": "/cases/detailing",
       "destination": "https://details.rs/ru/works/",
       "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/vehicle-buyback/:country(de|es|ch|pt|fr|it|pl)",
+      "destination": "/:locale/vehicle-buyback/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/vehicle-buyback/:country(de|es|ch|pt|fr|it|pl)/",
+      "destination": "/:locale/vehicle-buyback/",
+      "permanent": true
     }
   ],
   "headers": [

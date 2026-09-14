@@ -147,6 +147,7 @@ export const servicesContentSchema = z
         breadcrumbLabel: z.string(),
         descriptionSerbia: z.string(),
         descriptionOtherFor: z.string(),
+        serbiaLinkLabel: z.string(),
         step1: z.string(),
         step2: z.string(),
         step3Serbia: z.string(),

@@ -229,7 +229,7 @@ const heroStats = [
     <ChipLinks
       label={t.common.otherServicesLabel}
       items={SERVICES.filter((s) => s.slug !== currentService).map((s) => ({
-        href: PathBuilder.service(locale, s.slug, currentCountry),
+        href: PathBuilder.sectionRoot(locale, s.slug),
         text: t.nav[s.slug],
       }))}
     />

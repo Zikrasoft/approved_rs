@@ -110,6 +110,21 @@ export function moveGermanySpoke(pathname: string): string | null {
     : null;
 }
 
+// Buyback ran a page per country whose only difference was a substituted
+// country name. Serbia keeps its page (Serbian plates are a different offer);
+// the rest collapse onto the hub.
+const BUYBACK_COLLAPSED_COUNTRIES = ['de', 'es', 'ch', 'pt', 'fr', 'it', 'pl'];
+
+export function collapseBuybackCountry(pathname: string): string | null {
+  const normalized = pathname.endsWith('/') ? pathname : `${pathname}/`;
+  const match = BUYBACK_COLLAPSED_COUNTRIES.find((code) =>
+    normalized.endsWith(`/vehicle-buyback/${code}/`),
+  );
+  return match
+    ? normalized.slice(0, -(match.length + 1)) // drop "<code>/"
+    : null;
+}
+
 // No trailing slash on '/keystatic': the CMS admin's own root route is the
 // bare path (no trailing slash) before Keystatic does its own internal
 // routing, so a trailing-slash prefix would miss it.
@@ -196,8 +211,11 @@ export const onRequest = defineMiddleware((context, next) => {
   // visitor's current browser/cookie locale differs from the one baked
   // into the stale link they clicked.
   const slugRenamed = renameSlugSegments(rewritten);
+  const afterSlugRename = slugRenamed ?? rewritten;
   const restructured =
-    moveGermanySpoke(slugRenamed ?? rewritten) ?? slugRenamed;
+    moveGermanySpoke(afterSlugRename) ??
+    collapseBuybackCountry(afterSlugRename) ??
+    slugRenamed;
   if (restructured) {
     if (requestHasLocale(context)) {
       return context.redirect(`${restructured}${search}`, 301);

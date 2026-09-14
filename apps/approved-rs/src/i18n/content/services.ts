@@ -118,6 +118,7 @@ export interface ServicesContent {
     breadcrumbLabel: string;
     descriptionSerbia: string;
     descriptionOtherFor: (name: string) => string;
+    serbiaLinkLabel: string;
     step1: string;
     step2: string;
     step3Serbia: string;
@@ -297,6 +298,7 @@ function toServicesContent(data: ServicesContentData): ServicesContent {
       descriptionSerbia: vb.descriptionSerbia,
       descriptionOtherFor: (name) =>
         withPlaceholder(vb.descriptionOtherFor, 'name', name),
+      serbiaLinkLabel: vb.serbiaLinkLabel,
       step1: vb.step1,
       step2: vb.step2,
       step3Serbia: vb.step3Serbia,

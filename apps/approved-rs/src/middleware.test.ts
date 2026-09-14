@@ -9,8 +9,13 @@ vi.mock('astro:i18n', () => ({
     ),
 }));
 
-const { renameSlugSegments, moveGermanySpoke, movedBrandUrl, onRequest } =
-  await import('./middleware');
+const {
+  renameSlugSegments,
+  moveGermanySpoke,
+  collapseBuybackCountry,
+  movedBrandUrl,
+  onRequest,
+} = await import('./middleware');
 
 type Handler = (context: unknown, next: () => unknown) => unknown;
 
@@ -85,6 +90,32 @@ describe('renameSlugSegments', () => {
     // Same for the old country-first pages: '/rs/autopodbor/' rewrites to
     // '/autopodbor/rs' in LEGACY_PATH_REWRITES, which then still needs renaming.
     expect(renameSlugSegments('/autopodbor/rs')).toBe('/vehicle-sourcing/rs');
+  });
+});
+
+describe('collapseBuybackCountry', () => {
+  it('sends a collapsed country page to the buyback hub', () => {
+    expect(collapseBuybackCountry('/ru/vehicle-buyback/de/')).toBe(
+      '/ru/vehicle-buyback/',
+    );
+    expect(collapseBuybackCountry('/en/vehicle-buyback/pl/')).toBe(
+      '/en/vehicle-buyback/',
+    );
+  });
+
+  it('leaves Serbia alone — it kept its own page', () => {
+    expect(collapseBuybackCountry('/ru/vehicle-buyback/rs/')).toBeNull();
+  });
+
+  it('returns null for the hub itself and for other services', () => {
+    expect(collapseBuybackCountry('/ru/vehicle-buyback/')).toBeNull();
+    expect(collapseBuybackCountry('/ru/vehicle-sourcing/de/')).toBeNull();
+  });
+
+  it('matches even without a trailing slash (trailingSlash is "ignore")', () => {
+    expect(collapseBuybackCountry('/ru/vehicle-buyback/it')).toBe(
+      '/ru/vehicle-buyback/',
+    );
   });
 });
 

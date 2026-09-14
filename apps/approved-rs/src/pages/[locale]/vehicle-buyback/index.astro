@@ -1,10 +1,11 @@
 ---
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
-import CountryPill from '@/components/CountryPill.astro';
 import PageSection from '@/components/PageSection.astro';
 import StepsList from '@/components/StepsList.astro';
 import IncludedGrid from '@/components/IncludedGrid.astro';
 import Faq from '@/components/Faq.astro';
+import ChipLinks from '@/components/ChipLinks.astro';
+import { getI18n } from '@/i18n/getI18n';
 import heroPhoto from '@/assets/service-buyback.jpg';
 import { getFaq } from '@/i18n/content/faq';
 import { getServicesContent } from '@/i18n/content/services';
@@ -22,6 +23,7 @@ const { locale } = Astro.params as { locale: Locale };
 const sc = getServicesContent(locale)['vehicle-buyback'];
 const pc = sc.hub;
 const countries = getActiveCountries();
+const t = getI18n(locale);
 const meta = {
   title: `${pc.metaTitle} | ${SITE_NAME}`,
   description: pc.metaDescription,
@@ -57,16 +59,12 @@ const cases = (await getCollection('cases'))
   imageAlt={pc.heroPhotoAlt}
   closing={sc.closing}
 >
-  <p class="text-xs tracking-widest uppercase mb-4 font-medium text-muted">
-    {pc.chooseCountryLabel}
+  <p class="text-xs tracking-widest uppercase mb-3 font-medium text-muted">
+    {t.common.alsoWorkingInLabel}
   </p>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-    {
-      countries.map((c) => (
-        <CountryPill country={c} locale={locale} service="vehicle-buyback" />
-      ))
-    }
-  </div>
+  <p class="text-[0.97rem] leading-relaxed text-muted">
+    {countries.map((c) => c[locale].name).join(' · ')}
+  </p>
 
   <Fragment slot="extra">
     <PageSection title={pc.processHeading} lead={pc.processLead}>
@@ -79,6 +77,17 @@ const cases = (await getCollection('cases'))
       items={pc.included}
     />
 
+    <div class="max-w-6xl mx-auto px-6">
+      <ChipLinks
+        label={sc.serbiaLinkLabel}
+        items={[
+          {
+            href: PathBuilder.service(locale, 'vehicle-buyback', 'rs'),
+            text: countries.find((c) => c.code === 'rs')![locale].name,
+          },
+        ]}
+      />
+    </div>
     <Faq items={getFaq(locale)['vehicle-buyback']} />
   </Fragment>
 </ServicePageLayout>
