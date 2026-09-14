@@ -8,6 +8,7 @@ import GeoBanner from '@/components/GeoBanner.astro';
 import ServiceQuickLinks from '@/components/ServiceQuickLinks.astro';
 import ContactCTA from '@/components/ContactCTA.astro';
 import CaseCatalogue from '@/components/CaseCatalogue.astro';
+import CountryPlate from '@/components/CountryPlate.astro';
 import InspectionMap from '@/components/InspectionMap.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
 import LeadForm from '@/components/LeadForm.astro';
@@ -235,8 +236,11 @@ const geoCells = countries.map((country) => ({
       </p>
 
       <div class="grid gap-5 md:grid-cols-2">
-        <article class="origin-card">
-          <h3 class="origin-title font-display font-bold text-primary">
+        <article class="origin-card group">
+          <h3
+            class="origin-title font-display font-bold text-primary flex items-center gap-2.5"
+          >
+            <CountryPlate code="eu" size="md" />
             {h.origin.euTitle}
           </h3>
           <p class="text-[0.97rem] leading-relaxed text-muted">
@@ -257,8 +261,11 @@ const geoCells = countries.map((country) => ({
           >
         </article>
 
-        <article class="origin-card">
-          <h3 class="origin-title font-display font-bold text-primary">
+        <article class="origin-card group">
+          <h3
+            class="origin-title font-display font-bold text-primary flex items-center gap-2.5"
+          >
+            <CountryPlate code="cn" size="md" />
             {h.origin.chinaTitle}
           </h3>
           <p class="text-[0.97rem] leading-relaxed text-muted">

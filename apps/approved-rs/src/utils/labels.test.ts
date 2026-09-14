@@ -10,7 +10,7 @@ describe('getNavItems', () => {
     const result = getNavItems('ru');
     expect(result.map((i) => i.label)).toEqual([
       'Автоподбор',
-      'Авто из ЕС и Китая',
+      'Авто из Европы и Китая',
       'Выкуп',
       'Проверка',
     ]);
@@ -26,7 +26,7 @@ describe('getNavItems', () => {
       },
       {
         href: '/ru/vehicle-import/',
-        label: 'Авто из ЕС и Китая',
+        label: 'Авто из Европы и Китая',
         slug: 'vehicle-import',
       },
       {
