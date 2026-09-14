@@ -2,80 +2,58 @@
 title: BMW X5 — оклейка PPF и бронирование фар в Белграде
 translations:
   en:
-    title: BMW X5
+    title: BMW X5 — PPF Wrap and Headlight Protection in Belgrade
     body: |-
-      BMW X5 — Protective PPF Film Installation in Belgrade, Serbia
+      Another BMW X5 is now wrapped in transparent **PPF film**.
 
-      Another BMW X5 has received a professional wrap of clear **PPF film**.
+      The film takes the brunt of what would otherwise damage the paint: stones, sand, bug splatter, and minor scratches that accumulation from daily driving.
 
-      The protective film helps preserve the car's paintwork from chips, small stones, scratches, road debris, insect marks, and other damage that can occur during everyday use.
-
-      We highly recommend **headlight protection** with PPF film.
-
-      **Front Headlight Protection:**
+      We highly recommend protecting the headlights as well. Here’s what this brings to the front:
 
       <ul class="icon-shield">
-      <li>Protection against small stones and road debris</li>
-      <li>Protection against scratches and sandblasting</li>
-      <li>Extra UV ray protection</li>
-      <li>Slows down yellowing and clouding of plastic</li>
-      <li>Headlights maintain clarity for a longer time</li>
-      <li>Preserves the appearance of expensive LED and adaptive optics</li>
+      <li>Stones and road debris are kept away from the glass</li>
+      <li>No scratches or sandblasting</li>
+      <li>Ultra-violet rays are filtered out by the film, preventing the plastic from yellowing and clouding over time</li>
+      <li>Expensive LED and adaptive optics keep their factory appearance</li>
       </ul>
 
-      **Rear Light Protection:**
+      The task for the rear is simpler:
 
       <ul class="icon-shield">
-      <li>Protection against scratches and minor damage</li>
-      <li>Protection from external factors</li>
-      <li>Maintains shine and transparency</li>
-      <li>Rear optics stay looking new for longer</li>
+      <li>No scratches or minor damages</li>
+      <li>Taillights stay clear and shiny for a longer time</li>
       </ul>
 
-      Headlights are one of the most vulnerable parts of a vehicle. Stones, sand, dust, road debris, car washes, and constant sun exposure gradually damage the surface of the optics. The clear protective film creates an additional barrier and absorbs a significant amount of external impact.
+      Headlights are one of the most vulnerable areas on a vehicle. Stones, sand, dust, brushes from car washes, and sunlight gradually eat away at the surface of the optics year after year. The film adds an extra layer between these elements and the plastic, absorbing a significant portion of the impact.
 
-      We are located in **Belgrade** and specialize in professional car wrapping with protective PPF film, including separate protection for front and rear headlights.
-
-      We serve clients from Belgrade, Zemun, New Belgrade, Novi Sad, Pančevo, Smederevo, Kragujevac, Niš, and other cities in Serbia.
-
-      You can choose to protect your car completely, wrap only the front part, specific body elements, or opt for standalone **front and rear headlight protection**.
+      You can wrap the entire car, just the front, specific body parts, or only the optics.
     car: BMW X5
   sr:
-    title: BMW X5
+    title: BMW X5 — PPF folija i zaštita farova u Beogradu
     body: |-
-      BMW X5 — zaštita sa prozirnom **PPF-folijom** u Beogradu, Srbija
+      Još jedan BMW X5 pod prozirnom **PPF folijom**.
 
-      Još jedan BMW X5 je dobio profesionalnu zaštitu prozirnom PPF-folijom.
+      Folija preuzima sve što bi inače oštetilo lak: kamenčiće, pesak, tragove insekata i sitne ogrebotine koje auto skuplja tokom svakodnevne vožnje.
 
-      Zaštitna folija pomaže da se očuva lak na automobilu od udaraca, sitnih kamenčića, ogrebotina, prljavštine sa puta, tragova insekata i drugih oštećenja koja se javljaju prilikom svakodnevne upotrebe vozila.
+      Preporučujemo i zaštitu farova. Šta to donosi sa prednje strane:
 
-      Posebno preporučujemo **zaštitu prednjih svetala** PPF-folijom.
-
-      Zaštita prednjih svetala:
       <ul class="icon-shield">
-      <li>zaštita od sitnih kamenčića i putne prljavštine</li>
-      <li>zaštita od ogrebotina i peskibljenja</li>
-      <li>dodatna zaštita od UV zraka</li>
-      <li>usporavanje žutjenja i zamagljivanja plastike</li>
-      <li>svetla duže zadržavaju prozračnost</li>
-      <li>očuvanje izgleda skupih LED i adaptivnih svetala</li>
+      <li>kamenčići i putni otpad ne dolaze do stakla</li>
+      <li>nema ogrebotina i peskostruganja</li>
+      <li>ultraljubičasti zraci se zadržavaju folijom, plastika duže ostaje bez žutljenja i mutnoće</li>
+      <li>skupa LED i adaptivna svetla zadržavaju fabrički izgled</li>
       </ul>
 
-      Zaštita zadnjih svetala:
+      Pozadi je situacija jednostavnija:
+
       <ul class="icon-shield">
-      <li>zaštita od ogrebotina i sitnih oštećenja</li>
-      <li>zaštita od spoljašnjih uticaja</li>
-      <li>očuvanje sjaja i prozračnosti</li>
-      <li>zadnja svetla duže izgledaju kao nova</li>
+      <li>nema ogrebotina i manjih oštećenja</li>
+      <li>bele lampe duže ostaju prozirne i sjajne</li>
       </ul>
 
-      Svetla su jedan od najosetljivijih delova automobila. Kamenčići, pesak, prašina, putna prljavština, pranje i stalno izlaganje sunčevoj svetlosti postepeno oštećuju površinu svetala. Prozirna zaštitna folija stvara dodatnu barijeru i preuzima značajan deo spoljašnjih uticaja na sebe.
+      Farovi su jedno od najranjivijih mesta na automobilu. Kamenčići, pesak, prašina, četke na perionici i sunce godinama uništavaju površinu svetala. Folija stavlja dodatni sloj između njih i plastike i preuzima najveći deo udarca na sebe.
 
-      Mi se nalazimo u **Beogradu** i vršimo profesionalnu zaštitu automobila PPF-folijom, kao i posebno zaštitu prednjih i zadnjih svetala.
-
-      Radimo sa klijentima iz Beograda, Zemuna, Novog Beograda, Novog Sada, Pančeva, Smedereva, Kragujevca, Niša i drugih gradova Srbije.
-
-      Moguće je zaštititi automobil u potpunosti, oblepići samo prednji deo, određene delove karoserije ili uraditi posebno **zaštitu prednjih i zadnjih svetala**.
+      Mogu se oblepi cela kola, samo prednji deo, pojedini delovi karoserije ili samo svetla.
     car: BMW X5
 car: BMW X5
 year: 2026
@@ -85,7 +63,7 @@ image: image.jpg
 gallery: []
 date: 2026-08-26
 published: true
-translatedFrom: 739135d5e16bc5b8
+translatedFrom: 7155b4549dfd6d79
 ---
 
 Ещё один BMW X5 под прозрачной **PPF-плёнкой**.

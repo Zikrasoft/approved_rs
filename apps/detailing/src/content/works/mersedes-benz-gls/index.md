@@ -2,86 +2,62 @@
 title: Mercedes-Benz GLS — оклейка сатиновой плёнкой
 translations:
   en:
-    title: Mercedes-Benz GLS
+    title: Mercedes-Benz GLS — Satin Film Wrap
     body: |-
-      Mercedes-Benz GLS 2026 — complete satin protective film wrap in Belgrade
+      The new 2026 Mercedes-Benz GLS arrived at our studio with two main objectives: to protect the body and to give it a sleek satin finish. Together with the owner, we selected a protective satin film that is **190 microns** thick, wrapping the entire vehicle.
 
-      We were approached by the owner of a new 2026 Mercedes-Benz GLS with the goal of maximizing the protection of the car’s body while also giving it an eye-catching satin finish.
+      Underneath the film, the factory paint remains untouched: minor scratches, stone chips, insect residues, road salt, and dirt are no longer a concern. The satin finish changes the way the car interacts with light while the original color stays preserved beneath the protective layer.
 
-      Together with the client, we selected a **190-micron satin protective film** and performed a full wrap of the car's exterior.
+      We make sure to tuck the edges of the film wherever technically feasible, which reduces visible edges and creates a more seamless look, allowing the wrap to last longer.
 
-      The complete wrap of the Mercedes-Benz GLS with protective film helps preserve the factory paint and protects the body from minor scratches, stone chips, insect residues, road grime, chemicals, and other impacts the vehicle faces in daily use.
+      The film can be repaired locally. If any part gets damaged during use, it's often unnecessary to replace the entire car wrap — we simply replace the film on that specific area.
 
-      Not only does the satin film serve a protective function, but it also completely transforms the car's appearance. The body gains a deep, noble satin effect, while the original color of the car remains intact beneath the protective layer.
-
-      We perform professional vehicle wrapping with precise overlaps at the edges of the parts whenever technically feasible. This approach helps achieve a seamless look, reducing the visibility of edges and ensuring the longevity of the coating.
-
-      One of the essential advantages of the protective film is its reparability. If the film on a specific part gets damaged during use, in most cases, there is no need to re-wrap the entire vehicle. You can simply replace the film on the affected body panel.
-
-      Benefits of a full wrap of the vehicle with protective film:
+      Here’s what a complete wrap offers:
 
       <ul class="icon-shield">
-      <li>protects factory paint from chips and minor scratches</li>
-      <li>guards against road grime and external impacts</li>
-      <li>preserves the original paint finish</li>
-      <li>provides easier maintenance of the body</li>
-      <li>allows for local replacement of damaged film</li>
-      <li>maintains the car’s attractive appearance</li>
-      <li>offers additional protection for new vehicles from the first kilometers of use</li>
-      <li>preserves the condition of the body, positively influencing the vehicle's resale value</li>
-      <li>provides a stunning satin exterior without the need to repaint the car</li>
+      <li>The factory paint won't collect chips or minor scratches</li>
+      <li>Road dirt and chemicals stay on the film</li>
+      <li>Maintaining the body becomes easier</li>
+      <li>A damaged piece can be rewrapped individually</li>
+      <li>The new car is protected from the very first mile</li>
+      <li>The preserved paint is an appealing factor for resale</li>
+      <li>Satin appearance without the need for a repaint</li>
       </ul>
 
-      We carry out PPF vehicle wrapping in Serbia, in **Belgrade**, near Ada Mall.
+      We perform PPF wrapping in Belgrade, in the Zvezdara area.
 
-      We welcome car owners not only from Belgrade but also from Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Novi Pazar, Čačak, Zrenjanin, Kraljevo, Kruševac, and other cities across Serbia.
+      You can wrap both a new car and one that has already been on the road, either fully or just the most vulnerable areas. We’ll choose the right film for you during the inspection.
 
-      If you want to protect your new or pre-owned vehicle, we can help you find the right film option and perform both **full body wrappings** and protection for the most vulnerable elements.
-
-      Protective film for cars in Belgrade is an investment in maintaining the factory finish and the overall appearance of your vehicle for many years to come.
-
-      Mercedes-Benz GLS 2026 — stay tuned for the results of the complete satin protective film wrap.
+      Stay tuned for the results of the full satin wrap on the GLS once we're finished.
     car: Mercedes-Benz GLS
   sr:
-    title: Mercedes-Benz GLS
+    title: Mercedes-Benz GLS — oblačenje satinske folije
     body: |-
-      Mercedes-Benz GLS 2026 — potpuno obavijanje zaštitnom satinskom folijom u Beogradu
+      Novi Mercedes-Benz GLS 2026 stigao je kod nas sa dva zadatka: zaštititi karoseriju i promeniti izgled u satinski. Zajedno sa vlasnikom, odabrali smo zaštitnu satinsku foliju debljine **190 mikrona**, koja pokriva celu karoseriju.
 
-      Obratio nam se vlasnik novog Mercedes-Benz GLS 2026 godine sa zadatkom da maksimalno zaštiti karoseriju automobila i istovremeno mu pridoda efekatan satinski izgled.
+      Pod folijom fabrički lak ostaje netaknut: sitne ogrebotine, kamenčići, tragovi insekata, hemijski reagenti i ulična prljavština više ne dolaze do njega. Satinska folija promena način na koji automobil izgleda na svetlu, dok originalna boja ostaje za zaštitnim slojem.
 
-      Zajedno s klijentom, odabrali smo **zaštitnu satinsku foliju debljine 190 mikrona** i izvršili potpuno obavijanje karoserije automobila.
+      Isečci detalja preklapamo gde je to tehnički moguće: vidljivih ivica je manje, slika deluje celovitije, a pokriće se duže drži.
 
-      Kompletno obavijanje Mercedes-Benz GLS zaštitnom folijom pomaže u očuvanju fabričkog lakog sloja i štiti karoseriju od sitnih ogrebotina, kamenčića, tragova insekata, saobraćajnih zagađenja, hemikalija i drugih uticaja sa kojima se automobil suočava tokom svakodnevnog koriščenja.
+      Foliju je moguće lokalno popraviti. Ako tokom korišćenja bude oštećen jedan deo, obično nije potrebno ponovo oblepljivati ceo automobil — folija se menja samo na njemu.
 
-      Satinska folija ne samo da služi kao zaštita, već potpuno menja percepciju automobila. Karoserija dobija dubok, plemenit satinski efekat, pri čemu se originalna boja automobila čuva ispod zaštitnog sloja.
-
-      Sprovodimo profesionalno obavijanje automobila s preciznim preklapanjem folije na ivicama delova gde je to tehnički izvodljivo. Ovaj pristup omogućava da se postigne što jedinstveniji izgled, smanjuje vidljivost ivica i obezbeđuje dugotrajnost premaza.
-
-      Jedna od važnih prednosti zaštitne folije jest njena mogućnost popravke. Ako se tokom korišćenja folija na pojedinom delu ošteti, u većini slučajeva nije potrebno prekrajati ceo automobil. Moguće je zameniti foliju samo na oštećenom delu karoserije.
-
-      Prednosti kompletnog obavijanja automobila zaštitnom folijom:
+      Šta donosi potpuno oblačenje:
 
       <ul class="icon-shield">
-      <li>zaštita fabričkog LKP od kamenčića i sitnih ogrebotina</li>
-      <li>zaštita od saobraćajnih zagađenja i spoljašnjih uticaja</li>
-      <li>očuvanje originalnog lakog sloja</li>
-      <li>lakše održavanje karoserije</li>
-      <li>mogućnost lokalne zamene oštećene folije</li>
-      <li>očuvanje atraktivnog izgleda automobila</li>
-      <li>dodatna zaštita novog automobila od prvih pređenih kilometara</li>
-      <li>očuvanje stanja karoserije, što može pozitivno uticati na privlačnost automobila prilikom kasnije prodaje</li>
-      <li>efektan satinski izgled bez potrebe za prefarbavanjem automobila</li>
+      <li>fabrička lak zaštita ne skuplja kamenčiće i sitne ogrebotine</li>
+      <li>ulicna prljavština i hemijski reagenti ostaju na foliji</li>
+      <li>lakše je održavati karoseriju</li>
+      <li>oštećeni deo se zasebno oblepljuje</li>
+      <li>novi automobil je zaštićen od prvih kilometara</li>
+      <li>sačuvana lak zaštita koja se vidi prilikom prodaje</li>
+      <li>satinski izgled bez ponovnog farbanja</li>
       </ul>
 
-      Obavijanje automobila zaštitnom PPF-folijom vršimo u Srbiji, u **Beogradu**, u blizini Ada Mall-a.
+      Oblačenje PPF folijom radimo u Beogradu, na Zvezdari.
 
-      Kod nas dolaze vlasnici automobila ne samo iz Beograda, već i iz Novog Sada, Niša, Kragujevca, Subotice, Pančeva, Novog Pazara, Čačka, Zrenjanina, Kraljeva, Kruševca i drugih gradova Srbije.
+      Može se obleći i novi automobil, kao i onaj koji je već vozio: cela ili samo najranjivija mesta. Opciju folije odabraćemo prilikom pregleda.
 
-      Ako želite da zaštitite novi ili već korišćen automobil, možemo izabrati odgovarajuću foliju i izvršiti kako **potpuno obavijanje karoserije**, tako i zaštitu pojedinačnih najpodložnijih elemenata.
-
-      Zaštitna folija za automobil u Beogradu — to je investicija u očuvanje fabričkog premaza i izgleda automobila na dugi niz godina.
-
-      Mercedes-Benz GLS 2026 — uskoro ćemo prikazati rezultat potpunog obavijanja satinskom zaštitnom folijom.
+      Rezultat potpunog oblačenja GLS-a satinskom folijom pokažemo kada završimo.
     car: Mercedes-Benz GLS
 car: Mercedes-Benz GLS
 year: 2026
@@ -92,7 +68,7 @@ image: image.jpg
 gallery: []
 date: 2026-03-10
 published: true
-translatedFrom: 37db9c883b04d93e
+translatedFrom: b68a6e7d2498f97c
 ---
 
 Новый Mercedes-Benz GLS 2026 приехал к нам с двумя задачами сразу: защитить кузов и сменить вид на сатиновый. Вместе с владельцем выбрали защитную сатиновую плёнку толщиной **190 микрон**, оклеиваем кузов целиком.

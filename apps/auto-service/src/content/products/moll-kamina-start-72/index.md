@@ -28,11 +28,11 @@ published: true
 translations:
   sr:
     title: Moll Kamina Start 72
-    body: Nemačka izrada sa pojačanim rešetkama. Razuman kompromis ako vam ne treba AGM, ali želite dodatak za startni tok.
+    body: "**Nemačka konstrukcija** sa ojačanim rešetkama. Razuman kompromis ako vam AGM nije potreban, ali želite rezervu za startni tok."
   en:
     title: Moll Kamina Start 72
-    body: German craftsmanship with reinforced grids. A sensible compromise if you don't need an AGM battery but still want extra starting power.
-translatedFrom: 9b28e05a5b36da14
+    body: "**German assembly** with reinforced grids. A sensible compromise if you don’t need an AGM battery but still want some extra cold cranking power."
+translatedFrom: 8cca9d61dc0f8050
 ---
 
 **Немецкая сборка** с усиленными решётками. Разумный компромисс, если не нужен AGM, но хочется запас по пусковому току.

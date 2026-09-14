@@ -60,122 +60,122 @@ notFound:
 translations:
   sr:
     works:
-      metaTitle: Radovi detailing studija u Beogradu — Details
-      metaDescription: 'Automobili koji su prošli kroz naš boks na Zvezdari: zaštita farova folijom PPF, full wrap, mašinsko poliranje sa keramičkom zaštitom. Fotografije svake naše usluge.'
+      metaTitle: Radovi detaliziranja automobila u Beogradu — Details
+      metaDescription: 'Automobili koji su prošli kroz naš boks na Zvezdari: zaštitna folija PPF, zaštita farova, potpuno oblaganje karoserije. Svoje fotografije za svaki rad.'
       eyebrow: Radovi
-      heading: Automobili u našem boksu
-      lead: Bez stock fotografija. Svaka kartica predstavlja automobil koji je bio kod nas i snimljen nakon obavljenog posla.
+      heading: Automobili koji su prošli kroz naš boks
+      lead: Nema stock fotografija. Svaka kartica — automobil koji je bio kod nas u boksu, snimljen nakon rada.
       filterAll: Sve
       detailMetaSuffix: Details
-      detailCtaHeading: Želite takođe?
-      detailCtaBody: Dođite na pregled ili pošalite fotografije svog automobila — izračunaćemo cenu i rok.
+      detailCtaHeading: Želite i vi tako?
+      detailCtaBody: Dovedite automobil na pregled ili pošaljite fotografije vaše mašine — izračunaćemo i reći ćemo vam rok.
     contact:
-      metaTitle: Kontakti detailing studija u Beogradu — Details
-      metaDescription: Adresa, radno vreme i telefon studija detailing Details u Beogradu. Zakazivanje pregleda putem telefona, WhatsApp-a, Vibera ili Telegram-a.
+      metaTitle: Kontakti studije detaliziranja u Beogradu — Details
+      metaDescription: Adresa, radno vreme i telefon studije detaliziranja Details u Beogradu. Zakazivanje pregleda putem telefona, WhatsApp, Viber ili Telegrama.
       eyebrow: Kontakti
-      heading: Posetite nas da pogledate boks
-      lead: 'Ne prodajemo telefonom. Najbolji način je da svratite na petnaest minuta: pogledamo automobil zajedno i kažemo šta mu je zaista potrebno.'
+      heading: Dođite da pogledate boks
+      lead: 'Ne prodajemo preko telefona. Najbolji način je da svratite na petnaest minuta: pogledajmo zajedno automobil i kažemo šta mu zaista treba.'
       addressLabel: Adresa
       hoursLabel: Radno vreme
       phoneLabel: Telefon
       mapHeading: Kako nas pronaći
-      mapNote: Ulaz iz dvorišta, kapija sa natpisom. Parking ispred boksa.
+      mapNote: Ulaz iz dvorišta, kapija sa natpisom. Parkiranje ispred boksa.
       arrivalHeading: Pre dolaska
       arrival:
-        - Ne morate da perete automobil — mi to radimo sami pre rada.
-        - 'Ako imate vremena, dođite tokom dana: lak se bolje vidi na dnevnom svetlu.'
-        - Ponesite ključeve od svih bravica, uključujući i sigurnosne matice na točkovima.
+        - Nema potrebe da perete automobil — mi ga već peremo pre rada.
+        - 'Ako imate vremena, dođite tokom dana: lak se poštenije vidi na dnevnom svetlu.'
+        - Ponesite ključeve od svih brava, uključujući i skrivene na točkovima.
     thanks:
-      metaTitle: Zahtev poslat — Details
-      metaDescription: Hvala na zahtevu. Javićemo se u radno vreme i dogovoriti se za pregled.
+      metaTitle: Zahtev je poslat — Details
+      metaDescription: Hvala na zahtevu. Javićemo se u radno vreme i dogovoriti pregled.
       eyebrow: Gotovo
-      heading: Zahtev je kod nas
-      body: Javićemo se u radno vreme — obično u roku od sat vremena. Ako imate hitno pitanje, pišite na menteri, tu brže odgovaramo.
-      note: Ako nema odgovora duže od radnog dana, verovatno je poruka izgubljena. Pišite ponovo, nećemo se naljutiti.
-      cta: Vrati se na početnu
+      heading: Zahtev kod nas
+      body: Javićemo vam se u radno vreme — obično u roku od sat vremena. Ako je pitanje hitno, napišite u messenger, tamo odgovaramo brže.
+      note: Ako nema odgovora duže od radnog dana, to znači da je poruka izgubljena. Napišite ponovo, nećemo se ljutiti.
+      cta: Vratite se na početnu
     privacy:
       metaTitle: Politika privatnosti — Details
-      metaDescription: Koje podatke prikuplja sajt studija detailing Details, zašto i koliko dugo ih čuva.
+      metaDescription: Koje podatke sakuplja sajt studije detaliziranja Details, zašto i koliko dugo se čuvaju.
       heading: Politika privatnosti
       lastUpdated: Ažurirano 12. septembra 2026.
       sections:
-        - title: Koje podatke prikupljamo
-          text: Samo ono što sami unesete u formu zahteva — ime, kontakt i komentar, kao i adresu stranice sa koje je zahtev poslat, i anonimni identifikator pretraživača. Ovaj identifikator je slučajan, čuva se u vašem pretraživaču i potreban je samo da ne otvorimo tri kartice za isti zahtev.
+        - title: Koje podatke sakupljamo
+          text: Samo ono što vi sami unosite u obrazac zahteva — ime, kontakt i komentar — kao i adresu stranice s koje je zahtev poslat, i anonimni identifikator pretraživača. Ovaj identifikator je slučajan, čuva se u vašem pretraživaču i potreban je samo da ne bismo napravili tri kartice za jedan i isti zahtev.
         - title: Zašto su nam ti podaci
-          text: Da bismo se povezali sa vama povodom zahteva i vodili evidenciju o kontaktima. Ne koristimo ih za slanje obaveštenja i ne delimo ih trećim licima u marketinške svrhe.
+          text: Da bismo se povezali sa vama u vezi zahteva i vodili istoriju obraćanja. Ne koristimo ih za slanje reklama i ne prenosimo trećim licima u promotivne svrhe.
         - title: Gde se čuvaju
-          text: Zahtevi se čuvaju u enkriptovanoj arhivi našeg hosting provajdera i dupliraju se u naš unutrašnji radni chat. Pristup imaju samo zaposleni studija.
+          text: Zahtevi se čuvaju u šifrovanom skladištu našeg hosting provajdera i dupliraju se u našem internom radnom čatu. Pristup imaju samo zaposleni studije.
         - title: Koliko ih čuvamo
-          text: Do dve godine od poslednjeg kontakta. Na vaš zahtev možemo ih obrisati ranije.
+          text: Do dve godine od poslednjeg kontakta. Na vaš zahtev ćemo ih obrisati ranije.
         - title: Kolačići
-          text: Sajt koristi jedan tehnički kolačić — izabrani jezik interfejsa. Ovde nema reklamnih i analitičkih kolačića koji vas prate na drugim sajtovima.
+          text: Sajt koristi jedan tehnički kolačić — izabrani jezik interfejsa. Reklamnih i analitičkih kolačića koji prate vas na drugim sajtovima ovde nema.
         - title: Vaša prava
-          text: Možete zatražiti kopiju svojih podataka, njihovo ispravljenje ili brisanje. Dovoljno je da nam se obratite u bilo kojem od menteri ili da pozovete.
+          text: Možete zatražiti kopiju svojih podataka, njihovo ispravljenje ili brisanje. Dovoljno je da nam pišete u bilo kojem messengeru ili pozovete.
       contactTitle: Pitanja o podacima
-      contactBefore: Pišite ili pozovite nas, kontakti su na stranici
+      contactBefore: Pišite ili nazovite nas, kontakti se nalaze na stranici
     notFound:
       metaTitle: Stranica nije pronađena — Details
       heading: Ova stranica ne postoji
-      body: Možda je veza zastarela ili je u adresi greška. Pogledajte na početnu ili proverite radove.
+      body: Verovatno je link zastareo ili ima grešku u adresi. Pogledajte na početnoj ili promenite radove.
       cta: Na početnu
   en:
     works:
-      metaTitle: Detailing Studio Works in Belgrade — Details
-      metaDescription: 'Cars that have passed through our box in Zvezdara: PPF application, headlight protection, full body wraps. Photos of each job.'
+      metaTitle: Detailing Studio Work in Belgrade — Details
+      metaDescription: 'Vehicles that have passed through our box in Zvezdara: PPF wrapping, headlight protection, full body wraps. Photos for each job.'
       eyebrow: Works
-      heading: Cars that have been in our box
-      lead: No stock photos. Each card features a car that was in our box, taken after the work was done.
+      heading: Cars That Have Visited Our Box
+      lead: No stock photos here. Each card features a vehicle that was with us, captured after the work was done.
       filterAll: All
       detailMetaSuffix: Details
-      detailCtaHeading: Want it too?
-      detailCtaBody: Come for an inspection or send a photo of your car — we’ll give you a quote and timeframe.
+      detailCtaHeading: Want the same?
+      detailCtaBody: Come for an inspection or send us a photo of your car — we’ll provide a quote and timeframe.
     contact:
-      metaTitle: Contact Details for the Detailing Studio in Belgrade — Details
-      metaDescription: Address, working hours, and phone number for the Details car detailing studio in Belgrade. Schedule an inspection by phone, WhatsApp, Viber, or Telegram.
+      metaTitle: Contact the Detailing Studio in Belgrade — Details
+      metaDescription: Address, hours, and phone number of Details car detailing studio in Belgrade. Schedule an inspection via phone, WhatsApp, Viber, or Telegram.
       eyebrow: Contacts
-      heading: Come and check out the box
-      lead: 'We don’t sell over the phone. The best way is to stop by for fifteen minutes: we’ll look at the car together and discuss what it really needs.'
+      heading: Visit Us to See the Box
+      lead: 'We don’t sell over the phone. The best way is to drop by for fifteen minutes: we’ll look at your car together and discuss what it actually needs.'
       addressLabel: Address
-      hoursLabel: Working Hours
+      hoursLabel: Opening Hours
       phoneLabel: Phone
-      mapHeading: How to find us
-      mapNote: Entrance from the courtyard, gate with a sign. Parking in front of the box.
-      arrivalHeading: Before Your Visit
+      mapHeading: How to Find Us
+      mapNote: Entry from the courtyard, gates with a sign. Parking in front of the box.
+      arrivalHeading: Before Your Arrival
       arrival:
-        - There’s no need to wash the car — we will wash it ourselves before starting the work.
-        - 'If you have the time, come during the day: the paint looks clearer in daylight.'
-        - Please bring the keys to all locks, including any wheel locks.
+        - You don’t need to wash your car — we will wash it ourselves before the job.
+        - 'If possible, try to come during the day: the paint is more honestly visible in daylight.'
+        - Bring the keys for all locks, including the security locks on the wheels.
     thanks:
-      metaTitle: Request Submitted — Details
-      metaDescription: Thank you for your request. We will get in touch during working hours to arrange an inspection.
+      metaTitle: Application Submitted — Details
+      metaDescription: Thank you for your application. We'll get back to you during business hours to arrange an inspection.
       eyebrow: Done
-      heading: We have your request
-      body: We will contact you during working hours — usually within an hour. If it's urgent, message us directly; we respond faster there.
-      note: If you haven't received a reply by the end of the working day, the message may have been lost. Please write to us again, we won’t mind.
+      heading: We Received Your Application
+      body: We will contact you during business hours — usually within an hour. If it’s urgent, please message us; we respond faster there.
+      note: If there’s no response by the end of the business day, your message might have been lost. Please write again; we won’t be offended.
       cta: Return to Home
     privacy:
       metaTitle: Privacy Policy — Details
-      metaDescription: What data is collected by the Details detailing studio website, why it is collected, and how long it is stored.
+      metaDescription: The data collected by the Details car detailing website, why it's needed, and how long it's stored.
       heading: Privacy Policy
       lastUpdated: Updated September 12, 2026
       sections:
         - title: What Data We Collect
-          text: Only what you enter in the request form — name, contact information, and comments — as well as the page address from which the request was sent, and an anonymous browser identifier. This identifier is random, stored in your browser, and is only needed so we don’t create three cards for the same request.
+          text: Only what you enter in the application form — name, contact information, and comments — as well as the URL of the page from which the application was submitted and an anonymous browser identifier. This identifier is random, stored in your browser, and needed just so we don't create three cards for the same request.
         - title: Why We Need This Data
-          text: To contact you regarding your request and maintain a record of inquiries. We do not use it for newsletters and do not share it with third parties for advertising purposes.
-        - title: Where It Is Stored
-          text: Requests are stored in an encrypted repository of our hosting provider and duplicated in our internal work chat. Access is granted only to studio staff.
-        - title: How Long We Store It
-          text: Up to two years from the last contact. We can remove it earlier at your request.
+          text: To contact you regarding your application and keep a record of your inquiries. We do not use it for mailing lists and do not share it with third parties for advertising purposes.
+        - title: Where It’s Stored
+          text: Applications are stored in encrypted storage provided by our hosting provider and are duplicated in our internal work chat. Only studio staff have access.
+        - title: How Long We Keep It
+          text: Up to two years from the last contact. We will delete it sooner upon your request.
         - title: Cookies
-          text: The site uses one technical cookie — the selected interface language. There are no advertising or analytical cookies that track you on other sites.
+          text: The site uses one technical cookie — the selected interface language. There are no advertising or analytical cookies tracking you on other sites.
         - title: Your Rights
-          text: You can request a copy of your data, its correction or deletion. Just message us on any of the messengers or call.
-      contactTitle: Questions About Data
-      contactBefore: Write or call us, contact information is available on the page.
+          text: You can request a copy of your data, have it corrected, or deleted. Just write to us through any messaging platform or call us.
+      contactTitle: Questions About Your Data
+      contactBefore: Write or call us; contact details are on the page.
     notFound:
       metaTitle: Page Not Found — Details
-      heading: This page does not exist
-      body: The link may be outdated or there could be a typo in the address. Check the home page or view our works.
+      heading: This Page Doesn’t Exist
+      body: The link may be outdated or there might be a typo in the address. Check the homepage or view our work.
       cta: Go to Home
-translatedFrom: rerun-for-meta-length-budget
+translatedFrom: 9b22571fedd9aa19

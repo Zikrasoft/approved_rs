@@ -6,81 +6,65 @@ translations:
     body: |-
       ## Car Sourcing for Porsche Boxster in Germany
 
-      We were approached by Vladimir, a long-time resident of Germany, with the task of finding and sourcing a Porsche Boxster in excellent condition.
+      Vladimir, who has been living in Germany for quite some time, reached out to us with the task of finding a Porsche Boxster in excellent condition.
 
-      Together with Vladimir, we defined his key requirements for the vehicle and began searching for suitable options. Ultimately, we selected three Porsche Boxsters, which we inspected at various dealerships across Germany.
+      Together with Vladimir, we outlined the key requirements for the vehicle and began our search for suitable options. Ultimately, we selected **three Porsche Boxster** models, which we inspected across different dealerships and cities in Germany.
 
-      Each car underwent a thorough pre-purchase inspection. We evaluated the technical condition, bodywork, paint finish, interior, equipment, engine and transmission condition, as well as checked the vehicle's history and verified that the stated condition matched the reality.
+      Each car underwent a thorough pre-purchase inspection. We evaluated their technical condition, bodywork, paint quality, interior, specifications, engine and transmission state, as well as checked the vehicle's history to ensure that its claimed condition matched reality.
 
-      The primary goal of the car sourcing process is to find a Porsche Boxster that is truly worth the investment and meets the client's expectations.
+      The main goal of the sourcing process is to find a Porsche Boxster that is truly worth its price and meets the client's requirements.
 
-      In the end, Vladimir chose a vehicle that fully satisfied him. He was pleased with its condition and features, and most importantly, after our inspection, he had no doubts about the purchase.
+      It’s important to note that the cost of car sourcing services in Germany is higher than similar services in Serbia. This is due to the higher labor costs for specialists, greater distances between cities, and the necessity of traveling to inspect cars in various regions of Germany.
 
-      It is essential to understand that the cost of car sourcing services in Germany is higher than similar services in Serbia. This is due to the higher rates for specialists, the greater distances between cities, and the need to travel to inspect vehicles in different regions of Germany.
-
-      We operate with vehicles throughout Germany, which allows us to organize sourcing for Porsche and other cars in Berlin, Munich, Hamburg, Frankfurt, Cologne, Düsseldorf, Stuttgart, Leipzig, Nuremberg, and other cities.
-
-      If you are looking for a Porsche Boxster in Germany and want to buy a car without unpleasant surprises, professional car sourcing can save you time, money, and help you avoid purchasing a problematic vehicle.
+      In the end, Vladimir chose a car that completely satisfied him. He was pleased with both its condition and specifications, and most importantly—after our inspection, he had no lingering questions about the purchase.
   sr:
     title: Porsche Boxster
     body: |-
       ## Autoizbor Porsche Boxster u Nemačkoj
 
-      Obratio nam se Vladimir, koji već dugo živi u Nemačkoj, sa zadatkom da pronađemo i izaberemo za njega Porsche Boxster u odličnom stanju.
+      Vladimir, koji već duže vreme živi u Nemačkoj, obratio nam se sa zahtevom da pronađemo i odaberemo Porsche Boxster u odličnom stanju.
 
-      Zajedno sa Vladimirom smo definisali osnovne zahteve za automobil i započeli potragu za odgovarajućim varijantama. Na kraju smo izabrali tri Porsche Boxster koja smo pregledali u različitim salonima i gradovima Nemačke.
+      Zajedno sa Vladimirom, definisali smo osnovne zahteve za automobil i započeli pretragu odgovarajućih opcija. Kao rezultat, izabrali smo **tri Porsche Boxster** koja smo pregledali u različitim salonima i gradovima Nemačke.
 
-      Svaki automobil je prošao detaljnu proveru pre kupovine. Procjenjivali smo tehničko stanje, karoseriju, lak, enterijer, opremu, stanje motora i menjača, a takođe smo proveravali istoriju automobila i usklađenost deklarisanog stanja sa realnim.
+      Svaki automobil je prošao detaljnu proveru pre kupovine. Procjenjivali smo tehničko stanje, limariju, lakiranje, enterijer, opremu, stanje motora i menjača, kao i proveravali istoriju automobila i usklađenost navedenog stanja sa stvarnim.
 
-      Glavni cilj autoizbora je pronaći Porsche Boxster koji stvarno vredi novca i odgovara zahtevima klijenta.
+      Glavni cilj autoizbora je da pronađemo Porsche Boxster koji zaista vrednuje svoj novac i ispunjava zahteve klijenta.
 
-      Na kraju je Vladimir izabrao automobil koji ga je potpuno zadovoljio. Automobil mu se svideo i po stanju i po opremi, a najvažnije je da, nakon naše provere, nije imao nikakvih pitanja u vezi sa kupovinom.
+      Važno je razumeti da su troškovi autoizbora automobila u Nemačkoj veći nego slične usluge u Srbiji. To je zbog viših troškova rada stručnjaka, većih razdaljina između gradova i potrebe da se ide na preglede automobila u različitim regionima Nemačke.
 
-      Važno je razumeti da su troškovi autoizbora automobila u Nemačkoj viši nego slične usluge u Srbiji. To je povezano sa višim troškovima rada stručnjaka, većim udaljenostima između gradova i potrebom da se putuje na preglede automobila u različite regione Nemačke.
-
-      Radimo sa automobilima širom Nemačke, stoga možemo organizovati autoizbor Porsche i drugih automobila u Berlinu, Minhenu, Hamburgu, Frankfurtu na Majni, Kelnu, Diseldorfu, Štutgartu, Lajpcigu, Nurnbergu i drugim gradovima.
-
-      Ako tražite Porsche Boxster u Nemačkoj i želite da kupite automobil bez neprijatnih iznenađenja, profesionalni autoizbor će vam pomoći da uštedite vreme, novac i izbegnete kupovinu problematičnog automobila.
+      Na kraju, Vladimir je izabrao automobil koji mu je u potpunosti odgovarao. Automobil mu se dopao kako po stanju, tako i po opremi, a najvažnije je da nakon naše provere nije imao nedoumica u vezi sa kupovinom.
   es:
     title: Porsche Boxster
     body: |-
-      ## Búsqueda de Porsche Boxster en Alemania
+      ## Selección de Porsche Boxster en Alemania
 
-      Vladimir, quien lleva mucho tiempo viviendo en Alemania, se acercó a nosotros con la tarea de encontrar un Porsche Boxster en excelentes condiciones.
+      Vladimir, quien reside en Alemania desde hace tiempo, se puso en contacto con nosotros para que lo ayudáramos a encontrar un Porsche Boxster en excelentes condiciones.
 
-      Junto a Vladimir, definimos los requisitos principales para el automóvil y comenzamos la búsqueda de las opciones más adecuadas. Como resultado, seleccionamos tres Porsche Boxster, los cuales inspeccionamos en diferentes concesionarios y ciudades de Alemania.
+      Junto a Vladimir, definimos los requisitos clave para el vehículo y comenzamos la búsqueda de opciones adecuadas. Finalmente, seleccionamos **tres Porsche Boxster** que inspeccionamos en diferentes concesionarios y ciudades de Alemania.
 
-      Cada vehículo pasó por una revisión detallada antes de la compra. Evaluamos el estado técnico, la carrocería, la pintura, el interior, el equipamiento, así como la condición del motor y la transmisión; además, verificamos el historial del automóvil y la coincidencia entre el estado declarado y la realidad.
+      Cada automóvil pasó por un exhaustivo chequeo antes de la compra. Evaluamos el estado técnico, la carrocería, el acabado de pintura, el interior, el equipamiento, así como el estado del motor y la transmisión. También revisamos el historial del vehículo y confirmamos que el estado declarado coincidía con la realidad.
 
-      El objetivo principal de la búsqueda es encontrar un Porsche Boxster que realmente valga su precio y cumpla con las expectativas del cliente.
+      La principal misión de la selección de vehículos es encontrar un Porsche Boxster que realmente valga la pena y que cumpla con las expectativas del cliente.
 
-      Al final, Vladimir eligió el automóvil que lo satisfizo por completo. Le gustó tanto el estado del vehículo como su equipamiento, y lo más importante, tras nuestra revisión no le quedaron dudas sobre la compra.
+      Es importante entender que el costo del servicio de selección de automóviles en Alemania es más elevado que el de un servicio similar en Serbia. Esto se debe a los mayores costos de los especialistas, las largas distancias entre ciudades y la necesidad de desplazarse para inspeccionar vehículos en diferentes regiones de Alemania.
 
-      Es importante entender que el costo del servicio de búsqueda de automóviles en Alemania es mayor que el de un servicio similar en Serbia. Esto se debe a los salarios más altos de los especialistas, las largas distancias entre ciudades y la necesidad de desplazarse a diferentes regiones de Alemania para inspeccionar los vehículos.
-
-      Trabajamos con automóviles en toda Alemania, por lo que podemos organizar la búsqueda de un Porsche y otros vehículos en Berlín, Múnich, Hamburgo, Frankfurt, Colonia, Düsseldorf, Stuttgart, Leipzig, Núremberg y otras ciudades.
-
-      Si estás buscando un Porsche Boxster en Alemania y deseas comprar un automóvil sin sorpresas desagradables, un servicio profesional de búsqueda te ayudará a ahorrar tiempo, dinero y a evitar la compra de un automóvil problemático.
+      Al final, Vladimir eligió el automóvil que cumplía con todas sus expectativas. Le agradó tanto el estado como el equipamiento del coche, y lo más importante, después de nuestra inspección, no tenía dudas sobre la compra.
   de:
     title: Porsche Boxster
     body: |-
-      ## Autovorbereitung Porsche Boxster in Deutschland
+      ## Autoauswahl Porsche Boxster in Deutschland
 
-      Vladimir, der schon lange in Deutschland lebt, wandte sich an uns mit der Aufgabe, für ihn einen Porsche Boxster in einwandfreiem Zustand zu finden und auszuwählen.
+      Wladimir, der schon seit längerer Zeit in Deutschland lebt, wandte sich an uns mit der Aufgabe, einen Porsche Boxster in einwandfreiem Zustand zu finden und auszuwählen.
 
-      Zusammen mit Vladimir haben wir die Hauptanforderungen an das Fahrzeug definiert und mit der Suche nach passenden Optionen begonnen. Letztendlich haben wir drei Porsche Boxster ausgewählt, die wir in verschiedenen Autohäusern und Städten Deutschlands besichtigt haben.
+      Zusammen mit Wladimir haben wir die wichtigsten Anforderungen an das Fahrzeug festgelegt und mit der Suche nach geeigneten Optionen begonnen. Schließlich wurden **drei Porsche Boxster** ausgewählt, die wir in verschiedenen Autohäusern und Städten Deutschlands besichtigt haben.
 
-      Jedes Fahrzeug wurde vor dem Kauf gründlich überprüft. Wir haben den technischen Zustand, die Karosserie, den Lack, das Interieur, die Ausstattung, den Zustand des Motors und des Getriebes sowie die Fahrzeughistorie und die Übereinstimmung des angegebenen Zustands mit der Realität bewertet.
+      Jedes Fahrzeug wurde vor dem Kauf gründlich überprüft. Wir haben den technischen Zustand, die Karosserie, die Lackierung, das Interieur, die Ausstattung sowie den Zustand des Motors und des Getriebes bewertet und zudem die Fahrzeughistorie sowie die Übereinstimmung des angegebenen Zustands mit der Realität überprüft.
 
-      Das Hauptziel der Autovorbereitung ist es, einen Porsche Boxster zu finden, der wirklich seinen Preis wert ist und den Anforderungen des Kunden entspricht.
+      Die Hauptaufgabe bei der Autoauswahl besteht darin, einen Porsche Boxster zu finden, der sein Geld wirklich wert ist und den Anforderungen des Kunden entspricht.
 
-      Schließlich wählte Vladimir ein Fahrzeug, das ihn vollständig zufriedenstellte. Er war sowohl mit dem Zustand als auch mit der Ausstattung des Autos zufrieden, und vor allem hatte er nach unserer Überprüfung keine Fragen mehr zum Kauf.
+      Es ist wichtig zu verstehen, dass die Kosten für die Autoauswahl in Deutschland höher sind als für vergleichbare Dienstleistungen in Serbien. Dies liegt an den höheren Löhnen der Fachleute, den großen Entfernungen zwischen den Städten und der Notwendigkeit, zu Fahrzeugbesichtigungen in verschiedene Regionen Deutschlands zu reisen.
 
-      Es ist wichtig zu verstehen, dass die Kosten für die Fahrzeugauswahl in Deutschland höher sind als für ähnliche Dienstleistungen in Serbien. Dies liegt an den höheren Arbeitskosten der Spezialisten, den größeren Entfernungen zwischen den Städten und der Notwendigkeit, zu Fahrzeugbesichtigungen in verschiedene Regionen Deutschlands zu fahren.
-
-      Wir arbeiten mit Fahrzeugen aus ganz Deutschland, daher können wir die Autovorbereitung für Porsche und andere Autos in Berlin, München, Hamburg, Frankfurt am Main, Köln, Düsseldorf, Stuttgart, Leipzig, Nürnberg und anderen Städten organisieren.
-
-      Wenn Sie nach einem Porsche Boxster in Deutschland suchen und ein Auto ohne unangenehme Überraschungen kaufen möchten, hilft Ihnen eine professionelle Autovorbereitung, Zeit, Geld zu sparen und den Kauf eines problematischen Fahrzeugs zu vermeiden.
+      Letztendlich wählte Wladimir ein Fahrzeug, das ihn vollständig zufriedenstellte. Er war sowohl mit dem Zustand als auch der Ausstattung der Maschine zufrieden und vor allem — nach unserer Überprüfung hatte er keine Fragen mehr zum Kauf.
 car: Porsche Boxster
 year: 2020
 price:
@@ -92,7 +76,7 @@ image: image.jpg
 gallery: []
 date: 2026-07-07
 published: true
-translatedFrom: 0ded1aec98df2c4a
+translatedFrom: fe15dfa3ac3b36d3
 ---
 
 ## Автоподбор Porsche Boxster в Германии

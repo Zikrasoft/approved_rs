@@ -13,36 +13,40 @@ date: 2026-09-11
 published: true
 translations:
   en:
-    title: 'Major Service for Skoda Octavia 2.0 TDI: Timing Belt Replacement'
+    title: "Major Service for Skoda Octavia 2.0 TDI: Timing Belt Replacement"
     body: |-
-      Our workshop in Belgrade has completed a major service on the Skoda Octavia 2.0 TDI.
+      At our car service in Belgrade, we conducted a major service on a **Skoda Octavia 2.0 TDI**. In Serbia, this type of service is referred to as *veliki servis*.
 
-      This diesel engine uses a timing belt, which needs to be replaced according to the manufacturer's schedule. Failing to replace the belt or other timing components can lead to severe engine damage and costly repairs.
+      This diesel engine is equipped with a timing belt, which needs to be replaced according to the maintenance schedule. Failing to replace the belt or other components can lead to serious engine damage and costly repairs.
 
-      We installed a complete Continental timing belt kit, which includes the belt, tensioner, and water pump. Everything was replaced simultaneously to ensure the vehicle is fully ready for continued use.
+      We installed a complete **Continental** timing belt kit—everything in one go:
 
-      In Serbia, this set of services is commonly referred to as a "Veliki servis." This is especially important after purchasing a used vehicle when there is no reliable information about the last replacement of the belt, pump, and rollers.
+      <ul class="icon-check">
+      <li>timing belt</li>
+      <li>tensioner</li>
+      <li>water pump</li>
+      </ul>
 
-      We provide major and minor services, diagnostics, and other maintenance in Belgrade. Clients come to us from various neighborhoods in the city as well as from Pančevo, Smederevo, Kovin, Stara Pazova, and other areas.
-
-      If you need a major service in Belgrade (Veliki servis Beograd), a timing belt replacement for your Skoda Octavia 2.0 TDI, or maintenance for another vehicle, we can source the parts and take care of it.
+      Typically, this kind of service is necessary after purchasing a used car when you have no reliable information about the previous replacement of the belt, pump, and pulleys.
     car: Skoda Octavia
   sr:
-    title: 'Veliki servis Skoda Octavia 2.0 TDI: zamena GRM'
+    title: "Veliki servis Skoda Octavia 2.0 TDI: zamena GRA"
     body: |-
-      U našem autoservisu u Beogradu napravili smo veliki servis na Skoda Octavia 2.0 TDI.
+      U našem automehaničarskom servisu u Beogradu obavili smo veliki servis na **Skoda Octavia 2.0 TDI**. U Srbiji se ovakav skup radova naziva *veliki servis*.
 
-      Na ovom dizelu se nalazi zupčasti remen GRM, koji se mora menjati prema propisu. Propuštena zamena remena ili drugih delova pogona GRM može dovesti do ozbiljnog oštećenja motora i skupog popravka.
+      Na ovom dizelašu se nalazi zupčasti remen GRA, koji je potrebno menjati prema propisima. Propuštena zamena remena ili drugih delova pogonskog sklopa može dovesti do ozbiljnih oštećenja motora i skupih popravki.
 
-      Postavili smo kompletan GRM set Continental: remen, zatezač i vodena pumpa. Sve smo menjali istovremeno, kako bi automobil otišao potpuno spreman za dalju upotrebu.
+      Postavili smo kompletan set GRA **Continental** — sve u jednom potezu:
 
-      U Srbiji se ovaj set radova naziva Veliki servis. Posebno je potreban nakon kupovine automobila sa ruku, kada pouzdano ništa ne znamo o prethodnoj zameni remena, pumpe i role.
+      <ul class="icon-check">
+      <li>GRA remen</li>
+      <li>napinjač</li>
+      <li>vodena pumpa</li>
+      </ul>
 
-      Veliki servis, mali servis, dijagnostiku i ostalo održavanje obavljamo u Beogradu. Kod nas dolaze iz raznih delova grada, kao i iz Pančeva, Smedereva, Kovina, Stare Pazove i drugih mesta.
-
-      Ako vam je potreban veliki servis u Beogradu, zamena remena GRM na Skoda Octavia 2.0 TDI ili održavanje drugog vozila — pronaći ćemo delove i obaviti servis.
+      Najčešće je ovakav servis potreban nakon kupovine polovnog vozila, kada o prethodnoj zameni remena, pumpe i rola nema pouzdanih informacija.
     car: Skoda Octavia
-translatedFrom: fe63c797d57de4cf
+translatedFrom: 0c126a043c3447d4
 ---
 
 В нашем автосервисе в Белграде сделали большое ТО на **Skoda Octavia 2.0 TDI**. В Сербии такой набор работ называют *veliki servis*.

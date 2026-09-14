@@ -28,11 +28,11 @@ published: true
 translations:
   sr:
     title: Varta Silver Dynamic AGM E39
-    body: AGM za automobile sa start-stop sistemom. Obična akumulator ne može se staviti u takvo vozilo — ne bi izdržala broj ciklusa i crkneće u toku sezone.
+    body: AGM akumulator za automobile **sa start-stop sistemom**. Običnu bateriju u ovakav auto ne treba stavljati — neće izdržati broj ciklusa i pregoreće nakon jedne sezone.
   en:
     title: Varta Silver Dynamic AGM E39
-    body: AGM battery designed for vehicles with start-stop systems. A regular battery simply won't suffice for these cars — it won't withstand the number of cycles and will fail within a season.
-translatedFrom: b97233416a30476a
+    body: AGM battery for vehicles equipped with **start-stop** systems. A regular battery cannot be used in such vehicles — it won't withstand the number of cycles and will fail within one season.
+translatedFrom: 5a3a07ee0f71f321
 ---
 
 AGM для машин **со старт-стопом**. Обычную батарею в такую машину ставить нельзя — она не выдержит числа циклов и умрёт за сезон.

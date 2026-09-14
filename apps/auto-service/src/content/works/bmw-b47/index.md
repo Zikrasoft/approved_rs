@@ -2,41 +2,23 @@
 title: Система охлаждения и вихревые заслонки BMW
 translations:
   en:
-    title: Cooling System and Swirl Flaps of BMW
+    title: Cooling System and Swirl Flaps for BMW
     body: |-
-      A BMW came into our Russian auto service in Belgrade for cooling system maintenance and engine preventive care.
+      A BMW came into our Russian car service in Belgrade for maintenance on its cooling system and engine preventative care.
 
-      We performed a partial coolant replacement. For B47 engines, this typically requires about 5–7 liters. This time, we used the green HT-12 from Valvoline.
+      We performed a partial coolant replacement, which typically requires **5–7 liters** for engines like the **B47**. This time, we used the green HT-12 coolant from Valvoline.
 
-      In addition, we cleaned the swirl flaps and the intake system. Over time, diesel engines accumulate carbon deposits in the intake and on the flaps, which can hinder engine performance.
-
-      You can visit us for:
-
-      - Antifreeze or coolant replacement;
-      - Cooling system maintenance;
-      - Radiator flushing;
-      - Intake system cleaning;
-      - Swirl flap cleaning;
-      - Diagnostic and comprehensive service for BMW.
+      Additionally, we cleaned the swirl flaps and the intake system. Over time, diesel engines accumulate carbon deposits in the intake and on the flaps, which can hinder engine performance.
     car: BMW
 
   sr:
-    title: Sistem hlađenja i ventilatori BMW
+    title: Sistem hlađenja i vortex klapne BMW
     body: |-
-      BMW je stigao u naš ruski auto servis u Beogradu na održavanje sistema hlađenja i preventivnu proveru motora.
+      BMW je došao u našu servisnu radionicu u Beogradu na servis sistema hlađenja i preventivnu kontrolu motora.
 
-      Urađena je delimična zamena rashladne tečnosti. Na motorima B47 obično se koristi 5–7 litara prilikom delimične zamene. Ovaj put smo sipali zelenu HT-12 od Valvoline.
+      Izvršena je delimična zamena rashladne tečnosti. Na motorima **B47** obično se koristi **5–7 litara** prilikom delimične zamene. Ovog puta smo sipali zelenu HT-12 od Valvoline.
 
-      Uz to, očistili smo ventilatore i usisni sistem. Na dizel motorima, tokom vremena se na usisu i ventilatorima nagomila čađa, što može ometati rad motora.
-
-      Možete nam se obratiti za:
-
-      - zamenu antifriza ili rashladne tečnosti;
-      - održavanje sistema hlađenja;
-      - pranje radijatora;
-      - čišćenje usisnog sistema;
-      - čišćenje ventilatora;
-      - dijagnostiku i sveobuhvatno održavanje BMW-a.
+      Uz to, očišćene su vortex klapne i usisni sistem. Na dizelskim motorima se vremenom nakuplja čađa u usisnom sistemu i na klapnama, što ometa rad motora.
     car: BMW
 car: BMW
 year: 2020
@@ -48,7 +30,7 @@ gallery:
   - gallery/0.jpg
 date: 2026-08-12
 published: true
-translatedFrom: ffbc8ea38d604917
+translatedFrom: 9064e194dfd6398f
 ---
 
 BMW приехала в наш русский автосервис в Белграде на обслуживание системы охлаждения и профилактику по двигателю.

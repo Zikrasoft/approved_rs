@@ -28,11 +28,11 @@ published: true
 translations:
   sr:
     title: Exide Premium EA770
-    body: Univerzalna opcija za francuske modele. Postavljamo uz proveru generatora — na ovim automobilima slab napon je česta uzroka "smrti" baterije.
+    body: Univerzalna opcija za **francuske modele**. Ugrađujemo uz proveru alternatora — na ovim automobilima slab prenos često je uzrok "smrti" akumulatora.
   en:
     title: Exide Premium EA770
-    body: A versatile option for French models. We install it with a generator check – weak charging is a common cause of battery failure in these cars.
-translatedFrom: 854ebe27e5333371
+    body: A versatile option for **French models**. We install it after checking the generator — a weak charge is a common reason for battery failure in these cars.
+translatedFrom: b062047112befff4
 ---
 
 Универсальный вариант для **французских моделей**. Ставим с проверкой генератора — на этих машинах слабый заряд частая причина «смерти» батареи.

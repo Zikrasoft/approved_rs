@@ -4,243 +4,219 @@ translations:
   en:
     title: Kia Stonic
     body: |-
-      ## Car Sourcing in Serbia: Kia Stonic Instead of Peugeot 208 — A Real Case
+      ## Car Sourcing in Serbia: Choosing Kia Stonic over Peugeot 208 - A Real Case Study
 
-      We were approached by a young couple seeking assistance with **car sourcing in Serbia**. Their budget was capped at **€13,000**, and they had specific requirements for their future vehicle:
+      We were approached by a young couple seeking **car sourcing services in Serbia**. Their budget was up to **€13,000**, and they had quite specific requirements for their future vehicle:
 
       <ul class="icon-check">
-      <li>the newest model possible</li>
+      <li>as new as possible</li>
       <li>automatic transmission</li>
-      <li>reliable and fuel-efficient for daily use</li>
-      <li>power output of <strong>up to 109 hp</strong>, as they were new drivers</li>
-      <li>good mileage and a clear history without serious accidents</li>
+      <li>reliable and economical for daily use</li>
+      <li>power of <strong>up to 109 hp</strong> since they were new drivers</li>
+      <li>good mileage and a transparent history without serious accidents</li>
       </ul>
 
-      Initially, the clients had their sights set on a **Peugeot 208 with automatic transmission**. At first glance, this seemed like a fitting option: a compact city car with modern design and a vast selection available on the Serbian used car market.
+      Initially, the clients wanted to purchase a **Peugeot 208 with an automatic transmission**. At first glance, this seemed like a suitable option: a compact city car, a modern design, and a wide selection available on the used car market in Serbia.
 
-      ### Inspecting the Peugeot 208 Before Purchase
+      ### Inspection of Peugeot 208 Before Purchase
 
-      As part of our sourcing service, we found and inspected several Peugeot 208 models that fit their budget and requirements.
+      As part of the car sourcing process, we found and inspected several Peugeot 208 vehicles that fit their budget and listed criteria.
 
-      However, the appealing listings and photographs did not align with the actual condition of the cars.
+      However, the attractive listings and photos did not match the actual condition of the cars.
 
-      During our thorough evaluation, we uncovered significant issues: poor technical condition, signs of previous repairs, questionable service histories, and in some cases, indications of **odometer tampering**.
+      During our thorough inspection, serious defects were uncovered: poor technical condition, signs of prior repairs, uncertainties in maintenance history, and in some cases, signs of **odometer tampering**.
 
       We advised the clients against purchasing such a Peugeot 208.
 
-      This solidifies why **car inspection before purchase in Serbia** is crucial. The condition of a vehicle as advertised can greatly differ from its actual technical state.
+      This highlights the importance of **vehicle inspection before buying in Serbia**. The condition of a car in a listing can differ significantly from its actual technical state.
 
-      ### We Suggested an Alternative — Kia Stonic
+      ### Proposed an Alternative - Kia Stonic
 
-      After several disappointments with the Peugeot 208, we recommended that the clients consider a **Kia Stonic with automatic transmission**.
+      After several unsuccessful checks on the Peugeot 208, we suggested that the clients consider a **Kia Stonic with an automatic transmission**.
 
-      Initially, this option didn’t spark much enthusiasm; the clients were firmly focused on the Peugeot.
+      Initially, this option didn’t spark much interest as the clients were set on the Peugeot.
 
-      Yet, one of the core responsibilities of professional car sourcing is to find the **best vehicle within the given budget that meets the owner's actual requirements**, even if that means exploring a different model.
+      However, one of the key roles of professional car sourcing is to find the **best vehicle within a budget that fits the owner's real requirements**, even if that means considering a different model.
 
-      We located a suitable Kia Stonic, accompanied the clients for an inspection, conducted a thorough check, and took the vehicle for a test drive.
+      We identified a suitable Kia Stonic, accompanied the clients to the inspection, conducted a thorough check, and took the car for a test drive.
 
       Their opinion changed almost immediately.
 
-      The car impressed them with its condition, seating comfort, handling, and overall feel. After reviewing all the details, they made the decision to purchase.
+      The clients liked the car's condition, seating, handling, and the overall feel of the vehicle. After inspection and discussing all the details, they made the decision to proceed with the purchase.
 
-      Consequently, instead of driving away in a Peugeot 208, the clients left with a **Kia Stonic** that met their budgetary constraints, automatic transmission preference, power requirements, and technical condition.
+      As a result, instead of a Peugeot 208, the clients drove away in a **Kia Stonic** that met their budget, preferences for an automatic transmission, power, and technical condition.
 
-      ### Car Sourcing and Inspections Throughout Serbia
-
-      We assist clients in finding and inspecting vehicles for purchase not only in Belgrade but across all of Serbia.
-
-      Our services span cities such as: **Belgrade, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Čačak, Novi Pazar, Zrenjanin, Kraljevo, Smederevo, Kruševac, Leskovac, Šabac, Valjevo**, and beyond.
-
-      If the right vehicle is located in another city, there’s no reason to restrict your search to just the closest listings. The broader the market, the higher the chances of finding a truly good car at a reasonable price.
+      If a suitable vehicle is located in another city, that shouldn’t limit the search to just nearby listings. The broader the market search, the higher the chance of finding a truly good car for a reasonable price.
 
       ### Need Car Sourcing in Serbia?
 
-      We can help you find a vehicle that fits your **budget, driving experience, and individual requirements**, and inspect its technical condition, history, mileage, and paperwork before purchase.
+      We can help you find a car tailored to your **budget, driving experience, and individual requirements**, and check its technical condition, history, mileage, and documents before purchase.
 
-      You can come to us with a specific model in mind, or simply explain what type of vehicle you need and your budget.
+      You can come to us with a specific model in mind or simply share what kind of car you need and your budget.
 
-      Sometimes, the best car is not the one you initially planned to buy.
+      Sometimes the best car turns out to be quite different from what you originally intended to buy.
   sr:
     title: Kia Stonic
     body: |-
-      ## Auto izbor u Srbiji: Kia Stonic umesto Peugeot 208 – pravi slučaj
+      ## Auto izbor u Srbiji: Kia Stonic umesto Peugeot 208 — stvarna priča
 
-      Mladi par se obratio za **izbor automobila u Srbiji** sa budžetom do **13.000 evra**, a zahtevi za budući automobil su bili prilično konkretni:
+      Mladi par nam se obratio s zahtevom za **izbor automobila u Srbiji**. Budžet — do **13 000 evra**, a zahtevi za budućim automobilom su bili prilično konkretni:
 
       <ul class="icon-check">
-      <li>maksimalno sveža godina proizvodnje</li>
+      <li>maksimalno novija godina proizvodnje</li>
       <li>automatski menjač</li>
-      <li>pouzdano i ekonomično vozilo za svakodnevnu upotrebu</li>
-      <li>snaga <strong>do 109 KS</strong>, pošto su vlasnici nedavno stekli vozačku dozvolu</li>
-      <li>dobra kilometraža i transparentna istorija bez ozbiljnih saobraćajnih nesreća</li>
+      <li>pouzdan i ekonomičan automobil za svakodnevnu upotrebu</li>
+      <li>snaga <strong>do 109 KS</strong>, s obzirom na to da su vlasnici novu vozačku dozvolu</li>
+      <li>dobar pređeni put i jasna istorija bez ozbiljnih saobraćajnih nezgoda</li>
       </ul>
 
-      Prvobitno su klijenti želeli da kupe **Peugeot 208 sa automatskim menjačem**. Na prvi pogled, to je zaista izgledalo kao dobar izbor: kompaktnu gradski automobil, modernog dizajna i veliki izbor ponuda na tržištu polovnih automobila u Srbiji.
+      Klijenti su prvobitno želeli da kupe **Peugeot 208 s automatskim menjačem**. Na prvi pogled, to je zaista izgledalo kao dobar izbor: kompaktni gradski automobil, moderan dizajn i širok spektar ponuda na tržištu polovnih automobila u Srbiji.
 
       ### Provera Peugeot 208 pre kupovine
 
-      Tokom auto izbora, našli smo i proverili nekoliko Peugeot 208 koji su odgovarali budžetu i zatraženim karakteristikama.
+      Tokom auto izbora, pronašli smo i proverili nekoliko Peugeot 208 koji su se uklapali u budžet i zahteve.
 
-      Međutim, lepe ponude i fotografije nisu se poklopile sa stvarnim stanjem automobila.
+      Međutim, lepe ankete i fotografije nisu odgovarale stvarnom stanju automobila.
 
-      Tokom profesionalne provere otkriveni su ozbiljni nedostaci: loše tehničko stanje, tragovi prethodnih popravki, problemi sa servisnom istorijom, a kod nekih automobila – indicije **skidanju kilometraže**.
+      Tokom profesionalne provere otkriveni su ozbiljni nedostaci: loše tehničko stanje, tragovi prethodnih popravki, pitanja o istoriji servisiranja, a kod nekih automobila — znakovi **prevara s pređenim kilometrima**.
 
-      Kupovinu takvog Peugeot 208 nismo preporučili klijentima.
+      Nismo preporučili klijentima da kupe takav Peugeot 208.
 
-      Zato je **provera automobila pre kupovine u Srbiji** od izuzetne važnosti. Stanje automobila u oglasu i stvarno tehničko stanje mogu se značajno razlikovati.
+      Zato je **provera automobila pre kupovine u Srbiji** posebno važna. Stanje automobila u oglasu i stvarno tehničko stanje mogu se značajno razlikovati.
 
-      ### Predložili alternativu – Kia Stonic
+      ### Ponuda alternative — Kia Stonic
 
-      Nakon nekoliko neuspešnih provere Peugeot 208, sugerisali smo klijentima da razmotre **Kia Stonic sa automatskim menjačem**.
+      Nakon nekoliko neuspešnih provera Peugeot 208, predložili smo klijentima da razmotre **Kia Stonic s automatskim menjačem**.
 
-      U početku ovaj izbor nije izazvao veliko interesovanje – klijenti su prvobitno bili fokusirani samo na Peugeot.
+      Iako u početku ovaj model nije izazvao poseban interes — klijenti su bili fokusirani na Peugeot.
 
-      Ali jedan od zadataka profesionalnog auto izbora je pronaći **najbolji automobil za raspoloživi budžet i stvarne zahteve vlasnika**, čak i ako to znači da će to biti drugačiji model.
+      Ali jedan od zadataka profesionalnog auto izbora je pronaći **najbolji automobil za dati budžet i stvarne zahteve vlasnika**, čak i ako se ispostavi da je to drugačiji model.
 
-      Pronašli smo odgovarajući Kia Stonic, zajedno sa klijentima otišli na pregled, obavili proveru automobila i probnu vožnju.
+      Pronašli smo odgovarajući Kia Stonic, zajedno s klijentima otišli na pregled, izvršili provere i test vožnju.
 
-      I njihovo mišljenje se odmah promenilo.
+      Mišljenje se gotovo odmah promenilo.
 
-      Automobil im se mnogo dopao po stanju, udobnosti, upravljivosti i opštem uticaju. Nakon provere i rasprave o svim detaljima, doneta je odluka o kupovini.
+      Automobil je klijentima bio veoma dopadljiv po stanju, udobnosti, upravljivosti i opštem osećaju od vožnje. Nakon provere i razgovora o svim detaljima, doneta je odluka o kupovini.
 
-      Umesto Peugeot 208, klijenti su otišli sa **Kia Stonic** koji je odgovarao njihovom budžetu, zahtevima za automatski menjač, snagom i tehničkim stanjem.
+      Kao rezultat, umesto Peugeot 208, klijenti su otišli u **Kia Stonic** koji je odgovarao njihovom budžetu, zahtevima za automatski menjač, snagom i tehničkim stanjem.
 
-      ### Auto izbor i provera automobila širom Srbije
+      Ako se odgovarajući automobil nalazi u drugom gradu, to nije razlog da suzite pretragu samo na najbliže oglase. Što je šire tržište pretrage, veće su šanse da pronađete zaista dobar primerak za razumnu cenu.
 
-      Pomažemo u pronalaženju i proveri automobila pre kupovine ne samo u Beogradu.
+      ### Potreban auto izbor u Srbiji?
 
-      Radimo sa ponudama širom Srbije: **Beograd, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Čačak, Novi Pazar, Zrenjanin, Kraljevo, Smederevo, Kruševac, Leskovac, Šabac, Valjevo** i drugim gradovima.
+      Pomoći ćemo vam da pronađete automobil prema vašem **budžetu, vozačkom stažu i individualnim zahtevima**, proveriti njegovo tehničko stanje, istoriju, pređeni put i dokumentaciju pre kupovine.
 
-      Ako se odgovarajući automobil nalazi u drugom gradu, to nije razlog da ograničimo pretragu samo na najbliže ponude. Što je tržište pretrage šire, to je veća verovatnoća da nađete zaista dobar primerak za razumnu cenu.
+      Možete nam doći s konkretno modelom — ili jednostavno reći kakav automobil vam treba i koji je vaš budžet.
 
-      ### Treba vam auto izbor u Srbiji?
-
-      Pomoći ćemo vam da pronađete automobil prema vašem **budžetu, vozačkom stažu i individualnim zahtevima**, proverimo njegovo tehničko stanje, istoriju, kilometražu i dokumente pre kupovine.
-
-      Možete doći kod nas sa konkretnim modelom – ili jednostavno da nam ispričate koji automobil vam treba i koji je vaš budžet.
-
-      Ponekad je najbolji automobil potpuno drugačiji od onog koji ste prvobitno planirali da kupite.
+      Ponekad se najbolji automobil ispostavi da nije onaj koji ste prvobitno planirali da kupite.
   es:
     title: Kia Stonic
     body: |-
-      ## Selección de autos en Serbia: Kia Stonic en lugar de Peugeot 208 — un caso real
+      ## Búsqueda de coches en Serbia: Kia Stonic en lugar de Peugeot 208 — un caso real
 
-      Una joven pareja se acercó a nosotros con la solicitud de **seleccionar un automóvil en Serbia**. Su presupuesto era de hasta **13,000 euros** y tenían requisitos bastante específicos para el futuro vehículo:
+      Una joven pareja se acercó a nosotros con la solicitud de **encontrar un automóvil en Serbia**. Su presupuesto era de **hasta 13.000 euros**, y los requisitos para el futuro vehículo eran bastante concretos:
 
       <ul class="icon-check">
-      <li>modelo lo más reciente posible</li>
+      <li>el año de fabricación más reciente posible</li>
       <li>transmisión automática</li>
-      <li>un vehículo confiable y económico para el uso diario</li>
-      <li>potencia <strong>hasta 109 CV</strong>, ya que son nuevos conductores</li>
+      <li>un coche confiable y económico para el uso diario</li>
+      <li>potencia <strong>de hasta 109 CV</strong>, ya que los propietarios tenían licencia de conducir reciente</li>
       <li>bajo kilometraje y un historial transparente sin accidentes graves</li>
       </ul>
 
-      Inicialmente, los clientes deseaban comprar un **Peugeot 208 con transmisión automática**. A primera vista, parecía ser una opción adecuada: un coche urbano compacto, con un diseño moderno y una gran variedad de ofertas en el mercado de segunda mano en Serbia.
+      Inicialmente, los clientes querían comprar un **Peugeot 208 con transmisión automática**. A primera vista, parecía una opción adecuada: un coche urbano compacto, diseño moderno y una amplia oferta en el mercado de segunda mano de Serbia.
 
-      ### Revisión del Peugeot 208 antes de la compra
+      ### Inspección del Peugeot 208 antes de la compra
 
-      Como parte de nuestra selección de autos, encontramos y revisamos varios Peugeot 208 que se ajustaban al presupuesto y a las especificaciones requeridas.
+      Como parte de nuestra búsqueda de coches, localizamos y revisamos varios Peugeot 208 que cumplían con el presupuesto y las características solicitadas.
 
-      Sin embargo, las atractivas ofertas y fotografías no coincidían con el estado real de los vehículos.
+      Sin embargo, las atractivas publicaciones y fotografías no coincidían con el estado real de los vehículos.
 
-      Durante la inspección profesional, se detectaron fallas serias: mala condición técnica, signos de reparaciones anteriores, dudas sobre el historial de mantenimiento y, en algunos vehículos, indicios de **kilometraje manipulado**.
+      Durante la inspección profesional, encontramos serios defectos: mala condición técnica, signos de reparaciones anteriores, dudas sobre el historial de mantenimiento, y en algunos vehículos, indicios de **odómetros manipulados**.
 
-      No recomendamos a nuestros clientes comprar un Peugeot 208 en esas condiciones.
+      No recomendábamos a nuestros clientes comprar un Peugeot 208 en esas condiciones.
 
-      Por eso, **la revisión del vehículo antes de la compra en Serbia** es especialmente importante. El estado del coche en el anuncio y su verdadero estado técnico pueden diferir significativamente.
+      Por eso, **la inspección de vehículos antes de la compra en Serbia** es especialmente importante. El estado del coche en el anuncio puede diferir significativamente del estado técnico real.
 
-      ### Sugerimos una alternativa — Kia Stonic
+      ### Propuesta alternativa — Kia Stonic
 
-      Después de varias inspeciones fallidas del Peugeot 208, propusimos a los clientes considerar un **Kia Stonic con transmisión automática**.
+      Después de varias inspecciones infructuosas del Peugeot 208, sugerimos a los clientes considerar un **Kia Stonic con transmisión automática**.
 
-      Al principio, esta opción no despertó mucho interés, ya que los clientes estaban decididos a adquirir un Peugeot.
+      Al principio, esta opción no despertó gran interés — los clientes estaban decididos por el Peugeot.
 
-      Sin embargo, una de las funciones de la selección profesional de automóviles es encontrar **el mejor vehículo dentro del presupuesto y según las necesidades reales del propietario**, aunque esto signifique considerar un modelo diferente.
+      Pero uno de los objetivos de la búsqueda profesional de coches es encontrar **el mejor automóvil dentro del presupuesto y según las necesidades reales del propietario**, incluso si eso significa elegir otro modelo.
 
-      Encontramos un Kia Stonic adecuado, fuimos junto con los clientes a verlo, realizamos la inspección del vehículo y una prueba de manejo.
+      Encontramos un Kia Stonic adecuado, fuimos juntos con los clientes a la inspección, realizamos la verificación del vehículo y un test drive.
 
-      Las opiniones cambiaron casi de inmediato.
+      La opinión de los clientes cambió casi de inmediato.
 
-      A los clientes les gustó el estado del vehículo, la comodidad al conducir y la sensación general que les transmitía. Tras la revisión y la discusión de todos los detalles, se tomó la decisión de realizar la compra.
+      Les gustó el coche por su estado, la forma en que se sentaban en él, la conducción y la sensación general del automóvil. Después de la revisión y discusión de todos los detalles, tomaron la decisión de compra.
 
-      Así, en lugar de un Peugeot 208, los clientes se fueron con un **Kia Stonic**, que se ajustaba a su presupuesto y cumplía con sus requisitos de transmisión automática, potencia y estado técnico.
+      Como resultado, en lugar de un Peugeot 208, los clientes se llevaron un **Kia Stonic**, que cumplía con su presupuesto, requerimientos de transmisión automática, potencia y estado técnico.
 
-      ### Selección y revisión de vehículos en toda Serbia
+      Si el coche adecuado se encuentra en otra ciudad, no es motivo para limitar la búsqueda solo a los anuncios más cercanos. Cuanto más amplio sea el mercado, mayor será la probabilidad de encontrar una buena unidad por un precio razonable.
 
-      No solo ayudamos a encontrar y revisar vehículos en Belgrado.
+      ### ¿Necesitas ayuda para encontrar un coche en Serbia?
 
-      Trabajamos con ofertas en toda Serbia: **Belgrado, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Čačak, Novi Pazar, Zrenjanin, Kraljevo, Smederevo, Kruševac, Leskovac, Šabac, Valjevo** y otras ciudades.
+      Te ayudaremos a encontrar un automóvil que se ajuste a tu **presupuesto, experiencia de conducción y requisitos individuales**, verificar su estado técnico, historial, kilometraje y documentos antes de la compra.
 
-      Si el automóvil adecuado se encuentra en otra ciudad, no es razón suficiente para restringir la búsqueda solo a los anuncios más cercanos. Cuanto más amplio sea el mercado de búsqueda, mayor será la probabilidad de encontrar un buen ejemplar a un precio razonable.
+      Puedes venir a nosotros con un modelo específico — o simplemente contarnos qué coche necesitas y cuál es tu presupuesto.
 
-      ### ¿Necesitas selección de automóviles en Serbia?
-
-      Te ayudaremos a encontrar un automóvil que se ajuste a tu **presupuesto, experiencia de conducción y requisitos individuales**, así como a verificar su estado técnico, historial, kilometraje y documentos antes de la compra.
-
-      Puedes venir a nosotros con un modelo específico, o simplemente contarnos qué tipo de automóvil necesitas y cuál es tu presupuesto.
-
-      A veces, el mejor automóvil resulta ser completamente diferente al que inicialmente planeabas comprar.
+      A veces, el mejor automóvil resulta ser algo totalmente diferente de lo que planeabas comprar inicialmente.
   de:
     title: Kia Stonic
     body: |-
-      ## Autoauswahl in Serbien: Kia Stonic statt Peugeot 208 — Ein praxisnaher Fall
+      ## Fahrzeugauswahl in Serbien: Kia Stonic statt Peugeot 208 — ein realer Fall
 
-      Ein junges Paar wandte sich an uns mit der Anfrage für **eine Autoauswahl in Serbien**. Das Budget betrug bis zu **13.000 Euro**, und die Anforderungen an das zukünftige Fahrzeug waren recht konkret:
+      Ein junges Paar wandte sich an uns mit der Anfrage zur **Fahrzeugauswahl in Serbien**. Das Budget lag bei **13.000 Euro**, und die Anforderungen an das zukünftige Auto waren ziemlich konkret:
 
       <ul class="icon-check">
-      <li>möglichst neuester Baujahr</li>
+      <li>möglichst aktuelles Baujahr</li>
       <li>Automatikgetriebe</li>
-      <li>ein zuverlässiges und wirtschaftliches Auto für den täglichen Gebrauch</li>
-      <li>Leistung <strong>bis 109 PS</strong>, da die Besitzer neu im Fahren sind</li>
-      <li>geringer Kilometerstand und eine transparente Geschichte ohne schwere Unfälle</li>
+      <li>verlässliches und sparsames Auto für den täglichen Gebrauch</li>
+      <li>Leistung <strong>bis 109 PS</strong>, da die Besitzer neu im Besitz eines Führerscheins sind</li>
+      <li>geringer Kilometerstand und transparente Vorgeschichte ohne schwere Unfälle</li>
       </ul>
 
-      Ursprünglich wollten die Kunden einen **Peugeot 208 mit Automatikgetriebe** kaufen. Auf den ersten Blick erschien dies tatsächlich als passende Wahl: ein kompakter Stadtwagen, modernes Design und eine große Auswahl an Angeboten auf dem Gebrauchtmarkt in Serbien.
+      Ursprünglich wollten die Kunden einen **Peugeot 208 mit Automatikgetriebe** kaufen. Auf den ersten Blick schien dies der passende Kandidat: ein kompakter Stadtwagen, modernes Design und eine große Auswahl an Angeboten auf dem Gebrauchtwagenmarkt in Serbien.
 
       ### Überprüfung des Peugeot 208 vor dem Kauf
 
-      Im Rahmen der Autoauswahl fanden und überprüften wir mehrere Peugeot 208, die in das Budget und die angegebenen Kriterien passten.
+      Im Rahmen der Fahrzeugauswahl fanden und überprüften wir mehrere Peugeot 208, die im Budget und den angegebenen Kriterien lagen.
 
-      Doch schöne Anzeigen und Fotos stimmten nicht mit dem tatsächlichen Zustand der Fahrzeuge überein.
+      Doch die schönen Anzeigen und Fotos stimmten nicht mit dem tatsächlichen Zustand der Fahrzeuge überein.
 
-      Bei der professionellen Überprüfung traten ernsthafte Mängel zutage: mangelhafter technischer Zustand, Spuren vorheriger Reparaturen, Fragen zur Wartungsgeschichte, und bei einigen Fahrzeugen Anzeichen von **verdrehtem Kilometerstand**.
+      Während der professionellen Überprüfung kamen ernsthafte Mängel ans Licht: schlechter technischer Zustand, Spuren früherer Reparaturen, Fragen zur Wartungsgeschichte, und bei einigen Fahrzeugen — Anzeichen von **verfälschtem Kilometerstand**.
 
-      Einen solchen Peugeot 208 empfahlen wir unseren Kunden nicht zu kaufen.
+      Solch einen Peugeot 208 empfahlen wir unseren Kunden nicht zu kaufen.
 
-      Gerade deshalb ist **die Überprüfung des Fahrzeugs vor dem Kauf in Serbien** besonders wichtig. Der Zustand des Fahrzeugs in der Anzeige kann stark vom tatsächlichen technischen Zustand abweichen.
+      Genau aus diesem Grund ist **die Überprüfung eines Fahrzeugs vor dem Kauf in Serbien** besonders wichtig. Der Zustand des Fahrzeugs in der Anzeige und der tatsächliche technische Zustand können stark voneinander abweichen.
 
-      ### Eine Alternative vorgeschlagen – Kia Stonic
+      ### Alternative angeboten — Kia Stonic
 
-      Nach mehreren gescheiterten Überprüfungen des Peugeot 208 schlugen wir unseren Kunden vor, **den Kia Stonic mit Automatikgetriebe** in Betracht zu ziehen.
+      Nach mehreren erfolglosen Überprüfungen des Peugeot 208 schlugen wir den Kunden vor, den **Kia Stonic mit Automatikgetriebe** in Betracht zu ziehen.
 
-      Zunächst fand dieser Vorschlag nicht viel Anklang – die Kunden waren ursprünglich fest auf Peugeot eingestellt.
+      Zu Beginn fand dieser Vorschlag nicht viel Anklang — die Kunden waren ursprünglich auf Peugeot eingestellt.
 
-      Doch eine der Aufgaben der professionellen Autoauswahl ist es, das **beste Fahrzeug innerhalb des Budgets und unter Berücksichtigung der echten Anforderungen des Besitzers** zu finden, selbst wenn es ein anderes Modell ist.
+      Aber eine der Aufgaben der professionellen Fahrzeugauswahl ist es, das **beste Auto für das vorhandene Budget und die realen Anforderungen des Besitzers** zu finden, auch wenn es sich um ein anderes Modell handelt.
 
-      Wir fanden einen geeigneten Kia Stonic, fuhren mit den Kunden zur Besichtigung, führten die Fahrzeugprüfung und eine Probefahrt durch.
+      Wir fanden einen passenden Kia Stonic, fuhren mit den Kunden zur Besichtigung, führten eine Fahrzeugüberprüfung und eine Probefahrt durch.
 
-      Die Meinung änderte sich nahezu sofort.
+      Die Meinung änderte sich beinahe sofort.
 
-      Das Fahrzeug gefiel den Kunden durch seinen Zustand, die Sitzposition, das Handling und das allgemeine Fahrgefühl. Nach der Prüfung und der Diskussion aller Details wurde die Entscheidung für den Kauf getroffen.
+      Das Auto gefiel den Kunden im Zustand, in der Sitzgelegenheiten, im Handling und im allgemeinen Gefühl vom Fahrzeug. Nach der Überprüfung und Diskussion aller Details wurde die Entscheidung zum Kauf getroffen.
 
-      Letztendlich fuhren die Kunden anstelle des Peugeot 208 mit einem **Kia Stonic** nach Hause, der ihrem Budget, den Anforderungen an das Automatikgetriebe, der Leistung und dem technischen Zustand entsprach.
+      Infolgedessen fuhren die Kunden anstelle des Peugeot 208 mit dem **Kia Stonic** davon, der ihrem Budget, den Anforderungen an das Automatikgetriebe, der Leistung und dem technischen Zustand entsprach.
 
-      ### Autoauswahl und Fahrzeugprüfung in ganz Serbien
+      Wenn das passende Fahrzeug in einer anderen Stadt ist, ist das kein Grund, die Suche nur auf nahe Angebote zu beschränken. Je breiter der Markt ist, desto höher ist die Wahrscheinlichkeit, ein wirklich gutes Exemplar zu einem fairen Preis zu finden.
 
-      Wir helfen, nicht nur in Belgrad, ein Auto vor dem Kauf zu finden und zu überprüfen.
+      ### Brauchen Sie Fahrzeugauswahl in Serbien?
 
-      Wir arbeiten mit Angeboten in ganz Serbien: **Belgrad, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Čačak, Novi Pazar, Zrenjanin, Kraljevo, Smederevo, Kruševac, Leskovac, Šabac, Valjevo** und anderen Städten.
+      Wir helfen Ihnen, ein Fahrzeug nach Ihrem **Budget, Fahrpraxis und individuellen Anforderungen** auszuwählen, seinen technischen Zustand, seine Geschichte, seinen Kilometerstand und die Dokumente vor dem Kauf zu überprüfen.
 
-      Wenn sich das passende Auto in einer anderen Stadt befindet, ist das kein Grund, die Suche nur auf die nächstgelegenen Anzeigen einzuschränken. Je breiter der Suchmarkt, desto höher die Wahrscheinlichkeit, ein wirklich gutes Exemplar zu einem angemessenen Preis zu finden.
+      Sie können mit einem konkreten Modell zu uns kommen — oder einfach erzählen, welches Auto Sie benötigen und welches Budget Sie haben.
 
-      ### Brauchen Sie eine Autoauswahl in Serbien?
-
-      Wir helfen Ihnen, ein Auto basierend auf Ihrem **Budget, Fahrpraxis und individuellen Anforderungen** auszuwählen, seinen technischen Zustand, die Geschichte, den Kilometerstand und die Dokumente vor dem Kauf zu überprüfen.
-
-      Sie können mit einem bestimmten Modell zu uns kommen – oder einfach erzählen, welches Auto Sie benötigen und welches Budget Sie haben.
-
-      Manchmal stellt sich heraus, dass das beste Auto ganz anders ist als das, was Sie ursprünglich kaufen wollten.
+      Manchmal stellt sich heraus, dass das beste Auto überhaupt nicht das ist, was Sie ursprünglich kaufen wollten.
 car: Kia Stonic
 year: 2022
 price:
@@ -252,7 +228,7 @@ image: image.jpg
 gallery: []
 date: 2026-07-10
 published: true
-translatedFrom: 26ecf11a39dda279
+translatedFrom: a302df92cb25c5a5
 ---
 
 ## Автоподбор в Сербии: Kia Stonic вместо Peugeot 208 — реальный кейс

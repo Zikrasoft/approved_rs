@@ -28,11 +28,11 @@ published: true
 translations:
   sr:
     title: Bosch S5 008
-    body: 'Povećani startni tok i dug vek trajanja. Ova baterija se bira kada u vozilu ima puno elektronike: grejači, audio sistem, automatski start.'
+    body: "**Povećani startni tok** i dobar kapacitet za cikluse. Ova baterija se preporučuje kada u automobilu ima puno elektronike: grejači, audio sistemi, automatsko pokretanje."
   en:
     title: Bosch S5 008
-    body: Enhanced starting power and a higher cycle reserve make this battery ideal for vehicles with a lot of electronics, such as heated seats, audio systems, and remote start functions.
-translatedFrom: 11afe5d573a3adaf
+    body: "**High cranking power** and ample cycle reserve. It's a great choice for vehicles with a lot of electronics: heating systems, audio equipment, and remote start features."
+translatedFrom: 4b64cd05ad956042
 ---
 
 **Повышенный пусковой ток** и запас по циклам. Берут, когда в машине много электроники: подогревы, аудио, автозапуск.

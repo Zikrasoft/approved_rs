@@ -5,38 +5,36 @@ translations:
   en:
     title: Brake Disc and Pad Replacement in Belgrade
     body: |-
-      A vehicle arrived at our workshop in Belgrade with a complaint of vibrations during braking: when the driver presses the pedal, the car shakes.
+      A vehicle arrived at our car service in Belgrade with a complaint of **vibration when braking**: the driver presses the pedal, and the car starts to shake.
 
-      We started with a wheel balancing check — this is the most common cause of such vibrations, and it’s the easiest to rule out. The balancing was fine, so we moved on to inspect the braking system.
+      We began with wheel balancing — this is the most common cause of such vibrations and the easiest to rule out. The balancing was fine, so we moved on to the braking system.
 
-      At first glance, the discs and pads appeared to be in good condition, with no obvious signs of severe wear. However, upon closer inspection, we discovered that the left brake disc was deformed. This was the source of the vibrations.
+      At first glance, the discs and pads seemed fine, showing no obvious signs of severe wear. However, upon closer inspection, we discovered that the **left brake disc was warped**. This was causing the vibration.
 
-      We showed the issue to the client and got approval for the repair. Here’s what we did:
+      We informed the client and agreed on the repair. Here’s what we carried out:
 
-      - Diagnosed the braking system;
-      - Checked and balanced the wheels;
-      - Identified the deformation of the left brake disc;
-      - Replaced the brake discs;
-      - Replaced the brake pads;
-      - Rechecked the wheel balancing;
-      - Conducted a test drive post-repair.
+      - Diagnosis of the braking system;
+      - Checking and balancing the wheels;
+      - Detection of the left brake disc deformation;
+      - Replacement of the brake discs;
+      - Replacement of the brake pads;
+      - Re-checking the wheel balancing;
+      - Test drive after the repair.
 
-      After these steps, the vibrations during braking completely disappeared. The vehicle was thoroughly inspected and returned to the owner.
+      The vibration during braking completely disappeared after this, and we checked the car before handing it back to the owner.
 
-      A disc may look normal but can still be warped — it's often difficult to detect such deformation with the naked eye. Therefore, if you notice steering wheel shaking, pedal vibrations, or body shake during braking, it’s best not to delay the diagnostics.
-
-      We offer diagnostics and servicing for braking systems, disc and pad replacements, suspension checks, wheel balancing, and comprehensive maintenance in Belgrade.
-    car: Обслуживание тормозной системы
+      A disc may look normal but can still be warped — such deformation isn’t detectable by the naked eye. Therefore, if you notice steering wheel shake, pedal vibration, or body vibrations when braking, it's best not to postpone the diagnosis.
+    car: Brake System Service
   sr:
-    title: Zamena kočionih diskova i pločica u Beogradu
+    title: Zamena kočionih diskova i kočnica u Beogradu
     body: |-
-      U naš servis u Beogradu stiglo je vozilo sa pritužbom na vibraciju prilikom kočenja: vozač pritisne papučicu, a automobil počinje da se trese.
+      U naš servis u Beogradu je stiglo vozilo sa pritužbom na **vibracije prilikom kočenja**: vozač pritisne kočnicu, a auto počne da se trese.
 
-      Počeli smo s balansiranjem točkova — to je najčešći uzrok ove vrste vibracije, a najlakše ga je isključiti. Balansiranje je bilo u redu, pa smo nastavili dalje sa kočionim sistemom.
+      Počeli smo od balansiranja točkova — to je najčešći uzrok takvih vibracija i najlakše ga je isključiti. Balansiranje je bilo u redu, pa smo nastavili dalje sa kočionim sistemom.
 
-      Na prvi pogled diskovi i pločice su bili u dobrom stanju, bez vidljivih tragova velikog trošenja. Međutim, pažljivom proverom otkriveno je da je levi kočioni disk deformisan. On je uzrokovao vibraciju.
+      Na prvi pogled, diskovi i kočnice su izgledali dobro, bez vidljivih znakova velikog trošenja. U detaljnoj prolezi otkriveno je da je **levi kočioni disk deformisan**. On je izazivao vibracije.
 
-      Prikazali smo klijentu i saglasili se oko popravke. Šta smo uradili:
+      P pokazali smo klijentu i dogovorili se o popravci. Šta smo uradili:
 
       - dijagnostika kočionog sistema;
       - provera i balansiranje točkova;
@@ -46,12 +44,10 @@ translations:
       - ponovna provera balansiranja točkova;
       - kontrolna vožnja nakon popravke.
 
-      Nakon svih ovih radnji, vibracija prilikom kočenja je potpuno nestala, vozilo je provereno i vraćeno vlasniku.
+      Vibracije prilikom kočenja su nakon toga potpuno nestale, vozilo je provereno i predato vlasniku.
 
-      Disk može izgledati normalno, a da pritom bude kriv — ovakvu deformaciju je teško primetiti golim okom. Zato, ako se pojavi podrhtavanje volana, vibracija papučice ili karoserije pri kočenju, dijagnostiku nije dobro odlagati.
-
-      Dijagnostiku i servis kočionih sistema, zamenu diskova i pločica, proveru vešanja, balansiranje točkova i kompleksno održavanje radimo u Beogradu.
-    car: Observacija kočionog sistema
+      Disk može izgledati normalno, a da pritom bude izobličen — takvu deformaciju je teško primetiti golim okom. Zato, ako primetite podrhtavanje volana, vibracije pedale ili karoserije prilikom kočenja, dijagnostiku ne treba odlagati.
+    car: Observisanje kočionog sistema
 year: 2022
 servicesApplied:
   - brakes-suspension
@@ -59,7 +55,7 @@ image: image.jpg
 gallery: []
 date: 2026-06-06
 published: true
-translatedFrom: ad62f9f7357aa78c
+translatedFrom: 7cf2e966c003d366
 ---
 
 В наш автосервис в Белграде приехала машина с жалобой на **вибрацию при торможении**: водитель нажимает педаль, и автомобиль начинает трясти.
