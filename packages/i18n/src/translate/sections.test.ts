@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { parseDocument, stringify } from 'yaml';
 import { z } from 'zod';
 import {
+  chunkByKey,
   createSectionTranslator,
   hashSource,
   type Section,
@@ -376,5 +377,34 @@ describe('recordHashes', () => {
   it('throws instead of stamping a hash over malformed ru content', () => {
     writeFileSync(file, 'nav:\n  home: Главная\ntranslations: {}\n');
     expect(() => recordHashes([{ ...NAV_SECTION, path: file }])).toThrow();
+  });
+});
+
+describe('chunkByKey', () => {
+  it('keeps a small section in a single request', () => {
+    expect(chunkByKey({ a: 'x', b: 'y' })).toEqual([{ a: 'x', b: 'y' }]);
+  });
+
+  it('splits once the budget is used up', () => {
+    const data = { a: 'x'.repeat(40), b: 'y'.repeat(40), c: 'z'.repeat(40) };
+    expect(chunkByKey(data, 60)).toEqual([
+      { a: data.a },
+      { b: data.b },
+      { c: data.c },
+    ]);
+  });
+
+  it('packs as many keys into a chunk as the budget allows', () => {
+    const data = { a: 'xx', b: 'yy', c: 'z'.repeat(80) };
+    expect(chunkByKey(data, 60)).toEqual([{ a: 'xx', b: 'yy' }, { c: data.c }]);
+  });
+
+  it('never drops a key that is bigger than the budget on its own', () => {
+    const huge = 'x'.repeat(500);
+    expect(chunkByKey({ a: huge }, 10)).toEqual([{ a: huge }]);
+  });
+
+  it('returns nothing for an empty section', () => {
+    expect(chunkByKey({})).toEqual([]);
   });
 });

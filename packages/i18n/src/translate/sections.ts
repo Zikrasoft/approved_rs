@@ -27,6 +27,34 @@ export interface SectionTranslatorOptions<L extends string> {
   model?: string;
 }
 
+// gpt-4o-mini caps a completion at 16k tokens, and approved-rs's services.yaml
+// outgrew that in one request: the tail key came back missing, or the socket
+// timed out mid-generation. Top-level keys are translated in batches small
+// enough to stay well under the cap; the merged result is still validated
+// against the section's full schema, so a dropped key still fails loudly.
+const MAX_REQUEST_CHARS = 12_000;
+
+export function chunkByKey(
+  data: SectionData,
+  maxChars = MAX_REQUEST_CHARS,
+): SectionData[] {
+  const chunks: SectionData[] = [];
+  let current: SectionData = {};
+  let size = 0;
+  for (const [key, value] of Object.entries(data)) {
+    const cost = JSON.stringify({ [key]: value }).length;
+    if (size > 0 && size + cost > maxChars) {
+      chunks.push(current);
+      current = {};
+      size = 0;
+    }
+    current[key] = value;
+    size += cost;
+  }
+  if (size > 0) chunks.push(current);
+  return chunks;
+}
+
 export function hashSource(data: SectionData): string {
   return sha256Hex(JSON.stringify(data));
 }
@@ -45,24 +73,30 @@ export function createSectionTranslator<L extends string>({
     apiKey: string,
     section: Pick<Section, 'schema' | 'promptSubject'>,
   ): Promise<SectionData> {
-    const raw = await callOpenAiJson({
-      apiKey,
-      model,
-      systemPrompt:
-        `You translate ${section.promptSubject} from Russian into ${names.get(targetLocale)} ` +
-        `for ${businessDescription}. ` +
-        'Translate the MEANING naturally and idiomatically, the way a native speaker would actually write ' +
-        'it — never a literal word-for-word translation. Keep any markdown formatting intact. If a string ' +
-        'contains a placeholder token like {siteName} in curly braces, copy it into the translation exactly ' +
-        'as written, character for character — never translate, remove, or move it. Copy personal names ' +
-        'exactly as written too, keeping their original script — never transliterate or localise them. ' +
-        'Respond with a JSON ' +
-        'object that has EXACTLY the same nested key structure as the input — same keys, same nesting, same ' +
-        'array lengths — with only the string values translated.',
-      userContent: JSON.stringify(data),
-    });
+    const systemPrompt =
+      `You translate ${section.promptSubject} from Russian into ${names.get(targetLocale)} ` +
+      `for ${businessDescription}. ` +
+      'Translate the MEANING naturally and idiomatically, the way a native speaker would actually write ' +
+      'it — never a literal word-for-word translation. Keep any markdown formatting intact. If a string ' +
+      'contains a placeholder token like {siteName} in curly braces, copy it into the translation exactly ' +
+      'as written, character for character — never translate, remove, or move it. Copy personal names ' +
+      'exactly as written too, keeping their original script — never transliterate or localise them. ' +
+      'Respond with a JSON ' +
+      'object that has EXACTLY the same nested key structure as the input — same keys, same nesting, same ' +
+      'array lengths — with only the string values translated.';
 
-    const parsed = section.schema.safeParse(raw);
+    const merged: SectionData = {};
+    for (const chunk of chunkByKey(data)) {
+      const raw = await callOpenAiJson({
+        apiKey,
+        model,
+        systemPrompt,
+        userContent: JSON.stringify(chunk),
+      });
+      Object.assign(merged, raw as SectionData);
+    }
+
+    const parsed = section.schema.safeParse(merged);
     if (!parsed.success) {
       throw new Error(
         `translate response for "${targetLocale}" doesn't match the schema for ${section.promptSubject}: ${parsed.error.message}`,

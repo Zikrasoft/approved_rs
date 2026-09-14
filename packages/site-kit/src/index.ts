@@ -1,4 +1,6 @@
 export { safeMarkdown, safeMarkdownInline } from './safeMarkdown.ts';
+export { breadcrumbListSchema } from './breadcrumbSchema.ts';
+export { jsonLdText } from './jsonLd.ts';
 export { formatPhone } from './formatPhone.ts';
 export { mapEmbedSrc } from './mapEmbed.ts';
 export {
@@ -18,3 +20,4 @@ export {
 export type { Consent } from './consent.ts';
 export type { VisitorIdEnvironment } from './visitorId.ts';
 export type { MapPlace } from './mapEmbed.ts';
+export type { Crumb } from './breadcrumbSchema.ts';

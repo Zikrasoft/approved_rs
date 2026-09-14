@@ -1,7 +1,10 @@
 import { readOrCreateVisitorId } from './visitorId.ts';
+export { defineCtaReveal } from './ctaReveal.ts';
 export { defineLazyMapEmbed, mapEmbedSrc } from './mapEmbed.ts';
 export { defineLocaleChoice } from './localeCookie.ts';
 export { defineMenuToggle, type MenuToggleElement } from './menuToggle.ts';
+export { defineRangeFilter } from './rangeFilter.ts';
+export { defineZoneMap } from './zoneMap.ts';
 export { lockScroll, unlockScroll } from './scrollLock.ts';
 export {
   defineModalDialog,
