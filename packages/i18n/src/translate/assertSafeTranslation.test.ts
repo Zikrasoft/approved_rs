@@ -188,3 +188,37 @@ describe('mixed-script words', () => {
     ).not.toThrow();
   });
 });
+
+describe('placeholder tokens', () => {
+  it('rejects a translation that dropped a token to save characters', () => {
+    expect(() =>
+      assertSafeTranslation(
+        'Политика конфиденциальности сайта {siteName}: какие данные мы собираем',
+        'Datenschutzerklärung der Website: welche Daten wir erheben',
+        'privacy.metaDescription',
+      ),
+    ).toThrow(/dropped placeholder tokens \(\{siteName\}\)/);
+  });
+
+  it('names every token that went missing', () => {
+    expect(() =>
+      assertSafeTranslation('{car} {year} в {location}', 'Auto', 'meta'),
+    ).toThrow(/\{car\} \{year\} \{location\}/);
+  });
+
+  it('accepts a translation that moved a token but kept it', () => {
+    expect(() =>
+      assertSafeTranslation(
+        'Подбор авто {location} — {siteName}',
+        '{siteName}: Fahrzeugsuche {location}',
+        'meta',
+      ),
+    ).not.toThrow();
+  });
+
+  it('says nothing about a source that carries no tokens', () => {
+    expect(() =>
+      assertSafeTranslation('Обычная строка', 'A plain string', 'x'),
+    ).not.toThrow();
+  });
+});

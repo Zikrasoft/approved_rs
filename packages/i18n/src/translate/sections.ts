@@ -81,6 +81,10 @@ export function createSectionTranslator<L extends string>({
       'contains a placeholder token like {siteName} in curly braces, copy it into the translation exactly ' +
       'as written, character for character — never translate, remove, or move it. Copy personal names ' +
       'exactly as written too, keeping their original script — never transliterate or localise them. ' +
+      'Search-engine snippets have a hard budget: metaTitle and title at most 60 characters, ' +
+      'metaDescription and description at most 160, counted on what you output. German and Spanish ' +
+      'run longer than the Russian, so drop a detail rather than going over — but never drop a ' +
+      'placeholder token to save room. ' +
       'Respond with a JSON ' +
       'object that has EXACTLY the same nested key structure as the input — same keys, same nesting, same ' +
       'array lengths — with only the string values translated.';

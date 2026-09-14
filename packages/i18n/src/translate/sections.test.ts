@@ -161,6 +161,9 @@ describe('translateSection', () => {
     };
     expect(body.messages[0].content).toContain('Serbian (Latin script)');
     expect(body.messages[0].content).toContain('a test business');
+    expect(body.messages[0].content).toMatch(
+      /metaTitle and title at most 60 characters[\s\S]*at most 160/,
+    );
   });
 
   it('throws when the response has a leaf of the wrong type', async () => {

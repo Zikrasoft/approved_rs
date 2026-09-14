@@ -17,16 +17,12 @@ describe('getPagesContent', () => {
     }
   });
 
-  it('privacy.metaDescription interpolates the site name', () => {
-    expect(getPagesContent('ru').privacy.metaDescription(SITE_NAME)).toContain(
-      SITE_NAME,
-    );
-    expect(getPagesContent('en').privacy.metaDescription(SITE_NAME)).toContain(
-      SITE_NAME,
-    );
-    expect(getPagesContent('sr').privacy.metaDescription(SITE_NAME)).toContain(
-      SITE_NAME,
-    );
+  it('privacy.metaDescription interpolates the site name in every locale', () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      expect(
+        getPagesContent(locale).privacy.metaDescription(SITE_NAME),
+      ).toContain(SITE_NAME);
+    }
   });
 
   it('en, sr, es and de differ from ru', () => {

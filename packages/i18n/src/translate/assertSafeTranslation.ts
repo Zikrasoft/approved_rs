@@ -7,6 +7,11 @@ const HTML_TAG = /<[a-zA-Z/!]/;
 const MIXED_SCRIPT_WORD =
   /[\p{Script=Latin}][\p{Script=Cyrillic}]|[\p{Script=Cyrillic}][\p{Script=Latin}]/u;
 const TAG_NAME = /<\/?([a-zA-Z][a-zA-Z0-9]*)/g;
+// Nothing downstream notices a dropped token: withPlaceholder is a
+// replaceAll that quietly no-ops, and the section schemas are bare
+// z.string(). A translation that shortens by deleting {siteName} would ship
+// on an auto-commit with a hole where the name should be.
+const PLACEHOLDER = /\{[a-zA-Z][a-zA-Z0-9]*\}/g;
 
 function tagNamesOf(text: string): Set<string> {
   return new Set(
@@ -44,6 +49,14 @@ export function assertSafeTranslation(
     if (HTML_TAG.test(translated) && !HTML_TAG.test(source)) {
       throw new Error(
         `translated response for "${path}" contains raw HTML-looking content the source didn't have: ${translated}`,
+      );
+    }
+    const dropped = [...new Set(source.match(PLACEHOLDER) ?? [])].filter(
+      (token) => !translated.includes(token),
+    );
+    if (dropped.length > 0) {
+      throw new Error(
+        `translated response for "${path}" dropped placeholder tokens (${dropped.join(' ')}): ${translated}`,
       );
     }
     const mixed = MIXED_SCRIPT_WORD.exec(translated);
