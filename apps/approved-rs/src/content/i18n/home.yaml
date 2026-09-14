@@ -297,13 +297,13 @@ translations:
     testimonialsHeading: Šta kažu klijenti
     testimonials:
       - quote: «Doveli su BMW serije 3 iz Minhena u Beograd. Sve jasno - od pregleda do registracije. Uštedeli smo mnogo živaca na registraciji.»
-        name: Aleksandar
+        name: Александр
         caption: BMW 320d, Nemačka → Srbija
       - quote: «Dugo sam tražio Skodu Octaviju u dobrom stanju. Momci su pronašli opciju u Španiji, proverili sa nezavisnim ekspertom - sve se poklapalo sa opisom.»
-        name: Mihail
+        name: Михаил
         caption: Skoda Octavia, Španija → Rusija
       - quote: «Registracija na strane brojeve činila se kompliciranom. Tim me vodio kroz svaki korak - i mesec dana kasnije sam već vozio. Preporučujem.»
-        name: Dmitrij
+        name: Дмитрий
         caption: VW Passat, Nemačka → Srbija
     ctaEyebrow: Spremni da počnete?
     ctaHeading:
