@@ -2,7 +2,10 @@ import { getActiveCountries, getCitiesForCountry } from './geo';
 import { swapLocalePath } from '@podbor/site-kit';
 import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 import type { CountryScopedServiceSlug } from './labels';
-import type { VehicleImportSpoke } from './vehicleImportCrossSell';
+import {
+  EU_SPOKE_COUNTRIES,
+  type VehicleImportSpoke,
+} from './vehicleImportCrossSell';
 
 // Single source of truth for every internal href the site links to — no
 // page/component should build one with a raw template literal. Country-
@@ -27,7 +30,7 @@ export const PathBuilder = {
   // grouping instead of a parallel top-level spoke) — still their own
   // dedicated page/URL for their own search intent, just one level deeper.
   vehicleImportSpoke: (locale: Locale, slug: VehicleImportSpoke) =>
-    slug === 'de' || slug === 'es' || slug === 'ch'
+    (EU_SPOKE_COUNTRIES as readonly string[]).includes(slug)
       ? `/${locale}/vehicle-import/eu/${slug}/`
       : `/${locale}/vehicle-import/${slug}/`,
   case: (locale: Locale, caseId: string) => `/${locale}/cases/${caseId}/`,

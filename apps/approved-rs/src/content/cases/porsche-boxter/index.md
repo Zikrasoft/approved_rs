@@ -1,5 +1,5 @@
 ---
-title: Porsche Boxter
+title: Porsche Boxster
 translations:
   en:
     title: Porsche Boxter
@@ -97,7 +97,7 @@ translations:
       Wir arbeiten mit Fahrzeugen in ganz Deutschland, daher können wir die Autoauswahl für den Porsche und andere Fahrzeuge in Berlin, München, Hamburg, Frankfurt am Main, Köln, Düsseldorf, Stuttgart, Leipzig, Nürnberg und anderen Städten organisieren.
 
       Wenn Sie einen Porsche Boxster in Deutschland suchen und ein Auto ohne unangenehme Überraschungen kaufen möchten, hilft Ihnen die professionelle Autoauswahl, Zeit und Geld zu sparen und den Kauf eines problematischen Fahrzeugs zu vermeiden.
-car: Porsche Boxter
+car: Porsche Boxster
 year: 2020
 price:
   value: '63000'
@@ -111,7 +111,7 @@ published: true
 translatedFrom: b0ad6e62b237a74a
 ---
 
-# Автоподбор Porsche Boxster в Германии
+## Автоподбор Porsche Boxster в Германии
 
 К нам обратился Владимир, который уже давно живёт в Германии, с задачей найти и подобрать для него Porsche Boxster в отличном состоянии.
 
@@ -119,7 +119,7 @@ translatedFrom: b0ad6e62b237a74a
 
 Каждый автомобиль прошёл подробную проверку перед покупкой. Мы оценивали техническое состояние, кузов, лакокрасочное покрытие, салон, комплектацию, состояние двигателя и коробки передач, а также проверяли историю автомобиля и соответствие заявленного состояния реальному.
 
-Главная задача автоподбора — не просто найти Porsche Boxster по объявлению, а найти автомобиль, который действительно стоит своих денег и соответствует требованиям клиента.
+Главная задача автоподбора — найти Porsche Boxster, который действительно стоит своих денег и соответствует требованиям клиента.
 
 В итоге Владимир выбрал автомобиль, который полностью его устроил. Машина понравилась ему как по состоянию, так и по комплектации, и главное — после нашей проверки у него не осталось вопросов относительно покупки.
 

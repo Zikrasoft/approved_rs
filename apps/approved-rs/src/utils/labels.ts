@@ -59,9 +59,11 @@ export function isCountryScopedServiceSlug(
 
 // Primary nav order: Автоподбор first, then Привоз, then the remaining
 // per-country SERVICES. Shared by Header (desktop + mobile) and Footer.
+// Every entry points at the service's own hub: the country pages hang one
+// click below it. Linking Выкуп/Проверка straight at /rs/ left their hubs
+// with no inbound link on the whole site.
 export const getNavItems = (
   locale: Locale,
-  countryCode: string,
 ): { href: string; label: string; slug: string }[] => {
   const nav = getI18n(locale).nav;
   return [
@@ -76,7 +78,7 @@ export const getNavItems = (
       slug: SLUG.IMPORT,
     },
     ...SERVICES.filter((s) => s.slug !== SLUG.SOURCING).map((s) => ({
-      href: PathBuilder.service(locale, s.slug, countryCode),
+      href: PathBuilder.sectionRoot(locale, s.slug),
       label: nav[s.slug],
       slug: s.slug,
     })),

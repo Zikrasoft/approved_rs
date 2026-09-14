@@ -1,0 +1,133 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import ContactCTA from './ContactCTA.astro';
+import StatBlock from './StatBlock.astro';
+
+interface Props {
+  image: ImageMetadata;
+  imageAlt: string;
+  eyebrow: string;
+  line1: string;
+  line2: string;
+  accentWord: string;
+  text: string;
+  ctaLabel: string;
+  openModal?: boolean;
+  stats: { value: string; label: string }[];
+}
+
+const {
+  image,
+  imageAlt,
+  eyebrow,
+  line1,
+  line2,
+  accentWord,
+  text,
+  ctaLabel,
+  openModal = false,
+  stats,
+} = Astro.props;
+---
+
+<section class="close relative">
+  <div class="close-shot">
+    <Image
+      src={image}
+      alt={imageAlt}
+      format="webp"
+      widths={[640, 1024, 1600]}
+      sizes="100vw"
+      loading="lazy"
+      class="w-full h-full object-cover"
+    />
+    <span class="close-veil"></span>
+  </div>
+  <div class="close-body relative max-w-6xl mx-auto px-6">
+    <div class="grid gap-10 lg:grid-cols-2 lg:items-end">
+      <div>
+        <span class="eyebrow">{eyebrow}</span>
+        <h2 class="cta-headline font-display font-bold mb-4 text-primary">
+          {line1}<br />{line2}<br />{accentWord}
+        </h2>
+        <p class="text-base mb-2 max-w-sm text-secondary leading-[1.7]">
+          {text}
+        </p>
+        <ContactCTA label={ctaLabel} {openModal} />
+      </div>
+      <div class="grid grid-cols-2 gap-6 lg:justify-items-end">
+        {
+          stats.map((stat) => (
+            <StatBlock value={stat.value} label={stat.label} />
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .close-shot {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+  }
+  @media (min-width: 640px) {
+    .close-shot {
+      aspect-ratio: 21 / 9;
+    }
+  }
+  .close-veil {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgb(var(--color-bg-rgb) / 0.55) 0%,
+      rgb(var(--color-bg-rgb) / 0.2) 34%,
+      var(--color-bg) 99%
+    );
+  }
+  .close-body {
+    padding-top: 1.6rem;
+    padding-bottom: var(--spacing-band);
+  }
+  .cta-headline {
+    font-size: clamp(1.9rem, 4.4vw, 3rem);
+    line-height: 1.03;
+    letter-spacing: -0.045em;
+  }
+  @media (min-width: 1024px) {
+    .close {
+      display: flex;
+      align-items: flex-end;
+      min-height: 34rem;
+      overflow: hidden;
+    }
+    .close-shot {
+      position: absolute;
+      inset: 0;
+      aspect-ratio: auto;
+    }
+    .close-veil {
+      background:
+        linear-gradient(
+          90deg,
+          rgb(var(--color-bg-rgb) / 0.92) 0%,
+          rgb(var(--color-bg-rgb) / 0.6) 52%,
+          rgb(var(--color-bg-rgb) / 0.25) 80%
+        ),
+        linear-gradient(
+          180deg,
+          rgb(var(--color-bg-rgb) / 0.5) 0%,
+          rgb(var(--color-bg-rgb) / 0.45) 40%,
+          rgb(var(--color-bg-rgb) / 0.9) 100%
+        );
+    }
+    .close-body {
+      width: 100%;
+      padding-top: var(--spacing-band-lg);
+      padding-bottom: var(--spacing-band-lg);
+    }
+  }
+</style>

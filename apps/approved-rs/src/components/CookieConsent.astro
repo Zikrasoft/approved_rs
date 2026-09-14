@@ -18,22 +18,22 @@ const cc = getI18n(locale).common.cookie;
   <p class="text-sm leading-relaxed text-secondary mb-4">
     {cc.notice}
     {' '}{cc.more}{' '}
-    <a href={PathBuilder.privacy(locale)} class="underline text-accent"
+    <a href={PathBuilder.privacy(locale)} class="underline text-muted"
       >{cc.policyLink}</a
     >.
   </p>
   <div class="flex gap-3">
     <button
-      id="cookie-accept"
-      class="px-4 py-2 rounded-sm text-xs font-medium bg-accent text-on-accent"
-    >
-      {cc.accept}
-    </button>
-    <button
       id="cookie-decline"
-      class="px-4 py-2 rounded-sm text-xs font-medium text-muted"
+      class="px-4 py-2 rounded-sm border text-xs font-medium border-default text-primary"
     >
       {cc.decline}
+    </button>
+    <button
+      id="cookie-accept"
+      class="px-4 py-2 rounded-sm border text-xs font-medium border-accent bg-accent text-on-accent"
+    >
+      {cc.accept}
     </button>
   </div>
 </div>

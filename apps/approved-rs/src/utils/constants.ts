@@ -28,15 +28,6 @@ export const SOCIAL_SAME_AS = [
   `https://www.threads.com/@${THREADS_CHANNEL}`,
 ];
 
-// Official brand colors — kept true regardless of theme/hover state so the
-// icons stay instantly recognizable (that's the whole point of a brand
-// mark), unlike the site's own UI chrome which follows light/dark tokens.
-export const BRAND_COLORS = {
-  telegram: '#26A5E4',
-  whatsapp: '#25D366',
-  viber: '#7360F2',
-} as const;
-
 // Single source of truth for flag emoji — keyed lowercase by whatever 2-letter
 // code is in play (delivery country, locale, or phone-country ISO). `sr`
 // (Serbian locale) and `rs` (Serbia country) are different keys that happen

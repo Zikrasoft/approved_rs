@@ -1,0 +1,79 @@
+---
+import PageSection from './PageSection.astro';
+import type { CountryNote } from '@/i18n/content/services';
+
+interface Props {
+  heading: string;
+  lead: string;
+  hint: string;
+  pointsLabel: string;
+  items: {
+    name: string;
+    href: string;
+    linkLabel: string;
+    note: CountryNote;
+  }[];
+}
+
+const { heading, lead, hint, pointsLabel, items } = Astro.props;
+---
+
+<PageSection title={heading} lead={lead}>
+  <market-tabs class="block">
+    <div class="flex flex-wrap gap-2">
+      {
+        items.map((item, i) => (
+          <button
+            type="button"
+            data-zone={String(i)}
+            aria-pressed={i === 0 ? 'true' : 'false'}
+            class="chip"
+          >
+            {item.name}
+          </button>
+        ))
+      }
+    </div>
+    <p class="mt-3 text-xs text-muted">{hint}</p>
+
+    <div class="mt-6">
+      {
+        items.map((item, i) => (
+          <div
+            data-zone-panel={String(i)}
+            hidden
+            class="rounded-sm border border-default bg-surface p-6 md:p-8"
+          >
+            <p class="text-base leading-relaxed text-primary max-w-2xl">
+              {item.note.lead}
+            </p>
+            <p class="text-xs tracking-widest uppercase mt-7 mb-4 font-medium text-muted">
+              {pointsLabel}
+            </p>
+            <ul class="market-points">
+              {item.note.points.map((point) => (
+                <li class="market-point text-[0.97rem] leading-relaxed text-muted">
+                  {point}
+                </li>
+              ))}
+            </ul>
+            <a
+              href={item.href}
+              class="mt-7 inline-block text-sm font-medium text-accent no-underline hover:underline"
+            >
+              {item.linkLabel}
+            </a>
+          </div>
+        ))
+      }
+    </div>
+  </market-tabs>
+</PageSection>
+
+<script>
+  import { defineZoneMap } from '@podbor/site-kit/browser';
+
+  // interval 0: a wall of market notes is read, not watched — swapping it on
+  // a timer pulls the text out from under whoever is mid-sentence.
+  defineZoneMap('market-tabs', { interval: 0 });
+</script>

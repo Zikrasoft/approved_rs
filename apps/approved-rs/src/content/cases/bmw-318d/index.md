@@ -1,6 +1,6 @@
 ---
-title: 'BMW 318D - Автоподбор '
-car: BMW 318D
+title: BMW 318d
+car: BMW 318d
 year: 2026
 price:
   value: '26500'

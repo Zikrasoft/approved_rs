@@ -25,8 +25,6 @@ export const dictionaryContentSchema = z
         menuLabel: z.string(),
         menuCloseLabel: z.string(),
         languageLabel: z.string(),
-        themeToggleLabel: z.string(),
-        themeToggleMobileLabel: z.string(),
         ctaShort: z.string(),
         ctaLong: z.string(),
       })

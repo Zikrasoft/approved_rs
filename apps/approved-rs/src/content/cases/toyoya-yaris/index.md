@@ -1,5 +1,5 @@
 ---
-title: TOYOYA YARIS
+title: Toyota Yaris
 translations:
   en:
     title: TOYOYA YARIS
@@ -185,7 +185,7 @@ translations:
       Wenn Sie das Fahrzeug selbst gefunden haben — **müssen Sie es nicht blind kaufen**. Vor dem Kauf können Sie eine unabhängige Prüfung anfordern: VIN und Fahrzeughistorie, Karosserie, Motor, Getriebe, Fahrwerk, Diagnose und Probefahrt.
 
       **Einmalige Fahrzeugprüfung vor dem Kauf in Serbien — eine Möglichkeit, eine unabhängige Meinung über das Auto zu erhalten, bevor Sie dem Verkäufer das Geld übergeben.**
-car: TOYOYA YARIS
+car: Toyota Yaris
 year: 2008
 price:
   value: '6200'
@@ -199,7 +199,7 @@ published: true
 translatedFrom: eec29ba6bc15596a
 ---
 
-# Разовая проверка автомобиля перед покупкой в Сербии
+## Разовая проверка автомобиля перед покупкой в Сербии
 
 **Проверка автомобиля перед покупкой в Белграде и других городах Сербии**
 
@@ -230,5 +230,3 @@ translatedFrom: eec29ba6bc15596a
 Проводим проверки автомобилей в **Белграде, Новом-Саде, Нише, Крагуеваце, Суботице, Панчево, Нови-Пазаре, Чачаке, Зренянине, Смедерево, Кралево, Крушеваце, Лесковаце, Ужице, Валево, Вране, Шапаце, Сомборе, Заечаре, Пожареваце, Пироте, Боре, Сремской-Митровице, Вршаце, Ягодине, Кикинде** и других городах Сербии.
 
 Если вы нашли автомобиль самостоятельно — **не обязательно покупать его вслепую**. Перед покупкой можно заказать независимую проверку: VIN и история автомобиля, кузов, двигатель, коробка передач, подвеска, диагностика и тест-драйв.
-
-**Разовая проверка автомобиля перед покупкой в Сербии — способ получить независимое мнение о машине до передачи денег продавцу.**

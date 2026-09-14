@@ -1,5 +1,5 @@
 ---
-title: Seat LEON
+title: SEAT Leon
 translations:
   en:
     title: Seat LEON
@@ -151,7 +151,7 @@ translations:
       Wir arbeiten mit der Beschaffung und Überprüfung von Fahrzeugen in Barcelona, Madrid, Valencia, Alicante, Málaga, Sevilla, Saragossa, Bilbao, Murcia, Palma de Mallorca und anderen Städten Spaniens.
 
       Wenn Sie planen, ein Fahrzeug in Spanien zu kaufen, können wir die Suche nach geeigneten Optionen, die Kommunikation mit den Verkäufern, die Überprüfung der Historie, die Inspektion und die Diagnose des Fahrzeugs vor dem Kauf übernehmen.
-car: Seat LEON
+car: SEAT Leon
 year: 2021
 price:
   value: '16000'
@@ -166,7 +166,7 @@ published: true
 translatedFrom: eccdf1a1aed0df47
 ---
 
-# Автоподбор в Испании: SEAT Leon 2.0 TDI для клиента
+## Автоподбор в Испании: SEAT Leon 2.0 TDI для клиента
 
 Очередной успешно завершенный автоподбор в Испании. На этот раз мы искали автомобиль для нашего клиента Максима в Барселоне.
 

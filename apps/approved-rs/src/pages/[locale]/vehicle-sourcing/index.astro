@@ -2,10 +2,16 @@
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import CountryPill from '@/components/CountryPill.astro';
 import Faq from '@/components/Faq.astro';
+import PageSection from '@/components/PageSection.astro';
+import StepsList from '@/components/StepsList.astro';
+import IncludedGrid from '@/components/IncludedGrid.astro';
+import MarketCompare from '@/components/MarketCompare.astro';
+import heroPhoto from '@/assets/service-sourcing.jpg';
 import { getFaq } from '@/i18n/content/faq';
 import { getServicesContent } from '@/i18n/content/services';
 import { withLocales, PathBuilder } from '@/utils/paths';
 import { getActiveCountries } from '@/utils/geo';
+import { compareItemsFor } from '@/utils/compareItems';
 import { generateServiceSchema, placeholderOgImage } from '@/utils/seo';
 import { getCollection } from 'astro:content';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
@@ -28,6 +34,14 @@ const schema = generateServiceSchema(
   meta.canonical,
 );
 
+const sc = getServicesContent(locale)['vehicle-sourcing'];
+const compareItems = compareItemsFor(
+  locale,
+  'vehicle-sourcing',
+  sc.countryNoteFor,
+  pc.compareLinkFor,
+);
+
 const cases = (await getCollection('cases'))
   .filter((c) => c.data.published && c.data.service === 'vehicle-sourcing')
   .slice(0, 6);
@@ -47,6 +61,9 @@ const cases = (await getCollection('cases'))
   showCountryCrossLinks={false}
   casesHeading={pc.casesHeading}
   breadcrumbs={[{ label: pc.breadcrumbLabel }]}
+  image={heroPhoto}
+  imageAlt={pc.heroPhotoAlt}
+  closing={sc.closing}
 >
   <p class="text-xs tracking-widest uppercase mb-4 font-medium text-muted">
     {pc.chooseCountryLabel}
@@ -56,6 +73,24 @@ const cases = (await getCollection('cases'))
   </div>
 
   <Fragment slot="extra">
+    <PageSection title={pc.processHeading} lead={pc.processLead}>
+      <StepsList steps={pc.processSteps} />
+    </PageSection>
+
+    <IncludedGrid
+      heading={pc.includedHeading}
+      lead={pc.includedLead}
+      items={pc.included}
+    />
+
+    <MarketCompare
+      heading={pc.compareHeading}
+      lead={pc.compareLead}
+      hint={pc.compareHint}
+      pointsLabel={sc.countryNotesPointsLabel}
+      items={compareItems}
+    />
+
     <Faq items={getFaq(locale)['vehicle-sourcing']} />
   </Fragment>
 </ServicePageLayout>

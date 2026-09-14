@@ -1,0 +1,33 @@
+---
+import PageSection from './PageSection.astro';
+
+interface Props {
+  heading: string;
+  lead: string;
+  items: { name: string; href: string; text: string }[];
+}
+
+const { heading, lead, items } = Astro.props;
+---
+
+<PageSection title={heading} {lead}>
+  <div
+    class="grid grid-cols-1 sm:grid-cols-2 gap-px bg-border border border-default"
+  >
+    {
+      items.map((item) => (
+        <a
+          href={item.href}
+          class="group block bg-bg p-6 no-underline transition-colors hover:bg-surface"
+        >
+          <span class="font-display text-lg font-bold text-primary transition-colors group-hover:text-accent">
+            {item.name}
+          </span>
+          <span class="mt-2 block text-[0.95rem] leading-relaxed text-muted">
+            {item.text}
+          </span>
+        </a>
+      ))
+    }
+  </div>
+</PageSection>

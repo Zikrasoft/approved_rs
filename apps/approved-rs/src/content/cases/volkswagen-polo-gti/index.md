@@ -1,5 +1,5 @@
 ---
-title: Volkswagen POLO GTI
+title: Volkswagen Polo GTI
 translations:
   en:
     title: Volkswagen POLO GTI
@@ -113,7 +113,7 @@ translations:
       Wir helfen Ihnen beim Kauf und der Lieferung von Autos aus Deutschland nach Portugal schlüsselfertig. Wenn Sie ein Auto in Deutschland kaufen und nach Lissabon, Porto, Cascais, Estoril oder eine andere Stadt in Portugal bringen möchten, können wir Ihnen in allen wichtigen Phasen helfen: das Auto auswählen, vor dem Kauf überprüfen, den Kauf begleiten, den Transport von Deutschland nach Portugal organisieren und bei der weiteren Zulassung und Registrierung des Fahrzeugs unterstützen.
 
       Der Import eines Autos aus Deutschland nach Portugal ist nicht nur der Transport eines Fahrzeugs von einem Land ins andere. Es ist ein gesamter Prozess, in dem die richtige Auswahl des Autos, eine technische Prüfung, ein sicherer Kauf, Logistik, Dokumente und Zulassung wichtig sind. Wir vereinen all diese Schritte, damit der Kauf eines Autos in Deutschland und die Lieferung nach Portugal für den Kunden so einfach und komfortabel wie möglich sind.
-car: Volkswagen POLO GTI
+car: Volkswagen Polo GTI
 year: 2025
 price:
   value: '25000'
@@ -129,7 +129,7 @@ published: true
 translatedFrom: 51afc7096a4e717c
 ---
 
-# Volkswagen Polo GTI из Германии в Португалию — подбор, покупка, доставка и оформление в Лиссабоне
+## Volkswagen Polo GTI из Германии в Португалию — подбор, покупка, доставка и оформление в Лиссабоне
 
 Ещё один автомобиль успешно доставлен из Германии в Португалию — на этот раз Volkswagen Polo GTI для нашего клиента из Лиссабона.
 
@@ -146,5 +146,3 @@ translatedFrom: 51afc7096a4e717c
 Сейчас Volkswagen Polo GTI уже у своего владельца, все необходимые процедуры завершены, а клиент с удовольствием ездит на своей новой машине по Лиссабону.
 
 Мы помогаем с покупкой и доставкой автомобилей из Германии в Португалию под ключ. Если вы хотите купить автомобиль в Германии и привезти его в Лиссабон, Порту, Кашкайш, Эшторил или другой город Португалии, мы можем помочь на всех основных этапах: подобрать автомобиль, проверить его перед покупкой, сопроводить сделку, организовать доставку автовозом из Германии в Португалию и помочь с дальнейшим оформлением и регистрацией автомобиля.
-
-Пригон авто из Германии в Португалию — это не только перевозка машины из одной страны в другую. Это целый процесс, в котором важны правильный подбор автомобиля, техническая проверка, безопасная покупка, логистика, документы и регистрация. Мы объединяем все эти этапы, чтобы покупка автомобиля в Германии и его доставка в Португалию были для клиента максимально понятными и удобными.

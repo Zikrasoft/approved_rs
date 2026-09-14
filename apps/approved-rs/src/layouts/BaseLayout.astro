@@ -1,4 +1,5 @@
 ---
+import { jsonLdText } from '@podbor/site-kit';
 import { OG_SUFFIX, type MetaProps } from '@/utils/seo';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
@@ -10,11 +11,16 @@ import { getAlternateLinks } from '@/i18n/hreflang';
 import { getLocale } from '@/i18n/config';
 // Logo/heading font: preload so it's ready before first paint (avoids the
 // fallback→webfont width jump on every navigation, most visible on the logo).
-import logoFontUrl from '@fontsource/playfair-display/files/playfair-display-latin-700-normal.woff2?url';
+import logoFontUrl from '@fontsource/unbounded/files/unbounded-latin-700-normal.woff2?url';
 // Header nav links (400) and the CTA button (500) — same swap-jump issue, and
-// the nav is flex-centred, so a swap slides the whole row sideways.
-import navFontUrl from '@fontsource/outfit/files/outfit-latin-400-normal.woff2?url';
-import navCtaFontUrl from '@fontsource/outfit/files/outfit-latin-500-normal.woff2?url';
+// the nav is flex-centred, so a swap slides the whole row sideways. The nav
+// renders in the visitor's language, so the subset follows it: preloading the
+// Cyrillic file for a Latin-script locale downloads a font nothing uses and
+// leaves that locale with the swap this preload exists to prevent.
+import navCyrillicUrl from '@fontsource/golos-text/files/golos-text-cyrillic-400-normal.woff2?url';
+import navCtaCyrillicUrl from '@fontsource/golos-text/files/golos-text-cyrillic-500-normal.woff2?url';
+import navLatinUrl from '@fontsource/golos-text/files/golos-text-latin-400-normal.woff2?url';
+import navCtaLatinUrl from '@fontsource/golos-text/files/golos-text-latin-500-normal.woff2?url';
 
 interface Props extends MetaProps {
   schema?: object;
@@ -44,6 +50,8 @@ const OG_LOCALE_MAP: Record<string, string> = {
   de: 'de_DE',
 };
 const alternateLinks = getAlternateLinks(Astro.url.pathname);
+const navFontUrl = locale === 'ru' ? navCyrillicUrl : navLatinUrl;
+const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
 ---
 
 <!doctype html>
@@ -51,6 +59,8 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0a0b0c" />
     <link
       rel="preload"
       as="font"
@@ -96,7 +106,7 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
 
     {
       schema && (
-        <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+        <script type="application/ld+json" set:html={jsonLdText(schema)} />
       )
     }
 
@@ -178,21 +188,6 @@ const alternateLinks = getAlternateLinks(Astro.url.pathname);
     <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-
-    <!-- Prevent flash of wrong theme: explicit choice wins, otherwise follow OS preference.
-         Runs before body paint since it's in <head>, so data-theme is set on
-         <html> before anything renders. -->
-    <script is:inline>
-      try {
-        const stored = localStorage.getItem('theme');
-        const wantsDark = stored
-          ? stored === 'dark'
-          : window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (wantsDark)
-          document.documentElement.setAttribute('data-theme', 'dark');
-        else document.documentElement.removeAttribute('data-theme');
-      } catch (e) {}
-    </script>
   </head>
   <body>
     <Header />

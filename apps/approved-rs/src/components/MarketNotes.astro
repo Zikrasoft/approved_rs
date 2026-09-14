@@ -1,0 +1,27 @@
+---
+import PageSection from './PageSection.astro';
+import type { CountryNote } from '@/i18n/content/services';
+
+interface Props {
+  heading: string;
+  pointsLabel: string;
+  note: CountryNote;
+}
+
+const { heading, pointsLabel, note } = Astro.props;
+---
+
+<PageSection title={heading} lead={note.lead}>
+  <p class="text-xs tracking-widest uppercase mb-5 font-medium text-muted">
+    {pointsLabel}
+  </p>
+  <ul class="market-points">
+    {
+      note.points.map((point) => (
+        <li class="market-point text-[0.97rem] leading-relaxed text-muted">
+          {point}
+        </li>
+      ))
+    }
+  </ul>
+</PageSection>

@@ -83,6 +83,12 @@ describe('excerptFromMarkdown', () => {
     ).toBe('Мы подобрали BMW X5 для клиента.');
   });
 
+  it('skips a leading heading and takes the first prose paragraph', () => {
+    expect(excerptFromMarkdown('## Автоподбор в Сербии\n\nНашли BMW X3.')).toBe(
+      'Нашли BMW X3.',
+    );
+  });
+
   it('takes only the first paragraph', () => {
     expect(excerptFromMarkdown('Первый абзац.\n\nВторой абзац.')).toBe(
       'Первый абзац.',
@@ -109,6 +115,15 @@ describe('buildLocation', () => {
   it('uses the Slavic locative case + preposition for ru/sr', () => {
     expect(buildLocation('ru', de)).toBe('в Германии');
     expect(buildLocation('sr', de)).toBe('u Nemačkoj');
+  });
+
+  it('uses "во" before a Russian locative starting with в/ф + consonant', () => {
+    const fr = {
+      ...de,
+      code: 'fr',
+      ru: { ...de.ru, name: 'Франция', nameLocative: 'Франции' },
+    };
+    expect(buildLocation('ru', fr)).toBe('во Франции');
   });
 
   it('uses a plain preposition + name for en/es/de (no case declension)', () => {

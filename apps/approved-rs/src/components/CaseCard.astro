@@ -58,7 +58,7 @@ const { href, image, imageAlt, badges, car, year, price } = Astro.props;
       <div class="flex flex-wrap gap-1.5">
         {
           badges.map((badge) => (
-            <span class="text-xs tracking-[0.16em] uppercase font-semibold text-accent">
+            <span class="text-xs tracking-[0.16em] uppercase font-semibold text-muted">
               {badge}
             </span>
           ))
@@ -79,7 +79,7 @@ const { href, image, imageAlt, badges, car, year, price } = Astro.props;
         price && (
           <Price
             price={price}
-            class="font-display text-xl font-bold text-accent"
+            class="font-display text-xl font-bold text-primary"
           />
         )
       }

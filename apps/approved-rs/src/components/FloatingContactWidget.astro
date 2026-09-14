@@ -17,7 +17,11 @@ const locale = getLocale(Astro.currentLocale);
 const cc = getServicesContent(locale).caseChrome;
 ---
 
-<div class="floating-contact" data-floating-contact>
+<cta-reveal
+  class="floating-contact"
+  data-floating-contact
+  watch="[data-contact-cta]"
+>
   <div class="floating-panel" role="menu" data-panel hidden>
     <a
       data-contact-channel="telegram"
@@ -88,7 +92,7 @@ const cc = getServicesContent(locale).caseChrome;
     <span data-icon-open><MessageCircle size={22} /></span>
     <span data-icon-close hidden><X size={22} /></span>
   </button>
-</div>
+</cta-reveal>
 
 <style>
   .floating-contact {
@@ -96,6 +100,21 @@ const cc = getServicesContent(locale).caseChrome;
     right: 1rem;
     bottom: 1.25rem;
     z-index: var(--z-sticky);
+    transition:
+      opacity 0.25s,
+      transform 0.25s,
+      visibility 0.25s;
+  }
+  .floating-contact[data-revealed='false'] {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.9);
+    visibility: hidden;
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .floating-contact {
+      transition: none;
+    }
   }
   @media (min-width: 640px) {
     .floating-contact {
@@ -180,6 +199,10 @@ const cc = getServicesContent(locale).caseChrome;
 </style>
 
 <script>
+  import { defineCtaReveal } from '@podbor/site-kit/browser';
+
+  defineCtaReveal();
+
   function initFloatingContact() {
     const root = document.querySelector<HTMLElement>('[data-floating-contact]');
     if (!root) return;

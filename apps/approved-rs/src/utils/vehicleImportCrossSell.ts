@@ -1,5 +1,11 @@
 export type VehicleImportSpoke = 'de' | 'eu' | 'china' | 'es' | 'ch';
 
+// The spokes that live under /vehicle-import/eu/ — the countries cars are
+// imported from, which is not the same set as the countries we operate in.
+export const EU_SPOKE_COUNTRIES = ['de', 'es', 'ch'] as const;
+
+export type EuSpokeCountry = (typeof EU_SPOKE_COUNTRIES)[number];
+
 // Corridor-driven, not a blanket "also see vehicle-import" everywhere — only these
 // country/vehicle-import-spoke pairs match a real corridor the business actually
 // runs (EU/China→Serbia, Germany/EU→Spain/Portugal, China→Germany).

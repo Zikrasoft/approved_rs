@@ -3,17 +3,19 @@ import { getCountryFlag } from '@/utils/geo';
 import { PathBuilder } from '@/utils/paths';
 import type { Country } from '@/utils/geo';
 import type { Locale } from '@/i18n/config';
+import type { CountryScopedServiceSlug } from '@/utils/labels';
 
 interface Props {
   country: Country;
   locale: Locale;
+  service?: CountryScopedServiceSlug;
 }
 
-const { country, locale } = Astro.props;
+const { country, locale, service = 'vehicle-sourcing' } = Astro.props;
 ---
 
 <a
-  href={PathBuilder.service(locale, 'vehicle-sourcing', country.code)}
+  href={PathBuilder.service(locale, service, country.code)}
   class="country-pill group flex items-center justify-between gap-2.5 px-4 py-2.5 rounded-sm no-underline glow-border bg-surface border border-default"
 >
   <span class="flex items-center gap-2.5 min-w-0">
@@ -26,7 +28,7 @@ const { country, locale } = Astro.props;
     </span>
   </span>
   <span
-    class="country-arrow text-xs text-accent shrink-0 transition-transform duration-200"
+    class="country-arrow text-xs text-muted shrink-0 transition-transform duration-200"
   >
     →
   </span>

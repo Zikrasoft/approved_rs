@@ -61,10 +61,16 @@ export function buildLocation(
   city?: City,
 ): string {
   if (locale === 'ru' || locale === 'sr') {
-    const preposition = locale === 'ru' ? 'в' : 'u';
     const form = city
       ? city[locale].nameLocative
       : country![locale].nameLocative;
+    // Russian takes "во" before в/ф + consonant ("во Франции"), "в" otherwise.
+    const preposition =
+      locale === 'sr'
+        ? 'u'
+        : /^[вф][бвгджзклмнпрстфхцчшщ]/i.test(form)
+          ? 'во'
+          : 'в';
     return `${preposition} ${form}`;
   }
   const name = city ? city[locale].name : country![locale].name;
@@ -174,7 +180,11 @@ const textRenderer = new marked.TextRenderer();
 // top-level `marked.parseInline()` convenience function only accepts a full
 // Renderer, not a TextRenderer, so this goes through Lexer/Parser directly.
 export function excerptFromMarkdown(markdown: string, maxLen = 140): string {
-  const firstParagraph = markdown.trim().split(/\n\s*\n/)[0] ?? '';
+  const firstParagraph =
+    markdown
+      .trim()
+      .split(/\n\s*\n/)
+      .find((block) => !/^#{1,6}\s/.test(block.trim())) ?? '';
   const tokens = marked.Lexer.lexInline(firstParagraph);
   const plain = inlineParser
     .parseInline(tokens, textRenderer)

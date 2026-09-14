@@ -2,6 +2,7 @@
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import StepsList from '@/components/StepsList.astro';
 import Faq from '@/components/Faq.astro';
+import IncludedGrid from '@/components/IncludedGrid.astro';
 import { getCountryPaths, withLocales, PathBuilder } from '@/utils/paths';
 import { getCountry } from '@/utils/geo';
 import {
@@ -67,6 +68,7 @@ const description = isSerbia
     },
     { label: sc.breadcrumbLabel },
   ]}
+  closing={sc.closing}
 >
   <StepsList
     steps={[
@@ -78,6 +80,11 @@ const description = isSerbia
   />
 
   <Fragment slot="extra">
+    <IncludedGrid
+      heading={sc.hub.includedHeading}
+      lead={sc.hub.includedLead}
+      items={sc.hub.included}
+    />
     <Faq items={getFaq(locale)['vehicle-buyback']} />
   </Fragment>
 </ServicePageLayout>

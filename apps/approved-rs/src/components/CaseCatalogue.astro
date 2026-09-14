@@ -1,0 +1,170 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Button from './Button.astro';
+import CaseCard from './CaseCard.astro';
+import SectionHeading from './SectionHeading.astro';
+import { toCaseItem } from '@/utils/cases';
+import { formatPrice } from '@/utils/price';
+import { getActiveCountries } from '@/utils/geo';
+import { getI18n } from '@/i18n/getI18n';
+import type { HomeContent } from '@/i18n/content/homeContentSchema';
+import { BCP47_BY_LOCALE, type Locale } from '@/i18n/config';
+
+interface Props {
+  cases: CollectionEntry<'cases'>[];
+  locale: Locale;
+  content: HomeContent['catalogue'];
+  viewAllHref: string;
+}
+
+const { cases, locale, content, viewAllHref } = Astro.props;
+
+// Keystatic stores the amount as free text, so a case can carry "по запросу" or
+// "68 000" as easily as "68000". Anything that isn't a number counts as no
+// price: it stays visible at every ceiling instead of turning the ceiling
+// itself into NaN, which collapses the whole catalogue to its empty state.
+const entries = cases.map((c) => {
+  const amount = Number(c.data.price.value);
+  return {
+    item: toCaseItem(c, locale),
+    amount: Number.isFinite(amount) ? amount : 0,
+    country: c.data.country,
+  };
+});
+
+const ceiling = Math.max(...entries.map((e) => e.amount));
+const floor = Math.min(1000, ceiling);
+const present = new Set(entries.map((e) => e.country));
+const chips = getActiveCountries().filter((c) => present.has(c.code));
+const currency = cases.find((c) => c.data.price.currency)?.data.price.currency;
+const viewAllLabel = getI18n(locale).common.viewAllCasesLabel;
+
+// Rendered server-side too, so a visitor whose JS hasn't run yet reads the real
+// ceiling and count instead of two blanks above a live-looking slider.
+const initialCeiling = formatPrice(
+  { value: String(ceiling), currency },
+  locale,
+);
+const initialCount = content.countTemplate
+  .replace('{shown}', String(entries.length))
+  .replace('{total}', String(entries.length));
+---
+
+<section class="border-b border-default">
+  <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
+    <SectionHeading title={content.heading} />
+    <p class="text-base max-w-xl mt-4 mb-10 leading-relaxed text-muted">
+      {content.subtext}
+    </p>
+
+    <range-filter
+      data-locale={BCP47_BY_LOCALE[locale]}
+      data-suffix={currency ? ` ${currency}` : undefined}
+      data-cap="3"
+      class="block"
+    >
+      <div
+        class="grid gap-6 lg:grid-cols-[22rem_1fr] lg:gap-10 lg:items-center rounded-sm border border-default bg-surface p-5 sm:p-6 mb-8"
+      >
+        <label class="block">
+          <span class="block text-sm text-muted mb-1">
+            {content.budgetLabel}
+          </span>
+          <output
+            data-range-output
+            class="block font-display text-3xl font-bold tracking-[-0.04em] tabular-nums text-primary"
+            >{initialCeiling}</output
+          >
+          <input
+            data-range
+            type="range"
+            min={floor}
+            max={ceiling}
+            step="1000"
+            value={ceiling}
+            class="budget-range w-full mt-3"
+          />
+        </label>
+
+        <div class="flex flex-wrap gap-2">
+          <button
+            type="button"
+            data-filter-chip
+            data-group="*"
+            aria-pressed="true"
+            class="chip">{content.allCountriesLabel}</button
+          >
+          {
+            chips.map((country) => (
+              <button
+                type="button"
+                data-filter-chip
+                data-group={country.code}
+                aria-pressed="false"
+                class="chip"
+              >
+                {country[locale].name}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+
+      <p
+        data-filter-count
+        data-template={content.countTemplate}
+        aria-live="polite"
+        class="text-sm text-muted mb-5"
+      >
+        {initialCount}
+      </p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {
+          entries.map((entry) => (
+            <div
+              data-filter-item
+              data-amount={entry.amount}
+              data-group={entry.country}
+            >
+              <CaseCard {...entry.item} />
+            </div>
+          ))
+        }
+      </div>
+
+      <button
+        type="button"
+        data-filter-more
+        data-template={content.moreLabel}
+        hidden
+        class="chip mt-6 w-full py-3 sm:hidden"></button>
+
+      <p
+        data-filter-empty
+        hidden
+        class="rounded-sm border border-default bg-surface px-6 py-10 text-center text-sm text-muted"
+      >
+        {content.emptyText}
+      </p>
+    </range-filter>
+
+    <div class="mt-10 flex justify-center">
+      <Button href={viewAllHref} variant="secondary" class="px-7 py-3">
+        {viewAllLabel}
+      </Button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .budget-range {
+    accent-color: var(--color-accent);
+  }
+</style>
+
+<script>
+  import { defineRangeFilter } from '@podbor/site-kit/browser';
+
+  defineRangeFilter();
+</script>

@@ -26,25 +26,29 @@ const statItemSchema = z
 // country is added or removed, as it silently did when Portugal was added.
 const countStatItemSchema = z.object({ label: z.string() }).strict();
 
+const inspectionZoneSchema = z
+  .object({
+    title: z.string(),
+    text: z.string(),
+    points: z.array(z.string()).min(1),
+    finding: z.string().optional(),
+  })
+  .strict();
+
 export const homeContentSchema = z
   .object({
     metaTitle: z.string(),
     metaDescription: z.string(),
     journey: z.array(journeyStepSchema).length(4),
-    heroEyebrow: z.string(),
     heroLine1: z.string(),
     heroLine2: z.string(),
     heroLine3: z.string(),
-    stampText: z.string(),
     heroSubtext: z.string(),
     statClients: statItemSchema,
     statCountries: countStatItemSchema,
     statYears: statItemSchema,
     journeyHeading: z.string(),
     journeySubtext: z.string(),
-    journeyMoreLabel: z.string(),
-    countryStripLabel: z.string(),
-    latestCasesHeading: z.string(),
     whyUsHeading: z.string(),
     whyUsSubtext: z.string(),
     trustCards: z.array(trustCardSchema).length(3),
@@ -60,6 +64,46 @@ export const homeContentSchema = z
     ctaStatCountries: countStatItemSchema,
     ctaStatYears: statItemSchema,
     ctaStatResponse: statItemSchema,
+    origin: z
+      .object({
+        heading: z.string(),
+        note: z.string(),
+        euTitle: z.string(),
+        euText: z.string(),
+        euCta: z.string(),
+        chinaTitle: z.string(),
+        chinaText: z.string(),
+        chinaCta: z.string(),
+        chinaTags: z.array(z.string()).min(1),
+      })
+      .strict(),
+    catalogue: z
+      .object({
+        heading: z.string(),
+        subtext: z.string(),
+        budgetLabel: z.string(),
+        allCountriesLabel: z.string(),
+        countTemplate: z.string(),
+        moreLabel: z.string(),
+        emptyText: z.string(),
+      })
+      .strict(),
+    inspection: z
+      .object({
+        heading: z.string(),
+        subtext: z.string(),
+        hint: z.string(),
+        ctaLabel: z.string(),
+        pointsLabel: z.string(),
+        mediaLabel: z.string(),
+        reportLabel: z.string(),
+        zones: z.array(inspectionZoneSchema).length(4),
+      })
+      .strict(),
+    findingLabel: z.string(),
+    heroPhotoNote: z.string(),
+    heroPhotoAlt: z.string(),
+    ctaPhotoAlt: z.string(),
   })
   .strict();
 

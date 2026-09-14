@@ -9,8 +9,6 @@ header:
   menuLabel: Меню
   menuCloseLabel: Закрыть меню
   languageLabel: Язык
-  themeToggleLabel: Переключить тему
-  themeToggleMobileLabel: Сменить тему
   ctaShort: Заявка
   ctaLong: Оставить заявку
 footer:
@@ -36,7 +34,7 @@ common:
   channelLabel: Наш канал
   cookie:
     notice: >-
-      Мы используем аналитические cookies (Google Analytics), чтобы понимать, как посетители используют сайт.
+      Мы используем аналитические cookies (Google Analytics и Яндекс.Метрика), чтобы понимать, как посетители используют сайт.
     more: Подробнее в
     policyLink: политике конфиденциальности
     accept: Принять

@@ -73,7 +73,18 @@ export const pagesContentSchema = z
     casesVehicleInspection: pageMetaSchema,
     casesVehicleImport: pageMetaSchema,
     casesShared: z
-      .object({ heroSubtitle: z.string(), emptyState: z.string() })
+      .object({
+        heroSubtitle: z.string(),
+        emptyState: z.string(),
+        // Keyed by CasesTabKind, kept as a record so a new tab is a content
+        // edit rather than a schema edit; a missing key renders no intro.
+        tabIntros: z.record(z.string(), z.string()),
+        closingHeading: z.string(),
+        closingLine1: z.string(),
+        closingLine2: z.string(),
+        closingLine3: z.string(),
+        closingText: z.string(),
+      })
       .strict(),
   })
   .strict();

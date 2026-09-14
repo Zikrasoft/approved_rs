@@ -12,8 +12,10 @@ const { title, size = 'xl', class: className } = Astro.props;
   <span class="accent-line"></span>
   <h2
     class:list={[
-      'font-display font-bold tracking-[-0.025em] leading-tight',
-      size === 'xl' ? 'text-[2.75rem]' : 'text-[2.25rem]',
+      'font-display font-bold tracking-[-0.04em] leading-[1.05]',
+      size === 'xl'
+        ? 'text-[clamp(1.85rem,6.5vw,2.6rem)]'
+        : 'text-[clamp(1.6rem,5.5vw,2.15rem)]',
     ]}
   >
     {title}

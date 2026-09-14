@@ -130,7 +130,7 @@ translations:
       Wenn Sie Ihr Auto schnell in Serbien oder Montenegro verkaufen möchten, wenden Sie sich an uns. Wir organisieren die Besichtigung, den Vertragsabschluss, die Zahlung und den Transport des Fahrzeugs.
 
       **Autoankauf in Serbien – schnell, bequem und sicher.**
-car: MINI Cooper SD
+car: Mini Cooper SD
 year: 2017
 price:
   value: '13000'
@@ -167,5 +167,3 @@ translatedFrom: 03bec9f1619c68ca
 Также осуществляем **выкуп автомобилей в Черногории**.
 
 Если вам необходимо быстро продать автомобиль в Сербии или Черногории, обращайтесь к нам. Мы организуем осмотр, оформление сделки, оплату и транспортировку автомобиля.
-
-**Выкуп автомобиля в Сербии — быстро, удобно и безопасно.**

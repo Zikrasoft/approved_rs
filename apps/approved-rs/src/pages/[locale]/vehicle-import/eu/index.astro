@@ -51,6 +51,11 @@ const areaServed = sourceCountries.map((c) => c[locale].name);
   steps={pc.steps}
   destinationsNote={pc.destinationsNote}
   {areaServed}
+  notes={{
+    heading: pc.notesHeading,
+    pointsLabel: pc.notesPointsLabel,
+    note: pc.notes,
+  }}
 >
   <ChipLinks
     label={pc.sourceCountriesLabel}

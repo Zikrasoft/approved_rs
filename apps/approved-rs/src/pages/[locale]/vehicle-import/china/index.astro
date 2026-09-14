@@ -37,6 +37,11 @@ const cases = (await getCollection('cases'))
   steps={pc.steps}
   destinationsNote={pc.destinationsNote}
   areaServed={CHINA_NAME[locale]}
+  notes={{
+    heading: pc.notesHeading,
+    pointsLabel: pc.notesPointsLabel,
+    note: pc.notes,
+  }}
 >
   <p class="mt-4 text-sm">
     <a

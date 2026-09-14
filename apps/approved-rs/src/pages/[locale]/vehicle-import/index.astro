@@ -1,6 +1,10 @@
 ---
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import Faq from '@/components/Faq.astro';
+import heroPhoto from '@/assets/service-import.jpg';
+import PageSection from '@/components/PageSection.astro';
+import StepsList from '@/components/StepsList.astro';
+import IncludedGrid from '@/components/IncludedGrid.astro';
 import { getFaq } from '@/i18n/content/faq';
 import { getServicesContent } from '@/i18n/content/services';
 import { withLocales, PathBuilder } from '@/utils/paths';
@@ -18,7 +22,8 @@ import type { VehicleImportSpoke } from '@/utils/vehicleImportCrossSell';
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const { locale } = Astro.params;
-const pc = getServicesContent(locale)['vehicle-import'].hub;
+const sc = getServicesContent(locale)['vehicle-import'];
+const pc = sc.hub;
 const meta = {
   title: `${pc.metaTitle} | ${SITE_NAME}`,
   description: pc.metaDescription,
@@ -83,6 +88,9 @@ const cards: {
   showCountryCrossLinks={false}
   casesHeading={pc.casesHeading}
   breadcrumbs={[{ label: pc.breadcrumbLabel }]}
+  image={heroPhoto}
+  imageAlt={pc.heroPhotoAlt}
+  closing={sc.closing}
 >
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
     {
@@ -104,6 +112,16 @@ const cards: {
   </div>
 
   <Fragment slot="extra">
+    <PageSection title={pc.processHeading} lead={pc.processLead}>
+      <StepsList steps={pc.processSteps} />
+    </PageSection>
+
+    <IncludedGrid
+      heading={pc.includedHeading}
+      lead={pc.includedLead}
+      items={pc.included}
+    />
+
     <Faq items={getFaq(locale)['vehicle-import']} />
   </Fragment>
 </ServicePageLayout>

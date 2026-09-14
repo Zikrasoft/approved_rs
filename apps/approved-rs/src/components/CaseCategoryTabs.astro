@@ -37,59 +37,21 @@ const tabs = [
 ] as const satisfies { id: CasesTabKind; href: string; label: string }[];
 ---
 
-<div class="mb-10 sm:flex">
-  <div
-    class="case-tabs grid grid-cols-2 gap-1 p-1 rounded-sm bg-surface border border-border-strong sm:inline-flex sm:flex-nowrap"
-    role="tablist"
-  >
-    {
-      tabs
-        .filter((tab) => counts[tab.id] > 0 || tab.id === active)
-        .map((tab) => (
-          <a
-            href={tab.href}
-            class:list={[
-              'pill-tab flex items-center justify-between sm:justify-start gap-2 px-4 py-2 rounded-sm text-sm font-medium no-underline',
-              tab.id === active ? 'text-on-accent' : 'text-muted',
-            ]}
-            role="tab"
-            aria-selected={tab.id === active ? 'true' : 'false'}
-            aria-current={tab.id === active ? 'page' : undefined}
-          >
-            {tab.label}
-            <span class="case-tab-count text-xs">{counts[tab.id]}</span>
-          </a>
-        ))
-    }
-  </div>
+<div class="mb-10 flex flex-wrap gap-2" role="tablist">
+  {
+    tabs
+      .filter((tab) => counts[tab.id] > 0 || tab.id === active)
+      .map((tab) => (
+        <a
+          href={tab.href}
+          class="chip inline-flex items-center gap-2"
+          role="tab"
+          aria-selected={tab.id === active ? 'true' : 'false'}
+          aria-current={tab.id === active ? 'page' : undefined}
+        >
+          {tab.label}
+          <span class="chip-count">{counts[tab.id]}</span>
+        </a>
+      ))
+  }
 </div>
-
-<style>
-  /* No sliding-pill track here on purpose — that pattern (see
-     .pill-tab-track in global.css, used by LeadForm's contact tabs) only
-     works for a single row of client-side-switched tabs: it's positioned
-     with left/width alone, so once tabs wrap onto multiple lines it stays
-     pinned to row 1 while translateX lands it under whatever happens to
-     share a column with the active tab in its real row — a tall bar
-     smeared across unrelated tabs. Each tab here is a real link that
-     reloads the page, so there's no slide animation to preserve anyway —
-     the active tab just gets a solid background directly, which is correct
-     at any wrap layout. */
-  /* global.css's shared `.pill-tab { background: transparent }` (for the
-     LeadForm sliding-track variant) otherwise beats the bg-accent utility
-     here — same specificity, later in the cascade. Astro scopes this rule
-     with a data-astro-cid attribute, which outranks it. */
-  .pill-tab[aria-selected='true'] {
-    background-color: var(--color-accent);
-  }
-  .case-tab-count {
-    padding: 0.05rem 0.4rem;
-    border-radius: 999px;
-    background: var(--color-accent-subtle);
-    color: inherit;
-    opacity: 0.75;
-  }
-  .pill-tab[aria-selected='true'] .case-tab-count {
-    background: rgba(255, 255, 255, 0.18);
-  }
-</style>

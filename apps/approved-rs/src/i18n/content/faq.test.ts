@@ -3,14 +3,24 @@ import { getFaq } from './faq';
 import { SUPPORTED_LOCALES } from '@/i18n/config';
 
 describe('getFaq', () => {
+  it('returns the authored ru counts', () => {
+    const faq = getFaq('ru');
+    expect(faq['vehicle-sourcing'].length).toBe(6);
+    expect(faq['vehicle-import'].length).toBe(4);
+    expect(faq['vehicle-buyback'].length).toBe(5);
+    expect(faq['vehicle-inspection'].length).toBe(4);
+    expect(faq.general.length).toBe(4);
+    expect(faq.cityExpert.q).toBeTruthy();
+  });
+
   it('returns all 7 groups plus cityExpert for every locale', () => {
     for (const locale of SUPPORTED_LOCALES) {
       const faq = getFaq(locale);
-      expect(faq['vehicle-sourcing'].length).toBe(6);
-      expect(faq['vehicle-import'].length).toBe(2);
-      expect(faq['vehicle-buyback'].length).toBe(4);
-      expect(faq['vehicle-inspection'].length).toBe(3);
-      expect(faq.general.length).toBe(2);
+      expect(faq['vehicle-sourcing'].length).toBeGreaterThan(0);
+      expect(faq['vehicle-import'].length).toBeGreaterThan(0);
+      expect(faq['vehicle-buyback'].length).toBeGreaterThan(0);
+      expect(faq['vehicle-inspection'].length).toBeGreaterThan(0);
+      expect(faq.general.length).toBeGreaterThan(0);
       expect(faq.cityExpert.q).toBeTruthy();
     }
   });

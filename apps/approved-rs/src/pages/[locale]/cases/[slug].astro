@@ -12,10 +12,15 @@ import { getCollection, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { getPromoBanners } from '@/i18n/content/promoBanners';
-import { excerptFromMarkdown, generateArticleSchema } from '@/utils/seo';
+import {
+  excerptFromMarkdown,
+  generateArticleSchema,
+  buildLocation,
+} from '@/utils/seo';
 import { withLocales, PathBuilder } from '@/utils/paths';
 import { getServicesContent } from '@/i18n/content/services';
 import { getI18n } from '@/i18n/getI18n';
+import { formatPrice } from '@/utils/price';
 import { getCountry } from '@/utils/geo';
 import { CHINA_NAME, CHINA_COUNTRY_CODE } from '@/utils/constants';
 import { getCaseTranslation } from '@/utils/cases';
@@ -56,6 +61,14 @@ const CASES_TAB_PATH: Record<
 // China isn't in countries.json (it's a vehicle-import-only source, not a
 // full active market with its own [country] page) — same special case the
 // vehicle-import china spoke already handles via CHINA_COUNTRY_CODE.
+const caseCountry =
+  c.data.country && c.data.country !== CHINA_COUNTRY_CODE
+    ? getCountry(c.data.country)
+    : undefined;
+const originName =
+  caseCountry && (locale === 'ru' || locale === 'sr')
+    ? caseCountry[locale].nameGenitive
+    : (caseCountry?.[locale].name ?? '');
 const countryName = c.data.country
   ? c.data.country === CHINA_COUNTRY_CODE
     ? CHINA_NAME[locale]
@@ -68,14 +81,37 @@ const serviceHref =
     ? PathBuilder.vehicleImportHub(locale)
     : PathBuilder.service(locale, c.data.service, c.data.country);
 
-const hook = excerptFromMarkdown(translation?.body ?? c.body ?? '');
+const caseFacts =
+  `${c.data.car} ${c.data.year}, ${c.data.price.value} ${c.data.price.currency ?? ''}.`
+    .replace(/\s{2,}/g, ' ')
+    .replace(' .', '.')
+    .trim();
+const hook = excerptFromMarkdown(
+  translation?.body ?? c.body ?? '',
+  156 - caseFacts.length,
+);
 const canonical = `${SITE_URL}${PathBuilder.case(locale, c.id)}`;
 const imageUrl = c.data.image ? `${SITE_URL}${c.data.image.src}` : undefined;
 
+// A case page's most valuable SERP line was just the car name ("BMW X1"),
+// which also collided whenever two clients bought the same model. Year, service
+// and price make it unique and match how people actually search.
+const metaTitle = cc.metaTitleFor({
+  car: c.data.car,
+  year: String(c.data.year),
+  service: cc.serviceBadges[c.data.service],
+  location: caseCountry
+    ? c.data.service === 'vehicle-import'
+      ? cc.metaOriginFor(originName)
+      : buildLocation(locale, caseCountry)
+    : '',
+  price: formatPrice(c.data.price, locale),
+});
+
 const meta = {
-  title: `${title} | ${SITE_NAME}`,
+  title: metaTitle.replace(/\s{2,}/g, ' ').replace(' ,', ','),
   description: hook
-    ? `${hook} ${c.data.car} ${c.data.year}, ${c.data.price.value} ${c.data.price.currency ?? ''}.`.trim()
+    ? `${hook} ${caseFacts}`
     : `${c.data.car} ${c.data.year}, ${c.data.price.value}. ${cc.realCaseFallback}`,
   canonical,
   // Real car photo makes a more compelling share preview than the generic template.

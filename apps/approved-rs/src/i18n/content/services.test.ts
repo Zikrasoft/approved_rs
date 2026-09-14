@@ -1,7 +1,13 @@
 import { describe, it, expect } from 'vitest';
+import { translationIsCurrent } from '@podbor/i18n';
+import servicesYaml from '@/content/i18n/services.yaml?raw';
 import { getServicesContent } from './services';
+import { servicesContentSchema } from './servicesContentSchema';
 import { SUPPORTED_LOCALES } from '@/i18n/config';
 import { SLUG } from '@/utils/labels';
+
+// See home.test.ts — the ru source moves ahead of CI's translate run.
+const translated = translationIsCurrent(servicesYaml, servicesContentSchema);
 
 describe('getServicesContent', () => {
   it('every locale produces all top-level sections', () => {
@@ -51,7 +57,7 @@ describe('getServicesContent', () => {
     ).toContain('__CITY__');
   });
 
-  it('en, sr, es and de differ from ru', () => {
+  it.skipIf(!translated)('en, sr, es and de differ from ru', () => {
     expect(getServicesContent('en')['vehicle-sourcing'].title).not.toBe(
       getServicesContent('ru')['vehicle-sourcing'].title,
     );

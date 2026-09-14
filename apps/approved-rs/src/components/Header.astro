@@ -3,8 +3,6 @@ import {
   Menu,
   X,
   Send,
-  Sun,
-  Moon,
   Search,
   Banknote,
   ClipboardCheck,
@@ -16,27 +14,15 @@ import LeadFormModal from './LeadFormModal.astro';
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import HeaderDesktopNav from './HeaderDesktopNav.astro';
 import HeaderMobileMenu from './HeaderMobileMenu.astro';
-import { getNavItems, SERVICES, type ServiceSlug } from '@/utils/labels';
+import { getNavItems, type ServiceSlug } from '@/utils/labels';
 import { navCurrent } from '@/utils/navState';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
-import { DEFAULT_COUNTRY } from '@/utils/constants';
-import { getActiveCountries } from '@/utils/geo';
 import { PathBuilder } from '@/utils/paths';
 import { DATA_OPEN_LEAD_MODAL } from '@/utils/contactChannel';
 
 const locale = getLocale(Astro.currentLocale);
 const t = getI18n(locale);
-// Country only sits at a fixed position (segment 2) on the 3 country-scoped
-// service pages (/ru/vehicle-sourcing/de/...) — everywhere else (contacts, cases,
-// the home page) there's no country in the URL at all, so fall back to the
-// default rather than misreading an unrelated segment as a country code.
-const pathSegments = Astro.url.pathname.split('/').filter(Boolean);
-const isServicePage = SERVICES.some((s) => s.slug === pathSegments[1]);
-const urlCountry = isServicePage ? pathSegments[2] : undefined;
-const navCountry = getActiveCountries().some((c) => c.code === urlCountry)
-  ? urlCountry!
-  : DEFAULT_COUNTRY;
 const casesHref = PathBuilder.casesVehicleSourcing(locale);
 const casesCurrent = navCurrent(
   Astro.url.pathname,
@@ -53,7 +39,7 @@ const SERVICE_ICONS: Record<ServiceSlug, typeof Search> = {
   'vehicle-inspection': ClipboardCheck,
 };
 
-const navItems = getNavItems(locale, navCountry).map((item) => ({
+const navItems = getNavItems(locale).map((item) => ({
   ...item,
   Icon: SERVICE_ICONS[item.slug as ServiceSlug],
   current: navCurrent(
@@ -84,24 +70,11 @@ const navItems = getNavItems(locale, navCountry).map((item) => ({
       />
 
       <div class="flex items-center gap-1.5 shrink-0">
-        <!-- Language switcher: desktop only, grouped with theme toggle (both are
-           preference controls, not nav destinations) — mobile gets its own
-           row inside HeaderMobileMenu -->
+        <!-- Language switcher: desktop only — mobile gets its own row inside
+           HeaderMobileMenu -->
         <div class="hidden xl:block">
           <LanguageSwitcher />
         </div>
-
-        <!-- Theme toggle: desktop only — mobile gets its own row inside HeaderMobileMenu -->
-        <button
-          class="theme-toggle-btn theme-btn hidden xl:flex items-center justify-center w-9 h-9 rounded-sm border border-border-strong bg-surface text-muted"
-          aria-label={t.header.themeToggleLabel}
-          title={t.header.themeToggleLabel}
-        >
-          <!-- Sun: shown when dark (click → light) -->
-          <span class="theme-icon-sun hidden"><Sun size={16} /></span>
-          <!-- Moon: shown when light (click → dark) -->
-          <span class="theme-icon-moon"><Moon size={16} /></span>
-        </button>
 
         <!-- CTA: always visible -->
         <Button
@@ -132,89 +105,12 @@ const navItems = getNavItems(locale, navCountry).map((item) => ({
   </header>
 
   <HeaderMobileMenu
-    countryCode={navCountry}
     casesHref={casesHref}
     casesLabel={t.nav.cases}
     casesCurrent={casesCurrent}
     languageLabel={t.header.languageLabel}
-    themeToggleLabel={t.header.themeToggleMobileLabel}
   />
 </approved-menu>
-
-<style>
-  .theme-btn {
-    transition:
-      border-color 0.2s,
-      color 0.2s,
-      background-color 0.2s;
-  }
-  .theme-btn:hover {
-    border-color: var(--color-accent) !important;
-    color: var(--color-accent) !important;
-  }
-</style>
-
-<script is:inline>
-  function updateThemeIcons() {
-    const isDark =
-      document.documentElement.getAttribute('data-theme') === 'dark';
-    document.querySelectorAll('.theme-icon-sun').forEach(function (el) {
-      el.classList.toggle('hidden', !isDark);
-    });
-    document.querySelectorAll('.theme-icon-moon').forEach(function (el) {
-      el.classList.toggle('hidden', isDark);
-    });
-  }
-
-  function initHeader() {
-    // Guard against double init: Vite/Astro HMR can re-run this inline
-    // script on the same live DOM (e.g. after editing this file) without a
-    // full page reload. Without this, every listener below (theme toggle,
-    // OS-theme listener, burger/menu/scroll) stacks a second copy on top of
-    // the first, and a single click/scroll fires both in the same tick —
-    // e.g. the theme flips twice (looks like the button "stopped working"),
-    // or the menu opens then immediately closes (looks like it toggles on
-    // its own).
-    if (document.body.dataset.headerInit) return;
-    document.body.dataset.headerInit = '1';
-
-    /* ── Theme toggle: one in the desktop bar, one in the mobile menu ── */
-    updateThemeIcons();
-    document.querySelectorAll('.theme-toggle-btn').forEach(function (toggle) {
-      toggle.addEventListener('click', function () {
-        const isDark =
-          document.documentElement.getAttribute('data-theme') === 'dark';
-        if (isDark) {
-          document.documentElement.removeAttribute('data-theme');
-          try {
-            localStorage.setItem('theme', 'light');
-          } catch (e) {}
-        } else {
-          document.documentElement.setAttribute('data-theme', 'dark');
-          try {
-            localStorage.setItem('theme', 'dark');
-          } catch (e) {}
-        }
-        updateThemeIcons();
-      });
-    });
-
-    // Follow OS theme changes live, but only while the user hasn't picked one explicitly.
-    try {
-      window
-        .matchMedia('(prefers-color-scheme: dark)')
-        .addEventListener('change', function (e) {
-          if (localStorage.getItem('theme')) return;
-          if (e.matches)
-            document.documentElement.setAttribute('data-theme', 'dark');
-          else document.documentElement.removeAttribute('data-theme');
-          updateThemeIcons();
-        });
-    } catch (e) {}
-  }
-
-  initHeader();
-</script>
 
 <script>
   import { defineMenuToggle } from '@podbor/site-kit/browser';

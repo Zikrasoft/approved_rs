@@ -1,6 +1,6 @@
 ---
-title: AUDI Q3
-car: AUDI Q3
+title: Audi Q3
+car: Audi Q3
 year: 2026
 price:
   value: '25000'

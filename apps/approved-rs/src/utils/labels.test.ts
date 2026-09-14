@@ -7,7 +7,7 @@ import {
 
 describe('getNavItems', () => {
   it('orders Автоподбор first, Привоз second, then the rest of SERVICES', () => {
-    const result = getNavItems('ru', 'de');
+    const result = getNavItems('ru');
     expect(result.map((i) => i.label)).toEqual([
       'Автоподбор',
       'Авто из ЕС и Китая',
@@ -16,8 +16,8 @@ describe('getNavItems', () => {
     ]);
   });
 
-  it('builds per-locale, per-country hrefs for Выкуп/Проверка, fixed hub hrefs for Автоподбор/Привоз', () => {
-    const result = getNavItems('ru', 'rs');
+  it('points every service at its own hub, not at a country page', () => {
+    const result = getNavItems('ru');
     expect(result).toEqual([
       {
         href: '/ru/vehicle-sourcing/',
@@ -30,12 +30,12 @@ describe('getNavItems', () => {
         slug: 'vehicle-import',
       },
       {
-        href: '/ru/vehicle-buyback/rs/',
+        href: '/ru/vehicle-buyback/',
         label: 'Выкуп',
         slug: 'vehicle-buyback',
       },
       {
-        href: '/ru/vehicle-inspection/rs/',
+        href: '/ru/vehicle-inspection/',
         label: 'Проверка',
         slug: 'vehicle-inspection',
       },
@@ -43,7 +43,7 @@ describe('getNavItems', () => {
   });
 
   it("every slug is covered by SERVICE_SLUGS (Header.astro's SERVICE_ICONS is typed against this exact union, so a mismatch is a compile error there too)", () => {
-    getNavItems('ru', 'de').forEach((item) =>
+    getNavItems('ru').forEach((item) =>
       expect(SERVICE_SLUGS as readonly string[]).toContain(item.slug),
     );
   });

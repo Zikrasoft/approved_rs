@@ -1,0 +1,35 @@
+---
+import SectionHeading from './SectionHeading.astro';
+
+interface Props {
+  title?: string;
+  lead?: string;
+  border?: 'top' | 'bottom' | 'none';
+  id?: string;
+  class?: string;
+}
+
+const { title, lead, border = 'bottom', id, class: className } = Astro.props;
+---
+
+<section
+  id={id}
+  class:list={[
+    border === 'top' && 'border-t',
+    border === 'bottom' && 'border-b',
+    border !== 'none' && 'border-default',
+    className,
+  ]}
+>
+  <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
+    {title && <SectionHeading title={title} />}
+    {
+      lead && (
+        <p class="text-base max-w-xl mt-4 mb-10 leading-relaxed text-muted">
+          {lead}
+        </p>
+      )
+    }
+    <slot />
+  </div>
+</section>

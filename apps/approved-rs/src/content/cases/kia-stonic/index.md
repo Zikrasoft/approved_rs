@@ -1,5 +1,5 @@
 ---
-title: KIA STONIC
+title: Kia Stonic
 translations:
   en:
     title: KIA STONIC
@@ -277,7 +277,7 @@ translations:
       Sie können mit einem bestimmten Modell zu uns kommen — oder uns einfach sagen, welches Fahrzeug Sie benötigen und welches Budget Sie haben.
 
       Manchmal ist das beste Auto ganz anders als das, was Sie ursprünglich kaufen wollten.
-car: KIA STONIC
+car: Kia Stonic
 year: 2022
 price:
   value: '13200'
@@ -323,7 +323,7 @@ translatedFrom: d9fd1d6c5b4dc208
 
 Сначала этот вариант не вызвал большого интереса — клиенты изначально были настроены именно на Peugeot.
 
-Но одна из задач профессионального автоподбора — не просто найти конкретную модель, а подобрать **лучший автомобиль за имеющийся бюджет и под реальные требования владельца**.
+Но одна из задач профессионального автоподбора — подобрать **лучший автомобиль за имеющийся бюджет и под реальные требования владельца**, даже если это окажется другая модель.
 
 Мы нашли подходящий Kia Stonic, вместе с клиентами приехали на осмотр, провели проверку автомобиля и тест-драйв.
 
