@@ -89,7 +89,7 @@ translations:
       cta: Zakazati
       phoneLabel: Pozvati
     footer:
-      tagline: Autoservis u Beogradu. Dijagnostika, popravka, limarija i farbanje, izbor delova.
+      tagline: Auto servis u Beogradu. Dijagnostika, popravka, karoserija i farbanje, izbor delova.
       servicesHeading: Usluge
       companyHeading: Servis
       contactHeading: Kontakti
@@ -100,7 +100,7 @@ translations:
     common:
       homeLabel: Početna
       skipToContent: Na sadržaj
-      breadcrumbLabel: Putanja
+      breadcrumbLabel: Hlebne mrvice
       primaryNavLabel: Glavna navigacija
       mobileNavLabel: Mobilni meni
       faqHeading: Česta pitanja
@@ -110,7 +110,7 @@ translations:
       allServices: Sve usluge
       backToShop: Svi delovi
       allWorks: Svi primeri radova
-      emptyWorks: Primeri radova uskoro dolaze. Za sada nas pozovite — ispričaćemo vam šta smo radili na sličnim vozilima.
+      emptyWorks: Primeri radova uskoro će se pojaviti. Za sada nas pozovite — ispričaćemo vam šta smo radili na sličnim automobilima.
     channels:
       call: Pozvati
       whatsapp: WhatsApp
@@ -118,37 +118,44 @@ translations:
       telegram: Telegram
     form:
       heading: Zakazati u servis
-      subheading: Opisujte problem sa vozilom. Javićemo se nazad radi detalja i reći ćemo vreme i cenu.
+      subheading: Opišite šta nije u redu sa automobilom. Nazvaćemo vas, razjasnićemo detalje i reći ćemo vreme i cenu.
       nameLabel: Ime
-      namePlaceholder: Kako da vam se obratimo
+      namePlaceholder: Kako vas zovemo
       contactLabel: Telefon
       contactPlaceholder: +381 11 000 0000
       contactChannelLabel: Kako da vas kontaktiramo
       channelPhone: Poziv
       countryLabel: Kod zemlje
-      serviceLabel: Šta vam je potrebno
-      servicePlaceholder: Možete izabrati više opcija
+      serviceLabel: Šta je potrebno
+      servicePlaceholder: Možete izabrati više
       carLabel: Automobil
       carPlaceholder: Marka, model, godina
       commentLabel: Šta vas muči
-      commentPlaceholder: Kucanje na neravnom, svetli lampica, treba servis...
-      submit: Pošalji zahtev
-      submitting: Šaljemo...
-      privacyNote: Slanjem forme, pristajete na
-      privacyLinkText: politiku privatnosti
+      commentPlaceholder: Udaranje na neravnom terenu, svetli check, potrebno održavanje…
+      submit: Poslati zahtev
+      submitting: Šaljemo…
+      privacyNote: Slanjem forme slažete se sa
+      privacyLinkText: politikom privatnosti
       modalTitle: Zakazati u servis
       requiredError: Popunite ovo polje
-      errorPhone: Proverite broj — izgleda da nije u potpunosti unet
-      errorTelegram: Unesite nadimak u Telegramu — najmanje tri karaktera
-      errorConsent: Bez saglasnosti ne možemo poslati zahtev
+      errorPhone: Proverite broj — čini se da nije u potpunosti unet
+      errorTelegram: Unesite nik u Telegramu — najmanje tri karaktera
+      errorConsent: Bez pristanka ne možemo poslati zahtev
+    cookie:
+      notice: 'Čuvamo anonimni identifikator u pretraživaču: on povezuje vaše klikove na dugmad za kontakt sa poslatim zahtevom, kako bismo osigurali da se obraćanje ne izgubi.'
+      more: Više informacija u
+      policyLink: politici privatnosti
+      accept: Prihvatiti
+      decline: Odbiti
+      settings: Podešavanja kolačića
   en:
     nav:
       services: Services
       shop: Parts
       works: Work Examples
       process: How We Work
-      about: About Us
-      contact: Contact
+      about: About the Service
+      contact: Contact Us
     header:
       menuOpenLabel: Menu
       menuCloseLabel: Close Menu
@@ -159,8 +166,8 @@ translations:
       tagline: Car service in Belgrade. Diagnostics, repairs, bodywork and painting, parts selection.
       servicesHeading: Services
       companyHeading: Service
-      contactHeading: Contact
-      hoursHeading: Business Hours
+      contactHeading: Contact Us
+      hoursHeading: Opening Hours
       hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
       privacyLabel: Privacy Policy
       rightsSuffix: All rights reserved.
@@ -177,7 +184,7 @@ translations:
       allServices: All Services
       backToShop: All Parts
       allWorks: All Work Examples
-      emptyWorks: Work examples will be available soon. In the meantime, give us a call — we’ll tell you what we’ve done on similar cars.
+      emptyWorks: Work examples will be available soon. For now, give us a call — we'll share what we've done on similar cars.
     channels:
       call: Call
       whatsapp: WhatsApp
@@ -185,27 +192,34 @@ translations:
       telegram: Telegram
     form:
       heading: Book a Service
-      subheading: Describe what’s wrong with your car. We’ll call you back to clarify details and provide time and cost.
+      subheading: Describe what's wrong with your car. We'll call back to confirm details and provide time and cost.
       nameLabel: Name
       namePlaceholder: How should we address you
       contactLabel: Phone
       contactPlaceholder: +381 11 000 0000
-      contactChannelLabel: How to Contact You
-      channelPhone: Phone Call
+      contactChannelLabel: How can we reach you
+      channelPhone: Call
       countryLabel: Country Code
-      serviceLabel: What is Needed
-      servicePlaceholder: You can select multiple options
+      serviceLabel: What Do You Need
+      servicePlaceholder: You can select multiple
       carLabel: Car
       carPlaceholder: Make, model, year
-      commentLabel: What’s the Issue
-      commentPlaceholder: Noise on bumps, check engine light on, needs maintenance…
+      commentLabel: What's the issue
+      commentPlaceholder: Noise on bumps, check engine light on, need maintenance...
       submit: Submit Request
-      submitting: Sending…
+      submitting: Submitting...
       privacyNote: By submitting this form, you agree to our
       privacyLinkText: privacy policy
       modalTitle: Book a Service
       requiredError: This field is required
-      errorPhone: Please check the number — it seems to be incomplete
-      errorTelegram: Please provide a Telegram username — at least three characters
-      errorConsent: Without consent, we cannot submit the request
-translatedFrom: 6368403691586bf9
+      errorPhone: Check the number — it seems to be incomplete
+      errorTelegram: Please provide your Telegram username — at least three characters
+      errorConsent: Without consent, we can't submit your request
+    cookie:
+      notice: 'We store an anonymous identifier in the browser: it links your clicks on the contact buttons with the submitted request, so your inquiry is not lost.'
+      more: Learn more in the
+      policyLink: privacy policy
+      accept: Accept
+      decline: Decline
+      settings: Cookie Settings
+translatedFrom: 5ff2d8ef24005c68

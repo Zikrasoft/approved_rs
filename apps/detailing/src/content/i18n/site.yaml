@@ -83,138 +83,152 @@ translations:
       works: Radovi
       process: Kako radimo
       prices: Cene
-      contact: Kontakt
+      contact: Kontakti
     header:
-      primaryNavLabel: Glavna navigacija
+      primaryNavLabel: Osnovna navigacija
       mobileNavLabel: Mobilni meni
       menuOpenLabel: Meni
       menuCloseLabel: Zatvori meni
       languageLabel: Jezik
-      cta: Zakaži termin
+      cta: Prijavite se
     footer:
-      tagline: Detailing studio u Beogradu. Folije, poliranje, keramika, koža.
+      tagline: Studio deailing-a u Beogradu. Film, poliranje, keramika, koža.
       navHeading: Sekcije
       contactHeading: Kontakt
       hoursHeading: Radno vreme
       hours: Pon–Sub, 09:00–19:00
-      privacyLabel: Politika privatnosti
+      privacyLabel: Pravila privatnosti
       rightsSuffix: Sva prava zadržana.
     common:
       homeLabel: Početna
-      skipToContent: Na sadržaj
+      skipToContent: Idi na sadržaj
       breadcrumbLabel: Putanja
       readMore: Saznaj više
       backToWorks: Svi radovi
-      allWorks: Pogledaj sve radove
+      allWorks: Pogledajte sve radove
       faqHeading: Česta pitanja
       beforeLabel: Pre
       afterLabel: Posle
       dragHint: Povucite da uporedite
       closeLabel: Zatvori
-      prevLabel: Prethodna fotografija
-      nextLabel: Sledeća fotografija
-      scrollHint: Skrolujte nadole
+      prevLabel: Prethodna slika
+      nextLabel: Sledeća slika
+      scrollHint: Skrolujte dole
       fromPrice: od
       perCar: po automobilu
-      emptyWorks: Radovi uskoro stižu ovde. Do tada nam pišite — rado ćemo vam sve pokazati uživo.
+      emptyWorks: Uskoro će se ovde pojaviti radovi. Za sada nam pišite — reći ćemo vam i pokazati uživo.
     channels:
-      call: Pozovite nas
-      whatsapp: Pišite na WhatsApp
-      viber: Pišite na Viber
-      telegram: Pišite na Telegram
+      call: Pozovite
+      whatsapp: Napišite na WhatsApp
+      viber: Napišite na Viber
+      telegram: Napišite na Telegram
       instagram: Instagram
     form:
-      heading: Zakažite konsultaciju
-      subheading: Pogledaćemo auto, iskreno reći šta mu stvarno treba i dati tačnu cenu.
+      heading: Prijavite se za konsultaciju
+      subheading: Pogledaćemo auto, iskreno ćemo reći šta mu zaista treba, i navesti tačnu cenu.
       nameLabel: Kako se zovete
       namePlaceholder: Ime
       contactChannelLabel: Kako da vas kontaktiramo
       channelPhone: Poziv
-      countryLabel: Pozivni broj zemlje
+      countryLabel: Šifra zemlje
       contactLabel: Broj telefona
       contactPlaceholder: 60 123 4567
       serviceLabel: Šta vas zanima
-      servicePlaceholder: Možete izabrati više usluga
+      servicePlaceholder: Možete izabrati više opcija
       commentLabel: Komentar
-      commentPlaceholder: Marka, model, godište — i šta želite da uradimo
-      submit: Pošalji zahtev
+      commentPlaceholder: Marka, model, godina — i šta želite da uradite
+      submit: Pošaljite zahtev
       submitting: Šaljemo…
       privacyNote: Prihvatam
-      privacyLinkText: politiku privatnosti
+      privacyLinkText: pravila privatnosti
       requiredError: Unesite ime
-      errorTelegram: Unesite Telegram nadimak — najmanje tri znaka
+      errorTelegram: Unesite nadimak na Telegramu — minimum tri karaktera
       errorPhone: Unesite ispravan broj telefona
-      errorConsent: Označite saglasnost da biste poslali zahtev
-      modalTitle: Ostavite zahtev
-      noscriptNote: Formular radi samo uz uključen JavaScript. Ako je isključen, javite nam se direktno.
+      errorConsent: Ozmarkujte saglasnost da biste poslali zahtev
+      modalTitle: Podneti zahtev
+      noscriptNote: Forma funkcioniše samo sa uključenim JavaScript-om. Ako je isključen — kontaktirajte nas direktno.
+    cookie:
+      notice: 'Slažemo se u pretraživaču anonimni identifikator: on povezuje vaše klikove na dugmadi za kontakt sa poslatim zahtevom, kako se ne bi izgubio.'
+      more: Saznajte više u
+      policyLink: pravilima privatnosti
+      accept: Prihvatiti
+      decline: Odbiti
+      settings: Podešavanja kolačića
   en:
     nav:
       services: Services
-      works: Work
-      process: How it works
-      prices: Pricing
+      works: Portfolio
+      process: Our Process
+      prices: Prices
       contact: Contact
     header:
-      primaryNavLabel: Primary navigation
-      mobileNavLabel: Mobile menu
+      primaryNavLabel: Main Navigation
+      mobileNavLabel: Mobile Menu
       menuOpenLabel: Menu
-      menuCloseLabel: Close menu
+      menuCloseLabel: Close Menu
       languageLabel: Language
-      cta: Book a slot
+      cta: Book Now
     footer:
-      tagline: A detailing studio in Belgrade. Film, polishing, ceramic, leather.
+      tagline: Car detailing studio in Belgrade. Film, polishing, ceramic, leather.
       navHeading: Sections
-      contactHeading: Get in touch
-      hoursHeading: Opening hours
+      contactHeading: Get in Touch
+      hoursHeading: Operating Hours
       hours: Mon–Sat, 09:00–19:00
-      privacyLabel: Privacy policy
+      privacyLabel: Privacy Policy
       rightsSuffix: All rights reserved.
     common:
       homeLabel: Home
       skipToContent: Skip to content
-      breadcrumbLabel: Breadcrumb
+      breadcrumbLabel: Breadcrumbs
       readMore: Read more
-      backToWorks: All work
-      allWorks: See all our work
-      faqHeading: Frequently asked
+      backToWorks: All Works
+      allWorks: View All Works
+      faqHeading: Frequently Asked Questions
       beforeLabel: Before
       afterLabel: After
       dragHint: Drag to compare
       closeLabel: Close
-      prevLabel: Previous photo
-      nextLabel: Next photo
+      prevLabel: Previous Photo
+      nextLabel: Next Photo
       scrollHint: Scroll down
       fromPrice: from
-      perCar: per car
-      emptyWorks: Our work will show up here shortly. In the meantime, message us — we are happy to show you in person.
+      perCar: per vehicle
+      emptyWorks: Upcoming works will be here. For now, feel free to reach out — we’ll tell you all about it and show it in person.
     channels:
-      call: Call us
-      whatsapp: Message us on WhatsApp
-      viber: Message us on Viber
-      telegram: Message us on Telegram
+      call: Call Us
+      whatsapp: Message on WhatsApp
+      viber: Message on Viber
+      telegram: Message on Telegram
       instagram: Instagram
     form:
-      heading: Book a consultation
-      subheading: We look at the car, tell you honestly what it actually needs, and quote an exact price.
-      nameLabel: Your name
+      heading: Schedule a Consultation
+      subheading: We’ll take a look at your vehicle, provide honest feedback on what it truly needs, and give you an exact price.
+      nameLabel: What’s your name
       namePlaceholder: Name
-      contactChannelLabel: How should we reach you
-      channelPhone: Phone call
-      countryLabel: Country code
-      contactLabel: Phone number
+      contactChannelLabel: How would you like to be contacted
+      channelPhone: Phone Call
+      countryLabel: Country Code
+      contactLabel: Phone Number
       contactPlaceholder: 60 123 4567
-      serviceLabel: What are you after
-      servicePlaceholder: You can pick more than one
-      commentLabel: Anything to add
-      commentPlaceholder: Make, model, year — and what you would like done
-      submit: Send request
-      submitting: Sending…
-      privacyNote: I accept the
-      privacyLinkText: privacy policy
-      requiredError: Enter your name
-      errorTelegram: Enter your Telegram handle — at least three characters
-      errorPhone: Enter a valid phone number
-      errorConsent: Tick the consent box to send your request
-      modalTitle: Send a request
-      noscriptNote: The form only works with JavaScript enabled. If it is turned off, get in touch with us directly.
-translatedFrom: 4ab7b3c704dc3e6a
+      serviceLabel: What are you interested in
+      servicePlaceholder: Multiple selections allowed
+      commentLabel: Comment
+      commentPlaceholder: Make, model, year — and what you’d like to have done
+      submit: Submit Request
+      submitting: Submitting…
+      privacyNote: I accept
+      privacyLinkText: the privacy policy
+      requiredError: Please enter your name
+      errorTelegram: Enter your Telegram username — at least three characters
+      errorPhone: Please enter a valid phone number
+      errorConsent: Check the consent box to submit your request
+      modalTitle: Submit a Request
+      noscriptNote: The form works only with JavaScript enabled. If it’s turned off, please contact us directly.
+    cookie:
+      notice: 'We store an anonymous identifier in your browser: it links your clicks on the contact buttons to the submitted request, so your inquiry isn’t missed.'
+      more: Learn more in the
+      policyLink: privacy policy
+      accept: Accept
+      decline: Decline
+      settings: Cookie Settings
+translatedFrom: 1da20b98d7e99491
