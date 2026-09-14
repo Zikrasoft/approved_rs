@@ -48,7 +48,6 @@ export function defineZoneMap(
         // A visitor who picks a zone is reading it; the walkthrough does not
         // get to pull the text out from under them again.
         let handedOver =
-          interval <= 0 ||
           globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')
             .matches === true;
 
@@ -72,16 +71,22 @@ export function defineZoneMap(
             { signal },
           );
 
-        this.addEventListener('pointerenter', stop, { signal });
-        this.addEventListener('focusin', stop, { signal });
-        this.addEventListener('pointerleave', start, { signal });
-        this.addEventListener('focusout', start, { signal });
-
         const preselected = buttons.find(
           (button) => button.getAttribute('aria-pressed') === 'true',
         );
         index = preselected ? buttons.indexOf(preselected) : 0;
         select(buttons[index].dataset.zone);
+
+        // interval 0 means click-only: without this the element still bound
+        // four listeners and an observer that could never do anything, and
+        // start() could reach setInterval(fn, 0) — a timer that fires on every
+        // tick and hangs a fake-timer test run instead of failing it.
+        if (interval <= 0) return;
+
+        this.addEventListener('pointerenter', stop, { signal });
+        this.addEventListener('focusin', stop, { signal });
+        this.addEventListener('pointerleave', start, { signal });
+        this.addEventListener('focusout', start, { signal });
 
         // Off-screen it would swap text nobody is reading, so it only runs
         // while the map is actually in view.

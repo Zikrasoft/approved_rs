@@ -1,4 +1,11 @@
 const HTML_TAG = /<[a-zA-Z/!]/;
+// A word that mixes Latin and Cyrillic letters is never a real word in either
+// script — it is the model splicing the source language into its own output
+// mid-token ("vazdušnim jastuком"). Whole untranslated words are a separate
+// problem each app checks against its own locale, because a personal name is
+// meant to keep its original script.
+const MIXED_SCRIPT_WORD =
+  /[\p{Script=Latin}][\p{Script=Cyrillic}]|[\p{Script=Cyrillic}][\p{Script=Latin}]/u;
 const TAG_NAME = /<\/?([a-zA-Z][a-zA-Z0-9]*)/g;
 
 function tagNamesOf(text: string): Set<string> {
@@ -37,6 +44,12 @@ export function assertSafeTranslation(
     if (HTML_TAG.test(translated) && !HTML_TAG.test(source)) {
       throw new Error(
         `translated response for "${path}" contains raw HTML-looking content the source didn't have: ${translated}`,
+      );
+    }
+    const mixed = MIXED_SCRIPT_WORD.exec(translated);
+    if (mixed) {
+      throw new Error(
+        `translated response for "${path}" mixes Latin and Cyrillic inside one word (near "${mixed[0]}"): ${translated}`,
       );
     }
     const introduced = introducedTags(source, translated);

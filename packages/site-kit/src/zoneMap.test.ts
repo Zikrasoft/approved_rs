@@ -163,6 +163,29 @@ describe('defineZoneMap', () => {
     expect(visible(root)).toEqual(['engine']);
   });
 
+  it('does not resume after the pointer leaves a zone the visitor picked', () => {
+    const root = mount(MARKUP, { interval: 1000 });
+    inView(true);
+
+    root.querySelector<HTMLButtonElement>('[data-zone="engine"]')!.click();
+    root.dispatchEvent(new Event('pointerleave'));
+    vi.advanceTimersByTime(5000);
+
+    expect(visible(root)).toEqual(['engine']);
+  });
+
+  it('does not resume when a picked zone scrolls back into view', () => {
+    const root = mount(MARKUP, { interval: 1000 });
+    inView(true);
+
+    root.querySelector<HTMLButtonElement>('[data-zone="engine"]')!.click();
+    inView(false);
+    inView(true);
+    vi.advanceTimersByTime(5000);
+
+    expect(visible(root)).toEqual(['engine']);
+  });
+
   it('continues from the zone the visitor was last shown', () => {
     const root = mount(MARKUP, { interval: 1000 });
     inView(true);
@@ -223,11 +246,24 @@ describe('defineZoneMap', () => {
 
   it('stays put when the walkthrough is switched off', () => {
     const root = mount(MARKUP, { interval: 0 });
-    inView(true);
 
     vi.advanceTimersByTime(10000);
 
     expect(visible(root)).toEqual(['body']);
+  });
+
+  it('watches nothing when the walkthrough is switched off', () => {
+    mount(MARKUP, { interval: 0 });
+
+    expect(observers).toEqual([]);
+  });
+
+  it('still switches zones on click with the walkthrough off', () => {
+    const root = mount(MARKUP, { interval: 0 });
+
+    root.querySelectorAll<HTMLButtonElement>('[data-zone]')[1].click();
+
+    expect(visible(root)).toEqual(['engine']);
   });
 
   it('stays put for a visitor who asked for reduced motion', () => {

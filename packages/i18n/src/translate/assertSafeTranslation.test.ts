@@ -146,3 +146,45 @@ describe('assertSafeTranslation', () => {
     );
   });
 });
+
+describe('mixed-script words', () => {
+  it('rejects a Latin word the model finished in Cyrillic', () => {
+    expect(() =>
+      assertSafeTranslation(
+        'с подушкой безопасности',
+        'sa vazdušnim jastuком',
+        'meta',
+      ),
+    ).toThrow(/mixes Latin and Cyrillic/);
+  });
+
+  it('rejects the reverse splice too', () => {
+    expect(() => assertSafeTranslation('подушка', 'подushка', 'meta')).toThrow(
+      /mixes Latin and Cyrillic/,
+    );
+  });
+
+  it('names the offending pair so the field can be found', () => {
+    expect(() =>
+      assertSafeTranslation('подушка', 'jastuком', 'services.x'),
+    ).toThrow(/near "uк"/);
+  });
+
+  it('allows a Cyrillic word standing on its own in a Latin sentence', () => {
+    expect(() =>
+      assertSafeTranslation('Наше слово', 'Naše ваше', 'meta'),
+    ).not.toThrow();
+  });
+
+  it('allows a fully Latin translation', () => {
+    expect(() =>
+      assertSafeTranslation('подушка безопасности', 'vazdušni jastuk', 'meta'),
+    ).not.toThrow();
+  });
+
+  it('allows the source language passing through unchanged', () => {
+    expect(() =>
+      assertSafeTranslation('BMW X5', 'BMW X5', 'meta'),
+    ).not.toThrow();
+  });
+});
