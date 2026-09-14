@@ -78,7 +78,7 @@ const navItems = getNavItems(locale).map((item) => ({
 
         <!-- CTA: always visible -->
         <Button
-          type="button"
+          href={PathBuilder.contacts(locale)}
           {...{ [DATA_OPEN_LEAD_MODAL]: true }}
           class="px-3 xl:px-4 py-2"
         >

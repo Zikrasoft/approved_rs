@@ -4,6 +4,7 @@ import type { Search as IconType } from '@lucide/astro';
 import { getNavItems, type ServiceSlug } from '@/utils/labels';
 import { navCurrent } from '@podbor/site-kit';
 import { getLocale } from '@/i18n/config';
+import { getI18n } from '@/i18n/getI18n';
 import { PathBuilder } from '@/utils/paths';
 
 interface Props {
@@ -22,9 +23,11 @@ const SERVICE_ICONS: Record<ServiceSlug, typeof IconType> = {
   'vehicle-inspection': ClipboardCheck,
 };
 
+const hints = getI18n(locale).navHint;
 const items = getNavItems(locale).map((item) => ({
   ...item,
   Icon: SERVICE_ICONS[item.slug],
+  hint: hints[item.slug],
   current: navCurrent(
     Astro.url.pathname,
     PathBuilder.sectionRoot(locale, item.slug),
@@ -47,15 +50,17 @@ const items = getNavItems(locale).map((item) => ({
       ))}
     </div>
   ) : (
-    <div class="grid grid-cols-2 gap-2">
+    <div class="service-rows">
       {items.map((item) => (
         <a
           href={item.href}
-          class="mobile-service-card flex flex-col items-center justify-center gap-2 py-5 rounded-sm border border-default text-secondary"
+          class="mobile-service-row flex flex-col gap-0.5 py-4 no-underline"
           aria-current={item.current}
         >
-          {item.Icon && <item.Icon size={20} />}
-          <span class="text-sm">{item.label}</span>
+          <span class="font-display text-[1.45rem] font-bold leading-tight tracking-[-0.03em] text-primary">
+            {item.label}
+          </span>
+          <span class="text-[0.9rem] leading-snug text-muted">{item.hint}</span>
         </a>
       ))}
     </div>
@@ -71,6 +76,17 @@ const items = getNavItems(locale).map((item) => ({
   }
   .service-strip::-webkit-scrollbar {
     display: none;
+  }
+
+  .service-rows > a + a {
+    border-top: 1px solid var(--color-border);
+  }
+  .mobile-service-row {
+    transition: color 0.2s;
+  }
+  .mobile-service-row:active span:first-child,
+  .mobile-service-row[aria-current] span:first-child {
+    color: var(--color-accent);
   }
 
   .mobile-service-card {

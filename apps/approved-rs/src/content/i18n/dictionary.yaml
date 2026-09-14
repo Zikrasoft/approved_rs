@@ -5,6 +5,11 @@ nav:
   vehicle-inspection: Проверка
   cases: Кейсы
   contacts: Контакты
+navHint:
+  vehicle-sourcing: Найдём и проверим машину
+  vehicle-import: Привезём и растаможим
+  vehicle-buyback: Выкупим вашу машину
+  vehicle-inspection: Осмотрим ту, что нашли вы
 header:
   menuLabel: Меню
   menuCloseLabel: Закрыть меню

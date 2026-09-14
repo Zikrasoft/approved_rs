@@ -1,7 +1,10 @@
 ---
-import { LayoutGrid, ChevronRight, Globe } from '@lucide/astro';
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import ServiceQuickLinks from './ServiceQuickLinks.astro';
+import ContactIcon from './ContactIcon.astro';
+import { PHONE_NUMBER } from '@/utils/constants';
+import { getLocale } from '@/i18n/config';
+import { getServicesContent } from '@/i18n/content/services';
 
 interface Props {
   casesHref: string;
@@ -11,62 +14,47 @@ interface Props {
 }
 
 const { casesHref, casesLabel, casesCurrent, languageLabel } = Astro.props;
+const callLabel = getServicesContent(getLocale(Astro.currentLocale)).caseChrome
+  .callButtonLabel;
 ---
 
 <div
   id="mobile-menu"
   data-menu
-  class="xl:hidden invisible fixed inset-0 z-40 flex flex-col justify-between overflow-y-auto bg-header-mobile px-2 pb-10 pt-20 opacity-0 backdrop-blur-xl transition-[opacity,visibility] duration-200 group-data-[open]:visible group-data-[open]:opacity-100"
+  class="xl:hidden invisible fixed inset-0 z-40 flex flex-col overflow-y-auto bg-header-mobile pb-8 pt-20 opacity-0 backdrop-blur-xl transition-[opacity,visibility] duration-200 group-data-[open]:visible group-data-[open]:opacity-100"
   inert
 >
-  <div>
-    <nav class="max-w-6xl mx-auto px-6 py-5 flex flex-col gap-4 mobile-nav">
-      <ServiceQuickLinks />
+  <nav class="mobile-nav flex w-full max-w-6xl flex-1 flex-col px-6">
+    <ServiceQuickLinks />
 
-      <!-- Same row shape/border as a service card above, so it reads as one
-           more tappable destination — not a stray line of text. -->
-      <a
-        href={casesHref}
-        class="mobile-list-row flex items-center gap-3 py-3.5 px-4 rounded-sm border border-default text-secondary"
-        aria-current={casesCurrent}
+    <a
+      href={casesHref}
+      class="mobile-service-row border-t border-default py-4 no-underline"
+      aria-current={casesCurrent}
+    >
+      <span
+        class="font-display text-[1.45rem] font-bold leading-tight tracking-[-0.03em] text-primary"
+        >{casesLabel}</span
       >
-        <LayoutGrid size={18} class="shrink-0 text-muted" />
-        <span class="flex-1 text-sm">{casesLabel}</span>
-        <ChevronRight size={16} class="shrink-0 text-muted" />
-      </a>
+    </a>
 
-      <!-- Language is a setting, not a destination — kept in its own tinted
-           block instead of a stray row. The "Язык" label makes the flag row's
-           job explicit; flags alone read as decoration, not as a control. -->
-      <div class="prefs-group flex flex-col gap-3 p-4 rounded-sm bg-surface-2">
-        <div class="flex items-center gap-2 text-xs font-medium text-muted">
-          <Globe size={14} />
-          {languageLabel}
-        </div>
-        <LanguageSwitcher variant="inline" />
-      </div>
-    </nav>
-  </div>
+    <a
+      href={`tel:+${PHONE_NUMBER}`}
+      data-contact-channel="phone"
+      class="mt-auto flex items-center justify-center gap-2.5 rounded-sm border border-accent-border bg-accent-subtle py-3.5 text-accent no-underline"
+    >
+      <ContactIcon channel="phone" size={15} />
+      <span class="text-sm font-medium">{callLabel}</span>
+    </a>
+
+    <p class="mt-6 mb-2 text-xs text-muted">{languageLabel}</p>
+    <LanguageSwitcher variant="inline" />
+  </nav>
 </div>
 
 <style>
-  .mobile-list-row {
-    transition:
-      background-color 0.2s,
-      border-color 0.2s,
-      transform 0.2s;
-  }
-  .mobile-list-row:active {
-    background-color: var(--color-accent-subtle);
-    border-color: var(--color-accent-border);
-    transform: translateX(0.25rem);
-  }
-  .mobile-list-row[aria-current] {
-    background-color: var(--color-accent-subtle);
-    border-color: var(--color-accent-border);
-    color: var(--color-text);
-  }
-  .mobile-list-row[aria-current] svg {
+  .mobile-service-row:active span,
+  .mobile-service-row[aria-current] span {
     color: var(--color-accent);
   }
 </style>

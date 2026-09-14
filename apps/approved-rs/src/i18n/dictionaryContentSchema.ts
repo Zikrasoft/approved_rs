@@ -10,6 +10,14 @@ import { z } from 'zod';
 // object"), which zod's `.string()` on each leaf catches directly.
 export const dictionaryContentSchema = z
   .object({
+    navHint: z
+      .object({
+        'vehicle-sourcing': z.string(),
+        'vehicle-import': z.string(),
+        'vehicle-buyback': z.string(),
+        'vehicle-inspection': z.string(),
+      })
+      .strict(),
     nav: z
       .object({
         'vehicle-sourcing': z.string(),
