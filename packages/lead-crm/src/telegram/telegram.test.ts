@@ -60,6 +60,7 @@ const {
   sendCommissionClaimToAdmin,
   sendCommissionResultToOwner,
   sendStatusChangeToAdmin,
+  sendFieldChangeToAdmin,
   sendPostponeReminderToOwner,
   editLeadDetailMessage,
 } = notifier;
@@ -404,6 +405,94 @@ describe('sendForceReplyPrompt', () => {
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.chat_id).toBe(111);
     expect(body.reply_markup).toEqual({ force_reply: true, selective: true });
+  });
+});
+
+describe('sendFieldChangeToAdmin', () => {
+  beforeEach(() => mockFetchOk({ message_id: 1 }));
+  afterEach(() => mockFetch.mockReset());
+
+  it('tells the admin what the value was and what it became', async () => {
+    await sendFieldChangeToAdmin(
+      makeLead({ id: 9, name: 'Иван Петров' }),
+      'name',
+      'Иван',
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.chat_id).toBe(222);
+    expect(body.text).toContain('#9');
+    expect(body.text).toContain('имя');
+    expect(body.text).toContain('Было: Иван');
+    expect(body.text).toContain('Стало: Иван Петров');
+  });
+
+  it('goes to the admin, never to the owner', async () => {
+    await sendFieldChangeToAdmin(
+      makeLead({ comment: 'после' }),
+      'comment',
+      'до',
+    );
+    const recipients = mockFetch.mock.calls.map(
+      (c) => JSON.parse(c[1].body).chat_id,
+    );
+    expect(recipients).toEqual([222]);
+  });
+
+  it('stays quiet when the value did not actually change', async () => {
+    await sendFieldChangeToAdmin(
+      makeLead({ comment: 'BMW X5' }),
+      'comment',
+      'BMW X5',
+    );
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('treats a cleared field and an absent one as the same non-change', async () => {
+    await sendFieldChangeToAdmin(makeLead({ comment: null }), 'comment', '');
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('reports a field that had no value before', async () => {
+    await sendFieldChangeToAdmin(
+      makeLead({ comment: 'перезвонить в среду' }),
+      'comment',
+      undefined,
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('Было: —');
+    expect(body.text).toContain('Стало: перезвонить в среду');
+  });
+
+  it('renders an emptied field as a dash rather than nothing', async () => {
+    await sendFieldChangeToAdmin(
+      makeLead({ comment: null }),
+      'comment',
+      'BMW X5',
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('Стало: —');
+  });
+
+  it('truncates a comment too long to read at a glance', async () => {
+    const long = 'а'.repeat(200);
+    await sendFieldChangeToAdmin(
+      makeLead({ comment: long }),
+      'comment',
+      'коротко',
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('…');
+    expect(body.text).not.toContain(long);
+  });
+
+  it('escapes html so a contact with angle brackets cannot break the message', async () => {
+    await sendFieldChangeToAdmin(
+      makeLead({ contact: '<b>ivan</b>' }),
+      'contact',
+      '@ivan',
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('&lt;b&gt;ivan&lt;/b&gt;');
   });
 });
 

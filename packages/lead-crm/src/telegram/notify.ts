@@ -4,7 +4,9 @@ import {
   commissionClaimText,
   commissionResultText,
   dealNotificationText,
+  fieldChangeText,
   statusChangeText,
+  type EditField,
   type Formatter,
   type Role,
 } from './format.ts';
@@ -120,6 +122,17 @@ export function createNotifier({
       confirmed: boolean,
     ): Promise<void> {
       await sendToAll(ownerIds, commissionResultText(lead.id, confirmed));
+    },
+
+    // The owner edits a lead's name, contact or comment straight from the
+    // card; without this the admin only ever heard about status moves.
+    async sendFieldChangeToAdmin(
+      lead: StoredLead,
+      field: EditField,
+      before: string | null | undefined,
+    ): Promise<void> {
+      if ((before ?? '') === (lead[field] ?? '')) return;
+      await sendToAll(adminIds, fieldChangeText(lead, field, before));
     },
 
     async sendStatusChangeToAdmin(lead: StoredLead): Promise<void> {

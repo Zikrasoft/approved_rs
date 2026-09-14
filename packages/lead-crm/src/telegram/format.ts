@@ -333,6 +333,43 @@ export function commissionClaimText(
   return `🔔 Отмечена оплата комиссии по заявке #${lead.id}: ${formatMoney(lead.pendingCommissionClaim.amount)}.\n\nПодтвердить?`;
 }
 
+// The fields the owner can edit from the lead card. Operator-facing Russian
+// lives in the package, same as every other bot string.
+export const EDIT_FIELD_LABELS = {
+  name: 'имя',
+  contact: 'контакт',
+  comment: 'комментарий',
+} as const;
+
+export type EditField = keyof typeof EDIT_FIELD_LABELS;
+
+// A comment can be paragraphs long; the admin needs to see what moved, not
+// the whole field, and Telegram caps a message at 4096 characters.
+const FIELD_PREVIEW_LIMIT = 120;
+
+function fieldPreview(value: string | null | undefined): string {
+  const text = (value ?? '').trim();
+  if (!text) return '—';
+  return escapeHtml(
+    text.length <= FIELD_PREVIEW_LIMIT
+      ? text
+      : `${text.slice(0, FIELD_PREVIEW_LIMIT)}…`,
+  );
+}
+
+export function fieldChangeText(
+  lead: StoredLead,
+  field: EditField,
+  before: string | null | undefined,
+): string {
+  return [
+    `✏️ Заявка #${lead.id} ${escapeHtml(lead.name)}: ${EDIT_FIELD_LABELS[field]}`,
+    ``,
+    `Было: ${fieldPreview(before)}`,
+    `Стало: ${fieldPreview(lead[field])}`,
+  ].join('\n');
+}
+
 export function statusChangeText(lead: StoredLead): string {
   const meta = statusMeta(lead.status);
   return `🔔 Заявка #${lead.id} ${escapeHtml(lead.name)}: статус — ${meta.emoji} ${meta.label}`;

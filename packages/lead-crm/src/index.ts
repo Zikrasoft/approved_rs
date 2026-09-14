@@ -36,6 +36,8 @@ export {
   buildStats,
   buildStatusKeyboard,
   createFormatter,
+  EDIT_FIELD_LABELS,
+  fieldChangeText,
   formatDateRu,
   formatDealsList,
   formatMoney,
@@ -45,6 +47,7 @@ export {
 } from './telegram/format.ts';
 export type {
   Btn,
+  EditField,
   Formatter,
   FormatterOptions,
   Keyboard,

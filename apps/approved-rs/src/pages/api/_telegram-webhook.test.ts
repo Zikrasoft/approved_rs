@@ -17,6 +17,12 @@ vi.mock('@/lib/telegram', () => ({
   sendCommissionClaimToAdmin: vi.fn(),
   sendCommissionResultToOwner: vi.fn(),
   sendStatusChangeToAdmin: vi.fn(),
+  sendFieldChangeToAdmin: vi.fn(),
+  EDIT_FIELD_LABELS: {
+    name: 'имя',
+    contact: 'контакт',
+    comment: 'комментарий',
+  },
   sendMessage: vi.fn(),
   buildOwedList: vi.fn().mockReturnValue({
     text: 'OWED_LIST',
@@ -86,6 +92,7 @@ import {
   sendCommissionClaimToAdmin,
   sendCommissionResultToOwner,
   sendStatusChangeToAdmin,
+  sendFieldChangeToAdmin,
   sendMessage,
   buildLeadDetail,
   editLeadDetailMessage,
@@ -1899,6 +1906,39 @@ describe('POST /api/telegram-webhook', () => {
         `✅ Обновлено\n\nDETAIL_${updated.id}_owner`,
         { reply_markup: { inline_keyboard: [] } },
       );
+    });
+
+    it('tells the admin what the field was and what it became', async () => {
+      const lead = makeLead({
+        id: 5,
+        comment: 'Старый',
+        pendingPrompt: {
+          chatId: DM_CHAT_ID,
+          messageId: 888,
+          kind: 'edit_comment',
+        },
+      });
+      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
+      mockResolveFromBase(lead);
+
+      await POST(
+        makeCtx({
+          message: {
+            message_id: 2,
+            text: 'Перезвонить в среду',
+            chat: { id: DM_CHAT_ID, type: 'private' },
+            from: { id: OWNER_ID },
+            reply_to_message: { message_id: 888 },
+          },
+        }),
+      );
+
+      const call = vi.mocked(sendFieldChangeToAdmin).mock.calls.at(-1);
+      expect(call).toBeDefined();
+      const [updated, field, before] = call!;
+      expect(field).toBe('comment');
+      expect(before).toBe('Старый');
+      expect(updated.comment).toBe('Перезвонить в среду');
     });
 
     it('rejects an empty edit value for name/contact', async () => {

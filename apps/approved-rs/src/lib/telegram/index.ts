@@ -23,6 +23,7 @@ export const {
   sendCommissionClaimToAdmin,
   sendCommissionResultToOwner,
   sendStatusChangeToAdmin,
+  sendFieldChangeToAdmin,
   editLeadDetailMessage,
 } = notifier;
 
@@ -46,6 +47,13 @@ export {
   buildDeleteConfirm,
   buildRemindPicker,
   LEAD_STATUS_ACTIONS,
+  EDIT_FIELD_LABELS,
 } from '@podbor/lead-crm';
 
-export type { Role, LeadStatusKey, Btn, Keyboard } from '@podbor/lead-crm';
+export type {
+  Role,
+  LeadStatusKey,
+  Btn,
+  Keyboard,
+  EditField,
+} from '@podbor/lead-crm';
