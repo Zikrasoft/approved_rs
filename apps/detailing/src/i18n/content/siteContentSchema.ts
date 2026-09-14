@@ -93,6 +93,17 @@ const formSchema = z
   })
   .strict();
 
+const cookieSchema = z
+  .object({
+    notice: z.string(),
+    more: z.string(),
+    policyLink: z.string(),
+    accept: z.string(),
+    decline: z.string(),
+    settings: z.string(),
+  })
+  .strict();
+
 export const siteContentSchema = z
   .object({
     nav: navSchema,
@@ -101,6 +112,7 @@ export const siteContentSchema = z
     common: commonSchema,
     channels: channelsSchema,
     form: formSchema,
+    cookie: cookieSchema,
   })
   .strict();
 

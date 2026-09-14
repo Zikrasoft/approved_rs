@@ -39,7 +39,9 @@ export function createLocaleSet<L extends string, P extends L>({
     isLocale,
 
     getLocale(currentLocale: string | undefined): L {
-      return (currentLocale ?? primaryLocale) as L;
+      return currentLocale && isLocale(currentLocale)
+        ? currentLocale
+        : primaryLocale;
     },
 
     detectLocale(

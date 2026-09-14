@@ -58,21 +58,20 @@ same Vercel Blob store and are separated by the lead's `brand` field, which the
 app's `createNotifyLead({ brand })` stamps on — a visitor can never set it.
 Connect the same Blob store to all three Vercel projects.
 
-**Cross-site URLs would leak the relationship.** A brand site must never call
-another brand's origin from the browser: the request shows up in the network
-tab and ties the two together. Each site writes leads through its own
-server-side route.
+**Each site writes its own leads.** A brand site posts to its own
+server-side route rather than another brand's origin — three separate Vercel
+projects on three separate domains, so a cross-origin POST buys nothing but a
+CORS config to maintain.
 
 **Why packages exist:** this repo is becoming a portfolio of deliberately
 independent brand sites (see `docs/open-questions.md` and the split plan). The
 shared code is the machinery — lead capture, i18n — never the visual identity.
 Design systems and components stay per-app because each brand gets its own
-look, not because the sites have to be unrecognisable as relatives. **Visual
-overlap between two sites is fine** — a shared typeface or a similar palette is
-not a finding. The separation that does matter is structural: no cross-site
-requests from the browser, no shared brand root, nothing carrying Approved's
-trust semantics. The three sites already share a phone number; a font is not
-what would give them away.
+look, not because the sites have to hide that they are relatives. **The sites
+being traceable to each other is not a finding** — a shared typeface, a similar
+palette, one repository, one Keystatic admin, one phone number. The only rule
+is branding: no shared brand root between the three, and nothing carrying
+Approved's trust/verification semantics.
 
 **Package rules:**
 
@@ -247,7 +246,7 @@ a commit but cannot run the review itself.
 
 **Content model — two different systems by design:**
 
-- **Case studies** (`src/content/{cases,autoservice-cases,detailing-cases}`, schemas in `src/content.config.ts`) are Keystatic-managed Markdown collections. Admin writes `title`/`car`/`price`/etc. and the RU `title`/`body` only; a `translations: { en, sr, es, de }` field on the same entry (not a separate collection) holds the other four locales, each optional — missing/failed falls back to RU rather than breaking the page.
+- **Case studies** (`src/content/cases` on approved.rs, `src/content/works` on the two brand sites, schemas in each app's `src/content.config.ts`) are Keystatic-managed Markdown collections. Admin writes `title`/`car`/`price`/etc. and the RU `title`/`body` only; a `translations: { en, sr, es, de }` field on the same entry (not a separate collection) holds the other four locales, each optional — missing/failed falls back to RU rather than breaking the page.
 - **UI/site copy** (`src/content/i18n/*.yaml`: `dictionary`, `faq`, `home`, `pages`, `meta`, `leadForm`, `promoBanners`, `services`) is flat YAML, read via `src/i18n/content/*.ts` + a matching `*ContentSchema.ts` (zod), all going through the shared `loadI18nSection()` helper (`src/i18n/loadI18nSection.ts`, a thin binding over `@podbor/i18n`'s `createSectionLoader`) — it parses the YAML once at module load, validates RU against the schema (throws loudly on a bad file instead of failing at render time), and falls back to RU per-locale if a translation fails validation. `getI18n()` (`src/i18n/getI18n.ts`) additionally merges in `src/i18n/dictionaries/templates.ts` — the handful of interpolation functions (e.g. gallery alt-text templates) that can't be represented as static YAML strings.
 
 **Both content systems share one auto-translate mechanism:** admin/dev only ever hand-writes RU. The `translate` job in `.github/workflows/ci.yml` runs `scripts/translate-cases.ts` and `scripts/translate-i18n.ts` on every push (any branch, so translations land in a feature branch before merge, not after) and commits the result back. It is unconditional rather than path-filtered — the scripts are hash-gated and exit in milliseconds when nothing changed, and `deploy` reads the SHA the job left behind, so untranslated content cannot reach production. Each script hashes the RU source and stores that hash (`translatedFrom`) alongside the translations, so a rerun only retranslates locales whose RU actually changed — everything else is left untouched. Both call through `scripts/lib/openaiChat.ts` (official `openai` SDK) and validate the AI's response with `scripts/lib/assertSafeTranslation.ts`, which rejects a translation that introduces HTML the RU source didn't already have (a stored-XSS guard on an otherwise-unreviewed auto-commit path — case bodies are rendered as markdown via `src/lib/safeMarked.ts`, which itself sanitizes with `sanitize-html`). Needs `OPENAI_API_KEY` as a GitHub Actions secret (separate from Vercel's env vars); without it the job fails at the translate step but doesn't touch already-translated content.
@@ -275,7 +274,7 @@ This site supports 5 locales: `ru` (default), `en`, `sr`, `es`, `de`. Translatio
 - Serbian needs correct grammatical case agreement (locative/genitive/accusative depending on preposition) — not just vocabulary swapped in.
 - Store new strings in the existing i18n structure — `src/content/i18n/*.yaml` (dictionary, faq, home, pages, etc.), validated by the matching schema in `src/i18n/dictionaryContentSchema.ts`/`src/i18n/content/*ContentSchema.ts` and read via `src/i18n/getI18n.ts`/`src/i18n/content/*.ts` — reusing existing keys where possible (DRY) rather than a new inline literal per component. Admin hand-edits only the `ru` fields directly in the YAML; `scripts/translate-i18n.ts` (the `translate` job in `.github/workflows/ci.yml`) auto-fills en/sr/es/de on every push that touches one of those files.
 - Before considering any UI change done, verify no hardcoded RU-only text was left behind (e.g. `grep -rP '[а-яА-ЯёЁ]' src/components src/pages src/layouts` outside of comments/intentional RU-only surfaces).
-- Case-study content (`src/content/{cases,autoservice-cases,detailing-cases}`) is the one exception to "admin writes it by hand" that still goes through Keystatic: the admin only ever writes the `ru` fields there, and the `translate` job in `.github/workflows/ci.yml` auto-translates en/sr/es/de on every push that touches a case file.
+- Case-study content (`src/content/cases`, `src/content/works`) is the one exception to "admin writes it by hand" that still goes through Keystatic: the admin only ever writes the `ru` fields there, and the `translate` job in `.github/workflows/ci.yml` auto-translates en/sr/es/de on every push that touches a case file.
 
 ## Validation
 

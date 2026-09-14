@@ -88,7 +88,7 @@ const caseFacts =
     .trim();
 const hook = excerptFromMarkdown(
   translation?.body ?? c.body ?? '',
-  156 - caseFacts.length,
+  Math.max(156 - caseFacts.length, 60),
 );
 const canonical = `${SITE_URL}${PathBuilder.case(locale, c.id)}`;
 const imageUrl = c.data.image ? `${SITE_URL}${c.data.image.src}` : undefined;

@@ -45,6 +45,7 @@ const productSchema = {
   '@context': 'https://schema.org',
   '@type': 'Product',
   name: title,
+  image: new URL(product.data.image.src, SITE_URL).href,
   brand: { '@type': 'Brand', name: product.data.brand },
   description: shop.metaDescription,
   offers: {

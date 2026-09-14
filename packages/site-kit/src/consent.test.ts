@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  analyticsAllowed,
+  analyticsDeclined,
   newConsent,
   parseConsent,
   STORAGE_KEY,
@@ -66,18 +66,41 @@ describe('newConsent', () => {
   });
 });
 
-describe('analyticsAllowed', () => {
-  it('is false without an answer and follows the answer otherwise', () => {
-    expect(analyticsAllowed(null)).toBe(false);
-    expect(analyticsAllowed(newConsent(false, VERSION, new Date()))).toBe(
-      false,
-    );
-    expect(analyticsAllowed(newConsent(true, VERSION, new Date()))).toBe(true);
-  });
-});
-
 describe('STORAGE_KEY', () => {
   it('keeps the key the existing banner already wrote under', () => {
     expect(STORAGE_KEY).toBe('cookie_consent');
+  });
+});
+
+describe('analyticsDeclined', () => {
+  it('is false when nothing was ever stored', () => {
+    expect(analyticsDeclined(null)).toBe(false);
+    expect(analyticsDeclined('')).toBe(false);
+  });
+
+  it('is true for a stored refusal, whatever policy it was given against', () => {
+    expect(
+      analyticsDeclined(
+        JSON.stringify(newConsent(false, '2020-01-01', new Date())),
+      ),
+    ).toBe(true);
+  });
+
+  it('is false once the visitor accepts', () => {
+    expect(
+      analyticsDeclined(JSON.stringify(newConsent(true, VERSION, new Date()))),
+    ).toBe(false);
+  });
+
+  it('is false for junk rather than blocking on an unreadable record', () => {
+    expect(analyticsDeclined('{not json')).toBe(false);
+    expect(analyticsDeclined('null')).toBe(false);
+    expect(analyticsDeclined('granted')).toBe(false);
+  });
+});
+
+describe('analyticsDeclined and the pre-versioning values', () => {
+  it('honours the bare legacy refusal the old banner wrote', () => {
+    expect(analyticsDeclined('denied')).toBe(true);
   });
 });

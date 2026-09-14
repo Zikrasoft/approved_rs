@@ -11,34 +11,24 @@ export {
   MODAL_OPEN_EVENT,
   type ModalOpenDetail,
 } from './modalDialog.ts';
-import {
-  STORAGE_KEY,
-  newConsent,
-  parseConsent,
-  type Consent,
+export {
+  defineCookieConsent,
+  CONSENT_EVENT,
+  type ConsentDetail,
+} from './cookieConsent.ts';
+export {
+  STORAGE_KEY as CONSENT_STORAGE_KEY,
+  analyticsDeclined,
 } from './consent.ts';
+export { VISITOR_ID_STORAGE_KEY } from './visitorId.ts';
 
 export function getOrCreateVisitorId(): string {
-  return readOrCreateVisitorId({
-    storage: localStorage,
-    randomId: () => crypto.randomUUID(),
-  });
-}
-
-export function readConsent(version: string): Consent | null {
   try {
-    return parseConsent(localStorage.getItem(STORAGE_KEY), version);
+    return readOrCreateVisitorId({
+      storage: localStorage,
+      randomId: () => crypto.randomUUID(),
+    });
   } catch {
-    return null;
+    return '';
   }
-}
-
-export function saveConsent(analytics: boolean, version: string): Consent {
-  const consent = newConsent(analytics, version, new Date());
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(consent));
-  } catch {
-    // Private mode or a full quota — the visitor simply gets asked again.
-  }
-  return consent;
 }

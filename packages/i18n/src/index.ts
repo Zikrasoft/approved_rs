@@ -6,3 +6,10 @@ export { createSectionLoader } from './loadSection.ts';
 export { withPlaceholder } from './withPlaceholder.ts';
 
 export { translationIsCurrent } from './translationIsCurrent.ts';
+
+export {
+  localizedEntry,
+  publishedByNewest,
+  publishedEntries,
+} from './localizedEntry.ts';
+export type { LocalizableEntry, LocalizedEntry } from './localizedEntry.ts';

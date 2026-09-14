@@ -81,6 +81,11 @@ describe('getLocale', () => {
     expect(set.getLocale(undefined)).toBe('ru');
     expect(srFirst.getLocale(undefined)).toBe('sr');
   });
+
+  it('falls back to the primary locale for a value outside the set', () => {
+    expect(set.getLocale('en-GB')).toBe('ru');
+    expect(srFirst.getLocale('')).toBe('sr');
+  });
 });
 
 describe('detectLocale', () => {

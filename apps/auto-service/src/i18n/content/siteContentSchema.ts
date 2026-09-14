@@ -1,5 +1,16 @@
 import { z } from 'zod';
 
+const cookieSchema = z
+  .object({
+    notice: z.string(),
+    more: z.string(),
+    policyLink: z.string(),
+    accept: z.string(),
+    decline: z.string(),
+    settings: z.string(),
+  })
+  .strict();
+
 export const siteContentSchema = z
   .object({
     nav: z
@@ -86,6 +97,7 @@ export const siteContentSchema = z
         errorConsent: z.string(),
       })
       .strict(),
+    cookie: cookieSchema,
   })
   .strict();
 

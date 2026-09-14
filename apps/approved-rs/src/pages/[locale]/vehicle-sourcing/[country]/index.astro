@@ -43,6 +43,7 @@ const cityCards = getCitiesForCountry(countryCode!).flatMap((city) => {
             city.slug,
           ),
           text: note.lead,
+          point: note.points[0],
         },
       ]
     : [];

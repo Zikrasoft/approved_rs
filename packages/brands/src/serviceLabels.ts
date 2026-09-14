@@ -21,8 +21,13 @@ export const SERVICE_LABELS_RU: Record<string, string> = {
   'colour-change-wrap': 'Смена цвета плёнкой',
   'polishing-ceramic': 'Полировка и керамика',
   'steering-wheel-restoration': 'Реставрация руля',
+
+  'auto-service-belgrade': 'Автосервис',
+  'detailing-belgrade': 'Детейлинг',
 };
 
 export function serviceLabel(slug: string): string {
-  return SERVICE_LABELS_RU[slug] ?? slug;
+  return Object.hasOwn(SERVICE_LABELS_RU, slug)
+    ? SERVICE_LABELS_RU[slug]
+    : slug;
 }

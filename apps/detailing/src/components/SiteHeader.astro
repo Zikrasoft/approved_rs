@@ -5,7 +5,7 @@ import { SUPPORTED_LOCALES, LOCALE_NAME } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getSiteContent } from '@/i18n/content/site';
 import { PathBuilder, swapLocale } from '@/utils/paths';
-import { navCurrent } from '@/utils/navState';
+import { navCurrent } from '@podbor/site-kit';
 import { LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
 
 const locale = localeFrom(Astro.url.pathname);
@@ -116,7 +116,9 @@ const links = [
 
   <div
     id="site-menu"
+    data-menu
     class="invisible fixed inset-0 z-20 flex flex-col justify-between bg-void/90 px-6 pb-10 pt-28 opacity-0 backdrop-blur-3xl transition-[opacity,visibility] duration-500 group-data-[open]:visible group-data-[open]:opacity-100 lg:hidden"
+    inert
   >
     <nav class="flex flex-col gap-1" aria-label={site.header.mobileNavLabel}>
       {

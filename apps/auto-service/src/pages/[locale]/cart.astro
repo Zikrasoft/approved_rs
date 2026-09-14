@@ -132,8 +132,11 @@ const shop = getShopContent(locale);
       'textarea[name="comment"]',
     );
 
-    form?.addEventListener('submit', () => {
-      if (!comment) return;
+    // Listens on the bubble, not on the form: LeadForm's own handler runs
+    // first and may preventDefault, and emptying the cart on a submit that
+    // never left the page loses the visitor's order.
+    document.addEventListener('submit', (event) => {
+      if (event.defaultPrevented || event.target !== form || !comment) return;
       const ordered = readCart();
       if (ordered.length === 0) return;
       comment.value = [describeCart(ordered), comment.value.trim()]

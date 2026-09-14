@@ -39,6 +39,7 @@ export function createLeadsRoute<L extends string>({
       requested && isLocale(requested) ? requested : defaultLocale;
 
     if (envelope.website) {
+      console.log('[leads] dropped by the honeypot', { locale });
       return redirect(thanksPath(locale), 302);
     }
 

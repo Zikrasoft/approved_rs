@@ -30,6 +30,16 @@
     "active": true
   },
   {
+    "slug": "dusseldorf",
+    "ru": { "name": "Дюссельдорф", "nameLocative": "Дюссельдорфе" },
+    "en": { "name": "Düsseldorf" },
+    "sr": { "name": "Diseldorf", "nameLocative": "Diseldorfu" },
+    "es": { "name": "Düsseldorf" },
+    "de": { "name": "Düsseldorf" },
+    "country": "de",
+    "active": true
+  },
+  {
     "slug": "belgrade",
     "ru": { "name": "Белград", "nameLocative": "Белграде" },
     "en": { "name": "Belgrade" },

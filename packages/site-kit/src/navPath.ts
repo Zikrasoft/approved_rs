@@ -18,3 +18,11 @@ export function isActiveNavPath(current: string, target: string): boolean {
   const depth = there.split('/').filter(Boolean).length;
   return depth > 1 && here.startsWith(there);
 }
+
+export function navCurrent(
+  pathname: string,
+  href: string,
+): 'page' | 'true' | undefined {
+  if (!isActiveNavPath(pathname, href)) return undefined;
+  return normalise(pathname) === normalise(href) ? 'page' : 'true';
+}

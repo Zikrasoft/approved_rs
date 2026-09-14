@@ -30,6 +30,9 @@ const DETAILS_SLUGS = [
   'steering-wheel-restoration',
 ];
 
+// Retired approved.rs slugs that still sit on stored leads.
+const LEGACY_SLUGS = ['auto-service-belgrade', 'detailing-belgrade'];
+
 describe('serviceLabel', () => {
   it('returns the Russian label for a known slug', () => {
     expect(serviceLabel('vehicle-sourcing')).toBe('Автоподбор');
@@ -38,6 +41,18 @@ describe('serviceLabel', () => {
   it('falls back to the raw slug for an unknown one', () => {
     expect(serviceLabel('no-such-service')).toBe('no-such-service');
   });
+
+  it('still labels the retired approved.rs slugs stored leads carry', () => {
+    expect(serviceLabel('auto-service-belgrade')).toBe('Автосервис');
+    expect(serviceLabel('detailing-belgrade')).toBe('Детейлинг');
+  });
+
+  it.each(['constructor', '__proto__', 'toString', 'hasOwnProperty'])(
+    'falls back to the raw slug for the inherited key %s',
+    (slug) => {
+      expect(serviceLabel(slug)).toBe(slug);
+    },
+  );
 });
 
 describe('SERVICE_LABELS_RU', () => {
@@ -58,7 +73,12 @@ describe('SERVICE_LABELS_RU', () => {
 
   it('holds no slug outside the three brands', () => {
     expect(Object.keys(SERVICE_LABELS_RU).sort()).toEqual(
-      [...APPROVED_SLUGS, ...CARLAB_SLUGS, ...DETAILS_SLUGS].sort(),
+      [
+        ...APPROVED_SLUGS,
+        ...CARLAB_SLUGS,
+        ...DETAILS_SLUGS,
+        ...LEGACY_SLUGS,
+      ].sort(),
     );
   });
 });

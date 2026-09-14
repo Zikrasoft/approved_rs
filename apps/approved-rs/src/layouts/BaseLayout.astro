@@ -110,8 +110,11 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
       )
     }
 
-    <!-- Google tag (gtag.js) + Yandex.Metrika — both loaded only after cookie consent, see CookieConsent.astro -->
     <script>
+      import {
+        CONSENT_STORAGE_KEY,
+        analyticsDeclined,
+      } from '@podbor/site-kit/browser';
       import { YM_COUNTER_ID } from '@/utils/constants';
       import { ymReachGoal } from '@/utils/metrika';
 
@@ -178,10 +181,16 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
           trackLinks: true,
         });
       };
+
+      // Analytics start with the page; only an explicit refusal holds them
+      // back, and that refusal takes effect from the next load — there is no
+      // supported way to unload a running Metrika counter.
       try {
-        if (localStorage.getItem('cookie_consent') === 'granted')
+        if (!analyticsDeclined(localStorage.getItem(CONSENT_STORAGE_KEY)))
           window.loadAnalytics();
-      } catch {}
+      } catch {
+        window.loadAnalytics();
+      }
     </script>
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

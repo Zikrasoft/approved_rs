@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isActiveNavPath, swapLocalePath } from './navPath.ts';
+import { isActiveNavPath, navCurrent, swapLocalePath } from './navPath.ts';
 
 describe('isActiveNavPath', () => {
   it('matches the section page itself', () => {
@@ -93,5 +93,21 @@ describe('swapLocalePath', () => {
 
   it('treats a bare root as having no rest', () => {
     expect(swapLocalePath('/', 'sr')).toBe('/sr/');
+  });
+});
+
+describe('navCurrent', () => {
+  it('marks the link the visitor is standing on as the page', () => {
+    expect(navCurrent('/sr/works/', '/sr/works/')).toBe('page');
+    expect(navCurrent('/sr/works', '/sr/works/')).toBe('page');
+    expect(navCurrent('/sr/works/?utm_source=x', '/sr/works/')).toBe('page');
+  });
+
+  it('marks an ancestor section as related, not as the page', () => {
+    expect(navCurrent('/sr/works/bmw-x3/', '/sr/works/')).toBe('true');
+  });
+
+  it('leaves an unrelated link unmarked', () => {
+    expect(navCurrent('/sr/contact/', '/sr/works/')).toBeUndefined();
   });
 });

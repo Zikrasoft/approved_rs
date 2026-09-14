@@ -321,34 +321,13 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
   import { getOrCreateVisitorId } from '@podbor/site-kit/browser';
   import { composeE164 } from '@podbor/lead-crm/compose-e164';
   import { bindPhoneCountry } from '@podbor/lead-crm/phone-input';
+  import {
+    deferSubmitUntilKit,
+    loadPhoneKit,
+    phoneKit,
+  } from '@podbor/lead-crm/phone-kit';
   import type { CountryCode } from 'libphonenumber-js/min';
   import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
-
-  type PhoneKit = {
-    parse: typeof import('libphonenumber-js/min').parsePhoneNumberFromString;
-    isValidContact: typeof import('@podbor/lead-crm/phone').isValidContact;
-  };
-
-  let kit: PhoneKit | null = null;
-  let unavailable = false;
-  let loading: Promise<void> | null = null;
-
-  function loadPhoneKit() {
-    loading ??= Promise.all([
-      import('libphonenumber-js/min'),
-      import('@podbor/lead-crm/phone'),
-    ])
-      .then(([phone, crm]) => {
-        kit = {
-          parse: phone.parsePhoneNumberFromString,
-          isValidContact: crm.isValidContact,
-        };
-      })
-      .catch(() => {
-        unavailable = true;
-      });
-    return loading;
-  }
 
   document
     .querySelectorAll<HTMLFormElement>('[data-lead-form]')
@@ -370,7 +349,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
 
     form.noValidate = true;
     pick<HTMLInputElement>('[data-source-url]').value = location.href;
-    pick<HTMLInputElement>('[data-visitor-id]').value = getOrCreateVisitorId();
+    const visitor = pick<HTMLInputElement>('[data-visitor-id]');
 
     const name = pick<HTMLInputElement>('[data-name]');
     const telegram = pick<HTMLInputElement>('[data-telegram]');
@@ -387,8 +366,6 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
       consent: [pick('[data-error-consent]'), consent],
     };
 
-    let awaitingKit = false;
-
     form.addEventListener('focusin', loadPhoneKit, { once: true });
     form.addEventListener('input', () => {
       Object.values(fields).forEach(([error, field]) =>
@@ -397,16 +374,12 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     });
 
     form.addEventListener('submit', (event) => {
-      if (!kit && !unavailable) {
+      if (deferSubmitUntilKit(form)) {
         event.preventDefault();
-        if (awaitingKit) return;
-        awaitingKit = true;
-        loadPhoneKit().then(() => {
-          awaitingKit = false;
-          form.requestSubmit();
-        });
         return;
       }
+      const kit = phoneKit();
+      visitor.value = getOrCreateVisitorId();
 
       const channel = pick<HTMLInputElement>('[name="contact_channel"]:checked')
         .value as TrackedContactChannel;

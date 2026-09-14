@@ -316,34 +316,13 @@ const noscriptLink =
   import { getOrCreateVisitorId } from '@podbor/site-kit/browser';
   import { composeE164 } from '@podbor/lead-crm/compose-e164';
   import { bindPhoneCountry } from '@podbor/lead-crm/phone-input';
+  import {
+    deferSubmitUntilKit,
+    loadPhoneKit,
+    phoneKit,
+  } from '@podbor/lead-crm/phone-kit';
   import type { CountryCode } from 'libphonenumber-js/min';
   import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
-
-  type PhoneKit = {
-    parse: typeof import('libphonenumber-js/min').parsePhoneNumberFromString;
-    isValidContact: typeof import('@podbor/lead-crm/phone').isValidContact;
-  };
-
-  let kit: PhoneKit | null = null;
-  let unavailable = false;
-  let loading: Promise<void> | null = null;
-
-  function loadPhoneKit() {
-    loading ??= Promise.all([
-      import('libphonenumber-js/min'),
-      import('@podbor/lead-crm/phone'),
-    ])
-      .then(([phone, crm]) => {
-        kit = {
-          parse: phone.parsePhoneNumberFromString,
-          isValidContact: crm.isValidContact,
-        };
-      })
-      .catch(() => {
-        unavailable = true;
-      });
-    return loading;
-  }
 
   document
     .querySelectorAll<HTMLFormElement>('[data-lead-form]')
@@ -356,7 +335,6 @@ const noscriptLink =
     const source = pick<HTMLInputElement>('[data-source-url]');
     const visitor = pick<HTMLInputElement>('[data-visitor-id]');
     source.value = location.href;
-    visitor.value = getOrCreateVisitorId();
 
     const contact = pick<HTMLInputElement>('[data-contact]');
     const name = pick<HTMLInputElement>('[data-name]');
@@ -392,11 +370,12 @@ const noscriptLink =
     });
 
     form.addEventListener('submit', (event) => {
-      if (!kit && !unavailable) {
+      if (deferSubmitUntilKit(form)) {
         event.preventDefault();
-        loadPhoneKit().then(() => form.requestSubmit());
         return;
       }
+      const kit = phoneKit();
+      visitor.value = getOrCreateVisitorId();
 
       const channel = pick<HTMLInputElement>('[name="contact_channel"]:checked')
         .value as TrackedContactChannel;

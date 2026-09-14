@@ -1,6 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
 import type { Locale } from '@/i18n/config';
-import { localizedEntry, publishedEntries } from './localized';
+import { localizedEntry, publishedEntries } from '@podbor/i18n';
 import { buildFitmentIndex as buildIndex } from './fitment';
 
 export type { FitmentEntry, FitmentIndex } from './fitment';

@@ -4,7 +4,7 @@ import PageSection from './PageSection.astro';
 interface Props {
   heading: string;
   lead: string;
-  items: { name: string; href: string; text: string }[];
+  items: { name: string; href: string; text: string; point?: string }[];
 }
 
 const { heading, lead, items } = Astro.props;
@@ -12,20 +12,26 @@ const { heading, lead, items } = Astro.props;
 
 <PageSection title={heading} {lead}>
   <div
-    class="grid grid-cols-1 sm:grid-cols-2 gap-px bg-border border border-default"
+    class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:[&>a:nth-child(odd):last-child]:col-span-2"
   >
     {
       items.map((item) => (
         <a
           href={item.href}
-          class="group block bg-bg p-6 no-underline transition-colors hover:bg-surface"
+          class="group flex flex-col rounded-sm border border-default bg-linear-to-b from-surface-2 to-surface p-6 no-underline shadow-[inset_0_1px_0_rgb(255_255_255/0.05)] transition-colors hover:border-accent-border focus-visible:border-accent-border"
         >
-          <span class="font-display text-lg font-bold text-primary transition-colors group-hover:text-accent">
+          <span class="mb-4 block h-px w-6 bg-border-strong transition-colors group-hover:bg-accent group-focus-visible:bg-accent" />
+          <span class="font-display text-lg font-bold text-primary transition-colors group-hover:text-accent group-focus-visible:text-accent">
             {item.name}
           </span>
-          <span class="mt-2 block text-[0.95rem] leading-relaxed text-muted">
+          <span class="mt-2 mb-5 block text-[0.95rem] leading-relaxed text-muted">
             {item.text}
           </span>
+          {item.point && (
+            <span class="mt-auto block border-t border-default pt-4 text-sm leading-relaxed text-secondary">
+              {item.point}
+            </span>
+          )}
         </a>
       ))
     }

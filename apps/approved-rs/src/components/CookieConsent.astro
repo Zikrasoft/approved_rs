@@ -8,12 +8,10 @@ const locale = getLocale(Astro.currentLocale);
 const cc = getI18n(locale).common.cookie;
 ---
 
-<div
-  id="cookie-consent"
+<cookie-consent
   data-policy-version={COOKIE_POLICY_VERSION}
   hidden
-  class="fixed bottom-4 left-4 right-4 sm:right-auto sm:max-w-sm z-50 rounded-sm border border-default p-5 shadow-lg"
-  style="background: var(--color-surface);"
+  class="fixed bottom-4 left-4 right-4 sm:right-auto sm:max-w-sm z-50 rounded-sm border border-default bg-surface p-5 shadow-lg"
 >
   <p class="text-sm leading-relaxed text-secondary mb-4">
     {cc.notice}
@@ -24,58 +22,31 @@ const cc = getI18n(locale).common.cookie;
   </p>
   <div class="flex gap-3">
     <button
-      id="cookie-decline"
+      data-consent-decline
       class="px-4 py-2 rounded-sm border text-xs font-medium border-default text-primary"
     >
       {cc.decline}
     </button>
     <button
-      id="cookie-accept"
+      data-consent-accept
       class="px-4 py-2 rounded-sm border text-xs font-medium border-accent bg-accent text-on-accent"
     >
       {cc.accept}
     </button>
   </div>
-</div>
+</cookie-consent>
 
 <script>
-  import { readConsent, saveConsent } from '@podbor/site-kit/browser';
+  import {
+    CONSENT_EVENT,
+    defineCookieConsent,
+    type ConsentDetail,
+  } from '@podbor/site-kit/browser';
 
-  const el = document.getElementById('cookie-consent');
-  const version = el?.dataset.policyVersion ?? '';
+  defineCookieConsent();
 
-  function answer(analytics: boolean) {
-    saveConsent(analytics, version);
-    if (analytics) window.loadAnalytics?.();
-    if (el) el.hidden = true;
-  }
-
-  function open() {
-    if (el) el.hidden = false;
-  }
-
-  if (el) {
-    const stored = readConsent(version);
-    if (stored) {
-      if (stored.analytics) window.loadAnalytics?.();
-    } else {
-      open();
-    }
-
-    document
-      .getElementById('cookie-accept')
-      ?.addEventListener('click', () => answer(true));
-    document
-      .getElementById('cookie-decline')
-      ?.addEventListener('click', () => answer(false));
-
-    document.addEventListener('click', (event) => {
-      const trigger = (event.target as Element | null)?.closest(
-        '[data-cookie-settings]',
-      );
-      if (!trigger) return;
-      event.preventDefault();
-      open();
-    });
-  }
+  document.addEventListener(CONSENT_EVENT, (event) => {
+    if ((event as CustomEvent<ConsentDetail>).detail.analytics)
+      window.loadAnalytics?.();
+  });
 </script>

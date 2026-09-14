@@ -11,6 +11,7 @@ import SiteHeader from '@/components/SiteHeader.astro';
 import SiteFooter from '@/components/SiteFooter.astro';
 import LeadModal from '@/components/LeadModal.astro';
 import FloatingCta from '@/components/FloatingCta.astro';
+import CookieConsent from '@/components/CookieConsent.astro';
 import { BCP47_BY_LOCALE, OG_IMAGE, OG_LOCALE, localeSet } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
 import {
@@ -162,6 +163,7 @@ const businessSchema = {
     <SiteFooter />
     <LeadModal />
     <FloatingCta />
+    <CookieConsent />
 
     <script>
       const reduced = window.matchMedia(

@@ -62,6 +62,11 @@ const channels = contactChannels(site);
       <a href={PathBuilder.privacy(locale)} class="link-muted"
         >{site.footer.privacyLabel}</a
       >
+      <button
+        type="button"
+        data-cookie-settings
+        class="link-muted w-fit text-left">{site.cookie.settings}</button
+      >
     </nav>
 
     <div class="flex flex-col gap-2.5">

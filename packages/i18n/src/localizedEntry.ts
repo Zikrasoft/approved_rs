@@ -1,4 +1,4 @@
-import { SOURCE_LOCALE, type Locale } from '@/i18n/config';
+import { SOURCE_LOCALE } from './locales.ts';
 
 export interface LocalizableEntry {
   body?: string;
@@ -11,16 +11,18 @@ export interface LocalizableEntry {
   };
 }
 
-export interface LocalizedEntry {
+export interface LocalizedEntry<
+  Car extends string | undefined = string | undefined,
+> {
   title: string;
   body: string;
-  car?: string;
+  car: Car;
 }
 
-export function localizedEntry(
-  entry: LocalizableEntry,
-  locale: Locale,
-): LocalizedEntry {
+export function localizedEntry<E extends LocalizableEntry>(
+  entry: E,
+  locale: string,
+): LocalizedEntry<E['data']['car']> {
   const source = {
     title: entry.data.title,
     body: entry.body ?? '',
@@ -39,4 +41,12 @@ export function publishedEntries<T extends { data: { published: boolean } }>(
   entries: T[],
 ): T[] {
   return entries.filter((entry) => entry.data.published);
+}
+
+export function publishedByNewest<
+  T extends { data: { published: boolean; date: Date } },
+>(entries: T[]): T[] {
+  return publishedEntries(entries).sort(
+    (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+  );
 }

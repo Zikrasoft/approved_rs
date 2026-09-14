@@ -1,4 +1,5 @@
 export const STORAGE_KEY = 'cookie_consent';
+const LEGACY_DENIED = 'denied';
 
 export interface Consent {
   version: string;
@@ -45,5 +46,17 @@ export function newConsent(
   return { version, at: now.toISOString(), analytics };
 }
 
-export const analyticsAllowed = (consent: Consent | null): boolean =>
-  Boolean(consent?.analytics);
+// Version-agnostic on purpose: an answer given against an older policy still
+// counts as "no" until the visitor answers the current one, so a policy bump
+// never silently resumes tracking someone who turned it down.
+export function analyticsDeclined(raw: string | null): boolean {
+  if (!raw) return false;
+  if (raw === LEGACY_DENIED) return true;
+  try {
+    return (
+      (JSON.parse(raw) as { analytics?: unknown } | null)?.analytics === false
+    );
+  } catch {
+    return false;
+  }
+}

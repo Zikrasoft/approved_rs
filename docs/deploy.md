@@ -353,7 +353,7 @@ Git-триггер отключать в дашборде не нужно — е
 
 ## Автоперевод контента
 
-Кейсы (`src/content/{cases,autoservice-cases,detailing-cases}`, `works`,
+Кейсы (`src/content/cases`, `works`,
 `products`) и UI-копия (`src/content/i18n/*.yaml`) переводятся автоматически.
 Админ в Keystatic пишет только русские поля — ни один из четырёх языков в
 `translations` там не обязателен, потому что Keystatic не умеет запускать

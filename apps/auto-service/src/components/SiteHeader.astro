@@ -6,7 +6,7 @@ import { SUPPORTED_LOCALES, LOCALE_NAME } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getSiteContent } from '@/i18n/content/site';
 import { PathBuilder, swapLocale } from '@/utils/paths';
-import { isActiveNavPath, LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
+import { navCurrent, LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
 import { CONTACT_LINKS } from '@/utils/contactLinks';
 import { SHOP_ENABLED } from '@/utils/constants';
 
@@ -22,7 +22,7 @@ const links = [
     : []),
   { href: `${PathBuilder.home(locale)}#process`, label: site.nav.process },
   { href: PathBuilder.contact(locale), label: site.nav.contact },
-].map((link) => ({ ...link, current: isActiveNavPath(pathname, link.href) }));
+].map((link) => ({ ...link, current: navCurrent(pathname, link.href) }));
 ---
 
 <carlab-menu
@@ -50,7 +50,7 @@ const links = [
           links.map((link) => (
             <a
               href={link.href}
-              aria-current={link.current ? 'page' : undefined}
+              aria-current={link.current}
               class:list={[
                 'relative text-sm font-medium transition-colors duration-150',
                 link.current
@@ -130,14 +130,16 @@ const links = [
 
   <div
     id="site-menu"
+    data-menu
     class="invisible fixed inset-0 z-20 flex flex-col justify-between overflow-y-auto bg-paper/95 px-5 pb-28 pt-24 opacity-0 backdrop-blur-xl transition-[opacity,visibility] duration-200 group-data-[open]:visible group-data-[open]:opacity-100 md:hidden"
+    inert
   >
     <nav class="flex flex-col" aria-label={site.common.mobileNavLabel}>
       {
         links.map((link) => (
           <a
             href={link.href}
-            aria-current={link.current ? 'page' : undefined}
+            aria-current={link.current}
             class:list={[
               'border-b border-line py-5 text-2xl font-semibold tracking-tight',
               link.current ? 'text-ink' : 'text-ink-2',

@@ -17,6 +17,7 @@ export function relatedEntries<T extends Taggable>(
   const shared = others.filter((entry) =>
     entry.data.servicesApplied.some((slug) => services.has(slug)),
   );
-  const rest = others.filter((entry) => !shared.includes(entry));
+  const inShared = new Set(shared);
+  const rest = others.filter((entry) => !inShared.has(entry));
   return [...shared, ...rest].slice(0, limit);
 }

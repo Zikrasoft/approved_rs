@@ -49,3 +49,5 @@ export const SOCIAL_SAME_AS = TELEGRAM_ENABLED
   : [];
 
 export const CURRENCY = 'RSD';
+
+export const COOKIE_POLICY_VERSION = '2026-09-12';

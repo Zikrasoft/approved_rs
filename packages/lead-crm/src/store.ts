@@ -225,6 +225,7 @@ export function createLeadStore({ storage, schema }: LeadStoreOptions) {
             ? {
                 name: data.name,
                 contact: data.contact,
+                contactChannel: data.contactChannel ?? existing.contactChannel,
                 service: data.service || existing.service,
                 services: data.services?.length
                   ? data.services

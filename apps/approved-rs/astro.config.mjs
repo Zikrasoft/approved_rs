@@ -5,10 +5,11 @@ import react from '@astrojs/react';
 import keystatic from '@keystatic/astro';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
+import { APPROVED } from '@podbor/brands';
 import { BCP47_BY_LOCALE, localeConfig } from './src/i18n/config.ts';
 
 export default defineConfig({
-  site: 'https://approved.rs',
+  site: APPROVED.url,
   // Static by default — 14 of 15 pages are fully static; the two API routes
   // and the homepage (needs Astro.locals.suggestedCountry from middleware
   // for the geo banner) opt into SSR individually via `prerender = false`

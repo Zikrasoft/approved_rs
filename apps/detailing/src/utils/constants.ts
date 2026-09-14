@@ -50,3 +50,5 @@ export const SOCIAL_SAME_AS = [
   ...(INSTAGRAM_ENABLED ? [`https://www.instagram.com/${INSTAGRAM}`] : []),
   ...(TELEGRAM_ENABLED ? [`https://t.me/${TG_MANAGER}`] : []),
 ];
+
+export const COOKIE_POLICY_VERSION = '2026-09-12';

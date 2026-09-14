@@ -42,6 +42,7 @@ const articleSchema = {
   '@context': 'https://schema.org',
   '@type': 'Article',
   headline: title,
+  image: new URL(work.data.image.src, SITE_URL).href,
   datePublished: work.data.date.toISOString(),
   author: { '@id': `${SITE_URL}/#studio` },
   publisher: { '@id': `${SITE_URL}/#studio` },

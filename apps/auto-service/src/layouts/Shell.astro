@@ -7,6 +7,7 @@ import SiteHeader from '@/components/SiteHeader.astro';
 import SiteFooter from '@/components/SiteFooter.astro';
 import LeadModal from '@/components/LeadModal.astro';
 import StickyContactBar from '@/components/StickyContactBar.astro';
+import CookieConsent from '@/components/CookieConsent.astro';
 import {
   BCP47_BY_LOCALE,
   OG_LOCALE,
@@ -147,6 +148,7 @@ const businessSchema = {
     <SiteFooter />
     {stickyContact && <StickyContactBar />}
     <LeadModal />
+    <CookieConsent />
 
     <script>
       import { isTrackedContactChannel } from '@podbor/lead-crm/contact-channel';

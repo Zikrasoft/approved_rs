@@ -249,13 +249,14 @@ const fieldClass =
 </div>
 
 <script>
-  import {
-    AsYouType,
-    parsePhoneNumberFromString,
-    type CountryCode,
-  } from 'libphonenumber-js/min';
-  import { isValidContact } from '@podbor/lead-crm/phone';
+  import type { CountryCode } from 'libphonenumber-js/min';
+  import { composeE164 } from '@podbor/lead-crm/compose-e164';
   import { bindPhoneCountry } from '@podbor/lead-crm/phone-input';
+  import {
+    deferSubmitUntilKit,
+    loadPhoneKit,
+    phoneKit,
+  } from '@podbor/lead-crm/phone-kit';
   import {
     isTrackedContactChannel,
     getPreferredChannel,
@@ -284,7 +285,6 @@ const fieldClass =
     const visitorIdInput = form.querySelector<HTMLInputElement>(
       'input[type="hidden"][name="visitor_id"]',
     );
-    if (visitorIdInput) visitorIdInput.value = getOrCreateVisitorId();
 
     const errName = form.dataset.errName!;
     const errTgRequired = form.dataset.errTgRequired!;
@@ -358,24 +358,23 @@ const fieldClass =
 
     bindPhoneCountry(phoneCountry, phoneNumber);
 
-    function parsedPhone() {
-      return parsePhoneNumberFromString(
-        phoneNumber.value,
-        phoneCountry.value as CountryCode,
-      );
+    function dialCode() {
+      return phoneCountry.selectedOptions[0]?.dataset.dial ?? '';
     }
 
     // ponytail: re-mask from raw digits on every keystroke instead of a
     // caret-aware stateful mask — simpler, good enough for a lead form.
     function formatPhone() {
+      const kit = phoneKit();
+      if (!kit) return;
       const value = phoneNumber.value;
       if (value.trim().startsWith('+')) {
         const digits = '+' + value.replace(/[^\d]/g, '');
-        phoneNumber.value = new AsYouType().input(digits);
+        phoneNumber.value = new kit.AsYouType().input(digits);
         return;
       }
       const raw = value.replace(/[^\d]/g, '');
-      phoneNumber.value = new AsYouType(
+      phoneNumber.value = new kit.AsYouType(
         phoneCountry.value as CountryCode,
       ).input(raw);
     }
@@ -384,9 +383,14 @@ const fieldClass =
       hiddenChannel.value = activeTab;
       if (activeTab === 'telegram') {
         hiddenContact.value = tgInput.value.trim();
-      } else {
-        const parsed = parsedPhone();
+      } else if (phoneKit()) {
+        const parsed = phoneKit()!.parse(
+          phoneNumber.value,
+          phoneCountry.value as CountryCode,
+        );
         hiddenContact.value = parsed ? parsed.number : phoneNumber.value.trim();
+      } else {
+        hiddenContact.value = composeE164(phoneNumber.value.trim(), dialCode());
       }
     }
 
@@ -455,7 +459,30 @@ const fieldClass =
       if (event.isTrusted) phoneNumber.focus();
     });
 
+    form.addEventListener(
+      'focusin',
+      () => {
+        loadPhoneKit().then(() => {
+          // Re-masking would rewrite the field and drop the caret to the end,
+          // and on the slow connection this lazy load exists for the visitor
+          // is already typing by now.
+          if (phoneNumber !== document.activeElement) formatPhone();
+          syncContact();
+        });
+      },
+      { once: true },
+    );
+
     form.addEventListener('submit', (e) => {
+      if (deferSubmitUntilKit(form)) {
+        e.preventDefault();
+        return;
+      }
+      const kit = phoneKit();
+      // Read at send time, not at init: a visitor who refuses after the page
+      // renders would otherwise still post the id baked into the field.
+      if (visitorIdInput) visitorIdInput.value = getOrCreateVisitorId();
+
       let ok = true;
       const name = form.querySelector<HTMLInputElement>('[name="name"]')!;
 
@@ -475,7 +502,7 @@ const fieldClass =
       if (!typed) {
         setError(contactInput, isTelegram ? errTgRequired : errPhoneRequired);
         ok = false;
-      } else if (!isValidContact(hiddenContact.value, activeTab)) {
+      } else if (kit && !kit.isValidContact(hiddenContact.value, activeTab)) {
         setError(contactInput, isTelegram ? errTgFormat : errPhoneInvalid);
         ok = false;
       } else clearError(contactInput);

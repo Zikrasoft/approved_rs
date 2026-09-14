@@ -171,6 +171,23 @@ describe('insertOrMergeLead', () => {
     expect(lead.contact).toBe('@ivan');
     expect(lead.kind).toBeUndefined();
     expect(lead.services).toEqual([]);
+    expect(lead.contactChannel).toBe('telegram');
+  });
+
+  it('records the channel the form chose, not the one the earlier click used', async () => {
+    await store.insertOrMergeLead(clickData('phone'));
+    const { lead } = await store.insertOrMergeLead({
+      brand: 'Test',
+      name: 'Иван',
+      contact: '@ivan',
+      contactChannel: 'telegram',
+      service: 'vehicle-sourcing',
+      visitorId: 'visitor-1',
+      locale: 'ru',
+    });
+
+    expect(lead.contact).toBe('@ivan');
+    expect(lead.contactChannel).toBe('telegram');
   });
 
   it('replaces the call-click service list with every service the form carried', async () => {
