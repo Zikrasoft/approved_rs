@@ -50,86 +50,86 @@ cart:
   badgeLabel: товаров в корзине
 translations:
   sr:
-    metaTitle: 'Baterije u Beogradu: izbor i ugradnja — CarLab'
-    metaDescription: Baterije dostupne u Beogradu. Izbor po marki, modelu i godini, ugradnja za 20 minuta, reciklaža stare. Cene sa PDV-om, garancija proizvođača.
+    metaTitle: 'Akumulatori u Beogradu: izbor i instalacija — CarLab'
+    metaDescription: Akumulatori dostupni u Beogradu. Izbor po markama, modelima i godinama, instalacija za 20 minuta, reciklaža starog. Cene sa PDV-om, garancija proizvođača.
     eyebrow: Delovi
-    heading: Baterije sa izborom za vašu mašinu
-    lead: Izaberite marku, model i godinu — prikazaćemo samo ono što fizički može da se ugradi i ima dovoljno startnog struja. Ugradnja je uključena u cenu.
+    heading: Akumulatori sa izborom za vašu mašinu
+    lead: Izaberite marku, model i godinu — prikazaćemo samo ono što fizički odgovara i ima dovoljno struje za pokretanje. Instalacija je uključena u cenu.
     fitmentHeading: Izbor po automobilu
     makeLabel: Marka
     modelLabel: Model
     yearLabel: Godina proizvodnje
     anyOption: Nije važno
-    resetLabel: Resetuj
+    resetLabel: Poništi
     matchCount:
-      one: prikladna {count} baterija
-      few: prikladne {count} baterije
-      many: prikladnih {count} baterija
-      other: prikladne {count} baterije
-    noMatches: Nema dostupnih baterija po ovim parametrima
-    noMatchesHint: Pišite nam — obezbedićemo na narudžbinu obično za jedan do dva dana.
-    emptyCatalog: Katalog će uskoro biti popunjen. Za sada nazovite — reći ćemo vam šta imamo na skladištu danas.
+      one: odgovara {count} akumulator
+      few: odgovara {count} akumulatora
+      many: odgovara {count} akumulatora
+      other: odgovara {count} akumulatora
+    noMatches: Nema dostupnih akumulatora za ove parametre
+    noMatchesHint: Pišite nam — stiže po narudžbini obično za jedan do dva dana.
+    emptyCatalog: Katalog će uskoro biti ažuriran. Za sada nazovite — reci ćemo vam šta imamo na skladištu danas.
     capacityLabel: Kapacitet
-    crankingLabel: Startna struja
-    polarityLabel: Polaritet
+    crankingLabel: Struja pokretanja
+    polarityLabel: Polarnost
     dimensionsLabel: Dimenzije
     dimensionsUnit: mm
-    polarityLeft: obrnuti (minus levo)
-    polarityRight: pravilan (plus levo)
+    polarityLeft: obrnuta (minus levo)
+    polarityRight: prava (plus levo)
     warrantyLabel: Garancija
     warrantyUnit: mes.
-    fitsLabel: Prikladno za
+    fitsLabel: Odgovara za
     inStock: Na skladištu
-    onOrder: Na narudžbinu
+    onOrder: Na raskhod
     addToCart: Dodaj u korpu
     inCart: U korpi
-    installNote: Ugradnja i reciklaža stare baterije — besplatno uz kupovinu kod nas.
-    productMetaSuffix: baterija u Beogradu
+    installNote: Instalacija i reciklaža starog akumulatora — besplatno uz kupovinu kod nas.
+    productMetaSuffix: akumulator u Beogradu
     cart:
       metaTitle: Korpa — CarLab
-      metaDescription: Vaša narudžbina delova. Održavanje bez avansa — plaćanje prilikom preuzimanja u servisu.
+      metaDescription: Vaša narudžba delova. Oformite bez preplate — plaćanje prilikom preuzimanja u servisu.
       eyebrow: Korpa
-      heading: Vaša narudžbina
-      lead: Nema predujma. Potvrdićemo dostupnost, odložiti robu i dogovoriti vreme — plaćanje u servisu prilikom preuzimanja.
+      heading: Vaša narudžba
+      lead: Nema preplate. Potvrdićemo dostupnost, odložiti proizvod i dogovoriti vreme — plaćanje u servisu prilikom preuzimanja.
       empty: Korpa je za sada prazna.
-      emptyCta: Pređite u katalog
+      emptyCta: Pređi na katalog
       quantityLabel: Količina
       removeLabel: Ukloni
       totalLabel: Ukupno
-      totalNote: Cene sa PDV-om. Ugradnja baterije je uključena u cenu.
-      orderHeading: Poručite
-      orderNote: Nazvaćemo vas, potvrdićemo dostupnost i dogovoriti vreme.
+      totalNote: Cene su sa PDV-om. Instalacija akumulatora je uključena u cenu.
+      orderHeading: Oformiti narudžbu
+      orderNote: Pobrinućemo se da vas pozovemo, potvrdimo dostupnost i dogovorimo vreme.
       badgeLabel: proizvoda u korpi
   en:
-    metaTitle: 'Batteries in Belgrade: Selection and Installation — CarLab'
-    metaDescription: Batteries available in Belgrade. Choose by make, model and year, installation in 20 minutes, old battery disposal. Prices include VAT, manufacturer warranty.
+    metaTitle: 'Car Batteries in Belgrade: Selection & Installation — CarLab'
+    metaDescription: Car batteries available in Belgrade. Choose by make, model, and year, installation in 20 minutes, old battery disposal. Prices include VAT, manufacturer warranty.
     eyebrow: Parts
-    heading: Batteries Selected for Your Vehicle
-    lead: Select the make, model, and year — we'll show only what fits physically and meets the cranking current. Installation is included in the price.
-    fitmentHeading: Select by Vehicle
+    heading: Batteries tailored for your vehicle
+    lead: Select make, model, and year — we'll show only what's compatible and sufficient for cranking power. Installation is included in the price.
+    fitmentHeading: Vehicle Selection
     makeLabel: Make
     modelLabel: Model
-    yearLabel: Year of Manufacture
-    anyOption: Any
+    yearLabel: Year
+    anyOption: Doesn't matter
     resetLabel: Reset
     matchCount:
       one: '{count} battery fits'
       few: '{count} batteries fit'
       many: '{count} batteries fit'
       other: '{count} batteries fit'
-    noMatches: No batteries available for these parameters
-    noMatchesHint: Contact us — we can usually order in one to two days.
-    emptyCatalog: Our catalog will be filled soon. For now, call us — we'll let you know what is in stock today.
+    noMatches: Nothing available for these parameters
+    noMatchesHint: Contact us — we can order it in usually within one or two days.
+    emptyCatalog: Catalog will be updated soon. For now, call us — we can tell you what's in stock today.
     capacityLabel: Capacity
-    crankingLabel: Cranking Current
+    crankingLabel: Cranking Power
     polarityLabel: Polarity
     dimensionsLabel: Dimensions
     dimensionsUnit: mm
-    polarityLeft: reversed (negative on the left)
+    polarityLeft: reverse (negative on the left)
     polarityRight: standard (positive on the left)
     warrantyLabel: Warranty
     warrantyUnit: months
-    fitsLabel: Fits for
+    fitsLabel: Fits
     inStock: In stock
     onOrder: On order
     addToCart: Add to Cart
@@ -138,17 +138,17 @@ translations:
     productMetaSuffix: battery in Belgrade
     cart:
       metaTitle: Cart — CarLab
-      metaDescription: Your parts order. No prepayment required — payment upon collection at the service.
+      metaDescription: Your parts order. No prepayment required — pay upon collection at the service.
       eyebrow: Cart
       heading: Your Order
-      lead: No prepayment. We'll confirm availability, reserve the items, and set a time — payment at the service upon collection.
+      lead: No prepayment. We will confirm availability, reserve the item, and set a pickup time — payment at service upon collection.
       empty: Your cart is currently empty.
-      emptyCta: Go to the catalog
+      emptyCta: Go to Catalog
       quantityLabel: Quantity
       removeLabel: Remove
       totalLabel: Total
       totalNote: Prices include VAT. Battery installation is included in the price.
       orderHeading: Place Order
-      orderNote: We will call you to confirm availability and arrange a time.
+      orderNote: We will call you to confirm availability and arrange a pickup time.
       badgeLabel: items in cart
-translatedFrom: rerun-for-automotive-glossary
+translatedFrom: b7dbd7795054e10d
