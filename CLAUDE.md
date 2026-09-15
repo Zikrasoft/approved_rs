@@ -113,6 +113,13 @@ Approved's trust/verification semantics.
   renders Serbian pages in Russian, and no test catches it. A future brand that
   authors in another language turns `SOURCE_LOCALE` into config; until one
   exists, that would be configuration for a single caller.
+- **`LLMS_HEADINGS` in `packages/i18n` is the second deliberate exception** to
+  "the locale list is config". The three `llms.txt` section headings that are
+  not already a nav entry are crawler-facing, identical for every brand, and
+  live outside the `translate-i18n.ts` pipeline on purpose — the same reasoning
+  as the operator-facing Russian bot copy. A brand serving a locale outside the
+  five listed there fails at compile time, not at render time; that is the
+  moment to turn it into config.
 - The app binds a package through a thin re-export file (`src/lib/store.ts`,
   `src/lib/telegram/index.ts`, `src/i18n/config.ts`). That keeps the ~950 lines
   of API-route call sites and ~190 `.astro` i18n call sites free of churn when
@@ -153,6 +160,13 @@ Both new apps follow the same shape, and a third should too:
   prerendered in both new apps — a rewrite returns a 500 for every hit on the
   site root. `src/pages/index.astro` still has to exist with
   `prerender = false` so Vercel routes `/` through middleware at all.
+- **`/llms.txt` is served, never redirected.** Each app has both
+  `src/pages/llms.txt.ts` (the default locale's copy, at the well-known root
+  URI) and `src/pages/[locale]/llms.txt.ts`. Some AI crawlers do not follow
+  redirects, and this is the one URI where that risk is not worth taking — so
+  the root path must also be listed in the app's unlocalized-path config, or
+  middleware 302s it to `/{locale}/llms.txt` in dev and the well-known URI
+  stops being one.
 - **The lead form carries its own `locale`** in a hidden input. Middleware never
   runs for a prerendered page on Vercel's static output, so the `lang` cookie
   may not exist — without the field, every non-Russian visitor lands on

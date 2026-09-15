@@ -2,7 +2,7 @@ import type { APIContext } from 'astro';
 import { defineMiddleware } from 'astro:middleware';
 import { requestHasLocale } from 'astro:i18n';
 import { BRAND_SITES, brandLocale } from '@podbor/brands';
-import { LOCALE_COOKIE } from '@podbor/site-kit';
+import { LOCALE_COOKIE, createUnlocalizedMatcher } from '@podbor/site-kit';
 import { detectLocale } from './i18n/detectLocale';
 import { SUPPORTED_LOCALES } from './i18n/config';
 import { getCountry } from './utils/geo';
@@ -147,10 +147,10 @@ const UNLOCALIZED_PREFIXES = [
 // file into a "Redirecting to /ru/404/" stub, breaking 404 handling
 // sitewide instead of just for literal /404 visits.
 const UNLOCALIZED_EXACT = ['/llms.txt', '/404', '/404/'];
-// @astrojs/sitemap generates these as real routes (not static files under
-// public/), so they pass through this middleware like any other page and
-// would otherwise get wrongly redirected to a locale-prefixed 404.
-const UNLOCALIZED_PATTERN = /^\/sitemap[\w-]*\.xml$/;
+const isUnlocalized = createUnlocalizedMatcher({
+  exact: UNLOCALIZED_EXACT,
+  prefixes: UNLOCALIZED_PREFIXES,
+});
 
 // ISO 3166-1 alpha-2 → site country code, for the homepage's "we detected
 // you're in Germany, see our DE page" suggestion banner. Countries we don't
@@ -176,13 +176,7 @@ function applyGeoSuggestion(context: APIContext): void {
 export const onRequest = defineMiddleware((context, next) => {
   const { pathname, search } = context.url;
 
-  if (
-    UNLOCALIZED_EXACT.includes(pathname) ||
-    UNLOCALIZED_PREFIXES.some((p) => pathname.startsWith(p)) ||
-    UNLOCALIZED_PATTERN.test(pathname)
-  ) {
-    return next();
-  }
+  if (isUnlocalized(pathname)) return next();
 
   const movedBrand = movedBrandUrl(pathname);
   if (movedBrand) return context.redirect(`${movedBrand}${search}`, 301);

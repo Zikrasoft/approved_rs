@@ -1,18 +1,11 @@
 import { defineMiddleware } from 'astro:middleware';
 import { detectLocale, isLocale } from './i18n/config';
-import { LOCALE_COOKIE } from '@podbor/site-kit';
+import { LOCALE_COOKIE, createUnlocalizedMatcher } from '@podbor/site-kit';
 
-const UNLOCALIZED_PREFIXES = ['/api/', '/keystatic', '/_image'];
-const UNLOCALIZED_EXACT = ['/robots.txt', '/404', '/404/'];
-const UNLOCALIZED_PATTERN = /^\/sitemap[\w-]*\.xml$/;
-
-export function isUnlocalized(pathname: string): boolean {
-  return (
-    UNLOCALIZED_EXACT.includes(pathname) ||
-    UNLOCALIZED_PREFIXES.some((p) => pathname.startsWith(p)) ||
-    UNLOCALIZED_PATTERN.test(pathname)
-  );
-}
+export const isUnlocalized = createUnlocalizedMatcher({
+  exact: ['/robots.txt', '/llms.txt', '/404', '/404/'],
+  prefixes: ['/api/', '/keystatic', '/_image'],
+});
 
 export const onRequest = defineMiddleware((context, next) => {
   const { pathname, search } = context.url;

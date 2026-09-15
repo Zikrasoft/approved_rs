@@ -13,3 +13,11 @@ export {
   publishedEntries,
 } from './localizedEntry.ts';
 export type { LocalizableEntry, LocalizedEntry } from './localizedEntry.ts';
+
+export {
+  LLMS_HEADINGS,
+  llmsLanguageLinks,
+  llmsLink,
+  renderLlmsTxt,
+} from './llmsTxt.ts';
+export type { LlmsHeadings, LlmsSection } from './llmsTxt.ts';

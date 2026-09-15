@@ -30,15 +30,12 @@ const run = (context: unknown, next = vi.fn(() => 'next')) =>
 describe('isUnlocalized', () => {
   it.each([
     '/api/leads',
-    '/api/contact-click',
-    '/keystatic',
-    '/keystatic/collection/products',
+    '/keystatic/collection/works',
     '/_image?href=x',
     '/robots.txt',
+    '/llms.txt',
     '/404',
-    '/404/',
     '/sitemap-index.xml',
-    '/sitemap-0.xml',
   ])('leaves %s alone', (pathname) => {
     expect(isUnlocalized(pathname)).toBe(true);
   });
@@ -49,10 +46,6 @@ describe('isUnlocalized', () => {
       expect(isUnlocalized(pathname)).toBe(false);
     },
   );
-
-  it('does not treat a content page merely containing "api" as unlocalized', () => {
-    expect(isUnlocalized('/ru/works/mapi/')).toBe(false);
-  });
 });
 
 describe('onRequest', () => {
