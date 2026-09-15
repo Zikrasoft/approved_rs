@@ -5,3 +5,7 @@ pnpm-lock.yaml
 # Admin-authored case-study content (Keystatic-managed Markdown, not code) —
 # prettier reformatting these isn't wanted and shouldn't gate CI.
 apps/*/src/content/**/*.md
+
+# Static assets served byte-for-byte as their provider wrote them (search-console
+# verification files, manifests, robots.txt) — prettier must not touch them.
+apps/*/public/
