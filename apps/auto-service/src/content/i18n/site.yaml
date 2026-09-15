@@ -86,14 +86,18 @@ translations:
       process: Kako radimo
       about: O servisu
       contact: Kontakti
+    llms:
+      keyFacts: Ključne informacije
+      other: Ostalo
+      languages: Drugi jezici
     header:
       menuOpenLabel: Meni
       menuCloseLabel: Zatvori meni
       languageLabel: Jezik
-      cta: Zakazati
-      phoneLabel: Pozvati
+      cta: Zakazivanje
+      phoneLabel: Pozovite
     footer:
-      tagline: Auto servis u Beogradu. Dijagnostika, popravka, karoserija i farbanje, izbor delova.
+      tagline: Aut servis u Beogradu. Dijagnostika, popravka, karoserija i farbanje, prodaja delova.
       servicesHeading: Usluge
       companyHeading: Servis
       contactHeading: Kontakti
@@ -103,7 +107,7 @@ translations:
       rightsSuffix: Sva prava zadržana.
     common:
       homeLabel: Početna
-      skipToContent: Na sadržaj
+      skipToContent: Idite na sadržaj
       breadcrumbLabel: Hlebne mrvice
       primaryNavLabel: Glavna navigacija
       mobileNavLabel: Mobilni meni
@@ -112,19 +116,19 @@ translations:
       fromPrice: od
       priceOnRequest: na zahtev
       allServices: Sve usluge
-      backToShop: Svi delovi
-      allWorks: Svi primeri radova
-      emptyWorks: Primeri radova uskoro će se pojaviti. Za sada nas pozovite — ispričaćemo vam šta smo radili na sličnim automobilima.
+      backToShop: Sve delove
+      allWorks: Sve primere radova
+      emptyWorks: Primeri radova uskoro stižu. Dok čekate, pozovite nas — ispričaćemo vam šta smo radili na sličnim automobilima.
     channels:
       call: Pozvati
       whatsapp: WhatsApp
       viber: Viber
       telegram: Telegram
     form:
-      heading: Zakazati u servis
-      subheading: Opišite šta nije u redu sa automobilom. Nazvaćemo vas, razjasnićemo detalje i reći ćemo vreme i cenu.
+      heading: Zakazivanje u servis
+      subheading: Opisujte problem sa autom. Javićemo se da utvrdimo detalje i kažemo vreme i cenu.
       nameLabel: Ime
-      namePlaceholder: Kako vas zovemo
+      namePlaceholder: Kako vas zvati
       contactLabel: Telefon
       contactPlaceholder: +381 11 000 0000
       contactChannelLabel: Kako da vas kontaktiramo
@@ -134,20 +138,20 @@ translations:
       servicePlaceholder: Možete izabrati više
       carLabel: Automobil
       carPlaceholder: Marka, model, godina
-      commentLabel: Šta vas muči
-      commentPlaceholder: Udaranje na neravnom terenu, svetli check, potrebno održavanje…
-      submit: Poslati zahtev
+      commentLabel: Šta vas brine
+      commentPlaceholder: Zujanje na neravninama, svetli lampica, potrebno servisiranje…
+      submit: Pošalji zahtev
       submitting: Šaljemo…
-      privacyNote: Slanjem forme slažete se sa
-      privacyLinkText: politikom privatnosti
-      modalTitle: Zakazati u servis
+      privacyNote: Slanjem forme, pristajete na
+      privacyLinkText: politiku privatnosti
+      modalTitle: Zakazivanje u servis
       requiredError: Popunite ovo polje
-      errorPhone: Proverite broj — čini se da nije u potpunosti unet
-      errorTelegram: Unesite nik u Telegramu — najmanje tri karaktera
+      errorPhone: Proverite broj — čini se da nije unet potpuno
+      errorTelegram: Unesite nadimak na Telegramu — minimum tri karaktera
       errorConsent: Bez pristanka ne možemo poslati zahtev
     cookie:
-      notice: 'Čuvamo anonimni identifikator u pretraživaču: on povezuje vaše klikove na dugmad za kontakt sa poslatim zahtevom, kako bismo osigurali da se obraćanje ne izgubi.'
-      more: Više informacija u
+      notice: Skladištimo anonimni ID u pretraživaču — on povezuje vaše klikove na dugmad za kontakt sa poslatim zahtevom, kako ne bi došlo do izgubljenih informacija. Takođe koristimo Yandex.Metriu kako bismo razumeli kako posetioci koriste sajt. Ona beleži sesije — kretanje kursora, skrolovanje i klikove; forma zahteva nije uključena u zapis.
+      more: Više u
       policyLink: politici privatnosti
       accept: Prihvatiti
       decline: Odbiti
@@ -156,10 +160,14 @@ translations:
     nav:
       services: Services
       shop: Parts
-      works: Work Examples
+      works: Our Work
       process: How We Work
-      about: About the Service
-      contact: Contact Us
+      about: About Us
+      contact: Contact
+    llms:
+      keyFacts: Key Facts
+      other: Others
+      languages: Other Languages
     header:
       menuOpenLabel: Menu
       menuCloseLabel: Close Menu
@@ -170,8 +178,8 @@ translations:
       tagline: Car service in Belgrade. Diagnostics, repairs, bodywork and painting, parts selection.
       servicesHeading: Services
       companyHeading: Service
-      contactHeading: Contact Us
-      hoursHeading: Opening Hours
+      contactHeading: Contact
+      hoursHeading: Working Hours
       hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
       privacyLabel: Privacy Policy
       rightsSuffix: All rights reserved.
@@ -187,43 +195,43 @@ translations:
       priceOnRequest: upon request
       allServices: All Services
       backToShop: All Parts
-      allWorks: All Work Examples
-      emptyWorks: Work examples will be available soon. For now, give us a call — we'll share what we've done on similar cars.
+      allWorks: All Our Work
+      emptyWorks: Work examples will be available soon. For now, please call us — we’ll tell you what we’ve done on similar vehicles.
     channels:
-      call: Call
+      call: Call Us
       whatsapp: WhatsApp
       viber: Viber
       telegram: Telegram
     form:
       heading: Book a Service
-      subheading: Describe what's wrong with your car. We'll call back to confirm details and provide time and cost.
+      subheading: Describe the issue with your car. We’ll call you back to confirm details and provide time and price.
       nameLabel: Name
       namePlaceholder: How should we address you
       contactLabel: Phone
       contactPlaceholder: +381 11 000 0000
-      contactChannelLabel: How can we reach you
+      contactChannelLabel: How to contact you
       channelPhone: Call
       countryLabel: Country Code
-      serviceLabel: What Do You Need
+      serviceLabel: What do you need
       servicePlaceholder: You can select multiple
       carLabel: Car
       carPlaceholder: Make, model, year
-      commentLabel: What's the issue
-      commentPlaceholder: Noise on bumps, check engine light on, need maintenance...
+      commentLabel: What seems to be the problem
+      commentPlaceholder: Noise on bumps, check engine light, needs service…
       submit: Submit Request
-      submitting: Submitting...
-      privacyNote: By submitting this form, you agree to our
+      submitting: Submitting…
+      privacyNote: By submitting the form, you agree to our
       privacyLinkText: privacy policy
       modalTitle: Book a Service
       requiredError: This field is required
-      errorPhone: Check the number — it seems to be incomplete
-      errorTelegram: Please provide your Telegram username — at least three characters
-      errorConsent: Without consent, we can't submit your request
+      errorPhone: Please check the number — it seems incomplete
+      errorTelegram: Please provide your Telegram nickname — at least three characters
+      errorConsent: Without consent, we cannot submit the request
     cookie:
-      notice: 'We store an anonymous identifier in the browser: it links your clicks on the contact buttons with the submitted request, so your inquiry is not lost.'
-      more: Learn more in the
+      notice: We store an anonymous identifier in your browser — it connects your clicks on contact buttons to the submitted request so that your inquiry isn't lost. We also use Yandex.Metrica to understand how visitors use the site. It records sessions — cursor movements, scrolling, and clicks; the request form is excluded from the recording.
+      more: Learn more in
       policyLink: privacy policy
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: 5ff2d8ef24005c68
+translatedFrom: 872df0f987053a81
