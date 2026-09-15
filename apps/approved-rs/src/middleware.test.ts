@@ -24,32 +24,22 @@ function makeContext(
   {
     acceptLanguage = '',
     cookie,
-    country,
-    geoDismissed = false,
   }: {
     acceptLanguage?: string;
     cookie?: string;
-    country?: string;
-    geoDismissed?: boolean;
   } = {},
 ) {
   return {
     url: new URL(url, 'https://approved.rs'),
-    locals: {} as { suggestedCountry?: { code: string } },
     request: {
       headers: {
         get: (name: string) =>
-          name === 'accept-language'
-            ? acceptLanguage
-            : name === 'x-vercel-ip-country'
-              ? (country ?? null)
-              : null,
+          name === 'accept-language' ? acceptLanguage : null,
       },
     },
     cookies: {
       set: vi.fn(),
       get: () => (cookie ? { value: cookie } : undefined),
-      has: () => geoDismissed,
     },
     redirect: vi.fn((path: string, status?: number) => ({ path, status })),
     rewrite: vi.fn((path: string) => ({ path })),
@@ -245,19 +235,6 @@ describe('onRequest', () => {
     });
     run(context);
     expect(context.rewrite).toHaveBeenCalledWith('/sr/');
-  });
-
-  it('suggests the visitor country on a locale home page, unless dismissed', () => {
-    const context = makeContext('/de/', { country: 'de' });
-    run(context);
-    expect(context.locals.suggestedCountry?.code).toBe('de');
-
-    const dismissed = makeContext('/de/', {
-      country: 'de',
-      geoDismissed: true,
-    });
-    run(dismissed);
-    expect(dismissed.locals.suggestedCountry).toBeUndefined();
   });
 
   it('keeps the query string on the cross-brand 301', () => {

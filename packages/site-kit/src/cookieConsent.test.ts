@@ -33,7 +33,14 @@ function click(selector: string): void {
 beforeEach(() => {
   localStorage.clear();
   document.body.innerHTML = '';
+  vi.useFakeTimers();
+  window.scrollY = 0;
 });
+
+function scrollTo(y: number): void {
+  window.scrollY = y;
+  window.dispatchEvent(new Event('scroll'));
+}
 
 describe('defineCookieConsent', () => {
   it('registers once per tag name', () => {
@@ -44,8 +51,43 @@ describe('defineCookieConsent', () => {
     expect(customElements.get(tagName)).toBe(first);
   });
 
-  it('asks a visitor who has not answered yet', () => {
-    expect(mount().hidden).toBe(false);
+  it('waits before asking a visitor who has not answered yet', () => {
+    const el = mount();
+    expect(el.hidden).toBe(true);
+    vi.advanceTimersByTime(6000);
+    expect(el.hidden).toBe(false);
+  });
+
+  it('asks as soon as the visitor scrolls past the fold', () => {
+    const el = mount();
+    scrollTo(100);
+    expect(el.hidden).toBe(true);
+    scrollTo(700);
+    expect(el.hidden).toBe(false);
+  });
+
+  it('never asks a visitor who answered while the timer was running', () => {
+    const el = mount();
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(newConsent(true, VERSION, new Date())),
+    );
+    vi.advanceTimersByTime(6000);
+    expect(el.hidden).toBe(true);
+  });
+
+  it('stays visible when reconnected after the reveal', () => {
+    const el = mount();
+    vi.advanceTimersByTime(6000);
+    (el as unknown as { connectedCallback: () => void }).connectedCallback();
+    expect(el.hidden).toBe(false);
+  });
+
+  it('drops a pending reveal when the element goes away', () => {
+    const el = mount();
+    el.remove();
+    vi.advanceTimersByTime(6000);
+    expect(el.hidden).toBe(true);
   });
 
   it('stays out of the way once an answer is stored', () => {
@@ -61,7 +103,9 @@ describe('defineCookieConsent', () => {
       STORAGE_KEY,
       JSON.stringify(newConsent(true, '2020-01-01', new Date())),
     );
-    expect(mount().hidden).toBe(false);
+    const el = mount();
+    vi.advanceTimersByTime(6000);
+    expect(el.hidden).toBe(false);
   });
 
   it('records an acceptance and announces it', () => {
@@ -101,6 +145,7 @@ describe('defineCookieConsent', () => {
 
   it('ignores a click on the banner that is not an answer', () => {
     const el = mount();
+    vi.advanceTimersByTime(6000);
     el.click();
     expect(el.hidden).toBe(false);
     expect(localStorage.getItem(STORAGE_KEY)).toBeNull();

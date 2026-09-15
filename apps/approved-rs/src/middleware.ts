@@ -1,11 +1,9 @@
-import type { APIContext } from 'astro';
 import { defineMiddleware } from 'astro:middleware';
 import { requestHasLocale } from 'astro:i18n';
 import { BRAND_SITES, brandLocale } from '@podbor/brands';
 import { LOCALE_COOKIE, createUnlocalizedMatcher } from '@podbor/site-kit';
 import { detectLocale } from './i18n/detectLocale';
 import { SUPPORTED_LOCALES } from './i18n/config';
-import { getCountry } from './utils/geo';
 
 // Pre-i18n legacy redirects (old service slugs). Kept here instead of
 // astro.config.mjs's `redirects` so the slug rewrite and the locale prefix
@@ -152,27 +150,6 @@ const isUnlocalized = createUnlocalizedMatcher({
   prefixes: UNLOCALIZED_PREFIXES,
 });
 
-// ISO 3166-1 alpha-2 → site country code, for the homepage's "we detected
-// you're in Germany, see our DE page" suggestion banner. Countries we don't
-// serve are intentionally left unmapped — those visitors just get the
-// default homepage.
-const GEO_MAP: Record<string, string> = {
-  DE: 'de',
-  RS: 'rs',
-  ES: 'es',
-  FR: 'fr',
-  IT: 'it',
-  PL: 'pl',
-};
-const GEO_DISMISS_COOKIE = 'geo-banner-dismissed';
-
-function applyGeoSuggestion(context: APIContext): void {
-  if (context.cookies.has(GEO_DISMISS_COOKIE)) return;
-  const ipCountry = context.request.headers.get('x-vercel-ip-country') ?? '';
-  const siteCode = GEO_MAP[ipCountry.toUpperCase()];
-  if (siteCode) context.locals.suggestedCountry = getCountry(siteCode);
-}
-
 export const onRequest = defineMiddleware((context, next) => {
   const { pathname, search } = context.url;
 
@@ -191,8 +168,6 @@ export const onRequest = defineMiddleware((context, next) => {
       context.request.headers.get('accept-language'),
       context.cookies.get(LOCALE_COOKIE)?.value,
     );
-    applyGeoSuggestion(context);
-
     return context.rewrite(`/${locale}/${search}`);
   }
 
@@ -221,13 +196,7 @@ export const onRequest = defineMiddleware((context, next) => {
     return context.redirect(`/${locale}${restructured}${search}`, 301);
   }
 
-  if (rewritten === pathname && requestHasLocale(context)) {
-    const locale = pathname.split('/')[1];
-    const isHome = pathname === `/${locale}/` || pathname === `/${locale}`;
-    if (isHome) applyGeoSuggestion(context);
-
-    return next();
-  }
+  if (rewritten === pathname && requestHasLocale(context)) return next();
 
   // Same production caveat as the legacy-slug redirects above: this branch
   // only fires for requests that reach this middleware at all. On Vercel,

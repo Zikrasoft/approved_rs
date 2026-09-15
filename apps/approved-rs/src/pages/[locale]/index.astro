@@ -1,10 +1,7 @@
 ---
-// No getStaticPaths — resolved per-request so it can read
-// Astro.locals.suggestedCountry (set by middleware) for the geo banner.
 export const prerender = false;
 import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import GeoBanner from '@/components/GeoBanner.astro';
 import ServiceQuickLinks from '@/components/ServiceQuickLinks.astro';
 import ContactCTA from '@/components/ContactCTA.astro';
 import CaseCatalogue from '@/components/CaseCatalogue.astro';
@@ -117,12 +114,6 @@ const geoCells = countries.map((country) => ({
       <ServiceQuickLinks variant="strip" />
     </div>
   </section>
-
-  {
-    Astro.locals.suggestedCountry && (
-      <GeoBanner detected={Astro.locals.suggestedCountry} />
-    )
-  }
 
   <section class="photo-hero relative border-b border-default">
     <div class="photo-hero-shot">

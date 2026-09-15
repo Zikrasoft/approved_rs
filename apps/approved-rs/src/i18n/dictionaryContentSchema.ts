@@ -62,8 +62,6 @@ export const dictionaryContentSchema = z
         alsoWorkingInLabel: z.string(),
         homeLabel: z.string(),
         faqHeading: z.string(),
-        whereFromLabel: z.string(),
-        otherCountryLabel: z.string(),
         viewAllCasesLabel: z.string(),
         closeLabel: z.string(),
         channelLabel: z.string(),

@@ -39,8 +39,6 @@ common:
   alsoWorkingInLabel: 'Также работаем в:'
   homeLabel: Главная
   faqHeading: Частые вопросы
-  whereFromLabel: Откуда вы?
-  otherCountryLabel: Другая страна
   viewAllCasesLabel: Все кейсы
   closeLabel: Закрыть
   channelLabel: Наш канал
@@ -97,8 +95,6 @@ translations:
       alsoWorkingInLabel: 'Also Operating In:'
       homeLabel: Home
       faqHeading: Frequently Asked Questions
-      whereFromLabel: Where are you from?
-      otherCountryLabel: Another Country
       viewAllCasesLabel: All Cases
       closeLabel: Close
       channelLabel: Our Channel
@@ -153,8 +149,6 @@ translations:
       alsoWorkingInLabel: 'Takođe radimo u:'
       homeLabel: Početna
       faqHeading: Česta pitanja
-      whereFromLabel: Odakle ste?
-      otherCountryLabel: Druga zemlja
       viewAllCasesLabel: Svi slučajevi
       closeLabel: Zatvori
       channelLabel: Naš kanal
@@ -209,8 +203,6 @@ translations:
       alsoWorkingInLabel: 'También trabajamos en:'
       homeLabel: Inicio
       faqHeading: Preguntas frecuentes
-      whereFromLabel: ¿De dónde eres?
-      otherCountryLabel: Otro país
       viewAllCasesLabel: Todos los casos
       closeLabel: Cerrar
       channelLabel: Nuestro canal
@@ -265,8 +257,6 @@ translations:
       alsoWorkingInLabel: 'Wir sind auch tätig in:'
       homeLabel: Startseite
       faqHeading: Häufige Fragen
-      whereFromLabel: Woher kommen Sie?
-      otherCountryLabel: Anderes Land
       viewAllCasesLabel: Alle Fälle
       closeLabel: Schließen
       channelLabel: Unser Kanal
@@ -280,4 +270,4 @@ translations:
         morePhotos: Weitere Fotos
         prev: Vorheriges Foto
         next: Nächstes Foto
-translatedFrom: 2592c5832f81eb5d
+translatedFrom: 453f92214272df20

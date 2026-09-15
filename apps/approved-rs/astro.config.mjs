@@ -10,9 +10,9 @@ import { BCP47_BY_LOCALE, localeConfig } from './src/i18n/config.ts';
 
 export default defineConfig({
   site: APPROVED.url,
-  // Static by default — 14 of 15 pages are fully static; the two API routes
-  // and the homepage (needs Astro.locals.suggestedCountry from middleware
-  // for the geo banner) opt into SSR individually via `prerender = false`
+  // Static by default — the two API routes and the homepage (bare '/' is
+  // rewritten to it by middleware, which Astro only allows into an
+  // on-demand route) opt into SSR individually via `prerender = false`
   // instead of every static page opting in via `prerender = true`.
   output: 'static',
   adapter: vercel(),
