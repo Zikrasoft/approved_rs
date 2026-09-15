@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { llmsHeadingsSchema } from '@podbor/i18n';
 
 const cookieSchema = z
   .object({
@@ -23,6 +24,7 @@ export const siteContentSchema = z
         contact: z.string(),
       })
       .strict(),
+    llms: llmsHeadingsSchema,
     header: z
       .object({
         menuOpenLabel: z.string(),

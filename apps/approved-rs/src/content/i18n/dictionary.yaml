@@ -10,6 +10,13 @@ navHint:
   vehicle-import: Привезём и растаможим
   vehicle-buyback: Выкупим вашу машину
   vehicle-inspection: Осмотрим ту, что нашли вы
+llms:
+  keyFacts: Ключевые факты
+  countries: Услуги по странам
+  cities: Автоподбор по городам
+  vehicleImport: Привоз авто
+  other: Прочее
+  languages: Другие языки
 header:
   menuLabel: Меню
   menuCloseLabel: Закрыть меню

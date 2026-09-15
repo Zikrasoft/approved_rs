@@ -15,9 +15,16 @@ export {
 export type { LocalizableEntry, LocalizedEntry } from './localizedEntry.ts';
 
 export {
-  LLMS_HEADINGS,
+  llmsHeadingsSchema,
   llmsLanguageLinks,
   llmsLink,
+  renderBrandLlmsTxt,
   renderLlmsTxt,
 } from './llmsTxt.ts';
-export type { LlmsHeadings, LlmsSection } from './llmsTxt.ts';
+export type {
+  BrandLlmsInput,
+  LlmsEntry,
+  LlmsHeadings,
+  LlmsLinkList,
+  LlmsSection,
+} from './llmsTxt.ts';

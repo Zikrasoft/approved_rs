@@ -1,10 +1,5 @@
 import { getCollection } from 'astro:content';
-import {
-  LLMS_HEADINGS,
-  llmsLanguageLinks,
-  llmsLink,
-  renderLlmsTxt,
-} from '@podbor/i18n';
+import { renderBrandLlmsTxt } from '@podbor/i18n';
 import { SITE_URL, SITE_NAME, STUDIO_ADDRESS } from '@/utils/constants';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { localizedWork, publishedWorks } from '@/utils/works';
@@ -15,71 +10,57 @@ import { getServicesContent } from '@/i18n/content/services';
 import { getSiteContent } from '@/i18n/content/site';
 import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 
+const url = (path: string) => `${SITE_URL}${path}`;
+
 export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const home = getHomeContent(locale);
   const pages = getPagesContent(locale);
   const services = getServicesContent(locale);
   const site = getSiteContent(locale);
-  const s = LLMS_HEADINGS[locale];
   const works = publishedWorks(await getCollection('works'));
 
-  return renderLlmsTxt(SITE_NAME, home.meta.description, [
-    {
-      heading: s.keyFacts,
-      items: [
-        ...home.hero.stats.map((stat) => `- ${stat.value} — ${stat.label}`),
-        `- ${pages.contact.addressLabel}: ${STUDIO_ADDRESS.street}, ${STUDIO_ADDRESS.district}, ${STUDIO_ADDRESS.city}`,
-        `- ${pages.contact.hoursLabel}: ${site.footer.hours}`,
-      ],
-    },
-    {
-      heading: site.nav.services,
-      items: [
-        llmsLink(
-          services.indexHeading,
-          `${SITE_URL}${PathBuilder.services(locale)}`,
-        ),
-        ...SERVICE_SLUGS.map((slug) =>
-          llmsLink(
-            services[slug].name,
-            `${SITE_URL}${PathBuilder.service(locale, slug)}`,
-            services[slug].short,
-          ),
-        ),
-      ],
-    },
-    {
-      heading: site.nav.works,
-      items: [
-        llmsLink(
-          pages.works.heading,
-          `${SITE_URL}${PathBuilder.works(locale)}`,
-        ),
-        ...works.map((work) =>
-          llmsLink(
-            localizedWork(work, locale).title,
-            `${SITE_URL}${PathBuilder.work(locale, work.id)}`,
-          ),
-        ),
-      ],
-    },
-    {
-      heading: s.other,
-      items: [
-        llmsLink(
-          site.common.homeLabel,
-          `${SITE_URL}${PathBuilder.home(locale)}`,
-        ),
-        llmsLink(site.nav.contact, `${SITE_URL}${PathBuilder.contact(locale)}`),
-        llmsLink(
-          site.footer.privacyLabel,
-          `${SITE_URL}${PathBuilder.privacy(locale)}`,
-        ),
-      ],
-    },
-    {
-      heading: s.languages,
-      items: llmsLanguageLinks(SITE_URL, SUPPORTED_LOCALES, locale),
-    },
-  ]);
+  return renderBrandLlmsTxt({
+    site: { name: SITE_NAME, url: SITE_URL, summary: home.meta.description },
+    headings: site.llms,
+    facts: [
+      ...home.hero.stats.map((stat) => `- ${stat.value} — ${stat.label}`),
+      `- ${pages.contact.addressLabel}: ${STUDIO_ADDRESS.street}, ${STUDIO_ADDRESS.district}, ${STUDIO_ADDRESS.city}`,
+      `- ${pages.contact.hoursLabel}: ${site.footer.hours}`,
+    ],
+    lists: [
+      {
+        heading: site.nav.services,
+        index: {
+          label: services.indexHeading,
+          href: url(PathBuilder.services(locale)),
+        },
+        entries: SERVICE_SLUGS.map((slug) => ({
+          label: services[slug].name,
+          href: url(PathBuilder.service(locale, slug)),
+          note: services[slug].short,
+        })),
+      },
+      {
+        heading: site.nav.works,
+        index: {
+          label: pages.works.heading,
+          href: url(PathBuilder.works(locale)),
+        },
+        entries: works.map((work) => ({
+          label: localizedWork(work, locale).title,
+          href: url(PathBuilder.work(locale, work.id)),
+        })),
+      },
+    ],
+    other: [
+      { label: site.common.homeLabel, href: url(PathBuilder.home(locale)) },
+      { label: site.nav.contact, href: url(PathBuilder.contact(locale)) },
+      {
+        label: site.footer.privacyLabel,
+        href: url(PathBuilder.privacy(locale)),
+      },
+    ],
+    locales: SUPPORTED_LOCALES,
+    locale,
+  });
 }

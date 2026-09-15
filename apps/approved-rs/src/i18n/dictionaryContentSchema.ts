@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { llmsHeadingsSchema } from '@podbor/i18n';
 
 // Single source of truth for the dictionary's ru/translated shape — used to
 // type getI18n()'s return value AND to validate every AI translation
@@ -10,6 +11,11 @@ import { z } from 'zod';
 // object"), which zod's `.string()` on each leaf catches directly.
 export const dictionaryContentSchema = z
   .object({
+    llms: llmsHeadingsSchema.extend({
+      countries: z.string(),
+      cities: z.string(),
+      vehicleImport: z.string(),
+    }),
     navHint: z
       .object({
         'vehicle-sourcing': z.string(),

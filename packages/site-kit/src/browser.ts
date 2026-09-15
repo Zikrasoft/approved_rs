@@ -1,4 +1,6 @@
 import { readOrCreateVisitorId } from './visitorId.ts';
+export { defineAnalytics, type AnalyticsConfig } from './analytics.ts';
+export { defineContactClickTracking } from './contactClick.ts';
 export { defineCtaReveal } from './ctaReveal.ts';
 export { defineLazyMapEmbed, mapEmbedSrc } from './mapEmbed.ts';
 export { defineLocaleChoice } from './localeCookie.ts';

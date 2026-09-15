@@ -111,86 +111,13 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
     }
 
     <script>
-      import {
-        CONSENT_STORAGE_KEY,
-        analyticsDeclined,
-      } from '@podbor/site-kit/browser';
-      import { YM_COUNTER_ID } from '@/utils/constants';
-      import { ymReachGoal } from '@/utils/metrika';
+      import { defineAnalytics } from '@podbor/site-kit/browser';
+      import { GA_MEASUREMENT_ID, YM_COUNTER_ID } from '@/utils/constants';
 
-      window.dataLayer = window.dataLayer || [];
-      function gtag(...args: unknown[]) {
-        window.dataLayer.push(args);
-      }
-      // Module scripts don't leak top-level declarations onto `window` the
-      // way classic/inline scripts do — explicit assignment needed so other
-      // scripts (e.g. the contact-click tracker below) can still call it.
-      window.gtag = gtag;
-      window.ymReachGoal = ymReachGoal;
-
-      window.loadAnalytics = function () {
-        if (window.__gaLoaded) return;
-        window.__gaLoaded = true;
-        const s = document.createElement('script');
-        s.async = true;
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-M17GZT849M';
-        document.head.appendChild(s);
-        gtag('js', new Date());
-        gtag('config', 'G-M17GZT849M');
-
-        /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-expressions, prefer-rest-params -- verbatim Yandex.Metrika install snippet, keep as shipped */
-        (function (
-          m: any,
-          e: Document,
-          t: string,
-          r: string,
-          i: string,
-          k?: any,
-          a?: any,
-        ) {
-          m[i] =
-            m[i] ||
-            function () {
-              (m[i].a = m[i].a || []).push(arguments);
-            };
-          m[i].l = Date.now();
-          for (let j = 0; j < document.scripts.length; j++) {
-            if (document.scripts[j].src === r) {
-              return;
-            }
-          }
-          ((k = e.createElement(t)),
-            (a = e.getElementsByTagName(t)[0]),
-            (k.async = 1),
-            (k.src = r),
-            a.parentNode.insertBefore(k, a));
-        })(
-          window,
-          document,
-          'script',
-          'https://mc.yandex.ru/metrika/tag.js?id=' + YM_COUNTER_ID,
-          'ym',
-        );
-        /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-expressions, prefer-rest-params */
-        window.ym!(YM_COUNTER_ID, 'init', {
-          ssr: true,
-          webvisor: true,
-          clickmap: true,
-          ecommerce: 'dataLayer',
-          accurateTrackBounce: true,
-          trackLinks: true,
-        });
-      };
-
-      // Analytics start with the page; only an explicit refusal holds them
-      // back, and that refusal takes effect from the next load — there is no
-      // supported way to unload a running Metrika counter.
-      try {
-        if (!analyticsDeclined(localStorage.getItem(CONSENT_STORAGE_KEY)))
-          window.loadAnalytics();
-      } catch {
-        window.loadAnalytics();
-      }
+      defineAnalytics({
+        ymCounterId: YM_COUNTER_ID,
+        gaMeasurementId: GA_MEASUREMENT_ID,
+      });
     </script>
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -226,7 +153,6 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
         DATA_OPEN_LEAD_MODAL,
         DATA_OPEN_PAGE_LEAD_MODAL,
       } from '@/utils/contactChannel';
-      import { ymReachGoal } from '@/utils/metrika';
       import { getOrCreateVisitorId } from '@/utils/visitorId';
 
       // Which contact channel people actually pick, site-wide — every
@@ -253,7 +179,7 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
           el.addEventListener('click', () => {
             const channel = el.dataset.contactChannel;
             window.gtag?.('event', 'contact_click', { channel });
-            ymReachGoal('contact_click', { channel });
+            window.ymReachGoal?.('contact_click', { channel });
             const opensLeadModal =
               el.hasAttribute(DATA_OPEN_LEAD_MODAL) ||
               el.hasAttribute(DATA_OPEN_PAGE_LEAD_MODAL);

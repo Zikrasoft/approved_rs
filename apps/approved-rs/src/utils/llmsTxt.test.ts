@@ -11,6 +11,18 @@ vi.mock('astro:content', () => ({
 
 const { generateLlmsTxt } = await import('./llmsTxt');
 const { SUPPORTED_LOCALES } = await import('@/i18n/config');
+const { translationIsCurrent } = await import('@podbor/i18n');
+const { dictionaryContentSchema } =
+  await import('@/i18n/dictionaryContentSchema');
+const dictionaryYaml = (await import('@/content/i18n/dictionary.yaml?raw'))
+  .default;
+
+// ru is hand-edited and CI translates on push; this assertion describes the
+// state CI produces and stands down while a translation is still pending.
+const translated = translationIsCurrent(
+  dictionaryYaml,
+  dictionaryContentSchema,
+);
 
 describe('generateLlmsTxt', () => {
   it('includes the hub and all 5 vehicle-import spokes for every locale', async () => {
@@ -43,10 +55,17 @@ describe('generateLlmsTxt', () => {
     expect(body.endsWith('\n')).toBe(true);
   });
 
-  it('en and sr produce different section headings than ru (real translation, not copied)', async () => {
-    const ru = await generateLlmsTxt('ru');
-    const en = await generateLlmsTxt('en');
-    expect(en).toContain('## Car Import');
-    expect(ru).not.toContain('## Car Import');
-  });
+  it.skipIf(!translated)(
+    'en headings are a real translation of the ru ones, not a copy',
+    async () => {
+      const ru = await generateLlmsTxt('ru');
+      const en = await generateLlmsTxt('en');
+      const headings = (body: string) =>
+        body.split('\n').filter((line) => line.startsWith('## '));
+      expect(headings(en)).toHaveLength(headings(ru).length);
+      headings(en).forEach((heading, index) => {
+        expect(heading).not.toBe(headings(ru)[index]);
+      });
+    },
+  );
 });

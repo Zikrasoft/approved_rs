@@ -1,9 +1,4 @@
-import {
-  LLMS_HEADINGS,
-  llmsLanguageLinks,
-  llmsLink,
-  renderLlmsTxt,
-} from '@podbor/i18n';
+import { llmsLanguageLinks, llmsLink, renderLlmsTxt } from '@podbor/i18n';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { SERVICES } from '@/utils/labels';
 import { getI18n } from '@/i18n/getI18n';
@@ -15,37 +10,6 @@ import { getFaq } from '@/i18n/content/faq';
 import { buildLocation } from '@/utils/seo';
 import { PathBuilder } from '@/utils/paths';
 import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
-
-const SECTION_HEADINGS: Record<
-  Locale,
-  Record<'countries' | 'cities' | 'vehicleImport', string>
-> = {
-  ru: {
-    countries: 'Услуги по странам',
-    cities: 'Автоподбор по городам',
-    vehicleImport: 'Привоз авто',
-  },
-  en: {
-    countries: 'Services by Country',
-    cities: 'Car Sourcing by City',
-    vehicleImport: 'Car Import',
-  },
-  sr: {
-    countries: 'Usluge po zemljama',
-    cities: 'Odabir vozila po gradovima',
-    vehicleImport: 'Uvoz vozila',
-  },
-  es: {
-    countries: 'Servicios por país',
-    cities: 'Búsqueda de autos por ciudad',
-    vehicleImport: 'Importación de autos',
-  },
-  de: {
-    countries: 'Leistungen nach Land',
-    cities: 'Fahrzeugbeschaffung nach Stadt',
-    vehicleImport: 'Fahrzeugimport',
-  },
-};
 
 const CASE_COUNT_LABELS: Record<
   Locale,
@@ -84,14 +48,13 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const nav = t.nav;
   const sc = getServicesContent(locale);
   const h = getHomeContent(locale);
-  const s = SECTION_HEADINGS[locale];
-  const shared = LLMS_HEADINGS[locale];
+  const s = t.llms;
   const cc = CASE_COUNT_LABELS[locale];
   const paymentFaq = getFaq(locale).general[0];
 
   return renderLlmsTxt(SITE_NAME, h.metaDescription, [
     {
-      heading: shared.keyFacts,
+      heading: s.keyFacts,
       items: [
         `- ${h.statClients.value} ${h.statClients.label}, ${countries.length} ${h.statCountries.label}, ${h.statYears.value} ${h.statYears.label}.`,
         ...(paymentFaq ? [`- ${paymentFaq.a}`] : []),
@@ -146,14 +109,14 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
       ],
     },
     {
-      heading: shared.other,
+      heading: s.other,
       items: [
         llmsLink(t.common.homeLabel, `${SITE_URL}${PathBuilder.home(locale)}`),
         llmsLink(nav.contacts, `${SITE_URL}${PathBuilder.contacts(locale)}`),
       ],
     },
     {
-      heading: shared.languages,
+      heading: s.languages,
       items: llmsLanguageLinks(SITE_URL, SUPPORTED_LOCALES, locale),
     },
   ]);

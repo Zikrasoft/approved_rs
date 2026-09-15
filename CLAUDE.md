@@ -113,13 +113,6 @@ Approved's trust/verification semantics.
   renders Serbian pages in Russian, and no test catches it. A future brand that
   authors in another language turns `SOURCE_LOCALE` into config; until one
   exists, that would be configuration for a single caller.
-- **`LLMS_HEADINGS` in `packages/i18n` is the second deliberate exception** to
-  "the locale list is config". The three `llms.txt` section headings that are
-  not already a nav entry are crawler-facing, identical for every brand, and
-  live outside the `translate-i18n.ts` pipeline on purpose — the same reasoning
-  as the operator-facing Russian bot copy. A brand serving a locale outside the
-  five listed there fails at compile time, not at render time; that is the
-  moment to turn it into config.
 - The app binds a package through a thin re-export file (`src/lib/store.ts`,
   `src/lib/telegram/index.ts`, `src/i18n/config.ts`). That keeps the ~950 lines
   of API-route call sites and ~190 `.astro` i18n call sites free of churn when

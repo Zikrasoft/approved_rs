@@ -37,16 +37,6 @@ const cc = getI18n(locale).common.cookie;
 </cookie-consent>
 
 <script>
-  import {
-    CONSENT_EVENT,
-    defineCookieConsent,
-    type ConsentDetail,
-  } from '@podbor/site-kit/browser';
-
+  import { defineCookieConsent } from '@podbor/site-kit/browser';
   defineCookieConsent();
-
-  document.addEventListener(CONSENT_EVENT, (event) => {
-    if ((event as CustomEvent<ConsentDetail>).detail.analytics)
-      window.loadAnalytics?.();
-  });
 </script>

@@ -1,9 +1,8 @@
 import { APPROVED } from '@podbor/brands';
 import type { Locale } from '@/i18n/config';
 
-// Single source for the Yandex.Metrika counter — referenced by BaseLayout's
-// tag init, LeadFormModal's lead_modal_open goal, and the contact_click goal.
 export const YM_COUNTER_ID = 111800377;
+export const GA_MEASUREMENT_ID = 'G-M17GZT849M';
 
 export const BRAND = APPROVED;
 export const SITE_URL = import.meta.env.SITE ?? BRAND.url;

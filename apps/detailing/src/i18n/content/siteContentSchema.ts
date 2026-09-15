@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { llmsHeadingsSchema } from '@podbor/i18n';
 
 const navSchema = z
   .object({
@@ -107,6 +108,7 @@ const cookieSchema = z
 export const siteContentSchema = z
   .object({
     nav: navSchema,
+    llms: llmsHeadingsSchema,
     header: headerSchema,
     footer: footerSchema,
     common: commonSchema,

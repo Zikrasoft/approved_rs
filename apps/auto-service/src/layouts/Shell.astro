@@ -152,21 +152,17 @@ const businessSchema = {
 
     <script>
       import { isTrackedContactChannel } from '@podbor/lead-crm/contact-channel';
-      import { getOrCreateVisitorId } from '@podbor/site-kit/browser';
+      import {
+        defineAnalytics,
+        defineContactClickTracking,
+      } from '@podbor/site-kit/browser';
+      import { GA_MEASUREMENT_ID, YM_COUNTER_ID } from '@/utils/constants';
 
-      document
-        .querySelectorAll<HTMLElement>('[data-contact-channel]')
-        .forEach((el) => {
-          el.addEventListener('click', () => {
-            const channel = el.dataset.contactChannel;
-            if (!isTrackedContactChannel(channel)) return;
-            const body = new FormData();
-            body.set('channel', channel);
-            body.set('source_url', location.href);
-            body.set('visitor_id', getOrCreateVisitorId());
-            navigator.sendBeacon('/api/contact-click', body);
-          });
-        });
+      defineAnalytics({
+        ymCounterId: YM_COUNTER_ID,
+        gaMeasurementId: GA_MEASUREMENT_ID,
+      });
+      defineContactClickTracking(isTrackedContactChannel);
     </script>
   </body>
 </html>

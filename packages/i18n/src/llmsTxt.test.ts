@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
-  LLMS_HEADINGS,
   llmsLanguageLinks,
   llmsLink,
+  renderBrandLlmsTxt,
   renderLlmsTxt,
 } from './llmsTxt.ts';
 
@@ -79,12 +79,87 @@ describe('renderLlmsTxt', () => {
   });
 });
 
-describe('LLMS_HEADINGS', () => {
-  it.each(['keyFacts', 'other', 'languages'] as const)(
-    'translates %s rather than repeating one language across locales',
-    (field) => {
-      const values = Object.values(LLMS_HEADINGS).map((h) => h[field]);
-      expect(new Set(values).size).toBe(values.length);
-    },
-  );
+describe('renderBrandLlmsTxt', () => {
+  const services = {
+    heading: 'Services',
+    index: { label: 'All services', href: 'https://x.rs/sr/services/' },
+    entries: [
+      { label: 'PPF', href: 'https://x.rs/sr/services/ppf/', note: 'Film' },
+    ],
+  };
+  const works = {
+    heading: 'Works',
+    index: { label: 'All works', href: 'https://x.rs/sr/works/' },
+    entries: [{ label: 'BMW X5', href: 'https://x.rs/sr/works/bmw-x5/' }],
+  };
+  const input = {
+    site: { name: 'Details', url: 'https://x.rs', summary: 'Studio' },
+    headings: { keyFacts: 'Facts', other: 'Other', languages: 'Languages' },
+    facts: ['- 7 years'],
+    lists: [services, works],
+    other: [{ label: 'Home', href: 'https://x.rs/sr/' }],
+    locales: ['ru', 'sr', 'en'],
+    locale: 'sr',
+  };
+
+  it('puts the index link above the entries of each list', () => {
+    expect(renderBrandLlmsTxt(input)).toBe(
+      [
+        '# Details',
+        '',
+        '> Studio',
+        '',
+        '## Facts',
+        '',
+        '- 7 years',
+        '',
+        '## Services',
+        '',
+        '- [All services](https://x.rs/sr/services/)',
+        '- [PPF](https://x.rs/sr/services/ppf/) — Film',
+        '',
+        '## Works',
+        '',
+        '- [All works](https://x.rs/sr/works/)',
+        '- [BMW X5](https://x.rs/sr/works/bmw-x5/)',
+        '',
+        '## Other',
+        '',
+        '- [Home](https://x.rs/sr/)',
+        '',
+        '## Languages',
+        '',
+        '- https://x.rs/ru/llms.txt',
+        '- https://x.rs/en/llms.txt',
+      ].join('\n') + '\n',
+    );
+  });
+
+  it('keeps the lists in the order the site gave them', () => {
+    const shop = {
+      heading: 'Shop',
+      index: { label: 'Parts', href: 'https://x.rs/sr/shop/' },
+      entries: [],
+    };
+    const body = renderBrandLlmsTxt({
+      ...input,
+      lists: [services, shop, works],
+    });
+    expect(body.indexOf('## Shop')).toBeGreaterThan(
+      body.indexOf('## Services'),
+    );
+    expect(body.indexOf('## Shop')).toBeLessThan(body.indexOf('## Works'));
+  });
+
+  it('omits a list the site does not have', () => {
+    expect(renderBrandLlmsTxt(input)).not.toContain('## Shop');
+  });
+
+  it('keeps a list whose only link is the index', () => {
+    const body = renderBrandLlmsTxt({
+      ...input,
+      lists: [{ ...works, entries: [] }],
+    });
+    expect(body).toContain('## Works\n\n- [All works](https://x.rs/sr/works/)');
+  });
 });

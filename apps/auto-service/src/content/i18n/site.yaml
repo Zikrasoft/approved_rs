@@ -5,6 +5,10 @@ nav:
   process: Как работаем
   about: О сервисе
   contact: Контакты
+llms:
+  keyFacts: Ключевые факты
+  other: Прочее
+  languages: Другие языки
 header:
   menuOpenLabel: Меню
   menuCloseLabel: Закрыть меню

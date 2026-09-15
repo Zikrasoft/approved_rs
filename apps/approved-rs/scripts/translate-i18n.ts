@@ -16,7 +16,7 @@ import { servicesContentSchema } from '../src/i18n/content/servicesContentSchema
 export const SECTIONS: readonly Section[] = [
   {
     path: 'src/content/i18n/dictionary.yaml',
-    fields: ['nav', 'navHint', 'header', 'footer', 'common'],
+    fields: dictionaryContentSchema.keyof().options,
     schema: dictionaryContentSchema,
     promptSubject: 'UI copy (navigation, header, footer, and shared labels)',
   },

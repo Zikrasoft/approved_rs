@@ -60,3 +60,9 @@ export function analyticsDeclined(raw: string | null): boolean {
     return false;
   }
 }
+
+export const CONSENT_EVENT = 'consent:answer';
+
+export interface ConsentDetail {
+  analytics: boolean;
+}

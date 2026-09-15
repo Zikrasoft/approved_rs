@@ -1,44 +1,41 @@
+import { z } from 'zod';
+
 export interface LlmsSection {
   heading: string;
   items: string[];
 }
 
-export interface LlmsHeadings {
-  keyFacts: string;
-  other: string;
-  languages: string;
+export const llmsHeadingsSchema = z
+  .object({
+    keyFacts: z.string(),
+    other: z.string(),
+    languages: z.string(),
+  })
+  .strict();
+
+export type LlmsHeadings = z.infer<typeof llmsHeadingsSchema>;
+
+export interface LlmsEntry {
+  label: string;
+  href: string;
+  note?: string;
 }
 
-export const LLMS_HEADINGS: Record<
-  'ru' | 'en' | 'sr' | 'es' | 'de',
-  LlmsHeadings
-> = {
-  ru: {
-    keyFacts: 'Ключевые факты',
-    other: 'Прочее',
-    languages: 'Другие языки',
-  },
-  en: {
-    keyFacts: 'Key Facts',
-    other: 'Other',
-    languages: 'Other Languages',
-  },
-  sr: {
-    keyFacts: 'Ključne činjenice',
-    other: 'Ostalo',
-    languages: 'Drugi jezici',
-  },
-  es: {
-    keyFacts: 'Datos clave',
-    other: 'Otros',
-    languages: 'Otros idiomas',
-  },
-  de: {
-    keyFacts: 'Wichtige Fakten',
-    other: 'Sonstiges',
-    languages: 'Weitere Sprachen',
-  },
-};
+export interface LlmsLinkList {
+  heading: string;
+  index: LlmsEntry;
+  entries: LlmsEntry[];
+}
+
+export interface BrandLlmsInput<L extends string> {
+  site: { name: string; url: string; summary: string };
+  headings: LlmsHeadings;
+  facts: string[];
+  lists: LlmsLinkList[];
+  other: LlmsEntry[];
+  locales: readonly L[];
+  locale: L;
+}
 
 const escapeLabel = (label: string): string => label.replace(/[[\]]/g, '\\$&');
 
@@ -46,6 +43,9 @@ export const llmsLink = (label: string, url: string, note?: string): string => {
   const link = `- [${escapeLabel(label)}](${url})`;
   return note ? `${link} — ${note}` : link;
 };
+
+const entryLine = ({ label, href, note }: LlmsEntry): string =>
+  llmsLink(label, href, note);
 
 export function llmsLanguageLinks<L extends string>(
   siteUrl: string,
@@ -68,4 +68,22 @@ export function renderLlmsTxt(
     lines.push('', `## ${section.heading}`, '', ...section.items);
   }
   return lines.join('\n') + '\n';
+}
+
+export function renderBrandLlmsTxt<L extends string>(
+  input: BrandLlmsInput<L>,
+): string {
+  const { site, headings, locales, locale } = input;
+  return renderLlmsTxt(site.name, site.summary, [
+    { heading: headings.keyFacts, items: input.facts },
+    ...input.lists.map((list) => ({
+      heading: list.heading,
+      items: [list.index, ...list.entries].map(entryLine),
+    })),
+    { heading: headings.other, items: input.other.map(entryLine) },
+    {
+      heading: headings.languages,
+      items: llmsLanguageLinks(site.url, locales, locale),
+    },
+  ]);
 }

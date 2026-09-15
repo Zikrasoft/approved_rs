@@ -4,6 +4,10 @@ nav:
   process: Как работаем
   prices: Цены
   contact: Контакты
+llms:
+  keyFacts: Ключевые факты
+  other: Прочее
+  languages: Другие языки
 header:
   primaryNavLabel: Основная навигация
   mobileNavLabel: Мобильное меню
