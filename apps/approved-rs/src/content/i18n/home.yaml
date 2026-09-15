@@ -117,23 +117,23 @@ heroPhotoAlt: Седан на европейской трассе
 ctaPhotoAlt: Чистый кузов и колесо автомобиля крупным планом
 translations:
   en:
-    metaTitle: Car Sourcing, Import, and Buyback in Europe
-    metaDescription: End-to-end car sourcing or import from Europe and China. Inspection and buyback. We serve Russian speakers worldwide.
+    metaTitle: Car Sourcing, Import and Buyback in Europe
+    metaDescription: Car sourcing in your country or importing from Europe and China – done for you. Inspection and buyback. We work for Russian speakers worldwide.
     journey:
       - title: Sourcing
-        desc: We find, inspect, and deliver a car within your budget — turn-key solutions in Germany, Spain, Serbia, and Switzerland.
+        desc: We find, verify, and deliver the car that fits your budget – done for you, in Germany, Spain, Serbia, and Switzerland.
       - title: Import
-        desc: Is the car not in your country? We'll source and import it from Germany, Europe, or China — all-inclusive, including customs clearance.
+        desc: Is the car not in your country? We’ll source and bring it from Germany, Europe, or China – done for you, including customs clearance.
       - title: Inspection
-        desc: An independent expert examines the car before purchase — over 100 points with video evidence.
-        note: Found the car yourself? We can arrange an inspection separately.
+        desc: An independent expert inspects the car before purchase – over 100 points with video.
+        note: Found a car yourself? We can arrange a separate inspection.
       - title: Buyback
-        desc: We handle the buyback and customs clearance for cars with foreign plates.
-        note: Is the car already abroad? We'll help you with the paperwork.
+        desc: We handle the buyback and customs clearance of cars with foreign license plates.
+        note: Is the car already abroad? We can help process it.
     heroLine1: Found.
-    heroLine2: Checked.
+    heroLine2: Verified.
     heroLine3: Delivered.
-    heroSubtext: We'll source, inspect, process, and import a car from Germany, Spain, or Serbia. One path, one team.
+    heroSubtext: We’ll source, verify, process, and deliver the car from Germany, Spain, or Serbia. One route, one team.
     statClients:
       value: 200+
       label: clients
@@ -142,22 +142,22 @@ translations:
     statYears:
       value: 5 years
       label: in the market
-    journeyHeading: 'One Path: From Search to Keys'
-    journeySubtext: Car sourcing, import, inspection, and buyback — not separate services, but stages of your car's journey. You can start from any step.
-    whyUsHeading: Why Choose Us
+    journeyHeading: 'One route: from search to keys'
+    journeySubtext: Car sourcing, import, inspection, and buyback— not separate services, but stages of one journey for your car. You can start at any step.
+    whyUsHeading: Why choose us
     whyUsSubtext: Buying a car from another country raises questions. Here’s how we address them.
     trustCards:
       - title: Full Transparency
-        text: 'We send a detailed checklist (100+ points) and videos of every detail: body, interior, undercarriage. You see the car as if you were standing beside it.'
+        text: 'We send a detailed checklist (100+ points) and videos of every detail: body, interior, chassis. You see the car as if you’re standing right next to it.'
       - title: Transaction Security
-        text: 'Step-by-step payment and clear conditions. We support documentation at all stages: processing, customs clearance, registration — no surprises.'
+        text: 'Stage payments and clear terms. We support the documents at every stage: registration, customs clearance, licensing— no surprises.'
       - title: Local Expertise
-        text: 'We know the specifics of each market: German autobahn mileage, Spanish car body features, and nuances of paperwork for foreign plates in Serbia.'
-    ctaEyebrow: Ready to start?
+        text: 'We know the specifics of each market: autobahn mileage in Germany, characteristics of Spanish cars, nuances of registering with foreign plates in Serbia.'
+    ctaEyebrow: Ready to get started?
     ctaHeading:
       line1: Tell us about your
-      line2: car
-      accentWord: ''
+      line2: vehicle
+      accentWord: car
     ctaSubtext: We respond within 2 hours. Consultation is free.
     ctaTelegramLabel: Message on Telegram
     ctaStatClients:
@@ -169,70 +169,70 @@ translations:
       value: 5 years
       label: experience
     ctaStatResponse:
-      value: 2h
+      value: 2 hrs
       label: response
     origin:
-      heading: Where We Source From
-      note: We can deliver to any country — we’ll discuss this upon request.
+      heading: Where we import from
+      note: We can deliver to any country – let’s discuss when you apply.
       euTitle: From Europe
-      euText: Germany, Spain, Switzerland, and other European countries. We source locally, inspect before purchase, handle export, transport, and customs clearance. The final price is provided before the deal, not after crossing the border.
+      euText: Germany, Spain, Switzerland, and other European countries. We procure locally, inspect before purchase, handle export, transport, and customs. We provide the total cost before the deal, not after the border.
       euCta: Calculate import from Europe
       chinaTitle: From China
-      chinaText: New and used cars from China through a verified partner. Sourcing within your budget, inspections before shipping, delivery, and customs clearance — the same process as for Europe.
+      chinaText: New and used cars from China through our trusted partner. We source based on your budget, inspect before shipping, deliver, and handle customs — in the same manner as with Europe.
       chinaCta: Calculate import from China
       chinaTags:
         - New
         - Used
-        - Turn-key
+        - Done for you
     catalogue:
-      heading: What You Can Get for This Budget
-      subtext: 'There are no ads here: every car is sourced, inspected, processed, and delivered to an individual. The price is what it was paid.'
+      heading: What can you get for this budget
+      subtext: 'There are no listings here: each car is found, inspected, processed, and delivered to a person. The price is what they paid.'
       budgetLabel: Budget for the car, up to
       allCountriesLabel: All countries
-      countTemplate: Matches {shown} out of {total}
+      countTemplate: '{shown} out of {total} match'
       moreLabel: Show more {rest}
-      emptyText: We haven't completed any deals in the selected country for this budget yet. Message us — we’ll honestly tell you what can be realistically obtained.
+      emptyText: So far, we haven’t closed deals in your chosen country within this budget. Contact us — we'll honestly say what’s realistically available.
     inspection:
-      heading: One Hundred Points, Four Key Areas
-      subtext: The checklist is extensive, but almost always we advise against a deal based on one of four areas. Click the number on the diagram — we’ll show what the expert looks at and what we’ve found there.
-      hint: Click a number on the diagram
+      heading: Hundred points, four critical zones
+      subtext: The checklist is long, but we often decline a deal based on one of four zones. Click on the number on the diagram to see what the expert checks and what we’ve found.
+      hint: Click the number on the diagram
       ctaLabel: Order an inspection
       pointsLabel: 100+ points
       mediaLabel: photos and videos
       reportLabel: report before decision
       zones:
         - title: Body and Paint
-          text: Thickness measurement on each panel, geometry of gaps, signs of welding and filler. This shows if there was any repair the seller forgot to mention.
+          text: Thickness gauge on each panel, geometry of gaps, signs of welding and filler. This reveals if repairs were made that the seller forgot to mention.
           points:
-            - Paint and touch-ups on panels
+            - Repainting and touch-ups on panels
             - Gaps and geometry after an impact
-            - Rust in sills and arches
-            - Originality of glass and optics
+            - Corrosion in sills and arches
+            - Authenticity of glass and lights
         - title: Engine and Transmission
-          text: Parameters on a warmed-up engine, transmission adaptations, errors in block memory. The most costly zone — and the most common reason for deal rejection.
+          text: Parameters on a warmed-up engine, transmission adaptations, errors in the block memory. This is the costliest zone and the most common reason for a deal’s failure.
           points:
             - Timing chain stretch
-            - Leaks and oil sweating
-            - Transmission adaptations and jolting
+            - Leaks and oil stains
+            - Transmission adaptations and jerks
             - Compression and smoke
-          finding: 'BMW M340 2025 model with low mileage: diagnostics showed a timing chain stretch of about 20%. Found before the deal — provided the client with leverage for negotiation.'
-        - title: Suspension and Brakes
-          text: Lift, play, suspension and brake system condition. German autobahn mileage and Balkan roads wear a car differently.
+          finding: 'BMW M340 2025 model with low mileage: diagnostics showed timing chain stretch of about 20%. Found it before the deal — gave the client leverage for negotiation.'
+        - title: Chassis and Brakes
+          text: Lift checks, play, condition of the suspension and braking system. Autobahn mileage in Germany and Balkan roads wear a car differently.
           points:
             - Play in control arms and ball joints
             - Shock absorber leaks
             - Wear on discs and pads
-            - Steering rack and bellows
-        - title: Electronics, VIN, and Documents
-          text: Service history by VIN, tampered odometer, electronics errors, and legal clarity — liens, registration bans, unresolved accidents.
+            - Steering rack and boots
+        - title: Electronics, VIN, and Documentation
+          text: Service history by VIN, tampered mileage, electronics errors, and legal purity — collateral, registration bans, unresolved accidents.
           points:
             - Mileage discrepancies with history
             - Errors in block memory
-            - Liens and registration bans
-            - Unresolved accidents and insurance events
+            - Collateral and registration ban
+            - Unresolved accidents and insurance claims
     findingLabel: 'Found:'
     heroPhotoAlt: Sedan on a European highway
-    ctaPhotoAlt: Clean body and wheel of the car in close-up
+    ctaPhotoAlt: Close-up of a clean car body and wheel
   sr:
     metaTitle: Auto izbor, uvoz i otkup automobila u Evropi
     metaDescription: Auto izbor u vašoj zemlji ili uvoz automobila iz Evrope i Kine — sve uključeno. Provera i otkup. Radimo za ruskojezične klijente širom sveta.
