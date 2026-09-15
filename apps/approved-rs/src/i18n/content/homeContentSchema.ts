@@ -95,7 +95,6 @@ export const homeContentSchema = z
       })
       .strict(),
     findingLabel: z.string(),
-    heroPhotoNote: z.string(),
     heroPhotoAlt: z.string(),
     ctaPhotoAlt: z.string(),
   })

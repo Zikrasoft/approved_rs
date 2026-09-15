@@ -31,7 +31,6 @@ import { PathBuilder } from '@/utils/paths';
 import { SLUG } from '@/utils/labels';
 import { EU_SPOKE_COUNTRIES } from '@/utils/vehicleImportCrossSell';
 import { getLocale } from '@/i18n/config';
-import { formatPrice } from '@/utils/price';
 import heroImage from '@/assets/hero-delivery.jpg';
 import closingImage from '@/assets/closing.jpg';
 
@@ -50,12 +49,6 @@ const published = allCases
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 const catalogueCases = published.slice(0, 6);
 const countries = getActiveCountries();
-
-// The hero photograph is a copy of this case's own image, so the caption under
-// it links to the case it came from. The case can be unpublished or renamed
-// without breaking the hero — the caption just disappears.
-const heroCase = published.find((c) => c.id === 'ineos-grenadier');
-const heroCountry = countries.find((c) => c.code === heroCase?.data.country);
 
 const schema = generateOrganizationSchema({
   url: SITE_URL,
@@ -149,21 +142,6 @@ const geoCells = countries.map((country) => ({
     <div class="photo-hero-body relative max-w-6xl mx-auto px-6">
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
         <div class="lg:col-span-3">
-          {
-            heroCase && (
-              <a
-                href={PathBuilder.case(locale, heroCase.id)}
-                class="hero-tag fade-up fade-up-1"
-              >
-                {heroCase.data.car}
-                {heroCountry && <> · {heroCountry[locale].name}</>}
-                {heroCase.data.price.value && (
-                  <> · {formatPrice(heroCase.data.price, locale)}</>
-                )}{' '}
-                · {h.heroPhotoNote}
-              </a>
-            )
-          }
           <h1
             class="hero-headline font-display font-bold mb-8 fade-up fade-up-2 text-primary"
           >

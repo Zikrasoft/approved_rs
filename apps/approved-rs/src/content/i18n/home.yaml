@@ -113,8 +113,7 @@ inspection:
         - Залог и запрет на регистрацию
         - Незакрытые ДТП и страховые события
 findingLabel: 'Нашли:'
-heroPhotoNote: передан клиенту
-heroPhotoAlt: Ineos Grenadier, подобранный в Германии и переданный клиенту
+heroPhotoAlt: Седан на европейской трассе
 ctaPhotoAlt: Чистый кузов и колесо автомобиля крупным планом
 translations:
   en:
@@ -232,7 +231,6 @@ translations:
             - Pledges and registration bans
             - Unresolved accidents and insurance claims
     findingLabel: 'Found:'
-    heroPhotoNote: handed over to the client
     heroPhotoAlt: Ineos Grenadier sourced in Germany and handed over to the client
     ctaPhotoAlt: Close-up of a clean car body and wheel
   sr:
@@ -350,7 +348,6 @@ translations:
             - Zalog i zabrana registracije
             - Nerazrešeni sudari i osiguravajuće nesreće
     findingLabel: 'Pronašli smo:'
-    heroPhotoNote: predan klijentu
     heroPhotoAlt: Ineos Grenadier, pronađen u Nemačkoj i predan klijentu
     ctaPhotoAlt: Čista karoserija i točak automobila u krupnom planu
   es:
@@ -468,7 +465,6 @@ translations:
             - Gravámenes y prohibición de registro
             - Accidentes no resueltos y eventos de seguros
     findingLabel: 'Encontramos:'
-    heroPhotoNote: entregado al cliente
     heroPhotoAlt: Ineos Grenadier, seleccionado en Alemania y entregado al cliente
     ctaPhotoAlt: Cuerpo limpio y rueda del automóvil en primer plano
   de:
@@ -586,7 +582,6 @@ translations:
             - Hypotheken und Sperren für die Registrierung
             - Ungeschlossene Unfälle und Versicherungsereignisse
     findingLabel: 'Gefunden:'
-    heroPhotoNote: an den Kunden übergeben
     heroPhotoAlt: Ineos Grenadier, in Deutschland ausgewählt und an den Kunden übergeben
     ctaPhotoAlt: Saubere Karosserie und Rad des Fahrzeugs im Detail
 translatedFrom: eb0184edd36d0b2d
