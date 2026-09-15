@@ -50,11 +50,6 @@ export const SOCIAL_SAME_AS = TELEGRAM_ENABLED
 
 export const CURRENCY = 'RSD';
 
-// TODO: setting either of these turns on analytics the privacy page currently
-// denies ("аналитических кук здесь нет") and the cookie banner never mentions.
-// Rewrite both ru strings and bump COOKIE_POLICY_VERSION in the same change.
-export const YM_COUNTER_ID =
-  Number(import.meta.env.PUBLIC_YM_COUNTER_ID) || undefined;
-export const GA_MEASUREMENT_ID = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
+export const YM_COUNTER_ID = 112647692;
 
-export const COOKIE_POLICY_VERSION = '2026-09-12';
+export const COOKIE_POLICY_VERSION = '2026-09-15';

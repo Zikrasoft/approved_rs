@@ -201,12 +201,9 @@ const businessSchema = {
         defineAnalytics,
         defineContactClickTracking,
       } from '@podbor/site-kit/browser';
-      import { GA_MEASUREMENT_ID, YM_COUNTER_ID } from '@/utils/constants';
+      import { YM_COUNTER_ID } from '@/utils/constants';
 
-      defineAnalytics({
-        ymCounterId: YM_COUNTER_ID,
-        gaMeasurementId: GA_MEASUREMENT_ID,
-      });
+      defineAnalytics({ ymCounterId: YM_COUNTER_ID });
       defineContactClickTracking(isTrackedContactChannel);
     </script>
   </body>
