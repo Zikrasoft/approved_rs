@@ -24,11 +24,11 @@ translations:
   sr:
     title: Range Rover Evoque
     body: |-
-      ## Uvoz automobila iz Nemačke u Srbiju — uz pratnju do spremnog vozila
+      ## Uvoz automobila iz Nemačke u Srbiju — uz pratnju do gotovog vozila
 
-      Obratio nam se klijent za **Range Rover Evoque iz Nemačke**. Pronašli smo odgovarajući automobil, izvršili profesionalni pregled pre kupovine i odmah otkrili karakterističan problem za ovaj motor — **produženu EZM lanac** (lanac za paljenje). Klijent je bio unapred upozoren na sve detalje, ali uzimajući u obzir stanje automobila, opremu i atraktivnu cenu, odlučio se baš za ovu opciju.
+      Obratio nam se klijent za **Range Rover Evoque iz Nemačke**. Pronašli smo odgovarajući automobil, sproveli profesionalni pregled pre kupovine i odmah otkrili karakterističan problem za taj motor — **proširenu lancu bregaste osovine**. Klijent je unapred bio upozoren na sve nijanse, ali s obzirom na stanje automobila, opremu i privlačnu cenu odlučio se upravo za ovu opciju.
 
-      Nakon kupovine, organizovali smo isporuku automobila u Srbiju, sproveli carinjenje i obavili potpunu tehničku pripremu u našoj radionici. Zamenjeni su **lanac GРM**, izvršen je **popravak turbine**, obavljeno je potpuno tehničko održavanje, uključujući zamenu ulja u motoru i **zamenu ulja u 9-stepenoj ZF 9HP menjaču**.
+      Nakon kupovine organizovali smo dostavu automobila u Srbiju, izvršili carinjenje i sproveli kompletnu tehničku pripremu u našoj radionici. Zamenjena je **lanac bregaste osovine**, izvršen je **popravak turbine**, obavljeno je potpuno tehničko održavanje, uključujući zamenu ulja u motoru i **zamenu ulja u 9-stepenoj automatskoj transmisiji ZF 9HP**.
 
       Na kraju, klijent je dobio potpuno servisiran i pouzdan automobil, spreman za korišćenje bez neprijatnih iznenađenja.
   es:
