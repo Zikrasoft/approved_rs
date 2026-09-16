@@ -187,10 +187,24 @@ Both new apps follow the same shape, and a third should too:
   applies to `src/lib/githubContents.ts` in approved-rs.
 - Empty content directories need a `.gitkeep` — git does not track them, and
   both the glob loader and the registry test fail on a fresh clone without it.
-- After hand-editing any `src/content/i18n/*.yaml`, run
-  `node --experimental-strip-types scripts/translate-i18n.ts --record-hashes`.
-  Without a current `translatedFrom` hash the next CI translate run hands the
-  hand-written Serbian back to the model and commits the result.
+- **A hand-written translation survives on its own, in its own commit.** The
+  translate job compares each string in the file against what the cache says it
+  produced; a value that differs was written by a person, so it is adopted and
+  served from then on — but only while `translatedFrom` says the file's
+  translations were made from the Russian it holds now. That condition is what
+  separates a person's edit from stale machine output left behind by a
+  reordered list or a chunk that failed last run. The catch is the word _alone_, and it is wider than it
+  looks: `translatedFrom` hashes the file's **whole** Russian source, so editing
+  any Russian string in a file discards every hand-written translation in that
+  file, not only the one whose source moved. Fix translations in one commit and
+  Russian in another. The job logs `overwriting hand-written <path>` for each
+  dropped translation whose own Russian is unchanged — the one whose Russian you
+  just edited is replaced without a line in the log, because there is no cache
+  entry under its new key to compare against. An unsafe hand-edit — a dropped `{placeholder}`, a Latin stem on a
+  Cyrillic ending, a blank — is refused with a warning; the cached translation
+  is served instead, or the string is retranslated if there is none. Adopting
+  it would fail the whole-file guard on every subsequent run and wedge the
+  pipeline.
 
 ## Commands
 
@@ -220,9 +234,14 @@ directory, so they must run from inside the app:
 
 ```bash
 cd apps/approved-rs
-node --experimental-strip-types scripts/translate-i18n.ts   # dry-run i18n YAML translation (needs OPENAI_API_KEY)
-node --experimental-strip-types scripts/translate-cases.ts  # dry-run case-study translation
+node --experimental-strip-types scripts/translate-i18n.ts   # i18n YAML (needs OPENAI_API_KEY)
+node --experimental-strip-types scripts/translate-cases.ts  # case studies
 ```
+
+Neither has a dry-run mode: both call OpenAI, rewrite the YAML or the
+frontmatter, move `translatedFrom` and write `translations.cache.json`.
+Translation belongs to CI — run these locally only to debug the scripts
+themselves, and expect a diff to commit or discard afterwards.
 
 Dev-only filesystem code in an SSR route must sit inside an
 `if (import.meta.env.DEV)` block with its `node:fs`/`node:path` imports done
@@ -268,7 +287,7 @@ a commit but cannot run the review itself.
 - **Case studies** (`src/content/cases` on approved.rs, `src/content/works` on the two brand sites, schemas in each app's `src/content.config.ts`) are Keystatic-managed Markdown collections. Admin writes `title`/`car`/`price`/etc. and the RU `title`/`body` only; a `translations: { en, sr, es, de }` field on the same entry (not a separate collection) holds the other four locales, each optional — missing/failed falls back to RU rather than breaking the page.
 - **UI/site copy** (`src/content/i18n/*.yaml`: `dictionary`, `faq`, `home`, `pages`, `meta`, `leadForm`, `promoBanners`, `services`) is flat YAML, read via `src/i18n/content/*.ts` + a matching `*ContentSchema.ts` (zod), all going through the shared `loadI18nSection()` helper (`src/i18n/loadI18nSection.ts`, a thin binding over `@podbor/i18n`'s `createSectionLoader`) — it parses the YAML once at module load, validates RU against the schema (throws loudly on a bad file instead of failing at render time), and falls back to RU per-locale if a translation fails validation. `getI18n()` (`src/i18n/getI18n.ts`) additionally merges in `src/i18n/dictionaries/templates.ts` — the handful of interpolation functions (e.g. gallery alt-text templates) that can't be represented as static YAML strings.
 
-**Both content systems share one auto-translate mechanism:** admin/dev only ever hand-writes RU. The `translate` job in `.github/workflows/ci.yml` runs `scripts/translate-cases.ts` and `scripts/translate-i18n.ts` on every push (any branch, so translations land in a feature branch before merge, not after) and commits the result back. The `translate` job itself stays unconditional rather than path-filtered — the scripts are hash-gated and exit in milliseconds when nothing changed, and every job downstream reads the SHA it left behind, so untranslated content cannot reach production. **Filtering happens one job later and on a different axis:** the `scope` step in `verify` works out which apps are stale in production and both deploy jobs are gated on that list, so a push to `main` deploys only the sites it actually changed. The base of that comparison is a per-app `refs/tags/deployed/<app>` tag each deploy job moves after it succeeds — deliberately not the previous commit, which would never retry an app whose deploy failed and which has not changed since. Every unknown (no tag yet, a force-push, a turbo crash, unparseable output) answers "deploy". This is not the `gate`/`paths:` arrangement that double-deployed `main` before: there is one answer rather than two, computed from real git history inside an existing checkout instead of the push payload's `commits` array, which GitHub sends as `null` on merge commits. Each script hashes the RU source and stores that hash (`translatedFrom`) alongside the translations, so a rerun only retranslates locales whose RU actually changed — everything else is left untouched. Both call through `scripts/lib/openaiChat.ts` (official `openai` SDK) and validate the AI's response with `scripts/lib/assertSafeTranslation.ts`, which rejects a translation that introduces HTML the RU source didn't already have (a stored-XSS guard on an otherwise-unreviewed auto-commit path — case bodies are rendered as markdown via `src/lib/safeMarked.ts`, which itself sanitizes with `sanitize-html`). Needs `OPENAI_API_KEY` as a GitHub Actions secret (separate from Vercel's env vars); without it the job fails at the translate step but doesn't touch already-translated content.
+**Both content systems share one auto-translate mechanism:** admin/dev only ever hand-writes RU. The `translate` job in `.github/workflows/ci.yml` runs each app's `scripts/translate-i18n.ts` plus `scripts/translate-cases.ts` on approved.rs and `scripts/translate-works.ts` on the two brand sites, on every push (any branch, so translations land in a feature branch before merge, not after) and commits the result back. The `translate` job itself stays unconditional rather than path-filtered — every string is looked up in the leaf cache first, so a run with nothing new makes no OpenAI request at all, and every job downstream reads the SHA it left behind, so untranslated content cannot reach production. **Filtering happens one job later and on a different axis:** the `scope` step in `verify` works out which apps are stale in production and both deploy jobs are gated on that list, so a push to `main` deploys only the sites it actually changed. The base of that comparison is a per-app `refs/tags/deployed/<app>` tag each deploy job moves after it succeeds — deliberately not the previous commit, which would never retry an app whose deploy failed and which has not changed since. Every unknown (no tag yet, a force-push, a turbo crash, unparseable output) answers "deploy". This is not the `gate`/`paths:` arrangement that double-deployed `main` before: there is one answer rather than two, computed from real git history inside an existing checkout instead of the push payload's `commits` array, which GitHub sends as `null` on merge commits. **The unit of work is one string, not one file.** `packages/i18n/src/translate/leafCache.ts` keys a committed cache on the triple (system prompt, model, Russian string), so a rerun asks the model only for the strings whose Russian actually moved — the rest come back from `apps/<app>/src/content/translations.cache.json`. The first CI translate run on this branch creates it — it is not in the repository yet. Once there it must stay committed: deleting it regenerates the whole corpus at OpenAI's price. The cache is keyed by file path, so renaming a case directory drops its block and the next run adopts the committed translations as if they were hand-written, which quietly exempts that file from the next prompt fix. Editing the prompt or the model changes the fingerprint and regenerates everything that prompt produced, which is the deliberate switch for a prompt fix. `translatedFrom` still records the hash of the whole RU source, and is what tells the job whether the committed translations correspond to the Russian in the file right now — the condition a hand-written translation is adopted under. Both scripts call through `packages/i18n/src/translate/openaiChat.ts` (official `openai` SDK) and validate the AI's response with `packages/i18n/src/translate/assertSafeTranslation.ts`, which rejects a translation that introduces HTML the RU source didn't already have (a stored-XSS guard on an otherwise-unreviewed auto-commit path — case bodies are rendered as markdown via `src/lib/safeMarked.ts`, which itself sanitizes with `sanitize-html`). Needs `OPENAI_API_KEY` as a GitHub Actions secret (separate from Vercel's env vars); without it the job fails at the translate step but doesn't touch already-translated content.
 
 **Lead capture pipeline (`@podbor/lead-crm`, bound in `src/lib/crm.ts` + `src/lib/crmBot.ts`):** form submissions (`api/leads.ts`) and call-button clicks (`api/contact-click.ts`) both funnel through `notifyLead`, which stores the lead and notifies Telegram via `waitUntil()` (fire-and-forget after the response redirects). Leads live in a single JSON blob on Vercel Blob (`data/leads.json`), not a database — every mutation goes through `updateLeads()`, a compare-and-swap loop with jittered exponential backoff so two concurrent writers (e.g. a bot button edit racing a new form submission) desync instead of retry-colliding. Storage sits behind a `LeadStorage` interface, so moving to Postgres later is one adapter rather than a rewrite. `api/telegram-webhook.ts` handles the bot side (status changes, deal-amount/commission prompts, postpone/remind flow) driven by the same store. `api/reminders.ts` is a Vercel Cron job (needs `CRON_SECRET`) that pushes due `postponed` leads back to the owner.
 

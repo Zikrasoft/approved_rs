@@ -3,10 +3,17 @@ import { join } from 'node:path';
 import { parseDocument } from 'yaml';
 import { assertSafeTranslation } from './assertSafeTranslation.ts';
 import { getOrCreateTranslationsMap } from './getOrCreateTranslationsMap.ts';
-import { hasRealTranslation } from './hasRealTranslation.ts';
-import { callOpenAiJson } from './openaiChat.ts';
+import {
+  blockIsEmpty,
+  DEFAULT_CACHE_PATH,
+  loadCache,
+  pruneMissingFiles,
+  saveCache,
+  type CacheBlock,
+  type CacheFile,
+} from './leafCache.ts';
 import { sha256Hex } from './sha256Hex.ts';
-import { decideAction } from './translateDecision.ts';
+import { translateLeaves } from './translateLeaves.ts';
 import { errorMessage } from './errorMessage.ts';
 
 export interface CaseTranslation {
@@ -16,8 +23,6 @@ export interface CaseTranslation {
 }
 
 export type CaseOutcome = 'translated' | 'backfilled' | 'skipped';
-
-const CASE_FIELDS = ['title', 'body'] as const;
 
 const FIELD_GUIDANCE: Record<string, string> = {
   car:
@@ -32,6 +37,7 @@ export interface CaseTranslatorOptions<L extends string> {
   subject: string;
   model?: string;
   extraFields?: readonly string[];
+  cachePath?: string;
 }
 
 export function splitFrontmatter(raw: string): {
@@ -58,68 +64,40 @@ export function createCaseTranslator<L extends string>({
   subject,
   model,
   extraFields = [],
+  cachePath = DEFAULT_CACHE_PATH,
 }: CaseTranslatorOptions<L>) {
   const names = new Map<string, string>(Object.entries<string>(languageName));
 
-  async function translateCase(
-    source: CaseTranslation,
-    targetLocale: L,
-    apiKey: string,
-    extras: readonly string[] = [],
-  ): Promise<CaseTranslation> {
-    const shape = [...CASE_FIELDS, ...extras]
-      .map((field) => `"${field}": string`)
-      .join(', ');
+  function buildCasePrompt(targetLocale: L, extras: readonly string[]): string {
     const guidance = extras
       .map((field) => FIELD_GUIDANCE[field])
       .filter(Boolean)
       .map((sentence) => ` ${sentence}`)
       .join('');
-    const extraLines = extras
-      .map((field) => `\n${field}: ${source[field]}`)
-      .join('');
-
-    const raw = await callOpenAiJson({
-      apiKey,
-      model,
-      systemPrompt:
-        `You translate ${subject} from Russian into ${names.get(targetLocale)} ` +
-        `for ${businessDescription}. ` +
-        'Translate the MEANING naturally and idiomatically, the way a native speaker would actually write ' +
-        'this case study — never a literal word-for-word translation. Keep markdown formatting (headings, ' +
-        'bold, lists) intact. Keep car makes/models, prices, and place names as they would normally appear ' +
-        `in the target language.${guidance} Respond with a JSON object: {${shape}}.`,
-      userContent: `Title: ${source.title}${extraLines}\n\nBody:\n${source.body}`,
-    });
-
-    const parsed = raw as Partial<CaseTranslation>;
-    if (!parsed.title?.trim() || !parsed.body?.trim()) {
-      throw new Error('translate response missing title/body');
-    }
-    const translation: CaseTranslation = {
-      title: parsed.title,
-      body: parsed.body,
-    };
-    for (const field of extras) {
-      if (!parsed[field]?.trim()) {
-        throw new Error(`translate response missing ${field}`);
-      }
-      translation[field] = parsed[field];
-    }
-    assertSafeTranslation(source, translation, '');
-    return translation;
+    return (
+      `You translate ${subject} from Russian into ${names.get(targetLocale)} ` +
+      `for ${businessDescription}. ` +
+      'Translate the MEANING naturally and idiomatically, the way a native speaker would actually write ' +
+      'this case study — never a literal word-for-word translation. Keep markdown formatting (headings, ' +
+      'bold, lists) intact. Keep car makes/models, prices, and place names as they would normally appear ' +
+      `in the target language.${guidance} The input is a flat JSON object whose keys are field names ` +
+      'and whose values are the strings to translate. Respond with a JSON object having EXACTLY the ' +
+      'same keys, with each value translated — never translate the keys themselves.'
+    );
   }
 
   async function processFile(
     path: string,
     apiKey: string,
+    cache: CacheFile,
   ): Promise<CaseOutcome> {
     const raw = readFileSync(path, 'utf-8');
     const { frontmatter, body } = splitFrontmatter(raw);
     const doc = parseDocument(frontmatter);
     const translationsNode = getOrCreateTranslationsMap(doc, path);
 
-    const title = String(doc.get('title'));
+    const rawTitle = doc.get('title');
+    const title = typeof rawTitle === 'string' ? rawTitle : '';
     const extras = extraFields.filter(
       (field) =>
         typeof doc.get(field) === 'string' && String(doc.get(field)).trim(),
@@ -127,40 +105,68 @@ export function createCaseTranslator<L extends string>({
     const source: CaseTranslation = { title, body: body.trim() };
     for (const field of extras) source[field] = String(doc.get(field));
 
+    if (!title.trim() || !source.body) {
+      console.warn(`- ${path} (title or body is empty, not translated)`);
+      return 'skipped';
+    }
+
     const currentHash = hashSource(source, extras);
     const storedHash = doc.get('translatedFrom') as string | undefined;
 
-    const action = decideAction({
-      targetLocales,
-      storedHash,
-      currentHash,
-      hasReal: (locale) =>
-        hasRealTranslation(translationsNode, locale, [
-          ...CASE_FIELDS,
-          ...extras,
-        ]),
-    });
+    const committed = (doc.toJS() as { translations: Record<string, unknown> })
+      .translations;
 
-    if (action.kind === 'skip') return 'skipped';
+    const translationsAreCurrent = storedHash === currentHash;
 
-    if (action.kind === 'backfill') {
+    const block: CacheBlock = cache[path] ?? {};
+    const neverTranslated = blockIsEmpty(block);
+    cache[path] = block;
+
+    const used = new Set<string>();
+    let requests = 0;
+    let wrote = false;
+
+    for (const locale of targetLocales) {
+      const existing = committed[locale];
+      const result = await translateLeaves({
+        source,
+        existing,
+        block,
+        translationsAreCurrent,
+        neverTranslated,
+        systemPrompt: buildCasePrompt(locale, extras),
+        apiKey,
+        model,
+      });
+      requests += result.requests;
+      for (const key of result.used) used.add(key);
+
+      const translation = result.value as CaseTranslation;
+      assertSafeTranslation(source, translation, '');
+
+      if (JSON.stringify(existing) !== JSON.stringify(translation)) {
+        translationsNode.set(locale, translation);
+        wrote = true;
+      }
+    }
+
+    cache[path] = Object.fromEntries(
+      Object.entries(block).filter(([key]) => used.has(key)),
+    );
+
+    if (storedHash !== currentHash) {
       doc.set('translatedFrom', currentHash);
+      wrote = true;
+    }
+    if (wrote) {
       writeFileSync(
         path,
         `---\n${doc.toString({ lineWidth: 0 }).trimEnd()}\n---\n${body}`,
       );
-      return 'backfilled';
     }
 
-    for (const locale of action.locales) {
-      const translation = await translateCase(source, locale, apiKey, extras);
-      translationsNode.set(locale, translation);
-    }
-    doc.set('translatedFrom', currentHash);
-
-    const newFrontmatter = doc.toString({ lineWidth: 0 }).trimEnd();
-    writeFileSync(path, `---\n${newFrontmatter}\n---\n${body}`);
-    return 'translated';
+    if (requests > 0) return 'translated';
+    return wrote ? 'backfilled' : 'skipped';
   }
 
   async function run(caseDirs: readonly string[]): Promise<number> {
@@ -178,6 +184,13 @@ export function createCaseTranslator<L extends string>({
       }
     }
 
+    let cache: CacheFile;
+    try {
+      cache = loadCache(cachePath);
+    } catch (err) {
+      console.error(`✗ ${cachePath}: ${errorMessage(err)}`);
+      return 1;
+    }
     console.log(`Found ${files.length} case files.`);
     let translated = 0;
     let backfilled = 0;
@@ -186,7 +199,7 @@ export function createCaseTranslator<L extends string>({
 
     for (const file of files) {
       try {
-        const result = await processFile(file, apiKey);
+        const result = await processFile(file, apiKey, cache);
         if (result === 'translated') {
           translated++;
           console.log(`✓ ${file}`);
@@ -195,12 +208,18 @@ export function createCaseTranslator<L extends string>({
           console.log(`~ ${file} (recorded hash, no translation needed)`);
         } else {
           skipped++;
-          console.log(`- ${file} (up to date)`);
+          console.log(`- ${file} (nothing to translate)`);
         }
       } catch (err) {
         failed++;
         console.error(`✗ ${file}: ${errorMessage(err)}`);
       }
+      saveCache(cachePath, cache);
+    }
+
+    if (failed === 0) {
+      pruneMissingFiles(cache);
+      saveCache(cachePath, cache);
     }
 
     console.log(
@@ -209,5 +228,5 @@ export function createCaseTranslator<L extends string>({
     return failed > 0 ? 1 : 0;
   }
 
-  return { translateCase, processFile, run };
+  return { processFile, run };
 }

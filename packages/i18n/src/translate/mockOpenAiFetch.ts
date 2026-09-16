@@ -36,3 +36,30 @@ export function stubOpenAiFetch(
     }),
   );
 }
+
+export function stubTranslate(transform: (text: string) => string): void {
+  stubOpenAiFetch((content) =>
+    Object.fromEntries(
+      Object.entries(JSON.parse(content) as Record<string, string>).map(
+        ([path, text]) => [path, transform(text)],
+      ),
+    ),
+  );
+}
+
+function sentMessages(index: 0 | 1): string[] {
+  return (
+    fetch as unknown as { mock: { calls: [string, { body: string }][] } }
+  ).mock.calls.map(
+    (call) =>
+      (JSON.parse(call[1].body) as { messages: { content: string }[] })
+        .messages[index]!.content,
+  );
+}
+
+export const systemPrompts = (): string[] => sentMessages(0);
+
+export const sentPayloads = (): Record<string, string>[] =>
+  sentMessages(1).map(
+    (content) => JSON.parse(content) as Record<string, string>,
+  );

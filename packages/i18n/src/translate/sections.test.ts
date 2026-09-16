@@ -1,28 +1,29 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { mkdtempSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  mkdtempSync,
+  rmSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parseDocument, stringify } from 'yaml';
 import { z } from 'zod';
 import {
-  chunkByKey,
-  mergeChunks,
+  buildSectionPrompt,
   createSectionTranslator,
-  hashSource,
   type Section,
 } from './sections.ts';
+import { hashSource } from './hashSource.ts';
+import { translationIsCurrent } from '../translationIsCurrent.ts';
+import { loadCache, type CacheFile } from './leafCache.ts';
 import {
-  stubOpenAiResponse,
-  stubOpenAiFetch,
   openAiErrorResponse,
+  sentPayloads,
+  stubOpenAiFetch,
+  stubTranslate,
 } from './mockOpenAiFetch.ts';
-
-const { translateSection, processSection, recordHashes, run } =
-  createSectionTranslator({
-    targetLocales: ['en', 'sr'] as const,
-    languageName: { en: 'English', sr: 'Serbian (Latin script)' },
-    businessDescription: 'a test business',
-  });
 
 const navSchema = z
   .object({
@@ -36,517 +37,617 @@ const RU_NAV = {
   footer: { tagline: 'Слоган' },
 };
 
-const NAV_SECTION: Section = {
-  path: '',
+const NAV_SECTION: Omit<Section, 'path'> = {
   fields: ['nav', 'footer'],
   schema: navSchema,
   promptSubject: 'UI copy',
 };
 
-const faqSchema = z
-  .object({
-    general: z.array(z.object({ q: z.string(), a: z.string() }).strict()),
-    cityExpert: z.object({ q: z.string(), a: z.string() }).strict(),
-  })
-  .strict();
+let dir: string;
+let cachePath: string;
 
-const RU_FAQ = {
-  general: [{ q: 'Сколько это стоит?', a: 'По запросу.' }],
-  cityExpert: { q: 'Эксперт в городе?', a: 'Да.' },
-};
-
-const FAQ_SECTION: Section = {
-  path: '',
-  fields: ['general', 'cityExpert'],
-  schema: faqSchema,
-  promptSubject: 'FAQ entries',
-};
-
-function upper<T>(v: T): T {
-  if (typeof v === 'string') return v.toUpperCase() as T;
-  if (Array.isArray(v)) return v.map(upper) as T;
-  if (typeof v === 'object' && v !== null) {
-    return Object.fromEntries(
-      Object.entries(v).map(([k, vv]) => [k, upper(vv)]),
-    ) as T;
-  }
-  return v;
+function translator(
+  cache = cachePath,
+  businessDescription = 'a test business',
+) {
+  return createSectionTranslator({
+    targetLocales: ['en', 'sr'] as const,
+    languageName: { en: 'English', sr: 'Serbian (Latin script)' },
+    businessDescription,
+    cachePath: cache,
+  });
 }
 
+function writeSection(
+  name: string,
+  ru: Record<string, unknown> = RU_NAV,
+  extra: Record<string, unknown> = {},
+): string {
+  const file = join(dir, name);
+  writeFileSync(file, stringify({ ...ru, ...extra }));
+  return file;
+}
+
+function section(file: string): Section {
+  return { ...NAV_SECTION, path: file };
+}
+
+const translationsOf = (file: string) =>
+  (parseDocument(readFileSync(file, 'utf-8')).toJS() as Record<string, unknown>)
+    .translations as Record<string, Record<string, unknown>>;
+
+beforeEach(() => {
+  dir = mkdtempSync(join(tmpdir(), 'sections-'));
+  cachePath = join(dir, 'translations.cache.json');
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  rmSync(dir, { recursive: true, force: true });
+});
+
 describe('hashSource', () => {
-  it('is stable for the same object', () => {
-    expect(hashSource({ nav: { home: 'Главная' } })).toBe(
-      hashSource({ nav: { home: 'Главная' } }),
-    );
-  });
-
-  it('changes when a deeply nested leaf changes', () => {
-    expect(hashSource({ nav: { home: 'Главная' } })).not.toBe(
-      hashSource({ nav: { home: 'Главная страница' } }),
-    );
-  });
-
-  it('changes when a key is added or removed', () => {
-    expect(hashSource({ nav: { home: 'Главная' } })).not.toBe(
-      hashSource({ nav: { home: 'Главная', cases: 'Кейсы' } }),
+  it('is stable for the same data and moves when the data does', () => {
+    expect(hashSource(RU_NAV)).toBe(hashSource({ ...RU_NAV }));
+    expect(hashSource(RU_NAV)).not.toBe(
+      hashSource({ ...RU_NAV, footer: { tagline: 'Другой' } }),
     );
   });
 });
 
-describe('translateSection', () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
+describe('buildSectionPrompt', () => {
+  it('names the subject, the language and the business', () => {
+    const prompt = buildSectionPrompt('UI copy', 'German', 'a car service');
+    expect(prompt).toContain('UI copy');
+    expect(prompt).toContain('German');
+    expect(prompt).toContain('a car service');
   });
 
-  it('translates a nested section and validates the response', async () => {
-    const translated = upper(RU_NAV);
-    stubOpenAiResponse(translated);
-    await expect(
-      translateSection(RU_NAV, 'en', 'test-key', NAV_SECTION),
-    ).resolves.toEqual(translated);
-  });
-
-  it('translates an array-of-objects section and validates the response', async () => {
-    const translated = upper(RU_FAQ);
-    stubOpenAiResponse(translated);
-    await expect(
-      translateSection(RU_FAQ, 'en', 'test-key', FAQ_SECTION),
-    ).resolves.toEqual(translated);
-  });
-
-  it('splits a section too large for one completion into several requests', async () => {
-    // The production budget, not a test-only one: a single request for this
-    // much copy is what came back with its tail key missing.
-    const big = Object.fromEntries(
-      Array.from({ length: 4 }, (_, i) => [`k${i}`, 'я'.repeat(4000)]),
+  it('asks for the flat shape the payload actually uses', () => {
+    expect(buildSectionPrompt('x', 'y', 'z')).toContain(
+      'EXACTLY the same keys',
     );
-    const schema = z
-      .object(
-        Object.fromEntries(
-          Object.keys(big).map((k) => [k, z.string()]),
-        ) as Record<string, z.ZodString>,
-      )
-      .strict();
-    stubOpenAiFetch((userContent) => {
-      const chunk = JSON.parse(userContent) as Record<string, string>;
-      return Object.fromEntries(
-        Object.entries(chunk).map(([k, v]) => [k, v.toUpperCase()]),
-      );
-    });
-
-    const result = await translateSection(big, 'en', 'test-key', {
-      schema,
-      promptSubject: 'oversized copy',
-    });
-
-    expect(vi.mocked(fetch).mock.calls.length).toBeGreaterThan(1);
-    expect(Object.keys(result).sort()).toEqual(Object.keys(big).sort());
-  });
-
-  it('names the target language in the prompt rather than the locale code', async () => {
-    const fetchMock = vi.fn().mockImplementation(
-      async () =>
-        new Response(
-          JSON.stringify({
-            choices: [{ message: { content: JSON.stringify(upper(RU_NAV)) } }],
-          }),
-          { status: 200, headers: { 'Content-Type': 'application/json' } },
-        ),
-    );
-    vi.stubGlobal('fetch', fetchMock);
-
-    await translateSection(RU_NAV, 'sr', 'test-key', NAV_SECTION);
-
-    const body = JSON.parse(fetchMock.mock.calls[0][1].body as string) as {
-      messages: { content: string }[];
-    };
-    expect(body.messages[0].content).toContain('Serbian (Latin script)');
-    expect(body.messages[0].content).toContain('a test business');
-    expect(body.messages[0].content).toMatch(
-      /metaTitle and title at most 60 characters[\s\S]*at most 160/,
-    );
-    expect(body.messages[0].content).toMatch(
-      /akumulator in Serbian[\s\S]*never baterija/,
-    );
-  });
-
-  it('throws when the response has a leaf of the wrong type', async () => {
-    stubOpenAiResponse({ ...upper(RU_NAV), footer: { tagline: 42 } });
-    await expect(
-      translateSection(RU_NAV, 'en', 'test-key', NAV_SECTION),
-    ).rejects.toThrow();
-  });
-
-  it('throws when a translated string contains raw HTML the source did not have', async () => {
-    stubOpenAiResponse({
-      ...upper(RU_NAV),
-      footer: { tagline: '<script>alert(1)</script>' },
-    });
-    await expect(
-      translateSection(RU_NAV, 'en', 'test-key', NAV_SECTION),
-    ).rejects.toThrow(/tagline/);
-  });
-
-  it('throws when the OpenAI call itself fails', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockImplementation(async () => openAiErrorResponse('boom', 500)),
-    );
-    await expect(
-      translateSection(RU_NAV, 'en', 'test-key', NAV_SECTION),
-    ).rejects.toThrow(/boom/);
   });
 });
 
-describe('processSection (file round-trip)', () => {
-  let dir: string;
-  let file: string;
+describe('processSection', () => {
+  it('translates every locale on a cold cache and records the hash', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml');
+    const { processSection } = translator();
+    const cache: CacheFile = {};
 
-  beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), 'i18n-section-test-'));
-    file = join(dir, 'section.yaml');
-  });
+    expect(await processSection(section(file), 'key', cache)).toBe(
+      'translated',
+    );
 
-  afterEach(() => {
-    rmSync(dir, { recursive: true, force: true });
-    vi.unstubAllGlobals();
-    vi.unstubAllEnvs();
-  });
-
-  function stubTranslateFetch() {
-    stubOpenAiFetch((userContent) => upper(JSON.parse(userContent)));
-  }
-
-  function garbled(userContent: string) {
-    const out = upper(JSON.parse(userContent)) as {
-      nav: Record<string, string>;
-    };
-    out.nav.cases = 'Opишите';
-    return out;
-  }
-
-  it('asks again when the model garbles a word, and keeps the clean answer', async () => {
-    let calls = 0;
-    stubOpenAiFetch((userContent) => {
-      calls += 1;
-      return calls === 1
-        ? garbled(userContent)
-        : upper(JSON.parse(userContent));
+    const written = parseDocument(readFileSync(file, 'utf-8')).toJS() as Record<
+      string,
+      unknown
+    >;
+    expect(written.translatedFrom).toBe(hashSource(RU_NAV));
+    expect(translationsOf(file).en).toEqual({
+      nav: { home: 't:Главная', cases: 't:Кейсы' },
+      footer: { tagline: 't:Слоган' },
     });
-    writeFileSync(file, stringify({ ...RU_NAV, translations: {} }));
-
-    await expect(
-      processSection({ ...NAV_SECTION, path: file }, 'test-key'),
-    ).resolves.toBe('translated');
-
-    const doc = parseDocument(readFileSync(file, 'utf-8'));
-    expect(doc.getIn(['translations', 'en', 'nav', 'cases'])).toBe('КЕЙСЫ');
+    expect(Object.keys(cache[file] as object)).toHaveLength(6);
   });
 
-  it('gives up once the model keeps garbling the same chunk', async () => {
-    stubOpenAiFetch(garbled);
-    writeFileSync(file, stringify({ ...RU_NAV, translations: {} }));
+  it('makes no request and does not reopen the file for write on the second run', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml');
+    const { processSection } = translator();
+    const cache: CacheFile = {};
+    await processSection(section(file), 'key', cache);
+    const afterFirst = readFileSync(file, 'utf-8');
 
-    await expect(
-      processSection({ ...NAV_SECTION, path: file }, 'test-key'),
-    ).rejects.toThrow(/mixes Latin and Cyrillic/);
+    vi.unstubAllGlobals();
+    stubTranslate((text) => `t:${text}`);
+    const before = statSync(file).mtimeMs;
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(await processSection(section(file), 'key', cache)).toBe('skipped');
+    expect(sentPayloads()).toEqual([]);
+    expect(readFileSync(file, 'utf-8')).toBe(afterFirst);
+    expect(statSync(file).mtimeMs).toBe(before);
   });
 
-  it('rejects a response that invented a key the schema does not allow', async () => {
-    stubOpenAiFetch((userContent) => ({
-      ...(upper(JSON.parse(userContent)) as object),
-      extra: 'не просили',
-    }));
-    writeFileSync(file, stringify({ ...RU_NAV, translations: {} }));
+  it('sends only the leaf whose Russian changed', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml');
+    const { processSection } = translator();
+    const cache: CacheFile = {};
+    await processSection(section(file), 'key', cache);
 
-    await expect(
-      processSection({ ...NAV_SECTION, path: file }, 'test-key'),
-    ).rejects.toThrow(/doesn't match the schema/);
-  });
-
-  it('translates every target locale on first run and writes the hash back', async () => {
-    stubTranslateFetch();
-    writeFileSync(file, stringify({ ...RU_NAV, translations: {} }));
-
-    await expect(
-      processSection({ ...NAV_SECTION, path: file }, 'test-key'),
-    ).resolves.toBe('translated');
-
-    const doc = parseDocument(readFileSync(file, 'utf-8'));
-    expect(doc.getIn(['translations', 'en', 'nav', 'cases'])).toBe('КЕЙСЫ');
-    expect(doc.getIn(['translations', 'sr', 'nav', 'cases'])).toBe('КЕЙСЫ');
-    expect(typeof doc.get('translatedFrom')).toBe('string');
-    expect(doc.getIn(['nav', 'cases'])).toBe('Кейсы');
-  });
-
-  it('skips on a second run with no ru changes', async () => {
-    stubTranslateFetch();
-    writeFileSync(file, stringify({ ...RU_NAV, translations: {} }));
-    const section = { ...NAV_SECTION, path: file };
-
-    await processSection(section, 'test-key');
-    const fetchMock = vi.fn();
-    vi.stubGlobal('fetch', fetchMock);
-
-    await expect(processSection(section, 'test-key')).resolves.toBe('skipped');
-    expect(fetchMock).not.toHaveBeenCalled();
-  });
-
-  it('records the hash without translating for a file that predates hash tracking', async () => {
     writeFileSync(
       file,
       stringify({
-        ...RU_NAV,
-        translations: { en: upper(RU_NAV), sr: upper(RU_NAV) },
+        ...parseDocument(readFileSync(file, 'utf-8')).toJS(),
+        footer: { tagline: 'Новый слоган' },
       }),
     );
-    const fetchMock = vi.fn();
-    vi.stubGlobal('fetch', fetchMock);
+    vi.unstubAllGlobals();
+    stubTranslate((text) => `t:${text}`);
+    expect(await processSection(section(file), 'key', cache)).toBe(
+      'translated',
+    );
+    expect(sentPayloads()).toEqual([
+      { 'footer.tagline': 'Новый слоган' },
+      { 'footer.tagline': 'Новый слоган' },
+    ]);
+  });
 
-    await expect(
-      processSection({ ...NAV_SECTION, path: file }, 'test-key'),
-    ).resolves.toBe('backfilled');
-    expect(fetchMock).not.toHaveBeenCalled();
+  it('adopts what is committed when it first meets a file with a current hash', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const translated = {
+      nav: { home: 'Home', cases: 'Cases' },
+      footer: { tagline: 'Tagline' },
+    };
+    const file = writeSection('home.yaml', RU_NAV, {
+      translations: { en: translated, sr: translated },
+      translatedFrom: hashSource(RU_NAV),
+    });
+
+    const { processSection } = translator();
+    const cache: CacheFile = {};
+    expect(await processSection(section(file), 'key', cache)).toBe('skipped');
+    expect(sentPayloads()).toEqual([]);
+    expect(Object.values(cache[file] as Record<string, string>)).toContain(
+      'Home',
+    );
+  });
+
+  it('does not adopt translations whose hash says they are stale', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml', RU_NAV, {
+      translations: {
+        en: {
+          nav: { home: 'Old', cases: 'Old' },
+          footer: { tagline: 'Old' },
+        },
+      },
+      translatedFrom: 'stale',
+    });
+
+    const { processSection } = translator();
+    expect(await processSection(section(file), 'key', {})).toBe('translated');
+    expect(translationsOf(file).en).toEqual({
+      nav: { home: 't:Главная', cases: 't:Кейсы' },
+      footer: { tagline: 't:Слоган' },
+    });
+  });
+
+  it('keeps a hand-written value and stops asking for it', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml');
+    const { processSection } = translator();
+    const cache: CacheFile = {};
+    await processSection(section(file), 'key', cache);
+
+    const doc = parseDocument(readFileSync(file, 'utf-8')).toJS() as Record<
+      string,
+      Record<string, Record<string, Record<string, string>>>
+    >;
+    doc.translations!.en!.footer!.tagline = 'Hand written';
+    writeFileSync(file, stringify(doc));
+
+    vi.unstubAllGlobals();
+    stubTranslate((text) => `t:${text}`);
+    expect(await processSection(section(file), 'key', cache)).toBe('skipped');
+    expect(sentPayloads()).toEqual([]);
+    expect(translationsOf(file).en!.footer).toEqual({
+      tagline: 'Hand written',
+    });
+  });
+
+  it('drops cache entries for Russian that no longer exists', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml');
+    const { processSection } = translator();
+    const cache: CacheFile = {};
+    await processSection(section(file), 'key', cache);
+    expect(Object.keys(cache[file] as object)).toHaveLength(6);
+
+    writeFileSync(
+      file,
+      stringify({
+        ...parseDocument(readFileSync(file, 'utf-8')).toJS(),
+        footer: { tagline: 'Слоган' },
+        nav: { home: 'Главная', cases: 'Кейсы' },
+      }),
+    );
+    const narrower: Section = {
+      ...section(file),
+      fields: ['nav'],
+      schema: navSchema.pick({ nav: true }).strict(),
+    };
+    vi.unstubAllGlobals();
+    stubTranslate((text) => `t:${text}`);
+    await processSection(narrower, 'key', cache);
+    expect(Object.keys(cache[file] as object)).toHaveLength(4);
+  });
+
+  it('keeps paid-for entries when a later locale fails', async () => {
+    let call = 0;
+    stubOpenAiFetch((content) => {
+      call += 1;
+      const payload = JSON.parse(content) as Record<string, string>;
+      if (call <= 1)
+        return Object.fromEntries(
+          Object.keys(payload).map((path) => [path, 'en']),
+        );
+      return Object.fromEntries(
+        Object.keys(payload).map((path) => [path, 'Srпски']),
+      );
+    });
+    const file = writeSection('home.yaml');
+    const { processSection } = translator();
+    const cache: CacheFile = {};
+
+    await expect(processSection(section(file), 'key', cache)).rejects.toThrow(
+      'mixes Latin and Cyrillic',
+    );
+    expect(Object.values(cache[file] ?? {})).toContain('en');
+  });
+
+  it('rejects a response the leaf guard passes but the schema does not', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml');
+    const { processSection } = translator();
+    const strict: Section = {
+      ...section(file),
+      schema: z
+        .object({
+          nav: z
+            .object({ home: z.string(), cases: z.string().max(6) })
+            .strict(),
+          footer: z.object({ tagline: z.string() }).strict(),
+        })
+        .strict(),
+    };
+    await expect(processSection(strict, 'key', {})).rejects.toThrow(
+      "doesn't match the schema",
+    );
+  });
+
+  it('lets the committed file win over a cache entry that disagrees', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml');
+    const { processSection } = translator();
+    const cache: CacheFile = {};
+    await processSection(section(file), 'key', cache);
+
+    const block = cache[file] as Record<string, string>;
+    const key = Object.keys(block)[0] as string;
+    block[key] = '<script>alert(1)</script>';
+
+    vi.unstubAllGlobals();
+    stubTranslate((text) => `t:${text}`);
+    expect(await processSection(section(file), 'key', cache)).toBe('skipped');
+    expect(JSON.stringify(translationsOf(file))).not.toContain('<script>');
+    expect(Object.values(cache[file] as Record<string, string>)).not.toContain(
+      '<script>alert(1)</script>',
+    );
+  });
+
+  it('discards a cache entry that would not have passed as a fresh one', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const file = writeSection('home.yaml');
+    const { processSection } = translator();
+    const cache: CacheFile = {};
+    await processSection(section(file), 'key', cache);
+
+    const written = parseDocument(readFileSync(file, 'utf-8')).toJS() as Record<
+      string,
+      unknown
+    >;
+    delete written.translations;
+    writeFileSync(file, stringify(written));
+
+    const block = cache[file] as Record<string, string>;
+    const key = Object.keys(block)[0] as string;
+    block[key] = '<script>alert(1)</script>';
+
+    vi.unstubAllGlobals();
+    stubTranslate((text) => `t:${text}`);
+    expect(await processSection(section(file), 'key', cache)).toBe(
+      'translated',
+    );
+    expect(JSON.stringify(translationsOf(file))).not.toContain('<script>');
+    expect(Object.values(cache[file] as Record<string, string>)).not.toContain(
+      '<script>alert(1)</script>',
+    );
+    warn.mockRestore();
+  });
+
+  it('throws on a malformed ru source before paying for a translation', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml', { nav: { home: 'Главная' } });
+    const { processSection } = translator();
+    await expect(processSection(section(file), 'key', {})).rejects.toThrow(
+      /footer/,
+    );
+    expect(sentPayloads()).toEqual([]);
+  });
+
+  it('regenerates a file whose cache block predates the prompt change', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml');
+    const cache: CacheFile = {};
+    await translator().processSection(section(file), 'key', cache);
+
+    vi.unstubAllGlobals();
+    stubTranslate((text) => `v2:${text}`);
     expect(
-      parseDocument(readFileSync(file, 'utf-8')).get('translatedFrom'),
-    ).toBeTruthy();
+      await translator(cachePath, 'a different business').processSection(
+        section(file),
+        'key',
+        cache,
+      ),
+    ).toBe('translated');
+    expect(translationsOf(file).en!.footer).toEqual({ tagline: 'v2:Слоган' });
   });
 
-  it('translates an array-of-objects section end to end', async () => {
-    stubTranslateFetch();
-    writeFileSync(file, stringify({ ...RU_FAQ, translations: {} }));
-
-    await expect(
-      processSection({ ...FAQ_SECTION, path: file }, 'test-key'),
-    ).resolves.toBe('translated');
-
-    const doc = parseDocument(readFileSync(file, 'utf-8'));
-    expect(doc.getIn(['translations', 'en', 'general', 0, 'q'])).toBe(
-      'СКОЛЬКО ЭТО СТОИТ?',
+  it('serves a committed translation written as a YAML alias', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml');
+    const cache: CacheFile = {};
+    await translator().processSection(section(file), 'key', cache);
+    const withAlias = readFileSync(file, 'utf-8').replace(
+      /^ {2}en:$/m,
+      '  en: &shared',
     );
-    expect(doc.getIn(['translations', 'en', 'cityExpert', 'q'])).toBe(
-      'ЭКСПЕРТ В ГОРОДЕ?',
+    writeFileSync(
+      file,
+      withAlias.replace(/^ {2}sr:\n(?: {4}.*\n?)*/m, '  sr: *shared\n'),
+    );
+
+    vi.unstubAllGlobals();
+    stubTranslate((text) => `t:${text}`);
+    expect(await translator().processSection(section(file), 'key', cache)).toBe(
+      'skipped',
+    );
+    expect(sentPayloads()).toEqual([]);
+  });
+
+  it('writes a hash the runtime side reads back as current', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml');
+    await translator().processSection(section(file), 'key', {});
+    expect(translationIsCurrent(readFileSync(file, 'utf-8'), navSchema)).toBe(
+      true,
     );
   });
 
-  it('throws instead of writing when ru itself fails schema validation', async () => {
-    writeFileSync(file, 'nav:\n  home: Главная\ntranslations: {}\n');
-    await expect(
-      processSection({ ...NAV_SECTION, path: file }, 'test-key'),
-    ).rejects.toThrow();
+  it('is indifferent to the order of keys nested inside a field', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml');
+    const cache: CacheFile = {};
+    await translator().processSection(section(file), 'key', cache);
+    const written = parseDocument(readFileSync(file, 'utf-8')).toJS() as Record<
+      string,
+      Record<string, unknown>
+    >;
+    writeFileSync(
+      file,
+      stringify({
+        ...written,
+        nav: { cases: written.nav.cases, home: written.nav.home },
+      }),
+    );
+
+    vi.unstubAllGlobals();
+    stubTranslate((text) => `t:${text}`);
+    expect(await translator().processSection(section(file), 'key', cache)).toBe(
+      'skipped',
+    );
+    expect(sentPayloads()).toEqual([]);
+  });
+
+  it('retranslates a file whose translations have no hash to vouch for them', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const translated = {
+      nav: { home: 'Home', cases: 'Cases' },
+      footer: { tagline: 'Tagline' },
+    };
+    const file = writeSection('home.yaml', RU_NAV, {
+      translations: { en: translated, sr: translated },
+    });
+    const { processSection } = translator();
+    expect(await processSection(section(file), 'key', {})).toBe('translated');
+    expect(translationsOf(file).en!.footer).toEqual({ tagline: 't:Слоган' });
+  });
+
+  it('restores a wiped translations block from the cache, asking for nothing', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml');
+    const { processSection } = translator();
+    const cache: CacheFile = {};
+    await processSection(section(file), 'key', cache);
+
+    const written = parseDocument(readFileSync(file, 'utf-8')).toJS() as Record<
+      string,
+      unknown
+    >;
+    delete written.translations;
+    writeFileSync(file, stringify(written));
+
+    vi.unstubAllGlobals();
+    stubTranslate((text) => `t:${text}`);
+    expect(await processSection(section(file), 'key', cache)).toBe(
+      'backfilled',
+    );
+    expect(sentPayloads()).toEqual([]);
+    expect(translationsOf(file).en!.footer).toEqual({ tagline: 't:Слоган' });
+  });
+
+  it('is indifferent to the order the ru keys are written in', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml');
+    const { processSection } = translator();
+    const cache: CacheFile = {};
+    await processSection(section(file), 'key', cache);
+    const hash = (
+      parseDocument(readFileSync(file, 'utf-8')).toJS() as Record<
+        string,
+        unknown
+      >
+    ).translatedFrom;
+
+    const written = parseDocument(readFileSync(file, 'utf-8')).toJS() as Record<
+      string,
+      unknown
+    >;
+    writeFileSync(
+      file,
+      stringify({
+        footer: written.footer,
+        nav: written.nav,
+        translations: written.translations,
+        translatedFrom: written.translatedFrom,
+      }),
+    );
+
+    vi.unstubAllGlobals();
+    stubTranslate((text) => `t:${text}`);
+    expect(await processSection(section(file), 'key', cache)).toBe('skipped');
+    expect(sentPayloads()).toEqual([]);
+    expect(
+      (
+        parseDocument(readFileSync(file, 'utf-8')).toJS() as Record<
+          string,
+          unknown
+        >
+      ).translatedFrom,
+    ).toBe(hash);
   });
 });
 
 describe('run', () => {
-  let dir: string;
-  let file: string;
-
-  beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), 'i18n-run-test-'));
-    file = join(dir, 'section.yaml');
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(console, 'error').mockImplementation(() => {});
-  });
-
+  const OLD_KEY = process.env.OPENAI_API_KEY;
   afterEach(() => {
-    rmSync(dir, { recursive: true, force: true });
-    vi.unstubAllGlobals();
-    vi.unstubAllEnvs();
+    process.env.OPENAI_API_KEY = OLD_KEY;
     vi.restoreAllMocks();
   });
 
-  it('fails without an API key rather than silently doing nothing', async () => {
-    vi.stubEnv('OPENAI_API_KEY', '');
-    await expect(run([])).resolves.toBe(1);
-    expect(console.error).toHaveBeenCalledWith(
-      'Missing env var: OPENAI_API_KEY',
+  it('refuses to start without an api key', async () => {
+    delete process.env.OPENAI_API_KEY;
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect(await translator().run([])).toBe(1);
+    expect(error).toHaveBeenCalledWith('Missing env var: OPENAI_API_KEY');
+  });
+
+  it('writes the cache file and reuses it next time', async () => {
+    process.env.OPENAI_API_KEY = 'key';
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml');
+
+    expect(await translator().run([section(file)])).toBe(0);
+    expect(Object.keys(loadCache(cachePath))).toEqual([file]);
+
+    vi.unstubAllGlobals();
+    stubTranslate((text) => `t:${text}`);
+    expect(await translator().run([section(file)])).toBe(0);
+    expect(sentPayloads()).toEqual([]);
+  });
+
+  it('reports the run that restored a block without translating', async () => {
+    process.env.OPENAI_API_KEY = 'key';
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml');
+    await translator().run([section(file)]);
+
+    const written = parseDocument(readFileSync(file, 'utf-8')).toJS() as Record<
+      string,
+      unknown
+    >;
+    delete written.translations;
+    writeFileSync(file, stringify(written));
+
+    vi.unstubAllGlobals();
+    stubTranslate((text) => `t:${text}`);
+    expect(await translator().run([section(file)])).toBe(0);
+    expect(log).toHaveBeenCalledWith(
+      expect.stringContaining('no translation needed'),
     );
   });
 
-  it('reports every outcome and exits 0 when nothing failed', async () => {
-    vi.stubEnv('OPENAI_API_KEY', 'test-key');
-    stubOpenAiFetch((userContent) => upper(JSON.parse(userContent)));
-    writeFileSync(file, stringify({ ...RU_NAV, translations: {} }));
-    const section = { ...NAV_SECTION, path: file };
-
-    await expect(run([section])).resolves.toBe(0);
-    await expect(run([section])).resolves.toBe(0);
-
-    const messages = vi.mocked(console.log).mock.calls.map((c) => c[0]);
-    expect(messages.some((m) => String(m).startsWith('✓'))).toBe(true);
-    expect(messages.some((m) => String(m).startsWith('-'))).toBe(true);
-  });
-
-  it('reports the backfill outcome', async () => {
-    vi.stubEnv('OPENAI_API_KEY', 'test-key');
-    writeFileSync(
-      file,
-      stringify({
-        ...RU_NAV,
-        translations: { en: upper(RU_NAV), sr: upper(RU_NAV) },
-      }),
+  it('reports a failure and keeps going', async () => {
+    process.env.OPENAI_API_KEY = 'key';
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(openAiErrorResponse('boom')),
     );
-
-    await expect(run([{ ...NAV_SECTION, path: file }])).resolves.toBe(0);
-
-    const messages = vi.mocked(console.log).mock.calls.map((c) => c[0]);
-    expect(messages.some((m) => String(m).startsWith('~'))).toBe(true);
+    const file = writeSection('home.yaml');
+    expect(await translator().run([section(file)])).toBe(1);
+    expect(error).toHaveBeenCalled();
   });
 
-  it('keeps going after a failing section and exits 1', async () => {
-    vi.stubEnv('OPENAI_API_KEY', 'test-key');
-    stubOpenAiFetch((userContent) => upper(JSON.parse(userContent)));
-    writeFileSync(file, 'nav:\n  home: Главная\ntranslations: {}\n');
-    const good = join(dir, 'good.yaml');
-    writeFileSync(good, stringify({ ...RU_NAV, translations: {} }));
-
-    await expect(
-      run([
-        { ...NAV_SECTION, path: file },
-        { ...NAV_SECTION, path: good },
-      ]),
-    ).resolves.toBe(1);
-
-    expect(console.error).toHaveBeenCalled();
-    expect(
-      parseDocument(readFileSync(good, 'utf-8')).get('translatedFrom'),
-    ).toBeTruthy();
-  });
-});
-
-describe('recordHashes', () => {
-  let dir: string;
-  let file: string;
-
-  beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), 'i18n-rehash-test-'));
-    file = join(dir, 'section.yaml');
-  });
-
-  afterEach(() => {
-    rmSync(dir, { recursive: true, force: true });
-  });
-
-  it('stamps the current hash without calling the API', () => {
-    writeFileSync(
-      file,
-      stringify({
-        ...RU_NAV,
-        translations: { en: upper(RU_NAV), sr: upper(RU_NAV) },
-      }),
-    );
-
-    expect(recordHashes([{ ...NAV_SECTION, path: file }])).toBe(1);
-    expect(
-      parseDocument(readFileSync(file, 'utf-8')).get('translatedFrom'),
-    ).toBe(hashSource(RU_NAV));
-  });
-
-  it('leaves a file whose hash is already current untouched', () => {
-    writeFileSync(
-      file,
-      stringify({
-        ...RU_NAV,
-        translations: {},
-        translatedFrom: hashSource(RU_NAV),
-      }),
-    );
-    const before = readFileSync(file, 'utf-8');
-
-    expect(recordHashes([{ ...NAV_SECTION, path: file }])).toBe(0);
-    expect(readFileSync(file, 'utf-8')).toBe(before);
-  });
-
-  it('throws instead of stamping a hash over malformed ru content', () => {
-    writeFileSync(file, 'nav:\n  home: Главная\ntranslations: {}\n');
-    expect(() => recordHashes([{ ...NAV_SECTION, path: file }])).toThrow();
-  });
-});
-
-describe('chunkByKey', () => {
-  it('keeps a small section in a single request', () => {
-    expect(chunkByKey({ a: 'x', b: 'y' })).toEqual([{ a: 'x', b: 'y' }]);
-  });
-
-  it('splits once the budget is used up', () => {
-    const data = { a: 'x'.repeat(40), b: 'y'.repeat(40), c: 'z'.repeat(40) };
-    expect(chunkByKey(data, 60)).toEqual([
-      { a: data.a },
-      { b: data.b },
-      { c: data.c },
-    ]);
-  });
-
-  it('packs as many keys into a chunk as the budget allows', () => {
-    const data = { a: 'xx', b: 'yy', c: 'z'.repeat(80) };
-    expect(chunkByKey(data, 60)).toEqual([{ a: 'xx', b: 'yy' }, { c: data.c }]);
-  });
-
-  it('never drops a key that is bigger than the budget on its own', () => {
-    const huge = 'x'.repeat(500);
-    expect(chunkByKey({ a: huge }, 10)).toEqual([{ a: huge }]);
-  });
-
-  it('returns nothing for an empty section', () => {
-    expect(chunkByKey({})).toEqual([]);
-  });
-});
-
-describe('chunkByKey boundary', () => {
-  it('keeps a key that exactly fills the remaining budget in the same chunk', () => {
-    const data = { a: 'xx', b: 'yy' };
-    const exact =
-      JSON.stringify({ a: 'xx' }).length + JSON.stringify({ b: 'yy' }).length;
-    expect(chunkByKey(data, exact)).toEqual([data]);
-  });
-});
-
-describe('chunkByKey with a key bigger than the budget', () => {
-  it('splits that key by its own children instead of sending it whole', () => {
-    const big = {
-      de: { notes: 'x'.repeat(60) },
-      es: { notes: 'y'.repeat(60) },
-      ch: { notes: 'z'.repeat(60) },
-    };
-    const chunks = chunkByKey({ 'vehicle-import': big }, 100);
-
-    expect(chunks.length).toBeGreaterThan(1);
-    for (const chunk of chunks) {
-      expect(Object.keys(chunk)).toEqual(['vehicle-import']);
-      expect(JSON.stringify(chunk).length).toBeLessThanOrEqual(120);
-    }
-    expect(
-      chunks.reduce(
-        (all, chunk) => ({
-          ...all,
-          ...(chunk['vehicle-import'] as Record<string, unknown>),
-        }),
-        {},
-      ),
-    ).toEqual(big);
-  });
-
-  it('leaves an oversized leaf alone rather than losing it', () => {
-    const chunks = chunkByKey({ note: 'x'.repeat(200) }, 100);
-    expect(chunks).toEqual([{ note: 'x'.repeat(200) }]);
-  });
-});
-
-describe('mergeChunks', () => {
-  it('keeps both halves of a key that was split across requests', () => {
-    const merged = mergeChunks(
-      { 'vehicle-import': { de: { points: ['a'] } } },
-      { 'vehicle-import': { es: { points: ['b'] } } },
-    );
-
-    expect(merged).toEqual({
-      'vehicle-import': { de: { points: ['a'] }, es: { points: ['b'] } },
+  it('keeps the entries of an earlier file when a later one fails', async () => {
+    process.env.OPENAI_API_KEY = 'key';
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const good = writeSection('a-good.yaml');
+    const bad = writeSection('z-bad.yaml');
+    let call = 0;
+    stubOpenAiFetch((content) => {
+      call += 1;
+      const payload = JSON.parse(content) as Record<string, string>;
+      if (call > 2) return {};
+      return Object.fromEntries(
+        Object.entries(payload).map(([path, text]) => [path, `t:${text}`]),
+      );
     });
+
+    expect(await translator().run([section(good), section(bad)])).toBe(1);
+    expect(Object.keys(loadCache(cachePath))).toContain(good);
   });
 
-  it('replaces an array rather than merging it index by index', () => {
-    expect(mergeChunks({ points: ['a', 'b'] }, { points: ['c'] })).toEqual({
-      points: ['c'],
-    });
+  it('refuses to start on a cache it cannot read, without crashing', async () => {
+    process.env.OPENAI_API_KEY = 'key';
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    writeFileSync(cachePath, '{not json');
+    expect(await translator().run([])).toBe(1);
+    expect(error).toHaveBeenCalledWith(expect.stringContaining(cachePath));
+  });
+
+  it('forgets a file that no longer exists, but only on a clean run', async () => {
+    process.env.OPENAI_API_KEY = 'key';
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml');
+    await translator().run([section(file)]);
+
+    rmSync(file);
+    const second = writeSection('other.yaml');
+    vi.unstubAllGlobals();
+    stubTranslate((text) => `t:${text}`);
+    await translator().run([section(second)]);
+
+    expect(Object.keys(loadCache(cachePath))).toEqual([second]);
+  });
+
+  it('leaves a vanished file untouched in the cache when the run had a failure', async () => {
+    process.env.OPENAI_API_KEY = 'key';
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml');
+    await translator().run([section(file)]);
+
+    rmSync(file);
+    const second = writeSection('other.yaml');
+    vi.unstubAllGlobals();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(openAiErrorResponse('boom')),
+    );
+    await translator().run([section(second)]);
+
+    expect(Object.keys(loadCache(cachePath))).toContain(file);
   });
 });

@@ -11,7 +11,7 @@ const works = defineCollection({
   loader: glob({ pattern: '*/index.md', base: './src/content/works' }),
   schema: ({ image }) =>
     z.object({
-      title: z.string(),
+      title: z.string().trim().min(1),
       translations: z
         .object({ sr: translationSchema, en: translationSchema })
         .optional(),

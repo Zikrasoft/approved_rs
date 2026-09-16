@@ -136,8 +136,8 @@ translations:
     });
   });
 
-  it('takes a translated array whole instead of merging element by element', () => {
-    const listed = z.object({ steps: z.array(z.string()) });
+  it('takes a translated array whole when filling in what a partial translation omits', () => {
+    const listed = z.object({ steps: z.array(z.string()), cta: z.string() });
     const get = loadSection(
       listed,
       `
@@ -145,6 +145,7 @@ steps:
   - Первый
   - Второй
   - Третий
+cta: Заявка
 translations:
   en:
     steps:
@@ -153,7 +154,7 @@ translations:
 `,
     );
 
-    expect(get('en')).toEqual({ steps: ['One', 'Two'] });
+    expect(get('en')).toEqual({ steps: ['One', 'Two'], cta: 'Заявка' });
   });
 
   it('falls back to the source array when the translation omits it', () => {

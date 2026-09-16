@@ -1,9 +1,7 @@
 import { parse as parseYaml } from 'yaml';
 import type { ZodObject, z } from 'zod';
+import { isPlainObject } from './isPlainObject.ts';
 import { SOURCE_LOCALE } from './locales.ts';
-
-const isPlainObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 function mergeOverSource(source: unknown, translation: unknown): unknown {
   if (!isPlainObject(source) || !isPlainObject(translation)) return translation;
@@ -14,6 +12,9 @@ function mergeOverSource(source: unknown, translation: unknown): unknown {
   }
   return Object.fromEntries(merged);
 }
+
+const issueLocation = (issue: z.core.$ZodIssue): string =>
+  'keys' in issue ? (issue.keys as string[]).join(', ') : issue.path.join('.');
 
 export function createSectionLoader<L extends string>() {
   return function loadSection<S extends ZodObject>(
@@ -48,21 +49,9 @@ export function createSectionLoader<L extends string>() {
         if (result.success) {
           translations.set(locale, result.data as T);
         } else {
-          // Both parses failed, so this locale silently serves the source
-          // language on every page. The usual cause is a key deleted from the
-          // ru source and left behind in the translation block, which a strict
-          // schema rejects and mergeOverSource cannot remove.
           console.warn(
             `[i18n] ${locale}: dropped, falling back to ${SOURCE_LOCALE} —`,
-            result.error.issues
-              .map((issue) =>
-                // An unrecognized_keys issue carries an empty path — the
-                // offending names are the one thing worth printing here.
-                'keys' in issue
-                  ? (issue.keys as string[]).join(', ')
-                  : issue.path.join('.'),
-              )
-              .join(', '),
+            result.error.issues.map(issueLocation).join(', '),
           );
         }
       }

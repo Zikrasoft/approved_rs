@@ -1,16 +1,7 @@
 const HTML_TAG = /<[a-zA-Z/!]/;
-// A word that mixes Latin and Cyrillic letters is never a real word in either
-// script — it is the model splicing the source language into its own output
-// mid-token ("vazdušnim jastuком"). Whole untranslated words are a separate
-// problem each app checks against its own locale, because a personal name is
-// meant to keep its original script.
 const MIXED_SCRIPT_WORD =
-  /[\p{Script=Latin}][\p{Script=Cyrillic}]|[\p{Script=Cyrillic}][\p{Script=Latin}]/u;
+  /\p{L}*(?:\p{Script=Latin}\p{Script=Cyrillic}|\p{Script=Cyrillic}\p{Script=Latin})\p{L}*/gu;
 const TAG_NAME = /<\/?([a-zA-Z][a-zA-Z0-9]*)/g;
-// Nothing downstream notices a dropped token: withPlaceholder is a
-// replaceAll that quietly no-ops, and the section schemas are bare
-// z.string(). A translation that shortens by deleting {siteName} would ship
-// on an auto-commit with a hole where the name should be.
 const PLACEHOLDER = /\{[a-zA-Z][a-zA-Z0-9]*\}/g;
 
 function tagNamesOf(text: string): Set<string> {
@@ -46,6 +37,9 @@ export function assertSafeTranslation(
         `translated response for "${path}" is missing (expected a string)`,
       );
     }
+    if (source.trim() !== '' && translated.trim() === '') {
+      throw new Error(`translated response for "${path}" came back blank`);
+    }
     if (HTML_TAG.test(translated) && !HTML_TAG.test(source)) {
       throw new Error(
         `translated response for "${path}" contains raw HTML-looking content the source didn't have: ${translated}`,
@@ -59,10 +53,13 @@ export function assertSafeTranslation(
         `translated response for "${path}" dropped placeholder tokens (${dropped.join(' ')}): ${translated}`,
       );
     }
-    const mixed = MIXED_SCRIPT_WORD.exec(translated);
-    if (mixed) {
+    const mixedInSource = new Set(source.match(MIXED_SCRIPT_WORD) ?? []);
+    const newlyMixed = (translated.match(MIXED_SCRIPT_WORD) ?? []).find(
+      (word) => !mixedInSource.has(word),
+    );
+    if (newlyMixed !== undefined) {
       throw new Error(
-        `translated response for "${path}" mixes Latin and Cyrillic inside one word (near "${mixed[0]}"): ${translated}`,
+        `translated response for "${path}" mixes Latin and Cyrillic inside one word ("${newlyMixed}"): ${translated}`,
       );
     }
     const introduced = introducedTags(source, translated);

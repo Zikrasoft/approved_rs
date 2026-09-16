@@ -3,10 +3,17 @@ import { parseDocument } from 'yaml';
 import type { ZodObject } from 'zod';
 import { assertSafeTranslation } from './assertSafeTranslation.ts';
 import { getOrCreateTranslationsMap } from './getOrCreateTranslationsMap.ts';
-import { hasRealTranslation } from './hasRealTranslation.ts';
-import { callOpenAiJson } from './openaiChat.ts';
-import { sha256Hex } from './sha256Hex.ts';
-import { decideAction } from './translateDecision.ts';
+import {
+  blockIsEmpty,
+  DEFAULT_CACHE_PATH,
+  loadCache,
+  pruneMissingFiles,
+  saveCache,
+  type CacheBlock,
+  type CacheFile,
+} from './leafCache.ts';
+import { hashSource, type SectionData } from './hashSource.ts';
+import { translateLeaves } from './translateLeaves.ts';
 import { errorMessage } from './errorMessage.ts';
 
 export interface Section {
@@ -16,8 +23,6 @@ export interface Section {
   promptSubject: string;
 }
 
-export type SectionData = Record<string, unknown>;
-
 export type SectionOutcome = 'translated' | 'backfilled' | 'skipped';
 
 export interface SectionTranslatorOptions<L extends string> {
@@ -25,67 +30,35 @@ export interface SectionTranslatorOptions<L extends string> {
   languageName: Record<L, string>;
   businessDescription: string;
   model?: string;
+  cachePath?: string;
 }
 
-// gpt-4o-mini caps a completion at 16k tokens, and approved-rs's services.yaml
-// outgrew that in one request: the tail key came back missing, or the socket
-// timed out mid-generation. Top-level keys are translated in batches small
-// enough to stay well under the cap; the merged result is still validated
-// against the section's full schema, so a dropped key still fails loudly.
-const MAX_REQUEST_CHARS = 8_000;
-const CHUNK_ATTEMPTS = 3;
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-export function chunkByKey(
-  data: SectionData,
-  maxChars = MAX_REQUEST_CHARS,
-): SectionData[] {
-  const chunks: SectionData[] = [];
-  let current: SectionData = {};
-  let size = 0;
-
-  const flush = () => {
-    if (size > 0) chunks.push(current);
-    current = {};
-    size = 0;
-  };
-
-  for (const [key, value] of Object.entries(data)) {
-    const cost = JSON.stringify({ [key]: value }).length;
-    // A single key can outgrow the budget on its own, and asking for the whole
-    // thing back is how the model starts dropping nested arrays. Split it by
-    // its own children and let mergeChunks put the halves back together.
-    if (cost > maxChars && isPlainObject(value)) {
-      flush();
-      for (const part of chunkByKey(value as SectionData, maxChars)) {
-        chunks.push({ [key]: part });
-      }
-      continue;
-    }
-    if (size > 0 && size + cost > maxChars) flush();
-    current[key] = value;
-    size += cost;
-  }
-  flush();
-  return chunks;
-}
-
-export function mergeChunks(into: SectionData, from: SectionData): SectionData {
-  for (const [key, value] of Object.entries(from)) {
-    const existing = into[key];
-    into[key] =
-      isPlainObject(existing) && isPlainObject(value)
-        ? mergeChunks(existing as SectionData, value as SectionData)
-        : value;
-  }
-  return into;
-}
-
-export function hashSource(data: SectionData): string {
-  return sha256Hex(JSON.stringify(data));
+export function buildSectionPrompt(
+  promptSubject: string,
+  languageName: string,
+  businessDescription: string,
+): string {
+  return (
+    `You translate ${promptSubject} from Russian into ${languageName} ` +
+    `for ${businessDescription}. ` +
+    'Translate the MEANING naturally and idiomatically, the way a native speaker would actually write ' +
+    'it — never a literal word-for-word translation. Keep any markdown formatting intact. If a string ' +
+    'contains a placeholder token like {siteName} in curly braces, copy it into the translation exactly ' +
+    'as written, character for character — never translate, remove, or move it. Copy personal names ' +
+    'exactly as written too, keeping their original script — never transliterate or localise them. ' +
+    'Search-engine snippets have a hard budget: metaTitle and title at most 60 characters, ' +
+    'metaDescription and description at most 160, counted on what you output. German and Spanish ' +
+    'run longer than the Russian, so drop a detail rather than going over — but never drop a ' +
+    'placeholder token to save room. ' +
+    'Use the trade word a mechanic or a driver would use, not the everyday one: ' +
+    'a car battery is akumulator in Serbian, Autobatterie in German, batería de coche in ' +
+    'Spanish — never baterija, Batterie or pila on their own. The same holds for the rest ' +
+    'of the workshop vocabulary: servicing, timing belt, suspension, customs clearance. ' +
+    'The input is a flat JSON object whose keys are field paths and whose values are the strings to ' +
+    'translate. Respond with a JSON object having EXACTLY the same keys, with each value translated. ' +
+    'A key like meta.metaTitle or steps[2].title tells you what the string is for — never translate ' +
+    'the keys themselves.'
+  );
 }
 
 export function createSectionTranslator<L extends string>({
@@ -93,79 +66,14 @@ export function createSectionTranslator<L extends string>({
   languageName,
   businessDescription,
   model,
+  cachePath = DEFAULT_CACHE_PATH,
 }: SectionTranslatorOptions<L>) {
   const names = new Map<string, string>(Object.entries<string>(languageName));
-
-  async function translateSection(
-    data: SectionData,
-    targetLocale: L,
-    apiKey: string,
-    section: Pick<Section, 'schema' | 'promptSubject'>,
-  ): Promise<SectionData> {
-    const systemPrompt =
-      `You translate ${section.promptSubject} from Russian into ${names.get(targetLocale)} ` +
-      `for ${businessDescription}. ` +
-      'Translate the MEANING naturally and idiomatically, the way a native speaker would actually write ' +
-      'it — never a literal word-for-word translation. Keep any markdown formatting intact. If a string ' +
-      'contains a placeholder token like {siteName} in curly braces, copy it into the translation exactly ' +
-      'as written, character for character — never translate, remove, or move it. Copy personal names ' +
-      'exactly as written too, keeping their original script — never transliterate or localise them. ' +
-      'Search-engine snippets have a hard budget: metaTitle and title at most 60 characters, ' +
-      'metaDescription and description at most 160, counted on what you output. German and Spanish ' +
-      'run longer than the Russian, so drop a detail rather than going over — but never drop a ' +
-      'placeholder token to save room. ' +
-      'Use the trade word a mechanic or a driver would use, not the everyday one: ' +
-      'a car battery is akumulator in Serbian, Autobatterie in German, batería de coche in ' +
-      'Spanish — never baterija, Batterie or pila on their own. The same holds for the rest ' +
-      'of the workshop vocabulary: servicing, timing belt, suspension, customs clearance. ' +
-      'Respond with a JSON ' +
-      'object that has EXACTLY the same nested key structure as the input — same keys, same nesting, same ' +
-      'array lengths — with only the string values translated.';
-
-    const merged: SectionData = {};
-    for (const chunk of chunkByKey(data)) {
-      mergeChunks(merged, await translateChunk(chunk, apiKey, systemPrompt));
-    }
-
-    const parsed = section.schema.safeParse(merged);
-    if (!parsed.success) {
-      throw new Error(
-        `translate response for "${targetLocale}" doesn't match the schema for ${section.promptSubject}: ${parsed.error.message}`,
-      );
-    }
-    assertSafeTranslation(data, parsed.data, '');
-    return parsed.data as SectionData;
-  }
-
-  // The model garbles a word now and then — a Latin stem welded onto a
-  // Cyrillic ending, a dropped array. Sampling it again usually comes back
-  // clean, and one bad token should not cost a deploy.
-  async function translateChunk(
-    chunk: SectionData,
-    apiKey: string,
-    systemPrompt: string,
-  ): Promise<SectionData> {
-    let lastError: unknown;
-    for (let attempt = 0; attempt < CHUNK_ATTEMPTS; attempt++) {
-      const raw = await callOpenAiJson({
-        apiKey,
-        model,
-        systemPrompt,
-        userContent: JSON.stringify(chunk),
-      });
-      try {
-        assertSafeTranslation(chunk, raw, '');
-        return raw as SectionData;
-      } catch (error) {
-        lastError = error;
-      }
-    }
-    throw lastError;
-  }
 
   async function processSection(
     section: Section,
     apiKey: string,
+    cache: CacheFile,
   ): Promise<SectionOutcome> {
     const doc = parseDocument(readFileSync(section.path, 'utf-8'));
     const translationsNode = getOrCreateTranslationsMap(doc, section.path);
@@ -179,53 +87,63 @@ export function createSectionTranslator<L extends string>({
     const currentHash = hashSource(source);
     const storedHash = doc.get('translatedFrom') as string | undefined;
 
-    const action = decideAction({
-      targetLocales,
-      storedHash,
-      currentHash,
-      hasReal: (locale) =>
-        hasRealTranslation(translationsNode, locale, section.fields),
-    });
+    const committed = plain.translations as Record<string, unknown>;
 
-    if (action.kind === 'skip') return 'skipped';
+    const translationsAreCurrent = storedHash === currentHash;
 
-    if (action.kind === 'backfill') {
-      doc.set('translatedFrom', currentHash);
-      writeFileSync(section.path, doc.toString({ lineWidth: 0 }));
-      return 'backfilled';
-    }
+    const block: CacheBlock = cache[section.path] ?? {};
+    const neverTranslated = blockIsEmpty(block);
+    cache[section.path] = block;
 
-    for (const locale of action.locales) {
-      const translation = await translateSection(
+    const used = new Set<string>();
+    let requests = 0;
+    let wrote = false;
+
+    for (const locale of targetLocales) {
+      const existing = committed[locale];
+      const result = await translateLeaves({
         source,
-        locale,
+        existing,
+        block,
+        translationsAreCurrent,
+        neverTranslated,
+        systemPrompt: buildSectionPrompt(
+          section.promptSubject,
+          names.get(locale) as string,
+          businessDescription,
+        ),
         apiKey,
-        section,
-      );
-      translationsNode.set(locale, translation);
-    }
-    doc.set('translatedFrom', currentHash);
+        model,
+      });
+      requests += result.requests;
+      for (const key of result.used) used.add(key);
 
-    writeFileSync(section.path, doc.toString({ lineWidth: 0 }));
-    return 'translated';
-  }
-
-  function recordHashes(sections: readonly Section[]): number {
-    let rewritten = 0;
-    for (const section of sections) {
-      const doc = parseDocument(readFileSync(section.path, 'utf-8'));
-      const plain = doc.toJS() as SectionData;
-      const rawSource: SectionData = {};
-      for (const field of section.fields) {
-        if (plain[field] !== undefined) rawSource[field] = plain[field];
+      const parsed = section.schema.safeParse(result.value);
+      if (!parsed.success) {
+        throw new Error(
+          `translate response for "${locale}" doesn't match the schema for ${section.promptSubject}: ${parsed.error.message}`,
+        );
       }
-      const next = hashSource(section.schema.parse(rawSource) as SectionData);
-      if (doc.get('translatedFrom') === next) continue;
-      doc.set('translatedFrom', next);
-      writeFileSync(section.path, doc.toString({ lineWidth: 0 }));
-      rewritten += 1;
+      assertSafeTranslation(source, parsed.data, '');
+
+      if (JSON.stringify(existing) !== JSON.stringify(parsed.data)) {
+        translationsNode.set(locale, parsed.data);
+        wrote = true;
+      }
     }
-    return rewritten;
+
+    cache[section.path] = Object.fromEntries(
+      Object.entries(block).filter(([key]) => used.has(key)),
+    );
+
+    if (storedHash !== currentHash) {
+      doc.set('translatedFrom', currentHash);
+      wrote = true;
+    }
+    if (wrote) writeFileSync(section.path, doc.toString({ lineWidth: 0 }));
+
+    if (requests > 0) return 'translated';
+    return wrote ? 'backfilled' : 'skipped';
   }
 
   async function run(sections: readonly Section[]): Promise<number> {
@@ -235,10 +153,17 @@ export function createSectionTranslator<L extends string>({
       return 1;
     }
 
+    let cache: CacheFile;
+    try {
+      cache = loadCache(cachePath);
+    } catch (err) {
+      console.error(`✗ ${cachePath}: ${errorMessage(err)}`);
+      return 1;
+    }
     let failed = 0;
     for (const section of sections) {
       try {
-        const result = await processSection(section, apiKey);
+        const result = await processSection(section, apiKey, cache);
         if (result === 'translated') {
           console.log(`✓ ${section.path} (translated)`);
         } else if (result === 'backfilled') {
@@ -252,9 +177,16 @@ export function createSectionTranslator<L extends string>({
         failed++;
         console.error(`✗ ${section.path}: ${errorMessage(err)}`);
       }
+      saveCache(cachePath, cache);
     }
+
+    if (failed === 0) {
+      pruneMissingFiles(cache);
+      saveCache(cachePath, cache);
+    }
+
     return failed > 0 ? 1 : 0;
   }
 
-  return { translateSection, processSection, recordHashes, run };
+  return { processSection, run };
 }

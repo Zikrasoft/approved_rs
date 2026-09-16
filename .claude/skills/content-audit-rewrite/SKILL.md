@@ -21,11 +21,11 @@ checks on meta strings.
 **Edit the Russian source only. Never hand-edit anything under a `translations:`
 key — not in YAML, not in case frontmatter.**
 
-Both content systems hash the Russian source and store it as `translatedFrom`
-(`packages/i18n/src/translate/sections.ts` for YAML, `translate/cases.ts` for
-markdown). When that hash moves, every locale is regenerated from Russian. A
-hand-polished Serbian string survives exactly until the next Russian edit, then
-vanishes with no error anywhere.
+Both content systems cache translations against the Russian they were made
+from (`packages/i18n/src/translate/leafCache.ts`). Edit a Russian string and
+that string is retranslated in every locale; the rest are left alone. A
+hand-polished Serbian string survives — but only until the Russian under it
+changes, and only if it was committed on its own (see below).
 
 This is why you fix formatting in Russian only and stop. Converting fake bullets
 to a real list in the Russian body moves the hash, CI retranslates, and the
@@ -38,19 +38,22 @@ Order, not negotiable:
 edit Russian → commit → push → CI translate job rewrites every locale
 ```
 
-One exception: hand-written Serbian that is deliberately not machine translated.
-After editing such a YAML by hand, run
-`node --experimental-strip-types scripts/translate-i18n.ts --record-hashes` from
-inside the app, or the next CI run hands your Serbian back to the model.
+One exception: hand-written Serbian that is deliberately not machine
+translated. It now survives on its own — the translate job treats a value that
+differs from what it produced as a human's and keeps serving it. But only if it
+is edited **alone**: the cache key comes from the Russian, so changing both in
+one commit regenerates the translation. Fix the translation in one commit and
+the Russian in another.
 
 ## Where the content is
 
-| what                           | path                                                         |
-| ------------------------------ | ------------------------------------------------------------ |
-| case bodies (approved.rs)      | `apps/approved-rs/src/content/cases/*/index.md`              |
-| work bodies (Details, CarLab)  | `apps/{detailing,auto-service}/src/content/works/*/index.md` |
-| product bodies (CarLab shop)   | `apps/auto-service/src/content/products/*/index.md`          |
-| page and UI copy, meta strings | `apps/*/src/content/i18n/*.yaml`                             |
+| what                                          | path                                                         |
+| --------------------------------------------- | ------------------------------------------------------------ |
+| case bodies (approved.rs)                     | `apps/approved-rs/src/content/cases/*/index.md`              |
+| work bodies (Details, CarLab)                 | `apps/{detailing,auto-service}/src/content/works/*/index.md` |
+| product bodies (CarLab shop)                  | `apps/auto-service/src/content/products/*/index.md`          |
+| page and UI copy, meta strings                | `apps/*/src/content/i18n/*.yaml`                             |
+| translation cache (never edit; CI creates it) | `apps/*/src/content/translations.cache.json`                 |
 
 Product bodies are Russian-authored and auto-translated exactly like works, and
 they render through `.prose-shop`, so the list icons apply there too. The shop
@@ -171,9 +174,9 @@ Arithmetic first, judgement after.
    a title compete with each other.
 3. **Placeholders must survive.** Tokens look like `{location}`. Every token in
    the Russian source must appear in each translation and no new ones may appear;
-   a dropped token renders a hole in the live page. **Nothing catches this
-   automatically** — `assertSafeTranslation` checks only for missing strings,
-   short arrays and introduced HTML tags, never tokens. Check by eye.
+   a dropped token renders a hole in the live page. A **dropped** token is
+   caught: `assertSafeTranslation` fails the translation and the job retries.
+   A token the model **invented** is not — check for those by eye.
 4. **Never let a model rewrite a meta string containing a placeholder.** The
    wording gain does not pay for losing the token. Edit those by hand.
 
@@ -213,9 +216,10 @@ and English are derived from it, so fixing the Russian fixes all of them.
 - `pnpm --filter @podbor/<app> typecheck` — a stray unclosed `<li>`, a broken
   YAML block scalar or a `.strict()` schema violation surfaces here
 - `pnpm exec prettier --check apps/<app>/src/content` — the CI translate job
-  commits YAML without running prettier, so drift there is normal and fixing it
-  is in scope. Case markdown under `apps/approved-rs/src/content/cases` is in
-  `.prettierignore` on purpose — do not reformat it
+  runs `prettier --write` over the same paths before committing, so a failure
+  here is a real finding, not expected drift. Case markdown under
+  `apps/approved-rs/src/content/cases` is in `.prettierignore` on purpose — do
+  not reformat it
 - If you touched list markup or anything with a placeholder, look at the rendered
   page; the markdown alone does not tell you whether a glyph reads legibly or
   whether a token resolved

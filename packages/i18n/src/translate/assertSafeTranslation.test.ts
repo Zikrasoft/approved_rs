@@ -2,6 +2,16 @@ import { describe, it, expect } from 'vitest';
 import { assertSafeTranslation } from './assertSafeTranslation';
 
 describe('assertSafeTranslation', () => {
+  it('refuses a blank translation of a non-blank source', () => {
+    expect(() =>
+      assertSafeTranslation('Услуги', '   ', 'nav.services'),
+    ).toThrow('came back blank');
+  });
+
+  it('leaves a blank source alone', () => {
+    expect(() => assertSafeTranslation('', '', 'blank')).not.toThrow();
+  });
+
   it('does not throw for a matching, safe translation', () => {
     expect(() =>
       assertSafeTranslation(
@@ -22,6 +32,32 @@ describe('assertSafeTranslation', () => {
     expect(() =>
       assertSafeTranslation({ general: [1, 2, 3] }, { general: [1] }, ''),
     ).toThrow(/general/);
+  });
+
+  it('throws when an array is longer than the source (an invented item)', () => {
+    expect(() =>
+      assertSafeTranslation({ general: [1] }, { general: [1, 2] }, ''),
+    ).toThrow(/general/);
+  });
+
+  it('throws when the translation smuggles in an HTML comment', () => {
+    expect(() =>
+      assertSafeTranslation(
+        { body: 'Обычный текст.' },
+        { body: 'Tekst <!-- skriveno -->' },
+        '',
+      ),
+    ).toThrow(/body/);
+  });
+
+  it('tells two numbered heading levels apart', () => {
+    expect(() =>
+      assertSafeTranslation(
+        { body: '<h1>Заголовок</h1>' },
+        { body: '<h2>Naslov</h2>' },
+        '',
+      ),
+    ).toThrow(/<h2>/);
   });
 
   it('throws when a translated string contains raw HTML', () => {
@@ -164,10 +200,29 @@ describe('mixed-script words', () => {
     );
   });
 
-  it('names the offending pair so the field can be found', () => {
+  it('gives the same answer when asked twice', () => {
+    const check = () => assertSafeTranslation('подушка', 'подushка', 'meta');
+    expect(check).toThrow(/mixes Latin and Cyrillic/);
+    expect(check).toThrow(/mixes Latin and Cyrillic/);
+  });
+
+  it('accepts a whitespace-only source translated as whitespace', () => {
+    expect(() => assertSafeTranslation('   ', '   ', 'x')).not.toThrow();
+  });
+
+  it('names the whole offending word so the field can be found', () => {
     expect(() =>
-      assertSafeTranslation('подушка', 'jastuком', 'services.x'),
-    ).toThrow(/near "uк"/);
+      assertSafeTranslation('подушка', 'vazdušnim jastuком', 'services.x'),
+    ).toThrow(/"jastuком"/);
+  });
+
+  it('exempts only the spliced word the source already had, not the string', () => {
+    expect(() =>
+      assertSafeTranslation('Hondа Accord чинится', 'Hondа Accord radi', 'x'),
+    ).not.toThrow();
+    expect(() =>
+      assertSafeTranslation('Hondа Accord чинится', 'Hondа Accord radи', 'x'),
+    ).toThrow(/"radи"/);
   });
 
   it('allows a Cyrillic word standing on its own in a Latin sentence', () => {
