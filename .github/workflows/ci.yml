@@ -2,7 +2,16 @@ name: CI
 
 on:
   push:
-  workflow_dispatch: {}
+    # Branches only. Naming a tag filter without a branch filter would stop
+    # branch pushes triggering anything at all, and a tag checkout puts the
+    # translate job on a detached HEAD where its commit-and-push cannot work.
+    branches: ['**']
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Deploy every app, whatever the tags say
+        type: boolean
+        default: false
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -63,7 +72,8 @@ jobs:
             exit 0
           fi
           git commit -m "Auto-translate content"
-          git pull --rebase && git push
+          git pull --rebase
+          git push
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
   # The translate job pushes with GITHUB_TOKEN, which does not start a new
@@ -75,20 +85,94 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      changed: ${{ steps.scope.outputs.changed || '[]' }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.translate.outputs.sha }}
+          # turbo's [ref] filter diffs against real history, and the
+          # deployed/* tags below have to be present locally to be read.
+          fetch-depth: 0
       - uses: ./.github/actions/setup-pnpm
       - run: pnpm test
 
+      # Which apps are stale in production. The base is what is actually live
+      # (refs/tags/deployed/<app>), not the previous commit — an app whose
+      # deploy failed and which has not changed since would otherwise never be
+      # retried. Every unknown answers "deploy": the failure direction is
+      # always a redundant deploy, never a skipped one.
+      #
+      # The filter is `...[base]`, with the leading dots: they pull in the
+      # dependents of a changed package. That is what makes a change in
+      # packages/lead-crm deploy all three apps at once, which is what keeps
+      # two schema versions from meeting over the shared data/leads.json blob.
+      # Nothing else enforces that invariant.
+      - id: scope
+        if: github.ref == 'refs/heads/main'
+        env:
+          TURBO_TELEMETRY_DISABLED: '1'
+          FORCE: ${{ inputs.force || false }}
+        run: |
+          set -euo pipefail
+
+          # Only a clean "false" from turbo means the app is unchanged. A crash,
+          # unreadable output, or a turbo release that stops emitting .packages
+          # yields a verdict that is neither, and deploys: set -e is
+          # suppressed inside a condition, so a failed command would otherwise
+          # read as "nothing changed" and silently skip a production deploy
+          # while the step stayed green.
+          app_changed() {
+            local app="$1" base="$2" verdict
+            verdict=$(pnpm exec turbo run build --filter="...[$base]" --dry=json \
+              | jq -r --arg p "@podbor/$app" \
+                  'if (.packages | type) == "array"
+                   then ((.packages | index($p)) != null) else "?" end')
+            case "$verdict" in
+              false) return 1 ;;
+              true) return 0 ;;
+              *) echo "::warning::could not diff $app against $base — deploying anyway" ;;
+            esac
+          }
+
+          changed='[]'
+          for path in apps/*/; do
+            app=$(basename "$path")
+            base=$(git rev-parse -q --verify "refs/tags/deployed/$app^{commit}" || true)
+            if [ "$FORCE" = 'true' ]; then
+              reason='forced from workflow_dispatch'
+            elif [ -z "$base" ]; then
+              reason='no deployed/ tag yet'
+            elif ! git merge-base --is-ancestor "$base" HEAD; then
+              reason="deployed/$app ($base) is not an ancestor of HEAD"
+            elif ! git diff --quiet "$base" HEAD -- \
+                 pnpm-lock.yaml pnpm-workspace.yaml turbo.json package.json \
+                 .npmrc .node-version .pnpmfile.cjs \
+                 .github/actions/setup-pnpm/action.yml; then
+              # turbo attributes root-file changes to the "//" package and not
+              # to the apps, so a dependency bump would otherwise deploy nothing.
+              reason='root build config changed'
+            elif app_changed "$app" "$base"; then
+              reason="changed since $base"
+            else
+              echo "- $app is current in production ($base)"
+              continue
+            fi
+            echo "+ $app will deploy — $reason"
+            changed=$(jq -cn --argjson c "$changed" --arg a "$app" '$c + [$a]')
+          done
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+
   deploy:
     needs: [translate, verify]
-    if: needs.verify.result == 'success' && github.ref == 'refs/heads/main'
+    if: >-
+      needs.verify.result == 'success' &&
+      github.ref == 'refs/heads/main' &&
+      contains(fromJSON(needs.verify.outputs.changed), 'approved-rs')
     runs-on: ubuntu-latest
     environment: production
     permissions:
-      contents: read
+      contents: write
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -100,18 +184,35 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.translate.outputs.sha }}
+          persist-credentials: false
       - uses: ./.github/actions/setup-pnpm
       - run: pnpm exec vercel pull --yes --environment=production
       - run: pnpm exec vercel build --prod
       - run: pnpm exec vercel deploy --prebuilt --prod --archive=tgz
+      - name: Record what is live
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ needs.translate.outputs.sha }}
+          APP: approved-rs
+        run: |
+          gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/tags/deployed/$APP" \
+              -f sha="$SHA" -F force=true \
+            || gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" \
+              -f ref="refs/tags/deployed/$APP" -f sha="$SHA"
 
   deploy-brand-site:
     needs: [translate, verify]
-    if: needs.verify.result == 'success' && github.ref == 'refs/heads/main'
+    # The per-app decision is in the guard step below, because matrix is not a
+    # context in a job-level if. This only keeps the job — and the production
+    # environment it enters — out of a push where nothing changed at all.
+    if: >-
+      needs.verify.result == 'success' &&
+      github.ref == 'refs/heads/main' &&
+      needs.verify.outputs.changed != '[]'
     runs-on: ubuntu-latest
     environment: production
     permissions:
-      contents: read
+      contents: write
     strategy:
       matrix:
         include:
@@ -127,24 +228,47 @@ jobs:
       run:
         working-directory: apps/${{ matrix.app }}
     steps:
+      # Both reasons to skip live here rather than in the job's `if`, because
+      # the matrix context is not available in a job-level condition.
       - id: guard
         working-directory: .
+        env:
+          CHANGED: ${{ needs.verify.outputs.changed }}
+          APP: ${{ matrix.app }}
         run: |
           if [ -z "$VERCEL_PROJECT_ID" ]; then
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "${{ matrix.project_secret }} is not set — skipping the ${{ matrix.app }} deploy."
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "${{ matrix.project_secret }} is not set — skipping the $APP deploy."
+          elif ! jq -e 'type == "array"' <<<"$CHANGED" >/dev/null; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::unreadable changed list — deploying $APP anyway"
+          elif ! jq -e --arg a "$APP" 'index($a)' <<<"$CHANGED" >/dev/null; then
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "$APP is current in production — skipping."
           else
-            echo "configured=true" >> "$GITHUB_OUTPUT"
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
           fi
       - uses: actions/checkout@v4
-        if: steps.guard.outputs.configured == 'true'
+        if: steps.guard.outputs.deploy == 'true'
         with:
           ref: ${{ needs.translate.outputs.sha }}
+          persist-credentials: false
       - uses: ./.github/actions/setup-pnpm
-        if: steps.guard.outputs.configured == 'true'
+        if: steps.guard.outputs.deploy == 'true'
       - run: pnpm exec vercel pull --yes --environment=production
-        if: steps.guard.outputs.configured == 'true'
+        if: steps.guard.outputs.deploy == 'true'
       - run: pnpm exec vercel build --prod
-        if: steps.guard.outputs.configured == 'true'
+        if: steps.guard.outputs.deploy == 'true'
       - run: pnpm exec vercel deploy --prebuilt --prod --archive=tgz
-        if: steps.guard.outputs.configured == 'true'
+        if: steps.guard.outputs.deploy == 'true'
+      - name: Record what is live
+        if: steps.guard.outputs.deploy == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ needs.translate.outputs.sha }}
+          APP: ${{ matrix.app }}
+        run: |
+          gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/tags/deployed/$APP" \
+              -f sha="$SHA" -F force=true \
+            || gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" \
+              -f ref="refs/tags/deployed/$APP" -f sha="$SHA"
