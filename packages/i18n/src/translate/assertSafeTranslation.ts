@@ -1,8 +1,15 @@
 const HTML_TAG = /<[a-zA-Z/!]/;
-const MIXED_SCRIPT_WORD =
-  /\p{L}*(?:\p{Script=Latin}\p{Script=Cyrillic}|\p{Script=Cyrillic}\p{Script=Latin})\p{L}*/gu;
+const WORD = /\p{L}+/gu;
+const LATIN = /\p{Script=Latin}/u;
+const CYRILLIC = /\p{Script=Cyrillic}/u;
 const TAG_NAME = /<\/?([a-zA-Z][a-zA-Z0-9]*)/g;
 const PLACEHOLDER = /\{[a-zA-Z][a-zA-Z0-9]*\}/g;
+
+function mixedScriptWords(text: string): string[] {
+  return (text.match(WORD) ?? []).filter(
+    (word) => LATIN.test(word) && CYRILLIC.test(word),
+  );
+}
 
 function tagNamesOf(text: string): Set<string> {
   return new Set(
@@ -53,8 +60,8 @@ export function assertSafeTranslation(
         `translated response for "${path}" dropped placeholder tokens (${dropped.join(' ')}): ${translated}`,
       );
     }
-    const mixedInSource = new Set(source.match(MIXED_SCRIPT_WORD) ?? []);
-    const newlyMixed = (translated.match(MIXED_SCRIPT_WORD) ?? []).find(
+    const mixedInSource = new Set(mixedScriptWords(source));
+    const newlyMixed = mixedScriptWords(translated).find(
       (word) => !mixedInSource.has(word),
     );
     if (newlyMixed !== undefined) {
