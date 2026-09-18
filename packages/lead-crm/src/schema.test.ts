@@ -14,8 +14,28 @@ const base = {
 describe('createLeadSchema options', () => {
   it('rejects a negative commission rate', () => {
     expect(() => createLeadSchema({ defaultCommissionPercent: -1 })).toThrow(
-      'defaultCommissionPercent must not be negative',
+      'defaultCommissionPercent must be between 0 and 100',
     );
+  });
+
+  it('rejects a commission rate above the whole deal', () => {
+    expect(() => createLeadSchema({ defaultCommissionPercent: 101 })).toThrow(
+      'defaultCommissionPercent must be between 0 and 100',
+    );
+  });
+});
+
+describe('commission rate on a lead', () => {
+  const schema = createLeadSchema({ defaultCommissionPercent: 10 });
+
+  it('accepts a rate up to the whole deal', () => {
+    expect(
+      schema.parse({ ...base, commissionPercent: 100 }).commissionPercent,
+    ).toBe(100);
+  });
+
+  it('refuses a rate that would owe more than the deal was worth', () => {
+    expect(() => schema.parse({ ...base, commissionPercent: 101 })).toThrow();
   });
 });
 

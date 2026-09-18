@@ -53,6 +53,8 @@ export type PendingCommissionClaim = z.infer<
 
 export const LEGACY_BRAND = 'Approved.rs';
 
+export const MAX_COMMISSION_PERCENT = 100;
+
 const baseStoredLeadSchema = z.object({
   id: z.number().int().positive(),
   brand: z.string().default(LEGACY_BRAND),
@@ -69,7 +71,7 @@ const baseStoredLeadSchema = z.object({
   kind: z.enum(['lead', 'call_click']).optional(),
   status: leadStatusSchema.default('new'),
   dealAmount: z.number().nonnegative().nullable().default(null),
-  commissionPercent: z.number().nonnegative(),
+  commissionPercent: z.number().nonnegative().max(MAX_COMMISSION_PERCENT),
   paidAmount: z.number().nonnegative().default(0),
   payments: z.array(paymentSchema).default(() => []),
   incomes: z.array(incomeSchema).default(() => []),
@@ -98,7 +100,7 @@ function migratedIncomes(lead: StoredLead): Income[] {
   if (commission <= 0 || lead.paidAmount <= PAID_EPSILON) return whole(null);
   if (lead.paidAmount >= commission - PAID_EPSILON) return whole(paidAt);
   const covered = roundMoney((total * lead.paidAmount) / commission);
-  if (covered <= 0 || covered >= total) return whole(null);
+  if (covered >= total) return whole(paidAt);
   return [
     { id: 1, amount: covered, at, paidAt },
     { id: 2, amount: roundMoney(total - covered), at, paidAt: null },
@@ -151,14 +153,20 @@ export type StoredLeadSchema = z.ZodType<StoredLead, unknown>;
 export function createLeadSchema({
   defaultCommissionPercent,
 }: LeadSchemaOptions): StoredLeadSchema {
-  if (defaultCommissionPercent < 0) {
-    throw new Error('[lead-crm] defaultCommissionPercent must not be negative');
+  if (
+    defaultCommissionPercent < 0 ||
+    defaultCommissionPercent > MAX_COMMISSION_PERCENT
+  ) {
+    throw new Error(
+      `[lead-crm] defaultCommissionPercent must be between 0 and ${MAX_COMMISSION_PERCENT}`,
+    );
   }
   return baseStoredLeadSchema
     .extend({
       commissionPercent: z
         .number()
         .nonnegative()
+        .max(MAX_COMMISSION_PERCENT)
         .default(defaultCommissionPercent),
     })
     .transform(withDerivedMoney);
