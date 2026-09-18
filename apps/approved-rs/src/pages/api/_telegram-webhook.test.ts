@@ -259,6 +259,9 @@ describe('POST /api/telegram-webhook', () => {
     vi.mocked(sendDealNotificationToAdmin)
       .mockReset()
       .mockResolvedValue(undefined);
+    vi.mocked(sendIncomeNotificationToAdmin)
+      .mockReset()
+      .mockResolvedValue(undefined);
     vi.mocked(sendCommissionClaimToAdmin)
       .mockReset()
       .mockResolvedValue(undefined);
@@ -1983,6 +1986,35 @@ describe('POST /api/telegram-webhook', () => {
         updated,
         updated.incomes[0],
       );
+    });
+
+    it('ignores a mid-job income answered after the lead was lost', async () => {
+      const lead = makeLead({
+        id: 5,
+        status: 'lost',
+        pendingPrompt: {
+          chatId: DM_CHAT_ID,
+          messageId: 888,
+          kind: 'add_income',
+        },
+      });
+      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
+      mockResolveFromBase(lead);
+
+      await POST(
+        makeCtx({
+          message: {
+            message_id: 2,
+            text: '300',
+            chat: { id: DM_CHAT_ID, type: 'private' },
+            from: { id: OWNER_ID },
+            reply_to_message: { message_id: 888 },
+          },
+        }),
+      );
+
+      expect(ensureLeadCard).not.toHaveBeenCalled();
+      expect(sendIncomeNotificationToAdmin).not.toHaveBeenCalled();
     });
 
     it('rejects a zero mid-job income without recording anything', async () => {

@@ -830,13 +830,17 @@ async function handlePromptReply(
       await sendMessage(chatId, '⚠️ Нужна сумма в евро. Попробуйте ещё раз.');
       return;
     }
+    let added = false;
     const updated = await resolvePendingPrompt(
       chatId,
       replyToMessageId,
-      (lead) => ({ incomes: appendIncome(lead.incomes, amount) }),
+      (lead) => {
+        added = canAddIncome(lead, 'owner');
+        return added ? { incomes: appendIncome(lead.incomes, amount) } : {};
+      },
     );
     const income = updated?.incomes.at(-1);
-    if (updated && income) {
+    if (updated && added && income) {
       await ensureLeadCard(updated);
       await sendIncomeNotificationToAdmin(updated, income);
       await replyWithCard(chatId, updated, '✅ Доход добавлен');
