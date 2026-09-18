@@ -6,7 +6,7 @@ import {
 import { createLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
 import { createLeadStore, type LeadStore } from './store.ts';
 import { createQuarantine } from './quarantine.ts';
-import { getCommission } from './money.ts';
+import { appendIncome, getCommission } from './money.ts';
 
 let storage: MemoryStorage;
 let store: LeadStore;
@@ -29,28 +29,38 @@ async function forceComplete(id: number, dealAmount: number): Promise<void> {
     ),
   );
 }
-async function forcePay(id: number, amount: number): Promise<void> {
+async function forcePay(id: number): Promise<void> {
   await store.updateLeads((leads) =>
     leads.map((l) =>
       l.id === id
         ? {
             ...l,
-            paidAmount: l.paidAmount + amount,
-            payments: [...l.payments, { amount, at: new Date().toISOString() }],
+            incomes: l.incomes.map((i) => ({
+              ...i,
+              paidAt: new Date().toISOString(),
+            })),
           }
         : l,
     ),
   );
 }
-async function forceClaim(id: number, amount: number): Promise<void> {
+async function forceIncome(id: number, amount: number): Promise<void> {
+  await store.updateLeads((leads) =>
+    leads.map((l) =>
+      l.id === id ? { ...l, incomes: appendIncome(l.incomes, amount) } : l,
+    ),
+  );
+}
+async function forceClaim(id: number): Promise<void> {
   await store.updateLeads((leads) =>
     leads.map((l) =>
       l.id === id
         ? {
             ...l,
             pendingCommissionClaim: {
-              amount,
+              amount: getCommission(l).remaining,
               claimedAt: new Date().toISOString(),
+              incomeIds: l.incomes.filter((i) => !i.paidAt).map((i) => i.id),
             },
           }
         : l,
@@ -388,6 +398,28 @@ describe('resolvePendingPrompt', () => {
     expect(after?.dealAmount).toBe(5000);
   });
 
+  it('returns undefined when a concurrent write clears the prompt between retry attempts', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.setPendingPrompt(lead.id, {
+      chatId: 111,
+      messageId: 999,
+      kind: 'deal_amount',
+    });
+    storage.failNextWrites(1, () => {
+      const leads = storage.current() as StoredLead[];
+      leads[0]!.pendingPrompt = null;
+      storage.seed(leads);
+    });
+
+    const resolved = await store.resolvePendingPrompt(111, 999, () => ({
+      dealAmount: 5000,
+    }));
+
+    expect(resolved).toBeUndefined();
+    const after = await store.getLead(lead.id);
+    expect(after?.dealAmount).toBeNull();
+  });
+
   it('returns undefined when no lead has a matching pending prompt', async () => {
     await store.insertLead(baseData);
     const resolved = await store.resolvePendingPrompt(1, 1, () => ({
@@ -540,48 +572,125 @@ describe('deleteLead', () => {
   });
 });
 
-describe('claimFullCommission', () => {
-  it('claims the full remaining balance, not a hardcoded/typed one', async () => {
+describe('claimCommission', () => {
+  it('claims every unpaid income when no ids are given', async () => {
     const lead = await store.insertLead(baseData);
     await forceComplete(lead.id, 100_000);
-    await forcePay(lead.id, 3000);
+    await forceIncome(lead.id, 50_000);
 
-    const claimed = await store.claimFullCommission(lead.id);
+    const claimed = await store.claimCommission(lead.id, null);
 
     expect(claimed?.pendingCommissionClaim).toEqual({
-      amount: 7000,
+      amount: 15_000,
       claimedAt: expect.any(String),
+      incomeIds: [1, 2],
     });
+  });
+
+  it('claims one named income, leaving the other unpaid', async () => {
+    const lead = await store.insertLead(baseData);
+    await forceComplete(lead.id, 100_000);
+    await forceIncome(lead.id, 50_000);
+
+    const claimed = await store.claimCommission(lead.id, [2]);
+
+    expect(claimed?.pendingCommissionClaim).toEqual({
+      amount: 5000,
+      claimedAt: expect.any(String),
+      incomeIds: [2],
+    });
+  });
+
+  it('skips incomes already paid off', async () => {
+    const lead = await store.insertLead(baseData);
+    await forceComplete(lead.id, 100_000);
+    await forcePay(lead.id);
+    await forceIncome(lead.id, 50_000);
+
+    const claimed = await store.claimCommission(lead.id, null);
+
+    expect(claimed?.pendingCommissionClaim).toEqual({
+      amount: 5000,
+      claimedAt: expect.any(String),
+      incomeIds: [2],
+    });
+  });
+
+  it('reports nothing claimed when every income is already settled', async () => {
+    const lead = await store.insertLead(baseData);
+    await forceComplete(lead.id, 100_000);
+    await forcePay(lead.id);
+
+    const claimed = await store.claimCommission(lead.id, null);
+
+    expect(claimed).toBeUndefined();
+    const after = await store.getLead(lead.id);
+    expect(after?.pendingCommissionClaim).toBeNull();
   });
 });
 
 describe('confirmCommissionPayment / rejectCommissionPayment', () => {
-  it('confirm moves the claimed amount into paidAmount/payments and clears the claim', async () => {
+  it('confirm settles the claimed incomes, moving them into paidAmount, and clears the claim', async () => {
     const lead = await store.insertLead(baseData);
     await forceComplete(lead.id, 100_000);
-    await forceClaim(lead.id, 4000);
+    await forceClaim(lead.id);
 
     const confirmed = await store.confirmCommissionPayment(lead.id);
 
-    expect(confirmed?.paidAmount).toBe(4000);
-    expect(confirmed?.payments).toEqual([
-      { amount: 4000, at: expect.any(String) },
-    ]);
+    expect(confirmed?.paidAmount).toBe(10_000);
+    expect(confirmed?.incomes[0]?.paidAt).toEqual(expect.any(String));
     expect(confirmed?.pendingCommissionClaim).toBeNull();
+  });
+
+  it('marks only the claimed income paid, leaving the rest owed', async () => {
+    const lead = await store.insertLead(baseData);
+    await forceComplete(lead.id, 100_000);
+    await forceIncome(lead.id, 50_000);
+    await store.claimCommission(lead.id, [2]);
+
+    const confirmed = await store.confirmCommissionPayment(lead.id);
+
+    expect(confirmed?.incomes.map((i) => i.paidAt == null)).toEqual([
+      true,
+      false,
+    ]);
+    expect(confirmed?.paidAmount).toBe(5000);
+  });
+
+  it('falls back to every unpaid income for a legacy claim that carries no ids', async () => {
+    const lead = await store.insertLead(baseData);
+    await forceComplete(lead.id, 100_000);
+    await store.updateLeads((leads) =>
+      leads.map((l) =>
+        l.id === lead.id
+          ? {
+              ...l,
+              pendingCommissionClaim: {
+                amount: 10_000,
+                claimedAt: new Date().toISOString(),
+                incomeIds: [],
+              },
+            }
+          : l,
+      ),
+    );
+
+    const confirmed = await store.confirmCommissionPayment(lead.id);
+
+    expect(confirmed?.paidAmount).toBe(10_000);
   });
 
   it('confirm is a no-op the second time (TOCTOU regression)', async () => {
     const lead = await store.insertLead(baseData);
     await forceComplete(lead.id, 100_000);
-    await forceClaim(lead.id, 4000);
+    await forceClaim(lead.id);
     await store.confirmCommissionPayment(lead.id);
 
     const second = await store.confirmCommissionPayment(lead.id);
 
     expect(second).toBeUndefined();
     const after = await store.getLead(lead.id);
-    expect(after?.paidAmount).toBe(4000);
-    expect(after?.payments).toHaveLength(1);
+    expect(after?.paidAmount).toBe(10_000);
   });
 
   it('confirm returns undefined (not the unchanged lead) when there was never a claim to confirm', async () => {
@@ -596,7 +705,7 @@ describe('confirmCommissionPayment / rejectCommissionPayment', () => {
   it('returns undefined if the claim was cleared by a concurrent write between retry attempts', async () => {
     const lead = await store.insertLead(baseData);
     await forceComplete(lead.id, 100_000);
-    await forceClaim(lead.id, 4000);
+    await forceClaim(lead.id);
 
     // Forces one write conflict on the first attempt; right before it
     // throws, simulate another process (e.g. a duplicate webhook delivery)
@@ -617,7 +726,7 @@ describe('confirmCommissionPayment / rejectCommissionPayment', () => {
   it('reject clears the claim without moving any money', async () => {
     const lead = await store.insertLead(baseData);
     await forceComplete(lead.id, 100_000);
-    await forceClaim(lead.id, 4000);
+    await forceClaim(lead.id);
 
     const rejected = await store.rejectCommissionPayment(lead.id);
 
@@ -636,12 +745,12 @@ describe('confirmCommissionPayment / rejectCommissionPayment', () => {
 });
 
 describe('getOwedSummary', () => {
-  it('sums remaining commission across won leads with a balance, skipping fully-paid ones', async () => {
+  it('sums remaining commission across leads with a balance, skipping fully-paid ones', async () => {
     const a = await store.insertLead(baseData);
     await forceComplete(a.id, 100_000); // 10% commission = 10 000
     const b = await store.insertLead(baseData);
     await forceComplete(b.id, 50_000); // commission 5 000
-    await forcePay(b.id, 5000); // fully paid — excluded
+    await forcePay(b.id); // fully paid — excluded
 
     const { rows, total } = await store.getOwedSummary();
     expect(rows).toEqual([
@@ -720,39 +829,87 @@ describe('getLead / findByPendingPrompt — not-found paths', () => {
   });
 });
 
+describe('appendIncome', () => {
+  it('numbers each income after the highest id already on the lead', () => {
+    const first = appendIncome([], 300);
+    const second = appendIncome(first, 150);
+
+    expect(second.map((i) => [i.id, i.amount, i.paidAt])).toEqual([
+      [1, 300, null],
+      [2, 150, null],
+    ]);
+  });
+
+  it('does not reuse the id of a removed income', () => {
+    const next = appendIncome(
+      [{ id: 7, amount: 100, at: 'x', paidAt: null }],
+      50,
+    );
+
+    expect(next[1].id).toBe(8);
+  });
+});
+
 describe('getCommission', () => {
+  const income = (amount: number, paidAt: string | null = null) => ({
+    id: 1,
+    amount,
+    at: '2026-01-01T00:00:00.000Z',
+    paidAt,
+  });
+
+  it('sums the commission of each income rather than taxing the total', () => {
+    const info = getCommission({
+      commissionPercent: 10,
+      paidAmount: 15,
+      incomes: [
+        { ...income(300, '2026-02-01T00:00:00.000Z') },
+        { ...income(150), id: 2 },
+      ],
+    });
+
+    expect(info.commission).toBe(45);
+    expect(info.remaining).toBe(30);
+    expect(info.isPaidOff).toBe(false);
+  });
+
+  it('rounds each income separately, so the total can differ from taxing the sum', () => {
+    const perIncome = getCommission({
+      commissionPercent: 33,
+      paidAmount: 0,
+      incomes: [income(10.05), { ...income(10.05), id: 2 }],
+    });
+    const onTheTotal = getCommission({
+      commissionPercent: 33,
+      paidAmount: 0,
+      incomes: [income(20.1)],
+    });
+
+    expect(perIncome.commission).toBe(6.64);
+    expect(onTheTotal.commission).toBe(6.63);
+  });
+
   it('uses the rate stored on the lead, so brands on different rates differ', () => {
     const sourcing = getCommission({
-      dealAmount: 1000,
       commissionPercent: 10,
       paidAmount: 0,
+      incomes: [income(1000)],
     });
     const detailing = getCommission({
-      dealAmount: 1000,
       commissionPercent: 50,
       paidAmount: 0,
+      incomes: [income(1000)],
     });
 
     expect(sourcing.commission).toBe(100);
     expect(detailing.commission).toBe(500);
   });
 
-  it('computes commission and remaining from dealAmount/commissionPercent/paidAmount', () => {
+  it('owes nothing on a lead without incomes', () => {
     const info = getCommission({
-      dealAmount: 100_000,
-      commissionPercent: 10,
-      paidAmount: 3000,
-    });
-    expect(info.commission).toBe(10_000);
-    expect(info.remaining).toBe(7000);
-    expect(info.isPaidOff).toBe(false);
-  });
-
-  it('treats a null dealAmount as zero', () => {
-    const info = getCommission({
-      dealAmount: null,
       commissionPercent: 10,
       paidAmount: 0,
+      incomes: [],
     });
     expect(info.commission).toBe(0);
     expect(info.isPaidOff).toBe(true);
@@ -760,9 +917,9 @@ describe('getCommission', () => {
 
   it('stays isPaidOff when overpaid (remaining goes negative) instead of flagging still-owed', () => {
     const info = getCommission({
-      dealAmount: 100_000,
       commissionPercent: 10,
       paidAmount: 15_000,
+      incomes: [income(100_000)],
     });
     expect(info.remaining).toBe(-5000);
     expect(info.isPaidOff).toBe(true);
@@ -770,9 +927,9 @@ describe('getCommission', () => {
 
   it('is paid off within the rounding epsilon', () => {
     const info = getCommission({
-      dealAmount: 100_000,
       commissionPercent: 10,
       paidAmount: 9999.999,
+      incomes: [income(100_000)],
     });
     expect(info.isPaidOff).toBe(true);
   });
@@ -834,6 +991,169 @@ describe('readLeads — schema validation on the way in', () => {
     expect(lead).toBeDefined();
     expect(lead.dealAmount).toBe(300);
     expect(lead.pendingPrompt).toBeNull();
+  });
+
+  it('turns a legacy paid-off deal into one settled income', async () => {
+    seedRawBlob([
+      {
+        id: 1,
+        name: 'Иван',
+        contact: '@ivan',
+        service: 'vehicle-sourcing',
+        locale: 'ru',
+        status: 'won',
+        dealAmount: 1000,
+        commissionPercent: 10,
+        paidAmount: 100,
+        payments: [{ amount: 100, at: '2026-02-02T00:00:00.000Z' }],
+        statusChangedAt: '2026-01-01T00:00:00.000Z',
+        createdAt: '2026-01-01T00:00:00.000Z',
+      },
+    ]);
+
+    const [lead] = await store.readLeads();
+
+    expect(lead.incomes).toEqual([
+      {
+        id: 1,
+        amount: 1000,
+        at: '2026-01-01T00:00:00.000Z',
+        paidAt: '2026-02-02T00:00:00.000Z',
+      },
+    ]);
+    expect(lead.dealAmount).toBe(1000);
+    expect(lead.paidAmount).toBe(100);
+  });
+
+  it('keeps a legacy unpaid deal owed, dating the income from the status change', async () => {
+    seedRawBlob([
+      {
+        id: 1,
+        name: 'Иван',
+        contact: '@ivan',
+        service: 'vehicle-sourcing',
+        locale: 'ru',
+        status: 'won',
+        dealAmount: 1000,
+        commissionPercent: 10,
+        statusChangedAt: '2026-01-01T00:00:00.000Z',
+        createdAt: '2026-01-01T00:00:00.000Z',
+      },
+    ]);
+
+    const [lead] = await store.readLeads();
+
+    expect(lead.incomes).toEqual([
+      { id: 1, amount: 1000, at: '2026-01-01T00:00:00.000Z', paidAt: null },
+    ]);
+    expect(lead.paidAmount).toBe(0);
+  });
+
+  it('leaves a legacy zero-euro deal without an income, keeping the amount as it was', async () => {
+    seedRawBlob([
+      {
+        id: 1,
+        name: 'Иван',
+        contact: '@ivan',
+        service: 'vehicle-sourcing',
+        locale: 'ru',
+        status: 'won',
+        dealAmount: 0,
+        statusChangedAt: 'x',
+        createdAt: 'x',
+      },
+    ]);
+
+    const [lead] = await store.readLeads();
+
+    expect(lead.incomes).toEqual([]);
+    expect(lead.dealAmount).toBe(0);
+  });
+
+  it('keeps a legacy partly-paid deal partly paid, splitting it at what the payment covered', async () => {
+    seedRawBlob([
+      {
+        id: 1,
+        name: 'Иван',
+        contact: '@ivan',
+        service: 'vehicle-sourcing',
+        locale: 'ru',
+        status: 'won',
+        dealAmount: 100_000,
+        commissionPercent: 10,
+        paidAmount: 3000,
+        payments: [{ amount: 3000, at: '2026-02-02T00:00:00.000Z' }],
+        statusChangedAt: '2026-01-01T00:00:00.000Z',
+        createdAt: '2026-01-01T00:00:00.000Z',
+      },
+    ]);
+
+    const [lead] = await store.readLeads();
+
+    expect(lead.incomes).toEqual([
+      {
+        id: 1,
+        amount: 30_000,
+        at: '2026-01-01T00:00:00.000Z',
+        paidAt: '2026-02-02T00:00:00.000Z',
+      },
+      {
+        id: 2,
+        amount: 70_000,
+        at: '2026-01-01T00:00:00.000Z',
+        paidAt: null,
+      },
+    ]);
+    expect(lead.dealAmount).toBe(100_000);
+    expect(lead.paidAmount).toBe(3000);
+    expect(getCommission(lead).remaining).toBe(7000);
+  });
+
+  it('leaves a legacy deal on a zero commission rate whole and unsettled', async () => {
+    seedRawBlob([
+      {
+        id: 1,
+        name: 'Иван',
+        contact: '@ivan',
+        service: 'vehicle-sourcing',
+        locale: 'ru',
+        status: 'won',
+        dealAmount: 1000,
+        commissionPercent: 0,
+        paidAmount: 0,
+        statusChangedAt: '2026-01-01T00:00:00.000Z',
+        createdAt: '2026-01-01T00:00:00.000Z',
+      },
+    ]);
+
+    const [lead] = await store.readLeads();
+
+    expect(lead.incomes).toEqual([
+      { id: 1, amount: 1000, at: '2026-01-01T00:00:00.000Z', paidAt: null },
+    ]);
+  });
+
+  it('keeps a legacy deal whole when the payment covers less than a euro of it', async () => {
+    seedRawBlob([
+      {
+        id: 1,
+        name: 'Иван',
+        contact: '@ivan',
+        service: 'vehicle-sourcing',
+        locale: 'ru',
+        status: 'won',
+        dealAmount: 1000,
+        commissionPercent: 10,
+        paidAmount: 0.001,
+        statusChangedAt: '2026-01-01T00:00:00.000Z',
+        createdAt: '2026-01-01T00:00:00.000Z',
+      },
+    ]);
+
+    const [lead] = await store.readLeads();
+
+    expect(lead.incomes).toHaveLength(1);
+    expect(lead.paidAmount).toBe(0);
   });
 
   it('hides a record missing a required field from callers', async () => {

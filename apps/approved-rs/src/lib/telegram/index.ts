@@ -20,6 +20,7 @@ export const {
   sendLeadNotification,
   sendPostponeReminderToOwner,
   sendDealNotificationToAdmin,
+  sendIncomeNotificationToAdmin,
   sendCommissionClaimToAdmin,
   sendCommissionResultToOwner,
   sendStatusChangeToAdmin,
@@ -33,6 +34,7 @@ export const OWNER_IDS = ownerIds;
 export const ADMIN_IDS = adminIds;
 
 export {
+  canAddIncome,
   isLeadStatusKey,
   statusLabel,
   formatMoney,

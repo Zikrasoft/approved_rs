@@ -4,6 +4,7 @@ export type {
   LeadInput,
   LeadSubmission,
   LeadSchemaOptions,
+  Income,
   LeadStatus,
   PendingCommissionClaim,
   PendingPrompt,
@@ -12,7 +13,14 @@ export type {
   StoredLeadSchema,
 } from './schema.ts';
 
-export { getCommission, roundMoney } from './money.ts';
+export {
+  appendIncome,
+  getCommission,
+  hasIncome,
+  incomeCommission,
+  roundMoney,
+  unpaidIncomes,
+} from './money.ts';
 export type { CommissionInfo } from './money.ts';
 
 export { appendNote, createLeadStore, MAX_LIST_ROWS } from './store.ts';
@@ -29,6 +37,7 @@ export type { TelegramClient } from './telegram/client.ts';
 
 export {
   buildDeleteConfirm,
+  canAddIncome,
   buildLeadList,
   buildMenu,
   buildOwedList,

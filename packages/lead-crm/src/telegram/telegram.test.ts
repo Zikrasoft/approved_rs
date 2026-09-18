@@ -10,6 +10,7 @@ import {
 } from './client.ts';
 import { createFormatter } from './format.ts';
 import { createNotifier } from './notify.ts';
+import { withDerivedMoney } from '../schema.ts';
 import type { LeadStatus, StoredLead } from '../schema.ts';
 
 // Free functions — no per-business config, so they are imported directly.
@@ -57,6 +58,7 @@ const {
   sendLeadNotification,
   refreshLeadCard,
   sendDealNotificationToAdmin,
+  sendIncomeNotificationToAdmin,
   sendCommissionClaimToAdmin,
   sendCommissionResultToOwner,
   sendQuarantinedLeadsToAdmin,
@@ -67,7 +69,7 @@ const {
 } = notifier;
 
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
-  return {
+  return withDerivedMoney({
     id: 42,
     brand: 'Approved.rs',
     name: 'Иван',
@@ -91,8 +93,9 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     archived: false,
     pendingCommissionClaim: null,
     remindAt: null,
+    incomes: [],
     ...overrides,
-  };
+  });
 }
 
 // Intl.NumberFormat('ru-RU') uses a non-breaking thousands separator that
@@ -517,6 +520,28 @@ describe('sendDealNotificationToAdmin', () => {
   });
 });
 
+describe('sendIncomeNotificationToAdmin', () => {
+  beforeEach(() => mockFetchOk({ message_id: 1 }));
+  afterEach(() => mockFetch.mockReset());
+
+  it('tells the admin what came in mid-job and the commission on it', async () => {
+    const lead = makeLead({
+      id: 9,
+      status: 'in_progress',
+      incomes: [
+        { id: 1, amount: 300, at: '2026-03-01T00:00:00.000Z', paidAt: null },
+      ],
+    });
+
+    await sendIncomeNotificationToAdmin(lead, lead.incomes[0]);
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body as string);
+    expect(body.chat_id).toBe(222);
+    expect(body.text).toContain(money(300));
+    expect(body.text).toContain(`(10%): ${money(30)}`);
+  });
+});
+
 describe('sendCommissionClaimToAdmin', () => {
   beforeEach(() => mockFetchOk({ message_id: 1 }));
   afterEach(() => mockFetch.mockReset());
@@ -528,6 +553,7 @@ describe('sendCommissionClaimToAdmin', () => {
         pendingCommissionClaim: {
           amount: 4000,
           claimedAt: '2026-01-01T00:00:00.000Z',
+          incomeIds: [1],
         },
       }),
     );
@@ -687,11 +713,18 @@ describe('formatDealsList', () => {
     expect(text).toContain('🔴 Не оплачено');
   });
 
-  it('marks a partially-paid deal 🟡 with both amounts', () => {
+  it('marks a deal with one income settled and one still owed 🟡', () => {
     const text = formatDealsList([
-      makeLead({ id: 1, status: 'won', dealAmount: 100000, paidAmount: 3000 }),
+      makeLead({
+        id: 1,
+        status: 'won',
+        incomes: [
+          { id: 1, amount: 70000, at: 'x', paidAt: 'y' },
+          { id: 2, amount: 30000, at: 'x', paidAt: null },
+        ],
+      }),
     ]);
-    expect(text).toContain(`🟡 Оплачено ${money(3000)} из ${money(10000)}`);
+    expect(text).toContain(`🟡 Оплачено ${money(7000)} из ${money(10000)}`);
   });
 
   it('marks a fully-paid deal 🟢', () => {
@@ -800,10 +833,11 @@ describe('buildMenu', () => {
 });
 
 describe('buildHelp', () => {
-  it('owner text explains finalizing and the one-tap full-balance claim', () => {
+  it('owner text explains adding incomes, finalizing and the per-income claim', () => {
     const text = buildHelp('owner');
     expect(text).toContain('Завершить');
-    expect(text).toContain('Отметить оплату комиссии');
+    expect(text).toContain('Добавить доход');
+    expect(text).toContain('Оплатил всё');
     expect(text).not.toContain('Подтвердить');
   });
 
@@ -852,7 +886,14 @@ describe('buildStats', () => {
   const leads = [
     makeLead({ id: 1, status: 'new' }),
     makeLead({ id: 2, status: 'in_progress' }),
-    makeLead({ id: 3, status: 'won', dealAmount: 100000, paidAmount: 4000 }),
+    makeLead({
+      id: 3,
+      status: 'won',
+      incomes: [
+        { id: 1, amount: 40000, at: 'x', paidAt: 'y' },
+        { id: 2, amount: 60000, at: 'x', paidAt: null },
+      ],
+    }),
     makeLead({ id: 4, status: 'lost' }),
     makeLead({ id: 5, status: 'new', archived: true }),
   ];
@@ -922,12 +963,105 @@ describe('buildLeadDetail', () => {
     const data = reply_markup.inline_keyboard
       .flat()
       .map((b) => b.callback_data);
-    expect(data).toContain('claimpay:7');
+    expect(data).toContain('claimpay:7:1');
     expect(
       reply_markup.inline_keyboard[0].some((b) =>
         b.callback_data?.startsWith('st:'),
       ),
     ).toBe(false);
+  });
+
+  it('lists every income with its own commission and paid mark', () => {
+    const lead = makeLead({
+      id: 7,
+      status: 'won',
+      incomes: [
+        { id: 1, amount: 300, at: '2026-03-01T00:00:00.000Z', paidAt: 'y' },
+        { id: 2, amount: 200, at: '2026-03-05T00:00:00.000Z', paidAt: null },
+      ],
+    });
+
+    const { text, reply_markup } = buildLeadDetail(lead, 'owner');
+
+    expect(text).toContain(
+      `• ${money(300)} от 01.03.2026 · комиссия ${money(30)} · 🟢 оплачена`,
+    );
+    expect(text).toContain(
+      `• ${money(200)} от 05.03.2026 · комиссия ${money(20)} · 🔴 не оплачена`,
+    );
+    expect(
+      reply_markup.inline_keyboard.flat().map((b) => b.callback_data),
+    ).toContain('claimpay:7:2');
+  });
+
+  it('offers a pay-everything button only when more than one income is owed', () => {
+    const one = buildLeadDetail(
+      makeLead({
+        id: 7,
+        status: 'won',
+        incomes: [
+          { id: 1, amount: 300, at: '2026-03-01T00:00:00.000Z', paidAt: null },
+        ],
+      }),
+      'owner',
+    );
+    const two = buildLeadDetail(
+      makeLead({
+        id: 7,
+        status: 'won',
+        incomes: [
+          { id: 1, amount: 300, at: '2026-03-01T00:00:00.000Z', paidAt: null },
+          { id: 2, amount: 200, at: '2026-03-05T00:00:00.000Z', paidAt: null },
+        ],
+      }),
+      'owner',
+    );
+
+    expect(
+      one.reply_markup.inline_keyboard.flat().map((b) => b.callback_data),
+    ).not.toContain('claimpay:7');
+    const rows = two.reply_markup.inline_keyboard.flat();
+    expect(rows.map((b) => b.callback_data)).toContain('claimpay:7');
+    expect(rows.find((b) => b.callback_data === 'claimpay:7')?.text).toBe(
+      `💸 Оплатил всё — ${money(50)}`,
+    );
+  });
+
+  it('lets the owner add an income while the job is still running, but not the admin', () => {
+    const lead = makeLead({ id: 7, status: 'in_progress' });
+
+    expect(
+      buildLeadDetail(lead, 'owner')
+        .reply_markup.inline_keyboard.flat()
+        .map((b) => b.callback_data),
+    ).toContain('income:7');
+    expect(
+      buildLeadDetail(lead, 'admin')
+        .reply_markup.inline_keyboard.flat()
+        .map((b) => b.callback_data),
+    ).not.toContain('income:7');
+  });
+
+  it('keeps the add-income button off a lead nobody is working on', () => {
+    for (const status of ['new', 'lost'] as const) {
+      const { reply_markup } = buildLeadDetail(
+        makeLead({ id: 7, status }),
+        'owner',
+      );
+      expect(
+        reply_markup.inline_keyboard.flat().map((b) => b.callback_data),
+      ).not.toContain('income:7');
+    }
+  });
+
+  it('shows the commission block without an income list for a legacy zero-euro deal', () => {
+    const { text } = buildLeadDetail(
+      makeLead({ id: 7, status: 'won', dealAmount: 0 }),
+      'owner',
+    );
+
+    expect(text).toContain(`💰 Комиссия Zikrasoft: ${money(0)}`);
+    expect(text).not.toContain('💶 Доходы:');
   });
 
   it('won lead, owner, claim pending: shows waiting line, no claim button', () => {
@@ -938,13 +1072,16 @@ describe('buildLeadDetail', () => {
       pendingCommissionClaim: {
         amount: 3000,
         claimedAt: '2026-01-01T00:00:00.000Z',
+        incomeIds: [1],
       },
     });
     const { text, reply_markup } = buildLeadDetail(lead, 'owner');
     expect(text).toContain(`🕓 Ожидает подтверждения: ${money(3000)}`);
     expect(
-      reply_markup.inline_keyboard.flat().map((b) => b.callback_data),
-    ).not.toContain('claimpay:7');
+      reply_markup.inline_keyboard
+        .flat()
+        .some((b) => b.callback_data?.startsWith('claimpay:')),
+    ).toBe(false);
   });
 
   it('won lead, admin, no remaining and no pending claim: no money buttons at all', () => {
@@ -970,6 +1107,7 @@ describe('buildLeadDetail', () => {
       pendingCommissionClaim: {
         amount: 3000,
         claimedAt: '2026-01-01T00:00:00.000Z',
+        incomeIds: [1],
       },
     });
     const { reply_markup } = buildLeadDetail(lead, 'admin');

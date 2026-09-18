@@ -1,6 +1,7 @@
 export const prerender = false;
 
 import type { APIContext } from 'astro';
+import { z } from 'zod';
 import {
   parse,
   isValid,
@@ -17,6 +18,7 @@ import {
   sendForceReplyPrompt,
   safeEditMessage,
   sendDealNotificationToAdmin,
+  sendIncomeNotificationToAdmin,
   sendCommissionClaimToAdmin,
   sendCommissionResultToOwner,
   sendStatusChangeToAdmin,
@@ -37,6 +39,7 @@ import {
   OWNER_IDS,
   ADMIN_IDS,
   EDIT_FIELD_LABELS,
+  canAddIncome,
   type Role,
   type EditField,
 } from '@/lib/telegram';
@@ -47,7 +50,7 @@ import {
   unarchiveLead,
   deleteLead,
   confirmCommissionPayment,
-  claimFullCommission,
+  claimCommission,
   rejectCommissionPayment,
   setPendingPrompt,
   findByPendingPrompt,
@@ -59,6 +62,7 @@ import {
   getOwedSummary,
   readLeads,
   getCommission,
+  appendIncome,
   type LeadStatus,
   type StoredLead,
 } from '@/lib/store';
@@ -112,14 +116,21 @@ function roleOf(id: number | undefined): Role | undefined {
   return undefined;
 }
 
-// Strips everything but digits/decimal, rejects a leading '-' explicitly
-// (rather than letting it get silently stripped into a positive number),
-// requires strictly positive.
-function parseAmount(text: string): number | null {
-  const trimmed = text.trim();
-  if (trimmed.startsWith('-')) return null;
-  const amount = Number(trimmed.replace(/[^\d.,]/g, '').replace(',', '.'));
-  return Number.isFinite(amount) && amount > 0 ? amount : null;
+const MAX_AMOUNT = 1_000_000;
+
+const amountSchema = z
+  .string()
+  .transform((text) => text.replace(/[^\d.,-]/g, '').replace(',', '.'))
+  .refine((digits) => /^\d+(\.\d+)?$/.test(digits))
+  .transform((digits) => Number(digits))
+  .pipe(z.number().max(MAX_AMOUNT));
+
+function parseAmount(text: string, allowZero = false): number | null {
+  const parsed = amountSchema.safeParse(text);
+  if (!parsed.success) return null;
+  return parsed.data > 0 || (allowZero && parsed.data === 0)
+    ? parsed.data
+    : null;
 }
 
 // ДД.ММ.ГГГГ -> ISO 'YYYY-MM-DD', rejecting impossible calendar dates
@@ -203,10 +214,12 @@ async function handleStatusCallback(
       await answerCallback(cbId).catch(() => {});
       return;
     }
-    if (key === 'won' && lead.dealAmount == null) {
+    if (key === 'won' && lead.status !== 'won') {
       const promptId = await sendForceReplyPrompt(
         chatId,
-        '💰 Сколько ты заработал с этой заявки (в евро)? Не стоимость машины, а твоя прибыль.\n\nНапример: 300',
+        lead.incomes.length
+          ? '💰 Сколько ты заработал сверх уже добавленных доходов (в евро)?\n\nЕсли больше ничего — 0'
+          : '💰 Сколько ты заработал с этой заявки (в евро)? Не стоимость машины, а твоя прибыль.\n\nНапример: 300',
       );
       await setPendingPrompt(id, {
         chatId,
@@ -417,14 +430,39 @@ async function handleDeleteCancelCallback(
   });
 }
 
+async function handleIncomeCallback(
+  id: number,
+  chatId: number,
+  cbId: string,
+): Promise<void> {
+  await withErrorAck(cbId, { id }, async () => {
+    const lead = await getLead(id);
+    if (!lead || !canAddIncome(lead, 'owner')) {
+      await answerCallback(cbId).catch(() => {});
+      return;
+    }
+    const promptId = await sendForceReplyPrompt(
+      chatId,
+      '💶 Сколько получил (в евро)? Предоплата или частичный расчёт — твоя прибыль, не стоимость машины.\n\nНапример: 150',
+    );
+    await setPendingPrompt(id, {
+      chatId,
+      messageId: promptId,
+      kind: 'add_income',
+    });
+    await answerCallback(cbId, 'Жду сумму');
+  });
+}
+
 async function handleClaimPayCallback(
   id: number,
+  target: string | undefined,
   chatId: number,
   messageId: number,
   role: Role,
   cbId: string,
 ): Promise<void> {
-  await withErrorAck(cbId, { id }, async () => {
+  await withErrorAck(cbId, { id, target }, async () => {
     const lead = await getLead(id);
     if (!lead || lead.dealAmount == null) {
       await answerCallback(cbId).catch(() => {});
@@ -435,11 +473,16 @@ async function handleClaimPayCallback(
       await answerCallback(cbId).catch(() => {});
       return;
     }
-    const updated = await claimFullCommission(id);
-    if (updated) {
-      await refreshBothSurfaces(updated, chatId, messageId, role);
-      await sendCommissionClaimToAdmin(updated);
+    const updated = await claimCommission(
+      id,
+      target == null ? null : [Number(target)],
+    );
+    if (!updated) {
+      await answerCallback(cbId).catch(() => {});
+      return;
     }
+    await refreshBothSurfaces(updated, chatId, messageId, role);
+    await sendCommissionClaimToAdmin(updated);
     await answerCallback(cbId, 'Отмечено — ждём подтверждения');
   });
 }
@@ -499,6 +542,20 @@ async function handleEditCallback(
   });
 }
 
+async function replyWithCard(
+  chatId: number,
+  lead: StoredLead,
+  headline: string,
+): Promise<void> {
+  const role = roleOf(chatId);
+  if (!role) {
+    await sendMessage(chatId, headline);
+    return;
+  }
+  const { text, reply_markup } = buildLeadDetail(lead, role);
+  await sendMessage(chatId, `${headline}\n\n${text}`, { reply_markup });
+}
+
 async function handleCallbackQuery(
   cb: NonNullable<TelegramUpdate['callback_query']>,
 ): Promise<void> {
@@ -522,7 +579,8 @@ async function handleCallbackQuery(
   const delMatch = /^del:(\d+)$/.exec(data);
   const delConfirmMatch = /^delconfirm:(\d+)$/.exec(data);
   const delCancelMatch = /^delcancel:(\d+)$/.exec(data);
-  const claimPayMatch = /^claimpay:(\d+)$/.exec(data);
+  const claimPayMatch = /^claimpay:(\d+)(?::(\d+))?$/.exec(data);
+  const incomeMatch = /^income:(\d+)$/.exec(data);
   const confirmPayMatch = /^confirmpay:(\d+)$/.exec(data);
   const rejectPayMatch = /^rejectpay:(\d+)$/.exec(data);
   const editMatch = /^edit:(\d+):(name|contact|comment)$/.exec(data);
@@ -646,11 +704,17 @@ async function handleCallbackQuery(
     if (!(await requireRole(role, 'owner', cb.id))) return;
     await handleClaimPayCallback(
       Number(claimPayMatch[1]),
+      claimPayMatch[2],
       chatId,
       messageId,
       role,
       cb.id,
     );
+    return;
+  }
+  if (incomeMatch) {
+    if (!(await requireRole(role, 'owner', cb.id))) return;
+    await handleIncomeCallback(Number(incomeMatch[1]), chatId, cb.id);
     return;
   }
   if (confirmPayMatch) {
@@ -739,19 +803,16 @@ async function handlePromptReply(
   const kind = pending.pendingPrompt.kind;
 
   if (kind === 'deal_amount') {
-    const amount = parseAmount(text);
+    const amount = parseAmount(text, pending.incomes.length > 0);
     if (amount == null) {
-      await sendMessage(
-        chatId,
-        '⚠️ Нужно число больше нуля. Попробуйте ещё раз.',
-      );
+      await sendMessage(chatId, '⚠️ Нужна сумма в евро. Попробуйте ещё раз.');
       return;
     }
     const updated = await resolvePendingPrompt(
       chatId,
       replyToMessageId,
-      () => ({
-        dealAmount: amount,
+      (lead) => ({
+        incomes: amount > 0 ? appendIncome(lead.incomes, amount) : lead.incomes,
         status: 'won',
         statusChangedAt: new Date().toISOString(),
       }),
@@ -759,6 +820,30 @@ async function handlePromptReply(
     if (updated) {
       await ensureLeadCard(updated);
       await sendDealNotificationToAdmin(updated);
+    }
+    return;
+  }
+
+  if (kind === 'add_income') {
+    const amount = parseAmount(text);
+    if (amount == null) {
+      await sendMessage(chatId, '⚠️ Нужна сумма в евро. Попробуйте ещё раз.');
+      return;
+    }
+    let added = false;
+    const updated = await resolvePendingPrompt(
+      chatId,
+      replyToMessageId,
+      (lead) => {
+        added = canAddIncome(lead, 'owner');
+        return added ? { incomes: appendIncome(lead.incomes, amount) } : {};
+      },
+    );
+    const income = updated?.incomes.at(-1);
+    if (updated && added && income) {
+      await ensureLeadCard(updated);
+      await sendIncomeNotificationToAdmin(updated, income);
+      await replyWithCard(chatId, updated, '✅ Доход добавлен');
     }
     return;
   }
@@ -823,16 +908,7 @@ async function handlePromptReply(
   if (updated) {
     await ensureLeadCard(updated);
     await sendFieldChangeToAdmin(updated, field, before);
-    // In a private chat, chat.id is the user's own id — safe to role-check directly.
-    const role = roleOf(chatId);
-    if (role) {
-      const { text: detailText, reply_markup } = buildLeadDetail(updated, role);
-      await sendMessage(chatId, `✅ Обновлено\n\n${detailText}`, {
-        reply_markup,
-      });
-    } else {
-      await sendMessage(chatId, '✅ Обновлено');
-    }
+    await replyWithCard(chatId, updated, '✅ Обновлено');
   }
 }
 

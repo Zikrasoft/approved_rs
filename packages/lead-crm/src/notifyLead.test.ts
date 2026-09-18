@@ -43,6 +43,7 @@ const storedLead: StoredLead = {
   dealAmount: null,
   commissionPercent: 10,
   paidAmount: 0,
+  incomes: [],
   payments: [],
   telegramChatId: null,
   telegramMessageId: null,
