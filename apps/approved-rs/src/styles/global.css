@@ -638,21 +638,6 @@ h4 {
   font-size: 16px !important;
 }
 
-@media (max-width: 639px) {
-  dialog .lead-submit {
-    /* TODO: keep in step with .lead-form-card's p-7 in LeadForm.astro */
-    --form-pad: 1.75rem;
-    position: sticky;
-    bottom: 0;
-    z-index: 1;
-    margin: auto calc(-1 * var(--form-pad)) 0;
-    padding: 1rem var(--form-pad)
-      calc(var(--form-pad) + env(safe-area-inset-bottom));
-    background: var(--color-surface);
-    border-top: 1px solid var(--color-border);
-  }
-}
-
 /* ─── Form validation ───────────────────────────────────── */
 .form-field.has-error {
   border-color: #dc2626 !important;

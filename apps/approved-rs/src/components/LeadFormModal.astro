@@ -51,13 +51,12 @@ const closeLabel = getI18n(locale).common.closeLabel;
 
 <style>
   .lead-modal {
-    position: relative;
     background: transparent;
     border: none;
     padding: 0;
     max-width: 26rem;
     width: 90vw;
-    max-height: 90vh;
+    max-height: 90dvh;
     overflow: hidden;
     margin: auto;
   }
@@ -79,17 +78,9 @@ const closeLabel = getI18n(locale).common.closeLabel;
       margin: 0;
     }
     .lead-modal :global(.lead-form-card) {
-      display: flex;
       flex: 1;
-      flex-direction: column;
-      padding-bottom: 0;
       border: none;
       border-radius: 0;
-    }
-    .lead-modal :global(.lead-form-card form) {
-      display: flex;
-      flex: 1;
-      flex-direction: column;
     }
   }
   .lead-modal::backdrop {
