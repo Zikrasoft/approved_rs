@@ -17,7 +17,7 @@ export const {
   resumeLead,
   postponeLead,
   deleteLead,
-  claimFullCommission,
+  claimCommission,
   confirmCommissionPayment,
   rejectCommissionPayment,
   searchLeads,
@@ -26,14 +26,15 @@ export const {
 } = leadStore;
 
 export {
+  appendIncome,
   appendNote,
   getCommission,
-  roundMoney,
   MAX_LIST_ROWS,
 } from '@podbor/lead-crm';
 
 export type {
   CommissionInfo,
+  Income,
   LeadStatus,
   OwedRow,
   Payment,

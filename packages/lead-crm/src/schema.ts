@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { incomeCommission, roundMoney, PAID_EPSILON } from './money.ts';
 
 export const LEAD_STATUSES = [
   'new',
@@ -13,6 +14,7 @@ export type LeadStatus = z.infer<typeof leadStatusSchema>;
 
 export const PROMPT_KINDS = [
   'deal_amount',
+  'add_income',
   'edit_name',
   'edit_contact',
   'edit_comment',
@@ -32,9 +34,18 @@ const paymentSchema = z.object({
 });
 export type Payment = z.infer<typeof paymentSchema>;
 
+const incomeSchema = z.object({
+  id: z.number().int().positive(),
+  amount: z.number().positive(),
+  at: z.string(),
+  paidAt: z.string().nullable().default(null),
+});
+export type Income = z.infer<typeof incomeSchema>;
+
 const pendingCommissionClaimSchema = z.object({
   amount: z.number().positive(),
   claimedAt: z.string(),
+  incomeIds: z.array(z.number().int().positive()).default(() => []),
 });
 export type PendingCommissionClaim = z.infer<
   typeof pendingCommissionClaimSchema
@@ -61,6 +72,7 @@ const baseStoredLeadSchema = z.object({
   commissionPercent: z.number().nonnegative(),
   paidAmount: z.number().nonnegative().default(0),
   payments: z.array(paymentSchema).default(() => []),
+  incomes: z.array(incomeSchema).default(() => []),
   telegramChatId: z.number().int().nullable().default(null),
   telegramMessageId: z.number().int().nullable().default(null),
   statusChangedAt: z.string(),
@@ -72,6 +84,45 @@ const baseStoredLeadSchema = z.object({
 });
 
 export type StoredLead = z.infer<typeof baseStoredLeadSchema>;
+
+function migratedIncomes(lead: StoredLead): Income[] {
+  if (lead.incomes.length > 0) return lead.incomes;
+  const total = lead.dealAmount;
+  if (total == null || total <= 0) return [];
+  const at = lead.statusChangedAt;
+  const paidAt = lead.payments.at(-1)?.at ?? at;
+  const commission = incomeCommission(total, lead.commissionPercent);
+  const whole = (settledAt: string | null): Income[] => [
+    { id: 1, amount: total, at, paidAt: settledAt },
+  ];
+  if (commission <= 0 || lead.paidAmount <= PAID_EPSILON) return whole(null);
+  if (lead.paidAmount >= commission - PAID_EPSILON) return whole(paidAt);
+  const covered = roundMoney((total * lead.paidAmount) / commission);
+  if (covered <= 0 || covered >= total) return whole(null);
+  return [
+    { id: 1, amount: covered, at, paidAt },
+    { id: 2, amount: roundMoney(total - covered), at, paidAt: null },
+  ];
+}
+
+export function withDerivedMoney(lead: StoredLead): StoredLead {
+  const incomes = migratedIncomes(lead);
+  if (incomes.length === 0) return lead;
+  return {
+    ...lead,
+    incomes,
+    dealAmount: roundMoney(incomes.reduce((sum, i) => sum + i.amount, 0)),
+    paidAmount: roundMoney(
+      incomes.reduce(
+        (sum, i) =>
+          i.paidAt
+            ? sum + incomeCommission(i.amount, lead.commissionPercent)
+            : sum,
+        0,
+      ),
+    ),
+  };
+}
 
 export type LeadInput = Pick<
   StoredLead,
@@ -103,10 +154,12 @@ export function createLeadSchema({
   if (defaultCommissionPercent < 0) {
     throw new Error('[lead-crm] defaultCommissionPercent must not be negative');
   }
-  return baseStoredLeadSchema.extend({
-    commissionPercent: z
-      .number()
-      .nonnegative()
-      .default(defaultCommissionPercent),
-  });
+  return baseStoredLeadSchema
+    .extend({
+      commissionPercent: z
+        .number()
+        .nonnegative()
+        .default(defaultCommissionPercent),
+    })
+    .transform(withDerivedMoney);
 }

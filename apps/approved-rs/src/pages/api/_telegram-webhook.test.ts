@@ -2,7 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { APIContext } from 'astro';
 import type { StoredLead } from '@/lib/store';
 
-vi.mock('@/lib/telegram', () => ({
+vi.mock('@/lib/telegram', async () => ({
+  canAddIncome: (
+    await vi.importActual<typeof import('@podbor/lead-crm')>('@podbor/lead-crm')
+  ).canAddIncome,
   isLeadStatusKey: (key: string) =>
     ['in_progress', 'won', 'lost'].includes(key),
   answerCallback: vi.fn(),
@@ -14,6 +17,7 @@ vi.mock('@/lib/telegram', () => ({
     return `${d}.${m}.${y}`;
   },
   sendDealNotificationToAdmin: vi.fn(),
+  sendIncomeNotificationToAdmin: vi.fn(),
   sendCommissionClaimToAdmin: vi.fn(),
   sendCommissionResultToOwner: vi.fn(),
   sendStatusChangeToAdmin: vi.fn(),
@@ -61,7 +65,10 @@ vi.mock('@/lib/telegram', () => ({
   ADMIN_IDS: [222],
 }));
 
-vi.mock('@/lib/store', () => ({
+vi.mock('@/lib/store', async () => ({
+  appendIncome: (
+    await vi.importActual<typeof import('@podbor/lead-crm')>('@podbor/lead-crm')
+  ).appendIncome,
   getLead: vi.fn(),
   setStatus: vi.fn(),
   archiveLead: vi.fn(),
@@ -71,7 +78,7 @@ vi.mock('@/lib/store', () => ({
   postponeLead: vi.fn(),
   appendNote: (comment: string | null | undefined, note: string) =>
     comment ? `${comment}\n${note}` : note,
-  claimFullCommission: vi.fn(),
+  claimCommission: vi.fn(),
   confirmCommissionPayment: vi.fn(),
   rejectCommissionPayment: vi.fn(),
   setPendingPrompt: vi.fn(),
@@ -89,6 +96,7 @@ import {
   ensureLeadCard,
   sendForceReplyPrompt,
   sendDealNotificationToAdmin,
+  sendIncomeNotificationToAdmin,
   sendCommissionClaimToAdmin,
   sendCommissionResultToOwner,
   sendStatusChangeToAdmin,
@@ -107,7 +115,7 @@ import {
   deleteLead,
   resumeLead,
   postponeLead,
-  claimFullCommission,
+  claimCommission,
   confirmCommissionPayment,
   rejectCommissionPayment,
   setPendingPrompt,
@@ -147,6 +155,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     archived: false,
     pendingCommissionClaim: null,
     remindAt: null,
+    incomes: [],
     ...overrides,
   };
 }
@@ -207,7 +216,7 @@ describe('POST /api/telegram-webhook', () => {
       .mockResolvedValue(
         makeLead({ status: 'postponed', remindAt: '2026-10-20' }),
       );
-    vi.mocked(claimFullCommission)
+    vi.mocked(claimCommission)
       .mockReset()
       .mockResolvedValue(
         makeLead({
@@ -216,6 +225,7 @@ describe('POST /api/telegram-webhook', () => {
           pendingCommissionClaim: {
             amount: 10000,
             claimedAt: '2026-01-02T00:00:00.000Z',
+            incomeIds: [1],
           },
         }),
       );
@@ -413,6 +423,70 @@ describe('POST /api/telegram-webhook', () => {
       });
       expect(answerCallback).toHaveBeenCalledWith('cb-2', 'Жду сумму');
       expect(sendStatusChangeToAdmin).not.toHaveBeenCalled();
+    });
+
+    it('asks for the amount on top when prepayments are already booked', async () => {
+      vi.mocked(getLead).mockResolvedValue(
+        makeLead({
+          id: 5,
+          incomes: [
+            {
+              id: 1,
+              amount: 50000,
+              at: '2026-01-01T00:00:00.000Z',
+              paidAt: null,
+            },
+          ],
+        }),
+      );
+
+      await POST(
+        makeCtx({
+          callback_query: {
+            id: 'cb-2c',
+            data: 'st:5:won',
+            from: { id: OWNER_ID },
+            message: { message_id: 555, chat: { id: DM_CHAT_ID } },
+          },
+        }),
+      );
+
+      expect(sendForceReplyPrompt).toHaveBeenCalledWith(
+        DM_CHAT_ID,
+        expect.stringContaining('сверх'),
+      );
+    });
+
+    it('does not re-open the amount prompt on a stale "won" button for a closed deal', async () => {
+      vi.mocked(getLead).mockResolvedValue(
+        makeLead({
+          id: 5,
+          status: 'won',
+          dealAmount: 50000,
+          incomes: [
+            {
+              id: 1,
+              amount: 50000,
+              at: '2026-01-01T00:00:00.000Z',
+              paidAt: null,
+            },
+          ],
+        }),
+      );
+
+      await POST(
+        makeCtx({
+          callback_query: {
+            id: 'cb-2d',
+            data: 'st:5:won',
+            from: { id: OWNER_ID },
+            message: { message_id: 555, chat: { id: DM_CHAT_ID } },
+          },
+        }),
+      );
+
+      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
+      expect(setPendingPrompt).not.toHaveBeenCalled();
     });
 
     it('resends a fresh deal-amount prompt on a second "won" tap, replacing a stale pending one', async () => {
@@ -849,6 +923,87 @@ describe('POST /api/telegram-webhook', () => {
     });
   });
 
+  describe('income:<id> — owner only', () => {
+    it('opens an amount prompt the owner can answer mid-job', async () => {
+      vi.mocked(getLead).mockResolvedValue(
+        makeLead({ id: 9, status: 'in_progress' }),
+      );
+
+      const res = await POST(
+        makeCtx({
+          callback_query: {
+            id: 'cb-inc',
+            data: 'income:9',
+            from: { id: OWNER_ID },
+            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
+          },
+        }),
+      );
+
+      expect(res.status).toBe(200);
+      expect(sendForceReplyPrompt).toHaveBeenCalledWith(
+        DM_CHAT_ID,
+        expect.stringContaining('получил'),
+      );
+      expect(setPendingPrompt).toHaveBeenCalledWith(9, {
+        chatId: DM_CHAT_ID,
+        messageId: 888,
+        kind: 'add_income',
+      });
+    });
+
+    it('acks an unknown lead without prompting', async () => {
+      vi.mocked(getLead).mockResolvedValue(undefined);
+
+      await POST(
+        makeCtx({
+          callback_query: {
+            id: 'cb-inc2',
+            data: 'income:9',
+            from: { id: OWNER_ID },
+            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
+          },
+        }),
+      );
+
+      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
+      expect(answerCallback).toHaveBeenCalledWith('cb-inc2');
+    });
+
+    it('ignores a stale add-income button on a lead nobody is working on', async () => {
+      vi.mocked(getLead).mockResolvedValue(makeLead({ id: 9, status: 'lost' }));
+
+      await POST(
+        makeCtx({
+          callback_query: {
+            id: 'cb-inc4',
+            data: 'income:9',
+            from: { id: OWNER_ID },
+            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
+          },
+        }),
+      );
+
+      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
+      expect(setPendingPrompt).not.toHaveBeenCalled();
+    });
+
+    it('admin cannot add an income', async () => {
+      await POST(
+        makeCtx({
+          callback_query: {
+            id: 'cb-inc3',
+            data: 'income:9',
+            from: { id: ADMIN_ID },
+            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
+          },
+        }),
+      );
+
+      expect(setPendingPrompt).not.toHaveBeenCalled();
+    });
+  });
+
   describe('claimpay:<id> — owner only', () => {
     it('owner claims the full remaining balance immediately, no amount prompt', async () => {
       const lead = makeLead({ id: 9, status: 'won', dealAmount: 100000 });
@@ -865,9 +1020,10 @@ describe('POST /api/telegram-webhook', () => {
         pendingCommissionClaim: {
           amount: 10000,
           claimedAt: '2026-01-02T00:00:00.000Z',
+          incomeIds: [1],
         },
       });
-      vi.mocked(claimFullCommission).mockResolvedValue(claimed);
+      vi.mocked(claimCommission).mockResolvedValue(claimed);
 
       const res = await POST(
         makeCtx({
@@ -882,9 +1038,74 @@ describe('POST /api/telegram-webhook', () => {
 
       expect(res.status).toBe(200);
       expect(sendForceReplyPrompt).not.toHaveBeenCalled();
-      expect(claimFullCommission).toHaveBeenCalledWith(9);
+      expect(claimCommission).toHaveBeenCalledWith(9, null);
       expect(sendCommissionClaimToAdmin).toHaveBeenCalledWith(claimed);
       expect(answerCallback).toHaveBeenCalledWith('cb-10', expect.any(String));
+    });
+
+    it('claims just the income the owner tapped', async () => {
+      const lead = makeLead({
+        id: 9,
+        status: 'won',
+        dealAmount: 500,
+        incomes: [
+          { id: 1, amount: 300, at: '2026-01-01T00:00:00.000Z', paidAt: 'x' },
+          { id: 2, amount: 200, at: '2026-01-02T00:00:00.000Z', paidAt: null },
+        ],
+      });
+      vi.mocked(getLead).mockResolvedValue(lead);
+      vi.mocked(getCommission).mockReturnValue({
+        commission: 50,
+        remaining: 20,
+        isPaidOff: false,
+      });
+
+      await POST(
+        makeCtx({
+          callback_query: {
+            id: 'cb-10b',
+            data: 'claimpay:9:2',
+            from: { id: OWNER_ID },
+            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
+          },
+        }),
+      );
+
+      expect(claimCommission).toHaveBeenCalledWith(9, [2]);
+    });
+
+    it('tells nobody when the store reports the income was already settled', async () => {
+      const lead = makeLead({
+        id: 9,
+        status: 'won',
+        dealAmount: 300,
+        incomes: [
+          { id: 1, amount: 300, at: '2026-01-01T00:00:00.000Z', paidAt: 'x' },
+        ],
+      });
+      vi.mocked(getLead).mockResolvedValue(lead);
+      vi.mocked(getCommission).mockReturnValue({
+        commission: 30,
+        remaining: 30,
+        isPaidOff: false,
+      });
+
+      vi.mocked(claimCommission).mockResolvedValue(undefined);
+
+      await POST(
+        makeCtx({
+          callback_query: {
+            id: 'cb-10c',
+            data: 'claimpay:9:1',
+            from: { id: OWNER_ID },
+            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
+          },
+        }),
+      );
+
+      expect(claimCommission).toHaveBeenCalledWith(9, [1]);
+      expect(sendCommissionClaimToAdmin).not.toHaveBeenCalled();
+      expect(answerCallback).toHaveBeenCalledWith('cb-10c');
     });
 
     it('acks without claiming once nothing remains', async () => {
@@ -914,7 +1135,7 @@ describe('POST /api/telegram-webhook', () => {
       );
 
       expect(res.status).toBe(200);
-      expect(claimFullCommission).not.toHaveBeenCalled();
+      expect(claimCommission).not.toHaveBeenCalled();
     });
 
     it('admin cannot claim', async () => {
@@ -929,7 +1150,7 @@ describe('POST /api/telegram-webhook', () => {
         }),
       );
       expect(res.status).toBe(200);
-      expect(claimFullCommission).not.toHaveBeenCalled();
+      expect(claimCommission).not.toHaveBeenCalled();
     });
 
     it('a second tap while a claim is already pending is a no-op, not a double-claim', async () => {
@@ -941,6 +1162,7 @@ describe('POST /api/telegram-webhook', () => {
           pendingCommissionClaim: {
             amount: 10000,
             claimedAt: '2026-01-01T00:00:00.000Z',
+            incomeIds: [1],
           },
         }),
       );
@@ -962,7 +1184,7 @@ describe('POST /api/telegram-webhook', () => {
       );
 
       expect(res.status).toBe(200);
-      expect(claimFullCommission).not.toHaveBeenCalled();
+      expect(claimCommission).not.toHaveBeenCalled();
     });
   });
 
@@ -1605,9 +1827,193 @@ describe('POST /api/telegram-webhook', () => {
         expect.any(Function),
       );
       const updated = vi.mocked(ensureLeadCard).mock.calls[0][0];
-      expect(updated.dealAmount).toBe(150000);
+      expect(updated.incomes).toEqual([
+        expect.objectContaining({ id: 1, amount: 150000, paidAt: null }),
+      ]);
       expect(updated.status).toBe('won');
       expect(sendDealNotificationToAdmin).toHaveBeenCalled();
+    });
+
+    it('books the closing amount on top of the prepayments already taken', async () => {
+      const lead = makeLead({
+        id: 5,
+        incomes: [
+          {
+            id: 1,
+            amount: 50000,
+            at: '2026-01-01T00:00:00.000Z',
+            paidAt: null,
+          },
+        ],
+        pendingPrompt: {
+          chatId: DM_CHAT_ID,
+          messageId: 888,
+          kind: 'deal_amount',
+        },
+      });
+      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
+      mockResolveFromBase(lead);
+
+      await POST(
+        makeCtx({
+          message: {
+            message_id: 2,
+            text: '100000',
+            chat: { id: DM_CHAT_ID, type: 'private' },
+            from: { id: OWNER_ID },
+            reply_to_message: { message_id: 888 },
+          },
+        }),
+      );
+
+      const updated = vi.mocked(ensureLeadCard).mock.calls[0][0];
+      expect(updated.incomes.map((i) => i.amount)).toEqual([50000, 100000]);
+      expect(updated.status).toBe('won');
+    });
+
+    it('accepts a zero closing amount when prepayments already cover the deal', async () => {
+      const lead = makeLead({
+        id: 5,
+        incomes: [
+          {
+            id: 1,
+            amount: 50000,
+            at: '2026-01-01T00:00:00.000Z',
+            paidAt: null,
+          },
+        ],
+        pendingPrompt: {
+          chatId: DM_CHAT_ID,
+          messageId: 888,
+          kind: 'deal_amount',
+        },
+      });
+      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
+      mockResolveFromBase(lead);
+
+      await POST(
+        makeCtx({
+          message: {
+            message_id: 2,
+            text: '0',
+            chat: { id: DM_CHAT_ID, type: 'private' },
+            from: { id: OWNER_ID },
+            reply_to_message: { message_id: 888 },
+          },
+        }),
+      );
+
+      const updated = vi.mocked(ensureLeadCard).mock.calls[0][0];
+      expect(updated.incomes.map((i) => i.amount)).toEqual([50000]);
+      expect(updated.status).toBe('won');
+      expect(sendMessage).not.toHaveBeenCalledWith(
+        DM_CHAT_ID,
+        expect.stringContaining('⚠️'),
+      );
+    });
+
+    it('refuses a closing reply with no number in it, even when prepayments allow zero', async () => {
+      const lead = makeLead({
+        id: 5,
+        incomes: [
+          {
+            id: 1,
+            amount: 50000,
+            at: '2026-01-01T00:00:00.000Z',
+            paidAt: null,
+          },
+        ],
+        pendingPrompt: {
+          chatId: DM_CHAT_ID,
+          messageId: 888,
+          kind: 'deal_amount',
+        },
+      });
+      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
+      mockResolveFromBase(lead);
+
+      await POST(
+        makeCtx({
+          message: {
+            message_id: 2,
+            text: 'не знаю',
+            chat: { id: DM_CHAT_ID, type: 'private' },
+            from: { id: OWNER_ID },
+            reply_to_message: { message_id: 888 },
+          },
+        }),
+      );
+
+      expect(resolvePendingPrompt).not.toHaveBeenCalled();
+      expect(sendMessage).toHaveBeenCalledWith(
+        DM_CHAT_ID,
+        expect.stringContaining('сумма'),
+      );
+    });
+
+    it('records a mid-job income and tells the admin about it', async () => {
+      const lead = makeLead({
+        id: 5,
+        pendingPrompt: {
+          chatId: DM_CHAT_ID,
+          messageId: 888,
+          kind: 'add_income',
+        },
+      });
+      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
+      mockResolveFromBase(lead);
+
+      const res = await POST(
+        makeCtx({
+          message: {
+            message_id: 2,
+            text: '300',
+            chat: { id: DM_CHAT_ID, type: 'private' },
+            from: { id: OWNER_ID },
+            reply_to_message: { message_id: 888 },
+          },
+        }),
+      );
+
+      expect(res.status).toBe(200);
+      const updated = vi.mocked(ensureLeadCard).mock.calls[0][0];
+      expect(updated.incomes.map((i) => i.amount)).toEqual([300]);
+      expect(updated.status).toBe('in_progress');
+      expect(sendIncomeNotificationToAdmin).toHaveBeenCalledWith(
+        updated,
+        updated.incomes[0],
+      );
+    });
+
+    it('rejects a zero mid-job income without recording anything', async () => {
+      const lead = makeLead({
+        id: 5,
+        pendingPrompt: {
+          chatId: DM_CHAT_ID,
+          messageId: 888,
+          kind: 'add_income',
+        },
+      });
+      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
+      mockResolveFromBase(lead);
+
+      await POST(
+        makeCtx({
+          message: {
+            message_id: 2,
+            text: '0',
+            chat: { id: DM_CHAT_ID, type: 'private' },
+            from: { id: OWNER_ID },
+            reply_to_message: { message_id: 888 },
+          },
+        }),
+      );
+
+      expect(resolvePendingPrompt).not.toHaveBeenCalled();
+      expect(sendMessage).toHaveBeenCalledWith(
+        DM_CHAT_ID,
+        expect.stringContaining('сумма'),
+      );
     });
 
     it('postpones with the given date, appends a comment note, and notifies the admin', async () => {
@@ -1781,7 +2187,7 @@ describe('POST /api/telegram-webhook', () => {
       expect(resolvePendingPrompt).not.toHaveBeenCalled();
       expect(sendMessage).toHaveBeenCalledWith(
         DM_CHAT_ID,
-        expect.stringContaining('число'),
+        expect.stringContaining('сумма'),
       );
     });
 
@@ -1841,7 +2247,7 @@ describe('POST /api/telegram-webhook', () => {
       expect(resolvePendingPrompt).not.toHaveBeenCalled();
       expect(sendMessage).toHaveBeenCalledWith(
         DM_CHAT_ID,
-        expect.stringContaining('число'),
+        expect.stringContaining('сумма'),
       );
     });
 

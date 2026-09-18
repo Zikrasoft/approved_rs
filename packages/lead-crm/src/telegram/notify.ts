@@ -1,9 +1,10 @@
-import type { StoredLead } from '../schema.ts';
+import type { Income, StoredLead } from '../schema.ts';
 import { expectMessageAndChatId, type TelegramClient } from './client.ts';
 import {
   commissionClaimText,
   commissionResultText,
   dealNotificationText,
+  incomeNotificationText,
   fieldChangeText,
   quarantinedLeadsText,
   statusChangeText,
@@ -92,6 +93,13 @@ export function createNotifier({
         adminIds,
         dealNotificationText({ ...lead, dealAmount: lead.dealAmount }),
       );
+    },
+
+    async sendIncomeNotificationToAdmin(
+      lead: StoredLead,
+      income: Income,
+    ): Promise<void> {
+      await sendToAll(adminIds, incomeNotificationText(lead, income));
     },
 
     async sendCommissionClaimToAdmin(lead: StoredLead): Promise<void> {

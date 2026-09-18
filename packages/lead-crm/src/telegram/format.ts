@@ -1,7 +1,14 @@
 import { format, parseISO } from 'date-fns';
-import { getCommission, roundMoney, type CommissionInfo } from '../money.ts';
+import {
+  getCommission,
+  hasIncome,
+  incomeCommission,
+  roundMoney,
+  unpaidIncomes,
+  type CommissionInfo,
+} from '../money.ts';
 import { LEADS_PATH } from '../quarantine.ts';
-import type { LeadStatus, StoredLead } from '../schema.ts';
+import type { Income, LeadStatus, StoredLead } from '../schema.ts';
 import { MAX_LIST_ROWS, type OwedRow } from '../store.ts';
 
 export type Role = 'owner' | 'admin';
@@ -62,6 +69,24 @@ export function formatMoney(n: number): string {
 
 export function formatDateRu(iso: string): string {
   return format(parseISO(iso), 'dd.MM.yyyy');
+}
+
+const INCOME_STATUSES: LeadStatus[] = [
+  'negotiations',
+  'in_progress',
+  'postponed',
+  'won',
+];
+
+export function canAddIncome(lead: StoredLead, role: Role): boolean {
+  return (
+    role === 'owner' && !lead.archived && INCOME_STATUSES.includes(lead.status)
+  );
+}
+
+function incomeLine(lead: StoredLead, income: Income): string {
+  const commission = incomeCommission(income.amount, lead.commissionPercent);
+  return `• ${formatMoney(income.amount)} от ${formatDateRu(income.at)} · комиссия ${formatMoney(commission)} · ${income.paidAt ? '🟢 оплачена' : '🔴 не оплачена'}`;
 }
 
 const QUICK_REMIND_DAYS = [
@@ -229,10 +254,8 @@ function paidStatusMark(
 
 export function formatDealsList(leads: StoredLead[]): string {
   const deals = leads
-    .filter(
-      (l): l is StoredLead & { dealAmount: number } =>
-        l.status === 'won' && l.dealAmount != null && !l.archived,
-    )
+    .filter(hasIncome)
+    .filter((l) => !l.archived)
     .sort((a, b) => b.id - a.id)
     .slice(0, MAX_LIST_ROWS);
   if (deals.length === 0) return '<b>💰 Все сделки</b>\n\nСделок пока нет.';
@@ -266,12 +289,9 @@ export function buildStats(leads: StoredLead[], role: Role): string {
   const active = leads.filter((l) => !l.archived);
   const archivedCount = leads.length - active.length;
   const count = (s: LeadStatus) => active.filter((l) => l.status === s).length;
-  const wonLeads = active.filter(
-    (l): l is StoredLead & { dealAmount: number } =>
-      l.status === 'won' && l.dealAmount != null,
-  );
+  const earningLeads = active.filter(hasIncome);
   const sum = (pick: (l: StoredLead & { dealAmount: number }) => number) =>
-    roundMoney(wonLeads.reduce((acc, l) => acc + pick(l), 0));
+    roundMoney(earningLeads.reduce((acc, l) => acc + pick(l), 0));
 
   const totalEarned = sum((l) => l.dealAmount);
   const commissionTotal = sum((l) => getCommission(l).commission);
@@ -389,6 +409,18 @@ export function statusChangeText(lead: StoredLead): string {
   return `🔔 Заявка #${lead.id} ${escapeHtml(lead.name)}: статус — ${meta.emoji} ${meta.label}`;
 }
 
+export function incomeNotificationText(
+  lead: StoredLead,
+  income: Income,
+): string {
+  return [
+    `💶 Доход по заявке #${lead.id} ${escapeHtml(lead.name)}`,
+    ``,
+    `Получено: ${formatMoney(income.amount)}`,
+    `Твоя комиссия (${lead.commissionPercent}%): ${formatMoney(incomeCommission(income.amount, lead.commissionPercent))}`,
+  ].join('\n');
+}
+
 export function dealNotificationText(
   lead: StoredLead & { dealAmount: number },
 ): string {
@@ -454,6 +486,9 @@ export function createFormatter({
   function moneyStatusLines(lead: StoredLead, info: CommissionInfo): string[] {
     const lines = [
       '',
+      ...(lead.incomes.length
+        ? ['💶 Доходы:', ...lead.incomes.map((i) => incomeLine(lead, i)), '']
+        : []),
       `💰 Комиссия Zikrasoft: ${formatMoney(info.commission)} · ${info.isPaidOff ? '🟢 Оплачено' : `Осталось: ${formatMoney(info.remaining)}`}`,
     ];
     if (lead.pendingCommissionClaim)
@@ -469,17 +504,23 @@ export function createFormatter({
     info: CommissionInfo,
   ): Btn[][] {
     if (role === 'owner') {
-      if (!info.isPaidOff && !lead.pendingCommissionClaim) {
-        return [
-          [
-            {
-              text: '💸 Отметить оплату комиссии',
-              callback_data: `claimpay:${lead.id}`,
-            },
-          ],
-        ];
+      if (info.isPaidOff || lead.pendingCommissionClaim) return [];
+      const unpaid = unpaidIncomes(lead);
+      const rows: Btn[][] = unpaid.map((i) => [
+        {
+          text: `💸 Оплатил ${formatMoney(incomeCommission(i.amount, lead.commissionPercent))} с ${formatMoney(i.amount)} от ${formatDateRu(i.at)}`,
+          callback_data: `claimpay:${lead.id}:${i.id}`,
+        },
+      ]);
+      if (unpaid.length > 1) {
+        rows.unshift([
+          {
+            text: `💸 Оплатил всё — ${formatMoney(info.remaining)}`,
+            callback_data: `claimpay:${lead.id}`,
+          },
+        ]);
       }
-      return [];
+      return rows;
     }
     return lead.pendingCommissionClaim
       ? [
@@ -530,9 +571,13 @@ export function createFormatter({
           'Не договорились сейчас? ⏰ Отложить — укажи дату (ДД.ММ.ГГГГ), заявка вернётся в работу сама в этот день, или жми ▶️ Возобновить раньше.',
           'В заявке можно поправить имя/контакт/комментарий или архивировать.',
           '',
+          '<b>Деньги</b>',
+          'Получил предоплату или частичный расчёт — ➕ Добавить доход прямо в работе, сколько угодно раз.',
+          'При ✅ Завершить бот спросит, сколько ты заработал сверх уже добавленного (0 — если больше ничего).',
+          '',
           '<b>Комиссия</b>',
-          'Ставка указана в самой заявке — она своя у каждого бизнеса.',
-          'На завершённой заявке — 💸 Отметить оплату комиссии. Считается, что отправил остаток целиком, сумму вводить не надо. Админ подтвердит или отклонит.',
+          'Ставка указана в самой заявке — она своя у каждого бизнеса. Считается с каждого дохода отдельно.',
+          'Кнопка 💸 Оплатил — своя на каждый неоплаченный доход, плюс 💸 Оплатил всё, если их несколько. Админ подтвердит или отклонит.',
           '',
           '<b>Меню</b>',
           'Списки заявок, 📊 Статистика, 🔴 Мой долг по комиссии. Найти заявку — просто пришли имя, телефон или номер.',
@@ -575,16 +620,23 @@ export function createFormatter({
         };
       }
 
-      const commission =
-        lead.status === 'won' && lead.dealAmount != null
-          ? getCommission(lead)
-          : null;
+      const commission = hasIncome(lead) ? getCommission(lead) : null;
       const lines = [
         formatLeadText(lead, role),
         ...(commission ? moneyStatusLines(lead, commission) : []),
       ];
       const rows: Btn[][] = [
         ...buildStatusKeyboard(lead, role).inline_keyboard,
+        ...(canAddIncome(lead, role)
+          ? [
+              [
+                {
+                  text: '➕ Добавить доход',
+                  callback_data: `income:${lead.id}`,
+                },
+              ],
+            ]
+          : []),
         [
           { text: '✏️ Имя', callback_data: `edit:${lead.id}:name` },
           { text: '✏️ Контакт', callback_data: `edit:${lead.id}:contact` },

@@ -1,9 +1,17 @@
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { getCommission, roundMoney, PAID_EPSILON } from './money.ts';
+import {
+  getCommission,
+  hasIncome,
+  incomeCommission,
+  roundMoney,
+  unpaidIncomes,
+  PAID_EPSILON,
+} from './money.ts';
 import type {
   LeadInput,
   LeadStatus,
+  PendingCommissionClaim,
   PendingPrompt,
   StoredLead,
 } from './schema.ts';
@@ -114,8 +122,9 @@ export function createLeadStore({
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       if (attempt > 0) await sleep(backoffDelay(attempt - 1));
       const { leads, unreadable, version } = await readSnapshot();
-      const next = mutate(leads, unreadableIdFloor(unreadable));
-      next.forEach((lead) => schema.parse(lead));
+      const next = mutate(leads, unreadableIdFloor(unreadable)).map((lead) =>
+        schema.parse(lead),
+      );
       await copyToQuarantine(unreadable);
       try {
         await storage.write([...next, ...unreadable], version);
@@ -141,35 +150,38 @@ export function createLeadStore({
     return leads.find((l) => l.id === id);
   }
 
-  async function updateOne(
+  async function updateMatching(
+    matches: (lead: StoredLead) => boolean,
+    apply: (lead: StoredLead) => StoredLead,
+  ): Promise<StoredLead | undefined> {
+    let touchedId: number | undefined;
+    const next = await updateLeads((leads) => {
+      touchedId = undefined;
+      return leads.map((l) => {
+        if (!matches(l)) return l;
+        touchedId = l.id;
+        return apply(l);
+      });
+    });
+    return touchedId == null ? undefined : next.find((l) => l.id === touchedId);
+  }
+
+  function updateOne(
     id: number,
     apply: (lead: StoredLead) => StoredLead,
   ): Promise<StoredLead | undefined> {
-    let updated: StoredLead | undefined;
-    await updateLeads((leads) =>
-      leads.map((l) => {
-        if (l.id !== id) return l;
-        updated = apply(l);
-        return updated;
-      }),
-    );
-    return updated;
+    return updateMatching((l) => l.id === id, apply);
   }
 
-  async function updateOneIfStatus(
+  function updateOneIfStatus(
     id: number,
     requiredStatus: LeadStatus,
     apply: (lead: StoredLead) => StoredLead,
   ): Promise<StoredLead | undefined> {
-    let updated: StoredLead | undefined;
-    await updateLeads((leads) =>
-      leads.map((l) => {
-        if (l.id !== id || l.status !== requiredStatus) return l;
-        updated = apply(l);
-        return updated;
-      }),
+    return updateMatching(
+      (l) => l.id === id && l.status === requiredStatus,
+      apply,
     );
-    return updated;
   }
 
   async function copyToQuarantine(entries: unknown[]): Promise<void> {
@@ -190,14 +202,14 @@ export function createLeadStore({
 
   async function settleCommissionClaim(
     id: number,
-    apply: (lead: StoredLead, amount: number) => StoredLead,
+    apply: (lead: StoredLead, claim: PendingCommissionClaim) => StoredLead,
   ): Promise<StoredLead | undefined> {
     let acted = false;
     const updated = await updateOne(id, (l) => {
       acted = false;
       if (!l.pendingCommissionClaim) return l;
       acted = true;
-      return apply(l, l.pendingCommissionClaim.amount);
+      return apply(l, l.pendingCommissionClaim);
     });
     return acted ? updated : undefined;
   }
@@ -315,24 +327,17 @@ export function createLeadStore({
       );
     },
 
-    async resolvePendingPrompt(
+    resolvePendingPrompt(
       chatId: number,
       messageId: number,
       apply: (lead: StoredLead) => Partial<StoredLead>,
     ): Promise<StoredLead | undefined> {
-      let resolved: StoredLead | undefined;
-      await updateLeads((leads) =>
-        leads.map((l) => {
-          if (
-            l.pendingPrompt?.chatId !== chatId ||
-            l.pendingPrompt?.messageId !== messageId
-          )
-            return l;
-          resolved = { ...l, ...apply(l), pendingPrompt: null };
-          return resolved;
-        }),
+      return updateMatching(
+        (l) =>
+          l.pendingPrompt?.chatId === chatId &&
+          l.pendingPrompt?.messageId === messageId,
+        (l) => ({ ...l, ...apply(l), pendingPrompt: null }),
       );
-      return resolved;
     },
 
     archiveLead(id: number): Promise<StoredLead | undefined> {
@@ -376,23 +381,50 @@ export function createLeadStore({
       return found;
     },
 
-    claimFullCommission(id: number): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({
-        ...l,
-        pendingCommissionClaim: {
-          amount: getCommission(l).remaining,
-          claimedAt: new Date().toISOString(),
-        },
-      }));
+    async claimCommission(
+      id: number,
+      onlyIncomeIds: number[] | null,
+    ): Promise<StoredLead | undefined> {
+      let claimed = false;
+      const updated = await updateOne(id, (l) => {
+        claimed = false;
+        const targets = unpaidIncomes(l).filter(
+          (i) => onlyIncomeIds == null || onlyIncomeIds.includes(i.id),
+        );
+        const amount = roundMoney(
+          targets.reduce(
+            (sum, i) => sum + incomeCommission(i.amount, l.commissionPercent),
+            0,
+          ),
+        );
+        if (amount <= 0) return l;
+        claimed = true;
+        return {
+          ...l,
+          pendingCommissionClaim: {
+            amount,
+            claimedAt: new Date().toISOString(),
+            incomeIds: targets.map((i) => i.id),
+          },
+        };
+      });
+      return claimed ? updated : undefined;
     },
 
     confirmCommissionPayment(id: number): Promise<StoredLead | undefined> {
-      return settleCommissionClaim(id, (l, amount) => ({
-        ...l,
-        paidAmount: roundMoney(l.paidAmount + amount),
-        payments: [...l.payments, { amount, at: new Date().toISOString() }],
-        pendingCommissionClaim: null,
-      }));
+      return settleCommissionClaim(id, (l, claim) => {
+        const now = new Date().toISOString();
+        const ids = claim.incomeIds.length
+          ? claim.incomeIds
+          : unpaidIncomes(l).map((i) => i.id);
+        return {
+          ...l,
+          incomes: l.incomes.map((i) =>
+            ids.includes(i.id) ? { ...i, paidAt: now } : i,
+          ),
+          pendingCommissionClaim: null,
+        };
+      });
     },
 
     rejectCommissionPayment(id: number): Promise<StoredLead | undefined> {
@@ -433,10 +465,8 @@ export function createLeadStore({
     async getOwedSummary(): Promise<{ rows: OwedRow[]; total: number }> {
       const leads = await readLeads();
       const rows: OwedRow[] = leads
-        .filter(
-          (l): l is StoredLead & { dealAmount: number } =>
-            l.status === 'won' && l.dealAmount != null && !l.archived,
-        )
+        .filter(hasIncome)
+        .filter((l) => !l.archived)
         .map((l) => {
           const { commission, remaining } = getCommission(l);
           return {

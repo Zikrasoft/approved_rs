@@ -38,6 +38,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     dealAmount: null,
     commissionPercent: 10,
     paidAmount: 0,
+    incomes: [],
     payments: [],
     telegramChatId: -100123,
     telegramMessageId: 555,
