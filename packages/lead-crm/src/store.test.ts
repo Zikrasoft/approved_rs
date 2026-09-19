@@ -456,6 +456,17 @@ describe('resumeLead', () => {
     expect(resumed?.remindAt).toBeNull();
   });
 
+  it('returns a lead postponed from negotiations back to negotiations', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.setStatus(lead.id, 'negotiations');
+    await store.postponeLead(lead.id, '2026-10-20', 'Отложено');
+
+    const resumed = await store.resumeLead(lead.id);
+
+    expect(resumed?.status).toBe('negotiations');
+    expect(resumed?.postponedFrom).toBeNull();
+  });
+
   it('no-ops when the lead is not postponed (stale button, already finalized elsewhere)', async () => {
     const lead = await store.insertLead(baseData);
     await forceComplete(lead.id, 100_000); // status: 'won'
@@ -484,7 +495,21 @@ describe('postponeLead', () => {
     expect(postponed?.comment).toBe('Отложено до 20.10.2026');
   });
 
-  it('no-ops when the lead is not in_progress (stale button, already finalized elsewhere)', async () => {
+  it('postpones a lead that is still in negotiations and remembers the stage', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.setStatus(lead.id, 'negotiations');
+
+    const postponed = await store.postponeLead(
+      lead.id,
+      '2026-10-20',
+      'Отложено до 20.10.2026',
+    );
+
+    expect(postponed?.status).toBe('postponed');
+    expect(postponed?.postponedFrom).toBe('negotiations');
+  });
+
+  it('no-ops when the lead is neither in negotiations nor in_progress (stale button, already finalized elsewhere)', async () => {
     const lead = await store.insertLead(baseData); // status: 'new'
 
     const postponed = await store.postponeLead(

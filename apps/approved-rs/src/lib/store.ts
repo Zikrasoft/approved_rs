@@ -27,8 +27,9 @@ export const {
 
 export {
   appendIncome,
-  appendNote,
+  canPostpone,
   getCommission,
+  postponePatch,
   MAX_LIST_ROWS,
 } from '@podbor/lead-crm';
 

@@ -10,7 +10,11 @@ import {
 } from './client.ts';
 import { createFormatter } from './format.ts';
 import { createNotifier } from './notify.ts';
-import { withDerivedMoney } from '../schema.ts';
+import {
+  LEAD_STATUSES,
+  POSTPONABLE_STATUSES,
+  withDerivedMoney,
+} from '../schema.ts';
 import type { LeadStatus, StoredLead } from '../schema.ts';
 
 // Free functions — no per-business config, so they are imported directly.
@@ -93,6 +97,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     archived: false,
     pendingCommissionClaim: null,
     remindAt: null,
+    postponedFrom: null,
     incomes: [],
     ...overrides,
   });
@@ -238,14 +243,15 @@ describe('buildStatusKeyboard', () => {
     ]);
   });
 
-  it('owner: shows В работу/Отказ for a lead in negotiations', () => {
+  it('owner: shows В работу/Отказ/Отложить for a lead in negotiations', () => {
     const kb = buildStatusKeyboard(
       makeLead({ id: 7, status: 'negotiations' }),
       'owner',
     );
-    expect(kb.inline_keyboard[0].map((b) => b.callback_data)).toEqual([
+    expect(kb.inline_keyboard.flat().map((b) => b.callback_data)).toEqual([
       'st:7:in_progress',
       'st:7:lost',
+      'postpone:7',
     ]);
   });
 
@@ -278,12 +284,12 @@ describe('buildStatusKeyboard', () => {
     ]);
   });
 
-  it('admin: only В работу for a lead in negotiations, no Отказ', () => {
+  it('admin: only В работу for a lead in negotiations, no Отказ or Отложить', () => {
     const kb = buildStatusKeyboard(
       makeLead({ id: 7, status: 'negotiations' }),
       'admin',
     );
-    expect(kb.inline_keyboard[0].map((b) => b.callback_data)).toEqual([
+    expect(kb.inline_keyboard.flat().map((b) => b.callback_data)).toEqual([
       'st:7:in_progress',
     ]);
   });
@@ -293,6 +299,15 @@ describe('buildStatusKeyboard', () => {
       buildStatusKeyboard(makeLead({ status: 'in_progress' }), 'admin')
         .inline_keyboard,
     ).toEqual([]);
+  });
+
+  it('offers Отложить to the owner on exactly the postponable statuses', () => {
+    const withPostpone = LEAD_STATUSES.filter((status) =>
+      buildStatusKeyboard(makeLead({ id: 7, status }), 'owner')
+        .inline_keyboard.flat()
+        .some((b) => b.callback_data === 'postpone:7'),
+    );
+    expect(withPostpone).toEqual([...POSTPONABLE_STATUSES]);
   });
 
   it('postponed: shows just Возобновить, for either role', () => {

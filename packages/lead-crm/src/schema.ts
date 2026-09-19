@@ -12,6 +12,17 @@ export const LEAD_STATUSES = [
 const leadStatusSchema = z.enum(LEAD_STATUSES);
 export type LeadStatus = z.infer<typeof leadStatusSchema>;
 
+export const POSTPONABLE_STATUSES = ['negotiations', 'in_progress'] as const;
+const postponableStatusSchema = z.enum(POSTPONABLE_STATUSES);
+export type PostponableStatus = z.infer<typeof postponableStatusSchema>;
+
+export function postponableStatus(
+  status: LeadStatus,
+): PostponableStatus | null {
+  const parsed = postponableStatusSchema.safeParse(status);
+  return parsed.success ? parsed.data : null;
+}
+
 export const PROMPT_KINDS = [
   'deal_amount',
   'add_income',
@@ -83,6 +94,7 @@ const baseStoredLeadSchema = z.object({
   archived: z.boolean().default(false),
   pendingCommissionClaim: pendingCommissionClaimSchema.nullable().default(null),
   remindAt: z.string().nullable().default(null),
+  postponedFrom: postponableStatusSchema.nullable().default(null),
 });
 
 export type StoredLead = z.infer<typeof baseStoredLeadSchema>;

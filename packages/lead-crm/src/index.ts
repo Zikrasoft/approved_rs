@@ -23,7 +23,13 @@ export {
 } from './money.ts';
 export type { CommissionInfo } from './money.ts';
 
-export { appendNote, createLeadStore, MAX_LIST_ROWS } from './store.ts';
+export {
+  appendNote,
+  canPostpone,
+  createLeadStore,
+  postponePatch,
+  MAX_LIST_ROWS,
+} from './store.ts';
 export type { LeadStore, LeadStoreOptions, OwedRow } from './store.ts';
 
 export {

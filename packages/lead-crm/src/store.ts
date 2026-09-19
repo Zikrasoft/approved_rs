@@ -8,6 +8,7 @@ import {
   unpaidIncomes,
   PAID_EPSILON,
 } from './money.ts';
+import { postponableStatus } from './schema.ts';
 import type {
   LeadInput,
   LeadStatus,
@@ -64,6 +65,24 @@ export function appendNote(
 ): string {
   const next = comment ? `${comment}\n${note}` : note;
   return next.slice(-MAX_STORED_COMMENT_LENGTH);
+}
+
+export function canPostpone(lead: StoredLead): boolean {
+  return postponableStatus(lead.status) !== null;
+}
+
+export function postponePatch(
+  lead: StoredLead,
+  remindAt: string,
+  note: string,
+): Partial<StoredLead> {
+  return {
+    status: 'postponed',
+    postponedFrom: postponableStatus(lead.status),
+    remindAt,
+    statusChangedAt: new Date().toISOString(),
+    comment: appendNote(lead.comment, note),
+  };
 }
 
 const unreadableId = z.object({
@@ -351,7 +370,8 @@ export function createLeadStore({
     resumeLead(id: number): Promise<StoredLead | undefined> {
       return updateOneIfStatus(id, 'postponed', (l) => ({
         ...l,
-        status: 'in_progress',
+        status: l.postponedFrom ?? 'in_progress',
+        postponedFrom: null,
         remindAt: null,
         statusChangedAt: new Date().toISOString(),
       }));
@@ -362,13 +382,10 @@ export function createLeadStore({
       remindAt: string,
       note: string,
     ): Promise<StoredLead | undefined> {
-      return updateOneIfStatus(id, 'in_progress', (l) => ({
-        ...l,
-        status: 'postponed',
-        remindAt,
-        statusChangedAt: new Date().toISOString(),
-        comment: appendNote(l.comment, note),
-      }));
+      return updateMatching(
+        (l) => l.id === id && canPostpone(l),
+        (l) => ({ ...l, ...postponePatch(l, remindAt, note) }),
+      );
     },
 
     async deleteLead(id: number): Promise<boolean> {

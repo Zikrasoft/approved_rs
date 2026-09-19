@@ -53,6 +53,7 @@ const storedLead: StoredLead = {
   archived: false,
   pendingCommissionClaim: null,
   remindAt: null,
+  postponedFrom: null,
 };
 
 beforeEach(() => {

@@ -76,8 +76,12 @@ vi.mock('@/lib/store', async () => ({
   deleteLead: vi.fn(),
   resumeLead: vi.fn(),
   postponeLead: vi.fn(),
-  appendNote: (comment: string | null | undefined, note: string) =>
-    comment ? `${comment}\n${note}` : note,
+  canPostpone: (
+    await vi.importActual<typeof import('@podbor/lead-crm')>('@podbor/lead-crm')
+  ).canPostpone,
+  postponePatch: (
+    await vi.importActual<typeof import('@podbor/lead-crm')>('@podbor/lead-crm')
+  ).postponePatch,
   claimCommission: vi.fn(),
   confirmCommissionPayment: vi.fn(),
   rejectCommissionPayment: vi.fn(),
@@ -155,6 +159,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     archived: false,
     pendingCommissionClaim: null,
     remindAt: null,
+    postponedFrom: null,
     incomes: [],
     ...overrides,
   };
@@ -2075,6 +2080,33 @@ describe('POST /api/telegram-webhook', () => {
       expect(updated.remindAt).toBe('2026-10-20');
       expect(updated.comment).toBe('BMW X5\nОтложено до 20.10.2026');
       expect(sendStatusChangeToAdmin).toHaveBeenCalled();
+    });
+
+    it('postpones a lead that is still in negotiations and remembers the stage', async () => {
+      const lead = makeLead({
+        id: 5,
+        status: 'negotiations',
+        pendingPrompt: { chatId: DM_CHAT_ID, messageId: 888, kind: 'postpone' },
+      });
+      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
+      mockResolveFromBase(lead);
+
+      const res = await POST(
+        makeCtx({
+          message: {
+            message_id: 2,
+            text: '20.10.2026',
+            chat: { id: DM_CHAT_ID, type: 'private' },
+            from: { id: OWNER_ID },
+            reply_to_message: { message_id: 888 },
+          },
+        }),
+      );
+
+      expect(res.status).toBe(200);
+      const updated = vi.mocked(ensureLeadCard).mock.calls[0][0];
+      expect(updated.status).toBe('postponed');
+      expect(updated.postponedFrom).toBe('negotiations');
     });
 
     it('does not postpone via typed reply if the lead moved on while the prompt sat unanswered (stale guard)', async () => {

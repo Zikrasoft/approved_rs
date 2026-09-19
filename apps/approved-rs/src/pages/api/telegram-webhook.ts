@@ -58,7 +58,8 @@ import {
   searchLeads,
   resumeLead,
   postponeLead,
-  appendNote,
+  canPostpone,
+  postponePatch,
   getOwedSummary,
   readLeads,
   getCommission,
@@ -284,8 +285,6 @@ async function handlePostponeCallback(
   });
 }
 
-// Shared by every date-picking path (quick preset, calendar day, typed
-// reply) once an actual ISO date has been settled on.
 async function applyPostpone(
   id: number,
   remindAt: string,
@@ -295,10 +294,6 @@ async function applyPostpone(
   cbId: string,
 ): Promise<void> {
   await withErrorAck(cbId, { id }, async () => {
-    // No pre-read here — postponeLead builds the comment note from the live
-    // lead inside its own CAS-protected write, and no-ops (returns
-    // undefined) if the lead isn't found or isn't 'in_progress' anymore
-    // (e.g. a stale button on an old message, already resolved elsewhere).
     const updated = await postponeLead(
       id,
       remindAt,
@@ -857,24 +852,17 @@ async function handlePromptReply(
       );
       return;
     }
-    // Same stale-guard as postponeLead — if the lead moved on (won/lost) via
-    // a different message while this prompt sat unanswered, no-op instead
-    // of postponing a lead that's no longer 'in_progress'.
     const updated = await resolvePendingPrompt(
       chatId,
       replyToMessageId,
       (lead) =>
-        lead.status !== 'in_progress'
-          ? {}
-          : {
-              status: 'postponed',
+        canPostpone(lead)
+          ? postponePatch(
+              lead,
               remindAt,
-              statusChangedAt: new Date().toISOString(),
-              comment: appendNote(
-                lead.comment,
-                `Отложено до ${formatDateRu(remindAt)}`,
-              ),
-            },
+              `Отложено до ${formatDateRu(remindAt)}`,
+            )
+          : {},
     );
     // resolvePendingPrompt returns the lead as soon as the prompt correlates
     // — even when `apply` no-op'd with {} — so truthiness alone can't tell

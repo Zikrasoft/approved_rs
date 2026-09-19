@@ -125,9 +125,14 @@ export function buildStatusKeyboard(lead: StoredLead, role: Role): Keyboard {
     const row: Btn[] = [
       { text: '🔵 В работу', callback_data: `st:${lead.id}:in_progress` },
     ];
-    if (role === 'owner')
-      row.push({ text: '❌ Отказ', callback_data: `st:${lead.id}:lost` });
-    return { inline_keyboard: [row] };
+    if (role !== 'owner') return { inline_keyboard: [row] };
+    row.push({ text: '❌ Отказ', callback_data: `st:${lead.id}:lost` });
+    return {
+      inline_keyboard: [
+        row,
+        [{ text: '⏰ Отложить', callback_data: `postpone:${lead.id}` }],
+      ],
+    };
   }
   if (lead.status === 'in_progress' && role === 'owner') {
     return {
@@ -557,7 +562,7 @@ export function createFormatter({
         `⏰ Напоминание по заявке #${lead.id}`,
         ``,
         `${escapeHtml(lead.name)} — ${escapeHtml(servicesLabel(lead))}`,
-        `Ты просил напомнить сегодня — заявка снова в работе.`,
+        `Ты просил напомнить сегодня — заявка снова активна.`,
       ].join('\n');
     },
 
@@ -568,7 +573,7 @@ export function createFormatter({
           '',
           '<b>Заявки</b>',
           '🆕 Новая → 🗣 Переговоры → 🔵 В работу → ✅ Завершить (укажи свою прибыль в €) или ❌ Отказ.',
-          'Не договорились сейчас? ⏰ Отложить — укажи дату (ДД.ММ.ГГГГ), заявка вернётся в работу сама в этот день, или жми ▶️ Возобновить раньше.',
+          'Не договорились сейчас? ⏰ Отложить — укажи дату (ДД.ММ.ГГГГ), заявка сама вернётся на прежний этап в этот день, или жми ▶️ Возобновить раньше.',
           'В заявке можно поправить имя/контакт/комментарий или архивировать.',
           '',
           '<b>Деньги</b>',
