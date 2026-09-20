@@ -238,7 +238,7 @@ payload, а по реальной истории git внутри уже сде�
 
 | Переменная               | approved.rs | carlab.rs | details.rs | Фолбэк в коде                   | Без неё                       |
 | ------------------------ | ----------- | --------- | ---------- | ------------------------------- | ----------------------------- |
-| `PUBLIC_TG_MANAGER`      | ✅ обяз.    | ✅        | ✅         | нет / заглушка / заглушка       | ссылка на `t.me/undefined`    |
+| `PUBLIC_TG_MANAGER`      | ✅ обяз.    | ✅        | ✅         | нет / `carlabrs` / заглушка     | ссылка на `t.me/undefined`    |
 | `PUBLIC_WHATSAPP_NUMBER` | ✅ обяз.    | ✅        | ✅         | нет / `PUBLIC_PHONE_NUMBER`     | битая ссылка WhatsApp         |
 | `PUBLIC_VIBER_NUMBER`    | ✅ обяз.    | ✅        | ✅         | нет / `PUBLIC_PHONE_NUMBER`     | битая ссылка Viber            |
 | `PUBLIC_PHONE_NUMBER`    | —           | ✅        | ✅         | номер-заглушка в `constants.ts` | сайт показывает чужой номер   |

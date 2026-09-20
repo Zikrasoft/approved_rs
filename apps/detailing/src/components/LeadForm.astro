@@ -122,10 +122,10 @@ const noscriptLink =
   <fieldset class="group m-0 border-0 p-0">
     <legend class={`${label} p-0`}>{site.form.contactChannelLabel}</legend>
 
-    <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+    <div class="grid grid-cols-2 gap-2 sm:grid-cols-4" data-contact-order>
       {
         channels.map((channel, index) => (
-          <label class="block">
+          <label class="block" data-channel={channel.value}>
             <input
               type="radio"
               name="contact_channel"

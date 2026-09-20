@@ -48,11 +48,13 @@ const channels = [
 <div
   class={`grid gap-2 sm:grid-cols-2 lg:grid-cols-1 ${className}`}
   data-contact-cta
+  data-contact-order
 >
   {
     channels.map((channel) => (
       <a
         href={channel.href}
+        data-channel={channel.track}
         data-contact-channel={channel.track}
         rel="noopener"
         class="group flex min-h-11 items-center gap-3.5 rounded-2xl border border-line bg-white/[0.02] px-4 py-3 text-sm text-chalk transition-all duration-500 ease-spring hover:border-line-strong hover:bg-white/[0.05]"

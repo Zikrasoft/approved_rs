@@ -260,11 +260,11 @@ const fieldClass =
   } from '@podbor/lead-crm/phone-kit';
   import {
     isTrackedContactChannel,
-    getPreferredChannel,
+    detectVisitorCountry,
+    preferredContactChannel,
     type TrackedContactChannel,
   } from '@/utils/contactChannel';
   import { getOrCreateVisitorId } from '@/utils/visitorId';
-  import { detectVisitorCountry } from '@/utils/visitorCountry';
 
   // A page can have more than one LeadForm instance (e.g. a page-level form
   // plus the header's "Оставить заявку" modal) — Astro only emits this
@@ -419,11 +419,7 @@ const fieldClass =
       tab.addEventListener('click', () => selectTab(tab, true));
     });
 
-    // Region-based default: e.g. a Balkan visitor lands on the WhatsApp tab
-    // instead of Telegram (see contactChannel.ts's getPreferredChannel).
-    // 'telegram' is already the tabs[0] default, so there's nothing to do
-    // for it or for a country/detection that isn't recognized.
-    const preferredChannel = getPreferredChannel(
+    const preferredChannel = preferredContactChannel(
       detectedCountry,
       document.documentElement.lang,
     );

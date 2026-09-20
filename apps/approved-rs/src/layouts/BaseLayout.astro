@@ -153,7 +153,10 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
         DATA_OPEN_LEAD_MODAL,
         DATA_OPEN_PAGE_LEAD_MODAL,
       } from '@/utils/contactChannel';
+      import { applyPrimaryContactChannel } from '@podbor/site-kit/contact-preference';
       import { getOrCreateVisitorId } from '@/utils/visitorId';
+
+      applyPrimaryContactChannel();
 
       // Which contact channel people actually pick, site-wide — every
       // Telegram/WhatsApp/Viber/callback/call touchpoint carries

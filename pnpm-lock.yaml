@@ -375,6 +375,9 @@ importers:
 
   packages/site-kit:
     dependencies:
+      '@podbor/lead-crm':
+        specifier: workspace:*
+        version: link:../lead-crm
       marked:
         specifier: 18.0.11
         version: 18.0.11

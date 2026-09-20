@@ -38,9 +38,6 @@ const uid = crypto.randomUUID().slice(0, 8);
 
 const countryOptions = phoneCountryOptions(BCP47_BY_LOCALE[locale]);
 
-// TODO: with JS off and the Telegram tab picked, the required name="contact" phone
-// input is display:none and blocks submit unfocusably. Solve before TELEGRAM_ENABLED
-// goes true.
 const channels = (
   [
     {
@@ -123,6 +120,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     <legend class="field-label p-0">{site.form.contactChannelLabel}</legend>
 
     <div
+      data-contact-order
       class:list={[
         'grid gap-2',
         channels.length === 4
@@ -132,7 +130,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     >
       {
         channels.map((channel, index) => (
-          <label class="block">
+          <label class="block" data-channel={channel.value}>
             <input
               type="radio"
               name="contact_channel"

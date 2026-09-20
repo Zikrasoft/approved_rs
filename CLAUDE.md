@@ -12,7 +12,7 @@ apps/detailing/       Details, the detailing studio site — details.rs
 apps/auto-service/    CarLab, the car service site + parts shop — carlab.rs
 packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click routes
 packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
-packages/site-kit/    brand-agnostic mechanics: safeMarkdown, formatPhone, visitor id, lazy map embed, scroll lock, modal dialog
+packages/site-kit/    brand-agnostic mechanics: safeMarkdown, formatPhone, visitor id, lazy map embed, scroll lock, modal dialog, preferred contact channel (owns the `data-contact-order` / `data-channel` / `data-primary-contact` / `data-primary-channel` markup contract the apps must honour)
 packages/brands/      the three brands: domains, display names, locale mapping, ops service labels
 ```
 
@@ -107,6 +107,10 @@ Approved's trust/verification semantics.
   framework island. `defineLazyMapEmbed` and `defineLocaleChoice` in
   `packages/site-kit/src` are the shape: idempotent `define(tagName?)`, no
   auto-registration on import, no styles shipped, the app supplying the markup.
+  A stateless run-once page effect is the one exception — `defineContactClickTracking`
+  and `applyPreferredContactOrder` are plain functions called once from the app's
+  layout, because they have nothing per-instance to hold. Anything with instance
+  state or a lazy mount boundary is still a custom element.
 - Every `packages/*` carries its own test suite at **100% coverage**
   (statements/functions/lines; branches too where achievable). The `test`
   script runs `vitest run --coverage`, so the threshold is enforced by CI

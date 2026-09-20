@@ -41,17 +41,6 @@ const coverageLine = getActiveCountries()
           {t.footer.tagline}
         </p>
         <div class="flex flex-wrap gap-2">
-          {
-            /*
-            Region-preferred channel gets the labeled slot, the other one
-            demotes to an icon-only chip instead of disappearing — same
-            regionalContact.ts detection as RegionalContactButton.astro,
-            just wired as two swap pairs instead of one. The icon-only pair
-            below is intentionally keyed by the OPPOSITE channel value: it
-            should show when that channel is NOT the preferred one, i.e.
-            when it's time for it to be the demoted icon.
-          */
-          }
           <div data-primary-contact class="contents">
             <a
               data-primary-channel="telegram"
@@ -216,8 +205,3 @@ const coverageLine = getActiveCountries()
     transform: translateX(3px);
   }
 </style>
-
-<script>
-  import { applyRegionalContactPreference } from '@/utils/regionalContact';
-  applyRegionalContactPreference();
-</script>

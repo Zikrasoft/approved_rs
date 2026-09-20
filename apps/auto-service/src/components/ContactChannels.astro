@@ -15,10 +15,14 @@ const site = getSiteContent(locale);
 const channels = contactChannels(site);
 ---
 
-<ul class={`grid gap-2 sm:grid-cols-2 ${className}`} data-contact-cta>
+<ul
+  class={`grid gap-2 sm:grid-cols-2 ${className}`}
+  data-contact-cta
+  data-contact-order
+>
   {
     channels.map((channel) => (
-      <li>
+      <li data-channel={channel.track}>
         <a
           href={channel.href}
           data-contact-channel={channel.track}

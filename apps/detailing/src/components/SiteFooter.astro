@@ -126,10 +126,10 @@ const messengers = [
           <Icon name="phone" size={16} class="shrink-0" />
           {site.channels.call}
         </a>
-        <ul class="-ml-3.5 flex flex-wrap items-center">
+        <ul class="-ml-3.5 flex flex-wrap items-center" data-contact-order>
           {
             messengers.map((messenger) => (
-              <li>
+              <li data-channel={messenger.track}>
                 <a
                   href={messenger.href}
                   data-contact-channel={messenger.track}

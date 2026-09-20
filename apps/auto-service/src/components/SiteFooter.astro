@@ -75,10 +75,10 @@ const channels = contactChannels(site);
       >
         {site.footer.contactHeading}
       </span>
-      <ul class="flex flex-col">
+      <ul class="flex flex-col" data-contact-order>
         {
           channels.map((channel) => (
-            <li>
+            <li data-channel={channel.track}>
               <a
                 href={channel.href}
                 data-contact-channel={channel.track}

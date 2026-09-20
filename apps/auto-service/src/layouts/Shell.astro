@@ -111,6 +111,17 @@ const businessSchema = {
     <meta property="og:locale" content={OG_LOCALE[locale]} />
     <meta name="twitter:card" content="summary_large_image" />
 
+    <noscript>
+      <style is:inline>
+        [data-lead-form] [data-channel='telegram'] {
+          display: none;
+        }
+        [data-lead-form] [data-contact-order] {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      </style>
+    </noscript>
+
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
@@ -156,10 +167,12 @@ const businessSchema = {
         defineAnalytics,
         defineContactClickTracking,
       } from '@podbor/site-kit/browser';
+      import { applyPreferredContactOrder } from '@podbor/site-kit/contact-preference';
       import { YM_COUNTER_ID } from '@/utils/constants';
 
       defineAnalytics({ ymCounterId: YM_COUNTER_ID });
       defineContactClickTracking(isTrackedContactChannel);
+      applyPreferredContactOrder();
     </script>
   </body>
 </html>

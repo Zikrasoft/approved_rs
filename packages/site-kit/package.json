@@ -6,13 +6,15 @@
   "version": "0.0.1",
   "exports": {
     ".": "./src/index.ts",
-    "./browser": "./src/browser.ts"
+    "./browser": "./src/browser.ts",
+    "./contact-preference": "./src/contactPreference.ts"
   },
   "scripts": {
     "test": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@podbor/lead-crm": "workspace:*",
     "marked": "18.0.11",
     "sanitize-html": "2.17.7"
   },
