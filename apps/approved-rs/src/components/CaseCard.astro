@@ -29,6 +29,7 @@ const { href, image, imageAlt, badges, car, year, price } = Astro.props;
           src={image}
           alt={imageAlt}
           format="webp"
+          densities={[1, 2]}
           width={400}
           height={208}
           class="w-full h-full object-cover transition-transform duration-400 ease-out group-hover:scale-105"

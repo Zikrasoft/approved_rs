@@ -217,6 +217,8 @@ const schema = generateArticleSchema({
                 src={c.data.image}
                 alt={c.data.car}
                 format="webp"
+                widths={[480, 720, 960]}
+                sizes="(min-width: 1024px) 420px, 92vw"
                 class="w-full h-full object-cover"
               />
             </div>

@@ -23,7 +23,6 @@ export function defineContactClickTracking(
         body.set('source_url', location.href);
         body.set('visitor_id', browserVisitorId());
         navigator.sendBeacon(CONTACT_CLICK_ENDPOINT, body);
-        window.gtag?.('event', 'contact_click', { channel });
         window.ymReachGoal?.('contact_click', { channel });
       });
     });

@@ -8,30 +8,11 @@ import type { NotifyLead } from '../notifyLead.ts';
 
 const clickedChannelSchema = contactChannelSchema.catch('phone');
 
-const CHANNEL_COPY: Record<
-  TrackedContactChannel,
-  { service: string; comment: string }
-> = {
-  phone: {
-    service: 'Звонок с сайта',
-    comment:
-      'Посетитель нажал кнопку звонка на сайте. Если пропустили — перезвоните.',
-  },
-  telegram: {
-    service: 'Клик Telegram с сайта',
-    comment:
-      'Посетитель нажал кнопку Telegram на сайте. Если не написал первым — напишите сами.',
-  },
-  whatsapp: {
-    service: 'Клик WhatsApp с сайта',
-    comment:
-      'Посетитель нажал кнопку WhatsApp на сайте. Если не написал первым — напишите сами.',
-  },
-  viber: {
-    service: 'Клик Viber с сайта',
-    comment:
-      'Посетитель нажал кнопку Viber на сайте. Если не написал первым — напишите сами.',
-  },
+const CHANNEL_SERVICE: Record<TrackedContactChannel, string> = {
+  phone: 'Звонок с сайта',
+  telegram: 'Telegram с сайта',
+  whatsapp: 'WhatsApp с сайта',
+  viber: 'Viber с сайта',
 };
 
 export interface ContactClickRouteOptions {
@@ -67,7 +48,7 @@ export function createContactClickRoute({
   }): Promise<Response> {
     const form = await request.formData();
     const channel = clickedChannelSchema.parse(form.get('channel'));
-    const copy = CHANNEL_COPY[channel];
+    const service = CHANNEL_SERVICE[channel];
     const sourceUrl = sourceUrlSchema.parse(form.get('source_url'));
 
     waitUntil(
@@ -75,10 +56,10 @@ export function createContactClickRoute({
         {
           name: '',
           contact: '—',
-          service: copy.service,
-          services: [copy.service],
+          service,
+          services: [service],
           contactChannel: channel,
-          comment: copy.comment,
+          comment: '',
           source_url: sourceUrl,
           visitorId: visitorIdSchema.parse(form.get('visitor_id')),
           locale: localeFromUrl(sourceUrl, isLocale) ?? defaultLocale,

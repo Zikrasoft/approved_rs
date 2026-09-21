@@ -33,6 +33,10 @@ const lf = getLeadFormContent(locale);
 const defaultPhoneCountry = 'RS';
 const countryOptions = phoneCountryOptions(DISPLAY_LOCALE[locale]);
 
+const uid = crypto.randomUUID().slice(0, 8);
+const telegramPanelId = `contact-panel-telegram-${uid}`;
+const phonePanelId = `contact-panel-phone-${uid}`;
+
 const fieldClass =
   'form-field py-3 rounded-sm text-sm outline-none bg-page border border-border-strong text-primary font-sans';
 ---
@@ -41,9 +45,9 @@ const fieldClass =
   class="lead-form-card rounded-sm p-7 bg-surface-glass border border-border-strong backdrop-blur-[12px]"
 >
   <div class="mb-6">
-    <h3 class="font-display text-2xl leading-snug text-primary mb-1">
+    <h2 class="font-display text-2xl leading-snug text-primary mb-1">
       {lf.headingLine1}<br /><em>{lf.headingEmphasis}</em>
-    </h3>
+    </h2>
     <p class="text-xs text-muted">{lf.subtext}</p>
   </div>
 
@@ -103,7 +107,7 @@ const fieldClass =
           class="pill-tab relative z-10 flex items-center justify-center flex-1 py-2 rounded-sm cursor-pointer"
           role="tab"
           aria-selected="true"
-          aria-controls="contact-panel-telegram"
+          aria-controls={telegramPanelId}
         >
           <TelegramIcon size={16} />
           <span class="pill-tab-label">{lf.telegramTab}</span>
@@ -117,7 +121,7 @@ const fieldClass =
           class="pill-tab relative z-10 flex items-center justify-center flex-1 py-2 rounded-sm cursor-pointer"
           role="tab"
           aria-selected="false"
-          aria-controls="contact-panel-phone"
+          aria-controls={phonePanelId}
         >
           <WhatsAppIcon size={16} />
           <span class="pill-tab-label">{lf.whatsappTab}</span>
@@ -131,7 +135,7 @@ const fieldClass =
           class="pill-tab relative z-10 flex items-center justify-center flex-1 py-2 rounded-sm cursor-pointer"
           role="tab"
           aria-selected="false"
-          aria-controls="contact-panel-phone"
+          aria-controls={phonePanelId}
         >
           <ViberIcon size={16} />
           <span class="pill-tab-label">{lf.viberTab}</span>
@@ -145,7 +149,7 @@ const fieldClass =
           class="pill-tab relative z-10 flex items-center justify-center flex-1 py-2 rounded-sm cursor-pointer"
           role="tab"
           aria-selected="false"
-          aria-controls="contact-panel-phone"
+          aria-controls={phonePanelId}
         >
           <Phone size={15} />
           <span class="pill-tab-label">{lf.phoneTab}</span>
@@ -153,14 +157,14 @@ const fieldClass =
       </div>
 
       <div
-        id="contact-panel-telegram"
+        id={telegramPanelId}
         class="contact-panel"
         data-panel="telegram"
         role="tabpanel"
       >
         <input
           type="text"
-          id="contact-telegram"
+          data-contact-telegram
           name="contact"
           placeholder="@username"
           class={`${fieldClass} w-full px-4`}
@@ -168,7 +172,7 @@ const fieldClass =
       </div>
 
       <div
-        id="contact-panel-phone"
+        id={phonePanelId}
         class="contact-panel hidden"
         data-panel="phone"
         role="tabpanel"
@@ -176,7 +180,7 @@ const fieldClass =
         <div class="flex gap-2">
           <div class="relative min-w-0 max-w-[min(14rem,45%)] shrink-0">
             <select
-              id="contact-phone-country"
+              data-contact-phone-country
               class={`${fieldClass} max-w-full pl-2 pr-6 appearance-none cursor-pointer overflow-hidden text-ellipsis`}
             >
               {
@@ -199,7 +203,7 @@ const fieldClass =
           </div>
           <input
             type="tel"
-            id="contact-phone-number"
+            data-contact-phone-number
             inputmode="tel"
             placeholder="060 123 4567"
             class={`${fieldClass} min-w-0 flex-1 px-4`}
@@ -325,13 +329,14 @@ const fieldClass =
     const hiddenChannel = form.querySelector<HTMLInputElement>(
       'input[type="hidden"][name="contact_channel"]',
     )!;
-    const tgInput =
-      contactField.querySelector<HTMLInputElement>('#contact-telegram')!;
+    const tgInput = contactField.querySelector<HTMLInputElement>(
+      '[data-contact-telegram]',
+    )!;
     const phoneCountry = contactField.querySelector<HTMLSelectElement>(
-      '#contact-phone-country',
+      '[data-contact-phone-country]',
     )!;
     const phoneNumber = contactField.querySelector<HTMLInputElement>(
-      '#contact-phone-number',
+      '[data-contact-phone-number]',
     )!;
     const consent = form.querySelector<HTMLInputElement>('[name="consent"]')!;
     const consentErr = form.querySelector<HTMLElement>('.consent-error');

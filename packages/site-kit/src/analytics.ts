@@ -6,19 +6,15 @@ import {
 } from './consent.ts';
 
 const YM_TAG_SRC = 'https://mc.yandex.ru/metrika/tag.js?id=';
-const GA_TAG_SRC = 'https://www.googletagmanager.com/gtag/js?id=';
 
 export interface AnalyticsConfig {
   ymCounterId?: number;
-  gaMeasurementId?: string;
 }
 
 type YmQueue = ((...args: unknown[]) => void) & { a?: unknown[][]; l?: number };
 
 declare global {
   interface Window {
-    dataLayer: unknown[];
-    gtag: (...args: unknown[]) => void;
     ym?: (...args: unknown[]) => void;
     ymReachGoal?: (goal: string, params?: Record<string, unknown>) => void;
     loadAnalytics?: () => void;
@@ -33,6 +29,16 @@ function loadOnce(src: string): void {
   document.head.appendChild(element);
 }
 
+function whenIdle(run: () => void): void {
+  const schedule = (): void => {
+    if (typeof requestIdleCallback === 'function')
+      requestIdleCallback(run, { timeout: 4000 });
+    else setTimeout(run, 1200);
+  };
+  if (document.readyState === 'complete') schedule();
+  else addEventListener('load', schedule, { once: true });
+}
+
 function stubYm(): void {
   if (window.ym) return;
   const queue: unknown[][] = [];
@@ -42,16 +48,6 @@ function stubYm(): void {
   ym.a = queue;
   ym.l = Date.now();
   window.ym = ym;
-}
-
-function stubGtag(): void {
-  window.dataLayer = window.dataLayer ?? [];
-  // gtag.js tells its own commands apart from other dataLayer messages by
-  // the Arguments object, so the vendor shape has to survive here.
-  window.gtag = function () {
-    // eslint-disable-next-line prefer-rest-params
-    window.dataLayer.push(arguments);
-  };
 }
 
 let pendingStart: (() => void) | undefined;
@@ -74,13 +70,8 @@ function refused(): boolean {
   }
 }
 
-export function defineAnalytics({
-  ymCounterId,
-  gaMeasurementId,
-}: AnalyticsConfig): void {
+export function defineAnalytics({ ymCounterId }: AnalyticsConfig): void {
   if (window.loadAnalytics) return;
-
-  stubGtag();
 
   window.ymReachGoal = (goal, params) => {
     if (ymCounterId) window.ym?.(ymCounterId, 'reachGoal', goal, params);
@@ -88,27 +79,18 @@ export function defineAnalytics({
 
   let started = false;
   const start = (): void => {
-    if (started) return;
+    if (started || !ymCounterId) return;
     started = true;
 
-    if (gaMeasurementId) {
-      loadOnce(`${GA_TAG_SRC}${gaMeasurementId}`);
-      window.gtag('js', new Date());
-      window.gtag('config', gaMeasurementId);
-    }
-
-    if (ymCounterId) {
-      stubYm();
-      loadOnce(`${YM_TAG_SRC}${ymCounterId}`);
-      window.ym?.(ymCounterId, 'init', {
-        ssr: true,
-        webvisor: true,
-        clickmap: true,
-        ecommerce: 'dataLayer',
-        accurateTrackBounce: true,
-        trackLinks: true,
-      });
-    }
+    stubYm();
+    window.ym?.(ymCounterId, 'init', {
+      ssr: true,
+      webvisor: true,
+      clickmap: true,
+      accurateTrackBounce: true,
+      trackLinks: true,
+    });
+    whenIdle(() => loadOnce(`${YM_TAG_SRC}${ymCounterId}`));
   };
   window.loadAnalytics = start;
   pendingStart = start;

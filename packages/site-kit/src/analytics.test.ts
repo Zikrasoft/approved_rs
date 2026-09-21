@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { defineAnalytics } from './analytics.ts';
 import { CONSENT_EVENT, newConsent, STORAGE_KEY } from './consent.ts';
 
 const YM = 111800377;
-const GA = 'G-TEST';
+const TAG = `https://mc.yandex.ru/metrika/tag.js?id=${YM}`;
 
 const srcs = () => [...document.scripts].map((script) => script.src);
 const ymQueue = () => (window.ym as unknown as { a: unknown[][] }).a;
@@ -14,31 +14,45 @@ const refuse = () =>
     JSON.stringify(newConsent(false, '2026-09-12', new Date())),
   );
 
+let idleTasks: (() => void)[] = [];
+const runIdle = () => {
+  const queued = idleTasks;
+  idleTasks = [];
+  queued.forEach((task) => task());
+};
+
 beforeEach(() => {
   document.head.innerHTML = '';
   localStorage.clear();
+  idleTasks = [];
+  vi.stubGlobal('requestIdleCallback', (task: () => void) => {
+    idleTasks.push(task);
+  });
   delete (window as Partial<Window>).ym;
-  delete (window as Partial<Window>).dataLayer;
   delete (window as Partial<Window>).loadAnalytics;
   delete (window as Partial<Window>).ymReachGoal;
 });
 
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
 describe('defineAnalytics', () => {
-  it('loads both counters on the first page view when nothing was refused', () => {
-    defineAnalytics({ ymCounterId: YM, gaMeasurementId: GA });
-    expect(srcs()).toContain(`https://mc.yandex.ru/metrika/tag.js?id=${YM}`);
-    expect(srcs()).toContain(
-      `https://www.googletagmanager.com/gtag/js?id=${GA}`,
-    );
+  it('loads the counter on the first page view when nothing was refused', () => {
+    defineAnalytics({ ymCounterId: YM });
+    runIdle();
+    expect(srcs()).toEqual([TAG]);
   });
 
-  it('holds both back when the visitor refused analytics', () => {
-    refuse();
-    defineAnalytics({ ymCounterId: YM, gaMeasurementId: GA });
+  it('keeps the tag out of the critical path until the browser goes idle', () => {
+    defineAnalytics({ ymCounterId: YM });
     expect(srcs()).toEqual([]);
+    runIdle();
+    expect(srcs()).toEqual([TAG]);
   });
 
-  it('initialises Metrika with the options this site is set up for', () => {
+  it('records the page view before the tag downloads, so nothing is lost', () => {
     defineAnalytics({ ymCounterId: YM });
     expect(ymQueue()).toContainEqual([
       YM,
@@ -47,22 +61,42 @@ describe('defineAnalytics', () => {
         ssr: true,
         webvisor: true,
         clickmap: true,
-        ecommerce: 'dataLayer',
         accurateTrackBounce: true,
         trackLinks: true,
       },
     ]);
   });
 
+  it('falls back to a timer where requestIdleCallback is missing', () => {
+    vi.stubGlobal('requestIdleCallback', undefined);
+    vi.useFakeTimers();
+    defineAnalytics({ ymCounterId: YM });
+    expect(srcs()).toEqual([]);
+    vi.runAllTimers();
+    expect(srcs()).toEqual([TAG]);
+    vi.useRealTimers();
+  });
+
+  it('waits for load before scheduling when the page is still parsing', () => {
+    vi.spyOn(document, 'readyState', 'get').mockReturnValue('loading');
+    defineAnalytics({ ymCounterId: YM });
+    runIdle();
+    expect(srcs()).toEqual([]);
+    dispatchEvent(new Event('load'));
+    runIdle();
+    expect(srcs()).toEqual([TAG]);
+  });
+
+  it('holds the counter back when the visitor refused analytics', () => {
+    refuse();
+    defineAnalytics({ ymCounterId: YM });
+    runIdle();
+    expect(srcs()).toEqual([]);
+  });
+
   it('stamps the queue start time the Metrika tag reads back', () => {
     defineAnalytics({ ymCounterId: YM });
     expect(typeof (window.ym as unknown as { l: number }).l).toBe('number');
-  });
-
-  it('tells GA the session started before configuring it', () => {
-    defineAnalytics({ gaMeasurementId: GA });
-    const commands = window.dataLayer.map((call) => (call as unknown[])[0]);
-    expect(commands).toEqual(['js', 'config']);
   });
 
   it('starts once a later acceptance answers the banner', () => {
@@ -71,7 +105,8 @@ describe('defineAnalytics', () => {
     document.dispatchEvent(
       new CustomEvent(CONSENT_EVENT, { detail: { analytics: true } }),
     );
-    expect(srcs()).toHaveLength(1);
+    runIdle();
+    expect(srcs()).toEqual([TAG]);
   });
 
   it('stays held back when the banner answer is another refusal', () => {
@@ -80,13 +115,15 @@ describe('defineAnalytics', () => {
     document.dispatchEvent(
       new CustomEvent(CONSENT_EVENT, { detail: { analytics: false } }),
     );
+    runIdle();
     expect(srcs()).toEqual([]);
   });
 
   it('ignores a second call rather than resetting what is already running', () => {
     defineAnalytics({ ymCounterId: YM });
     defineAnalytics({ ymCounterId: 42 });
-    expect(srcs()).toEqual([`https://mc.yandex.ru/metrika/tag.js?id=${YM}`]);
+    runIdle();
+    expect(srcs()).toEqual([TAG]);
   });
 
   it('starts when the refusal cannot be read rather than failing closed', () => {
@@ -94,8 +131,8 @@ describe('defineAnalytics', () => {
       throw new Error('private mode');
     });
     defineAnalytics({ ymCounterId: YM });
-    expect(srcs()).toHaveLength(1);
-    vi.restoreAllMocks();
+    runIdle();
+    expect(srcs()).toEqual([TAG]);
   });
 
   it('lets a later acceptance start what the refusal held back', () => {
@@ -103,23 +140,24 @@ describe('defineAnalytics', () => {
     defineAnalytics({ ymCounterId: YM });
     expect(srcs()).toEqual([]);
     window.loadAnalytics?.();
-    expect(srcs()).toHaveLength(1);
+    runIdle();
+    expect(srcs()).toEqual([TAG]);
   });
 
-  it('initialises each counter once however often it is asked', () => {
-    defineAnalytics({ ymCounterId: YM, gaMeasurementId: GA });
+  it('initialises the counter once however often it is asked', () => {
+    defineAnalytics({ ymCounterId: YM });
     window.loadAnalytics?.();
     window.loadAnalytics?.();
-    expect(srcs()).toHaveLength(2);
-    expect(
-      window.dataLayer.filter((call) => (call as unknown[])[0] === 'config'),
-    ).toHaveLength(1);
+    runIdle();
+    expect(srcs()).toEqual([TAG]);
     expect(ymQueue().filter((call) => call[1] === 'init')).toHaveLength(1);
   });
 
-  it('does not load a counter the site has not configured', () => {
-    defineAnalytics({ gaMeasurementId: GA });
-    expect(srcs()).toHaveLength(1);
+  it('does nothing on a site with no counter configured', () => {
+    defineAnalytics({});
+    window.loadAnalytics?.();
+    runIdle();
+    expect(srcs()).toEqual([]);
     expect(window.ym).toBeUndefined();
   });
 
@@ -142,30 +180,8 @@ describe('defineAnalytics', () => {
   });
 
   it('swallows a goal on a site with no Metrika counter instead of throwing', () => {
-    defineAnalytics({ gaMeasurementId: GA });
+    defineAnalytics({});
     expect(() => window.ymReachGoal?.('lead_submit')).not.toThrow();
-  });
-
-  it('keeps a dataLayer the page already had, so nothing queued is lost', () => {
-    window.dataLayer = ['existing'];
-    defineAnalytics({ gaMeasurementId: GA });
-    expect(window.dataLayer[0]).toBe('existing');
-  });
-
-  it('feeds gtag calls into the dataLayer the tag reads', () => {
-    defineAnalytics({ gaMeasurementId: GA });
-    const calls = window.dataLayer.map((call) =>
-      Array.from(call as ArrayLike<unknown>),
-    );
-    expect(calls).toContainEqual(['config', GA]);
-  });
-
-  it('pushes gtag commands as the Arguments object gtag.js looks for', () => {
-    defineAnalytics({ gaMeasurementId: GA });
-    expect(Array.isArray(window.dataLayer[0])).toBe(false);
-    expect(Object.prototype.toString.call(window.dataLayer[0])).toBe(
-      '[object Arguments]',
-    );
   });
 
   it('keeps an already-installed ym queue instead of dropping what it holds', () => {
@@ -177,9 +193,10 @@ describe('defineAnalytics', () => {
 
   it('reuses a tag another script already put on the page', () => {
     const script = document.createElement('script');
-    script.src = `https://mc.yandex.ru/metrika/tag.js?id=${YM}`;
+    script.src = TAG;
     document.head.appendChild(script);
     defineAnalytics({ ymCounterId: YM });
-    expect(srcs()).toHaveLength(1);
+    runIdle();
+    expect(srcs()).toEqual([TAG]);
   });
 });

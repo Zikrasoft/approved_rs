@@ -19,7 +19,7 @@ statClients:
   value: 200+
   label: клиентов
 statCountries:
-  label: страны
+  label: стран
 statYears:
   value: 5 лет
   label: на рынке
@@ -45,7 +45,7 @@ ctaStatClients:
   value: 200+
   label: клиентов
 ctaStatCountries:
-  label: страны
+  label: стран
 ctaStatYears:
   value: 5 лет
   label: опыт

@@ -19,7 +19,6 @@ beforeEach(() => {
     sent.push([String(url), body as FormData]);
     return true;
   }) as unknown as typeof navigator.sendBeacon;
-  window.gtag = vi.fn();
   window.ymReachGoal = vi.fn();
   vi.stubGlobal('crypto', { randomUUID: () => 'fixed-id' });
 });
@@ -48,12 +47,9 @@ describe('defineContactClickTracking', () => {
     expect(sent[0]![1].get('visitor_id')).toBe('earlier-id');
   });
 
-  it('reports the same click to both analytics counters', () => {
+  it('reports the same click to the analytics counter', () => {
     defineContactClickTracking(isTracked);
     click('telegram');
-    expect(window.gtag).toHaveBeenCalledWith('event', 'contact_click', {
-      channel: 'telegram',
-    });
     expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
       channel: 'telegram',
     });
@@ -67,7 +63,6 @@ describe('defineContactClickTracking', () => {
   });
 
   it('still records the click on a page where analytics never loaded', () => {
-    delete (window as Partial<Window>).gtag;
     delete (window as Partial<Window>).ymReachGoal;
     defineContactClickTracking(isTracked);
     expect(() => click('telegram')).not.toThrow();

@@ -56,8 +56,8 @@ describe('createContactClickRoute', () => {
         name: '',
         contact: '—',
         contactChannel: 'telegram',
-        service: 'Клик Telegram с сайта',
-        services: ['Клик Telegram с сайта'],
+        service: 'Telegram с сайта',
+        services: ['Telegram с сайта'],
       }),
       '[contact-click]',
     );

@@ -30,6 +30,12 @@ export function bindPhoneCountry(
     primary: 'dialPrimary' in option.dataset,
   }));
 
+  const fitWhenSettled = (): void => {
+    const fonts = document.fonts?.ready;
+    if (fonts) void fonts.then(() => fitToSelection(select));
+    else requestAnimationFrame(() => fitToSelection(select));
+  };
+
   select.addEventListener('change', () => fitToSelection(select));
   input.addEventListener('input', () => {
     const split = splitDialCode(input.value, countries);
@@ -41,6 +47,5 @@ export function bindPhoneCountry(
     else fitToSelection(select);
   });
 
-  fitToSelection(select);
-  document.fonts?.ready.then(() => fitToSelection(select));
+  fitWhenSettled();
 }
