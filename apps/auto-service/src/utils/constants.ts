@@ -51,3 +51,17 @@ export const CURRENCY = 'RSD';
 export const YM_COUNTER_ID = 112647692;
 
 export const COOKIE_POLICY_VERSION = '2026-09-15';
+
+export const PHONE_COUNTRY_SHORTLIST = [
+  'RS',
+  'ME',
+  'BA',
+  'HR',
+  'MK',
+  'SI',
+  'DE',
+  'AT',
+  'RU',
+  'UA',
+  'BY',
+] as const;

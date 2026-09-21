@@ -16,6 +16,7 @@ export default defineConfig({
   // instead of every static page opting in via `prerender = true`.
   output: 'static',
   adapter: vercel(),
+  prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   i18n: {
     locales: [...localeConfig.locales],
     defaultLocale: localeConfig.primaryLocale,

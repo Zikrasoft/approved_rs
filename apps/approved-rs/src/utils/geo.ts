@@ -45,6 +45,14 @@ const cities = citiesData as City[];
 export const getActiveCountries = (): Country[] =>
   countries.filter((c) => c.active);
 
+const RUSSIAN_SPEAKING_DIAL_CODES = ['RU', 'UA', 'BY', 'KZ'];
+
+export const phoneCountryShortlist = (): ReadonlySet<string> =>
+  new Set([
+    ...getActiveCountries().map((c) => c.code.toUpperCase()),
+    ...RUSSIAN_SPEAKING_DIAL_CODES,
+  ]);
+
 export const getCountry = (code: string): Country | undefined =>
   countries.find((c) => c.code === code);
 

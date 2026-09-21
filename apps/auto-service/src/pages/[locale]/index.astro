@@ -1,5 +1,5 @@
 ---
-import { Image } from 'astro:assets';
+import { getImage } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import heroImage from '@/assets/hero-workshop.jpg';
 import Shell from '@/layouts/Shell.astro';
@@ -23,6 +23,13 @@ export function getStaticPaths() {
   return localePaths();
 }
 
+const HERO_SIZES = '(min-width: 1024px) 35vw, 100vw';
+const heroPicture = await getImage({
+  src: heroImage,
+  widths: [480, 960],
+  sizes: HERO_SIZES,
+  format: 'webp',
+});
 const locale = localeFrom(Astro.url.pathname);
 const home = getHomeContent(locale);
 const site = getSiteContent(locale);
@@ -44,6 +51,11 @@ const faqSchema = {
   title={home.meta.title}
   description={home.meta.description}
   jsonLd={[faqSchema]}
+  preloadImage={{
+    src: heroPicture.src,
+    srcset: heroPicture.srcSet.attribute,
+    sizes: HERO_SIZES,
+  }}
 >
   <ServiceChips />
 
@@ -76,13 +88,16 @@ const faqSchema = {
         </ul>
       </div>
 
-      <Image
-        src={heroImage}
+      <img
+        src={heroPicture.src}
+        srcset={heroPicture.srcSet.attribute}
+        sizes={HERO_SIZES}
+        width={heroImage.width}
+        height={heroImage.height}
         alt=""
-        widths={[480, 960]}
-        sizes="(min-width: 1024px) 35vw, 100vw"
         loading="eager"
         fetchpriority="high"
+        decoding="async"
         class="aspect-[16/10] w-full object-cover lg:aspect-auto lg:h-full"
       />
     </div>

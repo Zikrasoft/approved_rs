@@ -2,6 +2,7 @@ export interface PhoneKit {
   AsYouType: typeof import('libphonenumber-js/min').AsYouType;
   parse: typeof import('libphonenumber-js/min').parsePhoneNumberFromString;
   isValidContact: typeof import('./phone.ts').isValidContact;
+  countryOptions: typeof import('./phone.ts').phoneCountryOptions;
 }
 
 // A stalled request is not a rejected one: the module can hang on a flaky
@@ -26,6 +27,7 @@ export function loadPhoneKit(): Promise<void> {
         AsYouType: phone.AsYouType,
         parse: phone.parsePhoneNumberFromString,
         isValidContact: crm.isValidContact,
+        countryOptions: crm.phoneCountryOptions,
       };
     })
     .catch(() => {

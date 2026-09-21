@@ -30,9 +30,16 @@ interface Props {
   description: string;
   noindex?: boolean;
   jsonLd?: Record<string, unknown>[];
+  preloadImage?: { src: string; srcset: string; sizes: string };
 }
 
-const { title, description, noindex = false, jsonLd = [] } = Astro.props;
+const {
+  title,
+  description,
+  preloadImage,
+  noindex = false,
+  jsonLd = [],
+} = Astro.props;
 
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
@@ -101,7 +108,18 @@ const businessSchema = {
       ))
     }
     <meta name="theme-color" content="#060608" />
-    <slot name="head" />
+    {
+      preloadImage && (
+        <link
+          rel="preload"
+          as="image"
+          href={preloadImage.src}
+          imagesrcset={preloadImage.srcset}
+          imagesizes={preloadImage.sizes}
+          fetchpriority="high"
+        />
+      )
+    }
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />

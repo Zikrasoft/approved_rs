@@ -48,18 +48,12 @@ const faqSchema = {
   title={home.meta.title}
   description={home.meta.description}
   jsonLd={[faqSchema]}
+  preloadImage={{
+    src: heroPicture.src,
+    srcset: heroPicture.srcSet.attribute,
+    sizes: HERO_SIZES,
+  }}
 >
-  <Fragment slot="head">
-    <link
-      rel="preload"
-      as="image"
-      href={heroPicture.src}
-      imagesrcset={heroPicture.srcSet.attribute}
-      imagesizes={HERO_SIZES}
-      fetchpriority="high"
-    />
-  </Fragment>
-
   <Hero />
 
   <Marquee items={home.marquee} />

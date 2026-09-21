@@ -9,6 +9,7 @@ import { HONEYPOT_FIELD } from '@podbor/lead-crm';
 import { phoneCountryOptions } from '@podbor/lead-crm/phone';
 import { getLeadFormContent } from '@/i18n/content/leadForm';
 import { getLocale, DISPLAY_LOCALE } from '@/i18n/config';
+import { phoneCountryShortlist } from '@/utils/geo';
 import { PathBuilder } from '@/utils/paths';
 
 interface Props {
@@ -31,7 +32,12 @@ const locale = getLocale(Astro.currentLocale);
 const lf = getLeadFormContent(locale);
 
 const defaultPhoneCountry = 'RS';
-const countryOptions = phoneCountryOptions(DISPLAY_LOCALE[locale]);
+const displayLocale = DISPLAY_LOCALE[locale];
+const shortlist = phoneCountryShortlist();
+const countryOptions = phoneCountryOptions(displayLocale).filter(
+  (country) =>
+    shortlist.has(country.iso) || country.iso === defaultPhoneCountry,
+);
 
 const uid = crypto.randomUUID().slice(0, 8);
 const telegramPanelId = `contact-panel-telegram-${uid}`;
@@ -181,6 +187,7 @@ const fieldClass =
           <div class="relative min-w-0 max-w-[min(14rem,45%)] shrink-0">
             <select
               data-contact-phone-country
+              data-display-locale={displayLocale}
               class={`${fieldClass} max-w-full pl-2 pr-6 appearance-none cursor-pointer overflow-hidden text-ellipsis`}
             >
               {
@@ -256,7 +263,10 @@ const fieldClass =
 <script>
   import type { CountryCode } from 'libphonenumber-js/min';
   import { composeE164 } from '@podbor/lead-crm/compose-e164';
-  import { bindPhoneCountry } from '@podbor/lead-crm/phone-input';
+  import {
+    bindPhoneCountry,
+    fillCountrySelect,
+  } from '@podbor/lead-crm/phone-input';
   import {
     deferSubmitUntilKit,
     loadPhoneKit,
@@ -364,6 +374,16 @@ const fieldClass =
 
     bindPhoneCountry(phoneCountry, phoneNumber);
 
+    const expandCountries = () =>
+      loadPhoneKit().then(() => {
+        const kit = phoneKit();
+        if (kit)
+          fillCountrySelect(
+            phoneCountry,
+            kit.countryOptions(phoneCountry.dataset.displayLocale ?? 'ru'),
+          );
+      });
+
     function dialCode() {
       return phoneCountry.selectedOptions[0]?.dataset.dial ?? '';
     }
@@ -420,8 +440,15 @@ const fieldClass =
       if (focusField) (panel === 'telegram' ? tgInput : phoneNumber).focus();
     }
 
+    form.addEventListener('pointerenter', () => void expandCountries(), {
+      once: true,
+    });
+
     tabs.forEach((tab) => {
-      tab.addEventListener('click', () => selectTab(tab, true));
+      tab.addEventListener('click', () => {
+        selectTab(tab, true);
+        if (PANEL_FOR[activeTab] === 'phone') void expandCountries();
+      });
     });
 
     const preferredChannel = preferredContactChannel(
@@ -464,7 +491,7 @@ const fieldClass =
     form.addEventListener(
       'focusin',
       () => {
-        loadPhoneKit().then(() => {
+        expandCountries().then(() => {
           // Re-masking would rewrite the field and drop the caret to the end,
           // and on the slow connection this lazy load exists for the visitor
           // is already typing by now.

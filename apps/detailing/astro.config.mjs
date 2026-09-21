@@ -13,6 +13,7 @@ export default defineConfig({
   site,
   output: 'static',
   adapter: vercel(),
+  prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   i18n: {
     locales: [...localeConfig.locales],
     defaultLocale: localeConfig.primaryLocale,

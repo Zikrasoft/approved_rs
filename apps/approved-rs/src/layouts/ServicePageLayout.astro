@@ -1,6 +1,6 @@
 ---
 import type { ImageMetadata } from 'astro';
-import { Image } from 'astro:assets';
+import { heroImageAttrs } from '@/utils/heroImage';
 import BaseLayout from './BaseLayout.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
 import ClosingBand from '@/components/ClosingBand.astro';
@@ -92,6 +92,7 @@ const {
   closing,
 } = Astro.props;
 
+const hero = image ? await heroImageAttrs(image) : undefined;
 const locale = getLocale(Astro.currentLocale);
 const items = cases.map((c) => toCaseItem(c, locale));
 const t = getI18n(locale);
@@ -104,7 +105,7 @@ const heroStats = [
 ];
 ---
 
-<BaseLayout {...meta} schema={schema}>
+<BaseLayout {...meta} schema={schema} preloadImage={hero}>
   <section
     class:list={[
       'relative border-b overflow-hidden border-default',
@@ -114,14 +115,16 @@ const heroStats = [
     {
       image ? (
         <div class="photo-hero-shot">
-          <Image
-            src={image}
+          <img
+            src={hero!.src}
+            srcset={hero!.srcset}
+            sizes={hero!.sizes}
+            width={hero!.width}
+            height={hero!.height}
             alt={imageAlt ?? title}
-            format="webp"
-            widths={[480, 768, 1024, 1440, 1920]}
-            sizes="100vw"
             loading="eager"
             fetchpriority="high"
+            decoding="async"
             class="w-full h-full object-cover"
           />
           <span class="photo-hero-veil" />

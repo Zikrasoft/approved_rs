@@ -32,11 +32,13 @@ interface Props {
   noindex?: boolean;
   jsonLd?: Record<string, unknown>[];
   stickyContact?: boolean;
+  preloadImage?: { src: string; srcset: string; sizes: string };
 }
 
 const {
   title,
   description,
+  preloadImage,
   noindex = false,
   jsonLd = [],
   stickyContact = true,
@@ -85,6 +87,18 @@ const businessSchema = {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#ffffff" />
+    {
+      preloadImage && (
+        <link
+          rel="preload"
+          as="image"
+          href={preloadImage.src}
+          imagesrcset={preloadImage.srcset}
+          imagesizes={preloadImage.sizes}
+          fetchpriority="high"
+        />
+      )
+    }
     <link
       rel="preload"
       as="font"

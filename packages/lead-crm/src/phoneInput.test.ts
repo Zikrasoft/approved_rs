@@ -2,7 +2,7 @@
 // TODO: jsdom reports zero layout, so fitToSelection's measuring arm is
 // unreachable here — the width it sets is only ever exercised in a browser.
 import { describe, it, expect, beforeEach } from 'vitest';
-import { bindPhoneCountry } from './phoneInput.ts';
+import { bindPhoneCountry, fillCountrySelect } from './phoneInput.ts';
 
 function mount(
   options = `
@@ -153,5 +153,68 @@ describe('bindPhoneCountry', () => {
 
     expect(document.querySelectorAll('select')).toHaveLength(1);
     expect(select.isConnected).toBe(true);
+  });
+});
+
+describe('fillCountrySelect', () => {
+  const full = [
+    { iso: 'DE', dial: '49', primary: true, flag: '🇩🇪', name: 'Nemačka' },
+    { iso: 'RS', dial: '381', primary: true, flag: '🇷🇸', name: 'Srbija' },
+    { iso: 'TH', dial: '66', primary: true, flag: '🇹🇭', name: 'Tajland' },
+  ];
+
+  it('replaces the shortlist with the full list', () => {
+    const { select } = mount();
+    fillCountrySelect(select, full);
+
+    expect(Array.from(select.options, (o) => o.value)).toEqual([
+      'DE',
+      'RS',
+      'TH',
+    ]);
+  });
+
+  it('keeps the country the visitor already had selected', () => {
+    const { select } = mount();
+    select.value = 'DE';
+    fillCountrySelect(select, full);
+
+    expect(select.value).toBe('DE');
+  });
+
+  it('carries the dial code and primary flag onto each option', () => {
+    const { select } = mount();
+    fillCountrySelect(select, full);
+    const rs = select.options[1]!;
+
+    expect(rs.dataset.dial).toBe('381');
+    expect('dialPrimary' in rs.dataset).toBe(true);
+    expect(rs.text).toBe('🇷🇸 +381 Srbija');
+  });
+
+  it('marks only the countries that own their dial code', () => {
+    const { select } = mount();
+    fillCountrySelect(select, [{ ...full[0]!, primary: false }]);
+
+    expect('dialPrimary' in select.options[0]!.dataset).toBe(false);
+  });
+
+  it('expands once, so a second call cannot undo a later choice', () => {
+    const { select } = mount();
+    fillCountrySelect(select, full);
+    select.value = 'TH';
+    fillCountrySelect(select, full);
+
+    expect(select.value).toBe('TH');
+    expect(select.options).toHaveLength(3);
+  });
+
+  it('still splits a typed dial code once the list has grown', () => {
+    const { select, input } = mount('');
+    fillCountrySelect(select, full);
+    type(input, '+66123456');
+
+    expect(select.value).toBe('TH');
+    expect(input.value).toBe('123456');
   });
 });

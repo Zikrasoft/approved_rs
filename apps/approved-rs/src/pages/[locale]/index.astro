@@ -1,6 +1,5 @@
 ---
 export const prerender = false;
-import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import ServiceQuickLinks from '@/components/ServiceQuickLinks.astro';
 import ContactCTA from '@/components/ContactCTA.astro';
@@ -29,8 +28,10 @@ import { SLUG } from '@/utils/labels';
 import { EU_SPOKE_COUNTRIES } from '@/utils/vehicleImportCrossSell';
 import { getLocale } from '@/i18n/config';
 import heroImage from '@/assets/hero-delivery.jpg';
+import { heroImageAttrs } from '@/utils/heroImage';
 import closingImage from '@/assets/closing.jpg';
 
+const hero = await heroImageAttrs(heroImage);
 const locale = getLocale(Astro.params.locale);
 const h = getHomeContent(locale);
 const t = getI18n(locale);
@@ -108,7 +109,7 @@ const geoCells = countries.map((country) => ({
 }));
 ---
 
-<BaseLayout {...meta} schema={schema}>
+<BaseLayout {...meta} schema={schema} preloadImage={hero}>
   <section id="quick-links-band" class="xl:hidden border-b border-default">
     <div class="max-w-6xl mx-auto px-6 py-3">
       <ServiceQuickLinks variant="strip" />
@@ -117,14 +118,16 @@ const geoCells = countries.map((country) => ({
 
   <section class="photo-hero relative border-b border-default">
     <div class="photo-hero-shot">
-      <Image
-        src={heroImage}
+      <img
+        src={hero.src}
+        srcset={hero.srcset}
+        sizes={hero.sizes}
+        width={hero.width}
+        height={hero.height}
         alt={h.heroPhotoAlt}
-        format="webp"
-        widths={[480, 768, 1024, 1440, 1920]}
-        sizes="100vw"
         loading="eager"
         fetchpriority="high"
+        decoding="async"
         class="w-full h-full object-cover"
       />
       <span class="photo-hero-veil"></span>

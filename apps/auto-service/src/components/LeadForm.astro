@@ -12,7 +12,7 @@ import {
 } from '@/utils/services';
 import { phoneCountryOptions } from '@podbor/lead-crm/phone';
 import { HONEYPOT_FIELD } from '@podbor/lead-crm';
-import { TELEGRAM_ENABLED } from '@/utils/constants';
+import { PHONE_COUNTRY_SHORTLIST, TELEGRAM_ENABLED } from '@/utils/constants';
 
 interface Props {
   service?: ServiceSlug | typeof SHOP_SERVICE;
@@ -36,7 +36,13 @@ const services = getServicesContent(locale);
 const DEFAULT_COUNTRY = 'RS';
 const uid = crypto.randomUUID().slice(0, 8);
 
-const countryOptions = phoneCountryOptions(BCP47_BY_LOCALE[locale]);
+const displayLocale = BCP47_BY_LOCALE[locale];
+const countryOptions = phoneCountryOptions(displayLocale).filter(
+  (country) =>
+    PHONE_COUNTRY_SHORTLIST.includes(
+      country.iso as (typeof PHONE_COUNTRY_SHORTLIST)[number],
+    ) || country.iso === DEFAULT_COUNTRY,
+);
 
 const channels = (
   [
@@ -177,6 +183,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
             aria-label={site.form.countryLabel}
             class="field spec max-w-full appearance-none overflow-hidden text-ellipsis pr-8"
             data-country
+            data-display-locale={displayLocale}
           >
             {
               countryOptions.map((country) => (
@@ -318,7 +325,10 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
 <script>
   import { getOrCreateVisitorId } from '@podbor/site-kit/browser';
   import { composeE164 } from '@podbor/lead-crm/compose-e164';
-  import { bindPhoneCountry } from '@podbor/lead-crm/phone-input';
+  import {
+    bindPhoneCountry,
+    fillCountrySelect,
+  } from '@podbor/lead-crm/phone-input';
   import {
     deferSubmitUntilKit,
     loadPhoneKit,
@@ -364,7 +374,20 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
       consent: [pick('[data-error-consent]'), consent],
     };
 
-    form.addEventListener('focusin', loadPhoneKit, { once: true });
+    const expandCountries = () =>
+      loadPhoneKit().then(() => {
+        const kit = phoneKit();
+        if (kit)
+          fillCountrySelect(
+            country,
+            kit.countryOptions(country.dataset.displayLocale ?? 'sr-RS'),
+          );
+      });
+
+    form.addEventListener('focusin', expandCountries, { once: true });
+    form.addEventListener('pointerenter', () => void expandCountries(), {
+      once: true,
+    });
     form.addEventListener('input', () => {
       Object.values(fields).forEach(([error, field]) =>
         setInvalid(error, field, false),

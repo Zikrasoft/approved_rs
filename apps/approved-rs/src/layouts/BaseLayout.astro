@@ -1,7 +1,9 @@
 ---
 import { jsonLdText } from '@podbor/site-kit';
+import type { HeroImageAttrs } from '@/utils/heroImage';
 import { OG_SUFFIX, type MetaProps } from '@/utils/seo';
 import Header from '@/components/Header.astro';
+import IconSprite from '@/components/icons/IconSprite.astro';
 import Footer from '@/components/Footer.astro';
 import CookieConsent from '@/components/CookieConsent.astro';
 import FloatingContactWidget from '@/components/FloatingContactWidget.astro';
@@ -24,6 +26,7 @@ import navCtaLatinUrl from '@fontsource/golos-text/files/golos-text-latin-500-no
 
 interface Props extends MetaProps {
   schema?: object;
+  preloadImage?: HeroImageAttrs;
   ogImage?: string;
   ogImageWidth?: number;
   ogImageHeight?: number;
@@ -37,6 +40,7 @@ const {
   canonical,
   noindex,
   schema,
+  preloadImage,
   ogImage = `${SITE_URL}/og${OG_SUFFIX[locale]}.png`,
   ogImageWidth = 1200,
   ogImageHeight = 630,
@@ -61,6 +65,17 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#0a0b0c" />
+    {
+      preloadImage && (
+        <link
+          rel="preload"
+          as="image"
+          imagesrcset={preloadImage.srcset}
+          imagesizes={preloadImage.sizes}
+          fetchpriority="high"
+        />
+      )
+    }
     <link
       rel="preload"
       as="font"
@@ -123,6 +138,7 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
     <link rel="manifest" href="/site.webmanifest" />
   </head>
   <body>
+    <IconSprite />
     <Header />
     <main>
       <slot />
