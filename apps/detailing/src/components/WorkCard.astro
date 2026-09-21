@@ -23,8 +23,9 @@ const { title, car } = localizedWork(work, locale);
       <Image
         src={work.data.image}
         alt={title}
-        widths={[400, 720, 1100]}
-        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+        widths={[360, 560, 760, 1100]}
+        sizes="(min-width: 1280px) 392px, (min-width: 1024px) 31vw, (min-width: 768px) 46vw, calc(100vw - 2.5rem)"
+        quality={68}
         loading={eager ? 'eager' : 'lazy'}
         class="h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
       />

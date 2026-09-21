@@ -70,8 +70,8 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
     <Image
       src={work.data.image}
       alt={title}
-      widths={[720, 1200]}
-      sizes="(min-width: 1024px) 70vw, 100vw"
+      widths={[560, 760, 1080, 1440]}
+      sizes="(min-width: 1024px) 70vw, calc(100vw - 2.5rem)"
       loading="eager"
       class="card mt-4 aspect-[4/3] w-full object-cover sm:aspect-[16/10]"
     />
@@ -94,8 +94,8 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
               <Image
                 src={image}
                 alt={`${title} — ${i + 1}`}
-                widths={[480, 900]}
-                sizes="(min-width: 640px) 45vw, 100vw"
+                widths={[400, 600, 900]}
+                sizes="(min-width: 640px) 45vw, calc(100vw - 2.5rem)"
                 loading="lazy"
                 class="card aspect-[4/3] w-full object-cover"
               />

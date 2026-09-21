@@ -100,8 +100,8 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
           <Image
             src={work.data.image}
             alt={title}
-            widths={[720, 1200, 1800]}
-            sizes="(min-width: 1024px) 80vw, 100vw"
+            widths={[540, 760, 1080, 1440]}
+            sizes="(min-width: 1024px) 80vw, calc(100vw - 2.5rem)"
             loading="eager"
             class="core block aspect-[4/3] w-full object-cover sm:aspect-[16/10]"
           />

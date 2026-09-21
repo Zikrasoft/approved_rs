@@ -29,8 +29,8 @@ const site = getSiteContent(locale);
           <Image
             src={image}
             alt={`${alt} — ${i + 1}`}
-            widths={[480, 900, 1600]}
-            sizes="(min-width: 640px) 45vw, 100vw"
+            widths={[420, 640, 900, 1300]}
+            sizes="(min-width: 640px) 45vw, calc(100vw - 2.5rem)"
             loading="lazy"
             class="block aspect-[4/3] w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
           />

@@ -28,8 +28,8 @@ const href = PathBuilder.product(locale, product.id);
     <Image
       src={product.data.image}
       alt={title}
-      widths={[280, 520]}
-      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+      widths={[260, 400, 560, 760]}
+      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, calc(100vw - 2.5rem)"
       loading={eager ? 'eager' : 'lazy'}
       class="aspect-[4/3] w-full object-contain p-5"
     />

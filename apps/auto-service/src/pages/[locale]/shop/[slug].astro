@@ -97,8 +97,8 @@ const specs = [
       <Image
         src={product.data.image}
         alt={title}
-        widths={[420, 800]}
-        sizes="(min-width: 1024px) 45vw, 100vw"
+        widths={[420, 640, 860, 1200]}
+        sizes="(min-width: 1024px) 45vw, calc(100vw - 2.5rem)"
         loading="eager"
         class="max-h-80 w-auto object-contain"
       />

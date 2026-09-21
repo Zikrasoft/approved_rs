@@ -26,8 +26,8 @@ const site = getSiteContent(locale);
     <Image
       src={after}
       alt={`${alt} — ${site.common.afterLabel}`}
-      widths={[640, 1024, 1600]}
-      sizes="(min-width: 1024px) 60vw, 100vw"
+      widths={[480, 720, 1024, 1440]}
+      sizes="(min-width: 1024px) 60vw, calc(100vw - 2.5rem)"
       class="block h-full w-full object-cover"
       loading="lazy"
     />
@@ -39,8 +39,8 @@ const site = getSiteContent(locale);
       <Image
         src={before}
         alt={`${alt} — ${site.common.beforeLabel}`}
-        widths={[640, 1024, 1600]}
-        sizes="(min-width: 1024px) 60vw, 100vw"
+        widths={[480, 720, 1024, 1440]}
+        sizes="(min-width: 1024px) 60vw, calc(100vw - 2.5rem)"
         class="block h-full w-full object-cover"
         loading="lazy"
       />

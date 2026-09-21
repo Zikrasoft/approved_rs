@@ -27,8 +27,8 @@ const applied = work.data.servicesApplied
   <Image
     src={work.data.image}
     alt={title}
-    widths={[400, 720]}
-    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+    widths={[360, 560, 760, 1080]}
+    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, calc(100vw - 2.5rem)"
     loading={eager ? 'eager' : 'lazy'}
     class="aspect-[4/3] w-full object-cover"
   />

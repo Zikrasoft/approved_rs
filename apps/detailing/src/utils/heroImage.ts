@@ -12,8 +12,8 @@ export const HERO_HEIGHT = heroSource.height;
 export const getHeroPicture = () =>
   getImage({
     src: heroSource,
-    widths: [640, 768, 960, 1440, 1920],
+    widths: [540, 640, 768, 960, 1440, 1920],
     sizes: HERO_SIZES,
     format: 'webp',
-    quality: 70,
+    quality: 55,
   });
