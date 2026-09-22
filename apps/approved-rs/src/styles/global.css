@@ -257,6 +257,8 @@ h4 {
   line-height: 1.15;
   color: var(--color-text);
   text-wrap: balance;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 @layer base {
@@ -282,6 +284,8 @@ h4 {
   /* Apple HIG asks for a 44pt minimum hit area. Applied only to coarse
      pointers so mouse layouts keep their compact controls. */
   @media (pointer: coarse) {
+    a.btn,
+    a.cta,
     button,
     [role='button'],
     summary,

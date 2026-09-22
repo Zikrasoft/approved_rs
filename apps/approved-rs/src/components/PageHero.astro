@@ -26,16 +26,14 @@ const {
   >
   </div>
   <span
-    class="deco-word"
-    style="font-size: clamp(6rem, 18vw, 15rem); bottom: -1rem; right: -1%; opacity: 0.8;"
+    class="deco-word text-[clamp(6rem,18vw,15rem)] bottom-[-1rem] right-[-1%] opacity-80"
     >{decoWord}</span
   >
   <div class="relative max-w-6xl mx-auto px-6 py-band md:py-band-lg">
     {breadcrumbs && <Breadcrumbs items={breadcrumbs} />}
     {eyebrow && <span class="eyebrow fade-up fade-up-1">{eyebrow}</span>}
     <h1
-      class="font-display mb-3 fade-up fade-up-2 tracking-[-0.045em]"
-      style="font-size: clamp(1.95rem, 5vw, 3.7rem); font-weight: 700;"
+      class="font-display mb-3 fade-up fade-up-2 tracking-[-0.045em] text-[clamp(1.95rem,5vw,3.7rem)] font-bold"
     >
       {title}
     </h1>

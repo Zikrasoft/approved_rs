@@ -80,10 +80,13 @@ const navItems = getNavItems(locale).map((item) => ({
         <Button
           href={PathBuilder.contacts(locale)}
           {...{ [DATA_OPEN_LEAD_MODAL]: true }}
-          class="px-3 xl:px-4 py-2"
+          aria-label={t.header.ctaShort}
+          class="h-9 px-3 xl:px-4 py-2"
         >
           <Send size={13} />
-          <span class="xl:hidden">{t.header.ctaShort}</span>
+          <span class="hidden min-[360px]:inline xl:hidden">
+            {t.header.ctaShort}
+          </span>
           <span class="hidden xl:inline">{t.header.ctaLong}</span>
         </Button>
 
