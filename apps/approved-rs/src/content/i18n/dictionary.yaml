@@ -99,7 +99,7 @@ translations:
       closeLabel: Close
       channelLabel: Our Channel
       cookie:
-        notice: We use analytical cookies (Google Analytics and Yandex.Metrica) to understand how visitors use the site.
+        notice: We use analytic cookies to understand how visitors use the site.
         more: More in
         policyLink: privacy policy
         accept: Accept
@@ -153,7 +153,7 @@ translations:
       closeLabel: Zatvori
       channelLabel: Naš kanal
       cookie:
-        notice: Koristimo analitičke kolačiće (Google Analytics i Yandex.Metrica) da bismo razumeli kako posetioci koriste sajt.
+        notice: Koristimo analitičke kolačiće da bismo razumeli kako posetioci koriste sajt.
         more: Više u
         policyLink: politici privatnosti
         accept: Prihvatam
@@ -207,7 +207,7 @@ translations:
       closeLabel: Cerrar
       channelLabel: Nuestro canal
       cookie:
-        notice: Usamos cookies analíticas (Google Analytics y Yandex.Metrica) para entender cómo los visitantes utilizan el sitio.
+        notice: Usamos cookies analíticas para entender cómo los visitantes utilizan el sitio.
         more: Más información en
         policyLink: la política de privacidad
         accept: Aceptar
@@ -261,7 +261,7 @@ translations:
       closeLabel: Schließen
       channelLabel: Unser Kanal
       cookie:
-        notice: Wir verwenden analytische Cookies (Google Analytics und Yandex.Metrica), um zu verstehen, wie Besucher die Website nutzen.
+        notice: Wir verwenden analytische Cookies, um zu verstehen, wie die Besucher die Webseite nutzen.
         more: Mehr erfahren in
         policyLink: der Datenschutzerklärung
         accept: Akzeptieren
@@ -270,4 +270,4 @@ translations:
         morePhotos: Weitere Fotos
         prev: Vorheriges Foto
         next: Nächstes Foto
-translatedFrom: 453f92214272df20
+translatedFrom: bd5f540c10ebedde

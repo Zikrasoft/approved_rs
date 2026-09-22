@@ -132,7 +132,7 @@ translations:
         - title: Data Storage
           text: Requests are stored in a secure cloud storage system, Vercel Blob; access is limited to our team. You can request deletion of your data anytime by contacting us on Telegram.
         - title: Cookies
-          text: The site uses technical cookies, without which it doesn't work, and analytical cookies from Google Analytics and Yandex.Metrica. Analytics is initiated on the first page load. In the banner at the bottom of the screen, you can opt-out, and it won’t be activated on subsequent loads; your choice is saved in the browser. Yandex.Metrica records sessions — cursor movements, scrolling, and clicks. The request form is excluded from recording — name, phone, nickname, and comments are not captured.
+          text: The site uses essential technical cookies that are necessary for its functionality, as well as analytical cookies. You can opt out using the banner at the bottom of the screen; your choice will be saved in your browser. The metrics track sessions — cursor movement, scrolling, and clicks. The application form is excluded from this recording — name, phone, username, and comments are not included.
       contactTitle: Contact
       contactBefore: 'For privacy inquiries, reach out to us via '
       contactLinkText: Telegram
@@ -216,7 +216,7 @@ translations:
         - title: Skladištenje podataka
           text: Zahtevi se čuvaju u zaštićenom cloud skladištu Vercel Blob; pristup im imaju samo naši članovi. Možete zatražiti brisanje vaših podataka u bilo kojem trenutku, pišući nam na Telegramu.
         - title: Cookies
-          text: Sajt koristi tehničke cookies, bez kojih ne radi, i analitičke — Google Analytics i Yandex.Metriju. Analitika se pokreće prilikom prvog učitavanja stranice. U baneru na dnu ekrana možete se odjaviti, i tada više neće biti uključena pri sledećem učitavanju; izbor se čuva u browseru. Yandex.Metrika beleži sesije — pokret miša, skrolovanje i klikove. Forma zahteva nije uključena u beleženje — ime, telefon, nik i komentar ne ulaze u to.
+          text: Sajt koristi tehničke kolačiće bez kojih ne može funkcionisati, kao i analitičke kolačiće. U baneru na dnu ekrana možete odbiti korišćenje kolačića; izbor se čuva u pretraživaču. Metrički podaci beleže sesije — kretanje kursora, skrolovanje i klike. Forma za prijavu je isključena iz ove statistike — ime, telefon, nadimak i komentar se ne beleže.
       contactTitle: Kontakt
       contactBefore: 'Za pitanja u vezi sa privatnošću obratite nam se preko '
       contactLinkText: Telegrama
@@ -300,7 +300,7 @@ translations:
         - title: Almacenamiento de datos
           text: Las solicitudes se almacenan en un espacio en la nube protegido (Vercel Blob); solo nuestro equipo tiene acceso. Puedes solicitar la eliminación de tus datos en cualquier momento escribiéndonos por Telegram.
         - title: Cookies
-          text: El sitio utiliza cookies técnicas, sin las cuales no funcionaría, y cookies analíticas — Google Analytics y Yandex.Metrica. La analítica se activa en la primera carga de la página. Puedes rechazarla desde el banner en la parte inferior de la pantalla, y a partir de la próxima carga no se activará; la elección se guarda en el navegador. Yandex.Metrica registra sesiones — movimiento del cursor, desplazamiento y clics. La forma de la solicitud queda fuera del registro — nombre, teléfono, apodo y comentarios no se incluuyen.
+          text: 'El sitio utiliza cookies técnicas, sin las cuales no funciona, y analíticas. Se puede rechazar en el banner en la parte inferior de la pantalla; la elección se guarda en el navegador. Métrica registra sesiones: movimiento del cursor, desplazamiento y clics. El formulario de solicitud está excluido de la grabación; el nombre, teléfono, apodo y comentario no se incluyen.'
       contactTitle: Contacto
       contactBefore: 'Para cuestiones de privacidad, contáctanos a través de '
       contactLinkText: Telegram
@@ -384,7 +384,7 @@ translations:
         - title: Datenaufbewahrung
           text: Anfragen werden in einem gesicherten Cloud-Speicher von Vercel Blob aufbewahrt; nur unser Team hat Zugriff darauf. Sie können jederzeit die Löschung Ihrer Daten anfordern, indem Sie uns über Telegram kontaktieren.
         - title: Cookies
-          text: Die Website verwendet technische Cookies, ohne die sie nicht funktioniert, und analytische — Google Analytics und Yandex.Metrik. Die Analyse wird beim ersten Laden der Seite aktiviert. Im Banner am unteren Bildschirmrand können Sie ablehnen, und dann wird sie beim nächsten Laden nicht mehr aktiviert; die Auswahl wird im Browser gespeichert. Yandex.Metrika zeichnet die Sitzungen auf — Mausbewegungen, Scrollen und Klicks. Das Antragsformular wird aus der Aufzeichnung ausgeschlossen — Name, Telefon, Nick und Kommentar gelangen nicht hinein.
+          text: Die Webseite verwendet technische Cookies, ohne die sie nicht funktioniert, sowie analytische Cookies. Im Banner am unteren Bildschirmrand kann man ablehnen; die Auswahl wird im Browser gespeichert. Die Metrik erfasst Sitzungen - Mausbewegungen, Scrollen und Klicks. Das Antragsformular ist von der Aufzeichnung ausgeschlossen - Name, Telefon, Nickname und Kommentare gelangen nicht hinein.
       contactTitle: Kontakt
       contactBefore: 'Für Datenschutzfragen kontaktieren Sie uns über '
       contactLinkText: Telegram
@@ -423,4 +423,4 @@ translations:
       closingLine2: wonach Sie suchen, —
       closingLine3: wir finden auch für Sie
       closingText: Marke, Budget und ein paar Wünsche genügen. Wir antworten innerhalb von zwei Stunden und sagen Ihnen ehrlich, ob das für diesen Preis realistisch ist.
-translatedFrom: 755b95893bf84901
+translatedFrom: 62c450c995c92f43
