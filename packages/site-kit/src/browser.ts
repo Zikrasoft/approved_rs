@@ -2,6 +2,7 @@ import { readOrCreateVisitorId } from './visitorId.ts';
 export { defineAnalytics, type AnalyticsConfig } from './analytics.ts';
 export { defineContactClickTracking } from './contactClick.ts';
 export { defineCtaReveal } from './ctaReveal.ts';
+export { defineLanguageSuggestion } from './languageSuggestion.ts';
 export { defineLazyMapEmbed, mapEmbedSrc } from './mapEmbed.ts';
 export { defineLocaleChoice } from './localeCookie.ts';
 export { defineMenuToggle, type MenuToggleElement } from './menuToggle.ts';

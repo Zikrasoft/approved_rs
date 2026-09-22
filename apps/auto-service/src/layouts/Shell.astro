@@ -167,6 +167,23 @@ const businessSchema = {
       >{site.common.skipToContent}</a
     >
     <SiteHeader />
+    <language-suggestion hidden>
+      <div class="bg-ink text-paper">
+        <div class="wrap flex items-center gap-3 py-2">
+          <a
+            data-lang-link
+            href="#"
+            class="spec rounded-control bg-paper px-3.5 py-2 text-sm font-semibold text-ink no-underline transition-opacity hover:opacity-90"
+          ></a>
+          <button
+            type="button"
+            data-lang-dismiss
+            class="ml-auto flex size-9 shrink-0 items-center justify-center rounded-control text-xl leading-none opacity-55 transition-opacity hover:opacity-100"
+            >&times;</button
+          >
+        </div>
+      </div>
+    </language-suggestion>
     <main id="main" class="flex-1">
       <slot />
     </main>
@@ -180,6 +197,7 @@ const businessSchema = {
       import {
         defineAnalytics,
         defineContactClickTracking,
+        defineLanguageSuggestion,
       } from '@podbor/site-kit/browser';
       import { applyPreferredContactOrder } from '@podbor/site-kit/contact-preference';
       import { YM_COUNTER_ID } from '@/utils/constants';
@@ -187,6 +205,7 @@ const businessSchema = {
       defineAnalytics({ ymCounterId: YM_COUNTER_ID });
       defineContactClickTracking(isTrackedContactChannel);
       applyPreferredContactOrder();
+      defineLanguageSuggestion();
     </script>
   </body>
 </html>
