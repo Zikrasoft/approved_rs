@@ -2,6 +2,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   defineLanguageSuggestion,
+  LANGUAGE_OFFER_GOALS,
   LANGUAGE_SUGGESTION_STORAGE_KEY,
   pageAlternates,
   preferredAlternate,
@@ -34,10 +35,14 @@ function render(lang: string, languages: readonly string[], head = ALTERNATES) {
 
 beforeEach(() => {
   localStorage.clear();
+  window.ymReachGoal = vi.fn();
   defineLanguageSuggestion();
 });
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  delete (window as Partial<Window>).ymReachGoal;
+  vi.restoreAllMocks();
+});
 
 describe('preferredAlternate', () => {
   it('offers the first preference the site actually has', () => {
@@ -215,6 +220,52 @@ describe('<language-suggestion>', () => {
 
     expect(el.hidden).toBe(true);
     expect(localStorage.getItem(LANGUAGE_SUGGESTION_STORAGE_KEY)).toBe('1');
+  });
+
+  it('reports the offer, so a click rate can be read against it', () => {
+    render('sr', ['ru-RU']);
+
+    expect(window.ymReachGoal).toHaveBeenCalledWith(
+      LANGUAGE_OFFER_GOALS.shown,
+      { from: 'sr', to: 'ru' },
+    );
+  });
+
+  it('reports a switch separately from the offer', () => {
+    render('sr', ['ru-RU']);
+    link().addEventListener('click', (event) => event.preventDefault());
+    link().click();
+
+    expect(window.ymReachGoal).toHaveBeenCalledWith(
+      LANGUAGE_OFFER_GOALS.taken,
+      {
+        from: 'sr',
+        to: 'ru',
+      },
+    );
+  });
+
+  it('reports a dismissal', () => {
+    render('sr', ['ru-RU']);
+    document.querySelector<HTMLElement>('[data-lang-dismiss]')!.click();
+
+    expect(window.ymReachGoal).toHaveBeenCalledWith(
+      LANGUAGE_OFFER_GOALS.dismissed,
+      { from: 'sr', to: 'ru' },
+    );
+  });
+
+  it('reports nothing on a page where the bar stays hidden', () => {
+    render('ru', ['ru-RU']);
+
+    expect(window.ymReachGoal).not.toHaveBeenCalled();
+  });
+
+  it('works on a page where analytics never loaded', () => {
+    delete (window as Partial<Window>).ymReachGoal;
+
+    expect(() => render('sr', ['ru-RU'])).not.toThrow();
+    expect(bar().hidden).toBe(false);
   });
 
   it('drops its listeners when the bar leaves the document', () => {

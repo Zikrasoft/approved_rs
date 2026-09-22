@@ -15,6 +15,16 @@ export const LANGUAGE_LABELS: Record<string, LanguageLabels> = {
 
 const subtag = (tag: string): string => tag.toLowerCase().split('-')[0]!;
 
+export const LANGUAGE_OFFER_GOALS = {
+  shown: 'lang_offer_shown',
+  taken: 'lang_offer_taken',
+  dismissed: 'lang_offer_dismissed',
+} as const;
+
+function reachGoal(goal: string, from: string, to: string): void {
+  window.ymReachGoal?.(goal, { from, to });
+}
+
 export function preferredAlternate(
   current: string,
   preferences: readonly string[],
@@ -93,13 +103,22 @@ export function defineLanguageSuggestion(
         close?.setAttribute('aria-label', labels.dismiss);
         this.hidden = false;
 
+        const from = subtag(this.ownerDocument.documentElement.lang);
+        const to = subtag(offer);
+        reachGoal(LANGUAGE_OFFER_GOALS.shown, from, to);
+
         this.addEventListener(
           'click',
           (event) => {
             const target = event.target as Element | null;
-            if (target?.closest('[data-lang-link]')) return remember();
+            if (target?.closest('[data-lang-link]')) {
+              remember();
+              reachGoal(LANGUAGE_OFFER_GOALS.taken, from, to);
+              return;
+            }
             if (!target?.closest('[data-lang-dismiss]')) return;
             remember();
+            reachGoal(LANGUAGE_OFFER_GOALS.dismissed, from, to);
             this.hidden = true;
           },
           { signal },
