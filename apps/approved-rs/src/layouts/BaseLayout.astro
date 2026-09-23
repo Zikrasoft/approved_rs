@@ -173,35 +173,25 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
     <script>
       import {
         isTrackedContactChannel,
-        DATA_CONTACT_CHANNEL,
         DATA_OPEN_LEAD_MODAL,
         DATA_OPEN_PAGE_LEAD_MODAL,
       } from '@/utils/contactChannel';
-      import { defineLanguageSuggestion } from '@podbor/site-kit/browser';
+      import {
+        defineContactClickTracking,
+        defineFunnelTracking,
+        defineLanguageSuggestion,
+      } from '@podbor/site-kit/browser';
       import { applyPrimaryContactChannel } from '@podbor/site-kit/contact-preference';
-      import { getOrCreateVisitorId } from '@/utils/visitorId';
 
       defineLanguageSuggestion();
       applyPrimaryContactChannel();
-
-      document
-        .querySelectorAll<HTMLElement>(`[${DATA_CONTACT_CHANNEL}]`)
-        .forEach((el) => {
-          el.addEventListener('click', () => {
-            const channel = el.dataset.contactChannel;
-            window.ymReachGoal?.('contact_click', { channel });
-            const opensLeadModal =
-              el.hasAttribute(DATA_OPEN_LEAD_MODAL) ||
-              el.hasAttribute(DATA_OPEN_PAGE_LEAD_MODAL);
-            if (isTrackedContactChannel(channel) && !opensLeadModal) {
-              const body = new FormData();
-              body.set('channel', channel);
-              body.set('source_url', location.href);
-              body.set('visitor_id', getOrCreateVisitorId());
-              navigator.sendBeacon('/api/contact-click', body);
-            }
-          });
-        });
+      defineContactClickTracking({
+        isTracked: isTrackedContactChannel,
+        opensLeadForm: (el) =>
+          el.hasAttribute(DATA_OPEN_LEAD_MODAL) ||
+          el.hasAttribute(DATA_OPEN_PAGE_LEAD_MODAL),
+      });
+      defineFunnelTracking();
     </script>
   </body>
 </html>

@@ -92,6 +92,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
         <span class="field-label">{site.form.nameLabel}</span>
         <input
           name="name"
+          data-field="name"
           type="text"
           required
           autocomplete="name"
@@ -163,6 +164,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
           aria-describedby={`telegram-error-${uid}`}
           class="field"
           data-telegram
+          data-field="telegram"
         />
       </label>
       <p
@@ -216,6 +218,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
             aria-describedby={`phone-error-${uid}`}
             class="field"
             data-phone
+            data-field="phone"
           />
         </label>
       </div>
@@ -288,6 +291,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
           aria-describedby={`consent-error-${uid}`}
           class="peer sr-only"
           data-consent
+          data-field="consent"
         />
         <span
           class="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-[3px] border border-line-field bg-card text-white transition-colors duration-150 peer-checked:border-signal peer-checked:bg-signal peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100"
@@ -323,7 +327,10 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
 </form>
 
 <script>
-  import { getOrCreateVisitorId } from '@podbor/site-kit/browser';
+  import {
+    getOrCreateVisitorId,
+    markFieldValidity,
+  } from '@podbor/site-kit/browser';
   import { composeE164 } from '@podbor/lead-crm/compose-e164';
   import {
     bindPhoneCountry,
@@ -347,8 +354,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     invalid: boolean,
   ) {
     error.hidden = !invalid;
-    if (invalid) field.setAttribute('aria-invalid', 'true');
-    else field.removeAttribute('aria-invalid');
+    markFieldValidity(field, !invalid);
   }
 
   function initLeadForm(form: HTMLFormElement) {

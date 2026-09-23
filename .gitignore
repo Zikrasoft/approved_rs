@@ -41,3 +41,6 @@ graphify-out/
 
 # vitest --coverage output
 coverage/
+
+# Local, never committed: identifiers of real people (see docs/analytics-exclusions.md)
+.local/

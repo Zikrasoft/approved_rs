@@ -2,11 +2,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   defineLanguageSuggestion,
-  LANGUAGE_OFFER_GOALS,
   LANGUAGE_SUGGESTION_STORAGE_KEY,
   pageAlternates,
   preferredAlternate,
 } from './languageSuggestion.ts';
+import { GOALS } from './goals.ts';
 
 const ALTERNATES = `
   <link rel="alternate" hreflang="ru" href="https://approved.rs/ru/contacts/" />
@@ -225,10 +225,10 @@ describe('<language-suggestion>', () => {
   it('reports the offer, so a click rate can be read against it', () => {
     render('sr', ['ru-RU']);
 
-    expect(window.ymReachGoal).toHaveBeenCalledWith(
-      LANGUAGE_OFFER_GOALS.shown,
-      { from: 'sr', to: 'ru' },
-    );
+    expect(window.ymReachGoal).toHaveBeenCalledWith(GOALS.langOfferShown, {
+      from: 'sr',
+      to: 'ru',
+    });
   });
 
   it('reports a switch separately from the offer', () => {
@@ -236,23 +236,20 @@ describe('<language-suggestion>', () => {
     link().addEventListener('click', (event) => event.preventDefault());
     link().click();
 
-    expect(window.ymReachGoal).toHaveBeenCalledWith(
-      LANGUAGE_OFFER_GOALS.taken,
-      {
-        from: 'sr',
-        to: 'ru',
-      },
-    );
+    expect(window.ymReachGoal).toHaveBeenCalledWith(GOALS.langOfferTaken, {
+      from: 'sr',
+      to: 'ru',
+    });
   });
 
   it('reports a dismissal', () => {
     render('sr', ['ru-RU']);
     document.querySelector<HTMLElement>('[data-lang-dismiss]')!.click();
 
-    expect(window.ymReachGoal).toHaveBeenCalledWith(
-      LANGUAGE_OFFER_GOALS.dismissed,
-      { from: 'sr', to: 'ru' },
-    );
+    expect(window.ymReachGoal).toHaveBeenCalledWith(GOALS.langOfferDismissed, {
+      from: 'sr',
+      to: 'ru',
+    });
   });
 
   it('reports nothing on a page where the bar stays hidden', () => {

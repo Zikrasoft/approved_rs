@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, it, expect, vi } from 'vitest';
 import { SUPPORTED_LOCALES } from './i18n/config';
 
@@ -15,6 +16,8 @@ const {
   collapseBuybackCountry,
   movedBrandUrl,
   onRequest,
+  MOVED_BRAND_HOSTS,
+  MOVED_BRAND_CASE_TABS,
 } = await import('./middleware');
 
 type Handler = (context: unknown, next: () => unknown) => unknown;
@@ -141,12 +144,12 @@ describe('moveGermanySpoke', () => {
 });
 
 describe('movedBrandUrl', () => {
-  it('sends a service hub to the brand site that owns it now', () => {
+  it('lands a service hub on the brand services page, not its home', () => {
     expect(movedBrandUrl('/ru/auto-service-belgrade/')).toBe(
-      'https://carlab.rs/ru/',
+      'https://carlab.rs/ru/services/',
     );
     expect(movedBrandUrl('/sr/detailing-belgrade/')).toBe(
-      'https://details.rs/sr/',
+      'https://details.rs/sr/services/',
     );
   });
 
@@ -158,7 +161,7 @@ describe('movedBrandUrl', () => {
 
   it('redirects the pre-rename wrapping slug to the detailing brand', () => {
     expect(movedBrandUrl('/ru/wrapping-belgrade/')).toBe(
-      'https://details.rs/ru/',
+      'https://details.rs/ru/services/',
     );
     expect(movedBrandUrl('/ru/wrapping-belgrade/bmw-x5/')).toBe(
       'https://details.rs/ru/works/bmw-x5/',
@@ -173,7 +176,7 @@ describe('movedBrandUrl', () => {
 
   it('treats an unprefixed path as ru', () => {
     expect(movedBrandUrl('/avtoservis-belgrade/')).toBe(
-      'https://carlab.rs/ru/',
+      'https://carlab.rs/ru/services/',
     );
   });
 
@@ -241,7 +244,7 @@ describe('onRequest', () => {
     const context = makeContext('/ru/detailing-belgrade/?utm_source=ig');
     run(context);
     expect(context.redirect).toHaveBeenCalledWith(
-      'https://details.rs/ru/?utm_source=ig',
+      'https://details.rs/ru/services/?utm_source=ig',
       301,
     );
   });
@@ -270,5 +273,55 @@ describe('onRequest', () => {
       '/sr/vehicle-sourcing/rs/',
       301,
     );
+  });
+});
+
+describe('vercel.json brand redirects', () => {
+  const BRAND_HOSTS = ['carlab.rs', 'details.rs'];
+  const SLUG = 'bmw-x3';
+
+  interface Redirect {
+    source: string;
+    destination: string;
+  }
+
+  function localesOf(source: string): string[] {
+    const group = /:locale\(([^)]+)\)/.exec(source);
+    return group ? group[1]!.split('|') : ['ru'];
+  }
+
+  function fill(pattern: string, locale: string): string {
+    return pattern
+      .replace(/:locale\([^)]+\)/, locale)
+      .replace(':locale', locale)
+      .replace(':slug+', SLUG);
+  }
+
+  const redirects: Redirect[] = (
+    JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'))
+      .redirects as Redirect[]
+  ).filter((entry) =>
+    BRAND_HOSTS.some((host) => entry.destination.includes(host)),
+  );
+
+  const cases = redirects.flatMap((entry) =>
+    localesOf(entry.source).map(
+      (locale) =>
+        [fill(entry.source, locale), fill(entry.destination, locale)] as const,
+    ),
+  );
+
+  const RULES_PER_HUB = 12;
+  const RULES_PER_CASE_TAB = 6;
+
+  it('carries a vercel rule for every slug the middleware moves', () => {
+    expect(redirects).toHaveLength(
+      Object.keys(MOVED_BRAND_HOSTS).length * RULES_PER_HUB +
+        Object.keys(MOVED_BRAND_CASE_TABS).length * RULES_PER_CASE_TAB,
+    );
+  });
+
+  it.each(cases)('sends %s where the middleware sends it', (path, target) => {
+    expect(movedBrandUrl(path)).toBe(target);
   });
 });

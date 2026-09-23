@@ -363,12 +363,12 @@
     },
     {
       "source": "/:locale(ru|sr|en)/auto-service-belgrade/",
-      "destination": "https://carlab.rs/:locale/",
+      "destination": "https://carlab.rs/:locale/services/",
       "permanent": true
     },
     {
       "source": "/:locale(ru|sr|en)/auto-service-belgrade",
-      "destination": "https://carlab.rs/:locale/",
+      "destination": "https://carlab.rs/:locale/services/",
       "permanent": true
     },
     {
@@ -383,12 +383,12 @@
     },
     {
       "source": "/:locale(es|de)/auto-service-belgrade/",
-      "destination": "https://carlab.rs/en/",
+      "destination": "https://carlab.rs/en/services/",
       "permanent": true
     },
     {
       "source": "/:locale(es|de)/auto-service-belgrade",
-      "destination": "https://carlab.rs/en/",
+      "destination": "https://carlab.rs/en/services/",
       "permanent": true
     },
     {
@@ -403,12 +403,12 @@
     },
     {
       "source": "/auto-service-belgrade/",
-      "destination": "https://carlab.rs/ru/",
+      "destination": "https://carlab.rs/ru/services/",
       "permanent": true
     },
     {
       "source": "/auto-service-belgrade",
-      "destination": "https://carlab.rs/ru/",
+      "destination": "https://carlab.rs/ru/services/",
       "permanent": true
     },
     {
@@ -423,12 +423,12 @@
     },
     {
       "source": "/:locale(ru|sr|en)/avtoservis-belgrade/",
-      "destination": "https://carlab.rs/:locale/",
+      "destination": "https://carlab.rs/:locale/services/",
       "permanent": true
     },
     {
       "source": "/:locale(ru|sr|en)/avtoservis-belgrade",
-      "destination": "https://carlab.rs/:locale/",
+      "destination": "https://carlab.rs/:locale/services/",
       "permanent": true
     },
     {
@@ -443,12 +443,12 @@
     },
     {
       "source": "/:locale(es|de)/avtoservis-belgrade/",
-      "destination": "https://carlab.rs/en/",
+      "destination": "https://carlab.rs/en/services/",
       "permanent": true
     },
     {
       "source": "/:locale(es|de)/avtoservis-belgrade",
-      "destination": "https://carlab.rs/en/",
+      "destination": "https://carlab.rs/en/services/",
       "permanent": true
     },
     {
@@ -463,12 +463,12 @@
     },
     {
       "source": "/avtoservis-belgrade/",
-      "destination": "https://carlab.rs/ru/",
+      "destination": "https://carlab.rs/ru/services/",
       "permanent": true
     },
     {
       "source": "/avtoservis-belgrade",
-      "destination": "https://carlab.rs/ru/",
+      "destination": "https://carlab.rs/ru/services/",
       "permanent": true
     },
     {
@@ -483,12 +483,12 @@
     },
     {
       "source": "/:locale(ru|sr|en)/detailing-belgrade/",
-      "destination": "https://details.rs/:locale/",
+      "destination": "https://details.rs/:locale/services/",
       "permanent": true
     },
     {
       "source": "/:locale(ru|sr|en)/detailing-belgrade",
-      "destination": "https://details.rs/:locale/",
+      "destination": "https://details.rs/:locale/services/",
       "permanent": true
     },
     {
@@ -503,12 +503,12 @@
     },
     {
       "source": "/:locale(es|de)/detailing-belgrade/",
-      "destination": "https://details.rs/en/",
+      "destination": "https://details.rs/en/services/",
       "permanent": true
     },
     {
       "source": "/:locale(es|de)/detailing-belgrade",
-      "destination": "https://details.rs/en/",
+      "destination": "https://details.rs/en/services/",
       "permanent": true
     },
     {
@@ -523,12 +523,12 @@
     },
     {
       "source": "/detailing-belgrade/",
-      "destination": "https://details.rs/ru/",
+      "destination": "https://details.rs/ru/services/",
       "permanent": true
     },
     {
       "source": "/detailing-belgrade",
-      "destination": "https://details.rs/ru/",
+      "destination": "https://details.rs/ru/services/",
       "permanent": true
     },
     {
@@ -543,12 +543,12 @@
     },
     {
       "source": "/:locale(ru|sr|en)/wrapping-belgrade/",
-      "destination": "https://details.rs/:locale/",
+      "destination": "https://details.rs/:locale/services/",
       "permanent": true
     },
     {
       "source": "/:locale(ru|sr|en)/wrapping-belgrade",
-      "destination": "https://details.rs/:locale/",
+      "destination": "https://details.rs/:locale/services/",
       "permanent": true
     },
     {
@@ -563,12 +563,12 @@
     },
     {
       "source": "/:locale(es|de)/wrapping-belgrade/",
-      "destination": "https://details.rs/en/",
+      "destination": "https://details.rs/en/services/",
       "permanent": true
     },
     {
       "source": "/:locale(es|de)/wrapping-belgrade",
-      "destination": "https://details.rs/en/",
+      "destination": "https://details.rs/en/services/",
       "permanent": true
     },
     {
@@ -583,12 +583,12 @@
     },
     {
       "source": "/wrapping-belgrade/",
-      "destination": "https://details.rs/ru/",
+      "destination": "https://details.rs/ru/services/",
       "permanent": true
     },
     {
       "source": "/wrapping-belgrade",
-      "destination": "https://details.rs/ru/",
+      "destination": "https://details.rs/ru/services/",
       "permanent": true
     },
     {

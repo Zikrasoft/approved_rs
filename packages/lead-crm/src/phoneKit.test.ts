@@ -71,6 +71,19 @@ describe('deferSubmitUntilKit', () => {
     expect(deferSubmitUntilKit(element)).toBe(false);
   });
 
+  it('flags the held form so other scripts can tell a wait from a rejection', async () => {
+    const { deferSubmitUntilKit, loadPhoneKit, AWAITING_KIT_ATTRIBUTE } =
+      await freshModule();
+    const element = form();
+
+    deferSubmitUntilKit(element);
+    expect(element.hasAttribute(AWAITING_KIT_ATTRIBUTE)).toBe(true);
+
+    await loadPhoneKit();
+    await vi.runAllTimersAsync();
+    expect(element.hasAttribute(AWAITING_KIT_ATTRIBUTE)).toBe(false);
+  });
+
   it('replays once when an impatient visitor taps send twice', async () => {
     const { deferSubmitUntilKit, loadPhoneKit } = await freshModule();
     const element = form();

@@ -61,6 +61,7 @@ const fieldClass =
     method="POST"
     action="/api/leads"
     novalidate
+    data-lead-form
     data-err-name={lf.errorNameRequired}
     data-err-tg-required={lf.errorTelegramRequired}
     data-err-tg-format={lf.errorTelegramFormat}
@@ -88,6 +89,7 @@ const fieldClass =
 
     <FormField
       name="name"
+      field="name"
       label={lf.nameLabel}
       placeholder={lf.namePlaceholder}
       required
@@ -171,6 +173,7 @@ const fieldClass =
         <input
           type="text"
           data-contact-telegram
+          data-field="telegram"
           name="contact"
           placeholder="@username"
           class={`${fieldClass} w-full px-4`}
@@ -211,6 +214,7 @@ const fieldClass =
           <input
             type="tel"
             data-contact-phone-number
+            data-field="phone"
             inputmode="tel"
             placeholder="060 123 4567"
             class={`${fieldClass} min-w-0 flex-1 px-4`}
@@ -236,6 +240,7 @@ const fieldClass =
         <input
           type="checkbox"
           name="consent"
+          data-field="consent"
           class="mt-0.5 shrink-0 w-4 h-4 cursor-pointer accent-accent"
         />
         <span class="text-xs leading-relaxed">
@@ -278,6 +283,7 @@ const fieldClass =
     preferredContactChannel,
     type TrackedContactChannel,
   } from '@/utils/contactChannel';
+  import { markFieldValidity } from '@podbor/site-kit/browser';
   import { getOrCreateVisitorId } from '@/utils/visitorId';
 
   // A page can have more than one LeadForm instance (e.g. a page-level form
@@ -313,6 +319,7 @@ const fieldClass =
 
     function setError(input: HTMLElement, msg: string) {
       input.classList.add('has-error');
+      markFieldValidity(input, false);
       const wrap = fieldWrap(input);
       let err = wrap.querySelector('.field-error');
       if (!err) {
@@ -325,6 +332,7 @@ const fieldClass =
 
     function clearError(input: HTMLElement) {
       input.classList.remove('has-error');
+      markFieldValidity(input, true);
       const err = fieldWrap(input).querySelector('.field-error');
       if (err) err.remove();
     }
@@ -348,8 +356,11 @@ const fieldClass =
     const phoneNumber = contactField.querySelector<HTMLInputElement>(
       '[data-contact-phone-number]',
     )!;
+    const nameInput = form.querySelector<HTMLInputElement>('[name="name"]')!;
     const consent = form.querySelector<HTMLInputElement>('[name="consent"]')!;
     const consentErr = form.querySelector<HTMLElement>('.consent-error');
+
+    nameInput.addEventListener('input', () => clearError(nameInput));
 
     // progressive enhancement: the Telegram field ships with name="contact"
     // so the form still submits something if this script never runs (ad
@@ -445,8 +456,8 @@ const fieldClass =
     });
 
     tabs.forEach((tab) => {
-      tab.addEventListener('click', () => {
-        selectTab(tab, true);
+      tab.addEventListener('click', (event) => {
+        selectTab(tab, event.isTrusted);
         if (PANEL_FOR[activeTab] === 'phone') void expandCountries();
       });
     });
@@ -513,12 +524,10 @@ const fieldClass =
       if (visitorIdInput) visitorIdInput.value = getOrCreateVisitorId();
 
       let ok = true;
-      const name = form.querySelector<HTMLInputElement>('[name="name"]')!;
-
-      if (!name.value.trim()) {
-        setError(name, errName);
+      if (!nameInput.value.trim()) {
+        setError(nameInput, errName);
         ok = false;
-      } else clearError(name);
+      } else clearError(nameInput);
 
       const isTelegram = activeTab === 'telegram';
       const contactInput = isTelegram ? tgInput : phoneNumber;
@@ -537,6 +546,7 @@ const fieldClass =
       } else clearError(contactInput);
 
       if (consentErr) consentErr.style.display = consent.checked ? 'none' : '';
+      markFieldValidity(consent, consent.checked);
       if (!consent.checked) ok = false;
 
       if (!ok) {
@@ -567,6 +577,7 @@ const fieldClass =
     if (consentErr) {
       consent.addEventListener('change', () => {
         consentErr.style.display = consent.checked ? 'none' : '';
+        markFieldValidity(consent, consent.checked);
       });
     }
 

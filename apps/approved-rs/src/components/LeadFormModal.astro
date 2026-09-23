@@ -113,6 +113,7 @@ const closeLabel = getI18n(locale).common.closeLabel;
 </style>
 
 <script>
+  import { GOALS, reachGoal } from '@podbor/site-kit/browser';
   import {
     defineModalDialog,
     MODAL_OPEN_EVENT,
@@ -140,7 +141,7 @@ const closeLabel = getI18n(locale).common.closeLabel;
       tabButton.click();
       host.querySelector<HTMLElement>('[data-modal-close]')?.focus();
     }
-    window.ymReachGoal?.('lead_modal_open', {
+    reachGoal(GOALS.leadModalOpen, {
       tab: tabButton ? tab : 'default',
     });
   });
