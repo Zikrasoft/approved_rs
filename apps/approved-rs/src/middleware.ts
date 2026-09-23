@@ -53,13 +53,13 @@ export function renameSlugSegments(pathname: string): string | null {
   return changed ? renamed.join('/') : null;
 }
 
-const MOVED_BRAND_HOSTS: Record<string, string> = {
+export const MOVED_BRAND_HOSTS: Record<string, string> = {
   'auto-service-belgrade': BRAND_SITES.carlab,
   'avtoservis-belgrade': BRAND_SITES.carlab,
   'detailing-belgrade': BRAND_SITES.details,
   'wrapping-belgrade': BRAND_SITES.details,
 };
-const MOVED_BRAND_CASE_TABS: Record<string, string> = {
+export const MOVED_BRAND_CASE_TABS: Record<string, string> = {
   'auto-service': BRAND_SITES.carlab,
   autoservice: BRAND_SITES.carlab,
   detailing: BRAND_SITES.details,

@@ -16,6 +16,8 @@ const {
   collapseBuybackCountry,
   movedBrandUrl,
   onRequest,
+  MOVED_BRAND_HOSTS,
+  MOVED_BRAND_CASE_TABS,
 } = await import('./middleware');
 
 type Handler = (context: unknown, next: () => unknown) => unknown;
@@ -309,8 +311,14 @@ describe('vercel.json brand redirects', () => {
     ),
   );
 
-  it('finds the brand rules to check', () => {
-    expect(cases.length).toBeGreaterThan(60);
+  const RULES_PER_HUB = 12;
+  const RULES_PER_CASE_TAB = 6;
+
+  it('carries a vercel rule for every slug the middleware moves', () => {
+    expect(redirects).toHaveLength(
+      Object.keys(MOVED_BRAND_HOSTS).length * RULES_PER_HUB +
+        Object.keys(MOVED_BRAND_CASE_TABS).length * RULES_PER_CASE_TAB,
+    );
   });
 
   it.each(cases)('sends %s where the middleware sends it', (path, target) => {

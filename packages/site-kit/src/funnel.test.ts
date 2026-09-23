@@ -46,11 +46,14 @@ function trustedFocusIn(field: HTMLElement): void {
   field.focus();
 }
 
+const submitEvent = (): Event =>
+  new Event('submit', { cancelable: true, bubbles: true });
+
 function blockedSubmit(form: HTMLFormElement): void {
   form.addEventListener('submit', (event) => event.preventDefault(), {
     once: true,
   });
-  form.dispatchEvent(new Event('submit', { cancelable: true }));
+  form.dispatchEvent(submitEvent());
 }
 
 const scrollTo = (y: number): void => {
@@ -155,73 +158,70 @@ describe('defineFunnelTracking', () => {
     );
   });
 
-  it('reports a submit the page let through to the server', async () => {
+  it('reports a submit the page let through to the server', () => {
     document.body.innerHTML = FORM;
     start();
-    document
-      .querySelector('form')!
-      .dispatchEvent(new Event('submit', { cancelable: true }));
-    await vi.waitFor(() => expect(goalNames()).toContain(GOALS.formSubmit));
+    document.querySelector('form')!.dispatchEvent(submitEvent());
+    expect(goalNames()).toContain(GOALS.formSubmit);
   });
 
-  it('reports the field that blocked the submit instead of a success', async () => {
+  it('reports the field that blocked the submit instead of a success', () => {
     document.body.innerHTML = FORM;
     start();
     document.querySelector('input')!.setAttribute('aria-invalid', 'true');
     blockedSubmit(document.querySelector('form')!);
-    await vi.waitFor(() =>
-      expect(goals()).toContainEqual([GOALS.formError, { field: 'phone' }]),
-    );
+    expect(goals()).toContainEqual([GOALS.formError, { field: 'phone' }]);
     expect(goalNames()).not.toContain(GOALS.formSubmit);
   });
 
-  it('names a blocking control that carries no name attribute', async () => {
+  it('names a blocking control that carries no name attribute', () => {
     document.body.innerHTML = `
       <form data-lead-form>
         <div data-field="consent" aria-invalid="true"></div>
       </form>`;
     start();
     blockedSubmit(document.querySelector('form')!);
-    await vi.waitFor(() =>
-      expect(goals()).toContainEqual([GOALS.formError, { field: 'consent' }]),
-    );
+    expect(goals()).toContainEqual([GOALS.formError, { field: 'consent' }]);
   });
 
-  it('says unknown when a blocking control carries no name at all', async () => {
+  it('says unknown when a blocking control carries no name at all', () => {
     document.body.innerHTML = `
       <form data-lead-form><fieldset aria-invalid="true"></fieldset></form>`;
     start();
     blockedSubmit(document.querySelector('form')!);
-    await vi.waitFor(() =>
-      expect(goals()).toContainEqual([GOALS.formError, { field: 'unknown' }]),
-    );
+    expect(goals()).toContainEqual([GOALS.formError, { field: 'unknown' }]);
   });
 
-  it('ignores a focus the page moved itself, not the visitor', async () => {
+  it('ignores a focus the page moved itself, not the visitor', () => {
     document.body.innerHTML = FORM;
     start();
     document
       .querySelector('input')!
       .dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
-    await new Promise((resolve) => setTimeout(resolve, 10));
     expect(goalNames()).not.toContain(GOALS.formStart);
   });
 
-  it('stays quiet when the page holds the submit back to load its phone kit', async () => {
+  it('stays quiet when the page holds the submit back to load its phone kit', () => {
     document.body.innerHTML = FORM;
     start();
     const form = document.querySelector('form')!;
     form.setAttribute('data-awaiting-kit', '1');
     form.querySelector('input')!.setAttribute('aria-invalid', 'true');
     blockedSubmit(form);
-    await new Promise((resolve) => setTimeout(resolve, 10));
     expect(goalNames()).not.toContain(GOALS.formSubmit);
     expect(goalNames()).not.toContain(GOALS.formError);
 
     form.removeAttribute('data-awaiting-kit');
     form.querySelector('input')!.removeAttribute('aria-invalid');
-    form.dispatchEvent(new Event('submit', { cancelable: true }));
-    await vi.waitFor(() => expect(goalNames()).toContain(GOALS.formSubmit));
+    form.dispatchEvent(submitEvent());
+    expect(goalNames()).toContain(GOALS.formSubmit);
+  });
+
+  it('ignores a submit from a form that is not the lead form', () => {
+    document.body.innerHTML = `${FORM}<form id="search"></form>`;
+    start();
+    document.querySelector('#search')!.dispatchEvent(submitEvent());
+    expect(goalNames()).not.toContain(GOALS.formSubmit);
   });
 
   it('does nothing about forms on a page that carries none', () => {

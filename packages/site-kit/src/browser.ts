@@ -4,16 +4,8 @@ export {
   defineContactClickTracking,
   type ContactClickOptions,
 } from './contactClick.ts';
-export {
-  defineFunnelTracking,
-  BRAND_LINK_ATTRIBUTE,
-  LEAD_FORM_ATTRIBUTE,
-} from './funnel.ts';
-export {
-  markFieldValidity,
-  FIELD_NAME_ATTRIBUTE,
-  INVALID_ATTRIBUTE,
-} from './fieldValidity.ts';
+export { defineFunnelTracking } from './funnel.ts';
+export { markFieldValidity } from './fieldValidity.ts';
 export { GOALS, reachGoal, type Goal } from './goals.ts';
 export { defineCtaReveal } from './ctaReveal.ts';
 export { defineLanguageSuggestion } from './languageSuggestion.ts';

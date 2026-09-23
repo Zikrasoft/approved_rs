@@ -75,26 +75,25 @@ function trackForms(signal: AbortSignal): void {
       },
       { signal },
     );
-
-    form.addEventListener(
-      'submit',
-      (event) => {
-        setTimeout(() => {
-          if (!event.defaultPrevented) {
-            reachGoal(GOALS.formSubmit);
-            return;
-          }
-          if (form.hasAttribute(AWAITING_KIT_ATTRIBUTE)) return;
-          const invalid = form.querySelector<HTMLElement>(
-            `[${INVALID_ATTRIBUTE}="true"]`,
-          );
-          if (invalid)
-            reachGoal(GOALS.formError, { field: fieldName(invalid) });
-        });
-      },
-      { signal },
-    );
   });
+
+  document.addEventListener(
+    'submit',
+    (event) => {
+      const form = event.target as HTMLFormElement;
+      if (!form.matches(`[${LEAD_FORM_ATTRIBUTE}]`)) return;
+      if (!event.defaultPrevented) {
+        reachGoal(GOALS.formSubmit);
+        return;
+      }
+      if (form.hasAttribute(AWAITING_KIT_ATTRIBUTE)) return;
+      const invalid = form.querySelector<HTMLElement>(
+        `[${INVALID_ATTRIBUTE}="true"]`,
+      );
+      if (invalid) reachGoal(GOALS.formError, { field: fieldName(invalid) });
+    },
+    { signal },
+  );
 }
 
 function trackBrandLinks(signal: AbortSignal): void {
