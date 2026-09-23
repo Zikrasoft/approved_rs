@@ -79,7 +79,7 @@ export function movedBrandUrl(pathname: string): string | null {
     const rest = path.slice(1);
     return rest.length
       ? `${host}/${target}/works/${rest.join('/')}/`
-      : `${host}/${target}/`;
+      : `${host}/${target}/services/`;
   }
   if (
     path.length === 2 &&
