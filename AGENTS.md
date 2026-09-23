@@ -1,6 +1,8 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Instructions for any coding agent working in this repository. Claude Code reads
+this file directly; other agents pick it up through the same
+[AGENTS.md](https://agents.md) convention.
 
 ## Monorepo layout
 
@@ -225,7 +227,7 @@ pnpm test             # turbo run test
 pnpm typecheck        # turbo run typecheck (astro check: .astro files + zod/TS schemas)
 pnpm lint             # eslint . (root, covers all workspaces)
 pnpm lint:fix
-pnpm format           # prettier --write . (never --write in a review pass — see review-local skill)
+pnpm format           # prettier --write . (never --write in a review pass — it reformats what you are meant to be reading)
 pnpm exec prettier --check .
 ```
 
@@ -275,10 +277,13 @@ monorepo artifact.
 
 Husky + lint-staged run eslint --fix/prettier on staged files on commit — a commit can silently reformat what you staged, so `git status`/`git diff` after committing if that matters.
 
-**Run `review-local --fix-all` before every commit, and after each significant
-block of work on a long task.** No exceptions — a typo and a refactor both go
-through it. It is the only pass that reads the diff against this file's
-conventions, and it costs minutes against a bug reaching production. On work
+**Review the diff against this file's conventions before every commit, and
+after each significant block of work on a long task.** No exceptions — a typo
+and a refactor both go through it. In Claude Code that pass is the
+`review-local --fix-all` skill; with another agent, run whatever equivalent it
+offers, or read the diff yourself against the rules here. Nothing else checks
+the diff against these conventions, and it costs minutes against a bug reaching
+production. On work
 split across several agents or stages, review after each stage lands rather
 than once over the combined diff — a diff too large to judge is a review that
 finds nothing. This is not enforced by a git hook on purpose: a hook can block
