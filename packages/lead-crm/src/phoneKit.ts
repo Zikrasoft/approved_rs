@@ -9,6 +9,7 @@ export interface PhoneKit {
 // mobile connection or behind a captive portal and never settle, and a form
 // waiting on it would swallow every submit with no spinner and no error.
 const LOAD_TIMEOUT_MS = 4000;
+export const AWAITING_KIT_ATTRIBUTE = 'data-awaiting-kit';
 const AWAITING = 'awaitingKit';
 
 let kit: PhoneKit | null = null;

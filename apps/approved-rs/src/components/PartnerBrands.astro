@@ -28,6 +28,7 @@ const partners = [
         {partners.map(({ brand, description }) => (
           <a
             href={brandHome(brand.key, locale)}
+            data-brand-link={brand.key}
             target="_blank"
             rel="noopener"
             class="group block max-w-xs"
@@ -56,6 +57,7 @@ const partners = [
         {partners.map(({ brand, description }) => (
           <a
             href={brandHome(brand.key, locale)}
+            data-brand-link={brand.key}
             target="_blank"
             rel="noopener"
             class="group flex flex-col p-5 border rounded-sm no-underline bg-surface border-default transition-colors hover:border-accent-mid hover:bg-accent-subtle"

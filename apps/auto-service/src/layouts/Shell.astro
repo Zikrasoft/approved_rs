@@ -197,13 +197,15 @@ const businessSchema = {
       import {
         defineAnalytics,
         defineContactClickTracking,
+        defineFunnelTracking,
         defineLanguageSuggestion,
       } from '@podbor/site-kit/browser';
       import { applyPreferredContactOrder } from '@podbor/site-kit/contact-preference';
       import { YM_COUNTER_ID } from '@/utils/constants';
 
       defineAnalytics({ ymCounterId: YM_COUNTER_ID });
-      defineContactClickTracking(isTrackedContactChannel);
+      defineContactClickTracking({ isTracked: isTrackedContactChannel });
+      defineFunnelTracking();
       applyPreferredContactOrder();
       defineLanguageSuggestion();
     </script>

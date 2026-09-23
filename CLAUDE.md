@@ -12,7 +12,7 @@ apps/detailing/       Details, the detailing studio site — details.rs
 apps/auto-service/    CarLab, the car service site + parts shop — carlab.rs
 packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click routes
 packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
-packages/site-kit/    brand-agnostic mechanics: safeMarkdown, formatPhone, visitor id, lazy map embed, scroll lock, modal dialog, preferred contact channel (owns the `data-contact-order` / `data-channel` / `data-primary-contact` / `data-primary-channel` markup contract the apps must honour)
+packages/site-kit/    brand-agnostic mechanics: safeMarkdown, formatPhone, visitor id, lazy map embed, scroll lock, modal dialog, preferred contact channel (owns the `data-contact-order` / `data-channel` / `data-primary-contact` / `data-primary-channel` markup contract the apps must honour), funnel tracking (owns a second one: `data-lead-form` / `data-brand-link` / `data-field` / `aria-invalid`)
 packages/brands/      the three brands: domains, display names, locale mapping, ops service labels
 ```
 
@@ -107,10 +107,14 @@ Approved's trust/verification semantics.
   framework island. `defineLazyMapEmbed` and `defineLocaleChoice` in
   `packages/site-kit/src` are the shape: idempotent `define(tagName?)`, no
   auto-registration on import, no styles shipped, the app supplying the markup.
-  A stateless run-once page effect is the one exception — `defineContactClickTracking`
-  and `applyPreferredContactOrder` are plain functions called once from the app's
-  layout, because they have nothing per-instance to hold. Anything with instance
-  state or a lazy mount boundary is still a custom element.
+  A run-once page effect with no per-instance state is the one exception —
+  `defineContactClickTracking`, `applyPreferredContactOrder` and
+  `defineFunnelTracking` are plain functions called once from the app's layout,
+  because what they hold belongs to the page, not to an element. Such a function
+  must guard against being armed twice (`defineFunnelTracking`'s module flag,
+  `defineAnalytics`'s `window.loadAnalytics` check) — a second call that
+  re-attaches listeners doubles whatever it counts, silently. Anything with
+  instance state is still a custom element.
 - Every `packages/*` carries its own test suite at **100% coverage**
   (statements/functions/lines; branches too where achievable). The `test`
   script runs `vitest run --coverage`, so the threshold is enforced by CI
@@ -317,6 +321,16 @@ This site supports 5 locales: `ru` (default), `en`, `sr`, `es`, `de`. Translatio
 - Store new strings in the existing i18n structure — `src/content/i18n/*.yaml` (dictionary, faq, home, pages, etc.), validated by the matching schema in `src/i18n/dictionaryContentSchema.ts`/`src/i18n/content/*ContentSchema.ts` and read via `src/i18n/getI18n.ts`/`src/i18n/content/*.ts` — reusing existing keys where possible (DRY) rather than a new inline literal per component. Admin hand-edits only the `ru` fields directly in the YAML; `scripts/translate-i18n.ts` (the `translate` job in `.github/workflows/ci.yml`) auto-fills en/sr/es/de on every push that touches one of those files.
 - Before considering any UI change done, verify no hardcoded RU-only text was left behind (e.g. `grep -rP '[а-яА-ЯёЁ]' src/components src/pages src/layouts` outside of comments/intentional RU-only surfaces).
 - Case-study content (`src/content/cases`, `src/content/works`) is the one exception to "admin writes it by hand" that still goes through Keystatic: the admin only ever writes the `ru` fields there, and the `translate` job in `.github/workflows/ci.yml` auto-translates en/sr/es/de on every push that touches a case file.
+
+## Analytics
+
+Event names live once in `packages/site-kit/src/goals.ts` and are fired through
+`reachGoal` from `@podbor/site-kit/browser`, never as string literals in an app. Every event must also exist as a goal in **all three** Metrika counters —
+one created in code but not in a counter is silently lost. The vocabulary, the
+markup hooks it depends on (`data-lead-form`, `data-contact-channel`,
+`data-brand-link`, `aria-invalid`) and how to add one are in `docs/analytics.md`;
+whose visits to exclude before drawing any conclusion is in
+`docs/analytics-exclusions.md`.
 
 ## Validation
 

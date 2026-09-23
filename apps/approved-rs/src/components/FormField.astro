@@ -1,6 +1,7 @@
 ---
 interface Props {
   name: string;
+  field?: string;
   label: string;
   placeholder?: string;
   required?: boolean;
@@ -10,6 +11,7 @@ interface Props {
 
 const {
   name,
+  field,
   label,
   placeholder = '',
   required = false,
@@ -28,6 +30,7 @@ const {
     type === 'textarea' ? (
       <textarea
         {name}
+        data-field={field}
         {rows}
         {placeholder}
         class="form-field w-full px-4 py-3 rounded-sm text-sm outline-none resize-y bg-page border border-border-strong text-primary font-sans"
@@ -36,6 +39,7 @@ const {
       <input
         type="text"
         {name}
+        data-field={field}
         {required}
         {placeholder}
         class="form-field w-full px-4 py-3 rounded-sm text-sm outline-none bg-page border border-border-strong text-primary font-sans"
