@@ -200,6 +200,12 @@ const geoCells = countries.map((country) => ({
     </div>
   </section>
 
+  <section class="lg:hidden border-b border-default">
+    <div class="max-w-6xl mx-auto px-6 py-band">
+      <LeadForm />
+    </div>
+  </section>
+
   <section class="border-b border-default">
     <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
       <SectionHeading title={h.origin.heading} />
@@ -309,15 +315,6 @@ const geoCells = countries.map((country) => ({
           ))
         }
       </div>
-    </div>
-  </section>
-
-  <!-- Mobile-only lead form: desktop keeps it in the hero sidebar, mobile
-       moves it here so the page explains the business before asking for
-       contact details. -->
-  <section class="lg:hidden border-b border-default">
-    <div class="max-w-6xl mx-auto px-6 py-band">
-      <LeadForm />
     </div>
   </section>
 
