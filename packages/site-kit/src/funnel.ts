@@ -67,9 +67,9 @@ function trackForms(signal: AbortSignal): void {
     seen.observe(form);
 
     form.addEventListener(
-      'focusin',
-      (event) => {
-        if (started || !event.isTrusted) return;
+      'input',
+      () => {
+        if (started) return;
         started = true;
         reachGoal(GOALS.formStart);
       },

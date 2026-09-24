@@ -37,11 +37,7 @@ const {
   compact = false,
 } = Astro.props;
 
-// Callback should land in whichever modal is actually in scope on this page:
-// the page-local one (ServicePageLayout) when the Telegram button also uses
-// it, otherwise the header's global modal — same rule `openModal` already
-// applies to the Telegram button above.
-const callbackTrigger = openModal
+const modalTrigger = openModal
   ? DATA_OPEN_PAGE_LEAD_MODAL
   : DATA_OPEN_LEAD_MODAL;
 ---
@@ -72,10 +68,10 @@ const callbackTrigger = openModal
         <div class="contact-bar">
           <a
             data-contact-channel="telegram"
-            {...{ [DATA_OPEN_PAGE_LEAD_MODAL]: openModal ? true : undefined }}
-            href={openModal ? undefined : telegramLink(manager)}
-            target={openModal ? undefined : '_blank'}
-            rel={openModal ? undefined : 'noopener'}
+            {...{ [modalTrigger]: 'telegram' }}
+            href={telegramLink(manager)}
+            target="_blank"
+            rel="noopener"
             aria-label={label}
             class="contact-cell"
           >
@@ -85,6 +81,7 @@ const callbackTrigger = openModal
 
           <a
             data-contact-channel="whatsapp"
+            {...{ [modalTrigger]: 'whatsapp' }}
             href={whatsappLink(WHATSAPP_NUMBER)}
             target="_blank"
             rel="noopener"
@@ -97,6 +94,7 @@ const callbackTrigger = openModal
 
           <a
             data-contact-channel="viber"
+            {...{ [modalTrigger]: 'viber' }}
             href={viberLink(VIBER_NUMBER)}
             target="_blank"
             rel="noopener"
@@ -111,7 +109,7 @@ const callbackTrigger = openModal
             type="button"
             data-contact-channel="callback"
             aria-label={cc.callbackButtonLabel}
-            {...{ [callbackTrigger]: 'phone' }}
+            {...{ [modalTrigger]: 'phone' }}
             class="contact-cell"
           >
             <ContactIcon channel="phone" size={16} />

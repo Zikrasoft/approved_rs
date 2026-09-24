@@ -26,6 +26,7 @@ const cc = getServicesContent(locale).caseChrome;
   <div class="floating-panel" role="menu" data-panel hidden>
     <a
       data-contact-channel="telegram"
+      {...{ [DATA_OPEN_LEAD_MODAL]: 'telegram' }}
       href={telegramLink(TG_MANAGER)}
       target="_blank"
       rel="noopener"
@@ -38,6 +39,7 @@ const cc = getServicesContent(locale).caseChrome;
     </a>
     <a
       data-contact-channel="whatsapp"
+      {...{ [DATA_OPEN_LEAD_MODAL]: 'whatsapp' }}
       href={whatsappLink(WHATSAPP_NUMBER)}
       target="_blank"
       rel="noopener"
@@ -50,6 +52,7 @@ const cc = getServicesContent(locale).caseChrome;
     </a>
     <a
       data-contact-channel="viber"
+      {...{ [DATA_OPEN_LEAD_MODAL]: 'viber' }}
       href={viberLink(VIBER_NUMBER)}
       target="_blank"
       rel="noopener"
