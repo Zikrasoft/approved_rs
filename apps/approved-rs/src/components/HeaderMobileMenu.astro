@@ -5,6 +5,7 @@ import ContactIcon from './ContactIcon.astro';
 import { PHONE_NUMBER } from '@/utils/constants';
 import { getLocale } from '@/i18n/config';
 import { getServicesContent } from '@/i18n/content/services';
+import { phoneLink } from '@/utils/contactLinks';
 
 interface Props {
   casesHref: string;
@@ -39,7 +40,7 @@ const callLabel = getServicesContent(getLocale(Astro.currentLocale)).caseChrome
     </a>
 
     <a
-      href={`tel:+${PHONE_NUMBER}`}
+      href={phoneLink(PHONE_NUMBER)}
       data-contact-channel="phone"
       class="mt-auto flex items-center justify-center gap-2.5 rounded-sm border border-accent-border bg-accent-subtle py-3.5 text-accent no-underline"
     >

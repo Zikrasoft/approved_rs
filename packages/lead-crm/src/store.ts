@@ -8,6 +8,7 @@ import {
   unpaidIncomes,
   PAID_EPSILON,
 } from './money.ts';
+import { channelLabel } from './channelLabels.ts';
 import { postponableStatus } from './schema.ts';
 import type {
   LeadInput,
@@ -53,7 +54,7 @@ function todayISODate(): string {
   return format(new Date(), 'yyyy-MM-dd');
 }
 
-function isPlaceholderContact(contact: string): boolean {
+export function isPlaceholderContact(contact: string): boolean {
   return contact === '' || contact === '—';
 }
 
@@ -274,9 +275,17 @@ export function createLeadStore({
         const upgradeContact =
           isPlaceholderContact(existing.contact) &&
           !isPlaceholderContact(data.contact);
-        const triedLabel = data.services?.length
-          ? data.services.join(', ')
-          : data.service;
+        const triedLabel =
+          (data.services?.length ? data.services.join(', ') : data.service) ||
+          (data.kind === 'call_click' && data.contactChannel
+            ? channelLabel(data.contactChannel)
+            : '');
+        const clickedFirst =
+          upgradeContact &&
+          existing.kind === 'call_click' &&
+          existing.contactChannel
+            ? channelLabel(existing.contactChannel)
+            : null;
         const merged: StoredLead = {
           ...existing,
           ...(upgradeContact
@@ -288,12 +297,13 @@ export function createLeadStore({
                 services: data.services?.length
                   ? data.services
                   : existing.services,
-                kind: data.kind,
+                kind: data.kind ?? existing.kind,
               }
             : {}),
           comment: appendNote(
             existing.comment,
             [
+              clickedFirst ? `Сначала кликнул: ${clickedFirst}` : '',
               triedLabel ? `Также пробовал: ${triedLabel}` : '',
               data.comment?.trim(),
             ]

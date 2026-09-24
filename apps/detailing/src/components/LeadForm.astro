@@ -3,13 +3,12 @@ import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { getSiteContent } from '@/i18n/content/site';
-import { getServicesContent } from '@/i18n/content/services';
 import { PathBuilder } from '@/utils/paths';
 import { CONTACT_LINKS } from '@/utils/contactLinks';
 import { PHONE_COUNTRY_SHORTLIST } from '@/utils/constants';
-import { SERVICE_SLUGS, type ServiceSlug } from '@/utils/services';
+import type { ServiceSlug } from '@/utils/services';
 import { phoneCountryOptions } from '@podbor/lead-crm/phone';
-import { HONEYPOT_FIELD } from '@podbor/lead-crm';
+import { HONEYPOT_FIELD, SERVICE_FIELD } from '@podbor/lead-crm';
 
 interface Props {
   service?: ServiceSlug;
@@ -20,12 +19,10 @@ interface Props {
 const { service, compact = false, class: className = '' } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
-const services = getServicesContent(locale);
 
 const DEFAULT_COUNTRY = 'RS';
 const uid = `lf-${crypto.randomUUID().slice(0, 8)}`;
 const errorId = {
-  name: `${uid}-name`,
   telegram: `${uid}-telegram`,
   phone: `${uid}-phone`,
   consent: `${uid}-consent`,
@@ -52,8 +49,6 @@ const label =
   'mb-2 block text-[0.6875rem] uppercase tracking-[0.18em] text-mute-2';
 const chip =
   'flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/35 px-2 text-center text-xs text-mute transition-colors duration-400 peer-hover:border-line-strong peer-checked:border-champagne/60 peer-checked:bg-champagne/10 peer-checked:text-chalk peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-champagne';
-const serviceChip =
-  'flex min-h-11 items-center rounded-full border border-white/35 px-4 text-center text-xs leading-tight text-mute transition-colors duration-400 peer-hover:border-line-strong peer-checked:border-champagne/60 peer-checked:bg-champagne/10 peer-checked:text-chalk peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-champagne';
 const errorText = 'mt-2 text-xs leading-relaxed text-[#e0876c]';
 const noscriptLink =
   'inline-flex min-h-11 items-center gap-2 rounded-full border border-white/35 px-4 text-xs text-chalk transition-colors duration-400 hover:border-champagne';
@@ -101,31 +96,6 @@ const noscriptLink =
       </div>
     </div>
   </noscript>
-
-  <div>
-    <label class="block">
-      <span class={label}>{site.form.nameLabel}</span>
-      <input
-        name="name"
-        data-field="name"
-        type="text"
-        autocomplete="name"
-        placeholder={site.form.namePlaceholder}
-        aria-describedby={errorId.name}
-        class={field}
-        data-name
-      />
-    </label>
-    <p
-      id={errorId.name}
-      class={errorText}
-      aria-live="polite"
-      data-error-name
-      hidden
-    >
-      {site.form.requiredError}
-    </p>
-  </div>
 
   <fieldset class="group m-0 border-0 p-0">
     <legend class={`${label} p-0`}>{site.form.contactChannelLabel}</legend>
@@ -228,39 +198,18 @@ const noscriptLink =
     </div>
   </fieldset>
 
-  <details class="group/svc" open={!compact}>
-    <summary
-      class={`${field} flex cursor-pointer list-none items-center justify-between gap-2 [&::-webkit-details-marker]:hidden`}
-    >
-      {site.form.serviceLabel}
-      <Icon
-        name="chevronDown"
-        size={14}
-        class="shrink-0 transition-transform duration-400 group-open/svc:rotate-180"
-      />
-    </summary>
-    <div
-      class="mt-2 flex flex-wrap gap-2"
-      role="group"
-      aria-label={site.form.serviceLabel}
-    >
-      {
-        SERVICE_SLUGS.map((slug) => (
-          <label class="block">
-            <input
-              type="checkbox"
-              name="service"
-              value={slug}
-              checked={slug === service}
-              class="peer sr-only"
-            />
-            <span class={serviceChip}>{services[slug].name}</span>
-          </label>
-        ))
-      }
-    </div>
-    <p class="mt-2 text-xs text-mute-2">{site.form.servicePlaceholder}</p>
-  </details>
+  <label class="block">
+    <span class={label}>{site.form.nameLabel}</span>
+    <input
+      name="name"
+      type="text"
+      autocomplete="name"
+      placeholder={site.form.namePlaceholder}
+      class={field}
+    />
+  </label>
+
+  {service && <input type="hidden" name={SERVICE_FIELD} value={service} />}
 
   <label class="block">
     <span class={label}>{site.form.commentLabel}</span>
@@ -355,7 +304,6 @@ const noscriptLink =
     source.value = location.href;
 
     const contact = pick<HTMLInputElement>('[data-contact]');
-    const name = pick<HTMLInputElement>('[data-name]');
     const telegram = pick<HTMLInputElement>('[data-telegram]');
     const country = pick<HTMLSelectElement>('[data-country]');
     const phone = pick<HTMLInputElement>('[data-phone]');
@@ -364,7 +312,6 @@ const noscriptLink =
     bindPhoneCountry(country, phone);
 
     const errors = {
-      name: pick('[data-error-name]'),
       telegram: pick('[data-error-telegram]'),
       phone: pick('[data-error-phone]'),
       consent: pick('[data-error-consent]'),
@@ -376,7 +323,6 @@ const noscriptLink =
     };
 
     const controlled: [HTMLElement, HTMLElement][] = [
-      [errors.name, name],
       [errors.telegram, telegram],
       [errors.phone, phone],
       [errors.consent, consent],
@@ -420,7 +366,6 @@ const noscriptLink =
           composeE164(typed, dial));
 
       const contactError = viaTelegram ? errors.telegram : errors.phone;
-      mark(errors.name, name, name.value.trim().length > 0);
       mark(
         contactError,
         input,
@@ -430,7 +375,6 @@ const noscriptLink =
       mark(errors.consent, consent, consent.checked);
 
       const invalid: [HTMLElement, HTMLElement][] = [
-        [errors.name, name],
         [contactError, input],
         [errors.consent, consent],
       ];

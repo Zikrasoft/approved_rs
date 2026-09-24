@@ -14,6 +14,7 @@ export const MAX_COMMENT_LENGTH = 2000;
 export const MAX_URL_LENGTH = 500;
 export const MAX_SERVICES = 20;
 export const HONEYPOT_FIELD = 'website';
+export const SERVICE_FIELD = 'service';
 
 export const contactChannelSchema = z.enum(TRACKED_CONTACT_CHANNELS);
 
@@ -56,7 +57,7 @@ function formRecord(value: unknown): unknown {
   value.forEach((entry, key) => {
     if (!(key in record)) record[key] = entry;
   });
-  record.service = value.getAll('service');
+  record[SERVICE_FIELD] = value.getAll(SERVICE_FIELD);
   return record;
 }
 
@@ -72,13 +73,15 @@ export const leadEnvelopeSchema = z
 const submissionObject = z
   .object({
     ...envelopeShape,
-    name: requiredText(MAX_FIELD_LENGTH),
+    name: cappedText(MAX_FIELD_LENGTH),
     contact: requiredText(MAX_FIELD_LENGTH),
     contact_channel: z
       .union([contactChannelSchema, z.literal('')])
       .nullish()
       .transform((value) => value || null),
     service: z.array(cappedText(MAX_FIELD_LENGTH)).catch([]).default([]),
+    // TODO: no form posts `car` since the CarLab field was folded into the comment;
+    // drop this once cached pages from before that deploy can no longer submit.
     car: optionalText(MAX_FIELD_LENGTH),
     comment: optionalText(MAX_COMMENT_LENGTH),
     country: optionalText(MAX_FIELD_LENGTH),

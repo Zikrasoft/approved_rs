@@ -181,10 +181,10 @@ describe('leadEnvelopeSchema', () => {
 });
 
 describe('leadSubmissionSchema', () => {
-  it('rejects a name that is only whitespace', () => {
-    expect(submit({ name: '  ', contact: '+381641234567' }).success).toBe(
-      false,
-    );
+  it('accepts a lead with no name, since only the contact is asked for', () => {
+    const parsed = submit({ name: '  ', contact: '+381641234567' });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) expect(parsed.data.name).toBe('');
   });
 
   it('rejects a missing contact', () => {

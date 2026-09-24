@@ -2,7 +2,9 @@ import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 
 // TODO: two channels only — a third (Viber, Instagram) taking the first slot
 // needs a preference list here and an insertBefore walk in
-// applyPreferredContactOrder, not another literal.
+// applyPreferredContactOrder, not another literal. applyPrimaryContactChannel
+// is stricter still: it hides every data-primary-channel it does not match, so
+// a third channel in such a group disappears for everyone until that list exists.
 export type PreferredContactChannel = Extract<
   TrackedContactChannel,
   'telegram' | 'whatsapp'

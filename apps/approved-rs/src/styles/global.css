@@ -709,6 +709,16 @@ h4 {
    under 16px — text-sm (14px) on .form-field triggered it on every phone. */
 .form-field {
   font-size: 16px !important;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+.form-field::placeholder {
+  color: var(--color-muted);
+}
+.form-field:focus {
+  border-color: var(--color-accent) !important;
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
 }
 
 /* ─── Form validation ───────────────────────────────────── */

@@ -33,12 +33,11 @@ describe('createContactClickRoute', () => {
     expect(res.status).toBe(204);
   });
 
-  it('defaults to phone wording when no channel is given', async () => {
+  it('defaults to phone when no channel is given', async () => {
     await POST(makeCtx({ source_url: '/ru/' }));
     expect(notifyLead).toHaveBeenCalledWith(
       expect.objectContaining({
         contactChannel: 'phone',
-        service: 'Звонок с сайта',
         kind: 'call_click',
         name: '',
         locale: 'ru',
@@ -56,33 +55,31 @@ describe('createContactClickRoute', () => {
         name: '',
         contact: '—',
         contactChannel: 'telegram',
-        service: 'Telegram с сайта',
-        services: ['Telegram с сайта'],
+        service: '',
+        services: [],
       }),
       '[contact-click]',
     );
   });
 
   it.each(['whatsapp', 'viber'] as const)(
-    'builds channel-specific wording for %s',
+    'records the clicked channel for %s and leaves the service to the pages that know one',
     async (channel) => {
       await POST(makeCtx({ channel, source_url: '/ru/' }));
       const call = notifyLead.mock.calls.at(-1)![0];
       expect(call.contactChannel).toBe(channel);
-      expect(call.service).toContain(
-        channel === 'whatsapp' ? 'WhatsApp' : 'Viber',
-      );
+      expect(call.service).toBe('');
     },
   );
 
   it.each(['sms', 'constructor', 'toString', 'hasOwnProperty'])(
-    'falls back to phone wording for an unrecognized/prototype-key channel (%s)',
+    'falls back to phone for an unrecognized/prototype-key channel (%s)',
     async (channel) => {
       await POST(makeCtx({ channel, source_url: '/ru/' }));
       expect(notifyLead).toHaveBeenCalledWith(
         expect.objectContaining({
-          service: 'Звонок с сайта',
-          services: ['Звонок с сайта'],
+          service: '',
+          services: [],
           contactChannel: 'phone',
         }),
         '[contact-click]',

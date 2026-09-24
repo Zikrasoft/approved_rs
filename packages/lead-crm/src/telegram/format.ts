@@ -7,9 +7,10 @@ import {
   unpaidIncomes,
   type CommissionInfo,
 } from '../money.ts';
+import { channelLabel } from '../channelLabels.ts';
 import { LEADS_PATH } from '../quarantine.ts';
 import type { Income, LeadStatus, StoredLead } from '../schema.ts';
-import { MAX_LIST_ROWS, type OwedRow } from '../store.ts';
+import { MAX_LIST_ROWS, isPlaceholderContact, type OwedRow } from '../store.ts';
 
 export type Role = 'owner' | 'admin';
 
@@ -19,10 +20,12 @@ export type Keyboard = { inline_keyboard: Btn[][] };
 export interface FormatterOptions {
   serviceLabel: (slug: string) => string;
   botUsername: string;
-  contactChannelLabels: Record<string, string>;
 }
 
 const MAX_SERVICES_LABEL = 200;
+
+export const leadDisplayName = (lead: { name: string }): string =>
+  lead.name || '—';
 
 export const LEAD_STATUS_ACTIONS = [
   { key: 'negotiations', emoji: '🗣', label: 'Переговоры' },
@@ -160,7 +163,7 @@ export function buildDeleteConfirm(lead: StoredLead): {
   reply_markup: Keyboard;
 } {
   return {
-    text: `❗ Удалить заявку #${lead.id} (${escapeHtml(lead.name)}) навсегда? Это нельзя отменить.`,
+    text: `❗ Удалить заявку #${lead.id} (${escapeHtml(leadDisplayName(lead))}) навсегда? Это нельзя отменить.`,
     reply_markup: {
       inline_keyboard: [
         [
@@ -183,7 +186,7 @@ export function buildLeadList(
     .slice(0, MAX_LIST_ROWS)
     .map((l) => [
       {
-        text: `#${l.id} ${l.name || '—'} · ${l.brand} · ${statusEmoji(l.status)}`,
+        text: `#${l.id} ${leadDisplayName(l)} · ${l.brand} · ${statusEmoji(l.status)}`,
         callback_data: `open:${l.id}`,
       },
     ]);
@@ -237,7 +240,7 @@ export function buildOwedList(
   }
   const buttons: Btn[][] = rows.map((r) => [
     {
-      text: `#${r.id} ${r.name} · ${r.brand} — ${formatMoney(r.remaining)}`,
+      text: `#${r.id} ${leadDisplayName(r)} · ${r.brand} — ${formatMoney(r.remaining)}`,
       callback_data: `open:${r.id}`,
     },
   ]);
@@ -266,7 +269,7 @@ export function formatDealsList(leads: StoredLead[]): string {
   if (deals.length === 0) return '<b>💰 Все сделки</b>\n\nСделок пока нет.';
   const lines = deals.map((l) => {
     const info = getCommission(l);
-    return `#${l.id} ${escapeHtml(l.name)} · ${escapeHtml(l.brand)}\nдоход ${formatMoney(l.dealAmount)} · комиссия ${formatMoney(info.commission)}\n${paidStatusMark(l, info)}`;
+    return `#${l.id} ${escapeHtml(leadDisplayName(l))} · ${escapeHtml(l.brand)}\nдоход ${formatMoney(l.dealAmount)} · комиссия ${formatMoney(info.commission)}\n${paidStatusMark(l, info)}`;
   });
   return ['<b>💰 Все сделки</b>', ...lines].join('\n\n');
 }
@@ -284,7 +287,7 @@ export function buildSearchResults(leads: StoredLead[]): {
     const amount =
       l.dealAmount != null ? ` — ${formatMoney(l.dealAmount)}` : '';
     const archivedMark = l.archived ? '🗄 ' : '';
-    const label = `${archivedMark}${statusEmoji(l.status)} #${l.id} ${l.brand} ${l.name} — ${l.contact}${amount}`;
+    const label = `${archivedMark}${statusEmoji(l.status)} #${l.id} ${l.brand} ${leadDisplayName(l)} — ${l.contact}${amount}`;
     return [{ text: label, callback_data: `open:${l.id}` }];
   });
   return { text: 'Найдено:', reply_markup: { inline_keyboard: rows } };
@@ -389,7 +392,7 @@ export function fieldChangeText(
   before: string | null | undefined,
 ): string {
   return [
-    `✏️ Заявка #${lead.id} ${escapeHtml(lead.name)}: ${EDIT_FIELD_LABELS[field]}`,
+    `✏️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${EDIT_FIELD_LABELS[field]}`,
     ``,
     `Было: ${fieldPreview(before)}`,
     `Стало: ${fieldPreview(lead[field])}`,
@@ -411,7 +414,7 @@ export function quarantinedLeadsText(
 
 export function statusChangeText(lead: StoredLead): string {
   const meta = statusMeta(lead.status);
-  return `🔔 Заявка #${lead.id} ${escapeHtml(lead.name)}: статус — ${meta.emoji} ${meta.label}`;
+  return `🔔 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: статус — ${meta.emoji} ${meta.label}`;
 }
 
 export function incomeNotificationText(
@@ -419,7 +422,7 @@ export function incomeNotificationText(
   income: Income,
 ): string {
   return [
-    `💶 Доход по заявке #${lead.id} ${escapeHtml(lead.name)}`,
+    `💶 Доход по заявке #${lead.id} ${escapeHtml(leadDisplayName(lead))}`,
     ``,
     `Получено: ${formatMoney(income.amount)}`,
     `Твоя комиссия (${lead.commissionPercent}%): ${formatMoney(incomeCommission(income.amount, lead.commissionPercent))}`,
@@ -433,7 +436,7 @@ export function dealNotificationText(
   return [
     `💰 Новая сделка`,
     ``,
-    `#${lead.id} ${escapeHtml(lead.name)}`,
+    `#${lead.id} ${escapeHtml(leadDisplayName(lead))}`,
     ``,
     `Доход с заявки: ${formatMoney(lead.dealAmount)}`,
     `Твоя комиссия (${lead.commissionPercent}%): ${formatMoney(commission)}`,
@@ -443,21 +446,25 @@ export function dealNotificationText(
 export function createFormatter({
   serviceLabel,
   botUsername,
-  contactChannelLabels,
 }: FormatterOptions) {
-  const channelLabels = new Map(Object.entries(contactChannelLabels));
+  function clickLabel(lead: StoredLead): string {
+    const channel = lead.contactChannel;
+    return lead.kind === 'call_click' &&
+      channel &&
+      isPlaceholderContact(lead.contact)
+      ? `Клик: ${channelLabel(channel)}`
+      : '';
+  }
 
   function servicesLabel(lead: StoredLead): string {
     const slugs = lead.services.length > 0 ? lead.services : [lead.service];
-    return slugs.map(serviceLabel).join(' · ').slice(0, MAX_SERVICES_LABEL);
+    const label = slugs.map(serviceLabel).filter(Boolean).join(' · ');
+    return (label || clickLabel(lead) || '—').slice(0, MAX_SERVICES_LABEL);
   }
 
   function formatLeadText(lead: StoredLead, role: Role): string {
-    const channelLabel = lead.contactChannel
-      ? channelLabels.get(lead.contactChannel)
-      : undefined;
-    const contactLine = channelLabel
-      ? `${lead.contact} (${channelLabel})`
+    const contactLine = lead.contactChannel
+      ? `${lead.contact} (${channelLabel(lead.contactChannel)})`
       : lead.contact;
     const lines: string[] = [
       `🚗 Заявка #${lead.id} — ${escapeHtml(servicesLabel(lead))}`,
@@ -475,7 +482,7 @@ export function createFormatter({
       lines.push(`⏰ Напомнить: ${formatDateRu(lead.remindAt)}`);
     lines.push(
       ``,
-      `Имя: ${escapeHtml(lead.name)}`,
+      `Имя: ${escapeHtml(leadDisplayName(lead))}`,
       `Контакт: ${escapeHtml(contactLine)}`,
     );
     if (lead.country)
@@ -541,7 +548,7 @@ export function createFormatter({
     formatLeadText,
 
     formatTeaser(lead: StoredLead): string {
-      return `🚗 Заявка #${lead.id} · ${escapeHtml(lead.name || '—')} · ${escapeHtml(servicesLabel(lead))} · ${statusEmoji(lead.status)} ${statusLabel(lead.status)}`;
+      return `🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusEmoji(lead.status)} ${statusLabel(lead.status)}`;
     },
 
     deepLinkKeyboard(id: number): Keyboard {
@@ -561,7 +568,7 @@ export function createFormatter({
       return [
         `⏰ Напоминание по заявке #${lead.id}`,
         ``,
-        `${escapeHtml(lead.name)} — ${escapeHtml(servicesLabel(lead))}`,
+        `${escapeHtml(leadDisplayName(lead))} — ${escapeHtml(servicesLabel(lead))}`,
         `Ты просил напомнить сегодня — заявка снова активна.`,
       ].join('\n');
     },

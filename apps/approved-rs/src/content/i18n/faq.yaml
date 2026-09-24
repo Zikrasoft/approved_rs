@@ -42,7 +42,7 @@ vehicle-inspection:
     a: 'Вы получаете отчёт с фото и прямой ответ «не берите» — и теряете стоимость проверки, а не деньги за машину. Отчёт остаётся у вас, и если вы всё-таки решите брать, найденные замечания работают как аргумент в торге: на одном из наших осмотров в Сербии это снизило цену на 700 евро.'
 general:
   - q: Как оплачивается работа?
-    a: Оплата наличными в день сделки — вы не переводите деньги вперёд.
+    a: Часть суммы — предоплата, остальное по факту. Размер предоплаты зависит от услуги и суммы сделки — называем его до начала работ, чтобы условия были понятны обеим сторонам.
   - q: Можно написать не в Telegram?
     a: Да, помимо Telegram доступны звонки и WhatsApp.
   - q: Где вы находитесь?
@@ -98,7 +98,7 @@ translations:
         a: 'You receive a report with photos and a clear recommendation not to buy — and you lose only the inspection fee, not the money for the car. The report remains with you, and if you decide to proceed, the noted issues can serve as bargaining chips: in one of our inspections in Serbia, this reduced the price by 700 euros.'
     general:
       - q: How is your service paid for?
-        a: Payment is made in cash on the day of the transaction — you do not pay upfront.
+        a: A portion of the total amount is a deposit, with the remainder due upon completion. The deposit amount varies depending on the service and the deal size — we specify it before starting the work to ensure that the terms are clear to both parties.
       - q: Can I contact you in ways other than Telegram?
         a: Yes, in addition to Telegram, you can also call us or reach out via WhatsApp.
       - q: Where are you located?
@@ -153,7 +153,7 @@ translations:
         a: "Dobijate izveštaj sa fotografijama i jasan odgovor 'ne uzimajte' — izgubite samo cenu provere, a ne novac za automobil. Izveštaj ostaje kod vas, i ako ipak odlučite da kupite, uočene zamerke služe kao argument za pregovaranje: na jednom od naših pregleda u Srbiji ovo je smanjilo cenu za 700 evra."
     general:
       - q: Kako se plaća rad?
-        a: Plaćanje u gotovini na dan transakcije — ne šaljete novac unapred.
+        a: Deo iznosa je avans, a ostatak po završetku. Iznos avansa zavisi od usluge i vrednosti transakcije — dogovaramo ga pre početka radova kako bi uslovi bili jasni za obe strane.
       - q: Mogu li pisati ne putem Telegrama?
         a: Da, osim Telegrama dostupni su pozivi i WhatsApp.
       - q: Gde se nalazite?
@@ -208,7 +208,7 @@ translations:
         a: "Recibes un informe con fotos y una respuesta directa 'no compres' — y solo pierdes el costo de la inspección, no el dinero del coche. El informe se queda contigo, y si decides comprar, las observaciones encontradas funcionan como argumentos en la negociación: en una de nuestras inspecciones en Serbia, esto redujo el precio en 700 euros."
     general:
       - q: ¿Cómo se paga por el trabajo?
-        a: Pago en efectivo el día de la transacción; no tienes que transferir dinero por adelantado.
+        a: Una parte del importe es un anticipo, el resto se paga al finalizar. El monto del anticipo depende del servicio y la cantidad total de la transacción; lo comunicamos antes de comenzar para que ambas partes comprendan las condiciones.
       - q: ¿Puedo escribir por otro medio que no sea Telegram?
         a: Sí, además de Telegram, están disponibles las llamadas y WhatsApp.
       - q: ¿Dónde están ubicados?
@@ -263,7 +263,7 @@ translations:
         a: 'Sie erhalten einen Bericht mit Fotos und die klare Antwort „nicht kaufen“ – und verlieren nur die Kosten für die Prüfung, nicht das Geld für das Auto. Der Bericht bleibt bei Ihnen, und wenn Sie sich dennoch entscheiden, zu kaufen, können die gefundenen Mängel als Argument für den Preisnachlass genutzt werden: In einer unserer Besichtigungen in Serbien reduzierte sich der Preis um 700 Euro.'
     general:
       - q: Wie wird die Arbeit bezahlt?
-        a: Die Zahlung erfolgt bar am Tag des Deals – Sie überweisen kein Geld im Voraus.
+        a: Ein Teil des Betrags ist eine Anzahlung, der Rest wird nach der Durchführung fällig. Die Höhe der Anzahlung hängt von der Dienstleistung und der Summe des Deals ab – wir nennen diesen Betrag vor Beginn der Arbeiten, damit beide Seiten die Bedingungen verstehen.
       - q: Kann ich nicht über Telegram schreiben?
         a: Ja, neben Telegram sind auch Anrufe und WhatsApp verfügbar.
       - q: Wo befinden Sie sich?
@@ -273,4 +273,4 @@ translations:
     cityExpert:
       q: Gibt es in jeder Stadt einen eigenen Experten?
       a: In verschiedenen Städten arbeiten unterschiedliche Spezialisten von uns; in einigen Fällen fährt ein Experte in eine benachbarte Stadt der Region.
-translatedFrom: 43a3fae3a084677d
+translatedFrom: b11f23df2c6a89c6

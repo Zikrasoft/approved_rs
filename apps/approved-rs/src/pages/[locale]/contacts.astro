@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import ContactCTA from '@/components/ContactCTA.astro';
+import LeadForm from '@/components/LeadForm.astro';
 import PageHero from '@/components/PageHero.astro';
 import Faq from '@/components/Faq.astro';
 import {
@@ -15,7 +16,7 @@ import { getPagesContent } from '@/i18n/content/pages';
 import { getI18n } from '@/i18n/getI18n';
 import { withLocales, PathBuilder } from '@/utils/paths';
 import { generateOrganizationSchema } from '@/utils/seo';
-import { telegramLink } from '@/utils/telegramLink';
+import { telegramLink } from '@/utils/contactLinks';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
@@ -72,24 +73,28 @@ const schema = {
         </div>
       </div>
 
-      <div
-        class="fade-up fade-up-2 rounded-sm p-8 border border-t-2 bg-surface border-border-strong border-t-accent"
-      >
-        <span class="eyebrow">{p.workEyebrow}</span>
-        <div class="space-y-6">
-          {
-            steps.map((step, i) => (
-              <div
-                class="flex gap-4 anim-inline"
-                style={`--anim-delay: ${0.2 + i * 0.1}s`}
-              >
-                <div class="step-circle shrink-0 !mb-0">{step.n}</div>
-                <p class="text-sm leading-relaxed pt-2.5 text-muted">
-                  {step.text}
-                </p>
-              </div>
-            ))
-          }
+      <div class="fade-up fade-up-2 space-y-10">
+        <LeadForm />
+
+        <div
+          class="rounded-sm p-8 border border-t-2 bg-surface border-border-strong border-t-accent"
+        >
+          <span class="eyebrow">{p.workEyebrow}</span>
+          <div class="space-y-6">
+            {
+              steps.map((step, i) => (
+                <div
+                  class="flex gap-4 anim-inline"
+                  style={`--anim-delay: ${0.2 + i * 0.1}s`}
+                >
+                  <div class="step-circle shrink-0 !mb-0">{step.n}</div>
+                  <p class="text-sm leading-relaxed pt-2.5 text-muted">
+                    {step.text}
+                  </p>
+                </div>
+              ))
+            }
+          </div>
         </div>
       </div>
     </div>

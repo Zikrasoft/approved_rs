@@ -1,5 +1,5 @@
 metaTitle: Автоподбор, привоз и выкуп авто в Европе
-metaDescription: Автоподбор в своей стране или привоз авто из Европы и Китая — под ключ. Проверка и выкуп. Работаем для русскоязычных по всему миру.
+metaDescription: Автоподбор в своей стране или привоз авто из Европы и Китая — под ключ. Проверка и выкуп. Работаем по всей Европе.
 journey:
   - title: Подбор
     desc: Находим, проверяем и доставляем автомобиль под ваш бюджет — под ключ, в Германии, Испании, Сербии и Швейцарии.
@@ -11,10 +11,10 @@ journey:
   - title: Выкуп
     desc: Оформляем выкуп и растаможку автомобиля на иностранных номерах.
     note: Машина уже за границей? Поможем её оформить
-heroLine1: Найдено.
-heroLine2: Проверено.
-heroLine3: Доставлено.
-heroSubtext: Подберём, проверим, оформим и привезём автомобиль из Германии, Испании или Сербии. Один путь, одна команда.
+heroLine1: Машину найдём.
+heroLine2: Проверим.
+heroLine3: Привезём.
+heroSubtext: Подберём машину в Германии, Испании, Швейцарии или Сербии, а если она в другой стране, привезём к вам с проверкой, оформлением и растаможкой.
 statClients:
   value: 200+
   label: клиентов
@@ -34,6 +34,17 @@ trustCards:
     text: 'Поэтапная оплата и понятные условия. Сопровождаем документы на всех этапах: оформление, растаможка, регистрация — без сюрпризов.'
   - title: Локальная экспертиза
     text: 'Знаем специфику каждого рынка: автобанные пробеги Германии, особенности кузова испанских авто, нюансы оформления на иностранные номера в Сербии.'
+testimonialsHeading: Что говорят клиенты
+testimonials:
+  - quote: «Привезли BMW 3 серии из Мюнхена в Белград. Всё чётко — от осмотра до постановки на учёт. Сэкономили кучу нервов на оформлении.»
+    name: Александр
+    caption: BMW 320d, Германия → Сербия
+  - quote: «Долго искал Skoda Octavia в хорошем состоянии. Ребята нашли вариант в Испании, проверили независимым экспертом — всё совпало с описанием.»
+    name: Михаил
+    caption: Skoda Octavia, Испания → Россия
+  - quote: «Оформление на иностранные номера казалось сложным. Команда провела через каждый шаг — и через месяц я уже ездил. Рекомендую.»
+    name: Дмитрий
+    caption: VW Passat, Германия → Сербия
 ctaEyebrow: Готовы начать?
 ctaHeading:
   line1: Расскажите нам
@@ -118,7 +129,7 @@ ctaPhotoAlt: Чистый кузов и колесо автомобиля кру
 translations:
   en:
     metaTitle: Car Sourcing, Import and Buyback in Europe
-    metaDescription: Car sourcing in your country or importing from Europe and China – done for you. Inspection and buyback. We work for Russian speakers worldwide.
+    metaDescription: Car sourcing in your country or importing from Europe and China — full service. Inspection and buyback. We operate across Europe.
     journey:
       - title: Sourcing
         desc: We find, verify, and deliver the car that fits your budget – done for you, in Germany, Spain, Serbia, and Switzerland.
@@ -130,10 +141,10 @@ translations:
       - title: Buyback
         desc: We handle the buyback and customs clearance of cars with foreign license plates.
         note: Is the car already abroad? We can help process it.
-    heroLine1: Found.
-    heroLine2: Verified.
-    heroLine3: Delivered.
-    heroSubtext: We’ll source, verify, process, and deliver the car from Germany, Spain, or Serbia. One route, one team.
+    heroLine1: We'll find the car.
+    heroLine2: We'll inspect it.
+    heroLine3: We'll deliver it.
+    heroSubtext: We can source a car in Germany, Spain, Switzerland, or Serbia, and if it’s in another country, we’ll bring it to you with inspection, registration, and customs clearance.
     statClients:
       value: 200+
       label: clients
@@ -153,6 +164,17 @@ translations:
         text: 'Stage payments and clear terms. We support the documents at every stage: registration, customs clearance, licensing— no surprises.'
       - title: Local Expertise
         text: 'We know the specifics of each market: autobahn mileage in Germany, characteristics of Spanish cars, nuances of registering with foreign plates in Serbia.'
+    testimonialsHeading: What our clients say
+    testimonials:
+      - quote: “Brought a BMW 3 Series from Munich to Belgrade. Everything was precise — from inspection to registration. Saved a lot of hassle during the process.”
+        name: Александр
+        caption: BMW 320d, Germany → Serbia
+      - quote: “I searched for a well-maintained Skoda Octavia for a long time. The team found a great option in Spain, had it checked by an independent expert — everything matched the description.”
+        name: Михаил
+        caption: Skoda Octavia, Spain → Russia
+      - quote: “Dealing with foreign license plates seemed complicated. The team guided me through every step — and within a month, I was driving. Highly recommend.”
+        name: Дмитрий
+        caption: VW Passat, Germany → Serbia
     ctaEyebrow: Ready to get started?
     ctaHeading:
       line1: Tell us about your
@@ -235,7 +257,7 @@ translations:
     ctaPhotoAlt: Close-up of a clean car body and wheel
   sr:
     metaTitle: Auto izbor, uvoz i otkup automobila u Evropi
-    metaDescription: Auto izbor u vašoj zemlji ili uvoz automobila iz Evrope i Kine — sve uključeno. Provera i otkup. Radimo za ruskojezične klijente širom sveta.
+    metaDescription: Izbor automobila u svojoj zemlji ili uvoz auta iz Evrope i Kine — sve na ključ. Provera i otkup. Radimo širom Evrope.
     journey:
       - title: Izbor
         desc: Pronalažemo, proveravamo i dostavljamo automobil prema vašem budžetu — sve uključeno, u Nemačkoj, Španiji, Srbiji i Švajcarskoj.
@@ -247,10 +269,10 @@ translations:
       - title: Otkup
         desc: Obrađujemo otkup i carinjenje automobila sa stranim registarskim tablicama.
         note: Automobil je već u inostranstvu? Pomoći ćemo da ga legalizujete.
-    heroLine1: Pronađeno.
-    heroLine2: Provereno.
-    heroLine3: Dostavljeno.
-    heroSubtext: Pronaći ćemo, proveriti, obraditi i dovesti automobil iz Nemačke, Španije ili Srbije. Jedan put, jedan tim.
+    heroLine1: Naći ćemo auto.
+    heroLine2: Proverićemo.
+    heroLine3: Dovozimo.
+    heroSubtext: Pronaći ćemo auto u Nemačkoj, Španiji, Švajcarskoj ili Srbiji, a ako je u drugoj zemlji, dovući ćemo ga sa proverom, registracijom i carinjenjem.
     statClients:
       value: 200+
       label: klijenata
@@ -270,6 +292,17 @@ translations:
         text: 'Fazna uplata i jasni uslovi. Pratimo dokumente na svim koracima: registracija, carinjenje, registracija — bez iznenađenja.'
       - title: Lokalna ekspertiza
         text: 'Znamo specifičnosti svake tržišne sredine: auto-putne pređene kilometre u Nemačkoj, karakteristike karoserija španskih automobila, detalje o registraciji na strane tablice u Srbiji.'
+    testimonialsHeading: Šta kažu klijenti
+    testimonials:
+      - quote: «Doveli su BMW 3. serije iz Minhena u Beograd. Sve je bilo jasno — od pregleda do registracije. Uštedeli smo mnogo stresa kod obrade.»
+        name: Aleksandar
+        caption: BMW 320d, Nemačka → Srbija
+      - quote: «Dugo sam tražio Skoda Octavia u dobrom stanju. Momci su našli opciju u Španiji, proverili sa nezavisnim stručnjakom — sve se poklopilo sa opisom.»
+        name: Mihail
+        caption: Skoda Octavia, Španija → Rusija
+      - quote: «Registracija na strana brojna bila je teška. Tim me vodio kroz svaki korak — i za mesec dana sam već vozio. Preporučujem.»
+        name: Dmitrij
+        caption: VW Passat, Nemačka → Srbija
     ctaEyebrow: Spremni da počnemo?
     ctaHeading:
       line1: Recite nam
@@ -352,7 +385,7 @@ translations:
     ctaPhotoAlt: Čista karoserija i točak automobila izbliza
   es:
     metaTitle: Selección de autos, importación y compra en Europa
-    metaDescription: Selecciona un auto en tu país o importa desde Europa y China, llaves en mano. Inspección y compra. Atendemos a hispanohablantes en todo el mundo.
+    metaDescription: Búsqueda de coches en su país o importación de vehículos de Europa y China — llave en mano. Inspección y compra. Operamos en toda Europa.
     journey:
       - title: Selección
         desc: Encontramos, verificamos y entregamos el automóvil según tu presupuesto, llaves en mano, en Alemania, España, Serbia y Suiza.
@@ -364,10 +397,10 @@ translations:
       - title: Compra
         desc: Gestionamos la compra y el trámite de despachado del automóvil con matrículas extranjeras.
         note: ¿El auto ya está en el extranjero? Te ayudamos con el trámite.
-    heroLine1: Encontrado.
-    heroLine2: Verificado.
-    heroLine3: Entregado.
-    heroSubtext: Seleccionamos, verificamos, tramitamos y traemos tu automóvil de Alemania, España o Serbia. Un camino, un equipo.
+    heroLine1: Encontramos el coche.
+    heroLine2: Lo inspeccionamos.
+    heroLine3: Lo traemos.
+    heroSubtext: Seleccionamos vehículos en Alemania, España, Suiza o Serbia, y si están en otro país, los traemos a usted con inspección, documentación y despacho aduanero.
     statClients:
       value: 200+
       label: clientes
@@ -387,6 +420,17 @@ translations:
         text: 'Pago por etapas y condiciones claras. Acompañamos la documentación en todos los pasos: trámites, despachado, registro — sin sorpresas.'
       - title: Experiencia local
         text: 'Conocemos las particularidades de cada mercado: kilometrajes en autopistas alemanas, características de la carrocería de autos españoles, detalles de registro con matrículas extranjeras en Serbia.'
+    testimonialsHeading: Lo que dicen nuestros clientes
+    testimonials:
+      - quote: «Trajeron un BMW serie 3 de Múnich a Belgrado. Todo claro — desde la inspección hasta el registro. Ahorra un montón de nervios en la documentación.»
+        name: Александр
+        caption: BMW 320d, Alemania → Serbia
+      - quote: «Busqué mucho tiempo un Skoda Octavia en buen estado. Ellos encontraron una opción en España, la revisaron con un experto independiente — todo coincidía con la descripción.»
+        name: Михаил
+        caption: Skoda Octavia, España → Rusia
+      - quote: «El registro con matrículas extranjeras parecía complicado. El equipo me guió en cada paso — y al mes ya estaba conduciendo. Los recomiendo.»
+        name: Дмитрий
+        caption: VW Passat, Alemania → Serbia
     ctaEyebrow: ¿Listo para empezar?
     ctaHeading:
       line1: Cuéntanos
@@ -469,7 +513,7 @@ translations:
     ctaPhotoAlt: Carrocería limpia y rueda de automóvil en primer plano
   de:
     metaTitle: Autobeschaffung, Import und Rückkauf in Europa
-    metaDescription: Autobeschaffung in Ihrem Land oder Import aus Europa und China – schlüsselfertig. Prüfung und Rückkauf. Wir arbeiten für Russischsprachige weltweit.
+    metaDescription: Fahrzeugbeschaffung in Ihrem Land oder Import von Autos aus Europa und China – schlüsselfertig. Prüfungen und Rückkäufe. Wir arbeiten in ganz Europa.
     journey:
       - title: Auswahl
         desc: Wir finden, prüfen und liefern das Auto passend zu Ihrem Budget – schlüsselfertig, in Deutschland, Spanien, Serbien und der Schweiz.
@@ -481,10 +525,10 @@ translations:
       - title: Rückkauf
         desc: Wir kümmern uns um den Rückkauf und die Zollabwicklung des Fahrzeugs mit ausländischen Nummernschildern.
         note: Das Auto ist bereits im Ausland? Wir helfen Ihnen bei der Abwicklung.
-    heroLine1: Gefunden.
-    heroLine2: Geprüft.
-    heroLine3: Geliefert.
-    heroSubtext: Wir wählen, prüfen, bearbeiten und bringen Fahrzeuge aus Deutschland, Spanien oder Serbien. Ein Weg, ein Team.
+    heroLine1: Wir finden Ihr Auto.
+    heroLine2: Wir überprüfen es.
+    heroLine3: Wir bringen es Ihnen.
+    heroSubtext: Wir beschaffen Autos aus Deutschland, Spanien, der Schweiz oder Serbien. Sollte es in einem anderen Land sein, bringen wir es zu Ihnen mit Prüfung, Abwicklung und Zollabfertigung.
     statClients:
       value: 200+
       label: Kunden
@@ -504,6 +548,17 @@ translations:
         text: 'Schrittweise Zahlung und klare Bedingungen. Wir begleiten die Dokumente auf allen Etappen: Abwicklung, Zoll, Registrierung – ohne Überraschungen.'
       - title: Lokale Expertise
         text: 'Wir kennen die Besonderheiten jedes Marktes: Autobahnfahrten in Deutschland, spezifische Eigenschaften spanischer Fahrzeuge, Details zur Anmeldung auf ausländische Nummern in Serbien.'
+    testimonialsHeading: Das sagen unsere Kunden
+    testimonials:
+      - quote: „Wir haben einen BMW 3er aus München nach Belgrad gebracht. Alles lief reibungslos – von der Inspektion bis zur Zulassung. Wir haben eine Menge Nerven bei der Abwicklung gespart.“
+        name: Александр
+        caption: BMW 320d, Deutschland → Serbien
+      - quote: „Ich habe lange nach einer Skoda Octavia in gutem Zustand gesucht. Die Jungs haben einen Wagen in Spanien gefunden und von einem unabhängigen Experten prüfen lassen – alles stimmte mit der Beschreibung überein.“
+        name: Михаил
+        caption: Skoda Octavia, Spanien → Russland
+      - quote: „Die Registrierung auf ausländische Nummern schien kompliziert. Das Team hat mich durch jeden Schritt geführt – und nach einem Monat konnte ich schon fahren. Ich empfehle es.“
+        name: Дмитрий
+        caption: VW Passat, Deutschland → Serbien
     ctaEyebrow: Bereit zu starten?
     ctaHeading:
       line1: Erzählen Sie uns
@@ -584,4 +639,4 @@ translations:
     findingLabel: 'Gefunden:'
     heroPhotoAlt: Limousine auf einer europäischen Autobahn
     ctaPhotoAlt: Saubere Karosserie und Auto-Rad im Close-up
-translatedFrom: 57d0edff34a1f44b
+translatedFrom: 16762abf32c16a94

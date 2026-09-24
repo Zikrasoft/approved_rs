@@ -1,4 +1,5 @@
 import { APPROVED } from '@podbor/brands';
+import { telegramLink } from '@podbor/site-kit/contact-links';
 import type { Locale } from '@/i18n/config';
 
 export const YM_COUNTER_ID = 111800377;
@@ -24,7 +25,7 @@ export const VIBER_NUMBER = import.meta.env.PUBLIC_VIBER_NUMBER!;
 export const PHONE_NUMBER = import.meta.env.PUBLIC_WHATSAPP_NUMBER!;
 
 export const SOCIAL_SAME_AS = [
-  `https://t.me/${TG_MANAGER}`,
+  telegramLink(TG_MANAGER),
   `https://www.threads.com/@${THREADS_CHANNEL}`,
 ];
 

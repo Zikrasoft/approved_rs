@@ -19,9 +19,9 @@ const POST = createLeadsRoute<Locale>({
   localeCookie: 'lang',
   thanksPath: (locale) => `/${locale}/thanks/`,
   missingFieldsMessage: {
-    ru: 'Имя и контакт обязательны',
-    en: 'Name and contact are required',
-    sr: 'Ime i kontakt su obavezni',
+    ru: 'Укажите контакт',
+    en: 'Please enter a contact',
+    sr: 'Unesite kontakt',
   },
 });
 
@@ -155,7 +155,7 @@ describe('createLeadsRoute', () => {
     expect(notifyLead).not.toHaveBeenCalled();
   });
 
-  it('folds an optional car field into the comment the operator reads', async () => {
+  it('still folds a car field posted by a page cached before the field was merged away', async () => {
     await POST(
       makeCtx(valid({ car: 'BMW X5 2019', comment: 'Стучит спереди' })),
     );
@@ -165,18 +165,21 @@ describe('createLeadsRoute', () => {
     );
   });
 
-  it('sends the car alone when there is no comment', async () => {
-    await POST(makeCtx(valid({ car: 'Golf 7' })));
+  it('passes the comment through as the operator reads it', async () => {
+    await POST(makeCtx(valid({ comment: 'BMW X5 2019, стучит спереди' })));
     expect(notifyLead).toHaveBeenCalledWith(
-      expect.objectContaining({ comment: 'Golf 7' }),
+      expect.objectContaining({ comment: 'BMW X5 2019, стучит спереди' }),
       '[leads]',
     );
   });
 
-  it('returns 400 when name is empty', async () => {
+  it('takes a lead whose name is empty, because only the contact is required', async () => {
     const res = await POST(makeCtx({ name: '', contact: RS_PHONE }));
-    expect(res.status).toBe(400);
-    expect(notifyLead).not.toHaveBeenCalled();
+    expect(res.status).toBe(302);
+    expect(notifyLead).toHaveBeenCalledWith(
+      expect.objectContaining({ name: '' }),
+      '[leads]',
+    );
   });
 
   it('returns 400 when contact is missing', async () => {
@@ -187,7 +190,7 @@ describe('createLeadsRoute', () => {
   it('returns 400 without leaking the schema when the contact is not a phone', async () => {
     const res = await POST(makeCtx({ name: 'Иван', contact: 'asdf' }));
     expect(res.status).toBe(400);
-    await expect(res.text()).resolves.toBe('Имя и контакт обязательны');
+    await expect(res.text()).resolves.toBe('Укажите контакт');
   });
 
   it('returns 400 for a contact_channel outside the tracked set', async () => {
@@ -198,12 +201,12 @@ describe('createLeadsRoute', () => {
 
   it('answers the 400 in the visitor own locale', async () => {
     const res = await POST(makeCtx({ name: '' }, 'sr'));
-    await expect(res.text()).resolves.toBe('Ime i kontakt su obavezni');
+    await expect(res.text()).resolves.toBe('Unesite kontakt');
   });
 
   it('answers the 400 in the default locale for a prototype-key cookie value', async () => {
     const res = await POST(makeCtx({ name: '' }, 'constructor'));
-    await expect(res.text()).resolves.toBe('Имя и контакт обязательны');
+    await expect(res.text()).resolves.toBe('Укажите контакт');
   });
 
   it('dispatches notifyLead via waitUntil with the parsed form fields', async () => {

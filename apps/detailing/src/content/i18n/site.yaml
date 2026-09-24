@@ -57,15 +57,12 @@ form:
   countryLabel: Код страны
   contactLabel: Номер телефона
   contactPlaceholder: 60 123 4567
-  serviceLabel: Что интересует
-  servicePlaceholder: Можно выбрать несколько
   commentLabel: Комментарий
   commentPlaceholder: Марка, модель, год — и что хотите сделать
   submit: Отправить заявку
   submitting: Отправляем…
   privacyNote: Принимаю
   privacyLinkText: политику конфиденциальности
-  requiredError: Введите имя
   errorTelegram: Введите ник в Telegram — не меньше трёх символов
   errorPhone: Введите корректный номер телефона
   errorConsent: Отметьте согласие, чтобы отправить заявку
@@ -141,15 +138,12 @@ translations:
       countryLabel: Kod države
       contactLabel: Broj telefona
       contactPlaceholder: 60 123 4567
-      serviceLabel: Šta vas zanima
-      servicePlaceholder: Možete odabrati više
       commentLabel: Komentar
       commentPlaceholder: Marka, model, godina — i šta želite da uradite
       submit: Pošalji zahtev
       submitting: Šaljemo…
       privacyNote: Prihvatam
       privacyLinkText: politiku privatnosti
-      requiredError: Unesite ime
       errorTelegram: Unesite nik u Telegramu — najmanje tri karaktera
       errorPhone: Unesite ispravan broj telefona
       errorConsent: Potvrdite saglasnost da biste poslali zahtev
@@ -222,15 +216,12 @@ translations:
       countryLabel: Country Code
       contactLabel: Phone Number
       contactPlaceholder: 60 123 4567
-      serviceLabel: What Interests You
-      servicePlaceholder: You can select multiple
       commentLabel: Comment
       commentPlaceholder: Make, model, year — and what you'd like done
       submit: Submit Request
       submitting: Submitting…
       privacyNote: I accept
       privacyLinkText: the privacy policy
-      requiredError: Please enter your name
       errorTelegram: Enter your Telegram username — at least three characters
       errorPhone: Please enter a valid phone number
       errorConsent: Check the consent box to submit your request
@@ -243,4 +234,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: 833a3e4ccd0394d1
+translatedFrom: 32600abaf30f2a23

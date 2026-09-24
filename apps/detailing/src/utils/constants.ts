@@ -1,4 +1,5 @@
 import { DETAILS } from '@podbor/brands';
+import { instagramLink, telegramLink } from '@podbor/site-kit/contact-links';
 
 export const BRAND = DETAILS;
 
@@ -47,8 +48,8 @@ export const TELEGRAM_ENABLED = !TG_MANAGER.endsWith('_placeholder');
 export const INSTAGRAM_ENABLED = !INSTAGRAM.endsWith('_placeholder');
 
 export const SOCIAL_SAME_AS = [
-  ...(INSTAGRAM_ENABLED ? [`https://www.instagram.com/${INSTAGRAM}`] : []),
-  ...(TELEGRAM_ENABLED ? [`https://t.me/${TG_MANAGER}`] : []),
+  ...(INSTAGRAM_ENABLED ? [instagramLink(INSTAGRAM)] : []),
+  ...(TELEGRAM_ENABLED ? [telegramLink(TG_MANAGER)] : []),
 ];
 
 export const YM_COUNTER_ID = 112647721;

@@ -137,10 +137,11 @@ const closeLabel = getI18n(locale).common.closeLabel;
           `.pill-tab[data-tab="${CSS.escape(tab)}"]`,
         )
       : null;
-    if (tabButton) {
-      tabButton.click();
-      host.querySelector<HTMLElement>('[data-modal-close]')?.focus();
-    }
+    if (tabButton) tabButton.click();
+    host
+      .querySelector('.contact-panel:not(.hidden)')
+      ?.querySelector<HTMLInputElement>('input')
+      ?.focus();
     reachGoal(GOALS.leadModalOpen, {
       tab: tabButton ? tab : 'default',
     });

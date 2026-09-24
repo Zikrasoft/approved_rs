@@ -13,6 +13,10 @@ const trustCardSchema = z
   .object({ title: z.string(), text: z.string() })
   .strict();
 
+const testimonialSchema = z
+  .object({ quote: z.string(), name: z.string(), caption: z.string() })
+  .strict();
+
 const statItemSchema = z
   .object({ value: z.string(), label: z.string() })
   .strict();
@@ -48,6 +52,8 @@ export const homeContentSchema = z
     whyUsHeading: z.string(),
     whyUsSubtext: z.string(),
     trustCards: z.array(trustCardSchema).length(3),
+    testimonialsHeading: z.string(),
+    testimonials: z.array(testimonialSchema).min(1),
     ctaEyebrow: z.string(),
     ctaHeading: z
       .object({ line1: z.string(), line2: z.string(), accentWord: z.string() })

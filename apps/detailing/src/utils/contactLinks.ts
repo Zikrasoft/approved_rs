@@ -1,4 +1,11 @@
 import {
+  instagramLink,
+  phoneLink,
+  telegramLink,
+  viberLink,
+  whatsappLink,
+} from '@podbor/site-kit/contact-links';
+import {
   INSTAGRAM,
   PHONE_NUMBER,
   TG_MANAGER,
@@ -7,9 +14,9 @@ import {
 } from './constants';
 
 export const CONTACT_LINKS = {
-  phone: `tel:+${PHONE_NUMBER}`,
-  whatsapp: `https://wa.me/${WHATSAPP_NUMBER}`,
-  viber: `viber://chat?number=%2B${VIBER_NUMBER}`,
-  telegram: `https://t.me/${TG_MANAGER}`,
-  instagram: `https://www.instagram.com/${INSTAGRAM}`,
+  phone: phoneLink(PHONE_NUMBER),
+  whatsapp: whatsappLink(WHATSAPP_NUMBER),
+  viber: viberLink(VIBER_NUMBER),
+  telegram: telegramLink(TG_MANAGER),
+  instagram: instagramLink(INSTAGRAM),
 } as const;

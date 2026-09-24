@@ -124,7 +124,9 @@ Approved's trust/verification semantics.
 - Packages are configured per business, never per hardcoded assumption:
   the commission rate, the locale list, the storage key and the service labels
   are all config. Operator-facing Russian bot copy is _not_ — it is the same
-  for every brand and lives in the package.
+  for every brand and lives in the package, contact-channel labels included
+  (`CHANNEL_LABELS` in `packages/lead-crm/src/telegram/format.ts`, after three
+  byte-identical copies of it sat in the apps' `crmBot.ts`).
 - **`SOURCE_LOCALE = 'ru'` in `packages/i18n` is a deliberate exception** to that
   rule. It is the language content is authored in, not a locale a site serves,
   and the whole auto-translate pipeline is built on every app writing Russian and
@@ -186,6 +188,27 @@ Both new apps follow the same shape, and a third should too:
   runs for a prerendered page on Vercel's static output, so the `lang` cookie
   may not exist — without the field, every non-Russian visitor lands on
   `/ru/thanks/` and the lead is stored as `locale: 'ru'`.
+- **Only the contact is required**, on all three sites: `@podbor/lead-crm`'s
+  form schema accepts an empty `name`, and no form marks it `required`. A
+  shorter form converts better, and a lead is answerable without a name. The
+  same reasoning removed the service picker from the brand forms. What posts a
+  slug now is the page, through a hidden `SERVICE_FIELD` input: the service
+  pages, CarLab's cart (`parts-order`) and Details' work pages
+  (`servicesApplied[0]`). Everywhere else — the modal, the contact page, the
+  homepage forms — a lead carries no service **by design**, and the operator
+  card renders `—` for it with the visited page on the `Страница:` line. A
+  contact click renders `Клик: <канал>` instead: the click has a channel worth
+  naming, a form lead does not. The
+  bot cannot set the service afterwards, so treat it as lost rather than
+  pending; if per-service numbers ever matter more than the shorter form, the
+  fix is to thread the page's service into the modal, not to bring the picker
+  back.
+- **A messenger tap opens the lead form**, everywhere except the footer and
+  `/thanks/`. A bare click reaches the operator as a lead with no name and no
+  contact — unanswerable — so the tiles route into the modal with the channel
+  preselected and the click still lands in Telegram. The footer keeps direct
+  links, and `ContactCTA direct` on the thanks page does too: someone who has
+  just sent a brief wants the messenger, not the form again.
 - **Form controls nest their label** instead of using `id`/`for`. The lead form
   renders two or three times per page (inline, in the modal, on the contact
   page), and duplicate ids make every label focus the first form.
@@ -308,7 +331,7 @@ The binding is split in two on purpose: `src/lib/crm.ts` builds the store and ne
 
 The commission rate is per business (`DEFAULT_COMMISSION_PERCENT` in `src/lib/crm.ts`), and a lead stores the rate it was created with, so changing the default never rewrites history.
 
-**Keystatic admin (`keystatic.config.ts`):** local dev reads/writes the working tree directly (`storage: { kind: 'local' }`); production (`import.meta.env.PROD`) goes through GitHub's API (`storage: { kind: 'github' }`) since Vercel's filesystem is ephemeral. Service-slug enums are hand-duplicated between `keystatic.config.ts` and `src/content.config.ts`/`src/utils/labels.ts` because Keystatic's config can't import Astro-coupled modules — keep both in sync when adding a service.
+**Keystatic admin (`keystatic.config.ts`):** local dev reads/writes the working tree directly (`storage: { kind: 'local' }`); production (`import.meta.env.PROD`) goes through GitHub's API (`storage: { kind: 'github' }`) since Vercel's filesystem is ephemeral. Service-slug enums are hand-duplicated between `keystatic.config.ts` and `src/content.config.ts`/`src/utils/labels.ts` (`src/utils/services.ts` on the brand sites) because Keystatic's config can't import Astro-coupled modules — and a fourth copy lives in `packages/brands/src/serviceLabels.ts`, which is what the Telegram card reads. `serviceLabel()` echoes an unknown slug rather than throwing, and `serviceLabels.test.ts` hardcodes its own list because a package cannot import an app, so a slug added to an app alone passes every test and reaches the operator raw. Update all of them when adding a service.
 
 **Path/URL construction:** always go through `src/utils/paths.ts`'s `PathBuilder` rather than hand-building locale-prefixed URLs, so a routing change (like the legacy-slug renames above) only needs updating in one place.
 

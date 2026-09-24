@@ -1,5 +1,11 @@
 import type { SiteContent } from '@/i18n/content/site';
 import {
+  phoneLink,
+  telegramLink,
+  viberLink,
+  whatsappLink,
+} from '@podbor/site-kit/contact-links';
+import {
   PHONE_NUMBER,
   TELEGRAM_ENABLED,
   TG_MANAGER,
@@ -8,10 +14,10 @@ import {
 } from './constants';
 
 export const CONTACT_LINKS = {
-  phone: `tel:+${PHONE_NUMBER}`,
-  whatsapp: `https://wa.me/${WHATSAPP_NUMBER}`,
-  viber: `viber://chat?number=%2B${VIBER_NUMBER}`,
-  telegram: `https://t.me/${TG_MANAGER}`,
+  phone: phoneLink(PHONE_NUMBER),
+  whatsapp: whatsappLink(WHATSAPP_NUMBER),
+  viber: viberLink(VIBER_NUMBER),
+  telegram: telegramLink(TG_MANAGER),
 } as const;
 
 export const contactChannels = (site: SiteContent) =>

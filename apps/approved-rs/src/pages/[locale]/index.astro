@@ -20,7 +20,6 @@ import {
   CHINA_NAME,
 } from '@/utils/constants';
 import { generateOrganizationSchema } from '@/utils/seo';
-import { telegramLink } from '@/utils/telegramLink';
 import { getHomeContent } from '@/i18n/content/home';
 import { getI18n } from '@/i18n/getI18n';
 import { PathBuilder } from '@/utils/paths';
@@ -30,6 +29,7 @@ import { getLocale } from '@/i18n/config';
 import heroImage from '@/assets/hero-delivery.jpg';
 import { heroImageAttrs } from '@/utils/heroImage';
 import closingImage from '@/assets/closing.jpg';
+import { telegramLink } from '@/utils/contactLinks';
 
 const hero = await heroImageAttrs(heroImage);
 const locale = getLocale(Astro.params.locale);
@@ -200,6 +200,12 @@ const geoCells = countries.map((country) => ({
     </div>
   </section>
 
+  <section class="lg:hidden border-b border-default">
+    <div class="max-w-6xl mx-auto px-6 py-band">
+      <LeadForm />
+    </div>
+  </section>
+
   <section class="border-b border-default">
     <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
       <SectionHeading title={h.origin.heading} />
@@ -291,6 +297,35 @@ const geoCells = countries.map((country) => ({
 
   <section class="border-b border-default">
     <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
+      <SectionHeading title={h.testimonialsHeading} />
+      <div class="grid gap-6 md:grid-cols-3 mt-12">
+        {
+          h.testimonials.map((review, i) => (
+            <figure
+              class="glow-border flex flex-col gap-5 rounded-sm border p-7 bg-surface border-default anim-inline"
+              style={`--anim-delay: ${0.08 + i * 0.08}s`}
+            >
+              <blockquote class="flex-1 text-sm leading-relaxed text-secondary">
+                {review.quote}
+              </blockquote>
+              <figcaption class="flex items-center gap-3">
+                <div class="flex size-9 items-center justify-center rounded-full font-display text-sm font-bold bg-accent-subtle text-accent">
+                  {review.name.slice(0, 1)}
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-primary">{review.name}</p>
+                  <p class="text-xs text-muted">{review.caption}</p>
+                </div>
+              </figcaption>
+            </figure>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="border-b border-default">
+    <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
       <SectionHeading title={h.whyUsHeading} />
       <p class="text-base max-w-md text-muted mt-4 mb-12 leading-relaxed">
         {h.whyUsSubtext}
@@ -309,15 +344,6 @@ const geoCells = countries.map((country) => ({
           ))
         }
       </div>
-    </div>
-  </section>
-
-  <!-- Mobile-only lead form: desktop keeps it in the hero sidebar, mobile
-       moves it here so the page explains the business before asking for
-       contact details. -->
-  <section class="lg:hidden border-b border-default">
-    <div class="max-w-6xl mx-auto px-6 py-band">
-      <LeadForm />
     </div>
   </section>
 

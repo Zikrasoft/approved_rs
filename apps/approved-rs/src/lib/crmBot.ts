@@ -7,7 +7,6 @@ import {
   parseIds,
 } from '@podbor/lead-crm';
 import { serviceLabel } from '@podbor/brands';
-import type { TrackedContactChannel } from '@/utils/contactChannel';
 import { BRAND, leadStore } from './crm';
 
 function requireEnv(name: string): string {
@@ -24,12 +23,6 @@ export const client = createTelegramClient(requireEnv('TELEGRAM_BOT_TOKEN'));
 export const formatter = createFormatter({
   serviceLabel,
   botUsername: requireEnv('TELEGRAM_BOT_USERNAME'),
-  contactChannelLabels: {
-    telegram: 'Telegram',
-    whatsapp: 'WhatsApp',
-    viber: 'Viber',
-    phone: 'звонок',
-  } satisfies Record<TrackedContactChannel, string>,
 });
 
 export const notifier = createNotifier({

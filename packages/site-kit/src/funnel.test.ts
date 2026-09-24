@@ -41,9 +41,9 @@ function stubViewport(scrollHeight: number, innerHeight: number): void {
 
 const start = (): void => defineFunnelTracking(page.signal);
 
-function trustedFocusIn(field: HTMLElement): void {
-  field.blur();
-  field.focus();
+function typeInto(field: HTMLInputElement): void {
+  field.value += 'a';
+  field.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 const submitEvent = (): Event =>
@@ -147,15 +147,22 @@ describe('defineFunnelTracking', () => {
     expect(goalNames()).not.toContain(GOALS.formView);
   });
 
-  it('reports the first field the visitor touches, and only the first', () => {
+  it('reports the first thing the visitor types, and only the first', () => {
     document.body.innerHTML = FORM;
     start();
     const field = document.querySelector('input')!;
-    trustedFocusIn(field);
-    trustedFocusIn(field);
+    typeInto(field);
+    typeInto(field);
     expect(goalNames().filter((name) => name === GOALS.formStart)).toHaveLength(
       1,
     );
+  });
+
+  it('does not count the modal putting a cursor in a field as starting', () => {
+    document.body.innerHTML = FORM;
+    start();
+    document.querySelector('input')!.focus();
+    expect(goalNames()).not.toContain(GOALS.formStart);
   });
 
   it('reports a submit the page let through to the server', () => {
@@ -274,7 +281,7 @@ describe('defineFunnelTracking', () => {
     controller.abort();
 
     scrollTo(950);
-    trustedFocusIn(document.querySelector('input')!);
+    typeInto(document.querySelector('input')!);
     expect(disconnected).toBe(1);
     expect(goalNames()).not.toContain(GOALS.scroll90);
     expect(goalNames()).not.toContain(GOALS.formStart);

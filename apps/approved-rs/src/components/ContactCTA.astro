@@ -2,8 +2,12 @@
 import Button from './Button.astro';
 import ContactIcon from './ContactIcon.astro';
 import RegionalContactButton from './RegionalContactButton.astro';
-import { telegramLink } from '@/utils/telegramLink';
-import { whatsappLink, viberLink } from '@/utils/contactLinks';
+import {
+  phoneLink,
+  telegramLink,
+  whatsappLink,
+  viberLink,
+} from '@/utils/contactLinks';
 import { getServicesContent } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
 import {
@@ -26,6 +30,7 @@ interface Props {
   // they've even read the pitch is friction the warm/closing CTAs don't
   // have. WhatsApp/Viber/callback stay one tap away via the floating widget.
   compact?: boolean;
+  direct?: boolean;
 }
 
 const locale = getLocale(Astro.currentLocale);
@@ -35,15 +40,14 @@ const {
   label = cc.ctaButtonLabel,
   openModal = false,
   compact = false,
+  direct = false,
 } = Astro.props;
 
-// Callback should land in whichever modal is actually in scope on this page:
-// the page-local one (ServicePageLayout) when the Telegram button also uses
-// it, otherwise the header's global modal — same rule `openModal` already
-// applies to the Telegram button above.
-const callbackTrigger = openModal
+const modalTrigger = openModal
   ? DATA_OPEN_PAGE_LEAD_MODAL
   : DATA_OPEN_LEAD_MODAL;
+const opensModal = (channel: string) =>
+  direct ? {} : { [modalTrigger]: channel };
 ---
 
 <div class="flex flex-col gap-3 my-8" data-contact-cta>
@@ -55,11 +59,12 @@ const callbackTrigger = openModal
           whatsappLabel={openModal ? label : cc.whatsappButtonLabel}
           {manager}
           {openModal}
+          {direct}
           class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center"
         />
         <Button
           variant="secondary"
-          href={`tel:+${PHONE_NUMBER}`}
+          href={phoneLink(PHONE_NUMBER)}
           data-contact-channel="phone"
           class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center bg-surface"
         >
@@ -72,10 +77,10 @@ const callbackTrigger = openModal
         <div class="contact-bar">
           <a
             data-contact-channel="telegram"
-            {...{ [DATA_OPEN_PAGE_LEAD_MODAL]: openModal ? true : undefined }}
-            href={openModal ? undefined : telegramLink(manager)}
-            target={openModal ? undefined : '_blank'}
-            rel={openModal ? undefined : 'noopener'}
+            {...opensModal('telegram')}
+            href={telegramLink(manager)}
+            target="_blank"
+            rel="noopener"
             aria-label={label}
             class="contact-cell"
           >
@@ -85,6 +90,7 @@ const callbackTrigger = openModal
 
           <a
             data-contact-channel="whatsapp"
+            {...opensModal('whatsapp')}
             href={whatsappLink(WHATSAPP_NUMBER)}
             target="_blank"
             rel="noopener"
@@ -97,6 +103,7 @@ const callbackTrigger = openModal
 
           <a
             data-contact-channel="viber"
+            {...opensModal('viber')}
             href={viberLink(VIBER_NUMBER)}
             target="_blank"
             rel="noopener"
@@ -107,21 +114,33 @@ const callbackTrigger = openModal
             <span>Viber</span>
           </a>
 
-          <button
-            type="button"
-            data-contact-channel="callback"
-            aria-label={cc.callbackButtonLabel}
-            {...{ [callbackTrigger]: 'phone' }}
-            class="contact-cell"
-          >
-            <ContactIcon channel="phone" size={16} />
-            <span>{cc.callbackShortLabel}</span>
-          </button>
+          {direct ? (
+            <a
+              data-contact-channel="phone"
+              href={phoneLink(PHONE_NUMBER)}
+              aria-label={cc.callButtonLabel}
+              class="contact-cell"
+            >
+              <ContactIcon channel="phone" size={16} />
+              <span>{cc.callbackShortLabel}</span>
+            </a>
+          ) : (
+            <button
+              type="button"
+              data-contact-channel="callback"
+              aria-label={cc.callbackButtonLabel}
+              {...opensModal('phone')}
+              class="contact-cell"
+            >
+              <ContactIcon channel="phone" size={16} />
+              <span>{cc.callbackShortLabel}</span>
+            </button>
+          )}
         </div>
 
         <Button
           variant="secondary"
-          href={`tel:+${PHONE_NUMBER}`}
+          href={phoneLink(PHONE_NUMBER)}
           data-contact-channel="phone"
           class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full justify-center bg-surface"
         >

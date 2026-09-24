@@ -1,8 +1,12 @@
 ---
 import { MessageCircle, X } from '@lucide/astro';
 import ContactIcon from './ContactIcon.astro';
-import { telegramLink } from '@/utils/telegramLink';
-import { whatsappLink, viberLink } from '@/utils/contactLinks';
+import {
+  phoneLink,
+  telegramLink,
+  whatsappLink,
+  viberLink,
+} from '@/utils/contactLinks';
 import { getServicesContent } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
 import {
@@ -26,6 +30,7 @@ const cc = getServicesContent(locale).caseChrome;
   <div class="floating-panel" role="menu" data-panel hidden>
     <a
       data-contact-channel="telegram"
+      {...{ [DATA_OPEN_LEAD_MODAL]: 'telegram' }}
       href={telegramLink(TG_MANAGER)}
       target="_blank"
       rel="noopener"
@@ -38,6 +43,7 @@ const cc = getServicesContent(locale).caseChrome;
     </a>
     <a
       data-contact-channel="whatsapp"
+      {...{ [DATA_OPEN_LEAD_MODAL]: 'whatsapp' }}
       href={whatsappLink(WHATSAPP_NUMBER)}
       target="_blank"
       rel="noopener"
@@ -50,6 +56,7 @@ const cc = getServicesContent(locale).caseChrome;
     </a>
     <a
       data-contact-channel="viber"
+      {...{ [DATA_OPEN_LEAD_MODAL]: 'viber' }}
       href={viberLink(VIBER_NUMBER)}
       target="_blank"
       rel="noopener"
@@ -73,7 +80,7 @@ const cc = getServicesContent(locale).caseChrome;
     </button>
     <a
       data-contact-channel="phone"
-      href={`tel:+${PHONE_NUMBER}`}
+      href={phoneLink(PHONE_NUMBER)}
       role="menuitem"
       class="floating-cell"
     >

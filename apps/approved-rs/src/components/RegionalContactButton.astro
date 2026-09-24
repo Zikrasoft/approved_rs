@@ -1,16 +1,19 @@
 ---
 import Button from './Button.astro';
 import ContactIcon from './ContactIcon.astro';
-import { telegramLink } from '@/utils/telegramLink';
-import { whatsappLink } from '@/utils/contactLinks';
+import { telegramLink, whatsappLink } from '@/utils/contactLinks';
 import { TG_MANAGER, WHATSAPP_NUMBER } from '@/utils/constants';
-import { DATA_OPEN_PAGE_LEAD_MODAL } from '@/utils/contactChannel';
+import {
+  DATA_OPEN_LEAD_MODAL,
+  DATA_OPEN_PAGE_LEAD_MODAL,
+} from '@/utils/contactChannel';
 
 interface Props {
   telegramLabel: string;
   whatsappLabel: string;
   manager?: string;
   openModal?: boolean;
+  direct?: boolean;
   class?: string;
 }
 
@@ -19,18 +22,25 @@ const {
   whatsappLabel,
   manager = TG_MANAGER,
   openModal = false,
+  direct = false,
   class: className,
 } = Astro.props;
+
+const modalTrigger = openModal
+  ? DATA_OPEN_PAGE_LEAD_MODAL
+  : DATA_OPEN_LEAD_MODAL;
+const opensModal = (channel: string) =>
+  direct ? {} : { [modalTrigger]: channel };
 ---
 
 <div data-primary-contact class="contents">
   <Button
     data-primary-channel="telegram"
     data-contact-channel="telegram"
-    {...{ [DATA_OPEN_PAGE_LEAD_MODAL]: openModal ? true : undefined }}
-    href={openModal ? undefined : telegramLink(manager)}
-    target={openModal ? undefined : '_blank'}
-    rel={openModal ? undefined : 'noopener'}
+    {...opensModal('telegram')}
+    href={telegramLink(manager)}
+    target="_blank"
+    rel="noopener"
     class={className}
   >
     <ContactIcon channel="telegram" size={16} />
@@ -39,10 +49,10 @@ const {
   <Button
     data-primary-channel="whatsapp"
     data-contact-channel="whatsapp"
-    {...{ [DATA_OPEN_PAGE_LEAD_MODAL]: openModal ? true : undefined }}
-    href={openModal ? undefined : whatsappLink(WHATSAPP_NUMBER)}
-    target={openModal ? undefined : '_blank'}
-    rel={openModal ? undefined : 'noopener'}
+    {...opensModal('whatsapp')}
+    href={whatsappLink(WHATSAPP_NUMBER)}
+    target="_blank"
+    rel="noopener"
     hidden
     class={className}
   >

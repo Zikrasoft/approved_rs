@@ -31,6 +31,7 @@ import {
   buildDeleteConfirm,
   buildRemindPicker,
   formatDateRu,
+  leadDisplayName,
 } from './format.ts';
 
 const SERVICE_LABELS: Record<string, string> = {
@@ -41,12 +42,6 @@ const client = createTelegramClient('test-bot-token');
 const formatter = createFormatter({
   serviceLabel: (slug) => SERVICE_LABELS[slug] ?? slug,
   botUsername: 'approved_test_bot',
-  contactChannelLabels: {
-    telegram: 'Telegram',
-    whatsapp: 'WhatsApp',
-    viber: 'Viber',
-    phone: 'звонок',
-  },
 });
 const notifier = createNotifier({
   client,
@@ -199,6 +194,16 @@ describe('sendLeadNotification', () => {
       json: () => Promise.resolve({ description: 'Bad Request' }),
     });
     await expect(sendLeadNotification(makeLead())).rejects.toThrow();
+  });
+});
+
+describe('leadDisplayName', () => {
+  it('stands in for a lead left without a name', () => {
+    expect(leadDisplayName(makeLead({ name: '' }))).toBe('—');
+  });
+
+  it('keeps the name a visitor did give', () => {
+    expect(leadDisplayName(makeLead({ name: 'Иван' }))).toBe('Иван');
   });
 });
 
@@ -1308,7 +1313,6 @@ describe('per-business formatter config', () => {
   const detailingFormatter = createFormatter({
     serviceLabel: () => 'Оклейка плёнкой',
     botUsername: 'detailing_bot',
-    contactChannelLabels: {},
   });
 
   it('does not quote one business rate in help text a shared bot shows every brand', () => {
@@ -1372,6 +1376,58 @@ describe('a lead that asked for several services at once', () => {
     expect(formatter.formatTeaser(makeLead({ services: [] }))).toContain(
       'Автоподбор',
     );
+  });
+
+  it('shows the channel a contact click came from, in place of a service', () => {
+    const click = makeLead({
+      contact: '—',
+      service: '',
+      services: [],
+      kind: 'call_click',
+      contactChannel: 'telegram',
+    });
+    expect(buildLeadDetail(click, 'owner').text).toContain('Клик: Telegram');
+  });
+
+  it('stops calling a click a click once a form left a real contact on it', () => {
+    const upgraded = makeLead({
+      contact: '@ivan',
+      service: '',
+      services: [],
+      kind: 'call_click',
+      contactChannel: 'telegram',
+    });
+    expect(buildLeadDetail(upgraded, 'owner').text).toContain('Заявка #42 — —');
+  });
+
+  it('marks a click whose channel never reached the record', () => {
+    const click = makeLead({
+      contact: '—',
+      service: '',
+      services: [],
+      kind: 'call_click',
+      contactChannel: null,
+    });
+    expect(formatter.formatTeaser(click)).toContain('· — ·');
+  });
+
+  it('prints a channel it has no label for as it is stored', () => {
+    const click = makeLead({
+      contact: '—',
+      service: '',
+      services: [],
+      kind: 'call_click',
+      contactChannel: 'signal',
+    });
+    expect(formatter.formatTeaser(click)).toContain('Клик: signal');
+  });
+
+  it('marks a lead that named no service instead of leaving a gap', () => {
+    const serviceless = makeLead({ service: '', services: [] });
+    expect(buildLeadDetail(serviceless, 'owner').text).toContain(
+      'Заявка #42 — —',
+    );
+    expect(formatter.formatTeaser(serviceless)).toContain('· — ·');
   });
 
   it('keeps the card inside the Telegram length limit when the services are flooded', () => {

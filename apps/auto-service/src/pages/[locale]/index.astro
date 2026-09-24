@@ -9,6 +9,7 @@ import ProcessSteps from '@/components/ProcessSteps.astro';
 import ServiceChips from '@/components/ServiceChips.astro';
 import PriceTable from '@/components/PriceTable.astro';
 import Faq from '@/components/Faq.astro';
+import LeadForm from '@/components/LeadForm.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/currentLocale';
@@ -123,6 +124,13 @@ const faqSchema = {
       body={home.servicesHead.body}
     />
     <PriceTable />
+  </section>
+
+  <section class="wrap pb-band lg:hidden" data-contact-cta>
+    <div class="rounded-block bg-shade p-6">
+      <h2 class="text-section mb-5">{site.form.heading}</h2>
+      <LeadForm compact />
+    </div>
   </section>
 
   <section class="bg-shade">
