@@ -203,6 +203,12 @@ Both new apps follow the same shape, and a third should too:
   pending; if per-service numbers ever matter more than the shorter form, the
   fix is to thread the page's service into the modal, not to bring the picker
   back.
+- **A messenger tap opens the lead form**, everywhere except the footer and
+  `/thanks/`. A bare click reaches the operator as a lead with no name and no
+  contact — unanswerable — so the tiles route into the modal with the channel
+  preselected and the click still lands in Telegram. The footer keeps direct
+  links, and `ContactCTA direct` on the thanks page does too: someone who has
+  just sent a brief wants the messenger, not the form again.
 - **Form controls nest their label** instead of using `id`/`for`. The lead form
   renders two or three times per page (inline, in the modal, on the contact
   page), and duplicate ids make every label focus the first form.

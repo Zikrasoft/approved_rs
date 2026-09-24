@@ -13,6 +13,7 @@ interface Props {
   whatsappLabel: string;
   manager?: string;
   openModal?: boolean;
+  direct?: boolean;
   class?: string;
 }
 
@@ -21,19 +22,22 @@ const {
   whatsappLabel,
   manager = TG_MANAGER,
   openModal = false,
+  direct = false,
   class: className,
 } = Astro.props;
 
 const modalTrigger = openModal
   ? DATA_OPEN_PAGE_LEAD_MODAL
   : DATA_OPEN_LEAD_MODAL;
+const opensModal = (channel: string) =>
+  direct ? {} : { [modalTrigger]: channel };
 ---
 
 <div data-primary-contact class="contents">
   <Button
     data-primary-channel="telegram"
     data-contact-channel="telegram"
-    {...{ [modalTrigger]: 'telegram' }}
+    {...opensModal('telegram')}
     href={telegramLink(manager)}
     target="_blank"
     rel="noopener"
@@ -45,7 +49,7 @@ const modalTrigger = openModal
   <Button
     data-primary-channel="whatsapp"
     data-contact-channel="whatsapp"
-    {...{ [modalTrigger]: 'whatsapp' }}
+    {...opensModal('whatsapp')}
     href={whatsappLink(WHATSAPP_NUMBER)}
     target="_blank"
     rel="noopener"
