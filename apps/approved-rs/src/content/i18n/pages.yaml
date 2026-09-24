@@ -118,6 +118,7 @@ translations:
       heading: What Happens Next with the Car
       intro: We find and import the vehicle. For what happens next, we recommend reaching out to trusted teams.
       linkLabel: Go to Site
+      requestLabel: Submit your request here
       carlabDescription: Auto service in Belgrade — diagnostics, scheduled maintenance, and repairs, including prepping the car after import.
       detailsDescription: Detailing studio — pre-sale preparation, polishing, upholstery cleaning, and protective coatings.
     privacy:
@@ -202,6 +203,7 @@ translations:
       heading: Šta dalje sa autom
       intro: Nalazimo i uvozimo automobil. Za dalja pitanja, savetujemo da se obratite proverenim timovima.
       linkLabel: Posetite sajt
+      requestLabel: Ostavite zahtev ovde
       carlabDescription: Autoservis u Beogradu — dijagnostika, planirano održavanje i popravke, uključujući pripremu automobila nakon prevoza.
       detailsDescription: Detailing studio — priprema za prodaju, polishing, hemijsko čišćenje enterijera i zaštitne prevlake.
     privacy:
@@ -286,6 +288,7 @@ translations:
       heading: ¿Qué hacer con el auto?
       intro: Nosotros encontramos e importamos el vehículo. Para el siguiente paso, te recomendamos contactar a nuestros equipos de confianza.
       linkLabel: Visitar el sitio
+      requestLabel: Dejar una solicitud aquí
       carlabDescription: Servicio automotriz en Belgrado — diagnóstico, mantenimiento programado y reparaciones, incluyendo la preparación del vehículo después de la importación.
       detailsDescription: Estudio de detallado — preparación previa a la venta, pulido, limpieza química del interior y recubrimientos protectores.
     privacy:
@@ -370,6 +373,7 @@ translations:
       heading: Was nun mit dem Auto
       intro: Wir finden und importieren das Fahrzeug. Für weitere Schritte empfehlen wir Ihnen, sich an bewährte Teams zu wenden.
       linkLabel: Zur Website
+      requestLabel: Hier Anfrage absenden
       carlabDescription: Autowerkstatt in Belgrad — Diagnose, planmäßige Wartung und Reparatur, einschließlich der Vorbereitung des Fahrzeugs nach dem Import.
       detailsDescription: Detailing-Studio — Verkaufsbereitschaft, Politur, Innenreinigung und Schutzbeschichtungen.
     privacy:
@@ -424,4 +428,4 @@ translations:
       closingLine2: wonach Sie suchen, —
       closingLine3: wir finden auch für Sie
       closingText: Marke, Budget und ein paar Wünsche genügen. Wir antworten innerhalb von zwei Stunden und sagen Ihnen ehrlich, ob das für diesen Preis realistisch ist.
-translatedFrom: 62c450c995c92f43
+translatedFrom: 2ce7433be6267eb0
