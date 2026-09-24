@@ -3,6 +3,7 @@ export const prerender = false;
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import ServiceQuickLinks from '@/components/ServiceQuickLinks.astro';
 import ContactCTA from '@/components/ContactCTA.astro';
+import PartnerBrands from '@/components/PartnerBrands.astro';
 import CaseCatalogue from '@/components/CaseCatalogue.astro';
 import CountryPlate from '@/components/CountryPlate.astro';
 import InspectionMap from '@/components/InspectionMap.astro';
@@ -346,6 +347,10 @@ const geoCells = countries.map((country) => ({
       </div>
     </div>
   </section>
+
+  <div class="max-w-6xl mx-auto px-6">
+    <PartnerBrands />
+  </div>
 
   <ClosingBand
     image={closingImage}

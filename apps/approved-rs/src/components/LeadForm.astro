@@ -11,6 +11,7 @@ import { getLeadFormContent } from '@/i18n/content/leadForm';
 import { getLocale, DISPLAY_LOCALE } from '@/i18n/config';
 import { phoneCountryShortlist } from '@/utils/geo';
 import { PathBuilder } from '@/utils/paths';
+import { DATA_DEFAULT_SERVICE } from '@/utils/contactChannel';
 
 interface Props {
   service?: string;
@@ -62,6 +63,7 @@ const fieldClass =
     action="/api/leads"
     novalidate
     data-lead-form
+    {...{ [DATA_DEFAULT_SERVICE]: service }}
     data-err-tg-required={lf.errorTelegramRequired}
     data-err-tg-format={lf.errorTelegramFormat}
     data-err-phone-required={lf.errorPhoneRequired}

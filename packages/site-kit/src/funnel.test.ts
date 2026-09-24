@@ -5,6 +5,7 @@ import { GOALS, reachGoal } from './goals.ts';
 
 const FORM = `
   <form data-lead-form>
+    <input type="hidden" name="service" value="" />
     <input name="phone" />
     <button type="submit">Send</button>
   </form>`;
@@ -150,7 +151,9 @@ describe('defineFunnelTracking', () => {
   it('reports the first thing the visitor types, and only the first', () => {
     document.body.innerHTML = FORM;
     start();
-    const field = document.querySelector('input')!;
+    const field = document.querySelector<HTMLInputElement>(
+      'input[name="phone"]',
+    )!;
     typeInto(field);
     typeInto(field);
     expect(goalNames().filter((name) => name === GOALS.formStart)).toHaveLength(
@@ -161,7 +164,7 @@ describe('defineFunnelTracking', () => {
   it('does not count the modal putting a cursor in a field as starting', () => {
     document.body.innerHTML = FORM;
     start();
-    document.querySelector('input')!.focus();
+    document.querySelector<HTMLInputElement>('input[name="phone"]')!.focus();
     expect(goalNames()).not.toContain(GOALS.formStart);
   });
 
@@ -169,13 +172,28 @@ describe('defineFunnelTracking', () => {
     document.body.innerHTML = FORM;
     start();
     document.querySelector('form')!.dispatchEvent(submitEvent());
-    expect(goalNames()).toContain(GOALS.formSubmit);
+    expect(goals()).toContainEqual([GOALS.formSubmit, { service: 'none' }]);
+  });
+
+  it('names the service a submitted form carried, so a partner lead is countable', () => {
+    document.body.innerHTML = FORM;
+    start();
+    const form = document.querySelector('form')!;
+    form.querySelector<HTMLInputElement>('input[name="service"]')!.value =
+      'partner-details';
+    form.dispatchEvent(submitEvent());
+    expect(goals()).toContainEqual([
+      GOALS.formSubmit,
+      { service: 'partner-details' },
+    ]);
   });
 
   it('reports the field that blocked the submit instead of a success', () => {
     document.body.innerHTML = FORM;
     start();
-    document.querySelector('input')!.setAttribute('aria-invalid', 'true');
+    document
+      .querySelector('input[name="phone"]')!
+      .setAttribute('aria-invalid', 'true');
     blockedSubmit(document.querySelector('form')!);
     expect(goals()).toContainEqual([GOALS.formError, { field: 'phone' }]);
     expect(goalNames()).not.toContain(GOALS.formSubmit);
@@ -203,7 +221,7 @@ describe('defineFunnelTracking', () => {
     document.body.innerHTML = FORM;
     start();
     document
-      .querySelector('input')!
+      .querySelector('input[name="phone"]')!
       .dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
     expect(goalNames()).not.toContain(GOALS.formStart);
   });
@@ -213,13 +231,15 @@ describe('defineFunnelTracking', () => {
     start();
     const form = document.querySelector('form')!;
     form.setAttribute('data-awaiting-kit', '1');
-    form.querySelector('input')!.setAttribute('aria-invalid', 'true');
+    form
+      .querySelector('input[name="phone"]')!
+      .setAttribute('aria-invalid', 'true');
     blockedSubmit(form);
     expect(goalNames()).not.toContain(GOALS.formSubmit);
     expect(goalNames()).not.toContain(GOALS.formError);
 
     form.removeAttribute('data-awaiting-kit');
-    form.querySelector('input')!.removeAttribute('aria-invalid');
+    form.querySelector('input[name="phone"]')!.removeAttribute('aria-invalid');
     form.dispatchEvent(submitEvent());
     expect(goalNames()).toContain(GOALS.formSubmit);
   });
@@ -281,7 +301,7 @@ describe('defineFunnelTracking', () => {
     controller.abort();
 
     scrollTo(950);
-    typeInto(document.querySelector('input')!);
+    typeInto(document.querySelector<HTMLInputElement>('input[name="phone"]')!);
     expect(disconnected).toBe(1);
     expect(goalNames()).not.toContain(GOALS.scroll90);
     expect(goalNames()).not.toContain(GOALS.formStart);

@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { SERVICE_LABELS_RU, serviceLabel } from './serviceLabels.ts';
+import {
+  PARTNER_SERVICE,
+  SERVICE_LABELS_RU,
+  isPartnerService,
+  serviceLabel,
+} from './serviceLabels.ts';
+import { BRANDS } from './registry.ts';
 
 const APPROVED_SLUGS = [
   'vehicle-sourcing',
@@ -32,6 +38,7 @@ const DETAILS_SLUGS = [
 
 // Retired approved.rs slugs that still sit on stored leads.
 const LEGACY_SLUGS = ['auto-service-belgrade', 'detailing-belgrade'];
+const PARTNER_SLUGS = Object.values(PARTNER_SERVICE);
 
 describe('serviceLabel', () => {
   it('returns the Russian label for a known slug', () => {
@@ -78,7 +85,27 @@ describe('SERVICE_LABELS_RU', () => {
         ...CARLAB_SLUGS,
         ...DETAILS_SLUGS,
         ...LEGACY_SLUGS,
+        ...PARTNER_SLUGS,
       ].sort(),
     );
+  });
+
+  it('labels the service a lead gets when approved.rs sends it to a sister brand', () => {
+    for (const slug of PARTNER_SLUGS) {
+      expect(serviceLabel(slug)).not.toBe(slug);
+    }
+  });
+
+  it('names a partner slug for every brand but approved.rs itself', () => {
+    expect(Object.keys(PARTNER_SERVICE).sort()).toEqual(
+      Object.keys(BRANDS)
+        .filter((key) => key !== 'approved')
+        .sort(),
+    );
+  });
+
+  it('tells a partner slug from a service a brand site offers itself', () => {
+    expect(isPartnerService('partner-carlab')).toBe(true);
+    expect(isPartnerService('diagnostics')).toBe(false);
   });
 });

@@ -45,9 +45,12 @@ export interface NotifyLeadOptions {
   brand: string;
 }
 
+export type LeadHandOff = Pick<StoredLead, 'brand' | 'commissionPercent'>;
+
 export type NotifyLead = (
   data: LeadSubmission,
   logPrefix: string,
+  handOff?: LeadHandOff,
 ) => Promise<void>;
 
 export function createNotifyLead({
@@ -55,8 +58,8 @@ export function createNotifyLead({
   notifier,
   brand,
 }: NotifyLeadOptions): NotifyLead {
-  return async function notifyLead(submission, logPrefix) {
-    const data = { ...submission, brand };
+  return async function notifyLead(submission, logPrefix, handOff) {
+    const data = { ...submission, brand, ...handOff };
     console.log(`${logPrefix} notifyLead started`, { lead: data });
 
     let lead: StoredLead;

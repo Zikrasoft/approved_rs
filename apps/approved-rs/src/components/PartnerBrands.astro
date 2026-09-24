@@ -1,14 +1,13 @@
 ---
-import { BRANDS } from '@podbor/brands';
+import { BRANDS, PARTNER_SERVICE } from '@podbor/brands';
 import { brandHome } from '@/utils/brandLinks';
 import { getLocale } from '@/i18n/config';
 import { getPagesContent } from '@/i18n/content/pages';
+import {
+  DATA_LEAD_SERVICE,
+  DATA_OPEN_LEAD_MODAL,
+} from '@/utils/contactChannel';
 
-interface Props {
-  variant?: 'section' | 'footer';
-}
-
-const { variant = 'section' } = Astro.props;
 const locale = getLocale(Astro.currentLocale);
 const p = getPagesContent(locale).partners;
 
@@ -18,65 +17,50 @@ const partners = [
 ];
 ---
 
-{
-  variant === 'footer' ? (
-    <div>
-      <p class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted">
-        {p.heading}
-      </p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5">
-        {partners.map(({ brand, description }) => (
-          <a
-            href={brandHome(brand.key, locale)}
-            data-brand-link={brand.key}
-            target="_blank"
-            rel="noopener"
-            class="group block max-w-xs"
-          >
-            <span class="inline-flex items-center gap-1.5 text-sm font-semibold mb-1 text-accent">
-              {brand.name}
-              <span class="transition-transform group-hover:translate-x-0.5">
-                →
-              </span>
-            </span>
-            <span class="block text-xs leading-relaxed text-muted">
-              {description}
-            </span>
-          </a>
-        ))}
-      </div>
-    </div>
-  ) : (
-    <section class="py-10 border-t border-default">
-      <span class="eyebrow">{p.eyebrow}</span>
-      <h2 class="font-display text-3xl font-bold mb-3">{p.heading}</h2>
-      <p class="text-sm leading-relaxed mb-7 max-w-xl text-secondary">
-        {p.intro}
-      </p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {partners.map(({ brand, description }) => (
-          <a
-            href={brandHome(brand.key, locale)}
-            data-brand-link={brand.key}
-            target="_blank"
-            rel="noopener"
-            class="group flex flex-col p-5 border rounded-sm no-underline bg-surface border-default transition-colors hover:border-accent-mid hover:bg-accent-subtle"
-          >
-            <span class="font-display text-xl font-bold mb-2 text-primary">
-              {brand.name}
-            </span>
-            <span class="text-sm leading-relaxed mb-5 flex-1 text-secondary">
-              {description}
-            </span>
-            <span class="inline-flex items-center gap-1.5 text-sm font-semibold text-accent">
+<section class="py-10 border-t border-default">
+  <span class="eyebrow">{p.eyebrow}</span>
+  <h2 class="font-display text-3xl font-bold mb-3">{p.heading}</h2>
+  <p class="text-sm leading-relaxed mb-7 max-w-xl text-secondary">
+    {p.intro}
+  </p>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    {
+      partners.map(({ brand, description }) => (
+        <div class="relative flex flex-col p-5 border rounded-sm bg-surface border-default transition-colors hover:border-accent-mid">
+          <span class="font-display text-xl font-bold mb-2 text-primary">
+            {brand.name}
+          </span>
+          <span class="text-sm leading-relaxed mb-5 flex-1 text-secondary">
+            {description}
+          </span>
+          <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <a
+              href={brandHome(brand.key, locale)}
+              data-brand-link={brand.key}
+              target="_blank"
+              rel="noopener"
+              aria-label={`${p.linkLabel} — ${brand.name}`}
+              class="group inline-flex items-center gap-1.5 text-sm font-semibold no-underline text-accent before:absolute before:inset-0 before:content-['']"
+            >
               {p.linkLabel}
               <span class="transition-transform group-hover:translate-x-0.5">
                 →
               </span>
-            </span>
-          </a>
-        ))}
-      </div>
-    </section>
-  )
-}
+            </a>
+            <button
+              type="button"
+              {...{
+                [DATA_OPEN_LEAD_MODAL]: true,
+                [DATA_LEAD_SERVICE]: PARTNER_SERVICE[brand.key],
+              }}
+              aria-label={`${p.requestLabel} — ${brand.name}`}
+              class="relative text-sm underline underline-offset-4 cursor-pointer text-muted hover:text-primary"
+            >
+              {p.requestLabel}
+            </button>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</section>

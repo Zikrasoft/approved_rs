@@ -1,5 +1,6 @@
 import { AWAITING_KIT_ATTRIBUTE } from '@podbor/lead-crm/phone-kit';
 import { FIELD_NAME_ATTRIBUTE, INVALID_ATTRIBUTE } from './fieldValidity.ts';
+import { SERVICE_FIELD } from '@podbor/lead-crm/fields';
 import { GOALS, reachGoal } from './goals.ts';
 
 export const LEAD_FORM_ATTRIBUTE = 'data-lead-form';
@@ -14,6 +15,13 @@ export function scrolledPercent(): number {
   const scrollable = document.documentElement.scrollHeight - innerHeight;
   if (scrollable <= 0) return 100;
   return Math.round((scrollY / scrollable) * 100);
+}
+
+export function submittedService(form: HTMLFormElement): string {
+  const service = form.querySelector<HTMLInputElement>(
+    `input[name="${SERVICE_FIELD}"]`,
+  );
+  return service?.value || 'none';
 }
 
 export function fieldName(control: HTMLElement): string {
@@ -83,7 +91,7 @@ function trackForms(signal: AbortSignal): void {
       const form = event.target as HTMLFormElement;
       if (!form.matches(`[${LEAD_FORM_ATTRIBUTE}]`)) return;
       if (!event.defaultPrevented) {
-        reachGoal(GOALS.formSubmit);
+        reachGoal(GOALS.formSubmit, { service: submittedService(form) });
         return;
       }
       if (form.hasAttribute(AWAITING_KIT_ATTRIBUTE)) return;

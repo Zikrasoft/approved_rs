@@ -1,3 +1,4 @@
+import { COMMISSION_PERCENT } from '@podbor/brands';
 import {
   createLeadSchema,
   createLeadStore,
@@ -8,7 +9,7 @@ import {
 import { createVercelBlobStorage } from '@podbor/lead-crm/storage/vercel-blob';
 import { SITE_NAME } from '@/utils/constants';
 
-export const DEFAULT_COMMISSION_PERCENT = 15;
+export const DEFAULT_COMMISSION_PERCENT = COMMISSION_PERCENT.carlab;
 export const BRAND = SITE_NAME;
 
 export const leadSchema = createLeadSchema({

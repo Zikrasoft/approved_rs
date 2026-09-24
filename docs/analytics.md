@@ -29,9 +29,9 @@
 | `form_view`                                                      | форма попала в экран                            | —                                       |
 | `form_start`                                                     | первый ввод в форму                             | —                                       |
 | `form_error`                                                     | отправку отбила валидация                       | `field`: `telegram`, `phone`, `consent` |
-| `form_submit`                                                    | форма реально ушла на сервер                    | —                                       |
+| `form_submit`                                                    | форма реально ушла на сервер                    | `service`                               |
 | `contact_click`                                                  | клик по телефону, мессенджеру или кнопке заявки | `channel`                               |
-| `lead_modal_open`                                                | открыл форму в модалке (только approved.rs)     | `tab`                                   |
+| `lead_modal_open`                                                | открыл форму в модалке (только approved.rs)     | `tab`, `service`                        |
 | `brand_link_click`                                               | ушёл на сайт-партнёр (только approved.rs)       | `to`                                    |
 | `lang_offer_shown` / `lang_offer_taken` / `lang_offer_dismissed` | баннер выбора языка                             | `from`, `to`                            |
 

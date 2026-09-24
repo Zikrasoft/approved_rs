@@ -12,6 +12,12 @@ export const BRANDS = {
   details: DETAILS,
 } as const satisfies Record<BrandKey, Brand>;
 
+export const COMMISSION_PERCENT = {
+  approved: 10,
+  carlab: 15,
+  details: 20,
+} as const satisfies Record<BrandKey, number>;
+
 export const BRAND_SITES = {
   approved: APPROVED.url,
   carlab: CARLAB.url,

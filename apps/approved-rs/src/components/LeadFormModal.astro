@@ -119,7 +119,10 @@ const closeLabel = getI18n(locale).common.closeLabel;
     MODAL_OPEN_EVENT,
     type ModalOpenDetail,
   } from '@podbor/site-kit/browser';
+  import { SERVICE_FIELD } from '@podbor/lead-crm/fields';
   import {
+    DATA_DEFAULT_SERVICE,
+    DATA_LEAD_SERVICE,
     DATA_OPEN_LEAD_MODAL,
     DATA_OPEN_PAGE_LEAD_MODAL,
   } from '@/utils/contactChannel';
@@ -138,12 +141,23 @@ const closeLabel = getI18n(locale).common.closeLabel;
         )
       : null;
     if (tabButton) tabButton.click();
+    const form = host.querySelector<HTMLFormElement>('[data-lead-form]');
+    const service = form?.querySelector<HTMLInputElement>(
+      `input[type="hidden"][name="${SERVICE_FIELD}"]`,
+    );
+    if (form && service) {
+      service.value =
+        trigger.getAttribute(DATA_LEAD_SERVICE) ??
+        form.getAttribute(DATA_DEFAULT_SERVICE) ??
+        '';
+    }
     host
       .querySelector('.contact-panel:not(.hidden)')
       ?.querySelector<HTMLInputElement>('input')
       ?.focus();
     reachGoal(GOALS.leadModalOpen, {
       tab: tabButton ? tab : 'default',
+      service: service?.value || 'none',
     });
   });
 </script>

@@ -75,7 +75,11 @@ export { createNotifier } from './telegram/notify.ts';
 export type { Notifier } from './telegram/notify.ts';
 
 export { createEnsureLeadCard, createNotifyLead } from './notifyLead.ts';
-export type { NotifyLead, NotifyLeadOptions } from './notifyLead.ts';
+export type {
+  LeadHandOff,
+  NotifyLead,
+  NotifyLeadOptions,
+} from './notifyLead.ts';
 
 export {
   isTrackedContactChannel,

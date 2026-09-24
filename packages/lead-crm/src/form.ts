@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { TRACKED_CONTACT_CHANNELS } from './contactChannel.ts';
 import { isValidContact } from './phone.ts';
+import { HONEYPOT_FIELD, SERVICE_FIELD } from './fields.ts';
 
 export {
   isValidContact,
@@ -13,8 +14,7 @@ export const MAX_FIELD_LENGTH = 200;
 export const MAX_COMMENT_LENGTH = 2000;
 export const MAX_URL_LENGTH = 500;
 export const MAX_SERVICES = 20;
-export const HONEYPOT_FIELD = 'website';
-export const SERVICE_FIELD = 'service';
+export { HONEYPOT_FIELD, SERVICE_FIELD } from './fields.ts';
 
 export const contactChannelSchema = z.enum(TRACKED_CONTACT_CHANNELS);
 

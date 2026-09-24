@@ -1,4 +1,4 @@
-export const SERVICE_LABELS_RU: Record<string, string> = {
+export const SERVICE_LABELS_RU = {
   'vehicle-sourcing': 'Автоподбор',
   'vehicle-buyback': 'Выкуп',
   'vehicle-inspection': 'Проверка',
@@ -24,10 +24,25 @@ export const SERVICE_LABELS_RU: Record<string, string> = {
 
   'auto-service-belgrade': 'Автосервис',
   'detailing-belgrade': 'Детейлинг',
-};
+
+  'partner-carlab': 'Автосервис CarLab',
+  'partner-details': 'Детейлинг Details',
+} as const satisfies Record<string, string>;
+
+export const PARTNER_SERVICE = {
+  carlab: 'partner-carlab',
+  details: 'partner-details',
+} as const satisfies Record<string, keyof typeof SERVICE_LABELS_RU>;
+
+export type PartnerService =
+  (typeof PARTNER_SERVICE)[keyof typeof PARTNER_SERVICE];
+
+export function isPartnerService(value: string): value is PartnerService {
+  return (Object.values(PARTNER_SERVICE) as readonly string[]).includes(value);
+}
 
 export function serviceLabel(slug: string): string {
   return Object.hasOwn(SERVICE_LABELS_RU, slug)
-    ? SERVICE_LABELS_RU[slug]
+    ? SERVICE_LABELS_RU[slug as keyof typeof SERVICE_LABELS_RU]
     : slug;
 }

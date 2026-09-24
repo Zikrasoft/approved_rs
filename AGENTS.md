@@ -42,8 +42,9 @@ module — a brand site whose `constants.ts` reaches a client script would then
 ship its siblings' domains and legal names. Each app pins its brand once
 (`export const BRAND = CARLAB`) in `src/utils/constants.ts`, and
 `astro.config.mjs` imports the same constant for `site:`. Only approved.rs may
-touch the aggregate, and only in the two places that genuinely need every brand:
-the cross-brand link builder and the legacy-redirect host map in `middleware.ts`.
+touch the aggregate, and only in the three places that genuinely need every
+brand: the cross-brand link builder, the legacy-redirect host map in
+`middleware.ts`, and the partner block that links to both sister sites.
 
 `vercel.json` cannot import anything, so the domains stay hand-duplicated there
 — and in `src/i18n/translateConfig.ts`, which the translate scripts load under
@@ -59,6 +60,17 @@ and `/api/contact-click`. All three write to the same `data/leads.json` on the
 same Vercel Blob store and are separated by the lead's `brand` field, which the
 app's `createNotifyLead({ brand })` stamps on — a visitor can never set it.
 Connect the same Blob store to all three Vercel projects.
+
+**A lead captured for a sister brand is stored as that brand's.** approved.rs's
+partner block can open its own form for CarLab or Details, and
+`src/lib/notifyLead.ts` maps the partner service slug onto that brand's name and
+commission rate (`PARTNER_SERVICE` and `COMMISSION_PERCENT` in
+`packages/brands`) before the store sees the lead. So `brand` still means "whose
+lead this is", the per-brand rate is right from the start — a stored lead keeps
+the rate it was created with — and `source_url` is what says the visitor came
+from approved.rs. The visitor still cannot name a brand: they can only pick one
+of the two partner slugs the page renders, and every other value falls through
+to approved.rs itself.
 
 **A `packages/*` change deploys all three apps, and that is the point.** The
 deploy filter in `ci.yml` is `turbo --filter="...[<deployed tag>]"` — the
@@ -209,6 +221,13 @@ Both new apps follow the same shape, and a third should too:
   preselected and the click still lands in Telegram. The footer keeps direct
   links, and `ContactCTA direct` on the thanks page does too: someone who has
   just sent a brief wants the messenger, not the form again.
+- **The lead modal takes its service from the trigger.** `data-lead-service` on
+  a button sets the form's `service` when the modal opens; `data-default-service`
+  on the form is what it resets to when the trigger names none. Both constants
+  live in `src/utils/contactChannel.ts`. The second attribute is not redundant:
+  for an `<input type="hidden">` the `value` IDL attribute reflects the content
+  attribute, so assigning `.value` moves `defaultValue` with it and the slug
+  would stick between openings of the same modal.
 - **Form controls nest their label** instead of using `id`/`for`. The lead form
   renders two or three times per page (inline, in the modal, on the contact
   page), and duplicate ids make every label focus the first form.

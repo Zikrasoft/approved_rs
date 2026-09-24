@@ -1,4 +1,4 @@
-import { APPROVED } from '@podbor/brands';
+import { APPROVED, COMMISSION_PERCENT } from '@podbor/brands';
 import {
   createLeadSchema,
   createLeadStore,
@@ -8,7 +8,7 @@ import {
 } from '@podbor/lead-crm';
 import { createVercelBlobStorage } from '@podbor/lead-crm/storage/vercel-blob';
 
-export const DEFAULT_COMMISSION_PERCENT = 10;
+export const DEFAULT_COMMISSION_PERCENT = COMMISSION_PERCENT.approved;
 export const BRAND = APPROVED.name;
 
 export const leadSchema = createLeadSchema({

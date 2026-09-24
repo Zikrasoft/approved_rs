@@ -57,6 +57,7 @@ const partnersSchema = z
     heading: z.string(),
     intro: z.string(),
     linkLabel: z.string(),
+    requestLabel: z.string(),
     carlabDescription: z.string(),
     detailsDescription: z.string(),
   })

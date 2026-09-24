@@ -10,6 +10,7 @@ import { getHomeContent } from '@/i18n/content/home';
 import LeadForm from '@/components/LeadForm.astro';
 import LeadFormModal from '@/components/LeadFormModal.astro';
 import ContactCTA from '@/components/ContactCTA.astro';
+import PartnerBrands from '@/components/PartnerBrands.astro';
 import CasesGrid from '@/components/CasesGrid.astro';
 import ChipLinks from '@/components/ChipLinks.astro';
 import type { MetaProps } from '@/utils/seo';
@@ -232,6 +233,10 @@ const heroStats = [
         text: t.nav[s.slug],
       }))}
     />
+  </div>
+
+  <div class="max-w-6xl mx-auto px-6">
+    <PartnerBrands />
   </div>
 
   {

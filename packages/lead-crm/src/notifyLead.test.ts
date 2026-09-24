@@ -77,6 +77,18 @@ describe('notifyLead', () => {
     expect(sendLeadNotification).toHaveBeenCalledWith(storedLead);
   });
 
+  it('stores a lead handed to a sister brand under that brand and its rate', async () => {
+    await notifyLead(baseData, '[test]', {
+      brand: 'Details',
+      commissionPercent: 20,
+    });
+    expect(insertOrMergeLead).toHaveBeenCalledWith({
+      ...baseData,
+      brand: 'Details',
+      commissionPercent: 20,
+    });
+  });
+
   it('persists the telegram message id after a successful notification', async () => {
     await notifyLead(baseData, '[test]');
     expect(setTelegramMessage).toHaveBeenCalledWith(42, -100, 999);
