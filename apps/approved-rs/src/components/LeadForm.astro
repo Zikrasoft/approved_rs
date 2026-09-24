@@ -62,7 +62,6 @@ const fieldClass =
     action="/api/leads"
     novalidate
     data-lead-form
-    data-err-name={lf.errorNameRequired}
     data-err-tg-required={lf.errorTelegramRequired}
     data-err-tg-format={lf.errorTelegramFormat}
     data-err-phone-required={lf.errorPhoneRequired}
@@ -87,19 +86,11 @@ const fieldClass =
     <input type="hidden" name="source_url" value={sourceUrl} />
     <input type="hidden" name="visitor_id" />
 
-    <FormField
-      name="name"
-      field="name"
-      label={lf.nameLabel}
-      placeholder={lf.namePlaceholder}
-      required
-    />
-
     <div class="mb-5 contact-field">
       <label
         class="block text-xs font-medium mb-2 tracking-[0.14em] uppercase text-muted"
       >
-        {lf.contactLabel}<span class="text-muted ml-0.5">*</span>
+        {lf.contactLabel}<span class="text-accent ml-0.5">*</span>
       </label>
 
       <div
@@ -227,6 +218,13 @@ const fieldClass =
     </div>
 
     <FormField
+      name="name"
+      field="name"
+      label={lf.nameLabel}
+      placeholder={lf.namePlaceholder}
+    />
+
+    <FormField
       name="comment"
       label={commentLabel ?? lf.commentLabel}
       placeholder={commentPlaceholder ?? lf.commentPlaceholder}
@@ -307,7 +305,6 @@ const fieldClass =
       'input[type="hidden"][name="visitor_id"]',
     );
 
-    const errName = form.dataset.errName!;
     const errTgRequired = form.dataset.errTgRequired!;
     const errTgFormat = form.dataset.errTgFormat!;
     const errPhoneRequired = form.dataset.errPhoneRequired!;
@@ -356,11 +353,8 @@ const fieldClass =
     const phoneNumber = contactField.querySelector<HTMLInputElement>(
       '[data-contact-phone-number]',
     )!;
-    const nameInput = form.querySelector<HTMLInputElement>('[name="name"]')!;
     const consent = form.querySelector<HTMLInputElement>('[name="consent"]')!;
     const consentErr = form.querySelector<HTMLElement>('.consent-error');
-
-    nameInput.addEventListener('input', () => clearError(nameInput));
 
     // progressive enhancement: the Telegram field ships with name="contact"
     // so the form still submits something if this script never runs (ad
@@ -523,12 +517,6 @@ const fieldClass =
       // renders would otherwise still post the id baked into the field.
       if (visitorIdInput) visitorIdInput.value = getOrCreateVisitorId();
 
-      let ok = true;
-      if (!nameInput.value.trim()) {
-        setError(nameInput, errName);
-        ok = false;
-      } else clearError(nameInput);
-
       const isTelegram = activeTab === 'telegram';
       const contactInput = isTelegram ? tgInput : phoneNumber;
       const typed = contactInput.value.trim();
@@ -537,6 +525,7 @@ const fieldClass =
       }
       syncContact();
 
+      let ok = true;
       if (!typed) {
         setError(contactInput, isTelegram ? errTgRequired : errPhoneRequired);
         ok = false;

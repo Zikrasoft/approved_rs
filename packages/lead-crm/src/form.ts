@@ -72,7 +72,7 @@ export const leadEnvelopeSchema = z
 const submissionObject = z
   .object({
     ...envelopeShape,
-    name: requiredText(MAX_FIELD_LENGTH),
+    name: cappedText(MAX_FIELD_LENGTH),
     contact: requiredText(MAX_FIELD_LENGTH),
     contact_channel: z
       .union([contactChannelSchema, z.literal('')])

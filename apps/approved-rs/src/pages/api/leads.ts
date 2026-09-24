@@ -8,11 +8,11 @@ import { PRIMARY_LOCALE, isLocale, type Locale } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 
 const MISSING_FIELDS_MESSAGE: Record<Locale, string> = {
-  ru: 'Имя и контакт обязательны',
-  en: 'Name and contact are required',
-  sr: 'Ime i kontakt su obavezni',
-  es: 'El nombre y el contacto son obligatorios',
-  de: 'Name und Kontakt sind erforderlich',
+  ru: 'Укажите телефон или мессенджер',
+  en: 'Enter a phone number or messenger',
+  sr: 'Unesite telefon ili messenger',
+  es: 'Indique un teléfono o mensajería',
+  de: 'Bitte Telefon oder Messenger angeben',
 };
 
 export const POST = createLeadsRoute({

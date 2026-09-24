@@ -138,7 +138,10 @@ const closeLabel = getI18n(locale).common.closeLabel;
         )
       : null;
     if (tabButton) tabButton.click();
-    host.querySelector<HTMLInputElement>('[data-field="name"]')?.focus();
+    host
+      .querySelector('.contact-panel:not(.hidden)')
+      ?.querySelector<HTMLInputElement>('input')
+      ?.focus();
     reachGoal(GOALS.leadModalOpen, {
       tab: tabButton ? tab : 'default',
     });

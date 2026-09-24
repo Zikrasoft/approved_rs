@@ -186,6 +186,12 @@ Both new apps follow the same shape, and a third should too:
   runs for a prerendered page on Vercel's static output, so the `lang` cookie
   may not exist — without the field, every non-Russian visitor lands on
   `/ru/thanks/` and the lead is stored as `locale: 'ru'`.
+- **Only the contact is required.** `@podbor/lead-crm`'s form schema accepts an
+  empty `name`, because approved.rs asks for the name as optional — a shorter
+  form converts better, and a lead is answerable without a name. Details and
+  CarLab still mark their name field `required` in markup; that is a per-app
+  choice rather than an oversight, and dropping the attribute is all it takes
+  to follow approved.rs.
 - **Form controls nest their label** instead of using `id`/`for`. The lead form
   renders two or three times per page (inline, in the modal, on the contact
   page), and duplicate ids make every label focus the first form.

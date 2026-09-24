@@ -31,6 +31,7 @@ import {
   buildDeleteConfirm,
   buildRemindPicker,
   formatDateRu,
+  leadDisplayName,
 } from './format.ts';
 
 const SERVICE_LABELS: Record<string, string> = {
@@ -199,6 +200,16 @@ describe('sendLeadNotification', () => {
       json: () => Promise.resolve({ description: 'Bad Request' }),
     });
     await expect(sendLeadNotification(makeLead())).rejects.toThrow();
+  });
+});
+
+describe('leadDisplayName', () => {
+  it('stands in for a lead left without a name', () => {
+    expect(leadDisplayName(makeLead({ name: '' }))).toBe('—');
+  });
+
+  it('keeps the name a visitor did give', () => {
+    expect(leadDisplayName(makeLead({ name: 'Иван' }))).toBe('Иван');
   });
 });
 
