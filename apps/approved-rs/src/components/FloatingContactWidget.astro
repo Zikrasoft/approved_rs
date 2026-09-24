@@ -17,8 +17,15 @@ import {
 } from '@/utils/constants';
 import { DATA_OPEN_LEAD_MODAL } from '@/utils/contactChannel';
 
+interface Props {
+  direct?: boolean;
+}
+
+const { direct = false } = Astro.props;
 const locale = getLocale(Astro.currentLocale);
 const cc = getServicesContent(locale).caseChrome;
+const opensModal = (channel: string) =>
+  direct ? {} : { [DATA_OPEN_LEAD_MODAL]: channel };
 ---
 
 <cta-reveal
@@ -30,7 +37,7 @@ const cc = getServicesContent(locale).caseChrome;
   <div class="floating-panel" role="menu" data-panel hidden>
     <a
       data-contact-channel="telegram"
-      {...{ [DATA_OPEN_LEAD_MODAL]: 'telegram' }}
+      {...opensModal('telegram')}
       href={telegramLink(TG_MANAGER)}
       target="_blank"
       rel="noopener"
@@ -43,7 +50,7 @@ const cc = getServicesContent(locale).caseChrome;
     </a>
     <a
       data-contact-channel="whatsapp"
-      {...{ [DATA_OPEN_LEAD_MODAL]: 'whatsapp' }}
+      {...opensModal('whatsapp')}
       href={whatsappLink(WHATSAPP_NUMBER)}
       target="_blank"
       rel="noopener"
@@ -56,7 +63,7 @@ const cc = getServicesContent(locale).caseChrome;
     </a>
     <a
       data-contact-channel="viber"
-      {...{ [DATA_OPEN_LEAD_MODAL]: 'viber' }}
+      {...opensModal('viber')}
       href={viberLink(VIBER_NUMBER)}
       target="_blank"
       rel="noopener"
@@ -72,7 +79,7 @@ const cc = getServicesContent(locale).caseChrome;
       role="menuitem"
       data-contact-channel="callback"
       aria-label={cc.callbackButtonLabel}
-      {...{ [DATA_OPEN_LEAD_MODAL]: 'phone' }}
+      {...opensModal('phone')}
       class="floating-cell"
     >
       <ContactIcon channel="phone" size={16} />

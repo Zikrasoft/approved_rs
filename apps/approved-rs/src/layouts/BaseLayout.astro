@@ -30,6 +30,7 @@ interface Props extends MetaProps {
   ogImage?: string;
   ogImageWidth?: number;
   ogImageHeight?: number;
+  directContacts?: boolean;
 }
 
 const locale = getLocale(Astro.currentLocale);
@@ -44,6 +45,7 @@ const {
   ogImage = `${SITE_URL}/og${OG_SUFFIX[locale]}.png`,
   ogImageWidth = 1200,
   ogImageHeight = 630,
+  directContacts = false,
 } = Astro.props;
 
 const OG_LOCALE_MAP: Record<string, string> = {
@@ -163,7 +165,7 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
       <slot />
     </main>
     <Footer />
-    <FloatingContactWidget />
+    <FloatingContactWidget direct={directContacts} />
     <CookieConsent />
     <script is:inline>
       setTimeout(function () {
