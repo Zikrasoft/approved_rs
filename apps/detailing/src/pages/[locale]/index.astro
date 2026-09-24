@@ -11,6 +11,7 @@ import ProcessTimeline from '@/components/ProcessTimeline.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import EmptyState from '@/components/EmptyState.astro';
 import Faq from '@/components/Faq.astro';
+import LeadForm from '@/components/LeadForm.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import Cta from '@/components/Cta.astro';
 import { localeFrom } from '@/i18n/currentLocale';
@@ -76,6 +77,15 @@ const faqSchema = {
           </div>
         ))
       }
+    </div>
+  </section>
+
+  <section class="wrap mt-32 lg:hidden" data-contact-cta>
+    <div class="shell">
+      <div class="core flex flex-col gap-6 p-6">
+        <h2 class="text-big">{site.form.heading}</h2>
+        <LeadForm compact />
+      </div>
     </div>
   </section>
 

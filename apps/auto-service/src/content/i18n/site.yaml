@@ -53,8 +53,6 @@ form:
   contactChannelLabel: Как с вами связаться
   channelPhone: Звонок
   countryLabel: Код страны
-  serviceLabel: Что нужно
-  servicePlaceholder: Можно выбрать несколько
   carLabel: Автомобиль
   carPlaceholder: Марка, модель, год
   commentLabel: Что беспокоит
@@ -64,7 +62,6 @@ form:
   privacyNote: Отправляя форму, вы соглашаетесь с
   privacyLinkText: политикой конфиденциальности
   modalTitle: Записаться в сервис
-  requiredError: Заполните это поле
   errorPhone: Проверьте номер — кажется, он введён не полностью
   errorTelegram: Укажите ник в Telegram — минимум три символа
   errorConsent: Без согласия мы не сможем отправить заявку
@@ -134,8 +131,6 @@ translations:
       contactChannelLabel: Kako da vas kontaktiramo
       channelPhone: Poziv
       countryLabel: Kod zemlje
-      serviceLabel: Šta je potrebno
-      servicePlaceholder: Možete izabrati više
       carLabel: Automobil
       carPlaceholder: Marka, model, godina
       commentLabel: Šta vas brine
@@ -145,7 +140,6 @@ translations:
       privacyNote: Slanjem forme, pristajete na
       privacyLinkText: politiku privatnosti
       modalTitle: Zakazivanje u servis
-      requiredError: Popunite ovo polje
       errorPhone: Proverite broj — čini se da nije unet potpuno
       errorTelegram: Unesite nadimak na Telegramu — minimum tri karaktera
       errorConsent: Bez pristanka ne možemo poslati zahtev
@@ -212,8 +206,6 @@ translations:
       contactChannelLabel: How to contact you
       channelPhone: Call
       countryLabel: Country Code
-      serviceLabel: What do you need
-      servicePlaceholder: You can select multiple
       carLabel: Car
       carPlaceholder: Make, model, year
       commentLabel: What seems to be the problem
@@ -223,7 +215,6 @@ translations:
       privacyNote: By submitting the form, you agree to our
       privacyLinkText: privacy policy
       modalTitle: Book a Service
-      requiredError: This field is required
       errorPhone: Please check the number — it seems incomplete
       errorTelegram: Please provide your Telegram nickname — at least three characters
       errorConsent: Without consent, we cannot submit the request

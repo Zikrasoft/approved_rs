@@ -5,7 +5,7 @@ import TelegramIcon from './icons/TelegramIcon.astro';
 import WhatsAppIcon from './icons/WhatsAppIcon.astro';
 import ViberIcon from './icons/ViberIcon.astro';
 import { Phone, ChevronDown } from '@lucide/astro';
-import { HONEYPOT_FIELD } from '@podbor/lead-crm';
+import { HONEYPOT_FIELD, SERVICE_FIELD } from '@podbor/lead-crm';
 import { phoneCountryOptions } from '@podbor/lead-crm/phone';
 import { getLeadFormContent } from '@/i18n/content/leadForm';
 import { getLocale, DISPLAY_LOCALE } from '@/i18n/config';
@@ -80,7 +80,7 @@ const fieldClass =
         />
       </label>
     </div>
-    <input type="hidden" name="service" value={service} />
+    <input type="hidden" name={SERVICE_FIELD} value={service} />
     <input type="hidden" name="country" value={country} />
     <input type="hidden" name="city" value={city} />
     <input type="hidden" name="source_url" value={sourceUrl} />

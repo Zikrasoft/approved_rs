@@ -14,6 +14,7 @@ export const MAX_COMMENT_LENGTH = 2000;
 export const MAX_URL_LENGTH = 500;
 export const MAX_SERVICES = 20;
 export const HONEYPOT_FIELD = 'website';
+export const SERVICE_FIELD = 'service';
 
 export const contactChannelSchema = z.enum(TRACKED_CONTACT_CHANNELS);
 
@@ -56,7 +57,7 @@ function formRecord(value: unknown): unknown {
   value.forEach((entry, key) => {
     if (!(key in record)) record[key] = entry;
   });
-  record.service = value.getAll('service');
+  record[SERVICE_FIELD] = value.getAll(SERVICE_FIELD);
   return record;
 }
 

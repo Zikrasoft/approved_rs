@@ -452,7 +452,8 @@ export function createFormatter({
 
   function servicesLabel(lead: StoredLead): string {
     const slugs = lead.services.length > 0 ? lead.services : [lead.service];
-    return slugs.map(serviceLabel).join(' · ').slice(0, MAX_SERVICES_LABEL);
+    const label = slugs.map(serviceLabel).filter(Boolean).join(' · ');
+    return (label || '—').slice(0, MAX_SERVICES_LABEL);
   }
 
   function formatLeadText(lead: StoredLead, role: Role): string {

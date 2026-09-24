@@ -2,21 +2,15 @@
 import { localeFrom } from '@/i18n/currentLocale';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { getSiteContent } from '@/i18n/content/site';
-import { getServicesContent } from '@/i18n/content/services';
 import Icon from './Icon.astro';
 import { PathBuilder } from '@/utils/paths';
-import {
-  SERVICE_SLUGS,
-  SHOP_SERVICE,
-  type ServiceSlug,
-} from '@/utils/services';
+import { SHOP_SERVICE, type ServiceSlug } from '@/utils/services';
 import { phoneCountryOptions } from '@podbor/lead-crm/phone';
-import { HONEYPOT_FIELD } from '@podbor/lead-crm';
+import { HONEYPOT_FIELD, SERVICE_FIELD } from '@podbor/lead-crm';
 import { PHONE_COUNTRY_SHORTLIST, TELEGRAM_ENABLED } from '@/utils/constants';
 
 interface Props {
   service?: ServiceSlug | typeof SHOP_SERVICE;
-  fixedService?: boolean;
   compact?: boolean;
   comment?: string;
   class?: string;
@@ -24,14 +18,12 @@ interface Props {
 
 const {
   service,
-  fixedService = false,
   compact = false,
   comment = '',
   class: className = '',
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
-const services = getServicesContent(locale);
 
 const DEFAULT_COUNTRY = 'RS';
 const uid = crypto.randomUUID().slice(0, 8);
@@ -85,43 +77,6 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
 
   <input type="hidden" name="source_url" data-source-url />
   <input type="hidden" name="visitor_id" data-visitor-id />
-
-  <div class={compact ? 'flex flex-col gap-4' : 'grid gap-4 sm:grid-cols-2'}>
-    <div>
-      <label class="block">
-        <span class="field-label">{site.form.nameLabel}</span>
-        <input
-          name="name"
-          data-field="name"
-          type="text"
-          required
-          autocomplete="name"
-          placeholder={site.form.namePlaceholder}
-          aria-describedby={`name-error-${uid}`}
-          class="field"
-          data-name
-        />
-      </label>
-      <p
-        id={`name-error-${uid}`}
-        class={errorText}
-        aria-live="polite"
-        data-error-name
-        hidden
-      >
-        {site.form.requiredError}
-      </p>
-    </div>
-    <label class="block">
-      <span class="field-label">{site.form.carLabel}</span>
-      <input
-        name="car"
-        type="text"
-        placeholder={site.form.carPlaceholder}
-        class="field"
-      />
-    </label>
-  </div>
 
   <fieldset class="group m-0 border-0 p-0">
     <legend class="field-label p-0">{site.form.contactChannelLabel}</legend>
@@ -234,41 +189,29 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     </div>
   </fieldset>
 
-  {fixedService && <input type="hidden" name="service" value={service} />}
+  <div class={compact ? 'flex flex-col gap-4' : 'grid gap-4 sm:grid-cols-2'}>
+    <label class="block">
+      <span class="field-label">{site.form.nameLabel}</span>
+      <input
+        name="name"
+        type="text"
+        autocomplete="name"
+        placeholder={site.form.namePlaceholder}
+        class="field"
+      />
+    </label>
+    <label class="block">
+      <span class="field-label">{site.form.carLabel}</span>
+      <input
+        name="car"
+        type="text"
+        placeholder={site.form.carPlaceholder}
+        class="field"
+      />
+    </label>
+  </div>
 
-  {
-    !fixedService && (
-      <details class="group/svc" open={!compact}>
-        <summary class="field flex cursor-pointer list-none items-center justify-between gap-2 [&::-webkit-details-marker]:hidden">
-          {site.form.serviceLabel}
-          <Icon
-            name="chevronDown"
-            size={14}
-            class="shrink-0 text-muted transition-transform duration-150 group-open/svc:rotate-180"
-          />
-        </summary>
-        <div
-          class="mt-2 flex flex-wrap gap-2"
-          role="group"
-          aria-label={site.form.serviceLabel}
-        >
-          {SERVICE_SLUGS.map((slug) => (
-            <label class="block">
-              <input
-                type="checkbox"
-                name="service"
-                value={slug}
-                checked={slug === service}
-                class="peer sr-only"
-              />
-              <span class={chip}>{services[slug].name}</span>
-            </label>
-          ))}
-        </div>
-        <p class="mt-2 text-xs text-muted">{site.form.servicePlaceholder}</p>
-      </details>
-    )
-  }
+  {service && <input type="hidden" name={SERVICE_FIELD} value={service} />}
 
   <label class="block">
     <span class="field-label">{site.form.commentLabel}</span>
@@ -365,7 +308,6 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     pick<HTMLInputElement>('[data-source-url]').value = location.href;
     const visitor = pick<HTMLInputElement>('[data-visitor-id]');
 
-    const name = pick<HTMLInputElement>('[data-name]');
     const telegram = pick<HTMLInputElement>('[data-telegram]');
     const country = pick<HTMLSelectElement>('[data-country]');
     const phone = pick<HTMLInputElement>('[data-phone]');
@@ -374,7 +316,6 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     bindPhoneCountry(country, phone);
 
     const fields: Record<string, [HTMLElement, HTMLElement]> = {
-      name: [pick('[data-error-name]'), name],
       telegram: [pick('[data-error-telegram]'), telegram],
       phone: [pick('[data-error-phone]'), phone],
       consent: [pick('[data-error-consent]'), consent],
@@ -420,7 +361,6 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
           composeE164(typed, dial));
 
       const checks: [HTMLElement, HTMLElement, boolean][] = [
-        [...fields.name, name.value.trim().length === 0],
         [
           ...(viaTelegram ? fields.telegram : fields.phone),
           typed.length === 0 || (!!kit && !kit.isValidContact(value, channel)),

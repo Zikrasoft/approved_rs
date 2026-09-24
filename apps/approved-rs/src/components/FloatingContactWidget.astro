@@ -1,8 +1,12 @@
 ---
 import { MessageCircle, X } from '@lucide/astro';
 import ContactIcon from './ContactIcon.astro';
-import { telegramLink } from '@/utils/telegramLink';
-import { whatsappLink, viberLink } from '@/utils/contactLinks';
+import {
+  phoneLink,
+  telegramLink,
+  whatsappLink,
+  viberLink,
+} from '@/utils/contactLinks';
 import { getServicesContent } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
 import {
@@ -76,7 +80,7 @@ const cc = getServicesContent(locale).caseChrome;
     </button>
     <a
       data-contact-channel="phone"
-      href={`tel:+${PHONE_NUMBER}`}
+      href={phoneLink(PHONE_NUMBER)}
       role="menuitem"
       class="floating-cell"
     >

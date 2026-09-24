@@ -2,9 +2,9 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
 import { SITE_URL, SITE_NAME, TG_MANAGER } from '@/utils/constants';
-import { telegramLink } from '@/utils/telegramLink';
 import { getPagesContent } from '@/i18n/content/pages';
 import { withLocales, PathBuilder } from '@/utils/paths';
+import { telegramLink } from '@/utils/contactLinks';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 

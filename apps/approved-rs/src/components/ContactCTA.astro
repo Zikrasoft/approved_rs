@@ -2,8 +2,12 @@
 import Button from './Button.astro';
 import ContactIcon from './ContactIcon.astro';
 import RegionalContactButton from './RegionalContactButton.astro';
-import { telegramLink } from '@/utils/telegramLink';
-import { whatsappLink, viberLink } from '@/utils/contactLinks';
+import {
+  phoneLink,
+  telegramLink,
+  whatsappLink,
+  viberLink,
+} from '@/utils/contactLinks';
 import { getServicesContent } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
 import {
@@ -55,7 +59,7 @@ const modalTrigger = openModal
         />
         <Button
           variant="secondary"
-          href={`tel:+${PHONE_NUMBER}`}
+          href={phoneLink(PHONE_NUMBER)}
           data-contact-channel="phone"
           class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center bg-surface"
         >
@@ -119,7 +123,7 @@ const modalTrigger = openModal
 
         <Button
           variant="secondary"
-          href={`tel:+${PHONE_NUMBER}`}
+          href={phoneLink(PHONE_NUMBER)}
           data-contact-channel="phone"
           class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full justify-center bg-surface"
         >

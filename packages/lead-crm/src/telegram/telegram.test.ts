@@ -1385,6 +1385,14 @@ describe('a lead that asked for several services at once', () => {
     );
   });
 
+  it('marks a lead that named no service instead of leaving a gap', () => {
+    const serviceless = makeLead({ service: '', services: [] });
+    expect(buildLeadDetail(serviceless, 'owner').text).toContain(
+      'Заявка #42 — —',
+    );
+    expect(formatter.formatTeaser(serviceless)).toContain('· — ·');
+  });
+
   it('keeps the card inside the Telegram length limit when the services are flooded', () => {
     const flooded = makeLead({
       services: Array.from({ length: 20 }, () => 'x'.repeat(200)),

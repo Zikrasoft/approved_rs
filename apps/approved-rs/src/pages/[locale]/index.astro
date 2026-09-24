@@ -20,7 +20,6 @@ import {
   CHINA_NAME,
 } from '@/utils/constants';
 import { generateOrganizationSchema } from '@/utils/seo';
-import { telegramLink } from '@/utils/telegramLink';
 import { getHomeContent } from '@/i18n/content/home';
 import { getI18n } from '@/i18n/getI18n';
 import { PathBuilder } from '@/utils/paths';
@@ -30,6 +29,7 @@ import { getLocale } from '@/i18n/config';
 import heroImage from '@/assets/hero-delivery.jpg';
 import { heroImageAttrs } from '@/utils/heroImage';
 import closingImage from '@/assets/closing.jpg';
+import { telegramLink } from '@/utils/contactLinks';
 
 const hero = await heroImageAttrs(heroImage);
 const locale = getLocale(Astro.params.locale);

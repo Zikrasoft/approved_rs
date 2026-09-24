@@ -3,9 +3,13 @@ import Icon from '@/components/Icon.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getSiteContent } from '@/i18n/content/site';
 import { CONTACT_LINKS } from '@/utils/contactLinks';
+import { TELEGRAM_ENABLED } from '@/utils/constants';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
+
+const cell =
+  'flex min-h-14 flex-col items-center justify-center gap-1 border-r border-line text-ink';
 ---
 
 <cta-reveal
@@ -14,23 +18,45 @@ const site = getSiteContent(locale);
   watch="[data-contact-cta]"
 >
   <div class="grid grid-cols-3 items-stretch">
-    <a
-      href={CONTACT_LINKS.phone}
-      data-contact-channel="phone"
-      class="flex min-h-14 flex-col items-center justify-center gap-1 border-r border-line text-ink"
-    >
+    <a href={CONTACT_LINKS.phone} data-contact-channel="phone" class={cell}>
       <Icon name="phone" size={16} />
       <span class="spec text-[0.6875rem]">{site.channels.call}</span>
     </a>
 
-    <a
-      href={CONTACT_LINKS.viber}
-      data-contact-channel="viber"
-      class="flex min-h-14 flex-col items-center justify-center gap-1 border-r border-line text-ink"
-    >
-      <Icon name="viber" size={16} />
-      <span class="spec text-[0.6875rem]">{site.channels.viber}</span>
-    </a>
+    {
+      TELEGRAM_ENABLED ? (
+        <div data-primary-contact class="contents">
+          <a
+            href={CONTACT_LINKS.telegram}
+            data-primary-channel="telegram"
+            data-contact-channel="telegram"
+            class={cell}
+          >
+            <Icon name="telegram" size={16} />
+            <span class="spec text-[0.6875rem]">{site.channels.telegram}</span>
+          </a>
+          <a
+            href={CONTACT_LINKS.whatsapp}
+            data-primary-channel="whatsapp"
+            data-contact-channel="whatsapp"
+            hidden
+            class={cell}
+          >
+            <Icon name="whatsapp" size={16} />
+            <span class="spec text-[0.6875rem]">{site.channels.whatsapp}</span>
+          </a>
+        </div>
+      ) : (
+        <a
+          href={CONTACT_LINKS.whatsapp}
+          data-contact-channel="whatsapp"
+          class={cell}
+        >
+          <Icon name="whatsapp" size={16} />
+          <span class="spec text-[0.6875rem]">{site.channels.whatsapp}</span>
+        </a>
+      )
+    }
 
     <button
       type="button"
