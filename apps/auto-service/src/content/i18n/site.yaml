@@ -90,7 +90,7 @@ translations:
       menuCloseLabel: Zatvori meni
       languageLabel: Jezik
       cta: Zakazivanje
-      phoneLabel: Pozovite
+      phoneLabel: Pozvati
     footer:
       tagline: Aut servis u Beogradu. Dijagnostika, popravka, karoserija i farbanje, prodaja delova.
       servicesHeading: Usluge
@@ -129,8 +129,8 @@ translations:
       contactChannelLabel: Kako da vas kontaktiramo
       channelPhone: Poziv
       countryLabel: Kod zemlje
-      commentLabel: Šta vas brine
-      commentPlaceholder: Zujanje na neravninama, svetli lampica, potrebno servisiranje…
+      commentLabel: Automobil i šta mu je
+      commentPlaceholder: Marka, model, godina - i šta vas muči
       submit: Pošalji zahtev
       submitting: Šaljemo…
       privacyNote: Slanjem forme, pristajete na
@@ -202,8 +202,8 @@ translations:
       contactChannelLabel: How to contact you
       channelPhone: Call
       countryLabel: Country Code
-      commentLabel: What seems to be the problem
-      commentPlaceholder: Noise on bumps, check engine light, needs service…
+      commentLabel: Car and its issues
+      commentPlaceholder: Make, model, year — and what's troubling it
       submit: Submit Request
       submitting: Submitting…
       privacyNote: By submitting the form, you agree to our
@@ -219,4 +219,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: 872df0f987053a81
+translatedFrom: 39cf1b2409c1bc90
