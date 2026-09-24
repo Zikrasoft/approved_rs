@@ -10,7 +10,7 @@ import {
 import { channelLabel } from '../channelLabels.ts';
 import { LEADS_PATH } from '../quarantine.ts';
 import type { Income, LeadStatus, StoredLead } from '../schema.ts';
-import { MAX_LIST_ROWS, type OwedRow } from '../store.ts';
+import { MAX_LIST_ROWS, isPlaceholderContact, type OwedRow } from '../store.ts';
 
 export type Role = 'owner' | 'admin';
 
@@ -449,7 +449,9 @@ export function createFormatter({
 }: FormatterOptions) {
   function clickLabel(lead: StoredLead): string {
     const channel = lead.contactChannel;
-    return lead.kind === 'call_click' && channel
+    return lead.kind === 'call_click' &&
+      channel &&
+      isPlaceholderContact(lead.contact)
       ? `Клик: ${channelLabel(channel)}`
       : '';
   }

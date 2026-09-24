@@ -1380,6 +1380,7 @@ describe('a lead that asked for several services at once', () => {
 
   it('shows the channel a contact click came from, in place of a service', () => {
     const click = makeLead({
+      contact: '—',
       service: '',
       services: [],
       kind: 'call_click',
@@ -1388,8 +1389,20 @@ describe('a lead that asked for several services at once', () => {
     expect(buildLeadDetail(click, 'owner').text).toContain('Клик: Telegram');
   });
 
+  it('stops calling a click a click once a form left a real contact on it', () => {
+    const upgraded = makeLead({
+      contact: '@ivan',
+      service: '',
+      services: [],
+      kind: 'call_click',
+      contactChannel: 'telegram',
+    });
+    expect(buildLeadDetail(upgraded, 'owner').text).toContain('Заявка #42 — —');
+  });
+
   it('marks a click whose channel never reached the record', () => {
     const click = makeLead({
+      contact: '—',
       service: '',
       services: [],
       kind: 'call_click',
@@ -1400,6 +1413,7 @@ describe('a lead that asked for several services at once', () => {
 
   it('prints a channel it has no label for as it is stored', () => {
     const click = makeLead({
+      contact: '—',
       service: '',
       services: [],
       kind: 'call_click',

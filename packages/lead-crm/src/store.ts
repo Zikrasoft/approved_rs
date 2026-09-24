@@ -54,7 +54,7 @@ function todayISODate(): string {
   return format(new Date(), 'yyyy-MM-dd');
 }
 
-function isPlaceholderContact(contact: string): boolean {
+export function isPlaceholderContact(contact: string): boolean {
   return contact === '' || contact === '—';
 }
 

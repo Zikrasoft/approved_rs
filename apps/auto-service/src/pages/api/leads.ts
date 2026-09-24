@@ -8,9 +8,9 @@ import { PRIMARY_LOCALE, isLocale, type Locale } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 
 const MISSING_FIELDS_MESSAGE: Record<Locale, string> = {
-  ru: 'Укажите телефон',
-  sr: 'Unesite telefon',
-  en: 'Enter a phone number',
+  ru: 'Укажите контакт',
+  sr: 'Unesite kontakt',
+  en: 'Enter a contact',
 };
 
 export const POST = createLeadsRoute({
