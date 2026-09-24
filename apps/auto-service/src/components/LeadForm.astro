@@ -189,27 +189,16 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     </div>
   </fieldset>
 
-  <div class={compact ? 'flex flex-col gap-4' : 'grid gap-4 sm:grid-cols-2'}>
-    <label class="block">
-      <span class="field-label">{site.form.nameLabel}</span>
-      <input
-        name="name"
-        type="text"
-        autocomplete="name"
-        placeholder={site.form.namePlaceholder}
-        class="field"
-      />
-    </label>
-    <label class="block">
-      <span class="field-label">{site.form.carLabel}</span>
-      <input
-        name="car"
-        type="text"
-        placeholder={site.form.carPlaceholder}
-        class="field"
-      />
-    </label>
-  </div>
+  <label class="block">
+    <span class="field-label">{site.form.nameLabel}</span>
+    <input
+      name="name"
+      type="text"
+      autocomplete="name"
+      placeholder={site.form.namePlaceholder}
+      class="field"
+    />
+  </label>
 
   {service && <input type="hidden" name={SERVICE_FIELD} value={service} />}
 

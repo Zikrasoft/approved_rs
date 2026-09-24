@@ -124,7 +124,9 @@ Approved's trust/verification semantics.
 - Packages are configured per business, never per hardcoded assumption:
   the commission rate, the locale list, the storage key and the service labels
   are all config. Operator-facing Russian bot copy is _not_ — it is the same
-  for every brand and lives in the package.
+  for every brand and lives in the package, contact-channel labels included
+  (`CHANNEL_LABELS` in `packages/lead-crm/src/telegram/format.ts`, after three
+  byte-identical copies of it sat in the apps' `crmBot.ts`).
 - **`SOURCE_LOCALE = 'ru'` in `packages/i18n` is a deliberate exception** to that
   rule. It is the language content is authored in, not a locale a site serves,
   and the whole auto-translate pipeline is built on every app writing Russian and
@@ -194,7 +196,9 @@ Both new apps follow the same shape, and a third should too:
   pages, CarLab's cart (`parts-order`) and Details' work pages
   (`servicesApplied[0]`). Everywhere else — the modal, the contact page, the
   homepage forms — a lead carries no service **by design**, and the operator
-  card renders `—` for it with the visited page on the `Страница:` line. The
+  card renders `—` for it with the visited page on the `Страница:` line. A
+  contact click renders `Клик: <канал>` instead: the click has a channel worth
+  naming, a form lead does not. The
   bot cannot set the service afterwards, so treat it as lost rather than
   pending; if per-service numbers ever matter more than the shorter form, the
   fix is to thread the page's service into the modal, not to bring the picker

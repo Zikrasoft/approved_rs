@@ -155,7 +155,7 @@ describe('createLeadsRoute', () => {
     expect(notifyLead).not.toHaveBeenCalled();
   });
 
-  it('folds an optional car field into the comment the operator reads', async () => {
+  it('still folds a car field posted by a page cached before the field was merged away', async () => {
     await POST(
       makeCtx(valid({ car: 'BMW X5 2019', comment: 'Стучит спереди' })),
     );
@@ -165,10 +165,10 @@ describe('createLeadsRoute', () => {
     );
   });
 
-  it('sends the car alone when there is no comment', async () => {
-    await POST(makeCtx(valid({ car: 'Golf 7' })));
+  it('passes the comment through as the operator reads it', async () => {
+    await POST(makeCtx(valid({ comment: 'BMW X5 2019, стучит спереди' })));
     expect(notifyLead).toHaveBeenCalledWith(
-      expect.objectContaining({ comment: 'Golf 7' }),
+      expect.objectContaining({ comment: 'BMW X5 2019, стучит спереди' }),
       '[leads]',
     );
   });

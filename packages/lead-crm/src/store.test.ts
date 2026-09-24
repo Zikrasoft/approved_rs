@@ -135,7 +135,7 @@ describe('insertOrMergeLead', () => {
     brand: 'Test',
     name: '',
     contact: '—',
-    service: `Клик ${channel} с сайта`,
+    service: '',
     contactChannel: channel,
     visitorId,
     locale: 'ru',
@@ -160,10 +160,10 @@ describe('insertOrMergeLead', () => {
     expect(lead.id).toBe(first.lead.id);
     const all = await store.readLeads();
     expect(all).toHaveLength(1);
-    expect(lead.comment).toContain('Также пробовал: Клик whatsapp с сайта');
+    expect(lead.comment).toContain('Также пробовал: WhatsApp');
   });
 
-  it('upgrades a placeholder contact once real name/contact data arrives for the same visitor', async () => {
+  it('upgrades a placeholder contact once real name/contact data arrives, without forgetting the lead began as a click', async () => {
     const { lead: clicked } = await store.insertOrMergeLead(
       clickData('telegram'),
     );
@@ -180,7 +180,7 @@ describe('insertOrMergeLead', () => {
     expect(lead.id).toBe(clicked.id);
     expect(lead.name).toBe('Иван');
     expect(lead.contact).toBe('@ivan');
-    expect(lead.kind).toBeUndefined();
+    expect(lead.kind).toBe('call_click');
     expect(lead.services).toEqual([]);
     expect(lead.contactChannel).toBe('telegram');
   });
@@ -217,10 +217,11 @@ describe('insertOrMergeLead', () => {
     expect(lead.services).toEqual(['polishing', 'ppf']);
   });
 
-  it('keeps the clicked service when the form that upgrades the contact carried none', async () => {
+  it('keeps the service already on the lead when the form that upgrades the contact carried none', async () => {
     await store.insertOrMergeLead({
       ...clickData('whatsapp'),
-      services: ['Клик whatsapp с сайта'],
+      service: 'polishing',
+      services: ['polishing'],
     });
     const { lead } = await store.insertOrMergeLead({
       brand: 'Test',
@@ -232,22 +233,50 @@ describe('insertOrMergeLead', () => {
       locale: 'ru',
     });
 
-    expect(lead.service).toBe('Клик whatsapp с сайта');
-    expect(lead.services).toEqual(['Клик whatsapp с сайта']);
+    expect(lead.service).toBe('polishing');
+    expect(lead.services).toEqual(['polishing']);
   });
 
-  it('adds no empty "Также пробовал" note when the second submission named no service', async () => {
+  it('adds no "Также пробовал" note for a form submission that named no service', async () => {
     await store.insertOrMergeLead(clickData('telegram'));
     const { lead } = await store.insertOrMergeLead({
       brand: 'Test',
       name: 'Иван',
       contact: '@ivan',
       service: '',
+      contactChannel: 'telegram',
       visitorId: 'visitor-1',
       locale: 'ru',
     });
 
     expect(lead.comment).not.toContain('Также пробовал');
+  });
+
+  it('writes no note for a click whose channel never reached the record', async () => {
+    await store.insertOrMergeLead(clickData('telegram'));
+    const { lead } = await store.insertOrMergeLead({
+      ...clickData('telegram'),
+      contactChannel: undefined,
+    });
+
+    expect(lead.comment).not.toContain('Также пробовал');
+  });
+
+  it('remembers which channel the visitor clicked before the form replaced it', async () => {
+    await store.insertOrMergeLead(clickData('whatsapp'));
+    const { lead } = await store.insertOrMergeLead({
+      brand: 'Test',
+      name: 'Иван',
+      contact: '@ivan',
+      service: '',
+      contactChannel: 'telegram',
+      visitorId: 'visitor-1',
+      locale: 'ru',
+    });
+
+    expect(lead.contactChannel).toBe('telegram');
+    expect(lead.service).toBe('');
+    expect(lead.comment).toContain('Сначала кликнул: WhatsApp');
   });
 
   it('names every service of the second submission in the merge note', async () => {
@@ -294,11 +323,11 @@ describe('insertOrMergeLead', () => {
     expect(lead.comment).toContain(`Также пробовал: ${baseData.service}`);
   });
 
-  it('falls back to naming the service when the second submission carried no comment', async () => {
+  it('falls back to naming the clicked channel when the second submission carried no comment', async () => {
     await store.insertOrMergeLead(clickData('telegram'));
     const { lead } = await store.insertOrMergeLead(clickData('whatsapp'));
 
-    expect(lead.comment).toContain('Также пробовал: Клик whatsapp с сайта');
+    expect(lead.comment).toContain('Также пробовал: WhatsApp');
   });
 
   it('does not merge across brands — one store, three businesses, separate leads', async () => {

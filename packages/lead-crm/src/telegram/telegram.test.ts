@@ -42,12 +42,6 @@ const client = createTelegramClient('test-bot-token');
 const formatter = createFormatter({
   serviceLabel: (slug) => SERVICE_LABELS[slug] ?? slug,
   botUsername: 'approved_test_bot',
-  contactChannelLabels: {
-    telegram: 'Telegram',
-    whatsapp: 'WhatsApp',
-    viber: 'Viber',
-    phone: 'звонок',
-  },
 });
 const notifier = createNotifier({
   client,
@@ -1319,7 +1313,6 @@ describe('per-business formatter config', () => {
   const detailingFormatter = createFormatter({
     serviceLabel: () => 'Оклейка плёнкой',
     botUsername: 'detailing_bot',
-    contactChannelLabels: {},
   });
 
   it('does not quote one business rate in help text a shared bot shows every brand', () => {
@@ -1383,6 +1376,36 @@ describe('a lead that asked for several services at once', () => {
     expect(formatter.formatTeaser(makeLead({ services: [] }))).toContain(
       'Автоподбор',
     );
+  });
+
+  it('shows the channel a contact click came from, in place of a service', () => {
+    const click = makeLead({
+      service: '',
+      services: [],
+      kind: 'call_click',
+      contactChannel: 'telegram',
+    });
+    expect(buildLeadDetail(click, 'owner').text).toContain('Клик: Telegram');
+  });
+
+  it('marks a click whose channel never reached the record', () => {
+    const click = makeLead({
+      service: '',
+      services: [],
+      kind: 'call_click',
+      contactChannel: null,
+    });
+    expect(formatter.formatTeaser(click)).toContain('· — ·');
+  });
+
+  it('prints a channel it has no label for as it is stored', () => {
+    const click = makeLead({
+      service: '',
+      services: [],
+      kind: 'call_click',
+      contactChannel: 'signal',
+    });
+    expect(formatter.formatTeaser(click)).toContain('Клик: signal');
   });
 
   it('marks a lead that named no service instead of leaving a gap', () => {

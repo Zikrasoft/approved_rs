@@ -7,6 +7,7 @@ import {
   unpaidIncomes,
   type CommissionInfo,
 } from '../money.ts';
+import { channelLabel } from '../channelLabels.ts';
 import { LEADS_PATH } from '../quarantine.ts';
 import type { Income, LeadStatus, StoredLead } from '../schema.ts';
 import { MAX_LIST_ROWS, type OwedRow } from '../store.ts';
@@ -19,7 +20,6 @@ export type Keyboard = { inline_keyboard: Btn[][] };
 export interface FormatterOptions {
   serviceLabel: (slug: string) => string;
   botUsername: string;
-  contactChannelLabels: Record<string, string>;
 }
 
 const MAX_SERVICES_LABEL = 200;
@@ -446,22 +446,23 @@ export function dealNotificationText(
 export function createFormatter({
   serviceLabel,
   botUsername,
-  contactChannelLabels,
 }: FormatterOptions) {
-  const channelLabels = new Map(Object.entries(contactChannelLabels));
+  function clickLabel(lead: StoredLead): string {
+    const channel = lead.contactChannel;
+    return lead.kind === 'call_click' && channel
+      ? `Клик: ${channelLabel(channel)}`
+      : '';
+  }
 
   function servicesLabel(lead: StoredLead): string {
     const slugs = lead.services.length > 0 ? lead.services : [lead.service];
     const label = slugs.map(serviceLabel).filter(Boolean).join(' · ');
-    return (label || '—').slice(0, MAX_SERVICES_LABEL);
+    return (label || clickLabel(lead) || '—').slice(0, MAX_SERVICES_LABEL);
   }
 
   function formatLeadText(lead: StoredLead, role: Role): string {
-    const channelLabel = lead.contactChannel
-      ? channelLabels.get(lead.contactChannel)
-      : undefined;
-    const contactLine = channelLabel
-      ? `${lead.contact} (${channelLabel})`
+    const contactLine = lead.contactChannel
+      ? `${lead.contact} (${channelLabel(lead.contactChannel)})`
       : lead.contact;
     const lines: string[] = [
       `🚗 Заявка #${lead.id} — ${escapeHtml(servicesLabel(lead))}`,

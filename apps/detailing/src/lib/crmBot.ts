@@ -4,7 +4,6 @@ import {
   createNotifyLead,
   createTelegramClient,
   parseIds,
-  type TrackedContactChannel,
 } from '@podbor/lead-crm';
 import { getServicesContent } from '@/i18n/content/services';
 import { isServiceSlug } from '@/utils/services';
@@ -26,12 +25,6 @@ const client = createTelegramClient(requireEnv('TELEGRAM_BOT_TOKEN'));
 const formatter = createFormatter({
   serviceLabel: (slug) => (isServiceSlug(slug) ? ruServices[slug].name : slug),
   botUsername: requireEnv('TELEGRAM_BOT_USERNAME'),
-  contactChannelLabels: {
-    telegram: 'Telegram',
-    whatsapp: 'WhatsApp',
-    viber: 'Viber',
-    phone: 'звонок',
-  } satisfies Record<TrackedContactChannel, string>,
 });
 
 export const notifier = createNotifier({

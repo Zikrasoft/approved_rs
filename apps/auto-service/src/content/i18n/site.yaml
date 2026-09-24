@@ -53,10 +53,8 @@ form:
   contactChannelLabel: Как с вами связаться
   channelPhone: Звонок
   countryLabel: Код страны
-  carLabel: Автомобиль
-  carPlaceholder: Марка, модель, год
-  commentLabel: Что беспокоит
-  commentPlaceholder: Стук на неровностях, горит чек, нужно ТО…
+  commentLabel: Машина и что с ней
+  commentPlaceholder: Марка, модель, год — и что беспокоит
   submit: Отправить заявку
   submitting: Отправляем…
   privacyNote: Отправляя форму, вы соглашаетесь с
@@ -131,8 +129,6 @@ translations:
       contactChannelLabel: Kako da vas kontaktiramo
       channelPhone: Poziv
       countryLabel: Kod zemlje
-      carLabel: Automobil
-      carPlaceholder: Marka, model, godina
       commentLabel: Šta vas brine
       commentPlaceholder: Zujanje na neravninama, svetli lampica, potrebno servisiranje…
       submit: Pošalji zahtev
@@ -206,8 +202,6 @@ translations:
       contactChannelLabel: How to contact you
       channelPhone: Call
       countryLabel: Country Code
-      carLabel: Car
-      carPlaceholder: Make, model, year
       commentLabel: What seems to be the problem
       commentPlaceholder: Noise on bumps, check engine light, needs service…
       submit: Submit Request

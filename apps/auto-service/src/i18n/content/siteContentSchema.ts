@@ -82,8 +82,6 @@ export const siteContentSchema = z
         contactChannelLabel: z.string(),
         channelPhone: z.string(),
         countryLabel: z.string(),
-        carLabel: z.string(),
-        carPlaceholder: z.string(),
         commentLabel: z.string(),
         commentPlaceholder: z.string(),
         submit: z.string(),

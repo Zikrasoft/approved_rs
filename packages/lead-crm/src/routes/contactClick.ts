@@ -1,4 +1,3 @@
-import type { TrackedContactChannel } from '../contactChannel.ts';
 import {
   contactChannelSchema,
   sourceUrlSchema,
@@ -7,13 +6,6 @@ import {
 import type { NotifyLead } from '../notifyLead.ts';
 
 const clickedChannelSchema = contactChannelSchema.catch('phone');
-
-const CHANNEL_SERVICE: Record<TrackedContactChannel, string> = {
-  phone: 'Звонок с сайта',
-  telegram: 'Telegram с сайта',
-  whatsapp: 'WhatsApp с сайта',
-  viber: 'Viber с сайта',
-};
 
 export interface ContactClickRouteOptions {
   notifyLead: NotifyLead;
@@ -48,7 +40,6 @@ export function createContactClickRoute({
   }): Promise<Response> {
     const form = await request.formData();
     const channel = clickedChannelSchema.parse(form.get('channel'));
-    const service = CHANNEL_SERVICE[channel];
     const sourceUrl = sourceUrlSchema.parse(form.get('source_url'));
 
     waitUntil(
@@ -56,8 +47,8 @@ export function createContactClickRoute({
         {
           name: '',
           contact: '—',
-          service,
-          services: [service],
+          service: '',
+          services: [],
           contactChannel: channel,
           comment: '',
           source_url: sourceUrl,
