@@ -765,54 +765,6 @@
     "fcf7ce0a466f94e1": "Radno vreme",
     "fff24e238c145b20": "Viber"
   },
-  "src/content/products/bosch-s4-024/index.md": {
-    "0bf69312f99957b4": "**Obrnuta polaritet** za japanske modele. Klemna neće moći da se poveže ako se uzme evropska verzija — ovo je najčešća greška prilikom samostalne kupovine.",
-    "0e3e9a5a796dbd1f": "Bosch S4 024",
-    "55deb38770d198f9": "**Reverse polarity** for Japanese models. The terminal won't reach if you opt for the European version — this is the most common mistake when buying on your own.",
-    "ed1fa54826f2e359": "Bosch S4 024"
-  },
-  "src/content/products/bosch-s5-008/index.md": {
-    "3aed1acb7155cb3a": "Bosch S5 008",
-    "4f35ac5327034db5": "**High cranking power** and ample cycle reserve. It's a great choice for vehicles with a lot of electronics: heating systems, audio equipment, and remote start features.",
-    "ab3ef9ece7633a64": "Bosch S5 008",
-    "f556d1fc762f4058": "**Povećani startni tok** i dobar kapacitet za cikluse. Ova baterija se preporučuje kada u automobilu ima puno elektronike: grejači, audio sistemi, automatsko pokretanje."
-  },
-  "src/content/products/exide-agm-ek950/index.md": {
-    "47c16ee032807860": "Exide Start-Stop AGM EK950",
-    "80669cbefd6f0ccd": "Exide Start-Stop AGM EK950",
-    "c00334d04b351134": "A large AGM battery designed for heavy-duty SUVs and luxury sedans. Available on order, typically takes **two to three days** for delivery.",
-    "ef40fc98d722df9b": "Velika AGM za teške SUV-ove i poslovne limuzine. Dostavljamo po narudžbini, obično **dva do tri dana**."
-  },
-  "src/content/products/exide-premium-ea770/index.md": {
-    "61d77f1ffcb90451": "Univerzalna opcija za **francuske modele**. Ugrađujemo uz proveru alternatora — na ovim automobilima slab prenos često je uzrok \"smrti\" akumulatora.",
-    "78d59ec5bd206e2e": "Exide Premium EA770",
-    "c1208a729152d41e": "Exide Premium EA770",
-    "e664d9d09f414e19": "A versatile option for **French models**. We install it after checking the generator — a weak charge is a common reason for battery failure in these cars."
-  },
-  "src/content/products/moll-kamina-start-72/index.md": {
-    "6e202f31f0415c72": "Moll Kamina Start 72",
-    "cb454ba0fee23d48": "Moll Kamina Start 72",
-    "cb719f60f609e987": "**Nemačka konstrukcija** sa ojačanim rešetkama. Razuman kompromis ako vam AGM nije potreban, ali želite rezervu za startni tok.",
-    "d7d4a5f977e72942": "**German assembly** with reinforced grids. A sensible compromise if you don’t need an AGM battery but still want some extra cold cranking power."
-  },
-  "src/content/products/topla-energy-60/index.md": {
-    "3fa2e74f4ab14701": "Topla Energy 60",
-    "5754a7a4036224b9": "Topla Energy 60",
-    "f16a2edb058a47dc": "Budžetska baterija za manje gradske automobile. **Slovenačka proizvodnja**, dobar izbor kada auto koristiš svaki dan.",
-    "f5c0cd9d76e56d4f": "An affordable battery designed for small city cars. **Slovenian-made**, it's a solid choice for vehicles that are used daily."
-  },
-  "src/content/products/varta-agm-e39/index.md": {
-    "1990fdb24dab6e07": "Varta Silver Dynamic AGM E39",
-    "4152d5f02f85c13a": "AGM akumulator za automobile **sa start-stop sistemom**. Običnu bateriju u ovakav auto ne treba stavljati — neće izdržati broj ciklusa i pregoreće nakon jedne sezone.",
-    "4e6e5dbc0605c92a": "Varta Silver Dynamic AGM E39",
-    "75f54dcc8da377a9": "AGM battery for vehicles equipped with **start-stop** systems. A regular battery cannot be used in such vehicles — it won't withstand the number of cycles and will fail within one season."
-  },
-  "src/content/products/varta-blue-dynamic-e12/index.md": {
-    "4afc249d58152150": "Klasična olovna baterija za benzinske i dizel motore **bez start-stop sistema**. Dobro podnosi srpske letnje vrućine i kratke gradske vožnje.",
-    "5470bd37364e89d4": "A classic lead-acid battery designed for gasoline and diesel engines **without a start-stop system**. It performs well in the Serbian summer and is ideal for short urban trips.",
-    "7c35b8e36bbff6ae": "Varta Blue Dynamic E12",
-    "c7aa9203da1539f8": "Varta Blue Dynamic E12"
-  },
   "src/content/works/alfa-romeo-giulia/index.md": {
     "00c1f16aabeed96d": "Scheduled Maintenance for 2021 Alfa Romeo Giulia in Belgrade",
     "271ca12aa8250363": "ALFA ROMEO GIULIA",
