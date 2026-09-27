@@ -2,13 +2,25 @@ import { defineMiddleware } from 'astro:middleware';
 import { requestHasLocale } from 'astro:i18n';
 import { BRAND_SITES, brandLocale } from '@podbor/brands';
 import { LOCALE_COOKIE, createUnlocalizedMatcher } from '@podbor/site-kit';
+import cities from './data/cities.json';
 import { detectLocale } from './i18n/detectLocale';
 import { SUPPORTED_LOCALES } from './i18n/config';
 
 // Pre-i18n legacy redirects (old service slugs). Kept here instead of
 // astro.config.mjs's `redirects` so the slug rewrite and the locale prefix
 // resolve in a single 301, not two.
-const LEGACY_PATH_REWRITES: Record<string, string> = {
+// Same country-first word order as the /<country>/autopodbor/ pages below, one
+// level deeper. Built from the city list so a new city cannot be added without
+// its old URL redirecting too.
+const COUNTRY_FIRST_CITY_REWRITES = Object.fromEntries(
+  cities.map(({ country, slug }) => [
+    `/${country}/${slug}/autopodbor/`,
+    `/autopodbor/${country}/${slug}`,
+  ]),
+);
+
+export const LEGACY_PATH_REWRITES: Record<string, string> = {
+  ...COUNTRY_FIRST_CITY_REWRITES,
   '/cases/': '/cases/autopodbor',
   '/de/combined/': '/autopodbor/de',
   '/rs/combined/': '/autopodbor/rs',

@@ -18,6 +18,7 @@ const {
   onRequest,
   MOVED_BRAND_HOSTS,
   MOVED_BRAND_CASE_TABS,
+  LEGACY_PATH_REWRITES,
 } = await import('./middleware');
 
 type Handler = (context: unknown, next: () => unknown) => unknown;
@@ -324,4 +325,27 @@ describe('vercel.json brand redirects', () => {
   it.each(cases)('sends %s where the middleware sends it', (path, target) => {
     expect(movedBrandUrl(path)).toBe(target);
   });
+});
+
+describe('vercel.json legacy redirects', () => {
+  const rules: { source: string; destination: string }[] = JSON.parse(
+    readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'),
+  ).redirects;
+  const bySource = new Map(
+    rules.map((rule) => [rule.source, rule.destination]),
+  );
+
+  const legacy = Object.keys(LEGACY_PATH_REWRITES).filter((path) =>
+    path.endsWith('/autopodbor/'),
+  );
+
+  it.each(legacy)(
+    'sends %s to the same page at the edge as in middleware',
+    (path) => {
+      const withoutSlash = path.slice(0, -1);
+      const target = `/ru${renameSlugSegments(LEGACY_PATH_REWRITES[path]!)}`;
+      expect(bySource.get(path)).toBe(target);
+      expect(bySource.get(withoutSlash)).toBe(target);
+    },
+  );
 });

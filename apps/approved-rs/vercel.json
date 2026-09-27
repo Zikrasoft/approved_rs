@@ -700,6 +700,186 @@
       "source": "/:locale(ru|en|sr|es|de)/vehicle-buyback/:country(de|es|ch|pt|fr|it|pl)/",
       "destination": "/:locale/vehicle-buyback/",
       "permanent": true
+    },
+    {
+      "source": "/de/berlin/autopodbor",
+      "destination": "/ru/vehicle-sourcing/de/berlin",
+      "permanent": true
+    },
+    {
+      "source": "/de/berlin/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/de/berlin",
+      "permanent": true
+    },
+    {
+      "source": "/de/munich/autopodbor",
+      "destination": "/ru/vehicle-sourcing/de/munich",
+      "permanent": true
+    },
+    {
+      "source": "/de/munich/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/de/munich",
+      "permanent": true
+    },
+    {
+      "source": "/de/hamburg/autopodbor",
+      "destination": "/ru/vehicle-sourcing/de/hamburg",
+      "permanent": true
+    },
+    {
+      "source": "/de/hamburg/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/de/hamburg",
+      "permanent": true
+    },
+    {
+      "source": "/de/dusseldorf/autopodbor",
+      "destination": "/ru/vehicle-sourcing/de/dusseldorf",
+      "permanent": true
+    },
+    {
+      "source": "/de/dusseldorf/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/de/dusseldorf",
+      "permanent": true
+    },
+    {
+      "source": "/rs/belgrade/autopodbor",
+      "destination": "/ru/vehicle-sourcing/rs/belgrade",
+      "permanent": true
+    },
+    {
+      "source": "/rs/belgrade/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/rs/belgrade",
+      "permanent": true
+    },
+    {
+      "source": "/rs/novi-sad/autopodbor",
+      "destination": "/ru/vehicle-sourcing/rs/novi-sad",
+      "permanent": true
+    },
+    {
+      "source": "/rs/novi-sad/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/rs/novi-sad",
+      "permanent": true
+    },
+    {
+      "source": "/rs/pancevo/autopodbor",
+      "destination": "/ru/vehicle-sourcing/rs/pancevo",
+      "permanent": true
+    },
+    {
+      "source": "/rs/pancevo/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/rs/pancevo",
+      "permanent": true
+    },
+    {
+      "source": "/rs/subotica/autopodbor",
+      "destination": "/ru/vehicle-sourcing/rs/subotica",
+      "permanent": true
+    },
+    {
+      "source": "/rs/subotica/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/rs/subotica",
+      "permanent": true
+    },
+    {
+      "source": "/es/madrid/autopodbor",
+      "destination": "/ru/vehicle-sourcing/es/madrid",
+      "permanent": true
+    },
+    {
+      "source": "/es/madrid/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/es/madrid",
+      "permanent": true
+    },
+    {
+      "source": "/es/barcelona/autopodbor",
+      "destination": "/ru/vehicle-sourcing/es/barcelona",
+      "permanent": true
+    },
+    {
+      "source": "/es/barcelona/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/es/barcelona",
+      "permanent": true
+    },
+    {
+      "source": "/ch/zurich/autopodbor",
+      "destination": "/ru/vehicle-sourcing/ch/zurich",
+      "permanent": true
+    },
+    {
+      "source": "/ch/zurich/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/ch/zurich",
+      "permanent": true
+    },
+    {
+      "source": "/ch/geneva/autopodbor",
+      "destination": "/ru/vehicle-sourcing/ch/geneva",
+      "permanent": true
+    },
+    {
+      "source": "/ch/geneva/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/ch/geneva",
+      "permanent": true
+    },
+    {
+      "source": "/fr/paris/autopodbor",
+      "destination": "/ru/vehicle-sourcing/fr/paris",
+      "permanent": true
+    },
+    {
+      "source": "/fr/paris/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/fr/paris",
+      "permanent": true
+    },
+    {
+      "source": "/fr/lyon/autopodbor",
+      "destination": "/ru/vehicle-sourcing/fr/lyon",
+      "permanent": true
+    },
+    {
+      "source": "/fr/lyon/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/fr/lyon",
+      "permanent": true
+    },
+    {
+      "source": "/it/milan/autopodbor",
+      "destination": "/ru/vehicle-sourcing/it/milan",
+      "permanent": true
+    },
+    {
+      "source": "/it/milan/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/it/milan",
+      "permanent": true
+    },
+    {
+      "source": "/it/rome/autopodbor",
+      "destination": "/ru/vehicle-sourcing/it/rome",
+      "permanent": true
+    },
+    {
+      "source": "/it/rome/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/it/rome",
+      "permanent": true
+    },
+    {
+      "source": "/pl/warsaw/autopodbor",
+      "destination": "/ru/vehicle-sourcing/pl/warsaw",
+      "permanent": true
+    },
+    {
+      "source": "/pl/warsaw/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/pl/warsaw",
+      "permanent": true
+    },
+    {
+      "source": "/pl/krakow/autopodbor",
+      "destination": "/ru/vehicle-sourcing/pl/krakow",
+      "permanent": true
+    },
+    {
+      "source": "/pl/krakow/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/pl/krakow",
+      "permanent": true
     }
   ],
   "headers": [
