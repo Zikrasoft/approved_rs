@@ -415,6 +415,16 @@ https://<домен>/api/keystatic/github/oauth/callback
 Локальная разработка через GitHub App не ходит: `import.meta.env.PROD` там
 `false`, и Keystatic пишет прямо в рабочую копию (`storage: { kind: 'local' }`).
 
+`PUBLIC_KEYSTATIC_GITHUB_APP_SLUG` нельзя помечать в Vercel как Sensitive:
+такие переменные недоступны на сборке, а slug нужен клиентскому бандлу
+`/keystatic`. Три секрета — наоборот, Sensitive, их читает только функция.
+
+Сайт без этих переменных собирается, деплоится и отдаёт все страницы; мёртв
+только вход в `/keystatic`, и только когда кто-то в него полезет — carlab.rs и
+details.rs прожили так двенадцать дней. Проверять руками:
+`curl -o /dev/null -w '%{http_code}' https://<домен>/api/keystatic/github/login`
+— должно быть 307, а не 500.
+
 ---
 
 ## Секреты GitHub Actions
