@@ -52,6 +52,7 @@ module.exports = {
     'src/api/store/*.ts': { statements: 95, branches: 88 },
     'src/workflows/hooks/*.ts': { statements: 95, branches: 88 },
     'src/lib/*.ts': { statements: 95, branches: 90 },
+    'src/subscribers/*.ts': { statements: 95, branches: 88 },
     global: { statements: 70, branches: 75 },
   },
 };
