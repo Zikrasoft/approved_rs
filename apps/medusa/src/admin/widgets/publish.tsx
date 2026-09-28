@@ -3,32 +3,24 @@ import { Button, Container, Heading, Text, toast } from '@medusajs/ui';
 import { CARLAB } from '@podbor/brands';
 import { useState } from 'react';
 
+import { ask } from '../lib/ask';
+
 const PublishWidget = () => {
   const [sending, setSending] = useState(false);
 
   const publish = async () => {
     setSending(true);
     try {
-      const response = await fetch('/admin/publish', {
+      const answer: { message?: string } = await ask('/admin/publish', {
         method: 'POST',
-        credentials: 'include',
       });
-      const answer: { message?: string } = await response
-        .json()
-        .catch(() => ({}));
-      if (response.ok) {
-        toast.success('Публикация запущена', {
-          description:
-            answer.message ?? 'Сайт обновится в течение нескольких минут.',
-        });
-      } else {
-        toast.error('Публикация не запущена', {
-          description: answer.message ?? 'Попробуйте ещё раз через минуту.',
-        });
-      }
-    } catch {
+      toast.success('Публикация запущена', {
+        description:
+          answer.message ?? 'Сайт обновится в течение нескольких минут.',
+      });
+    } catch (error) {
       toast.error('Публикация не запущена', {
-        description: 'Сервер не ответил. Проверьте связь и попробуйте ещё раз.',
+        description: (error as Error).message,
       });
     } finally {
       setSending(false);
