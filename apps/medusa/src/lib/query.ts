@@ -35,3 +35,8 @@ export async function queryAll<T>(
   } while (page.length === QUERY_PAGE);
   return found;
 }
+
+export function money(value: unknown): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}

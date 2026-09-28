@@ -226,5 +226,37 @@ medusaIntegrationTestRunner({
       expect(error.response.data.message).toBe('Заказ не принят');
       expect(await orderCount()).toBe(before);
     });
+
+    const orderLocale = async (orderId: string): Promise<string | null> => {
+      const {
+        data: [order],
+      } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({
+          entity: 'order',
+          fields: ['locale'],
+          filters: { id: orderId },
+        });
+      return order.locale ?? null;
+    };
+
+    it('carries the language the cart was opened in onto the order (M-4)', async () => {
+      const { cartId, headers } = await readyCart({ locale: 'en-US' });
+
+      const { data } = await complete(cartId, headers);
+
+      expect(await orderLocale(data.order.id)).toBe('en-US');
+    });
+
+    it('takes the order language from the cart body only, never from the locale header', async () => {
+      const { cartId, headers } = await readyCart({
+        locale: null,
+        cartHeaders: { 'x-medusa-locale': 'en-US' },
+      });
+
+      const { data } = await complete(cartId, headers);
+
+      expect(await orderLocale(data.order.id)).toBeNull();
+    });
   },
 });

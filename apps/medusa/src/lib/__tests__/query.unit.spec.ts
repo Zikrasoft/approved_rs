@@ -1,4 +1,4 @@
-import { QUERY_PAGE, queryAll, queryOne } from '../query';
+import { QUERY_PAGE, money, queryAll, queryOne } from '../query';
 
 describe('queryOne', () => {
   it('asks for the given entity, fields and filters and returns the first row', async () => {
@@ -46,5 +46,16 @@ describe('queryAll', () => {
       fields: ['id'],
       pagination: { take: QUERY_PAGE, skip: QUERY_PAGE, order: { id: 'ASC' } },
     });
+  });
+});
+
+describe('money', () => {
+  it.each([
+    [12690, 12690],
+    ['12690', 12690],
+    [null, 0],
+    ['abc', 0],
+  ])('reads %p as %p', (value, expected) => {
+    expect(money(value)).toBe(expected);
   });
 });
