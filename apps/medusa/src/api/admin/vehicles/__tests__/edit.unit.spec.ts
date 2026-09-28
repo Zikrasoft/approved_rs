@@ -291,6 +291,44 @@ describe('saveEdit', () => {
     );
   });
 
+  it('deletes a generation whose car still fits a neighbouring, overlapping one', async () => {
+    const rows = [
+      {
+        id: 'mk_z',
+        name: 'Zikra',
+        models: [
+          {
+            id: 'md_p',
+            name: 'Proto',
+            generations: [
+              { id: 'gn_1', name: 'I', year_from: 2006, year_to: 2013 },
+              { id: 'gn_2', name: 'II', year_from: 2011, year_to: 2019 },
+            ],
+          },
+        ],
+      },
+      { id: 'mk_k', name: 'Kosava', models: [] },
+    ];
+    store.listVehicleMakes.mockResolvedValue(rows);
+    const car = {
+      ...VARTA,
+      metadata: {
+        fitment: [
+          { make: 'Zikra', model: 'Proto', yearFrom: 2012, yearTo: 2015 },
+        ],
+      },
+    };
+
+    expect(
+      await saveEdit(scopeWith([car]) as never, {
+        kind: 'delete',
+        level: 'generations',
+        id: 'gn_1',
+      }),
+    ).toBeUndefined();
+    expect(store.deleteVehicleGenerations).toHaveBeenCalledWith('gn_1');
+  });
+
   it('widens, renames and deletes what nothing relies on', async () => {
     const scope = scopeWith([VARTA]) as never;
 

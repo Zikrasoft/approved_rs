@@ -140,6 +140,27 @@ describe('fitmentComplaint', () => {
     );
   });
 
+  it('accepts an entry that fits only the second of two overlapping generations', () => {
+    const overlapping: VehicleTree = [
+      {
+        name: 'Zikra',
+        models: [
+          {
+            name: 'Vesna',
+            generations: [
+              { name: 'I', yearFrom: 2006, yearTo: 2013 },
+              { name: 'II', yearFrom: 2011, yearTo: 2019 },
+            ],
+          },
+        ],
+      },
+    ];
+
+    expect(
+      fitmentComplaint(overlapping, [car('Zikra', 'Vesna', 2014, 2016)]),
+    ).toBeUndefined();
+  });
+
   it('names the first car that does not fit', () => {
     expect(
       fitmentComplaint(TREE, [
