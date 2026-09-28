@@ -168,7 +168,10 @@ describe('sendOrderHook', () => {
   const payload = buildOrderHookPayload(ORDER, PRODUCTS, ADMIN);
 
   it('posts exactly the bytes it signed', async () => {
-    const send = jest.fn().mockResolvedValue({ ok: true, status: 202 });
+    const cancel = jest.fn().mockResolvedValue(undefined);
+    const send = jest
+      .fn()
+      .mockResolvedValue({ ok: true, status: 202, body: { cancel } });
 
     await sendOrderHook(
       payload,
@@ -187,6 +190,7 @@ describe('sendOrderHook', () => {
     expect(orderHookSchema.parse(JSON.parse(init.body))).toEqual(
       JSON.parse(init.body),
     );
+    expect(cancel).toHaveBeenCalled();
   });
 
   it('throws on an answer that is not 2xx, so the event bus retries it', async () => {

@@ -4,6 +4,14 @@ import { z } from 'zod';
 export const ORDER_HOOK_HEADER = 'x-carlab-signature';
 export const ORDER_HOOK_TOLERANCE_SECONDS = 300;
 
+export const ORDER_HOOK_LIMITS = {
+  name: 200,
+  channel: 40,
+  items: 100,
+  quantity: 1000,
+  comment: 2000,
+} as const;
+
 export const orderHookSchema = z
   .object({
     orderId: z.string().min(1).max(100),
@@ -11,10 +19,10 @@ export const orderHookSchema = z
     locale: z.enum(['ru', 'sr', 'en']),
     customer: z
       .object({
-        name: z.string().trim().min(1).max(200),
+        name: z.string().trim().min(1).max(ORDER_HOOK_LIMITS.name),
         phone: z.e164(),
         email: z.email(),
-        channel: z.string().trim().max(40).optional(),
+        channel: z.string().trim().max(ORDER_HOOK_LIMITS.channel).optional(),
       })
       .strict(),
     items: z
@@ -22,16 +30,20 @@ export const orderHookSchema = z
         z
           .object({
             title: z.string().trim().min(1).max(300),
-            quantity: z.number().int().positive().max(1000),
+            quantity: z
+              .number()
+              .int()
+              .positive()
+              .max(ORDER_HOOK_LIMITS.quantity),
             unitPrice: z.number().nonnegative(),
             isService: z.boolean(),
           })
           .strict(),
       )
       .min(1)
-      .max(100),
+      .max(ORDER_HOOK_LIMITS.items),
     total: z.number().nonnegative(),
-    comment: z.string().trim().max(2000).optional(),
+    comment: z.string().trim().max(ORDER_HOOK_LIMITS.comment).optional(),
     adminUrl: z.url({ protocol: /^https$/ }),
   })
   .strict();

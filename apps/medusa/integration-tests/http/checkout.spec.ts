@@ -1,5 +1,6 @@
 import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
+import { ORDER_HOOK_LIMITS } from '@podbor/shop-catalog/order-hook';
 
 import { INSTALLATION_SEED_PRICE, SHOP } from '../../src/lib/shop';
 import { BATTERIES } from '../../src/scripts/battery-fixture';
@@ -201,6 +202,16 @@ medusaIntegrationTestRunner({
           },
         },
       ],
+      [
+        'a full name longer than an order card holds',
+        {
+          ...CONTACT,
+          shipping_address: {
+            ...CONTACT.shipping_address,
+            last_name: 'y'.repeat(ORDER_HOOK_LIMITS.name),
+          },
+        },
+      ],
     ])('refuses an order with %s, in Russian', async (_label, contact) => {
       const { cartId, headers } = await readyCart({ contact });
       const before = await orderCount();
@@ -225,6 +236,85 @@ medusaIntegrationTestRunner({
       expect(error.response.status).toBe(400);
       expect(error.response.data.message).toBe('Заказ не принят');
       expect(await orderCount()).toBe(before);
+    });
+
+    it('refuses a quantity an order card cannot hold, in Russian', async () => {
+      const { cartId, headers, battery } = await readyCart();
+      const {
+        data: { cart },
+      } = await api.get(`/store/carts/${cartId}`, { headers });
+      const service = (cart.items as { id: string; variant_id: string }[]).find(
+        (line) => line.variant_id !== battery,
+      )!;
+      await api.post(
+        `/store/carts/${cartId}/line-items/${service.id}`,
+        { quantity: ORDER_HOOK_LIMITS.quantity + 1 },
+        { headers },
+      );
+      const before = await orderCount();
+
+      const error = await complete(cartId, headers).catch((failure) => failure);
+
+      expect(error.response.status).toBe(400);
+      expect(error.response.data.message).toContain(
+        `количество больше ${ORDER_HOOK_LIMITS.quantity}`,
+      );
+      expect(await orderCount()).toBe(before);
+    });
+
+    it('emails the customer once when the first send fails and the bus retries it', async () => {
+      const email = 'retry-once@example.com';
+      const notifications = getContainer().resolve(Modules.NOTIFICATION);
+      const providers = (
+        notifications as unknown as {
+          notificationProviderService_: {
+            send: (provider: unknown, data: { to: string }) => Promise<unknown>;
+          };
+        }
+      ).notificationProviderService_;
+      const deliver = providers.send.bind(providers);
+      let failed = false;
+      const send = jest
+        .spyOn(providers, 'send')
+        .mockImplementation(async (provider, data) => {
+          if (data.to === email && !failed) {
+            failed = true;
+            throw new Error('provider down');
+          }
+          return deliver(provider, data);
+        });
+
+      try {
+        const { cartId, headers } = await readyCart({
+          contact: { ...CONTACT, email },
+        });
+        const { data } = await complete(cartId, headers);
+        const statuses = async () =>
+          (
+            await notifications.listNotifications(
+              { resource_id: data.order.id, template: 'order-placed' },
+              { select: ['status'] },
+            )
+          )
+            .map((sent) => sent.status)
+            .sort();
+
+        const deadline = Date.now() + 60_000;
+        while (
+          !(await statuses()).includes('success') &&
+          Date.now() < deadline
+        ) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+        await new Promise((resolve) => setTimeout(resolve, 25_000));
+
+        expect(await statuses()).toEqual(['failure', 'success']);
+        expect(
+          send.mock.calls.filter(([, sent]) => sent.to === email),
+        ).toHaveLength(2);
+      } finally {
+        send.mockRestore();
+      }
     });
 
     const orderLocale = async (orderId: string): Promise<string | null> => {

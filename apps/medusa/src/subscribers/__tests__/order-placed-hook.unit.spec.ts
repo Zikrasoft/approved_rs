@@ -32,11 +32,14 @@ const PRODUCTS = [
   { id: 'prod_bat', title: 'Bosch S4 024', type: { value: 'batteries' } },
 ];
 
-const containerFor = (orders: unknown[] = [ORDER]) => {
+const containerFor = (
+  orders: unknown[] = [ORDER],
+  products: unknown[] = PRODUCTS,
+) => {
   const graph = jest.fn(async ({ entity }: { entity: string }) => ({
-    data: entity === 'order' ? orders : PRODUCTS,
+    data: entity === 'order' ? orders : products,
   }));
-  const logger = { info: jest.fn(), warn: jest.fn() };
+  const logger = { info: jest.fn(), warn: jest.fn(), error: jest.fn() };
   const services: Record<string, unknown> = {
     [ContainerRegistrationKeys.QUERY]: { graph },
     [ContainerRegistrationKeys.LOGGER]: logger,
@@ -139,10 +142,29 @@ describe('the order-placed hook subscriber', () => {
     );
   });
 
-  it('refuses to send a card for an order without lines', async () => {
-    const { container } = containerFor([{ ...ORDER, items: null }]);
+  it('logs an order the card contract refuses by id only and does not retry it', async () => {
+    const { container, logger } = containerFor([
+      {
+        ...ORDER,
+        shipping_address: { first_name: 'Marko', phone: '0601234567' },
+      },
+    ]);
 
-    await expect(fire(container)).rejects.toThrow();
+    await fire(container);
+
+    expect(sendOrderHook).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    const [message] = logger.error.mock.calls[0];
+    expect(message).toContain('order_1');
+    expect(message).toContain('customer.phone');
+    expect(message).not.toContain('0601234567');
+    expect(message).not.toContain('Marko');
+  });
+
+  it('still fails on anything that is not a contract refusal', async () => {
+    const { container } = containerFor([ORDER], [null]);
+
+    await expect(fire(container)).rejects.toThrow(TypeError);
     expect(sendOrderHook).not.toHaveBeenCalled();
   });
 

@@ -2,6 +2,7 @@ import { createHmac } from 'node:crypto';
 import { describe, it, expect } from 'vitest';
 import {
   ORDER_HOOK_HEADER,
+  ORDER_HOOK_LIMITS,
   ORDER_HOOK_TOLERANCE_SECONDS,
   orderHookSchema,
   signHook,
@@ -132,6 +133,27 @@ describe('orderHookSchema', () => {
     ],
     ['a javascript admin link', { adminUrl: 'javascript:alert(1)' }],
     ['a comment over 2000 characters', { comment: 'x'.repeat(2001) }],
+    [
+      'a name over the limit',
+      {
+        customer: {
+          ...PAYLOAD.customer,
+          name: 'x'.repeat(ORDER_HOOK_LIMITS.name + 1),
+        },
+      },
+    ],
+    [
+      'more lines than the limit',
+      { items: Array(ORDER_HOOK_LIMITS.items + 1).fill(PAYLOAD.items[0]) },
+    ],
+    [
+      'a quantity over the limit',
+      {
+        items: [
+          { ...PAYLOAD.items[0], quantity: ORDER_HOOK_LIMITS.quantity + 1 },
+        ],
+      },
+    ],
   ])('rejects %s', (_label, patch) => {
     expect(orderHookSchema.safeParse({ ...PAYLOAD, ...patch }).success).toBe(
       false,

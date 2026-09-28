@@ -8,6 +8,12 @@ loadEnv(process.env.NODE_ENV || 'development', process.cwd());
 const env = parseEnv(process.env);
 const brevo = brevoOptions(env);
 
+if (env.NODE_ENV === 'production' && !brevo) {
+  console.warn(
+    'BREVO_API_KEY is not set: order emails go to notification-local and never reach a customer',
+  );
+}
+
 const redisModules = (redisUrl: string) => [
   {
     resolve: '@medusajs/medusa/cache-redis',

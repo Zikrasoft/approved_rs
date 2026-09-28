@@ -7,7 +7,7 @@ import {
 } from '@podbor/shop-catalog/order-hook';
 import { z } from 'zod';
 
-import { CHANNEL_FIELD, COMMENT_FIELD } from '../api/store/contact';
+import { CHANNEL_FIELD, COMMENT_FIELD, fullName } from '../api/store/contact';
 import { money } from './query';
 import { shopLocale } from './shop';
 
@@ -75,15 +75,14 @@ export function buildOrderHookPayload(
   const channel = extras.success
     ? extras.data[CHANNEL_FIELD]?.trim()
     : undefined;
-  const address = order.shipping_address;
 
   return orderHookSchema.parse({
     orderId: order.id,
     displayId: Number(order.display_id),
     locale: shopLocale(order.locale),
     customer: {
-      name: [address?.first_name, address?.last_name].filter(Boolean).join(' '),
-      phone: address?.phone,
+      name: fullName(order.shipping_address),
+      phone: order.shipping_address?.phone,
       email: order.email,
       channel: channel || undefined,
     },
@@ -122,6 +121,7 @@ export async function sendOrderHook(
     body,
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
+  await response.body?.cancel();
   if (!response.ok) {
     throw new Error(`Order hook answered ${response.status}`);
   }

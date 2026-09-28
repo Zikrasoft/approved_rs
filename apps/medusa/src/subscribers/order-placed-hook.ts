@@ -1,5 +1,7 @@
 import type { SubscriberArgs, SubscriberConfig } from '@medusajs/framework';
 import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
+import type { OrderHookPayload } from '@podbor/shop-catalog/order-hook';
+import { z } from 'zod';
 
 import { parseEnv } from '../lib/env';
 import {
@@ -45,10 +47,28 @@ export default async function orderPlacedHook({
     filters: { id: productIds },
   });
 
-  await sendOrderHook(
-    buildOrderHookPayload(order, products as HookProduct[], env.ADMIN_URL),
-    { url: env.SHOP_ORDER_HOOK_URL, secret: env.SHOP_ORDER_HOOK_SECRET },
-  );
+  let payload: OrderHookPayload;
+  try {
+    payload = buildOrderHookPayload(
+      order,
+      products as HookProduct[],
+      env.ADMIN_URL,
+    );
+  } catch (error) {
+    if (!(error instanceof z.ZodError)) {
+      throw error;
+    }
+    const fields = error.issues.map((issue) => issue.path.join('.'));
+    logger.error(
+      `Order ${order.id} does not fit the order card, not sent: ${fields.join(', ')}`,
+    );
+    return;
+  }
+
+  await sendOrderHook(payload, {
+    url: env.SHOP_ORDER_HOOK_URL,
+    secret: env.SHOP_ORDER_HOOK_SECRET,
+  });
   logger.info(`Order ${event.data.id} sent to the order hook`);
 }
 

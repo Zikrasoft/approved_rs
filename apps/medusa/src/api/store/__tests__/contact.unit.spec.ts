@@ -1,4 +1,6 @@
-import { contactFaults, isBot } from '../contact';
+import { ORDER_HOOK_LIMITS } from '@podbor/shop-catalog/order-hook';
+
+import { contactFaults, fullName, isBot } from '../contact';
 
 const CART = {
   email: 'kupac@example.com',
@@ -55,8 +57,47 @@ describe('contactFaults', () => {
       { ...CART, metadata: { contact_channel: 'x'.repeat(41) } },
       ['способ связи'],
     ],
+    [
+      'a first and last name longer together than a card holds',
+      withAddress({ first_name: 'x'.repeat(150), last_name: 'y'.repeat(50) }),
+      ['имя'],
+    ],
+    [
+      'more lines than a card holds',
+      {
+        ...CART,
+        items: Array.from({ length: ORDER_HOOK_LIMITS.items + 1 }, () => ({
+          quantity: 1,
+        })),
+      },
+      [`больше ${ORDER_HOOK_LIMITS.items} позиций в заказе`],
+    ],
+    [
+      'a quantity a card cannot hold',
+      {
+        ...CART,
+        items: [{ quantity: 1 }, { quantity: ORDER_HOOK_LIMITS.quantity + 1 }],
+      },
+      [`количество больше ${ORDER_HOOK_LIMITS.quantity}`],
+    ],
   ])('names %s', (_label, cart, faults) => {
     expect(contactFaults(cart)).toEqual(faults);
+  });
+
+  it('accepts a cart right at the limits of a card', () => {
+    expect(
+      contactFaults({
+        ...CART,
+        shipping_address: {
+          ...CART.shipping_address,
+          first_name: 'x'.repeat(100),
+          last_name: 'y'.repeat(ORDER_HOOK_LIMITS.name - 101),
+        },
+        items: Array.from({ length: ORDER_HOOK_LIMITS.items }, () => ({
+          quantity: String(ORDER_HOOK_LIMITS.quantity),
+        })),
+      }),
+    ).toEqual([]);
   });
 
   it('names a fault outside FAULT_NAMES by its path instead of dropping it', () => {
@@ -79,5 +120,15 @@ describe('isBot', () => {
     ['a honeypot that is not text', { metadata: { website: 1 } }, true],
   ])('reads %s', (_label, cart, bot) => {
     expect(isBot(cart)).toBe(bot);
+  });
+});
+
+describe('fullName', () => {
+  it.each([
+    [{ first_name: 'Marko', last_name: 'Marković' }, 'Marko Marković'],
+    [{ first_name: ' Marko ', last_name: null }, 'Marko'],
+    [null, ''],
+  ])('reads %p as %p', (address, name) => {
+    expect(fullName(address)).toBe(name);
   });
 });
