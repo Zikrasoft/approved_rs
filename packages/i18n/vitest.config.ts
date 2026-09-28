@@ -12,6 +12,7 @@ export default defineConfig({
         'src/index.ts',
         'src/translate/index.ts',
         'src/translate/mockOpenAiFetch.ts',
+        'src/translate/core.ts',
       ],
       thresholds: {
         statements: 100,
