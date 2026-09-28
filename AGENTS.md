@@ -12,6 +12,7 @@ pnpm workspace + Turborepo. Apps live in `apps/*`, shared packages in `packages/
 apps/approved-rs/     Approved.rs, the approved.rs site (Astro) — most of this document describes it
 apps/detailing/       Details, the detailing studio site — details.rs
 apps/auto-service/    CarLab, the car service site + parts shop — carlab.rs
+apps/medusa/          CarLab shop backend — Medusa 2.19, CommonJS, api.carlab.rs
 packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click routes
 packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
 packages/site-kit/    brand-agnostic mechanics: safeMarkdown, formatPhone, visitor id, lazy map embed, scroll lock, modal dialog, preferred contact channel (owns the `data-contact-order` / `data-channel` / `data-primary-contact` / `data-primary-channel` markup contract the apps must honour), funnel tracking (owns a second one: `data-lead-form` / `data-brand-link` / `data-field` / `aria-invalid`)
@@ -342,6 +343,45 @@ split across several agents or stages, review after each stage lands rather
 than once over the combined diff — a diff too large to judge is a review that
 finds nothing. This is not enforced by a git hook on purpose: a hook can block
 a commit but cannot run the review itself.
+
+## Medusa backend (`apps/medusa`)
+
+Carried over from staywildwear's backend, where each rule cost a bug:
+
+- **CommonJS app.** Relative imports carry no extension. The one bare-node file
+  is `scripts/translate-i18n.ts` (the CI translate loop runs it); it imports with
+  `.ts` extensions and is excluded from `tsconfig.json`.
+- **The translation module needs two switches**: `modules: [{ resolve:
+'@medusajs/medusa/translation' }]` gives the tables and the service,
+  `featureFlags: { translation: true }` gives the routes and Store API
+  localisation. Either alone looks enabled and is not (spike 0b).
+- **Middleware that changes a request body mutates both `req.validatedBody` and
+  `req.body`.** The core validator runs first and the route reads
+  `validatedBody`.
+- **`metadata` is written read-merge-write under a lock** (`src/lib/metadata.ts`).
+  The admin never sends a partial `metadata`; it posts to a route that merges.
+- **Subscribe to workflow events, and write translations only through
+  `createTranslationsWorkflow`/`batchTranslationsWorkflow`** — they emit
+  `translation.*`, the module service does not.
+- **Providers register only when their keys exist** (`brevoOptions()` → else
+  `notification-local`); overriding `fulfillment` lists `manual` again;
+  `databaseDriverOptions` always states `ssl`.
+- **Seeds are idempotent by identity** (name, handle, code) and never overwrite
+  what the owner edited in the admin.
+- **Event retries need Redis**: `event-bus-redis` runs with
+  `jobOptions.attempts: 5`; a subscriber that throws is retried alone, the ones
+  that succeeded are not re-run.
+- **Tests**: jest (`@medusajs/test-utils` requires it). `pnpm --filter
+@podbor/medusa test` runs the unit suite (`src/**/__tests__/**/*.unit.spec.ts`)
+  with no database. The HTTP suite needs `docker compose -f
+apps/medusa/docker-compose.test.yml up -d --wait`; `DB_HOST` is the literal
+  `localhost` (test-utils turns SSL on otherwise and the pool hangs); tests never
+  go to the network (`integration-tests/setup.js`); seed in the top-level
+  `beforeAll` (the runner restores that snapshot before each test); a two-run
+  idempotency check runs both runs inside one test; never pick `variants[0]` of a
+  multi-variant product.
+- Locally the backend runs on port 9009 (`pnpm --filter @podbor/medusa develop`);
+  the script is not called `dev`, so the root `pnpm dev` does not start it.
 
 ## Architecture
 

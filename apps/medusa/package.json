@@ -2,6 +2,11 @@
   "name": "@podbor/medusa",
   "version": "0.0.1",
   "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --coverage --coverageProvider=v8 --silent --runInBand --forceExit --passWithNoTests",
+    "test:integration:http": "TEST_TYPE=integration:http NODE_OPTIONS=\"--experimental-vm-modules --max-old-space-size=4096\" jest --silent=false --maxWorkers=2 --forceExit"
+  },
   "dependencies": {
     "@medusajs/admin-sdk": "2.19.0",
     "@medusajs/admin-shared": "2.19.0",
