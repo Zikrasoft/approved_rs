@@ -43,8 +43,7 @@ common:
   closeLabel: Закрыть
   channelLabel: Наш канал
   cookie:
-    notice: >-
-      Мы используем аналитические cookies, чтобы понимать, как посетители используют сайт.
+    notice: Мы используем cookie.
     more: Подробнее в
     policyLink: политике конфиденциальности
     accept: Принять
