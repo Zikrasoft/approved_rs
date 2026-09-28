@@ -6,6 +6,7 @@ const TEST_STACK = {
   DB_USERNAME: 'postgres',
   DB_PASSWORD: 'postgres',
   REDIS_URL: 'redis://localhost:56379',
+  MEDUSA_BACKEND_URL: 'http://localhost:9009',
 };
 
 if (process.env.TEST_TYPE === 'integration:http') {

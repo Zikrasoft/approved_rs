@@ -23,7 +23,7 @@ const redisModules = (redisUrl: string) => [
   },
   {
     resolve: '@medusajs/medusa/workflow-engine-redis',
-    options: { redis: { url: redisUrl } },
+    options: { redis: { redisUrl } },
   },
   {
     resolve: '@medusajs/medusa/locking',
@@ -58,7 +58,13 @@ export default defineConfig({
     {
       resolve: '@medusajs/medusa/file',
       options: {
-        providers: [{ resolve: '@medusajs/medusa/file-local', id: 'local' }],
+        providers: [
+          {
+            resolve: '@medusajs/medusa/file-local',
+            id: 'local',
+            options: { backend_url: `${env.MEDUSA_BACKEND_URL}/static` },
+          },
+        ],
       },
     },
     {

@@ -61,7 +61,7 @@ medusaIntegrationTestRunner({
 
       const bosch = data.find((row) => row.handle === BOSCH.handle)!;
       expect(bosch.type?.value).toBe('batteries');
-      expect(bosch.thumbnail).toBeTruthy();
+      expect(bosch.thumbnail).toMatch(/^http:\/\/localhost:9009\/static\//);
       expect(bosch.metadata).toEqual({
         spec: BOSCH.spec,
         fitment: BOSCH.fitment,
