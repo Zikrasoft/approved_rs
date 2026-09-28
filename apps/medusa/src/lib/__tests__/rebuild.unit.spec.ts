@@ -98,17 +98,20 @@ describe('requestBuild', () => {
     );
   });
 
-  it('posts through fetch when no transport is given', async () => {
+  it('posts through fetch when no transport is given, with a 15s timeout', async () => {
     const original = global.fetch;
     const calls: string[] = [];
-    global.fetch = (async (url: string) => {
+    let signal: AbortSignal | undefined;
+    global.fetch = (async (url: string, init: RequestInit) => {
       calls.push(url);
+      signal = init.signal ?? undefined;
       return { ok: true, status: 204 };
     }) as unknown as typeof fetch;
 
     try {
       expect(await requestBuild({ target: TARGET, logger })).toBe('started');
       expect(calls).toEqual([DISPATCH_URL]);
+      expect(signal).toBeInstanceOf(AbortSignal);
     } finally {
       global.fetch = original;
     }

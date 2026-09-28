@@ -27,11 +27,16 @@ export type Send = (
 export type BuildOutcome =
   'started' | 'not-configured' | 'unauthorised' | 'refused';
 
+const REQUEST_TIMEOUT_MS = 15_000;
+
 async function defaultSend(
   url: string,
   init: { method: string; headers: Record<string, string>; body: string },
 ): Promise<{ ok: boolean; status: number }> {
-  const response = await fetch(url, init);
+  const response = await fetch(url, {
+    ...init,
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  });
   return { ok: response.ok, status: response.status };
 }
 
