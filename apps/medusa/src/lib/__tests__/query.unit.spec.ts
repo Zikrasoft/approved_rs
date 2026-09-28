@@ -44,7 +44,7 @@ describe('queryAll', () => {
     expect(graph).toHaveBeenLastCalledWith({
       entity: 'product',
       fields: ['id'],
-      pagination: { take: QUERY_PAGE, skip: QUERY_PAGE },
+      pagination: { take: QUERY_PAGE, skip: QUERY_PAGE, order: { id: 'ASC' } },
     });
   });
 });

@@ -25,7 +25,11 @@ export async function queryAll<T>(
     ({ data: page } = await query.graph({
       entity,
       fields: [...fields],
-      pagination: { take: QUERY_PAGE, skip: found.length },
+      pagination: {
+        take: QUERY_PAGE,
+        skip: found.length,
+        order: { id: 'ASC' },
+      },
     }));
     found.push(...(page as T[]));
   } while (page.length === QUERY_PAGE);
