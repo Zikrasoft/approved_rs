@@ -3,6 +3,7 @@ import {
   handleFor,
   refuseGuardedBatchEdits,
   refuseProductImports,
+  refuseRegistryTypeEdits,
   requireReadyToPublish,
   requireValidSpec,
 } from '../require-fields';
@@ -121,6 +122,73 @@ describe('fillProductDefaults', () => {
 
     expect(next).toHaveBeenCalledWith(failure);
   });
+
+  const withProductLookup = (taken: Set<string>) => ({
+    resolve: () => ({
+      graph: jest.fn(
+        async ({
+          entity,
+          filters,
+        }: {
+          entity: string;
+          filters?: { handle?: string };
+        }) => {
+          if (entity === 'product') {
+            return {
+              data:
+                filters?.handle && taken.has(filters.handle)
+                  ? [{ id: 'existing' }]
+                  : [],
+            };
+          }
+          return { data: SHOP_ROWS[entity] ?? [] };
+        },
+      ),
+    }),
+  });
+
+  it('appends -2 to a handle derived from the title when it collides', async () => {
+    const body: Record<string, unknown> = { title: 'Аккумулятор тест' };
+    const req = {
+      validatedBody: { ...body },
+      body,
+      scope: withProductLookup(new Set(['akkumulyator-test'])),
+    };
+    const next = jest.fn();
+
+    await fillProductDefaults(req as never, {} as never, next);
+
+    expect(req.validatedBody.handle).toBe('akkumulyator-test-2');
+  });
+
+  it('keeps trying suffixes until one is free', async () => {
+    const body: Record<string, unknown> = { title: 'Аккумулятор тест' };
+    const req = {
+      validatedBody: { ...body },
+      body,
+      scope: withProductLookup(
+        new Set(['akkumulyator-test', 'akkumulyator-test-2']),
+      ),
+    };
+    const next = jest.fn();
+
+    await fillProductDefaults(req as never, {} as never, next);
+
+    expect(req.validatedBody.handle).toBe('akkumulyator-test-3');
+  });
+
+  it('does not dedupe a handle the owner typed, only its title fallback', async () => {
+    const req = {
+      validatedBody: { title: 'Что угодно', handle: 'аккумулятор' },
+      body: { title: 'Что угодно', handle: 'аккумулятор' },
+      scope: withProductLookup(new Set(['akkumulyator'])),
+    };
+    const next = jest.fn();
+
+    await fillProductDefaults(req as never, {} as never, next);
+
+    expect(req.validatedBody.handle).toBe('akkumulyator');
+  });
 });
 
 const SPEC = {
@@ -210,7 +278,21 @@ describe('requireValidSpec', () => {
       {},
     );
 
-    expect(error?.message).toMatch(/^Характеристики товара не сходятся: /);
+    expect(error?.message).toBe(
+      'Характеристики товара не сходятся: не выбран тип товара',
+    );
+  });
+
+  it('refuses a spec on a type not in the site catalog, in Russian', async () => {
+    const error = await guard(
+      requireValidSpec,
+      { type_id: 'ptyp_legacy', metadata: { spec: SPEC } },
+      { product_type: [{ value: 'legacy-widgets' }] },
+    );
+
+    expect(error?.message).toBe(
+      'Характеристики товара не сходятся: тип «legacy-widgets» не из каталога сайта',
+    );
   });
 
   it('leaves a service alone', async () => {
@@ -336,6 +418,18 @@ describe('requireReadyToPublish', () => {
 
     expect(error?.message).toBe(
       'Товар не выпустить на сайт: не выбран тип товара',
+    );
+  });
+
+  it('refuses to publish a product of a type not in the site catalog', async () => {
+    const error = await guard(
+      requireReadyToPublish,
+      { status: 'published', type_id: 'ptyp_legacy' },
+      { product_type: [{ value: 'legacy-widgets' }] },
+    );
+
+    expect(error?.message).toBe(
+      'Товар не выпустить на сайт: тип «legacy-widgets» не из каталога сайта',
     );
   });
 
@@ -656,5 +750,48 @@ describe('refuseGuardedBatchEdits', () => {
         ],
       }),
     ).toBeUndefined();
+  });
+});
+
+describe('refuseRegistryTypeEdits', () => {
+  const guardId = async (id: string, rows: Rows) => {
+    const req = { params: { id }, scope: scopeWith(rows) };
+    const next = jest.fn();
+    await refuseRegistryTypeEdits(req as never, {} as never, next);
+    const [error] = next.mock.calls[0];
+    return error as { type: string; message: string } | undefined;
+  };
+
+  it('refuses renaming or deleting a registry product type, in Russian', async () => {
+    const error = await guardId('ptyp_bat', {
+      product_type: [{ value: 'batteries' }],
+    });
+
+    expect(error?.type).toBe('invalid_data');
+    expect(error?.message).toBe(
+      'Тип «batteries» задан каталогом сайта — его нельзя переименовать или удалить',
+    );
+  });
+
+  it('refuses editing the service type', async () => {
+    const error = await guardId('ptyp_svc', {
+      product_type: [{ value: 'services' }],
+    });
+
+    expect(error?.message).toBe(
+      'Тип «services» задан каталогом сайта — его нельзя переименовать или удалить',
+    );
+  });
+
+  it('lets a type outside the registry pass', async () => {
+    expect(
+      await guardId('ptyp_custom', {
+        product_type: [{ value: 'legacy-widgets' }],
+      }),
+    ).toBeUndefined();
+  });
+
+  it('lets a request naming no type pass', async () => {
+    expect(await guardId('', {})).toBeUndefined();
   });
 });

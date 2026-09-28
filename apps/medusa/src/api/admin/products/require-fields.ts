@@ -7,10 +7,15 @@ import {
   ContainerRegistrationKeys,
   MedusaError,
 } from '@medusajs/framework/utils';
-import { SERVICE_TYPE, parseAttributes } from '@podbor/shop-catalog';
+import {
+  PRODUCT_TYPES,
+  SERVICE_TYPE,
+  parseAttributes,
+  productType,
+} from '@podbor/shop-catalog';
 import { z } from 'zod';
 
-import { queryOne } from '../../../lib/query';
+import { type Query, queryOne } from '../../../lib/query';
 import { SHOP } from '../../../lib/shop';
 import { isLatin, translit } from '../../../lib/translit';
 import { fitmentComplaintFor } from '../../../lib/vehicles';
@@ -49,6 +54,18 @@ export function handleFor(
   return spelled && spelled !== handle ? spelled : null;
 }
 
+async function freeHandle(query: Query, handle: string): Promise<string> {
+  let candidate = handle;
+  for (
+    let suffix = 2;
+    await queryOne(query, 'product', ['id'], { handle: candidate });
+    suffix += 1
+  ) {
+    candidate = `${handle}-${suffix}`;
+  }
+  return candidate;
+}
+
 export async function fillProductDefaults(
   req: MedusaRequest,
   _res: MedusaResponse,
@@ -80,7 +97,9 @@ export async function fillProductDefaults(
       }
       const handle = handleFor(draft.data);
       if (handle) {
-        body.handle = handle;
+        body.handle = draft.data.handle?.trim()
+          ? handle
+          : await freeHandle(query, handle);
       }
       if (!draft.data.shipping_profile_id && profile) {
         body.shipping_profile_id = profile.id;
@@ -210,6 +229,26 @@ function priceComplaint(variants: Variant[]): string | undefined {
 const refusal = (message: string) =>
   new MedusaError(MedusaError.Types.INVALID_DATA, message);
 
+function typeComplaint(typeKey: string | undefined): string | undefined {
+  if (!typeKey) {
+    return 'не выбран тип товара';
+  }
+  if (typeKey !== SERVICE_TYPE && !productType(typeKey)) {
+    return `тип «${typeKey}» не из каталога сайта`;
+  }
+  return undefined;
+}
+
+async function specComplaint(
+  req: MedusaRequest,
+  product: Inspected,
+): Promise<string | undefined> {
+  const result = parseAttributes(product.typeKey, product.metadata);
+  return result.ok
+    ? await fitmentComplaintFor(req.scope, result.fitment)
+    : result.error;
+}
+
 export async function requireValidSpec(
   req: MedusaRequest,
   _res: MedusaResponse,
@@ -225,10 +264,8 @@ export async function requireValidSpec(
       product.touchesSpec ||
       (product.changesType && SPEC_KEY in product.metadata);
     if (recheck && product.typeKey !== SERVICE_TYPE) {
-      const result = parseAttributes(product.typeKey, product.metadata);
-      const complaint = result.ok
-        ? await fitmentComplaintFor(req.scope, result.fitment)
-        : result.error;
+      const complaint =
+        typeComplaint(product.typeKey) ?? (await specComplaint(req, product));
       if (complaint) {
         next(refusal(`Характеристики товара не сходятся: ${complaint}`));
         return;
@@ -241,8 +278,9 @@ export async function requireValidSpec(
 }
 
 function publishComplaint(product: Inspected): string | undefined {
-  if (!product.typeKey) {
-    return 'не выбран тип товара';
+  const problem = typeComplaint(product.typeKey);
+  if (problem) {
+    return problem;
   }
   if (product.typeKey !== SERVICE_TYPE) {
     const result = parseAttributes(product.typeKey, product.metadata);
@@ -326,4 +364,36 @@ export function refuseProductImports(
   next(
     refusal('Импорт товаров отключён — создавайте и меняйте товары в карточке'),
   );
+}
+
+const REGISTRY_TYPE_KEYS: readonly string[] = [
+  ...PRODUCT_TYPES.map((type) => type.key),
+  SERVICE_TYPE,
+];
+
+export async function refuseRegistryTypeEdits(
+  req: MedusaRequest,
+  _res: MedusaResponse,
+  next: MedusaNextFunction,
+): Promise<void> {
+  try {
+    const id = req.params?.id;
+    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+    const stored = id
+      ? await queryOne<{ value: string }>(query, 'product_type', ['value'], {
+          id,
+        })
+      : undefined;
+    if (stored && REGISTRY_TYPE_KEYS.includes(stored.value)) {
+      next(
+        refusal(
+          `Тип «${stored.value}» задан каталогом сайта — его нельзя переименовать или удалить`,
+        ),
+      );
+      return;
+    }
+    next();
+  } catch (error) {
+    next(error as Error);
+  }
 }

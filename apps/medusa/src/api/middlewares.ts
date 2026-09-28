@@ -5,6 +5,7 @@ import {
   fillProductDefaults,
   refuseGuardedBatchEdits,
   refuseProductImports,
+  refuseRegistryTypeEdits,
   requireReadyToPublish,
   requireValidSpec,
 } from './admin/products/require-fields';
@@ -45,6 +46,11 @@ export default defineMiddlewares({
       matcher: '/admin/products/:id',
       method: 'POST',
       middlewares: [requireValidSpec, requireReadyToPublish],
+    },
+    {
+      matcher: '/admin/product-types/:id',
+      method: ['POST', 'DELETE'],
+      middlewares: [refuseRegistryTypeEdits],
     },
     {
       matcher: '/admin/publish',
