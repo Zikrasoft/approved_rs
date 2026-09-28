@@ -16,7 +16,7 @@ packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click route
 packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
 packages/site-kit/    brand-agnostic mechanics: safeMarkdown, formatPhone, visitor id, lazy map embed, scroll lock, modal dialog, preferred contact channel (owns the `data-contact-order` / `data-channel` / `data-primary-contact` / `data-primary-channel` markup contract the apps must honour), funnel tracking (owns a second one: `data-lead-form` / `data-brand-link` / `data-field` / `aria-invalid`)
 packages/brands/      the three brands: domains, display names, locale mapping, ops service labels
-packages/shop-catalog/ CarLab shop machinery: product-type registry, attribute schemas, facets, landing pages, price format, signed order webhook (dual ESM/CJS for Medusa)
+packages/shop-catalog/ CarLab shop machinery: product-type registry, attribute schemas, vehicle fitment, facets, landing pages, price format, signed order webhook (dual ESM/CJS for Medusa)
 ```
 
 Each app owns its own `astro.config.mjs`, `keystatic.config.ts`, `vercel.json`,
@@ -160,9 +160,9 @@ Approved's trust/verification semantics.
   because two sites must not resemble each other, but because a shared token
   makes every brand's look a change to one file, and each brand owns its own.
 - Client-side imports go through a narrow subpath export
-  (`@podbor/lead-crm/contact-channel`, `@podbor/site-kit/browser`), never the
-  package root: the root barrel pulls zod, date-fns and the Telegram client
-  into the browser bundle.
+  (`@podbor/lead-crm/contact-channel`, `@podbor/site-kit/browser`,
+  `@podbor/shop-catalog/browser`), never the package root: the root barrel
+  pulls zod, date-fns and the Telegram client into the browser bundle.
 - **A package Medusa consumes ships a CommonJS build behind a `require`
   condition.** `apps/medusa` is CommonJS and cannot load the `.ts` sources the
   other workspaces import. `packages/shop-catalog` and `@podbor/i18n/translate/core`
@@ -381,7 +381,9 @@ This site supports 5 locales: `ru` (default), `en`, `sr`, `es`, `de`. Translatio
 
 Event names live once in `packages/site-kit/src/goals.ts` and are fired through
 `reachGoal` from `@podbor/site-kit/browser`, never as string literals in an app. Every event must also exist as a goal in **all three** Metrika counters —
-one created in code but not in a counter is silently lost. The vocabulary, the
+one created in code but not in a counter is silently lost. The shop funnel
+(`add_to_cart`, `begin_checkout`, `order_placed`) is the exception: carlab.rs
+only, created when the shop goes live — see `docs/analytics.md`. The vocabulary, the
 markup hooks it depends on (`data-lead-form`, `data-contact-channel`,
 `data-brand-link`, `aria-invalid`) and how to add one are in `docs/analytics.md`;
 whose visits to exclude before drawing any conclusion is in
