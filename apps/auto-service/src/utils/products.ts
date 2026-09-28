@@ -1,10 +1,10 @@
 import type { CollectionEntry } from 'astro:content';
 import type { Locale } from '@/i18n/config';
 import { localizedEntry, publishedEntries } from '@podbor/i18n';
-import { buildFitmentIndex as buildIndex } from './fitment';
+import { buildFitmentIndex as buildIndex } from '@podbor/shop-catalog/browser';
 
-export type { FitmentEntry, FitmentIndex } from './fitment';
-export { fitmentMatches } from './fitment';
+export type { FitmentEntry, FitmentIndex } from '@podbor/shop-catalog/browser';
+export { fitmentMatches } from '@podbor/shop-catalog/browser';
 
 export type Product = CollectionEntry<'products'>;
 

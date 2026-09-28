@@ -179,6 +179,9 @@ importers:
       '@podbor/lead-crm':
         specifier: workspace:*
         version: link:../../packages/lead-crm
+      '@podbor/shop-catalog':
+        specifier: workspace:*
+        version: link:../../packages/shop-catalog
       '@podbor/site-kit':
         specifier: workspace:*
         version: link:../../packages/site-kit
