@@ -1,6 +1,7 @@
 import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
+import { queryOne } from '../../src/lib/query';
 import { DEFAULT_OPTION, SHOP } from '../../src/lib/shop';
 import { seedBase } from '../../src/scripts/seed-base';
 import { VEHICLES } from '../../src/scripts/vehicle-fixture';
@@ -283,21 +284,56 @@ medusaIntegrationTestRunner({
 
       expect(data.product.handle).toBe('akkumulyator-test');
 
-      const {
-        data: [rawRow],
-      } = await query().graph({
-        entity: 'product',
-        fields: ['shipping_profile.id', 'sales_channels.name'],
-        filters: { id: data.product.id },
-      });
-      const row = rawRow as unknown as {
+      const row = await queryOne<{
         shipping_profile?: { id: string } | null;
         sales_channels: { name: string }[];
-      };
-      expect(row.sales_channels.map((channel) => channel.name)).toEqual([
+      }>(query(), 'product', ['shipping_profile.id', 'sales_channels.name'], {
+        id: data.product.id,
+      });
+      expect(row?.sales_channels.map((channel) => channel.name)).toEqual([
         SHOP.salesChannelName,
       ]);
-      expect(row.shipping_profile?.id).toBeTruthy();
+      expect(row?.shipping_profile?.id).toBeTruthy();
+    });
+
+    it('gives the second product with the same Russian title a suffixed handle', async () => {
+      const { data: first } = await api.post(
+        '/admin/products',
+        draft('Дубликат теста'),
+        await admin(),
+      );
+      const { data: second } = await api.post(
+        '/admin/products',
+        draft('Дубликат теста'),
+        await admin(),
+      );
+
+      expect(first.product.handle).toMatch(/^[a-z0-9-]+$/);
+      expect(second.product.handle).toBe(`${first.product.handle}-2`);
+    });
+
+    it('refuses to rename a registry product type, in Russian', async () => {
+      const typeId = await batteryTypeId();
+
+      const error = await api
+        .post(
+          `/admin/product-types/${typeId}`,
+          { value: 'renamed-batteries' },
+          await admin(),
+        )
+        .catch((failure) => failure.response);
+
+      expect(error.status).toBe(400);
+      expect(error.data.message).toBe(
+        'Тип «batteries» задан каталогом сайта — его нельзя переименовать или удалить',
+      );
+      const type = await queryOne<{ value: string }>(
+        query(),
+        'product_type',
+        ['value'],
+        { id: typeId },
+      );
+      expect(type?.value).toBe('batteries');
     });
   },
 });
