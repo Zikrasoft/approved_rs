@@ -1,5 +1,6 @@
 import { defineMiddlewares } from '@medusajs/framework/http';
 
+import { limitPublishes } from './admin/publish-limit';
 import {
   fillProductDefaults,
   refuseGuardedBatchEdits,
@@ -44,6 +45,11 @@ export default defineMiddlewares({
       matcher: '/admin/products/:id',
       method: 'POST',
       middlewares: [requireValidSpec, requireReadyToPublish],
+    },
+    {
+      matcher: '/admin/publish',
+      method: 'POST',
+      middlewares: [limitPublishes],
     },
     {
       matcher: '/auth/:actor_type/:auth_provider',
