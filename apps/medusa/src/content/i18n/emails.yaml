@@ -1,0 +1,8 @@
+orderPlaced:
+  subject: Заказ №{displayId} принят — CarLab
+  heading: Заказ №{displayId} принят
+  intro: Спасибо! Заказ у нас. Мы свяжемся с вами, чтобы договориться, когда его забрать.
+  itemsHeading: Состав заказа
+  totalLabel: Итого
+  pickupHeading: Самовывоз из сервиса
+  pickupNote: Оплата при получении в сервисе.

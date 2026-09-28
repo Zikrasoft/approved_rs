@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build": "medusa build && node -e \"for (const dir of ['src/scripts/fixtures']) require('node:fs').cpSync(dir, '.medusa/server/' + dir, { recursive: true })\"",
+    "build": "medusa build && node -e \"for (const dir of ['src/scripts/fixtures', 'src/content']) require('node:fs').cpSync(dir, '.medusa/server/' + dir, { recursive: true })\"",
     "start": "cd .medusa/server && medusa start",
     "develop": "medusa develop",
     "db:migrate": "medusa db:migrate",
