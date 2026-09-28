@@ -7,7 +7,7 @@ interface Props {
 }
 
 const { title } = Astro.props;
-const src = mapEmbedSrc({ lat: GARAGE_ADDRESS.lat, lon: GARAGE_ADDRESS.lon });
+const src = mapEmbedSrc(GARAGE_ADDRESS.googleMapsCid);
 ---
 
 <carlab-map

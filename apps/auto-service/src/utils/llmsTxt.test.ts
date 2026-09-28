@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import { mapPlaceUrl } from '@podbor/site-kit';
 
 vi.mock('astro:content', () => ({
   getCollection: vi.fn().mockResolvedValue([
@@ -65,6 +66,7 @@ describe('generateLlmsTxt', () => {
   it('carries the garage address and opening hours as key facts', async () => {
     const body = await generateLlmsTxt('sr');
     expect(body).toContain(GARAGE_ADDRESS.street);
+    expect(body).toContain(mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid));
     expect(body).toContain(getSiteContent('sr').footer.hours);
   });
 });

@@ -3,6 +3,7 @@ import {
   BRAND_LOCALES,
   brandLocale,
   isBrandLocale,
+  WORKSHOP_ADDRESS,
   type BrandKey,
 } from './brands.ts';
 import { BRANDS, BRAND_SITES } from './registry.ts';
@@ -53,5 +54,11 @@ describe('isBrandLocale', () => {
 
   it('rejects a locale the brand sites do not have', () => {
     expect(isBrandLocale('de')).toBe(false);
+  });
+});
+
+describe('WORKSHOP_ADDRESS', () => {
+  it('holds a decimal Google Maps cid, not a hex ftid or a place_id', () => {
+    expect(WORKSHOP_ADDRESS.googleMapsCid).toMatch(/^\d+$/);
   });
 });

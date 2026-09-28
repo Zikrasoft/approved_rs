@@ -1,5 +1,5 @@
 ---
-import { jsonLdText } from '@podbor/site-kit';
+import { jsonLdText, mapPlaceUrl } from '@podbor/site-kit';
 import '@/styles/global.css';
 import displayLatinUrl from '@fontsource-variable/unbounded/files/unbounded-latin-wght-normal.woff2?url';
 import displayLatinExtUrl from '@fontsource-variable/unbounded/files/unbounded-latin-ext-wght-normal.woff2?url';
@@ -54,6 +54,8 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
 const alternates = localeSet.getAlternateLinks(SITE_URL, Astro.url.pathname);
 const ogImage = new URL(OG_IMAGE[locale], SITE_URL).href;
 
+const googleMapsUrl = mapPlaceUrl(STUDIO_ADDRESS.googleMapsCid);
+
 const businessSchema = {
   '@context': 'https://schema.org',
   '@type': 'AutomotiveBusiness',
@@ -77,6 +79,7 @@ const businessSchema = {
     latitude: STUDIO_ADDRESS.lat,
     longitude: STUDIO_ADDRESS.lon,
   },
+  hasMap: googleMapsUrl,
   areaServed: 'Beograd',
   currenciesAccepted: 'RSD, EUR',
   openingHoursSpecification: [
@@ -87,7 +90,7 @@ const businessSchema = {
       closes: OPENING_HOURS.closes,
     },
   ],
-  sameAs: SOCIAL_SAME_AS,
+  sameAs: [googleMapsUrl, ...SOCIAL_SAME_AS],
 };
 ---
 

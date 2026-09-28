@@ -1,8 +1,9 @@
-export type MapPlace = string | { lat: number; lon: number };
+export function mapPlaceUrl(cid: string): string {
+  return `https://maps.google.com/?cid=${encodeURIComponent(cid)}`;
+}
 
-export function mapEmbedSrc(place: MapPlace): string {
-  const query = typeof place === 'string' ? place : `${place.lat},${place.lon}`;
-  return `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
+export function mapEmbedSrc(cid: string): string {
+  return `https://www.google.com/maps?cid=${encodeURIComponent(cid)}&output=embed`;
 }
 
 export function defineLazyMapEmbed(tagName = 'lazy-map-embed'): void {

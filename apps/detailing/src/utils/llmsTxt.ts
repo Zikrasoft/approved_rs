@@ -1,4 +1,5 @@
 import { getCollection } from 'astro:content';
+import { mapPlaceUrl } from '@podbor/site-kit';
 import { renderBrandLlmsTxt } from '@podbor/i18n';
 import { SITE_URL, SITE_NAME, STUDIO_ADDRESS } from '@/utils/constants';
 import { SERVICE_SLUGS } from '@/utils/services';
@@ -25,6 +26,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
     facts: [
       ...home.hero.stats.map((stat) => `- ${stat.value} — ${stat.label}`),
       `- ${pages.contact.addressLabel}: ${STUDIO_ADDRESS.street}, ${STUDIO_ADDRESS.district}, ${STUDIO_ADDRESS.city}`,
+      `- ${pages.contact.mapHeading}: ${mapPlaceUrl(STUDIO_ADDRESS.googleMapsCid)}`,
       `- ${pages.contact.hoursLabel}: ${site.footer.hours}`,
     ],
     lists: [

@@ -1,4 +1,4 @@
-import { DETAILS } from '@podbor/brands';
+import { DETAILS, WORKSHOP_ADDRESS } from '@podbor/brands';
 import { instagramLink, telegramLink } from '@podbor/site-kit/contact-links';
 
 export const BRAND = DETAILS;
@@ -7,15 +7,7 @@ export const SITE_URL = import.meta.env.SITE ?? BRAND.url;
 export const SITE_NAME = BRAND.name;
 export const SITE_LEGAL_NAME = BRAND.legalName;
 
-// TODO: postalCode left out until the owner confirms it — Zvezdara spans several.
-export const STUDIO_ADDRESS = {
-  street: 'Jovana Ćirilova 23a',
-  district: 'Zvezdara',
-  city: 'Beograd',
-  country: 'RS',
-  lat: 44.8054597,
-  lon: 20.4856936,
-};
+export const STUDIO_ADDRESS = WORKSHOP_ADDRESS;
 
 export const OPENING_HOURS = {
   days: [

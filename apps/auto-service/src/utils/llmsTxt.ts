@@ -1,4 +1,5 @@
 import { getCollection } from 'astro:content';
+import { mapPlaceUrl } from '@podbor/site-kit';
 import { renderBrandLlmsTxt, type LlmsLinkList } from '@podbor/i18n';
 import {
   SITE_URL,
@@ -47,6 +48,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
     facts: [
       ...home.trust.map((fact) => `- ${fact.value} — ${fact.label}`),
       `- ${pages.contact.addressLabel}: ${GARAGE_ADDRESS.street}, ${GARAGE_ADDRESS.district}, ${GARAGE_ADDRESS.city}`,
+      `- ${pages.contact.mapHeading}: ${mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid)}`,
       `- ${pages.contact.hoursLabel}: ${site.footer.hours}`,
     ],
     lists: [

@@ -1,4 +1,4 @@
-import { CARLAB } from '@podbor/brands';
+import { CARLAB, WORKSHOP_ADDRESS } from '@podbor/brands';
 import { telegramLink } from '@podbor/site-kit/contact-links';
 
 export const BRAND = CARLAB;
@@ -9,15 +9,7 @@ export const SITE_LEGAL_NAME = BRAND.legalName;
 
 export const SHOP_ENABLED = false;
 
-// TODO: postalCode is left out until the owner confirms it — Zvezdara spans several.
-export const GARAGE_ADDRESS = {
-  street: 'Jovana Ćirilova 23a',
-  district: 'Zvezdara',
-  city: 'Beograd',
-  country: 'RS',
-  lat: 44.8054597,
-  lon: 20.4856936,
-};
+export const GARAGE_ADDRESS = WORKSHOP_ADDRESS;
 
 export const OPENING_HOURS = [
   {
