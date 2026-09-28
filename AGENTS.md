@@ -414,6 +414,9 @@ apps/medusa/docker-compose.test.yml up -d --wait`; `DB_HOST` is the literal
 - In CI `typecheck` runs through turbo after `medusa build` (`.medusa/types` is
   generated output); a bare `pnpm --filter @podbor/medusa typecheck` on a clean
   checkout does not see those generated query types.
+- **Redis event-bus subscribers share one queue at concurrency 1**: no long
+  work in a subscriber without a timeout — `order.placed` does not jump the
+  queue in 2.19.
 
 ## Architecture
 

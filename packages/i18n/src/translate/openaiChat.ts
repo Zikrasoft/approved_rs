@@ -2,6 +2,9 @@ import OpenAI from 'openai';
 
 export const DEFAULT_TRANSLATE_MODEL = 'gpt-4o-mini';
 
+export const OPENAI_TIMEOUT_MS = 60_000;
+export const OPENAI_MAX_RETRIES = 1;
+
 export async function callOpenAiJson(params: {
   apiKey: string;
   systemPrompt: string;
@@ -14,7 +17,11 @@ export async function callOpenAiJson(params: {
     userContent,
     model = DEFAULT_TRANSLATE_MODEL,
   } = params;
-  const client = new OpenAI({ apiKey });
+  const client = new OpenAI({
+    apiKey,
+    timeout: OPENAI_TIMEOUT_MS,
+    maxRetries: OPENAI_MAX_RETRIES,
+  });
   const response = await client.chat.completions.create({
     model,
     response_format: { type: 'json_object' },
