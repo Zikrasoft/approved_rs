@@ -9,10 +9,13 @@ const TEST_STACK = {
   MEDUSA_BACKEND_URL: 'http://localhost:9009',
 };
 
+const ANY_FREE_PORT = '';
+
 if (process.env.TEST_TYPE === 'integration:http') {
   for (const [key, value] of Object.entries(TEST_STACK)) {
     process.env[key] ??= value;
   }
+  process.env.PORT = ANY_FREE_PORT;
 }
 
 module.exports = {
