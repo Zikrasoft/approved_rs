@@ -1,3 +1,5 @@
+import { CARLAB } from '@podbor/brands';
+
 import type { Env } from './env';
 
 export const DISPATCH_URL =
@@ -50,7 +52,7 @@ export async function requestBuild(deps: {
         'content-type': 'application/json',
         accept: 'application/vnd.github+json',
         'x-github-api-version': '2022-11-28',
-        'user-agent': 'carlab-medusa',
+        'user-agent': `${CARLAB.domain} medusa`,
         authorization: `Bearer ${deps.target.token}`,
       },
       body: JSON.stringify({ ref: deps.target.ref }),

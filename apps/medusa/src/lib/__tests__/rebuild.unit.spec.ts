@@ -63,7 +63,7 @@ describe('requestBuild', () => {
     expect(init.headers.authorization).toBe('Bearer github_pat_example');
     expect(init.headers.accept).toBe('application/vnd.github+json');
     expect(init.headers['x-github-api-version']).toBe('2022-11-28');
-    expect(init.headers['user-agent']).toBe('carlab-medusa');
+    expect(init.headers['user-agent']).toBe('carlab.rs medusa');
     expect(JSON.parse(init.body)).toEqual({ ref: 'main' });
   });
 
