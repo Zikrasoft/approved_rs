@@ -75,7 +75,7 @@ const envSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['SHOP_ORDER_HOOK_URL'],
-        message: 'required in production',
+        message: 'must be https in production',
       });
     }
     if (
@@ -85,7 +85,7 @@ const envSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['MEDUSA_BACKEND_URL'],
-        message: 'required in production',
+        message: 'must be https in production',
       });
     }
     if (!env.BREVO_API_KEY !== !env.BREVO_FROM_EMAIL) {

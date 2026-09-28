@@ -37,7 +37,7 @@ describe('parseEnv', () => {
   it('refuses a production backend URL that is not https', () => {
     expect(() =>
       parseEnv({ ...PRODUCTION, MEDUSA_BACKEND_URL: 'http://api.carlab.rs' }),
-    ).toThrow('MEDUSA_BACKEND_URL');
+    ).toThrow('must be https in production');
   });
 
   it('treats a blank line in .env as unset', () => {
@@ -87,7 +87,7 @@ describe('parseEnv', () => {
         SHOP_ORDER_HOOK_URL: 'http://carlab.rs/api/shop-order',
         SHOP_ORDER_HOOK_SECRET: SECRET,
       }),
-    ).toThrow('SHOP_ORDER_HOOK_URL');
+    ).toThrow('must be https in production');
   });
 
   it('accepts a configured order hook', () => {
