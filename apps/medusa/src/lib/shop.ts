@@ -1,12 +1,13 @@
+import { CARLAB } from '@podbor/brands';
 import { MEDUSA_LOCALE } from '@podbor/shop-catalog';
 
 export const SHOP = {
   currency: 'rsd',
   country: 'rs',
   regionName: 'Srbija',
-  salesChannelName: 'carlab.rs',
-  publishableKeyTitle: 'carlab.rs',
-  locationName: 'CarLab',
+  salesChannelName: CARLAB.domain,
+  publishableKeyTitle: CARLAB.domain,
+  locationName: CARLAB.name,
   fulfillmentSetName: 'pickup',
   fulfillmentSetType: 'pickup',
   serviceZoneName: 'Srbija',

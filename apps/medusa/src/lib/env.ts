@@ -1,3 +1,4 @@
+import { CARLAB } from '@podbor/brands';
 import { z } from 'zod';
 
 const secret = z.string().min(32);
@@ -35,7 +36,7 @@ const envSchema = z
     AUTH_CORS: z.string().default('http://localhost:9009'),
     ADMIN_URL: z
       .url({ protocol: /^https$/ })
-      .default('https://api.carlab.rs/app'),
+      .default(`https://api.${CARLAB.domain}/app`),
     MEDUSA_BACKEND_URL: z.url().default('http://localhost:9009'),
     OPENAI_API_KEY: z.string().optional(),
     BREVO_API_KEY: z.string().optional(),

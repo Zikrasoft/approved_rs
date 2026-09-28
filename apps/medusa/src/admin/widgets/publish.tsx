@@ -1,5 +1,6 @@
 import { defineWidgetConfig } from '@medusajs/admin-sdk';
 import { Button, Container, Heading, Text, toast } from '@medusajs/ui';
+import { CARLAB } from '@podbor/brands';
 import { useState } from 'react';
 
 const PublishWidget = () => {
@@ -37,7 +38,7 @@ const PublishWidget = () => {
   return (
     <Container className="mb-2 flex items-center justify-between gap-4">
       <div>
-        <Heading level="h2">Сайт carlab.rs</Heading>
+        <Heading level="h2">Сайт {CARLAB.domain}</Heading>
         <Text size="small" className="text-ui-fg-subtle">
           Правки товаров, цен и переводов попадают на сайт после публикации.
         </Text>

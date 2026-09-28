@@ -26,7 +26,7 @@ import {
   linkSalesChannelsToStockLocationWorkflow,
   updateStoresWorkflow,
 } from '@medusajs/medusa/core-flows';
-import { WORKSHOP_ADDRESS } from '@podbor/brands';
+import { CARLAB, WORKSHOP_ADDRESS } from '@podbor/brands';
 import { PRODUCT_TYPES, SERVICE_TYPE } from '@podbor/shop-catalog';
 
 import {
@@ -320,7 +320,7 @@ async function ensurePickup(
         prices: [{ currency_code: SHOP.currency, amount: 0 }],
         type: {
           label: SHOP.pickupName,
-          description: 'Забрать заказ в сервисе CarLab',
+          description: `Забрать заказ в сервисе ${CARLAB.name}`,
           code: SHOP.pickupCode,
         },
         rules: [
