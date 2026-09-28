@@ -1,15 +1,20 @@
-import { beforeAll, describe, it, expect } from 'vitest';
-import { execFileSync } from 'node:child_process';
+import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
 
-const root = fileURLToPath(new URL('..', import.meta.url));
 const require = createRequire(import.meta.url);
 
 describe('CommonJS build', () => {
-  beforeAll(() => {
-    execFileSync('pnpm', ['run', 'build'], { cwd: root, stdio: 'pipe' });
-  }, 120_000);
+  it('resolves every Medusa-facing subpath to dist/cjs', () => {
+    expect(require.resolve('@podbor/shop-catalog')).toMatch(
+      /dist\/cjs\/index\.js$/,
+    );
+    expect(require.resolve('@podbor/shop-catalog/browser')).toMatch(
+      /dist\/cjs\/browser\.js$/,
+    );
+    expect(require.resolve('@podbor/shop-catalog/order-hook')).toMatch(
+      /dist\/cjs\/orderHook\.js$/,
+    );
+  });
 
   it('serves the package root to require()', () => {
     const shop = require('@podbor/shop-catalog');
@@ -18,6 +23,11 @@ describe('CommonJS build', () => {
     expect(shop.landingSlug(shop.productType('batteries').fields[1], 60)).toBe(
       '60ah',
     );
+  });
+
+  it('serves the browser subpath to require()', () => {
+    const browser = require('@podbor/shop-catalog/browser');
+    expect(browser.MEDUSA_LOCALE.sr).toBe('sr-RS');
   });
 
   it('serves the order hook to require()', () => {

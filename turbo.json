@@ -12,6 +12,9 @@
     "test": {
       "dependsOn": ["^build"]
     },
+    "@podbor/shop-catalog#test": { "dependsOn": ["build"] },
+    "@podbor/i18n#test": { "dependsOn": ["build"] },
+    "@podbor/brands#test": { "dependsOn": ["build"] },
     "typecheck": {
       "dependsOn": ["^build"]
     },

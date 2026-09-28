@@ -55,7 +55,7 @@ export const fitmentEntrySchema = z
   .refine((entry) => entry.yearTo >= entry.yearFrom, {
     message: 'yearTo must not be earlier than yearFrom',
     path: ['yearTo'],
-  });
+  }) satisfies z.ZodType<FitmentEntry>;
 
 export const fitmentSchema = z.array(fitmentEntrySchema).max(500);
 

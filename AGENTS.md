@@ -165,11 +165,15 @@ Approved's trust/verification semantics.
   pulls zod, date-fns and the Telegram client into the browser bundle.
 - **A package Medusa consumes ships a CommonJS build behind a `require`
   condition.** `apps/medusa` is CommonJS and cannot load the `.ts` sources the
-  other workspaces import. `packages/shop-catalog` and `@podbor/i18n/translate/core`
-  export `{ "require": dist/cjs…, "default": src/….ts }`, build with
+  other workspaces import. `packages/shop-catalog` (`.`, `./browser`,
+  `./order-hook`), `packages/brands` and `@podbor/i18n`'s `./translate/core` and
+  `./section` export `{ "require": dist/cjs…, "default": src/….ts }`, build with
   `tsc -p tsconfig.cjs.json` (`module: CommonJS`, `rewriteRelativeImportExtensions`)
-  and stamp `dist/cjs/package.json` with `{"type":"commonjs"}`; a `cjs.test.ts`
-  builds and `require()`s it so a broken build fails the package's own tests.
+  and stamp `dist/cjs/package.json` with `{"type":"commonjs"}`. Their `test` task
+  depends on their own `build` in `turbo.json`, and a `cjs.test.ts` `require()`s
+  the result — so run such a package's tests through turbo
+  (`pnpm turbo run test --filter=<package>`); a bare `pnpm --filter <package> test`
+  finds no `dist/`.
 - **A helper a lazily-loaded path depends on must live in a module that imports
   nothing heavy.** Rollup cannot code-split a module that is also statically
   imported, so putting such a helper beside a static `libphonenumber-js` import

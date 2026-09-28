@@ -12,7 +12,13 @@
       },
       "default": "./src/index.ts"
     },
-    "./browser": "./src/browser.ts",
+    "./browser": {
+      "require": {
+        "types": "./dist/cjs/browser.d.ts",
+        "default": "./dist/cjs/browser.js"
+      },
+      "default": "./src/browser.ts"
+    },
     "./order-hook": {
       "require": {
         "types": "./dist/cjs/orderHook.d.ts",
