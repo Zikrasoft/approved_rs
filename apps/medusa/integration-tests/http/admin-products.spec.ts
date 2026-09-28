@@ -89,6 +89,53 @@ medusaIntegrationTestRunner({
       expect(data.product.status).toBe('published');
     });
 
+    it('keeps a published battery editable and refuses to un-type it', async () => {
+      const headers = await admin();
+      const { data } = await api.post(
+        '/admin/products',
+        draft('Varta опубликованная', {
+          status: 'published',
+          type_id: await batteryTypeId(),
+          metadata: { spec: SPEC, fitment: [] },
+        }),
+        headers,
+      );
+
+      const { data: renamed } = await api.post(
+        `/admin/products/${data.product.id}`,
+        { title: 'Varta переименованная' },
+        headers,
+      );
+      expect(renamed.product.title).toBe('Varta переименованная');
+
+      const error = await api
+        .post(`/admin/products/${data.product.id}`, { type_id: null }, headers)
+        .catch((failure) => failure);
+      expect(error.response.status).toBe(400);
+      expect(error.response.data.message).toMatch(
+        /^Характеристики товара не сходятся: /,
+      );
+      const { data: kept } = await api.get(
+        `/admin/products/${data.product.id}?fields=type_id`,
+        headers,
+      );
+      expect(kept.product.type_id).not.toBeNull();
+    });
+
+    it.each(['/admin/products/imports', '/admin/products/import'])(
+      'refuses a product import at %s',
+      async (path) => {
+        const error = await api
+          .post(path, {}, await admin())
+          .catch((failure) => failure);
+
+        expect(error.response.status).toBe(400);
+        expect(error.response.data.message).toBe(
+          'Импорт товаров отключён — создавайте и меняйте товары в карточке',
+        );
+      },
+    );
+
     it('refuses an edit that breaks the spec', async () => {
       const headers = await admin();
       const { data } = await api.post(

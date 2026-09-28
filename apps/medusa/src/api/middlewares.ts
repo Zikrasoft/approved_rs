@@ -3,6 +3,7 @@ import { defineMiddlewares } from '@medusajs/framework/http';
 import {
   fillProductDefaults,
   refuseGuardedBatchEdits,
+  refuseProductImports,
   requireReadyToPublish,
   requireValidSpec,
 } from './admin/products/require-fields';
@@ -28,6 +29,11 @@ export default defineMiddlewares({
         requireValidSpec,
         requireReadyToPublish,
       ],
+    },
+    {
+      matcher: /^\/admin\/products\/imports?(\/|$)/,
+      method: 'POST',
+      middlewares: [refuseProductImports],
     },
     {
       matcher: '/admin/products/batch',

@@ -2,6 +2,7 @@ import {
   fillProductDefaults,
   handleFor,
   refuseGuardedBatchEdits,
+  refuseProductImports,
   requireReadyToPublish,
   requireValidSpec,
 } from '../require-fields';
@@ -154,6 +155,11 @@ const guard = async (
 
 const BATTERY_TYPE: Rows = { product_type: [{ value: 'batteries' }] };
 const SERVICE: Rows = { product_type: [{ value: 'services' }] };
+const FILTER_TYPE: Rows = { product_type: [{ value: 'filters' }] };
+
+const PRICED = [
+  { title: 'Default', prices: [{ currency_code: 'rsd', amount: 12000 }] },
+];
 
 describe('requireValidSpec', () => {
   it('lets through an edit that does not touch the spec', async () => {
@@ -254,7 +260,12 @@ describe('requireReadyToPublish', () => {
     expect(
       await guard(
         requireReadyToPublish,
-        { status: 'published', type_id: 'ptyp_bat', metadata: { spec: SPEC } },
+        {
+          status: 'published',
+          type_id: 'ptyp_bat',
+          metadata: { spec: SPEC },
+          variants: PRICED,
+        },
         BATTERY_TYPE,
       ),
     ).toBeUndefined();
@@ -283,7 +294,7 @@ describe('requireReadyToPublish', () => {
     expect(
       await guard(
         requireReadyToPublish,
-        { status: 'published', type_id: 'ptyp_svc' },
+        { status: 'published', type_id: 'ptyp_svc', variants: PRICED },
         SERVICE,
       ),
     ).toBeUndefined();
@@ -323,6 +334,171 @@ describe('the single-product guards on the batch path', () => {
       ).toBeUndefined();
     },
   );
+});
+
+describe('the publish invariant', () => {
+  const PUBLISHED_BATTERY: Rows = {
+    product: [
+      {
+        status: 'published',
+        metadata: { spec: SPEC },
+        type: { value: 'batteries' },
+        variants: PRICED,
+      },
+    ],
+  };
+
+  it('refuses to un-type a published product', async () => {
+    const error = await guard(
+      requireReadyToPublish,
+      { type_id: null },
+      PUBLISHED_BATTERY,
+      'prod_1',
+    );
+
+    expect(error?.message).toBe(
+      'Товар не выпустить на сайт: не выбран тип товара',
+    );
+  });
+
+  it('checks a type change against the stored spec', async () => {
+    const error = await guard(
+      requireValidSpec,
+      { type_id: 'ptyp_flt' },
+      {
+        ...FILTER_TYPE,
+        product: [
+          {
+            status: 'draft',
+            metadata: { spec: SPEC },
+            type: { value: 'batteries' },
+          },
+        ],
+      },
+      'prod_1',
+    );
+
+    expect(error?.type).toBe('invalid_data');
+    expect(error?.message).toMatch(/^Характеристики товара не сходятся: /);
+    expect(error?.message).toContain('filterKind');
+  });
+
+  it('lets a type change through on a draft with no spec yet', async () => {
+    expect(
+      await guard(
+        requireValidSpec,
+        { type_id: 'ptyp_flt' },
+        {
+          ...FILTER_TYPE,
+          product: [{ status: 'draft', metadata: null, type: null }],
+        },
+        'prod_1',
+      ),
+    ).toBeUndefined();
+  });
+
+  it('refuses to publish a variant with no dinar price', async () => {
+    const error = await guard(
+      requireReadyToPublish,
+      {
+        status: 'published',
+        type_id: 'ptyp_bat',
+        metadata: { spec: SPEC },
+        variants: [
+          { title: 'Default', prices: [{ currency_code: 'eur', amount: 100 }] },
+        ],
+      },
+      BATTERY_TYPE,
+    );
+
+    expect(error?.type).toBe('invalid_data');
+    expect(error?.message).toBe(
+      'Товар не выпустить на сайт: у варианта «Default» нет цены в динарах',
+    );
+  });
+
+  it('refuses to publish a service with no variants', async () => {
+    const error = await guard(
+      requireReadyToPublish,
+      { status: 'published', type_id: 'ptyp_svc' },
+      SERVICE,
+    );
+
+    expect(error?.message).toBe(
+      'Товар не выпустить на сайт: нет ни одного варианта с ценой',
+    );
+  });
+
+  it('checks the stored prices when the edit sends no variants', async () => {
+    const error = await guard(
+      requireReadyToPublish,
+      { status: 'published' },
+      {
+        product: [
+          {
+            status: 'draft',
+            metadata: { spec: SPEC },
+            type: { value: 'batteries' },
+            variants: [
+              {
+                title: 'Default',
+                prices: [{ currency_code: 'rsd', amount: 0 }],
+              },
+            ],
+          },
+        ],
+      },
+      'prod_1',
+    );
+
+    expect(error?.message).toMatch(/нет цены в динарах/);
+  });
+
+  it('reads the stored prices of a sent variant that leaves them out', async () => {
+    expect(
+      await guard(
+        requireReadyToPublish,
+        { variants: [{ id: 'variant_1', title: 'Default' }] },
+        {
+          product: [
+            {
+              status: 'published',
+              metadata: { spec: SPEC },
+              type: { value: 'batteries' },
+              variants: [{ id: 'variant_1', ...PRICED[0] }],
+            },
+          ],
+        },
+        'prod_1',
+      ),
+    ).toBeUndefined();
+  });
+
+  it('publishes a stored product whose variants carry a dinar price', async () => {
+    expect(
+      await guard(
+        requireReadyToPublish,
+        { title: 'Varta' },
+        PUBLISHED_BATTERY,
+        'prod_1',
+      ),
+    ).toBeUndefined();
+  });
+});
+
+describe('refuseProductImports', () => {
+  it('refuses a product import, in Russian', () => {
+    const next = jest.fn();
+    refuseProductImports({} as never, {} as never, next);
+
+    expect(next).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'invalid_data',
+        message:
+          'Импорт товаров отключён — создавайте и меняйте товары в карточке',
+      }),
+    );
+  });
 });
 
 describe('refuseGuardedBatchEdits', () => {

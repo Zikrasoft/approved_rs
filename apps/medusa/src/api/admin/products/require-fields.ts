@@ -99,21 +99,42 @@ const FITMENT_KEY = 'fitment';
 const PUBLISHED = 'published';
 const BATCH_ID = 'batch';
 
+const priceSchema = z.looseObject({
+  currency_code: z.string().nullish(),
+  amount: z.union([z.number(), z.string()]).nullish(),
+});
+
+const variantSchema = z.looseObject({
+  id: z.string().nullish(),
+  title: z.string().nullish(),
+  prices: z.array(priceSchema).nullish(),
+});
+
+type Variant = z.infer<typeof variantSchema>;
+
+const variantsSchema = z.array(variantSchema);
+
+const sentVariantsSchema = z.looseObject({ variants: variantsSchema });
+
 type Stored = {
   status?: string | null;
   metadata?: Record<string, unknown> | null;
   type?: { value?: string | null } | null;
+  variants?: unknown;
 };
 
 type Inspected = {
   typeKey: string | undefined;
   metadata: Record<string, unknown>;
   touchesSpec: boolean;
+  changesType: boolean;
   publishing: boolean;
+  variants: Variant[];
 };
 
 async function inspect(req: MedusaRequest): Promise<Inspected> {
-  const parsed = draftSchema.safeParse(req.validatedBody ?? req.body ?? {});
+  const body = req.validatedBody ?? req.body ?? {};
+  const parsed = draftSchema.safeParse(body);
   const draft: ProductDraft = parsed.success ? parsed.data : {};
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
   const id = req.params?.id;
@@ -121,18 +142,31 @@ async function inspect(req: MedusaRequest): Promise<Inspected> {
     ? await queryOne<Stored>(
         query,
         'product',
-        ['status', 'metadata', 'type.value'],
+        [
+          'status',
+          'metadata',
+          'type.value',
+          'variants.id',
+          'variants.title',
+          'variants.prices.amount',
+          'variants.prices.currency_code',
+        ],
         { id },
       )
     : undefined;
-  const chosenType = draft.type_id
-    ? await queryOne<{ value: string }>(query, 'product_type', ['value'], {
-        id: draft.type_id,
-      })
-    : undefined;
+  const changesType = 'type_id' in draft;
+  const chosenType =
+    typeof draft.type_id === 'string'
+      ? await queryOne<{ value: string }>(query, 'product_type', ['value'], {
+          id: draft.type_id,
+        })
+      : undefined;
+  const sent = sentVariantsSchema.safeParse(body);
+  const kept = variantsSchema.safeParse(stored?.variants);
+  const storedVariants = kept.success ? kept.data : [];
 
   return {
-    typeKey: draft.type_id
+    typeKey: changesType
       ? chosenType?.value
       : (stored?.type?.value ?? undefined),
     metadata: { ...(stored?.metadata ?? {}), ...(draft.metadata ?? {}) },
@@ -140,8 +174,36 @@ async function inspect(req: MedusaRequest): Promise<Inspected> {
       draft.metadata &&
       (SPEC_KEY in draft.metadata || FITMENT_KEY in draft.metadata),
     ),
+    changesType,
     publishing: (draft.status ?? stored?.status) === PUBLISHED,
+    variants: sent.success
+      ? sent.data.variants.map(
+          (variant) =>
+            (!variant.prices &&
+              storedVariants.find((row) => row.id && row.id === variant.id)) ||
+            variant,
+        )
+      : storedVariants,
   };
+}
+
+const pricedInDinars = (variant: Variant): boolean =>
+  (variant.prices ?? []).some(
+    (price) =>
+      price.currency_code?.toLowerCase() === SHOP.currency &&
+      Number(price.amount) > 0,
+  );
+
+function priceComplaint(variants: Variant[]): string | undefined {
+  if (!variants.length) {
+    return 'нет ни одного варианта с ценой';
+  }
+  const index = variants.findIndex((variant) => !pricedInDinars(variant));
+  if (index < 0) {
+    return undefined;
+  }
+  const name = variants[index].title?.trim() || `${index + 1}`;
+  return `у варианта «${name}» нет цены в динарах`;
 }
 
 const refusal = (message: string) =>
@@ -158,7 +220,10 @@ export async function requireValidSpec(
   }
   try {
     const product = await inspect(req);
-    if (product.touchesSpec && product.typeKey !== SERVICE_TYPE) {
+    const recheck =
+      product.touchesSpec ||
+      (product.changesType && SPEC_KEY in product.metadata);
+    if (recheck && product.typeKey !== SERVICE_TYPE) {
       const result = parseAttributes(product.typeKey, product.metadata);
       if (!result.ok) {
         next(refusal(`Характеристики товара не сходятся: ${result.error}`));
@@ -169,6 +234,19 @@ export async function requireValidSpec(
   } catch (error) {
     next(error as Error);
   }
+}
+
+function publishComplaint(product: Inspected): string | undefined {
+  if (!product.typeKey) {
+    return 'не выбран тип товара';
+  }
+  if (product.typeKey !== SERVICE_TYPE) {
+    const result = parseAttributes(product.typeKey, product.metadata);
+    if (!result.ok) {
+      return result.error;
+    }
+  }
+  return priceComplaint(product.variants);
 }
 
 export async function requireReadyToPublish(
@@ -182,16 +260,12 @@ export async function requireReadyToPublish(
   }
   try {
     const product = await inspect(req);
-    if (product.publishing && product.typeKey !== SERVICE_TYPE) {
-      if (!product.typeKey) {
-        next(refusal('Товар не выпустить на сайт: не выбран тип товара'));
-        return;
-      }
-      const result = parseAttributes(product.typeKey, product.metadata);
-      if (!result.ok) {
-        next(refusal(`Товар не выпустить на сайт: ${result.error}`));
-        return;
-      }
+    const complaint = product.publishing
+      ? publishComplaint(product)
+      : undefined;
+    if (complaint) {
+      next(refusal(`Товар не выпустить на сайт: ${complaint}`));
+      return;
     }
     next();
   } catch (error) {
@@ -238,4 +312,14 @@ export function refuseGuardedBatchEdits(
     return;
   }
   next();
+}
+
+export function refuseProductImports(
+  _req: MedusaRequest,
+  _res: MedusaResponse,
+  next: MedusaNextFunction,
+): void {
+  next(
+    refusal('Импорт товаров отключён — создавайте и меняйте товары в карточке'),
+  );
 }
