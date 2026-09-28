@@ -20,24 +20,12 @@
         "make": "Toyota",
         "model": "Corolla",
         "yearFrom": 2013,
-        "yearTo": 2018
-      },
-      {
-        "make": "Toyota",
-        "model": "Corolla",
-        "yearFrom": 2018,
         "yearTo": 2019
       },
       {
         "make": "Honda",
         "model": "Civic",
         "yearFrom": 2012,
-        "yearTo": 2016
-      },
-      {
-        "make": "Honda",
-        "model": "Civic",
-        "yearFrom": 2016,
         "yearTo": 2017
       },
       {
@@ -97,12 +85,6 @@
         "make": "Audi",
         "model": "A4",
         "yearFrom": 2008,
-        "yearTo": 2015
-      },
-      {
-        "make": "Audi",
-        "model": "A4",
-        "yearFrom": 2015,
         "yearTo": 2016
       },
       {
@@ -209,7 +191,7 @@
         "make": "Renault",
         "model": "Megane",
         "yearFrom": 2012,
-        "yearTo": 2015
+        "yearTo": 2016
       },
       {
         "make": "Renault",
@@ -303,12 +285,6 @@
         "make": "Renault",
         "model": "Clio",
         "yearFrom": 2012,
-        "yearTo": 2018
-      },
-      {
-        "make": "Renault",
-        "model": "Clio",
-        "yearFrom": 2018,
         "yearTo": 2019
       },
       {
@@ -409,19 +385,13 @@
         "make": "Volkswagen",
         "model": "Golf",
         "yearFrom": 2012,
-        "yearTo": 2019
-      },
-      {
-        "make": "Volkswagen",
-        "model": "Golf",
-        "yearFrom": 2019,
         "yearTo": 2020
       },
       {
         "make": "Volkswagen",
         "model": "Passat",
         "yearFrom": 2010,
-        "yearTo": 2014
+        "yearTo": 2015
       },
       {
         "make": "Volkswagen",

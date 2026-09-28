@@ -53,14 +53,8 @@ const car = (
 });
 
 describe('treeComplaint', () => {
-  it('accepts generations that share only the changeover year', () => {
+  it('accepts a well-formed tree', () => {
     expect(treeComplaint(TREE)).toBeUndefined();
-  });
-
-  it('reads the generations in year order, whatever order they were written in', () => {
-    expect(
-      treeComplaint(withGenerations([...PROTO.generations].reverse())),
-    ).toBeUndefined();
   });
 
   it('refuses a make written twice', () => {
@@ -100,17 +94,15 @@ describe('treeComplaint', () => {
     ).toBe('у поколения «Zikra Proto I» год начала позже года конца');
   });
 
-  it('refuses generations that overlap by more than the changeover year', () => {
+  it('accepts generations that overlap, as production years of one model do', () => {
     expect(
       treeComplaint(
         withGenerations([
           { name: 'I', yearFrom: 2006, yearTo: 2013 },
-          { name: 'II', yearFrom: 2012, yearTo: 2019 },
+          { name: 'II', yearFrom: 2011, yearTo: 2019 },
         ]),
       ),
-    ).toBe(
-      'поколения «Zikra Proto I» (2006–2013) и «II» (2012–2019) пересекаются больше чем на год',
-    );
+    ).toBeUndefined();
   });
 });
 

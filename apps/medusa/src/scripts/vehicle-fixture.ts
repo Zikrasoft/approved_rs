@@ -5,15 +5,16 @@ import fixture from './fixtures/vehicles.json';
 
 const name = z.string().trim().min(1).max(60);
 const year = z.number().int().min(1950).max(2100);
+const source = z.url({ protocol: /^https$/ });
 
 const generationSchema = z
-  .object({ name, yearFrom: year, yearTo: year })
+  .object({ name, yearFrom: year, yearTo: year, source: source.optional() })
   .strict();
 
 const modelSchema = z
   .object({
     name,
-    source: z.url({ protocol: /^https$/ }),
+    source,
     generations: z.array(generationSchema).min(1),
   })
   .strict();

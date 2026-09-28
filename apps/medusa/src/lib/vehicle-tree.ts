@@ -27,16 +27,11 @@ function modelComplaint(make: Make, model: Model): string | undefined {
   if (twice !== undefined) {
     return `поколение «${label} ${twice}» записано дважды`;
   }
-  const sorted = [...model.generations].sort((a, b) => a.yearFrom - b.yearFrom);
-  for (let index = 0; index < sorted.length; index += 1) {
-    const generation = sorted[index];
-    if (generation.yearFrom > generation.yearTo) {
-      return `у поколения «${label} ${generation.name}» год начала позже года конца`;
-    }
-    const previous = sorted[index - 1];
-    if (previous && generation.yearFrom < previous.yearTo) {
-      return `поколения «${label} ${previous.name}» (${span(previous)}) и «${generation.name}» (${span(generation)}) пересекаются больше чем на год`;
-    }
+  const reversed = model.generations.find(
+    (generation) => generation.yearFrom > generation.yearTo,
+  );
+  if (reversed) {
+    return `у поколения «${label} ${reversed.name}» год начала позже года конца`;
   }
   return undefined;
 }

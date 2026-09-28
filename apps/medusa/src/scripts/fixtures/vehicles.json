@@ -9,27 +9,32 @@
           {
             "name": "Mk4",
             "yearFrom": 1997,
-            "yearTo": 2003
+            "yearTo": 2006,
+            "source": "https://en.wikipedia.org/wiki/Volkswagen_Golf_Mk4"
           },
           {
             "name": "Mk5",
             "yearFrom": 2003,
-            "yearTo": 2008
+            "yearTo": 2009,
+            "source": "https://en.wikipedia.org/wiki/Volkswagen_Golf_Mk5"
           },
           {
             "name": "Mk6",
             "yearFrom": 2008,
-            "yearTo": 2012
+            "yearTo": 2013,
+            "source": "https://en.wikipedia.org/wiki/Volkswagen_Golf_Mk6"
           },
           {
             "name": "Mk7",
             "yearFrom": 2012,
-            "yearTo": 2019
+            "yearTo": 2020,
+            "source": "https://en.wikipedia.org/wiki/Volkswagen_Golf_Mk7"
           },
           {
             "name": "Mk8",
             "yearFrom": 2019,
-            "yearTo": 2026
+            "yearTo": 2026,
+            "source": "https://en.wikipedia.org/wiki/Volkswagen_Golf_Mk8"
           }
         ]
       },
@@ -40,22 +45,26 @@
           {
             "name": "Mk3",
             "yearFrom": 1994,
-            "yearTo": 2001
+            "yearTo": 2002,
+            "source": "https://en.wikipedia.org/wiki/Volkswagen_Polo_Mk3"
           },
           {
             "name": "Mk4",
             "yearFrom": 2001,
-            "yearTo": 2009
+            "yearTo": 2010,
+            "source": "https://en.wikipedia.org/wiki/Volkswagen_Polo_Mk4"
           },
           {
             "name": "Mk5",
             "yearFrom": 2009,
-            "yearTo": 2017
+            "yearTo": 2017,
+            "source": "https://en.wikipedia.org/wiki/Volkswagen_Polo_Mk5"
           },
           {
             "name": "Mk6",
             "yearFrom": 2017,
-            "yearTo": 2026
+            "yearTo": 2026,
+            "source": "https://en.wikipedia.org/wiki/Volkswagen_Polo_Mk6"
           }
         ]
       },
@@ -66,27 +75,32 @@
           {
             "name": "B5",
             "yearFrom": 1996,
-            "yearTo": 2005
+            "yearTo": 2005,
+            "source": "https://en.wikipedia.org/wiki/Volkswagen_Passat_(B5)"
           },
           {
             "name": "B6",
             "yearFrom": 2005,
-            "yearTo": 2010
+            "yearTo": 2010,
+            "source": "https://en.wikipedia.org/wiki/Volkswagen_Passat_(B6)"
           },
           {
             "name": "B7",
             "yearFrom": 2010,
-            "yearTo": 2014
+            "yearTo": 2015,
+            "source": "https://en.wikipedia.org/wiki/Volkswagen_Passat_(B6)"
           },
           {
             "name": "B8",
             "yearFrom": 2014,
-            "yearTo": 2021
+            "yearTo": 2021,
+            "source": "https://en.wikipedia.org/wiki/Volkswagen_Passat_(B8)"
           },
           {
             "name": "B9",
             "yearFrom": 2023,
-            "yearTo": 2026
+            "yearTo": 2026,
+            "source": "https://en.wikipedia.org/wiki/Volkswagen_Passat_(B9)"
           }
         ]
       },
@@ -97,7 +111,7 @@
           {
             "name": "5N",
             "yearFrom": 2007,
-            "yearTo": 2016
+            "yearTo": 2018
           },
           {
             "name": "AD/BW",
@@ -139,12 +153,12 @@
           {
             "name": "9K/9U",
             "yearFrom": 1996,
-            "yearTo": 2003
+            "yearTo": 2004
           },
           {
             "name": "2K",
             "yearFrom": 2003,
-            "yearTo": 2020
+            "yearTo": 2021
           },
           {
             "name": "SB",
@@ -165,12 +179,12 @@
           {
             "name": "1U",
             "yearFrom": 1996,
-            "yearTo": 2004
+            "yearTo": 2010
           },
           {
             "name": "1Z",
             "yearFrom": 2004,
-            "yearTo": 2012
+            "yearTo": 2013
           },
           {
             "name": "5E",
@@ -191,7 +205,7 @@
           {
             "name": "6Y",
             "yearFrom": 1999,
-            "yearTo": 2007
+            "yearTo": 2009
           },
           {
             "name": "5J",
@@ -201,7 +215,7 @@
           {
             "name": "NJ",
             "yearFrom": 2014,
-            "yearTo": 2021
+            "yearTo": 2022
           },
           {
             "name": "PJ",
@@ -227,7 +241,7 @@
           {
             "name": "B8",
             "yearFrom": 2015,
-            "yearTo": 2023
+            "yearTo": 2024
           },
           {
             "name": "B9",
@@ -275,12 +289,12 @@
           {
             "name": "G",
             "yearFrom": 1998,
-            "yearTo": 2004
+            "yearTo": 2009
           },
           {
             "name": "H",
             "yearFrom": 2004,
-            "yearTo": 2009
+            "yearTo": 2014
           },
           {
             "name": "J",
@@ -311,7 +325,7 @@
           {
             "name": "C",
             "yearFrom": 2000,
-            "yearTo": 2006
+            "yearTo": 2007
           },
           {
             "name": "D",
@@ -374,7 +388,7 @@
           {
             "name": "B",
             "yearFrom": 2005,
-            "yearTo": 2011
+            "yearTo": 2014
           },
           {
             "name": "C",
@@ -395,7 +409,7 @@
           {
             "name": "II",
             "yearFrom": 1998,
-            "yearTo": 2005
+            "yearTo": 2012
           },
           {
             "name": "III",
@@ -405,12 +419,12 @@
           {
             "name": "IV",
             "yearFrom": 2012,
-            "yearTo": 2018
+            "yearTo": 2020
           },
           {
             "name": "V",
             "yearFrom": 2018,
-            "yearTo": 2025
+            "yearTo": 2026
           },
           {
             "name": "VI",
@@ -426,7 +440,7 @@
           {
             "name": "I",
             "yearFrom": 1995,
-            "yearTo": 2002
+            "yearTo": 2003
           },
           {
             "name": "II",
@@ -436,7 +450,7 @@
           {
             "name": "III",
             "yearFrom": 2008,
-            "yearTo": 2015
+            "yearTo": 2016
           },
           {
             "name": "IV",
@@ -589,7 +603,7 @@
           {
             "name": "FC/FN",
             "yearFrom": 2002,
-            "yearTo": 2009
+            "yearTo": 2010
           },
           {
             "name": "SC",
@@ -678,7 +692,7 @@
           {
             "name": "188",
             "yearFrom": 1999,
-            "yearTo": 2004
+            "yearTo": 2010
           },
           {
             "name": "199",
@@ -699,7 +713,7 @@
           {
             "name": "II",
             "yearFrom": 2003,
-            "yearTo": 2011
+            "yearTo": 2012
           },
           {
             "name": "III",
@@ -748,7 +762,7 @@
           {
             "name": "I",
             "yearFrom": 2000,
-            "yearTo": 2009
+            "yearTo": 2010
           },
           {
             "name": "II",
@@ -774,27 +788,32 @@
           {
             "name": "E110",
             "yearFrom": 1997,
-            "yearTo": 2000
+            "yearTo": 2002,
+            "source": "https://en.wikipedia.org/wiki/Toyota_Corolla_(E110)"
           },
           {
             "name": "E120",
             "yearFrom": 2000,
-            "yearTo": 2006
+            "yearTo": 2007,
+            "source": "https://en.wikipedia.org/wiki/Toyota_Corolla_(E120)"
           },
           {
             "name": "E140/E150",
             "yearFrom": 2006,
-            "yearTo": 2013
+            "yearTo": 2013,
+            "source": "https://en.wikipedia.org/wiki/Toyota_Corolla_(E140)"
           },
           {
             "name": "E170",
             "yearFrom": 2013,
-            "yearTo": 2018
+            "yearTo": 2019,
+            "source": "https://en.wikipedia.org/wiki/Toyota_Corolla_(E170)"
           },
           {
             "name": "E210",
             "yearFrom": 2018,
-            "yearTo": 2026
+            "yearTo": 2026,
+            "source": "https://en.wikipedia.org/wiki/Toyota_Corolla_(E210)"
           }
         ]
       },
@@ -899,22 +918,26 @@
           {
             "name": "C170",
             "yearFrom": 1998,
-            "yearTo": 2005
+            "yearTo": 2005,
+            "source": "https://en.wikipedia.org/wiki/Ford_Focus_(first_generation)"
           },
           {
             "name": "C307",
             "yearFrom": 2005,
-            "yearTo": 2010
+            "yearTo": 2010,
+            "source": "https://en.wikipedia.org/wiki/Ford_Focus_(second_generation,_Europe)"
           },
           {
             "name": "C346",
             "yearFrom": 2011,
-            "yearTo": 2018
+            "yearTo": 2018,
+            "source": "https://en.wikipedia.org/wiki/Ford_Focus_(third_generation)"
           },
           {
             "name": "C519",
             "yearFrom": 2018,
-            "yearTo": 2025
+            "yearTo": 2025,
+            "source": "https://en.wikipedia.org/wiki/Ford_Focus_(fourth_generation)"
           }
         ]
       },
@@ -935,7 +958,7 @@
           {
             "name": "B299",
             "yearFrom": 2008,
-            "yearTo": 2017
+            "yearTo": 2019
           },
           {
             "name": "B479",
@@ -951,22 +974,26 @@
           {
             "name": "I",
             "yearFrom": 1992,
-            "yearTo": 2000
+            "yearTo": 2000,
+            "source": "https://en.wikipedia.org/wiki/Ford_Mondeo_(first_generation)"
           },
           {
             "name": "II",
             "yearFrom": 2000,
-            "yearTo": 2006
+            "yearTo": 2007,
+            "source": "https://en.wikipedia.org/wiki/Ford_Mondeo_(second_generation)"
           },
           {
             "name": "III",
             "yearFrom": 2006,
-            "yearTo": 2014
+            "yearTo": 2014,
+            "source": "https://en.wikipedia.org/wiki/Ford_Mondeo_(third_generation)"
           },
           {
             "name": "IV",
             "yearFrom": 2014,
-            "yearTo": 2022
+            "yearTo": 2022,
+            "source": "https://en.wikipedia.org/wiki/Ford_Mondeo_(fourth_generation)"
           }
         ]
       },
@@ -977,7 +1004,7 @@
           {
             "name": "C394",
             "yearFrom": 2008,
-            "yearTo": 2012
+            "yearTo": 2013
           },
           {
             "name": "C520",
@@ -1003,22 +1030,26 @@
           {
             "name": "E87",
             "yearFrom": 2004,
-            "yearTo": 2011
+            "yearTo": 2013,
+            "source": "https://en.wikipedia.org/wiki/BMW_1_Series_(E87)"
           },
           {
             "name": "F20",
             "yearFrom": 2011,
-            "yearTo": 2019
+            "yearTo": 2019,
+            "source": "https://en.wikipedia.org/wiki/BMW_1_Series_(F20)"
           },
           {
             "name": "F40",
             "yearFrom": 2019,
-            "yearTo": 2024
+            "yearTo": 2024,
+            "source": "https://en.wikipedia.org/wiki/BMW_1_Series_(F40)"
           },
           {
             "name": "F70",
             "yearFrom": 2024,
-            "yearTo": 2026
+            "yearTo": 2026,
+            "source": "https://en.wikipedia.org/wiki/BMW_1_Series_(F70)"
           }
         ]
       },
@@ -1029,22 +1060,26 @@
           {
             "name": "E46",
             "yearFrom": 1997,
-            "yearTo": 2004
+            "yearTo": 2006,
+            "source": "https://en.wikipedia.org/wiki/BMW_3_Series_(E46)"
           },
           {
             "name": "E90",
             "yearFrom": 2004,
-            "yearTo": 2011
+            "yearTo": 2013,
+            "source": "https://en.wikipedia.org/wiki/BMW_3_Series_(E90)"
           },
           {
             "name": "F30",
             "yearFrom": 2011,
-            "yearTo": 2018
+            "yearTo": 2018,
+            "source": "https://en.wikipedia.org/wiki/BMW_3_Series_(F30)"
           },
           {
             "name": "G20",
             "yearFrom": 2018,
-            "yearTo": 2026
+            "yearTo": 2026,
+            "source": "https://en.wikipedia.org/wiki/BMW_3_Series_(G20)"
           }
         ]
       },
@@ -1055,27 +1090,32 @@
           {
             "name": "E39",
             "yearFrom": 1995,
-            "yearTo": 2003
+            "yearTo": 2004,
+            "source": "https://en.wikipedia.org/wiki/BMW_5_Series_(E39)"
           },
           {
             "name": "E60",
             "yearFrom": 2003,
-            "yearTo": 2009
+            "yearTo": 2010,
+            "source": "https://en.wikipedia.org/wiki/BMW_5_Series_(E60)"
           },
           {
             "name": "F10",
             "yearFrom": 2009,
-            "yearTo": 2016
+            "yearTo": 2016,
+            "source": "https://en.wikipedia.org/wiki/BMW_5_Series_(F10)"
           },
           {
             "name": "G30",
             "yearFrom": 2016,
-            "yearTo": 2023
+            "yearTo": 2023,
+            "source": "https://en.wikipedia.org/wiki/BMW_5_Series_(G30)"
           },
           {
             "name": "G60",
             "yearFrom": 2023,
-            "yearTo": 2026
+            "yearTo": 2026,
+            "source": "https://en.wikipedia.org/wiki/BMW_5_Series_(G60)"
           }
         ]
       },
@@ -1101,7 +1141,8 @@
           {
             "name": "G45",
             "yearFrom": 2024,
-            "yearTo": 2026
+            "yearTo": 2026,
+            "source": "https://en.wikipedia.org/wiki/BMW_X3_(G45)"
           }
         ]
       },
@@ -1112,22 +1153,26 @@
           {
             "name": "E53",
             "yearFrom": 1999,
-            "yearTo": 2006
+            "yearTo": 2006,
+            "source": "https://en.wikipedia.org/wiki/BMW_X5_(E53)"
           },
           {
             "name": "E70",
             "yearFrom": 2006,
-            "yearTo": 2013
+            "yearTo": 2013,
+            "source": "https://en.wikipedia.org/wiki/BMW_X5_(E70)"
           },
           {
             "name": "F15",
             "yearFrom": 2013,
-            "yearTo": 2018
+            "yearTo": 2018,
+            "source": "https://en.wikipedia.org/wiki/BMW_X5_(F15)"
           },
           {
             "name": "G05",
             "yearFrom": 2018,
-            "yearTo": 2026
+            "yearTo": 2026,
+            "source": "https://en.wikipedia.org/wiki/BMW_X5_(G05)"
           }
         ]
       }
@@ -1169,12 +1214,12 @@
           {
             "name": "W203",
             "yearFrom": 1999,
-            "yearTo": 2006
+            "yearTo": 2010
           },
           {
             "name": "W204",
             "yearFrom": 2006,
-            "yearTo": 2014
+            "yearTo": 2015
           },
           {
             "name": "W205",
@@ -1195,27 +1240,32 @@
           {
             "name": "W210",
             "yearFrom": 1994,
-            "yearTo": 2002
+            "yearTo": 2003,
+            "source": "https://en.wikipedia.org/wiki/Mercedes-Benz_E-Class_(W210)"
           },
           {
             "name": "W211",
             "yearFrom": 2002,
-            "yearTo": 2008
+            "yearTo": 2009,
+            "source": "https://en.wikipedia.org/wiki/Mercedes-Benz_E-Class_(W211)"
           },
           {
             "name": "W212",
             "yearFrom": 2008,
-            "yearTo": 2016
+            "yearTo": 2016,
+            "source": "https://en.wikipedia.org/wiki/Mercedes-Benz_E-Class_(W212)"
           },
           {
             "name": "W213",
             "yearFrom": 2016,
-            "yearTo": 2023
+            "yearTo": 2023,
+            "source": "https://en.wikipedia.org/wiki/Mercedes-Benz_E-Class_(W213)"
           },
           {
             "name": "W214",
             "yearFrom": 2023,
-            "yearTo": 2026
+            "yearTo": 2026,
+            "source": "https://en.wikipedia.org/wiki/Mercedes-Benz_E-Class_(W214)"
           }
         ]
       }
@@ -1236,7 +1286,7 @@
           {
             "name": "8P",
             "yearFrom": 2003,
-            "yearTo": 2012
+            "yearTo": 2013
           },
           {
             "name": "8V",
@@ -1257,22 +1307,22 @@
           {
             "name": "B5",
             "yearFrom": 1994,
-            "yearTo": 2000
+            "yearTo": 2001
           },
           {
             "name": "B6",
             "yearFrom": 2000,
-            "yearTo": 2004
+            "yearTo": 2006
           },
           {
             "name": "B7",
             "yearFrom": 2004,
-            "yearTo": 2008
+            "yearTo": 2009
           },
           {
             "name": "B8",
             "yearFrom": 2008,
-            "yearTo": 2015
+            "yearTo": 2016
           },
           {
             "name": "B9",
@@ -1288,12 +1338,12 @@
           {
             "name": "C5",
             "yearFrom": 1997,
-            "yearTo": 2004
+            "yearTo": 2005
           },
           {
             "name": "C6",
             "yearFrom": 2004,
-            "yearTo": 2010
+            "yearTo": 2011
           },
           {
             "name": "C7",
@@ -1319,12 +1369,12 @@
           {
             "name": "8R",
             "yearFrom": 2008,
-            "yearTo": 2016
+            "yearTo": 2017
           },
           {
             "name": "FY",
             "yearFrom": 2016,
-            "yearTo": 2024
+            "yearTo": 2025
           },
           {
             "name": "GU",
@@ -1345,12 +1395,12 @@
           {
             "name": "PA",
             "yearFrom": 2007,
-            "yearTo": 2013
+            "yearTo": 2015
           },
           {
             "name": "IA/BA",
             "yearFrom": 2013,
-            "yearTo": 2019
+            "yearTo": 2022
           },
           {
             "name": "AC3/AI3",
@@ -1392,12 +1442,12 @@
           {
             "name": "FD",
             "yearFrom": 2007,
-            "yearTo": 2011
+            "yearTo": 2012
           },
           {
             "name": "GD",
             "yearFrom": 2011,
-            "yearTo": 2016
+            "yearTo": 2017
           },
           {
             "name": "PD",
@@ -1423,7 +1473,7 @@
           {
             "name": "TL",
             "yearFrom": 2015,
-            "yearTo": 2020
+            "yearTo": 2021
           },
           {
             "name": "NX4",
@@ -1465,7 +1515,7 @@
           {
             "name": "NB",
             "yearFrom": 1993,
-            "yearTo": 2004
+            "yearTo": 2005
           },
           {
             "name": "JE/KM",
@@ -1506,7 +1556,7 @@
           {
             "name": "UB/QB",
             "yearFrom": 2011,
-            "yearTo": 2016
+            "yearTo": 2017
           },
           {
             "name": "YB/SC/FB/UC",
@@ -1574,7 +1624,7 @@
           {
             "name": "HM",
             "yearFrom": 2017,
-            "yearTo": 2023
+            "yearTo": 2024
           },
           {
             "name": "P1310",
@@ -1621,7 +1671,7 @@
           {
             "name": "1M",
             "yearFrom": 1999,
-            "yearTo": 2005
+            "yearTo": 2006
           },
           {
             "name": "1P",
@@ -1663,7 +1713,7 @@
           {
             "name": "K11",
             "yearFrom": 1992,
-            "yearTo": 2002
+            "yearTo": 2003
           },
           {
             "name": "K12",
@@ -1673,7 +1723,7 @@
           {
             "name": "K13",
             "yearFrom": 2010,
-            "yearTo": 2016
+            "yearTo": 2022
           },
           {
             "name": "K14",
@@ -1741,7 +1791,7 @@
           {
             "name": "T32",
             "yearFrom": 2013,
-            "yearTo": 2021
+            "yearTo": 2022
           },
           {
             "name": "T33",
@@ -1788,7 +1838,7 @@
           {
             "name": "GG1",
             "yearFrom": 2002,
-            "yearTo": 2007
+            "yearTo": 2008
           },
           {
             "name": "GH1/GH2",
@@ -1809,7 +1859,7 @@
           {
             "name": "KE",
             "yearFrom": 2012,
-            "yearTo": 2016
+            "yearTo": 2017
           },
           {
             "name": "KF",
@@ -1835,32 +1885,38 @@
           {
             "name": "VI",
             "yearFrom": 1995,
-            "yearTo": 2000
+            "yearTo": 2000,
+            "source": "https://en.wikipedia.org/wiki/Honda_Civic_(sixth_generation)"
           },
           {
             "name": "VII",
             "yearFrom": 2000,
-            "yearTo": 2005
+            "yearTo": 2005,
+            "source": "https://en.wikipedia.org/wiki/Honda_Civic_(seventh_generation)"
           },
           {
             "name": "VIII",
             "yearFrom": 2005,
-            "yearTo": 2011
+            "yearTo": 2012,
+            "source": "https://en.wikipedia.org/wiki/Honda_Civic_(eighth_generation)"
           },
           {
             "name": "IX",
             "yearFrom": 2011,
-            "yearTo": 2016
+            "yearTo": 2017,
+            "source": "https://en.wikipedia.org/wiki/Honda_Civic_(ninth_generation)"
           },
           {
             "name": "X",
             "yearFrom": 2016,
-            "yearTo": 2021
+            "yearTo": 2021,
+            "source": "https://en.wikipedia.org/wiki/Honda_Civic_(tenth_generation)"
           },
           {
             "name": "XI",
             "yearFrom": 2021,
-            "yearTo": 2026
+            "yearTo": 2026,
+            "source": "https://en.wikipedia.org/wiki/Honda_Civic_(eleventh_generation)"
           }
         ]
       },
@@ -1881,22 +1937,26 @@
           {
             "name": "III",
             "yearFrom": 2006,
-            "yearTo": 2011
+            "yearTo": 2012,
+            "source": "https://en.wikipedia.org/wiki/Honda_CR-V_(third_generation)"
           },
           {
             "name": "IV",
             "yearFrom": 2011,
-            "yearTo": 2016
+            "yearTo": 2018,
+            "source": "https://en.wikipedia.org/wiki/Honda_CR-V_(fourth_generation)"
           },
           {
             "name": "V",
             "yearFrom": 2016,
-            "yearTo": 2022
+            "yearTo": 2023,
+            "source": "https://en.wikipedia.org/wiki/Honda_CR-V_(fifth_generation)"
           },
           {
             "name": "VI",
             "yearFrom": 2022,
-            "yearTo": 2026
+            "yearTo": 2026,
+            "source": "https://en.wikipedia.org/wiki/Honda_CR-V_(sixth_generation)"
           }
         ]
       },
@@ -1907,17 +1967,19 @@
           {
             "name": "GD/GE",
             "yearFrom": 2001,
-            "yearTo": 2007
+            "yearTo": 2008,
+            "source": "https://en.wikipedia.org/wiki/Honda_Fit_(first_generation)"
           },
           {
             "name": "GE/GG",
             "yearFrom": 2007,
-            "yearTo": 2013
+            "yearTo": 2014,
+            "source": "https://en.wikipedia.org/wiki/Honda_Fit_(second_generation)"
           },
           {
             "name": "GK/GH/GP",
             "yearFrom": 2013,
-            "yearTo": 2020
+            "yearTo": 2022
           },
           {
             "name": "GR/GS",
@@ -1943,7 +2005,7 @@
           {
             "name": "AZG",
             "yearFrom": 2010,
-            "yearTo": 2016
+            "yearTo": 2017
           },
           {
             "name": "A2L",
@@ -1969,7 +2031,7 @@
           {
             "name": "JT",
             "yearFrom": 2005,
-            "yearTo": 2015
+            "yearTo": 2017
           },
           {
             "name": "LY",
@@ -2158,7 +2220,7 @@
           {
             "name": "GF/GG/ZJ/ZK/ZL",
             "yearFrom": 2012,
-            "yearTo": 2021
+            "yearTo": 2024
           },
           {
             "name": "GM/GN/ZM",
@@ -2174,7 +2236,7 @@
           {
             "name": "VIII",
             "yearFrom": 2000,
-            "yearTo": 2007
+            "yearTo": 2010
           },
           {
             "name": "IX",

@@ -68,27 +68,18 @@ describe('the vehicle fixture', () => {
     ).toEqual([]);
   });
 
-  it('lets the generations of one model share the changeover year and nothing more', () => {
-    const overlaps = models.flatMap((model) => {
-      const sorted = [...model.generations].sort(
-        (a, b) => a.yearFrom - b.yearFrom,
-      );
-      return sorted
-        .slice(1)
-        .filter(
-          (generation, index) => generation.yearFrom < sorted[index].yearTo,
-        )
-        .map((generation) => `${model.make} ${model.name} ${generation.name}`);
-    });
-
-    expect(overlaps).toEqual([]);
-  });
-
   it('says where every model came from', () => {
     expect(
       models
         .filter((model) => !model.source.startsWith('https://'))
         .map((model) => `${model.make} ${model.name}`),
+    ).toEqual([]);
+    expect(
+      generations
+        .filter(
+          (g) => g.source !== undefined && !g.source.startsWith('https://'),
+        )
+        .map((g) => g.car),
     ).toEqual([]);
   });
 
@@ -104,30 +95,27 @@ describe('the vehicle fixture', () => {
     expect(uncovered).toEqual([]);
   });
 
-  it('refuses a model with no source and generations that overlap', () => {
+  it('refuses a model with no source, a generation source that is not https and reversed years', () => {
     const first = { name: 'I', yearFrom: 2006, yearTo: 2013 };
+    const tree = (
+      generation: object,
+      model: object = { source: 'https://example.org/proto' },
+    ) => [
+      {
+        name: 'Zikra',
+        models: [{ name: 'Proto', ...model, generations: [generation] }],
+      },
+    ];
 
+    expect(vehiclesSchema.safeParse(tree(first)).success).toBe(true);
+    expect(vehiclesSchema.safeParse(tree(first, {})).success).toBe(false);
     expect(
-      vehiclesSchema.safeParse([
-        { name: 'Zikra', models: [{ name: 'Proto', generations: [first] }] },
-      ]).success,
+      vehiclesSchema.safeParse(
+        tree({ ...first, source: 'http://example.org/proto-i' }),
+      ).success,
     ).toBe(false);
     expect(
-      vehiclesSchema.safeParse([
-        {
-          name: 'Zikra',
-          models: [
-            {
-              name: 'Proto',
-              source: 'https://example.org/proto',
-              generations: [
-                first,
-                { name: 'II', yearFrom: 2011, yearTo: 2019 },
-              ],
-            },
-          ],
-        },
-      ]).success,
+      vehiclesSchema.safeParse(tree({ ...first, yearFrom: 2014 })).success,
     ).toBe(false);
   });
 });
