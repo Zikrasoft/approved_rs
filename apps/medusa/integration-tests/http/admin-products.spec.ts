@@ -35,6 +35,124 @@ medusaIntegrationTestRunner({
       ...extra,
     });
 
+    const SPEC = {
+      brand: 'Bosch',
+      capacityAh: 60,
+      crankingA: 540,
+      polarity: 'left',
+      lengthMm: 242,
+      widthMm: 175,
+      heightMm: 175,
+      warrantyMonths: 24,
+    };
+
+    const batteryTypeId = async (): Promise<string> => {
+      const {
+        data: [type],
+      } = await query().graph({
+        entity: 'product_type',
+        fields: ['id'],
+        filters: { value: 'batteries' },
+      });
+      return type.id;
+    };
+
+    it('refuses to publish a battery without its spec, in Russian', async () => {
+      const error = await api
+        .post(
+          '/admin/products',
+          draft('Varta без характеристик', {
+            status: 'published',
+            type_id: await batteryTypeId(),
+          }),
+          await admin(),
+        )
+        .catch((failure) => failure);
+
+      expect(error.response.status).toBe(400);
+      expect(error.response.data.message).toMatch(
+        /^Товар не выпустить на сайт: /,
+      );
+    });
+
+    it('publishes a battery whose spec fits the registry', async () => {
+      const { data } = await api.post(
+        '/admin/products',
+        draft('Varta с характеристиками', {
+          status: 'published',
+          type_id: await batteryTypeId(),
+          metadata: { spec: SPEC, fitment: [] },
+        }),
+        await admin(),
+      );
+
+      expect(data.product.status).toBe('published');
+    });
+
+    it('refuses an edit that breaks the spec', async () => {
+      const headers = await admin();
+      const { data } = await api.post(
+        '/admin/products',
+        draft('Varta правка', {
+          type_id: await batteryTypeId(),
+          metadata: { spec: SPEC, fitment: [] },
+        }),
+        headers,
+      );
+
+      const error = await api
+        .post(
+          `/admin/products/${data.product.id}`,
+          { metadata: { spec: { ...SPEC, capacityAh: 'sixty' } } },
+          headers,
+        )
+        .catch((failure) => failure);
+
+      expect(error.response.status).toBe(400);
+      expect(error.response.data.message).toMatch(
+        /^Характеристики товара не сходятся: /,
+      );
+    });
+
+    it('saves the spec without losing the other metadata keys', async () => {
+      const headers = await admin();
+      const { data } = await api.post(
+        '/admin/products',
+        draft('Varta для виджета', {
+          type_id: await batteryTypeId(),
+          metadata: { translated_from: 'abc123' },
+        }),
+        headers,
+      );
+
+      const fitment = [
+        { make: 'Toyota', model: 'Corolla', yearFrom: 2013, yearTo: 2019 },
+      ];
+      const { data: saved } = await api.post(
+        `/admin/products/${data.product.id}/spec`,
+        { spec: SPEC, fitment },
+        headers,
+      );
+
+      expect(saved.metadata).toEqual({
+        translated_from: 'abc123',
+        spec: SPEC,
+        fitment,
+      });
+
+      const error = await api
+        .post(
+          `/admin/products/${data.product.id}/spec`,
+          { spec: { ...SPEC, capacityAh: 0 }, fitment },
+          headers,
+        )
+        .catch((failure) => failure);
+      expect(error.response.status).toBe(400);
+      expect(error.response.data.message).toMatch(
+        /^Характеристики не сохранены: /,
+      );
+    });
+
     it('gives a product named in Russian a Latin address, the default profile and the carlab.rs channel', async () => {
       const { data } = await api.post(
         '/admin/products',

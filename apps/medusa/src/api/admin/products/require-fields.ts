@@ -3,7 +3,11 @@ import type {
   MedusaRequest,
   MedusaResponse,
 } from '@medusajs/framework/http';
-import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
+import {
+  ContainerRegistrationKeys,
+  MedusaError,
+} from '@medusajs/framework/utils';
+import { SERVICE_TYPE, parseAttributes } from '@podbor/shop-catalog';
 import { z } from 'zod';
 
 import { queryOne } from '../../../lib/query';
@@ -88,4 +92,150 @@ export async function fillProductDefaults(
   } catch (error) {
     next(error as Error);
   }
+}
+
+const SPEC_KEY = 'spec';
+const FITMENT_KEY = 'fitment';
+const PUBLISHED = 'published';
+const BATCH_ID = 'batch';
+
+type Stored = {
+  status?: string | null;
+  metadata?: Record<string, unknown> | null;
+  type?: { value?: string | null } | null;
+};
+
+type Inspected = {
+  typeKey: string | undefined;
+  metadata: Record<string, unknown>;
+  touchesSpec: boolean;
+  publishing: boolean;
+};
+
+async function inspect(req: MedusaRequest): Promise<Inspected> {
+  const parsed = draftSchema.safeParse(req.validatedBody ?? req.body ?? {});
+  const draft: ProductDraft = parsed.success ? parsed.data : {};
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+  const id = req.params?.id;
+  const stored = id
+    ? await queryOne<Stored>(
+        query,
+        'product',
+        ['status', 'metadata', 'type.value'],
+        { id },
+      )
+    : undefined;
+  const chosenType = draft.type_id
+    ? await queryOne<{ value: string }>(query, 'product_type', ['value'], {
+        id: draft.type_id,
+      })
+    : undefined;
+
+  return {
+    typeKey: draft.type_id
+      ? chosenType?.value
+      : (stored?.type?.value ?? undefined),
+    metadata: { ...(stored?.metadata ?? {}), ...(draft.metadata ?? {}) },
+    touchesSpec: Boolean(
+      draft.metadata &&
+      (SPEC_KEY in draft.metadata || FITMENT_KEY in draft.metadata),
+    ),
+    publishing: (draft.status ?? stored?.status) === PUBLISHED,
+  };
+}
+
+const refusal = (message: string) =>
+  new MedusaError(MedusaError.Types.INVALID_DATA, message);
+
+export async function requireValidSpec(
+  req: MedusaRequest,
+  _res: MedusaResponse,
+  next: MedusaNextFunction,
+): Promise<void> {
+  if (req.params?.id === BATCH_ID) {
+    next();
+    return;
+  }
+  try {
+    const product = await inspect(req);
+    if (product.touchesSpec && product.typeKey !== SERVICE_TYPE) {
+      const result = parseAttributes(product.typeKey, product.metadata);
+      if (!result.ok) {
+        next(refusal(`Характеристики товара не сходятся: ${result.error}`));
+        return;
+      }
+    }
+    next();
+  } catch (error) {
+    next(error as Error);
+  }
+}
+
+export async function requireReadyToPublish(
+  req: MedusaRequest,
+  _res: MedusaResponse,
+  next: MedusaNextFunction,
+): Promise<void> {
+  if (req.params?.id === BATCH_ID) {
+    next();
+    return;
+  }
+  try {
+    const product = await inspect(req);
+    if (product.publishing && product.typeKey !== SERVICE_TYPE) {
+      if (!product.typeKey) {
+        next(refusal('Товар не выпустить на сайт: не выбран тип товара'));
+        return;
+      }
+      const result = parseAttributes(product.typeKey, product.metadata);
+      if (!result.ok) {
+        next(refusal(`Товар не выпустить на сайт: ${result.error}`));
+        return;
+      }
+    }
+    next();
+  } catch (error) {
+    next(error as Error);
+  }
+}
+
+const batchItemSchema = z.looseObject({
+  type_id: z.unknown().optional(),
+  status: z.unknown().optional(),
+  metadata: z.record(z.string(), z.unknown()).nullish(),
+});
+
+const batchSchema = z.looseObject({
+  create: z.array(batchItemSchema).nullish(),
+  update: z.array(batchItemSchema).nullish(),
+});
+
+type BatchItem = z.infer<typeof batchItemSchema>;
+
+const touchesGuardedFields = (item: BatchItem): boolean =>
+  item.type_id !== undefined ||
+  item.status === PUBLISHED ||
+  Boolean(
+    item.metadata &&
+    (SPEC_KEY in item.metadata || FITMENT_KEY in item.metadata),
+  );
+
+export function refuseGuardedBatchEdits(
+  req: MedusaRequest,
+  _res: MedusaResponse,
+  next: MedusaNextFunction,
+): void {
+  const parsed = batchSchema.safeParse(req.validatedBody ?? req.body ?? {});
+  const items = parsed.success
+    ? [...(parsed.data.create ?? []), ...(parsed.data.update ?? [])]
+    : [];
+  if (items.some(touchesGuardedFields)) {
+    next(
+      refusal(
+        'Характеристики, совместимость и публикацию меняйте в карточке товара',
+      ),
+    );
+    return;
+  }
+  next();
 }

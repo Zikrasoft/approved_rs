@@ -1,6 +1,11 @@
 import { defineMiddlewares } from '@medusajs/framework/http';
 
-import { fillProductDefaults } from './admin/products/require-fields';
+import {
+  fillProductDefaults,
+  refuseGuardedBatchEdits,
+  requireReadyToPublish,
+  requireValidSpec,
+} from './admin/products/require-fields';
 import {
   limitIdentityRegistrations,
   limitPasswordLogins,
@@ -18,7 +23,21 @@ export default defineMiddlewares({
     {
       matcher: '/admin/products',
       method: 'POST',
-      middlewares: [fillProductDefaults],
+      middlewares: [
+        fillProductDefaults,
+        requireValidSpec,
+        requireReadyToPublish,
+      ],
+    },
+    {
+      matcher: '/admin/products/batch',
+      method: 'POST',
+      middlewares: [refuseGuardedBatchEdits],
+    },
+    {
+      matcher: '/admin/products/:id',
+      method: 'POST',
+      middlewares: [requireValidSpec, requireReadyToPublish],
     },
     {
       matcher: '/auth/:actor_type/:auth_provider',

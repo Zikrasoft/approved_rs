@@ -1,4 +1,10 @@
-import { fillProductDefaults, handleFor } from '../require-fields';
+import {
+  fillProductDefaults,
+  handleFor,
+  refuseGuardedBatchEdits,
+  requireReadyToPublish,
+  requireValidSpec,
+} from '../require-fields';
 
 type Rows = Record<string, unknown[]>;
 
@@ -112,5 +118,274 @@ describe('fillProductDefaults', () => {
     await fillProductDefaults(req as never, {} as never, next);
 
     expect(next).toHaveBeenCalledWith(failure);
+  });
+});
+
+const SPEC = {
+  brand: 'Bosch',
+  capacityAh: 60,
+  crankingA: 540,
+  polarity: 'left',
+  lengthMm: 242,
+  widthMm: 175,
+  heightMm: 175,
+  warrantyMonths: 24,
+};
+
+type Guard = typeof requireValidSpec;
+
+const guard = async (
+  middleware: Guard,
+  body: Record<string, unknown>,
+  rows: Rows,
+  id?: string,
+) => {
+  const req = {
+    validatedBody: body,
+    body,
+    params: id ? { id } : {},
+    scope: scopeWith(rows),
+  };
+  const next = jest.fn();
+  await middleware(req as never, {} as never, next);
+  const [error] = next.mock.calls[0];
+  return error as { type: string; message: string } | undefined;
+};
+
+const BATTERY_TYPE: Rows = { product_type: [{ value: 'batteries' }] };
+const SERVICE: Rows = { product_type: [{ value: 'services' }] };
+
+describe('requireValidSpec', () => {
+  it('lets through an edit that does not touch the spec', async () => {
+    expect(
+      await guard(requireValidSpec, { title: 'Varta' }, {}),
+    ).toBeUndefined();
+  });
+
+  it('refuses a spec that breaks the registry, naming the field, in Russian', async () => {
+    const error = await guard(
+      requireValidSpec,
+      {
+        type_id: 'ptyp_bat',
+        metadata: { spec: { ...SPEC, capacityAh: 'sixty' } },
+      },
+      BATTERY_TYPE,
+    );
+
+    expect(error?.type).toBe('invalid_data');
+    expect(error?.message).toMatch(/^Характеристики товара не сходятся: /);
+    expect(error?.message).toContain('capacityAh');
+  });
+
+  it('checks an edit against the stored type and the stored metadata', async () => {
+    const error = await guard(
+      requireValidSpec,
+      { metadata: { spec: { ...SPEC, polarity: 'up' } } },
+      {
+        product: [
+          {
+            status: 'draft',
+            metadata: { fitment: [] },
+            type: { value: 'batteries' },
+          },
+        ],
+      },
+      'prod_1',
+    );
+
+    expect(error?.message).toContain('polarity');
+  });
+
+  it('refuses a spec on a product with no type', async () => {
+    const error = await guard(
+      requireValidSpec,
+      { metadata: { spec: SPEC } },
+      {},
+    );
+
+    expect(error?.message).toMatch(/^Характеристики товара не сходятся: /);
+  });
+
+  it('leaves a service alone', async () => {
+    expect(
+      await guard(
+        requireValidSpec,
+        { type_id: 'ptyp_svc', metadata: { spec: { anything: true } } },
+        SERVICE,
+      ),
+    ).toBeUndefined();
+  });
+});
+
+describe('requireReadyToPublish', () => {
+  it('lets a draft through whatever its spec', async () => {
+    expect(
+      await guard(
+        requireReadyToPublish,
+        { status: 'draft', type_id: 'ptyp_bat' },
+        BATTERY_TYPE,
+      ),
+    ).toBeUndefined();
+  });
+
+  it('refuses to publish a product with no type', async () => {
+    const error = await guard(
+      requireReadyToPublish,
+      { status: 'published' },
+      {},
+    );
+
+    expect(error?.message).toBe(
+      'Товар не выпустить на сайт: не выбран тип товара',
+    );
+  });
+
+  it('refuses to publish a battery without its spec', async () => {
+    const error = await guard(
+      requireReadyToPublish,
+      { status: 'published', type_id: 'ptyp_bat' },
+      BATTERY_TYPE,
+    );
+
+    expect(error?.message).toMatch(/^Товар не выпустить на сайт: /);
+  });
+
+  it('publishes a battery whose spec fits', async () => {
+    expect(
+      await guard(
+        requireReadyToPublish,
+        { status: 'published', type_id: 'ptyp_bat', metadata: { spec: SPEC } },
+        BATTERY_TYPE,
+      ),
+    ).toBeUndefined();
+  });
+
+  it('re-checks a published product on every edit', async () => {
+    const error = await guard(
+      requireReadyToPublish,
+      { title: 'Новое имя' },
+      {
+        product: [
+          {
+            status: 'published',
+            metadata: { spec: { brand: 'Bosch' } },
+            type: { value: 'batteries' },
+          },
+        ],
+      },
+      'prod_1',
+    );
+
+    expect(error?.message).toMatch(/^Товар не выпустить на сайт: /);
+  });
+
+  it('publishes a service without a spec', async () => {
+    expect(
+      await guard(
+        requireReadyToPublish,
+        { status: 'published', type_id: 'ptyp_svc' },
+        SERVICE,
+      ),
+    ).toBeUndefined();
+  });
+
+  it('hands a failing lookup to Medusa instead of throwing', async () => {
+    const failure = new Error('db down');
+    const req = {
+      validatedBody: { status: 'published', type_id: 'ptyp_bat' },
+      params: {},
+      scope: {
+        resolve: () => ({ graph: jest.fn().mockRejectedValue(failure) }),
+      },
+    };
+    const next = jest.fn();
+
+    await requireReadyToPublish(req as never, {} as never, next);
+
+    expect(next).toHaveBeenCalledWith(failure);
+  });
+});
+
+describe('the single-product guards on the batch path', () => {
+  it.each([
+    ['requireValidSpec', requireValidSpec],
+    ['requireReadyToPublish', requireReadyToPublish],
+  ])(
+    '%s leaves /admin/products/batch to its own guard',
+    async (_name, middleware) => {
+      expect(
+        await guard(
+          middleware,
+          { status: 'published', metadata: { spec: {} } },
+          {},
+          'batch',
+        ),
+      ).toBeUndefined();
+    },
+  );
+});
+
+describe('refuseGuardedBatchEdits', () => {
+  const REFUSAL =
+    'Характеристики, совместимость и публикацию меняйте в карточке товара';
+
+  const batch = (body: Record<string, unknown>) => {
+    const next = jest.fn();
+    refuseGuardedBatchEdits(
+      { validatedBody: body, body } as never,
+      {} as never,
+      next,
+    );
+    const [error] = next.mock.calls[0];
+    return error as { type: string; message: string } | undefined;
+  };
+
+  it.each([
+    ['a spec', { update: [{ id: 'prod_1', metadata: { spec: {} } }] }],
+    ['a fitment', { create: [{ title: 'Varta', metadata: { fitment: [] } }] }],
+    ['a product type', { update: [{ id: 'prod_1', type_id: 'ptyp_bat' }] }],
+    ['a publication', { update: [{ id: 'prod_1', status: 'published' }] }],
+  ])('refuses a batch that sets %s, in Russian', (_label, body) => {
+    const error = batch(body);
+
+    expect(error?.type).toBe('invalid_data');
+    expect(error?.message).toBe(REFUSAL);
+  });
+
+  it('lets a price-only update through', () => {
+    expect(
+      batch({
+        update: [
+          {
+            id: 'prod_1',
+            variants: [
+              {
+                id: 'variant_1',
+                prices: [{ currency_code: 'rsd', amount: 12000 }],
+              },
+            ],
+          },
+        ],
+      }),
+    ).toBeUndefined();
+  });
+
+  it('lets a delete through', () => {
+    expect(batch({ delete: ['prod_1'] })).toBeUndefined();
+  });
+
+  it('lets a title, another metadata key and a draft status through', () => {
+    expect(
+      batch({
+        update: [
+          {
+            id: 'prod_1',
+            title: 'Varta E12',
+            status: 'draft',
+            metadata: { note: 'x' },
+          },
+        ],
+      }),
+    ).toBeUndefined();
   });
 });
