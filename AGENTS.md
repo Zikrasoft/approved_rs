@@ -418,19 +418,20 @@ apps/medusa/docker-compose.test.yml up -d --wait`; `DB_HOST` is the literal
   work in a subscriber without a timeout — `order.placed` does not jump the
   queue in 2.19.
 - **Translations are stamped per locale**: `metadata.translated_from_sr` /
-  `translated_from_en` mark a field as machine-translated, and the hourly
-  `translate-backlog` job re-pays anything that job missed or a retry
-  discarded.
+  `translated_from_en` store a hash of the Russian source (title/subtitle/description)
+  that locale was last translated from; `translate-product` re-translates only
+  locales whose stored hash differs from the current Russian, and the hourly
+  `translate-backlog` job retries any locale still behind.
 - **`store.metadata.catalog_version` bumps on a catalog write**;
   `GET /store/catalog-version` reads it back and needs the publishable key
   like any other Store API route — that's what the CI scope step compares
   against `catalog-version.txt`.
 - **`order.placed` fans out to two independent subscribers.** The hook
   subscriber signs and validates the card and gets 5 attempts (~2.5 min) from
-  the event bus, and is not deduped on this side — the receiver dedupes by
-  `orderId`, because a 2xx that times out gets retried anyway. The email
-  subscriber is deduped per order (checks `listNotifications` before
-  sending), so a retried delivery never emails the customer twice.
+  the event bus, and is not deduped on this side — the receiver (`/api/shop-order`,
+  Plan 4, not built yet) must dedupe by `orderId`, because a 2xx that times out
+  gets retried. The email subscriber is deduped per order (checks `listNotifications`
+  before sending), so a retried delivery never emails the customer twice.
 - **`emails.yaml` is RU-only**, like every other i18n source file — sr/en are
   filled by the same CI translate loop (`apps/*/scripts/translate-i18n.ts`)
   that covers the rest of the site copy, nothing Medusa-specific.
