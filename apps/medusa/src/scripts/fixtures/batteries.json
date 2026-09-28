@@ -20,10 +20,38 @@
         "make": "Toyota",
         "model": "Corolla",
         "yearFrom": 2013,
+        "yearTo": 2018
+      },
+      {
+        "make": "Toyota",
+        "model": "Corolla",
+        "yearFrom": 2018,
         "yearTo": 2019
       },
-      { "make": "Honda", "model": "Civic", "yearFrom": 2012, "yearTo": 2017 },
-      { "make": "Mazda", "model": "3", "yearFrom": 2014, "yearTo": 2019 }
+      {
+        "make": "Honda",
+        "model": "Civic",
+        "yearFrom": 2012,
+        "yearTo": 2016
+      },
+      {
+        "make": "Honda",
+        "model": "Civic",
+        "yearFrom": 2016,
+        "yearTo": 2017
+      },
+      {
+        "make": "Mazda",
+        "model": "3",
+        "yearFrom": 2014,
+        "yearTo": 2018
+      },
+      {
+        "make": "Mazda",
+        "model": "3",
+        "yearFrom": 2019,
+        "yearTo": 2019
+      }
     ],
     "translations": {
       "sr": {
@@ -53,8 +81,30 @@
       "warrantyMonths": 24
     },
     "fitment": [
-      { "make": "BMW", "model": "3 Series", "yearFrom": 2011, "yearTo": 2019 },
-      { "make": "Audi", "model": "A4", "yearFrom": 2008, "yearTo": 2016 },
+      {
+        "make": "BMW",
+        "model": "3 Series",
+        "yearFrom": 2011,
+        "yearTo": 2018
+      },
+      {
+        "make": "BMW",
+        "model": "3 Series",
+        "yearFrom": 2018,
+        "yearTo": 2019
+      },
+      {
+        "make": "Audi",
+        "model": "A4",
+        "yearFrom": 2008,
+        "yearTo": 2015
+      },
+      {
+        "make": "Audi",
+        "model": "A4",
+        "yearFrom": 2015,
+        "yearTo": 2016
+      },
       {
         "make": "Mercedes-Benz",
         "model": "C-Class",
@@ -96,11 +146,28 @@
         "yearFrom": 2016,
         "yearTo": 2023
       },
-      { "make": "BMW", "model": "X5", "yearFrom": 2014, "yearTo": 2021 },
+      {
+        "make": "BMW",
+        "model": "X5",
+        "yearFrom": 2014,
+        "yearTo": 2018
+      },
+      {
+        "make": "BMW",
+        "model": "X5",
+        "yearFrom": 2018,
+        "yearTo": 2021
+      },
       {
         "make": "Volkswagen",
         "model": "Touareg",
         "yearFrom": 2015,
+        "yearTo": 2018
+      },
+      {
+        "make": "Volkswagen",
+        "model": "Touareg",
+        "yearFrom": 2018,
         "yearTo": 2022
       }
     ],
@@ -132,14 +199,30 @@
       "warrantyMonths": 24
     },
     "fitment": [
-      { "make": "Peugeot", "model": "308", "yearFrom": 2013, "yearTo": 2021 },
+      {
+        "make": "Peugeot",
+        "model": "308",
+        "yearFrom": 2013,
+        "yearTo": 2021
+      },
       {
         "make": "Renault",
         "model": "Megane",
         "yearFrom": 2012,
+        "yearTo": 2015
+      },
+      {
+        "make": "Renault",
+        "model": "Megane",
+        "yearFrom": 2015,
         "yearTo": 2020
       },
-      { "make": "Citroen", "model": "C4", "yearFrom": 2011, "yearTo": 2018 }
+      {
+        "make": "Citroen",
+        "model": "C4",
+        "yearFrom": 2011,
+        "yearTo": 2018
+      }
     ],
     "translations": {
       "sr": {
@@ -169,8 +252,18 @@
       "warrantyMonths": 24
     },
     "fitment": [
-      { "make": "Skoda", "model": "Superb", "yearFrom": 2015, "yearTo": 2022 },
-      { "make": "Seat", "model": "Leon", "yearFrom": 2013, "yearTo": 2020 },
+      {
+        "make": "Skoda",
+        "model": "Superb",
+        "yearFrom": 2015,
+        "yearTo": 2022
+      },
+      {
+        "make": "Seat",
+        "model": "Leon",
+        "yearFrom": 2013,
+        "yearTo": 2020
+      },
       {
         "make": "Volkswagen",
         "model": "Golf",
@@ -206,9 +299,30 @@
       "warrantyMonths": 18
     },
     "fitment": [
-      { "make": "Renault", "model": "Clio", "yearFrom": 2012, "yearTo": 2019 },
-      { "make": "Opel", "model": "Corsa", "yearFrom": 2014, "yearTo": 2019 },
-      { "make": "Fiat", "model": "Punto", "yearFrom": 2010, "yearTo": 2018 }
+      {
+        "make": "Renault",
+        "model": "Clio",
+        "yearFrom": 2012,
+        "yearTo": 2018
+      },
+      {
+        "make": "Renault",
+        "model": "Clio",
+        "yearFrom": 2018,
+        "yearTo": 2019
+      },
+      {
+        "make": "Opel",
+        "model": "Corsa",
+        "yearFrom": 2014,
+        "yearTo": 2019
+      },
+      {
+        "make": "Fiat",
+        "model": "Punto",
+        "yearFrom": 2010,
+        "yearTo": 2018
+      }
     ],
     "translations": {
       "sr": {
@@ -238,14 +352,30 @@
       "warrantyMonths": 36
     },
     "fitment": [
-      { "make": "BMW", "model": "5 Series", "yearFrom": 2010, "yearTo": 2020 },
+      {
+        "make": "BMW",
+        "model": "5 Series",
+        "yearFrom": 2010,
+        "yearTo": 2016
+      },
+      {
+        "make": "BMW",
+        "model": "5 Series",
+        "yearFrom": 2016,
+        "yearTo": 2020
+      },
       {
         "make": "Volkswagen",
         "model": "Tiguan",
         "yearFrom": 2016,
         "yearTo": 2023
       },
-      { "make": "Audi", "model": "Q5", "yearFrom": 2017, "yearTo": 2023 }
+      {
+        "make": "Audi",
+        "model": "Q5",
+        "yearFrom": 2017,
+        "yearTo": 2023
+      }
     ],
     "translations": {
       "sr": {
@@ -279,15 +409,38 @@
         "make": "Volkswagen",
         "model": "Golf",
         "yearFrom": 2012,
+        "yearTo": 2019
+      },
+      {
+        "make": "Volkswagen",
+        "model": "Golf",
+        "yearFrom": 2019,
         "yearTo": 2020
       },
       {
         "make": "Volkswagen",
         "model": "Passat",
         "yearFrom": 2010,
+        "yearTo": 2014
+      },
+      {
+        "make": "Volkswagen",
+        "model": "Passat",
+        "yearFrom": 2014,
         "yearTo": 2019
       },
-      { "make": "Skoda", "model": "Octavia", "yearFrom": 2013, "yearTo": 2020 }
+      {
+        "make": "Skoda",
+        "model": "Octavia",
+        "yearFrom": 2013,
+        "yearTo": 2019
+      },
+      {
+        "make": "Skoda",
+        "model": "Octavia",
+        "yearFrom": 2019,
+        "yearTo": 2020
+      }
     ],
     "translations": {
       "sr": {

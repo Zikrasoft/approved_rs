@@ -1,0 +1,2215 @@
+[
+  {
+    "name": "Volkswagen",
+    "models": [
+      {
+        "name": "Golf",
+        "source": "https://en.wikipedia.org/wiki/Volkswagen_Golf",
+        "generations": [
+          {
+            "name": "Mk4",
+            "yearFrom": 1997,
+            "yearTo": 2003
+          },
+          {
+            "name": "Mk5",
+            "yearFrom": 2003,
+            "yearTo": 2008
+          },
+          {
+            "name": "Mk6",
+            "yearFrom": 2008,
+            "yearTo": 2012
+          },
+          {
+            "name": "Mk7",
+            "yearFrom": 2012,
+            "yearTo": 2019
+          },
+          {
+            "name": "Mk8",
+            "yearFrom": 2019,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Polo",
+        "source": "https://en.wikipedia.org/wiki/Volkswagen_Polo",
+        "generations": [
+          {
+            "name": "Mk3",
+            "yearFrom": 1994,
+            "yearTo": 2001
+          },
+          {
+            "name": "Mk4",
+            "yearFrom": 2001,
+            "yearTo": 2009
+          },
+          {
+            "name": "Mk5",
+            "yearFrom": 2009,
+            "yearTo": 2017
+          },
+          {
+            "name": "Mk6",
+            "yearFrom": 2017,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Passat",
+        "source": "https://en.wikipedia.org/wiki/Volkswagen_Passat",
+        "generations": [
+          {
+            "name": "B5",
+            "yearFrom": 1996,
+            "yearTo": 2005
+          },
+          {
+            "name": "B6",
+            "yearFrom": 2005,
+            "yearTo": 2010
+          },
+          {
+            "name": "B7",
+            "yearFrom": 2010,
+            "yearTo": 2014
+          },
+          {
+            "name": "B8",
+            "yearFrom": 2014,
+            "yearTo": 2021
+          },
+          {
+            "name": "B9",
+            "yearFrom": 2023,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Tiguan",
+        "source": "https://en.wikipedia.org/wiki/Volkswagen_Tiguan",
+        "generations": [
+          {
+            "name": "5N",
+            "yearFrom": 2007,
+            "yearTo": 2016
+          },
+          {
+            "name": "AD/BW",
+            "yearFrom": 2016,
+            "yearTo": 2024
+          },
+          {
+            "name": "CT1",
+            "yearFrom": 2024,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Touareg",
+        "source": "https://en.wikipedia.org/wiki/Volkswagen_Touareg",
+        "generations": [
+          {
+            "name": "7L",
+            "yearFrom": 2002,
+            "yearTo": 2010
+          },
+          {
+            "name": "7P",
+            "yearFrom": 2010,
+            "yearTo": 2018
+          },
+          {
+            "name": "CR",
+            "yearFrom": 2018,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Caddy",
+        "source": "https://en.wikipedia.org/wiki/Volkswagen_Caddy",
+        "generations": [
+          {
+            "name": "9K/9U",
+            "yearFrom": 1996,
+            "yearTo": 2003
+          },
+          {
+            "name": "2K",
+            "yearFrom": 2003,
+            "yearTo": 2020
+          },
+          {
+            "name": "SB",
+            "yearFrom": 2020,
+            "yearTo": 2026
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Skoda",
+    "models": [
+      {
+        "name": "Octavia",
+        "source": "https://en.wikipedia.org/wiki/%C5%A0koda_Octavia",
+        "generations": [
+          {
+            "name": "1U",
+            "yearFrom": 1996,
+            "yearTo": 2004
+          },
+          {
+            "name": "1Z",
+            "yearFrom": 2004,
+            "yearTo": 2012
+          },
+          {
+            "name": "5E",
+            "yearFrom": 2012,
+            "yearTo": 2019
+          },
+          {
+            "name": "NX",
+            "yearFrom": 2019,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Fabia",
+        "source": "https://en.wikipedia.org/wiki/%C5%A0koda_Fabia",
+        "generations": [
+          {
+            "name": "6Y",
+            "yearFrom": 1999,
+            "yearTo": 2007
+          },
+          {
+            "name": "5J",
+            "yearFrom": 2007,
+            "yearTo": 2014
+          },
+          {
+            "name": "NJ",
+            "yearFrom": 2014,
+            "yearTo": 2021
+          },
+          {
+            "name": "PJ",
+            "yearFrom": 2021,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Superb",
+        "source": "https://en.wikipedia.org/wiki/%C5%A0koda_Superb",
+        "generations": [
+          {
+            "name": "B5",
+            "yearFrom": 2001,
+            "yearTo": 2008
+          },
+          {
+            "name": "B6",
+            "yearFrom": 2008,
+            "yearTo": 2015
+          },
+          {
+            "name": "B8",
+            "yearFrom": 2015,
+            "yearTo": 2023
+          },
+          {
+            "name": "B9",
+            "yearFrom": 2023,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Kodiaq",
+        "source": "https://en.wikipedia.org/wiki/%C5%A0koda_Kodiaq",
+        "generations": [
+          {
+            "name": "I",
+            "yearFrom": 2016,
+            "yearTo": 2024
+          },
+          {
+            "name": "II",
+            "yearFrom": 2024,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Rapid",
+        "source": "https://en.wikipedia.org/wiki/%C5%A0koda_Rapid_(2012)",
+        "generations": [
+          {
+            "name": "NH",
+            "yearFrom": 2012,
+            "yearTo": 2019
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Opel",
+    "models": [
+      {
+        "name": "Astra",
+        "source": "https://en.wikipedia.org/wiki/Opel_Astra",
+        "generations": [
+          {
+            "name": "G",
+            "yearFrom": 1998,
+            "yearTo": 2004
+          },
+          {
+            "name": "H",
+            "yearFrom": 2004,
+            "yearTo": 2009
+          },
+          {
+            "name": "J",
+            "yearFrom": 2009,
+            "yearTo": 2015
+          },
+          {
+            "name": "K",
+            "yearFrom": 2015,
+            "yearTo": 2021
+          },
+          {
+            "name": "L",
+            "yearFrom": 2021,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Corsa",
+        "source": "https://en.wikipedia.org/wiki/Opel_Corsa",
+        "generations": [
+          {
+            "name": "B",
+            "yearFrom": 1993,
+            "yearTo": 2000
+          },
+          {
+            "name": "C",
+            "yearFrom": 2000,
+            "yearTo": 2006
+          },
+          {
+            "name": "D",
+            "yearFrom": 2006,
+            "yearTo": 2014
+          },
+          {
+            "name": "E",
+            "yearFrom": 2014,
+            "yearTo": 2019
+          },
+          {
+            "name": "F",
+            "yearFrom": 2019,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Insignia",
+        "source": "https://en.wikipedia.org/wiki/Opel_Insignia",
+        "generations": [
+          {
+            "name": "G09",
+            "yearFrom": 2008,
+            "yearTo": 2017
+          },
+          {
+            "name": "Z18",
+            "yearFrom": 2017,
+            "yearTo": 2022
+          }
+        ]
+      },
+      {
+        "name": "Vectra",
+        "source": "https://en.wikipedia.org/wiki/Opel_Vectra",
+        "generations": [
+          {
+            "name": "B",
+            "yearFrom": 1995,
+            "yearTo": 2002
+          },
+          {
+            "name": "C",
+            "yearFrom": 2002,
+            "yearTo": 2008
+          }
+        ]
+      },
+      {
+        "name": "Zafira",
+        "source": "https://en.wikipedia.org/wiki/Opel_Zafira",
+        "generations": [
+          {
+            "name": "A",
+            "yearFrom": 1999,
+            "yearTo": 2005
+          },
+          {
+            "name": "B",
+            "yearFrom": 2005,
+            "yearTo": 2011
+          },
+          {
+            "name": "C",
+            "yearFrom": 2011,
+            "yearTo": 2019
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Renault",
+    "models": [
+      {
+        "name": "Clio",
+        "source": "https://en.wikipedia.org/wiki/Renault_Clio",
+        "generations": [
+          {
+            "name": "II",
+            "yearFrom": 1998,
+            "yearTo": 2005
+          },
+          {
+            "name": "III",
+            "yearFrom": 2005,
+            "yearTo": 2012
+          },
+          {
+            "name": "IV",
+            "yearFrom": 2012,
+            "yearTo": 2018
+          },
+          {
+            "name": "V",
+            "yearFrom": 2018,
+            "yearTo": 2025
+          },
+          {
+            "name": "VI",
+            "yearFrom": 2025,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Megane",
+        "source": "https://en.wikipedia.org/wiki/Renault_M%C3%A9gane",
+        "generations": [
+          {
+            "name": "I",
+            "yearFrom": 1995,
+            "yearTo": 2002
+          },
+          {
+            "name": "II",
+            "yearFrom": 2002,
+            "yearTo": 2008
+          },
+          {
+            "name": "III",
+            "yearFrom": 2008,
+            "yearTo": 2015
+          },
+          {
+            "name": "IV",
+            "yearFrom": 2015,
+            "yearTo": 2024
+          }
+        ]
+      },
+      {
+        "name": "Captur",
+        "source": "https://en.wikipedia.org/wiki/Renault_Captur",
+        "generations": [
+          {
+            "name": "I",
+            "yearFrom": 2013,
+            "yearTo": 2019
+          },
+          {
+            "name": "II",
+            "yearFrom": 2019,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Scenic",
+        "source": "https://en.wikipedia.org/wiki/Renault_Sc%C3%A9nic",
+        "generations": [
+          {
+            "name": "I",
+            "yearFrom": 1996,
+            "yearTo": 2003
+          },
+          {
+            "name": "II",
+            "yearFrom": 2003,
+            "yearTo": 2009
+          },
+          {
+            "name": "III",
+            "yearFrom": 2009,
+            "yearTo": 2016
+          },
+          {
+            "name": "IV",
+            "yearFrom": 2016,
+            "yearTo": 2022
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Peugeot",
+    "models": [
+      {
+        "name": "206",
+        "source": "https://en.wikipedia.org/wiki/Peugeot_206",
+        "generations": [
+          {
+            "name": "T1",
+            "yearFrom": 1998,
+            "yearTo": 2012
+          }
+        ]
+      },
+      {
+        "name": "208",
+        "source": "https://en.wikipedia.org/wiki/Peugeot_208",
+        "generations": [
+          {
+            "name": "A9",
+            "yearFrom": 2012,
+            "yearTo": 2019
+          },
+          {
+            "name": "P21",
+            "yearFrom": 2019,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "308",
+        "source": "https://en.wikipedia.org/wiki/Peugeot_308",
+        "generations": [
+          {
+            "name": "T7",
+            "yearFrom": 2007,
+            "yearTo": 2013
+          },
+          {
+            "name": "T9",
+            "yearFrom": 2013,
+            "yearTo": 2021
+          },
+          {
+            "name": "P5",
+            "yearFrom": 2021,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "2008",
+        "source": "https://en.wikipedia.org/wiki/Peugeot_2008",
+        "generations": [
+          {
+            "name": "A94",
+            "yearFrom": 2013,
+            "yearTo": 2019
+          },
+          {
+            "name": "P24",
+            "yearFrom": 2019,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "3008",
+        "source": "https://en.wikipedia.org/wiki/Peugeot_3008",
+        "generations": [
+          {
+            "name": "T84",
+            "yearFrom": 2008,
+            "yearTo": 2016
+          },
+          {
+            "name": "P84",
+            "yearFrom": 2016,
+            "yearTo": 2024
+          },
+          {
+            "name": "P64",
+            "yearFrom": 2024,
+            "yearTo": 2026
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Citroen",
+    "models": [
+      {
+        "name": "C3",
+        "source": "https://en.wikipedia.org/wiki/Citro%C3%ABn_C3",
+        "generations": [
+          {
+            "name": "FC/FN",
+            "yearFrom": 2002,
+            "yearTo": 2009
+          },
+          {
+            "name": "SC",
+            "yearFrom": 2009,
+            "yearTo": 2016
+          },
+          {
+            "name": "SX/SY",
+            "yearFrom": 2016,
+            "yearTo": 2024
+          },
+          {
+            "name": "CC21",
+            "yearFrom": 2024,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "C4",
+        "source": "https://en.wikipedia.org/wiki/Citro%C3%ABn_C4",
+        "generations": [
+          {
+            "name": "B5",
+            "yearFrom": 2004,
+            "yearTo": 2010
+          },
+          {
+            "name": "B7",
+            "yearFrom": 2010,
+            "yearTo": 2018
+          },
+          {
+            "name": "C41",
+            "yearFrom": 2020,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "C5",
+        "source": "https://en.wikipedia.org/wiki/Citro%C3%ABn_C5",
+        "generations": [
+          {
+            "name": "DC/DE",
+            "yearFrom": 2000,
+            "yearTo": 2007
+          },
+          {
+            "name": "RD/TD",
+            "yearFrom": 2008,
+            "yearTo": 2019
+          }
+        ]
+      },
+      {
+        "name": "Berlingo",
+        "source": "https://en.wikipedia.org/wiki/Citro%C3%ABn_Berlingo",
+        "generations": [
+          {
+            "name": "M49",
+            "yearFrom": 1996,
+            "yearTo": 2008
+          },
+          {
+            "name": "B9",
+            "yearFrom": 2008,
+            "yearTo": 2018
+          },
+          {
+            "name": "K9",
+            "yearFrom": 2018,
+            "yearTo": 2026
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Fiat",
+    "models": [
+      {
+        "name": "Punto",
+        "source": "https://en.wikipedia.org/wiki/Fiat_Punto",
+        "generations": [
+          {
+            "name": "188",
+            "yearFrom": 1999,
+            "yearTo": 2004
+          },
+          {
+            "name": "199",
+            "yearFrom": 2004,
+            "yearTo": 2018
+          }
+        ]
+      },
+      {
+        "name": "Panda",
+        "source": "https://en.wikipedia.org/wiki/Fiat_Panda",
+        "generations": [
+          {
+            "name": "I",
+            "yearFrom": 1980,
+            "yearTo": 2003
+          },
+          {
+            "name": "II",
+            "yearFrom": 2003,
+            "yearTo": 2011
+          },
+          {
+            "name": "III",
+            "yearFrom": 2011,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "500",
+        "source": "https://en.wikipedia.org/wiki/Fiat_500_(2007)",
+        "generations": [
+          {
+            "name": "312",
+            "yearFrom": 2007,
+            "yearTo": 2024
+          }
+        ]
+      },
+      {
+        "name": "Tipo",
+        "source": "https://en.wikipedia.org/wiki/Fiat_Tipo_(2015)",
+        "generations": [
+          {
+            "name": "356",
+            "yearFrom": 2015,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Stilo",
+        "source": "https://en.wikipedia.org/wiki/Fiat_Stilo",
+        "generations": [
+          {
+            "name": "192",
+            "yearFrom": 2000,
+            "yearTo": 2007
+          }
+        ]
+      },
+      {
+        "name": "Doblo",
+        "source": "https://en.wikipedia.org/wiki/Fiat_Dobl%C3%B2",
+        "generations": [
+          {
+            "name": "I",
+            "yearFrom": 2000,
+            "yearTo": 2009
+          },
+          {
+            "name": "II",
+            "yearFrom": 2009,
+            "yearTo": 2022
+          },
+          {
+            "name": "III",
+            "yearFrom": 2023,
+            "yearTo": 2026
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Toyota",
+    "models": [
+      {
+        "name": "Corolla",
+        "source": "https://en.wikipedia.org/wiki/Toyota_Corolla",
+        "generations": [
+          {
+            "name": "E110",
+            "yearFrom": 1997,
+            "yearTo": 2000
+          },
+          {
+            "name": "E120",
+            "yearFrom": 2000,
+            "yearTo": 2006
+          },
+          {
+            "name": "E140/E150",
+            "yearFrom": 2006,
+            "yearTo": 2013
+          },
+          {
+            "name": "E170",
+            "yearFrom": 2013,
+            "yearTo": 2018
+          },
+          {
+            "name": "E210",
+            "yearFrom": 2018,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Yaris",
+        "source": "https://en.wikipedia.org/wiki/Toyota_Vitz",
+        "generations": [
+          {
+            "name": "XP10/XP20",
+            "yearFrom": 2001,
+            "yearTo": 2005
+          },
+          {
+            "name": "XP90",
+            "yearFrom": 2005,
+            "yearTo": 2011
+          },
+          {
+            "name": "XP130",
+            "yearFrom": 2011,
+            "yearTo": 2020
+          }
+        ]
+      },
+      {
+        "name": "Auris",
+        "source": "https://en.wikipedia.org/wiki/Toyota_Auris",
+        "generations": [
+          {
+            "name": "E150",
+            "yearFrom": 2006,
+            "yearTo": 2012
+          },
+          {
+            "name": "E180",
+            "yearFrom": 2012,
+            "yearTo": 2018
+          }
+        ]
+      },
+      {
+        "name": "RAV4",
+        "source": "https://en.wikipedia.org/wiki/Toyota_RAV4",
+        "generations": [
+          {
+            "name": "XA10",
+            "yearFrom": 1994,
+            "yearTo": 2000
+          },
+          {
+            "name": "XA20",
+            "yearFrom": 2000,
+            "yearTo": 2005
+          },
+          {
+            "name": "XA30",
+            "yearFrom": 2005,
+            "yearTo": 2012
+          },
+          {
+            "name": "XA40",
+            "yearFrom": 2012,
+            "yearTo": 2018
+          },
+          {
+            "name": "XA50",
+            "yearFrom": 2018,
+            "yearTo": 2025
+          },
+          {
+            "name": "XA60",
+            "yearFrom": 2025,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "C-HR",
+        "source": "https://en.wikipedia.org/wiki/Toyota_C-HR",
+        "generations": [
+          {
+            "name": "AX10",
+            "yearFrom": 2016,
+            "yearTo": 2023
+          },
+          {
+            "name": "AX20",
+            "yearFrom": 2023,
+            "yearTo": 2026
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Ford",
+    "models": [
+      {
+        "name": "Focus",
+        "source": "https://en.wikipedia.org/wiki/Ford_Focus",
+        "generations": [
+          {
+            "name": "C170",
+            "yearFrom": 1998,
+            "yearTo": 2005
+          },
+          {
+            "name": "C307",
+            "yearFrom": 2005,
+            "yearTo": 2010
+          },
+          {
+            "name": "C346",
+            "yearFrom": 2011,
+            "yearTo": 2018
+          },
+          {
+            "name": "C519",
+            "yearFrom": 2018,
+            "yearTo": 2025
+          }
+        ]
+      },
+      {
+        "name": "Fiesta",
+        "source": "https://en.wikipedia.org/wiki/Ford_Fiesta",
+        "generations": [
+          {
+            "name": "BE91",
+            "yearFrom": 1995,
+            "yearTo": 2002
+          },
+          {
+            "name": "BE256",
+            "yearFrom": 2002,
+            "yearTo": 2008
+          },
+          {
+            "name": "B299",
+            "yearFrom": 2008,
+            "yearTo": 2017
+          },
+          {
+            "name": "B479",
+            "yearFrom": 2017,
+            "yearTo": 2023
+          }
+        ]
+      },
+      {
+        "name": "Mondeo",
+        "source": "https://en.wikipedia.org/wiki/Ford_Mondeo",
+        "generations": [
+          {
+            "name": "I",
+            "yearFrom": 1992,
+            "yearTo": 2000
+          },
+          {
+            "name": "II",
+            "yearFrom": 2000,
+            "yearTo": 2006
+          },
+          {
+            "name": "III",
+            "yearFrom": 2006,
+            "yearTo": 2014
+          },
+          {
+            "name": "IV",
+            "yearFrom": 2014,
+            "yearTo": 2022
+          }
+        ]
+      },
+      {
+        "name": "Kuga",
+        "source": "https://en.wikipedia.org/wiki/Ford_Kuga",
+        "generations": [
+          {
+            "name": "C394",
+            "yearFrom": 2008,
+            "yearTo": 2012
+          },
+          {
+            "name": "C520",
+            "yearFrom": 2012,
+            "yearTo": 2019
+          },
+          {
+            "name": "C482",
+            "yearFrom": 2019,
+            "yearTo": 2026
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "BMW",
+    "models": [
+      {
+        "name": "1 Series",
+        "source": "https://en.wikipedia.org/wiki/BMW_1_Series",
+        "generations": [
+          {
+            "name": "E87",
+            "yearFrom": 2004,
+            "yearTo": 2011
+          },
+          {
+            "name": "F20",
+            "yearFrom": 2011,
+            "yearTo": 2019
+          },
+          {
+            "name": "F40",
+            "yearFrom": 2019,
+            "yearTo": 2024
+          },
+          {
+            "name": "F70",
+            "yearFrom": 2024,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "3 Series",
+        "source": "https://en.wikipedia.org/wiki/BMW_3_Series",
+        "generations": [
+          {
+            "name": "E46",
+            "yearFrom": 1997,
+            "yearTo": 2004
+          },
+          {
+            "name": "E90",
+            "yearFrom": 2004,
+            "yearTo": 2011
+          },
+          {
+            "name": "F30",
+            "yearFrom": 2011,
+            "yearTo": 2018
+          },
+          {
+            "name": "G20",
+            "yearFrom": 2018,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "5 Series",
+        "source": "https://en.wikipedia.org/wiki/BMW_5_Series",
+        "generations": [
+          {
+            "name": "E39",
+            "yearFrom": 1995,
+            "yearTo": 2003
+          },
+          {
+            "name": "E60",
+            "yearFrom": 2003,
+            "yearTo": 2009
+          },
+          {
+            "name": "F10",
+            "yearFrom": 2009,
+            "yearTo": 2016
+          },
+          {
+            "name": "G30",
+            "yearFrom": 2016,
+            "yearTo": 2023
+          },
+          {
+            "name": "G60",
+            "yearFrom": 2023,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "X3",
+        "source": "https://en.wikipedia.org/wiki/BMW_X3",
+        "generations": [
+          {
+            "name": "E83",
+            "yearFrom": 2003,
+            "yearTo": 2010
+          },
+          {
+            "name": "F25",
+            "yearFrom": 2010,
+            "yearTo": 2017
+          },
+          {
+            "name": "G01",
+            "yearFrom": 2017,
+            "yearTo": 2024
+          },
+          {
+            "name": "G45",
+            "yearFrom": 2024,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "X5",
+        "source": "https://en.wikipedia.org/wiki/BMW_X5",
+        "generations": [
+          {
+            "name": "E53",
+            "yearFrom": 1999,
+            "yearTo": 2006
+          },
+          {
+            "name": "E70",
+            "yearFrom": 2006,
+            "yearTo": 2013
+          },
+          {
+            "name": "F15",
+            "yearFrom": 2013,
+            "yearTo": 2018
+          },
+          {
+            "name": "G05",
+            "yearFrom": 2018,
+            "yearTo": 2026
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Mercedes-Benz",
+    "models": [
+      {
+        "name": "A-Class",
+        "source": "https://en.wikipedia.org/wiki/Mercedes-Benz_A-Class",
+        "generations": [
+          {
+            "name": "W168",
+            "yearFrom": 1996,
+            "yearTo": 2004
+          },
+          {
+            "name": "W169",
+            "yearFrom": 2004,
+            "yearTo": 2012
+          },
+          {
+            "name": "W176",
+            "yearFrom": 2012,
+            "yearTo": 2018
+          },
+          {
+            "name": "W177",
+            "yearFrom": 2018,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "C-Class",
+        "source": "https://en.wikipedia.org/wiki/Mercedes-Benz_C-Class",
+        "generations": [
+          {
+            "name": "W203",
+            "yearFrom": 1999,
+            "yearTo": 2006
+          },
+          {
+            "name": "W204",
+            "yearFrom": 2006,
+            "yearTo": 2014
+          },
+          {
+            "name": "W205",
+            "yearFrom": 2014,
+            "yearTo": 2021
+          },
+          {
+            "name": "W206",
+            "yearFrom": 2021,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "E-Class",
+        "source": "https://en.wikipedia.org/wiki/Mercedes-Benz_E-Class",
+        "generations": [
+          {
+            "name": "W210",
+            "yearFrom": 1994,
+            "yearTo": 2002
+          },
+          {
+            "name": "W211",
+            "yearFrom": 2002,
+            "yearTo": 2008
+          },
+          {
+            "name": "W212",
+            "yearFrom": 2008,
+            "yearTo": 2016
+          },
+          {
+            "name": "W213",
+            "yearFrom": 2016,
+            "yearTo": 2023
+          },
+          {
+            "name": "W214",
+            "yearFrom": 2023,
+            "yearTo": 2026
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Audi",
+    "models": [
+      {
+        "name": "A3",
+        "source": "https://en.wikipedia.org/wiki/Audi_A3",
+        "generations": [
+          {
+            "name": "8L",
+            "yearFrom": 1996,
+            "yearTo": 2003
+          },
+          {
+            "name": "8P",
+            "yearFrom": 2003,
+            "yearTo": 2012
+          },
+          {
+            "name": "8V",
+            "yearFrom": 2012,
+            "yearTo": 2020
+          },
+          {
+            "name": "8Y",
+            "yearFrom": 2020,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "A4",
+        "source": "https://en.wikipedia.org/wiki/Audi_A4",
+        "generations": [
+          {
+            "name": "B5",
+            "yearFrom": 1994,
+            "yearTo": 2000
+          },
+          {
+            "name": "B6",
+            "yearFrom": 2000,
+            "yearTo": 2004
+          },
+          {
+            "name": "B7",
+            "yearFrom": 2004,
+            "yearTo": 2008
+          },
+          {
+            "name": "B8",
+            "yearFrom": 2008,
+            "yearTo": 2015
+          },
+          {
+            "name": "B9",
+            "yearFrom": 2015,
+            "yearTo": 2025
+          }
+        ]
+      },
+      {
+        "name": "A6",
+        "source": "https://en.wikipedia.org/wiki/Audi_A6",
+        "generations": [
+          {
+            "name": "C5",
+            "yearFrom": 1997,
+            "yearTo": 2004
+          },
+          {
+            "name": "C6",
+            "yearFrom": 2004,
+            "yearTo": 2010
+          },
+          {
+            "name": "C7",
+            "yearFrom": 2010,
+            "yearTo": 2018
+          },
+          {
+            "name": "C8",
+            "yearFrom": 2018,
+            "yearTo": 2025
+          },
+          {
+            "name": "C9",
+            "yearFrom": 2025,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Q5",
+        "source": "https://en.wikipedia.org/wiki/Audi_Q5",
+        "generations": [
+          {
+            "name": "8R",
+            "yearFrom": 2008,
+            "yearTo": 2016
+          },
+          {
+            "name": "FY",
+            "yearFrom": 2016,
+            "yearTo": 2024
+          },
+          {
+            "name": "GU",
+            "yearFrom": 2024,
+            "yearTo": 2026
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Hyundai",
+    "models": [
+      {
+        "name": "i10",
+        "source": "https://en.wikipedia.org/wiki/Hyundai_i10",
+        "generations": [
+          {
+            "name": "PA",
+            "yearFrom": 2007,
+            "yearTo": 2013
+          },
+          {
+            "name": "IA/BA",
+            "yearFrom": 2013,
+            "yearTo": 2019
+          },
+          {
+            "name": "AC3/AI3",
+            "yearFrom": 2019,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "i20",
+        "source": "https://en.wikipedia.org/wiki/Hyundai_i20",
+        "generations": [
+          {
+            "name": "PB",
+            "yearFrom": 2008,
+            "yearTo": 2014
+          },
+          {
+            "name": "GB/IB",
+            "yearFrom": 2014,
+            "yearTo": 2020
+          },
+          {
+            "name": "BC3/BI3",
+            "yearFrom": 2020,
+            "yearTo": 2026
+          },
+          {
+            "name": "BC4",
+            "yearFrom": 2026,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "i30",
+        "source": "https://en.wikipedia.org/wiki/Hyundai_i30",
+        "generations": [
+          {
+            "name": "FD",
+            "yearFrom": 2007,
+            "yearTo": 2011
+          },
+          {
+            "name": "GD",
+            "yearFrom": 2011,
+            "yearTo": 2016
+          },
+          {
+            "name": "PD",
+            "yearFrom": 2016,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Tucson",
+        "source": "https://en.wikipedia.org/wiki/Hyundai_Tucson",
+        "generations": [
+          {
+            "name": "JM",
+            "yearFrom": 2004,
+            "yearTo": 2009
+          },
+          {
+            "name": "LM",
+            "yearFrom": 2009,
+            "yearTo": 2015
+          },
+          {
+            "name": "TL",
+            "yearFrom": 2015,
+            "yearTo": 2020
+          },
+          {
+            "name": "NX4",
+            "yearFrom": 2020,
+            "yearTo": 2026
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Kia",
+    "models": [
+      {
+        "name": "Ceed",
+        "source": "https://en.wikipedia.org/wiki/Kia_Ceed",
+        "generations": [
+          {
+            "name": "ED",
+            "yearFrom": 2006,
+            "yearTo": 2012
+          },
+          {
+            "name": "JD",
+            "yearFrom": 2012,
+            "yearTo": 2018
+          },
+          {
+            "name": "CD",
+            "yearFrom": 2018,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Sportage",
+        "source": "https://en.wikipedia.org/wiki/Kia_Sportage",
+        "generations": [
+          {
+            "name": "NB",
+            "yearFrom": 1993,
+            "yearTo": 2004
+          },
+          {
+            "name": "JE/KM",
+            "yearFrom": 2004,
+            "yearTo": 2010
+          },
+          {
+            "name": "SL",
+            "yearFrom": 2010,
+            "yearTo": 2015
+          },
+          {
+            "name": "QL",
+            "yearFrom": 2015,
+            "yearTo": 2021
+          },
+          {
+            "name": "NQ5",
+            "yearFrom": 2021,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Rio",
+        "source": "https://en.wikipedia.org/wiki/Kia_Rio",
+        "generations": [
+          {
+            "name": "DC",
+            "yearFrom": 1999,
+            "yearTo": 2005
+          },
+          {
+            "name": "JB",
+            "yearFrom": 2005,
+            "yearTo": 2011
+          },
+          {
+            "name": "UB/QB",
+            "yearFrom": 2011,
+            "yearTo": 2016
+          },
+          {
+            "name": "YB/SC/FB/UC",
+            "yearFrom": 2016,
+            "yearTo": 2023
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Dacia",
+    "models": [
+      {
+        "name": "Logan",
+        "source": "https://en.wikipedia.org/wiki/Dacia_Logan",
+        "generations": [
+          {
+            "name": "L90/U90/F90",
+            "yearFrom": 2004,
+            "yearTo": 2012
+          },
+          {
+            "name": "L52/K52",
+            "yearFrom": 2012,
+            "yearTo": 2020
+          },
+          {
+            "name": "LJI",
+            "yearFrom": 2020,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Sandero",
+        "source": "https://en.wikipedia.org/wiki/Dacia_Sandero",
+        "generations": [
+          {
+            "name": "B90",
+            "yearFrom": 2008,
+            "yearTo": 2012
+          },
+          {
+            "name": "B52",
+            "yearFrom": 2012,
+            "yearTo": 2020
+          },
+          {
+            "name": "BJI",
+            "yearFrom": 2020,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Duster",
+        "source": "https://en.wikipedia.org/wiki/Dacia_Duster",
+        "generations": [
+          {
+            "name": "HS",
+            "yearFrom": 2010,
+            "yearTo": 2017
+          },
+          {
+            "name": "HM",
+            "yearFrom": 2017,
+            "yearTo": 2023
+          },
+          {
+            "name": "P1310",
+            "yearFrom": 2023,
+            "yearTo": 2026
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Seat",
+    "models": [
+      {
+        "name": "Ibiza",
+        "source": "https://en.wikipedia.org/wiki/SEAT_Ibiza",
+        "generations": [
+          {
+            "name": "6K",
+            "yearFrom": 1993,
+            "yearTo": 2002
+          },
+          {
+            "name": "6L",
+            "yearFrom": 2002,
+            "yearTo": 2008
+          },
+          {
+            "name": "6J/6P",
+            "yearFrom": 2008,
+            "yearTo": 2017
+          },
+          {
+            "name": "6F/KJ1",
+            "yearFrom": 2017,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Leon",
+        "source": "https://en.wikipedia.org/wiki/SEAT_Le%C3%B3n",
+        "generations": [
+          {
+            "name": "1M",
+            "yearFrom": 1999,
+            "yearTo": 2005
+          },
+          {
+            "name": "1P",
+            "yearFrom": 2005,
+            "yearTo": 2012
+          },
+          {
+            "name": "5F",
+            "yearFrom": 2012,
+            "yearTo": 2020
+          },
+          {
+            "name": "KL1/KL8",
+            "yearFrom": 2020,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Ateca",
+        "source": "https://en.wikipedia.org/wiki/SEAT_Ateca",
+        "generations": [
+          {
+            "name": "KH7",
+            "yearFrom": 2016,
+            "yearTo": 2026
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Nissan",
+    "models": [
+      {
+        "name": "Micra",
+        "source": "https://en.wikipedia.org/wiki/Nissan_Micra",
+        "generations": [
+          {
+            "name": "K11",
+            "yearFrom": 1992,
+            "yearTo": 2002
+          },
+          {
+            "name": "K12",
+            "yearFrom": 2002,
+            "yearTo": 2010
+          },
+          {
+            "name": "K13",
+            "yearFrom": 2010,
+            "yearTo": 2016
+          },
+          {
+            "name": "K14",
+            "yearFrom": 2016,
+            "yearTo": 2023
+          },
+          {
+            "name": "K15",
+            "yearFrom": 2025,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Qashqai",
+        "source": "https://en.wikipedia.org/wiki/Nissan_Qashqai",
+        "generations": [
+          {
+            "name": "J10",
+            "yearFrom": 2006,
+            "yearTo": 2013
+          },
+          {
+            "name": "J11",
+            "yearFrom": 2013,
+            "yearTo": 2021
+          },
+          {
+            "name": "J12",
+            "yearFrom": 2021,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Juke",
+        "source": "https://en.wikipedia.org/wiki/Nissan_Juke",
+        "generations": [
+          {
+            "name": "F15",
+            "yearFrom": 2010,
+            "yearTo": 2019
+          },
+          {
+            "name": "F16",
+            "yearFrom": 2019,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "X-Trail",
+        "source": "https://en.wikipedia.org/wiki/Nissan_X-Trail",
+        "generations": [
+          {
+            "name": "T30",
+            "yearFrom": 2000,
+            "yearTo": 2007
+          },
+          {
+            "name": "T31",
+            "yearFrom": 2007,
+            "yearTo": 2013
+          },
+          {
+            "name": "T32",
+            "yearFrom": 2013,
+            "yearTo": 2021
+          },
+          {
+            "name": "T33",
+            "yearFrom": 2021,
+            "yearTo": 2026
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Mazda",
+    "models": [
+      {
+        "name": "3",
+        "source": "https://en.wikipedia.org/wiki/Mazda3",
+        "generations": [
+          {
+            "name": "BK",
+            "yearFrom": 2003,
+            "yearTo": 2008
+          },
+          {
+            "name": "BL",
+            "yearFrom": 2008,
+            "yearTo": 2013
+          },
+          {
+            "name": "BM/BN/BY",
+            "yearFrom": 2013,
+            "yearTo": 2018
+          },
+          {
+            "name": "BP",
+            "yearFrom": 2019,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "6",
+        "source": "https://en.wikipedia.org/wiki/Mazda6",
+        "generations": [
+          {
+            "name": "GG1",
+            "yearFrom": 2002,
+            "yearTo": 2007
+          },
+          {
+            "name": "GH1/GH2",
+            "yearFrom": 2007,
+            "yearTo": 2012
+          },
+          {
+            "name": "GJ1/GL",
+            "yearFrom": 2012,
+            "yearTo": 2024
+          }
+        ]
+      },
+      {
+        "name": "CX-5",
+        "source": "https://en.wikipedia.org/wiki/Mazda_CX-5",
+        "generations": [
+          {
+            "name": "KE",
+            "yearFrom": 2012,
+            "yearTo": 2016
+          },
+          {
+            "name": "KF",
+            "yearFrom": 2016,
+            "yearTo": 2025
+          },
+          {
+            "name": "KM",
+            "yearFrom": 2025,
+            "yearTo": 2026
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Honda",
+    "models": [
+      {
+        "name": "Civic",
+        "source": "https://en.wikipedia.org/wiki/Honda_Civic",
+        "generations": [
+          {
+            "name": "VI",
+            "yearFrom": 1995,
+            "yearTo": 2000
+          },
+          {
+            "name": "VII",
+            "yearFrom": 2000,
+            "yearTo": 2005
+          },
+          {
+            "name": "VIII",
+            "yearFrom": 2005,
+            "yearTo": 2011
+          },
+          {
+            "name": "IX",
+            "yearFrom": 2011,
+            "yearTo": 2016
+          },
+          {
+            "name": "X",
+            "yearFrom": 2016,
+            "yearTo": 2021
+          },
+          {
+            "name": "XI",
+            "yearFrom": 2021,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "CR-V",
+        "source": "https://en.wikipedia.org/wiki/Honda_CR-V",
+        "generations": [
+          {
+            "name": "I",
+            "yearFrom": 1995,
+            "yearTo": 2001
+          },
+          {
+            "name": "II",
+            "yearFrom": 2001,
+            "yearTo": 2006
+          },
+          {
+            "name": "III",
+            "yearFrom": 2006,
+            "yearTo": 2011
+          },
+          {
+            "name": "IV",
+            "yearFrom": 2011,
+            "yearTo": 2016
+          },
+          {
+            "name": "V",
+            "yearFrom": 2016,
+            "yearTo": 2022
+          },
+          {
+            "name": "VI",
+            "yearFrom": 2022,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Jazz",
+        "source": "https://en.wikipedia.org/wiki/Honda_Fit",
+        "generations": [
+          {
+            "name": "GD/GE",
+            "yearFrom": 2001,
+            "yearTo": 2007
+          },
+          {
+            "name": "GE/GG",
+            "yearFrom": 2007,
+            "yearTo": 2013
+          },
+          {
+            "name": "GK/GH/GP",
+            "yearFrom": 2013,
+            "yearTo": 2020
+          },
+          {
+            "name": "GR/GS",
+            "yearFrom": 2020,
+            "yearTo": 2026
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Suzuki",
+    "models": [
+      {
+        "name": "Swift",
+        "source": "https://en.wikipedia.org/wiki/Suzuki_Swift",
+        "generations": [
+          {
+            "name": "RS",
+            "yearFrom": 2004,
+            "yearTo": 2010
+          },
+          {
+            "name": "AZG",
+            "yearFrom": 2010,
+            "yearTo": 2016
+          },
+          {
+            "name": "A2L",
+            "yearFrom": 2016,
+            "yearTo": 2023
+          },
+          {
+            "name": "AOL",
+            "yearFrom": 2023,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Vitara",
+        "source": "https://en.wikipedia.org/wiki/Suzuki_Vitara",
+        "generations": [
+          {
+            "name": "FT/GT",
+            "yearFrom": 1998,
+            "yearTo": 2005
+          },
+          {
+            "name": "JT",
+            "yearFrom": 2005,
+            "yearTo": 2015
+          },
+          {
+            "name": "LY",
+            "yearFrom": 2015,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "SX4",
+        "source": "https://en.wikipedia.org/wiki/Suzuki_SX4",
+        "generations": [
+          {
+            "name": "GY/EY/RW",
+            "yearFrom": 2005,
+            "yearTo": 2013
+          },
+          {
+            "name": "JY",
+            "yearFrom": 2013,
+            "yearTo": 2021
+          },
+          {
+            "name": "JYB",
+            "yearFrom": 2021,
+            "yearTo": 2026
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Chevrolet",
+    "models": [
+      {
+        "name": "Aveo",
+        "source": "https://en.wikipedia.org/wiki/Chevrolet_Aveo",
+        "generations": [
+          {
+            "name": "T200",
+            "yearFrom": 2002,
+            "yearTo": 2011
+          },
+          {
+            "name": "T300",
+            "yearFrom": 2011,
+            "yearTo": 2020
+          },
+          {
+            "name": "310C",
+            "yearFrom": 2023,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Spark",
+        "source": "https://en.wikipedia.org/wiki/Chevrolet_Spark",
+        "generations": [
+          {
+            "name": "M100/M150",
+            "yearFrom": 1998,
+            "yearTo": 2005
+          },
+          {
+            "name": "M200/M250",
+            "yearFrom": 2005,
+            "yearTo": 2009
+          },
+          {
+            "name": "M300",
+            "yearFrom": 2009,
+            "yearTo": 2015
+          },
+          {
+            "name": "M400",
+            "yearFrom": 2015,
+            "yearTo": 2022
+          }
+        ]
+      },
+      {
+        "name": "Cruze",
+        "source": "https://en.wikipedia.org/wiki/Chevrolet_Cruze",
+        "generations": [
+          {
+            "name": "J300",
+            "yearFrom": 2008,
+            "yearTo": 2016
+          },
+          {
+            "name": "J400",
+            "yearFrom": 2016,
+            "yearTo": 2019
+          }
+        ]
+      },
+      {
+        "name": "Lacetti",
+        "source": "https://en.wikipedia.org/wiki/Daewoo_Lacetti",
+        "generations": [
+          {
+            "name": "J200",
+            "yearFrom": 2002,
+            "yearTo": 2009
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Volvo",
+    "models": [
+      {
+        "name": "XC60",
+        "source": "https://en.wikipedia.org/wiki/Volvo_XC60",
+        "generations": [
+          {
+            "name": "I",
+            "yearFrom": 2008,
+            "yearTo": 2017
+          },
+          {
+            "name": "II",
+            "yearFrom": 2017,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "XC90",
+        "source": "https://en.wikipedia.org/wiki/Volvo_XC90",
+        "generations": [
+          {
+            "name": "I",
+            "yearFrom": 2002,
+            "yearTo": 2014
+          },
+          {
+            "name": "II",
+            "yearFrom": 2015,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "S60",
+        "source": "https://en.wikipedia.org/wiki/Volvo_S60",
+        "generations": [
+          {
+            "name": "I",
+            "yearFrom": 2000,
+            "yearTo": 2009
+          },
+          {
+            "name": "II",
+            "yearFrom": 2010,
+            "yearTo": 2018
+          },
+          {
+            "name": "III",
+            "yearFrom": 2018,
+            "yearTo": 2024
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Mitsubishi",
+    "models": [
+      {
+        "name": "Outlander",
+        "source": "https://en.wikipedia.org/wiki/Mitsubishi_Outlander",
+        "generations": [
+          {
+            "name": "CU/ZE/ZF",
+            "yearFrom": 2003,
+            "yearTo": 2006
+          },
+          {
+            "name": "CW/ZG/ZH",
+            "yearFrom": 2006,
+            "yearTo": 2012
+          },
+          {
+            "name": "GF/GG/ZJ/ZK/ZL",
+            "yearFrom": 2012,
+            "yearTo": 2021
+          },
+          {
+            "name": "GM/GN/ZM",
+            "yearFrom": 2021,
+            "yearTo": 2026
+          }
+        ]
+      },
+      {
+        "name": "Lancer",
+        "source": "https://en.wikipedia.org/wiki/Mitsubishi_Lancer",
+        "generations": [
+          {
+            "name": "VIII",
+            "yearFrom": 2000,
+            "yearTo": 2007
+          },
+          {
+            "name": "IX",
+            "yearFrom": 2007,
+            "yearTo": 2019
+          }
+        ]
+      },
+      {
+        "name": "Pajero",
+        "source": "https://en.wikipedia.org/wiki/Mitsubishi_Pajero",
+        "generations": [
+          {
+            "name": "V60/V70",
+            "yearFrom": 1999,
+            "yearTo": 2006
+          },
+          {
+            "name": "V80/V90",
+            "yearFrom": 2006,
+            "yearTo": 2021
+          }
+        ]
+      },
+      {
+        "name": "Colt",
+        "source": "https://en.wikipedia.org/wiki/Mitsubishi_Colt",
+        "generations": [
+          {
+            "name": "Z20/Z30",
+            "yearFrom": 2004,
+            "yearTo": 2012
+          }
+        ]
+      }
+    ]
+  }
+]
