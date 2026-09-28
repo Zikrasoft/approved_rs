@@ -432,9 +432,6 @@ async function ensureStore(
     return;
   }
 
-  const hasDefaultCurrency = currencies.some(
-    (currency) => currency.is_default === true,
-  );
   const keptCurrencies = currencies.map((currency) => ({
     currency_code: currency.currency_code,
     is_default: currency.is_default,
@@ -442,8 +439,11 @@ async function ensureStore(
   const supportedCurrencies = hasRsd
     ? keptCurrencies
     : [
-        ...keptCurrencies,
-        { currency_code: SHOP.currency, is_default: !hasDefaultCurrency },
+        ...keptCurrencies.map((currency) => ({
+          ...currency,
+          is_default: false,
+        })),
+        { currency_code: SHOP.currency, is_default: true },
       ];
   const supportedLocales = [
     ...new Set([...existingLocales, ...STORE_LOCALES]),

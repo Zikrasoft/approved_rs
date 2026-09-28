@@ -156,7 +156,7 @@ medusaIntegrationTestRunner({
       );
       expect(first.store.supported_currencies).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ currency_code: 'rsd' }),
+          expect.objectContaining({ currency_code: 'rsd', is_default: true }),
         ]),
       );
       expect(
@@ -208,6 +208,12 @@ medusaIntegrationTestRunner({
               ),
               { locale_code: 'de-DE' },
             ],
+            supported_currencies: first.store.supported_currencies.map(
+              (currency: { currency_code: string; is_default: boolean }) => ({
+                currency_code: currency.currency_code,
+                is_default: currency.currency_code !== SHOP.currency,
+              }),
+            ),
           },
         },
       });
@@ -221,6 +227,12 @@ medusaIntegrationTestRunner({
           .map((locale: { locale_code: string }) => locale.locale_code)
           .sort(),
       ).toEqual(['de-DE', 'en-US', 'ru-RU', 'sr-RS']);
+      expect(
+        edited.store.supported_currencies.find(
+          (currency: { currency_code: string }) =>
+            currency.currency_code === SHOP.currency,
+        ),
+      ).toMatchObject({ is_default: false });
     });
 
     it('shows the storefront one region in dinars, paid on collection', async () => {
