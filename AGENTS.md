@@ -20,12 +20,15 @@ packages/brands/      the three brands: domains, display names, locale mapping, 
 packages/shop-catalog/ CarLab shop machinery: product-type registry, attribute schemas, vehicle fitment, facets, landing pages, price format, signed order webhook (dual ESM/CJS for Medusa)
 ```
 
-Each app owns its own `astro.config.mjs`, `keystatic.config.ts`, `vercel.json`,
-`tsconfig.json`, `vitest.config.ts` and `.env*`. Lint/format configs and the
+Each of the three sites owns its own `astro.config.mjs`, `keystatic.config.ts`,
+`vercel.json` and `vitest.config.ts`; every workspace app, `apps/medusa`
+included, has its own `tsconfig.json` and `.env*` (`apps/medusa` uses jest
+instead of vitest and is not a Vercel deploy, so it has neither `vercel.json`
+nor `vitest.config.ts`). Lint/format configs and the
 lockfile stay at the repo root and cover every workspace. The root
 `vercel.json` holds `git.deploymentEnabled: false` — without it every branch
 push triggers a failing preview build. **The same block is now duplicated into
-all three apps' `vercel.json` on purpose.** Which file Vercel's git integration
+all three sites' `vercel.json` on purpose.** Which file Vercel's git integration
 reads depends on a project's Root Directory setting, and this repo has three
 projects with three different roots; having it in both places is the only
 arrangement that is correct whatever that setting is. It costs three lines.
@@ -74,10 +77,12 @@ from approved.rs. The visitor still cannot name a brand: they can only pick one
 of the two partner slugs the page renders, and every other value falls through
 to approved.rs itself.
 
-**A `packages/*` change deploys all three apps, and that is the point.** The
+**A `packages/*` change deploys all three sites, and that is the point.** The
 deploy filter in `ci.yml` is `turbo --filter="...[<deployed tag>]"` — the
 leading dots pull in the dependents of a changed package, so touching
-`@podbor/lead-crm` or `@podbor/i18n` marks all three apps stale at once. All
+`@podbor/lead-crm` or `@podbor/i18n` marks all three sites stale at once
+(`apps/medusa` also depends on `@podbor/i18n` but has no deploy job in `ci.yml`
+yet — Plan 3 territory). All
 three write the same `data/leads.json` blob, so shipping a changed package to
 one site and not the others puts two versions of the lead schema on one file:
 one site writes records another cannot parse, and they land in
@@ -465,7 +470,7 @@ whose visits to exclude before drawing any conclusion is in
 Anything that validates data uses **zod** — no hand-rolled `typeof` guards,
 regex checks, string slicing or bare `as` casts at a trust boundary. `zod` is
 already pinned at the same exact version in `packages/lead-crm`, `packages/i18n`
-and all three apps, and the content-schema loaders (`src/i18n/content/*ContentSchema.ts`
+and all four apps (`apps/medusa` included), and the content-schema loaders (`src/i18n/content/*ContentSchema.ts`
 through `createSectionLoader`) are the pattern to copy: `z.object({…}).strict()`,
 `parse` where a failure should be loud, `safeParse` where a fallback exists.
 

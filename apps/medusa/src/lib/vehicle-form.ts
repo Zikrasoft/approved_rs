@@ -25,22 +25,33 @@ export const generationsOf = (
 export const generationLabel = (generation: Generation): string =>
   `${generation.name} (${generation.yearFrom}–${generation.yearTo})`;
 
+const holdingGenerations = (
+  tree: VehicleTree,
+  entry: Pick<FitmentEntry, 'make' | 'model' | 'yearFrom' | 'yearTo'>,
+): Generation[] =>
+  generationsOf(tree, entry.make, entry.model).filter(
+    (generation) =>
+      generation.yearFrom <= entry.yearFrom &&
+      entry.yearTo <= generation.yearTo,
+  );
+
 export function fitmentToRows(
   tree: VehicleTree,
   entries: readonly FitmentEntry[] | null | undefined,
 ): FitmentRow[] {
   return (entries ?? []).map((entry) => {
-    const holding = generationsOf(tree, entry.make, entry.model).filter(
-      (generation) =>
-        generation.yearFrom <= entry.yearFrom &&
-        entry.yearTo <= generation.yearTo,
-    );
+    const holding = holdingGenerations(tree, entry);
     return {
       ...entry,
       generation: holding.length === 1 ? holding[0].name : '',
     };
   });
 }
+
+export const isKnownCar = (
+  tree: VehicleTree,
+  row: Pick<FitmentRow, 'make' | 'model' | 'yearFrom' | 'yearTo'>,
+): boolean => holdingGenerations(tree, row).length > 0;
 
 export const rowsToFitment = (rows: readonly FitmentRow[]): FitmentEntry[] =>
   rows.map(({ make, model, yearFrom, yearTo }) => ({

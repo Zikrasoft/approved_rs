@@ -55,13 +55,11 @@ describe('BrevoNotificationService', () => {
   });
 
   it('throws when Brevo refuses, naming the status, so the event bus retries', async () => {
-    const fetchImpl = jest
-      .fn()
-      .mockResolvedValue({
-        ok: false,
-        status: 401,
-        text: async () => 'Key not found',
-      });
+    const fetchImpl = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      text: async () => 'Key not found',
+    });
 
     await expect(service(fetchImpl).send(NOTE as never)).rejects.toThrow(
       'Brevo refused the message: HTTP 401 Key not found',

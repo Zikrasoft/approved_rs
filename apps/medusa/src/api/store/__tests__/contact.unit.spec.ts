@@ -127,6 +127,7 @@ describe('fullName', () => {
   it.each([
     [{ first_name: 'Marko', last_name: 'Marković' }, 'Marko Marković'],
     [{ first_name: ' Marko ', last_name: null }, 'Marko'],
+    [{ first_name: 'Marko ', last_name: 'Marković' }, 'Marko Marković'],
     [null, ''],
   ])('reads %p as %p', (address, name) => {
     expect(fullName(address)).toBe(name);

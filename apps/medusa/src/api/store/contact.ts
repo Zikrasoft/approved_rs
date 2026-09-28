@@ -11,9 +11,9 @@ type Named = { first_name?: string | null; last_name?: string | null };
 
 export function fullName(address: Named | null | undefined): string {
   return [address?.first_name, address?.last_name]
+    .map((part) => part?.trim())
     .filter(Boolean)
-    .join(' ')
-    .trim();
+    .join(' ');
 }
 
 const contactSchema = z.object({

@@ -6,6 +6,7 @@ import {
   fitmentToRows,
   generationLabel,
   generationsOf,
+  isKnownCar,
   modelsOf,
   pickGeneration,
   pickMake,
@@ -84,6 +85,41 @@ describe('the fitment rows', () => {
       },
     ]);
     expect(unfinishedRow(rows)).toBe(-1);
+  });
+
+  it('tells a car missing from the dictionary apart from one the admin still has to pick a generation for', () => {
+    expect(
+      isKnownCar(TREE, {
+        make: 'Zikra',
+        model: 'Proto',
+        yearFrom: 2010,
+        yearTo: 2015,
+      }),
+    ).toBe(false);
+    expect(
+      isKnownCar(TREE, {
+        make: 'Nomake',
+        model: 'X',
+        yearFrom: 2010,
+        yearTo: 2011,
+      }),
+    ).toBe(false);
+    expect(
+      isKnownCar(TREE, {
+        make: 'Zikra',
+        model: 'Proto',
+        yearFrom: 2013,
+        yearTo: 2013,
+      }),
+    ).toBe(true);
+    expect(
+      isKnownCar(TREE, {
+        make: 'Zikra',
+        model: 'Proto',
+        yearFrom: 2014,
+        yearTo: 2016,
+      }),
+    ).toBe(true);
   });
 
   it('starts empty when the product has no fitment', () => {

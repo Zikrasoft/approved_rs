@@ -4,6 +4,7 @@ import {
   ProductStatus,
 } from '@medusajs/framework/utils';
 import {
+  batchTranslationsWorkflow,
   createProductsWorkflow,
   createTranslationsWorkflow,
 } from '@medusajs/medusa/core-flows';
@@ -68,6 +69,65 @@ medusaIntegrationTestRunner({
         translated_from_sr: sourceHash(productSource(BOSCH)),
         translated_from_en: sourceHash(productSource(BOSCH)),
       });
+      expect(await stockOf('BOSCH-S4-024')).toBe(BOSCH.stock);
+      expect(await stockOf('EXIDE-AGM-EK950')).toBe(EXIDE.stock);
+    });
+
+    it('restores a deleted translation and inventory level on rerun, without touching the rest', async () => {
+      const container = getContainer();
+      const {
+        data: [bosch],
+      } = await query().graph({
+        entity: 'product',
+        fields: ['id'],
+        filters: { handle: BOSCH.handle },
+      });
+      const translation = container.resolve(Modules.TRANSLATION);
+      const [serbian] = await translation.listTranslations({
+        reference: 'product',
+        reference_id: bosch.id,
+        locale_code: 'sr-RS',
+      });
+      await batchTranslationsWorkflow(container).run({
+        input: { create: [], update: [], delete: [serbian.id] },
+      });
+
+      const {
+        data: [variant],
+      } = await query().graph({
+        entity: 'product_variant',
+        fields: ['inventory_items.inventory_item_id'],
+        filters: { sku: 'BOSCH-S4-024' },
+      });
+      const itemId = variant.inventory_items![0]!.inventory_item_id;
+      const {
+        data: [level],
+      } = await query().graph({
+        entity: 'inventory_level',
+        fields: ['location_id'],
+        filters: { inventory_item_id: itemId },
+      });
+      const inventory = container.resolve(Modules.INVENTORY);
+      await inventory.deleteInventoryLevel(itemId, level.location_id);
+
+      expect(
+        await translation.listTranslations({
+          reference: 'product',
+          reference_id: bosch.id,
+          locale_code: 'sr-RS',
+        }),
+      ).toHaveLength(0);
+      expect(await stockOf('BOSCH-S4-024')).toBeUndefined();
+
+      await seed();
+
+      const restored = await translation.listTranslations({
+        reference: 'product',
+        reference_id: bosch.id,
+        locale_code: 'sr-RS',
+      });
+      expect(restored).toHaveLength(1);
+      expect(restored[0].translations).toEqual(BOSCH.translations.sr);
       expect(await stockOf('BOSCH-S4-024')).toBe(BOSCH.stock);
       expect(await stockOf('EXIDE-AGM-EK950')).toBe(EXIDE.stock);
     });

@@ -163,7 +163,9 @@ async function ensureTaxRegion(
   await createTaxRegionsWorkflow(container).run({
     input: [{ country_code: SHOP.country, provider_id: SHOP.taxProvider }],
   });
-  logger.info('Tax region created with no rates: CarLab is not a PDV payer');
+  logger.info(
+    `Tax region created with no rates: ${CARLAB.name} is not a PDV payer`,
+  );
 }
 
 async function ensureShippingProfile(
@@ -468,7 +470,7 @@ async function ensureStore(
       },
     },
   });
-  logger.info('Store set to RSD, sr/en/ru and the CarLab defaults');
+  logger.info(`Store set to RSD, sr/en/ru and the ${CARLAB.name} defaults`);
 }
 
 async function ensureProductTypes(

@@ -22,6 +22,7 @@ import {
   fitmentToRows,
   generationLabel,
   generationsOf,
+  isKnownCar,
   modelsOf,
   pickGeneration,
   pickMake,
@@ -198,8 +199,17 @@ const FitmentRows = ({
           </div>
           {!row.generation && row.yearFrom > 0 && (
             <Text size="xsmall" className="text-ui-fg-subtle">
-              Сохранено: {row.make} {row.model} {row.yearFrom}–{row.yearTo}.
-              Поколение не выбрано — выберите его, чтобы поменять годы.
+              {isKnownCar(tree, row) ? (
+                <>
+                  Сохранено: {row.make} {row.model} {row.yearFrom}–{row.yearTo}.
+                  Поколение не выбрано — выберите его, чтобы поменять годы.
+                </>
+              ) : (
+                <>
+                  Этой машины нет в справочнике — добавьте её на странице
+                  «Автомобили» или удалите строку.
+                </>
+              )}
             </Text>
           )}
         </div>
