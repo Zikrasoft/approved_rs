@@ -18,6 +18,7 @@
     "typecheck": {
       "dependsOn": ["^build"]
     },
+    "@podbor/medusa#typecheck": { "dependsOn": ["^build", "build"] },
     "lint": {}
   }
 }

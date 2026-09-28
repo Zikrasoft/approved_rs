@@ -382,6 +382,9 @@ apps/medusa/docker-compose.test.yml up -d --wait`; `DB_HOST` is the literal
   multi-variant product.
 - Locally the backend runs on port 9009 (`pnpm --filter @podbor/medusa develop`);
   the script is not called `dev`, so the root `pnpm dev` does not start it.
+- In CI `typecheck` runs through turbo after `medusa build` (`.medusa/types` is
+  generated output); a bare `pnpm --filter @podbor/medusa typecheck` on a clean
+  checkout does not see those generated query types.
 
 ## Architecture
 
