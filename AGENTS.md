@@ -16,6 +16,7 @@ packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click route
 packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
 packages/site-kit/    brand-agnostic mechanics: safeMarkdown, formatPhone, visitor id, lazy map embed, scroll lock, modal dialog, preferred contact channel (owns the `data-contact-order` / `data-channel` / `data-primary-contact` / `data-primary-channel` markup contract the apps must honour), funnel tracking (owns a second one: `data-lead-form` / `data-brand-link` / `data-field` / `aria-invalid`)
 packages/brands/      the three brands: domains, display names, locale mapping, ops service labels
+packages/shop-catalog/ CarLab shop machinery: product-type registry, attribute schemas, facets, landing pages, price format, signed order webhook (dual ESM/CJS for Medusa)
 ```
 
 Each app owns its own `astro.config.mjs`, `keystatic.config.ts`, `vercel.json`,
