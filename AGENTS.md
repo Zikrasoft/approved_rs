@@ -163,6 +163,13 @@ Approved's trust/verification semantics.
   (`@podbor/lead-crm/contact-channel`, `@podbor/site-kit/browser`), never the
   package root: the root barrel pulls zod, date-fns and the Telegram client
   into the browser bundle.
+- **A package Medusa consumes ships a CommonJS build behind a `require`
+  condition.** `apps/medusa` is CommonJS and cannot load the `.ts` sources the
+  other workspaces import. `packages/shop-catalog` and `@podbor/i18n/translate/core`
+  export `{ "require": dist/cjs…, "default": src/….ts }`, build with
+  `tsc -p tsconfig.cjs.json` (`module: CommonJS`, `rewriteRelativeImportExtensions`)
+  and stamp `dist/cjs/package.json` with `{"type":"commonjs"}`; a `cjs.test.ts`
+  builds and `require()`s it so a broken build fails the package's own tests.
 - **A helper a lazily-loaded path depends on must live in a module that imports
   nothing heavy.** Rollup cannot code-split a module that is also statically
   imported, so putting such a helper beside a static `libphonenumber-js` import

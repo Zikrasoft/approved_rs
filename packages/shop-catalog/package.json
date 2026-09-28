@@ -5,11 +5,24 @@
   "sideEffects": false,
   "version": "0.0.1",
   "exports": {
-    ".": "./src/index.ts",
+    ".": {
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      },
+      "default": "./src/index.ts"
+    },
     "./browser": "./src/browser.ts",
-    "./order-hook": "./src/orderHook.ts"
+    "./order-hook": {
+      "require": {
+        "types": "./dist/cjs/orderHook.d.ts",
+        "default": "./dist/cjs/orderHook.js"
+      },
+      "default": "./src/orderHook.ts"
+    }
   },
   "scripts": {
+    "build": "tsc -p tsconfig.cjs.json && node -e \"require('node:fs').writeFileSync('dist/cjs/package.json','{\\\"type\\\":\\\"commonjs\\\"}')\"",
     "test": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
