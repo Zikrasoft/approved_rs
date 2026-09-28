@@ -68,6 +68,7 @@ class BrevoNotificationService extends AbstractNotificationProviderService {
         to: [{ email: notification.to }],
         subject: content.subject,
         htmlContent: content.html,
+        ...(content.text ? { textContent: content.text } : {}),
       }),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
@@ -75,9 +76,7 @@ class BrevoNotificationService extends AbstractNotificationProviderService {
     if (!response.ok) {
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
-        `Brevo refused the message: HTTP ${response.status} ${await response
-          .text()
-          .catch(() => '')}`.trim(),
+        `Brevo refused the message: HTTP ${response.status}`,
       );
     }
 

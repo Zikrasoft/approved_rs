@@ -41,7 +41,21 @@ describe('BrevoNotificationService', () => {
       to: [{ email: 'kupac@example.com' }],
       subject: 'Заказ №7 принят',
       htmlContent: '<p>Hvala</p>',
+      textContent: 'Hvala',
     });
+  });
+
+  it('leaves textContent out when the notification has no plain-text body', async () => {
+    const fetchImpl = accepted();
+
+    await service(fetchImpl).send({
+      ...NOTE,
+      content: { subject: NOTE.content.subject, html: NOTE.content.html },
+    } as never);
+
+    expect(
+      JSON.parse(fetchImpl.mock.calls[0][1].body).textContent,
+    ).toBeUndefined();
   });
 
   it('leaves the sender name out when none is configured', async () => {
@@ -54,15 +68,15 @@ describe('BrevoNotificationService', () => {
     });
   });
 
-  it('throws when Brevo refuses, naming the status, so the event bus retries', async () => {
+  it('throws with only the status, never the response body, so the event bus retries', async () => {
     const fetchImpl = jest.fn().mockResolvedValue({
       ok: false,
       status: 401,
-      text: async () => 'Key not found',
+      text: async () => 'Key not found, sent to kupac@example.com',
     });
 
     await expect(service(fetchImpl).send(NOTE as never)).rejects.toThrow(
-      'Brevo refused the message: HTTP 401 Key not found',
+      new Error('Brevo refused the message: HTTP 401'),
     );
   });
 
