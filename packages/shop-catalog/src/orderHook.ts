@@ -10,6 +10,7 @@ export const ORDER_HOOK_LIMITS = {
   items: 100,
   quantity: 1000,
   comment: 2000,
+  title: 300,
 } as const;
 
 export const orderHookSchema = z
@@ -29,7 +30,7 @@ export const orderHookSchema = z
       .array(
         z
           .object({
-            title: z.string().trim().min(1).max(300),
+            title: z.string().trim().min(1).max(ORDER_HOOK_LIMITS.title),
             quantity: z
               .number()
               .int()

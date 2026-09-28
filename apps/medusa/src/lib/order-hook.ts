@@ -1,6 +1,7 @@
 import { SERVICE_TYPE } from '@podbor/shop-catalog';
 import {
   ORDER_HOOK_HEADER,
+  ORDER_HOOK_LIMITS,
   type OrderHookPayload,
   orderHookSchema,
   signHook,
@@ -91,9 +92,12 @@ export function buildOrderHookPayload(
         return [];
       }
       const product = byId.get(item.product_id ?? '');
+      const title = (product?.title ?? item.product_title ?? '')
+        .trim()
+        .slice(0, ORDER_HOOK_LIMITS.title);
       return [
         {
-          title: product?.title ?? item.product_title,
+          title,
           quantity: money(item.quantity),
           unitPrice: money(item.unit_price),
           isService: product?.type?.value === SERVICE_TYPE,

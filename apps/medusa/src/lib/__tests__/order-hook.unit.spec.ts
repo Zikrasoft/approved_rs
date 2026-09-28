@@ -1,5 +1,6 @@
 import {
   ORDER_HOOK_HEADER,
+  ORDER_HOOK_LIMITS,
   orderHookSchema,
   verifyHook,
 } from '@podbor/shop-catalog/order-hook';
@@ -155,6 +156,18 @@ describe('buildOrderHookPayload', () => {
     expect(payload.items).toEqual([
       { title: 'Ugradnja', quantity: 2, unitPrice: 750, isService: false },
     ]);
+  });
+
+  it('clamps a title longer than the schema allows, so the card is still sent', () => {
+    const longTitle = 'A'.repeat(400);
+    const payload = buildOrderHookPayload(
+      { ...ORDER, items: [ORDER.items![0]] },
+      [{ id: 'prod_bat', title: longTitle }],
+      ADMIN,
+    );
+
+    expect(payload.items[0].title).toHaveLength(ORDER_HOOK_LIMITS.title);
+    expect(payload.items[0].title).toBe('A'.repeat(ORDER_HOOK_LIMITS.title));
   });
 
   it('refuses to build a card for an order without lines', () => {
