@@ -11,11 +11,23 @@ const TEST_STACK = {
 
 const ANY_FREE_PORT = '';
 
+const PROVIDERS_OFF = [
+  'OPENAI_API_KEY',
+  'BREVO_API_KEY',
+  'BREVO_FROM_EMAIL',
+  'SHOP_ORDER_HOOK_URL',
+  'SHOP_ORDER_HOOK_SECRET',
+  'GITHUB_DISPATCH_TOKEN',
+];
+
 if (process.env.TEST_TYPE === 'integration:http') {
   for (const [key, value] of Object.entries(TEST_STACK)) {
     process.env[key] ??= value;
   }
   process.env.PORT = ANY_FREE_PORT;
+  for (const key of PROVIDERS_OFF) {
+    process.env[key] = '';
+  }
 }
 
 module.exports = {
