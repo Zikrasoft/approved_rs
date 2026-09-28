@@ -1,10 +1,12 @@
 import { defineConfig, loadEnv } from '@medusajs/framework/utils';
 
 import { parseEnv } from './src/lib/env';
+import { brevoOptions } from './src/modules/notification-brevo/config';
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd());
 
 const env = parseEnv(process.env);
+const brevo = brevoOptions(env);
 
 const redisModules = (redisUrl: string) => [
   {
@@ -80,11 +82,17 @@ export default defineConfig({
       resolve: '@medusajs/medusa/notification',
       options: {
         providers: [
-          {
-            resolve: '@medusajs/medusa/notification-local',
-            id: 'local',
-            options: { channels: ['email'] },
-          },
+          brevo
+            ? {
+                resolve: './src/modules/notification-brevo',
+                id: 'brevo',
+                options: { ...brevo, channels: ['email'] },
+              }
+            : {
+                resolve: '@medusajs/medusa/notification-local',
+                id: 'local',
+                options: { channels: ['email'] },
+              },
         ],
       },
     },
