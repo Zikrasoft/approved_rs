@@ -86,6 +86,13 @@ medusaIntegrationTestRunner({
       return { cartId, headers, battery };
     };
 
+    const orderCount = async (): Promise<number> => {
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({ entity: 'order', fields: ['id'] });
+      return data.length;
+    };
+
     const complete = async (cartId: string, headers: StoreHeaders) => {
       const { data } = await api.post(
         '/store/payment-collections',
@@ -114,9 +121,9 @@ medusaIntegrationTestRunner({
         },
       );
 
-      const pickupId = await pickupOptionId(getContainer);
       const pickup = data.shipping_options.find(
-        (option: { id: string }) => option.id === pickupId,
+        (option: { type?: { code?: string } }) =>
+          option.type?.code === SHOP.pickupCode,
       );
       expect(pickup).toBeDefined();
       expect(pickup.amount).toBe(0);
@@ -196,6 +203,7 @@ medusaIntegrationTestRunner({
       ],
     ])('refuses an order with %s, in Russian', async (_label, contact) => {
       const { cartId, headers } = await readyCart({ contact });
+      const before = await orderCount();
 
       const error = await complete(cartId, headers).catch((failure) => failure);
 
@@ -203,17 +211,20 @@ medusaIntegrationTestRunner({
       expect(error.response.data.message).toContain(
         'Не заполнено или заполнено неверно',
       );
+      expect(await orderCount()).toBe(before);
     });
 
     it('refuses an order a bot filled in', async () => {
       const { cartId, headers } = await readyCart({
         contact: { ...CONTACT, metadata: { website: 'http://spam.example' } },
       });
+      const before = await orderCount();
 
       const error = await complete(cartId, headers).catch((failure) => failure);
 
       expect(error.response.status).toBe(400);
       expect(error.response.data.message).toBe('Заказ не принят');
+      expect(await orderCount()).toBe(before);
     });
   },
 });
