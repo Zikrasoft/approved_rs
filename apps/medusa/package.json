@@ -3,12 +3,13 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build": "medusa build",
+    "build": "medusa build && node -e \"for (const dir of ['src/scripts/fixtures']) require('node:fs').cpSync(dir, '.medusa/server/' + dir, { recursive: true })\"",
     "start": "cd .medusa/server && medusa start",
     "develop": "medusa develop",
     "db:migrate": "medusa db:migrate",
     "typecheck": "tsc --noEmit",
     "seed": "medusa exec ./src/scripts/seed-base.ts",
+    "seed:batteries": "medusa exec ./src/scripts/seed-batteries.ts",
     "test": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --coverage --coverageProvider=v8 --silent --runInBand --forceExit --passWithNoTests",
     "test:integration:http": "TEST_TYPE=integration:http NODE_OPTIONS=\"--experimental-vm-modules --max-old-space-size=4096\" jest --silent=false --maxWorkers=2 --forceExit"
   },
