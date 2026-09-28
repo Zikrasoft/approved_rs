@@ -3,6 +3,7 @@ export {
   BRAND_LOCALES,
   CARLAB,
   DETAILS,
+  WORKSHOP_ADDRESS,
   brandLocale,
   isBrandLocale,
 } from './brands.ts';

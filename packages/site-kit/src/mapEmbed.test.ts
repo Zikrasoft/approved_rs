@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { mapEmbedSrc, defineLazyMapEmbed } from './mapEmbed.ts';
+import { mapEmbedSrc, mapPlaceUrl, defineLazyMapEmbed } from './mapEmbed.ts';
 
 type FakeEntry = { isIntersecting: boolean };
 type FakeObserverCallback = (
@@ -68,15 +68,23 @@ function mount(
 }
 
 describe('mapEmbedSrc', () => {
-  it('pins the map by coordinates', () => {
-    expect(mapEmbedSrc({ lat: 44.8125, lon: 20.4612 })).toBe(
-      'https://www.google.com/maps?q=44.8125%2C20.4612&output=embed',
+  it('pins the map to a Google Business Profile by cid', () => {
+    expect(mapEmbedSrc('4988774890072933706')).toBe(
+      'https://www.google.com/maps?cid=4988774890072933706&output=embed',
     );
   });
 
-  it('escapes a text query', () => {
-    expect(mapEmbedSrc('Bulevar 1, Beograd')).toBe(
-      'https://www.google.com/maps?q=Bulevar%201%2C%20Beograd&output=embed',
+  it('keeps a malformed cid from adding query parameters', () => {
+    expect(mapEmbedSrc('1&q=x')).toBe(
+      'https://www.google.com/maps?cid=1%26q%3Dx&output=embed',
+    );
+  });
+});
+
+describe('mapPlaceUrl', () => {
+  it('links a Google Business Profile by cid', () => {
+    expect(mapPlaceUrl('4988774890072933706')).toBe(
+      'https://maps.google.com/?cid=4988774890072933706',
     );
   });
 });

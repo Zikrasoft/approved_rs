@@ -1,5 +1,5 @@
 ---
-import { jsonLdText } from '@podbor/site-kit';
+import { jsonLdText, mapPlaceUrl } from '@podbor/site-kit';
 import '@/styles/global.css';
 import latinFontUrl from '@fontsource-variable/onest/files/onest-latin-wght-normal.woff2?url';
 import cyrillicFontUrl from '@fontsource-variable/onest/files/onest-cyrillic-wght-normal.woff2?url';
@@ -51,6 +51,8 @@ const alternates = localeSet.getAlternateLinks(SITE_URL, Astro.url.pathname);
 const ogImage = new URL(`/og${OG_SUFFIX[locale]}.png`, SITE_URL).href;
 const fontUrl = locale === 'ru' ? cyrillicFontUrl : latinFontUrl;
 
+const googleMapsUrl = mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid);
+
 const businessSchema = {
   '@context': 'https://schema.org',
   '@type': 'AutoRepair',
@@ -76,8 +78,9 @@ const businessSchema = {
     latitude: GARAGE_ADDRESS.lat,
     longitude: GARAGE_ADDRESS.lon,
   },
+  hasMap: googleMapsUrl,
   openingHoursSpecification: OPENING_HOURS,
-  sameAs: SOCIAL_SAME_AS,
+  sameAs: [googleMapsUrl, ...SOCIAL_SAME_AS],
 };
 ---
 

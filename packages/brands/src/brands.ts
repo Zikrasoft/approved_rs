@@ -32,6 +32,17 @@ export const DETAILS = {
   legalName: 'Details',
 } as const satisfies Brand;
 
+// TODO: postalCode is left out until the owner confirms it — Zvezdara spans several.
+export const WORKSHOP_ADDRESS = {
+  street: 'Jovana Ćirilova 23a',
+  district: 'Zvezdara',
+  city: 'Beograd',
+  country: 'RS',
+  lat: 44.8054581,
+  lon: 20.4858424,
+  googleMapsCid: '4988774890072933706',
+} as const;
+
 export const BRAND_LOCALES = ['ru', 'sr', 'en'] as const;
 
 export type BrandLocale = (typeof BRAND_LOCALES)[number];

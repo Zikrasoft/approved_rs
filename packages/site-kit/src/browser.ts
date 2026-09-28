@@ -9,7 +9,7 @@ export { markFieldValidity } from './fieldValidity.ts';
 export { GOALS, reachGoal, type Goal } from './goals.ts';
 export { defineCtaReveal } from './ctaReveal.ts';
 export { defineLanguageSuggestion } from './languageSuggestion.ts';
-export { defineLazyMapEmbed, mapEmbedSrc } from './mapEmbed.ts';
+export { defineLazyMapEmbed } from './mapEmbed.ts';
 export { defineLocaleChoice } from './localeCookie.ts';
 export { defineMenuToggle, type MenuToggleElement } from './menuToggle.ts';
 export { defineRangeFilter } from './rangeFilter.ts';
