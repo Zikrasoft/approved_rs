@@ -92,9 +92,11 @@ export function buildOrderHookPayload(
         return [];
       }
       const product = byId.get(item.product_id ?? '');
-      const title = (product?.title ?? item.product_title ?? '')
-        .trim()
-        .slice(0, ORDER_HOOK_LIMITS.title);
+      const title = Array.from(
+        (product?.title ?? item.product_title ?? '').trim(),
+      )
+        .slice(0, ORDER_HOOK_LIMITS.title)
+        .join('');
       return [
         {
           title,

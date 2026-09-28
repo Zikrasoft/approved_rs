@@ -170,6 +170,22 @@ describe('buildOrderHookPayload', () => {
     expect(payload.items[0].title).toBe('A'.repeat(ORDER_HOOK_LIMITS.title));
   });
 
+  it('clamps by code points, not UTF-16 units, to avoid splitting emoji', () => {
+    const titleWithEmoji = 'a'.repeat(299) + '🚗' + 'b'.repeat(50);
+    const payload = buildOrderHookPayload(
+      { ...ORDER, items: [ORDER.items![0]] },
+      [{ id: 'prod_bat', title: titleWithEmoji }],
+      ADMIN,
+    );
+
+    const title = payload.items[0].title;
+    const codePointLength = Array.from(title).length;
+    expect(codePointLength).toBeLessThanOrEqual(ORDER_HOOK_LIMITS.title);
+    expect(title).not.toMatch(
+      /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/,
+    );
+  });
+
   it('refuses to build a card for an order without lines', () => {
     expect(() =>
       buildOrderHookPayload({ ...ORDER, items: null }, PRODUCTS, ADMIN),
