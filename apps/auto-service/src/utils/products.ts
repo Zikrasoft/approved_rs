@@ -4,7 +4,6 @@ import { localizedEntry, publishedEntries } from '@podbor/i18n';
 import { buildFitmentIndex as buildIndex } from '@podbor/shop-catalog/browser';
 
 export type { FitmentEntry, FitmentIndex } from '@podbor/shop-catalog/browser';
-export { fitmentMatches } from '@podbor/shop-catalog/browser';
 
 export type Product = CollectionEntry<'products'>;
 
