@@ -36,6 +36,7 @@ const envSchema = z
     ADMIN_URL: z
       .url({ protocol: /^https$/ })
       .default('https://api.carlab.rs/app'),
+    MEDUSA_BACKEND_URL: z.url().default('http://localhost:9009'),
     OPENAI_API_KEY: z.string().optional(),
     BREVO_API_KEY: z.string().optional(),
     BREVO_FROM_EMAIL: z.email().optional(),
@@ -63,6 +64,27 @@ const envSchema = z
         code: 'custom',
         path: ['SHOP_ORDER_HOOK_SECRET'],
         message: 'SHOP_ORDER_HOOK_URL and SHOP_ORDER_HOOK_SECRET go together',
+      });
+    }
+    if (
+      env.NODE_ENV === 'production' &&
+      env.SHOP_ORDER_HOOK_URL &&
+      !env.SHOP_ORDER_HOOK_URL.startsWith('https://')
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['SHOP_ORDER_HOOK_URL'],
+        message: 'required in production',
+      });
+    }
+    if (
+      env.NODE_ENV === 'production' &&
+      !env.MEDUSA_BACKEND_URL.startsWith('https://')
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['MEDUSA_BACKEND_URL'],
+        message: 'required in production',
       });
     }
     if (!env.BREVO_API_KEY !== !env.BREVO_FROM_EMAIL) {

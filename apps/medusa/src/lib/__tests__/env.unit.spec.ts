@@ -9,6 +9,7 @@ const PRODUCTION = {
   REDIS_URL: 'redis://redis:6379',
   JWT_SECRET: SECRET,
   COOKIE_SECRET: SECRET,
+  MEDUSA_BACKEND_URL: 'https://api.carlab.rs',
 };
 
 describe('parseEnv', () => {
@@ -20,9 +21,23 @@ describe('parseEnv', () => {
     expect(env.ADMIN_CORS).toBe('http://localhost:9009');
     expect(env.AUTH_CORS).toBe('http://localhost:9009');
     expect(env.ADMIN_URL).toBe('https://api.carlab.rs/app');
+    expect(env.MEDUSA_BACKEND_URL).toBe('http://localhost:9009');
     expect(env.DATABASE_SSL).toBe(false);
     expect(env.REBUILD_ON_CATALOG_EVENTS).toBe(false);
     expect(env.REBUILD_DEBOUNCE_MS).toBe(120_000);
+  });
+
+  it('accepts an https backend URL', () => {
+    expect(
+      parseEnv({ MEDUSA_BACKEND_URL: 'https://api.carlab.rs' })
+        .MEDUSA_BACKEND_URL,
+    ).toBe('https://api.carlab.rs');
+  });
+
+  it('refuses a production backend URL that is not https', () => {
+    expect(() =>
+      parseEnv({ ...PRODUCTION, MEDUSA_BACKEND_URL: 'http://api.carlab.rs' }),
+    ).toThrow('MEDUSA_BACKEND_URL');
   });
 
   it('treats a blank line in .env as unset', () => {
@@ -63,6 +78,16 @@ describe('parseEnv', () => {
     expect(() => parseEnv({ SHOP_ORDER_HOOK_SECRET: SECRET })).toThrow(
       'SHOP_ORDER_HOOK_SECRET',
     );
+  });
+
+  it('refuses a production order hook that is not https', () => {
+    expect(() =>
+      parseEnv({
+        ...PRODUCTION,
+        SHOP_ORDER_HOOK_URL: 'http://carlab.rs/api/shop-order',
+        SHOP_ORDER_HOOK_SECRET: SECRET,
+      }),
+    ).toThrow('SHOP_ORDER_HOOK_URL');
   });
 
   it('accepts a configured order hook', () => {
