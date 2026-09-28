@@ -49,6 +49,7 @@ medusaIntegrationTestRunner({
           'payment_providers.id',
         ]),
         taxRegions: await graph('tax_region', ['country_code', 'provider_id']),
+        profiles: await graph('shipping_profile', ['id', 'name', 'type']),
         channels: (await graph('sales_channel', ['name'])).filter(
           (channel) => channel.name === SHOP.salesChannelName,
         ).length,
@@ -119,6 +120,11 @@ medusaIntegrationTestRunner({
         }),
       ]);
       expect(first.channels).toBe(1);
+      expect(
+        first.profiles.filter(
+          (profile: { type: string }) => profile.type === 'default',
+        ),
+      ).toHaveLength(1);
       expect(first.keys).toBe(1);
       expect(first.locations).toEqual([
         expect.objectContaining({
