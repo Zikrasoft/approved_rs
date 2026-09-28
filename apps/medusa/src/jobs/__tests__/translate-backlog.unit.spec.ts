@@ -12,9 +12,17 @@ jest.mock('../../lib/translate-product', () => ({
 const stale = (id: string) => ({ id, title: `Товар ${id}`, metadata: {} });
 const current = (id: string) => {
   const row = { id, title: `Товар ${id}` };
+  const hash = sourceHash(productSource(row));
   return {
     ...row,
-    metadata: { translated_from: sourceHash(productSource(row)) },
+    metadata: { translated_from_sr: hash, translated_from_en: hash },
+  };
+};
+const halfDone = (id: string) => {
+  const row = current(id);
+  return {
+    ...row,
+    metadata: { translated_from_sr: row.metadata.translated_from_sr },
   };
 };
 
@@ -46,7 +54,7 @@ describe('translate-backlog', () => {
     const { container, logger } = containerFor([
       current('a'),
       stale('b'),
-      stale('c'),
+      halfDone('c'),
     ]);
 
     await translateBacklog(container);

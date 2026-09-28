@@ -65,7 +65,8 @@ medusaIntegrationTestRunner({
       expect(bosch.metadata).toEqual({
         spec: BOSCH.spec,
         fitment: BOSCH.fitment,
-        translated_from: sourceHash(productSource(BOSCH)),
+        translated_from_sr: sourceHash(productSource(BOSCH)),
+        translated_from_en: sourceHash(productSource(BOSCH)),
       });
       expect(await stockOf('BOSCH-S4-024')).toBe(BOSCH.stock);
       expect(await stockOf('EXIDE-AGM-EK950')).toBe(EXIDE.stock);

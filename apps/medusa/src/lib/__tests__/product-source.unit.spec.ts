@@ -1,4 +1,8 @@
-import { productSource, sourceHash } from '../product-source';
+import {
+  productSource,
+  sourceHash,
+  translationStamps,
+} from '../product-source';
 
 describe('productSource', () => {
   it('keeps the Russian fields a translator should see, trimmed', () => {
@@ -37,5 +41,16 @@ describe('sourceHash', () => {
 
   it('is the 16-hex digest the YAML pipeline uses', () => {
     expect(sourceHash({ title: 'A' })).toMatch(/^[0-9a-f]{16}$/);
+  });
+});
+
+describe('translationStamps', () => {
+  it('stamps every translated language with the hash of the Russian it came from', () => {
+    const hash = sourceHash({ title: 'A' });
+
+    expect(translationStamps({ title: 'A' })).toEqual({
+      translated_from_sr: hash,
+      translated_from_en: hash,
+    });
   });
 });

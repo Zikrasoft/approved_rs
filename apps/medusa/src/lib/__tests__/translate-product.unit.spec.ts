@@ -1,4 +1,8 @@
-import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils';
+import {
+  ContainerRegistrationKeys,
+  MedusaError,
+  Modules,
+} from '@medusajs/framework/utils';
 import { batchTranslationsWorkflow } from '@medusajs/medusa/core-flows';
 import { translateFields } from '@podbor/i18n/translate/core';
 
@@ -24,6 +28,11 @@ const PRODUCT = {
 };
 
 const HASH = sourceHash(productSource(PRODUCT));
+
+const stamped = (stamps: Record<string, string>) => ({
+  ...PRODUCT,
+  metadata: { ...PRODUCT.metadata, ...stamps },
+});
 
 const run = jest.fn().mockResolvedValue({});
 let existing: Record<string, { id: string }[]>;
@@ -75,7 +84,7 @@ afterEach(() => {
 describe('translateProduct', () => {
   it('does nothing when the Russian text is what was translated last', async () => {
     const { container } = containerFor([
-      { ...PRODUCT, metadata: { ...PRODUCT.metadata, translated_from: HASH } },
+      stamped({ translated_from_sr: HASH, translated_from_en: HASH }),
     ]);
 
     expect(await translateProduct(container, 'prod_1')).toBe('current');
@@ -142,7 +151,8 @@ describe('translateProduct', () => {
       },
     });
     expect(updateProductMetadata).toHaveBeenCalledWith(container, 'prod_1', {
-      translated_from: HASH,
+      translated_from_sr: HASH,
+      translated_from_en: HASH,
     });
   });
 
@@ -169,7 +179,7 @@ describe('translateProduct', () => {
     });
   });
 
-  it('keeps the language that worked when the other fails, and leaves the hash for the backlog', async () => {
+  it('keeps the language that worked when the other fails, and stamps only that one', async () => {
     (translateFields as jest.Mock).mockImplementation(async (options) => {
       if (options.targetLocales[0] === 'en') {
         throw new Error('model answered off-contract');
@@ -182,9 +192,65 @@ describe('translateProduct', () => {
 
     expect(run).toHaveBeenCalledTimes(1);
     expect(run.mock.calls[0][0].input.create[0].locale_code).toBe('sr-RS');
-    expect(updateProductMetadata).not.toHaveBeenCalled();
+    expect(updateProductMetadata).toHaveBeenCalledWith(container, 'prod_1', {
+      translated_from_sr: HASH,
+    });
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('into en'),
+    );
+  });
+
+  it('retries only the language still behind, leaving the other untouched', async () => {
+    const { container } = containerFor([stamped({ translated_from_sr: HASH })]);
+
+    expect(await translateProduct(container, 'prod_1')).toBe('translated');
+
+    const calls = (translateFields as jest.Mock).mock.calls;
+    expect(calls.map(([options]) => options.targetLocales)).toEqual([['en']]);
+    expect(run).toHaveBeenCalledTimes(1);
+    expect(run.mock.calls[0][0].input.create[0].locale_code).toBe('en-US');
+    expect(updateProductMetadata).toHaveBeenCalledWith(container, 'prod_1', {
+      translated_from_en: HASH,
+    });
+  });
+
+  it('writes nothing when every language fails', async () => {
+    (translateFields as jest.Mock).mockRejectedValue(new Error('down'));
+    const { container } = containerFor();
+
+    expect(await translateProduct(container, 'prod_1')).toBe('failed');
+    expect(updateProductMetadata).not.toHaveBeenCalled();
+  });
+
+  it('retranslates a language whose stamp is from older Russian', async () => {
+    const { container } = containerFor([
+      stamped({ translated_from_sr: 'older', translated_from_en: HASH }),
+    ]);
+
+    await translateProduct(container, 'prod_1');
+
+    const calls = (translateFields as jest.Mock).mock.calls;
+    expect(calls.map(([options]) => options.targetLocales)).toEqual([['sr']]);
+  });
+
+  it('reports a product deleted mid-translation as missing instead of throwing', async () => {
+    (updateProductMetadata as jest.Mock).mockRejectedValue(
+      new MedusaError(MedusaError.Types.NOT_FOUND, 'Nothing to update'),
+    );
+    const { container, logger } = containerFor();
+
+    expect(await translateProduct(container, 'prod_1')).toBe('missing');
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('prod_1'));
+  });
+
+  it('still throws a stamp failure that is not a vanished product', async () => {
+    (updateProductMetadata as jest.Mock).mockRejectedValue(
+      new Error('db down'),
+    );
+    const { container } = containerFor();
+
+    await expect(translateProduct(container, 'prod_1')).rejects.toThrow(
+      'db down',
     );
   });
 });

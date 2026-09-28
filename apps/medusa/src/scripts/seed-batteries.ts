@@ -14,17 +14,13 @@ import {
 } from '@medusajs/medusa/core-flows';
 import { MEDUSA_LOCALE } from '@podbor/shop-catalog';
 
-import {
-  TRANSLATED_FROM,
-  productSource,
-  sourceHash,
-} from '../lib/product-source';
+import { productSource, translationStamps } from '../lib/product-source';
 import { DEFAULT_OPTION, SHOP } from '../lib/shop';
+import { TARGET_LOCALES } from '../lib/translate-config';
 import { BATTERIES, type Battery } from './battery-fixture';
 import { seedBase } from './seed-base';
 
 const BATTERY_TYPE = 'batteries';
-const TRANSLATED_LOCALES = ['sr', 'en'] as const;
 
 const skuOf = (battery: Battery): string => battery.handle.toUpperCase();
 
@@ -77,7 +73,7 @@ export default async function seedBatteries({ container }: ExecArgs) {
         metadata: {
           spec: battery.spec,
           fitment: battery.fitment,
-          [TRANSLATED_FROM]: sourceHash(productSource(battery)),
+          ...translationStamps(productSource(battery)),
         },
         options: [{ title: DEFAULT_OPTION, values: [DEFAULT_OPTION] }],
         variants: [
@@ -99,7 +95,7 @@ export default async function seedBatteries({ container }: ExecArgs) {
   await createTranslationsWorkflow(container).run({
     input: {
       translations: missing.flatMap((battery) =>
-        TRANSLATED_LOCALES.map((locale) => ({
+        TARGET_LOCALES.map((locale) => ({
           reference: 'product',
           reference_id: idByHandle.get(battery.handle) as string,
           locale_code: MEDUSA_LOCALE[locale],

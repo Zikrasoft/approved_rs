@@ -1,18 +1,28 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
-import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils';
+import {
+  ContainerRegistrationKeys,
+  MedusaError,
+  Modules,
+} from '@medusajs/framework/utils';
 import { batchTranslationsWorkflow } from '@medusajs/medusa/core-flows';
 import { translateFields } from '@podbor/i18n/translate/core';
 import { MEDUSA_LOCALE } from '@podbor/shop-catalog';
 
 import { parseEnv } from './env';
 import { updateProductMetadata } from './metadata';
-import { TRANSLATED_FROM, productSource, sourceHash } from './product-source';
+import {
+  productSource,
+  sourceHash,
+  translatedFromKey,
+  translationStamps,
+} from './product-source';
 import { queryOne } from './query';
 import {
   BUSINESS_DESCRIPTION,
   PRODUCT_PROMPT_SUBJECT,
   TARGET_LANGUAGE_NAME,
   TARGET_LOCALES,
+  type TargetLocale,
 } from './translate-config';
 
 export type TranslateOutcome =
@@ -34,8 +44,15 @@ export const SOURCE_ROW_FIELDS = [
   'metadata',
 ];
 
+export function staleLocales(product: SourceRow): TargetLocale[] {
+  const hash = sourceHash(productSource(product));
+  return TARGET_LOCALES.filter(
+    (locale) => product.metadata?.[translatedFromKey(locale)] !== hash,
+  );
+}
+
 export const isCurrent = (product: SourceRow): boolean =>
-  product.metadata?.[TRANSLATED_FROM] === sourceHash(productSource(product));
+  staleLocales(product).length === 0;
 
 export async function translateProduct(
   container: MedusaContainer,
@@ -53,7 +70,8 @@ export async function translateProduct(
   if (!product) {
     return 'missing';
   }
-  if (isCurrent(product)) {
+  const stale = staleLocales(product);
+  if (!stale.length) {
     return 'current';
   }
   const apiKey = parseEnv(process.env).OPENAI_API_KEY;
@@ -64,9 +82,9 @@ export async function translateProduct(
 
   const source = productSource(product);
   const translation = container.resolve(Modules.TRANSLATION);
-  let failed = false;
+  const done: TargetLocale[] = [];
 
-  for (const locale of TARGET_LOCALES) {
+  for (const locale of stale) {
     try {
       const translated = await translateFields({
         fields: source,
@@ -102,20 +120,29 @@ export async function translateProduct(
               delete: [],
             },
       });
+      done.push(locale);
     } catch (error) {
-      failed = true;
       logger.error(
         `Product ${id} was not translated into ${locale}: ${String(error)}`,
       );
     }
   }
 
-  if (failed) {
+  if (!done.length) {
     return 'failed';
   }
-  await updateProductMetadata(container, id, {
-    [TRANSLATED_FROM]: sourceHash(source),
-  });
-  logger.info(`Product ${id} translated into ${TARGET_LOCALES.join(', ')}`);
-  return 'translated';
+  try {
+    await updateProductMetadata(container, id, translationStamps(source, done));
+  } catch (error) {
+    if (
+      error instanceof MedusaError &&
+      error.type === MedusaError.Types.NOT_FOUND
+    ) {
+      logger.warn(`Product ${id} was deleted while it was being translated`);
+      return 'missing';
+    }
+    throw error;
+  }
+  logger.info(`Product ${id} translated into ${done.join(', ')}`);
+  return done.length === stale.length ? 'translated' : 'failed';
 }
