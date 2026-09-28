@@ -7,7 +7,10 @@ import {
   MedusaError,
   Modules,
 } from '@medusajs/framework/utils';
-import { updateProductsWorkflow } from '@medusajs/medusa/core-flows';
+import {
+  updateProductsWorkflow,
+  updateStoresWorkflow,
+} from '@medusajs/medusa/core-flows';
 
 import { queryOne } from './query';
 
@@ -50,6 +53,25 @@ export function updateProductMetadata(
     (productId, metadata) =>
       updateProductsWorkflow(scope).run({
         input: { selector: { id: productId }, update: { metadata } },
+      }),
+    patch,
+  );
+}
+
+export function updateStoreMetadata(
+  scope: MedusaContainer,
+  patch: Metadata,
+): Promise<Metadata> {
+  const query = scope.resolve(ContainerRegistrationKeys.QUERY);
+  return mergeUnderLock(
+    scope,
+    'store-metadata',
+    async () =>
+      (await query.graph({ entity: 'store', fields: ['id', 'metadata'] }))
+        .data[0],
+    (storeId, metadata) =>
+      updateStoresWorkflow(scope).run({
+        input: { selector: { id: storeId }, update: { metadata } },
       }),
     patch,
   );
