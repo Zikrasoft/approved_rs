@@ -1,4 +1,5 @@
 import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils';
+import { updateStoresWorkflow } from '@medusajs/medusa/core-flows';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { WORKSHOP_ADDRESS } from '@podbor/brands';
 import { PRODUCT_TYPES, SERVICE_TYPE } from '@podbor/shop-catalog';
@@ -153,9 +154,16 @@ medusaIntegrationTestRunner({
       expect(first.types).toEqual(
         [...PRODUCT_TYPES.map((type) => type.key), SERVICE_TYPE].sort(),
       );
-      expect(first.store.supported_currencies).toEqual([
-        expect.objectContaining({ currency_code: 'rsd', is_default: true }),
-      ]);
+      expect(first.store.supported_currencies).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ currency_code: 'rsd' }),
+        ]),
+      );
+      expect(
+        first.store.supported_currencies.filter(
+          (currency: { is_default: boolean }) => currency.is_default,
+        ),
+      ).toHaveLength(1);
       expect(
         first.store.supported_locales
           .map((locale: { locale_code: string }) => locale.locale_code)
@@ -182,6 +190,37 @@ medusaIntegrationTestRunner({
           }),
         ]);
       }
+
+      const { id: storeId } = (
+        await getContainer()
+          .resolve(ContainerRegistrationKeys.QUERY)
+          .graph({ entity: 'store', fields: ['id'] })
+      ).data[0];
+      await updateStoresWorkflow(getContainer()).run({
+        input: {
+          selector: { id: storeId },
+          update: {
+            supported_locales: [
+              ...first.store.supported_locales.map(
+                (locale: { locale_code: string }) => ({
+                  locale_code: locale.locale_code,
+                }),
+              ),
+              { locale_code: 'de-DE' },
+            ],
+          },
+        },
+      });
+      const edited = await state();
+
+      await seed();
+
+      expect(await state()).toEqual(edited);
+      expect(
+        edited.store.supported_locales
+          .map((locale: { locale_code: string }) => locale.locale_code)
+          .sort(),
+      ).toEqual(['de-DE', 'en-US', 'ru-RU', 'sr-RS']);
     });
 
     it('shows the storefront one region in dinars, paid on collection', async () => {

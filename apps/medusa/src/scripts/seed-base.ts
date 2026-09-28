@@ -411,35 +411,57 @@ async function ensureStore(
     );
   }
 
-  const currencies = store.supported_currencies ?? [];
-  const locales = (store.supported_locales ?? [])
-    .map((locale) => locale?.locale_code)
-    .sort();
+  const currencies = (store.supported_currencies ?? []).flatMap((currency) =>
+    currency ? [currency] : [],
+  );
+  const existingLocales = new Set(
+    (store.supported_locales ?? [])
+      .map((locale) => locale?.locale_code)
+      .filter((code): code is string => Boolean(code)),
+  );
+  const hasRsd = currencies.some(
+    (currency) => currency.currency_code === SHOP.currency,
+  );
   const settled =
-    currencies.length === 1 &&
-    currencies[0]?.currency_code === SHOP.currency &&
-    currencies[0]?.is_default === true &&
-    JSON.stringify(locales) === JSON.stringify([...STORE_LOCALES].sort()) &&
-    store.default_region_id === ids.regionId &&
-    store.default_location_id === ids.locationId &&
-    store.default_sales_channel_id === ids.salesChannelId;
+    hasRsd &&
+    STORE_LOCALES.every((locale) => existingLocales.has(locale)) &&
+    Boolean(store.default_region_id) &&
+    Boolean(store.default_location_id) &&
+    Boolean(store.default_sales_channel_id);
   if (settled) {
     return;
   }
+
+  const hasDefaultCurrency = currencies.some(
+    (currency) => currency.is_default === true,
+  );
+  const keptCurrencies = currencies.map((currency) => ({
+    currency_code: currency.currency_code,
+    is_default: currency.is_default,
+  }));
+  const supportedCurrencies = hasRsd
+    ? keptCurrencies
+    : [
+        ...keptCurrencies,
+        { currency_code: SHOP.currency, is_default: !hasDefaultCurrency },
+      ];
+  const supportedLocales = [
+    ...new Set([...existingLocales, ...STORE_LOCALES]),
+  ].map((locale_code) => ({ locale_code }));
 
   await updateStoresWorkflow(container).run({
     input: {
       selector: { id: store.id },
       update: {
-        supported_currencies: [
-          { currency_code: SHOP.currency, is_default: true },
-        ],
-        supported_locales: STORE_LOCALES.map((locale_code) => ({
-          locale_code,
-        })),
-        default_region_id: ids.regionId,
-        default_location_id: ids.locationId,
-        default_sales_channel_id: ids.salesChannelId,
+        supported_currencies: supportedCurrencies,
+        supported_locales: supportedLocales,
+        ...(store.default_region_id ? {} : { default_region_id: ids.regionId }),
+        ...(store.default_location_id
+          ? {}
+          : { default_location_id: ids.locationId }),
+        ...(store.default_sales_channel_id
+          ? {}
+          : { default_sales_channel_id: ids.salesChannelId }),
       },
     },
   });
