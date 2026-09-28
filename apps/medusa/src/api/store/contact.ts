@@ -25,7 +25,7 @@ const trapSchema = z.object({
   metadata: z.object({ [HONEYPOT_FIELD]: z.literal('').optional() }).nullish(),
 });
 
-const FAULT_NAMES: Record<string, string> = {
+const FAULT_NAMES: Partial<Record<string, string>> = {
   email: 'email',
   shipping_address: 'имя и телефон',
   first_name: 'имя',
@@ -44,7 +44,7 @@ export function contactFaults(cart: unknown): string[] {
     ...new Set(
       result.error.issues.map((issue) => {
         const field = String(issue.path[issue.path.length - 1]);
-        return FAULT_NAMES[field] as string;
+        return FAULT_NAMES[field] ?? issue.path.join('.');
       }),
     ),
   ];

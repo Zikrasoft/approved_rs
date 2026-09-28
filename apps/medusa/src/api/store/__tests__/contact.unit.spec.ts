@@ -58,6 +58,10 @@ describe('contactFaults', () => {
   ])('names %s', (_label, cart, faults) => {
     expect(contactFaults(cart)).toEqual(faults);
   });
+
+  it('names a fault outside FAULT_NAMES by its path instead of dropping it', () => {
+    expect(contactFaults({ ...CART, metadata: 'x' })).toEqual(['metadata']);
+  });
 });
 
 describe('isBot', () => {
