@@ -11,6 +11,9 @@ export const GOALS = {
   langOfferShown: 'lang_offer_shown',
   langOfferTaken: 'lang_offer_taken',
   langOfferDismissed: 'lang_offer_dismissed',
+  addToCart: 'add_to_cart',
+  beginCheckout: 'begin_checkout',
+  orderPlaced: 'order_placed',
 } as const;
 
 export type Goal = (typeof GOALS)[keyof typeof GOALS];

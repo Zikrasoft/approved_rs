@@ -108,4 +108,8 @@ describe('SERVICE_LABELS_RU', () => {
     expect(isPartnerService('partner-carlab')).toBe(true);
     expect(isPartnerService('diagnostics')).toBe(false);
   });
+
+  it('names a shop order the way the operator card should read it', () => {
+    expect(serviceLabel('parts-order')).toBe('Заказ из магазина');
+  });
 });
