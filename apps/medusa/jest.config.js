@@ -42,6 +42,8 @@ module.exports = {
     '!src/api/middlewares.ts',
   ],
   coverageThreshold: {
+    'src/api/store/*.ts': { statements: 95, branches: 88 },
+    'src/workflows/hooks/*.ts': { statements: 95, branches: 88 },
     'src/lib/*.ts': { statements: 95, branches: 90 },
     global: { statements: 70, branches: 75 },
   },
