@@ -364,7 +364,10 @@ Carried over from staywildwear's backend, where each rule cost a bug:
   `req.body`.** The core validator runs first and the route reads
   `validatedBody`.
 - **`metadata` is written read-merge-write under a lock** (`src/lib/metadata.ts`).
-  The admin never sends a partial `metadata`; it posts to a route that merges.
+  Medusa's own product card does send a partial `metadata`, and the core
+  repository merges it in (an empty string `''` deletes a key) — our code
+  writes `metadata` only through `src/lib/metadata.ts`, never by posting a
+  partial object straight to the product route.
 - **Subscribe to workflow events, and write translations only through
   `createTranslationsWorkflow`/`batchTranslationsWorkflow`** — they emit
   `translation.*`, the module service does not.
@@ -384,7 +387,23 @@ apps/medusa/docker-compose.test.yml up -d --wait`; `DB_HOST` is the literal
   go to the network (`integration-tests/setup.js`); seed in the top-level
   `beforeAll` (the runner restores that snapshot before each test); a two-run
   idempotency check runs both runs inside one test; never pick `variants[0]` of a
-  multi-variant product.
+  multi-variant product. `.env` is always loaded; the integration config blanks
+  `PORT` so each worker gets a free port.
+- **Admin product writes are guarded in `require-fields.ts`**: batch edits of
+  spec/fitment/type/status, CSV import, and registry product-type rename/delete
+  are all refused there. Any new admin write path that can touch spec, type,
+  status or price must go through those same guards.
+- **A 409 is written with `res.status(409).json(...)`, never thrown** — the
+  error handler rewrites `CONFLICT` messages, so a thrown `MedusaError` of that
+  type would not reach the client with the Russian reason intact.
+- **Middleware string matchers are exact express paths, not prefixes**:
+  `/admin/products/:id` also matches `/admin/products/batch` and
+  `/admin/products/imports` — the guards on that route bail out on
+  `req.params.id === 'batch'` for exactly this reason.
+- **Fitment names are the join key to the vehicle dictionary.** A product's
+  `metadata.fitment` entries are matched to the dictionary by make/model/year,
+  not by id; a dictionary edit that would strand a product's fitment answers
+  409 instead of silently orphaning it.
 - Locally the backend runs on port 9009 (`pnpm --filter @podbor/medusa develop`);
   the script is not called `dev`, so the root `pnpm dev` does not start it.
 - In CI `typecheck` runs through turbo after `medusa build` (`.medusa/types` is
