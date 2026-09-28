@@ -93,3 +93,66 @@ export function fitmentComplaint(
   }
   return undefined;
 }
+
+export type Level = 'makes' | 'models' | 'generations';
+
+export type Change = { name?: string; yearFrom?: number; yearTo?: number };
+
+export type TreeEdit =
+  | { kind: 'create'; level: Level; parentId?: string; change: Change }
+  | { kind: 'update'; level: Level; id: string; change: Change }
+  | { kind: 'delete'; level: Level; id: string };
+
+export function applyEdit(
+  tree: VehicleTree,
+  edit: TreeEdit,
+): VehicleTree | undefined {
+  let found = false;
+  const edited = <T extends { id?: string }>(
+    nodes: T[],
+    fresh: T,
+    parentId?: string,
+  ): T[] => {
+    if (edit.kind === 'create') {
+      if (parentId !== edit.parentId) {
+        return nodes;
+      }
+      found = true;
+      return [...nodes, fresh];
+    }
+    if (!nodes.some((node) => node.id === edit.id)) {
+      return nodes;
+    }
+    found = true;
+    if (edit.kind === 'delete') {
+      return nodes.filter((node) => node.id !== edit.id);
+    }
+    return nodes.map((node) =>
+      node.id === edit.id ? { ...node, ...edit.change } : node,
+    );
+  };
+  const change = edit.kind === 'delete' ? {} : edit.change;
+
+  const next =
+    edit.level === 'makes'
+      ? edited<Make>(tree, { name: '', models: [], ...change })
+      : tree.map((make) => ({
+          ...make,
+          models:
+            edit.level === 'models'
+              ? edited<Model>(
+                  make.models,
+                  { name: '', generations: [], ...change },
+                  make.id,
+                )
+              : make.models.map((model) => ({
+                  ...model,
+                  generations: edited<Generation>(
+                    model.generations,
+                    { name: '', yearFrom: 0, yearTo: 0, ...change },
+                    model.id,
+                  ),
+                })),
+        }));
+  return found ? next : undefined;
+}

@@ -13,6 +13,7 @@ import { z } from 'zod';
 import { queryOne } from '../../../lib/query';
 import { SHOP } from '../../../lib/shop';
 import { isLatin, translit } from '../../../lib/translit';
+import { fitmentComplaintFor } from '../../../lib/vehicles';
 
 export const draftSchema = z.looseObject({
   title: z.string().nullish(),
@@ -225,8 +226,11 @@ export async function requireValidSpec(
       (product.changesType && SPEC_KEY in product.metadata);
     if (recheck && product.typeKey !== SERVICE_TYPE) {
       const result = parseAttributes(product.typeKey, product.metadata);
-      if (!result.ok) {
-        next(refusal(`Характеристики товара не сходятся: ${result.error}`));
+      const complaint = result.ok
+        ? await fitmentComplaintFor(req.scope, result.fitment)
+        : result.error;
+      if (complaint) {
+        next(refusal(`Характеристики товара не сходятся: ${complaint}`));
         return;
       }
     }

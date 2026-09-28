@@ -1,11 +1,6 @@
 import { productType, type ProductTypeDef } from '@podbor/shop-catalog/browser';
 
-import {
-  fitmentToText,
-  formToSpec,
-  specToForm,
-  textToFitment,
-} from '../spec-form';
+import { formToSpec, specToForm } from '../spec-form';
 
 const batteries = productType('batteries') as ProductTypeDef;
 const oils = productType('motor-oils') as ProductTypeDef;
@@ -90,30 +85,5 @@ describe('formToSpec', () => {
     expect(specToForm(WITH_FLAG, { forStartStop: true })).toEqual({
       forStartStop: 'true',
     });
-  });
-});
-
-describe('fitment text', () => {
-  const FITMENT = [
-    { make: 'Toyota', model: 'Corolla', yearFrom: 2013, yearTo: 2019 },
-    { make: 'Mazda', model: '3', yearFrom: 2014, yearTo: 2014 },
-  ];
-
-  it('writes one car per line and reads it back', () => {
-    const text = fitmentToText(FITMENT);
-
-    expect(text).toBe('Toyota | Corolla | 2013-2019\nMazda | 3 | 2014-2014');
-    expect(textToFitment(text)).toEqual(FITMENT);
-  });
-
-  it('reads a single year as both ends of the range and ignores blank lines', () => {
-    expect(textToFitment('\n  Mazda | 3 | 2014  \n\n')).toEqual([
-      { make: 'Mazda', model: '3', yearFrom: 2014, yearTo: 2014 },
-    ]);
-  });
-
-  it('starts empty when the product has no fitment', () => {
-    expect(fitmentToText(undefined)).toBe('');
-    expect(fitmentToText(null)).toBe('');
   });
 });

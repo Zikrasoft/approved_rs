@@ -8,6 +8,7 @@ import { z } from 'zod';
 
 import { updateProductMetadata } from '../../../../../lib/metadata';
 import { queryOne } from '../../../../../lib/query';
+import { fitmentComplaintFor } from '../../../../../lib/vehicles';
 
 const bodySchema = z
   .object({
@@ -43,6 +44,10 @@ export async function POST(
   const result = parseAttributes(product.type?.value, body.data);
   if (!result.ok) {
     throw refusal(result.error);
+  }
+  const unknownCar = await fitmentComplaintFor(req.scope, result.fitment);
+  if (unknownCar) {
+    throw refusal(unknownCar);
   }
 
   const metadata = await updateProductMetadata(req.scope, product.id, {

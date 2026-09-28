@@ -3,9 +3,25 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { DEFAULT_OPTION, SHOP } from '../../src/lib/shop';
 import { seedBase } from '../../src/scripts/seed-base';
+import { VEHICLES } from '../../src/scripts/vehicle-fixture';
 import { adminHeaders } from './admin-session';
 
 jest.setTimeout(180_000);
+
+const [MAKE] = VEHICLES;
+const [MODEL] = MAKE.models;
+const [GENERATION] = MODEL.generations;
+
+const KNOWN_CAR = {
+  make: MAKE.name,
+  model: MODEL.name,
+  yearFrom: GENERATION.yearFrom,
+  yearTo: GENERATION.yearTo,
+};
+
+const FOREIGN_MODEL = VEHICLES.flatMap((make) =>
+  make.models.map((model) => model.name),
+).find((name) => !MAKE.models.some((model) => model.name === name)) as string;
 
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -172,9 +188,7 @@ medusaIntegrationTestRunner({
         headers,
       );
 
-      const fitment = [
-        { make: 'Toyota', model: 'Corolla', yearFrom: 2013, yearTo: 2019 },
-      ];
+      const fitment = [KNOWN_CAR];
       const { data: saved } = await api.post(
         `/admin/products/${data.product.id}/spec`,
         { spec: SPEC, fitment },
@@ -197,6 +211,66 @@ medusaIntegrationTestRunner({
       expect(error.response.status).toBe(400);
       expect(error.response.data.message).toMatch(
         /^Характеристики не сохранены: /,
+      );
+    });
+
+    it.each([
+      [
+        'an unknown make',
+        { ...KNOWN_CAR, make: 'Nomake' },
+        'марки «Nomake» нет в справочнике',
+      ],
+      [
+        'a model filed under another make',
+        { ...KNOWN_CAR, model: FOREIGN_MODEL },
+        `нет модели «${FOREIGN_MODEL}»`,
+      ],
+      [
+        'years outside every generation',
+        { ...KNOWN_CAR, yearFrom: 1950 },
+        'годы выходят за рамки поколений',
+      ],
+    ])('refuses to save %s, naming the car', async (label, car, reason) => {
+      const headers = await admin();
+      const { data } = await api.post(
+        '/admin/products',
+        draft(`Varta: ${label}`, { type_id: await batteryTypeId() }),
+        headers,
+      );
+
+      const error = await api
+        .post(
+          `/admin/products/${data.product.id}/spec`,
+          { spec: SPEC, fitment: [car] },
+          headers,
+        )
+        .catch((failure) => failure.response);
+
+      expect(error.status).toBe(400);
+      expect(error.data.message).toContain(
+        `Характеристики не сохранены: «${car.make} ${car.model} ${car.yearFrom}–${car.yearTo}»: `,
+      );
+      expect(error.data.message).toContain(reason);
+    });
+
+    it('refuses a product whose metadata carries an unknown car', async () => {
+      const error = await api
+        .post(
+          '/admin/products',
+          draft('Varta с чужой машиной', {
+            type_id: await batteryTypeId(),
+            metadata: {
+              spec: SPEC,
+              fitment: [{ ...KNOWN_CAR, make: 'Nomake' }],
+            },
+          }),
+          await admin(),
+        )
+        .catch((failure) => failure.response);
+
+      expect(error.status).toBe(400);
+      expect(error.data.message).toMatch(
+        /^Характеристики товара не сходятся: «Nomake /,
       );
     });
 

@@ -37,6 +37,7 @@ import {
   SHOP,
   STORE_LOCALES,
 } from '../lib/shop';
+import { seedVehicles } from './seed-vehicles';
 
 type Query = Omit<RemoteQueryFunction, symbol>;
 
@@ -91,6 +92,8 @@ export async function seedBase(
     { salesChannelId, shippingProfileId, serviceTypeId },
     logger,
   );
+
+  await seedVehicles(container, logger);
 
   return { salesChannelId, regionId, locationId, shippingProfileId, typeIds };
 }

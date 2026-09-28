@@ -55,6 +55,7 @@ export default defineConfig({
   featureFlags: { translation: true },
   modules: [
     { resolve: '@medusajs/medusa/translation' },
+    { resolve: './src/modules/vehicle' },
     {
       resolve: '@medusajs/medusa/file',
       options: {

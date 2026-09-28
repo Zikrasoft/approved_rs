@@ -1,15 +1,10 @@
 import type {
-  FitmentEntry,
   ProductTypeDef,
   Spec,
   SpecValue,
 } from '@podbor/shop-catalog/browser';
 
 export type FormValues = Record<string, string>;
-
-export type FitmentDraft = FitmentEntry;
-
-const SEPARATOR = ' | ';
 
 export function specToForm(
   type: ProductTypeDef,
@@ -53,32 +48,4 @@ export function formToSpec(
     }
   }
   return spec;
-}
-
-export function fitmentToText(
-  entries: readonly FitmentDraft[] | null | undefined,
-): string {
-  return (entries ?? [])
-    .map((entry) =>
-      [entry.make, entry.model, `${entry.yearFrom}-${entry.yearTo}`].join(
-        SEPARATOR,
-      ),
-    )
-    .join('\n');
-}
-
-export function textToFitment(text: string): FitmentDraft[] {
-  return text
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [make = '', model = '', years = ''] = line
-        .split('|')
-        .map((part) => part.trim());
-      const [from = '', to = from] = years
-        .split('-')
-        .map((year) => year.trim());
-      return { make, model, yearFrom: Number(from), yearTo: Number(to) };
-    });
 }

@@ -1,6 +1,7 @@
 import {
   type Generation,
   type VehicleTree,
+  applyEdit,
   fitmentComplaint,
   generationOf,
   treeComplaint,
@@ -160,5 +161,111 @@ describe('generationOf', () => {
     expect(
       generationOf(PROTO, car('Zikra', 'Proto', 2010, 2015)),
     ).toBeUndefined();
+  });
+});
+
+describe('applyEdit', () => {
+  const STORED: VehicleTree = [
+    {
+      id: 'mk_z',
+      name: 'Zikra',
+      models: [
+        {
+          id: 'md_p',
+          name: 'Proto',
+          generations: [
+            { id: 'gn_1', name: 'I', yearFrom: 2006, yearTo: 2013 },
+          ],
+        },
+      ],
+    },
+    { id: 'mk_k', name: 'Kosava', models: [] },
+  ];
+
+  it('adds a make at the end', () => {
+    expect(
+      applyEdit(STORED, {
+        kind: 'create',
+        level: 'makes',
+        change: { name: 'Vihor' },
+      })?.map((make) => make.name),
+    ).toEqual(['Zikra', 'Kosava', 'Vihor']);
+  });
+
+  it('adds a model under its make only', () => {
+    const next = applyEdit(STORED, {
+      kind: 'create',
+      level: 'models',
+      parentId: 'mk_k',
+      change: { name: 'Sever' },
+    });
+
+    expect(next?.[1].models).toEqual([{ name: 'Sever', generations: [] }]);
+    expect(next?.[0].models).toEqual(STORED[0].models);
+  });
+
+  it('adds a generation with its years', () => {
+    const next = applyEdit(STORED, {
+      kind: 'create',
+      level: 'generations',
+      parentId: 'md_p',
+      change: { name: 'II', yearFrom: 2013, yearTo: 2019 },
+    });
+
+    expect(next?.[0].models[0].generations).toEqual([
+      STORED[0].models[0].generations[0],
+      { name: 'II', yearFrom: 2013, yearTo: 2019 },
+    ]);
+  });
+
+  it('changes an entry in place', () => {
+    const next = applyEdit(STORED, {
+      kind: 'update',
+      level: 'generations',
+      id: 'gn_1',
+      change: { yearTo: 2012 },
+    });
+
+    expect(next?.[0].models[0].generations).toEqual([
+      { id: 'gn_1', name: 'I', yearFrom: 2006, yearTo: 2012 },
+    ]);
+  });
+
+  it('deletes a make with everything under it', () => {
+    expect(
+      applyEdit(STORED, { kind: 'delete', level: 'makes', id: 'mk_z' }),
+    ).toEqual([STORED[1]]);
+  });
+
+  it('knows nothing of an id or a parent it does not hold', () => {
+    expect(
+      applyEdit(STORED, {
+        kind: 'update',
+        level: 'models',
+        id: 'md_gone',
+        change: { name: 'X' },
+      }),
+    ).toBeUndefined();
+    expect(
+      applyEdit(STORED, {
+        kind: 'create',
+        level: 'generations',
+        parentId: 'md_gone',
+        change: { name: 'X', yearFrom: 2000, yearTo: 2001 },
+      }),
+    ).toBeUndefined();
+  });
+
+  it('never touches the tree it was given', () => {
+    const before = JSON.stringify(STORED);
+
+    applyEdit(STORED, {
+      kind: 'update',
+      level: 'makes',
+      id: 'mk_z',
+      change: { name: 'Zikra Motors' },
+    });
+
+    expect(JSON.stringify(STORED)).toBe(before);
   });
 });
