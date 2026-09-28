@@ -32,7 +32,7 @@ export const orderHookSchema = z
       .max(100),
     total: z.number().nonnegative(),
     comment: z.string().trim().max(2000).optional(),
-    adminUrl: z.url(),
+    adminUrl: z.url({ protocol: /^https$/ }),
   })
   .strict();
 
@@ -54,7 +54,7 @@ export function signHook(
   secret: string,
   nowMs = Date.now(),
 ): string {
-  if (!secret) throw new Error('order hook secret is empty');
+  if (!secret.trim()) throw new Error('order hook secret is empty');
   const timestamp = Math.floor(nowMs / 1000);
   return `t=${timestamp},v1=${digest(body, secret, timestamp)}`;
 }
@@ -65,7 +65,7 @@ export function verifyHook(
   secret: string,
   nowMs = Date.now(),
 ): boolean {
-  if (!header || !secret) return false;
+  if (!header || !secret.trim()) return false;
   const parsed = headerSchema.safeParse(
     Object.fromEntries(
       header.split(',').map((part) => part.trim().split('=', 2)),

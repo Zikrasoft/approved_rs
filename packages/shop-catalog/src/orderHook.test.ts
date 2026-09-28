@@ -1,3 +1,4 @@
+import { createHmac } from 'node:crypto';
 import { describe, it, expect } from 'vitest';
 import {
   ORDER_HOOK_HEADER,
@@ -87,6 +88,15 @@ describe('signHook / verifyHook', () => {
     const forged = `t=1790000000,v1=${'0'.repeat(64)}`;
     expect(verifyHook(BODY, forged, '', NOW)).toBe(false);
   });
+
+  it('never trusts a whitespace-only secret on either side', () => {
+    expect(() => signHook(BODY, '   ', NOW)).toThrow(
+      'order hook secret is empty',
+    );
+    const t = Math.floor(NOW / 1000);
+    const v1 = createHmac('sha256', '   ').update(`${t}.${BODY}`).digest('hex');
+    expect(verifyHook(BODY, `t=${t},v1=${v1}`, '   ', NOW)).toBe(false);
+  });
 });
 
 describe('orderHookSchema', () => {
@@ -116,6 +126,11 @@ describe('orderHookSchema', () => {
     ['an unknown locale', { locale: 'de' }],
     ['an extra key', { coupon: 'X' }],
     ['a non-URL admin link', { adminUrl: 'orders/1' }],
+    [
+      'a non-https admin link',
+      { adminUrl: 'http://admin.carlab.rs/app/orders/1' },
+    ],
+    ['a javascript admin link', { adminUrl: 'javascript:alert(1)' }],
     ['a comment over 2000 characters', { comment: 'x'.repeat(2001) }],
   ])('rejects %s', (_label, patch) => {
     expect(orderHookSchema.safeParse({ ...PAYLOAD, ...patch }).success).toBe(
