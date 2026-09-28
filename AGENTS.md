@@ -175,6 +175,11 @@ Approved's trust/verification semantics.
   the result — so run such a package's tests through turbo
   (`pnpm turbo run test --filter=<package>`); a bare `pnpm --filter <package> test`
   finds no `dist/`.
+- **Two slug helpers on purpose.** Medusa product handles use
+  `apps/medusa/src/lib/translit.ts` (slugify, Russian transliteration:
+  `Аккумулятор тест` → `akkumulyator-test`); storefront landing slugs use
+  `landingSlug` in `@podbor/shop-catalog` (ASCII-folds spec values such as
+  `5W-30` or `60 Ah`). Different inputs, different jobs — do not merge them.
 - **A helper a lazily-loaded path depends on must live in a module that imports
   nothing heavy.** Rollup cannot code-split a module that is also statically
   imported, so putting such a helper beside a static `libphonenumber-js` import

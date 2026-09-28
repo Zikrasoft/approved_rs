@@ -1,5 +1,6 @@
 import { defineMiddlewares } from '@medusajs/framework/http';
 
+import { fillProductDefaults } from './admin/products/require-fields';
 import {
   limitIdentityRegistrations,
   limitPasswordLogins,
@@ -13,6 +14,11 @@ export default defineMiddlewares({
       matcher: '/store/carts/:id/complete',
       method: 'POST',
       middlewares: [limitCartCompletions],
+    },
+    {
+      matcher: '/admin/products',
+      method: 'POST',
+      middlewares: [fillProductDefaults],
     },
     {
       matcher: '/auth/:actor_type/:auth_provider',
