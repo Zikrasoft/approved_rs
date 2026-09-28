@@ -624,7 +624,6 @@
     "4eab1da1b2b6f1b2": "Pogledaj sve radove",
     "4f82b1a608bb0a37": "Learn more in",
     "4fa90bae381b13ee": "Breadcrumbs",
-    "5497dd644ad3cc2f": "We store an anonymous identifier in your browser — it links your clicks on contact buttons to submitted requests, so your inquiry doesn't get lost. We also use Yandex.Metrica to understand how visitors use the site. It records sessions — cursor movement, scrolling, and clicks; the application form is excluded from the recording.",
     "563187f54d4b18f1": "Sledeća slika",
     "565daa15c498b44e": "Phone Call",
     "5ae20d720044f0ef": "Previous Photo",
@@ -665,6 +664,7 @@
     "a2bab8649e354552": "Česta pitanja",
     "a391d7eb3c9154a9": "Više informacija u",
     "a56517baa72d81ea": "Home",
+    "a8cad91bf2db3966": "Koristimo kolačiće.",
     "a90f2536226928a5": "Instagram",
     "a9da2590f10311c1": "Please enter a valid phone number",
     "aa2f7f86cbe74a8f": "Name",
@@ -716,10 +716,10 @@
     "f9dc0e5e16016fdd": "Jezik",
     "fadfd192a530d102": "Message on Viber",
     "fb2b103cc7fdcea4": "Potvrdite saglasnost da biste poslali zahtev",
-    "fd1ac92f6ed0f01e": "Čuvamo anonimni identifikator u pretraživaču — on povezuje vaše klikove na kontakt dugmadi sa poslati zahtevom, kako se ne bi izgubila. Takođe koristimo Yandex.Metriku da bismo razumeli kako posetioci koriste sajt. Ona beleži sesije — pokrete kursora, skrolovanje i klikove; forma zahteva nije uključena u snimke.",
     "ff8e44a6aadcc10c": "Book Now",
     "ff9c56f77c1d9c4a": "Comment",
-    "ff9f9869ac5485c1": "After"
+    "ff9f9869ac5485c1": "After",
+    "ffeb4d2a28089056": "We use cookies."
   },
   "src/content/works/bmw-x5/index.md": {
     "002044473e9ac809": "BMW X5",

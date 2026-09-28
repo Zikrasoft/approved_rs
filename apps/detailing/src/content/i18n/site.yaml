@@ -149,7 +149,7 @@ translations:
       modalTitle: Ostaviti zahtev
       noscriptNote: Forma funkcioniše samo sa uključenim JavaScript-om. Ako je isključen — kontaktirajte nas direktno.
     cookie:
-      notice: Čuvamo anonimni identifikator u pretraživaču — on povezuje vaše klikove na kontakt dugmadi sa poslati zahtevom, kako se ne bi izgubila. Takođe koristimo Yandex.Metriku da bismo razumeli kako posetioci koriste sajt. Ona beleži sesije — pokrete kursora, skrolovanje i klikove; forma zahteva nije uključena u snimke.
+      notice: Koristimo kolačiće.
       more: Više informacija u
       policyLink: politici privatnosti
       accept: Prihvatiti
@@ -227,10 +227,10 @@ translations:
       modalTitle: Submit a Request
       noscriptNote: The form works only with JavaScript enabled. If it’s disabled — contact us directly.
     cookie:
-      notice: We store an anonymous identifier in your browser — it links your clicks on contact buttons to submitted requests, so your inquiry doesn't get lost. We also use Yandex.Metrica to understand how visitors use the site. It records sessions — cursor movement, scrolling, and clicks; the application form is excluded from the recording.
+      notice: We use cookies.
       more: Learn more in
       policyLink: the privacy policy
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: 32600abaf30f2a23
+translatedFrom: 7a4ee37c94ac8ec4
