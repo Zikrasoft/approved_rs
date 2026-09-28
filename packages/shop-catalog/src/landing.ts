@@ -12,7 +12,7 @@ export function landingSlug(field: Field, value: string | number): string {
   const raw = field.kind === 'number' ? `${value}${field.unit}` : String(value);
   return raw
     .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/\p{M}/gu, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
