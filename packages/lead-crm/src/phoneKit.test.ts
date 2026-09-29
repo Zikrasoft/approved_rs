@@ -15,6 +15,16 @@ function form(): HTMLFormElement {
   return element;
 }
 
+function fields(typed: string): [HTMLSelectElement, HTMLInputElement] {
+  document.body.innerHTML = `
+    <select data-country><option value="RS" data-dial="381" selected>RS</option></select>
+    <input data-phone value="${typed}">`;
+  return [
+    document.querySelector<HTMLSelectElement>('[data-country]')!,
+    document.querySelector<HTMLInputElement>('[data-phone]')!,
+  ];
+}
+
 beforeEach(() => {
   vi.useFakeTimers();
   document.body.innerHTML = '';
@@ -55,6 +65,19 @@ describe('loadPhoneKit', () => {
     await loadPhoneKit();
     expect(phoneKit()).toBeNull();
     expect(deferSubmitUntilKit(form())).toBe(false);
+  });
+});
+
+describe('phoneValue', () => {
+  it('composes E.164 from the dial code before the kit loads', async () => {
+    const { phoneValue } = await freshModule();
+    expect(phoneValue(...fields('060 123 4567'))).toBe('+381601234567');
+  });
+
+  it('lets a typed foreign number win over the selected country once the kit loads', async () => {
+    const { phoneValue, loadPhoneKit } = await freshModule();
+    await loadPhoneKit();
+    expect(phoneValue(...fields('+7 999 123-45-67'))).toBe('+79991234567');
   });
 });
 
