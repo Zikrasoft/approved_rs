@@ -240,7 +240,10 @@ jobs:
           docker run -d --name medusa --network host --env-file "$RUNNER_TEMP/medusa.env" "$MEDUSA_IMAGE:$SHA"
           for _ in $(seq 60); do
             status=$(docker inspect --format '{{.State.Health.Status}}' medusa)
-            [ "$status" = healthy ] && break
+            case "$status" in
+              healthy | unhealthy) break ;;
+            esac
+            [ "$(docker inspect --format '{{.State.Running}}' medusa)" = true ] || break
             sleep 3
           done
           docker logs medusa 2>&1 | tail -40
@@ -251,9 +254,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VPS_HOST: ${{ secrets.MEDUSA_VPS_HOST }}
+          VPS_USER: ${{ secrets.MEDUSA_VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.MEDUSA_VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.MEDUSA_VPS_KNOWN_HOSTS }}
         run: |
-          if [ -z "$VPS_HOST" ]; then
-            echo "MEDUSA_VPS_HOST is not set — nothing will deploy the image, so it is not pushed."
+          if [ -z "$VPS_HOST" ] || [ -z "$VPS_USER" ] || [ -z "$VPS_SSH_KEY" ] || [ -z "$VPS_KNOWN_HOSTS" ]; then
+            echo "MEDUSA_VPS_* secrets are not set — nothing will deploy the image, so it is not pushed."
             exit 0
           fi
           echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
@@ -268,8 +274,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     permissions:
-      contents: write
+      contents: read
       packages: read
+    outputs:
+      deployed: ${{ steps.result.outputs.deployed }}
     env:
       SHA: ${{ needs.translate.outputs.sha }}
       VPS_HOST: ${{ secrets.MEDUSA_VPS_HOST }}
@@ -314,8 +322,24 @@ jobs:
       - name: Log the host out of GHCR
         if: always() && steps.guard.outputs.deploy == 'true'
         run: ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$TARGET" 'docker logout ghcr.io' || true
-      - name: Record what is live
+      - id: result
         if: steps.guard.outputs.deploy == 'true'
+        run: echo "deployed=true" >> "$GITHUB_OUTPUT"
+
+  record-medusa:
+    needs: [translate, deploy-medusa]
+    if: needs.deploy-medusa.outputs.deployed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      SHA: ${{ needs.translate.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.translate.outputs.sha }}
+          persist-credentials: false
+      - name: Record what is live
         env:
           GH_TOKEN: ${{ github.token }}
           APP: medusa
