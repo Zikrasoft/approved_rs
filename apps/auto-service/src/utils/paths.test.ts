@@ -12,7 +12,6 @@ describe('PathBuilder', () => {
       PathBuilder.works('sr'),
       PathBuilder.work('sr', 'bmw-x5'),
       PathBuilder.shop('sr'),
-      PathBuilder.product('sr', 'battery-60'),
       PathBuilder.shopType('sr', 'batteries'),
       PathBuilder.shopProduct('sr', 'batteries', 'bosch-s4-024'),
       PathBuilder.shopLanding('sr', 'batteries', '60ah'),

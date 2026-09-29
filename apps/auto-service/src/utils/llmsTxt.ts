@@ -2,6 +2,8 @@ import { getCollection } from 'astro:content';
 import { mapPlaceUrl } from '@podbor/site-kit';
 import { renderBrandLlmsTxt, type LlmsLinkList } from '@podbor/i18n';
 import { SITE_URL, SITE_NAME, GARAGE_ADDRESS } from '@/utils/constants';
+import { shopCatalog } from '@/lib/catalog';
+import { shopTypeKeys } from '@/lib/shopPages';
 import { shopIndexed } from '@/utils/shopStatus';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { localizedWork, publishedWorks } from '@/utils/works';
@@ -15,9 +17,13 @@ import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 
 const url = (path: string) => `${SITE_URL}${path}`;
 
-function shopList(locale: Locale, heading: string): LlmsLinkList[] {
+async function shopList(
+  locale: Locale,
+  heading: string,
+): Promise<LlmsLinkList[]> {
   if (!shopIndexed()) return [];
   const shop = getShopContent(locale);
+  const { products } = await shopCatalog().catalog(locale);
   return [
     {
       heading,
@@ -26,7 +32,11 @@ function shopList(locale: Locale, heading: string): LlmsLinkList[] {
         href: url(PathBuilder.shop(locale)),
         note: shop.lead,
       },
-      entries: [],
+      entries: shopTypeKeys(products).map((key) => ({
+        label: shop.types[key].name,
+        href: url(PathBuilder.shopType(locale, key)),
+        note: shop.types[key].lead,
+      })),
     },
   ];
 }
@@ -60,7 +70,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
           note: services[slug].short,
         })),
       },
-      ...shopList(locale, site.nav.shop),
+      ...(await shopList(locale, site.nav.shop)),
       {
         heading: site.nav.works,
         index: {

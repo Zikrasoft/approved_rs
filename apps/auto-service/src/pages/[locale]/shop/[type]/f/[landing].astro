@@ -1,0 +1,84 @@
+---
+import { productType } from '@podbor/shop-catalog/browser';
+import { withPlaceholder } from '@podbor/i18n';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import ShopGate from '@/components/ShopGate.astro';
+import CarPicker from '@/components/CarPicker.astro';
+import ShopFilter from '@/components/ShopFilter.astro';
+import ProductGrid from '@/components/ProductGrid.astro';
+import Icon from '@/components/Icon.astro';
+import { BCP47_BY_LOCALE, PRIMARY_LOCALE } from '@/i18n/config';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getShopContent } from '@/i18n/content/shop';
+import { getSiteContent } from '@/i18n/content/site';
+import { shopCatalog } from '@/lib/catalog';
+import { formatValue, specCopy } from '@/lib/formatSpec';
+import { landingProducts, landingsFor, shopTypeKeys } from '@/lib/shopPages';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import { shopBuilt, shopIndexed } from '@/utils/shopStatus';
+
+export async function getStaticPaths() {
+  if (!shopBuilt()) return [];
+  const { products } = await shopCatalog().catalog(PRIMARY_LOCALE);
+  return withLocales(
+    shopTypeKeys(products).flatMap((type) =>
+      landingsFor(products, type).map((landing) => ({
+        params: { type, landing: landing.slug },
+        props: { key: landing.key, value: landing.value },
+      })),
+    ),
+  );
+}
+
+const { key, value } = Astro.props;
+const typeKey = Astro.params.type!;
+const locale = localeFrom(Astro.url.pathname);
+const shop = getShopContent(locale);
+const site = getSiteContent(locale);
+const type = productType(typeKey)!;
+const copy = shop.types[typeKey];
+const label = formatValue(
+  type.fields.find((field) => field.key === key)!,
+  value,
+  specCopy(shop, typeKey, BCP47_BY_LOCALE[locale]),
+);
+const fill = (template: string) => withPlaceholder(template, 'value', label);
+const { products: all } = await shopCatalog().catalog(locale);
+const products = landingProducts(all, typeKey, { key, value });
+const vehicles =
+  type.fitment === 'none' ? undefined : await shopCatalog().vehicles();
+const heading = fill(copy.landing.heading);
+---
+
+<Shell
+  title={fill(copy.landing.metaTitle)}
+  description={fill(copy.landing.metaDescription)}
+  noindex={!shopIndexed()}
+>
+  <ShopGate>
+    <PageHero
+      eyebrow={copy.name}
+      heading={heading}
+      lead={copy.lead}
+      crumbs={[
+        { href: PathBuilder.shop(locale), label: site.nav.shop },
+        { href: PathBuilder.shopType(locale, typeKey), label: copy.name },
+        { href: Astro.url.pathname, label: heading },
+      ]}
+    />
+    <section class="wrap flex flex-col gap-6 py-band md:py-band-lg">
+      {vehicles && <CarPicker index={vehicles} />}
+      <ShopFilter typeKey={typeKey} products={products} omit={key}>
+        <ProductGrid products={products} />
+      </ShopFilter>
+      <a
+        href={PathBuilder.shopType(locale, typeKey)}
+        class="btn btn-secondary w-full sm:w-fit"
+      >
+        {withPlaceholder(shop.allOfType, 'type', copy.name)}
+        <Icon name="arrowRight" />
+      </a>
+    </section>
+  </ShopGate>
+</Shell>
