@@ -47,6 +47,13 @@ const related = productsOfType(catalog.products, typeKey)
   .slice(0, 4);
 const href = PathBuilder.shopProduct(locale, typeKey, handle);
 const description = `${product.title}. ${copy.metaDescription}`;
+const searchTerms = [
+  copy.name,
+  ...lines.map((line) => line.value),
+  ...product.fitment.map(
+    (entry) => `${entry.make} ${entry.model} ${entry.yearFrom}–${entry.yearTo}`,
+  ),
+].join(' ');
 ---
 
 <Shell
@@ -71,7 +78,15 @@ const description = `${product.title}. ${copy.metaDescription}`;
         { href, label: product.title },
       ]}
     />
-    <section class="wrap grid gap-8 py-band md:py-band-lg lg:grid-cols-2">
+    <section
+      data-pagefind-body
+      class="wrap grid gap-8 py-band md:py-band-lg lg:grid-cols-2"
+    >
+      <span class="hidden" data-pagefind-meta="title">{product.title}</span>
+      <span class="hidden" data-pagefind-meta="price"
+        >{formatPrice(product.price, bcp47)}</span
+      >
+      <p class="hidden" aria-hidden="true">{searchTerms}</p>
       <div class="card flex items-center justify-center bg-shade p-6 sm:p-8">
         {
           product.image && (
@@ -105,7 +120,7 @@ const description = `${product.title}. ${copy.metaDescription}`;
           </div>
         </div>
         <h2 class="sr-only">{shop.specsHeading}</h2>
-        <dl class="card divide-y divide-line">
+        <dl data-pagefind-ignore class="card divide-y divide-line">
           {
             lines.map((line) => (
               <div class="flex items-center justify-between gap-4 px-4 py-3">

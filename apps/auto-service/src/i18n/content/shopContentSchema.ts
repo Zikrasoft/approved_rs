@@ -156,6 +156,9 @@ export const shopContentSchema = z
     soldOutError: text,
     previewHeading: text,
     previewBody: text,
+    searchLabel: text,
+    searchPlaceholder: text,
+    searchEmpty: text,
     types: keyed(
       PRODUCT_TYPES.map((type) => type.key),
       (key) => typeCopy(PRODUCT_TYPES.find((type) => type.key === key)!),

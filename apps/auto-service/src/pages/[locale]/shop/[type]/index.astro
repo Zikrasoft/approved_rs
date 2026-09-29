@@ -5,6 +5,7 @@ import PageHero from '@/components/PageHero.astro';
 import ShopGate from '@/components/ShopGate.astro';
 import CarPicker from '@/components/CarPicker.astro';
 import ShopFilter from '@/components/ShopFilter.astro';
+import ShopSearch from '@/components/ShopSearch.astro';
 import ProductGrid from '@/components/ProductGrid.astro';
 import { BCP47_BY_LOCALE, PRIMARY_LOCALE } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
@@ -61,6 +62,7 @@ const vehicles =
       ]}
     />
     <section class="wrap flex flex-col gap-6 py-band md:py-band-lg">
+      <ShopSearch />
       {vehicles && <CarPicker index={vehicles} />}
       {
         landings.length > 0 && (
