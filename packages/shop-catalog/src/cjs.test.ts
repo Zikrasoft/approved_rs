@@ -23,6 +23,8 @@ describe('CommonJS build', () => {
     expect(shop.landingSlug(shop.productType('batteries').fields[1], 60)).toBe(
       '60ah',
     );
+    expect(shop.vehicleFitment({ makes: [] })).toEqual([]);
+    expect(shop.vehicleTreeSchema.safeParse({ makes: [] }).success).toBe(true);
   });
 
   it('serves the browser subpath to require()', () => {

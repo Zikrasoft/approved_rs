@@ -1,4 +1,5 @@
 import type { FitmentEntry } from '@podbor/shop-catalog/browser';
+import type { VehicleTreeResponse } from '@podbor/shop-catalog';
 
 export type Generation = {
   id?: string;
@@ -156,3 +157,17 @@ export function applyEdit(
         }));
   return found ? next : undefined;
 }
+
+export const publicVehicleTree = (tree: VehicleTree): VehicleTreeResponse => ({
+  makes: tree.map((make) => ({
+    name: make.name,
+    models: make.models.map((model) => ({
+      name: model.name,
+      generations: model.generations.map(({ name, yearFrom, yearTo }) => ({
+        name,
+        yearFrom,
+        yearTo,
+      })),
+    })),
+  })),
+});
