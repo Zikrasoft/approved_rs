@@ -5,8 +5,10 @@ import {
   SHOP_COUNTRY,
 } from '@podbor/shop-catalog/browser';
 import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
-import { CART_FIELDS, type Cart } from './cartApi';
+import { CART_FIELDS, carts, type Cart } from './cartApi';
 import { storeJson } from './store';
+
+export { retrieveCart } from './cartApi';
 
 export interface Contact {
   name: string;
@@ -27,15 +29,12 @@ export class NoPickupError extends Error {}
 
 export class CompletionError extends Error {}
 
-const cartPath = (id: string, rest = '') =>
-  `/store/carts/${encodeURIComponent(id)}${rest}`;
-
 export const saveContact = async (
   cartId: string,
   contact: Contact,
 ): Promise<Cart> =>
   (
-    await storeJson<{ cart: Cart }>(cartPath(cartId), {
+    await storeJson<{ cart: Cart }>(carts(cartId), {
       method: 'POST',
       params: { fields: CART_FIELDS },
       body: {
@@ -63,7 +62,7 @@ export async function choosePickup(cartId: string): Promise<Cart> {
   );
   if (!pickup) throw new NoPickupError(`No pickup option for cart ${cartId}`);
   return (
-    await storeJson<{ cart: Cart }>(cartPath(cartId, '/shipping-methods'), {
+    await storeJson<{ cart: Cart }>(carts(cartId, '/shipping-methods'), {
       method: 'POST',
       params: { fields: CART_FIELDS },
       body: { option_id: pickup.id },
@@ -98,7 +97,7 @@ export async function completeCart(cartId: string): Promise<PlacedOrder> {
     type: string;
     order?: PlacedOrder;
     error?: { message?: string };
-  }>(cartPath(cartId, '/complete'), { method: 'POST', body: {} });
+  }>(carts(cartId, '/complete'), { method: 'POST', body: {} });
   if (result.type !== 'order' || !result.order) {
     throw new CompletionError(
       result.error?.message ?? 'Cart was not completed',

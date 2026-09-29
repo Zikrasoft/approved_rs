@@ -22,7 +22,7 @@ export interface Cart {
 export const CART_FIELDS = '+items.total,+completed_at';
 
 const params = { fields: CART_FIELDS };
-const carts = (id: string, rest = '') =>
+export const carts = (id: string, rest = '') =>
   `/store/carts/${encodeURIComponent(id)}${rest}`;
 
 const send = async (path: string, method: string, body?: unknown) =>

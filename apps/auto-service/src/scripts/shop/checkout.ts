@@ -4,6 +4,7 @@ import {
   choosePickup,
   completeCart,
   preparePayment,
+  retrieveCart,
   saveContact,
   type Contact,
   type PlacedOrder,
@@ -23,6 +24,12 @@ export async function placeOrder(
 ): Promise<PlacedOrder> {
   const id = currentCart()?.id;
   if (!id) throw new NoCartError('No cart to check out');
+  const cart = await retrieveCart(id);
+  if (cart.completed_at) {
+    const order = await completeCart(id);
+    clearCart();
+    return order;
+  }
   applyCart(await saveContact(id, contact));
   applyCart(await choosePickup(id));
   const amount = await preparePayment(id);

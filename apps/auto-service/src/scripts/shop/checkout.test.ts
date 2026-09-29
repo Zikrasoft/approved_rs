@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { StoreError } from './store';
 
 const api = vi.hoisted(() => ({
+  retrieveCart: vi.fn(),
   saveContact: vi.fn(),
   choosePickup: vi.fn(),
   preparePayment: vi.fn(),
@@ -30,6 +31,7 @@ const CONTACT = {
 beforeEach(() => {
   vi.clearAllMocks();
   cart.currentCart.mockReturnValue({ id: 'c1', total: 12690, items: [] });
+  api.retrieveCart.mockResolvedValue({ id: 'c1', completed_at: null });
   api.saveContact.mockResolvedValue({ id: 'c1' });
   api.choosePickup.mockResolvedValue({ id: 'c1' });
   api.preparePayment.mockResolvedValue(12690);
@@ -69,6 +71,36 @@ describe('placeOrder', () => {
     cart.currentCart.mockReturnValue(null);
 
     await expect(placeOrder(CONTACT, 0)).rejects.toBeInstanceOf(NoCartError);
+  });
+
+  it('recovers a lost complete response instead of ordering twice', async () => {
+    api.completeCart.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+
+    await expect(placeOrder(CONTACT, 12690)).rejects.toThrow(TypeError);
+    expect(cart.clearCart).not.toHaveBeenCalled();
+
+    api.saveContact.mockClear();
+    api.choosePickup.mockClear();
+    api.preparePayment.mockClear();
+    api.retrieveCart.mockResolvedValue({
+      id: 'c1',
+      completed_at: '2026-01-01T00:00:00.000Z',
+    });
+    api.completeCart.mockResolvedValue({
+      id: 'o1',
+      display_id: 7,
+      total: 12690,
+    });
+
+    expect(await placeOrder(CONTACT, 12690)).toEqual({
+      id: 'o1',
+      display_id: 7,
+      total: 12690,
+    });
+    expect(api.saveContact).not.toHaveBeenCalled();
+    expect(api.choosePickup).not.toHaveBeenCalled();
+    expect(api.preparePayment).not.toHaveBeenCalled();
+    expect(cart.clearCart).toHaveBeenCalledTimes(1);
   });
 });
 

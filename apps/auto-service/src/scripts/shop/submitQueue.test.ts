@@ -54,4 +54,16 @@ describe('submitQueue', () => {
 
     expect(operation).not.toHaveBeenCalled();
   });
+
+  it('lets onIdle stop the queue so a collapsed follow-up never runs after success', async () => {
+    const operation = vi.fn();
+    const onIdle = vi.fn(() => submit.stop());
+    const submit = submitQueue(button(), vi.fn(), onIdle);
+
+    const first = submit(async () => {});
+    void submit(operation);
+    await first;
+
+    expect(operation).not.toHaveBeenCalled();
+  });
 });
