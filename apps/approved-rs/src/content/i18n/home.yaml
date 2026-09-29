@@ -204,7 +204,7 @@ translations:
         - Used
         - Done for you
     catalogue:
-      heading: What can you get for this budget
+      heading: Recent Transactions
       subtext: 'There are no listings here: each car is found, inspected, processed, and delivered to a person. The price is what they paid.'
       allCountriesLabel: All countries
       moreLabel: Show more {rest}
@@ -329,7 +329,7 @@ translations:
         - Sa pređenim kilometrima
         - Sve uključeno
     catalogue:
-      heading: Šta se može nabaviti za taj novac
+      heading: Poslednje transakcije
       subtext: 'Ovde nema oglasa: svaki automobil je pronađen, pregledan, registrovan i predat čoveku. Cena je ona koju je platao.'
       allCountriesLabel: Sve zemlje
       moreLabel: Prikaži još {rest}
@@ -454,7 +454,7 @@ translations:
         - Con kilometraje
         - Llave en mano
     catalogue:
-      heading: Qué puedes comprar por este dinero
+      heading: Últimas transacciones
       subtext: 'Aquí no hay anuncios: cada auto está encontrado, verificado, tramitado y entregado a una persona. El precio es el que pagó él.'
       allCountriesLabel: Todos los países
       moreLabel: Mostrar más {rest}
@@ -579,7 +579,7 @@ translations:
         - Gebraucht
         - Schlüsselfertig
     catalogue:
-      heading: Was man für dieses Geld bekommt
+      heading: Neueste Geschäfte
       subtext: 'Hier gibt es keine Anzeigen: Jedes Auto ist gefunden, geprüft, registriert und an eine Person übergeben. Der Preis ist der, den er bezahlt hat.'
       allCountriesLabel: Alle Länder
       moreLabel: Noch mehr zeigen {rest}
@@ -624,4 +624,4 @@ translations:
     findingLabel: 'Gefunden:'
     heroPhotoAlt: Limousine auf einer europäischen Autobahn
     ctaPhotoAlt: Saubere Karosserie und Auto-Rad im Close-up
-translatedFrom: 16762abf32c16a94
+translatedFrom: f9da32af62a6f2c0
