@@ -415,3 +415,17 @@ Don't reach for a library reflexively, though — a hand-rolled ~10-line helper 
 **A bot framework (grammy/telegraf) stays out, and the reason is no longer "the bot is too small".** It isn't: roughly fifteen named callback handlers and a five-kind `pendingPrompt` state machine driven by `force_reply`. The reasons that actually hold are structural. The webhook is a serverless function, so telegraf's long-running `bot.launch()` model collapses to `handleUpdate` plus a cold-start cost, and the ergonomics it is chosen for are exactly what gets lost. Its scenes want a session store keyed by user, while `pendingPrompt` deliberately lives on the lead record in Blob — the prompt belongs to a lead, not to a person, and two operators can act on one lead. And `packages/lead-crm/src/telegram/client.ts` is not a bare `fetch`: `safeEditMessage` swallows "message is not modified", and `notify.ts` separately swallows "message to edit not found" — domain knowledge no framework supplies. What has genuinely outgrown hand-rolling is the **dispatch**: `handleCallbackQuery` in `apps/approved-rs/src/pages/api/telegram-webhook.ts` runs every callback through a couple of dozen callback-data regexes and a flat chain of early-return guards. If that becomes painful, the fix is a `[pattern, handler]` table in that same file — note the guards carry per-branch role checks, so the table has to hold the required role too, which is why this is worth doing only when the chain actually hurts.
 
 This only applies to build-time code (`.astro` frontmatter, `src/lib/`, `scripts/`). Code that ships to the browser (client-side `<script>`, hydrated islands) still carries a real bundle-size cost — weigh a new client dependency normally there.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues in `Zikrasoft/approved_rs`, via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
