@@ -7,6 +7,7 @@ import PageHero from '@/components/PageHero.astro';
 import ShopGate from '@/components/ShopGate.astro';
 import SectionHead from '@/components/SectionHead.astro';
 import ProductCard from '@/components/ProductCard.astro';
+import AddToCart from '@/components/AddToCart.astro';
 import { BCP47_BY_LOCALE, PRIMARY_LOCALE } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getShopContent } from '@/i18n/content/shop';
@@ -39,7 +40,11 @@ const catalog = await shopCatalog().catalog(locale);
 const product = catalog.products.find(
   (candidate) => candidate.handle === handle,
 )!;
+const regionId = await shopCatalog().regionId();
 const type = productType(typeKey)!;
+const installation = type.installation
+  ? catalog.installations[type.installation]
+  : undefined;
 const copy = shop.types[typeKey];
 const lines = formatSpec(type, product.spec, specCopy(shop, typeKey, bcp47));
 const related = productsOfType(catalog.products, typeKey)
@@ -108,16 +113,25 @@ const searchTerms = [
             <span class="spec text-3xl font-medium text-ink">
               {formatPrice(product.price, bcp47)}
             </span>
-            <span
-              data-baked-stock
+            <stock-status
+              data-handle={product.handle}
+              data-variant={product.variantId}
+              data-in={shop.inStock}
+              data-out={shop.outOfStock}
+              data-low={shop.lowStock}
               class:list={[
-                'spec rounded-full px-2.5 py-1 text-xs',
+                'spec rounded-full px-2.5 py-1 text-xs data-[state=in]:bg-go/10 data-[state=in]:text-go data-[state=low]:bg-go/10 data-[state=low]:text-go data-[state=out]:bg-shade data-[state=out]:text-muted',
                 product.inStock ? 'bg-go/10 text-go' : 'bg-shade text-muted',
               ]}
             >
               {product.inStock ? shop.inStock : shop.outOfStock}
-            </span>
+            </stock-status>
           </div>
+          <AddToCart
+            product={product}
+            installation={installation}
+            regionId={regionId}
+          />
         </div>
         <h2 class="sr-only">{shop.specsHeading}</h2>
         <dl data-pagefind-ignore class="card divide-y divide-line">
@@ -172,3 +186,9 @@ const searchTerms = [
     }
   </ShopGate>
 </Shell>
+
+<script>
+  import { defineStockStatus } from '@/scripts/shop/stockStatus';
+
+  defineStockStatus();
+</script>

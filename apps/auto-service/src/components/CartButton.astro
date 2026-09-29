@@ -14,27 +14,16 @@ const shop = getShopContent(locale);
   aria-label={shop.cart.heading}
 >
   <Icon name="cart" />
-  <span
-    class="spec hidden text-xs tabular-nums"
-    data-cart-count
-    data-cart-label={shop.cart.badgeLabel}>0</span
+  <cart-count
+    data-locale={locale}
+    data-label={shop.cart.badgeLabel}
+    class="spec text-xs tabular-nums"
+    hidden>0</cart-count
   >
 </a>
 
 <script>
-  import { readCart, cartCount, onCartChange } from '@/utils/cart';
+  import { defineCartCount } from '@/scripts/shop/cartCount';
 
-  const badge = document.querySelector<HTMLElement>('[data-cart-count]');
-  const render = () => {
-    if (!badge) return;
-    const count = cartCount(readCart());
-    badge.textContent = String(count);
-    badge.classList.toggle('hidden', count === 0);
-    badge.parentElement?.setAttribute(
-      'aria-label',
-      `${badge.dataset.cartLabel ?? ''}: ${count}`,
-    );
-  };
-  render();
-  onCartChange(render);
+  defineCartCount();
 </script>
