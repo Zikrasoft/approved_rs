@@ -81,7 +81,7 @@ export function readStoreEnv(env: Record<string, unknown>): StoreEnv {
 const variantSchema = z.object({
   id: z.string(),
   sku: z.string().nullish(),
-  manage_inventory: z.boolean().nullish(),
+  manage_inventory: z.boolean(),
   allow_backorder: z.boolean().nullish(),
   inventory_quantity: z.number().nullish(),
   calculated_price: z
@@ -135,11 +135,11 @@ function priceOf(variant: StoreVariant): number | undefined {
     : undefined;
 }
 
-export function readCatalog(raw: unknown): {
+function buildCatalog(parsed: z.infer<typeof productsSchema>): {
   catalog: Catalog;
   skipped: string[];
 } {
-  const { products } = productsSchema.parse(raw);
+  const { products } = parsed;
   const skipped: string[] = [];
   const cards: CatalogProduct[] = [];
   const installations: Record<string, Installation> = {};
@@ -192,6 +192,13 @@ export function readCatalog(raw: unknown): {
   return { catalog: { products: cards, installations }, skipped };
 }
 
+export function readCatalog(raw: unknown): {
+  catalog: Catalog;
+  skipped: string[];
+} {
+  return buildCatalog(productsSchema.parse(raw));
+}
+
 export function createCatalogLoader(
   env: StoreEnv,
   fetcher: typeof fetch = fetch,
@@ -210,7 +217,11 @@ export function createCatalogLoader(
     if (!response.ok) {
       throw new Error(`Medusa answered ${response.status} for ${path}`);
     }
-    return schema.parse(await response.json());
+    try {
+      return schema.parse(await response.json());
+    } catch (cause) {
+      throw new Error(`[catalog] bad answer from ${path}`, { cause });
+    }
   };
 
   let version: Promise<string> | undefined;
@@ -238,19 +249,20 @@ export function createCatalogLoader(
       if (cached) return cached;
       const loading = (async () => {
         await loader.version();
-        const raw = await get('/store/products', z.unknown(), {
+        const raw = await get('/store/products', productsSchema, {
           region_id: await loader.regionId(),
           locale: MEDUSA_LOCALE[locale],
           limit: String(CATALOG_LIMIT),
           fields: PRODUCT_FIELDS,
         });
-        const { count } = productsSchema.pick({ count: true }).parse(raw);
-        if (count > CATALOG_LIMIT) {
+        if (raw.count > CATALOG_LIMIT || raw.products.length !== raw.count) {
           throw new Error(
-            `[catalog] Medusa holds ${count} products, one read returns ${CATALOG_LIMIT} — add pagination`,
+            raw.count > CATALOG_LIMIT
+              ? `[catalog] Medusa holds ${raw.count} products, one read returns ${CATALOG_LIMIT} — add pagination`
+              : `[catalog] Medusa reported ${raw.count} products but returned ${raw.products.length}`,
           );
         }
-        const { catalog, skipped } = readCatalog(raw);
+        const { catalog, skipped } = buildCatalog(raw);
         for (const reason of skipped)
           console.warn(`[catalog] skipped ${reason}`);
         if (catalog.products.length === 0) {

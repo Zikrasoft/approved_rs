@@ -230,6 +230,45 @@ describe('createCatalogLoader', () => {
     ).rejects.toThrow(/add pagination/);
   });
 
+  it('fails the build when Medusa returns fewer products than it counts', async () => {
+    const { fetcher } = store(products([BATTERY, INSTALLATION], 3));
+
+    await expect(
+      createCatalogLoader(ENV, fetcher).catalog('sr'),
+    ).rejects.toThrow(/reported 3 products but returned 2/);
+  });
+
+  it('fails the build on an unparsable answer, naming the route', async () => {
+    const fetcher = vi.fn(async (input: string | URL) => {
+      const path = new URL(String(input)).pathname;
+      if (path === '/store/products') return new Response('not json');
+      if (path === '/store/regions') return json(REGIONS);
+      return json(VERSION);
+    }) as unknown as typeof fetch;
+
+    await expect(
+      createCatalogLoader(ENV, fetcher).catalog('sr'),
+    ).rejects.toThrow('[catalog] bad answer from /store/products');
+  });
+
+  it('fails the build on a malformed products answer, naming the route', async () => {
+    const { fetcher } = store({ products: [{ id: 'x' }], count: 1 });
+
+    await expect(
+      createCatalogLoader(ENV, fetcher).catalog('sr'),
+    ).rejects.toThrow('[catalog] bad answer from /store/products');
+  });
+
+  it('fails the build when a variant is missing manage_inventory', async () => {
+    const drifted = battery('no-inventory-flag');
+    delete (drifted.variants[0] as Record<string, unknown>).manage_inventory;
+    const { fetcher } = store(products([drifted]));
+
+    await expect(
+      createCatalogLoader(ENV, fetcher).catalog('sr'),
+    ).rejects.toThrow('[catalog] bad answer from /store/products');
+  });
+
   it('fails the build when no region sells in RSD', async () => {
     const fetcher = vi.fn(async (input: string | URL) =>
       new URL(String(input)).pathname === '/store/regions'
