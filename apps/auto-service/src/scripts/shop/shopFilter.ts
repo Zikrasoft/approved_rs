@@ -1,10 +1,10 @@
 import {
   fitmentMatches,
   matchesFacets,
-  productType,
   readFacetState,
   writeFacetState,
   type FitmentEntry,
+  type ProductTypeDef,
   type Spec,
 } from '@podbor/shop-catalog/browser';
 import { pluralLabel, type PluralForms } from '@/utils/plural';
@@ -19,13 +19,14 @@ export function defineShopFilter(tagName = 'shop-filter'): void {
 
       connectedCallback(): void {
         if (this.controller) return;
-        const type = productType(this.dataset.type ?? '');
+        const typeDef = this.dataset.typeDef;
         const form = this.querySelector<HTMLFormElement>('form[data-facets]');
         const items = [...this.querySelectorAll<HTMLElement>('[data-product]')];
-        if (!type || !form || items.length === 0) return;
+        if (!typeDef || !form || items.length === 0) return;
 
         this.controller = new AbortController();
         const { signal } = this.controller;
+        const type = JSON.parse(typeDef) as ProductTypeDef;
         const count = this.querySelector<HTMLElement>('[data-filter-count]');
         const empty = this.querySelector<HTMLElement>('[data-filter-empty]');
         const forms = JSON.parse(
@@ -33,6 +34,13 @@ export function defineShopFilter(tagName = 'shop-filter'): void {
         ) as PluralForms;
         const bcp47 = this.dataset.bcp47 ?? 'sr-Latn-RS';
         const usesCar = type.fitment !== 'none';
+        const facetKeys = type.fields
+          .filter((field) => field.facet)
+          .flatMap((field) =>
+            field.kind === 'number'
+              ? [`${field.key}.min`, `${field.key}.max`]
+              : [field.key],
+          );
         const entries = items.map((item) => ({
           item,
           spec: JSON.parse(item.dataset.spec ?? '{}') as Spec,
@@ -64,12 +72,18 @@ export function defineShopFilter(tagName = 'shop-filter'): void {
             if (typeof value === 'string' && value.trim() !== '')
               params.append(key, value);
           const state = readFacetState(type, params);
-          const query = writeFacetState(type, state).toString();
-          history.replaceState(
-            history.state,
-            '',
-            query ? `?${query}` : location.pathname,
-          );
+          const next = new URLSearchParams(location.search);
+          for (const key of facetKeys) next.delete(key);
+          for (const [key, value] of writeFacetState(type, state))
+            next.append(key, value);
+          const query = next.toString();
+          if (query !== new URLSearchParams(location.search).toString()) {
+            history.replaceState(
+              history.state,
+              '',
+              query ? `?${query}` : location.pathname,
+            );
+          }
           const car = usesCar ? readCar() : null;
           let shown = 0;
           for (const { item, spec, fitment } of entries) {

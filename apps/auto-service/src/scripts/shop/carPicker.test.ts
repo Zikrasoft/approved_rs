@@ -1,5 +1,13 @@
 // @vitest-environment jsdom
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import { CAR_EVENT, CAR_STORAGE_KEY, readCar, writeCar } from './car';
 import { defineCarPicker } from './carPicker';
 
@@ -38,6 +46,10 @@ beforeAll(() => defineCarPicker());
 beforeEach(() => {
   localStorage.clear();
   document.body.innerHTML = '';
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
 });
 
 describe('<car-picker>', () => {
@@ -80,6 +92,40 @@ describe('<car-picker>', () => {
     mount();
 
     expect(readCar()).toBeNull();
+  });
+
+  it('drops a saved model the dictionary no longer has, keeping the make', () => {
+    writeCar({ make: 'Alfa', model: 'Zeta', year: 2020 });
+    const { pick } = mount();
+
+    expect(readCar()).toEqual({ make: 'Alfa' });
+    expect(pick('model').value).toBe('');
+    expect(pick('year').value).toBe('');
+  });
+
+  it('drops a saved year the dictionary no longer has, keeping make and model', () => {
+    writeCar({ make: 'Alfa', model: 'One', year: 1999 });
+    const { pick } = mount();
+
+    expect(readCar()).toEqual({ make: 'Alfa', model: 'One' });
+    expect(pick('model').value).toBe('One');
+    expect(pick('year').value).toBe('');
+  });
+
+  it('moving the element off and back on keeps exactly one live listener set', () => {
+    const { pick } = mount();
+    const picker = document.querySelector('car-picker')!;
+    const parent = picker.parentElement!;
+    parent.removeChild(picker);
+    parent.appendChild(picker);
+
+    const heard = vi.fn();
+    window.addEventListener(CAR_EVENT, heard);
+    pick('make').value = 'Alfa';
+    pick('make').dispatchEvent(new Event('change'));
+
+    expect(heard).toHaveBeenCalledTimes(1);
+    window.removeEventListener(CAR_EVENT, heard);
   });
 
   it('clears the car and tells the page', () => {
@@ -135,6 +181,5 @@ describe('readCar', () => {
     expect(heard).toHaveBeenCalledTimes(1);
 
     window.removeEventListener(CAR_EVENT, heard);
-    vi.restoreAllMocks();
   });
 });

@@ -47,14 +47,24 @@ export function defineCarPicker(tagName = 'car-picker'): void {
             writeCar(null);
             return;
           }
-          fill(model, car ? (index.modelsByMake[car.make] ?? []) : []);
+          const models = car ? (index.modelsByMake[car.make] ?? []) : [];
+          fill(model, models);
+          if (car?.model && !models.includes(car.model)) {
+            writeCar({ make: car.make });
+            return;
+          }
           model.value = car?.model ?? '';
-          fill(
-            year,
-            car?.model
-              ? (index.yearsByModel[`${car.make}|${car.model}`] ?? [])
-              : [],
-          );
+          const years = car?.model
+            ? (index.yearsByModel[`${car.make}|${car.model}`] ?? [])
+            : [];
+          fill(year, years);
+          if (car?.year && !years.includes(car.year)) {
+            writeCar({
+              make: car.make,
+              ...(car.model && { model: car.model }),
+            });
+            return;
+          }
           year.value = car?.year ? String(car.year) : '';
         };
 

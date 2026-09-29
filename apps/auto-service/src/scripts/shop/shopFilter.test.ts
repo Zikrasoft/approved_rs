@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
-import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { productType } from '@podbor/shop-catalog/browser';
+import { facetTypeDef } from '@/lib/facetTypeDef';
 import { writeCar } from './car';
 import { defineShopFilter } from './shopFilter';
 
@@ -9,6 +11,11 @@ const FORMS = JSON.stringify({
   many: '{count} товаров',
   other: '{count} товара',
 });
+
+const TYPE_DEF: Record<string, string> = {
+  batteries: JSON.stringify(facetTypeDef(productType('batteries')!)),
+  'motor-oils': JSON.stringify(facetTypeDef(productType('motor-oils')!)),
+};
 
 const item = (handle: string, spec: object, fitment: object[] = []) =>
   `<li data-product data-handle="${handle}" data-spec='${JSON.stringify(spec)}' data-fitment='${JSON.stringify(fitment)}'></li>`;
@@ -23,7 +30,7 @@ const COROLLA = {
 const mount = (search = '', type = 'batteries') => {
   history.replaceState(null, '', `/sr/shop/${type}/${search}`);
   document.body.innerHTML = `
-    <shop-filter data-type="${type}" data-bcp47="ru-RS" data-count-forms='${FORMS}'>
+    <shop-filter data-type="${type}" data-type-def='${TYPE_DEF[type]}' data-bcp47="ru-RS" data-count-forms='${FORMS}'>
       <form data-facets>
         <input type="checkbox" name="brand" value="Bosch">
         <input type="checkbox" name="brand" value="Varta">
@@ -96,6 +103,33 @@ describe('<shop-filter>', () => {
     expect(control('[name="capacityAh.min"]').value).toBe('70');
   });
 
+  it('keeps unrelated query params (attribution, dev flag) on connect and after a change', () => {
+    mount('?utm_source=x&dev=true&brand=Bosch');
+    const paramsNow = () => new URLSearchParams(location.search);
+
+    expect(paramsNow().get('utm_source')).toBe('x');
+    expect(paramsNow().get('dev')).toBe('true');
+    expect(paramsNow().getAll('brand')).toEqual(['Bosch']);
+
+    const varta = control('[value="Varta"]');
+    varta.checked = true;
+    change(varta);
+
+    expect(paramsNow().get('utm_source')).toBe('x');
+    expect(paramsNow().get('dev')).toBe('true');
+    expect(paramsNow().getAll('brand').sort()).toEqual(['Bosch', 'Varta']);
+  });
+
+  it('does not touch history when re-applying produces the same address', () => {
+    mount('?brand=Bosch');
+    const replaceSpy = vi.spyOn(history, 'replaceState');
+    replaceSpy.mockClear();
+
+    document.querySelector('[data-facets]')!.dispatchEvent(new Event('change'));
+
+    expect(replaceSpy).not.toHaveBeenCalled();
+  });
+
   it('keeps only what fits the saved car, and follows it when it changes', () => {
     writeCar({ make: 'Toyota', model: 'Corolla', year: 2015 });
     mount();
@@ -110,6 +144,26 @@ describe('<shop-filter>', () => {
     mount('', 'motor-oils');
 
     expect(shown()).toEqual(['a', 'b', 'c']);
+  });
+
+  it('still counts and filters by car when the type has no visible facets', () => {
+    writeCar({ make: 'Toyota', model: 'Corolla', year: 2015 });
+    history.replaceState(null, '', '/sr/shop/batteries/');
+    document.body.innerHTML = `
+      <shop-filter data-type="batteries" data-type-def='${JSON.stringify({ fitment: 'optional', fields: [] })}' data-bcp47="ru-RS" data-count-forms='${FORMS}'>
+        <form data-facets></form>
+        <p data-filter-count></p>
+        <ul>
+          ${item('a', { brand: 'Bosch', capacityAh: 60 }, [COROLLA])}
+          ${item('b', { brand: 'Varta', capacityAh: 74 }, [{ ...COROLLA, model: 'Auris' }])}
+        </ul>
+        <div data-filter-empty hidden></div>
+      </shop-filter>`;
+
+    expect(shown()).toEqual(['a']);
+    expect(document.querySelector('[data-filter-count]')!.textContent).toBe(
+      '1 товар',
+    );
   });
 
   it('says so when nothing is left, and resets', () => {

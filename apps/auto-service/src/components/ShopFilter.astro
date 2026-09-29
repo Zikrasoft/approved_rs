@@ -4,6 +4,7 @@ import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getShopContent } from '@/i18n/content/shop';
 import type { CatalogProduct } from '@/lib/catalog';
+import { facetTypeDef } from '@/lib/facetTypeDef';
 import { optionLabel, specCopy } from '@/lib/formatSpec';
 
 interface Props {
@@ -27,71 +28,68 @@ const unitOf = (key: string) => {
   const field = fieldOf(key);
   return field.kind === 'number' ? copy.units[field.unit] : '';
 };
+const typeDef = facetTypeDef(type);
 ---
 
 <shop-filter
   data-type={typeKey}
+  data-type-def={JSON.stringify(typeDef)}
   data-bcp47={BCP47_BY_LOCALE[locale]}
   data-count-forms={JSON.stringify(shop.matchCount)}
   class="flex flex-col gap-5"
 >
-  {
-    facets.length > 0 && (
-      <form
-        data-facets
-        class="card grid gap-5 p-4 sm:grid-cols-2 lg:grid-cols-4"
-      >
-        <h2 class="sr-only">{shop.filterHeading}</h2>
-        {facets.map((facet) =>
-          facet.kind === 'options' ? (
-            <fieldset class="m-0 flex min-w-0 flex-col gap-1 border-0 p-0">
-              <legend class="field-label p-0">
-                {copy.type.fields[facet.key].label}
-              </legend>
-              {facet.options.map((choice) => (
-                <label class="flex min-h-11 items-center gap-2.5 text-sm text-ink-2">
-                  <input
-                    type="checkbox"
-                    name={facet.key}
-                    value={choice.value}
-                    class="size-4 shrink-0 accent-signal"
-                  />
-                  <span>
-                    {optionLabel(fieldOf(facet.key), choice.value, copy)}
-                    <span class="spec text-xs text-muted"> {choice.count}</span>
+  <form data-facets class="card grid gap-5 p-4 sm:grid-cols-2 lg:grid-cols-4">
+    <h2 class="sr-only">{shop.filterHeading}</h2>
+    {
+      facets.map((facet) =>
+        facet.kind === 'options' ? (
+          <fieldset class="m-0 flex min-w-0 flex-col gap-1 border-0 p-0">
+            <legend class="field-label p-0">
+              {copy.type.fields[facet.key].label}
+            </legend>
+            {facet.options.map((choice) => (
+              <label class="flex min-h-11 items-center gap-2.5 text-sm text-ink-2">
+                <input
+                  type="checkbox"
+                  name={facet.key}
+                  value={choice.value}
+                  class="size-4 shrink-0 accent-signal"
+                />
+                <span>
+                  {optionLabel(fieldOf(facet.key), choice.value, copy)}
+                  <span class="spec text-xs text-muted"> {choice.count}</span>
+                </span>
+              </label>
+            ))}
+          </fieldset>
+        ) : (
+          <fieldset class="m-0 flex min-w-0 flex-col gap-1 border-0 p-0">
+            <legend class="field-label p-0">
+              {`${copy.type.fields[facet.key].label}, ${unitOf(facet.key)}`}
+            </legend>
+            <div class="flex gap-2">
+              {(['min', 'max'] as const).map((bound) => (
+                <label class="min-w-0 flex-1">
+                  <span class="sr-only">
+                    {bound === 'min' ? shop.filterFrom : shop.filterTo}
                   </span>
+                  <input
+                    type="number"
+                    inputmode="decimal"
+                    name={`${facet.key}.${bound}`}
+                    min={facet.values[0]}
+                    max={facet.values.at(-1)}
+                    placeholder={`${bound === 'min' ? shop.filterFrom : shop.filterTo} ${bound === 'min' ? facet.values[0] : facet.values.at(-1)}`}
+                    class="field spec"
+                  />
                 </label>
               ))}
-            </fieldset>
-          ) : (
-            <fieldset class="m-0 flex min-w-0 flex-col gap-1 border-0 p-0">
-              <legend class="field-label p-0">
-                {`${copy.type.fields[facet.key].label}, ${unitOf(facet.key)}`}
-              </legend>
-              <div class="flex gap-2">
-                {(['min', 'max'] as const).map((bound) => (
-                  <label class="min-w-0 flex-1">
-                    <span class="sr-only">
-                      {bound === 'min' ? shop.filterFrom : shop.filterTo}
-                    </span>
-                    <input
-                      type="number"
-                      inputmode="decimal"
-                      name={`${facet.key}.${bound}`}
-                      min={facet.values[0]}
-                      max={facet.values.at(-1)}
-                      placeholder={`${bound === 'min' ? shop.filterFrom : shop.filterTo} ${bound === 'min' ? facet.values[0] : facet.values.at(-1)}`}
-                      class="field spec"
-                    />
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-          ),
-        )}
-      </form>
-    )
-  }
+            </div>
+          </fieldset>
+        ),
+      )
+    }
+  </form>
   <div class="flex flex-wrap items-center justify-between gap-3">
     <p data-filter-count aria-live="polite" class="spec text-sm text-muted"></p>
     <button
