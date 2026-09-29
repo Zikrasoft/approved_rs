@@ -3,7 +3,7 @@ import { detectLocale, isLocale } from './i18n/config';
 import { LOCALE_COOKIE, createUnlocalizedMatcher } from '@podbor/site-kit';
 
 export const isUnlocalized = createUnlocalizedMatcher({
-  exact: ['/robots.txt', '/llms.txt', '/404', '/404/'],
+  exact: ['/robots.txt', '/llms.txt', '/catalog-version.txt', '/404', '/404/'],
   prefixes: ['/api/', '/keystatic', '/_image'],
 });
 

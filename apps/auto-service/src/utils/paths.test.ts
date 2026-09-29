@@ -13,6 +13,9 @@ describe('PathBuilder', () => {
       PathBuilder.work('sr', 'bmw-x5'),
       PathBuilder.shop('sr'),
       PathBuilder.product('sr', 'battery-60'),
+      PathBuilder.shopType('sr', 'batteries'),
+      PathBuilder.shopProduct('sr', 'batteries', 'bosch-s4-024'),
+      PathBuilder.shopLanding('sr', 'batteries', '60ah'),
       PathBuilder.cart('sr'),
       PathBuilder.contact('sr'),
       PathBuilder.thanks('sr'),
@@ -26,6 +29,15 @@ describe('PathBuilder', () => {
 
   it.each(SERVICE_SLUGS)('builds a service URL for %s', (slug) => {
     expect(PathBuilder.service('ru', slug)).toBe(`/ru/services/${slug}/`);
+  });
+
+  it('nests products and facet landings under their type', () => {
+    expect(PathBuilder.shopProduct('en', 'motor-oils', 'castrol-edge')).toBe(
+      '/en/shop/motor-oils/castrol-edge/',
+    );
+    expect(PathBuilder.shopLanding('ru', 'motor-oils', '5w-30')).toBe(
+      '/ru/shop/motor-oils/f/5w-30/',
+    );
   });
 });
 

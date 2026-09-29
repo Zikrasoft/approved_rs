@@ -11,6 +11,9 @@ import { sitemapFilter } from './src/utils/sitemap.ts';
 
 const site = CARLAB.url;
 
+const medusaUrl = process.env.PUBLIC_MEDUSA_BACKEND_URL;
+const medusaHost = medusaUrl ? new URL(medusaUrl) : undefined;
+
 export default defineConfig({
   site,
   output: 'static',
@@ -20,6 +23,18 @@ export default defineConfig({
     locales: [...localeConfig.locales],
     defaultLocale: localeConfig.primaryLocale,
     routing: 'manual',
+  },
+  image: {
+    remotePatterns: medusaHost
+      ? [
+          {
+            protocol: medusaHost.protocol.replace(':', ''),
+            hostname: medusaHost.hostname,
+            ...(medusaHost.port && { port: medusaHost.port }),
+            pathname: '/static/**',
+          },
+        ]
+      : [],
   },
   integrations: [
     react(),
