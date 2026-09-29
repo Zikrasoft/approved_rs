@@ -12,7 +12,7 @@ export { defineLanguageSuggestion } from './languageSuggestion.ts';
 export { defineLazyMapEmbed } from './mapEmbed.ts';
 export { defineLocaleChoice } from './localeCookie.ts';
 export { defineMenuToggle, type MenuToggleElement } from './menuToggle.ts';
-export { defineRangeFilter } from './rangeFilter.ts';
+export { defineChipFilter } from './chipFilter.ts';
 export { defineZoneMap } from './zoneMap.ts';
 export { lockScroll, unlockScroll } from './scrollLock.ts';
 export {

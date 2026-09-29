@@ -81,11 +81,8 @@ export const homeContentSchema = z
       .object({
         heading: z.string(),
         subtext: z.string(),
-        budgetLabel: z.string(),
         allCountriesLabel: z.string(),
-        countTemplate: z.string(),
         moreLabel: z.string(),
-        emptyText: z.string(),
       })
       .strict(),
     inspection: z

@@ -46,7 +46,6 @@ const allCases = await getCollection('cases');
 const published = allCases
   .filter((c) => c.data.published)
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
-const catalogueCases = published.slice(0, 6);
 const countries = getActiveCountries();
 
 const schema = generateOrganizationSchema({
@@ -280,9 +279,9 @@ const geoCells = countries.map((country) => ({
   </section>
 
   {
-    catalogueCases.length > 0 && (
+    published.length > 0 && (
       <CaseCatalogue
-        cases={catalogueCases}
+        cases={published}
         locale={locale}
         content={h.catalogue}
         viewAllHref={PathBuilder.casesVehicleSourcing(locale)}
