@@ -16,9 +16,10 @@ export interface Cart {
   locale: string | null;
   total: number;
   items: CartLine[];
+  completed_at: string | null;
 }
 
-export const CART_FIELDS = '+items.total';
+export const CART_FIELDS = '+items.total,+completed_at';
 
 const params = { fields: CART_FIELDS };
 const carts = (id: string, rest = '') =>

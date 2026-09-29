@@ -47,6 +47,10 @@ function forget(): void {
   announce(null);
 }
 
+function forgetIfCurrent(id: string): void {
+  if ((current?.id ?? storedId()) === id) forget();
+}
+
 channel?.addEventListener('message', (event: MessageEvent<Cart | null>) => {
   if (event.data === null) {
     forget();
@@ -83,6 +87,10 @@ async function restore(locale: Locale): Promise<Cart | null> {
   if (!id) return null;
   try {
     let cart = await api.retrieveCart(id);
+    if (cart.completed_at) {
+      forgetIfCurrent(id);
+      return null;
+    }
     const wanted = MEDUSA_LOCALE[locale];
     if (cart.locale !== wanted)
       cart = await api.updateCart(id, { locale: wanted });
@@ -90,7 +98,7 @@ async function restore(locale: Locale): Promise<Cart | null> {
     return cart;
   } catch (error) {
     if (!api.isCartGone(error)) throw error;
-    forget();
+    forgetIfCurrent(id);
     return null;
   }
 }
@@ -110,11 +118,15 @@ export async function refreshCart(): Promise<Cart | null> {
   if (!id) return null;
   try {
     const cart = await api.retrieveCart(id);
+    if (cart.completed_at) {
+      forgetIfCurrent(id);
+      return null;
+    }
     publish(cart);
     return cart;
   } catch (error) {
     if (!api.isCartGone(error)) throw error;
-    forget();
+    forgetIfCurrent(id);
     return null;
   }
 }
@@ -156,17 +168,14 @@ export async function addToCart(input: {
     preview: input.preview,
   };
   const quantity = input.quantity ?? 1;
+  const id = await cartId(create);
   try {
-    const cart = await api.addLine(
-      await cartId(create),
-      input.variantId,
-      quantity,
-    );
+    const cart = await api.addLine(id, input.variantId, quantity);
     publish(cart);
     return cart;
   } catch (error) {
     if (!api.isCartGone(error)) throw error;
-    forget();
+    forgetIfCurrent(id);
     const cart = await api.addLine(
       await cartId(create),
       input.variantId,
@@ -183,7 +192,7 @@ async function mutate(operation: (id: string) => Promise<Cart>): Promise<void> {
   try {
     publish(await operation(id));
   } catch (error) {
-    if (api.isCartGone(error)) forget();
+    if (api.isCartGone(error)) forgetIfCurrent(id);
     throw error;
   }
 }

@@ -44,7 +44,9 @@ describe('cart API', () => {
       body: { region_id: 'reg_1', locale: 'sr-RS' },
     });
     expect(lastCall().body).not.toHaveProperty('metadata');
-    expect(lastCall().url.searchParams.get('fields')).toBe('+items.total');
+    expect(lastCall().url.searchParams.get('fields')).toBe(
+      '+items.total,+completed_at',
+    );
   });
 
   it('marks a cart opened in preview so its order can be cleaned up', async () => {

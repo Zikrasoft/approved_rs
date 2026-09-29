@@ -16,14 +16,27 @@ vi.mock('./cartApi', () => api);
 
 class Gone extends Error {}
 
-const cart = (id: string, locale = 'sr-RS', items: object[] = []) => ({
+const cart = (
+  id: string,
+  locale = 'sr-RS',
+  items: object[] = [],
+  completedAt: string | null = null,
+) => ({
   id,
   locale,
   total: 0,
   items,
+  completed_at: completedAt,
 });
 
 const load = () => import('./cart');
+
+const ADD = {
+  regionId: 'reg_1',
+  locale: 'sr' as const,
+  preview: true,
+  variantId: 'var_1',
+};
 
 beforeEach(() => {
   vi.resetModules();
@@ -113,16 +126,42 @@ describe('loadCart', () => {
     expect(await loadCart('sr')).toBeNull();
     expect(localStorage.getItem('carlab_cart_id')).toBeNull();
   });
+
+  it('forgets a completed cart and starts a new one on the next add', async () => {
+    localStorage.setItem('carlab_cart_id', 'cart_1');
+    api.retrieveCart.mockResolvedValue(
+      cart('cart_1', 'sr-RS', [], '2024-01-01T00:00:00Z'),
+    );
+    api.createCart.mockResolvedValue(cart('cart_new'));
+    api.addLine.mockResolvedValue(cart('cart_new', 'sr-RS', [{ quantity: 1 }]));
+    const { loadCart, addToCart, currentCart } = await load();
+
+    expect(await loadCart('sr')).toBeNull();
+    expect(api.updateCart).not.toHaveBeenCalled();
+    expect(localStorage.getItem('carlab_cart_id')).toBeNull();
+
+    await addToCart(ADD);
+
+    expect(api.createCart).toHaveBeenCalledTimes(1);
+    expect(currentCart()?.id).toBe('cart_new');
+  });
+});
+
+describe('refreshCart', () => {
+  it('forgets a completed cart instead of reviving it', async () => {
+    localStorage.setItem('carlab_cart_id', 'cart_1');
+    api.retrieveCart.mockResolvedValue(
+      cart('cart_1', 'sr-RS', [], '2024-01-01T00:00:00Z'),
+    );
+    const { refreshCart, currentCart } = await load();
+
+    expect(await refreshCart()).toBeNull();
+    expect(currentCart()).toBeNull();
+    expect(localStorage.getItem('carlab_cart_id')).toBeNull();
+  });
 });
 
 describe('addToCart', () => {
-  const ADD = {
-    regionId: 'reg_1',
-    locale: 'sr' as const,
-    preview: true,
-    variantId: 'var_1',
-  };
-
   it('opens one cart in the shopper language, keeps its id and adds the line', async () => {
     api.createCart.mockResolvedValue(cart('cart_new'));
     api.addLine.mockResolvedValue(cart('cart_new', 'sr-RS', [{ quantity: 1 }]));
@@ -175,6 +214,24 @@ describe('addToCart', () => {
     await expect(addToCart(ADD)).rejects.toBe(soldOut);
     expect(localStorage.getItem('carlab_cart_id')).toBe('cart_1');
   });
+
+  it('does not drop a cart another call already recreated', async () => {
+    localStorage.setItem('carlab_cart_id', 'cart_1');
+    let rejectAdd: (error: unknown) => void = () => {};
+    api.addLine.mockReturnValue(
+      new Promise((_resolve, reject) => {
+        rejectAdd = reject;
+      }),
+    );
+    const { addToCart, applyCart, currentCart } = await load();
+
+    const pending = addToCart(ADD).catch((error: unknown) => error);
+    applyCart(cart('cart_new', 'sr-RS', [{ quantity: 9 }]) as never);
+    rejectAdd(new Gone());
+    await pending;
+
+    expect(currentCart()?.id).toBe('cart_new');
+  });
 });
 
 describe('changing lines', () => {
@@ -199,6 +256,24 @@ describe('changing lines', () => {
     await expect(removeFromCart('line_1')).rejects.toBeInstanceOf(Gone);
     expect(localStorage.getItem('carlab_cart_id')).toBeNull();
     expect(currentCart()).toBeNull();
+  });
+
+  it('does not drop a cart another call already recreated', async () => {
+    localStorage.setItem('carlab_cart_id', 'cart_1');
+    let rejectRemove: (error: unknown) => void = () => {};
+    api.removeLine.mockReturnValue(
+      new Promise((_resolve, reject) => {
+        rejectRemove = reject;
+      }),
+    );
+    const { removeFromCart, applyCart, currentCart } = await load();
+
+    const pending = removeFromCart('line_1').catch((error: unknown) => error);
+    applyCart(cart('cart_new', 'sr-RS', [{ quantity: 9 }]) as never);
+    rejectRemove(new Gone());
+
+    expect(await pending).toBeInstanceOf(Gone);
+    expect(currentCart()?.id).toBe('cart_new');
   });
 
   it('counts pieces, not lines', async () => {
@@ -247,5 +322,43 @@ describe('other tabs', () => {
     clearCart();
     expect(posted.at(-1)).toBeNull();
     expect(localStorage.getItem('carlab_cart_id')).toBeNull();
+  });
+});
+
+describe('storage failures', () => {
+  it('treats an unreadable cart id as absent', async () => {
+    const spy = vi
+      .spyOn(Storage.prototype, 'getItem')
+      .mockImplementation(() => {
+        throw new Error('blocked');
+      });
+
+    const { loadCart, currentCart } = await load();
+
+    expect(await loadCart('sr')).toBeNull();
+    expect(api.retrieveCart).not.toHaveBeenCalled();
+    expect(currentCart()).toBeNull();
+
+    spy.mockRestore();
+  });
+
+  it('swallows a write failure when a cart id cannot be stored', async () => {
+    const setItemSpy = vi
+      .spyOn(Storage.prototype, 'setItem')
+      .mockImplementation(() => {
+        throw new Error('blocked');
+      });
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    api.createCart.mockResolvedValue(cart('cart_new'));
+    api.addLine.mockResolvedValue(cart('cart_new', 'sr-RS', [{ quantity: 1 }]));
+    const { addToCart, currentCart } = await load();
+
+    await addToCart(ADD);
+
+    expect(currentCart()?.id).toBe('cart_new');
+    expect(warnSpy).toHaveBeenCalled();
+
+    setItemSpy.mockRestore();
+    warnSpy.mockRestore();
   });
 });
