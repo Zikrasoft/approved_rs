@@ -92,10 +92,11 @@ Actions и заново в контейнере Vercel), и несовпаден
 ### Порядок джоб
 
 `check` (lint/prettier/typecheck/test, sh-тесты скриптов, shellcheck,
-actionlint) и `medusa-integration` (HTTP-тесты Medusa на postgres+redis из
-`services:`) идут параллельно → `translate` → `verify` → `medusa-image` →
-`deploy-medusa` → `deploy-brand-site`; `deploy` (approved.rs) ждёт только
-`verify`. `deploy*` запускаются только на `main`, каждая только если
+actionlint) → `translate` → `verify`; параллельно с ними
+`medusa-integration` (HTTP-тесты Medusa на postgres+redis из `services:`),
+которого ждёт только `medusa-image`. Дальше `medusa-image` → `deploy-medusa`
+→ `record-medusa` (двигает тег) и `deploy-brand-site`; `deploy` (approved.rs)
+ждёт только `verify`. `deploy*` запускаются только на `main`, каждая только если
 предыдущая прошла. Воркфлоу срабатывает на пуш в любую **ветку** и никогда на
 тег: фильтр по тегам без фильтра по веткам выключил бы ветки совсем, а на
 чекауте тега `translate` оказался бы на detached HEAD и не смог бы запушить.
