@@ -77,13 +77,10 @@ origin:
     - С пробегом
     - Под ключ
 catalogue:
-  heading: Что берут на эти деньги
+  heading: Последние сделки
   subtext: 'Здесь нет объявлений: каждая машина найдена, проверена, оформлена и передана человеку. Цена — та, которую он заплатил.'
-  budgetLabel: Бюджет на машину, до
   allCountriesLabel: Все страны
-  countTemplate: 'Подходит {shown} из {total}'
   moreLabel: 'Показать ещё {rest}'
-  emptyText: В этот бюджет в выбранной стране мы пока не закрывали сделок. Напишите — скажем честно, что реально взять.
 inspection:
   heading: Сто пунктов, из которых решают четыре
   subtext: Чек-лист длинный, но от сделки отговаривают почти всегда по одной из четырёх зон. Нажмите номер на схеме — покажем, что смотрит эксперт и что мы там находили.
@@ -209,11 +206,8 @@ translations:
     catalogue:
       heading: What can you get for this budget
       subtext: 'There are no listings here: each car is found, inspected, processed, and delivered to a person. The price is what they paid.'
-      budgetLabel: Budget for the car, up to
       allCountriesLabel: All countries
-      countTemplate: '{shown} out of {total} match'
       moreLabel: Show more {rest}
-      emptyText: So far, we haven’t closed deals in your chosen country within this budget. Contact us — we'll honestly say what’s realistically available.
     inspection:
       heading: Hundred points, four critical zones
       subtext: The checklist is long, but we often decline a deal based on one of four zones. Click on the number on the diagram to see what the expert checks and what we’ve found.
@@ -337,11 +331,8 @@ translations:
     catalogue:
       heading: Šta se može nabaviti za taj novac
       subtext: 'Ovde nema oglasa: svaki automobil je pronađen, pregledan, registrovan i predat čoveku. Cena je ona koju je platao.'
-      budgetLabel: Budžet za automobil, do
       allCountriesLabel: Sve zemlje
-      countTemplate: Odgovara {shown} od {total}
       moreLabel: Prikaži još {rest}
-      emptyText: U ovaj budžet u izabranoj zemlji još nismo obavili transakcije. Pišite nam — reći ćemo vam iskreno šta se može uzeti.
     inspection:
       heading: Stotinu tačaka, od kojih rešavaju četiri
       subtext: Kontrolni spisak je dugačak, ali vas skoro uvek odbijaju zbog jedne od četiri zone. Pritisnite broj na dijagramu — pokazaćemo šta proverava ekspert i šta smo tamo pronašli.
@@ -465,11 +456,8 @@ translations:
     catalogue:
       heading: Qué puedes comprar por este dinero
       subtext: 'Aquí no hay anuncios: cada auto está encontrado, verificado, tramitado y entregado a una persona. El precio es el que pagó él.'
-      budgetLabel: Presupuesto para el auto, hasta
       allCountriesLabel: Todos los países
-      countTemplate: Se ajusta {shown} de {total}
       moreLabel: Mostrar más {rest}
-      emptyText: En este presupuesto, aún no hemos cerrado acuerdos en el país elegido. Escríbenos y te diremos honestamente qué se puede conseguir.
     inspection:
       heading: Cien puntos, de los cuales cuatro deciden
       subtext: La lista de verificación es larga, pero casi siempre desaconsejan la venta por alguna de las cuatro áreas. Haz clic en el número en el esquema — te mostramos qué revisa el experto y qué hemos encontrado.
@@ -593,11 +581,8 @@ translations:
     catalogue:
       heading: Was man für dieses Geld bekommt
       subtext: 'Hier gibt es keine Anzeigen: Jedes Auto ist gefunden, geprüft, registriert und an eine Person übergeben. Der Preis ist der, den er bezahlt hat.'
-      budgetLabel: Budget für das Auto, bis
       allCountriesLabel: Alle Länder
-      countTemplate: '{shown} von {total} verfügbar'
       moreLabel: Noch mehr zeigen {rest}
-      emptyText: In diesem Budget in dem ausgewählten Land haben wir bisher keine Deals abgeschlossen. Schreiben Sie uns – wir sagen ehrlich, was man wirklich bekommen kann.
     inspection:
       heading: Hundert Punkte, von denen vier entscheiden
       subtext: Die Checkliste ist lang, aber fast immer wird wegen einer der vier Zonen vom Deal abgeraten. Klicken Sie auf die Nummer im Diagramm – wir zeigen, was der Experte prüft und was wir dort gefunden haben.
