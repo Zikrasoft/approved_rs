@@ -1,0 +1,251 @@
+// @vitest-environment jsdom
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+const api = vi.hoisted(() => ({
+  createCart: vi.fn(),
+  retrieveCart: vi.fn(),
+  updateCart: vi.fn(),
+  addLine: vi.fn(),
+  updateLine: vi.fn(),
+  removeLine: vi.fn(),
+  isCartGone: vi.fn(),
+  isOutOfStock: vi.fn(),
+}));
+
+vi.mock('./cartApi', () => api);
+
+class Gone extends Error {}
+
+const cart = (id: string, locale = 'sr-RS', items: object[] = []) => ({
+  id,
+  locale,
+  total: 0,
+  items,
+});
+
+const load = () => import('./cart');
+
+beforeEach(() => {
+  vi.resetModules();
+  vi.clearAllMocks();
+  localStorage.clear();
+  vi.stubGlobal('BroadcastChannel', undefined);
+  api.isCartGone.mockImplementation((e: unknown) => e instanceof Gone);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
+describe('loadCart', () => {
+  it('does nothing without a stored cart', async () => {
+    const { loadCart, currentCart } = await load();
+
+    expect(await loadCart('sr')).toBeNull();
+    expect(api.retrieveCart).not.toHaveBeenCalled();
+    expect(currentCart()).toBeNull();
+  });
+
+  it('restores the stored cart and tells the page', async () => {
+    localStorage.setItem('carlab_cart_id', 'cart_1');
+    api.retrieveCart.mockResolvedValue(cart('cart_1'));
+    const { loadCart, currentCart, onCart } = await load();
+    const heard = vi.fn();
+    onCart(heard);
+
+    await loadCart('sr');
+
+    expect(currentCart()).toEqual(cart('cart_1'));
+    expect(heard).toHaveBeenCalledWith(cart('cart_1'));
+  });
+
+  it('moves a cart opened in Serbian to English when the shopper switches language', async () => {
+    localStorage.setItem('carlab_cart_id', 'cart_1');
+    api.retrieveCart.mockResolvedValue(cart('cart_1', 'sr-RS'));
+    api.updateCart.mockResolvedValue(cart('cart_1', 'en-US'));
+    const { loadCart, currentCart } = await load();
+
+    await loadCart('en');
+
+    expect(api.updateCart).toHaveBeenCalledTimes(1);
+    expect(api.updateCart).toHaveBeenCalledWith('cart_1', { locale: 'en-US' });
+    expect(currentCart()?.locale).toBe('en-US');
+  });
+
+  it('leaves a cart already in the page language alone', async () => {
+    localStorage.setItem('carlab_cart_id', 'cart_1');
+    api.retrieveCart.mockResolvedValue(cart('cart_1', 'ru-RU'));
+    const { loadCart } = await load();
+
+    await loadCart('ru');
+
+    expect(api.updateCart).not.toHaveBeenCalled();
+  });
+
+  it('asks once when the header and the cart page both load', async () => {
+    localStorage.setItem('carlab_cart_id', 'cart_1');
+    api.retrieveCart.mockResolvedValue(cart('cart_1'));
+    const { loadCart } = await load();
+
+    await Promise.all([loadCart('sr'), loadCart('sr')]);
+
+    expect(api.retrieveCart).toHaveBeenCalledTimes(1);
+  });
+
+  it('asks again after a failed load instead of replaying the failure', async () => {
+    localStorage.setItem('carlab_cart_id', 'cart_1');
+    api.retrieveCart
+      .mockRejectedValueOnce(new Error('Failed to fetch'))
+      .mockResolvedValue(cart('cart_1'));
+    const { loadCart, currentCart } = await load();
+
+    await expect(loadCart('sr')).rejects.toThrow();
+    await loadCart('sr');
+
+    expect(currentCart()).toEqual(cart('cart_1'));
+  });
+
+  it('forgets a cart the server no longer knows', async () => {
+    localStorage.setItem('carlab_cart_id', 'cart_gone');
+    api.retrieveCart.mockRejectedValue(new Gone());
+    const { loadCart } = await load();
+
+    expect(await loadCart('sr')).toBeNull();
+    expect(localStorage.getItem('carlab_cart_id')).toBeNull();
+  });
+});
+
+describe('addToCart', () => {
+  const ADD = {
+    regionId: 'reg_1',
+    locale: 'sr' as const,
+    preview: true,
+    variantId: 'var_1',
+  };
+
+  it('opens one cart in the shopper language, keeps its id and adds the line', async () => {
+    api.createCart.mockResolvedValue(cart('cart_new'));
+    api.addLine.mockResolvedValue(cart('cart_new', 'sr-RS', [{ quantity: 1 }]));
+    const { addToCart, currentCart } = await load();
+
+    await Promise.all([addToCart(ADD), addToCart(ADD)]);
+
+    expect(api.createCart).toHaveBeenCalledTimes(1);
+    expect(api.createCart).toHaveBeenCalledWith({
+      regionId: 'reg_1',
+      locale: 'sr-RS',
+      preview: true,
+    });
+    expect(localStorage.getItem('carlab_cart_id')).toBe('cart_new');
+    expect(api.addLine).toHaveBeenCalledWith('cart_new', 'var_1', 1);
+    expect(currentCart()?.items).toHaveLength(1);
+  });
+
+  it('reuses the stored cart', async () => {
+    localStorage.setItem('carlab_cart_id', 'cart_1');
+    api.addLine.mockResolvedValue(cart('cart_1'));
+    const { addToCart } = await load();
+
+    await addToCart({ ...ADD, quantity: 2 });
+
+    expect(api.createCart).not.toHaveBeenCalled();
+    expect(api.addLine).toHaveBeenCalledWith('cart_1', 'var_1', 2);
+  });
+
+  it('opens a fresh cart when the stored one is gone', async () => {
+    localStorage.setItem('carlab_cart_id', 'cart_old');
+    api.addLine
+      .mockRejectedValueOnce(new Gone())
+      .mockResolvedValue(cart('cart_new'));
+    api.createCart.mockResolvedValue(cart('cart_new'));
+    const { addToCart } = await load();
+
+    await addToCart(ADD);
+
+    expect(api.addLine).toHaveBeenLastCalledWith('cart_new', 'var_1', 1);
+    expect(localStorage.getItem('carlab_cart_id')).toBe('cart_new');
+  });
+
+  it('passes a sold-out refusal through untouched', async () => {
+    localStorage.setItem('carlab_cart_id', 'cart_1');
+    const soldOut = new Error('insufficient_inventory');
+    api.addLine.mockRejectedValue(soldOut);
+    const { addToCart } = await load();
+
+    await expect(addToCart(ADD)).rejects.toBe(soldOut);
+    expect(localStorage.getItem('carlab_cart_id')).toBe('cart_1');
+  });
+});
+
+describe('changing lines', () => {
+  it('removes a line set below one and updates the others', async () => {
+    localStorage.setItem('carlab_cart_id', 'cart_1');
+    api.removeLine.mockResolvedValue(cart('cart_1'));
+    api.updateLine.mockResolvedValue(cart('cart_1'));
+    const { setQuantity } = await load();
+
+    await setQuantity('line_1', 0);
+    await setQuantity('line_2', 3);
+
+    expect(api.removeLine).toHaveBeenCalledWith('cart_1', 'line_1');
+    expect(api.updateLine).toHaveBeenCalledWith('cart_1', 'line_2', 3);
+  });
+
+  it('forgets a cart that vanished mid-edit and still reports the failure', async () => {
+    localStorage.setItem('carlab_cart_id', 'cart_1');
+    api.removeLine.mockRejectedValue(new Gone());
+    const { removeFromCart, currentCart } = await load();
+
+    await expect(removeFromCart('line_1')).rejects.toBeInstanceOf(Gone);
+    expect(localStorage.getItem('carlab_cart_id')).toBeNull();
+    expect(currentCart()).toBeNull();
+  });
+
+  it('counts pieces, not lines', async () => {
+    const { cartCount } = await load();
+
+    expect(
+      cartCount(
+        cart('c', 'sr-RS', [{ quantity: 2 }, { quantity: 1 }]) as never,
+      ),
+    ).toBe(3);
+    expect(cartCount(null)).toBe(0);
+  });
+});
+
+describe('other tabs', () => {
+  it('shares every change and the checkout with the other tabs', async () => {
+    const posted: unknown[] = [];
+    const listeners: ((event: MessageEvent) => void)[] = [];
+    vi.stubGlobal(
+      'BroadcastChannel',
+      class {
+        postMessage(message: unknown) {
+          posted.push(message);
+        }
+        addEventListener(
+          _type: string,
+          listener: (event: MessageEvent) => void,
+        ) {
+          listeners.push(listener);
+        }
+      },
+    );
+    localStorage.setItem('carlab_cart_id', 'cart_1');
+    api.retrieveCart.mockResolvedValue(cart('cart_1'));
+    const { loadCart, clearCart, currentCart } = await load();
+
+    await loadCart('sr');
+    listeners[0]({
+      data: cart('cart_1', 'sr-RS', [{ quantity: 4 }]),
+    } as MessageEvent);
+    expect(currentCart()?.items).toHaveLength(1);
+
+    listeners[0]({ data: cart('cart_other') } as MessageEvent);
+    expect(currentCart()?.id).toBe('cart_1');
+
+    clearCart();
+    expect(posted.at(-1)).toBeNull();
+    expect(localStorage.getItem('carlab_cart_id')).toBeNull();
+  });
+});
