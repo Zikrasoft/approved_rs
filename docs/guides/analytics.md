@@ -1,135 +1,142 @@
-# Аналитика: что меряем и как это держать в порядке
+# Analytics: what we measure and how to keep it honest
 
-Цель — отвечать на вопрос «что изменилось после наших действий» цифрами, а не
-ощущениями. До этого мерились только визиты и факт отправки формы, поэтому
-падение конверсии нельзя было отличить от смены состава трафика.
+The goal is to answer "what changed after what we did" with numbers rather than
+impressions. Before this, only visits and the fact of a form submission were
+measured, so a drop in conversion could not be told apart from a change in the
+traffic mix.
 
-Исключения из выборки (свои визиты, Россия) — в [analytics-exclusions.md](analytics-exclusions.md).
-Без них любая конверсия завышена примерно вдвое.
+Exclusions from the sample (our own visits, Russia) are in
+[analytics-exclusions.md](analytics-exclusions.md). Without them, any conversion
+figure is roughly doubled.
 
-## Одно место для имён событий
+## One place for event names
 
-`packages/site-kit/src/goals.ts` — единственный источник истины. Идентификатор
-пишется там один раз, оттуда его берут все три сайта, и ровно эта строка
-заводится целью в Метрике. Литералов `'form_view'` в приложениях быть не должно.
+`packages/site-kit/src/goals.ts` is the single source of truth. The identifier is
+written there once, all three sites take it from there, and exactly that string is
+registered as a goal in Metrika. There should be no `'form_view'` literals in the
+apps.
 
-`packages/site-kit/src/funnel.ts` (`defineFunnelTracking`) навешивает всё по
-разметке и вызывается один раз из лэйаута каждого приложения. Клики по контактам
-живут отдельно в `contactClick.ts`, потому что они ещё и пишут лид на сервер.
+`packages/site-kit/src/funnel.ts` (`defineFunnelTracking`) wires everything up from
+the markup and is called once from each app's layout. Contact clicks live
+separately in `contactClick.ts`, because they also write a lead to the server.
 
-## Словарь событий
+## Event vocabulary
 
-Имена по конвенции GA4 — глагол о том, что сделал человек, snake_case.
-Варианты уходят в параметры, а не в новые имена.
+Names follow the GA4 convention — a verb about what the person did, in snake_case.
+Variants go into parameters, not into new names.
 
-| идентификатор                                                    | когда                                           | параметры                               |
-| ---------------------------------------------------------------- | ----------------------------------------------- | --------------------------------------- |
-| `scroll_50`                                                      | прокрутил половину страницы                     | —                                       |
-| `scroll_90`                                                      | дочитал страницу                                | —                                       |
-| `form_view`                                                      | форма попала в экран                            | —                                       |
-| `form_start`                                                     | первый ввод в форму                             | —                                       |
-| `form_error`                                                     | отправку отбила валидация                       | `field`: `telegram`, `phone`, `consent` |
-| `form_submit`                                                    | форма реально ушла на сервер                    | `service`                               |
-| `contact_click`                                                  | клик по телефону, мессенджеру или кнопке заявки | `channel`                               |
-| `lead_modal_open`                                                | открыл форму в модалке (только approved.rs)     | `tab`, `service`                        |
-| `brand_link_click`                                               | ушёл на сайт-партнёр (только approved.rs)       | `to`                                    |
-| `lang_offer_shown` / `lang_offer_taken` / `lang_offer_dismissed` | баннер выбора языка                             | `from`, `to`                            |
+| identifier                                                       | when                                               | parameters                              |
+| ---------------------------------------------------------------- | -------------------------------------------------- | --------------------------------------- |
+| `scroll_50`                                                      | scrolled half the page                             | —                                       |
+| `scroll_90`                                                      | read to the end of the page                        | —                                       |
+| `form_view`                                                      | the form entered the viewport                      | —                                       |
+| `form_start`                                                     | first input into the form                          | —                                       |
+| `form_error`                                                     | validation rejected the submission                 | `field`: `telegram`, `phone`, `consent` |
+| `form_submit`                                                    | the form actually went to the server               | `service`                               |
+| `contact_click`                                                  | clicked a phone, a messenger or the enquiry button | `channel`                               |
+| `lead_modal_open`                                                | opened the form in the modal (approved.rs only)    | `tab`, `service`                        |
+| `brand_link_click`                                               | left for a partner site (approved.rs only)         | `to`                                    |
+| `lang_offer_shown` / `lang_offer_taken` / `lang_offer_dismissed` | the language-choice banner                         | `from`, `to`                            |
 
-`scroll_50`, `form_view` и `form_start` срабатывают один раз на страницу, а не на
-каждую форму: на главной approved.rs форм три, и считать их по отдельности
-значило бы утроить числитель.
+`scroll_50`, `form_view` and `form_start` fire once per page rather than once per
+form: the approved.rs homepage has three forms, and counting them separately would
+triple the numerator.
 
-**Тем, что видно по URL, JS-события не занимаются.** Просмотр страницы услуги и
-страница «спасибо» заведены URL-целями прямо в Метрике — дублировать их кодом
-незачем.
+**JS events do not deal with anything visible from the URL.** A service-page view
+and the thank-you page are registered as URL goals in Metrika directly —
+duplicating them in code is pointless.
 
-`form_start` считает ввод, а не фокус. Модалка ставит курсор в первое поле
-сама, и по фокусу цель срабатывала бы на каждом открытии, повторяя
-`lead_modal_open`. Заполнять — значит печатать.
+`form_start` counts input, not focus. The modal puts the cursor in the first field
+itself, so on focus the goal would fire on every opening, duplicating
+`lead_modal_open`. Filling something in means typing.
 
-## Разметка, на которую всё цепляется
+## The markup everything hangs off
 
-| атрибут                | на чём                       | зачем                           |
-| ---------------------- | ---------------------------- | ------------------------------- |
-| `data-lead-form`       | `<form>` формы заявки        | показ, старт, ошибка, отправка  |
-| `data-contact-channel` | ссылки и кнопки связи        | `contact_click` и лид на сервер |
-| `data-brand-link`      | ссылки на сайты-партнёры     | `brand_link_click`              |
-| `aria-invalid="true"`  | поле, не прошедшее валидацию | имя поля в `form_error`         |
+| attribute              | on what                        | for what                          |
+| ---------------------- | ------------------------------ | --------------------------------- |
+| `data-lead-form`       | the enquiry `<form>`           | view, start, error, submit        |
+| `data-contact-channel` | contact links and buttons      | `contact_click` and a server lead |
+| `data-brand-link`      | links to partner sites         | `brand_link_click`                |
+| `aria-invalid="true"`  | a field that failed validation | the field name in `form_error`    |
 
-`aria-invalid` ставится и снимается только через `markFieldValidity` из
-`@podbor/site-kit/browser` — три формы раньше делали это тремя разными
-способами. По этому атрибуту трекер понимает, что отправку отбили, а по
-`data-field` — какое поле виновато. Форма, которая пометит ошибку только
-классом, останется без `form_error`. Заодно `aria-invalid` читает скринридер,
-поэтому снимать его надо сразу, как посетитель исправил поле.
+`aria-invalid` is set and cleared only through `markFieldValidity` from
+`@podbor/site-kit/browser` — three forms used to do it three different ways. The
+tracker reads that attribute to know the submission was rejected, and `data-field`
+to know which field is to blame. A form that marks an error with a class alone gets
+no `form_error`. `aria-invalid` is also read by screen readers, so it has to be
+cleared as soon as the visitor fixes the field.
 
-## Как считается отправка формы
+## How a form submission is counted
 
-Обработчик висит на `document` в фазе всплытия, а не на самой форме: к этому
-моменту все её собственные слушатели уже отработали, поэтому
-`event.defaultPrevented` окончателен и цель уходит синхронно — до того, как
-пропущенная отправка начнёт переход на сервер.
+The handler sits on `document` in the bubbling phase rather than on the form
+itself: by that point all the form's own listeners have run, so
+`event.defaultPrevented` is final and the goal is sent synchronously — before a
+submission that got through starts navigating to the server.
 
-- отправку никто не отменил → `form_submit`, человек ушёл на сервер;
-- отменили и есть `aria-invalid` → `form_error` с именем поля;
-- на форме висит `data-awaiting-kit` → молчим. Атрибут ставит
-  `deferSubmitUntilKit` из `@podbor/lead-crm/phone-kit`, пока догружается
-  `libphonenumber-js`; форма сама повторит отправку через мгновение. Признак
-  берётся из самой формы, а не угадывается по отсутствию пометок.
+- nobody cancelled the submission → `form_submit`, the person went to the server;
+- it was cancelled and there is an `aria-invalid` → `form_error` with the field name;
+- the form carries `data-awaiting-kit` → stay quiet. That attribute is set by
+  `deferSubmitUntilKit` from `@podbor/lead-crm/phone-kit` while
+  `libphonenumber-js` is still loading; the form will resubmit itself a moment
+  later. The signal comes from the form itself rather than being guessed from an
+  absence of markers.
 
-## Воронка
+## The funnel
 
-Id счётчиков — в [deploy.md](deploy.md), чтобы не держать третью копию. На
-каждом заведена составная цель **«ВОРОНКА заявки: увидел → начал →
-отправил»** (`form_view` → `form_start` → `form_submit`). Составная цель
-засчитывается, только если все шаги пройдены за один визит; шагов может быть до
-пяти, условий в шаге — до десяти.
+The counter ids are in [deploy.md](deploy.md), to avoid keeping a third copy. Each
+has a composite goal, **"ENQUIRY FUNNEL: saw → started → submitted"**
+(`form_view` → `form_start` → `form_submit`). A composite goal only counts if every
+step happened within one visit; there can be up to five steps and up to ten
+conditions per step.
 
-Что заведено руками во всех трёх счётчиках: четыре шага формы, два события
-чтения, `contact_click`, три события языкового баннера, URL-цель на `/thanks/`
-и сама воронка. На approved.rs дополнительно `lead_modal_open`,
-`brand_link_click` и URL-цель «Интерес — страница услуги или кейс».
+Registered by hand in all three counters: the four form steps, the two reading
+events, `contact_click`, the three language-banner events, a URL goal on
+`/thanks/`, and the funnel itself. On approved.rs there are additionally
+`lead_modal_open`, `brand_link_click` and the URL goal "Interest — a service page
+or a case study".
 
-Автоцели Метрики (отправка формы, переход в мессенджер, клик по телефону) не
-трогаем: они считают то же самое независимо от нашего кода и годятся как
-перекрёстная проверка.
+Metrika's automatic goals (form submission, going to a messenger, clicking a phone
+number) are left alone: they count the same things independently of our code and
+serve as a cross-check.
 
-## Магазин CarLab
+## The CarLab shop
 
-`add_to_cart` (параметр `type` — ключ типа товара), `begin_checkout` и
-`order_placed` (параметр `total`, RSD) — воронка магазина, только carlab.rs.
-Цели в счётчиках заводятся при переводе магазина в `live`, не раньше: пока он
-в `preview`, эти события шлют только разработчики с `?dev=true`, и такие визиты
-исключаются из выборок так же, как остальные из `docs/analytics-exclusions.md`.
+`add_to_cart` (with a `type` parameter — the product type's key), `begin_checkout`
+and `order_placed` (with a `total` parameter, in RSD) are the shop funnel, and they
+are carlab.rs only. The goals are created in the counters when the shop moves to
+`live`, not before: while it is in `preview`, those events are only sent by
+developers with `?dev=true`, and such visits are excluded from samples the same way
+as everything else in `docs/analytics-exclusions.md`.
 
-## Как добавить событие
+## How to add an event
 
-1. Добавить идентификатор в `GOALS` и вызвать `reachGoal` там, где он происходит.
-2. Покрыть тестом: `packages/site-kit` держит гейт 100 % и уронит CI без него.
-3. Завести цель руками во **всех трёх** счётчиках: Цели → Добавить цель →
-   «Целевое событие», условие **Совпадает**, идентификатор — ровно та же строка.
-   API Метрики у нас только на чтение, целями управляем через интерфейс.
+1. Add the identifier to `GOALS` and call `reachGoal` where it happens.
+2. Cover it with a test: `packages/site-kit` holds a 100% gate and CI will fail
+   without one.
+3. Register the goal by hand in **all three** counters: Goals → Add goal →
+   "Target event", condition **Matches**, identifier exactly the same string.
+   Our Metrika API access is read-only, so goals are managed through the interface.
 
-Событие, заведённое в коде и не заведённое в счётчике, не считается нигде и
-молча теряется — это самый частый способ остаться без данных.
+An event registered in code but not in the counter is counted nowhere and lost
+silently — it is the most common way to end up with no data.
 
-## Чего эти цифры не покажут
+## What these numbers will not show
 
-Переход между сайтами разрывает сессию: с approved.rs на details.rs человек
-уходит на другой домен и в другой счётчик, где он уже новый посетитель с
-реферером approved.rs. `brand_link_click` — единственное место, где этот переход
-виден со стороны approved.rs.
+Moving between sites breaks the session: going from approved.rs to details.rs means
+a different domain and a different counter, where the person is already a new
+visitor with approved.rs as the referrer. `brand_link_click` is the only place that
+transition is visible from approved.rs's side.
 
-`form_view` держится на IntersectionObserver и требует, чтобы вкладка рисовала
-кадры. В фоновой вкладке событие не придёт — на живых визитах это не мешает, но
-при проверке через автоматизацию браузера вкладка должна быть на переднем плане.
+`form_view` rests on IntersectionObserver and needs the tab to be painting frames.
+In a background tab the event never arrives — harmless for real visits, but when
+verifying through browser automation the tab has to be in the foreground.
 
-## Переломы в рядах
+## Breaks in the series
 
-Цель с историей нельзя переопределять молча — сравнение «до и после» соврёт.
-Что уже сломано:
+A goal with history must not be redefined quietly — a before-and-after comparison
+would lie. What is already broken:
 
-| дата                   | цель                                      | что изменилось                                                                                                                                                                 |
-| ---------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 16.09.2026             | автоцель «клик по номеру телефона»        | цель создана; до этой даты по ней нули по определению                                                                                                                          |
-| 23.09.2026 (`a65f421`) | `contact_click` на carlab.rs и details.rs | раньше считала только телефон и мессенджеры, теперь любой `[data-contact-channel]`, включая кнопки открытия формы. Ряд идёт ступенькой вверх. На approved.rs поведение прежнее |
+| date                   | goal                                        | what changed                                                                                                                                                                         |
+| ---------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-09-16             | the automatic "phone number click" goal     | the goal was created; before that date it is zero by definition                                                                                                                      |
+| 2026-09-23 (`a65f421`) | `contact_click` on carlab.rs and details.rs | it used to count only phone numbers and messengers, and now counts any `[data-contact-channel]`, including buttons that open the form. The series steps up. On approved.rs unchanged |

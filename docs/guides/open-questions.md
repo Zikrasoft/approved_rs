@@ -1,122 +1,133 @@
-# Открытые вопросы
+# Open questions
 
-Что ждёт решения или данных от владельца, и технический долг без хозяина.
-Принятые решения — в [`docs/adr/`](../adr/); сюда их не дублировать, а
-закрытый вопрос удалять.
+What is waiting on a decision or on data from the owner, plus technical debt with
+no owner. Decisions that have been made live in [`docs/adr/`](../adr/); don't
+duplicate them here, and delete a question once it is closed.
 
-Состояние на 2026-09-29: все три сайта в проде, теги `deployed/*` стоят на
-`8b46200`.
+State as of 2026-09-29: all three sites are in production, and the `deployed/*`
+tags sit on `8b46200`.
 
-## От владельца: данные и тексты
+## From the owner: data and copy
 
-### Контакты Details
+### Details' contacts
 
-`PUBLIC_TG_MANAGER` и `PUBLIC_INSTAGRAM` у Details — заглушки под `TODO:` в
-`apps/detailing/src/utils/constants.ts`. Они уезжают в `sameAs` разметки и в
-кнопку Telegram, а `PUBLIC_INSTAGRAM` по умолчанию `details.studio` — сайт
-молча показывает чужой аккаунт. У CarLab канал уже есть: `t.me/carlabrs`.
+`PUBLIC_TG_MANAGER` and `PUBLIC_INSTAGRAM` for Details are placeholders under a
+`TODO:` in `apps/detailing/src/utils/constants.ts`. They end up in the `sameAs`
+markup and in the Telegram button, and `PUBLIC_INSTAGRAM` defaults to
+`details.studio` — so the site quietly shows somebody else's account. CarLab
+already has a channel: `t.me/carlabrs`.
 
-### Почтовый индекс
+### Postcode
 
-Адрес `Jovana Ćirilova 23a`, Звездара, Белград (`WORKSHOP_ADDRESS` в
-`packages/brands`). В Звездаре индексов несколько, угадывать нельзя, поэтому
-`postalCode` из разметки убран (в `PostalAddress` он необязательный). Пришлите —
-вернём.
+The address is `Jovana Ćirilova 23a`, Zvezdara, Belgrade (`WORKSHOP_ADDRESS` in
+`packages/brands`). Zvezdara has several postcodes and guessing is not an option,
+so `postalCode` was removed from the markup (it is optional in `PostalAddress`).
+Send it and it goes back.
 
-Оба бренда сидят в одном здании и на одном номере — владелец знает и
-принимает. По плану у трёх бизнесов три разных адреса; это организационное
-решение, не техническое.
+Both brands sit in one building and on one phone number — the owner knows and
+accepts that. The plan is three different addresses for three businesses; that is
+an organisational decision, not a technical one.
 
-### Фотографии и доказательства у Details
+### Photographs and evidence for Details
 
-- **Кадры «до».** Поле `beforeImage` есть, но ни у одной работы не заполнено.
-  Заполните — на странице работы и на главной включится слайдер сравнения.
-- **Снимок испорченного материала** — пожелтевшая или отходящая плёнка с чужой
-  машины на приёмке. Раздел материалов утверждает, что дешёвый материал желтеет
-  за сезон и снимается вместе с лаком, а доказательства на странице нет.
-  Рисовать такое нельзя — это подделка улики на сайте, который продаёт доверие.
-- **Марка материала в карточках работ.** Сейчас работы размечены по услугам, но
-  не по брендам материалов. Разметите — теги материалов смогут переключать
-  настоящие примеры вместо иллюстраций.
-- **Кейс GLS** опубликован с текстом «результат покажем, когда закончим» и
-  пустой галереей.
+- **"Before" shots.** The `beforeImage` field exists but is filled in for not one
+  piece of work. Fill it and the comparison slider turns on, on the work's page
+  and on the homepage.
+- **A shot of ruined material** — yellowed or peeling film on somebody else's car
+  at intake. The materials section claims cheap film yellows within a season and
+  comes off along with the lacquer, and there is no evidence of that on the page.
+  Such a thing cannot be drawn — that would be fabricating evidence on a site that
+  sells trust.
+- **The material brand on work cards.** Works are currently tagged by service, not
+  by material brand. Tag them and the material filters can show real examples
+  instead of illustrations.
+- **The GLS case** is published with the text "we'll show the result when we're
+  done" and an empty gallery.
 
-### Кейсы под страницы услуг без доказательств
+### Case studies for service pages that have no evidence
 
-У Details — полировка/керамика и реставрация руля, у CarLab — кузовной ремонт
-и проверка перед покупкой. Самые маржинальные страницы, и показать на них
-нечего.
+For Details: polishing/ceramics and steering-wheel restoration. For CarLab: body
+repair and pre-purchase inspection. The highest-margin pages, with nothing to show
+on them.
 
-### Непроверенные утверждения на сайтах
+### Unverified claims on the sites
 
-Гарантия 12 месяцев (на работы или и на запчасти?), «ответ за 2 часа»,
-«круглосуточно без выходных», доли восстановленных машин по странам.
+The 12-month warranty (on labour, or on parts too?), "a reply within 2 hours",
+"around the clock, seven days a week", the share of recovered cars per country.
 
-### Цены CarLab в динарах
+### CarLab prices in dinars
 
-Отложено до 2026-12-01. Владелец решил (2026-09-13) не показывать цены на
-детейлинге вовсе и убрать их со страниц услуг автосервиса. Убран только рендер:
-поля `priceFrom` в YAML и zod-схемах на месте, потому что схемы `.strict()` с
-обязательными полями, и удаление ключей потянуло бы `registry.test.ts` и скрипт
-перевода. Вернуть — рендер в двух компонентах.
+Deferred until 2026-12-01. The owner decided (2026-09-13) not to show prices on
+detailing at all and to remove them from the auto-service pages. Only the rendering
+was removed: the `priceFrom` fields stay in the YAML and the zod schemas, because
+the schemas are `.strict()` with required fields, and dropping the keys would drag
+in `registry.test.ts` and the translation script. To bring them back: the rendering
+in two components.
 
-## От владельца: решения
+## From the owner: decisions
 
-### Где живёт инфраструктура бота
+### Where the bot's infrastructure lives
 
-Вебхук и крон напоминаний всех трёх брендов живут в проекте approved.rs.
-Поднято владельцем 14.09.2026, решения нет. Варианты и рекомендация —
+The webhook and the reminder cron for all three brands live in the approved.rs
+project. Raised by the owner on 2026-09-14, no decision yet. The options and a
+recommendation are in
 [ADR-0014](../adr/0014-bot-webhook-and-cron-hosted-by-approved-rs.md).
 
-### Запуск магазина CarLab
+### Launching the CarLab shop
 
-Магазин на Medusa собран в ветке `feat/carlab-shop` (не влита): см.
-[ADR-0016](../adr/0016-carlab-shop-on-self-hosted-medusa.md) и следующие. На
-`main` старый MVP выключен флагом `SHOP_ENABLED = false`. До запуска нужны:
-заказ VPS (доступность CX23 проверить в Hetzner Console), аккаунт Brevo и DKIM,
-реальные цены и наличие, правовые тексты (условия продажи, возврат 14 дней), а
-для онлайн-оплаты позже — ответ бухгалтера про e-fiskalizacija.
+The shop is built on Medusa in branch `feat/carlab-shop` (unmerged): see
+[ADR-0016](../adr/0016-carlab-shop-on-self-hosted-medusa.md) and the ones after
+it. On `main` the old MVP is switched off with `SHOP_ENABLED = false`. Before
+launch we need: a VPS ordered (check CX23 availability in the Hetzner Console), a
+Brevo account with DKIM, real prices and stock, the legal texts (terms of sale,
+14-day returns), and — for online payment later — an answer from the accountant
+about e-fiskalizacija.
 
-Ещё спросить у заказчика:
+Also to ask the client:
 
-- поля карточек по типам (аккумуляторы, масла, фильтры, тормоза): что
-  показывать в карточке, по чему фильтровать;
-- цены установки (аккумулятор, колодки/диски): фиксированная или «от»;
-- сколько дней держим резерв неоплаченного заказа на самовывоз;
-- кто работает в админке Medusa (имена/почты для учёток);
-- гарантия, кто принимает возврат, реквизиты продавца для страницы условий;
-- адрес отправителя писем (например `shop@carlab.rs`) и доступ к DNS carlab.rs.
+- the card fields per product type (batteries, oils, filters, brakes): what to show
+  on the card, what to filter by;
+- installation prices (battery, pads/discs): fixed or "from";
+- how many days we hold an unpaid pickup order;
+- who works in the Medusa admin (names and emails for accounts);
+- warranty, who accepts returns, the seller's registration details for the terms
+  page;
+- the sender address for email (e.g. `shop@carlab.rs`) and access to carlab.rs DNS.
 
-Открыто по данным справочника авто: именование Doblo III/K9, порядковые номера
-Megane против кодов, нужны ли Aveo 310C и Lacetti. Покупать ли доступ к TecDoc —
-отдельное решение ([ADR-0024](../adr/0024-hand-collected-vehicle-dictionary.md)).
+Open on the vehicle dictionary's data: naming for Doblo III/K9, Megane by sequence
+versus by code, whether Aveo 310C and Lacetti are needed. Whether to buy TecDoc
+access is a separate decision
+([ADR-0024](../adr/0024-hand-collected-vehicle-dictionary.md)).
 
-## Техдолг
+## Technical debt
 
-- **`translate` сцепляет три бренда.** Шаг один на все приложения: неисправимый
-  файл у одного сайта роняет джобу, и не выкатывается никто. Развязывается
-  матрицей по `apps/*`, ценой трёх параллельных коммитов в одну ветку.
-- **Гонка `get`+`head` в Blob CAS** (`packages/lead-crm/src/storage/vercelBlob.ts`):
-  запись между двумя вызовами даёт etag чужой версии. Нужна проверка поведения
-  etag на проде.
-- **Вес контактных страниц брендов.** 490 server-rendered `<option>` плюс
-  вторая копия формы в закрытом `<dialog>`: ~26 КБ gzip там, где хватило бы ~7.
-  Список стран `bindPhoneCountry` может брать из чанка, который и так грузится
-  динамически.
+- **`translate` couples the three brands.** It is one step across every app: an
+  unfixable file on one site fails the job and nothing ships. It can be untangled
+  with a matrix over `apps/*`, at the price of three parallel commits into one
+  branch.
+- **A `get`+`head` race in the Blob CAS**
+  (`packages/lead-crm/src/storage/vercelBlob.ts`): a write between the two calls
+  yields the etag of somebody else's version. Needs a check of etag behaviour in
+  production.
+- **The weight of the brands' contact pages.** 490 server-rendered `<option>`
+  elements plus a second copy of the form inside a closed `<dialog>`: ~26 KB gzip
+  where ~7 would do. `bindPhoneCountry`'s country list could come from a chunk that
+  is already loaded dynamically.
 
-## Проверить руками на проде
+## To check by hand in production
 
-- Баннер согласия не перекрывает плавающую кнопку связи на мобильном, на всех
-  трёх сайтах.
-- 301 legacy-слагов: `vercel.json` дублирует `middleware.ts` руками, и
-  расходятся они молча ([ADR-0010](../adr/0010-locale-prefixed-urls-and-permanent-legacy-redirects.md)).
-- Отказ в баннере действительно не запускает Метрику со следующей загрузки.
-- Meta-описания неанглийских локалей: если где-то нет имени сайта или города
-  там, где в русском `{siteName}` / `{location}`, модель выбросила токен.
-- `TELEGRAM_ADMIN_ID` заполнен во всех трёх проектах — иначе карантин
-  нечитаемых заявок отработает молча.
+- The consent banner does not cover the floating contact button on mobile, on all
+  three sites.
+- The 301s for legacy slugs: `vercel.json` duplicates `middleware.ts` by hand, and
+  they diverge silently
+  ([ADR-0010](../adr/0010-locale-prefixed-urls-and-permanent-legacy-redirects.md)).
+- Declining in the banner really does keep Metrika from starting on the next load.
+- Meta descriptions in non-English locales: if the site name or the city is missing
+  anywhere the Russian has `{siteName}` / `{location}`, the model dropped a token.
+- `TELEGRAM_ADMIN_ID` is filled in on all three projects — otherwise the quarantine
+  for unreadable enquiries works silently.
 
-## Мелочь, которую не переигрывать
+## Small things not to relitigate
 
-Флаг ЕС на карточке «Из Европы» оставлен, хотя Швейцария не в ЕС: текст
-исправлен на «страны Европы», а пиктограмма ничего не утверждает.
+The EU flag on the "From Europe" card stays, even though Switzerland is not in the
+EU: the text was corrected to "European countries", and the icon asserts nothing.
