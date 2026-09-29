@@ -949,10 +949,6 @@ async function handlePrivateMessage(msg: TelegramMessage): Promise<void> {
 }
 
 export async function POST({ request }: APIContext): Promise<Response> {
-  // Telegram echoes this header back on every webhook call once the webhook
-  // is registered with a secret_token (see docs/deploy.md) — the only way
-  // to confirm a request actually came from Telegram and not a public POST
-  // to a guessable URL. Fail closed if it's missing or wrong.
   if (
     !secretMatches(
       request.headers.get('x-telegram-bot-api-secret-token'),

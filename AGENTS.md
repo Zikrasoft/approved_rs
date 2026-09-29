@@ -23,10 +23,7 @@ Each app owns its own `astro.config.mjs`, `keystatic.config.ts`, `vercel.json`,
 lockfile stay at the repo root and cover every workspace. The root
 `vercel.json` holds `git.deploymentEnabled: false` — without it every branch
 push triggers a failing preview build. **The same block is now duplicated into
-all three apps' `vercel.json` on purpose.** Which file Vercel's git integration
-reads depends on a project's Root Directory setting, and this repo has three
-projects with three different roots; having it in both places is the only
-arrangement that is correct whatever that setting is. It costs three lines.
+all three apps' `vercel.json` on purpose.** Why: `docs/adr/0007-github-actions-builds-vercel-only-hosts.md`.
 
 Unqualified paths in this document are relative to `apps/approved-rs/`:
 `src/lib/store.ts` means `apps/approved-rs/src/lib/store.ts`.
@@ -90,7 +87,7 @@ projects on three separate domains, so a cross-origin POST buys nothing but a
 CORS config to maintain.
 
 **Why packages exist:** this repo is becoming a portfolio of deliberately
-independent brand sites (see `docs/open-questions.md` and the split plan). The
+independent brand sites (see `docs/adr/0001-one-repo-three-independent-brand-sites.md`). The
 shared code is the machinery — lead capture, i18n — never the visual identity.
 Design systems and components stay per-app because each brand gets its own
 look, not because the sites have to hide that they are relatives. **The sites
@@ -342,7 +339,7 @@ a commit but cannot run the review itself.
 - **Case studies** (`src/content/cases` on approved.rs, `src/content/works` on the two brand sites, schemas in each app's `src/content.config.ts`) are Keystatic-managed Markdown collections. Admin writes `title`/`car`/`price`/etc. and the RU `title`/`body` only; a `translations: { en, sr, es, de }` field on the same entry (not a separate collection) holds the other four locales, each optional — missing/failed falls back to RU rather than breaking the page.
 - **UI/site copy** (`src/content/i18n/*.yaml`: `dictionary`, `faq`, `home`, `pages`, `meta`, `leadForm`, `promoBanners`, `services`) is flat YAML, read via `src/i18n/content/*.ts` + a matching `*ContentSchema.ts` (zod), all going through the shared `loadI18nSection()` helper (`src/i18n/loadI18nSection.ts`, a thin binding over `@podbor/i18n`'s `createSectionLoader`) — it parses the YAML once at module load, validates RU against the schema (throws loudly on a bad file instead of failing at render time), and falls back to RU per-locale if a translation fails validation. `getI18n()` (`src/i18n/getI18n.ts`) additionally merges in `src/i18n/dictionaries/templates.ts` — the handful of interpolation functions (e.g. gallery alt-text templates) that can't be represented as static YAML strings.
 
-**Both content systems share one auto-translate mechanism:** admin/dev only ever hand-writes RU. The `translate` job in `.github/workflows/ci.yml` runs each app's `scripts/translate-i18n.ts` plus `scripts/translate-cases.ts` on approved.rs and `scripts/translate-works.ts` on the two brand sites, on every push (any branch, so translations land in a feature branch before merge, not after) and commits the result back. The `translate` job itself stays unconditional rather than path-filtered — every string is looked up in the leaf cache first, so a run with nothing new makes no OpenAI request at all, and every job downstream reads the SHA it left behind, so untranslated content cannot reach production. **Filtering happens one job later and on a different axis:** the `scope` step in `verify` works out which apps are stale in production and both deploy jobs are gated on that list, so a push to `main` deploys only the sites it actually changed. The base of that comparison is a per-app `refs/tags/deployed/<app>` tag each deploy job moves after it succeeds — deliberately not the previous commit, which would never retry an app whose deploy failed and which has not changed since. Every unknown (no tag yet, a force-push, a turbo crash, unparseable output) answers "deploy". This is not the `gate`/`paths:` arrangement that double-deployed `main` before: there is one answer rather than two, computed from real git history inside an existing checkout instead of the push payload's `commits` array, which GitHub sends as `null` on merge commits. **The unit of work is one string, not one file.** `packages/i18n/src/translate/leafCache.ts` keys a committed cache on the triple (system prompt, model, Russian string), so a rerun asks the model only for the strings whose Russian actually moved — the rest come back from `apps/<app>/src/content/translations.cache.json`. The first CI translate run on this branch creates it — it is not in the repository yet. Once there it must stay committed: deleting it regenerates the whole corpus at OpenAI's price. The cache is keyed by file path, so renaming a case directory drops its block and the next run adopts the committed translations as if they were hand-written, which quietly exempts that file from the next prompt fix. Editing the prompt or the model changes the fingerprint and regenerates everything that prompt produced, which is the deliberate switch for a prompt fix. `translatedFrom` still records the hash of the whole RU source, and is what tells the job whether the committed translations correspond to the Russian in the file right now — the condition a hand-written translation is adopted under. Both scripts call through `packages/i18n/src/translate/openaiChat.ts` (official `openai` SDK) and validate the AI's response with `packages/i18n/src/translate/assertSafeTranslation.ts`, which rejects a translation that introduces HTML the RU source didn't already have (a stored-XSS guard on an otherwise-unreviewed auto-commit path — case bodies are rendered as markdown via `src/lib/safeMarked.ts`, which itself sanitizes with `sanitize-html`). Needs `OPENAI_API_KEY` as a GitHub Actions secret (separate from Vercel's env vars); without it the job fails at the translate step but doesn't touch already-translated content.
+**Both content systems share one auto-translate mechanism:** admin/dev only ever hand-writes RU. The `translate` job in `.github/workflows/ci.yml` runs each app's `scripts/translate-i18n.ts` plus `scripts/translate-cases.ts` on approved.rs and `scripts/translate-works.ts` on the two brand sites, on every push (any branch, so translations land in a feature branch before merge, not after) and commits the result back. The `translate` job itself stays unconditional rather than path-filtered — every string is looked up in the leaf cache first, so a run with nothing new makes no OpenAI request at all, and every job downstream reads the SHA it left behind, so untranslated content cannot reach production. **Deploy filtering is a separate step** (`scope` in `verify`, against per-app `refs/tags/deployed/<app>` tags) — why: `docs/adr/0008-deploy-only-what-is-stale-in-production.md`. **The unit of work is one string, not one file.** `packages/i18n/src/translate/leafCache.ts` keys a committed cache on the triple (system prompt, model, Russian string), so a rerun asks the model only for the strings whose Russian actually moved — the rest come back from `apps/<app>/src/content/translations.cache.json`. It must stay committed: deleting it regenerates the whole corpus at OpenAI's price. The cache is keyed by file path, so renaming a case directory drops its block and the next run adopts the committed translations as if they were hand-written, which quietly exempts that file from the next prompt fix. Editing the prompt or the model changes the fingerprint and regenerates everything that prompt produced, which is the deliberate switch for a prompt fix. `translatedFrom` still records the hash of the whole RU source, and is what tells the job whether the committed translations correspond to the Russian in the file right now — the condition a hand-written translation is adopted under. Both scripts call through `packages/i18n/src/translate/openaiChat.ts` (official `openai` SDK) and validate the AI's response with `packages/i18n/src/translate/assertSafeTranslation.ts`, which rejects a translation that introduces HTML the RU source didn't already have (a stored-XSS guard on an otherwise-unreviewed auto-commit path — case bodies are rendered as markdown via `src/lib/safeMarked.ts`, which itself sanitizes with `sanitize-html`). Needs `OPENAI_API_KEY` as a GitHub Actions secret (separate from Vercel's env vars); without it the job fails at the translate step but doesn't touch already-translated content.
 
 **Lead capture pipeline (`@podbor/lead-crm`, bound in `src/lib/crm.ts` + `src/lib/crmBot.ts`):** form submissions (`api/leads.ts`) and call-button clicks (`api/contact-click.ts`) both funnel through `notifyLead`, which stores the lead and notifies Telegram via `waitUntil()` (fire-and-forget after the response redirects). Leads live in a single JSON blob on Vercel Blob (`data/leads.json`), not a database — every mutation goes through `updateLeads()`, a compare-and-swap loop with jittered exponential backoff so two concurrent writers (e.g. a bot button edit racing a new form submission) desync instead of retry-colliding. Storage sits behind a `LeadStorage` interface, so moving to Postgres later is one adapter rather than a rewrite. `api/telegram-webhook.ts` handles the bot side (status changes, deal-amount/commission prompts, postpone/remind flow) driven by the same store. `api/reminders.ts` is a Vercel Cron job (needs `CRON_SECRET`) that pushes due `postponed` leads back to the owner.
 
@@ -354,7 +351,7 @@ The commission rate is per business (`DEFAULT_COMMISSION_PERCENT` in `src/lib/cr
 
 **Path/URL construction:** always go through `src/utils/paths.ts`'s `PathBuilder` rather than hand-building locale-prefixed URLs, so a routing change (like the legacy-slug renames above) only needs updating in one place.
 
-See `docs/deploy.md` for the full environment-variable list and Vercel deployment/git.deploymentEnabled setup.
+See `docs/guides/deploy.md` for the full environment-variable list and Vercel deployment/git.deploymentEnabled setup.
 
 ## Project instructions
 
@@ -375,9 +372,9 @@ Event names live once in `packages/site-kit/src/goals.ts` and are fired through
 `reachGoal` from `@podbor/site-kit/browser`, never as string literals in an app. Every event must also exist as a goal in **all three** Metrika counters —
 one created in code but not in a counter is silently lost. The vocabulary, the
 markup hooks it depends on (`data-lead-form`, `data-contact-channel`,
-`data-brand-link`, `aria-invalid`) and how to add one are in `docs/analytics.md`;
+`data-brand-link`, `aria-invalid`) and how to add one are in `docs/guides/analytics.md`;
 whose visits to exclude before drawing any conclusion is in
-`docs/analytics-exclusions.md`.
+`docs/guides/analytics-exclusions.md`.
 
 ## Validation
 
@@ -412,6 +409,20 @@ This site is Astro SSG (`output: 'static'`/prerendered, no SSR) — `.astro` fro
 
 Don't reach for a library reflexively, though — a hand-rolled ~10-line helper that's already correct and purpose-built to one exact call site (e.g. `src/lib/store.ts`'s jittered CAS-retry backoff) doesn't get simpler by wrapping it in a generic library's config API. The bar is: does an existing library solve a real edge case this code either gets wrong today or would have to re-solve by hand, not "is there a package for this."
 
-**A bot framework (grammy/telegraf) stays out, and the reason is no longer "the bot is too small".** It isn't: roughly fifteen named callback handlers and a five-kind `pendingPrompt` state machine driven by `force_reply`. The reasons that actually hold are structural. The webhook is a serverless function, so telegraf's long-running `bot.launch()` model collapses to `handleUpdate` plus a cold-start cost, and the ergonomics it is chosen for are exactly what gets lost. Its scenes want a session store keyed by user, while `pendingPrompt` deliberately lives on the lead record in Blob — the prompt belongs to a lead, not to a person, and two operators can act on one lead. And `packages/lead-crm/src/telegram/client.ts` is not a bare `fetch`: `safeEditMessage` swallows "message is not modified", and `notify.ts` separately swallows "message to edit not found" — domain knowledge no framework supplies. What has genuinely outgrown hand-rolling is the **dispatch**: `handleCallbackQuery` in `apps/approved-rs/src/pages/api/telegram-webhook.ts` runs every callback through a couple of dozen callback-data regexes and a flat chain of early-return guards. If that becomes painful, the fix is a `[pattern, handler]` table in that same file — note the guards carry per-branch role checks, so the table has to hold the required role too, which is why this is worth doing only when the chain actually hurts.
+**No bot framework (grammy/telegraf)** — why: `docs/adr/0006-no-telegram-bot-framework.md`. If the regex chain in `handleCallbackQuery` (`apps/approved-rs/src/pages/api/telegram-webhook.ts`) starts to hurt, the fix is a `[pattern, requiredRole, handler]` table in that file.
 
 This only applies to build-time code (`.astro` frontmatter, `src/lib/`, `scripts/`). Code that ships to the browser (client-side `<script>`, hydrated islands) still carries a real bundle-size cost — weigh a new client dependency normally there.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues in `Zikrasoft/approved_rs`, via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
