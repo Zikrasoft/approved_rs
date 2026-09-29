@@ -45,3 +45,7 @@ coverage/
 
 # Local, never committed: identifiers of real people (see docs/analytics-exclusions.md)
 .local/
+
+# Medusa deploy state (host-only)
+infra/medusa/.previous-tag
+infra/medusa/.deploy.lock

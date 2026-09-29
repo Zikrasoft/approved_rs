@@ -1,6 +1,5 @@
 #!/bin/sh
 set -eu
-cd "$(dirname -- "$0")"
 
 dump=${1:-}
 files=${2:-}
@@ -12,6 +11,13 @@ files=${2:-}
   echo "$files is missing or empty." >&2
   exit 2
 }
+
+dump=$(cd "$(dirname -- "$dump")" && pwd)/$(basename -- "$dump")
+if [ -n "$files" ]; then
+  files=$(cd "$(dirname -- "$files")" && pwd)/$(basename -- "$files")
+fi
+
+cd "$(dirname -- "$0")"
 
 docker compose up -d --wait postgres
 
@@ -33,6 +39,10 @@ if [ -n "$files" ]; then
   docker compose run --rm -T --no-deps --entrypoint sh medusa \
     -c 'find /server/static -mindepth 1 -delete && tar -C /server/static -xzf -' <"$files"
 fi
+
+echo "==> Migrations"
+docker compose run --rm -T medusa \
+  node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing
 
 docker compose up -d --wait --wait-timeout 300
 echo "Restored."

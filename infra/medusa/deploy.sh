@@ -20,6 +20,12 @@ esac
   exit 1
 }
 
+mkdir .deploy.lock 2>/dev/null || {
+  echo "Another deploy is already running (.deploy.lock present)." >&2
+  exit 1
+}
+trap 'rmdir .deploy.lock 2>/dev/null || true' EXIT
+
 previous=$(sed -n 's/^MEDUSA_TAG=//p' .env)
 api_host=$(sed -n 's/^API_HOST=//p' .env)
 export MEDUSA_TAG="$tag"
@@ -37,6 +43,7 @@ mv .env.next .env
 if [ -n "$previous" ] && [ "$previous" != "$tag" ]; then
   echo "$previous" >.previous-tag
 fi
+trap '[ $? -eq 0 ] || [ ! -s .previous-tag ] || echo "Roll back with: $0 $(cat .previous-tag)" >&2; rmdir .deploy.lock 2>/dev/null || true' EXIT
 
 echo "==> Restarting"
 docker compose up -d --wait --wait-timeout 300 --remove-orphans
@@ -48,6 +55,5 @@ if curl -fsS -o /dev/null --max-time 10 --retry 12 --retry-delay 5 --retry-all-e
   echo "Live at $tag."
 else
   echo "The stack is up but the public health check failed." >&2
-  [ ! -s .previous-tag ] || echo "Roll back with: $0 $(cat .previous-tag)" >&2
   exit 1
 fi
