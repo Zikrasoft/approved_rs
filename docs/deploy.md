@@ -577,7 +577,7 @@ will deploy the image, so it is not pushed.`», пушит только когд
   успешного выката удаляет образы Medusa, кроме текущего и `.previous-tag`
   (ошибка удаления деплой не валит) — иначе ~650 MB на выкат забьют диск.
 - `/var/backups/carlab/` — бэкапы, хранятся 7 дней; cron
-  `/etc/cron.d/carlab-backup` в 03:30 UTC, лог `/var/log/carlab-backup.log`.
+  `/etc/cron.d/carlab-backup` в 03:30 UTC, лог `/var/log/carlab-backup.log`. Если деплой или бэкап убит посреди работы (ребут, `kill -9`), `.deploy.lock` остаётся и блокирует оба — убедившись, что ни `deploy.sh`, ни `backup.sh` не запущены (`pgrep -f "deploy.sh|backup.sh"`), удалить его: `rmdir /srv/carlab/.deploy.lock`.
   Это копия на том же диске; внесерверная копия в фазе 1 — автобэкапы Hetzner.
 - Наружу опубликован только Caddy: 80, 443, 443/udp. У Medusa, Postgres и
   Redis портов на хосте нет; Postgres и Redis сидят во внутренней сети без

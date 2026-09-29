@@ -21,7 +21,7 @@ esac
 }
 
 mkdir .deploy.lock 2>/dev/null || {
-  echo "Another deploy is already running (.deploy.lock present)." >&2
+  echo "A deploy or backup is already running (.deploy.lock present)." >&2
   exit 1
 }
 trap 'rmdir .deploy.lock 2>/dev/null || true' EXIT
