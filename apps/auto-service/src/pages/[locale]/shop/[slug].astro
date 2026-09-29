@@ -17,10 +17,11 @@ import {
   publishedProducts,
 } from '@/utils/products';
 import { safeMarkdown } from '@podbor/site-kit';
-import { CURRENCY, SHOP_ENABLED, SITE_NAME, SITE_URL } from '@/utils/constants';
+import { CURRENCY, SITE_NAME, SITE_URL } from '@/utils/constants';
+import { shopBuilt } from '@/utils/shopStatus';
 
 export async function getStaticPaths() {
-  if (!SHOP_ENABLED) return [];
+  if (!shopBuilt()) return [];
   const products = publishedProducts(await getCollection('products'));
   return withLocales(
     products.map((product) => ({

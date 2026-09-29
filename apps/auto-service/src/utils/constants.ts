@@ -7,8 +7,6 @@ export const SITE_URL = import.meta.env.SITE ?? BRAND.url;
 export const SITE_NAME = BRAND.name;
 export const SITE_LEGAL_NAME = BRAND.legalName;
 
-export const SHOP_ENABLED = false;
-
 export const GARAGE_ADDRESS = WORKSHOP_ADDRESS;
 
 export const OPENING_HOURS = [

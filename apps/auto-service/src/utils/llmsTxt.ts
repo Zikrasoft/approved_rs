@@ -1,12 +1,8 @@
 import { getCollection } from 'astro:content';
 import { mapPlaceUrl } from '@podbor/site-kit';
 import { renderBrandLlmsTxt, type LlmsLinkList } from '@podbor/i18n';
-import {
-  SITE_URL,
-  SITE_NAME,
-  GARAGE_ADDRESS,
-  SHOP_ENABLED,
-} from '@/utils/constants';
+import { SITE_URL, SITE_NAME, GARAGE_ADDRESS } from '@/utils/constants';
+import { shopIndexed } from '@/utils/shopStatus';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { localizedWork, publishedWorks } from '@/utils/works';
 import { PathBuilder } from '@/utils/paths';
@@ -20,7 +16,7 @@ import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 const url = (path: string) => `${SITE_URL}${path}`;
 
 function shopList(locale: Locale, heading: string): LlmsLinkList[] {
-  if (!SHOP_ENABLED) return [];
+  if (!shopIndexed()) return [];
   const shop = getShopContent(locale);
   return [
     {

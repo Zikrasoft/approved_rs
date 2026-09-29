@@ -69,4 +69,8 @@ describe('generateLlmsTxt', () => {
     expect(body).toContain(mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid));
     expect(body).toContain(getSiteContent('sr').footer.hours);
   });
+
+  it('leaves the shop out of llms.txt unless the shop is live', async () => {
+    expect(await generateLlmsTxt('sr')).not.toContain('/sr/shop/');
+  });
 });

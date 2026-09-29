@@ -8,10 +8,10 @@ import { getShopContent } from '@/i18n/content/shop';
 import { localePaths, PathBuilder } from '@/utils/paths';
 import { SHOP_SERVICE } from '@/utils/services';
 import { MAX_LINE_QUANTITY } from '@/utils/cart';
-import { SHOP_ENABLED } from '@/utils/constants';
+import { shopBuilt } from '@/utils/shopStatus';
 
 export function getStaticPaths() {
-  return SHOP_ENABLED ? localePaths() : [];
+  return shopBuilt() ? localePaths() : [];
 }
 
 const locale = localeFrom(Astro.url.pathname);
