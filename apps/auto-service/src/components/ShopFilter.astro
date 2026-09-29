@@ -1,0 +1,120 @@
+---
+import { facetIndex, productType } from '@podbor/shop-catalog/browser';
+import { BCP47_BY_LOCALE } from '@/i18n/config';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getShopContent } from '@/i18n/content/shop';
+import type { CatalogProduct } from '@/lib/catalog';
+import { optionLabel, specCopy } from '@/lib/formatSpec';
+
+interface Props {
+  typeKey: string;
+  products: CatalogProduct[];
+  omit?: string;
+}
+
+const { typeKey, products, omit } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const shop = getShopContent(locale);
+const type = productType(typeKey)!;
+const copy = specCopy(shop, typeKey, BCP47_BY_LOCALE[locale]);
+const facets = facetIndex(
+  type,
+  products.map((product) => product.spec),
+).filter((facet) => facet.key !== omit);
+const fieldOf = (key: string) =>
+  type.fields.find((field) => field.key === key)!;
+const unitOf = (key: string) => {
+  const field = fieldOf(key);
+  return field.kind === 'number' ? copy.units[field.unit] : '';
+};
+---
+
+<shop-filter
+  data-type={typeKey}
+  data-bcp47={BCP47_BY_LOCALE[locale]}
+  data-count-forms={JSON.stringify(shop.matchCount)}
+  class="flex flex-col gap-5"
+>
+  {
+    facets.length > 0 && (
+      <form
+        data-facets
+        class="card grid gap-5 p-4 sm:grid-cols-2 lg:grid-cols-4"
+      >
+        <h2 class="sr-only">{shop.filterHeading}</h2>
+        {facets.map((facet) =>
+          facet.kind === 'options' ? (
+            <fieldset class="m-0 flex min-w-0 flex-col gap-1 border-0 p-0">
+              <legend class="field-label p-0">
+                {copy.type.fields[facet.key].label}
+              </legend>
+              {facet.options.map((choice) => (
+                <label class="flex min-h-11 items-center gap-2.5 text-sm text-ink-2">
+                  <input
+                    type="checkbox"
+                    name={facet.key}
+                    value={choice.value}
+                    class="size-4 shrink-0 accent-signal"
+                  />
+                  <span>
+                    {optionLabel(fieldOf(facet.key), choice.value, copy)}
+                    <span class="spec text-xs text-muted"> {choice.count}</span>
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+          ) : (
+            <fieldset class="m-0 flex min-w-0 flex-col gap-1 border-0 p-0">
+              <legend class="field-label p-0">
+                {`${copy.type.fields[facet.key].label}, ${unitOf(facet.key)}`}
+              </legend>
+              <div class="flex gap-2">
+                {(['min', 'max'] as const).map((bound) => (
+                  <label class="min-w-0 flex-1">
+                    <span class="sr-only">
+                      {bound === 'min' ? shop.filterFrom : shop.filterTo}
+                    </span>
+                    <input
+                      type="number"
+                      inputmode="decimal"
+                      name={`${facet.key}.${bound}`}
+                      min={facet.values[0]}
+                      max={facet.values.at(-1)}
+                      placeholder={`${bound === 'min' ? shop.filterFrom : shop.filterTo} ${bound === 'min' ? facet.values[0] : facet.values.at(-1)}`}
+                      class="field spec"
+                    />
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          ),
+        )}
+      </form>
+    )
+  }
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <p data-filter-count aria-live="polite" class="spec text-sm text-muted"></p>
+    <button
+      type="button"
+      data-filter-reset
+      class="btn btn-secondary px-3 py-2 text-sm"
+    >
+      {shop.resetLabel}
+    </button>
+  </div>
+  <slot />
+  <div
+    data-filter-empty
+    hidden
+    class="card flex flex-col gap-2 p-6 text-center"
+  >
+    <p class="font-medium text-ink">{shop.noMatches}</p>
+    <p class="text-sm text-muted">{shop.noMatchesHint}</p>
+  </div>
+</shop-filter>
+
+<script>
+  import { defineShopFilter } from '@/scripts/shop/shopFilter';
+
+  defineShopFilter();
+</script>
