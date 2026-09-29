@@ -22,6 +22,8 @@ expect() {
 expect 'only caddy publishes a port' '[.services | to_entries[] | select(.value.ports) | .key] == ["caddy"]'
 expect 'postgres and redis sit on the internal network only' \
   '[.services.postgres, .services.redis | .networks | keys] == [["data"], ["data"]] and .networks.data.internal == true'
+expect 'the edge network carries IPv6 so clients reach caddy without the userland proxy' \
+  '.networks.edge.enable_ipv6 == true and ([.networks.edge.ipam.config[].subnet] | any(test(":")))'
 expect 'every service restarts on its own' '[.services[] | .restart] | all(. == "unless-stopped")'
 expect 'every service has a memory limit, together under 3.2 GB' \
   '[.services[] | .mem_limit | tonumber] | (all(. > 0) and add < 3200 * 1024 * 1024)'

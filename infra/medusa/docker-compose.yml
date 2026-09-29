@@ -108,6 +108,10 @@ networks:
   data:
     internal: true
   edge:
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: fd00:ca7:1ab::/64
 
 volumes:
   pgdata:

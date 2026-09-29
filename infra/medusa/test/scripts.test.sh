@@ -18,6 +18,8 @@ case "$*" in
 *'tar -C /server/static -czf'*) printf 'TAR' ;;
 *pg_tables*) printf '%s' "${TABLES:-0}" ;;
 *'up -d --wait'*) exit "${UP_EXIT:-0}" ;;
+*'image ls'*) printf '%s\n' ${IMAGE_TAGS:-} ;;
+*'image rm'*) exit "${RM_EXIT:-0}" ;;
 esac
 STUB
 cat >"$work/bin/curl" <<'STUB'
@@ -86,11 +88,38 @@ expect 'pull, migrate, up, reload and health run in order on the new tag' logged
   "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing" \
   "docker[$NEW] compose up -d --wait --wait-timeout 300 --remove-orphans" \
   "docker[$NEW] compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile" \
-  'curl -fsS -o /dev/null --max-time 10 --retry 12 --retry-delay 5 --retry-all-errors https://api.test/health/ready'
+  'curl -fsS -o /dev/null --max-time 10 --retry 12 --retry-delay 5 --retry-all-errors https://api.test/health/ready' \
+  "docker[$NEW] image ls ghcr.io/zikrasoft/podbor-medusa --format {{.Tag}}"
 expect '.env names the new tag' has "MEDUSA_TAG=$NEW" "$work/host/.env"
 expect '.env keeps every other line' has 'POSTGRES_PASSWORD=x' "$work/host/.env"
 expect 'the old tag is kept for rollback' has "$OLD" "$work/host/.previous-tag"
 expect 'the lock is released after a deploy' test ! -d "$work/host/.deploy.lock"
+
+OLDER=3333333333333333333333333333333333333333
+stage
+IMAGE_TAGS="$NEW $OLD $OLDER <none>"
+export IMAGE_TAGS
+expect 'a deploy with old images on the host succeeds' run deploy.sh "$NEW"
+expect 'an image older than the previous one is removed' grep -qxF "docker[$NEW] image rm ghcr.io/zikrasoft/podbor-medusa:$OLDER" "$LOG"
+refuse 'the live and the previous image are kept' grep -Eq "image rm .*($NEW|$OLD)" "$LOG"
+refuse 'an untagged image is not addressed by tag' grep -q 'image rm .*<none>' "$LOG"
+
+stage
+printf 'API_HOST=api.test\nMEDUSA_IMAGE=registry.test/medusa\nMEDUSA_TAG=%s\nPOSTGRES_PASSWORD=x\n' "$OLD" >"$work/host/.env"
+expect 'a custom MEDUSA_IMAGE deploy succeeds' run deploy.sh "$NEW"
+expect 'pruning follows MEDUSA_IMAGE from .env' grep -qxF "docker[$NEW] image rm registry.test/medusa:$OLDER" "$LOG"
+
+stage
+printf '%s\n' "$OLDER" >"$work/host/.previous-tag"
+printf 'API_HOST=api.test\nMEDUSA_TAG=%s\nPOSTGRES_PASSWORD=x\n' "$NEW" >"$work/host/.env"
+expect 'a redeploy of the live tag succeeds' run deploy.sh "$NEW"
+refuse 'a redeploy keeps the recorded rollback image' grep -q "image rm .*$OLDER" "$LOG"
+
+stage
+RM_EXIT=1
+export RM_EXIT
+expect 'a failed image removal does not fail the deploy' run deploy.sh "$NEW"
+unset RM_EXIT IMAGE_TAGS
 
 stage
 MIGRATE_EXIT=1
@@ -185,6 +214,20 @@ refuse 'a week-old files archive is removed' test -e "$work/backups/static-old.t
 expect 'a recent dump stays' test -e "$work/backups/db-recent.dump"
 expect 'an unrelated old file is not rotated away' test -e "$work/backups/db-old-notes.txt"
 expect 'no .part file is left behind' test -z "$(find "$work/backups" -name '*.part')"
+
+stage
+mkdir "$work/host/.deploy.lock" "$work/backups3"
+BACKUP_DIR="$work/backups3"
+export BACKUP_DIR
+refuse 'a running deploy makes the backup fail' run backup.sh ''
+expect 'a skipped backup says why' grep -q 'deploy is running' "$work/host/stderr"
+refuse 'a skipped backup never reaches docker' test -s "$LOG"
+expect 'a skipped backup leaves the deploy lock alone' test -d "$work/host/.deploy.lock"
+
+stage
+BACKUP_DIR="$work/backups3"
+expect 'a backup releases the lock' run backup.sh ''
+expect 'no lock is left after a backup' test ! -d "$work/host/.deploy.lock"
 
 stage
 mkdir "$work/backups2"

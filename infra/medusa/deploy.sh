@@ -28,6 +28,8 @@ trap 'rmdir .deploy.lock 2>/dev/null || true' EXIT
 
 previous=$(sed -n 's/^MEDUSA_TAG=//p' .env)
 api_host=$(sed -n 's/^API_HOST=//p' .env)
+image=$(sed -n 's/^MEDUSA_IMAGE=//p' .env)
+image=${image:-ghcr.io/zikrasoft/podbor-medusa}
 export MEDUSA_TAG="$tag"
 
 echo "==> Image $tag"
@@ -53,6 +55,10 @@ echo "==> https://${api_host:-api.carlab.rs}/health/ready"
 if curl -fsS -o /dev/null --max-time 10 --retry 12 --retry-delay 5 --retry-all-errors \
   "https://${api_host:-api.carlab.rs}/health/ready"; then
   echo "Live at $tag."
+  keep=$(cat .previous-tag 2>/dev/null || echo "$tag")
+  docker image ls "$image" --format '{{.Tag}}' | grep -vx -e "$tag" -e "$keep" -e '<none>' -e '' | while read -r old; do
+    docker image rm "$image:$old" >/dev/null || echo "Could not remove $image:$old." >&2
+  done || true
 else
   echo "The stack is up but the public health check failed." >&2
   exit 1
