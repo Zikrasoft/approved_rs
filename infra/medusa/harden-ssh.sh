@@ -8,12 +8,18 @@ DEPLOY_USER=${DEPLOY_USER:-deploy}
   exit 1
 }
 
+[ "${SUDO_USER:-}" = "$DEPLOY_USER" ] || {
+  echo "Run via sudo from a $DEPLOY_USER ssh session." >&2
+  exit 1
+}
+
 [ -s "/home/$DEPLOY_USER/.ssh/authorized_keys" ] || {
   echo "/home/$DEPLOY_USER/.ssh/authorized_keys is empty. Locking root out now would leave nobody able to log in." >&2
   exit 1
 }
 
-cat >/etc/ssh/sshd_config.d/00-carlab.conf <<CONF
+conf=/etc/ssh/sshd_config.d/00-carlab.conf
+cat >"$conf" <<CONF
 PermitRootLogin no
 PasswordAuthentication no
 KbdInteractiveAuthentication no
@@ -27,13 +33,17 @@ AllowTcpForwarding no
 AllowUsers $DEPLOY_USER
 CONF
 
-sshd -t
+sshd -t || {
+  rm -f "$conf"
+  exit 1
+}
 
 for want in "permitrootlogin no" "passwordauthentication no" \
   "kbdinteractiveauthentication no" "permitemptypasswords no" \
   "authenticationmethods publickey" "allowusers $DEPLOY_USER"; do
-  sshd -T | grep -qix "$want" || {
+  sshd -T -C "user=$DEPLOY_USER,host=localhost,addr=203.0.113.1" | grep -qix "$want" || {
     echo "sshd reports something other than '$want': another drop-in in /etc/ssh/sshd_config.d/ sorts before 00-carlab.conf, or /etc/ssh/sshd_config sets it above its Include line." >&2
+    rm -f "$conf"
     exit 1
   }
 done

@@ -14,7 +14,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 echo "==> Packages"
 apt-get update -qq
-apt-get install -y -qq ca-certificates curl gnupg ufw fail2ban unattended-upgrades
+apt-get install -y -qq ca-certificates curl gnupg ufw fail2ban unattended-upgrades sudo
 
 echo "==> Swap"
 if [ -z "$(swapon --show)" ]; then
@@ -72,7 +72,7 @@ rm -f "$sudoers"
 echo "==> Directories"
 install -d -m 0750 -o "$DEPLOY_USER" -g "$DEPLOY_USER" "$DEPLOY_DIR"
 install -d -m 0700 -o "$DEPLOY_USER" -g "$DEPLOY_USER" "$BACKUP_DIR"
-install -m 0640 -o "$DEPLOY_USER" -g "$DEPLOY_USER" /dev/null /var/log/carlab-backup.log
+[ -e /var/log/carlab-backup.log ] || install -m 0640 -o "$DEPLOY_USER" -g "$DEPLOY_USER" /dev/null /var/log/carlab-backup.log
 
 echo "==> Nightly backup"
 printf '30 3 * * * %s %s/backup.sh >>/var/log/carlab-backup.log 2>&1\n' "$DEPLOY_USER" "$DEPLOY_DIR" \
