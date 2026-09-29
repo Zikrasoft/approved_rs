@@ -350,9 +350,11 @@ jobs:
               -f ref="refs/tags/deployed/$APP" -f sha="$SHA"
 
   deploy:
-    needs: [translate, verify]
+    needs: [translate, verify, deploy-medusa]
     if: >-
+      !cancelled() &&
       needs.verify.result == 'success' &&
+      needs.deploy-medusa.result != 'failure' &&
       github.ref == 'refs/heads/main' &&
       contains(fromJSON(needs.verify.outputs.changed), 'approved-rs')
     runs-on: ubuntu-latest
