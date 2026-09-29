@@ -1,3 +1,4 @@
+import { isIPv4, isIPv6 } from 'node:net';
 import type {
   MedusaNextFunction,
   MedusaRequest,
@@ -14,8 +15,41 @@ let sweptAt = 0;
 
 export type Bucket = [key: string, max: number];
 
+const MAPPED_IPV4 = '::ffff:';
+
+const hextets = (address: string): string[] => {
+  const [head, tail] = address.split('::');
+  const groups = (part: string | undefined): string[] =>
+    part ? part.split(':') : [];
+  const left = groups(head);
+  if (tail === undefined) {
+    return left;
+  }
+  const right = groups(tail);
+  const embeddedIPv4 = right[right.length - 1]?.includes('.') ? 1 : 0;
+  const zeros = 8 - left.length - right.length - embeddedIPv4;
+  return [...left, ...Array<string>(zeros).fill('0'), ...right];
+};
+
+const addressKey = (ip: string): string => {
+  const address = ip.split('%')[0].toLowerCase();
+  const mapped = address.startsWith(MAPPED_IPV4)
+    ? address.slice(MAPPED_IPV4.length)
+    : '';
+  if (isIPv4(mapped)) {
+    return mapped;
+  }
+  if (!isIPv6(address)) {
+    return ip;
+  }
+  const network = hextets(address)
+    .slice(0, 4)
+    .map((hextet) => Number.parseInt(hextet, 16).toString(16));
+  return `${network.join(':')}::/64`;
+};
+
 export const clientKey = (req: MedusaRequest, scope: string): string =>
-  `${scope}:ip:${req.ip ?? '?'}`;
+  `${scope}:ip:${req.ip ? addressKey(req.ip) : '?'}`;
 
 export const trackedKeys = (): number => seen.size;
 

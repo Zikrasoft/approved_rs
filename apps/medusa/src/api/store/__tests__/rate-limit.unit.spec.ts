@@ -98,4 +98,34 @@ describe('limit', () => {
       'complete:ip:198.51.100.7',
     );
   });
+
+  it.each([
+    ['2001:db8:abcd:12:1:2:3:4', '2001:db8:abcd:12::/64'],
+    ['2001:DB8:ABCD:0012:ffff::1', '2001:db8:abcd:12::/64'],
+    ['2001:db8::1', '2001:db8:0:0::/64'],
+    ['2001:db8::1:2:3:4:5', '2001:db8:0:1::/64'],
+    ['2001:db8::', '2001:db8:0:0::/64'],
+    ['::1', '0:0:0:0::/64'],
+    ['64:ff9b::198.51.100.7', '64:ff9b:0:0::/64'],
+    ['fe80::1%eth0', 'fe80:0:0:0::/64'],
+    ['::ffff:198.51.100.7', '198.51.100.7'],
+    ['::FFFF:198.51.100.7', '198.51.100.7'],
+    ['198.51.100.7', '198.51.100.7'],
+    ['not-an-address', 'not-an-address'],
+  ])('keys %s as %s', (ip, key) => {
+    const { clientKey } = load();
+
+    expect(clientKey({ ip } as never, 'complete')).toBe(`complete:ip:${key}`);
+  });
+
+  it('counts a whole IPv6 /64 as one client', () => {
+    const { limit, clientKey } = load();
+    const middleware = limit((req) => [[clientKey(req, 't'), 1]], 'x');
+
+    expect(hit(middleware, '2001:db8:abcd:12::1').refused).toBe(false);
+    expect(
+      hit(middleware, '2001:db8:abcd:12:ffff:ffff:ffff:ffff').refused,
+    ).toBe(true);
+    expect(hit(middleware, '2001:db8:abcd:13::1').refused).toBe(false);
+  });
 });
