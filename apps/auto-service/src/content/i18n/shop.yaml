@@ -1,19 +1,19 @@
-metaTitle: 'Аккумуляторы в Белграде: подбор и установка — CarLab'
-metaDescription: Аккумуляторы в наличии в Белграде. Подбор по марке, модели и году, установка за 20 минут, утилизация старого. Цены с НДС, гарантия производителя.
+metaTitle: 'Запчасти в Белграде: аккумуляторы, масла, фильтры, тормоза — CarLab'
+metaDescription: Аккумуляторы, моторные масла, фильтры и тормозные детали в наличии в Белграде. Подбор по вашей машине, самовывоз из сервиса, установка на месте.
 eyebrow: Запчасти
-heading: Аккумуляторы с подбором по вашей машине
-lead: Выберите марку, модель и год — покажем только то, что физически встанет на место и хватит по пусковому току. Установка входит в цену.
-fitmentHeading: Подбор по автомобилю
+heading: Запчасти с подбором по вашей машине
+lead: Выберите машину — покажем только то, что на неё встанет. Забираете в сервисе, платите при получении, а установим сразу на месте, если нужно.
+fitmentHeading: Ваша машина
 makeLabel: Марка
 modelLabel: Модель
 yearLabel: Год выпуска
 anyOption: Не важно
 resetLabel: Сбросить
 matchCount:
-  one: подходит {count} аккумулятор
-  few: подходит {count} аккумулятора
-  many: подходит {count} аккумуляторов
-  other: подходит {count} аккумулятора
+  one: найден {count} товар
+  few: найдено {count} товара
+  many: найдено {count} товаров
+  other: найдено {count} товара
 noMatches: Под эти параметры в наличии ничего нет
 noMatchesHint: Напишите нам — привезём под заказ обычно за один-два дня.
 emptyCatalog: Каталог скоро наполнится. Пока что позвоните — скажем, что есть в наличии сегодня.
@@ -33,122 +33,196 @@ addToCart: В корзину
 inCart: В корзине
 installNote: Установка и утилизация старого аккумулятора — бесплатно при покупке у нас.
 productMetaSuffix: аккумулятор в Белграде
+typesHeading: Что есть в магазине
+productCount:
+  one: '{count} товар'
+  few: '{count} товара'
+  many: '{count} товаров'
+  other: '{count} товара'
+carLead: Выберите марку, модель и год — каталог покажет только подходящее. Выбор запомним на этом устройстве.
+carClear: Сбросить машину
+filterHeading: Фильтры
+filterFrom: от
+filterTo: до
+booleanYes: Да
+booleanNo: Нет
+allOfType: Все товары раздела «{type}»
+specsHeading: Характеристики
+outOfStock: Нет в наличии
+lowStock: Осталось {count} шт.
+goToCart: Перейти в корзину
+addError: Не получилось добавить в корзину. Попробуйте ещё раз.
+soldOutError: Столько нет в наличии — уменьшите количество или напишите нам.
+previewHeading: Магазин скоро откроется
+previewBody: Мы заканчиваем наполнять каталог. Пока что позвоните или напишите — скажем, что есть в наличии сегодня.
+types:
+  batteries:
+    name: Аккумуляторы
+    heading: Аккумуляторы с подбором по машине
+    lead: Подберём по марке, модели и году — чтобы подошли и габариты, и полярность, и пусковой ток. Установим за 20 минут, старый заберём на утилизацию.
+    metaTitle: Аккумуляторы в Белграде с установкой — CarLab
+    metaDescription: Аккумуляторы в наличии в Белграде. Подбор по марке, модели и году, установка в сервисе за 20 минут, оплата при получении.
+    landing:
+      heading: Аккумуляторы {value}
+      metaTitle: Аккумуляторы {value} в Белграде — CarLab
+      metaDescription: Аккумуляторы {value} в наличии в Белграде. Подбор по вашей машине, установка в сервисе CarLab, оплата при получении.
+    fields:
+      brand:
+        label: Бренд
+      capacityAh:
+        label: Ёмкость
+      crankingA:
+        label: Пусковой ток
+      polarity:
+        label: Полярность
+        values:
+          left: обратная (минус слева)
+          right: прямая (плюс слева)
+      technology:
+        label: Технология
+        values:
+          flooded: жидкостный
+          efb: EFB
+          agm: AGM
+      lengthMm:
+        label: Длина
+      widthMm:
+        label: Ширина
+      heightMm:
+        label: Высота
+      warrantyMonths:
+        label: Гарантия
+  motor-oils:
+    name: Моторные масла
+    heading: Моторные масла
+    lead: Масла с нужной вязкостью и допусками производителя. Скажите машину — подскажем, какое подходит, и заменим в сервисе.
+    metaTitle: Моторное масло в Белграде — CarLab
+    metaDescription: Моторные масла в наличии в Белграде — синтетика, полусинтетика и минеральные, с допусками производителей. Самовывоз из сервиса, замена на месте.
+    landing:
+      heading: Моторное масло {value}
+      metaTitle: Моторное масло {value} в Белграде — CarLab
+      metaDescription: Моторное масло {value} в наличии в Белграде. Самовывоз из сервиса CarLab, оплата при получении, замена масла на месте.
+    fields:
+      brand:
+        label: Бренд
+      viscosity:
+        label: Вязкость
+        values:
+          0w-16: 0W-16
+          0w-20: 0W-20
+          0w-30: 0W-30
+          0w-40: 0W-40
+          5w-20: 5W-20
+          5w-30: 5W-30
+          5w-40: 5W-40
+          10w-40: 10W-40
+          10w-60: 10W-60
+          15w-40: 15W-40
+      volumeL:
+        label: Объём
+      base:
+        label: Основа
+        values:
+          synthetic: синтетическое
+          semi-synthetic: полусинтетическое
+          mineral: минеральное
+      approvals:
+        label: Допуски
+  filters:
+    name: Фильтры
+    heading: Фильтры с подбором по машине
+    lead: Масляные, воздушные, салонные и топливные фильтры — подбираем по машине и по OEM-номеру.
+    metaTitle: Фильтры для авто в Белграде — CarLab
+    metaDescription: Масляные, воздушные, салонные и топливные фильтры в наличии в Белграде. Подбор по машине и OEM-номеру, самовывоз из сервиса CarLab.
+    landing:
+      heading: 'Фильтры: {value}'
+      metaTitle: 'Фильтры: {value} — в Белграде, CarLab'
+      metaDescription: 'Фильтры ({value}) в наличии в Белграде. Подбор по машине и OEM-номеру, самовывоз из сервиса CarLab, оплата при получении.'
+    fields:
+      brand:
+        label: Бренд
+      filterKind:
+        label: Тип фильтра
+        values:
+          oil: масляный
+          air: воздушный
+          cabin: салонный
+          fuel: топливный
+      oemNumbers:
+        label: OEM-номера
+  brakes:
+    name: Тормоза
+    heading: Тормозные колодки и диски
+    lead: Колодки и диски под вашу машину — подбираем по оси и диаметру. Поставим в сервисе и проверим тормоза.
+    metaTitle: Тормозные колодки и диски в Белграде — CarLab
+    metaDescription: Тормозные колодки и диски в наличии в Белграде. Подбор по машине, оси и диаметру, установка в сервисе CarLab, оплата при получении.
+    landing:
+      heading: 'Тормоза: {value}'
+      metaTitle: 'Тормоза: {value} — в Белграде, CarLab'
+      metaDescription: 'Тормоза ({value}) в наличии в Белграде. Подбор по машине, установка в сервисе CarLab, оплата при получении заказа.'
+    fields:
+      brand:
+        label: Бренд
+      part:
+        label: Деталь
+        values:
+          pads: колодки
+          discs: диски
+      axle:
+        label: Ось
+        values:
+          front: передняя
+          rear: задняя
+      diameterMm:
+        label: Диаметр диска
+      oemNumbers:
+        label: OEM-номера
+units:
+  Ah: А·ч
+  A: А
+  mm: мм
+  months: мес.
+  l: л
+installations:
+  battery-installation:
+    name: Установка аккумулятора
+    note: Поставим в сервисе, когда заберёте заказ, и проверим зарядку.
+  brake-installation:
+    name: Установка тормозов
+    note: Поставим в сервисе, когда заберёте заказ, и проверим тормоза.
 cart:
   metaTitle: Корзина — CarLab
-  metaDescription: Ваш заказ запчастей. Оформление без предоплаты — оплата при получении в сервисе.
+  metaDescription: Ваш заказ запчастей. Без предоплаты — оплата при получении в сервисе.
   eyebrow: Корзина
   heading: Ваш заказ
-  lead: Предоплаты нет. Мы подтвердим наличие, отложим товар и назовём время — оплата в сервисе при получении.
+  lead: Предоплаты нет. Мы подтвердим наличие, отложим товар и договоримся о времени — оплата в сервисе при получении.
   empty: В корзине пока пусто.
   emptyCta: Перейти к каталогу
   quantityLabel: Количество
   removeLabel: Убрать
   totalLabel: Итого
-  totalNote: Цены с НДС. Установка аккумулятора входит в стоимость.
+  totalNote: Цены окончательные, НДС не начисляется. Установка — отдельной строкой, если вы её добавили.
   orderHeading: Оформить заказ
   orderNote: Мы перезвоним, подтвердим наличие и договоримся о времени.
   badgeLabel: товаров в корзине
-translations:
-  sr:
-    metaTitle: 'Akumulatori u Beogradu: izbor i instalacija — CarLab'
-    metaDescription: Akumulatori dostupni u Beogradu. Izbor po markama, modelima i godinama, instalacija za 20 minuta, reciklaža starog. Cene sa PDV-om, garancija proizvođača.
-    eyebrow: Delovi
-    heading: Akumulatori sa izborom za vašu mašinu
-    lead: Izaberite marku, model i godinu — prikazaćemo samo ono što fizički odgovara i ima dovoljno struje za pokretanje. Instalacija je uključena u cenu.
-    fitmentHeading: Izbor po automobilu
-    makeLabel: Marka
-    modelLabel: Model
-    yearLabel: Godina proizvodnje
-    anyOption: Nije važno
-    resetLabel: Poništi
-    matchCount:
-      one: odgovara {count} akumulator
-      few: odgovara {count} akumulatora
-      many: odgovara {count} akumulatora
-      other: odgovara {count} akumulatora
-    noMatches: Nema dostupnih akumulatora za ove parametre
-    noMatchesHint: Pišite nam — stiže po narudžbini obično za jedan do dva dana.
-    emptyCatalog: Katalog će uskoro biti ažuriran. Za sada nazovite — reci ćemo vam šta imamo na skladištu danas.
-    capacityLabel: Kapacitet
-    crankingLabel: Struja pokretanja
-    polarityLabel: Polarnost
-    dimensionsLabel: Dimenzije
-    dimensionsUnit: mm
-    polarityLeft: obrnuta (minus levo)
-    polarityRight: prava (plus levo)
-    warrantyLabel: Garancija
-    warrantyUnit: mes.
-    fitsLabel: Odgovara za
-    inStock: Na skladištu
-    onOrder: Na raskhod
-    addToCart: Dodaj u korpu
-    inCart: U korpi
-    installNote: Instalacija i reciklaža starog akumulatora — besplatno uz kupovinu kod nas.
-    productMetaSuffix: akumulator u Beogradu
-    cart:
-      metaTitle: Korpa — CarLab
-      metaDescription: Vaša narudžba delova. Oformite bez preplate — plaćanje prilikom preuzimanja u servisu.
-      eyebrow: Korpa
-      heading: Vaša narudžba
-      lead: Nema preplate. Potvrdićemo dostupnost, odložiti proizvod i dogovoriti vreme — plaćanje u servisu prilikom preuzimanja.
-      empty: Korpa je za sada prazna.
-      emptyCta: Pređi na katalog
-      quantityLabel: Količina
-      removeLabel: Ukloni
-      totalLabel: Ukupno
-      totalNote: Cene su sa PDV-om. Instalacija akumulatora je uključena u cenu.
-      orderHeading: Oformiti narudžbu
-      orderNote: Pobrinućemo se da vas pozovemo, potvrdimo dostupnost i dogovorimo vreme.
-      badgeLabel: proizvoda u korpi
-  en:
-    metaTitle: 'Car Batteries in Belgrade: Selection & Installation — CarLab'
-    metaDescription: Car batteries available in Belgrade. Choose by make, model, and year, installation in 20 minutes, old battery disposal. Prices include VAT, manufacturer warranty.
-    eyebrow: Parts
-    heading: Batteries tailored for your vehicle
-    lead: Select make, model, and year — we'll show only what's compatible and sufficient for cranking power. Installation is included in the price.
-    fitmentHeading: Vehicle Selection
-    makeLabel: Make
-    modelLabel: Model
-    yearLabel: Year
-    anyOption: Doesn't matter
-    resetLabel: Reset
-    matchCount:
-      one: '{count} battery fits'
-      few: '{count} batteries fit'
-      many: '{count} batteries fit'
-      other: '{count} batteries fit'
-    noMatches: Nothing available for these parameters
-    noMatchesHint: Contact us — we can order it in usually within one or two days.
-    emptyCatalog: Catalog will be updated soon. For now, call us — we can tell you what's in stock today.
-    capacityLabel: Capacity
-    crankingLabel: Cranking Power
-    polarityLabel: Polarity
-    dimensionsLabel: Dimensions
-    dimensionsUnit: mm
-    polarityLeft: reverse (negative on the left)
-    polarityRight: standard (positive on the left)
-    warrantyLabel: Warranty
-    warrantyUnit: months
-    fitsLabel: Fits
-    inStock: In stock
-    onOrder: On order
-    addToCart: Add to Cart
-    inCart: In Cart
-    installNote: Installation and disposal of the old battery are free with purchase from us.
-    productMetaSuffix: battery in Belgrade
-    cart:
-      metaTitle: Cart — CarLab
-      metaDescription: Your parts order. No prepayment required — pay upon collection at the service.
-      eyebrow: Cart
-      heading: Your Order
-      lead: No prepayment. We will confirm availability, reserve the item, and set a pickup time — payment at service upon collection.
-      empty: Your cart is currently empty.
-      emptyCta: Go to Catalog
-      quantityLabel: Quantity
-      removeLabel: Remove
-      totalLabel: Total
-      totalNote: Prices include VAT. Battery installation is included in the price.
-      orderHeading: Place Order
-      orderNote: We will call you to confirm availability and arrange a pickup time.
-      badgeLabel: items in cart
+  checkoutHeading: Контакты для заказа
+  nameRequired: Имя обязательно — так мы узнаем вас в сервисе.
+  emailLabel: Email
+  emailPlaceholder: name@example.com
+  errorEmail: Проверьте email — на него придёт подтверждение заказа
+  errorName: Укажите имя
+  submit: Оформить заказ
+  submitting: Оформляем…
+  pickupHeading: Самовывоз из сервиса
+  pickupNote: Заберёте заказ в сервисе CarLab. Оплата при получении — наличными или картой.
+  successHeading: Заказ №{number} принят
+  successBody: Подтверждение отправили на email. Мы свяжемся с вами, чтобы договориться, когда его забрать.
+  successCta: Вернуться в магазин
+  errors:
+    stock: Часть товаров закончилась — обновили корзину, проверьте её ещё раз.
+    tooMany: Слишком много попыток. Подождите минуту и попробуйте снова.
+    network: Нет связи с магазином. Проверьте интернет и попробуйте ещё раз.
+    invalid: Проверьте имя, телефон и email — что-то заполнено неверно.
+    changed: Сумма заказа изменилась — проверьте корзину и нажмите ещё раз.
+    generic: Не получилось оформить заказ. Попробуйте ещё раз или позвоните нам.
 translatedFrom: b7dbd7795054e10d
