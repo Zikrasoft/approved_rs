@@ -28,6 +28,8 @@ describe('CommonJS build', () => {
   it('serves the browser subpath to require()', () => {
     const browser = require('@podbor/shop-catalog/browser');
     expect(browser.MEDUSA_LOCALE.sr).toBe('sr-RS');
+    expect(browser.CART_METADATA.honeypot).toBe('website');
+    expect(browser.PICKUP_OPTION_CODE).toBe('pickup');
   });
 
   it('serves the order hook to require()', () => {

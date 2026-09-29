@@ -1,3 +1,4 @@
+import { countValues } from './facets.ts';
 import type { Field, ProductTypeDef, Spec } from './registry.ts';
 
 export const LANDING_MIN_PRODUCTS = 3;
@@ -33,20 +34,15 @@ export function landingPages(
   const taken = new Set<string>();
   for (const field of type.fields) {
     if (!field.landing) continue;
-    const counts = new Map<string | number, number>();
-    for (const spec of specs) {
-      const value = spec[field.key];
-      const values: (string | number)[] = Array.isArray(value)
-        ? [...new Set<string>(value)]
-        : typeof value === 'string' || typeof value === 'number'
-          ? [value]
-          : [];
-      for (const item of values) counts.set(item, (counts.get(item) ?? 0) + 1);
-    }
+    const counts = countValues(specs, field.key);
     const order: (string | number)[] =
       field.kind === 'enum'
         ? field.values.map((option) => option.value)
-        : [...counts.keys()].sort(compareValues);
+        : [...counts.keys()]
+            .filter(
+              (value): value is string | number => typeof value !== 'boolean',
+            )
+            .sort(compareValues);
     for (const value of order) {
       if ((counts.get(value) ?? 0) < minProducts) continue;
       const slug = landingSlug(field, value);

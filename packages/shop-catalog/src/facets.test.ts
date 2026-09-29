@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  countValues,
   facetIndex,
   matchesFacets,
   readFacetState,
@@ -172,6 +173,21 @@ describe('readFacetState', () => {
         new URLSearchParams('oemNumbers=123'),
       ),
     ).toEqual({});
+  });
+});
+
+describe('countValues', () => {
+  it('counts each product once per value, dedupes arrays and skips missing values', () => {
+    const counts = countValues(
+      [{ a: 'x' }, { a: ['x', 'y', 'x'] }, { a: 60 }, { b: 1 }, { a: true }],
+      'a',
+    );
+    expect([...counts]).toEqual([
+      ['x', 2],
+      ['y', 1],
+      [60, 1],
+      [true, 1],
+    ]);
   });
 });
 

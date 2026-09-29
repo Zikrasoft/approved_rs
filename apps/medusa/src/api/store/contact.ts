@@ -1,11 +1,12 @@
+import { CART_METADATA } from '@podbor/shop-catalog';
 import { ORDER_HOOK_LIMITS } from '@podbor/shop-catalog/order-hook';
 import { z } from 'zod';
 
 import { SHOP } from '../../lib/shop';
 
-export const HONEYPOT_FIELD = 'website';
-export const COMMENT_FIELD = 'comment';
-export const CHANNEL_FIELD = 'contact_channel';
+export const HONEYPOT_FIELD = CART_METADATA.honeypot;
+export const COMMENT_FIELD = CART_METADATA.comment;
+export const CHANNEL_FIELD = CART_METADATA.channel;
 
 type Named = { first_name?: string | null; last_name?: string | null };
 

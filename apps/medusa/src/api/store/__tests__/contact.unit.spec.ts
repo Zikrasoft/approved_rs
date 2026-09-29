@@ -103,6 +103,13 @@ describe('contactFaults', () => {
   it('names a fault outside FAULT_NAMES by its path instead of dropping it', () => {
     expect(contactFaults({ ...CART, metadata: 'x' })).toEqual(['metadata']);
   });
+
+  it('lets a preview cart through: the storefront marks it metadata.preview', () => {
+    expect(
+      contactFaults({ ...CART, metadata: { ...CART.metadata, preview: true } }),
+    ).toEqual([]);
+    expect(isBot({ metadata: { website: '', preview: true } })).toBe(false);
+  });
 });
 
 describe('isBot', () => {

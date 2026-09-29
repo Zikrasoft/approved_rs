@@ -29,6 +29,24 @@ function toNumber(raw: string | null): number | undefined {
   return Number.isFinite(value) ? value : undefined;
 }
 
+export function countValues(
+  specs: readonly Spec[],
+  key: string,
+): Map<string | number | boolean, number> {
+  const counts = new Map<string | number | boolean, number>();
+  for (const spec of specs) {
+    const value = spec[key];
+    const values: (string | number | boolean)[] =
+      value === undefined
+        ? []
+        : Array.isArray(value)
+          ? [...new Set<string>(value)]
+          : [value as string | number | boolean];
+    for (const item of values) counts.set(item, (counts.get(item) ?? 0) + 1);
+  }
+  return counts;
+}
+
 export function facetIndex(
   type: ProductTypeDef,
   specs: readonly Spec[],
@@ -48,12 +66,12 @@ export function facetIndex(
           ? [{ kind: 'range', key: field.key, values }]
           : [];
       }
-      const counts = new Map<string, number>();
-      for (const spec of specs) {
-        for (const value of optionValues(spec[field.key])) {
-          counts.set(value, (counts.get(value) ?? 0) + 1);
-        }
-      }
+      const counts = new Map(
+        [...countValues(specs, field.key)].map(([value, count]) => [
+          String(value),
+          count,
+        ]),
+      );
       const order =
         field.kind === 'enum'
           ? field.values.map((option) => option.value)

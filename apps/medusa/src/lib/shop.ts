@@ -1,9 +1,15 @@
 import { CARLAB } from '@podbor/brands';
-import { MEDUSA_LOCALE } from '@podbor/shop-catalog';
+import {
+  MEDUSA_LOCALE,
+  PAYMENT_PROVIDER,
+  PICKUP_OPTION_CODE,
+  SHOP_COUNTRY,
+  SHOP_CURRENCY,
+} from '@podbor/shop-catalog';
 
 export const SHOP = {
-  currency: 'rsd',
-  country: 'rs',
+  currency: SHOP_CURRENCY,
+  country: SHOP_COUNTRY,
   regionName: 'Srbija',
   salesChannelName: CARLAB.domain,
   publishableKeyTitle: CARLAB.domain,
@@ -11,9 +17,9 @@ export const SHOP = {
   fulfillmentSetName: 'pickup',
   fulfillmentSetType: 'pickup',
   serviceZoneName: 'Srbija',
-  pickupCode: 'pickup',
+  pickupCode: PICKUP_OPTION_CODE,
   pickupName: 'Самовывоз',
-  paymentProvider: 'pp_system_default',
+  paymentProvider: PAYMENT_PROVIDER,
   taxProvider: 'tp_system',
   fulfillmentProvider: 'manual_manual',
 } as const;
