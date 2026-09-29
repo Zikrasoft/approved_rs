@@ -427,11 +427,11 @@ translations:
           oemNumbers:
             label: OEM-brojevi
     units:
-      Ah: А·ч
-      A: А
+      Ah: Ah
+      A: A
       mm: mm
       months: mes.
-      l: л
+      l: l
     installations:
       battery-installation:
         name: Ugradnja akumulatora
