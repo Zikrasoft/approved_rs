@@ -154,6 +154,7 @@ export const shopContentSchema = z
     goToCart: text,
     addError: text,
     soldOutError: text,
+    installError: text,
     previewHeading: text,
     previewBody: text,
     searchLabel: text,

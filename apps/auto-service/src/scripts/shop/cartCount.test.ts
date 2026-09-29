@@ -44,4 +44,13 @@ describe('<cart-count>', () => {
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
   });
+
+  it('does nothing without a page locale', () => {
+    cartModule.loadCart.mockClear();
+    cartModule.onCart.mockClear();
+    document.body.innerHTML = `<a><cart-count></cart-count></a>`;
+
+    expect(cartModule.loadCart).not.toHaveBeenCalled();
+    expect(cartModule.onCart).not.toHaveBeenCalled();
+  });
 });

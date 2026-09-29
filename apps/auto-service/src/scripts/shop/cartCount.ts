@@ -11,6 +11,9 @@ export function defineCartCount(tagName = 'cart-count'): void {
 
       connectedCallback(): void {
         if (this.controller) return;
+        const locale = this.dataset.locale;
+        if (!locale) return;
+
         this.controller = new AbortController();
         const render = (cart: Cart | null) => {
           const count = cartCount(cart);
@@ -23,8 +26,8 @@ export function defineCartCount(tagName = 'cart-count'): void {
         };
         onCart(render, this.controller.signal);
         render(currentCart());
-        loadCart((this.dataset.locale ?? 'sr') as Locale).catch(
-          (error: unknown) => console.warn('[cart] not loaded', error),
+        loadCart(locale as Locale).catch((error: unknown) =>
+          console.warn('[cart] not loaded', error),
         );
       }
 

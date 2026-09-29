@@ -1,6 +1,6 @@
 import { GOALS, reachGoal } from '@podbor/site-kit/browser';
 import type { Locale } from '@/i18n/config';
-import { addToCart } from './cart';
+import { addToCart, loadCart } from './cart';
 import { isOutOfStock } from './cartApi';
 import { STOCK_EVENT, type StockDetail } from './stock';
 
@@ -26,6 +26,7 @@ export function defineAddToCart(tagName = 'add-to-cart'): void {
           '[data-install-toggle]',
         );
         let busy = false;
+        let soldOut = false;
 
         const add = (variantId: string) =>
           addToCart({
@@ -44,26 +45,36 @@ export function defineAddToCart(tagName = 'add-to-cart'): void {
         button.addEventListener(
           'click',
           async () => {
-            if (busy) return;
+            if (busy || soldOut) return;
             busy = true;
             button.disabled = true;
             say(undefined);
             try {
+              await loadCart(locale as Locale);
               await add(variant);
-              const installVariant = this.dataset.installVariant;
-              if (install?.checked && installVariant) await add(installVariant);
               if (label) label.textContent = this.dataset.addedLabel ?? '';
               if (goCart) goCart.hidden = false;
               reachGoal(GOALS.addToCart, { type });
+
+              const installVariant = this.dataset.installVariant;
+              if (install?.checked && installVariant) {
+                try {
+                  await add(installVariant);
+                } catch {
+                  say(this.dataset.installErrorLabel);
+                }
+              }
             } catch (error) {
+              const outOfStock = isOutOfStock(error);
+              if (outOfStock) soldOut = true;
               say(
-                isOutOfStock(error)
+                outOfStock
                   ? this.dataset.soldOutLabel
                   : this.dataset.errorLabel,
               );
             } finally {
               busy = false;
-              button.disabled = false;
+              button.disabled = soldOut;
             }
           },
           { signal },
@@ -74,7 +85,10 @@ export function defineAddToCart(tagName = 'add-to-cart'): void {
           (event) => {
             const { variantId, quantity } = (event as CustomEvent<StockDetail>)
               .detail;
-            if (variantId === variant) button.disabled = quantity === 0;
+            if (variantId === variant) {
+              soldOut = quantity === 0;
+              button.disabled = soldOut;
+            }
           },
           { signal },
         );
