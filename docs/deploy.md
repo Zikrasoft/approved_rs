@@ -1,4 +1,4 @@
-# Деплой на Vercel
+# Деплой: три сайта на Vercel, бэкенд магазина на VPS
 
 ## Стек
 
@@ -91,9 +91,14 @@ Actions и заново в контейнере Vercel), и несовпаден
 
 ### Порядок джоб
 
-`check` (lint/prettier/typecheck/test) → `translate` → `verify` → `deploy` и
-`deploy-brand-site` параллельно, каждая только если предыдущая прошла.
-`deploy*` запускаются только на `main`.
+`check` (lint/prettier/typecheck/test, sh-тесты скриптов, shellcheck,
+actionlint) и `medusa-integration` (HTTP-тесты Medusa на postgres+redis из
+`services:`) идут параллельно → `translate` → `verify` → `medusa-image` →
+`deploy-medusa` → `deploy-brand-site`; `deploy` (approved.rs) ждёт только
+`verify`. `deploy*` запускаются только на `main`, каждая только если
+предыдущая прошла. Воркфлоу срабатывает на пуш в любую **ветку** и никогда на
+тег: фильтр по тегам без фильтра по веткам выключил бы ветки совсем, а на
+чекауте тега `translate` оказался бы на detached HEAD и не смог бы запушить.
 
 `translate` идёт до деплоя, а не параллельно ему: скрипты перевода
 отрабатывают, коммит с переводами уходит в ту же ветку, и всё, что дальше,
@@ -121,14 +126,36 @@ Actions и заново в контейнере Vercel), и несовпаден
 
 Список собирается по каждой `apps/*/` так:
 
-| Что видит `scope`                                            | Решение    |
-| ------------------------------------------------------------ | ---------- |
-| тега `deployed/<app>` ещё нет                                | деплоим    |
-| тег не предок `HEAD` (force-push, откат ветки)               | деплоим    |
-| изменились корневые файлы сборки (список ниже)               | деплоим    |
-| `turbo --filter="...[<тег>]"` называет пакет изменившимся    | деплоим    |
-| turbo упал или его вывод не разобрался                       | деплоим    |
-| turbo положительно сказал, что пакета среди изменившихся нет | пропускаем |
+| Что видит `scope`                                                                           | Решение                 |
+| ------------------------------------------------------------------------------------------- | ----------------------- |
+| тега `deployed/<app>` ещё нет                                                               | деплоим                 |
+| тег не предок `HEAD` (force-push, откат ветки)                                              | деплоим                 |
+| изменились корневые файлы сборки (список ниже)                                              | деплоим                 |
+| `turbo --filter="...[<тег>]"` называет пакет изменившимся                                   | деплоим                 |
+| turbo упал или его вывод не разобрался                                                      | деплоим                 |
+| `apps/medusa`: изменилось что-то в `infra/medusa/`                                          | деплоим                 |
+| `auto-service`: `catalog-version.txt` сайта ≠ версия каталога в Medusa, или её не прочитать | деплоим                 |
+| `auto-service`: сайт отвечает 404 на `catalog-version.txt` или `disabled`                   | эта проверка не деплоит |
+| turbo положительно сказал, что пакета среди изменившихся нет                                | пропускаем              |
+
+**`infra/medusa/` проверяется отдельно**, как и корневые файлы: turbo знает
+только пакеты воркспейса и приписывает всё остальное `//`, поэтому правка
+Dockerfile, compose, Caddyfile или скриптов без этой строки не выкатила бы
+бэкенд никогда.
+
+**Каталог магазина — отдельная причина выкатить carlab.rs.** Цены и товары
+запекаются в статику, поэтому правка каталога в админке Medusa должна
+пересобрать сайт, даже если код не менялся. Medusa после правки дёргает
+`workflow_dispatch` у `ci.yml` (`GITHUB_DISPATCH_TOKEN`), а шаг `scope`
+сравнивает `https://carlab.rs/catalog-version.txt` (версия, с которой сайт
+собран) с `GET $MEDUSA_URL/store/catalog-version` через
+`.github/scripts/catalog-stale.sh`. Скрипт отвечает «не деплоить» ровно в
+трёх случаях: версии равны; сайт отвечает `disabled` (магазин выключен); сайт
+отвечает 404 — файла ещё нет, магазин не запущен (Plan 4 его создаст). Всё
+остальное — сеть, 5xx, нет `MEDUSA_URL`/`MEDUSA_PUBLISHABLE_KEY`, Medusa
+отвечает не JSON, `unstamped` (каталог ни разу не штамповался) — «деплоить»:
+неизвестность, как и везде в `scope`, отвечает лишним деплоем, а не
+пропущенным. Тесты на все ветки — `.github/scripts/catalog-stale.test.sh`.
 
 **Любая неизвестность отвечает «деплоить».** Единственный ответ «нет» — когда
 turbo прямо перечислил изменившиеся пакеты и приложения в списке не оказалось.
@@ -161,12 +188,19 @@ pnpm-lock.yaml  pnpm-workspace.yaml  turbo.json  package.json
 на сборку, добавить его надо туда же. Остальной `.github/` намеренно не
 отслеживается: иначе любая правка воркфлоу выкатывала бы все три сайта.
 
+Включая `apps/medusa`: бамп Astro пересоберёт и смигрирует бэкенд, бамп
+Medusa передеплоит три сайта. Так решено осознанно (Plan 3): lockfile один на
+всех, приписать его изменение одному приложению `scope` не может, а лишний
+деплой дешевле ошибки в эту сторону. По той же логике `setup-pnpm` ставит
+весь воркспейс (включая ~680 MB Medusa) в каждой джобе — пока это не мешает
+измеримо, `pnpm install --filter` не вводим.
+
 ### Теги `deployed/*`
 
-`refs/tags/deployed/approved-rs`, `deployed/detailing` и
-`deployed/auto-service` появляются и двигаются сами: последний шаг каждой
-деплой-джобы переставляет свой тег на выложенный SHA через `gh api` (`PATCH`
-с `force`, а если тега ещё нет — `POST`).
+`refs/tags/deployed/approved-rs`, `deployed/detailing`,
+`deployed/auto-service` и `deployed/medusa` появляются и двигаются сами:
+последний шаг каждой деплой-джобы переставляет свой тег на выложенный SHA
+через `gh api` (`PATCH` с `force`, а если тега ещё нет — `POST`).
 
 Это **служебные теги, а не релизные**. Версий они не обозначают, в release
 notes не участвуют, читает их ровно один шаг `scope`.
@@ -431,14 +465,26 @@ details.rs прожили так двенадцать дней. Проверят
 
 Settings → Secrets and variables → Actions:
 
-| Секрет                           | Для чего                                 | Где взять                                                      |
-| -------------------------------- | ---------------------------------------- | -------------------------------------------------------------- |
-| `OPENAI_API_KEY`                 | джоба `translate` (автоперевод контента) | OpenAI. **Только в GitHub, на Vercel не нужен**                |
-| `VERCEL_TOKEN`                   | все деплой-джобы                         | [vercel.com/account/tokens](https://vercel.com/account/tokens) |
-| `VERCEL_ORG_ID`                  | все деплой-джобы                         | `.vercel/project.json` → `orgId` после `vercel link`           |
-| `VERCEL_PROJECT_ID`              | деплой approved.rs                       | Project Settings → General нужного проекта                     |
-| `VERCEL_PROJECT_ID_AUTO_SERVICE` | деплой carlab.rs                         | то же, у проекта carlab.rs                                     |
-| `VERCEL_PROJECT_ID_DETAILING`    | деплой details.rs                        | то же, у проекта details.rs                                    |
+| Секрет                           | Для чего                                 | Где взять                                                        |
+| -------------------------------- | ---------------------------------------- | ---------------------------------------------------------------- |
+| `OPENAI_API_KEY`                 | джоба `translate` (автоперевод контента) | OpenAI. **Только в GitHub, на Vercel не нужен**                  |
+| `VERCEL_TOKEN`                   | все деплой-джобы                         | [vercel.com/account/tokens](https://vercel.com/account/tokens)   |
+| `VERCEL_ORG_ID`                  | все деплой-джобы                         | `.vercel/project.json` → `orgId` после `vercel link`             |
+| `VERCEL_PROJECT_ID`              | деплой approved.rs                       | Project Settings → General нужного проекта                       |
+| `VERCEL_PROJECT_ID_AUTO_SERVICE` | деплой carlab.rs                         | то же, у проекта carlab.rs                                       |
+| `VERCEL_PROJECT_ID_DETAILING`    | деплой details.rs                        | то же, у проекта details.rs                                      |
+| `MEDUSA_VPS_HOST`                | деплой Medusa (IPv4 сервера)             | Hetzner Console                                                  |
+| `MEDUSA_VPS_USER`                | деплой Medusa                            | `deploy` (создаёт `bootstrap-host.sh`)                           |
+| `MEDUSA_VPS_SSH_KEY`             | деплой Medusa (приватный ключ CI)        | `ssh-keygen -t ed25519`, публичная часть — `restrict` на сервере |
+| `MEDUSA_VPS_KNOWN_HOSTS`         | деплой Medusa (ключ хоста)               | `ssh-keyscan -t ed25519 <IPv4>`, отпечаток сверить               |
+| `MEDUSA_PUBLISHABLE_KEY`         | шаг `scope` (версия каталога)            | админка Medusa → Settings → Publishable API Keys                 |
+
+Плюс **переменная** (Variables, не Secrets) `MEDUSA_URL` = `https://api.carlab.rs`.
+Пока `MEDUSA_VPS_*` не заданы, шаг `guard` в `deploy-medusa` пишет
+«`MEDUSA_VPS_* secrets are not set — skipping the medusa deploy.`», а
+`medusa-image` не пушит образ («`MEDUSA_VPS_* secrets are not set — nothing
+will deploy the image, so it is not pushed.`», пушит только когда заданы все
+четыре) — воркфлоу зелёный.
 
 > **Внимание: незаданный `VERCEL_PROJECT_ID_*` не подсвечивается никак.** Шаг
 > `guard` в джобе `deploy-brand-site` проверяет, что секрет непустой, и если
@@ -449,6 +495,9 @@ Settings → Secrets and variables → Actions:
 > У approved.rs такого guard нет: без `VERCEL_PROJECT_ID` джоба `deploy`
 > честно падает на `vercel pull`.
 >
+> Проверка живёт в шаге, а не в `if:` джобы, потому что контекст `matrix` в
+> условии уровня джобы недоступен.
+>
 > С появлением тегов `deployed/*` у `guard` есть и вторая причина пропустить
 > деплой, уже штатная: «`<app> is current in production — skipping`» — сайт не
 > менялся с прошлого выката. Это нормальная работа, а не сломанная
@@ -458,19 +507,27 @@ Settings → Secrets and variables → Actions:
 ### Права джоб (`permissions`)
 
 `GITHUB_TOKEN` выдаётся по джобам, а не на весь файл. `contents: write` держат
-три джобы, и по двум разным поводам:
+четыре джобы, и по двум разным поводам:
 
-| Джоба               | `permissions`     | Зачем именно столько                                                      |
-| ------------------- | ----------------- | ------------------------------------------------------------------------- |
-| `check`             | `contents: read`  | только чекаут                                                             |
-| `translate`         | `contents: write` | коммитит и пушит переводы в ту же ветку                                   |
-| `verify`            | `contents: read`  | чекаут с `fetch-depth: 0` — теги `deployed/*` приезжают вместе с историей |
-| `deploy`            | `contents: write` | передвигает `refs/tags/deployed/approved-rs` после успешного деплоя       |
-| `deploy-brand-site` | `contents: write` | то же для `deployed/detailing` и `deployed/auto-service`                  |
+| Джоба                | `permissions`                       | Зачем именно столько                                                                        |
+| -------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------- |
+| `check`              | `contents: read`                    | только чекаут                                                                               |
+| `translate`          | `contents: write`                   | коммитит и пушит переводы в ту же ветку                                                     |
+| `verify`             | `contents: read`                    | чекаут с `fetch-depth: 0` — теги `deployed/*` приезжают вместе с историей                   |
+| `medusa-integration` | `contents: read`                    | только чекаут                                                                               |
+| `medusa-image`       | `contents: read`, `packages: write` | пушит `ghcr.io/zikrasoft/podbor-medusa:<sha>` в GHCR                                        |
+| `deploy-medusa`      | `contents: read`, `packages: read`  | даёт серверу разовый токен на `docker pull`; писать в репозиторий этим токеном нельзя       |
+| `record-medusa`      | `contents: write`                   | двигает `deployed/medusa` после успешного `deploy-medusa` — отдельная джоба, только за этим |
+| `deploy`             | `contents: write`                   | передвигает `refs/tags/deployed/approved-rs` после успешного деплоя                         |
+| `deploy-brand-site`  | `contents: write`                   | то же для `deployed/detailing` и `deployed/auto-service`                                    |
 
 Запись у `translate` и запись у деплой-джоб — разные вещи: первая меняет
-содержимое ветки, вторая трогает только служебные теги. Ничего, кроме
-`contents`, воркфлоу не просит.
+содержимое ветки, вторая трогает только служебные теги. Двигать `deployed/medusa`
+вынесено в отдельную джобу `record-medusa` нарочно: `deploy-medusa` шлёт свой
+`GITHUB_TOKEN` на сервер (разовый логин в GHCR), и токен с правом записи в
+репозиторий там лишний — уедет на VPS токен, который умеет только читать
+пакеты. Кроме `contents`, воркфлоу просит только `packages` — и только в двух
+джобах Medusa.
 
 Обе деплой-джобы чекаутятся с `persist-credentials: false`. Токен им нужен
 только на последнем шаге, где он передаётся явно через `GH_TOKEN`, а в
@@ -486,6 +543,236 @@ Settings → Secrets and variables → Actions:
 - Tag protection rules не должны накрывать `deployed/*`. Если накроют, сайт
   выложится, а джоба покраснеет уже после этого: тег останется старым, и
   следующий прогон выкатит тот же самый сайт заново.
+
+---
+
+## Бэкенд магазина: Medusa на VPS (`api.carlab.rs`)
+
+`apps/medusa` — не Vercel. Это docker compose на одном сервере Hetzner Cloud
+(CX23: 2 vCPU x86, 4 GB; запасной вариант — CPX22), всё описано в
+`infra/medusa/`:
+
+| Файл                                     | Что это                                                                                                                              |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `Dockerfile` + `Dockerfile.dockerignore` | прод-образ: пакеты через turbo, `pnpm --filter @podbor/medusa build`, `pnpm deploy --legacy`; рантайм из `.medusa/server` под `node` |
+| `docker-compose.yml`                     | postgres 16.15, redis 7.4.9, medusa (образ из GHCR по sha), caddy 2.11.4                                                             |
+| `caddy/Caddyfile`                        | `api.carlab.rs` → `medusa:9000`, TLS, заголовки безопасности, тело запроса до 25 MB                                                  |
+| `production.env.example`                 | шаблон `/srv/carlab/.env`                                                                                                            |
+| `deploy.sh`, `backup.sh`, `restore.sh`   | выкат, ночной бэкап, восстановление                                                                                                  |
+| `bootstrap-host.sh`, `harden-ssh.sh`     | первичная настройка сервера (один раз, руками)                                                                                       |
+
+### Сервер
+
+- `/srv/carlab/` — `docker-compose.yml`, `caddy/Caddyfile` и скрипты кладёт
+  CI при каждом деплое; `.env` (права 600) пишется руками один раз;
+  `.previous-tag` — предыдущий выложенный sha, для отката.
+- `/var/backups/carlab/` — бэкапы, хранятся 7 дней; cron
+  `/etc/cron.d/carlab-backup` в 03:30 UTC, лог `/var/log/carlab-backup.log`.
+  Это копия на том же диске; внесерверная копия в фазе 1 — автобэкапы Hetzner.
+- Наружу опубликован только Caddy: 80, 443, 443/udp. У Medusa, Postgres и
+  Redis портов на хосте нет; Postgres и Redis сидят во внутренней сети без
+  выхода в интернет. Это не косметика: rate-limit'ы Medusa ключуются по
+  `req.ip` (IPv6 — по /64) при `trust proxy 1`, а Caddy перезаписывает
+  `X-Forwarded-For` адресом клиента. Любой второй прокси или CDN перед
+  Caddy сделает всех клиентов одним адресом. Проверяет
+  `infra/medusa/test/compose.test.sh`.
+- Лимиты памяти на 4 GB: medusa 1536m (куча Node 1024 MB), postgres 512m,
+  redis 256m, caddy 128m. В простое при проверке плана: medusa ~310–410 MiB,
+  postgres ~40 MiB, redis ~6 MiB, caddy ~60 MiB. Реальные цифры под нагрузкой
+  — после первого деплоя (`docker stats --no-stream`).
+
+### `.env`
+
+Шаблон — `infra/medusa/production.env.example`, `env.ts` проверяет всё при
+старте. Неочевидное:
+
+- `MEDUSA_TAG` руками не трогать — его переписывает `deploy.sh`.
+- `POSTGRES_PASSWORD`, `JWT_SECRET`, `COOKIE_SECRET` — `openssl rand -hex 32`.
+  Именно hex: compose подставляет `$…` внутри `.env`.
+- `DATABASE_URL` и `REDIS_URL` в `.env` не пишутся: их собирает compose из
+  имён сервисов и `POSTGRES_PASSWORD`.
+- `REBUILD_ON_CATALOG_EVENTS=true` — по умолчанию `false`, и тогда правка
+  каталога никогда не пересоберёт сайт.
+- `SHOP_ORDER_HOOK_URL` и `SHOP_ORDER_HOOK_SECRET` — только парой; пустые,
+  пока на carlab.rs нет приёмника (Plan 4).
+- `GITHUB_DISPATCH_TOKEN` — fine-grained PAT только на этот репозиторий,
+  Actions: Read and write.
+
+### Как выкатывается
+
+1. `medusa-image` собирает образ из SHA после `translate` (в образ попадает
+   переведённый `emails.yaml`), мигрирует им пустую базу из `services:` и
+   поднимает до `healthy`. На ветках на этом всё. На `main` — только если
+   `medusa` в списке `scope` — пушит `ghcr.io/zikrasoft/podbor-medusa:<sha>`,
+   и только когда заданы все четыре секрета `MEDUSA_VPS_*` — иначе шаг
+   выводит предупреждение и молча завершается без пуша.
+2. `deploy-medusa` кладёт стек-файлы tar'ом по ssh в `/srv/carlab`, логинит
+   сервер в GHCR разовым токеном джобы, запускает `deploy.sh <sha>` и
+   разлогинивает (в том числе при ошибке). Тег `deployed/medusa` эта джоба
+   **не двигает** — за это отвечает следующая, `record-medusa`, с отдельным
+   `contents: write`; токен, который `deploy-medusa` отправляет на сервер,
+   писать в репозиторий не умеет.
+3. `deploy.sh`: отказ без `.env` и для всего, что не 40-символьный sha;
+   `pull` образа; миграции в одноразовом контейнере
+   (`medusa db:migrate --execute-safe-links --all-or-nothing` из
+   `/server`); только после успешной миграции `MEDUSA_TAG` в `.env`
+   меняется, старый уходит в `.previous-tag`; `up -d --wait`;
+   `caddy reload`; проверка `https://api.carlab.rs/health/ready`.
+4. `record-medusa` двигает `deployed/medusa`, только если `deploy-medusa`
+   выложила образ (`outputs.deployed == 'true'`).
+5. `deploy-brand-site` ждёт `deploy-medusa` и не стартует, только если та
+   упала.
+
+### Откат
+
+```bash
+ssh deploy@<IPv4> '/srv/carlab/deploy.sh "$(cat /srv/carlab/.previous-tag)"'
+```
+
+Откатывается только образ: миграции назад не едут. Если выкат менял схему —
+восстанавливать бэкап (миграции Medusa не гарантированно обратно
+совместимы — старый образ против уже смигрированной вперёд схемы может не
+подняться или повредить данные; см. «Что легко упустить» ниже). После
+ручного отката тег `deployed/medusa` указывает на версию, которой в проде
+нет; удалите его, когда исправление будет в `main`.
+
+### Бэкап и восстановление
+
+```bash
+ssh deploy@<IPv4> /srv/carlab/backup.sh
+ssh deploy@<IPv4> 'ls -la /var/backups/carlab'
+ssh deploy@<IPv4> '/srv/carlab/restore.sh /var/backups/carlab/db-<stamp>.dump /var/backups/carlab/static-<stamp>.tar.gz'
+```
+
+`restore.sh` отказывается писать в базу, где уже есть таблицы, пока не задано
+`RESTORE_OVER_EXISTING=yes`. Сиды, миграции и создание админа — только из
+образа (`docker compose exec -T medusa node_modules/.bin/medusa …`,
+скрипты — `./src/scripts/<name>.js`), никогда из чекаута репозитория: в
+образе нет ts-node.
+
+### Локальная проверка стека
+
+Тот же compose поднимается на своей машине без отдельного override —
+через переменные в `infra/medusa/.env` (он в `.gitignore`):
+`API_HOST=localhost`, `HTTP_PORT=8080`, `HTTPS_PORT=8443`,
+`MEDUSA_IMAGE=podbor-medusa`, `MEDUSA_TAG=local` плюс секреты; образ —
+`docker build -f infra/medusa/Dockerfile -t podbor-medusa:local .`. Проверка —
+`curl -k https://localhost:8443/health/ready`.
+
+### Что легко упустить
+
+- **`.env` читается буквально.** `deploy.sh` вытаскивает значения из `.env`
+  через `sed`, без снятия кавычек — не оборачивайте значения в `"…"`,
+  кавычки попадут в само значение.
+- **`umask 077` на сервере.** `deploy.sh` и `backup.sh` ставят его сами:
+  `.env` и файлы бэкапа в `/var/backups/carlab` ложатся с правами 600/700 и
+  владельцем `deploy`.
+- **Откат — это только образ.** `deploy.sh <предыдущий_sha>` поднимает старый
+  код против схемы, которую мог уже смигрировать вперёд новый образ; миграции
+  Medusa не гарантированно обратно совместимы. Если откатываемый деплой менял
+  схему — старый образ может не стартовать или повредить данные; в этом
+  случае откат — это восстановление бэкапа, снятого перед деплоем, а не
+  `deploy.sh` со старым тегом.
+- **Порт наружу даёт только Caddy.** `ports:` в docker compose обходит ufw —
+  правило фильтрует трафик на хосте, а не то, что Docker сам пробрасывает
+  через iptables. Никогда не добавляйте `ports:` другим сервисам compose-стека.
+- **Docker apt-ключ не сверен по отпечатку.** `bootstrap-host.sh` не пинит
+  fingerprint GPG-ключа Docker — его нет на странице установки Docker для
+  Ubuntu. После бутстрапа сверьте вручную:
+  `gpg --show-keys /etc/apt/keyrings/docker.asc` — и сравните с отпечатком,
+  который публикует сама документация Docker (не переписывайте его сюда).
+- **`ufw limit 22/tcp`** пускает не больше 6 новых соединений за 30 секунд с
+  одного адреса. `deploy-medusa` за один прогон открывает 4 ssh-соединения к
+  серверу (заливка стек-файлов, логин в GHCR, запуск `deploy.sh`, логаут) —
+  запас есть, но не добавляйте ssh-вызовы в этот шаг бездумно.
+- **Cron бэкапа — в таймзоне хоста**, на образах Hetzner это UTC: `03:30 UTC`
+  выше и есть местное время сервера. `/var/log/carlab-backup.log` растёт без
+  ограничения — добавьте logrotate-сниппет вручную (в репозиторий его никто
+  не кладёт):
+  ```
+  /var/log/carlab-backup.log {
+    weekly
+    rotate 8
+    compress
+    missingok
+    notifempty
+  }
+  ```
+- **Ubuntu 24.04 запускает ssh через socket activation** — `systemctl reload
+ssh` после `harden-ssh.sh` может отчитаться не так, как ожидается. Прежде чем
+  закрывать первую сессию, откройте второй терминал и убедитесь, что вход по
+  ключу под `deploy` по-прежнему работает.
+- **У Caddy пока нет CSP** — `caddy/Caddyfile` ставит HSTS, `X-Content-Type-Options`,
+  `Referrer-Policy`, `X-Frame-Options`, снимает `Server`, но Content-Security-Policy
+  не задан. Единственное ограничение на загрузку в админку — `request_body`
+  `max_size 25MB` в том же Caddyfile.
+- **Правка `pnpm-lock.yaml` передеплоивает и Medusa** — один lockfile на все
+  четыре приложения, `scope` не умеет приписать его правку одному из них
+  (см. «Корневые файлы проверяются отдельным `git diff`» выше). Решение
+  осознанное: лишний деплой дешевле пропущенного.
+
+### Первый выкат — чеклист
+
+> Чек-лист для человека-владельца инфраструктуры. Каждый шаг — конкретная
+> команда и условие «готово». Агент этот раздел не выполняет — здесь описаны
+> только шаги, которые нужно проделать руками вне репозитория (Hetzner
+> Console, DNS у регистратора, Brevo, GitHub Secrets).
+
+1. **Hetzner.** В Console проверить доступность CX23 (запасной вариант —
+   CPX22) и цену автобэкапа в нужном регионе. Создать сервер: Ubuntu 24.04,
+   IPv4 + IPv6, автобэкапы включены.
+   Готово: сервер виден в Console, есть оба адреса.
+2. **Bootstrap.** Зайти по root/ssh-ключу, залить и запустить
+   `infra/medusa/bootstrap-host.sh`. Разлогиниться, зайти уже под `deploy`
+   тем же ключом (`ssh deploy@<IPv4>`), затем **от `deploy` через `sudo`**
+   запустить `infra/medusa/harden-ssh.sh`.
+   Готово: `ssh deploy@<IPv4>` пускает по ключу без пароля; `ssh root@<IPv4>`
+   отказывает.
+3. **DNS.** Прописать A- и AAAA-записи `api.carlab.rs` на IPv4/IPv6 сервера.
+   Проверить IPv6 отдельно: `curl -6 https://api.carlab.rs/health/ready` (пока
+   не задеплоено — на этом шаге просто резолвится). Если IPv6 недоступен у
+   хостера/сети — AAAA-запись убрать.
+   Готово: `dig +short api.carlab.rs` и `dig +short AAAA api.carlab.rs`
+   отдают адреса сервера.
+4. **Brevo.** Подтвердить домен `carlab.rs` (DKIM + DMARC), выпустить
+   API-ключ, завести отправителя на этом домене.
+   Готово: домен в Brevo помечен verified, есть API-ключ и адрес отправителя.
+5. **Токены.** Создать fine-grained PAT для `GITHUB_DISPATCH_TOKEN`
+   (только этот репозиторий, Actions: Read and write) и ключ OpenAI.
+   Готово: оба значения сохранены в менеджере паролей (пока не в GitHub —
+   это шаг 7).
+6. **`.env` на сервере.** Скопировать `infra/medusa/production.env.example`
+   в `/srv/carlab/.env`, заполнить все значения (пароли — `openssl rand -hex
+32`), `chmod 600 /srv/carlab/.env`.
+   Готово: `ssh deploy@<IPv4> 'stat -c %a /srv/carlab/.env'` печатает `600`.
+7. **Секреты CI.** Сгенерировать ssh-ключ CI (`ssh-keygen -t ed25519`),
+   ограничить публичную часть на сервере (`restrict` в `authorized_keys`),
+   получить `known_hosts` (`ssh-keyscan -t ed25519 <IPv4>`) и **сверить
+   отпечаток** отдельно (например, при первом интерактивном
+   `ssh deploy@<IPv4>`). Записать `MEDUSA_VPS_HOST`, `MEDUSA_VPS_USER`,
+   `MEDUSA_VPS_SSH_KEY`, `MEDUSA_VPS_KNOWN_HOSTS` в GitHub Secrets и
+   переменную `MEDUSA_URL` в GitHub Variables.
+   Готово: все четыре секрета и переменная видны в Settings → Secrets and
+   variables → Actions.
+8. **Первый деплой.** Запустить `ci.yml` (пуш в `main` или
+   `workflow_dispatch`). Проверить пакет в GHCR: привязан к репозиторию,
+   видимость и доступ Actions на чтение настроены.
+   Готово: `deploy-medusa` и `record-medusa` зелёные,
+   `https://api.carlab.rs/health/ready` отвечает 200.
+9. **Данные.** Прогнать сиды `seed-base.js`, `seed-batteries.js`
+   (`docker compose exec -T medusa node_modules/.bin/medusa exec
+./src/scripts/seed-base.js`, аналогично для второго). Создать админа
+   (`medusa user --invite`). В админке выпустить publishable key и записать
+   его в секрет `MEDUSA_PUBLISHABLE_KEY`.
+   Готово: вход в `/app` под новым админом работает, `MEDUSA_PUBLISHABLE_KEY`
+   в секретах.
+10. **Приёмка.** `/health/ready` отвечает 200; тестовый заказ через Store API
+    (вебхук заказа выключен — Plan 4); письмо клиенту дошло; `docker stats
+--no-stream` под небольшой нагрузкой укладывается в лимиты памяти; ручной
+    `ssh deploy@<IPv4> /srv/carlab/backup.sh` отрабатывает; наутро — проверить
+    `/var/log/carlab-backup.log` на сервере, что cron отработал.
+    Готово: все пункты пройдены, дата и результат записаны рядом с этим
+    чек-листом (вне репозитория).
 
 ---
 

@@ -13,6 +13,7 @@ apps/approved-rs/     Approved.rs, the approved.rs site (Astro) — most of this
 apps/detailing/       Details, the detailing studio site — details.rs
 apps/auto-service/    CarLab, the car service site + parts shop — carlab.rs
 apps/medusa/          CarLab shop backend — Medusa 2.19, CommonJS, api.carlab.rs
+infra/medusa/         CarLab shop production: image, compose (postgres, redis, medusa, caddy), host scripts — one Hetzner VPS
 packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click routes
 packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
 packages/site-kit/    brand-agnostic mechanics: safeMarkdown, formatPhone, visitor id, lazy map embed, scroll lock, modal dialog, preferred contact channel (owns the `data-contact-order` / `data-channel` / `data-primary-contact` / `data-primary-channel` markup contract the apps must honour), funnel tracking (owns a second one: `data-lead-form` / `data-brand-link` / `data-field` / `aria-invalid`)
@@ -81,8 +82,9 @@ to approved.rs itself.
 deploy filter in `ci.yml` is `turbo --filter="...[<deployed tag>]"` — the
 leading dots pull in the dependents of a changed package, so touching
 `@podbor/lead-crm` or `@podbor/i18n` marks all three sites stale at once
-(`apps/medusa` also depends on `@podbor/i18n` but has no deploy job in `ci.yml`
-yet — Plan 3 territory). All
+(`@podbor/i18n`, `@podbor/brands` and `@podbor/shop-catalog` also mark
+`apps/medusa` stale; its `deploy-medusa` job ships it in the same run, before
+the brand sites). All
 three write the same `data/leads.json` blob, so shipping a changed package to
 one site and not the others puts two versions of the lead schema on one file:
 one site writes records another cannot parse, and they land in
@@ -435,6 +437,31 @@ apps/medusa/docker-compose.test.yml up -d --wait`; `DB_HOST` is the literal
 - **`emails.yaml` is RU-only**, like every other i18n source file — sr/en are
   filled by the same CI translate loop (`apps/*/scripts/translate-i18n.ts`)
   that covers the rest of the site copy, nothing Medusa-specific.
+- **Production is `infra/medusa`: one VPS, one compose stack, deployed by
+  `ci.yml`.** `medusa-image` builds `infra/medusa/Dockerfile` from the
+  translate job's sha, migrates a blank database with it and boots it to
+  healthy; on `main` it pushes `ghcr.io/zikrasoft/podbor-medusa:<sha>` and
+  `deploy-medusa` runs `infra/medusa/deploy.sh <sha>` on the host. `deploy-medusa`
+  itself only holds `contents: read` — the separate `record-medusa` job moves
+  `deployed/medusa`, so the one-shot GHCR token shipped to the VPS never carries
+  repo-write. Migrations, seeds and `medusa user` run from the image
+  (`node_modules/.bin/medusa … ./src/scripts/<name>.js` under `/server`),
+  never from a repo checkout — the image has no ts-node. The Dockerfile
+  `require()`s every `@podbor/*` subpath Medusa imports; a new subpath goes
+  into that smoke line. A change under `infra/medusa/` redeploys medusa on its
+  own scope rule, because turbo cannot see files outside the workspace.
+- **Caddy is the single hop in front of Medusa.** Medusa runs with
+  `trust proxy 1`, Caddy overwrites `X-Forwarded-For` with the peer address,
+  and only Caddy publishes a port (`infra/medusa/test/compose.test.sh`). The
+  rate limits key on `req.ip` — IPv6 by its /64 (`clientKey` in
+  `rate-limit.ts`). A CDN or second proxy in front would turn every client
+  into the proxy's address: change the proxy count, `trust proxy` and the
+  Caddy header together or not at all.
+- **A `pnpm-lock.yaml` change redeploys all four apps, medusa included** —
+  decided in Plan 3: one lockfile, no way to attribute a change to one app,
+  and a redundant deploy is the cheap failure direction. `setup-pnpm`
+  installing Medusa in every job is accepted on the same grounds until it
+  measurably hurts.
 
 ## Architecture
 
