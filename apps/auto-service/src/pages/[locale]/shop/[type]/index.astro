@@ -64,7 +64,7 @@ const vehicles =
       {vehicles && <CarPicker index={vehicles} />}
       {
         landings.length > 0 && (
-          <nav aria-label={copy.name} class="flex flex-wrap gap-2">
+          <nav aria-label={shop.landingsLabel} class="flex flex-wrap gap-2">
             {landings.map((landing) => (
               <a
                 href={landing.href}

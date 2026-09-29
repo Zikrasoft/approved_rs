@@ -33,6 +33,7 @@ export async function getStaticPaths() {
 
 const { key, value } = Astro.props;
 const typeKey = Astro.params.type!;
+const landingSlug = Astro.params.landing!;
 const locale = localeFrom(Astro.url.pathname);
 const shop = getShopContent(locale);
 const site = getSiteContent(locale);
@@ -60,11 +61,14 @@ const heading = fill(copy.landing.heading);
     <PageHero
       eyebrow={copy.name}
       heading={heading}
-      lead={copy.lead}
+      lead={fill(copy.landing.lead)}
       crumbs={[
         { href: PathBuilder.shop(locale), label: site.nav.shop },
         { href: PathBuilder.shopType(locale, typeKey), label: copy.name },
-        { href: Astro.url.pathname, label: heading },
+        {
+          href: PathBuilder.shopLanding(locale, typeKey, landingSlug),
+          label: heading,
+        },
       ]}
     />
     <section class="wrap flex flex-col gap-6 py-band md:py-band-lg">

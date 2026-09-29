@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
+import { withPlaceholder } from '@podbor/i18n';
 import { PRODUCT_TYPES } from '@podbor/shop-catalog/browser';
 import shopYaml from '@/content/i18n/shop.yaml?raw';
 import {
@@ -63,6 +64,12 @@ describe('shopContentSchema', () => {
       },
     ],
     [
+      "a type's landing lead",
+      (raw) => {
+        delete (raw.types.batteries.landing as { lead?: string }).lead;
+      },
+    ],
+    [
       'a unit',
       (raw) => {
         delete raw.units.Ah;
@@ -78,6 +85,17 @@ describe('shopContentSchema', () => {
     const raw = russian();
     drop(raw);
     expect(shopContentSchema.safeParse(raw).success).toBe(false);
+  });
+
+  it('gives every landing its own lead, distinct from the type lead', () => {
+    const copy = shopContentSchema.parse(russian());
+    for (const type of PRODUCT_TYPES) {
+      const typeCopy = copy.types[type.key];
+      expect(typeCopy.landing.lead).not.toBe(typeCopy.lead);
+      const filled = withPlaceholder(typeCopy.landing.lead, 'value', '60 А·ч');
+      expect(filled).toContain('60 А·ч');
+      expect(filled).not.toBe(typeCopy.landing.lead);
+    }
   });
 
   it('refuses copy for a field the registry does not have', () => {

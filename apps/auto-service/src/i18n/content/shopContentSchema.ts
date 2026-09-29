@@ -17,7 +17,12 @@ export interface TypeCopy {
   lead: string;
   metaTitle: string;
   metaDescription: string;
-  landing: { heading: string; metaTitle: string; metaDescription: string };
+  landing: {
+    heading: string;
+    lead: string;
+    metaTitle: string;
+    metaDescription: string;
+  };
   fields: Record<string, FieldCopy>;
 }
 
@@ -67,7 +72,12 @@ const typeCopy = (type: ProductTypeDef): z.ZodType<TypeCopy> =>
       metaTitle: text,
       metaDescription: text,
       landing: z
-        .object({ heading: text, metaTitle: text, metaDescription: text })
+        .object({
+          heading: text,
+          lead: text,
+          metaTitle: text,
+          metaDescription: text,
+        })
         .strict(),
       fields: keyed(
         type.fields.map((field) => field.key),
@@ -131,6 +141,7 @@ export const shopContentSchema = z
     productCount: pluralSchema,
     carLead: text,
     carClear: text,
+    landingsLabel: text,
     filterHeading: text,
     filterFrom: text,
     filterTo: text,
