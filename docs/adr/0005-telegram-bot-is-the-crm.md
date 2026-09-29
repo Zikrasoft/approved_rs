@@ -8,9 +8,3 @@ Capture is fail-open: the route redirects to `/thanks/` immediately and does sto
 
 - **Status buttons in the group** (original design): the group became unreadable and status lived in message text.
 - **Google Sheet as the ledger, Telegram as fire-and-forget** (August 2026): see [ADR-0004](0004-leads-in-one-vercel-blob-json-file.md).
-
-## Consequences
-
-- Telegram forbids a bot from starting a conversation, so the owner and admin must `/start` the bot once before they get DMs or reminders.
-- The webhook needs `secret_token` = `TELEGRAM_WEBHOOK_SECRET`; without it every update gets 401 and the buttons are dead.
-- A contact click (phone/messenger tap) is also a lead (`/api/contact-click`), rendered as `Клик: <channel>`.

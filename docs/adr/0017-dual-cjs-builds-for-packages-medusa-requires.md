@@ -13,4 +13,3 @@ Medusa's backend is CommonJS and cannot load the `.ts` sources the Astro apps im
 - turbo runs `#test` after `build` for these packages; a `cjs.test.ts` that built inside `beforeAll` raced a concurrent `tsc` writing `dist/cjs`.
 - The Docker image smoke-`require()`s every `@podbor/*` subpath Medusa uses, because packages have no `files` field and a missing `dist/cjs` would otherwise surface at runtime.
 - A helper Medusa needs must live in one of these packages; `site-kit` has no CJS build, which is why the contact-link builders move to `brands`.
-- `apps/medusa` alone runs React 18 (its admin needs it); Node is pinned to 24.

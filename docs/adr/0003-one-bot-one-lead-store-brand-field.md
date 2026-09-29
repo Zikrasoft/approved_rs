@@ -9,6 +9,5 @@ All three sites write leads to the same `data/leads.json` on one Vercel Blob sto
 
 ## Consequences
 
-- A `packages/*` change must reach all three apps together (the `...[tag]` turbo filter, see [ADR-0008](0008-deploy-only-what-is-stale-in-production.md)), otherwise one site writes records another cannot parse.
-- The same Blob store must be _connected_ to all three Vercel projects; `BLOB_READ_WRITE_TOKEN` is never set by hand, or some leads land in a file the bot does not read.
-- A lead captured by approved.rs's partner block for CarLab or Details is stored as that brand's lead, with that brand's commission rate; `source_url` records that it came from approved.rs.
+- A `packages/*` change must reach all three apps together — see [ADR-0008](0008-deploy-only-what-is-stale-in-production.md).
+- A lead keeps the `brand` and commission rate it was created with (`COMMISSION_PERCENT` in `packages/brands`, copied onto the lead). Renaming a brand or changing a rate never rewrites history, so past deal commissions stay what was agreed; the bot can still override the rate per lead. A lead captured by approved.rs's partner block for CarLab or Details is stored as that brand's, with that brand's rate.

@@ -41,11 +41,8 @@
 
 ### Vercel ничего не собирает
 
-`git.deploymentEnabled: false` отключает собственный git-триггер Vercel. Блок
-стоит и в корневом `vercel.json`, и в `vercel.json` всех трёх приложений: какой
-файл читает git-интеграция, зависит от Root Directory проекта, а копия в
-каждом — единственный вариант, верный при любой настройке. Без него каждый пуш в любую
-ветку запускал бы падающий preview-билд. Почему так —
+`git.deploymentEnabled: false` в корневом `vercel.json` и в `vercel.json`
+каждого приложения отключает собственный git-триггер Vercel — почему так,
 [ADR-0007](../adr/0007-github-actions-builds-vercel-only-hosts.md).
 
 Собирает и деплоит GitHub Actions — и только те сайты, которые отстали от

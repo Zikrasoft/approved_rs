@@ -15,4 +15,3 @@ Online payment (Serbian acquirers: NestPay/Payten, AllSecure, Monri), delivery, 
 ## Consequences
 
 - The audience includes many Russian-speaking residents, so ru/sr/en are equal; the phone input keeps the country shortlist rather than forcing RS.
-- Before online payment: e-fiscalisation needs an accountant's answer, and distance-selling terms plus the 14-day return must be published.

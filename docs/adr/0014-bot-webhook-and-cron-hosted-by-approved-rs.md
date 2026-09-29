@@ -8,10 +8,10 @@ status: accepted
 
 ## Considered Options
 
-1. **A fourth, service-only Vercel project** on `*.vercel.app` holding the webhook, cron and admin routes — recommended: removes the coupling, no new domain, the owner's chat stays single.
+1. **A fourth, service-only Vercel project** on `*.vercel.app` holding the webhook, cron and admin routes — removes the coupling, no new domain, the owner's chat stays single.
 2. **A bot per brand** — full independence but three chats and no single money summary; only if a brand is sold separately.
 3. **Leave as is** — the current state.
 
 ## Consequences
 
-Taking the approved.rs project down kills the bot buttons and reminders for CarLab and Details too, while their own sites and forms keep working; nothing in their deploys shows it. Raised by the owner on 2026-09-14, undecided.
+Taking the approved.rs project down kills the bot buttons and reminders for CarLab and Details too, while their own sites and forms keep working; nothing in their deploys shows it. Whether to move it is tracked in `docs/guides/open-questions.md`.
