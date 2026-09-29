@@ -186,6 +186,7 @@ export const shopContentSchema = z
         badgeLabel: text,
         checkoutHeading: text,
         nameRequired: text,
+        commentLabel: text,
         emailLabel: text,
         emailPlaceholder: text,
         errorEmail: text,

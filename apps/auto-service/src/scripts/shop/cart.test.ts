@@ -276,6 +276,36 @@ describe('changing lines', () => {
     expect(currentCart()?.id).toBe('cart_new');
   });
 
+  it('serialises quantity changes so an older response cannot publish over a newer one', async () => {
+    localStorage.setItem('carlab_cart_id', 'cart_1');
+    let resolveFirst!: (value: ReturnType<typeof cart>) => void;
+    api.updateLine.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveFirst = resolve;
+        }),
+    );
+    api.updateLine.mockResolvedValueOnce(
+      cart('cart_1', 'sr-RS', [{ quantity: 5 }]),
+    );
+    const { setQuantity, currentCart } = await load();
+
+    const first = setQuantity('line_1', 2);
+    const second = setQuantity('line_1', 5);
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(api.updateLine).toHaveBeenCalledTimes(1);
+
+    resolveFirst(cart('cart_1', 'sr-RS', [{ quantity: 2 }]));
+    await first;
+    await second;
+
+    expect(api.updateLine).toHaveBeenCalledTimes(2);
+    expect(currentCart()?.items).toEqual([{ quantity: 5 }]);
+  });
+
   it('counts pieces, not lines', async () => {
     const { cartCount } = await load();
 

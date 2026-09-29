@@ -165,4 +165,27 @@ describe('<checkout-form>', () => {
       goals.reachGoal.mock.calls.filter(([goal]) => goal === 'begin_checkout'),
     ).toHaveLength(1);
   });
+
+  it('still counts the start of checkout once after the async country redraw and a failed submit repaint the form', async () => {
+    checkout.placeOrder.mockRejectedValueOnce(new Error('nope'));
+    checkout.checkoutFailure.mockReturnValueOnce('generic');
+    const { field, submit } = mount();
+
+    field('[name="name"]').dispatchEvent(
+      new FocusEvent('focusin', { bubbles: true }),
+    );
+    await settle();
+    submit();
+    await settle();
+    field('[name="email"]').dispatchEvent(
+      new FocusEvent('focusin', { bubbles: true }),
+    );
+    field('[name="name"]').dispatchEvent(
+      new FocusEvent('focusin', { bubbles: true }),
+    );
+
+    expect(
+      goals.reachGoal.mock.calls.filter(([goal]) => goal === 'begin_checkout'),
+    ).toHaveLength(1);
+  });
 });

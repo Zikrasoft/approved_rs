@@ -40,38 +40,57 @@ const chip =
         />
       </label>
     </div>
-    <label class="block">
-      <span class="field-label">{site.form.nameLabel}</span>
-      <input
-        name="name"
-        type="text"
-        autocomplete="name"
-        required
-        maxlength={200}
-        placeholder={site.form.namePlaceholder}
-        class="field"
-      />
-      <span class="mt-1 block text-xs text-muted">{shop.cart.nameRequired}</span
+    <div>
+      <label class="block">
+        <span class="field-label">{site.form.nameLabel}</span>
+        <input
+          name="name"
+          type="text"
+          autocomplete="name"
+          required
+          maxlength={200}
+          placeholder={site.form.namePlaceholder}
+          aria-describedby="checkout-name-hint checkout-name-error"
+          class="field"
+        />
+      </label>
+      <span id="checkout-name-hint" class="mt-1 block text-xs text-muted">
+        {shop.cart.nameRequired}
+      </span>
+      <p
+        id="checkout-name-error"
+        data-error="name"
+        class={errorText}
+        aria-live="polite"
+        hidden
       >
-      <p data-error="name" class={errorText} aria-live="polite" hidden>
         {shop.cart.errorName}
       </p>
-    </label>
-    <label class="block">
-      <span class="field-label">{shop.cart.emailLabel}</span>
-      <input
-        name="email"
-        type="email"
-        inputmode="email"
-        autocomplete="email"
-        required
-        placeholder={shop.cart.emailPlaceholder}
-        class="field"
-      />
-      <p data-error="email" class={errorText} aria-live="polite" hidden>
+    </div>
+    <div>
+      <label class="block">
+        <span class="field-label">{shop.cart.emailLabel}</span>
+        <input
+          name="email"
+          type="email"
+          inputmode="email"
+          autocomplete="email"
+          required
+          placeholder={shop.cart.emailPlaceholder}
+          aria-describedby="checkout-email-error"
+          class="field"
+        />
+      </label>
+      <p
+        id="checkout-email-error"
+        data-error="email"
+        class={errorText}
+        aria-live="polite"
+        hidden
+      >
         {shop.cart.errorEmail}
       </p>
-    </label>
+    </div>
     <div>
       <span class="field-label">{site.form.contactLabel}</span>
       <PhoneInput name="phone" errorId="checkout-phone-error" />
@@ -110,7 +129,7 @@ const chip =
       </div>
     </fieldset>
     <label class="block">
-      <span class="field-label">{site.form.commentLabel}</span>
+      <span class="field-label">{shop.cart.commentLabel}</span>
       <textarea
         name="comment"
         rows={2}

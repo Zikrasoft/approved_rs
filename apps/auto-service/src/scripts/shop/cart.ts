@@ -131,6 +131,17 @@ export async function refreshCart(): Promise<Cart | null> {
   }
 }
 
+let queue: Promise<unknown> = Promise.resolve();
+
+function serialize<T>(task: () => Promise<T>): Promise<T> {
+  const result = queue.then(task);
+  queue = result.then(
+    () => undefined,
+    () => undefined,
+  );
+  return result;
+}
+
 interface NewCart {
   regionId: string;
   locale: string;
@@ -155,7 +166,7 @@ function cartId(input: NewCart): Promise<string> {
   return creating;
 }
 
-export async function addToCart(input: {
+export function addToCart(input: {
   regionId: string;
   locale: Locale;
   preview: boolean;
@@ -168,33 +179,38 @@ export async function addToCart(input: {
     preview: input.preview,
   };
   const quantity = input.quantity ?? 1;
-  const id = await cartId(create);
-  try {
-    const cart = await api.addLine(id, input.variantId, quantity);
-    publish(cart);
-    return cart;
-  } catch (error) {
-    if (!api.isCartGone(error)) throw error;
-    forgetIfCurrent(id);
-    const cart = await api.addLine(
-      await cartId(create),
-      input.variantId,
-      quantity,
-    );
-    publish(cart);
-    return cart;
-  }
+  const idPromise = cartId(create);
+  return serialize(async () => {
+    const id = await idPromise;
+    try {
+      const cart = await api.addLine(id, input.variantId, quantity);
+      publish(cart);
+      return cart;
+    } catch (error) {
+      if (!api.isCartGone(error)) throw error;
+      forgetIfCurrent(id);
+      const cart = await api.addLine(
+        await cartId(create),
+        input.variantId,
+        quantity,
+      );
+      publish(cart);
+      return cart;
+    }
+  });
 }
 
-async function mutate(operation: (id: string) => Promise<Cart>): Promise<void> {
+function mutate(operation: (id: string) => Promise<Cart>): Promise<void> {
   const id = current?.id ?? storedId();
-  if (!id) return;
-  try {
-    publish(await operation(id));
-  } catch (error) {
-    if (api.isCartGone(error)) forgetIfCurrent(id);
-    throw error;
-  }
+  if (!id) return Promise.resolve();
+  return serialize(async () => {
+    try {
+      publish(await operation(id));
+    } catch (error) {
+      if (api.isCartGone(error)) forgetIfCurrent(id);
+      throw error;
+    }
+  });
 }
 
 export const setQuantity = (lineId: string, quantity: number): Promise<void> =>

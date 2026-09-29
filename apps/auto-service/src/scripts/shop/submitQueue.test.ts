@@ -45,6 +45,40 @@ describe('submitQueue', () => {
     expect(onIdle).toHaveBeenCalledTimes(1);
   });
 
+  it('restores only the label element, keeping the icon markup for a later retry', async () => {
+    const node = document.createElement('button');
+    node.innerHTML =
+      '<span data-submit-label>Poruči</span><svg data-icon></svg>';
+    const submit = submitQueue(node, vi.fn(), vi.fn());
+
+    await submit(async () => {
+      node.querySelector('[data-submit-label]')!.textContent = 'Šaljemo…';
+      throw new Error('nope');
+    });
+
+    expect(node.querySelector('[data-submit-label]')?.textContent).toBe(
+      'Poruči',
+    );
+    expect(node.querySelector('[data-icon]')).not.toBeNull();
+
+    let release!: () => void;
+    const retry = submit(
+      () =>
+        new Promise<void>((resolve) => {
+          node.querySelector('[data-submit-label]')!.textContent = 'Šaljemo…';
+          release = resolve;
+        }),
+    );
+
+    expect(node.querySelector('[data-submit-label]')?.textContent).toBe(
+      'Šaljemo…',
+    );
+    expect(node.querySelector('[data-icon]')).not.toBeNull();
+
+    release();
+    await retry;
+  });
+
   it('does nothing once stopped', async () => {
     const operation = vi.fn();
     const submit = submitQueue(button(), vi.fn(), vi.fn());

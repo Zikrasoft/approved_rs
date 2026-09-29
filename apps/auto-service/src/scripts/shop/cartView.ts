@@ -49,7 +49,7 @@ export function defineCartView(tagName = 'cart-view'): void {
         let placed = false;
 
         const complain = (error: unknown) => {
-          if (!failure) return;
+          if (placed || !failure) return;
           failure.textContent = isOutOfStock(error)
             ? (errors.stock ?? '')
             : (errors.generic ?? '');
@@ -75,6 +75,7 @@ export function defineCartView(tagName = 'cart-view'): void {
           quantity.value = String(entry.quantity);
           quantity.max = String(MAX_QUANTITY);
           quantity.addEventListener('change', () => {
+            failure?.setAttribute('hidden', '');
             const wanted = Math.min(
               Math.max(Math.trunc(Number(quantity.value)) || 0, 0),
               MAX_QUANTITY,
@@ -83,14 +84,16 @@ export function defineCartView(tagName = 'cart-view'): void {
           });
           item
             .querySelector<HTMLButtonElement>('[data-line-remove]')!
-            .addEventListener('click', () =>
-              removeFromCart(entry.id).catch(complain),
-            );
+            .addEventListener('click', () => {
+              failure?.setAttribute('hidden', '');
+              removeFromCart(entry.id).catch(complain);
+            });
           return item;
         };
 
         const render = (cart: Cart | null) => {
           if (placed) return;
+          failure?.setAttribute('hidden', '');
           const filled = (cart?.items.length ?? 0) > 0;
           list.replaceChildren(...(cart?.items ?? []).map(line));
           empty?.toggleAttribute('hidden', filled);

@@ -216,6 +216,7 @@ cart:
   badgeLabel: товаров в корзине
   checkoutHeading: Контакты для заказа
   nameRequired: Имя обязательно — так мы узнаем вас в сервисе.
+  commentLabel: Комментарий к заказу
   emailLabel: Email
   emailPlaceholder: name@example.com
   errorEmail: Проверьте email — на него придёт подтверждение заказа

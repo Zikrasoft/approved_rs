@@ -8,7 +8,9 @@ export function submitQueue(
   onError: (error: unknown) => void,
   onIdle: () => void,
 ): Submit {
-  const label = submit.textContent ?? '';
+  const labelNode =
+    submit.querySelector<HTMLElement>('[data-submit-label]') ?? submit;
+  const label = labelNode.textContent ?? '';
   let busy = false;
   let stopped = false;
   let queued: (() => Promise<void>) | null = null;
@@ -28,7 +30,7 @@ export function submitQueue(
       onError(error);
     } finally {
       busy = false;
-      submit.textContent = label;
+      labelNode.textContent = label;
       onIdle();
     }
     const next = queued;

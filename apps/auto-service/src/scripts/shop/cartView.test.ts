@@ -144,6 +144,43 @@ describe('<cart-view>', () => {
     expect(cart.refreshCart).toHaveBeenCalled();
   });
 
+  it('clamps a typed quantity to the 0–99 range', () => {
+    mount();
+    push(CART);
+    const quantity = document.querySelector<HTMLInputElement>(
+      '[data-line-quantity]',
+    )!;
+
+    quantity.value = '-5';
+    quantity.dispatchEvent(new Event('change'));
+    expect(cart.setQuantity).toHaveBeenLastCalledWith('l1', 0);
+
+    quantity.value = '150';
+    quantity.dispatchEvent(new Event('change'));
+    expect(cart.setQuantity).toHaveBeenLastCalledWith('l1', 99);
+  });
+
+  it('does not repaint a stale mutation error once the order is placed', async () => {
+    cart.setQuantity.mockRejectedValue(new Error('insufficient'));
+    mount();
+    push(CART);
+    q('#inner').dispatchEvent(
+      new CustomEvent('order-placed', {
+        bubbles: true,
+        detail: { displayId: 7, total: 12690 },
+      }),
+    );
+    const quantity = document.querySelector<HTMLInputElement>(
+      '[data-line-quantity]',
+    )!;
+    quantity.value = '3';
+    quantity.dispatchEvent(new Event('change'));
+    await settle();
+
+    expect(q('[data-cart-error]').hidden).toBe(true);
+    expect(q('[data-placed]').hidden).toBe(false);
+  });
+
   it('switches to the numbered confirmation once the order is placed, and stays there', () => {
     mount();
     push(CART);

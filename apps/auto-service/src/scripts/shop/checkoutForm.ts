@@ -10,7 +10,7 @@ import {
   phoneKit,
   phoneValue,
 } from '@podbor/lead-crm/phone-kit';
-import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
+import { isTrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 import { phoneInvalid } from '../phone';
 import { currentCart, refreshCart } from './cart';
 import { checkoutFailure, placeOrder } from './checkout';
@@ -129,9 +129,12 @@ export function defineCheckoutForm(tagName = 'checkout-form'): void {
               first[1].focus();
               return;
             }
-            const channel = (form.querySelector<HTMLInputElement>(
+            const checkedChannel = form.querySelector<HTMLInputElement>(
               '[name="contact_channel"]:checked',
-            )?.value ?? 'phone') as TrackedContactChannel;
+            )?.value;
+            const channel = isTrackedContactChannel(checkedChannel)
+              ? checkedChannel
+              : 'phone';
             void queue(async () => {
               if (submitLabel && this.dataset.submitting)
                 submitLabel.textContent = this.dataset.submitting;
