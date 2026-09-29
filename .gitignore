@@ -43,7 +43,7 @@ graphify-out/
 # vitest --coverage output
 coverage/
 
-# Local, never committed: identifiers of real people (see docs/analytics-exclusions.md)
+# Local, never committed: identifiers of real people (see docs/guides/analytics-exclusions.md)
 .local/
 
 # Medusa deploy state (host-only)

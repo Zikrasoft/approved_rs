@@ -359,9 +359,6 @@ describe('refreshLeadCard', () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  // TELEGRAM_GROUP_ID may be an @username (see docs/deploy.md), which never
-  // equals the numeric chat.id Telegram reports back. Matching the two was
-  // what stopped cards updating at all, so the edit goes by stored id alone.
   it('edits by the stored chat id without matching it against the configured group', async () => {
     await expect(
       refreshLeadCard(makeLead({ telegramChatId: -1, telegramMessageId: 1 })),
