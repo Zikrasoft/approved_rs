@@ -87,7 +87,7 @@ export {
 } from './contactChannel.ts';
 export type { TrackedContactChannel } from './contactChannel.ts';
 
-export { HONEYPOT_FIELD, SERVICE_FIELD } from './form.ts';
+export { contactChannelSchema, HONEYPOT_FIELD, SERVICE_FIELD } from './form.ts';
 
 export { createLeadsRoute } from './routes/leads.ts';
 export type { LeadsRouteOptions, RouteRequestContext } from './routes/leads.ts';

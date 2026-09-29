@@ -51,7 +51,7 @@ export type NotifyLead = (
   data: LeadSubmission,
   logPrefix: string,
   handOff?: LeadHandOff,
-) => Promise<void>;
+) => Promise<boolean>;
 
 export function createNotifyLead({
   store,
@@ -78,13 +78,10 @@ export function createNotifyLead({
           error: fallbackErr,
           lead: data,
         });
-        return;
+        return false;
       }
     }
 
-    // A repeat submission only ever edits the card it already has. Posting a
-    // replacement here would let anyone mint group messages by resubmitting
-    // under one visitor id; the operator paths heal a missing card instead.
     if (merged) {
       console.log(`${logPrefix} merged into an existing open lead`, {
         leadId: lead.id,
@@ -98,7 +95,7 @@ export function createNotifyLead({
         });
       }
       console.log(`${logPrefix} notifyLead finished`);
-      return;
+      return true;
     }
 
     try {
@@ -112,6 +109,8 @@ export function createNotifyLead({
           leadId: lead.id,
         });
       }
+      console.log(`${logPrefix} notifyLead finished`);
+      return true;
     } catch (err) {
       console.error(`${logPrefix} Telegram notification failed`, {
         error: err,
@@ -120,5 +119,6 @@ export function createNotifyLead({
     }
 
     console.log(`${logPrefix} notifyLead finished`);
+    return false;
   };
 }
