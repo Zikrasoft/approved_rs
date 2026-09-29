@@ -7,7 +7,6 @@ const hit = (url: string, title: string, price: string) => ({
 });
 
 const pagefind = {
-  options: vi.fn(),
   debouncedSearch: vi.fn(),
 };
 const load = vi.fn();
@@ -101,6 +100,19 @@ describe('<shop-search>', () => {
 
     await expect(type(input, 'bosch')).resolves.toBeUndefined();
     expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it('clears stale results after a later search fails', async () => {
+    const input = mount();
+    await type(input, 'bosch');
+    expect(results()).toHaveLength(1);
+
+    pagefind.debouncedSearch.mockRejectedValue(new Error('boom'));
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    await type(input, 'boschx');
+
+    expect(results()).toEqual([]);
     warn.mockRestore();
   });
 });

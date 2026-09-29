@@ -75,6 +75,7 @@ export function defineShopSearch(
             empty?.toggleAttribute('hidden', hits.length > 0);
           } catch (error) {
             api = undefined;
+            show([]);
             console.warn('[search] index unavailable', error);
           }
         };
