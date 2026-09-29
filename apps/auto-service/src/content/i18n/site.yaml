@@ -139,7 +139,7 @@ translations:
       errorTelegram: Unesite nadimak na Telegramu — minimum tri karaktera
       errorConsent: Bez pristanka ne možemo poslati zahtev
     cookie:
-      notice: Skladištimo anonimni ID u pretraživaču — on povezuje vaše klikove na dugmad za kontakt sa poslatim zahtevom, kako ne bi došlo do izgubljenih informacija. Takođe koristimo Yandex.Metriu kako bismo razumeli kako posetioci koriste sajt. Ona beleži sesije — kretanje kursora, skrolovanje i klikove; forma zahteva nije uključena u zapis.
+      notice: Koristimo kolačiće.
       more: Više u
       policyLink: politici privatnosti
       accept: Prihvatiti
@@ -212,10 +212,10 @@ translations:
       errorTelegram: Please provide your Telegram nickname — at least three characters
       errorConsent: Without consent, we cannot submit the request
     cookie:
-      notice: We store an anonymous identifier in your browser — it connects your clicks on contact buttons to the submitted request so that your inquiry isn't lost. We also use Yandex.Metrica to understand how visitors use the site. It records sessions — cursor movements, scrolling, and clicks; the request form is excluded from the recording.
+      notice: We use cookies.
       more: Learn more in
       policyLink: privacy policy
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: 39cf1b2409c1bc90
+translatedFrom: f450b9500e54d33d

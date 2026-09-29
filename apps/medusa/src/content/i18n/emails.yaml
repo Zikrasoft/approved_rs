@@ -6,3 +6,23 @@ orderPlaced:
   totalLabel: Итого
   pickupHeading: Самовывоз из сервиса
   pickupNote: Оплата при получении в сервисе.
+translations:
+  sr:
+    orderPlaced:
+      subject: Porudžbina br. {displayId} primljena — CarLab
+      heading: Porudžbina br. {displayId} primljena
+      intro: Hvala! Porudžbina je kod nas. Javićemo vam se da se dogovorimo kada da je preuzmete.
+      itemsHeading: Sadržaj porudžbine
+      totalLabel: Ukupno
+      pickupHeading: Preuzimanje u servisu
+      pickupNote: Plaćanje prilikom preuzimanja u servisu.
+  en:
+    orderPlaced:
+      subject: 'Order #{displayId} Confirmed — CarLab'
+      heading: 'Order #{displayId} Confirmed'
+      intro: Thank you! We have received your order. We'll contact you to arrange pickup.
+      itemsHeading: Order Details
+      totalLabel: Total
+      pickupHeading: Pickup from Workshop
+      pickupNote: Payment upon pickup at the workshop.
+translatedFrom: cbfafb5712244580
