@@ -22,7 +22,8 @@ already has a channel: `t.me/carlabrs`.
 The address is `Jovana Ćirilova 23a`, Zvezdara, Belgrade (`WORKSHOP_ADDRESS` in
 `packages/brands`). Zvezdara has several postcodes and guessing is not an option,
 so `postalCode` was removed from the markup (it is optional in `PostalAddress`).
-Send it and it goes back.
+Send it and it goes back; it is collected together with the registration details on
+[#79](https://github.com/Zikrasoft/approved_rs/issues/79).
 
 Both brands sit in one building and on one phone number — the owner knows and
 accepts that. The plan is three different addresses for three businesses; that is
@@ -52,7 +53,10 @@ on them.
 
 ### Unverified claims on the sites
 
-The 12-month warranty (on labour, or on parts too?), "a reply within 2 hours",
+The 12-month warranty (on labour, or on parts too?) — the owner ruled on
+[#68](https://github.com/Zikrasoft/approved_rs/issues/68) that shop parts carry
+the manufacturer's warranty only, which says nothing about this claim on the
+service pages. Also "a reply within 2 hours",
 "around the clock, seven days a week", the share of recovered cars per country.
 
 ### CarLab prices in dinars
@@ -101,18 +105,15 @@ pickup at all is **not established**
 ([#74](https://github.com/Zikrasoft/approved_rs/issues/74)). What is established
 is in `docs/research/serbia-online-shop-legal.md`.
 
-Also to ask the client, collected on
-[#68](https://github.com/Zikrasoft/approved_rs/issues/68):
-
-- the card fields per product type (batteries, oils, filters, brakes): what to show
-  on the card, what to filter by — separately from the fields the law requires
-  ([#75](https://github.com/Zikrasoft/approved_rs/issues/75));
-- installation prices (battery, pads/discs): fixed or "from";
-- how many days we hold an unpaid pickup order — the reserve-release mechanism waits on the number ([#78](https://github.com/Zikrasoft/approved_rs/issues/78));
-- who works in the Medusa admin (names and emails for accounts);
-- warranty, who accepts returns, the seller's registration details for the terms
-  page;
-- the sender address for email (e.g. `shop@carlab.rs`) and access to carlab.rs DNS.
+The owner answered on
+[#68](https://github.com/Zikrasoft/approved_rs/issues/68) (2026-09-30): batteries
+only at launch, under 10 SKUs typed into the Medusa admin by hand, card fields as
+already coded, installation priced «od X RSD», a 3-day reserve window, the
+manufacturer's warranty only, returns at the counter, `info@carlab.rs` as the
+sender, registrar access in the owner's hands, two admin accounts. One question
+did not close and moved to
+[#79](https://github.com/Zikrasoft/approved_rs/issues/79): the seller's poslovno
+ime, PIB, matični broj and seat, which the legal pages cannot be written without.
 
 Open on the vehicle dictionary's data: naming for Doblo III/K9, Megane by sequence
 versus by code, whether Aveo 310C and Lacetti are needed. Whether to buy TecDoc
