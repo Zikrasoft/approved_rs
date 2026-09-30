@@ -1,0 +1,18 @@
+{
+  "src/content/i18n/emails.yaml": {
+    "04fd606fcad61989": "Order #{displayId} Confirmed",
+    "07f3ef069c1b4f38": "Sadržaj porudžbine",
+    "1692036410944329": "Plaćanje prilikom preuzimanja u servisu.",
+    "1ecd20cd14e8d241": "Order Details",
+    "206370ca8384ef9a": "Thank you! We have received your order. We'll contact you to arrange pickup.",
+    "8a59a28740d4ab0f": "Pickup from Workshop",
+    "8eee3b3983beb101": "Hvala! Porudžbina je kod nas. Javićemo vam se da se dogovorimo kada da je preuzmete.",
+    "997dee9e4616f5b1": "Payment upon pickup at the workshop.",
+    "c6aeaaee1ef000c1": "Preuzimanje u servisu",
+    "cfddc331e89f96d1": "Porudžbina br. {displayId} primljena — CarLab",
+    "d38424ed905fc375": "Porudžbina br. {displayId} primljena",
+    "d6c4b0c888b37280": "Order #{displayId} Confirmed — CarLab",
+    "e9c9258f01d91006": "Total",
+    "fe4409ba8235a062": "Ukupno"
+  }
+}

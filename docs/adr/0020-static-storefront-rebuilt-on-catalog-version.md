@@ -1,10 +1,10 @@
 ---
-status: proposed
+status: accepted
 ---
 
 # The storefront is static; the catalog is baked at build and a version stamp drives rebuilds
 
-Implemented on branch `feat/carlab-shop`.
+In `main` since PR #34.
 
 `astro build` reads the Store API once (`src/lib/catalog.ts`); prices are baked, and only cart, stock and checkout call Medusa at runtime. ISR on Vercel is paid, so it was declined. Medusa writes `store.metadata.catalog_version` on every catalog event (product, variant, type, price, translation; not stock or orders), serves it at `GET /store/catalog-version`, and the site publishes the version it baked at `/catalog-version.txt`. CI's `scope` step redeploys auto-service when they differ; `disabled`, a 404 or equality skip, any error deploys. Optionally Medusa dispatches `ci.yml` after a 120 s debounce (off by default, `REBUILD_ON_CATALOG_EVENTS`), so translations arriving after an edit land in the same build.
 

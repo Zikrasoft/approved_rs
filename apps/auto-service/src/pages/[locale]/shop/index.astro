@@ -1,64 +1,79 @@
 ---
-import { getCollection } from 'astro:content';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
-import FitmentFilter from '@/components/FitmentFilter.astro';
-import ProductCard from '@/components/ProductCard.astro';
-import AddToCart from '@/components/AddToCart.astro';
-import FinalCta from '@/components/FinalCta.astro';
+import ShopGate from '@/components/ShopGate.astro';
+import CarPicker from '@/components/CarPicker.astro';
+import ShopSearch from '@/components/ShopSearch.astro';
+import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getShopContent } from '@/i18n/content/shop';
 import { getSiteContent } from '@/i18n/content/site';
-import { getHomeContent } from '@/i18n/content/home';
+import { shopCatalog } from '@/lib/catalog';
+import { productsOfType, shopTypeKeys } from '@/lib/shopPages';
 import { localePaths, PathBuilder } from '@/utils/paths';
-import { buildFitmentIndex, publishedProducts } from '@/utils/products';
-import { SHOP_ENABLED } from '@/utils/constants';
+import { pluralLabel } from '@/utils/plural';
+import { shopBuilt, shopIndexed } from '@/utils/shopStatus';
 
 export function getStaticPaths() {
-  return SHOP_ENABLED ? localePaths() : [];
+  return shopBuilt() ? localePaths() : [];
 }
 
 const locale = localeFrom(Astro.url.pathname);
 const shop = getShopContent(locale);
 const site = getSiteContent(locale);
-const home = getHomeContent(locale);
-const products = publishedProducts(await getCollection('products'));
-const index = buildFitmentIndex(products);
+const { products } = await shopCatalog().catalog(locale);
+const vehicles = await shopCatalog().vehicles();
+const types = shopTypeKeys(products).map((key) => ({
+  key,
+  copy: shop.types[key],
+  count: productsOfType(products, key).length,
+}));
 ---
 
-<Shell title={shop.metaTitle} description={shop.metaDescription}>
-  <PageHero
-    eyebrow={shop.eyebrow}
-    heading={shop.heading}
-    lead={shop.lead}
-    crumbs={[{ href: PathBuilder.shop(locale), label: site.nav.shop }]}
-  />
-
-  <section class="wrap py-band md:py-band-lg">
-    {
-      products.length === 0 ? (
-        <p class="card p-6 text-base text-muted">{shop.emptyCatalog}</p>
-      ) : (
-        <>
-          <FitmentFilter index={index} />
-          <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {products.map((product, i) => (
+<Shell
+  title={shop.metaTitle}
+  description={shop.metaDescription}
+  noindex={!shopIndexed()}
+>
+  <ShopGate>
+    <PageHero
+      eyebrow={shop.eyebrow}
+      heading={shop.heading}
+      lead={shop.lead}
+      crumbs={[{ href: PathBuilder.shop(locale), label: site.nav.shop }]}
+    />
+    <section class="wrap flex flex-col gap-8 py-band md:py-band-lg">
+      <ShopSearch />
+      <CarPicker index={vehicles} />
+      <div class="flex flex-col gap-4">
+        <h2 class="text-section">{shop.typesHeading}</h2>
+        <ul class="grid gap-4 sm:grid-cols-2">
+          {
+            types.map((type) => (
               <li>
-                <ProductCard product={product} eager={i < 4} />
+                <a
+                  href={PathBuilder.shopType(locale, type.key)}
+                  class="card flex h-full flex-col gap-2 p-5 transition-colors duration-150 hover:border-ink"
+                >
+                  <span class="text-block font-semibold text-ink">
+                    {type.copy.name}
+                  </span>
+                  <span class="text-sm leading-relaxed text-muted">
+                    {type.copy.lead}
+                  </span>
+                  <span class="spec mt-auto text-xs text-muted">
+                    {pluralLabel(
+                      shop.productCount,
+                      BCP47_BY_LOCALE[locale],
+                      type.count,
+                    )}
+                  </span>
+                </a>
               </li>
-            ))}
-          </ul>
-          <p class="mt-6 text-sm text-muted">{shop.installNote}</p>
-        </>
-      )
-    }
-  </section>
-
-  <AddToCart />
-
-  <FinalCta
-    eyebrow={home.shopTeaser.eyebrow}
-    heading={home.shopTeaser.heading}
-    body={home.shopTeaser.body}
-  />
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+  </ShopGate>
 </Shell>

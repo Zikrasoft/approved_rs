@@ -25,6 +25,8 @@ import {
   SOCIAL_SAME_AS,
 } from '@/utils/constants';
 import { getSiteContent } from '@/i18n/content/site';
+import { DEV_MODE_INLINE } from '@/scripts/devMode';
+import { SHOP_STATUS } from '@/utils/shopStatus';
 
 interface Props {
   title: string;
@@ -89,6 +91,11 @@ const businessSchema = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {
+      SHOP_STATUS === 'preview' && (
+        <script is:inline set:html={DEV_MODE_INLINE} />
+      )
+    }
     <meta name="theme-color" content="#ffffff" />
     {
       preloadImage && (

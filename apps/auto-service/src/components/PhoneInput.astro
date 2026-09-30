@@ -1,0 +1,69 @@
+---
+import Icon from './Icon.astro';
+import { phoneCountryOptions } from '@podbor/lead-crm/phone';
+import { BCP47_BY_LOCALE } from '@/i18n/config';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getSiteContent } from '@/i18n/content/site';
+import { PHONE_COUNTRY_SHORTLIST } from '@/utils/constants';
+
+interface Props {
+  name?: string;
+  errorId: string;
+}
+
+const { name = 'contact', errorId } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const site = getSiteContent(locale);
+const DEFAULT_COUNTRY = 'RS';
+const displayLocale = BCP47_BY_LOCALE[locale];
+const countryOptions = phoneCountryOptions(displayLocale).filter(
+  (country) =>
+    PHONE_COUNTRY_SHORTLIST.includes(
+      country.iso as (typeof PHONE_COUNTRY_SHORTLIST)[number],
+    ) || country.iso === DEFAULT_COUNTRY,
+);
+---
+
+<div class="flex gap-2">
+  <div class="relative min-w-0 max-w-[min(14rem,45%)] shrink-0">
+    <select
+      aria-label={site.form.countryLabel}
+      class="field spec max-w-full appearance-none overflow-hidden text-ellipsis pr-8"
+      data-country
+      data-display-locale={displayLocale}
+    >
+      {
+        countryOptions.map((country) => (
+          <option
+            value={country.iso}
+            data-dial={country.dial}
+            data-dial-primary={country.primary ? '' : undefined}
+            selected={country.iso === DEFAULT_COUNTRY}
+          >
+            {country.flag} +{country.dial} {country.name}
+          </option>
+        ))
+      }
+    </select>
+    <Icon
+      name="chevronDown"
+      size={12}
+      class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted"
+    />
+  </div>
+  <label class="min-w-0 flex-1">
+    <span class="sr-only">{site.form.contactLabel}</span>
+    <input
+      name={name}
+      type="tel"
+      inputmode="tel"
+      required
+      autocomplete="tel-national"
+      placeholder={site.form.contactPlaceholder}
+      aria-describedby={errorId}
+      class="field"
+      data-phone
+      data-field="phone"
+    />
+  </label>
+</div>

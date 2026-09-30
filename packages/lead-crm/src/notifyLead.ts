@@ -1,4 +1,4 @@
-import type { LeadSubmission, StoredLead } from './schema.ts';
+import type { LeadInput, LeadSubmission, StoredLead } from './schema.ts';
 import type { LeadStore } from './store.ts';
 import type { Notifier } from './telegram/notify.ts';
 
@@ -13,12 +13,8 @@ export function createEnsureLeadCard({
 }: EnsureLeadCardOptions) {
   return async function ensureLeadCard(lead: StoredLead): Promise<void> {
     if (await notifier.refreshLeadCard(lead)) return;
-    // Deleting the group card is how an archived lead gets retired, so
-    // posting it again would undo the gesture that removed it.
     if (lead.archived) return;
     const { chatId, messageId } = await notifier.sendLeadNotification(lead);
-    // The card is already in the group; losing its id here only costs the
-    // next refresh, so it must not take the caller's whole callback down.
     try {
       const saved = await store.setTelegramMessage(lead.id, chatId, messageId);
       if (!saved)
@@ -51,7 +47,11 @@ export type NotifyLead = (
   data: LeadSubmission,
   logPrefix: string,
   handOff?: LeadHandOff,
-) => Promise<void>;
+) => Promise<boolean>;
+
+function leadTrace(data: LeadInput) {
+  return { brand: data.brand, service: data.service, kind: data.kind };
+}
 
 export function createNotifyLead({
   store,
@@ -60,7 +60,7 @@ export function createNotifyLead({
 }: NotifyLeadOptions): NotifyLead {
   return async function notifyLead(submission, logPrefix, handOff) {
     const data = { ...submission, brand, ...handOff };
-    console.log(`${logPrefix} notifyLead started`, { lead: data });
+    console.log(`${logPrefix} notifyLead started`, leadTrace(data));
 
     let lead: StoredLead;
     let merged = false;
@@ -69,22 +69,19 @@ export function createNotifyLead({
     } catch (err) {
       console.error(
         `${logPrefix} store insertLead failed, notifying without CRM tracking`,
-        { error: err, lead: data },
+        { error: err, ...leadTrace(data) },
       );
       try {
         lead = store.newStoredLead(data, Date.now());
       } catch (fallbackErr) {
         console.error(`${logPrefix} lead failed validation, cannot notify`, {
           error: fallbackErr,
-          lead: data,
+          ...leadTrace(data),
         });
-        return;
+        return false;
       }
     }
 
-    // A repeat submission only ever edits the card it already has. Posting a
-    // replacement here would let anyone mint group messages by resubmitting
-    // under one visitor id; the operator paths heal a missing card instead.
     if (merged) {
       console.log(`${logPrefix} merged into an existing open lead`, {
         leadId: lead.id,
@@ -98,7 +95,7 @@ export function createNotifyLead({
         });
       }
       console.log(`${logPrefix} notifyLead finished`);
-      return;
+      return true;
     }
 
     try {
@@ -112,13 +109,17 @@ export function createNotifyLead({
           leadId: lead.id,
         });
       }
+      console.log(`${logPrefix} notifyLead finished`);
+      return true;
     } catch (err) {
       console.error(`${logPrefix} Telegram notification failed`, {
         error: err,
-        lead,
+        leadId: lead.id,
+        ...leadTrace(lead),
       });
     }
 
     console.log(`${logPrefix} notifyLead finished`);
+    return false;
   };
 }

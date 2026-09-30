@@ -1,3 +1,6 @@
+import type { CountryCode } from 'libphonenumber-js/min';
+import { composeE164 } from './composeE164.ts';
+
 export interface PhoneKit {
   AsYouType: typeof import('libphonenumber-js/min').AsYouType;
   parse: typeof import('libphonenumber-js/min').parsePhoneNumberFromString;
@@ -17,6 +20,17 @@ let unavailable = false;
 let loading: Promise<void> | null = null;
 
 export const phoneKit = (): PhoneKit | null => kit;
+
+export function phoneValue(
+  country: HTMLSelectElement,
+  input: HTMLInputElement,
+): string {
+  const typed = input.value.trim();
+  return (
+    kit?.parse(typed, country.value as CountryCode)?.number ??
+    composeE164(typed, country.selectedOptions[0]?.dataset.dial ?? '')
+  );
+}
 
 export function loadPhoneKit(): Promise<void> {
   loading ??= Promise.all([

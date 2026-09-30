@@ -1,0 +1,27 @@
+---
+import { localeFrom } from '@/i18n/currentLocale';
+import { getShopContent } from '@/i18n/content/shop';
+import { SHOP_STATUS } from '@/utils/shopStatus';
+
+const shop = getShopContent(localeFrom(Astro.url.pathname));
+---
+
+{
+  SHOP_STATUS === 'preview' ? (
+    <>
+      <div data-dev-only>
+        <slot />
+      </div>
+      <section data-dev-hidden class="wrap py-band md:py-band-lg">
+        <div class="card flex flex-col gap-2 p-6">
+          <h1 class="text-block font-semibold text-ink">
+            {shop.previewHeading}
+          </h1>
+          <p class="text-base leading-relaxed text-muted">{shop.previewBody}</p>
+        </div>
+      </section>
+    </>
+  ) : (
+    <slot />
+  )
+}

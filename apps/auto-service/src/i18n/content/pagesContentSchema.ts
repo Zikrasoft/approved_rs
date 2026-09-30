@@ -51,8 +51,6 @@ export const pagesContentSchema = z
         heading: z.string(),
         lastUpdated: z.string(),
         sections: z.array(privacySectionSchema),
-        // Rendered only when SHOP_ENABLED: a separate list, so nothing depends
-        // on a shared array index or on a flag the translate job could drop.
         shopSections: z.array(privacySectionSchema),
         contactTitle: z.string(),
         contactBefore: z.string(),

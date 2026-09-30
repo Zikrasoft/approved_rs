@@ -1,0 +1,194 @@
+---
+import { Image } from 'astro:assets';
+import { formatPrice, productType } from '@podbor/shop-catalog/browser';
+import { safeMarkdown } from '@podbor/site-kit';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import ShopGate from '@/components/ShopGate.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import ProductCard from '@/components/ProductCard.astro';
+import AddToCart from '@/components/AddToCart.astro';
+import { BCP47_BY_LOCALE, PRIMARY_LOCALE } from '@/i18n/config';
+import { localeFrom } from '@/i18n/currentLocale';
+import { getShopContent } from '@/i18n/content/shop';
+import { getSiteContent } from '@/i18n/content/site';
+import { shopCatalog } from '@/lib/catalog';
+import { formatSpec, specCopy } from '@/lib/formatSpec';
+import { productJsonLd } from '@/lib/productJsonLd';
+import { productsOfType } from '@/lib/shopPages';
+import { SITE_NAME, SITE_URL } from '@/utils/constants';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import { shopBuilt, shopIndexed } from '@/utils/shopStatus';
+
+export async function getStaticPaths() {
+  if (!shopBuilt()) return [];
+  const { products } = await shopCatalog().catalog(PRIMARY_LOCALE);
+  return withLocales(
+    products.map((product) => ({
+      params: { type: product.typeKey, handle: product.handle },
+    })),
+  );
+}
+
+const typeKey = Astro.params.type!;
+const handle = Astro.params.handle!;
+const locale = localeFrom(Astro.url.pathname);
+const bcp47 = BCP47_BY_LOCALE[locale];
+const shop = getShopContent(locale);
+const site = getSiteContent(locale);
+const catalog = await shopCatalog().catalog(locale);
+const product = catalog.products.find(
+  (candidate) => candidate.handle === handle,
+)!;
+const regionId = await shopCatalog().regionId();
+const type = productType(typeKey)!;
+const installation = type.installation
+  ? catalog.installations[type.installation]
+  : undefined;
+const copy = shop.types[typeKey];
+const lines = formatSpec(type, product.spec, specCopy(shop, typeKey, bcp47));
+const related = productsOfType(catalog.products, typeKey)
+  .filter((candidate) => candidate.handle !== handle)
+  .slice(0, 4);
+const href = PathBuilder.shopProduct(locale, typeKey, handle);
+const description = `${product.title}. ${copy.metaDescription}`;
+const searchTerms = [
+  copy.name,
+  ...lines.map((line) => line.value),
+  ...product.fitment.map(
+    (entry) => `${entry.make} ${entry.model} ${entry.yearFrom}–${entry.yearTo}`,
+  ),
+].join(' ');
+---
+
+<Shell
+  title={`${product.title} — ${copy.name} — ${SITE_NAME}`}
+  description={description}
+  noindex={!shopIndexed()}
+  jsonLd={[
+    productJsonLd({
+      product,
+      url: new URL(href, SITE_URL).href,
+      description,
+    }),
+  ]}
+>
+  <ShopGate>
+    <PageHero
+      eyebrow={copy.name}
+      heading={product.title}
+      crumbs={[
+        { href: PathBuilder.shop(locale), label: site.nav.shop },
+        { href: PathBuilder.shopType(locale, typeKey), label: copy.name },
+        { href, label: product.title },
+      ]}
+    />
+    <section
+      data-pagefind-body
+      class="wrap grid gap-8 py-band md:py-band-lg lg:grid-cols-2"
+    >
+      <span class="hidden" data-pagefind-meta="title">{product.title}</span>
+      <span class="hidden" data-pagefind-meta="price"
+        >{formatPrice(product.price, bcp47)}</span
+      >
+      <p class="hidden" aria-hidden="true">{searchTerms}</p>
+      <div class="card flex items-center justify-center bg-shade p-6 sm:p-8">
+        {
+          product.image && (
+            <Image
+              src={product.image}
+              inferSize
+              alt={product.title}
+              widths={[420, 640, 860]}
+              sizes="(min-width: 1024px) 45vw, calc(100vw - 2.5rem)"
+              loading="eager"
+              class="max-h-80 w-auto object-contain"
+            />
+          )
+        }
+      </div>
+      <div class="flex flex-col gap-5">
+        <div data-offer class="flex flex-col gap-4">
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="spec text-3xl font-medium text-ink">
+              {formatPrice(product.price, bcp47)}
+            </span>
+            <stock-status
+              data-handle={product.handle}
+              data-variant={product.variantId}
+              data-in={shop.inStock}
+              data-out={shop.outOfStock}
+              data-low={shop.lowStock}
+              class:list={[
+                'spec rounded-full px-2.5 py-1 text-xs data-[state=in]:bg-go/10 data-[state=in]:text-go data-[state=low]:bg-go/10 data-[state=low]:text-go data-[state=out]:bg-shade data-[state=out]:text-muted',
+                product.inStock ? 'bg-go/10 text-go' : 'bg-shade text-muted',
+              ]}
+            >
+              {product.inStock ? shop.inStock : shop.outOfStock}
+            </stock-status>
+          </div>
+          <AddToCart
+            product={product}
+            installation={installation}
+            regionId={regionId}
+          />
+        </div>
+        <h2 class="sr-only">{shop.specsHeading}</h2>
+        <dl data-pagefind-ignore class="card divide-y divide-line">
+          {
+            lines.map((line) => (
+              <div class="flex items-center justify-between gap-4 px-4 py-3">
+                <dt class="text-sm text-muted">{line.label}</dt>
+                <dd class="spec text-right text-sm text-ink">{line.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        {
+          product.fitment.length > 0 && (
+            <div class="flex flex-col gap-2">
+              <h2 class="text-sm font-semibold text-ink">{shop.fitsLabel}</h2>
+              <ul class="flex flex-wrap gap-2">
+                {product.fitment.map((entry) => (
+                  <li class="spec rounded-full border border-line bg-card px-3 py-1 text-xs text-ink-2">
+                    {`${entry.make} ${entry.model} ${entry.yearFrom}–${entry.yearTo}`}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
+      </div>
+    </section>
+    {
+      product.description?.trim() && (
+        <section class="wrap pb-10">
+          <div
+            class="prose-shop"
+            set:html={safeMarkdown(product.description)}
+          />
+        </section>
+      )
+    }
+    {
+      related.length > 0 && (
+        <section class="wrap pb-14">
+          <SectionHead eyebrow={copy.name} heading={site.common.backToShop} />
+          <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {related.map((item) => (
+              <li>
+                <ProductCard product={item} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </ShopGate>
+</Shell>
+
+<script>
+  import { defineStockStatus } from '@/scripts/shop/stockStatus';
+
+  defineStockStatus();
+</script>

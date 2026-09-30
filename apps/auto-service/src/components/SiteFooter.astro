@@ -6,7 +6,8 @@ import { getSiteContent } from '@/i18n/content/site';
 import { getServicesContent } from '@/i18n/content/services';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
-import { GARAGE_ADDRESS, SHOP_ENABLED, SITE_NAME } from '@/utils/constants';
+import { GARAGE_ADDRESS, SITE_NAME } from '@/utils/constants';
+import { devOnly, shopBuilt } from '@/utils/shopStatus';
 import { contactChannels } from '@/utils/contactLinks';
 
 const locale = localeFrom(Astro.url.pathname);
@@ -50,8 +51,8 @@ const channels = contactChannels(site);
       <a href={PathBuilder.works(locale)} class="link-muted">{site.nav.works}</a
       >
       {
-        SHOP_ENABLED && (
-          <a href={PathBuilder.shop(locale)} class="link-muted">
+        shopBuilt() && (
+          <a href={PathBuilder.shop(locale)} class="link-muted" {...devOnly()}>
             {site.nav.shop}
           </a>
         )

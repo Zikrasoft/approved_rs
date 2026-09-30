@@ -38,5 +38,9 @@ export default defineConfig(
     files: ['**/env.d.ts'],
     rules: { '@typescript-eslint/triple-slash-reference': 'off' },
   },
+  {
+    files: ['apps/medusa/**/*.js'],
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
+  },
   eslintConfigPrettier,
 );

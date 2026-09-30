@@ -12,18 +12,24 @@ pnpm workspace + Turborepo. Apps live in `apps/*`, shared packages in `packages/
 apps/approved-rs/     Approved.rs, the approved.rs site (Astro) — most of this document describes it
 apps/detailing/       Details, the detailing studio site — details.rs
 apps/auto-service/    CarLab, the car service site + parts shop — carlab.rs
+apps/medusa/          CarLab shop backend — Medusa 2.19, CommonJS, api.carlab.rs
+infra/medusa/         CarLab shop production: image, compose (postgres, redis, medusa, caddy), host scripts — one Hetzner VPS
 packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click routes
 packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
 packages/site-kit/    brand-agnostic mechanics: safeMarkdown, formatPhone, visitor id, lazy map embed, scroll lock, modal dialog, preferred contact channel (owns the `data-contact-order` / `data-channel` / `data-primary-contact` / `data-primary-channel` markup contract the apps must honour), funnel tracking (owns a second one: `data-lead-form` / `data-brand-link` / `data-field` / `aria-invalid`)
 packages/brands/      the three brands: domains, display names, locale mapping, ops service labels, the shared workshop address
+packages/shop-catalog/ CarLab shop machinery: product-type registry, attribute schemas, vehicle fitment, facets, landing pages, price format, signed order webhook (dual ESM/CJS for Medusa)
 ```
 
-Each app owns its own `astro.config.mjs`, `keystatic.config.ts`, `vercel.json`,
-`tsconfig.json`, `vitest.config.ts` and `.env*`. Lint/format configs and the
+Each of the three sites owns its own `astro.config.mjs`, `keystatic.config.ts`,
+`vercel.json` and `vitest.config.ts`; every workspace app, `apps/medusa`
+included, has its own `tsconfig.json` and `.env*` (`apps/medusa` uses jest
+instead of vitest and is not a Vercel deploy, so it has neither `vercel.json`
+nor `vitest.config.ts`). Lint/format configs and the
 lockfile stay at the repo root and cover every workspace. The root
 `vercel.json` holds `git.deploymentEnabled: false` — without it every branch
 push triggers a failing preview build. **The same block is now duplicated into
-all three apps' `vercel.json` on purpose.** Why: `docs/adr/0007-github-actions-builds-vercel-only-hosts.md`.
+all three sites' `vercel.json` on purpose.** Why: `docs/adr/0007-github-actions-builds-vercel-only-hosts.md`.
 
 Unqualified paths in this document are relative to `apps/approved-rs/`:
 `src/lib/store.ts` means `apps/approved-rs/src/lib/store.ts`.
@@ -69,10 +75,13 @@ from approved.rs. The visitor still cannot name a brand: they can only pick one
 of the two partner slugs the page renders, and every other value falls through
 to approved.rs itself.
 
-**A `packages/*` change deploys all three apps, and that is the point.** The
+**A `packages/*` change deploys all three sites, and that is the point.** The
 deploy filter in `ci.yml` is `turbo --filter="...[<deployed tag>]"` — the
 leading dots pull in the dependents of a changed package, so touching
-`@podbor/lead-crm` or `@podbor/i18n` marks all three apps stale at once. All
+`@podbor/lead-crm` or `@podbor/i18n` marks all three sites stale at once
+(`@podbor/i18n`, `@podbor/brands` and `@podbor/shop-catalog` also mark
+`apps/medusa` stale; its `deploy-medusa` job ships it in the same run, before
+all three sites, and a failed medusa deploy holds all three back). All
 three write the same `data/leads.json` blob, so shipping a changed package to
 one site and not the others puts two versions of the lead schema on one file:
 one site writes records another cannot parse, and they land in
@@ -156,9 +165,25 @@ Approved's trust/verification semantics.
   because two sites must not resemble each other, but because a shared token
   makes every brand's look a change to one file, and each brand owns its own.
 - Client-side imports go through a narrow subpath export
-  (`@podbor/lead-crm/contact-channel`, `@podbor/site-kit/browser`), never the
-  package root: the root barrel pulls zod, date-fns and the Telegram client
-  into the browser bundle.
+  (`@podbor/lead-crm/contact-channel`, `@podbor/site-kit/browser`,
+  `@podbor/shop-catalog/browser`), never the package root: the root barrel
+  pulls zod, date-fns and the Telegram client into the browser bundle.
+- **A package Medusa consumes ships a CommonJS build behind a `require`
+  condition.** `apps/medusa` is CommonJS and cannot load the `.ts` sources the
+  other workspaces import. `packages/shop-catalog` (`.`, `./browser`,
+  `./order-hook`), `packages/brands` and `@podbor/i18n`'s `./translate/core` and
+  `./section` export `{ "require": dist/cjs…, "default": src/….ts }`, build with
+  `tsc -p tsconfig.cjs.json` (`module: CommonJS`, `rewriteRelativeImportExtensions`)
+  and stamp `dist/cjs/package.json` with `{"type":"commonjs"}`. Their `test` task
+  depends on their own `build` in `turbo.json`, and a `cjs.test.ts` `require()`s
+  the result — so run such a package's tests through turbo
+  (`pnpm turbo run test --filter=<package>`); a bare `pnpm --filter <package> test`
+  finds no `dist/`.
+- **Two slug helpers on purpose.** Medusa product handles use
+  `apps/medusa/src/lib/translit.ts` (slugify, Russian transliteration:
+  `Аккумулятор тест` → `akkumulyator-test`); storefront landing slugs use
+  `landingSlug` in `@podbor/shop-catalog` (ASCII-folds spec values such as
+  `5W-30` or `60 Ah`). Different inputs, different jobs — do not merge them.
 - **A helper a lazily-loaded path depends on must live in a module that imports
   nothing heavy.** Rollup cannot code-split a module that is also statically
   imported, so putting such a helper beside a static `libphonenumber-js` import
@@ -328,6 +353,113 @@ than once over the combined diff — a diff too large to judge is a review that
 finds nothing. This is not enforced by a git hook on purpose: a hook can block
 a commit but cannot run the review itself.
 
+## Medusa backend (`apps/medusa`)
+
+Carried over from staywildwear's backend, where each rule cost a bug:
+
+- **CommonJS app.** Relative imports carry no extension. The one bare-node file
+  is `scripts/translate-i18n.ts` (the CI translate loop runs it); it imports with
+  `.ts` extensions and is excluded from `tsconfig.json`.
+- **The translation module needs two switches**: `modules: [{ resolve:
+'@medusajs/medusa/translation' }]` gives the tables and the service,
+  `featureFlags: { translation: true }` gives the routes and Store API
+  localisation. Either alone looks enabled and is not (spike 0b).
+- **Middleware that changes a request body mutates both `req.validatedBody` and
+  `req.body`.** The core validator runs first and the route reads
+  `validatedBody`.
+- **`metadata` is written read-merge-write under a lock** (`src/lib/metadata.ts`).
+  Medusa's own product card does send a partial `metadata`, and the core
+  repository merges it in (an empty string `''` deletes a key) — our code
+  writes `metadata` only through `src/lib/metadata.ts`, never by posting a
+  partial object straight to the product route.
+- **Subscribe to workflow events, and write translations only through
+  `createTranslationsWorkflow`/`batchTranslationsWorkflow`** — they emit
+  `translation.*`, the module service does not.
+- **Providers register only when their keys exist** (`brevoOptions()` → else
+  `notification-local`); overriding `fulfillment` lists `manual` again;
+  `databaseDriverOptions` always states `ssl`.
+- **Seeds are idempotent by identity** (name, handle, code) and never overwrite
+  what the owner edited in the admin.
+- **Event retries need Redis**: `event-bus-redis` runs with
+  `jobOptions.attempts: 5`; a subscriber that throws is retried alone, the ones
+  that succeeded are not re-run.
+- **Tests**: jest (`@medusajs/test-utils` requires it). `pnpm --filter
+@podbor/medusa test` runs the unit suite (`src/**/__tests__/**/*.unit.spec.ts`)
+  with no database. The HTTP suite needs `docker compose -f
+apps/medusa/docker-compose.test.yml up -d --wait`; `DB_HOST` is the literal
+  `localhost` (test-utils turns SSL on otherwise and the pool hangs); tests never
+  go to the network (`integration-tests/setup.js`); seed in the top-level
+  `beforeAll` (the runner restores that snapshot before each test); a two-run
+  idempotency check runs both runs inside one test; never pick `variants[0]` of a
+  multi-variant product. `.env` is always loaded; the integration config blanks
+  `PORT` so each worker gets a free port.
+- **Admin product writes are guarded in `require-fields.ts`**: batch edits of
+  spec/fitment/type/status, CSV import, and registry product-type rename/delete
+  are all refused there. Any new admin write path that can touch spec, type,
+  status or price must go through those same guards.
+- **A 409 is written with `res.status(409).json(...)`, never thrown** — the
+  error handler rewrites `CONFLICT` messages, so a thrown `MedusaError` of that
+  type would not reach the client with the Russian reason intact.
+- **Middleware string matchers are exact express paths, not prefixes**:
+  `/admin/products/:id` also matches `/admin/products/batch` and
+  `/admin/products/imports` — the guards on that route bail out on
+  `req.params.id === 'batch'` for exactly this reason.
+- **Fitment names are the join key to the vehicle dictionary.** A product's
+  `metadata.fitment` entries are matched to the dictionary by make/model/year,
+  not by id; a dictionary edit that would strand a product's fitment answers
+  409 instead of silently orphaning it.
+- Locally the backend runs on port 9009 (`pnpm --filter @podbor/medusa develop`);
+  the script is not called `dev`, so the root `pnpm dev` does not start it.
+- In CI `typecheck` runs through turbo after `medusa build` (`.medusa/types` is
+  generated output); a bare `pnpm --filter @podbor/medusa typecheck` on a clean
+  checkout does not see those generated query types.
+- **Redis event-bus subscribers share one queue at concurrency 1**: no long
+  work in a subscriber without a timeout — `order.placed` does not jump the
+  queue in 2.19.
+- **Translations are stamped per locale**: `metadata.translated_from_sr` /
+  `translated_from_en` store a hash of the Russian source (title/subtitle/description)
+  that locale was last translated from; `translate-product` re-translates only
+  locales whose stored hash differs from the current Russian, and the hourly
+  `translate-backlog` job retries any locale still behind.
+- **`store.metadata.catalog_version` bumps on a catalog write**;
+  `GET /store/catalog-version` reads it back and needs the publishable key
+  like any other Store API route — that's what the CI scope step compares
+  against `catalog-version.txt`.
+- **`order.placed` fans out to two independent subscribers.** The hook
+  subscriber signs and validates the card and gets 5 attempts (~2.5 min) from
+  the event bus, and is not deduped on this side — the receiver (`/api/shop-order`,
+  Plan 4, not built yet) must dedupe by `orderId`, because a 2xx that times out
+  gets retried. The email subscriber is deduped per order (checks `listNotifications`
+  before sending), so a retried delivery never emails the customer twice.
+- **`emails.yaml` is RU-only**, like every other i18n source file — sr/en are
+  filled by the same CI translate loop (`apps/*/scripts/translate-i18n.ts`)
+  that covers the rest of the site copy, nothing Medusa-specific.
+- **Production is `infra/medusa`: one VPS, one compose stack, deployed by
+  `ci.yml`.** `medusa-image` builds `infra/medusa/Dockerfile` from the
+  translate job's sha, migrates a blank database with it and boots it to
+  healthy; on `main` it pushes `ghcr.io/zikrasoft/podbor-medusa:<sha>` and
+  `deploy-medusa` runs `infra/medusa/deploy.sh <sha>` on the host. `deploy-medusa`
+  itself only holds `contents: read` — the separate `record-medusa` job moves
+  `deployed/medusa`, so the one-shot GHCR token shipped to the VPS never carries
+  repo-write. Migrations, seeds and `medusa user` run from the image
+  (`node_modules/.bin/medusa … ./src/scripts/<name>.js` under `/server`),
+  never from a repo checkout — the image has no ts-node. The Dockerfile
+  `require()`s every `@podbor/*` subpath Medusa imports; a new subpath goes
+  into that smoke line. A change under `infra/medusa/` redeploys medusa on its
+  own scope rule, because turbo cannot see files outside the workspace.
+- **Caddy is the single hop in front of Medusa.** Medusa runs with
+  `trust proxy 1`, Caddy overwrites `X-Forwarded-For` with the peer address,
+  and only Caddy publishes a port (`infra/medusa/test/compose.test.sh`). The
+  rate limits key on `req.ip` — IPv6 by its /64 (`clientKey` in
+  `rate-limit.ts`). A CDN or second proxy in front would turn every client
+  into the proxy's address: change the proxy count, `trust proxy` and the
+  Caddy header together or not at all.
+- **A `pnpm-lock.yaml` change redeploys all four apps, medusa included** —
+  decided in Plan 3: one lockfile, no way to attribute a change to one app,
+  and a redundant deploy is the cheap failure direction. `setup-pnpm`
+  installing Medusa in every job is accepted on the same grounds until it
+  measurably hurts.
+
 ## Architecture
 
 **Stack:** Astro v7, `output: 'static'` (prerendered) with the Vercel adapter — most pages are static; a page opts into SSR individually via `export const prerender = false` (used by the two `/api/*` routes and the homepage, which middleware rewrites bare `/` into). There is no global SSR mode.
@@ -370,7 +502,9 @@ This site supports 5 locales: `ru` (default), `en`, `sr`, `es`, `de`. Translatio
 
 Event names live once in `packages/site-kit/src/goals.ts` and are fired through
 `reachGoal` from `@podbor/site-kit/browser`, never as string literals in an app. Every event must also exist as a goal in **all three** Metrika counters —
-one created in code but not in a counter is silently lost. The vocabulary, the
+one created in code but not in a counter is silently lost. The shop funnel
+(`add_to_cart`, `begin_checkout`, `order_placed`) is the exception: carlab.rs
+only, created when the shop goes live — see `docs/analytics.md`. The vocabulary, the
 markup hooks it depends on (`data-lead-form`, `data-contact-channel`,
 `data-brand-link`, `aria-invalid`) and how to add one are in `docs/guides/analytics.md`;
 whose visits to exclude before drawing any conclusion is in
@@ -381,7 +515,7 @@ whose visits to exclude before drawing any conclusion is in
 Anything that validates data uses **zod** — no hand-rolled `typeof` guards,
 regex checks, string slicing or bare `as` casts at a trust boundary. `zod` is
 already pinned at the same exact version in `packages/lead-crm`, `packages/i18n`
-and all three apps, and the content-schema loaders (`src/i18n/content/*ContentSchema.ts`
+and all four apps (`apps/medusa` included), and the content-schema loaders (`src/i18n/content/*ContentSchema.ts`
 through `createSectionLoader`) are the pattern to copy: `z.object({…}).strict()`,
 `parse` where a failure should be loud, `safeParse` where a fallback exists.
 

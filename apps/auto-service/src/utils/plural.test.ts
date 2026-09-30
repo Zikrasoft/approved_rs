@@ -19,10 +19,10 @@ describe('pluralLabel', () => {
   it('declines the Russian noun by count, not by a single plural form', () => {
     const forms = getShopContent('ru').matchCount;
     const label = (n: number) => pluralLabel(forms, 'ru-RS', n);
-    expect(label(1)).toBe('подходит 1 аккумулятор');
-    expect(label(2)).toBe('подходит 2 аккумулятора');
-    expect(label(5)).toBe('подходит 5 аккумуляторов');
-    expect(label(21)).toBe('подходит 21 аккумулятор');
+    expect(label(1)).toBe('найден 1 товар');
+    expect(label(2)).toBe('найдено 2 товара');
+    expect(label(5)).toBe('найдено 5 товаров');
+    expect(label(21)).toBe('найден 21 товар');
   });
 
   it('picks the Serbian few form for 2 and other for 5', () => {

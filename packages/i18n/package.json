@@ -7,9 +7,24 @@
   "exports": {
     ".": "./src/index.ts",
     "./translate": "./src/translate/index.ts",
+    "./translate/core": {
+      "require": {
+        "types": "./dist/cjs/translate/core.d.ts",
+        "default": "./dist/cjs/translate/core.js"
+      },
+      "default": "./src/translate/core.ts"
+    },
+    "./section": {
+      "require": {
+        "types": "./dist/cjs/section.d.ts",
+        "default": "./dist/cjs/section.js"
+      },
+      "default": "./src/section.ts"
+    },
     "./translate/testing": "./src/translate/mockOpenAiFetch.ts"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.cjs.json && node -e \"require('node:fs').writeFileSync('dist/cjs/package.json','{\\\"type\\\":\\\"commonjs\\\"}')\"",
     "test": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
@@ -19,6 +34,7 @@
     "zod": "4.5.4"
   },
   "devDependencies": {
+    "@types/node": "24.13.2",
     "@vitest/coverage-v8": "3.2.6",
     "typescript": "5.9.3",
     "vitest": "3.2.6"

@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { callOpenAiJson } from './openaiChat';
+import {
+  callOpenAiJson,
+  OPENAI_TIMEOUT_MS,
+  OPENAI_MAX_RETRIES,
+} from './openaiChat';
 
 describe('callOpenAiJson', () => {
   afterEach(() => {
@@ -54,6 +58,21 @@ describe('callOpenAiJson', () => {
     await expect(
       callOpenAiJson({ apiKey: 'k', systemPrompt: 's', userContent: 'u' }),
     ).rejects.toThrow(/boom/);
+  });
+
+  it('retries exactly once, matching OPENAI_MAX_RETRIES', async () => {
+    expect(OPENAI_MAX_RETRIES).toBe(1);
+    expect(OPENAI_TIMEOUT_MS).toBe(60_000);
+    const fetchMock = vi
+      .fn()
+      .mockImplementation(async () => jsonResponse({}, 500));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      callOpenAiJson({ apiKey: 'k', systemPrompt: 's', userContent: 'u' }),
+    ).rejects.toThrow();
+
+    expect(fetchMock).toHaveBeenCalledTimes(OPENAI_MAX_RETRIES + 1);
   });
 
   it('throws when the response has no message content', async () => {

@@ -8,20 +8,30 @@ import { getSiteContent } from '@/i18n/content/site';
 import { PathBuilder, swapLocale } from '@/utils/paths';
 import { navCurrent, LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
 import { CONTACT_LINKS } from '@/utils/contactLinks';
-import { SHOP_ENABLED } from '@/utils/constants';
+import { devOnly, shopBuilt } from '@/utils/shopStatus';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
 const pathname = Astro.url.pathname;
 
 const links = [
-  { href: PathBuilder.services(locale), label: site.nav.services },
-  { href: PathBuilder.works(locale), label: site.nav.works },
-  ...(SHOP_ENABLED
-    ? [{ href: PathBuilder.shop(locale), label: site.nav.shop }]
+  { href: PathBuilder.services(locale), label: site.nav.services, attrs: {} },
+  { href: PathBuilder.works(locale), label: site.nav.works, attrs: {} },
+  ...(shopBuilt()
+    ? [
+        {
+          href: PathBuilder.shop(locale),
+          label: site.nav.shop,
+          attrs: devOnly(),
+        },
+      ]
     : []),
-  { href: `${PathBuilder.home(locale)}#process`, label: site.nav.process },
-  { href: PathBuilder.contact(locale), label: site.nav.contact },
+  {
+    href: `${PathBuilder.home(locale)}#process`,
+    label: site.nav.process,
+    attrs: {},
+  },
+  { href: PathBuilder.contact(locale), label: site.nav.contact, attrs: {} },
 ].map((link) => ({ ...link, current: navCurrent(pathname, link.href) }));
 ---
 
@@ -51,6 +61,7 @@ const links = [
             <a
               href={link.href}
               aria-current={link.current}
+              {...link.attrs}
               class:list={[
                 'relative text-sm font-medium transition-colors duration-150',
                 link.current
@@ -87,7 +98,13 @@ const links = [
           }
         </carlab-lang>
 
-        {SHOP_ENABLED && <CartButton />}
+        {
+          shopBuilt() && (
+            <span class="contents" {...devOnly()}>
+              <CartButton />
+            </span>
+          )
+        }
 
         <a
           href={CONTACT_LINKS.phone}
@@ -140,6 +157,7 @@ const links = [
           <a
             href={link.href}
             aria-current={link.current}
+            {...link.attrs}
             class:list={[
               'border-b border-line py-5 text-2xl font-semibold tracking-tight',
               link.current ? 'text-ink' : 'text-ink-2',

@@ -3,7 +3,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".astro/**", ".vercel/output/**"]
+      "outputs": ["dist/**", ".astro/**", ".vercel/output/**", ".medusa/**"]
     },
     "dev": {
       "cache": false,
@@ -12,9 +12,13 @@
     "test": {
       "dependsOn": ["^build"]
     },
+    "@podbor/shop-catalog#test": { "dependsOn": ["build"] },
+    "@podbor/i18n#test": { "dependsOn": ["build"] },
+    "@podbor/brands#test": { "dependsOn": ["build"] },
     "typecheck": {
       "dependsOn": ["^build"]
     },
+    "@podbor/medusa#typecheck": { "dependsOn": ["^build", "build"] },
     "lint": {}
   }
 }

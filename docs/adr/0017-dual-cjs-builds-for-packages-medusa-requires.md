@@ -1,10 +1,10 @@
 ---
-status: proposed
+status: accepted
 ---
 
 # Packages Medusa loads ship a CommonJS build beside their TypeScript sources
 
-Implemented on branch `feat/carlab-shop`.
+In `main` since PR #34.
 
 Medusa's backend is CommonJS and cannot load the `.ts` sources the Astro apps import. `shop-catalog`, `brands` and the `i18n` subpaths Medusa uses (`./translate/core`, `./section`) export `{ require: dist/cjs/…, default: src/….ts }`, built with `tsc -p tsconfig.cjs.json` and stamped with a `{"type":"commonjs"}` `package.json`. Astro, Vite and vitest keep reading sources, so the three sites build exactly as before.
 

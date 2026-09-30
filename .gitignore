@@ -4,6 +4,7 @@ node_modules/
 # Build output
 dist/
 .vercel/
+.medusa/
 
 # Astro
 .astro/
@@ -44,3 +45,7 @@ coverage/
 
 # Local, never committed: identifiers of real people (see docs/guides/analytics-exclusions.md)
 .local/
+
+# Medusa deploy state (host-only)
+infra/medusa/.previous-tag
+infra/medusa/.deploy.lock

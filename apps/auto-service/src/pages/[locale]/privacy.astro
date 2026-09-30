@@ -5,7 +5,7 @@ import { localeFrom } from '@/i18n/currentLocale';
 import { getPagesContent } from '@/i18n/content/pages';
 import { getSiteContent } from '@/i18n/content/site';
 import { localePaths, PathBuilder } from '@/utils/paths';
-import { SHOP_ENABLED } from '@/utils/constants';
+import { shopBuilt } from '@/utils/shopStatus';
 
 export function getStaticPaths() {
   return localePaths();
@@ -16,7 +16,7 @@ const pages = getPagesContent(locale);
 const site = getSiteContent(locale);
 const sections = [
   ...pages.privacy.sections,
-  ...(SHOP_ENABLED ? pages.privacy.shopSections : []),
+  ...(shopBuilt() ? pages.privacy.shopSections : []),
 ];
 ---
 

@@ -7,6 +7,10 @@ allowBuilds:
   esbuild: true
   sharp: true
   '@parcel/watcher': true
+  '@medusajs/telemetry': false
+  '@swc/core': true
+  msgpackr-extract: true
+  protobufjs: true
 # Glob, not exact-versioned entries — pnpm auto-generated this list pinned
 # to the versions resolved at the time `vercel` was added; a future `vercel`
 # bump changes every one of those versions, and an exact-pinned list would
@@ -20,3 +24,6 @@ onlyBuiltDependencies:
   - esbuild
   - sharp
   - '@parcel/watcher'
+  - msgpackr-extract
+  - '@swc/core'
+  - protobufjs

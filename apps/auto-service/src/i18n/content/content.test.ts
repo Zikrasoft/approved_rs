@@ -91,6 +91,9 @@ describe.each(SUPPORTED_LOCALES)('content for %s', (locale) => {
       getPagesContent(locale).works.metaDescription,
       getPagesContent(locale).contact.metaDescription,
       ...SERVICE_SLUGS.map((slug) => services[slug].metaDescription),
+      ...Object.values(getShopContent(locale).types).map(
+        (type) => type.metaDescription,
+      ),
     ];
     descriptions.forEach((description) => {
       expect(description.length).toBeGreaterThan(70);

@@ -278,7 +278,6 @@ const noscriptLink =
     getOrCreateVisitorId,
     markFieldValidity,
   } from '@podbor/site-kit/browser';
-  import { composeE164 } from '@podbor/lead-crm/compose-e164';
   import {
     bindPhoneCountry,
     fillCountrySelect,
@@ -287,8 +286,8 @@ const noscriptLink =
     deferSubmitUntilKit,
     loadPhoneKit,
     phoneKit,
+    phoneValue,
   } from '@podbor/lead-crm/phone-kit';
-  import type { CountryCode } from 'libphonenumber-js/min';
   import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 
   document
@@ -359,11 +358,9 @@ const noscriptLink =
       const viaTelegram = channel === 'telegram';
       const input = viaTelegram ? telegram : phone;
       const typed = input.value.trim();
-      const dial = country.selectedOptions[0]?.dataset.dial ?? '';
       contact.value = viaTelegram
         ? typed.replace(/^@?/, '@')
-        : (kit?.parse(typed, country.value as CountryCode)?.number ??
-          composeE164(typed, dial));
+        : phoneValue(country, phone);
 
       const contactError = viaTelegram ? errors.telegram : errors.phone;
       mark(

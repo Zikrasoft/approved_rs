@@ -1,0 +1,35 @@
+---
+import { localeFrom } from '@/i18n/currentLocale';
+import { getShopContent } from '@/i18n/content/shop';
+
+const shop = getShopContent(localeFrom(Astro.url.pathname));
+---
+
+<shop-search
+  data-bundle="/pagefind/pagefind.js"
+  class="card flex flex-col gap-2 p-4"
+>
+  <form role="search">
+    <label class="block">
+      <span class="field-label">{shop.searchLabel}</span>
+      <input
+        type="search"
+        data-search-input
+        enterkeyhint="search"
+        autocomplete="off"
+        placeholder={shop.searchPlaceholder}
+        class="field"
+      />
+    </label>
+  </form>
+  <ul data-search-results aria-live="polite" class="flex flex-col"></ul>
+  <p data-search-empty hidden aria-live="polite" class="text-sm text-muted">
+    {shop.searchEmpty}
+  </p>
+</shop-search>
+
+<script>
+  import { defineShopSearch } from '@/scripts/shop/shopSearch';
+
+  defineShopSearch();
+</script>

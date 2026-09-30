@@ -37,7 +37,7 @@ export const SECTIONS: readonly Section[] = [
     fields: shopContentSchema.keyof().options,
     schema: shopContentSchema,
     promptSubject:
-      'car battery shop copy (fitment filter labels, product specs, basket and order flow)',
+      'car parts shop copy (product types, spec labels and units, filters, car picker, basket, pickup checkout and order confirmation) — keep brand names, codes such as 5W-30 or AGM, and the {placeholders} exactly as they are',
   },
   {
     path: 'src/content/i18n/pages.yaml',

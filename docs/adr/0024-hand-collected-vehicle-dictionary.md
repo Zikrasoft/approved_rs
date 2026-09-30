@@ -1,10 +1,10 @@
 ---
-status: proposed
+status: accepted
 ---
 
 # Vehicle fitment uses a hand-collected dictionary and stores car names, not ids
 
-Implemented on branch `feat/carlab-shop`. Owner decisions 2026-09-28/29.
+In `main` since PR #34. Owner decisions 2026-09-28/29.
 
 A custom Medusa `vehicle` module holds make → model → generation with years, collected by us from cited sources; the admin picks from selects and the server validates fitment against it. `metadata.fitment` keeps `{make, model, yearFrom, yearTo}` by name so the package, storefront and tests needed no change; an entry must sit inside one generation. Renaming, narrowing or deleting an entry a product depends on returns 409 naming the products. A public `GET /store/vehicles` (shape fixed by `vehicleTreeSchema`) is baked into the car picker at build.
 

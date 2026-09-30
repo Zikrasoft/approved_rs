@@ -463,3 +463,8 @@
     }
   }
 }
+
+html:not([data-dev]) [data-dev-only],
+html[data-dev] [data-dev-hidden] {
+  display: none;
+}

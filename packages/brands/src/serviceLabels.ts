@@ -15,7 +15,7 @@ export const SERVICE_LABELS_RU = {
   'engine-gearbox': 'Двигатель и коробка',
   'bodywork-painting': 'Кузов и покраска',
   'pre-purchase-inspection': 'Проверка перед покупкой',
-  'parts-order': 'Заказ запчастей',
+  'parts-order': 'Заказ из магазина',
 
   'paint-protection-film': 'Защитная плёнка (PPF)',
   'colour-change-wrap': 'Смена цвета плёнкой',
