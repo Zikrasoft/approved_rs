@@ -37,7 +37,7 @@ export function createQuarantine({
     await storage.write([...stored, ...fresh], version);
     console.error('[lead-crm] copied records it cannot parse', {
       count: fresh.length,
-      entries: fresh,
+      path: QUARANTINE_PATH,
     });
     const { notifier } = await getNotifier();
     await notifier

@@ -9,9 +9,6 @@ const setTelegramMessage = vi.fn();
 const sendLeadNotification = vi.fn();
 const refreshLeadCard = vi.fn();
 
-// newStoredLead stays real — it is pure (spread + timestamps, no I/O), so the
-// fallback-path test exercises the actual default-fields shape instead of a
-// hand-copied mirror that could silently drift from it.
 const realStore = createLeadStore({
   storage: createMemoryStorage(),
   schema: createLeadSchema({ defaultCommissionPercent: 10 }),
@@ -66,7 +63,6 @@ beforeEach(() => {
     messageId: 999,
   });
   setTelegramMessage.mockReset().mockResolvedValue(storedLead);
-  // Mirrors the stored lead below: no card on file, so nothing to edit.
   refreshLeadCard.mockReset().mockResolvedValue(false);
 });
 
@@ -264,9 +260,31 @@ describe('notifyLead — lead that cannot be validated at all', () => {
 
     expect(errorSpy).toHaveBeenCalledWith(
       '[test] lead failed validation, cannot notify',
-      expect.objectContaining({ lead: expect.anything() }),
+      expect.objectContaining({ brand: 'Test', service: 'vehicle-sourcing' }),
     );
     expect(sendLeadNotification).not.toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
+});
+
+describe('notifyLead — what reaches the logs', () => {
+  it('never logs a name, a contact or a comment', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    insertOrMergeLead.mockRejectedValue(new Error('storage down'));
+    sendLeadNotification.mockRejectedValue(new Error('telegram down'));
+
+    await notifyLead(
+      { ...baseData, comment: 'ГРМ на Octavia, тел. +381601234567' },
+      '[test]',
+    );
+
+    const logged = JSON.stringify([logSpy.mock.calls, errorSpy.mock.calls]);
+    for (const secret of ['Иван', '@ivan', 'Octavia', '+381601234567']) {
+      expect(logged).not.toContain(secret);
+    }
+    expect(logged).toContain('vehicle-sourcing');
+    logSpy.mockRestore();
     errorSpy.mockRestore();
   });
 });

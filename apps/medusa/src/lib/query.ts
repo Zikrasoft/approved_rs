@@ -36,7 +36,16 @@ export async function queryAll<T>(
   return found;
 }
 
+// TODO: a raw BigNumber ({ value, precision }) is refused rather than read. Queried
+// amounts are plain numbers in Medusa 2.19; if one ever arrives raw, every order
+// hard-fails instead of one amount degrading.
 export function money(value: unknown): number {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
+  const readable =
+    typeof value === 'number' ||
+    (typeof value === 'string' && value.trim() !== '');
+  const parsed = readable ? Number(value) : NaN;
+  if (!Number.isFinite(parsed)) {
+    throw new Error(`unreadable amount of type ${typeof value}`);
+  }
+  return parsed;
 }

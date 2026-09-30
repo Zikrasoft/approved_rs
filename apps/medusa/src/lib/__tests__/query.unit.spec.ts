@@ -53,9 +53,22 @@ describe('money', () => {
   it.each([
     [12690, 12690],
     ['12690', 12690],
-    [null, 0],
-    ['abc', 0],
+    [0, 0],
   ])('reads %p as %p', (value, expected) => {
     expect(money(value)).toBe(expected);
+  });
+
+  it.each([
+    [null, 'object'],
+    ['abc', 'string'],
+    [{ value: '12690', precision: 20 }, 'object'],
+    [undefined, 'undefined'],
+    ['', 'string'],
+    ['  ', 'string'],
+    [true, 'boolean'],
+    [NaN, 'number'],
+    [Infinity, 'number'],
+  ])('refuses %p rather than calling it zero', (value, type) => {
+    expect(() => money(value)).toThrow(`unreadable amount of type ${type}`);
   });
 });
