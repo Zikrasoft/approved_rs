@@ -1,3 +1,4 @@
+import { BigNumber } from '@medusajs/framework/utils';
 import { QUERY_PAGE, money, queryAll, queryOne } from '../query';
 
 describe('queryOne', () => {
@@ -57,6 +58,16 @@ describe('money', () => {
   ])('reads %p as %p', (value, expected) => {
     expect(money(value)).toBe(expected);
   });
+
+  it.each([
+    [new BigNumber(12690), 12690],
+    [new BigNumber({ value: '3390.5', precision: 20 }), 3390.5],
+  ])(
+    'reads a Medusa BigNumber — query.graph returns them for item.total',
+    (value, expected) => {
+      expect(money(value)).toBe(expected);
+    },
+  );
 
   it.each([
     [null, 'object'],
