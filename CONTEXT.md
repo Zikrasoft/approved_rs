@@ -40,6 +40,10 @@ fitment ships ([ADR-0028](docs/adr/0028-no-vehicle-dictionary-until-fitment-is-r
 **Landing page** — a page for one value of one field ("batteries, 60 Ah"),
 built only when enough products fall under it to be worth a page.
 
+**Reserve window** — how long an unpaid, uncollected Order keeps the stock it
+reserved. Past it the order is cancelled outright, which is what frees the
+reservation. The buyer is told the window in the order email.
+
 **Installation** — a service sold alongside a part (fitting a battery, changing
 pads). Priced per type of part, not per product.
 

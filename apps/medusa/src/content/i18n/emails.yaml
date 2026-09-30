@@ -6,6 +6,7 @@ orderPlaced:
   totalLabel: Итого
   pickupHeading: Самовывоз из сервиса
   pickupNote: Оплата при получении в сервисе.
+  holdNote: Держим заказ 3 дня. Если не заберёте, заказ отменится, а детали вернутся в продажу.
 translations:
   sr:
     orderPlaced:

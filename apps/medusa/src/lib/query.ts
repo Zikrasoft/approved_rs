@@ -18,6 +18,7 @@ export async function queryAll<T>(
   query: Query,
   entity: string,
   fields: readonly string[],
+  filters?: Record<string, unknown>,
 ): Promise<T[]> {
   const found: T[] = [];
   let page: unknown[];
@@ -25,6 +26,7 @@ export async function queryAll<T>(
     ({ data: page } = await query.graph({
       entity,
       fields: [...fields],
+      ...(filters ? { filters } : {}),
       pagination: {
         take: QUERY_PAGE,
         skip: found.length,

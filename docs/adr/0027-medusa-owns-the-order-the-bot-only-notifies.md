@@ -19,5 +19,5 @@ A shop order exists in two stores at once and nothing reconciles them. Medusa ho
 
 - The operator works in two interfaces: Telegram for the conversation, Medusa admin for the order. Accepted — the admin already exists and has the statuses the owner asked for, and no new code is written to avoid a second tab.
 - `Lead.status` must not be read as an order state anywhere. A `won` lead says the conversation closed, not that the parts left the counter.
-- Cancelling an order in the admin is what releases its inventory reservation. Nothing releases it on a timer yet — that is a separate decision, tracked as its own ticket, and the reserve window comes from the owner.
+- Cancelling an order is what releases its inventory reservation. The operator does it in the admin; after the reserve window the hourly `release-uncollected` job does it unasked, and the order email tells the buyer that window up front.
 - The spec in issue #77 has no order-lifecycle user stories. That gap is real and is filled by this decision rather than by the code.

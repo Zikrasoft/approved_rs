@@ -64,6 +64,7 @@ export function buildOrderEmail(order: OrderEmailInput): OrderEmail {
     copy.pickupHeading,
     address,
     copy.pickupNote,
+    copy.holdNote,
   ].join('\n');
 
   const html = [
@@ -76,6 +77,7 @@ export function buildOrderEmail(order: OrderEmailInput): OrderEmail {
     `<p><strong>${escapeHtml(total)}</strong></p>`,
     `<h2 style="font-size:16px">${escapeHtml(copy.pickupHeading)}</h2>`,
     `<p>${escapeHtml(address)}<br>${escapeHtml(copy.pickupNote)}</p>`,
+    `<p>${escapeHtml(copy.holdNote)}</p>`,
     '</body></html>',
   ].join('');
 
