@@ -1,10 +1,10 @@
 ---
-status: proposed
+status: accepted
 ---
 
 # Shop search is a static Pagefind index, loaded on first focus
 
-Implemented on branch `feat/carlab-shop`. Owner decision 2026-09-29.
+In `main` since PR #34. Owner decision 2026-09-29.
 
 Free-text search (title, brand, spec codes, OEM numbers) runs in the browser against a per-locale Pagefind index built after `astro build`; there is no search server. Only product pages carry `data-pagefind-body`, and nothing loads until the search box gets focus.
 

@@ -75,20 +75,40 @@ recommendation are in
 
 ### Launching the CarLab shop
 
-The shop is built on Medusa in branch `feat/carlab-shop` (unmerged): see
-[ADR-0016](../adr/0016-carlab-shop-on-self-hosted-medusa.md) and the ones after
-it. On `main` the old MVP is switched off with `SHOP_ENABLED = false`. Before
-launch we need: a VPS ordered (check CX23 availability in the Hetzner Console), a
-Brevo account with DKIM, real prices and stock, the legal texts (terms of sale,
-14-day returns), and — for online payment later — an answer from the accountant
-about e-fiskalizacija.
+The shop is in `main`, switched off: `SHOP_STATUS` defaults to `off`, so no shop
+page is built and Medusa is never called. See
+[ADR-0016](../adr/0016-carlab-shop-on-self-hosted-medusa.md) and the ten after
+it, all accepted. Getting it to production is mapped on
+[issue #61](https://github.com/Zikrasoft/approved_rs/issues/61), and what was
+deferred rather than fixed before the merge is the two-tier checklist there.
 
-Also to ask the client:
+Before the flag moves: a VPS ordered (check CX23 availability in the Hetzner
+Console, [#69](https://github.com/Zikrasoft/approved_rs/issues/69)), a Brevo
+account with DKIM ([#70](https://github.com/Zikrasoft/approved_rs/issues/70)),
+secrets and the first deploy
+([#71](https://github.com/Zikrasoft/approved_rs/issues/71)), the shop funnel
+goals in the carlab.rs counter
+([#72](https://github.com/Zikrasoft/approved_rs/issues/72)), real prices and
+stock, the shop's legal pages
+([#76](https://github.com/Zikrasoft/approved_rs/issues/76)), and — for online
+payment later — an answer from the accountant about e-fiskalizacija.
+
+The consumer protection act moved underneath all of that. Zakon o zaštiti
+potrošača is now «Sl. glasnik RS» br. 35/2026, in force since 02.08.2026, and
+88/2021 is repealed — any downloaded template, and any article older than August
+2026, has the wrong numbers. Whether the 14-day right of withdrawal applies to
+pickup at all is **not established**
+([#74](https://github.com/Zikrasoft/approved_rs/issues/74)). What is established
+is in `docs/research/serbia-online-shop-legal.md`.
+
+Also to ask the client, collected on
+[#68](https://github.com/Zikrasoft/approved_rs/issues/68):
 
 - the card fields per product type (batteries, oils, filters, brakes): what to show
-  on the card, what to filter by;
+  on the card, what to filter by — separately from the fields the law requires
+  ([#75](https://github.com/Zikrasoft/approved_rs/issues/75));
 - installation prices (battery, pads/discs): fixed or "from";
-- how many days we hold an unpaid pickup order;
+- how many days we hold an unpaid pickup order — the reserve-release mechanism waits on the number ([#78](https://github.com/Zikrasoft/approved_rs/issues/78));
 - who works in the Medusa admin (names and emails for accounts);
 - warranty, who accepts returns, the seller's registration details for the terms
   page;

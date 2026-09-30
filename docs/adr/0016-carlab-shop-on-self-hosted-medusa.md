@@ -1,10 +1,10 @@
 ---
-status: proposed
+status: accepted
 ---
 
 # The CarLab shop runs on Medusa 2.19, self-hosted on one Hetzner VPS
 
-Implemented on branch `feat/carlab-shop`, not yet merged; the VPS is not ordered yet.
+In `main` since PR #34; the VPS is not ordered yet.
 
 The shop needs several product types with their own cards and filters, stock, orders with statuses, and later online payment and delivery. It is built on Medusa 2.19 as `apps/medusa` inside this monorepo (sharing the catalog registry, order hook and translator with the sites), with staywildwear (Medusa + static Astro + custom elements) as the reference. It runs on a Hetzner CX23 (4 GB, ≈€7.7/month; CPX22 as fallback) under docker compose: Postgres 16, Redis 7, Medusa, Caddy on `api.carlab.rs`, product files on a local volume, backups by script.
 

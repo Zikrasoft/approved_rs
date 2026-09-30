@@ -1,10 +1,10 @@
 ---
-status: proposed
+status: accepted
 ---
 
 # Products are auto-translated inside Medusa, stamped per locale
 
-Implemented on branch `feat/carlab-shop`.
+In `main` since PR #34.
 
 The admin writes Russian. On `product.created`/`updated` a subscriber sends each target locale (sr-RS, en-US) to OpenAI as its own call through `@podbor/i18n/translate/core` (so one failure keeps the other), writes results only through Medusa's translation workflows (only those emit `translation.*` events), and stamps a hash of the Russian source per locale (`translated_from_sr`, `translated_from_en`). An unchanged hash makes no OpenAI call and also breaks the update-event loop; an hourly backlog job retries up to 50 products.
 

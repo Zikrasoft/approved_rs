@@ -1,10 +1,10 @@
 ---
-status: proposed
+status: accepted
 ---
 
 # Product types are one registry entry in code; specs live in product metadata
 
-Implemented on branch `feat/carlab-shop`.
+In `main` since PR #34.
 
 A developer adds a product type (batteries, motor oils, filters, brakes, …) as one entry in `PRODUCT_TYPES` in `@podbor/shop-catalog`. From it come the admin form, validation (`specSchema`/`parseAttributes`), card fields, facets and landing pages. Specs and fitment are language-neutral codes in `product.metadata` (Medusa does not translate metadata); labels live in the app's YAML. Admin middleware validates specs, a publish gate refuses an invalid typed product, and batch edits, CSV imports and edits of registry types are refused because they bypass the guards.
 
