@@ -9,17 +9,10 @@ import {
   INSTALLATION_TITLES,
   SHOP,
 } from '../../src/lib/shop';
-import type { VehicleTree } from '../../src/lib/vehicle-tree';
-import { loadVehicleTree } from '../../src/lib/vehicles';
 import { seedBase } from '../../src/scripts/seed-base';
-import { VEHICLES } from '../../src/scripts/vehicle-fixture';
 import { storeHeaders } from './store-context';
 
 jest.setTimeout(180_000);
-
-const generationCount = (tree: VehicleTree): number =>
-  tree.flatMap((make) => make.models.flatMap((model) => model.generations))
-    .length;
 
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -102,7 +95,6 @@ medusaIntegrationTestRunner({
             .resolve(Modules.TRANSLATION)
             .listLocales({ code: 'sr-RS' })
         ).length,
-        vehicles: await loadVehicleTree(getContainer()),
       };
     };
 
@@ -178,10 +170,6 @@ medusaIntegrationTestRunner({
           .sort(),
       ).toEqual(['en-US', 'ru-RU', 'sr-RS']);
       expect(first.serbian).toBe(1);
-      expect(
-        first.vehicles.map((make: { name: string }) => make.name).sort(),
-      ).toEqual(VEHICLES.map((make) => make.name).sort());
-      expect(generationCount(first.vehicles)).toBe(generationCount(VEHICLES));
 
       expect(first.services).toHaveLength(2);
       for (const service of first.services) {

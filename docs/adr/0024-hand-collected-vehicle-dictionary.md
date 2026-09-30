@@ -1,8 +1,10 @@
 ---
-status: accepted
+status: superseded
 ---
 
 # Vehicle fitment uses a hand-collected dictionary and stores car names, not ids
+
+Superseded by [ADR-0028](0028-no-vehicle-dictionary-until-fitment-is-required.md): the dictionary was deleted before launch because no product type requires fitment. The considered options below still stand.
 
 In `main` since PR #34. Owner decisions 2026-09-28/29.
 

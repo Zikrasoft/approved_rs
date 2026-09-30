@@ -89,17 +89,3 @@ export const products = (list: object[], count = list.length) => ({
   limit: 1000,
   offset: 0,
 });
-
-export const VEHICLES = {
-  makes: [
-    {
-      name: 'Toyota',
-      models: [
-        {
-          name: 'Corolla',
-          generations: [{ name: 'E170', yearFrom: 2013, yearTo: 2019 }],
-        },
-      ],
-    },
-  ],
-};

@@ -9,7 +9,6 @@ import {
   BATTERY,
   INSTALLATION,
   REGIONS,
-  VEHICLES,
   VERSION,
   battery,
   products,
@@ -35,7 +34,6 @@ const store = (productsBody: unknown = products([BATTERY, INSTALLATION])) => {
       if (url.pathname === '/store/catalog-version') return json(VERSION);
       if (url.pathname === '/store/regions') return json(REGIONS);
       if (url.pathname === '/store/products') return json(productsBody);
-      if (url.pathname === '/store/vehicles') return json(VEHICLES);
       return json({ message: 'no' }, 404);
     },
   );
@@ -279,18 +277,6 @@ describe('createCatalogLoader', () => {
     await expect(createCatalogLoader(ENV, fetcher).regionId()).rejects.toThrow(
       /no RSD region/,
     );
-  });
-
-  it('bakes the vehicle dictionary into the car picker index', async () => {
-    const { fetcher } = store();
-
-    expect(await createCatalogLoader(ENV, fetcher).vehicles()).toEqual({
-      makes: ['Toyota'],
-      modelsByMake: { Toyota: ['Corolla'] },
-      yearsByModel: {
-        'Toyota|Corolla': [2019, 2018, 2017, 2016, 2015, 2014, 2013],
-      },
-    });
   });
 });
 

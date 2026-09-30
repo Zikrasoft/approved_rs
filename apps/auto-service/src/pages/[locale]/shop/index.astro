@@ -2,7 +2,6 @@
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import ShopGate from '@/components/ShopGate.astro';
-import CarPicker from '@/components/CarPicker.astro';
 import ShopSearch from '@/components/ShopSearch.astro';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
@@ -22,7 +21,6 @@ const locale = localeFrom(Astro.url.pathname);
 const shop = getShopContent(locale);
 const site = getSiteContent(locale);
 const { products } = await shopCatalog().catalog(locale);
-const vehicles = await shopCatalog().vehicles();
 const types = shopTypeKeys(products).map((key) => ({
   key,
   copy: shop.types[key],
@@ -44,7 +42,6 @@ const types = shopTypeKeys(products).map((key) => ({
     />
     <section class="wrap flex flex-col gap-8 py-band md:py-band-lg">
       <ShopSearch />
-      <CarPicker index={vehicles} />
       <div class="flex flex-col gap-4">
         <h2 class="text-section">{shop.typesHeading}</h2>
         <ul class="grid gap-4 sm:grid-cols-2">

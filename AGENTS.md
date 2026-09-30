@@ -18,7 +18,7 @@ packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click route
 packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
 packages/site-kit/    brand-agnostic mechanics: safeMarkdown, formatPhone, visitor id, lazy map embed, scroll lock, modal dialog, preferred contact channel (owns the `data-contact-order` / `data-channel` / `data-primary-contact` / `data-primary-channel` markup contract the apps must honour), funnel tracking (owns a second one: `data-lead-form` / `data-brand-link` / `data-field` / `aria-invalid`)
 packages/brands/      the three brands: domains, display names, locale mapping, ops service labels, the shared workshop address
-packages/shop-catalog/ CarLab shop machinery: product-type registry, attribute schemas, vehicle fitment, facets, landing pages, price format, signed order webhook (dual ESM/CJS for Medusa)
+packages/shop-catalog/ CarLab shop machinery: product-type registry, attribute schemas, fitment, facets, landing pages, price format, signed order webhook (dual ESM/CJS for Medusa)
 ```
 
 Each of the three sites owns its own `astro.config.mjs`, `keystatic.config.ts`,
@@ -404,10 +404,13 @@ apps/medusa/docker-compose.test.yml up -d --wait`; `DB_HOST` is the literal
   `/admin/products/:id` also matches `/admin/products/batch` and
   `/admin/products/imports` — the guards on that route bail out on
   `req.params.id === 'batch'` for exactly this reason.
-- **Fitment names are the join key to the vehicle dictionary.** A product's
-  `metadata.fitment` entries are matched to the dictionary by make/model/year,
-  not by id; a dictionary edit that would strand a product's fitment answers
-  409 instead of silently orphaning it.
+- **Fitment is checked for shape only, against no dictionary.** A product's
+  `metadata.fitment` entries are free-text make/model plus a year range, typed
+  in the admin and validated by `fitmentSchema` in `@podbor/shop-catalog`;
+  two products can spell one car differently and nothing catches it. The
+  dictionary that used to be the join key was deleted before launch
+  (`docs/adr/0028-no-vehicle-dictionary-until-fitment-is-required.md`) and comes
+  back when a product type with **required** fitment ships.
 - Locally the backend runs on port 9009 (`pnpm --filter @podbor/medusa develop`);
   the script is not called `dev`, so the root `pnpm dev` does not start it.
 - In CI `typecheck` runs through turbo after `medusa build` (`.medusa/types` is

@@ -56,7 +56,6 @@ module.exports = {
     '!src/modules/*/index.ts',
     '!src/modules/*/models/**',
     '!src/modules/*/migrations/**',
-    '!src/modules/vehicle/service.ts',
     '!src/scripts/seed-*.ts',
     '!src/api/middlewares.ts',
   ],

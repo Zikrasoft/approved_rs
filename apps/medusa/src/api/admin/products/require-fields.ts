@@ -18,7 +18,6 @@ import { z } from 'zod';
 import { type Query, queryOne } from '../../../lib/query';
 import { SHOP } from '../../../lib/shop';
 import { isLatin, translit } from '../../../lib/translit';
-import { fitmentComplaintFor } from '../../../lib/vehicles';
 
 export const draftSchema = z.looseObject({
   title: z.string().nullish(),
@@ -239,14 +238,9 @@ function typeComplaint(typeKey: string | undefined): string | undefined {
   return undefined;
 }
 
-async function specComplaint(
-  req: MedusaRequest,
-  product: Inspected,
-): Promise<string | undefined> {
+function specComplaint(product: Inspected): string | undefined {
   const result = parseAttributes(product.typeKey, product.metadata);
-  return result.ok
-    ? await fitmentComplaintFor(req.scope, result.fitment)
-    : result.error;
+  return result.ok ? undefined : result.error;
 }
 
 export async function requireValidSpec(
@@ -265,7 +259,7 @@ export async function requireValidSpec(
       (product.changesType && SPEC_KEY in product.metadata);
     if (recheck && product.typeKey !== SERVICE_TYPE) {
       const complaint =
-        typeComplaint(product.typeKey) ?? (await specComplaint(req, product));
+        typeComplaint(product.typeKey) ?? specComplaint(product);
       if (complaint) {
         next(refusal(`Характеристики товара не сходятся: ${complaint}`));
         return;
