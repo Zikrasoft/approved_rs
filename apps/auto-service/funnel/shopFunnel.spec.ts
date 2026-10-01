@@ -6,6 +6,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
+import type { StoredLead } from '@podbor/lead-crm';
 import {
   ORDER_HOOK_HEADER,
   signHook,
@@ -39,19 +40,6 @@ interface OperatorCard {
   reply_markup: { inline_keyboard: { text: string; url: string }[][] };
 }
 
-interface StoredRow {
-  id: number;
-  brand: string;
-  name: string;
-  contact: string;
-  service: string;
-  comment: string;
-  locale: string;
-  visitorId: string | null;
-  source_url: string;
-  telegramMessageId: number | null;
-}
-
 const telegramCalls = (): TelegramCall[] =>
   existsSync(TELEGRAM_LOG)
     ? readFileSync(TELEGRAM_LOG, 'utf8')
@@ -65,7 +53,7 @@ const cardsSentSince = (seen: number): TelegramCall[] =>
     .slice(seen)
     .filter((call) => call.method === 'sendMessage');
 
-const leads = (): StoredRow[] =>
+const leads = (): StoredLead[] =>
   existsSync(LEADS_FILE) ? JSON.parse(readFileSync(LEADS_FILE, 'utf8')) : [];
 
 const markerFiles = (): string[] =>
@@ -181,7 +169,7 @@ test('a refused card holds the marker and the retry answers as a duplicate', asy
   await expect.poll(leads, { timeout: 60_000 }).toHaveLength(2);
 
   const lead = leads().find((row) =>
-    row.comment.includes(`Заказ #${displayId}`),
+    (row.comment ?? '').includes(`Заказ #${displayId}`),
   );
   expect(lead).toBeDefined();
   expect(lead?.telegramMessageId).toBeNull();

@@ -154,7 +154,12 @@ for no new observation.
 **What it cannot prove.**
 
 - **Nothing, after the fact.** Local-only by decision, so it gives no regression
-  protection. The automated floor for exactly-once is layer 2, not the browser.
+  protection. The automated floor for exactly-once is
+  `apps/auto-service/src/lib/shopOrder.test.ts` — the handler factory's own unit
+  tests, which assert the duplicate answer against a fake marker store. Layer 2
+  is the floor for the Reserve window, not for exactly-once; no layer here
+  raises exactly-once to a real Order in CI, and that is the gap the walk fills
+  by hand.
 - **Medusa's own event-bus retry is not what the walk observes.** The 502 does
   make the bus retry, but in every run the retries arrived after Playwright had
   stopped the dev server, so Medusa logs `fetch failed`. The duplicate path is
@@ -328,7 +333,7 @@ sequenceDiagram
   API-->>HK: 202 {accepted: true}
 
   Note over M,HK: Retry — bus attempt 2 of 5, or a replayed hook
-  HK->>API: the same signed payload
+  HK->>API: a signed payload for the same orderId
   API->>MK: has(orderId)? → yes
   API-->>HK: 200 {duplicate: true}
   Note over API,TG: no second Lead, no second marker,<br/>no second card

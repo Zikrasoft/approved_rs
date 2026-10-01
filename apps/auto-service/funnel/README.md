@@ -43,6 +43,9 @@ pnpm --filter @podbor/medusa seed:batteries   # the walk buys a battery
 pnpm --filter @podbor/medusa develop          # the script is `develop`, not `dev`
 ```
 
+`develop` blocks and must stay up for the whole walk, so give it its own
+terminal.
+
 `seed:batteries` prints the publishable key (`Publishable key: pk_…`). A fresh
 database means a fresh key — put it in `apps/auto-service/.env.local` as
 `PUBLIC_MEDUSA_PUBLISHABLE_KEY`, or the storefront talks to Medusa with the key
@@ -94,6 +97,9 @@ afterwards:
 ```
 
 ## What it asserts
+
+Both counts are per test. A full two-test run therefore leaves two Leads, two
+Order markers and three intercepted calls behind.
 
 1. **One order.** Exactly one Lead, exactly one Order marker, and exactly one
    `sendMessage` to the group — with the operator card's payload: the group
