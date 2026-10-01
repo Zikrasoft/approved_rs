@@ -130,9 +130,11 @@ export function createShopOrderHandler({
       });
       return Response.json({ error: 'storage' }, { status: 503 });
     }
-    // TODO: notifyLead's boolean cannot say whether the lead was stored, so an
-    // attempt that fails to store AND fails to notify loses the order — the
-    // marker then absorbs every retry. Needs a three-state result from notifyLead.
+    // TODO: notifyLead's boolean cannot say whether the lead was stored, so the
+    // marker has to be held on failure and absorbs every retry. Two losses fall
+    // out of that: an attempt that fails to store AND to notify loses the order,
+    // and a Telegram-only failure loses the card the bus used to redeliver.
+    // Needs a three-state result from notifyLead, plus a card-only retry path.
     if (!(await notifyLead(orderLead(order), '[shop-order]'))) {
       console.error(
         '[shop-order] the lead is stored but its card did not go out',
