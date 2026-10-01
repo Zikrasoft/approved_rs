@@ -17,6 +17,7 @@ translations:
       totalLabel: Ukupno
       pickupHeading: Preuzimanje u servisu
       pickupNote: Plaćanje prilikom preuzimanja u servisu.
+      holdNote: Držimo porudžbinu 3 dana. Ako je ne preuzmete, porudžbina će biti otkazana, a delovi će se vratiti u prodaju.
   en:
     orderPlaced:
       subject: 'Order #{displayId} Confirmed — CarLab'
@@ -26,4 +27,5 @@ translations:
       totalLabel: Total
       pickupHeading: Pickup from Workshop
       pickupNote: Payment upon pickup at the workshop.
-translatedFrom: cbfafb5712244580
+      holdNote: We will hold your order for 3 days. If not picked up, it will be canceled and the parts will go back on sale.
+translatedFrom: b121bf2763084315
