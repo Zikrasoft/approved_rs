@@ -1,6 +1,12 @@
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
+import {
+  ORDER_MARKER_PREFIX,
+  markerBody,
+  markerPath,
+  type OrderMarkers,
+} from '../orderMarkers.ts';
 import {
   StorageConflictError,
   type LeadStorage,
@@ -45,6 +51,26 @@ export function createFileStorage({
       await mkdir(dirname(file), { recursive: true });
       await writeFile(staging, JSON.stringify(leads));
       await rename(staging, file);
+    },
+  };
+}
+
+export function createFileOrderMarkers({ dir }: { dir: string }): OrderMarkers {
+  const fileFor = (orderId: string) => join(dir, markerPath(orderId));
+
+  return {
+    async has(orderId: string): Promise<boolean> {
+      try {
+        await access(fileFor(orderId));
+        return true;
+      } catch {
+        return false;
+      }
+    },
+
+    async add(orderId: string): Promise<void> {
+      await mkdir(join(dir, ORDER_MARKER_PREFIX), { recursive: true });
+      await writeFile(fileFor(orderId), markerBody(orderId), { flag: 'wx' });
     },
   };
 }

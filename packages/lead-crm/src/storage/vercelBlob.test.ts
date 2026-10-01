@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 class FakePreconditionFailedError extends Error {}
+class FakeNotFoundError extends Error {}
 
 const get = vi.fn();
 const head = vi.fn();
@@ -10,10 +11,12 @@ vi.mock('@vercel/blob', () => ({
   get: (...args: unknown[]) => get(...args),
   head: (...args: unknown[]) => head(...args),
   put: (...args: unknown[]) => put(...args),
+  BlobNotFoundError: FakeNotFoundError,
   BlobPreconditionFailedError: FakePreconditionFailedError,
 }));
 
-const { createVercelBlobStorage } = await import('./vercelBlob.ts');
+const { createVercelBlobStorage, createBlobOrderMarkers } =
+  await import('./vercelBlob.ts');
 const { StorageConflictError } = await import('./types.ts');
 
 const storage = createVercelBlobStorage({ path: 'data/leads.json' });
@@ -105,5 +108,39 @@ describe('write', () => {
     put.mockRejectedValue(boom);
 
     await expect(storage.write([], 'e1')).rejects.toBe(boom);
+  });
+});
+
+describe('createBlobOrderMarkers', () => {
+  const markers = createBlobOrderMarkers();
+
+  it('takes one private marker per order and never overwrites it', async () => {
+    await markers.add('order_01/../x');
+
+    expect(put).toHaveBeenCalledWith(
+      'shop-orders/order_01%2F..%2Fx.json',
+      expect.stringContaining('order_01/../x'),
+      {
+        access: 'private',
+        allowOverwrite: false,
+        addRandomSuffix: false,
+        contentType: 'application/json',
+      },
+    );
+  });
+
+  it('knows a taken marker from an untaken one', async () => {
+    head.mockResolvedValueOnce({});
+    await expect(markers.has('o1')).resolves.toBe(true);
+
+    head.mockRejectedValueOnce(new FakeNotFoundError());
+    await expect(markers.has('o2')).resolves.toBe(false);
+  });
+
+  it('passes any other storage failure up, so no second lead is stored', async () => {
+    const boom = new Error('store suspended');
+    head.mockRejectedValueOnce(boom);
+
+    await expect(markers.has('o3')).rejects.toBe(boom);
   });
 });

@@ -1,15 +1,21 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
 import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import { cancelOrderWorkflow } from '@medusajs/medusa/core-flows';
+import { z } from 'zod';
 
 import { money, queryAll } from '../lib/query';
 import { RESERVE_DAYS } from '../lib/shop';
 
-type UncollectedOrder = {
-  id: string;
-  fulfillments?: { canceled_at?: string | Date | null }[] | null;
-  payment_collections?: { captured_amount?: unknown }[] | null;
-};
+export { RESERVE_DAYS };
+
+const uncollectedOrderSchema = z.object({
+  fulfillments: z.array(
+    z.object({ canceled_at: z.union([z.string(), z.date()]).nullish() }),
+  ),
+  payment_collections: z.array(z.object({ captured_amount: z.unknown() })),
+});
+
+type UncollectedOrder = z.infer<typeof uncollectedOrderSchema>;
 
 const ORDER_FIELDS = [
   'id',
@@ -18,10 +24,8 @@ const ORDER_FIELDS = [
 ];
 
 const isUncollected = (order: UncollectedOrder) =>
-  (order.fulfillments ?? []).every((fulfillment) =>
-    Boolean(fulfillment.canceled_at),
-  ) &&
-  (order.payment_collections ?? []).every(
+  order.fulfillments.every((fulfillment) => Boolean(fulfillment.canceled_at)) &&
+  order.payment_collections.every(
     (collection) => money(collection.captured_amount ?? 0) === 0,
   );
 
@@ -29,7 +33,7 @@ export default async function releaseUncollected(
   container: MedusaContainer,
 ): Promise<void> {
   const cutoff = new Date(Date.now() - RESERVE_DAYS * 24 * 60 * 60 * 1000);
-  const orders = await queryAll<UncollectedOrder>(
+  const orders = await queryAll<{ id: string }>(
     container.resolve(ContainerRegistrationKeys.QUERY),
     'order',
     ORDER_FIELDS,
@@ -39,7 +43,7 @@ export default async function releaseUncollected(
   let cancelled = 0;
   for (const order of orders) {
     try {
-      if (!isUncollected(order)) continue;
+      if (!isUncollected(uncollectedOrderSchema.parse(order))) continue;
       await cancelOrderWorkflow(container).run({
         input: { order_id: order.id },
       });
@@ -51,8 +55,10 @@ export default async function releaseUncollected(
       );
     }
   }
-  if (cancelled) {
-    logger.info(`Uncollected orders: ${cancelled} order(s) cancelled`);
+  if (orders.length) {
+    logger.info(
+      `Uncollected orders: ${cancelled} of ${orders.length} cancelled`,
+    );
   }
 }
 

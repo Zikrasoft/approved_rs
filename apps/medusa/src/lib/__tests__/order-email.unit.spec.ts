@@ -88,6 +88,15 @@ describe('the email copy', () => {
       `${RESERVE_DAYS} дня`,
     );
   });
+
+  it.each(['sr', 'en'] as const)(
+    'names the same window in %s, which spells it out too',
+    (locale) => {
+      expect(emailCopy(locale).orderPlaced.holdNote).toContain(
+        String(RESERVE_DAYS),
+      );
+    },
+  );
 });
 
 describe('escapeHtml', () => {

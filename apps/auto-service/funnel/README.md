@@ -76,7 +76,7 @@ pnpm --filter @podbor/auto-service exec playwright install chromium
 ## Running it
 
 ```bash
-cd apps/auto-service && pnpm exec playwright test
+pnpm --filter @podbor/auto-service funnel
 ```
 
 The walk starts its own `astro dev` on port 4322 (`FUNNEL_PORT` overrides it)

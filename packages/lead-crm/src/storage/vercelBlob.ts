@@ -1,4 +1,11 @@
-import { get, head, put, BlobPreconditionFailedError } from '@vercel/blob';
+import {
+  get,
+  head,
+  put,
+  BlobNotFoundError,
+  BlobPreconditionFailedError,
+} from '@vercel/blob';
+import { markerBody, markerPath, type OrderMarkers } from '../orderMarkers.ts';
 import {
   StorageConflictError,
   type LeadStorage,
@@ -37,6 +44,29 @@ export function createVercelBlobStorage({
         }
         throw err;
       }
+    },
+  };
+}
+
+export function createBlobOrderMarkers(): OrderMarkers {
+  return {
+    async has(orderId: string): Promise<boolean> {
+      try {
+        await head(markerPath(orderId));
+        return true;
+      } catch (error) {
+        if (error instanceof BlobNotFoundError) return false;
+        throw error;
+      }
+    },
+
+    async add(orderId: string): Promise<void> {
+      await put(markerPath(orderId), markerBody(orderId), {
+        access: 'private',
+        allowOverwrite: false,
+        addRandomSuffix: false,
+        contentType: 'application/json',
+      });
     },
   };
 }

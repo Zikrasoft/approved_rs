@@ -10,7 +10,8 @@
     "astro": "astro",
     "test": "vitest run --passWithNoTests",
     "typecheck": "astro check",
-    "gen:og": "node --experimental-strip-types scripts/gen-og.mjs"
+    "gen:og": "node --experimental-strip-types scripts/gen-og.mjs",
+    "funnel": "playwright test"
   },
   "dependencies": {
     "@astrojs/react": "6.0.5",

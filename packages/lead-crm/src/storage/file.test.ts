@@ -2,7 +2,7 @@ import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createFileStorage } from './file.ts';
+import { createFileOrderMarkers, createFileStorage } from './file.ts';
 import { StorageConflictError } from './types.ts';
 
 describe('createFileStorage', () => {
@@ -76,5 +76,24 @@ describe('createFileStorage', () => {
     await mkdir(join(dir, 'data'), { recursive: true });
     await writeFile(join(dir, 'data', 'leads.json'), 'not json');
     await expect(storage().read()).rejects.toThrow(SyntaxError);
+  });
+});
+
+describe('createFileOrderMarkers', () => {
+  let dir = '';
+
+  beforeEach(async () => {
+    dir = await mkdtemp(join(tmpdir(), 'lead-crm-markers-'));
+  });
+
+  it('keeps one file per order and refuses to take a marker twice', async () => {
+    const markers = createFileOrderMarkers({ dir });
+
+    await expect(markers.has('order_01/../x')).resolves.toBe(false);
+
+    await markers.add('order_01/../x');
+    await expect(markers.has('order_01/../x')).resolves.toBe(true);
+
+    await expect(markers.add('order_01/../x')).rejects.toThrow(/EEXIST/);
   });
 });

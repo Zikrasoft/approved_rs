@@ -125,7 +125,7 @@ with no `refused cancellation` line, so `paid` and `fulfilled` were skipped by
 | ------- | ------------------------------------------------------------------------------------------------------------------- |
 | Seam    | the one new one: a browser driving the storefront, with Telegram intercepted at the network boundary                |
 | Files   | `apps/auto-service/playwright.config.ts`, `funnel/telegramStub.ts`, `funnel/shopFunnel.spec.ts`, `funnel/README.md` |
-| Command | `cd apps/auto-service && pnpm exec playwright test` — prerequisites in `funnel/README.md`                           |
+| Command | `pnpm --filter @podbor/auto-service funnel` — prerequisites in `funnel/README.md`                                   |
 | Cost    | ~15 s of test time on top of the whole backend; **local only, never a CI job**                                      |
 
 Two tests. One Order leaves exactly one Lead, exactly one Order marker and

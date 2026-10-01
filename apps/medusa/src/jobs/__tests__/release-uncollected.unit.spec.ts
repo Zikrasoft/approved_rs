@@ -24,6 +24,8 @@ const containerFor = (rows: unknown[]) => {
   };
 };
 
+const EMPTY = { fulfillments: [], payment_collections: [] };
+
 const cancelled = () =>
   (run.mock.calls as [{ input: { order_id: string } }][]).map(
     ([call]) => call.input.order_id,
@@ -53,13 +55,13 @@ describe('release-uncollected', () => {
   });
 
   it('cancels an order the query returned as past the window', async () => {
-    const { container, logger } = containerFor([{ id: 'order_1' }]);
+    const { container, logger } = containerFor([{ id: 'order_1', ...EMPTY }]);
 
     await releaseUncollected(container);
 
     expect(cancelled()).toEqual(['order_1']);
     expect(logger.info).toHaveBeenCalledWith(
-      'Uncollected orders: 1 order(s) cancelled',
+      'Uncollected orders: 1 of 1 cancelled',
     );
   });
 
@@ -80,6 +82,23 @@ describe('release-uncollected', () => {
     await releaseUncollected(container);
 
     expect(cancelled()).toEqual(['refulfilled']);
+  });
+
+  it('says how many of the aged orders it let go, even when that is none', async () => {
+    const { container, logger } = containerFor([
+      {
+        id: 'fulfilled',
+        fulfillments: [{ canceled_at: null }],
+        payment_collections: [],
+      },
+    ]);
+
+    await releaseUncollected(container);
+
+    expect(run).not.toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledWith(
+      'Uncollected orders: 0 of 1 cancelled',
+    );
   });
 
   it('skips an order whose payment was already captured', async () => {
@@ -108,7 +127,7 @@ describe('release-uncollected', () => {
         fulfillments: [],
         payment_collections: [{ captured_amount: 'about a tenner' }],
       },
-      { id: 'fine' },
+      { id: 'fine', ...EMPTY },
     ]);
 
     await releaseUncollected(container);
@@ -122,8 +141,8 @@ describe('release-uncollected', () => {
 
   it('logs an order that refuses cancellation, even without an Error, and cancels the rest anyway', async () => {
     const { container, logger } = containerFor([
-      { id: 'stuck' },
-      { id: 'fine' },
+      { id: 'stuck', ...EMPTY },
+      { id: 'fine', ...EMPTY },
     ]);
     run.mockRejectedValueOnce('has a fulfillment');
 
@@ -135,7 +154,22 @@ describe('release-uncollected', () => {
       expect.any(Error),
     );
     expect(logger.info).toHaveBeenCalledWith(
-      'Uncollected orders: 1 order(s) cancelled',
+      'Uncollected orders: 1 of 2 cancelled',
+    );
+  });
+
+  it('refuses to guess at an order whose relations the query did not return', async () => {
+    const { container, logger } = containerFor([
+      { id: 'shapeless' },
+      { id: 'fine', ...EMPTY },
+    ]);
+
+    await releaseUncollected(container);
+
+    expect(cancelled()).toEqual(['fine']);
+    expect(logger.error).toHaveBeenCalledWith(
+      'Uncollected order shapeless refused cancellation',
+      expect.any(Error),
     );
   });
 

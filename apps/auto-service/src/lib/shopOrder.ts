@@ -3,6 +3,7 @@ import {
   contactChannelSchema,
   type LeadSubmission,
   type NotifyLead,
+  type OrderMarkers,
 } from '@podbor/lead-crm';
 import { MEDUSA_LOCALE, formatPrice } from '@podbor/shop-catalog/browser';
 import {
@@ -12,7 +13,6 @@ import {
   type OrderHookPayload,
 } from '@podbor/shop-catalog/order-hook';
 import { SHOP_SERVICE } from '@/utils/services';
-import type { OrderMarkers } from './orderMarkers';
 
 export const CARD_COMMENT_LIMIT = 2500;
 
@@ -130,11 +130,7 @@ export function createShopOrderHandler({
       });
       return Response.json({ error: 'storage' }, { status: 503 });
     }
-    // TODO: notifyLead's boolean cannot say whether the lead was stored, so the
-    // marker has to be held on failure and absorbs every retry. Two losses fall
-    // out of that: an attempt that fails to store AND to notify loses the order,
-    // and a Telegram-only failure loses the card the bus used to redeliver.
-    // Needs a three-state result from notifyLead, plus a card-only retry path.
+    // TODO: three-state notifyLead result + a card-only retry path — ADR-0022.
     if (!(await notifyLead(orderLead(order), '[shop-order]'))) {
       console.error(
         '[shop-order] the lead is stored but its card did not go out',

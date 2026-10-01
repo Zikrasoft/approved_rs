@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest';
+import { BRANDS, COMMISSION_PERCENT } from '@podbor/brands';
 import { createLeadSchema, type StoredLead } from './schema.ts';
 
-// TODO: read these from @podbor/brands once lead-crm may depend on it.
-const BRAND_COMMISSION_PERCENT = {
-  'Approved.rs': 10,
-  CarLab: 10,
-  Details: 10,
-} as const;
+const BRAND_COMMISSION_PERCENT = Object.fromEntries(
+  Object.entries(BRANDS).map(([key, brand]) => [
+    brand.name,
+    COMMISSION_PERCENT[key as keyof typeof COMMISSION_PERCENT],
+  ]),
+);
 
 interface StoredShape {
   label: string;

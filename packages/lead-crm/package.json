@@ -28,6 +28,7 @@
     "@vercel/blob": "2.8.0"
   },
   "devDependencies": {
+    "@podbor/brands": "workspace:*",
     "@vercel/blob": "2.8.0",
     "@vitest/coverage-v8": "3.2.6",
     "jsdom": "30.0.1",

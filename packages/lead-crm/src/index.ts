@@ -32,7 +32,10 @@ export {
 } from './store.ts';
 export type { LeadStore, LeadStoreOptions, OwedRow } from './store.ts';
 
+export type { OrderMarkers } from './orderMarkers.ts';
+
 export {
+  LOCAL_DATA_DIR,
   StorageConflictError,
   type LeadStorage,
   type StorageSnapshot,
