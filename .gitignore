@@ -52,3 +52,7 @@ infra/medusa/.deploy.lock
 
 # Local-only lead store and order markers for a dev walk of the funnel
 .local-data/
+
+# Playwright output from the local funnel walk (apps/auto-service/funnel)
+test-results/
+playwright-report/

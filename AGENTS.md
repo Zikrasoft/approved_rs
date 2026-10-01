@@ -303,6 +303,15 @@ pnpm --filter @podbor/approved-rs exec vitest run path/to/file.test.ts   # singl
 pnpm --filter @podbor/approved-rs exec vitest run -t "name substring"    # single test by name
 ```
 
+**The shop funnel walk is local-only and never a CI job.** `cd apps/auto-service
+&& pnpm exec playwright test` drives a browser through card → cart → checkout
+against a local Medusa and then reads the Leads and Order markers the system
+wrote; it needs the whole backend up and the env exported first. Prerequisites,
+assertions and what the layer cannot prove are in
+`apps/auto-service/funnel/README.md`. Its specs ride along in the app's existing
+`astro check`, which is CI's only involvement — do not add a workflow step and
+do not install browser binaries in CI.
+
 The translate scripts resolve content paths relative to the process's working
 directory, so they must run from inside the app:
 
