@@ -49,3 +49,6 @@ coverage/
 # Medusa deploy state (host-only)
 infra/medusa/.previous-tag
 infra/medusa/.deploy.lock
+
+# Local-only lead store for a dev walk of the funnel
+.local-leads/

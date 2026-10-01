@@ -7,6 +7,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./storage/vercel-blob": "./src/storage/vercelBlob.ts",
+    "./storage/file": "./src/storage/file.ts",
     "./contact-channel": "./src/contactChannel.ts",
     "./fields": "./src/fields.ts",
     "./phone": "./src/phone.ts",
