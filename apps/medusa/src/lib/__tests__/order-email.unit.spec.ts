@@ -3,6 +3,7 @@ import { withPlaceholder } from '@podbor/i18n/section';
 import { MEDUSA_LOCALE, formatPrice } from '@podbor/shop-catalog';
 
 import { buildOrderEmail, emailCopy, escapeHtml } from '../order-email';
+import { RESERVE_DAYS } from '../shop';
 
 const ORDER = {
   displayId: 7,
@@ -36,6 +37,14 @@ describe('buildOrderEmail', () => {
     expect(buildOrderEmail(ORDER).text).toContain(
       `${WORKSHOP_ADDRESS.street}, ${WORKSHOP_ADDRESS.city}`,
     );
+  });
+
+  it('tells the customer how long the parts are held', () => {
+    const { text, html } = buildOrderEmail(ORDER);
+    const hold = emailCopy('ru').orderPlaced.holdNote;
+
+    expect(text).toContain(hold);
+    expect(html).toContain(hold);
   });
 
   it('escapes a product title before it reaches the HTML', () => {
@@ -73,6 +82,21 @@ describe('the email copy', () => {
     expect(copy.subject).toContain('{displayId}');
     expect(copy.heading).toContain('{displayId}');
   });
+
+  it('names the reserve window the job enforces — the Russian spells the number out, plural and all', () => {
+    expect(emailCopy('ru').orderPlaced.holdNote).toContain(
+      `${RESERVE_DAYS} дня`,
+    );
+  });
+
+  it.each(['sr', 'en'] as const)(
+    'names the same window in %s, which spells it out too',
+    (locale) => {
+      expect(emailCopy(locale).orderPlaced.holdNote).toContain(
+        String(RESERVE_DAYS),
+      );
+    },
+  );
 });
 
 describe('escapeHtml', () => {

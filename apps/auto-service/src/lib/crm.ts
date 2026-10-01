@@ -4,7 +4,9 @@ import {
   createLeadStore,
   createQuarantine,
   LEADS_PATH,
+  LOCAL_DATA_DIR,
   QUARANTINE_PATH,
+  type LeadStorage,
 } from '@podbor/lead-crm';
 import { createVercelBlobStorage } from '@podbor/lead-crm/storage/vercel-blob';
 import { SITE_NAME } from '@/utils/constants';
@@ -16,11 +18,25 @@ export const leadSchema = createLeadSchema({
   defaultCommissionPercent: DEFAULT_COMMISSION_PERCENT,
 });
 
+const storageFor = (path: string): LeadStorage => {
+  if (import.meta.env.DEV) {
+    const opened = import('@podbor/lead-crm/storage/file').then(
+      ({ createFileStorage }) =>
+        createFileStorage({ path, dir: LOCAL_DATA_DIR }),
+    );
+    return {
+      read: async () => (await opened).read(),
+      write: async (leads, version) => (await opened).write(leads, version),
+    };
+  }
+  return createVercelBlobStorage({ path });
+};
+
 export const leadStore = createLeadStore({
-  storage: createVercelBlobStorage({ path: LEADS_PATH }),
+  storage: storageFor(LEADS_PATH),
   schema: leadSchema,
   quarantine: createQuarantine({
-    storage: createVercelBlobStorage({ path: QUARANTINE_PATH }),
+    storage: storageFor(QUARANTINE_PATH),
     brand: BRAND,
     getNotifier: () => import('./crmBot'),
   }),

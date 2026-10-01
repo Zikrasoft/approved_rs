@@ -1,42 +1,33 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, describe, expect, it, vi } from 'vitest';
 
-const blob = vi.hoisted(() => {
-  class BlobNotFoundError extends Error {}
-  return { head: vi.fn(), put: vi.fn(), BlobNotFoundError };
-});
-vi.mock('@vercel/blob', () => blob);
+const local = vi.hoisted(() => ({
+  dir: `${process.env.TMPDIR?.replace(/\/$/, '') ?? '/tmp'}/carlab-markers-${process.pid}`,
+}));
+vi.mock('@podbor/lead-crm', () => ({ LOCAL_DATA_DIR: local.dir }));
 
-const { markerPath, orderMarkers } = await import('./orderMarkers');
+const { orderMarkers } = await import('./orderMarkers');
 
-beforeEach(() => vi.clearAllMocks());
+describe('the order markers dev picks', () => {
+  const orderId = 'order_01/../x';
 
-describe('order markers', () => {
-  it('keeps one private file per order, never overwriting', async () => {
-    await orderMarkers.add('order_01/../x');
-
-    expect(markerPath('order_01/../x')).toBe(
-      'shop-orders/order_01%2F..%2Fx.json',
-    );
-    expect(blob.put).toHaveBeenCalledWith(
-      'shop-orders/order_01%2F..%2Fx.json',
-      expect.stringContaining('order_01/../x'),
-      {
-        access: 'private',
-        allowOverwrite: false,
-        addRandomSuffix: false,
-        contentType: 'application/json',
-      },
-    );
+  afterAll(async () => {
+    const { rm } = await import('node:fs/promises');
+    await rm(local.dir, { recursive: true, force: true });
   });
 
-  it('knows a seen order, an unseen one, and passes storage failures up', async () => {
-    blob.head.mockResolvedValueOnce({});
-    expect(await orderMarkers.has('o1')).toBe(true);
+  it('writes under the local data directory and refuses a second marker', async () => {
+    expect(await orderMarkers.has(orderId)).toBe(false);
 
-    blob.head.mockRejectedValueOnce(new blob.BlobNotFoundError());
-    expect(await orderMarkers.has('o2')).toBe(false);
+    await orderMarkers.add(orderId);
+    expect(await orderMarkers.has(orderId)).toBe(true);
 
-    blob.head.mockRejectedValueOnce(new Error('store suspended'));
-    await expect(orderMarkers.has('o3')).rejects.toThrow('store suspended');
+    const { readFile } = await import('node:fs/promises');
+    const written = await readFile(
+      `${local.dir}/shop-orders/order_01%2F..%2Fx.json`,
+      'utf8',
+    );
+    expect(JSON.parse(written)).toMatchObject({ orderId });
+
+    await expect(orderMarkers.add(orderId)).rejects.toThrow(/EEXIST/);
   });
 });

@@ -25,6 +25,11 @@ operator advances it in the Medusa admin ([ADR-0027](docs/adr/0027-medusa-owns-t
 An Order also produces a Lead so the conversation has a home, but that Lead's
 status is not the Order's state.
 
+**Order marker** — the claim one delivery attempt takes on an Order, so that
+only the attempt holding it stores the Order's Lead. Taken before the Lead is
+stored and never given back, which is what keeps a retried delivery from
+storing a second Lead ([ADR-0022](docs/adr/0022-orders-reach-the-bot-through-a-signed-hook.md)).
+
 **Product type** — a kind of part (batteries, motor oils, filters, brakes). A
 type declares which fields a product of that kind has, which of them filter,
 which show on the card and which get their own landing page. One declaration,
@@ -39,6 +44,10 @@ fitment ships ([ADR-0028](docs/adr/0028-no-vehicle-dictionary-until-fitment-is-r
 
 **Landing page** — a page for one value of one field ("batteries, 60 Ah"),
 built only when enough products fall under it to be worth a page.
+
+**Reserve window** — how long an unpaid, uncollected Order keeps the stock it
+reserved. Past it the order is cancelled outright, which is what frees the
+reservation. The buyer is told the window in the order email.
 
 **Installation** — a service sold alongside a part (fitting a battery, changing
 pads). Priced per type of part, not per product.

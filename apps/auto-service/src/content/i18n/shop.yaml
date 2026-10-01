@@ -441,10 +441,10 @@ translations:
         note: Ugradit ćemo u servisu prilikom preuzimanja i proveriti kočnice.
     cart:
       metaTitle: Korpa — CarLab
-      metaDescription: Vaša narudžba delova. Bez prepaymenta — plaćanje prilikom preuzimanja u servisu.
+      metaDescription: Vaša narudžba delova. Bez avansa — plaćanje prilikom preuzimanja u servisu.
       eyebrow: Korpa
       heading: Vaša narudžba
-      lead: Bez prepaymenta. Potvrdićemo dostupnost, odložiti robu i dogovoriti vreme — plaćanje u servisu prilikom preuzimanja.
+      lead: Nema avansa. Potvrdićemo dostupnost, odložiti robu i dogovoriti vreme — plaćanje u servisu prilikom preuzimanja.
       empty: Korpa je trenutno prazna.
       emptyCta: Pređi na katalog
       quantityLabel: Količina

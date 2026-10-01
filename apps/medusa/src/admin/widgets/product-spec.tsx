@@ -14,7 +14,7 @@ import {
   type ProductTypeDef,
   productType,
 } from '@podbor/shop-catalog/browser';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ComponentProps } from 'react';
 
 import { EMPTY_ROW, readFitment, unfinishedRow } from '../../lib/fitment-form';
 import { type FormValues, formToSpec, specToForm } from '../../lib/spec-form';
@@ -29,29 +29,33 @@ type Loaded = {
 const SELECT =
   'bg-ui-bg-field border-ui-border-base txt-compact-small rounded-md border px-2 py-1.5';
 
+type LabelledInputProps = {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+};
+
 const LabelledInput = ({
   label,
   value,
-  year,
   onChange,
-}: {
-  label: string;
-  value: string;
-  year?: boolean;
-  onChange: (value: string) => void;
-}) => (
+  ...input
+}: LabelledInputProps &
+  Pick<ComponentProps<typeof Input>, 'type' | 'min' | 'max'>) => (
   <label className="flex flex-col gap-1">
     <Text size="xsmall" className="text-ui-fg-subtle">
       {label}
     </Text>
     <Input
       value={value}
-      type={year ? 'number' : undefined}
-      min={year ? 1950 : undefined}
-      max={year ? 2100 : undefined}
+      {...input}
       onChange={(event) => onChange(event.target.value)}
     />
   </label>
+);
+
+const YearInput = (props: LabelledInputProps) => (
+  <LabelledInput {...props} type="number" min={1950} max={2100} />
 );
 
 const FieldInput = ({
@@ -134,15 +138,13 @@ const FitmentRows = ({
             value={row.model}
             onChange={(model) => put({ ...row, model })}
           />
-          <LabelledInput
+          <YearInput
             label="С года"
-            year
             value={row.yearFrom ? String(row.yearFrom) : ''}
             onChange={(value) => put({ ...row, yearFrom: asYear(value) })}
           />
-          <LabelledInput
+          <YearInput
             label="По год"
-            year
             value={row.yearTo ? String(row.yearTo) : ''}
             onChange={(value) => put({ ...row, yearTo: asYear(value) })}
           />

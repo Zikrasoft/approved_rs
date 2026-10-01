@@ -1,36 +1,18 @@
-import { BlobNotFoundError, head, put } from '@vercel/blob';
+import { LOCAL_DATA_DIR, type OrderMarkers } from '@podbor/lead-crm';
+import { createBlobOrderMarkers } from '@podbor/lead-crm/storage/vercel-blob';
 
-export const ORDER_MARKER_PREFIX = 'shop-orders/';
-
-export interface OrderMarkers {
-  has(orderId: string): Promise<boolean>;
-  add(orderId: string): Promise<void>;
+function selectOrderMarkers(): OrderMarkers {
+  if (import.meta.env.DEV) {
+    const opened = import('@podbor/lead-crm/storage/file').then(
+      ({ createFileOrderMarkers }) =>
+        createFileOrderMarkers({ dir: LOCAL_DATA_DIR }),
+    );
+    return {
+      has: async (orderId) => (await opened).has(orderId),
+      add: async (orderId) => (await opened).add(orderId),
+    };
+  }
+  return createBlobOrderMarkers();
 }
 
-export const markerPath = (orderId: string): string =>
-  `${ORDER_MARKER_PREFIX}${encodeURIComponent(orderId)}.json`;
-
-export const orderMarkers: OrderMarkers = {
-  async has(orderId) {
-    try {
-      await head(markerPath(orderId));
-      return true;
-    } catch (error) {
-      if (error instanceof BlobNotFoundError) return false;
-      throw error;
-    }
-  },
-
-  async add(orderId) {
-    await put(
-      markerPath(orderId),
-      JSON.stringify({ orderId, at: new Date().toISOString() }),
-      {
-        access: 'private',
-        allowOverwrite: false,
-        addRandomSuffix: false,
-        contentType: 'application/json',
-      },
-    );
-  },
-};
+export const orderMarkers: OrderMarkers = selectOrderMarkers();

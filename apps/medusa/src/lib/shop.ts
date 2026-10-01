@@ -34,6 +34,8 @@ export const STORE_LOCALES = [
   MEDUSA_LOCALE.ru,
 ];
 
+export const RESERVE_DAYS = 3;
+
 export const INSTALLATION_SEED_PRICE = 1500;
 
 export const INSTALLATION_TITLES: Record<string, string> = {

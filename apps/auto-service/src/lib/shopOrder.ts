@@ -3,6 +3,7 @@ import {
   contactChannelSchema,
   type LeadSubmission,
   type NotifyLead,
+  type OrderMarkers,
 } from '@podbor/lead-crm';
 import { MEDUSA_LOCALE, formatPrice } from '@podbor/shop-catalog/browser';
 import {
@@ -12,7 +13,6 @@ import {
   type OrderHookPayload,
 } from '@podbor/shop-catalog/order-hook';
 import { SHOP_SERVICE } from '@/utils/services';
-import type { OrderMarkers } from './orderMarkers';
 
 export const CARD_COMMENT_LIMIT = 2500;
 
@@ -122,23 +122,23 @@ export function createShopOrderHandler({
       if (await markers.has(order.orderId)) {
         return Response.json({ duplicate: true }, { status: 200 });
       }
+      await markers.add(order.orderId);
     } catch (error) {
-      console.error('[shop-order] cannot read the order marker', {
+      console.error('[shop-order] cannot take the order marker', {
         orderId: order.orderId,
         error,
       });
       return Response.json({ error: 'storage' }, { status: 503 });
     }
+    // TODO: three-state notifyLead result + a card-only retry path — ADR-0022.
     if (!(await notifyLead(orderLead(order), '[shop-order]'))) {
-      return Response.json({ delivered: false }, { status: 502 });
-    }
-    try {
-      await markers.add(order.orderId);
-    } catch (error) {
       console.error(
-        '[shop-order] marker not written — a retry may post the card again',
-        { orderId: order.orderId, error },
+        '[shop-order] the lead is stored but its card did not go out',
+        {
+          orderId: order.orderId,
+        },
       );
+      return Response.json({ delivered: false }, { status: 502 });
     }
     return Response.json({ accepted: true }, { status: 202 });
   };

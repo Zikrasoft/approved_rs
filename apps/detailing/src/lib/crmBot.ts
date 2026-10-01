@@ -5,6 +5,7 @@ import {
   createTelegramClient,
   parseIds,
 } from '@podbor/lead-crm';
+import { serviceLabel as brandServiceLabel } from '@podbor/brands';
 import { getServicesContent } from '@/i18n/content/services';
 import { isServiceSlug } from '@/utils/services';
 import { BRAND, leadStore } from './crm';
@@ -23,7 +24,8 @@ const ADMIN_IDS = parseIds(process.env.TELEGRAM_ADMIN_ID);
 const client = createTelegramClient(requireEnv('TELEGRAM_BOT_TOKEN'));
 
 const formatter = createFormatter({
-  serviceLabel: (slug) => (isServiceSlug(slug) ? ruServices[slug].name : slug),
+  serviceLabel: (slug) =>
+    isServiceSlug(slug) ? ruServices[slug].name : brandServiceLabel(slug),
   botUsername: requireEnv('TELEGRAM_BOT_USERNAME'),
 });
 

@@ -303,6 +303,18 @@ pnpm --filter @podbor/approved-rs exec vitest run path/to/file.test.ts   # singl
 pnpm --filter @podbor/approved-rs exec vitest run -t "name substring"    # single test by name
 ```
 
+**The shop funnel walk is local-only and never a CI job.** `pnpm --filter
+@podbor/auto-service funnel` drives a browser through card → cart → checkout
+against a local Medusa and then reads the Leads and Order markers the system
+wrote; it needs the whole backend up and the env exported first. Prerequisites,
+assertions and what the layer cannot prove are in
+`apps/auto-service/funnel/README.md`. Its specs ride along in the app's existing
+`astro check`, which is CI's only involvement — do not add a workflow step and
+do not install browser binaries in CI. The four test layers the shop funnel has,
+what each one proves, what none of them prove and the standing checklists are in
+`docs/guides/shop-funnel-testing.md` — add to a layer there rather than cutting a
+fifth seam.
+
 The translate scripts resolve content paths relative to the process's working
 directory, so they must run from inside the app:
 
@@ -343,9 +355,8 @@ Husky + lint-staged run eslint --fix/prettier on staged files on commit — a co
 
 **Review the diff against this file's conventions before every commit, and
 after each significant block of work on a long task.** No exceptions — a typo
-and a refactor both go through it. In Claude Code that pass is the
-`review-local --fix-all` skill; with another agent, run whatever equivalent it
-offers, or read the diff yourself against the rules here. Nothing else checks
+and a refactor both go through it. Run whatever review pass your agent offers,
+or read the diff yourself against the rules here. Nothing else checks
 the diff against these conventions, and it costs minutes against a bug reaching
 production. On work
 split across several agents or stages, review after each stage lands rather
@@ -397,6 +408,14 @@ apps/medusa/docker-compose.test.yml up -d --wait`; `DB_HOST` is the literal
   spec/fitment/type/status, CSV import, and registry product-type rename/delete
   are all refused there. Any new admin write path that can touch spec, type,
   status or price must go through those same guards.
+- **The release job filters fulfilment and capture in memory, not in the query.**
+  `Order.fulfillment_status` is not a queryable property — `query.graph` throws
+  `Trying to query by not existing property Order.fulfillment_status`, proven by
+  `release-uncollected.spec.ts`. It also validates the rows it got with zod and
+  skips any order whose `fulfillments`/`payment_collections` the query did not
+  return: `cancelOrderWorkflow` refuses an order with a live fulfilment, but it
+  **refunds** captured payments rather than refusing, so a missing relation read
+  as "nothing captured" would cancel and refund a paid order.
 - **A 409 is written with `res.status(409).json(...)`, never thrown** — the
   error handler rewrites `CONFLICT` messages, so a thrown `MedusaError` of that
   type would not reach the client with the Russian reason intact.

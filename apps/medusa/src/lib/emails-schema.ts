@@ -11,6 +11,7 @@ export const emailsContentSchema = z
         totalLabel: z.string(),
         pickupHeading: z.string(),
         pickupNote: z.string(),
+        holdNote: z.string(),
       })
       .strict(),
   })

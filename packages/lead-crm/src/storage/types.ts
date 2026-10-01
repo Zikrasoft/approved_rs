@@ -1,3 +1,5 @@
+export const LOCAL_DATA_DIR = '.local-data';
+
 export class StorageConflictError extends Error {
   constructor(message = 'storage write conflict') {
     super(message);
