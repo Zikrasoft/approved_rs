@@ -158,7 +158,7 @@ test('one order leaves one lead, one marker and one operator card', async ({
   expect(card.chat_id).toBe(process.env.TELEGRAM_GROUP_ID);
   expect(card.parse_mode).toBe('HTML');
   expect(card.text).toContain(BUYER.name);
-  expect(card.text).toContain('parts-order');
+  expect(card.text).toContain('Заказ из магазина');
   expect(card.reply_markup.inline_keyboard[0][0].url).toContain(
     `lead_${lead.id}`,
   );
