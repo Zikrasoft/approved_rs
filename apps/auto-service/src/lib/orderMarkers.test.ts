@@ -6,6 +6,11 @@ const blob = vi.hoisted(() => {
 });
 vi.mock('@vercel/blob', () => blob);
 
+const local = vi.hoisted(() => ({
+  dir: `${process.env.TMPDIR?.replace(/\/$/, '') ?? '/tmp'}/carlab-markers-${process.pid}`,
+}));
+vi.mock('./localDataDir', () => ({ LOCAL_DATA_DIR: local.dir }));
+
 const { markerPath, blobOrderMarkers, orderMarkers } =
   await import('./orderMarkers');
 
@@ -43,12 +48,11 @@ describe('order markers on Vercel Blob', () => {
 });
 
 describe('order markers on the local filesystem, which dev selects', () => {
-  const orderId = `order_${process.pid}/../x`;
+  const orderId = 'order_01/../x';
 
   afterAll(async () => {
     const { rm } = await import('node:fs/promises');
-    const { LOCAL_LEADS_DIR } = await import('./localStorageDir');
-    await rm(`${LOCAL_LEADS_DIR}/${markerPath(orderId)}`, { force: true });
+    await rm(local.dir, { recursive: true, force: true });
   });
 
   it('keeps one file per order and refuses to write it twice', async () => {

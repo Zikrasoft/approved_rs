@@ -1,5 +1,5 @@
 import { BlobNotFoundError, head, put } from '@vercel/blob';
-import { LOCAL_LEADS_DIR } from './localStorageDir';
+import { LOCAL_DATA_DIR } from './localDataDir';
 
 export const ORDER_MARKER_PREFIX = 'shop-orders/';
 
@@ -35,29 +35,31 @@ export const blobOrderMarkers: OrderMarkers = {
   },
 };
 
-const localPath = (orderId: string): string =>
-  `${LOCAL_LEADS_DIR}/${markerPath(orderId)}`;
+function selectOrderMarkers(): OrderMarkers {
+  if (import.meta.env.DEV) {
+    const localPath = (orderId: string) =>
+      `${LOCAL_DATA_DIR}/${markerPath(orderId)}`;
+    return {
+      async has(orderId) {
+        const { access } = await import('node:fs/promises');
+        try {
+          await access(localPath(orderId));
+          return true;
+        } catch {
+          return false;
+        }
+      },
 
-const fileOrderMarkers: OrderMarkers = {
-  async has(orderId) {
-    const { access } = await import('node:fs/promises');
-    try {
-      await access(localPath(orderId));
-      return true;
-    } catch {
-      return false;
-    }
-  },
+      async add(orderId) {
+        const { mkdir, writeFile } = await import('node:fs/promises');
+        await mkdir(`${LOCAL_DATA_DIR}/${ORDER_MARKER_PREFIX}`, {
+          recursive: true,
+        });
+        await writeFile(localPath(orderId), marker(orderId), { flag: 'wx' });
+      },
+    };
+  }
+  return blobOrderMarkers;
+}
 
-  async add(orderId) {
-    const { mkdir, writeFile } = await import('node:fs/promises');
-    await mkdir(`${LOCAL_LEADS_DIR}/${ORDER_MARKER_PREFIX}`, {
-      recursive: true,
-    });
-    await writeFile(localPath(orderId), marker(orderId), { flag: 'wx' });
-  },
-};
-
-export const orderMarkers: OrderMarkers = import.meta.env.DEV
-  ? fileOrderMarkers
-  : blobOrderMarkers;
+export const orderMarkers: OrderMarkers = selectOrderMarkers();
