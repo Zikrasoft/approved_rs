@@ -343,9 +343,8 @@ Husky + lint-staged run eslint --fix/prettier on staged files on commit — a co
 
 **Review the diff against this file's conventions before every commit, and
 after each significant block of work on a long task.** No exceptions — a typo
-and a refactor both go through it. In Claude Code that pass is the
-`review-local --fix-all` skill; with another agent, run whatever equivalent it
-offers, or read the diff yourself against the rules here. Nothing else checks
+and a refactor both go through it. Run whatever review pass your agent offers,
+or read the diff yourself against the rules here. Nothing else checks
 the diff against these conventions, and it costs minutes against a bug reaching
 production. On work
 split across several agents or stages, review after each stage lands rather
