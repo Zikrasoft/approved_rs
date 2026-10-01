@@ -15,7 +15,7 @@
 | App                 | Domain        | Brand                          | What it deploys                                                                                    |
 | ------------------- | ------------- | ------------------------------ | -------------------------------------------------------------------------------------------------- |
 | `apps/approved-rs`  | `approved.rs` | Approved.rs — vehicle sourcing | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-webhook`, `/api/reminders` (cron) |
-| `apps/auto-service` | `carlab.rs`   | CarLab — auto service          | the site plus `/api/leads`, `/api/contact-click`                                                   |
+| `apps/auto-service` | `carlab.rs`   | CarLab — auto service          | the site plus `/api/leads`, `/api/contact-click`, `/api/shop-order` (the shop's order hook)        |
 | `apps/detailing`    | `details.rs`  | Details — detailing            | the site plus `/api/leads`, `/api/contact-click`                                                   |
 
 Each app owns its own `astro.config.mjs`, `vercel.json`, `keystatic.config.ts` and

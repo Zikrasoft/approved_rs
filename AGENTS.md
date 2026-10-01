@@ -310,7 +310,10 @@ wrote; it needs the whole backend up and the env exported first. Prerequisites,
 assertions and what the layer cannot prove are in
 `apps/auto-service/funnel/README.md`. Its specs ride along in the app's existing
 `astro check`, which is CI's only involvement — do not add a workflow step and
-do not install browser binaries in CI.
+do not install browser binaries in CI. The four test layers the shop funnel has,
+what each one proves, what none of them prove and the standing checklists are in
+`docs/guides/shop-funnel-testing.md` — add to a layer there rather than cutting a
+fifth seam.
 
 The translate scripts resolve content paths relative to the process's working
 directory, so they must run from inside the app:
