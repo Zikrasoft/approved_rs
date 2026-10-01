@@ -105,22 +105,24 @@ describe('shop order receiver', () => {
     expect(notifyLead).toHaveBeenCalledTimes(1);
   });
 
-  it('asks Medusa to retry when the card did not go out, and posts it on the retry', async () => {
+  it('stores the lead once even when the card did not go out', async () => {
     notifyLead.mockResolvedValueOnce(false);
 
     const first = await handler()(signed(ORDER));
     expect(first.status).toBe(502);
-    expect(markers.seen.size).toBe(0);
+    expect(markers.seen.has('order_01')).toBe(true);
 
     const retry = await handler()(signed(ORDER));
-    expect(retry.status).toBe(202);
-    expect(notifyLead).toHaveBeenCalledTimes(2);
+    expect(retry.status).toBe(200);
+    expect(await retry.json()).toEqual({ duplicate: true });
+    expect(notifyLead).toHaveBeenCalledTimes(1);
   });
 
-  it('still accepts when only the marker could not be written', async () => {
+  it('asks for a retry when the marker could not be written, storing nothing', async () => {
     markers.add.mockRejectedValueOnce(new Error('blob down'));
 
-    expect((await handler()(signed(ORDER))).status).toBe(202);
+    expect((await handler()(signed(ORDER))).status).toBe(503);
+    expect(notifyLead).not.toHaveBeenCalled();
   });
 
   it('asks for a retry when it cannot tell whether the order was seen', async () => {

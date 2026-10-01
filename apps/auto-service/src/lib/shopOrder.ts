@@ -122,23 +122,25 @@ export function createShopOrderHandler({
       if (await markers.has(order.orderId)) {
         return Response.json({ duplicate: true }, { status: 200 });
       }
+      await markers.add(order.orderId);
     } catch (error) {
-      console.error('[shop-order] cannot read the order marker', {
+      console.error('[shop-order] cannot take the order marker', {
         orderId: order.orderId,
         error,
       });
       return Response.json({ error: 'storage' }, { status: 503 });
     }
+    // TODO: notifyLead's boolean cannot say whether the lead was stored, so an
+    // attempt that fails to store AND fails to notify loses the order — the
+    // marker then absorbs every retry. Needs a three-state result from notifyLead.
     if (!(await notifyLead(orderLead(order), '[shop-order]'))) {
-      return Response.json({ delivered: false }, { status: 502 });
-    }
-    try {
-      await markers.add(order.orderId);
-    } catch (error) {
       console.error(
-        '[shop-order] marker not written — a retry may post the card again',
-        { orderId: order.orderId, error },
+        '[shop-order] the lead is stored but its card did not go out',
+        {
+          orderId: order.orderId,
+        },
       );
+      return Response.json({ delivered: false }, { status: 502 });
     }
     return Response.json({ accepted: true }, { status: 202 });
   };
