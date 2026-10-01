@@ -24,6 +24,7 @@ interface Props {
 const { direct = false } = Astro.props;
 const locale = getLocale(Astro.currentLocale);
 const cc = getServicesContent(locale).caseChrome;
+const callbackTrigger = { [DATA_OPEN_LEAD_MODAL]: 'phone' };
 ---
 
 <cta-reveal
@@ -60,8 +61,6 @@ const cc = getServicesContent(locale).caseChrome;
     <a
       data-contact-channel="viber"
       href={viberLink(VIBER_NUMBER)}
-      target="_blank"
-      rel="noopener"
       role="menuitem"
       class="floating-cell"
       aria-label={cc.viberButtonLabel}
@@ -76,7 +75,7 @@ const cc = getServicesContent(locale).caseChrome;
           role="menuitem"
           data-contact-channel="callback"
           aria-label={cc.callbackButtonLabel}
-          {...{ [DATA_OPEN_LEAD_MODAL]: 'phone' }}
+          {...callbackTrigger}
           class="floating-cell"
         >
           <ContactIcon channel="phone" size={16} />

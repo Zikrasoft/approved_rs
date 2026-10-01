@@ -39,9 +39,9 @@ const {
   direct = false,
 } = Astro.props;
 
-const modalTrigger = openModal
-  ? DATA_OPEN_PAGE_LEAD_MODAL
-  : DATA_OPEN_LEAD_MODAL;
+const callbackTrigger = {
+  [openModal ? DATA_OPEN_PAGE_LEAD_MODAL : DATA_OPEN_LEAD_MODAL]: 'phone',
+};
 ---
 
 <div class="flex flex-col gap-3 my-8" data-contact-cta>
@@ -49,9 +49,6 @@ const modalTrigger = openModal
     compact ? (
       <div class="flex flex-col sm:flex-row gap-3">
         <RegionalContactButton
-          telegramLabel={label}
-          whatsappLabel={openModal ? label : cc.whatsappButtonLabel}
-          prefill={cc.messengerPrefill}
           {manager}
           class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center"
         />
@@ -95,8 +92,6 @@ const modalTrigger = openModal
           <a
             data-contact-channel="viber"
             href={viberLink(VIBER_NUMBER)}
-            target="_blank"
-            rel="noopener"
             aria-label={cc.viberButtonLabel}
             class="contact-cell"
           >
@@ -119,7 +114,7 @@ const modalTrigger = openModal
               type="button"
               data-contact-channel="callback"
               aria-label={cc.callbackButtonLabel}
-              {...{ [modalTrigger]: 'phone' }}
+              {...callbackTrigger}
               class="contact-cell"
             >
               <ContactIcon channel="phone" size={16} />
