@@ -25,6 +25,11 @@ operator advances it in the Medusa admin ([ADR-0027](docs/adr/0027-medusa-owns-t
 An Order also produces a Lead so the conversation has a home, but that Lead's
 status is not the Order's state.
 
+**Order marker** — the claim one delivery attempt takes on an Order, so that
+only the attempt holding it stores the Order's Lead. Taken before the Lead is
+stored and never given back, which is what keeps a retried delivery from
+storing a second Lead ([ADR-0022](docs/adr/0022-orders-reach-the-bot-through-a-signed-hook.md)).
+
 **Product type** — a kind of part (batteries, motor oils, filters, brakes). A
 type declares which fields a product of that kind has, which of them filter,
 which show on the card and which get their own landing page. One declaration,
