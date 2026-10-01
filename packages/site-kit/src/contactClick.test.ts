@@ -64,18 +64,6 @@ describe('defineContactClickTracking', () => {
     });
   });
 
-  it('skips the lead beacon when the click only opens the form', () => {
-    defineContactClickTracking({
-      isTracked,
-      opensLeadForm: (element) => element.dataset.contactChannel === 'telegram',
-    });
-    click('telegram');
-    expect(sent).toEqual([]);
-    expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
-      channel: 'telegram',
-    });
-  });
-
   it('still records the click on a page where analytics never loaded', () => {
     delete (window as Partial<Window>).ymReachGoal;
     defineContactClickTracking({ isTracked });

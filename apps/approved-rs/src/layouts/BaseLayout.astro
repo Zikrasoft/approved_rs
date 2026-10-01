@@ -173,11 +173,7 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
       }, 1600);
     </script>
     <script>
-      import {
-        isTrackedContactChannel,
-        DATA_OPEN_LEAD_MODAL,
-        DATA_OPEN_PAGE_LEAD_MODAL,
-      } from '@/utils/contactChannel';
+      import { isTrackedContactChannel } from '@/utils/contactChannel';
       import {
         defineContactClickTracking,
         defineFunnelTracking,
@@ -187,12 +183,7 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
 
       defineLanguageSuggestion();
       applyPrimaryContactChannel();
-      defineContactClickTracking({
-        isTracked: isTrackedContactChannel,
-        opensLeadForm: (el) =>
-          el.hasAttribute(DATA_OPEN_LEAD_MODAL) ||
-          el.hasAttribute(DATA_OPEN_PAGE_LEAD_MODAL),
-      });
+      defineContactClickTracking({ isTracked: isTrackedContactChannel });
       defineFunnelTracking();
     </script>
   </body>

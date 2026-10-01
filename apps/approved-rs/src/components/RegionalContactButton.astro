@@ -3,42 +3,29 @@ import Button from './Button.astro';
 import ContactIcon from './ContactIcon.astro';
 import { telegramLink, whatsappLink } from '@/utils/contactLinks';
 import { TG_MANAGER, WHATSAPP_NUMBER } from '@/utils/constants';
-import {
-  DATA_OPEN_LEAD_MODAL,
-  DATA_OPEN_PAGE_LEAD_MODAL,
-} from '@/utils/contactChannel';
 
 interface Props {
   telegramLabel: string;
   whatsappLabel: string;
+  prefill: string;
   manager?: string;
-  openModal?: boolean;
-  direct?: boolean;
   class?: string;
 }
 
 const {
   telegramLabel,
   whatsappLabel,
+  prefill,
   manager = TG_MANAGER,
-  openModal = false,
-  direct = false,
   class: className,
 } = Astro.props;
-
-const modalTrigger = openModal
-  ? DATA_OPEN_PAGE_LEAD_MODAL
-  : DATA_OPEN_LEAD_MODAL;
-const opensModal = (channel: string) =>
-  direct ? {} : { [modalTrigger]: channel };
 ---
 
 <div data-primary-contact class="contents">
   <Button
     data-primary-channel="telegram"
     data-contact-channel="telegram"
-    {...opensModal('telegram')}
-    href={telegramLink(manager)}
+    href={telegramLink(manager, prefill)}
     target="_blank"
     rel="noopener"
     class={className}
@@ -49,8 +36,7 @@ const opensModal = (channel: string) =>
   <Button
     data-primary-channel="whatsapp"
     data-contact-channel="whatsapp"
-    {...opensModal('whatsapp')}
-    href={whatsappLink(WHATSAPP_NUMBER)}
+    href={whatsappLink(WHATSAPP_NUMBER, prefill)}
     target="_blank"
     rel="noopener"
     hidden

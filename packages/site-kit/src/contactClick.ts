@@ -12,12 +12,10 @@ const CONTACT_CLICK_ENDPOINT = '/api/contact-click';
 
 export interface ContactClickOptions {
   isTracked: (channel: string | undefined) => channel is string;
-  opensLeadForm?: (element: HTMLElement) => boolean;
 }
 
 export function defineContactClickTracking({
   isTracked,
-  opensLeadForm,
 }: ContactClickOptions): void {
   document
     .querySelectorAll<HTMLElement>(`[${CHANNEL_ATTRIBUTE}]`)
@@ -25,7 +23,7 @@ export function defineContactClickTracking({
       element.addEventListener('click', () => {
         const channel = element.dataset.contactChannel;
         reachGoal(GOALS.contactClick, { channel });
-        if (!isTracked(channel) || opensLeadForm?.(element)) return;
+        if (!isTracked(channel)) return;
         const body = new FormData();
         body.set('channel', channel);
         body.set('source_url', location.href);

@@ -237,6 +237,7 @@ export interface ServicesContent {
     callbackButtonLabel: string;
     callbackShortLabel: string;
     callButtonLabel: string;
+    messengerPrefill: string;
     usefulInfoLabel: string;
     channelBannerTitle: string;
     channelBannerText: string;

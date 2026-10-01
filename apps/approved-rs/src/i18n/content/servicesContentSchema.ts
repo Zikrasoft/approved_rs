@@ -273,6 +273,7 @@ export const servicesContentSchema = z
         callbackButtonLabel: z.string(),
         callbackShortLabel: z.string(),
         callButtonLabel: z.string(),
+        messengerPrefill: z.string(),
         usefulInfoLabel: z.string(),
         channelBannerTitle: z.string(),
         channelBannerText: z.string(),

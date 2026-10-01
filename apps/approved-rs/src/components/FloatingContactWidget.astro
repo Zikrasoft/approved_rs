@@ -24,8 +24,6 @@ interface Props {
 const { direct = false } = Astro.props;
 const locale = getLocale(Astro.currentLocale);
 const cc = getServicesContent(locale).caseChrome;
-const opensModal = (channel: string) =>
-  direct ? {} : { [DATA_OPEN_LEAD_MODAL]: channel };
 ---
 
 <cta-reveal
@@ -37,8 +35,7 @@ const opensModal = (channel: string) =>
   <div class="floating-panel" role="menu" data-panel hidden>
     <a
       data-contact-channel="telegram"
-      {...opensModal('telegram')}
-      href={telegramLink(TG_MANAGER)}
+      href={telegramLink(TG_MANAGER, cc.messengerPrefill)}
       target="_blank"
       rel="noopener"
       role="menuitem"
@@ -50,8 +47,7 @@ const opensModal = (channel: string) =>
     </a>
     <a
       data-contact-channel="whatsapp"
-      {...opensModal('whatsapp')}
-      href={whatsappLink(WHATSAPP_NUMBER)}
+      href={whatsappLink(WHATSAPP_NUMBER, cc.messengerPrefill)}
       target="_blank"
       rel="noopener"
       role="menuitem"
@@ -63,7 +59,6 @@ const opensModal = (channel: string) =>
     </a>
     <a
       data-contact-channel="viber"
-      {...opensModal('viber')}
       href={viberLink(VIBER_NUMBER)}
       target="_blank"
       rel="noopener"
@@ -74,17 +69,21 @@ const opensModal = (channel: string) =>
       <ContactIcon channel="viber" size={17} />
       <span>Viber</span>
     </a>
-    <button
-      type="button"
-      role="menuitem"
-      data-contact-channel="callback"
-      aria-label={cc.callbackButtonLabel}
-      {...opensModal('phone')}
-      class="floating-cell"
-    >
-      <ContactIcon channel="phone" size={16} />
-      <span>{cc.callbackShortLabel}</span>
-    </button>
+    {
+      !direct && (
+        <button
+          type="button"
+          role="menuitem"
+          data-contact-channel="callback"
+          aria-label={cc.callbackButtonLabel}
+          {...{ [DATA_OPEN_LEAD_MODAL]: 'phone' }}
+          class="floating-cell"
+        >
+          <ContactIcon channel="phone" size={16} />
+          <span>{cc.callbackShortLabel}</span>
+        </button>
+      )
+    }
     <a
       data-contact-channel="phone"
       href={phoneLink(PHONE_NUMBER)}
@@ -240,8 +239,6 @@ const opensModal = (channel: string) =>
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !panel.hidden) setOpen(false);
     });
-    // menu items either navigate away or open the lead modal — either way,
-    // collapse back to the closed icon so it's not left open underneath.
     panel.querySelectorAll('.floating-cell').forEach((cell) => {
       cell.addEventListener('click', () => setOpen(false));
     });

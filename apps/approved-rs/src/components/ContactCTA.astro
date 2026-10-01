@@ -25,10 +25,6 @@ interface Props {
   manager?: string;
   label?: string;
   openModal?: boolean;
-  // Cold placements (page hero, first fold) get a single action instead of
-  // the full channel picker — asking someone to choose a messenger before
-  // they've even read the pitch is friction the warm/closing CTAs don't
-  // have. WhatsApp/Viber/callback stay one tap away via the floating widget.
   compact?: boolean;
   direct?: boolean;
 }
@@ -46,8 +42,6 @@ const {
 const modalTrigger = openModal
   ? DATA_OPEN_PAGE_LEAD_MODAL
   : DATA_OPEN_LEAD_MODAL;
-const opensModal = (channel: string) =>
-  direct ? {} : { [modalTrigger]: channel };
 ---
 
 <div class="flex flex-col gap-3 my-8" data-contact-cta>
@@ -57,9 +51,8 @@ const opensModal = (channel: string) =>
         <RegionalContactButton
           telegramLabel={label}
           whatsappLabel={openModal ? label : cc.whatsappButtonLabel}
+          prefill={cc.messengerPrefill}
           {manager}
-          {openModal}
-          {direct}
           class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center"
         />
         <Button
@@ -77,8 +70,7 @@ const opensModal = (channel: string) =>
         <div class="contact-bar">
           <a
             data-contact-channel="telegram"
-            {...opensModal('telegram')}
-            href={telegramLink(manager)}
+            href={telegramLink(manager, cc.messengerPrefill)}
             target="_blank"
             rel="noopener"
             aria-label={label}
@@ -90,8 +82,7 @@ const opensModal = (channel: string) =>
 
           <a
             data-contact-channel="whatsapp"
-            {...opensModal('whatsapp')}
-            href={whatsappLink(WHATSAPP_NUMBER)}
+            href={whatsappLink(WHATSAPP_NUMBER, cc.messengerPrefill)}
             target="_blank"
             rel="noopener"
             aria-label={cc.whatsappButtonLabel}
@@ -103,7 +94,6 @@ const opensModal = (channel: string) =>
 
           <a
             data-contact-channel="viber"
-            {...opensModal('viber')}
             href={viberLink(VIBER_NUMBER)}
             target="_blank"
             rel="noopener"
@@ -129,7 +119,7 @@ const opensModal = (channel: string) =>
               type="button"
               data-contact-channel="callback"
               aria-label={cc.callbackButtonLabel}
-              {...opensModal('phone')}
+              {...{ [modalTrigger]: 'phone' }}
               class="contact-cell"
             >
               <ContactIcon channel="phone" size={16} />

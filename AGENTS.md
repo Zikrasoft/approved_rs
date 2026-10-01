@@ -237,12 +237,24 @@ Both new apps follow the same shape, and a third should too:
   pending; if per-service numbers ever matter more than the shorter form, the
   fix is to thread the page's service into the modal, not to bring the picker
   back.
-- **A messenger tap opens the lead form**, everywhere except the footer and
-  `/thanks/`. A bare click reaches the operator as a lead with no name and no
-  contact — unanswerable — so the tiles route into the modal with the channel
-  preselected and the click still lands in Telegram. The footer keeps direct
-  links, and `ContactCTA direct` on the thanks page does too: someone who has
-  just sent a brief wants the messenger, not the form again.
+- **A messenger tap opens the messenger**, on all three sites. The tile's label
+  promises a messenger, so it is a plain `<a>` to one — no modal trigger, works
+  with JavaScript off. approved.rs routed these through the lead form until the
+  CRO audit priced the detour (issue #56,
+  `docs/adr/0015-lead-form-asks-only-for-a-contact.md`); do not re-add it. The
+  form keeps its own doors there: the header CTA, the callback control, the
+  partner block and the inline form in the same fold. `ContactCTA direct` and
+  `BaseLayout directContacts` no longer mean "no modal" — messengers are
+  unconditionally direct now — they mean the `/thanks/` carve-out: a phone link
+  instead of the callback control, because someone who has just sent a brief is
+  not served the form again.
+- **Only approved.rs prefills the first message**, `messengerPrefill` in its
+  `services.yaml`, so the chat does not open empty. The mechanism is shared and
+  the brand sites opt in by passing a message: `telegramLink`/`whatsappLink` in
+  `@podbor/site-kit/contact-links` take an optional one and encode it as `text`
+  (documented for public username links, unlike `start`, which is bot-only).
+  Viber's chat link has no such parameter, so Viber tiles stay bare — asymmetry
+  by platform, not by choice.
 - **The lead modal takes its service from the trigger.** `data-lead-service` on
   a button sets the form's `service` when the modal opens; `data-default-service`
   on the form is what it resets to when the trigger names none. Both constants
