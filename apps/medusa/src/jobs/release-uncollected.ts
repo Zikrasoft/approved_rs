@@ -7,8 +7,8 @@ import { RESERVE_DAYS } from '../lib/shop';
 
 type UncollectedOrder = {
   id: string;
-  fulfillments?: ({ canceled_at?: string | Date | null } | null)[] | null;
-  payment_collections?: ({ captured_amount?: unknown } | null)[] | null;
+  fulfillments?: { canceled_at?: string | Date | null }[] | null;
+  payment_collections?: { captured_amount?: unknown }[] | null;
 };
 
 const ORDER_FIELDS = [
@@ -18,11 +18,11 @@ const ORDER_FIELDS = [
 ];
 
 const isUncollected = (order: UncollectedOrder) =>
-  (order.fulfillments ?? []).every(
-    (fulfillment) => !fulfillment || Boolean(fulfillment.canceled_at),
+  (order.fulfillments ?? []).every((fulfillment) =>
+    Boolean(fulfillment.canceled_at),
   ) &&
   (order.payment_collections ?? []).every(
-    (collection) => money(collection?.captured_amount ?? 0) === 0,
+    (collection) => money(collection.captured_amount ?? 0) === 0,
   );
 
 export default async function releaseUncollected(
@@ -37,8 +37,9 @@ export default async function releaseUncollected(
   );
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
   let cancelled = 0;
-  for (const order of orders.filter(isUncollected)) {
+  for (const order of orders) {
     try {
+      if (!isUncollected(order)) continue;
       await cancelOrderWorkflow(container).run({
         input: { order_id: order.id },
       });
@@ -46,7 +47,7 @@ export default async function releaseUncollected(
     } catch (error) {
       logger.error(
         `Uncollected order ${order.id} refused cancellation`,
-        error as Error,
+        error instanceof Error ? error : new Error(String(error)),
       );
     }
   }

@@ -72,7 +72,7 @@ describe('release-uncollected', () => {
       },
       {
         id: 'refulfilled',
-        fulfillments: [null, { canceled_at: '2026-09-01T00:00:00.000Z' }],
+        fulfillments: [{ canceled_at: '2026-09-01T00:00:00.000Z' }],
         payment_collections: [],
       },
     ]);
@@ -101,12 +101,31 @@ describe('release-uncollected', () => {
     expect(cancelled()).toEqual(['unpaid']);
   });
 
-  it('logs an order that refuses cancellation and cancels the rest anyway', async () => {
+  it('logs an unreadable captured amount and still reaches the next order', async () => {
+    const { container, logger } = containerFor([
+      {
+        id: 'unreadable',
+        fulfillments: [],
+        payment_collections: [{ captured_amount: 'about a tenner' }],
+      },
+      { id: 'fine' },
+    ]);
+
+    await releaseUncollected(container);
+
+    expect(cancelled()).toEqual(['fine']);
+    expect(logger.error).toHaveBeenCalledWith(
+      'Uncollected order unreadable refused cancellation',
+      expect.any(Error),
+    );
+  });
+
+  it('logs an order that refuses cancellation, even without an Error, and cancels the rest anyway', async () => {
     const { container, logger } = containerFor([
       { id: 'stuck' },
       { id: 'fine' },
     ]);
-    run.mockRejectedValueOnce(new Error('has a fulfillment'));
+    run.mockRejectedValueOnce('has a fulfillment');
 
     await releaseUncollected(container);
 
