@@ -1,17 +1,11 @@
 import { z } from 'zod';
-import {
-  parseAttributes,
-  vehicleFitment,
-  vehicleTreeSchema,
-} from '@podbor/shop-catalog';
+import { parseAttributes } from '@podbor/shop-catalog';
 import {
   MEDUSA_LOCALE,
   PUBLISHABLE_KEY_HEADER,
   SERVICE_TYPE,
   SHOP_CURRENCY,
-  buildFitmentIndex,
   type FitmentEntry,
-  type FitmentIndex,
   type Spec,
 } from '@podbor/shop-catalog/browser';
 import type { Locale } from '@/i18n/config';
@@ -226,7 +220,6 @@ export function createCatalogLoader(
 
   let version: Promise<string> | undefined;
   let region: Promise<string> | undefined;
-  let vehicles: Promise<FitmentIndex> | undefined;
   const catalogs = new Map<Locale, Promise<Catalog>>();
 
   const loader = {
@@ -273,11 +266,6 @@ export function createCatalogLoader(
       catalogs.set(locale, loading);
       return loading;
     },
-
-    vehicles: () =>
-      (vehicles ??= get('/store/vehicles', vehicleTreeSchema).then((tree) =>
-        buildFitmentIndex([vehicleFitment(tree)]),
-      )),
   };
   return loader;
 }

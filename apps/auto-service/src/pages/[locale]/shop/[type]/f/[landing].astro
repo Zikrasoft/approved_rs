@@ -4,7 +4,6 @@ import { withPlaceholder } from '@podbor/i18n';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import ShopGate from '@/components/ShopGate.astro';
-import CarPicker from '@/components/CarPicker.astro';
 import ShopFilter from '@/components/ShopFilter.astro';
 import ProductGrid from '@/components/ProductGrid.astro';
 import Icon from '@/components/Icon.astro';
@@ -47,8 +46,6 @@ const label = formatValue(
 const fill = (template: string) => withPlaceholder(template, 'value', label);
 const { products: all } = await shopCatalog().catalog(locale);
 const products = landingProducts(all, typeKey, { key, value });
-const vehicles =
-  type.fitment === 'none' ? undefined : await shopCatalog().vehicles();
 const heading = fill(copy.landing.heading);
 ---
 
@@ -72,7 +69,6 @@ const heading = fill(copy.landing.heading);
       ]}
     />
     <section class="wrap flex flex-col gap-6 py-band md:py-band-lg">
-      {vehicles && <CarPicker index={vehicles} />}
       <ShopFilter typeKey={typeKey} products={products} omit={key}>
         <ProductGrid products={products} />
       </ShopFilter>

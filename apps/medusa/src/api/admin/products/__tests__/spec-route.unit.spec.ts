@@ -20,22 +20,6 @@ const FITMENT = [
   { make: 'Toyota', model: 'Corolla', yearFrom: 2013, yearTo: 2019 },
 ];
 
-const MAKES = [
-  {
-    id: 'mk_t',
-    name: 'Toyota',
-    models: [
-      {
-        id: 'md_c',
-        name: 'Corolla',
-        generations: [
-          { id: 'gn_2', name: 'II', year_from: 2013, year_to: 2019 },
-        ],
-      },
-    ],
-  },
-];
-
 const post = async (body: unknown, rows: unknown[]) => {
   const res = { json: jest.fn() };
   const req = {
@@ -44,7 +28,6 @@ const post = async (body: unknown, rows: unknown[]) => {
     scope: {
       resolve: () => ({
         graph: jest.fn().mockResolvedValue({ data: rows }),
-        listVehicleMakes: jest.fn().mockResolvedValue(MAKES),
       }),
     },
   };
@@ -102,22 +85,19 @@ describe('POST /admin/products/:id/spec', () => {
   });
 
   it.each([
+    ['a blank make', { ...FITMENT[0], make: ' ' }, 'make'],
+    ['a year out of range', { ...FITMENT[0], yearFrom: 1890 }, 'yearFrom'],
     [
-      'an unknown make',
-      { ...FITMENT[0], make: 'Nomake' },
-      '«Nomake Corolla 2013–2019»: марки «Nomake» нет в справочнике',
-    ],
-    [
-      'years outside the generation',
-      { ...FITMENT[0], yearFrom: 2012 },
-      '«Toyota Corolla 2012–2019»: годы выходят за рамки поколений Toyota Corolla (2013–2019)',
+      'years running backwards',
+      { ...FITMENT[0], yearTo: 2012 },
+      'yearTo must not be earlier than yearFrom',
     ],
   ])('refuses %s before saving anything', async (_label, car, reason) => {
     await expect(
       post({ spec: SPEC, fitment: [car] }, BATTERY),
     ).rejects.toMatchObject({
       type: 'invalid_data',
-      message: `Характеристики не сохранены: ${reason}`,
+      message: expect.stringContaining(reason),
     });
     expect(updateProductMetadata).not.toHaveBeenCalled();
   });

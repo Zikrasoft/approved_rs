@@ -20,7 +20,6 @@ const scopeWith = (rows: Rows) => ({
     graph: jest.fn(async ({ entity }: { entity: string }) => ({
       data: rows[entity] ?? [],
     })),
-    listVehicleMakes: jest.fn(async () => rows.vehicle_make ?? []),
   }),
 });
 
@@ -305,43 +304,12 @@ describe('requireValidSpec', () => {
     ).toBeUndefined();
   });
 
-  const DICTIONARY: Rows = {
-    vehicle_make: [
-      {
-        id: 'mk_z',
-        name: 'Zikra',
-        models: [
-          {
-            id: 'md_p',
-            name: 'Proto',
-            generations: [
-              { id: 'gn_1', name: 'I', year_from: 2006, year_to: 2013 },
-            ],
-          },
-          {
-            id: 'md_v',
-            name: 'Vesna',
-            generations: [
-              { id: 'gn_v1', name: 'I', year_from: 2006, year_to: 2013 },
-              { id: 'gn_v2', name: 'II', year_from: 2011, year_to: 2019 },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'mk_k',
-        name: 'Kosava',
-        models: [{ id: 'md_s', name: 'Sever', generations: [] }],
-      },
-    ],
-  };
-
   const withCar = (car: object) => ({
     type_id: 'ptyp_bat',
     metadata: { spec: SPEC, fitment: [car] },
   });
 
-  it('lets through a car the dictionary holds', async () => {
+  it('lets through a well-shaped car', async () => {
     expect(
       await guard(
         requireValidSpec,
@@ -351,50 +319,33 @@ describe('requireValidSpec', () => {
           yearFrom: 2007,
           yearTo: 2012,
         }),
-        { ...BATTERY_TYPE, ...DICTIONARY },
-      ),
-    ).toBeUndefined();
-  });
-
-  it('lets through a car that fits only the second of two overlapping generations', async () => {
-    expect(
-      await guard(
-        requireValidSpec,
-        withCar({
-          make: 'Zikra',
-          model: 'Vesna',
-          yearFrom: 2012,
-          yearTo: 2016,
-        }),
-        { ...BATTERY_TYPE, ...DICTIONARY },
+        BATTERY_TYPE,
       ),
     ).toBeUndefined();
   });
 
   it.each([
     [
-      'an unknown make',
-      { make: 'Nomake', model: 'Proto', yearFrom: 2007, yearTo: 2012 },
-      '«Nomake Proto 2007–2012»: марки «Nomake» нет в справочнике',
+      'a blank make',
+      { make: ' ', model: 'Proto', yearFrom: 2007, yearTo: 2012 },
+      'make',
     ],
     [
-      'a model under the wrong make',
-      { make: 'Kosava', model: 'Proto', yearFrom: 2007, yearTo: 2012 },
-      '«Kosava Proto 2007–2012»: у марки «Kosava» нет модели «Proto»',
+      'a year out of range',
+      { make: 'Zikra', model: 'Proto', yearFrom: 1890, yearTo: 2012 },
+      'yearFrom',
     ],
     [
-      'years outside the generation',
-      { make: 'Zikra', model: 'Proto', yearFrom: 2005, yearTo: 2012 },
-      '«Zikra Proto 2005–2012»: годы выходят за рамки поколений Zikra Proto (2006–2013)',
+      'years running backwards',
+      { make: 'Zikra', model: 'Proto', yearFrom: 2012, yearTo: 2007 },
+      'yearTo must not be earlier than yearFrom',
     ],
-  ])('refuses %s, naming the car', async (_label, car, reason) => {
-    const error = await guard(requireValidSpec, withCar(car), {
-      ...BATTERY_TYPE,
-      ...DICTIONARY,
-    });
+  ])('refuses %s', async (_label, car, reason) => {
+    const error = await guard(requireValidSpec, withCar(car), BATTERY_TYPE);
 
     expect(error?.type).toBe('invalid_data');
-    expect(error?.message).toBe(`Характеристики товара не сходятся: ${reason}`);
+    expect(error?.message).toContain('Характеристики товара не сходятся');
+    expect(error?.message).toContain(reason);
   });
 });
 

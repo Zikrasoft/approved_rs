@@ -32,11 +32,10 @@ not four copies.
 
 **Spec** — the attribute values of one product, keyed by its type's fields.
 
-**Fitment** — the set of cars a product fits, as make/model/year entries. The
-names are the join key to the vehicle dictionary, not identifiers.
-
-**Vehicle dictionary** — the hand-collected tree of makes, models and years the
-shop offers fitment against ([ADR-0024](docs/adr/0024-hand-collected-vehicle-dictionary.md)).
+**Fitment** — the set of cars a product fits, as make/model/year entries, typed
+by the admin as free text and checked for shape only. There is no vehicle
+dictionary to join them against, and none until a product type with required
+fitment ships ([ADR-0028](docs/adr/0028-no-vehicle-dictionary-until-fitment-is-required.md)).
 
 **Landing page** — a page for one value of one field ("batteries, 60 Ah"),
 built only when enough products fall under it to be worth a page.

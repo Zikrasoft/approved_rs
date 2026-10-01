@@ -115,10 +115,12 @@ did not close and moved to
 [#79](https://github.com/Zikrasoft/approved_rs/issues/79): the seller's poslovno
 ime, PIB, matični broj and seat, which the legal pages cannot be written without.
 
-Open on the vehicle dictionary's data: naming for Doblo III/K9, Megane by sequence
-versus by code, whether Aveo 310C and Lacetti are needed. Whether to buy TecDoc
-access is a separate decision
-([ADR-0024](../adr/0024-hand-collected-vehicle-dictionary.md)).
+The vehicle dictionary is gone until a product type requires fitment
+([ADR-0028](../adr/0028-no-vehicle-dictionary-until-fitment-is-required.md)), so
+its open naming questions (Doblo III/K9, Megane by sequence versus by code,
+whether Aveo 310C and Lacetti are needed) are parked with the collected tree in
+`docs/research/vehicles.json`. Whether to buy TecDoc access is still a separate
+decision ([ADR-0024](../adr/0024-hand-collected-vehicle-dictionary.md)).
 
 ## Technical debt
 

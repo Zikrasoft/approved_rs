@@ -4,25 +4,16 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { queryOne } from '../../src/lib/query';
 import { DEFAULT_OPTION, SHOP } from '../../src/lib/shop';
 import { seedBase } from '../../src/scripts/seed-base';
-import { VEHICLES } from '../../src/scripts/vehicle-fixture';
 import { adminHeaders } from './admin-session';
 
 jest.setTimeout(180_000);
 
-const [MAKE] = VEHICLES;
-const [MODEL] = MAKE.models;
-const [GENERATION] = MODEL.generations;
-
 const KNOWN_CAR = {
-  make: MAKE.name,
-  model: MODEL.name,
-  yearFrom: GENERATION.yearFrom,
-  yearTo: GENERATION.yearTo,
+  make: 'Volkswagen',
+  model: 'Golf',
+  yearFrom: 2012,
+  yearTo: 2020,
 };
-
-const FOREIGN_MODEL = VEHICLES.flatMap((make) =>
-  make.models.map((model) => model.name),
-).find((name) => !MAKE.models.some((model) => model.name === name)) as string;
 
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -216,22 +207,14 @@ medusaIntegrationTestRunner({
     });
 
     it.each([
+      ['a blank make', { ...KNOWN_CAR, make: ' ' }, 'make'],
+      ['a year out of range', { ...KNOWN_CAR, yearFrom: 1890 }, 'yearFrom'],
       [
-        'an unknown make',
-        { ...KNOWN_CAR, make: 'Nomake' },
-        'марки «Nomake» нет в справочнике',
+        'years running backwards',
+        { ...KNOWN_CAR, yearFrom: 2020, yearTo: 2012 },
+        'yearTo must not be earlier than yearFrom',
       ],
-      [
-        'a model filed under another make',
-        { ...KNOWN_CAR, model: FOREIGN_MODEL },
-        `нет модели «${FOREIGN_MODEL}»`,
-      ],
-      [
-        'years outside every generation',
-        { ...KNOWN_CAR, yearFrom: 1950 },
-        'годы выходят за рамки поколений',
-      ],
-    ])('refuses to save %s, naming the car', async (label, car, reason) => {
+    ])('refuses to save %s', async (label, car, reason) => {
       const headers = await admin();
       const { data } = await api.post(
         '/admin/products',
@@ -248,21 +231,19 @@ medusaIntegrationTestRunner({
         .catch((failure) => failure.response);
 
       expect(error.status).toBe(400);
-      expect(error.data.message).toContain(
-        `Характеристики не сохранены: «${car.make} ${car.model} ${car.yearFrom}–${car.yearTo}»: `,
-      );
+      expect(error.data.message).toContain('Характеристики не сохранены: ');
       expect(error.data.message).toContain(reason);
     });
 
-    it('refuses a product whose metadata carries an unknown car', async () => {
+    it('refuses a product whose metadata carries a malformed car', async () => {
       const error = await api
         .post(
           '/admin/products',
-          draft('Varta с чужой машиной', {
+          draft('Varta с битой машиной', {
             type_id: await batteryTypeId(),
             metadata: {
               spec: SPEC,
-              fitment: [{ ...KNOWN_CAR, make: 'Nomake' }],
+              fitment: [{ ...KNOWN_CAR, yearTo: 1890 }],
             },
           }),
           await admin(),
@@ -271,7 +252,7 @@ medusaIntegrationTestRunner({
 
       expect(error.status).toBe(400);
       expect(error.data.message).toMatch(
-        /^Характеристики товара не сходятся: «Nomake /,
+        /^Характеристики товара не сходятся: /,
       );
     });
 

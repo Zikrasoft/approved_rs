@@ -10,75 +10,47 @@ import {
 } from '@medusajs/ui';
 import {
   type Field,
+  type FitmentEntry,
   type ProductTypeDef,
   productType,
 } from '@podbor/shop-catalog/browser';
 import { useEffect, useState } from 'react';
 
+import { EMPTY_ROW, readFitment, unfinishedRow } from '../../lib/fitment-form';
 import { type FormValues, formToSpec, specToForm } from '../../lib/spec-form';
-import {
-  EMPTY_ROW,
-  type FitmentRow,
-  fitmentToRows,
-  generationLabel,
-  generationsOf,
-  isKnownCar,
-  modelsOf,
-  pickGeneration,
-  pickMake,
-  pickModel,
-  rowsToFitment,
-  unfinishedRow,
-  withYearFrom,
-  withYearTo,
-  yearsOf,
-} from '../../lib/vehicle-form';
-import type { VehicleTree } from '../../lib/vehicle-tree';
 import { ask } from '../lib/ask';
 
 type Loaded = {
   type: ProductTypeDef;
   values: FormValues;
-  rows: FitmentRow[];
-  tree: VehicleTree;
+  rows: FitmentEntry[];
 };
-
-type Option = { value: string; label: string };
 
 const SELECT =
   'bg-ui-bg-field border-ui-border-base txt-compact-small rounded-md border px-2 py-1.5';
 
-const asOptions = (values: readonly (string | number)[]): Option[] =>
-  values.map((value) => ({ value: String(value), label: String(value) }));
-
-const Choice = ({
+const LabelledInput = ({
   label,
   value,
-  options,
+  year,
   onChange,
 }: {
   label: string;
   value: string;
-  options: Option[];
+  year?: boolean;
   onChange: (value: string) => void;
 }) => (
   <label className="flex flex-col gap-1">
     <Text size="xsmall" className="text-ui-fg-subtle">
       {label}
     </Text>
-    <select
-      className={SELECT}
+    <Input
       value={value}
-      disabled={!options.length}
+      type={year ? 'number' : undefined}
+      min={year ? 1950 : undefined}
+      max={year ? 2100 : undefined}
       onChange={(event) => onChange(event.target.value)}
-    >
-      <option value="">—</option>
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
+    />
   </label>
 );
 
@@ -136,82 +108,51 @@ const FieldInput = ({
 };
 
 const FitmentRows = ({
-  tree,
   rows,
   onChange,
 }: {
-  tree: VehicleTree;
-  rows: FitmentRow[];
-  onChange: (rows: FitmentRow[]) => void;
+  rows: FitmentEntry[];
+  onChange: (rows: FitmentEntry[]) => void;
 }) => (
   <>
     {rows.map((row, index) => {
-      const put = (next: FitmentRow) =>
+      const put = (next: FitmentEntry) =>
         onChange(rows.map((current, at) => (at === index ? next : current)));
-      const years = asOptions(yearsOf(tree, row));
+      const asYear = (value: string) => Number(value) || 0;
       return (
-        <div key={index} className="flex flex-col gap-1">
-          <div className="grid grid-cols-2 items-end gap-2 md:grid-cols-6">
-            <Choice
-              label="Марка"
-              value={row.make}
-              options={asOptions(tree.map((make) => make.name))}
-              onChange={(make) => put(pickMake(make))}
-            />
-            <Choice
-              label="Модель"
-              value={row.model}
-              options={asOptions(
-                modelsOf(tree, row.make).map((model) => model.name),
-              )}
-              onChange={(model) => put(pickModel(row, model))}
-            />
-            <Choice
-              label="Поколение"
-              value={row.generation}
-              options={generationsOf(tree, row.make, row.model).map(
-                (generation) => ({
-                  value: generation.name,
-                  label: generationLabel(generation),
-                }),
-              )}
-              onChange={(name) => put(pickGeneration(tree, row, name))}
-            />
-            <Choice
-              label="С года"
-              value={row.generation ? String(row.yearFrom) : ''}
-              options={years}
-              onChange={(year) => year && put(withYearFrom(row, Number(year)))}
-            />
-            <Choice
-              label="По год"
-              value={row.generation ? String(row.yearTo) : ''}
-              options={years}
-              onChange={(year) => year && put(withYearTo(row, Number(year)))}
-            />
-            <Button
-              size="small"
-              variant="transparent"
-              onClick={() => onChange(rows.filter((_, at) => at !== index))}
-            >
-              Убрать
-            </Button>
-          </div>
-          {!row.generation && row.yearFrom > 0 && (
-            <Text size="xsmall" className="text-ui-fg-subtle">
-              {isKnownCar(tree, row) ? (
-                <>
-                  Сохранено: {row.make} {row.model} {row.yearFrom}–{row.yearTo}.
-                  Поколение не выбрано — выберите его, чтобы поменять годы.
-                </>
-              ) : (
-                <>
-                  Этой машины нет в справочнике — добавьте её на странице
-                  «Автомобили» или удалите строку.
-                </>
-              )}
-            </Text>
-          )}
+        <div
+          key={index}
+          className="grid grid-cols-2 items-end gap-2 md:grid-cols-5"
+        >
+          <LabelledInput
+            label="Марка"
+            value={row.make}
+            onChange={(make) => put({ ...row, make })}
+          />
+          <LabelledInput
+            label="Модель"
+            value={row.model}
+            onChange={(model) => put({ ...row, model })}
+          />
+          <LabelledInput
+            label="С года"
+            year
+            value={row.yearFrom ? String(row.yearFrom) : ''}
+            onChange={(value) => put({ ...row, yearFrom: asYear(value) })}
+          />
+          <LabelledInput
+            label="По год"
+            year
+            value={row.yearTo ? String(row.yearTo) : ''}
+            onChange={(value) => put({ ...row, yearTo: asYear(value) })}
+          />
+          <Button
+            size="small"
+            variant="transparent"
+            onClick={() => onChange(rows.filter((_, at) => at !== index))}
+          >
+            Убрать
+          </Button>
         </div>
       );
     })}
@@ -232,11 +173,8 @@ const ProductSpecWidget = ({ data }: { data: { id: string } }) => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    Promise.all([
-      ask(`/admin/products/${data.id}?fields=id,metadata,*type`),
-      ask('/admin/vehicles'),
-    ])
-      .then(([{ product }, { makes }]) => {
+    ask(`/admin/products/${data.id}?fields=id,metadata,*type`)
+      .then(({ product }) => {
         const type = product.type?.value
           ? productType(product.type.value)
           : undefined;
@@ -245,8 +183,7 @@ const ProductSpecWidget = ({ data }: { data: { id: string } }) => {
             ? {
                 type,
                 values: specToForm(type, product.metadata?.spec),
-                rows: fitmentToRows(makes, product.metadata?.fitment),
-                tree: makes,
+                rows: readFitment(product.metadata?.fitment),
               }
             : null,
         );
@@ -262,13 +199,13 @@ const ProductSpecWidget = ({ data }: { data: { id: string } }) => {
     return null;
   }
 
-  const { type, values, rows, tree } = loaded;
+  const { type, values, rows } = loaded;
 
   const save = async () => {
     const unfinished = unfinishedRow(rows);
     if (unfinished >= 0) {
       toast.error('Не сохранилось', {
-        description: `Машина ${unfinished + 1}: выберите марку, модель и поколение.`,
+        description: `Машина ${unfinished + 1}: заполните марку, модель и годы (с года не позже по год).`,
       });
       return;
     }
@@ -279,7 +216,7 @@ const ProductSpecWidget = ({ data }: { data: { id: string } }) => {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           spec: formToSpec(type, values),
-          fitment: rowsToFitment(rows),
+          fitment: rows,
         }),
       });
       toast.success('Характеристики сохранены', {
@@ -329,13 +266,12 @@ const ProductSpecWidget = ({ data }: { data: { id: string } }) => {
             Подходит к машинам{type.fitment === 'required' ? ' *' : ''}
           </Label>
           <FitmentRows
-            tree={tree}
             rows={rows}
             onChange={(next) => setLoaded({ ...loaded, rows: next })}
           />
           <Text size="xsmall" className="text-ui-fg-subtle">
-            Машины берутся из справочника «Автомобили». Годы подставляются из
-            поколения: их можно сузить, но не расширить.
+            Марку и модель пишите так же, как в предыдущих товарах — по ним
+            строится фильтр на сайте. Годы — от 1950 до 2100.
           </Text>
         </div>
       )}
