@@ -1,0 +1,26 @@
+greeting: Здравствуйте! Спасибо, что написали — мы уже видим ваше обращение и скоро ответим.
+lookingFor: Расскажите в двух словах, какая машина вас интересует или с чем нужна помощь.
+budget: И на какой бюджет вы рассчитываете?
+thanks: Спасибо! Всё передали менеджеру — он напишет вам прямо здесь.
+translations:
+  en:
+    greeting: Hello! Thanks for getting in touch — we can see your enquiry and we'll come back to you shortly.
+    lookingFor: Tell us in a couple of words which car you have in mind, or what you need a hand with.
+    budget: And what budget are you working with?
+    thanks: Thank you! Your manager has it all and will write to you right here.
+  sr:
+    greeting: Zdravo! Hvala što ste nam se javili — vidimo vaš upit i javljamo se uskoro.
+    lookingFor: Recite nam ukratko koji automobil vas zanima ili oko čega vam treba pomoć.
+    budget: A koji budžet imate na umu?
+    thanks: Hvala! Sve smo prosledili menadžeru — javiće vam se baš ovde.
+  es:
+    greeting: ¡Hola! Gracias por escribirnos, ya vemos tu consulta y te respondemos enseguida.
+    lookingFor: Cuéntanos en dos palabras qué coche te interesa o en qué necesitas ayuda.
+    budget: ¿Y con qué presupuesto cuentas?
+    thanks: ¡Gracias! El gestor ya lo tiene todo y te escribirá por aquí mismo.
+  de:
+    greeting: Hallo! Danke für Ihre Nachricht – Ihre Anfrage liegt uns vor, wir melden uns gleich.
+    lookingFor: Sagen Sie uns kurz, welches Auto Sie interessiert oder wobei Sie Hilfe brauchen.
+    budget: Und mit welchem Budget rechnen Sie?
+    thanks: Danke! Ihr Ansprechpartner hat alles und schreibt Ihnen direkt hier.
+translatedFrom: 5d335d35f4db377d

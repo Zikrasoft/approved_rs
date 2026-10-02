@@ -161,7 +161,7 @@ export type LeadInput = Pick<
   | 'locale'
   | 'kind'
 > &
-  Partial<Pick<StoredLead, 'services' | 'commissionPercent'>>;
+  Partial<Pick<StoredLead, 'services' | 'commissionPercent' | 'capturePrompt'>>;
 
 export type LeadSubmission = Omit<LeadInput, 'brand'>;
 

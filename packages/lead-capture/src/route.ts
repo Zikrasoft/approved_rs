@@ -2,8 +2,10 @@ import { z } from 'zod';
 import {
   secretMatches,
   telegramIdNote,
+  type CapturePrompt,
   type LeadStore,
   type StoredLead,
+  type TelegramClient,
 } from '@podbor/lead-crm';
 import { captureUpdateSchema, type CaptureSender } from './update.ts';
 
@@ -22,16 +24,42 @@ const startPayloadSchema = z
   .regex(/^[A-Za-z0-9_-]+$/)
   .catch('');
 
-export type CaptureStore = Pick<LeadStore, 'insertLead'>;
+type CaptureStep = CapturePrompt['step'];
 
-export interface CaptureWebhookRouteOptions {
+const ANSWER_NOTE: Record<CaptureStep, string> = {
+  looking_for: 'Ищет',
+  budget: 'Бюджет',
+  phone: 'Телефон',
+};
+
+const NEXT_STEP: Record<CaptureStep, CaptureStep | null> = {
+  looking_for: 'budget',
+  budget: null,
+  phone: null,
+};
+
+export interface CaptureCopy {
+  greeting: string;
+  lookingFor: string;
+  budget: string;
+  thanks: string;
+}
+
+export type CaptureStore = Pick<
+  LeadStore,
+  'insertLead' | 'findByCapturePrompt' | 'updateCapture'
+>;
+
+export interface CaptureWebhookRouteOptions<L extends string> {
   secret: string | undefined;
   store: CaptureStore;
   ensureLeadCard: (lead: StoredLead) => Promise<void>;
+  bot: Pick<TelegramClient, 'sendMessage'>;
   brand: string;
   isService: (value: string) => boolean;
-  isLocale: (value: string) => boolean;
-  primaryLocale: string;
+  isLocale: (value: string) => value is L;
+  primaryLocale: L;
+  copy: (locale: L) => CaptureCopy;
 }
 
 function senderName(sender: CaptureSender): string {
@@ -42,19 +70,25 @@ function senderContact(sender: CaptureSender): string {
   return sender.username ? `@${sender.username}` : `tg://user?id=${sender.id}`;
 }
 
-export function createCaptureWebhookRoute({
+function question(step: CaptureStep, copy: CaptureCopy): string {
+  return step === 'budget' ? copy.budget : copy.lookingFor;
+}
+
+export function createCaptureWebhookRoute<L extends string>({
   secret,
   store,
   ensureLeadCard,
+  bot,
   brand,
   isService,
   isLocale,
   primaryLocale,
-}: CaptureWebhookRouteOptions) {
+  copy,
+}: CaptureWebhookRouteOptions<L>) {
   function startFields(
     payload: string | undefined,
     sender: CaptureSender,
-  ): { service: string; locale: string } {
+  ): { service: string; locale: L } {
     const parts = startPayloadSchema.parse(payload).split('_');
     const head = parts[0];
     const tail = parts[parts.length - 1];
@@ -70,10 +104,12 @@ export function createCaptureWebhookRoute({
   }
 
   async function start(
+    chatId: number,
     sender: CaptureSender,
     payload: string | undefined,
   ): Promise<void> {
     const { service, locale } = startFields(payload, sender);
+    const words = copy(locale);
     const lead = await store.insertLead({
       brand,
       name: senderName(sender),
@@ -87,8 +123,43 @@ export function createCaptureWebhookRoute({
       visitorId: null,
       locale,
       kind: 'lead',
+      capturePrompt: { chatId, step: 'looking_for' },
     });
     await ensureLeadCard(lead);
+    await bot.sendMessage(
+      chatId,
+      `${words.greeting}\n\n${question('looking_for', words)}`,
+    );
+  }
+
+  async function answer(
+    lead: StoredLead,
+    prompt: CapturePrompt,
+    text: string,
+  ): Promise<void> {
+    const next = NEXT_STEP[prompt.step];
+    const words = copy(isLocale(lead.locale) ? lead.locale : primaryLocale);
+    const updated = await store.updateCapture(lead.id, {
+      note: `${ANSWER_NOTE[prompt.step]}: ${text}`,
+      capturePrompt: next ? { chatId: prompt.chatId, step: next } : null,
+    });
+    await ensureLeadCard(updated ?? lead);
+    await bot.sendMessage(
+      prompt.chatId,
+      next ? question(next, words) : words.thanks,
+    );
+  }
+
+  async function handle(
+    chatId: number,
+    sender: CaptureSender,
+    text: string,
+  ): Promise<void> {
+    const started = START_PATTERN.exec(text);
+    if (started) return start(chatId, sender, started[1]);
+
+    const lead = await store.findByCapturePrompt(chatId);
+    if (lead?.capturePrompt) return answer(lead, lead.capturePrompt, text);
   }
 
   return async function POST({
@@ -113,11 +184,11 @@ export function createCaptureWebhookRoute({
     const { message } = captureUpdateSchema.parse(body);
     if (!message || message.chat.type !== 'private') return ACK;
 
-    const started = START_PATTERN.exec(message.text?.trim() ?? '');
-    if (!started) return ACK;
+    const text = message.text?.trim() ?? '';
+    if (!text) return ACK;
 
     try {
-      await start(message.from, started[1]);
+      await handle(message.chat.id, message.from, text);
     } catch (error) {
       console.error('[capture] could not handle the update', { error });
     }

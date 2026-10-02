@@ -1,11 +1,19 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { LeadInput, StoredLead } from '@podbor/lead-crm';
+import type { CaptureUpdate, LeadInput, StoredLead } from '@podbor/lead-crm';
 import { createCaptureWebhookRoute } from './route.ts';
 
 const SECRET = 'capture-webhook-secret';
 const BRAND = 'Approved.rs';
 const SERVICES = ['vehicle-sourcing', 'vehicle-import'];
 const LOCALES = ['ru', 'en', 'sr', 'es', 'de'];
+type TestLocale = (typeof LOCALES)[number];
+
+const COPY = {
+  greeting: 'GREETING',
+  lookingFor: 'LOOKING_FOR',
+  budget: 'BUDGET',
+  thanks: 'THANKS',
+};
 
 function storedLead(data: LeadInput, id: number): StoredLead {
   const now = new Date().toISOString();
@@ -34,7 +42,7 @@ function storedLead(data: LeadInput, id: number): StoredLead {
     statusChangedAt: now,
     createdAt: now,
     pendingPrompt: null,
-    capturePrompt: null,
+    capturePrompt: data.capturePrompt ?? null,
     archived: false,
     pendingCommissionClaim: null,
     remindAt: null,
@@ -44,6 +52,10 @@ function storedLead(data: LeadInput, id: number): StoredLead {
 
 function makeStore() {
   const leads: StoredLead[] = [];
+  const patch = (lead: StoredLead, next: StoredLead) => {
+    leads[leads.indexOf(lead)] = next;
+    return next;
+  };
   return {
     leads,
     insertLead: vi.fn(async (data: LeadInput) => {
@@ -51,11 +63,26 @@ function makeStore() {
       leads.push(lead);
       return lead;
     }),
+    findByCapturePrompt: vi.fn(async (chatId: number) =>
+      leads.find((l) => l.capturePrompt?.chatId === chatId),
+    ),
+    updateCapture: vi.fn(
+      async (id: number, { note, capturePrompt }: CaptureUpdate) => {
+        const lead = leads.find((l) => l.id === id);
+        if (!lead) return undefined;
+        return patch(lead, {
+          ...lead,
+          comment: note ? `${lead.comment ?? ''}\n${note}` : lead.comment,
+          capturePrompt,
+        });
+      },
+    ),
   };
 }
 
 let store: ReturnType<typeof makeStore>;
 let ensureLeadCard: ReturnType<typeof vi.fn>;
+let bot: { sendMessage: ReturnType<typeof vi.fn> };
 let POST: ReturnType<typeof createCaptureWebhookRoute>;
 
 function route(secret: string | undefined) {
@@ -63,10 +90,12 @@ function route(secret: string | undefined) {
     secret,
     store,
     ensureLeadCard,
+    bot,
     brand: BRAND,
     isService: (value) => SERVICES.includes(value),
-    isLocale: (value) => LOCALES.includes(value),
+    isLocale: (value): value is TestLocale => LOCALES.includes(value),
     primaryLocale: 'ru',
+    copy: (locale) => ({ ...COPY, greeting: `GREETING_${locale}` }),
   });
 }
 
@@ -109,9 +138,31 @@ function startUpdate(
   };
 }
 
+function textUpdate(text: string, from: Record<string, unknown> = HANDLED) {
+  return {
+    update_id: 2,
+    message: {
+      message_id: 11,
+      chat: { id: from.id, type: 'private' },
+      from,
+      text,
+    },
+  };
+}
+
+async function say(text: string, from: Record<string, unknown> = HANDLED) {
+  await POST(makeCtx(textUpdate(text, from)));
+}
+
+function lastSent(): [number, string] {
+  const calls = bot.sendMessage.mock.calls;
+  return calls[calls.length - 1] as [number, string];
+}
+
 beforeEach(() => {
   store = makeStore();
   ensureLeadCard = vi.fn(async () => {});
+  bot = { sendMessage: vi.fn(async () => {}) };
   POST = route(SECRET);
 });
 
@@ -171,11 +222,12 @@ describe('updates that are not a visitor pressing Start', () => {
     expect(store.insertLead).not.toHaveBeenCalled();
   });
 
-  it('ignores a message that is not /start', async () => {
+  it('ignores a message that is not /start and starts no dialog', async () => {
     const update = startUpdate();
     update.message.text = 'здравствуйте';
     await POST(makeCtx(update));
     expect(store.insertLead).not.toHaveBeenCalled();
+    expect(bot.sendMessage).not.toHaveBeenCalled();
   });
 
   it('acknowledges even when the store throws', async () => {
@@ -287,5 +339,113 @@ describe('the deep-link payload', () => {
     expect(store.insertLead).toHaveBeenCalledWith(
       expect.objectContaining({ service: '', locale: 'ru' }),
     );
+  });
+});
+
+describe('the two questions', () => {
+  it('greets and asks what the visitor is looking for, in the page locale', async () => {
+    await POST(makeCtx(startUpdate('vehicle-sourcing_sr')));
+
+    expect(bot.sendMessage).toHaveBeenCalledTimes(1);
+    expect(lastSent()).toEqual([42, 'GREETING_sr\n\nLOOKING_FOR']);
+  });
+
+  it('puts the first answer on the card and asks for the budget', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    ensureLeadCard.mockClear();
+
+    await say('BMW X5, не старше 2018');
+
+    expect(store.leads[0].comment).toContain('Ищет: BMW X5, не старше 2018');
+    expect(ensureLeadCard).toHaveBeenCalledTimes(1);
+    expect(lastSent()).toEqual([42, 'BUDGET']);
+  });
+
+  it('puts the budget on the card and closes the dialog', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    await say('BMW X5');
+
+    await say('до 20 000 евро');
+
+    expect(store.leads[0].comment).toContain('Бюджет: до 20 000 евро');
+    expect(store.leads[0].capturePrompt).toBeNull();
+    expect(lastSent()).toEqual([42, 'THANKS']);
+  });
+
+  it('ignores anything typed after the dialog has closed', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    await say('BMW X5');
+    await say('до 20 000 евро');
+    bot.sendMessage.mockClear();
+
+    await say('а ещё вопрос');
+
+    expect(bot.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it('answers in the locale the Lead was created in', async () => {
+    await POST(makeCtx(startUpdate('de')));
+
+    await say('ein Kombi');
+
+    expect(lastSent()).toEqual([42, 'BUDGET']);
+    expect(store.leads[0].locale).toBe('de');
+  });
+});
+
+describe('a Lead that disappears mid-dialog', () => {
+  it('still refreshes the card and keeps the conversation going', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    store.updateCapture.mockResolvedValueOnce(undefined);
+
+    await say('BMW X5');
+
+    expect(ensureLeadCard).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 1 }),
+    );
+    expect(lastSent()).toEqual([42, 'BUDGET']);
+  });
+});
+
+describe('abandoning the dialog', () => {
+  it('leaves the contact and the card intact after the first question', async () => {
+    await POST(makeCtx(startUpdate('vehicle-sourcing_ru', ANONYMOUS)));
+
+    expect(store.leads[0]).toMatchObject({
+      contact: 'tg://user?id=777',
+      service: 'vehicle-sourcing',
+      status: 'new',
+      archived: false,
+    });
+    expect(ensureLeadCard).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves the contact intact after the second question', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+
+    await say('BMW X5');
+
+    expect(store.leads[0]).toMatchObject({
+      contact: '@ivan',
+      capturePrompt: { chatId: 42, step: 'budget' },
+    });
+  });
+});
+
+describe('an operator editing the same Lead mid-dialog', () => {
+  it('neither side overwrites the other', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    store.leads[0] = {
+      ...store.leads[0],
+      name: 'Иван Петрович',
+      pendingPrompt: { chatId: 111, messageId: 555, kind: 'edit_name' },
+    };
+
+    await say('BMW X5');
+
+    expect(store.leads[0].name).toBe('Иван Петрович');
+    expect(store.leads[0].pendingPrompt?.kind).toBe('edit_name');
+    expect(store.leads[0].comment).toContain('Ищет: BMW X5');
+    expect(store.leads[0].capturePrompt?.step).toBe('budget');
   });
 });

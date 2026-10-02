@@ -36,6 +36,11 @@ export interface OwedRow {
   remaining: number;
 }
 
+export interface CaptureUpdate {
+  note?: string;
+  capturePrompt: CapturePrompt | null;
+}
+
 export interface LeadStoreOptions {
   storage: LeadStorage;
   schema: StoredLeadSchema;
@@ -394,6 +399,17 @@ export function createLeadStore({
       prompt: CapturePrompt | null,
     ): Promise<StoredLead | undefined> {
       return updateOne(id, (l) => ({ ...l, capturePrompt: prompt }));
+    },
+
+    updateCapture(
+      id: number,
+      { note, capturePrompt }: CaptureUpdate,
+    ): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) => ({
+        ...l,
+        comment: note ? appendNote(l.comment, note) : l.comment,
+        capturePrompt,
+      }));
     },
 
     async findByCapturePrompt(chatId: number): Promise<StoredLead | undefined> {

@@ -1684,3 +1684,51 @@ describe('capturePrompt', () => {
     );
   });
 });
+
+describe('updateCapture', () => {
+  it('appends the answer and moves the dialog on in one write', async () => {
+    const lead = await store.insertLead({ ...baseData, comment: 'Было' });
+
+    const updated = await store.updateCapture(lead.id, {
+      note: 'Ищет: BMW X5',
+      capturePrompt: { chatId: 777, step: 'budget' },
+    });
+
+    expect(updated?.comment).toBe('Было\nИщет: BMW X5');
+    expect(updated?.capturePrompt).toEqual({ chatId: 777, step: 'budget' });
+  });
+
+  it('ends the dialog without touching the comment when there is no note', async () => {
+    const lead = await store.insertLead({ ...baseData, comment: 'Было' });
+    await store.setCapturePrompt(lead.id, { chatId: 777, step: 'budget' });
+
+    const updated = await store.updateCapture(lead.id, {
+      capturePrompt: null,
+    });
+
+    expect(updated?.comment).toBe('Было');
+    expect(updated?.capturePrompt).toBeNull();
+  });
+
+  it('leaves an operator edit made mid-dialog in place', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.setPendingPrompt(lead.id, {
+      chatId: 111,
+      messageId: 555,
+      kind: 'edit_comment',
+    });
+
+    const updated = await store.updateCapture(lead.id, {
+      note: 'Бюджет: 20000',
+      capturePrompt: null,
+    });
+
+    expect(updated?.pendingPrompt?.kind).toBe('edit_comment');
+  });
+
+  it('returns undefined for an id that does not exist', async () => {
+    expect(
+      await store.updateCapture(999, { capturePrompt: null }),
+    ).toBeUndefined();
+  });
+});

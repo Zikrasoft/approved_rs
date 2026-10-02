@@ -5,6 +5,7 @@ import {
   TARGET_LANGUAGE_NAME,
 } from '../src/i18n/translateConfig.ts';
 import { dictionaryContentSchema } from '../src/i18n/dictionaryContentSchema.ts';
+import { captureBotContentSchema } from '../src/i18n/content/captureBotContentSchema.ts';
 import { faqContentSchema } from '../src/i18n/content/faqContentSchema.ts';
 import { leadFormContentSchema } from '../src/i18n/content/leadFormContentSchema.ts';
 import { homeContentSchema } from '../src/i18n/content/homeContentSchema.ts';
@@ -59,6 +60,13 @@ export const SECTIONS: readonly Section[] = [
     schema: promoBannersContentSchema,
     promptSubject:
       'SEO-keyword-dense promotional banner copy shown on case-detail pages (markdown **bold** spans mark the keyword phrases — keep them)',
+  },
+  {
+    path: 'src/content/i18n/captureBot.yaml',
+    fields: captureBotContentSchema.keyof().options,
+    schema: captureBotContentSchema,
+    promptSubject:
+      'what the Telegram capture bot says to a visitor who opened it from the site (a greeting and short questions, written as one person messaging another)',
   },
   {
     path: 'src/content/i18n/meta.yaml',

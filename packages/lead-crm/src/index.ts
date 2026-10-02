@@ -32,7 +32,12 @@ export {
   telegramIdNote,
   MAX_LIST_ROWS,
 } from './store.ts';
-export type { LeadStore, LeadStoreOptions, OwedRow } from './store.ts';
+export type {
+  CaptureUpdate,
+  LeadStore,
+  LeadStoreOptions,
+  OwedRow,
+} from './store.ts';
 
 export type { OrderMarkers } from './orderMarkers.ts';
 
