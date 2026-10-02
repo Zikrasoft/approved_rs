@@ -29,10 +29,6 @@ export const PHONE_NUMBER =
 export const WHATSAPP_NUMBER =
   import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? PHONE_NUMBER;
 export const VIBER_NUMBER = import.meta.env.PUBLIC_VIBER_NUMBER ?? PHONE_NUMBER;
-export const TG_MANAGER = import.meta.env.PUBLIC_TG_MANAGER ?? 'carlabrs';
-
-export const TELEGRAM_ENABLED = !TG_MANAGER.endsWith('_placeholder');
-
 export const TELEGRAM_BOT_URL = telegramBotLink(BRAND.captureBot);
 
 export const SOCIAL_SAME_AS = [TELEGRAM_BOT_URL];

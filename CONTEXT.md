@@ -28,6 +28,12 @@ retires itself — the daily reminder cron archives it and marks it lost
 ([ADR-0029](docs/adr/0029-ghost-leads-retire-themselves.md)). Because the sweep
 runs daily against a 24-hour window, a Ghost lead actually lives 24 to 48 hours.
 
+**Capture bot** — one per brand. It talks to visitors and writes a Lead; it has
+no operator surface at all.
+
+**CRM bot** — the single bot the operator works in: cards, statuses, money,
+reminders and order notifications, for all three brands in one chat.
+
 ## Shop
 
 **Order** — a purchase in Medusa. Medusa is its only source of truth: its

@@ -15,7 +15,6 @@ export const SITE_BRAND = 'APPROVED';
 export const SITE_TLD = '.rs';
 export const DEFAULT_COUNTRY = 'rs';
 
-export const TG_MANAGER = import.meta.env.PUBLIC_TG_MANAGER!;
 export const THREADS_CHANNEL = import.meta.env.PUBLIC_THREADS_CHANNEL!;
 export const WHATSAPP_NUMBER = import.meta.env.PUBLIC_WHATSAPP_NUMBER!;
 export const VIBER_NUMBER = import.meta.env.PUBLIC_VIBER_NUMBER!;
