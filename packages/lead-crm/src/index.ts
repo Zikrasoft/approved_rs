@@ -102,6 +102,8 @@ export { contactChannelSchema, HONEYPOT_FIELD, SERVICE_FIELD } from './form.ts';
 export { createLeadsRoute } from './routes/leads.ts';
 export type { LeadsRouteOptions, RouteRequestContext } from './routes/leads.ts';
 
+export { requireEnv } from './requireEnv.ts';
+
 export { secretMatches } from './verifySecret.ts';
 
 export { createContactClickRoute } from './routes/contactClick.ts';

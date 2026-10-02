@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const captureBotContentSchema = z
+export const captureCopySchema = z
   .object({
     greeting: z.string(),
     lookingFor: z.string(),
@@ -14,4 +14,4 @@ export const captureBotContentSchema = z
   })
   .strict();
 
-export type CaptureBotContent = z.infer<typeof captureBotContentSchema>;
+export type CaptureCopy = z.infer<typeof captureCopySchema>;

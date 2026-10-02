@@ -5,7 +5,8 @@
   "sideEffects": false,
   "version": "0.0.1",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./copy": "./src/copy.ts"
   },
   "scripts": {
     "test": "vitest run --coverage",

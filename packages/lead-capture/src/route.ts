@@ -7,6 +7,7 @@ import {
   type StoredLead,
   type TelegramClient,
 } from '@podbor/lead-crm';
+import type { CaptureCopy } from './copy.ts';
 import { captureUpdateSchema, type CaptureSender } from './update.ts';
 
 const ACK = new Response(null, { status: 200 });
@@ -38,18 +39,6 @@ const WITHOUT_HANDLE: CaptureStep[] = ['phone', 'looking_for', 'budget'];
 const MESSAGE_NOTE = 'Сообщение';
 
 const CLEAR_KEYBOARD = { reply_markup: { remove_keyboard: true } };
-
-export interface CaptureCopy {
-  greeting: string;
-  lookingFor: string;
-  budget: string;
-  phoneAsk: string;
-  phoneOffer: string;
-  phoneButton: string;
-  phoneSkip: string;
-  thanks: string;
-  received: string;
-}
 
 export type CaptureStore = Pick<
   LeadStore,

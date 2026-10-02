@@ -5,17 +5,12 @@ import {
   createNotifyLead,
   createTelegramClient,
   parseIds,
+  requireEnv,
 } from '@podbor/lead-crm';
 import { serviceLabel as brandServiceLabel } from '@podbor/brands';
 import { getServicesContent } from '@/i18n/content/services';
 import { isServiceSlug } from '@/utils/services';
 import { BRAND, leadStore } from './crm';
-
-function requireEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) throw new Error(`[telegram] ${name} is not set`);
-  return value;
-}
 
 const ruServices = getServicesContent('ru');
 

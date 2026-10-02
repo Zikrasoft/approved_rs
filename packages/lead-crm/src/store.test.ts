@@ -1625,12 +1625,11 @@ describe('quarantine — nothing leaves the blob on its own', () => {
 });
 
 describe('capturePrompt', () => {
-  it('sets the step a visitor is on and finds the lead by their chat id', async () => {
+  it('holds the step a visitor is on and finds the lead by their chat id', async () => {
     const lead = await store.insertLead(baseData);
 
-    await store.setCapturePrompt(lead.id, {
-      chatId: 777,
-      step: 'looking_for',
+    await store.updateCapture(lead.id, {
+      capturePrompt: { chatId: 777, step: 'looking_for' },
     });
 
     const found = await store.findByCapturePrompt(777, baseData.brand);
@@ -1640,9 +1639,13 @@ describe('capturePrompt', () => {
 
   it('clears the prompt when set to null', async () => {
     const lead = await store.insertLead(baseData);
-    await store.setCapturePrompt(lead.id, { chatId: 777, step: 'budget' });
+    await store.updateCapture(lead.id, {
+      capturePrompt: { chatId: 777, step: 'budget' },
+    });
 
-    const cleared = await store.setCapturePrompt(lead.id, null);
+    const cleared = await store.updateCapture(lead.id, {
+      capturePrompt: null,
+    });
 
     expect(cleared?.capturePrompt).toBeNull();
     expect(
@@ -1652,16 +1655,12 @@ describe('capturePrompt', () => {
 
   it('returns undefined for a chat id no lead is waiting on', async () => {
     const lead = await store.insertLead(baseData);
-    await store.setCapturePrompt(lead.id, { chatId: 777, step: 'phone' });
+    await store.updateCapture(lead.id, {
+      capturePrompt: { chatId: 777, step: 'phone' },
+    });
 
     expect(
       await store.findByCapturePrompt(778, baseData.brand),
-    ).toBeUndefined();
-  });
-
-  it('returns undefined for an id that does not exist', async () => {
-    expect(
-      await store.setCapturePrompt(999, { chatId: 777, step: 'phone' }),
     ).toBeUndefined();
   });
 
@@ -1673,7 +1672,9 @@ describe('capturePrompt', () => {
       kind: 'edit_name',
     });
 
-    await store.setCapturePrompt(lead.id, { chatId: 777, step: 'budget' });
+    await store.updateCapture(lead.id, {
+      capturePrompt: { chatId: 777, step: 'budget' },
+    });
 
     expect(await store.findByPendingPrompt(111, 555)).toBeDefined();
     expect(
@@ -1798,7 +1799,9 @@ describe('updateCapture', () => {
 
   it('ends the dialog without touching the comment when there is no note', async () => {
     const lead = await store.insertLead({ ...baseData, comment: 'Было' });
-    await store.setCapturePrompt(lead.id, { chatId: 777, step: 'budget' });
+    await store.updateCapture(lead.id, {
+      capturePrompt: { chatId: 777, step: 'budget' },
+    });
 
     const updated = await store.updateCapture(lead.id, {
       capturePrompt: null,

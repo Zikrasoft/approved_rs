@@ -127,5 +127,6 @@ continues the open one and skips the contact questions.
   lookups match on — together with the Lead's `brand`, because in a private chat the chat id is the
   user id and is identical in all four bots, so an unfiltered scan of the one shared store would
   resume another brand's Lead and bill it at that brand's commission.
-- Dialog copy is three question sets across five locales, and every string is visitor-facing, so the
-  5-locale rule applies to all of it.
+- Dialog copy is three question sets, each in its own site's locales — five on approved.rs, three on
+  carlab.rs and details.rs — and every string is visitor-facing, so the locale rule applies to all
+  of it.

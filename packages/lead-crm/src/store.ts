@@ -407,13 +407,6 @@ export function createLeadStore({
       );
     },
 
-    setCapturePrompt(
-      id: number,
-      prompt: CapturePrompt | null,
-    ): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({ ...l, capturePrompt: prompt }));
-    },
-
     updateCapture(
       id: number,
       { note, contact, capturePrompt }: CaptureUpdate,
