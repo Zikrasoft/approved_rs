@@ -11,28 +11,35 @@ const cc = getI18n(locale).common.cookie;
 <cookie-consent
   data-policy-version={COOKIE_POLICY_VERSION}
   hidden
-  class="fixed bottom-4 left-4 right-4 sm:right-auto sm:max-w-sm z-50 rounded-sm border border-default bg-surface p-5 shadow-lg"
+  aria-live="polite"
+  class="fixed inset-x-0 bottom-0 z-50 border-t border-default bg-surface"
 >
-  <p class="text-sm leading-relaxed text-secondary mb-4">
-    {cc.notice}
-    {' '}{cc.more}{' '}
-    <a href={PathBuilder.privacy(locale)} class="underline text-muted"
-      >{cc.policyLink}</a
-    >.
-  </p>
-  <div class="flex gap-3">
-    <button
-      data-consent-decline
-      class="px-4 py-2 rounded-sm border text-xs font-medium border-default text-primary"
-    >
-      {cc.decline}
-    </button>
-    <button
-      data-consent-accept
-      class="px-4 py-2 rounded-sm border text-xs font-medium border-accent-strong bg-accent-strong text-on-accent"
-    >
-      {cc.accept}
-    </button>
+  <div
+    class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:px-6"
+  >
+    <p class="min-w-0 flex-1 text-xs leading-snug text-secondary">
+      {cc.notice}
+      {' '}{cc.more}{' '}
+      <a href={PathBuilder.privacy(locale)} class="underline text-muted"
+        >{cc.policyLink}</a
+      >.
+    </p>
+    <div class="flex shrink-0 items-center gap-2">
+      <button
+        type="button"
+        data-consent-decline
+        class="rounded-sm border border-default px-3 py-2 text-xs font-medium text-primary"
+      >
+        {cc.decline}
+      </button>
+      <button
+        type="button"
+        data-consent-accept
+        class="rounded-sm border border-accent-strong bg-accent-strong px-3 py-2 text-xs font-medium text-on-accent"
+      >
+        {cc.accept}
+      </button>
+    </div>
   </div>
 </cookie-consent>
 

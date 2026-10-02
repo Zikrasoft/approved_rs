@@ -51,34 +51,32 @@ describe('defineCookieConsent', () => {
     expect(customElements.get(tagName)).toBe(first);
   });
 
-  it('waits before asking a visitor who has not answered yet', () => {
+  it('leaves the first screen alone, however long the visitor stays on it', () => {
     const el = mount();
+    vi.advanceTimersByTime(60_000);
+    scrollTo(window.innerHeight - 1);
     expect(el.hidden).toBe(true);
-    vi.advanceTimersByTime(6000);
+  });
+
+  it('asks once a whole screen has scrolled past', () => {
+    const el = mount();
+    scrollTo(window.innerHeight);
     expect(el.hidden).toBe(false);
   });
 
-  it('asks as soon as the visitor scrolls past the fold', () => {
-    const el = mount();
-    scrollTo(100);
-    expect(el.hidden).toBe(true);
-    scrollTo(700);
-    expect(el.hidden).toBe(false);
-  });
-
-  it('never asks a visitor who answered while the timer was running', () => {
+  it('never asks a visitor who answered while it was waiting', () => {
     const el = mount();
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify(newConsent(true, VERSION, new Date())),
     );
-    vi.advanceTimersByTime(6000);
+    scrollTo(window.innerHeight);
     expect(el.hidden).toBe(true);
   });
 
   it('stays visible when reconnected after the reveal', () => {
     const el = mount();
-    vi.advanceTimersByTime(6000);
+    scrollTo(window.innerHeight);
     (el as unknown as { connectedCallback: () => void }).connectedCallback();
     expect(el.hidden).toBe(false);
   });
@@ -86,7 +84,7 @@ describe('defineCookieConsent', () => {
   it('drops a pending reveal when the element goes away', () => {
     const el = mount();
     el.remove();
-    vi.advanceTimersByTime(6000);
+    scrollTo(window.innerHeight);
     expect(el.hidden).toBe(true);
   });
 
@@ -104,7 +102,7 @@ describe('defineCookieConsent', () => {
       JSON.stringify(newConsent(true, '2020-01-01', new Date())),
     );
     const el = mount();
-    vi.advanceTimersByTime(6000);
+    scrollTo(window.innerHeight);
     expect(el.hidden).toBe(false);
   });
 
@@ -145,7 +143,7 @@ describe('defineCookieConsent', () => {
 
   it('ignores a click on the banner that is not an answer', () => {
     const el = mount();
-    vi.advanceTimersByTime(6000);
+    scrollTo(window.innerHeight);
     el.click();
     expect(el.hidden).toBe(false);
     expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
