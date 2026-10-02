@@ -30,6 +30,18 @@ jobs:
       - run: pnpm exec prettier --check .
       - run: pnpm typecheck
       - run: pnpm test
+      - run: sh .github/scripts/pinned-deps.sh
+
+      # The two sites that prerender without a backend, so the markup contracts
+      # site-kit owns are checked against real HTML rather than a grep. CarLab
+      # needs a live Medusa to prerender and is left to its deploy build.
+      - run: >-
+          pnpm turbo run build
+          --filter=@podbor/approved-rs --filter=@podbor/detailing
+      - run: >-
+          node --experimental-strip-types .github/scripts/contact-placement.ts
+          apps/approved-rs/dist/client apps/detailing/dist/client
+
       - run: sh .github/scripts/catalog-stale.test.sh
       - run: sh infra/medusa/test/scripts.test.sh
       - run: sh infra/medusa/test/compose.test.sh

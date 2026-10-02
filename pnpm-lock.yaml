@@ -13,6 +13,9 @@ importers:
       '@eslint/js':
         specifier: 10.0.1
         version: 10.0.1(eslint@10.9.1(jiti@2.7.0)(supports-color@7.2.0))
+      '@playwright/test':
+        specifier: 1.63.0
+        version: 1.63.0
       astro-eslint-parser:
         specifier: 3.1.0
         version: 3.1.0(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(supports-color@7.2.0)
@@ -31,6 +34,9 @@ importers:
       globals:
         specifier: 17.12.0
         version: 17.12.0
+      htmlparser2:
+        specifier: 12.0.0
+        version: 12.0.0
       husky:
         specifier: 9.1.7
         version: 9.1.7
