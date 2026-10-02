@@ -14,10 +14,7 @@ import {
   STUDIO_ADDRESS,
 } from '@/utils/constants';
 import { CONTACT_LINKS } from '@/utils/contactLinks';
-import {
-  captureStartPayload,
-  telegramBotLink,
-} from '@podbor/site-kit/contact-links';
+import { captureBotLink } from '@podbor/site-kit/contact-links';
 import { contactPlacement } from '@podbor/site-kit';
 
 const locale = localeFrom(Astro.url.pathname);
@@ -41,10 +38,7 @@ const messengers = [
     track: 'viber',
   },
   {
-    href: telegramBotLink(
-      BRAND.captureBot,
-      captureStartPayload(undefined, locale),
-    ),
+    href: captureBotLink(BRAND.captureBot, locale),
     icon: 'telegram',
     label: site.channels.telegram,
     track: 'telegram',

@@ -7,7 +7,6 @@ import { createLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
 import {
   createLeadStore,
   GHOST_LEAD_RETENTION_MS,
-  telegramIdNote,
   VISITOR_MERGE_WINDOW_MS,
   type LeadStore,
 } from './store.ts';
@@ -79,13 +78,6 @@ beforeEach(() => {
   store = createLeadStore({
     storage,
     schema: createLeadSchema({ defaultCommissionPercent: 10 }),
-  });
-});
-
-describe('telegramIdNote', () => {
-  it('is a single line a comment can be searched for', () => {
-    expect(telegramIdNote(4242)).toBe('Telegram id: 4242');
-    expect(telegramIdNote(4242)).not.toContain('\n');
   });
 });
 
@@ -1633,39 +1625,42 @@ describe('quarantine — nothing leaves the blob on its own', () => {
 });
 
 describe('capturePrompt', () => {
-  it('sets the step a visitor is on and finds the lead by their chat id', async () => {
+  it('holds the step a visitor is on and finds the lead by their chat id', async () => {
     const lead = await store.insertLead(baseData);
 
-    await store.setCapturePrompt(lead.id, {
-      chatId: 777,
-      step: 'looking_for',
+    await store.updateCapture(lead.id, {
+      capturePrompt: { chatId: 777, step: 'looking_for' },
     });
 
-    const found = await store.findByCapturePrompt(777);
+    const found = await store.findByCapturePrompt(777, baseData.brand);
     expect(found?.id).toBe(lead.id);
     expect(found?.capturePrompt).toEqual({ chatId: 777, step: 'looking_for' });
   });
 
   it('clears the prompt when set to null', async () => {
     const lead = await store.insertLead(baseData);
-    await store.setCapturePrompt(lead.id, { chatId: 777, step: 'budget' });
+    await store.updateCapture(lead.id, {
+      capturePrompt: { chatId: 777, step: 'budget' },
+    });
 
-    const cleared = await store.setCapturePrompt(lead.id, null);
+    const cleared = await store.updateCapture(lead.id, {
+      capturePrompt: null,
+    });
 
     expect(cleared?.capturePrompt).toBeNull();
-    expect(await store.findByCapturePrompt(777)).toBeUndefined();
+    expect(
+      await store.findByCapturePrompt(777, baseData.brand),
+    ).toBeUndefined();
   });
 
   it('returns undefined for a chat id no lead is waiting on', async () => {
     const lead = await store.insertLead(baseData);
-    await store.setCapturePrompt(lead.id, { chatId: 777, step: 'phone' });
+    await store.updateCapture(lead.id, {
+      capturePrompt: { chatId: 777, step: 'phone' },
+    });
 
-    expect(await store.findByCapturePrompt(778)).toBeUndefined();
-  });
-
-  it('returns undefined for an id that does not exist', async () => {
     expect(
-      await store.setCapturePrompt(999, { chatId: 777, step: 'phone' }),
+      await store.findByCapturePrompt(778, baseData.brand),
     ).toBeUndefined();
   });
 
@@ -1677,81 +1672,115 @@ describe('capturePrompt', () => {
       kind: 'edit_name',
     });
 
-    await store.setCapturePrompt(lead.id, { chatId: 777, step: 'budget' });
+    await store.updateCapture(lead.id, {
+      capturePrompt: { chatId: 777, step: 'budget' },
+    });
 
     expect(await store.findByPendingPrompt(111, 555)).toBeDefined();
-    expect((await store.findByCapturePrompt(777))?.pendingPrompt?.kind).toBe(
-      'edit_name',
-    );
+    expect(
+      (await store.findByCapturePrompt(777, baseData.brand))?.pendingPrompt
+        ?.kind,
+    ).toBe('edit_name');
   });
 });
 
-describe('findOpenLeadByTelegramId', () => {
+describe('the capture lookups', () => {
   const fromTelegram = (id: number, overrides: Partial<LeadInput> = {}) =>
-    store.insertLead({
-      ...baseData,
-      comment: telegramIdNote(id),
-      ...overrides,
-    });
+    store.insertLead({ ...baseData, telegramId: id, ...overrides });
 
   it('is the visitor merge window that decides a returning visitor', () => {
     expect(VISITOR_MERGE_WINDOW_MS).toBe(60 * 60 * 1000);
   });
 
-  it('finds the lead whose comment carries the marker', async () => {
+  it('finds the lead carrying the sender id', async () => {
     const lead = await fromTelegram(42);
 
-    expect((await store.findOpenLeadByTelegramId(42))?.id).toBe(lead.id);
-  });
-
-  it('matches the marker as a whole line, not as a prefix', async () => {
-    await fromTelegram(4);
-
-    expect(await store.findOpenLeadByTelegramId(42)).toBeUndefined();
-  });
-
-  it('survives extra notes appended under the marker', async () => {
-    const lead = await fromTelegram(42);
-    await store.updateCapture(lead.id, {
-      note: 'Ищет: BMW X5',
-      capturePrompt: null,
-    });
-
-    expect((await store.findOpenLeadByTelegramId(42))?.id).toBe(lead.id);
+    expect((await store.findOpenLeadByTelegramId(42, baseData.brand))?.id).toBe(
+      lead.id,
+    );
   });
 
   it('returns the newest of several leads from the same visitor', async () => {
     await fromTelegram(42);
     const second = await fromTelegram(42);
 
-    expect((await store.findOpenLeadByTelegramId(42))?.id).toBe(second.id);
+    expect((await store.findOpenLeadByTelegramId(42, baseData.brand))?.id).toBe(
+      second.id,
+    );
   });
 
-  it('skips a lead with no comment at all', async () => {
-    await store.insertLead({ ...baseData, comment: null });
+  it('skips a lead with no sender id at all', async () => {
+    await store.insertLead(baseData);
 
-    expect(await store.findOpenLeadByTelegramId(42)).toBeUndefined();
+    expect(
+      await store.findOpenLeadByTelegramId(42, baseData.brand),
+    ).toBeUndefined();
+  });
+
+  it('never crosses brands, where the chat id is the same person', async () => {
+    const mine = await fromTelegram(42);
+    await fromTelegram(42, { brand: 'CarLab' });
+
+    expect((await store.findOpenLeadByTelegramId(42, baseData.brand))?.id).toBe(
+      mine.id,
+    );
+  });
+
+  it('keeps an open dialog on another brand out of this one', async () => {
+    const other = await fromTelegram(42, { brand: 'CarLab' });
+    await store.updateCapture(other.id, {
+      capturePrompt: { chatId: 42, step: 'budget' },
+    });
+
+    expect(await store.findByCapturePrompt(42, baseData.brand)).toBeUndefined();
+  });
+
+  it('answers with the newest open dialog on the same chat', async () => {
+    const first = await fromTelegram(42);
+    const second = await fromTelegram(42);
+    for (const lead of [first, second])
+      await store.updateCapture(lead.id, {
+        capturePrompt: { chatId: 42, step: 'budget' },
+      });
+
+    expect((await store.findByCapturePrompt(42, baseData.brand))?.id).toBe(
+      second.id,
+    );
   });
 
   it('skips an archived lead', async () => {
     const lead = await fromTelegram(42);
+    await store.updateCapture(lead.id, {
+      capturePrompt: { chatId: 42, step: 'budget' },
+    });
     await store.archiveLead(lead.id);
 
-    expect(await store.findOpenLeadByTelegramId(42)).toBeUndefined();
+    expect(
+      await store.findOpenLeadByTelegramId(42, baseData.brand),
+    ).toBeUndefined();
+    expect(await store.findByCapturePrompt(42, baseData.brand)).toBeUndefined();
   });
 
   it.each(['won', 'lost'] as const)('skips a %s lead', async (status) => {
     const lead = await fromTelegram(42);
+    await store.updateCapture(lead.id, {
+      capturePrompt: { chatId: 42, step: 'budget' },
+    });
     await store.setStatus(lead.id, status);
 
-    expect(await store.findOpenLeadByTelegramId(42)).toBeUndefined();
+    expect(
+      await store.findOpenLeadByTelegramId(42, baseData.brand),
+    ).toBeUndefined();
+    expect(await store.findByCapturePrompt(42, baseData.brand)).toBeUndefined();
   });
 
   it('keeps a lead the operator has moved along but not closed', async () => {
     const lead = await fromTelegram(42);
     await store.setStatus(lead.id, 'in_progress');
 
-    expect((await store.findOpenLeadByTelegramId(42))?.id).toBe(lead.id);
+    expect((await store.findOpenLeadByTelegramId(42, baseData.brand))?.id).toBe(
+      lead.id,
+    );
   });
 });
 
@@ -1770,7 +1799,9 @@ describe('updateCapture', () => {
 
   it('ends the dialog without touching the comment when there is no note', async () => {
     const lead = await store.insertLead({ ...baseData, comment: 'Было' });
-    await store.setCapturePrompt(lead.id, { chatId: 777, step: 'budget' });
+    await store.updateCapture(lead.id, {
+      capturePrompt: { chatId: 777, step: 'budget' },
+    });
 
     const updated = await store.updateCapture(lead.id, {
       capturePrompt: null,

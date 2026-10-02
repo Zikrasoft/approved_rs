@@ -15,6 +15,7 @@ apps/auto-service/    CarLab, the car service site + parts shop — carlab.rs
 apps/medusa/          CarLab shop backend — Medusa 2.19, CommonJS, api.carlab.rs
 infra/medusa/         CarLab shop production: image, compose (postgres, redis, medusa, caddy), host scripts — one Hetzner VPS
 packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click routes
+packages/lead-capture/ the capture bots' webhook route: the /start dialog that turns a Telegram tap into a Lead
 packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
 packages/site-kit/    brand-agnostic mechanics, never anything visual
 packages/brands/      the three brands: domains, names, locale mapping, service labels, the shared address

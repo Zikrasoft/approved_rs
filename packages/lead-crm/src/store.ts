@@ -78,6 +78,24 @@ function isGhostLead(lead: StoredLead, now: Date): boolean {
   );
 }
 
+function newestOpen(
+  leads: StoredLead[],
+  brand: string,
+  matches: (lead: StoredLead) => boolean,
+): StoredLead | undefined {
+  return leads
+    .filter(
+      (l) =>
+        l.brand === brand &&
+        !l.archived &&
+        l.status !== 'won' &&
+        l.status !== 'lost' &&
+        matches(l),
+    )
+    .sort((a, b) => a.id - b.id)
+    .at(-1);
+}
+
 const MAX_STORED_COMMENT_LENGTH = 4000;
 
 export function appendNote(
@@ -86,12 +104,6 @@ export function appendNote(
 ): string {
   const next = comment ? `${comment}\n${note}` : note;
   return next.slice(-MAX_STORED_COMMENT_LENGTH);
-}
-
-const TELEGRAM_ID_PREFIX = 'Telegram id:';
-
-export function telegramIdNote(telegramId: number): string {
-  return `${TELEGRAM_ID_PREFIX} ${telegramId}`;
 }
 
 export function canPostpone(lead: StoredLead): boolean {
@@ -395,13 +407,6 @@ export function createLeadStore({
       );
     },
 
-    setCapturePrompt(
-      id: number,
-      prompt: CapturePrompt | null,
-    ): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({ ...l, capturePrompt: prompt }));
-    },
-
     updateCapture(
       id: number,
       { note, contact, capturePrompt }: CaptureUpdate,
@@ -416,24 +421,24 @@ export function createLeadStore({
 
     async findOpenLeadByTelegramId(
       telegramId: number,
+      brand: string,
     ): Promise<StoredLead | undefined> {
-      const marker = telegramIdNote(telegramId);
-      const leads = await readLeads();
-      return leads
-        .filter(
-          (l) =>
-            !l.archived &&
-            l.status !== 'won' &&
-            l.status !== 'lost' &&
-            (l.comment ?? '').split('\n').includes(marker),
-        )
-        .sort((a, b) => a.id - b.id)
-        .at(-1);
+      return newestOpen(
+        await readLeads(),
+        brand,
+        (l) => l.telegramId === telegramId,
+      );
     },
 
-    async findByCapturePrompt(chatId: number): Promise<StoredLead | undefined> {
-      const leads = await readLeads();
-      return leads.find((l) => l.capturePrompt?.chatId === chatId);
+    async findByCapturePrompt(
+      chatId: number,
+      brand: string,
+    ): Promise<StoredLead | undefined> {
+      return newestOpen(
+        await readLeads(),
+        brand,
+        (l) => l.capturePrompt?.chatId === chatId,
+      );
     },
 
     archiveLead(id: number): Promise<StoredLead | undefined> {

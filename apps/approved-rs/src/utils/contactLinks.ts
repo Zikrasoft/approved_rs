@@ -1,5 +1,5 @@
 export {
-  captureStartPayload,
+  captureBotLink,
   phoneLink,
   telegramBotLink,
   viberLink,

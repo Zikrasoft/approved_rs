@@ -5,10 +5,7 @@ import { getSiteContent } from '@/i18n/content/site';
 import { CONTACT_LINKS } from '@/utils/contactLinks';
 import { BRAND, PHONE_NUMBER } from '@/utils/constants';
 import type { ServiceSlug } from '@/utils/services';
-import {
-  captureStartPayload,
-  telegramBotLink,
-} from '@podbor/site-kit/contact-links';
+import { captureBotLink } from '@podbor/site-kit/contact-links';
 import { contactPlacement, type ContactPlacement } from '@podbor/site-kit';
 import { formatPhone } from '@podbor/site-kit/format-phone';
 
@@ -42,10 +39,7 @@ const channels = [
     track: 'viber',
   },
   {
-    href: telegramBotLink(
-      BRAND.captureBot,
-      captureStartPayload(service, locale),
-    ),
+    href: captureBotLink(BRAND.captureBot, locale, service),
     icon: 'telegram',
     label: site.channels.telegram,
     track: 'telegram',

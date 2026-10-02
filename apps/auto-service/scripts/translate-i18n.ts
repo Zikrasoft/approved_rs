@@ -5,7 +5,7 @@ import {
   TARGET_LANGUAGE_NAME,
 } from '../src/i18n/translateConfig.ts';
 import { siteContentSchema } from '../src/i18n/content/siteContentSchema.ts';
-import { captureBotContentSchema } from '../src/i18n/content/captureBotContentSchema.ts';
+import { captureCopySchema } from '@podbor/lead-capture/copy';
 import { homeContentSchema } from '../src/i18n/content/homeContentSchema.ts';
 import { servicesContentSchema } from '../src/i18n/content/servicesContentSchema.ts';
 import { pagesContentSchema } from '../src/i18n/content/pagesContentSchema.ts';
@@ -42,8 +42,8 @@ export const SECTIONS: readonly Section[] = [
   },
   {
     path: 'src/content/i18n/captureBot.yaml',
-    fields: captureBotContentSchema.keyof().options,
-    schema: captureBotContentSchema,
+    fields: captureCopySchema.keyof().options,
+    schema: captureCopySchema,
     promptSubject:
       'what the Telegram capture bot says to a visitor who opened it from a car service and parts shop site (a greeting and short questions about their car and the repair, written as one person messaging another)',
   },

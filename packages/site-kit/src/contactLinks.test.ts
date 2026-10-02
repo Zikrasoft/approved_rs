@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  captureStartPayload,
+  captureBotLink,
   instagramLink,
   phoneLink,
   telegramBotLink,
@@ -46,19 +46,17 @@ describe('contact links', () => {
   });
 
   it('carries the page service and locale into the bot start payload', () => {
-    expect(captureStartPayload('vehicle-sourcing', 'sr')).toBe(
-      'vehicle-sourcing_sr',
+    expect(captureBotLink('ApprovedRsBot', 'sr', 'vehicle-sourcing')).toBe(
+      'https://t.me/ApprovedRsBot?start=vehicle-sourcing_sr',
     );
   });
 
   it('carries the locale alone where the page has no service', () => {
-    expect(captureStartPayload(undefined, 'ru')).toBe('ru');
-    expect(captureStartPayload('', 'ru')).toBe('ru');
-  });
-
-  it('opens the capture bot on the start payload', () => {
-    expect(telegramBotLink('ApprovedRsBot', 'vehicle-sourcing_sr')).toBe(
-      'https://t.me/ApprovedRsBot?start=vehicle-sourcing_sr',
+    expect(captureBotLink('ApprovedRsBot', 'ru')).toBe(
+      'https://t.me/ApprovedRsBot?start=ru',
+    );
+    expect(captureBotLink('ApprovedRsBot', 'ru', '')).toBe(
+      'https://t.me/ApprovedRsBot?start=ru',
     );
   });
 

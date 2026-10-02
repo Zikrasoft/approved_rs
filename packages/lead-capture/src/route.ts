@@ -1,13 +1,13 @@
 import { z } from 'zod';
 import {
   secretMatches,
-  telegramIdNote,
   VISITOR_MERGE_WINDOW_MS,
   type CapturePrompt,
   type LeadStore,
   type StoredLead,
   type TelegramClient,
 } from '@podbor/lead-crm';
+import type { CaptureCopy } from './copy.ts';
 import { captureUpdateSchema, type CaptureSender } from './update.ts';
 
 const ACK = new Response(null, { status: 200 });
@@ -39,18 +39,6 @@ const WITHOUT_HANDLE: CaptureStep[] = ['phone', 'looking_for', 'budget'];
 const MESSAGE_NOTE = 'Сообщение';
 
 const CLEAR_KEYBOARD = { reply_markup: { remove_keyboard: true } };
-
-export interface CaptureCopy {
-  greeting: string;
-  lookingFor: string;
-  budget: string;
-  phoneAsk: string;
-  phoneOffer: string;
-  phoneButton: string;
-  phoneSkip: string;
-  thanks: string;
-  received: string;
-}
 
 export type CaptureStore = Pick<
   LeadStore,
@@ -123,6 +111,19 @@ function nextMessage(
   return [words.thanks, extra];
 }
 
+function answerNote(
+  step: CaptureStep,
+  words: CaptureCopy,
+  keepsHandle: boolean,
+  text: string | undefined,
+  phone: string | undefined,
+): string | undefined {
+  if (step !== 'phone') return `${ANSWER_NOTE[step]}: ${text}`;
+  if (phone !== undefined)
+    return keepsHandle ? `${ANSWER_NOTE.phone}: ${phone}` : undefined;
+  return text === words.phoneSkip ? undefined : `${MESSAGE_NOTE}: ${text}`;
+}
+
 function sharedPhone(phoneNumber: string): string {
   return phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
 }
@@ -177,9 +178,8 @@ export function createCaptureWebhookRoute<L extends string>({
       service,
       services: service ? [service] : [],
       contactChannel: 'telegram',
-      comment: message
-        ? `${telegramIdNote(sender.id)}\n${MESSAGE_NOTE}: ${message}`
-        : telegramIdNote(sender.id),
+      comment: message ? `${MESSAGE_NOTE}: ${message}` : null,
+      telegramId: sender.id,
       country: null,
       source_url: null,
       visitorId: null,
@@ -203,12 +203,7 @@ export function createCaptureWebhookRoute<L extends string>({
     const takesPhone = prompt.step === 'phone' && phone !== undefined;
     const next = stepAfter(lead.contact, prompt.step);
     const updated = await store.updateCapture(lead.id, {
-      note:
-        prompt.step === 'phone'
-          ? takesPhone && keepsHandle
-            ? `${ANSWER_NOTE.phone}: ${phone}`
-            : undefined
-          : `${ANSWER_NOTE[prompt.step]}: ${text}`,
+      note: answerNote(prompt.step, words, keepsHandle, text, phone),
       contact: takesPhone && !keepsHandle ? phone : undefined,
       capturePrompt: next ? { chatId: prompt.chatId, step: next } : null,
     });
@@ -231,7 +226,7 @@ export function createCaptureWebhookRoute<L extends string>({
     sender: CaptureSender,
     payload: string | undefined,
   ): Promise<void> {
-    const open = await store.findOpenLeadByTelegramId(sender.id);
+    const open = await store.findOpenLeadByTelegramId(sender.id, brand);
     const age = open ? Date.now() - new Date(open.createdAt).getTime() : 0;
     if (open && age < VISITOR_MERGE_WINDOW_MS) return resume(chatId, open);
     return start(chatId, sender, payload);
@@ -242,7 +237,7 @@ export function createCaptureWebhookRoute<L extends string>({
     sender: CaptureSender,
     text: string,
   ): Promise<void> {
-    const open = await store.findOpenLeadByTelegramId(sender.id);
+    const open = await store.findOpenLeadByTelegramId(sender.id, brand);
     if (!open) return start(chatId, sender, undefined, text);
     const updated = await store.updateCapture(open.id, {
       note: `${MESSAGE_NOTE}: ${text}`,
@@ -265,8 +260,8 @@ export function createCaptureWebhookRoute<L extends string>({
 
     // TODO: a dialog abandoned long ago still answers here, so a question
     // typed weeks later lands as that step's answer; bound it on the Lead's
-    // age once a dedicated telegramId field replaces the comment marker.
-    const lead = await store.findByCapturePrompt(chatId);
+    // age if that shows up in the store.
+    const lead = await store.findByCapturePrompt(chatId, brand);
     const prompt = lead?.capturePrompt;
     if (lead && prompt) {
       if (prompt.step !== 'phone' && text === undefined) return;

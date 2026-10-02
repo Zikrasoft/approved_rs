@@ -1,16 +1,8 @@
 import captureBotYaml from '@/content/i18n/captureBot.yaml?raw';
-import type { Locale } from '@/i18n/config';
+import { captureCopySchema } from '@podbor/lead-capture/copy';
 import { loadI18nSection } from '@/i18n/loadI18nSection';
-import {
-  captureBotContentSchema,
-  type CaptureBotContent,
-} from './captureBotContentSchema';
 
-const getCaptureBotContent = loadI18nSection(
-  captureBotContentSchema,
+export const getCaptureBotCopy = loadI18nSection(
+  captureCopySchema,
   captureBotYaml,
 );
-
-export function getCaptureBotCopy(locale: Locale): CaptureBotContent {
-  return getCaptureBotContent(locale);
-}

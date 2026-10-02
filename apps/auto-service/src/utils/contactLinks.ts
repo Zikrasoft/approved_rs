@@ -1,9 +1,8 @@
 import type { SiteContent } from '@/i18n/content/site';
 import type { Locale } from '@/i18n/config';
 import {
-  captureStartPayload,
+  captureBotLink,
   phoneLink,
-  telegramBotLink,
   viberLink,
   whatsappLink,
 } from '@podbor/site-kit/contact-links';
@@ -21,7 +20,7 @@ export const CONTACT_LINKS = {
 } as const;
 
 export const telegramBotHref = (locale: Locale, service?: string): string =>
-  telegramBotLink(BRAND.captureBot, captureStartPayload(service, locale));
+  captureBotLink(BRAND.captureBot, locale, service);
 
 export const contactChannels = (
   site: SiteContent,
