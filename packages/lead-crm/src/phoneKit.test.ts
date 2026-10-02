@@ -164,3 +164,59 @@ describe('contactValue', () => {
     );
   });
 });
+
+describe('showContactValue', () => {
+  function telegramField(typed: string): [HTMLSelectElement, HTMLInputElement] {
+    const [country] = fields('');
+    const input = document.createElement('input');
+    input.value = typed;
+    document.body.append(input);
+    return [country, input];
+  }
+
+  it('shows the country it guessed for a number it accepts', async () => {
+    const { showContactValue, loadPhoneKit } = await freshModule();
+    await loadPhoneKit();
+    const field = telegramField('064 123 4567');
+    expect(showContactValue('telegram', ...field)).toBe('+381641234567');
+    expect(field[1].value).toBe('+381641234567');
+  });
+
+  it('leaves a half-typed number alone', async () => {
+    const { showContactValue, loadPhoneKit } = await freshModule();
+    await loadPhoneKit();
+    const field = telegramField('064');
+    expect(showContactValue('telegram', ...field)).toBe('+381064');
+    expect(field[1].value).toBe('064');
+  });
+
+  it('leaves every number alone until the kit can judge it', async () => {
+    const { showContactValue } = await freshModule();
+    const field = telegramField('064 123 4567');
+    expect(showContactValue('telegram', ...field)).toBe('+381641234567');
+    expect(field[1].value).toBe('064 123 4567');
+  });
+
+  it('still fills in the @ a handle is missing', async () => {
+    const { showContactValue, loadPhoneKit } = await freshModule();
+    await loadPhoneKit();
+    const field = telegramField('ivan');
+    expect(showContactValue('telegram', ...field)).toBe('@ivan');
+    expect(field[1].value).toBe('@ivan');
+  });
+
+  it('never posts a bare @ for an empty field', async () => {
+    const { showContactValue } = await freshModule();
+    const field = telegramField('   ');
+    expect(showContactValue('telegram', ...field)).toBe('');
+    expect(field[1].value).toBe('   ');
+  });
+
+  it('leaves the phone panel to format itself', async () => {
+    const { showContactValue, loadPhoneKit } = await freshModule();
+    await loadPhoneKit();
+    const [country, input] = fields('060 123 4567');
+    expect(showContactValue('whatsapp', country, input)).toBe('+381601234567');
+    expect(input.value).toBe('060 123 4567');
+  });
+});

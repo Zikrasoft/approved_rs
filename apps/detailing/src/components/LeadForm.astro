@@ -126,7 +126,7 @@ const noscriptLink =
         <input
           type="text"
           autocomplete="username"
-          placeholder="@username"
+          placeholder={site.form.telegramPlaceholder}
           aria-describedby={errorId.telegram}
           class={field}
           data-telegram
@@ -283,10 +283,10 @@ const noscriptLink =
     fillCountrySelect,
   } from '@podbor/lead-crm/phone-input';
   import {
-    contactValue,
     deferSubmitUntilKit,
     loadPhoneKit,
     phoneKit,
+    showContactValue,
   } from '@podbor/lead-crm/phone-kit';
   import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 
@@ -358,7 +358,7 @@ const noscriptLink =
       const viaTelegram = channel === 'telegram';
       const input = viaTelegram ? telegram : phone;
       const typed = input.value.trim();
-      contact.value = contactValue(channel, country, input);
+      contact.value = showContactValue(channel, country, input);
 
       const contactError = viaTelegram ? errors.telegram : errors.phone;
       mark(

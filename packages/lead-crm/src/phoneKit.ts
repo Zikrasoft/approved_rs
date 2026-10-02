@@ -44,6 +44,19 @@ export function contactValue(
     : phoneValue(country, input);
 }
 
+export function showContactValue(
+  channel: TrackedContactChannel,
+  country: HTMLSelectElement,
+  input: HTMLInputElement,
+): string {
+  const value = contactValue(channel, country, input);
+  const typed = input.value.trim();
+  if (channel !== 'telegram' || !typed) return value;
+  if (!typedAsPhone(typed) || kit?.isValidContact(value, channel))
+    input.value = value;
+  return value;
+}
+
 export function loadPhoneKit(): Promise<void> {
   loading ??= Promise.all([
     import('libphonenumber-js/min'),

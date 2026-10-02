@@ -77,6 +77,7 @@ const formSchema = z
     countryLabel: z.string(),
     contactLabel: z.string(),
     contactPlaceholder: z.string(),
+    telegramPlaceholder: z.string(),
     commentLabel: z.string(),
     commentPlaceholder: z.string(),
     submit: z.string(),

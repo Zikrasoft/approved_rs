@@ -9,6 +9,7 @@ export const leadFormContentSchema = z
     namePlaceholder: z.string(),
     contactLabel: z.string(),
     telegramTab: z.string(),
+    telegramPlaceholder: z.string(),
     whatsappTab: z.string(),
     viberTab: z.string(),
     phoneTab: z.string(),

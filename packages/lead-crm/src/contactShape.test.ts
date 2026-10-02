@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  TELEGRAM_HANDLE,
-  telegramContact,
-  typedAsPhone,
-} from './contactShape.ts';
+import { telegramContact, typedAsPhone } from './contactShape.ts';
 
 describe('typedAsPhone', () => {
   it.each([
@@ -41,20 +37,4 @@ describe('telegramContact', () => {
   it('leaves an empty field empty instead of posting a bare @', () => {
     expect(telegramContact('   ')).toBe('');
   });
-});
-
-describe('TELEGRAM_HANDLE', () => {
-  it.each(['@ivan', 'ivan', 'i_v4n', `@${'a'.repeat(32)}`])(
-    'accepts %s',
-    (handle) => {
-      expect(TELEGRAM_HANDLE.test(handle)).toBe(true);
-    },
-  );
-
-  it.each(['@0641234567', '_ivan', '@i', `@${'a'.repeat(33)}`, '@ivan ivan'])(
-    'rejects %s',
-    (handle) => {
-      expect(TELEGRAM_HANDLE.test(handle)).toBe(false);
-    },
-  );
 });

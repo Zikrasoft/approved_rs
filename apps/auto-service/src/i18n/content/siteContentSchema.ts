@@ -79,6 +79,7 @@ export const siteContentSchema = z
         namePlaceholder: z.string(),
         contactLabel: z.string(),
         contactPlaceholder: z.string(),
+        telegramPlaceholder: z.string(),
         contactChannelLabel: z.string(),
         channelPhone: z.string(),
         countryLabel: z.string(),

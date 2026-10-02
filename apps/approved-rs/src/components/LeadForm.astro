@@ -168,7 +168,7 @@ const fieldClass =
           data-contact-telegram
           data-field="telegram"
           name="contact"
-          placeholder="@username"
+          placeholder={lf.telegramPlaceholder}
           class={`${fieldClass} w-full px-4`}
         />
       </div>
@@ -268,10 +268,6 @@ const fieldClass =
 <script>
   import type { CountryCode } from 'libphonenumber-js/min';
   import {
-    telegramContact,
-    typedAsPhone,
-  } from '@podbor/lead-crm/contact-shape';
-  import {
     bindPhoneCountry,
     fillCountrySelect,
   } from '@podbor/lead-crm/phone-input';
@@ -280,6 +276,7 @@ const fieldClass =
     deferSubmitUntilKit,
     loadPhoneKit,
     phoneKit,
+    showContactValue,
   } from '@podbor/lead-crm/phone-kit';
   import {
     isTrackedContactChannel,
@@ -468,11 +465,8 @@ const fieldClass =
       syncContact();
     });
     tgInput.addEventListener('blur', () => {
-      const v = tgInput.value.trim();
-      if (v && !typedAsPhone(v)) {
-        tgInput.value = telegramContact(v);
-        syncContact();
-      }
+      showContactValue('telegram', phoneCountry, tgInput);
+      syncContact();
     });
     phoneNumber.addEventListener('input', () => {
       formatPhone();
@@ -516,9 +510,7 @@ const fieldClass =
       const isTelegram = activeTab === 'telegram';
       const contactInput = isTelegram ? tgInput : phoneNumber;
       const typed = contactInput.value.trim();
-      if (isTelegram && typed && !typedAsPhone(typed)) {
-        tgInput.value = telegramContact(typed);
-      }
+      if (isTelegram) showContactValue('telegram', phoneCountry, tgInput);
       syncContact();
 
       let ok = true;
