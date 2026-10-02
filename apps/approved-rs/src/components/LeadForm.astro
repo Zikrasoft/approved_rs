@@ -382,11 +382,6 @@ const fieldClass =
       else button.removeAttribute('aria-busy');
     }
 
-    // progressive enhancement: the Telegram field ships with name="contact"
-    // so the form still submits something if this script never runs (ad
-    // blocker, disabled JS, failed dynamic import). Once we're here, JS is
-    // confirmed working, so hand control to the hidden field exclusively —
-    // otherwise the two same-named fields would collide on submit.
     tgInput.removeAttribute('name');
 
     // WhatsApp/Viber/phone-call all collect the same shape of data (a phone
