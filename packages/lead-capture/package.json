@@ -1,0 +1,23 @@
+{
+  "name": "@podbor/lead-capture",
+  "type": "module",
+  "private": true,
+  "sideEffects": false,
+  "version": "0.0.1",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@podbor/lead-crm": "workspace:*",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "3.2.6",
+    "typescript": "5.9.3",
+    "vitest": "3.2.6"
+  }
+}

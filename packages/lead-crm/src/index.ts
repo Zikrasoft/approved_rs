@@ -29,6 +29,7 @@ export {
   canPostpone,
   createLeadStore,
   postponePatch,
+  telegramIdNote,
   MAX_LIST_ROWS,
 } from './store.ts';
 export type { LeadStore, LeadStoreOptions, OwedRow } from './store.ts';
@@ -95,6 +96,8 @@ export { contactChannelSchema, HONEYPOT_FIELD, SERVICE_FIELD } from './form.ts';
 
 export { createLeadsRoute } from './routes/leads.ts';
 export type { LeadsRouteOptions, RouteRequestContext } from './routes/leads.ts';
+
+export { secretMatches } from './verifySecret.ts';
 
 export { createContactClickRoute } from './routes/contactClick.ts';
 export type { ContactClickRouteOptions } from './routes/contactClick.ts';

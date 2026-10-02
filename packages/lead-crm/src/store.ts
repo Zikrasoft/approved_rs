@@ -82,6 +82,12 @@ export function appendNote(
   return next.slice(-MAX_STORED_COMMENT_LENGTH);
 }
 
+const TELEGRAM_ID_PREFIX = 'Telegram id:';
+
+export function telegramIdNote(telegramId: number): string {
+  return `${TELEGRAM_ID_PREFIX} ${telegramId}`;
+}
+
 export function canPostpone(lead: StoredLead): boolean {
   return postponableStatus(lead.status) !== null;
 }

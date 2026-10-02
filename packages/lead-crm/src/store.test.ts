@@ -7,6 +7,7 @@ import { createLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
 import {
   createLeadStore,
   GHOST_LEAD_RETENTION_MS,
+  telegramIdNote,
   type LeadStore,
 } from './store.ts';
 import { createQuarantine } from './quarantine.ts';
@@ -77,6 +78,13 @@ beforeEach(() => {
   store = createLeadStore({
     storage,
     schema: createLeadSchema({ defaultCommissionPercent: 10 }),
+  });
+});
+
+describe('telegramIdNote', () => {
+  it('is a single line a comment can be searched for', () => {
+    expect(telegramIdNote(4242)).toBe('Telegram id: 4242');
+    expect(telegramIdNote(4242)).not.toContain('\n');
   });
 });
 
