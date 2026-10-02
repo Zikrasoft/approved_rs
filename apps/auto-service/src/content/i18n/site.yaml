@@ -141,7 +141,7 @@ translations:
       errorPhone: Proverite broj — čini se da nije unet potpuno
       errorTelegram: Unesite @username na Telegramu ili broj telefona
       errorConsent: Bez pristanka ne možemo poslati zahtev
-      errorSubmit: Prijava nije prosledjena. Proverite vezu i pokušajte ponovo.
+      errorSubmit: Prijava nije poslata. Proverite vezu i pokušajte ponovo.
     cookie:
       notice: Koristimo kolačiće.
       more: Više u

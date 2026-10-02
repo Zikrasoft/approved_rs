@@ -229,7 +229,7 @@ translations:
       errorTelegram: Please provide @username on Telegram or a phone number
       errorPhone: Please enter a valid phone number
       errorConsent: Check the consent box to submit your request
-      errorSubmit: The application didn't go through. Please check your connection and try again.
+      errorSubmit: The request didn't go through. Please check your connection and try again.
       modalTitle: Submit a Request
       noscriptNote: The form works only with JavaScript enabled. If it’s disabled — contact us directly.
     cookie:
