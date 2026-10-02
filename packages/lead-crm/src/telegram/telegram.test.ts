@@ -1419,6 +1419,26 @@ describe('a lead that asked for several services at once', () => {
     expect(formatter.formatTeaser(click)).toContain('Клик: signal');
   });
 
+  it('renders an expired ghost as archived and lost, keeping its channel line', () => {
+    const ghost = makeLead({
+      contact: '—',
+      service: '',
+      services: [],
+      kind: 'call_click',
+      contactChannel: 'telegram',
+      status: 'lost',
+      archived: true,
+    });
+
+    const detail = buildLeadDetail(ghost, 'owner').text;
+    expect(detail).toContain('🗄 В архиве');
+    expect(detail).toContain('Статус: ');
+    expect(detail).toContain(statusLabel('lost'));
+    expect(detail).toContain('Клик: Telegram');
+    expect(formatter.formatTeaser(ghost)).toContain('🗄 ');
+    expect(formatter.formatTeaser(ghost)).toContain('Клик: Telegram');
+  });
+
   it('marks a lead that named no service instead of leaving a gap', () => {
     const serviceless = makeLead({ service: '', services: [] });
     expect(buildLeadDetail(serviceless, 'owner').text).toContain(

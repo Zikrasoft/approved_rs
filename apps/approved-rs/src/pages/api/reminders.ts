@@ -2,14 +2,11 @@ export const prerender = false;
 
 import type { APIContext } from 'astro';
 import { secretMatches } from '@/lib/verifySecret';
-import { getDuePostponed, resumeLead } from '@/lib/store';
+import { expireGhostLeads, getDuePostponed, resumeLead } from '@/lib/store';
 import { sendPostponeReminderToOwner, ensureLeadCard } from '@/lib/telegram';
 
 const CRON_SECRET = process.env.CRON_SECRET;
 
-// Vercel Cron sends `Authorization: Bearer $CRON_SECRET` automatically once
-// that env var is set on the project — same constant-time-compare pattern
-// as the Telegram webhook's own secret check, just a different header shape.
 function extractBearer(header: string | null): string | null {
   if (!header?.startsWith('Bearer ')) return null;
   return header.slice('Bearer '.length);
@@ -41,8 +38,23 @@ export async function GET({ request }: APIContext): Promise<Response> {
     }
   }
 
-  return new Response(JSON.stringify({ remindedPostponed }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  const expired = await expireGhostLeads(new Date());
+  for (const lead of expired) {
+    try {
+      await ensureLeadCard(lead);
+    } catch (err) {
+      console.error('[reminders] failed to refresh an expired ghost card', {
+        error: err,
+        leadId: lead.id,
+      });
+    }
+  }
+
+  return new Response(
+    JSON.stringify({ remindedPostponed, expiredGhosts: expired.length }),
+    {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
 }

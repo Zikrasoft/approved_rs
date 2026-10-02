@@ -745,6 +745,7 @@ caseChrome:
   callbackButtonLabel: Заказать звонок
   callbackShortLabel: Звонок
   callButtonLabel: Позвонить
+  messengerPrefill: Здравствуйте! Пишу с сайта Approved — интересует подбор автомобиля.
   channelBannerTitle: Ещё больше кейсов
   channelBannerText: Публикуем новые кейсы, процесс подбора и полезные советы.
   channelBannerCta: Подписаться
@@ -1430,6 +1431,7 @@ translations:
       callbackButtonLabel: Request a call
       callbackShortLabel: Call
       callButtonLabel: Call
+      messengerPrefill: Hello! I'm writing from the Approved site — I'm interested in car sourcing.
       usefulInfoLabel: Useful information
       channelBannerTitle: More cases
       channelBannerText: We publish new cases, sourcing processes, and helpful tips.
@@ -2114,6 +2116,7 @@ translations:
       callbackButtonLabel: Zatraži poziv
       callbackShortLabel: Poziv
       callButtonLabel: Pozvati
+      messengerPrefill: Zdravo! Pišem sa sajta Approved – zanima me izbor automobila.
       usefulInfoLabel: Korisne informacije
       channelBannerTitle: Još više slučajeva
       channelBannerText: Objavljujemo nove slučajeve, proces odabira i korisne savete.
@@ -2798,6 +2801,7 @@ translations:
       callbackButtonLabel: Solicitar llamada
       callbackShortLabel: Llamada
       callButtonLabel: Llamar
+      messengerPrefill: ¡Hola! Estoy escribiendo desde el sitio Approved — estoy interesado en la búsqueda de un automóvil.
       usefulInfoLabel: Información útil
       channelBannerTitle: Más casos
       channelBannerText: Publicamos nuevos casos, el proceso de selección y consejos útiles.
@@ -3482,6 +3486,7 @@ translations:
       callbackButtonLabel: Rückruf anfordern
       callbackShortLabel: Anruf
       callButtonLabel: Anrufen
+      messengerPrefill: Hallo! Ich schreibe von der Seite Approved – ich interessiere mich für die Fahrzeugauswahl.
       usefulInfoLabel: Nützliche Informationen
       channelBannerTitle: Noch mehr Fälle
       channelBannerText: Wir veröffentlichen neue Fälle, Auswahlprozesse und nützliche Tipps.
@@ -3495,4 +3500,4 @@ translations:
           label: Inspektion
         - slug: vehicle-import
           label: Import
-translatedFrom: 5804703f127311e0
+translatedFrom: 8a0294fcd9957c46

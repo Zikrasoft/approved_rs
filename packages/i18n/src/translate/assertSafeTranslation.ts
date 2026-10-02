@@ -60,6 +60,14 @@ export function assertSafeTranslation(
         `translated response for "${path}" dropped placeholder tokens (${dropped.join(' ')}): ${translated}`,
       );
     }
+    const invented = [...new Set(translated.match(PLACEHOLDER) ?? [])].filter(
+      (token) => !source.includes(token),
+    );
+    if (invented.length > 0) {
+      throw new Error(
+        `translated response for "${path}" invented placeholder tokens (${invented.join(' ')}): ${translated}`,
+      );
+    }
     const mixedInSource = new Set(mixedScriptWords(source));
     const newlyMixed = mixedScriptWords(translated).find(
       (word) => !mixedInSource.has(word),

@@ -30,7 +30,7 @@ const click = (channel: string) =>
 
 describe('defineContactClickTracking', () => {
   it('beacons a tracked channel to the lead route with the page it happened on', () => {
-    defineContactClickTracking({ isTracked });
+    defineContactClickTracking(isTracked);
     click('telegram');
     expect(sent).toHaveLength(1);
     const [url, body] = sent[0]!;
@@ -42,13 +42,13 @@ describe('defineContactClickTracking', () => {
 
   it('reuses the visitor id a previous click already minted', () => {
     localStorage.setItem(VISITOR_ID_STORAGE_KEY, 'earlier-id');
-    defineContactClickTracking({ isTracked });
+    defineContactClickTracking(isTracked);
     click('telegram');
     expect(sent[0]![1].get('visitor_id')).toBe('earlier-id');
   });
 
   it('reports the same click to the analytics counter', () => {
-    defineContactClickTracking({ isTracked });
+    defineContactClickTracking(isTracked);
     click('telegram');
     expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
       channel: 'telegram',
@@ -56,7 +56,7 @@ describe('defineContactClickTracking', () => {
   });
 
   it('counts an untracked channel as interest without storing a lead', () => {
-    defineContactClickTracking({ isTracked });
+    defineContactClickTracking(isTracked);
     click('callback');
     expect(sent).toEqual([]);
     expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
@@ -64,21 +64,9 @@ describe('defineContactClickTracking', () => {
     });
   });
 
-  it('skips the lead beacon when the click only opens the form', () => {
-    defineContactClickTracking({
-      isTracked,
-      opensLeadForm: (element) => element.dataset.contactChannel === 'telegram',
-    });
-    click('telegram');
-    expect(sent).toEqual([]);
-    expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
-      channel: 'telegram',
-    });
-  });
-
   it('still records the click on a page where analytics never loaded', () => {
     delete (window as Partial<Window>).ymReachGoal;
-    defineContactClickTracking({ isTracked });
+    defineContactClickTracking(isTracked);
     expect(() => click('telegram')).not.toThrow();
     expect(sent).toHaveLength(1);
   });

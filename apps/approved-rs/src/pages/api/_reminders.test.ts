@@ -5,6 +5,7 @@ import type { StoredLead } from '@/lib/store';
 vi.mock('@/lib/store', () => ({
   getDuePostponed: vi.fn(),
   resumeLead: vi.fn(),
+  expireGhostLeads: vi.fn(),
 }));
 vi.mock('@/lib/telegram', () => ({
   sendPostponeReminderToOwner: vi.fn(),
@@ -12,7 +13,7 @@ vi.mock('@/lib/telegram', () => ({
 }));
 
 import { GET } from './reminders';
-import { getDuePostponed, resumeLead } from '@/lib/store';
+import { expireGhostLeads, getDuePostponed, resumeLead } from '@/lib/store';
 import { sendPostponeReminderToOwner, ensureLeadCard } from '@/lib/telegram';
 
 const SECRET = 'test-cron-secret';
@@ -63,6 +64,7 @@ describe('GET /api/reminders', () => {
       .mockReset()
       .mockResolvedValue(undefined);
     vi.mocked(ensureLeadCard).mockReset().mockResolvedValue(undefined);
+    vi.mocked(expireGhostLeads).mockReset().mockResolvedValue([]);
   });
 
   it('rejects a request without a matching bearer token', async () => {
@@ -110,7 +112,10 @@ describe('GET /api/reminders', () => {
     );
     expect(resumeLead).toHaveBeenCalledWith(9);
     expect(ensureLeadCard).toHaveBeenCalledWith(resumed);
-    expect(await res.json()).toEqual({ remindedPostponed: 1 });
+    expect(await res.json()).toEqual({
+      remindedPostponed: 1,
+      expiredGhosts: 0,
+    });
   });
 
   it('does not try to refresh the card when resumeLead no-ops (e.g. lead already moved on)', async () => {
@@ -121,7 +126,10 @@ describe('GET /api/reminders', () => {
 
     expect(res.status).toBe(200);
     expect(ensureLeadCard).not.toHaveBeenCalled();
-    expect(await res.json()).toEqual({ remindedPostponed: 1 });
+    expect(await res.json()).toEqual({
+      remindedPostponed: 1,
+      expiredGhosts: 0,
+    });
   });
 
   it('skips resuming a postponed lead whose reminder send failed, but still processes the next one', async () => {
@@ -138,6 +146,39 @@ describe('GET /api/reminders', () => {
     expect(res.status).toBe(200);
     expect(resumeLead).toHaveBeenCalledTimes(1);
     expect(resumeLead).toHaveBeenCalledWith(10);
-    expect(await res.json()).toEqual({ remindedPostponed: 1 });
+    expect(await res.json()).toEqual({
+      remindedPostponed: 1,
+      expiredGhosts: 0,
+    });
+  });
+
+  it('sweeps ghost leads and refreshes each archived card', async () => {
+    const ghost = makeLead({ id: 7, status: 'lost', archived: true });
+    vi.mocked(expireGhostLeads).mockResolvedValue([ghost]);
+
+    const res = await GET(makeCtx());
+
+    expect(expireGhostLeads).toHaveBeenCalledWith(expect.any(Date));
+    expect(ensureLeadCard).toHaveBeenCalledWith(ghost);
+    expect(await res.json()).toEqual({
+      remindedPostponed: 0,
+      expiredGhosts: 1,
+    });
+  });
+
+  it('still counts a swept ghost whose card refresh failed', async () => {
+    vi.mocked(expireGhostLeads).mockResolvedValue([
+      makeLead({ id: 7, archived: true }),
+      makeLead({ id: 8, archived: true }),
+    ]);
+    vi.mocked(ensureLeadCard).mockRejectedValueOnce(new Error('down'));
+
+    const res = await GET(makeCtx());
+
+    expect(ensureLeadCard).toHaveBeenCalledTimes(2);
+    expect(await res.json()).toEqual({
+      remindedPostponed: 0,
+      expiredGhosts: 2,
+    });
   });
 });

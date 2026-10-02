@@ -11,14 +11,7 @@ import '../styles/global.css';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { getAlternateLinks } from '@/i18n/hreflang';
 import { getLocale } from '@/i18n/config';
-// Logo/heading font: preload so it's ready before first paint (avoids the
-// fallback→webfont width jump on every navigation, most visible on the logo).
 import logoFontUrl from '@fontsource/unbounded/files/unbounded-latin-700-normal.woff2?url';
-// Header nav links (400) and the CTA button (500) — same swap-jump issue, and
-// the nav is flex-centred, so a swap slides the whole row sideways. The nav
-// renders in the visitor's language, so the subset follows it: preloading the
-// Cyrillic file for a Latin-script locale downloads a font nothing uses and
-// leaves that locale with the swap this preload exists to prevent.
 import navCyrillicUrl from '@fontsource/golos-text/files/golos-text-cyrillic-400-normal.woff2?url';
 import navCtaCyrillicUrl from '@fontsource/golos-text/files/golos-text-cyrillic-500-normal.woff2?url';
 import navLatinUrl from '@fontsource/golos-text/files/golos-text-latin-400-normal.woff2?url';
@@ -173,11 +166,7 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
       }, 1600);
     </script>
     <script>
-      import {
-        isTrackedContactChannel,
-        DATA_OPEN_LEAD_MODAL,
-        DATA_OPEN_PAGE_LEAD_MODAL,
-      } from '@/utils/contactChannel';
+      import { isTrackedContactChannel } from '@/utils/contactChannel';
       import {
         defineContactClickTracking,
         defineFunnelTracking,
@@ -187,12 +176,7 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
 
       defineLanguageSuggestion();
       applyPrimaryContactChannel();
-      defineContactClickTracking({
-        isTracked: isTrackedContactChannel,
-        opensLeadForm: (el) =>
-          el.hasAttribute(DATA_OPEN_LEAD_MODAL) ||
-          el.hasAttribute(DATA_OPEN_PAGE_LEAD_MODAL),
-      });
+      defineContactClickTracking(isTrackedContactChannel);
       defineFunnelTracking();
     </script>
   </body>

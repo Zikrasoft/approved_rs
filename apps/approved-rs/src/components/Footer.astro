@@ -5,14 +5,9 @@ import { getNavItems } from '@/utils/labels';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
 import { getServicesContent } from '@/i18n/content/services';
-import {
-  SITE_NAME,
-  TG_MANAGER,
-  WHATSAPP_NUMBER,
-  VIBER_NUMBER,
-  THREADS_CHANNEL,
-} from '@/utils/constants';
-import { telegramLink, whatsappLink, viberLink } from '@/utils/contactLinks';
+import { SITE_NAME, VIBER_NUMBER, THREADS_CHANNEL } from '@/utils/constants';
+import { viberLink } from '@/utils/contactLinks';
+import { messengerHrefs } from '@/utils/messengerHrefs';
 import { getActiveCountries } from '@/utils/geo';
 import { PathBuilder } from '@/utils/paths';
 
@@ -20,11 +15,10 @@ const year = new Date().getFullYear();
 const locale = getLocale(Astro.currentLocale);
 const t = getI18n(locale);
 const cc = getServicesContent(locale).caseChrome;
-// Derived live from countries.json, not a hardcoded string — the literal
-// list went stale the moment Portugal was added as a 5th active country.
 const coverageLine = getActiveCountries()
   .map((c) => c[locale].name)
   .join(' · ');
+const messenger = messengerHrefs(locale);
 ---
 
 <footer class="mt-24 border-t border-default">
@@ -43,7 +37,7 @@ const coverageLine = getActiveCountries()
             <a
               data-primary-channel="telegram"
               data-contact-channel="telegram"
-              href={telegramLink(TG_MANAGER)}
+              href={messenger.telegram}
               target="_blank"
               rel="noopener"
               class="footer-cta inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline bg-accent-strong text-on-accent"
@@ -54,7 +48,7 @@ const coverageLine = getActiveCountries()
             <a
               data-primary-channel="whatsapp"
               data-contact-channel="whatsapp"
-              href={whatsappLink(WHATSAPP_NUMBER)}
+              href={messenger.whatsapp}
               target="_blank"
               rel="noopener"
               hidden
@@ -68,7 +62,7 @@ const coverageLine = getActiveCountries()
             <a
               data-primary-channel="whatsapp"
               data-contact-channel="telegram"
-              href={telegramLink(TG_MANAGER)}
+              href={messenger.telegram}
               target="_blank"
               rel="noopener"
               hidden
@@ -80,7 +74,7 @@ const coverageLine = getActiveCountries()
             <a
               data-primary-channel="telegram"
               data-contact-channel="whatsapp"
-              href={whatsappLink(WHATSAPP_NUMBER)}
+              href={messenger.whatsapp}
               target="_blank"
               rel="noopener"
               aria-label={cc.whatsappButtonLabel}
@@ -92,8 +86,6 @@ const coverageLine = getActiveCountries()
           <a
             data-contact-channel="viber"
             href={viberLink(VIBER_NUMBER)}
-            target="_blank"
-            rel="noopener"
             aria-label={cc.viberButtonLabel}
             class="footer-channel-btn inline-flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-default text-muted"
           >

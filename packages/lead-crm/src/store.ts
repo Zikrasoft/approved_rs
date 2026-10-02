@@ -58,6 +58,19 @@ export function isPlaceholderContact(contact: string): boolean {
   return contact === '' || contact === '—';
 }
 
+export const GHOST_LEAD_RETENTION_MS = 24 * 60 * 60 * 1000;
+
+function isGhostLead(lead: StoredLead, now: Date): boolean {
+  return (
+    lead.kind === 'call_click' &&
+    isPlaceholderContact(lead.contact) &&
+    lead.status === 'new' &&
+    !lead.archived &&
+    now.getTime() - new Date(lead.createdAt).getTime() >=
+      GHOST_LEAD_RETENTION_MS
+  );
+}
+
 const MAX_STORED_COMMENT_LENGTH = 4000;
 
 export function appendNote(
@@ -487,6 +500,23 @@ export function createLeadStore({
           l.remindAt != null &&
           l.remindAt <= today,
       );
+    },
+
+    async expireGhostLeads(now: Date): Promise<StoredLead[]> {
+      const statusChangedAt = now.toISOString();
+      const expired = (l: StoredLead) =>
+        l.archived &&
+        l.status === 'lost' &&
+        l.statusChangedAt === statusChangedAt;
+      if (!(await readLeads()).some((l) => isGhostLead(l, now))) return [];
+      const next = await updateLeads((leads) =>
+        leads.map((l) =>
+          isGhostLead(l, now)
+            ? { ...l, status: 'lost' as const, archived: true, statusChangedAt }
+            : l,
+        ),
+      );
+      return next.filter(expired);
     },
 
     async getOwedSummary(): Promise<{ rows: OwedRow[]; total: number }> {

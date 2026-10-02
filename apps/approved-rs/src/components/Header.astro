@@ -19,7 +19,7 @@ import { navCurrent } from '@podbor/site-kit';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
-import { DATA_OPEN_LEAD_MODAL } from '@/utils/contactChannel';
+import { DATA_OPEN_LEAD_MODAL, leadModalTrigger } from '@/utils/contactChannel';
 
 const locale = getLocale(Astro.currentLocale);
 const t = getI18n(locale);
@@ -79,7 +79,7 @@ const navItems = getNavItems(locale).map((item) => ({
         <!-- CTA: always visible -->
         <Button
           href={PathBuilder.contacts(locale)}
-          {...{ [DATA_OPEN_LEAD_MODAL]: true }}
+          {...leadModalTrigger()}
           aria-label={t.header.ctaShort}
           class="h-9 px-3 xl:px-4 py-2"
         >
