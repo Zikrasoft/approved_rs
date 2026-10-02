@@ -1,4 +1,5 @@
 import {
+  createEnsureLeadCard,
   createFormatter,
   createNotifier,
   createNotifyLead,
@@ -35,6 +36,11 @@ export const notifier = createNotifier({
   groupId: requireEnv('TELEGRAM_GROUP_ID'),
   ownerIds: OWNER_IDS,
   adminIds: ADMIN_IDS,
+});
+
+export const ensureLeadCard = createEnsureLeadCard({
+  store: leadStore,
+  notifier,
 });
 
 export const notifyLead = createNotifyLead({

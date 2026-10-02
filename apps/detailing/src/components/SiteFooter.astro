@@ -7,13 +7,17 @@ import { getServicesContent } from '@/i18n/content/services';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
 import {
+  BRAND,
   INSTAGRAM,
   INSTAGRAM_ENABLED,
   SITE_NAME,
   STUDIO_ADDRESS,
-  TELEGRAM_ENABLED,
 } from '@/utils/constants';
 import { CONTACT_LINKS } from '@/utils/contactLinks';
+import {
+  captureStartPayload,
+  telegramBotLink,
+} from '@podbor/site-kit/contact-links';
 import { contactPlacement } from '@podbor/site-kit';
 
 const locale = localeFrom(Astro.url.pathname);
@@ -36,16 +40,15 @@ const messengers = [
     label: site.channels.viber,
     track: 'viber',
   },
-  ...(TELEGRAM_ENABLED
-    ? ([
-        {
-          href: CONTACT_LINKS.telegram,
-          icon: 'telegram',
-          label: site.channels.telegram,
-          track: 'telegram',
-        },
-      ] as const)
-    : []),
+  {
+    href: telegramBotLink(
+      BRAND.captureBot,
+      captureStartPayload(undefined, locale),
+    ),
+    icon: 'telegram',
+    label: site.channels.telegram,
+    track: 'telegram',
+  },
 ] as const;
 ---
 

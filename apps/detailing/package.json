@@ -22,6 +22,7 @@
     "@keystatic/core": "0.6.9",
     "@podbor/brands": "workspace:*",
     "@podbor/i18n": "workspace:*",
+    "@podbor/lead-capture": "workspace:*",
     "@podbor/lead-crm": "workspace:*",
     "@podbor/site-kit": "workspace:*",
     "@vercel/blob": "2.8.0",

@@ -3,16 +3,22 @@ import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getSiteContent } from '@/i18n/content/site';
 import { CONTACT_LINKS } from '@/utils/contactLinks';
-import { PHONE_NUMBER, TELEGRAM_ENABLED } from '@/utils/constants';
+import { BRAND, PHONE_NUMBER } from '@/utils/constants';
+import type { ServiceSlug } from '@/utils/services';
+import {
+  captureStartPayload,
+  telegramBotLink,
+} from '@podbor/site-kit/contact-links';
 import { contactPlacement, type ContactPlacement } from '@podbor/site-kit';
 import { formatPhone } from '@podbor/site-kit/format-phone';
 
 interface Props {
   class?: string;
   placement?: Extract<ContactPlacement, 'bar' | 'thanks'>;
+  service?: ServiceSlug;
 }
 
-const { class: className = '', placement = 'bar' } = Astro.props;
+const { class: className = '', placement = 'bar', service } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
 
@@ -35,16 +41,15 @@ const channels = [
     label: site.channels.viber,
     track: 'viber',
   },
-  ...(TELEGRAM_ENABLED
-    ? ([
-        {
-          href: CONTACT_LINKS.telegram,
-          icon: 'telegram',
-          label: site.channels.telegram,
-          track: 'telegram',
-        },
-      ] as const)
-    : []),
+  {
+    href: telegramBotLink(
+      BRAND.captureBot,
+      captureStartPayload(service, locale),
+    ),
+    icon: 'telegram',
+    label: site.channels.telegram,
+    track: 'telegram',
+  },
 ] as const;
 
 const CHANNEL_CLASS =
