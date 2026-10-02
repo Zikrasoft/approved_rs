@@ -140,6 +140,13 @@ a different domain and a different counter, where the person is already a new
 visitor with approved.rs as the referrer. `brand_link_click` is the only place that
 transition is visible from approved.rs's side.
 
+Nothing from a dev server. All three layouts skip `defineAnalytics` when
+`import.meta.env.DEV`, so no Metrika script is loaded locally and `reachGoal` is a
+no-op — verify an event against a build (`pnpm build`, then
+`pnpm --filter <app> preview`), never against `pnpm dev`. A preview serves the
+production build and so does report to the real counter, from `127.0.0.1`; the
+`only_mirrors` filter is what keeps that out of the reports.
+
 `form_view` rests on IntersectionObserver and needs the tab to be painting frames.
 In a background tab the event never arrives — harmless for real visits, but when
 verifying through browser automation the tab has to be in the foreground.
