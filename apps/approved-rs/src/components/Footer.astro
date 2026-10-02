@@ -5,14 +5,9 @@ import { getNavItems } from '@/utils/labels';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
 import { getServicesContent } from '@/i18n/content/services';
-import {
-  SITE_NAME,
-  TG_MANAGER,
-  WHATSAPP_NUMBER,
-  VIBER_NUMBER,
-  THREADS_CHANNEL,
-} from '@/utils/constants';
-import { telegramLink, whatsappLink, viberLink } from '@/utils/contactLinks';
+import { SITE_NAME, VIBER_NUMBER, THREADS_CHANNEL } from '@/utils/constants';
+import { viberLink } from '@/utils/contactLinks';
+import { messengerHrefs } from '@/utils/messengerHrefs';
 import { getActiveCountries } from '@/utils/geo';
 import { PathBuilder } from '@/utils/paths';
 
@@ -23,8 +18,7 @@ const cc = getServicesContent(locale).caseChrome;
 const coverageLine = getActiveCountries()
   .map((c) => c[locale].name)
   .join(' · ');
-const telegramHref = telegramLink(TG_MANAGER, cc.messengerPrefill);
-const whatsappHref = whatsappLink(WHATSAPP_NUMBER, cc.messengerPrefill);
+const messenger = messengerHrefs(locale);
 ---
 
 <footer class="mt-24 border-t border-default">
@@ -43,7 +37,7 @@ const whatsappHref = whatsappLink(WHATSAPP_NUMBER, cc.messengerPrefill);
             <a
               data-primary-channel="telegram"
               data-contact-channel="telegram"
-              href={telegramHref}
+              href={messenger.telegram}
               target="_blank"
               rel="noopener"
               class="footer-cta inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline bg-accent-strong text-on-accent"
@@ -54,7 +48,7 @@ const whatsappHref = whatsappLink(WHATSAPP_NUMBER, cc.messengerPrefill);
             <a
               data-primary-channel="whatsapp"
               data-contact-channel="whatsapp"
-              href={whatsappHref}
+              href={messenger.whatsapp}
               target="_blank"
               rel="noopener"
               hidden
@@ -68,7 +62,7 @@ const whatsappHref = whatsappLink(WHATSAPP_NUMBER, cc.messengerPrefill);
             <a
               data-primary-channel="whatsapp"
               data-contact-channel="telegram"
-              href={telegramHref}
+              href={messenger.telegram}
               target="_blank"
               rel="noopener"
               hidden
@@ -80,7 +74,7 @@ const whatsappHref = whatsappLink(WHATSAPP_NUMBER, cc.messengerPrefill);
             <a
               data-primary-channel="telegram"
               data-contact-channel="whatsapp"
-              href={whatsappHref}
+              href={messenger.whatsapp}
               target="_blank"
               rel="noopener"
               aria-label={cc.whatsappButtonLabel}

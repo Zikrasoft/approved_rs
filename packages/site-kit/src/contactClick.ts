@@ -10,13 +10,9 @@ const browserVisitorId = (): string =>
 const CHANNEL_ATTRIBUTE = 'data-contact-channel';
 const CONTACT_CLICK_ENDPOINT = '/api/contact-click';
 
-export interface ContactClickOptions {
-  isTracked: (channel: string | undefined) => channel is string;
-}
-
-export function defineContactClickTracking({
-  isTracked,
-}: ContactClickOptions): void {
+export function defineContactClickTracking(
+  isTracked: (channel: string | undefined) => channel is string,
+): void {
   document
     .querySelectorAll<HTMLElement>(`[${CHANNEL_ATTRIBUTE}]`)
     .forEach((element) => {
