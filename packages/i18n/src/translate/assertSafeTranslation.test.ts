@@ -255,6 +255,16 @@ describe('placeholder tokens', () => {
     ).toThrow(/dropped placeholder tokens \(\{siteName\}\)/);
   });
 
+  it('refuses a placeholder the source never had', () => {
+    expect(() =>
+      assertSafeTranslation(
+        'Пишу с сайта Approved',
+        'Ich schreibe von der Seite {siteName}',
+        'caseChrome.messengerPrefill',
+      ),
+    ).toThrow(/invented placeholder tokens \(\{siteName\}\)/);
+  });
+
   it('names every token that went missing', () => {
     expect(() =>
       assertSafeTranslation('{car} {year} в {location}', 'Auto', 'meta'),
