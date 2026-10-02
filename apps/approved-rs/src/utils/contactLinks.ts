@@ -1,6 +1,7 @@
 export {
+  captureStartPayload,
   phoneLink,
-  telegramLink,
+  telegramBotLink,
   viberLink,
   whatsappLink,
 } from '@podbor/site-kit/contact-links';

@@ -8,7 +8,7 @@ import {
   SITE_URL,
   SITE_NAME,
   PHONE_NUMBER,
-  TG_MANAGER,
+  TELEGRAM_BOT_URL,
   SOCIAL_SAME_AS,
 } from '@/utils/constants';
 import { getFaq } from '@/i18n/content/faq';
@@ -16,7 +16,6 @@ import { getPagesContent } from '@/i18n/content/pages';
 import { getI18n } from '@/i18n/getI18n';
 import { withLocales, PathBuilder } from '@/utils/paths';
 import { generateOrganizationSchema } from '@/utils/seo';
-import { telegramLink } from '@/utils/contactLinks';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
@@ -38,7 +37,7 @@ const schema = {
     description: p.metaDescription,
     areaServed: [],
     sameAs: SOCIAL_SAME_AS,
-    contactUrl: telegramLink(TG_MANAGER),
+    contactUrl: TELEGRAM_BOT_URL,
   }),
   telephone: `+${PHONE_NUMBER}`,
 };

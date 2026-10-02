@@ -14,10 +14,14 @@ anything they bought.
 **Brand** — one of the three businesses (Approved, CarLab, Details). Stamped on
 a Lead by the server; a visitor can never name one.
 
-**Contact click** — a Lead created by tapping a messenger or phone tile rather
-than by submitting a form. It carries a channel and no message.
+**Contact click** — a Lead created by tapping a WhatsApp, Viber or phone tile
+rather than by submitting a form. It carries a channel and no message. A
+Telegram tile opens the brand's own bot instead, which writes an ordinary Lead
+of its own, so it produces no Contact click
+([ADR-0030](docs/adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
 
-**Ghost lead** — a Contact click that never gained a contact: still the
+**Ghost lead** — a Contact click on a channel whose outcome we cannot observe
+— WhatsApp, Viber or the phone — that never gained a contact: still the
 placeholder contact, still `new`, not archived, and older than the retention
 window. Nothing on our side can tell whether the person wrote, so a Ghost lead
 retires itself — the daily reminder cron archives it and marks it lost

@@ -16,7 +16,7 @@ import { getActiveCountries } from '@/utils/geo';
 import {
   SITE_URL,
   SITE_NAME,
-  TG_MANAGER,
+  TELEGRAM_BOT_URL,
   SOCIAL_SAME_AS,
   CHINA_NAME,
 } from '@/utils/constants';
@@ -30,7 +30,6 @@ import { getLocale } from '@/i18n/config';
 import heroImage from '@/assets/hero-delivery.jpg';
 import { heroImageAttrs } from '@/utils/heroImage';
 import closingImage from '@/assets/closing.jpg';
-import { telegramLink } from '@/utils/contactLinks';
 
 const hero = await heroImageAttrs(heroImage);
 const locale = getLocale(Astro.params.locale);
@@ -55,7 +54,7 @@ const schema = generateOrganizationSchema({
   // too, even though it's not a countries.json market in its own right.
   areaServed: [...countries.map((c) => c[locale].name), CHINA_NAME[locale]],
   sameAs: SOCIAL_SAME_AS,
-  contactUrl: telegramLink(TG_MANAGER),
+  contactUrl: TELEGRAM_BOT_URL,
 });
 
 // One connected story instead of a flat service list — each stop is a real

@@ -1,5 +1,5 @@
 import { APPROVED } from '@podbor/brands';
-import { telegramLink } from '@podbor/site-kit/contact-links';
+import { telegramBotLink } from '@podbor/site-kit/contact-links';
 import type { Locale } from '@/i18n/config';
 
 export const YM_COUNTER_ID = 111800377;
@@ -24,8 +24,10 @@ export const VIBER_NUMBER = import.meta.env.PUBLIC_VIBER_NUMBER!;
 // diverge later (e.g. a dedicated landline).
 export const PHONE_NUMBER = import.meta.env.PUBLIC_WHATSAPP_NUMBER!;
 
+export const TELEGRAM_BOT_URL = telegramBotLink(BRAND.captureBot);
+
 export const SOCIAL_SAME_AS = [
-  telegramLink(TG_MANAGER),
+  TELEGRAM_BOT_URL,
   `https://www.threads.com/@${THREADS_CHANNEL}`,
 ];
 
