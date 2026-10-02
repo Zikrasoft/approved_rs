@@ -190,7 +190,10 @@ describe('createLeadsRoute', () => {
   it('returns 400 without leaking the schema when the contact is not a phone', async () => {
     const res = await POST(makeCtx({ name: 'Иван', contact: 'asdf' }));
     expect(res.status).toBe(400);
-    await expect(res.text()).resolves.toBe('Укажите контакт');
+    expect(res.headers.get('content-type')).toBe('text/html; charset=utf-8');
+    const body = await res.text();
+    expect(body).toContain('<p>Укажите контакт</p>');
+    expect(body).not.toMatch(/zod|invalid_type|path/i);
   });
 
   it('returns 400 for a contact_channel outside the tracked set', async () => {
@@ -199,14 +202,17 @@ describe('createLeadsRoute', () => {
     expect(notifyLead).not.toHaveBeenCalled();
   });
 
-  it('answers the 400 in the visitor own locale', async () => {
+  it('answers the 400 in the visitor own locale, in a page a browser can render', async () => {
     const res = await POST(makeCtx({ name: '' }, 'sr'));
-    await expect(res.text()).resolves.toBe('Unesite kontakt');
+    const body = await res.text();
+    expect(body).toContain('<html lang="sr">');
+    expect(body).toContain('<p>Unesite kontakt</p>');
+    expect(body).toContain('name="viewport"');
   });
 
   it('answers the 400 in the default locale for a prototype-key cookie value', async () => {
     const res = await POST(makeCtx({ name: '' }, 'constructor'));
-    await expect(res.text()).resolves.toBe('Укажите контакт');
+    await expect(res.text()).resolves.toContain('<p>Укажите контакт</p>');
   });
 
   it('dispatches notifyLead via waitUntil with the parsed form fields', async () => {

@@ -13,7 +13,8 @@
     "./phone": "./src/phone.ts",
     "./compose-e164": "./src/composeE164.ts",
     "./phone-input": "./src/phoneInput.ts",
-    "./phone-kit": "./src/phoneKit.ts"
+    "./phone-kit": "./src/phoneKit.ts",
+    "./submit": "./src/submitLeadForm.ts"
   },
   "scripts": {
     "test": "vitest run --coverage",

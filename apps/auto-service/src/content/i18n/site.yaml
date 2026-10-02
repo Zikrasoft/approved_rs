@@ -64,6 +64,7 @@ form:
   errorPhone: Проверьте номер — кажется, он введён не полностью
   errorTelegram: Укажите @username в Telegram или номер телефона
   errorConsent: Без согласия мы не сможем отправить заявку
+  errorSubmit: Заявка не ушла. Проверьте связь и попробуйте ещё раз
 cookie:
   notice: Мы используем cookie.
   more: Подробнее в

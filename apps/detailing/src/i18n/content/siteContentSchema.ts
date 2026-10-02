@@ -87,6 +87,7 @@ const formSchema = z
     errorTelegram: z.string(),
     errorPhone: z.string(),
     errorConsent: z.string(),
+    errorSubmit: z.string(),
     modalTitle: z.string(),
     noscriptNote: z.string(),
   })

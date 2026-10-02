@@ -197,6 +197,9 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
       >
         {site.form.errorConsent}
       </p>
+      <p class={errorText} role="alert" data-error-submit hidden>
+        {site.form.errorSubmit}
+      </p>
     </div>
 
     <button type="submit" class="btn btn-primary w-full sm:w-auto">
@@ -221,6 +224,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     phoneKit,
     showContactValue,
   } from '@podbor/lead-crm/phone-kit';
+  import { submitLeadForm } from '@podbor/lead-crm/submit';
   import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 
   document
@@ -256,6 +260,10 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
       phone: [pick('[data-error-phone]'), phone],
       consent: [pick('[data-error-consent]'), consent],
     };
+    const submitError = pick('[data-error-submit]');
+    const button = pick<HTMLButtonElement>('button[type="submit"]');
+    const submitLabel = pick('[data-submit-label]');
+    const idleLabel = submitLabel.textContent;
 
     const expandCountries = () =>
       loadPhoneKit().then(() => {
@@ -275,6 +283,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
       Object.values(fields).forEach(([error, field]) =>
         setInvalid(error, field, false),
       );
+      submitError.hidden = true;
     });
 
     form.addEventListener('submit', (event) => {
@@ -312,11 +321,18 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
 
       phone.value = value;
 
-      const button = pick<HTMLButtonElement>('button[type="submit"]');
+      event.preventDefault();
+      submitError.hidden = true;
       button.disabled = true;
       if (form.dataset.submittingLabel) {
-        pick('[data-submit-label]').textContent = form.dataset.submittingLabel;
+        submitLabel.textContent = form.dataset.submittingLabel;
       }
+      void submitLeadForm(form).then((sent) => {
+        if (sent) return;
+        button.disabled = false;
+        submitLabel.textContent = idleLabel;
+        submitError.hidden = false;
+      });
     });
   }
 </script>

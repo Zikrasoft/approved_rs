@@ -254,6 +254,14 @@ const fieldClass =
       <p class="field-error consent-error mb-3" style="display:none">
         {lf.consentError}
       </p>
+      <p
+        class="field-error submit-error mb-3"
+        style="display:none"
+        role="alert"
+        data-error-submit
+      >
+        {lf.errorSubmit}
+      </p>
 
       <Button
         type="submit"
@@ -278,6 +286,7 @@ const fieldClass =
     phoneKit,
     showContactValue,
   } from '@podbor/lead-crm/phone-kit';
+  import { submitLeadForm } from '@podbor/lead-crm/submit';
   import {
     isTrackedContactChannel,
     detectVisitorCountry,
@@ -358,6 +367,18 @@ const fieldClass =
     )!;
     const consent = form.querySelector<HTMLInputElement>('[name="consent"]')!;
     const consentErr = form.querySelector<HTMLElement>('.consent-error');
+    const submitErr = form.querySelector<HTMLElement>('[data-error-submit]');
+
+    function setBusy(busy: boolean) {
+      const button = form.querySelector<HTMLButtonElement>(
+        'button[type="submit"]',
+      );
+      if (!button) return;
+      button.classList.toggle('is-loading', busy);
+      button.disabled = busy;
+      if (busy) button.setAttribute('aria-busy', 'true');
+      else button.removeAttribute('aria-busy');
+    }
 
     // progressive enhancement: the Telegram field ships with name="contact"
     // so the form still submits something if this script never runs (ad
@@ -526,29 +547,16 @@ const fieldClass =
       markFieldValidity(consent, consent.checked);
       if (!consent.checked) ok = false;
 
-      if (!ok) {
-        e.preventDefault();
-        return;
-      }
+      e.preventDefault();
+      if (!ok) return;
 
-      // Native form submit → full-page navigation to /thanks/ once the
-      // server redirects, so there's no "success" handler to clear this —
-      // the button just leaves the page. The timeout is only a safety net
-      // for the rare case the browser never navigates (e.g. offline).
-      const submitBtn = form.querySelector<HTMLButtonElement>(
-        'button[type="submit"]',
-      );
-      submitBtn?.classList.add('is-loading');
-      submitBtn?.setAttribute('disabled', 'true');
-      // is-loading hides the label visually (see global.css) — aria-busy is
-      // what actually tells a screen reader the button is doing something,
-      // since the hidden label alone drops it from the accessible name.
-      submitBtn?.setAttribute('aria-busy', 'true');
-      setTimeout(() => {
-        submitBtn?.classList.remove('is-loading');
-        submitBtn?.removeAttribute('disabled');
-        submitBtn?.removeAttribute('aria-busy');
-      }, 10000);
+      if (submitErr) submitErr.style.display = 'none';
+      setBusy(true);
+      void submitLeadForm(form).then((sent) => {
+        if (sent) return;
+        setBusy(false);
+        if (submitErr) submitErr.style.display = '';
+      });
     });
 
     if (consentErr) {
