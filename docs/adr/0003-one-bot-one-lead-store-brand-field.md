@@ -2,6 +2,8 @@
 
 All three sites write leads to the same `data/leads.json` on one Vercel Blob store, and one Telegram bot posts them to one operator chat. The lead's `brand` is stamped by the server (`createNotifyLead({ brand })`), never taken from the visitor. Telegram allows exactly one webhook URL per bot, so the bot has to see every brand's leads from a single deployment anyway.
 
+**Amended by [ADR-0030](0030-a-capture-bot-per-brand-takes-the-telegram-contact.md): the single bot is now the CRM bot, and each brand has its own visitor-facing capture bot.** The store is still one and `brand` still separates it, but the brand is no longer stamped only by a site's route — which capture bot received the update identifies it, and that is what keeps the brand a server fact once a `?start=` payload the visitor controls is in play. The rejected option below stays rejected: it was three _CRM_ bots, with three chats and no single money summary.
+
 ## Considered Options
 
 - **A storage key per business** (the original split plan): rejected — the single webhook would need a registry of stores and a store prefix in every `callback_data`. Splitting later is a migration of one JSON file.
