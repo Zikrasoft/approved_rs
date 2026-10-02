@@ -343,7 +343,9 @@ A special case: it does not need setting in the dashboard.
 - each app's `vercel.json` additionally puts `env.SITE` into the functions' runtime,
   in case anything needs it;
 - in practice, only the local `scripts/register-webhook.ts` reads
-  `process.env.SITE` (from `.env.local`).
+  `process.env.SITE` (from `.env.local`), and it is the host the webhook is
+  registered against — so run it with the `.env.local` of the project that
+  hosts that bot's webhook.
 
 Changing the domain means editing `site:` in `astro.config.mjs` and `env.SITE` in
 `vercel.json`, not a dashboard variable.
@@ -894,13 +896,20 @@ To check:
 curl "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/getWebhookInfo"
 ```
 
-`apps/approved-rs/scripts/register-webhook.ts` does the same thing, reading
-`TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` and `SITE` from the environment:
+`apps/approved-rs/scripts/register-webhook.ts` does the same thing. It takes the
+bot as its one argument — `crm` reads `TELEGRAM_BOT_TOKEN` /
+`TELEGRAM_WEBHOOK_SECRET` and registers `/api/telegram-webhook`, `capture` reads
+`TELEGRAM_CAPTURE_BOT_TOKEN` / `TELEGRAM_CAPTURE_WEBHOOK_SECRET` and registers
+`/api/telegram-capture`. Both take the target host from `SITE`, and an unknown
+bot or a missing variable exits non-zero without calling Telegram:
 
 ```bash
 cd apps/approved-rs
-node --env-file=.env.local --experimental-strip-types scripts/register-webhook.ts
+node --env-file=.env.local --experimental-strip-types scripts/register-webhook.ts crm
 ```
+
+A capture bot's webhook is hosted by its own brand's project, so run the same
+script with that project's `.env.local` and `capture` as the argument.
 
 > Until 2026-09-13 the script registered a non-existent `${SITE}/api/telegram` and
 > passed `allowed_updates: ['callback_query']`, which meant direct messages to the
