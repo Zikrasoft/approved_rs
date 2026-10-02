@@ -110,7 +110,7 @@ const geoCells = countries.map((country) => ({
 ---
 
 <BaseLayout {...meta} schema={schema} preloadImage={hero}>
-  <section id="quick-links-band" class="xl:hidden border-b border-default">
+  <section class="hidden lg:block xl:hidden border-b border-default">
     <div class="max-w-6xl mx-auto px-6 py-3">
       <ServiceQuickLinks variant="strip" />
     </div>
@@ -137,14 +137,14 @@ const geoCells = countries.map((country) => ({
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
         <div class="lg:col-span-3">
           <h1
-            class="hero-headline font-display font-bold mb-8 fade-up fade-up-2 text-primary"
+            class="hero-headline font-display font-bold mb-5 sm:mb-8 fade-up fade-up-2 text-primary"
           >
             <span class="block">{h.heroLine1}</span>{' '}
             <span class="block">{h.heroLine2}</span>{' '}
             <span class="block text-accent">{h.heroLine3}</span>
           </h1>
           <p
-            class="text-base leading-relaxed mb-10 max-w-md fade-up fade-up-3 text-secondary"
+            class="text-sm sm:text-base leading-relaxed mb-6 sm:mb-10 max-w-md fade-up fade-up-3 text-secondary"
           >
             {h.heroSubtext}
           </p>
@@ -152,7 +152,7 @@ const geoCells = countries.map((country) => ({
             <ContactCTA compact />
           </div>
           <div
-            class="grid grid-cols-3 gap-3 sm:gap-6 mt-8 pt-8 border-t fade-up fade-up-5 border-default"
+            class="grid grid-cols-3 gap-3 sm:gap-6 mt-6 pt-6 sm:mt-8 sm:pt-8 border-t fade-up fade-up-5 border-default"
           >
             <StatBlock
               value={h.statClients.value}
@@ -172,6 +172,18 @@ const geoCells = countries.map((country) => ({
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="lg:hidden border-b border-default">
+    <div class="max-w-6xl mx-auto px-6 pt-6 pb-band">
+      <LeadForm />
+    </div>
+  </section>
+
+  <section class="lg:hidden border-b border-default">
+    <div class="max-w-6xl mx-auto px-6 py-3">
+      <ServiceQuickLinks variant="strip" />
     </div>
   </section>
 
@@ -197,12 +209,6 @@ const geoCells = countries.map((country) => ({
           ))
         }
       </div>
-    </div>
-  </section>
-
-  <section class="lg:hidden border-b border-default">
-    <div class="max-w-6xl mx-auto px-6 py-band">
-      <LeadForm />
     </div>
   </section>
 
@@ -371,9 +377,10 @@ const geoCells = countries.map((country) => ({
 
 <style>
   .hero-headline {
-    font-size: clamp(2.4rem, 6.5vw, 5rem);
+    font-size: clamp(1.95rem, 6.5vw, 5rem);
     line-height: 0.98;
     letter-spacing: -0.045em;
+    hyphens: manual;
   }
   .hero-tag {
     display: inline-flex;
@@ -387,12 +394,6 @@ const geoCells = countries.map((country) => ({
   .hero-tag:hover {
     color: var(--color-text);
   }
-  @media (max-width: 380px) {
-    .hero-headline {
-      font-size: 2.2rem;
-    }
-  }
-
   .svc-row {
     display: grid;
     gap: 0.3rem;

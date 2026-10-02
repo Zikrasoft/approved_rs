@@ -456,13 +456,10 @@ h4 {
   background-size: 48px 48px;
 }
 
-/* ─── Photo hero (homepage + service pages) ──────────────────
-   Mobile keeps the photograph as its own block: a full-bleed image behind
-   the headline needs a veil heavy enough to read through, and at phone
-   width that veil leaves nothing of the car visible. */
+/* ─── Photo hero (homepage + service pages) ──────────────── */
 .photo-hero-shot {
   position: relative;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 21 / 9;
   overflow: hidden;
 }
 .photo-hero-veil {
@@ -477,13 +474,8 @@ h4 {
   );
 }
 .photo-hero-body {
-  padding-top: 1rem;
+  padding-top: 0.5rem;
   padding-bottom: var(--spacing-band);
-}
-@media (min-width: 640px) {
-  .photo-hero-shot {
-    aspect-ratio: 21 / 9;
-  }
 }
 @media (min-width: 1024px) {
   .photo-hero {

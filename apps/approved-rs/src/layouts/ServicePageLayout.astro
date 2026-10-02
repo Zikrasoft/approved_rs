@@ -148,12 +148,14 @@ const heroStats = [
         image ? 'photo-hero-body' : 'py-band md:py-band-lg',
       ]}
     >
-      <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-start">
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-12 items-start">
         <div class="lg:col-span-3">
           {breadcrumbs && <Breadcrumbs items={breadcrumbs} />}
-          <span class="eyebrow fade-up fade-up-1">{SITE_NAME}</span>
+          <span class="eyebrow hidden! sm:inline-flex! fade-up fade-up-1">
+            {SITE_NAME}
+          </span>
           <h1
-            class="font-display font-bold mb-5 leading-none fade-up fade-up-2 tracking-[-0.045em] text-primary text-[clamp(2.1rem,5.6vw,4.4rem)]"
+            class="font-display font-bold mb-5 leading-none fade-up fade-up-2 tracking-[-0.045em] text-primary [hyphens:manual] text-[clamp(1.75rem,5.6vw,4.4rem)]"
           >
             {title}{
               titleHighlight && (
@@ -167,7 +169,7 @@ const heroStats = [
             }
           </h1>
           <p
-            class="text-base max-w-lg mb-2 leading-relaxed fade-up fade-up-3 text-muted"
+            class="text-sm sm:text-base max-w-lg mb-2 leading-relaxed fade-up fade-up-3 text-muted"
           >
             {description}
           </p>
@@ -183,7 +185,6 @@ const heroStats = [
               ))
             }
           </div>
-          <div class="fade-up fade-up-5 pt-8"><slot /></div>
         </div>
         <div class="lg:col-span-2 fade-up fade-up-3">
           <LeadForm
@@ -194,6 +195,7 @@ const heroStats = [
             {commentPlaceholder}
           />
         </div>
+        <div class="lg:col-span-3 fade-up fade-up-5"><slot /></div>
       </div>
     </div>
   </section>

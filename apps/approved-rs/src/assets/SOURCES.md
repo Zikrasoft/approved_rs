@@ -7,7 +7,7 @@
 | `inspection-car.jpg`     | own photo — case `ineos-grenadier`, cropped |
 | `service-sourcing.jpg`   | Unsplash `photo-1630165356623-266076eaceb6` |
 | `service-import.jpg`     | Unsplash `photo-1761993600321-757e086491c0` |
-| `service-inspection.jpg` | Unsplash `photo-1723099971299-3789db53604c` |
+| `service-inspection.jpg` | Unsplash `photo-1730461747788-ced66cb36434` |
 | `service-buyback.jpg`    | Unsplash `photo-1723095136747-20a24afcee20` |
 
 `hero-delivery.jpg`, the four `service-*.jpg` and `closing.jpg` are stock under
