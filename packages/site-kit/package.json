@@ -8,6 +8,7 @@
     ".": "./src/index.ts",
     "./browser": "./src/browser.ts",
     "./contact-links": "./src/contactLinks.ts",
+    "./format-phone": "./src/formatPhone.ts",
     "./contact-preference": "./src/contactPreference.ts"
   },
   "scripts": {
@@ -16,6 +17,7 @@
   },
   "dependencies": {
     "@podbor/lead-crm": "workspace:*",
+    "libphonenumber-js": "1.13.12",
     "marked": "18.0.11",
     "sanitize-html": "2.17.7"
   },

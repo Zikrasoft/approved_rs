@@ -18,6 +18,23 @@ export const GOALS = {
 
 export type Goal = (typeof GOALS)[keyof typeof GOALS];
 
+export const CONTACT_PLACEMENTS = [
+  'hero',
+  'bar',
+  'floating',
+  'footer',
+  'header',
+  'thanks',
+] as const;
+
+export type ContactPlacement = (typeof CONTACT_PLACEMENTS)[number];
+
+export const CONTACT_PLACEMENT_ATTRIBUTE = 'data-contact-placement';
+
+export const contactPlacement = (placement: ContactPlacement) => ({
+  [CONTACT_PLACEMENT_ATTRIBUTE]: placement,
+});
+
 export function reachGoal(goal: Goal, params?: Record<string, unknown>): void {
   window.ymReachGoal?.(goal, params);
 }

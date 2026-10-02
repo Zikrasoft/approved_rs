@@ -17,7 +17,7 @@ const meta = {
 };
 ---
 
-<BaseLayout {...meta} directContacts>
+<BaseLayout {...meta}>
   <section
     class="thanks-section min-h-[80vh] flex items-center justify-center px-6 py-20"
   >
@@ -64,7 +64,7 @@ const meta = {
 
       <!-- CTA -->
       <div class="thanks-item" style="--i:3">
-        <ContactCTA label={p.ctaLabel} direct />
+        <ContactCTA label={p.ctaLabel} />
       </div>
 
       <!-- While you wait -->

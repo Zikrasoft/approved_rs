@@ -3,13 +3,13 @@ import { X } from '@lucide/astro';
 import LeadForm from './LeadForm.astro';
 import { getLocale } from '@/i18n/config';
 import { getI18n } from '@/i18n/getI18n';
-import type {
+import {
   DATA_OPEN_LEAD_MODAL,
-  DATA_OPEN_PAGE_LEAD_MODAL,
+  DATA_PAGE_LEAD_MODAL,
 } from '@/utils/contactChannel';
 
 interface Props {
-  triggerAttr: typeof DATA_OPEN_LEAD_MODAL | typeof DATA_OPEN_PAGE_LEAD_MODAL;
+  page?: boolean;
   service?: string;
   country?: string;
   city?: string;
@@ -18,7 +18,7 @@ interface Props {
 }
 
 const {
-  triggerAttr,
+  page = false,
   service = '',
   country = '',
   city = '',
@@ -29,7 +29,10 @@ const locale = getLocale(Astro.currentLocale);
 const closeLabel = getI18n(locale).common.closeLabel;
 ---
 
-<approved-modal trigger={`[${triggerAttr}]`}>
+<approved-modal
+  trigger={`[${DATA_OPEN_LEAD_MODAL}]`}
+  {...page ? { [DATA_PAGE_LEAD_MODAL]: '' } : {}}
+>
   <dialog class="lead-modal">
     <button
       type="button"
@@ -124,17 +127,20 @@ const closeLabel = getI18n(locale).common.closeLabel;
     DATA_DEFAULT_SERVICE,
     DATA_LEAD_SERVICE,
     DATA_OPEN_LEAD_MODAL,
-    DATA_OPEN_PAGE_LEAD_MODAL,
+    DATA_PAGE_LEAD_MODAL,
   } from '@/utils/contactChannel';
+
+  if (document.querySelector(`[${DATA_PAGE_LEAD_MODAL}]`))
+    document
+      .querySelectorAll(`approved-modal:not([${DATA_PAGE_LEAD_MODAL}])`)
+      .forEach((modal) => modal.removeAttribute('trigger'));
 
   defineModalDialog('approved-modal');
 
   document.addEventListener(MODAL_OPEN_EVENT, (event) => {
     const host = event.target as HTMLElement;
     const { trigger } = (event as CustomEvent<ModalOpenDetail>).detail;
-    const tab =
-      trigger.getAttribute(DATA_OPEN_LEAD_MODAL) ??
-      trigger.getAttribute(DATA_OPEN_PAGE_LEAD_MODAL);
+    const tab = trigger.getAttribute(DATA_OPEN_LEAD_MODAL);
     const tabButton = tab
       ? host.querySelector<HTMLElement>(
           `.pill-tab[data-tab="${CSS.escape(tab)}"]`,

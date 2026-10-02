@@ -1,4 +1,4 @@
-import { GOALS, reachGoal } from './goals.ts';
+import { CONTACT_PLACEMENT_ATTRIBUTE, GOALS, reachGoal } from './goals.ts';
 import { readOrCreateVisitorId } from './visitorId.ts';
 
 const browserVisitorId = (): string =>
@@ -18,7 +18,10 @@ export function defineContactClickTracking(
     .forEach((element) => {
       element.addEventListener('click', () => {
         const channel = element.dataset.contactChannel;
-        reachGoal(GOALS.contactClick, { channel });
+        const placement = element.closest<HTMLElement>(
+          `[${CONTACT_PLACEMENT_ATTRIBUTE}]`,
+        )?.dataset.contactPlacement;
+        reachGoal(GOALS.contactClick, { channel, placement });
         if (!isTracked(channel)) return;
         const body = new FormData();
         body.set('channel', channel);

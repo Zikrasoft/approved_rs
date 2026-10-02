@@ -13,7 +13,6 @@ interface Props {
   accentWord: string;
   text: string;
   ctaLabel: string;
-  openModal?: boolean;
   stats: { value: string; label: string }[];
 }
 
@@ -26,7 +25,6 @@ const {
   accentWord,
   text,
   ctaLabel,
-  openModal = false,
   stats,
 } = Astro.props;
 ---
@@ -54,7 +52,7 @@ const {
         <p class="text-base mb-2 max-w-sm text-secondary leading-[1.7]">
           {text}
         </p>
-        <ContactCTA label={ctaLabel} {openModal} />
+        <ContactCTA label={ctaLabel} />
       </div>
       <div class="grid grid-cols-2 gap-6 lg:justify-items-end">
         {

@@ -4,6 +4,7 @@ import { localeFrom } from '@/i18n/currentLocale';
 import { getSiteContent } from '@/i18n/content/site';
 import { CONTACT_LINKS } from '@/utils/contactLinks';
 import { TELEGRAM_ENABLED } from '@/utils/constants';
+import { contactPlacement } from '@podbor/site-kit';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
@@ -16,9 +17,14 @@ const cell =
   data-revealed="false"
   class="sticky-contact fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper/95 backdrop-blur-sm lg:hidden"
   watch="[data-contact-cta]"
+  {...contactPlacement('floating')}
 >
-  <div class="grid grid-cols-3 items-stretch">
-    <a href={CONTACT_LINKS.phone} data-contact-channel="phone" class={cell}>
+  <div class="grid grid-cols-3 items-stretch pointer-fine:grid-cols-2">
+    <a
+      href={CONTACT_LINKS.phone}
+      data-contact-channel="phone"
+      class={`${cell} pointer-fine:hidden!`}
+    >
       <Icon name="phone" size={16} />
       <span class="spec text-[0.6875rem]">{site.channels.call}</span>
     </a>
