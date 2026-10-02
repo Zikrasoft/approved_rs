@@ -160,4 +160,14 @@ cards the backfill posted as `@SerbCRMBot` become the dead ones, so re-run the
 backfill with `--apply` under the restored token to redraw them.
 
 If the lead store itself looks wrong, the step 1 backup is the restore source:
-its contents are the exact body of `data/leads.json`.
+
+```bash
+cd apps/approved-rs
+node --env-file=.env.local --experimental-strip-types scripts/restore-leads.ts .local/leads-<timestamp>.json
+node --env-file=.env.local --experimental-strip-types scripts/restore-leads.ts .local/leads-<timestamp>.json --apply
+```
+
+The first form is a dry run: it prints the backup's record count against the
+live blob's and writes nothing. `--apply` overwrites `data/leads.json` with the
+backup, so anything written since the backup is lost — read both counts before
+you type it.
