@@ -282,6 +282,9 @@ importers:
       '@podbor/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@podbor/lead-capture':
+        specifier: workspace:*
+        version: link:../../packages/lead-capture
       '@podbor/lead-crm':
         specifier: workspace:*
         version: link:../../packages/lead-crm

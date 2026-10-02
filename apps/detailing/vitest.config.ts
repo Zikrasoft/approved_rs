@@ -10,5 +10,14 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/**/*.test.ts'],
+    env: {
+      TELEGRAM_BOT_TOKEN: 'test-bot-token',
+      TELEGRAM_GROUP_ID: '-1009876543210',
+      TELEGRAM_OWNER_ID: '111',
+      TELEGRAM_ADMIN_ID: '222',
+      TELEGRAM_BOT_USERNAME: 'details_test_bot',
+      TELEGRAM_CAPTURE_BOT_TOKEN: 'test-capture-bot-token',
+      TELEGRAM_CAPTURE_WEBHOOK_SECRET: 'test-capture-webhook-secret',
+    },
   },
 });

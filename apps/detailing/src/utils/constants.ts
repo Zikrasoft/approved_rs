@@ -1,5 +1,5 @@
 import { DETAILS, WORKSHOP_ADDRESS } from '@podbor/brands';
-import { instagramLink, telegramLink } from '@podbor/site-kit/contact-links';
+import { instagramLink, telegramBotLink } from '@podbor/site-kit/contact-links';
 
 export const BRAND = DETAILS;
 
@@ -27,10 +27,12 @@ export const PHONE_NUMBER =
 export const WHATSAPP_NUMBER =
   import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? PHONE_NUMBER;
 export const VIBER_NUMBER = import.meta.env.PUBLIC_VIBER_NUMBER ?? PHONE_NUMBER;
-// TODO: the real Telegram and Instagram handles are not decided yet. Until
-// PUBLIC_TG_MANAGER / PUBLIC_INSTAGRAM are set the channel is hidden rather
-// than pointed at a guess — a dead link in the footer costs more trust than a
-// missing one, and an unreachable sameAs is worse than none.
+// TODO: the real Instagram handle is not decided yet. Until PUBLIC_INSTAGRAM
+// is set the channel is hidden rather than pointed at a guess — a dead link in
+// the footer costs more trust than a missing one, and an unreachable sameAs is
+// worse than none.
+// TODO: #112 retires TG_MANAGER, TELEGRAM_ENABLED and INSTAGRAM_ENABLED's
+// Telegram half — nothing reads TG_MANAGER since the capture bot took over.
 export const TG_MANAGER =
   import.meta.env.PUBLIC_TG_MANAGER ?? 'details_placeholder';
 export const INSTAGRAM =
@@ -39,9 +41,11 @@ export const INSTAGRAM =
 export const TELEGRAM_ENABLED = !TG_MANAGER.endsWith('_placeholder');
 export const INSTAGRAM_ENABLED = !INSTAGRAM.endsWith('_placeholder');
 
+export const TELEGRAM_BOT_URL = telegramBotLink(BRAND.captureBot);
+
 export const SOCIAL_SAME_AS = [
   ...(INSTAGRAM_ENABLED ? [instagramLink(INSTAGRAM)] : []),
-  ...(TELEGRAM_ENABLED ? [telegramLink(TG_MANAGER)] : []),
+  TELEGRAM_BOT_URL,
 ];
 
 export const YM_COUNTER_ID = 112647721;
