@@ -25,18 +25,18 @@ separately in `contactClick.ts`, because they also write a lead to the server.
 Names follow the GA4 convention — a verb about what the person did, in snake_case.
 Variants go into parameters, not into new names.
 
-| identifier                                                       | when                                               | parameters                              |
-| ---------------------------------------------------------------- | -------------------------------------------------- | --------------------------------------- |
-| `scroll_50`                                                      | scrolled half the page                             | —                                       |
-| `scroll_90`                                                      | read to the end of the page                        | —                                       |
-| `form_view`                                                      | the form entered the viewport                      | —                                       |
-| `form_start`                                                     | first input into the form                          | —                                       |
-| `form_error`                                                     | validation rejected the submission                 | `field`: `telegram`, `phone`, `consent` |
-| `form_submit`                                                    | the form actually went to the server               | `service`                               |
-| `contact_click`                                                  | clicked a phone, a messenger or the enquiry button | `channel`, `placement`                  |
-| `lead_modal_open`                                                | opened the form in the modal (approved.rs only)    | `tab`, `service`                        |
-| `brand_link_click`                                               | left for a partner site (approved.rs only)         | `to`                                    |
-| `lang_offer_shown` / `lang_offer_taken` / `lang_offer_dismissed` | the language-choice banner                         | `from`, `to`                            |
+| identifier                                                       | when                                            | parameters                                        |
+| ---------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------- |
+| `scroll_50`                                                      | scrolled half the page                          | —                                                 |
+| `scroll_90`                                                      | read to the end of the page                     | —                                                 |
+| `form_view`                                                      | the form entered the viewport                   | —                                                 |
+| `form_start`                                                     | first input into the form                       | —                                                 |
+| `form_error`                                                     | the submission was rejected                     | `field`: `telegram`, `phone`, `consent`, `server` |
+| `form_submit`                                                    | the server took the lead                        | `service`                                         |
+| `contact_click`                                                  | clicked a phone number or a messenger           | `channel`, `placement`                            |
+| `lead_modal_open`                                                | opened the form in the modal (approved.rs only) | `tab`, `service`                                  |
+| `brand_link_click`                                               | left for a partner site (approved.rs only)      | `to`                                              |
+| `lang_offer_shown` / `lang_offer_taken` / `lang_offer_dismissed` | the language-choice banner                      | `from`, `to`                                      |
 
 `scroll_50`, `form_view` and `form_start` fire once per page rather than once per
 form: the approved.rs homepage has three forms, and counting them separately would
@@ -55,7 +55,7 @@ itself, so on focus the goal would fire on every opening, duplicating
 | attribute                | on what                        | for what                          |
 | ------------------------ | ------------------------------ | --------------------------------- |
 | `data-lead-form`         | the enquiry `<form>`           | view, start, error, submit        |
-| `data-contact-channel`   | contact links and buttons      | `contact_click` and a server lead |
+| `data-contact-channel`   | phone and messenger controls   | `contact_click` and a server lead |
 | `data-contact-placement` | the region the control sits in | `placement` in `contact_click`    |
 | `data-brand-link`        | links to partner sites         | `brand_link_click`                |
 | `aria-invalid="true"`    | a field that failed validation | the field name in `form_error`    |
@@ -81,13 +81,20 @@ cleared as soon as the visitor fixes the field.
 
 ## How a form submission is counted
 
-The handler sits on `document` in the bubbling phase rather than on the form
-itself: by that point all the form's own listeners have run, so
-`event.defaultPrevented` is final and the goal is sent synchronously — before a
-submission that got through starts navigating to the server.
+All three forms post through `submitLeadForm` from `@podbor/lead-crm/submit`,
+which fires `lead-form-result` on the form with whether the server took the
+lead. `form_submit` hangs off that event, so it counts leads the server
+accepted rather than times the button was pressed — a submission the server
+refuses is counted as `form_error` with `field: server` instead.
 
-- nobody cancelled the submission → `form_submit`, the person went to the server;
-- it was cancelled and there is an `aria-invalid` → `form_error` with the field name;
+The submit handler sits on `document` in the bubbling phase rather than on the
+form itself: by that point all the form's own listeners have run and the
+`aria-invalid` markers are final.
+
+- the submission carries an `aria-invalid` → `form_error` with the field name;
+- the server took it → `form_submit` with the service;
+- the server refused it, or the connection dropped → `form_error` with
+  `field: server`;
 - the form carries `data-awaiting-kit` → stay quiet. That attribute is set by
   `deferSubmitUntilKit` from `@podbor/lead-crm/phone-kit` while
   `libphonenumber-js` is still loading; the form will resubmit itself a moment
@@ -161,3 +168,5 @@ would lie. What is already broken:
 | 2026-09-16             | the automatic "phone number click" goal     | the goal was created; before that date it is zero by definition                                                                                                                                                                                                                 |
 | 2026-09-23 (`a65f421`) | `contact_click` on carlab.rs and details.rs | it used to count only phone numbers and messengers, and now counts any `[data-contact-channel]`, including buttons that open the form. The series steps up. On approved.rs unchanged                                                                                            |
 | 2026-10-02             | `lead_modal_open` on approved.rs            | messenger tiles stopped opening the form ([ADR-0015](../adr/0015-lead-form-asks-only-for-a-contact.md), issue #56), so the goal lost every messenger tap. The series steps down; `contact_click` is unaffected, and the contact-click Leads in the CRM step up by the same taps |
+| 2026-10-02             | `form_submit` on all three sites            | it used to fire on a submission attempt and now fires only once the server has taken the lead (issue #54). The series steps down by whatever share of attempts was failing, and the drop is the number worth knowing                                                            |
+| 2026-10-02             | `contact_click` on all three sites          | it no longer counts a control that merely opens the lead form — only the channels that reach a person (`phone`, `telegram`, `whatsapp`, `viber`), which is what `lead_modal_open` already counts on approved.rs. The series steps down                                          |

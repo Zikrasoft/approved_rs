@@ -19,6 +19,7 @@ errorTelegramRequired: Введите Telegram
 errorTelegramFormat: 'Формат: @username или номер телефона'
 errorPhoneRequired: Введите номер телефона
 errorPhoneInvalid: Проверьте номер телефона
+errorSubmit: Заявка не ушла. Проверьте связь и попробуйте ещё раз
 translations:
   en:
     headingLine1: We'll be in touch

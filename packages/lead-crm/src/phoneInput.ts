@@ -57,6 +57,17 @@ export function fillCountrySelect(
   fitToSelection(select);
 }
 
+export function selectCountry(
+  select: HTMLSelectElement,
+  iso: string | undefined,
+): void {
+  const wanted = iso?.toUpperCase();
+  if (!wanted) return;
+  if (!Array.from(select.options).some((option) => option.value === wanted))
+    return;
+  select.value = wanted;
+}
+
 export function bindPhoneCountry(
   select: HTMLSelectElement,
   input: HTMLInputElement,

@@ -1,6 +1,10 @@
 import { AWAITING_KIT_ATTRIBUTE } from '@podbor/lead-crm/phone-kit';
 import { FIELD_NAME_ATTRIBUTE, INVALID_ATTRIBUTE } from './fieldValidity.ts';
 import { SERVICE_FIELD } from '@podbor/lead-crm/fields';
+import {
+  LEAD_FORM_RESULT_EVENT,
+  type LeadFormResult,
+} from '@podbor/lead-crm/submit';
 import { GOALS, reachGoal } from './goals.ts';
 
 export const LEAD_FORM_ATTRIBUTE = 'data-lead-form';
@@ -90,15 +94,22 @@ function trackForms(signal: AbortSignal): void {
     (event) => {
       const form = event.target as HTMLFormElement;
       if (!form.matches(`[${LEAD_FORM_ATTRIBUTE}]`)) return;
-      if (!event.defaultPrevented) {
-        reachGoal(GOALS.formSubmit, { service: submittedService(form) });
-        return;
-      }
       if (form.hasAttribute(AWAITING_KIT_ATTRIBUTE)) return;
       const invalid = form.querySelector<HTMLElement>(
         `[${INVALID_ATTRIBUTE}="true"]`,
       );
       if (invalid) reachGoal(GOALS.formError, { field: fieldName(invalid) });
+    },
+    { signal },
+  );
+
+  document.addEventListener(
+    LEAD_FORM_RESULT_EVENT,
+    (event) => {
+      const form = event.target as HTMLFormElement;
+      const { ok } = (event as CustomEvent<LeadFormResult>).detail;
+      if (ok) reachGoal(GOALS.formSubmit, { service: submittedService(form) });
+      else reachGoal(GOALS.formError, { field: 'server' });
     },
     { signal },
   );

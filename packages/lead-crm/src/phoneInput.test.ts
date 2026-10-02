@@ -2,7 +2,11 @@
 // TODO: jsdom reports zero layout, so fitToSelection's measuring arm is
 // unreachable here — the width it sets is only ever exercised in a browser.
 import { describe, it, expect, beforeEach } from 'vitest';
-import { bindPhoneCountry, fillCountrySelect } from './phoneInput.ts';
+import {
+  bindPhoneCountry,
+  fillCountrySelect,
+  selectCountry,
+} from './phoneInput.ts';
 
 function mount(
   options = `
@@ -216,5 +220,39 @@ describe('fillCountrySelect', () => {
 
     expect(select.value).toBe('TH');
     expect(input.value).toBe('123456');
+  });
+});
+
+describe('selectCountry', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('picks the detected country when the shortlist renders it', () => {
+    const { select } = mount();
+
+    selectCountry(select, 'de');
+
+    expect(select.value).toBe('DE');
+  });
+
+  it.each(['ba', 'hr', 'me', 'mk', 'tr'])(
+    'keeps the default selected for %s, a country the shortlist leaves out',
+    (iso) => {
+      const { select } = mount();
+
+      selectCountry(select, iso);
+
+      expect(select.value).toBe('RS');
+      expect(select.selectedIndex).toBeGreaterThanOrEqual(0);
+    },
+  );
+
+  it('leaves the default alone when nothing was detected', () => {
+    const { select } = mount();
+
+    selectCountry(select, undefined);
+
+    expect(select.value).toBe('RS');
   });
 });

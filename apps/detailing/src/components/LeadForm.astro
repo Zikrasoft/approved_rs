@@ -256,6 +256,9 @@ const noscriptLink =
       >
         {site.form.errorConsent}
       </p>
+      <p class={errorText} role="alert" data-error-submit hidden>
+        {site.form.errorSubmit}
+      </p>
     </div>
 
     <button
@@ -288,6 +291,7 @@ const noscriptLink =
     phoneKit,
     showContactValue,
   } from '@podbor/lead-crm/phone-kit';
+  import { submitLeadForm } from '@podbor/lead-crm/submit';
   import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 
   document
@@ -314,7 +318,11 @@ const noscriptLink =
       telegram: pick('[data-error-telegram]'),
       phone: pick('[data-error-phone]'),
       consent: pick('[data-error-consent]'),
+      submit: pick('[data-error-submit]'),
     };
+    const button = pick<HTMLButtonElement>('button[type="submit"]');
+    const submitLabel = pick('[data-submit-label]');
+    const idleLabel = submitLabel.textContent;
 
     const mark = (error: HTMLElement, control: HTMLElement, valid: boolean) => {
       error.hidden = valid;
@@ -343,6 +351,7 @@ const noscriptLink =
     });
     form.addEventListener('input', () => {
       controlled.forEach(([error, control]) => mark(error, control, true));
+      errors.submit.hidden = true;
     });
 
     form.addEventListener('submit', (event) => {
@@ -380,12 +389,18 @@ const noscriptLink =
         return;
       }
 
-      const button = pick<HTMLButtonElement>('button[type="submit"]');
-      const submitLabel = pick('[data-submit-label]');
+      event.preventDefault();
+      errors.submit.hidden = true;
       button.disabled = true;
       if (form.dataset.submittingLabel) {
         submitLabel.textContent = form.dataset.submittingLabel;
       }
+      void submitLeadForm(form).then((sent) => {
+        if (sent) return;
+        button.disabled = false;
+        submitLabel.textContent = idleLabel;
+        errors.submit.hidden = false;
+      });
     });
   }
 </script>
