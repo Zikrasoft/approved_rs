@@ -3,10 +3,14 @@ import Icon from '@/components/Icon.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getSiteContent } from '@/i18n/content/site';
 import { CONTACT_LINKS, telegramBotHref } from '@/utils/contactLinks';
+import { isServiceSlug } from '@/utils/services';
 import { contactPlacement } from '@podbor/site-kit';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
+const [, , section, slug = ''] = Astro.url.pathname.split('/');
+const service =
+  section === 'services' && isServiceSlug(slug) ? slug : undefined;
 
 const cell =
   'flex min-h-14 flex-col items-center justify-center gap-1 border-r border-line text-ink';
@@ -30,7 +34,7 @@ const cell =
 
     <div data-primary-contact class="contents">
       <a
-        href={telegramBotHref(locale)}
+        href={telegramBotHref(locale, service)}
         data-primary-channel="telegram"
         data-contact-channel="telegram"
         class={cell}

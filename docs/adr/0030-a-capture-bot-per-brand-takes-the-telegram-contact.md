@@ -121,8 +121,11 @@ continues the open one and skips the contact questions.
   off. The research file names the query that would produce one.
 - **Four tokens live in the approved.rs project** — the CRM bot and all three capture bots — and the
   CRM token lives in all three projects.
-- **The repeat-visit lookup is the weakest joint.** With no new field, finding a person's open Lead
-  means matching a string, so the capture bot writes the Telegram id into `comment` on every Lead and
-  looks it up there. A dedicated field is the obvious upgrade if this misbehaves.
+- **The repeat-visit lookup is a stored `telegramId` on the Lead.** A comment marker was tried first
+  and did not survive: the comment is truncated from the front once the dialog fills it, so the
+  marker was the first thing to go. The field is written at `/start` and is what both capture
+  lookups match on — together with the Lead's `brand`, because in a private chat the chat id is the
+  user id and is identical in all four bots, so an unfiltered scan of the one shared store would
+  resume another brand's Lead and bill it at that brand's commission.
 - Dialog copy is three question sets across five locales, and every string is visitor-facing, so the
   5-locale rule applies to all of it.

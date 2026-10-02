@@ -48,6 +48,7 @@ function storedLead(data: LeadInput, id: number): StoredLead {
     createdAt: now,
     pendingPrompt: null,
     capturePrompt: data.capturePrompt ?? null,
+    telegramId: data.telegramId ?? null,
     archived: false,
     pendingCommissionClaim: null,
     remindAt: null,
@@ -57,6 +58,14 @@ function storedLead(data: LeadInput, id: number): StoredLead {
 
 function makeStore() {
   const leads: StoredLead[] = [];
+  const open = (brand: string) =>
+    leads.filter(
+      (l) =>
+        l.brand === brand &&
+        !l.archived &&
+        l.status !== 'won' &&
+        l.status !== 'lost',
+    );
   const patch = (lead: StoredLead, next: StoredLead) => {
     leads[leads.indexOf(lead)] = next;
     return next;
@@ -68,20 +77,14 @@ function makeStore() {
       leads.push(lead);
       return lead;
     }),
-    findByCapturePrompt: vi.fn(async (chatId: number) =>
-      leads.find((l) => l.capturePrompt?.chatId === chatId),
+    findByCapturePrompt: vi.fn(async (chatId: number, brand: string) =>
+      open(brand)
+        .filter((l) => l.capturePrompt?.chatId === chatId)
+        .at(-1),
     ),
-    findOpenLeadByTelegramId: vi.fn(async (telegramId: number) =>
-      leads
-        .filter(
-          (l) =>
-            !l.archived &&
-            l.status !== 'won' &&
-            l.status !== 'lost' &&
-            (l.comment ?? '')
-              .split('\n')
-              .includes(`Telegram id: ${telegramId}`),
-        )
+    findOpenLeadByTelegramId: vi.fn(async (telegramId: number, brand: string) =>
+      open(brand)
+        .filter((l) => l.telegramId === telegramId)
         .at(-1),
     ),
     updateCapture: vi.fn(
@@ -90,7 +93,11 @@ function makeStore() {
         if (!lead) return undefined;
         return patch(lead, {
           ...lead,
-          comment: note ? `${lead.comment ?? ''}\n${note}` : lead.comment,
+          comment: note
+            ? lead.comment
+              ? `${lead.comment}\n${note}`
+              : note
+            : lead.comment,
           contact: contact ?? lead.contact,
           capturePrompt,
         });
@@ -311,7 +318,7 @@ describe('the Lead written at /start', () => {
 
   it('records the sender id so the visitor can be found again', async () => {
     await POST(makeCtx(startUpdate('ru')));
-    expect(store.leads[0].comment).toBe('Telegram id: 42');
+    expect(store.leads[0].telegramId).toBe(42);
   });
 
   it('stamps the bot owner brand, whatever the payload says', async () => {
@@ -668,9 +675,7 @@ describe('free text outside the dialog', () => {
     await say('привет, ищу машину');
 
     expect(store.insertLead).toHaveBeenCalledTimes(1);
-    expect(store.leads[0].comment).toBe(
-      'Telegram id: 42\nСообщение: привет, ищу машину',
-    );
+    expect(store.leads[0].comment).toBe('Сообщение: привет, ищу машину');
     expect(lastSent()).toEqual([42, 'GREETING_ru\n\nLOOKING_FOR']);
   });
 
@@ -699,5 +704,120 @@ describe('free text outside the dialog', () => {
       expect.objectContaining({ id: 1 }),
     );
     expect(lastSent()).toEqual([42, 'RECEIVED']);
+  });
+});
+
+describe("the same person tapping another brand's tile", () => {
+  it("opens its own Lead instead of resuming the sister brand's", async () => {
+    store.leads.push(
+      storedLead(
+        {
+          brand: 'CarLab',
+          name: 'Иван Петров',
+          contact: '@ivan',
+          service: '',
+          locale: 'ru',
+          comment: null,
+          country: null,
+          source_url: null,
+          visitorId: null,
+          contactChannel: 'telegram',
+          kind: 'lead',
+          telegramId: 42,
+          capturePrompt: { chatId: 42, step: 'looking_for' },
+        },
+        1,
+      ),
+    );
+
+    await POST(makeCtx(startUpdate('vehicle-sourcing_ru')));
+
+    expect(store.leads).toHaveLength(2);
+    expect(store.leads[1]).toMatchObject({ brand: BRAND, telegramId: 42 });
+    expect(lastSent()).toEqual([42, 'GREETING_ru\n\nLOOKING_FOR']);
+  });
+
+  it("answers onto its own Lead, never the sister brand's", async () => {
+    store.leads.push(
+      storedLead(
+        {
+          brand: 'CarLab',
+          name: 'Иван Петров',
+          contact: '@ivan',
+          service: '',
+          locale: 'ru',
+          comment: null,
+          country: null,
+          source_url: null,
+          visitorId: null,
+          contactChannel: 'telegram',
+          kind: 'lead',
+          telegramId: 42,
+          capturePrompt: { chatId: 42, step: 'looking_for' },
+        },
+        1,
+      ),
+    );
+    await POST(makeCtx(startUpdate('ru')));
+
+    await say('BMW X5');
+
+    expect(store.leads[0].comment).toBeNull();
+    expect(store.leads[1].comment).toContain('Ищет: BMW X5');
+  });
+});
+
+describe('a second enquiry once the hour has passed', () => {
+  const HOUR = 60 * 60 * 1000;
+
+  it('puts the answers on the new Lead, not the one left open', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    store.leads[0] = {
+      ...store.leads[0],
+      createdAt: new Date(Date.now() - HOUR - 1000).toISOString(),
+    };
+    await POST(makeCtx(startUpdate('vehicle-import_ru')));
+
+    await say('Golf 7');
+
+    expect(store.leads).toHaveLength(2);
+    expect(store.leads[0].comment).toBeNull();
+    expect(store.leads[1].comment).toContain('Ищет: Golf 7');
+    expect(store.leads[1].capturePrompt?.step).toBe('budget');
+  });
+
+  it('leaves a closed Lead out of the lookup entirely', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    store.leads[0] = { ...store.leads[0], status: 'won' };
+
+    await say('ещё одна машина');
+
+    expect(store.leads).toHaveLength(2);
+    expect(store.leads[1].comment).toBe('Сообщение: ещё одна машина');
+  });
+});
+
+describe('a question typed instead of sharing a number', () => {
+  it('reaches the card and the dialog carries on', async () => {
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+
+    await say('сколько стоит?', ANONYMOUS);
+
+    expect(store.leads[0].comment).toBe('Сообщение: сколько стоит?');
+    expect(store.leads[0].contact).toBe('tg://user?id=777');
+    expect(store.leads[0].capturePrompt?.step).toBe('looking_for');
+    expect(lastSent()).toEqual([777, 'LOOKING_FOR']);
+  });
+
+  it('reaches the card when the call offer comes last too', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    await say('BMW X5');
+    await say('20 000');
+
+    await say('а в рассрочку можно?');
+
+    expect(store.leads[0].comment).toContain('Сообщение: а в рассрочку можно?');
+    expect(store.leads[0].capturePrompt).toBeNull();
+    expect(lastSent()).toEqual([42, 'THANKS']);
   });
 });

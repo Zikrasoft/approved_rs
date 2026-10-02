@@ -100,6 +100,7 @@ const baseStoredLeadSchema = z.object({
   createdAt: z.string(),
   pendingPrompt: pendingPromptSchema.nullable().default(null).catch(null),
   capturePrompt: capturePromptSchema.nullable().default(null).catch(null),
+  telegramId: z.number().int().nullable().default(null).catch(null),
   archived: z.boolean().default(false),
   pendingCommissionClaim: pendingCommissionClaimSchema.nullable().default(null),
   remindAt: z.string().nullable().default(null),
@@ -161,7 +162,12 @@ export type LeadInput = Pick<
   | 'locale'
   | 'kind'
 > &
-  Partial<Pick<StoredLead, 'services' | 'commissionPercent' | 'capturePrompt'>>;
+  Partial<
+    Pick<
+      StoredLead,
+      'services' | 'commissionPercent' | 'capturePrompt' | 'telegramId'
+    >
+  >;
 
 export type LeadSubmission = Omit<LeadInput, 'brand'>;
 
