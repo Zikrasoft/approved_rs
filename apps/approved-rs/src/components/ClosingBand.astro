@@ -14,6 +14,7 @@ interface Props {
   text: string;
   ctaLabel: string;
   stats: { value: string; label: string }[];
+  service?: string;
 }
 
 const {
@@ -26,6 +27,7 @@ const {
   text,
   ctaLabel,
   stats,
+  service,
 } = Astro.props;
 ---
 
@@ -52,7 +54,7 @@ const {
         <p class="text-base mb-2 max-w-sm text-secondary leading-[1.7]">
           {text}
         </p>
-        <ContactCTA label={ctaLabel} />
+        <ContactCTA label={ctaLabel} {service} />
       </div>
       <div class="grid grid-cols-2 gap-6 lg:justify-items-end">
         {

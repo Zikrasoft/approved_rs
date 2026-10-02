@@ -312,11 +312,20 @@ Both new apps follow the same shape, and a third should too:
   site that will be told wrong.
 - **Only approved.rs prefills the first message**, `messengerPrefill` in its
   `services.yaml`, so the chat does not open empty. The mechanism is shared and
-  the brand sites opt in by passing a message: `telegramLink`/`whatsappLink` in
-  `@podbor/site-kit/contact-links` take an optional one and encode it as `text`
-  (documented for public username links, unlike `start`, which is bot-only).
-  Viber's chat link has no such parameter, so Viber tiles stay bare — asymmetry
-  by platform, not by choice.
+  the brand sites opt in by passing a message: `whatsappLink` in
+  `@podbor/site-kit/contact-links` takes an optional one and encodes it as
+  `text`. Viber's chat link has no such parameter, so Viber tiles stay bare —
+  asymmetry by platform, not by choice.
+- **A Telegram tile carries a `?start=` payload, not a prefill.** It opens the
+  brand's capture bot, built from `telegramBotLink` and `captureStartPayload`
+  in `@podbor/site-kit/contact-links` over `BRAND.captureBot`, and `?start=` and
+  `?text=` are different parameters, so `messengerPrefill` never reaches
+  Telegram. The payload is `<service>_<locale>`, or the locale alone where the
+  page has no service (the homepage, the footer, the floating widget, the
+  contacts page). The tile keeps `data-contact-channel="telegram"` so the
+  Metrika goal still fires, but a Telegram tap stores no Lead — the bot writes
+  a better one a moment later, so
+  `defineContactClickTracking`'s second predicate excludes the channel.
 - **The lead modal takes its service from the trigger.** `data-lead-service` on
   a button sets the form's `service` when the modal opens; `data-default-service`
   on the form is what it resets to when the trigger names none. Both constants

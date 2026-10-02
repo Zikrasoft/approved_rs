@@ -1,10 +1,9 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
-import { SITE_URL, SITE_NAME, TG_MANAGER } from '@/utils/constants';
+import { SITE_URL, SITE_NAME, TELEGRAM_BOT_URL } from '@/utils/constants';
 import { getPagesContent } from '@/i18n/content/pages';
 import { withLocales, PathBuilder } from '@/utils/paths';
-import { telegramLink } from '@/utils/contactLinks';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
@@ -50,7 +49,7 @@ const sections = p.sections;
         <p class="text-base leading-relaxed text-muted">
           {p.contactBefore}
           <a
-            href={telegramLink(TG_MANAGER)}
+            href={TELEGRAM_BOT_URL}
             class="underline transition-colors text-accent"
           >
             {p.contactLinkText}
