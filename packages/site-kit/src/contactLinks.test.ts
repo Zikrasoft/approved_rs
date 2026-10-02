@@ -1,7 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import {
+  captureStartPayload,
   instagramLink,
   phoneLink,
+  telegramBotLink,
   telegramLink,
   viberLink,
   whatsappLink,
@@ -41,6 +43,30 @@ describe('contact links', () => {
   it('leaves the link bare when there is nothing to prefill', () => {
     expect(telegramLink('manager', '')).toBe('https://t.me/manager');
     expect(whatsappLink('381641234567', '')).toBe('https://wa.me/381641234567');
+  });
+
+  it('carries the page service and locale into the bot start payload', () => {
+    expect(captureStartPayload('vehicle-sourcing', 'sr')).toBe(
+      'vehicle-sourcing_sr',
+    );
+  });
+
+  it('carries the locale alone where the page has no service', () => {
+    expect(captureStartPayload(undefined, 'ru')).toBe('ru');
+    expect(captureStartPayload('', 'ru')).toBe('ru');
+  });
+
+  it('opens the capture bot on the start payload', () => {
+    expect(telegramBotLink('ApprovedRsBot', 'vehicle-sourcing_sr')).toBe(
+      'https://t.me/ApprovedRsBot?start=vehicle-sourcing_sr',
+    );
+  });
+
+  it('opens the capture bot bare when there is no payload', () => {
+    expect(telegramBotLink('ApprovedRsBot')).toBe('https://t.me/ApprovedRsBot');
+    expect(telegramBotLink('ApprovedRsBot', '')).toBe(
+      'https://t.me/ApprovedRsBot',
+    );
   });
 
   it('opens the Instagram profile', () => {
