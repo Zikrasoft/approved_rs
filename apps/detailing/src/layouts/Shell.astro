@@ -228,7 +228,7 @@ const businessSchema = {
       import { YM_COUNTER_ID } from '@/utils/constants';
 
       if (!import.meta.env.DEV) defineAnalytics({ ymCounterId: YM_COUNTER_ID });
-      defineContactClickTracking(isTrackedContactChannel);
+      defineContactClickTracking(isTrackedContactChannel, () => true);
       applyPreferredContactOrder();
       defineLanguageSuggestion();
       defineFunnelTracking();

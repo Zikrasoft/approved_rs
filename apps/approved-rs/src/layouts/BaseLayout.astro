@@ -174,7 +174,7 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
 
       defineLanguageSuggestion();
       applyPrimaryContactChannel();
-      defineContactClickTracking(isTrackedContactChannel);
+      defineContactClickTracking(isTrackedContactChannel, () => true);
       defineFunnelTracking();
     </script>
   </body>
