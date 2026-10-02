@@ -10,8 +10,6 @@ import { forgetVisitorId } from './visitorId.ts';
 
 export { CONSENT_EVENT, type ConsentDetail };
 const CONSENT_SETTINGS_ATTRIBUTE = 'data-cookie-settings';
-const REVEAL_DELAY_MS = 6000;
-const REVEAL_SCROLL_PX = 600;
 const CONSENT_ACCEPT_ATTRIBUTE = 'data-consent-accept';
 const CONSENT_DECLINE_ATTRIBUTE = 'data-consent-decline';
 
@@ -49,7 +47,7 @@ export function defineCookieConsent(tagName = 'cookie-consent'): void {
         const version = this.dataset.policyVersion ?? '';
 
         if (readConsent(version) !== null) this.hidden = true;
-        else if (this.hidden) this.revealLater(version, signal);
+        else if (this.hidden) this.revealPastFirstScreen(version, signal);
 
         this.addEventListener(
           'click',
@@ -86,22 +84,21 @@ export function defineCookieConsent(tagName = 'cookie-consent'): void {
         );
       }
 
-      private revealLater(version: string, signal: AbortSignal): void {
+      private revealPastFirstScreen(
+        version: string,
+        signal: AbortSignal,
+      ): void {
         const pending = new AbortController();
         signal.addEventListener('abort', () => pending.abort(), {
           signal: pending.signal,
         });
 
-        const reveal = () => {
-          pending.abort();
-          if (readConsent(version) === null) this.hidden = false;
-        };
-        const timer = setTimeout(reveal, REVEAL_DELAY_MS);
-        pending.signal.addEventListener('abort', () => clearTimeout(timer));
         window.addEventListener(
           'scroll',
           () => {
-            if (window.scrollY >= REVEAL_SCROLL_PX) reveal();
+            if (window.scrollY < window.innerHeight) return;
+            pending.abort();
+            if (readConsent(version) === null) this.hidden = false;
           },
           { signal: pending.signal, passive: true },
         );
