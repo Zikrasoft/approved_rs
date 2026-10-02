@@ -359,7 +359,6 @@ const noscriptLink =
       const input = viaTelegram ? telegram : phone;
       const typed = input.value.trim();
       contact.value = contactValue(channel, country, input);
-      if (viaTelegram) input.value = contact.value;
 
       const contactError = viaTelegram ? errors.telegram : errors.phone;
       mark(

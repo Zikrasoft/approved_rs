@@ -268,6 +268,10 @@ const fieldClass =
 <script>
   import type { CountryCode } from 'libphonenumber-js/min';
   import {
+    telegramContact,
+    typedAsPhone,
+  } from '@podbor/lead-crm/contact-shape';
+  import {
     bindPhoneCountry,
     fillCountrySelect,
   } from '@podbor/lead-crm/phone-input';
@@ -464,9 +468,11 @@ const fieldClass =
       syncContact();
     });
     tgInput.addEventListener('blur', () => {
-      if (!tgInput.value.trim()) return;
-      tgInput.value = contactValue('telegram', phoneCountry, tgInput);
-      syncContact();
+      const v = tgInput.value.trim();
+      if (v && !typedAsPhone(v)) {
+        tgInput.value = telegramContact(v);
+        syncContact();
+      }
     });
     phoneNumber.addEventListener('input', () => {
       formatPhone();
@@ -510,8 +516,8 @@ const fieldClass =
       const isTelegram = activeTab === 'telegram';
       const contactInput = isTelegram ? tgInput : phoneNumber;
       const typed = contactInput.value.trim();
-      if (isTelegram && typed) {
-        tgInput.value = contactValue('telegram', phoneCountry, tgInput);
+      if (isTelegram && typed && !typedAsPhone(typed)) {
+        tgInput.value = telegramContact(typed);
       }
       syncContact();
 

@@ -291,7 +291,6 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
       const input = viaTelegram ? telegram : phone;
       const typed = input.value.trim();
       const value = contactValue(channel, country, input);
-      if (viaTelegram) input.value = value;
 
       const checks: [HTMLElement, HTMLElement, boolean][] = [
         [
