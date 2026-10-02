@@ -105,7 +105,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
         <input
           type="text"
           autocomplete="username"
-          placeholder="@username"
+          placeholder={site.form.telegramPlaceholder}
           aria-describedby={`telegram-error-${uid}`}
           class="field"
           data-telegram
@@ -219,7 +219,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     deferSubmitUntilKit,
     loadPhoneKit,
     phoneKit,
-    phoneValue,
+    showContactValue,
   } from '@podbor/lead-crm/phone-kit';
   import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 
@@ -290,9 +290,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
       const viaTelegram = channel === 'telegram';
       const input = viaTelegram ? telegram : phone;
       const typed = input.value.trim();
-      const value = viaTelegram
-        ? typed.replace(/^@?/, '@')
-        : phoneValue(country, phone);
+      const value = showContactValue(channel, country, input);
 
       const checks: [HTMLElement, HTMLElement, boolean][] = [
         [

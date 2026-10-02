@@ -5,6 +5,7 @@ import {
   type CountryCode,
 } from 'libphonenumber-js/min';
 import type { TrackedContactChannel } from './contactChannel.ts';
+import { TELEGRAM_HANDLE, typedAsPhone } from './contactShape.ts';
 
 export { composeE164 } from './composeE164.ts';
 
@@ -59,8 +60,6 @@ export function phoneCountryOptions(locale: string): PhoneCountryOption[] {
   })).sort((a, b) => a.name.localeCompare(b.name, locale));
 }
 
-const TELEGRAM_HANDLE = /^@?\w{3,}$/;
-
 // TODO: /min metadata accepts numbers no carrier issues, e.g. +3813012345678
 // (a German national number typed while the picker still shows RS).
 // isPossible() does not help — 10 national digits is a possible RS length.
@@ -71,6 +70,7 @@ export function isValidContact(
   contact: string,
   channel: TrackedContactChannel | null,
 ): boolean {
-  if (channel === 'telegram') return TELEGRAM_HANDLE.test(contact);
+  if (channel === 'telegram' && !typedAsPhone(contact))
+    return TELEGRAM_HANDLE.test(contact.trim());
   return parsePhoneNumberFromString(contact)?.isValid() ?? false;
 }

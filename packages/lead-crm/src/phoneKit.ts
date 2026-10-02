@@ -1,5 +1,7 @@
 import type { CountryCode } from 'libphonenumber-js/min';
 import { composeE164 } from './composeE164.ts';
+import { telegramContact, typedAsPhone } from './contactShape.ts';
+import type { TrackedContactChannel } from './contactChannel.ts';
 
 export interface PhoneKit {
   AsYouType: typeof import('libphonenumber-js/min').AsYouType;
@@ -30,6 +32,29 @@ export function phoneValue(
     kit?.parse(typed, country.value as CountryCode)?.number ??
     composeE164(typed, country.selectedOptions[0]?.dataset.dial ?? '')
   );
+}
+
+export function contactValue(
+  channel: TrackedContactChannel,
+  country: HTMLSelectElement,
+  input: HTMLInputElement,
+): string {
+  return channel === 'telegram' && !typedAsPhone(input.value)
+    ? telegramContact(input.value)
+    : phoneValue(country, input);
+}
+
+export function showContactValue(
+  channel: TrackedContactChannel,
+  country: HTMLSelectElement,
+  input: HTMLInputElement,
+): string {
+  const value = contactValue(channel, country, input);
+  const typed = input.value.trim();
+  if (channel !== 'telegram' || !typed) return value;
+  if (!typedAsPhone(typed) || kit?.isValidContact(value, channel))
+    input.value = value;
+  return value;
 }
 
 export function loadPhoneKit(): Promise<void> {

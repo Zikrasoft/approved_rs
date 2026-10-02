@@ -5,6 +5,7 @@ nameLabel: Ваше имя
 namePlaceholder: Иван
 contactLabel: Как с вами связаться
 telegramTab: Telegram
+telegramPlaceholder: '@username или телефон'
 whatsappTab: WhatsApp
 viberTab: Viber
 phoneTab: Телефон
@@ -15,7 +16,7 @@ consentLinkText: политикой конфиденциальности
 consentError: Необходимо ваше согласие
 submitLabel: Рассчитать стоимость
 errorTelegramRequired: Введите Telegram
-errorTelegramFormat: 'Формат: @username'
+errorTelegramFormat: 'Формат: @username или номер телефона'
 errorPhoneRequired: Введите номер телефона
 errorPhoneInvalid: Проверьте номер телефона
 translations:

@@ -168,7 +168,7 @@ const fieldClass =
           data-contact-telegram
           data-field="telegram"
           name="contact"
-          placeholder="@username"
+          placeholder={lf.telegramPlaceholder}
           class={`${fieldClass} w-full px-4`}
         />
       </div>
@@ -267,15 +267,16 @@ const fieldClass =
 
 <script>
   import type { CountryCode } from 'libphonenumber-js/min';
-  import { composeE164 } from '@podbor/lead-crm/compose-e164';
   import {
     bindPhoneCountry,
     fillCountrySelect,
   } from '@podbor/lead-crm/phone-input';
   import {
+    contactValue,
     deferSubmitUntilKit,
     loadPhoneKit,
     phoneKit,
+    showContactValue,
   } from '@podbor/lead-crm/phone-kit';
   import {
     isTrackedContactChannel,
@@ -391,10 +392,6 @@ const fieldClass =
           );
       });
 
-    function dialCode() {
-      return phoneCountry.selectedOptions[0]?.dataset.dial ?? '';
-    }
-
     // ponytail: re-mask from raw digits on every keystroke instead of a
     // caret-aware stateful mask — simpler, good enough for a lead form.
     function formatPhone() {
@@ -414,17 +411,11 @@ const fieldClass =
 
     function syncContact() {
       hiddenChannel.value = activeTab;
-      if (activeTab === 'telegram') {
-        hiddenContact.value = tgInput.value.trim();
-      } else if (phoneKit()) {
-        const parsed = phoneKit()!.parse(
-          phoneNumber.value,
-          phoneCountry.value as CountryCode,
-        );
-        hiddenContact.value = parsed ? parsed.number : phoneNumber.value.trim();
-      } else {
-        hiddenContact.value = composeE164(phoneNumber.value.trim(), dialCode());
-      }
+      hiddenContact.value = contactValue(
+        activeTab,
+        phoneCountry,
+        activeTab === 'telegram' ? tgInput : phoneNumber,
+      );
     }
 
     // Shared by the click handler below and the region-based auto-select
@@ -474,11 +465,8 @@ const fieldClass =
       syncContact();
     });
     tgInput.addEventListener('blur', () => {
-      const v = tgInput.value.trim();
-      if (v && !v.startsWith('@')) {
-        tgInput.value = '@' + v;
-        syncContact();
-      }
+      showContactValue('telegram', phoneCountry, tgInput);
+      syncContact();
     });
     phoneNumber.addEventListener('input', () => {
       formatPhone();
@@ -522,9 +510,7 @@ const fieldClass =
       const isTelegram = activeTab === 'telegram';
       const contactInput = isTelegram ? tgInput : phoneNumber;
       const typed = contactInput.value.trim();
-      if (isTelegram && typed && !typed.startsWith('@')) {
-        tgInput.value = '@' + typed;
-      }
+      if (isTelegram) showContactValue('telegram', phoneCountry, tgInput);
       syncContact();
 
       let ok = true;

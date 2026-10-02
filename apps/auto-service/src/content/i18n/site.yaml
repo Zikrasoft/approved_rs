@@ -50,6 +50,7 @@ form:
   namePlaceholder: Как к вам обращаться
   contactLabel: Телефон
   contactPlaceholder: +381 11 000 0000
+  telegramPlaceholder: '@username или телефон'
   contactChannelLabel: Как с вами связаться
   channelPhone: Звонок
   countryLabel: Код страны
@@ -61,7 +62,7 @@ form:
   privacyLinkText: политикой конфиденциальности
   modalTitle: Записаться в сервис
   errorPhone: Проверьте номер — кажется, он введён не полностью
-  errorTelegram: Укажите ник в Telegram — минимум три символа
+  errorTelegram: Укажите @username в Telegram или номер телефона
   errorConsent: Без согласия мы не сможем отправить заявку
 cookie:
   notice: Мы используем cookie.
