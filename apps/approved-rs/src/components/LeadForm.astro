@@ -278,6 +278,7 @@ const fieldClass =
   import {
     bindPhoneCountry,
     fillCountrySelect,
+    selectCountry,
   } from '@podbor/lead-crm/phone-input';
   import {
     contactValue,
@@ -399,7 +400,7 @@ const fieldClass =
     let activeTab: TrackedContactChannel = 'telegram';
 
     const detectedCountry = detectVisitorCountry();
-    if (detectedCountry) phoneCountry.value = detectedCountry.toUpperCase();
+    selectCountry(phoneCountry, detectedCountry);
 
     bindPhoneCountry(phoneCountry, phoneNumber);
 
