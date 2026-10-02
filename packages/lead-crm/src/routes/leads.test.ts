@@ -54,6 +54,7 @@ function makeCtx(
 const valid = (extra: Record<string, Field | Field[]> = {}) => ({
   name: 'Иван',
   contact: RS_PHONE,
+  consent: 'on',
   ...extra,
 });
 
@@ -174,7 +175,9 @@ describe('createLeadsRoute', () => {
   });
 
   it('takes a lead whose name is empty, because only the contact is required', async () => {
-    const res = await POST(makeCtx({ name: '', contact: RS_PHONE }));
+    const res = await POST(
+      makeCtx({ name: '', contact: RS_PHONE, consent: 'on' }),
+    );
     expect(res.status).toBe(302);
     expect(notifyLead).toHaveBeenCalledWith(
       expect.objectContaining({ name: '' }),
@@ -187,8 +190,16 @@ describe('createLeadsRoute', () => {
     expect(res.status).toBe(400);
   });
 
+  it('refuses a submission whose consent box never reached the server', async () => {
+    const res = await POST(makeCtx({ name: 'Иван', contact: RS_PHONE }));
+    expect(res.status).toBe(400);
+    expect(notifyLead).not.toHaveBeenCalled();
+  });
+
   it('returns 400 without leaking the schema when the contact is not a phone', async () => {
-    const res = await POST(makeCtx({ name: 'Иван', contact: 'asdf' }));
+    const res = await POST(
+      makeCtx({ name: 'Иван', contact: 'asdf', consent: 'on' }),
+    );
     expect(res.status).toBe(400);
     expect(res.headers.get('content-type')).toBe('text/html; charset=utf-8');
     const body = await res.text();
@@ -266,6 +277,7 @@ describe('createLeadsRoute', () => {
       name: 'Иван',
       contact: ['@ivan', ''],
       contact_channel: 'telegram',
+      consent: 'on',
     });
     await POST(ctx);
     expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);

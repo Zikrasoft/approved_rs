@@ -88,11 +88,7 @@ const submissionObject = z
     source_url: sourceUrlSchema,
     visitor_id: visitorIdSchema,
     // TODO: LeadForm.astro posts `city` on every city landing page and it is discarded here.
-    // TODO: all three forms now post `consent` and gate submission on it client-side, so making
-    // this required is a one-line change. Deliberately deferred: the forms were rewritten the same
-    // night, and a server requirement turns any client regression into silently lost leads.
-    // Decide after the rewritten forms have run in production.
-    consent: z.string().optional(),
+    consent: z.string().trim().min(1),
   })
   .refine((value) => isValidContact(value.contact, value.contact_channel), {
     path: ['contact'],
