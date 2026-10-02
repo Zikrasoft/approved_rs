@@ -134,3 +134,33 @@ describe('deferSubmitUntilKit', () => {
     expect(deferSubmitUntilKit(element)).toBe(false);
   });
 });
+
+describe('contactValue', () => {
+  function telegramField(typed: string): [HTMLSelectElement, HTMLInputElement] {
+    const [country] = fields('');
+    const input = document.createElement('input');
+    input.value = typed;
+    document.body.append(input);
+    return [country, input];
+  }
+
+  it('turns a handle into @handle', async () => {
+    const { contactValue } = await freshModule();
+    expect(contactValue('telegram', ...telegramField('ivan'))).toBe('@ivan');
+  });
+
+  it('turns a number typed into the telegram field into E.164', async () => {
+    const { contactValue, loadPhoneKit } = await freshModule();
+    await loadPhoneKit();
+    expect(contactValue('telegram', ...telegramField('064 123 4567'))).toBe(
+      '+381641234567',
+    );
+  });
+
+  it('reads the phone panel the same way whatever the channel', async () => {
+    const { contactValue } = await freshModule();
+    expect(contactValue('whatsapp', ...fields('060 123 4567'))).toBe(
+      '+381601234567',
+    );
+  });
+});

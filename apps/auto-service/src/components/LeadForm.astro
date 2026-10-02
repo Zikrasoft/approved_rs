@@ -216,10 +216,10 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     fillCountrySelect,
   } from '@podbor/lead-crm/phone-input';
   import {
+    contactValue,
     deferSubmitUntilKit,
     loadPhoneKit,
     phoneKit,
-    phoneValue,
   } from '@podbor/lead-crm/phone-kit';
   import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 
@@ -290,9 +290,8 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
       const viaTelegram = channel === 'telegram';
       const input = viaTelegram ? telegram : phone;
       const typed = input.value.trim();
-      const value = viaTelegram
-        ? typed.replace(/^@?/, '@')
-        : phoneValue(country, phone);
+      const value = contactValue(channel, country, input);
+      if (viaTelegram) input.value = value;
 
       const checks: [HTMLElement, HTMLElement, boolean][] = [
         [

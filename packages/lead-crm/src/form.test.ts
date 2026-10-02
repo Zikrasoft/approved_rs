@@ -139,9 +139,17 @@ describe('isValidContact', () => {
     expect(isValidContact('ivan', 'telegram')).toBe(true);
   });
 
-  it('never runs phone rules on the telegram channel', () => {
-    expect(isValidContact('+381641234567', 'telegram')).toBe(false);
+  it('rejects a handle too short to be one', () => {
     expect(isValidContact('ab', 'telegram')).toBe(false);
+  });
+
+  it('accepts a number typed into the telegram field', () => {
+    expect(isValidContact('+381641234567', 'telegram')).toBe(true);
+  });
+
+  it('rejects a number dressed up as a handle', () => {
+    expect(isValidContact('@0641234567', 'telegram')).toBe(false);
+    expect(isValidContact('0641234567', 'telegram')).toBe(false);
   });
 });
 

@@ -283,10 +283,10 @@ const noscriptLink =
     fillCountrySelect,
   } from '@podbor/lead-crm/phone-input';
   import {
+    contactValue,
     deferSubmitUntilKit,
     loadPhoneKit,
     phoneKit,
-    phoneValue,
   } from '@podbor/lead-crm/phone-kit';
   import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 
@@ -358,9 +358,8 @@ const noscriptLink =
       const viaTelegram = channel === 'telegram';
       const input = viaTelegram ? telegram : phone;
       const typed = input.value.trim();
-      contact.value = viaTelegram
-        ? typed.replace(/^@?/, '@')
-        : phoneValue(country, phone);
+      contact.value = contactValue(channel, country, input);
+      if (viaTelegram) input.value = contact.value;
 
       const contactError = viaTelegram ? errors.telegram : errors.phone;
       mark(

@@ -9,6 +9,7 @@
     "./storage/vercel-blob": "./src/storage/vercelBlob.ts",
     "./storage/file": "./src/storage/file.ts",
     "./contact-channel": "./src/contactChannel.ts",
+    "./contact-shape": "./src/contactShape.ts",
     "./fields": "./src/fields.ts",
     "./phone": "./src/phone.ts",
     "./compose-e164": "./src/composeE164.ts",
