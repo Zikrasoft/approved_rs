@@ -6,7 +6,11 @@ import { SUPPORTED_LOCALES, LOCALE_NAME } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getSiteContent } from '@/i18n/content/site';
 import { PathBuilder, swapLocale } from '@/utils/paths';
-import { navCurrent, LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
+import {
+  contactPlacement,
+  navCurrent,
+  LOCALE_CHOICE_ATTRIBUTE,
+} from '@podbor/site-kit';
 import { CONTACT_LINKS } from '@/utils/contactLinks';
 import { devOnly, shopBuilt } from '@/utils/shopStatus';
 
@@ -39,6 +43,7 @@ const links = [
   class="group contents"
   data-lock-scroll
   data-desktop-media="(min-width: 768px)"
+  {...contactPlacement('header')}
 >
   <header
     class="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur"
@@ -109,7 +114,7 @@ const links = [
         <a
           href={CONTACT_LINKS.phone}
           data-contact-channel="phone"
-          class="btn btn-secondary hidden h-10 py-0 lg:inline-flex"
+          class="btn btn-secondary hidden h-10 py-0 lg:inline-flex pointer-fine:hidden!"
         >
           <Icon name="phone" />
           <span class="spec text-xs">{site.header.phoneLabel}</span>
@@ -173,7 +178,7 @@ const links = [
       <a
         href={CONTACT_LINKS.phone}
         data-contact-channel="phone"
-        class="btn btn-secondary w-full"
+        class="btn btn-secondary w-full pointer-fine:hidden!"
       >
         <Icon name="phone" />
         <span class="spec">{site.header.phoneLabel}</span>

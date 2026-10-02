@@ -248,6 +248,41 @@ Both new apps follow the same shape, and a third should too:
   unconditionally direct now — they mean the `/thanks/` carve-out: a phone link
   instead of the callback control, because someone who has just sent a brief is
   not served the form again.
+- **A `tel:` control only exists where a dialer does**, on all three sites. A
+  desktop machine has no dialer, so «Позвонить» there is a click that does
+  nothing — the same defect as a messenger tile that opens a form. The choice is
+  a CSS media query over the primary pointer (`pointer-coarse:hidden!` /
+  `pointer-fine:hidden!`, Tailwind v4 variants), never JavaScript: both variants
+  are rendered, the query picks one, a touchscreen laptop reports a fine primary
+  pointer and correctly gets the desktop shape, and it survives static
+  prerendering where middleware never runs. `display: none` is the hiding, so
+  the unused variant leaves the tab order and the accessibility tree too. The
+  `!` is load-bearing: Tailwind utilities sit in `@layer utilities` and lose to
+  an unlayered Astro scoped `display`, so a plain `pointer-fine:hidden` on a
+  `.contact-cell` silently does nothing. Coarse is the base in every one of
+  these pairs, so a `pointer: none` client gets the mobile shape whole rather
+  than half of each. Two shapes, by whether the region has a callback sibling:
+  where one is already on screen — the full contact bar, the floating widget,
+  approved.rs's mobile menu, CarLab's header, CarLab's sticky bar and the
+  compact hero that ships a `label` button — the phone control is simply absent
+  on a fine pointer and nothing replaces it; where the phone link is the only
+  phone control, as in the compact hero without a `label`, a callback button
+  takes its place carrying `callbackButtonLabel`. `/thanks/` is the one
+  exception: `direct` on the `ContactCTA` contacts block renders the number as
+  plain selectable text through `@podbor/site-kit/format-phone` — its own
+  subpath, because the root barrel would put `libphonenumber-js` one client
+  import away from the browser. That block is the only place a number is shown
+  as text; the floating widget on the same page takes the absent shape like
+  everywhere else. Details' header has no phone control at all, so there is
+  nothing to do there, and both brand footers simply drop theirs on a fine
+  pointer, the way approved.rs's footer has never carried one.
+- **`direct`, `directContacts` and `openModal` are live props**, despite issue
+  #92 specifying all three as dead flexibility to delete. `direct` /
+  `directContacts` is what marks the `/thanks/` carve-out above, and `openModal`
+  is what routes a service page's CTAs to that page's own `LeadFormModal`,
+  carrying its service, instead of the global one in the header. Deleting them
+  on the strength of that spec line drops the carve-out and silently strips the
+  service off every service-page lead.
 - **Only approved.rs prefills the first message**, `messengerPrefill` in its
   `services.yaml`, so the chat does not open empty. The mechanism is shared and
   the brand sites opt in by passing a message: `telegramLink`/`whatsappLink` in

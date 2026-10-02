@@ -7,6 +7,7 @@ import { getServicesContent } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
 import { VIBER_NUMBER, PHONE_NUMBER } from '@/utils/constants';
 import { callbackTrigger } from '@/utils/contactChannel';
+import { contactPlacement } from '@podbor/site-kit';
 
 interface Props {
   direct?: boolean;
@@ -23,6 +24,7 @@ const messenger = messengerHrefs(locale);
   class="floating-contact"
   data-floating-contact
   watch="[data-contact-cta]"
+  {...contactPlacement('floating')}
 >
   <div class="floating-panel" role="menu" data-panel hidden>
     <a
@@ -78,7 +80,7 @@ const messenger = messengerHrefs(locale);
       data-contact-channel="phone"
       href={phoneLink(PHONE_NUMBER)}
       role="menuitem"
-      class="floating-cell"
+      class="floating-cell pointer-fine:hidden!"
     >
       <ContactIcon channel="phone" size={16} />
       <span>{cc.callButtonLabel}</span>

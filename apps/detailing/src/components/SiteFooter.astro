@@ -14,6 +14,7 @@ import {
   TELEGRAM_ENABLED,
 } from '@/utils/constants';
 import { CONTACT_LINKS } from '@/utils/contactLinks';
+import { contactPlacement } from '@podbor/site-kit';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
@@ -114,14 +115,17 @@ const messengers = [
         >
       </nav>
 
-      <div class="flex flex-col items-start gap-3">
+      <div
+        class="flex flex-col items-start gap-3"
+        {...contactPlacement('footer')}
+      >
         <span class={columnHeading}>
           {site.footer.contactHeading}
         </span>
         <a
           href={CONTACT_LINKS.phone}
           data-contact-channel="phone"
-          class="inline-flex min-h-11 items-center gap-2.5 text-sm text-chalk transition-colors duration-400 hover:text-champagne"
+          class="inline-flex min-h-11 items-center gap-2.5 text-sm text-chalk transition-colors duration-400 hover:text-champagne pointer-fine:hidden!"
         >
           <Icon name="phone" size={16} class="shrink-0" />
           {site.channels.call}

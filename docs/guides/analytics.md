@@ -33,7 +33,7 @@ Variants go into parameters, not into new names.
 | `form_start`                                                     | first input into the form                          | —                                       |
 | `form_error`                                                     | validation rejected the submission                 | `field`: `telegram`, `phone`, `consent` |
 | `form_submit`                                                    | the form actually went to the server               | `service`                               |
-| `contact_click`                                                  | clicked a phone, a messenger or the enquiry button | `channel`                               |
+| `contact_click`                                                  | clicked a phone, a messenger or the enquiry button | `channel`, `placement`                  |
 | `lead_modal_open`                                                | opened the form in the modal (approved.rs only)    | `tab`, `service`                        |
 | `brand_link_click`                                               | left for a partner site (approved.rs only)         | `to`                                    |
 | `lang_offer_shown` / `lang_offer_taken` / `lang_offer_dismissed` | the language-choice banner                         | `from`, `to`                            |
@@ -52,12 +52,25 @@ itself, so on focus the goal would fire on every opening, duplicating
 
 ## The markup everything hangs off
 
-| attribute              | on what                        | for what                          |
-| ---------------------- | ------------------------------ | --------------------------------- |
-| `data-lead-form`       | the enquiry `<form>`           | view, start, error, submit        |
-| `data-contact-channel` | contact links and buttons      | `contact_click` and a server lead |
-| `data-brand-link`      | links to partner sites         | `brand_link_click`                |
-| `aria-invalid="true"`  | a field that failed validation | the field name in `form_error`    |
+| attribute                | on what                        | for what                          |
+| ------------------------ | ------------------------------ | --------------------------------- |
+| `data-lead-form`         | the enquiry `<form>`           | view, start, error, submit        |
+| `data-contact-channel`   | contact links and buttons      | `contact_click` and a server lead |
+| `data-contact-placement` | the region the control sits in | `placement` in `contact_click`    |
+| `data-brand-link`        | links to partner sites         | `brand_link_click`                |
+| `aria-invalid="true"`    | a field that failed validation | the field name in `form_error`    |
+
+`data-contact-placement` names where on the page the control sits, never which
+component renders it: `hero`, `bar`, `floating`, `footer`, `header`, `thanks` —
+one word can therefore be stamped by several components (`bar` is every full
+contact bar, wherever it is rendered) and `thanks` is a whole page, because that
+page is one region. The closed set is `CONTACT_PLACEMENTS`
+in `packages/site-kit/src/goals.ts`, stamped through `contactPlacement()` so a
+typo is a build error. It goes on a container, and the tracker reads the nearest
+one above the tapped control, so one attribute covers a whole bar. A rename of
+the component that renders a region must not move the word, or a year of data
+splits in two. `placement` rides on the existing goal, so there is nothing to
+create in the three counters.
 
 `aria-invalid` is set and cleared only through `markFieldValidity` from
 `@podbor/site-kit/browser` — three forms used to do it three different ways. The

@@ -8,6 +8,8 @@ import { getServicesContent } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
 import { TG_MANAGER, VIBER_NUMBER, PHONE_NUMBER } from '@/utils/constants';
 import { PathBuilder } from '@/utils/paths';
+import { contactPlacement } from '@podbor/site-kit';
+import { formatPhone } from '@podbor/site-kit/format-phone';
 import { callbackTrigger, leadModalTrigger } from '@/utils/contactChannel';
 
 interface Props {
@@ -30,9 +32,14 @@ const {
 const telegramAriaLabel = label ?? cc.ctaButtonLabel;
 
 const messenger = messengerHrefs(locale, manager);
+const placement = direct ? 'thanks' : compact ? 'hero' : 'bar';
 ---
 
-<div class="flex flex-col gap-3 my-8" data-contact-cta>
+<div
+  class="flex flex-col gap-3 my-8"
+  data-contact-cta
+  {...contactPlacement(placement)}
+>
   {
     compact ? (
       <div class="flex flex-col sm:flex-row sm:flex-wrap gap-3">
@@ -54,11 +61,22 @@ const messenger = messengerHrefs(locale, manager);
           variant="secondary"
           href={phoneLink(PHONE_NUMBER)}
           data-contact-channel="phone"
-          class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center"
+          class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center pointer-fine:hidden!"
         >
           <ContactIcon channel="phone" size={15} />
           {cc.callButtonLabel}
         </Button>
+        {!label && (
+          <Button
+            variant="secondary"
+            data-contact-channel="callback"
+            {...callbackTrigger(openModal)}
+            class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center pointer-coarse:hidden!"
+          >
+            <ContactIcon channel="phone" size={15} />
+            {cc.callbackButtonLabel}
+          </Button>
+        )}
       </div>
     ) : (
       <>
@@ -98,15 +116,21 @@ const messenger = messengerHrefs(locale, manager);
           </a>
 
           {direct ? (
-            <a
-              data-contact-channel="phone"
-              href={phoneLink(PHONE_NUMBER)}
-              aria-label={cc.callButtonLabel}
-              class="contact-cell"
-            >
-              <ContactIcon channel="phone" size={16} />
-              <span>{cc.callbackShortLabel}</span>
-            </a>
+            <>
+              <a
+                data-contact-channel="phone"
+                href={phoneLink(PHONE_NUMBER)}
+                aria-label={cc.callButtonLabel}
+                class="contact-cell pointer-fine:hidden!"
+              >
+                <ContactIcon channel="phone" size={16} />
+                <span>{cc.callbackShortLabel}</span>
+              </a>
+              <span class="contact-cell pointer-coarse:hidden!">
+                <ContactIcon channel="phone" size={16} />
+                <span>{formatPhone(PHONE_NUMBER)}</span>
+              </span>
+            </>
           ) : (
             <button
               type="button"
@@ -125,7 +149,7 @@ const messenger = messengerHrefs(locale, manager);
           variant="secondary"
           href={phoneLink(PHONE_NUMBER)}
           data-contact-channel="phone"
-          class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full justify-center bg-surface"
+          class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full justify-center bg-surface pointer-fine:hidden!"
         >
           <ContactIcon channel="phone" size={15} />
           {cc.callButtonLabel}
@@ -170,8 +194,14 @@ const messenger = messengerHrefs(locale, manager);
       background-color 0.2s,
       color 0.2s;
   }
-  .contact-cell:hover,
-  .contact-cell:focus-visible {
+  span.contact-cell {
+    cursor: text;
+    user-select: text;
+  }
+  a.contact-cell:hover,
+  a.contact-cell:focus-visible,
+  button.contact-cell:hover,
+  button.contact-cell:focus-visible {
     background-color: var(--color-accent);
     color: var(--color-on-accent);
   }

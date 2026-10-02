@@ -6,6 +6,7 @@ import { PHONE_NUMBER } from '@/utils/constants';
 import { getLocale } from '@/i18n/config';
 import { getServicesContent } from '@/i18n/content/services';
 import { phoneLink } from '@/utils/contactLinks';
+import { contactPlacement } from '@podbor/site-kit';
 
 interface Props {
   casesHref: string;
@@ -22,6 +23,7 @@ const callLabel = getServicesContent(getLocale(Astro.currentLocale)).caseChrome
 <div
   id="mobile-menu"
   data-menu
+  {...contactPlacement('header')}
   class="xl:hidden invisible fixed inset-0 z-40 flex flex-col overflow-y-auto bg-header-mobile pb-8 pt-20 opacity-0 backdrop-blur-xl transition-[opacity,visibility] duration-200 group-data-[open]:visible group-data-[open]:opacity-100"
   inert
 >
@@ -42,13 +44,15 @@ const callLabel = getServicesContent(getLocale(Astro.currentLocale)).caseChrome
     <a
       href={phoneLink(PHONE_NUMBER)}
       data-contact-channel="phone"
-      class="mt-auto flex items-center justify-center gap-2.5 rounded-sm border border-accent-border bg-accent-subtle py-3.5 text-accent no-underline"
+      class="mt-auto flex items-center justify-center gap-2.5 rounded-sm border border-accent-border bg-accent-subtle py-3.5 text-accent no-underline pointer-fine:hidden!"
     >
       <ContactIcon channel="phone" size={15} />
       <span class="text-sm font-medium">{callLabel}</span>
     </a>
 
-    <p class="mt-6 mb-2 text-xs text-muted">{languageLabel}</p>
+    <p class="mt-6 mb-2 text-xs text-muted pointer-fine:mt-auto">
+      {languageLabel}
+    </p>
     <LanguageSwitcher variant="inline" />
   </nav>
 </div>

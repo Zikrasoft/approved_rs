@@ -10,6 +10,7 @@ import { viberLink } from '@/utils/contactLinks';
 import { messengerHrefs } from '@/utils/messengerHrefs';
 import { getActiveCountries } from '@/utils/geo';
 import { PathBuilder } from '@/utils/paths';
+import { contactPlacement } from '@podbor/site-kit';
 
 const year = new Date().getFullYear();
 const locale = getLocale(Astro.currentLocale);
@@ -32,7 +33,7 @@ const messenger = messengerHrefs(locale);
         <p class="text-sm leading-relaxed max-w-xs mb-6 text-muted">
           {t.footer.tagline}
         </p>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap gap-2" {...contactPlacement('footer')}>
           <div data-primary-contact class="contents">
             <a
               data-primary-channel="telegram"

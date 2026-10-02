@@ -12,8 +12,14 @@ beforeEach(() => {
   sent = [];
   localStorage.clear();
   document.body.innerHTML = `
-    <a data-contact-channel="telegram" href="#t">Telegram</a>
-    <a data-contact-channel="callback" href="#c">Callback</a>
+    <div data-contact-placement="footer">
+      <a data-contact-channel="telegram" href="#t">Telegram</a>
+      <a data-contact-channel="callback" href="#c">Callback</a>
+    </div>
+    <a data-contact-channel="viber" href="#v">Viber</a>
+    <a data-contact-channel="whatsapp" data-contact-placement="made-up" href="#w">
+      WhatsApp
+    </a>
   `;
   navigator.sendBeacon = vi.fn((url: string | URL, body?: BodyInit | null) => {
     sent.push([String(url), body as FormData]);
@@ -52,6 +58,25 @@ describe('defineContactClickTracking', () => {
     click('telegram');
     expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
       channel: 'telegram',
+      placement: 'footer',
+    });
+  });
+
+  it('reports the placement the tapped control sits in', () => {
+    defineContactClickTracking(isTracked);
+    click('whatsapp');
+    expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
+      channel: 'whatsapp',
+      placement: 'made-up',
+    });
+  });
+
+  it('still reports a usable goal where no placement is stamped', () => {
+    defineContactClickTracking(isTracked);
+    click('viber');
+    expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
+      channel: 'viber',
+      placement: undefined,
     });
   });
 
@@ -61,6 +86,7 @@ describe('defineContactClickTracking', () => {
     expect(sent).toEqual([]);
     expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
       channel: 'callback',
+      placement: 'footer',
     });
   });
 

@@ -9,6 +9,7 @@ import { SERVICE_SLUGS } from '@/utils/services';
 import { GARAGE_ADDRESS, SITE_NAME } from '@/utils/constants';
 import { devOnly, shopBuilt } from '@/utils/shopStatus';
 import { contactChannels } from '@/utils/contactLinks';
+import { contactPlacement } from '@podbor/site-kit';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
@@ -76,10 +77,17 @@ const channels = contactChannels(site);
       >
         {site.footer.contactHeading}
       </span>
-      <ul class="flex flex-col" data-contact-order>
+      <ul
+        class="flex flex-col"
+        data-contact-order
+        {...contactPlacement('footer')}
+      >
         {
           channels.map((channel) => (
-            <li data-channel={channel.track}>
+            <li
+              data-channel={channel.track}
+              class:list={[channel.track === 'phone' && 'pointer-fine:hidden!']}
+            >
               <a
                 href={channel.href}
                 data-contact-channel={channel.track}
