@@ -73,11 +73,8 @@ vehicle-sourcing:
     - Хорватию
     - Северную Македонию
     - Турцию
-    - Россию
     - Казахстан
-    - Беларусь
     - Кыргызстан
-    - Украину
   citiesHeadingFor: Где смотрим машины {countryLocation}
   citiesLead: >-
     Эксперт выезжает по всей стране, но чаще всего смотрим машины там, где их больше всего выставляют. Вот что это значит для каждого города.
@@ -823,11 +820,8 @@ translations:
           text: We deliver the car to your city — turnkey, including customs clearance
       deliveryLineFor: We deliver to {destinations} — and any other country, can discuss upon request.
       deliveryDestinations:
-        - Russia
         - Kazakhstan
         - Kyrgyzstan
-        - Ukraine
-        - Belarus
         - Bosnia and Herzegovina
         - Croatia
         - North Macedonia
@@ -1508,11 +1502,8 @@ translations:
           text: Dostavljamo automobil do vašeg grada — pod ključ, uključujući carinjenje
       deliveryLineFor: Dovozimo u {destinations} — i u bilo koju drugu zemlju, razgovaraćemo prilikom prijave.
       deliveryDestinations:
-        - Rusiju
         - Kazahstan
         - Kirgistan
-        - Ukrajinu
-        - Belorusiju
         - Bosnu i Hercegovinu
         - Hrvatsku
         - Severnu Makedoniju
@@ -2193,11 +2184,8 @@ translations:
           text: Entregamos el coche a tu ciudad — llave en mano, incluyendo aduanas
       deliveryLineFor: Entregamos en {destinations} — y en cualquier otro país, lo discutimos al realizar la solicitud.
       deliveryDestinations:
-        - Rusia
         - Kazajistán
         - Kirguisistán
-        - Ucrania
-        - Bielorrusia
         - Bosnia y Herzegovina
         - Croacia
         - Macedonia del Norte
@@ -2878,11 +2866,8 @@ translations:
           text: Wir liefern das Fahrzeug in Ihre Stadt — schlüsselfertig, einschließlich Zollabwicklung
       deliveryLineFor: Wir liefern nach {destinations} — und in jedes andere Land, sprechen wir bei der Anfrage ab.
       deliveryDestinations:
-        - Russland
         - Kasachstan
         - Kirgisistan
-        - Ukraine
-        - Weißrussland
         - Bosnien und Herzegowina
         - Kroatien
         - Nordmazedonien
