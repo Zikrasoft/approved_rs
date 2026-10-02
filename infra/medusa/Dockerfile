@@ -2,7 +2,14 @@ FROM node:24.21.0-alpine AS builder
 
 WORKDIR /repo
 ENV MEDUSA_DISABLE_TELEMETRY=1 TURBO_TELEMETRY_DISABLED=1
-RUN corepack enable && corepack prepare pnpm@11.22.0 --activate
+
+COPY package.json .
+RUN corepack enable && \
+    for i in 1 2 3; do \
+      corepack prepare --activate && break; \
+      echo "corepack prepare failed (attempt $i), retrying" >&2; sleep 5; \
+    done; \
+    pnpm --version
 
 COPY . .
 RUN pnpm install --frozen-lockfile
