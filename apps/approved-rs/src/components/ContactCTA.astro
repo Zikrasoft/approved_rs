@@ -7,7 +7,8 @@ import { messengerHrefs } from '@/utils/messengerHrefs';
 import { getServicesContent } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
 import { TG_MANAGER, VIBER_NUMBER, PHONE_NUMBER } from '@/utils/constants';
-import { callbackTrigger } from '@/utils/contactChannel';
+import { PathBuilder } from '@/utils/paths';
+import { callbackTrigger, leadModalTrigger } from '@/utils/contactChannel';
 
 interface Props {
   manager?: string;
@@ -21,11 +22,12 @@ const locale = getLocale(Astro.currentLocale);
 const cc = getServicesContent(locale).caseChrome;
 const {
   manager = TG_MANAGER,
-  label = cc.ctaButtonLabel,
+  label,
   openModal = false,
   compact = false,
   direct = false,
 } = Astro.props;
+const telegramAriaLabel = label ?? cc.ctaButtonLabel;
 
 const messenger = messengerHrefs(locale, manager);
 ---
@@ -33,11 +35,21 @@ const messenger = messengerHrefs(locale, manager);
 <div class="flex flex-col gap-3 my-8" data-contact-cta>
   {
     compact ? (
-      <div class="flex flex-col sm:flex-row gap-3">
+      <div class="flex flex-col sm:flex-row sm:flex-wrap gap-3">
         <RegionalContactButton
           {manager}
           class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center"
         />
+        {label && !direct && (
+          <Button
+            variant="secondary"
+            href={PathBuilder.contacts(locale)}
+            {...leadModalTrigger(openModal)}
+            class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center bg-surface"
+          >
+            {label}
+          </Button>
+        )}
         <Button
           variant="secondary"
           href={phoneLink(PHONE_NUMBER)}
@@ -56,7 +68,7 @@ const messenger = messengerHrefs(locale, manager);
             href={messenger.telegram}
             target="_blank"
             rel="noopener"
-            aria-label={label}
+            aria-label={telegramAriaLabel}
             class="contact-cell"
           >
             <ContactIcon channel="telegram" size={17} />
