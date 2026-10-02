@@ -1726,6 +1726,20 @@ describe('updateCapture', () => {
     expect(updated?.pendingPrompt?.kind).toBe('edit_comment');
   });
 
+  it('replaces the contact when the visitor shares a better one', async () => {
+    const lead = await store.insertLead({
+      ...baseData,
+      contact: 'tg://user?id=42',
+    });
+
+    const updated = await store.updateCapture(lead.id, {
+      contact: '+381601234567',
+      capturePrompt: null,
+    });
+
+    expect(updated?.contact).toBe('+381601234567');
+  });
+
   it('returns undefined for an id that does not exist', async () => {
     expect(
       await store.updateCapture(999, { capturePrompt: null }),

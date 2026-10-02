@@ -1,26 +1,46 @@
 greeting: Здравствуйте! Спасибо, что написали — мы уже видим ваше обращение и скоро ответим.
 lookingFor: Расскажите в двух словах, какая машина вас интересует или с чем нужна помощь.
 budget: И на какой бюджет вы рассчитываете?
+phoneAsk: Чтобы мы могли с вами связаться, поделитесь номером телефона — или пропустите этот шаг.
+phoneOffer: Если удобнее по телефону, поделитесь номером, и мы позвоним. Если нет, просто пропустите.
+phoneButton: Поделиться номером
+phoneSkip: Пропустить
 thanks: Спасибо! Всё передали менеджеру — он напишет вам прямо здесь.
 translations:
   en:
     greeting: Hello! Thanks for getting in touch — we can see your enquiry and we'll come back to you shortly.
     lookingFor: Tell us in a couple of words which car you have in mind, or what you need a hand with.
     budget: And what budget are you working with?
+    phoneAsk: Share your phone number so we can reach you — or skip this step.
+    phoneOffer: If a call suits you better, share your number and we'll ring you. If not, just skip it.
+    phoneButton: Share my number
+    phoneSkip: Skip
     thanks: Thank you! Your manager has it all and will write to you right here.
   sr:
     greeting: Zdravo! Hvala što ste nam se javili — vidimo vaš upit i javljamo se uskoro.
     lookingFor: Recite nam ukratko koji automobil vas zanima ili oko čega vam treba pomoć.
     budget: A koji budžet imate na umu?
+    phoneAsk: Podelite broj telefona da bismo mogli da vas kontaktiramo — ili preskočite ovaj korak.
+    phoneOffer: Ako vam više odgovara telefon, podelite broj pa ćemo vas pozvati. Ako ne, slobodno preskočite.
+    phoneButton: Podeli broj
+    phoneSkip: Preskoči
     thanks: Hvala! Sve smo prosledili menadžeru — javiće vam se baš ovde.
   es:
     greeting: ¡Hola! Gracias por escribirnos, ya vemos tu consulta y te respondemos enseguida.
     lookingFor: Cuéntanos en dos palabras qué coche te interesa o en qué necesitas ayuda.
     budget: ¿Y con qué presupuesto cuentas?
+    phoneAsk: Comparte tu número de teléfono para que podamos contactarte, o salta este paso.
+    phoneOffer: Si prefieres que te llamemos, comparte tu número. Si no, sáltatelo sin problema.
+    phoneButton: Compartir mi número
+    phoneSkip: Omitir
     thanks: ¡Gracias! El gestor ya lo tiene todo y te escribirá por aquí mismo.
   de:
     greeting: Hallo! Danke für Ihre Nachricht – Ihre Anfrage liegt uns vor, wir melden uns gleich.
     lookingFor: Sagen Sie uns kurz, welches Auto Sie interessiert oder wobei Sie Hilfe brauchen.
     budget: Und mit welchem Budget rechnen Sie?
+    phoneAsk: Teilen Sie Ihre Telefonnummer, damit wir Sie erreichen können – oder überspringen Sie diesen Schritt.
+    phoneOffer: Wenn Ihnen ein Anruf lieber ist, teilen Sie Ihre Nummer, dann rufen wir an. Wenn nicht, einfach überspringen.
+    phoneButton: Nummer teilen
+    phoneSkip: Überspringen
     thanks: Danke! Ihr Ansprechpartner hat alles und schreibt Ihnen direkt hier.
-translatedFrom: 5d335d35f4db377d
+translatedFrom: 52ec77195a04b5db

@@ -32,16 +32,19 @@ const ANSWER_NOTE: Record<CaptureStep, string> = {
   phone: 'Телефон',
 };
 
-const NEXT_STEP: Record<CaptureStep, CaptureStep | null> = {
-  looking_for: 'budget',
-  budget: null,
-  phone: null,
-};
+const WITH_HANDLE: CaptureStep[] = ['looking_for', 'budget', 'phone'];
+const WITHOUT_HANDLE: CaptureStep[] = ['phone', 'looking_for', 'budget'];
+
+const CLEAR_KEYBOARD = { reply_markup: { remove_keyboard: true } };
 
 export interface CaptureCopy {
   greeting: string;
   lookingFor: string;
   budget: string;
+  phoneAsk: string;
+  phoneOffer: string;
+  phoneButton: string;
+  phoneSkip: string;
   thanks: string;
 }
 
@@ -70,8 +73,51 @@ function senderContact(sender: CaptureSender): string {
   return sender.username ? `@${sender.username}` : `tg://user?id=${sender.id}`;
 }
 
-function question(step: CaptureStep, copy: CaptureCopy): string {
-  return step === 'budget' ? copy.budget : copy.lookingFor;
+function hasHandle(contact: string): boolean {
+  return contact.startsWith('@');
+}
+
+function order(contact: string): CaptureStep[] {
+  return hasHandle(contact) ? WITH_HANDLE : WITHOUT_HANDLE;
+}
+
+function stepAfter(contact: string, step: CaptureStep): CaptureStep | null {
+  const steps = order(contact);
+  return steps[steps.indexOf(step) + 1] ?? null;
+}
+
+function phoneKeyboard(words: CaptureCopy) {
+  return {
+    reply_markup: {
+      keyboard: [
+        [{ text: words.phoneButton, request_contact: true }],
+        [{ text: words.phoneSkip }],
+      ],
+      resize_keyboard: true,
+      one_time_keyboard: true,
+    },
+  };
+}
+
+function nextMessage(
+  next: CaptureStep | null,
+  leaving: CaptureStep | null,
+  contact: string,
+  words: CaptureCopy,
+): [string, object | undefined] {
+  if (next === 'phone')
+    return [
+      hasHandle(contact) ? words.phoneOffer : words.phoneAsk,
+      phoneKeyboard(words),
+    ];
+  const extra = leaving === 'phone' ? CLEAR_KEYBOARD : undefined;
+  if (next === 'looking_for') return [words.lookingFor, extra];
+  if (next === 'budget') return [words.budget, extra];
+  return [words.thanks, extra];
+}
+
+function sharedPhone(phoneNumber: string): string {
+  return phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
 }
 
 export function createCaptureWebhookRoute<L extends string>({
@@ -110,10 +156,12 @@ export function createCaptureWebhookRoute<L extends string>({
   ): Promise<void> {
     const { service, locale } = startFields(payload, sender);
     const words = copy(locale);
+    const contact = senderContact(sender);
+    const step = order(contact)[0];
     const lead = await store.insertLead({
       brand,
       name: senderName(sender),
-      contact: senderContact(sender),
+      contact,
       service,
       services: service ? [service] : [],
       contactChannel: 'telegram',
@@ -123,43 +171,54 @@ export function createCaptureWebhookRoute<L extends string>({
       visitorId: null,
       locale,
       kind: 'lead',
-      capturePrompt: { chatId, step: 'looking_for' },
+      capturePrompt: { chatId, step },
     });
     await ensureLeadCard(lead);
-    await bot.sendMessage(
-      chatId,
-      `${words.greeting}\n\n${question('looking_for', words)}`,
-    );
+    const [text, extra] = nextMessage(step, null, contact, words);
+    await bot.sendMessage(chatId, `${words.greeting}\n\n${text}`, extra);
   }
 
   async function answer(
     lead: StoredLead,
     prompt: CapturePrompt,
-    text: string,
+    text: string | undefined,
+    phone: string | undefined,
   ): Promise<void> {
-    const next = NEXT_STEP[prompt.step];
     const words = copy(isLocale(lead.locale) ? lead.locale : primaryLocale);
+    const keepsHandle = hasHandle(lead.contact);
+    const takesPhone = prompt.step === 'phone' && phone !== undefined;
+    const next = stepAfter(lead.contact, prompt.step);
     const updated = await store.updateCapture(lead.id, {
-      note: `${ANSWER_NOTE[prompt.step]}: ${text}`,
+      note:
+        prompt.step === 'phone'
+          ? takesPhone && keepsHandle
+            ? `${ANSWER_NOTE.phone}: ${phone}`
+            : undefined
+          : `${ANSWER_NOTE[prompt.step]}: ${text}`,
+      contact: takesPhone && !keepsHandle ? phone : undefined,
       capturePrompt: next ? { chatId: prompt.chatId, step: next } : null,
     });
     await ensureLeadCard(updated ?? lead);
-    await bot.sendMessage(
-      prompt.chatId,
-      next ? question(next, words) : words.thanks,
-    );
+    const [reply, extra] = nextMessage(next, prompt.step, lead.contact, words);
+    await bot.sendMessage(prompt.chatId, reply, extra);
   }
 
   async function handle(
     chatId: number,
     sender: CaptureSender,
-    text: string,
+    text: string | undefined,
+    phone: string | undefined,
   ): Promise<void> {
-    const started = START_PATTERN.exec(text);
-    if (started) return start(chatId, sender, started[1]);
+    if (text !== undefined) {
+      const started = START_PATTERN.exec(text);
+      if (started) return start(chatId, sender, started[1]);
+    }
 
     const lead = await store.findByCapturePrompt(chatId);
-    if (lead?.capturePrompt) return answer(lead, lead.capturePrompt, text);
+    const prompt = lead?.capturePrompt;
+    if (!lead || !prompt) return;
+    if (prompt.step !== 'phone' && text === undefined) return;
+    return answer(lead, prompt, text, phone);
   }
 
   return async function POST({
@@ -184,11 +243,13 @@ export function createCaptureWebhookRoute<L extends string>({
     const { message } = captureUpdateSchema.parse(body);
     if (!message || message.chat.type !== 'private') return ACK;
 
-    const text = message.text?.trim() ?? '';
-    if (!text) return ACK;
+    const trimmed = message.text?.trim();
+    const text = trimmed ? trimmed : undefined;
+    const phone = message.contact && sharedPhone(message.contact.phone_number);
+    if (text === undefined && phone === undefined) return ACK;
 
     try {
-      await handle(message.chat.id, message.from, text);
+      await handle(message.chat.id, message.from, text, phone);
     } catch (error) {
       console.error('[capture] could not handle the update', { error });
     }

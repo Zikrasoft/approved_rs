@@ -12,6 +12,10 @@ const COPY = {
   greeting: 'GREETING',
   lookingFor: 'LOOKING_FOR',
   budget: 'BUDGET',
+  phoneAsk: 'PHONE_ASK',
+  phoneOffer: 'PHONE_OFFER',
+  phoneButton: 'SHARE_NUMBER',
+  phoneSkip: 'SKIP',
   thanks: 'THANKS',
 };
 
@@ -67,12 +71,13 @@ function makeStore() {
       leads.find((l) => l.capturePrompt?.chatId === chatId),
     ),
     updateCapture: vi.fn(
-      async (id: number, { note, capturePrompt }: CaptureUpdate) => {
+      async (id: number, { note, contact, capturePrompt }: CaptureUpdate) => {
         const lead = leads.find((l) => l.id === id);
         if (!lead) return undefined;
         return patch(lead, {
           ...lead,
           comment: note ? `${lead.comment ?? ''}\n${note}` : lead.comment,
+          contact: contact ?? lead.contact,
           capturePrompt,
         });
       },
@@ -156,7 +161,30 @@ async function say(text: string, from: Record<string, unknown> = HANDLED) {
 
 function lastSent(): [number, string] {
   const calls = bot.sendMessage.mock.calls;
-  return calls[calls.length - 1] as [number, string];
+  return (calls[calls.length - 1] as [number, string, unknown]).slice(0, 2) as [
+    number,
+    string,
+  ];
+}
+
+function lastExtra(): Record<string, unknown> | undefined {
+  const calls = bot.sendMessage.mock.calls;
+  return calls[calls.length - 1][2] as Record<string, unknown> | undefined;
+}
+
+function contactUpdate(
+  phoneNumber: string,
+  from: Record<string, unknown> = ANONYMOUS,
+) {
+  return {
+    update_id: 3,
+    message: {
+      message_id: 12,
+      chat: { id: from.id, type: 'private' },
+      from,
+      contact: { phone_number: phoneNumber, user_id: from.id },
+    },
+  };
 }
 
 beforeEach(() => {
@@ -361,21 +389,20 @@ describe('the two questions', () => {
     expect(lastSent()).toEqual([42, 'BUDGET']);
   });
 
-  it('puts the budget on the card and closes the dialog', async () => {
+  it('puts the budget on the card too', async () => {
     await POST(makeCtx(startUpdate('ru')));
     await say('BMW X5');
 
     await say('до 20 000 евро');
 
     expect(store.leads[0].comment).toContain('Бюджет: до 20 000 евро');
-    expect(store.leads[0].capturePrompt).toBeNull();
-    expect(lastSent()).toEqual([42, 'THANKS']);
   });
 
   it('ignores anything typed after the dialog has closed', async () => {
     await POST(makeCtx(startUpdate('ru')));
     await say('BMW X5');
     await say('до 20 000 евро');
+    await say('SKIP');
     bot.sendMessage.mockClear();
 
     await say('а ещё вопрос');
@@ -447,5 +474,121 @@ describe('an operator editing the same Lead mid-dialog', () => {
     expect(store.leads[0].pendingPrompt?.kind).toBe('edit_name');
     expect(store.leads[0].comment).toContain('Ищет: BMW X5');
     expect(store.leads[0].capturePrompt?.step).toBe('budget');
+  });
+});
+
+describe('the phone, asked first when nothing else can reach the visitor', () => {
+  it('asks for the number through a share-contact button before anything else', async () => {
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+
+    expect(lastSent()).toEqual([777, 'GREETING_ru\n\nPHONE_ASK']);
+    expect(lastExtra()).toEqual({
+      reply_markup: {
+        keyboard: [
+          [{ text: 'SHARE_NUMBER', request_contact: true }],
+          [{ text: 'SKIP' }],
+        ],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+      },
+    });
+  });
+
+  it('makes the shared number the contact, ahead of the tg://user fallback', async () => {
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+
+    await POST(makeCtx(contactUpdate('381601234567')));
+
+    expect(store.leads[0].contact).toBe('+381601234567');
+    expect(lastSent()).toEqual([777, 'LOOKING_FOR']);
+    expect(lastExtra()).toEqual({ reply_markup: { remove_keyboard: true } });
+  });
+
+  it('keeps a number that already carries its plus sign', async () => {
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+
+    await POST(makeCtx(contactUpdate('+381601234567')));
+
+    expect(store.leads[0].contact).toBe('+381601234567');
+  });
+
+  it('carries on through the questions after the number', async () => {
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    await POST(makeCtx(contactUpdate('381601234567')));
+
+    await say('Golf 7', ANONYMOUS);
+    expect(lastSent()).toEqual([777, 'BUDGET']);
+
+    await say('10 000', ANONYMOUS);
+    expect(lastSent()).toEqual([777, 'THANKS']);
+    expect(store.leads[0].capturePrompt).toBeNull();
+  });
+
+  it('moves on when the visitor declines, keeping the Lead reachable by bot', async () => {
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+
+    await say('SKIP', ANONYMOUS);
+
+    expect(store.leads[0].contact).toBe('tg://user?id=777');
+    expect(store.leads[0].capturePrompt?.step).toBe('looking_for');
+    expect(lastSent()).toEqual([777, 'LOOKING_FOR']);
+  });
+});
+
+describe('the phone, offered last when the visitor has a handle', () => {
+  it('comes after both questions, as a call offer', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    await say('BMW X5');
+
+    await say('20 000');
+
+    expect(lastSent()).toEqual([42, 'PHONE_OFFER']);
+    expect(store.leads[0].capturePrompt?.step).toBe('phone');
+  });
+
+  it('puts a shared number in the comment and leaves the handle as the contact', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    await say('BMW X5');
+    await say('20 000');
+
+    await POST(makeCtx(contactUpdate('381601234567', HANDLED)));
+
+    expect(store.leads[0].contact).toBe('@ivan');
+    expect(store.leads[0].comment).toContain('Телефон: +381601234567');
+    expect(store.leads[0].capturePrompt).toBeNull();
+    expect(lastSent()).toEqual([42, 'THANKS']);
+    expect(lastExtra()).toEqual({ reply_markup: { remove_keyboard: true } });
+  });
+
+  it('ends the dialog intact when the visitor declines the call', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    await say('BMW X5');
+    await say('20 000');
+
+    await say('SKIP');
+
+    expect(store.leads[0].contact).toBe('@ivan');
+    expect(store.leads[0].comment).not.toContain('Телефон');
+    expect(store.leads[0].capturePrompt).toBeNull();
+    expect(lastSent()).toEqual([42, 'THANKS']);
+  });
+});
+
+describe('a contact shared outside the phone step', () => {
+  it('is ignored while another question is open', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    bot.sendMessage.mockClear();
+
+    await POST(makeCtx(contactUpdate('381601234567', HANDLED)));
+
+    expect(store.leads[0].capturePrompt?.step).toBe('looking_for');
+    expect(bot.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it('is ignored when the visitor has no dialog open at all', async () => {
+    await POST(makeCtx(contactUpdate('381601234567')));
+
+    expect(store.insertLead).not.toHaveBeenCalled();
+    expect(bot.sendMessage).not.toHaveBeenCalled();
   });
 });
