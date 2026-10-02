@@ -10,13 +10,14 @@ import { PHONE_NUMBER } from '@/utils/constants';
 interface Props {
   class?: string;
   placement?: Extract<ContactPlacement, 'bar' | 'thanks'>;
+  service?: string;
 }
 
-const { class: className = '', placement = 'bar' } = Astro.props;
+const { class: className = '', placement = 'bar', service } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
 
-const channels = contactChannels(site);
+const channels = contactChannels(site, locale, service);
 ---
 
 <ul
