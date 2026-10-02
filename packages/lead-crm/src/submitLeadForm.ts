@@ -16,6 +16,6 @@ export async function submitLeadForm(form: HTMLFormElement): Promise<boolean> {
       detail: { ok },
     }),
   );
-  if (response && ok) location.assign(response.url || form.action);
+  if (ok) location.assign(response.url || form.action);
   return ok;
 }

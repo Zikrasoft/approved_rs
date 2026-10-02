@@ -61,7 +61,6 @@ const fieldClass =
   <form
     method="POST"
     action="/api/leads"
-    novalidate
     data-lead-form
     {...{ [DATA_DEFAULT_SERVICE]: service }}
     data-err-tg-required={lf.errorTelegramRequired}
@@ -315,6 +314,7 @@ const fieldClass =
   initAllLeadForms();
 
   function initLeadForm(form: HTMLFormElement) {
+    form.noValidate = true;
     const visitorIdInput = form.querySelector<HTMLInputElement>(
       'input[type="hidden"][name="visitor_id"]',
     );

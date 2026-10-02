@@ -57,7 +57,6 @@ const noscriptLink =
 <form
   method="POST"
   action="/api/leads"
-  novalidate
   data-lead-form
   data-submitting-label={site.form.submitting}
   class={`ym-hide-content ym-disable-keys flex flex-col ${compact ? 'gap-4' : 'gap-5'} ${className}`}
@@ -226,6 +225,7 @@ const noscriptLink =
         <input
           type="checkbox"
           name="consent"
+          required
           value="1"
           aria-describedby={errorId.consent}
           class="peer sr-only"
@@ -299,6 +299,7 @@ const noscriptLink =
     .forEach(initLeadForm);
 
   function initLeadForm(form: HTMLFormElement) {
+    form.noValidate = true;
     const pick = <T extends HTMLElement>(selector: string) =>
       form.querySelector<T>(selector)!;
 
