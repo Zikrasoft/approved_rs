@@ -23,6 +23,7 @@ export const {
   searchLeads,
   getDuePostponed,
   getOwedSummary,
+  expireGhostLeads,
 } = leadStore;
 
 export {

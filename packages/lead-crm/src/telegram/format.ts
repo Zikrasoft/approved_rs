@@ -58,6 +58,10 @@ function statusEmoji(status: LeadStatus): string {
   return statusMeta(status).emoji;
 }
 
+function archivedMark(lead: StoredLead): string {
+  return lead.archived ? '🗄 ' : '';
+}
+
 function statusLine(status: LeadStatus): string {
   return `<b>Статус: ${statusEmoji(status)} ${statusLabel(status)}</b>`;
 }
@@ -286,8 +290,7 @@ export function buildSearchResults(leads: StoredLead[]): {
   const rows: Btn[][] = leads.slice(0, MAX_LIST_ROWS).map((l) => {
     const amount =
       l.dealAmount != null ? ` — ${formatMoney(l.dealAmount)}` : '';
-    const archivedMark = l.archived ? '🗄 ' : '';
-    const label = `${archivedMark}${statusEmoji(l.status)} #${l.id} ${l.brand} ${leadDisplayName(l)} — ${l.contact}${amount}`;
+    const label = `${archivedMark(l)}${statusEmoji(l.status)} #${l.id} ${l.brand} ${leadDisplayName(l)} — ${l.contact}${amount}`;
     return [{ text: label, callback_data: `open:${l.id}` }];
   });
   return { text: 'Найдено:', reply_markup: { inline_keyboard: rows } };
@@ -548,7 +551,7 @@ export function createFormatter({
     formatLeadText,
 
     formatTeaser(lead: StoredLead): string {
-      return `🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusEmoji(lead.status)} ${statusLabel(lead.status)}`;
+      return `${archivedMark(lead)}🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusEmoji(lead.status)} ${statusLabel(lead.status)}`;
     },
 
     deepLinkKeyboard(id: number): Keyboard {

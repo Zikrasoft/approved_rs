@@ -4,7 +4,11 @@ import {
   type MemoryStorage,
 } from './storage/memory.testing.ts';
 import { createLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
-import { createLeadStore, type LeadStore } from './store.ts';
+import {
+  createLeadStore,
+  GHOST_LEAD_RETENTION_MS,
+  type LeadStore,
+} from './store.ts';
 import { createQuarantine } from './quarantine.ts';
 import { appendIncome, getCommission } from './money.ts';
 
@@ -604,6 +608,132 @@ describe('getDuePostponed', () => {
   it('excludes leads that are not postponed', async () => {
     await store.insertLead(baseData);
     expect(await store.getDuePostponed()).toEqual([]);
+  });
+});
+
+describe('expireGhostLeads', () => {
+  const clickData: LeadInput = {
+    ...baseData,
+    name: '',
+    contact: '—',
+    service: '',
+    kind: 'call_click',
+    contactChannel: 'telegram',
+  };
+  const NOW = new Date('2026-10-02T12:00:00.000Z');
+  const DAY_MS = GHOST_LEAD_RETENTION_MS;
+
+  async function forceAge(id: number, ms: number): Promise<void> {
+    await store.updateLeads((leads) =>
+      leads.map((l) =>
+        l.id === id
+          ? { ...l, createdAt: new Date(NOW.getTime() - ms).toISOString() }
+          : l,
+      ),
+    );
+  }
+
+  async function ghost(
+    overrides: Partial<LeadInput> = {},
+    ageMs = DAY_MS + 1,
+  ): Promise<StoredLead> {
+    const lead = await store.insertLead({ ...clickData, ...overrides });
+    await forceAge(lead.id, ageMs);
+    return lead;
+  }
+
+  it('archives a ghost past the window and marks it lost', async () => {
+    const lead = await ghost();
+
+    const expired = await store.expireGhostLeads(NOW);
+
+    expect(expired.map((l) => l.id)).toEqual([lead.id]);
+    expect(expired[0]).toMatchObject({
+      status: 'lost',
+      archived: true,
+      statusChangedAt: NOW.toISOString(),
+    });
+    expect(await store.getLead(lead.id)).toMatchObject({
+      status: 'lost',
+      archived: true,
+    });
+  });
+
+  it('leaves a click inside the retention window alone', async () => {
+    const lead = await ghost({}, DAY_MS - 1000);
+
+    expect(await store.expireGhostLeads(NOW)).toEqual([]);
+    expect(await store.getLead(lead.id)).toMatchObject({
+      status: 'new',
+      archived: false,
+    });
+  });
+
+  it('leaves a click the operator already moved off new alone', async () => {
+    const lead = await ghost();
+    await store.setStatus(lead.id, 'negotiations');
+
+    expect(await store.expireGhostLeads(NOW)).toEqual([]);
+    expect(await store.getLead(lead.id)).toMatchObject({
+      status: 'negotiations',
+      archived: false,
+    });
+  });
+
+  it('leaves a click whose contact the merge window upgraded alone', async () => {
+    const lead = await store.insertLead({
+      ...clickData,
+      visitorId: 'v-1',
+    });
+    const { merged } = await store.insertOrMergeLead({
+      ...baseData,
+      contact: '@ivan',
+      visitorId: 'v-1',
+      brand: clickData.brand,
+    });
+    expect(merged).toBe(true);
+    await forceAge(lead.id, DAY_MS + 1);
+
+    expect(await store.expireGhostLeads(NOW)).toEqual([]);
+  });
+
+  it('leaves a form lead with no contact alone — only clicks are ghosts', async () => {
+    const lead = await store.insertLead({ ...clickData, kind: 'lead' });
+    await forceAge(lead.id, DAY_MS + 1);
+
+    expect(await store.expireGhostLeads(NOW)).toEqual([]);
+  });
+
+  it('does not touch an already-archived ghost', async () => {
+    const lead = await ghost();
+    await store.archiveLead(lead.id);
+
+    expect(await store.expireGhostLeads(NOW)).toEqual([]);
+    expect(await store.getLead(lead.id)).toMatchObject({ status: 'new' });
+  });
+
+  it('is idempotent — a second run writes nothing at all', async () => {
+    await ghost();
+    await store.expireGhostLeads(NOW);
+    const after = await store.readLeads();
+    const writes = storage.writeAttempts();
+
+    expect(await store.expireGhostLeads(NOW)).toEqual([]);
+    expect(await store.readLeads()).toEqual(after);
+    expect(storage.writeAttempts()).toBe(writes);
+  });
+
+  it('sweeps every brand in one call and returns only what it changed', async () => {
+    const a = await ghost({ brand: 'Approved.rs' });
+    const b = await ghost({ brand: 'CarLab' });
+    const c = await ghost({ brand: 'Details' }, DAY_MS - 1000);
+    const live = await store.insertLead(baseData);
+
+    const expired = await store.expireGhostLeads(NOW);
+
+    expect(expired.map((l) => l.id).sort()).toEqual([a.id, b.id].sort());
+    expect(await store.getLead(c.id)).toMatchObject({ archived: false });
+    expect(await store.getLead(live.id)).toMatchObject({ status: 'new' });
   });
 });
 

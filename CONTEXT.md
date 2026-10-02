@@ -17,6 +17,13 @@ a Lead by the server; a visitor can never name one.
 **Contact click** — a Lead created by tapping a messenger or phone tile rather
 than by submitting a form. It carries a channel and no message.
 
+**Ghost lead** — a Contact click that never gained a contact: still the
+placeholder contact, still `new`, not archived, and older than the retention
+window. Nothing on our side can tell whether the person wrote, so a Ghost lead
+retires itself — the daily reminder cron archives it and marks it lost
+([ADR-0029](docs/adr/0029-ghost-leads-retire-themselves.md)). Because the sweep
+runs daily against a 24-hour window, a Ghost lead actually lives 24 to 48 hours.
+
 ## Shop
 
 **Order** — a purchase in Medusa. Medusa is its only source of truth: its
