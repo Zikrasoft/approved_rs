@@ -43,6 +43,7 @@ translations:
     errorTelegramFormat: 'Format: @username or phone number'
     errorPhoneRequired: Enter your phone number
     errorPhoneInvalid: Check your phone number
+    errorSubmit: The submission failed. Please check your connection and try again.
   sr:
     headingLine1: Javljamo vam se
     headingEmphasis: u roku od 2 sata
@@ -65,6 +66,7 @@ translations:
     errorTelegramFormat: 'Format: @username ili broj telefona'
     errorPhoneRequired: Unesite broj telefona
     errorPhoneInvalid: Proverite broj telefona
+    errorSubmit: Zahtev nije poslat. Proverite vezu i pokušajte ponovo.
   es:
     headingLine1: Nos pondremos en contacto contigo
     headingEmphasis: en menos de 2 horas
@@ -87,6 +89,7 @@ translations:
     errorTelegramFormat: 'Formato: @username o número de teléfono'
     errorPhoneRequired: Introduce tu número de teléfono
     errorPhoneInvalid: Revisa tu número de teléfono
+    errorSubmit: La solicitud no se envió. Verifique la conexión y pruebe de nuevo.
   de:
     headingLine1: Wir melden uns bei Ihnen
     headingEmphasis: innerhalb von 2 Stunden
@@ -109,4 +112,5 @@ translations:
     errorTelegramFormat: 'Format: @Benutzername oder Telefonnummer'
     errorPhoneRequired: Bitte geben Sie Ihre Telefonnummer ein
     errorPhoneInvalid: Bitte überprüfen Sie Ihre Telefonnummer
-translatedFrom: 639e1eb4d9ce8d64
+    errorSubmit: Die Anfrage konnte nicht gesendet werden. Bitte überprüfen Sie die Verbindung und versuchen Sie es erneut.
+translatedFrom: 833f69c120134e64

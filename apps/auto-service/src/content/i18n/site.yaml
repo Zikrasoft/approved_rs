@@ -141,6 +141,7 @@ translations:
       errorPhone: Proverite broj — čini se da nije unet potpuno
       errorTelegram: Unesite @username na Telegramu ili broj telefona
       errorConsent: Bez pristanka ne možemo poslati zahtev
+      errorSubmit: Prijava nije prosledjena. Proverite vezu i pokušajte ponovo.
     cookie:
       notice: Koristimo kolačiće.
       more: Više u
@@ -215,6 +216,7 @@ translations:
       errorPhone: Please check the number — it seems incomplete
       errorTelegram: Please provide @username on Telegram or your phone number
       errorConsent: Without consent, we cannot submit the request
+      errorSubmit: Your request could not be submitted. Please check your connection and try again.
     cookie:
       notice: We use cookies.
       more: Learn more in
@@ -222,4 +224,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: 2f14ca8c4327ba83
+translatedFrom: d982e2180dbcbc2d

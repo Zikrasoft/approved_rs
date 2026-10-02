@@ -763,11 +763,11 @@ translations:
         metaTitle: Turnkey Car Sourcing in Europe
         metaDescription: 'We source vehicles in Germany, Serbia, Spain, Switzerland, Italy, France, Poland, and Portugal: search, inspection, negotiation, and delivery.'
         title: Car Sourcing
-        titleHighlight: Turnkey
+        titleHighlight: Full Service
         description: We help you find a vehicle in the country where you are or plan to make a purchase — complete verification, transaction support, and delivery included. Select a country to see details.
         breadcrumbLabel: Car Sourcing
         casesHeading: Car Sourcing Cases
-        chooseCountryLabel: 'Select a country:'
+        chooseCountryLabel: 'Choose a Country:'
         ctaLabel: Get a Car
         heroPhotoAlt: A row of cars at a dealer's lot
         processHeading: How the Sourcing Process Works
@@ -803,13 +803,13 @@ translations:
         compareHint: Select a country — we'll show you what we look for there first.
         compareLinkFor: Sourcing in {location} — details
       title: Turnkey Car Sourcing
-      descriptionFor: We’ll find a vehicle in {location} — among cars already in the country, avoiding imports. Complete inspection, deal support, and delivery to your city — turnkey, including customs clearance.
-      ctaLabel: Submit a Request
+      descriptionFor: We'll source a car in {location} — from those already available in the country, without imports from abroad. Comprehensive inspection, deal support, and delivery to your city.
+      ctaLabel: Request a Quote
       casesHeadingFor: 'Cases: Car Sourcing in {location}'
       breadcrumbLabelFor: Cars in {location}
       stepsFor:
         - n: '01'
-          text: Submit a request with your requirements — budget, brand, mileage
+          text: Submit your request with requirements — budget, brand, mileage
         - n: '02'
           text: We search for options in {location} based on your criteria
         - n: '03'
@@ -817,15 +817,15 @@ translations:
         - n: '04'
           text: We assist with the transaction, help with documents and registration
         - n: '05'
-          text: We deliver the car to your city — turnkey, including customs clearance
-      deliveryLineFor: We deliver to {destinations} — and any other country, can discuss upon request.
+          text: We deliver the car to your city and assist with vehicle registration.
+      deliveryLineFor: We deliver cars to any city in the country. If it needs to be exported abroad, we handle the export and customs clearance — to {destinations} and any other country.
       deliveryDestinations:
-        - Kazakhstan
-        - Kyrgyzstan
         - Bosnia and Herzegovina
         - Croatia
         - North Macedonia
         - Turkey
+        - Kazakhstan
+        - Kyrgyzstan
       citiesHeadingFor: Where We Inspect Cars in {countryLocation}
       citiesLead: The expert travels across the country, but we most often inspect cars where they are most available. Here is what it means for each city.
       alsoInLabel: 'We also source in:'
@@ -904,7 +904,7 @@ translations:
         description: 'We take away cars that are hard to sell through regular means: Russian plates, expired imports, disputed documents. The price is below market value — this covers the speed of service and all the hassle of selling.'
         breadcrumbLabel: Car Buyback
         casesHeading: Buyback Cases
-        chooseCountryLabel: 'Select a country:'
+        chooseCountryLabel: 'Choose a Country:'
         ctaLabel: Get a Quote
         heroPhotoAlt: Car keys on money and documents
         processHeading: How the Buyback Process Works
@@ -1001,26 +1001,26 @@ translations:
         metaTitle: Car Import from Germany Turnkey — Sourcing and Delivery
         metaDescription: We source and deliver cars from Germany — inspection, documentation, and customs clearance all included. Delivered to Serbia, Spain, and Portugal.
         title: Car from Germany
-        titleHighlight: turnkey
+        titleHighlight: Full Service
         description: We source cars from Germany and deliver them to you, wherever you are — inspection, documentation, and customs clearance included.
-        ctaLabel: Submit Request
+        ctaLabel: Request a Quote
         breadcrumbLabel: Car from Germany
         casesHeading: 'Cases: Cars from Germany'
         steps:
           - n: '01'
-            text: You submit a request with your requirements — budget, brand, mileage.
+            text: Submit your request with requirements — budget, brand, mileage
           - n: '02'
             text: We source cars from Germany based on your criteria.
           - n: '03'
-            text: An independent expert inspects and verifies the vehicle on site.
+            text: An independent expert inspects and verifies the vehicle on-site
           - n: '04'
-            text: We prepare export documents and arrange delivery to your city.
+            text: We prepare export documents and arrange delivery to your city
           - n: '05'
-            text: Customs clearance and vehicle handover to you — turnkey.
+            text: Customs clearance and delivery of the vehicle to you — full service
         destinationsNote: We deliver to Serbia, Spain, Portugal, and France — and to any other country, we can discuss upon request.
         chinaCrossLabel: Considering Import from China?
         notesHeading: What Affects Time and Cost from Germany
-        notesPointsLabel: Route Characteristics
+        notesPointsLabel: Route Specifics
         notes:
           lead: 'Germany is our most experienced market: short distance, clear documentation, and a market where almost anything can be found. The longest parts are deregistration and preparing export documents, while the road is shorter.'
           points:
@@ -1033,26 +1033,26 @@ translations:
         metaTitle: Car Import from Spain Turnkey — Sourcing and Delivery
         metaDescription: We source and deliver cars from Spain — inspection, documentation, and customs clearance included. Delivered to Serbia and Portugal.
         title: Car from Spain
-        titleHighlight: turnkey
+        titleHighlight: Full Service
         description: We source cars from Spain and deliver them to you, wherever you are — inspection, documentation, and customs clearance included.
-        ctaLabel: Submit Request
+        ctaLabel: Request a Quote
         breadcrumbLabel: Car from Spain
         casesHeading: 'Cases: Cars from Spain'
         steps:
           - n: '01'
-            text: You submit a request with your requirements — budget, brand, mileage.
+            text: Submit your request with requirements — budget, brand, mileage
           - n: '02'
             text: We source cars from Spain based on your criteria.
           - n: '03'
-            text: An independent expert inspects and verifies the vehicle on site.
+            text: An independent expert inspects and verifies the vehicle on-site
           - n: '04'
-            text: We prepare export documents and arrange delivery to your city.
+            text: We prepare export documents and arrange delivery to your city
           - n: '05'
-            text: Customs clearance and vehicle handover to you — turnkey.
+            text: Customs clearance and delivery of the vehicle to you — full service
         destinationsNote: We deliver to Serbia and Portugal — and to any other country, we can discuss upon request.
         chinaCrossLabel: Considering Import from China?
         notesHeading: What Affects Time and Cost from Spain
-        notesPointsLabel: Route Characteristics
+        notesPointsLabel: Route Specifics
         notes:
           lead: 'Cars are imported from Spain for their body condition: mild climate and nearly no de-icing agents. The downside — the distance is twice that of Germany, making a noticeable impact on the budget.'
           points:
@@ -1064,26 +1064,26 @@ translations:
         metaTitle: Car Import from Switzerland Turnkey — Sourcing and Delivery
         metaDescription: We source and deliver cars from Switzerland — inspection, documentation, and customs clearance included. Delivered to Serbia, Spain, and Portugal.
         title: Car from Switzerland
-        titleHighlight: turnkey
+        titleHighlight: Full Service
         description: We source cars from Switzerland and deliver them to you, wherever you are — inspection, documentation, and customs clearance included.
-        ctaLabel: Submit Request
+        ctaLabel: Request a Quote
         breadcrumbLabel: Car from Switzerland
         casesHeading: 'Cases: Cars from Switzerland'
         steps:
           - n: '01'
-            text: You submit a request with your requirements — budget, brand, mileage.
+            text: Submit your request with requirements — budget, brand, mileage
           - n: '02'
             text: We source cars from Switzerland based on your criteria.
           - n: '03'
-            text: An independent expert inspects and verifies the vehicle on site.
+            text: An independent expert inspects and verifies the vehicle on-site
           - n: '04'
-            text: We prepare export documents and arrange delivery to your city.
+            text: We prepare export documents and arrange delivery to your city
           - n: '05'
-            text: Customs clearance and vehicle handover to you — turnkey.
-        destinationsNote: We deliver to Serbia, Spain, and Portugal — and to any other country, we can discuss upon request.
+            text: Customs clearance and delivery of the vehicle to you — full service
+        destinationsNote: We deliver to Serbia, Spain, and Portugal — and to any other country, to be discussed upon request.
         chinaCrossLabel: Considering Import from China?
         notesHeading: What Affects Time and Cost from Switzerland
-        notesPointsLabel: Route Characteristics
+        notesPointsLabel: Route Specifics
         notes:
           lead: 'Switzerland is outside the EU, so the vehicle goes through customs twice: upon exiting the country and upon entering the destination. This is the main difference compared to routes within the EU.'
           points:
@@ -1444,10 +1444,10 @@ translations:
       hub:
         metaTitle: Auto izbor u Evropi pod ključ
         metaDescription: 'Biramo auto u Nemačkoj, Srbiji, Španiji, Švajcarskoj, Italiji, Francuskoj, Poljskoj i Portugalu: pretraga, izlazak na pregled, pregovor i dostava pod ključ.'
-        title: Auto izbor
+        title: Odabir automobila
         titleHighlight: pod ključ
         description: Biramo automobil u zemlji u kojoj se nalazite ili planirate kupovinu — sveobuhvatna provera, podrška tokom transakcije i dostava pod ključ. Izaberite zemlju za više detalja.
-        breadcrumbLabel: Auto izbor
+        breadcrumbLabel: Odabir automobila
         casesHeading: Kase auto izbora
         chooseCountryLabel: 'Izaberite zemlju:'
         ctaLabel: Izabrati auto
@@ -1485,13 +1485,13 @@ translations:
         compareHint: Izaberite zemlju — pokažaćemo šta prvo gledamo tamo.
         compareLinkFor: Izbor {location} — u detalje
       title: Auto izbor pod ključ
-      descriptionFor: Izabraćemo automobil {location} — među automobilima koji su već u ovoj zemlji, bez uvoza iz inostranstva. Sveobuhvatna provera, podrška tokom transakcije i dostava do vašeg grada — pod ključ, uključujući carinjenje.
-      ctaLabel: Poslati zahteva
+      descriptionFor: Pronađite automobil u {location} — među onima koji su već u zemlji, bez uvoza iz inostranstva. Potpuna provera, pratimo postupak i dostavljamo do vašeg grada.
+      ctaLabel: Ostavi zahtev
       casesHeadingFor: 'Kase: auto izbor {location}'
       breadcrumbLabelFor: Auto {location}
       stepsFor:
         - n: '01'
-          text: Ostavljate zahtev sa zahtevima — budžet, marka, pređeni kilometri
+          text: Ostavite zahtev sa potrebama — budžet, marka, kilometraža
         - n: '02'
           text: Tražimo opcije {location} prema vašim kriterijumima
         - n: '03'
@@ -1499,15 +1499,15 @@ translations:
         - n: '04'
           text: Pratimo transakciju, pomažemo sa dokumentima i registracijom
         - n: '05'
-          text: Dostavljamo automobil do vašeg grada — pod ključ, uključujući carinjenje
-      deliveryLineFor: Dovozimo u {destinations} — i u bilo koju drugu zemlju, razgovaraćemo prilikom prijave.
+          text: Dostavljamo automobil do vašeg grada i pomažemo da ga registrujete.
+      deliveryLineFor: Dostavićemo automobil u bilo koji grad u zemlji. Ako je potrebno izvesti ga u inostranstvo, preuzimamo izvoz i carinjenje — šaljemo u {destinations} i bilo koju drugu zemlju.
       deliveryDestinations:
-        - Kazahstan
-        - Kirgistan
         - Bosnu i Hercegovinu
         - Hrvatsku
         - Severnu Makedoniju
         - Tursku
+        - Kazahstan
+        - Kirgistan
       citiesHeadingFor: Gde gledamo automobile {countryLocation}
       citiesLead: Stručnjak izlazi širom zemlje, ali najčešće gledamo automobile tamo gde ih najviše izlažu. Evo šta to znači za svaki grad.
       alsoInLabel: 'Takođe biramo u:'
@@ -1685,24 +1685,24 @@ translations:
         title: Automobili iz Nemačke
         titleHighlight: pod ključ
         description: 'Izabiremo auto iz Nemačke i dovodimo ga do vas, gde god da ste: pregled, dokumentacija i carinjenje pod ključ.'
-        ctaLabel: Predaj zahtev
+        ctaLabel: Ostavi zahtev
         breadcrumbLabel: Automobili iz Nemačke
         casesHeading: 'Slučajevi: automobili iz Nemačke'
         steps:
           - n: '01'
-            text: Predajete zahtev sa zahtevima — budžet, marka, pređeni kilometri
+            text: Ostavite zahtev sa potrebama — budžet, marka, kilometraža
           - n: '02'
             text: Pronalazimo auto iz Nemačke prema vašim kriterijumima
           - n: '03'
-            text: Nezavisni ekspert pregleda i proverava auto na licu mesta
+            text: Nezavisni ekspert pregledava i proverava automobil na licu mesta
           - n: '04'
-            text: Pripremamo izvoznu dokumentaciju i organizujemo dostavu do vašeg grada
+            text: Oformljujemo izvozne dokumente i organizujemo dostavu do vašeg grada
           - n: '05'
             text: Carinjenje i predaja automobila vama — pod ključ
         destinationsNote: Dostavljamo u Srbiju, Španiju, Portugal i Francusku — i u bilo koju drugu zemlju, dogovaram se pri zahtevu.
         chinaCrossLabel: Razmatrate uvoz iz Kine?
         notesHeading: Šta utiče na vreme i cenu iz Nemačke
-        notesPointsLabel: Osobine rute
+        notesPointsLabel: Specifičnosti pravca
         notes:
           lead: 'Nemačka je nampoznatija ruta: kratka putanja, jasni dokumenti i tržište gde gotovo sve možete naći. Najduže ide skidanje sa evidencije i priprema izvoznih dokumenata, a put traje kraće od toga.'
           points:
@@ -1717,24 +1717,24 @@ translations:
         title: Automobili iz Španije
         titleHighlight: pod ključ
         description: 'Izabiremo auto iz Španije i dovodimo ga do vas, gde god da ste: pregled, dokumentacija i carinjenje pod ključ.'
-        ctaLabel: Predaj zahtev
+        ctaLabel: Ostavi zahtev
         breadcrumbLabel: Automobili iz Španije
         casesHeading: 'Slučajevi: automobili iz Španije'
         steps:
           - n: '01'
-            text: Predajete zahtev sa zahtevima — budžet, marka, pređeni kilometri
+            text: Ostavite zahtev sa potrebama — budžet, marka, kilometraža
           - n: '02'
             text: Pronalazimo auto iz Španije prema vašim kriterijumima
           - n: '03'
-            text: Nezavisni ekspert pregleda i proverava auto na licu mesta
+            text: Nezavisni ekspert pregledava i proverava automobil na licu mesta
           - n: '04'
-            text: Pripremamo izvoznu dokumentaciju i organizujemo dostavu do vašeg grada
+            text: Oformljujemo izvozne dokumente i organizujemo dostavu do vašeg grada
           - n: '05'
             text: Carinjenje i predaja automobila vama — pod ključ
         destinationsNote: Dostavljamo u Srbiju i Portugal — i u bilo koju drugu zemlju, dogovaram se pri zahtevu.
         chinaCrossLabel: Razmatrate uvoz iz Kine?
         notesHeading: Šta utiče na vreme i cenu iz Španije
-        notesPointsLabel: Osobine rute
+        notesPointsLabel: Specifičnosti pravca
         notes:
           lead: 'Iz Španije se uvoze zbog stanja karoserije: blaga klima i skoro da nema reagensa. Nedostatak — dužina putanje: dvostruko duža od nemačke, i to se najbolje vidi u budžetu.'
           points:
@@ -1748,24 +1748,24 @@ translations:
         title: Automobili iz Švajcarske
         titleHighlight: pod ključ
         description: 'Izabiremo auto iz Švajcarske i dovodimo ga do vas, gde god da ste: pregled, dokumentacija i carinjenje pod ključ.'
-        ctaLabel: Predaj zahtev
+        ctaLabel: Ostavi zahtev
         breadcrumbLabel: Automobili iz Švajcarske
         casesHeading: 'Slučajevi: automobili iz Švajcarske'
         steps:
           - n: '01'
-            text: Predajete zahtev sa zahtevima — budžet, marka, pređeni kilometri
+            text: Ostavite zahtev sa potrebama — budžet, marka, kilometraža
           - n: '02'
             text: Pronalazimo auto iz Švajcarske prema vašim kriterijumima
           - n: '03'
-            text: Nezavisni ekspert pregleda i proverava auto na licu mesta
+            text: Nezavisni ekspert pregledava i proverava automobil na licu mesta
           - n: '04'
-            text: Pripremamo izvoznu dokumentaciju i organizujemo dostavu do vašeg grada
+            text: Oformljujemo izvozne dokumente i organizujemo dostavu do vašeg grada
           - n: '05'
             text: Carinjenje i predaja automobila vama — pod ključ
-        destinationsNote: Dostavljamo u Srbiju, Španiju i Portugal — i u bilo koju drugu zemlju, dogovaram se pri zahtevu.
+        destinationsNote: Dostavljamo u Srbiju, Španiju i Portugal — i u svaku drugu zemlju, razgovaraćemo o tome prilikom zahteva.
         chinaCrossLabel: Razmatrate uvoz iz Kine?
         notesHeading: Šta utiče na vreme i cenu iz Švajcarske
-        notesPointsLabel: Osobine rute
+        notesPointsLabel: Specifičnosti pravca
         notes:
           lead: 'Švajcarska nije deo EU, pa automobil prolazi carinu dvaput: na izlazu iz zemlje i na ulazu u destinaciju. To je glavna razlika u odnosu na bilo koju rutu unutar EU.'
           points:
@@ -1971,7 +1971,7 @@ translations:
         accentWord: doći ćemo i proveriti
         text: Dolazimo u jedan do dva dana. Izveštaj sa slikama ostaje kod vas, čak i ako se kasnije predomislite o kupovini.
     cityVehicleSourcing:
-      title: Izbor automobila
+      title: Odabir automobila
       descriptionFor: Izaberi automobil u {cityLocation} sa potpunom proverom. Radimo širom regiona {countryName}.
       casesHeadingFor: Primeri iz {countryGenitiveOrName}
       whyCityHeadingFor: Zašto {cityName}
@@ -2126,12 +2126,12 @@ translations:
       hub:
         metaTitle: Selección de coches en Europa llave en mano
         metaDescription: 'Seleccionamos auto en Alemania, Serbia, España, Suiza, Italia, Francia, Polonia y Portugal: búsqueda, inspección, negociación y entrega llave en mano.'
-        title: Selección de coches
+        title: Selección de autos
         titleHighlight: llave en mano
         description: Seleccionamos un vehículo en el país donde se encuentra o planea comprar — verificación completa, acompañamiento de la transacción y entrega llave en mano. Elija un país para ver los detalles.
-        breadcrumbLabel: Selección de coches
+        breadcrumbLabel: Selección de autos
         casesHeading: Casos de selección de coches
-        chooseCountryLabel: 'Elija un país:'
+        chooseCountryLabel: 'Selecciona un país:'
         ctaLabel: Seleccionar un coche
         heroPhotoAlt: Fila de coches en el lote del concesionario
         processHeading: Cómo se realiza la selección
@@ -2167,13 +2167,13 @@ translations:
         compareHint: Elija un país — mostraremos lo que estamos mirando allí primero.
         compareLinkFor: Selección {location} — en detalle
       title: Selección de coches llave en mano
-      descriptionFor: Seleccionamos un vehículo {location} — entre coches que ya se encuentran en este país, sin importar desde el extranjero. Verificación completa, acompañamiento de la transacción y entrega a su ciudad — llave en mano, incluyendo aduanas.
-      ctaLabel: Dejar una solicitud
+      descriptionFor: Encontramos un coche en {location} entre los que ya están en este país, sin necesidad de importar desde el extranjero. Realizamos una revisión completa, acompañamos la transacción y entregamos en su ciudad.
+      ctaLabel: Enviar solicitud
       casesHeadingFor: 'Casos: selección de coches {location}'
       breadcrumbLabelFor: Coches {location}
       stepsFor:
         - n: '01'
-          text: Deja tu solicitud con requisitos — presupuesto, marca, kilometraje
+          text: Envías una solicitud con tus requisitos — presupuesto, marca, kilometraje
         - n: '02'
           text: Buscamos opciones {location} según tus criterios
         - n: '03'
@@ -2181,15 +2181,15 @@ translations:
         - n: '04'
           text: Acompañamos la transacción, ayudamos con la documentación y el registro
         - n: '05'
-          text: Entregamos el coche a tu ciudad — llave en mano, incluyendo aduanas
-      deliveryLineFor: Entregamos en {destinations} — y en cualquier otro país, lo discutimos al realizar la solicitud.
+          text: Entregamos el coche en su ciudad y le ayudamos a registrarlo.
+      deliveryLineFor: Entregamos el coche en cualquier ciudad del país. Si necesita sacarlo al extranjero, nos encargamos de la exportación y el despacho aduanero — transportamos a {destinations} y a cualquier otro país.
       deliveryDestinations:
-        - Kazajistán
-        - Kirguisistán
         - Bosnia y Herzegovina
         - Croacia
         - Macedonia del Norte
         - Turquía
+        - Kazajistán
+        - Kirguisistán
       citiesHeadingFor: Dónde inspeccionamos coches {countryLocation}
       citiesLead: El experto se desplaza por todo el país, pero generalmente inspeccionamos coches donde se exponen más. Esto es lo que significa para cada ciudad.
       alsoInLabel: 'También seleccionamos en:'
@@ -2268,7 +2268,7 @@ translations:
         description: 'Recogemos coches que son difíciles de vender de forma convencional: matrículas rusas, importación vencida, documentación controvertida. El precio es inferior al del mercado — es el costo de la rapidez y de que nos encargamos de todo el proceso de venta.'
         breadcrumbLabel: Compra de coches
         casesHeading: Casos de compra
-        chooseCountryLabel: 'Seleccione un país:'
+        chooseCountryLabel: 'Selecciona un país:'
         ctaLabel: Obtener valoración
         heroPhotoAlt: Llaves de coche sobre dinero y documentos
         processHeading: Cómo se lleva a cabo la compra
@@ -2365,26 +2365,26 @@ translations:
         metaTitle: Autos de Alemania a medida — Selección e importación
         metaDescription: Seleccionamos y traemos vehículos de Alemania — Inspección, documentación y trámites aduaneros incluidos. Hemos entregado en Serbia, España y Portugal.
         title: Autos de Alemania
-        titleHighlight: a medida
+        titleHighlight: llave en mano
         description: 'Seleccionamos los coches de Alemania y te los traemos, dondequiera que estés: inspección, documentación y trámites aduaneros incluidos.'
         ctaLabel: Enviar solicitud
         breadcrumbLabel: Autos de Alemania
         casesHeading: 'Casos: autos de Alemania'
         steps:
           - n: '01'
-            text: 'Envías una solicitud con tus requisitos: presupuesto, marca, kilometraje.'
+            text: Envías una solicitud con tus requisitos — presupuesto, marca, kilometraje
           - n: '02'
             text: Seleccionamos autos de Alemania según tus criterios.
           - n: '03'
-            text: Un experto independiente revisa y verifica el coche in situ.
+            text: Un experto independiente inspecciona y verifica el coche in situ
           - n: '04'
-            text: Preparamos la documentación de exportación y organizamos la entrega a tu ciudad.
+            text: Gestionamos la documentación de exportación y organizamos la entrega hasta tu ciudad
           - n: '05'
-            text: Trámites aduaneros y entrega del vehículo a ti — a medida.
+            text: Despacho aduanero y entrega del coche a ti — llave en mano
         destinationsNote: Entregamos en Serbia, España, Portugal y Francia — y cualquier otro país, lo discutimos al realizar la solicitud.
         chinaCrossLabel: ¿Consideras importar de China?
         notesHeading: Qué afecta el tiempo y costo desde Alemania
-        notesPointsLabel: Características de la ruta
+        notesPointsLabel: Particularidades de la ruta
         notes:
           lead: 'Alemania es nuestra ruta más trabajada: trayecto corto, documentación clara y un mercado donde casi todo está disponible. Lo que más demora es dar de baja y preparar la documentación de exportación, el viaje es más corto que ambos.'
           points:
@@ -2397,26 +2397,26 @@ translations:
         metaTitle: Autos desde España a medida — Selección e importación
         metaDescription: Seleccionamos y traemos vehículos desde España — Inspección, documentación y trámites aduaneros incluidos. Hemos entregado en Serbia y Portugal.
         title: Autos desde España
-        titleHighlight: a medida
+        titleHighlight: llave en mano
         description: 'Seleccionamos coches de España y los traemos a ti, dondequiera que estés: inspección, documentación y trámites aduaneros incluidos.'
         ctaLabel: Enviar solicitud
         breadcrumbLabel: Autos desde España
         casesHeading: 'Casos: autos desde España'
         steps:
           - n: '01'
-            text: 'Envías una solicitud con tus requisitos: presupuesto, marca, kilometraje.'
+            text: Envías una solicitud con tus requisitos — presupuesto, marca, kilometraje
           - n: '02'
             text: Seleccionamos autos de España según tus criterios.
           - n: '03'
-            text: Un experto independiente revisa y verifica el coche in situ.
+            text: Un experto independiente inspecciona y verifica el coche in situ
           - n: '04'
-            text: Preparamos la documentación de exportación y organizamos la entrega a tu ciudad.
+            text: Gestionamos la documentación de exportación y organizamos la entrega hasta tu ciudad
           - n: '05'
-            text: Trámites aduaneros y entrega del vehículo a ti — a medida.
+            text: Despacho aduanero y entrega del coche a ti — llave en mano
         destinationsNote: Entregamos en Serbia y Portugal — y en cualquier otro país, lo discutimos al realizar la solicitud.
         chinaCrossLabel: ¿Consideras importar de China?
         notesHeading: Qué afecta el tiempo y costo desde España
-        notesPointsLabel: Características de la ruta
+        notesPointsLabel: Particularidades de la ruta
         notes:
           lead: 'Desde España, los coches se importan por su buen estado de la carrocería: clima suave y escasos reactivos. La desventaja es la distancia: el trayecto es el doble que desde Alemania, lo que se refleja en el presupuesto.'
           points:
@@ -2428,26 +2428,26 @@ translations:
         metaTitle: Autos de Suiza a medida — Selección e importación
         metaDescription: Seleccionamos y traemos vehículos desde Suiza — Inspección, documentación y trámites aduaneros incluidos. Hemos entregado en Serbia, España y Portugal.
         title: Autos de Suiza
-        titleHighlight: a medida
+        titleHighlight: llave en mano
         description: 'Seleccionamos coches de Suiza y los traemos a ti, dondequiera que estés: inspección, documentación y trámites aduaneros incluidos.'
         ctaLabel: Enviar solicitud
         breadcrumbLabel: Autos de Suiza
         casesHeading: 'Casos: autos de Suiza'
         steps:
           - n: '01'
-            text: 'Envías una solicitud con tus requisitos: presupuesto, marca, kilometraje.'
+            text: Envías una solicitud con tus requisitos — presupuesto, marca, kilometraje
           - n: '02'
             text: Seleccionamos autos de Suiza según tus criterios.
           - n: '03'
-            text: Un experto independiente revisa y verifica el coche in situ.
+            text: Un experto independiente inspecciona y verifica el coche in situ
           - n: '04'
-            text: Preparamos la documentación de exportación y organizamos la entrega a tu ciudad.
+            text: Gestionamos la documentación de exportación y organizamos la entrega hasta tu ciudad
           - n: '05'
-            text: Trámites aduaneros y entrega del vehículo a ti — a medida.
-        destinationsNote: Entregamos en Serbia, España y Portugal — y en cualquier otro país, lo discutimos al realizar la solicitud.
+            text: Despacho aduanero y entrega del coche a ti — llave en mano
+        destinationsNote: Entregamos en Serbia, España y Portugal — así como en cualquier otro país, lo discutiremos al hacer la solicitud.
         chinaCrossLabel: ¿Consideras importar de China?
         notesHeading: Qué afecta el tiempo y costo desde Suiza
-        notesPointsLabel: Características de la ruta
+        notesPointsLabel: Particularidades de la ruta
         notes:
           lead: 'Suiza no forma parte de la UE, por lo que el coche pasa por aduana dos veces: a la salida del país y a la entrada al destino final. Esta es la principal diferencia con cualquier ruta dentro de la Unión Europea.'
           points:
@@ -2653,7 +2653,7 @@ translations:
         accentWord: iremos a verlo
         text: Salimos en uno o dos días. El informe con fotos se queda contigo, incluso si después decides no comprar.
     cityVehicleSourcing:
-      title: Selección de coches
+      title: Selección de autos
       descriptionFor: Encontramos un coche en {cityLocation} con una verificación completa. Trabajamos en toda la región de {countryName}.
       casesHeadingFor: Casos de {countryGenitiveOrName}
       whyCityHeadingFor: Por qué {cityName}
@@ -2808,12 +2808,12 @@ translations:
       hub:
         metaTitle: Fahrzeugauswahl in Europa - schlüsselfertig
         metaDescription: 'Fahrzeugsuche in Deutschland, Serbien, Spanien, Schweiz, Italien, Frankreich, Polen und Portugal: Suche, Besichtigung, Preisverhandlung und Lieferung.'
-        title: Fahrzeugauswahl
+        title: Fahrzeugbeschaffung
         titleHighlight: schlüsselfertig
         description: Wir suchen ein Auto in dem Land, in dem Sie sich befinden oder das Sie kaufen möchten — vollständige Prüfung, Begleitung des Geschäfts und Lieferung. Wählen Sie ein Land, um die Details zu sehen.
-        breadcrumbLabel: Fahrzeugauswahl
+        breadcrumbLabel: Fahrzeugbeschaffung
         casesHeading: Fälle der Fahrzeugauswahl
-        chooseCountryLabel: 'Wählen Sie ein Land:'
+        chooseCountryLabel: 'Land auswählen:'
         ctaLabel: Auto auswählen
         heroPhotoAlt: Reihe von Fahrzeugen auf dem Händlerplatz
         processHeading: So läuft die Auswahl ab
@@ -2849,13 +2849,13 @@ translations:
         compareHint: Wählen Sie ein Land — wir zeigen, was wir dort zunächst prüfen.
         compareLinkFor: Auswahl {location} — im Detail
       title: Schlüsselfertige Fahrzeugauswahl
-      descriptionFor: Wir finden ein Auto in {location} — unter den Fahrzeugen, die bereits in diesem Land sind, ohne Import aus dem Ausland. Vollständige Prüfung, Begleitung des Geschäfts und Lieferung in Ihre Stadt — schlüsselfertig, einschließlich Zollabwicklung.
-      ctaLabel: Anfrage senden
+      descriptionFor: Wir finden das passende Auto für Sie in {location} – aus bereits verfügbaren Fahrzeugen im Land, ohne Import aus dem Ausland. Umfassende Prüfung, Begleitung des Kaufs und Lieferung in Ihre Stadt.
+      ctaLabel: Anfrage stellen
       casesHeadingFor: 'Fälle: Fahrzeugauswahl {location}'
       breadcrumbLabelFor: Auto {location}
       stepsFor:
         - n: '01'
-          text: Sie senden eine Anfrage mit Ihren Anforderungen — Budget, Marke, Kilometerstand
+          text: Sie stellen eine Anfrage mit Ihren Anforderungen — Budget, Marke, Kilometerstand
         - n: '02'
           text: Wir suchen Optionen in {location} nach Ihren Kriterien
         - n: '03'
@@ -2863,15 +2863,15 @@ translations:
         - n: '04'
           text: Wir begleiten das Geschäft, helfen bei Dokumenten und Anmeldung
         - n: '05'
-          text: Wir liefern das Fahrzeug in Ihre Stadt — schlüsselfertig, einschließlich Zollabwicklung
-      deliveryLineFor: Wir liefern nach {destinations} — und in jedes andere Land, sprechen wir bei der Anfrage ab.
+          text: Wir liefern das Fahrzeug in Ihre Stadt und unterstützen Sie bei der Zulassung.
+      deliveryLineFor: Wir bringen das Auto in jede Stadt des Landes. Wenn es ins Ausland exportiert werden muss, übernehmen wir den Export und die Zollabwicklung – wir bringen es nach {destinations} und in jedes andere Land.
       deliveryDestinations:
-        - Kasachstan
-        - Kirgisistan
         - Bosnien und Herzegowina
         - Kroatien
         - Nordmazedonien
         - Türkei
+        - Kasachstan
+        - Kirgisistan
       citiesHeadingFor: Wo wir Fahrzeuge in {countryLocation} anschauen
       citiesLead: Der Experte fährt im ganzen Land, aber meistens schauen wir dort, wo die meisten Fahrzeuge angeboten werden. Was das für jede Stadt bedeutet.
       alsoInLabel: 'Wir wählen auch in:'
@@ -2950,7 +2950,7 @@ translations:
         description: 'Wir holen das Auto ab, das sich schwer verkaufen lässt: russische Nummern, abgelaufene Einfuhr, umstrittene Dokumente. Der Preis liegt unter dem Marktwert — das ist der Preis für Schnelligkeit und dafür, dass wir die gesamte Verkaufsabwicklung übernehmen.'
         breadcrumbLabel: Rückkauf von Autos
         casesHeading: Rückkauf-Fälle
-        chooseCountryLabel: 'Wählen Sie ein Land:'
+        chooseCountryLabel: 'Land auswählen:'
         ctaLabel: Bewertung erhalten
         heroPhotoAlt: Autoschlüssel auf Geld und Dokumenten
         processHeading: So läuft der Rückkauf ab
@@ -3049,24 +3049,24 @@ translations:
         title: Fahrzeuge aus Deutschland
         titleHighlight: schlüsselfertig
         description: 'Wir wählen ein Fahrzeug aus Deutschland aus und bringen es zu Ihnen, wo auch immer Sie sich befinden: Prüfung, Dokumentation und Zollabwicklung schlüsselfertig.'
-        ctaLabel: Antrag stellen
+        ctaLabel: Anfrage stellen
         breadcrumbLabel: Fahrzeuge aus Deutschland
         casesHeading: 'Fälle: Fahrzeuge aus Deutschland'
         steps:
           - n: '01'
-            text: Sie stellen einen Antrag mit Anforderungen — Budget, Marke, Kilometerstand
+            text: Sie stellen eine Anfrage mit Ihren Anforderungen — Budget, Marke, Kilometerstand
           - n: '02'
             text: Wir suchen das Fahrzeug aus Deutschland nach Ihren Kriterien
           - n: '03'
-            text: Ein unabhängiger Experte inspiziert und prüft das Fahrzeug vor Ort
+            text: Ein unabhängiger Experte prüft das Fahrzeug vor Ort
           - n: '04'
-            text: Wir erstellen die Exportdokumente und organisieren die Lieferung zu Ihrer Stadt
+            text: Wir erstellen die Exportdokumente und organisieren den Transport zu Ihrer Stadt
           - n: '05'
             text: Zollabwicklung und Übergabe des Fahrzeugs an Sie — schlüsselfertig
         destinationsNote: Wir liefern nach Serbien, Spanien, Portugal und Frankreich — sowie in jedes andere Land, das wir bei der Anfrage besprechen können.
         chinaCrossLabel: Überlegen Sie den Import aus China?
         notesHeading: Was beeinflusst Fristen und Preise aus Deutschland
-        notesPointsLabel: Besonderheiten der Richtung
+        notesPointsLabel: Besonderheiten der Route
         notes:
           lead: 'Deutschland ist unser am besten etablierter Markt: kurze Wege, klare Dokumente und ein Markt, in dem fast alles zu finden ist. Am längsten dauert die Abmeldung und die Vorbereitung der Exportdokumente, die Fahrt ist kürzer als beide.'
           points:
@@ -3081,24 +3081,24 @@ translations:
         title: Fahrzeuge aus Spanien
         titleHighlight: schlüsselfertig
         description: 'Wir wählen ein Fahrzeug aus Spanien aus und bringen es zu Ihnen, wo auch immer Sie sich befinden: Prüfung, Dokumentation und Zollabwicklung schlüsselfertig.'
-        ctaLabel: Antrag stellen
+        ctaLabel: Anfrage stellen
         breadcrumbLabel: Fahrzeuge aus Spanien
         casesHeading: 'Fälle: Fahrzeuge aus Spanien'
         steps:
           - n: '01'
-            text: Sie stellen einen Antrag mit Anforderungen — Budget, Marke, Kilometerstand
+            text: Sie stellen eine Anfrage mit Ihren Anforderungen — Budget, Marke, Kilometerstand
           - n: '02'
             text: Wir suchen das Fahrzeug aus Spanien nach Ihren Kriterien
           - n: '03'
-            text: Ein unabhängiger Experte inspiziert und prüft das Fahrzeug vor Ort
+            text: Ein unabhängiger Experte prüft das Fahrzeug vor Ort
           - n: '04'
-            text: Wir erstellen die Exportdokumente und organisieren die Lieferung zu Ihrer Stadt
+            text: Wir erstellen die Exportdokumente und organisieren den Transport zu Ihrer Stadt
           - n: '05'
             text: Zollabwicklung und Übergabe des Fahrzeugs an Sie — schlüsselfertig
         destinationsNote: Wir liefern nach Serbien und Portugal — sowie in jedes andere Land, das wir bei der Anfrage besprechen können.
         chinaCrossLabel: Überlegen Sie den Import aus China?
         notesHeading: Was beeinflusst Fristen und Preise aus Spanien
-        notesPointsLabel: Besonderheiten der Richtung
+        notesPointsLabel: Besonderheiten der Route
         notes:
           lead: 'Autos aus Spanien werden wegen des guten Karosseriezustands geholt: mildes Klima und fast keine Streusalze. Nachteil: die Entfernung ist doppelt so groß wie bei deutschen Autos, was sich im Kostenvoranschlag bemerkbar macht.'
           points:
@@ -3112,24 +3112,24 @@ translations:
         title: Fahrzeuge aus der Schweiz
         titleHighlight: schlüsselfertig
         description: 'Wir wählen ein Fahrzeug aus der Schweiz aus und bringen es zu Ihnen, wo auch immer Sie sich befinden: Prüfung, Dokumentation und Zollabwicklung schlüsselfertig.'
-        ctaLabel: Antrag stellen
+        ctaLabel: Anfrage stellen
         breadcrumbLabel: Fahrzeuge aus der Schweiz
         casesHeading: 'Fälle: Fahrzeuge aus der Schweiz'
         steps:
           - n: '01'
-            text: Sie stellen einen Antrag mit Anforderungen — Budget, Marke, Kilometerstand
+            text: Sie stellen eine Anfrage mit Ihren Anforderungen — Budget, Marke, Kilometerstand
           - n: '02'
             text: Wir suchen das Fahrzeug aus der Schweiz nach Ihren Kriterien
           - n: '03'
-            text: Ein unabhängiger Experte inspiziert und prüft das Fahrzeug vor Ort
+            text: Ein unabhängiger Experte prüft das Fahrzeug vor Ort
           - n: '04'
-            text: Wir erstellen die Exportdokumente und organisieren die Lieferung zu Ihrer Stadt
+            text: Wir erstellen die Exportdokumente und organisieren den Transport zu Ihrer Stadt
           - n: '05'
             text: Zollabwicklung und Übergabe des Fahrzeugs an Sie — schlüsselfertig
-        destinationsNote: Wir liefern nach Serbien, Spanien und Portugal — sowie in jedes andere Land, das wir bei der Anfrage besprechen können.
+        destinationsNote: Wir liefern nach Serbien, Spanien und Portugal — und in jedes andere Land, das wir bei der Anfrage besprechen.
         chinaCrossLabel: Überlegen Sie den Import aus China?
         notesHeading: Was beeinflusst Fristen und Preise aus der Schweiz
-        notesPointsLabel: Besonderheiten der Richtung
+        notesPointsLabel: Besonderheiten der Route
         notes:
           lead: 'Die Schweiz gehört nicht zur EU, weshalb das Fahrzeug zweimal verzollt wird: beim Verlassen des Landes und beim Eintritt ins Zielland. Das ist der Hauptunterschied zu jedem anderen Ziel innerhalb der EU.'
           points:
@@ -3335,7 +3335,7 @@ translations:
         accentWord: wir kommen und schauen uns das an
         text: Wir fahren innerhalb eines bis zwei Tagen los. Der Bericht mit Fotos bleibt bei Ihnen, selbst wenn Sie nach ihm vom Kauf Abstand nehmen.
     cityVehicleSourcing:
-      title: Fahrzeugauswahl
+      title: Fahrzeugbeschaffung
       descriptionFor: Wir suchen ein Auto in {cityLocation} mit vollständiger Überprüfung. Wir arbeiten in der gesamten Region {countryName}.
       casesHeadingFor: Fälle aus {countryGenitiveOrName}
       whyCityHeadingFor: Warum {cityName}
@@ -3485,4 +3485,4 @@ translations:
           label: Inspektion
         - slug: vehicle-import
           label: Import
-translatedFrom: 8a0294fcd9957c46
+translatedFrom: f815525bf9b420c3
