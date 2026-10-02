@@ -52,7 +52,7 @@ vehicle-sourcing:
     compareHint: Выберите страну — покажем, что смотрим там первым делом.
     compareLinkFor: Подбор {location} — подробно
   title: Автоподбор под ключ
-  descriptionFor: Подберём автомобиль {location} — среди авто, которые уже в этой стране, без ввоза из-за рубежа. Полная проверка, сопровождение сделки и доставка до вашего города — под ключ, включая растаможку.
+  descriptionFor: Подберём автомобиль {location} — среди тех, что уже в этой стране, без ввоза из-за рубежа. Полная проверка, сопровождение сделки и доставка до вашего города.
   ctaLabel: Оставить заявку
   casesHeadingFor: 'Кейсы: автоподбор {location}'
   breadcrumbLabelFor: Авто {location}
@@ -66,18 +66,15 @@ vehicle-sourcing:
     - n: '04'
       text: Сопровождаем сделку, помогаем с документами и оформлением
     - n: '05'
-      text: Доставляем автомобиль до вашего города — под ключ, включая растаможку
-  deliveryLineFor: Доставляем в {destinations} — и в любую другую страну, обсудим при заявке.
+      text: Доставляем автомобиль до вашего города и помогаем поставить его на учёт
+  deliveryLineFor: Доставим машину в любой город страны. Если её нужно вывезти за границу, берём на себя экспорт и растаможку — возим в {destinations} и в любую другую страну.
   deliveryDestinations:
-    - Россию
-    - Казахстан
-    - Кыргызстан
-    - Украину
-    - Беларусь
     - Боснию и Герцеговину
     - Хорватию
     - Северную Македонию
     - Турцию
+    - Казахстан
+    - Кыргызстан
   citiesHeadingFor: Где смотрим машины {countryLocation}
   citiesLead: >-
     Эксперт выезжает по всей стране, но чаще всего смотрим машины там, где их больше всего выставляют. Вот что это значит для каждого города.
@@ -806,7 +803,7 @@ translations:
         compareHint: Select a country — we'll show you what we look for there first.
         compareLinkFor: Sourcing in {location} — details
       title: Turnkey Car Sourcing
-      descriptionFor: We’ll find a vehicle in {location} — among cars already in the country, avoiding imports. Complete inspection, deal support, and delivery to your city — turnkey, including customs clearance.
+      descriptionFor: We'll source a car in {location} — from those already available in the country, without imports from abroad. Comprehensive inspection, deal support, and delivery to your city.
       ctaLabel: Submit a Request
       casesHeadingFor: 'Cases: Car Sourcing in {location}'
       breadcrumbLabelFor: Cars in {location}
@@ -820,18 +817,15 @@ translations:
         - n: '04'
           text: We assist with the transaction, help with documents and registration
         - n: '05'
-          text: We deliver the car to your city — turnkey, including customs clearance
-      deliveryLineFor: We deliver to {destinations} — and any other country, can discuss upon request.
+          text: We deliver the car to your city and assist with vehicle registration.
+      deliveryLineFor: We deliver cars to any city in the country. If it needs to be exported abroad, we handle the export and customs clearance — to {destinations} and any other country.
       deliveryDestinations:
-        - Russia
-        - Kazakhstan
-        - Kyrgyzstan
-        - Ukraine
-        - Belarus
         - Bosnia and Herzegovina
         - Croatia
         - North Macedonia
         - Turkey
+        - Kazakhstan
+        - Kyrgyzstan
       citiesHeadingFor: Where We Inspect Cars in {countryLocation}
       citiesLead: The expert travels across the country, but we most often inspect cars where they are most available. Here is what it means for each city.
       alsoInLabel: 'We also source in:'
@@ -1491,7 +1485,7 @@ translations:
         compareHint: Izaberite zemlju — pokažaćemo šta prvo gledamo tamo.
         compareLinkFor: Izbor {location} — u detalje
       title: Auto izbor pod ključ
-      descriptionFor: Izabraćemo automobil {location} — među automobilima koji su već u ovoj zemlji, bez uvoza iz inostranstva. Sveobuhvatna provera, podrška tokom transakcije i dostava do vašeg grada — pod ključ, uključujući carinjenje.
+      descriptionFor: Pronađite automobil u {location} — među onima koji su već u zemlji, bez uvoza iz inostranstva. Potpuna provera, pratimo postupak i dostavljamo do vašeg grada.
       ctaLabel: Poslati zahteva
       casesHeadingFor: 'Kase: auto izbor {location}'
       breadcrumbLabelFor: Auto {location}
@@ -1505,18 +1499,15 @@ translations:
         - n: '04'
           text: Pratimo transakciju, pomažemo sa dokumentima i registracijom
         - n: '05'
-          text: Dostavljamo automobil do vašeg grada — pod ključ, uključujući carinjenje
-      deliveryLineFor: Dovozimo u {destinations} — i u bilo koju drugu zemlju, razgovaraćemo prilikom prijave.
+          text: Dostavljamo automobil do vašeg grada i pomažemo da ga registrujete.
+      deliveryLineFor: Dostavićemo automobil u bilo koji grad u zemlji. Ako je potrebno izvesti ga u inostranstvo, preuzimamo izvoz i carinjenje — šaljemo u {destinations} i bilo koju drugu zemlju.
       deliveryDestinations:
-        - Rusiju
-        - Kazahstan
-        - Kirgistan
-        - Ukrajinu
-        - Belorusiju
         - Bosnu i Hercegovinu
         - Hrvatsku
         - Severnu Makedoniju
         - Tursku
+        - Kazahstan
+        - Kirgistan
       citiesHeadingFor: Gde gledamo automobile {countryLocation}
       citiesLead: Stručnjak izlazi širom zemlje, ali najčešće gledamo automobile tamo gde ih najviše izlažu. Evo šta to znači za svaki grad.
       alsoInLabel: 'Takođe biramo u:'
@@ -2176,7 +2167,7 @@ translations:
         compareHint: Elija un país — mostraremos lo que estamos mirando allí primero.
         compareLinkFor: Selección {location} — en detalle
       title: Selección de coches llave en mano
-      descriptionFor: Seleccionamos un vehículo {location} — entre coches que ya se encuentran en este país, sin importar desde el extranjero. Verificación completa, acompañamiento de la transacción y entrega a su ciudad — llave en mano, incluyendo aduanas.
+      descriptionFor: Encontramos un coche en {location} entre los que ya están en este país, sin necesidad de importar desde el extranjero. Realizamos una revisión completa, acompañamos la transacción y entregamos en su ciudad.
       ctaLabel: Dejar una solicitud
       casesHeadingFor: 'Casos: selección de coches {location}'
       breadcrumbLabelFor: Coches {location}
@@ -2190,18 +2181,15 @@ translations:
         - n: '04'
           text: Acompañamos la transacción, ayudamos con la documentación y el registro
         - n: '05'
-          text: Entregamos el coche a tu ciudad — llave en mano, incluyendo aduanas
-      deliveryLineFor: Entregamos en {destinations} — y en cualquier otro país, lo discutimos al realizar la solicitud.
+          text: Entregamos el coche en su ciudad y le ayudamos a registrarlo.
+      deliveryLineFor: Entregamos el coche en cualquier ciudad del país. Si necesita sacarlo al extranjero, nos encargamos de la exportación y el despacho aduanero — transportamos a {destinations} y a cualquier otro país.
       deliveryDestinations:
-        - Rusia
-        - Kazajistán
-        - Kirguisistán
-        - Ucrania
-        - Bielorrusia
         - Bosnia y Herzegovina
         - Croacia
         - Macedonia del Norte
         - Turquía
+        - Kazajistán
+        - Kirguisistán
       citiesHeadingFor: Dónde inspeccionamos coches {countryLocation}
       citiesLead: El experto se desplaza por todo el país, pero generalmente inspeccionamos coches donde se exponen más. Esto es lo que significa para cada ciudad.
       alsoInLabel: 'También seleccionamos en:'
@@ -2861,7 +2849,7 @@ translations:
         compareHint: Wählen Sie ein Land — wir zeigen, was wir dort zunächst prüfen.
         compareLinkFor: Auswahl {location} — im Detail
       title: Schlüsselfertige Fahrzeugauswahl
-      descriptionFor: Wir finden ein Auto in {location} — unter den Fahrzeugen, die bereits in diesem Land sind, ohne Import aus dem Ausland. Vollständige Prüfung, Begleitung des Geschäfts und Lieferung in Ihre Stadt — schlüsselfertig, einschließlich Zollabwicklung.
+      descriptionFor: Wir finden das passende Auto für Sie in {location} – aus bereits verfügbaren Fahrzeugen im Land, ohne Import aus dem Ausland. Umfassende Prüfung, Begleitung des Kaufs und Lieferung in Ihre Stadt.
       ctaLabel: Anfrage senden
       casesHeadingFor: 'Fälle: Fahrzeugauswahl {location}'
       breadcrumbLabelFor: Auto {location}
@@ -2875,18 +2863,15 @@ translations:
         - n: '04'
           text: Wir begleiten das Geschäft, helfen bei Dokumenten und Anmeldung
         - n: '05'
-          text: Wir liefern das Fahrzeug in Ihre Stadt — schlüsselfertig, einschließlich Zollabwicklung
-      deliveryLineFor: Wir liefern nach {destinations} — und in jedes andere Land, sprechen wir bei der Anfrage ab.
+          text: Wir liefern das Fahrzeug in Ihre Stadt und unterstützen Sie bei der Zulassung.
+      deliveryLineFor: Wir bringen das Auto in jede Stadt des Landes. Wenn es ins Ausland exportiert werden muss, übernehmen wir den Export und die Zollabwicklung – wir bringen es nach {destinations} und in jedes andere Land.
       deliveryDestinations:
-        - Russland
-        - Kasachstan
-        - Kirgisistan
-        - Ukraine
-        - Weißrussland
         - Bosnien und Herzegowina
         - Kroatien
         - Nordmazedonien
         - Türkei
+        - Kasachstan
+        - Kirgisistan
       citiesHeadingFor: Wo wir Fahrzeuge in {countryLocation} anschauen
       citiesLead: Der Experte fährt im ganzen Land, aber meistens schauen wir dort, wo die meisten Fahrzeuge angeboten werden. Was das für jede Stadt bedeutet.
       alsoInLabel: 'Wir wählen auch in:'
@@ -3500,4 +3485,4 @@ translations:
           label: Inspektion
         - slug: vehicle-import
           label: Import
-translatedFrom: 8a0294fcd9957c46
+translatedFrom: f815525bf9b420c3

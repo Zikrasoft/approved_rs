@@ -23,6 +23,7 @@ export const leadFormContentSchema = z
     errorTelegramFormat: z.string(),
     errorPhoneRequired: z.string(),
     errorPhoneInvalid: z.string(),
+    errorSubmit: z.string(),
   })
   .strict();
 

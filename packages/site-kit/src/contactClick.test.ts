@@ -4,7 +4,7 @@ import { defineContactClickTracking } from './contactClick.ts';
 import { VISITOR_ID_STORAGE_KEY } from './visitorId.ts';
 
 const isTracked = (channel: string | undefined): channel is string =>
-  channel === 'telegram';
+  channel === 'telegram' || channel === 'whatsapp' || channel === 'viber';
 
 let sent: [string, FormData][];
 
@@ -80,14 +80,11 @@ describe('defineContactClickTracking', () => {
     });
   });
 
-  it('counts an untracked channel as interest without storing a lead', () => {
+  it('leaves the button that only opens the form out of the contact count', () => {
     defineContactClickTracking(isTracked);
     click('callback');
     expect(sent).toEqual([]);
-    expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
-      channel: 'callback',
-      placement: 'footer',
-    });
+    expect(window.ymReachGoal).not.toHaveBeenCalled();
   });
 
   it('still records the click on a page where analytics never loaded', () => {

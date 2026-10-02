@@ -20,7 +20,7 @@ const schema = breadcrumbListSchema(SITE_URL, trail);
 ---
 
 <script type="application/ld+json" set:html={jsonLdText(schema)} />
-<nav aria-label="breadcrumb" class="mb-6">
+<nav aria-label="breadcrumb" class="mb-3 sm:mb-6">
   <ol class="flex flex-wrap items-center gap-1.5 text-xs text-muted">
     {
       trail.map((item, i) => (

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { LEAD_FORM_RESULT_EVENT } from '@podbor/lead-crm/submit';
 import { defineFunnelTracking, fieldName, scrolledPercent } from './funnel.ts';
 import { GOALS, reachGoal } from './goals.ts';
 
@@ -55,6 +56,12 @@ function blockedSubmit(form: HTMLFormElement): void {
     once: true,
   });
   form.dispatchEvent(submitEvent());
+}
+
+function answer(form: HTMLFormElement, ok: boolean): void {
+  form.dispatchEvent(
+    new CustomEvent(LEAD_FORM_RESULT_EVENT, { bubbles: true, detail: { ok } }),
+  );
 }
 
 const scrollTo = (y: number): void => {
@@ -168,11 +175,23 @@ describe('defineFunnelTracking', () => {
     expect(goalNames()).not.toContain(GOALS.formStart);
   });
 
-  it('reports a submit the page let through to the server', () => {
+  it('reports the submission the server took, not the attempt', () => {
     document.body.innerHTML = FORM;
     start();
-    document.querySelector('form')!.dispatchEvent(submitEvent());
+    const form = document.querySelector('form')!;
+    form.dispatchEvent(submitEvent());
+    expect(goalNames()).not.toContain(GOALS.formSubmit);
+
+    answer(form, true);
     expect(goals()).toContainEqual([GOALS.formSubmit, { service: 'none' }]);
+  });
+
+  it('blames the server for a submission it refused', () => {
+    document.body.innerHTML = FORM;
+    start();
+    answer(document.querySelector('form')!, false);
+    expect(goals()).toContainEqual([GOALS.formError, { field: 'server' }]);
+    expect(goalNames()).not.toContain(GOALS.formSubmit);
   });
 
   it('names the service a submitted form carried, so a partner lead is countable', () => {
@@ -181,7 +200,7 @@ describe('defineFunnelTracking', () => {
     const form = document.querySelector('form')!;
     form.querySelector<HTMLInputElement>('input[name="service"]')!.value =
       'partner-details';
-    form.dispatchEvent(submitEvent());
+    answer(form, true);
     expect(goals()).toContainEqual([
       GOALS.formSubmit,
       { service: 'partner-details' },
@@ -240,15 +259,16 @@ describe('defineFunnelTracking', () => {
 
     form.removeAttribute('data-awaiting-kit');
     form.querySelector('input[name="phone"]')!.removeAttribute('aria-invalid');
-    form.dispatchEvent(submitEvent());
+    answer(form, true);
     expect(goalNames()).toContain(GOALS.formSubmit);
   });
 
   it('ignores a submit from a form that is not the lead form', () => {
     document.body.innerHTML = `${FORM}<form id="search"></form>`;
     start();
-    document.querySelector('#search')!.dispatchEvent(submitEvent());
-    expect(goalNames()).not.toContain(GOALS.formSubmit);
+    const search = document.querySelector<HTMLFormElement>('#search')!;
+    search.dispatchEvent(submitEvent());
+    expect(goalNames()).not.toContain(GOALS.formError);
   });
 
   it('does nothing about forms on a page that carries none', () => {
@@ -312,5 +332,19 @@ describe('reachGoal', () => {
   it('stays silent on a page where analytics never loaded', () => {
     delete (window as Partial<Window>).ymReachGoal;
     expect(() => reachGoal(GOALS.formView)).not.toThrow();
+  });
+});
+
+describe('a result event from something that is not a lead form', () => {
+  it('counts nothing', () => {
+    document.body.innerHTML = `${FORM}<form id="other"></form>`;
+    defineFunnelTracking(page.signal);
+
+    answer(document.querySelector<HTMLFormElement>('#other')!, true);
+
+    expect(window.ymReachGoal).not.toHaveBeenCalledWith(
+      GOALS.formSubmit,
+      expect.anything(),
+    );
   });
 });

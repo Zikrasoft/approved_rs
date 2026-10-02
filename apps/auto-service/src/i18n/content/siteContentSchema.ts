@@ -93,6 +93,7 @@ export const siteContentSchema = z
         errorPhone: z.string(),
         errorTelegram: z.string(),
         errorConsent: z.string(),
+        errorSubmit: z.string(),
       })
       .strict(),
     cookie: cookieSchema,

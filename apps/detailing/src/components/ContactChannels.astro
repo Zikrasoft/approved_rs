@@ -80,7 +80,7 @@ const CHANNEL_CLASS =
         {channel.track === 'phone' && placement === 'thanks' && (
           <span class={`${CHANNEL_CLASS} pointer-coarse:hidden!`}>
             <Icon name="phone" size={18} class="shrink-0 text-mute" />
-            {formatPhone(PHONE_NUMBER)}
+            <span class="whitespace-nowrap">{formatPhone(PHONE_NUMBER)}</span>
           </span>
         )}
       </>

@@ -18,11 +18,11 @@ export function defineContactClickTracking(
     .forEach((element) => {
       element.addEventListener('click', () => {
         const channel = element.dataset.contactChannel;
+        if (!isTracked(channel)) return;
         const placement = element.closest<HTMLElement>(
           `[${CONTACT_PLACEMENT_ATTRIBUTE}]`,
         )?.dataset.contactPlacement;
         reachGoal(GOALS.contactClick, { channel, placement });
-        if (!isTracked(channel)) return;
         const body = new FormData();
         body.set('channel', channel);
         body.set('source_url', location.href);

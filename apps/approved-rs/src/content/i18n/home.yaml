@@ -48,8 +48,8 @@ testimonials:
 ctaEyebrow: Готовы начать?
 ctaHeading:
   line1: Расскажите нам
-  line2: о своём
-  accentWord: автомобиле
+  line2: о машине,
+  accentWord: которую ищете
 ctaSubtext: Отвечаем в течение 2 часов. Консультация бесплатна.
 ctaTelegramLabel: Написать в Telegram
 ctaStatClients:
@@ -59,7 +59,7 @@ ctaStatCountries:
   label: стран
 ctaStatYears:
   value: 5 лет
-  label: опыт
+  label: на рынке
 ctaStatResponse:
   value: 2 ч
   label: ответ
@@ -174,9 +174,9 @@ translations:
         caption: VW Passat, Germany → Serbia
     ctaEyebrow: Ready to get started?
     ctaHeading:
-      line1: Tell us about your
-      line2: vehicle
-      accentWord: car
+      line1: Tell us
+      line2: about the car
+      accentWord: you are looking for
     ctaSubtext: We respond within 2 hours. Consultation is free.
     ctaTelegramLabel: Message on Telegram
     ctaStatClients:
@@ -186,7 +186,7 @@ translations:
       label: countries
     ctaStatYears:
       value: 5 years
-      label: experience
+      label: in the market
     ctaStatResponse:
       value: 2 hrs
       label: response
@@ -300,8 +300,8 @@ translations:
     ctaEyebrow: Spremni da počnemo?
     ctaHeading:
       line1: Recite nam
-      line2: o svom
-      accentWord: automobilu
+      line2: o automobilu,
+      accentWord: koji tražite
     ctaSubtext: Odgovaramo u roku od 2 sata. Konsultacija je besplatna.
     ctaTelegramLabel: Pitajte na Telegramu
     ctaStatClients:
@@ -311,7 +311,7 @@ translations:
       label: zemalja
     ctaStatYears:
       value: 5 godina
-      label: iskustvo
+      label: na tržištu
     ctaStatResponse:
       value: 2 h
       label: odgovor
@@ -425,8 +425,8 @@ translations:
     ctaEyebrow: ¿Listo para empezar?
     ctaHeading:
       line1: Cuéntanos
-      line2: sobre tu
-      accentWord: automóvil
+      line2: sobre el coche,
+      accentWord: que estás buscando
     ctaSubtext: Respondemos en un plazo de 2 horas. La consulta es gratuita.
     ctaTelegramLabel: Escribir en Telegram
     ctaStatClients:
@@ -436,7 +436,7 @@ translations:
       label: países
     ctaStatYears:
       value: 5 años
-      label: de experiencia
+      label: en el mercado
     ctaStatResponse:
       value: 2 h
       label: respuesta
@@ -550,8 +550,8 @@ translations:
     ctaEyebrow: Bereit zu starten?
     ctaHeading:
       line1: Erzählen Sie uns
-      line2: von Ihrem
-      accentWord: Auto
+      line2: über das Auto,
+      accentWord: das Sie suchen
     ctaSubtext: Wir antworten innerhalb von 2 Stunden. Die Beratung ist kostenlos.
     ctaTelegramLabel: Nachricht an Telegram
     ctaStatClients:
@@ -561,7 +561,7 @@ translations:
       label: Länder
     ctaStatYears:
       value: 5 Jahre
-      label: Erfahrung
+      label: auf dem Markt
     ctaStatResponse:
       value: 2 Std.
       label: Antwort
@@ -624,4 +624,4 @@ translations:
     findingLabel: 'Gefunden:'
     heroPhotoAlt: Limousine auf einer europäischen Autobahn
     ctaPhotoAlt: Saubere Karosserie und Auto-Rad im Close-up
-translatedFrom: f9da32af62a6f2c0
+translatedFrom: beacbd500ac32c11

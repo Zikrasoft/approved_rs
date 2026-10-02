@@ -270,10 +270,15 @@ Both new apps follow the same shape, and a third should too:
   than half of each. Two shapes, by whether the region has a callback sibling:
   where one is already on screen — the full contact bar, the floating widget,
   approved.rs's mobile menu, CarLab's header, CarLab's sticky bar and the
-  compact hero that ships a `label` button — the phone control is simply absent
-  on a fine pointer and nothing replaces it; where the phone link is the only
-  phone control, as in the compact hero without a `label`, a callback button
-  takes its place carrying `callbackButtonLabel`. `/thanks/` is the one
+  compact hero, whose filled button opens the lead modal — the phone control is
+  simply absent on a fine pointer and nothing replaces it; where the phone link
+  is the only phone control a callback button takes its place carrying
+  `callbackButtonLabel`. The compact hero earns the absent shape only while
+  that modal button stays unconditional: putting `lg:hidden` on it left
+  `cases/[slug].astro`, which renders no form of its own, with neither a phone
+  control nor a form door on a mouse, and `contact-controls-pass.ts` cannot see
+  that — it checks `tel:` exposure and placement, not whether a form is
+  reachable. `/thanks/` is the one
   exception: the `ContactCTA` contacts block there renders the number as plain
   selectable text through `@podbor/site-kit/format-phone` — its own
   subpath, because the root barrel would put `libphonenumber-js` one client

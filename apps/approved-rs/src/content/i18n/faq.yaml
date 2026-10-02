@@ -10,7 +10,7 @@ vehicle-sourcing:
   - q: Даёте ли фото- или видеоотчёт по машине до принятия решения?
     a: Да, полный отчёт с фото по машине — до того, как вы принимаете решение о покупке.
   - q: Есть компенсация, если сроки сорваны по вашей вине?
-    a: Фиксированной неустойки нет — срок сделки часто зависит не только от нас (переговоры с продавцом, растаможка). Но называем реалистичный срок сразу и не тянем время.
+    a: Фиксированной неустойки нет — срок сделки часто зависит не только от нас (переговоры с продавцом, оформление документов). Но называем реалистичный срок сразу и не тянем время.
 vehicle-import:
   - q: Чем привоз отличается от автоподбора?
     a: Автоподбор — когда вы находитесь в той же стране, что и автомобиль. Привоз — когда машина едет к вам в Сербию из Европы или Китая.
@@ -66,7 +66,7 @@ translations:
       - q: Do you provide photo or video reports of the car before a decision is made?
         a: Yes, you will receive a complete report with photos of the car before you decide to make a purchase.
       - q: Is there compensation if deadlines are missed due to your fault?
-        a: There is no fixed penalty — the timeline often depends on factors beyond our control (negotiations with the seller, customs clearance). However, we provide a realistic timeframe from the start and do not delay.
+        a: There is no fixed penalty — the duration of a deal often depends on factors beyond our control (negotiations with the seller, document processing). However, we provide a realistic timeframe from the outset and don't delay the process.
     vehicle-import:
       - q: What is the difference between import and vehicle sourcing?
         a: Vehicle sourcing is when you are in the same country as the car. Importing is when the vehicle is coming to you in Serbia from Europe or China.
@@ -121,7 +121,7 @@ translations:
       - q: Da li dostavljate foto- ili video izveštaj o automobilu pre donošenja odluke?
         a: Da, šaljemo kompletan izveštaj sa fotografijama automobila — pre nego što donesete odluku o kupovini.
       - q: Da li postoji kompenzacija ako su rokovi probijeni vašom krivicom?
-        a: Nema fiksne kazne — rok transakcije često zavisi ne samo od nas (pregovori sa prodavcem, carinjenje). Ali odmah navodimo realan rok i ne odugovlačimo.
+        a: Ne postoji fiksna kazna — rok za realizaciju često zavisi ne samo od nas (pregovori s prodavcem, priprema dokumentacije). Ali odmah dajemo realističan rok i ne odugovlačimo.
     vehicle-import:
       - q: Šta se razlikuje između uvoza i pretrage automobila?
         a: Pretraga automobila je kada ste u istoj zemlji gde je automobil. Uvoz je kada automobil dolazi u Srbiju iz Evrope ili Kine.
@@ -176,7 +176,7 @@ translations:
       - q: ¿Proporcionan un informe fotográfico o en video sobre el coche antes de tomar una decisión?
         a: Sí, un informe completo con fotos del coche se proporciona antes de que tomes la decisión de compra.
       - q: ¿Hay compensación si los plazos se incumplen debido a su culpa?
-        a: No hay una penalización fija; el tiempo de la transacción a menudo depende no solo de nosotros (negociaciones con el vendedor, aduanas). Pero nominamos un plazo realista desde el principio y no hacemos perder tiempo.
+        a: No hay una penalización fija; la duración del trato a menudo depende de factores que no están solo en nuestras manos (negociaciones con el vendedor, formalización de documentos). Sin embargo, indicamos un plazo realista desde el principio y no retrasamos el proceso.
     vehicle-import:
       - q: ¿En qué se diferencia la importación de la selección de coches?
         a: La selección de coches es cuando estás en el mismo país que el coche. La importación es cuando el coche viene hacia ti en Serbia desde Europa o China.
@@ -231,7 +231,7 @@ translations:
       - q: Geben Sie einen Foto- oder Videobericht über das Auto vor der Kaufentscheidung?
         a: Ja, Sie erhalten einen vollständigen Bericht mit Fotos des Autos, bevor Sie eine Kaufentscheidung treffen.
       - q: Gibt es eine Entschädigung, wenn Fristen durch Ihr Verschulden überschritten werden?
-        a: Es gibt keine feste Vertragsstrafe – die Dauer des Deals hängt oft nicht nur von uns ab (Verhandlungen mit dem Verkäufer, Zollabfertigung). Wir nennen jedoch sofort einen realistischen Zeitrahmen und ziehen keine Zeit in die Länge.
+        a: Es gibt keine feste Vertragsstrafe – die Dauer der Transaktion hängt oft nicht nur von uns ab (Verhandlungen mit dem Verkäufer, Dokumentenbearbeitung). Wir nennen jedoch sofort einen realistischen Zeitraum und ziehen die Dinge nicht in die Länge.
     vehicle-import:
       - q: Was ist der Unterschied zwischen Import und Fahrzeugsuche?
         a: Fahrzeugsuche bedeutet, dass Sie sich im selben Land wie das Auto befinden. Import bedeutet, dass das Auto aus Europa oder China nach Serbien kommt.
@@ -273,4 +273,4 @@ translations:
     cityExpert:
       q: Gibt es in jeder Stadt einen eigenen Experten?
       a: In verschiedenen Städten arbeiten unterschiedliche Spezialisten von uns; in einigen Fällen fährt ein Experte in eine benachbarte Stadt der Region.
-translatedFrom: b11f23df2c6a89c6
+translatedFrom: 80b62baf0cbc6b99

@@ -138,8 +138,7 @@ const messenger = messengerHrefs(locale);
       class="pt-6 border-t border-default flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
     >
       <p class="text-xs text-muted">
-        © {year}
-        {SITE_NAME} — {t.footer.copyrightSuffix}
+        {`© ${year} ${SITE_NAME} — ${t.footer.copyrightSuffix}`}
       </p>
       <a
         href={`https://www.threads.com/@${THREADS_CHANNEL}`}

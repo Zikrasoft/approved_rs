@@ -57,7 +57,6 @@ const noscriptLink =
 <form
   method="POST"
   action="/api/leads"
-  novalidate
   data-lead-form
   data-submitting-label={site.form.submitting}
   class={`ym-hide-content ym-disable-keys flex flex-col ${compact ? 'gap-4' : 'gap-5'} ${className}`}
@@ -226,6 +225,7 @@ const noscriptLink =
         <input
           type="checkbox"
           name="consent"
+          required
           value="1"
           aria-describedby={errorId.consent}
           class="peer sr-only"
@@ -255,6 +255,9 @@ const noscriptLink =
         hidden
       >
         {site.form.errorConsent}
+      </p>
+      <p class={errorText} role="alert" data-error-submit hidden>
+        {site.form.errorSubmit}
       </p>
     </div>
 
@@ -288,6 +291,7 @@ const noscriptLink =
     phoneKit,
     showContactValue,
   } from '@podbor/lead-crm/phone-kit';
+  import { submitLeadForm } from '@podbor/lead-crm/submit';
   import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 
   document
@@ -295,6 +299,7 @@ const noscriptLink =
     .forEach(initLeadForm);
 
   function initLeadForm(form: HTMLFormElement) {
+    form.noValidate = true;
     const pick = <T extends HTMLElement>(selector: string) =>
       form.querySelector<T>(selector)!;
 
@@ -314,7 +319,11 @@ const noscriptLink =
       telegram: pick('[data-error-telegram]'),
       phone: pick('[data-error-phone]'),
       consent: pick('[data-error-consent]'),
+      submit: pick('[data-error-submit]'),
     };
+    const button = pick<HTMLButtonElement>('button[type="submit"]');
+    const submitLabel = pick('[data-submit-label]');
+    const idleLabel = submitLabel.textContent;
 
     const mark = (error: HTMLElement, control: HTMLElement, valid: boolean) => {
       error.hidden = valid;
@@ -343,6 +352,7 @@ const noscriptLink =
     });
     form.addEventListener('input', () => {
       controlled.forEach(([error, control]) => mark(error, control, true));
+      errors.submit.hidden = true;
     });
 
     form.addEventListener('submit', (event) => {
@@ -380,12 +390,18 @@ const noscriptLink =
         return;
       }
 
-      const button = pick<HTMLButtonElement>('button[type="submit"]');
-      const submitLabel = pick('[data-submit-label]');
+      event.preventDefault();
+      errors.submit.hidden = true;
       button.disabled = true;
       if (form.dataset.submittingLabel) {
         submitLabel.textContent = form.dataset.submittingLabel;
       }
+      void submitLeadForm(form).then((sent) => {
+        if (sent) return;
+        button.disabled = false;
+        submitLabel.textContent = idleLabel;
+        errors.submit.hidden = false;
+      });
     });
   }
 </script>

@@ -17,6 +17,24 @@ export interface LeadsRouteOptions<L extends string> {
   missingFieldsMessage: Record<L, string>;
 }
 
+function refusalPage(locale: string, message: string): Response {
+  return new Response(
+    `<!doctype html>
+<html lang="${locale}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${message}</title>
+  </head>
+  <body>
+    <p>${message}</p>
+  </body>
+</html>
+`,
+    { status: 400, headers: { 'content-type': 'text/html; charset=utf-8' } },
+  );
+}
+
 export function createLeadsRoute<L extends string>({
   notifyLead,
   waitUntil,
@@ -45,7 +63,7 @@ export function createLeadsRoute<L extends string>({
 
     const submission = leadSubmissionSchema.safeParse(form);
     if (!submission.success) {
-      return new Response(missingFieldsMessage[locale], { status: 400 });
+      return refusalPage(locale, missingFieldsMessage[locale]);
     }
 
     waitUntil(notifyLead({ ...submission.data, locale }, '[leads]'));

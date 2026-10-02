@@ -14,7 +14,7 @@ describe('getServicesContent', () => {
     for (const locale of SUPPORTED_LOCALES) {
       const s = getServicesContent(locale);
       expect(s['vehicle-sourcing'].stepsFor('X').length).toBe(5);
-      expect(s['vehicle-sourcing'].deliveryDestinations.length).toBe(9);
+      expect(s['vehicle-sourcing'].deliveryDestinations.length).toBe(6);
       expect(s['vehicle-inspection'].steps.length).toBe(5);
       expect(Object.keys(s.caseChrome.serviceBadges).length).toBe(4);
       expect(s['vehicle-import'].de.steps.length).toBe(5);

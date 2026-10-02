@@ -61,7 +61,6 @@ const fieldClass =
   <form
     method="POST"
     action="/api/leads"
-    novalidate
     data-lead-form
     {...{ [DATA_DEFAULT_SERVICE]: service }}
     data-err-tg-required={lf.errorTelegramRequired}
@@ -240,6 +239,7 @@ const fieldClass =
         <input
           type="checkbox"
           name="consent"
+          required
           data-field="consent"
           class="mt-0.5 shrink-0 w-4 h-4 cursor-pointer accent-accent"
         />
@@ -253,6 +253,14 @@ const fieldClass =
       </label>
       <p class="field-error consent-error mb-3" style="display:none">
         {lf.consentError}
+      </p>
+      <p
+        class="field-error submit-error mb-3"
+        role="alert"
+        data-error-submit
+        hidden
+      >
+        {lf.errorSubmit}
       </p>
 
       <Button
@@ -270,6 +278,7 @@ const fieldClass =
   import {
     bindPhoneCountry,
     fillCountrySelect,
+    selectCountry,
   } from '@podbor/lead-crm/phone-input';
   import {
     contactValue,
@@ -278,6 +287,7 @@ const fieldClass =
     phoneKit,
     showContactValue,
   } from '@podbor/lead-crm/phone-kit';
+  import { submitLeadForm } from '@podbor/lead-crm/submit';
   import {
     isTrackedContactChannel,
     detectVisitorCountry,
@@ -304,6 +314,7 @@ const fieldClass =
   initAllLeadForms();
 
   function initLeadForm(form: HTMLFormElement) {
+    form.noValidate = true;
     const visitorIdInput = form.querySelector<HTMLInputElement>(
       'input[type="hidden"][name="visitor_id"]',
     );
@@ -358,12 +369,19 @@ const fieldClass =
     )!;
     const consent = form.querySelector<HTMLInputElement>('[name="consent"]')!;
     const consentErr = form.querySelector<HTMLElement>('.consent-error');
+    const submitErr = form.querySelector<HTMLElement>('[data-error-submit]');
 
-    // progressive enhancement: the Telegram field ships with name="contact"
-    // so the form still submits something if this script never runs (ad
-    // blocker, disabled JS, failed dynamic import). Once we're here, JS is
-    // confirmed working, so hand control to the hidden field exclusively —
-    // otherwise the two same-named fields would collide on submit.
+    function setBusy(busy: boolean) {
+      const button = form.querySelector<HTMLButtonElement>(
+        'button[type="submit"]',
+      );
+      if (!button) return;
+      button.classList.toggle('is-loading', busy);
+      button.disabled = busy;
+      if (busy) button.setAttribute('aria-busy', 'true');
+      else button.removeAttribute('aria-busy');
+    }
+
     tgInput.removeAttribute('name');
 
     // WhatsApp/Viber/phone-call all collect the same shape of data (a phone
@@ -378,7 +396,7 @@ const fieldClass =
     let activeTab: TrackedContactChannel = 'telegram';
 
     const detectedCountry = detectVisitorCountry();
-    if (detectedCountry) phoneCountry.value = detectedCountry.toUpperCase();
+    selectCountry(phoneCountry, detectedCountry);
 
     bindPhoneCountry(phoneCountry, phoneNumber);
 
@@ -460,6 +478,9 @@ const fieldClass =
       if (preferredTab) selectTab(preferredTab, false);
     }
 
+    form.addEventListener('input', () => {
+      if (submitErr) submitErr.hidden = true;
+    });
     tgInput.addEventListener('input', () => {
       clearError(tgInput);
       syncContact();
@@ -526,29 +547,15 @@ const fieldClass =
       markFieldValidity(consent, consent.checked);
       if (!consent.checked) ok = false;
 
-      if (!ok) {
-        e.preventDefault();
-        return;
-      }
+      e.preventDefault();
+      if (!ok) return;
 
-      // Native form submit → full-page navigation to /thanks/ once the
-      // server redirects, so there's no "success" handler to clear this —
-      // the button just leaves the page. The timeout is only a safety net
-      // for the rare case the browser never navigates (e.g. offline).
-      const submitBtn = form.querySelector<HTMLButtonElement>(
-        'button[type="submit"]',
-      );
-      submitBtn?.classList.add('is-loading');
-      submitBtn?.setAttribute('disabled', 'true');
-      // is-loading hides the label visually (see global.css) — aria-busy is
-      // what actually tells a screen reader the button is doing something,
-      // since the hidden label alone drops it from the accessible name.
-      submitBtn?.setAttribute('aria-busy', 'true');
-      setTimeout(() => {
-        submitBtn?.classList.remove('is-loading');
-        submitBtn?.removeAttribute('disabled');
-        submitBtn?.removeAttribute('aria-busy');
-      }, 10000);
+      setBusy(true);
+      void submitLeadForm(form).then((sent) => {
+        if (sent) return;
+        setBusy(false);
+        if (submitErr) submitErr.hidden = false;
+      });
     });
 
     if (consentErr) {

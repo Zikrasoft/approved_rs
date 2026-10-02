@@ -122,7 +122,7 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
       import { defineAnalytics } from '@podbor/site-kit/browser';
       import { YM_COUNTER_ID } from '@/utils/constants';
 
-      defineAnalytics({ ymCounterId: YM_COUNTER_ID });
+      if (!import.meta.env.DEV) defineAnalytics({ ymCounterId: YM_COUNTER_ID });
     </script>
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

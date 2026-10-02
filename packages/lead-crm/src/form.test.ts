@@ -19,7 +19,7 @@ const VISITOR_ID = '9f1c2b7e-4a3d-4c9e-8b21-6f0d5a7c3e11';
 
 function submit(fields: Record<string, string | string[]>) {
   const form = new FormData();
-  Object.entries(fields).forEach(([key, value]) => {
+  Object.entries({ consent: 'on', ...fields }).forEach(([key, value]) => {
     if (Array.isArray(value)) value.forEach((item) => form.append(key, item));
     else form.append(key, value);
   });
@@ -199,6 +199,12 @@ describe('leadSubmissionSchema', () => {
     expect(submit({ name: 'Иван' }).success).toBe(false);
   });
 
+  it('rejects a submission that carries no consent', () => {
+    expect(
+      submit({ name: 'Иван', contact: '+381641234567', consent: '' }),
+    ).toMatchObject({ success: false });
+  });
+
   it('rejects "asdf" as a phone number', () => {
     expect(phone('asdf').success).toBe(false);
   });
@@ -313,6 +319,7 @@ describe('leadSubmissionSchema', () => {
     const parsed = leadSubmissionSchema.safeParse({
       name: 'Иван',
       contact: '+381641234567',
+      consent: 'on',
       service: [{ nope: true }],
     });
     expect(parsed.success).toBe(true);
@@ -333,6 +340,7 @@ describe('leadSubmissionSchema', () => {
     const parsed = leadSubmissionSchema.safeParse({
       name: 'Иван',
       contact: '+381641234567',
+      consent: 'on',
     });
     expect(parsed.success).toBe(true);
     expect(parsed.data?.services).toEqual([]);
