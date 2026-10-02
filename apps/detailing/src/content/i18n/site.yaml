@@ -138,13 +138,14 @@ translations:
       countryLabel: Kod države
       contactLabel: Broj telefona
       contactPlaceholder: 60 123 4567
+      telegramPlaceholder: '@username ili telefon'
       commentLabel: Komentar
       commentPlaceholder: Marka, model, godina — i šta želite da uradite
       submit: Pošalji zahtev
       submitting: Šaljemo…
       privacyNote: Prihvatam
       privacyLinkText: politiku privatnosti
-      errorTelegram: Unesite nik u Telegramu — najmanje tri karaktera
+      errorTelegram: Unesite @username na Telegramu ili broj telefona
       errorPhone: Unesite ispravan broj telefona
       errorConsent: Potvrdite saglasnost da biste poslali zahtev
       modalTitle: Ostaviti zahtev
@@ -216,13 +217,14 @@ translations:
       countryLabel: Country Code
       contactLabel: Phone Number
       contactPlaceholder: 60 123 4567
+      telegramPlaceholder: '@username or phone number'
       commentLabel: Comment
       commentPlaceholder: Make, model, year — and what you'd like done
       submit: Submit Request
       submitting: Submitting…
       privacyNote: I accept
       privacyLinkText: the privacy policy
-      errorTelegram: Enter your Telegram username — at least three characters
+      errorTelegram: Please provide @username on Telegram or a phone number
       errorPhone: Please enter a valid phone number
       errorConsent: Check the consent box to submit your request
       modalTitle: Submit a Request
@@ -234,4 +236,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: 7a4ee37c94ac8ec4
+translatedFrom: b5b76116d225d483

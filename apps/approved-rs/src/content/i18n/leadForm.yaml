@@ -28,6 +28,7 @@ translations:
     namePlaceholder: John
     contactLabel: How to reach you
     telegramTab: Telegram
+    telegramPlaceholder: '@username or phone number'
     whatsappTab: WhatsApp
     viberTab: Viber
     phoneTab: Phone
@@ -38,7 +39,7 @@ translations:
     consentError: Your consent is required
     submitLabel: Get a Quote
     errorTelegramRequired: Enter your Telegram
-    errorTelegramFormat: 'Format: @username'
+    errorTelegramFormat: 'Format: @username or phone number'
     errorPhoneRequired: Enter your phone number
     errorPhoneInvalid: Check your phone number
   sr:
@@ -49,6 +50,7 @@ translations:
     namePlaceholder: Marko
     contactLabel: Kako da vas kontaktiramo
     telegramTab: Telegram
+    telegramPlaceholder: '@username ili telefon'
     whatsappTab: WhatsApp
     viberTab: Viber
     phoneTab: Telefon
@@ -59,7 +61,7 @@ translations:
     consentError: Vaša saglasnost je obavezna
     submitLabel: Zatražite procenu
     errorTelegramRequired: Unesite Telegram
-    errorTelegramFormat: 'Format: @username'
+    errorTelegramFormat: 'Format: @username ili broj telefona'
     errorPhoneRequired: Unesite broj telefona
     errorPhoneInvalid: Proverite broj telefona
   es:
@@ -70,6 +72,7 @@ translations:
     namePlaceholder: Juan
     contactLabel: Cómo prefieres que te contactemos
     telegramTab: Telegram
+    telegramPlaceholder: '@username o teléfono'
     whatsappTab: WhatsApp
     viberTab: Viber
     phoneTab: Teléfono
@@ -80,7 +83,7 @@ translations:
     consentError: Tu consentimiento es necesario
     submitLabel: Calcular el precio
     errorTelegramRequired: Introduce tu Telegram
-    errorTelegramFormat: 'Formato: @usuario'
+    errorTelegramFormat: 'Formato: @username o número de teléfono'
     errorPhoneRequired: Introduce tu número de teléfono
     errorPhoneInvalid: Revisa tu número de teléfono
   de:
@@ -91,6 +94,7 @@ translations:
     namePlaceholder: Max
     contactLabel: Wie können wir Sie erreichen
     telegramTab: Telegram
+    telegramPlaceholder: '@Benutzername oder Telefonnummer'
     whatsappTab: WhatsApp
     viberTab: Viber
     phoneTab: Telefon
@@ -101,7 +105,7 @@ translations:
     consentError: Ihre Zustimmung ist erforderlich
     submitLabel: Preis berechnen
     errorTelegramRequired: Bitte geben Sie Ihren Telegram-Namen ein
-    errorTelegramFormat: 'Format: @username'
+    errorTelegramFormat: 'Format: @Benutzername oder Telefonnummer'
     errorPhoneRequired: Bitte geben Sie Ihre Telefonnummer ein
     errorPhoneInvalid: Bitte überprüfen Sie Ihre Telefonnummer
-translatedFrom: 80366a864295c01f
+translatedFrom: 639e1eb4d9ce8d64

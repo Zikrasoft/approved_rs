@@ -126,6 +126,7 @@ translations:
       namePlaceholder: Kako vas zvati
       contactLabel: Telefon
       contactPlaceholder: +381 11 000 0000
+      telegramPlaceholder: '@username ili telefon'
       contactChannelLabel: Kako da vas kontaktiramo
       channelPhone: Poziv
       countryLabel: Kod zemlje
@@ -137,7 +138,7 @@ translations:
       privacyLinkText: politiku privatnosti
       modalTitle: Zakazivanje u servis
       errorPhone: Proverite broj — čini se da nije unet potpuno
-      errorTelegram: Unesite nadimak na Telegramu — minimum tri karaktera
+      errorTelegram: Unesite @username na Telegramu ili broj telefona
       errorConsent: Bez pristanka ne možemo poslati zahtev
     cookie:
       notice: Koristimo kolačiće.
@@ -199,6 +200,7 @@ translations:
       namePlaceholder: How should we address you
       contactLabel: Phone
       contactPlaceholder: +381 11 000 0000
+      telegramPlaceholder: '@username or phone number'
       contactChannelLabel: How to contact you
       channelPhone: Call
       countryLabel: Country Code
@@ -210,7 +212,7 @@ translations:
       privacyLinkText: privacy policy
       modalTitle: Book a Service
       errorPhone: Please check the number — it seems incomplete
-      errorTelegram: Please provide your Telegram nickname — at least three characters
+      errorTelegram: Please provide @username on Telegram or your phone number
       errorConsent: Without consent, we cannot submit the request
     cookie:
       notice: We use cookies.
@@ -219,4 +221,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: f450b9500e54d33d
+translatedFrom: 2f14ca8c4327ba83
