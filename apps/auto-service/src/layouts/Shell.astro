@@ -216,7 +216,7 @@ const businessSchema = {
       } from '@podbor/site-kit/contact-preference';
       import { YM_COUNTER_ID } from '@/utils/constants';
 
-      defineAnalytics({ ymCounterId: YM_COUNTER_ID });
+      if (!import.meta.env.DEV) defineAnalytics({ ymCounterId: YM_COUNTER_ID });
       defineContactClickTracking(isTrackedContactChannel);
       applyPreferredContactOrder();
       applyPrimaryContactChannel();

@@ -45,3 +45,10 @@ All three counters have the `exclude uniq_id me` filter active — "don't count 
 visits". It works off a browser cookie and only covers the browsers the counter's
 reports were opened from, so the partner's phones and browsers are not caught by
 it. A clientID filter does not exist in Metrika's interface.
+
+All three also carry an active `include url only_mirrors` filter — count only the
+counter's own domain and its mirrors. That is the reason local visits never
+polluted the data while the dev server was still loading the production counter
+(issue #49): checked on 2026-10-02, the only host in all three counters over the
+last 180 days is their own domain. Dev no longer loads the script at all, so the
+filter is now the second line of defence rather than the only one.
