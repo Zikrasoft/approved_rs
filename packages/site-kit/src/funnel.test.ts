@@ -334,3 +334,17 @@ describe('reachGoal', () => {
     expect(() => reachGoal(GOALS.formView)).not.toThrow();
   });
 });
+
+describe('a result event from something that is not a lead form', () => {
+  it('counts nothing', () => {
+    document.body.innerHTML = `${FORM}<form id="other"></form>`;
+    defineFunnelTracking(page.signal);
+
+    answer(document.querySelector<HTMLFormElement>('#other')!, true);
+
+    expect(window.ymReachGoal).not.toHaveBeenCalledWith(
+      GOALS.formSubmit,
+      expect.anything(),
+    );
+  });
+});

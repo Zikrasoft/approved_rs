@@ -93,12 +93,23 @@ export function defineCookieConsent(tagName = 'cookie-consent'): void {
           signal: pending.signal,
         });
 
+        const reveal = (): void => {
+          pending.abort();
+          if (readConsent(version) === null) this.hidden = false;
+        };
+        const pastFirstScreen = (): boolean =>
+          window.scrollY >= window.innerHeight ||
+          document.documentElement.scrollHeight < window.innerHeight * 2;
+
+        if (pastFirstScreen()) {
+          reveal();
+          return;
+        }
+
         window.addEventListener(
           'scroll',
           () => {
-            if (window.scrollY < window.innerHeight) return;
-            pending.abort();
-            if (readConsent(version) === null) this.hidden = false;
+            if (pastFirstScreen()) reveal();
           },
           { signal: pending.signal, passive: true },
         );

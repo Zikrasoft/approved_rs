@@ -240,6 +240,7 @@ const fieldClass =
         <input
           type="checkbox"
           name="consent"
+          required
           data-field="consent"
           class="mt-0.5 shrink-0 w-4 h-4 cursor-pointer accent-accent"
         />
@@ -256,9 +257,9 @@ const fieldClass =
       </p>
       <p
         class="field-error submit-error mb-3"
-        style="display:none"
         role="alert"
         data-error-submit
+        hidden
       >
         {lf.errorSubmit}
       </p>
@@ -482,6 +483,9 @@ const fieldClass =
       if (preferredTab) selectTab(preferredTab, false);
     }
 
+    form.addEventListener('input', () => {
+      if (submitErr) submitErr.hidden = true;
+    });
     tgInput.addEventListener('input', () => {
       clearError(tgInput);
       syncContact();
@@ -551,12 +555,11 @@ const fieldClass =
       e.preventDefault();
       if (!ok) return;
 
-      if (submitErr) submitErr.style.display = 'none';
       setBusy(true);
       void submitLeadForm(form).then((sent) => {
         if (sent) return;
         setBusy(false);
-        if (submitErr) submitErr.style.display = '';
+        if (submitErr) submitErr.hidden = false;
       });
     });
 

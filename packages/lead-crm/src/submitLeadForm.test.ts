@@ -24,7 +24,11 @@ function form(): HTMLFormElement {
 }
 
 const answer = (status: number, url = '') =>
-  vi.fn().mockResolvedValue({ ok: status < 400, url } as Response);
+  vi.fn().mockResolvedValue({
+    ok: status < 400,
+    redirected: status < 400,
+    url,
+  } as Response);
 
 beforeEach(() => {
   results = [];
@@ -80,5 +84,33 @@ describe('submitLeadForm', () => {
     await submitLeadForm(form());
 
     expect(assign).toHaveBeenCalledWith(ACTION);
+  });
+});
+
+describe('what counts as the server taking the lead', () => {
+  it('reads the redirect, not the status of the page it lands on', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        redirected: true,
+        url: 'http://localhost:3000/ru/thanks/',
+      } as Response),
+    );
+
+    await expect(submitLeadForm(form())).resolves.toBe(true);
+    expect(results).toEqual([true]);
+    expect(assign).toHaveBeenCalledWith('http://localhost:3000/ru/thanks/');
+  });
+
+  it('refuses a 200 that never redirected, because the route always does', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, redirected: false, url: ACTION }),
+    );
+
+    await expect(submitLeadForm(form())).resolves.toBe(false);
+    expect(results).toEqual([false]);
+    expect(assign).not.toHaveBeenCalled();
   });
 });

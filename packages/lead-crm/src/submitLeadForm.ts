@@ -9,7 +9,7 @@ export async function submitLeadForm(form: HTMLFormElement): Promise<boolean> {
     method: 'POST',
     body: new FormData(form),
   }).catch(() => undefined);
-  const ok = response?.ok === true;
+  const ok = response?.redirected === true;
   form.dispatchEvent(
     new CustomEvent<LeadFormResult>(LEAD_FORM_RESULT_EVENT, {
       bubbles: true,

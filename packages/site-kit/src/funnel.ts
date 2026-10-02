@@ -107,6 +107,7 @@ function trackForms(signal: AbortSignal): void {
     LEAD_FORM_RESULT_EVENT,
     (event) => {
       const form = event.target as HTMLFormElement;
+      if (!form.matches(`[${LEAD_FORM_ATTRIBUTE}]`)) return;
       const { ok } = (event as CustomEvent<LeadFormResult>).detail;
       if (ok) reachGoal(GOALS.formSubmit, { service: submittedService(form) });
       else reachGoal(GOALS.formError, { field: 'server' });

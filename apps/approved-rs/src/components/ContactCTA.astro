@@ -63,7 +63,6 @@ const placement = onThanks ? 'thanks' : compact ? 'hero' : 'bar';
         {!label && (
           <Button
             variant="secondary"
-            data-contact-channel="callback"
             {...callbackTrigger()}
             class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center pointer-coarse:hidden!"
           >
@@ -130,7 +129,6 @@ const placement = onThanks ? 'thanks' : compact ? 'hero' : 'bar';
           ) : (
             <button
               type="button"
-              data-contact-channel="callback"
               aria-label={cc.callbackButtonLabel}
               {...callbackTrigger()}
               class="contact-cell"

@@ -30,11 +30,19 @@ function click(selector: string): void {
   document.querySelector<HTMLElement>(selector)!.click();
 }
 
+function pageHeight(px: number): void {
+  Object.defineProperty(document.documentElement, 'scrollHeight', {
+    configurable: true,
+    value: px,
+  });
+}
+
 beforeEach(() => {
   localStorage.clear();
   document.body.innerHTML = '';
   vi.useFakeTimers();
   window.scrollY = 0;
+  pageHeight(window.innerHeight * 3);
 });
 
 function scrollTo(y: number): void {
@@ -237,5 +245,17 @@ describe('the answer reaching the rest of the page', () => {
     (el as unknown as { connectedCallback: () => void }).connectedCallback();
     click('[data-consent-accept]');
     expect(heard).toEqual([{ analytics: true }]);
+  });
+});
+
+describe('pages the visitor cannot scroll past', () => {
+  it('asks straight away when there is no second screen to reach', () => {
+    pageHeight(Math.round(window.innerHeight * 1.4));
+    expect(mount().hidden).toBe(false);
+  });
+
+  it('asks on a position restored past the first screen, with no scroll event', () => {
+    window.scrollY = window.innerHeight;
+    expect(mount().hidden).toBe(false);
   });
 });
