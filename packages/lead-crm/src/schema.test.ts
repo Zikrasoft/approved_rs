@@ -118,3 +118,45 @@ describe('records other businesses wrote', () => {
     expect(schema.parse({ ...base, comment }).comment).toBe(comment);
   });
 });
+
+describe('capturePrompt on a lead', () => {
+  const schema = createLeadSchema({ defaultCommissionPercent: 10 });
+
+  it('reads a record written before the capture dialog as having no prompt', () => {
+    expect(schema.parse(base).capturePrompt).toBeNull();
+  });
+
+  it('keeps a step the capture bot is waiting on', () => {
+    const lead = schema.parse({
+      ...base,
+      capturePrompt: { chatId: 42, step: 'budget' },
+    });
+
+    expect(lead.capturePrompt).toEqual({ chatId: 42, step: 'budget' });
+  });
+
+  it('drops a malformed capture prompt instead of making the whole lead unreadable', () => {
+    const lead = schema.parse({
+      ...base,
+      capturePrompt: { chatId: 42, step: 'colour_preference' },
+    });
+
+    expect(lead.capturePrompt).toBeNull();
+    expect(lead.contact).toBe('@ivan');
+  });
+
+  it('leaves the operator prompt alone', () => {
+    const lead = schema.parse({
+      ...base,
+      pendingPrompt: { chatId: 1, messageId: 2, kind: 'deal_amount' },
+      capturePrompt: { chatId: 42, step: 'phone' },
+    });
+
+    expect(lead.pendingPrompt).toEqual({
+      chatId: 1,
+      messageId: 2,
+      kind: 'deal_amount',
+    });
+    expect(lead.capturePrompt).toEqual({ chatId: 42, step: 'phone' });
+  });
+});

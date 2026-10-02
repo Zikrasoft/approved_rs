@@ -39,6 +39,14 @@ const pendingPromptSchema = z.object({
 });
 export type PendingPrompt = z.infer<typeof pendingPromptSchema>;
 
+export const CAPTURE_STEPS = ['looking_for', 'budget', 'phone'] as const;
+
+const capturePromptSchema = z.object({
+  chatId: z.number().int(),
+  step: z.enum(CAPTURE_STEPS),
+});
+export type CapturePrompt = z.infer<typeof capturePromptSchema>;
+
 const paymentSchema = z.object({
   amount: z.number().positive(),
   at: z.string(),
@@ -91,6 +99,7 @@ const baseStoredLeadSchema = z.object({
   statusChangedAt: z.string(),
   createdAt: z.string(),
   pendingPrompt: pendingPromptSchema.nullable().default(null).catch(null),
+  capturePrompt: capturePromptSchema.nullable().default(null).catch(null),
   archived: z.boolean().default(false),
   pendingCommissionClaim: pendingCommissionClaimSchema.nullable().default(null),
   remindAt: z.string().nullable().default(null),

@@ -1,6 +1,7 @@
-export { createLeadSchema } from './schema.ts';
+export { CAPTURE_STEPS, createLeadSchema } from './schema.ts';
 export { createQuarantine, LEADS_PATH, QUARANTINE_PATH } from './quarantine.ts';
 export type {
+  CapturePrompt,
   LeadInput,
   LeadSubmission,
   LeadSchemaOptions,
