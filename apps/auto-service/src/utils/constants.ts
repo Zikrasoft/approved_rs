@@ -1,5 +1,5 @@
 import { CARLAB, WORKSHOP_ADDRESS } from '@podbor/brands';
-import { telegramLink } from '@podbor/site-kit/contact-links';
+import { telegramBotLink } from '@podbor/site-kit/contact-links';
 
 export const BRAND = CARLAB;
 
@@ -33,9 +33,9 @@ export const TG_MANAGER = import.meta.env.PUBLIC_TG_MANAGER ?? 'carlabrs';
 
 export const TELEGRAM_ENABLED = !TG_MANAGER.endsWith('_placeholder');
 
-export const SOCIAL_SAME_AS = TELEGRAM_ENABLED
-  ? [telegramLink(TG_MANAGER)]
-  : [];
+export const TELEGRAM_BOT_URL = telegramBotLink(BRAND.captureBot);
+
+export const SOCIAL_SAME_AS = [TELEGRAM_BOT_URL];
 
 export const YM_COUNTER_ID = 112647692;
 
