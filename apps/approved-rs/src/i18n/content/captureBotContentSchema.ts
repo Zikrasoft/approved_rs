@@ -10,6 +10,7 @@ export const captureBotContentSchema = z
     phoneButton: z.string(),
     phoneSkip: z.string(),
     thanks: z.string(),
+    received: z.string(),
   })
   .strict();
 

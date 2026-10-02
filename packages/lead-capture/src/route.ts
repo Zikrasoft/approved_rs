@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
   secretMatches,
   telegramIdNote,
+  VISITOR_MERGE_WINDOW_MS,
   type CapturePrompt,
   type LeadStore,
   type StoredLead,
@@ -35,6 +36,8 @@ const ANSWER_NOTE: Record<CaptureStep, string> = {
 const WITH_HANDLE: CaptureStep[] = ['looking_for', 'budget', 'phone'];
 const WITHOUT_HANDLE: CaptureStep[] = ['phone', 'looking_for', 'budget'];
 
+const MESSAGE_NOTE = 'Сообщение';
+
 const CLEAR_KEYBOARD = { reply_markup: { remove_keyboard: true } };
 
 export interface CaptureCopy {
@@ -46,11 +49,15 @@ export interface CaptureCopy {
   phoneButton: string;
   phoneSkip: string;
   thanks: string;
+  received: string;
 }
 
 export type CaptureStore = Pick<
   LeadStore,
-  'insertLead' | 'findByCapturePrompt' | 'updateCapture'
+  | 'insertLead'
+  | 'findByCapturePrompt'
+  | 'findOpenLeadByTelegramId'
+  | 'updateCapture'
 >;
 
 export interface CaptureWebhookRouteOptions<L extends string> {
@@ -149,10 +156,15 @@ export function createCaptureWebhookRoute<L extends string>({
     };
   }
 
+  function localeOf(lead: StoredLead): L {
+    return isLocale(lead.locale) ? lead.locale : primaryLocale;
+  }
+
   async function start(
     chatId: number,
     sender: CaptureSender,
     payload: string | undefined,
+    message?: string,
   ): Promise<void> {
     const { service, locale } = startFields(payload, sender);
     const words = copy(locale);
@@ -165,7 +177,9 @@ export function createCaptureWebhookRoute<L extends string>({
       service,
       services: service ? [service] : [],
       contactChannel: 'telegram',
-      comment: telegramIdNote(sender.id),
+      comment: message
+        ? `${telegramIdNote(sender.id)}\n${MESSAGE_NOTE}: ${message}`
+        : telegramIdNote(sender.id),
       country: null,
       source_url: null,
       visitorId: null,
@@ -184,7 +198,7 @@ export function createCaptureWebhookRoute<L extends string>({
     text: string | undefined,
     phone: string | undefined,
   ): Promise<void> {
-    const words = copy(isLocale(lead.locale) ? lead.locale : primaryLocale);
+    const words = copy(localeOf(lead));
     const keepsHandle = hasHandle(lead.contact);
     const takesPhone = prompt.step === 'phone' && phone !== undefined;
     const next = stepAfter(lead.contact, prompt.step);
@@ -203,6 +217,41 @@ export function createCaptureWebhookRoute<L extends string>({
     await bot.sendMessage(prompt.chatId, reply, extra);
   }
 
+  async function resume(chatId: number, lead: StoredLead): Promise<void> {
+    const words = copy(localeOf(lead));
+    const prompt = lead.capturePrompt;
+    const [reply, extra]: [string, object | undefined] = prompt
+      ? nextMessage(prompt.step, null, lead.contact, words)
+      : [words.thanks, undefined];
+    await bot.sendMessage(chatId, reply, extra);
+  }
+
+  async function startOrResume(
+    chatId: number,
+    sender: CaptureSender,
+    payload: string | undefined,
+  ): Promise<void> {
+    const open = await store.findOpenLeadByTelegramId(sender.id);
+    const age = open ? Date.now() - new Date(open.createdAt).getTime() : 0;
+    if (open && age < VISITOR_MERGE_WINDOW_MS) return resume(chatId, open);
+    return start(chatId, sender, payload);
+  }
+
+  async function aside(
+    chatId: number,
+    sender: CaptureSender,
+    text: string,
+  ): Promise<void> {
+    const open = await store.findOpenLeadByTelegramId(sender.id);
+    if (!open) return start(chatId, sender, undefined, text);
+    const updated = await store.updateCapture(open.id, {
+      note: `${MESSAGE_NOTE}: ${text}`,
+      capturePrompt: open.capturePrompt,
+    });
+    await ensureLeadCard(updated ?? open);
+    await bot.sendMessage(chatId, copy(localeOf(open)).received);
+  }
+
   async function handle(
     chatId: number,
     sender: CaptureSender,
@@ -211,14 +260,21 @@ export function createCaptureWebhookRoute<L extends string>({
   ): Promise<void> {
     if (text !== undefined) {
       const started = START_PATTERN.exec(text);
-      if (started) return start(chatId, sender, started[1]);
+      if (started) return startOrResume(chatId, sender, started[1]);
     }
 
+    // TODO: a dialog abandoned long ago still answers here, so a question
+    // typed weeks later lands as that step's answer; bound it on the Lead's
+    // age once a dedicated telegramId field replaces the comment marker.
     const lead = await store.findByCapturePrompt(chatId);
     const prompt = lead?.capturePrompt;
-    if (!lead || !prompt) return;
-    if (prompt.step !== 'phone' && text === undefined) return;
-    return answer(lead, prompt, text, phone);
+    if (lead && prompt) {
+      if (prompt.step !== 'phone' && text === undefined) return;
+      return answer(lead, prompt, text, phone);
+    }
+
+    if (text === undefined) return;
+    return aside(chatId, sender, text);
   }
 
   return async function POST({

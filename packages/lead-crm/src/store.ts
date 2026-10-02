@@ -22,7 +22,7 @@ import type { StoredLeadSchema } from './schema.ts';
 import { StorageConflictError, type LeadStorage } from './storage/types.ts';
 
 const MAX_RETRIES = 6;
-const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
+export const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
 
 export const MAX_LIST_ROWS = 20;
 
@@ -412,6 +412,23 @@ export function createLeadStore({
         contact: contact ?? l.contact,
         capturePrompt,
       }));
+    },
+
+    async findOpenLeadByTelegramId(
+      telegramId: number,
+    ): Promise<StoredLead | undefined> {
+      const marker = telegramIdNote(telegramId);
+      const leads = await readLeads();
+      return leads
+        .filter(
+          (l) =>
+            !l.archived &&
+            l.status !== 'won' &&
+            l.status !== 'lost' &&
+            (l.comment ?? '').split('\n').includes(marker),
+        )
+        .sort((a, b) => a.id - b.id)
+        .at(-1);
     },
 
     async findByCapturePrompt(chatId: number): Promise<StoredLead | undefined> {

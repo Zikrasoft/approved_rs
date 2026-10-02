@@ -31,6 +31,7 @@ export {
   postponePatch,
   telegramIdNote,
   MAX_LIST_ROWS,
+  VISITOR_MERGE_WINDOW_MS,
 } from './store.ts';
 export type {
   CaptureUpdate,

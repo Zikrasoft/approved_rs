@@ -8,6 +8,7 @@ import {
   createLeadStore,
   GHOST_LEAD_RETENTION_MS,
   telegramIdNote,
+  VISITOR_MERGE_WINDOW_MS,
   type LeadStore,
 } from './store.ts';
 import { createQuarantine } from './quarantine.ts';
@@ -1682,6 +1683,75 @@ describe('capturePrompt', () => {
     expect((await store.findByCapturePrompt(777))?.pendingPrompt?.kind).toBe(
       'edit_name',
     );
+  });
+});
+
+describe('findOpenLeadByTelegramId', () => {
+  const fromTelegram = (id: number, overrides: Partial<LeadInput> = {}) =>
+    store.insertLead({
+      ...baseData,
+      comment: telegramIdNote(id),
+      ...overrides,
+    });
+
+  it('is the visitor merge window that decides a returning visitor', () => {
+    expect(VISITOR_MERGE_WINDOW_MS).toBe(60 * 60 * 1000);
+  });
+
+  it('finds the lead whose comment carries the marker', async () => {
+    const lead = await fromTelegram(42);
+
+    expect((await store.findOpenLeadByTelegramId(42))?.id).toBe(lead.id);
+  });
+
+  it('matches the marker as a whole line, not as a prefix', async () => {
+    await fromTelegram(4);
+
+    expect(await store.findOpenLeadByTelegramId(42)).toBeUndefined();
+  });
+
+  it('survives extra notes appended under the marker', async () => {
+    const lead = await fromTelegram(42);
+    await store.updateCapture(lead.id, {
+      note: 'Ищет: BMW X5',
+      capturePrompt: null,
+    });
+
+    expect((await store.findOpenLeadByTelegramId(42))?.id).toBe(lead.id);
+  });
+
+  it('returns the newest of several leads from the same visitor', async () => {
+    await fromTelegram(42);
+    const second = await fromTelegram(42);
+
+    expect((await store.findOpenLeadByTelegramId(42))?.id).toBe(second.id);
+  });
+
+  it('skips a lead with no comment at all', async () => {
+    await store.insertLead({ ...baseData, comment: null });
+
+    expect(await store.findOpenLeadByTelegramId(42)).toBeUndefined();
+  });
+
+  it('skips an archived lead', async () => {
+    const lead = await fromTelegram(42);
+    await store.archiveLead(lead.id);
+
+    expect(await store.findOpenLeadByTelegramId(42)).toBeUndefined();
+  });
+
+  it.each(['won', 'lost'] as const)('skips a %s lead', async (status) => {
+    const lead = await fromTelegram(42);
+    await store.setStatus(lead.id, status);
+
+    expect(await store.findOpenLeadByTelegramId(42)).toBeUndefined();
+  });
+
+  it('keeps a lead the operator has moved along but not closed', async () => {
+    const lead = await fromTelegram(42);
+    await store.setStatus(lead.id, 'in_progress');
+
+    expect((await store.findOpenLeadByTelegramId(42))?.id).toBe(lead.id);
   });
 });
 

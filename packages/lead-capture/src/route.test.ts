@@ -17,6 +17,7 @@ const COPY = {
   phoneButton: 'SHARE_NUMBER',
   phoneSkip: 'SKIP',
   thanks: 'THANKS',
+  received: 'RECEIVED',
 };
 
 function storedLead(data: LeadInput, id: number): StoredLead {
@@ -69,6 +70,19 @@ function makeStore() {
     }),
     findByCapturePrompt: vi.fn(async (chatId: number) =>
       leads.find((l) => l.capturePrompt?.chatId === chatId),
+    ),
+    findOpenLeadByTelegramId: vi.fn(async (telegramId: number) =>
+      leads
+        .filter(
+          (l) =>
+            !l.archived &&
+            l.status !== 'won' &&
+            l.status !== 'lost' &&
+            (l.comment ?? '')
+              .split('\n')
+              .includes(`Telegram id: ${telegramId}`),
+        )
+        .at(-1),
     ),
     updateCapture: vi.fn(
       async (id: number, { note, contact, capturePrompt }: CaptureUpdate) => {
@@ -250,14 +264,6 @@ describe('updates that are not a visitor pressing Start', () => {
     expect(store.insertLead).not.toHaveBeenCalled();
   });
 
-  it('ignores a message that is not /start and starts no dialog', async () => {
-    const update = startUpdate();
-    update.message.text = 'здравствуйте';
-    await POST(makeCtx(update));
-    expect(store.insertLead).not.toHaveBeenCalled();
-    expect(bot.sendMessage).not.toHaveBeenCalled();
-  });
-
   it('acknowledges even when the store throws', async () => {
     store.insertLead.mockRejectedValueOnce(new Error('blob is down'));
     vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -396,18 +402,6 @@ describe('the two questions', () => {
     await say('до 20 000 евро');
 
     expect(store.leads[0].comment).toContain('Бюджет: до 20 000 евро');
-  });
-
-  it('ignores anything typed after the dialog has closed', async () => {
-    await POST(makeCtx(startUpdate('ru')));
-    await say('BMW X5');
-    await say('до 20 000 евро');
-    await say('SKIP');
-    bot.sendMessage.mockClear();
-
-    await say('а ещё вопрос');
-
-    expect(bot.sendMessage).not.toHaveBeenCalled();
   });
 
   it('answers in the locale the Lead was created in', async () => {
@@ -590,5 +584,120 @@ describe('a contact shared outside the phone step', () => {
 
     expect(store.insertLead).not.toHaveBeenCalled();
     expect(bot.sendMessage).not.toHaveBeenCalled();
+  });
+});
+
+describe('a visitor who presses Start again', () => {
+  const HOUR = 60 * 60 * 1000;
+
+  it('continues the open Lead within the hour instead of capturing again', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    await say('BMW X5');
+    store.insertLead.mockClear();
+
+    await POST(makeCtx(startUpdate('ru')));
+
+    expect(store.insertLead).not.toHaveBeenCalled();
+    expect(store.leads).toHaveLength(1);
+    expect(lastSent()).toEqual([42, 'BUDGET']);
+  });
+
+  it('says nothing new when the dialog it rejoins is already done', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    await say('BMW X5');
+    await say('20 000');
+    await say('SKIP');
+
+    await POST(makeCtx(startUpdate('ru')));
+
+    expect(store.leads).toHaveLength(1);
+    expect(lastSent()).toEqual([42, 'THANKS']);
+  });
+
+  it('starts a fresh enquiry once the hour has passed', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    store.leads[0] = {
+      ...store.leads[0],
+      createdAt: new Date(Date.now() - HOUR - 1000).toISOString(),
+    };
+
+    await POST(makeCtx(startUpdate('vehicle-import_en')));
+
+    expect(store.leads).toHaveLength(2);
+    expect(store.leads[1].service).toBe('vehicle-import');
+    expect(lastSent()).toEqual([42, 'GREETING_en\n\nLOOKING_FOR']);
+  });
+
+  it('skips the greeting and brings the share-contact keyboard back', async () => {
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    bot.sendMessage.mockClear();
+
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+
+    expect(store.leads).toHaveLength(1);
+    expect(lastSent()).toEqual([777, 'PHONE_ASK']);
+    expect(lastExtra()).toHaveProperty('reply_markup.keyboard');
+  });
+});
+
+describe('free text outside the dialog', () => {
+  it('lands on the open Lead and refreshes the card', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    await say('BMW X5');
+    await say('20 000');
+    await say('SKIP');
+    ensureLeadCard.mockClear();
+
+    await say('а можно в рассрочку?');
+
+    expect(store.leads).toHaveLength(1);
+    expect(store.leads[0].comment).toContain('Сообщение: а можно в рассрочку?');
+    expect(ensureLeadCard).toHaveBeenCalledTimes(1);
+    expect(lastSent()).toEqual([42, 'RECEIVED']);
+  });
+
+  it('leaves a dialog that is still running alone', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    await say('BMW X5');
+
+    expect(store.leads[0].comment).not.toContain('Сообщение');
+    expect(store.leads[0].capturePrompt?.step).toBe('budget');
+  });
+
+  it('opens a new enquiry when the visitor has no open Lead', async () => {
+    await say('привет, ищу машину');
+
+    expect(store.insertLead).toHaveBeenCalledTimes(1);
+    expect(store.leads[0].comment).toBe(
+      'Telegram id: 42\nСообщение: привет, ищу машину',
+    );
+    expect(lastSent()).toEqual([42, 'GREETING_ru\n\nLOOKING_FOR']);
+  });
+
+  it('opens a new enquiry when the only Lead is archived', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    await say('BMW X5');
+    await say('20 000');
+    await say('SKIP');
+    store.leads[0] = { ...store.leads[0], archived: true };
+
+    await say('я вернулся');
+
+    expect(store.leads).toHaveLength(2);
+  });
+
+  it('still records the message when the Lead vanishes mid-write', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    await say('BMW X5');
+    await say('20 000');
+    await say('SKIP');
+    store.updateCapture.mockResolvedValueOnce(undefined);
+
+    await say('ещё вопрос');
+
+    expect(ensureLeadCard).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 1 }),
+    );
+    expect(lastSent()).toEqual([42, 'RECEIVED']);
   });
 });

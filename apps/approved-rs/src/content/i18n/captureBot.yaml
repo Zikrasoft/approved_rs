@@ -6,6 +6,7 @@ phoneOffer: Если удобнее по телефону, поделитесь 
 phoneButton: Поделиться номером
 phoneSkip: Пропустить
 thanks: Спасибо! Всё передали менеджеру — он напишет вам прямо здесь.
+received: Приняли, менеджер увидит ваше сообщение.
 translations:
   en:
     greeting: Hello! Thanks for getting in touch — we can see your enquiry and we'll come back to you shortly.
@@ -16,6 +17,7 @@ translations:
     phoneButton: Share my number
     phoneSkip: Skip
     thanks: Thank you! Your manager has it all and will write to you right here.
+    received: Got it, your manager will see your message.
   sr:
     greeting: Zdravo! Hvala što ste nam se javili — vidimo vaš upit i javljamo se uskoro.
     lookingFor: Recite nam ukratko koji automobil vas zanima ili oko čega vam treba pomoć.
@@ -25,6 +27,7 @@ translations:
     phoneButton: Podeli broj
     phoneSkip: Preskoči
     thanks: Hvala! Sve smo prosledili menadžeru — javiće vam se baš ovde.
+    received: Primili smo, menadžer će videti vašu poruku.
   es:
     greeting: ¡Hola! Gracias por escribirnos, ya vemos tu consulta y te respondemos enseguida.
     lookingFor: Cuéntanos en dos palabras qué coche te interesa o en qué necesitas ayuda.
@@ -34,6 +37,7 @@ translations:
     phoneButton: Compartir mi número
     phoneSkip: Omitir
     thanks: ¡Gracias! El gestor ya lo tiene todo y te escribirá por aquí mismo.
+    received: Recibido, el gestor verá tu mensaje.
   de:
     greeting: Hallo! Danke für Ihre Nachricht – Ihre Anfrage liegt uns vor, wir melden uns gleich.
     lookingFor: Sagen Sie uns kurz, welches Auto Sie interessiert oder wobei Sie Hilfe brauchen.
@@ -43,4 +47,5 @@ translations:
     phoneButton: Nummer teilen
     phoneSkip: Überspringen
     thanks: Danke! Ihr Ansprechpartner hat alles und schreibt Ihnen direkt hier.
-translatedFrom: 52ec77195a04b5db
+    received: Angekommen, Ihr Ansprechpartner sieht Ihre Nachricht.
+translatedFrom: 337a658b92590e69
