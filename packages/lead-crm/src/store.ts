@@ -22,7 +22,7 @@ import type { StoredLeadSchema } from './schema.ts';
 import { StorageConflictError, type LeadStorage } from './storage/types.ts';
 
 const MAX_RETRIES = 6;
-const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
+export const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
 
 export const MAX_LIST_ROWS = 20;
 
@@ -34,6 +34,12 @@ export interface OwedRow {
   commissionAmount: number;
   paidAmount: number;
   remaining: number;
+}
+
+export interface CaptureUpdate {
+  note?: string;
+  contact?: string;
+  capturePrompt: CapturePrompt | null;
 }
 
 export interface LeadStoreOptions {
@@ -80,6 +86,12 @@ export function appendNote(
 ): string {
   const next = comment ? `${comment}\n${note}` : note;
   return next.slice(-MAX_STORED_COMMENT_LENGTH);
+}
+
+const TELEGRAM_ID_PREFIX = 'Telegram id:';
+
+export function telegramIdNote(telegramId: number): string {
+  return `${TELEGRAM_ID_PREFIX} ${telegramId}`;
 }
 
 export function canPostpone(lead: StoredLead): boolean {
@@ -388,6 +400,35 @@ export function createLeadStore({
       prompt: CapturePrompt | null,
     ): Promise<StoredLead | undefined> {
       return updateOne(id, (l) => ({ ...l, capturePrompt: prompt }));
+    },
+
+    updateCapture(
+      id: number,
+      { note, contact, capturePrompt }: CaptureUpdate,
+    ): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) => ({
+        ...l,
+        comment: note ? appendNote(l.comment, note) : l.comment,
+        contact: contact ?? l.contact,
+        capturePrompt,
+      }));
+    },
+
+    async findOpenLeadByTelegramId(
+      telegramId: number,
+    ): Promise<StoredLead | undefined> {
+      const marker = telegramIdNote(telegramId);
+      const leads = await readLeads();
+      return leads
+        .filter(
+          (l) =>
+            !l.archived &&
+            l.status !== 'won' &&
+            l.status !== 'lost' &&
+            (l.comment ?? '').split('\n').includes(marker),
+        )
+        .sort((a, b) => a.id - b.id)
+        .at(-1);
     },
 
     async findByCapturePrompt(chatId: number): Promise<StoredLead | undefined> {
