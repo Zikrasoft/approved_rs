@@ -1,4 +1,4 @@
-import { telegramLink, whatsappLink } from '@podbor/site-kit/contact-links';
+import { telegramLink, whatsappLink } from './contactLinks';
 import { getServicesContent } from '@/i18n/content/services';
 import type { Locale } from '@/i18n/config';
 import { TG_MANAGER, WHATSAPP_NUMBER } from './constants';

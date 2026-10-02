@@ -7,10 +7,7 @@ import { messengerHrefs } from '@/utils/messengerHrefs';
 import { getServicesContent } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
 import { TG_MANAGER, VIBER_NUMBER, PHONE_NUMBER } from '@/utils/constants';
-import {
-  DATA_OPEN_LEAD_MODAL,
-  DATA_OPEN_PAGE_LEAD_MODAL,
-} from '@/utils/contactChannel';
+import { callbackTrigger } from '@/utils/contactChannel';
 
 interface Props {
   manager?: string;
@@ -31,10 +28,6 @@ const {
 } = Astro.props;
 
 const messenger = messengerHrefs(locale, manager);
-
-const callbackTrigger = {
-  [openModal ? DATA_OPEN_PAGE_LEAD_MODAL : DATA_OPEN_LEAD_MODAL]: 'phone',
-};
 ---
 
 <div class="flex flex-col gap-3 my-8" data-contact-cta>
@@ -107,7 +100,7 @@ const callbackTrigger = {
               type="button"
               data-contact-channel="callback"
               aria-label={cc.callbackButtonLabel}
-              {...callbackTrigger}
+              {...callbackTrigger(openModal)}
               class="contact-cell"
             >
               <ContactIcon channel="phone" size={16} />

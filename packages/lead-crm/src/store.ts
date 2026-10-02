@@ -503,22 +503,20 @@ export function createLeadStore({
     },
 
     async expireGhostLeads(now: Date): Promise<StoredLead[]> {
+      const statusChangedAt = now.toISOString();
+      const expired = (l: StoredLead) =>
+        l.archived &&
+        l.status === 'lost' &&
+        l.statusChangedAt === statusChangedAt;
       if (!(await readLeads()).some((l) => isGhostLead(l, now))) return [];
-      const expiredIds = new Set<number>();
-      const next = await updateLeads((leads) => {
-        expiredIds.clear();
-        return leads.map((l) => {
-          if (!isGhostLead(l, now)) return l;
-          expiredIds.add(l.id);
-          return {
-            ...l,
-            status: 'lost' as const,
-            archived: true,
-            statusChangedAt: now.toISOString(),
-          };
-        });
-      });
-      return next.filter((l) => expiredIds.has(l.id));
+      const next = await updateLeads((leads) =>
+        leads.map((l) =>
+          isGhostLead(l, now)
+            ? { ...l, status: 'lost' as const, archived: true, statusChangedAt }
+            : l,
+        ),
+      );
+      return next.filter(expired);
     },
 
     async getOwedSummary(): Promise<{ rows: OwedRow[]; total: number }> {
