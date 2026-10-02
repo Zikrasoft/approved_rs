@@ -8,31 +8,25 @@ import { getServicesContent } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
 import { TG_MANAGER, VIBER_NUMBER, PHONE_NUMBER } from '@/utils/constants';
 import { PathBuilder } from '@/utils/paths';
-import { contactPlacement } from '@podbor/site-kit';
+import { contactPlacement, navCurrent } from '@podbor/site-kit';
 import { formatPhone } from '@podbor/site-kit/format-phone';
 import { callbackTrigger, leadModalTrigger } from '@/utils/contactChannel';
 
 interface Props {
   manager?: string;
   label?: string;
-  openModal?: boolean;
   compact?: boolean;
-  direct?: boolean;
 }
 
 const locale = getLocale(Astro.currentLocale);
 const cc = getServicesContent(locale).caseChrome;
-const {
-  manager = TG_MANAGER,
-  label,
-  openModal = false,
-  compact = false,
-  direct = false,
-} = Astro.props;
+const { manager = TG_MANAGER, label, compact = false } = Astro.props;
 const telegramAriaLabel = label ?? cc.ctaButtonLabel;
 
 const messenger = messengerHrefs(locale, manager);
-const placement = direct ? 'thanks' : compact ? 'hero' : 'bar';
+const onThanks =
+  navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page';
+const placement = onThanks ? 'thanks' : compact ? 'hero' : 'bar';
 ---
 
 <div
@@ -47,11 +41,11 @@ const placement = direct ? 'thanks' : compact ? 'hero' : 'bar';
           {manager}
           class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center"
         />
-        {label && !direct && (
+        {label && (
           <Button
             variant="secondary"
             href={PathBuilder.contacts(locale)}
-            {...leadModalTrigger(openModal)}
+            {...leadModalTrigger()}
             class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center bg-surface lg:hidden"
           >
             {label}
@@ -70,7 +64,7 @@ const placement = direct ? 'thanks' : compact ? 'hero' : 'bar';
           <Button
             variant="secondary"
             data-contact-channel="callback"
-            {...callbackTrigger(openModal)}
+            {...callbackTrigger()}
             class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full sm:w-auto justify-center pointer-coarse:hidden!"
           >
             <ContactIcon channel="phone" size={15} />
@@ -115,7 +109,7 @@ const placement = direct ? 'thanks' : compact ? 'hero' : 'bar';
             <span>Viber</span>
           </a>
 
-          {direct ? (
+          {onThanks ? (
             <>
               <a
                 data-contact-channel="phone"
@@ -136,7 +130,7 @@ const placement = direct ? 'thanks' : compact ? 'hero' : 'bar';
               type="button"
               data-contact-channel="callback"
               aria-label={cc.callbackButtonLabel}
-              {...callbackTrigger(openModal)}
+              {...callbackTrigger()}
               class="contact-cell"
             >
               <ContactIcon channel="phone" size={16} />

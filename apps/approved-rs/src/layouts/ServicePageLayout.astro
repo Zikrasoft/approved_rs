@@ -26,7 +26,6 @@ import { toCaseItem } from '@/utils/cases';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
-import { DATA_OPEN_PAGE_LEAD_MODAL } from '@/utils/contactChannel';
 
 interface Props {
   meta: MetaProps;
@@ -173,7 +172,7 @@ const heroStats = [
             {description}
           </p>
           <div class="fade-up fade-up-4">
-            <ContactCTA label={ctaLabel} openModal compact />
+            <ContactCTA label={ctaLabel} compact />
           </div>
           <div
             class="grid grid-cols-3 gap-3 sm:gap-6 mt-8 pt-8 border-t fade-up fade-up-5 border-default"
@@ -202,7 +201,7 @@ const heroStats = [
   <slot name="extra" />
 
   <LeadFormModal
-    triggerAttr={DATA_OPEN_PAGE_LEAD_MODAL}
+    page
     service={formService}
     country={leadCountry}
     city={city}
@@ -250,7 +249,6 @@ const heroStats = [
         accentWord={closing.accentWord}
         text={closing.text}
         ctaLabel={ctaLabel ?? h.ctaTelegramLabel}
-        openModal
         stats={[
           h.ctaStatClients,
           { value: countryCount, label: h.ctaStatCountries.label },

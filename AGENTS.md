@@ -243,11 +243,7 @@ Both new apps follow the same shape, and a third should too:
   CRO audit priced the detour (issue #56,
   `docs/adr/0015-lead-form-asks-only-for-a-contact.md`); do not re-add it. The
   form keeps its own doors there: the header CTA, the callback control, the
-  partner block and the inline form in the same fold. `ContactCTA direct` and
-  `BaseLayout directContacts` no longer mean "no modal" — messengers are
-  unconditionally direct now — they mean the `/thanks/` carve-out: a phone link
-  instead of the callback control, because someone who has just sent a brief is
-  not served the form again.
+  partner block and the inline form in the same fold.
 - **A `tel:` control only exists where a dialer does**, on all three sites. A
   desktop machine has no dialer, so «Позвонить» there is a click that does
   nothing — the same defect as a messenger tile that opens a form. The choice is
@@ -268,21 +264,29 @@ Both new apps follow the same shape, and a third should too:
   on a fine pointer and nothing replaces it; where the phone link is the only
   phone control, as in the compact hero without a `label`, a callback button
   takes its place carrying `callbackButtonLabel`. `/thanks/` is the one
-  exception: `direct` on the `ContactCTA` contacts block renders the number as
-  plain selectable text through `@podbor/site-kit/format-phone` — its own
+  exception: the `ContactCTA` contacts block there renders the number as plain
+  selectable text through `@podbor/site-kit/format-phone` — its own
   subpath, because the root barrel would put `libphonenumber-js` one client
   import away from the browser. That block is the only place a number is shown
   as text; the floating widget on the same page takes the absent shape like
   everywhere else. Details' header has no phone control at all, so there is
   nothing to do there, and both brand footers simply drop theirs on a fine
   pointer, the way approved.rs's footer has never carried one.
-- **`direct`, `directContacts` and `openModal` are live props**, despite issue
-  #92 specifying all three as dead flexibility to delete. `direct` /
-  `directContacts` is what marks the `/thanks/` carve-out above, and `openModal`
-  is what routes a service page's CTAs to that page's own `LeadFormModal`,
-  carrying its service, instead of the global one in the header. Deleting them
-  on the strength of that spec line drops the carve-out and silently strips the
-  service off every service-page lead.
+- **No boolean rides down to a contact component to say which page it is on.**
+  `ContactCTA direct`, `BaseLayout directContacts` and the `openModal` threaded
+  through `ContactCTA` and `ClosingBand` are all gone (issue #92). What replaced
+  them: the `/thanks/` carve-out is read from the route —
+  `navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page'` in
+  `ContactCTA` and `FloatingContactWidget`, which is also where their `thanks`
+  placement comes from, so the two can never disagree. And there is now one
+  trigger attribute, `data-open-lead-modal`: a page that needs its own
+  `LeadFormModal` — only `ServicePageLayout`, which carries the page's service,
+  country, city and comment copy — renders it with `page`, and the modal script
+  strips `trigger` off every unmarked `approved-modal` when a `page` one is
+  present, so the page's modal is the only one that answers and the header's
+  stands down. `DATA_OPEN_PAGE_LEAD_MODAL` is gone with it. Do not reintroduce a
+  prop for either job: a call site that has to be told where it is, is a call
+  site that will be told wrong.
 - **Only approved.rs prefills the first message**, `messengerPrefill` in its
   `services.yaml`, so the chat does not open empty. The mechanism is shared and
   the brand sites opt in by passing a message: `telegramLink`/`whatsappLink` in

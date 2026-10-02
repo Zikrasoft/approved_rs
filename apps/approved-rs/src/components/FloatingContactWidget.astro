@@ -7,16 +7,14 @@ import { getServicesContent } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
 import { VIBER_NUMBER, PHONE_NUMBER } from '@/utils/constants';
 import { callbackTrigger } from '@/utils/contactChannel';
-import { contactPlacement } from '@podbor/site-kit';
+import { contactPlacement, navCurrent } from '@podbor/site-kit';
+import { PathBuilder } from '@/utils/paths';
 
-interface Props {
-  direct?: boolean;
-}
-
-const { direct = false } = Astro.props;
 const locale = getLocale(Astro.currentLocale);
 const cc = getServicesContent(locale).caseChrome;
 const messenger = messengerHrefs(locale);
+const onThanks =
+  navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page';
 ---
 
 <cta-reveal
@@ -62,7 +60,7 @@ const messenger = messengerHrefs(locale);
       <span>Viber</span>
     </a>
     {
-      !direct && (
+      !onThanks && (
         <button
           type="button"
           role="menuitem"
