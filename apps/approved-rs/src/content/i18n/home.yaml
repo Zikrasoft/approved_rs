@@ -48,8 +48,8 @@ testimonials:
 ctaEyebrow: Готовы начать?
 ctaHeading:
   line1: Расскажите нам
-  line2: о своём
-  accentWord: автомобиле
+  line2: о машине,
+  accentWord: которую ищете
 ctaSubtext: Отвечаем в течение 2 часов. Консультация бесплатна.
 ctaTelegramLabel: Написать в Telegram
 ctaStatClients:
@@ -59,7 +59,7 @@ ctaStatCountries:
   label: стран
 ctaStatYears:
   value: 5 лет
-  label: опыт
+  label: на рынке
 ctaStatResponse:
   value: 2 ч
   label: ответ
