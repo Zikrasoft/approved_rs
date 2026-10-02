@@ -11,6 +11,7 @@ import {
 import { channelLabel } from './channelLabels.ts';
 import { postponableStatus } from './schema.ts';
 import type {
+  CapturePrompt,
   LeadInput,
   LeadStatus,
   PendingCommissionClaim,
@@ -380,6 +381,18 @@ export function createLeadStore({
           l.pendingPrompt?.messageId === messageId,
         (l) => ({ ...l, ...apply(l), pendingPrompt: null }),
       );
+    },
+
+    setCapturePrompt(
+      id: number,
+      prompt: CapturePrompt | null,
+    ): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) => ({ ...l, capturePrompt: prompt }));
+    },
+
+    async findByCapturePrompt(chatId: number): Promise<StoredLead | undefined> {
+      const leads = await readLeads();
+      return leads.find((l) => l.capturePrompt?.chatId === chatId);
     },
 
     archiveLead(id: number): Promise<StoredLead | undefined> {

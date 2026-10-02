@@ -1622,3 +1622,57 @@ describe('quarantine — nothing leaves the blob on its own', () => {
     expect(quarantine).not.toHaveBeenCalled();
   });
 });
+
+describe('capturePrompt', () => {
+  it('sets the step a visitor is on and finds the lead by their chat id', async () => {
+    const lead = await store.insertLead(baseData);
+
+    await store.setCapturePrompt(lead.id, {
+      chatId: 777,
+      step: 'looking_for',
+    });
+
+    const found = await store.findByCapturePrompt(777);
+    expect(found?.id).toBe(lead.id);
+    expect(found?.capturePrompt).toEqual({ chatId: 777, step: 'looking_for' });
+  });
+
+  it('clears the prompt when set to null', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.setCapturePrompt(lead.id, { chatId: 777, step: 'budget' });
+
+    const cleared = await store.setCapturePrompt(lead.id, null);
+
+    expect(cleared?.capturePrompt).toBeNull();
+    expect(await store.findByCapturePrompt(777)).toBeUndefined();
+  });
+
+  it('returns undefined for a chat id no lead is waiting on', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.setCapturePrompt(lead.id, { chatId: 777, step: 'phone' });
+
+    expect(await store.findByCapturePrompt(778)).toBeUndefined();
+  });
+
+  it('returns undefined for an id that does not exist', async () => {
+    expect(
+      await store.setCapturePrompt(999, { chatId: 777, step: 'phone' }),
+    ).toBeUndefined();
+  });
+
+  it('does not disturb the operator prompt on the same lead', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.setPendingPrompt(lead.id, {
+      chatId: 111,
+      messageId: 555,
+      kind: 'edit_name',
+    });
+
+    await store.setCapturePrompt(lead.id, { chatId: 777, step: 'budget' });
+
+    expect(await store.findByPendingPrompt(111, 555)).toBeDefined();
+    expect((await store.findByCapturePrompt(777))?.pendingPrompt?.kind).toBe(
+      'edit_name',
+    );
+  });
+});
