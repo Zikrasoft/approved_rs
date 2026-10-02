@@ -66,10 +66,11 @@ bare node where `import.meta.env` does not exist.
 The brands were chosen to satisfy one rule: no shared brand root between the
 three sites, and nothing carrying Approved's trust/verification semantics.
 
-**One bot, one chat, one lead store, three brands.** Telegram allows a single
-webhook URL per bot, so `api/telegram-webhook.ts` and `api/reminders.ts` are
-deployed only by `apps/approved-rs`; the other two apps ship just `/api/leads`
-and `/api/contact-click`. All three write to the same `data/leads.json` on the
+**One CRM bot, one chat, one lead store, three brands — plus a capture bot
+each.** Telegram allows a single webhook URL per bot, so the CRM bot's
+`api/telegram-webhook.ts` and `api/reminders.ts` are deployed only by
+`apps/approved-rs`; the other two apps ship `/api/leads`, `/api/contact-click`
+and their own capture bot's `/api/telegram-capture`. All three write to the same `data/leads.json` on the
 same Vercel Blob store and are separated by the lead's `brand` field, which the
 app's `createNotifyLead({ brand })` stamps on — a visitor can never set it.
 Connect the same Blob store to all three Vercel projects.
