@@ -1,14 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { secretMatches } from './verifySecret';
+import { secretMatches } from './verifySecret.ts';
 
 describe('secretMatches', () => {
   it('matches when received equals expected', () => {
     expect(secretMatches('correct-secret', 'correct-secret')).toBe(true);
   });
 
-  // Negative cases — this guards the Telegram webhook and the cron
-  // reminders route, so every way a caller could accidentally let a wrong
-  // or absent value through needs to fail closed.
   it('rejects a wrong value of the same length', () => {
     expect(secretMatches('wrong-secretx', 'correct-secret')).toBe(false);
   });

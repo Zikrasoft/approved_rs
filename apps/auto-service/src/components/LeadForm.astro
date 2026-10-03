@@ -6,7 +6,6 @@ import PhoneInput from './PhoneInput.astro';
 import { PathBuilder } from '@/utils/paths';
 import { SHOP_SERVICE, type ServiceSlug } from '@/utils/services';
 import { HONEYPOT_FIELD, SERVICE_FIELD } from '@podbor/lead-crm';
-import { TELEGRAM_ENABLED } from '@/utils/constants';
 
 interface Props {
   service?: ServiceSlug | typeof SHOP_SERVICE;
@@ -26,19 +25,17 @@ const site = getSiteContent(locale);
 
 const uid = crypto.randomUUID().slice(0, 8);
 
-const channels = (
-  [
-    {
-      value: 'phone',
-      icon: 'phone',
-      label: site.form.channelPhone,
-      panel: 'ph',
-    },
-    { value: 'whatsapp', icon: 'whatsapp', label: 'WhatsApp', panel: 'ph' },
-    { value: 'viber', icon: 'viber', label: 'Viber', panel: 'ph' },
-    { value: 'telegram', icon: 'telegram', label: 'Telegram', panel: 'tg' },
-  ] as const
-).filter((channel) => TELEGRAM_ENABLED || channel.value !== 'telegram');
+const channels = [
+  {
+    value: 'phone',
+    icon: 'phone',
+    label: site.form.channelPhone,
+    panel: 'ph',
+  },
+  { value: 'whatsapp', icon: 'whatsapp', label: 'WhatsApp', panel: 'ph' },
+  { value: 'viber', icon: 'viber', label: 'Viber', panel: 'ph' },
+  { value: 'telegram', icon: 'telegram', label: 'Telegram', panel: 'tg' },
+] as const;
 
 const chip =
   'flex min-h-11 items-center justify-center gap-2 rounded-control border border-line-field bg-card px-3 text-center text-[0.8125rem] font-medium leading-tight text-ink-2 transition-colors duration-150 peer-hover:border-ink peer-checked:border-signal peer-checked:bg-signal peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal';

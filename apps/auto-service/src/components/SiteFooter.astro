@@ -16,7 +16,7 @@ const site = getSiteContent(locale);
 const services = getServicesContent(locale);
 const year = new Date().getFullYear();
 
-const channels = contactChannels(site);
+const channels = contactChannels(site, locale);
 ---
 
 <footer class="mt-20 border-t border-line bg-card">

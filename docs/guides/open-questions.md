@@ -11,11 +11,10 @@ tags sit on `8b46200`.
 
 ### Details' contacts
 
-`PUBLIC_TG_MANAGER` and `PUBLIC_INSTAGRAM` for Details are placeholders under a
-`TODO:` in `apps/detailing/src/utils/constants.ts`. They end up in the `sameAs`
-markup and in the Telegram button, and `PUBLIC_INSTAGRAM` defaults to
-`details.studio` — so the site quietly shows somebody else's account. CarLab
-already has a channel: `t.me/carlabrs`.
+`PUBLIC_INSTAGRAM` for Details is a placeholder under a `TODO:` in
+`apps/detailing/src/utils/constants.ts`. It ends up in the `sameAs` markup and
+defaults to `details.studio` — so the site quietly shows somebody else's
+account.
 
 ### Postcode
 

@@ -23,6 +23,10 @@ export const SERVICE_SLUGS = [
 ] as const;
 export type ServiceSlug = (typeof SERVICE_SLUGS)[number];
 
+export function isServiceSlug(value: string): value is ServiceSlug {
+  return (SERVICE_SLUGS as readonly string[]).includes(value);
+}
+
 // Named handles for each slug, used below in getNavItems (nav[SLUG.SOURCING],
 // PathBuilder.service(locale, SLUG.SOURCING, cc)) instead of the magic string
 // 'vehicle-sourcing'. `satisfies` ties every value back to ServiceSlug

@@ -11,6 +11,7 @@ import {
 import { channelLabel } from './channelLabels.ts';
 import { postponableStatus } from './schema.ts';
 import type {
+  CapturePrompt,
   LeadInput,
   LeadStatus,
   PendingCommissionClaim,
@@ -21,7 +22,7 @@ import type { StoredLeadSchema } from './schema.ts';
 import { StorageConflictError, type LeadStorage } from './storage/types.ts';
 
 const MAX_RETRIES = 6;
-const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
+export const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
 
 export const MAX_LIST_ROWS = 20;
 
@@ -33,6 +34,12 @@ export interface OwedRow {
   commissionAmount: number;
   paidAmount: number;
   remaining: number;
+}
+
+export interface CaptureUpdate {
+  note?: string;
+  contact?: string;
+  capturePrompt: CapturePrompt | null;
 }
 
 export interface LeadStoreOptions {
@@ -58,6 +65,10 @@ export function isPlaceholderContact(contact: string): boolean {
   return contact === '' || contact === '—';
 }
 
+function isPhoneContact(contact: string): boolean {
+  return contact.startsWith('+');
+}
+
 export const GHOST_LEAD_RETENTION_MS = 24 * 60 * 60 * 1000;
 
 function isGhostLead(lead: StoredLead, now: Date): boolean {
@@ -69,6 +80,24 @@ function isGhostLead(lead: StoredLead, now: Date): boolean {
     now.getTime() - new Date(lead.createdAt).getTime() >=
       GHOST_LEAD_RETENTION_MS
   );
+}
+
+function newestOpen(
+  leads: StoredLead[],
+  brand: string,
+  matches: (lead: StoredLead) => boolean,
+): StoredLead | undefined {
+  return leads
+    .filter(
+      (l) =>
+        l.brand === brand &&
+        !l.archived &&
+        l.status !== 'won' &&
+        l.status !== 'lost' &&
+        matches(l),
+    )
+    .sort((a, b) => a.id - b.id)
+    .at(-1);
 }
 
 const MAX_STORED_COMMENT_LENGTH = 4000;
@@ -379,6 +408,55 @@ export function createLeadStore({
           l.pendingPrompt?.chatId === chatId &&
           l.pendingPrompt?.messageId === messageId,
         (l) => ({ ...l, ...apply(l), pendingPrompt: null }),
+      );
+    },
+
+    updateCapture(
+      id: number,
+      { note, contact, capturePrompt }: CaptureUpdate,
+    ): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) => ({
+        ...l,
+        comment: note ? appendNote(l.comment, note) : l.comment,
+        contact: contact ?? l.contact,
+        capturePrompt,
+      }));
+    },
+
+    async findOpenLeadByTelegramId(
+      telegramId: number,
+      brand: string,
+    ): Promise<StoredLead | undefined> {
+      return newestOpen(
+        await readLeads(),
+        brand,
+        (l) => l.telegramId === telegramId,
+      );
+    },
+
+    async findPhoneByTelegramId(
+      telegramId: number,
+      brand: string,
+    ): Promise<string | undefined> {
+      return (await readLeads())
+        .filter(
+          (l) =>
+            l.brand === brand &&
+            l.telegramId === telegramId &&
+            isPhoneContact(l.contact),
+        )
+        .sort((a, b) => a.id - b.id)
+        .at(-1)?.contact;
+    },
+
+    async findByCapturePrompt(
+      chatId: number,
+      brand: string,
+    ): Promise<StoredLead | undefined> {
+      return newestOpen(
+        await readLeads(),
+        brand,
+        (l) => l.capturePrompt?.chatId === chatId,
       );
     },
 

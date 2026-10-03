@@ -10,8 +10,12 @@ const browserVisitorId = (): string =>
 const CHANNEL_ATTRIBUTE = 'data-contact-channel';
 const CONTACT_CLICK_ENDPOINT = '/api/contact-click';
 
+export const storesContactClickLead = (channel: string): boolean =>
+  channel !== 'telegram';
+
 export function defineContactClickTracking(
   isTracked: (channel: string | undefined) => channel is string,
+  storesLead: (channel: string) => boolean,
 ): void {
   document
     .querySelectorAll<HTMLElement>(`[${CHANNEL_ATTRIBUTE}]`)
@@ -23,6 +27,7 @@ export function defineContactClickTracking(
           `[${CONTACT_PLACEMENT_ATTRIBUTE}]`,
         )?.dataset.contactPlacement;
         reachGoal(GOALS.contactClick, { channel, placement });
+        if (!storesLead(channel)) return;
         const body = new FormData();
         body.set('channel', channel);
         body.set('source_url', location.href);

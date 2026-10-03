@@ -6,19 +6,16 @@ import { localeFrom } from '@/i18n/currentLocale';
 import { getShopContent } from '@/i18n/content/shop';
 import { getSiteContent } from '@/i18n/content/site';
 import { PathBuilder } from '@/utils/paths';
-import { TELEGRAM_ENABLED } from '@/utils/constants';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
 const shop = getShopContent(locale);
-const channels = (
-  [
-    { value: 'phone', label: site.form.channelPhone },
-    { value: 'whatsapp', label: 'WhatsApp' },
-    { value: 'viber', label: 'Viber' },
-    { value: 'telegram', label: 'Telegram' },
-  ] as const
-).filter((channel) => TELEGRAM_ENABLED || channel.value !== 'telegram');
+const channels = [
+  { value: 'phone', label: site.form.channelPhone },
+  { value: 'whatsapp', label: 'WhatsApp' },
+  { value: 'viber', label: 'Viber' },
+  { value: 'telegram', label: 'Telegram' },
+] as const;
 const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
 const chip =
   'flex min-h-11 items-center justify-center rounded-control border border-line-field bg-card px-3 text-center text-[0.8125rem] font-medium text-ink-2 transition-colors duration-150 peer-checked:border-signal peer-checked:bg-signal peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal';

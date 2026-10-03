@@ -91,6 +91,9 @@ importers:
       '@podbor/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@podbor/lead-capture':
+        specifier: workspace:*
+        version: link:../../packages/lead-capture
       '@podbor/lead-crm':
         specifier: workspace:*
         version: link:../../packages/lead-crm
@@ -182,6 +185,9 @@ importers:
       '@podbor/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@podbor/lead-capture':
+        specifier: workspace:*
+        version: link:../../packages/lead-capture
       '@podbor/lead-crm':
         specifier: workspace:*
         version: link:../../packages/lead-crm
@@ -276,6 +282,9 @@ importers:
       '@podbor/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@podbor/lead-capture':
+        specifier: workspace:*
+        version: link:../../packages/lead-capture
       '@podbor/lead-crm':
         specifier: workspace:*
         version: link:../../packages/lead-crm
@@ -444,6 +453,25 @@ importers:
       '@types/node':
         specifier: 24.13.2
         version: 24.13.2
+      '@vitest/coverage-v8':
+        specifier: 3.2.6
+        version: 3.2.6(supports-color@8.1.1)(vitest@3.2.6)
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 3.2.6
+        version: 3.2.6(@edge-runtime/vm@3.2.0)(@types/debug@4.1.13)(@types/node@24.13.2)(@vitest/ui@3.2.6)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.32.0)(supports-color@8.1.1)(tsx@4.21.0)(yaml@2.9.0)
+
+  packages/lead-capture:
+    dependencies:
+      '@podbor/lead-crm':
+        specifier: workspace:*
+        version: link:../lead-crm
+      zod:
+        specifier: 4.5.4
+        version: 4.5.4
+    devDependencies:
       '@vitest/coverage-v8':
         specifier: 3.2.6
         version: 3.2.6(supports-color@8.1.1)(vitest@3.2.6)
