@@ -5,7 +5,7 @@ phoneAsk: Чтобы мы могли с вами связаться, подел�
 phoneOffer: Если удобнее по телефону, поделитесь номером, и мы позвоним. Если нет, просто пропустите.
 phoneButton: Поделиться номером
 phoneSkip: Пропустить
-thanks: Спасибо! Всё передали менеджеру — он напишет вам прямо здесь.
+thanks: Спасибо! Передали менеджеру — он скоро с вами свяжется.
 received: Приняли, менеджер увидит ваше сообщение.
 translations:
   en:
@@ -16,7 +16,7 @@ translations:
     phoneOffer: If a call suits you better, share your number and we'll ring you. If not, just skip it.
     phoneButton: Share my number
     phoneSkip: Skip
-    thanks: Thank you! Your manager has it all and will write to you right here.
+    thanks: Thank you! Your manager has everything and will get in touch shortly.
     received: Got it, your manager will see your message.
   sr:
     greeting: Zdravo! Hvala što ste nam se javili — vidimo vaš upit i javljamo se uskoro.
@@ -26,7 +26,7 @@ translations:
     phoneOffer: Ako vam više odgovara telefon, podelite broj pa ćemo vas pozvati. Ako ne, slobodno preskočite.
     phoneButton: Podeli broj
     phoneSkip: Preskoči
-    thanks: Hvala! Sve smo prosledili menadžeru — javiće vam se baš ovde.
+    thanks: Hvala! Sve smo prosledili menadžeru — uskoro će vas kontaktirati.
     received: Primili smo, menadžer će videti vašu poruku.
   es:
     greeting: ¡Hola! Gracias por escribirnos, ya vemos tu consulta y te respondemos enseguida.
@@ -36,7 +36,7 @@ translations:
     phoneOffer: Si prefieres que te llamemos, comparte tu número. Si no, sáltatelo sin problema.
     phoneButton: Compartir mi número
     phoneSkip: Omitir
-    thanks: ¡Gracias! El gestor ya lo tiene todo y te escribirá por aquí mismo.
+    thanks: ¡Gracias! El gestor ya lo tiene todo y se pondrá en contacto contigo en breve.
     received: Recibido, el gestor verá tu mensaje.
   de:
     greeting: Hallo! Danke für Ihre Nachricht – Ihre Anfrage liegt uns vor, wir melden uns gleich.
@@ -46,6 +46,6 @@ translations:
     phoneOffer: Wenn Ihnen ein Anruf lieber ist, teilen Sie Ihre Nummer, dann rufen wir an. Wenn nicht, einfach überspringen.
     phoneButton: Nummer teilen
     phoneSkip: Überspringen
-    thanks: Danke! Ihr Ansprechpartner hat alles und schreibt Ihnen direkt hier.
+    thanks: Danke! Ihr Ansprechpartner hat alles und meldet sich in Kürze bei Ihnen.
     received: Angekommen, Ihr Ansprechpartner sieht Ihre Nachricht.
-translatedFrom: 337a658b92590e69
+translatedFrom: e4e962f84ccafd96
