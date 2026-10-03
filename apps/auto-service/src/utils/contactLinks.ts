@@ -1,5 +1,6 @@
 import type { SiteContent } from '@/i18n/content/site';
 import type { Locale } from '@/i18n/config';
+import type { ServiceSlug } from './services';
 import {
   captureBotLink,
   phoneLink,
@@ -19,13 +20,15 @@ export const CONTACT_LINKS = {
   viber: viberLink(VIBER_NUMBER),
 } as const;
 
-export const telegramBotHref = (locale: Locale, service?: string): string =>
-  captureBotLink(BRAND.captureBot, locale, service);
+export const telegramBotHref = (
+  locale: Locale,
+  service?: ServiceSlug,
+): string => captureBotLink(BRAND.captureBot, locale, service);
 
 export const contactChannels = (
   site: SiteContent,
   locale: Locale,
-  service?: string,
+  service?: ServiceSlug,
 ) =>
   [
     {

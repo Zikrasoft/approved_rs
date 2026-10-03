@@ -169,6 +169,7 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
         defineContactClickTracking,
         defineFunnelTracking,
         defineLanguageSuggestion,
+        storesContactClickLead,
       } from '@podbor/site-kit/browser';
       import { applyPrimaryContactChannel } from '@podbor/site-kit/contact-preference';
 
@@ -176,7 +177,7 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
       applyPrimaryContactChannel();
       defineContactClickTracking(
         isTrackedContactChannel,
-        (channel) => channel !== 'telegram',
+        storesContactClickLead,
       );
       defineFunnelTracking();
     </script>
