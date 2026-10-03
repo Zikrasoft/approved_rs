@@ -169,12 +169,16 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
         defineContactClickTracking,
         defineFunnelTracking,
         defineLanguageSuggestion,
+        storesContactClickLead,
       } from '@podbor/site-kit/browser';
       import { applyPrimaryContactChannel } from '@podbor/site-kit/contact-preference';
 
       defineLanguageSuggestion();
       applyPrimaryContactChannel();
-      defineContactClickTracking(isTrackedContactChannel);
+      defineContactClickTracking(
+        isTrackedContactChannel,
+        storesContactClickLead,
+      );
       defineFunnelTracking();
     </script>
   </body>

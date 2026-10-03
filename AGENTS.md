@@ -15,6 +15,7 @@ apps/auto-service/    CarLab, the car service site + parts shop — carlab.rs
 apps/medusa/          CarLab shop backend — Medusa 2.19, CommonJS, api.carlab.rs
 infra/medusa/         CarLab shop production: image, compose (postgres, redis, medusa, caddy), host scripts — one Hetzner VPS
 packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click routes
+packages/lead-capture/ the capture bots' webhook route: the /start dialog that turns a Telegram tap into a Lead
 packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
 packages/site-kit/    brand-agnostic mechanics, never anything visual
 packages/brands/      the three brands: domains, names, locale mapping, service labels, the shared address
@@ -66,10 +67,11 @@ bare node where `import.meta.env` does not exist.
 The brands were chosen to satisfy one rule: no shared brand root between the
 three sites, and nothing carrying Approved's trust/verification semantics.
 
-**One bot, one chat, one lead store, three brands.** Telegram allows a single
-webhook URL per bot, so `api/telegram-webhook.ts` and `api/reminders.ts` are
-deployed only by `apps/approved-rs`; the other two apps ship just `/api/leads`
-and `/api/contact-click`. All three write to the same `data/leads.json` on the
+**One CRM bot, one chat, one lead store, three brands — plus a capture bot
+each.** Telegram allows a single webhook URL per bot, so the CRM bot's
+`api/telegram-webhook.ts` and `api/reminders.ts` are deployed only by
+`apps/approved-rs`; the other two apps ship `/api/leads`, `/api/contact-click`
+and their own capture bot's `/api/telegram-capture`. All three write to the same `data/leads.json` on the
 same Vercel Blob store and are separated by the lead's `brand` field, which the
 app's `createNotifyLead({ brand })` stamps on — a visitor can never set it.
 Connect the same Blob store to all three Vercel projects.
@@ -312,11 +314,25 @@ Both new apps follow the same shape, and a third should too:
   site that will be told wrong.
 - **Only approved.rs prefills the first message**, `messengerPrefill` in its
   `services.yaml`, so the chat does not open empty. The mechanism is shared and
-  the brand sites opt in by passing a message: `telegramLink`/`whatsappLink` in
-  `@podbor/site-kit/contact-links` take an optional one and encode it as `text`
-  (documented for public username links, unlike `start`, which is bot-only).
-  Viber's chat link has no such parameter, so Viber tiles stay bare — asymmetry
-  by platform, not by choice.
+  the brand sites opt in by passing a message: `whatsappLink` in
+  `@podbor/site-kit/contact-links` takes an optional one and encodes it as
+  `text`. Viber's chat link has no such parameter, so Viber tiles stay bare —
+  asymmetry by platform, not by choice.
+- **A Telegram tile carries a `?start=` payload, not a prefill.** It opens the
+  brand's capture bot through `captureBotLink` in
+  `@podbor/site-kit/contact-links`, which every app binds once over its own
+  `BRAND.captureBot` as `telegramBotHref(locale, service?)` in
+  `src/utils/contactLinks.ts` — a tile calls that, never the bot name. `?start=`
+  and `?text=` are different parameters, so `messengerPrefill` never reaches
+  Telegram. The payload is `<service>_<locale>`, or the locale alone where the
+  page has no service (the homepage, the footer, the floating widget, the
+  contacts page); a component that sits on a service page takes the slug as a
+  prop rather than reading it off the path. The tile keeps
+  `data-contact-channel="telegram"` so the Metrika goal still fires, but a
+  Telegram tap stores no Lead — the bot writes a better one a moment later, so
+  `defineContactClickTracking`'s second predicate is `storesContactClickLead`
+  from `@podbor/site-kit/browser`, one named export rather than the same lambda
+  in three layouts.
 - **The lead modal takes its service from the trigger.** `data-lead-service` on
   a button sets the form's `service` when the modal opens; `data-default-service`
   on the form is what it resets to when the trigger names none. Both constants

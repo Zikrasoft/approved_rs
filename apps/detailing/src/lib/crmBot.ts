@@ -1,20 +1,16 @@
 import {
+  createEnsureLeadCard,
   createFormatter,
   createNotifier,
   createNotifyLead,
   createTelegramClient,
   parseIds,
+  requireEnv,
 } from '@podbor/lead-crm';
 import { serviceLabel as brandServiceLabel } from '@podbor/brands';
 import { getServicesContent } from '@/i18n/content/services';
 import { isServiceSlug } from '@/utils/services';
 import { BRAND, leadStore } from './crm';
-
-function requireEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) throw new Error(`[telegram] ${name} is not set`);
-  return value;
-}
 
 const ruServices = getServicesContent('ru');
 
@@ -35,6 +31,11 @@ export const notifier = createNotifier({
   groupId: requireEnv('TELEGRAM_GROUP_ID'),
   ownerIds: OWNER_IDS,
   adminIds: ADMIN_IDS,
+});
+
+export const ensureLeadCard = createEnsureLeadCard({
+  store: leadStore,
+  notifier,
 });
 
 export const notifyLead = createNotifyLead({

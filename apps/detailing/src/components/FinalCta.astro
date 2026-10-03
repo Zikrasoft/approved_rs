@@ -27,7 +27,7 @@ const { eyebrow, heading, body, service } = Astro.props;
         <span class="eyebrow w-fit">{eyebrow}</span>
         <h2 class="text-giant">{heading}</h2>
         <p class="max-w-md text-base leading-relaxed text-mute">{body}</p>
-        <ContactChannels class="mt-2" />
+        <ContactChannels class="mt-2" service={service} />
       </div>
       <LeadForm service={service} />
     </div>

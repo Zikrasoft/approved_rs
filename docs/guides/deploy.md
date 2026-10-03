@@ -12,21 +12,27 @@
 
 ## Three sites, one repository
 
-| App                 | Domain        | Brand                          | What it deploys                                                                                    |
-| ------------------- | ------------- | ------------------------------ | -------------------------------------------------------------------------------------------------- |
-| `apps/approved-rs`  | `approved.rs` | Approved.rs — vehicle sourcing | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-webhook`, `/api/reminders` (cron) |
-| `apps/auto-service` | `carlab.rs`   | CarLab — auto service          | the site plus `/api/leads`, `/api/contact-click`, `/api/shop-order` (the shop's order hook)        |
-| `apps/detailing`    | `details.rs`  | Details — detailing            | the site plus `/api/leads`, `/api/contact-click`                                                   |
+| App                 | Domain        | Brand                          | What it deploys                                                                                                             |
+| ------------------- | ------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `apps/approved-rs`  | `approved.rs` | Approved.rs — vehicle sourcing | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`, `/api/telegram-webhook`, `/api/reminders` (cron) |
+| `apps/auto-service` | `carlab.rs`   | CarLab — auto service          | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`, `/api/shop-order` (the shop's order hook)        |
+| `apps/detailing`    | `details.rs`  | Details — detailing            | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`                                                   |
 
 Each app owns its own `astro.config.mjs`, `vercel.json`, `keystatic.config.ts` and
 `.env*`. The Vercel CLI identifies the project from the working directory, so every
 deploy job runs entirely from its own `apps/<app>`.
 
-**One bot, one chat, one lead store, three brands.** Telegram allows exactly one
-webhook URL per bot, so `api/telegram-webhook.ts` and `api/reminders.ts` live only
-in `apps/approved-rs`. All three apps write to the same `data/leads.json` in the
-same Vercel Blob store and are separated by the lead's `brand` field, which the
-server stamps on (`createNotifyLead({ brand })`) — a visitor cannot set it.
+**Four bots, one chat, one lead store, three brands.** `@SerbCRMBot` is the CRM
+bot — cards, statuses, money, postpone, reminders and shop-order notifications —
+and it is the same bot in all three projects; Telegram allows exactly one webhook
+URL per bot, so `api/telegram-webhook.ts` and `api/reminders.ts` live only in
+`apps/approved-rs`. `@ApprovedRsBot`, `@CarLabRsBot` and `@DetailsRsBot` are
+capture bots, one per brand: each one talks to visitors, writes a lead, and has
+its own `api/telegram-capture.ts` webhook in its own project
+([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
+All three apps write to the same `data/leads.json` in the same Vercel Blob store
+and are separated by the lead's `brand` field, which the server stamps on
+(`createNotifyLead({ brand })`) — a visitor cannot set it.
 
 > Unprefixed paths in this document are relative to the app being discussed
 > (`vercel.json` in the approved.rs section means
@@ -235,7 +241,6 @@ Production environment; Preview is unused — there are no preview deploys).
 
 | Variable                 | approved.rs | carlab.rs | details.rs | Fallback in code                       | Without it                            |
 | ------------------------ | ----------- | --------- | ---------- | -------------------------------------- | ------------------------------------- |
-| `PUBLIC_TG_MANAGER`      | ✅ required | ✅        | ✅         | none / `carlabrs` / a placeholder      | a link to `t.me/undefined`            |
 | `PUBLIC_WHATSAPP_NUMBER` | ✅ required | ✅        | ✅         | none / `PUBLIC_PHONE_NUMBER`           | a broken WhatsApp link                |
 | `PUBLIC_VIBER_NUMBER`    | ✅ required | ✅        | ✅         | none / `PUBLIC_PHONE_NUMBER`           | a broken Viber link                   |
 | `PUBLIC_PHONE_NUMBER`    | —           | ✅        | ✅         | a placeholder number in `constants.ts` | the site shows someone else's number  |
@@ -284,14 +289,19 @@ On approved.rs, `PUBLIC_WHATSAPP_NUMBER` doubles as the number for an ordinary c
 
 ### Telegram (needed by all three projects)
 
-| Variable                  | approved.rs | carlab.rs | details.rs | Without it                                                                     |
-| ------------------------- | ----------- | --------- | ---------- | ------------------------------------------------------------------------------ |
-| `TELEGRAM_BOT_TOKEN`      | ✅          | ✅        | ✅         | `/api/leads` and `/api/contact-click` answer 500                               |
-| `TELEGRAM_BOT_USERNAME`   | ✅          | ✅        | ✅         | the same — 500                                                                 |
-| `TELEGRAM_GROUP_ID`       | ✅          | ✅        | ✅         | the same — 500                                                                 |
-| `TELEGRAM_OWNER_ID`       | ✅          | ✅        | ✅         | this brand's leads never reach the owner's DMs                                 |
-| `TELEGRAM_ADMIN_ID`       | ✅          | ✅        | ✅         | this brand's leads never reach the admin's DMs                                 |
-| `TELEGRAM_WEBHOOK_SECRET` | ✅          | —         | —          | `/api/telegram-webhook` answers 401 to everything — the bot's buttons are dead |
+Four bots, and the variables split along that line. The CRM bot `@SerbCRMBot` is
+one bot shared by the three projects; each brand's capture bot is its own.
+
+| Variable                          | approved.rs | carlab.rs | details.rs | Bot     | Without it                                                                     |
+| --------------------------------- | ----------- | --------- | ---------- | ------- | ------------------------------------------------------------------------------ |
+| `TELEGRAM_BOT_TOKEN`              | ✅          | ✅        | ✅         | CRM     | `/api/leads` and `/api/contact-click` answer 500                               |
+| `TELEGRAM_BOT_USERNAME`           | ✅          | ✅        | ✅         | CRM     | the same — 500                                                                 |
+| `TELEGRAM_GROUP_ID`               | ✅          | ✅        | ✅         | CRM     | the same — 500                                                                 |
+| `TELEGRAM_OWNER_ID`               | ✅          | ✅        | ✅         | CRM     | this brand's leads never reach the owner's DMs                                 |
+| `TELEGRAM_ADMIN_ID`               | ✅          | ✅        | ✅         | CRM     | this brand's leads never reach the admin's DMs                                 |
+| `TELEGRAM_WEBHOOK_SECRET`         | ✅          | —         | —          | CRM     | `/api/telegram-webhook` answers 401 to everything — the bot's buttons are dead |
+| `TELEGRAM_CAPTURE_BOT_TOKEN`      | ✅          | ✅        | ✅         | capture | this brand's capture bot never answers a visitor and no lead is written        |
+| `TELEGRAM_CAPTURE_WEBHOOK_SECRET` | ✅          | ✅        | ✅         | capture | `/api/telegram-capture` answers 401 to everything — the Telegram tile is dead  |
 
 > **The main trap when setting up new projects.** All three `src/lib/crmBot.ts`
 > call `requireEnv('TELEGRAM_BOT_TOKEN')`, `requireEnv('TELEGRAM_BOT_USERNAME')` and
@@ -306,8 +316,19 @@ comma-separated if a person has several accounts (`111,222`). Their absence does
 fail the route — it just means direct messages about this brand's leads go nowhere.
 Set the same ids in all three projects.
 
-The bot is shared across brands: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME` and
-`TELEGRAM_GROUP_ID` are identical in all three projects.
+The **CRM** bot is shared across brands: `TELEGRAM_BOT_TOKEN`,
+`TELEGRAM_BOT_USERNAME` and `TELEGRAM_GROUP_ID` are identical in all three
+projects, and `TELEGRAM_WEBHOOK_SECRET` is set only on approved.rs, which hosts
+that one bot's webhook.
+
+The **capture** bots are not. `TELEGRAM_CAPTURE_BOT_TOKEN` is `@ApprovedRsBot`'s
+on approved.rs, `@CarLabRsBot`'s on carlab.rs and `@DetailsRsBot`'s on
+details.rs — three different tokens from @BotFather, never copied between
+projects: which bot received the update is what tells the server the brand, so a
+shared token would hand a visitor the choice. `TELEGRAM_CAPTURE_WEBHOOK_SECRET`
+is per project too, and on approved.rs it is a **different** value from
+`TELEGRAM_WEBHOOK_SECRET` — the two webhooks there belong to two different bots
+and do not share a secret.
 
 ### Storage and cron
 
@@ -343,7 +364,10 @@ A special case: it does not need setting in the dashboard.
 - each app's `vercel.json` additionally puts `env.SITE` into the functions' runtime,
   in case anything needs it;
 - in practice, only the local `scripts/register-webhook.ts` reads
-  `process.env.SITE` (from `.env.local`).
+  `process.env.SITE` (from the `.env.local` handed to `--env-file`), and it is
+  the host the webhook is registered against — so point it at the `.env.local`
+  of the project that hosts that bot's webhook, which for a capture bot is that
+  brand's own project.
 
 Changing the domain means editing `site:` in `astro.config.mjs` and `env.SITE` in
 `vercel.json`, not a dashboard variable.
@@ -868,7 +892,22 @@ node --env-file=.env --experimental-strip-types scripts/translate-cases.ts
 
 ---
 
-## The Telegram webhook (approved.rs only)
+## The Telegram webhooks
+
+Two kinds, and only the CRM one is approved.rs-only.
+
+- **`/api/telegram-webhook`** — `@SerbCRMBot`, the CRM bot. One bot, so one
+  webhook, and it lives in approved.rs; carlab.rs and details.rs have no such
+  route. Its `secret_token` is approved.rs's `TELEGRAM_WEBHOOK_SECRET`.
+- **`/api/telegram-capture`** — the brand's own capture bot, in **all three**
+  projects. `@ApprovedRsBot` is registered against `approved.rs`, `@CarLabRsBot`
+  against `carlab.rs`, `@DetailsRsBot` against `details.rs`, each with that
+  project's `TELEGRAM_CAPTURE_WEBHOOK_SECRET`
+  ([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
+
+Each is registered once per bot, four registrations in total.
+
+### The CRM bot
 
 The group receives only a short teaser of the lead ("#123 · Ivan · Vehicle
 sourcing · status") and an "Open in the bot" link button — all the handling
@@ -879,10 +918,9 @@ The owner and the admin each have to message the bot `/start` once before it can
 send them direct messages (including the cron's reminders) — Telegram forbids a bot
 from starting a conversation.
 
-The webhook is registered **once per bot** and points at approved.rs: carlab.rs and
-details.rs simply have no `/api/telegram-webhook` route. It must carry a
-`secret_token` equal to the approved.rs project's `TELEGRAM_WEBHOOK_SECRET` —
-without a match the endpoint answers 401 to every request:
+The webhook must carry a `secret_token` equal to the approved.rs project's
+`TELEGRAM_WEBHOOK_SECRET` — without a match the endpoint answers 401 to every
+request:
 
 ```bash
 curl "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook?url=https://approved.rs/api/telegram-webhook&secret_token=<TELEGRAM_WEBHOOK_SECRET>"
@@ -894,18 +932,42 @@ To check:
 curl "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/getWebhookInfo"
 ```
 
-`apps/approved-rs/scripts/register-webhook.ts` does the same thing, reading
-`TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` and `SITE` from the environment:
+`apps/approved-rs/scripts/register-webhook.ts` does the same thing. It takes the
+bot as its one argument — `crm` reads `TELEGRAM_BOT_TOKEN` /
+`TELEGRAM_WEBHOOK_SECRET` and registers `/api/telegram-webhook`, `capture` reads
+`TELEGRAM_CAPTURE_BOT_TOKEN` / `TELEGRAM_CAPTURE_WEBHOOK_SECRET` and registers
+`/api/telegram-capture`. Both take the target host from `SITE`, and an unknown
+bot or a missing variable exits non-zero without calling Telegram:
 
 ```bash
 cd apps/approved-rs
-node --env-file=.env.local --experimental-strip-types scripts/register-webhook.ts
+node --env-file=.env.local --experimental-strip-types scripts/register-webhook.ts crm
 ```
 
 > Until 2026-09-13 the script registered a non-existent `${SITE}/api/telegram` and
 > passed `allowed_updates: ['callback_query']`, which meant direct messages to the
 > bot and replies to its deal-amount prompts never reached the webhook. If the
 > webhook was registered with it before then, re-register.
+
+### The capture bots
+
+The script reads nothing but `process.env`, so the one copy in
+`apps/approved-rs/scripts/` registers all three — hand it the other project's
+`.env.local`, which carries that project's `SITE` and that brand's
+`TELEGRAM_CAPTURE_*`. Do not copy the script into the other two apps.
+
+```bash
+cd apps/approved-rs
+node --env-file=.env.local --experimental-strip-types scripts/register-webhook.ts capture
+node --env-file=../auto-service/.env.local --experimental-strip-types scripts/register-webhook.ts capture
+node --env-file=../detailing/.env.local --experimental-strip-types scripts/register-webhook.ts capture
+```
+
+Equivalently, by hand, once per brand:
+
+```bash
+curl "https://api.telegram.org/bot<TELEGRAM_CAPTURE_BOT_TOKEN>/setWebhook?url=https://carlab.rs/api/telegram-capture&secret_token=<TELEGRAM_CAPTURE_WEBHOOK_SECRET>"
+```
 
 ---
 

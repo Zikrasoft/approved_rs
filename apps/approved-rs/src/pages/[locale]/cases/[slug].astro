@@ -205,7 +205,7 @@ const schema = generateArticleSchema({
             </div>
           </div>
 
-          <ContactCTA compact />
+          <ContactCTA service={c.data.service} compact />
         </div>
 
         {
@@ -267,7 +267,7 @@ const schema = generateArticleSchema({
         {t.nav[c.data.service]}
         <span class="transition-transform group-hover:translate-x-0.5">→</span>
       </a>
-      <ContactCTA label={cc.ctaButtonLabel} />
+      <ContactCTA label={cc.ctaButtonLabel} service={c.data.service} />
     </div>
   </div>
 </BaseLayout>

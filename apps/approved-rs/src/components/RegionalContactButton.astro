@@ -6,15 +6,15 @@ import { getServicesContent } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
 
 interface Props {
-  manager?: string;
+  service?: string;
   variant?: 'primary' | 'secondary';
   class?: string;
 }
 
 const locale = getLocale(Astro.currentLocale);
 const cc = getServicesContent(locale).caseChrome;
-const { manager, variant = 'primary', class: className } = Astro.props;
-const messenger = messengerHrefs(locale, manager);
+const { service, variant = 'primary', class: className } = Astro.props;
+const messenger = messengerHrefs(locale, service);
 ---
 
 <div data-primary-contact class="contents">

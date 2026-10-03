@@ -11,9 +11,8 @@ import {
   INSTAGRAM_ENABLED,
   SITE_NAME,
   STUDIO_ADDRESS,
-  TELEGRAM_ENABLED,
 } from '@/utils/constants';
-import { CONTACT_LINKS } from '@/utils/contactLinks';
+import { CONTACT_LINKS, telegramBotHref } from '@/utils/contactLinks';
 import { contactPlacement } from '@podbor/site-kit';
 
 const locale = localeFrom(Astro.url.pathname);
@@ -36,16 +35,12 @@ const messengers = [
     label: site.channels.viber,
     track: 'viber',
   },
-  ...(TELEGRAM_ENABLED
-    ? ([
-        {
-          href: CONTACT_LINKS.telegram,
-          icon: 'telegram',
-          label: site.channels.telegram,
-          track: 'telegram',
-        },
-      ] as const)
-    : []),
+  {
+    href: telegramBotHref(locale),
+    icon: 'telegram',
+    label: site.channels.telegram,
+    track: 'telegram',
+  },
 ] as const;
 ---
 

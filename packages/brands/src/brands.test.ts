@@ -26,6 +26,20 @@ describe('brand registry', () => {
     }
   });
 
+  it.each([
+    ['approved', 'ApprovedRsBot'],
+    ['carlab', 'CarLabRsBot'],
+    ['details', 'DetailsRsBot'],
+  ] as const)('stores %s capture bot bare, without a leading @', (key, bot) => {
+    expect(BRANDS[key].captureBot).toBe(bot);
+  });
+
+  it('gives every brand a distinct capture bot', () => {
+    expect(new Set(KEYS.map((key) => BRANDS[key].captureBot)).size).toBe(
+      KEYS.length,
+    );
+  });
+
   it('gives every brand a distinct domain', () => {
     expect(new Set(KEYS.map((key) => BRANDS[key].domain)).size).toBe(
       KEYS.length,

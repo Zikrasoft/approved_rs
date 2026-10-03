@@ -1,10 +1,15 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { defineContactClickTracking } from './contactClick.ts';
+import {
+  defineContactClickTracking,
+  storesContactClickLead,
+} from './contactClick.ts';
 import { VISITOR_ID_STORAGE_KEY } from './visitorId.ts';
 
 const isTracked = (channel: string | undefined): channel is string =>
   channel === 'telegram' || channel === 'whatsapp' || channel === 'viber';
+
+const storesLead = () => true;
 
 let sent: [string, FormData][];
 
@@ -36,7 +41,7 @@ const click = (channel: string) =>
 
 describe('defineContactClickTracking', () => {
   it('beacons a tracked channel to the lead route with the page it happened on', () => {
-    defineContactClickTracking(isTracked);
+    defineContactClickTracking(isTracked, storesLead);
     click('telegram');
     expect(sent).toHaveLength(1);
     const [url, body] = sent[0]!;
@@ -48,13 +53,13 @@ describe('defineContactClickTracking', () => {
 
   it('reuses the visitor id a previous click already minted', () => {
     localStorage.setItem(VISITOR_ID_STORAGE_KEY, 'earlier-id');
-    defineContactClickTracking(isTracked);
+    defineContactClickTracking(isTracked, storesLead);
     click('telegram');
     expect(sent[0]![1].get('visitor_id')).toBe('earlier-id');
   });
 
   it('reports the same click to the analytics counter', () => {
-    defineContactClickTracking(isTracked);
+    defineContactClickTracking(isTracked, storesLead);
     click('telegram');
     expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
       channel: 'telegram',
@@ -63,7 +68,7 @@ describe('defineContactClickTracking', () => {
   });
 
   it('reports the placement the tapped control sits in', () => {
-    defineContactClickTracking(isTracked);
+    defineContactClickTracking(isTracked, storesLead);
     click('whatsapp');
     expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
       channel: 'whatsapp',
@@ -72,7 +77,7 @@ describe('defineContactClickTracking', () => {
   });
 
   it('still reports a usable goal where no placement is stamped', () => {
-    defineContactClickTracking(isTracked);
+    defineContactClickTracking(isTracked, storesLead);
     click('viber');
     expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
       channel: 'viber',
@@ -81,15 +86,32 @@ describe('defineContactClickTracking', () => {
   });
 
   it('leaves the button that only opens the form out of the contact count', () => {
-    defineContactClickTracking(isTracked);
+    defineContactClickTracking(isTracked, storesLead);
     click('callback');
     expect(sent).toEqual([]);
     expect(window.ymReachGoal).not.toHaveBeenCalled();
   });
 
+  it('counts the tap but writes no lead for a channel that stores none', () => {
+    defineContactClickTracking(isTracked, storesContactClickLead);
+    click('telegram');
+    expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
+      channel: 'telegram',
+      placement: 'footer',
+    });
+    expect(sent).toEqual([]);
+  });
+
+  it('still writes a lead for the channels that do store one', () => {
+    defineContactClickTracking(isTracked, storesContactClickLead);
+    click('viber');
+    expect(sent).toHaveLength(1);
+    expect(sent[0]![1].get('channel')).toBe('viber');
+  });
+
   it('still records the click on a page where analytics never loaded', () => {
     delete (window as Partial<Window>).ymReachGoal;
-    defineContactClickTracking(isTracked);
+    defineContactClickTracking(isTracked, storesLead);
     expect(() => click('telegram')).not.toThrow();
     expect(sent).toHaveLength(1);
   });

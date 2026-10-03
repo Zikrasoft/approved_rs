@@ -8,7 +8,9 @@ Decided 2026-10-02 on issue #91, split out of #56.
 
 Someone taps a messenger tile and never writes. A Lead is stored, a card lands in the operator's Telegram with the contact shown as a dash, and there is nothing to answer. The operator waits to see whether a message arrives, then deletes the card by hand. Every one of those is a false to-do, and making approved.rs's messenger tiles direct multiplies them.
 
-The only party who knows whether the person wrote is the operator, sitting in Telegram: the manager account is a human account and the conversation never touches our infrastructure. So the choice is between never creating the card and retiring it on a timer. The card stays, because a tap is worth seeing while it might still turn into a conversation. The chore goes.
+The only party who knows whether the person wrote is the operator, sitting in Telegram: the manager account is a human account and the conversation never touches our infrastructure.
+
+**[ADR-0030](0030-a-capture-bot-per-brand-takes-the-telegram-contact.md) takes Telegram out of this.** A capture bot's `/start` is observable and yields a contact, so a Telegram tap no longer stores a contact click at all and can no longer become a Ghost lead. What is written here holds for the phone, WhatsApp and Viber — every remaining ghost comes from those three. So the choice is between never creating the card and retiring it on a timer. The card stays, because a tap is worth seeing while it might still turn into a conversation. The chore goes.
 
 **A Ghost lead is a contact click whose contact is still the placeholder, whose status is still `new`, which is not archived, and which is older than the retention window.** All four conditions, deliberately narrow: a click the operator advanced is their work, and a click the store's visitor-merge window upgraded with a real contact is a conversion. `isGhostLead` in `packages/lead-crm/src/store.ts` is the only definition.
 

@@ -5,6 +5,7 @@ import {
   TARGET_LANGUAGE_NAME,
 } from '../src/i18n/translateConfig.ts';
 import { siteContentSchema } from '../src/i18n/content/siteContentSchema.ts';
+import { captureCopySchema } from '@podbor/lead-capture/copy';
 import { homeContentSchema } from '../src/i18n/content/homeContentSchema.ts';
 import { servicesContentSchema } from '../src/i18n/content/servicesContentSchema.ts';
 import { pagesContentSchema } from '../src/i18n/content/pagesContentSchema.ts';
@@ -30,6 +31,13 @@ export const SECTIONS: readonly Section[] = [
     schema: servicesContentSchema,
     promptSubject:
       'detailing service page copy (paint protection film, colour-change wrap, machine polishing with ceramic coating, steering-wheel restoration) — keep industry terms a Serbian customer would recognise',
+  },
+  {
+    path: 'src/content/i18n/captureBot.yaml',
+    fields: captureCopySchema.keyof().options,
+    schema: captureCopySchema,
+    promptSubject:
+      'what the Telegram capture bot of a car detailing studio says to a visitor who opened it from the site (a greeting and short questions, written as one person messaging another)',
   },
   {
     path: 'src/content/i18n/pages.yaml',

@@ -18,6 +18,8 @@ export default defineConfig({
       TELEGRAM_OWNER_ID: '111',
       TELEGRAM_ADMIN_ID: '222',
       TELEGRAM_BOT_USERNAME: 'approved_test_bot',
+      TELEGRAM_CAPTURE_BOT_TOKEN: 'test-capture-bot-token',
+      TELEGRAM_CAPTURE_WEBHOOK_SECRET: 'test-capture-webhook-secret',
       CRON_SECRET: 'test-cron-secret',
     },
   },
