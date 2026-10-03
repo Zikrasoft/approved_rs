@@ -5,7 +5,7 @@ phoneAsk: Чтобы мы могли с вами связаться, подел�
 phoneOffer: Если удобнее по телефону, поделитесь номером, и мы позвоним. Если нет, просто пропустите.
 phoneButton: Поделиться номером
 phoneSkip: Пропустить
-thanks: Спасибо! Всё передали мастеру — он напишет вам прямо здесь.
+thanks: Спасибо! Передали мастеру — он скоро с вами свяжется.
 received: Приняли, мастер увидит ваше сообщение.
 translations:
   sr:
@@ -16,7 +16,7 @@ translations:
     phoneOffer: Ako vam više odgovara telefonski razgovor, podelite broj pa ćemo vas pozvati. Ako ne, slobodno preskočite.
     phoneButton: Podeli broj
     phoneSkip: Preskoči
-    thanks: Hvala! Sve smo prosledili majstoru — javiće vam se baš ovde.
+    thanks: Hvala! Sve smo prosledili majstoru — uskoro će vas kontaktirati.
     received: Primili smo, majstor će videti vašu poruku.
   en:
     greeting: Hello! Thanks for getting in touch — we can see your enquiry and we'll come back to you shortly.
@@ -26,6 +26,6 @@ translations:
     phoneOffer: If a call suits you better, share your number and we'll ring you. If not, just skip it.
     phoneButton: Share my number
     phoneSkip: Skip
-    thanks: Thank you! Our detailer has everything and will write to you right here.
+    thanks: Thank you! Our detailer has everything and will get in touch shortly.
     received: Got it, our detailer will see your message.
-translatedFrom: dd83bd75a5539f07
+translatedFrom: 9689dcfbb66b3146
