@@ -5,7 +5,8 @@ to `@SerbCRMBot` and gives every open lead a working card again. Why there are
 four bots at all: [ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md).
 
 A bot cannot edit a message another bot sent, so the moment the token changes,
-every existing card is dead markup. Step 6 redraws them. Do not skip step 1.
+every existing card goes frozen the moment the token changes. Step 6 says what
+that costs and why it needs no script. Do not skip step 1.
 
 Have ready, from `@BotFather`:
 
@@ -33,7 +34,8 @@ It reads `data/leads.json` through the same Vercel Blob storage the app uses,
 writes it to `apps/approved-rs/.local/leads-<timestamp>.json` (gitignored) and
 prints the path and the record count. It never writes to the blob.
 
-Note the record count. Step 6 should report an open-lead figure no larger than it.
+Note the record count — it is what you compare against if anything later looks
+wrong.
 
 ## 2. Unregister the old bot's webhook
 
@@ -81,41 +83,37 @@ The argument is mandatory. `crm` registers
 script prints `getWebhookInfo` afterwards. Check that `url` is the approved.rs
 one and `last_error_message` is absent.
 
-## 6. Redraw the open cards — dry run first
+## 6. The old cards, and why nothing redraws them
 
-```bash
-cd apps/approved-rs
-node --env-file=.env.local --experimental-strip-types scripts/backfill-crm-cards.ts
+A bot cannot edit a message another bot sent, so every group teaser posted by
+`@ApprovedRsBot` is now frozen, and its buttons answer to a bot whose webhook
+serves `/api/telegram-capture` and ignores callbacks. Tapping one does nothing.
+
+**That is not a dead end and there is nothing to run here.** Open a DM with
+`@SerbCRMBot`, send `/start`, and the menu, the lead list and search all draw a
+fresh card on demand with working buttons — every open lead is reachable that
+way immediately. And the first action you take on a lead heals its teaser:
+`ensureLeadCard` tries the edit, Telegram refuses it, the code falls through and
+posts a new teaser as `@SerbCRMBot`, rewriting `telegramChatId` /
+`telegramMessageId` through the store's normal compare-and-swap write.
+
+What you are left with until then is cosmetic: the frozen teasers stay in the
+group, and a lead you act on gains a second, live one beside its dead twin.
+Delete the dead ones by hand if they bother you.
+
+The direct-message cards from before the switch stay dead for good. Only the
+group teaser has a stored address; a DM card is rendered on demand when the
+operator taps «Открыть в боте». Repointing `TELEGRAM_BOT_USERNAME` in step 3 is
+what makes that link open `@SerbCRMBot` — ADR-0030 accepts the rest.
+
+## 7. Check the CRM answers at all
+
+```
+DM @SerbCRMBot → /start → menu → the lead list
 ```
 
-Dry run is the default: it lists every lead it would touch — every Lead that is
-not archived and whose status is neither `won` nor `lost` — and writes nothing,
-to the blob or to Telegram. Read the list. If it names leads you expect to be
-closed, close them in the bot first and re-run.
-
-## 7. Redraw the open cards — apply
-
-```bash
-node --env-file=.env.local --experimental-strip-types scripts/backfill-crm-cards.ts --apply
-```
-
-For each lead it posts a fresh **group teaser** as `@SerbCRMBot`, pins it, and
-rewrites `telegramChatId` / `telegramMessageId` through the store's normal
-compare-and-swap write. It sends sequentially with a short delay, well under
-Telegram's ~30 messages/second.
-
-Running it twice is safe: on a second run the card is one `@SerbCRMBot` itself
-sent, so the edit succeeds and no new message is posted.
-
-**The direct-message cards are not redrawn, and cannot be.** Only the group
-teaser has a stored address; a DM card is rendered on demand when the operator
-taps the teaser's «Открыть в боте» deep link. Repointing `TELEGRAM_BOT_USERNAME`
-in step 3 is what makes that link open `@SerbCRMBot`. Old DM cards sitting in the
-operator's chat with `@ApprovedRsBot` stay dead forever — ADR-0030 accepts this.
-Open the lead again from the group teaser instead.
-
-Delete `scripts/backfill-crm-cards.ts` once this run is done. It is a one-off and
-is deliberately untested; its safety is the dry run and its idempotence.
+A lead opens, its card has buttons, and a status change sticks. That is the
+whole proof the migration landed; it writes nothing you have to undo.
 
 ## 8. Smoke checks
 
@@ -155,9 +153,9 @@ Two values, the two from step 3:
    curl "https://api.telegram.org/bot<OLD_TELEGRAM_BOT_TOKEN>/setWebhook?url=https://approved.rs/api/telegram-webhook&secret_token=<TELEGRAM_WEBHOOK_SECRET>"
    ```
 
-Nothing else changed. Leads written during the switch keep working — but the
-cards the backfill posted as `@SerbCRMBot` become the dead ones, so re-run the
-backfill with `--apply` under the restored token to redraw them.
+Nothing else changed. Leads written during the switch keep working — but any
+teaser posted as `@SerbCRMBot` becomes the frozen one, and heals the same way in
+reverse the first time you act on that lead.
 
 If the lead store itself looks wrong, the step 1 backup is the restore source:
 
