@@ -16,7 +16,7 @@ translations:
     phoneOffer: Ako vam više odgovara poziv, podelite broj pa će vas majstor pozvati. Ako ne, slobodno preskočite.
     phoneButton: Podeli broj
     phoneSkip: Preskoči
-    thanks: Hvala! Sve smo prosledili majstoru — uskoro će vas kontaktirati.
+    thanks: Hvala! Proslijedili smo majstoru — uskoro će vas kontaktirati.
     received: Primili smo, majstor će videti vašu poruku.
   en:
     greeting: Hello! Thanks for getting in touch — we have your enquiry and a mechanic will reply shortly.
@@ -26,6 +26,6 @@ translations:
     phoneOffer: If a call suits you better, share your number and a mechanic will ring you. If not, just skip it.
     phoneButton: Share my number
     phoneSkip: Skip
-    thanks: Thank you! A mechanic has everything and will get in touch shortly.
+    thanks: Thank you! I’ve passed your message to the technician — he’ll be in touch with you shortly.
     received: Got it, a mechanic will see your message.
 translatedFrom: fe84a3a052ce6aea

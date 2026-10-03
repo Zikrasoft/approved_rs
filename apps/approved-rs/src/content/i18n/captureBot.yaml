@@ -16,7 +16,7 @@ translations:
     phoneOffer: If a call suits you better, share your number and we'll ring you. If not, just skip it.
     phoneButton: Share my number
     phoneSkip: Skip
-    thanks: Thank you! Your manager has everything and will get in touch shortly.
+    thanks: Thank you! I've passed this on to the manager — they'll be in touch with you soon.
     received: Got it, your manager will see your message.
   sr:
     greeting: Zdravo! Hvala što ste nam se javili — vidimo vaš upit i javljamo se uskoro.
@@ -26,7 +26,7 @@ translations:
     phoneOffer: Ako vam više odgovara telefon, podelite broj pa ćemo vas pozvati. Ako ne, slobodno preskočite.
     phoneButton: Podeli broj
     phoneSkip: Preskoči
-    thanks: Hvala! Sve smo prosledili menadžeru — uskoro će vas kontaktirati.
+    thanks: Hvala! Prosledili smo menadžeru — uskoro će vas kontaktirati.
     received: Primili smo, menadžer će videti vašu poruku.
   es:
     greeting: ¡Hola! Gracias por escribirnos, ya vemos tu consulta y te respondemos enseguida.
@@ -36,7 +36,7 @@ translations:
     phoneOffer: Si prefieres que te llamemos, comparte tu número. Si no, sáltatelo sin problema.
     phoneButton: Compartir mi número
     phoneSkip: Omitir
-    thanks: ¡Gracias! El gestor ya lo tiene todo y se pondrá en contacto contigo en breve.
+    thanks: ¡Gracias! Se lo hemos transmitido al gerente, pronto se pondrá en contacto contigo.
     received: Recibido, el gestor verá tu mensaje.
   de:
     greeting: Hallo! Danke für Ihre Nachricht – Ihre Anfrage liegt uns vor, wir melden uns gleich.
@@ -46,6 +46,6 @@ translations:
     phoneOffer: Wenn Ihnen ein Anruf lieber ist, teilen Sie Ihre Nummer, dann rufen wir an. Wenn nicht, einfach überspringen.
     phoneButton: Nummer teilen
     phoneSkip: Überspringen
-    thanks: Danke! Ihr Ansprechpartner hat alles und meldet sich in Kürze bei Ihnen.
+    thanks: Danke! Wir haben es dem Manager weitergeleitet — er wird sich bald bei Ihnen melden.
     received: Angekommen, Ihr Ansprechpartner sieht Ihre Nachricht.
 translatedFrom: e4e962f84ccafd96
