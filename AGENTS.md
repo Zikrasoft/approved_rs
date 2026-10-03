@@ -319,8 +319,8 @@ Both new apps follow the same shape, and a third should too:
   `text`. Viber's chat link has no such parameter, so Viber tiles stay bare —
   asymmetry by platform, not by choice.
 - **A Telegram tile carries a `?start=` payload, not a prefill.** It opens the
-  brand's capture bot, built from `telegramBotLink` and `captureStartPayload`
-  in `@podbor/site-kit/contact-links` over `BRAND.captureBot`, and `?start=` and
+  brand's capture bot through `captureBotLink` in
+  `@podbor/site-kit/contact-links` over `BRAND.captureBot`, and `?start=` and
   `?text=` are different parameters, so `messengerPrefill` never reaches
   Telegram. The payload is `<service>_<locale>`, or the locale alone where the
   page has no service (the homepage, the footer, the floating widget, the

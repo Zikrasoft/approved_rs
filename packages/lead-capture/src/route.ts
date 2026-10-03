@@ -33,20 +33,47 @@ const ANSWER_NOTE: Record<CaptureStep, string> = {
   phone: 'Телефон',
 };
 
-const WITH_HANDLE: CaptureStep[] = ['looking_for', 'budget', 'phone'];
-const WITHOUT_HANDLE: CaptureStep[] = ['phone', 'looking_for', 'budget'];
+const STEPS_WITH_HANDLE: CaptureStep[] = ['looking_for', 'budget', 'phone'];
+const STEPS_WITHOUT_HANDLE: CaptureStep[] = ['phone', 'looking_for', 'budget'];
 
 const MESSAGE_NOTE = 'Сообщение';
 
-const CLEAR_KEYBOARD = { reply_markup: { remove_keyboard: true } };
+interface PhoneKeyboardExtra {
+  reply_markup: {
+    keyboard: { text: string; request_contact?: true }[][];
+    resize_keyboard: true;
+    one_time_keyboard: true;
+  };
+}
+
+interface ClearKeyboardExtra {
+  reply_markup: { remove_keyboard: true };
+}
+
+type CaptureExtra = PhoneKeyboardExtra | ClearKeyboardExtra | undefined;
+
+const CLEAR_KEYBOARD: ClearKeyboardExtra = {
+  reply_markup: { remove_keyboard: true },
+};
 
 export type CaptureStore = Pick<
   LeadStore,
   | 'insertLead'
   | 'findByCapturePrompt'
   | 'findOpenLeadByTelegramId'
+  | 'findPhoneByTelegramId'
   | 'updateCapture'
 >;
+
+export function captureStore(store: LeadStore): CaptureStore {
+  return {
+    insertLead: store.insertLead,
+    findByCapturePrompt: store.findByCapturePrompt,
+    findOpenLeadByTelegramId: store.findOpenLeadByTelegramId,
+    findPhoneByTelegramId: store.findPhoneByTelegramId,
+    updateCapture: store.updateCapture,
+  };
+}
 
 export interface CaptureWebhookRouteOptions<L extends string> {
   secret: string | undefined;
@@ -72,16 +99,16 @@ function hasHandle(contact: string): boolean {
   return contact.startsWith('@');
 }
 
-function order(contact: string): CaptureStep[] {
-  return hasHandle(contact) ? WITH_HANDLE : WITHOUT_HANDLE;
+function stepOrder(contact: string): CaptureStep[] {
+  return hasHandle(contact) ? STEPS_WITH_HANDLE : STEPS_WITHOUT_HANDLE;
 }
 
 function stepAfter(contact: string, step: CaptureStep): CaptureStep | null {
-  const steps = order(contact);
+  const steps = stepOrder(contact);
   return steps[steps.indexOf(step) + 1] ?? null;
 }
 
-function phoneKeyboard(words: CaptureCopy) {
+function phoneKeyboard(words: CaptureCopy): PhoneKeyboardExtra {
   return {
     reply_markup: {
       keyboard: [
@@ -99,7 +126,7 @@ function nextMessage(
   leaving: CaptureStep | null,
   contact: string,
   words: CaptureCopy,
-): [string, object | undefined] {
+): [string, CaptureExtra] {
   if (next === 'phone')
     return [
       hasHandle(contact) ? words.phoneOffer : words.phoneAsk,
@@ -169,8 +196,11 @@ export function createCaptureWebhookRoute<L extends string>({
   ): Promise<void> {
     const { service, locale } = startFields(payload, sender);
     const words = copy(locale);
-    const contact = senderContact(sender);
-    const step = order(contact)[0];
+    const known = sender.username
+      ? undefined
+      : await store.findPhoneByTelegramId(sender.id, brand);
+    const contact = known ?? senderContact(sender);
+    const step = known ? 'looking_for' : stepOrder(contact)[0];
     const lead = await store.insertLead({
       brand,
       name: senderName(sender),
@@ -215,7 +245,7 @@ export function createCaptureWebhookRoute<L extends string>({
   async function resume(chatId: number, lead: StoredLead): Promise<void> {
     const words = copy(localeOf(lead));
     const prompt = lead.capturePrompt;
-    const [reply, extra]: [string, object | undefined] = prompt
+    const [reply, extra]: [string, CaptureExtra] = prompt
       ? nextMessage(prompt.step, null, lead.contact, words)
       : [words.thanks, undefined];
     await bot.sendMessage(chatId, reply, extra);
@@ -247,6 +277,22 @@ export function createCaptureWebhookRoute<L extends string>({
     await bot.sendMessage(chatId, copy(localeOf(open)).received);
   }
 
+  async function phoneAside(
+    lead: StoredLead,
+    prompt: CapturePrompt,
+    phone: string,
+  ): Promise<void> {
+    const words = copy(localeOf(lead));
+    const keepsHandle = hasHandle(lead.contact);
+    const updated = await store.updateCapture(lead.id, {
+      note: answerNote('phone', words, keepsHandle, undefined, phone),
+      contact: keepsHandle ? undefined : phone,
+      capturePrompt: prompt,
+    });
+    await ensureLeadCard(updated ?? lead);
+    await bot.sendMessage(prompt.chatId, words.received);
+  }
+
   async function handle(
     chatId: number,
     sender: CaptureSender,
@@ -264,7 +310,8 @@ export function createCaptureWebhookRoute<L extends string>({
     const lead = await store.findByCapturePrompt(chatId, brand);
     const prompt = lead?.capturePrompt;
     if (lead && prompt) {
-      if (prompt.step !== 'phone' && text === undefined) return;
+      if (prompt.step !== 'phone' && phone !== undefined)
+        return phoneAside(lead, prompt, phone);
       return answer(lead, prompt, text, phone);
     }
 
