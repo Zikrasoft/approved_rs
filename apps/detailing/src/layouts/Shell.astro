@@ -223,6 +223,7 @@ const businessSchema = {
         defineContactClickTracking,
         defineFunnelTracking,
         defineLanguageSuggestion,
+        storesContactClickLead,
       } from '@podbor/site-kit/browser';
       import { applyPreferredContactOrder } from '@podbor/site-kit/contact-preference';
       import { YM_COUNTER_ID } from '@/utils/constants';
@@ -230,7 +231,7 @@ const businessSchema = {
       if (!import.meta.env.DEV) defineAnalytics({ ymCounterId: YM_COUNTER_ID });
       defineContactClickTracking(
         isTrackedContactChannel,
-        (channel) => channel !== 'telegram',
+        storesContactClickLead,
       );
       applyPreferredContactOrder();
       defineLanguageSuggestion();

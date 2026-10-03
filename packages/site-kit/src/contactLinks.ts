@@ -15,17 +15,14 @@ export const telegramLink = (handle: string, message?: string): string =>
 export const instagramLink = (handle: string): string =>
   `https://www.instagram.com/${handle}`;
 
-export const telegramBotLink = (
-  botUsername: string,
-  startPayload?: string,
-): string =>
-  startPayload
-    ? `https://t.me/${botUsername}?start=${encodeURIComponent(startPayload)}`
-    : `https://t.me/${botUsername}`;
+export const telegramBotLink = (botUsername: string): string =>
+  `https://t.me/${botUsername}`;
 
 export const captureBotLink = (
   botUsername: string,
   locale: string,
   service?: string,
 ): string =>
-  telegramBotLink(botUsername, service ? `${service}_${locale}` : locale);
+  `${telegramBotLink(botUsername)}?start=${encodeURIComponent(
+    service ? `${service}_${locale}` : locale,
+  )}`;

@@ -65,6 +65,10 @@ export function isPlaceholderContact(contact: string): boolean {
   return contact === '' || contact === '—';
 }
 
+function isPhoneContact(contact: string): boolean {
+  return contact.startsWith('+');
+}
+
 export const GHOST_LEAD_RETENTION_MS = 24 * 60 * 60 * 1000;
 
 function isGhostLead(lead: StoredLead, now: Date): boolean {
@@ -428,6 +432,21 @@ export function createLeadStore({
         brand,
         (l) => l.telegramId === telegramId,
       );
+    },
+
+    async findPhoneByTelegramId(
+      telegramId: number,
+      brand: string,
+    ): Promise<string | undefined> {
+      return (await readLeads())
+        .filter(
+          (l) =>
+            l.brand === brand &&
+            l.telegramId === telegramId &&
+            isPhoneContact(l.contact),
+        )
+        .sort((a, b) => a.id - b.id)
+        .at(-1)?.contact;
     },
 
     async findByCapturePrompt(

@@ -2,10 +2,9 @@
 import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getSiteContent } from '@/i18n/content/site';
-import { CONTACT_LINKS } from '@/utils/contactLinks';
-import { BRAND, PHONE_NUMBER } from '@/utils/constants';
+import { CONTACT_LINKS, telegramBotHref } from '@/utils/contactLinks';
+import { PHONE_NUMBER } from '@/utils/constants';
 import type { ServiceSlug } from '@/utils/services';
-import { captureBotLink } from '@podbor/site-kit/contact-links';
 import { contactPlacement, type ContactPlacement } from '@podbor/site-kit';
 import { formatPhone } from '@podbor/site-kit/format-phone';
 
@@ -39,7 +38,7 @@ const channels = [
     track: 'viber',
   },
   {
-    href: captureBotLink(BRAND.captureBot, locale, service),
+    href: telegramBotHref(locale, service),
     icon: 'telegram',
     label: site.channels.telegram,
     track: 'telegram',

@@ -10,6 +10,9 @@ const browserVisitorId = (): string =>
 const CHANNEL_ATTRIBUTE = 'data-contact-channel';
 const CONTACT_CLICK_ENDPOINT = '/api/contact-click';
 
+export const storesContactClickLead = (channel: string): boolean =>
+  channel !== 'telegram';
+
 export function defineContactClickTracking(
   isTracked: (channel: string | undefined) => channel is string,
   storesLead: (channel: string) => boolean,

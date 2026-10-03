@@ -1,6 +1,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { defineContactClickTracking } from './contactClick.ts';
+import {
+  defineContactClickTracking,
+  storesContactClickLead,
+} from './contactClick.ts';
 import { VISITOR_ID_STORAGE_KEY } from './visitorId.ts';
 
 const isTracked = (channel: string | undefined): channel is string =>
@@ -90,7 +93,7 @@ describe('defineContactClickTracking', () => {
   });
 
   it('counts the tap but writes no lead for a channel that stores none', () => {
-    defineContactClickTracking(isTracked, (channel) => channel !== 'telegram');
+    defineContactClickTracking(isTracked, storesContactClickLead);
     click('telegram');
     expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
       channel: 'telegram',
@@ -100,7 +103,7 @@ describe('defineContactClickTracking', () => {
   });
 
   it('still writes a lead for the channels that do store one', () => {
-    defineContactClickTracking(isTracked, (channel) => channel !== 'telegram');
+    defineContactClickTracking(isTracked, storesContactClickLead);
     click('viber');
     expect(sent).toHaveLength(1);
     expect(sent[0]![1].get('channel')).toBe('viber');

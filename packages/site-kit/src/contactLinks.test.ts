@@ -60,11 +60,8 @@ describe('contact links', () => {
     );
   });
 
-  it('opens the capture bot bare when there is no payload', () => {
+  it('opens the bot bare where a page only names it', () => {
     expect(telegramBotLink('ApprovedRsBot')).toBe('https://t.me/ApprovedRsBot');
-    expect(telegramBotLink('ApprovedRsBot', '')).toBe(
-      'https://t.me/ApprovedRsBot',
-    );
   });
 
   it('opens the Instagram profile', () => {

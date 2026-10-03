@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { CaptureUpdate, LeadInput, StoredLead } from '@podbor/lead-crm';
-import { createCaptureWebhookRoute } from './route.ts';
+import type { LeadStore } from '@podbor/lead-crm';
+import { captureStore, createCaptureWebhookRoute } from './route.ts';
 
 const SECRET = 'capture-webhook-secret';
 const BRAND = 'Approved.rs';
@@ -86,6 +87,17 @@ function makeStore() {
       open(brand)
         .filter((l) => l.telegramId === telegramId)
         .at(-1),
+    ),
+    findPhoneByTelegramId: vi.fn(
+      async (telegramId: number, brand: string) =>
+        leads
+          .filter(
+            (l) =>
+              l.brand === brand &&
+              l.telegramId === telegramId &&
+              l.contact.startsWith('+'),
+          )
+          .at(-1)?.contact,
     ),
     updateCapture: vi.fn(
       async (id: number, { note, contact, capturePrompt }: CaptureUpdate) => {
@@ -576,16 +588,6 @@ describe('the phone, offered last when the visitor has a handle', () => {
 });
 
 describe('a contact shared outside the phone step', () => {
-  it('is ignored while another question is open', async () => {
-    await POST(makeCtx(startUpdate('ru')));
-    bot.sendMessage.mockClear();
-
-    await POST(makeCtx(contactUpdate('381601234567', HANDLED)));
-
-    expect(store.leads[0].capturePrompt?.step).toBe('looking_for');
-    expect(bot.sendMessage).not.toHaveBeenCalled();
-  });
-
   it('is ignored when the visitor has no dialog open at all', async () => {
     await POST(makeCtx(contactUpdate('381601234567')));
 
@@ -819,5 +821,106 @@ describe('a question typed instead of sharing a number', () => {
     expect(store.leads[0].comment).toContain('Сообщение: а в рассрочку можно?');
     expect(store.leads[0].capturePrompt).toBeNull();
     expect(lastSent()).toEqual([42, 'THANKS']);
+  });
+});
+
+describe('a number shared while another question is open', () => {
+  it('records it, keeps the dialog where it was and says it arrived', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+
+    await POST(makeCtx(contactUpdate('381601234567', HANDLED)));
+
+    expect(store.leads[0].comment).toBe('Телефон: +381601234567');
+    expect(store.leads[0].contact).toBe('@ivan');
+    expect(store.leads[0].capturePrompt?.step).toBe('looking_for');
+    expect(lastSent()).toEqual([42, 'RECEIVED']);
+  });
+
+  it('becomes the contact when the visitor has no handle', async () => {
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    await say('SKIP', ANONYMOUS);
+
+    await POST(makeCtx(contactUpdate('381601234567')));
+
+    expect(store.leads[0].contact).toBe('+381601234567');
+    expect(store.leads[0].capturePrompt?.step).toBe('looking_for');
+    expect(lastSent()).toEqual([777, 'RECEIVED']);
+  });
+
+  it('still refreshes the card when the write finds nothing', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    store.updateCapture.mockResolvedValueOnce(undefined);
+    ensureLeadCard.mockClear();
+
+    await POST(makeCtx(contactUpdate('381601234567', HANDLED)));
+
+    expect(ensureLeadCard).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 1 }),
+    );
+  });
+});
+
+describe('a visitor who already handed over a number', () => {
+  const HOUR = 60 * 60 * 1000;
+
+  const ageOut = () => {
+    store.leads[0] = {
+      ...store.leads[0],
+      createdAt: new Date(Date.now() - HOUR - 1000).toISOString(),
+      status: 'won',
+    };
+  };
+
+  it('is not asked for it again and keeps it as the contact', async () => {
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    await POST(makeCtx(contactUpdate('381601234567')));
+    ageOut();
+
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+
+    expect(store.leads[1].contact).toBe('+381601234567');
+    expect(store.leads[1].capturePrompt?.step).toBe('looking_for');
+    expect(lastSent()).toEqual([777, 'GREETING_ru\n\nLOOKING_FOR']);
+    expect(lastExtra()).toBeUndefined();
+  });
+
+  it('answers the rest of the dialog from there', async () => {
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    await POST(makeCtx(contactUpdate('381601234567')));
+    ageOut();
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+
+    await say('Golf 7', ANONYMOUS);
+    await say('10 000', ANONYMOUS);
+
+    expect(store.leads[1].comment).toBe('Ищет: Golf 7\nБюджет: 10 000');
+    expect(store.leads[1].capturePrompt).toBeNull();
+    expect(lastSent()).toEqual([777, 'THANKS']);
+  });
+
+  it('leaves a sender with a handle on their handle', async () => {
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    await POST(makeCtx(contactUpdate('381601234567')));
+    ageOut();
+
+    await POST(makeCtx(startUpdate('ru', { ...HANDLED, id: ANONYMOUS.id })));
+
+    expect(store.leads[1].contact).toBe('@ivan');
+    expect(store.leads[1].capturePrompt?.step).toBe('looking_for');
+  });
+});
+
+describe('captureStore', () => {
+  it('hands the route the write surface and nothing else', () => {
+    const full = { ...makeStore(), readLeads: vi.fn(), deleteLead: vi.fn() };
+    const narrowed = captureStore(full as unknown as LeadStore);
+
+    expect(Object.keys(narrowed).sort()).toEqual([
+      'findByCapturePrompt',
+      'findOpenLeadByTelegramId',
+      'findPhoneByTelegramId',
+      'insertLead',
+      'updateCapture',
+    ]);
   });
 });

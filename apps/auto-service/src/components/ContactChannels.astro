@@ -3,6 +3,7 @@ import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getSiteContent } from '@/i18n/content/site';
 import { contactChannels } from '@/utils/contactLinks';
+import type { ServiceSlug } from '@/utils/services';
 import { contactPlacement, type ContactPlacement } from '@podbor/site-kit';
 import { formatPhone } from '@podbor/site-kit/format-phone';
 import { PHONE_NUMBER } from '@/utils/constants';
@@ -10,7 +11,7 @@ import { PHONE_NUMBER } from '@/utils/constants';
 interface Props {
   class?: string;
   placement?: Extract<ContactPlacement, 'bar' | 'thanks'>;
-  service?: string;
+  service?: ServiceSlug;
 }
 
 const { class: className = '', placement = 'bar', service } = Astro.props;

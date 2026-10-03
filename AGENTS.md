@@ -319,15 +319,20 @@ Both new apps follow the same shape, and a third should too:
   `text`. Viber's chat link has no such parameter, so Viber tiles stay bare —
   asymmetry by platform, not by choice.
 - **A Telegram tile carries a `?start=` payload, not a prefill.** It opens the
-  brand's capture bot, built from `telegramBotLink` and `captureStartPayload`
-  in `@podbor/site-kit/contact-links` over `BRAND.captureBot`, and `?start=` and
-  `?text=` are different parameters, so `messengerPrefill` never reaches
+  brand's capture bot through `captureBotLink` in
+  `@podbor/site-kit/contact-links`, which every app binds once over its own
+  `BRAND.captureBot` as `telegramBotHref(locale, service?)` in
+  `src/utils/contactLinks.ts` — a tile calls that, never the bot name. `?start=`
+  and `?text=` are different parameters, so `messengerPrefill` never reaches
   Telegram. The payload is `<service>_<locale>`, or the locale alone where the
   page has no service (the homepage, the footer, the floating widget, the
-  contacts page). The tile keeps `data-contact-channel="telegram"` so the
-  Metrika goal still fires, but a Telegram tap stores no Lead — the bot writes
-  a better one a moment later, so
-  `defineContactClickTracking`'s second predicate excludes the channel.
+  contacts page); a component that sits on a service page takes the slug as a
+  prop rather than reading it off the path. The tile keeps
+  `data-contact-channel="telegram"` so the Metrika goal still fires, but a
+  Telegram tap stores no Lead — the bot writes a better one a moment later, so
+  `defineContactClickTracking`'s second predicate is `storesContactClickLead`
+  from `@podbor/site-kit/browser`, one named export rather than the same lambda
+  in three layouts.
 - **The lead modal takes its service from the trigger.** `data-lead-service` on
   a button sets the form's `service` when the modal opens; `data-default-service`
   on the form is what it resets to when the trigger names none. Both constants

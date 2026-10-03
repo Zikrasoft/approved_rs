@@ -1782,6 +1782,26 @@ describe('the capture lookups', () => {
       lead.id,
     );
   });
+
+  it('finds the newest number a closed lead of the same brand holds', async () => {
+    await fromTelegram(42, { contact: '+381600000001' });
+    const newer = await fromTelegram(42, { contact: '+381600000002' });
+    await store.setStatus(newer.id, 'won');
+
+    expect(await store.findPhoneByTelegramId(42, baseData.brand)).toBe(
+      '+381600000002',
+    );
+  });
+
+  it('ignores a handle, a deep link and another brand', async () => {
+    await fromTelegram(42, { contact: '@ivan' });
+    await fromTelegram(42, { contact: 'tg://user?id=42' });
+    await fromTelegram(42, { brand: 'CarLab', contact: '+381600000003' });
+
+    expect(
+      await store.findPhoneByTelegramId(42, baseData.brand),
+    ).toBeUndefined();
+  });
 });
 
 describe('updateCapture', () => {

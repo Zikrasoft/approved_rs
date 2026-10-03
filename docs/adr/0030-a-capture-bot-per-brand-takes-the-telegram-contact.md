@@ -69,8 +69,8 @@ nothing.
 **The card is posted on `/start` and edited as answers arrive.** Posting it at the end of the dialog
 would hide exactly the people this decision exists for: the contact is already captured by then, so
 an abandoned dialog is a success, not noise. The questions themselves are per-brand copy in each
-app's own `src/content/i18n/*.yaml` — visitor-facing, so all five locales, filled by the existing
-translate job — not operator-facing Russian in the package.
+app's own `src/content/i18n/*.yaml` — visitor-facing, so every locale that site serves, filled by
+the existing translate job — not operator-facing Russian in the package.
 
 **A Telegram tile no longer creates a contact click.** The capture bot writes a better Lead a moment
 later, so the beacon would only produce a duplicate and a ghost. The `contact_click` goal still fires

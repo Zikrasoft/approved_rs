@@ -27,6 +27,7 @@ import {
 import { getSiteContent } from '@/i18n/content/site';
 import { DEV_MODE_INLINE } from '@/scripts/devMode';
 import { SHOP_STATUS } from '@/utils/shopStatus';
+import type { ServiceSlug } from '@/utils/services';
 
 interface Props {
   title: string;
@@ -34,6 +35,7 @@ interface Props {
   noindex?: boolean;
   jsonLd?: Record<string, unknown>[];
   stickyContact?: boolean;
+  service?: ServiceSlug;
   preloadImage?: { src: string; srcset: string; sizes: string };
 }
 
@@ -44,6 +46,7 @@ const {
   noindex = false,
   jsonLd = [],
   stickyContact = true,
+  service,
 } = Astro.props;
 
 const locale = localeFrom(Astro.url.pathname);
@@ -198,7 +201,7 @@ const businessSchema = {
       <slot />
     </main>
     <SiteFooter />
-    {stickyContact && <StickyContactBar />}
+    {stickyContact && <StickyContactBar service={service} />}
     <LeadModal />
     <CookieConsent />
 
@@ -209,6 +212,7 @@ const businessSchema = {
         defineContactClickTracking,
         defineFunnelTracking,
         defineLanguageSuggestion,
+        storesContactClickLead,
       } from '@podbor/site-kit/browser';
       import {
         applyPreferredContactOrder,
@@ -219,7 +223,7 @@ const businessSchema = {
       if (!import.meta.env.DEV) defineAnalytics({ ymCounterId: YM_COUNTER_ID });
       defineContactClickTracking(
         isTrackedContactChannel,
-        (channel) => channel !== 'telegram',
+        storesContactClickLead,
       );
       applyPreferredContactOrder();
       applyPrimaryContactChannel();
