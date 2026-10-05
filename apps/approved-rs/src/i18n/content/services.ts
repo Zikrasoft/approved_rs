@@ -231,6 +231,8 @@ export interface ServicesContent {
     }) => string;
     ctaEyebrow: string;
     ctaHeading: string;
+    formHeading: string;
+    formText: string;
     ctaButtonLabel: string;
     whatsappButtonLabel: string;
     viberButtonLabel: string;
