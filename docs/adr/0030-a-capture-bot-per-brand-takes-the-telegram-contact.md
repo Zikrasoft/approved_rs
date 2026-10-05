@@ -2,6 +2,14 @@
 status: accepted
 ---
 
+## Amended 2026-10-06: a Telegram tap stores a contact click again, for its page
+
+This ADR held that a Telegram tile creates no contact click, because the bot's Lead would only be duplicated by it. That left every bot Lead without a page: `/start` carries at most 64 characters of `[A-Za-z0-9_-]`, so the URL the visitor tapped from cannot ride in it, and the operator card had no `Страница:` line.
+
+So the tap beacons a contact click again, carrying the page and the visitor id, and the tile appends that id to the `?start=` payload as a last `_<32 hex>` segment — `stampStartVisitor` and `readStartVisitor` in `@podbor/site-kit/contact-links`, one owner for both ends. The bot creates its Lead through `insertOrMergeLead`, which lets a Lead carrying a `telegramId` absorb only a placeholder click, never a form Lead; whichever of the two writes lands second fills the gap, so the page survives either order. The duplicate this ADR feared does not appear: one Lead, one card, which the CRM now marks `🤖 через бота`.
+
+What is still true: a tap that never reaches Start is now a Ghost lead again, retired by [ADR-0029](0029-ghost-leads-retire-themselves.md) like the other channels. A tap that cannot carry the id — analytics declined, or a payload past 64 characters — beacons nothing, so the bot writes its Lead alone and without a page rather than leaving a second, unmergeable card. The `contact_click` goal fires either way.
+
 # A capture bot per brand takes the Telegram contact before the conversation starts
 
 Decided 2026-10-03.
