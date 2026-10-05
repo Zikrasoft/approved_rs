@@ -734,8 +734,10 @@ caseChrome:
   realCaseFallback: Реальный кейс.
   metaTitleFor: '{car} {year} — {service} {location}, {price}'
   metaOriginFor: из {country}
-  ctaEyebrow: Нужна такая же услуга?
-  ctaHeading: Обсудим ваш автомобиль
+  ctaEyebrow: Подробнее об услуге
+  ctaHeading: Как проходит такая сделка
+  formHeading: Хотите такую же сделку?
+  formText: Оставьте контакт — обсудим машину, бюджет и сроки.
   ctaButtonLabel: Написать в Telegram
   whatsappButtonLabel: Написать в WhatsApp
   viberButtonLabel: Написать в Viber
