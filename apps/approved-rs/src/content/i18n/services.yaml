@@ -6,7 +6,7 @@ vehicle-sourcing:
     titleHighlight: под ключ
     description: Подбираем автомобиль в стране, где вы находитесь или планируете покупку, — полная проверка, сопровождение сделки и доставка под ключ. Выберите страну, чтобы увидеть детали.
     breadcrumbLabel: Автоподбор
-    casesHeading: Кейсы автоподбора
+    casesHeading: Реальные сделки по автоподбору
     chooseCountryLabel: 'Выберите страну:'
     ctaLabel: Подобрать авто
     processHeading: Как проходит подбор
@@ -54,7 +54,7 @@ vehicle-sourcing:
   title: Автоподбор под ключ
   descriptionFor: Подберём автомобиль {location} — среди тех, что уже в этой стране, без ввоза из-за рубежа. Полная проверка, сопровождение сделки и доставка до вашего города.
   ctaLabel: Оставить заявку
-  casesHeadingFor: 'Кейсы: автоподбор {location}'
+  casesHeadingFor: 'Реальные сделки: автоподбор {location}'
   breadcrumbLabelFor: Авто {location}
   stepsFor:
     - n: '01'
@@ -165,7 +165,7 @@ vehicle-buyback:
     description: >-
       Забираем машину, которую тяжело продать обычным способом: русские номера, просроченный ввоз, спорные документы. Цена ниже рыночной — это плата за скорость и за то, что все хлопоты по продаже мы берём на себя.
     breadcrumbLabel: Выкуп авто
-    casesHeading: Кейсы выкупа
+    casesHeading: Реальные сделки по выкупу
     chooseCountryLabel: 'Выберите страну:'
     ctaLabel: Получить оценку
     processHeading: Как проходит выкуп
@@ -207,7 +207,7 @@ vehicle-buyback:
     heroPhotoAlt: Ключи от машины на деньгах и документах
   title: Выкуп авто
   ctaLabel: Получить оценку
-  casesHeading: Кейсы выкупа
+  casesHeading: Реальные сделки по выкупу
   breadcrumbLabel: Выкуп авто
   descriptionSerbia: Выкупаем автомобили на русских номерах ниже рыночной цены — машина может находиться в любой стране Европы. Также выкупаем авто на сербских номерах в Сербии и Черногории. Оценка онлайн, оформление за 1 день, перевод в день сделки.
   descriptionOtherFor: Выкупаем автомобили на русских номерах ниже рыночной цены — машина может находиться в любой стране Европы, включая {name}. Оценка онлайн, оформление за 1 день, перевод в день сделки.
@@ -233,7 +233,7 @@ vehicle-import:
     titleHighlight: из Европы и Китая
     description: Машина — в Европе или Китае, вы — где угодно. Подбираем, проверяем и привозим её к вам под ключ, включая растаможку.
     breadcrumbLabel: Привоз авто
-    casesHeading: Кейсы привоза
+    casesHeading: Реальные сделки по привозу
     euCardTitle: Из Европы
     euCardText: Испания, Швейцария и другие страны — подбор и доставка в любую точку.
     chinaCardTitle: Из Китая
@@ -285,7 +285,7 @@ vehicle-import:
     description: 'Подбираем машину из Германии и привозим к вам, где бы вы ни находились: проверка, оформление и растаможка под ключ.'
     ctaLabel: Оставить заявку
     breadcrumbLabel: Авто из Германии
-    casesHeading: 'Кейсы: авто из Германии'
+    casesHeading: 'Реальные сделки: авто из Германии'
     steps:
       - &a1
         n: '01'
@@ -322,7 +322,7 @@ vehicle-import:
     description: 'Подбираем машину из Испании и привозим к вам, где бы вы ни находились: проверка, оформление и растаможка под ключ.'
     ctaLabel: Оставить заявку
     breadcrumbLabel: Авто из Испании
-    casesHeading: 'Кейсы: авто из Испании'
+    casesHeading: 'Реальные сделки: авто из Испании'
     steps:
       - *a1
       - n: '02'
@@ -350,7 +350,7 @@ vehicle-import:
     description: 'Подбираем машину из Швейцарии и привозим к вам, где бы вы ни находились: проверка, оформление и растаможка под ключ.'
     ctaLabel: Оставить заявку
     breadcrumbLabel: Авто из Швейцарии
-    casesHeading: 'Кейсы: авто из Швейцарии'
+    casesHeading: 'Реальные сделки: авто из Швейцарии'
     steps:
       - *a1
       - n: '02'
@@ -378,7 +378,7 @@ vehicle-import:
     description: 'Подбираем машину из Европы — Германия, Испания, Швейцария и другие европейские страны — и привозим к вам, где бы вы ни находились: проверка, оформление и растаможка под ключ.'
     ctaLabel: Оставить заявку
     breadcrumbLabel: Авто из Европы
-    casesHeading: 'Кейсы: авто из Европы'
+    casesHeading: 'Реальные сделки: авто из Европы'
     steps:
       - *a1
       - n: '02'
@@ -407,7 +407,7 @@ vehicle-import:
     description: Подбираем машину из Китая и привозим к вам, где бы вы ни находились, — напрямую через проверенного партнёра по логистике, под ключ, включая растаможку.
     ctaLabel: Оставить заявку
     breadcrumbLabel: Авто из Китая
-    casesHeading: 'Кейсы: авто из Китая'
+    casesHeading: 'Реальные сделки: авто из Китая'
     steps:
       - *a1
       - n: '02'
@@ -447,7 +447,7 @@ vehicle-inspection:
     description: >-
       Выезжаем к машине, которую вы нашли сами, и рассказываем, что с ней на самом деле. Отчёт приходит до того, как вы отдадите деньги: если ответ «не берите», вы теряете только стоимость проверки.
     breadcrumbLabel: Проверка авто
-    casesHeading: Кейсы проверки
+    casesHeading: 'Реальные сделки: проверка перед покупкой'
     chooseCountryLabel: 'Выберите страну:'
     ctaLabel: Заказать проверку
     processHeading: Как проходит проверка
@@ -498,7 +498,7 @@ vehicle-inspection:
   title: Проверка авто
   description: Независимая проверка автомобиля перед покупкой. Выезд эксперта, диагностика, отчёт — без обязательства покупки.
   ctaLabel: Заказать проверку
-  casesHeading: Кейсы проверки
+  casesHeading: 'Реальные сделки: проверка перед покупкой'
   breadcrumbLabel: Проверка авто
   steps:
     - n: '01'
@@ -590,7 +590,7 @@ vehicle-inspection:
 cityVehicleSourcing:
   title: Автоподбор
   descriptionFor: Подберём автомобиль {cityLocation} с полной проверкой. Работаем по всему региону {countryName}.
-  casesHeadingFor: Кейсы из {countryGenitiveOrName}
+  casesHeadingFor: 'Реальные сделки: авто из {countryGenitiveOrName}'
   whyCityHeadingFor: Почему {cityName}
   reason1: Смотрим и дилерские площадки, и частные объявления
   reason2: Историю по VIN проверяем до выезда на осмотр
@@ -731,7 +731,7 @@ caseChrome:
   autoLabel: Авто
   yearLabel: Год
   priceLabel: Цена
-  realCaseFallback: Реальный кейс.
+  realCaseFallback: Реальная сделка.
   metaTitleFor: '{car} {year} — {service} {location}, {price}'
   metaOriginFor: из {country}
   ctaEyebrow: Нужна такая же услуга?
@@ -743,8 +743,8 @@ caseChrome:
   callbackShortLabel: Звонок
   callButtonLabel: Позвонить
   messengerPrefill: Здравствуйте! Пишу с сайта Approved — интересует подбор автомобиля.
-  channelBannerTitle: Ещё больше кейсов
-  channelBannerText: Публикуем новые кейсы, процесс подбора и полезные советы.
+  channelBannerTitle: Ещё больше сделок
+  channelBannerText: Публикуем новые сделки, рассказываем, как идёт подбор, и делимся советами.
   channelBannerCta: Подписаться
   usefulInfoLabel: Полезная информация
   serviceBadges:
