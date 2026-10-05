@@ -3,6 +3,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
 import ContactCTA from '@/components/ContactCTA.astro';
+import LeadForm from '@/components/LeadForm.astro';
 import Price from '@/components/Price.astro';
 import CaseGallery from '@/components/CaseGallery.astro';
 import PromoBanner from '@/components/PromoBanner.astro';
@@ -227,7 +228,6 @@ const schema = generateArticleSchema({
   </section>
 
   <div class="max-w-4xl mx-auto px-6">
-    <!-- Content -->
     <div class="py-12 prose-custom">
       {
         translatedHtml ? (
@@ -243,18 +243,26 @@ const schema = generateArticleSchema({
       }
     </div>
 
-    <!-- More photos -->
+    <section
+      id="case-form"
+      class="py-10 border-t border-default scroll-mt-20 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10 items-start"
+    >
+      <div>
+        <h2 class="font-display text-3xl font-bold mb-3">{cc.formHeading}</h2>
+        <p class="text-base leading-relaxed text-muted">{cc.formText}</p>
+        <ContactCTA service={c.data.service} />
+      </div>
+      <LeadForm service={c.data.service} country={c.data.country} />
+    </section>
+
     <CaseGallery images={c.data.gallery} name={c.data.car} />
 
-    <!-- SEO banner -->
     <PromoBanner label={cc.usefulInfoLabel} {banners} />
 
-    <!-- Channel promo -->
     <ChannelBanner />
 
     <PartnerBrands />
 
-    <!-- CTA -->
     <div class="py-10 border-t mb-16 border-default">
       <p class="text-xs tracking-widest uppercase mb-2 font-medium text-accent">
         {cc.ctaEyebrow}
@@ -262,12 +270,11 @@ const schema = generateArticleSchema({
       <h2 class="font-display text-3xl font-bold mb-3">{cc.ctaHeading}</h2>
       <a
         href={serviceHref}
-        class="group inline-flex items-center gap-1.5 text-sm font-semibold mb-6 text-accent"
+        class="group inline-flex items-center gap-1.5 text-sm font-semibold text-accent"
       >
         {t.nav[c.data.service]}
         <span class="transition-transform group-hover:translate-x-0.5">→</span>
       </a>
-      <ContactCTA label={cc.ctaButtonLabel} service={c.data.service} />
     </div>
   </div>
 </BaseLayout>

@@ -267,6 +267,8 @@ export const servicesContentSchema = z
         metaOriginFor: z.string(),
         ctaEyebrow: z.string(),
         ctaHeading: z.string(),
+        formHeading: z.string(),
+        formText: z.string(),
         ctaButtonLabel: z.string(),
         whatsappButtonLabel: z.string(),
         viberButtonLabel: z.string(),
