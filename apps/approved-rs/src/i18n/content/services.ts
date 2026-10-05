@@ -233,6 +233,9 @@ export interface ServicesContent {
     ctaHeading: string;
     formHeading: string;
     formText: string;
+    doorHeading: string;
+    doorText: string;
+    doorButtonLabel: string;
     ctaButtonLabel: string;
     whatsappButtonLabel: string;
     viberButtonLabel: string;
