@@ -82,6 +82,15 @@ at all, built but hidden and unindexed, or public
 **Source locale** — the language content is authored in (`ru`). Not the language
 a site presents by default; that is the site's **primary locale**.
 
+**Case study** — one finished deal shown as proof: the car, the price paid and
+the outcome. Visitors see it as a «реальная сделка»; "case study" is the name in
+code and in this glossary. The brand sites call theirs works.
+_Avoid_: case (bare), кейс in visitor copy.
+
+**Browsing depth** — how many distinct Case studies one visitor has opened in
+one visit, the current one included. A visit ends after 30 minutes without
+opening another, the same length as Metrika's visit timeout.
+
 **Hand-written translation** — a translation a person wrote instead of the
 model. It is adopted and served, but only while the file's Russian source is
 unchanged.

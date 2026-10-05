@@ -95,7 +95,10 @@ const businessSchema = {
 ---
 
 <!doctype html>
-<html lang={BCP47_BY_LOCALE[locale]}>
+<html
+  lang={BCP47_BY_LOCALE[locale]}
+  class="[&:has(language-suggestion:not([hidden]))]:scroll-pt-16"
+>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

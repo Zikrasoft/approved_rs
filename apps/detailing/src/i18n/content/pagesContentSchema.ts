@@ -13,6 +13,9 @@ export const pagesContentSchema = z
         detailMetaSuffix: z.string(),
         detailCtaHeading: z.string(),
         detailCtaBody: z.string(),
+        doorHeading: z.string(),
+        doorText: z.string(),
+        doorButtonLabel: z.string(),
       })
       .strict(),
     contact: z

@@ -28,9 +28,10 @@ contracts** a package owns, and an app that breaks one fails silently:
 `packages/site-kit` owns `data-contact-order` / `data-channel` /
 `data-primary-contact` / `data-primary-channel` (preferred contact channel),
 `data-lead-form` / `data-brand-link` / `data-field` / `aria-invalid` (funnel
-tracking) and `data-contact-channel` / `data-contact-placement` (contact
-clicks, whose placement half `.github/scripts/contact-placement.ts` enforces
-against the built HTML).
+tracking), `data-depth-slug` / `data-depth-door` / `data-revealed` (browsing
+depth on case and work pages) and `data-contact-channel` /
+`data-contact-placement` (contact clicks, whose placement half
+`.github/scripts/contact-placement.ts` enforces against the built HTML).
 
 Each of the three sites owns its own `astro.config.mjs`, `keystatic.config.ts`,
 `vercel.json` and `vitest.config.ts`; every workspace app, `apps/medusa`
