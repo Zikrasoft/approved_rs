@@ -49,13 +49,13 @@ Pages are classified as follows:
 
 ## 1. Reach
 
-| | Visits | Share of 305 |
-| --- | --- | --- |
-| Any `/cases/` page | 62 | 20% |
-| A tab page | 35 | 11% |
-| An individual case | 47 | 15% |
-| Both tab and case | 20 | |
-| Case without any tab | 27 | |
+|                      | Visits | Share of 305 |
+| -------------------- | ------ | ------------ |
+| Any `/cases/` page   | 62     | 20%          |
+| A tab page           | 35     | 11%          |
+| An individual case   | 47     | 15%          |
+| Both tab and case    | 20     |              |
+| Case without any tab | 27     |              |
 
 Pageviews: 84 on cases and 61 on tabs, against 299 on service pages and 255 on
 the homepage. The most viewed cases were alfa-romeo-giulia (16 hits), vw-tiguan
@@ -64,10 +64,10 @@ the homepage. The most viewed cases were alfa-romeo-giulia (16 hits), vw-tiguan
 ## 2. Cases opened per visit (n = 47)
 
 | Cases | Visits |
-| --- | --- |
-| 1 | 32 |
-| 2 | 6 |
-| 3+ | 9 |
+| ----- | ------ |
+| 1     | 32     |
+| 2     | 6      |
+| 3+    | 9      |
 
 This can be answered from the logs, but only after the fact. Nothing on the page
 knows the depth, so a mechanic that reacts to depth needs its own per-visit
@@ -80,12 +80,12 @@ counter. Nothing in `packages/site-kit` counts pages today, and no app uses
 matching auto-goal). "Contact" means `contact_click` or the messenger/phone
 auto-goals.
 
-| Group | n | Form | Contact | Either |
-| --- | --- | --- | --- | --- |
-| Viewed ≥1 case | 47 | 1 | 4 | 5 (11%) |
-| Viewed any `/cases/` page | 62 | 4 | 6 | 9 (15%) |
-| No `/cases/` page | 243 | 12 | 19 | 27 (11%) |
-| No `/cases/`, ≥2 pageviews | 88 | 8 | 11 | ~19 |
+| Group                      | n   | Form | Contact | Either   |
+| -------------------------- | --- | ---- | ------- | -------- |
+| Viewed ≥1 case             | 47  | 1    | 4       | 5 (11%)  |
+| Viewed any `/cases/` page  | 62  | 4    | 6       | 9 (15%)  |
+| No `/cases/` page          | 243 | 12   | 19      | 27 (11%) |
+| No `/cases/`, ≥2 pageviews | 88  | 8    | 11      | ~19      |
 
 The 5 converting case visits were checked one by one:
 
@@ -97,28 +97,28 @@ The 5 converting case visits were checked one by one:
 
 ## 4. Where case views come from (84 views)
 
-| Previous page | Views |
-| --- | --- |
-| Another case | 27 |
-| Tab | 22 |
-| Service page | 17 |
-| Homepage | 9 |
-| Landing (no previous page) | 9 |
+| Previous page              | Views |
+| -------------------------- | ----- |
+| Another case               | 27    |
+| Tab                        | 22    |
+| Service page               | 17    |
+| Homepage                   | 9     |
+| Landing (no previous page) | 9     |
 
 The 9 landings were 5 direct, 2 organic search, and 2 with an approved.rs
 referrer from an earlier visit.
 
 ## 5. Where case views go (84 views)
 
-| Next page | Views |
-| --- | --- |
-| Exit | 28 |
-| Another case | 27 |
-| Tab | 11 |
-| Service page | 11 |
-| Homepage | 3 |
-| Other | 3 |
-| `/thanks/` | 1 |
+| Next page    | Views |
+| ------------ | ----- |
+| Exit         | 28    |
+| Another case | 27    |
+| Tab          | 11    |
+| Service page | 11    |
+| Homepage     | 3     |
+| Other        | 3     |
+| `/thanks/`   | 1     |
 
 None of the 28 exits opened the modal or clicked a contact on the case page
 first.
@@ -129,11 +129,11 @@ first.
 the page they fired on as their referrer, so they can be attributed to a page.
 
 | Page class | Views since 09-24 | With `scroll_90` | Rate |
-| --- | --- | --- | --- |
-| Case | 34 | 4 | ~12% |
-| Tab | 19 | 5 | ~26% |
-| Service | 86 | 17 | ~20% |
-| Homepage | 81 | 4 | ~5% |
+| ---------- | ----------------- | ---------------- | ---- |
+| Case       | 34                | 4                | ~12% |
+| Tab        | 19                | 5                | ~26% |
+| Service    | 86                | 17               | ~20% |
+| Homepage   | 81                | 4                | ~5%  |
 
 ## What could not be answered
 

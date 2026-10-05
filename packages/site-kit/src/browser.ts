@@ -1,9 +1,6 @@
 import { readOrCreateVisitorId } from './visitorId.ts';
 export { defineAnalytics, type AnalyticsConfig } from './analytics.ts';
-export {
-  defineContactClickTracking,
-  storesContactClickLead,
-} from './contactClick.ts';
+export { defineContactClickTracking } from './contactClick.ts';
 export { defineFunnelTracking } from './funnel.ts';
 export {
   defineBrowsingDepth,

@@ -102,6 +102,14 @@ function newestOpen(
 
 const MAX_STORED_COMMENT_LENGTH = 4000;
 
+function triedLabel(data: LeadInput): string {
+  if (data.services?.length) return data.services.join(', ');
+  if (data.service) return data.service;
+  return data.kind === 'call_click' && data.contactChannel
+    ? channelLabel(data.contactChannel)
+    : '';
+}
+
 export function appendNote(
   comment: string | null | undefined,
   note: string,
@@ -304,7 +312,9 @@ export function createLeadStore({
                 l.brand === data.brand &&
                 l.status === 'new' &&
                 !l.archived &&
-                now - new Date(l.createdAt).getTime() < VISITOR_MERGE_WINDOW_MS,
+                now - new Date(l.createdAt).getTime() <
+                  VISITOR_MERGE_WINDOW_MS &&
+                (data.telegramId == null || isPlaceholderContact(l.contact)),
             )
           : undefined;
 
@@ -317,13 +327,13 @@ export function createLeadStore({
         const upgradeContact =
           isPlaceholderContact(existing.contact) &&
           !isPlaceholderContact(data.contact);
-        const triedLabel =
-          (data.services?.length ? data.services.join(', ') : data.service) ||
-          (data.kind === 'call_click' && data.contactChannel
-            ? channelLabel(data.contactChannel)
-            : '');
+        const botHandOff =
+          (data.telegramId ?? existing.telegramId) != null &&
+          data.contactChannel === existing.contactChannel;
+        const tried = botHandOff ? '' : triedLabel(data);
         const clickedFirst =
           upgradeContact &&
+          !botHandOff &&
           existing.kind === 'call_click' &&
           existing.contactChannel
             ? channelLabel(existing.contactChannel)
@@ -342,11 +352,14 @@ export function createLeadStore({
                 kind: data.kind ?? existing.kind,
               }
             : {}),
+          source_url: existing.source_url ?? data.source_url,
+          telegramId: data.telegramId ?? existing.telegramId,
+          capturePrompt: data.capturePrompt ?? existing.capturePrompt,
           comment: appendNote(
             existing.comment,
             [
               clickedFirst ? `Сначала кликнул: ${clickedFirst}` : '',
-              triedLabel ? `Также пробовал: ${triedLabel}` : '',
+              tried ? `Также пробовал: ${tried}` : '',
               data.comment?.trim(),
             ]
               .filter(Boolean)

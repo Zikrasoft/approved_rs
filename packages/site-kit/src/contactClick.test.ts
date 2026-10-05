@@ -1,15 +1,17 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import {
-  defineContactClickTracking,
-  storesContactClickLead,
-} from './contactClick.ts';
+import { defineContactClickTracking } from './contactClick.ts';
 import { VISITOR_ID_STORAGE_KEY } from './visitorId.ts';
 
 const isTracked = (channel: string | undefined): channel is string =>
   channel === 'telegram' || channel === 'whatsapp' || channel === 'viber';
 
-const storesLead = () => true;
+const UUID = '0f8fad5b-d9cb-469f-a165-70867728950e';
+
+const link = () =>
+  document.querySelector<HTMLAnchorElement>(
+    '[data-contact-channel="telegram"]',
+  )!;
 
 let sent: [string, FormData][];
 
@@ -41,7 +43,7 @@ const click = (channel: string) =>
 
 describe('defineContactClickTracking', () => {
   it('beacons a tracked channel to the lead route with the page it happened on', () => {
-    defineContactClickTracking(isTracked, storesLead);
+    defineContactClickTracking(isTracked);
     click('telegram');
     expect(sent).toHaveLength(1);
     const [url, body] = sent[0]!;
@@ -53,13 +55,13 @@ describe('defineContactClickTracking', () => {
 
   it('reuses the visitor id a previous click already minted', () => {
     localStorage.setItem(VISITOR_ID_STORAGE_KEY, 'earlier-id');
-    defineContactClickTracking(isTracked, storesLead);
+    defineContactClickTracking(isTracked);
     click('telegram');
     expect(sent[0]![1].get('visitor_id')).toBe('earlier-id');
   });
 
   it('reports the same click to the analytics counter', () => {
-    defineContactClickTracking(isTracked, storesLead);
+    defineContactClickTracking(isTracked);
     click('telegram');
     expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
       channel: 'telegram',
@@ -68,7 +70,7 @@ describe('defineContactClickTracking', () => {
   });
 
   it('reports the placement the tapped control sits in', () => {
-    defineContactClickTracking(isTracked, storesLead);
+    defineContactClickTracking(isTracked);
     click('whatsapp');
     expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
       channel: 'whatsapp',
@@ -77,7 +79,7 @@ describe('defineContactClickTracking', () => {
   });
 
   it('still reports a usable goal where no placement is stamped', () => {
-    defineContactClickTracking(isTracked, storesLead);
+    defineContactClickTracking(isTracked);
     click('viber');
     expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
       channel: 'viber',
@@ -86,32 +88,59 @@ describe('defineContactClickTracking', () => {
   });
 
   it('leaves the button that only opens the form out of the contact count', () => {
-    defineContactClickTracking(isTracked, storesLead);
+    defineContactClickTracking(isTracked);
     click('callback');
     expect(sent).toEqual([]);
     expect(window.ymReachGoal).not.toHaveBeenCalled();
   });
 
-  it('counts the tap but writes no lead for a channel that stores none', () => {
-    defineContactClickTracking(isTracked, storesContactClickLead);
+  it('writes a lead for a Telegram tap too, so the bot can pick up its page', () => {
+    defineContactClickTracking(isTracked);
     click('telegram');
-    expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
-      channel: 'telegram',
-      placement: 'footer',
-    });
-    expect(sent).toEqual([]);
+    expect(sent).toHaveLength(1);
+    expect(sent[0]![1].get('channel')).toBe('telegram');
   });
 
-  it('still writes a lead for the channels that do store one', () => {
-    defineContactClickTracking(isTracked, storesContactClickLead);
-    click('viber');
+  it('appends the compact visitor id to a capture-bot start payload, once', () => {
+    localStorage.setItem(VISITOR_ID_STORAGE_KEY, UUID);
+    document.body.innerHTML = `<a data-contact-channel="telegram" href="https://t.me/Bot?start=detailing_sr">T</a>`;
+    defineContactClickTracking(isTracked);
+    click('telegram');
+    click('telegram');
+    expect(link().href).toBe(
+      `https://t.me/Bot?start=detailing_sr_${UUID.replaceAll('-', '')}`,
+    );
+  });
+
+  it('beacons a Telegram link that opens no capture bot as usual', () => {
+    localStorage.setItem(VISITOR_ID_STORAGE_KEY, UUID);
+    document.body.innerHTML = `<a data-contact-channel="telegram" href="https://t.me/Bot">T</a>`;
+    defineContactClickTracking(isTracked);
+    click('telegram');
+    expect(link().href).toBe('https://t.me/Bot');
     expect(sent).toHaveLength(1);
-    expect(sent[0]![1].get('channel')).toBe('viber');
+  });
+
+  it.each([
+    ['a visitor id that is not a uuid', 'https://t.me/Bot?start=sr', 'odd-id'],
+    [
+      'a payload that would outgrow 64 characters',
+      `https://t.me/Bot?start=${'x'.repeat(32)}`,
+      UUID,
+    ],
+  ])('leaves the bot to write the lead alone for %s', (_, href, visitorId) => {
+    localStorage.setItem(VISITOR_ID_STORAGE_KEY, visitorId);
+    document.body.innerHTML = `<a data-contact-channel="telegram" href="${href}">T</a>`;
+    defineContactClickTracking(isTracked);
+    click('telegram');
+    expect(link().href).toBe(href);
+    expect(sent).toEqual([]);
+    expect(window.ymReachGoal).toHaveBeenCalled();
   });
 
   it('still records the click on a page where analytics never loaded', () => {
     delete (window as Partial<Window>).ymReachGoal;
-    defineContactClickTracking(isTracked, storesLead);
+    defineContactClickTracking(isTracked);
     expect(() => click('telegram')).not.toThrow();
     expect(sent).toHaveLength(1);
   });
