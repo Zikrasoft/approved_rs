@@ -26,15 +26,15 @@ translations:
   sr:
     title: BMW X1
     body: |-
-      ## Autoizbor u Srbiji: Viktor je došao po Peugeot, a otišao na BMW X1
+      ## Auto-sourcing u Srbiji: Viktor je došao po Peugeot, a otišao u BMW X1
 
-      Viktor se obratio nama još pre nego što je dobio boravišnu dozvolu u Srbiji. Odmah smo ga obavestili da može da registruje vozilo na svoje ime tek nakon dobijanja dozvole, pa je izbor automobila jedno vreme bio odložen. Nakon nekoliko meseci, u julu 2026. godine, kada su dokumenta stigla, krenuli smo u potragu za automobilom.
+      Viktor nam se obratio još pre nego što je dobio boravišnu dozvolu u Srbiji. Odmah smo ga obavestili da može registrovati automobil na svoje ime tek nakon dobijanja boravišne dozvole, pa smo morali malo odložiti pretragu. Nakon nekoliko meseci, u julu 2026. godine, kada su dokumenti konačno bili u redu, krenuli smo u potragu za automobilom.
 
-      Tokom tog perioda, Viktorova očekivanja se promenila. Prvobitno je razmišljao o **Peugeotu**, ali nakon što smo razgovarali o svim prednostima i manama, odlučio se da obrate pažnju na pouzdaniju opciju — **BMW X1**.
+      Tokom tog vremena, Viktorove želje za automobilom su se promenile. Prvobitno je razmatrao **Peugeot**, ali nakon razgovora o svim prednostima i manama odlučio je da se fokusira na pouzdaniju opciju — **BMW X1**.
 
-      Zahvaljujući tome što koristimo **公式na BMW ISTA dijagnostiku**, automobil je detaljno pregledan. Dijagnostika je pokazala odličnu stanje motora: **timinga lanac**, **mlaznice**, **EGR sistem** i ostali parametri su bili u normalnom opsegu. Automobil je opremljen pouzdanim **2,0-litarskim dizel motorom B47** i **8-stepenom automatskom transmisijom Aisin**, koji su se pokazali kao jedni od najuspešnijih u svojoj klasi.
+      Zahvaljujući tome što koristimo **zvaničnu BMW ISTA dijagnostiku**, automobil je proveren na maksimalno detaljan način. Dijagnostika je pokazala odlično stanje motora: **razvodna lančanik**, **mlaznice**, **EGR sistem** i drugi parametri su bili u skladu sa normama. Automobil je opremljen pouzdanim **2,0-litarskim dizel motorom B47** i **8-stepenom automatskom transmisijom Aisin**, koji su se pokazali kao neki od najuspešnijih u svojoj klasi.
 
-      Na kraju, Viktor je dobio potpuno pregledan automobil sa transparentnom istorijom i bez skrivenih tehničkih problema.
+      Kao rezultat, Viktor je dobio potpuno provereni automobil sa transparentnom istorijom i bez skrivenih tehničkih problema.
   es:
     title: BMW X1
     body: |-

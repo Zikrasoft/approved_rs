@@ -22,19 +22,19 @@ translations:
   sr:
     title: Volkswagen Touareg
     body: |-
-      **Volkswagen Touareg 2024** iz Nemačke u Srbiju — još jedan odličan automobil uspešno pronađen, proveren, kupljen, rasterećen i dostavljen našem klijentu u Beograd.
+      **Volkswagen Touareg 2024** iz Nemačke u Srbiju — još jedan odličan automobil uspešno pronađen, proveren, kupljen, raspoređen i isporučen našem klijentu u Beogradu.
 
-      Ovoga puta zadatak je bio pronalaženje i dovođenje iz Nemačke Volkswagen Touareg 2024. godine sa **3.0-litarskim dizel motorom**. Punu pogon SUV ovog tipa jednako je praktičan u Beogradu, kao i na putu kroz pola Evrope.
+      Ovoga puta zadatak je bio pronaći i dovesti iz Nemačke Volkswagen Touareg 2024. godine sa **3.0-litarskim dizel motorom**. Punoopremljeni SUV ove veličine jednako je prikladan i u Beogradu, i na putu kroz pola Evrope.
 
-      Za našeg klijenta pronašli smo odgovarajući Volkswagen Touareg kod nemačkog dilera. Međutim, pronalaženje lepog oglasa je samo početak rada. Pre kupovine smo dugo razgovarali s menadžerom auto-salona u Nemačkoj, proveravali istoriju vozila, njegovo stanje, servisiranje, opremu i sve važne detalje.
+      Za našeg klijenta pronašli smo odgovarajući Volkswagen Touareg kod nemačkog dilera. Ali pronaći dobar oglas je samo početak posla. Pre kupovine dugo smo razgovarali sa menadžerom auto salona u Nemačkoj, razjašnjavali istoriju automobila, njegovo stanje, održavanje, opremu i sve važne detalje.
 
-      Sledeći korak bila je provera automobila putem **CarVertical**. Dodatno smo naručili izveštaj od dilera o Volkswagen-u, kako bismo dobili maksimalne dostupne informacije o istoriji konkretnog automobila. Tek nakon što je preliminarna provera pokazala dobre rezultate, poslali smo stručnjake direktno kod dilera na fizičku proveru Volkswagen Touareg na licu mesta u Nemačkoj.
+      Sledeći korak bila je provera automobila putem **CarVertical**. Dodatno smo naručili izveštaj od dilera o Volkswagen-u, kako bismo dobili maksimum dostupnih informacija o istoriji konkretnog automobila. Tek nakon što je preliminarna provera pokazala dobar rezultat, poslali smo naše stručnjake direktno kod dilera na fizičku provere Volkswagen Touareg na licu mesta u Nemačkoj.
 
-      Automobil je detaljno pregledan i provereno je njegovo stvarno stanje. I tek kada smo se uverili da ovaj Touareg zaista ispunjava naše zahteve i da ga možemo preporučiti klijentu za kupovinu, naša kompanija je izvršila uplatu direktno nemačkom dileru.
+      Automobil je pomno osmatran i provereno je njegovo stvarno stanje. I tek kada smo se uverili da ovaj Touareg zaista ispunjava naše zahteve i da ga možemo preporučiti klijentu za kupovinu, naša kompanija je izvršila uplatu direktno nemačkom dileru.
 
-      Nakon uplate, preuzeli smo Volkswagen Touareg od dilera i organizovali dostavu automobila iz Nemačke u Srbiju. Auto je dostavljen u **Suboticu**, gde je prošao proceduru carinjenja. Nakon završetka carinskog postupka, automobil je krenuo dalje — ka svom novom vlasniku u Beograd.
+      Nakon uplate, preuzeli smo Volkswagen Touareg od dilera i organizovali isporuku automobila iz Nemačke u Srbiju. Automobil je isporučen u **Suboticu**, gde je prošao kroz proceduru carinjenja. Nakon završetka carinskog postupka, automobil je krenuo dalje — ka svom novom vlasniku u Beograd.
 
-      Takođe smo u potpunosti pratili proces registracije automobila u Srbiji, kako bi klijent dobio već gotov rezultat bez potrebe da se sam snalazi kroz sve faze kupovine automobila u inostranstvu, transporta, carinjenja i registracije.
+      Takođe smo potpuno pratili proces registracije automobila u Srbiji, kako bi klijent dobio već gotov rezultat bez potrebe da se sam snalazi u svim fazama kupovine automobila u inostranstvu, transporta, carinjenja i registracije.
 
       Volkswagen Touareg 2024 već je u Beogradu.
   es:

@@ -61,64 +61,64 @@ translations:
 
       **Nikita and his wife's case conclusion:** we found a BMW 320 GT with an N47 engine producing 184 hp, a complete service history from an authorized BMW dealer, confirmed provenance from Germany, four years of use in Serbia, a verified timing chain, and two sets of wheels.
   sr:
-    title: "Autopodbor u Srbiji: kako smo pronašli BMW 320 GT za Nikitu i njegovu suprugu"
+    title: "Pretraga automobila u Srbiji: kako smo pronašli BMW 320 GT za Nikitu i njegovu suprugu"
     body: |-
-      Kupovina polovnog automobila u Srbiji nije jednostavna i zahteva mnogo više pažnje nego samo pregled oglasâ i kratka vožnja na testiranju. Ovo je posebno važno kada je reč o BMW-u, gde je važno proveriti ne samo karoseriju i tehničko stanje, već i istoriju održavanja, realan kilometražni status i stanje komponenti specifičnih za određeni motor.
+      Kupovina polovnog automobila u Srbiji je zadatak koji zahteva mnogo više pažnje nego samo pregled oglasa i kratka vožnja na probu. Posebno kada je reč o BMW-u, gde je važno proveriti ne samo karoseriju i tehničko stanje, već i istoriju servisiranja, actualni pređeni kilometražu i stanje delova specifičnih za određeni motor.
 
-      U okviru **autopodbor u Srbiji** pomogli smo Nikiti i njegovoj supruzi da pronađu BMW 320 GT — automobil koji je odgovarao njihovim zahtevima za udobnošću, praktičnošću i tehničkim stanjem.
+      U okviru **pretrage automobila u Srbiji** pomogli smo Nikiti i njegovoj supruzi da pronađu BMW 320 GT - auto koji je ispunjavao njihova očekivanja po pitanju udobnosti, praktičnosti i tehničkog stanja.
 
       ### BMW 320 GT sa motorom N47
 
-      Izabran automobil je **BMW 320d Gran Turismo** sa dizel motorom **N47D20** zapremine 2,0 litra. Snaga ove verzije iznosi **184 KS (135 kW)**.
+      Izabrani automobil je bio **BMW 320d Gran Turismo** sa dizel motorom **N47D20** zapremine 2.0 litra. Snaga ove verzije iznosi **184 KS (135 kW)**.
 
-      Posebno nam je bilo važno da se uverimo da je konkretan primerak zaista u dobrom stanju.
+      Za nas je bilo posebno važno da se uverimo da je konkretni primerak zaista u dobrom stanju.
 
-      Jedan od ključnih momenata bila je provera **lanca razvodnog mehanizma**. Kod automobila sa motorom N47 stanje lančanog pogona je ključno pitanje pri kupovini, pa smo dodatno proverili stepen istezanja lanca i uverili se da sa ovom komponentom nema kritičnih problema.
+      Jedan od ključnih trenutaka bila je provera **lanca bregaste osovine**. Kod automobila sa motorom N47, stanje lanca je ključno pitanje prilikom kupovine, tako da smo posebno proverili stepen istezanja lanca i uverili se da nema kritičnih problema sa tim delom.
 
-      ### Potpuna istorija održavanja BMW-a
+      ### Puna istorija servisiranja BMW-a
 
-      Velika prednost ovog automobila bila je **potpuna servisna istorija kod ovlašćenog BMW dela**.
+      Velika prednost ovog automobila je bila **puna servisna istorija kod ovlašćenog BMW servisera**.
 
-      Proverili smo istoriju održavanja i uporedili dostupne podatke kako bismo uverili da je automobil zaista redovno servisiran i da informacije o njegovom korišćenju odgovaraju stvarnosti.
+      Proverili smo istoriju servisiranja i uporedili dostupne podatke kako bismo se uverili da je automobil zaista redovno održavan i da informacije o njegovom korišćenju odgovaraju stvarnosti.
 
-      Ovo je posebno važno prilikom kupovine automobila u Srbiji, gde se mogu naći vozila sa nepotpunom istorijom, nepoznatim poreklom ili neusklađenim kilometražama.
+      To je posebno važno prilikom kupovine automobila u Srbiji, gde se često sreću vozila sa nepotpunom istorijom, nepoznatim poreklom ili neslaganjem između deklarisane i stvarne pređene kilometraže.
 
       ### Automobil iz Nemačke, četiri godine u Srbiji
 
-      BMW je prvobitno kupljen u **Nemačkoj**, a zatim je bio korišćen u Srbiji skoro četiri godine.
+      BMW je prvobitno kupljen u **Nemačkoj**, a zatim je oko četiri godine korišćen u Srbiji.
 
-      Ovakav automobil je zanimljiv kada je reč o istoriji korišćenja: može se proveriti ne samo njegovo prvobitno poreklo, već i period korišćenja direktno na srpskom tržištu.
+      Ovakav automobil je zanimljiv sa stanovišta istorije korišćenja: može se proveriti ne samo njegovo prvobitno poreklo, već i period korišćenja na srpskom tržištu.
 
-      Za kupca, to znači mnogo više informacija o automobilu i manje nepoznanica pri donošenju odluke.
+      Za kupca to znači mnogo više informacija o automobilu i manje nepoznanica prilikom donošenja odluke.
 
       ### Dva kompleta točkova
 
-      Dodatna prednost automobila su **dva kompleta točkova**:
+      Dodatna prednost automobila su bila **dva kompleta točkova**:
 
       - letnji komplet na felnama;
       - zimski komplet na felnama.
 
-      To znači da nakon kupovine vlasnicima ne treba odmah rešavati pitanje nabavke drugog kompleta točkova — oba godišnja doba su već obezbeđena.
+      Tako da nakon kupovine vlasnicima nije odmah potrebno da razmišljaju o nabavci drugog kompleta točkova - oba godišnja doba su već pokrivena.
 
-      ### Zašto je autopodbor važan u Srbiji
+      ### Zašto je pretraga automobila važna u Srbiji
 
-      Tržište polovnih automobila u Srbiji je dovoljno raznoliko. Ovde se mogu naći dobri evropski automobili, ali stanje konkretnih primeraka može se drastično razlikovati, čak i kod vozila iste godine proizvodnje i slične kilometraže.
+      Tržište polovnih automobila u Srbiji je prilično raznovrsno. Ovde se mogu pronaći dobri evropski automobili, ali stanje određenog vozila može se drastično razlikovati čak i među vozilima istog godišta i sličnog pređenog broja kilometara.
 
-      Zbog toga profesionalni **autopodbor u Beogradu i Srbiji** uključuje sveobuhvatnu proveru:
+      Zato je profesionalna **pretraga automobila u Beogradu i Srbiji** sveobuhvatna provala:
 
-      **istorija automobila → karoserija → kilometraža → motor → menjač → ogibljenje → elektronski sistemi → servisna istorija → konačna procena automobila.**
+      **istorija automobila → karoserija → pređena kilometraža → motor → menjač → suspenzija → elektronski sistemi → servisna istorija → konačna procena automobila.**
 
-      U slučaju Nikite, pronašli smo BMW 320 GT, proverili smo ga po ključnim parametrima i uverili se da automobil ispunjava postavljene zahteve.
+      U slučaju Nikite, našli smo BMW 320 GT, proverili ga po ključnim parametrima i uverili se da automobil ispunjava zadatke.
 
-      ### Autopodbor automobila u Beogradu
+      ### Pretraga automobila u Beogradu
 
-      Ako planirate da kupite BMW, Mercedes-Benz, Volkswagen, Škoda, Toyota ili neki drugi polovni automobil u Srbiji, ne treba se oslanjati isključivo na oglas prodavca.
+      Ako planirate da kupite BMW, Mercedes-Benz, Volkswagen, Škoda, Toyota ili neki drugi polovni automobil u Srbiji, nemojte se oslanjati samo na oglas prodavca.
 
-      **Autopodbor u Srbiji** omogućava da unapred shvatite stvarno stanje automobila, istoriju njegovog održavanja i potencijalne troškove nakon kupovine.
+      **Pretraga automobila u Srbiji** omogućava vam da unapred saznate stvarno stanje automobila, istoriju njegovog servisiranja i potencijalne troškove nakon kupovine.
 
-      Ovakav pristup primenjujemo u radu: bolje je temeljno proveriti nekoliko odgovarajućih automobila nego kupiti prvi koji vam se svidi i naići na skupe probleme već posle transakcije.
+      Baš takav pristup koristimo u našem radu: bolje je detaljno proveriti nekoliko odgovarajućih automobila nego kupiti prvi koji vam se dopada i otkriti skupe probleme tek nakon posla.
 
-      **Zaključak slučaja Nikite i njegove supruge:** pronađen BMW 320 GT sa motorom N47 snagom 184 KS, potpunom istorijom održavanja kod ovlašćenog BMW dela, potvrđenim poreklom iz Nemačke, četiri godine korišćenja u Srbiji, proverenim lancem razvodnog mehanizma i dva kompleta točkova.
+      **Iskustvo Nikite i njegove supruge:** pronađen je BMW 320 GT sa motorom N47 snage 184 KS, punom servisnom istorijom kod ovlašćenog BMW servisera, potvrđenim poreklom iz Nemačke, četvorogodišnjim korišćenjem u Srbiji, proverenim lancem bregaste osovine i dva kompleta točkova.
   es:
     title: "Selección de vehículos en Serbia: cómo encontramos un BMW 320 GT para Nikita y su esposa"
     body: |-

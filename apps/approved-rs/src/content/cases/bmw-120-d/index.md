@@ -40,39 +40,39 @@ translations:
   sr:
     title: BMW 120d
     body: |-
-      ## Automobilsku selekciju u Švajcarskoj: pronašli smo BMW 120d sa originalnim pređenim kilometrima za našeg klijenta
+      ## Odabir automobila u Švajcarskoj: pronašli smo BMW 120d sa originalnom kilometražom za našeg klijenta
 
-      Kupovina polovnog automobila u Švajcarskoj zahteva posebno pažljiv pristup. Troškovi održavanja i popravki ovde su prilično visoki, pa jedna greška pri izboru automobila može dovesti do značajnih dodatnih troškova već nakon kupovine.
+      Kupovina polovnog vozila u Švajcarskoj zahteva poseban pažljiv pristup. Troškovi održavanja i popravke ovde su prilično visoki, stoga greška prilikom odabira automobila može dovesti do ozbiljnih dodatnih troškova već posle kupovine.
 
-      Nedavno nam se obratio klijent koji je nedavno preselio u Švajcarsku i želeo je da kupi svoj prvi automobil ovde. Njegovi osnovni zahtevi bili su pouzdanost, razumna cena kupovine i eksploatacije, ekonomičan dizel motor i dobro tehničko stanje bez potrebe da odmah nakon kupovine ide na skupe popravke.
+      Nedavno nam se obratio klijent koji je nedavno prešao u Švajcarsku i želeo je da kupi svoj prvi automobil ovde. Njegovi osnovni zahtevi bili su pouzdanost, razumna cena kupovine i korišćenja, ekonomičan dizel motor i dobro tehničko stanje bez potrebe za odlaskom na skupi popravak odmah nakon kupovine.
 
       Kao jedan od pogodnih opcija razmatrali smo **BMW serije 1 120d**.
 
-      ## Selekcija BMW 120d u Švajcarskoj
+      ## Odabir BMW 120d u Švajcarskoj
 
-      Potrebno je bilo pronaći BMW sa transparentnom istorijom, originalnim pređenim kilometrima i normalnim tehničkim stanjem.
+      Potrebno je odabrati BMW sa transparentnom istorijom, originalnom kilometražom i normalnim tehničkim stanjem.
 
-      Pri odabiru polovnih BMW automobila koristimo profesionalnu računarsku dijagnostiku **BMW ISTA**. Ona omogućava da dobijemo značajno više informacija o stanju automobila nego što bi to učinila uobičajena dijagnostika.
+      Prilikom odabira polovnih BMW vozila koristimo profesionalnu kompjutersku dijagnostiku **BMW ISTA**. Ona omogućava dobijanje značajno više informacija o stanju automobila nego obično povezivanje sa univerzalnim dijagnostičkim skenerom.
 
-      Proveravamo elektronske module automobila, sačuvane greške, parametre rada sistema i druge dostupne dijagnostičke informacije. Prikupljeni podaci se upoređuju sa pređenim kilometrima, dokumentacijom, izveštajima o istoriji automobila i rezultatima fizičkog pregleda.
+      Proveravamo elektronske module vozila, sačuvane greške, parametre rada sistema i druge dostupne dijagnostičke informacije. Dobijeni podaci se upoređuju sa kilometražom, dokumentima, izveštajima o istoriji automobila i rezultatima fizičkog pregleda.
 
-      U ovom slučaju, svi podaci dobro su se slagali. Pređeni kilometri automobila bili su originalni, nismo pronašli znakove manipulacije.
+      U ovom slučaju, svi podaci su se dobro slagali. Kilometraža automobila se pokazala kao originalna, a znake prepravke nismo otkrili.
 
       ## Da li je automobil imao popravke?
 
-      Da. Kao i kod većine polovnih automobila, kod izabranog BMW-a postojali su određeni tragovi korišćenja, manji nedostaci i popravke u prošlosti.
+      Da. Kao i kod većine polovnih automobila, izabrani BMW imao je određene tragove korišćenja, manje nedostatke i popravke u prošlosti.
 
-      Sama činjenica da je automobil bio popravljan za nas nije razlog da odmah odustanemo od kupovine. Mnogo je važnije razumeti šta je tačno popravljano, koliko ozbiljna su bila oštećenja i koliko je kvalitetno obavljen posao.
+      Sam činjenica da je automobil bio popravljan za nas nije razlog da odmah odustanemo od kupovine. Daleko je važnije razumeti šta je tačno popravljano, koliko su ozbiljna oštećenja i koliko su kvalitetno izvedeni radovi.
 
-      Nakon provere došli smo do zaključka da otkriveni problemi nisu kritični i ne ometaju nas da razmatramo automobil za kupovinu.
+      Nakon provere, zaključili smo da pronađeni momenti nisu kritični i ne sprečavaju nas da razmatramo automobil za kupovinu.
 
-      Kao rezultat, klijent je dobio BMW 120d sa potvrđenim originalnim pređenim kilometrima, jasnom istorijom i dobrim tehničkim stanjem.
+      Kao rezultat, klijent je dobio BMW 120d sa potvrđenom originalnom kilometražom, jasnom istorijom i dobrim tehničkim stanjem.
 
-      ## Zašto je profesionalna selekcija automobila posebno važna u Švajcarskoj?
+      ## Zašto je profesionalni odabir automobila posebno važan u Švajcarskoj?
 
-      Kada su popravke i održavanje automobila skupi, daleko je isplativije proveriti automobil pre kupovine, nego nakon što se otkriju kvarovi i da se sami plaćaju troškovi popravke.
+      Kada popravka i održavanje automobila mnogo koštaju, daleko je isplativije proveriti vozilo pre kupovine, nego posle transakcije otkrivati kvarove i plaćati njihovo otklanjanje samostalno.
 
-      Zbog toga pokušavamo da što detaljnije proverimo automobil pre donošenja odluke: tehničko stanje, karoseriju, istoriju, pređene kilometre, računarsku dijagnostiku i dostupnu dokumentaciju.
+      Zato se prilikom odabira automobila trudimo da maksimalno detaljno proverimo vozilo pre donošenja odluke: tehničko stanje, karoseriju, istoriju, kilometražu, kompjutersku dijagnostiku i dostupne dokumente.
   es:
     title: BMW 120d
     body: |-

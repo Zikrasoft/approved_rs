@@ -16,15 +16,15 @@ translations:
   sr:
     title: Škoda Octavia
     body: |-
-      Roman nam se obratio za pomoć u odabiru automobila u Srbiji. Pre je živeo u Biškeku, a sada planira da poveća porodicu — pa je postala neophodna potraga za prostranim, pouzdanim i praktičnim vozilom.
+      Roman se obratio nama za pomoć u odabiru automobila u Srbiji. Pre je živeo u Biškeku, a sada mu se planira proširenje porodice — stoga se javila potreba za prostranim, pouzdanim i praktičnim automobilom.
 
-      Kao glavni izbor izabrali smo **Škoda Octavia**.
+      Kao glavni izbor odabrali smo **Škoda Octavia**.
 
-      Pogledali smo tri automobila i na kraju pronašli zaista odličan primjerak: **2.0 TDI, mokri robot DSG DQ381 i pređenih oko 150 000 km**.
+      Pogledali smo tri automobila i na kraju pronašli zaista odličan primerak: **2.0 TDI, mokri robot DSG DQ381 i pređenih oko 150 000 km**.
 
-      Kompletacija vozila je prilično jednostavna, ali je tehničko stanje — praktično savršeno. Nakon izbora automobila, dodatno smo ga odveli na dizalicu. Proverili smo donji deo, suspenziju, amortizere i glavne delove s donje strane — sve je bilo u odličnom stanju, bez neprijatnih iznenađenja.
+      Oprema automobila je prilično skromna, ali je tehničko stanje — gotovo idealno. Nakon što smo odabrali automobil, dodatno smo ga stavili na dizalicu. Proverili smo donji deo, suspenziju, amortizere i osnovne elemente sa donje strane — sve je u odličnom stanju, bez neprijatnih iznenađenja.
 
-      Na kraju je Roman dobio upravo onaj automobil koji je tražio: bez preplate za bogatu opremu, ali sa odličnim tehničkim stanjem i dobrim rezervoarom resursa.
+      Na kraju je Roman dobio upravo onaj automobil koji je tražio: bez preplate za bogatu opremu, ali sa odličnim tehničkim stanjem i dobrim zalihama resursa.
   es:
     title: Škoda Octavia
     body: |-

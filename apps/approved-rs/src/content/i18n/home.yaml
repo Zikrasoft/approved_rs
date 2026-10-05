@@ -250,23 +250,23 @@ translations:
     heroPhotoAlt: Sedan on a European highway
     ctaPhotoAlt: Close-up of a clean car body and wheel
   sr:
-    metaTitle: Auto izbor, uvoz i otkup automobila u Evropi
-    metaDescription: Izbor automobila u svojoj zemlji ili uvoz auta iz Evrope i Kine — sve na ključ. Provera i otkup. Radimo širom Evrope.
+    metaTitle: Izbor, uvoz i otkup automobila u Evropi
+    metaDescription: Izbor automobila u vašoj zemlji ili uvoz vozila iz Evrope i Kine — sve pod ključ. Provera i otkup. Radimo širom Evrope.
     journey:
       - title: Izbor
-        desc: Pronalažemo, proveravamo i dostavljamo automobil prema vašem budžetu — sve uključeno, u Nemačkoj, Španiji, Srbiji i Švajcarskoj.
+        desc: Nalazimo, proveravamo i dostavljamo automobil prema vašem budžetu — sve pod ključ, u Nemačkoj, Španiji, Srbiji i Švajcarskoj.
       - title: Uvoz
-        desc: Automobil nije u vašoj zemlji? Pronaći ćemo i dovesti ga iz Nemačke, Evrope ili Kine — sve uključeno, uključujući carinjenje.
+        desc: Auto nije u vašoj zemlji? Izaberićemo i dovesti ga iz Nemačke, Evrope ili Kine — sve pod ključ, uključujući carinjenje.
       - title: Provera
-        desc: Nezavisni ekspert pregleda automobil pre kupovine — prema 100+ tačaka sa video zapisima.
-        note: Pronašli ste automobil sami? Možemo naručiti dodatnu proveru.
+        desc: Nezavisni ekspert pregledava automobil pre kupovine — po 100+ kriterijuma uz video.
+        note: Pronašli ste auto sami? Možemo naručiti prolepu provere posebno.
       - title: Otkup
-        desc: Obrađujemo otkup i carinjenje automobila sa stranim registarskim tablicama.
-        note: Automobil je već u inostranstvu? Pomoći ćemo da ga legalizujete.
+        desc: Obrađujemo otkup i carinjenje vozila sa stranim tablicama.
+        note: Auto je već u inostranstvu? Pomoći ćemo vam da ga registrujete.
     heroLine1: Naći ćemo auto.
-    heroLine2: Proverićemo.
-    heroLine3: Dovozimo.
-    heroSubtext: Pronaći ćemo auto u Nemačkoj, Španiji, Švajcarskoj ili Srbiji, a ako je u drugoj zemlji, dovući ćemo ga sa proverom, registracijom i carinjenjem.
+    heroLine2: Proverićemo ga.
+    heroLine3: Dovesti ćemo ga.
+    heroSubtext: Izabraćemo auto u Nemačkoj, Španiji, Švajcarskoj ili Srbiji, a ako je u drugoj zemlji, doveš ćemo ga k vama uz proveru, registraciju i carinjenje.
     statClients:
       value: 200+
       label: klijenata
@@ -276,34 +276,34 @@ translations:
       value: 5 godina
       label: na tržištu
     journeyHeading: 'Jedan put: od pretrage do ključeva'
-    journeySubtext: Auto izbor, uvoz, provera i otkup — nisu različite usluge, već koraci jednog puta vašeg automobila. Možete započeti s bilo kojeg koraka.
+    journeySubtext: Izbor, uvoz, provera i otkup — nisu odvojene usluge, već koraci jednog puta vašeg automobila. Možete ući s bilo kojeg koraka.
     whyUsHeading: Zašto nas biraju
-    whyUsSubtext: Kupovina automobila iz druge zemlje postavlja pitanja. Evo kako ih razjašnjavamo.
+    whyUsSubtext: Kupovina automobila iz druge zemlje postavlja pitanja. Evo kako ih rešavamo.
     trustCards:
       - title: Potpuna transparentnost
-        text: 'Šaljemo detaljan kontrolni spisak (100+ tačaka) i video svakog detalja: karoserija, enterijer, mehanička stanja. Vidite automobil kao da stojite pored njega.'
+        text: 'Šaljemo detaljan kontrolni spisak (100+ tačaka) i video svakog detalja: karoserija, enterijer, mehanika. Vidite auto kao da stojite pored njega.'
       - title: Sigurnost transakcije
-        text: 'Fazna uplata i jasni uslovi. Pratimo dokumente na svim koracima: registracija, carinjenje, registracija — bez iznenađenja.'
+        text: 'Plaćanje u etapama i jasni uslovi. Pratimo dokumente na svim koracima: registracija, carinjenje, osiguranje — bez iznenađenja.'
       - title: Lokalna ekspertiza
-        text: 'Znamo specifičnosti svake tržišne sredine: auto-putne pređene kilometre u Nemačkoj, karakteristike karoserija španskih automobila, detalje o registraciji na strane tablice u Srbiji.'
+        text: 'Znamo specifičnosti svakog tržišta: autobahn pređeni km u Nemačkoj, osobine karoserije španskih automobila, detalje registracije na stranim tablicama u Srbiji.'
     testimonialsHeading: Šta kažu klijenti
     testimonials:
-      - quote: «Doveli su BMW 3. serije iz Minhena u Beograd. Sve je bilo jasno — od pregleda do registracije. Uštedeli smo mnogo stresa kod obrade.»
+      - quote: «Doveli su mi BMW 3 serije iz Minhena u Beograd. Sve je bilo jasno — od provere do registracije. Uštedeli su mi hrpu nerviranja oko papirologije.»
         name: Aleksandar
         caption: BMW 320d, Nemačka → Srbija
-      - quote: «Dugo sam tražio Skoda Octavia u dobrom stanju. Momci su našli opciju u Španiji, proverili sa nezavisnim stručnjakom — sve se poklopilo sa opisom.»
+      - quote: «Dugo sam tražio Škodu Octaviu u dobrom stanju. Momci su pronašli opciju u Španiji, proverili je nezavisnim ekspertom — sve se poklopilo s opisom.»
         name: Mihail
-        caption: Skoda Octavia, Španija → Rusija
-      - quote: «Registracija na strana brojna bila je teška. Tim me vodio kroz svaki korak — i za mesec dana sam već vozio. Preporučujem.»
+        caption: Škoda Octavia, Španija → Rusija
+      - quote: «Registracija na strane tablice činila se komplikovano. Tim me provodio kroz svaki korak — i već za mesec dana sam vozio. Preporučujem.»
         name: Dmitrij
         caption: VW Passat, Nemačka → Srbija
-    ctaEyebrow: Spremni da počnemo?
+    ctaEyebrow: Spremni da počnete?
     ctaHeading:
       line1: Recite nam
       line2: o automobilu,
       accentWord: koji tražite
-    ctaSubtext: Odgovaramo u roku od 2 sata. Konsultacija je besplatna.
-    ctaTelegramLabel: Pitajte na Telegramu
+    ctaSubtext: Odgovaramo u roku od 2 sata. Konsultacije su besplatne.
+    ctaTelegramLabel: Pišite na Telegram
     ctaStatClients:
       value: 200+
       label: klijenata
@@ -313,67 +313,67 @@ translations:
       value: 5 godina
       label: na tržištu
     ctaStatResponse:
-      value: 2 h
+      value: 2 č
       label: odgovor
     origin:
       heading: Odakle uvozimo
-      note: Dostavićemo u svaku zemlju — razgovaraćemo o tome prilikom zahteva
+      note: Dostavićemo u bilo koju zemlju — dogovorićemo se prilikom prijave
       euTitle: Iz Evrope
-      euText: Nemačka, Španija, Švajcarska i druge evropske zemlje. Pronalazimo ih na licu mesta, pregledamo pre kupovine, obrađujemo izvoz, transportujemo i carinimo. Konačnu cenu javljamo pre transakcije, a ne posle granice.
+      euText: Nemačka, Španija, Švajcarska i druge evropske zemlje. Biramo na licu mesta, pregledamo pre kupovine, obavljamo izvoz, prevozimo i carinimo. Ukupnu cenu navodimo pre transakcije, a ne posle prelaska granice.
       euCta: Izračunajte uvoz iz Evrope
       chinaTitle: Iz Kine
-      chinaText: Novi i polovni automobili iz Kine preko proverenog partnera. Izbor prema vašem budžetu, provera pre slanja, dostava i carinjenje — isto kao i u Evropi.
+      chinaText: Nova i polovna vozila iz Kine preko proverenog partnera. Izbor prema vašem budžetu, provera pre slanja, dostava i carinjenje — na isti način kao i iz Evrope.
       chinaCta: Izračunajte uvoz iz Kine
       chinaTags:
-        - Novi
-        - Sa pređenim kilometrima
-        - Sve uključeno
+        - Nova
+        - Polovna
+        - Pod ključ
     catalogue:
       heading: Poslednje transakcije
-      subtext: 'Ovde nema oglasa: svaki automobil je pronađen, pregledan, registrovan i predat čoveku. Cena je ona koju je platao.'
+      subtext: 'Nema oglasa: svako vozilo je pronađeno, proveren, registrovano i predato kupcu. Cene su one koje je korisnik platio.'
       allCountriesLabel: Sve zemlje
       moreLabel: Prikaži još {rest}
     inspection:
-      heading: Stotinu tačaka, od kojih rešavaju četiri
-      subtext: Kontrolni spisak je dugačak, ali vas skoro uvek odbijaju zbog jedne od četiri zone. Pritisnite broj na dijagramu — pokazaćemo šta proverava ekspert i šta smo tamo pronašli.
-      hint: Pritisnite broj na dijagramu
+      heading: Stotinu tačaka, od kojih reše četiri
+      subtext: Kontrolna lista je duga, ali gotovo uvek odbijaju stranu zbog jedne od četiri oblasti. Kliknite broj na dijagramu — pokazat ćemo šta proverava ekspert i šta smo tamo našli.
+      hint: Kliknite broj na dijagramu
       ctaLabel: Naručite proveru
-      pointsLabel: 100+ tački
+      pointsLabel: 100+ tačaka
       mediaLabel: fotografije i video
       reportLabel: izveštaj pre odluke
       zones:
         - title: Karoserija i lak
-          text: Mera debljine po svakoj paneli, geometrija otvora, tragovi zavarivanja i kitovanja. Odavde se vidi da li je bilo popravki o kojima prodavac nije obavestio.
+          text: Mera debljine po svakoj paneli, geometrija otvora, tragovi zavarivanja i špakhla. Odatle se vidi da li je bilo popravki za koje prodavac nije rekao.
           points:
-            - Prefarbavanje i dotiranje panela
-            - Razmaci i geometrija nakon udarca
-            - Korozija u pragovima i lukovima
+            - Prebojenje i farbanje panela
+            - Zazori i geometrija nakon udarca
+            - Korozija u pragovima i blatobranima
             - Originalnost stakala i svetala
         - title: Motor i menjač
-          text: Parametri na zagrejanom motoru, prilagodbe menjača, greške u memoriji blokova. Najskuplja zona — i najčešći razlog za odbijanje.
+          text: Parametri na zagrejanom motoru, podešavanja menjača, greške u memoriji blokova. Najskuplja zona — i najčešći razlog odbijanja.
           points:
-            - Produžetak lanca GRE
-            - Curjenja i zamućenja
-            - Prilagodbe i trzaji menjača
-            - Kompresija i dimljivost
-          finding: 'BMW M340 2025. godine sa malim pređenim kilometrima: dijagnostika je pokazala produženje lanca GRE od oko 20 %. Pronašli smo to pre transakcije — klijent je dobio argument za pregovor.'
-        - title: Ovjes i kočnice
-          text: Dizalica, luftovi, stanje ovjesa i kočionog sistema. Nemački auto-putni pređeni kilometri i balkanske ceste troše automobil na različite načine.
+            - Produženje lanca u GPR-u
+            - Curenja i vlaženje
+            - Podešavanja i udarci menjača
+            - Kompresija i dimljenost
+          finding: 'BMW M340 iz 2025. godine sa malim pređenim km: dijagnostika je pokazala produženje lanca u GPR-u oko 20%. Pronašli smo to pre dogovora — klijent je dobio argument za pregovaranje.'
+        - title: Mehanika i kočnice
+          text: Podizanje, luftovi, stanje vešanja i kočionog sistema. Nemčki autobahn pređeni km i balkanski putevi troše auto na drugačiji način.
           points:
-            - Luftovi krakova i kugličnih zglobova
-            - Curenje amortizera
+            - Luftovi u rukama i kuglastim zglobovima
+            - Curjenje amortizera
             - Trošenje diskova i kočnica
-            - Upravljačka letva i čuvari
+            - Upravljačka oprema i zaptivači
         - title: Elektronika, VIN i dokumenti
-          text: Servisna istorija po VIN-u, manipulisan pređeni kilometri, greške u elektronici i pravna čistoća — zalozi, zabrana registracije, neregistrovani udesi.
+          text: Servisna istorija prema VIN-u, prevara pređenih km, greške u elektronici i pravna čistoća — zalozi, zabrane registracije, nezatvorene sudare.
           points:
-            - Prašina razlike pređene kilometre sa istorijom
+            - Razlika u pređenim km s istorijom
             - Greške u memoriji blokova
-            - Zalozi i zabrana registracije
-            - Neregistrovani udesi i osiguravajući događaji
+            - Zalozi i zabrane registracije
+            - Nezatvoreni sudari i osigurani događaji
     findingLabel: 'Pronađeno:'
-    heroPhotoAlt: Limuzina na evropskom putu
-    ctaPhotoAlt: Čista karoserija i točak automobila izbliza
+    heroPhotoAlt: Limuzina na evropskoj autoputu
+    ctaPhotoAlt: Čista karoserija i točak automobila u krupnom planu
   es:
     metaTitle: Selección de autos, importación y compra en Europa
     metaDescription: Búsqueda de coches en su país o importación de vehículos de Europa y China — llave en mano. Inspección y compra. Operamos en toda Europa.

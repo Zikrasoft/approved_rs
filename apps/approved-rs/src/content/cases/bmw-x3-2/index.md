@@ -20,19 +20,19 @@ translations:
   sr:
     title: BMW X3
     body: |-
-      ## Odabir BMW X3 u Srbiji — pronašli smo odličan automobil za Nikolaja i Juliju
+      ## Izbor BMW X3 u Srbiji — pronašli smo odličan automobil za Nikolaja i Juliju
 
-      Obratili su nam se Nikolaj i njegova supruga Julija, sa željom da pronađu BMW X3 u Srbiji. Iako su već sami našli zanimljiv model na tržištu, pre nego što su se odlučili za kupovinu, nisu želeli da rizikuju i odlučili su da Auto dovedu na potpunu profesionalnu provere.
+      Obratili su nam se Nikolaj i njegova supruga Julija sa željom da odaberu BMW X3 u Srbiji. Već su sami pronašli zanimljivu opciju na platformi, ali pre kupovine su odlučili da ne rizikuju i da izvedu potpunu profesionalnu provere auta pre kupovine.
 
-      Na kraju smo otišli na pregled i proverili dva BMW X3. Prvi automobil je na prvi pogled izgledao solidno, ali dijagnostika je pokazala **habanje bregaste osovine**. Takva kupovina značila bi dodatne troškove gotovo odmah nakon sticanja automobila.
+      Na kraju smo došli na pregled i proverili dva BMW X3. Prvi automobil je na prvi pogled delovao dobro, međutim, dijagnostika je pokazala **habanje lanca distributivnog mehanizma**. Takva kupovina bi značila dodatne troškove gotovo odmah nakon sticanja automobila.
 
-      Predložili smo im da razmotre drugačiji pristup: umesto da kupe jeftiniji auto i zatim ulažu novac u skupo održavanje i popravke, ponekad je pametnije malo povećati budžet i izabrati automobil u boljem tehničkom stanju i bogatijoj opremi. Na taj način novac ide ne na rešavanje problema prethodnog vlasnika, već na zaista bolji automobil.
+      Predložili smo alternativu: umesto da kupe automobil po nižoj ceni, a zatim ulažu novac u skupu popravku i održavanje, ponekad je pametnije malo povećati budžet i odabrati automobil u boljem tehničkom stanju i istovremeno sa bogatijom opremom. U tom slučaju novac ide ne na rešavanje problema prethodnog vlasnika, već na zaista bolji automobil.
 
-      Upravo takav BMW X3 smo i pronašli. Automobil je bio u odličnom tehničkom stanju, sa veoma dobrom opremom i bez potrebe za ozbiljnim ulaganjima nakon kupovine.
+      Baš takav BMW X3 smo uspeli da pronađemo. Automobil se pokazao u odličnom tehničkom stanju, sa veoma dobrom opremom i bez potrebe za ozbiljnim ulaganjima nakon kupovine.
 
-      Izabrani BMW X3 je opremljen dvolitarskim dizel motorom **B47** i pouzdanim 8-stepenim automatskim menjačem **ZF**. Pre kupovine detaljno smo proverili automobil, uključujući računar nu dijagnostiku koristeći originalnu BMW ISTA dijagnostiku.
+      Izabrani BMW X3 je opremljen dvolitarskim dizel motorom **B47** i pouzdanim 8-stepenim automatskim menjačem **ZF**. Pre kupovine smo detaljno proverili automobil, uključujući kompjutersku dijagnostiku uz korišćenje originalne dijagnostičke opreme BMW ISTA.
 
-      Nikolaj i Julija su bili veoma zadovoljni rezultatom i kupili su BMW X3, koji ne samo da odgovara njihovim željama po opremi, već je i u stanju koje im omogućava da izbegnu velike troškove odmah nakon kupovine.
+      Nikolaj i Julija su bili veoma zadovoljni rezultatom i kupili su BMW X3, koji ne samo da odgovara njihovim željama u vezi opreme, već je i u stanju koje omogućava izbegavanje velikih troškova odmah nakon kupovine.
   es:
     title: BMW X3
     body: |-

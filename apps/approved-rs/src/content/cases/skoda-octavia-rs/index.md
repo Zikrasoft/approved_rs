@@ -30,19 +30,19 @@ translations:
 
       If you've found a vehicle in France and plan to buy it for yourself or for export, we can conduct an independent inspection on-site. You will receive photographs and videos, diagnostic results, a list of identified defects, and our assessment of its real condition before making your decision.
   sr:
-    title: Škoda Octavia RS
+    title: Skoda Octavia RS
     body: |-
-      Automobilski izbor i inspekcija vozila u Francuskoj pre kupovine i eksportovanja
+      Autopodbor i provera automobila u Francuskoj pre kupovine i izvoza
 
-      Na inspekciji u Francuskoj je **Škoda Octavia RS** sa motorom **1.4 TSI** i plug-in hibridnim sklopom. Vozilo se bira za dalju eksportaciju u drugu zemlju, zbog čega je posebno važno dobiti potpuni uvid u njegovo stvarno stanje pre kupovine.
+      Na pregledu u Francuskoj — **Skoda Octavia RS** sa motorom **1.4 TSI** i plug-in hibridnim pogonom. Automobil se bira za dalji izvoz u drugu zemlju, stoga je posebno važno još pre kupovine steći potpunu sliku o njegovom stvarnom stanju.
 
-      Francusko tržište nudi širok spektar automobila, uključujući zanimljive verzije opreme i hibridne modele. Međutim, ima svojih specifičnosti u korišćenju. Gradski parking, uske ulice, stalnikontakt branika i karoserije sa susednim automobilima — sve to često ostavlja tragove. Zbog toga lepe fotografije i opis prodavca nisu dovoljni, naročito kada se vozilo odmah nakon kupovine šalje na export.
+      Francusko tržište nudi veliki izbor automobila, uključujući zanimljive opreme i hibridne verzije. Međutim, tu su i svoje specifičnosti korišćenja. Gradski parkirališta, uske ulice, kontinuirani kontakt branika i karoserijskih elemenata sa susednim vozilima — sve to često ostavlja tragove. Stoga lepe fotografije i opis prodavca nisu dovoljni, posebno ako se automobil odmah nakon kupovine šalje na izvoz.
 
-      Pre kupovine sprovodimo detaljnu inspekciju automobila: proveravamo karoseriju i lak, tražimo tragove prethodnih popravki i udesa, procenjujemo stanje enterijera, motora, menjača, ovSuspensioner, kao i drugih sklopova. Za plug-in hibride posebno obraćamo pažnju na rad hibridnog sistema, **visokonaponskoj bateriji** i elektronici. Takođe proveravamo dokumentaciju, istoriju servisiranja i usklađenost stvarnog stanja sa navedenim pređenim kilometrima.
+      Pre kupovine obavljamo potpunu proveru automobila: proveravamo karoseriju i lak, tražimo tragove prethodnih popravki i nezgoda, ocenjujemo stanje enterijera, motora, menjača, ov Suspension i drugih sklopova. Za plug-in hibride posebno obraćamo pažnju na rad hibridnog sistema, **visokonaponske baterije** i elektroniku. Takođe proveravamo dokumentaciju, istoriju održavanja i usklađenost stvarnog stanja sa navedenim pređenim kilometrima.
 
-      Kada kupujete automobil za izvoz, ova inspekcija je posebno bitna. Kada vozilo napusti Francusku, rešavanje problema koji su otkriveni nakon kupovine postaje značajno kompleksnije i skuplje. Naša misija je da ih otkrijemo pre zaključenja posla i pružimo klijentu objektivne informacije, kako bi mogao doneti odluku o kupovini.
+      Kada se kupuje automobil za izvoz, ova provera je posebno važna. Kada vozilo napusti Francusku, rešenje problema otkrivenih nakon kupovine postaje znatno složenije i skuplje. Naš zadatak je da ih pronađemo pre sklapanja ugovora i pružimo klijentu objektivne informacije kako bi mogao doneti odluku o kupovini.
 
-      Ako ste pronašli vozilo u Francuskoj i planirate da ga kupite za sebe ili za izvoz, možemo obaviti nezavisnu inspekciju na licu mesta. Dobijaćete fotografije i video zapise, rezultate dijagnostike, listu otkrivenih nedostataka i našu procenu stvarnog stanja pre nego što donesete odluku.
+      Ako ste pronašli automobil u Francuskoj i planirate da ga kupite za sebe ili na izvoz, možemo obaviti nezavistan pregled na licu mesta. Dobijaćete fotografije i video, rezultate dijagnostike, spisak otkrivenih nedostataka i našu procenu stvarnog stanja pre nego što donesete odluku.
   es:
     title: Skoda Octavia RS
     body: |-

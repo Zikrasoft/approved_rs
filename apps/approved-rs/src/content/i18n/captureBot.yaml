@@ -19,15 +19,15 @@ translations:
     thanks: Thank you! I've passed this on to the manager — they'll be in touch with you soon.
     received: Got it, your manager will see your message.
   sr:
-    greeting: Zdravo! Hvala što ste nam se javili — vidimo vaš upit i javljamo se uskoro.
-    lookingFor: Recite nam ukratko koji automobil vas zanima ili oko čega vam treba pomoć.
-    budget: A koji budžet imate na umu?
-    phoneAsk: Podelite broj telefona da bismo mogli da vas kontaktiramo — ili preskočite ovaj korak.
-    phoneOffer: Ako vam više odgovara telefon, podelite broj pa ćemo vas pozvati. Ako ne, slobodno preskočite.
-    phoneButton: Podeli broj
-    phoneSkip: Preskoči
-    thanks: Hvala! Prosledili smo menadžeru — uskoro će vas kontaktirati.
-    received: Primili smo, menadžer će videti vašu poruku.
+    greeting: Zdravo! Hvala što ste se javili — već smo primili vašu poruku i uskoro ćemo odgovoriti.
+    lookingFor: Recite nam ukratko koju mašinu tražite ili u čemu vam treba pomoć.
+    budget: Koji je vaš budžet?
+    phoneAsk: Da bismo mogli da vas kontaktiramo, podelite nam svoj broj telefona — ili preskočite ovaj korak.
+    phoneOffer: Ako vam je lakše putem telefona, podelite broj, pa ćemo pozvati. Ako ne, samo preskočite.
+    phoneButton: Podeliti broj
+    phoneSkip: Preskočiti
+    thanks: Hvala! Prosledili smo manageru — uskoro će vas kontaktirati.
+    received: Primili smo, manager će videti vašu poruku.
   es:
     greeting: ¡Hola! Gracias por escribirnos, ya vemos tu consulta y te respondemos enseguida.
     lookingFor: Cuéntanos en dos palabras qué coche te interesa o en qué necesitas ayuda.

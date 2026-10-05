@@ -45,11 +45,11 @@ translations:
     errorPhoneInvalid: Check your phone number
     errorSubmit: The submission failed. Please check your connection and try again.
   sr:
-    headingLine1: Javljamo vam se
+    headingLine1: Javićemo se
     headingEmphasis: u roku od 2 sata
     subtext: Besplatna konsultacija
     nameLabel: Vaše ime
-    namePlaceholder: Marko
+    namePlaceholder: Ivan
     contactLabel: Kako da vas kontaktiramo
     telegramTab: Telegram
     telegramPlaceholder: '@username ili telefon'
@@ -57,16 +57,16 @@ translations:
     viberTab: Viber
     phoneTab: Telefon
     commentLabel: Marka, model, budžet
-    commentPlaceholder: BMW 3, 2020–2022, do €25.000…
+    commentPlaceholder: BMW 3, 2020–2022, do €25 000…
     consentBefore: 'Slažem se sa '
     consentLinkText: politikom privatnosti
-    consentError: Vaša saglasnost je obavezna
-    submitLabel: Zatražite procenu
+    consentError: Potrebna je vaša saglasnost
+    submitLabel: Izračunaj cenu
     errorTelegramRequired: Unesite Telegram
     errorTelegramFormat: 'Format: @username ili broj telefona'
     errorPhoneRequired: Unesite broj telefona
     errorPhoneInvalid: Proverite broj telefona
-    errorSubmit: Zahtev nije poslat. Proverite vezu i pokušajte ponovo.
+    errorSubmit: Zahtjev nije poslat. Proverite vezu i pokušajte ponovo
   es:
     headingLine1: Nos pondremos en contacto contigo
     headingEmphasis: en menos de 2 horas

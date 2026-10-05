@@ -20,19 +20,19 @@ translations:
   sr:
     title: BMW X3
     body: |-
-      ## Uvoz automobila iz Nemačke u Srbiju — BMW X3 2020
+      ## Uvoz automobila iz Nemačke u Srbiju — BMW X3 iz 2020. godine
 
-      Uvoz automobila iz Nemačke u Srbiju jedan je od naših glavnih zadataka. Ne kupujemo vozila samo na osnovu fotografija i oglasa; pre svake kupovine, automobili prolaze temeljnu proveru.
+      Uvoz automobila iz Nemačke u Srbiju je jedno od područja našeg rada. Ne kupujemo automobile samo na osnovu fotografija i oglasa: pre kupovine svaki automobil prolazi kompletnu provere auta pre kupovine.
 
-      Ovoga puta, u Nemačkoj smo pronašli **BMW X3 iz 2020. godine** u beloj boji sa pređenih **140,000 km**. Vozilo je opremljeno **xDrive** pogonom na sva četiri točka, dvolitarskim dizel motorom **B47 snage 190 KS** i dobrom opremom. Uz to, automobil nije imao nijednu obojenu delu.
+      Ovoga puta smo u Nemačkoj pronašli **BMW X3 iz 2020. godine** u beloj boji sa pređenih **140 000 km**. Automobil je opremljen pogonom na sva četiri točka **xDrive**, dvolitarskim dizel motorom **B47 snage 190 KS** i dobrom opremom. Pored toga, automobil nije imao nijedan obojen deo.
 
-      Naš stručnjak je lično otišao u nemački grad gde se automobil nalazio i izvršio njegovu proveru. Uspešno smo se dogovorili sa prodavcem o korišćenju fabrične dijagnostičke aplikacije **BMW ISTA**. Ovom metodom dodatno smo proverili tehničko stanje vozila, uključujući stanje razvodne lanca, brizgaljki, i usklađenost stvarnog prelaznog puta.
+      Naš stručnjak je lično otišao u nemački grad gde se automobil nalazio i obavio njegov pregled. Uspeli smo da se dogovorimo sa prodavcem o povezivanju na fabrični dijagnostički program **BMW ISTA**. Uz njegovu pomoć dodatno smo proverili tehničko stanje automobila, uključujući stanje razvodne lance, ubrizgivače i usklađenost stvarnog pređenog broja kilometara.
 
-      Tek nakon potpune provere i potvrde stanja automobila, transakcija je obavljena. Posle kupovine, organizovali smo **transport BMW X3 iz Nemačke u Srbiju**, završili carinske procedure, i omogućili registraciju automobila u Beogradu na novog vlasnika.
+      Tek nakon kompletne provere i potvrde stanja automobila, obavljena je transakcija. Nakon kupovine organizovali smo **dostavu BMW X3 iz Nemačke u Srbiju**, kao i sprovođenje carinskih procedura i kasniju registraciju automobila u Beogradu na novog vlasnika.
 
-      Kao rezultat, klijent je dobio tehnički pregledan automobil sa potvrđenom istorijom, dostavljen iz Nemačke direktno u Srbiju. Sada je BMW X3 već registrovan u Beogradu, a njegov vlasnik uživa u kupovini.
+      Kao rezultat, klijent je dobio tehnički provereni automobil sa potvrđenom istorijom, dostavljen iz Nemačke direktno u Srbiju. Sada je BMW X3 već registrovan u Beogradu, a njegov vlasnik uživa u vožnji i zadovoljan je kupovinom.
 
-      Ako planirate **kupovinu automobila u Nemačkoj i njegovo dovođenje u Srbiju**, možemo preuzeti ceo proces: pretragu i izbor automobila, izlazak stručnjaka na pregled, dijagnostiku, proveru istorije i pređenog puta, pregovore sa prodavcem, kupovinu, dostavu, carinjenje i registraciju u Srbiji.
+      Ako planirate **kupovinu automobila u Nemačkoj i njegov uvoz u Srbiju**, možemo preuzeti ceo proces: potragu i odabir automobila, izlazak stručnjaka na pregled, dijagnostiku, proveru istorije i prevoza, pregovore s prodavcem, kupovinu, dostavu, carinjenje i registraciju u Srbiji.
   es:
     title: BMW X3
     body: |-

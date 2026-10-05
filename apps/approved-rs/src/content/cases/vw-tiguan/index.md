@@ -73,59 +73,59 @@ translations:
   sr:
     title: VW Tiguan
     body: |-
-      ## Autopodbor Volkswagen Tiguan u Srbiji: Provera Tiguan 2.0 TDI 4Motion iz 2018. godine
+      ## Autopodbor Volkswagen Tiguan u Srbiji: provera Tiguan 2.0 TDI 4Motion iz 2018. godine
 
-      Još jedan primer sveobuhvatnog autopodbora automobila u Srbiji — **Volkswagen Tiguan 2018. godine** sa dizel motorom **2.0 TDI**, pogonom na sve točkove **4Motion** i 7-brzinskim automatskim menjačem DSG sa mokrim kvačilom. Pređeni put automobila u trenutku provere iznosio je oko **180 000 km**.
+      Još jedan primer sveobuhvatnog autopodbora automobila u Srbiji — **Volkswagen Tiguan 2018. godine** proizvodnje sa dizel motorom **2.0 TDI**, pogonom na sve točkove **4Motion** i 7-stepenom robotizovanom menjaču DSG sa vlažnim spojkama. Pretraga automobila u trenutku provere iznosila je oko **180 000 km**.
 
-      Prilikom kupovine polovnog Volkswagen Tiguan-a u Srbiji važno je ne ograničiti se samo na uobičajeni pregled automobila i kratku vožnju. To je posebno važno kada je reč o dizel Tiguan-u sa pogonom na sve točkove i DSG menjačem. Stoga smo pre donošenja odluke izvršili potpunu proveru automobila, uključujući njegovu istoriju, karoseriju, elektronske sisteme, tehničko stanje i pregled donjeg dela.
+      Pri kupovini polovnog Volkswagen Tiguan-a u Srbiji važno je ne ograničiti se samo na običan pregled automobila i kratak test-vožnju. Pogotovo kada je reč o dizel Tiguan-u sa pogonom na sve točkove i DSG menjačem. Zbog toga smo pre donošenja odluke sproveli potpunu provere auta pre kupovine, uključujući istoriju, karoseriju, elektronske sisteme, tehničko stanje i pregled sa donje strane.
 
-      ## Provera istorije Volkswagen Tiguan-a pre kupovine
+      ## Provera istorije Volkswagen Tiguan pre kupovine
 
-      Prvi korak u autopodboru bila je provera istorije automobila. Naručili smo **CarVertical** izveštaj, a takođe smo dobili i servisnu i dealersku istoriju Volkswagen-a.
+      Prvi korak u autopodboru bila je provera istorije automobila. Naručili smo izveštaj **CarVertical**, kao i dodatno dobili servisnu i dilersku istoriju Volkswagen-a.
 
-      Ova provera omogućava usklađivanje navedenog pređenog puta sa dostupnim zapisima, proučavanje servisiranja automobila i dobijanje dodatnih informacija o njegovoj upotrebi pre prodaje.
+      Ova provera omogućava poređenje deklarisanog pređenog puta sa postojećim zapisima, proučavanje održavanja automobila i dobijanje dodatnih informacija o njegovom korišćenju pre prodaje.
 
-      Za automobile sa pređenih oko 180 000 km istorija servisiranja je posebno važna. Lep izgled vozila ne ukazuje na to koliko su dobro održavani motor, DSG menjač i sistem pogona na sve točkove.
+      Za automobile sa pređenih oko 180 000 km, istorija održavanja je posebno važna. Lep izgled nije garant da je motor, DSG menjač i sistem pogona na sve točkove dobro održavan.
 
-      ## Provera karoserije debljinomerom
+      ## Provera karoserije debljinomera
 
       Sledeći korak — detaljna provera karoserije. Svi delovi karoserije Volkswagen Tiguan-a su provereni profesionalnim debljinomerom.
 
-      Rezultati dijagnostike nisu pokazali tragove sekundarnog farbanja. Karoserija je očuvana u fabričkom lakiranju. Dodatno smo proverili razmake između delova karoserije, pričvršćenja, stanje otvora i druge znakove mogućih popravki karoserije.
+      Prema rezultatima dijagnostike, tragovi sekundarnog farbanja nisu otkriveni. Karoserija je ostala u fabričkom lakiranju. Dodatno su provereni razmaci među karoserijskim elementima, pričvršćenje, stanje otvora i drugi znaci mogućih karoserijskih popravki.
 
-      Debljinomer je obavezan alat pri izboru automobila sa pređenim kilometrom. Čak i kada vizuelno auto izgleda savršeno, uređaj pomaže u otkrivanju ponovo farbanih ili popravljanih delova.
+      Debljinomer je obavezan alat prilikom izbora polovnog automobila. Čak i ako vizuelno auto izgleda odlično, uređaj pomaže u otkrivanju prefarbanih ili popravljanih komponenti.
 
-      ## Računarska dijagnostika Volkswagen Tiguan-a
+      ## Računarska dijagnostika Volkswagen Tiguan
 
-      Obavezni deo našeg autopodbora u Srbiji je sveobuhvatna računaraska dijagnostika vozila.
+      Obavezan deo našeg autopodbora u Srbiji — potpuna računarska dijagnostika automobila.
 
-      Na Volkswagen Tiguan-u proverene su elektronske jedinice, prisustvo tekućih i sačuvanih grešaka, rad motora, DSG menjača, sistema pogona na sve točkove i drugih elektronskih sistema automobila.
+      Na Volkswagen Tiguan-u provereni su elektronski kontrolni blokovi, prisustvo aktuelnih i sačuvanih grešaka, rad motora, DSG menjača, sistema pogona na sve točkove i drugih elektronskih sistema automobila.
 
-      Važno je ne samo proveriti da li su greške upaljene na kontrolnoj tabli. Savremeni automobil može da ne prikazuje upozorenja vozaču, dok u memoriji elektronskih jedinica može postojati greška ili podaci koji zahtevaju dodatnu pažnju.
+      Važno je ne samo proveriti da li se greške prikazuju na instrument tabli. Savremeni automobil može da ne pokazuje nikakva upozorenja vozaču, a pritom u memoriji elektronskih blokova mogu postojati greške ili podaci koji zahtevaju dodatnu pažnju.
 
-      Takođe, tokom dijagnostike procenjuju se stvarni parametri rada sistema automobila. U kombinaciji sa servisnom istorijom i test vožnjom to daje značajno više informacija o stvarnom tehničkom stanju vozila.
+      Takođe, prilikom dijagnostike ocenjuju se stvarni parametri rada sistema automobila. U kombinaciji sa servisnom istorijom i test-vožnjom, to daje znatno više informacija o realnom tehničkom stanju vozila.
 
-      ## Motor 2.0 TDI, pogon na sve točkove 4Motion i 7-brzinski DSG
+      ## Motor 2.0 TDI, pogon na sve točkove 4Motion i 7-stepena DSG
 
-      Proveravan Volkswagen Tiguan opremljen je dizel motorom 2.0 TDI, sistemom pogona na sve točkove 4Motion i 7-brzinskim DSG menjačem sa mokrim kvačilima. Ova kombinacija motora, pogona na sve točkove i 7-brzinskog DSG menjača zaista je bila dostupna za Tiguan ove generacije.
+      Provereni Volkswagen Tiguan je opremljen dizel motorom 2.0 TDI, sistemom pogona na sve točkove 4Motion i 7-stepenom DSG sa vlažnim spojkama. Ova kombinacija motora, pogona i 7-stepenog DSG menjača zaista je bila dostupna za Tiguan ovog modela.
 
-      Prilikom izbora takvog automobila, važno je obratiti pažnju ne samo na motor, već i na rad menjača i pogona na sve točkove. Proverava se ponašanje DSG prilikom pokretanja, prebacivanja brzina naviše i naniže, manevrisanja, vožnje pod opterećenjem i tokom sveobuhvatne test vožnje.
+      Pri izboru takvog automobila, velika pažnja se mora posvetiti ne samo motoru, već i radu menjača i pogona. Proverava se ponašanje DSG-a pri kretanju, prilikom promena brzina, manevarisanju, vožnji pod opterećenjem i tokom pune test-vožnje.
 
-      Pređeni put od 180 000 km sam po sebi nije razlog za odbijanje automobila. Mnogo je važnije stvarno stanje konkretne mašine, potvrđeno servisiranjem i rezultatima sveobuhvatne dijagnostike.
+      Pređeni put od 180 000 km sam po sebi nije razlog za odbijanje automobila. Mnogo je važnije stvarno stanje konkretnog vozila, potvrđeno održavanjem i rezultatima sveobuhvatne dijagnostike.
 
-      ## Pregled automobila sa donje strane i provera donjeg dela
+      ## Pregled automobila sa donje strane i provera dna
 
-      Posebno je Volkswagen Tiguan pregledan sa donje strane. Provereno je stanje donjeg dela, elemenata ovjesa, spojeva, zaštita, agregata i prisustvo mogućih curenja ili mehaničkih oštećenja.
+      Posebno je Volkswagen Tiguan pregledan sa donje strane. Provereno je stanje dna, elemenata suspenzije, spojeva, zaštita, agregata i prisustvo mogućih curenja ili mehaničkih oštećenja.
 
-      Na osnovu pregleda nisu otkrivene ozbiljne primedbe u vezi sa stanjem donjeg dela automobila.
+      Prema rezultatima pregleda, ozbiljnih zamerki na stanje donjeg dela automobila nije otkriveno.
 
-      Pregled automobila sa donje strane posebno je važan prilikom autopodbora. Neka skupa oštećenja nije moguće normalno videti tokom uobičajenog pregleda automobila na parkingu prodavca.
+      Pregled automobila sa donje strane je posebno važan prilikom autopodbora. Neke skupe probleme je nemoguće normalno uočiti prilikom običnog pregleda automobila na parkingu prodavca.
 
-      ## Rezultat provere Volkswagen Tiguan-a
+      ## Rezultat provere Volkswagen Tiguan
 
-      Na osnovu sveobuhvatne dijagnostike automobil je pokazao dobro stanje. Karoserija bez sekundarnog farbanja, istorija je dodatno proverena putem CarVertical-a, servisnih i dealerskih podataka, izvršena je računaraska dijagnostika, provereni su rad motora, 7-brzinskog DSG-a i pogona na sve točkove 4Motion. Pregled donjeg dela također nije pokazao značajne primedbe.
+      Na osnovu sveobuhvatne dijagnostike, automobil je pokazao dobro stanje. Karoserija je bez sekundarnih farbanja, istorija je dodatno proverena putem CarVertical-a, servisnim i dilerskim podacima, izvršena je računarska dijagnostika, provereni su rad motora, 7-stepena DSG i pogon na sve točkove 4Motion. Pregled dna takođe nije otkrio bitne primedbe.
 
-      Ako planirate kupovinu Tiguan-a sa ovakvim pređenim putem, proverite ga pre predaje novca prodavcu: karoseriju, servisnu istoriju, elektroniku i rad DSG sistema sa pogonom na sve točkove tokom test vožnje.
+      Ako planirate da kupite Tiguan sa ovim pređenim putem, važno je proveriti ga pre nego što predate novac prodavcu: karoseriju, istoriju održavanja, elektroniku i rad DSG-a sa pogonom na test-vožnji.
   es:
     title: VW Tiguan
     body: |-

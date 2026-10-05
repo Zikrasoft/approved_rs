@@ -28,27 +28,27 @@ translations:
   sr:
     title: SEAT Leon
     body: |-
-      ## Automobil na zahtev u Španiji: SEAT Leon 2.0 TDI za klijenta
+      ## Autopodbor u Španiji: SEAT Leon 2.0 TDI za klijenta
 
-      Još jedan uspešno završen automobilski nalog u Španiji. Ovog puta smo tražili vozilo za našeg klijenta Maksima u Barseloni.
+      Još jedan uspešno završen autopodbor u Španiji. Ovog puta smo tražili automobil za našeg klijenta Maksima u Barseloni.
 
       Zadatak je bio pronaći **SEAT Leon** sa dizel motorom **2.0 TDI** i pouzdanim mokrim robotizovanim menjačem DSG DQ381, u dobrom tehničkom stanju, sa potvrđenim pređenim kilometrima i transparentnom istorijom.
 
-      Tokom automobilske potrage pronašli smo, pregledali i proverili četiri vozila. Svaka opcija je procenjivana ne samo na osnovu oglasa i spoljašnjeg stanja. Detaljno smo proveravali tehničke karakteristike, istoriju korišćenja, servisiranje i relevantne podatke o vozilu.
+      Tokom procesa autopodbora pronašli smo, pregledali i izvršili provere na četiri automobila. Svaka opcija je ocenjivana ne samo prema oglasu i spoljašnjem stanju. Detaljno smo proveravali tehnički deo, istoriju korišćenja, održavanje i podatke o automobilu.
 
-      Na kraju, od četiri opcije izabrana je najbolja:
+      Kao rezultat, od četiri opcije izabran je najbolji:
 
       - SEAT Leon crvene boje
       - motor 2.0 TDI Diesel
       - menjač DSG DQ381 sa mokrim kvačilima
-      - pređeno oko 100.000 km
-      - vozilo pronađeno i provereno u Španiji
+      - pređenih oko 100 000 km
+      - automobil pronađen i proveravan u Španiji
 
-      Pre kupovine izvršen je sveobuhvatan pregled vozila. Istorija je proverena putem **CarVertical**, kao i kroz baze podataka zvaničnog dilera SEAT. Dodatno, obavljena je potpuna kompjuterska dijagnostika elektronskih sistema vozila.
+      Pre kupovine izvršena je sveobuhvatna provera automobila. Istorija je proverena preko **CarVertical**, a takođe i kroz baze podataka zvaničnog dilera SEAT. Dodatno je izvršena kompletna kompjuterska dijagnostika elektronskih sistema automobila.
 
-      Takođe, proverili smo tehničko stanje, karoseriju, enterijer, usklađenost pređenih kilometara sa istorijom servisiranja i opšte stanje automobila pre potpisivanja ugovora.
+      Takođe smo proverili tehničko stanje, karoseriju, enterijer, usklađenost pređenih kilometara sa postojećom istorijom održavanja i ukupno stanje automobila pre zaključenja posla.
 
-      Nakon upoređivanja četiri vozila, ovaj SEAT Leon se pokazao kao najbolja opcija u pogledu stanja, istorije, pređenih kilometara i karakteristika.
+      Nakon upoređivanja četiri automobila, ovaj SEAT Leon se pokazao kao najbolja opcija u zbiru stanja, istorije, pređenih kilometara i karakteristika.
   es:
     title: SEAT Leon
     body: |-

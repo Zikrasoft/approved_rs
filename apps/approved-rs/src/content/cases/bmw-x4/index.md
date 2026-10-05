@@ -52,51 +52,51 @@ translations:
   sr:
     title: BMW X4
     body: |-
-      ## Kupovina BMW X4 2019. godine u Srbiji – auto-podbor vozila sa proverom  
+      ## Kupovina BMW X4 iz 2019. godine u Srbiji — autoprodajna usluga sa proverenim autom
 
-      Obratili su nam se Aleksej i njegova supruga sa zadatkom da pronađu **BMW u Srbiji** u izvanrednom tehničkom i vizuelnom stanju. Budžet za kupovinu automobila bio je do **35 000 evra**.  
-       
-      Naš cilj je bio da pronađemo BMW X4 u postavljenom budžetu – sa transparentnom istorijom, dobrom opremom i minimalnim ulaganjima nakon kupovine.  
-       
-      Tokom podbora razmotrili smo **5 automobila BMW X4**, nakon čega smo se odlučili za najuspešniju opciju.  
+      Obratili su nam se Aleksej i njegova supruga sa zadatkom da pronađemo **BMW u Srbiji** u odličnom tehničkom i vizuelnom stanju. Budžet za kupovinu automobila bio je do **35 000 evra**.
 
-      ## BMW X4 2019. godine – odličan izbor za kupovinu  
+      Pred nama je bio zadatak da pronađemo BMW X4 unutar zadatog budžeta — sa transparentnom istorijom, dobrom opremom i minimalnim ulaganjima nakon kupovine.
 
-      Na kraju je izabran **BMW X4 iz 2019. godine** u veoma atraktivnoj crvenoj boji. Automobil se odmah izdvaja svojim izgledom, a dobra oprema čini ga još privlačnijim izborom za svakodnevnu upotrebu.  
-       
-      Pod haubom se nalazi benzinski motor **BMW B48**. Pređeni put automobila u trenutku kupovine iznosio je oko **130 000 kilometara**.  
-       
-      Jedna od glavnih prednosti automobila je **ozbiljna servisna istorija kod ovlašćenog dilera**, koja je omogućila da se potvrdi servisiranje i stvarna kilometraža automobila.  
-       
-      Prilikom pregleda, automobil je pokazao **odlično stanje** – kako tehnički, tako i vizuelno.  
+      Tokom procesa selekcije razmotrili smo **5 automobila BMW X4**, nakon čega smo se odlučili za najpovoljniju opciju.
 
-      ## Oprema BMW X4  
+      ## BMW X4 iz 2019. godine — odlična opcija za kupovinu
 
-      Izabrani BMW X4 dolazi sa traženom opremom:  
+      Na kraju je izabran **BMW X4 iz 2019. godine** u veoma efektnoj crvenoj boji. Automobil se odmah ističe svojim spoljnim izgledom, a dobra oprema ga čini još privlačnijom opcijom za svakodnevnu upotrebu.
 
-      <ul class="icon-check">  
-      <li>panoramski krov</li>  
-      <li>multimedijalni sistem BMW iDrive ID6</li>  
-      <li>kuka za vuču</li>  
-      <li>benzinac B48</li>  
-      <li>atraktivna crvena boja karoserije</li>  
-      </ul>  
+      Pod haubom se nalazi benzinski motor **BMW B48**. Pređeni put automobila u trenutku kupovine iznosio je oko **130 000 kilometara**.
 
-      Nakon kupovine, takođe smo instalirali i podesili **Apple CarPlay**, što je učinilo fabrički multimedijalni sistem značajno prikladnijim za svakodnevnu upotrebu.  
+      Jedna od glavnih prednosti automobila je **službena servisna istorija**, koja je omogućila potvrdu servisa i realnog pređenog puta automobila.
 
-      ## Zašto smo izabrali baš ovaj automobil?  
+      Tokom provere, automobil se pokazao u **odličnom stanju** — kako tehnički, tako i vizuelno.
 
-      Prilikom podbora vozila uvek procenjujemo ne samo cenu i opremu, već i skup faktora: tehničko stanje, istoriju servisiranja, stvarnu kilometražu, stanje karoserije i perspektivne investicije.  
-       
-      Od pet razmatranih BMW X4, ovaj automobil se pokazao kao **najbolja izbalansirana opcija**. Dobra istorija, potvrđena kilometraža, odlično stanje, pogodna oprema i lepi spoljašnji izgled učinili su ga najboljim izborom u okviru postavljenog budžeta.  
-       
-      Na kraju, Aleksej i njegova supruga su dobili **BMW X4 2019. godine**, koji odgovara početnim zahtevima po budžetu, stanju i opremi.  
+      ## Oprema BMW X4
 
-      ### Auto-podbor BMW u Srbiji  
+      Izabrani BMW X4 poseda traženu opremu:
 
-      Ako planirate da kupite **BMW X4, BMW X3 ili drugi model BMW u Srbiji**, samostalna potraga ne omogućava uvek brzo razlikovanje stvarno dobrog automobila od vozila sa problematičnom istorijom.  
+      <ul class="icon-check">
+      <li>panoramski krov</li>
+      <li>multimedijalni sistem BMW iDrive ID6</li>
+      <li>prikolica</li>
+      <li>benzinski motor B48</li>
+      <li>efektivna crvena boja karoserije</li>
+      </ul>
 
-      **BMW X4 2019. godine – još jedan primer automobila koji je uspešno pronađen i kupljen nakon potpunog podbora i provere.**
+      Nakon kupovine, takođe smo instalirali i podesili **Apple CarPlay**, što je učinilo ugrađeni multimedijalni sistem znatno pogodnijim za svakodnevnu upotrebu.
+
+      ## Zašto smo odabrali baš ovaj automobil?
+
+      Tokom selekcije automobila uvek ocenjujemo ne samo cenu i opremu, već i skup faktora: tehničko stanje, istoriju servisa, realni pređeni put, stanje karoserije i perspektivna ulaganja.
+
+      Od pet razmatranih BMW X4, ovaj automobil se pokazao kao **najbalansiranija opcija**. Dobra istorija, potvrđen pređeni put, odlično stanje, pogodna oprema i lep spoljašnji izgled učinili su ga najboljim izborom u okviru postavljenog budžeta.
+
+      Kao rezultat, Aleksej i njegova supruga su dobili **BMW X4 iz 2019. godine**, koji ispunjava početne zahteve vezane za budžet, stanje i opremu.
+
+      ### Autoprodaja BMW u Srbiji
+
+      Ako planirate da kupite **BMW X4, BMW X3 ili neki drugi model BMW u Srbiji**, samostalna potražnja ne dopušta uvek brzo razlikovanje zaista dobrog automobila od vozila s problematičnom istorijom.
+
+      **BMW X4 iz 2019. godine — još jedan primer automobila koji je pronađen i kupljen nakon pune selekcije i provere.**
   es:
     title: BMW X4
     body: |-

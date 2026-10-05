@@ -22,15 +22,15 @@ translations:
 
       As a bonus, the client received a **professional body polish**.
   sr:
-    title: BMW X6 2023 — nabavka iz Nemačke
+    title: BMW X6 2023 — nabavka u Nemačkoj
     body: |-
       ## Uvoz BMW X6 iz Nemačke u Srbiju
 
-      Klijent se obratio nama, jer je već pronašao **BMW X6** u Nemačkoj. Analizirali smo tržište, predložili nekoliko zanimljivijih alternativa sa manjim pređenim kilometrima i pomogli mu da izabere najbolju opciju.
+      Klijent se obratio nama, već odabravši **BMW X6** u Nemačkoj. Analizirali smo tržište, ponudili nekoliko zanimljivijih alternativa sa manjim pređenim kilometrima i pomogli u izboru najboljeg auta.
 
-      Obavili smo profesionalnu inspekciju vozila u Nemačkoj (cena provere — **od 300 do 500 €** za jedno vozilo), organizovali transport kamionom do Subotice, izvršili carinjenje i predali **kompletno spremno vozilo** vlasniku već u Srbiji.
+      Organizovali smo profesionalnu proveru auta pre kupovine u Nemačkoj (cena provere — **od 300 do 500 €** po automobilu), obezbedili prevoz automobilom kamionom do Subotice, izvršili carinjenje i predali **potpuno spreman automobil** vlasniku već u Srbiji.
 
-      Kao poklon, klijent je dobio **profesionalnu polirku karoserije**.
+      Kao poklon, klijent je dobio **profesionalno poliranje karoserije**.
   es:
     title: BMW X6 2023 — selección en Alemania
     body: |-

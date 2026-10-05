@@ -175,17 +175,17 @@ translations:
       closingText: Just provide the make, budget, and a couple of preferences. We'll respond within two hours and let you know if it's achievable at that price.
   sr:
     contacts:
-      metaTitle: Kontakti — autopodbor, uvoz i otkup automobila
-      metaDescription: 'Kontaktirajte nas na Telegramu: autopodbor, uvoz, otkup i provera automobila. Odgovaramo u roku od dva sata, 24/7, na srpskom i engleskom.'
+      metaTitle: Kontakti — autopodbor, uvoz i otkup auta
+      metaDescription: 'Kontaktirajte nas na Telegramu: autopodbor, uvoz, otkup i provera auta. Odgovaramo u roku od dva sata, 24/7, na ruskom i engleskom.'
       heroTitle: Kontakti
-      heroSubtitle: Radimo preko Telegrama — brzo i jednostavno
+      heroSubtitle: Radimo preko Telegrama — brzo i praktično
       info:
         - label: Vreme odgovora
           value: U roku od 2 sata
-        - label: Režim rada
-          value: 24/7, bez odmora
+        - label: Radno vreme
+          value: 24/7, bez praznika
         - label: Jezici
-          value: Srpski, English
+          value: Ruski, English
         - label: Baza
           value: Beograd, Srbija
         - label: Zemlje
@@ -193,19 +193,19 @@ translations:
       workEyebrow: Kako radimo
       steps:
         - n: '01'
-          text: Pišete na Telegramu ili ostavljate zahtev na sajtu
+          text: Pišete na Telegram ili ostavljate zahtev na sajtu
         - n: '02'
-          text: Razgovaramo o vašem zahtevu, pojašnjavamo detalje i kriterijume
+          text: Razgovaramo o vašem zahtevu, preciziramo detalje i kriterijume
         - n: '03'
-          text: Počinjemo rad — nalazimo, proveravamo, uvozimo
+          text: Počinjemo rad — pronalazimo, proveravamo, dovozimo
     partners:
       eyebrow: Preporučujemo
-      heading: Šta dalje sa autom
-      intro: Nalazimo i uvozimo automobil. Za dalja pitanja, savetujemo da se obratite proverenim timovima.
-      linkLabel: Posetite sajt
-      requestLabel: Ostavite zahtev ovde
-      carlabDescription: Autoservis u Beogradu — dijagnostika, planirano održavanje i popravke, uključujući pripremu automobila nakon prevoza.
-      detailsDescription: Detailing studio — priprema za prodaju, polishing, hemijsko čišćenje enterijera i zaštitne prevlake.
+      heading: Šta dalje s autom
+      intro: Pronalazimo i dovozimo automobil. Za dalju sudbinu, preporučujemo da se obratite proverenim timovima.
+      linkLabel: Preći na sajt
+      requestLabel: Ostaviti zahtev ovde
+      carlabDescription: Autoservis u Beogradu — dijagnostika, planirano održavanje i popravka, uključujući pripremu automobila nakon transporta.
+      detailsDescription: Detaljning studio — priprema za prodaju, poliranje, hemijsko čišćenje i zaštitni premaz.
     privacy:
       metaTitle: Politika privatnosti
       metaDescription: 'Politika privatnosti i obrade ličnih podataka sajta {siteName}: koje podatke prikupljamo, kako ih koristimo i kako zatražiti brisanje.'
@@ -213,51 +213,51 @@ translations:
       lastUpdated: 'Poslednje ažuriranje: jun 2026'
       sections:
         - title: Koje podatke prikupljamo
-          text: Prilikom slanja zahteva prikupljamo ime i kontakt podatke (Telegram/telefon) koje unosite u formu. Takođe beležimo stranicu sa koje je zahtev poslat.
+          text: Pri slanju zahteva prikupljamo ime i kontakt podatke (Telegram/telefon), koje unosite u formu. Takođe beležimo stranicu sa koje je zahtev poslat.
         - title: Kako koristimo podatke
-          text: Podaci iz zahteva koriste se samo za povratnu informaciju. Zahtev ne prosledjujemo trećim licima i ne koristimo za reklamu. Odvojeno od zahteva radi web-analitika — Google i Yandex dobijaju anonimne podatke o pregledima stranica.
-        - title: Skladištenje podataka
-          text: Zahtevi se čuvaju u zaštićenom cloud skladištu Vercel Blob; pristup im imaju samo naši članovi. Možete zatražiti brisanje vaših podataka u bilo kojem trenutku, pišući nam na Telegramu.
+          text: Podaci iz zahteva se koriste samo za povratnu informaciju. Zahtev ne prosleđujemo trećim licima i ne koristimo za oglašavanje. Odvojeno od zahteva, postoji web analitika — Google i Yandex dobijaju anonimizovane podatke o pregledu stranica.
+        - title: Čuvanje podataka
+          text: Zahtevi se čuvaju u zaštićenoj cloud memoriji Vercel Blob; pristup imaju samo članovi našeg tima. Možete zatražiti brisanje vaših podataka bilo kada, pišući nam na Telegram.
         - title: Cookies
-          text: Sajt koristi tehničke kolačiće bez kojih ne može funkcionisati, kao i analitičke kolačiće. U baneru na dnu ekrana možete odbiti korišćenje kolačića; izbor se čuva u pretraživaču. Metrički podaci beleže sesije — kretanje kursora, skrolovanje i klike. Forma za prijavu je isključena iz ove statistike — ime, telefon, nadimak i komentar se ne beleže.
+          text: Sajt koristi tehničke cookies, bez kojih ne funkcioniše, i analitičke. U banneru na dnu ekrana možete se odjaviti; izbor se čuva u pretraživaču. Metrija beleži sesije — kretanje kursora, skrolovanje i klikove. Forma zahteva se ne beleži — ime, telefon, nadimak i komentar ne ulaze u to.
       contactTitle: Kontakt
-      contactBefore: 'Za pitanja u vezi sa privatnošću obratite nam se preko '
-      contactLinkText: Telegrama
+      contactBefore: 'Za pitanja o privatnosti obratite nam se preko '
+      contactLinkText: Telegram
     thanks:
       metaTitle: Zahtev primljen
-      metaDescription: Vaš zahtev je primljen. Javićemo se u najkraćem roku.
+      metaDescription: Vaš zahtev je primljen. Kontaktiraćemo vas u najkraćem roku.
       eyebrow: Zahtev poslat
-      heading: Ubrzo ćemo se javiti
-      body: Primačili smo vaš zahtev i javit ćemo se u roku od 2 sata. Ako je hitno — pišite direktno na Telegram.
-      ctaLabel: Povezati se direktno
+      heading: Uskoro ćemo vas kontaktirati
+      body: Primili smo vaš zahtev i javićemo se u roku od 2 sata. Ako je hitno — pišite direktno na Telegram.
+      ctaLabel: Pisati direktno
       waitLabel: Dok čekate
-      waitCasesLink: Stvarne transakcije →
-      waitSourcingLink: Autopodbor po meri →
+      waitCasesLink: Stvarni poslovi →
+      waitSourcingLink: Autopodbor pod ključ →
     casesVehicleSourcing:
-      metaTitle: Stvarne transakcije za autočno pretragu — automobili, cene i rokovi
-      metaDescription: Stvarne transakcije za autočno pretragu, dostavu, otkup i inspekciju automobila iz Nemačke, Španije, Srbije i Švajcarske. Automobil, cena i kako je sve prošlo.
+      metaTitle: Stvarni poslovi po autopodboru — automobili, cene i rokovi
+      metaDescription: Stvarni poslovi po autopodboru, dostavi, otkupu i proverenim automobilima iz Nemačke, Španije, Srbije i Švajcarske. Auto, cena i kako je sve prošlo.
     casesVehicleBuyback:
-      metaTitle: Stvarne transakcije za otkup automobila
-      metaDescription: 'Stvarne transakcije otkupa: ruske registarske tablice, istekao rok uvoza, sporna dokumentacija. Automobil, cena i kako je vlasnik dobio novac na dan transakcije.'
+      metaTitle: Stvarni poslovi po otkupu automobila
+      metaDescription: 'Stvarni poslovi po otkupu: ruske registarske tablice, istekao uvoz, sporni dokumenti. Auto, cena i kako je vlasnik dobio novac na dan transakcije.'
     casesVehicleInspection:
-      metaTitle: 'Stvarne transakcije: inspekcija automobila pre kupovine'
-      metaDescription: 'Stvarni izlazi na proveru pre kupovine: automobil, njegova cena i rezultat pregleda. Deo ovih priča završio je kupovinom, deo — odustajanjem.'
+      metaTitle: 'Stvarni poslovi: provera auta pre kupovine'
+      metaDescription: 'Stvarni izlazi na provere pre kupovine: auto, njegova cena i rezultat provere. Deo ovih priča završio je kupovinom, deo — odbijanjem.'
     casesVehicleImport:
-      metaTitle: 'Stvarne transakcije: automobili iz Evrope i Kine na ključ'
-      metaDescription: 'Stvarne transakcije za dovoz automobila iz Evrope i Kine: automobil i konačna cena uključuje logistiku, carine i obrade na licu mesta.'
+      metaTitle: 'Stvarni poslovi: auto iz Evrope i Kine pod ključ'
+      metaDescription: 'Stvarni poslovi po uvozu automobila iz Evrope i Kine: auto i konačna cena, koja uključuje logistiku, carine i papire.'
     casesShared:
       heroSubtitle: Stvarni automobili, stvarne cene, stvarne priče
-      emptyState: Uskoro će ovde biti prve transakcije.
+      emptyState: Uskoro će se ovde pojaviti prvi poslovi.
       tabIntros:
-        vehicle-sourcing: Svaki automobil na ovoj listi prošao je pregled pre kupovine. Opcije koje smo odbacili na putu do njih, ovde nisu uključene.
-        vehicle-buyback: 'Automobili koji se teško prodaju na uobičajen način: ruske registarske tablice, istekao rok uvoza, sporna dokumentacija. Vlasnik je dobio novac na dan transakcije, a sve brige oko daljnje sudbine automobila preuzeli smo mi.'
-        vehicle-inspection: Klijent je sam pronašao automobil, mi smo otišli i proverili. Deo ovih priča završio je kupovinom, deo — odustajanjem, a odustajanje smatramo istim ishodom.
-        vehicle-import: 'Dovoz iz Evrope i Kine na ključ: od pretrage u zemlji pošiljaoca do registracije. U konačnu cenu svake transakcije uključeno je sve: automobil, logistika, carine i obrada.'
+        vehicle-sourcing: Svaki auto na ovom spisku prošao je provere pre kupovine. Opcije koje smo odbacili na putu do njih nisu ovde uključene.
+        vehicle-buyback: 'Automobili koje je teško prodati na uobičajen način: ruske registarske tablice, istekao uvoz, sporni dokumenti. Vlasnik je dobio novac na dan transakcije, a sve brige oko daljnje sudbine automobila preuzeli smo mi.'
+        vehicle-inspection: Klijent je pronašao auto sam, mi smo otišli i proverili. Deo ovih priča završio je kupovinom, deo — odbijanjem, a odbijanje smatramo takođe rezultatom.
+        vehicle-import: 'Uvoz iz Evrope i Kine pod ključ: od pronalaska u zemlji pošiljaocu do registarskih tablica. U konačnu cenu svake transakcije uključeno je sve: auto, logistika, carine i papiri.'
       closingHeading: Sličan zadatak?
-      closingLine1: Ispričajte nam,
-      closingLine2: šta tražite, —
-      closingLine3: naći ćemo i za vas
-      closingText: Dovoljno je reći marku, budžet i nekoliko želja. Odgovaramo u roku od dva sata i iskreno kažemo da li je to realno za takve novce.
+      closingLine1: Recite nam,
+      closingLine2: šta tražite —
+      closingLine3: pronaći ćemo i vama
+      closingText: Dovoljno je da navedete marku, budžet i nekoliko želja. Odgovorićemo u roku od dva sata i reći iskreno, da li je to za takve novce realno.
   es:
     contacts:
       metaTitle: Contactos — selección, importación y compra de autos
