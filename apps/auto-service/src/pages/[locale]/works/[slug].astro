@@ -14,6 +14,7 @@ import { PathBuilder, withLocales } from '@/utils/paths';
 import { localizedWork, publishedWorks } from '@/utils/works';
 import { safeMarkdown, relatedEntries } from '@podbor/site-kit';
 import { SITE_URL } from '@/utils/constants';
+import { DEPTH_DOOR_ATTRIBUTE } from '@podbor/site-kit/browser';
 
 export async function getStaticPaths() {
   const works = publishedWorks(await getCollection('works'));
@@ -76,6 +77,28 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
       class="card mt-4 aspect-[4/3] w-full object-cover sm:aspect-[16/10]"
     />
   </section>
+
+  <div class="wrap" data-work-slug={work.id}>
+    <aside
+      {...{ [DEPTH_DOOR_ATTRIBUTE]: '' }}
+      class="card hidden data-[revealed=true]:flex mb-8 flex-col gap-5 border-signal p-6 sm:flex-row sm:items-center sm:justify-between sm:gap-8"
+    >
+      <div>
+        <h2 class="text-block font-semibold text-ink">
+          {pages.works.doorHeading}
+        </h2>
+        <p class="mt-1.5 text-base leading-relaxed text-muted">
+          {pages.works.doorText}
+        </p>
+      </div>
+      <a
+        href="#lead"
+        class="btn btn-primary w-full shrink-0 whitespace-nowrap sm:w-fit"
+      >
+        {pages.works.doorButtonLabel}
+      </a>
+    </aside>
+  </div>
 
   {
     body.trim() && (
@@ -146,4 +169,11 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
     body={pages.works.detailCtaBody}
     service={work.data.servicesApplied[0]}
   />
+  <script>
+    import { defineBrowsingDepth } from '@podbor/site-kit/browser';
+
+    const slug =
+      document.querySelector<HTMLElement>('[data-work-slug]')?.dataset.workSlug;
+    if (slug) defineBrowsingDepth(slug);
+  </script>
 </Shell>

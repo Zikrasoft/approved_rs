@@ -17,6 +17,8 @@ import { PathBuilder, withLocales } from '@/utils/paths';
 import { localizedWork, publishedWorks, workExcerpt } from '@/utils/works';
 import { safeMarkdown, relatedEntries } from '@podbor/site-kit';
 import { SITE_URL } from '@/utils/constants';
+import Icon from '@/components/Icon.astro';
+import { DEPTH_DOOR_ATTRIBUTE } from '@podbor/site-kit/browser';
 
 export async function getStaticPaths() {
   const works = publishedWorks(await getCollection('works'));
@@ -110,6 +112,41 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
     }
   </section>
 
+  <aside
+    {...{ [DEPTH_DOOR_ATTRIBUTE]: '' }}
+    data-work-slug={work.id}
+    class="wrap mt-10 hidden data-[revealed=true]:block"
+  >
+    <div class="shell">
+      <div
+        class="core flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between sm:gap-10 sm:p-8"
+      >
+        <div>
+          <h2
+            class="font-display text-xl tracking-tight text-chalk sm:text-2xl"
+          >
+            {pages.works.doorHeading}
+          </h2>
+          <p class="mt-2 max-w-md text-base leading-relaxed text-mute">
+            {pages.works.doorText}
+          </p>
+        </div>
+        <a
+          href="#lead"
+          class="inline-flex shrink-0 items-center justify-center gap-3 self-start whitespace-nowrap rounded-full bg-chalk py-3 pl-6 pr-2.5 text-sm font-semibold text-void transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-champagne active:scale-[0.98] sm:self-auto"
+        >
+          <span>{pages.works.doorButtonLabel}</span>
+          <span
+            class="flex h-8 w-8 items-center justify-center rounded-full bg-void/10"
+            aria-hidden="true"
+          >
+            <Icon name="arrow" />
+          </span>
+        </a>
+      </div>
+    </div>
+  </aside>
+
   {
     body.trim() && (
       <section class="wrap mt-20">
@@ -144,4 +181,11 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
     body={pages.works.detailCtaBody}
     service={work.data.servicesApplied[0]}
   />
+  <script>
+    import { defineBrowsingDepth } from '@podbor/site-kit/browser';
+
+    const slug =
+      document.querySelector<HTMLElement>('[data-work-slug]')?.dataset.workSlug;
+    if (slug) defineBrowsingDepth(slug);
+  </script>
 </Shell>
