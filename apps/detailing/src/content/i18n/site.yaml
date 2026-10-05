@@ -82,7 +82,7 @@ translations:
   sr:
     nav:
       services: Usluge
-      works: Radovi
+      works: Naši radovi
       process: Kako radimo
       prices: Cene
       contact: Kontakt
@@ -162,7 +162,7 @@ translations:
   en:
     nav:
       services: Services
-      works: Works
+      works: Our Work
       process: How We Work
       prices: Prices
       contact: Contact
@@ -239,4 +239,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: 48f95a48a9467800
+translatedFrom: 4d00dbd7b42411be

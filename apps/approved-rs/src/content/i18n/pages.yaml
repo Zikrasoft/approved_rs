@@ -146,28 +146,28 @@ translations:
       body: We have received your application and will reach out within 2 hours. If urgent, message us directly on Telegram.
       ctaLabel: Message Directly
       waitLabel: While You Wait
-      waitCasesLink: Our Cases →
+      waitCasesLink: Real Transactions →
       waitSourcingLink: Key Turn Car Sourcing →
     casesVehicleSourcing:
-      metaTitle: Sourcing Cases — Cars, Prices, and Timelines
-      metaDescription: Real sourcing cases for delivery, buyback, and inspection of cars from Germany, Spain, Serbia, and Switzerland. Car, price, deal history.
+      metaTitle: Real Vehicle Sourcing Transactions — Cars, Prices, and Timelines
+      metaDescription: Real vehicle sourcing deals, delivery, buyback, and inspection of cars from Germany, Spain, Serbia, and Switzerland. Car, price, and how it all went.
     casesVehicleBuyback:
-      metaTitle: Buyback Cases — Real Transactions
+      metaTitle: Real Auto Buyback Transactions
       metaDescription: 'Real buyback transactions: Russian plates, overdue imports, disputed documents. Car, price, and how the owner received payment on the deal day.'
     casesVehicleInspection:
-      metaTitle: Inspection Cases — Real Reports
+      metaTitle: 'Real Transactions: Vehicle Inspection Before Purchase'
       metaDescription: 'Real inspections before purchase: car, price, and inspection results. Some stories finished with a purchase, others with a refusal.'
     casesVehicleImport:
-      metaTitle: Import Cases from Europe and China
-      metaDescription: 'Real cases of importing vehicles from Europe and China: car and final price, including logistics, duties, and local registration.'
+      metaTitle: 'Real Transactions: Turnkey Cars from Europe and China'
+      metaDescription: 'Real transactions for importing cars from Europe and China: the car and the final price, including logistics, duties, and local registration.'
     casesShared:
       heroSubtitle: Real Cars, Real Prices, Real Stories
-      emptyState: Cases will be available soon.
+      emptyState: The first transactions will appear here soon.
       tabIntros:
         vehicle-sourcing: Every car on this list was inspected before purchase. Options we rejected along the way are not included here.
         vehicle-buyback: "Cars that are hard to sell through usual channels: Russian plates, overdue imports, disputed documents. The owner received payment on the deal day, and we managed all the hassle regarding the car's future."
         vehicle-inspection: The client found the car themselves; we went to inspect it. Some of these stories ended in a purchase, others — in a refusal, which we consider a valid outcome.
-        vehicle-import: 'Import from Europe and China as a complete package: from searching in the origin country to registration. The cost of these cases includes everything — the car, logistics, duties, and registration.'
+        vehicle-import: 'Turnkey import from Europe and China: from sourcing in the country of origin to registration plates. The final price of each transaction includes everything: the car, logistics, duties, and registration.'
       closingHeading: Similar Task?
       closingLine1: Tell us,
       closingLine2: what you're looking for —
@@ -231,28 +231,28 @@ translations:
       body: Primačili smo vaš zahtev i javit ćemo se u roku od 2 sata. Ako je hitno — pišite direktno na Telegram.
       ctaLabel: Povezati se direktno
       waitLabel: Dok čekate
-      waitCasesLink: Naši slučajevi →
+      waitCasesLink: Stvarne transakcije →
       waitSourcingLink: Autopodbor po meri →
     casesVehicleSourcing:
-      metaTitle: Slučajevi autopodbora — automobili, cene i rokovi
-      metaDescription: Stvarni slučajevi autopodbora, dostave, otkupa i provere automobila iz Nemačke, Španije, Srbije i Švajcarske. Automobil, cena, istorija transakcije.
+      metaTitle: Stvarne transakcije za autočno pretragu — automobili, cene i rokovi
+      metaDescription: Stvarne transakcije za autočno pretragu, dostavu, otkup i inspekciju automobila iz Nemačke, Španije, Srbije i Švajcarske. Automobil, cena i kako je sve prošlo.
     casesVehicleBuyback:
-      metaTitle: Slučajevi otkupa automobila — stvarne transakcije
+      metaTitle: Stvarne transakcije za otkup automobila
       metaDescription: 'Stvarne transakcije otkupa: ruske registarske tablice, istekao rok uvoza, sporna dokumentacija. Automobil, cena i kako je vlasnik dobio novac na dan transakcije.'
     casesVehicleInspection:
-      metaTitle: Slučajevi provere automobila — stvarni izveštaji
+      metaTitle: 'Stvarne transakcije: inspekcija automobila pre kupovine'
       metaDescription: 'Stvarni izlazi na proveru pre kupovine: automobil, njegova cena i rezultat pregleda. Deo ovih priča završio je kupovinom, deo — odustajanjem.'
     casesVehicleImport:
-      metaTitle: Slučajevi uvoza automobila iz Evrope i Kine
-      metaDescription: 'Stvarni slučajevi uvoza automobila iz Evrope i Kine: automobil i konačna cena, koja obuhvata logistiku, carine i lokacijsku obradu.'
+      metaTitle: 'Stvarne transakcije: automobili iz Evrope i Kine na ključ'
+      metaDescription: 'Stvarne transakcije za dovoz automobila iz Evrope i Kine: automobil i konačna cena uključuje logistiku, carine i obrade na licu mesta.'
     casesShared:
       heroSubtitle: Stvarni automobili, stvarne cene, stvarne priče
-      emptyState: Slučajevi će uskoro biti dostupni.
+      emptyState: Uskoro će ovde biti prve transakcije.
       tabIntros:
         vehicle-sourcing: Svaki automobil na ovoj listi prošao je pregled pre kupovine. Opcije koje smo odbacili na putu do njih, ovde nisu uključene.
         vehicle-buyback: 'Automobili koji se teško prodaju na uobičajen način: ruske registarske tablice, istekao rok uvoza, sporna dokumentacija. Vlasnik je dobio novac na dan transakcije, a sve brige oko daljnje sudbine automobila preuzeli smo mi.'
         vehicle-inspection: Klijent je sam pronašao automobil, mi smo otišli i proverili. Deo ovih priča završio je kupovinom, deo — odustajanjem, a odustajanje smatramo istim ishodom.
-        vehicle-import: 'Uvoz iz Evrope i Kine po meri: od potrage u zemlji otpreme do registarskih tablica. U cenu ovih slučajeva ulazi sve — automobil, logistika, carine i obrada.'
+        vehicle-import: 'Dovoz iz Evrope i Kine na ključ: od pretrage u zemlji pošiljaoca do registracije. U konačnu cenu svake transakcije uključeno je sve: automobil, logistika, carine i obrada.'
       closingHeading: Sličan zadatak?
       closingLine1: Ispričajte nam,
       closingLine2: šta tražite, —
@@ -316,28 +316,28 @@ translations:
       body: Hemos recibido tu solicitud y nos contactaremos en un plazo de 2 horas. Si es urgente, envíanos un mensaje directamente por Telegram.
       ctaLabel: Escribir directamente
       waitLabel: Mientras esperas
-      waitCasesLink: Nuestros casos →
+      waitCasesLink: Transacciones reales →
       waitSourcingLink: Selección de autos a medida →
     casesVehicleSourcing:
-      metaTitle: Casos de selección de autos — vehículos, precios y plazos
-      metaDescription: Casos reales de selección, entrega, compra e inspección de vehículos de Alemania, España, Serbia y Suiza. Auto, precio, historia de la transacción.
+      metaTitle: Transacciones reales de búsqueda de coches — vehículos, precios y plazos
+      metaDescription: Transacciones reales de búsqueda, entrega, compra y revisión de coches desde Alemania, España, Serbia y Suiza. Vehículo, precio y cómo fue todo.
     casesVehicleBuyback:
-      metaTitle: Casos de compra de autos — transacciones reales
+      metaTitle: Transacciones reales de recompra de coches
       metaDescription: 'Transacciones reales de compra: matrículas rusas, importación caducada, documentos en disputa. Auto, precio y cómo el propietario obtuvo el dinero el día de la transacción.'
     casesVehicleInspection:
-      metaTitle: Casos de inspección de autos — informes reales
+      metaTitle: 'Transacciones reales: revisión de coches antes de la compra'
       metaDescription: 'Visitas reales para inspección antes de la compra: auto, su precio y el resultado de la revisión. Algunas de estas historias culminaron en una compra, otras en una negativa.'
     casesVehicleImport:
-      metaTitle: Casos de importación de autos desde Europa y China
-      metaDescription: 'Casos reales de importación de autos desde Europa y China: auto y precio final, incluyendo logística, aranceles y tramitación en el lugar.'
+      metaTitle: 'Transacciones reales: coches de Europa y China llave en mano'
+      metaDescription: 'Transacciones reales de importación de coches desde Europa y China: vehículo y precio final que incluye logística, tasas e inscripción.'
     casesShared:
       heroSubtitle: Autos reales, precios reales, historias reales
-      emptyState: Los casos aparecerán pronto.
+      emptyState: Pronto aparecerán las primeras transacciones aquí.
       tabIntros:
         vehicle-sourcing: Cada auto en esta lista fue revisado antes de la compra. Las opciones que descartamos en el proceso no están aquí.
         vehicle-buyback: 'Autos que son difíciles de vender por métodos convencionales: matrículas rusas, importación caducada, documentación en disputa. El propietario recibió el dinero el día de la transacción, y nosotros nos encargamos de todos los problemas relacionados con el futuro del vehículo.'
         vehicle-inspection: El cliente encontró el auto por su cuenta, nosotros fuimos a revisarlo. Algunas de estas historias terminaron en compra, otras en negativa, y consideramos la negativa como un resultado válido.
-        vehicle-import: 'Importación desde Europa y China llave en mano: desde la búsqueda en el país de origen hasta las placas. El costo de estos casos incluye todo: auto, logística, aranceles y trámites.'
+        vehicle-import: 'Importación de coches de Europa y China llave en mano: desde la búsqueda en el país de origen hasta las matrículas. El precio final de cada transacción incluye todo: vehículo, logística, tasas e inscripción.'
       closingHeading: ¿Tienes una tarea similar?
       closingLine1: Cuéntanos,
       closingLine2: qué buscas, —
@@ -401,31 +401,31 @@ translations:
       body: Wir haben Ihre Anfrage erhalten und melden uns innerhalb von 2 Stunden. Wenn es dringend ist — schreiben Sie direkt über Telegram.
       ctaLabel: Direkt schreiben
       waitLabel: Während Sie warten
-      waitCasesLink: Unsere Fälle →
+      waitCasesLink: Echte Deals →
       waitSourcingLink: Autoauswahl schlüsselfertig →
     casesVehicleSourcing:
-      metaTitle: Fälle der Autoauswahl — Fahrzeuge, Preise und Fristen
-      metaDescription: Echte Fälle von Autoauswahl, Lieferung, Rückkauf und Inspektion von Fahrzeugen aus Deutschland, Spanien, Serbien und der Schweiz. Auto, Preis, Transaktionsgeschichte.
+      metaTitle: Echte Deals beim Autokauf — Autos, Preise und Fristen
+      metaDescription: Echte Deals beim Autokauf, Lieferung, Rückkauf und Inspektion von Fahrzeugen aus Deutschland, Spanien, Serbien und der Schweiz. Auto, Preis und Ablauf.
     casesVehicleBuyback:
-      metaTitle: Fälle des Autoankaufs — echte Transaktionen
+      metaTitle: Echte Deals zum Auto-Rückkauf
       metaDescription: 'Echte Transaktionen beim Rückkauf: russische Nummernschilder, abgelaufene Einfuhr, strittige Dokumente. Auto, Preis und wie der Eigentümer am Tag der Transaktion das Geld erhielt.'
     casesVehicleInspection:
-      metaTitle: Fälle der Fahrzeuginspektion — echte Berichte
+      metaTitle: 'Echte Deals: Fahrzeuginspektion vor dem Kauf'
       metaDescription: 'Echte Inspektionen vor dem Kauf: das Auto, der Preis und das Ergebnis der Inspektion. Einige dieser Geschichten endeten mit einem Kauf, andere mit einer Ablehnung.'
     casesVehicleImport:
-      metaTitle: Fälle des Autoimports aus Europa und China
-      metaDescription: 'Echte Fälle des Autoimports aus Europa und China: das Auto und der Endpreis, der Logistik, Zölle und die Abwicklung vor Ort umfasst.'
+      metaTitle: 'Echte Deals: Fahrzeuge aus Europa und China schlüsselfertig'
+      metaDescription: 'Echte Deals zum Import von Fahrzeugen aus Europa und China: Auto und Endpreis, einschließlich Logistik, Zölle und vor Ort Gebühren.'
     casesShared:
       heroSubtitle: Echte Fahrzeuge, echte Preise, echte Geschichten
-      emptyState: Fälle werden bald verfügbar sein.
+      emptyState: Bald erscheinen hier die ersten Deals.
       tabIntros:
         vehicle-sourcing: Jedes Auto in dieser Liste hat vor dem Kauf eine Inspektion durchlaufen. Optionen, die wir zuvor abgelehnt haben, sind hier nicht aufgeführt.
         vehicle-buyback: 'Autos, die auf herkömmlichem Weg schwer zu verkaufen sind: russische Nummern, abgelaufene Einfuhr, strittige Dokumente. Der Eigentümer erhielt das Geld am Tag der Transaktion, und wir übernahmen alle weiteren Aufgaben bezüglich des Fahrzeugs.'
         vehicle-inspection: Der Kunde hat das Auto selbst gefunden, wir sind hingegangen und haben geschaut. Einige dieser Geschichten endeten mit einem Kauf, andere mit einer Ablehnung, und wir betrachten eine Ablehnung als ebenso gültiges Ergebnis.
-        vehicle-import: 'Import aus Europa und China schlüsselfertig: vom Suchen im Herkunftsland bis zu den Nummernschildern. Der Preis dieser Fälle umfasst alles — Auto, Logistik, Zölle und Abwicklung.'
+        vehicle-import: 'Import aus Europa und China schlüsselfertig: von der Suche im Abgangsland bis zu den Nummernschildern. Der Endpreis jedes Deals umfasst alles: Auto, Logistik, Zölle und Gebühren.'
       closingHeading: Ähnliche Aufgabe?
       closingLine1: Erzählen Sie uns,
       closingLine2: wonach Sie suchen, —
       closingLine3: wir finden auch für Sie
       closingText: Marke, Budget und ein paar Wünsche genügen. Wir antworten innerhalb von zwei Stunden und sagen Ihnen ehrlich, ob das für diesen Preis realistisch ist.
-translatedFrom: 2ce7433be6267eb0
+translatedFrom: b19dc54d24bf57ce

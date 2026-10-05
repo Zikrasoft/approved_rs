@@ -73,7 +73,7 @@ translations:
       - q: Is customs clearance included in the cost?
         a: Yes, we assist with customs clearance in Serbia and include this in our calculations — the final amount is provided before the transaction.
       - q: How much more expensive is the 'turnkey' price compared to the price in the listing?
-        a: 'The difference depends on the country, the age of the vehicle, and whether a EUR1 certificate is available — we calculate and fix the total amount before starting. As a reference: in one of our cases, a BMW X1 cost 39,860 € in Germany, but the final price in Serbia, including all expenses, delivery, customs clearance, and registration, came to 46,000 €.'
+        a: "The difference depends on the country, the age of the vehicle, and whether there's an EUR1 certificate — we calculate and confirm the total amount before starting. For reference: in one of our deals, a BMW X1 cost €39,860 in Germany, while the all-inclusive price in Serbia, including all expenses, delivery, customs clearance, and documentation, came to €46,000."
       - q: What is required to register the imported car in Serbia?
         a: You can only register the car in your name in Serbia after obtaining a residency permit, so it's best to start the sourcing process once you have the documents in hand. Customs clearance takes place in Subotica, and afterwards, we deliver the car to your city and assist with the registration process.
     vehicle-buyback:
@@ -128,7 +128,7 @@ translations:
       - q: Da li je carinjenje uključeno u cenu?
         a: Da, pratimo carinjenje u Srbiji i uključujemo ga u izračun — konačnu sumu navodimo pre transakcije.
       - q: Koliko je automobil 'ključ u ruke' skuplji od cene u oglasu?
-        a: "Razlika zavisi od zemlje, starosti automobila i prisustva EUR1 sertifikata — punu sumu izračunavamo i fiksiramo pre početka. Za orijentaciju: u jednom od naših slučajeva, BMW X1 je koštao 39.860 € u Nemačkoj, a 'ključ u ruke' u Srbiji, sa svim troškovima, dostavom, carinjenjem i administracijom, je bio 46.000 €."
+        a: 'Razlika zavisi od zemlje, starosti vozila i postojanju EUR1 sertifikata — konačnu sumu izračunavamo i fiksiramo pre početka. Za orijentaciju: u jednoj od naših transakcija BMW X1 je koštao 39.860 € u Nemačkoj, a ukupno u Srbiji, sa svim troškovima, isporukom, carinjenjem i papirologijom, došlo je do 46.000 €.'
       - q: Šta je potrebno da se registrovani uvezeni automobil u Srbiji?
         a: Automobil možete registrovati na sebe u Srbiji samo nakon dobijanja boravišne dozvole, tako da je najbolje da započnete pretragu kada su vam dokumenti već u ruci. Carinjenje se obavlja u Subotici, nakon čega dostavljamo automobil do vašeg grada i pratimo registraciju.
     vehicle-buyback:
@@ -183,7 +183,7 @@ translations:
       - q: ¿La aduana está incluida en el precio?
         a: Sí, acompañamos la aduana en Serbia e incluimos eso en el cálculo; el precio final se comunica antes de la transacción.
       - q: ¿Cuánto más caro es el coche 'llave en mano' en comparación con el precio del anuncio?
-        a: "La diferencia depende del país, la antigüedad del coche y la existencia del certificado EUR1; calculamos y fijamos la suma total antes de comenzar. A modo de referencia: en uno de nuestros casos, un BMW X1 costaba 39,860 € en Alemania, y 'llave en mano' en Serbia, con todos los gastos, envío, aduanas y documentación, salió en 46,000 €."
+        a: 'La diferencia depende del país, la antigüedad del vehículo y la disponibilidad del certificado EUR1; el monto total lo calculamos y fijamos antes de comenzar. Como referencia: en uno de nuestros acuerdos, un BMW X1 costó en Alemania 39,860 €, mientras que en Serbia, lista para usar, con todos los gastos, entrega, despacho de aduanas y trámites, salió por 46,000 €.'
       - q: ¿Qué se necesita para registrar el coche importado en Serbia?
         a: Puedes registrar el coche a tu nombre en Serbia solo después de obtener el permiso de residencia, así que tiene sentido comenzar la selección cuando ya tienes los documentos. La aduana se realiza en Subotica, después de lo cual llevamos el coche a tu ciudad y te ayudamos con el registro.
     vehicle-buyback:
@@ -238,7 +238,7 @@ translations:
       - q: Ist die Zollabfertigung im Preis inbegriffen?
         a: Ja, wir unterstützen die Zollabfertigung in Serbien und inkludieren sie in die Berechnung – den endgültigen Betrag nennen wir vor Abschluss des Deals.
       - q: Wie viel teurer ist das Auto „schlüsselfertig“ im Vergleich zum Preis in der Anzeige?
-        a: 'Die Differenz hängt von dem Land, dem Alter des Fahrzeugs und der Verfügbarkeit des EUR1-Zertifikats ab – den Gesamtbetrag berechnen und fixieren wir vor dem Start. Zur Orientierung: In einem unserer Fälle kostete ein BMW X1 in Deutschland 39.860 €, und schlüsselfertig in Serbien, einschließlich aller Kosten, Lieferung, Zollabfertigung und Formalitäten, betrug er 46.000 €.'
+        a: 'Der Preisunterschied hängt vom Land, dem Alter des Fahrzeugs und der Verfügbarkeit des EUR1-Zertifikats ab — die Gesamtsumme berechnen und fixieren wir vor dem Start. Zur Orientierung: In einem unserer Geschäfte kostete ein BMW X1 in Deutschland 39.860 €, während er schlüsselfertig in Serbien, inklusive aller Kosten, Lieferung, Zollabwicklung und Formalitäten, 46.000 € betrug.'
       - q: Was wird benötigt, um das importierte Auto in Serbien zuzulassen?
         a: Die Anmeldung des Fahrzeugs auf Ihren Namen in Serbien ist erst nach Erhalt des Aufenthaltstitels möglich, daher macht es Sinn, mit der Suche zu beginnen, wenn die Unterlagen bereits bereit sind. Die Zollabfertigung erfolgt in Subotica, danach bringen wir das Auto in Ihre Stadt und unterstützen die Zulassung.
     vehicle-buyback:
@@ -273,4 +273,4 @@ translations:
     cityExpert:
       q: Gibt es in jeder Stadt einen eigenen Experten?
       a: In verschiedenen Städten arbeiten unterschiedliche Spezialisten von uns; in einigen Fällen fährt ein Experte in eine benachbarte Stadt der Region.
-translatedFrom: 80b62baf0cbc6b99
+translatedFrom: 4d8387bc4738a100

@@ -65,13 +65,16 @@ translations:
     works:
       metaTitle: Radovi detailing studija u Beogradu — Details
       metaDescription: 'Automobili koji su prošli kroz naš boks na Zvezdari: PPF obloge, zaštita farova, kompletna obloga karoserije. Vaše fotografije za svaki rad.'
-      eyebrow: Radovi
+      eyebrow: Naši radovi
       heading: Automobili koji su prošli kroz naš boks
       lead: Nema stock fotografija. Svaka kartica je automobil koji je bio kod nas, snimljen nakon rada.
       filterAll: Sve
       detailMetaSuffix: Details
       detailCtaHeading: Želite isto?
       detailCtaBody: Dođite na pregled ili pošaljite fotografiju svog automobila — sve ćemo izračunati i reći vam rok.
+      doorHeading: Sviđa vam se rezultat?
+      doorText: Pošaljite fotografiju svog automobila — izračunaćemo cenu i rok.
+      doorButtonLabel: Izračunaj cenu
     contact:
       metaTitle: Kontakti detailing studija u Beogradu — Details
       metaDescription: Adresa, radno vreme i telefon detailing studija Details u Beogradu. Zakazivanje pregleda putem telefona, WhatsApp-a, Vibera ili Telegrama.
@@ -125,13 +128,16 @@ translations:
     works:
       metaTitle: Detailing Studio Projects in Belgrade — Details
       metaDescription: 'Cars that have passed through our shop in Zvezdara: PPF installation, headlight protection, full body wraps. Photos of each project included.'
-      eyebrow: Projects
+      eyebrow: Our Works
       heading: Cars that have visited our shop
       lead: No stock images. Each card features a vehicle that was in our shop, photographed after the work was completed.
       filterAll: All
       detailMetaSuffix: Details
       detailCtaHeading: Want this for your car?
       detailCtaBody: Stop by for an inspection or send us photos of your car — we’ll provide a quote and timeline.
+      doorHeading: Like the result?
+      doorText: Send us a photo of your car — we'll estimate the cost and time.
+      doorButtonLabel: Calculate Cost
     contact:
       metaTitle: Contact Us — Details
       metaDescription: Address, hours, and phone number for the Details detailing studio in Belgrade. Book an inspection via phone, WhatsApp, Viber, or Telegram.
@@ -181,4 +187,4 @@ translations:
       heading: This Page Doesn't Exist
       body: The link may be outdated or there could be a typo in the address. Please check the home page or view our projects.
       cta: Go to Home
-translatedFrom: 793b3d7184522a35
+translatedFrom: 3ae0b4ae03c24e6e
