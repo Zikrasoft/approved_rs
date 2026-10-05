@@ -7,6 +7,9 @@ works:
   detailMetaSuffix: CarLab
   detailCtaHeading: Похожая проблема?
   detailCtaBody: Опишите симптомы — скажем, на что это похоже и сколько будет стоить диагностика.
+  doorHeading: Похожая история с вашей машиной?
+  doorText: Опишите симптомы — подскажем, с чего начать.
+  doorButtonLabel: Описать проблему
 contact:
   metaTitle: Контакты автосервиса CarLab в Белграде — адрес и телефон
   metaDescription: Адрес, часы работы и телефон автосервиса CarLab в Белграде. Запись на диагностику и ремонт по телефону, в WhatsApp или Viber.
