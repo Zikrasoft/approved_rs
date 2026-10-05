@@ -327,12 +327,18 @@ Both new apps follow the same shape, and a third should too:
   Telegram. The payload is `<service>_<locale>`, or the locale alone where the
   page has no service (the homepage, the footer, the floating widget, the
   contacts page); a component that sits on a service page takes the slug as a
-  prop rather than reading it off the path. The tile keeps
-  `data-contact-channel="telegram"` so the Metrika goal still fires, but a
-  Telegram tap stores no Lead — the bot writes a better one a moment later, so
-  `defineContactClickTracking`'s second predicate is `storesContactClickLead`
-  from `@podbor/site-kit/browser`, one named export rather than the same lambda
-  in three layouts.
+  prop rather than reading it off the path. A Telegram tap stores a click Lead
+  like every other channel, carrying the page and the visitor id, and
+  `defineContactClickTracking` appends that id to the payload through
+  `stampStartVisitor` in `@podbor/site-kit/contact-links` — the bot decodes it
+  with `readStartVisitor` from the same module, so the wire format has one
+  owner. The bot then goes through `insertOrMergeLead`, which lets a Lead
+  carrying a `telegramId` absorb only a placeholder click, never a form the
+  visitor already sent — that is how the operator card gets a `Страница:` line,
+  and `telegramId` is what the card reads as `🤖 через бота`. A tap that cannot
+  carry the id (analytics declined, or a payload past 64 characters) beacons
+  nothing: the bot writes its Lead alone, without a page, rather than leaving a
+  second, unmergeable card in the chat.
 - **The lead modal takes its service from the trigger.** `data-lead-service` on
   a button sets the form's `service` when the modal opens; `data-default-service`
   on the form is what it resets to when the trigger names none. Both constants

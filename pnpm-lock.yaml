@@ -468,6 +468,9 @@ importers:
       '@podbor/lead-crm':
         specifier: workspace:*
         version: link:../lead-crm
+      '@podbor/site-kit':
+        specifier: workspace:*
+        version: link:../site-kit
       zod:
         specifier: 4.5.4
         version: 4.5.4

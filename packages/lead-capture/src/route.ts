@@ -1,5 +1,9 @@
 import { z } from 'zod';
 import {
+  readStartVisitor,
+  START_PAYLOAD_LIMIT,
+} from '@podbor/site-kit/contact-links';
+import {
   secretMatches,
   VISITOR_MERGE_WINDOW_MS,
   type CapturePrompt,
@@ -15,15 +19,15 @@ const UNAUTHORIZED = new Response(null, { status: 401 });
 
 const SECRET_HEADER = 'x-telegram-bot-api-secret-token';
 const START_PATTERN = /^\/start(?:\s+(\S+))?$/;
-const MAX_START_PAYLOAD = 64;
 
 const webhookSecretSchema = z.string().min(1);
 
 const startPayloadSchema = z
   .string()
-  .max(MAX_START_PAYLOAD)
+  .max(START_PAYLOAD_LIMIT)
   .regex(/^[A-Za-z0-9_-]+$/)
-  .catch('');
+  .catch('')
+  .transform(readStartVisitor);
 
 type CaptureStep = CapturePrompt['step'];
 
@@ -58,7 +62,7 @@ const CLEAR_KEYBOARD: ClearKeyboardExtra = {
 
 export type CaptureStore = Pick<
   LeadStore,
-  | 'insertLead'
+  | 'insertOrMergeLead'
   | 'findByCapturePrompt'
   | 'findOpenLeadByTelegramId'
   | 'findPhoneByTelegramId'
@@ -67,7 +71,7 @@ export type CaptureStore = Pick<
 
 export function captureStore(store: LeadStore): CaptureStore {
   return {
-    insertLead: store.insertLead,
+    insertOrMergeLead: store.insertOrMergeLead,
     findByCapturePrompt: store.findByCapturePrompt,
     findOpenLeadByTelegramId: store.findOpenLeadByTelegramId,
     findPhoneByTelegramId: store.findPhoneByTelegramId,
@@ -169,8 +173,9 @@ export function createCaptureWebhookRoute<L extends string>({
   function startFields(
     payload: string | undefined,
     sender: CaptureSender,
-  ): { service: string; locale: L } {
-    const parts = startPayloadSchema.parse(payload).split('_');
+  ): { service: string; locale: L; visitorId: string | null } {
+    const start = startPayloadSchema.parse(payload);
+    const parts = start.payload.split('_');
     const head = parts[0];
     const tail = parts[parts.length - 1];
     const fallback = sender.language_code ?? '';
@@ -181,6 +186,7 @@ export function createCaptureWebhookRoute<L extends string>({
         : isLocale(fallback)
           ? fallback
           : primaryLocale,
+      visitorId: start.visitorId,
     };
   }
 
@@ -194,14 +200,15 @@ export function createCaptureWebhookRoute<L extends string>({
     payload: string | undefined,
     message?: string,
   ): Promise<void> {
-    const { service, locale } = startFields(payload, sender);
+    const { service, locale, visitorId } = startFields(payload, sender);
     const words = copy(locale);
     const known = sender.username
       ? undefined
       : await store.findPhoneByTelegramId(sender.id, brand);
     const contact = known ?? senderContact(sender);
     const step = known ? 'looking_for' : stepOrder(contact)[0];
-    const lead = await store.insertLead({
+    // TODO: merging before the click card saves its message id posts a second teaser.
+    const { lead } = await store.insertOrMergeLead({
       brand,
       name: senderName(sender),
       contact,
@@ -212,7 +219,7 @@ export function createCaptureWebhookRoute<L extends string>({
       telegramId: sender.id,
       country: null,
       source_url: null,
-      visitorId: null,
+      visitorId,
       locale,
       kind: 'lead',
       capturePrompt: { chatId, step },
