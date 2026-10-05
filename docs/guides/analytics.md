@@ -37,6 +37,7 @@ Variants go into parameters, not into new names.
 | `lead_modal_open`                                                | opened the form in the modal (approved.rs only) | `tab`, `service`                                  |
 | `brand_link_click`                                               | left for a partner site (approved.rs only)      | `to`                                              |
 | `lang_offer_shown` / `lang_offer_taken` / `lang_offer_dismissed` | the language-choice banner                      | `from`, `to`                                      |
+| `case_view`                                                      | opened a Case study                             | `depth`: Case studies opened this visit           |
 
 `scroll_50`, `form_view` and `form_start` fire once per page rather than once per
 form: the approved.rs homepage has three forms, and counting them separately would

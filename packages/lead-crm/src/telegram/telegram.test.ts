@@ -169,8 +169,21 @@ describe('sendLeadNotification', () => {
     expect(body.text).toContain('Автоподбор');
     expect(body.text).toContain('Иван');
     expect(body.text).toContain('🆕 Новая');
+    expect(body.text).toContain(`🏷 ${makeLead().brand}`);
     expect(body.text).not.toContain('@ivan');
     expect(body.text).not.toContain('BMW X5');
+  });
+
+  it('says in the teaser that the lead came through the capture bot', async () => {
+    await sendLeadNotification(makeLead({ telegramId: 77 }));
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('🤖 через бота');
+  });
+
+  it('leaves the bot mark off a lead the site wrote', async () => {
+    await sendLeadNotification(makeLead());
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).not.toContain('через бота');
   });
 
   it('attaches exactly one deep-link url button, no callback_data, no status buttons', async () => {

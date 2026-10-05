@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@podbor/lead-crm": "workspace:*",
+    "@podbor/site-kit": "workspace:*",
     "zod": "4.5.4"
   },
   "devDependencies": {

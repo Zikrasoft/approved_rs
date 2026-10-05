@@ -267,6 +267,96 @@ describe('insertOrMergeLead', () => {
     expect(lead.comment).not.toContain('Также пробовал');
   });
 
+  it('hands a Telegram click over to the capture bot that picks up the same visitor', async () => {
+    await store.insertOrMergeLead({
+      ...clickData('telegram'),
+      source_url: 'https://approved.rs/sr/cases/x/',
+    });
+    const { lead, merged } = await store.insertOrMergeLead({
+      brand: 'Test',
+      name: 'Петр',
+      contact: '@petr',
+      service: '',
+      contactChannel: 'telegram',
+      source_url: null,
+      visitorId: 'visitor-1',
+      locale: 'sr',
+      kind: 'lead',
+      telegramId: 77,
+      capturePrompt: { chatId: 77, step: 'looking_for' },
+    });
+
+    expect(merged).toBe(true);
+    expect(lead).toMatchObject({
+      contact: '@petr',
+      kind: 'lead',
+      source_url: 'https://approved.rs/sr/cases/x/',
+      telegramId: 77,
+      capturePrompt: { chatId: 77, step: 'looking_for' },
+    });
+    expect(lead.comment ?? '').not.toContain('Сначала кликнул');
+  });
+
+  it('keeps a bot lead apart from a form the same visitor already sent', async () => {
+    await store.insertOrMergeLead({
+      ...clickData('phone'),
+      name: 'Иван',
+      contact: '+381601234567',
+      kind: 'lead',
+    });
+    const { merged } = await store.insertOrMergeLead({
+      ...clickData('telegram'),
+      name: 'Петр',
+      contact: '@petr',
+      kind: 'lead',
+      telegramId: 77,
+    });
+
+    expect(merged).toBe(false);
+    expect(await store.readLeads()).toHaveLength(2);
+  });
+
+  it('still notes the other channel a bot lead was clicked through first', async () => {
+    await store.insertOrMergeLead(clickData('whatsapp'));
+    const { lead } = await store.insertOrMergeLead({
+      ...clickData('telegram'),
+      name: 'Петр',
+      contact: '@petr',
+      kind: 'lead',
+      telegramId: 77,
+    });
+
+    expect(lead.comment).toContain('Сначала кликнул: WhatsApp');
+  });
+
+  it('still notes a repeat click on the same channel when no bot is involved', async () => {
+    await store.insertOrMergeLead(clickData('whatsapp'));
+    const { lead } = await store.insertOrMergeLead(clickData('whatsapp'));
+
+    expect(lead.comment).toContain('Также пробовал: WhatsApp');
+  });
+
+  it('fills the page in when the Telegram click lands after the bot already wrote the lead', async () => {
+    await store.insertOrMergeLead({
+      brand: 'Test',
+      name: 'Петр',
+      contact: '@petr',
+      service: '',
+      contactChannel: 'telegram',
+      visitorId: 'visitor-1',
+      locale: 'sr',
+      telegramId: 77,
+    });
+    const { lead } = await store.insertOrMergeLead({
+      ...clickData('telegram'),
+      source_url: 'https://approved.rs/sr/',
+    });
+
+    expect(lead.source_url).toBe('https://approved.rs/sr/');
+    expect(lead.telegramId).toBe(77);
+    expect(lead.comment ?? '').not.toContain('Также пробовал');
+  });
+
   it('remembers which channel the visitor clicked before the form replaced it', async () => {
     await store.insertOrMergeLead(clickData('whatsapp'));
     const { lead } = await store.insertOrMergeLead({

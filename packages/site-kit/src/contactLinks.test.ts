@@ -3,6 +3,9 @@ import {
   captureBotLink,
   instagramLink,
   phoneLink,
+  readStartVisitor,
+  stampStartVisitor,
+  START_PAYLOAD_LIMIT,
   telegramBotLink,
   telegramLink,
   viberLink,
@@ -66,5 +69,48 @@ describe('contact links', () => {
 
   it('opens the Instagram profile', () => {
     expect(instagramLink('studio')).toBe('https://www.instagram.com/studio');
+  });
+});
+
+describe('start payload visitor id', () => {
+  const UUID = '0f8fad5b-d9cb-469f-a165-70867728950e';
+  const COMPACT = '0f8fad5bd9cb469fa16570867728950e';
+
+  it('stamps the compact id on as the last segment', () => {
+    expect(stampStartVisitor('detailing_sr', UUID)).toBe(
+      `detailing_sr_${COMPACT}`,
+    );
+  });
+
+  it('replaces an id stamped earlier instead of stacking a second one', () => {
+    expect(stampStartVisitor(`sr_${COMPACT}`, UUID)).toBe(`sr_${COMPACT}`);
+  });
+
+  it('refuses an id that is not a uuid', () => {
+    expect(stampStartVisitor('sr', 'odd-id')).toBeNull();
+  });
+
+  it('refuses a payload that would outgrow the Telegram limit', () => {
+    expect(stampStartVisitor('x'.repeat(32), UUID)).toBeNull();
+  });
+
+  it('fits the longest service slug', () => {
+    expect(
+      stampStartVisitor('steering-wheel-restoration_sr', UUID)?.length,
+    ).toBeLessThanOrEqual(START_PAYLOAD_LIMIT);
+  });
+
+  it('reads the id back with its dashes and the payload without it', () => {
+    expect(readStartVisitor(`detailing_sr_${COMPACT}`)).toEqual({
+      payload: 'detailing_sr',
+      visitorId: UUID,
+    });
+  });
+
+  it('reads a payload without an id as it is', () => {
+    expect(readStartVisitor('detailing_sr')).toEqual({
+      payload: 'detailing_sr',
+      visitorId: null,
+    });
   });
 });

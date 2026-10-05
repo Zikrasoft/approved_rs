@@ -465,13 +465,18 @@ export function createFormatter({
     return (label || clickLabel(lead) || '—').slice(0, MAX_SERVICES_LABEL);
   }
 
+  function brandLine(lead: StoredLead): string {
+    const via = lead.telegramId == null ? '' : ' · 🤖 через бота';
+    return `🏷 ${escapeHtml(lead.brand)}${via}`;
+  }
+
   function formatLeadText(lead: StoredLead, role: Role): string {
     const contactLine = lead.contactChannel
       ? `${lead.contact} (${channelLabel(lead.contactChannel)})`
       : lead.contact;
     const lines: string[] = [
       `🚗 Заявка #${lead.id} — ${escapeHtml(servicesLabel(lead))}`,
-      `🏷 ${escapeHtml(lead.brand)}`,
+      brandLine(lead),
       statusLine(lead.status),
     ];
     if (lead.dealAmount != null) {
@@ -551,7 +556,7 @@ export function createFormatter({
     formatLeadText,
 
     formatTeaser(lead: StoredLead): string {
-      return `${archivedMark(lead)}🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusEmoji(lead.status)} ${statusLabel(lead.status)}`;
+      return `${archivedMark(lead)}🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusEmoji(lead.status)} ${statusLabel(lead.status)}\n${brandLine(lead)}`;
     },
 
     deepLinkKeyboard(id: number): Keyboard {

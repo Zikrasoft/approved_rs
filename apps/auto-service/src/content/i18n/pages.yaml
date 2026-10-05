@@ -7,6 +7,9 @@ works:
   detailMetaSuffix: CarLab
   detailCtaHeading: Похожая проблема?
   detailCtaBody: Опишите симптомы — скажем, на что это похоже и сколько будет стоить диагностика.
+  doorHeading: Похожая история с вашей машиной?
+  doorText: Опишите симптомы — подскажем, с чего начать.
+  doorButtonLabel: Описать проблему
 contact:
   metaTitle: Контакты автосервиса CarLab в Белграде — адрес и телефон
   metaDescription: Адрес, часы работы и телефон автосервиса CarLab в Белграде. Запись на диагностику и ремонт по телефону, в WhatsApp или Viber.
@@ -69,6 +72,9 @@ translations:
       detailMetaSuffix: CarLab
       detailCtaHeading: Imate sličan problem?
       detailCtaBody: Opisajte simptome — na šta to liči i koliko će koštati dijagnostika.
+      doorHeading: Slična situacija sa vašim autom?
+      doorText: Opisujte simptome — pomoći ćemo vam odakle da počnete.
+      doorButtonLabel: Opisati problem
     contact:
       metaTitle: Kontakti auto servisa CarLab u Beogradu — adresa i telefon
       metaDescription: Adresa, radno vreme i telefon auto servisa CarLab u Beogradu. Zakazivanje dijagnostike i popravke putem telefona, na WhatsApp ili Viber.
@@ -130,6 +136,9 @@ translations:
       detailMetaSuffix: CarLab
       detailCtaHeading: Similar Issue?
       detailCtaBody: Describe the symptoms — for instance, what it feels like, and how much the diagnostics will cost.
+      doorHeading: Is your car having a similar issue?
+      doorText: Describe the symptoms — we'll help you figure out where to start.
+      doorButtonLabel: Describe the problem
     contact:
       metaTitle: Contact CarLab Car Service in Belgrade — Address and Phone
       metaDescription: Address, operating hours, and phone number of CarLab in Belgrade. Make an appointment for diagnostics and repairs via phone, WhatsApp, or Viber.
@@ -181,4 +190,4 @@ translations:
       heading: This Page Does Not Exist
       body: The link may be outdated or there could be a typo in the address. Check out our services or message us — we can help.
       cta: Go to Homepage
-translatedFrom: 57d289ecab32d11a
+translatedFrom: cadc960cb6f2bd23

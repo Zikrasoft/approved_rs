@@ -3,7 +3,7 @@ nav:
   vehicle-import: Авто из Европы и Китая
   vehicle-buyback: Выкуп
   vehicle-inspection: Проверка
-  cases: Кейсы
+  cases: Реальные сделки
   contacts: Контакты
 navHint:
   vehicle-sourcing: Найдём и проверим машину
@@ -39,7 +39,7 @@ common:
   alsoWorkingInLabel: 'Также работаем в:'
   homeLabel: Главная
   faqHeading: Частые вопросы
-  viewAllCasesLabel: Все кейсы
+  viewAllCasesLabel: Все сделки
   closeLabel: Закрыть
   channelLabel: Наш канал
   cookie:
@@ -71,7 +71,7 @@ translations:
       vehicle-import: Cars from Europe and China
       vehicle-buyback: Buyback
       vehicle-inspection: Inspection
-      cases: Cases
+      cases: Real Transactions
       contacts: Contacts
     header:
       menuLabel: Menu
@@ -94,7 +94,7 @@ translations:
       alsoWorkingInLabel: 'Also Operating In:'
       homeLabel: Home
       faqHeading: Frequently Asked Questions
-      viewAllCasesLabel: All Cases
+      viewAllCasesLabel: View All Transactions
       closeLabel: Close
       channelLabel: Our Channel
       cookie:
@@ -125,7 +125,7 @@ translations:
       vehicle-import: Automobili iz Evrope i Kine
       vehicle-buyback: Otkup
       vehicle-inspection: Provera
-      cases: Kase
+      cases: Stvarni poslovi
       contacts: Kontakti
     header:
       menuLabel: Meni
@@ -148,7 +148,7 @@ translations:
       alsoWorkingInLabel: 'Takođe radimo u:'
       homeLabel: Početna
       faqHeading: Česta pitanja
-      viewAllCasesLabel: Svi slučajevi
+      viewAllCasesLabel: Sve transakcije
       closeLabel: Zatvori
       channelLabel: Naš kanal
       cookie:
@@ -179,7 +179,7 @@ translations:
       vehicle-import: Coches de Europa y China
       vehicle-buyback: Compra
       vehicle-inspection: Inspección
-      cases: Casos
+      cases: Transacciones reales
       contacts: Contactos
     header:
       menuLabel: Menú
@@ -202,7 +202,7 @@ translations:
       alsoWorkingInLabel: 'También trabajamos en:'
       homeLabel: Inicio
       faqHeading: Preguntas frecuentes
-      viewAllCasesLabel: Todos los casos
+      viewAllCasesLabel: Ver todas las transacciones
       closeLabel: Cerrar
       channelLabel: Nuestro canal
       cookie:
@@ -233,7 +233,7 @@ translations:
       vehicle-import: Autos aus Europa und China
       vehicle-buyback: Rückkauf
       vehicle-inspection: Überprüfung
-      cases: Fälle
+      cases: Echte Geschäfte
       contacts: Kontakte
     header:
       menuLabel: Menü
@@ -256,7 +256,7 @@ translations:
       alsoWorkingInLabel: 'Wir sind auch tätig in:'
       homeLabel: Startseite
       faqHeading: Häufige Fragen
-      viewAllCasesLabel: Alle Fälle
+      viewAllCasesLabel: Alle Geschäfte
       closeLabel: Schließen
       channelLabel: Unser Kanal
       cookie:
@@ -269,4 +269,4 @@ translations:
         morePhotos: Weitere Fotos
         prev: Vorheriges Foto
         next: Nächstes Foto
-translatedFrom: 7d499b7c7b5b62de
+translatedFrom: 3fb6c0f8742e985e

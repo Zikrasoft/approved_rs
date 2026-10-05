@@ -1,10 +1,12 @@
 import { readOrCreateVisitorId } from './visitorId.ts';
 export { defineAnalytics, type AnalyticsConfig } from './analytics.ts';
-export {
-  defineContactClickTracking,
-  storesContactClickLead,
-} from './contactClick.ts';
+export { defineContactClickTracking } from './contactClick.ts';
 export { defineFunnelTracking } from './funnel.ts';
+export {
+  defineBrowsingDepth,
+  DEPTH_DOOR_ATTRIBUTE,
+  DEPTH_SLUG_ATTRIBUTE,
+} from './browsingDepth.ts';
 export { markFieldValidity } from './fieldValidity.ts';
 export { GOALS, reachGoal, type Goal } from './goals.ts';
 export { defineCtaReveal } from './ctaReveal.ts';

@@ -73,10 +73,10 @@ function makeStore() {
   };
   return {
     leads,
-    insertLead: vi.fn(async (data: LeadInput) => {
+    insertOrMergeLead: vi.fn(async (data: LeadInput) => {
       const lead = storedLead(data, leads.length + 1);
       leads.push(lead);
-      return lead;
+      return { lead, merged: false };
     }),
     findByCapturePrompt: vi.fn(async (chatId: number, brand: string) =>
       open(brand)
@@ -233,13 +233,13 @@ describe('the webhook secret', () => {
       makeCtx(startUpdate(), { 'x-telegram-bot-api-secret-token': 'nope' }),
     );
     expect(res.status).toBe(401);
-    expect(store.insertLead).not.toHaveBeenCalled();
+    expect(store.insertOrMergeLead).not.toHaveBeenCalled();
   });
 
   it('rejects every update when no secret is configured', async () => {
     const res = await route(undefined)(makeCtx(startUpdate()));
     expect(res.status).toBe(401);
-    expect(store.insertLead).not.toHaveBeenCalled();
+    expect(store.insertOrMergeLead).not.toHaveBeenCalled();
   });
 
   it('acknowledges an update that carries the right secret', async () => {
@@ -252,12 +252,12 @@ describe('updates that are not a visitor pressing Start', () => {
   it('acknowledges a malformed body without storing anything', async () => {
     const res = await POST(makeCtx('not json'));
     expect(res.status).toBe(200);
-    expect(store.insertLead).not.toHaveBeenCalled();
+    expect(store.insertOrMergeLead).not.toHaveBeenCalled();
   });
 
   it('acknowledges an update with no message', async () => {
     await POST(makeCtx({ update_id: 2, callback_query: { id: 'x' } }));
-    expect(store.insertLead).not.toHaveBeenCalled();
+    expect(store.insertOrMergeLead).not.toHaveBeenCalled();
   });
 
   it('acknowledges a message that is missing a sender', async () => {
@@ -266,12 +266,12 @@ describe('updates that are not a visitor pressing Start', () => {
         message: { chat: { id: 1, type: 'private' }, text: '/start' },
       }),
     );
-    expect(store.insertLead).not.toHaveBeenCalled();
+    expect(store.insertOrMergeLead).not.toHaveBeenCalled();
   });
 
   it('ignores chatter in a group chat', async () => {
     await POST(makeCtx(startUpdate(undefined, HANDLED, 'supergroup')));
-    expect(store.insertLead).not.toHaveBeenCalled();
+    expect(store.insertOrMergeLead).not.toHaveBeenCalled();
   });
 
   it('ignores a message with no text at all', async () => {
@@ -280,11 +280,11 @@ describe('updates that are not a visitor pressing Start', () => {
         message: { chat: { id: 42, type: 'private' }, from: HANDLED },
       }),
     );
-    expect(store.insertLead).not.toHaveBeenCalled();
+    expect(store.insertOrMergeLead).not.toHaveBeenCalled();
   });
 
   it('acknowledges even when the store throws', async () => {
-    store.insertLead.mockRejectedValueOnce(new Error('blob is down'));
+    store.insertOrMergeLead.mockRejectedValueOnce(new Error('blob is down'));
     vi.spyOn(console, 'error').mockImplementation(() => {});
     const res = await POST(makeCtx(startUpdate()));
     expect(res.status).toBe(200);
@@ -302,7 +302,7 @@ describe('the Lead written at /start', () => {
 
   it('takes the @username as the contact, and the full name', async () => {
     await POST(makeCtx(startUpdate('ru')));
-    expect(store.insertLead).toHaveBeenCalledWith(
+    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
       expect.objectContaining({
         contact: '@ivan',
         name: 'Иван Петров',
@@ -314,16 +314,31 @@ describe('the Lead written at /start', () => {
     );
   });
 
+  it('takes the visitor id the site tile stamped on the start payload', async () => {
+    await POST(
+      makeCtx(
+        startUpdate('vehicle-import_sr_0f8fad5bd9cb469fa16570867728950e'),
+      ),
+    );
+    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
+      expect.objectContaining({
+        visitorId: '0f8fad5b-d9cb-469f-a165-70867728950e',
+        service: 'vehicle-import',
+        locale: 'sr',
+      }),
+    );
+  });
+
   it('falls back to a tg://user link when the sender has no username', async () => {
     await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
-    expect(store.insertLead).toHaveBeenCalledWith(
+    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
       expect.objectContaining({ contact: 'tg://user?id=777', name: 'Лена' }),
     );
   });
 
   it('stores an empty name when the sender has none', async () => {
     await POST(makeCtx(startUpdate('ru', { id: 9 })));
-    expect(store.insertLead).toHaveBeenCalledWith(
+    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
       expect.objectContaining({ name: '' }),
     );
   });
@@ -335,7 +350,7 @@ describe('the Lead written at /start', () => {
 
   it('stamps the bot owner brand, whatever the payload says', async () => {
     await POST(makeCtx(startUpdate('CarLab_sr')));
-    expect(store.insertLead).toHaveBeenCalledWith(
+    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
       expect.objectContaining({ brand: BRAND }),
     );
   });
@@ -344,7 +359,7 @@ describe('the Lead written at /start', () => {
 describe('the deep-link payload', () => {
   it('takes the service and the locale the page was in', async () => {
     await POST(makeCtx(startUpdate('vehicle-import_de')));
-    expect(store.insertLead).toHaveBeenCalledWith(
+    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
       expect.objectContaining({
         service: 'vehicle-import',
         services: ['vehicle-import'],
@@ -355,14 +370,14 @@ describe('the deep-link payload', () => {
 
   it('carries the locale alone when the page had no service', async () => {
     await POST(makeCtx(startUpdate('es')));
-    expect(store.insertLead).toHaveBeenCalledWith(
+    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
       expect.objectContaining({ service: '', services: [], locale: 'es' }),
     );
   });
 
   it('drops a service it does not recognise but keeps the locale', async () => {
     await POST(makeCtx(startUpdate('wheel-polishing_en')));
-    expect(store.insertLead).toHaveBeenCalledWith(
+    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
       expect.objectContaining({ service: '', locale: 'en' }),
     );
   });
@@ -373,7 +388,7 @@ describe('the deep-link payload', () => {
         startUpdate('vehicle-sourcing_fr', { ...HANDLED, language_code: 'en' }),
       ),
     );
-    expect(store.insertLead).toHaveBeenCalledWith(
+    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
       expect.objectContaining({ service: 'vehicle-sourcing', locale: 'en' }),
     );
   });
@@ -382,14 +397,14 @@ describe('the deep-link payload', () => {
     await POST(
       makeCtx(startUpdate(undefined, { ...HANDLED, language_code: 'fr' })),
     );
-    expect(store.insertLead).toHaveBeenCalledWith(
+    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
       expect.objectContaining({ locale: 'ru' }),
     );
   });
 
   it('never rejects a visitor over a hostile payload', async () => {
     await POST(makeCtx(startUpdate('<script>_'.repeat(20))));
-    expect(store.insertLead).toHaveBeenCalledWith(
+    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
       expect.objectContaining({ service: '', locale: 'ru' }),
     );
   });
@@ -591,7 +606,7 @@ describe('a contact shared outside the phone step', () => {
   it('is ignored when the visitor has no dialog open at all', async () => {
     await POST(makeCtx(contactUpdate('381601234567')));
 
-    expect(store.insertLead).not.toHaveBeenCalled();
+    expect(store.insertOrMergeLead).not.toHaveBeenCalled();
     expect(bot.sendMessage).not.toHaveBeenCalled();
   });
 });
@@ -602,11 +617,11 @@ describe('a visitor who presses Start again', () => {
   it('continues the open Lead within the hour instead of capturing again', async () => {
     await POST(makeCtx(startUpdate('ru')));
     await say('BMW X5');
-    store.insertLead.mockClear();
+    store.insertOrMergeLead.mockClear();
 
     await POST(makeCtx(startUpdate('ru')));
 
-    expect(store.insertLead).not.toHaveBeenCalled();
+    expect(store.insertOrMergeLead).not.toHaveBeenCalled();
     expect(store.leads).toHaveLength(1);
     expect(lastSent()).toEqual([42, 'BUDGET']);
   });
@@ -676,7 +691,7 @@ describe('free text outside the dialog', () => {
   it('opens a new enquiry when the visitor has no open Lead', async () => {
     await say('привет, ищу машину');
 
-    expect(store.insertLead).toHaveBeenCalledTimes(1);
+    expect(store.insertOrMergeLead).toHaveBeenCalledTimes(1);
     expect(store.leads[0].comment).toBe('Сообщение: привет, ищу машину');
     expect(lastSent()).toEqual([42, 'GREETING_ru\n\nLOOKING_FOR']);
   });
@@ -919,7 +934,7 @@ describe('captureStore', () => {
       'findByCapturePrompt',
       'findOpenLeadByTelegramId',
       'findPhoneByTelegramId',
-      'insertLead',
+      'insertOrMergeLead',
       'updateCapture',
     ]);
   });
