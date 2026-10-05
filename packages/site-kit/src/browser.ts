@@ -5,6 +5,11 @@ export {
   storesContactClickLead,
 } from './contactClick.ts';
 export { defineFunnelTracking } from './funnel.ts';
+export {
+  defineBrowsingDepth,
+  DEPTH_DOOR_ATTRIBUTE,
+  type BrowsingDepthOptions,
+} from './browsingDepth.ts';
 export { markFieldValidity } from './fieldValidity.ts';
 export { GOALS, reachGoal, type Goal } from './goals.ts';
 export { defineCtaReveal } from './ctaReveal.ts';

@@ -14,6 +14,7 @@ export const GOALS = {
   addToCart: 'add_to_cart',
   beginCheckout: 'begin_checkout',
   orderPlaced: 'order_placed',
+  caseView: 'case_view',
 } as const;
 
 export type Goal = (typeof GOALS)[keyof typeof GOALS];
