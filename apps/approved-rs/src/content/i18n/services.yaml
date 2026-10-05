@@ -590,7 +590,7 @@ vehicle-inspection:
 cityVehicleSourcing:
   title: Автоподбор
   descriptionFor: Подберём автомобиль {cityLocation} с полной проверкой. Работаем по всему региону {countryName}.
-  casesHeadingFor: 'Реальные сделки: авто из {countryGenitiveOrName}'
+  casesHeadingFor: Реальные сделки на рынке {countryGenitiveOrName}
   whyCityHeadingFor: Почему {cityName}
   reason1: Смотрим и дилерские площадки, и частные объявления
   reason2: Историю по VIN проверяем до выезда на осмотр
