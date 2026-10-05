@@ -35,6 +35,7 @@ export interface CaseTranslatorOptions<L extends string> {
   languageName: Record<L, string>;
   businessDescription: string;
   subject: string;
+  localeGuidance?: Partial<Record<L, string>>;
   model?: string;
   extraFields?: readonly string[];
   cachePath?: string;
@@ -62,6 +63,7 @@ export function createCaseTranslator<L extends string>({
   languageName,
   businessDescription,
   subject,
+  localeGuidance = {},
   model,
   extraFields = [],
   cachePath = DEFAULT_CACHE_PATH,
@@ -74,6 +76,7 @@ export function createCaseTranslator<L extends string>({
       .filter(Boolean)
       .map((sentence) => ` ${sentence}`)
       .join('');
+    const localeNote = localeGuidance[targetLocale];
     return (
       `You translate ${subject} from Russian into ${names.get(targetLocale)} ` +
       `for ${businessDescription}. ` +
@@ -82,7 +85,8 @@ export function createCaseTranslator<L extends string>({
       'bold, lists) intact. Keep car makes/models, prices, and place names as they would normally appear ' +
       `in the target language.${guidance} The input is a flat JSON object whose keys are field names ` +
       'and whose values are the strings to translate. Respond with a JSON object having EXACTLY the ' +
-      'same keys, with each value translated — never translate the keys themselves.'
+      'same keys, with each value translated — never translate the keys themselves.' +
+      (localeNote ? ` ${localeNote}` : '')
     );
   }
 
