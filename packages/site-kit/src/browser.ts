@@ -8,7 +8,7 @@ export { defineFunnelTracking } from './funnel.ts';
 export {
   defineBrowsingDepth,
   DEPTH_DOOR_ATTRIBUTE,
-  type BrowsingDepthOptions,
+  DEPTH_SLUG_ATTRIBUTE,
 } from './browsingDepth.ts';
 export { markFieldValidity } from './fieldValidity.ts';
 export { GOALS, reachGoal, type Goal } from './goals.ts';

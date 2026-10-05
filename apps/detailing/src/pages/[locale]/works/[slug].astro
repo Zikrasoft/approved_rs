@@ -18,7 +18,10 @@ import { localizedWork, publishedWorks, workExcerpt } from '@/utils/works';
 import { safeMarkdown, relatedEntries } from '@podbor/site-kit';
 import { SITE_URL } from '@/utils/constants';
 import Icon from '@/components/Icon.astro';
-import { DEPTH_DOOR_ATTRIBUTE } from '@podbor/site-kit/browser';
+import {
+  DEPTH_DOOR_ATTRIBUTE,
+  DEPTH_SLUG_ATTRIBUTE,
+} from '@podbor/site-kit/browser';
 
 export async function getStaticPaths() {
   const works = publishedWorks(await getCollection('works'));
@@ -114,7 +117,7 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
 
   <aside
     {...{ [DEPTH_DOOR_ATTRIBUTE]: '' }}
-    data-work-slug={work.id}
+    {...{ [DEPTH_SLUG_ATTRIBUTE]: work.id }}
     class="wrap mt-10 hidden data-[revealed=true]:block"
   >
     <div class="shell">
@@ -184,8 +187,6 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
   <script>
     import { defineBrowsingDepth } from '@podbor/site-kit/browser';
 
-    const slug =
-      document.querySelector<HTMLElement>('[data-work-slug]')?.dataset.workSlug;
-    if (slug) defineBrowsingDepth(slug);
+    defineBrowsingDepth();
   </script>
 </Shell>

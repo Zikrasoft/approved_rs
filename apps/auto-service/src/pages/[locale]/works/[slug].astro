@@ -14,7 +14,10 @@ import { PathBuilder, withLocales } from '@/utils/paths';
 import { localizedWork, publishedWorks } from '@/utils/works';
 import { safeMarkdown, relatedEntries } from '@podbor/site-kit';
 import { SITE_URL } from '@/utils/constants';
-import { DEPTH_DOOR_ATTRIBUTE } from '@podbor/site-kit/browser';
+import {
+  DEPTH_DOOR_ATTRIBUTE,
+  DEPTH_SLUG_ATTRIBUTE,
+} from '@podbor/site-kit/browser';
 
 export async function getStaticPaths() {
   const works = publishedWorks(await getCollection('works'));
@@ -78,7 +81,7 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
     />
   </section>
 
-  <div class="wrap" data-work-slug={work.id}>
+  <div class="wrap" {...{ [DEPTH_SLUG_ATTRIBUTE]: work.id }}>
     <aside
       {...{ [DEPTH_DOOR_ATTRIBUTE]: '' }}
       class="card hidden data-[revealed=true]:flex mb-8 flex-col gap-5 border-signal p-6 sm:flex-row sm:items-center sm:justify-between sm:gap-8"
@@ -172,8 +175,6 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
   <script>
     import { defineBrowsingDepth } from '@podbor/site-kit/browser';
 
-    const slug =
-      document.querySelector<HTMLElement>('[data-work-slug]')?.dataset.workSlug;
-    if (slug) defineBrowsingDepth(slug);
+    defineBrowsingDepth();
   </script>
 </Shell>
