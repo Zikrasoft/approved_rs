@@ -49,7 +49,10 @@ export {
   buildDeleteConfirm,
   buildRemindPicker,
   LEAD_STATUS_ACTIONS,
+  EDIT_COPY,
   EDIT_FIELD_LABELS,
+  REPLY_COPY,
+  escapeHtml,
 } from '@podbor/lead-crm';
 
 export type {

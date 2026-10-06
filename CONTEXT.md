@@ -14,11 +14,15 @@ anything they bought.
 **Brand** — one of the three businesses (Approved, CarLab, Details). Stamped on
 a Lead by the server; a visitor can never name one.
 
-**Contact click** — a Lead created by tapping a WhatsApp, Viber or phone tile
-rather than by submitting a form. It carries a channel and no message. A
-Telegram tile opens the brand's own bot instead, which writes an ordinary Lead
-of its own, so it produces no Contact click
+**Contact click** — a Lead created by tapping a WhatsApp, Viber, phone or
+Telegram tile rather than by submitting a form. It carries a channel and no
+message. A Telegram tile opens the brand's own bot, and the Contact click it
+stores is a placeholder the bot's own Lead absorbs on `telegramId`
 ([ADR-0030](docs/adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
+A Telegram tile that opens a human account — no `?start=` in its link, which
+on approved.rs is the `/thanks/` tile when `PUBLIC_TG_MANAGER` is set — stores
+no Contact click: the visitor already has a Lead, and no bot will come to
+absorb a placeholder.
 
 **Ghost lead** — a Contact click on a channel whose outcome we cannot observe
 — WhatsApp, Viber or the phone — that never gained a contact: still the

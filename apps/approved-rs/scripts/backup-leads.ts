@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { LEADS_PATH } from '@podbor/lead-crm';
+import { LEADS_PATH, storedRecordsSchema } from '@podbor/lead-crm';
 import { createVercelBlobStorage } from '@podbor/lead-crm/storage/vercel-blob';
 import { z } from 'zod';
 
@@ -26,7 +26,7 @@ if (raw === undefined) {
   process.exit(1);
 }
 
-const records = z.array(z.unknown()).safeParse(raw);
+const records = storedRecordsSchema.safeParse(raw);
 if (!records.success) {
   console.error(
     `${LEADS_PATH} is ${typeof raw}, not an array — backing it up anyway, but read it before going further`,

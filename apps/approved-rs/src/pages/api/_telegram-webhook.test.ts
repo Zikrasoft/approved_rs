@@ -2,99 +2,118 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { APIContext } from 'astro';
 import type { StoredLead } from '@/lib/store';
 
-vi.mock('@/lib/telegram', async () => ({
-  canAddIncome: (
-    await vi.importActual<typeof import('@podbor/lead-crm')>('@podbor/lead-crm')
-  ).canAddIncome,
-  isLeadStatusKey: (key: string) =>
-    ['in_progress', 'won', 'lost'].includes(key),
-  answerCallback: vi.fn(),
-  ensureLeadCard: vi.fn(),
-  sendForceReplyPrompt: vi.fn(),
-  formatMoney: (n: number) => `${n} €`,
-  formatDateRu: (iso: string) => {
-    const [y, m, d] = iso.split('-');
-    return `${d}.${m}.${y}`;
-  },
-  sendDealNotificationToAdmin: vi.fn(),
-  sendIncomeNotificationToAdmin: vi.fn(),
-  sendCommissionClaimToAdmin: vi.fn(),
-  sendCommissionResultToOwner: vi.fn(),
-  sendStatusChangeToAdmin: vi.fn(),
-  sendFieldChangeToAdmin: vi.fn(),
-  EDIT_FIELD_LABELS: {
-    name: 'имя',
-    contact: 'контакт',
-    comment: 'комментарий',
-  },
-  sendMessage: vi.fn(),
-  buildOwedList: vi.fn().mockReturnValue({
-    text: 'OWED_LIST',
-    reply_markup: { inline_keyboard: [] },
-  }),
-  formatDealsList: vi.fn().mockReturnValue('DEALS_LIST'),
-  buildSearchResults: vi.fn().mockReturnValue({
-    text: 'SEARCH_RESULTS',
-    reply_markup: { inline_keyboard: [] },
-  }),
-  buildMenu: vi.fn((role: string) => ({
-    text: `MENU_${role}`,
-    reply_markup: { inline_keyboard: [] },
-  })),
-  buildHelp: vi.fn((role: string) => `HELP_${role}`),
-  buildLeadList: vi.fn((_leads: unknown[], status: string) => ({
-    text: `LIST_${status}`,
-    reply_markup: { inline_keyboard: [] },
-  })),
-  buildStats: vi.fn().mockReturnValue('STATS'),
-  buildLeadDetail: vi.fn((lead: { id: number }, role: string) => ({
-    text: `DETAIL_${lead.id}_${role}`,
-    reply_markup: { inline_keyboard: [] },
-  })),
-  buildDeleteConfirm: vi.fn((lead: { id: number }) => ({
-    text: `DELCONFIRM_${lead.id}`,
-    reply_markup: { inline_keyboard: [] },
-  })),
-  buildRemindPicker: vi.fn((id: number) => ({
-    text: `REMINDPICKER_${id}`,
-    reply_markup: { inline_keyboard: [] },
-  })),
-  editLeadDetailMessage: vi.fn(),
-  safeEditMessage: vi.fn(),
-  OWNER_IDS: [111],
-  ADMIN_IDS: [222],
+vi.mock('@/lib/telegram', async () => {
+  const actual =
+    await vi.importActual<typeof import('@podbor/lead-crm')>(
+      '@podbor/lead-crm',
+    );
+  return {
+    canAddIncome: actual.canAddIncome,
+    isLeadStatusKey: (key: string) =>
+      ['in_progress', 'won', 'lost'].includes(key),
+    answerCallback: vi.fn(),
+    ensureLeadCard: vi.fn(),
+    sendForceReplyPrompt: vi.fn(),
+    formatMoney: (n: number) => `${n} €`,
+    formatDateRu: (iso: string) => {
+      const [y, m, d] = iso.split('-');
+      return `${d}.${m}.${y}`;
+    },
+    sendDealNotificationToAdmin: vi.fn(),
+    sendIncomeNotificationToAdmin: vi.fn(),
+    sendCommissionClaimToAdmin: vi.fn(),
+    sendCommissionResultToOwner: vi.fn(),
+    sendStatusChangeToAdmin: vi.fn(),
+    sendFieldChangeToAdmin: vi.fn(),
+    EDIT_COPY: actual.EDIT_COPY,
+    escapeHtml: actual.escapeHtml,
+    REPLY_COPY: actual.REPLY_COPY,
+    sendMessage: vi.fn(),
+    buildOwedList: vi.fn().mockReturnValue({
+      text: 'OWED_LIST',
+      reply_markup: { inline_keyboard: [] },
+    }),
+    formatDealsList: vi.fn().mockReturnValue('DEALS_LIST'),
+    buildSearchResults: vi.fn().mockReturnValue({
+      text: 'SEARCH_RESULTS',
+      reply_markup: { inline_keyboard: [] },
+    }),
+    buildMenu: vi.fn((role: string) => ({
+      text: `MENU_${role}`,
+      reply_markup: { inline_keyboard: [] },
+    })),
+    buildHelp: vi.fn((role: string) => `HELP_${role}`),
+    buildLeadList: vi.fn((_leads: unknown[], status: string) => ({
+      text: `LIST_${status}`,
+      reply_markup: { inline_keyboard: [] },
+    })),
+    buildStats: vi.fn().mockReturnValue('STATS'),
+    buildLeadDetail: vi.fn((lead: { id: number }, role: string) => ({
+      text: `DETAIL_${lead.id}_${role}`,
+      reply_markup: { inline_keyboard: [] },
+    })),
+    buildDeleteConfirm: vi.fn((lead: { id: number }) => ({
+      text: `DELCONFIRM_${lead.id}`,
+      reply_markup: { inline_keyboard: [] },
+    })),
+    buildRemindPicker: vi.fn((id: number) => ({
+      text: `REMINDPICKER_${id}`,
+      reply_markup: { inline_keyboard: [] },
+    })),
+    editLeadDetailMessage: vi.fn(),
+    safeEditMessage: vi.fn(),
+    OWNER_IDS: [111],
+    ADMIN_IDS: [222],
+  };
+});
+
+const capture = vi.hoisted(() => ({
+  approved: { sendMessage: vi.fn() },
+  carlab: { sendMessage: vi.fn() },
 }));
 
-vi.mock('@/lib/store', async () => ({
-  appendIncome: (
-    await vi.importActual<typeof import('@podbor/lead-crm')>('@podbor/lead-crm')
-  ).appendIncome,
-  getLead: vi.fn(),
-  setStatus: vi.fn(),
-  archiveLead: vi.fn(),
-  unarchiveLead: vi.fn(),
-  deleteLead: vi.fn(),
-  resumeLead: vi.fn(),
-  postponeLead: vi.fn(),
-  canPostpone: (
-    await vi.importActual<typeof import('@podbor/lead-crm')>('@podbor/lead-crm')
-  ).canPostpone,
-  postponePatch: (
-    await vi.importActual<typeof import('@podbor/lead-crm')>('@podbor/lead-crm')
-  ).postponePatch,
-  claimCommission: vi.fn(),
-  confirmCommissionPayment: vi.fn(),
-  rejectCommissionPayment: vi.fn(),
-  setPendingPrompt: vi.fn(),
-  findByPendingPrompt: vi.fn(),
-  resolvePendingPrompt: vi.fn(),
-  searchLeads: vi.fn(),
-  getOwedSummary: vi.fn(),
-  readLeads: vi.fn(),
-  getCommission: vi.fn(),
+vi.mock('@/lib/captureBot', () => ({
+  captureClient: capture.approved,
+  REPLY_RELAY_BRANDS: ['Approved.rs', 'CarLab'],
+  captureClientFor: (brand: string) =>
+    new Map([
+      ['Approved.rs', capture.approved],
+      ['CarLab', capture.carlab],
+    ]).get(brand),
 }));
+
+vi.mock('@/lib/store', async () => {
+  const actual =
+    await vi.importActual<typeof import('@podbor/lead-crm')>(
+      '@podbor/lead-crm',
+    );
+  return {
+    appendIncome: actual.appendIncome,
+    appendNote: actual.appendNote,
+    getLead: vi.fn(),
+    setStatus: vi.fn(),
+    archiveLead: vi.fn(),
+    unarchiveLead: vi.fn(),
+    deleteLead: vi.fn(),
+    resumeLead: vi.fn(),
+    postponeLead: vi.fn(),
+    canPostpone: actual.canPostpone,
+    postponePatch: actual.postponePatch,
+    claimCommission: vi.fn(),
+    confirmCommissionPayment: vi.fn(),
+    rejectCommissionPayment: vi.fn(),
+    setPendingPrompt: vi.fn(),
+    findByPendingPrompt: vi.fn(),
+    resolvePendingPrompt: vi.fn(),
+    searchLeads: vi.fn(),
+    getOwedSummary: vi.fn(),
+    readLeads: vi.fn(),
+    getCommission: vi.fn(),
+  };
+});
 
 import { POST } from './telegram-webhook';
+import { captureClient } from '@/lib/captureBot';
 import {
   answerCallback,
   ensureLeadCard,
@@ -277,6 +296,13 @@ describe('POST /api/telegram-webhook', () => {
       .mockResolvedValue(undefined);
     vi.mocked(sendStatusChangeToAdmin).mockReset().mockResolvedValue(undefined);
     vi.mocked(sendMessage).mockReset().mockResolvedValue(undefined);
+    vi.mocked(sendFieldChangeToAdmin).mockReset().mockResolvedValue(undefined);
+    vi.mocked(captureClient.sendMessage)
+      .mockReset()
+      .mockResolvedValue(undefined);
+    vi.mocked(capture.carlab.sendMessage)
+      .mockReset()
+      .mockResolvedValue(undefined);
   });
 
   it('rejects a request without the secret token header', async () => {
@@ -297,6 +323,26 @@ describe('POST /api/telegram-webhook', () => {
     expect(res.status).toBe(200);
     expect(getLead).not.toHaveBeenCalled();
   });
+
+  it.each([
+    ['wrong field types', { update_id: 'x', message: 5 }],
+    ['a non-object', 'just a string'],
+    ['a callback without an id', { callback_query: { data: 'st:5:won' } }],
+  ])(
+    'acks with 200 on a well-formed JSON body of the wrong shape (%s) without running a handler',
+    async (_label, body) => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const res = await POST(makeCtx(body));
+      expect(res.status).toBe(200);
+      expect(warn).toHaveBeenCalledOnce();
+      expect(getLead).not.toHaveBeenCalled();
+      expect(setStatus).not.toHaveBeenCalled();
+      expect(findByPendingPrompt).not.toHaveBeenCalled();
+      expect(answerCallback).not.toHaveBeenCalled();
+      expect(sendMessage).not.toHaveBeenCalled();
+      warn.mockRestore();
+    },
+  );
 
   describe('duplicate delivery — same update_id is only processed once', () => {
     it('skips a redelivered update_id instead of writing twice', async () => {
@@ -1308,6 +1354,34 @@ describe('POST /api/telegram-webhook', () => {
         chatId: DM_CHAT_ID,
         messageId: 888,
         kind: 'edit_contact',
+      });
+    });
+  });
+
+  describe('reply:<id>', () => {
+    it('starts a reply-to-visitor prompt', async () => {
+      vi.mocked(getLead).mockResolvedValue(
+        makeLead({ id: 5, contact: 'tg://user?id=4242', telegramId: 4242 }),
+      );
+      const res = await POST(
+        makeCtx({
+          callback_query: {
+            id: 'cb-reply',
+            data: 'reply:5',
+            from: { id: OWNER_ID },
+            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
+          },
+        }),
+      );
+      expect(res.status).toBe(200);
+      expect(sendForceReplyPrompt).toHaveBeenCalledWith(
+        DM_CHAT_ID,
+        expect.stringContaining('посетителю'),
+      );
+      expect(setPendingPrompt).toHaveBeenCalledWith(5, {
+        chatId: DM_CHAT_ID,
+        messageId: 888,
+        kind: 'reply_visitor',
       });
     });
   });
@@ -2411,6 +2485,231 @@ describe('POST /api/telegram-webhook', () => {
       expect(field).toBe('comment');
       expect(before).toBe('Старый');
       expect(updated.comment).toBe('Перезвонить в среду');
+    });
+
+    it('reply_visitor reply goes to the visitor through the capture bot, not into a lead field', async () => {
+      const lead = makeLead({
+        id: 5,
+        name: 'Иван',
+        contact: 'tg://user?id=4242',
+        telegramId: 4242,
+        comment: 'Ищу Golf 7',
+        pendingPrompt: {
+          chatId: DM_CHAT_ID,
+          messageId: 888,
+          kind: 'reply_visitor',
+        },
+      });
+      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
+      mockResolveFromBase(lead);
+
+      const res = await POST(
+        makeCtx({
+          message: {
+            message_id: 2,
+            text: 'Нашёл вариант <до 10k>',
+            chat: { id: DM_CHAT_ID, type: 'private' },
+            from: { id: OWNER_ID },
+            reply_to_message: { message_id: 888 },
+          },
+        }),
+      );
+
+      expect(res.status).toBe(200);
+      expect(captureClient.sendMessage).toHaveBeenCalledWith(
+        4242,
+        'Нашёл вариант &lt;до 10k&gt;',
+      );
+      expect(sendFieldChangeToAdmin).not.toHaveBeenCalled();
+      const updated = vi.mocked(ensureLeadCard).mock.calls[0][0];
+      expect(updated).toMatchObject({
+        name: 'Иван',
+        contact: 'tg://user?id=4242',
+        comment: 'Ищу Golf 7\nОтвет: Нашёл вариант <до 10k>',
+      });
+      expect(Object.keys(updated)).toEqual(Object.keys(lead));
+      expect(sendMessage).toHaveBeenCalledWith(
+        DM_CHAT_ID,
+        `✅ Отправлено\n\nDETAIL_5_owner`,
+        { reply_markup: { inline_keyboard: [] } },
+      );
+    });
+
+    it('reports a reply the capture bot could not deliver instead of recording it', async () => {
+      vi.mocked(findByPendingPrompt).mockResolvedValue(
+        makeLead({
+          id: 5,
+          contact: 'tg://user?id=4242',
+          telegramId: 4242,
+          pendingPrompt: {
+            chatId: DM_CHAT_ID,
+            messageId: 888,
+            kind: 'reply_visitor',
+          },
+        }),
+      );
+      vi.mocked(captureClient.sendMessage).mockRejectedValueOnce(
+        new Error('Telegram sendMessage failed: 403 Forbidden'),
+      );
+
+      const res = await POST(
+        makeCtx({
+          message: {
+            message_id: 2,
+            text: 'Нашёл вариант',
+            chat: { id: DM_CHAT_ID, type: 'private' },
+            from: { id: OWNER_ID },
+            reply_to_message: { message_id: 888 },
+          },
+        }),
+      );
+
+      expect(res.status).toBe(200);
+      expect(resolvePendingPrompt).not.toHaveBeenCalled();
+      expect(ensureLeadCard).not.toHaveBeenCalled();
+      expect(sendMessage).toHaveBeenCalledWith(
+        DM_CHAT_ID,
+        expect.stringContaining('Не доставлено'),
+      );
+    });
+
+    it("sends a sibling brand's reply through that brand's capture bot", async () => {
+      const lead = makeLead({
+        id: 5,
+        brand: 'CarLab',
+        contact: 'tg://user?id=4242',
+        telegramId: 4242,
+        pendingPrompt: {
+          chatId: DM_CHAT_ID,
+          messageId: 888,
+          kind: 'reply_visitor',
+        },
+      });
+      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
+      mockResolveFromBase(lead);
+
+      await POST(
+        makeCtx({
+          message: {
+            message_id: 2,
+            text: 'Запчасть есть',
+            chat: { id: DM_CHAT_ID, type: 'private' },
+            from: { id: OWNER_ID },
+            reply_to_message: { message_id: 888 },
+          },
+        }),
+      );
+
+      expect(capture.carlab.sendMessage).toHaveBeenCalledWith(
+        4242,
+        'Запчасть есть',
+      );
+      expect(captureClient.sendMessage).not.toHaveBeenCalled();
+      expect(ensureLeadCard).toHaveBeenCalled();
+    });
+
+    it('reports a reply as undelivered when the brand has no capture bot configured', async () => {
+      vi.mocked(findByPendingPrompt).mockResolvedValue(
+        makeLead({
+          id: 5,
+          brand: 'Details',
+          contact: 'tg://user?id=4242',
+          telegramId: 4242,
+          pendingPrompt: {
+            chatId: DM_CHAT_ID,
+            messageId: 888,
+            kind: 'reply_visitor',
+          },
+        }),
+      );
+
+      await POST(
+        makeCtx({
+          message: {
+            message_id: 2,
+            text: 'Нашёл вариант',
+            chat: { id: DM_CHAT_ID, type: 'private' },
+            from: { id: OWNER_ID },
+            reply_to_message: { message_id: 888 },
+          },
+        }),
+      );
+
+      expect(captureClient.sendMessage).not.toHaveBeenCalled();
+      expect(capture.carlab.sendMessage).not.toHaveBeenCalled();
+      expect(resolvePendingPrompt).not.toHaveBeenCalled();
+      expect(sendMessage).toHaveBeenCalledWith(
+        DM_CHAT_ID,
+        expect.stringContaining('Не доставлено'),
+      );
+    });
+
+    it('reports a reply as undelivered when the lead carries no telegramId', async () => {
+      vi.mocked(findByPendingPrompt).mockResolvedValue(
+        makeLead({
+          id: 5,
+          contact: 'tg://user?id=4242',
+          telegramId: null,
+          pendingPrompt: {
+            chatId: DM_CHAT_ID,
+            messageId: 888,
+            kind: 'reply_visitor',
+          },
+        }),
+      );
+
+      await POST(
+        makeCtx({
+          message: {
+            message_id: 2,
+            text: 'Нашёл вариант',
+            chat: { id: DM_CHAT_ID, type: 'private' },
+            from: { id: OWNER_ID },
+            reply_to_message: { message_id: 888 },
+          },
+        }),
+      );
+
+      expect(captureClient.sendMessage).not.toHaveBeenCalled();
+      expect(resolvePendingPrompt).not.toHaveBeenCalled();
+      expect(sendMessage).toHaveBeenCalledWith(
+        DM_CHAT_ID,
+        expect.stringContaining('Не доставлено'),
+      );
+    });
+
+    it('rejects an empty reply to the visitor', async () => {
+      vi.mocked(findByPendingPrompt).mockResolvedValue(
+        makeLead({
+          id: 5,
+          contact: 'tg://user?id=4242',
+          telegramId: 4242,
+          pendingPrompt: {
+            chatId: DM_CHAT_ID,
+            messageId: 888,
+            kind: 'reply_visitor',
+          },
+        }),
+      );
+
+      await POST(
+        makeCtx({
+          message: {
+            message_id: 2,
+            text: '   ',
+            chat: { id: DM_CHAT_ID, type: 'private' },
+            from: { id: OWNER_ID },
+            reply_to_message: { message_id: 888 },
+          },
+        }),
+      );
+
+      expect(captureClient.sendMessage).not.toHaveBeenCalled();
+      expect(resolvePendingPrompt).not.toHaveBeenCalled();
+      expect(sendMessage).toHaveBeenCalledWith(
+        DM_CHAT_ID,
+        expect.stringContaining('пустым'),
+      );
     });
 
     it('rejects an empty edit value for name/contact', async () => {

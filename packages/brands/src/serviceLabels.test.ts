@@ -2,41 +2,21 @@ import { describe, it, expect } from 'vitest';
 import {
   PARTNER_SERVICE,
   SERVICE_LABELS_RU,
+  SERVICE_SLUGS_BY_BRAND,
+  isBrandServiceSlug,
   isPartnerService,
   serviceLabel,
 } from './serviceLabels.ts';
 import { BRANDS } from './registry.ts';
 
-const APPROVED_SLUGS = [
-  'vehicle-sourcing',
-  'vehicle-buyback',
-  'vehicle-inspection',
-  'vehicle-import',
+const FORM_ONLY_SLUGS = [
   'vehicle-import-de',
   'vehicle-import-es',
   'vehicle-import-ch',
   'vehicle-import-eu',
   'vehicle-import-china',
-];
-
-const CARLAB_SLUGS = [
-  'diagnostics',
-  'servicing',
-  'brakes-suspension',
-  'engine-gearbox',
-  'bodywork-painting',
-  'pre-purchase-inspection',
   'parts-order',
 ];
-
-const DETAILS_SLUGS = [
-  'paint-protection-film',
-  'colour-change-wrap',
-  'polishing-ceramic',
-  'steering-wheel-restoration',
-];
-
-// Retired approved.rs slugs that still sit on stored leads.
 const LEGACY_SLUGS = ['auto-service-belgrade', 'detailing-belgrade'];
 const PARTNER_SLUGS = Object.values(PARTNER_SERVICE);
 
@@ -62,15 +42,42 @@ describe('serviceLabel', () => {
   );
 });
 
-describe('SERVICE_LABELS_RU', () => {
-  it.each([
-    ['approved.rs', APPROVED_SLUGS],
-    ['CarLab', CARLAB_SLUGS],
-    ['Details', DETAILS_SLUGS],
-  ])('covers every %s service slug', (_brand, slugs) => {
-    const missing = slugs.filter((slug) => !(slug in SERVICE_LABELS_RU));
-    expect(missing).toEqual([]);
+describe('SERVICE_SLUGS_BY_BRAND', () => {
+  it('lists a non-empty slug list for every brand', () => {
+    expect(Object.keys(SERVICE_SLUGS_BY_BRAND).sort()).toEqual(
+      Object.keys(BRANDS).sort(),
+    );
+    for (const slugs of Object.values(SERVICE_SLUGS_BY_BRAND)) {
+      expect(slugs.length).toBeGreaterThan(0);
+    }
   });
+
+  it.each(['approved', 'carlab', 'details'] as const)(
+    "narrows a %s slug and rejects every other brand's",
+    (brand) => {
+      for (const [other, slugs] of Object.entries(SERVICE_SLUGS_BY_BRAND)) {
+        for (const slug of slugs) {
+          expect(isBrandServiceSlug(brand, slug)).toBe(other === brand);
+        }
+      }
+      expect(isBrandServiceSlug(brand, 'no-such-service')).toBe(false);
+    },
+  );
+
+  it('gives no slug to two brands', () => {
+    const all = Object.values(SERVICE_SLUGS_BY_BRAND).flat();
+    expect(new Set(all).size).toBe(all.length);
+  });
+});
+
+describe('SERVICE_LABELS_RU', () => {
+  it.each(Object.entries(SERVICE_SLUGS_BY_BRAND))(
+    'covers every %s service slug',
+    (_brand, slugs) => {
+      const missing = slugs.filter((slug) => !(slug in SERVICE_LABELS_RU));
+      expect(missing).toEqual([]);
+    },
+  );
 
   it('has no label that is only a copy of its slug', () => {
     for (const [slug, label] of Object.entries(SERVICE_LABELS_RU)) {
@@ -81,9 +88,8 @@ describe('SERVICE_LABELS_RU', () => {
   it('holds no slug outside the three brands', () => {
     expect(Object.keys(SERVICE_LABELS_RU).sort()).toEqual(
       [
-        ...APPROVED_SLUGS,
-        ...CARLAB_SLUGS,
-        ...DETAILS_SLUGS,
+        ...Object.values(SERVICE_SLUGS_BY_BRAND).flat(),
+        ...FORM_ONLY_SLUGS,
         ...LEGACY_SLUGS,
         ...PARTNER_SLUGS,
       ].sort(),

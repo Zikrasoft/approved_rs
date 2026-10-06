@@ -19,7 +19,12 @@ import type {
   StoredLead,
 } from './schema.ts';
 import type { StoredLeadSchema } from './schema.ts';
-import { StorageConflictError, type LeadStorage } from './storage/types.ts';
+import {
+  StorageConflictError,
+  storedRecordsSchema,
+  type LeadStorage,
+} from './storage/types.ts';
+import { LEADS_PATH } from './quarantine.ts';
 
 const MAX_RETRIES = 6;
 export const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
@@ -168,14 +173,19 @@ export function createLeadStore({
   }> {
     const { raw, version } = await storage.read();
     if (raw === undefined) return { leads: [], unreadable: [], version };
-    if (!Array.isArray(raw)) {
+    const records = storedRecordsSchema.safeParse(raw);
+    if (!records.success) {
+      console.error('[lead-crm] stored leads are not an array', {
+        path: LEADS_PATH,
+        type: typeof raw,
+      });
       throw new Error(
         `[lead-crm] stored leads are ${typeof raw}, not an array — refusing to overwrite`,
       );
     }
     const leads: StoredLead[] = [];
     const unreadable: unknown[] = [];
-    for (const entry of raw) {
+    for (const entry of records.data) {
       const parsed = schema.safeParse(entry);
       if (parsed.success) leads.push(parsed.data);
       else unreadable.push(entry);

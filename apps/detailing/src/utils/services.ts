@@ -1,12 +1,12 @@
-export const SERVICE_SLUGS = [
-  'paint-protection-film',
-  'colour-change-wrap',
-  'polishing-ceramic',
-  'steering-wheel-restoration',
-] as const;
+import {
+  SERVICE_SLUGS_BY_BRAND,
+  isBrandServiceSlug,
+  type BrandServiceSlug,
+} from '@podbor/brands';
 
-export type ServiceSlug = (typeof SERVICE_SLUGS)[number];
+export const SERVICE_SLUGS = SERVICE_SLUGS_BY_BRAND.details;
 
-export function isServiceSlug(value: string): value is ServiceSlug {
-  return (SERVICE_SLUGS as readonly string[]).includes(value);
-}
+export type ServiceSlug = BrandServiceSlug<'details'>;
+
+export const isServiceSlug = (value: string): value is ServiceSlug =>
+  isBrandServiceSlug('details', value);

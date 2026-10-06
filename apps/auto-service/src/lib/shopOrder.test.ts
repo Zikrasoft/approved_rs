@@ -57,8 +57,14 @@ const memoryMarkers = () => {
     seen,
     has: vi.fn(async (id: string) => seen.has(id)),
     add: vi.fn(async (id: string) => void seen.add(id)),
+    release: vi.fn(async (id: string) => void seen.delete(id)),
   };
 };
+
+const outcome = (stored: boolean, delivered: boolean) => ({
+  stored,
+  delivered,
+});
 
 let markers: ReturnType<typeof memoryMarkers>;
 const notifyLead = vi.fn();
@@ -72,7 +78,7 @@ const handler = (...args: [string | undefined] | []) =>
 
 beforeEach(() => {
   markers = memoryMarkers();
-  notifyLead.mockReset().mockResolvedValue(true);
+  notifyLead.mockReset().mockResolvedValue(outcome(true, true));
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
 });
 
@@ -106,16 +112,54 @@ describe('shop order receiver', () => {
   });
 
   it('stores the lead once even when the card did not go out', async () => {
-    notifyLead.mockResolvedValueOnce(false);
+    notifyLead.mockResolvedValueOnce(outcome(true, false));
 
     const first = await handler()(signed(ORDER));
     expect(first.status).toBe(502);
     expect(markers.seen.has('order_01')).toBe(true);
+    expect(markers.release).not.toHaveBeenCalled();
 
     const retry = await handler()(signed(ORDER));
     expect(retry.status).toBe(200);
     expect(await retry.json()).toEqual({ duplicate: true });
     expect(notifyLead).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ['no card went out', false],
+    ['the card went out', true],
+  ])(
+    'releases the marker and asks for a retry when nothing was stored and %s',
+    async (_label, delivered) => {
+      notifyLead.mockResolvedValueOnce(outcome(false, delivered));
+
+      const first = await handler()(signed(ORDER));
+      expect(first.status).toBe(502);
+      expect(await first.json()).toEqual({ delivered: false });
+      expect(markers.seen.has('order_01')).toBe(false);
+
+      const retry = await handler()(signed(ORDER));
+      expect(retry.status).toBe(202);
+      expect(notifyLead).toHaveBeenCalledTimes(2);
+      expect(markers.seen.has('order_01')).toBe(true);
+
+      const third = await handler()(signed(ORDER));
+      expect(third.status).toBe(200);
+      expect(notifyLead).toHaveBeenCalledTimes(2);
+    },
+  );
+
+  it('still answers 502 when the marker could not be released', async () => {
+    notifyLead.mockResolvedValueOnce(outcome(false, false));
+    markers.release.mockRejectedValueOnce(new Error('blob down'));
+
+    const response = await handler()(signed(ORDER));
+
+    expect(response.status).toBe(502);
+    expect(console.error).toHaveBeenCalledWith(
+      '[shop-order] cannot release the order marker',
+      expect.objectContaining({ orderId: 'order_01' }),
+    );
   });
 
   it('asks for a retry when the marker could not be written, storing nothing', async () => {

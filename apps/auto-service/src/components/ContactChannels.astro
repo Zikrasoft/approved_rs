@@ -5,24 +5,72 @@ import { getSiteContent } from '@/i18n/content/site';
 import { contactChannels } from '@/utils/contactLinks';
 import type { ServiceSlug } from '@/utils/services';
 import { contactPlacement, type ContactPlacement } from '@podbor/site-kit';
+import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 import { formatPhone } from '@podbor/site-kit/format-phone';
 import { PHONE_NUMBER } from '@/utils/constants';
 
 interface Props {
   class?: string;
-  placement?: Extract<ContactPlacement, 'bar' | 'thanks'>;
+  placement?: Extract<ContactPlacement, 'bar' | 'thanks' | 'hero'>;
+  tone?: 'card' | 'panel';
   service?: ServiceSlug;
 }
 
-const { class: className = '', placement = 'bar', service } = Astro.props;
+const {
+  class: className = '',
+  placement = 'bar',
+  tone = 'card',
+  service,
+} = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
 
-const channels = contactChannels(site, locale, service);
+type Variant = {
+  channels: readonly TrackedContactChannel[];
+  list: string;
+  tile: string;
+  iconSize: number;
+  label: string;
+};
+const FULL: Variant = {
+  channels: ['phone', 'whatsapp', 'viber', 'telegram'],
+  list: 'grid gap-2 sm:grid-cols-2',
+  tile: 'min-h-11 gap-3 px-4 py-3',
+  iconSize: 18,
+  label: 'text-sm',
+};
+const VARIANT: Record<NonNullable<Props['placement']>, Variant> = {
+  bar: FULL,
+  thanks: FULL,
+  hero: {
+    channels: ['phone', 'whatsapp', 'telegram'],
+    list: 'grid grid-cols-3 gap-2 pointer-fine:grid-cols-2 sm:flex sm:flex-wrap',
+    tile: 'min-h-11 justify-center gap-1.5 px-1.5 py-2.5 sm:gap-2 sm:px-5',
+    iconSize: 16,
+    label: 'text-xs sm:text-[0.8125rem]',
+  },
+};
+const TONE = {
+  card: {
+    surface: 'border-line bg-card text-ink hover:border-ink',
+    icon: 'text-muted',
+  },
+  panel: {
+    surface:
+      'border-panel-line text-white hover:border-panel-line-strong hover:bg-panel-2',
+    icon: 'text-panel-ink',
+  },
+};
+
+const variant = VARIANT[placement];
+const { surface, icon: iconTone } = TONE[tone];
+const channels = contactChannels(site, locale, service).filter((channel) =>
+  variant.channels.includes(channel.track),
+);
 ---
 
 <ul
-  class={`grid gap-2 sm:grid-cols-2 ${className}`}
+  class={`${variant.list} ${className}`}
   data-contact-cta
   data-contact-order
   {...contactPlacement(placement)}
@@ -42,16 +90,20 @@ const channels = contactChannels(site, locale, service);
           data-contact-channel={channel.track}
           rel="noopener"
           class:list={[
-            'group flex min-h-11 items-center gap-3 rounded-control border border-line bg-card px-4 py-3 transition-colors duration-150 hover:border-ink',
+            'group flex items-center rounded-control border transition-colors duration-150',
+            variant.tile,
+            surface,
             channel.track === 'phone' && 'pointer-fine:hidden!',
           ]}
         >
           <Icon
             name={channel.icon}
-            size={18}
-            class="shrink-0 text-muted transition-colors duration-150 group-hover:text-signal group-focus-visible:text-signal"
+            size={variant.iconSize}
+            class={`shrink-0 transition-colors duration-150 group-hover:text-signal group-focus-visible:text-signal ${iconTone}`}
           />
-          <span class="spec text-sm text-ink">{channel.label}</span>
+          <span class:list={['spec whitespace-nowrap', variant.label]}>
+            {channel.label}
+          </span>
         </a>
         {channel.track === 'phone' && placement === 'thanks' && (
           <span class="flex min-h-11 items-center gap-3 rounded-control border border-line bg-card px-4 py-3 pointer-coarse:hidden!">

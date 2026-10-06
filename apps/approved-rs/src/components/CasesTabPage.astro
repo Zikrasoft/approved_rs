@@ -10,12 +10,12 @@ import type { CaseCardProps } from './CaseCard.astro';
 import { getPagesContent } from '@/i18n/content/pages';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
-import type { CasesTabKind } from '@/utils/labels';
+import type { ServiceSlug } from '@/utils/labels';
 
 interface Props {
-  active: CasesTabKind;
+  active: ServiceSlug;
   items: CaseCardProps[];
-  counts: Record<CasesTabKind, number>;
+  counts: Record<ServiceSlug, number>;
   meta: { title: string; description: string; canonical: string };
 }
 
@@ -73,8 +73,8 @@ const intro = cs.tabIntros[active];
     text={cs.closingText}
     ctaLabel={h.ctaTelegramLabel}
     stats={[
-      h.ctaStatClients,
-      h.ctaStatYears,
+      h.statClients,
+      h.statYears,
       h.ctaStatResponse,
       { value: String(items.length), label: t.nav.cases.toLowerCase() },
     ]}

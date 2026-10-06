@@ -35,7 +35,12 @@ jobs:
       # The two sites that prerender without a backend, so the markup contracts
       # site-kit owns are checked against real HTML rather than a grep. CarLab
       # needs a live Medusa to prerender and is left to its deploy build.
-      - run: >-
+      - env:
+          PUBLIC_PHONE_NUMBER: '381000000000'
+          PUBLIC_WHATSAPP_NUMBER: '381000000000'
+          PUBLIC_VIBER_NUMBER: '381000000000'
+          PUBLIC_THREADS_CHANNEL: check
+        run: >-
           pnpm turbo run build
           --filter=@podbor/approved-rs --filter=@podbor/detailing
       - run: >-

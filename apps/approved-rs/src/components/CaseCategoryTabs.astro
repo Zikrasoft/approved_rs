@@ -2,11 +2,11 @@
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
-import type { CasesTabKind } from '@/utils/labels';
+import type { ServiceSlug } from '@/utils/labels';
 
 interface Props {
-  active: CasesTabKind;
-  counts: Record<CasesTabKind, number>;
+  active: ServiceSlug;
+  counts: Record<ServiceSlug, number>;
 }
 
 const { active, counts } = Astro.props;
@@ -34,7 +34,7 @@ const tabs = [
     href: PathBuilder.casesVehicleImport(locale),
     label: t.nav['vehicle-import'],
   },
-] as const satisfies { id: CasesTabKind; href: string; label: string }[];
+] as const satisfies { id: ServiceSlug; href: string; label: string }[];
 ---
 
 <div class="mb-10 flex flex-wrap gap-2" role="tablist">

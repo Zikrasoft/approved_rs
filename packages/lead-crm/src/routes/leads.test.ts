@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { SERVICE_SLUGS_BY_BRAND } from '@podbor/brands';
 import { MAX_SERVICES } from '../form.ts';
 import { createLeadsRoute } from './leads.ts';
 
@@ -261,12 +262,14 @@ describe('createLeadsRoute', () => {
 
   it('stores every selected service, with the first one as the primary', async () => {
     await POST(
-      makeCtx(valid({ service: ['polishing', 'ceramic-coating', 'ppf'] })),
+      makeCtx(
+        valid({ service: ['polishing-ceramic', 'paint-protection-film'] }),
+      ),
     );
     expect(notifyLead).toHaveBeenCalledWith(
       expect.objectContaining({
-        service: 'polishing',
-        services: ['polishing', 'ceramic-coating', 'ppf'],
+        service: 'polishing-ceramic',
+        services: ['polishing-ceramic', 'paint-protection-film'],
       }),
       '[leads]',
     );
@@ -291,14 +294,28 @@ describe('createLeadsRoute', () => {
     await POST(
       makeCtx(
         valid({
-          service: Array.from({ length: 10_000 }, (_, i) => `service-${i}`),
+          service: Array.from({ length: 10_000 }, () => 'vehicle-sourcing'),
         }),
       ),
     );
     const lead = notifyLead.mock.calls.at(-1)![0];
     expect(lead.services).toHaveLength(MAX_SERVICES);
-    expect(lead.service).toBe('service-0');
+    expect(lead.service).toBe('vehicle-sourcing');
   });
+
+  it.each(Object.entries(SERVICE_SLUGS_BY_BRAND))(
+    'accepts every %s slug and refuses one outside the enum with a 400',
+    async (brand, slugs) => {
+      for (const slug of slugs) {
+        const ctx = makeCtx(valid({ service: slug }));
+        await POST(ctx);
+        expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
+      }
+      const res = await POST(makeCtx(valid({ service: `${brand}-no-such` })));
+      expect(res.status).toBe(400);
+      expect(notifyLead).toHaveBeenCalledTimes(slugs.length);
+    },
+  );
 
   it('sends null rather than an empty string for the optional fields', async () => {
     await POST(makeCtx(valid({ service: '' })));

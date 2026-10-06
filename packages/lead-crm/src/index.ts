@@ -44,6 +44,7 @@ export type { OrderMarkers } from './orderMarkers.ts';
 export {
   LOCAL_DATA_DIR,
   StorageConflictError,
+  storedRecordsSchema,
   type LeadStorage,
   type StorageSnapshot,
 } from './storage/types.ts';
@@ -62,7 +63,10 @@ export {
   buildStats,
   buildStatusKeyboard,
   createFormatter,
+  EDIT_COPY,
   EDIT_FIELD_LABELS,
+  REPLY_COPY,
+  escapeHtml,
   fieldChangeText,
   formatDateRu,
   formatDealsList,
@@ -89,6 +93,7 @@ export type {
   LeadHandOff,
   NotifyLead,
   NotifyLeadOptions,
+  NotifyLeadResult,
 } from './notifyLead.ts';
 
 export {

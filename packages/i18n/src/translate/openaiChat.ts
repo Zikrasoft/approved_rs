@@ -1,20 +1,35 @@
 import OpenAI from 'openai';
+import { z } from 'zod';
 
 export const DEFAULT_TRANSLATE_MODEL = 'gpt-4o-mini';
 
 export const OPENAI_TIMEOUT_MS = 60_000;
 export const OPENAI_MAX_RETRIES = 1;
 
+const translationSchema = z.record(z.string(), z.string());
+
+export class TranslateResponseError extends Error {
+  readonly chunk: string;
+
+  constructor(chunk: string, detail: string) {
+    super(`translate response for "${chunk}" is malformed: ${detail}`);
+    this.name = 'TranslateResponseError';
+    this.chunk = chunk;
+  }
+}
+
 export async function callOpenAiJson(params: {
   apiKey: string;
   systemPrompt: string;
   userContent: string;
+  chunk: string;
   model?: string;
-}): Promise<unknown> {
+}): Promise<Record<string, string>> {
   const {
     apiKey,
     systemPrompt,
     userContent,
+    chunk,
     model = DEFAULT_TRANSLATE_MODEL,
   } = params;
   const client = new OpenAI({
@@ -32,7 +47,10 @@ export async function callOpenAiJson(params: {
   });
 
   const content = response.choices[0]?.message?.content;
-  if (!content) throw new Error('translate response missing content');
+  if (!content) throw new TranslateResponseError(chunk, 'missing content');
 
-  return JSON.parse(content) as unknown;
+  const parsed = translationSchema.safeParse(JSON.parse(content));
+  if (!parsed.success)
+    throw new TranslateResponseError(chunk, z.prettifyError(parsed.error));
+  return parsed.data;
 }

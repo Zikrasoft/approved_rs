@@ -1,5 +1,12 @@
 import { createHash } from 'node:crypto';
-import { access, mkdir, readFile, rename, writeFile } from 'node:fs/promises';
+import {
+  access,
+  mkdir,
+  readFile,
+  rename,
+  unlink,
+  writeFile,
+} from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import {
   ORDER_MARKER_PREFIX,
@@ -71,6 +78,10 @@ export function createFileOrderMarkers({ dir }: { dir: string }): OrderMarkers {
     async add(orderId: string): Promise<void> {
       await mkdir(join(dir, ORDER_MARKER_PREFIX), { recursive: true });
       await writeFile(fileFor(orderId), markerBody(orderId), { flag: 'wx' });
+    },
+
+    async release(orderId: string): Promise<void> {
+      await unlink(fileFor(orderId));
     },
   };
 }

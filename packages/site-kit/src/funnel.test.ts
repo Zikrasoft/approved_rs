@@ -282,7 +282,10 @@ describe('defineFunnelTracking', () => {
     document.querySelector('span')!.click();
     start();
     document.querySelector('span')!.click();
-    expect(goals()).toContainEqual([GOALS.brandLinkClick, { to: 'details' }]);
+    expect(goals()).toContainEqual([
+      GOALS.brandLinkClick,
+      { brand: 'details' },
+    ]);
   });
 
   it('ignores an ordinary link', () => {

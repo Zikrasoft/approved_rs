@@ -41,15 +41,44 @@ const countryOptions = phoneCountryOptions(displayLocale).filter(
 );
 
 const uid = crypto.randomUUID().slice(0, 8);
-const telegramPanelId = `contact-panel-telegram-${uid}`;
-const phonePanelId = `contact-panel-phone-${uid}`;
+const panelIds = {
+  telegram: `contact-panel-telegram-${uid}`,
+  phone: `contact-panel-phone-${uid}`,
+};
+
+const channelTabs = [
+  {
+    tab: 'telegram',
+    panel: 'telegram',
+    label: lf.telegramTab,
+    Icon: TelegramIcon,
+  },
+  {
+    tab: 'whatsapp',
+    panel: 'phone',
+    label: lf.whatsappTab,
+    Icon: WhatsAppIcon,
+  },
+  {
+    tab: 'viber',
+    panel: 'phone',
+    label: lf.viberTab,
+    Icon: ViberIcon,
+  },
+  {
+    tab: 'phone',
+    panel: 'phone',
+    label: lf.phoneTab,
+    Icon: Phone,
+  },
+] as const;
 
 const fieldClass =
   'form-field py-3 rounded-sm text-sm outline-none bg-page border border-border-strong text-primary font-sans';
 ---
 
 <div
-  class="lead-form-card rounded-sm p-7 bg-surface-glass border border-border-strong backdrop-blur-[12px]"
+  class="lead-form-card rounded-sm p-7 bg-surface-glass border border-border-strong backdrop-blur-[12px] in-[dialog]:min-h-0 in-[dialog]:overflow-y-auto in-[dialog]:overscroll-contain in-[dialog]:max-sm:flex-1 in-[dialog]:max-sm:rounded-none in-[dialog]:max-sm:border-0"
 >
   <div class="mb-6">
     <h2 class="font-display text-2xl leading-snug text-primary mb-1">
@@ -95,69 +124,31 @@ const fieldClass =
       </label>
 
       <div
-        class="contact-tabs relative flex gap-1 p-1 mb-2 rounded-sm bg-page border border-border-strong"
+        class="grid grid-cols-2 gap-1 p-1 mb-2 rounded-sm bg-page border border-border-strong"
         role="tablist"
       >
-        <button
-          type="button"
-          data-tab="telegram"
-          data-panel="telegram"
-          title={lf.telegramTab}
-          aria-label={lf.telegramTab}
-          class="pill-tab relative z-10 flex items-center justify-center flex-1 py-2 rounded-sm cursor-pointer"
-          role="tab"
-          aria-selected="true"
-          aria-controls={telegramPanelId}
-        >
-          <TelegramIcon size={16} />
-          <span class="pill-tab-label">{lf.telegramTab}</span>
-        </button>
-        <button
-          type="button"
-          data-tab="whatsapp"
-          data-panel="phone"
-          title={lf.whatsappTab}
-          aria-label={lf.whatsappTab}
-          class="pill-tab relative z-10 flex items-center justify-center flex-1 py-2 rounded-sm cursor-pointer"
-          role="tab"
-          aria-selected="false"
-          aria-controls={phonePanelId}
-        >
-          <WhatsAppIcon size={16} />
-          <span class="pill-tab-label">{lf.whatsappTab}</span>
-        </button>
-        <button
-          type="button"
-          data-tab="viber"
-          data-panel="phone"
-          title={lf.viberTab}
-          aria-label={lf.viberTab}
-          class="pill-tab relative z-10 flex items-center justify-center flex-1 py-2 rounded-sm cursor-pointer"
-          role="tab"
-          aria-selected="false"
-          aria-controls={phonePanelId}
-        >
-          <ViberIcon size={16} />
-          <span class="pill-tab-label">{lf.viberTab}</span>
-        </button>
-        <button
-          type="button"
-          data-tab="phone"
-          data-panel="phone"
-          title={lf.phoneTab}
-          aria-label={lf.phoneTab}
-          class="pill-tab relative z-10 flex items-center justify-center flex-1 py-2 rounded-sm cursor-pointer"
-          role="tab"
-          aria-selected="false"
-          aria-controls={phonePanelId}
-        >
-          <Phone size={15} />
-          <span class="pill-tab-label">{lf.phoneTab}</span>
-        </button>
+        {
+          channelTabs.map((tab, index) => (
+            <button
+              type="button"
+              data-tab={tab.tab}
+              data-panel={tab.panel}
+              title={tab.label}
+              aria-label={tab.label}
+              class="pill-tab flex min-w-0 items-center justify-center gap-2 rounded-sm px-2 py-2.5 text-[0.8125rem] font-medium text-muted cursor-pointer transition-colors duration-200 motion-reduce:transition-none hover:text-text-2 aria-selected:bg-surface-2 aria-selected:text-text aria-selected:shadow-[inset_0_-2px_0_var(--color-accent)]"
+              role="tab"
+              aria-selected={index === 0 ? 'true' : 'false'}
+              aria-controls={panelIds[tab.panel]}
+            >
+              <tab.Icon size={16} />
+              <span class="truncate">{tab.label}</span>
+            </button>
+          ))
+        }
       </div>
 
       <div
-        id={telegramPanelId}
+        id={panelIds.telegram}
         class="contact-panel"
         data-panel="telegram"
         role="tabpanel"
@@ -167,13 +158,14 @@ const fieldClass =
           data-contact-telegram
           data-field="telegram"
           name="contact"
+          autocomplete="username"
           placeholder={lf.telegramPlaceholder}
           class={`${fieldClass} w-full px-4`}
         />
       </div>
 
       <div
-        id={phonePanelId}
+        id={panelIds.phone}
         class="contact-panel hidden"
         data-panel="phone"
         role="tabpanel"
@@ -205,6 +197,8 @@ const fieldClass =
           </div>
           <input
             type="tel"
+            name="phone_number"
+            autocomplete="tel"
             data-contact-phone-number
             data-field="phone"
             inputmode="tel"
@@ -221,6 +215,7 @@ const fieldClass =
     <FormField
       name="name"
       field="name"
+      autocomplete="name"
       label={lf.nameLabel}
       placeholder={lf.namePlaceholder}
     />
@@ -297,9 +292,6 @@ const fieldClass =
   import { markFieldValidity } from '@podbor/site-kit/browser';
   import { getOrCreateVisitorId } from '@/utils/visitorId';
 
-  // A page can have more than one LeadForm instance (e.g. a page-level form
-  // plus the header's "Оставить заявку" modal) — Astro only emits this
-  // <script> once per page regardless, so it must initialize every card.
   function initAllLeadForms() {
     document
       .querySelectorAll<HTMLElement>('.lead-form-card')
@@ -348,7 +340,6 @@ const fieldClass =
       if (err) err.remove();
     }
 
-    // ── Contact switcher (Telegram / Phone) ──
     const contactField = form.querySelector('.contact-field')!;
     const tabs = contactField.querySelectorAll<HTMLButtonElement>('.pill-tab');
     const panels = contactField.querySelectorAll<HTMLElement>('.contact-panel');
@@ -384,9 +375,6 @@ const fieldClass =
 
     tgInput.removeAttribute('name');
 
-    // WhatsApp/Viber/phone-call all collect the same shape of data (a phone
-    // number) — they share the "phone" panel and its validation, and only
-    // differ in which channel gets recorded for staff to reach back out on.
     const PANEL_FOR: Record<TrackedContactChannel, 'telegram' | 'phone'> = {
       telegram: 'telegram',
       whatsapp: 'phone',
@@ -410,8 +398,7 @@ const fieldClass =
           );
       });
 
-    // ponytail: re-mask from raw digits on every keystroke instead of a
-    // caret-aware stateful mask — simpler, good enough for a lead form.
+    // TODO: re-masks from raw digits on every keystroke; a caret-aware mask if the caret jump bites.
     function formatPhone() {
       const kit = phoneKit();
       if (!kit) return;
@@ -436,11 +423,6 @@ const fieldClass =
       );
     }
 
-    // Shared by the click handler below and the region-based auto-select
-    // right after it — same tab-activation work either way, only whether
-    // focus jumps into the newly-shown field differs (auto-selecting on
-    // page load shouldn't steal focus or pop the mobile keyboard the way a
-    // real click should).
     function selectTab(tab: HTMLButtonElement, focusField: boolean) {
       activeTab = isTrackedContactChannel(tab.dataset.tab)
         ? tab.dataset.tab
@@ -495,9 +477,6 @@ const fieldClass =
       syncContact();
     });
     phoneCountry.addEventListener('change', (event) => {
-      // if the field holds international "+..." text, the user picking a
-      // different country is overriding the auto-detect — drop the stale
-      // text instead of silently re-showing a number for the old country.
       if (phoneNumber.value.trim().startsWith('+')) phoneNumber.value = '';
       formatPhone();
       syncContact();
@@ -508,9 +487,6 @@ const fieldClass =
       'focusin',
       () => {
         expandCountries().then(() => {
-          // Re-masking would rewrite the field and drop the caret to the end,
-          // and on the slow connection this lazy load exists for the visitor
-          // is already typing by now.
           if (phoneNumber !== document.activeElement) formatPhone();
           syncContact();
         });
@@ -524,8 +500,6 @@ const fieldClass =
         return;
       }
       const kit = phoneKit();
-      // Read at send time, not at init: a visitor who refuses after the page
-      // renders would otherwise still post the id baked into the field.
       if (visitorIdInput) visitorIdInput.value = getOrCreateVisitorId();
 
       const isTelegram = activeTab === 'telegram';
@@ -568,54 +542,3 @@ const fieldClass =
     syncContact();
   }
 </script>
-
-<style>
-  /* Tabs size to their own content, so growing the active tab's label is what
-     animates every width in the row — no measuring, no JS. */
-  .contact-tabs :global(.pill-tab) {
-    flex: 1 1 auto;
-    min-width: 0;
-    color: var(--color-muted);
-    transition:
-      color 0.25s,
-      background-color 0.25s;
-  }
-
-  .contact-tabs :global(.pill-tab[aria-selected='true']) {
-    color: var(--color-text);
-    background-color: var(--color-surface-2);
-    /* inset, not a border: a real border would change the row's height */
-    box-shadow: inset 0 -2px 0 var(--color-accent);
-  }
-
-  .contact-tabs :global(.pill-tab:hover:not([aria-selected='true'])) {
-    color: var(--color-text-2);
-  }
-
-  .pill-tab-label {
-    max-width: 0;
-    margin-left: 0;
-    overflow: hidden;
-    opacity: 0;
-    white-space: nowrap;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    transition:
-      max-width 0.32s var(--ease-spring),
-      margin-left 0.32s var(--ease-spring),
-      opacity 0.2s ease-out;
-  }
-
-  :global(.pill-tab[aria-selected='true']) .pill-tab-label {
-    max-width: 6rem;
-    margin-left: 0.5rem;
-    opacity: 1;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .contact-tabs :global(.pill-tab),
-    .pill-tab-label {
-      transition: none;
-    }
-  }
-</style>

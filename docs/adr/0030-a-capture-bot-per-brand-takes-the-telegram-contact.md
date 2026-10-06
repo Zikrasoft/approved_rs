@@ -10,6 +10,12 @@ So the tap beacons a contact click again, carrying the page and the visitor id, 
 
 What is still true: a tap that never reaches Start is now a Ghost lead again, retired by [ADR-0029](0029-ghost-leads-retire-themselves.md) like the other channels. A tap that cannot carry the id — analytics declined, or a payload past 64 characters — beacons nothing, so the bot writes its Lead alone and without a page rather than leaving a second, unmergeable card. The `contact_click` goal fires either way.
 
+## Amended 2026-10-06: `/thanks/` on approved.rs opens the manager, not the bot
+
+A visitor on `/thanks/` has just sent the form. They are the warmest person on the site, and the bot would ask them the two questions they just answered; worse, the bot's Lead merges only on `telegramId` while the form Lead merges on the visitor id, so one person got two cards. WhatsApp and Viber on that page already reach the human.
+
+So that one Telegram tile opens the manager's account, `PUBLIC_TG_MANAGER`, through `telegramLink` with no `?start=`. The handle is an approved.rs environment variable, not a `packages/brands` field: it is a staff account, not brand identity. Unset, the tile falls back to the capture bot — a missing handle degrades the channel, it does not hide it. The page is read from the route, as the contact components already do for their placement. A tap there fires `contact_click` and writes no Lead of any kind: `defineContactClickTracking` skips the beacon for a Telegram link without a `start` parameter, since no bot will come to absorb the placeholder — the rule is keyed on the link rather than the placement, so the unset-variable fallback on the same page beacons as usual. The other channels on `/thanks/` keep their contact click, which merges into the form Lead. Every other Telegram control on all three sites still opens its brand's capture bot with its payload.
+
 # A capture bot per brand takes the Telegram contact before the conversation starts
 
 Decided 2026-10-03.
@@ -63,10 +69,10 @@ has a username goes in `comment` instead, since the username is where the conver
 
 **Telegram's `username` is optional, and that is what shapes the handoff.** With a handle the owner
 writes from their own account, as they do now. Without one, nobody but the capture bot can reach that
-person, so the card offers a reply-through-the-bot fallback. That fallback is built for approved.rs
-only: it needs the visitor's own capture bot, the operator's tap lands on the CRM webhook, and
-approved.rs therefore holds all three capture tokens. CarLab and Details have had zero contact clicks
-and zero form submissions over two months, so a relay for them would be built for nobody.
+person, so the card offers a reply-through-the-bot fallback for every brand. It needs the visitor's
+own capture bot, the operator's tap lands on the CRM webhook, and approved.rs therefore holds all
+three capture tokens and picks the bot by the Lead's `brand`. A brand whose token is not set simply
+gets no reply button on its cards.
 
 **The phone is an extra step with two different purposes.** `/start` does not carry a phone number;
 only a `KeyboardButton{request_contact:true}` in a private chat produces one, and the visitor can

@@ -17,8 +17,8 @@ import {
 } from '../schema.ts';
 import type { LeadStatus, StoredLead } from '../schema.ts';
 
-// Free functions — no per-business config, so they are imported directly.
 import {
+  EDIT_COPY,
   statusLabel,
   isLeadStatusKey,
   buildStatusKeyboard,
@@ -42,6 +42,7 @@ const client = createTelegramClient('test-bot-token');
 const formatter = createFormatter({
   serviceLabel: (slug) => SERVICE_LABELS[slug] ?? slug,
   botUsername: 'approved_test_bot',
+  replyRelayBrands: ['Approved.rs', 'Details'],
 });
 const notifier = createNotifier({
   client,
@@ -100,9 +101,6 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
   });
 }
 
-// Intl.NumberFormat('ru-RU') uses a non-breaking thousands separator that
-// isn't a plain U+0020 space — build expectations from the same formatter
-// instead of hardcoding a literal that looks right but silently isn't.
 function money(n: number): string {
   return `${new Intl.NumberFormat('ru-RU').format(n)} €`;
 }
@@ -636,10 +634,6 @@ describe('sendPostponeReminderToOwner', () => {
     expect(body.reply_markup.inline_keyboard[0][0].url).toContain('lead_9');
   });
 
-  // Only one OWNER_ID in this test env, so "every send failed" and "the
-  // only send failed" are the same case here — still the behavior that
-  // matters: don't silently succeed when nobody actually got the reminder,
-  // so the cron's catch block keeps the lead 'due' for a retry.
   it('throws when every owner send fails, so the cron keeps the lead due for retry', async () => {
     mockFetch.mockResolvedValue({
       ok: false,
@@ -971,6 +965,36 @@ describe('buildLeadDetail', () => {
     expect(rows[rows.length - 1]).toEqual([
       { text: '🗑 Архивировать', callback_data: 'arch:7' },
     ]);
+  });
+
+  it('offers a reply through the bot only when the contact is a Telegram id link', () => {
+    const buttons = (contact: string) =>
+      buildLeadDetail(makeLead({ id: 7, contact }), 'owner')
+        .reply_markup.inline_keyboard.flat()
+        .map((b) => b.callback_data);
+    expect(buttons('tg://user?id=123456')).toContain('reply:7');
+    expect(buttons('@ivan')).not.toContain('reply:7');
+    expect(buttons('+381601234567')).not.toContain('reply:7');
+  });
+
+  it('offers a reply only for the brands whose capture bot this app relays through', () => {
+    const lead = makeLead({ id: 7, contact: 'tg://user?id=123456' });
+    const buttons = (detail: ReturnType<typeof buildLeadDetail>) =>
+      detail.reply_markup.inline_keyboard.flat().map((b) => b.callback_data);
+    expect(buttons(buildLeadDetail(lead, 'owner'))).toContain('reply:7');
+    expect(
+      buttons(buildLeadDetail({ ...lead, brand: 'Details' }, 'owner')),
+    ).toContain('reply:7');
+    expect(
+      buttons(buildLeadDetail({ ...lead, brand: 'CarLab' }, 'owner')),
+    ).not.toContain('reply:7');
+    const bare = createFormatter({
+      serviceLabel: (slug) => slug,
+      botUsername: 'carlab_test_bot',
+    });
+    expect(buttons(bare.buildLeadDetail(lead, 'owner'))).not.toContain(
+      'reply:7',
+    );
   });
 
   it('in_progress lead: Завершить/Отказ status row', () => {
@@ -1529,5 +1553,13 @@ describe('brand attribution — one bot, one chat, several businesses', () => {
       'owner',
     );
     expect(text).toContain('По брендам: Approved.rs — 1 · PRIZMA — 1');
+  });
+});
+
+describe('EDIT_COPY', () => {
+  it('names the field in the prompt', () => {
+    expect(EDIT_COPY.prompt('contact')).toBe(
+      '✏️ Введите новое значение (контакт):',
+    );
   });
 });

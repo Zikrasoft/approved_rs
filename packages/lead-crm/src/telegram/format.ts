@@ -8,6 +8,7 @@ import {
   type CommissionInfo,
 } from '../money.ts';
 import { channelLabel } from '../channelLabels.ts';
+import { isTelegramIdContact } from '../contactShape.ts';
 import { LEADS_PATH } from '../quarantine.ts';
 import type { Income, LeadStatus, StoredLead } from '../schema.ts';
 import { MAX_LIST_ROWS, isPlaceholderContact, type OwedRow } from '../store.ts';
@@ -20,6 +21,7 @@ export type Keyboard = { inline_keyboard: Btn[][] };
 export interface FormatterOptions {
   serviceLabel: (slug: string) => string;
   botUsername: string;
+  replyRelayBrands?: readonly string[];
 }
 
 const MAX_SERVICES_LABEL = 200;
@@ -66,7 +68,7 @@ function statusLine(status: LeadStatus): string {
   return `<b>Статус: ${statusEmoji(status)} ${statusLabel(status)}</b>`;
 }
 
-function escapeHtml(s: string): string {
+export function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
@@ -365,8 +367,6 @@ export function commissionClaimText(
   return `🔔 Отмечена оплата комиссии по заявке #${lead.id}: ${formatMoney(lead.pendingCommissionClaim.amount)}.\n\nПодтвердить?`;
 }
 
-// The fields the owner can edit from the lead card. Operator-facing Russian
-// lives in the package, same as every other bot string.
 export const EDIT_FIELD_LABELS = {
   name: 'имя',
   contact: 'контакт',
@@ -375,8 +375,22 @@ export const EDIT_FIELD_LABELS = {
 
 export type EditField = keyof typeof EDIT_FIELD_LABELS;
 
-// A comment can be paragraphs long; the admin needs to see what moved, not
-// the whole field, and Telegram caps a message at 4096 characters.
+export const EDIT_COPY = {
+  prompt: (field: EditField) =>
+    `✏️ Введите новое значение (${EDIT_FIELD_LABELS[field]}):`,
+  ack: 'Жду значение',
+} as const;
+
+export const REPLY_COPY = {
+  prompt: '💬 Напишите ответ посетителю — бот отправит его в чат:',
+  ack: 'Жду сообщение',
+  empty: '⚠️ Сообщение не может быть пустым. Попробуйте ещё раз.',
+  undelivered:
+    '⚠️ Не доставлено: посетитель заблокировал бота или чат недоступен.',
+  sent: '✅ Отправлено',
+  notePrefix: 'Ответ: ',
+} as const;
+
 const FIELD_PREVIEW_LIMIT = 120;
 
 function fieldPreview(value: string | null | undefined): string {
@@ -449,7 +463,11 @@ export function dealNotificationText(
 export function createFormatter({
   serviceLabel,
   botUsername,
+  replyRelayBrands = [],
 }: FormatterOptions) {
+  const canReplyThroughBot = (lead: StoredLead): boolean =>
+    replyRelayBrands.includes(lead.brand) && isTelegramIdContact(lead.contact);
+
   function clickLabel(lead: StoredLead): string {
     const channel = lead.contactChannel;
     return lead.kind === 'call_click' &&
@@ -662,6 +680,16 @@ export function createFormatter({
           { text: '✏️ Контакт', callback_data: `edit:${lead.id}:contact` },
           { text: '✏️ Комментарий', callback_data: `edit:${lead.id}:comment` },
         ],
+        ...(canReplyThroughBot(lead)
+          ? [
+              [
+                {
+                  text: '💬 Ответить через бота',
+                  callback_data: `reply:${lead.id}`,
+                },
+              ],
+            ]
+          : []),
         ...(commission ? moneyActionRows(lead, role, commission) : []),
         [{ text: '🗑 Архивировать', callback_data: `arch:${lead.id}` }],
         ...deleteRow,

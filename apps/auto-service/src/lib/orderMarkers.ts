@@ -10,6 +10,7 @@ function selectOrderMarkers(): OrderMarkers {
     return {
       has: async (orderId) => (await opened).has(orderId),
       add: async (orderId) => (await opened).add(orderId),
+      release: async (orderId) => (await opened).release(orderId),
     };
   }
   return createBlobOrderMarkers();

@@ -38,11 +38,14 @@ import {
   editLeadDetailMessage,
   OWNER_IDS,
   ADMIN_IDS,
-  EDIT_FIELD_LABELS,
+  EDIT_COPY,
+  REPLY_COPY,
+  escapeHtml,
   canAddIncome,
   type Role,
   type EditField,
 } from '@/lib/telegram';
+import { captureClientFor } from '@/lib/captureBot';
 import {
   getLead,
   setStatus,
@@ -64,37 +67,40 @@ import {
   readLeads,
   getCommission,
   appendIncome,
+  appendNote,
   type LeadStatus,
+  type PendingPrompt,
   type StoredLead,
 } from '@/lib/store';
 
 const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
 
-interface TelegramMessage {
-  message_id: number;
-  text?: string;
-  chat: { id: number; type: string };
-  from?: { id: number };
-  reply_to_message?: { message_id: number };
-}
+const messageSchema = z.object({
+  message_id: z.number().int(),
+  text: z.string().optional(),
+  chat: z.object({ id: z.number().int(), type: z.string().optional() }),
+  from: z.object({ id: z.number().int() }).optional(),
+  reply_to_message: z.object({ message_id: z.number().int() }).optional(),
+});
 
-interface TelegramUpdate {
-  update_id?: number;
-  message?: TelegramMessage;
-  callback_query?: {
-    id: string;
-    data?: string;
-    from?: { id: number };
-    message?: TelegramMessage;
-  };
-}
+const updateSchema = z.object({
+  update_id: z.number().int().optional(),
+  message: messageSchema.optional(),
+  callback_query: z
+    .object({
+      id: z.string(),
+      data: z.string().optional(),
+      from: z.object({ id: z.number().int() }).optional(),
+      message: messageSchema.optional(),
+    })
+    .optional(),
+});
+
+type TelegramMessage = z.infer<typeof messageSchema>;
+type TelegramUpdate = z.infer<typeof updateSchema>;
 
 const ACK = new Response(null, { status: 200 });
 
-// Telegram redelivers an update if our response takes too long — module-scope
-// state survives across invocations on the same warm instance, so a
-// redelivery landing there gets caught instead of writing to the leads blob
-// twice and racing itself for no reason.
 const SEEN_UPDATE_IDS_MAX = 500;
 const seenUpdateIds = new Set<number>();
 const seenUpdateIdsOrder: number[] = [];
@@ -134,9 +140,6 @@ function parseAmount(text: string, allowZero = false): number | null {
     : null;
 }
 
-// ДД.ММ.ГГГГ -> ISO 'YYYY-MM-DD', rejecting impossible calendar dates
-// (date-fns' `parse` marks 31.02 etc. invalid rather than rolling over) and
-// any date before today — a reminder for the past makes no sense.
 function parseReminderDate(text: string): string | null {
   const parsed = parse(text.trim(), 'dd.MM.yyyy', new Date());
   if (!isValid(parsed) || isBefore(parsed, startOfDay(new Date()))) return null;
@@ -147,8 +150,6 @@ function quickRemindDate(days: number): string {
   return format(addDays(new Date(), days), 'yyyy-MM-dd');
 }
 
-// Every mutation touches two surfaces — the group teaser and whichever DM
-// message the callback fired on — from one fresh StoredLead.
 async function refreshBothSurfaces(
   updated: StoredLead | undefined,
   chatId: number,
@@ -160,10 +161,6 @@ async function refreshBothSurfaces(
   await editLeadDetailMessage(chatId, messageId, updated, role);
 }
 
-// Every mutating callback needs the same shape: try the action, and if it
-// throws, still ack with an error so the tapped button stops spinning
-// instead of hanging forever (the outer POST catch only logs, it never
-// acks). One place instead of duplicating try/catch per handler.
 async function withErrorAck(
   cbId: string,
   logCtx: Record<string, unknown>,
@@ -180,8 +177,6 @@ async function withErrorAck(
   }
 }
 
-// Shared role gate for the handful of owner-only/admin-only callbacks —
-// acks-and-rejects on mismatch, same as every other "not allowed" path.
 async function requireRole(
   role: Role,
   needed: Role,
@@ -265,8 +260,6 @@ async function handleUnarchiveCallback(
   });
 }
 
-// Tapping "⏰ Отложить" opens the picker (quick presets / calendar / type it)
-// in place of the lead card, rather than jumping straight to a text prompt.
 async function handlePostponeCallback(
   id: number,
   chatId: number,
@@ -512,28 +505,50 @@ async function handleRejectPayCallback(
   });
 }
 
-async function handleEditCallback(
+async function startPrompt(
   id: number,
-  field: EditField,
   chatId: number,
   cbId: string,
+  {
+    prompt,
+    kind,
+    ack,
+  }: { prompt: string; kind: PendingPrompt['kind']; ack: string },
 ): Promise<void> {
-  await withErrorAck(cbId, { id, field }, async () => {
+  await withErrorAck(cbId, { id, kind }, async () => {
     const lead = await getLead(id);
     if (!lead) {
       await answerCallback(cbId).catch(() => {});
       return;
     }
-    const promptId = await sendForceReplyPrompt(
-      chatId,
-      `✏️ Введите новое значение (${EDIT_FIELD_LABELS[field]}):`,
-    );
-    await setPendingPrompt(id, {
-      chatId,
-      messageId: promptId,
-      kind: `edit_${field}`,
-    });
-    await answerCallback(cbId, 'Жду значение');
+    const promptId = await sendForceReplyPrompt(chatId, prompt);
+    await setPendingPrompt(id, { chatId, messageId: promptId, kind });
+    await answerCallback(cbId, ack);
+  });
+}
+
+function handleEditCallback(
+  id: number,
+  field: EditField,
+  chatId: number,
+  cbId: string,
+): Promise<void> {
+  return startPrompt(id, chatId, cbId, {
+    prompt: EDIT_COPY.prompt(field),
+    kind: `edit_${field}`,
+    ack: EDIT_COPY.ack,
+  });
+}
+
+function handleReplyCallback(
+  id: number,
+  chatId: number,
+  cbId: string,
+): Promise<void> {
+  return startPrompt(id, chatId, cbId, {
+    prompt: REPLY_COPY.prompt,
+    kind: 'reply_visitor',
+    ack: REPLY_COPY.ack,
   });
 }
 
@@ -579,6 +594,7 @@ async function handleCallbackQuery(
   const confirmPayMatch = /^confirmpay:(\d+)$/.exec(data);
   const rejectPayMatch = /^rejectpay:(\d+)$/.exec(data);
   const editMatch = /^edit:(\d+):(name|contact|comment)$/.exec(data);
+  const replyMatch = /^reply:(\d+)$/.exec(data);
   const listMatch =
     /^list:(new|negotiations|in_progress|won|lost|postponed|in_progress\+postponed)$/.exec(
       data,
@@ -743,6 +759,10 @@ async function handleCallbackQuery(
     );
     return;
   }
+  if (replyMatch) {
+    await handleReplyCallback(Number(replyMatch[1]), chatId, cb.id);
+    return;
+  }
   if (listMatch) {
     const leads = await readLeads();
     const statuses = listMatch[1].split('+') as LeadStatus[];
@@ -766,8 +786,6 @@ async function handleCallbackQuery(
     return;
   }
   if (data === 'menu:debt') {
-    // Both roles see this — whoever's asking, it's the same "who still
-    // owes/is owed commission" list, just framed differently in the text.
     const { rows, total } = await getOwedSummary();
     const { text, reply_markup } = buildOwedList(rows, total);
     await sendMessage(chatId, text, { reply_markup });
@@ -780,14 +798,9 @@ async function handleCallbackQuery(
     await answerCallback(cb.id).catch(() => {});
     return;
   }
-  // Unrecognized/invalid callback — still ack so the button stops spinning.
   await answerCallback(cb.id).catch(() => {});
 }
 
-// A reply to one of our own force_reply prompts — deal amount, a field
-// edit, or a commission claim. This is the only free text the bot ever
-// acts on outside of /start and DM search, which is what keeps it safe to
-// ignore ordinary chatter (see the no-match fallthrough below).
 async function handlePromptReply(
   chatId: number,
   replyToMessageId: number,
@@ -864,9 +877,6 @@ async function handlePromptReply(
             )
           : {},
     );
-    // resolvePendingPrompt returns the lead as soon as the prompt correlates
-    // — even when `apply` no-op'd with {} — so truthiness alone can't tell
-    // "postponed" from "guard blocked it"; check the field the guard controls.
     if (updated?.status === 'postponed') {
       await ensureLeadCard(updated);
       await sendStatusChangeToAdmin(updated);
@@ -874,7 +884,47 @@ async function handlePromptReply(
     return;
   }
 
-  // edit_name / edit_contact / edit_comment
+  if (kind === 'reply_visitor') {
+    const reply = text.trim();
+    if (!reply) {
+      await sendMessage(chatId, REPLY_COPY.empty);
+      return;
+    }
+    const undelivered = () => sendMessage(chatId, REPLY_COPY.undelivered);
+    const client = captureClientFor(pending.brand);
+    if (pending.telegramId == null || !client) {
+      console.warn('[telegram-webhook] reply to visitor has no route', {
+        id: pending.id,
+        brand: pending.brand,
+        reason: client ? 'no telegramId' : 'no capture bot for brand',
+      });
+      await undelivered();
+      return;
+    }
+    try {
+      await client.sendMessage(pending.telegramId, escapeHtml(reply));
+    } catch (err) {
+      console.error('[telegram-webhook] reply to visitor failed', {
+        id: pending.id,
+        error: err,
+      });
+      await undelivered();
+      return;
+    }
+    const updated = await resolvePendingPrompt(
+      chatId,
+      replyToMessageId,
+      (lead) => ({
+        comment: appendNote(lead.comment, `${REPLY_COPY.notePrefix}${reply}`),
+      }),
+    );
+    if (updated) {
+      await ensureLeadCard(updated);
+      await replyWithCard(chatId, updated, REPLY_COPY.sent);
+    }
+    return;
+  }
+
   const field = kind.slice('edit_'.length) as EditField;
   const value = text.trim();
   if ((field === 'name' || field === 'contact') && !value) {
@@ -940,9 +990,6 @@ async function handlePrivateMessage(msg: TelegramMessage): Promise<void> {
     return;
   }
 
-  // Plain DM text, not /start, not a prompt reply (that's handled earlier
-  // in POST, before chat-type is even checked) — there's nothing else it
-  // could mean, so treat it as a search query.
   const results = await searchLeads(text);
   const { text: resultsText, reply_markup } = buildSearchResults(results);
   await sendMessage(chatId, resultsText, { reply_markup });
@@ -958,19 +1005,18 @@ export async function POST({ request }: APIContext): Promise<Response> {
     return new Response(null, { status: 401 });
   }
 
-  let update: TelegramUpdate;
-  try {
-    update = (await request.json()) as TelegramUpdate;
-  } catch {
-    // Malformed body after a valid secret — ack with 200 so Telegram stops
-    // retrying instead of hammering this endpoint forever on a bad payload.
+  const parsed = updateSchema.safeParse(
+    await request.json().catch(() => undefined),
+  );
+  if (!parsed.success) {
+    console.warn('[telegram-webhook] ignoring unparseable update', {
+      issues: parsed.error.issues,
+    });
     return ACK;
   }
+  const update = parsed.data;
 
-  if (
-    typeof update.update_id === 'number' &&
-    alreadyProcessed(update.update_id)
-  ) {
+  if (update.update_id !== undefined && alreadyProcessed(update.update_id)) {
     return ACK;
   }
 
@@ -978,10 +1024,6 @@ export async function POST({ request }: APIContext): Promise<Response> {
     if (update.callback_query) {
       await handleCallbackQuery(update.callback_query);
     } else if (update.message?.reply_to_message) {
-      // Checked before chat.type, not gated behind it — a prompt is only
-      // ever sent to a DM chatId now, so a reply typed in the group
-      // correlates to nothing and safely no-ops below, rather than this
-      // class of bug being able to recur if some future path slips.
       await handlePromptReply(
         update.message.chat.id,
         update.message.reply_to_message.message_id,
@@ -990,15 +1032,11 @@ export async function POST({ request }: APIContext): Promise<Response> {
     } else if (update.message && update.message.chat.type === 'private') {
       await handlePrivateMessage(update.message);
     }
-    // Group messages that aren't button presses (chatter) fall through here
-    // untouched.
   } catch (err) {
     console.error('[telegram-webhook] unhandled error processing update', {
       error: err,
     });
   }
 
-  // Telegram retries the webhook on anything but 2xx — always ack even for
-  // update types we don't act on.
   return ACK;
 }

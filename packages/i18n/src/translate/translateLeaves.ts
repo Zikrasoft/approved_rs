@@ -177,16 +177,16 @@ export async function translateLeaves({
     for (let attempt = 0; attempt < CHUNK_ATTEMPTS; attempt++) {
       requests += 1;
       try {
-        const raw = await callOpenAiJson({
+        const translated = await callOpenAiJson({
           apiKey,
           model,
           systemPrompt,
           userContent: JSON.stringify(payload),
+          chunk: `${chunk.length} leaves from ${chunk[0].path}`,
         });
-        assertSafeTranslation(payload, raw, '');
-        const translated = raw as Record<string, string>;
+        assertSafeTranslation(payload, translated, '');
         for (const leaf of chunk) {
-          const value = translated[leaf.path] as string;
+          const value = translated[leaf.path];
           block[leafKey(fingerprint, leaf.text)] = value;
           byPath.set(leaf.path, value);
         }

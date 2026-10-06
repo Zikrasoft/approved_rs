@@ -323,7 +323,9 @@ Both new apps follow the same shape, and a third should too:
   brand's capture bot through `captureBotLink` in
   `@podbor/site-kit/contact-links`, which every app binds once over its own
   `BRAND.captureBot` as `telegramBotHref(locale, service?)` in
-  `src/utils/contactLinks.ts` — a tile calls that, never the bot name. `?start=`
+  `src/utils/contactLinks.ts` — a tile calls that, never the bot name. A
+  tracked Telegram tile must carry `?start=`: a Telegram link without it is
+  treated as a human account, and a tap on it stores no Lead. `?start=`
   and `?text=` are different parameters, so `messengerPrefill` never reaches
   Telegram. The payload is `<service>_<locale>`, or the locale alone where the
   page has no service (the homepage, the footer, the floating widget, the
@@ -339,7 +341,21 @@ Both new apps follow the same shape, and a third should too:
   and `telegramId` is what the card reads as `🤖 через бота`. A tap that cannot
   carry the id (analytics declined, or a payload past 64 characters) beacons
   nothing: the bot writes its Lead alone, without a page, rather than leaving a
-  second, unmergeable card in the chat.
+  second, unmergeable card in the chat. **`/thanks/` on approved.rs is the one
+  carve-out**: the visitor there has just sent the form, so its Telegram tile
+  opens the manager's own account (`PUBLIC_TG_MANAGER`, an app variable and
+  never a `packages/brands` field, because it is a staff account rather than
+  brand identity) through `telegramLink`, with no `?start=`, and falls back to
+  the capture bot when the variable is unset. `messengerHrefs` takes the choice
+  as `{ human }`, which `ContactCTA` and `FloatingContactWidget` fill from the
+  same route check that already picks their placement — no prop says where a
+  component is. A tap there fires `contact_click` and writes no Lead:
+  `defineContactClickTracking` skips the beacon for a `telegram` link whose
+  href carries no `start` parameter — a human account, which a capture-bot
+  link never is — so the rule is keyed on the link, not on the placement, and
+  the fallback bot link on the same page beacons its placeholder like
+  everywhere else. The other channels on that page keep their click Lead,
+  which merges into the form Lead on the visitor id.
 - **The lead modal takes its service from the trigger.** `data-lead-service` on
   a button sets the form's `service` when the modal opens; `data-default-service`
   on the form is what it resets to when the trigger names none. Both constants
@@ -500,7 +516,7 @@ The binding is split in two on purpose: `src/lib/crm.ts` builds the store and ne
 
 The commission rate is per business (`DEFAULT_COMMISSION_PERCENT` in `src/lib/crm.ts`), and a lead stores the rate it was created with, so changing the default never rewrites history.
 
-**Keystatic admin (`keystatic.config.ts`):** local dev reads/writes the working tree directly (`storage: { kind: 'local' }`); production (`import.meta.env.PROD`) goes through GitHub's API (`storage: { kind: 'github' }`) since Vercel's filesystem is ephemeral. Service-slug enums are hand-duplicated between `keystatic.config.ts` and `src/content.config.ts`/`src/utils/labels.ts` (`src/utils/services.ts` on the brand sites) because Keystatic's config can't import Astro-coupled modules — and a fourth copy lives in `packages/brands/src/serviceLabels.ts`, which is what the Telegram card reads. `serviceLabel()` echoes an unknown slug rather than throwing, and `serviceLabels.test.ts` hardcodes its own list because a package cannot import an app, so a slug added to an app alone passes every test and reaches the operator raw. Update all of them when adding a service.
+**Keystatic admin (`keystatic.config.ts`):** local dev reads/writes the working tree directly (`storage: { kind: 'local' }`); production (`import.meta.env.PROD`) goes through GitHub's API (`storage: { kind: 'github' }`) since Vercel's filesystem is ephemeral. Service slugs live once, in `SERVICE_SLUGS_BY_BRAND` in `packages/brands/src/serviceLabels.ts`, typed against `SERVICE_LABELS_RU` so a slug without a label is a compile error. `src/utils/labels.ts` (`src/utils/services.ts` on the brand sites), `src/content.config.ts` and the Keystatic select options all read that list — Keystatic's config cannot import Astro-coupled modules, but `@podbor/brands` is plain TypeScript. Add a service there and its label in the same edit; `serviceLabel()` still echoes an unknown slug rather than throwing, which only a slug outside the list (the `vehicle-import-<spoke>` sub-slugs, `parts-order`, the partner and legacy slugs) can reach.
 
 **Path/URL construction:** always go through `src/utils/paths.ts`'s `PathBuilder` rather than hand-building locale-prefixed URLs, so a routing change (like the legacy-slug renames above) only needs updating in one place.
 

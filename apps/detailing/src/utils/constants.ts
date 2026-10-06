@@ -1,9 +1,24 @@
 import { DETAILS, WORKSHOP_ADDRESS } from '@podbor/brands';
 import { instagramLink, telegramBotLink } from '@podbor/site-kit/contact-links';
+import {
+  createPublicEnvSchema,
+  withMessengerFallback,
+} from '@podbor/site-kit/public-env';
+import { z } from 'zod';
 
 export const BRAND = DETAILS;
 
-export const SITE_URL = import.meta.env.SITE ?? BRAND.url;
+const publicEnvSchema = createPublicEnvSchema({ siteDefault: BRAND.url })
+  .extend({ PUBLIC_INSTAGRAM: z.string().min(1).optional() })
+  .transform(withMessengerFallback);
+
+export function readPublicEnv(env: Record<string, unknown>) {
+  return publicEnvSchema.parse(env);
+}
+
+const env = readPublicEnv(import.meta.env);
+
+export const SITE_URL = env.SITE;
 export const SITE_NAME = BRAND.name;
 export const SITE_LEGAL_NAME = BRAND.legalName;
 
@@ -22,25 +37,23 @@ export const OPENING_HOURS = {
   closes: '19:00',
 };
 
-export const PHONE_NUMBER =
-  import.meta.env.PUBLIC_PHONE_NUMBER ?? '381677210533';
-export const WHATSAPP_NUMBER =
-  import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? PHONE_NUMBER;
-export const VIBER_NUMBER = import.meta.env.PUBLIC_VIBER_NUMBER ?? PHONE_NUMBER;
-// TODO: hidden until the real Instagram handle is decided and PUBLIC_INSTAGRAM is set.
+export const PHONE_NUMBER = env.PUBLIC_PHONE_NUMBER;
+export const WHATSAPP_NUMBER = env.PUBLIC_WHATSAPP_NUMBER;
+export const VIBER_NUMBER = env.PUBLIC_VIBER_NUMBER;
 export const INSTAGRAM =
-  import.meta.env.PUBLIC_INSTAGRAM ?? 'details_placeholder';
-
-export const INSTAGRAM_ENABLED = !INSTAGRAM.endsWith('_placeholder');
+  env.PUBLIC_INSTAGRAM === undefined
+    ? undefined
+    : {
+        handle: env.PUBLIC_INSTAGRAM,
+        url: instagramLink(env.PUBLIC_INSTAGRAM),
+      };
 
 export const TELEGRAM_BOT_URL = telegramBotLink(BRAND.captureBot);
 
 export const SOCIAL_SAME_AS = [
-  ...(INSTAGRAM_ENABLED ? [instagramLink(INSTAGRAM)] : []),
+  ...(INSTAGRAM ? [INSTAGRAM.url] : []),
   TELEGRAM_BOT_URL,
 ];
-
-export const YM_COUNTER_ID = 112647721;
 
 export const COOKIE_POLICY_VERSION = '2026-09-15';
 

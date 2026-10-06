@@ -1,9 +1,23 @@
 import { CARLAB, WORKSHOP_ADDRESS } from '@podbor/brands';
 import { telegramBotLink } from '@podbor/site-kit/contact-links';
+import {
+  createPublicEnvSchema,
+  withMessengerFallback,
+} from '@podbor/site-kit/public-env';
 
 export const BRAND = CARLAB;
 
-export const SITE_URL = import.meta.env.SITE ?? BRAND.url;
+const publicEnvSchema = createPublicEnvSchema({
+  siteDefault: BRAND.url,
+}).transform(withMessengerFallback);
+
+export function readPublicEnv(env: Record<string, unknown>) {
+  return publicEnvSchema.parse(env);
+}
+
+const env = readPublicEnv(import.meta.env);
+
+export const SITE_URL = env.SITE;
 export const SITE_NAME = BRAND.name;
 export const SITE_LEGAL_NAME = BRAND.legalName;
 
@@ -24,16 +38,12 @@ export const OPENING_HOURS = [
   },
 ];
 
-export const PHONE_NUMBER =
-  import.meta.env.PUBLIC_PHONE_NUMBER ?? '381677210533';
-export const WHATSAPP_NUMBER =
-  import.meta.env.PUBLIC_WHATSAPP_NUMBER ?? PHONE_NUMBER;
-export const VIBER_NUMBER = import.meta.env.PUBLIC_VIBER_NUMBER ?? PHONE_NUMBER;
+export const PHONE_NUMBER = env.PUBLIC_PHONE_NUMBER;
+export const WHATSAPP_NUMBER = env.PUBLIC_WHATSAPP_NUMBER;
+export const VIBER_NUMBER = env.PUBLIC_VIBER_NUMBER;
 export const TELEGRAM_BOT_URL = telegramBotLink(BRAND.captureBot);
 
 export const SOCIAL_SAME_AS = [TELEGRAM_BOT_URL];
-
-export const YM_COUNTER_ID = 112647692;
 
 export const COOKIE_POLICY_VERSION = '2026-09-15';
 

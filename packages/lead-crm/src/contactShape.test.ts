@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { telegramContact, typedAsPhone } from './contactShape.ts';
+import {
+  isTelegramIdContact,
+  telegramContact,
+  typedAsPhone,
+} from './contactShape.ts';
 
 describe('typedAsPhone', () => {
   it.each([
@@ -36,5 +40,15 @@ describe('telegramContact', () => {
 
   it('leaves an empty field empty instead of posting a bare @', () => {
     expect(telegramContact('   ')).toBe('');
+  });
+});
+
+describe('isTelegramIdContact', () => {
+  it('matches the id link the capture bot stores for a visitor without a handle', () => {
+    expect(isTelegramIdContact('tg://user?id=123456')).toBe(true);
+  });
+
+  it.each(['@ivan', '+381601234567', ''])('rejects %p', (contact) => {
+    expect(isTelegramIdContact(contact)).toBe(false);
   });
 });

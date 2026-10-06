@@ -120,7 +120,7 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
 
     <script>
       import { defineAnalytics } from '@podbor/site-kit/browser';
-      import { YM_COUNTER_ID } from '@/utils/constants';
+      import { YM_COUNTER_ID } from '@/utils/metrika';
 
       if (!import.meta.env.DEV) defineAnalytics({ ymCounterId: YM_COUNTER_ID });
     </script>

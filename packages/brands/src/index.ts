@@ -14,7 +14,13 @@ export { BRAND_SITES, BRANDS, COMMISSION_PERCENT } from './registry.ts';
 export {
   PARTNER_SERVICE,
   SERVICE_LABELS_RU,
+  SERVICE_SLUGS_BY_BRAND,
+  isBrandServiceSlug,
   isPartnerService,
   serviceLabel,
 } from './serviceLabels.ts';
-export type { PartnerService } from './serviceLabels.ts';
+export type {
+  BrandServiceSlug,
+  LabelledService,
+  PartnerService,
+} from './serviceLabels.ts';

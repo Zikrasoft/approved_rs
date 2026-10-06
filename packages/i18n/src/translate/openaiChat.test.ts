@@ -3,6 +3,7 @@ import {
   callOpenAiJson,
   OPENAI_TIMEOUT_MS,
   OPENAI_MAX_RETRIES,
+  TranslateResponseError,
 } from './openaiChat';
 
 describe('callOpenAiJson', () => {
@@ -20,7 +21,7 @@ describe('callOpenAiJson', () => {
   it('posts model/response_format/messages and returns the parsed content', async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       jsonResponse({
-        choices: [{ message: { content: JSON.stringify({ x: 1 }) } }],
+        choices: [{ message: { content: JSON.stringify({ x: 'y' }) } }],
       }),
     );
     vi.stubGlobal('fetch', fetchMock);
@@ -29,8 +30,9 @@ describe('callOpenAiJson', () => {
       apiKey: 'test-key',
       systemPrompt: 'sys',
       userContent: 'user',
+      chunk: 'c',
     });
-    expect(result).toEqual({ x: 1 });
+    expect(result).toEqual({ x: 'y' });
 
     const [url, init] = fetchMock.mock.calls[0];
     expect(String(url)).toBe('https://api.openai.com/v1/chat/completions');
@@ -56,7 +58,12 @@ describe('callOpenAiJson', () => {
         ),
     );
     await expect(
-      callOpenAiJson({ apiKey: 'k', systemPrompt: 's', userContent: 'u' }),
+      callOpenAiJson({
+        apiKey: 'k',
+        systemPrompt: 's',
+        userContent: 'u',
+        chunk: 'c',
+      }),
     ).rejects.toThrow(/boom/);
   });
 
@@ -69,7 +76,12 @@ describe('callOpenAiJson', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(
-      callOpenAiJson({ apiKey: 'k', systemPrompt: 's', userContent: 'u' }),
+      callOpenAiJson({
+        apiKey: 'k',
+        systemPrompt: 's',
+        userContent: 'u',
+        chunk: 'c',
+      }),
     ).rejects.toThrow();
 
     expect(fetchMock).toHaveBeenCalledTimes(OPENAI_MAX_RETRIES + 1);
@@ -81,7 +93,39 @@ describe('callOpenAiJson', () => {
       vi.fn().mockResolvedValue(jsonResponse({ choices: [{ message: {} }] })),
     );
     await expect(
-      callOpenAiJson({ apiKey: 'k', systemPrompt: 's', userContent: 'u' }),
+      callOpenAiJson({
+        apiKey: 'k',
+        systemPrompt: 's',
+        userContent: 'u',
+        chunk: 'c',
+      }),
     ).rejects.toThrow(/missing content/);
   });
+
+  it.each([
+    ['a list', ['x']],
+    ['a nested value', { x: { y: 'z' } }],
+    ['a number', { x: 1 }],
+  ])(
+    'throws a typed error naming the chunk when the content is %s',
+    async (_label, content) => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue(
+          jsonResponse({
+            choices: [{ message: { content: JSON.stringify(content) } }],
+          }),
+        ),
+      );
+      const call = callOpenAiJson({
+        apiKey: 'k',
+        systemPrompt: 's',
+        userContent: 'u',
+        chunk: 'home.sr',
+      });
+      await expect(call).rejects.toBeInstanceOf(TranslateResponseError);
+      await expect(call).rejects.toMatchObject({ chunk: 'home.sr' });
+      await expect(call).rejects.toThrow(/"home.sr" is malformed/);
+    },
+  );
 });

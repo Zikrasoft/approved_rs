@@ -26,9 +26,10 @@ export function defineContactClickTracking(
         )?.dataset.contactPlacement;
         reachGoal(GOALS.contactClick, { channel, placement });
         const visitorId = browserVisitorId();
+        let start: string | null = null;
         if (element instanceof HTMLAnchorElement) {
           const url = new URL(element.href);
-          const start = url.searchParams.get(START_PARAM);
+          start = url.searchParams.get(START_PARAM);
           if (start != null) {
             const stamped = stampStartVisitor(start, visitorId);
             if (!stamped) return;
@@ -36,6 +37,7 @@ export function defineContactClickTracking(
             element.href = url.href;
           }
         }
+        if (channel === 'telegram' && start == null) return;
         const body = new FormData();
         body.set('channel', channel);
         body.set('source_url', location.href);
