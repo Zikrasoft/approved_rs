@@ -160,3 +160,16 @@ describe('capturePrompt on a lead', () => {
     expect(lead.capturePrompt).toEqual({ chatId: 42, step: 'phone' });
   });
 });
+
+describe('pendingPrompt on a lead', () => {
+  const schema = createLeadSchema({ defaultCommissionPercent: 10 });
+
+  it('accepts the reply-to-visitor prompt', () => {
+    const lead = schema.parse({
+      ...base,
+      pendingPrompt: { chatId: 1, messageId: 2, kind: 'reply_visitor' },
+    });
+
+    expect(lead.pendingPrompt?.kind).toBe('reply_visitor');
+  });
+});

@@ -30,6 +30,7 @@ export const PROMPT_KINDS = [
   'edit_contact',
   'edit_comment',
   'postpone',
+  'reply_visitor',
 ] as const;
 
 const pendingPromptSchema = z.object({

@@ -28,6 +28,7 @@ export const {
 
 export {
   appendIncome,
+  appendNote,
   canPostpone,
   getCommission,
   postponePatch,

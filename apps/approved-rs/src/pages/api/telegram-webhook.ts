@@ -39,10 +39,12 @@ import {
   OWNER_IDS,
   ADMIN_IDS,
   EDIT_FIELD_LABELS,
+  escapeHtml,
   canAddIncome,
   type Role,
   type EditField,
 } from '@/lib/telegram';
+import { captureClient } from '@/lib/captureBot';
 import {
   getLead,
   setStatus,
@@ -64,6 +66,7 @@ import {
   readLeads,
   getCommission,
   appendIncome,
+  appendNote,
   type LeadStatus,
   type StoredLead,
 } from '@/lib/store';
@@ -537,6 +540,30 @@ async function handleEditCallback(
   });
 }
 
+async function handleReplyCallback(
+  id: number,
+  chatId: number,
+  cbId: string,
+): Promise<void> {
+  await withErrorAck(cbId, { id }, async () => {
+    const lead = await getLead(id);
+    if (!lead) {
+      await answerCallback(cbId).catch(() => {});
+      return;
+    }
+    const promptId = await sendForceReplyPrompt(
+      chatId,
+      '💬 Напишите ответ посетителю — бот отправит его в чат:',
+    );
+    await setPendingPrompt(id, {
+      chatId,
+      messageId: promptId,
+      kind: 'reply_visitor',
+    });
+    await answerCallback(cbId, 'Жду сообщение');
+  });
+}
+
 async function replyWithCard(
   chatId: number,
   lead: StoredLead,
@@ -579,6 +606,7 @@ async function handleCallbackQuery(
   const confirmPayMatch = /^confirmpay:(\d+)$/.exec(data);
   const rejectPayMatch = /^rejectpay:(\d+)$/.exec(data);
   const editMatch = /^edit:(\d+):(name|contact|comment)$/.exec(data);
+  const replyMatch = /^reply:(\d+)$/.exec(data);
   const listMatch =
     /^list:(new|negotiations|in_progress|won|lost|postponed|in_progress\+postponed)$/.exec(
       data,
@@ -743,6 +771,10 @@ async function handleCallbackQuery(
     );
     return;
   }
+  if (replyMatch) {
+    await handleReplyCallback(Number(replyMatch[1]), chatId, cb.id);
+    return;
+  }
   if (listMatch) {
     const leads = await readLeads();
     const statuses = listMatch[1].split('+') as LeadStatus[];
@@ -784,10 +816,6 @@ async function handleCallbackQuery(
   await answerCallback(cb.id).catch(() => {});
 }
 
-// A reply to one of our own force_reply prompts — deal amount, a field
-// edit, or a commission claim. This is the only free text the bot ever
-// acts on outside of /start and DM search, which is what keeps it safe to
-// ignore ordinary chatter (see the no-match fallthrough below).
 async function handlePromptReply(
   chatId: number,
   replyToMessageId: number,
@@ -864,9 +892,6 @@ async function handlePromptReply(
             )
           : {},
     );
-    // resolvePendingPrompt returns the lead as soon as the prompt correlates
-    // — even when `apply` no-op'd with {} — so truthiness alone can't tell
-    // "postponed" from "guard blocked it"; check the field the guard controls.
     if (updated?.status === 'postponed') {
       await ensureLeadCard(updated);
       await sendStatusChangeToAdmin(updated);
@@ -874,7 +899,41 @@ async function handlePromptReply(
     return;
   }
 
-  // edit_name / edit_contact / edit_comment
+  if (kind === 'reply_visitor') {
+    const reply = text.trim();
+    if (!reply) {
+      await sendMessage(
+        chatId,
+        '⚠️ Сообщение не может быть пустым. Попробуйте ещё раз.',
+      );
+      return;
+    }
+    try {
+      if (pending.telegramId == null) throw new Error('lead has no telegramId');
+      await captureClient.sendMessage(pending.telegramId, escapeHtml(reply));
+    } catch (err) {
+      console.error('[telegram-webhook] reply to visitor failed', {
+        id: pending.id,
+        error: err,
+      });
+      await sendMessage(
+        chatId,
+        '⚠️ Не доставлено: посетитель заблокировал бота или чат недоступен.',
+      );
+      return;
+    }
+    const updated = await resolvePendingPrompt(
+      chatId,
+      replyToMessageId,
+      (lead) => ({ comment: appendNote(lead.comment, `Ответ: ${reply}`) }),
+    );
+    if (updated) {
+      await ensureLeadCard(updated);
+      await replyWithCard(chatId, updated, '✅ Отправлено');
+    }
+    return;
+  }
+
   const field = kind.slice('edit_'.length) as EditField;
   const value = text.trim();
   if ((field === 'name' || field === 'contact') && !value) {

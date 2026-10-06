@@ -8,6 +8,7 @@ import {
   type CommissionInfo,
 } from '../money.ts';
 import { channelLabel } from '../channelLabels.ts';
+import { isTelegramIdContact } from '../contactShape.ts';
 import { LEADS_PATH } from '../quarantine.ts';
 import type { Income, LeadStatus, StoredLead } from '../schema.ts';
 import { MAX_LIST_ROWS, isPlaceholderContact, type OwedRow } from '../store.ts';
@@ -66,7 +67,7 @@ function statusLine(status: LeadStatus): string {
   return `<b>Статус: ${statusEmoji(status)} ${statusLabel(status)}</b>`;
 }
 
-function escapeHtml(s: string): string {
+export function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
@@ -662,6 +663,16 @@ export function createFormatter({
           { text: '✏️ Контакт', callback_data: `edit:${lead.id}:contact` },
           { text: '✏️ Комментарий', callback_data: `edit:${lead.id}:comment` },
         ],
+        ...(isTelegramIdContact(lead.contact)
+          ? [
+              [
+                {
+                  text: '💬 Ответить через бота',
+                  callback_data: `reply:${lead.id}`,
+                },
+              ],
+            ]
+          : []),
         ...(commission ? moneyActionRows(lead, role, commission) : []),
         [{ text: '🗑 Архивировать', callback_data: `arch:${lead.id}` }],
         ...deleteRow,
