@@ -1,7 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
-import { COUNTRY_SCOPED_SERVICE_SLUGS } from './utils/labels';
+import { SERVICE_SLUGS } from './utils/labels';
 
 const caseTranslation = z
   .object({ title: z.string(), body: z.string() })
@@ -25,7 +25,7 @@ const cases = defineCollection({
       year: z.coerce.number(),
       price: z.object({ value: z.string(), currency: z.string().optional() }),
       country: z.string(),
-      service: z.enum([...COUNTRY_SCOPED_SERVICE_SLUGS, 'vehicle-import']),
+      service: z.enum(SERVICE_SLUGS),
       image: image().optional(),
       gallery: z.array(image()).default([]),
       date: z.coerce.date(),
