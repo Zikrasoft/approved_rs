@@ -44,6 +44,23 @@ const uid = crypto.randomUUID().slice(0, 8);
 const telegramPanelId = `contact-panel-telegram-${uid}`;
 const phonePanelId = `contact-panel-phone-${uid}`;
 
+const channelTabs = [
+  {
+    tab: 'telegram',
+    panel: 'telegram',
+    label: lf.telegramTab,
+    Icon: TelegramIcon,
+  },
+  {
+    tab: 'whatsapp',
+    panel: 'phone',
+    label: lf.whatsappTab,
+    Icon: WhatsAppIcon,
+  },
+  { tab: 'viber', panel: 'phone', label: lf.viberTab, Icon: ViberIcon },
+  { tab: 'phone', panel: 'phone', label: lf.phoneTab, Icon: Phone },
+] as const;
+
 const fieldClass =
   'form-field py-3 rounded-sm text-sm outline-none bg-page border border-border-strong text-primary font-sans';
 ---
@@ -95,65 +112,29 @@ const fieldClass =
       </label>
 
       <div
-        class="contact-tabs relative flex gap-1 p-1 mb-2 rounded-sm bg-page border border-border-strong"
+        class="grid grid-cols-2 gap-1 p-1 mb-2 rounded-sm bg-page border border-border-strong"
         role="tablist"
       >
-        <button
-          type="button"
-          data-tab="telegram"
-          data-panel="telegram"
-          title={lf.telegramTab}
-          aria-label={lf.telegramTab}
-          class="pill-tab relative z-10 flex items-center justify-center flex-1 py-2 rounded-sm cursor-pointer"
-          role="tab"
-          aria-selected="true"
-          aria-controls={telegramPanelId}
-        >
-          <TelegramIcon size={16} />
-          <span class="pill-tab-label">{lf.telegramTab}</span>
-        </button>
-        <button
-          type="button"
-          data-tab="whatsapp"
-          data-panel="phone"
-          title={lf.whatsappTab}
-          aria-label={lf.whatsappTab}
-          class="pill-tab relative z-10 flex items-center justify-center flex-1 py-2 rounded-sm cursor-pointer"
-          role="tab"
-          aria-selected="false"
-          aria-controls={phonePanelId}
-        >
-          <WhatsAppIcon size={16} />
-          <span class="pill-tab-label">{lf.whatsappTab}</span>
-        </button>
-        <button
-          type="button"
-          data-tab="viber"
-          data-panel="phone"
-          title={lf.viberTab}
-          aria-label={lf.viberTab}
-          class="pill-tab relative z-10 flex items-center justify-center flex-1 py-2 rounded-sm cursor-pointer"
-          role="tab"
-          aria-selected="false"
-          aria-controls={phonePanelId}
-        >
-          <ViberIcon size={16} />
-          <span class="pill-tab-label">{lf.viberTab}</span>
-        </button>
-        <button
-          type="button"
-          data-tab="phone"
-          data-panel="phone"
-          title={lf.phoneTab}
-          aria-label={lf.phoneTab}
-          class="pill-tab relative z-10 flex items-center justify-center flex-1 py-2 rounded-sm cursor-pointer"
-          role="tab"
-          aria-selected="false"
-          aria-controls={phonePanelId}
-        >
-          <Phone size={15} />
-          <span class="pill-tab-label">{lf.phoneTab}</span>
-        </button>
+        {
+          channelTabs.map((tab) => (
+            <button
+              type="button"
+              data-tab={tab.tab}
+              data-panel={tab.panel}
+              title={tab.label}
+              aria-label={tab.label}
+              class="pill-tab flex min-w-0 items-center justify-center gap-2 rounded-sm px-2 py-2.5 text-[0.8125rem] font-medium text-muted cursor-pointer transition-colors duration-200 motion-reduce:transition-none hover:text-text-2 aria-selected:bg-surface-2 aria-selected:text-text aria-selected:shadow-[inset_0_-2px_0_var(--color-accent)]"
+              role="tab"
+              aria-selected={tab.tab === 'telegram' ? 'true' : 'false'}
+              aria-controls={
+                tab.panel === 'telegram' ? telegramPanelId : phonePanelId
+              }
+            >
+              <tab.Icon size={16} />
+              <span class="pill-tab-label truncate">{tab.label}</span>
+            </button>
+          ))
+        }
       </div>
 
       <div
@@ -167,6 +148,7 @@ const fieldClass =
           data-contact-telegram
           data-field="telegram"
           name="contact"
+          autocomplete="username"
           placeholder={lf.telegramPlaceholder}
           class={`${fieldClass} w-full px-4`}
         />
@@ -205,6 +187,8 @@ const fieldClass =
           </div>
           <input
             type="tel"
+            name="phone_number"
+            autocomplete="tel"
             data-contact-phone-number
             data-field="phone"
             inputmode="tel"
@@ -221,6 +205,7 @@ const fieldClass =
     <FormField
       name="name"
       field="name"
+      autocomplete="name"
       label={lf.nameLabel}
       placeholder={lf.namePlaceholder}
     />
@@ -568,54 +553,3 @@ const fieldClass =
     syncContact();
   }
 </script>
-
-<style>
-  /* Tabs size to their own content, so growing the active tab's label is what
-     animates every width in the row — no measuring, no JS. */
-  .contact-tabs :global(.pill-tab) {
-    flex: 1 1 auto;
-    min-width: 0;
-    color: var(--color-muted);
-    transition:
-      color 0.25s,
-      background-color 0.25s;
-  }
-
-  .contact-tabs :global(.pill-tab[aria-selected='true']) {
-    color: var(--color-text);
-    background-color: var(--color-surface-2);
-    /* inset, not a border: a real border would change the row's height */
-    box-shadow: inset 0 -2px 0 var(--color-accent);
-  }
-
-  .contact-tabs :global(.pill-tab:hover:not([aria-selected='true'])) {
-    color: var(--color-text-2);
-  }
-
-  .pill-tab-label {
-    max-width: 0;
-    margin-left: 0;
-    overflow: hidden;
-    opacity: 0;
-    white-space: nowrap;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    transition:
-      max-width 0.32s var(--ease-spring),
-      margin-left 0.32s var(--ease-spring),
-      opacity 0.2s ease-out;
-  }
-
-  :global(.pill-tab[aria-selected='true']) .pill-tab-label {
-    max-width: 6rem;
-    margin-left: 0.5rem;
-    opacity: 1;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .contact-tabs :global(.pill-tab),
-    .pill-tab-label {
-      transition: none;
-    }
-  }
-</style>
