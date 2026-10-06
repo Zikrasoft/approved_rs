@@ -137,15 +137,21 @@ export function createShopOrderHandler({
     if (stored && delivered) {
       return Response.json({ accepted: true }, { status: 202 });
     }
-    if (!stored) await releaseMarker(markers, order.orderId);
-    console.error(
-      stored
-        ? '[shop-order] the lead is stored but its card did not go out'
-        : delivered
+    const context = { orderId: order.orderId };
+    if (stored) {
+      console.error(
+        '[shop-order] the lead is stored but its card did not go out',
+        context,
+      );
+    } else {
+      await releaseMarker(markers, order.orderId);
+      console.error(
+        delivered
           ? '[shop-order] the card went out but nothing is stored, the marker is released and the retry will post a second card'
           : '[shop-order] nothing stored and no card, the marker is released for a retry',
-      { orderId: order.orderId },
-    );
+        context,
+      );
+    }
     return Response.json({ delivered: false }, { status: 502 });
   };
 }
