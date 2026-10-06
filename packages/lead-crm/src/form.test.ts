@@ -5,6 +5,7 @@ import {
   leadEnvelopeSchema,
   leadSubmissionSchema,
   sourceUrlSchema,
+  serviceSlugSchema,
   visitorIdSchema,
   MAX_COMMENT_LENGTH,
   MAX_FIELD_LENGTH,
@@ -13,6 +14,7 @@ import {
   PHONE_COUNTRIES,
   phoneCountryOptions,
 } from './form.ts';
+import { SERVICE_LABELS_RU, SERVICE_SLUGS_BY_BRAND } from '@podbor/brands';
 import { TRACKED_CONTACT_CHANNELS } from './contactChannel.ts';
 
 const VISITOR_ID = '9f1c2b7e-4a3d-4c9e-8b21-6f0d5a7c3e11';
@@ -26,7 +28,8 @@ function submit(fields: Record<string, string | string[]>) {
   return leadSubmissionSchema.safeParse(form);
 }
 
-const phone = (contact: string) => submit({ name: 'Иван', contact });
+const phone = (contact: string, service = '') =>
+  submit({ name: 'Иван', contact, service });
 
 describe('contactChannelSchema', () => {
   it('accepts every tracked channel', () => {
@@ -261,13 +264,12 @@ describe('leadSubmissionSchema', () => {
     const parsed = submit({
       name: 'Иван',
       contact: '+381641234567',
-      service: ['polishing', 'ceramic-coating', 'ppf'],
+      service: ['polishing-ceramic', 'paint-protection-film'],
     });
-    expect(parsed.data?.service).toBe('polishing');
+    expect(parsed.data?.service).toBe('polishing-ceramic');
     expect(parsed.data?.services).toEqual([
-      'polishing',
-      'ceramic-coating',
-      'ppf',
+      'polishing-ceramic',
+      'paint-protection-film',
     ]);
   });
 
@@ -275,11 +277,35 @@ describe('leadSubmissionSchema', () => {
     const parsed = submit({
       name: 'Иван',
       contact: '+381641234567',
-      service: ['', 'polishing'],
+      service: ['', 'polishing-ceramic'],
     });
-    expect(parsed.data?.service).toBe('polishing');
-    expect(parsed.data?.services).toEqual(['polishing']);
+    expect(parsed.data?.service).toBe('polishing-ceramic');
+    expect(parsed.data?.services).toEqual(['polishing-ceramic']);
   });
+
+  it.each(Object.entries(SERVICE_SLUGS_BY_BRAND))(
+    'accepts every %s slug the brand site posts',
+    (_brand, slugs) => {
+      slugs.forEach((slug) => {
+        const parsed = phone('+381641234567', slug);
+        expect(parsed.data?.service).toBe(slug);
+      });
+    },
+  );
+
+  it('accepts every labelled slug a page may post beside the brand lists', () => {
+    Object.keys(SERVICE_LABELS_RU).forEach((slug) => {
+      expect(serviceSlugSchema.safeParse(slug).success).toBe(true);
+    });
+  });
+
+  it.each(Object.keys(SERVICE_SLUGS_BY_BRAND))(
+    'rejects a service outside the enum on a %s form',
+    (brand) => {
+      const parsed = phone('+381641234567', `${brand}-no-such-service`);
+      expect(parsed.success).toBe(false);
+    },
+  );
 
   it('truncates the long fields to their own limits', () => {
     const parsed = submit({
@@ -308,22 +334,21 @@ describe('leadSubmissionSchema', () => {
     const parsed = submit({
       name: 'Иван',
       contact: '+381641234567',
-      service: Array.from({ length: 10_000 }, (_, i) => `service-${i}`),
+      service: Array.from({ length: 10_000 }, () => 'vehicle-sourcing'),
     });
     expect(parsed.success).toBe(true);
     expect(parsed.data?.services).toHaveLength(MAX_SERVICES);
-    expect(parsed.data?.service).toBe('service-0');
+    expect(parsed.data?.service).toBe('vehicle-sourcing');
   });
 
-  it('keeps the lead when the service list is not an array of text at all', () => {
+  it('rejects the lead when the service list is not an array of text at all', () => {
     const parsed = leadSubmissionSchema.safeParse({
       name: 'Иван',
       contact: '+381641234567',
       consent: 'on',
       service: [{ nope: true }],
     });
-    expect(parsed.success).toBe(true);
-    expect(parsed.data?.services).toEqual([]);
+    expect(parsed.success).toBe(false);
   });
 
   it('keeps the first value when the same field is submitted twice', () => {

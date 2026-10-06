@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SERVICE_LABELS_RU } from '@podbor/brands';
 import { TRACKED_CONTACT_CHANNELS } from './contactChannel.ts';
 import { isValidContact } from './phone.ts';
 import { HONEYPOT_FIELD, SERVICE_FIELD } from './fields.ts';
@@ -17,6 +18,8 @@ export const MAX_SERVICES = 20;
 export { HONEYPOT_FIELD, SERVICE_FIELD } from './fields.ts';
 
 export const contactChannelSchema = z.enum(TRACKED_CONTACT_CHANNELS);
+
+export const serviceSlugSchema = z.enum(Object.keys(SERVICE_LABELS_RU));
 
 const VISITOR_ID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
@@ -79,7 +82,7 @@ const submissionObject = z
       .union([contactChannelSchema, z.literal('')])
       .nullish()
       .transform((value) => value || null),
-    service: z.array(cappedText(MAX_FIELD_LENGTH)).catch([]).default([]),
+    service: z.array(z.union([serviceSlugSchema, z.literal('')])).default([]),
     // TODO: no form posts `car` since the CarLab field was folded into the comment;
     // drop this once cached pages from before that deploy can no longer submit.
     car: optionalText(MAX_FIELD_LENGTH),
