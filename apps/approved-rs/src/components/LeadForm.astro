@@ -48,17 +48,35 @@ const channelTabs = [
   {
     tab: 'telegram',
     panel: 'telegram',
+    panelId: telegramPanelId,
+    selected: true,
     label: lf.telegramTab,
     Icon: TelegramIcon,
   },
   {
     tab: 'whatsapp',
     panel: 'phone',
+    panelId: phonePanelId,
+    selected: false,
     label: lf.whatsappTab,
     Icon: WhatsAppIcon,
   },
-  { tab: 'viber', panel: 'phone', label: lf.viberTab, Icon: ViberIcon },
-  { tab: 'phone', panel: 'phone', label: lf.phoneTab, Icon: Phone },
+  {
+    tab: 'viber',
+    panel: 'phone',
+    panelId: phonePanelId,
+    selected: false,
+    label: lf.viberTab,
+    Icon: ViberIcon,
+  },
+  {
+    tab: 'phone',
+    panel: 'phone',
+    panelId: phonePanelId,
+    selected: false,
+    label: lf.phoneTab,
+    Icon: Phone,
+  },
 ] as const;
 
 const fieldClass =
@@ -125,10 +143,8 @@ const fieldClass =
               aria-label={tab.label}
               class="pill-tab flex min-w-0 items-center justify-center gap-2 rounded-sm px-2 py-2.5 text-[0.8125rem] font-medium text-muted cursor-pointer transition-colors duration-200 motion-reduce:transition-none hover:text-text-2 aria-selected:bg-surface-2 aria-selected:text-text aria-selected:shadow-[inset_0_-2px_0_var(--color-accent)]"
               role="tab"
-              aria-selected={tab.tab === 'telegram' ? 'true' : 'false'}
-              aria-controls={
-                tab.panel === 'telegram' ? telegramPanelId : phonePanelId
-              }
+              aria-selected={tab.selected ? 'true' : 'false'}
+              aria-controls={tab.panelId}
             >
               <tab.Icon size={16} />
               <span class="pill-tab-label truncate">{tab.label}</span>
