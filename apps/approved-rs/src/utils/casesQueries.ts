@@ -15,8 +15,6 @@ export const getPublishedCasesByService = async (
     )
   ).sort(byDateDesc);
 
-// One counts map for every /cases/ tab's badge number — a single pass over
-// each collection instead of a separate getCollection call per tab.
 export const getCasesTabCounts = async (): Promise<
   Record<ServiceSlug, number>
 > => {

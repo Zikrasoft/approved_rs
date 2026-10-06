@@ -17,7 +17,6 @@ import {
 } from '../schema.ts';
 import type { LeadStatus, StoredLead } from '../schema.ts';
 
-// Free functions — no per-business config, so they are imported directly.
 import {
   EDIT_COPY,
   statusLabel,
@@ -102,9 +101,6 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
   });
 }
 
-// Intl.NumberFormat('ru-RU') uses a non-breaking thousands separator that
-// isn't a plain U+0020 space — build expectations from the same formatter
-// instead of hardcoding a literal that looks right but silently isn't.
 function money(n: number): string {
   return `${new Intl.NumberFormat('ru-RU').format(n)} €`;
 }
@@ -638,10 +634,6 @@ describe('sendPostponeReminderToOwner', () => {
     expect(body.reply_markup.inline_keyboard[0][0].url).toContain('lead_9');
   });
 
-  // Only one OWNER_ID in this test env, so "every send failed" and "the
-  // only send failed" are the same case here — still the behavior that
-  // matters: don't silently succeed when nobody actually got the reminder,
-  // so the cron's catch block keeps the lead 'due' for a retry.
   it('throws when every owner send fails, so the cron keeps the lead due for retry', async () => {
     mockFetch.mockResolvedValue({
       ok: false,
