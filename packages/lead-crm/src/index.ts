@@ -44,6 +44,7 @@ export type { OrderMarkers } from './orderMarkers.ts';
 export {
   LOCAL_DATA_DIR,
   StorageConflictError,
+  storedRecords,
   type LeadStorage,
   type StorageSnapshot,
 } from './storage/types.ts';
