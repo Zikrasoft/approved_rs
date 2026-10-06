@@ -487,6 +487,9 @@ importers:
 
   packages/lead-crm:
     dependencies:
+      '@podbor/brands':
+        specifier: workspace:*
+        version: link:../brands
       date-fns:
         specifier: 4.4.0
         version: 4.4.0
@@ -497,9 +500,6 @@ importers:
         specifier: 4.5.4
         version: 4.5.4
     devDependencies:
-      '@podbor/brands':
-        specifier: workspace:*
-        version: link:../brands
       '@vercel/blob':
         specifier: 2.8.0
         version: 2.8.0
