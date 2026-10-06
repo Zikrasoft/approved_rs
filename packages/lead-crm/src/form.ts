@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SERVICE_LABELS_RU } from '@podbor/brands';
+import { SERVICE_LABELS_RU, type LabelledService } from '@podbor/brands';
 import { TRACKED_CONTACT_CHANNELS } from './contactChannel.ts';
 import { isValidContact } from './phone.ts';
 import { HONEYPOT_FIELD, SERVICE_FIELD } from './fields.ts';
@@ -19,7 +19,9 @@ export { HONEYPOT_FIELD, SERVICE_FIELD } from './fields.ts';
 
 export const contactChannelSchema = z.enum(TRACKED_CONTACT_CHANNELS);
 
-export const serviceSlugSchema = z.enum(Object.keys(SERVICE_LABELS_RU));
+export const serviceSlugSchema = z.enum(
+  Object.keys(SERVICE_LABELS_RU) as [LabelledService, ...LabelledService[]],
+);
 
 const VISITOR_ID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
