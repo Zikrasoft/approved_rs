@@ -10,19 +10,40 @@ import { PHONE_NUMBER } from '@/utils/constants';
 
 interface Props {
   class?: string;
-  placement?: Extract<ContactPlacement, 'bar' | 'thanks'>;
+  placement?: Extract<ContactPlacement, 'bar' | 'thanks' | 'hero'>;
+  tone?: 'card' | 'panel';
   service?: ServiceSlug;
 }
 
-const { class: className = '', placement = 'bar', service } = Astro.props;
+const {
+  class: className = '',
+  placement = 'bar',
+  tone = 'card',
+  service,
+} = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
 
-const channels = contactChannels(site, locale, service);
+const hero = placement === 'hero';
+const channels = contactChannels(site, locale, service).filter(
+  (channel) => !hero || channel.track !== 'viber',
+);
+
+const list = hero
+  ? 'grid grid-cols-3 gap-2 pointer-fine:grid-cols-2 sm:flex sm:flex-wrap'
+  : 'grid gap-2 sm:grid-cols-2';
+const tile = hero
+  ? 'min-h-11 justify-center gap-1.5 px-1.5 py-2.5 sm:gap-2 sm:px-5'
+  : 'min-h-11 gap-3 px-4 py-3';
+const surface =
+  tone === 'panel'
+    ? 'border-panel-line text-white hover:border-panel-line-strong hover:bg-panel-2'
+    : 'border-line bg-card text-ink hover:border-ink';
+const iconTone = tone === 'panel' ? 'text-panel-ink' : 'text-muted';
 ---
 
 <ul
-  class={`grid gap-2 sm:grid-cols-2 ${className}`}
+  class={`${list} ${className}`}
   data-contact-cta
   data-contact-order
   {...contactPlacement(placement)}
@@ -42,16 +63,25 @@ const channels = contactChannels(site, locale, service);
           data-contact-channel={channel.track}
           rel="noopener"
           class:list={[
-            'group flex min-h-11 items-center gap-3 rounded-control border border-line bg-card px-4 py-3 transition-colors duration-150 hover:border-ink',
+            'group flex items-center rounded-control border transition-colors duration-150',
+            tile,
+            surface,
             channel.track === 'phone' && 'pointer-fine:hidden!',
           ]}
         >
           <Icon
             name={channel.icon}
-            size={18}
-            class="shrink-0 text-muted transition-colors duration-150 group-hover:text-signal group-focus-visible:text-signal"
+            size={hero ? 16 : 18}
+            class={`shrink-0 transition-colors duration-150 group-hover:text-signal group-focus-visible:text-signal ${iconTone}`}
           />
-          <span class="spec text-sm text-ink">{channel.label}</span>
+          <span
+            class:list={[
+              'spec whitespace-nowrap',
+              hero ? 'text-xs sm:text-[0.8125rem]' : 'text-sm',
+            ]}
+          >
+            {channel.label}
+          </span>
         </a>
         {channel.track === 'phone' && placement === 'thanks' && (
           <span class="flex min-h-11 items-center gap-3 rounded-control border border-line bg-card px-4 py-3 pointer-coarse:hidden!">
