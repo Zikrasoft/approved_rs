@@ -9,12 +9,12 @@ export const OPENAI_MAX_RETRIES = 1;
 const translationSchema = z.record(z.string(), z.string());
 
 export class TranslateResponseError extends Error {
-  constructor(
-    readonly chunk: string,
-    detail: string,
-  ) {
+  readonly chunk: string;
+
+  constructor(chunk: string, detail: string) {
     super(`translate response for "${chunk}" is malformed: ${detail}`);
     this.name = 'TranslateResponseError';
+    this.chunk = chunk;
   }
 }
 
