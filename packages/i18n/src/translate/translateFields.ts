@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import { assertSafeTranslation } from './assertSafeTranslation.ts';
 import { callOpenAiJson } from './openaiChat.ts';
 
@@ -11,8 +10,6 @@ export interface TranslateFieldsOptions<L extends string> {
   apiKey: string;
   model?: string;
 }
-
-const answerSchema = z.record(z.string(), z.unknown());
 
 export function fieldsPrompt(
   language: string,
@@ -45,23 +42,23 @@ export async function translateFields<L extends string>(
   const entries = await Promise.all(
     targetLocales.map(async (locale) => {
       if (keys.length === 0) return [locale, {}] as const;
-      const answer = answerSchema.parse(
-        await callOpenAiJson({
-          apiKey,
-          model,
-          systemPrompt: fieldsPrompt(
-            languageName[locale],
-            businessDescription,
-            subject,
-          ),
-          userContent: JSON.stringify(fields),
-        }),
-      );
-      assertSafeTranslation(fields, answer, `${subject}.${locale}`);
-      const translated = z
-        .record(z.string(), z.string())
-        .parse(Object.fromEntries(keys.map((key) => [key, answer[key]])));
-      return [locale, translated] as const;
+      const chunk = `${subject}.${locale}`;
+      const answer = await callOpenAiJson({
+        apiKey,
+        model,
+        systemPrompt: fieldsPrompt(
+          languageName[locale],
+          businessDescription,
+          subject,
+        ),
+        userContent: JSON.stringify(fields),
+        chunk,
+      });
+      assertSafeTranslation(fields, answer, chunk);
+      return [
+        locale,
+        Object.fromEntries(keys.map((key) => [key, answer[key]])),
+      ] as const;
     }),
   );
   return Object.fromEntries(entries) as Record<L, Record<string, string>>;

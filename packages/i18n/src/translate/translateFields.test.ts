@@ -78,7 +78,11 @@ describe('translateFields', () => {
       { title: '<script>x</script>', description: 'Opis' },
       /HTML/,
     ],
-    ['a non-string value', { title: 1, description: 'Opis' }, /missing/],
+    [
+      'a non-string value',
+      { title: 1, description: 'Opis' },
+      /expected string/,
+    ],
     ['a non-object answer', ['Akumulator'], /expected record/i],
   ])('rejects %s', async (_label, answer, message) => {
     stubOpenAiResponse(answer);
