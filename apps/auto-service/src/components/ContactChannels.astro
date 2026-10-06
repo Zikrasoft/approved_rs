@@ -5,6 +5,7 @@ import { getSiteContent } from '@/i18n/content/site';
 import { contactChannels } from '@/utils/contactLinks';
 import type { ServiceSlug } from '@/utils/services';
 import { contactPlacement, type ContactPlacement } from '@podbor/site-kit';
+import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 import { formatPhone } from '@podbor/site-kit/format-phone';
 import { PHONE_NUMBER } from '@/utils/constants';
 
@@ -25,7 +26,7 @@ const locale = localeFrom(Astro.url.pathname);
 const site = getSiteContent(locale);
 
 type Variant = {
-  channels: readonly ReturnType<typeof contactChannels>[number]['track'][];
+  channels: readonly TrackedContactChannel[];
   list: string;
   tile: string;
   iconSize: number;
