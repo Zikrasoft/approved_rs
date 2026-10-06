@@ -25,8 +25,6 @@ export const SLUG = {
   INSPECTION: 'vehicle-inspection',
 } as const satisfies Record<string, ServiceSlug>;
 
-export type CasesTabKind = ServiceSlug;
-
 export const SERVICES: { slug: CountryScopedServiceSlug }[] =
   COUNTRY_SCOPED_SERVICE_SLUGS.map((slug) => ({ slug }));
 

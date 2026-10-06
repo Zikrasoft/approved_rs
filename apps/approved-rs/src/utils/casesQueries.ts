@@ -1,6 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
-import type { CasesTabKind } from './labels';
+import type { ServiceSlug } from './labels';
 
 const byDateDesc = (a: CollectionEntry<'cases'>, b: CollectionEntry<'cases'>) =>
   b.data.date.getTime() - a.data.date.getTime();
@@ -18,10 +18,10 @@ export const getPublishedCasesByService = async (
 // One counts map for every /cases/ tab's badge number — a single pass over
 // each collection instead of a separate getCollection call per tab.
 export const getCasesTabCounts = async (): Promise<
-  Record<CasesTabKind, number>
+  Record<ServiceSlug, number>
 > => {
   const cases = await getCollection('cases', (c) => c.data.published);
-  const counts: Record<CasesTabKind, number> = {
+  const counts: Record<ServiceSlug, number> = {
     'vehicle-sourcing': 0,
     'vehicle-buyback': 0,
     'vehicle-inspection': 0,
