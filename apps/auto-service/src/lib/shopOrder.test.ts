@@ -125,22 +125,29 @@ describe('shop order receiver', () => {
     expect(notifyLead).toHaveBeenCalledTimes(1);
   });
 
-  it('releases the marker when nothing was stored, so the retry stores one row and posts the card', async () => {
-    notifyLead.mockResolvedValueOnce(outcome(false, false));
+  it.each([
+    ['no card went out', false],
+    ['the card went out', true],
+  ])(
+    'releases the marker and asks for a retry when nothing was stored and %s',
+    async (_label, delivered) => {
+      notifyLead.mockResolvedValueOnce(outcome(false, delivered));
 
-    const first = await handler()(signed(ORDER));
-    expect(first.status).toBe(502);
-    expect(markers.seen.has('order_01')).toBe(false);
+      const first = await handler()(signed(ORDER));
+      expect(first.status).toBe(502);
+      expect(await first.json()).toEqual({ delivered: false });
+      expect(markers.seen.has('order_01')).toBe(false);
 
-    const retry = await handler()(signed(ORDER));
-    expect(retry.status).toBe(202);
-    expect(notifyLead).toHaveBeenCalledTimes(2);
-    expect(markers.seen.has('order_01')).toBe(true);
+      const retry = await handler()(signed(ORDER));
+      expect(retry.status).toBe(202);
+      expect(notifyLead).toHaveBeenCalledTimes(2);
+      expect(markers.seen.has('order_01')).toBe(true);
 
-    const third = await handler()(signed(ORDER));
-    expect(third.status).toBe(200);
-    expect(notifyLead).toHaveBeenCalledTimes(2);
-  });
+      const third = await handler()(signed(ORDER));
+      expect(third.status).toBe(200);
+      expect(notifyLead).toHaveBeenCalledTimes(2);
+    },
+  );
 
   it('still answers 502 when the marker could not be released', async () => {
     notifyLead.mockResolvedValueOnce(outcome(false, false));
