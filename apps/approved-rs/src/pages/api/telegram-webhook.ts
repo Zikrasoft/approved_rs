@@ -99,10 +99,6 @@ type TelegramUpdate = z.infer<typeof updateSchema>;
 
 const ACK = new Response(null, { status: 200 });
 
-// Telegram redelivers an update if our response takes too long — module-scope
-// state survives across invocations on the same warm instance, so a
-// redelivery landing there gets caught instead of writing to the leads blob
-// twice and racing itself for no reason.
 const SEEN_UPDATE_IDS_MAX = 500;
 const seenUpdateIds = new Set<number>();
 const seenUpdateIdsOrder: number[] = [];
@@ -142,9 +138,6 @@ function parseAmount(text: string, allowZero = false): number | null {
     : null;
 }
 
-// ДД.ММ.ГГГГ -> ISO 'YYYY-MM-DD', rejecting impossible calendar dates
-// (date-fns' `parse` marks 31.02 etc. invalid rather than rolling over) and
-// any date before today — a reminder for the past makes no sense.
 function parseReminderDate(text: string): string | null {
   const parsed = parse(text.trim(), 'dd.MM.yyyy', new Date());
   if (!isValid(parsed) || isBefore(parsed, startOfDay(new Date()))) return null;
@@ -155,8 +148,6 @@ function quickRemindDate(days: number): string {
   return format(addDays(new Date(), days), 'yyyy-MM-dd');
 }
 
-// Every mutation touches two surfaces — the group teaser and whichever DM
-// message the callback fired on — from one fresh StoredLead.
 async function refreshBothSurfaces(
   updated: StoredLead | undefined,
   chatId: number,
@@ -168,10 +159,6 @@ async function refreshBothSurfaces(
   await editLeadDetailMessage(chatId, messageId, updated, role);
 }
 
-// Every mutating callback needs the same shape: try the action, and if it
-// throws, still ack with an error so the tapped button stops spinning
-// instead of hanging forever (the outer POST catch only logs, it never
-// acks). One place instead of duplicating try/catch per handler.
 async function withErrorAck(
   cbId: string,
   logCtx: Record<string, unknown>,
@@ -188,8 +175,6 @@ async function withErrorAck(
   }
 }
 
-// Shared role gate for the handful of owner-only/admin-only callbacks —
-// acks-and-rejects on mismatch, same as every other "not allowed" path.
 async function requireRole(
   role: Role,
   needed: Role,
@@ -273,8 +258,6 @@ async function handleUnarchiveCallback(
   });
 }
 
-// Tapping "⏰ Отложить" opens the picker (quick presets / calendar / type it)
-// in place of the lead card, rather than jumping straight to a text prompt.
 async function handlePostponeCallback(
   id: number,
   chatId: number,
@@ -803,8 +786,6 @@ async function handleCallbackQuery(
     return;
   }
   if (data === 'menu:debt') {
-    // Both roles see this — whoever's asking, it's the same "who still
-    // owes/is owed commission" list, just framed differently in the text.
     const { rows, total } = await getOwedSummary();
     const { text, reply_markup } = buildOwedList(rows, total);
     await sendMessage(chatId, text, { reply_markup });
@@ -817,7 +798,6 @@ async function handleCallbackQuery(
     await answerCallback(cb.id).catch(() => {});
     return;
   }
-  // Unrecognized/invalid callback — still ack so the button stops spinning.
   await answerCallback(cb.id).catch(() => {});
 }
 
@@ -1004,9 +984,6 @@ async function handlePrivateMessage(msg: TelegramMessage): Promise<void> {
     return;
   }
 
-  // Plain DM text, not /start, not a prompt reply (that's handled earlier
-  // in POST, before chat-type is even checked) — there's nothing else it
-  // could mean, so treat it as a search query.
   const results = await searchLeads(text);
   const { text: resultsText, reply_markup } = buildSearchResults(results);
   await sendMessage(chatId, resultsText, { reply_markup });

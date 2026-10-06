@@ -282,9 +282,6 @@ const fieldClass =
   import { markFieldValidity } from '@podbor/site-kit/browser';
   import { getOrCreateVisitorId } from '@/utils/visitorId';
 
-  // A page can have more than one LeadForm instance (e.g. a page-level form
-  // plus the header's "Оставить заявку" modal) — Astro only emits this
-  // <script> once per page regardless, so it must initialize every card.
   function initAllLeadForms() {
     document
       .querySelectorAll<HTMLElement>('.lead-form-card')
@@ -333,7 +330,6 @@ const fieldClass =
       if (err) err.remove();
     }
 
-    // ── Contact switcher (Telegram / Phone) ──
     const contactField = form.querySelector('.contact-field')!;
     const tabs = contactField.querySelectorAll<HTMLButtonElement>('.pill-tab');
     const panels = contactField.querySelectorAll<HTMLElement>('.contact-panel');
@@ -369,9 +365,6 @@ const fieldClass =
 
     tgInput.removeAttribute('name');
 
-    // WhatsApp/Viber/phone-call all collect the same shape of data (a phone
-    // number) — they share the "phone" panel and its validation, and only
-    // differ in which channel gets recorded for staff to reach back out on.
     const PANEL_FOR: Record<TrackedContactChannel, 'telegram' | 'phone'> = {
       telegram: 'telegram',
       whatsapp: 'phone',
@@ -395,8 +388,7 @@ const fieldClass =
           );
       });
 
-    // ponytail: re-mask from raw digits on every keystroke instead of a
-    // caret-aware stateful mask — simpler, good enough for a lead form.
+    // TODO: re-masks from raw digits on every keystroke; a caret-aware mask if the caret jump bites.
     function formatPhone() {
       const kit = phoneKit();
       if (!kit) return;
@@ -421,11 +413,6 @@ const fieldClass =
       );
     }
 
-    // Shared by the click handler below and the region-based auto-select
-    // right after it — same tab-activation work either way, only whether
-    // focus jumps into the newly-shown field differs (auto-selecting on
-    // page load shouldn't steal focus or pop the mobile keyboard the way a
-    // real click should).
     function selectTab(tab: HTMLButtonElement, focusField: boolean) {
       activeTab = isTrackedContactChannel(tab.dataset.tab)
         ? tab.dataset.tab
@@ -480,9 +467,6 @@ const fieldClass =
       syncContact();
     });
     phoneCountry.addEventListener('change', (event) => {
-      // if the field holds international "+..." text, the user picking a
-      // different country is overriding the auto-detect — drop the stale
-      // text instead of silently re-showing a number for the old country.
       if (phoneNumber.value.trim().startsWith('+')) phoneNumber.value = '';
       formatPhone();
       syncContact();
@@ -493,9 +477,6 @@ const fieldClass =
       'focusin',
       () => {
         expandCountries().then(() => {
-          // Re-masking would rewrite the field and drop the caret to the end,
-          // and on the slow connection this lazy load exists for the visitor
-          // is already typing by now.
           if (phoneNumber !== document.activeElement) formatPhone();
           syncContact();
         });
@@ -509,8 +490,6 @@ const fieldClass =
         return;
       }
       const kit = phoneKit();
-      // Read at send time, not at init: a visitor who refuses after the page
-      // renders would otherwise still post the id baked into the field.
       if (visitorIdInput) visitorIdInput.value = getOrCreateVisitorId();
 
       const isTelegram = activeTab === 'telegram';

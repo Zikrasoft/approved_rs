@@ -50,16 +50,11 @@ const countries = getActiveCountries();
 const schema = generateOrganizationSchema({
   url: SITE_URL,
   description: meta.description,
-  // Autopodbor's own markets plus China — vehicle-import sources cars from there
-  // too, even though it's not a countries.json market in its own right.
   areaServed: [...countries.map((c) => c[locale].name), CHINA_NAME[locale]],
   sameAs: SOCIAL_SAME_AS,
   contactUrl: TELEGRAM_BOT_URL,
 });
 
-// One connected story instead of a flat service list — each stop is a real
-// page, but the copy makes clear this is one journey (and where you can
-// jump in if you're not starting from zero).
 const journey = [
   {
     href: PathBuilder.vehicleSourcingHub(locale),
@@ -99,8 +94,6 @@ const euSources = EU_SPOKE_COUNTRIES.flatMap((code) => {
     : [];
 });
 
-// Every country we work in, with the cases already closed there — the count is
-// derived, so a new case changes the number without anyone editing copy.
 const geoCells = countries.map((country) => ({
   href: PathBuilder.service(locale, 'vehicle-sourcing', country.code),
   name: country[locale].name,

@@ -24,8 +24,6 @@ const env = readPublicEnv(import.meta.env);
 export const SITE_URL = env.SITE;
 export const SITE_NAME = BRAND.name;
 
-// Bump when the cookie/privacy policy changes materially — every visitor is
-// then asked again instead of carrying an answer given to the old text.
 export const COOKIE_POLICY_VERSION = '2026-09-21';
 export const SITE_BRAND = 'APPROVED';
 export const SITE_TLD = '.rs';
@@ -44,10 +42,6 @@ export const SOCIAL_SAME_AS = [
   `https://www.threads.com/@${THREADS_CHANNEL}`,
 ];
 
-// China isn't in countries.json (no vehicle sourcing market there, no per-country
-// name-case data needed) but vehicle-import sources cars from it — one shared name
-// constant instead of the same inline locale map duplicated in every place
-// that needs to mention it (schema areaServed on 2+ vehicle-import pages).
 export const CHINA_NAME: Record<Locale, string> = {
   ru: 'Китай',
   en: 'China',
@@ -55,14 +49,6 @@ export const CHINA_NAME: Record<Locale, string> = {
   es: 'China',
   de: 'China',
 };
-// Not in countries.json (see above) — used as the `country` value on
-// vehicle-import cases sourced from China, so the china spoke page can filter
-// for them the same way de/eu do.
 export const CHINA_COUNTRY_CODE = 'cn';
 
-// Explicit, not "every active country except rs/de" — countries.json's
-// active list can grow for reasons that have nothing to do with where
-// vehicle-import sources cars from (e.g. Portugal, added as a destination-only
-// vehicle sourcing market). Deriving this by exclusion would silently claim new
-// destination-only countries as EU sourcing markets too.
 export const VEHICLE_IMPORT_EU_SOURCE_CODES = ['es', 'ch'] as const;

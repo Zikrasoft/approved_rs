@@ -83,8 +83,7 @@ const submissionObject = z
       .nullish()
       .transform((value) => value || null),
     service: z.array(z.union([serviceSlugSchema, z.literal('')])).default([]),
-    // TODO: no form posts `car` since the CarLab field was folded into the comment;
-    // drop this once cached pages from before that deploy can no longer submit.
+    // TODO: no form posts `car` since the CarLab field was folded into the comment; drop it once pre-deploy cached pages can no longer submit.
     car: optionalText(MAX_FIELD_LENGTH),
     comment: optionalText(MAX_COMMENT_LENGTH),
     country: optionalText(MAX_FIELD_LENGTH),

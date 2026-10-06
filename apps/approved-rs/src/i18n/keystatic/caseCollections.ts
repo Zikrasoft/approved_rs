@@ -12,17 +12,8 @@ export const casesCollection = collection({
   label: 'Кейсы автоподбора',
   slugField: 'title',
   path: `${APP_ROOT}src/content/cases/*/`,
-  // "Preview" button in the entry editor — points at the multi-photo
-  // upload prototype (src/pages/admin/case-photos.astro), preselected to
-  // this exact case, since Keystatic's own gallery field only accepts
-  // one photo at a time (see caseImage() above).
   previewUrl: '/admin/case-photos?dir=src/content/cases&slug={slug}',
   format: { contentField: 'content' },
-  // Plain stacked form, full width for every field: the ru `content`
-  // body is still a real rich-text field and gets squeezed into the
-  // narrow metadata sidebar under Keystatic's default 'content' layout.
-  // Fields stay top-level (content.config.ts's schema and every reader
-  // of c.data.* expects that shape).
   schema: {
     title: fields.slug({
       name: { label: 'Заголовок', validation: { isRequired: true } },
@@ -66,9 +57,6 @@ export const casesCollection = collection({
         { label: 'Франция', value: 'fr' },
         { label: 'Италия', value: 'it' },
         { label: 'Польша', value: 'pl' },
-        // Not a real sourcing/delivery country in countries.json — used
-        // only to tag vehicle-import cases sourced from China so the
-        // /vehicle-import/china/ page can filter for them.
         { label: 'Китай', value: 'cn' },
       ],
       defaultValue: 'de',

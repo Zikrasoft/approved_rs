@@ -36,30 +36,17 @@ interface Props {
   ctaLabel?: string;
   formService: string;
   currentCountry: string;
-  // The "deal identity" shown in the hero watermark and sent as the lead's
-  // country field — defaults to currentCountry, but vehicle-import pages need to
-  // diverge: currentCountry stays a real country code (so the "other
-  // services" cross-links below still resolve to a valid /vehicle-sourcing/{cc}/
-  // etc.), while leadCountry carries the actual corridor ('de'/'eu'/'china')
-  // so sales sees the right source in the Telegram notification instead of
-  // a misleading "RS" on every vehicle-import lead.
   leadCountry?: string;
   currentService: ServiceSlug;
   cases?: CollectionEntry<'cases'>[];
   casesHeading?: string;
   city?: string;
-  // Passed straight through to LeadForm — see its own prop doc. Left
-  // undefined for pages happy with LeadForm's sourcing-flavored default.
   commentLabel?: string;
   commentPlaceholder?: string;
   showCountryCrossLinks?: boolean;
   breadcrumbs?: { label: string; href?: string }[];
-  // Present on the four service hubs, absent on the country/city pages —
-  // they keep the ghost country code as their own identity instead.
   image?: ImageMetadata;
   imageAlt?: string;
-  // Closing band copy. Its photograph, stats and alt text are the same brand
-  // assets the homepage closes on, so only the words travel per service.
   closing?: {
     eyebrow: string;
     line1: string;
