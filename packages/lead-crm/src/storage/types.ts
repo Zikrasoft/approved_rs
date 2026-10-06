@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const LOCAL_DATA_DIR = '.local-data';
 
-export const storedRecords = z.array(z.unknown());
+export const storedRecordsSchema = z.array(z.unknown());
 
 export class StorageConflictError extends Error {
   constructor(message = 'storage write conflict') {

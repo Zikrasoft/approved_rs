@@ -21,7 +21,7 @@ import type {
 import type { StoredLeadSchema } from './schema.ts';
 import {
   StorageConflictError,
-  storedRecords,
+  storedRecordsSchema,
   type LeadStorage,
 } from './storage/types.ts';
 
@@ -172,7 +172,7 @@ export function createLeadStore({
   }> {
     const { raw, version } = await storage.read();
     if (raw === undefined) return { leads: [], unreadable: [], version };
-    const records = storedRecords.safeParse(raw);
+    const records = storedRecordsSchema.safeParse(raw);
     if (!records.success) {
       throw new Error(
         `[lead-crm] stored leads are ${typeof raw}, not an array — refusing to overwrite`,

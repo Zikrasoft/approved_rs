@@ -1,4 +1,4 @@
-import { storedRecords, type LeadStorage } from './storage/types.ts';
+import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
 
 export const LEADS_PATH = 'data/leads.json';
 export const QUARANTINE_PATH = 'data/leads-unreadable.json';
@@ -24,7 +24,7 @@ export function createQuarantine({
 }: QuarantineOptions) {
   return async function quarantine(entries: unknown[]): Promise<void> {
     const { raw, version } = await storage.read();
-    const records = storedRecords.safeParse(raw ?? []);
+    const records = storedRecordsSchema.safeParse(raw ?? []);
     if (!records.success) {
       throw new Error(
         `[lead-crm] the quarantine file is ${typeof raw}, not an array — refusing to overwrite`,

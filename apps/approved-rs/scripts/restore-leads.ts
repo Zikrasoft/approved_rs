@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { LEADS_PATH, storedRecords } from '@podbor/lead-crm';
+import { LEADS_PATH, storedRecordsSchema } from '@podbor/lead-crm';
 import { createVercelBlobStorage } from '@podbor/lead-crm/storage/vercel-blob';
 import { z } from 'zod';
 
@@ -32,7 +32,7 @@ if (!env.success) {
 }
 
 const file = resolve(process.cwd(), path);
-const records = storedRecords.safeParse(
+const records = storedRecordsSchema.safeParse(
   JSON.parse(await readFile(file, 'utf8')),
 );
 
@@ -43,7 +43,7 @@ if (!records.success) {
 
 const storage = createVercelBlobStorage({ path: LEADS_PATH });
 const { raw, version } = await storage.read();
-const live = storedRecords.safeParse(raw);
+const live = storedRecordsSchema.safeParse(raw);
 
 console.log(`Backup:    ${file} — ${records.data.length} record(s)`);
 console.log(
