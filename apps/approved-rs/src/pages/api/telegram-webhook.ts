@@ -509,9 +509,11 @@ async function startPrompt(
   id: number,
   chatId: number,
   cbId: string,
-  promptText: string,
-  kind: PendingPrompt['kind'],
-  ack: string,
+  {
+    prompt,
+    kind,
+    ack,
+  }: { prompt: string; kind: PendingPrompt['kind']; ack: string },
 ): Promise<void> {
   await withErrorAck(cbId, { id, kind }, async () => {
     const lead = await getLead(id);
@@ -519,7 +521,7 @@ async function startPrompt(
       await answerCallback(cbId).catch(() => {});
       return;
     }
-    const promptId = await sendForceReplyPrompt(chatId, promptText);
+    const promptId = await sendForceReplyPrompt(chatId, prompt);
     await setPendingPrompt(id, { chatId, messageId: promptId, kind });
     await answerCallback(cbId, ack);
   });
@@ -531,14 +533,11 @@ function handleEditCallback(
   chatId: number,
   cbId: string,
 ): Promise<void> {
-  return startPrompt(
-    id,
-    chatId,
-    cbId,
-    EDIT_COPY.prompt(field),
-    `edit_${field}`,
-    EDIT_COPY.ack,
-  );
+  return startPrompt(id, chatId, cbId, {
+    prompt: EDIT_COPY.prompt(field),
+    kind: `edit_${field}`,
+    ack: EDIT_COPY.ack,
+  });
 }
 
 function handleReplyCallback(
@@ -546,14 +545,11 @@ function handleReplyCallback(
   chatId: number,
   cbId: string,
 ): Promise<void> {
-  return startPrompt(
-    id,
-    chatId,
-    cbId,
-    REPLY_COPY.prompt,
-    'reply_visitor',
-    REPLY_COPY.ack,
-  );
+  return startPrompt(id, chatId, cbId, {
+    prompt: REPLY_COPY.prompt,
+    kind: 'reply_visitor',
+    ack: REPLY_COPY.ack,
+  });
 }
 
 async function replyWithCard(
