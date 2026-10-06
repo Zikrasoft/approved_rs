@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { createPublicEnvSchema } from './publicEnv.ts';
+import { createPublicEnvSchema, withMessengerFallback } from './publicEnv.ts';
 
-const schema = createPublicEnvSchema({ siteDefault: 'https://example.rs' });
+const schema = createPublicEnvSchema({
+  siteDefault: 'https://example.rs',
+}).transform(withMessengerFallback);
 const VALID = { PUBLIC_PHONE_NUMBER: '381601234567' };
 
 describe('createPublicEnvSchema', () => {
@@ -39,10 +41,11 @@ describe('createPublicEnvSchema', () => {
   it('carries the extra fields an app adds through the fallback', () => {
     const extended = createPublicEnvSchema({
       siteDefault: 'https://example.rs',
-      extra: { PUBLIC_INSTAGRAM: z.string().min(1).default('placeholder') },
-    });
-    const env = extended.parse(VALID);
-    expect(env.PUBLIC_INSTAGRAM).toBe('placeholder');
+    })
+      .extend({ PUBLIC_INSTAGRAM: z.string().min(1).optional() })
+      .transform(withMessengerFallback);
+    const env = extended.parse({ ...VALID, PUBLIC_INSTAGRAM: 'handle' });
+    expect(env.PUBLIC_INSTAGRAM).toBe('handle');
     expect(env.PUBLIC_VIBER_NUMBER).toBe('381601234567');
   });
 });

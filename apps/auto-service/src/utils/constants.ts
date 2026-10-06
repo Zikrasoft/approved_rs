@@ -1,12 +1,15 @@
 import { CARLAB, WORKSHOP_ADDRESS } from '@podbor/brands';
 import { telegramBotLink } from '@podbor/site-kit/contact-links';
-import { createPublicEnvSchema } from '@podbor/site-kit/public-env';
+import {
+  createPublicEnvSchema,
+  withMessengerFallback,
+} from '@podbor/site-kit/public-env';
 
 export const BRAND = CARLAB;
 
 const publicEnvSchema = createPublicEnvSchema({
   siteDefault: BRAND.url,
-});
+}).transform(withMessengerFallback);
 
 export function readPublicEnv(env: Record<string, unknown>) {
   return publicEnvSchema.parse(env);
