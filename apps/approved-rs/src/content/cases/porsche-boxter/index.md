@@ -20,19 +20,19 @@ translations:
   sr:
     title: Porsche Boxster
     body: |-
-      ## Autoizbor Porsche Boxster u Nemačkoj
+      ## Auto-podbor Porsche Boxster u Nemačkoj
 
-      Vladimir, koji već duže vreme živi u Nemačkoj, obratio nam se sa zahtevom da pronađemo i odaberemo Porsche Boxster u odličnom stanju.
+      Obratio nam se Vladimir, koji već dugo živi u Nemačkoj, sa zadatkom da pronađemo i odaberemo za njega Porsche Boxster u odličnom stanju.
 
-      Zajedno sa Vladimirom, definisali smo osnovne zahteve za automobil i započeli pretragu odgovarajućih opcija. Kao rezultat, izabrali smo **tri Porsche Boxster** koja smo pregledali u različitim salonima i gradovima Nemačke.
+      Zajedno sa Vladimirom smo definisali osnovne zahteve za automobil i započeli pretragu odgovarajućih opcija. Na kraju, izabrano je **tri Porsche Boxster** koja smo pregledali u različitim salonima i gradovima Nemačke.
 
-      Svaki automobil je prošao detaljnu proveru pre kupovine. Procjenjivali smo tehničko stanje, limariju, lakiranje, enterijer, opremu, stanje motora i menjača, kao i proveravali istoriju automobila i usklađenost navedenog stanja sa stvarnim.
+      Svako vozilo je prošlo detaljnu provere auta pre kupovine. Ocenjivali smo tehničko stanje, karoseriju, farbu, enterijer, opremu, stanje motora i menjača, kao i proveravali istoriju automobila i usklađenost navedenog stanja sa stvarnim. 
 
-      Glavni cilj autoizbora je da pronađemo Porsche Boxster koji zaista vrednuje svoj novac i ispunjava zahteve klijenta.
+      Glavni cilj auto-podbora je pronaći Porsche Boxster koji zaista vredi svojih para i odgovara zahtevima klijenta.
 
-      Važno je razumeti da su troškovi autoizbora automobila u Nemačkoj veći nego slične usluge u Srbiji. To je zbog viših troškova rada stručnjaka, većih razdaljina između gradova i potrebe da se ide na preglede automobila u različitim regionima Nemačke.
+      Važno je razumeti da su troškovi auto-podbora u Nemačkoj viši nego slične usluge u Srbiji. To je posledica viših troškova rada stručnjaka, velikih razdaljina između gradova i potrebe da se izlazi na provere automobila u različite regione Nemačke.
 
-      Na kraju, Vladimir je izabrao automobil koji mu je u potpunosti odgovarao. Automobil mu se dopao kako po stanju, tako i po opremi, a najvažnije je da nakon naše provere nije imao nedoumica u vezi sa kupovinom.
+      Na kraju, Vladimir je izabrao automobil koji ga je potpuno zadovoljio. Automobil mu se dopao kako po stanju, tako i po opremi, i najvažnije — nakon naše provere, nije imao nikakvih pitanja u vezi sa kupovinom.
   es:
     title: Porsche Boxster
     body: |-

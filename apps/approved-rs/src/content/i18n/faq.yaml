@@ -111,58 +111,58 @@ translations:
   sr:
     vehicle-sourcing:
       - q: Koliko traje ceo proces — od prijave do automobila kod klijenta?
-        a: U proseku 3–14 dana — zavisi od toga koliko brzo se pronađe odgovarajuća opcija na tržištu.
-      - q: Ako pronađeni automobil nije odgovara, da li nastavljate pretragu besplatno?
-        a: Da, nastavljamo pretragu bez dodatne nadoknade, dok ne pronađemo nešto što vam odgovara.
-      - q: Da li treba sam otići da pogledam automobil?
-        a: Ne, nije obavezno — možemo obaviti celu transakciju bez vašeg prisustva. Ako želite da dođete i pogledate sami — takođe nema problema.
+        a: U proseku 3–14 dana — zavisi od toga koliko brzo nađemo odgovarajući auto na tržištu.
+      - q: Ako pronađeni auto ne odgovara, da li kontinuirate pretragu besplatno?
+        a: Da, nastavljamo potragu bez dodatnih troškova, sve dok ne nađemo automobil koji vam odgovara.
+      - q: Da li je potrebno da sami idete da gledate auto?
+        a: Ne, nije obavezno — možemo da obavimo celu transakciju bez prisustva. Ako želite da dođete i pogledate, nema problema.
       - q: Kakva je garancija na pronađeni automobil?
-        a: "Ne postoji formalna garancija proizvođača, kao za novi automobil — ovo je sekundarno tržište. Vaša zaštita je nezavisna tehnička provera pre kupovine: automobil pregleda stručnjak, a ne vi 'naslepo'."
-      - q: Da li dostavljate foto- ili video izveštaj o automobilu pre donošenja odluke?
+        a: "Formalna garancija proizvođača, kao na novom automobilu, ne postoji — to je sekundarno tržište. Vaša zaštita je nezavisna tehnička provera pre kupovine: auto pregleda ekspert, a ne vi 'naslepo'."
+      - q: Da li šaljete foto- ili video izveštaj o automobilu pre donošenja odluke?
         a: Da, šaljemo kompletan izveštaj sa fotografijama automobila — pre nego što donesete odluku o kupovini.
       - q: Da li postoji kompenzacija ako su rokovi probijeni vašom krivicom?
-        a: Ne postoji fiksna kazna — rok za realizaciju često zavisi ne samo od nas (pregovori s prodavcem, priprema dokumentacije). Ali odmah dajemo realističan rok i ne odugovlačimo.
+        a: Nema fiksne kazne — trajanje transakcije često zavisi ne samo od nas (pregovaranje s prodavcem, sređivanje dokumentacije). Ali maksimalni rok nazivamo odmah i ne odugovlačimo.
     vehicle-import:
-      - q: Šta se razlikuje između uvoza i pretrage automobila?
-        a: Pretraga automobila je kada ste u istoj zemlji gde je automobil. Uvoz je kada automobil dolazi u Srbiju iz Evrope ili Kine.
-      - q: Da li je carinjenje uključeno u cenu?
-        a: Da, pratimo carinjenje u Srbiji i uključujemo ga u izračun — konačnu sumu navodimo pre transakcije.
-      - q: Koliko je automobil 'ključ u ruke' skuplji od cene u oglasu?
-        a: 'Razlika zavisi od zemlje, starosti vozila i postojanju EUR1 sertifikata — konačnu sumu izračunavamo i fiksiramo pre početka. Za orijentaciju: u jednoj od naših transakcija BMW X1 je koštao 39.860 € u Nemačkoj, a ukupno u Srbiji, sa svim troškovima, isporukom, carinjenjem i papirologijom, došlo je do 46.000 €.'
-      - q: Šta je potrebno da se registrovani uvezeni automobil u Srbiji?
-        a: Automobil možete registrovati na sebe u Srbiji samo nakon dobijanja boravišne dozvole, tako da je najbolje da započnete pretragu kada su vam dokumenti već u ruci. Carinjenje se obavlja u Subotici, nakon čega dostavljamo automobil do vašeg grada i pratimo registraciju.
+      - q: Šta se razlikuje između uvoza i izbor automobila?
+        a: Izbor automobila — kada ste u istoj zemlji kao i auto. Uvoz — kada automobil dolazi iz Evrope ili Kine u Srbiju.
+      - q: Da li je carina uključena u cenu?
+        a: Da, pratimo carinjenje u Srbiji i uključujemo to u obračun — konačnu sumu saopštavamo pre transakcije.
+      - q: Koliko je automobil "ključ u ruke" skuplji od cene u oglasu?
+        a: 'Razlika zavisi od zemlje, starosti automobila i prisustva sertifikata EUR1 — punu sumu izračunavamo i fiksiramo pre početka. Za informaciju: u jednom od naših poslova, BMW X1 je koštao 39 860 € u Nemačkoj, a sa svim troškovima, dostavom, carinjenjem i dokumentacijom, njegov odvod u Srbiji je bio 46 000 €.'
+      - q: Šta vam je potrebno da registrovate doneti automobil u Srbiji?
+        a: Automobil se može registrovati u Srbiji tek nakon dobijanja boravišne ili radne dozvole, stoga ima smisla početi sa izborom kada su dokumenti već u rukama. Carinjenje se vrši u Subotici, nakon čega vam dostavljamo automobil do vašeg grada i pratimo registraciju.
     vehicle-buyback:
-      - q: Za koliko dana se može prodati automobil, ako još nije carinjen ili prepisan?
-        a: Obično 1–2 dana, čak iako automobil još nije carinjen ili prepisan na vas.
-      - q: Otkupljujete li automobile na kredit ili u zalogu?
-        a: Ne, otkupljujemo samo automobile koji nemaju aktivni kredit ili zalogu.
-      - q: Kako brzo dolaze novci nakon pregleda?
-        a: Na dan potpisivanja ugovora — odmah nakon pregleda, ako opis odgovara.
-      - q: Postoje li ograničenja po marki, godini ili pređenoj kilometraži?
-        a: 'Da — ne razmatramo automobile u lošem tehničkom stanju i francuske marke. Ovo ograničenje važi samo za otkup: možemo i dalje pretraživati Peugeot ili Renault za vas.'
-      - q: Šta se dešava sa automobilom nakon otkupa?
-        a: 'Posle toga, to je naša briga: prevoz i prodaju organizujemo sami. Automobili sa srpskim registarskim oznakama obično se prodaju na tržištu u Beogradu, dok automobile sa ruskim registarskim oznakama izvezemo i prodajemo u Rusiji.'
+      - q: Za koliko dana mogu prodati auto, ako još nije carinjen ili prepisan?
+        a: Obično 1–2 dana, čak i ako automobil još nije carinjen ili prepisan na vas.
+      - q: Da li otkupljujete automobile u kreditu ili zalogu?
+        a: Ne, otkupljujemo samo automobile bez važećeg kredita ili zaloge.
+      - q: Kako brzo dolaze novci nakon provere?
+        a: Na dan potpisivanja ugovora — odmah nakon provere, ako se opis poklapa.
+      - q: Postoje li ograničenja po markama, godini ili pređenim kilometrima?
+        a: 'Da — ne razmatramo automobile u lošem tehničkom stanju i francuske marke. Ovo ograničenje važi samo za otkup: možemo vam i dalje pronaći Peugeot ili Renault.'
+      - q: Šta se dešava s automobilom nakon otkupa?
+        a: 'Dalje je to naša briga: organizujemo transport i prodaju. Automobili sa srpskim registarskim tablicama obično se prodaju na tržištu u Beogradu, dok automobile sa ruskim registarskim tablicama iznosimo i prodajemo u Rusiji.'
     vehicle-inspection:
       - q: Koliko košta provera i da li je cena ista u svim zemljama?
-        a: Cena se razlikuje po zemljama i zavisi od obima provere — tačan iznos navodimo prilikom prijave.
-      - q: Može li se naručiti provera ako fizički niste u toj zemlji?
+        a: Cena se razlikuje od zemlje do zemlje i zavisi od obima provere — tačnu cifru nazivamo prilikom prijave.
+      - q: Da li mogu naručiti provere ako nisam fizički prisutan u toj zemlji?
         a: Da, vaše prisustvo nije obavezno — izveštaj i odluku dobijate na daljinu.
-      - q: U kom obliku je izveštaj?
-        a: Fotografije i detaljan tekstualni opis nakon pregleda.
-      - q: Šta će se desiti ako provera pokaže da automobil ne vredi uzeti?
-        a: "Dobijate izveštaj sa fotografijama i jasan odgovor 'ne uzimajte' — izgubite samo cenu provere, a ne novac za automobil. Izveštaj ostaje kod vas, i ako ipak odlučite da kupite, uočene zamerke služe kao argument za pregovaranje: na jednom od naših pregleda u Srbiji ovo je smanjilo cenu za 700 evra."
+      - q: U kakvom formatu je izveštaj?
+        a: Fotografije i detaljan tekstualni opis po završetku provere.
+      - q: Šta će se desiti ako provera pokaže da auto nije dobar za kupovinu?
+        a: 'Dobijate izveštaj sa fotografijama i jasan odgovor „nemojte kupovati” — gubite samo trošak provere, a ne novac za automobil. Izveštaj ostaje kod vas, i ako se ipak odlučite da kupite, uočene nedostatke možete koristiti kao argument za snižavanje cene: u jednom od naših pregleda u Srbiji, to je oborilo cenu za 700 evra.'
     general:
       - q: Kako se plaća rad?
-        a: Deo iznosa je avans, a ostatak po završetku. Iznos avansa zavisi od usluge i vrednosti transakcije — dogovaramo ga pre početka radova kako bi uslovi bili jasni za obe strane.
-      - q: Mogu li pisati ne putem Telegrama?
-        a: Da, osim Telegrama dostupni su pozivi i WhatsApp.
+        a: Deo iznosa — avans, ostatak po izvršenju. Visina avansa zavisi od usluge i iznosa posla — navodimo ga pre početka radova, kako bi uslovi bili jasni obe strane.
+      - q: Da li mogu pisati ne preko Telegrama?
+        a: Da, osim Telegrama, moguće su pozivi i WhatsApp.
       - q: Gde se nalazite?
-        a: Baza — Beograd, odatle odlazimo širom Srbije. U Nemačkoj, Španiji, Švajcarskoj i drugim evropskim zemljama rade naši stručnjaci na terenu.
+        a: Osnovna lokacija — Beograd, odakle delujemo širom Srbije. U Nemačkoj, Španiji, Švajcarskoj i drugim zemljama Evrope rade naši stručnjaci na terenu.
       - q: Da li je konsultacija plaćena?
-        a: Ne. Razgovaraćemo o zadatku i iskreno reći da li je moguće uklopiti se u vaš budžet. Cenu rada navodimo pre početka, i nakon toga ona se ne menja.
+        a: Ne. Razgovaraćemo o zadatku i iskreno reći da li možemo da se uklopimo u vaš budžet. Cenu rada ćemo navesti pre početka, i ona se nakon toga ne menja.
     cityExpert:
-      q: Da li u svakom gradu postoji svoj stručnjak?
-      a: U različitim gradovima rade različiti naši stručnjaci; u pojedinim slučajevima stručnjak odlazi u obližnji grad regiona.
+      q: Da li u svakom gradu postoji svoj dodeljeni ekspert?
+      a: U različitim gradovima rade različiti naši stručnjaci; u posebnim slučajevima ekspert može otići u obližnji grad regiona.
   es:
     vehicle-sourcing:
       - q: ¿Cuánto tiempo lleva todo el proceso, desde la solicitud hasta que el coche está con el cliente?

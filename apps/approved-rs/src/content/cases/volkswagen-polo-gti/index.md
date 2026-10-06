@@ -20,17 +20,17 @@ translations:
   sr:
     title: Volkswagen Polo GTI
     body: |-
-      ## Volkswagen Polo GTI iz Nemačke u Portugal — izbor, kupovina, dostava i registracija u Lisabonu
+      ## Volkswagen Polo GTI iz Nemačke u Portugal — izbor, kupovina, isporuka i registracija u Lisabonu
 
-      Još jedno vozilo uspešno je isporučeno iz Nemačke u Portugal — ovaj put **Volkswagen Polo GTI** za našeg klijenta iz **Lisabona**.
+      Još jedan automobil uspešno je isporučen iz Nemačke u Portugal — ovaj put **Volkswagen Polo GTI** za našeg klijenta iz **Lisabona**.
 
-      Zadatak je bio jasan: pronaći dobar Volkswagen Polo GTI u Nemačkoj u pristojnom stanju, proveriti automobil pre kupovine i organizovati ceo proces — od izbora i plaćanja do dostave i registracije vozila u Portugalu.
+      Zadatak je bio jasan: pronaći u Nemačkoj dobar Volkswagen Polo GTI u odličnom stanju, obaviti proveru auta pre kupovine i organizovati ceo proces — od odabira i plaćanja do isporuke i registracije automobila u Portugaliji.
 
-      Na nemačkom tržištu pronašli smo odličan Volkswagen Polo GTI, sproveli pregled i kontrolu vozila, nakon čega je klijent uz našu pomoć platio izabrano auto. Kupovina automobila u Nemačkoj je posebno zanimljiva zahvaljujući velikom izboru opreme i ponuda, ali je pri daljinskoj kupovini važno unapred proveriti konkretan primerak i pravilno organizovati transakciju.
+      Na nemačkom tržištu smo našli odličan Volkswagen Polo GTI, izvršili prozor汽车 pre kupovine, nakon čega je klijent uz našu pomoć platio izabrano vozilo. Kupovina automobila u Nemačkoj je posebno zanimljiva zbog širokog izbora opreme i ponuda, ali je pri kupovini na daljinu važno unapred proveriti konkretan model i pravilno organizovati transakciju.
 
-      Izabrani Volkswagen Polo GTI opremljen je **2.0-litarskim benzinskim motorom** i robotizovanim menjačem **DSG**. Kompaktno vozilo za svakodnevne vožnje po Lisabonu.
+      Izabrani Volkswagen Polo GTI je opremljen **2.0-litarskim benzinskim motorom** i robotizovanom menjačem **DSG**. Kompaktan automobil za svakodnevne vožnje po Lisabonu.
 
-      Nakon kupovine, organizovali smo transport automobila iz Nemačke u Portugal. Polo GTI je isporučeno transportnom kompanijom u Lisabon, gde se našem lokalnom partneru pridružio deo posla. On se potpuno posvetio registraciji automobila u Portugalu, potrebnoj dokumentaciji i registracionim procedurama.
+      Nakon kupovine, organizovali smo transport automobila iz Nemačke u Portugal. Polo GTI je isporučen transportnom kompanijom u Lisabon, gde je naš lokalni partner preuzeo brigu o registraciji automobila u Portugaliji, potrebnim dokumentima i registracionim procedurama.
 
       Sada je Volkswagen Polo GTI već kod svog vlasnika, sve potrebne procedure su završene, a klijent sa zadovoljstvom vozi svoj novi automobil po Lisabonu.
   es:

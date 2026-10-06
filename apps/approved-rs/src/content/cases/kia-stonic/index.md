@@ -58,57 +58,57 @@ translations:
   sr:
     title: Kia Stonic
     body: |-
-      ## Auto izbor u Srbiji: Kia Stonic umesto Peugeot 208 — stvarna priča
+      ## Autopodbor u Srbiji: Kia Stonic umesto Peugeot 208 — stvarni slučaj
 
-      Mladi par nam se obratio s zahtevom za **izbor automobila u Srbiji**. Budžet — do **13 000 evra**, a zahtevi za budućim automobilom su bili prilično konkretni:
+      Obratila nam se mlada par sa zahtevom za **izbor automobila u Srbiji**. Budžet — do **13 000 evra**, a zahtevi za budući automobil su bili prilično konkretni:
 
       <ul class="icon-check">
-      <li>maksimalno novija godina proizvodnje</li>
+      <li>maksimalno svež model</li>
       <li>automatski menjač</li>
-      <li>pouzdan i ekonomičan automobil za svakodnevnu upotrebu</li>
-      <li>snaga <strong>do 109 KS</strong>, s obzirom na to da su vlasnici novu vozačku dozvolu</li>
-      <li>dobar pređeni put i jasna istorija bez ozbiljnih saobraćajnih nezgoda</li>
+      <li>pouzdano i ekonomično vozilo za svakodnevnu upotrebu</li>
+      <li>snaga <strong>do 109 KS</strong>, pošto vlasnici imaju nove vozačke dozvole</li>
+      <li>dobar pređeni kilometraža i transparentna istorija bez ozbiljnih nezgoda</li>
       </ul>
 
-      Klijenti su prvobitno želeli da kupe **Peugeot 208 s automatskim menjačem**. Na prvi pogled, to je zaista izgledalo kao dobar izbor: kompaktni gradski automobil, moderan dizajn i širok spektar ponuda na tržištu polovnih automobila u Srbiji.
+      Prvobitno su klijenti želeli da kupe **Peugeot 208 sa automatskim menjačem**. Na prvi pogled, zaista je bio dobar izbor: kompaktno gradsko vozilo, savremen dizajn i široka ponuda na sekundarnom tržištu Srbije.
 
       ### Provera Peugeot 208 pre kupovine
 
-      Tokom auto izbora, pronašli smo i proverili nekoliko Peugeot 208 koji su se uklapali u budžet i zahteve.
+      U okviru autopodbor aktivnosti, pronašli smo i proverili nekoliko Peugeot 208 koji su odgovarali budžetu i traženim karakteristikama.
 
-      Međutim, lepe ankete i fotografije nisu odgovarale stvarnom stanju automobila.
+      Međutim, lepe oglase i fotografije nisu se poklopile sa stvarnim stanjem vozila.
 
-      Tokom profesionalne provere otkriveni su ozbiljni nedostaci: loše tehničko stanje, tragovi prethodnih popravki, pitanja o istoriji servisiranja, a kod nekih automobila — znakovi **prevara s pređenim kilometrima**.
+      Tokom profesionalne provere otkrivene su ozbiljne nedostatke: loše tehničko stanje, tragovi prethodnih popravki, pitanja vezana za servisnu istoriju, a kod nekih vozila — znakovi **skrenutog pređenog kilograma**.
 
-      Nismo preporučili klijentima da kupe takav Peugeot 208.
+      Klijentima nismo preporučili da kupuju takav Peugeot 208.
 
-      Zato je **provera automobila pre kupovine u Srbiji** posebno važna. Stanje automobila u oglasu i stvarno tehničko stanje mogu se značajno razlikovati.
+      Zato je **provera automobila pre kupovine u Srbiji** posebno važna. Stanje automobila u oglasu i stvarno tehničko stanje mogu značajno da se razlikuju.
 
-      ### Ponuda alternative — Kia Stonic
+      ### Predložili alternativu — Kia Stonic
 
-      Nakon nekoliko neuspešnih provera Peugeot 208, predložili smo klijentima da razmotre **Kia Stonic s automatskim menjačem**.
+      Nakon nekoliko ne uspešnih provera Peugeot 208, predložili smo klijentima da razmotre **Kia Stonic sa automatskim menjačem**.
 
-      Iako u početku ovaj model nije izazvao poseban interes — klijenti su bili fokusirani na Peugeot.
+      Isprva ovaj opcion nije izazvao veliko zanimanje — klijenti su prvobitno bili orijentisani na Peugeot.
 
-      Ali jedan od zadataka profesionalnog auto izbora je pronaći **najbolji automobil za dati budžet i stvarne zahteve vlasnika**, čak i ako se ispostavi da je to drugačiji model.
+      Ali jedna od zadataka profesionalnog autopodbora je da izabere **najbolji automobil za dostupan budžet i prave zahteve vlasnika**, čak i ako to bude drugi model.
 
-      Pronašli smo odgovarajući Kia Stonic, zajedno s klijentima otišli na pregled, izvršili provere i test vožnju.
+      Pronašli smo odgovarajući Kia Stonic, zajedno sa klijentima otišli na pregled, izvršili provere automobila i test vožnju.
 
-      Mišljenje se gotovo odmah promenilo.
+      I mišljenje se promenilo gotovo odmah.
 
-      Automobil je klijentima bio veoma dopadljiv po stanju, udobnosti, upravljivosti i opštem osećaju od vožnje. Nakon provere i razgovora o svim detaljima, doneta je odluka o kupovini.
+      Automobil se klijentima dopao po stanju, udobnosti, upravljivosti i opštoj impresiji o vozilu. Nakon provere i diskusije o svim detaljima, doneta je odluka o kupovini.
 
-      Kao rezultat, umesto Peugeot 208, klijenti su otišli u **Kia Stonic** koji je odgovarao njihovom budžetu, zahtevima za automatski menjač, snagom i tehničkim stanjem.
+      U rezultat, umesto Peugeot 208, klijenti su otišli u **Kia Stonic**, koji je odgovarao njihovom budžetu, zahtevima za automatski menjač, snazi i tehničkom stanju.
 
-      Ako se odgovarajući automobil nalazi u drugom gradu, to nije razlog da suzite pretragu samo na najbliže oglase. Što je šire tržište pretrage, veće su šanse da pronađete zaista dobar primerak za razumnu cenu.
+      Ako odgovarajući automobil nalazi u drugom gradu, to nije razlog da se potraga ograniči samo na najbliže oglase. Što je širi tržište, to je veća verovatnoća da se pronađe zaista dobar primerak po adekvatnoj ceni.
 
-      ### Potreban auto izbor u Srbiji?
+      ### Treba vam autopodbor u Srbiji?
 
-      Pomoći ćemo vam da pronađete automobil prema vašem **budžetu, vozačkom stažu i individualnim zahtevima**, proveriti njegovo tehničko stanje, istoriju, pređeni put i dokumentaciju pre kupovine.
+      Pomoći ćemo vam da pronađete automobil koji odgovara vašem **budžetu, vozačkom iskustvu i individualnim zahtevima**, da proverimo njegovo tehničko stanje, istoriju, pređeni kilometražu i dokumente pre kupovine.
 
-      Možete nam doći s konkretno modelom — ili jednostavno reći kakav automobil vam treba i koji je vaš budžet.
+      Možete doći kod nas sa konkretnim modelom — ili jednostavno reći kakav automobil vam treba i koji vam je budžet.
 
-      Ponekad se najbolji automobil ispostavi da nije onaj koji ste prvobitno planirali da kupite.
+      Ponekad je najbolji automobil potpuno drugačiji od onoga što ste prvobitno planirali da kupite.
   es:
     title: Kia Stonic
     body: |-

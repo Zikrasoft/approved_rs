@@ -28,15 +28,15 @@ translations:
   sr:
     title: Audi Q3
     body: |-
-      Još jedno vozilo uspešno je provereno, kupljeno i isporučeno iz Nemačke u Portugal.
+      Još jedan automobil uspešno je proveren, kupljen i dostavljen iz Nemačke u Portugal.
 
-      Ovaj put nam se obratio klijent iz **Lisabona**, kojem je bila potrebna pomoć u potrazi, proveri i kupovini automobila u Nemačkoj. Nakon selekcije odgovarajuće opcije, odlučili smo se za **Audi Q3 sa pređenih 102.000 km**.
+      Ovaj put nam se obratio klijent iz **Lisbona**, kojem je bila potrebna pomoć u pronalaženju, proverenju i kupovini automobila u Nemačkoj. Nakon odabira odgovarajuće opcije, odlučili smo se za **Audi Q3 sa pređenih 102.000 km**.
 
-      Pre kupovine, vozilo je prošlo detaljnu proveru: ocenili smo tehničko stanje, istoriju korišćenja, dokumentaciju i usaglašenost sa podacima koje je izneo prodavac. Nakon što smo vozilo usaglasili sa klijentom, Audi Q3 je kupljen u Nemačkoj, dokumentacija je obezbeđena, a vozilo je poslato u Portugal.
+      Pre kupovine, automobil je prošao provera auta pre kupovine: procenili smo njegovo tehničko stanje, istoriju korišćenja, dokumentaciju i usklađenost sa podacima koje je pružio prodavac. Nakon dogovora sa klijentom, Audi Q3 je kupljen u Nemačkoj, registrovan i otpremljen u Portugal.
 
-      Na taj način, klijent je dobio svoj odabrani automobil već u Portugalu, bez potrebe da lično ide u Nemačku, bavi se pregledima, pregovorima sa prodavcem, obradom dokumenata i organizacijom međunarodne isporuke.
+      Kao rezultat, klijent je dobio odabrani automobil već u Portugalu, bez potrebe da sam ide u Nemačku, bavi se pregledima, pregovorima sa prodavcem, obradom dokumenata i organizacijom međunarodne dostave.
 
-      Ako željeni automobil nije dostupan na lokalnom tržištu u Portugalu ili vas ne zadovoljava izbor i cene, možete razmotriti kupovinu automobila u Nemačkoj. Veliko evropsko tržište omogućava vam da birate između mnoštva marki, modela, opreme, godina proizvodnje i vozila sa različitim pređenim kilometrima.
+      Ako traženi automobil nije dostupan na lokalnom tržištu Portugala ili vas izbor i cene ne zadovoljavaju, možete razmotriti kupovinu automobila u Nemačkoj. Veliko evropsko tržište omogućava izbor među mnogim markama, modelima, opremama, godinama proizvodnje i opcijama sa različitim pređenim kilometrima.
   es:
     title: Audi Q3
     body: |-

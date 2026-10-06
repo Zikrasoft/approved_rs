@@ -24,27 +24,21 @@ translations:
 
       We wish Damir many safe and happy kilometres on Serbian roads!
   sr:
-    title: BMW X1
-    body: >
-      **Auto selekcija u Beogradu i Srbiji: BMW X1 xDrive**
+    title: BMW X1 xDrive
+    body: |-
+      **Provera auta pre kupovine u Beogradu i Srbiji: BMW X1 xDrive za našeg klijenta**
 
+      Na preporuku prethodnog klijenta obratio nam se Damir. Nedavno je došao u Srbiju, dobio boravišnu dozvolu i konačno odlučio da kupi svoj automobil.
 
-      Damir nam se obratio po preporuci našeg prethodnog klijenta. Nedavno je stigao u Srbiju, dobio boravišnu dozvolu i odlučio da konačno kupi automobil za sebe.
+      Prvobitno smo razmatrali nekoliko opcija — **Skoda Octavia, BMW serije 2 Gran Tourer i BMW X1**. Na kraju se klijent odlučio za BMW X1, a u okviru provere automobila pre kupovine u Beogradu pregledali smo **4 automobila**.
 
+      Izbor je pao na **BMW X1 sa pređenih oko 180.000 km**, uvežen iz Švajcarske. Automobil je opremljen sistemom pogona na sve točkove **xDrive** i generalno je u zadovoljavajućem tehničkom stanju.
 
-      U početku su razmatrani modeli **Škoda Octavia, BMW Serije 2 Gran Tourer i BMW X1**. Na kraju je izbor pao na BMW X1, a tokom procesa auto selekcije pregledali smo ukupno **četiri automobila**.
+      Prethodni vlasnik je samostalno izvršio zamenu motornih ulja i svih filtera. Nakon kupovine preporučujemo da se izvrši **zamena ulja u automatskom menjaču**, kao i čišćenje usisnog sistema motora **BMW B47 2.0 dizel** — preventivna procedura koja je posebno važna za ove motore.
 
+      Kao rezultat, Damir je dobio automobil koji je prošao potpunu provere auta pre kupovine, a mi — još jednog zadovoljnog klijenta po preporuci.
 
-      Izabran je **BMW X1 sa oko 180.000 km**, uvezen iz Švajcarske i opremljen **xDrive pogonom na sva četiri točka**. Automobil je u zadovoljavajućem tehničkom stanju.
-
-
-      Prodavac je već samostalno zamenio motorno ulje i sve filtere. Nakon kupovine ostaje da se uradi **zamena ulja u automatskom menjaču**, kao i čišćenje usisnog sistema na **2.0 dizel motoru B47**.
-
-
-      Još jedan automobil je pronađen i proveren uz našu pomoć.
-
-
-      Damiru želimo puno sreće i bezbednih kilometara na putevima Srbije!
+      Želimo Damiru sreću na putevima Srbije!
   es:
     title: BMW X1 xDrive
     body: |-

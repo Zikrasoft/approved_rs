@@ -20,14 +20,14 @@ translations:
       description: Independent car inspection in {location}. Expert visit, body and running gear inspection, report. Protect yourself from buying a damaged vehicle.
   sr:
     vehicle-sourcing:
-      title: Odabir automobila po meri {location}
-      description: 'Odabir automobila po meri {location}: pretraga, nezavisna provera, pratnja pri kupovini i dostava do vašeg grada. Ostavite zahtev — javićemo se na Telegram.'
+      title: Izbor automobila po meri {location}
+      description: 'Izbor automobila po meri {location}: potraga, nezavisna provera, pratnja pri transakciji i dostava do vašeg grada. Ostavite zahtev — javićemo se na Telegram.'
     vehicle-buyback:
-      title: Otkupljujemo auto {location} — hitno, bilo koji registracijski broj
-      description: Hitni otkup automobila {location} sa bilo kojim registracijskim brojem — stranih, ruskih ili srpskih. Procena online, završavanje za 1 dan, isplata na dan transakcije.
+      title: Otkupljenje automobila {location} — hitno, svi brojevi
+      description: Hitno otkupljenje automobila {location} na svim brojevima — stranim, ruskim ili srpskim. Online procena, obrada za 1 dan, prenos na dan transakcije.
     vehicle-inspection:
-      title: Provera automobila {location} pre kupovine
-      description: Nezavisna provera automobila {location}. Dolazak stručnjaka, pregled karoserije i mehanike, izveštaj. Zaštitite se od kupovine oštećenog automobila.
+      title: Provera auta {location} pre kupovine
+      description: Nezavisna provera automobila {location}. Dolazak eksperta, pregled karoserije i suspenzije, izveštaj. Zaštitite se od kupovine pokvarenog automobila.
   es:
     vehicle-sourcing:
       title: Búsqueda de autos llave en mano {location}

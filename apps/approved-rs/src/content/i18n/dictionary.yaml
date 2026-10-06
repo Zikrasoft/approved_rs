@@ -111,19 +111,19 @@ translations:
     llms:
       keyFacts: Ključne činjenice
       other: Ostalo
-      languages: Ostali jezici
+      languages: Drugi jezici
       countries: Usluge po zemljama
       cities: Autopodbor po gradovima
-      vehicleImport: Uvoz auta
+      vehicleImport: Uvoz automobila
     navHint:
       vehicle-sourcing: Naći ćemo i proveriti auto
-      vehicle-import: Dovesti i cariniti
-      vehicle-buyback: Otkupljujemo vaš auto
-      vehicle-inspection: Pogledaćemo onaj koji ste našli
+      vehicle-import: Dovozimo i carinimo
+      vehicle-buyback: Otkupljujemo vašu mašinu
+      vehicle-inspection: Proverićemo onaj koji ste našli
     nav:
       vehicle-sourcing: Autopodbor
       vehicle-import: Automobili iz Evrope i Kine
-      vehicle-buyback: Otkup
+      vehicle-buyback: Otkupljenje
       vehicle-inspection: Provera
       cases: Stvarni poslovi
       contacts: Kontakti
@@ -137,10 +137,10 @@ translations:
       servicesHeading: Usluge
       companyHeading: Kompanija
       privacyLabel: Privatnost
-      tagline: Odabraćemo, proveriti i isporučiti auto iz Evrope. Preuzimamo ceo proces — od potrage do isporuke.
-      contactManagerLabel: Kontaktirajte menadžera
-      hoursLine: 24/7, bez odmora
-      copyrightSuffix: Autopodbor, provera i isporuka automobila iz Evrope
+      tagline: Naći ćemo, proveriti i dostaviti automobil iz Evrope. Preuzimamo celu proceduru — od pretrage do dostave.
+      contactManagerLabel: Pitajte menadžera
+      hoursLine: Non-stop, bez vikenda
+      copyrightSuffix: Autopodbor, provera i dostava automobila iz Evrope
       cookieSettingsLabel: Podešavanja kolačića
       channelLinkLabel: Naš kanal
     common:
@@ -153,14 +153,14 @@ translations:
       channelLabel: Naš kanal
       cookie:
         notice: Koristimo kolačiće.
-        more: Više u
+        more: Više o
         policyLink: politici privatnosti
-        accept: Prihvatam
-        decline: Odbijam
+        accept: Prihvatiti
+        decline: Odbiti
       gallery:
-        morePhotos: Više fotografija
-        prev: Prethodna fotografija
-        next: Sledeća fotografija
+        morePhotos: Više slika
+        prev: Prethodna slika
+        next: Sledeća slika
   es:
     llms:
       keyFacts: Datos clave

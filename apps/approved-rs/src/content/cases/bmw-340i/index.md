@@ -39,40 +39,36 @@ translations:
       We’ll inspect the vehicle, run diagnostics, take it for a test drive and give you a clear picture of its actual condition before you buy.
   sr:
     title: BMW 340i
-    body: >
-      **Jednokratni pregled BMW M340 pre kupovine u Srbiji — mala kilometraža ne znači uvek i idealno stanje**
+    body: |-
+      **Provera BMW M340 u Srbiji — kada ni mali pređeni kilometri ne garantuju savršeno stanje**
 
+      Ponovo nam se obratio naš stari klijent, kojem smo prethodno pomogli da pronađe automobil u okviru punog autoprograma. Ovoga puta zadatak je bio lakši: klijent je odlučio da doda još jednu „konja u štalu“ i samostalno je izabrao **BMW M340**. Od nas je bila potrebna profesionalna provera auta pre kupovine.
 
-      Ponovo nam se obratio naš stari klijent kome smo ranije pomogli da pronađe automobil u okviru kompletne usluge odabira vozila. Ovog puta poželeo je da doda još jednog „konja u svoju štalu“ i sam je pronašao **BMW M340**.
+      Provere automobila vršimo ne samo u **Beogradu**, već i u **Novom Sadu, Čačku i drugim gradovima Srbije**. Ako ste pronašli zanimljivu opciju — možemo doći, pregledati automobil i pomoći vam da shvatite njegovo stvarno tehničko stanje pre kupovine.
 
+      Šta smo proverili na BMW M340:
 
-      Naš zadatak je bio da uradimo **jednokratni pregled automobila pre kupovine**.
+      - stanje motora i lanca distribucije
+      - rad osnovnih sistema automobila
+      - dijagnostiku i stvarne parametre rada sklopova
+      - adaptacije menjača
+      - punu probnu vožnju
+      - opšte tehničko stanje automobila
 
+      I ovde imamo dobar primer zašto **mali pređeni kilometri — nisu garancija odsustva tehničkih nijansi**.
 
-      Preglede vozila radimo ne samo u **Beogradu**, već i u **Novom Sadu, Čačku i drugim gradovima širom Srbije**. Ako ste sami pronašli automobil koji vas zanima, možemo da ga detaljno proverimo pre nego što donesete odluku o kupovini.
+      Dijagnostika je pokazala da je **produženje lanca distribucije već dostiglo oko 20%**. Upravo ovakve detalje je važno otkriti pre realizacije posla, kako biste razumeli stvarno stanje vozila, moguće buduće troškove i imali dodatne argumente prilikom donošenja odluke o kupovini.
 
+      Ako ste sami pronašli automobil u Srbiji i ne trebate potpunu auto selekciju, možete naručiti **proveru automobila pre kupovine** u:
 
-      Na ovom BMW M340 proverili smo:
+      <ul class="icon-pin">
+      <li>Beogradu</li>
+      <li>Novom Sadu</li>
+      <li>Čačku</li>
+      <li>i drugim gradovima Srbije</li>
+      </ul>
 
-      - stanje motora i lanca razvoda - rad glavnih sistema automobila - dijagnostičke parametre vozila - adaptacije menjača - ponašanje automobila tokom test vožnje - opšte tehničko stanje vozila
-
-
-      Ovaj automobil je odličan primer zašto **mala kilometraža nije garancija da je automobil bez tehničkih problema**.
-
-
-      Uprkos relativno maloj kilometraži, dijagnostika je pokazala da je **istezanje lanca razvoda već dostiglo oko 20%**.
-
-
-      Upravo zbog ovakvih stvari detaljan pregled pre kupovine ima smisla. Kupac dobija realnu sliku stanja automobila, može da proceni moguće buduće troškove i donese odluku na osnovu činjenica, a ne samo izgleda vozila i kilometraže na satu.
-
-
-      Ako ste sami pronašli automobil u Srbiji i nije vam potrebna kompletna usluga odabira vozila, možete naručiti **jednokratni pregled automobila pre kupovine** u:
-
-
-      <ul class="icon-pin"> <li>Beogradu</li> <li>Novom Sadu</li> <li>Čačku</li> <li>i drugim gradovima Srbije</li> </ul>
-
-
-      Proverićemo automobil, uraditi dijagnostiku i test vožnju i dati vam objektivnu sliku njegovog stvarnog stanja pre kupovine.
+      Proverićemo automobil, obaviti dijagnostiku i probnu vožnju i pružiti objektivnu sliku njegovog stanja pre nego što mu isplatite novac.
   es:
     title: BMW 340i
     body: |-

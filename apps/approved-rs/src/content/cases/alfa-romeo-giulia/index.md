@@ -26,15 +26,15 @@ translations:
   sr:
     title: Alfa Romeo Giulia
     body: |-
-      ## Autoizbor u Srbiji: kako smo pronašli savršenu Alfa Romeo Giulia
+      ## Auto-sourcing u Srbiji: kako smo našli savršenu Alfa Romeo Giulia
 
-      Dmitrij nam se obratio s jasnim ciljem — da kupi **Alfa Romeo Giulia**. Prvobitno je tražio verziju sa **280 KS** i poslao nekoliko atraktivnih opcija. Proverili smo svaki automobil preko istorije dilera i **CarVertical**. Kao što se i očekivalo, značajan deo automobila bio je posle udesa. Nažalost, snažnije verzije često su jako korišćene, a prava dobra rodbina je teško pronaći.
+      Dmitrij nam se obratio sa konkretnim ciljem — da kupi **Alfa Romeo Giulia**. U početku je želeo verziju sa **280 KS** i poslao nekoliko opcija koje su mu se dopale. Proverili smo svaki automobil prema istoriji kod dilera i **CarVertical**. Kao što se i očekivalo, značajan deo automobila je bio nakon saobraćajnih nesreća. Nažalost, jače verzije se često koriste veoma aktivno, te je teško naći zaista dobar primerak.
 
-      Na kraju smo mu ponudili alternativu — **Alfa Romeo Giulia iz 2021. godine** u upečatljivoj crvenoj boji sa motorom **2.0 Turbo 200 KS**. Automobil je imao **potpunu servisnu istoriju**, odličan izveštaj **CarVertical** i bio je opremljen jednim od najpouzdanijih automatskih menjača u svojoj klasi — **ZF 8HP**.
+      Na kraju, ponudili smo alternativu — **Alfa Romeo Giulia iz 2021. godine** u atraktivnoj crvenoj boji sa motorom **2.0 Turbo 200 KS**. Automobil je imao **potpunu servisnu istoriju**, odličan izveštaj sa **CarVertical** i bio je opremljen jednim od najpouzdanijih automatskih menjača u ovoj klasi — **ZF 8HP**.
 
-      Nakon kupovine, automobil je prošao kompletnu tehničku obradu u našoj službi: zamenili smo **ulje i sve filtere**, **svjećice**, izvršili **zamenu ulja u automatskoj transmisiji ZF 8HP zajedno s karterom**. Da, kod Alfa Romeo zamena kabinskog filtera predstavlja poseban izazov, ali smo i to uspešno savladali.
+      Nakon kupovine, automobil je prošao potpunu tehničku proveru u našem servisu: zamenili smo **ulje i sve filtere**, **svjećice**, obavili **zamenu ulja u automatskoj transmisiji ZF 8HP zajedno sa podrigom**. Da, na Alfa Romeo zamena kabinskog filtera je poseban izazov, ali smo i s tim uspešno izašli na kraj.
 
-      Kao rezultat, Dmitrij je dobio potpuno servisiranu **Alfa Romeo Giulia**, koja pruža uživanje u vožnji bez neprijatnih iznenađenja.
+      Kao rezultat, Dmitrij je dobio potpuno servisiranu **Alfa Romeo Giulia**, koja užitak u vožnji čini bez neprijatnih iznenađenja.
   es:
     title: Alfa Romeo Giulia
     body: |-

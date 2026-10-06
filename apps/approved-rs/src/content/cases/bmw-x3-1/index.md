@@ -40,41 +40,40 @@ translations:
       If you are looking to buy a car in Germany and import it to Serbia without dealing with listings, inspections, logistics, customs procedures and registration yourself, we can handle the entire process — from finding the right vehicle to handing you the keys.
   sr:
     title: BMW X3
-    body: >
-      **Izbor, kupovina i uvoz BMW X3 iz Nemačke u Srbiju – kompletna usluga**
+    body: |-
+      **Odabir, kupovina i uvoz BMW X3 iz Nemačke u Srbiju bez brige**
 
+      Obratio nam se Denis sa zadatkom da pronađemo i dovučemo BMW X3 iz Nemačke u Srbiju u dobrom tehničkom stanju, sa transparentnom istorijom održavanja i bez potrebe za ozbiljnim ulaganjima nakon kupovine.
 
-      Denis nam se obratio sa željom da pronađe i kupi BMW X3 u Nemačkoj, sa urednom servisnom istorijom, dobrim tehničkim stanjem i bez potrebe za većim ulaganjima nakon kupovine.
+      U Nemačkoj smo razmotrili i proveli provere za klijenta na dva odgovarajuća automobila BMW X3. Nakon detaljnog pregleda, odlučili smo se za jedan od njih: automobil je imao potpunu servisnu istoriju, a test vožnja nije pokazala nikakve tehničke probleme.
 
+      Dodatna prednost je bila što su na automobilu, nedugo pre prodaje, zamenjeni svi kočioni diskovi i pločice. Nema drugih značajnih zamerki na ostale delove i sklopove.
 
-      Za klijenta smo u Nemačkoj pronašli i proverili dva odgovarajuća BMW X3. Nakon detaljnog pregleda odlučili smo se za jedan automobil koji je imao kompletnu servisnu istoriju, dok tokom test vožnje nisu primećeni nikakvi tehnički problemi.
+      Odabrani BMW X3 je opremljen dizel motorom B47 zapremine 2.0 litra. Pređeni kilometri u trenutku kupovine iznosili su 190.000 km. Bez obzira na pređene kilometre, automobil se nalazi u odličnom tehničkom stanju. Ovaj primer još jednom pokazuje da pri kupovini automobila iz Nemačke nisu bitni samo brojevi na brzinomeru, već i stvarno stanje vozila, istorija korišćenja i pravovremeno tehničko održavanje.
 
+      Nakon kupovine, sami smo dovukli BMW X3 iz Nemačke u Srbiju na njegovim registarskim oznakama. Ova usluga je takođe dostupna našim klijentima: možemo preuzeti ne samo traženje, izbor i provere automobila, već i njegov uvoz iz Nemačke u Srbiju.
 
-      Dodatna prednost izabranog primerka bila je nedavna zamena svih kočionih diskova i pločica. Provera ostalih sklopova i sistema takođe nije pokazala značajne nedostatke.
+      Radimo sa automobilima iz cele Nemačke i možemo da pronađemo, proverimo, kupimo i dovučemo automobil praktično iz bilo kog regiona zemlje, uključujući najveće gradove: Berlin, Minhen, Hamburg, Frankfurt na Majni, Keln, Diseldorf, Štutgart, Dortmund, Lajpcig, Hanover, Nirnberg i druge gradove Nemačke.
 
+      Nakon dolaska u Srbiju, automobil je prošao carinjenje u Subotici, nakon čega je dostavljen u Beograd. Organizovali smo registraciju BMW X3 u Srbiji i predali klijentu potpuno spreman za vožnju automobil iz ruku u ruke.
 
-      Izabrani BMW X3 opremljen je 2.0 dizel motorom B47. Kilometraža u trenutku kupovine iznosila je 190.000 km. Bez obzira na kilometražu, automobil je u odličnom tehničkom stanju. Ovaj primer još jednom pokazuje koliko su prilikom kupovine polovnog automobila iz Nemačke važni servisna istorija, pravilno održavanje i stvarno stanje vozila.
+      Dodatno, u našem servisu obavljeno je planirano tehničko održavanje vozila.
 
+      Nudimo sveobuhvatnu uslugu kupovine i uvoza automobila iz Nemačke u Srbiju:
 
-      Nakon kupovine lično smo dovezli BMW X3 iz Nemačke u Srbiju na njegovim tablicama. Ova usluga je takođe dostupna našim klijentima: možemo preuzeti ne samo pronalaženje, izbor i proveru vozila, već i kompletan dovoz automobila iz Nemačke u Srbiju.
+      <ul class="icon-check">
+      <li>odabir automobila u Nemačkoj</li>
+      <li>provera istorije i tehničkog stanja</li>
+      <li>pregled automobila i test vožnja</li>
+      <li>pomoć pri kupovini</li>
+      <li>dovoz automobila iz Nemačke u Srbiju</li>
+      <li>carinjenje automobila u Srbiji</li>
+      <li>dostava u Beograd</li>
+      <li>registracija automobila</li>
+      <li>tehničko održavanje u našem servisu</li>
+      </ul>
 
-
-      Radimo sa automobilima širom Nemačke i možemo pronaći, proveriti, kupiti i dovesti vozilo iz praktično bilo kog dela zemlje, uključujući najveće gradove: Berlin, Minhen, Hamburg, Frankfurt na Majni, Keln, Diseldorf, Štutgart, Dortmund, Lajpcig, Hanover, Nirnberg i druge gradove u Nemačkoj.
-
-
-      Po dolasku u Srbiju automobil je prošao carinjenje u Subotici, nakon čega smo ga dostavili u Beograd. Organizovali smo registraciju BMW X3 u Srbiji i predali klijentu potpuno spreman automobil.
-
-
-      U našem servisu je dodatno urađen redovan servis vozila.
-
-
-      Nudimo kompletnu uslugu kupovine i uvoza automobila iz Nemačke u Srbiju:
-
-
-      <ul class="icon-check"> <li>pronalaženje i izbor automobila u Nemačkoj</li> <li>provera istorije i tehničkog stanja</li> <li>pregled vozila i test vožnja</li> <li>pomoć pri kupovini</li> <li>dovoz automobila iz Nemačke u Srbiju</li> <li>carinjenje vozila u Srbiji</li> <li>transport do Beograda</li> <li>registracija automobila</li> <li>redovno održavanje u našem servisu</li> </ul>
-
-
-      Ako želite da kupite automobil u Nemačkoj i uvezete ga u Srbiju bez samostalnog bavljenja oglasima, proverama, transportom, carinom i registracijom, možemo preuzeti ceo proces — od pronalaženja odgovarajućeg vozila do predaje ključeva vlasniku.
+      Ako želite da kupite automobil u Nemačkoj i donesete ga u Srbiju bez potrebe da se sami bavite traženjem, proverama, logistikom, carinom i registracijom, možemo preuzeti ceo proces – od odabira automobila do predaje ključeva vlasniku.
   es:
     title: BMW X3
     body: |-

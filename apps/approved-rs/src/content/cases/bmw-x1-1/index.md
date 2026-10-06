@@ -147,136 +147,136 @@ translations:
   sr:
     title: BMW X1
     body: |-
-      ## Automobili iz Nemačke po meri — izbor, provera, otkup i dostava
+      ## Automobili iz Nemačke na ključ — izbor, provera, otkup i dostava
 
-      Želite da kupite dobar automobil iz Nemačke bez putovanja, pregovaranja s nemačkim auto salonom i problema oko plaćanja, dokumentacije, izvoza i dostave? Potpuno organizujemo kupovinu i dostavljanje automobila iz Nemačke po meri.
+      Želite da kupite dobar automobil iz Nemačke bez ličnih putovanja, pregovaranja sa nemačkim auto-salonima i komplikacija oko plaćanja, dokumenata, izvoza i dostave? Mi potpuno organizujemo kupovinu i dovoz automobila iz Nemačke na ključ.
 
-      Radimo sa klijentima iz raznih zemalja i možemo organizovati dostavu automobila iz Nemačke u **Srbija, Rusiju, Španiju, Portugal, Francusku i druge evropske zemlje**.
+      Radimo sa klijentima iz raznih zemalja i možemo organizovati dostavu automobila iz Nemačke u **Srbija, Rusija, Španija, Portugalija, Francuska i druge zemlje Evrope**.
 
-      Pratimo ceo proces: od traženja odgovarajućeg automobila i prvih pregovora sa prodavcem do provere, otkupa, obrade dokumenata, transporta i predaje automobila klijentu.
+      Pratimo ceo proces: od pronalaženja odgovarajućeg automobila i prvih pregovora sa prodavcem do provere, otkupa, sređivanja dokumenata, transporta i predaje automobila kupcu.
 
       ## Izbor automobila u Nemačkoj
 
-      Nemačko tržište automobila nudi ogroman izbor različitih marki, modela i opreme. Međutim, lepo oglašavanje i dobra oprema ne znače nužno da konkretan automobil vredi kupiti.
+      Nemačko tržište automobila nudi ogromnu ponudu vozila različitih marki, modela i oprema. Međutim, lepo oglas i dobra oprema ne znače da konkretan automobil vredan kupovine.
 
-      Zato posao počinje mnogo pre plaćanja — od preliminarnog analize automobila.
+      Zato rad započinje mnogo pre plaćanja — od preliminarne analize automobila.
 
-      Biramo opcije prema zahtevima i budžetu klijenta, proučavamo oglase, opremu, istoriju automobila i informacije o prodavcu. Nakon toga kontaktiramo direktno menadžere nemačkih auto salona i diler centara.
+      Pronalazimo opcije prema zahtevima i budžetu klijenta, proučavamo oglase, opremu, istoriju automobila i informacije o prodavcu. Nakon toga kontaktiramo direktno sa menadžerima nemačkih auto-salona i dilerskih centara.
 
-      Sami pregovaramo na nemačkom jeziku, razjašnjavamo tehničko stanje automobila, istoriju održavanja, prisustvo oštećenja i popravki, uslove prodaje za izvoz, paket dokumenata i mogućnost dodatnog pregovaranja.
+      Samostalno vodimo pregovore na nemačkom jeziku, proveravamo tehničko stanje automobila, istoriju servisiranja, prisustvo oštećenja i popravki, uslove prodaje na izvoz, komplet dokumenata i mogućnost dodatne cene.
 
-      Klijent ne treba sam da zove u Nemačku, dopisuje se s dilerom ili razmišlja o specifičnostima kupovine automobila na evropskom tržištu — ovaj posao preuzimamo mi.
+      Klijentu nije potrebno da samostalno zove u Nemačku, dopisuje se s trgovcem ili razume posebnosti kupovine automobila na evropskom tržištu — taj posao preuzimamo mi.
 
       ## Lično proveravamo automobil pre kupovine
 
       Jedan od najvažnijih koraka je provera automobila direktno u Nemačkoj.
 
-      Ne kupujemo automobil oslanjajući se samo na fotografije prodavca i opis u oglasu. Pre otkupa, stručnjak lično dolazi do automobila i vrši sveobuhvatnu proveru.
+      Mi ne kupujemo automobil oslanjajući se samo na fotografije prodavca i opis u oglasu. Pre otkupa, stručnjak lično dolazi do automobila i vrši sveobuhvatan pregled.
 
-      Automobil se proverava **na više od 100 parametara**.
+      Automobil se proverava **po više od 100 parametara**.
 
-      Provera obuhvata:
+      U provere su uključene:
 
-      - karoseriju, lak i tragove prethodnih popravki;
+      - karoserija, lak i tragovi prethodnih popravki;
       - stanje karoserijskih elemenata i razmaka;
-      - znakove saobraćajnih nesreća i restauratorskih radova;
-      - stakla, optiku, felne i gume;
-      - stanje enterijera i usklađenost trošenja sa navedenim pređenim kilometrima;
-      - motor i dodatnu opremu;
+      - tragovi saobraćajnih nesreća i radova na obnovi;
+      - stakla, svetla, felne i gume;
+      - stanje enterijera i usaglašavanje habanja sa deklarisanim pređenim kilometrima;
+      - motor i dodatna oprema;
       - menjač;
-      - suspenziju, kočioni sistem i upravljački mehanizam;
-      - elektronske sisteme i opremu automobila;
-      - kompjutersku dijagnostiku;
-      - servisnu istoriju i dokumenta;
-      - stvarnu opremu automobila;
-      - proveru identifikacionih podataka automobila;
+      - suspenzija, kočioni sistem i upravljanje;
+      - elektronski sistemi i oprema automobila;
+      - kompjuterska dijagnostika;
+      - servisna istorija i dokumenti;
+      - stvarna oprema automobila;
+      - provera identifikacionih podataka automobila;
       - testiranje osnovnih funkcija i sistema;
-      - procena opšteg tehničkog stanja.
+      - procena opšte tehničke ispravnosti.
 
-      Na osnovu rezultata provere, klijent dobija objektivno razumevanje stanja automobila **pre kupovine**.
+      Na osnovu rezultata provere, klijent dobija objektivno razumevanje stanja automobila **pre njegove kupovine**.
 
-      Ako se otkriju ozbiljni nedostaci, skrivene štete ili stanje automobila ne odgovara prodavcu, ne preporučujemo takvu opciju i nastavljamo potragu.
+      Ako se otkriju ozbiljni nedostaci, skrivena oštećenja ili stanje automobila ne odgovara onome što je prodavac naveo, ne preporučujemo tu opciju i nastavljamo traganje.
 
-      Naš cilj je pronaći i kupiti zaista dostojan automobil.
+      Naš cilj je da pronađemo i kupimo zaista kvalitetan automobil.
 
-      ## Pregovaramo i cenimo sa nemačkim dilerom
+      ## Vodimo pregovore i trgujemo sa nemačkim trgovcem
 
-      Nakon pregleda ponovo razgovaramo o automobilu s prodavcem. Ako su tokom provere otkriveni nedostaci koji omogućavaju argumentovano preispitivanje cene, koristimo ih u pregovorima.
+      Nakon pregleda, ponovo razgovaramo o automobilu s prodavcem. Ako su tokom provere otkriveni nedostaci koji opravdavaju preispitivanje cene, koristimo ih u pregovorima.
 
-      Dogovaramo konačnu cenu, uslove kupovine, dokumentaciju i izvoz automobila.
+      Dogovaramo konačnu cenu, uslove kupovine, dokumente i izvoz automobila.
 
-      Za klijenta čitav proces prolazi preko jednog izvršitelja: ne treba odvojeno tražiti osobu za pregled, kompaniju za plaćanje, prevoznika, carinskog predstavnika i druge posrednike.
+      Za klijenta ceo proces prolazi preko jednog izvršioca: nije potrebno posebno tražiti osobu za pregled, firmu za plaćanje, prevoznika, carinskog agenta i druge posrednike.
 
-      ## Otkup automobila preko naše kompanije
+      ## Otkup automobila putem naše vlastite kompanije
 
-      Nakon što se dogovorimo o automobilu s klijentom, organizujemo njegov otkup.
+      Nakon saglasnosti o automobilu s klijentom organizujemo njegov otkup.
 
-      **Plaćanje automobila nemačkom prodavcu vrši se iz naše sopstvene evropske kompanije.**
+      **Plaćanje automobila nemačkom prodavcu vrši se putem naše vlastite evropske kompanije.**
 
-      To značajno olakšava rad s nemačkim auto salonima i omogućava nam da samostalno pratimo transakciju, kontrolišemo dokumente i dalji izvoz automobila.
+      To znatno pojednostavljuje rad s nemačkim auto-salonima i omogućava nam da samostalno pratimo transakciju, kontrolišemo dokumente i dalji izvoz automobila.
 
-      Nakon plaćanja uzimamo automobil od prodavca i započinjemo pripremu za dostavu u zemlju odredišta.
+      Nakon plaćanja, preuzimamo automobil od prodavca i započinjemo pripremu za dostavu u zemlju odredišta.
 
       ## Dostava automobila iz Nemačke
 
       Organizujemo dostavu kupljenih automobila iz Nemačke u:
 
-      **Srbija**  
-      **Španija**  
-      **Portugal**  
+      **Srbija**\
+      **Španija**\
+      **Portugalija**\
       **Francuska**
 
-      Takođe možemo razmotriti dostavu automobila u druge zemlje — rute i uslovi se obračunavaju individualno.
+      Takođe možemo razmotriti dostavu automobila u druge zemlje — ruta i uslovi se izračunavaju individualno.
 
-      Zato nije važno gde se nalazite. Ako ste pronašli zanimljiv automobil u Nemačkoj ili želite da mi odaberemo za vas, možemo organizovati ceo proces kupovine i dostave.
+      Dakle, nije važno gde se nalazite. Ako ste pronašli zanimljiv automobil u Nemačkoj ili želite da mi pronađemo jedan za vas, možemo organizovati ceo proces kupovine i dostave.
 
-      ## Automobil iz Nemačke u Srbiju po meri
+      ## Automobil iz Nemačke u Srbiju na ključ
 
-      Za klijente u Srbiji nudimo potpuni ciklus uvoza automobila.
+      Za klijente u Srbiji nudimo pun ciklus uvoza automobila.
 
-      Biramo automobil u Nemačkoj, kontaktiramo prodavca, lično proveravamo vozilo, vršimo dijagnostiku, dogovaramo kupovinu, plaćamo automobil iz naše kompanije i uzimamo ga od dilera.
+      Pronalazimo automobil u Nemačkoj, kontaktiramo s prodavcem, lično proveravamo auto, vršimo dijagnostiku, dogovaramo kupovinu, plaćamo auto iz naše kompanije i preuzimamo ga od dilera.
 
-      Nakon toga organizujemo dostavu automobila u Srbiju, bavimo se potrebnim procedurama za uvoz i carinsko oblikovanje, a zatim dovodimo proces do registracije automobila.
+      Nakon toga organizujemo dostavu automobila u Srbiju, obavljamo potrebne procedure za uvoz i carinjenje, a zatim dovodimo proces do registracije automobila.
 
-      **Na kraju klijent dobija spreman automobil već na srpskim registarskim tablicama.**
+      **Kao rezultat, klijent dobija gotov automobil već na srpskim registarskim tablicama.**
 
-      Nije potrebno samostalno putovati u Nemačku, tražiti izvozne tablice, raspraviti se s prodavcem, organizovati prevoz i prolaziti ceo proces uvoza — te zadatke preuzimamo mi.
+      Nije potrebno da samostalno idete u Nemačku, tražite izvozne tablice, bavite se prodavcem, organizujete prevoz i prolazite kroz ceo proces uvoza — te zadatke preuzimamo mi.
 
-      ## Pravi primer — BMW X1 iz Nemačke u Srbiju
+      ## Realan primer — BMW X1 iz Nemačke u Srbiju
 
-      Jedan od automobila koje smo odabrali i doneli klijentu je **BMW X1**.
+      Jedan od automobila koji smo izabrali i doveli za klijenta je **BMW X1**.
 
       **Cena automobila u Nemačkoj (Brutto): 39 860 €**
 
-      Nakon kupovine, provere, dostave, obrade i svih potrebnih troškova:
+      Nakon kupovine, provere, dostave, sređivanja i svih potrebnih troškova:
 
-      **Konačna cena BMW X1 u Srbiji po meri — 46 000 €**.
+      **Konačna cena BMW X1 u Srbiji na ključ — 46 000 €.**
 
-      To znači da je klijent unapred razumeo konačni budžet i na kraju dobio potpuno spreman automobil u Srbiji.
+      Dakle, klijent je unapred znao konačni budžet i kao rezultat dobio potpuno sređen automobil u Srbiji.
 
-      Ovo je dobar primer zašto je prilikom odabira automobila važno gledati ne samo na cenu u nemačkom oglasu, već i unapred izračunati **pravu konačnu cenu automobila po meri u zemlji odredišta**.
+      Ovo je dobar primer zašto je važno prilikom izbora automobila posmatrati ne samo cenu u nemačkom oglasu, već i unapred izračunati **pravu konačnu cenu automobila na ključ u zemlji odredišta**.
 
       ## Zašto je dobro naručiti automobil iz Nemačke preko nas
 
-      Pratimo transakciju u celini i odgovaramo za svaki njen korak:
+      Pratimo transakciju u celosti i odgovaramo za svaki njen korak:
 
-      **Izbor → pregovori s dilerom → lična provera → provera na 200+ parametara → dijagnostika → dogovor → otkup → dokumenta → izvoz → dostava → carinsko oblikovanje → registracija.**
+      **Izbor → pregovori s trgovcem → lični pregled → provera po 200+ parametara → dijagnostika → dogovor → otkup → dokumenti → izvoz → dostava → carinjenje → registracija.**
 
-      Klijent pritom dobija jednog izvršitelja i jasan proces umesto potrebe da samostalno koordinira nekoliko kompanija i stručnjaka u različitim zemljama.
+      Klijent pritom dobija jednog izvršioca i razumljiv proces umesto potrebe da samostalno koordinira sa više firmi i stručnjaka u različitim zemljama.
 
-      Posebnu pažnju posvećujemo upravo proveri automobila pre plaćanja. Važno nam je da razumemo šta tačno kupujemo i u kakvom stanju će automobil doći klijentu.
+      Posebnu pažnju posvećujemo upravo proveri automobila pre plaćanja. Važno nam je da znamo šta tačno kupujemo i u kakvom stanju će automobil stići do klijenta.
 
       ## Želite da kupite automobil iz Nemačke?
 
-      Ako razmišljate o **BMW, Mercedes-Benz, Audi, Porsche, Volkswagen ili automobilu druge marke iz Nemačke**, pošaljite nam model, željenu godinu proizvodnje, opremu i okvirni budžet.
+      Ako razmatrate **BMW, Mercedes-Benz, Audi, Porsche, Volkswagen ili automobile druge marke iz Nemačke**, pošaljite nam model, željenu godinu proizvodnje, opremu i okvirni budžet.
 
-      Ako već imate konkretan oglas na nemačkom auto sajtu — jednostavno pošaljite link. Mi ćemo preliminarno proučiti automobil i kontaktirati prodavca.
+      Ako već imate konkretan oglas na nemačkom sajtu automobila — samo pošaljite link. Mi ćemo preliminarno proučiti automobil i kontaktirati prodavca.
 
-      Ako još nemate konkretan izbor — pronaći ćemo automobile prema vašim zahtevima.
+      Ako konkretna opcija još uvek ne postoji — pronaći ćemo automobile prema vašim zahtevima.
 
-      **Izbor i prevoz automobila iz Nemačke po meri u Srbiju, Rusiju, Španiju, Portugal i Francusku.**
+      **Izbor i preuzimanje automobila iz Nemačke na ključ u Srbiju, Rusiju, Španiju, Portugaliju i Francusku.**
 
-      Pronaći ćemo automobil, voditi pregovore, lično proveriti u Nemačkoj, otkupiti, obraditi dokumente i organizovati dostavu do krajnjeg klijenta.
+      Naići ćemo na automobil, obaviti pregovore, lično ga proveriti u Nemačkoj, otkupiti, sređivati dokumente i organizovati dostavu do krajnjeg klijenta.
   es:
     title: BMW X1
     body: |-

@@ -28,12 +28,14 @@ let cachePath: string;
 function translator(
   extraFields: readonly string[] = [],
   businessDescription = 'a test business',
+  localeGuidance: Partial<Record<'en' | 'sr', string>> = {},
 ) {
   return createCaseTranslator({
     targetLocales: ['en', 'sr'] as const,
     languageName: { en: 'English', sr: 'Serbian (Latin script)' },
     businessDescription,
     subject: 'car case studies',
+    localeGuidance,
     extraFields,
     cachePath,
   });
@@ -335,6 +337,17 @@ describe('processFile', () => {
     expect(systemPrompts()[0]).toContain('a test business');
     expect(systemPrompts()[0]).toContain('car case studies');
     expect(systemPrompts()[1]).toContain('Serbian (Latin script)');
+  });
+
+  it('sends locale guidance only to that locale', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = caseFile();
+    await translator([], 'a test business', {
+      sr: 'Say provera auta pre kupovine.',
+    }).processFile(file, 'key', {});
+    const [en, sr] = systemPrompts();
+    expect(en).not.toContain('provera');
+    expect(sr).toMatch(/keys themselves\. Say provera auta pre kupovine\.$/);
   });
 });
 

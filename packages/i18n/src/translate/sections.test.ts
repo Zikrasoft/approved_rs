@@ -23,6 +23,7 @@ import {
   sentPayloads,
   stubOpenAiFetch,
   stubTranslate,
+  systemPrompts,
 } from './mockOpenAiFetch.ts';
 
 const navSchema = z
@@ -49,11 +50,13 @@ let cachePath: string;
 function translator(
   cache = cachePath,
   businessDescription = 'a test business',
+  localeGuidance: Partial<Record<'en' | 'sr', string>> = {},
 ) {
   return createSectionTranslator({
     targetLocales: ['en', 'sr'] as const,
     languageName: { en: 'English', sr: 'Serbian (Latin script)' },
     businessDescription,
+    localeGuidance,
     cachePath: cache,
   });
 }
@@ -108,9 +111,26 @@ describe('buildSectionPrompt', () => {
       'EXACTLY the same keys',
     );
   });
+
+  it('appends locale guidance after the shape instructions', () => {
+    expect(buildSectionPrompt('x', 'y', 'z', 'Say provera.')).toMatch(
+      /keys themselves\. Say provera\.$/,
+    );
+  });
 });
 
 describe('processSection', () => {
+  it('sends locale guidance only to that locale', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('nav.yaml');
+    await translator(cachePath, 'a test business', {
+      sr: 'Say provera auta pre kupovine.',
+    }).processSection({ ...NAV_SECTION, path: file }, 'key', {});
+    const [en, sr] = systemPrompts();
+    expect(en).not.toContain('provera');
+    expect(sr).toContain('Say provera auta pre kupovine.');
+  });
+
   it('translates every locale on a cold cache and records the hash', async () => {
     stubTranslate((text) => `t:${text}`);
     const file = writeSection('home.yaml');

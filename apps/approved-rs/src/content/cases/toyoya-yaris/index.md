@@ -36,35 +36,35 @@ translations:
   sr:
     title: Toyota Yaris
     body: |-
-      ## Jednokratna provera automobila pre kupovine u Srbiji
+      ## Provera automobila pre kupovine u Srbiji
 
       **Provera automobila pre kupovine u Beogradu i drugim gradovima Srbije**
 
-      Obratila nam se mlada par sa zahtevom da provere automobil pre nego što ga kupe u Srbiji. Automobil su pronašli samostalno i jednostavno su nam poslali link na oglas. Naša zaduženja uključivala su **jednokratnu proveru automobila pre kupovine** i objektivnu procenu njegovog tehničkog stanja.
+      Obratila nam se mlada par sa molbom da provere automobil pre kupovine u Srbiji. Auto su sami pronašli i jednostavno su nam poslali link na oglas. Naš zadatak je bio da izvršimo **proveru automobila pre kupovine** i objektivno ocenimo njegovo tehničko stanje.
 
-      Pre polaska, tražili smo od prodavca **VIN broj automobila**. Preko VIN-a smo proverili istoriju automobila putem **CarVertical**: analizirali smo dostupnu istoriju, evidentirane kilometraže i moguće događaje iz prošlosti. Prema rezultatima provere, kilometraža je izgledala uverljivo, pa je donesena odluka da idemo na fizičku prozoru automobila.
+      Pre izlaska, tražili smo od prodavca **VIN broj automobila**. Preko VIN-a smo proverili istoriju vozila putem **CarVertical**: proučili smo dostupnu istoriju, zabeležene pređene kilometre i moguće događaje iz prošlosti. Pređeni kilometri su na osnovu provere delovali verodostojno, tako da smo doneli odluku da idemo na fizički pregled automobila.
 
-      Na licu mesta, izvršili smo sveobuhvatnu proveru automobila pre kupovine:
+      Na licu mesta smo izvršili sveobuhvatnu proveru automobila pre kupovine:
 
-      - pregled karoserije i farbe;
-      - otkriveno je nekoliko farbanih elemenata;
-      - proveren je stanje motora;
-      - uverili smo se da je motor suv i bez očiglednih tragova curenja;
-      - proverena je funkcionalnost menjača;
-      - ocenjeno je prebacivanje brzina u različitim režimima;
-      - provereno je delovanje kvačila;
-      - obavljen je test vožnje;
-      - ocenjeno je ukupno tehničko stanje automobila.
+      - pregleda karoserije i boje;
+      - otkrili smo nekoliko ofarbanih elemenata;
+      - proverili stanje motora;
+      - uverili se da je motor suv i bez očiglednih tragova curenja;
+      - proverili rad menjača;
+      - procenili promene brzina u različitim režimima;
+      - proverili rad kvačila;
+      - obavili probnu vožnju;
+      - procenili ukupno tehničko stanje automobila.
 
-      Kao rezultat, kupci su dobili objektivnu sliku o stanju automobila i razumevanje šta je važno uzeti u obzir pre kupovine.
+      Na kraju su kupci dobili objektivnu sliku o stanju automobila i razumevanje koje aspekte treba uzeti u obzir pre kupovine.
 
-      ### Jednokratna provera automobila u Srbiji
+      ### Provera automobila u Srbiji
 
-      Nije uvek neophodno vršiti kompletnu **automobilsku selekciju po meri**. Ako ste već pronašli automobil sami, možemo doći i uraditi njegovu nezavisnu proveru pre kupovine.
+      Nije uvek potrebna potpuna **automobilska selekcija po meri**. Ako ste automobil već pronašli sami, možemo doći i izvršiti njegovu nezavisnu proveru pre kupovine.
 
-      Usluga **jednokratnog pregleda automobila** posebno je pogodna ako se automobil nalazi u drugom gradu u Srbiji, a vi nemate mogućnost da lično odete na pregled.
+      Usluga **provere automobila pre kupovine** je posebno praktična ako se auto nalazi u drugom gradu Srbije, a vi nemate mogućnost da sami idete na pregled.
 
-      Ako ste pronašli automobil sami — **nije obavezno kupovati ga naslepo**. Pre kupovine možete naručiti nezavisnu proveru: VIN i istorija automobila, karoserija, motor, menjač, ovjes, dijagnostika i test vožnja.
+      Ako ste sami pronašli automobil — **nije obavezno kupovati ga na slepo**. Pre kupovine možete naručiti nezavisnu proveru: VIN i istorija automobila, karoserija, motor, menjač, ovSuspensija, dijagnostika i probna vožnja.
   es:
     title: Toyota Yaris
     body: |-

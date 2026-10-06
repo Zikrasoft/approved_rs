@@ -30,19 +30,19 @@ translations:
   sr:
     title: BMW 520 F10
     body: |-
-      ## Automatski izbor u Srbiji: BMW 520 F10 sa jednim vlasnikom i potpunom istorijom
+      ## Autopodbor u Srbiji: BMW 520 F10 sa jednim vlasnikom i potpunom istorijom
 
-      Obratio nam se Aleksej sa zahtevom za **BMW 420** ili **BMW 520 u F10 karoseriji**. Odmah prilikom razgovora o kriterijumima objasnili smo da ćemo razmatrati vozila samo nakon **2015. godine**, jer je upravo u tom periodu BMW počeo intenzivno da koristi motor **B47**, koji smatramo uspešnijim rešenjem u poređenju sa prethodnim **N47**. U ovom motoru su značajno unapređena osnovna slaba mesta, uključujući problem sa lancem razvodnika.
+      Kod nas se obratio Aleksej sa zahtevom za **BMW 420** ili **BMW 520 u F10 karoseriji**. Odmah prilikom razgovora o kriterijumima objasnili smo da ćemo razmatrati automobile samo posle **2015. godine**, jer je upravo u tom periodu BMW počeo da koristi motor **B47**, koji se, po našem mišljenju, pokazao kao bolji izbor u odnosu na prethodni **N47**. U njemu su značajno unapređene osnovne slabosti, uključujući problem sa lancem bregaste osovine.
 
-      Kao rezultat pretrage pronađen je odličan primerak — **BMW iz 2016. godine** sa pređenih samo **140.000 km**, što je za ovaj model zaista dobar indikator. Vozilo je imalo **potpunu istoriju servisiranja kod ovlašćenog dilera**, dovezeno je u Srbiju 2018. godine i tokom celog vremena je bilo kod **jednog vlasnika**.
+      Kao rezultat pretrage pronađena je odlična opcija — **BMW iz 2016. godine** sa pređenih samo **140 000 km**, što je za takav automobil veoma dobar pokazatelj. Automobil je imao **potpunu istoriju servisiranja kod ovlašćenog dilera**, dovezen je u Srbiju 2018. godine i sve vreme je bio kod **jednog vlasnika**.
 
-      Vlasnik je bio izuzetno pažljiv: osoba starijeg uzrasta koja je malo vozila, a poslednjih godina skoro uopšte nije koristila automobil jer je sin već imao svoj **BMW 320 G20**.
+      Osim toga, vlasnik je bio veoma pažljiv: starija osoba koja je malo vozila, a poslednjih godina praktično nije koristila automobil, jer je njen sin već imao svoj **BMW 320 G20**.
 
-      Prilikom provere, automobil se pokazao odličnim: **bez ijednog farbanog dela**, sa transparentnom istorijom i izvrsnim tehničkim stanjem.
+      Tokom provere, automobil se pokazao odlično: **bez jednog jedinstvenog farbanog dela**, sa transparentnom istorijom i odličnim tehničkim stanjem.
 
-      Za dijagnostiku BMW-a koristimo **zvaničnu BMW ISTA opremu**, koja omogućava duboku proveru elektronskih blokova vozila, parametara motora, stanja sistema i otkrivanje potencijalnih skrivenih problema pre kupovine.
+      Za dijagnostiku BMW-a koristimo **ozvaničenu BMW ISTA opremu**, koja omogućava dubinsko proveravanje elektronskih blokova vozila, parametara motora, stanja sistema i identifikaciju mogućih skrivenih problema pre kupovine.
 
-      Na kraju, Aleksej je dobio upravo onaj automobil koji je tražio — dobro očuvan BMW sa dobrom istorijom i bez neprijatnih iznenađenja.
+      Na kraju, Aleksej je dobio upravo onakav automobil kakav je tražio — negovan BMW sa dobrom istorijom i bez neprijatnih iznenađenja.
   es:
     title: BMW 520 F10
     body: |-

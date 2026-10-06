@@ -29,6 +29,7 @@ export interface SectionTranslatorOptions<L extends string> {
   targetLocales: readonly L[];
   languageName: Record<L, string>;
   businessDescription: string;
+  localeGuidance?: Partial<Record<L, string>>;
   model?: string;
   cachePath?: string;
 }
@@ -37,6 +38,7 @@ export function buildSectionPrompt(
   promptSubject: string,
   languageName: string,
   businessDescription: string,
+  guidance = '',
 ): string {
   return (
     `You translate ${promptSubject} from Russian into ${languageName} ` +
@@ -57,7 +59,8 @@ export function buildSectionPrompt(
     'The input is a flat JSON object whose keys are field paths and whose values are the strings to ' +
     'translate. Respond with a JSON object having EXACTLY the same keys, with each value translated. ' +
     'A key like meta.metaTitle or steps[2].title tells you what the string is for — never translate ' +
-    'the keys themselves.'
+    'the keys themselves.' +
+    (guidance ? ` ${guidance}` : '')
   );
 }
 
@@ -65,6 +68,7 @@ export function createSectionTranslator<L extends string>({
   targetLocales,
   languageName,
   businessDescription,
+  localeGuidance = {},
   model,
   cachePath = DEFAULT_CACHE_PATH,
 }: SectionTranslatorOptions<L>) {
@@ -111,6 +115,7 @@ export function createSectionTranslator<L extends string>({
           section.promptSubject,
           names.get(locale) as string,
           businessDescription,
+          localeGuidance[locale],
         ),
         apiKey,
         model,

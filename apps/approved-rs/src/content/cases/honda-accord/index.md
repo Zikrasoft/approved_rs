@@ -43,38 +43,38 @@ translations:
     body: |-
       ## Jednokratna provera automobila pre kupovine u Srbiji — Honda Accord 2024
 
-      Juri se obratio sa zahtevom da izvršimo jednokratnu prozoru automobila pre kupovine u Srbiji. Bio je zainteresovan za **Honda Accord 2024. godište** sa pređenih oko **30 000 kilometara**.
+      Juri nam se obratio sa molbom da izvršimo jednokratnu provere automobila pre kupovine u Srbiji. Interesovala ga je **Honda Accord 2024. godište** sa pređenih oko **30 000 kilometara**.
 
-      Pre kupovine automobila, sproveli smo sveobuhvatnu tehničku i vizuelnu proveru kako bismo procenili stvarno stanje Honda Accord i uočili eventualne nedostatke koji nisu uvek vidljivi pri standardnom pregledu.
+      Pre kupovine automobila izvršili smo sveobuhvatnu tehničku i vizuelnu provere, kako bismo procenili stvarno stanje Honda Accord i otkrili moguće nedostatke koji nisu uvek uočljivi prilikom običnog pregleda.
 
-      Tokom provere automobila pre kupovine, izvršili smo:
+      U okviru provere automobila pre kupovine, izvršili smo:
 
-      - dijagnostiku svih ključnih elektronskih sistema automobila;
+      - kompjutersku dijagnostiku svih osnovnih elektronskih sistema automobila;
       - proveru grešaka i sačuvanih kvarova u kontrolnim blokovima;
       - dijagnostiku motora i procenu njegovog rada;
       - proveru motornog prostora na prisustvo tragova ulja i drugih tehničkih tečnosti;
-      - proveru nivoa i stanja funkcionalnih tečnosti;
-      - vizuelnu proveru karoserije i svih delova automobila;
-      - merenje debljine laka kako bismo utvrdili farbane i popravljane delove;
-      - proveru karoserije na prisustvo tragova sudara, popravki i zamene delova;
-      - proveru stanja farova, stakala, karoserijskih razmaka i spoljnjih delova;
-      - inspekciju suspenzije i delova pogonskog sklopa;
+      - proveru nivoa i stanja eksploatacionih tečnosti;
+      - vizuelnu proveru karoserije i svih elemenata automobila;
+      - merenje debljine lakoprimene površine za određivanje farbanih i remontovanih elemenata;
+      - proveru karoserije na prisustvo tragova sudara, popravke i zamene delova;
+      - proveru stanja svetala, stakala, karoserijskih razmaka i spoljašnjih elemenata;
+      - pregled ovjesa i delova pogonskog sklopa;
       - proveru kočionog sistema;
       - proveru stanja guma i felni;
-      - pregled donjeg dela vozila;
+      - pregled donjeg dela automobila;
       - proveru na prisustvo korozije, oštećenja i tragova korišćenja;
-      - test vožnju kako bismo ocenili rad motora, menjača, suspenzije i kočnica;
-      - procenu opšteg tehničkog stanja automobila i mogućih ulaganja nakon kupovine.
+      - test vožnju za procenu rada motora, menjača, ovjesa i kočnica;
+      - procenu ukupnog tehničkog stanja automobila i mogućih ulaganja nakon kupovine.
 
-      Posebno smo obratili pažnju na usklađenost navedenog pređenog broja kilometara sa stvarnim stanjem automobila. Prilikom pregleda takođe je ocenjeno stanje karoserije, enterijera, motora, pogonskog sklopa i drugih osnovnih delova **Honda Accord**.
+      Posebnu pažnju obratili smo na usklađenost deklarisanog pređenog puta sa stvarnim stanjem automobila. Tokom pregleda takođe se procenjivalo stanje karoserije, enterijera, motora, pogonskog sklopa i drugih ključnih sklopova **Honda Accord**.
 
       Na osnovu rezultata provere, Juri je dobio objektivne informacije o stanju automobila i mogao je doneti odluku o kupovini, oslanjajući se ne samo na reči prodavca, već i na rezultate profesionalne dijagnostike.
 
-      Pored toga, tokom pregovora uspeli smo da smanjimo početnu cenu automobila za **700 evra**.
+      Pored toga, tokom pregovora, uspeli smo da smanjimo početnu cenu automobila za **700 evra**.
 
-      Jednokratna provera automobila pre kupovine je praktična usluga za one koji su samostalno pronašli automobil u Srbiji, ali žele da se uvere u njegovo tehničko stanje i pravnu transparentnost pre nego što predaju novac prodavcu.
+      Jednokratna provera automobila pre kupovine je praktična usluga za one koji su sami našli automobil u Srbiji, ali žele da se uvere u njegovo tehničko stanje i pravnu transparentnost pre nego što predaju novac prodavcu.
 
-      Ako ste pronašli Honda, BMW, Mercedes-Benz, Volkswagen, Škoda, Toyota ili automobil druge marke u Srbiji, ne žurite da prenesete novac prodavcu. Profesionalna jednokratna prozora pomoći će da se otkriju skriveni nedostaci i argumentovano pregovara.
+      Ako ste pronašli Honda, BMW, Mercedes-Benz, Volkswagen, Škoda, Toyota ili automobil druge marke u Srbiji, ne žurite da prenesete novac prodavcu. Profesionalna jednokratna provera pomoći će otkriti skrivene nedostatke i argumentovano obaviti pregovore.
   es:
     title: Honda Accord
     body: |-

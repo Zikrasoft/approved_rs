@@ -24,23 +24,23 @@ translations:
   sr:
     title: Ineos Grenadier
     body: |-
-      **Autopodbor u Nemačkoj: INEOS Grenadier za klijenta iz Minhena**
+      Auto-sourcing u Nemačkoj: INEOS Grenadier za klijenta iz **Minhena**
 
-      Ovaj put, za uslugu autopodbora u Nemačkoj, obratio nam se Grigorij — vlasnik građevinske kompanije iz **Minhena**. Zadatak je bio zanimljiv i pomalo neobičan: pronaći dobar **INEOS Grenadier** u odličnom tehničkom stanju.
+      Ovog puta za uslugu auto-sourcinga u Nemačkoj obratio nam se Grigorije — vlasnik građevinske kompanije u **Minhenu**. Zadatak je bio zanimljiv i ne baš standardan: pronaći dobar **INEOS Grenadier** u odličnom tehničkom stanju.
 
-      INEOS Grenadier je pravi rameni SUV, stvoren za sve one kojima su važni pouzdanost, prohodnost i mogućnost sigurne vožnje van asfalta. Dodatni plus ovog modela su provereni motori od BMW-a. Grenadier dolazi sa **3,0-litarskim rednim šestocilindričnim motorima BMW**, sa kojima smo vrlo dobro upoznati zahvaljujući višegodišnjem radu sa vozilima ove marke.
+      INEOS Grenadier je pravi ramni SUV, stvoren za one kojima su važni pouzdanost, prohodnost i mogućnost da se bez problema skrene sa asfalta. Dodatni plus ove modele su proverenih motora BMW. Grenadier je opremljen **3,0-litarskim rednim šestocilindričnim motorima BMW**, sa kojima smo veoma dobro upoznati zahvaljujući višegodišnjem radu s automobilima ove marke.
 
-      U okviru autopodbora, pregledali smo **dva INEOS Grenadier** modela. Kao i obično, zadatak je bio temeljno proveriti stanje i istoriju svake jedinice i shvatiti koja od njih zaista vredi kupiti.
+      U okviru auto-sourcinga pregledali smo **dva INEOS Grenadier**. Kao i obično, zadatak je bio da pažljivo proverimo stanje i istoriju svakog od njih i shvatimo koji primerak zaista vredi kupiti.
 
-      Nakon pregleda, izabrali smo najbolju opciju — INEOS Grenadier u maksimalno dobrom stanju, sa pređenih oko **80 000 km**.
+      Na osnovu pregleda izabrali smo najbolju opciju — INEOS Grenadier u maksimalno dobrom stanju sa pređenih oko **80 000 km**.
 
-      Sada je Grenadier već četvrti automobil u Grigorijevoj porodici. Njegova glavna svrha su izleti van grada, putovanja i avanture tamo gde se dobar asfalt završava.
+      Sada je Grenadier već četvrti automobil u Grigorijevoj porodici. Njegova glavna svrha su izleti van grada, putovanja i vožnje na mestima gde se završava dobar asfalt.
 
-      Čestitamo Grigoriju na odličnom izboru i želimo mu zanimljive rute i nezaboravne utiske za volanom novog SUV-a!
+      Čestitamo Grigoriju na odličnom kupovini i želimo zanimljive rute i nezaboravne trenutke za volanom novog SUV-a!
 
-      Mi se bavimo profesionalnim autopodborom u Nemačkoj i možemo pronaći i proveriti automobil praktično u bilo kojoj regiji zemlje.
+      Bavimo se profesionalnim auto-sourcingom u Nemačkoj i možemo pronaći i proveriti automobil praktično u bilo kojoj regiji zemlje.
 
-      Ako želite da kupite automobil u Nemačkoj i dobijete nezavisnu profesionalnu proveru pre kupovine — obratite nam se. Pronaći ćemo odgovarajuće opcije, obaviti pregled i pomoći vam da izaberete zaista dobar automobil.
+      Ako želite da kupite automobil u Nemačkoj i dobijete nezavisnu profesionalnu proveru pre kupovine — obratite se. Pronaći ćemo odgovarajuće opcije, izvršićemo provere i pomoći da izaberete zaista dobar automobil.
   es:
     title: Ineos Grenadier
     body: |-
