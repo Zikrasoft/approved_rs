@@ -67,8 +67,19 @@ vi.mock('@/lib/telegram', async () => {
   };
 });
 
+const capture = vi.hoisted(() => ({
+  approved: { sendMessage: vi.fn() },
+  carlab: { sendMessage: vi.fn() },
+}));
+
 vi.mock('@/lib/captureBot', () => ({
-  captureClient: { sendMessage: vi.fn() },
+  captureClient: capture.approved,
+  REPLY_RELAY_BRANDS: ['Approved.rs', 'CarLab'],
+  captureClientFor: (brand: string) =>
+    new Map([
+      ['Approved.rs', capture.approved],
+      ['CarLab', capture.carlab],
+    ]).get(brand),
 }));
 
 vi.mock('@/lib/store', async () => {
@@ -287,6 +298,9 @@ describe('POST /api/telegram-webhook', () => {
     vi.mocked(sendMessage).mockReset().mockResolvedValue(undefined);
     vi.mocked(sendFieldChangeToAdmin).mockReset().mockResolvedValue(undefined);
     vi.mocked(captureClient.sendMessage)
+      .mockReset()
+      .mockResolvedValue(undefined);
+    vi.mocked(capture.carlab.sendMessage)
       .mockReset()
       .mockResolvedValue(undefined);
   });
@@ -2553,6 +2567,77 @@ describe('POST /api/telegram-webhook', () => {
       expect(res.status).toBe(200);
       expect(resolvePendingPrompt).not.toHaveBeenCalled();
       expect(ensureLeadCard).not.toHaveBeenCalled();
+      expect(sendMessage).toHaveBeenCalledWith(
+        DM_CHAT_ID,
+        expect.stringContaining('Не доставлено'),
+      );
+    });
+
+    it("sends a sibling brand's reply through that brand's capture bot", async () => {
+      const lead = makeLead({
+        id: 5,
+        brand: 'CarLab',
+        contact: 'tg://user?id=4242',
+        telegramId: 4242,
+        pendingPrompt: {
+          chatId: DM_CHAT_ID,
+          messageId: 888,
+          kind: 'reply_visitor',
+        },
+      });
+      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
+      mockResolveFromBase(lead);
+
+      await POST(
+        makeCtx({
+          message: {
+            message_id: 2,
+            text: 'Запчасть есть',
+            chat: { id: DM_CHAT_ID, type: 'private' },
+            from: { id: OWNER_ID },
+            reply_to_message: { message_id: 888 },
+          },
+        }),
+      );
+
+      expect(capture.carlab.sendMessage).toHaveBeenCalledWith(
+        4242,
+        'Запчасть есть',
+      );
+      expect(captureClient.sendMessage).not.toHaveBeenCalled();
+      expect(ensureLeadCard).toHaveBeenCalled();
+    });
+
+    it('reports a reply as undelivered when the brand has no capture bot configured', async () => {
+      vi.mocked(findByPendingPrompt).mockResolvedValue(
+        makeLead({
+          id: 5,
+          brand: 'Details',
+          contact: 'tg://user?id=4242',
+          telegramId: 4242,
+          pendingPrompt: {
+            chatId: DM_CHAT_ID,
+            messageId: 888,
+            kind: 'reply_visitor',
+          },
+        }),
+      );
+
+      await POST(
+        makeCtx({
+          message: {
+            message_id: 2,
+            text: 'Нашёл вариант',
+            chat: { id: DM_CHAT_ID, type: 'private' },
+            from: { id: OWNER_ID },
+            reply_to_message: { message_id: 888 },
+          },
+        }),
+      );
+
+      expect(captureClient.sendMessage).not.toHaveBeenCalled();
+      expect(capture.carlab.sendMessage).not.toHaveBeenCalled();
+      expect(resolvePendingPrompt).not.toHaveBeenCalled();
       expect(sendMessage).toHaveBeenCalledWith(
         DM_CHAT_ID,
         expect.stringContaining('Не доставлено'),

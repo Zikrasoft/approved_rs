@@ -45,7 +45,7 @@ import {
   type Role,
   type EditField,
 } from '@/lib/telegram';
-import { captureClient } from '@/lib/captureBot';
+import { captureClientFor } from '@/lib/captureBot';
 import {
   getLead,
   setStatus,
@@ -891,12 +891,18 @@ async function handlePromptReply(
       return;
     }
     const undelivered = () => sendMessage(chatId, REPLY_COPY.undelivered);
-    if (pending.telegramId == null) {
+    const client = captureClientFor(pending.brand);
+    if (pending.telegramId == null || !client) {
+      console.warn('[telegram-webhook] reply to visitor has no route', {
+        id: pending.id,
+        brand: pending.brand,
+        reason: client ? 'no telegramId' : 'no capture bot for brand',
+      });
       await undelivered();
       return;
     }
     try {
-      await captureClient.sendMessage(pending.telegramId, escapeHtml(reply));
+      await client.sendMessage(pending.telegramId, escapeHtml(reply));
     } catch (err) {
       console.error('[telegram-webhook] reply to visitor failed', {
         id: pending.id,
