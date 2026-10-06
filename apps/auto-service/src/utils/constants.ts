@@ -45,8 +45,6 @@ export const TELEGRAM_BOT_URL = telegramBotLink(BRAND.captureBot);
 
 export const SOCIAL_SAME_AS = [TELEGRAM_BOT_URL];
 
-export const YM_COUNTER_ID = 112647692;
-
 export const COOKIE_POLICY_VERSION = '2026-09-15';
 
 export const PHONE_COUNTRY_SHORTLIST = [

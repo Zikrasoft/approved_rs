@@ -3,8 +3,6 @@ import { telegramBotLink } from '@podbor/site-kit/contact-links';
 import { z } from 'zod';
 import type { Locale } from '@/i18n/config';
 
-export const YM_COUNTER_ID = 111800377;
-
 export const BRAND = APPROVED;
 
 const publicEnvSchema = z.object({

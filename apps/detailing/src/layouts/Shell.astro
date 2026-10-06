@@ -228,7 +228,7 @@ const businessSchema = {
         defineLanguageSuggestion,
       } from '@podbor/site-kit/browser';
       import { applyPreferredContactOrder } from '@podbor/site-kit/contact-preference';
-      import { YM_COUNTER_ID } from '@/utils/constants';
+      import { YM_COUNTER_ID } from '@/utils/metrika';
 
       if (!import.meta.env.DEV) defineAnalytics({ ymCounterId: YM_COUNTER_ID });
       defineContactClickTracking(isTrackedContactChannel);
