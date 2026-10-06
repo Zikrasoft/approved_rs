@@ -130,16 +130,32 @@ export function createShopOrderHandler({
       });
       return Response.json({ error: 'storage' }, { status: 503 });
     }
-    // TODO: three-state notifyLead result + a card-only retry path — ADR-0022.
-    if (!(await notifyLead(orderLead(order), '[shop-order]'))) {
-      console.error(
-        '[shop-order] the lead is stored but its card did not go out',
-        {
-          orderId: order.orderId,
-        },
-      );
-      return Response.json({ delivered: false }, { status: 502 });
-    }
-    return Response.json({ accepted: true }, { status: 202 });
+    const { stored, delivered } = await notifyLead(
+      orderLead(order),
+      '[shop-order]',
+    );
+    if (!stored) await releaseMarker(markers, order.orderId);
+    if (delivered) return Response.json({ accepted: true }, { status: 202 });
+    console.error(
+      stored
+        ? '[shop-order] the lead is stored but its card did not go out'
+        : '[shop-order] nothing stored and no card, the marker is released for a retry',
+      { orderId: order.orderId },
+    );
+    return Response.json({ delivered: false }, { status: 502 });
   };
+}
+
+async function releaseMarker(
+  markers: OrderMarkers,
+  orderId: string,
+): Promise<void> {
+  try {
+    await markers.release(orderId);
+  } catch (error) {
+    console.error('[shop-order] cannot release the order marker', {
+      orderId,
+      error,
+    });
+  }
 }

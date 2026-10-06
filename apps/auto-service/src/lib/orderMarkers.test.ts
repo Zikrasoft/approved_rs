@@ -29,5 +29,8 @@ describe('the order markers dev picks', () => {
     expect(JSON.parse(written)).toMatchObject({ orderId });
 
     await expect(orderMarkers.add(orderId)).rejects.toThrow(/EEXIST/);
+
+    await orderMarkers.release(orderId);
+    expect(await orderMarkers.has(orderId)).toBe(false);
   });
 });

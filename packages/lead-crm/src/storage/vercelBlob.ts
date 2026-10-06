@@ -1,4 +1,5 @@
 import {
+  del,
   get,
   head,
   put,
@@ -67,6 +68,10 @@ export function createBlobOrderMarkers(): OrderMarkers {
         addRandomSuffix: false,
         contentType: 'application/json',
       });
+    },
+
+    async release(orderId: string): Promise<void> {
+      await del(markerPath(orderId));
     },
   };
 }

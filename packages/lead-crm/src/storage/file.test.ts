@@ -96,4 +96,14 @@ describe('createFileOrderMarkers', () => {
 
     await expect(markers.add('order_01/../x')).rejects.toThrow(/EEXIST/);
   });
+
+  it('releases a marker so the order can be taken again', async () => {
+    const markers = createFileOrderMarkers({ dir });
+
+    await markers.add('order_02');
+    await markers.release('order_02');
+
+    await expect(markers.has('order_02')).resolves.toBe(false);
+    await expect(markers.add('order_02')).resolves.toBeUndefined();
+  });
 });

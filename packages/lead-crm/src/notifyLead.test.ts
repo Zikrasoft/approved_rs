@@ -94,7 +94,10 @@ describe('notifyLead', () => {
 
   it('does not throw when sendLeadNotification fails', async () => {
     vi.mocked(sendLeadNotification).mockRejectedValueOnce(new Error('TG down'));
-    await expect(notifyLead(baseData, '[test]')).resolves.toBe(false);
+    await expect(notifyLead(baseData, '[test]')).resolves.toEqual({
+      stored: true,
+      delivered: false,
+    });
   });
 
   it('falls back to a synthetic untracked lead and still notifies Telegram when the store insert fails', async () => {
@@ -141,14 +144,30 @@ describe('notifyLead', () => {
 });
 
 describe('notifyLead — delivery result', () => {
-  it('reports a posted card', async () => {
-    expect(await notifyLead(baseData, '[test]')).toBe(true);
+  it('reports a stored lead with a posted card', async () => {
+    expect(await notifyLead(baseData, '[test]')).toEqual({
+      stored: true,
+      delivered: true,
+    });
   });
 
   it('reports a card posted without CRM tracking when the store is down', async () => {
     vi.mocked(insertOrMergeLead).mockRejectedValueOnce(new Error('blob down'));
 
-    expect(await notifyLead(baseData, '[test]')).toBe(true);
+    expect(await notifyLead(baseData, '[test]')).toEqual({
+      stored: false,
+      delivered: true,
+    });
+  });
+
+  it('reports nothing stored and nothing posted when the store and Telegram both fail', async () => {
+    vi.mocked(insertOrMergeLead).mockRejectedValueOnce(new Error('blob down'));
+    vi.mocked(sendLeadNotification).mockRejectedValueOnce(new Error('TG down'));
+
+    expect(await notifyLead(baseData, '[test]')).toEqual({
+      stored: false,
+      delivered: false,
+    });
   });
 
   it('reports a merged lead as delivered once its card is refreshed', async () => {
@@ -157,13 +176,19 @@ describe('notifyLead — delivery result', () => {
       merged: true,
     });
 
-    expect(await notifyLead(baseData, '[test]')).toBe(true);
+    expect(await notifyLead(baseData, '[test]')).toEqual({
+      stored: true,
+      delivered: true,
+    });
   });
 
   it('still counts the card as delivered when only its id could not be kept', async () => {
     vi.mocked(setTelegramMessage).mockRejectedValueOnce(new Error('blob down'));
 
-    expect(await notifyLead(baseData, '[test]')).toBe(true);
+    expect(await notifyLead(baseData, '[test]')).toEqual({
+      stored: true,
+      delivered: true,
+    });
   });
 });
 
@@ -228,7 +253,10 @@ describe('notifyLead — failures that must not sink the lead', () => {
     });
     refreshLeadCard.mockRejectedValue(new Error('telegram down'));
 
-    await expect(notifyLead(baseData, '[test]')).resolves.toBe(true);
+    await expect(notifyLead(baseData, '[test]')).resolves.toEqual({
+      stored: true,
+      delivered: true,
+    });
 
     expect(errorSpy).toHaveBeenCalledWith(
       "[test] failed to refresh the merged lead's card",
@@ -241,7 +269,10 @@ describe('notifyLead — failures that must not sink the lead', () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     setTelegramMessage.mockRejectedValue(new Error('storage down'));
 
-    await expect(notifyLead(baseData, '[test]')).resolves.toBe(true);
+    await expect(notifyLead(baseData, '[test]')).resolves.toEqual({
+      stored: true,
+      delivered: true,
+    });
 
     expect(errorSpy).toHaveBeenCalledWith(
       '[test] failed to persist telegram message id',
@@ -258,7 +289,7 @@ describe('notifyLead — lead that cannot be validated at all', () => {
 
     await expect(
       notifyLead({ ...baseData, name: 42 as unknown as string }, '[test]'),
-    ).resolves.toBe(false);
+    ).resolves.toEqual({ stored: false, delivered: false });
 
     expect(errorSpy).toHaveBeenCalledWith(
       '[test] lead failed validation, cannot notify',

@@ -3,11 +3,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 class FakePreconditionFailedError extends Error {}
 class FakeNotFoundError extends Error {}
 
+const del = vi.fn();
 const get = vi.fn();
 const head = vi.fn();
 const put = vi.fn();
 
 vi.mock('@vercel/blob', () => ({
+  del: (...args: unknown[]) => del(...args),
   get: (...args: unknown[]) => get(...args),
   head: (...args: unknown[]) => head(...args),
   put: (...args: unknown[]) => put(...args),
@@ -22,6 +24,7 @@ const { StorageConflictError } = await import('./types.ts');
 const storage = createVercelBlobStorage({ path: 'data/leads.json' });
 
 beforeEach(() => {
+  del.mockReset();
   get.mockReset();
   head.mockReset();
   put.mockReset();
@@ -142,5 +145,11 @@ describe('createBlobOrderMarkers', () => {
     head.mockRejectedValueOnce(boom);
 
     await expect(markers.has('o3')).rejects.toBe(boom);
+  });
+
+  it('releases a marker by deleting its blob', async () => {
+    await markers.release('order_01/../x');
+
+    expect(del).toHaveBeenCalledWith('shop-orders/order_01%2F..%2Fx.json');
   });
 });
