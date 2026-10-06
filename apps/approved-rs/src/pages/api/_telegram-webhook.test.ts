@@ -2,110 +2,108 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { APIContext } from 'astro';
 import type { StoredLead } from '@/lib/store';
 
-vi.mock('@/lib/telegram', async () => ({
-  canAddIncome: (
-    await vi.importActual<typeof import('@podbor/lead-crm')>('@podbor/lead-crm')
-  ).canAddIncome,
-  isLeadStatusKey: (key: string) =>
-    ['in_progress', 'won', 'lost'].includes(key),
-  answerCallback: vi.fn(),
-  ensureLeadCard: vi.fn(),
-  sendForceReplyPrompt: vi.fn(),
-  formatMoney: (n: number) => `${n} €`,
-  formatDateRu: (iso: string) => {
-    const [y, m, d] = iso.split('-');
-    return `${d}.${m}.${y}`;
-  },
-  sendDealNotificationToAdmin: vi.fn(),
-  sendIncomeNotificationToAdmin: vi.fn(),
-  sendCommissionClaimToAdmin: vi.fn(),
-  sendCommissionResultToOwner: vi.fn(),
-  sendStatusChangeToAdmin: vi.fn(),
-  sendFieldChangeToAdmin: vi.fn(),
-  EDIT_FIELD_LABELS: {
-    name: 'имя',
-    contact: 'контакт',
-    comment: 'комментарий',
-  },
-  escapeHtml: (
-    await vi.importActual<typeof import('@podbor/lead-crm')>('@podbor/lead-crm')
-  ).escapeHtml,
-  REPLY_COPY: (
-    await vi.importActual<typeof import('@podbor/lead-crm')>('@podbor/lead-crm')
-  ).REPLY_COPY,
-  sendMessage: vi.fn(),
-  buildOwedList: vi.fn().mockReturnValue({
-    text: 'OWED_LIST',
-    reply_markup: { inline_keyboard: [] },
-  }),
-  formatDealsList: vi.fn().mockReturnValue('DEALS_LIST'),
-  buildSearchResults: vi.fn().mockReturnValue({
-    text: 'SEARCH_RESULTS',
-    reply_markup: { inline_keyboard: [] },
-  }),
-  buildMenu: vi.fn((role: string) => ({
-    text: `MENU_${role}`,
-    reply_markup: { inline_keyboard: [] },
-  })),
-  buildHelp: vi.fn((role: string) => `HELP_${role}`),
-  buildLeadList: vi.fn((_leads: unknown[], status: string) => ({
-    text: `LIST_${status}`,
-    reply_markup: { inline_keyboard: [] },
-  })),
-  buildStats: vi.fn().mockReturnValue('STATS'),
-  buildLeadDetail: vi.fn((lead: { id: number }, role: string) => ({
-    text: `DETAIL_${lead.id}_${role}`,
-    reply_markup: { inline_keyboard: [] },
-  })),
-  buildDeleteConfirm: vi.fn((lead: { id: number }) => ({
-    text: `DELCONFIRM_${lead.id}`,
-    reply_markup: { inline_keyboard: [] },
-  })),
-  buildRemindPicker: vi.fn((id: number) => ({
-    text: `REMINDPICKER_${id}`,
-    reply_markup: { inline_keyboard: [] },
-  })),
-  editLeadDetailMessage: vi.fn(),
-  safeEditMessage: vi.fn(),
-  OWNER_IDS: [111],
-  ADMIN_IDS: [222],
-}));
+vi.mock('@/lib/telegram', async () => {
+  const actual =
+    await vi.importActual<typeof import('@podbor/lead-crm')>(
+      '@podbor/lead-crm',
+    );
+  return {
+    canAddIncome: actual.canAddIncome,
+    isLeadStatusKey: (key: string) =>
+      ['in_progress', 'won', 'lost'].includes(key),
+    answerCallback: vi.fn(),
+    ensureLeadCard: vi.fn(),
+    sendForceReplyPrompt: vi.fn(),
+    formatMoney: (n: number) => `${n} €`,
+    formatDateRu: (iso: string) => {
+      const [y, m, d] = iso.split('-');
+      return `${d}.${m}.${y}`;
+    },
+    sendDealNotificationToAdmin: vi.fn(),
+    sendIncomeNotificationToAdmin: vi.fn(),
+    sendCommissionClaimToAdmin: vi.fn(),
+    sendCommissionResultToOwner: vi.fn(),
+    sendStatusChangeToAdmin: vi.fn(),
+    sendFieldChangeToAdmin: vi.fn(),
+    EDIT_FIELD_LABELS: {
+      name: 'имя',
+      contact: 'контакт',
+      comment: 'комментарий',
+    },
+    escapeHtml: actual.escapeHtml,
+    REPLY_COPY: actual.REPLY_COPY,
+    sendMessage: vi.fn(),
+    buildOwedList: vi.fn().mockReturnValue({
+      text: 'OWED_LIST',
+      reply_markup: { inline_keyboard: [] },
+    }),
+    formatDealsList: vi.fn().mockReturnValue('DEALS_LIST'),
+    buildSearchResults: vi.fn().mockReturnValue({
+      text: 'SEARCH_RESULTS',
+      reply_markup: { inline_keyboard: [] },
+    }),
+    buildMenu: vi.fn((role: string) => ({
+      text: `MENU_${role}`,
+      reply_markup: { inline_keyboard: [] },
+    })),
+    buildHelp: vi.fn((role: string) => `HELP_${role}`),
+    buildLeadList: vi.fn((_leads: unknown[], status: string) => ({
+      text: `LIST_${status}`,
+      reply_markup: { inline_keyboard: [] },
+    })),
+    buildStats: vi.fn().mockReturnValue('STATS'),
+    buildLeadDetail: vi.fn((lead: { id: number }, role: string) => ({
+      text: `DETAIL_${lead.id}_${role}`,
+      reply_markup: { inline_keyboard: [] },
+    })),
+    buildDeleteConfirm: vi.fn((lead: { id: number }) => ({
+      text: `DELCONFIRM_${lead.id}`,
+      reply_markup: { inline_keyboard: [] },
+    })),
+    buildRemindPicker: vi.fn((id: number) => ({
+      text: `REMINDPICKER_${id}`,
+      reply_markup: { inline_keyboard: [] },
+    })),
+    editLeadDetailMessage: vi.fn(),
+    safeEditMessage: vi.fn(),
+    OWNER_IDS: [111],
+    ADMIN_IDS: [222],
+  };
+});
 
 vi.mock('@/lib/captureBot', () => ({
   captureClient: { sendMessage: vi.fn() },
 }));
 
-vi.mock('@/lib/store', async () => ({
-  appendIncome: (
-    await vi.importActual<typeof import('@podbor/lead-crm')>('@podbor/lead-crm')
-  ).appendIncome,
-  appendNote: (
-    await vi.importActual<typeof import('@podbor/lead-crm')>('@podbor/lead-crm')
-  ).appendNote,
-  getLead: vi.fn(),
-  setStatus: vi.fn(),
-  archiveLead: vi.fn(),
-  unarchiveLead: vi.fn(),
-  deleteLead: vi.fn(),
-  resumeLead: vi.fn(),
-  postponeLead: vi.fn(),
-  canPostpone: (
-    await vi.importActual<typeof import('@podbor/lead-crm')>('@podbor/lead-crm')
-  ).canPostpone,
-  postponePatch: (
-    await vi.importActual<typeof import('@podbor/lead-crm')>('@podbor/lead-crm')
-  ).postponePatch,
-  claimCommission: vi.fn(),
-  confirmCommissionPayment: vi.fn(),
-  rejectCommissionPayment: vi.fn(),
-  setPendingPrompt: vi.fn(),
-  findByPendingPrompt: vi.fn(),
-  resolvePendingPrompt: vi.fn(),
-  searchLeads: vi.fn(),
-  getOwedSummary: vi.fn(),
-  readLeads: vi.fn(),
-  getCommission: vi.fn(),
-}));
+vi.mock('@/lib/store', async () => {
+  const actual =
+    await vi.importActual<typeof import('@podbor/lead-crm')>(
+      '@podbor/lead-crm',
+    );
+  return {
+    appendIncome: actual.appendIncome,
+    appendNote: actual.appendNote,
+    getLead: vi.fn(),
+    setStatus: vi.fn(),
+    archiveLead: vi.fn(),
+    unarchiveLead: vi.fn(),
+    deleteLead: vi.fn(),
+    resumeLead: vi.fn(),
+    postponeLead: vi.fn(),
+    canPostpone: actual.canPostpone,
+    postponePatch: actual.postponePatch,
+    claimCommission: vi.fn(),
+    confirmCommissionPayment: vi.fn(),
+    rejectCommissionPayment: vi.fn(),
+    setPendingPrompt: vi.fn(),
+    findByPendingPrompt: vi.fn(),
+    resolvePendingPrompt: vi.fn(),
+    searchLeads: vi.fn(),
+    getOwedSummary: vi.fn(),
+    readLeads: vi.fn(),
+    getCommission: vi.fn(),
+  };
+});
 
 import { POST } from './telegram-webhook';
 import { captureClient } from '@/lib/captureBot';
