@@ -19,7 +19,11 @@ import type {
   StoredLead,
 } from './schema.ts';
 import type { StoredLeadSchema } from './schema.ts';
-import { StorageConflictError, type LeadStorage } from './storage/types.ts';
+import {
+  StorageConflictError,
+  storedRecords,
+  type LeadStorage,
+} from './storage/types.ts';
 
 const MAX_RETRIES = 6;
 export const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
@@ -168,14 +172,15 @@ export function createLeadStore({
   }> {
     const { raw, version } = await storage.read();
     if (raw === undefined) return { leads: [], unreadable: [], version };
-    if (!Array.isArray(raw)) {
+    const records = storedRecords.safeParse(raw);
+    if (!records.success) {
       throw new Error(
         `[lead-crm] stored leads are ${typeof raw}, not an array — refusing to overwrite`,
       );
     }
     const leads: StoredLead[] = [];
     const unreadable: unknown[] = [];
-    for (const entry of raw) {
+    for (const entry of records.data) {
       const parsed = schema.safeParse(entry);
       if (parsed.success) leads.push(parsed.data);
       else unreadable.push(entry);
