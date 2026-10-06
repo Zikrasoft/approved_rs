@@ -27,7 +27,9 @@ vi.mock('@/lib/telegram', async () => ({
     contact: 'контакт',
     comment: 'комментарий',
   },
-  escapeHtml: (s: string) => s.replace(/</g, '&lt;'),
+  escapeHtml: (
+    await vi.importActual<typeof import('@podbor/lead-crm')>('@podbor/lead-crm')
+  ).escapeHtml,
   sendMessage: vi.fn(),
   buildOwedList: vi.fn().mockReturnValue({
     text: 'OWED_LIST',
@@ -2505,7 +2507,7 @@ describe('POST /api/telegram-webhook', () => {
       expect(res.status).toBe(200);
       expect(captureClient.sendMessage).toHaveBeenCalledWith(
         4242,
-        'Нашёл вариант &lt;до 10k>',
+        'Нашёл вариант &lt;до 10k&gt;',
       );
       expect(sendFieldChangeToAdmin).not.toHaveBeenCalled();
       const updated = vi.mocked(ensureLeadCard).mock.calls[0][0];
