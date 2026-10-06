@@ -304,6 +304,18 @@ describe('leadSubmissionSchema', () => {
     expect(parsed.data).not.toHaveProperty('city');
   });
 
+  it('discards the visible phone field the script composes contact from', () => {
+    const parsed = submit({
+      name: '',
+      contact: '+381641234567',
+      contact_channel: 'whatsapp',
+      phone_number: '064 123 4567',
+    });
+    expect(parsed.success).toBe(true);
+    expect(parsed.data).not.toHaveProperty('phone_number');
+    expect(parsed.data?.contact).toBe('+381641234567');
+  });
+
   it(`caps the service list at ${MAX_SERVICES} instead of storing what was posted`, () => {
     const parsed = submit({
       name: 'Иван',
