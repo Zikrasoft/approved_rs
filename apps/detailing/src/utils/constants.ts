@@ -1,23 +1,14 @@
 import { DETAILS, WORKSHOP_ADDRESS } from '@podbor/brands';
 import { instagramLink, telegramBotLink } from '@podbor/site-kit/contact-links';
+import { createPublicEnvSchema } from '@podbor/site-kit/public-env';
 import { z } from 'zod';
 
 export const BRAND = DETAILS;
 
-const publicEnvSchema = z
-  .object({
-    SITE: z.string().min(1).default(BRAND.url),
-    PUBLIC_PHONE_NUMBER: z.string().min(1),
-    PUBLIC_WHATSAPP_NUMBER: z.string().min(1).optional(),
-    PUBLIC_VIBER_NUMBER: z.string().min(1).optional(),
-    PUBLIC_INSTAGRAM: z.string().min(1).default('details_placeholder'),
-  })
-  .transform((env) => ({
-    ...env,
-    PUBLIC_WHATSAPP_NUMBER:
-      env.PUBLIC_WHATSAPP_NUMBER ?? env.PUBLIC_PHONE_NUMBER,
-    PUBLIC_VIBER_NUMBER: env.PUBLIC_VIBER_NUMBER ?? env.PUBLIC_PHONE_NUMBER,
-  }));
+const publicEnvSchema = createPublicEnvSchema({
+  siteDefault: BRAND.url,
+  extra: { PUBLIC_INSTAGRAM: z.string().min(1).default('details_placeholder') },
+});
 
 export function readPublicEnv(env: Record<string, unknown>) {
   return publicEnvSchema.parse(env);

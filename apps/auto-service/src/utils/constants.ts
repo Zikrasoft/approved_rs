@@ -1,22 +1,12 @@
 import { CARLAB, WORKSHOP_ADDRESS } from '@podbor/brands';
 import { telegramBotLink } from '@podbor/site-kit/contact-links';
-import { z } from 'zod';
+import { createPublicEnvSchema } from '@podbor/site-kit/public-env';
 
 export const BRAND = CARLAB;
 
-const publicEnvSchema = z
-  .object({
-    SITE: z.string().min(1).default(BRAND.url),
-    PUBLIC_PHONE_NUMBER: z.string().min(1),
-    PUBLIC_WHATSAPP_NUMBER: z.string().min(1).optional(),
-    PUBLIC_VIBER_NUMBER: z.string().min(1).optional(),
-  })
-  .transform((env) => ({
-    ...env,
-    PUBLIC_WHATSAPP_NUMBER:
-      env.PUBLIC_WHATSAPP_NUMBER ?? env.PUBLIC_PHONE_NUMBER,
-    PUBLIC_VIBER_NUMBER: env.PUBLIC_VIBER_NUMBER ?? env.PUBLIC_PHONE_NUMBER,
-  }));
+const publicEnvSchema = createPublicEnvSchema({
+  siteDefault: BRAND.url,
+});
 
 export function readPublicEnv(env: Record<string, unknown>) {
   return publicEnvSchema.parse(env);
