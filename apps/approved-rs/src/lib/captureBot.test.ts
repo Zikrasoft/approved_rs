@@ -1,34 +1,42 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import {
+  captureClient,
+  captureClientFor,
+  REPLY_RELAY_BRANDS,
+  siblingTokens,
+} from './captureBot';
 
-const load = async (env: Record<string, string>) => {
-  vi.resetModules();
-  for (const [name, value] of Object.entries(env)) vi.stubEnv(name, value);
-  return import('./captureBot');
-};
+describe('siblingTokens', () => {
+  it('holds no sibling without its token', () => {
+    expect(siblingTokens({})).toEqual(new Map());
+    expect(
+      siblingTokens({
+        TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB: '',
+        TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS: '',
+      }),
+    ).toEqual(new Map());
+  });
 
-afterEach(() => vi.unstubAllEnvs());
+  it('keys each sibling token by its brand name', () => {
+    expect(
+      siblingTokens({
+        TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB: 'carlab-token',
+        TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS: 'details-token',
+      }),
+    ).toEqual(
+      new Map([
+        ['CarLab', 'carlab-token'],
+        ['Details', 'details-token'],
+      ]),
+    );
+  });
+});
 
 describe('captureClientFor', () => {
-  it('relays only through approved.rs without the sibling tokens', async () => {
-    const { captureClientFor, captureClient, REPLY_RELAY_BRANDS } = await load({
-      TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB: '',
-      TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS: '',
-    });
+  it('relays through approved.rs and nobody else under the test env', () => {
     expect(REPLY_RELAY_BRANDS).toEqual(['Approved.rs']);
     expect(captureClientFor('Approved.rs')).toBe(captureClient);
     expect(captureClientFor('CarLab')).toBeUndefined();
-    expect(captureClientFor('Details')).toBeUndefined();
-  });
-
-  it('adds a sibling brand once its capture token is set', async () => {
-    const { captureClientFor, captureClient, REPLY_RELAY_BRANDS } = await load({
-      TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB: 'carlab-token',
-      TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS: 'details-token',
-    });
-    expect(REPLY_RELAY_BRANDS).toEqual(['Approved.rs', 'CarLab', 'Details']);
-    expect(captureClientFor('CarLab')).toBeDefined();
-    expect(captureClientFor('CarLab')).not.toBe(captureClient);
-    expect(captureClientFor('Details')).toBeDefined();
     expect(captureClientFor('Unknown')).toBeUndefined();
   });
 });

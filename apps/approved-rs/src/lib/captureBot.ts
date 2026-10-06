@@ -18,23 +18,28 @@ const optionalToken = z
   .optional()
   .transform((value) => value || undefined);
 
-const siblingTokens = z
-  .object({
-    TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB: optionalToken,
-    TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS: optionalToken,
-  })
-  .parse(process.env);
+const siblingTokensSchema = z.object({
+  TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB: optionalToken,
+  TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS: optionalToken,
+});
+
+export function siblingTokens(
+  env: Record<string, unknown>,
+): ReadonlyMap<string, string> {
+  const parsed = siblingTokensSchema.parse(env);
+  const tokens = new Map<string, string>();
+  if (parsed.TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB)
+    tokens.set(CARLAB.name, parsed.TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB);
+  if (parsed.TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS)
+    tokens.set(DETAILS.name, parsed.TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS);
+  return tokens;
+}
 
 const clients = new Map<string, TelegramClient>([
   [APPROVED.name, captureClient],
 ]);
-
-const addSibling = (brand: string, token: string | undefined): void => {
-  if (token) clients.set(brand, createTelegramClient(token));
-};
-
-addSibling(CARLAB.name, siblingTokens.TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB);
-addSibling(DETAILS.name, siblingTokens.TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS);
+for (const [brand, token] of siblingTokens(process.env))
+  clients.set(brand, createTelegramClient(token));
 
 export const captureClientFor = (brand: string): TelegramClient | undefined =>
   clients.get(brand);
