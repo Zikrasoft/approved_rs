@@ -12,6 +12,7 @@ import Faq from '@/components/Faq.astro';
 import LeadForm from '@/components/LeadForm.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import FinalCta from '@/components/FinalCta.astro';
+import ContactChannels from '@/components/ContactChannels.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { getHomeContent } from '@/i18n/content/home';
 import { getSiteContent } from '@/i18n/content/site';
@@ -77,6 +78,7 @@ const faqSchema = {
             {home.hero.ctaSecondary}
           </a>
         </div>
+        <ContactChannels placement="hero" tone="panel" />
         <ul class="flex flex-wrap gap-x-5 gap-y-2 pt-2">
           {
             home.hero.badges.map((badge) => (
