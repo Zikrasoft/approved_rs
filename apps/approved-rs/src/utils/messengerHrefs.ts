@@ -1,15 +1,20 @@
 import { telegramBotHref, whatsappLink } from './contactLinks';
+import { telegramLink } from '@podbor/site-kit/contact-links';
 import { getServicesContent } from '@/i18n/content/services';
 import type { Locale } from '@/i18n/config';
-import { WHATSAPP_NUMBER } from './constants';
+import { TG_MANAGER, WHATSAPP_NUMBER } from './constants';
 
 export function messengerHrefs(
   locale: Locale,
   service?: string,
+  { human = false }: { human?: boolean } = {},
 ): { telegram: string; whatsapp: string } {
   const { messengerPrefill } = getServicesContent(locale).caseChrome;
   return {
-    telegram: telegramBotHref(locale, service),
+    telegram:
+      human && TG_MANAGER
+        ? telegramLink(TG_MANAGER)
+        : telegramBotHref(locale, service),
     whatsapp: whatsappLink(WHATSAPP_NUMBER, messengerPrefill),
   };
 }

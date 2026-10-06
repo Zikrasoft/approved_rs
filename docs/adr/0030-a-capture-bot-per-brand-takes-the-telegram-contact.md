@@ -10,6 +10,12 @@ So the tap beacons a contact click again, carrying the page and the visitor id, 
 
 What is still true: a tap that never reaches Start is now a Ghost lead again, retired by [ADR-0029](0029-ghost-leads-retire-themselves.md) like the other channels. A tap that cannot carry the id — analytics declined, or a payload past 64 characters — beacons nothing, so the bot writes its Lead alone and without a page rather than leaving a second, unmergeable card. The `contact_click` goal fires either way.
 
+## Amended 2026-10-06: `/thanks/` on approved.rs opens the manager, not the bot
+
+A visitor on `/thanks/` has just sent the form. They are the warmest person on the site, and the bot would ask them the two questions they just answered; worse, the bot's Lead merges only on `telegramId` while the form Lead merges on the visitor id, so one person got two cards. WhatsApp and Viber on that page already reach the human.
+
+So that one Telegram tile opens the manager's account, `PUBLIC_TG_MANAGER`, through `telegramLink` with no `?start=`. The handle is an approved.rs environment variable, not a `packages/brands` field: it is a staff account, not brand identity. Unset, the tile falls back to the capture bot — a missing handle degrades the channel, it does not hide it. The page is read from the route, as the contact components already do for their placement. A tap there fires `contact_click` and writes no Lead of any kind; the other channels on `/thanks/` keep their contact click, which merges into the form Lead. Every other Telegram control on all three sites still opens its brand's capture bot with its payload.
+
 # A capture bot per brand takes the Telegram contact before the conversation starts
 
 Decided 2026-10-03.

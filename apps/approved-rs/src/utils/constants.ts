@@ -12,6 +12,7 @@ const publicEnvSchema = z.object({
   PUBLIC_WHATSAPP_NUMBER: z.string().min(1),
   PUBLIC_VIBER_NUMBER: z.string().min(1),
   PUBLIC_THREADS_CHANNEL: z.string().min(1),
+  PUBLIC_TG_MANAGER: z.string().min(1).optional(),
 });
 
 export function readPublicEnv(env: Record<string, unknown>) {
@@ -34,6 +35,7 @@ export const THREADS_CHANNEL = env.PUBLIC_THREADS_CHANNEL;
 export const WHATSAPP_NUMBER = env.PUBLIC_WHATSAPP_NUMBER;
 export const VIBER_NUMBER = env.PUBLIC_VIBER_NUMBER;
 export const PHONE_NUMBER = env.PUBLIC_WHATSAPP_NUMBER;
+export const TG_MANAGER = env.PUBLIC_TG_MANAGER;
 
 export const TELEGRAM_BOT_URL = telegramBotLink(BRAND.captureBot);
 

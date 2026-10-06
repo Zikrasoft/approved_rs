@@ -339,7 +339,18 @@ Both new apps follow the same shape, and a third should too:
   and `telegramId` is what the card reads as `🤖 через бота`. A tap that cannot
   carry the id (analytics declined, or a payload past 64 characters) beacons
   nothing: the bot writes its Lead alone, without a page, rather than leaving a
-  second, unmergeable card in the chat.
+  second, unmergeable card in the chat. **`/thanks/` on approved.rs is the one
+  carve-out**: the visitor there has just sent the form, so its Telegram tile
+  opens the manager's own account (`PUBLIC_TG_MANAGER`, an app variable and
+  never a `packages/brands` field, because it is a staff account rather than
+  brand identity) through `telegramLink`, with no `?start=`, and falls back to
+  the capture bot when the variable is unset. `messengerHrefs` takes the choice
+  as `{ human }`, which `ContactCTA` and `FloatingContactWidget` fill from the
+  same route check that already picks their placement — no prop says where a
+  component is. A tap there fires `contact_click` and writes no Lead:
+  `defineContactClickTracking` skips the beacon for a `telegram` channel in the
+  `thanks` placement, while the other channels on that page keep their click
+  Lead, which merges into the form Lead on the visitor id.
 - **The lead modal takes its service from the trigger.** `data-lead-service` on
   a button sets the form's `service` when the modal opens; `data-default-service`
   on the form is what it resets to when the trigger names none. Both constants

@@ -101,6 +101,24 @@ describe('defineContactClickTracking', () => {
     expect(sent[0]![1].get('channel')).toBe('telegram');
   });
 
+  it('fires the goal for a Telegram tap on the thanks page but writes no lead', () => {
+    document.body.innerHTML = `
+      <div data-contact-placement="thanks">
+        <a data-contact-channel="telegram" href="https://t.me/manager">T</a>
+        <a data-contact-channel="whatsapp" href="https://wa.me/1">W</a>
+      </div>`;
+    defineContactClickTracking(isTracked);
+    click('telegram');
+    expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
+      channel: 'telegram',
+      placement: 'thanks',
+    });
+    expect(sent).toEqual([]);
+    click('whatsapp');
+    expect(sent).toHaveLength(1);
+    expect(sent[0]![1].get('channel')).toBe('whatsapp');
+  });
+
   it('appends the compact visitor id to a capture-bot start payload, once', () => {
     localStorage.setItem(VISITOR_ID_STORAGE_KEY, UUID);
     document.body.innerHTML = `<a data-contact-channel="telegram" href="https://t.me/Bot?start=detailing_sr">T</a>`;
