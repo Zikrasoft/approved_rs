@@ -311,6 +311,26 @@ describe('POST /api/telegram-webhook', () => {
     expect(getLead).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['wrong field types', { update_id: 'x', message: 5 }],
+    ['a non-object', 'just a string'],
+    ['a callback without an id', { callback_query: { data: 'st:5:won' } }],
+  ])(
+    'acks with 200 on a well-formed JSON body of the wrong shape (%s) without running a handler',
+    async (_label, body) => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const res = await POST(makeCtx(body));
+      expect(res.status).toBe(200);
+      expect(warn).toHaveBeenCalledOnce();
+      expect(getLead).not.toHaveBeenCalled();
+      expect(setStatus).not.toHaveBeenCalled();
+      expect(findByPendingPrompt).not.toHaveBeenCalled();
+      expect(answerCallback).not.toHaveBeenCalled();
+      expect(sendMessage).not.toHaveBeenCalled();
+      warn.mockRestore();
+    },
+  );
+
   describe('duplicate delivery — same update_id is only processed once', () => {
     it('skips a redelivered update_id instead of writing twice', async () => {
       const body = {
