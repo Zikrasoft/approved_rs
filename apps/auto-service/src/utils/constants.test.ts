@@ -10,4 +10,13 @@ describe('readPublicEnv', () => {
   it('accepts the documented environment', () => {
     expect(() => readPublicEnv(VALID)).not.toThrow();
   });
+
+  it('names the required variable that is empty or missing', () => {
+    expect(() => readPublicEnv({ ...VALID, PUBLIC_PHONE_NUMBER: '' })).toThrow(
+      /PUBLIC_PHONE_NUMBER/,
+    );
+    expect(() =>
+      readPublicEnv({ ...VALID, PUBLIC_PHONE_NUMBER: undefined }),
+    ).toThrow(/PUBLIC_PHONE_NUMBER/);
+  });
 });
