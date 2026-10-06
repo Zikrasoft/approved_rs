@@ -2,6 +2,10 @@
 status: accepted
 ---
 
+## Amended 2026-10-06: Telegram taps can be Ghost leads again
+
+The paragraph below that takes Telegram out of this no longer holds. [ADR-0030](0030-a-capture-bot-per-brand-takes-the-telegram-contact.md), amended the same day, has a Telegram tap store a contact click again so the bot's Lead can inherit its page. A tap whose visitor reaches Start is merged into the bot's Lead and gains a contact; one who never does leaves a placeholder click that this sweep retires like any other. Nothing in the predicate or the sweep changed.
+
 # A contact click that never gains a contact retires itself
 
 Decided 2026-10-02 on issue #91, split out of #56.
