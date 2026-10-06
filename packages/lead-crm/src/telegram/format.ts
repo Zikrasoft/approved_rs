@@ -1,4 +1,3 @@
-import type { Brand } from '@podbor/brands';
 import { format, parseISO } from 'date-fns';
 import {
   getCommission,
@@ -22,7 +21,7 @@ export type Keyboard = { inline_keyboard: Btn[][] };
 export interface FormatterOptions {
   serviceLabel: (slug: string) => string;
   botUsername: string;
-  replyRelayBrand?: Brand['name'];
+  replyRelayBrands?: readonly string[];
 }
 
 const MAX_SERVICES_LABEL = 200;
@@ -464,10 +463,10 @@ export function dealNotificationText(
 export function createFormatter({
   serviceLabel,
   botUsername,
-  replyRelayBrand,
+  replyRelayBrands = [],
 }: FormatterOptions) {
   const canReplyThroughBot = (lead: StoredLead): boolean =>
-    lead.brand === replyRelayBrand && isTelegramIdContact(lead.contact);
+    replyRelayBrands.includes(lead.brand) && isTelegramIdContact(lead.contact);
 
   function clickLabel(lead: StoredLead): string {
     const channel = lead.contactChannel;

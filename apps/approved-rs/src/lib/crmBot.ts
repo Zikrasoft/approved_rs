@@ -9,6 +9,7 @@ import {
 } from '@podbor/lead-crm';
 import { serviceLabel } from '@podbor/brands';
 import { BRAND, leadStore } from './crm';
+import { REPLY_RELAY_BRANDS } from './captureBot';
 
 export const OWNER_IDS = parseIds(process.env.TELEGRAM_OWNER_ID);
 export const ADMIN_IDS = parseIds(process.env.TELEGRAM_ADMIN_ID);
@@ -18,7 +19,7 @@ export const client = createTelegramClient(requireEnv('TELEGRAM_BOT_TOKEN'));
 export const formatter = createFormatter({
   serviceLabel,
   botUsername: requireEnv('TELEGRAM_BOT_USERNAME'),
-  replyRelayBrand: BRAND,
+  replyRelayBrands: REPLY_RELAY_BRANDS,
 });
 
 export const notifier = createNotifier({

@@ -42,7 +42,7 @@ const client = createTelegramClient('test-bot-token');
 const formatter = createFormatter({
   serviceLabel: (slug) => SERVICE_LABELS[slug] ?? slug,
   botUsername: 'approved_test_bot',
-  replyRelayBrand: 'Approved.rs',
+  replyRelayBrands: ['Approved.rs', 'Details'],
 });
 const notifier = createNotifier({
   client,
@@ -977,10 +977,14 @@ describe('buildLeadDetail', () => {
     expect(buttons('+381601234567')).not.toContain('reply:7');
   });
 
-  it('offers a reply only for the brand whose capture bot this app relays through', () => {
+  it('offers a reply only for the brands whose capture bot this app relays through', () => {
     const lead = makeLead({ id: 7, contact: 'tg://user?id=123456' });
     const buttons = (detail: ReturnType<typeof buildLeadDetail>) =>
       detail.reply_markup.inline_keyboard.flat().map((b) => b.callback_data);
+    expect(buttons(buildLeadDetail(lead, 'owner'))).toContain('reply:7');
+    expect(
+      buttons(buildLeadDetail({ ...lead, brand: 'Details' }, 'owner')),
+    ).toContain('reply:7');
     expect(
       buttons(buildLeadDetail({ ...lead, brand: 'CarLab' }, 'owner')),
     ).not.toContain('reply:7');
