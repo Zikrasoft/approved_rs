@@ -251,12 +251,7 @@ const heroStats = [
         accentWord={closing.accentWord}
         text={closing.text}
         ctaLabel={ctaLabel ?? h.ctaTelegramLabel}
-        stats={[
-          h.ctaStatClients,
-          { value: countryCount, label: h.ctaStatCountries.label },
-          h.ctaStatYears,
-          h.ctaStatResponse,
-        ]}
+        stats={[...heroStats, h.ctaStatResponse]}
         service={currentService}
       />
     )
