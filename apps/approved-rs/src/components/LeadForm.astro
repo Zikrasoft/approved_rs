@@ -41,39 +41,33 @@ const countryOptions = phoneCountryOptions(displayLocale).filter(
 );
 
 const uid = crypto.randomUUID().slice(0, 8);
-const telegramPanelId = `contact-panel-telegram-${uid}`;
-const phonePanelId = `contact-panel-phone-${uid}`;
+const panelIds = {
+  telegram: `contact-panel-telegram-${uid}`,
+  phone: `contact-panel-phone-${uid}`,
+};
 
 const channelTabs = [
   {
     tab: 'telegram',
     panel: 'telegram',
-    panelId: telegramPanelId,
-    selected: true,
     label: lf.telegramTab,
     Icon: TelegramIcon,
   },
   {
     tab: 'whatsapp',
     panel: 'phone',
-    panelId: phonePanelId,
-    selected: false,
     label: lf.whatsappTab,
     Icon: WhatsAppIcon,
   },
   {
     tab: 'viber',
     panel: 'phone',
-    panelId: phonePanelId,
-    selected: false,
     label: lf.viberTab,
     Icon: ViberIcon,
   },
   {
     tab: 'phone',
     panel: 'phone',
-    panelId: phonePanelId,
-    selected: false,
     label: lf.phoneTab,
     Icon: Phone,
   },
@@ -134,7 +128,7 @@ const fieldClass =
         role="tablist"
       >
         {
-          channelTabs.map((tab) => (
+          channelTabs.map((tab, index) => (
             <button
               type="button"
               data-tab={tab.tab}
@@ -143,18 +137,18 @@ const fieldClass =
               aria-label={tab.label}
               class="pill-tab flex min-w-0 items-center justify-center gap-2 rounded-sm px-2 py-2.5 text-[0.8125rem] font-medium text-muted cursor-pointer transition-colors duration-200 motion-reduce:transition-none hover:text-text-2 aria-selected:bg-surface-2 aria-selected:text-text aria-selected:shadow-[inset_0_-2px_0_var(--color-accent)]"
               role="tab"
-              aria-selected={tab.selected ? 'true' : 'false'}
-              aria-controls={tab.panelId}
+              aria-selected={index === 0 ? 'true' : 'false'}
+              aria-controls={panelIds[tab.panel]}
             >
               <tab.Icon size={16} />
-              <span class="pill-tab-label truncate">{tab.label}</span>
+              <span class="truncate">{tab.label}</span>
             </button>
           ))
         }
       </div>
 
       <div
-        id={telegramPanelId}
+        id={panelIds.telegram}
         class="contact-panel"
         data-panel="telegram"
         role="tabpanel"
@@ -171,7 +165,7 @@ const fieldClass =
       </div>
 
       <div
-        id={phonePanelId}
+        id={panelIds.phone}
         class="contact-panel hidden"
         data-panel="phone"
         role="tabpanel"
