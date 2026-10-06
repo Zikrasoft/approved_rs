@@ -30,6 +30,9 @@ vi.mock('@/lib/telegram', async () => ({
   escapeHtml: (
     await vi.importActual<typeof import('@podbor/lead-crm')>('@podbor/lead-crm')
   ).escapeHtml,
+  REPLY_COPY: (
+    await vi.importActual<typeof import('@podbor/lead-crm')>('@podbor/lead-crm')
+  ).REPLY_COPY,
   sendMessage: vi.fn(),
   buildOwedList: vi.fn().mockReturnValue({
     text: 'OWED_LIST',

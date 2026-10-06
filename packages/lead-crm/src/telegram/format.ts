@@ -376,6 +376,16 @@ export const EDIT_FIELD_LABELS = {
 
 export type EditField = keyof typeof EDIT_FIELD_LABELS;
 
+export const REPLY_COPY = {
+  prompt: '💬 Напишите ответ посетителю — бот отправит его в чат:',
+  ack: 'Жду сообщение',
+  empty: '⚠️ Сообщение не может быть пустым. Попробуйте ещё раз.',
+  undelivered:
+    '⚠️ Не доставлено: посетитель заблокировал бота или чат недоступен.',
+  sent: '✅ Отправлено',
+  notePrefix: 'Ответ: ',
+} as const;
+
 const FIELD_PREVIEW_LIMIT = 120;
 
 function fieldPreview(value: string | null | undefined): string {

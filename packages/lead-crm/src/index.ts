@@ -64,6 +64,7 @@ export {
   buildStatusKeyboard,
   createFormatter,
   EDIT_FIELD_LABELS,
+  REPLY_COPY,
   escapeHtml,
   fieldChangeText,
   formatDateRu,

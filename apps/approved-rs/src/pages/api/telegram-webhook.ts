@@ -39,6 +39,7 @@ import {
   OWNER_IDS,
   ADMIN_IDS,
   EDIT_FIELD_LABELS,
+  REPLY_COPY,
   escapeHtml,
   canAddIncome,
   type Role,
@@ -549,9 +550,9 @@ function handleReplyCallback(
     id,
     chatId,
     cbId,
-    '💬 Напишите ответ посетителю — бот отправит его в чат:',
+    REPLY_COPY.prompt,
     'reply_visitor',
-    'Жду сообщение',
+    REPLY_COPY.ack,
   );
 }
 
@@ -890,17 +891,10 @@ async function handlePromptReply(
   if (kind === 'reply_visitor') {
     const reply = text.trim();
     if (!reply) {
-      await sendMessage(
-        chatId,
-        '⚠️ Сообщение не может быть пустым. Попробуйте ещё раз.',
-      );
+      await sendMessage(chatId, REPLY_COPY.empty);
       return;
     }
-    const undelivered = () =>
-      sendMessage(
-        chatId,
-        '⚠️ Не доставлено: посетитель заблокировал бота или чат недоступен.',
-      );
+    const undelivered = () => sendMessage(chatId, REPLY_COPY.undelivered);
     if (pending.telegramId == null) {
       await undelivered();
       return;
@@ -918,11 +912,13 @@ async function handlePromptReply(
     const updated = await resolvePendingPrompt(
       chatId,
       replyToMessageId,
-      (lead) => ({ comment: appendNote(lead.comment, `Ответ: ${reply}`) }),
+      (lead) => ({
+        comment: appendNote(lead.comment, `${REPLY_COPY.notePrefix}${reply}`),
+      }),
     );
     if (updated) {
       await ensureLeadCard(updated);
-      await replyWithCard(chatId, updated, '✅ Отправлено');
+      await replyWithCard(chatId, updated, REPLY_COPY.sent);
     }
     return;
   }
