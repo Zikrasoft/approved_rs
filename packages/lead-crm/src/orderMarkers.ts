@@ -3,6 +3,7 @@ export const ORDER_MARKER_PREFIX = 'shop-orders/';
 export interface OrderMarkers {
   has(orderId: string): Promise<boolean>;
   add(orderId: string): Promise<void>;
+  release(orderId: string): Promise<void>;
 }
 
 export const markerPath = (orderId: string): string =>

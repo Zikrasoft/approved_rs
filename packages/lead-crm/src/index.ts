@@ -89,6 +89,7 @@ export type {
   LeadHandOff,
   NotifyLead,
   NotifyLeadOptions,
+  NotifyLeadResult,
 } from './notifyLead.ts';
 
 export {

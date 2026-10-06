@@ -43,11 +43,16 @@ export interface NotifyLeadOptions {
 
 export type LeadHandOff = Pick<StoredLead, 'brand' | 'commissionPercent'>;
 
+export interface NotifyLeadResult {
+  stored: boolean;
+  delivered: boolean;
+}
+
 export type NotifyLead = (
   data: LeadSubmission,
   logPrefix: string,
   handOff?: LeadHandOff,
-) => Promise<boolean>;
+) => Promise<NotifyLeadResult>;
 
 function leadTrace(data: LeadInput) {
   return { brand: data.brand, service: data.service, kind: data.kind };
@@ -64,6 +69,7 @@ export function createNotifyLead({
 
     let lead: StoredLead;
     let merged = false;
+    let stored = true;
     try {
       ({ lead, merged } = await store.insertOrMergeLead(data));
     } catch (err) {
@@ -71,6 +77,7 @@ export function createNotifyLead({
         `${logPrefix} store insertLead failed, notifying without CRM tracking`,
         { error: err, ...leadTrace(data) },
       );
+      stored = false;
       try {
         lead = store.newStoredLead(data, Date.now());
       } catch (fallbackErr) {
@@ -78,7 +85,7 @@ export function createNotifyLead({
           error: fallbackErr,
           ...leadTrace(data),
         });
-        return false;
+        return { stored, delivered: false };
       }
     }
 
@@ -95,7 +102,7 @@ export function createNotifyLead({
         });
       }
       console.log(`${logPrefix} notifyLead finished`);
-      return true;
+      return { stored, delivered: true };
     }
 
     try {
@@ -110,7 +117,7 @@ export function createNotifyLead({
         });
       }
       console.log(`${logPrefix} notifyLead finished`);
-      return true;
+      return { stored, delivered: true };
     } catch (err) {
       console.error(`${logPrefix} Telegram notification failed`, {
         error: err,
@@ -120,6 +127,6 @@ export function createNotifyLead({
     }
 
     console.log(`${logPrefix} notifyLead finished`);
-    return false;
+    return { stored, delivered: false };
   };
 }
