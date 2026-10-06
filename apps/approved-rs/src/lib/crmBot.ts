@@ -18,6 +18,7 @@ export const client = createTelegramClient(requireEnv('TELEGRAM_BOT_TOKEN'));
 export const formatter = createFormatter({
   serviceLabel,
   botUsername: requireEnv('TELEGRAM_BOT_USERNAME'),
+  replyRelayBrand: BRAND,
 });
 
 export const notifier = createNotifier({
