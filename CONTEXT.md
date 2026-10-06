@@ -19,8 +19,10 @@ Telegram tile rather than by submitting a form. It carries a channel and no
 message. A Telegram tile opens the brand's own bot, and the Contact click it
 stores is a placeholder the bot's own Lead absorbs on `telegramId`
 ([ADR-0030](docs/adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
-The one Telegram tile that stores no Contact click is the one on `/thanks/`:
-the visitor already has a Lead, and that tile opens the manager, not the bot.
+A Telegram tile that opens a human account — no `?start=` in its link, which
+on approved.rs is the `/thanks/` tile when `PUBLIC_TG_MANAGER` is set — stores
+no Contact click: the visitor already has a Lead, and no bot will come to
+absorb a placeholder.
 
 **Ghost lead** — a Contact click on a channel whose outcome we cannot observe
 — WhatsApp, Viber or the phone — that never gained a contact: still the

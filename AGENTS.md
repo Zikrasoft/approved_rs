@@ -348,9 +348,12 @@ Both new apps follow the same shape, and a third should too:
   as `{ human }`, which `ContactCTA` and `FloatingContactWidget` fill from the
   same route check that already picks their placement — no prop says where a
   component is. A tap there fires `contact_click` and writes no Lead:
-  `defineContactClickTracking` skips the beacon for a `telegram` channel in the
-  `thanks` placement, while the other channels on that page keep their click
-  Lead, which merges into the form Lead on the visitor id.
+  `defineContactClickTracking` skips the beacon for a `telegram` link whose
+  href carries no `start` parameter — a human account, which a capture-bot
+  link never is — so the rule is keyed on the link, not on the placement, and
+  the fallback bot link on the same page beacons its placeholder like
+  everywhere else. The other channels on that page keep their click Lead,
+  which merges into the form Lead on the visitor id.
 - **The lead modal takes its service from the trigger.** `data-lead-service` on
   a button sets the form's `service` when the modal opens; `data-default-service`
   on the form is what it resets to when the trigger names none. Both constants
