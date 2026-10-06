@@ -1,4 +1,5 @@
 import { collection, config, fields } from '@keystatic/core';
+import { SERVICE_LABELS_RU, SERVICE_SLUGS_BY_BRAND } from '@podbor/brands';
 
 const APP_ROOT = import.meta.env.PROD ? 'apps/detailing/' : '';
 
@@ -35,12 +36,10 @@ export default config({
         year: fields.integer({ label: 'Год' }),
         servicesApplied: fields.multiselect({
           label: 'Выполненные услуги',
-          options: [
-            { label: 'Защитная плёнка (PPF)', value: 'paint-protection-film' },
-            { label: 'Смена цвета плёнкой', value: 'colour-change-wrap' },
-            { label: 'Полировка и керамика', value: 'polishing-ceramic' },
-            { label: 'Реставрация руля', value: 'steering-wheel-restoration' },
-          ],
+          options: SERVICE_SLUGS_BY_BRAND.details.map((value) => ({
+            label: SERVICE_LABELS_RU[value],
+            value,
+          })),
         }),
         image: workImage(),
         beforeImage: fields.image({ label: 'Фото «до» (для слайдера)' }),

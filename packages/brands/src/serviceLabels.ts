@@ -1,3 +1,5 @@
+import type { BrandKey } from './brands.ts';
+
 export const SERVICE_LABELS_RU = {
   'vehicle-sourcing': 'Автоподбор',
   'vehicle-buyback': 'Выкуп',
@@ -29,10 +31,41 @@ export const SERVICE_LABELS_RU = {
   'partner-details': 'Детейлинг Details',
 } as const satisfies Record<string, string>;
 
+export type LabelledService = keyof typeof SERVICE_LABELS_RU;
+
+export const SERVICE_SLUGS_BY_BRAND = {
+  approved: [
+    'vehicle-sourcing',
+    'vehicle-buyback',
+    'vehicle-inspection',
+    'vehicle-import',
+  ],
+  carlab: [
+    'diagnostics',
+    'servicing',
+    'brakes-suspension',
+    'engine-gearbox',
+    'bodywork-painting',
+    'pre-purchase-inspection',
+  ],
+  details: [
+    'paint-protection-film',
+    'colour-change-wrap',
+    'polishing-ceramic',
+    'steering-wheel-restoration',
+  ],
+} as const satisfies Record<
+  BrandKey,
+  readonly [LabelledService, ...LabelledService[]]
+>;
+
+export type BrandServiceSlug<K extends BrandKey> =
+  (typeof SERVICE_SLUGS_BY_BRAND)[K][number];
+
 export const PARTNER_SERVICE = {
   carlab: 'partner-carlab',
   details: 'partner-details',
-} as const satisfies Record<string, keyof typeof SERVICE_LABELS_RU>;
+} as const satisfies Record<string, LabelledService>;
 
 export type PartnerService =
   (typeof PARTNER_SERVICE)[keyof typeof PARTNER_SERVICE];
@@ -43,6 +76,6 @@ export function isPartnerService(value: string): value is PartnerService {
 
 export function serviceLabel(slug: string): string {
   return Object.hasOwn(SERVICE_LABELS_RU, slug)
-    ? SERVICE_LABELS_RU[slug as keyof typeof SERVICE_LABELS_RU]
+    ? SERVICE_LABELS_RU[slug as LabelledService]
     : slug;
 }

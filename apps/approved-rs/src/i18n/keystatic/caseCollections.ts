@@ -1,4 +1,5 @@
 import { collection, fields } from '@keystatic/core';
+import { SERVICE_LABELS_RU, SERVICE_SLUGS_BY_BRAND } from '@podbor/brands';
 import {
   caseImage,
   translationsField,
@@ -72,16 +73,12 @@ export const casesCollection = collection({
       ],
       defaultValue: 'de',
     }),
-    // Keep in sync with the `service` z.enum in src/content.config.ts —
-    // can't import it here (that file pulls in Astro-coupled code).
     service: fields.select({
       label: 'Услуга',
-      options: [
-        { label: 'Автоподбор', value: 'vehicle-sourcing' },
-        { label: 'Выкуп', value: 'vehicle-buyback' },
-        { label: 'Проверка', value: 'vehicle-inspection' },
-        { label: 'Привоз авто', value: 'vehicle-import' },
-      ],
+      options: SERVICE_SLUGS_BY_BRAND.approved.map((value) => ({
+        label: SERVICE_LABELS_RU[value],
+        value,
+      })),
       defaultValue: 'vehicle-sourcing',
     }),
     image: caseImage(),

@@ -13,5 +13,6 @@ describe('CommonJS build', () => {
     expect(brands.WORKSHOP_ADDRESS.country).toBe('RS');
     expect(brands.CARLAB.domain).toBe('carlab.rs');
     expect(brands.serviceLabel('parts-order')).toBe('Заказ из магазина');
+    expect(brands.SERVICE_SLUGS_BY_BRAND.carlab).toContain('diagnostics');
   });
 });

@@ -1,4 +1,5 @@
 import { collection, config, fields } from '@keystatic/core';
+import { SERVICE_LABELS_RU, SERVICE_SLUGS_BY_BRAND } from '@podbor/brands';
 import { SITE_NAME } from './src/utils/constants';
 
 const APP_ROOT = import.meta.env.PROD ? 'apps/auto-service/' : '';
@@ -34,17 +35,10 @@ export default config({
         year: fields.integer({ label: 'Год' }),
         servicesApplied: fields.multiselect({
           label: 'Выполненные работы',
-          options: [
-            { label: 'Диагностика', value: 'diagnostics' },
-            { label: 'Плановое ТО', value: 'servicing' },
-            { label: 'Тормоза и подвеска', value: 'brakes-suspension' },
-            { label: 'Двигатель и коробка', value: 'engine-gearbox' },
-            { label: 'Кузов и покраска', value: 'bodywork-painting' },
-            {
-              label: 'Проверка перед покупкой',
-              value: 'pre-purchase-inspection',
-            },
-          ],
+          options: SERVICE_SLUGS_BY_BRAND.carlab.map((value) => ({
+            label: SERVICE_LABELS_RU[value],
+            value,
+          })),
         }),
         image: photo(),
         gallery: fields.array(photo(), {
