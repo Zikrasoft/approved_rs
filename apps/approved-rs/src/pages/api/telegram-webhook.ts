@@ -38,7 +38,7 @@ import {
   editLeadDetailMessage,
   OWNER_IDS,
   ADMIN_IDS,
-  EDIT_FIELD_LABELS,
+  EDIT_COPY,
   REPLY_COPY,
   escapeHtml,
   canAddIncome,
@@ -535,9 +535,9 @@ function handleEditCallback(
     id,
     chatId,
     cbId,
-    `✏️ Введите новое значение (${EDIT_FIELD_LABELS[field]}):`,
+    EDIT_COPY.prompt(field),
     `edit_${field}`,
-    'Жду значение',
+    EDIT_COPY.ack,
   );
 }
 

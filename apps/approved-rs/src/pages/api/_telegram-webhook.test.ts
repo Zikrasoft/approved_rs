@@ -25,11 +25,7 @@ vi.mock('@/lib/telegram', async () => {
     sendCommissionResultToOwner: vi.fn(),
     sendStatusChangeToAdmin: vi.fn(),
     sendFieldChangeToAdmin: vi.fn(),
-    EDIT_FIELD_LABELS: {
-      name: 'имя',
-      contact: 'контакт',
-      comment: 'комментарий',
-    },
+    EDIT_COPY: actual.EDIT_COPY,
     escapeHtml: actual.escapeHtml,
     REPLY_COPY: actual.REPLY_COPY,
     sendMessage: vi.fn(),

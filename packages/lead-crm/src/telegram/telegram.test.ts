@@ -19,6 +19,7 @@ import type { LeadStatus, StoredLead } from '../schema.ts';
 
 // Free functions — no per-business config, so they are imported directly.
 import {
+  EDIT_COPY,
   statusLabel,
   isLeadStatusKey,
   buildStatusKeyboard,
@@ -1556,5 +1557,13 @@ describe('brand attribution — one bot, one chat, several businesses', () => {
       'owner',
     );
     expect(text).toContain('По брендам: Approved.rs — 1 · PRIZMA — 1');
+  });
+});
+
+describe('EDIT_COPY', () => {
+  it('names the field in the prompt', () => {
+    expect(EDIT_COPY.prompt('contact')).toBe(
+      '✏️ Введите новое значение (контакт):',
+    );
   });
 });

@@ -63,6 +63,7 @@ export {
   buildStats,
   buildStatusKeyboard,
   createFormatter,
+  EDIT_COPY,
   EDIT_FIELD_LABELS,
   REPLY_COPY,
   escapeHtml,

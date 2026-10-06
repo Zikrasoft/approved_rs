@@ -376,6 +376,12 @@ export const EDIT_FIELD_LABELS = {
 
 export type EditField = keyof typeof EDIT_FIELD_LABELS;
 
+export const EDIT_COPY = {
+  prompt: (field: EditField) =>
+    `✏️ Введите новое значение (${EDIT_FIELD_LABELS[field]}):`,
+  ack: 'Жду значение',
+} as const;
+
 export const REPLY_COPY = {
   prompt: '💬 Напишите ответ посетителю — бот отправит его в чат:',
   ack: 'Жду сообщение',
