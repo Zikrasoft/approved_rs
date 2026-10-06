@@ -248,6 +248,7 @@ Production environment; Preview is unused — there are no preview deploys).
 | `PUBLIC_PHONE_NUMBER`    | —           | ✅ required | ✅ required | none                           | the build fails              |
 | `PUBLIC_THREADS_CHANNEL` | ✅ required | —           | —           | none                           | the build fails              |
 | `PUBLIC_INSTAGRAM`       | —           | —           | ✅          | `details_placeholder` (hidden) | the Instagram tile is hidden |
+| `PUBLIC_TG_MANAGER`      | ✅          | —           | —           | none                           | `/thanks/` opens the bot     |
 
 ### Analytics — no environment variables
 

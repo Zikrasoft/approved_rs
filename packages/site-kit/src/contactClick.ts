@@ -36,6 +36,7 @@ export function defineContactClickTracking(
             element.href = url.href;
           }
         }
+        if (channel === 'telegram' && placement === 'thanks') return;
         const body = new FormData();
         body.set('channel', channel);
         body.set('source_url', location.href);

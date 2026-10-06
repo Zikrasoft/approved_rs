@@ -25,9 +25,9 @@ const t = getI18n(locale);
 const { service, label, compact = false } = Astro.props;
 const telegramAriaLabel = label ?? cc.ctaButtonLabel;
 
-const messenger = messengerHrefs(locale, service);
 const onThanks =
   navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page';
+const messenger = messengerHrefs(locale, service, { human: onThanks });
 const placement = onThanks ? 'thanks' : compact ? 'hero' : 'bar';
 ---
 
