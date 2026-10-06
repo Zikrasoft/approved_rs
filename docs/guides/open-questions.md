@@ -11,10 +11,9 @@ tags sit on `8b46200`.
 
 ### Details' contacts
 
-`PUBLIC_INSTAGRAM` for Details is a placeholder under a `TODO:` in
-`apps/detailing/src/utils/constants.ts`. It defaults to `details_placeholder`,
-which hides the Instagram tile and keeps it out of `sameAs` until the real
-handle is set.
+`PUBLIC_INSTAGRAM` for Details is unset. The variable is optional in
+`apps/detailing/src/utils/constants.ts`; while it is missing the Instagram tile
+is hidden and the handle stays out of `sameAs`. Setting it is all that is needed.
 
 ### Postcode
 

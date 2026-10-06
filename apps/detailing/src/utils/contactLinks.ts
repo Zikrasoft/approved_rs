@@ -19,7 +19,7 @@ export const CONTACT_LINKS = {
   phone: phoneLink(PHONE_NUMBER),
   whatsapp: whatsappLink(WHATSAPP_NUMBER),
   viber: viberLink(VIBER_NUMBER),
-  instagram: instagramLink(INSTAGRAM),
+  instagram: INSTAGRAM === undefined ? undefined : instagramLink(INSTAGRAM),
 } as const;
 
 export const telegramBotHref = (

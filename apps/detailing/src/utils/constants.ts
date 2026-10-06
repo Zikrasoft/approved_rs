@@ -9,9 +9,7 @@ import { z } from 'zod';
 export const BRAND = DETAILS;
 
 const publicEnvSchema = createPublicEnvSchema({ siteDefault: BRAND.url })
-  .extend({
-    PUBLIC_INSTAGRAM: z.string().min(1).default('details_placeholder'),
-  })
+  .extend({ PUBLIC_INSTAGRAM: z.string().min(1).optional() })
   .transform(withMessengerFallback);
 
 export function readPublicEnv(env: Record<string, unknown>) {
@@ -42,15 +40,13 @@ export const OPENING_HOURS = {
 export const PHONE_NUMBER = env.PUBLIC_PHONE_NUMBER;
 export const WHATSAPP_NUMBER = env.PUBLIC_WHATSAPP_NUMBER;
 export const VIBER_NUMBER = env.PUBLIC_VIBER_NUMBER;
-// TODO: hidden until the real Instagram handle is decided and PUBLIC_INSTAGRAM is set.
 export const INSTAGRAM = env.PUBLIC_INSTAGRAM;
-
-export const INSTAGRAM_ENABLED = !INSTAGRAM.endsWith('_placeholder');
+export const INSTAGRAM_ENABLED = INSTAGRAM !== undefined;
 
 export const TELEGRAM_BOT_URL = telegramBotLink(BRAND.captureBot);
 
 export const SOCIAL_SAME_AS = [
-  ...(INSTAGRAM_ENABLED ? [instagramLink(INSTAGRAM)] : []),
+  ...(INSTAGRAM === undefined ? [] : [instagramLink(INSTAGRAM)]),
   TELEGRAM_BOT_URL,
 ];
 

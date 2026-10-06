@@ -241,14 +241,14 @@ Production environment; Preview is unused — there are no preview deploys).
 
 ### Public (contacts, inlined into the HTML)
 
-| Variable                 | approved.rs | carlab.rs   | details.rs  | Default in the schema          | Without it                   |
-| ------------------------ | ----------- | ----------- | ----------- | ------------------------------ | ---------------------------- |
-| `PUBLIC_WHATSAPP_NUMBER` | ✅ required | ✅          | ✅          | none / `PUBLIC_PHONE_NUMBER`   | the build fails / the phone  |
-| `PUBLIC_VIBER_NUMBER`    | ✅ required | ✅          | ✅          | none / `PUBLIC_PHONE_NUMBER`   | the build fails / the phone  |
-| `PUBLIC_PHONE_NUMBER`    | —           | ✅ required | ✅ required | none                           | the build fails              |
-| `PUBLIC_THREADS_CHANNEL` | ✅ required | —           | —           | none                           | the build fails              |
-| `PUBLIC_INSTAGRAM`       | —           | —           | ✅          | `details_placeholder` (hidden) | the Instagram tile is hidden |
-| `PUBLIC_TG_MANAGER`      | ✅          | —           | —           | none                           | `/thanks/` opens the bot     |
+| Variable                 | approved.rs | carlab.rs   | details.rs  | Default in the schema        | Without it                   |
+| ------------------------ | ----------- | ----------- | ----------- | ---------------------------- | ---------------------------- |
+| `PUBLIC_WHATSAPP_NUMBER` | ✅ required | ✅          | ✅          | none / `PUBLIC_PHONE_NUMBER` | the build fails / the phone  |
+| `PUBLIC_VIBER_NUMBER`    | ✅ required | ✅          | ✅          | none / `PUBLIC_PHONE_NUMBER` | the build fails / the phone  |
+| `PUBLIC_PHONE_NUMBER`    | —           | ✅ required | ✅ required | none                         | the build fails              |
+| `PUBLIC_THREADS_CHANNEL` | ✅ required | —           | —           | none                         | the build fails              |
+| `PUBLIC_INSTAGRAM`       | —           | —           | ✅          | none (optional)              | the Instagram tile is hidden |
+| `PUBLIC_TG_MANAGER`      | ✅          | —           | —           | none                         | `/thanks/` opens the bot     |
 
 ### Analytics — no environment variables
 
