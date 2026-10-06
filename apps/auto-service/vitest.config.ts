@@ -11,6 +11,7 @@ export default defineConfig({
     environment: 'node',
     include: ['src/**/*.test.ts'],
     env: {
+      PUBLIC_PHONE_NUMBER: '381677210533',
       TELEGRAM_BOT_TOKEN: 'test-bot-token',
       TELEGRAM_GROUP_ID: '-1009876543210',
       TELEGRAM_OWNER_ID: '111',

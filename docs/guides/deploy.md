@@ -221,9 +221,11 @@ created by itself on the first run, with no protection rules.
 
 - **variables are set in the Vercel dashboard, not in GitHub secrets.** GitHub only
   holds the token/IDs for reaching Vercel plus `OPENAI_API_KEY` (see below);
-- **a missing variable does not break the build.** `PUBLIC_*` variables are inlined
-  into the HTML at build time, and one that is unset with no fallback becomes
-  `undefined` right there in the markup (`https://t.me/undefined`). Server-side
+- **a missing public variable fails the build, a missing server-side one fails the
+  route.** `PUBLIC_*` variables are inlined into the HTML at build time, so each
+  app's `src/utils/constants.ts` parses them through a zod schema at module load
+  and the build dies naming the variable that is unset or empty, instead of
+  shipping `undefined` in the markup (`https://t.me/undefined`). Server-side
   variables are checked at runtime and fail the route with a 500 in production;
 - **changing a variable only takes effect after a new deploy** — the existing build
   already holds the old value inside its HTML.
@@ -239,13 +241,13 @@ Production environment; Preview is unused — there are no preview deploys).
 
 ### Public (contacts, inlined into the HTML)
 
-| Variable                 | approved.rs | carlab.rs | details.rs | Fallback in code                       | Without it                            |
-| ------------------------ | ----------- | --------- | ---------- | -------------------------------------- | ------------------------------------- |
-| `PUBLIC_WHATSAPP_NUMBER` | ✅ required | ✅        | ✅         | none / `PUBLIC_PHONE_NUMBER`           | a broken WhatsApp link                |
-| `PUBLIC_VIBER_NUMBER`    | ✅ required | ✅        | ✅         | none / `PUBLIC_PHONE_NUMBER`           | a broken Viber link                   |
-| `PUBLIC_PHONE_NUMBER`    | —           | ✅        | ✅         | a placeholder number in `constants.ts` | the site shows someone else's number  |
-| `PUBLIC_THREADS_CHANNEL` | ✅ required | —         | —          | none                                   | a broken Threads link plus schema     |
-| `PUBLIC_INSTAGRAM`       | —           | —         | ✅         | `details.studio` (a placeholder)       | the site shows someone else's account |
+| Variable                 | approved.rs | carlab.rs   | details.rs  | Default in the schema          | Without it                   |
+| ------------------------ | ----------- | ----------- | ----------- | ------------------------------ | ---------------------------- |
+| `PUBLIC_WHATSAPP_NUMBER` | ✅ required | ✅          | ✅          | none / `PUBLIC_PHONE_NUMBER`   | the build fails / the phone  |
+| `PUBLIC_VIBER_NUMBER`    | ✅ required | ✅          | ✅          | none / `PUBLIC_PHONE_NUMBER`   | the build fails / the phone  |
+| `PUBLIC_PHONE_NUMBER`    | —           | ✅ required | ✅ required | none                           | the build fails              |
+| `PUBLIC_THREADS_CHANNEL` | ✅ required | —           | —           | none                           | the build fails              |
+| `PUBLIC_INSTAGRAM`       | —           | —           | ✅          | `details_placeholder` (hidden) | the Instagram tile is hidden |
 
 ### Analytics — no environment variables
 
