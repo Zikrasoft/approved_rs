@@ -73,24 +73,29 @@ import {
 
 const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
 
-interface TelegramMessage {
-  message_id: number;
-  text?: string;
-  chat: { id: number; type: string };
-  from?: { id: number };
-  reply_to_message?: { message_id: number };
-}
+const messageSchema = z.object({
+  message_id: z.number().int(),
+  text: z.string().optional(),
+  chat: z.object({ id: z.number().int(), type: z.string().optional() }),
+  from: z.object({ id: z.number().int() }).optional(),
+  reply_to_message: z.object({ message_id: z.number().int() }).optional(),
+});
 
-interface TelegramUpdate {
-  update_id?: number;
-  message?: TelegramMessage;
-  callback_query?: {
-    id: string;
-    data?: string;
-    from?: { id: number };
-    message?: TelegramMessage;
-  };
-}
+const updateSchema = z.object({
+  update_id: z.number().int().optional(),
+  message: messageSchema.optional(),
+  callback_query: z
+    .object({
+      id: z.string(),
+      data: z.string().optional(),
+      from: z.object({ id: z.number().int() }).optional(),
+      message: messageSchema.optional(),
+    })
+    .optional(),
+});
+
+type TelegramMessage = z.infer<typeof messageSchema>;
+type TelegramUpdate = z.infer<typeof updateSchema>;
 
 const ACK = new Response(null, { status: 200 });
 
@@ -1017,19 +1022,18 @@ export async function POST({ request }: APIContext): Promise<Response> {
     return new Response(null, { status: 401 });
   }
 
-  let update: TelegramUpdate;
-  try {
-    update = (await request.json()) as TelegramUpdate;
-  } catch {
-    // Malformed body after a valid secret — ack with 200 so Telegram stops
-    // retrying instead of hammering this endpoint forever on a bad payload.
+  const parsed = updateSchema.safeParse(
+    await request.json().catch(() => undefined),
+  );
+  if (!parsed.success) {
+    console.warn('[telegram-webhook] ignoring unparseable update', {
+      issues: parsed.error.issues,
+    });
     return ACK;
   }
+  const update = parsed.data;
 
-  if (
-    typeof update.update_id === 'number' &&
-    alreadyProcessed(update.update_id)
-  ) {
+  if (update.update_id !== undefined && alreadyProcessed(update.update_id)) {
     return ACK;
   }
 
@@ -1037,10 +1041,6 @@ export async function POST({ request }: APIContext): Promise<Response> {
     if (update.callback_query) {
       await handleCallbackQuery(update.callback_query);
     } else if (update.message?.reply_to_message) {
-      // Checked before chat.type, not gated behind it — a prompt is only
-      // ever sent to a DM chatId now, so a reply typed in the group
-      // correlates to nothing and safely no-ops below, rather than this
-      // class of bug being able to recur if some future path slips.
       await handlePromptReply(
         update.message.chat.id,
         update.message.reply_to_message.message_id,
@@ -1049,15 +1049,11 @@ export async function POST({ request }: APIContext): Promise<Response> {
     } else if (update.message && update.message.chat.type === 'private') {
       await handlePrivateMessage(update.message);
     }
-    // Group messages that aren't button presses (chatter) fall through here
-    // untouched.
   } catch (err) {
     console.error('[telegram-webhook] unhandled error processing update', {
       error: err,
     });
   }
 
-  // Telegram retries the webhook on anything but 2xx — always ack even for
-  // update types we don't act on.
   return ACK;
 }
