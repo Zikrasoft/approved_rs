@@ -2560,6 +2560,40 @@ describe('POST /api/telegram-webhook', () => {
       );
     });
 
+    it('reports a reply as undelivered when the lead carries no telegramId', async () => {
+      vi.mocked(findByPendingPrompt).mockResolvedValue(
+        makeLead({
+          id: 5,
+          contact: 'tg://user?id=4242',
+          telegramId: null,
+          pendingPrompt: {
+            chatId: DM_CHAT_ID,
+            messageId: 888,
+            kind: 'reply_visitor',
+          },
+        }),
+      );
+
+      await POST(
+        makeCtx({
+          message: {
+            message_id: 2,
+            text: 'Нашёл вариант',
+            chat: { id: DM_CHAT_ID, type: 'private' },
+            from: { id: OWNER_ID },
+            reply_to_message: { message_id: 888 },
+          },
+        }),
+      );
+
+      expect(captureClient.sendMessage).not.toHaveBeenCalled();
+      expect(resolvePendingPrompt).not.toHaveBeenCalled();
+      expect(sendMessage).toHaveBeenCalledWith(
+        DM_CHAT_ID,
+        expect.stringContaining('Не доставлено'),
+      );
+    });
+
     it('rejects an empty reply to the visitor', async () => {
       vi.mocked(findByPendingPrompt).mockResolvedValue(
         makeLead({

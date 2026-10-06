@@ -68,6 +68,7 @@ import {
   appendIncome,
   appendNote,
   type LeadStatus,
+  type PendingPrompt,
   type StoredLead,
 } from '@/lib/store';
 
@@ -503,53 +504,55 @@ async function handleRejectPayCallback(
   });
 }
 
-async function handleEditCallback(
+async function startPrompt(
+  id: number,
+  chatId: number,
+  cbId: string,
+  promptText: string,
+  kind: PendingPrompt['kind'],
+  ack: string,
+): Promise<void> {
+  await withErrorAck(cbId, { id, kind }, async () => {
+    const lead = await getLead(id);
+    if (!lead) {
+      await answerCallback(cbId).catch(() => {});
+      return;
+    }
+    const promptId = await sendForceReplyPrompt(chatId, promptText);
+    await setPendingPrompt(id, { chatId, messageId: promptId, kind });
+    await answerCallback(cbId, ack);
+  });
+}
+
+function handleEditCallback(
   id: number,
   field: EditField,
   chatId: number,
   cbId: string,
 ): Promise<void> {
-  await withErrorAck(cbId, { id, field }, async () => {
-    const lead = await getLead(id);
-    if (!lead) {
-      await answerCallback(cbId).catch(() => {});
-      return;
-    }
-    const promptId = await sendForceReplyPrompt(
-      chatId,
-      `✏️ Введите новое значение (${EDIT_FIELD_LABELS[field]}):`,
-    );
-    await setPendingPrompt(id, {
-      chatId,
-      messageId: promptId,
-      kind: `edit_${field}`,
-    });
-    await answerCallback(cbId, 'Жду значение');
-  });
+  return startPrompt(
+    id,
+    chatId,
+    cbId,
+    `✏️ Введите новое значение (${EDIT_FIELD_LABELS[field]}):`,
+    `edit_${field}`,
+    'Жду значение',
+  );
 }
 
-async function handleReplyCallback(
+function handleReplyCallback(
   id: number,
   chatId: number,
   cbId: string,
 ): Promise<void> {
-  await withErrorAck(cbId, { id }, async () => {
-    const lead = await getLead(id);
-    if (!lead) {
-      await answerCallback(cbId).catch(() => {});
-      return;
-    }
-    const promptId = await sendForceReplyPrompt(
-      chatId,
-      '💬 Напишите ответ посетителю — бот отправит его в чат:',
-    );
-    await setPendingPrompt(id, {
-      chatId,
-      messageId: promptId,
-      kind: 'reply_visitor',
-    });
-    await answerCallback(cbId, 'Жду сообщение');
-  });
+  return startPrompt(
+    id,
+    chatId,
+    cbId,
+    '💬 Напишите ответ посетителю — бот отправит его в чат:',
+    'reply_visitor',
+    'Жду сообщение',
+  );
 }
 
 async function replyWithCard(
@@ -893,18 +896,23 @@ async function handlePromptReply(
       );
       return;
     }
+    const undelivered = () =>
+      sendMessage(
+        chatId,
+        '⚠️ Не доставлено: посетитель заблокировал бота или чат недоступен.',
+      );
+    if (pending.telegramId == null) {
+      await undelivered();
+      return;
+    }
     try {
-      if (pending.telegramId == null) throw new Error('lead has no telegramId');
       await captureClient.sendMessage(pending.telegramId, escapeHtml(reply));
     } catch (err) {
       console.error('[telegram-webhook] reply to visitor failed', {
         id: pending.id,
         error: err,
       });
-      await sendMessage(
-        chatId,
-        '⚠️ Не доставлено: посетитель заблокировал бота или чат недоступен.',
-      );
+      await undelivered();
       return;
     }
     const updated = await resolvePendingPrompt(
