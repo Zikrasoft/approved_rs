@@ -6,12 +6,7 @@ import { getSiteContent } from '@/i18n/content/site';
 import { getServicesContent } from '@/i18n/content/services';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
-import {
-  INSTAGRAM,
-  INSTAGRAM_ENABLED,
-  SITE_NAME,
-  STUDIO_ADDRESS,
-} from '@/utils/constants';
+import { INSTAGRAM, SITE_NAME, STUDIO_ADDRESS } from '@/utils/constants';
 import { CONTACT_LINKS, telegramBotHref } from '@/utils/contactLinks';
 import { contactPlacement } from '@podbor/site-kit';
 
@@ -53,15 +48,16 @@ const messengers = [
           {site.footer.tagline}
         </p>
         {
-          INSTAGRAM_ENABLED && (
+          INSTAGRAM && (
             <a
-              href={CONTACT_LINKS.instagram}
+              href={INSTAGRAM.url}
               rel="noopener"
               target="_blank"
               class="inline-flex min-h-11 items-center gap-2.5 text-sm text-mute transition-colors duration-400 hover:text-champagne"
             >
               <Icon name="instagram" size={16} class="shrink-0" />
-              <span class="sr-only">{site.channels.instagram}</span>@{INSTAGRAM}
+              <span class="sr-only">{site.channels.instagram}</span>@
+              {INSTAGRAM.handle}
             </a>
           )
         }

@@ -40,13 +40,18 @@ export const OPENING_HOURS = {
 export const PHONE_NUMBER = env.PUBLIC_PHONE_NUMBER;
 export const WHATSAPP_NUMBER = env.PUBLIC_WHATSAPP_NUMBER;
 export const VIBER_NUMBER = env.PUBLIC_VIBER_NUMBER;
-export const INSTAGRAM = env.PUBLIC_INSTAGRAM;
-export const INSTAGRAM_ENABLED = INSTAGRAM !== undefined;
+export const INSTAGRAM =
+  env.PUBLIC_INSTAGRAM === undefined
+    ? undefined
+    : {
+        handle: env.PUBLIC_INSTAGRAM,
+        url: instagramLink(env.PUBLIC_INSTAGRAM),
+      };
 
 export const TELEGRAM_BOT_URL = telegramBotLink(BRAND.captureBot);
 
 export const SOCIAL_SAME_AS = [
-  ...(INSTAGRAM === undefined ? [] : [instagramLink(INSTAGRAM)]),
+  ...(INSTAGRAM ? [INSTAGRAM.url] : []),
   TELEGRAM_BOT_URL,
 ];
 
