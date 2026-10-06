@@ -35,7 +35,7 @@ Variants go into parameters, not into new names.
 | `form_submit`                                                    | the server took the lead                        | `service`                                         |
 | `contact_click`                                                  | clicked a phone number or a messenger           | `channel`, `placement`                            |
 | `lead_modal_open`                                                | opened the form in the modal (approved.rs only) | `tab`, `service`                                  |
-| `brand_link_click`                                               | left for a partner site (approved.rs only)      | `to`                                              |
+| `brand_link_click`                                               | left for a partner site (approved.rs only)      | `brand`: `details`, `carlab`                      |
 | `lang_offer_shown` / `lang_offer_taken` / `lang_offer_dismissed` | the language-choice banner                      | `from`, `to`                                      |
 | `case_view`                                                      | opened a Case study                             | `depth`: Case studies opened this visit           |
 
@@ -148,6 +148,13 @@ a different domain and a different counter, where the person is already a new
 visitor with approved.rs as the referrer. `brand_link_click` is the only place that
 transition is visible from approved.rs's side.
 
+To see which partner the visitor left for, open the approved.rs counter (the
+other two never fire this event), take the goal `brand_link_click` and group it
+by the visit parameter `brand`: one row for `details`, one for `carlab`. The
+language banner keeps `from` / `to`, so grouping by `to` would mix locale codes
+into the same report. Apply the standing exclusions from
+[analytics-exclusions.md](analytics-exclusions.md) before reading the numbers.
+
 Nothing from a dev server. All three layouts skip `defineAnalytics` when
 `import.meta.env.DEV`, so no Metrika script is loaded locally and `reachGoal` is a
 no-op — verify an event against a build (`pnpm build`, then
@@ -172,3 +179,4 @@ would lie. What is already broken:
 | 2026-10-02             | `form_submit` on all three sites            | it used to fire on a submission attempt and now fires only once the server has taken the lead (issue #54). The series steps down by whatever share of attempts was failing, and the drop is the number worth knowing                                                                                        |
 | 2026-10-02             | `form_submit` on all three sites            | a honeypot hit still answers with the same redirect as an accepted lead, so a bot that trips it is counted as a conversion. Pre-existing — the native submit counted it too — and left alone so the trap keeps looking like success                                                                         |
 | 2026-10-02             | `contact_click` on approved.rs              | it no longer counts a control that merely opens the lead form — only the channels that reach a person (`phone`, `telegram`, `whatsapp`, `viber`), which is what `lead_modal_open` already counts. By then approved.rs was the only site still stamping a non-channel control, so only its series steps down |
+| 2026-10-06 (this PR)   | `brand_link_click` on approved.rs           | the partner destination moved from the parameter `to` to `brand`, so it no longer shares a key with the language banner's locale codes (issue #115). The goal itself is unchanged; a report crossing the date sees `to=details` / `to=carlab` before it and `brand=details` / `brand=carlab` after          |

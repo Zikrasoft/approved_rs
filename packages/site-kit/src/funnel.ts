@@ -125,7 +125,7 @@ function trackBrandLinks(signal: AbortSignal): void {
       );
       if (!link) return;
       reachGoal(GOALS.brandLinkClick, {
-        to: link.getAttribute(BRAND_LINK_ATTRIBUTE),
+        brand: link.getAttribute(BRAND_LINK_ATTRIBUTE),
       });
     },
     { signal },
