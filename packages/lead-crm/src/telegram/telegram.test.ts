@@ -973,6 +973,16 @@ describe('buildLeadDetail', () => {
     ]);
   });
 
+  it('offers a reply through the bot only when the contact is a Telegram id link', () => {
+    const buttons = (contact: string) =>
+      buildLeadDetail(makeLead({ id: 7, contact }), 'owner')
+        .reply_markup.inline_keyboard.flat()
+        .map((b) => b.callback_data);
+    expect(buttons('tg://user?id=123456')).toContain('reply:7');
+    expect(buttons('@ivan')).not.toContain('reply:7');
+    expect(buttons('+381601234567')).not.toContain('reply:7');
+  });
+
   it('in_progress lead: Завершить/Отказ status row', () => {
     const { reply_markup } = buildLeadDetail(
       makeLead({ id: 7, status: 'in_progress' }),

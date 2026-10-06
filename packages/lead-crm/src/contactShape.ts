@@ -9,3 +9,6 @@ export const telegramContact = (typed: string): string => {
   const handle = typed.trim().replace(/^@+/, '');
   return handle ? `@${handle}` : '';
 };
+
+export const isTelegramIdContact = (contact: string): boolean =>
+  contact.startsWith('tg://user?id=');

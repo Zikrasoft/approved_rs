@@ -50,6 +50,7 @@ export {
   buildRemindPicker,
   LEAD_STATUS_ACTIONS,
   EDIT_FIELD_LABELS,
+  escapeHtml,
 } from '@podbor/lead-crm';
 
 export type {
