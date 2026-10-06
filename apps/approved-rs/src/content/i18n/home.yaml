@@ -52,14 +52,6 @@ ctaHeading:
   accentWord: которую ищете
 ctaSubtext: Отвечаем в течение 2 часов. Консультация бесплатна.
 ctaTelegramLabel: Написать в Telegram
-ctaStatClients:
-  value: 200+
-  label: клиентов
-ctaStatCountries:
-  label: стран
-ctaStatYears:
-  value: 5 лет
-  label: на рынке
 ctaStatResponse:
   value: 2 ч
   label: ответ
@@ -179,14 +171,6 @@ translations:
       accentWord: you are looking for
     ctaSubtext: We respond within 2 hours. Consultation is free.
     ctaTelegramLabel: Message on Telegram
-    ctaStatClients:
-      value: 200+
-      label: clients
-    ctaStatCountries:
-      label: countries
-    ctaStatYears:
-      value: 5 years
-      label: in the market
     ctaStatResponse:
       value: 2 hrs
       label: response
@@ -304,14 +288,6 @@ translations:
       accentWord: koji tražite
     ctaSubtext: Odgovaramo u roku od 2 sata. Konsultacije su besplatne.
     ctaTelegramLabel: Pišite na Telegram
-    ctaStatClients:
-      value: 200+
-      label: klijenata
-    ctaStatCountries:
-      label: zemalja
-    ctaStatYears:
-      value: 5 godina
-      label: na tržištu
     ctaStatResponse:
       value: 2 č
       label: odgovor
@@ -429,14 +405,6 @@ translations:
       accentWord: que estás buscando
     ctaSubtext: Respondemos en un plazo de 2 horas. La consulta es gratuita.
     ctaTelegramLabel: Escribir en Telegram
-    ctaStatClients:
-      value: 200+
-      label: clientes
-    ctaStatCountries:
-      label: países
-    ctaStatYears:
-      value: 5 años
-      label: en el mercado
     ctaStatResponse:
       value: 2 h
       label: respuesta
@@ -554,14 +522,6 @@ translations:
       accentWord: das Sie suchen
     ctaSubtext: Wir antworten innerhalb von 2 Stunden. Die Beratung ist kostenlos.
     ctaTelegramLabel: Nachricht an Telegram
-    ctaStatClients:
-      value: 200+
-      label: Kunden
-    ctaStatCountries:
-      label: Länder
-    ctaStatYears:
-      value: 5 Jahre
-      label: auf dem Markt
     ctaStatResponse:
       value: 2 Std.
       label: Antwort

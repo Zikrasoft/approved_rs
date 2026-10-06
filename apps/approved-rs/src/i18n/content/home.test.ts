@@ -5,9 +5,6 @@ import { getHomeContent } from './home';
 import { homeContentSchema } from './homeContentSchema';
 import { SUPPORTED_LOCALES } from '@/i18n/config';
 
-// ru is hand-edited and CI translates on push, so between the two every other
-// locale legitimately reads ru. Skipping keeps the guard on the state CI
-// produces without turning every Russian copy edit into a red build.
 const translated = translationIsCurrent(homeYaml, homeContentSchema);
 
 describe('getHomeContent', () => {
@@ -35,5 +32,23 @@ describe('getHomeContent', () => {
     expect(getHomeContent('en').ctaHeading.accentWord).not.toBe(
       getHomeContent('ru').ctaHeading.accentWord,
     );
+  });
+});
+
+describe('homeContentSchema', () => {
+  it('rejects the closing-band copies of the stats band keys', () => {
+    const ru = getHomeContent('ru');
+    expect(homeContentSchema.safeParse(ru).success).toBe(true);
+    for (const stray of [
+      'ctaStatClients',
+      'ctaStatCountries',
+      'ctaStatYears',
+    ]) {
+      const result = homeContentSchema.safeParse({
+        ...ru,
+        [stray]: { value: '200+', label: 'клиентов' },
+      });
+      expect(result.success, stray).toBe(false);
+    }
   });
 });
