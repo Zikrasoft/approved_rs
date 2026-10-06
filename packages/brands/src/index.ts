@@ -15,6 +15,7 @@ export {
   PARTNER_SERVICE,
   SERVICE_LABELS_RU,
   SERVICE_SLUGS_BY_BRAND,
+  isBrandServiceSlug,
   isPartnerService,
   serviceLabel,
 } from './serviceLabels.ts';

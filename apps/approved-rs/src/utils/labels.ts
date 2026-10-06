@@ -1,14 +1,17 @@
 import { getI18n } from '@/i18n/getI18n';
 import { PathBuilder } from '@/utils/paths';
 import type { Locale } from '@/i18n/config';
-import { SERVICE_SLUGS_BY_BRAND, type BrandServiceSlug } from '@podbor/brands';
+import {
+  SERVICE_SLUGS_BY_BRAND,
+  isBrandServiceSlug,
+  type BrandServiceSlug,
+} from '@podbor/brands';
 
 export const SERVICE_SLUGS = SERVICE_SLUGS_BY_BRAND.approved;
 export type ServiceSlug = BrandServiceSlug<'approved'>;
 
-export function isServiceSlug(value: string): value is ServiceSlug {
-  return (SERVICE_SLUGS as readonly string[]).includes(value);
-}
+export const isServiceSlug = (value: string): value is ServiceSlug =>
+  isBrandServiceSlug('approved', value);
 
 export const COUNTRY_SCOPED_SERVICE_SLUGS = [
   'vehicle-sourcing',

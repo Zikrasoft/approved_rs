@@ -62,6 +62,13 @@ export const SERVICE_SLUGS_BY_BRAND = {
 export type BrandServiceSlug<K extends BrandKey> =
   (typeof SERVICE_SLUGS_BY_BRAND)[K][number];
 
+export function isBrandServiceSlug<K extends BrandKey>(
+  brand: K,
+  value: string,
+): value is BrandServiceSlug<K> {
+  return (SERVICE_SLUGS_BY_BRAND[brand] as readonly string[]).includes(value);
+}
+
 export const PARTNER_SERVICE = {
   carlab: 'partner-carlab',
   details: 'partner-details',

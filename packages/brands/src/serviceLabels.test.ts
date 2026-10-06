@@ -3,6 +3,7 @@ import {
   PARTNER_SERVICE,
   SERVICE_LABELS_RU,
   SERVICE_SLUGS_BY_BRAND,
+  isBrandServiceSlug,
   isPartnerService,
   serviceLabel,
 } from './serviceLabels.ts';
@@ -50,6 +51,18 @@ describe('SERVICE_SLUGS_BY_BRAND', () => {
       expect(slugs.length).toBeGreaterThan(0);
     }
   });
+
+  it.each(['approved', 'carlab', 'details'] as const)(
+    "narrows a %s slug and rejects every other brand's",
+    (brand) => {
+      for (const [other, slugs] of Object.entries(SERVICE_SLUGS_BY_BRAND)) {
+        for (const slug of slugs) {
+          expect(isBrandServiceSlug(brand, slug)).toBe(other === brand);
+        }
+      }
+      expect(isBrandServiceSlug(brand, 'no-such-service')).toBe(false);
+    },
+  );
 
   it('gives no slug to two brands', () => {
     const all = Object.values(SERVICE_SLUGS_BY_BRAND).flat();
