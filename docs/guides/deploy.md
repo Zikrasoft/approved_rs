@@ -295,16 +295,18 @@ On approved.rs, `PUBLIC_WHATSAPP_NUMBER` doubles as the number for an ordinary c
 Four bots, and the variables split along that line. The CRM bot `@SerbCRMBot` is
 one bot shared by the three projects; each brand's capture bot is its own.
 
-| Variable                          | approved.rs | carlab.rs | details.rs | Bot     | Without it                                                                     |
-| --------------------------------- | ----------- | --------- | ---------- | ------- | ------------------------------------------------------------------------------ |
-| `TELEGRAM_BOT_TOKEN`              | ✅          | ✅        | ✅         | CRM     | `/api/leads` and `/api/contact-click` answer 500                               |
-| `TELEGRAM_BOT_USERNAME`           | ✅          | ✅        | ✅         | CRM     | the same — 500                                                                 |
-| `TELEGRAM_GROUP_ID`               | ✅          | ✅        | ✅         | CRM     | the same — 500                                                                 |
-| `TELEGRAM_OWNER_ID`               | ✅          | ✅        | ✅         | CRM     | this brand's leads never reach the owner's DMs                                 |
-| `TELEGRAM_ADMIN_ID`               | ✅          | ✅        | ✅         | CRM     | this brand's leads never reach the admin's DMs                                 |
-| `TELEGRAM_WEBHOOK_SECRET`         | ✅          | —         | —          | CRM     | `/api/telegram-webhook` answers 401 to everything — the bot's buttons are dead |
-| `TELEGRAM_CAPTURE_BOT_TOKEN`      | ✅          | ✅        | ✅         | capture | this brand's capture bot never answers a visitor and no lead is written        |
-| `TELEGRAM_CAPTURE_WEBHOOK_SECRET` | ✅          | ✅        | ✅         | capture | `/api/telegram-capture` answers 401 to everything — the Telegram tile is dead  |
+| Variable                             | approved.rs | carlab.rs | details.rs | Bot     | Without it                                                                     |
+| ------------------------------------ | ----------- | --------- | ---------- | ------- | ------------------------------------------------------------------------------ |
+| `TELEGRAM_BOT_TOKEN`                 | ✅          | ✅        | ✅         | CRM     | `/api/leads` and `/api/contact-click` answer 500                               |
+| `TELEGRAM_BOT_USERNAME`              | ✅          | ✅        | ✅         | CRM     | the same — 500                                                                 |
+| `TELEGRAM_GROUP_ID`                  | ✅          | ✅        | ✅         | CRM     | the same — 500                                                                 |
+| `TELEGRAM_OWNER_ID`                  | ✅          | ✅        | ✅         | CRM     | this brand's leads never reach the owner's DMs                                 |
+| `TELEGRAM_ADMIN_ID`                  | ✅          | ✅        | ✅         | CRM     | this brand's leads never reach the admin's DMs                                 |
+| `TELEGRAM_WEBHOOK_SECRET`            | ✅          | —         | —          | CRM     | `/api/telegram-webhook` answers 401 to everything — the bot's buttons are dead |
+| `TELEGRAM_CAPTURE_BOT_TOKEN`         | ✅          | ✅        | ✅         | capture | this brand's capture bot never answers a visitor and no lead is written        |
+| `TELEGRAM_CAPTURE_WEBHOOK_SECRET`    | ✅          | ✅        | ✅         | capture | `/api/telegram-capture` answers 401 to everything — the Telegram tile is dead  |
+| `TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB`  | optional    | —         | —          | capture | the reply button is absent on CarLab's cards                                   |
+| `TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS` | optional    | —         | —          | capture | the reply button is absent on Details' cards                                   |
 
 > **The main trap when setting up new projects.** All three `src/lib/crmBot.ts`
 > call `requireEnv('TELEGRAM_BOT_TOKEN')`, `requireEnv('TELEGRAM_BOT_USERNAME')` and
@@ -331,7 +333,12 @@ projects: which bot received the update is what tells the server the brand, so a
 shared token would hand a visitor the choice. `TELEGRAM_CAPTURE_WEBHOOK_SECRET`
 is per project too, and on approved.rs it is a **different** value from
 `TELEGRAM_WEBHOOK_SECRET` — the two webhooks there belong to two different bots
-and do not share a secret.
+and do not share a secret. approved.rs additionally holds the other two capture
+tokens as `TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB` and `TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS`:
+the operator's reply to a handle-less visitor lands on the CRM webhook there, and
+only the visitor's own brand's bot can deliver it, so the webhook picks the bot by
+the lead's `brand` ([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
+Without a sibling token the reply button is simply absent on that brand's cards.
 
 ### Storage and cron
 

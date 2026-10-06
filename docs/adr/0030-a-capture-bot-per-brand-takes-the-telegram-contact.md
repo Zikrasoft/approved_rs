@@ -69,10 +69,10 @@ has a username goes in `comment` instead, since the username is where the conver
 
 **Telegram's `username` is optional, and that is what shapes the handoff.** With a handle the owner
 writes from their own account, as they do now. Without one, nobody but the capture bot can reach that
-person, so the card offers a reply-through-the-bot fallback. That fallback is built for approved.rs
-only: it needs the visitor's own capture bot, the operator's tap lands on the CRM webhook, and
-approved.rs therefore holds all three capture tokens. CarLab and Details have had zero contact clicks
-and zero form submissions over two months, so a relay for them would be built for nobody.
+person, so the card offers a reply-through-the-bot fallback for every brand. It needs the visitor's
+own capture bot, the operator's tap lands on the CRM webhook, and approved.rs therefore holds all
+three capture tokens and picks the bot by the Lead's `brand`. A brand whose token is not set simply
+gets no reply button on its cards.
 
 **The phone is an extra step with two different purposes.** `/start` does not carry a phone number;
 only a `KeyboardButton{request_contact:true}` in a private chat produces one, and the visitor can
