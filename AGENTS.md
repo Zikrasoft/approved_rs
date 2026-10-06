@@ -323,7 +323,9 @@ Both new apps follow the same shape, and a third should too:
   brand's capture bot through `captureBotLink` in
   `@podbor/site-kit/contact-links`, which every app binds once over its own
   `BRAND.captureBot` as `telegramBotHref(locale, service?)` in
-  `src/utils/contactLinks.ts` — a tile calls that, never the bot name. `?start=`
+  `src/utils/contactLinks.ts` — a tile calls that, never the bot name. A
+  tracked Telegram tile must carry `?start=`: a Telegram link without it is
+  treated as a human account, and a tap on it stores no Lead. `?start=`
   and `?text=` are different parameters, so `messengerPrefill` never reaches
   Telegram. The payload is `<service>_<locale>`, or the locale alone where the
   page has no service (the homepage, the footer, the floating widget, the
