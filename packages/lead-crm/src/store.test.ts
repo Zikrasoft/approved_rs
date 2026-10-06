@@ -10,7 +10,7 @@ import {
   VISITOR_MERGE_WINDOW_MS,
   type LeadStore,
 } from './store.ts';
-import { createQuarantine } from './quarantine.ts';
+import { createQuarantine, LEADS_PATH } from './quarantine.ts';
 import { appendIncome, getCommission } from './money.ts';
 
 let storage: MemoryStorage;
@@ -1565,11 +1565,17 @@ describe('updateLeads — failures that are not write conflicts', () => {
 });
 
 describe('readLeads — a record that is not a list at all', () => {
-  it('refuses to read a payload that is not a list', async () => {
+  beforeEach(() => vi.spyOn(console, 'error').mockImplementation(() => {}));
+
+  it('refuses to read a payload that is not a list, and says which file', async () => {
     storage.seed({ oops: 'this is not a list of leads' });
 
     await expect(store.readLeads()).rejects.toThrow(
       /stored leads are object, not an array/,
+    );
+    expect(vi.mocked(console.error)).toHaveBeenCalledWith(
+      '[lead-crm] stored leads are not an array',
+      { path: LEADS_PATH, type: 'object' },
     );
   });
 

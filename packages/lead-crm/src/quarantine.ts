@@ -26,6 +26,10 @@ export function createQuarantine({
     const { raw, version } = await storage.read();
     const records = storedRecordsSchema.safeParse(raw ?? []);
     if (!records.success) {
+      console.error('[lead-crm] the quarantine file is not an array', {
+        path: QUARANTINE_PATH,
+        type: typeof raw,
+      });
       throw new Error(
         `[lead-crm] the quarantine file is ${typeof raw}, not an array — refusing to overwrite`,
       );

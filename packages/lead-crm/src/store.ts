@@ -24,6 +24,7 @@ import {
   storedRecordsSchema,
   type LeadStorage,
 } from './storage/types.ts';
+import { LEADS_PATH } from './quarantine.ts';
 
 const MAX_RETRIES = 6;
 export const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
@@ -174,6 +175,10 @@ export function createLeadStore({
     if (raw === undefined) return { leads: [], unreadable: [], version };
     const records = storedRecordsSchema.safeParse(raw);
     if (!records.success) {
+      console.error('[lead-crm] stored leads are not an array', {
+        path: LEADS_PATH,
+        type: typeof raw,
+      });
       throw new Error(
         `[lead-crm] stored leads are ${typeof raw}, not an array — refusing to overwrite`,
       );

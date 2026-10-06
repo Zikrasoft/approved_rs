@@ -55,6 +55,10 @@ describe('createQuarantine', () => {
       /quarantine file is string, not an array/,
     );
     expect(storage.current()).toBe('not a list');
+    expect(vi.mocked(console.error)).toHaveBeenCalledWith(
+      '[lead-crm] the quarantine file is not an array',
+      { path: QUARANTINE_PATH, type: 'string' },
+    );
   });
 
   it('treats the copy as done even when the notice cannot be sent', async () => {
