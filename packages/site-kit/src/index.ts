@@ -4,7 +4,9 @@ export {
   jsonLdText,
   serviceSchema,
   articleSchema,
+  citySchema,
   localBusinessSchema,
+  productSchema,
   faqPageSchema,
   pageSchema,
 } from './jsonLd.ts';

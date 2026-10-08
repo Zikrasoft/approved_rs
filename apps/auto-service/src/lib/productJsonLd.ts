@@ -1,3 +1,4 @@
+import { productSchema } from '@podbor/site-kit';
 import type { CatalogProduct } from './catalog';
 
 export const productJsonLd =
@@ -8,26 +9,17 @@ export const productJsonLd =
     product: CatalogProduct;
     description: string;
   }) =>
-  (url: string): Record<string, unknown> => {
+  (url: string) => {
     const brand = product.spec.brand;
-    return {
-      '@context': 'https://schema.org',
-      '@type': 'Product',
+    return productSchema({
       name: product.title,
-      ...(product.image && { image: product.image }),
-      ...(typeof brand === 'string' && {
-        brand: { '@type': 'Brand', name: brand },
-      }),
+      image: product.image || undefined,
+      brand: typeof brand === 'string' ? brand : undefined,
       description,
-      offers: {
-        '@type': 'Offer',
-        price: product.price,
-        priceCurrency: 'RSD',
-        availability: product.inStock
-          ? 'https://schema.org/InStock'
-          : 'https://schema.org/OutOfStock',
-        itemCondition: 'https://schema.org/NewCondition',
-        url,
-      },
-    };
+      price: product.price,
+      currency: 'RSD',
+      inStock: product.inStock,
+      condition: 'NewCondition',
+      url,
+    });
   };

@@ -1,11 +1,11 @@
-import { articleSchema, serviceSchema } from '@podbor/site-kit';
+import { articleSchema, citySchema, serviceSchema } from '@podbor/site-kit';
 import { SITE_URL } from '@/utils/constants';
 import type { Work } from '@/utils/works';
 
 export const BUSINESS_ID = `${SITE_URL}/#workshop`;
 
 const BUSINESS = { '@id': BUSINESS_ID };
-const BELGRADE = { '@type': 'City', name: 'Beograd' };
+const BELGRADE = citySchema('Beograd');
 
 export const workSchema = (work: Work, headline: string) => (url: string) =>
   articleSchema({
