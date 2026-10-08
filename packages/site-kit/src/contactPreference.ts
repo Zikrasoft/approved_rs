@@ -70,7 +70,7 @@ export function preferredContactChannel(
   );
 }
 
-function visitorChannel(): PreferredContactChannel {
+export function visitorChannel(): PreferredContactChannel {
   return preferredContactChannel(
     detectVisitorCountry(),
     document.documentElement.lang,
