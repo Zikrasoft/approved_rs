@@ -28,6 +28,8 @@ const RU = { nav: { home: 'Главная' }, title: 'Заголовок' };
 
 describeSectionRegistry([
   {
+    key: 'listed',
+    promptSubject: 'listed',
     path: fixture('listed.yaml', {
       ...RU,
       translations: {
@@ -40,6 +42,8 @@ describeSectionRegistry([
     fields: ['title', 'nav'],
   },
   {
+    key: 'bare',
+    promptSubject: 'bare',
     path: fixture('bare.yaml', { ...RU, translatedFrom: 'abc' }),
     schema,
   },

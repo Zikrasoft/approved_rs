@@ -10,7 +10,7 @@ import Faq from '@/components/Faq.astro';
 import MarketNotes from '@/components/MarketNotes.astro';
 import type { CountryNote } from '@/i18n/content/services';
 import { content } from '@/i18n/content';
-import { getServices } from '@/i18n/content/services';
+import { servicesView } from '@/i18n/content/services';
 import { generateServiceSchema, placeholderOgImage } from '@/utils/seo';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { PathBuilder } from '@/utils/paths';
@@ -66,7 +66,7 @@ const meta = {
   canonical: `${SITE_URL}${PathBuilder.vehicleImportSpoke(locale, slug)}`,
   ogImage: placeholderOgImage(SITE_URL, locale),
 };
-const closing = getServices(locale)['vehicle-import'].closing;
+const closing = servicesView(locale)['vehicle-import'].closing;
 const schema = generateServiceSchema(
   `${title} ${titleHighlight}`,
   areaServed,

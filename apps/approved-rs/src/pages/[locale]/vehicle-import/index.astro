@@ -6,7 +6,7 @@ import PageSection from '@/components/PageSection.astro';
 import StepsList from '@/components/StepsList.astro';
 import IncludedGrid from '@/components/IncludedGrid.astro';
 import { content } from '@/i18n/content';
-import { getServices } from '@/i18n/content/services';
+import { servicesView } from '@/i18n/content/services';
 import { withLocales, PathBuilder } from '@/utils/paths';
 import { getCountry } from '@/utils/geo';
 import CountryPlate from '@/components/CountryPlate.astro';
@@ -23,7 +23,7 @@ import type { VehicleImportSpoke } from '@/utils/vehicleImportCrossSell';
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const { locale } = Astro.params;
-const sc = getServices(locale)['vehicle-import'];
+const sc = servicesView(locale)['vehicle-import'];
 const pc = sc.hub;
 const meta = {
   title: `${pc.metaTitle} | ${SITE_NAME}`,

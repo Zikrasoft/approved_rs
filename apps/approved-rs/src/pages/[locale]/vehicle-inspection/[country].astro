@@ -13,13 +13,13 @@ import {
 import { getCollection } from 'astro:content';
 import { SITE_URL } from '@/utils/constants';
 import { content } from '@/i18n/content';
-import { getServices } from '@/i18n/content/services';
+import { servicesView } from '@/i18n/content/services';
 
 export const getStaticPaths = () => withLocales(getCountryPaths());
 
 const { locale, country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
-const sc = getServices(locale)['vehicle-inspection'];
+const sc = servicesView(locale)['vehicle-inspection'];
 const location = buildLocation(locale, country);
 const countryNote = sc.countryNoteFor(country.code);
 const meta = generateMeta('vehicle-inspection', {

@@ -13,7 +13,7 @@ import {
 import { getCollection } from 'astro:content';
 import { SITE_URL } from '@/utils/constants';
 import { content } from '@/i18n/content';
-import { getServices } from '@/i18n/content/services';
+import { servicesView } from '@/i18n/content/services';
 
 // Only Serbia: everywhere else the page said nothing a reader could not read
 // on the hub, so the other seven 301 to it (see middleware.ts). Serbia keeps
@@ -24,7 +24,7 @@ export const getStaticPaths = () =>
 
 const { locale, country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
-const sc = getServices(locale)['vehicle-buyback'];
+const sc = servicesView(locale)['vehicle-buyback'];
 const location = buildLocation(locale, country);
 const meta = generateMeta('vehicle-buyback', {
   country,
