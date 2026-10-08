@@ -12,7 +12,8 @@ import SiteFooter from '@/components/SiteFooter.astro';
 import LeadModal from '@/components/LeadModal.astro';
 import FloatingCta from '@/components/FloatingCta.astro';
 import CookieConsent from '@/components/CookieConsent.astro';
-import { BCP47_BY_LOCALE, OG_IMAGE, OG_LOCALE, localeSet } from '@/i18n/config';
+import { BCP47_BY_LOCALE } from '@/i18n/config';
+import { pageHead } from '@/utils/pageHead';
 import { localeFrom } from '@/i18n/currentLocale';
 import {
   SITE_NAME,
@@ -50,9 +51,11 @@ const FONT_URLS: Record<typeof locale, string[]> = {
   en: [displayLatinUrl, bodyLatinUrl],
 };
 const fontUrls = FONT_URLS[locale];
-const canonical = new URL(Astro.url.pathname, SITE_URL).href;
-const alternates = localeSet.getAlternateLinks(SITE_URL, Astro.url.pathname);
-const ogImage = new URL(OG_IMAGE[locale], SITE_URL).href;
+const { canonical, alternates, ogLocale, ogImage } = pageHead(
+  locale,
+  Astro.url.pathname,
+  { title, description },
+);
 
 const googleMapsUrl = mapPlaceUrl(STUDIO_ADDRESS.googleMapsCid);
 
@@ -142,7 +145,7 @@ const businessSchema = {
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
-    <meta property="og:locale" content={OG_LOCALE[locale]} />
+    <meta property="og:locale" content={ogLocale} />
     <meta name="twitter:card" content="summary_large_image" />
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

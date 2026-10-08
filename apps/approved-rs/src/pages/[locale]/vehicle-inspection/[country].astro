@@ -1,4 +1,5 @@
 ---
+import { canonicalUrl } from '@/utils/pageHead';
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import StepsList from '@/components/StepsList.astro';
 import Faq from '@/components/Faq.astro';
@@ -11,7 +12,6 @@ import {
   buildLocation,
 } from '@/utils/seo';
 import { getCollection } from 'astro:content';
-import { SITE_URL } from '@/utils/constants';
 import { content } from '@/i18n/content';
 import { getServices } from '@/i18n/content/services';
 
@@ -24,8 +24,6 @@ const location = buildLocation(locale, country);
 const countryNote = sc.countryNoteFor(country.code);
 const meta = generateMeta('vehicle-inspection', {
   country,
-  baseUrl: SITE_URL,
-  path: PathBuilder.service(locale, 'vehicle-inspection', countryCode!),
   locale: locale,
 });
 const cases = (await getCollection('cases'))
@@ -39,7 +37,7 @@ const cases = (await getCollection('cases'))
 const schema = generateServiceSchema(
   `${sc.title} ${location}`,
   country[locale].name,
-  meta.canonical,
+  canonicalUrl(locale, Astro.url.pathname),
 );
 ---
 

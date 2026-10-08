@@ -4,6 +4,7 @@
 // destinationsNote/Faq structure on all of them; only the source data and
 // one slot's worth of page-specific content (a cross-link paragraph, or the
 // EU source chips) actually differs per spoke.
+import { canonicalUrl } from '@/utils/pageHead';
 import ServicePageLayout from './ServicePageLayout.astro';
 import StepsList from '@/components/StepsList.astro';
 import Faq from '@/components/Faq.astro';
@@ -63,14 +64,13 @@ const {
 const meta = {
   title: `${metaTitle} | ${SITE_NAME}`,
   description: metaDescription,
-  canonical: `${SITE_URL}${PathBuilder.vehicleImportSpoke(locale, slug)}`,
   ogImage: placeholderOgImage(SITE_URL, locale),
 };
 const closing = getServices(locale)['vehicle-import'].closing;
 const schema = generateServiceSchema(
   `${title} ${titleHighlight}`,
   areaServed,
-  meta.canonical,
+  canonicalUrl(locale, Astro.url.pathname),
 );
 ---
 

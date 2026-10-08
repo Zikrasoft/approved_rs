@@ -1,12 +1,19 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
-import { localeConfig, OG_SUFFIX } from '../src/i18n/config.ts';
+import { localeConfig, OG_SUFFIX, type Locale } from '../src/i18n/config.ts';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const asset = (name) => new URL(`public/${name}`, `file://${root}`);
+const asset = (name: string) => new URL(`public/${name}`, `file://${root}`);
 
-const COPY = {
+interface OgCopy {
+  heading: string;
+  services: string;
+  extra: string;
+  badge: string;
+}
+
+const COPY: Record<Locale, OgCopy> = {
   sr: {
     heading: 'Auto servis u Beogradu',
     services: 'Dijagnostika · Servis · Kočnice i vešanje · Motor i menjač',
@@ -27,21 +34,10 @@ const COPY = {
   },
 };
 
-for (const [name, map] of Object.entries({ COPY, OG_SUFFIX })) {
-  const missing = localeConfig.locales.filter(
-    (locale) => !Object.hasOwn(map, locale),
-  );
-  if (missing.length) {
-    throw new Error(
-      `gen-og: ${name} has no copy for ${missing.join(', ')} — add it before generating OG images`,
-    );
-  }
-}
-
-const esc = (text) =>
+const esc = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-function svg({ heading, services, extra, badge }) {
+function svg({ heading, services, extra, badge }: OgCopy) {
   const badgeWidth = Math.round(badge.length * 12.2) + 48;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
   <rect width="1200" height="630" fill="#F5F4F1"/>
@@ -73,7 +69,7 @@ for (const [name, size] of [
   ['apple-touch-icon.png', 180],
   ['icon-192.png', 192],
   ['icon-512.png', 512],
-]) {
+] as const) {
   writeFileSync(
     asset(name),
     await sharp(favicon, { density: 512 }).resize(size, size).png().toBuffer(),

@@ -1,4 +1,5 @@
 ---
+import { canonicalUrl } from '@/utils/pageHead';
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import ChipLinks from '@/components/ChipLinks.astro';
 import Faq from '@/components/Faq.astro';
@@ -11,7 +12,6 @@ import {
   buildLocation,
 } from '@/utils/seo';
 import { getCollection } from 'astro:content';
-import { SITE_URL } from '@/utils/constants';
 import { content } from '@/i18n/content';
 import { getServices } from '@/i18n/content/services';
 import { TrendingUp, History, UserCheck, BadgeCheck } from '@lucide/astro';
@@ -28,8 +28,6 @@ const countryLocation = buildLocation(locale, country);
 const meta = generateMeta('vehicle-sourcing', {
   country,
   city,
-  baseUrl: SITE_URL,
-  path: PathBuilder.vehicleSourcingCity(locale, countryCode!, city.slug),
   locale: locale,
 });
 const cases = (await getCollection('cases'))
@@ -43,7 +41,7 @@ const cases = (await getCollection('cases'))
 const schema = generateServiceSchema(
   `${sc.title} ${cityLocation}`,
   city[locale].name,
-  meta.canonical,
+  canonicalUrl(locale, Astro.url.pathname),
 );
 
 // DEKRA/TÜV are German-specific certification bodies — only true for country: 'de'.

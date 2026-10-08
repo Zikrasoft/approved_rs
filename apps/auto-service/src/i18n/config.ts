@@ -3,6 +3,11 @@ import { createLocaleSet, SOURCE_LOCALE } from '@podbor/i18n';
 export const localeConfig = {
   locales: ['ru', 'sr', 'en'],
   primaryLocale: 'sr',
+  ogLocale: {
+    ru: 'ru_RU',
+    sr: 'sr_RS',
+    en: 'en_US',
+  },
 } as const;
 
 export const localeSet = createLocaleSet(localeConfig);
@@ -25,12 +30,6 @@ export const BCP47_BY_LOCALE: Record<Locale, string> = {
   ru: 'ru-RS',
   sr: 'sr-Latn-RS',
   en: 'en-RS',
-};
-
-export const OG_LOCALE: Record<Locale, string> = {
-  ru: 'ru_RU',
-  sr: 'sr_RS',
-  en: 'en_US',
 };
 
 export const OG_SUFFIX: Record<Locale, string> = {

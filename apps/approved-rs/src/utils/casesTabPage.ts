@@ -1,4 +1,4 @@
-import { SITE_URL, SITE_NAME } from '@/utils/constants';
+import { SITE_NAME } from '@/utils/constants';
 import { getPages } from '@/i18n/content/pages';
 import { getCasesTabCounts } from '@/utils/casesQueries';
 import type { CaseCardProps } from '@/components/CaseCard.astro';
@@ -10,20 +10,15 @@ type CasesTabPageContentKey =
   | 'casesVehicleInspection'
   | 'casesVehicleImport';
 
-// Shared by every /cases/<tab>.astro page — each one only differs in which
-// PagesContent block/canonical path/item-fetching it uses; the meta-building
-// and tab-counts wiring was identical across all of them before this.
 export async function buildCasesTabPageData(
   locale: Locale,
   contentKey: CasesTabPageContentKey,
-  canonicalPath: string,
   fetchItems: () => Promise<CaseCardProps[]>,
 ) {
   const p = getPages(locale)[contentKey];
   const meta = {
     title: `${p.metaTitle} | ${SITE_NAME}`,
     description: p.metaDescription,
-    canonical: `${SITE_URL}${canonicalPath}`,
   };
   const [items, counts] = await Promise.all([
     fetchItems(),

@@ -1,4 +1,5 @@
 ---
+import { canonicalUrl } from '@/utils/pageHead';
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import CountryPill from '@/components/CountryPill.astro';
 import Faq from '@/components/Faq.astro';
@@ -9,7 +10,7 @@ import MarketCompare from '@/components/MarketCompare.astro';
 import heroPhoto from '@/assets/service-sourcing.jpg';
 import { content } from '@/i18n/content';
 import { getServices } from '@/i18n/content/services';
-import { withLocales, PathBuilder } from '@/utils/paths';
+import { withLocales } from '@/utils/paths';
 import { getActiveCountries } from '@/utils/geo';
 import { compareItemsFor } from '@/utils/compareItems';
 import { generateServiceSchema, placeholderOgImage } from '@/utils/seo';
@@ -25,13 +26,12 @@ const countries = getActiveCountries();
 const meta = {
   title: `${pc.metaTitle} | ${SITE_NAME}`,
   description: pc.metaDescription,
-  canonical: `${SITE_URL}${PathBuilder.vehicleSourcingHub(locale)}`,
   ogImage: placeholderOgImage(SITE_URL, locale),
 };
 const schema = generateServiceSchema(
   pc.title,
   countries.map((c) => c[locale].name),
-  meta.canonical,
+  canonicalUrl(locale, Astro.url.pathname),
 );
 
 const sc = getServices(locale)['vehicle-sourcing'];

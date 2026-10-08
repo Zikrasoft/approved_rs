@@ -1,4 +1,5 @@
 ---
+import { canonicalUrl } from '@/utils/pageHead';
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import Faq from '@/components/Faq.astro';
 import heroPhoto from '@/assets/service-import.jpg';
@@ -28,7 +29,6 @@ const pc = sc.hub;
 const meta = {
   title: `${pc.metaTitle} | ${SITE_NAME}`,
   description: pc.metaDescription,
-  canonical: `${SITE_URL}${PathBuilder.vehicleImportHub(locale)}`,
   ogImage: placeholderOgImage(SITE_URL, locale),
 };
 // Explicit — every real spoke this hub fans out to (Germany + the EU
@@ -44,7 +44,7 @@ const sourceNames = [
 const schema = generateServiceSchema(
   `${pc.title} ${pc.titleHighlight}`,
   sourceNames,
-  meta.canonical,
+  canonicalUrl(locale, Astro.url.pathname),
 );
 
 const cases = (await getCollection('cases'))

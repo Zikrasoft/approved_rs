@@ -1,4 +1,5 @@
 ---
+import { canonicalUrl } from '@/utils/pageHead';
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import PageSection from '@/components/PageSection.astro';
 import StepsList from '@/components/StepsList.astro';
@@ -10,7 +11,6 @@ import heroPhoto from '@/assets/service-buyback.jpg';
 import { content } from '@/i18n/content';
 import { getServices } from '@/i18n/content/services';
 import { withLocales, PathBuilder } from '@/utils/paths';
-import { SLUG } from '@/utils/labels';
 import { getActiveCountries } from '@/utils/geo';
 import { generateServiceSchema, placeholderOgImage } from '@/utils/seo';
 import { getCollection } from 'astro:content';
@@ -27,13 +27,12 @@ const t = getI18n(locale);
 const meta = {
   title: `${pc.metaTitle} | ${SITE_NAME}`,
   description: pc.metaDescription,
-  canonical: `${SITE_URL}${PathBuilder.sectionRoot(locale, SLUG.BUYBACK)}`,
   ogImage: placeholderOgImage(SITE_URL, locale),
 };
 const schema = generateServiceSchema(
   pc.title,
   countries.map((c) => c[locale].name),
-  meta.canonical,
+  canonicalUrl(locale, Astro.url.pathname),
 );
 
 const cases = (await getCollection('cases'))

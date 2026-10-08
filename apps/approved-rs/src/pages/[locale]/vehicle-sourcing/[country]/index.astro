@@ -1,4 +1,5 @@
 ---
+import { canonicalUrl } from '@/utils/pageHead';
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import StepsList from '@/components/StepsList.astro';
 import ChipLinks from '@/components/ChipLinks.astro';
@@ -21,7 +22,6 @@ import {
 } from '@/utils/seo';
 import { getVehicleImportCrossSellSpokes } from '@/utils/vehicleImportCrossSell';
 import { getCollection } from 'astro:content';
-import { SITE_URL } from '@/utils/constants';
 
 export const getStaticPaths = () => withLocales(getCountryPaths());
 
@@ -50,8 +50,6 @@ const cityCards = getCitiesForCountry(countryCode!).flatMap((city) => {
 });
 const meta = generateMeta('vehicle-sourcing', {
   country,
-  baseUrl: SITE_URL,
-  path: PathBuilder.service(locale, 'vehicle-sourcing', countryCode!),
   locale: locale,
 });
 const cases = (await getCollection('cases'))
@@ -65,7 +63,7 @@ const cases = (await getCollection('cases'))
 const schema = generateServiceSchema(
   `${sc.title} ${location}`,
   country[locale].name,
-  meta.canonical,
+  canonicalUrl(locale, Astro.url.pathname),
 );
 
 // Link text reuses each spoke's own title instead of new strings.

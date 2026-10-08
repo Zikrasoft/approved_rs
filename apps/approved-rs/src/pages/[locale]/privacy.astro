@@ -1,9 +1,9 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
-import { SITE_URL, SITE_NAME, TELEGRAM_BOT_URL } from '@/utils/constants';
+import { SITE_NAME, TELEGRAM_BOT_URL } from '@/utils/constants';
 import { getPages } from '@/i18n/content/pages';
-import { withLocales, PathBuilder } from '@/utils/paths';
+import { withLocales } from '@/utils/paths';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
@@ -12,7 +12,6 @@ const p = getPages(locale).privacy;
 const meta = {
   title: `${p.metaTitle} | ${SITE_NAME}`,
   description: p.metaDescription(SITE_NAME),
-  canonical: `${SITE_URL}${PathBuilder.privacy(locale)}`,
 };
 
 const sections = p.sections;
