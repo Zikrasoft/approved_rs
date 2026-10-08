@@ -1,13 +1,8 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { translationIsCurrent } from '@podbor/i18n';
-import siteYaml from '@/content/i18n/site.yaml?raw';
-import { siteContentSchema } from './siteContentSchema';
-import homeYaml from '@/content/i18n/home.yaml?raw';
-import { homeContentSchema } from './homeContentSchema';
-import servicesYaml from '@/content/i18n/services.yaml?raw';
-import { servicesContentSchema } from './servicesContentSchema';
-import pagesYaml from '@/content/i18n/pages.yaml?raw';
-import { pagesContentSchema } from './pagesContentSchema';
+import { content } from '@/i18n/content';
+import { SECTIONS } from '@/i18n/sections';
 import { SUPPORTED_LOCALES } from '@/i18n/config';
 import { getSiteContent } from './site';
 import { getHomeContent } from './home';
@@ -18,21 +13,15 @@ import { OPENING_HOURS } from '@/utils/constants';
 
 const LAST_OPEN_DAY_LABEL = { ru: 'Сб', sr: 'Sub', en: 'Sat' };
 
-// ru is hand-edited and CI translates on push, so between the two every other
-// locale legitimately reads ru. These two assertions describe the state CI
-// produces; they stand down while a translation is still pending instead of
-// turning every Russian copy edit into a red build.
-const translated = (
-  [
-    [siteYaml, siteContentSchema],
-    [homeYaml, homeContentSchema],
-    [servicesYaml, servicesContentSchema],
-    [pagesYaml, pagesContentSchema],
-  ] as const
-).every(([yaml, schema]) => translationIsCurrent(yaml, schema));
+const translated = SECTIONS.every(({ path, schema }) =>
+  translationIsCurrent(readFileSync(path, 'utf-8'), schema),
+);
 
 describe.each(SUPPORTED_LOCALES)('content for %s', (locale) => {
   it('loads and validates every section', () => {
+    expect(Object.keys(content(locale)).sort()).toEqual(
+      SECTIONS.map(({ key }) => key).sort(),
+    );
     expect(() => getSiteContent(locale)).not.toThrow();
     expect(() => getHomeContent(locale)).not.toThrow();
     expect(() => getServicesContent(locale)).not.toThrow();

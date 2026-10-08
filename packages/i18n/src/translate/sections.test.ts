@@ -171,6 +171,28 @@ describe('processSection', () => {
     expect(statSync(file).mtimeMs).toBe(before);
   });
 
+  it('reads every schema key when a section lists no fields, asking nothing on a rerun', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml');
+    const { processSection } = translator();
+    const cache: CacheFile = {};
+    const bare: Section = {
+      path: file,
+      schema: navSchema,
+      promptSubject: 'UI copy',
+    };
+    expect(await processSection(bare, 'key', cache)).toBe('translated');
+    expect(translationsOf(file).en).toEqual({
+      nav: { home: 't:Главная', cases: 't:Кейсы' },
+      footer: { tagline: 't:Слоган' },
+    });
+
+    vi.unstubAllGlobals();
+    stubTranslate((text) => `t:${text}`);
+    expect(await processSection(section(file), 'key', cache)).toBe('skipped');
+    expect(sentPayloads()).toEqual([]);
+  });
+
   it('sends only the leaf whose Russian changed', async () => {
     stubTranslate((text) => `t:${text}`);
     const file = writeSection('home.yaml');
