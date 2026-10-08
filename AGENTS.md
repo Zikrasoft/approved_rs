@@ -257,54 +257,35 @@ Both new apps follow the same shape, and a third should too:
   `docs/adr/0015-lead-form-asks-only-for-a-contact.md`); do not re-add it. The
   form keeps its own doors there: the header CTA, the callback control, the
   partner block and the inline form in the same fold.
-- **A `tel:` control only exists where a dialer does**, on all three sites. A
-  desktop machine has no dialer, so «Позвонить» there is a click that does
-  nothing — the same defect as a messenger tile that opens a form. The choice is
-  a CSS media query over the primary pointer (`pointer-coarse:hidden!` /
-  `pointer-fine:hidden!`, Tailwind v4 variants), never JavaScript: both variants
-  are rendered, the query picks one, a touchscreen laptop reports a fine primary
-  pointer and correctly gets the desktop shape, and it survives static
-  prerendering where middleware never runs. `display: none` is the hiding, so
-  the unused variant leaves the tab order and the accessibility tree too. The
-  `!` is load-bearing: Tailwind utilities sit in `@layer utilities` and lose to
-  an unlayered Astro scoped `display`, so a plain `pointer-fine:hidden` on a
-  `.contact-cell` silently does nothing. Coarse is the base in every one of
-  these pairs, so a `pointer: none` client gets the mobile shape whole rather
-  than half of each. Two shapes, by whether the region has a callback sibling:
-  where one is already on screen — the full contact bar, the floating widget,
-  approved.rs's mobile menu, CarLab's header, CarLab's sticky bar and the
-  compact hero, whose filled button opens the lead modal — the phone control is
-  simply absent on a fine pointer and nothing replaces it; where the phone link
-  is the only phone control a callback button takes its place carrying
-  `callbackButtonLabel`. The compact hero earns the absent shape only while
-  that modal button stays unconditional: putting `lg:hidden` on it left
-  `cases/[slug].astro`, which renders no form of its own, with neither a phone
-  control nor a form door on a mouse, and `contact-controls-pass.ts` cannot see
-  that — it checks `tel:` exposure and placement, not whether a form is
-  reachable. `/thanks/` is the one
-  exception: the `ContactCTA` contacts block there renders the number as plain
-  selectable text through `@podbor/site-kit/format-phone` — its own
-  subpath, because the root barrel would put `libphonenumber-js` one client
-  import away from the browser. That block is the only place a number is shown
-  as text; the floating widget on the same page takes the absent shape like
-  everywhere else. Details' header has no phone control at all, so there is
-  nothing to do there, and both brand footers simply drop theirs on a fine
-  pointer, the way approved.rs's footer has never carried one. Verify a change
-  here with `node --experimental-strip-types scripts/contact-controls-pass.ts
-<base-url> <path>...` against a built site or a dev server: it drives both
-  pointer variants through a device profile — a resized window stops at
-  Chrome's minimum width and still reports a fine pointer, so it proves nothing
-  — and fails on a `tel:` link offered to a mouse, one left in the tab order,
-  fine-only markup shown on a touchscreen, or a control outside any
-  `data-contact-placement`. Local only, like the shop funnel; CI gets the
-  placement half from `.github/scripts/contact-placement.ts` in `check`.
+- **A `tel:` control only exists where a dialer does**, on all three sites.
+  `createContactControls` in `@podbor/site-kit/contact-control` encodes the
+  contract — the phone is `coarse-only`, the plain-number twin exists only in
+  the `thanks` region, the human Telegram only on `/thanks/` — and each app's
+  `src/components/ContactControl.astro` is the only place that turns it into
+  `pointer-fine:hidden!` / `pointer-coarse:hidden!` and reads the route for
+  `onThanks`. Read those two instead of re-deciding a pointer rule at a call
+  site; what stays per region is whether a callback button replaces the phone
+  on a mouse. The `!` is load-bearing: Tailwind utilities sit in
+  `@layer utilities` and lose to an unlayered Astro scoped `display`, so a
+  plain `pointer-fine:hidden` on a `.contact-cell` silently does nothing. The
+  compact hero may drop its phone on a mouse only while its lead-modal button
+  stays unconditional — `cases/[slug].astro` renders no form of its own, and
+  no check below sees whether a form is reachable. Verify with
+  `node --experimental-strip-types scripts/contact-controls-pass.ts <base-url> <path>...`
+  against a built site or a dev server: it drives both pointer variants
+  through a device profile (a resized window still reports a fine pointer)
+  and fails on a `tel:` link offered to a mouse or left in the tab order,
+  fine-only markup on a touchscreen, or a control outside any
+  `data-contact-placement`. Local only; CI gets the placement half from
+  `.github/scripts/contact-placement.ts` in `check`.
 - **No boolean rides down to a contact component to say which page it is on.**
   `ContactCTA direct`, `BaseLayout directContacts` and the `openModal` threaded
   through `ContactCTA` and `ClosingBand` are all gone (issue #92). What replaced
   them: the `/thanks/` carve-out is read from the route —
-  `navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page'` in
-  `ContactCTA` and `FloatingContactWidget`, which is also where their `thanks`
-  placement comes from, so the two can never disagree. And there is now one
+  `navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page'` —
+  inside each app's `ContactControl.astro`, and in approved.rs's `ContactCTA`
+  and `FloatingContactWidget` for the markup they drop there. `placement`
+  only says where a click is recorded. And there is now one
   trigger attribute, `data-open-lead-modal`: a page that needs its own
   `LeadFormModal` — only `ServicePageLayout`, which carries the page's service,
   country, city and comment copy — renders it with `page`, and the modal script
@@ -347,9 +328,8 @@ Both new apps follow the same shape, and a third should too:
   never a `packages/brands` field, because it is a staff account rather than
   brand identity) through `telegramLink`, with no `?start=`, and falls back to
   the capture bot when the variable is unset. The bound `contactControl`
-  carries the handle as `humanTelegram` and picks it for a `thanks` request,
-  which `ContactCTA` and `FloatingContactWidget` make from the same route check
-  that already picks their placement — no prop says where a component is. A tap there fires `contact_click` and writes no Lead:
+  carries the handle as `humanTelegram` and picks it when `ContactControl.astro`
+  reads `/thanks/` off the route — no prop says where a component is. A tap there fires `contact_click` and writes no Lead:
   `defineContactClickTracking` skips the beacon for a `telegram` link whose
   href carries no `start` parameter — a human account, which a capture-bot
   link never is — so the rule is keyed on the link, not on the placement, and
