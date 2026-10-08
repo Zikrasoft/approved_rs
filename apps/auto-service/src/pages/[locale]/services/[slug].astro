@@ -11,7 +11,6 @@ import { PathBuilder, withLocales } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { safeMarkdown } from '@podbor/site-kit';
 import { servicePageSchema } from '@/utils/schema';
-import { canonicalUrl } from '@/utils/pageHead';
 import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
@@ -30,10 +29,7 @@ const related = publishedWorks(await getCollection('works')).filter((work) =>
   work.data.servicesApplied.includes(slug),
 );
 
-const schema = servicePageSchema(
-  service,
-  canonicalUrl(locale, Astro.url.pathname),
-);
+const schema = servicePageSchema(service);
 
 const specs = [
   { label: services.specsDurationLabel, value: service.duration },

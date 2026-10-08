@@ -16,6 +16,3 @@ export const pageHead = (
   description,
   ...localeSet.headLinks(SITE_URL, locale, pathname, ogImage),
 });
-
-export const canonicalUrl = (locale: Locale, pathname: string): string =>
-  localeSet.headLinks(SITE_URL, locale, pathname).canonical;

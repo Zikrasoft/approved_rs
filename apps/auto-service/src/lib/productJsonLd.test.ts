@@ -8,7 +8,7 @@ const URL_ = 'https://carlab.rs/sr/shop/batteries/bosch-s4-024/';
 
 describe('productJsonLd', () => {
   it('describes one offer in whole dinars with the baked availability', () => {
-    expect(productJsonLd({ product, url: URL_, description: 'Opis' })).toEqual({
+    expect(productJsonLd({ product, description: 'Opis' })(URL_)).toEqual({
       '@context': 'https://schema.org',
       '@type': 'Product',
       name: 'Bosch S4 024',
@@ -29,9 +29,8 @@ describe('productJsonLd', () => {
   it('says out of stock and leaves out an image it does not have', () => {
     const ld = productJsonLd({
       product: { ...product, inStock: false, image: null },
-      url: URL_,
       description: 'Opis',
-    });
+    })(URL_);
 
     expect(ld).not.toHaveProperty('image');
     expect((ld.offers as Record<string, unknown>).availability).toBe(

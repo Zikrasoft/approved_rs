@@ -6,8 +6,14 @@ export {
   articleSchema,
   localBusinessSchema,
   faqPageSchema,
+  pageSchema,
 } from './jsonLd.ts';
-export type { SchemaRef, BusinessAddress, OpeningHours } from './jsonLd.ts';
+export type {
+  SchemaRef,
+  BusinessAddress,
+  OpeningHours,
+  PageSchema,
+} from './jsonLd.ts';
 export type { ContactPlacement } from './goals.ts';
 export { relatedEntries } from './relatedEntries.ts';
 export { mapEmbedSrc, mapPlaceUrl } from './mapEmbed.ts';

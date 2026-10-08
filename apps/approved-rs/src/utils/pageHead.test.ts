@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { SUPPORTED_LOCALES } from '@/i18n/config';
 import { SITE_URL } from '@/utils/constants';
-import { canonicalUrl, pageHead } from './pageHead';
+import { pageHead } from './pageHead';
 
 const copy = { title: 'T', description: 'D' };
 
@@ -53,13 +53,5 @@ describe('pageHead', () => {
 
   it('passes title and description through', () => {
     expect(pageHead('ru', '/ru/', copy)).toMatchObject(copy);
-  });
-});
-
-describe('canonicalUrl', () => {
-  it('matches the canonical the layout renders', () => {
-    expect(canonicalUrl('de', '/de/contacts/')).toBe(
-      pageHead('de', '/de/contacts/', copy).canonical,
-    );
   });
 });

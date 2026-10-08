@@ -14,7 +14,6 @@ import { PathBuilder, withLocales } from '@/utils/paths';
 import { localizedWork, publishedWorks, workExcerpt } from '@/utils/works';
 import { safeMarkdown, relatedEntries } from '@podbor/site-kit';
 import { workSchema } from '@/utils/schema';
-import { canonicalUrl } from '@/utils/pageHead';
 import Icon from '@/components/Icon.astro';
 import {
   DEPTH_DOOR_ATTRIBUTE,
@@ -41,11 +40,7 @@ const services = content(locale).services;
 const site = content(locale).site;
 const { title, body, car } = localizedWork(work, locale);
 
-const schema = workSchema(
-  work,
-  title,
-  canonicalUrl(locale, Astro.url.pathname),
-);
+const schema = workSchema(work, title);
 
 const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
   year: 'numeric',

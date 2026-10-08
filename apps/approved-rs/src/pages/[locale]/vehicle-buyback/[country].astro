@@ -1,5 +1,4 @@
 ---
-import { canonicalUrl } from '@/utils/pageHead';
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import StepsList from '@/components/StepsList.astro';
 import Faq from '@/components/Faq.astro';
@@ -17,10 +16,6 @@ import { getCollection } from 'astro:content';
 import { content } from '@/i18n/content';
 import { servicesView } from '@/i18n/content/services';
 
-// Only Serbia: everywhere else the page said nothing a reader could not read
-// on the hub, so the other seven 301 to it (see middleware.ts). Serbia keeps
-// its own page because Serbian plates are a different offer and every buyback
-// case is Serbian.
 export const getStaticPaths = () =>
   withLocales([{ params: { country: 'rs' } }]);
 
@@ -46,7 +41,6 @@ const cases = (await getCollection('cases'))
 const schema = generateServiceSchema(
   `${sc.title} ${location}`,
   country[locale].name,
-  canonicalUrl(locale, Astro.url.pathname),
 );
 const isSerbia = countryCode === 'rs';
 const description = isSerbia

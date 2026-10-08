@@ -4,8 +4,22 @@ import {
   faqPageSchema,
   jsonLdText,
   localBusinessSchema,
+  pageSchema,
   serviceSchema,
 } from './jsonLd.ts';
+
+describe('pageSchema', () => {
+  it('hands the canonical to a schema that needs the page url', () => {
+    expect(pageSchema((url) => ({ url }), 'https://x.rs/ru/a/')).toEqual({
+      url: 'https://x.rs/ru/a/',
+    });
+  });
+
+  it('passes a finished schema through', () => {
+    const schema = { '@type': 'Thing' };
+    expect(pageSchema(schema, 'https://x.rs/ru/a/')).toBe(schema);
+  });
+});
 
 describe('faqPageSchema', () => {
   it('maps each item to a question with its answer', () => {

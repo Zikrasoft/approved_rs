@@ -1,5 +1,11 @@
 ---
-import { jsonLdText, localBusinessSchema, mapPlaceUrl } from '@podbor/site-kit';
+import {
+  jsonLdText,
+  localBusinessSchema,
+  mapPlaceUrl,
+  pageSchema,
+  type PageSchema,
+} from '@podbor/site-kit';
 import '@/styles/global.css';
 import displayLatinUrl from '@fontsource-variable/unbounded/files/unbounded-latin-wght-normal.woff2?url';
 import displayLatinExtUrl from '@fontsource-variable/unbounded/files/unbounded-latin-ext-wght-normal.woff2?url';
@@ -30,7 +36,7 @@ interface Props {
   title: string;
   description: string;
   noindex?: boolean;
-  jsonLd?: Record<string, unknown>[];
+  jsonLd?: PageSchema[];
   preloadImage?: { src: string; srcset: string; sizes: string };
 }
 
@@ -143,7 +149,7 @@ const businessSchema = localBusinessSchema({
         <script
           type="application/ld+json"
           is:inline
-          set:html={jsonLdText(schema)}
+          set:html={jsonLdText(pageSchema(schema, canonical))}
         />
       ))
     }

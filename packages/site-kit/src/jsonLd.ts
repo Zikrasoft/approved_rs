@@ -14,6 +14,12 @@ export function jsonLdText(schema: unknown): string {
   return JSON.stringify(schema).replace(/</g, '\\u003c');
 }
 
+export type PageSchema = object | ((canonical: string) => object);
+
+export function pageSchema(schema: PageSchema, canonical: string): object {
+  return typeof schema === 'function' ? schema(canonical) : schema;
+}
+
 export type SchemaRef = Record<string, unknown>;
 
 export function serviceSchema(options: {

@@ -1,5 +1,4 @@
 ---
-import { canonicalUrl } from '@/utils/pageHead';
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import StepsList from '@/components/StepsList.astro';
 import ChipLinks from '@/components/ChipLinks.astro';
@@ -68,10 +67,8 @@ const cases = (await getCollection('cases'))
 const schema = generateServiceSchema(
   `${sc.title} ${location}`,
   country[locale].name,
-  canonicalUrl(locale, Astro.url.pathname),
 );
 
-// Link text reuses each spoke's own title instead of new strings.
 const vehicleImportContent = servicesView(locale)['vehicle-import'];
 const vehicleImportCrossSellLinks = getVehicleImportCrossSellSpokes(
   countryCode!,

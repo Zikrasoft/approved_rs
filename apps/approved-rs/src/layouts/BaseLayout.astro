@@ -1,5 +1,5 @@
 ---
-import { jsonLdText } from '@podbor/site-kit';
+import { jsonLdText, pageSchema, type PageSchema } from '@podbor/site-kit';
 import type { HeroImageAttrs } from '@/utils/heroImage';
 import type { MetaProps } from '@/utils/seo';
 import { pageHead } from '@/utils/pageHead';
@@ -18,7 +18,7 @@ import navLatinUrl from '@fontsource/golos-text/files/golos-text-latin-400-norma
 import navCtaLatinUrl from '@fontsource/golos-text/files/golos-text-latin-500-normal.woff2?url';
 
 interface Props extends MetaProps {
-  schema?: object;
+  schema?: PageSchema;
   preloadImage?: HeroImageAttrs;
   ogImageWidth?: number;
   ogImageHeight?: number;
@@ -103,7 +103,10 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
 
     {
       schema && (
-        <script type="application/ld+json" set:html={jsonLdText(schema)} />
+        <script
+          type="application/ld+json"
+          set:html={jsonLdText(pageSchema(schema, canonical))}
+        />
       )
     }
 
