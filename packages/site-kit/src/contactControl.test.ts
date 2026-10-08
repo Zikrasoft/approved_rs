@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { TRACKED_CONTACT_CHANNELS } from '@podbor/lead-crm/contact-channel';
-import { contactRegion, createContactControls } from './contactControl.ts';
+import {
+  CONTACT_CTA_SELECTOR,
+  contactCta,
+  contactRegion,
+  createContactControls,
+} from './contactControl.ts';
 
 const BRAND = {
   phone: '381601234567',
@@ -126,5 +131,12 @@ describe('contactRegion', () => {
       expect(contactRegion(placement)).toEqual({
         'data-contact-placement': placement,
       });
+  });
+});
+
+describe('contactCta', () => {
+  it('stamps the attribute the floating CTA selector watches', () => {
+    expect(contactCta).toEqual({ 'data-contact-cta': '' });
+    expect(CONTACT_CTA_SELECTOR).toBe('[data-contact-cta]');
   });
 });

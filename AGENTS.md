@@ -29,9 +29,22 @@ contracts** a package owns, and an app that breaks one fails silently:
 `data-primary-contact` / `data-primary-channel` (preferred contact channel),
 `data-lead-form` / `data-brand-link` / `data-field` / `aria-invalid` (funnel
 tracking), `data-depth-slug` / `data-depth-door` / `data-revealed` (browsing
-depth on case and work pages) and `data-contact-channel` /
+depth on case and work pages), `data-contact-channel` /
 `data-contact-placement` (contact clicks, whose placement half
-`.github/scripts/contact-placement.ts` enforces against the built HTML).
+`.github/scripts/contact-placement.ts` enforces against the built HTML) and
+`data-contact-cta` (in-flow contact regions the floating CTA's `watch`
+selector hides behind — stamp it with `contactRegion`, `contactCta` and
+`CONTACT_CTA_SELECTOR` from `@podbor/site-kit/contact-control`, never as a
+literal). `packages/lead-crm` owns the `<lead-form>` hooks `leadForm.ts`
+picks with a non-null assertion, so a missing one is a `TypeError`:
+`data-telegram`, `data-country` (with `data-display-locale`), `data-phone`,
+`data-consent`, the hidden `contact` and `contact_channel` inputs,
+`data-source-url`, `data-visitor-id`, `data-submit-label` inside the submit
+button, `data-error-telegram` / `data-error-phone` / `data-error-consent` /
+`data-error-submit`, tab buttons carrying `data-tab` + `data-panel` +
+`aria-selected`, panels carrying `data-panel` alone, and the form's own
+`data-submitting-label` and `data-armed`; the busy submit button carries
+`aria-busy`, which the apps' spinner CSS keys on.
 
 Each of the three sites owns its own `astro.config.mjs`, `keystatic.config.ts`,
 `vercel.json` and `vitest.config.ts`; every workspace app, `apps/medusa`

@@ -6,7 +6,10 @@ import { servicesView } from '@/i18n/content/services';
 import { localeFrom } from '@/i18n/config';
 import { callbackTrigger } from '@/utils/contactChannel';
 import { navCurrent } from '@podbor/site-kit';
-import { contactRegion } from '@podbor/site-kit/contact-control';
+import {
+  contactRegion,
+  CONTACT_CTA_SELECTOR,
+} from '@podbor/site-kit/contact-control';
 import { PathBuilder } from '@/utils/paths';
 
 const locale = localeFrom(Astro.url.pathname);
@@ -19,7 +22,7 @@ const onThanks =
   data-revealed="false"
   class="floating-contact"
   data-floating-contact
-  watch="[data-contact-cta]"
+  watch={CONTACT_CTA_SELECTOR}
   {...contactRegion('floating')}
 >
   <div class="floating-panel" role="menu" data-panel hidden>

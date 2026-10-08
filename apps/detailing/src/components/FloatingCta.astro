@@ -1,4 +1,5 @@
 ---
+import { CONTACT_CTA_SELECTOR } from '@podbor/site-kit/contact-control';
 import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { content } from '@/i18n/content';
@@ -10,7 +11,7 @@ const site = content(locale).site;
 <cta-reveal
   data-revealed="false"
   class="floating-cta"
-  watch="[data-contact-cta]"
+  watch={CONTACT_CTA_SELECTOR}
 >
   <button
     type="button"
