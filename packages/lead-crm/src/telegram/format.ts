@@ -37,10 +37,6 @@ export const LEAD_STATUS_ACTIONS = [
 ] as const;
 export type LeadStatusKey = (typeof LEAD_STATUS_ACTIONS)[number]['key'];
 
-export function isLeadStatusKey(key: string): key is LeadStatusKey {
-  return LEAD_STATUS_ACTIONS.some((s) => s.key === key);
-}
-
 const NEW_STATUS_META = { emoji: '🆕', label: 'Новая' } as const;
 const POSTPONED_STATUS_META = { emoji: '⏸️', label: 'Отложена' } as const;
 const UNKNOWN_STATUS_META = { emoji: '⚪' };

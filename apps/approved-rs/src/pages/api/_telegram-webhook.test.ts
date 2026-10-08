@@ -9,8 +9,7 @@ vi.mock('@/lib/telegram', async () => {
     );
   return {
     canAddIncome: actual.canAddIncome,
-    isLeadStatusKey: (key: string) =>
-      ['in_progress', 'won', 'lost'].includes(key),
+    LEAD_STATUS_ACTIONS: actual.LEAD_STATUS_ACTIONS,
     answerCallback: vi.fn(),
     afterStatusChange: vi.fn(),
     ensureLeadCard: vi.fn(),
@@ -112,7 +111,7 @@ vi.mock('@/lib/store', async () => {
   };
 });
 
-import { POST } from './telegram-webhook';
+import { POST, CALLBACKS } from './telegram-webhook';
 import { captureClient } from '@/lib/captureBot';
 import {
   afterStatusChange,
@@ -125,6 +124,7 @@ import {
   sendFieldChangeToAdmin,
   sendMessage,
   buildLeadDetail,
+  buildLeadList,
   editLeadDetailMessage,
   safeEditMessage,
   buildRemindPicker,
@@ -153,7 +153,7 @@ const SECRET = 'test-webhook-secret';
 const OWNER_ID = 111;
 const ADMIN_ID = 222;
 const OTHER_ID = 999;
-const DM_CHAT_ID = 111; // a DM chat — prompts/detail views only ever live here now, never the group
+const DM_CHAT_ID = 111;
 
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
   return {
@@ -185,9 +185,6 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
   };
 }
 
-// Makes the mocked resolvePendingPrompt actually apply its patch callback
-// against a given base lead, so assertions can inspect the resulting
-// StoredLead the way the real store.ts primitive would produce it.
 function mockResolveFromBase(base: StoredLead) {
   vi.mocked(resolvePendingPrompt).mockImplementation(async (_c, _m, apply) => ({
     ...base,
@@ -1682,6 +1679,116 @@ describe('POST /api/telegram-webhook', () => {
       expect(confirmCommissionPayment).not.toHaveBeenCalled();
       expect(sendForceReplyPrompt).not.toHaveBeenCalled();
       expect(answerCallback).toHaveBeenCalledWith('cb-30');
+    });
+  });
+
+  describe('callback table', () => {
+    const ROWS: [string, 'owner' | 'admin' | 'any'][] = [
+      ['st:5:negotiations', 'any'],
+      ['st:5:in_progress', 'any'],
+      ['st:5:won', 'owner'],
+      ['st:5:lost', 'owner'],
+      ['arch:5', 'any'],
+      ['unarch:5', 'any'],
+      ['postpone:5', 'owner'],
+      ['remindpick:5:3', 'owner'],
+      ['remindtype:5', 'owner'],
+      ['remindcancel:5', 'owner'],
+      ['resume:5', 'any'],
+      ['del:5', 'admin'],
+      ['delconfirm:5', 'admin'],
+      ['delcancel:5', 'admin'],
+      ['claimpay:5:7', 'owner'],
+      ['income:5', 'owner'],
+      ['confirmpay:5', 'admin'],
+      ['rejectpay:5', 'admin'],
+      ['edit:5:name', 'any'],
+      ['edit:5:contact', 'any'],
+      ['edit:5:comment', 'any'],
+      ['reply:5', 'any'],
+      ['list:in_progress+postponed', 'any'],
+      ['open:5', 'any'],
+      ['menu:stats', 'any'],
+      ['menu:debt', 'any'],
+      ['menu:deals', 'admin'],
+    ];
+
+    const tap = (data: string, from: number) =>
+      POST(
+        makeCtx({
+          callback_query: {
+            id: 'cb-table',
+            data,
+            from: { id: from },
+            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
+          },
+        }),
+      );
+
+    it('has one row per sample, each matched first by its own row and role', () => {
+      expect(CALLBACKS).toHaveLength(ROWS.length);
+      ROWS.forEach(([data, role], i) => {
+        expect(CALLBACKS.findIndex(([pattern]) => pattern.test(data))).toBe(i);
+        expect(CALLBACKS[i][1]).toBe(role);
+      });
+    });
+
+    it.each(ROWS.filter(([, role]) => role !== 'any'))(
+      '%s refuses the other role with a bare ack',
+      async (data, role) => {
+        await tap(data, role === 'owner' ? ADMIN_ID : OWNER_ID);
+        expect(answerCallback).toHaveBeenCalledExactlyOnceWith('cb-table');
+        for (const fn of [
+          getLead,
+          setStatus,
+          postponeLead,
+          deleteLead,
+          claimCommission,
+          confirmCommissionPayment,
+          rejectCommissionPayment,
+          readLeads,
+          sendMessage,
+          safeEditMessage,
+          sendForceReplyPrompt,
+        ])
+          expect(fn).not.toHaveBeenCalled();
+      },
+    );
+
+    it('acks unknown data with no text and warns naming it', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      await tap('nope:5', OWNER_ID);
+      expect(answerCallback).toHaveBeenCalledExactlyOnceWith('cb-table');
+      expect(warn).toHaveBeenCalledWith(
+        '[telegram-webhook] unknown callback data',
+        { data: 'nope:5' },
+      );
+      warn.mockRestore();
+    });
+
+    it('passes the captured groups to the handler', async () => {
+      vi.mocked(getLead).mockResolvedValue(makeLead({ dealAmount: 1000 }));
+      vi.mocked(getCommission).mockReturnValue({
+        commission: 100,
+        remaining: 100,
+        isPaidOff: false,
+      });
+      vi.mocked(claimCommission).mockResolvedValue(makeLead());
+      await tap('claimpay:5:7', OWNER_ID);
+      expect(claimCommission).toHaveBeenCalledWith(5, [7]);
+
+      await tap('edit:6:contact', ADMIN_ID);
+      expect(getLead).toHaveBeenLastCalledWith(6);
+      expect(setPendingPrompt).toHaveBeenLastCalledWith(
+        6,
+        expect.objectContaining({ kind: 'edit_contact' }),
+      );
+
+      await tap('list:in_progress+postponed', ADMIN_ID);
+      expect(buildLeadList).toHaveBeenLastCalledWith(expect.anything(), [
+        'in_progress',
+        'postponed',
+      ]);
     });
   });
 
