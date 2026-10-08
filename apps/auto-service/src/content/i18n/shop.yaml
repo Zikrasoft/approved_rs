@@ -213,7 +213,7 @@ cart:
     invalid: Проверьте имя, телефон и email — что-то заполнено неверно.
     changed: Сумма заказа изменилась — проверьте корзину и нажмите ещё раз.
     generic: Не получилось оформить заказ. Попробуйте ещё раз или позвоните нам.
-translatedFrom: 5601c3646a2dd6d6
+translatedFrom: ba6b54fd46888b82
 translations:
   sr:
     metaTitle: 'Delovi u Beogradu: akumulatori, ulja, filteri, kočnice — CarLab'
