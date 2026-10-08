@@ -1,8 +1,8 @@
 ---
 import { localeFrom } from '@/i18n/currentLocale';
-import { getShopContent } from '@/i18n/content/shop';
+import { content } from '@/i18n/content';
 
-const shop = getShopContent(localeFrom(Astro.url.pathname));
+const shop = content(localeFrom(Astro.url.pathname)).shop;
 ---
 
 <shop-search

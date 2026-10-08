@@ -1,11 +1,11 @@
 ---
 import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getShopContent } from '@/i18n/content/shop';
 import { PathBuilder } from '@/utils/paths';
+import { content } from '@/i18n/content';
 
 const locale = localeFrom(Astro.url.pathname);
-const shop = getShopContent(locale);
+const shop = content(locale).shop;
 ---
 
 <a

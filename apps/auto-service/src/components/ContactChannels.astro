@@ -1,13 +1,13 @@
 ---
 import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
 import { contactChannels } from '@/utils/contactLinks';
 import type { ServiceSlug } from '@/utils/services';
 import { contactPlacement, type ContactPlacement } from '@podbor/site-kit';
 import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 import { formatPhone } from '@podbor/site-kit/format-phone';
 import { PHONE_NUMBER } from '@/utils/constants';
+import { content } from '@/i18n/content';
 
 interface Props {
   class?: string;
@@ -23,7 +23,7 @@ const {
   service,
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
+const site = content(locale).site;
 
 type Variant = {
   channels: readonly TrackedContactChannel[];

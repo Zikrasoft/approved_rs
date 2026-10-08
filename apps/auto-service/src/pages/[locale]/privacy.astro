@@ -2,18 +2,17 @@
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getPagesContent } from '@/i18n/content/pages';
-import { getSiteContent } from '@/i18n/content/site';
 import { localePaths, PathBuilder } from '@/utils/paths';
 import { shopBuilt } from '@/utils/shopStatus';
+import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
   return localePaths();
 }
 
 const locale = localeFrom(Astro.url.pathname);
-const pages = getPagesContent(locale);
-const site = getSiteContent(locale);
+const pages = content(locale).pages;
+const site = content(locale).site;
 const sections = [
   ...pages.privacy.sections,
   ...(shopBuilt() ? pages.privacy.shopSections : []),

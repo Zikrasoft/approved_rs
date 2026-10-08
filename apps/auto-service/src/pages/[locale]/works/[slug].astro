@@ -6,9 +6,6 @@ import PageHero from '@/components/PageHero.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getPagesContent } from '@/i18n/content/pages';
-import { getServicesContent } from '@/i18n/content/services';
-import { getSiteContent } from '@/i18n/content/site';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { localizedWork, publishedWorks } from '@/utils/works';
@@ -18,6 +15,7 @@ import {
   DEPTH_DOOR_ATTRIBUTE,
   DEPTH_SLUG_ATTRIBUTE,
 } from '@podbor/site-kit/browser';
+import { content } from '@/i18n/content';
 
 export async function getStaticPaths() {
   const works = publishedWorks(await getCollection('works'));
@@ -31,9 +29,9 @@ export async function getStaticPaths() {
 
 const { work, related } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const pages = getPagesContent(locale);
-const site = getSiteContent(locale);
-const services = getServicesContent(locale);
+const pages = content(locale).pages;
+const site = content(locale).site;
+const services = content(locale).services;
 const { title, body, car } = localizedWork(work, locale);
 
 const articleSchema = {

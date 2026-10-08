@@ -8,11 +8,11 @@ import {
   requireEnv,
 } from '@podbor/lead-crm';
 import { serviceLabel as brandServiceLabel } from '@podbor/brands';
-import { getServicesContent } from '@/i18n/content/services';
 import { isServiceSlug } from '@/utils/services';
 import { BRAND, leadStore } from './crm';
+import { content } from '@/i18n/content';
 
-const ruServices = getServicesContent('ru');
+const ruServices = content('ru').services;
 
 const OWNER_IDS = parseIds(process.env.TELEGRAM_OWNER_ID);
 const ADMIN_IDS = parseIds(process.env.TELEGRAM_ADMIN_ID);
