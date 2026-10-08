@@ -315,15 +315,15 @@ Both new apps follow the same shape, and a third should too:
   site that will be told wrong.
 - **Only approved.rs prefills the first message**, `messengerPrefill` in its
   `services.yaml`, so the chat does not open empty. The mechanism is shared and
-  the brand sites opt in by passing a message: `whatsappLink` in
-  `@podbor/site-kit/contact-links` takes an optional one and encodes it as
-  `text`. Viber's chat link has no such parameter, so Viber tiles stay bare —
+  the brand sites opt in through the `prefill` option of
+  `createContactControls`, which reaches WhatsApp only, as `text`. Viber's chat link has no such parameter, so Viber tiles stay bare —
   asymmetry by platform, not by choice.
 - **A Telegram tile carries a `?start=` payload, not a prefill.** It opens the
-  brand's capture bot through `captureBotLink` in
-  `@podbor/site-kit/contact-links`, which every app binds once over its own
-  `BRAND.captureBot` as `telegramBotHref(locale, service?)` in
-  `src/utils/contactLinks.ts` — a tile calls that, never the bot name. A
+  brand's capture bot through `createContactControls` in
+  `@podbor/site-kit/contact-control`, which every app binds once over its own
+  `BRAND.captureBot` as `contactControl` in `src/utils/contactLinks.ts` and
+  renders through its own `ContactControl.astro` — a tile is that component,
+  never a hand-built href or the bot name. A
   tracked Telegram tile must carry `?start=`: a Telegram link without it is
   treated as a human account, and a tap on it stores no Lead. `?start=`
   and `?text=` are different parameters, so `messengerPrefill` never reaches
