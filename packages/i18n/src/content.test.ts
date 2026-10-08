@@ -9,8 +9,18 @@ const homeSchema = z.object({ title: z.string() }).strict();
 const navSchema = z.object({ home: z.string() }).strict();
 
 const SECTIONS = [
-  { key: 'home', path: 'src/content/i18n/home.yaml', schema: homeSchema },
-  { key: 'nav', path: 'src/content/i18n/nav.yaml', schema: navSchema },
+  {
+    key: 'home',
+    path: 'src/content/i18n/home.yaml',
+    schema: homeSchema,
+    promptSubject: 'home',
+  },
+  {
+    key: 'nav',
+    path: 'src/content/i18n/nav.yaml',
+    schema: navSchema,
+    promptSubject: 'nav',
+  },
 ] as const;
 
 const FILES = {

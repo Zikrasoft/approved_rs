@@ -1,7 +1,7 @@
 ---
 import ContactControl from './ContactControl.astro';
 import ContactIcon from './ContactIcon.astro';
-import { getServices } from '@/i18n/content/services';
+import { servicesView } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
 import type { ContactPlacement } from '@podbor/site-kit';
 
@@ -12,7 +12,7 @@ interface Props {
   class?: string;
 }
 
-const cc = getServices(getLocale(Astro.currentLocale)).caseChrome;
+const cc = servicesView(getLocale(Astro.currentLocale)).caseChrome;
 const {
   placement,
   service,

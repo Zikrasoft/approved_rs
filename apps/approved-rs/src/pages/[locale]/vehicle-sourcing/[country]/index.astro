@@ -7,7 +7,7 @@ import Faq from '@/components/Faq.astro';
 import MarketNotes from '@/components/MarketNotes.astro';
 import CityCards from '@/components/CityCards.astro';
 import { content } from '@/i18n/content';
-import { getServices } from '@/i18n/content/services';
+import { servicesView } from '@/i18n/content/services';
 import { getCountryPaths, withLocales, PathBuilder } from '@/utils/paths';
 import {
   getCountry,
@@ -27,10 +27,10 @@ export const getStaticPaths = () => withLocales(getCountryPaths());
 
 const { locale, country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
-const sc = getServices(locale)['vehicle-sourcing'];
+const sc = servicesView(locale)['vehicle-sourcing'];
 const location = buildLocation(locale, country);
 const countryNote = sc.countryNoteFor(countryCode!);
-const cvs = getServices(locale).cityVehicleSourcing;
+const cvs = servicesView(locale).cityVehicleSourcing;
 const cityCards = getCitiesForCountry(countryCode!).flatMap((city) => {
   const note = cvs.cityNoteFor(city.slug);
   return note
@@ -69,7 +69,7 @@ const schema = generateServiceSchema(
 );
 
 // Link text reuses each spoke's own title instead of new strings.
-const vehicleImportContent = getServices(locale)['vehicle-import'];
+const vehicleImportContent = servicesView(locale)['vehicle-import'];
 const vehicleImportCrossSellLinks = getVehicleImportCrossSellSpokes(
   countryCode!,
 ).map((slug) => ({

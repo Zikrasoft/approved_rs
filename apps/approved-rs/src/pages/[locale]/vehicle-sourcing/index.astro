@@ -8,7 +8,7 @@ import IncludedGrid from '@/components/IncludedGrid.astro';
 import MarketCompare from '@/components/MarketCompare.astro';
 import heroPhoto from '@/assets/service-sourcing.jpg';
 import { content } from '@/i18n/content';
-import { getServices } from '@/i18n/content/services';
+import { servicesView } from '@/i18n/content/services';
 import { withLocales, PathBuilder } from '@/utils/paths';
 import { getActiveCountries } from '@/utils/geo';
 import { compareItemsFor } from '@/utils/compareItems';
@@ -20,7 +20,7 @@ import type { Locale } from '@/i18n/config';
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const { locale } = Astro.params as { locale: Locale };
-const pc = getServices(locale)['vehicle-sourcing'].hub;
+const pc = servicesView(locale)['vehicle-sourcing'].hub;
 const countries = getActiveCountries();
 const meta = {
   title: `${pc.metaTitle} | ${SITE_NAME}`,
@@ -34,7 +34,7 @@ const schema = generateServiceSchema(
   meta.canonical,
 );
 
-const sc = getServices(locale)['vehicle-sourcing'];
+const sc = servicesView(locale)['vehicle-sourcing'];
 const compareItems = compareItemsFor(
   locale,
   'vehicle-sourcing',

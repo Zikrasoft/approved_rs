@@ -1,4 +1,4 @@
-import type { Section } from '@podbor/i18n/translate';
+import type { RegistryEntry } from '@podbor/i18n';
 import { dictionaryContentSchema } from './dictionaryContentSchema.ts';
 import { captureCopySchema } from '@podbor/lead-capture/copy';
 import { faqContentSchema } from './content/faqContentSchema.ts';
@@ -78,4 +78,4 @@ export const SECTIONS = [
     promptSubject:
       'service page copy (sourcing/buyback/import/inspection) — many strings contain literal placeholder tokens like {location}, {cityLocation}, {countryName}, {destinations}, {name}, {countryLocation}, {countryGenitiveOrName}',
   },
-] as const satisfies readonly (Section & { key: string })[];
+] as const satisfies readonly RegistryEntry[];

@@ -1,6 +1,6 @@
 import { createContactControls } from '@podbor/site-kit/contact-control';
 import { getLocale } from '@/i18n/config';
-import { getServices } from '@/i18n/content/services';
+import { servicesView } from '@/i18n/content/services';
 import {
   BRAND,
   PHONE_NUMBER,
@@ -16,5 +16,5 @@ export const contactControl = createContactControls({
   captureBot: BRAND.captureBot,
   humanTelegram: TG_MANAGER,
   prefill: (locale) =>
-    getServices(getLocale(locale)).caseChrome.messengerPrefill,
+    servicesView(getLocale(locale)).caseChrome.messengerPrefill,
 });

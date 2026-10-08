@@ -1,10 +1,7 @@
 import type { ZodObject, z } from 'zod';
+import type { RegistryEntry } from './translate/sections.ts';
 
-type RegistryEntries = readonly {
-  key: string;
-  path: string;
-  schema: ZodObject;
-}[];
+type RegistryEntries = readonly RegistryEntry[];
 
 export type ContentOf<S extends RegistryEntries> = {
   [E in S[number] as E['key']]: z.infer<E['schema']>;

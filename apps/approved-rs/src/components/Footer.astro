@@ -4,7 +4,7 @@ import ContactIcon from './ContactIcon.astro';
 import { getNavItems } from '@/utils/labels';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
-import { getServices } from '@/i18n/content/services';
+import { servicesView } from '@/i18n/content/services';
 import ContactControl from './ContactControl.astro';
 import { SITE_NAME, THREADS_CHANNEL } from '@/utils/constants';
 import { getActiveCountries } from '@/utils/geo';
@@ -14,7 +14,7 @@ import { contactRegion } from '@podbor/site-kit/contact-control';
 const year = new Date().getFullYear();
 const locale = getLocale(Astro.currentLocale);
 const t = getI18n(locale);
-const cc = getServices(locale).caseChrome;
+const cc = servicesView(locale).caseChrome;
 const coverageLine = getActiveCountries()
   .map((c) => c[locale].name)
   .join(' · ');
