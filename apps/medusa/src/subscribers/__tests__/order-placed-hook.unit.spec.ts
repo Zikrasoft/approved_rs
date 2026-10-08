@@ -164,7 +164,9 @@ describe('the order-placed hook subscriber', () => {
   it('still fails on anything that is not a contract refusal', async () => {
     const { container } = containerFor([{ ...ORDER, total: 'abc' }]);
 
-    await expect(fire(container)).rejects.toThrow('unreadable amount');
+    await expect(fire(container)).rejects.toThrow(
+      'order order_1 does not fit its read: total:',
+    );
     expect(sendOrderHook).not.toHaveBeenCalled();
   });
 

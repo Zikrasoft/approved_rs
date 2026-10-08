@@ -3,8 +3,8 @@ import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import { cancelOrderWorkflow } from '@medusajs/medusa/core-flows';
 import { z } from 'zod';
 
-import { money } from '../lib/money';
 import { selectAll } from '../lib/query';
+import { moneyField } from '../lib/row-schema';
 import { RESERVE_DAYS } from '../lib/shop';
 
 export { RESERVE_DAYS };
@@ -14,7 +14,9 @@ export const uncollectedOrderSchema = z.object({
   fulfillments: z.array(
     z.object({ canceled_at: z.union([z.string(), z.date()]).nullish() }),
   ),
-  payment_collections: z.array(z.object({ captured_amount: z.unknown() })),
+  payment_collections: z.array(
+    z.object({ captured_amount: moneyField.nullish() }),
+  ),
 });
 
 type UncollectedOrder = z.infer<typeof uncollectedOrderSchema>;
@@ -22,7 +24,7 @@ type UncollectedOrder = z.infer<typeof uncollectedOrderSchema>;
 const isUncollected = (order: UncollectedOrder) =>
   order.fulfillments.every((fulfillment) => Boolean(fulfillment.canceled_at)) &&
   order.payment_collections.every(
-    (collection) => money(collection.captured_amount ?? 0) === 0,
+    (collection) => (collection.captured_amount ?? 0) === 0,
   );
 
 export default async function releaseUncollected(
