@@ -17,691 +17,6 @@
   },
   "redirects": [
     {
-      "source": "/:locale(ru|en|sr)/privoz/de/:path*",
-      "destination": "/:locale/vehicle-import/eu/de/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|en|sr)/privoz/de/:path*/",
-      "destination": "/:locale/vehicle-import/eu/de/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/privoz/de/:path*",
-      "destination": "/ru/vehicle-import/eu/de/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/privoz/de/:path*/",
-      "destination": "/ru/vehicle-import/eu/de/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|en|sr)/vehicle-import/de/:path*",
-      "destination": "/:locale/vehicle-import/eu/de/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|en|sr)/vehicle-import/de/:path*/",
-      "destination": "/:locale/vehicle-import/eu/de/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/vehicle-import/de/:path*",
-      "destination": "/ru/vehicle-import/eu/de/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/vehicle-import/de/:path*/",
-      "destination": "/ru/vehicle-import/eu/de/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|en|sr)/cases/autopodbor",
-      "destination": "/:locale/cases/vehicle-sourcing",
-      "permanent": true
-    },
-    {
-      "source": "/cases/autopodbor",
-      "destination": "/ru/cases/vehicle-sourcing",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|en|sr)/autopodbor/:path*",
-      "destination": "/:locale/vehicle-sourcing/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|en|sr)/autopodbor/:path*/",
-      "destination": "/:locale/vehicle-sourcing/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/autopodbor/:path*",
-      "destination": "/ru/vehicle-sourcing/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/autopodbor/:path*/",
-      "destination": "/ru/vehicle-sourcing/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|en|sr)/privoz/:path*",
-      "destination": "/:locale/vehicle-import/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|en|sr)/privoz/:path*/",
-      "destination": "/:locale/vehicle-import/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/privoz/:path*",
-      "destination": "/ru/vehicle-import/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/privoz/:path*/",
-      "destination": "/ru/vehicle-import/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|en|sr)/vykup/:path*",
-      "destination": "/:locale/vehicle-buyback/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|en|sr)/vykup/:path*/",
-      "destination": "/:locale/vehicle-buyback/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/vykup/:path*",
-      "destination": "/ru/vehicle-buyback/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/vykup/:path*/",
-      "destination": "/ru/vehicle-buyback/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|en|sr)/proverka/:path*",
-      "destination": "/:locale/vehicle-inspection/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|en|sr)/proverka/:path*/",
-      "destination": "/:locale/vehicle-inspection/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/proverka/:path*",
-      "destination": "/ru/vehicle-inspection/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/proverka/:path*/",
-      "destination": "/ru/vehicle-inspection/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/cases/",
-      "destination": "/ru/cases/vehicle-sourcing",
-      "permanent": true
-    },
-    {
-      "source": "/de/combined",
-      "destination": "/ru/vehicle-sourcing/de",
-      "permanent": true
-    },
-    {
-      "source": "/de/combined/",
-      "destination": "/ru/vehicle-sourcing/de",
-      "permanent": true
-    },
-    {
-      "source": "/rs/combined",
-      "destination": "/ru/vehicle-sourcing/rs",
-      "permanent": true
-    },
-    {
-      "source": "/rs/combined/",
-      "destination": "/ru/vehicle-sourcing/rs",
-      "permanent": true
-    },
-    {
-      "source": "/es/combined",
-      "destination": "/ru/vehicle-sourcing/es",
-      "permanent": true
-    },
-    {
-      "source": "/es/combined/",
-      "destination": "/ru/vehicle-sourcing/es",
-      "permanent": true
-    },
-    {
-      "source": "/rs/dostavka",
-      "destination": "/ru/vehicle-sourcing/rs",
-      "permanent": true
-    },
-    {
-      "source": "/rs/dostavka/",
-      "destination": "/ru/vehicle-sourcing/rs",
-      "permanent": true
-    },
-    {
-      "source": "/es/dostavka",
-      "destination": "/ru/vehicle-sourcing/es",
-      "permanent": true
-    },
-    {
-      "source": "/es/dostavka/",
-      "destination": "/ru/vehicle-sourcing/es",
-      "permanent": true
-    },
-    {
-      "source": "/de/autopodbor",
-      "destination": "/ru/vehicle-sourcing/de",
-      "permanent": true
-    },
-    {
-      "source": "/de/autopodbor/",
-      "destination": "/ru/vehicle-sourcing/de",
-      "permanent": true
-    },
-    {
-      "source": "/rs/autopodbor",
-      "destination": "/ru/vehicle-sourcing/rs",
-      "permanent": true
-    },
-    {
-      "source": "/rs/autopodbor/",
-      "destination": "/ru/vehicle-sourcing/rs",
-      "permanent": true
-    },
-    {
-      "source": "/es/autopodbor",
-      "destination": "/ru/vehicle-sourcing/es",
-      "permanent": true
-    },
-    {
-      "source": "/es/autopodbor/",
-      "destination": "/ru/vehicle-sourcing/es",
-      "permanent": true
-    },
-    {
-      "source": "/cases/mercedes-c-2021-de",
-      "destination": "/ru/cases/vehicle-sourcing",
-      "permanent": true
-    },
-    {
-      "source": "/cases/mercedes-c-2021-de/",
-      "destination": "/ru/cases/vehicle-sourcing",
-      "permanent": true
-    },
-    {
-      "source": "/cases/ford-focus-2020-rs",
-      "destination": "/ru/cases/vehicle-sourcing",
-      "permanent": true
-    },
-    {
-      "source": "/cases/ford-focus-2020-rs/",
-      "destination": "/ru/cases/vehicle-sourcing",
-      "permanent": true
-    },
-    {
-      "source": "/cases/vw-golf-2022-rs",
-      "destination": "/ru/cases/vehicle-sourcing",
-      "permanent": true
-    },
-    {
-      "source": "/cases/vw-golf-2022-rs/",
-      "destination": "/ru/cases/vehicle-sourcing",
-      "permanent": true
-    },
-    {
-      "source": "/cases/bmw-x5-2023-de",
-      "destination": "/ru/cases/vehicle-sourcing",
-      "permanent": true
-    },
-    {
-      "source": "/cases/bmw-x5-2023-de/",
-      "destination": "/ru/cases/vehicle-sourcing",
-      "permanent": true
-    },
-    {
-      "source": "/cases/audi-a4-2022-de",
-      "destination": "/ru/cases/vehicle-sourcing",
-      "permanent": true
-    },
-    {
-      "source": "/cases/audi-a4-2022-de/",
-      "destination": "/ru/cases/vehicle-sourcing",
-      "permanent": true
-    },
-    {
-      "source": "/vehicle-sourcing/:path*",
-      "destination": "/ru/vehicle-sourcing/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/vehicle-sourcing/:path*/",
-      "destination": "/ru/vehicle-sourcing/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/vehicle-import/:path*",
-      "destination": "/ru/vehicle-import/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/vehicle-import/:path*/",
-      "destination": "/ru/vehicle-import/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/vehicle-buyback/:path*",
-      "destination": "/ru/vehicle-buyback/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/vehicle-buyback/:path*/",
-      "destination": "/ru/vehicle-buyback/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/vehicle-inspection/:path*",
-      "destination": "/ru/vehicle-inspection/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/vehicle-inspection/:path*/",
-      "destination": "/ru/vehicle-inspection/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/cases/:path*",
-      "destination": "/ru/cases/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/cases/:path*/",
-      "destination": "/ru/cases/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/contacts/:path*",
-      "destination": "/ru/contacts/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/contacts/:path*/",
-      "destination": "/ru/contacts/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/privacy/:path*",
-      "destination": "/ru/privacy/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/privacy/:path*/",
-      "destination": "/ru/privacy/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/thanks/:path*",
-      "destination": "/ru/thanks/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/thanks/:path*/",
-      "destination": "/ru/thanks/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/auto-service-belgrade/",
-      "destination": "https://carlab.rs/:locale/services/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/auto-service-belgrade",
-      "destination": "https://carlab.rs/:locale/services/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/auto-service-belgrade/:slug+/",
-      "destination": "https://carlab.rs/:locale/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/auto-service-belgrade/:slug+",
-      "destination": "https://carlab.rs/:locale/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/auto-service-belgrade/",
-      "destination": "https://carlab.rs/en/services/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/auto-service-belgrade",
-      "destination": "https://carlab.rs/en/services/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/auto-service-belgrade/:slug+/",
-      "destination": "https://carlab.rs/en/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/auto-service-belgrade/:slug+",
-      "destination": "https://carlab.rs/en/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/auto-service-belgrade/",
-      "destination": "https://carlab.rs/ru/services/",
-      "permanent": true
-    },
-    {
-      "source": "/auto-service-belgrade",
-      "destination": "https://carlab.rs/ru/services/",
-      "permanent": true
-    },
-    {
-      "source": "/auto-service-belgrade/:slug+/",
-      "destination": "https://carlab.rs/ru/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/auto-service-belgrade/:slug+",
-      "destination": "https://carlab.rs/ru/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/avtoservis-belgrade/",
-      "destination": "https://carlab.rs/:locale/services/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/avtoservis-belgrade",
-      "destination": "https://carlab.rs/:locale/services/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/avtoservis-belgrade/:slug+/",
-      "destination": "https://carlab.rs/:locale/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/avtoservis-belgrade/:slug+",
-      "destination": "https://carlab.rs/:locale/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/avtoservis-belgrade/",
-      "destination": "https://carlab.rs/en/services/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/avtoservis-belgrade",
-      "destination": "https://carlab.rs/en/services/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/avtoservis-belgrade/:slug+/",
-      "destination": "https://carlab.rs/en/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/avtoservis-belgrade/:slug+",
-      "destination": "https://carlab.rs/en/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/avtoservis-belgrade/",
-      "destination": "https://carlab.rs/ru/services/",
-      "permanent": true
-    },
-    {
-      "source": "/avtoservis-belgrade",
-      "destination": "https://carlab.rs/ru/services/",
-      "permanent": true
-    },
-    {
-      "source": "/avtoservis-belgrade/:slug+/",
-      "destination": "https://carlab.rs/ru/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/avtoservis-belgrade/:slug+",
-      "destination": "https://carlab.rs/ru/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/detailing-belgrade/",
-      "destination": "https://details.rs/:locale/services/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/detailing-belgrade",
-      "destination": "https://details.rs/:locale/services/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/detailing-belgrade/:slug+/",
-      "destination": "https://details.rs/:locale/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/detailing-belgrade/:slug+",
-      "destination": "https://details.rs/:locale/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/detailing-belgrade/",
-      "destination": "https://details.rs/en/services/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/detailing-belgrade",
-      "destination": "https://details.rs/en/services/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/detailing-belgrade/:slug+/",
-      "destination": "https://details.rs/en/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/detailing-belgrade/:slug+",
-      "destination": "https://details.rs/en/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/detailing-belgrade/",
-      "destination": "https://details.rs/ru/services/",
-      "permanent": true
-    },
-    {
-      "source": "/detailing-belgrade",
-      "destination": "https://details.rs/ru/services/",
-      "permanent": true
-    },
-    {
-      "source": "/detailing-belgrade/:slug+/",
-      "destination": "https://details.rs/ru/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/detailing-belgrade/:slug+",
-      "destination": "https://details.rs/ru/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/wrapping-belgrade/",
-      "destination": "https://details.rs/:locale/services/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/wrapping-belgrade",
-      "destination": "https://details.rs/:locale/services/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/wrapping-belgrade/:slug+/",
-      "destination": "https://details.rs/:locale/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/wrapping-belgrade/:slug+",
-      "destination": "https://details.rs/:locale/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/wrapping-belgrade/",
-      "destination": "https://details.rs/en/services/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/wrapping-belgrade",
-      "destination": "https://details.rs/en/services/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/wrapping-belgrade/:slug+/",
-      "destination": "https://details.rs/en/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/wrapping-belgrade/:slug+",
-      "destination": "https://details.rs/en/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/wrapping-belgrade/",
-      "destination": "https://details.rs/ru/services/",
-      "permanent": true
-    },
-    {
-      "source": "/wrapping-belgrade",
-      "destination": "https://details.rs/ru/services/",
-      "permanent": true
-    },
-    {
-      "source": "/wrapping-belgrade/:slug+/",
-      "destination": "https://details.rs/ru/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/wrapping-belgrade/:slug+",
-      "destination": "https://details.rs/ru/works/:slug+/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/cases/auto-service/",
-      "destination": "https://carlab.rs/:locale/works/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/cases/auto-service",
-      "destination": "https://carlab.rs/:locale/works/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/cases/auto-service/",
-      "destination": "https://carlab.rs/en/works/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/cases/auto-service",
-      "destination": "https://carlab.rs/en/works/",
-      "permanent": true
-    },
-    {
-      "source": "/cases/auto-service/",
-      "destination": "https://carlab.rs/ru/works/",
-      "permanent": true
-    },
-    {
-      "source": "/cases/auto-service",
-      "destination": "https://carlab.rs/ru/works/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/cases/autoservice/",
-      "destination": "https://carlab.rs/:locale/works/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/cases/autoservice",
-      "destination": "https://carlab.rs/:locale/works/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/cases/autoservice/",
-      "destination": "https://carlab.rs/en/works/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/cases/autoservice",
-      "destination": "https://carlab.rs/en/works/",
-      "permanent": true
-    },
-    {
-      "source": "/cases/autoservice/",
-      "destination": "https://carlab.rs/ru/works/",
-      "permanent": true
-    },
-    {
-      "source": "/cases/autoservice",
-      "destination": "https://carlab.rs/ru/works/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/cases/detailing/",
-      "destination": "https://details.rs/:locale/works/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|sr|en)/cases/detailing",
-      "destination": "https://details.rs/:locale/works/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/cases/detailing/",
-      "destination": "https://details.rs/en/works/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(es|de)/cases/detailing",
-      "destination": "https://details.rs/en/works/",
-      "permanent": true
-    },
-    {
-      "source": "/cases/detailing/",
-      "destination": "https://details.rs/ru/works/",
-      "permanent": true
-    },
-    {
-      "source": "/cases/detailing",
-      "destination": "https://details.rs/ru/works/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|en|sr|es|de)/vehicle-buyback/:country(de|es|ch|pt|fr|it|pl)",
-      "destination": "/:locale/vehicle-buyback/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|en|sr|es|de)/vehicle-buyback/:country(de|es|ch|pt|fr|it|pl)/",
-      "destination": "/:locale/vehicle-buyback/",
-      "permanent": true
-    },
-    {
       "source": "/de/berlin/autopodbor",
       "destination": "/ru/vehicle-sourcing/de/berlin",
       "permanent": true
@@ -879,6 +194,886 @@
     {
       "source": "/pl/krakow/autopodbor/",
       "destination": "/ru/vehicle-sourcing/pl/krakow",
+      "permanent": true
+    },
+    {
+      "source": "/cases",
+      "destination": "/ru/cases/vehicle-sourcing",
+      "permanent": true
+    },
+    {
+      "source": "/cases/",
+      "destination": "/ru/cases/vehicle-sourcing",
+      "permanent": true
+    },
+    {
+      "source": "/de/combined",
+      "destination": "/ru/vehicle-sourcing/de",
+      "permanent": true
+    },
+    {
+      "source": "/de/combined/",
+      "destination": "/ru/vehicle-sourcing/de",
+      "permanent": true
+    },
+    {
+      "source": "/rs/combined",
+      "destination": "/ru/vehicle-sourcing/rs",
+      "permanent": true
+    },
+    {
+      "source": "/rs/combined/",
+      "destination": "/ru/vehicle-sourcing/rs",
+      "permanent": true
+    },
+    {
+      "source": "/es/combined",
+      "destination": "/ru/vehicle-sourcing/es",
+      "permanent": true
+    },
+    {
+      "source": "/es/combined/",
+      "destination": "/ru/vehicle-sourcing/es",
+      "permanent": true
+    },
+    {
+      "source": "/rs/dostavka",
+      "destination": "/ru/vehicle-sourcing/rs",
+      "permanent": true
+    },
+    {
+      "source": "/rs/dostavka/",
+      "destination": "/ru/vehicle-sourcing/rs",
+      "permanent": true
+    },
+    {
+      "source": "/es/dostavka",
+      "destination": "/ru/vehicle-sourcing/es",
+      "permanent": true
+    },
+    {
+      "source": "/es/dostavka/",
+      "destination": "/ru/vehicle-sourcing/es",
+      "permanent": true
+    },
+    {
+      "source": "/de/autopodbor",
+      "destination": "/ru/vehicle-sourcing/de",
+      "permanent": true
+    },
+    {
+      "source": "/de/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/de",
+      "permanent": true
+    },
+    {
+      "source": "/rs/autopodbor",
+      "destination": "/ru/vehicle-sourcing/rs",
+      "permanent": true
+    },
+    {
+      "source": "/rs/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/rs",
+      "permanent": true
+    },
+    {
+      "source": "/es/autopodbor",
+      "destination": "/ru/vehicle-sourcing/es",
+      "permanent": true
+    },
+    {
+      "source": "/es/autopodbor/",
+      "destination": "/ru/vehicle-sourcing/es",
+      "permanent": true
+    },
+    {
+      "source": "/cases/mercedes-c-2021-de",
+      "destination": "/ru/cases/vehicle-sourcing",
+      "permanent": true
+    },
+    {
+      "source": "/cases/mercedes-c-2021-de/",
+      "destination": "/ru/cases/vehicle-sourcing",
+      "permanent": true
+    },
+    {
+      "source": "/cases/ford-focus-2020-rs",
+      "destination": "/ru/cases/vehicle-sourcing",
+      "permanent": true
+    },
+    {
+      "source": "/cases/ford-focus-2020-rs/",
+      "destination": "/ru/cases/vehicle-sourcing",
+      "permanent": true
+    },
+    {
+      "source": "/cases/vw-golf-2022-rs",
+      "destination": "/ru/cases/vehicle-sourcing",
+      "permanent": true
+    },
+    {
+      "source": "/cases/vw-golf-2022-rs/",
+      "destination": "/ru/cases/vehicle-sourcing",
+      "permanent": true
+    },
+    {
+      "source": "/cases/bmw-x5-2023-de",
+      "destination": "/ru/cases/vehicle-sourcing",
+      "permanent": true
+    },
+    {
+      "source": "/cases/bmw-x5-2023-de/",
+      "destination": "/ru/cases/vehicle-sourcing",
+      "permanent": true
+    },
+    {
+      "source": "/cases/audi-a4-2022-de",
+      "destination": "/ru/cases/vehicle-sourcing",
+      "permanent": true
+    },
+    {
+      "source": "/cases/audi-a4-2022-de/",
+      "destination": "/ru/cases/vehicle-sourcing",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/auto-service-belgrade",
+      "destination": "https://carlab.rs/ru/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/auto-service-belgrade/",
+      "destination": "https://carlab.rs/ru/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/auto-service-belgrade/:slug+",
+      "destination": "https://carlab.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/auto-service-belgrade/:slug+/",
+      "destination": "https://carlab.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/avtoservis-belgrade",
+      "destination": "https://carlab.rs/ru/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/avtoservis-belgrade/",
+      "destination": "https://carlab.rs/ru/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/avtoservis-belgrade/:slug+",
+      "destination": "https://carlab.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/avtoservis-belgrade/:slug+/",
+      "destination": "https://carlab.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/detailing-belgrade",
+      "destination": "https://details.rs/ru/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/detailing-belgrade/",
+      "destination": "https://details.rs/ru/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/detailing-belgrade/:slug+",
+      "destination": "https://details.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/detailing-belgrade/:slug+/",
+      "destination": "https://details.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/wrapping-belgrade",
+      "destination": "https://details.rs/ru/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/wrapping-belgrade/",
+      "destination": "https://details.rs/ru/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/wrapping-belgrade/:slug+",
+      "destination": "https://details.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/wrapping-belgrade/:slug+/",
+      "destination": "https://details.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/cases/auto-service",
+      "destination": "https://carlab.rs/ru/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/cases/auto-service/",
+      "destination": "https://carlab.rs/ru/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/cases/autoservice",
+      "destination": "https://carlab.rs/ru/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/cases/autoservice/",
+      "destination": "https://carlab.rs/ru/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/cases/detailing",
+      "destination": "https://details.rs/ru/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru)/cases/detailing/",
+      "destination": "https://details.rs/ru/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/auto-service-belgrade",
+      "destination": "https://carlab.rs/en/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/auto-service-belgrade/",
+      "destination": "https://carlab.rs/en/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/auto-service-belgrade/:slug+",
+      "destination": "https://carlab.rs/en/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/auto-service-belgrade/:slug+/",
+      "destination": "https://carlab.rs/en/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/avtoservis-belgrade",
+      "destination": "https://carlab.rs/en/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/avtoservis-belgrade/",
+      "destination": "https://carlab.rs/en/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/avtoservis-belgrade/:slug+",
+      "destination": "https://carlab.rs/en/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/avtoservis-belgrade/:slug+/",
+      "destination": "https://carlab.rs/en/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/detailing-belgrade",
+      "destination": "https://details.rs/en/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/detailing-belgrade/",
+      "destination": "https://details.rs/en/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/detailing-belgrade/:slug+",
+      "destination": "https://details.rs/en/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/detailing-belgrade/:slug+/",
+      "destination": "https://details.rs/en/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/wrapping-belgrade",
+      "destination": "https://details.rs/en/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/wrapping-belgrade/",
+      "destination": "https://details.rs/en/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/wrapping-belgrade/:slug+",
+      "destination": "https://details.rs/en/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/wrapping-belgrade/:slug+/",
+      "destination": "https://details.rs/en/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/cases/auto-service",
+      "destination": "https://carlab.rs/en/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/cases/auto-service/",
+      "destination": "https://carlab.rs/en/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/cases/autoservice",
+      "destination": "https://carlab.rs/en/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/cases/autoservice/",
+      "destination": "https://carlab.rs/en/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/cases/detailing",
+      "destination": "https://details.rs/en/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(en|es|de)/cases/detailing/",
+      "destination": "https://details.rs/en/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/auto-service-belgrade",
+      "destination": "https://carlab.rs/sr/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/auto-service-belgrade/",
+      "destination": "https://carlab.rs/sr/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/auto-service-belgrade/:slug+",
+      "destination": "https://carlab.rs/sr/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/auto-service-belgrade/:slug+/",
+      "destination": "https://carlab.rs/sr/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/avtoservis-belgrade",
+      "destination": "https://carlab.rs/sr/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/avtoservis-belgrade/",
+      "destination": "https://carlab.rs/sr/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/avtoservis-belgrade/:slug+",
+      "destination": "https://carlab.rs/sr/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/avtoservis-belgrade/:slug+/",
+      "destination": "https://carlab.rs/sr/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/detailing-belgrade",
+      "destination": "https://details.rs/sr/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/detailing-belgrade/",
+      "destination": "https://details.rs/sr/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/detailing-belgrade/:slug+",
+      "destination": "https://details.rs/sr/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/detailing-belgrade/:slug+/",
+      "destination": "https://details.rs/sr/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/wrapping-belgrade",
+      "destination": "https://details.rs/sr/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/wrapping-belgrade/",
+      "destination": "https://details.rs/sr/services/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/wrapping-belgrade/:slug+",
+      "destination": "https://details.rs/sr/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/wrapping-belgrade/:slug+/",
+      "destination": "https://details.rs/sr/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/cases/auto-service",
+      "destination": "https://carlab.rs/sr/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/cases/auto-service/",
+      "destination": "https://carlab.rs/sr/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/cases/autoservice",
+      "destination": "https://carlab.rs/sr/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/cases/autoservice/",
+      "destination": "https://carlab.rs/sr/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/cases/detailing",
+      "destination": "https://details.rs/sr/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(sr)/cases/detailing/",
+      "destination": "https://details.rs/sr/works/",
+      "permanent": true
+    },
+    {
+      "source": "/auto-service-belgrade",
+      "destination": "https://carlab.rs/ru/services/",
+      "permanent": true
+    },
+    {
+      "source": "/auto-service-belgrade/",
+      "destination": "https://carlab.rs/ru/services/",
+      "permanent": true
+    },
+    {
+      "source": "/auto-service-belgrade/:slug+",
+      "destination": "https://carlab.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/auto-service-belgrade/:slug+/",
+      "destination": "https://carlab.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/avtoservis-belgrade",
+      "destination": "https://carlab.rs/ru/services/",
+      "permanent": true
+    },
+    {
+      "source": "/avtoservis-belgrade/",
+      "destination": "https://carlab.rs/ru/services/",
+      "permanent": true
+    },
+    {
+      "source": "/avtoservis-belgrade/:slug+",
+      "destination": "https://carlab.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/avtoservis-belgrade/:slug+/",
+      "destination": "https://carlab.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/detailing-belgrade",
+      "destination": "https://details.rs/ru/services/",
+      "permanent": true
+    },
+    {
+      "source": "/detailing-belgrade/",
+      "destination": "https://details.rs/ru/services/",
+      "permanent": true
+    },
+    {
+      "source": "/detailing-belgrade/:slug+",
+      "destination": "https://details.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/detailing-belgrade/:slug+/",
+      "destination": "https://details.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/wrapping-belgrade",
+      "destination": "https://details.rs/ru/services/",
+      "permanent": true
+    },
+    {
+      "source": "/wrapping-belgrade/",
+      "destination": "https://details.rs/ru/services/",
+      "permanent": true
+    },
+    {
+      "source": "/wrapping-belgrade/:slug+",
+      "destination": "https://details.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/wrapping-belgrade/:slug+/",
+      "destination": "https://details.rs/ru/works/:slug+/",
+      "permanent": true
+    },
+    {
+      "source": "/cases/auto-service",
+      "destination": "https://carlab.rs/ru/works/",
+      "permanent": true
+    },
+    {
+      "source": "/cases/auto-service/",
+      "destination": "https://carlab.rs/ru/works/",
+      "permanent": true
+    },
+    {
+      "source": "/cases/autoservice",
+      "destination": "https://carlab.rs/ru/works/",
+      "permanent": true
+    },
+    {
+      "source": "/cases/autoservice/",
+      "destination": "https://carlab.rs/ru/works/",
+      "permanent": true
+    },
+    {
+      "source": "/cases/detailing",
+      "destination": "https://details.rs/ru/works/",
+      "permanent": true
+    },
+    {
+      "source": "/cases/detailing/",
+      "destination": "https://details.rs/ru/works/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/privoz/de/:path*",
+      "destination": "/:locale/vehicle-import/eu/de/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/privoz/de/:path*/",
+      "destination": "/:locale/vehicle-import/eu/de/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/privoz/de/:path*",
+      "destination": "/ru/vehicle-import/eu/de/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/privoz/de/:path*/",
+      "destination": "/ru/vehicle-import/eu/de/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/vehicle-import/de/:path*",
+      "destination": "/:locale/vehicle-import/eu/de/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/vehicle-import/de/:path*/",
+      "destination": "/:locale/vehicle-import/eu/de/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/vehicle-import/de/:path*",
+      "destination": "/ru/vehicle-import/eu/de/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/vehicle-import/de/:path*/",
+      "destination": "/ru/vehicle-import/eu/de/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/autopodbor/:path*",
+      "destination": "/:locale/vehicle-sourcing/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/autopodbor/:path*/",
+      "destination": "/:locale/vehicle-sourcing/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/autopodbor/:path*",
+      "destination": "/ru/vehicle-sourcing/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/autopodbor/:path*/",
+      "destination": "/ru/vehicle-sourcing/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/cases/autopodbor",
+      "destination": "/:locale/cases/vehicle-sourcing",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/cases/autopodbor/",
+      "destination": "/:locale/cases/vehicle-sourcing",
+      "permanent": true
+    },
+    {
+      "source": "/cases/autopodbor",
+      "destination": "/ru/cases/vehicle-sourcing",
+      "permanent": true
+    },
+    {
+      "source": "/cases/autopodbor/",
+      "destination": "/ru/cases/vehicle-sourcing",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/privoz/:path*",
+      "destination": "/:locale/vehicle-import/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/privoz/:path*/",
+      "destination": "/:locale/vehicle-import/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/privoz/:path*",
+      "destination": "/ru/vehicle-import/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/privoz/:path*/",
+      "destination": "/ru/vehicle-import/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/cases/privoz",
+      "destination": "/:locale/cases/vehicle-import",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/cases/privoz/",
+      "destination": "/:locale/cases/vehicle-import",
+      "permanent": true
+    },
+    {
+      "source": "/cases/privoz",
+      "destination": "/ru/cases/vehicle-import",
+      "permanent": true
+    },
+    {
+      "source": "/cases/privoz/",
+      "destination": "/ru/cases/vehicle-import",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/vykup/:path*",
+      "destination": "/:locale/vehicle-buyback/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/vykup/:path*/",
+      "destination": "/:locale/vehicle-buyback/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/vykup/:path*",
+      "destination": "/ru/vehicle-buyback/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/vykup/:path*/",
+      "destination": "/ru/vehicle-buyback/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/cases/vykup",
+      "destination": "/:locale/cases/vehicle-buyback",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/cases/vykup/",
+      "destination": "/:locale/cases/vehicle-buyback",
+      "permanent": true
+    },
+    {
+      "source": "/cases/vykup",
+      "destination": "/ru/cases/vehicle-buyback",
+      "permanent": true
+    },
+    {
+      "source": "/cases/vykup/",
+      "destination": "/ru/cases/vehicle-buyback",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/proverka/:path*",
+      "destination": "/:locale/vehicle-inspection/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/proverka/:path*/",
+      "destination": "/:locale/vehicle-inspection/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/proverka/:path*",
+      "destination": "/ru/vehicle-inspection/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/proverka/:path*/",
+      "destination": "/ru/vehicle-inspection/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/cases/proverka",
+      "destination": "/:locale/cases/vehicle-inspection",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/cases/proverka/",
+      "destination": "/:locale/cases/vehicle-inspection",
+      "permanent": true
+    },
+    {
+      "source": "/cases/proverka",
+      "destination": "/ru/cases/vehicle-inspection",
+      "permanent": true
+    },
+    {
+      "source": "/cases/proverka/",
+      "destination": "/ru/cases/vehicle-inspection",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/vehicle-buyback/:country(de|es|ch|pt|fr|it|pl)",
+      "destination": "/:locale/vehicle-buyback/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/vehicle-buyback/:country(de|es|ch|pt|fr|it|pl)/",
+      "destination": "/:locale/vehicle-buyback/",
+      "permanent": true
+    },
+    {
+      "source": "/vehicle-buyback/:country(de|es|ch|pt|fr|it|pl)",
+      "destination": "/ru/vehicle-buyback/",
+      "permanent": true
+    },
+    {
+      "source": "/vehicle-buyback/:country(de|es|ch|pt|fr|it|pl)/",
+      "destination": "/ru/vehicle-buyback/",
+      "permanent": true
+    },
+    {
+      "source": "/vehicle-sourcing/:path*",
+      "destination": "/ru/vehicle-sourcing/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/vehicle-sourcing/:path*/",
+      "destination": "/ru/vehicle-sourcing/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/vehicle-import/:path*",
+      "destination": "/ru/vehicle-import/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/vehicle-import/:path*/",
+      "destination": "/ru/vehicle-import/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/vehicle-buyback/:path*",
+      "destination": "/ru/vehicle-buyback/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/vehicle-buyback/:path*/",
+      "destination": "/ru/vehicle-buyback/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/vehicle-inspection/:path*",
+      "destination": "/ru/vehicle-inspection/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/vehicle-inspection/:path*/",
+      "destination": "/ru/vehicle-inspection/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/cases/:path*",
+      "destination": "/ru/cases/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/cases/:path*/",
+      "destination": "/ru/cases/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/contacts/:path*",
+      "destination": "/ru/contacts/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/contacts/:path*/",
+      "destination": "/ru/contacts/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/privacy/:path*",
+      "destination": "/ru/privacy/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/privacy/:path*/",
+      "destination": "/ru/privacy/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/thanks/:path*",
+      "destination": "/ru/thanks/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/thanks/:path*/",
+      "destination": "/ru/thanks/:path*",
       "permanent": true
     }
   ],
