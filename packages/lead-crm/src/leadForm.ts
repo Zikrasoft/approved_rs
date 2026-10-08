@@ -124,6 +124,8 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
       : idleLabel;
   };
 
+  let awaitingKit = false;
+
   selectCountry(country, deps.visitorCountry?.());
   bindPhoneCountry(country, phone);
 
@@ -165,7 +167,15 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
-    if (button.hasAttribute('aria-busy') || deferSubmitUntilKit(form)) return;
+    if (deferSubmitUntilKit(form)) {
+      awaitingKit = true;
+      setBusy(true);
+      return;
+    }
+    if (awaitingKit) {
+      awaitingKit = false;
+      setBusy(false);
+    } else if (button.hasAttribute('aria-busy')) return;
     pick<HTMLInputElement>('[data-visitor-id]').value = deps.visitorId();
     pick<HTMLInputElement>('[data-source-url]').value = location.href;
 

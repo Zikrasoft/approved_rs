@@ -368,8 +368,16 @@ describe('before the phone kit loads', () => {
     form.requestSubmit = vi.fn(() => submit(form));
     form.querySelector<HTMLInputElement>('[data-phone]')!.value = '60';
     form.querySelector<HTMLInputElement>('[data-consent]')!.checked = true;
+    const button = form.querySelector<HTMLButtonElement>(
+      'button[type="submit"]',
+    )!;
     submit(form);
     expect(form.hasAttribute('data-awaiting-kit')).toBe(true);
+    expect(button.getAttribute('aria-busy')).toBe('true');
+    expect(button.disabled).toBe(true);
+    expect(form.querySelector('[data-submit-label]')!.textContent).toBe(
+      'Sending',
+    );
     expect(form.querySelector<HTMLElement>('[data-error-phone]')!.hidden).toBe(
       true,
     );
@@ -377,6 +385,9 @@ describe('before the phone kit loads', () => {
     expect(form.querySelector<HTMLElement>('[data-error-phone]')!.hidden).toBe(
       false,
     );
+    expect(button.hasAttribute('aria-busy')).toBe(false);
+    expect(button.disabled).toBe(false);
+    expect(form.querySelector('[data-submit-label]')!.textContent).toBe('Send');
   });
 
   it('leaves the phone unmasked and the countries short until then', async () => {
