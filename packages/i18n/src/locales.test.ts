@@ -212,11 +212,15 @@ describe('detectLocale', () => {
   });
 });
 
-describe('headLinks', () => {
-  it('builds canonical, alternates and og:locale for a page', () => {
-    expect(
-      set.headLinks('https://approved.rs', 'en', '/en/vehicle-import/de/'),
-    ).toEqual({
+describe('createPageHead', () => {
+  const copy = { title: 'T', description: 'D' };
+  const approvedHead = set.createPageHead('https://approved.rs');
+  const detailsHead = srFirst.createPageHead('https://details.rs');
+
+  it('builds canonical, alternates, og:locale and og image for a page', () => {
+    expect(approvedHead('en', '/en/vehicle-import/de/', copy)).toEqual({
+      title: 'T',
+      description: 'D',
       canonical: 'https://approved.rs/en/vehicle-import/de/',
       alternates: [
         { hreflang: 'ru', href: 'https://approved.rs/ru/vehicle-import/de/' },
@@ -235,7 +239,7 @@ describe('headLinks', () => {
   });
 
   it('points x-default at the primary locale, not the translation source', () => {
-    const head = srFirst.headLinks('https://details.rs', 'ru', '/ru/works/');
+    const head = detailsHead('ru', '/ru/works/', copy);
 
     expect(head.alternates.at(-1)).toEqual({
       hreflang: 'x-default',
@@ -244,17 +248,17 @@ describe('headLinks', () => {
   });
 
   it('defaults the og image to the locale one and keeps a supplied one', () => {
-    expect(set.headLinks('https://approved.rs', 'ru', '/ru/').ogImage).toBe(
+    expect(approvedHead('ru', '/ru/', copy).ogImage).toBe(
       'https://approved.rs/og.png',
     );
     expect(
-      set.headLinks('https://approved.rs', 'ru', '/ru/', 'https://x/y.png')
+      approvedHead('ru', '/ru/', { ...copy, ogImage: 'https://x/y.png' })
         .ogImage,
     ).toBe('https://x/y.png');
   });
 
   it('points the bare site root at the locale homepage', () => {
-    const head = srFirst.headLinks('https://details.rs', 'ru', '/');
+    const head = detailsHead('ru', '/', copy);
 
     expect(head.canonical).toBe('https://details.rs/ru/');
     expect(head.alternates[0]).toEqual({
@@ -264,7 +268,7 @@ describe('headLinks', () => {
   });
 
   it('keeps the 404 page on its own canonical', () => {
-    const head = srFirst.headLinks('https://details.rs', 'sr', '/404/');
+    const head = detailsHead('sr', '/404/', copy);
 
     expect(head.canonical).toBe('https://details.rs/404/');
     expect(head.alternates.at(-1)).toEqual({

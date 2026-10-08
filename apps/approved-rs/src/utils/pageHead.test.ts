@@ -33,25 +33,11 @@ describe('pageHead', () => {
     });
   });
 
-  it('keeps the 404 page on its own canonical', () => {
-    expect(pageHead('ru', '/404/', copy).canonical).toBe(`${SITE_URL}/404/`);
-  });
-
   it('carries the og:locale and the locale default og image', () => {
     const head = pageHead('sr', '/sr/', copy);
 
     expect(head.ogLocale).toBe('sr_RS');
     expect(head.ogImage).toBe(`${SITE_URL}/og-sr.png`);
     expect(pageHead('ru', '/ru/', copy).ogImage).toBe(`${SITE_URL}/og.png`);
-  });
-
-  it('keeps a page-supplied og image', () => {
-    expect(
-      pageHead('ru', '/ru/', { ...copy, ogImage: 'https://x/y.png' }).ogImage,
-    ).toBe('https://x/y.png');
-  });
-
-  it('passes title and description through', () => {
-    expect(pageHead('ru', '/ru/', copy)).toMatchObject(copy);
   });
 });

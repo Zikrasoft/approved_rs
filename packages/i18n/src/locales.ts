@@ -2,6 +2,12 @@ export const SOURCE_LOCALE = 'ru';
 
 export type SourceLocale = typeof SOURCE_LOCALE;
 
+export interface PageHeadInput {
+  title: string;
+  description: string;
+  ogImage?: string;
+}
+
 export interface LocaleSetOptions<L extends string, P extends L> {
   locales: readonly L[];
   primaryLocale: P;
@@ -105,13 +111,22 @@ export function createLocaleSet<L extends string, P extends L>({
       return primaryLocale;
     },
 
-    headLinks(siteUrl: string, locale: L, pathname: string, ogImage?: string) {
-      const path = pathname === '/' ? `/${locale}/` : pathname;
-      return {
-        canonical: new URL(path, siteUrl).href,
-        alternates: alternateLinks(siteUrl, path),
-        ogLocale: ogLocale[locale],
-        ogImage: ogImage ?? new URL(`/og${ogSuffix[locale]}.png`, siteUrl).href,
+    createPageHead(siteUrl: string) {
+      return (
+        locale: L,
+        pathname: string,
+        { title, description, ogImage }: PageHeadInput,
+      ) => {
+        const path = pathname === '/' ? `/${locale}/` : pathname;
+        return {
+          title,
+          description,
+          canonical: new URL(path, siteUrl).href,
+          alternates: alternateLinks(siteUrl, path),
+          ogLocale: ogLocale[locale],
+          ogImage:
+            ogImage ?? new URL(`/og${ogSuffix[locale]}.png`, siteUrl).href,
+        };
       };
     },
   };

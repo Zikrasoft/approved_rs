@@ -31,21 +31,11 @@ describe('pageHead', () => {
     });
   });
 
-  it('keeps the 404 page on its own canonical', () => {
-    expect(pageHead('sr', '/404/', copy).canonical).toBe(`${SITE_URL}/404/`);
-  });
-
   it('carries the og:locale and the locale og image', () => {
     const head = pageHead('ru', '/ru/', copy);
 
     expect(head.ogLocale).toBe('ru_RU');
     expect(head.ogImage).toBe(`${SITE_URL}/og-ru.png`);
     expect(pageHead('sr', '/sr/', copy).ogImage).toBe(`${SITE_URL}/og.png`);
-  });
-
-  it('keeps a page-supplied og image', () => {
-    expect(
-      pageHead('sr', '/sr/', { ...copy, ogImage: 'https://x/y.png' }).ogImage,
-    ).toBe('https://x/y.png');
   });
 });
