@@ -141,13 +141,15 @@ Approved's trust/verification semantics.
   `packages/site-kit/src` are the shape: idempotent `define(tagName?)`, no
   auto-registration on import, no styles shipped, the app supplying the markup.
   A run-once page effect with no per-instance state is the one exception —
-  `defineContactClickTracking`, `applyContactPreference` and
-  `defineFunnelTracking` are plain functions called once from the app's layout,
-  because what they hold belongs to the page, not to an element. Such a function
-  must guard against being armed twice (`defineFunnelTracking`'s module flag,
-  `defineAnalytics`'s `window.loadAnalytics` check) — a second call that
-  re-attaches listeners doubles whatever it counts, silently. Anything with
-  instance state is still a custom element.
+  analytics, contact-click tracking, contact preference, the language
+  suggestion and funnel tracking are armed by `bootSiteKit` from
+  `@podbor/site-kit/browser`, called once from each app's layout with its
+  `ymCounterId` and `analytics: !import.meta.env.DEV`. No app imports the five
+  parts, so none can arm one twice or forget one. `bootSiteKit` and each
+  part guard against being armed twice — a second call that re-attaches
+  listeners doubles whatever it counts, silently. A new page-level effect joins
+  `bootSiteKit` rather than a layout script. Anything with instance state is
+  still a custom element.
 - Every `packages/*` carries its own test suite at **100% coverage**
   (statements/functions/lines; branches too where achievable). The `test`
   script runs `vitest run --coverage`, so the threshold is enforced by CI

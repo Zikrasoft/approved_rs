@@ -16,8 +16,8 @@ written there once, all three sites take it from there, and exactly that string 
 registered as a goal in Metrika. There should be no `'form_view'` literals in the
 apps.
 
-`packages/site-kit/src/funnel.ts` (`defineFunnelTracking`) wires everything up from
-the markup and is called once from each app's layout. Contact clicks live
+`packages/site-kit/src/funnel.ts` wires everything up from
+the markup and is armed by `bootSiteKit` from each app's layout. Contact clicks live
 separately in `contactClick.ts`, because they also write a lead to the server.
 
 ## Event vocabulary
@@ -155,7 +155,7 @@ language banner keeps `from` / `to`, so grouping by `to` would mix locale codes
 into the same report. Apply the standing exclusions from
 [analytics-exclusions.md](analytics-exclusions.md) before reading the numbers.
 
-Nothing from a dev server. All three layouts skip `defineAnalytics` when
+Nothing from a dev server. All three layouts pass `analytics: false` to `bootSiteKit` when
 `import.meta.env.DEV`, so no Metrika script is loaded locally and `reachGoal` is a
 no-op — verify an event against a build (`pnpm build`, then
 `pnpm --filter <app> preview`), never against `pnpm dev`. A preview serves the
