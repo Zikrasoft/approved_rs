@@ -10,7 +10,8 @@ import { publishedWorks } from '@/utils/works';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { safeMarkdown } from '@podbor/site-kit';
-import { SITE_URL } from '@/utils/constants';
+import { servicePageSchema } from '@/utils/schema';
+import { canonicalUrl } from '@/utils/pageHead';
 import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
@@ -29,16 +30,10 @@ const related = publishedWorks(await getCollection('works')).filter((work) =>
   work.data.servicesApplied.includes(slug),
 );
 
-const serviceSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'Service',
-  name: service.name,
-  serviceType: service.name,
-  description: service.metaDescription,
-  provider: { '@id': `${SITE_URL}/#workshop` },
-  areaServed: { '@type': 'City', name: 'Beograd' },
-  url: new URL(PathBuilder.service(locale, slug), SITE_URL).href,
-};
+const schema = servicePageSchema(
+  service,
+  canonicalUrl(locale, Astro.url.pathname),
+);
 
 const specs = [
   { label: services.specsDurationLabel, value: service.duration },
@@ -49,7 +44,7 @@ const specs = [
 <Shell
   title={service.metaTitle}
   description={service.metaDescription}
-  jsonLd={[serviceSchema]}
+  jsonLd={[schema]}
   service={slug}
 >
   <PageHero

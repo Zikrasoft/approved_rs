@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { faqPageSchema } from '@podbor/site-kit';
 import Shell from '@/layouts/Shell.astro';
 import Hero from '@/components/Hero.astro';
 import Marquee from '@/components/Marquee.astro';
@@ -33,15 +34,7 @@ const works = publishedWorks(await getCollection('works'));
 const featured = works.slice(0, 3);
 const comparable = works.find((w) => w.data.beforeImage);
 
-const faqSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: home.faq.map((item) => ({
-    '@type': 'Question',
-    name: item.q,
-    acceptedAnswer: { '@type': 'Answer', text: item.a },
-  })),
-};
+const faqSchema = faqPageSchema(home.faq);
 ---
 
 <Shell

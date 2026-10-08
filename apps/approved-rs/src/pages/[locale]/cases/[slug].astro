@@ -1,4 +1,5 @@
 ---
+import { canonicalUrl } from '@/utils/pageHead';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
@@ -96,7 +97,6 @@ const hook = excerptFromMarkdown(
   translation?.body ?? c.body ?? '',
   Math.max(156 - caseFacts.length, 60),
 );
-const canonical = `${SITE_URL}${PathBuilder.case(locale, c.id)}`;
 const imageUrl = c.data.image ? `${SITE_URL}${c.data.image.src}` : undefined;
 
 // A case page's most valuable SERP line was just the car name ("BMW X1"),
@@ -119,8 +119,6 @@ const meta = {
   description: hook
     ? `${hook} ${caseFacts}`
     : `${c.data.car} ${c.data.year}, ${c.data.price.value}. ${cc.realCaseFallback}`,
-  canonical,
-  // Real car photo makes a more compelling share preview than the generic template.
   ogImage: imageUrl,
   ogImageWidth: c.data.image?.width,
   ogImageHeight: c.data.image?.height,
@@ -131,7 +129,7 @@ const schema = generateArticleSchema({
   description: meta.description,
   image: imageUrl,
   datePublished: c.data.date,
-  url: canonical,
+  url: canonicalUrl(locale, Astro.url.pathname),
 });
 ---
 

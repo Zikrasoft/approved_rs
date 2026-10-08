@@ -4,11 +4,39 @@ import {
   readFacetState,
   writeFacetState,
   type FitmentEntry,
-  type ProductTypeDef,
   type Spec,
 } from '@podbor/shop-catalog/browser';
+import type { FilterDef } from '@/lib/typeView';
 import { pluralLabel, type PluralForms } from '@/utils/plural';
 import { CAR_EVENT, readCar } from './car';
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isFilterDef = (def: unknown): def is FilterDef =>
+  isRecord(def) &&
+  typeof def.fitment === 'string' &&
+  Array.isArray(def.fields) &&
+  def.fields.every(
+    (field) =>
+      isRecord(field) &&
+      typeof field.key === 'string' &&
+      typeof field.kind === 'string' &&
+      (field.kind !== 'enum' ||
+        (Array.isArray(field.values) &&
+          field.values.every(
+            (option) => isRecord(option) && typeof option.value === 'string',
+          ))),
+  );
+
+const parseFilterDef = (raw: string): FilterDef | undefined => {
+  try {
+    const def: unknown = JSON.parse(raw);
+    return isFilterDef(def) ? def : undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 export function defineShopFilter(tagName = 'shop-filter'): void {
   if (customElements.get(tagName)) return;
@@ -19,14 +47,13 @@ export function defineShopFilter(tagName = 'shop-filter'): void {
 
       connectedCallback(): void {
         if (this.controller) return;
-        const typeDef = this.dataset.typeDef;
+        const type = parseFilterDef(this.dataset.filterDef ?? '');
         const form = this.querySelector<HTMLFormElement>('form[data-facets]');
         const items = [...this.querySelectorAll<HTMLElement>('[data-product]')];
-        if (!typeDef || !form || items.length === 0) return;
+        if (!type || !form || items.length === 0) return;
 
         this.controller = new AbortController();
         const { signal } = this.controller;
-        const type = JSON.parse(typeDef) as ProductTypeDef;
         const count = this.querySelector<HTMLElement>('[data-filter-count]');
         const empty = this.querySelector<HTMLElement>('[data-filter-empty]');
         const forms = JSON.parse(

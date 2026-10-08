@@ -20,7 +20,6 @@ import type { LeadStatus, StoredLead } from '../schema.ts';
 import {
   EDIT_COPY,
   statusLabel,
-  isLeadStatusKey,
   buildStatusKeyboard,
   buildOwedList,
   formatDealsList,
@@ -234,21 +233,6 @@ describe('statusLabel', () => {
 
   it('falls back to the raw value for an unknown status (defensive, should not happen)', () => {
     expect(statusLabel('bogus' as unknown as LeadStatus)).toBe('bogus');
-  });
-});
-
-describe('isLeadStatusKey', () => {
-  it('is true only for the 4 known status keys', () => {
-    expect(isLeadStatusKey('negotiations')).toBe(true);
-    expect(isLeadStatusKey('in_progress')).toBe(true);
-    expect(isLeadStatusKey('won')).toBe(true);
-    expect(isLeadStatusKey('lost')).toBe(true);
-  });
-
-  it('is false for anything else, including "new"', () => {
-    expect(isLeadStatusKey('new')).toBe(false);
-    expect(isLeadStatusKey('bogus')).toBe(false);
-    expect(isLeadStatusKey('')).toBe(false);
   });
 });
 

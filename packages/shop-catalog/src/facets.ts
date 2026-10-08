@@ -1,4 +1,4 @@
-import type { ProductTypeDef, Spec, SpecValue } from './registry.ts';
+import type { Field, ProductTypeDef, Spec, SpecValue } from './registry.ts';
 
 export interface FacetOption {
   value: string;
@@ -16,6 +16,19 @@ export interface FacetSelection {
 }
 
 export type FacetState = Readonly<Record<string, FacetSelection>>;
+
+export type FacetField =
+  | {
+      key: string;
+      kind: 'enum';
+      facet?: boolean;
+      values: readonly { value: string }[];
+    }
+  | { key: string; kind: Exclude<Field['kind'], 'enum'>; facet?: boolean };
+
+export interface FacetType {
+  fields: readonly FacetField[];
+}
 
 function optionValues(value: SpecValue | undefined): string[] {
   if (value === undefined) return [];
@@ -87,7 +100,7 @@ export function facetIndex(
 }
 
 export function matchesFacets(
-  type: ProductTypeDef,
+  type: FacetType,
   spec: Spec,
   state: FacetState,
 ): boolean {
@@ -113,7 +126,7 @@ export function matchesFacets(
 }
 
 export function readFacetState(
-  type: ProductTypeDef,
+  type: FacetType,
   params: URLSearchParams,
 ): FacetState {
   const state: Record<string, FacetSelection> = {};
@@ -142,7 +155,7 @@ export function readFacetState(
 }
 
 export function writeFacetState(
-  type: ProductTypeDef,
+  type: FacetType,
   state: FacetState,
 ): URLSearchParams {
   const params = new URLSearchParams();

@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import ContactCTA from '@/components/ContactCTA.astro';
-import { SITE_URL, SITE_NAME } from '@/utils/constants';
+import { SITE_NAME } from '@/utils/constants';
 import { pagesView } from '@/i18n/content/pages';
 import { withLocales, PathBuilder } from '@/utils/paths';
 
@@ -12,7 +12,6 @@ const p = pagesView(locale).thanks;
 const meta = {
   title: `${p.metaTitle} — ${SITE_NAME}`,
   description: p.metaDescription,
-  canonical: `${SITE_URL}${PathBuilder.thanks(locale)}`,
   noindex: true,
 };
 ---
