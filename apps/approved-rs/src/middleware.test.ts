@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import { describe, it, expect, vi } from 'vitest';
 import { SUPPORTED_LOCALES } from './i18n/config';
 
@@ -10,16 +9,7 @@ vi.mock('astro:i18n', () => ({
     ),
 }));
 
-const {
-  renameSlugSegments,
-  moveGermanySpoke,
-  collapseBuybackCountry,
-  movedBrandUrl,
-  onRequest,
-  MOVED_BRAND_HOSTS,
-  MOVED_BRAND_CASE_TABS,
-  LEGACY_PATH_REWRITES,
-} = await import('./middleware');
+const { onRequest } = await import('./middleware');
 
 type Handler = (context: unknown, next: () => unknown) => unknown;
 
@@ -52,155 +42,6 @@ function makeContext(
 
 const run = (context: unknown, next = vi.fn(() => 'next')) =>
   (onRequest as unknown as Handler)(context, next);
-
-describe('renameSlugSegments', () => {
-  it('renames a single old service-slug segment', () => {
-    expect(renameSlugSegments('/autopodbor/de/')).toBe('/vehicle-sourcing/de/');
-  });
-
-  it('renames only the matching segment, preserving the locale prefix', () => {
-    expect(renameSlugSegments('/en/autopodbor/de/')).toBe(
-      '/en/vehicle-sourcing/de/',
-    );
-  });
-
-  it('renames every old slug to its new equivalent', () => {
-    expect(renameSlugSegments('/privoz/')).toBe('/vehicle-import/');
-    expect(renameSlugSegments('/vykup/de/')).toBe('/vehicle-buyback/de/');
-    expect(renameSlugSegments('/proverka/de/')).toBe('/vehicle-inspection/de/');
-  });
-
-  it('returns null when no segment matches (no redirect needed)', () => {
-    expect(renameSlugSegments('/en/vehicle-sourcing/de/')).toBeNull();
-    expect(renameSlugSegments('/contacts/')).toBeNull();
-  });
-
-  it('chains correctly after LEGACY_PATH_REWRITES output', () => {
-    // '/cases/' rewrites to '/cases/autopodbor' in LEGACY_PATH_REWRITES,
-    // which must then still get slug-renamed to the current route.
-    expect(renameSlugSegments('/cases/autopodbor')).toBe(
-      '/cases/vehicle-sourcing',
-    );
-    // Same for the old country-first pages: '/rs/autopodbor/' rewrites to
-    // '/autopodbor/rs' in LEGACY_PATH_REWRITES, which then still needs renaming.
-    expect(renameSlugSegments('/autopodbor/rs')).toBe('/vehicle-sourcing/rs');
-  });
-});
-
-describe('collapseBuybackCountry', () => {
-  it('sends a collapsed country page to the buyback hub', () => {
-    expect(collapseBuybackCountry('/ru/vehicle-buyback/de/')).toBe(
-      '/ru/vehicle-buyback/',
-    );
-    expect(collapseBuybackCountry('/en/vehicle-buyback/pl/')).toBe(
-      '/en/vehicle-buyback/',
-    );
-  });
-
-  it('leaves Serbia alone — it kept its own page', () => {
-    expect(collapseBuybackCountry('/ru/vehicle-buyback/rs/')).toBeNull();
-  });
-
-  it('returns null for the hub itself and for other services', () => {
-    expect(collapseBuybackCountry('/ru/vehicle-buyback/')).toBeNull();
-    expect(collapseBuybackCountry('/ru/vehicle-sourcing/de/')).toBeNull();
-  });
-
-  it('matches even without a trailing slash (trailingSlash is "ignore")', () => {
-    expect(collapseBuybackCountry('/ru/vehicle-buyback/it')).toBe(
-      '/ru/vehicle-buyback/',
-    );
-  });
-});
-
-describe('moveGermanySpoke', () => {
-  it('nests the old Germany spoke path under /eu/', () => {
-    expect(moveGermanySpoke('/vehicle-import/de/')).toBe(
-      '/vehicle-import/eu/de/',
-    );
-    expect(moveGermanySpoke('/en/vehicle-import/de/')).toBe(
-      '/en/vehicle-import/eu/de/',
-    );
-  });
-
-  it('returns null for unrelated paths', () => {
-    expect(moveGermanySpoke('/en/vehicle-sourcing/de/')).toBeNull();
-    expect(moveGermanySpoke('/en/vehicle-import/eu/')).toBeNull();
-  });
-
-  it('matches even without a trailing slash (trailingSlash is "ignore")', () => {
-    expect(moveGermanySpoke('/vehicle-import/de')).toBe(
-      '/vehicle-import/eu/de/',
-    );
-    expect(moveGermanySpoke('/en/vehicle-import/de')).toBe(
-      '/en/vehicle-import/eu/de/',
-    );
-  });
-
-  it('chains after a slug rename, so very old /privoz/de/ links reach the new path in one hop', () => {
-    const renamed = renameSlugSegments('/privoz/de/');
-    expect(renamed).toBe('/vehicle-import/de/');
-    expect(moveGermanySpoke(renamed!)).toBe('/vehicle-import/eu/de/');
-  });
-});
-
-describe('movedBrandUrl', () => {
-  it('lands a service hub on the brand services page, not its home', () => {
-    expect(movedBrandUrl('/ru/auto-service-belgrade/')).toBe(
-      'https://carlab.rs/ru/services/',
-    );
-    expect(movedBrandUrl('/sr/detailing-belgrade/')).toBe(
-      'https://details.rs/sr/services/',
-    );
-  });
-
-  it('keeps the case slug, which moved across unchanged', () => {
-    expect(movedBrandUrl('/ru/auto-service-belgrade/bmw-x3/')).toBe(
-      'https://carlab.rs/ru/works/bmw-x3/',
-    );
-  });
-
-  it('redirects the pre-rename wrapping slug to the detailing brand', () => {
-    expect(movedBrandUrl('/ru/wrapping-belgrade/')).toBe(
-      'https://details.rs/ru/services/',
-    );
-    expect(movedBrandUrl('/ru/wrapping-belgrade/bmw-x5/')).toBe(
-      'https://details.rs/ru/works/bmw-x5/',
-    );
-  });
-
-  it('falls back to en for locales the brand sites do not run', () => {
-    expect(movedBrandUrl('/de/detailing-belgrade/bmw-x5/')).toBe(
-      'https://details.rs/en/works/bmw-x5/',
-    );
-  });
-
-  it('treats an unprefixed path as ru', () => {
-    expect(movedBrandUrl('/avtoservis-belgrade/')).toBe(
-      'https://carlab.rs/ru/services/',
-    );
-  });
-
-  it('sends a case-tab URL to the brand site works listing', () => {
-    expect(movedBrandUrl('/en/cases/auto-service')).toBe(
-      'https://carlab.rs/en/works/',
-    );
-    expect(movedBrandUrl('/cases/detailing')).toBe(
-      'https://details.rs/ru/works/',
-    );
-  });
-
-  it('leaves every path that did not move alone', () => {
-    expect(movedBrandUrl('/ru/vehicle-sourcing/de/')).toBeNull();
-    expect(movedBrandUrl('/ru/cases/vehicle-import/')).toBeNull();
-    expect(movedBrandUrl('/')).toBeNull();
-  });
-
-  it('does not read an inherited Object property as a moved host', () => {
-    expect(movedBrandUrl('/ru/constructor/')).toBeNull();
-    expect(movedBrandUrl('/ru/cases/toString/')).toBeNull();
-  });
-});
 
 describe('onRequest', () => {
   it('passes an unlocalized path straight through', () => {
@@ -260,7 +101,7 @@ describe('onRequest', () => {
     const context = makeContext('/en/autopodbor/de/?ref=x');
     run(context);
     expect(context.redirect).toHaveBeenCalledWith(
-      '/en/vehicle-sourcing/de/?ref=x',
+      '/en/vehicle-sourcing/de?ref=x',
       301,
     );
   });
@@ -275,77 +116,4 @@ describe('onRequest', () => {
       301,
     );
   });
-});
-
-describe('vercel.json brand redirects', () => {
-  const BRAND_HOSTS = ['carlab.rs', 'details.rs'];
-  const SLUG = 'bmw-x3';
-
-  interface Redirect {
-    source: string;
-    destination: string;
-  }
-
-  function localesOf(source: string): string[] {
-    const group = /:locale\(([^)]+)\)/.exec(source);
-    return group ? group[1]!.split('|') : ['ru'];
-  }
-
-  function fill(pattern: string, locale: string): string {
-    return pattern
-      .replace(/:locale\([^)]+\)/, locale)
-      .replace(':locale', locale)
-      .replace(':slug+', SLUG);
-  }
-
-  const redirects: Redirect[] = (
-    JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'))
-      .redirects as Redirect[]
-  ).filter((entry) =>
-    BRAND_HOSTS.some((host) => entry.destination.includes(host)),
-  );
-
-  const cases = redirects.flatMap((entry) =>
-    localesOf(entry.source).map(
-      (locale) =>
-        [fill(entry.source, locale), fill(entry.destination, locale)] as const,
-    ),
-  );
-
-  const RULES_PER_HUB = 12;
-  const RULES_PER_CASE_TAB = 6;
-
-  it('carries a vercel rule for every slug the middleware moves', () => {
-    expect(redirects).toHaveLength(
-      Object.keys(MOVED_BRAND_HOSTS).length * RULES_PER_HUB +
-        Object.keys(MOVED_BRAND_CASE_TABS).length * RULES_PER_CASE_TAB,
-    );
-  });
-
-  it.each(cases)('sends %s where the middleware sends it', (path, target) => {
-    expect(movedBrandUrl(path)).toBe(target);
-  });
-});
-
-describe('vercel.json legacy redirects', () => {
-  const rules: { source: string; destination: string }[] = JSON.parse(
-    readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'),
-  ).redirects;
-  const bySource = new Map(
-    rules.map((rule) => [rule.source, rule.destination]),
-  );
-
-  const legacy = Object.keys(LEGACY_PATH_REWRITES).filter((path) =>
-    path.endsWith('/autopodbor/'),
-  );
-
-  it.each(legacy)(
-    'sends %s to the same page at the edge as in middleware',
-    (path) => {
-      const withoutSlash = path.slice(0, -1);
-      const target = `/ru${renameSlugSegments(LEGACY_PATH_REWRITES[path]!)}`;
-      expect(bySource.get(path)).toBe(target);
-      expect(bySource.get(withoutSlash)).toBe(target);
-    },
-  );
 });

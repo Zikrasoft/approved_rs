@@ -31,6 +31,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: sh .github/scripts/pinned-deps.sh
+      - run: sh .github/scripts/redirects-drift.sh
 
       # The two sites that prerender without a backend, so the markup contracts
       # site-kit owns are checked against real HTML rather than a grep. CarLab
