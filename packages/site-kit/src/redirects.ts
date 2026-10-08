@@ -1,3 +1,4 @@
+import { readFileSync, writeFileSync } from 'node:fs';
 import { compile, pathToRegexp, type Key } from 'path-to-regexp';
 
 export interface Redirect {
@@ -50,19 +51,32 @@ export function withRedirects(
   return `${JSON.stringify({ ...JSON.parse(vercelJson), redirects }, null, 2)}\n`;
 }
 
-const PATH_PARAM_PLACEHOLDERS = ['_', '_', '_'] as never[];
+export function writeRedirects(
+  vercelJson: URL,
+  redirects: readonly Redirect[],
+): void {
+  writeFileSync(
+    vercelJson,
+    withRedirects(readFileSync(vercelJson, 'utf8'), redirects),
+  );
+}
+
+type PathBuilders<L extends string> = Record<
+  string,
+  { build(locale: L, ...params: string[]): string }['build']
+>;
 
 export function unprefixedSectionRedirects<L extends string>(
-  paths: Record<string, (locale: L, ...params: never[]) => string>,
+  paths: PathBuilders<L>,
   locale: L,
 ): Redirect[] {
   const nestedBySection = new Map<string, boolean>();
   for (const build of Object.values(paths)) {
-    const section = build(locale, ...PATH_PARAM_PLACEHOLDERS).split('/')[2];
-    if (section) {
+    const [, , section, ...rest] = build(locale, '_', '_', '_').split('/');
+    if (section && !section.includes('.')) {
       nestedBySection.set(
         section,
-        Boolean(nestedBySection.get(section)) || build.length > 1,
+        Boolean(nestedBySection.get(section)) || rest.some(Boolean),
       );
     }
   }

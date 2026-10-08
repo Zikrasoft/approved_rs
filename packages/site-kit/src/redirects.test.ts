@@ -1,8 +1,13 @@
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import {
   createRedirectMatcher,
   unprefixedSectionRedirects,
   withRedirects,
+  writeRedirects,
   type Redirect,
 } from './redirects.ts';
 
@@ -88,6 +93,20 @@ describe('withRedirects', () => {
   });
 });
 
+describe('writeRedirects', () => {
+  it('rewrites the redirects of the file in place', () => {
+    const file = pathToFileURL(
+      join(mkdtempSync(join(tmpdir(), 'redirects-')), 'vercel.json'),
+    );
+    writeFileSync(file, '{"framework":"astro"}');
+    writeRedirects(file, [rule('/a', '/b')]);
+    expect(JSON.parse(readFileSync(file, 'utf8'))).toEqual({
+      framework: 'astro',
+      redirects: [rule('/a', '/b')],
+    });
+  });
+});
+
 describe('unprefixedSectionRedirects', () => {
   type Locale = 'sr' | 'en';
   const paths = {
@@ -97,6 +116,7 @@ describe('unprefixedSectionRedirects', () => {
     shopProduct: (locale: Locale, type: string, handle: string) =>
       `/${locale}/shop/${type}/${handle}/`,
     contact: (locale: Locale) => `/${locale}/contact/`,
+    llmsTxt: (locale: Locale) => `/${locale}/llms.txt`,
   };
   const redirects = unprefixedSectionRedirects(paths, 'sr');
 
@@ -116,5 +136,9 @@ describe('unprefixedSectionRedirects', () => {
     ['/contact/', '/sr/contact/'],
   ])('sends %s to %s', (path, target) => {
     expect(createRedirectMatcher(redirects)(path)).toBe(target);
+  });
+
+  it('never redirects a file', () => {
+    expect(createRedirectMatcher(redirects)('/llms.txt')).toBeNull();
   });
 });

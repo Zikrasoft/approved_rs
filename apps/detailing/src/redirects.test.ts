@@ -1,11 +1,16 @@
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { createRedirectMatcher } from '@podbor/site-kit/redirects';
-import { REDIRECTS } from './redirects';
+import {
+  createRedirectMatcher,
+  unprefixedSectionRedirects,
+} from '@podbor/site-kit/redirects';
+import { PRIMARY_LOCALE } from './i18n/config';
+import { PathBuilder } from './utils/paths';
 
-const redirectFor = createRedirectMatcher(REDIRECTS);
+const redirectFor = createRedirectMatcher(
+  unprefixedSectionRedirects(PathBuilder, PRIMARY_LOCALE),
+);
 
-describe('REDIRECTS', () => {
+describe('redirects', () => {
   it.each([
     ['/services', '/sr/services/'],
     ['/services/ceramic-coating', '/sr/services/ceramic-coating'],
@@ -24,11 +29,4 @@ describe('REDIRECTS', () => {
       expect(redirectFor(path)).toBeNull();
     },
   );
-
-  it('is what vercel.json carries', () => {
-    const vercel = JSON.parse(
-      readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'),
-    );
-    expect(vercel.redirects).toEqual(REDIRECTS);
-  });
 });

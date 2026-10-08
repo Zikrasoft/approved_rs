@@ -6,6 +6,6 @@ for script in apps/*/scripts/redirects.ts; do
 done
 
 if ! git diff --exit-code -- 'apps/*/vercel.json'; then
-  echo "vercel.json redirects drifted from src/redirects.ts — run the app's scripts/redirects.ts and commit the result" >&2
+  echo "vercel.json redirects drifted from the redirect rules — run the app's scripts/redirects.ts and commit the result" >&2
   exit 1
 fi
