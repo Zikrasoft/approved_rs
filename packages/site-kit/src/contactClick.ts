@@ -13,35 +13,48 @@ const CHANNEL_ATTRIBUTE = 'data-contact-channel';
 const CONTACT_CLICK_ENDPOINT = '/api/contact-click';
 const START_PARAM = 'start';
 
-export function defineContactClickTracking(): void {
+let armed = false;
+
+export function defineContactClickTracking(
+  signal: AbortSignal = new AbortController().signal,
+): void {
+  if (armed) return;
+  armed = true;
+  signal.addEventListener('abort', () => {
+    armed = false;
+  });
   document
     .querySelectorAll<HTMLElement>(`[${CHANNEL_ATTRIBUTE}]`)
     .forEach((element) => {
-      element.addEventListener('click', () => {
-        const channel = element.dataset.contactChannel;
-        if (!isTrackedContactChannel(channel)) return;
-        const placement = element.closest<HTMLElement>(
-          `[${CONTACT_PLACEMENT_ATTRIBUTE}]`,
-        )?.dataset.contactPlacement;
-        reachGoal(GOALS.contactClick, { channel, placement });
-        const visitorId = browserVisitorId();
-        let start: string | null = null;
-        if (element instanceof HTMLAnchorElement) {
-          const url = new URL(element.href);
-          start = url.searchParams.get(START_PARAM);
-          if (start != null) {
-            const stamped = stampStartVisitor(start, visitorId);
-            if (!stamped) return;
-            url.searchParams.set(START_PARAM, stamped);
-            element.href = url.href;
+      element.addEventListener(
+        'click',
+        () => {
+          const channel = element.dataset.contactChannel;
+          if (!isTrackedContactChannel(channel)) return;
+          const placement = element.closest<HTMLElement>(
+            `[${CONTACT_PLACEMENT_ATTRIBUTE}]`,
+          )?.dataset.contactPlacement;
+          reachGoal(GOALS.contactClick, { channel, placement });
+          const visitorId = browserVisitorId();
+          let start: string | null = null;
+          if (element instanceof HTMLAnchorElement) {
+            const url = new URL(element.href);
+            start = url.searchParams.get(START_PARAM);
+            if (start != null) {
+              const stamped = stampStartVisitor(start, visitorId);
+              if (!stamped) return;
+              url.searchParams.set(START_PARAM, stamped);
+              element.href = url.href;
+            }
           }
-        }
-        if (channel === 'telegram' && start == null) return;
-        const body = new FormData();
-        body.set('channel', channel);
-        body.set('source_url', location.href);
-        body.set('visitor_id', visitorId);
-        navigator.sendBeacon(CONTACT_CLICK_ENDPOINT, body);
-      });
+          if (channel === 'telegram' && start == null) return;
+          const body = new FormData();
+          body.set('channel', channel);
+          body.set('source_url', location.href);
+          body.set('visitor_id', visitorId);
+          navigator.sendBeacon(CONTACT_CLICK_ENDPOINT, body);
+        },
+        { signal },
+      );
     });
 }
