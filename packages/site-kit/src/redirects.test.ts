@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   createRedirectMatcher,
+  unprefixedSectionRedirects,
   withRedirects,
   type Redirect,
 } from './redirects.ts';
@@ -84,5 +85,36 @@ describe('withRedirects', () => {
 
   it('adds the key when the file has none', () => {
     expect(JSON.parse(withRedirects('{}', []))).toEqual({ redirects: [] });
+  });
+});
+
+describe('unprefixedSectionRedirects', () => {
+  type Locale = 'sr' | 'en';
+  const paths = {
+    home: (locale: Locale) => `/${locale}/`,
+    services: (locale: Locale) => `/${locale}/services/`,
+    service: (locale: Locale, slug: string) => `/${locale}/services/${slug}/`,
+    shopProduct: (locale: Locale, type: string, handle: string) =>
+      `/${locale}/shop/${type}/${handle}/`,
+    contact: (locale: Locale) => `/${locale}/contact/`,
+  };
+  const redirects = unprefixedSectionRedirects(paths, 'sr');
+
+  it('sends a section with nested pages through a catch-all and a single page to its own URL', () => {
+    expect(redirects).toEqual([
+      rule('/services/:path*', '/sr/services/:path*'),
+      rule('/shop/:path*', '/sr/shop/:path*'),
+      rule('/contact', '/sr/contact/'),
+      rule('/contact/', '/sr/contact/'),
+    ]);
+  });
+
+  it.each([
+    ['/services/brakes', '/sr/services/brakes'],
+    ['/services', '/sr/services/'],
+    ['/shop/oil/castrol', '/sr/shop/oil/castrol'],
+    ['/contact/', '/sr/contact/'],
+  ])('sends %s to %s', (path, target) => {
+    expect(createRedirectMatcher(redirects)(path)).toBe(target);
   });
 });

@@ -49,3 +49,36 @@ export function withRedirects(
 ): string {
   return `${JSON.stringify({ ...JSON.parse(vercelJson), redirects }, null, 2)}\n`;
 }
+
+const PATH_PARAM_PLACEHOLDERS = ['_', '_', '_'] as never[];
+
+export function unprefixedSectionRedirects<L extends string>(
+  paths: Record<string, (locale: L, ...params: never[]) => string>,
+  locale: L,
+): Redirect[] {
+  const nestedBySection = new Map<string, boolean>();
+  for (const build of Object.values(paths)) {
+    const section = build(locale, ...PATH_PARAM_PLACEHOLDERS).split('/')[2];
+    if (section) {
+      nestedBySection.set(
+        section,
+        Boolean(nestedBySection.get(section)) || build.length > 1,
+      );
+    }
+  }
+  return [...nestedBySection].flatMap(([section, nested]) =>
+    nested
+      ? [
+          {
+            source: `/${section}/:path*`,
+            destination: `/${locale}/${section}/:path*`,
+            permanent: true,
+          },
+        ]
+      : [`/${section}`, `/${section}/`].map((source) => ({
+          source,
+          destination: `/${locale}/${section}/`,
+          permanent: true,
+        })),
+  );
+}
