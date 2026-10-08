@@ -1,7 +1,6 @@
 ---
 import Icon from './Icon.astro';
-import { localeFrom } from '@/i18n/currentLocale';
-import { BCP47_BY_LOCALE } from '@/i18n/config';
+import { localeFrom, BCP47_BY_LOCALE } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 import { PHONE_COUNTRY_SHORTLIST } from '@/utils/constants';
@@ -53,7 +52,7 @@ const channels = [
 ] as const;
 
 const field =
-  'w-full rounded-2xl border border-white/35 bg-void px-4 py-3 text-base text-chalk shadow-[inset_0_-1px_0_rgba(255,255,255,0.06)] placeholder:text-mute transition-colors duration-400 focus:border-champagne aria-invalid:border-[#e0876c]';
+  'w-full rounded-2xl border border-white/35 bg-void px-4 py-3 text-base text-chalk shadow-[inset_0_-1px_0_rgba(255,255,255,0.06)] placeholder:text-mute transition-colors duration-400 focus:border-champagne';
 const label =
   'mb-2 block text-[0.6875rem] uppercase tracking-[0.18em] text-mute-2';
 const chip =

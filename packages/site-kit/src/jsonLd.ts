@@ -14,7 +14,47 @@ export function jsonLdText(schema: unknown): string {
   return JSON.stringify(schema).replace(/</g, '\\u003c');
 }
 
+export type PageSchema = object | ((canonical: string) => object);
+
+export function pageSchema(schema: PageSchema, canonical: string): object {
+  return typeof schema === 'function' ? schema(canonical) : schema;
+}
+
 export type SchemaRef = Record<string, unknown>;
+
+export function citySchema(name: string) {
+  return { '@type': 'City', name };
+}
+
+export function productSchema(options: {
+  name: string;
+  image?: string;
+  brand?: string;
+  description: string;
+  price: number;
+  currency: string;
+  inStock: boolean;
+  condition: string;
+  url: string;
+}) {
+  const { name, image, brand, description, price, currency, inStock } = options;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name,
+    image,
+    brand: brand === undefined ? undefined : { '@type': 'Brand', name: brand },
+    description,
+    offers: {
+      '@type': 'Offer',
+      price,
+      priceCurrency: currency,
+      availability: `https://schema.org/${inStock ? 'InStock' : 'OutOfStock'}`,
+      itemCondition: `https://schema.org/${options.condition}`,
+      url: options.url,
+    },
+  };
+}
 
 export function serviceSchema(options: {
   name: string;

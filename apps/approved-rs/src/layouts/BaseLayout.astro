@@ -1,5 +1,5 @@
 ---
-import { jsonLdText } from '@podbor/site-kit';
+import { jsonLdText, pageSchema, type PageSchema } from '@podbor/site-kit';
 import type { HeroImageAttrs } from '@/utils/heroImage';
 import type { MetaProps } from '@/utils/seo';
 import { pageHead } from '@/utils/pageHead';
@@ -18,7 +18,7 @@ import navLatinUrl from '@fontsource/golos-text/files/golos-text-latin-400-norma
 import navCtaLatinUrl from '@fontsource/golos-text/files/golos-text-latin-500-normal.woff2?url';
 
 interface Props extends MetaProps {
-  schema?: object;
+  schema?: PageSchema;
   preloadImage?: HeroImageAttrs;
   ogImageWidth?: number;
   ogImageHeight?: number;
@@ -103,7 +103,10 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
 
     {
       schema && (
-        <script type="application/ld+json" set:html={jsonLdText(schema)} />
+        <script
+          type="application/ld+json"
+          set:html={jsonLdText(pageSchema(schema, canonical))}
+        />
       )
     }
 
@@ -146,28 +149,15 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
       }, 1600);
     </script>
     <script>
-      import {
-        bootSiteKit,
-        getOrCreateVisitorId,
-        markFieldValidity,
-      } from '@podbor/site-kit/browser';
-      import {
-        detectVisitorCountry,
-        visitorChannel,
-      } from '@podbor/site-kit/contact-preference';
-      import { defineLeadForm } from '@podbor/lead-crm/lead-form';
+      import { bootSiteKit } from '@podbor/site-kit/browser';
+      import { defineSiteLeadForm } from '@podbor/site-kit/lead-form';
       import { YM_COUNTER_ID } from '@/utils/metrika';
 
       bootSiteKit({
         ymCounterId: YM_COUNTER_ID,
         analytics: !import.meta.env.DEV,
       });
-      defineLeadForm({
-        visitorId: getOrCreateVisitorId,
-        markFieldValidity,
-        preferredChannel: visitorChannel,
-        visitorCountry: detectVisitorCountry,
-      });
+      defineSiteLeadForm();
     </script>
   </body>
 </html>

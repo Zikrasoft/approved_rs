@@ -1,5 +1,4 @@
 ---
-import { canonicalUrl } from '@/utils/pageHead';
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import ChipLinks from '@/components/ChipLinks.astro';
 import Faq from '@/components/Faq.astro';
@@ -46,11 +45,8 @@ const cases = (await getCollection('cases'))
 const schema = generateServiceSchema(
   `${sc.title} ${cityLocation}`,
   city[locale].name,
-  canonicalUrl(locale, Astro.url.pathname),
 );
 
-// DEKRA/TÜV are German-specific certification bodies — only true for country: 'de'.
-// Other countries get the generic claim instead of an invented local equivalent.
 const WHY_CITY = [
   { Icon: TrendingUp, text: sc.reason1 },
   { Icon: History, text: sc.reason2 },

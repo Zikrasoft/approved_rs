@@ -9,8 +9,13 @@ import {
 import { z } from 'zod';
 
 import { CHANNEL_FIELD, COMMENT_FIELD, fullName } from '../api/store/contact';
-import { money } from './money';
-import { metadataField, nullableText, typeValueField } from './row-schema';
+import {
+  metadataField,
+  moneyField,
+  nullableText,
+  quantityField,
+  typeValueField,
+} from './row-schema';
 import { shopLocale } from './shop';
 
 export const hookOrderSchema = z.object({
@@ -18,7 +23,7 @@ export const hookOrderSchema = z.object({
   display_id: z.union([z.number(), z.string()]),
   email: nullableText,
   locale: nullableText,
-  total: z.unknown(),
+  total: moneyField,
   metadata: metadataField,
   shipping_address: z
     .object({
@@ -33,8 +38,8 @@ export const hookOrderSchema = z.object({
         .object({
           product_id: nullableText,
           product_title: nullableText,
-          quantity: z.unknown(),
-          unit_price: z.unknown(),
+          quantity: quantityField,
+          unit_price: moneyField,
         })
         .nullable(),
     )
@@ -95,13 +100,13 @@ export function buildOrderHookPayload(
       return [
         {
           title,
-          quantity: money(item.quantity),
-          unitPrice: money(item.unit_price),
+          quantity: item.quantity,
+          unitPrice: item.unit_price,
           isService: product?.type?.value === SERVICE_TYPE,
         },
       ];
     }),
-    total: money(order.total),
+    total: order.total,
     comment: comment || undefined,
     adminUrl: `${adminUrl}/orders/${order.id}`,
   });

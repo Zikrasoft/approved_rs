@@ -145,7 +145,7 @@ describe('buildOrderHookPayload', () => {
             product_id: null,
             product_title: 'Ugradnja',
             quantity: 2,
-            unit_price: '750',
+            unit_price: 750,
           },
         ],
       },

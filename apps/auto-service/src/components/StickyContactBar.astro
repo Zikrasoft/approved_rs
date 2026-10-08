@@ -1,9 +1,12 @@
 ---
 import Icon from '@/components/Icon.astro';
-import { localeFrom } from '@/i18n/currentLocale';
+import { localeFrom } from '@/i18n/config';
 import ContactControl from '@/components/ContactControl.astro';
 import type { ServiceSlug } from '@/utils/services';
-import { contactRegion } from '@podbor/site-kit/contact-control';
+import {
+  contactRegion,
+  CONTACT_CTA_SELECTOR,
+} from '@podbor/site-kit/contact-control';
 import { content } from '@/i18n/content';
 
 interface Props {
@@ -21,11 +24,11 @@ const cell =
 <cta-reveal
   data-revealed="false"
   class="sticky-contact fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper/95 backdrop-blur-sm lg:hidden"
-  watch="[data-contact-cta]"
+  watch={CONTACT_CTA_SELECTOR}
   {...contactRegion('floating')}
 >
   <div class="grid grid-cols-3 items-stretch pointer-fine:grid-cols-2">
-    <ContactControl channel="phone" placement="floating" class={cell}>
+    <ContactControl channel="phone" class={cell}>
       <Icon name="phone" size={16} />
       <span class="spec text-[0.6875rem]">{site.channels.call}</span>
     </ContactControl>
@@ -33,7 +36,6 @@ const cell =
     <div data-primary-contact class="contents">
       <ContactControl
         channel="telegram"
-        placement="floating"
         service={service}
         data-primary-channel="telegram"
         class={cell}
@@ -43,7 +45,6 @@ const cell =
       </ContactControl>
       <ContactControl
         channel="whatsapp"
-        placement="floating"
         service={service}
         data-primary-channel="whatsapp"
         hidden

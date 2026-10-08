@@ -1,5 +1,6 @@
 ---
 import type { ImageMetadata } from 'astro';
+import type { PageSchema } from '@podbor/site-kit';
 import { heroImageAttrs } from '@/utils/heroImage';
 import BaseLayout from './BaseLayout.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
@@ -29,7 +30,7 @@ import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   meta: MetaProps;
-  schema?: object;
+  schema?: PageSchema;
   title: string;
   titleHighlight?: string;
   description: string;

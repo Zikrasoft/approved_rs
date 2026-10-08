@@ -1,10 +1,4 @@
 ---
-// Shared shell for the 5 vehicle-import spokes (de/es/ch/eu/china) — same
-// meta shape, schema wrapping, ServicePageLayout props, and StepsList/
-// destinationsNote/Faq structure on all of them; only the source data and
-// one slot's worth of page-specific content (a cross-link paragraph, or the
-// EU source chips) actually differs per spoke.
-import { canonicalUrl } from '@/utils/pageHead';
 import ServicePageLayout from './ServicePageLayout.astro';
 import StepsList from '@/components/StepsList.astro';
 import Faq from '@/components/Faq.astro';
@@ -30,8 +24,6 @@ interface Props {
   ctaLabel: string;
   breadcrumbLabel: string;
   hubBreadcrumbLabel: string;
-  // Only the nested 'de' page (under /vehicle-import/eu/) needs a 3rd
-  // breadcrumb level between the hub and itself; eu/china stay 2-level.
   parentBreadcrumb?: { label: string; href: string };
   casesHeading: string;
   cases?: CollectionEntry<'cases'>[];
@@ -67,11 +59,7 @@ const meta = {
   ogImage: placeholderOgImage(SITE_URL, locale),
 };
 const closing = servicesView(locale)['vehicle-import'].closing;
-const schema = generateServiceSchema(
-  `${title} ${titleHighlight}`,
-  areaServed,
-  canonicalUrl(locale, Astro.url.pathname),
-);
+const schema = generateServiceSchema(`${title} ${titleHighlight}`, areaServed);
 ---
 
 <ServicePageLayout

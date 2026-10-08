@@ -1,5 +1,4 @@
 ---
-import { canonicalUrl } from '@/utils/pageHead';
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import Faq from '@/components/Faq.astro';
 import heroPhoto from '@/assets/service-import.jpg';
@@ -31,9 +30,6 @@ const meta = {
   description: pc.metaDescription,
   ogImage: placeholderOgImage(SITE_URL, locale),
 };
-// Explicit — every real spoke this hub fans out to (Germany + the EU
-// whitelist + China), not "every active country" — countries.json can grow
-// with destination-only markets (e.g. Portugal) that aren't sourcing spokes.
 const sourceNames = [
   getCountry('de')![locale].name,
   ...VEHICLE_IMPORT_EU_SOURCE_CODES.map(
@@ -44,16 +40,12 @@ const sourceNames = [
 const schema = generateServiceSchema(
   `${pc.title} ${pc.titleHighlight}`,
   sourceNames,
-  canonicalUrl(locale, Astro.url.pathname),
 );
 
 const cases = (await getCollection('cases'))
   .filter((c) => c.data.published && c.data.service === 'vehicle-import')
   .slice(0, 6);
 
-// Germany isn't its own hub card anymore — it lives one level down, inside
-// the Europe spoke's source-country chips (see eu/index.astro) — since the
-// /eu/de/ URL move already nests it under "Europe" there.
 const cards: {
   slug: VehicleImportSpoke;
   title: string;

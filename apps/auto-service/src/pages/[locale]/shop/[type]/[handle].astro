@@ -8,14 +8,12 @@ import ShopGate from '@/components/ShopGate.astro';
 import SectionHead from '@/components/SectionHead.astro';
 import ProductCard from '@/components/ProductCard.astro';
 import AddToCart from '@/components/AddToCart.astro';
-import { BCP47_BY_LOCALE, PRIMARY_LOCALE } from '@/i18n/config';
-import { localeFrom } from '@/i18n/currentLocale';
+import { localeFrom, BCP47_BY_LOCALE, PRIMARY_LOCALE } from '@/i18n/config';
 import { shopCatalog } from '@/lib/catalog';
 import { productJsonLd } from '@/lib/productJsonLd';
 import { productsOfType } from '@/lib/shopPages';
 import { typeView } from '@/lib/typeView';
 import { SITE_NAME } from '@/utils/constants';
-import { canonicalUrl } from '@/utils/pageHead';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { shopBuilt, shopIndexed } from '@/utils/shopStatus';
 import { content } from '@/i18n/content';
@@ -67,7 +65,6 @@ const searchTerms = [
   jsonLd={[
     productJsonLd({
       product,
-      url: canonicalUrl(locale, href),
       description,
     }),
   ]}

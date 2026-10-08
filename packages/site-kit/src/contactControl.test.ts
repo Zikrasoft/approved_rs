@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { TRACKED_CONTACT_CHANNELS } from '@podbor/lead-crm/contact-channel';
-import { CONTACT_PLACEMENTS } from './goals.ts';
-import { contactRegion, createContactControls } from './contactControl.ts';
+import {
+  CONTACT_CTA_SELECTOR,
+  contactCta,
+  contactRegion,
+  createContactControls,
+} from './contactControl.ts';
 
 const BRAND = {
   phone: '381601234567',
@@ -18,47 +22,37 @@ const full = createContactControls({
 });
 
 describe('createContactControls', () => {
-  it.each(CONTACT_PLACEMENTS)(
-    'builds every channel href on %s',
-    (placement) => {
-      const hrefs = Object.fromEntries(
-        TRACKED_CONTACT_CHANNELS.map((channel) => [
-          channel,
-          bare({
-            channel,
-            placement,
-            onThanks: false,
-            locale: 'sr',
-            service: 'ppf',
-          }).href,
-        ]),
-      );
-      expect(hrefs).toEqual({
-        phone: 'tel:+381601234567',
-        whatsapp: 'https://wa.me/381601111111',
-        viber: 'viber://chat?number=%2B381602222222',
-        telegram: 'https://t.me/brand_capture_bot?start=ppf_sr',
-      });
-    },
-  );
+  it('builds every channel href', () => {
+    const hrefs = Object.fromEntries(
+      TRACKED_CONTACT_CHANNELS.map((channel) => [
+        channel,
+        bare({ channel, onThanks: false, locale: 'sr', service: 'ppf' }).href,
+      ]),
+    );
+    expect(hrefs).toEqual({
+      phone: 'tel:+381601234567',
+      whatsapp: 'https://wa.me/381601111111',
+      viber: 'viber://chat?number=%2B381602222222',
+      telegram: 'https://t.me/brand_capture_bot?start=ppf_sr',
+    });
+  });
 
   it('opens the capture bot with the locale alone where the page has no service', () => {
     expect(
       bare({
         channel: 'telegram',
-        placement: 'footer',
         onThanks: false,
         locale: 'en',
       }).href,
     ).toBe('https://t.me/brand_capture_bot?start=en');
   });
 
-  it.each(CONTACT_PLACEMENTS)(
+  it.each([undefined, 'contacts'] as const)(
     'opens the human Telegram on the thanks page only when the brand has one, in the %s region too',
-    (placement) => {
+    (region) => {
       const request = {
         channel: 'telegram',
-        placement,
+        region,
         onThanks: true,
         locale: 'ru',
       } as const;
@@ -75,7 +69,6 @@ describe('createContactControls', () => {
   it('prefills WhatsApp only when the brand configures a message', () => {
     const request = {
       channel: 'whatsapp',
-      placement: 'bar',
       onThanks: false,
       locale: 'en',
       service: 'ppf',
@@ -91,39 +84,34 @@ describe('createContactControls', () => {
 
   it('marks the phone coarse-only and every messenger any-pointer', () => {
     for (const channel of TRACKED_CONTACT_CHANNELS)
-      expect(
-        bare({ channel, placement: 'bar', onThanks: false, locale: 'ru' })
-          .pointer,
-      ).toBe(channel === 'phone' ? 'coarse-only' : 'any');
+      expect(bare({ channel, onThanks: false, locale: 'ru' }).pointer).toBe(
+        channel === 'phone' ? 'coarse-only' : 'any',
+      );
   });
 
-  it('carries the plain number only for the phone in the thanks region', () => {
-    for (const placement of CONTACT_PLACEMENTS)
-      for (const channel of TRACKED_CONTACT_CHANNELS)
-        expect(
-          bare({ channel, placement, onThanks: true, locale: 'ru' })
-            .plainNumber,
-        ).toBe(
-          channel === 'phone' && placement === 'thanks'
-            ? '381601234567'
-            : undefined,
-        );
+  it('carries the plain number only for the phone in the contacts block on the thanks page', () => {
+    for (const onThanks of [true, false])
+      for (const region of [undefined, 'contacts'] as const)
+        for (const channel of TRACKED_CONTACT_CHANNELS)
+          expect(
+            bare({ channel, region, onThanks, locale: 'ru' }).plainNumber,
+          ).toBe(
+            channel === 'phone' && onThanks && region === 'contacts'
+              ? '381601234567'
+              : undefined,
+          );
   });
 
   it('stamps the channel, and opens every messenger in a new tab', () => {
     expect(
       bare({
         channel: 'phone',
-        placement: 'bar',
         onThanks: false,
         locale: 'ru',
       }).attrs,
     ).toEqual({ 'data-contact-channel': 'phone' });
     for (const channel of ['whatsapp', 'viber', 'telegram'] as const)
-      expect(
-        bare({ channel, placement: 'bar', onThanks: false, locale: 'ru' })
-          .attrs,
-      ).toEqual({
+      expect(bare({ channel, onThanks: false, locale: 'ru' }).attrs).toEqual({
         'data-contact-channel': channel,
         target: '_blank',
         rel: 'noopener',
@@ -143,5 +131,12 @@ describe('contactRegion', () => {
       expect(contactRegion(placement)).toEqual({
         'data-contact-placement': placement,
       });
+  });
+});
+
+describe('contactCta', () => {
+  it('stamps the attribute the floating CTA selector watches', () => {
+    expect(contactCta).toEqual({ 'data-contact-cta': '' });
+    expect(CONTACT_CTA_SELECTOR).toBe('[data-contact-cta]');
   });
 });

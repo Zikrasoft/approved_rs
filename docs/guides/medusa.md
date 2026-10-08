@@ -61,7 +61,9 @@ apps/medusa/docker-compose.test.yml up -d --wait`; `DB_HOST` is the literal
   the issue path. `fieldsOf` unwraps only optional, nullable and array; an
   object behind any other wrapper (`.default()`, a transform, lazy, a union)
   throws rather than being read as a leaf. Shared pieces (`nullableText`,
-  `metadataField`, `typeValueField`, `idRowSchema`) live in
+  `metadataField`, `typeValueField`, `idRowSchema`, and `moneyField` /
+  `quantityField` for amounts query.graph returns as a number, a numeric string
+  or a `BigNumber`) live in
   `src/lib/row-schema.ts`. Medusa syntax a schema cannot spell goes through
   `fieldPrefix` (`{ images: '*' }`, `{ 'variants.inventory_quantity': '+' }`),
   keyed on a path the schema still parses. A new read adds a fixture row to

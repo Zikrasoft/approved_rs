@@ -212,78 +212,53 @@ describe('detectLocale', () => {
   });
 });
 
-describe('getAlternateLinks', () => {
-  it('lists every locale plus x-default for the site root', () => {
-    const links = set.getAlternateLinks('https://approved.rs', '/ru/');
+describe('createPageHead', () => {
+  const copy = { title: 'T', description: 'D' };
+  const approvedHead = set.createPageHead('https://approved.rs');
+  const detailsHead = srFirst.createPageHead('https://details.rs');
 
-    expect(links).toEqual([
-      { hreflang: 'ru', href: 'https://approved.rs/ru/' },
-      { hreflang: 'en', href: 'https://approved.rs/en/' },
-      { hreflang: 'sr', href: 'https://approved.rs/sr/' },
-      { hreflang: 'es', href: 'https://approved.rs/es/' },
-      { hreflang: 'de', href: 'https://approved.rs/de/' },
-      { hreflang: 'x-default', href: 'https://approved.rs/ru/' },
-    ]);
-  });
-
-  it('keeps the path below the locale segment', () => {
-    const links = set.getAlternateLinks(
-      'https://approved.rs',
-      '/en/vehicle-import/de/',
-    );
-
-    expect(links[0]).toEqual({
-      hreflang: 'ru',
-      href: 'https://approved.rs/ru/vehicle-import/de/',
-    });
-  });
-
-  it('points x-default at the primary locale', () => {
-    const links = set.getAlternateLinks('https://approved.rs', '/sr/services/');
-
-    expect(links.at(-1)).toEqual({
-      hreflang: 'x-default',
-      href: 'https://approved.rs/ru/services/',
+  it('builds canonical, alternates, og:locale and og image for a page', () => {
+    expect(approvedHead('en', '/en/vehicle-import/de/', copy)).toEqual({
+      title: 'T',
+      description: 'D',
+      canonical: 'https://approved.rs/en/vehicle-import/de/',
+      alternates: [
+        { hreflang: 'ru', href: 'https://approved.rs/ru/vehicle-import/de/' },
+        { hreflang: 'en', href: 'https://approved.rs/en/vehicle-import/de/' },
+        { hreflang: 'sr', href: 'https://approved.rs/sr/vehicle-import/de/' },
+        { hreflang: 'es', href: 'https://approved.rs/es/vehicle-import/de/' },
+        { hreflang: 'de', href: 'https://approved.rs/de/vehicle-import/de/' },
+        {
+          hreflang: 'x-default',
+          href: 'https://approved.rs/ru/vehicle-import/de/',
+        },
+      ],
+      ogLocale: 'en_US',
+      ogImage: 'https://approved.rs/og-en.png',
     });
   });
 
   it('points x-default at the primary locale, not the translation source', () => {
-    const links = srFirst.getAlternateLinks('https://details.rs', '/ru/works/');
+    const head = detailsHead('ru', '/ru/works/', copy);
 
-    expect(links.at(-1)).toEqual({
+    expect(head.alternates.at(-1)).toEqual({
       hreflang: 'x-default',
       href: 'https://details.rs/sr/works/',
     });
   });
-});
-
-describe('headLinks', () => {
-  it('builds canonical, alternates and og:locale for a page', () => {
-    expect(set.headLinks('https://approved.rs', 'en', '/en/contacts/')).toEqual(
-      {
-        canonical: 'https://approved.rs/en/contacts/',
-        alternates: set.getAlternateLinks(
-          'https://approved.rs',
-          '/en/contacts/',
-        ),
-        ogLocale: 'en_US',
-        ogImage: 'https://approved.rs/og-en.png',
-      },
-    );
-  });
 
   it('defaults the og image to the locale one and keeps a supplied one', () => {
-    expect(set.headLinks('https://approved.rs', 'ru', '/ru/').ogImage).toBe(
+    expect(approvedHead('ru', '/ru/', copy).ogImage).toBe(
       'https://approved.rs/og.png',
     );
     expect(
-      set.headLinks('https://approved.rs', 'ru', '/ru/', 'https://x/y.png')
+      approvedHead('ru', '/ru/', { ...copy, ogImage: 'https://x/y.png' })
         .ogImage,
     ).toBe('https://x/y.png');
   });
 
   it('points the bare site root at the locale homepage', () => {
-    const head = srFirst.headLinks('https://details.rs', 'ru', '/');
+    const head = detailsHead('ru', '/', copy);
 
     expect(head.canonical).toBe('https://details.rs/ru/');
     expect(head.alternates[0]).toEqual({
@@ -293,7 +268,7 @@ describe('headLinks', () => {
   });
 
   it('keeps the 404 page on its own canonical', () => {
-    const head = srFirst.headLinks('https://details.rs', 'sr', '/404/');
+    const head = detailsHead('sr', '/404/', copy);
 
     expect(head.canonical).toBe('https://details.rs/404/');
     expect(head.alternates.at(-1)).toEqual({

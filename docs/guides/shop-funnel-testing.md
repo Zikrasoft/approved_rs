@@ -115,8 +115,8 @@ with no `refused cancellation` line, so `paid` and `fulfilled` were skipped by
   `$lt` versus `$lte`) survives this layer.
 - **Nothing about scale.** Four Orders, so `selectAll`'s `QUERY_PAGE = 200`
   paging loop never takes a second page.
-- **The unreadable-amount path stays mocked.** `money()` throwing is reachable
-  only from a corrupt `captured_amount`, which the real database will not store,
+- **The unreadable-amount path stays mocked.** `moneyField` refusing a row is
+  reachable only from a corrupt `captured_amount`, which the real database will not store,
   so `113b3bc`'s per-Order survival remains a unit assertion.
 - **Inventory arithmetic.** The assertion is scoped to those two Orders' own
   line items, so a cancellation that removed the reservation without crediting

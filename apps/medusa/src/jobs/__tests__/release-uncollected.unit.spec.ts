@@ -134,8 +134,9 @@ describe('release-uncollected', () => {
 
     expect(cancelled()).toEqual(['fine']);
     expect(logger.error).toHaveBeenCalledWith(
-      'Uncollected order unreadable refused cancellation',
-      expect.any(Error),
+      expect.stringMatching(
+        /^Uncollected order skipped: order unreadable does not fit its read: payment_collections\.0\.captured_amount: /,
+      ),
     );
   });
 

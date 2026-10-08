@@ -7,7 +7,7 @@ const load = async (manager?: string) => {
   return (await import('./contactLinks')).contactControl;
 };
 
-const telegram = { channel: 'telegram', placement: 'bar' } as const;
+const telegram = { channel: 'telegram' } as const;
 
 describe('contactControl', () => {
   it('opens the capture bot with the service and the locale', async () => {
@@ -41,7 +41,6 @@ describe('contactControl', () => {
     const whatsapp = (locale: string) =>
       contactControl({
         channel: 'whatsapp',
-        placement: 'bar',
         onThanks: false,
         locale,
       }).href;

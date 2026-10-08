@@ -31,4 +31,51 @@ describe.each(SUPPORTED_LOCALES)('content for %s', (locale) => {
       });
     },
   );
+
+  it('has every faq group and the city expert answer', () => {
+    const faq = content(locale).faq;
+    for (const group of [
+      'vehicle-sourcing',
+      'vehicle-import',
+      'vehicle-buyback',
+      'vehicle-inspection',
+      'general',
+    ] as const) {
+      expect(faq[group].length, group).toBeGreaterThan(0);
+    }
+    expect(faq.cityExpert.q).toBeTruthy();
+  });
+
+  it('has the home journey and trust cards', () => {
+    const home = content(locale).home;
+    expect(home.journey.length).toBe(4);
+    expect(home.trustCards.length).toBe(3);
+  });
+
+  it('has every lead form field non-empty', () => {
+    for (const [key, value] of Object.entries(content(locale).leadForm)) {
+      expect(value, key).toBeTruthy();
+    }
+  });
+
+  it('has every sourcing promo banner', () => {
+    expect(content(locale).promoBanners.sourcing.length).toBe(10);
+  });
+
+  it('has every line the capture dialog sends', () => {
+    for (const line of Object.values(content(locale).captureBot)) {
+      expect(line.trim()).not.toBe('');
+    }
+  });
+});
+
+describe('content ru faq', () => {
+  it('returns the authored counts', () => {
+    const faq = content('ru').faq;
+    expect(faq['vehicle-sourcing'].length).toBe(6);
+    expect(faq['vehicle-import'].length).toBe(4);
+    expect(faq['vehicle-buyback'].length).toBe(5);
+    expect(faq['vehicle-inspection'].length).toBe(4);
+    expect(faq.general.length).toBe(4);
+  });
 });

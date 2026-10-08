@@ -1,7 +1,7 @@
 ---
 import Icon from './Icon.astro';
 import Wordmark from './Wordmark.astro';
-import { localeFrom } from '@/i18n/currentLocale';
+import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { GARAGE_ADDRESS, SITE_NAME } from '@/utils/constants';
@@ -86,7 +86,6 @@ const channels = [
           channels.map((channel) => (
             <ContactControl
               channel={channel.track}
-              placement="footer"
               listItem
               class="link-muted group flex min-h-11 items-center gap-2.5"
             >

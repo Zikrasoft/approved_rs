@@ -1,33 +1,25 @@
+import { productSchema } from '@podbor/site-kit';
 import type { CatalogProduct } from './catalog';
 
-export function productJsonLd({
-  product,
-  url,
-  description,
-}: {
-  product: CatalogProduct;
-  url: string;
-  description: string;
-}): Record<string, unknown> {
-  const brand = product.spec.brand;
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    name: product.title,
-    ...(product.image && { image: product.image }),
-    ...(typeof brand === 'string' && {
-      brand: { '@type': 'Brand', name: brand },
-    }),
+export const productJsonLd =
+  ({
+    product,
     description,
-    offers: {
-      '@type': 'Offer',
+  }: {
+    product: CatalogProduct;
+    description: string;
+  }) =>
+  (url: string) => {
+    const brand = product.spec.brand;
+    return productSchema({
+      name: product.title,
+      image: product.image || undefined,
+      brand: typeof brand === 'string' ? brand : undefined,
+      description,
       price: product.price,
-      priceCurrency: 'RSD',
-      availability: product.inStock
-        ? 'https://schema.org/InStock'
-        : 'https://schema.org/OutOfStock',
-      itemCondition: 'https://schema.org/NewCondition',
+      currency: 'RSD',
+      inStock: product.inStock,
+      condition: 'NewCondition',
       url,
-    },
+    });
   };
-}

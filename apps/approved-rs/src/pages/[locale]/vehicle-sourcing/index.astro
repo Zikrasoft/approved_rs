@@ -1,5 +1,4 @@
 ---
-import { canonicalUrl } from '@/utils/pageHead';
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import CountryPill from '@/components/CountryPill.astro';
 import Faq from '@/components/Faq.astro';
@@ -31,7 +30,6 @@ const meta = {
 const schema = generateServiceSchema(
   pc.title,
   countries.map((c) => c[locale].name),
-  canonicalUrl(locale, Astro.url.pathname),
 );
 
 const sc = servicesView(locale)['vehicle-sourcing'];

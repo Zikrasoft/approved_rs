@@ -72,13 +72,9 @@ export function generateMeta(
 
 const ORGANIZATION = { '@type': 'Organization', name: SITE_NAME };
 
-export function generateServiceSchema(
-  name: string,
-  areaServed: string | string[],
-  url: string,
-) {
-  return serviceSchema({ name, provider: ORGANIZATION, areaServed, url });
-}
+export const generateServiceSchema =
+  (name: string, areaServed: string | string[]) => (url: string) =>
+    serviceSchema({ name, provider: ORGANIZATION, areaServed, url });
 
 export function generateOrganizationSchema(options: {
   url: string;
@@ -124,12 +120,12 @@ export function excerptFromMarkdown(markdown: string, maxLen = 140): string {
   return plain.slice(0, maxLen).replace(/\s+\S*$/, '') + '…';
 }
 
-export function generateArticleSchema(options: {
-  headline: string;
-  description: string;
-  image?: string;
-  datePublished: Date;
-  url: string;
-}) {
-  return articleSchema({ ...options, publisher: ORGANIZATION });
-}
+export const generateArticleSchema =
+  (options: {
+    headline: string;
+    description: string;
+    image?: string;
+    datePublished: Date;
+  }) =>
+  (url: string) =>
+    articleSchema({ ...options, publisher: ORGANIZATION, url });

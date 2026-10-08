@@ -5,7 +5,7 @@ import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
 import ContactChannels from '@/components/ContactChannels.astro';
 import MapEmbed from '@/components/MapEmbed.astro';
-import { localeFrom } from '@/i18n/currentLocale';
+import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder, localePaths } from '@/utils/paths';
 import { STUDIO_ADDRESS } from '@/utils/constants';
@@ -86,7 +86,7 @@ const mapLink = mapPlaceUrl(STUDIO_ADDRESS.googleMapsCid);
       </div>
 
       <div class="flex flex-col gap-4">
-        <div class="shell" data-reveal data-reveal-delay="60" data-contact-cta>
+        <div class="shell" data-reveal data-reveal-delay="60">
           <div class="core flex flex-col gap-6 p-7 sm:p-9">
             <div class="flex flex-col gap-2">
               <h2 class="text-big">{site.form.heading}</h2>

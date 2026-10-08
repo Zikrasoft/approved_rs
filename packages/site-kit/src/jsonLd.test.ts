@@ -1,11 +1,27 @@
 import { describe, it, expect } from 'vitest';
 import {
   articleSchema,
+  citySchema,
   faqPageSchema,
   jsonLdText,
   localBusinessSchema,
+  pageSchema,
+  productSchema,
   serviceSchema,
 } from './jsonLd.ts';
+
+describe('pageSchema', () => {
+  it('hands the canonical to a schema that needs the page url', () => {
+    expect(pageSchema((url) => ({ url }), 'https://x.rs/ru/a/')).toEqual({
+      url: 'https://x.rs/ru/a/',
+    });
+  });
+
+  it('passes a finished schema through', () => {
+    const schema = { '@type': 'Thing' };
+    expect(pageSchema(schema, 'https://x.rs/ru/a/')).toBe(schema);
+  });
+});
 
 describe('faqPageSchema', () => {
   it('maps each item to a question with its answer', () => {
@@ -53,6 +69,44 @@ describe('jsonLdText', () => {
 });
 
 const org = { '@type': 'Organization', name: 'Acme' };
+
+describe('citySchema', () => {
+  it('names a city', () => {
+    expect(citySchema('Beograd')).toEqual({ '@type': 'City', name: 'Beograd' });
+  });
+});
+
+describe('productSchema', () => {
+  const product = {
+    name: 'Bosch S4',
+    description: 'Battery',
+    price: 100,
+    currency: 'RSD',
+    inStock: true,
+    condition: 'NewCondition',
+    url: 'https://x.test/p',
+  };
+
+  it('builds a Product with one Offer, keys in a stable order', () => {
+    expect(
+      jsonLdText(
+        productSchema({
+          ...product,
+          image: 'https://x.test/i.jpg',
+          brand: 'Bosch',
+        }),
+      ),
+    ).toBe(
+      '{"@context":"https://schema.org","@type":"Product","name":"Bosch S4","image":"https://x.test/i.jpg","brand":{"@type":"Brand","name":"Bosch"},"description":"Battery","offers":{"@type":"Offer","price":100,"priceCurrency":"RSD","availability":"https://schema.org/InStock","itemCondition":"https://schema.org/NewCondition","url":"https://x.test/p"}}',
+    );
+  });
+
+  it('says out of stock and leaves out a missing image and brand', () => {
+    expect(jsonLdText(productSchema({ ...product, inStock: false }))).toBe(
+      '{"@context":"https://schema.org","@type":"Product","name":"Bosch S4","description":"Battery","offers":{"@type":"Offer","price":100,"priceCurrency":"RSD","availability":"https://schema.org/OutOfStock","itemCondition":"https://schema.org/NewCondition","url":"https://x.test/p"}}',
+    );
+  });
+});
 
 describe('serviceSchema', () => {
   it('builds a Service with its keys in a stable order', () => {

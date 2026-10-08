@@ -35,8 +35,7 @@ const coverageLine = getActiveCountries()
             <ContactControl
               data-primary-channel="telegram"
               channel="telegram"
-              placement="footer"
-              class="footer-cta inline-flex min-h-11 items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline bg-accent-strong text-on-accent"
+              class="footer-cta inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline bg-accent-strong text-on-accent"
             >
               <ContactIcon channel="telegram" size={14} />
               {t.footer.contactManagerLabel}
@@ -44,9 +43,8 @@ const coverageLine = getActiveCountries()
             <ContactControl
               data-primary-channel="whatsapp"
               channel="whatsapp"
-              placement="footer"
               hidden
-              class="footer-cta inline-flex min-h-11 items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline bg-accent-strong text-on-accent"
+              class="footer-cta inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline bg-accent-strong text-on-accent"
             >
               <ContactIcon channel="whatsapp" size={14} />
               {cc.whatsappButtonLabel}
@@ -56,28 +54,25 @@ const coverageLine = getActiveCountries()
             <ContactControl
               data-primary-channel="whatsapp"
               channel="telegram"
-              placement="footer"
               hidden
               aria-label={t.footer.contactManagerLabel}
-              class="footer-channel-btn inline-flex min-h-11 min-w-11 items-center justify-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-default text-muted"
+              class="footer-channel-btn inline-flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-default text-muted"
             >
               <ContactIcon channel="telegram" size={14} />
             </ContactControl>
             <ContactControl
               data-primary-channel="telegram"
               channel="whatsapp"
-              placement="footer"
               aria-label={cc.whatsappButtonLabel}
-              class="footer-channel-btn inline-flex min-h-11 min-w-11 items-center justify-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-default text-muted"
+              class="footer-channel-btn inline-flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-default text-muted"
             >
               <ContactIcon channel="whatsapp" size={14} />
             </ContactControl>
           </div>
           <ContactControl
             channel="viber"
-            placement="footer"
             aria-label={cc.viberButtonLabel}
-            class="footer-channel-btn inline-flex min-h-11 min-w-11 items-center justify-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-default text-muted"
+            class="footer-channel-btn inline-flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-default text-muted"
           >
             <ContactIcon channel="viber" size={14} />
           </ContactControl>

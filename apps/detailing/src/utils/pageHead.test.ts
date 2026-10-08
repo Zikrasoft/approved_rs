@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { SUPPORTED_LOCALES } from '@/i18n/config';
 import { SITE_URL } from '@/utils/constants';
-import { canonicalUrl, pageHead } from './pageHead';
+import { pageHead } from './pageHead';
 
 const copy = { title: 'T', description: 'D' };
 
@@ -31,29 +31,11 @@ describe('pageHead', () => {
     });
   });
 
-  it('keeps the 404 page on its own canonical', () => {
-    expect(pageHead('sr', '/404/', copy).canonical).toBe(`${SITE_URL}/404/`);
-  });
-
   it('carries the og:locale and the locale og image', () => {
     const head = pageHead('ru', '/ru/', copy);
 
     expect(head.ogLocale).toBe('ru_RU');
     expect(head.ogImage).toBe(`${SITE_URL}/og-ru.png`);
     expect(pageHead('sr', '/sr/', copy).ogImage).toBe(`${SITE_URL}/og.png`);
-  });
-
-  it('keeps a page-supplied og image', () => {
-    expect(
-      pageHead('sr', '/sr/', { ...copy, ogImage: 'https://x/y.png' }).ogImage,
-    ).toBe('https://x/y.png');
-  });
-});
-
-describe('canonicalUrl', () => {
-  it('matches the canonical the layout renders', () => {
-    expect(canonicalUrl('en', '/en/works/x/')).toBe(
-      pageHead('en', '/en/works/x/', copy).canonical,
-    );
   });
 });

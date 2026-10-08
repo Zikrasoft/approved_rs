@@ -7,9 +7,8 @@ import {
 import { z } from 'zod';
 
 import { buildOrderEmail } from '../lib/order-email';
-import { money } from '../lib/money';
 import { selectOne } from '../lib/query';
-import { nullableText } from '../lib/row-schema';
+import { moneyField, nullableText, quantityField } from '../lib/row-schema';
 import { shopLocale } from '../lib/shop';
 
 export const emailOrderSchema = z.object({
@@ -17,15 +16,15 @@ export const emailOrderSchema = z.object({
   display_id: z.union([z.number(), z.string()]),
   email: nullableText,
   locale: nullableText,
-  total: z.unknown(),
+  total: moneyField,
   items: z
     .array(
       z
         .object({
           product_title: nullableText,
           title: nullableText,
-          quantity: z.unknown(),
-          total: z.unknown(),
+          quantity: quantityField,
+          total: moneyField,
         })
         .nullable(),
     )
@@ -70,13 +69,13 @@ export default async function orderPlacedEmail({
         ? [
             {
               title: item.product_title ?? item.title ?? '',
-              quantity: money(item.quantity),
-              total: money(item.total),
+              quantity: item.quantity,
+              total: item.total,
             },
           ]
         : [],
     ),
-    total: money(order.total),
+    total: order.total,
   });
 
   await notifications.createNotifications({

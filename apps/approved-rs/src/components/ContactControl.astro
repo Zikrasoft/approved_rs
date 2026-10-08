@@ -1,7 +1,7 @@
 ---
 import type { HTMLAttributes } from 'astro/types';
 import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
-import { navCurrent, type ContactPlacement } from '@podbor/site-kit';
+import { navCurrent } from '@podbor/site-kit';
 import { formatPhone } from '@podbor/site-kit/format-phone';
 import { localeFrom } from '@/i18n/config';
 import { contactControl } from '@/utils/contactLinks';
@@ -13,14 +13,14 @@ interface Props extends Omit<
   'href' | 'type' | 'target' | 'rel'
 > {
   channel: TrackedContactChannel;
-  placement: ContactPlacement;
+  region?: 'contacts';
   service?: string;
   variant?: 'primary' | 'secondary';
 }
 
 const {
   channel,
-  placement,
+  region,
   service,
   variant,
   class: className,
@@ -29,9 +29,9 @@ const {
 const locale = localeFrom(Astro.url.pathname);
 const control = contactControl({
   channel,
-  placement,
   onThanks:
     navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page',
+  region,
   locale,
   service,
 });

@@ -8,14 +8,12 @@ import CompareSlider from '@/components/CompareSlider.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import SectionHead from '@/components/SectionHead.astro';
 import FinalCta from '@/components/FinalCta.astro';
-import { localeFrom } from '@/i18n/currentLocale';
-import { BCP47_BY_LOCALE } from '@/i18n/config';
+import { localeFrom, BCP47_BY_LOCALE } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { localizedWork, publishedWorks, workExcerpt } from '@/utils/works';
 import { safeMarkdown, relatedEntries } from '@podbor/site-kit';
 import { workSchema } from '@/utils/schema';
-import { canonicalUrl } from '@/utils/pageHead';
 import Icon from '@/components/Icon.astro';
 import {
   DEPTH_DOOR_ATTRIBUTE,
@@ -42,11 +40,7 @@ const services = content(locale).services;
 const site = content(locale).site;
 const { title, body, car } = localizedWork(work, locale);
 
-const schema = workSchema(
-  work,
-  title,
-  canonicalUrl(locale, Astro.url.pathname),
-);
+const schema = workSchema(work, title);
 
 const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
   year: 'numeric',

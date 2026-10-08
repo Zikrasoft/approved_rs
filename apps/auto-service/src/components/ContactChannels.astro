@@ -1,7 +1,7 @@
 ---
 import Icon from './Icon.astro';
 import ContactControl from './ContactControl.astro';
-import { localeFrom } from '@/i18n/currentLocale';
+import { localeFrom } from '@/i18n/config';
 import type { ServiceSlug } from '@/utils/services';
 import type { ContactPlacement } from '@podbor/site-kit';
 import { contactRegion } from '@podbor/site-kit/contact-control';
@@ -39,12 +39,12 @@ const FULL: Variant = {
   label: 'text-sm',
 };
 const VARIANT: Record<NonNullable<Props['placement']>, Variant> = {
-  bar: { ...FULL, list: `${FULL.list} sm:pointer-fine:grid-cols-3` },
+  bar: FULL,
   thanks: FULL,
   hero: {
     channels: ['phone', 'whatsapp', 'telegram'],
-    list: 'grid grid-cols-3 gap-1.5 pointer-fine:grid-cols-2 sm:flex sm:flex-wrap sm:gap-2',
-    tile: 'min-h-11 justify-center gap-1 px-1 py-2.5 sm:gap-2 sm:px-5',
+    list: 'grid grid-cols-3 gap-2 pointer-fine:grid-cols-2 sm:flex sm:flex-wrap',
+    tile: 'min-h-11 justify-center gap-1.5 px-1.5 py-2.5 sm:gap-2 sm:px-5',
     iconSize: 16,
     label: 'text-xs sm:text-[0.8125rem]',
   },
@@ -80,7 +80,7 @@ const { surface, icon: iconTone } = TONE[tone];
     variant.channels.map((channel) => (
       <ContactControl
         channel={channel}
-        placement={placement}
+        region="contacts"
         service={service}
         listItem
         class={`group flex items-center rounded-control border transition-colors duration-150 ${variant.tile} ${surface}`}

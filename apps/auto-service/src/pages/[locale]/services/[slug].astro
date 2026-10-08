@@ -5,13 +5,12 @@ import Icon from '@/components/Icon.astro';
 import PageHero from '@/components/PageHero.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
-import { localeFrom } from '@/i18n/currentLocale';
+import { localeFrom } from '@/i18n/config';
 import { publishedWorks } from '@/utils/works';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { safeMarkdown } from '@podbor/site-kit';
 import { servicePageSchema } from '@/utils/schema';
-import { canonicalUrl } from '@/utils/pageHead';
 import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
@@ -30,10 +29,7 @@ const related = publishedWorks(await getCollection('works')).filter((work) =>
   work.data.servicesApplied.includes(slug),
 );
 
-const schema = servicePageSchema(
-  service,
-  canonicalUrl(locale, Astro.url.pathname),
-);
+const schema = servicePageSchema(service);
 
 const specs = [
   { label: services.specsDurationLabel, value: service.duration },

@@ -1,5 +1,4 @@
 ---
-import { canonicalUrl } from '@/utils/pageHead';
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import StepsList from '@/components/StepsList.astro';
 import Faq from '@/components/Faq.astro';
@@ -42,7 +41,6 @@ const cases = (await getCollection('cases'))
 const schema = generateServiceSchema(
   `${sc.title} ${location}`,
   country[locale].name,
-  canonicalUrl(locale, Astro.url.pathname),
 );
 ---
 

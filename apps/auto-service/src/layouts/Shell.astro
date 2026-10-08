@@ -1,5 +1,11 @@
 ---
-import { jsonLdText, localBusinessSchema, mapPlaceUrl } from '@podbor/site-kit';
+import {
+  jsonLdText,
+  localBusinessSchema,
+  mapPlaceUrl,
+  pageSchema,
+  type PageSchema,
+} from '@podbor/site-kit';
 import '@/styles/global.css';
 import latinFontUrl from '@fontsource-variable/onest/files/onest-latin-wght-normal.woff2?url';
 import cyrillicFontUrl from '@fontsource-variable/onest/files/onest-cyrillic-wght-normal.woff2?url';
@@ -8,10 +14,9 @@ import SiteFooter from '@/components/SiteFooter.astro';
 import LeadModal from '@/components/LeadModal.astro';
 import StickyContactBar from '@/components/StickyContactBar.astro';
 import CookieConsent from '@/components/CookieConsent.astro';
-import { BCP47_BY_LOCALE } from '@/i18n/config';
+import { localeFrom, BCP47_BY_LOCALE } from '@/i18n/config';
 import { pageHead } from '@/utils/pageHead';
 import { BUSINESS_ID } from '@/utils/schema';
-import { localeFrom } from '@/i18n/currentLocale';
 import {
   GARAGE_ADDRESS,
   OPENING_HOURS,
@@ -30,7 +35,7 @@ interface Props {
   title: string;
   description: string;
   noindex?: boolean;
-  jsonLd?: Record<string, unknown>[];
+  jsonLd?: PageSchema[];
   stickyContact?: boolean;
   service?: ServiceSlug;
   preloadImage?: { src: string; srcset: string; sizes: string };
@@ -139,7 +144,7 @@ const businessSchema = localBusinessSchema({
         <script
           type="application/ld+json"
           is:inline
-          set:html={jsonLdText(schema)}
+          set:html={jsonLdText(pageSchema(schema, canonical))}
         />
       ))
     }
@@ -182,28 +187,15 @@ const businessSchema = localBusinessSchema({
     <CookieConsent />
 
     <script>
-      import { defineLeadForm } from '@podbor/lead-crm/lead-form';
-      import {
-        bootSiteKit,
-        getOrCreateVisitorId,
-        markFieldValidity,
-      } from '@podbor/site-kit/browser';
-      import {
-        detectVisitorCountry,
-        visitorChannel,
-      } from '@podbor/site-kit/contact-preference';
+      import { bootSiteKit } from '@podbor/site-kit/browser';
+      import { defineSiteLeadForm } from '@podbor/site-kit/lead-form';
       import { YM_COUNTER_ID } from '@/utils/metrika';
 
       bootSiteKit({
         ymCounterId: YM_COUNTER_ID,
         analytics: !import.meta.env.DEV,
       });
-      defineLeadForm({
-        visitorId: getOrCreateVisitorId,
-        markFieldValidity,
-        preferredChannel: visitorChannel,
-        visitorCountry: detectVisitorCountry,
-      });
+      defineSiteLeadForm();
     </script>
   </body>
 </html>
