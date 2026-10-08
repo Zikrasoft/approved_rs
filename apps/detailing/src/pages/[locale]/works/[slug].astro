@@ -13,7 +13,7 @@ import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { localizedWork, publishedWorks, workExcerpt } from '@/utils/works';
-import { safeMarkdown, relatedEntries } from '@podbor/site-kit';
+import { articleSchema, safeMarkdown, relatedEntries } from '@podbor/site-kit';
 import { SITE_URL } from '@/utils/constants';
 import Icon from '@/components/Icon.astro';
 import {
@@ -41,16 +41,13 @@ const services = content(locale).services;
 const site = content(locale).site;
 const { title, body, car } = localizedWork(work, locale);
 
-const articleSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'Article',
+const schema = articleSchema({
   headline: title,
   image: new URL(work.data.image.src, SITE_URL).href,
-  datePublished: work.data.date.toISOString(),
-  author: { '@id': `${SITE_URL}/#studio` },
+  datePublished: work.data.date,
   publisher: { '@id': `${SITE_URL}/#studio` },
-  mainEntityOfPage: new URL(PathBuilder.work(locale, work.id), SITE_URL).href,
-};
+  url: new URL(PathBuilder.work(locale, work.id), SITE_URL).href,
+});
 
 const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
   year: 'numeric',
@@ -61,7 +58,7 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
 <Shell
   title={`${title} — ${pages.works.detailMetaSuffix}`}
   description={workExcerpt(body) || `${car}. ${pages.works.metaDescription}`}
-  jsonLd={[articleSchema]}
+  jsonLd={[schema]}
 >
   <PageHero
     eyebrow={car}

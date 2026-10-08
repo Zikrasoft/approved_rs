@@ -1,5 +1,5 @@
 ---
-import { jsonLdText, mapPlaceUrl } from '@podbor/site-kit';
+import { jsonLdText, localBusinessSchema, mapPlaceUrl } from '@podbor/site-kit';
 import '@/styles/global.css';
 import displayLatinUrl from '@fontsource-variable/unbounded/files/unbounded-latin-wght-normal.woff2?url';
 import displayLatinExtUrl from '@fontsource-variable/unbounded/files/unbounded-latin-ext-wght-normal.woff2?url';
@@ -56,10 +56,9 @@ const ogImage = new URL(OG_IMAGE[locale], SITE_URL).href;
 
 const googleMapsUrl = mapPlaceUrl(STUDIO_ADDRESS.googleMapsCid);
 
-const businessSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'AutomotiveBusiness',
-  '@id': `${SITE_URL}/#studio`,
+const businessSchema = localBusinessSchema({
+  type: 'AutomotiveBusiness',
+  id: `${SITE_URL}/#studio`,
   name: SITE_NAME,
   legalName: SITE_LEGAL_NAME,
   url: SITE_URL,
@@ -67,31 +66,13 @@ const businessSchema = {
   logo: new URL('/apple-touch-icon.png', SITE_URL).href,
   description: site.footer.tagline,
   telephone: `+${PHONE_NUMBER}`,
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: STUDIO_ADDRESS.street,
-    addressLocality: STUDIO_ADDRESS.city,
-    addressRegion: STUDIO_ADDRESS.district,
-    addressCountry: STUDIO_ADDRESS.country,
-  },
-  geo: {
-    '@type': 'GeoCoordinates',
-    latitude: STUDIO_ADDRESS.lat,
-    longitude: STUDIO_ADDRESS.lon,
-  },
+  address: STUDIO_ADDRESS,
   hasMap: googleMapsUrl,
   areaServed: 'Beograd',
   currenciesAccepted: 'RSD, EUR',
-  openingHoursSpecification: [
-    {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: [...OPENING_HOURS.days],
-      opens: OPENING_HOURS.opens,
-      closes: OPENING_HOURS.closes,
-    },
-  ],
+  openingHours: [OPENING_HOURS],
   sameAs: [googleMapsUrl, ...SOCIAL_SAME_AS],
-};
+});
 ---
 
 <!doctype html>

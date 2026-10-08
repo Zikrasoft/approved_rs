@@ -1,5 +1,5 @@
 ---
-import { jsonLdText, mapPlaceUrl } from '@podbor/site-kit';
+import { jsonLdText, localBusinessSchema, mapPlaceUrl } from '@podbor/site-kit';
 import '@/styles/global.css';
 import latinFontUrl from '@fontsource-variable/onest/files/onest-latin-wght-normal.woff2?url';
 import cyrillicFontUrl from '@fontsource-variable/onest/files/onest-cyrillic-wght-normal.woff2?url';
@@ -58,10 +58,9 @@ const fontUrl = locale === 'ru' ? cyrillicFontUrl : latinFontUrl;
 
 const googleMapsUrl = mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid);
 
-const businessSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'AutoRepair',
-  '@id': `${SITE_URL}/#workshop`,
+const businessSchema = localBusinessSchema({
+  type: 'AutoRepair',
+  id: `${SITE_URL}/#workshop`,
   name: SITE_NAME,
   legalName: SITE_LEGAL_NAME,
   url: SITE_URL,
@@ -69,24 +68,13 @@ const businessSchema = {
   logo: new URL('/icon-512.png', SITE_URL).href,
   description: site.footer.tagline,
   telephone: `+${PHONE_NUMBER}`,
+  address: GARAGE_ADDRESS,
+  hasMap: googleMapsUrl,
   areaServed: 'Beograd',
   currenciesAccepted: 'RSD, EUR',
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: GARAGE_ADDRESS.street,
-    addressLocality: GARAGE_ADDRESS.city,
-    addressRegion: GARAGE_ADDRESS.district,
-    addressCountry: GARAGE_ADDRESS.country,
-  },
-  geo: {
-    '@type': 'GeoCoordinates',
-    latitude: GARAGE_ADDRESS.lat,
-    longitude: GARAGE_ADDRESS.lon,
-  },
-  hasMap: googleMapsUrl,
-  openingHoursSpecification: OPENING_HOURS,
+  openingHours: OPENING_HOURS,
   sameAs: [googleMapsUrl, ...SOCIAL_SAME_AS],
-};
+});
 ---
 
 <!doctype html>

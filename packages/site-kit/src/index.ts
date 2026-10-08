@@ -5,6 +5,7 @@ export {
   serviceSchema,
   articleSchema,
   localBusinessSchema,
+  faqPageSchema,
 } from './jsonLd.ts';
 export type { SchemaRef, BusinessAddress, OpeningHours } from './jsonLd.ts';
 export { contactPlacement, type ContactPlacement } from './goals.ts';
