@@ -310,6 +310,21 @@ describe('applyContactPreference: reorder groups', () => {
     expect(order()).toEqual(['phone', 'whatsapp', 'viber']);
   });
 
+  it('moves only the promoted channel and keeps the rest in markup order', async () => {
+    stubTimeZone('Europe/Moscow');
+    render(`
+      <div data-contact-order>
+        <a data-channel="viber"></a>
+        <a data-channel="whatsapp"></a>
+        <a data-channel="phone"></a>
+        <a data-channel="telegram"></a>
+      </div>`);
+
+    await applyFresh();
+
+    expect(order()).toEqual(['viber', 'telegram', 'whatsapp', 'phone']);
+  });
+
   it('leaves a group with a single ranked channel alone', async () => {
     stubTimeZone('Europe/Moscow');
     render(`
