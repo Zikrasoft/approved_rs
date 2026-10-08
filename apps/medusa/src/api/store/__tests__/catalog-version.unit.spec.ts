@@ -17,7 +17,10 @@ describe('GET /store/catalog-version', () => {
   it('answers the stamp the last catalogue change left', async () => {
     expect(
       await get([
-        { metadata: { catalog_version: '2026-09-28T10:00:00.000Z' } },
+        {
+          id: 'store_1',
+          metadata: { catalog_version: '2026-09-28T10:00:00.000Z' },
+        },
       ]),
     ).toEqual({
       version: '2026-09-28T10:00:00.000Z',
@@ -25,7 +28,9 @@ describe('GET /store/catalog-version', () => {
   });
 
   it('answers unstamped before the first change', async () => {
-    expect(await get([{ metadata: null }])).toEqual({ version: 'unstamped' });
+    expect(await get([{ id: 'store_1', metadata: null }])).toEqual({
+      version: 'unstamped',
+    });
     expect(await get([])).toEqual({ version: 'unstamped' });
   });
 });
