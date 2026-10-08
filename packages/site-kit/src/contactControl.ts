@@ -19,8 +19,8 @@ export type BrandContacts = {
 
 export type ContactControlRequest = {
   channel: TrackedContactChannel;
-  placement: ContactPlacement;
   onThanks: boolean;
+  region?: 'contacts';
   locale: string;
   service?: string;
 };
@@ -38,8 +38,8 @@ export const createContactControls =
   (brand: BrandContacts) =>
   ({
     channel,
-    placement,
     onThanks,
+    region,
     locale,
     service,
   }: ContactControlRequest): ContactControl => {
@@ -49,7 +49,7 @@ export const createContactControls =
         href: phoneLink(brand.phone),
         attrs: channelAttr,
         pointer: 'coarse-only',
-        ...(placement === 'thanks' && { plainNumber: brand.phone }),
+        ...(onThanks && region === 'contacts' && { plainNumber: brand.phone }),
       };
 
     const href = {
@@ -74,7 +74,13 @@ const IN_FLOW_PLACEMENTS: readonly ContactPlacement[] = [
   'thanks',
 ];
 
+const CONTACT_CTA_ATTRIBUTE = 'data-contact-cta';
+
+export const CONTACT_CTA_SELECTOR = `[${CONTACT_CTA_ATTRIBUTE}]`;
+
+export const contactCta = { [CONTACT_CTA_ATTRIBUTE]: '' };
+
 export const contactRegion = (placement: ContactPlacement) => ({
   [CONTACT_PLACEMENT_ATTRIBUTE]: placement,
-  ...(IN_FLOW_PLACEMENTS.includes(placement) && { 'data-contact-cta': '' }),
+  ...(IN_FLOW_PLACEMENTS.includes(placement) && contactCta),
 });

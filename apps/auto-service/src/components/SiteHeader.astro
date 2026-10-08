@@ -109,7 +109,6 @@ const links = [
 
         <ContactControl
           channel="phone"
-          placement="header"
           class="btn btn-secondary hidden h-10 py-0 lg:inline-flex"
         >
           <Icon name="phone" />
@@ -171,11 +170,7 @@ const links = [
     </nav>
 
     <div class="flex flex-col gap-4">
-      <ContactControl
-        channel="phone"
-        placement="header"
-        class="btn btn-secondary w-full"
-      >
+      <ContactControl channel="phone" class="btn btn-secondary w-full">
         <Icon name="phone" />
         <span class="spec">{site.header.phoneLabel}</span>
       </ContactControl>

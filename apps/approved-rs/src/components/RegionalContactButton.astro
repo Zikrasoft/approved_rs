@@ -3,28 +3,20 @@ import ContactControl from './ContactControl.astro';
 import ContactIcon from './ContactIcon.astro';
 import { servicesView } from '@/i18n/content/services';
 import { localeFrom } from '@/i18n/config';
-import type { ContactPlacement } from '@podbor/site-kit';
 
 interface Props {
-  placement: ContactPlacement;
   service?: string;
   variant?: 'primary' | 'secondary';
   class?: string;
 }
 
 const cc = servicesView(localeFrom(Astro.url.pathname)).caseChrome;
-const {
-  placement,
-  service,
-  variant = 'primary',
-  class: className,
-} = Astro.props;
+const { service, variant = 'primary', class: className } = Astro.props;
 ---
 
 <div data-primary-contact class="contents">
   <ContactControl
     channel="telegram"
-    {placement}
     {service}
     {variant}
     data-primary-channel="telegram"
@@ -35,7 +27,6 @@ const {
   </ContactControl>
   <ContactControl
     channel="whatsapp"
-    {placement}
     {service}
     {variant}
     data-primary-channel="whatsapp"

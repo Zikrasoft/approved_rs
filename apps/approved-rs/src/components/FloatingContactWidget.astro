@@ -6,7 +6,10 @@ import { servicesView } from '@/i18n/content/services';
 import { localeFrom } from '@/i18n/config';
 import { callbackTrigger } from '@/utils/contactChannel';
 import { navCurrent } from '@podbor/site-kit';
-import { contactRegion } from '@podbor/site-kit/contact-control';
+import {
+  contactRegion,
+  CONTACT_CTA_SELECTOR,
+} from '@podbor/site-kit/contact-control';
 import { PathBuilder } from '@/utils/paths';
 
 const locale = localeFrom(Astro.url.pathname);
@@ -19,13 +22,12 @@ const onThanks =
   data-revealed="false"
   class="floating-contact"
   data-floating-contact
-  watch="[data-contact-cta]"
+  watch={CONTACT_CTA_SELECTOR}
   {...contactRegion('floating')}
 >
   <div class="floating-panel" role="menu" data-panel hidden>
     <ContactControl
       channel="telegram"
-      placement="floating"
       role="menuitem"
       class="floating-cell"
       aria-label={cc.ctaButtonLabel}
@@ -35,7 +37,6 @@ const onThanks =
     </ContactControl>
     <ContactControl
       channel="whatsapp"
-      placement="floating"
       role="menuitem"
       class="floating-cell"
       aria-label={cc.whatsappButtonLabel}
@@ -45,7 +46,6 @@ const onThanks =
     </ContactControl>
     <ContactControl
       channel="viber"
-      placement="floating"
       role="menuitem"
       class="floating-cell"
       aria-label={cc.viberButtonLabel}
@@ -67,12 +67,7 @@ const onThanks =
         </button>
       )
     }
-    <ContactControl
-      channel="phone"
-      placement="floating"
-      role="menuitem"
-      class="floating-cell"
-    >
+    <ContactControl channel="phone" role="menuitem" class="floating-cell">
       <ContactIcon channel="phone" size={16} />
       <span>{cc.callButtonLabel}</span>
     </ContactControl>
@@ -170,6 +165,7 @@ const onThanks =
     padding: 0.75rem 0.9rem;
     background: none;
     border: none;
+    border-bottom: 1px solid var(--color-border);
     color: var(--color-text-2);
     font-size: 0.8125rem;
     font-weight: 500;
@@ -181,8 +177,8 @@ const onThanks =
       background-color 0.2s,
       color 0.2s;
   }
-  .floating-cell + .floating-cell {
-    border-top: 1px solid var(--color-border);
+  .floating-cell:last-child {
+    border-bottom: none;
   }
   .floating-cell:hover,
   .floating-cell:focus-visible {

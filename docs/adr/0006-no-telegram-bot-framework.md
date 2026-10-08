@@ -5,3 +5,5 @@ The bot (about fifteen callback handlers and a five-kind `pendingPrompt` state m
 ## Consequences
 
 What has outgrown hand-rolling is the dispatch in `handleCallbackQuery` (a chain of callback-data regexes and early-return role guards). When it hurts, the fix is a `[pattern, requiredRole, handler]` table in the same file, not a framework.
+
+**Update 2026-10-08:** the table landed — `CALLBACKS` and `dispatchCallback` in `apps/approved-rs/src/pages/api/telegram-webhook.ts` replace the regex chain, and prompt replies dispatch from a table the same way. A new callback is a row there.

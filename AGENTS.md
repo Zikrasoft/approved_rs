@@ -29,9 +29,22 @@ contracts** a package owns, and an app that breaks one fails silently:
 `data-primary-contact` / `data-primary-channel` (preferred contact channel),
 `data-lead-form` / `data-brand-link` / `data-field` / `aria-invalid` (funnel
 tracking), `data-depth-slug` / `data-depth-door` / `data-revealed` (browsing
-depth on case and work pages) and `data-contact-channel` /
+depth on case and work pages), `data-contact-channel` /
 `data-contact-placement` (contact clicks, whose placement half
-`.github/scripts/contact-placement.ts` enforces against the built HTML).
+`.github/scripts/contact-placement.ts` enforces against the built HTML) and
+`data-contact-cta` (in-flow contact regions the floating CTA's `watch`
+selector hides behind — stamp it with `contactRegion`, `contactCta` and
+`CONTACT_CTA_SELECTOR` from `@podbor/site-kit/contact-control`, never as a
+literal). `packages/lead-crm` owns the `<lead-form>` hooks `leadForm.ts`
+picks with a non-null assertion, so a missing one is a `TypeError`:
+`data-telegram`, `data-country` (with `data-display-locale`), `data-phone`,
+`data-consent`, the hidden `contact` and `contact_channel` inputs,
+`data-source-url`, `data-visitor-id`, `data-submit-label` inside the submit
+button, `data-error-telegram` / `data-error-phone` / `data-error-consent` /
+`data-error-submit`, tab buttons carrying `data-tab` + `data-panel` +
+`aria-selected`, panels carrying `data-panel` alone, and the form's own
+`data-submitting-label` and `data-armed`; the busy submit button carries
+`aria-busy`, which the apps' spinner CSS keys on.
 
 Each of the three sites owns its own `astro.config.mjs`, `keystatic.config.ts`,
 `vercel.json` and `vitest.config.ts`; every workspace app, `apps/medusa`
@@ -141,10 +154,12 @@ Approved's trust/verification semantics.
   `packages/site-kit/src` are the shape: idempotent `define(tagName?)`, no
   auto-registration on import, no styles shipped, the app supplying the markup.
   A run-once page effect with no per-instance state is the one exception —
-  analytics, contact-click tracking, contact preference, the language
-  suggestion and funnel tracking are armed by `bootSiteKit` from
-  `@podbor/site-kit/browser`, called once from each app's layout with its
-  `ymCounterId` and `analytics: !import.meta.env.DEV`. No app imports the five
+  analytics, contact-click tracking, contact preference and funnel tracking
+  are armed by `bootSiteKit` from `@podbor/site-kit/browser`, called once from
+  each app's layout with its `ymCounterId` and
+  `analytics: !import.meta.env.DEV`. `bootSiteKit` also registers the
+  language-suggestion custom element (`defineLanguageSuggestion`), which keeps
+  its own instance state like any other element. No app imports the five
   parts, so none can arm one twice or forget one. `bootSiteKit` and each
   part guard against being armed twice — a second call that re-attaches
   listeners doubles whatever it counts, silently. A new page-level effect joins
@@ -261,8 +276,10 @@ Both new apps follow the same shape, and a third should too:
   partner block and the inline form in the same fold.
 - **A `tel:` control only exists where a dialer does**, on all three sites.
   `createContactControls` in `@podbor/site-kit/contact-control` encodes the
-  contract — the phone is `coarse-only`, the plain-number twin exists only in
-  the `thanks` region, the human Telegram only on `/thanks/` — and each app's
+  contract — the phone is `coarse-only`, the plain-number twin exists only on
+  `/thanks/` in the contacts block (`region: 'contacts'`, which the floating
+  widget never passes), the human Telegram only on `/thanks/` — and the
+  placement says only where a click is recorded. Each app's
   `src/components/ContactControl.astro` is the only place that turns it into
   `pointer-fine:hidden!` / `pointer-coarse:hidden!` and reads the route for
   `onThanks`. Read those two instead of re-deciding a pointer rule at a call
@@ -562,7 +579,7 @@ This site is Astro SSG (`output: 'static'`/prerendered, no SSR) — `.astro` fro
 
 Don't reach for a library reflexively, though — a hand-rolled ~10-line helper that's already correct and purpose-built to one exact call site (e.g. `src/lib/store.ts`'s jittered CAS-retry backoff) doesn't get simpler by wrapping it in a generic library's config API. The bar is: does an existing library solve a real edge case this code either gets wrong today or would have to re-solve by hand, not "is there a package for this."
 
-**No bot framework (grammy/telegraf)** — why: `docs/adr/0006-no-telegram-bot-framework.md`. If the regex chain in `handleCallbackQuery` (`apps/approved-rs/src/pages/api/telegram-webhook.ts`) starts to hurt, the fix is a `[pattern, requiredRole, handler]` table in that file.
+**No bot framework (grammy/telegraf)** — why: `docs/adr/0006-no-telegram-bot-framework.md`. Callback dispatch is the `[pattern, requiredRole, handler]` table `CALLBACKS`, walked by `dispatchCallback` in `apps/approved-rs/src/pages/api/telegram-webhook.ts`; a new callback is a row there, not a framework.
 
 This only applies to build-time code (`.astro` frontmatter, `src/lib/`, `scripts/`). Code that ships to the browser (client-side `<script>`, hydrated islands) still carries a real bundle-size cost — weigh a new client dependency normally there.
 
