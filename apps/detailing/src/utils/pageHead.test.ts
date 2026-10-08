@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { SUPPORTED_LOCALES } from '@/i18n/config';
 import { SITE_URL } from '@/utils/constants';
-import { pageHead } from './pageHead';
+import { canonicalUrl, pageHead } from './pageHead';
 
 const copy = { title: 'T', description: 'D' };
 
@@ -47,5 +47,13 @@ describe('pageHead', () => {
     expect(
       pageHead('sr', '/sr/', { ...copy, ogImage: 'https://x/y.png' }).ogImage,
     ).toBe('https://x/y.png');
+  });
+});
+
+describe('canonicalUrl', () => {
+  it('matches the canonical the layout renders', () => {
+    expect(canonicalUrl('en', '/en/works/x/')).toBe(
+      pageHead('en', '/en/works/x/', copy).canonical,
+    );
   });
 });

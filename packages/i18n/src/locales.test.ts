@@ -9,16 +9,20 @@ const OG_LOCALE = {
   de: 'de_DE',
 };
 
+const OG_SUFFIX = { ru: '', en: '-en', sr: '-sr', es: '-es', de: '-de' };
+
 const set = createLocaleSet({
   locales: ['ru', 'en', 'sr', 'es', 'de'] as const,
   primaryLocale: 'ru',
   ogLocale: OG_LOCALE,
+  ogSuffix: OG_SUFFIX,
 });
 
 const srFirst = createLocaleSet({
   locales: ['ru', 'sr', 'en'] as const,
   primaryLocale: 'sr',
   ogLocale: OG_LOCALE,
+  ogSuffix: OG_SUFFIX,
 });
 
 describe('createLocaleSet options', () => {
@@ -29,6 +33,7 @@ describe('createLocaleSet options', () => {
         // @ts-expect-error an empty list leaves no valid primary
         primaryLocale: 'ru',
         ogLocale: {},
+        ogSuffix: {},
       }),
     ).toThrow('locales must not be empty');
   });
@@ -40,6 +45,7 @@ describe('createLocaleSet options', () => {
         // @ts-expect-error the primary must be one of the locales
         primaryLocale: 'de',
         ogLocale: OG_LOCALE,
+        ogSuffix: OG_SUFFIX,
       }),
     ).toThrow('primaryLocale "de" is not in the locale list');
   });
@@ -50,6 +56,7 @@ describe('createLocaleSet options', () => {
         locales: ['sr', 'en'] as const,
         primaryLocale: 'sr',
         ogLocale: OG_LOCALE,
+        ogSuffix: OG_SUFFIX,
       }),
     ).toThrow(`SOURCE_LOCALE "${SOURCE_LOCALE}" is not in the locale list`);
   });
@@ -61,8 +68,21 @@ describe('createLocaleSet options', () => {
         primaryLocale: 'ru',
         // @ts-expect-error the map must cover every locale
         ogLocale: { ru: 'ru_RU' },
+        ogSuffix: OG_SUFFIX,
       }),
     ).toThrow('ogLocale has no entry for sr, en');
+  });
+
+  it('rejects an og suffix map that misses a locale', () => {
+    expect(() =>
+      createLocaleSet({
+        locales: ['ru', 'sr', 'en'] as const,
+        primaryLocale: 'ru',
+        ogLocale: OG_LOCALE,
+        // @ts-expect-error the map must cover every locale
+        ogSuffix: { ru: '', en: '-en' },
+      }),
+    ).toThrow('ogSuffix has no entry for sr');
   });
 });
 
@@ -83,6 +103,7 @@ describe('TRANSLATABLE_LOCALES', () => {
       locales: ['ru', 'sr'] as const,
       primaryLocale: 'ru',
       ogLocale: OG_LOCALE,
+      ogSuffix: OG_SUFFIX,
     });
 
     expect(small.TRANSLATABLE_LOCALES).toEqual(['sr']);
@@ -216,8 +237,19 @@ describe('headLinks', () => {
           '/en/contacts/',
         ),
         ogLocale: 'en_US',
+        ogImage: 'https://approved.rs/og-en.png',
       },
     );
+  });
+
+  it('defaults the og image to the locale one and keeps a supplied one', () => {
+    expect(set.headLinks('https://approved.rs', 'ru', '/ru/').ogImage).toBe(
+      'https://approved.rs/og.png',
+    );
+    expect(
+      set.headLinks('https://approved.rs', 'ru', '/ru/', 'https://x/y.png')
+        .ogImage,
+    ).toBe('https://x/y.png');
   });
 
   it('points the bare site root at the locale homepage', () => {

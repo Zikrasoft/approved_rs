@@ -9,8 +9,9 @@ import { localeFrom } from '@/i18n/currentLocale';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { localizedWork, publishedWorks } from '@/utils/works';
-import { articleSchema, safeMarkdown, relatedEntries } from '@podbor/site-kit';
-import { SITE_URL } from '@/utils/constants';
+import { safeMarkdown, relatedEntries } from '@podbor/site-kit';
+import { workSchema } from '@/utils/schema';
+import { canonicalUrl } from '@/utils/pageHead';
 import {
   DEPTH_DOOR_ATTRIBUTE,
   DEPTH_SLUG_ATTRIBUTE,
@@ -34,13 +35,11 @@ const site = content(locale).site;
 const services = content(locale).services;
 const { title, body, car } = localizedWork(work, locale);
 
-const schema = articleSchema({
-  headline: title,
-  image: new URL(work.data.image.src, SITE_URL).href,
-  datePublished: work.data.date,
-  publisher: { '@id': `${SITE_URL}/#workshop` },
-  url: new URL(PathBuilder.work(locale, work.id), SITE_URL).href,
-});
+const schema = workSchema(
+  work,
+  title,
+  canonicalUrl(locale, Astro.url.pathname),
+);
 
 const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
   year: 'numeric',

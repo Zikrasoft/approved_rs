@@ -10,6 +10,13 @@ export const localeConfig = {
     es: 'es_ES',
     de: 'de_DE',
   },
+  ogSuffix: {
+    ru: '',
+    en: '-en',
+    sr: '-sr',
+    es: '-es',
+    de: '-de',
+  },
 } as const;
 
 export const localeSet = createLocaleSet(localeConfig);
@@ -39,12 +46,4 @@ export const BCP47_BY_LOCALE: Record<Locale, string> = {
 export const DISPLAY_LOCALE: Record<Locale, string> = {
   ...BCP47_BY_LOCALE,
   sr: 'sr-Latn-RS',
-};
-
-export const OG_SUFFIX: Record<Locale, string> = {
-  ru: '',
-  en: '-en',
-  sr: '-sr',
-  es: '-es',
-  de: '-de',
 };

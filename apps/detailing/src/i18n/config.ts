@@ -8,6 +8,11 @@ export const localeConfig = {
     sr: 'sr_RS',
     en: 'en_US',
   },
+  ogSuffix: {
+    ru: '-ru',
+    sr: '',
+    en: '-en',
+  },
 } as const;
 
 export const localeSet = createLocaleSet(localeConfig);
@@ -30,12 +35,6 @@ export const BCP47_BY_LOCALE: Record<Locale, string> = {
   ru: 'ru-RS',
   sr: 'sr-Latn-RS',
   en: 'en-RS',
-};
-
-export const OG_SUFFIX: Record<Locale, string> = {
-  sr: '',
-  ru: '-ru',
-  en: '-en',
 };
 
 export const LOCALE_NAME: Record<Locale, string> = {

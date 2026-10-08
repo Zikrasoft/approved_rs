@@ -97,7 +97,6 @@ describe('articleSchema', () => {
 
 describe('localBusinessSchema', () => {
   it('builds the address, geo and opening hours from plain values', () => {
-    const sameAs = ['https://maps.test/1'];
     const schema = localBusinessSchema({
       type: 'AutoRepair',
       id: 'https://x.test/#shop',
@@ -120,7 +119,7 @@ describe('localBusinessSchema', () => {
       areaServed: 'Beograd',
       currenciesAccepted: 'RSD, EUR',
       openingHours: [{ days: ['Monday'], opens: '09:00', closes: '18:00' }],
-      sameAs,
+      sameAs: ['https://maps.test/1'],
     });
     expect(JSON.stringify(schema)).toBe(
       JSON.stringify({
@@ -156,6 +155,27 @@ describe('localBusinessSchema', () => {
         sameAs: ['https://maps.test/1'],
       }),
     );
-    expect(schema.sameAs).not.toBe(sameAs);
+  });
+
+  it('leaves the optional fields out of the serialised output', () => {
+    const text = jsonLdText(
+      localBusinessSchema({
+        type: 'LocalBusiness',
+        id: 'i',
+        name: 'N',
+        url: 'u',
+        address: {
+          street: 's',
+          district: 'd',
+          city: 'c',
+          country: 'RS',
+          lat: 1,
+          lon: 2,
+        },
+      }),
+    );
+    expect(text).toBe(
+      '{"@context":"https://schema.org","@type":"LocalBusiness","@id":"i","name":"N","url":"u","address":{"@type":"PostalAddress","streetAddress":"s","addressLocality":"c","addressRegion":"d","addressCountry":"RS"},"geo":{"@type":"GeoCoordinates","latitude":1,"longitude":2}}',
+    );
   });
 });

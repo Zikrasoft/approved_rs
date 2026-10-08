@@ -6,12 +6,14 @@ export interface LocaleSetOptions<L extends string, P extends L> {
   locales: readonly L[];
   primaryLocale: P;
   ogLocale: Readonly<Record<L, string>>;
+  ogSuffix: Readonly<Record<L, string>>;
 }
 
 export function createLocaleSet<L extends string, P extends L>({
   locales,
   primaryLocale,
   ogLocale,
+  ogSuffix,
 }: LocaleSetOptions<L, P>) {
   if (locales.length === 0) {
     throw new Error('[i18n] locales must not be empty');
@@ -27,11 +29,11 @@ export function createLocaleSet<L extends string, P extends L>({
     );
   }
 
-  const missingOgLocale = locales.filter((l) => !Object.hasOwn(ogLocale, l));
-  if (missingOgLocale.length) {
-    throw new Error(
-      `[i18n] ogLocale has no entry for ${missingOgLocale.join(', ')}`,
-    );
+  for (const [name, map] of Object.entries({ ogLocale, ogSuffix })) {
+    const missing = locales.filter((l) => !Object.hasOwn(map, l));
+    if (missing.length) {
+      throw new Error(`[i18n] ${name} has no entry for ${missing.join(', ')}`);
+    }
   }
 
   const translatable = locales.filter(
@@ -100,12 +102,13 @@ export function createLocaleSet<L extends string, P extends L>({
 
     getAlternateLinks: alternateLinks,
 
-    headLinks(siteUrl: string, locale: L, pathname: string) {
+    headLinks(siteUrl: string, locale: L, pathname: string, ogImage?: string) {
       const path = pathname === '/' ? `/${locale}/` : pathname;
       return {
         canonical: new URL(path, siteUrl).href,
         alternates: alternateLinks(siteUrl, path),
         ogLocale: ogLocale[locale],
+        ogImage: ogImage ?? new URL(`/og${ogSuffix[locale]}.png`, siteUrl).href,
       };
     },
   };

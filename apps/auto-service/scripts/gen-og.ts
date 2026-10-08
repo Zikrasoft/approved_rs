@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
-import { localeConfig, OG_SUFFIX, type Locale } from '../src/i18n/config.ts';
+import { localeConfig, type Locale } from '../src/i18n/config.ts';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const asset = (name: string) => new URL(`public/${name}`, `file://${root}`);
@@ -54,7 +54,7 @@ function svg({ heading, services, extra, badge }: OgCopy) {
 }
 
 for (const locale of localeConfig.locales) {
-  const name = `og${OG_SUFFIX[locale]}.png`;
+  const name = `og${localeConfig.ogSuffix[locale]}.png`;
   writeFileSync(
     asset(name),
     await sharp(Buffer.from(svg(COPY[locale])))

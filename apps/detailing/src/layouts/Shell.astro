@@ -14,6 +14,7 @@ import FloatingCta from '@/components/FloatingCta.astro';
 import CookieConsent from '@/components/CookieConsent.astro';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { pageHead } from '@/utils/pageHead';
+import { BUSINESS_ID } from '@/utils/schema';
 import { localeFrom } from '@/i18n/currentLocale';
 import {
   SITE_NAME,
@@ -61,7 +62,7 @@ const googleMapsUrl = mapPlaceUrl(STUDIO_ADDRESS.googleMapsCid);
 
 const businessSchema = localBusinessSchema({
   type: 'AutomotiveBusiness',
-  id: `${SITE_URL}/#studio`,
+  id: BUSINESS_ID,
   name: SITE_NAME,
   legalName: SITE_LEGAL_NAME,
   url: SITE_URL,

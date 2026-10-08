@@ -17,9 +17,11 @@ import {
 } from '@/utils/geo';
 import {
   generateMeta,
+  ogImageFor,
   generateServiceSchema,
   buildLocation,
 } from '@/utils/seo';
+import { SITE_URL } from '@/utils/constants';
 import { getVehicleImportCrossSellSpokes } from '@/utils/vehicleImportCrossSell';
 import { getCollection } from 'astro:content';
 
@@ -48,10 +50,13 @@ const cityCards = getCitiesForCountry(countryCode!).flatMap((city) => {
       ]
     : [];
 });
-const meta = generateMeta('vehicle-sourcing', {
-  country,
-  locale: locale,
-});
+const meta = {
+  ...generateMeta('vehicle-sourcing', {
+    country,
+    locale: locale,
+  }),
+  ogImage: ogImageFor(SITE_URL, 'vehicle-sourcing', locale),
+};
 const cases = (await getCollection('cases'))
   .filter(
     (c) =>

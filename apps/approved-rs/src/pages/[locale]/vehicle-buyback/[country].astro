@@ -8,9 +8,11 @@ import { withLocales, PathBuilder } from '@/utils/paths';
 import { getCountry } from '@/utils/geo';
 import {
   generateMeta,
+  ogImageFor,
   generateServiceSchema,
   buildLocation,
 } from '@/utils/seo';
+import { SITE_URL } from '@/utils/constants';
 import { getCollection } from 'astro:content';
 import { content } from '@/i18n/content';
 import { servicesView } from '@/i18n/content/services';
@@ -26,10 +28,13 @@ const { locale, country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
 const sc = servicesView(locale)['vehicle-buyback'];
 const location = buildLocation(locale, country);
-const meta = generateMeta('vehicle-buyback', {
-  country,
-  locale: locale,
-});
+const meta = {
+  ...generateMeta('vehicle-buyback', {
+    country,
+    locale: locale,
+  }),
+  ogImage: ogImageFor(SITE_URL, 'vehicle-buyback', locale),
+};
 const cases = (await getCollection('cases'))
   .filter(
     (c) =>

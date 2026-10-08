@@ -11,8 +11,9 @@ import { content } from '@/i18n/content';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { publishedWorks } from '@/utils/works';
-import { safeMarkdown, serviceSchema } from '@podbor/site-kit';
-import { SITE_URL } from '@/utils/constants';
+import { safeMarkdown } from '@podbor/site-kit';
+import { servicePageSchema } from '@/utils/schema';
+import { canonicalUrl } from '@/utils/pageHead';
 
 export function getStaticPaths() {
   return withLocales(
@@ -31,14 +32,10 @@ const related = publishedWorks(await getCollection('works'))
   .filter((w) => w.data.servicesApplied.includes(slug))
   .slice(0, 3);
 
-const schema = serviceSchema({
-  name: service.name,
-  serviceType: service.name,
-  description: service.metaDescription,
-  provider: { '@id': `${SITE_URL}/#studio` },
-  areaServed: { '@type': 'City', name: 'Beograd' },
-  url: new URL(PathBuilder.service(locale, slug), SITE_URL).href,
-});
+const schema = servicePageSchema(
+  service,
+  canonicalUrl(locale, Astro.url.pathname),
+);
 
 const specs = [
   { label: services.specsDurationLabel, value: service.duration },

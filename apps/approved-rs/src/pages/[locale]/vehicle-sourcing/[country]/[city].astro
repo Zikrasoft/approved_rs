@@ -8,9 +8,11 @@ import { getCityPaths, withLocales, PathBuilder } from '@/utils/paths';
 import { getCountry, getCitiesForCountry } from '@/utils/geo';
 import {
   generateMeta,
+  ogImageFor,
   generateServiceSchema,
   buildLocation,
 } from '@/utils/seo';
+import { SITE_URL } from '@/utils/constants';
 import { getCollection } from 'astro:content';
 import { content } from '@/i18n/content';
 import { servicesView } from '@/i18n/content/services';
@@ -25,11 +27,14 @@ const sc = servicesView(locale).cityVehicleSourcing;
 const cityLocation = buildLocation(locale, undefined, city);
 const cityNote = sc.cityNoteFor(city.slug);
 const countryLocation = buildLocation(locale, country);
-const meta = generateMeta('vehicle-sourcing', {
-  country,
-  city,
-  locale: locale,
-});
+const meta = {
+  ...generateMeta('vehicle-sourcing', {
+    country,
+    city,
+    locale: locale,
+  }),
+  ogImage: ogImageFor(SITE_URL, 'vehicle-sourcing', locale),
+};
 const cases = (await getCollection('cases'))
   .filter(
     (c) =>
