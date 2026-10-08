@@ -3,11 +3,6 @@ metaDescription: Аккумуляторы, моторные масла, филь
 eyebrow: Запчасти
 heading: Запчасти с подбором по вашей машине
 lead: Выберите машину — покажем только то, что на неё встанет. Забираете в сервисе, платите при получении, а установим сразу на месте, если нужно.
-fitmentHeading: Ваша машина
-makeLabel: Марка
-modelLabel: Модель
-yearLabel: Год выпуска
-anyOption: Не важно
 resetLabel: Сбросить
 matchCount:
   one: найден {count} товар
@@ -16,31 +11,16 @@ matchCount:
   other: найдено {count} товара
 noMatches: Под эти параметры в наличии ничего нет
 noMatchesHint: Напишите нам — привезём под заказ обычно за один-два дня.
-emptyCatalog: Каталог скоро наполнится. Пока что позвоните — скажем, что есть в наличии сегодня.
-capacityLabel: Ёмкость
-crankingLabel: Пусковой ток
-polarityLabel: Полярность
-dimensionsLabel: Габариты
-dimensionsUnit: мм
-polarityLeft: обратная (минус слева)
-polarityRight: прямая (плюс слева)
-warrantyLabel: Гарантия
-warrantyUnit: мес.
 fitsLabel: Подходит для
 inStock: В наличии
-onOrder: Под заказ
 addToCart: В корзину
 inCart: В корзине
-installNote: Установка и утилизация старого аккумулятора — бесплатно при покупке у нас.
-productMetaSuffix: аккумулятор в Белграде
 typesHeading: Что есть в магазине
 productCount:
   one: '{count} товар'
   few: '{count} товара'
   many: '{count} товаров'
   other: '{count} товара'
-carLead: Выберите марку, модель и год — каталог покажет только подходящее. Выбор запомним на этом устройстве.
-carClear: Сбросить машину
 landingsLabel: Популярные варианты
 filterHeading: Фильтры
 filterFrom: от
@@ -211,8 +191,6 @@ cart:
   removeLabel: Убрать
   totalLabel: Итого
   totalNote: Цены окончательные, НДС не начисляется. Установка — отдельной строкой, если вы её добавили.
-  orderHeading: Оформить заказ
-  orderNote: Мы перезвоним, подтвердим наличие и договоримся о времени.
   badgeLabel: товаров в корзине
   checkoutHeading: Контакты для заказа
   nameRequired: Имя обязательно — так мы узнаем вас в сервисе.
