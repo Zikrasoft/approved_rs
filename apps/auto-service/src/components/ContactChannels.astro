@@ -80,7 +80,7 @@ const { surface, icon: iconTone } = TONE[tone];
     variant.channels.map((channel) => (
       <ContactControl
         channel={channel}
-        placement={placement}
+        region="contacts"
         service={service}
         listItem
         class={`group flex items-center rounded-control border transition-colors duration-150 ${variant.tile} ${surface}`}

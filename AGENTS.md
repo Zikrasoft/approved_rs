@@ -261,8 +261,10 @@ Both new apps follow the same shape, and a third should too:
   partner block and the inline form in the same fold.
 - **A `tel:` control only exists where a dialer does**, on all three sites.
   `createContactControls` in `@podbor/site-kit/contact-control` encodes the
-  contract — the phone is `coarse-only`, the plain-number twin exists only in
-  the `thanks` region, the human Telegram only on `/thanks/` — and each app's
+  contract — the phone is `coarse-only`, the plain-number twin exists only on
+  `/thanks/` in the contacts block (`region: 'contacts'`, which the floating
+  widget never passes), the human Telegram only on `/thanks/` — and the
+  placement says only where a click is recorded. Each app's
   `src/components/ContactControl.astro` is the only place that turns it into
   `pointer-fine:hidden!` / `pointer-coarse:hidden!` and reads the route for
   `onThanks`. Read those two instead of re-deciding a pointer rule at a call

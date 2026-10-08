@@ -41,13 +41,11 @@ const placement = onThanks ? 'thanks' : compact ? 'hero' : 'bar';
         </Button>
         <RegionalContactButton
           variant="secondary"
-          {placement}
           {service}
           class="gap-2.5 px-4 sm:px-6 py-3 tracking-[0.03em] flex-auto whitespace-nowrap sm:flex-none sm:w-auto justify-center lg:flex-none"
         />
         <ContactControl
           channel="phone"
-          {placement}
           variant="secondary"
           class="gap-2.5 px-4 sm:px-6 py-3 tracking-[0.03em] flex-auto whitespace-nowrap sm:flex-none sm:w-auto justify-center"
         >
@@ -60,7 +58,6 @@ const placement = onThanks ? 'thanks' : compact ? 'hero' : 'bar';
         <div class="contact-bar">
           <ContactControl
             channel="telegram"
-            {placement}
             {service}
             aria-label={telegramAriaLabel}
             class="contact-cell"
@@ -71,7 +68,6 @@ const placement = onThanks ? 'thanks' : compact ? 'hero' : 'bar';
 
           <ContactControl
             channel="whatsapp"
-            {placement}
             {service}
             aria-label={cc.whatsappButtonLabel}
             class="contact-cell"
@@ -82,7 +78,6 @@ const placement = onThanks ? 'thanks' : compact ? 'hero' : 'bar';
 
           <ContactControl
             channel="viber"
-            {placement}
             aria-label={cc.viberButtonLabel}
             class="contact-cell"
           >
@@ -93,7 +88,7 @@ const placement = onThanks ? 'thanks' : compact ? 'hero' : 'bar';
           {onThanks ? (
             <ContactControl
               channel="phone"
-              {placement}
+              region="contacts"
               aria-label={cc.callButtonLabel}
               class="contact-cell"
             >
@@ -117,7 +112,6 @@ const placement = onThanks ? 'thanks' : compact ? 'hero' : 'bar';
         {!onThanks && (
           <ContactControl
             channel="phone"
-            {placement}
             variant="secondary"
             class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full justify-center bg-surface"
           >

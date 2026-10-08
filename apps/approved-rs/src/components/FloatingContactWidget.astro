@@ -25,7 +25,6 @@ const onThanks =
   <div class="floating-panel" role="menu" data-panel hidden>
     <ContactControl
       channel="telegram"
-      placement="floating"
       role="menuitem"
       class="floating-cell"
       aria-label={cc.ctaButtonLabel}
@@ -35,7 +34,6 @@ const onThanks =
     </ContactControl>
     <ContactControl
       channel="whatsapp"
-      placement="floating"
       role="menuitem"
       class="floating-cell"
       aria-label={cc.whatsappButtonLabel}
@@ -45,7 +43,6 @@ const onThanks =
     </ContactControl>
     <ContactControl
       channel="viber"
-      placement="floating"
       role="menuitem"
       class="floating-cell"
       aria-label={cc.viberButtonLabel}
@@ -67,12 +64,7 @@ const onThanks =
         </button>
       )
     }
-    <ContactControl
-      channel="phone"
-      placement="floating"
-      role="menuitem"
-      class="floating-cell"
-    >
+    <ContactControl channel="phone" role="menuitem" class="floating-cell">
       <ContactIcon channel="phone" size={16} />
       <span>{cc.callButtonLabel}</span>
     </ContactControl>

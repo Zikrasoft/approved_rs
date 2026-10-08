@@ -25,7 +25,7 @@ const cell =
   {...contactRegion('floating')}
 >
   <div class="grid grid-cols-3 items-stretch pointer-fine:grid-cols-2">
-    <ContactControl channel="phone" placement="floating" class={cell}>
+    <ContactControl channel="phone" class={cell}>
       <Icon name="phone" size={16} />
       <span class="spec text-[0.6875rem]">{site.channels.call}</span>
     </ContactControl>
@@ -33,7 +33,6 @@ const cell =
     <div data-primary-contact class="contents">
       <ContactControl
         channel="telegram"
-        placement="floating"
         service={service}
         data-primary-channel="telegram"
         class={cell}
@@ -43,7 +42,6 @@ const cell =
       </ContactControl>
       <ContactControl
         channel="whatsapp"
-        placement="floating"
         service={service}
         data-primary-channel="whatsapp"
         hidden
