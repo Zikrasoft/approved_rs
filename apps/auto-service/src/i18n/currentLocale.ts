@@ -1,1 +1,0 @@
-export { localeFrom } from './config';
