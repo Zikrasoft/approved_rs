@@ -170,6 +170,7 @@ const onThanks =
     padding: 0.75rem 0.9rem;
     background: none;
     border: none;
+    border-bottom: 1px solid var(--color-border);
     color: var(--color-text-2);
     font-size: 0.8125rem;
     font-weight: 500;
@@ -181,8 +182,8 @@ const onThanks =
       background-color 0.2s,
       color 0.2s;
   }
-  .floating-cell + .floating-cell {
-    border-top: 1px solid var(--color-border);
+  .floating-cell:last-child {
+    border-bottom: none;
   }
   .floating-cell:hover,
   .floating-cell:focus-visible {
