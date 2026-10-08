@@ -1,5 +1,6 @@
 import type { LeadInput, LeadSubmission, StoredLead } from './schema.ts';
 import type { LeadStore } from './store.ts';
+import type { Role } from './telegram/format.ts';
 import type { Notifier } from './telegram/notify.ts';
 
 interface EnsureLeadCardOptions {
@@ -29,6 +30,44 @@ export function createEnsureLeadCard({
         messageId,
       });
     }
+  };
+}
+
+export interface StatusChangeOptions {
+  surface?: { chatId: number; messageId: number; role: Role };
+  notice?: boolean;
+}
+
+interface AfterStatusChangeOptions {
+  ensureLeadCard: (lead: StoredLead) => Promise<void>;
+  notifier: Pick<
+    Notifier,
+    | 'editLeadDetailMessage'
+    | 'sendStatusChangeToAdmin'
+    | 'sendDealNotificationToAdmin'
+  >;
+}
+
+export function createAfterStatusChange({
+  ensureLeadCard,
+  notifier,
+}: AfterStatusChangeOptions) {
+  return async function afterStatusChange(
+    lead: StoredLead,
+    { surface, notice = true }: StatusChangeOptions = {},
+  ): Promise<void> {
+    await ensureLeadCard(lead);
+    if (surface)
+      await notifier.editLeadDetailMessage(
+        surface.chatId,
+        surface.messageId,
+        lead,
+        surface.role,
+      );
+    if (!notice) return;
+    if (lead.status === 'won' && lead.dealAmount != null)
+      await notifier.sendDealNotificationToAdmin(lead);
+    else await notifier.sendStatusChangeToAdmin(lead);
   };
 }
 

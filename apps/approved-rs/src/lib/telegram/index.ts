@@ -1,6 +1,7 @@
 import {
   adminIds,
   ownerIds,
+  afterStatusChange,
   client,
   ensureLeadCard,
   formatter,
@@ -14,7 +15,7 @@ export const {
   safeEditMessage,
 } = client;
 
-export { ensureLeadCard };
+export { afterStatusChange, ensureLeadCard };
 
 export const {
   sendLeadNotification,

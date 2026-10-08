@@ -12,6 +12,7 @@ vi.mock('@/lib/telegram', async () => {
     isLeadStatusKey: (key: string) =>
       ['in_progress', 'won', 'lost'].includes(key),
     answerCallback: vi.fn(),
+    afterStatusChange: vi.fn(),
     ensureLeadCard: vi.fn(),
     sendForceReplyPrompt: vi.fn(),
     formatMoney: (n: number) => `${n} €`,
@@ -19,11 +20,9 @@ vi.mock('@/lib/telegram', async () => {
       const [y, m, d] = iso.split('-');
       return `${d}.${m}.${y}`;
     },
-    sendDealNotificationToAdmin: vi.fn(),
     sendIncomeNotificationToAdmin: vi.fn(),
     sendCommissionClaimToAdmin: vi.fn(),
     sendCommissionResultToOwner: vi.fn(),
-    sendStatusChangeToAdmin: vi.fn(),
     sendFieldChangeToAdmin: vi.fn(),
     EDIT_COPY: actual.EDIT_COPY,
     escapeHtml: actual.escapeHtml,
@@ -99,6 +98,7 @@ vi.mock('@/lib/store', async () => {
     postponeLead: vi.fn(),
     canPostpone: actual.canPostpone,
     postponePatch: actual.postponePatch,
+    wonPatch: actual.wonPatch,
     claimCommission: vi.fn(),
     confirmCommissionPayment: vi.fn(),
     rejectCommissionPayment: vi.fn(),
@@ -115,14 +115,13 @@ vi.mock('@/lib/store', async () => {
 import { POST } from './telegram-webhook';
 import { captureClient } from '@/lib/captureBot';
 import {
+  afterStatusChange,
   answerCallback,
   ensureLeadCard,
   sendForceReplyPrompt,
-  sendDealNotificationToAdmin,
   sendIncomeNotificationToAdmin,
   sendCommissionClaimToAdmin,
   sendCommissionResultToOwner,
-  sendStatusChangeToAdmin,
   sendFieldChangeToAdmin,
   sendMessage,
   buildLeadDetail,
@@ -282,9 +281,7 @@ describe('POST /api/telegram-webhook', () => {
     vi.mocked(safeEditMessage).mockReset().mockResolvedValue(undefined);
     vi.mocked(buildRemindPicker).mockClear();
     vi.mocked(sendForceReplyPrompt).mockReset().mockResolvedValue(888);
-    vi.mocked(sendDealNotificationToAdmin)
-      .mockReset()
-      .mockResolvedValue(undefined);
+    vi.mocked(afterStatusChange).mockReset().mockResolvedValue(undefined);
     vi.mocked(sendIncomeNotificationToAdmin)
       .mockReset()
       .mockResolvedValue(undefined);
@@ -294,7 +291,6 @@ describe('POST /api/telegram-webhook', () => {
     vi.mocked(sendCommissionResultToOwner)
       .mockReset()
       .mockResolvedValue(undefined);
-    vi.mocked(sendStatusChangeToAdmin).mockReset().mockResolvedValue(undefined);
     vi.mocked(sendMessage).mockReset().mockResolvedValue(undefined);
     vi.mocked(sendFieldChangeToAdmin).mockReset().mockResolvedValue(undefined);
     vi.mocked(captureClient.sendMessage)
@@ -442,15 +438,9 @@ describe('POST /api/telegram-webhook', () => {
       );
       expect(res.status).toBe(200);
       expect(setStatus).toHaveBeenCalledWith(5, 'lost');
-      expect(ensureLeadCard).toHaveBeenCalled();
-      expect(editLeadDetailMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        555,
+      expect(afterStatusChange).toHaveBeenCalledWith(
         expect.objectContaining({ status: 'lost' }),
-        'owner',
-      );
-      expect(sendStatusChangeToAdmin).toHaveBeenCalledWith(
-        expect.objectContaining({ status: 'lost' }),
+        { surface: { chatId: DM_CHAT_ID, messageId: 555, role: 'owner' } },
       );
       expect(answerCallback).toHaveBeenCalledWith('cb-1', 'Статус обновлён');
     });
@@ -478,7 +468,7 @@ describe('POST /api/telegram-webhook', () => {
         kind: 'deal_amount',
       });
       expect(answerCallback).toHaveBeenCalledWith('cb-2', 'Жду сумму');
-      expect(sendStatusChangeToAdmin).not.toHaveBeenCalled();
+      expect(afterStatusChange).not.toHaveBeenCalled();
     });
 
     it('asks for the amount on top when prepayments are already booked', async () => {
@@ -744,8 +734,9 @@ describe('POST /api/telegram-webhook', () => {
         expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
         expect.stringContaining('Отложено до'),
       );
-      expect(ensureLeadCard).toHaveBeenCalled();
-      expect(sendStatusChangeToAdmin).toHaveBeenCalled();
+      expect(afterStatusChange).toHaveBeenCalledWith(expect.anything(), {
+        surface: { chatId: DM_CHAT_ID, messageId: 1, role: 'owner' },
+      });
       expect(answerCallback).toHaveBeenCalledWith('cb-rp1', 'Отложено');
     });
 
@@ -777,8 +768,7 @@ describe('POST /api/telegram-webhook', () => {
         }),
       );
       expect(res.status).toBe(200);
-      expect(ensureLeadCard).not.toHaveBeenCalled();
-      expect(sendStatusChangeToAdmin).not.toHaveBeenCalled();
+      expect(afterStatusChange).not.toHaveBeenCalled();
       expect(answerCallback).toHaveBeenCalledWith('cb-rp3');
     });
   });
@@ -863,7 +853,9 @@ describe('POST /api/telegram-webhook', () => {
       );
       expect(res.status).toBe(200);
       expect(resumeLead).toHaveBeenCalledWith(5);
-      expect(sendStatusChangeToAdmin).toHaveBeenCalled();
+      expect(afterStatusChange).toHaveBeenCalledWith(expect.anything(), {
+        surface: { chatId: DM_CHAT_ID, messageId: 1, role: 'owner' },
+      });
       expect(answerCallback).toHaveBeenCalledWith('cb-rs1', 'Возобновлено');
     });
 
@@ -1910,12 +1902,12 @@ describe('POST /api/telegram-webhook', () => {
         888,
         expect.any(Function),
       );
-      const updated = vi.mocked(ensureLeadCard).mock.calls[0][0];
+      const updated = vi.mocked(afterStatusChange).mock.calls[0][0];
       expect(updated.incomes).toEqual([
         expect.objectContaining({ id: 1, amount: 150000, paidAt: null }),
       ]);
       expect(updated.status).toBe('won');
-      expect(sendDealNotificationToAdmin).toHaveBeenCalled();
+      expect(vi.mocked(afterStatusChange).mock.calls[0][1]).toBeUndefined();
     });
 
     it('books the closing amount on top of the prepayments already taken', async () => {
@@ -1950,7 +1942,7 @@ describe('POST /api/telegram-webhook', () => {
         }),
       );
 
-      const updated = vi.mocked(ensureLeadCard).mock.calls[0][0];
+      const updated = vi.mocked(afterStatusChange).mock.calls[0][0];
       expect(updated.incomes.map((i) => i.amount)).toEqual([50000, 100000]);
       expect(updated.status).toBe('won');
     });
@@ -1987,7 +1979,7 @@ describe('POST /api/telegram-webhook', () => {
         }),
       );
 
-      const updated = vi.mocked(ensureLeadCard).mock.calls[0][0];
+      const updated = vi.mocked(afterStatusChange).mock.calls[0][0];
       expect(updated.incomes.map((i) => i.amount)).toEqual([50000]);
       expect(updated.status).toBe('won');
       expect(sendMessage).not.toHaveBeenCalledWith(
@@ -2151,11 +2143,11 @@ describe('POST /api/telegram-webhook', () => {
       );
 
       expect(res.status).toBe(200);
-      const updated = vi.mocked(ensureLeadCard).mock.calls[0][0];
+      const updated = vi.mocked(afterStatusChange).mock.calls[0][0];
       expect(updated.status).toBe('postponed');
       expect(updated.remindAt).toBe('2026-10-20');
       expect(updated.comment).toBe('BMW X5\nОтложено до 20.10.2026');
-      expect(sendStatusChangeToAdmin).toHaveBeenCalled();
+      expect(vi.mocked(afterStatusChange).mock.calls[0][1]).toBeUndefined();
     });
 
     it('postpones a lead that is still in negotiations and remembers the stage', async () => {
@@ -2180,7 +2172,7 @@ describe('POST /api/telegram-webhook', () => {
       );
 
       expect(res.status).toBe(200);
-      const updated = vi.mocked(ensureLeadCard).mock.calls[0][0];
+      const updated = vi.mocked(afterStatusChange).mock.calls[0][0];
       expect(updated.status).toBe('postponed');
       expect(updated.postponedFrom).toBe('negotiations');
     });
@@ -2207,8 +2199,7 @@ describe('POST /api/telegram-webhook', () => {
       );
 
       expect(res.status).toBe(200);
-      expect(ensureLeadCard).not.toHaveBeenCalled();
-      expect(sendStatusChangeToAdmin).not.toHaveBeenCalled();
+      expect(afterStatusChange).not.toHaveBeenCalled();
     });
 
     it('rejects a malformed date without resolving the prompt', async () => {
