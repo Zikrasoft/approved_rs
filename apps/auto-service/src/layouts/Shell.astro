@@ -125,17 +125,6 @@ const businessSchema = localBusinessSchema({
     <meta property="og:locale" content={ogLocale} />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <noscript>
-      <style is:inline>
-        [data-lead-form] [data-channel='telegram'] {
-          display: none;
-        }
-        [data-lead-form] [data-contact-order] {
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
-      </style>
-    </noscript>
-
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
@@ -204,8 +193,7 @@ const businessSchema = localBusinessSchema({
         markFieldValidity,
       } from '@podbor/site-kit/browser';
       import {
-        applyPreferredContactOrder,
-        applyPrimaryContactChannel,
+        applyContactPreference,
         detectVisitorCountry,
         visitorChannel,
       } from '@podbor/site-kit/contact-preference';
@@ -213,8 +201,7 @@ const businessSchema = localBusinessSchema({
 
       if (!import.meta.env.DEV) defineAnalytics({ ymCounterId: YM_COUNTER_ID });
       defineContactClickTracking(isTrackedContactChannel);
-      applyPreferredContactOrder();
-      applyPrimaryContactChannel();
+      applyContactPreference();
       defineLanguageSuggestion();
       defineFunnelTracking();
       defineLeadForm({

@@ -162,14 +162,14 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
         markFieldValidity,
       } from '@podbor/site-kit/browser';
       import {
-        applyPrimaryContactChannel,
+        applyContactPreference,
         detectVisitorCountry,
         visitorChannel,
       } from '@podbor/site-kit/contact-preference';
       import { defineLeadForm } from '@podbor/lead-crm/lead-form';
 
       defineLanguageSuggestion();
-      applyPrimaryContactChannel();
+      applyContactPreference();
       defineContactClickTracking(isTrackedContactChannel);
       defineFunnelTracking();
       defineLeadForm({

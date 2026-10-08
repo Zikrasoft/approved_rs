@@ -1,10 +1,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import {
-  applyPreferredContactOrder,
-  applyPrimaryContactChannel,
   detectVisitorCountry,
-  preferredContactChannel,
+  preferredContactChannels,
+  visitorChannel,
 } from './contactPreference.ts';
 
 function stubTimeZone(timeZone: string) {
@@ -17,6 +16,19 @@ function render(html: string, lang = 'sr') {
   document.documentElement.lang = lang;
   document.body.innerHTML = html;
 }
+
+async function applyFresh() {
+  vi.resetModules();
+  const { applyContactPreference } = await import('./contactPreference.ts');
+  applyContactPreference();
+  return applyContactPreference;
+}
+
+const hidden = () =>
+  Array.from(
+    document.querySelectorAll<HTMLElement>('[data-primary-channel]'),
+    (el) => [el.dataset.primaryChannel, el.hidden],
+  );
 
 const order = () =>
   Array.from(
@@ -52,111 +64,175 @@ describe('detectVisitorCountry', () => {
   });
 });
 
-describe('preferredContactChannel', () => {
-  it('prefers WhatsApp for the Balkans and Western/Southern Europe', () => {
-    expect(preferredContactChannel('rs')).toBe('whatsapp');
-    expect(preferredContactChannel('de')).toBe('whatsapp');
-    expect(preferredContactChannel('it')).toBe('whatsapp');
+describe('preferredContactChannels', () => {
+  it('ranks WhatsApp first in the Balkans and the rest of Europe', () => {
+    expect(preferredContactChannels('rs')).toEqual([
+      'whatsapp',
+      'telegram',
+      'viber',
+      'phone',
+    ]);
+    expect(preferredContactChannels('de')[0]).toBe('whatsapp');
+    expect(preferredContactChannels('it')[0]).toBe('whatsapp');
   });
 
-  it('prefers Telegram for Russia/CIS', () => {
-    expect(preferredContactChannel('ru')).toBe('telegram');
-    expect(preferredContactChannel('kz')).toBe('telegram');
+  it('ranks Telegram first across the post-Soviet countries', () => {
+    expect(preferredContactChannels('ru')).toEqual([
+      'telegram',
+      'whatsapp',
+      'viber',
+      'phone',
+    ]);
+    expect(preferredContactChannels('kz')[0]).toBe('telegram');
   });
 
-  it('is case-insensitive', () => {
-    expect(preferredContactChannel('RS')).toBe('whatsapp');
+  it('matches a country code regardless of case', () => {
+    expect(preferredContactChannels('RS')[0]).toBe('whatsapp');
   });
 
-  it('defaults to Telegram for an unlisted or missing country', () => {
-    expect(preferredContactChannel('gr')).toBe('telegram');
-    expect(preferredContactChannel(undefined)).toBe('telegram');
+  it('falls back to Telegram first for an unknown or missing country', () => {
+    expect(preferredContactChannels('gr')[0]).toBe('telegram');
+    expect(preferredContactChannels(undefined)[0]).toBe('telegram');
   });
 
-  it('does not hit Object.prototype members used as a country code', () => {
-    expect(preferredContactChannel('constructor')).toBe('telegram');
-    expect(preferredContactChannel('toString')).toBe('telegram');
+  it('does not treat inherited object keys as a country', () => {
+    expect(preferredContactChannels('constructor')[0]).toBe('telegram');
+    expect(preferredContactChannels('toString')[0]).toBe('telegram');
   });
 
-  it('forces Telegram for the Russian locale regardless of country', () => {
-    expect(preferredContactChannel('rs', 'ru')).toBe('telegram');
+  it('ranks Telegram first for a Russian locale whatever the country', () => {
+    expect(preferredContactChannels('rs', 'ru')[0]).toBe('telegram');
+    expect(preferredContactChannels('rs', 'ru-RS')[0]).toBe('telegram');
+    expect(preferredContactChannels('rs', 'RU-rs')[0]).toBe('telegram');
   });
 
-  it('reads the language subtag, so a BCP 47 tag counts as Russian too', () => {
-    expect(preferredContactChannel('rs', 'ru-RS')).toBe('telegram');
-    expect(preferredContactChannel('rs', 'RU-rs')).toBe('telegram');
+  it('keeps the country ranking for any other locale', () => {
+    expect(preferredContactChannels('rs', 'en')[0]).toBe('whatsapp');
   });
 
-  it('falls back to the country lookup for any other locale', () => {
-    expect(preferredContactChannel('rs', 'en')).toBe('whatsapp');
+  it('lists every tracked channel exactly once', () => {
+    for (const country of ['rs', 'ru', undefined]) {
+      expect([...preferredContactChannels(country)].sort()).toEqual([
+        'phone',
+        'telegram',
+        'viber',
+        'whatsapp',
+      ]);
+    }
   });
 });
 
-describe('applyPrimaryContactChannel', () => {
+describe('visitorChannel', () => {
   afterEach(() => vi.restoreAllMocks());
 
-  it('shows the channel the visitor region prefers and hides the rest', () => {
+  it('is the head of the visitor ranking', () => {
     stubTimeZone('Europe/Belgrade');
-    render(`
-      <div data-primary-contact>
-        <a data-primary-channel="telegram"></a>
-        <a data-primary-channel="whatsapp" hidden></a>
-      </div>`);
-
-    applyPrimaryContactChannel();
-
-    expect(
-      document.querySelector<HTMLElement>('[data-primary-channel="telegram"]')
-        ?.hidden,
-    ).toBe(true);
-    expect(
-      document.querySelector<HTMLElement>('[data-primary-channel="whatsapp"]')
-        ?.hidden,
-    ).toBe(false);
-  });
-
-  it('applies the same channel to every group on the page', () => {
-    stubTimeZone('Europe/Belgrade');
-    render(`
-      <div data-primary-contact>
-        <a data-primary-channel="telegram"></a>
-        <a data-primary-channel="whatsapp" hidden></a>
-      </div>
-      <div data-primary-contact>
-        <a data-primary-channel="telegram"></a>
-        <a data-primary-channel="whatsapp" hidden></a>
-      </div>`);
-
-    applyPrimaryContactChannel();
-
-    expect(
-      Array.from(
-        document.querySelectorAll<HTMLElement>('[data-primary-channel]'),
-        (el) => el.hidden,
-      ),
-    ).toEqual([true, false, true, false]);
-  });
-
-  it('keeps the Telegram default on a Russian page whatever the region says', () => {
-    stubTimeZone('Europe/Belgrade');
-    render(
-      `<div data-primary-contact>
-        <a data-primary-channel="telegram"></a>
-        <a data-primary-channel="whatsapp" hidden></a>
-      </div>`,
-      'ru',
-    );
-
-    applyPrimaryContactChannel();
-
-    expect(
-      document.querySelector<HTMLElement>('[data-primary-channel="telegram"]')
-        ?.hidden,
-    ).toBe(false);
+    render('');
+    expect(visitorChannel()).toBe('whatsapp');
+    render('', 'ru');
+    expect(visitorChannel()).toBe('telegram');
   });
 });
 
-describe('applyPreferredContactOrder', () => {
+describe('applyContactPreference: show-one groups', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  const pair = `
+    <div data-primary-contact>
+      <a data-primary-channel="telegram"></a>
+      <a data-primary-channel="whatsapp" hidden></a>
+    </div>`;
+
+  it('shows the channel the visitor region prefers and hides the rest', async () => {
+    stubTimeZone('Europe/Belgrade');
+    render(pair);
+
+    await applyFresh();
+
+    expect(hidden()).toEqual([
+      ['telegram', true],
+      ['whatsapp', false],
+    ]);
+  });
+
+  it('applies the same ranking to every group on the page', async () => {
+    stubTimeZone('Europe/Belgrade');
+    render(pair + pair);
+
+    await applyFresh();
+
+    expect(hidden().map(([, isHidden]) => isHidden)).toEqual([
+      true,
+      false,
+      true,
+      false,
+    ]);
+  });
+
+  it('keeps Telegram on a Russian page whatever the region says', async () => {
+    stubTimeZone('Europe/Belgrade');
+    render(pair, 'ru');
+
+    await applyFresh();
+
+    expect(hidden()).toEqual([
+      ['telegram', false],
+      ['whatsapp', true],
+    ]);
+  });
+
+  it('shows the third channel of a group when it ranks highest there', async () => {
+    stubTimeZone('Europe/Moscow');
+    render(`
+      <div data-primary-contact>
+        <a data-primary-channel="phone"></a>
+        <a data-primary-channel="viber" hidden></a>
+        <a data-primary-channel="whatsapp" hidden></a>
+      </div>`);
+
+    await applyFresh();
+
+    expect(hidden()).toEqual([
+      ['phone', true],
+      ['viber', true],
+      ['whatsapp', false],
+    ]);
+  });
+
+  it('falls down the ranking when the group lacks the preferred channel', async () => {
+    stubTimeZone('Europe/Moscow');
+    render(`
+      <div data-primary-contact>
+        <a data-primary-channel="phone"></a>
+        <a data-primary-channel="viber" hidden></a>
+      </div>`);
+
+    await applyFresh();
+
+    expect(hidden()).toEqual([
+      ['phone', true],
+      ['viber', false],
+    ]);
+  });
+
+  it('leaves a group with no ranked channel as rendered', async () => {
+    stubTimeZone('Europe/Moscow');
+    render(`
+      <div data-primary-contact>
+        <a data-primary-channel="instagram"></a>
+        <a data-primary-channel="email" hidden></a>
+      </div>`);
+
+    await applyFresh();
+
+    expect(hidden()).toEqual([
+      ['instagram', false],
+      ['email', true],
+    ]);
+  });
+});
+
+describe('applyContactPreference: reorder groups', () => {
   afterEach(() => vi.restoreAllMocks());
 
   const list = `
@@ -167,34 +243,34 @@ describe('applyPreferredContactOrder', () => {
       <a data-channel="telegram"></a>
     </div>`;
 
-  it('moves Telegram ahead of WhatsApp for a Russian-speaking visitor', () => {
+  it('moves Telegram just ahead of WhatsApp for a Russian-speaking visitor', async () => {
     stubTimeZone('Europe/Moscow');
     render(list);
 
-    applyPreferredContactOrder();
+    await applyFresh();
 
     expect(order()).toEqual(['phone', 'telegram', 'whatsapp', 'viber']);
   });
 
-  it('promotes Telegram on a page tagged with a Russian BCP 47 locale', () => {
+  it('promotes Telegram on a page tagged with a Russian BCP 47 locale', async () => {
     stubTimeZone('Europe/Belgrade');
     render(list, 'ru-RS');
 
-    applyPreferredContactOrder();
+    await applyFresh();
 
     expect(order()).toEqual(['phone', 'telegram', 'whatsapp', 'viber']);
   });
 
-  it('leaves the WhatsApp-first order alone in the Balkans', () => {
+  it('leaves the WhatsApp-first order alone in the Balkans', async () => {
     stubTimeZone('Europe/Belgrade');
     render(list);
 
-    applyPreferredContactOrder();
+    await applyFresh();
 
     expect(order()).toEqual(['phone', 'whatsapp', 'viber', 'telegram']);
   });
 
-  it('moves WhatsApp back ahead when it is rendered second', () => {
+  it('moves WhatsApp back ahead when it is rendered second', async () => {
     stubTimeZone('Europe/Belgrade');
     render(`
       <div data-contact-order>
@@ -202,70 +278,67 @@ describe('applyPreferredContactOrder', () => {
         <a data-channel="whatsapp"></a>
       </div>`);
 
-    applyPreferredContactOrder();
+    await applyFresh();
 
     expect(order()).toEqual(['whatsapp', 'telegram']);
   });
 
-  it('hands the selection over when the demoted messenger held it', () => {
+  it('ranks against the next channel the group has when the runner-up is missing', async () => {
     stubTimeZone('Europe/Moscow');
     render(`
       <div data-contact-order>
-        <label data-channel="whatsapp"><input type="radio" name="c" checked /></label>
-        <label data-channel="telegram"><input type="radio" name="c" /></label>
-      </div>`);
-
-    applyPreferredContactOrder();
-
-    expect(
-      document.querySelector<HTMLInputElement>(
-        '[data-channel="telegram"] input',
-      )?.checked,
-    ).toBe(true);
-  });
-
-  it('leaves a form whose default is another channel alone', () => {
-    stubTimeZone('Europe/Moscow');
-    render(`
-      <div data-contact-order>
-        <label data-channel="phone"><input type="radio" name="c" checked /></label>
-        <label data-channel="whatsapp"><input type="radio" name="c" /></label>
-        <label data-channel="telegram"><input type="radio" name="c" /></label>
-      </div>`);
-
-    applyPreferredContactOrder();
-
-    expect(order()).toEqual(['phone', 'telegram', 'whatsapp']);
-    expect(
-      document.querySelector<HTMLInputElement>('[data-channel="phone"] input')
-        ?.checked,
-    ).toBe(true);
-  });
-
-  it('does nothing when the preferred channel is not rendered', () => {
-    stubTimeZone('Europe/Moscow');
-    render(`
-      <div data-contact-order>
-        <a data-channel="phone"></a>
-        <a data-channel="whatsapp"></a>
-      </div>`);
-
-    applyPreferredContactOrder();
-
-    expect(order()).toEqual(['phone', 'whatsapp']);
-  });
-
-  it('does nothing when the channel it would demote is not rendered', () => {
-    stubTimeZone('Europe/Belgrade');
-    render(`
-      <div data-contact-order>
-        <a data-channel="phone"></a>
-        <a data-channel="whatsapp"></a>
         <a data-channel="viber"></a>
+        <a data-channel="telegram"></a>
       </div>`);
 
-    applyPreferredContactOrder();
+    await applyFresh();
+
+    expect(order()).toEqual(['telegram', 'viber']);
+  });
+
+  it('promotes the best channel the group has when it lacks the preferred one', async () => {
+    stubTimeZone('Europe/Moscow');
+    render(`
+      <div data-contact-order>
+        <a data-channel="phone"></a>
+        <a data-channel="viber"></a>
+        <a data-channel="whatsapp"></a>
+      </div>`);
+
+    await applyFresh();
 
     expect(order()).toEqual(['phone', 'whatsapp', 'viber']);
+  });
+
+  it('leaves a group with a single ranked channel alone', async () => {
+    stubTimeZone('Europe/Moscow');
+    render(`
+      <div data-contact-order>
+        <a data-channel="phone"></a>
+      </div>`);
+
+    await applyFresh();
+
+    expect(order()).toEqual(['phone']);
+  });
+});
+
+describe('applyContactPreference: arming', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it('acts once however many times it is called', async () => {
+    stubTimeZone('Europe/Moscow');
+    render(`
+      <div data-contact-order>
+        <a data-channel="whatsapp"></a>
+        <a data-channel="telegram"></a>
+      </div>`);
+
+    const apply = await applyFresh();
+    document.documentElement.lang = 'sr';
+    stubTimeZone('Europe/Belgrade');
+    apply();
+
+    expect(order()).toEqual(['telegram', 'whatsapp']);
   });
 });

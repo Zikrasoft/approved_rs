@@ -84,7 +84,6 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
         class="grid grid-cols-2 gap-2 sm:grid-cols-4"
         role="tablist"
         aria-labelledby={channelLabelId}
-        data-contact-order
       >
         {
           channels.map((channel, index) => (
@@ -92,7 +91,6 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
               type="button"
               role="tab"
               class={chip}
-              data-channel={channel.value}
               data-tab={channel.value}
               data-panel={channel.panel}
               aria-selected={index === 0 ? 'true' : 'false'}
