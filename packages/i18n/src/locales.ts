@@ -105,8 +105,6 @@ export function createLocaleSet<L extends string, P extends L>({
       return primaryLocale;
     },
 
-    getAlternateLinks: alternateLinks,
-
     headLinks(siteUrl: string, locale: L, pathname: string, ogImage?: string) {
       const path = pathname === '/' ? `/${locale}/` : pathname;
       return {
