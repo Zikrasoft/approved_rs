@@ -1,10 +1,10 @@
 ---
 import { Image } from 'astro:assets';
-import { formatPrice, productType } from '@podbor/shop-catalog/browser';
+import { formatPrice } from '@podbor/shop-catalog/browser';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
 import type { CatalogProduct } from '@/lib/catalog';
-import { formatSpec, specCopy } from '@/lib/formatSpec';
+import { typeView } from '@/lib/typeView';
 import { PathBuilder } from '@/utils/paths';
 import { content } from '@/i18n/content';
 
@@ -17,13 +17,8 @@ const { product, eager = false } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const shop = content(locale).shop;
 const bcp47 = BCP47_BY_LOCALE[locale];
-const lines = formatSpec(
-  productType(product.typeKey)!,
-  product.spec,
-  specCopy(shop, product.typeKey, bcp47),
-  'card',
-);
-const href = PathBuilder.shopProduct(locale, product.typeKey, product.handle);
+const lines = typeView(product.type, locale).specLines(product.spec, 'card');
+const href = PathBuilder.shopProduct(locale, product.type.key, product.handle);
 ---
 
 <article class="card flex h-full flex-col overflow-hidden">

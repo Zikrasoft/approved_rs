@@ -39,14 +39,13 @@ const pluralSchema = z
 
 const keyed = <T extends z.ZodType>(
   keys: readonly string[],
-  value: (key: string) => T,
+  value: (key: string, index: number) => T,
 ) =>
   z
     .object(
-      Object.fromEntries(keys.map((key) => [key, value(key)])) as Record<
-        string,
-        T
-      >,
+      Object.fromEntries(
+        keys.map((key, index) => [key, value(key, index)]),
+      ) as Record<string, T>,
     )
     .strict();
 
@@ -81,7 +80,7 @@ const typeCopy = (type: ProductTypeDef): z.ZodType<TypeCopy> =>
         .strict(),
       fields: keyed(
         type.fields.map((field) => field.key),
-        (key) => fieldCopy(type.fields.find((field) => field.key === key)!),
+        (_key, index) => fieldCopy(type.fields[index]),
       ),
     })
     .strict();
@@ -111,36 +110,16 @@ export const shopContentSchema = z
     eyebrow: text,
     heading: text,
     lead: text,
-    fitmentHeading: text,
-    makeLabel: text,
-    modelLabel: text,
-    yearLabel: text,
-    anyOption: text,
     resetLabel: text,
     matchCount: pluralSchema,
     noMatches: text,
     noMatchesHint: text,
-    emptyCatalog: text,
-    capacityLabel: text,
-    crankingLabel: text,
-    polarityLabel: text,
-    dimensionsLabel: text,
-    dimensionsUnit: text,
-    polarityLeft: text,
-    polarityRight: text,
-    warrantyLabel: text,
-    warrantyUnit: text,
     fitsLabel: text,
     inStock: text,
-    onOrder: text,
     addToCart: text,
     inCart: text,
-    installNote: text,
-    productMetaSuffix: text,
     typesHeading: text,
     productCount: pluralSchema,
-    carLead: text,
-    carClear: text,
     landingsLabel: text,
     filterHeading: text,
     filterFrom: text,
@@ -181,8 +160,6 @@ export const shopContentSchema = z
         removeLabel: text,
         totalLabel: text,
         totalNote: text,
-        orderHeading: text,
-        orderNote: text,
         badgeLabel: text,
         checkoutHeading: text,
         nameRequired: text,

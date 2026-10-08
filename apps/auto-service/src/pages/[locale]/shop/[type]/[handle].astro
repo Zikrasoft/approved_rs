@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import { formatPrice, productType } from '@podbor/shop-catalog/browser';
+import { formatPrice } from '@podbor/shop-catalog/browser';
 import { safeMarkdown } from '@podbor/site-kit';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
@@ -11,9 +11,9 @@ import AddToCart from '@/components/AddToCart.astro';
 import { BCP47_BY_LOCALE, PRIMARY_LOCALE } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
 import { shopCatalog } from '@/lib/catalog';
-import { formatSpec, specCopy } from '@/lib/formatSpec';
 import { productJsonLd } from '@/lib/productJsonLd';
 import { productsOfType } from '@/lib/shopPages';
+import { typeView } from '@/lib/typeView';
 import { SITE_NAME, SITE_URL } from '@/utils/constants';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { shopBuilt, shopIndexed } from '@/utils/shopStatus';
@@ -24,12 +24,11 @@ export async function getStaticPaths() {
   const { products } = await shopCatalog().catalog(PRIMARY_LOCALE);
   return withLocales(
     products.map((product) => ({
-      params: { type: product.typeKey, handle: product.handle },
+      params: { type: product.type.key, handle: product.handle },
     })),
   );
 }
 
-const typeKey = Astro.params.type!;
 const handle = Astro.params.handle!;
 const locale = localeFrom(Astro.url.pathname);
 const bcp47 = BCP47_BY_LOCALE[locale];
@@ -40,16 +39,16 @@ const product = catalog.products.find(
   (candidate) => candidate.handle === handle,
 )!;
 const regionId = await shopCatalog().regionId();
-const type = productType(typeKey)!;
+const view = typeView(product.type, locale);
+const { type, copy } = view;
 const installation = type.installation
   ? catalog.installations[type.installation]
   : undefined;
-const copy = shop.types[typeKey];
-const lines = formatSpec(type, product.spec, specCopy(shop, typeKey, bcp47));
-const related = productsOfType(catalog.products, typeKey)
+const lines = view.specLines(product.spec);
+const related = productsOfType(catalog.products, type)
   .filter((candidate) => candidate.handle !== handle)
   .slice(0, 4);
-const href = PathBuilder.shopProduct(locale, typeKey, handle);
+const href = PathBuilder.shopProduct(locale, type.key, handle);
 const description = `${product.title}. ${copy.metaDescription}`;
 const searchTerms = [
   copy.name,
@@ -78,7 +77,7 @@ const searchTerms = [
       heading={product.title}
       crumbs={[
         { href: PathBuilder.shop(locale), label: site.nav.shop },
-        { href: PathBuilder.shopType(locale, typeKey), label: copy.name },
+        { href: PathBuilder.shopType(locale, type.key), label: copy.name },
         { href, label: product.title },
       ]}
     />
