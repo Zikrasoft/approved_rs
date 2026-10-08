@@ -3,7 +3,7 @@ import type { ProductTypeDef } from '@podbor/shop-catalog/browser';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
 import type { CatalogProduct } from '@/lib/catalog';
-import { typeView } from '@/lib/typeView';
+import { filterDef, typeView } from '@/lib/typeView';
 import { content } from '@/i18n/content';
 
 interface Props {
@@ -24,7 +24,7 @@ const facets = view.facets(
 
 <shop-filter
   data-type={type.key}
-  data-type-def={JSON.stringify(type)}
+  data-filter-def={JSON.stringify(filterDef(type))}
   data-bcp47={BCP47_BY_LOCALE[locale]}
   data-count-forms={JSON.stringify(shop.matchCount)}
   class="flex flex-col gap-5"

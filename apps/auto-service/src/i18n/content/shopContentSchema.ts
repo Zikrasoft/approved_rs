@@ -39,14 +39,13 @@ const pluralSchema = z
 
 const keyed = <T extends z.ZodType>(
   keys: readonly string[],
-  value: (key: string) => T,
+  value: (key: string, index: number) => T,
 ) =>
   z
     .object(
-      Object.fromEntries(keys.map((key) => [key, value(key)])) as Record<
-        string,
-        T
-      >,
+      Object.fromEntries(
+        keys.map((key, index) => [key, value(key, index)]),
+      ) as Record<string, T>,
     )
     .strict();
 
@@ -79,13 +78,10 @@ const typeCopy = (type: ProductTypeDef): z.ZodType<TypeCopy> =>
           metaDescription: text,
         })
         .strict(),
-      fields: z
-        .object(
-          Object.fromEntries(
-            type.fields.map((field) => [field.key, fieldCopy(field)]),
-          ),
-        )
-        .strict(),
+      fields: keyed(
+        type.fields.map((field) => field.key),
+        (_key, index) => fieldCopy(type.fields[index]),
+      ),
     })
     .strict();
 

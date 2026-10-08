@@ -2,7 +2,10 @@ import {
   facetIndex,
   productType,
   type Facet,
+  type FacetField,
+  type FacetType,
   type Field,
+  type FitmentRule,
   type ProductTypeDef,
   type Spec,
   type SpecValue,
@@ -29,7 +32,11 @@ export interface TypeView {
   facets(specs: readonly Spec[], omit?: string): Facet[];
 }
 
-const views = new Map<string, TypeView>();
+export interface FilterDef extends FacetType {
+  fitment: FitmentRule;
+}
+
+const views = new WeakMap<ProductTypeDef, Map<Locale, TypeView>>();
 
 function resolveType(typeOrKey: ProductTypeDef | string): ProductTypeDef {
   if (typeof typeOrKey !== 'string') return typeOrKey;
@@ -77,10 +84,7 @@ function createView(type: ProductTypeDef, locale: Locale): TypeView {
     type,
     copy,
     field,
-    label: (key) => {
-      field(key);
-      return copy.fields[key].label;
-    },
+    label: (key) => copy.fields[field(key).key].label,
     unit,
     optionLabel,
     formatValue,
@@ -106,11 +110,35 @@ export function typeView(
   locale: Locale,
 ): TypeView {
   const type = resolveType(typeOrKey);
-  const id = `${type.key}:${locale}`;
-  let view = views.get(id);
+  let byLocale = views.get(type);
+  if (!byLocale) {
+    byLocale = new Map();
+    views.set(type, byLocale);
+  }
+  let view = byLocale.get(locale);
   if (!view) {
     view = createView(type, locale);
-    views.set(id, view);
+    byLocale.set(locale, view);
   }
   return view;
+}
+
+export function filterDef(type: ProductTypeDef): FilterDef {
+  return {
+    fitment: type.fitment,
+    fields: type.fields.flatMap((field): FacetField[] => {
+      if (!field.facet) return [];
+      const { key } = field;
+      return field.kind === 'enum'
+        ? [
+            {
+              key,
+              kind: field.kind,
+              facet: true,
+              values: field.values.map(({ value }) => ({ value })),
+            },
+          ]
+        : [{ key, kind: field.kind, facet: true }];
+    }),
+  };
 }

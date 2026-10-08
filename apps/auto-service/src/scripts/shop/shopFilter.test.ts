@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { typeView } from '@/lib/typeView';
+import { productType } from '@podbor/shop-catalog/browser';
+import { filterDef } from '@/lib/typeView';
 import { writeCar } from './car';
 import { defineShopFilter } from './shopFilter';
 
@@ -11,9 +12,9 @@ const FORMS = JSON.stringify({
   other: '{count} товара',
 });
 
-const TYPE_DEF: Record<string, string> = {
-  batteries: JSON.stringify(typeView('batteries', 'ru').type),
-  'motor-oils': JSON.stringify(typeView('motor-oils', 'ru').type),
+const FILTER_DEF: Record<string, string> = {
+  batteries: JSON.stringify(filterDef(productType('batteries')!)),
+  'motor-oils': JSON.stringify(filterDef(productType('motor-oils')!)),
 };
 
 const item = (handle: string, spec: object, fitment: object[] = []) =>
@@ -29,7 +30,7 @@ const COROLLA = {
 const mount = (search = '', type = 'batteries') => {
   history.replaceState(null, '', `/sr/shop/${type}/${search}`);
   document.body.innerHTML = `
-    <shop-filter data-type="${type}" data-type-def='${TYPE_DEF[type]}' data-bcp47="ru-RS" data-count-forms='${FORMS}'>
+    <shop-filter data-type="${type}" data-filter-def='${FILTER_DEF[type]}' data-bcp47="ru-RS" data-count-forms='${FORMS}'>
       <form data-facets>
         <input type="checkbox" name="brand" value="Bosch">
         <input type="checkbox" name="brand" value="Varta">
@@ -149,7 +150,7 @@ describe('<shop-filter>', () => {
     writeCar({ make: 'Toyota', model: 'Corolla', year: 2015 });
     history.replaceState(null, '', '/sr/shop/batteries/');
     document.body.innerHTML = `
-      <shop-filter data-type="batteries" data-type-def='${JSON.stringify({ ...typeView('batteries', 'ru').type, fields: [] })}' data-bcp47="ru-RS" data-count-forms='${FORMS}'>
+      <shop-filter data-type="batteries" data-filter-def='${JSON.stringify({ ...filterDef(productType('batteries')!), fields: [] })}' data-bcp47="ru-RS" data-count-forms='${FORMS}'>
         <form data-facets></form>
         <p data-filter-count></p>
         <ul>
@@ -180,9 +181,25 @@ describe('<shop-filter>', () => {
 
   it.each([
     ['is not JSON', '{'],
-    ['does not match a product type', JSON.stringify({ fitment: 'optional' })],
-  ])('stays inert when the type definition %s', (_label, def) => {
-    TYPE_DEF.broken = def;
+    ['has no fields', JSON.stringify({ fitment: 'optional' })],
+    ['is not an object', 'null'],
+    [
+      'has a field without a key',
+      JSON.stringify({ fitment: 'none', fields: [{ kind: 'number' }] }),
+    ],
+    [
+      'has an enum field without values',
+      JSON.stringify({ fitment: 'none', fields: [{ key: 'b', kind: 'enum' }] }),
+    ],
+    [
+      'has an enum value that is not an option',
+      JSON.stringify({
+        fitment: 'none',
+        fields: [{ key: 'b', kind: 'enum', values: ['Bosch'] }],
+      }),
+    ],
+  ])('stays inert when the filter definition %s', (_label, def) => {
+    FILTER_DEF.broken = def;
     mount('?brand=Bosch', 'broken');
 
     expect(shown()).toEqual(['a', 'b', 'c']);

@@ -1,58 +1,38 @@
-import * as z from 'zod/mini';
 import {
   fitmentMatches,
   matchesFacets,
   readFacetState,
   writeFacetState,
   type FitmentEntry,
-  type ProductTypeDef,
   type Spec,
 } from '@podbor/shop-catalog/browser';
+import type { FilterDef } from '@/lib/typeView';
 import { pluralLabel, type PluralForms } from '@/utils/plural';
 import { CAR_EVENT, readCar } from './car';
 
-const flags = {
-  key: z.string(),
-  label: z.string(),
-  required: z.optional(z.boolean()),
-  facet: z.optional(z.boolean()),
-  card: z.optional(z.boolean()),
-  landing: z.optional(z.boolean()),
-};
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
 
-const typeDefSchema: z.ZodMiniType<ProductTypeDef> = z.object({
-  key: z.string(),
-  label: z.string(),
-  fitment: z.enum(['none', 'optional', 'required']),
-  installation: z.optional(z.string()),
-  fields: z.array(
-    z.discriminatedUnion('kind', [
-      z.object({
-        ...flags,
-        kind: z.literal('enum'),
-        values: z.array(z.object({ value: z.string(), label: z.string() })),
-      }),
-      z.object({
-        ...flags,
-        kind: z.literal('number'),
-        unit: z.enum(['Ah', 'A', 'mm', 'l', 'months']),
-        integer: z.optional(z.boolean()),
-        min: z.optional(z.number()),
-        max: z.optional(z.number()),
-      }),
-      z.object({ ...flags, kind: z.literal('boolean') }),
-      z.object({
-        ...flags,
-        kind: z.literal('codes'),
-        multiple: z.optional(z.boolean()),
-      }),
-    ]),
-  ),
-});
+const isFilterDef = (def: unknown): def is FilterDef =>
+  isRecord(def) &&
+  typeof def.fitment === 'string' &&
+  Array.isArray(def.fields) &&
+  def.fields.every(
+    (field) =>
+      isRecord(field) &&
+      typeof field.key === 'string' &&
+      typeof field.kind === 'string' &&
+      (field.kind !== 'enum' ||
+        (Array.isArray(field.values) &&
+          field.values.every(
+            (option) => isRecord(option) && typeof option.value === 'string',
+          ))),
+  );
 
-const parseTypeDef = (raw: string): ProductTypeDef | undefined => {
+const parseFilterDef = (raw: string): FilterDef | undefined => {
   try {
-    return typeDefSchema.parse(JSON.parse(raw));
+    const def: unknown = JSON.parse(raw);
+    return isFilterDef(def) ? def : undefined;
   } catch {
     return undefined;
   }
@@ -67,7 +47,7 @@ export function defineShopFilter(tagName = 'shop-filter'): void {
 
       connectedCallback(): void {
         if (this.controller) return;
-        const type = parseTypeDef(this.dataset.typeDef ?? '');
+        const type = parseFilterDef(this.dataset.filterDef ?? '');
         const form = this.querySelector<HTMLFormElement>('form[data-facets]');
         const items = [...this.querySelectorAll<HTMLElement>('[data-product]')];
         if (!type || !form || items.length === 0) return;

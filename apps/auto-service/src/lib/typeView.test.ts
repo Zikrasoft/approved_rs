@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { productType } from '@podbor/shop-catalog/browser';
-import { typeView } from './typeView';
+import { filterDef, typeView } from './typeView';
 import { content } from '@/i18n/content';
 
 const SPEC = {
@@ -116,5 +116,27 @@ describe('typeView', () => {
       batteries.facets([SPEC], omit).map((facet) => facet.key);
     expect(keys()).toEqual(['brand', 'capacityAh', 'crankingA', 'polarity']);
     expect(keys('capacityAh')).toEqual(['brand', 'crankingA', 'polarity']);
+  });
+});
+
+describe('filterDef', () => {
+  it('keeps only what the client filter reads, without any copy', () => {
+    expect(filterDef(productType('filters')!)).toEqual({
+      fitment: 'required',
+      fields: [
+        { key: 'brand', kind: 'codes', facet: true },
+        {
+          key: 'filterKind',
+          kind: 'enum',
+          facet: true,
+          values: [
+            { value: 'oil' },
+            { value: 'air' },
+            { value: 'cabin' },
+            { value: 'fuel' },
+          ],
+        },
+      ],
+    });
   });
 });
