@@ -12,6 +12,7 @@ interface MetaOptions {
 }
 
 import { marked } from 'marked';
+import { articleSchema, serviceSchema } from '@podbor/site-kit';
 import type { Country, City } from './geo';
 import { OG_SUFFIX, type Locale } from '@/i18n/config';
 import type { CountryScopedServiceSlug } from './labels';
@@ -76,48 +77,14 @@ export function generateMeta(
   };
 }
 
+const ORGANIZATION = { '@type': 'Organization', name: SITE_NAME };
+
 export function generateServiceSchema(
   name: string,
   areaServed: string | string[],
   url: string,
 ) {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Service',
-    name,
-    // Organization, not LocalBusiness: the business has no physical storefront
-    // or service address — it operates cross-border, entirely through Telegram.
-    provider: { '@type': 'Organization', name: SITE_NAME },
-    areaServed,
-    url,
-  };
-}
-
-export function generateLocalBusinessSchema(options: {
-  type: 'AutoRepair' | 'AutomotiveBusiness';
-  name: string;
-  url: string;
-  streetAddress: string;
-  cityCountryLine: string;
-  areaServed: string | string[];
-}) {
-  const { type, name, url, streetAddress, cityCountryLine, areaServed } =
-    options;
-  const addressLocality = cityCountryLine.split(',')[0]!.trim();
-  return {
-    '@context': 'https://schema.org',
-    '@type': type,
-    name,
-    url,
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress,
-      addressLocality,
-      addressCountry: 'RS',
-    },
-    areaServed,
-    parentOrganization: { '@type': 'Organization', name: SITE_NAME },
-  };
+  return serviceSchema({ name, provider: ORGANIZATION, areaServed, url });
 }
 
 // Homepage/business-entity schema. Organization (not LocalBusiness — no address,
@@ -182,16 +149,5 @@ export function generateArticleSchema(options: {
   datePublished: Date;
   url: string;
 }) {
-  const { headline, description, image, datePublished, url } = options;
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline,
-    description,
-    image,
-    datePublished: datePublished.toISOString(),
-    author: { '@type': 'Organization', name: SITE_NAME },
-    publisher: { '@type': 'Organization', name: SITE_NAME },
-    mainEntityOfPage: url,
-  };
+  return articleSchema({ ...options, publisher: ORGANIZATION });
 }
