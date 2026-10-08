@@ -1,3 +1,4 @@
+import { isTrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 import { CONTACT_PLACEMENT_ATTRIBUTE, GOALS, reachGoal } from './goals.ts';
 import { stampStartVisitor } from './contactLinks.ts';
 import { readOrCreateVisitorId } from './visitorId.ts';
@@ -12,15 +13,13 @@ const CHANNEL_ATTRIBUTE = 'data-contact-channel';
 const CONTACT_CLICK_ENDPOINT = '/api/contact-click';
 const START_PARAM = 'start';
 
-export function defineContactClickTracking(
-  isTracked: (channel: string | undefined) => channel is string,
-): void {
+export function defineContactClickTracking(): void {
   document
     .querySelectorAll<HTMLElement>(`[${CHANNEL_ATTRIBUTE}]`)
     .forEach((element) => {
       element.addEventListener('click', () => {
         const channel = element.dataset.contactChannel;
-        if (!isTracked(channel)) return;
+        if (!isTrackedContactChannel(channel)) return;
         const placement = element.closest<HTMLElement>(
           `[${CONTACT_PLACEMENT_ATTRIBUTE}]`,
         )?.dataset.contactPlacement;

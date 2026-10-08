@@ -220,28 +220,22 @@ const businessSchema = {
     </script>
 
     <script>
-      import { isTrackedContactChannel } from '@podbor/lead-crm/contact-channel';
       import { defineLeadForm } from '@podbor/lead-crm/lead-form';
       import {
-        defineAnalytics,
-        defineContactClickTracking,
-        defineFunnelTracking,
-        defineLanguageSuggestion,
+        bootSiteKit,
         getOrCreateVisitorId,
         markFieldValidity,
       } from '@podbor/site-kit/browser';
       import {
-        applyContactPreference,
         detectVisitorCountry,
         visitorChannel,
       } from '@podbor/site-kit/contact-preference';
       import { YM_COUNTER_ID } from '@/utils/metrika';
 
-      if (!import.meta.env.DEV) defineAnalytics({ ymCounterId: YM_COUNTER_ID });
-      defineContactClickTracking(isTrackedContactChannel);
-      applyContactPreference();
-      defineLanguageSuggestion();
-      defineFunnelTracking();
+      bootSiteKit({
+        ymCounterId: YM_COUNTER_ID,
+        analytics: !import.meta.env.DEV,
+      });
       defineLeadForm({
         visitorId: getOrCreateVisitorId,
         markFieldValidity,
