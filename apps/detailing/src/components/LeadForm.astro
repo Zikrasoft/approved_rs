@@ -2,7 +2,7 @@
 import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
-import { getSiteContent } from '@/i18n/content/site';
+import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 import { CONTACT_LINKS } from '@/utils/contactLinks';
 import { PHONE_COUNTRY_SHORTLIST } from '@/utils/constants';
@@ -18,7 +18,7 @@ interface Props {
 
 const { service, compact = false, class: className = '' } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
+const site = content(locale).site;
 
 const DEFAULT_COUNTRY = 'RS';
 const uid = `lf-${crypto.randomUUID().slice(0, 8)}`;

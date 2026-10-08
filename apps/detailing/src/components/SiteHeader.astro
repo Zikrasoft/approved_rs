@@ -3,13 +3,13 @@ import Cta from './Cta.astro';
 import Wordmark from './Wordmark.astro';
 import { SUPPORTED_LOCALES, LOCALE_NAME } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
+import { content } from '@/i18n/content';
 import { PathBuilder, swapLocale } from '@/utils/paths';
 import { navCurrent } from '@podbor/site-kit';
 import { LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
 
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
+const site = content(locale).site;
 const pathname = Astro.url.pathname;
 
 const links = [
