@@ -612,6 +612,28 @@ describe('the publish invariant', () => {
     ).toBeUndefined();
   });
 
+  it('refuses the save when a stored variant does not fit its read', async () => {
+    const error = await guard(
+      requireReadyToPublish,
+      { title: 'Varta' },
+      {
+        product: [
+          {
+            status: 'published',
+            metadata: { spec: SPEC },
+            type: { value: 'batteries' },
+            variants: [{ id: 'variant_1', prices: [{ amount: {} }] }],
+          },
+        ],
+      },
+      'prod_1',
+    );
+
+    expect(error?.message).toMatch(
+      /^product \(no id\) does not fit its read: variants\.0\.prices\.0\.amount: /,
+    );
+  });
+
   it('publishes a stored product whose variants carry a dinar price', async () => {
     expect(
       await guard(

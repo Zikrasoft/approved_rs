@@ -18,6 +18,7 @@ import {
   translationStamps,
 } from './product-source';
 import { selectOne } from './query';
+import { metadataField } from './row-schema';
 import {
   BUSINESS_DESCRIPTION,
   PRODUCT_PROMPT_SUBJECT,
@@ -34,7 +35,7 @@ export const sourceRowSchema = z.object({
   title: z.string().nullish(),
   subtitle: z.string().nullish(),
   description: z.string().nullish(),
-  metadata: z.record(z.string(), z.unknown()).nullish(),
+  metadata: metadataField,
 });
 
 export type SourceRow = z.infer<typeof sourceRowSchema>;

@@ -9,9 +9,8 @@ import { z } from 'zod';
 import { buildOrderEmail } from '../lib/order-email';
 import { money } from '../lib/money';
 import { selectOne } from '../lib/query';
+import { nullableText } from '../lib/row-schema';
 import { shopLocale } from '../lib/shop';
-
-const nullableText = z.string().nullish();
 
 export const emailOrderSchema = z.object({
   id: z.string(),

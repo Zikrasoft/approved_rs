@@ -29,13 +29,17 @@ export default async function releaseUncollected(
   container: MedusaContainer,
 ): Promise<void> {
   const cutoff = new Date(Date.now() - RESERVE_DAYS * 24 * 60 * 60 * 1000);
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
   const orders = await selectAll(
     container.resolve(ContainerRegistrationKeys.QUERY),
     'order',
     uncollectedOrderSchema,
     { status: 'pending', created_at: { $lt: cutoff.toISOString() } },
+    {
+      skipUnfit: (reason) =>
+        logger.error(`Uncollected order skipped: ${reason}`),
+    },
   );
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
   let cancelled = 0;
   for (const order of orders) {
     try {

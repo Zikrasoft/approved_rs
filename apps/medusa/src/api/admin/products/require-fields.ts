@@ -16,6 +16,11 @@ import {
 import { z } from 'zod';
 
 import { type Query, selectOne } from '../../../lib/query';
+import {
+  idRowSchema,
+  metadataField,
+  typeValueField,
+} from '../../../lib/row-schema';
 import { SHOP } from '../../../lib/shop';
 import { isLatin, translit } from '../../../lib/translit';
 
@@ -28,14 +33,12 @@ export const draftSchema = z.looseObject({
     .nullish(),
   type_id: z.string().nullish(),
   status: z.string().nullish(),
-  metadata: z.record(z.string(), z.unknown()).nullish(),
+  metadata: metadataField,
 });
 
 export type ProductDraft = z.infer<typeof draftSchema>;
 
 const objectSchema = z.record(z.string(), z.unknown());
-
-export const idRowSchema = z.object({ id: z.string() });
 
 export const typeValueSchema = z.object({ value: z.string() });
 
@@ -131,8 +134,8 @@ const sentVariantsSchema = z.looseObject({ variants: variantsSchema });
 
 export const storedProductSchema = z.object({
   status: z.string().nullish(),
-  metadata: z.record(z.string(), z.unknown()).nullish(),
-  type: z.object({ value: z.string().nullish() }).nullish(),
+  metadata: metadataField,
+  type: typeValueField,
   variants: variantsSchema.nullish(),
 });
 
@@ -292,7 +295,7 @@ export async function requireReadyToPublish(
 const batchItemSchema = z.looseObject({
   type_id: z.unknown().optional(),
   status: z.unknown().optional(),
-  metadata: z.record(z.string(), z.unknown()).nullish(),
+  metadata: metadataField,
 });
 
 const batchSchema = z.looseObject({

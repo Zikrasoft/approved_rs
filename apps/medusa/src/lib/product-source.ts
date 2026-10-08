@@ -6,12 +6,12 @@ export const TRANSLATED_FROM = 'translated_from';
 
 const SOURCE_KEYS = ['title', 'subtitle', 'description'] as const;
 
-type SourceField = (typeof SOURCE_KEYS)[number];
+type SourceKey = (typeof SOURCE_KEYS)[number];
 
-export type ProductSource = Partial<Record<SourceField, string>>;
+export type ProductSource = Partial<Record<SourceKey, string>>;
 
 export function productSource(
-  product: Partial<Record<SourceField, string | null>>,
+  product: Partial<Record<SourceKey, string | null>>,
 ): ProductSource {
   return Object.fromEntries(
     SOURCE_KEYS.flatMap((field) => {

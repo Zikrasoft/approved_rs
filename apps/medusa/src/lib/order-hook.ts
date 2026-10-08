@@ -10,9 +10,8 @@ import { z } from 'zod';
 
 import { CHANNEL_FIELD, COMMENT_FIELD, fullName } from '../api/store/contact';
 import { money } from './money';
+import { metadataField, nullableText, typeValueField } from './row-schema';
 import { shopLocale } from './shop';
-
-const nullableText = z.string().nullish();
 
 export const hookOrderSchema = z.object({
   id: z.string(),
@@ -20,7 +19,7 @@ export const hookOrderSchema = z.object({
   email: nullableText,
   locale: nullableText,
   total: z.unknown(),
-  metadata: z.record(z.string(), z.unknown()).nullish(),
+  metadata: metadataField,
   shipping_address: z
     .object({
       first_name: nullableText,
@@ -47,7 +46,7 @@ export type HookOrder = z.infer<typeof hookOrderSchema>;
 export const hookProductSchema = z.object({
   id: z.string(),
   title: z.string(),
-  type: z.object({ value: nullableText }).nullish(),
+  type: typeValueField,
 });
 
 export type HookProduct = z.infer<typeof hookProductSchema>;

@@ -1,11 +1,17 @@
 import type { RemoteQueryFunction } from '@medusajs/framework/types';
 import { z } from 'zod';
 
+import { idRowSchema } from './row-schema';
+
 export type Query = Omit<RemoteQueryFunction, symbol>;
 
 export type FieldPrefix = Record<string, '*' | '+'>;
 
 export type SelectOptions = { fieldPrefix?: FieldPrefix };
+
+export type SelectAllOptions = SelectOptions & {
+  skipUnfit?: (reason: string) => void;
+};
 
 export const QUERY_PAGE = 200;
 
@@ -21,6 +27,26 @@ function unwrap(schema: z.ZodType): z.ZodType {
   return schema;
 }
 
+function hidesObject(schema: z.ZodType): boolean {
+  const inner = unwrap(schema);
+  if (inner instanceof z.ZodObject || inner instanceof z.ZodLazy) {
+    return true;
+  }
+  if (inner instanceof z.ZodUnion) {
+    return (inner.options as z.ZodType[]).some(hidesObject);
+  }
+  if (inner instanceof z.ZodIntersection) {
+    return [inner.def.left, inner.def.right].some((side) =>
+      hidesObject(side as z.ZodType),
+    );
+  }
+  if (inner instanceof z.ZodPipe) {
+    return [inner.in, inner.out].some((side) => hidesObject(side as z.ZodType));
+  }
+  const { def } = inner as { def: { innerType?: z.ZodType } };
+  return def.innerType ? hidesObject(def.innerType) : false;
+}
+
 function walk(
   schema: z.ZodType,
   prefix: FieldPrefix,
@@ -31,6 +57,11 @@ function walk(
   if (!(inner instanceof z.ZodObject)) {
     if (!path) {
       throw new Error('A Medusa read needs an object schema');
+    }
+    if (hidesObject(inner)) {
+      throw new Error(
+        `${path} wraps an object fieldsOf cannot walk; spell it as a plain z.object`,
+      );
     }
     return [path];
   }
@@ -65,24 +96,12 @@ export function fieldsOf(
   return fields;
 }
 
-const idSchema = z.object({ id: z.string() });
-
-function parseRow<S extends z.ZodType>(
-  entity: string,
-  schema: S,
-  row: unknown,
-): z.output<S> {
-  const parsed = schema.safeParse(row);
-  if (parsed.success) {
-    return parsed.data;
-  }
-  const id = idSchema.safeParse(row);
-  const where = parsed.error.issues
+function misfit(entity: string, row: unknown, error: z.ZodError): string {
+  const id = idRowSchema.safeParse(row);
+  const where = error.issues
     .map((issue) => `${issue.path.join('.') || '(row)'}: ${issue.message}`)
     .join('; ');
-  throw new Error(
-    `${entity} ${id.success ? id.data.id : '(no id)'} does not fit its read: ${where}`,
-  );
+  return `${entity} ${id.success ? id.data.id : '(no id)'} does not fit its read: ${where}`;
 }
 
 export async function selectOne<S extends z.ZodType>(
@@ -97,7 +116,14 @@ export async function selectOne<S extends z.ZodType>(
     fields: fieldsOf(schema, opts.fieldPrefix),
     filters,
   });
-  return data.length ? parseRow(entity, schema, data[0]) : undefined;
+  if (!data.length) {
+    return undefined;
+  }
+  const parsed = schema.safeParse(data[0]);
+  if (!parsed.success) {
+    throw new Error(misfit(entity, data[0], parsed.error));
+  }
+  return parsed.data;
 }
 
 export async function selectAll<S extends z.ZodType>(
@@ -105,23 +131,30 @@ export async function selectAll<S extends z.ZodType>(
   entity: string,
   schema: S,
   filters?: Record<string, unknown>,
-  opts: SelectOptions = {},
+  opts: SelectAllOptions = {},
 ): Promise<z.output<S>[]> {
   const fields = fieldsOf(schema, opts.fieldPrefix);
   const found: z.output<S>[] = [];
+  let skip = 0;
   let page: unknown[];
   do {
     ({ data: page } = await query.graph({
       entity,
       fields,
       ...(filters ? { filters } : {}),
-      pagination: {
-        take: QUERY_PAGE,
-        skip: found.length,
-        order: { id: 'ASC' },
-      },
+      pagination: { take: QUERY_PAGE, skip, order: { id: 'ASC' } },
     }));
-    found.push(...page.map((row) => parseRow(entity, schema, row)));
+    skip += page.length;
+    for (const row of page) {
+      const parsed = schema.safeParse(row);
+      if (parsed.success) {
+        found.push(parsed.data);
+      } else if (opts.skipUnfit) {
+        opts.skipUnfit(misfit(entity, row, parsed.error));
+      } else {
+        throw new Error(misfit(entity, row, parsed.error));
+      }
+    }
   } while (page.length === QUERY_PAGE);
   return found;
 }

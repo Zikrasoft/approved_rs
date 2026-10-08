@@ -73,6 +73,37 @@ describe('fieldsOf', () => {
     ).toThrow('fulfillment_status is not a queryable property');
   });
 
+  const inner = z.object({ value: z.string() });
+
+  it.each([
+    ['default', inner.default({ value: '' })],
+    ['transform', inner.transform((row) => row.value)],
+    ['lazy', z.lazy(() => inner)],
+    ['union', z.union([z.string(), inner])],
+    ['intersection', z.intersection(z.string(), inner.nullish())],
+    ['readonly', z.array(inner).readonly()],
+  ])(
+    'refuses an object behind a %s wrapper instead of reading it as a leaf',
+    (_, wrapped) => {
+      expect(() =>
+        fieldsOf(z.object({ id: z.string(), type: wrapped })),
+      ).toThrow('type wraps an object fieldsOf cannot walk');
+    },
+  );
+
+  it('still reads a scalar behind a wrapper as a leaf', () => {
+    expect(
+      fieldsOf(
+        z.object({
+          display_id: z.union([z.number(), z.string()]),
+          status: z.string().default('draft'),
+          total: z.unknown().transform(Number),
+          lines: z.intersection(z.string(), z.string()),
+        }),
+      ),
+    ).toEqual(['display_id', 'status', 'total', 'lines']);
+  });
+
   it('refuses a schema that is not an object', () => {
     expect(() => fieldsOf(z.string())).toThrow(
       'A Medusa read needs an object schema',
@@ -192,5 +223,29 @@ describe('selectAll', () => {
     await expect(
       selectAll({ graph } as never, 'product', rowSchema),
     ).rejects.toThrow(/^product b does not fit its read: title: /);
+  });
+
+  it('hands a misfit row to skipUnfit and keeps paging past it', async () => {
+    const full = Array.from({ length: QUERY_PAGE }, (_, index) =>
+      index === 0 ? { id: 'bad', title: 7 } : { id: `p${index}`, title: 'P' },
+    );
+    const graph = graphOf(full, [{ id: 'last', title: 'Last' }]);
+    const skipUnfit = jest.fn();
+
+    const rows = await selectAll(
+      { graph } as never,
+      'product',
+      rowSchema,
+      undefined,
+      { skipUnfit },
+    );
+
+    expect(rows).toHaveLength(QUERY_PAGE);
+    expect(rows.map((row) => row.id)).not.toContain('bad');
+    expect(skipUnfit).toHaveBeenCalledTimes(1);
+    expect(skipUnfit).toHaveBeenCalledWith(
+      expect.stringMatching(/^product bad does not fit its read: title: /),
+    );
+    expect(graph.mock.calls[1][0].pagination.skip).toBe(QUERY_PAGE);
   });
 });

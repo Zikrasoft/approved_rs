@@ -2,7 +2,6 @@ import { BigNumber } from '@medusajs/framework/utils';
 import type { z } from 'zod';
 
 import {
-  idRowSchema,
   storedProductSchema,
   typeValueSchema,
 } from '../../api/admin/products/require-fields';
@@ -12,6 +11,7 @@ import { emailOrderSchema } from '../../subscribers/order-placed-email';
 import { metadataRowSchema } from '../metadata';
 import { hookOrderSchema, hookProductSchema } from '../order-hook';
 import { fieldsOf } from '../query';
+import { idRowSchema } from '../row-schema';
 import { sourceRowSchema } from '../translate-product';
 
 const created = new Date('2026-10-01T09:30:00.000Z');

@@ -158,17 +158,23 @@ describe('release-uncollected', () => {
     );
   });
 
-  it('refuses to guess at an order whose relations the query did not return', async () => {
+  it('logs and skips an order whose relations the query did not return, and releases the rest', async () => {
     const { container, logger } = containerFor([
       { id: 'shapeless' },
       { id: 'fine', ...EMPTY },
     ]);
 
-    await expect(releaseUncollected(container)).rejects.toThrow(
-      'order shapeless does not fit its read: fulfillments',
+    await releaseUncollected(container);
+
+    expect(cancelled()).toEqual(['fine']);
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringMatching(
+        /^Uncollected order skipped: order shapeless does not fit its read: fulfillments: .*; payment_collections: /,
+      ),
     );
-    expect(run).not.toHaveBeenCalled();
-    expect(logger.info).not.toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledWith(
+      'Uncollected orders: 1 of 1 cancelled',
+    );
   });
 
   it('runs every hour', () => {

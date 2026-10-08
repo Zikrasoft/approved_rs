@@ -15,12 +15,13 @@ import {
 import { z } from 'zod';
 
 import { selectOne } from './query';
+import { metadataField } from './row-schema';
 
 export type Metadata = Record<string, unknown>;
 
 export const metadataRowSchema = z.object({
   id: z.string(),
-  metadata: z.record(z.string(), z.unknown()).nullish(),
+  metadata: metadataField,
 });
 
 type Row = z.infer<typeof metadataRowSchema>;

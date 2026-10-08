@@ -8,6 +8,7 @@ import { z } from 'zod';
 
 import { updateProductMetadata } from '../../../../../lib/metadata';
 import { selectOne } from '../../../../../lib/query';
+import { typeValueField } from '../../../../../lib/row-schema';
 
 const bodySchema = z
   .object({
@@ -18,7 +19,7 @@ const bodySchema = z
 
 export const specProductSchema = z.object({
   id: z.string(),
-  type: z.object({ value: z.string().nullish() }).nullish(),
+  type: typeValueField,
 });
 
 const refusal = (reason: string) =>
