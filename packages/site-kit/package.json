@@ -11,6 +11,7 @@
     "./contact-control": "./src/contactControl.ts",
     "./format-phone": "./src/formatPhone.ts",
     "./contact-preference": "./src/contactPreference.ts",
+    "./lead-form": "./src/leadForm.ts",
     "./public-env": "./src/publicEnv.ts",
     "./redirects": "./src/redirects.ts"
   },

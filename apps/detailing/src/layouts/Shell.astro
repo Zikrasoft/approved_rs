@@ -205,28 +205,15 @@ const businessSchema = localBusinessSchema({
     </script>
 
     <script>
-      import { defineLeadForm } from '@podbor/lead-crm/lead-form';
-      import {
-        bootSiteKit,
-        getOrCreateVisitorId,
-        markFieldValidity,
-      } from '@podbor/site-kit/browser';
-      import {
-        detectVisitorCountry,
-        visitorChannel,
-      } from '@podbor/site-kit/contact-preference';
+      import { bootSiteKit } from '@podbor/site-kit/browser';
+      import { defineSiteLeadForm } from '@podbor/site-kit/lead-form';
       import { YM_COUNTER_ID } from '@/utils/metrika';
 
       bootSiteKit({
         ymCounterId: YM_COUNTER_ID,
         analytics: !import.meta.env.DEV,
       });
-      defineLeadForm({
-        visitorId: getOrCreateVisitorId,
-        markFieldValidity,
-        preferredChannel: visitorChannel,
-        visitorCountry: detectVisitorCountry,
-      });
+      defineSiteLeadForm();
     </script>
   </body>
 </html>
