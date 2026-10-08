@@ -66,8 +66,8 @@ component renders it: `hero`, `bar`, `floating`, `footer`, `header`, `thanks` â€
 one word can therefore be stamped by several components (`bar` is every full
 contact bar, wherever it is rendered) and `thanks` is a whole page, because that
 page is one region. The closed set is `CONTACT_PLACEMENTS`
-in `packages/site-kit/src/goals.ts`, stamped through `contactPlacement()` so a
-typo is a build error. It goes on a container, and the tracker reads the nearest
+in `packages/site-kit/src/goals.ts`, stamped through `contactRegion()` in
+`@podbor/site-kit/contact-control` so a typo is a build error. It goes on a container, and the tracker reads the nearest
 one above the tapped control, so one attribute covers a whole bar. A rename of
 the component that renders a region must not move the word, or a year of data
 splits in two. `placement` rides on the existing goal, so there is nothing to

@@ -2,15 +2,13 @@
 import Button from './Button.astro';
 import ContactIcon from './ContactIcon.astro';
 import RegionalContactButton from './RegionalContactButton.astro';
-import { phoneLink, viberLink } from '@/utils/contactLinks';
-import { messengerHrefs } from '@/utils/messengerHrefs';
+import ContactControl from './ContactControl.astro';
 import { servicesView } from '@/i18n/content/services';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
-import { VIBER_NUMBER, PHONE_NUMBER } from '@/utils/constants';
 import { PathBuilder } from '@/utils/paths';
-import { contactPlacement, navCurrent } from '@podbor/site-kit';
-import { formatPhone } from '@podbor/site-kit/format-phone';
+import { navCurrent } from '@podbor/site-kit';
+import { contactRegion } from '@podbor/site-kit/contact-control';
 import { callbackTrigger, leadModalTrigger } from '@/utils/contactChannel';
 
 interface Props {
@@ -27,15 +25,10 @@ const telegramAriaLabel = label ?? cc.ctaButtonLabel;
 
 const onThanks =
   navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page';
-const messenger = messengerHrefs(locale, service, { human: onThanks });
 const placement = onThanks ? 'thanks' : compact ? 'hero' : 'bar';
 ---
 
-<div
-  class="flex flex-col gap-3 my-6 sm:my-8"
-  data-contact-cta
-  {...contactPlacement(placement)}
->
+<div class="flex flex-col gap-3 my-6 sm:my-8" {...contactRegion(placement)}>
   {
     compact ? (
       <div class="flex flex-wrap gap-3">
@@ -48,74 +41,66 @@ const placement = onThanks ? 'thanks' : compact ? 'hero' : 'bar';
         </Button>
         <RegionalContactButton
           variant="secondary"
+          {placement}
           {service}
           class="gap-2.5 px-4 sm:px-6 py-3 tracking-[0.03em] flex-auto whitespace-nowrap sm:flex-none sm:w-auto justify-center lg:flex-none"
         />
-        <Button
+        <ContactControl
+          channel="phone"
+          {placement}
           variant="secondary"
-          href={phoneLink(PHONE_NUMBER)}
-          data-contact-channel="phone"
-          class="gap-2.5 px-4 sm:px-6 py-3 tracking-[0.03em] flex-auto whitespace-nowrap sm:flex-none sm:w-auto justify-center pointer-fine:hidden!"
+          class="gap-2.5 px-4 sm:px-6 py-3 tracking-[0.03em] flex-auto whitespace-nowrap sm:flex-none sm:w-auto justify-center"
         >
           <ContactIcon channel="phone" size={15} />
           {cc.callButtonLabel}
-        </Button>
+        </ContactControl>
       </div>
     ) : (
       <>
         <div class="contact-bar">
-          <a
-            data-contact-channel="telegram"
-            href={messenger.telegram}
-            target="_blank"
-            rel="noopener"
+          <ContactControl
+            channel="telegram"
+            {placement}
+            {service}
             aria-label={telegramAriaLabel}
             class="contact-cell"
           >
             <ContactIcon channel="telegram" size={17} />
             <span>Telegram</span>
-          </a>
+          </ContactControl>
 
-          <a
-            data-contact-channel="whatsapp"
-            href={messenger.whatsapp}
-            target="_blank"
-            rel="noopener"
+          <ContactControl
+            channel="whatsapp"
+            {placement}
+            {service}
             aria-label={cc.whatsappButtonLabel}
             class="contact-cell"
           >
             <ContactIcon channel="whatsapp" size={17} />
             <span>WhatsApp</span>
-          </a>
+          </ContactControl>
 
-          <a
-            data-contact-channel="viber"
-            href={viberLink(VIBER_NUMBER)}
+          <ContactControl
+            channel="viber"
+            {placement}
             aria-label={cc.viberButtonLabel}
             class="contact-cell"
           >
             <ContactIcon channel="viber" size={17} />
             <span>Viber</span>
-          </a>
+          </ContactControl>
 
           {onThanks ? (
-            <>
-              <a
-                data-contact-channel="phone"
-                href={phoneLink(PHONE_NUMBER)}
-                aria-label={cc.callButtonLabel}
-                class="contact-cell pointer-fine:hidden!"
-              >
-                <ContactIcon channel="phone" size={16} />
-                <span>{cc.callbackShortLabel}</span>
-              </a>
-              <span class="contact-cell pointer-coarse:hidden!">
-                <ContactIcon channel="phone" size={16} />
-                <span class="whitespace-nowrap">
-                  {formatPhone(PHONE_NUMBER)}
-                </span>
-              </span>
-            </>
+            <ContactControl
+              channel="phone"
+              {placement}
+              aria-label={cc.callButtonLabel}
+              class="contact-cell"
+            >
+              <ContactIcon channel="phone" size={16} />
+              <span>{cc.callbackShortLabel}</span>
+              <ContactIcon slot="plain" channel="phone" size={16} />
+            </ContactControl>
           ) : (
             <button
               type="button"
@@ -129,15 +114,17 @@ const placement = onThanks ? 'thanks' : compact ? 'hero' : 'bar';
           )}
         </div>
 
-        <Button
-          variant="secondary"
-          href={phoneLink(PHONE_NUMBER)}
-          data-contact-channel="phone"
-          class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full justify-center bg-surface pointer-fine:hidden!"
-        >
-          <ContactIcon channel="phone" size={15} />
-          {cc.callButtonLabel}
-        </Button>
+        {!onThanks && (
+          <ContactControl
+            channel="phone"
+            {placement}
+            variant="secondary"
+            class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full justify-center bg-surface"
+          >
+            <ContactIcon channel="phone" size={15} />
+            {cc.callButtonLabel}
+          </ContactControl>
+        )}
       </>
     )
   }
@@ -158,7 +145,7 @@ const placement = onThanks ? 'thanks' : compact ? 'hero' : 'bar';
       grid-template-columns: repeat(4, 1fr);
     }
   }
-  .contact-cell {
+  .contact-bar :global(.contact-cell) {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -178,18 +165,18 @@ const placement = onThanks ? 'thanks' : compact ? 'hero' : 'bar';
       background-color 0.2s,
       color 0.2s;
   }
-  span.contact-cell {
+  .contact-bar :global(span.contact-cell) {
     cursor: text;
     user-select: text;
   }
-  a.contact-cell:hover,
-  a.contact-cell:focus-visible,
-  button.contact-cell:hover,
-  button.contact-cell:focus-visible {
+  .contact-bar :global(a.contact-cell:hover),
+  .contact-bar :global(a.contact-cell:focus-visible),
+  .contact-bar :global(button.contact-cell:hover),
+  .contact-bar :global(button.contact-cell:focus-visible) {
     background-color: var(--color-accent);
     color: var(--color-on-accent);
   }
-  .contact-cell:focus-visible {
+  .contact-bar :global(.contact-cell:focus-visible) {
     outline: 2px solid var(--color-on-accent);
     outline-offset: -3px;
   }

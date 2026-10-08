@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  CONTACT_PLACEMENTS,
-  contactPlacement,
-  GOALS,
-  type ContactPlacement,
-} from './goals.ts';
+import { CONTACT_PLACEMENTS, GOALS } from './goals.ts';
 
 describe('GOALS', () => {
   it('names the shop funnel', () => {
@@ -36,12 +31,5 @@ describe('CONTACT_PLACEMENTS', () => {
     expect(new Set(CONTACT_PLACEMENTS).size).toBe(CONTACT_PLACEMENTS.length);
     for (const placement of CONTACT_PLACEMENTS)
       expect(placement).toMatch(/^[a-z]+$/);
-  });
-
-  it('stamps the attribute the click tracker reads', () => {
-    const placement: ContactPlacement = 'footer';
-    expect(contactPlacement(placement)).toEqual({
-      'data-contact-placement': 'footer',
-    });
   });
 });

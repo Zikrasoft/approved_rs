@@ -1,7 +1,7 @@
 export { safeMarkdown, safeMarkdownInline } from './safeMarkdown.ts';
 export { breadcrumbListSchema } from './breadcrumbSchema.ts';
 export { jsonLdText } from './jsonLd.ts';
-export { contactPlacement, type ContactPlacement } from './goals.ts';
+export type { ContactPlacement } from './goals.ts';
 export { relatedEntries } from './relatedEntries.ts';
 export { mapEmbedSrc, mapPlaceUrl } from './mapEmbed.ts';
 export {

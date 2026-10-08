@@ -1,46 +1,48 @@
 ---
-import Button from './Button.astro';
+import ContactControl from './ContactControl.astro';
 import ContactIcon from './ContactIcon.astro';
-import { messengerHrefs } from '@/utils/messengerHrefs';
 import { servicesView } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
+import type { ContactPlacement } from '@podbor/site-kit';
 
 interface Props {
+  placement: ContactPlacement;
   service?: string;
   variant?: 'primary' | 'secondary';
   class?: string;
 }
 
-const locale = getLocale(Astro.currentLocale);
-const cc = servicesView(locale).caseChrome;
-const { service, variant = 'primary', class: className } = Astro.props;
-const messenger = messengerHrefs(locale, service);
+const cc = servicesView(getLocale(Astro.currentLocale)).caseChrome;
+const {
+  placement,
+  service,
+  variant = 'primary',
+  class: className,
+} = Astro.props;
 ---
 
 <div data-primary-contact class="contents">
-  <Button
+  <ContactControl
+    channel="telegram"
+    {placement}
+    {service}
     {variant}
     data-primary-channel="telegram"
-    data-contact-channel="telegram"
-    href={messenger.telegram}
-    target="_blank"
-    rel="noopener"
     class={className}
   >
     <ContactIcon channel="telegram" size={16} />
     {cc.ctaButtonLabel}
-  </Button>
-  <Button
+  </ContactControl>
+  <ContactControl
+    channel="whatsapp"
+    {placement}
+    {service}
     {variant}
     data-primary-channel="whatsapp"
-    data-contact-channel="whatsapp"
-    href={messenger.whatsapp}
-    target="_blank"
-    rel="noopener"
     hidden
     class={className}
   >
     <ContactIcon channel="whatsapp" size={16} />
     {cc.whatsappButtonLabel}
-  </Button>
+  </ContactControl>
 </div>
