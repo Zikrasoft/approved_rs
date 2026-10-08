@@ -13,7 +13,6 @@ const locale = getLocale(Astro.currentLocale);
 const cc = servicesView(locale).caseChrome;
 const onThanks =
   navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page';
-const placement = onThanks ? 'thanks' : 'floating';
 ---
 
 <cta-reveal
@@ -26,7 +25,7 @@ const placement = onThanks ? 'thanks' : 'floating';
   <div class="floating-panel" role="menu" data-panel hidden>
     <ContactControl
       channel="telegram"
-      {placement}
+      placement="floating"
       role="menuitem"
       class="floating-cell"
       aria-label={cc.ctaButtonLabel}
@@ -36,7 +35,7 @@ const placement = onThanks ? 'thanks' : 'floating';
     </ContactControl>
     <ContactControl
       channel="whatsapp"
-      {placement}
+      placement="floating"
       role="menuitem"
       class="floating-cell"
       aria-label={cc.whatsappButtonLabel}
@@ -46,7 +45,7 @@ const placement = onThanks ? 'thanks' : 'floating';
     </ContactControl>
     <ContactControl
       channel="viber"
-      {placement}
+      placement="floating"
       role="menuitem"
       class="floating-cell"
       aria-label={cc.viberButtonLabel}
@@ -70,7 +69,7 @@ const placement = onThanks ? 'thanks' : 'floating';
     }
     <ContactControl
       channel="phone"
-      {placement}
+      placement="floating"
       role="menuitem"
       class="floating-cell"
     >

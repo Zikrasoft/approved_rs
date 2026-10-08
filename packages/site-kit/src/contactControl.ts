@@ -20,6 +20,7 @@ export type BrandContacts = {
 export type ContactControlRequest = {
   channel: TrackedContactChannel;
   placement: ContactPlacement;
+  onThanks: boolean;
   locale: string;
   service?: string;
 };
@@ -38,6 +39,7 @@ export const createContactControls =
   ({
     channel,
     placement,
+    onThanks,
     locale,
     service,
   }: ContactControlRequest): ContactControl => {
@@ -55,7 +57,7 @@ export const createContactControls =
         whatsappLink(brand.whatsapp, brand.prefill?.(locale, service)),
       viber: () => viberLink(brand.viber),
       telegram: () =>
-        placement === 'thanks' && brand.humanTelegram
+        onThanks && brand.humanTelegram
           ? telegramLink(brand.humanTelegram)
           : captureBotLink(brand.captureBot, locale, service),
     }[channel]();

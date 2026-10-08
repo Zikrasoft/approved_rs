@@ -114,15 +114,17 @@ const placement = onThanks ? 'thanks' : compact ? 'hero' : 'bar';
           )}
         </div>
 
-        <ContactControl
-          channel="phone"
-          {placement}
-          variant="secondary"
-          class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full justify-center bg-surface"
-        >
-          <ContactIcon channel="phone" size={15} />
-          {cc.callButtonLabel}
-        </ContactControl>
+        {!onThanks && (
+          <ContactControl
+            channel="phone"
+            {placement}
+            variant="secondary"
+            class="gap-2.5 px-6 py-3 tracking-[0.03em] w-full justify-center bg-surface"
+          >
+            <ContactIcon channel="phone" size={15} />
+            {cc.callButtonLabel}
+          </ContactControl>
+        )}
       </>
     )
   }

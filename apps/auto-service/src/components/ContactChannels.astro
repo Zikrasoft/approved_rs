@@ -78,37 +78,24 @@ const { surface, icon: iconTone } = TONE[tone];
 >
   {
     variant.channels.map((channel) => (
-      <li
-        data-channel={channel}
-        class:list={[
-          channel === 'phone' &&
-            placement !== 'thanks' &&
-            'pointer-fine:hidden!',
-        ]}
+      <ContactControl
+        channel={channel}
+        placement={placement}
+        service={service}
+        listItem
+        class={`group flex items-center rounded-control border transition-colors duration-150 ${variant.tile} ${surface}`}
+        plainClass="flex min-h-11 items-center gap-3 rounded-control border border-line bg-card px-4 py-3"
       >
-        <ContactControl
-          channel={channel}
-          placement={placement}
-          service={service}
-          class={`group flex items-center rounded-control border transition-colors duration-150 ${variant.tile} ${surface}`}
-          plainClass="flex min-h-11 items-center gap-3 rounded-control border border-line bg-card px-4 py-3"
-        >
-          <Icon
-            name={CHANNEL[channel].icon}
-            size={variant.iconSize}
-            class={`shrink-0 transition-colors duration-150 group-hover:text-signal group-focus-visible:text-signal ${iconTone}`}
-          />
-          <span class:list={['spec whitespace-nowrap', variant.label]}>
-            {CHANNEL[channel].label}
-          </span>
-          <Icon
-            slot="plain"
-            name="phone"
-            size={18}
-            class="shrink-0 text-muted"
-          />
-        </ContactControl>
-      </li>
+        <Icon
+          name={CHANNEL[channel].icon}
+          size={variant.iconSize}
+          class={`shrink-0 transition-colors duration-150 group-hover:text-signal group-focus-visible:text-signal ${iconTone}`}
+        />
+        <span class:list={['spec whitespace-nowrap', variant.label]}>
+          {CHANNEL[channel].label}
+        </span>
+        <Icon slot="plain" name="phone" size={18} class="shrink-0 text-muted" />
+      </ContactControl>
     ))
   }
 </ul>

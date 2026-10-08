@@ -1,10 +1,11 @@
 ---
 import type { HTMLAttributes } from 'astro/types';
 import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
-import type { ContactPlacement } from '@podbor/site-kit';
+import { navCurrent, type ContactPlacement } from '@podbor/site-kit';
 import { formatPhone } from '@podbor/site-kit/format-phone';
 import { getLocale } from '@/i18n/config';
 import { contactControl } from '@/utils/contactLinks';
+import { PathBuilder } from '@/utils/paths';
 import Button from './Button.astro';
 
 interface Props extends Omit<
@@ -25,17 +26,20 @@ const {
   class: className,
   ...rest
 } = Astro.props;
+const locale = getLocale(Astro.currentLocale);
 const control = contactControl({
   channel,
   placement,
-  locale: getLocale(Astro.currentLocale),
+  onThanks:
+    navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page',
+  locale,
   service,
 });
 const classes = [
   className,
   control.pointer === 'coarse-only' && 'pointer-fine:hidden!',
 ];
-const plainNumber = Astro.slots.has('plain') ? control.plainNumber : undefined;
+const { plainNumber } = control;
 ---
 
 {

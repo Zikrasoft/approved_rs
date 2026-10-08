@@ -24,7 +24,13 @@ describe('createContactControls', () => {
       const hrefs = Object.fromEntries(
         TRACKED_CONTACT_CHANNELS.map((channel) => [
           channel,
-          bare({ channel, placement, locale: 'sr', service: 'ppf' }).href,
+          bare({
+            channel,
+            placement,
+            onThanks: false,
+            locale: 'sr',
+            service: 'ppf',
+          }).href,
         ]),
       );
       expect(hrefs).toEqual({
@@ -38,27 +44,39 @@ describe('createContactControls', () => {
 
   it('opens the capture bot with the locale alone where the page has no service', () => {
     expect(
-      bare({ channel: 'telegram', placement: 'footer', locale: 'en' }).href,
+      bare({
+        channel: 'telegram',
+        placement: 'footer',
+        onThanks: false,
+        locale: 'en',
+      }).href,
     ).toBe('https://t.me/brand_capture_bot?start=en');
   });
 
-  it('opens the human Telegram on thanks only when the brand has one', () => {
-    const request = {
-      channel: 'telegram',
-      placement: 'thanks',
-      locale: 'ru',
-    } as const;
-    expect(full(request).href).toBe('https://t.me/brand_manager');
-    expect(bare(request).href).toBe('https://t.me/brand_capture_bot?start=ru');
-    expect(full({ ...request, placement: 'bar' }).href).toBe(
-      'https://t.me/brand_capture_bot?start=ru',
-    );
-  });
+  it.each(CONTACT_PLACEMENTS)(
+    'opens the human Telegram on the thanks page only when the brand has one, in the %s region too',
+    (placement) => {
+      const request = {
+        channel: 'telegram',
+        placement,
+        onThanks: true,
+        locale: 'ru',
+      } as const;
+      expect(full(request).href).toBe('https://t.me/brand_manager');
+      expect(bare(request).href).toBe(
+        'https://t.me/brand_capture_bot?start=ru',
+      );
+      expect(full({ ...request, onThanks: false }).href).toBe(
+        'https://t.me/brand_capture_bot?start=ru',
+      );
+    },
+  );
 
   it('prefills WhatsApp only when the brand configures a message', () => {
     const request = {
       channel: 'whatsapp',
       placement: 'bar',
+      onThanks: false,
       locale: 'en',
       service: 'ppf',
     } as const;
@@ -73,15 +91,19 @@ describe('createContactControls', () => {
 
   it('marks the phone coarse-only and every messenger any-pointer', () => {
     for (const channel of TRACKED_CONTACT_CHANNELS)
-      expect(bare({ channel, placement: 'bar', locale: 'ru' }).pointer).toBe(
-        channel === 'phone' ? 'coarse-only' : 'any',
-      );
+      expect(
+        bare({ channel, placement: 'bar', onThanks: false, locale: 'ru' })
+          .pointer,
+      ).toBe(channel === 'phone' ? 'coarse-only' : 'any');
   });
 
-  it('carries the plain number only for the phone on thanks', () => {
+  it('carries the plain number only for the phone in the thanks region', () => {
     for (const placement of CONTACT_PLACEMENTS)
       for (const channel of TRACKED_CONTACT_CHANNELS)
-        expect(bare({ channel, placement, locale: 'ru' }).plainNumber).toBe(
+        expect(
+          bare({ channel, placement, onThanks: true, locale: 'ru' })
+            .plainNumber,
+        ).toBe(
           channel === 'phone' && placement === 'thanks'
             ? '381601234567'
             : undefined,
@@ -90,10 +112,18 @@ describe('createContactControls', () => {
 
   it('stamps the channel, and opens every messenger in a new tab', () => {
     expect(
-      bare({ channel: 'phone', placement: 'bar', locale: 'ru' }).attrs,
+      bare({
+        channel: 'phone',
+        placement: 'bar',
+        onThanks: false,
+        locale: 'ru',
+      }).attrs,
     ).toEqual({ 'data-contact-channel': 'phone' });
     for (const channel of ['whatsapp', 'viber', 'telegram'] as const)
-      expect(bare({ channel, placement: 'bar', locale: 'ru' }).attrs).toEqual({
+      expect(
+        bare({ channel, placement: 'bar', onThanks: false, locale: 'ru' })
+          .attrs,
+      ).toEqual({
         'data-contact-channel': channel,
         target: '_blank',
         rel: 'noopener',
