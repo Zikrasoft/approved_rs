@@ -104,14 +104,16 @@ export const REDIRECTS: Redirect[] = [
   ...movedBrandRedirects,
   ...localized('/privoz/de/:path*', '/vehicle-import/eu/de/:path*'),
   ...localized('/vehicle-import/de/:path*', '/vehicle-import/eu/de/:path*'),
+  ...['/vykup', '/vehicle-buyback'].flatMap((section) =>
+    localized(
+      `${section}/:country(${BUYBACK_COLLAPSED_COUNTRIES.join('|')})`,
+      '/vehicle-buyback/',
+    ),
+  ),
   ...Object.entries(SLUG_RENAMES).flatMap(([old, current]) => [
     ...localized(`/${old}/:path*`, `/${current}/:path*`),
     ...localized(`/cases/${old}`, `/cases/${current}`),
   ]),
-  ...localized(
-    `/vehicle-buyback/:country(${BUYBACK_COLLAPSED_COUNTRIES.join('|')})`,
-    '/vehicle-buyback/',
-  ),
 ];
 
 export const EDGE_REDIRECTS: Redirect[] = [

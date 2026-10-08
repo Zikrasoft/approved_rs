@@ -817,6 +817,46 @@
       "permanent": true
     },
     {
+      "source": "/:locale(ru|en|sr|es|de)/vykup/:country(de|es|ch|pt|fr|it|pl)",
+      "destination": "/:locale/vehicle-buyback/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/vykup/:country(de|es|ch|pt|fr|it|pl)/",
+      "destination": "/:locale/vehicle-buyback/",
+      "permanent": true
+    },
+    {
+      "source": "/vykup/:country(de|es|ch|pt|fr|it|pl)",
+      "destination": "/ru/vehicle-buyback/",
+      "permanent": true
+    },
+    {
+      "source": "/vykup/:country(de|es|ch|pt|fr|it|pl)/",
+      "destination": "/ru/vehicle-buyback/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/vehicle-buyback/:country(de|es|ch|pt|fr|it|pl)",
+      "destination": "/:locale/vehicle-buyback/",
+      "permanent": true
+    },
+    {
+      "source": "/:locale(ru|en|sr|es|de)/vehicle-buyback/:country(de|es|ch|pt|fr|it|pl)/",
+      "destination": "/:locale/vehicle-buyback/",
+      "permanent": true
+    },
+    {
+      "source": "/vehicle-buyback/:country(de|es|ch|pt|fr|it|pl)",
+      "destination": "/ru/vehicle-buyback/",
+      "permanent": true
+    },
+    {
+      "source": "/vehicle-buyback/:country(de|es|ch|pt|fr|it|pl)/",
+      "destination": "/ru/vehicle-buyback/",
+      "permanent": true
+    },
+    {
       "source": "/:locale(ru|en|sr|es|de)/autopodbor/:path*",
       "destination": "/:locale/vehicle-sourcing/:path*",
       "permanent": true
@@ -974,26 +1014,6 @@
     {
       "source": "/cases/proverka/",
       "destination": "/ru/cases/vehicle-inspection",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|en|sr|es|de)/vehicle-buyback/:country(de|es|ch|pt|fr|it|pl)",
-      "destination": "/:locale/vehicle-buyback/",
-      "permanent": true
-    },
-    {
-      "source": "/:locale(ru|en|sr|es|de)/vehicle-buyback/:country(de|es|ch|pt|fr|it|pl)/",
-      "destination": "/:locale/vehicle-buyback/",
-      "permanent": true
-    },
-    {
-      "source": "/vehicle-buyback/:country(de|es|ch|pt|fr|it|pl)",
-      "destination": "/ru/vehicle-buyback/",
-      "permanent": true
-    },
-    {
-      "source": "/vehicle-buyback/:country(de|es|ch|pt|fr|it|pl)/",
-      "destination": "/ru/vehicle-buyback/",
       "permanent": true
     },
     {

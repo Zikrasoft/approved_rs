@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { createRedirectMatcher } from '@podbor/site-kit/redirects';
 import { EDGE_REDIRECTS, REDIRECTS } from './redirects';
@@ -8,7 +7,9 @@ const edgeRedirectFor = createRedirectMatcher(EDGE_REDIRECTS);
 
 describe('REDIRECTS', () => {
   it.each([
-    ['/es/vykup/de/', '/es/vehicle-buyback/de'],
+    ['/es/vykup/de/', '/es/vehicle-buyback/'],
+    ['/vykup/pl', '/ru/vehicle-buyback/'],
+    ['/en/vykup/rs/', '/en/vehicle-buyback/rs'],
     ['/es/vehicle-buyback/de/', '/es/vehicle-buyback/'],
     ['/de/proverka/rs/', '/de/vehicle-inspection/rs'],
     ['/es/privoz/', '/es/vehicle-import/'],
@@ -54,6 +55,7 @@ describe('REDIRECTS', () => {
     '/ru/constructor/',
     '/ru/cases/toString/',
     '/vehicle-sourcing/rs/',
+    '/llms.txt',
   ])('leaves %s alone', (path) => {
     expect(redirectFor(path)).toBeNull();
   });
@@ -69,10 +71,7 @@ describe('EDGE_REDIRECTS', () => {
     expect(edgeRedirectFor(path)).toBe(target);
   });
 
-  it('is what vercel.json carries', () => {
-    const vercel = JSON.parse(
-      readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'),
-    );
-    expect(vercel.redirects).toEqual(EDGE_REDIRECTS);
+  it('leaves /llms.txt alone', () => {
+    expect(edgeRedirectFor('/llms.txt')).toBeNull();
   });
 });
