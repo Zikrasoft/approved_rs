@@ -1,12 +1,8 @@
-import servicesYaml from '@/content/i18n/services.yaml?raw';
 import type { Locale } from '@/i18n/config';
-import { loadI18nSection } from '@/i18n/loadI18nSection';
+import { content } from '@/i18n/content';
 import { withPlaceholder } from '@/i18n/withPlaceholder';
 import { type ServiceSlug } from '@/utils/labels';
-import {
-  servicesContentSchema,
-  type ServicesContentData,
-} from './servicesContentSchema';
+import type { ServicesContentData } from './servicesContentSchema';
 
 interface StepItem {
   n: string;
@@ -70,12 +66,6 @@ interface EuCountrySpokeContent {
   notes: CountryNote;
 }
 
-// Same public shape the original hand-written ServicesContent interface
-// had — every `xFor(...)` function is restored by toServicesContent() below
-// from the plain-string form servicesContentSchema.ts stores (see that
-// file's comment for why). The one call site per field elsewhere in the
-// codebase never sees the difference. whatWeDo/serviceBadges already carry
-// their key/slug from the YAML, so those two need no reshaping at all.
 export interface ServicesContent {
   'vehicle-sourcing': {
     hub: {
@@ -373,11 +363,6 @@ function toServicesContent(data: ServicesContentData): ServicesContent {
   };
 }
 
-// Admin hand-edits ru fields directly in services.yaml; en/sr/es/de filled
-// in by scripts/translate-i18n.ts (.github/workflows/translate.yml) — same
-// pattern as src/i18n/getI18n.ts/src/i18n/content/faq.ts.
-const getServices = loadI18nSection(servicesContentSchema, servicesYaml);
-
-export function getServicesContent(locale: Locale): ServicesContent {
-  return toServicesContent(getServices(locale));
+export function getServices(locale: Locale): ServicesContent {
+  return toServicesContent(content(locale).services);
 }

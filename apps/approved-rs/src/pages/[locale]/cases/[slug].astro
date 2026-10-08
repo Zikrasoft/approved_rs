@@ -20,7 +20,7 @@ import {
   buildLocation,
 } from '@/utils/seo';
 import { withLocales, PathBuilder } from '@/utils/paths';
-import { getServicesContent } from '@/i18n/content/services';
+import { getServices } from '@/i18n/content/services';
 import { getI18n } from '@/i18n/getI18n';
 import { formatPrice } from '@/utils/price';
 import { getCountry } from '@/utils/geo';
@@ -40,7 +40,7 @@ export async function getStaticPaths() {
 }
 
 const { locale } = Astro.params;
-const cc = getServicesContent(locale).caseChrome;
+const cc = getServices(locale).caseChrome;
 const t = getI18n(locale);
 const { case: c } = Astro.props;
 

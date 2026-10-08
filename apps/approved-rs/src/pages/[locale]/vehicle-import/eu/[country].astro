@@ -1,6 +1,6 @@
 ---
 import VehicleImportSpokeLayout from '@/layouts/VehicleImportSpokeLayout.astro';
-import { getServicesContent } from '@/i18n/content/services';
+import { getServices } from '@/i18n/content/services';
 import { withLocales, PathBuilder } from '@/utils/paths';
 import {
   EU_SPOKE_COUNTRIES,
@@ -20,7 +20,7 @@ const { locale, country } = Astro.params as {
   locale: Locale;
   country: EuSpokeCountry;
 };
-const sc = getServicesContent(locale);
+const sc = getServices(locale);
 const pc = sc['vehicle-import'][country];
 const cases = (await getCollection('cases'))
   .filter(

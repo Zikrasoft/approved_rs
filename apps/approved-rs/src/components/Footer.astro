@@ -4,7 +4,7 @@ import ContactIcon from './ContactIcon.astro';
 import { getNavItems } from '@/utils/labels';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
-import { getServicesContent } from '@/i18n/content/services';
+import { getServices } from '@/i18n/content/services';
 import { SITE_NAME, VIBER_NUMBER, THREADS_CHANNEL } from '@/utils/constants';
 import { viberLink } from '@/utils/contactLinks';
 import { messengerHrefs } from '@/utils/messengerHrefs';
@@ -15,7 +15,7 @@ import { contactPlacement } from '@podbor/site-kit';
 const year = new Date().getFullYear();
 const locale = getLocale(Astro.currentLocale);
 const t = getI18n(locale);
-const cc = getServicesContent(locale).caseChrome;
+const cc = getServices(locale).caseChrome;
 const coverageLine = getActiveCountries()
   .map((c) => c[locale].name)
   .join(' · ');

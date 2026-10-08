@@ -4,9 +4,8 @@ import { SERVICES } from '@/utils/labels';
 import { getI18n } from '@/i18n/getI18n';
 import { getActiveCountries, getCitiesForCountry } from '@/utils/geo';
 import { getPublishedCasesByService } from '@/utils/casesQueries';
-import { getServicesContent } from '@/i18n/content/services';
-import { getHomeContent } from '@/i18n/content/home';
-import { getFaq } from '@/i18n/content/faq';
+import { getServices } from '@/i18n/content/services';
+import { content } from '@/i18n/content';
 import { buildLocation } from '@/utils/seo';
 import { PathBuilder } from '@/utils/paths';
 import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
@@ -46,11 +45,11 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const cases = await getPublishedCasesByService('vehicle-sourcing');
   const t = getI18n(locale);
   const nav = t.nav;
-  const sc = getServicesContent(locale);
-  const h = getHomeContent(locale);
+  const sc = getServices(locale);
+  const h = content(locale).home;
   const s = t.llms;
   const cc = CASE_COUNT_LABELS[locale];
-  const paymentFaq = getFaq(locale).general[0];
+  const paymentFaq = content(locale).faq.general[0];
 
   return renderLlmsTxt(SITE_NAME, h.metaDescription, [
     {

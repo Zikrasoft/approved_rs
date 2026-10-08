@@ -11,8 +11,8 @@ import {
   TELEGRAM_BOT_URL,
   SOCIAL_SAME_AS,
 } from '@/utils/constants';
-import { getFaq } from '@/i18n/content/faq';
-import { getPagesContent } from '@/i18n/content/pages';
+import { content } from '@/i18n/content';
+import { getPages } from '@/i18n/content/pages';
 import { getI18n } from '@/i18n/getI18n';
 import { withLocales, PathBuilder } from '@/utils/paths';
 import { generateOrganizationSchema } from '@/utils/seo';
@@ -20,7 +20,7 @@ import { generateOrganizationSchema } from '@/utils/seo';
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const { locale } = Astro.params;
-const p = getPagesContent(locale).contacts;
+const p = getPages(locale).contacts;
 const t = getI18n(locale);
 const meta = {
   title: `${p.metaTitle} | ${SITE_NAME}`,
@@ -99,5 +99,5 @@ const schema = {
     </div>
   </section>
 
-  <Faq items={getFaq(locale).general} />
+  <Faq items={content(locale).faq.general} />
 </BaseLayout>

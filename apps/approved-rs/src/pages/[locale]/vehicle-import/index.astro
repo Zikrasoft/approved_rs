@@ -5,8 +5,8 @@ import heroPhoto from '@/assets/service-import.jpg';
 import PageSection from '@/components/PageSection.astro';
 import StepsList from '@/components/StepsList.astro';
 import IncludedGrid from '@/components/IncludedGrid.astro';
-import { getFaq } from '@/i18n/content/faq';
-import { getServicesContent } from '@/i18n/content/services';
+import { content } from '@/i18n/content';
+import { getServices } from '@/i18n/content/services';
 import { withLocales, PathBuilder } from '@/utils/paths';
 import { getCountry } from '@/utils/geo';
 import CountryPlate from '@/components/CountryPlate.astro';
@@ -23,7 +23,7 @@ import type { VehicleImportSpoke } from '@/utils/vehicleImportCrossSell';
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const { locale } = Astro.params;
-const sc = getServicesContent(locale)['vehicle-import'];
+const sc = getServices(locale)['vehicle-import'];
 const pc = sc.hub;
 const meta = {
   title: `${pc.metaTitle} | ${SITE_NAME}`,
@@ -124,7 +124,7 @@ const cards: {
       items={pc.included}
     />
 
-    <Faq items={getFaq(locale)['vehicle-import']} />
+    <Faq items={content(locale).faq['vehicle-import']} />
   </Fragment>
 </ServicePageLayout>
 

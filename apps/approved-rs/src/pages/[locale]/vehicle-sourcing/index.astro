@@ -7,8 +7,8 @@ import StepsList from '@/components/StepsList.astro';
 import IncludedGrid from '@/components/IncludedGrid.astro';
 import MarketCompare from '@/components/MarketCompare.astro';
 import heroPhoto from '@/assets/service-sourcing.jpg';
-import { getFaq } from '@/i18n/content/faq';
-import { getServicesContent } from '@/i18n/content/services';
+import { content } from '@/i18n/content';
+import { getServices } from '@/i18n/content/services';
 import { withLocales, PathBuilder } from '@/utils/paths';
 import { getActiveCountries } from '@/utils/geo';
 import { compareItemsFor } from '@/utils/compareItems';
@@ -20,7 +20,7 @@ import type { Locale } from '@/i18n/config';
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const { locale } = Astro.params as { locale: Locale };
-const pc = getServicesContent(locale)['vehicle-sourcing'].hub;
+const pc = getServices(locale)['vehicle-sourcing'].hub;
 const countries = getActiveCountries();
 const meta = {
   title: `${pc.metaTitle} | ${SITE_NAME}`,
@@ -34,7 +34,7 @@ const schema = generateServiceSchema(
   meta.canonical,
 );
 
-const sc = getServicesContent(locale)['vehicle-sourcing'];
+const sc = getServices(locale)['vehicle-sourcing'];
 const compareItems = compareItemsFor(
   locale,
   'vehicle-sourcing',
@@ -91,6 +91,6 @@ const cases = (await getCollection('cases'))
       items={compareItems}
     />
 
-    <Faq items={getFaq(locale)['vehicle-sourcing']} />
+    <Faq items={content(locale).faq['vehicle-sourcing']} />
   </Fragment>
 </ServicePageLayout>

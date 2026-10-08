@@ -1,5 +1,5 @@
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
-import { getPagesContent } from '@/i18n/content/pages';
+import { getPages } from '@/i18n/content/pages';
 import { getCasesTabCounts } from '@/utils/casesQueries';
 import type { CaseCardProps } from '@/components/CaseCard.astro';
 import type { Locale } from '@/i18n/config';
@@ -19,7 +19,7 @@ export async function buildCasesTabPageData(
   canonicalPath: string,
   fetchItems: () => Promise<CaseCardProps[]>,
 ) {
-  const p = getPagesContent(locale)[contentKey];
+  const p = getPages(locale)[contentKey];
   const meta = {
     title: `${p.metaTitle} | ${SITE_NAME}`,
     description: p.metaDescription,

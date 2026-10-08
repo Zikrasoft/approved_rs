@@ -6,7 +6,7 @@ import Breadcrumbs from '@/components/Breadcrumbs.astro';
 import ClosingBand from '@/components/ClosingBand.astro';
 import StatBlock from '@/components/StatBlock.astro';
 import closingImage from '@/assets/closing.jpg';
-import { getHomeContent } from '@/i18n/content/home';
+import { content } from '@/i18n/content';
 import LeadForm from '@/components/LeadForm.astro';
 import LeadFormModal from '@/components/LeadFormModal.astro';
 import ContactCTA from '@/components/ContactCTA.astro';
@@ -83,7 +83,7 @@ const hero = image ? await heroImageAttrs(image) : undefined;
 const locale = getLocale(Astro.currentLocale);
 const items = cases.map((c) => toCaseItem(c, locale));
 const t = getI18n(locale);
-const h = getHomeContent(locale);
+const h = content(locale).home;
 const countryCount = String(getActiveCountries().length);
 const heroStats = [
   h.statClients,

@@ -12,14 +12,14 @@ import {
 } from '@/utils/seo';
 import { getCollection } from 'astro:content';
 import { SITE_URL } from '@/utils/constants';
-import { getFaq } from '@/i18n/content/faq';
-import { getServicesContent } from '@/i18n/content/services';
+import { content } from '@/i18n/content';
+import { getServices } from '@/i18n/content/services';
 
 export const getStaticPaths = () => withLocales(getCountryPaths());
 
 const { locale, country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
-const sc = getServicesContent(locale)['vehicle-inspection'];
+const sc = getServices(locale)['vehicle-inspection'];
 const location = buildLocation(locale, country);
 const countryNote = sc.countryNoteFor(country.code);
 const meta = generateMeta('vehicle-inspection', {
@@ -79,6 +79,6 @@ const schema = generateServiceSchema(
         />
       )
     }
-    <Faq items={getFaq(locale)['vehicle-inspection']} />
+    <Faq items={content(locale).faq['vehicle-inspection']} />
   </Fragment>
 </ServicePageLayout>

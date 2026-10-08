@@ -1,8 +1,7 @@
-import metaYaml from '@/content/i18n/meta.yaml?raw';
 import type { Locale } from '@/i18n/config';
-import { loadI18nSection } from '@/i18n/loadI18nSection';
+import { content } from '@/i18n/content';
 import { withPlaceholder } from '@/i18n/withPlaceholder';
-import { metaContentSchema, type MetaContentData } from './metaContentSchema';
+import type { MetaContentData } from './metaContentSchema';
 
 interface MetaText {
   title: string;
@@ -29,11 +28,6 @@ function toTemplates(data: MetaContentData): MetaTemplates {
   };
 }
 
-// Admin hand-edits ru fields directly in meta.yaml; en/sr/es/de filled in
-// by scripts/translate-i18n.ts (.github/workflows/translate.yml) — same
-// pattern as src/i18n/getI18n.ts/src/i18n/content/faq.ts.
-const getMeta = loadI18nSection(metaContentSchema, metaYaml);
-
 export function getMetaTemplates(locale: Locale): MetaTemplates {
-  return toTemplates(getMeta(locale));
+  return toTemplates(content(locale).meta);
 }

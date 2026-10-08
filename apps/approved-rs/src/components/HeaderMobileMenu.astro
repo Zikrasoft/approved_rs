@@ -4,7 +4,7 @@ import ServiceQuickLinks from './ServiceQuickLinks.astro';
 import ContactIcon from './ContactIcon.astro';
 import { PHONE_NUMBER } from '@/utils/constants';
 import { getLocale } from '@/i18n/config';
-import { getServicesContent } from '@/i18n/content/services';
+import { getServices } from '@/i18n/content/services';
 import { phoneLink } from '@/utils/contactLinks';
 import { contactPlacement } from '@podbor/site-kit';
 
@@ -16,7 +16,7 @@ interface Props {
 }
 
 const { casesHref, casesLabel, casesCurrent, languageLabel } = Astro.props;
-const callLabel = getServicesContent(getLocale(Astro.currentLocale)).caseChrome
+const callLabel = getServices(getLocale(Astro.currentLocale)).caseChrome
   .callButtonLabel;
 ---
 

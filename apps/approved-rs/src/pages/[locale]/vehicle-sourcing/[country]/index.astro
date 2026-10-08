@@ -6,8 +6,8 @@ import CountryPill from '@/components/CountryPill.astro';
 import Faq from '@/components/Faq.astro';
 import MarketNotes from '@/components/MarketNotes.astro';
 import CityCards from '@/components/CityCards.astro';
-import { getFaq } from '@/i18n/content/faq';
-import { getServicesContent } from '@/i18n/content/services';
+import { content } from '@/i18n/content';
+import { getServices } from '@/i18n/content/services';
 import { getCountryPaths, withLocales, PathBuilder } from '@/utils/paths';
 import {
   getCountry,
@@ -27,10 +27,10 @@ export const getStaticPaths = () => withLocales(getCountryPaths());
 
 const { locale, country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
-const sc = getServicesContent(locale)['vehicle-sourcing'];
+const sc = getServices(locale)['vehicle-sourcing'];
 const location = buildLocation(locale, country);
 const countryNote = sc.countryNoteFor(countryCode!);
-const cvs = getServicesContent(locale).cityVehicleSourcing;
+const cvs = getServices(locale).cityVehicleSourcing;
 const cityCards = getCitiesForCountry(countryCode!).flatMap((city) => {
   const note = cvs.cityNoteFor(city.slug);
   return note
@@ -69,7 +69,7 @@ const schema = generateServiceSchema(
 );
 
 // Link text reuses each spoke's own title instead of new strings.
-const vehicleImportContent = getServicesContent(locale)['vehicle-import'];
+const vehicleImportContent = getServices(locale)['vehicle-import'];
 const vehicleImportCrossSellLinks = getVehicleImportCrossSellSpokes(
   countryCode!,
 ).map((slug) => ({
@@ -136,6 +136,6 @@ const vehicleImportCrossSellLinks = getVehicleImportCrossSellSpokes(
         />
       )
     }
-    <Faq items={getFaq(locale)['vehicle-sourcing']} />
+    <Faq items={content(locale).faq['vehicle-sourcing']} />
   </Fragment>
 </ServicePageLayout>

@@ -4,7 +4,7 @@ import ContactIcon from './ContactIcon.astro';
 import RegionalContactButton from './RegionalContactButton.astro';
 import { phoneLink, viberLink } from '@/utils/contactLinks';
 import { messengerHrefs } from '@/utils/messengerHrefs';
-import { getServicesContent } from '@/i18n/content/services';
+import { getServices } from '@/i18n/content/services';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
 import { VIBER_NUMBER, PHONE_NUMBER } from '@/utils/constants';
@@ -20,7 +20,7 @@ interface Props {
 }
 
 const locale = getLocale(Astro.currentLocale);
-const cc = getServicesContent(locale).caseChrome;
+const cc = getServices(locale).caseChrome;
 const t = getI18n(locale);
 const { service, label, compact = false } = Astro.props;
 const telegramAriaLabel = label ?? cc.ctaButtonLabel;
