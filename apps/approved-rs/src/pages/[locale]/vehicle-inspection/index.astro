@@ -1,4 +1,5 @@
 ---
+import { canonicalUrl } from '@/utils/pageHead';
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import CountryPill from '@/components/CountryPill.astro';
 import PageSection from '@/components/PageSection.astro';
@@ -10,8 +11,7 @@ import InspectionMap from '@/components/InspectionMap.astro';
 import heroPhoto from '@/assets/service-inspection.jpg';
 import { content } from '@/i18n/content';
 import { servicesView } from '@/i18n/content/services';
-import { withLocales, PathBuilder } from '@/utils/paths';
-import { SLUG } from '@/utils/labels';
+import { withLocales } from '@/utils/paths';
 import { getActiveCountries } from '@/utils/geo';
 import { compareItemsFor } from '@/utils/compareItems';
 import { generateServiceSchema, placeholderOgImage } from '@/utils/seo';
@@ -29,13 +29,12 @@ const countries = getActiveCountries();
 const meta = {
   title: `${pc.metaTitle} | ${SITE_NAME}`,
   description: pc.metaDescription,
-  canonical: `${SITE_URL}${PathBuilder.sectionRoot(locale, SLUG.INSPECTION)}`,
   ogImage: placeholderOgImage(SITE_URL, locale),
 };
 const schema = generateServiceSchema(
   pc.title,
   countries.map((c) => c[locale].name),
-  meta.canonical,
+  canonicalUrl(locale, Astro.url.pathname),
 );
 
 const compareItems = compareItemsFor(

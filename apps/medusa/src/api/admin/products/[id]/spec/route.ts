@@ -7,7 +7,8 @@ import { parseAttributes } from '@podbor/shop-catalog';
 import { z } from 'zod';
 
 import { updateProductMetadata } from '../../../../../lib/metadata';
-import { queryOne } from '../../../../../lib/query';
+import { selectOne } from '../../../../../lib/query';
+import { typeValueField } from '../../../../../lib/row-schema';
 
 const bodySchema = z
   .object({
@@ -15,6 +16,11 @@ const bodySchema = z
     fitment: z.array(z.unknown()),
   })
   .strict();
+
+export const specProductSchema = z.object({
+  id: z.string(),
+  type: typeValueField,
+});
 
 const refusal = (reason: string) =>
   new MedusaError(
@@ -32,10 +38,9 @@ export async function POST(
   }
 
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
-  const product = await queryOne<{
-    id: string;
-    type?: { value?: string | null } | null;
-  }>(query, 'product', ['id', 'type.value'], { id: req.params.id });
+  const product = await selectOne(query, 'product', specProductSchema, {
+    id: req.params.id,
+  });
   if (!product) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, 'Такого товара нет');
   }

@@ -3,7 +3,7 @@ export const prerender = false;
 import type { APIContext } from 'astro';
 import { secretMatches } from '@/lib/verifySecret';
 import { expireGhostLeads, getDuePostponed, resumeLead } from '@/lib/store';
-import { sendPostponeReminderToOwner, ensureLeadCard } from '@/lib/telegram';
+import { sendPostponeReminderToOwner, afterStatusChange } from '@/lib/telegram';
 
 const CRON_SECRET = process.env.CRON_SECRET;
 
@@ -28,7 +28,7 @@ export async function GET({ request }: APIContext): Promise<Response> {
     try {
       await sendPostponeReminderToOwner(lead);
       const resumed = await resumeLead(lead.id);
-      if (resumed) await ensureLeadCard(resumed);
+      if (resumed) await afterStatusChange(resumed);
       remindedPostponed++;
     } catch (err) {
       console.error('[reminders] failed to send/resume a due postponed lead', {
@@ -41,7 +41,7 @@ export async function GET({ request }: APIContext): Promise<Response> {
   const expired = await expireGhostLeads(new Date());
   for (const lead of expired) {
     try {
-      await ensureLeadCard(lead);
+      await afterStatusChange(lead, { notice: false });
     } catch (err) {
       console.error('[reminders] failed to refresh an expired ghost card', {
         error: err,

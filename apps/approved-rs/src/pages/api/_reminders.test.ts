@@ -9,12 +9,12 @@ vi.mock('@/lib/store', () => ({
 }));
 vi.mock('@/lib/telegram', () => ({
   sendPostponeReminderToOwner: vi.fn(),
-  ensureLeadCard: vi.fn(),
+  afterStatusChange: vi.fn(),
 }));
 
 import { GET } from './reminders';
 import { expireGhostLeads, getDuePostponed, resumeLead } from '@/lib/store';
-import { sendPostponeReminderToOwner, ensureLeadCard } from '@/lib/telegram';
+import { sendPostponeReminderToOwner, afterStatusChange } from '@/lib/telegram';
 
 const SECRET = 'test-cron-secret';
 
@@ -65,7 +65,7 @@ describe('GET /api/reminders', () => {
     vi.mocked(sendPostponeReminderToOwner)
       .mockReset()
       .mockResolvedValue(undefined);
-    vi.mocked(ensureLeadCard).mockReset().mockResolvedValue(undefined);
+    vi.mocked(afterStatusChange).mockReset().mockResolvedValue(undefined);
     vi.mocked(expireGhostLeads).mockReset().mockResolvedValue([]);
   });
 
@@ -101,7 +101,7 @@ describe('GET /api/reminders', () => {
     expect(res.status).toBe(401);
   });
 
-  it('sends the due-date reminder to the owner, resumes the lead, and refreshes its group card', async () => {
+  it('sends the due-date reminder to the owner, resumes the lead, and refreshes its card with the admin notice', async () => {
     vi.mocked(getDuePostponed).mockResolvedValue([makeLead({ id: 9 })]);
     const resumed = makeLead({ id: 9, status: 'in_progress', remindAt: null });
     vi.mocked(resumeLead).mockResolvedValue(resumed);
@@ -113,7 +113,8 @@ describe('GET /api/reminders', () => {
       expect.objectContaining({ id: 9 }),
     );
     expect(resumeLead).toHaveBeenCalledWith(9);
-    expect(ensureLeadCard).toHaveBeenCalledWith(resumed);
+    expect(afterStatusChange).toHaveBeenCalledWith(resumed);
+    expect(vi.mocked(afterStatusChange).mock.calls[0][1]).toBeUndefined();
     expect(await res.json()).toEqual({
       remindedPostponed: 1,
       expiredGhosts: 0,
@@ -127,7 +128,7 @@ describe('GET /api/reminders', () => {
     const res = await GET(makeCtx());
 
     expect(res.status).toBe(200);
-    expect(ensureLeadCard).not.toHaveBeenCalled();
+    expect(afterStatusChange).not.toHaveBeenCalled();
     expect(await res.json()).toEqual({
       remindedPostponed: 1,
       expiredGhosts: 0,
@@ -154,14 +155,14 @@ describe('GET /api/reminders', () => {
     });
   });
 
-  it('sweeps ghost leads and refreshes each archived card', async () => {
+  it('sweeps ghost leads and refreshes each archived card without a notice', async () => {
     const ghost = makeLead({ id: 7, status: 'lost', archived: true });
     vi.mocked(expireGhostLeads).mockResolvedValue([ghost]);
 
     const res = await GET(makeCtx());
 
     expect(expireGhostLeads).toHaveBeenCalledWith(expect.any(Date));
-    expect(ensureLeadCard).toHaveBeenCalledWith(ghost);
+    expect(afterStatusChange).toHaveBeenCalledWith(ghost, { notice: false });
     expect(await res.json()).toEqual({
       remindedPostponed: 0,
       expiredGhosts: 1,
@@ -173,11 +174,11 @@ describe('GET /api/reminders', () => {
       makeLead({ id: 7, archived: true }),
       makeLead({ id: 8, archived: true }),
     ]);
-    vi.mocked(ensureLeadCard).mockRejectedValueOnce(new Error('down'));
+    vi.mocked(afterStatusChange).mockRejectedValueOnce(new Error('down'));
 
     const res = await GET(makeCtx());
 
-    expect(ensureLeadCard).toHaveBeenCalledTimes(2);
+    expect(afterStatusChange).toHaveBeenCalledTimes(2);
     expect(await res.json()).toEqual({
       remindedPostponed: 0,
       expiredGhosts: 2,

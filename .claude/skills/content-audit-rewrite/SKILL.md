@@ -51,7 +51,6 @@ the Russian in another.
 | --------------------------------------------- | ------------------------------------------------------------ |
 | case bodies (approved.rs)                     | `apps/approved-rs/src/content/cases/*/index.md`              |
 | work bodies (Details, CarLab)                 | `apps/{detailing,auto-service}/src/content/works/*/index.md` |
-| product bodies (CarLab shop)                  | `apps/auto-service/src/content/products/*/index.md`          |
 | page and UI copy, meta strings                | `apps/*/src/content/i18n/*.yaml`                             |
 | translation cache (never edit; CI creates it) | `apps/*/src/content/translations.cache.json`                 |
 

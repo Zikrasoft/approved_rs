@@ -1,5 +1,5 @@
 import { swapLocalePath } from '@podbor/site-kit';
-import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
+import { SUPPORTED_LOCALES, type Locale } from '../i18n/config.ts';
 import type { ServiceSlug } from './services';
 
 export const PathBuilder = {
