@@ -1,4 +1,4 @@
-import { hasIncome } from './money.ts';
+import { hasDealAmount } from './money.ts';
 import type { LeadInput, LeadSubmission, StoredLead } from './schema.ts';
 import type { LeadStore } from './store.ts';
 import type { Role } from './telegram/format.ts';
@@ -66,7 +66,7 @@ export function createAfterStatusChange({
         surface.role,
       );
     if (!notice) return;
-    if (lead.status === 'won' && hasIncome(lead))
+    if (lead.status === 'won' && hasDealAmount(lead))
       await notifier.sendDealNotificationToAdmin(lead);
     else await notifier.sendStatusChangeToAdmin(lead);
   };
