@@ -1,19 +1,9 @@
-import { LOCAL_DATA_DIR, type OrderMarkers } from '@podbor/lead-crm';
+import type { OrderMarkers } from '@podbor/lead-crm';
 import { createBlobOrderMarkers } from '@podbor/lead-crm/storage/vercel-blob';
+import { localOrBlob } from './localOrBlob';
 
-function selectOrderMarkers(): OrderMarkers {
-  if (import.meta.env.DEV) {
-    const opened = import('@podbor/lead-crm/storage/file').then(
-      ({ createFileOrderMarkers }) =>
-        createFileOrderMarkers({ dir: LOCAL_DATA_DIR }),
-    );
-    return {
-      has: async (orderId) => (await opened).has(orderId),
-      add: async (orderId) => (await opened).add(orderId),
-      release: async (orderId) => (await opened).release(orderId),
-    };
-  }
-  return createBlobOrderMarkers();
-}
-
-export const orderMarkers: OrderMarkers = selectOrderMarkers();
+export const orderMarkers = localOrBlob<OrderMarkers>(
+  ['has', 'add', 'release'],
+  createBlobOrderMarkers,
+  ({ createFileOrderMarkers }, dir) => createFileOrderMarkers({ dir }),
+);

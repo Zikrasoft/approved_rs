@@ -1,6 +1,6 @@
 import {
-  ADMIN_IDS as adminIds,
-  OWNER_IDS as ownerIds,
+  adminIds,
+  ownerIds,
   client,
   ensureLeadCard,
   formatter,
