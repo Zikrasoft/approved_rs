@@ -108,7 +108,7 @@ function showOne(
   });
 }
 
-function promoteFirst(
+function promoteAheadOfRunnerUp(
   group: HTMLElement,
   ranking: readonly TrackedContactChannel[],
 ) {
@@ -137,5 +137,5 @@ export function applyContactPreference(): void {
     .forEach((group) => showOne(group, ranking));
   document
     .querySelectorAll<HTMLElement>('[data-contact-order]')
-    .forEach((group) => promoteFirst(group, ranking));
+    .forEach((group) => promoteAheadOfRunnerUp(group, ranking));
 }
