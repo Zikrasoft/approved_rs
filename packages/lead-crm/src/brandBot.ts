@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { createEnsureLeadCard, createNotifyLead } from './notifyLead.ts';
+import {
+  createAfterStatusChange,
+  createEnsureLeadCard,
+  createNotifyLead,
+} from './notifyLead.ts';
 import type { LeadStore } from './store.ts';
 import { createTelegramClient, parseIds } from './telegram/client.ts';
 import { createFormatter } from './telegram/format.ts';
@@ -55,9 +59,11 @@ export function createBrandBot({
     ownerIds,
     adminIds,
   });
+  const ensureLeadCard = createEnsureLeadCard({ store, notifier });
   return {
     notifier,
-    ensureLeadCard: createEnsureLeadCard({ store, notifier }),
+    ensureLeadCard,
+    afterStatusChange: createAfterStatusChange({ ensureLeadCard, notifier }),
     notifyLead: createNotifyLead({ store, notifier, brand }),
     client,
     formatter,

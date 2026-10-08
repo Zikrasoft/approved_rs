@@ -23,6 +23,9 @@ export {
   appendNote,
   canPostpone,
   postponePatch,
+  resumePatch,
+  statusPatch,
+  wonPatch,
   MAX_LIST_ROWS,
   VISITOR_MERGE_WINDOW_MS,
 } from './store.ts';
@@ -69,7 +72,11 @@ export type {
   Role,
 } from './telegram/format.ts';
 
-export type { LeadHandOff, NotifyLead } from './notifyLead.ts';
+export type {
+  LeadHandOff,
+  NotifyLead,
+  StatusChangeOptions,
+} from './notifyLead.ts';
 
 export { contactChannelSchema, HONEYPOT_FIELD, SERVICE_FIELD } from './form.ts';
 

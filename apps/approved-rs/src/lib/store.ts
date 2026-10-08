@@ -32,6 +32,7 @@ export {
   canPostpone,
   getCommission,
   postponePatch,
+  wonPatch,
   MAX_LIST_ROWS,
 } from '@podbor/lead-crm';
 

@@ -13,15 +13,14 @@ import {
 import { secretMatches } from '@/lib/verifySecret';
 import {
   isLeadStatusKey,
+  afterStatusChange,
   answerCallback,
   ensureLeadCard,
   sendForceReplyPrompt,
   safeEditMessage,
-  sendDealNotificationToAdmin,
   sendIncomeNotificationToAdmin,
   sendCommissionClaimToAdmin,
   sendCommissionResultToOwner,
-  sendStatusChangeToAdmin,
   sendFieldChangeToAdmin,
   sendMessage,
   buildOwedList,
@@ -63,6 +62,7 @@ import {
   postponeLead,
   canPostpone,
   postponePatch,
+  wonPatch,
   getOwedSummary,
   readLeads,
   getCommission,
@@ -226,8 +226,10 @@ async function handleStatusCallback(
       return;
     }
     const updated = await setStatus(id, key);
-    await refreshBothSurfaces(updated, chatId, messageId, role);
-    if (updated) await sendStatusChangeToAdmin(updated);
+    if (updated)
+      await afterStatusChange(updated, {
+        surface: { chatId, messageId, role },
+      });
     await answerCallback(cbId, 'Статус обновлён');
   });
 }
@@ -296,8 +298,7 @@ async function applyPostpone(
       await answerCallback(cbId).catch(() => {});
       return;
     }
-    await refreshBothSurfaces(updated, chatId, messageId, role);
-    await sendStatusChangeToAdmin(updated);
+    await afterStatusChange(updated, { surface: { chatId, messageId, role } });
     await answerCallback(cbId, 'Отложено');
   });
 }
@@ -359,8 +360,7 @@ async function handleResumeCallback(
       await answerCallback(cbId).catch(() => {});
       return;
     }
-    await refreshBothSurfaces(updated, chatId, messageId, role);
-    await sendStatusChangeToAdmin(updated);
+    await afterStatusChange(updated, { surface: { chatId, messageId, role } });
     await answerCallback(cbId, 'Возобновлено');
   });
 }
@@ -819,16 +819,9 @@ async function handlePromptReply(
     const updated = await resolvePendingPrompt(
       chatId,
       replyToMessageId,
-      (lead) => ({
-        incomes: amount > 0 ? appendIncome(lead.incomes, amount) : lead.incomes,
-        status: 'won',
-        statusChangedAt: new Date().toISOString(),
-      }),
+      (lead) => wonPatch(lead, amount),
     );
-    if (updated) {
-      await ensureLeadCard(updated);
-      await sendDealNotificationToAdmin(updated);
-    }
+    if (updated) await afterStatusChange(updated);
     return;
   }
 
@@ -877,10 +870,7 @@ async function handlePromptReply(
             )
           : {},
     );
-    if (updated?.status === 'postponed') {
-      await ensureLeadCard(updated);
-      await sendStatusChangeToAdmin(updated);
-    }
+    if (updated?.status === 'postponed') await afterStatusChange(updated);
     return;
   }
 

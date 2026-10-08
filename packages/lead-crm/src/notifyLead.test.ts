@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createEnsureLeadCard, createNotifyLead } from './notifyLead.ts';
+import {
+  createAfterStatusChange,
+  createEnsureLeadCard,
+  createNotifyLead,
+} from './notifyLead.ts';
 import { createLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
 import { createLeadStore } from './store.ts';
 import { createMemoryStorage } from './storage/memory.testing.ts';
@@ -319,5 +323,67 @@ describe('notifyLead — what reaches the logs', () => {
     expect(logged).toContain('vehicle-sourcing');
     logSpy.mockRestore();
     errorSpy.mockRestore();
+  });
+});
+
+describe('afterStatusChange', () => {
+  const calls: string[] = [];
+  const record = (name: string) => async (lead: StoredLead) => {
+    calls.push(`${name}:${lead.id}`);
+  };
+  const afterStatusChange = createAfterStatusChange({
+    ensureLeadCard: async (lead) => {
+      calls.push(`card:${lead.id}`);
+    },
+    notifier: {
+      editLeadDetailMessage: async (chatId, messageId, lead, role) => {
+        calls.push(`dm:${chatId}:${messageId}:${lead.id}:${role}`);
+      },
+      sendStatusChangeToAdmin: record('status'),
+      sendDealNotificationToAdmin: record('deal'),
+    },
+  });
+
+  beforeEach(() => {
+    calls.length = 0;
+  });
+
+  const surface = { chatId: 7, messageId: 8, role: 'owner' as const };
+
+  it.each([
+    [
+      'a plain change',
+      { status: 'in_progress' as const },
+      {},
+      ['card:42', 'status:42'],
+    ],
+    [
+      'a change from a DM',
+      { status: 'lost' as const },
+      { surface },
+      ['card:42', 'dm:7:8:42:owner', 'status:42'],
+    ],
+    [
+      'won with an amount',
+      { status: 'won' as const, dealAmount: 300 },
+      {},
+      ['card:42', 'deal:42'],
+    ],
+    [
+      'won without an amount',
+      { status: 'won' as const },
+      {},
+      ['card:42', 'status:42'],
+    ],
+    [
+      'the ghost sweep',
+      { status: 'lost' as const },
+      { notice: false },
+      ['card:42'],
+    ],
+  ])('%s', async (_, patch, options, expected) => {
+    await afterStatusChange({ ...storedLead, ...patch }, options);
+
+    expect(calls).toEqual(expected);
   });
 });
