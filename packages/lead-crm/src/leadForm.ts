@@ -146,21 +146,26 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
   form.addEventListener('pointerenter', () => void expandCountries(), {
     once: true,
   });
-  form.addEventListener('input', () => {
-    (Object.keys(errors) as ValidatedField[]).forEach((field) =>
-      mark(field, true),
+  form.addEventListener('input', (event) => {
+    const field = (Object.keys(controls) as ValidatedField[]).find(
+      (name) => controls[name] === event.target,
     );
+    if (field) mark(field, true);
     submitError.hidden = true;
   });
   phone.addEventListener('input', maskPhone);
-  country.addEventListener('change', maskPhone);
+  country.addEventListener('change', () => {
+    if (phone.value.trim().startsWith('+')) phone.value = '';
+    maskPhone();
+    phone.focus();
+  });
   telegram.addEventListener('blur', () => {
     showContactValue('telegram', country, telegram);
   });
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
-    if (deferSubmitUntilKit(form)) return;
+    if (button.hasAttribute('aria-busy') || deferSubmitUntilKit(form)) return;
     pick<HTMLInputElement>('[data-visitor-id]').value = deps.visitorId();
     pick<HTMLInputElement>('[data-source-url]').value = location.href;
 

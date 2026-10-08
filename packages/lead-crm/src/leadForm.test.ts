@@ -207,6 +207,15 @@ describe('fields', () => {
     expect(f.phone.value).toBe('01511 2345678');
   });
 
+  it('clears an international number and focuses the phone when the country changes', () => {
+    const f = mount();
+    f.phone.value = '+381601234567';
+    f.country.value = 'DE';
+    f.country.dispatchEvent(new Event('change'));
+    expect(f.phone.value).toBe('');
+    expect(document.activeElement).toBe(f.phone);
+  });
+
   it('normalises a Telegram handle on blur', () => {
     const f = mount({ selected: 'telegram' });
     f.telegram.value = 'driver_ok';
@@ -251,13 +260,37 @@ describe('submit', () => {
     expect(f.error('phone').hidden).toBe(false);
   });
 
-  it('clears every error on the next input', () => {
+  it("clears only the typed field's error", () => {
     const f = mount();
     submit(f.form);
-    f.form.dispatchEvent(new Event('input'));
+    type(f.phone, '6');
     expect(f.error('phone').hidden).toBe(true);
-    expect(f.error('consent').hidden).toBe(true);
+    expect(f.phone.hasAttribute('aria-invalid')).toBe(false);
+    expect(f.error('consent').hidden).toBe(false);
+    expect(f.consent.getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('hides the submit error on any input', async () => {
+    submitLeadForm.mockResolvedValue(false);
+    const f = mount();
+    f.phone.value = '601234567';
+    f.consent.checked = true;
+    submit(f.form);
+    await vi.waitFor(() => expect(f.error('submit').hidden).toBe(false));
+    f.form.dispatchEvent(new Event('input'));
     expect(f.error('submit').hidden).toBe(true);
+  });
+
+  it('ignores a second submit while sending', () => {
+    submitLeadForm.mockReturnValue(new Promise(() => {}));
+    const f = mount();
+    f.phone.value = '601234567';
+    f.consent.checked = true;
+    submit(f.form);
+    f.phone.value = '';
+    submit(f.form);
+    expect(submitLeadForm).toHaveBeenCalledTimes(1);
+    expect(f.error('phone').hidden).toBe(true);
   });
 
   it.each([
