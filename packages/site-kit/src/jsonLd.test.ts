@@ -1,10 +1,27 @@
 import { describe, it, expect } from 'vitest';
 import {
   articleSchema,
+  faqPageSchema,
   jsonLdText,
   localBusinessSchema,
   serviceSchema,
 } from './jsonLd.ts';
+
+describe('faqPageSchema', () => {
+  it('maps each item to a question with its answer', () => {
+    expect(faqPageSchema([{ q: 'Why?', a: 'Because.' }])).toEqual({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: 'Why?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Because.' },
+        },
+      ],
+    });
+  });
+});
 
 describe('jsonLdText', () => {
   it('serialises a schema object', () => {

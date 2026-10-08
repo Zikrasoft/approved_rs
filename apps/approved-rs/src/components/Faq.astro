@@ -1,5 +1,5 @@
 ---
-import { jsonLdText } from '@podbor/site-kit';
+import { faqPageSchema, jsonLdText } from '@podbor/site-kit';
 import { ChevronDown } from '@lucide/astro';
 import SectionHeading from './SectionHeading.astro';
 import { getI18n } from '@/i18n/getI18n';
@@ -13,15 +13,7 @@ interface Props {
 const locale = getLocale(Astro.currentLocale);
 const { heading = getI18n(locale).common.faqHeading, items } = Astro.props;
 
-const schema = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: items.map((item) => ({
-    '@type': 'Question',
-    name: item.q,
-    acceptedAnswer: { '@type': 'Answer', text: item.a },
-  })),
-};
+const schema = faqPageSchema(items);
 ---
 
 <script type="application/ld+json" set:html={jsonLdText(schema)} />
