@@ -2,7 +2,7 @@
 import CaseCard from './CaseCard.astro';
 import SectionHeading from './SectionHeading.astro';
 import type { CaseCardProps } from './CaseCard.astro';
-import { getLocale } from '@/i18n/config';
+import { localeFrom } from '@/i18n/config';
 import { getI18n } from '@/i18n/getI18n';
 
 interface Props {
@@ -22,7 +22,7 @@ const {
   topBorder = false,
   class: className,
 } = Astro.props;
-const locale = getLocale(Astro.currentLocale);
+const locale = localeFrom(Astro.url.pathname);
 const viewAllLabel = getI18n(locale).common.viewAllCasesLabel;
 ---
 

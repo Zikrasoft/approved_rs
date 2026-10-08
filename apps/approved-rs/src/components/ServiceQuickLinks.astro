@@ -3,7 +3,7 @@ import { Search, Globe, Banknote, ClipboardCheck } from '@lucide/astro';
 import type { Search as IconType } from '@lucide/astro';
 import { getNavItems, type ServiceSlug } from '@/utils/labels';
 import { navCurrent } from '@podbor/site-kit';
-import { getLocale } from '@/i18n/config';
+import { localeFrom } from '@/i18n/config';
 import { getI18n } from '@/i18n/getI18n';
 import { PathBuilder } from '@/utils/paths';
 
@@ -14,7 +14,7 @@ interface Props {
 }
 
 const { variant = 'grid' } = Astro.props;
-const locale = getLocale(Astro.currentLocale);
+const locale = localeFrom(Astro.url.pathname);
 
 const SERVICE_ICONS: Record<ServiceSlug, typeof IconType> = {
   'vehicle-sourcing': Search,

@@ -1,6 +1,6 @@
 ---
 import { SITE_BRAND, SITE_TLD } from '@/utils/constants';
-import { getLocale } from '@/i18n/config';
+import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 
 interface Props {
@@ -8,7 +8,7 @@ interface Props {
 }
 const { size = 'md' } = Astro.props;
 const textClass = size === 'sm' ? 'text-lg' : 'text-base sm:text-xl';
-const locale = getLocale(Astro.currentLocale);
+const locale = localeFrom(Astro.url.pathname);
 ---
 
 <a

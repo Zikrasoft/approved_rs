@@ -2,7 +2,7 @@
 import { breadcrumbListSchema, jsonLdText, type Crumb } from '@podbor/site-kit';
 import { SITE_URL } from '@/utils/constants';
 import { getI18n } from '@/i18n/getI18n';
-import { getLocale } from '@/i18n/config';
+import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
 }
 
 const { items } = Astro.props;
-const locale = getLocale(Astro.currentLocale);
+const locale = localeFrom(Astro.url.pathname);
 const trail: Crumb[] = [
   { label: getI18n(locale).common.homeLabel, href: PathBuilder.home(locale) },
   ...items,
