@@ -1,9 +1,30 @@
+import { z } from 'zod';
 import { createEnsureLeadCard, createNotifyLead } from './notifyLead.ts';
-import { requireEnv } from './requireEnv.ts';
 import type { LeadStore } from './store.ts';
 import { createTelegramClient, parseIds } from './telegram/client.ts';
 import { createFormatter } from './telegram/format.ts';
 import { createNotifier } from './telegram/notify.ts';
+
+const required = (name: string) =>
+  z.string({ error: `[telegram] ${name} is not set` }).min(1, {
+    error: `[telegram] ${name} is not set`,
+  });
+const ids = z.string().optional().transform(parseIds);
+
+const BotEnvSchema = z.object({
+  TELEGRAM_BOT_TOKEN: required('TELEGRAM_BOT_TOKEN'),
+  TELEGRAM_BOT_USERNAME: required('TELEGRAM_BOT_USERNAME'),
+  TELEGRAM_GROUP_ID: required('TELEGRAM_GROUP_ID'),
+  TELEGRAM_OWNER_ID: ids,
+  TELEGRAM_ADMIN_ID: ids,
+});
+
+function readBotEnv() {
+  const env = BotEnvSchema.safeParse(process.env);
+  if (!env.success)
+    throw new Error(env.error.issues.map((issue) => issue.message).join('; '));
+  return env.data;
+}
 
 export interface BrandBotOptions {
   store: LeadStore;
@@ -18,18 +39,19 @@ export function createBrandBot({
   serviceLabel,
   replyRelayBrands,
 }: BrandBotOptions) {
-  const ownerIds = parseIds(process.env.TELEGRAM_OWNER_ID);
-  const adminIds = parseIds(process.env.TELEGRAM_ADMIN_ID);
-  const client = createTelegramClient(requireEnv('TELEGRAM_BOT_TOKEN'));
+  const env = readBotEnv();
+  const ownerIds = env.TELEGRAM_OWNER_ID;
+  const adminIds = env.TELEGRAM_ADMIN_ID;
+  const client = createTelegramClient(env.TELEGRAM_BOT_TOKEN);
   const formatter = createFormatter({
     serviceLabel,
-    botUsername: requireEnv('TELEGRAM_BOT_USERNAME'),
+    botUsername: env.TELEGRAM_BOT_USERNAME,
     replyRelayBrands,
   });
   const notifier = createNotifier({
     client,
     formatter,
-    groupId: requireEnv('TELEGRAM_GROUP_ID'),
+    groupId: env.TELEGRAM_GROUP_ID,
     ownerIds,
     adminIds,
   });
