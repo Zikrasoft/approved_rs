@@ -206,13 +206,20 @@ const businessSchema = localBusinessSchema({
 
     <script>
       import { isTrackedContactChannel } from '@podbor/lead-crm/contact-channel';
+      import { defineLeadForm } from '@podbor/lead-crm/lead-form';
       import {
         defineAnalytics,
         defineContactClickTracking,
         defineFunnelTracking,
         defineLanguageSuggestion,
+        getOrCreateVisitorId,
+        markFieldValidity,
       } from '@podbor/site-kit/browser';
-      import { applyPreferredContactOrder } from '@podbor/site-kit/contact-preference';
+      import {
+        applyPreferredContactOrder,
+        detectVisitorCountry,
+        visitorChannel,
+      } from '@podbor/site-kit/contact-preference';
       import { YM_COUNTER_ID } from '@/utils/metrika';
 
       if (!import.meta.env.DEV) defineAnalytics({ ymCounterId: YM_COUNTER_ID });
@@ -220,6 +227,12 @@ const businessSchema = localBusinessSchema({
       applyPreferredContactOrder();
       defineLanguageSuggestion();
       defineFunnelTracking();
+      defineLeadForm({
+        visitorId: getOrCreateVisitorId,
+        markFieldValidity,
+        preferredChannel: visitorChannel,
+        visitorCountry: detectVisitorCountry,
+      });
     </script>
   </body>
 </html>
