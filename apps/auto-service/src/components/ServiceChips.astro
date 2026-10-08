@@ -1,13 +1,12 @@
 ---
 import { localeFrom } from '@/i18n/currentLocale';
-import { getServicesContent } from '@/i18n/content/services';
-import { getSiteContent } from '@/i18n/content/site';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
+import { content } from '@/i18n/content';
 
 const locale = localeFrom(Astro.url.pathname);
-const services = getServicesContent(locale);
-const site = getSiteContent(locale);
+const services = content(locale).services;
+const site = content(locale).site;
 ---
 
 <nav

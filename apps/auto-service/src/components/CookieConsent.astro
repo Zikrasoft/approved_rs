@@ -1,11 +1,11 @@
 ---
 import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
 import { PathBuilder } from '@/utils/paths';
 import { COOKIE_POLICY_VERSION } from '@/utils/constants';
+import { content } from '@/i18n/content';
 
 const locale = localeFrom(Astro.url.pathname);
-const cookie = getSiteContent(locale).cookie;
+const cookie = content(locale).site.cookie;
 ---
 
 <cookie-consent

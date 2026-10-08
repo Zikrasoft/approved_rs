@@ -5,21 +5,20 @@ import ShopGate from '@/components/ShopGate.astro';
 import ShopSearch from '@/components/ShopSearch.astro';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getShopContent } from '@/i18n/content/shop';
-import { getSiteContent } from '@/i18n/content/site';
 import { shopCatalog } from '@/lib/catalog';
 import { productsOfType, shopTypeKeys } from '@/lib/shopPages';
 import { localePaths, PathBuilder } from '@/utils/paths';
 import { pluralLabel } from '@/utils/plural';
 import { shopBuilt, shopIndexed } from '@/utils/shopStatus';
+import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
   return shopBuilt() ? localePaths() : [];
 }
 
 const locale = localeFrom(Astro.url.pathname);
-const shop = getShopContent(locale);
-const site = getSiteContent(locale);
+const shop = content(locale).shop;
+const site = content(locale).site;
 const { products } = await shopCatalog().catalog(locale);
 const types = shopTypeKeys(products).map((key) => ({
   key,

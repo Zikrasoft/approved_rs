@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { productType } from '@podbor/shop-catalog/browser';
-import { getShopContent } from '@/i18n/content/shop';
 import { formatSpec, optionLabel, specCopy } from './formatSpec';
+import { content } from '@/i18n/content';
 
 const SPEC = {
   brand: 'Bosch',
@@ -15,7 +15,7 @@ const SPEC = {
 };
 
 const batteries = productType('batteries')!;
-const copy = specCopy(getShopContent('ru'), 'batteries', 'ru-RS');
+const copy = specCopy(content('ru').shop, 'batteries', 'ru-RS');
 
 describe('formatSpec', () => {
   it('shows only the card fields on a card, labelled and with units', () => {
@@ -51,7 +51,7 @@ describe('formatSpec', () => {
         base: 'synthetic',
         approvals: ['VW 504.00', 'MB 229.51'],
       },
-      specCopy(getShopContent('ru'), 'motor-oils', 'ru-RS'),
+      specCopy(content('ru').shop, 'motor-oils', 'ru-RS'),
     );
     expect(Object.fromEntries(lines.map((l) => [l.key, l.value]))).toEqual({
       brand: 'Castrol',

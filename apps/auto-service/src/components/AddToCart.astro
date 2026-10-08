@@ -3,10 +3,10 @@ import Icon from './Icon.astro';
 import { formatPrice } from '@podbor/shop-catalog/browser';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getShopContent } from '@/i18n/content/shop';
 import type { CatalogProduct, Installation } from '@/lib/catalog';
 import { PathBuilder } from '@/utils/paths';
 import { SHOP_STATUS } from '@/utils/shopStatus';
+import { content } from '@/i18n/content';
 
 interface Props {
   product: CatalogProduct;
@@ -16,7 +16,7 @@ interface Props {
 
 const { product, installation, regionId } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const shop = getShopContent(locale);
+const shop = content(locale).shop;
 const installCopy = installation
   ? shop.installations[installation.handle]
   : undefined;

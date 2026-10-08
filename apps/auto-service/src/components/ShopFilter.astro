@@ -2,10 +2,10 @@
 import { facetIndex, productType } from '@podbor/shop-catalog/browser';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getShopContent } from '@/i18n/content/shop';
 import type { CatalogProduct } from '@/lib/catalog';
 import { facetTypeDef } from '@/lib/facetTypeDef';
 import { optionLabel, specCopy } from '@/lib/formatSpec';
+import { content } from '@/i18n/content';
 
 interface Props {
   typeKey: string;
@@ -15,7 +15,7 @@ interface Props {
 
 const { typeKey, products, omit } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const shop = getShopContent(locale);
+const shop = content(locale).shop;
 const type = productType(typeKey)!;
 const copy = specCopy(shop, typeKey, BCP47_BY_LOCALE[locale]);
 const facets = facetIndex(

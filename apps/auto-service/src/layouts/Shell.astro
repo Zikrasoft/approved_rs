@@ -24,10 +24,10 @@ import {
   SITE_URL,
   SOCIAL_SAME_AS,
 } from '@/utils/constants';
-import { getSiteContent } from '@/i18n/content/site';
 import { DEV_MODE_INLINE } from '@/scripts/devMode';
 import { SHOP_STATUS } from '@/utils/shopStatus';
 import type { ServiceSlug } from '@/utils/services';
+import { content } from '@/i18n/content';
 
 interface Props {
   title: string;
@@ -50,7 +50,7 @@ const {
 } = Astro.props;
 
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
+const site = content(locale).site;
 const canonical = new URL(Astro.url.pathname, SITE_URL).href;
 const alternates = localeSet.getAlternateLinks(SITE_URL, Astro.url.pathname);
 const ogImage = new URL(`/og${OG_SUFFIX[locale]}.png`, SITE_URL).href;

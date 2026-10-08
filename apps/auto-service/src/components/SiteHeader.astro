@@ -4,7 +4,6 @@ import Wordmark from './Wordmark.astro';
 import CartButton from './CartButton.astro';
 import { SUPPORTED_LOCALES, LOCALE_NAME } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
 import { PathBuilder, swapLocale } from '@/utils/paths';
 import {
   contactPlacement,
@@ -13,9 +12,10 @@ import {
 } from '@podbor/site-kit';
 import { CONTACT_LINKS } from '@/utils/contactLinks';
 import { devOnly, shopBuilt } from '@/utils/shopStatus';
+import { content } from '@/i18n/content';
 
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
+const site = content(locale).site;
 const pathname = Astro.url.pathname;
 
 const links = [
