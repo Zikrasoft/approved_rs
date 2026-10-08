@@ -219,6 +219,7 @@ const businessSchema = {
       import {
         applyPreferredContactOrder,
         applyPrimaryContactChannel,
+        detectVisitorCountry,
         visitorChannel,
       } from '@podbor/site-kit/contact-preference';
       import { YM_COUNTER_ID } from '@/utils/metrika';
@@ -233,6 +234,7 @@ const businessSchema = {
         visitorId: getOrCreateVisitorId,
         markFieldValidity,
         preferredChannel: visitorChannel,
+        visitorCountry: detectVisitorCountry,
       });
     </script>
   </body>
