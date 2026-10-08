@@ -10,7 +10,7 @@ import CookieConsent from '@/components/CookieConsent.astro';
 import FloatingContactWidget from '@/components/FloatingContactWidget.astro';
 import '../styles/global.css';
 import { SITE_NAME } from '@/utils/constants';
-import { getLocale } from '@/i18n/config';
+import { localeFrom } from '@/i18n/config';
 import logoFontUrl from '@fontsource/unbounded/files/unbounded-latin-700-normal.woff2?url';
 import navCyrillicUrl from '@fontsource/golos-text/files/golos-text-cyrillic-400-normal.woff2?url';
 import navCtaCyrillicUrl from '@fontsource/golos-text/files/golos-text-cyrillic-500-normal.woff2?url';
@@ -24,7 +24,7 @@ interface Props extends MetaProps {
   ogImageHeight?: number;
 }
 
-const locale = getLocale(Astro.currentLocale);
+const locale = localeFrom(Astro.url.pathname);
 
 const {
   noindex,

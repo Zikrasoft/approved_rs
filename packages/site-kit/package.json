@@ -8,6 +8,7 @@
     ".": "./src/index.ts",
     "./browser": "./src/browser.ts",
     "./contact-links": "./src/contactLinks.ts",
+    "./contact-control": "./src/contactControl.ts",
     "./format-phone": "./src/formatPhone.ts",
     "./contact-preference": "./src/contactPreference.ts",
     "./public-env": "./src/publicEnv.ts",

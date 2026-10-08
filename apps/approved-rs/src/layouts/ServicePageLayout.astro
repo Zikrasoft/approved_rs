@@ -24,7 +24,7 @@ import {
 } from '@/utils/labels';
 import { toCaseItem } from '@/utils/cases';
 import { getI18n } from '@/i18n/getI18n';
-import { getLocale } from '@/i18n/config';
+import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 
 interface Props {
@@ -80,7 +80,7 @@ const {
 } = Astro.props;
 
 const hero = image ? await heroImageAttrs(image) : undefined;
-const locale = getLocale(Astro.currentLocale);
+const locale = localeFrom(Astro.url.pathname);
 const items = cases.map((c) => toCaseItem(c, locale));
 const t = getI18n(locale);
 const h = content(locale).home;

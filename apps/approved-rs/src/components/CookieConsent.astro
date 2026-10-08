@@ -1,10 +1,10 @@
 ---
-import { getLocale } from '@/i18n/config';
+import { localeFrom } from '@/i18n/config';
 import { getI18n } from '@/i18n/getI18n';
 import { PathBuilder } from '@/utils/paths';
 import { COOKIE_POLICY_VERSION } from '@/utils/constants';
 
-const locale = getLocale(Astro.currentLocale);
+const locale = localeFrom(Astro.url.pathname);
 const cc = getI18n(locale).common.cookie;
 ---
 

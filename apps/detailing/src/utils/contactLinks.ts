@@ -1,11 +1,4 @@
-import {
-  captureBotLink,
-  phoneLink,
-  viberLink,
-  whatsappLink,
-} from '@podbor/site-kit/contact-links';
-import type { Locale } from '@/i18n/config';
-import type { ServiceSlug } from './services';
+import { createContactControls } from '@podbor/site-kit/contact-control';
 import {
   BRAND,
   PHONE_NUMBER,
@@ -13,13 +6,9 @@ import {
   WHATSAPP_NUMBER,
 } from './constants';
 
-export const CONTACT_LINKS = {
-  phone: phoneLink(PHONE_NUMBER),
-  whatsapp: whatsappLink(WHATSAPP_NUMBER),
-  viber: viberLink(VIBER_NUMBER),
-} as const;
-
-export const telegramBotHref = (
-  locale: Locale,
-  service?: ServiceSlug,
-): string => captureBotLink(BRAND.captureBot, locale, service);
+export const contactControl = createContactControls({
+  phone: PHONE_NUMBER,
+  whatsapp: WHATSAPP_NUMBER,
+  viber: VIBER_NUMBER,
+  captureBot: BRAND.captureBot,
+});

@@ -1,9 +1,9 @@
 ---
 import Icon from '@/components/Icon.astro';
 import { localeFrom } from '@/i18n/currentLocale';
-import { CONTACT_LINKS, telegramBotHref } from '@/utils/contactLinks';
+import ContactControl from '@/components/ContactControl.astro';
 import type { ServiceSlug } from '@/utils/services';
-import { contactPlacement } from '@podbor/site-kit';
+import { contactRegion } from '@podbor/site-kit/contact-control';
 import { content } from '@/i18n/content';
 
 interface Props {
@@ -22,38 +22,36 @@ const cell =
   data-revealed="false"
   class="sticky-contact fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper/95 backdrop-blur-sm lg:hidden"
   watch="[data-contact-cta]"
-  {...contactPlacement('floating')}
+  {...contactRegion('floating')}
 >
   <div class="grid grid-cols-3 items-stretch pointer-fine:grid-cols-2">
-    <a
-      href={CONTACT_LINKS.phone}
-      data-contact-channel="phone"
-      class={`${cell} pointer-fine:hidden!`}
-    >
+    <ContactControl channel="phone" placement="floating" class={cell}>
       <Icon name="phone" size={16} />
       <span class="spec text-[0.6875rem]">{site.channels.call}</span>
-    </a>
+    </ContactControl>
 
     <div data-primary-contact class="contents">
-      <a
-        href={telegramBotHref(locale, service)}
+      <ContactControl
+        channel="telegram"
+        placement="floating"
+        service={service}
         data-primary-channel="telegram"
-        data-contact-channel="telegram"
         class={cell}
       >
         <Icon name="telegram" size={16} />
         <span class="spec text-[0.6875rem]">{site.channels.telegram}</span>
-      </a>
-      <a
-        href={CONTACT_LINKS.whatsapp}
+      </ContactControl>
+      <ContactControl
+        channel="whatsapp"
+        placement="floating"
+        service={service}
         data-primary-channel="whatsapp"
-        data-contact-channel="whatsapp"
         hidden
         class={cell}
       >
         <Icon name="whatsapp" size={16} />
         <span class="spec text-[0.6875rem]">{site.channels.whatsapp}</span>
-      </a>
+      </ContactControl>
     </div>
 
     <button

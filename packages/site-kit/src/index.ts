@@ -8,7 +8,7 @@ export {
   faqPageSchema,
 } from './jsonLd.ts';
 export type { SchemaRef, BusinessAddress, OpeningHours } from './jsonLd.ts';
-export { contactPlacement, type ContactPlacement } from './goals.ts';
+export type { ContactPlacement } from './goals.ts';
 export { relatedEntries } from './relatedEntries.ts';
 export { mapEmbedSrc, mapPlaceUrl } from './mapEmbed.ts';
 export {

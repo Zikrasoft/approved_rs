@@ -3,14 +3,14 @@ import { faqPageSchema, jsonLdText } from '@podbor/site-kit';
 import { ChevronDown } from '@lucide/astro';
 import SectionHeading from './SectionHeading.astro';
 import { getI18n } from '@/i18n/getI18n';
-import { getLocale } from '@/i18n/config';
+import { localeFrom } from '@/i18n/config';
 
 interface Props {
   heading?: string;
   items: { q: string; a: string }[];
 }
 
-const locale = getLocale(Astro.currentLocale);
+const locale = localeFrom(Astro.url.pathname);
 const { heading = getI18n(locale).common.faqHeading, items } = Astro.props;
 
 const schema = faqPageSchema(items);

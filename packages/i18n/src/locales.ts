@@ -74,6 +74,11 @@ export function createLocaleSet<L extends string, P extends L>({
         : primaryLocale;
     },
 
+    localeFrom(pathname: string): L {
+      const first = pathname.split('/').filter(Boolean)[0];
+      return first && isLocale(first) ? first : primaryLocale;
+    },
+
     detectLocale(
       acceptLanguage: string | null,
       cookieValue: string | undefined,

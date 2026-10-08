@@ -1,12 +1,11 @@
 ---
 import Icon from './Icon.astro';
+import ContactControl from './ContactControl.astro';
 import { localeFrom } from '@/i18n/currentLocale';
-import { contactChannels } from '@/utils/contactLinks';
 import type { ServiceSlug } from '@/utils/services';
-import { contactPlacement, type ContactPlacement } from '@podbor/site-kit';
+import type { ContactPlacement } from '@podbor/site-kit';
+import { contactRegion } from '@podbor/site-kit/contact-control';
 import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
-import { formatPhone } from '@podbor/site-kit/format-phone';
-import { PHONE_NUMBER } from '@/utils/constants';
 import { content } from '@/i18n/content';
 
 interface Props {
@@ -40,12 +39,12 @@ const FULL: Variant = {
   label: 'text-sm',
 };
 const VARIANT: Record<NonNullable<Props['placement']>, Variant> = {
-  bar: FULL,
+  bar: { ...FULL, list: `${FULL.list} sm:pointer-fine:grid-cols-3` },
   thanks: FULL,
   hero: {
     channels: ['phone', 'whatsapp', 'telegram'],
-    list: 'grid grid-cols-3 gap-2 pointer-fine:grid-cols-2 sm:flex sm:flex-wrap',
-    tile: 'min-h-11 justify-center gap-1.5 px-1.5 py-2.5 sm:gap-2 sm:px-5',
+    list: 'grid grid-cols-3 gap-1.5 pointer-fine:grid-cols-2 sm:flex sm:flex-wrap sm:gap-2',
+    tile: 'min-h-11 justify-center gap-1 px-1 py-2.5 sm:gap-2 sm:px-5',
     iconSize: 16,
     label: 'text-xs sm:text-[0.8125rem]',
   },
@@ -61,59 +60,42 @@ const TONE = {
     icon: 'text-panel-ink',
   },
 };
+const CHANNEL = {
+  phone: { icon: 'phone', label: site.channels.call },
+  whatsapp: { icon: 'whatsapp', label: site.channels.whatsapp },
+  viber: { icon: 'viber', label: site.channels.viber },
+  telegram: { icon: 'telegram', label: site.channels.telegram },
+} as const;
 
 const variant = VARIANT[placement];
 const { surface, icon: iconTone } = TONE[tone];
-const channels = contactChannels(site, locale, service).filter((channel) =>
-  variant.channels.includes(channel.track),
-);
 ---
 
 <ul
   class={`${variant.list} ${className}`}
-  data-contact-cta
   data-contact-order
-  {...contactPlacement(placement)}
+  {...contactRegion(placement)}
 >
   {
-    channels.map((channel) => (
-      <li
-        data-channel={channel.track}
-        class:list={[
-          channel.track === 'phone' &&
-            placement !== 'thanks' &&
-            'pointer-fine:hidden!',
-        ]}
+    variant.channels.map((channel) => (
+      <ContactControl
+        channel={channel}
+        placement={placement}
+        service={service}
+        listItem
+        class={`group flex items-center rounded-control border transition-colors duration-150 ${variant.tile} ${surface}`}
+        plainClass="flex min-h-11 items-center gap-3 rounded-control border border-line bg-card px-4 py-3"
       >
-        <a
-          href={channel.href}
-          data-contact-channel={channel.track}
-          rel="noopener"
-          class:list={[
-            'group flex items-center rounded-control border transition-colors duration-150',
-            variant.tile,
-            surface,
-            channel.track === 'phone' && 'pointer-fine:hidden!',
-          ]}
-        >
-          <Icon
-            name={channel.icon}
-            size={variant.iconSize}
-            class={`shrink-0 transition-colors duration-150 group-hover:text-signal group-focus-visible:text-signal ${iconTone}`}
-          />
-          <span class:list={['spec whitespace-nowrap', variant.label]}>
-            {channel.label}
-          </span>
-        </a>
-        {channel.track === 'phone' && placement === 'thanks' && (
-          <span class="flex min-h-11 items-center gap-3 rounded-control border border-line bg-card px-4 py-3 pointer-coarse:hidden!">
-            <Icon name="phone" size={18} class="shrink-0 text-muted" />
-            <span class="spec whitespace-nowrap text-sm text-ink">
-              {formatPhone(PHONE_NUMBER)}
-            </span>
-          </span>
-        )}
-      </li>
+        <Icon
+          name={CHANNEL[channel].icon}
+          size={variant.iconSize}
+          class={`shrink-0 transition-colors duration-150 group-hover:text-signal group-focus-visible:text-signal ${iconTone}`}
+        />
+        <span class:list={['spec whitespace-nowrap', variant.label]}>
+          {CHANNEL[channel].label}
+        </span>
+        <Icon slot="plain" name="phone" size={18} class="shrink-0 text-muted" />
+      </ContactControl>
     ))
   }
 </ul>

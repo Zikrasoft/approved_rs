@@ -23,6 +23,7 @@ export const {
   TRANSLATABLE_LOCALES,
   isLocale,
   getLocale,
+  localeFrom,
   detectLocale,
 } = localeSet;
 

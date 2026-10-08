@@ -1,20 +1,18 @@
 ---
 import { MessageCircle, X } from '@lucide/astro';
 import ContactIcon from './ContactIcon.astro';
-import { phoneLink, viberLink } from '@/utils/contactLinks';
-import { messengerHrefs } from '@/utils/messengerHrefs';
+import ContactControl from './ContactControl.astro';
 import { servicesView } from '@/i18n/content/services';
-import { getLocale } from '@/i18n/config';
-import { VIBER_NUMBER, PHONE_NUMBER } from '@/utils/constants';
+import { localeFrom } from '@/i18n/config';
 import { callbackTrigger } from '@/utils/contactChannel';
-import { contactPlacement, navCurrent } from '@podbor/site-kit';
+import { navCurrent } from '@podbor/site-kit';
+import { contactRegion } from '@podbor/site-kit/contact-control';
 import { PathBuilder } from '@/utils/paths';
 
-const locale = getLocale(Astro.currentLocale);
+const locale = localeFrom(Astro.url.pathname);
 const cc = servicesView(locale).caseChrome;
 const onThanks =
   navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page';
-const messenger = messengerHrefs(locale, undefined, { human: onThanks });
 ---
 
 <cta-reveal
@@ -22,43 +20,39 @@ const messenger = messengerHrefs(locale, undefined, { human: onThanks });
   class="floating-contact"
   data-floating-contact
   watch="[data-contact-cta]"
-  {...contactPlacement('floating')}
+  {...contactRegion('floating')}
 >
   <div class="floating-panel" role="menu" data-panel hidden>
-    <a
-      data-contact-channel="telegram"
-      href={messenger.telegram}
-      target="_blank"
-      rel="noopener"
+    <ContactControl
+      channel="telegram"
+      placement="floating"
       role="menuitem"
       class="floating-cell"
       aria-label={cc.ctaButtonLabel}
     >
       <ContactIcon channel="telegram" size={17} />
       <span>Telegram</span>
-    </a>
-    <a
-      data-contact-channel="whatsapp"
-      href={messenger.whatsapp}
-      target="_blank"
-      rel="noopener"
+    </ContactControl>
+    <ContactControl
+      channel="whatsapp"
+      placement="floating"
       role="menuitem"
       class="floating-cell"
       aria-label={cc.whatsappButtonLabel}
     >
       <ContactIcon channel="whatsapp" size={17} />
       <span>WhatsApp</span>
-    </a>
-    <a
-      data-contact-channel="viber"
-      href={viberLink(VIBER_NUMBER)}
+    </ContactControl>
+    <ContactControl
+      channel="viber"
+      placement="floating"
       role="menuitem"
       class="floating-cell"
       aria-label={cc.viberButtonLabel}
     >
       <ContactIcon channel="viber" size={17} />
       <span>Viber</span>
-    </a>
+    </ContactControl>
     {
       !onThanks && (
         <button
@@ -73,15 +67,15 @@ const messenger = messengerHrefs(locale, undefined, { human: onThanks });
         </button>
       )
     }
-    <a
-      data-contact-channel="phone"
-      href={phoneLink(PHONE_NUMBER)}
+    <ContactControl
+      channel="phone"
+      placement="floating"
       role="menuitem"
-      class="floating-cell pointer-fine:hidden!"
+      class="floating-cell"
     >
       <ContactIcon channel="phone" size={16} />
       <span>{cc.callButtonLabel}</span>
-    </a>
+    </ContactControl>
   </div>
 
   <button
@@ -176,7 +170,6 @@ const messenger = messengerHrefs(locale, undefined, { human: onThanks });
     padding: 0.75rem 0.9rem;
     background: none;
     border: none;
-    border-bottom: 1px solid var(--color-border);
     color: var(--color-text-2);
     font-size: 0.8125rem;
     font-weight: 500;
@@ -188,8 +181,8 @@ const messenger = messengerHrefs(locale, undefined, { human: onThanks });
       background-color 0.2s,
       color 0.2s;
   }
-  .floating-cell:last-child {
-    border-bottom: none;
+  .floating-cell + .floating-cell {
+    border-top: 1px solid var(--color-border);
   }
   .floating-cell:hover,
   .floating-cell:focus-visible {
