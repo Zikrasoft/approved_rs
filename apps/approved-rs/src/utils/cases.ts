@@ -1,6 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
 import type { CaseCardProps } from '@/components/CaseCard.astro';
-import { getServicesContent } from '@/i18n/content/services';
+import { servicesView } from '@/i18n/content/services';
 import { PathBuilder } from '@/utils/paths';
 import type { Locale, TranslatableLocale } from '@/i18n/config';
 
@@ -21,7 +21,7 @@ export const toCaseItem = (
   c: CollectionEntry<'cases'>,
   locale: Locale,
 ): CaseCardProps => {
-  const badgeMap = getServicesContent(locale).caseChrome.serviceBadges;
+  const badgeMap = servicesView(locale).caseChrome.serviceBadges;
   return {
     href: PathBuilder.case(locale, c.id),
     image: c.data.image,

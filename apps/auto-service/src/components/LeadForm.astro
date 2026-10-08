@@ -1,11 +1,11 @@
 ---
 import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
 import Icon from './Icon.astro';
 import PhoneInput from './PhoneInput.astro';
 import { PathBuilder } from '@/utils/paths';
 import { SHOP_SERVICE, type ServiceSlug } from '@/utils/services';
 import { HONEYPOT_FIELD, SERVICE_FIELD } from '@podbor/lead-crm';
+import { content } from '@/i18n/content';
 
 interface Props {
   service?: ServiceSlug | typeof SHOP_SERVICE;
@@ -21,7 +21,7 @@ const {
   class: className = '',
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
+const site = content(locale).site;
 
 const uid = crypto.randomUUID().slice(0, 8);
 

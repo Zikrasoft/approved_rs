@@ -13,14 +13,14 @@ import PartnerBrands from '@/components/PartnerBrands.astro';
 import { getCollection, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
-import { getPromoBanners } from '@/i18n/content/promoBanners';
+import { content } from '@/i18n/content';
 import {
   excerptFromMarkdown,
   generateArticleSchema,
   buildLocation,
 } from '@/utils/seo';
 import { withLocales, PathBuilder } from '@/utils/paths';
-import { getServicesContent } from '@/i18n/content/services';
+import { servicesView } from '@/i18n/content/services';
 import { getI18n } from '@/i18n/getI18n';
 import { formatPrice } from '@/utils/price';
 import { getCountry } from '@/utils/geo';
@@ -40,7 +40,7 @@ export async function getStaticPaths() {
 }
 
 const { locale } = Astro.params;
-const cc = getServicesContent(locale).caseChrome;
+const cc = servicesView(locale).caseChrome;
 const t = getI18n(locale);
 const { case: c } = Astro.props;
 
@@ -52,7 +52,7 @@ const translation = getCaseTranslation(c.data, locale);
 const title = translation?.title ?? c.data.title;
 const { Content } = await render(c);
 const translatedHtml = translation ? safeMarkdown(translation.body) : null;
-const banners = getPromoBanners(locale);
+const banners = content(locale).promoBanners.sourcing;
 
 const CASES_TAB_PATH: Record<
   CollectionEntry<'cases'>['data']['service'],

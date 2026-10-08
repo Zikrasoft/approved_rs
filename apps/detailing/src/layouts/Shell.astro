@@ -23,7 +23,7 @@ import {
   OPENING_HOURS,
   PHONE_NUMBER,
 } from '@/utils/constants';
-import { getSiteContent } from '@/i18n/content/site';
+import { content } from '@/i18n/content';
 
 interface Props {
   title: string;
@@ -42,7 +42,7 @@ const {
 } = Astro.props;
 
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
+const site = content(locale).site;
 
 const FONT_URLS: Record<typeof locale, string[]> = {
   ru: [displayLatinUrl, displayCyrillicUrl, bodyLatinUrl, bodyCyrillicUrl],

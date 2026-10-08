@@ -1,10 +1,10 @@
 import { createBrandBot } from '@podbor/lead-crm';
 import { serviceLabel as brandServiceLabel } from '@podbor/brands';
-import { getServicesContent } from '@/i18n/content/services';
+import { content } from '@/i18n/content';
 import { isServiceSlug } from '@/utils/services';
 import { BRAND, leadStore } from './crm';
 
-const ruServices = getServicesContent('ru');
+const ruServices = content('ru').services;
 
 export const { notifier, ensureLeadCard, notifyLead } = createBrandBot({
   store: leadStore,

@@ -7,8 +7,8 @@ import Faq from '@/components/Faq.astro';
 import ChipLinks from '@/components/ChipLinks.astro';
 import { getI18n } from '@/i18n/getI18n';
 import heroPhoto from '@/assets/service-buyback.jpg';
-import { getFaq } from '@/i18n/content/faq';
-import { getServicesContent } from '@/i18n/content/services';
+import { content } from '@/i18n/content';
+import { servicesView } from '@/i18n/content/services';
 import { withLocales, PathBuilder } from '@/utils/paths';
 import { SLUG } from '@/utils/labels';
 import { getActiveCountries } from '@/utils/geo';
@@ -20,7 +20,7 @@ import type { Locale } from '@/i18n/config';
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const { locale } = Astro.params as { locale: Locale };
-const sc = getServicesContent(locale)['vehicle-buyback'];
+const sc = servicesView(locale)['vehicle-buyback'];
 const pc = sc.hub;
 const countries = getActiveCountries();
 const t = getI18n(locale);
@@ -88,6 +88,6 @@ const cases = (await getCollection('cases'))
         ]}
       />
     </div>
-    <Faq items={getFaq(locale)['vehicle-buyback']} />
+    <Faq items={content(locale).faq['vehicle-buyback']} />
   </Fragment>
 </ServicePageLayout>

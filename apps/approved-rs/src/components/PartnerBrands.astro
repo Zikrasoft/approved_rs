@@ -2,11 +2,11 @@
 import { BRANDS, PARTNER_SERVICE } from '@podbor/brands';
 import { brandHome } from '@/utils/brandLinks';
 import { getLocale } from '@/i18n/config';
-import { getPagesContent } from '@/i18n/content/pages';
+import { pagesView } from '@/i18n/content/pages';
 import { DATA_LEAD_SERVICE, leadModalTrigger } from '@/utils/contactChannel';
 
 const locale = getLocale(Astro.currentLocale);
-const p = getPagesContent(locale).partners;
+const p = pagesView(locale).partners;
 
 const partners = [
   { brand: BRANDS.carlab, description: p.carlabDescription },

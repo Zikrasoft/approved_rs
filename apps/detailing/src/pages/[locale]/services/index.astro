@@ -11,9 +11,7 @@ import Cta from '@/components/Cta.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { publishedWorks } from '@/utils/works';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getServicesContent } from '@/i18n/content/services';
-import { getHomeContent } from '@/i18n/content/home';
-import { getSiteContent } from '@/i18n/content/site';
+import { content } from '@/i18n/content';
 import { PathBuilder, localePaths } from '@/utils/paths';
 
 export function getStaticPaths() {
@@ -21,9 +19,9 @@ export function getStaticPaths() {
 }
 
 const locale = localeFrom(Astro.url.pathname);
-const services = getServicesContent(locale);
-const home = getHomeContent(locale);
-const site = getSiteContent(locale);
+const services = content(locale).services;
+const home = content(locale).home;
+const site = content(locale).site;
 const featured = publishedWorks(await getCollection('works')).slice(0, 3);
 ---
 

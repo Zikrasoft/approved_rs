@@ -1,11 +1,11 @@
 ---
 import { Send } from '@lucide/astro';
-import { getServicesContent } from '@/i18n/content/services';
+import { servicesView } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
 import { THREADS_CHANNEL } from '@/utils/constants';
 
 const locale = getLocale(Astro.currentLocale);
-const cc = getServicesContent(locale).caseChrome;
+const cc = servicesView(locale).caseChrome;
 ---
 
 <a

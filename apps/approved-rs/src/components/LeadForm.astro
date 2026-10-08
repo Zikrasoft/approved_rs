@@ -7,7 +7,7 @@ import ViberIcon from './icons/ViberIcon.astro';
 import { Phone, ChevronDown } from '@lucide/astro';
 import { HONEYPOT_FIELD, SERVICE_FIELD } from '@podbor/lead-crm';
 import { phoneCountryOptions } from '@podbor/lead-crm/phone';
-import { getLeadFormContent } from '@/i18n/content/leadForm';
+import { content } from '@/i18n/content';
 import { getLocale, DISPLAY_LOCALE } from '@/i18n/config';
 import { phoneCountryShortlist } from '@/utils/geo';
 import { PathBuilder } from '@/utils/paths';
@@ -30,7 +30,7 @@ const {
 } = Astro.props;
 const sourceUrl = Astro.url.href;
 const locale = getLocale(Astro.currentLocale);
-const lf = getLeadFormContent(locale);
+const lf = content(locale).leadForm;
 
 const defaultPhoneCountry = 'RS';
 const displayLocale = DISPLAY_LOCALE[locale];

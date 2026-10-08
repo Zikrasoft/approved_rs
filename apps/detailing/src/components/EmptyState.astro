@@ -1,10 +1,10 @@
 ---
 import Cta from './Cta.astro';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
+import { content } from '@/i18n/content';
 
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
+const site = content(locale).site;
 ---
 
 <div class="shell mt-14" data-reveal>

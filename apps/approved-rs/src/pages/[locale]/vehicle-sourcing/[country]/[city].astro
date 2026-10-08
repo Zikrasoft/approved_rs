@@ -12,8 +12,8 @@ import {
 } from '@/utils/seo';
 import { getCollection } from 'astro:content';
 import { SITE_URL } from '@/utils/constants';
-import { getFaq } from '@/i18n/content/faq';
-import { getServicesContent } from '@/i18n/content/services';
+import { content } from '@/i18n/content';
+import { servicesView } from '@/i18n/content/services';
 import { TrendingUp, History, UserCheck, BadgeCheck } from '@lucide/astro';
 
 export const getStaticPaths = () => withLocales(getCityPaths());
@@ -21,7 +21,7 @@ export const getStaticPaths = () => withLocales(getCityPaths());
 const { locale, country: countryCode } = Astro.params;
 const { city } = Astro.props;
 const country = getCountry(countryCode!)!;
-const sc = getServicesContent(locale).cityVehicleSourcing;
+const sc = servicesView(locale).cityVehicleSourcing;
 const cityLocation = buildLocation(locale, undefined, city);
 const cityNote = sc.cityNoteFor(city.slug);
 const countryLocation = buildLocation(locale, country);
@@ -70,7 +70,7 @@ const WHY_CITY = [
     (country[locale] as { nameGenitive?: string; name: string }).nameGenitive ??
       country[locale].name,
   )}
-  ctaLabel={getServicesContent(locale)['vehicle-sourcing'].ctaLabel}
+  ctaLabel={servicesView(locale)['vehicle-sourcing'].ctaLabel}
   formService="vehicle-sourcing"
   currentCountry={countryCode!}
   currentService="vehicle-sourcing"
@@ -81,7 +81,7 @@ const WHY_CITY = [
   )}
   breadcrumbs={[
     {
-      label: getServicesContent(locale)['vehicle-sourcing'].hub.breadcrumbLabel,
+      label: servicesView(locale)['vehicle-sourcing'].hub.breadcrumbLabel,
       href: PathBuilder.vehicleSourcingHub(locale),
     },
     {
@@ -90,7 +90,7 @@ const WHY_CITY = [
     },
     { label: city[locale].name },
   ]}
-  closing={getServicesContent(locale)['vehicle-sourcing'].closing}
+  closing={servicesView(locale)['vehicle-sourcing'].closing}
 >
   <div>
     <h2 class="font-display text-xl font-bold mb-4 text-primary">
@@ -130,7 +130,10 @@ const WHY_CITY = [
       )
     }
     <Faq
-      items={[...getFaq(locale)['vehicle-sourcing'], getFaq(locale).cityExpert]}
+      items={[
+        ...content(locale).faq['vehicle-sourcing'],
+        content(locale).faq.cityExpert,
+      ]}
     />
   </Fragment>
 </ServicePageLayout>

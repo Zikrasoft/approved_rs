@@ -2,7 +2,7 @@
 import { breadcrumbListSchema, jsonLdText } from '@podbor/site-kit';
 import { SITE_URL } from '@/utils/constants';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
+import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 
 interface Props {
@@ -14,7 +14,7 @@ interface Props {
 
 const { eyebrow, heading, lead, crumbs = [] } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
+const site = content(locale).site;
 const trail = [
   { href: PathBuilder.home(locale), label: site.common.homeLabel },
   ...crumbs,
