@@ -60,7 +60,6 @@ export {
   formatDateRu,
   formatDealsList,
   formatMoney,
-  isLeadStatusKey,
   statusLabel,
   LEAD_STATUS_ACTIONS,
 } from './telegram/format.ts';

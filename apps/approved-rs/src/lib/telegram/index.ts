@@ -36,7 +36,6 @@ export const ADMIN_IDS = adminIds;
 
 export {
   canAddIncome,
-  isLeadStatusKey,
   statusLabel,
   formatMoney,
   formatDateRu,

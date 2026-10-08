@@ -9,6 +9,7 @@ vi.mock('@/lib/telegram', async () => {
     );
   return {
     canAddIncome: actual.canAddIncome,
+    LEAD_STATUS_ACTIONS: actual.LEAD_STATUS_ACTIONS,
     answerCallback: vi.fn(),
     afterStatusChange: vi.fn(),
     ensureLeadCard: vi.fn(),

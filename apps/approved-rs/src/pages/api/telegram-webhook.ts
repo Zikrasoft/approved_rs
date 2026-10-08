@@ -40,6 +40,7 @@ import {
   REPLY_COPY,
   escapeHtml,
   canAddIncome,
+  LEAD_STATUS_ACTIONS,
   type Role,
   type EditField,
 } from '@/lib/telegram';
@@ -380,10 +381,9 @@ function editRow(field: EditField): CallbackRow {
 }
 
 export const CALLBACKS: CallbackRow[] = [
-  statusRow('negotiations', 'any'),
-  statusRow('in_progress', 'any'),
-  statusRow('won', 'owner'),
-  statusRow('lost', 'owner'),
+  ...LEAD_STATUS_ACTIONS.map(({ key }) =>
+    statusRow(key, key === 'won' || key === 'lost' ? 'owner' : 'any'),
+  ),
   [/^arch:(\d+)$/, 'any', onLead(archive)],
   [/^unarch:(\d+)$/, 'any', onLead(unarchive)],
   [/^postpone:(\d+)$/, 'owner', onLead(openRemindPicker)],
