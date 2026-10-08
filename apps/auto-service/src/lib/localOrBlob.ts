@@ -1,24 +1,18 @@
 import { LOCAL_DATA_DIR } from '@podbor/lead-crm';
 
 type FileStorageModule = typeof import('@podbor/lead-crm/storage/file');
-type AsyncMethod = (...args: unknown[]) => Promise<unknown>;
 
-export function localOrBlob<T extends object>(
-  methods: readonly (keyof T & string)[],
+export function localOrBlob<T>(
   blob: () => T,
   local: (file: FileStorageModule, dir: string) => T,
+  defer: (opened: Promise<T>) => T,
 ): T {
   if (import.meta.env.DEV) {
-    const opened = import('@podbor/lead-crm/storage/file').then((file) =>
-      local(file, LOCAL_DATA_DIR),
+    return defer(
+      import('@podbor/lead-crm/storage/file').then((file) =>
+        local(file, LOCAL_DATA_DIR),
+      ),
     );
-    return Object.fromEntries(
-      methods.map((method) => [
-        method,
-        async (...args: unknown[]) =>
-          ((await opened)[method] as AsyncMethod)(...args),
-      ]),
-    ) as T;
   }
   return blob();
 }

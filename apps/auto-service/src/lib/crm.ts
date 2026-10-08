@@ -8,9 +8,12 @@ export const BRAND = SITE_NAME;
 
 const storageFor = (path: string) =>
   localOrBlob<LeadStorage>(
-    ['read', 'write'],
     () => createVercelBlobStorage({ path }),
     ({ createFileStorage }, dir) => createFileStorage({ path, dir }),
+    (opened) => ({
+      read: async () => (await opened).read(),
+      write: async (leads, version) => (await opened).write(leads, version),
+    }),
   );
 
 export const { leadStore, leadSchema } = createBrandStore({
