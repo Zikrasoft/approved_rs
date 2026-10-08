@@ -1,0 +1,65 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
+import type { ContactPlacement } from '@podbor/site-kit';
+import { formatPhone } from '@podbor/site-kit/format-phone';
+import { getLocale } from '@/i18n/config';
+import { contactControl } from '@/utils/contactLinks';
+import Button from './Button.astro';
+
+interface Props extends Omit<
+  HTMLAttributes<'a'>,
+  'href' | 'type' | 'target' | 'rel'
+> {
+  channel: TrackedContactChannel;
+  placement: ContactPlacement;
+  service?: string;
+  variant?: 'primary' | 'secondary';
+}
+
+const {
+  channel,
+  placement,
+  service,
+  variant,
+  class: className,
+  ...rest
+} = Astro.props;
+const control = contactControl({
+  channel,
+  placement,
+  locale: getLocale(Astro.currentLocale),
+  service,
+});
+const classes = [
+  className,
+  control.pointer === 'coarse-only' && 'pointer-fine:hidden!',
+];
+const plainNumber = Astro.slots.has('plain') ? control.plainNumber : undefined;
+---
+
+{
+  variant ? (
+    <Button
+      {...rest}
+      {variant}
+      href={control.href}
+      {...control.attrs}
+      class:list={classes}
+    >
+      <slot />
+    </Button>
+  ) : (
+    <a {...rest} href={control.href} {...control.attrs} class:list={classes}>
+      <slot />
+    </a>
+  )
+}
+{
+  plainNumber && (
+    <span class:list={[className, 'pointer-coarse:hidden!']}>
+      <slot name="plain" />
+      <span class="whitespace-nowrap">{formatPhone(plainNumber)}</span>
+    </span>
+  )
+}

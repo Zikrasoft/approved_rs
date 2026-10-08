@@ -346,10 +346,10 @@ Both new apps follow the same shape, and a third should too:
   opens the manager's own account (`PUBLIC_TG_MANAGER`, an app variable and
   never a `packages/brands` field, because it is a staff account rather than
   brand identity) through `telegramLink`, with no `?start=`, and falls back to
-  the capture bot when the variable is unset. `messengerHrefs` takes the choice
-  as `{ human }`, which `ContactCTA` and `FloatingContactWidget` fill from the
-  same route check that already picks their placement — no prop says where a
-  component is. A tap there fires `contact_click` and writes no Lead:
+  the capture bot when the variable is unset. The bound `contactControl`
+  carries the handle as `humanTelegram` and picks it for a `thanks` request,
+  which `ContactCTA` and `FloatingContactWidget` make from the same route check
+  that already picks their placement — no prop says where a component is. A tap there fires `contact_click` and writes no Lead:
   `defineContactClickTracking` skips the beacon for a `telegram` link whose
   href carries no `start` parameter — a human account, which a capture-bot
   link never is — so the rule is keyed on the link, not on the placement, and

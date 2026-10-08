@@ -5,12 +5,11 @@ import { getNavItems } from '@/utils/labels';
 import { getI18n } from '@/i18n/getI18n';
 import { getLocale } from '@/i18n/config';
 import { getServices } from '@/i18n/content/services';
-import { SITE_NAME, VIBER_NUMBER, THREADS_CHANNEL } from '@/utils/constants';
-import { viberLink } from '@/utils/contactLinks';
-import { messengerHrefs } from '@/utils/messengerHrefs';
+import ContactControl from './ContactControl.astro';
+import { SITE_NAME, THREADS_CHANNEL } from '@/utils/constants';
 import { getActiveCountries } from '@/utils/geo';
 import { PathBuilder } from '@/utils/paths';
-import { contactPlacement } from '@podbor/site-kit';
+import { contactRegion } from '@podbor/site-kit/contact-control';
 
 const year = new Date().getFullYear();
 const locale = getLocale(Astro.currentLocale);
@@ -19,13 +18,11 @@ const cc = getServices(locale).caseChrome;
 const coverageLine = getActiveCountries()
   .map((c) => c[locale].name)
   .join(' · ');
-const messenger = messengerHrefs(locale);
 ---
 
 <footer class="mt-24 border-t border-default">
   <div class="max-w-6xl mx-auto px-6 pt-14 pb-10">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
-      <!-- Brand -->
       <div class="lg:col-span-2">
         <div class="mb-3">
           <SiteLogo size="sm" />
@@ -33,69 +30,59 @@ const messenger = messengerHrefs(locale);
         <p class="text-sm leading-relaxed max-w-xs mb-6 text-muted">
           {t.footer.tagline}
         </p>
-        <div class="flex flex-wrap gap-2" {...contactPlacement('footer')}>
+        <div class="flex flex-wrap gap-2" {...contactRegion('footer')}>
           <div data-primary-contact class="contents">
-            <a
+            <ContactControl
               data-primary-channel="telegram"
-              data-contact-channel="telegram"
-              href={messenger.telegram}
-              target="_blank"
-              rel="noopener"
+              channel="telegram"
+              placement="footer"
               class="footer-cta inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline bg-accent-strong text-on-accent"
             >
               <ContactIcon channel="telegram" size={14} />
               {t.footer.contactManagerLabel}
-            </a>
-            <a
+            </ContactControl>
+            <ContactControl
               data-primary-channel="whatsapp"
-              data-contact-channel="whatsapp"
-              href={messenger.whatsapp}
-              target="_blank"
-              rel="noopener"
+              channel="whatsapp"
+              placement="footer"
               hidden
               class="footer-cta inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline bg-accent-strong text-on-accent"
             >
               <ContactIcon channel="whatsapp" size={14} />
               {cc.whatsappButtonLabel}
-            </a>
+            </ContactControl>
           </div>
           <div data-primary-contact class="contents">
-            <a
+            <ContactControl
               data-primary-channel="whatsapp"
-              data-contact-channel="telegram"
-              href={messenger.telegram}
-              target="_blank"
-              rel="noopener"
+              channel="telegram"
+              placement="footer"
               hidden
               aria-label={t.footer.contactManagerLabel}
               class="footer-channel-btn inline-flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-default text-muted"
             >
               <ContactIcon channel="telegram" size={14} />
-            </a>
-            <a
+            </ContactControl>
+            <ContactControl
               data-primary-channel="telegram"
-              data-contact-channel="whatsapp"
-              href={messenger.whatsapp}
-              target="_blank"
-              rel="noopener"
+              channel="whatsapp"
+              placement="footer"
               aria-label={cc.whatsappButtonLabel}
               class="footer-channel-btn inline-flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-default text-muted"
             >
               <ContactIcon channel="whatsapp" size={14} />
-            </a>
+            </ContactControl>
           </div>
-          <a
-            data-contact-channel="viber"
-            href={viberLink(VIBER_NUMBER)}
+          <ContactControl
+            channel="viber"
+            placement="footer"
             aria-label={cc.viberButtonLabel}
             class="footer-channel-btn inline-flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-default text-muted"
           >
             <ContactIcon channel="viber" size={14} />
-          </a>
+          </ContactControl>
         </div>
       </div>
-
-      <!-- Services -->
       <div>
         <p
           class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted"
@@ -110,8 +97,6 @@ const messenger = messengerHrefs(locale);
           }
         </nav>
       </div>
-
-      <!-- Company -->
       <div>
         <p
           class="text-xs font-semibold tracking-[0.16em] uppercase mb-4 text-muted"
@@ -132,8 +117,6 @@ const messenger = messengerHrefs(locale);
         </div>
       </div>
     </div>
-
-    <!-- Bottom -->
     <div
       class="pt-6 border-t border-default flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
     >
