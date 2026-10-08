@@ -1,6 +1,7 @@
 import { APPROVED, COMMISSION_PERCENT } from '@podbor/brands';
 import {
   createBrandStore,
+  deferStorage,
   LOCAL_DATA_DIR,
   type LeadStorage,
 } from '@podbor/lead-crm';
@@ -10,14 +11,11 @@ export const BRAND = APPROVED.name;
 
 const storageFor = (path: string): LeadStorage => {
   if (import.meta.env.DEV) {
-    const opened = import('@podbor/lead-crm/storage/file').then(
-      ({ createFileStorage }) =>
+    return deferStorage(
+      import('@podbor/lead-crm/storage/file').then(({ createFileStorage }) =>
         createFileStorage({ path, dir: LOCAL_DATA_DIR }),
+      ),
     );
-    return {
-      read: async () => (await opened).read(),
-      write: async (leads, version) => (await opened).write(leads, version),
-    };
   }
   return createVercelBlobStorage({ path });
 };

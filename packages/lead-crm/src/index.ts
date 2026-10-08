@@ -38,6 +38,7 @@ export {
   storedRecordsSchema,
   type LeadStorage,
 } from './storage/types.ts';
+export { deferOrderMarkers, deferStorage } from './storage/deferred.ts';
 
 export { createTelegramClient } from './telegram/client.ts';
 export type { TelegramClient } from './telegram/client.ts';

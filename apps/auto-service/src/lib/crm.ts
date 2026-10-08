@@ -1,5 +1,9 @@
 import { COMMISSION_PERCENT } from '@podbor/brands';
-import { createBrandStore, type LeadStorage } from '@podbor/lead-crm';
+import {
+  createBrandStore,
+  deferStorage,
+  type LeadStorage,
+} from '@podbor/lead-crm';
 import { createVercelBlobStorage } from '@podbor/lead-crm/storage/vercel-blob';
 import { SITE_NAME } from '@/utils/constants';
 import { localOrBlob } from './localOrBlob';
@@ -10,10 +14,7 @@ const storageFor = (path: string) =>
   localOrBlob<LeadStorage>(
     () => createVercelBlobStorage({ path }),
     ({ createFileStorage }, dir) => createFileStorage({ path, dir }),
-    (opened) => ({
-      read: async () => (await opened).read(),
-      write: async (leads, version) => (await opened).write(leads, version),
-    }),
+    deferStorage,
   );
 
 export const { leadStore, leadSchema } = createBrandStore({

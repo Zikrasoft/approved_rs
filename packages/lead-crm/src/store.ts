@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import {
   appendIncome,
   getCommission,
-  hasIncome,
+  hasDealAmount,
   incomeCommission,
   roundMoney,
   unpaidIncomes,
@@ -641,7 +641,7 @@ export function createLeadStore({
     async getOwedSummary(): Promise<{ rows: OwedRow[]; total: number }> {
       const leads = await readLeads();
       const rows: OwedRow[] = leads
-        .filter(hasIncome)
+        .filter(hasDealAmount)
         .filter((l) => !l.archived)
         .map((l) => {
           const { commission, remaining } = getCommission(l);

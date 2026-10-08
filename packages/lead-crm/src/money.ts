@@ -10,7 +10,7 @@ export function incomeCommission(amount: number, percent: number): number {
   return roundMoney((amount * percent) / 100);
 }
 
-export function hasIncome(
+export function hasDealAmount(
   lead: StoredLead,
 ): lead is StoredLead & { dealAmount: number } {
   return lead.dealAmount != null;
