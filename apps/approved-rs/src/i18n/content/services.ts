@@ -363,6 +363,6 @@ function toServicesContent(data: ServicesContentData): ServicesContent {
   };
 }
 
-export function getServices(locale: Locale): ServicesContent {
+export function servicesView(locale: Locale): ServicesContent {
   return toServicesContent(content(locale).services);
 }

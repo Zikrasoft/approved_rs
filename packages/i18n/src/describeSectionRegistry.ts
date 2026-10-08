@@ -2,12 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
 import type { ZodObject } from 'zod';
-
-interface RegistryEntry {
-  path: string;
-  schema: ZodObject;
-  fields?: readonly string[];
-}
+import type { RegistryEntry } from './translate/sections.ts';
 
 const SIDECAR_KEYS = ['translations', 'translatedFrom'];
 

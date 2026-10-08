@@ -2,13 +2,13 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
 import { SITE_NAME, TELEGRAM_BOT_URL } from '@/utils/constants';
-import { getPages } from '@/i18n/content/pages';
+import { pagesView } from '@/i18n/content/pages';
 import { withLocales } from '@/utils/paths';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const { locale } = Astro.params;
-const p = getPages(locale).privacy;
+const p = pagesView(locale).privacy;
 const meta = {
   title: `${p.metaTitle} | ${SITE_NAME}`,
   description: p.metaDescription(SITE_NAME),

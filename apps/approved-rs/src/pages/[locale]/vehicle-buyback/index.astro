@@ -9,7 +9,7 @@ import ChipLinks from '@/components/ChipLinks.astro';
 import { getI18n } from '@/i18n/getI18n';
 import heroPhoto from '@/assets/service-buyback.jpg';
 import { content } from '@/i18n/content';
-import { getServices } from '@/i18n/content/services';
+import { servicesView } from '@/i18n/content/services';
 import { withLocales, PathBuilder } from '@/utils/paths';
 import { getActiveCountries } from '@/utils/geo';
 import { generateServiceSchema, placeholderOgImage } from '@/utils/seo';
@@ -20,7 +20,7 @@ import type { Locale } from '@/i18n/config';
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const { locale } = Astro.params as { locale: Locale };
-const sc = getServices(locale)['vehicle-buyback'];
+const sc = servicesView(locale)['vehicle-buyback'];
 const pc = sc.hub;
 const countries = getActiveCountries();
 const t = getI18n(locale);

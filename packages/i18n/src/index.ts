@@ -4,6 +4,7 @@ export type { LocaleSet, LocaleSetOptions, SourceLocale } from './locales.ts';
 export { createSectionLoader } from './loadSection.ts';
 export { createContent } from './content.ts';
 export type { ContentOf } from './content.ts';
+export type { RegistryEntry } from './translate/sections.ts';
 
 export { withPlaceholder } from './withPlaceholder.ts';
 

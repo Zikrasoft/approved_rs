@@ -2,13 +2,13 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import ContactCTA from '@/components/ContactCTA.astro';
 import { SITE_NAME } from '@/utils/constants';
-import { getPages } from '@/i18n/content/pages';
+import { pagesView } from '@/i18n/content/pages';
 import { withLocales, PathBuilder } from '@/utils/paths';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const { locale } = Astro.params;
-const p = getPages(locale).thanks;
+const p = pagesView(locale).thanks;
 const meta = {
   title: `${p.metaTitle} — ${SITE_NAME}`,
   description: p.metaDescription,

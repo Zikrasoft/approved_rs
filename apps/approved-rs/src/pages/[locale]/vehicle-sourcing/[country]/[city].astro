@@ -13,7 +13,7 @@ import {
 } from '@/utils/seo';
 import { getCollection } from 'astro:content';
 import { content } from '@/i18n/content';
-import { getServices } from '@/i18n/content/services';
+import { servicesView } from '@/i18n/content/services';
 import { TrendingUp, History, UserCheck, BadgeCheck } from '@lucide/astro';
 
 export const getStaticPaths = () => withLocales(getCityPaths());
@@ -21,7 +21,7 @@ export const getStaticPaths = () => withLocales(getCityPaths());
 const { locale, country: countryCode } = Astro.params;
 const { city } = Astro.props;
 const country = getCountry(countryCode!)!;
-const sc = getServices(locale).cityVehicleSourcing;
+const sc = servicesView(locale).cityVehicleSourcing;
 const cityLocation = buildLocation(locale, undefined, city);
 const cityNote = sc.cityNoteFor(city.slug);
 const countryLocation = buildLocation(locale, country);
@@ -68,7 +68,7 @@ const WHY_CITY = [
     (country[locale] as { nameGenitive?: string; name: string }).nameGenitive ??
       country[locale].name,
   )}
-  ctaLabel={getServices(locale)['vehicle-sourcing'].ctaLabel}
+  ctaLabel={servicesView(locale)['vehicle-sourcing'].ctaLabel}
   formService="vehicle-sourcing"
   currentCountry={countryCode!}
   currentService="vehicle-sourcing"
@@ -79,7 +79,7 @@ const WHY_CITY = [
   )}
   breadcrumbs={[
     {
-      label: getServices(locale)['vehicle-sourcing'].hub.breadcrumbLabel,
+      label: servicesView(locale)['vehicle-sourcing'].hub.breadcrumbLabel,
       href: PathBuilder.vehicleSourcingHub(locale),
     },
     {
@@ -88,7 +88,7 @@ const WHY_CITY = [
     },
     { label: city[locale].name },
   ]}
-  closing={getServices(locale)['vehicle-sourcing'].closing}
+  closing={servicesView(locale)['vehicle-sourcing'].closing}
 >
   <div>
     <h2 class="font-display text-xl font-bold mb-4 text-primary">
