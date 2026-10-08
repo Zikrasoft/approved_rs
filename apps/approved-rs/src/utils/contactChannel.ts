@@ -1,7 +1,4 @@
-export {
-  detectVisitorCountry,
-  preferredContactChannel,
-} from '@podbor/site-kit/contact-preference';
+export { detectVisitorCountry } from '@podbor/site-kit/contact-preference';
 
 export {
   TRACKED_CONTACT_CHANNELS,

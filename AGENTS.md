@@ -141,7 +141,7 @@ Approved's trust/verification semantics.
   `packages/site-kit/src` are the shape: idempotent `define(tagName?)`, no
   auto-registration on import, no styles shipped, the app supplying the markup.
   A run-once page effect with no per-instance state is the one exception —
-  `defineContactClickTracking`, `applyPreferredContactOrder` and
+  `defineContactClickTracking`, `applyContactPreference` and
   `defineFunnelTracking` are plain functions called once from the app's layout,
   because what they hold belongs to the page, not to an element. Such a function
   must guard against being armed twice (`defineFunnelTracking`'s module flag,

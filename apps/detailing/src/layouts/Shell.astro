@@ -231,7 +231,7 @@ const businessSchema = {
         markFieldValidity,
       } from '@podbor/site-kit/browser';
       import {
-        applyPreferredContactOrder,
+        applyContactPreference,
         detectVisitorCountry,
         visitorChannel,
       } from '@podbor/site-kit/contact-preference';
@@ -239,7 +239,7 @@ const businessSchema = {
 
       if (!import.meta.env.DEV) defineAnalytics({ ymCounterId: YM_COUNTER_ID });
       defineContactClickTracking(isTrackedContactChannel);
-      applyPreferredContactOrder();
+      applyContactPreference();
       defineLanguageSuggestion();
       defineFunnelTracking();
       defineLeadForm({

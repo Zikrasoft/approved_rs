@@ -143,9 +143,6 @@ const businessSchema = {
         [data-lead-form] [data-channel='telegram'] {
           display: none;
         }
-        [data-lead-form] [data-contact-order] {
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
       </style>
     </noscript>
 
@@ -217,8 +214,7 @@ const businessSchema = {
         markFieldValidity,
       } from '@podbor/site-kit/browser';
       import {
-        applyPreferredContactOrder,
-        applyPrimaryContactChannel,
+        applyContactPreference,
         detectVisitorCountry,
         visitorChannel,
       } from '@podbor/site-kit/contact-preference';
@@ -226,8 +222,7 @@ const businessSchema = {
 
       if (!import.meta.env.DEV) defineAnalytics({ ymCounterId: YM_COUNTER_ID });
       defineContactClickTracking(isTrackedContactChannel);
-      applyPreferredContactOrder();
-      applyPrimaryContactChannel();
+      applyContactPreference();
       defineLanguageSuggestion();
       defineFunnelTracking();
       defineLeadForm({
