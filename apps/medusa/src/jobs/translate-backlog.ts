@@ -2,11 +2,10 @@ import type { MedusaContainer } from '@medusajs/framework/types';
 import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 
 import { parseEnv } from '../lib/env';
-import { queryAll } from '../lib/query';
+import { selectAll } from '../lib/query';
 import {
-  SOURCE_ROW_FIELDS,
-  type SourceRow,
   isCurrent,
+  sourceRowSchema,
   translateProduct,
 } from '../lib/translate-product';
 
@@ -18,10 +17,10 @@ export default async function translateBacklog(
   if (!parseEnv(process.env).OPENAI_API_KEY) {
     return;
   }
-  const products = await queryAll<SourceRow>(
+  const products = await selectAll(
     container.resolve(ContainerRegistrationKeys.QUERY),
     'product',
-    SOURCE_ROW_FIELDS,
+    sourceRowSchema,
   );
   const stale = products
     .filter((product) => !isCurrent(product))

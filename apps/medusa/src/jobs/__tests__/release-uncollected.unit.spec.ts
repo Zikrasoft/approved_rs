@@ -164,13 +164,11 @@ describe('release-uncollected', () => {
       { id: 'fine', ...EMPTY },
     ]);
 
-    await releaseUncollected(container);
-
-    expect(cancelled()).toEqual(['fine']);
-    expect(logger.error).toHaveBeenCalledWith(
-      'Uncollected order shapeless refused cancellation',
-      expect.any(Error),
+    await expect(releaseUncollected(container)).rejects.toThrow(
+      'order shapeless does not fit its read: fulfillments',
     );
+    expect(run).not.toHaveBeenCalled();
+    expect(logger.info).not.toHaveBeenCalled();
   });
 
   it('runs every hour', () => {

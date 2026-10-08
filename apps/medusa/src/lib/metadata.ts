@@ -12,11 +12,18 @@ import {
   updateStoresWorkflow,
 } from '@medusajs/medusa/core-flows';
 
-import { queryOne } from './query';
+import { z } from 'zod';
+
+import { selectOne } from './query';
 
 export type Metadata = Record<string, unknown>;
 
-type Row = { id: string; metadata?: Metadata | null };
+export const metadataRowSchema = z.object({
+  id: z.string(),
+  metadata: z.record(z.string(), z.unknown()).nullish(),
+});
+
+type Row = z.infer<typeof metadataRowSchema>;
 
 async function mergeUnderLock(
   scope: MedusaContainer,
@@ -49,7 +56,7 @@ export function updateProductMetadata(
   return mergeUnderLock(
     scope,
     `product-metadata:${id}`,
-    () => queryOne<Row>(query, 'product', ['id', 'metadata'], { id }),
+    () => selectOne(query, 'product', metadataRowSchema, { id }),
     (productId, metadata) =>
       updateProductsWorkflow(scope).run({
         input: { selector: { id: productId }, update: { metadata } },
@@ -66,9 +73,7 @@ export function updateStoreMetadata(
   return mergeUnderLock(
     scope,
     'store-metadata',
-    async () =>
-      (await query.graph({ entity: 'store', fields: ['id', 'metadata'] }))
-        .data[0],
+    () => selectOne(query, 'store', metadataRowSchema, {}),
     (storeId, metadata) =>
       updateStoresWorkflow(scope).run({
         input: { selector: { id: storeId }, update: { metadata } },

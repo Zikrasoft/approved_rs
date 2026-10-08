@@ -7,6 +7,7 @@ import {
 import { batchTranslationsWorkflow } from '@medusajs/medusa/core-flows';
 import { translateFields } from '@podbor/i18n/translate/core';
 import { MEDUSA_LOCALE } from '@podbor/shop-catalog';
+import { z } from 'zod';
 
 import { parseEnv } from './env';
 import { updateProductMetadata } from './metadata';
@@ -16,7 +17,7 @@ import {
   translatedFromKey,
   translationStamps,
 } from './product-source';
-import { queryOne } from './query';
+import { selectOne } from './query';
 import {
   BUSINESS_DESCRIPTION,
   PRODUCT_PROMPT_SUBJECT,
@@ -28,21 +29,15 @@ import {
 export type TranslateOutcome =
   'missing' | 'current' | 'no-key' | 'translated' | 'failed';
 
-export type SourceRow = {
-  id: string;
-  title?: string | null;
-  subtitle?: string | null;
-  description?: string | null;
-  metadata?: Record<string, unknown> | null;
-};
+export const sourceRowSchema = z.object({
+  id: z.string(),
+  title: z.string().nullish(),
+  subtitle: z.string().nullish(),
+  description: z.string().nullish(),
+  metadata: z.record(z.string(), z.unknown()).nullish(),
+});
 
-export const SOURCE_ROW_FIELDS = [
-  'id',
-  'title',
-  'subtitle',
-  'description',
-  'metadata',
-];
+export type SourceRow = z.infer<typeof sourceRowSchema>;
 
 export function staleLocales(product: SourceRow): TargetLocale[] {
   const hash = sourceHash(productSource(product));
@@ -61,12 +56,7 @@ export async function translateProduct(
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
   const query = container.resolve(ContainerRegistrationKeys.QUERY);
 
-  const product = await queryOne<SourceRow>(
-    query,
-    'product',
-    SOURCE_ROW_FIELDS,
-    { id },
-  );
+  const product = await selectOne(query, 'product', sourceRowSchema, { id });
   if (!product) {
     return 'missing';
   }

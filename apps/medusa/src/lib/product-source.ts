@@ -4,9 +4,9 @@ import { TARGET_LOCALES, type TargetLocale } from './translate-config';
 
 export const TRANSLATED_FROM = 'translated_from';
 
-const SOURCE_FIELDS = ['title', 'subtitle', 'description'] as const;
+const SOURCE_KEYS = ['title', 'subtitle', 'description'] as const;
 
-type SourceField = (typeof SOURCE_FIELDS)[number];
+type SourceField = (typeof SOURCE_KEYS)[number];
 
 export type ProductSource = Partial<Record<SourceField, string>>;
 
@@ -14,7 +14,7 @@ export function productSource(
   product: Partial<Record<SourceField, string | null>>,
 ): ProductSource {
   return Object.fromEntries(
-    SOURCE_FIELDS.flatMap((field) => {
+    SOURCE_KEYS.flatMap((field) => {
       const value = product[field]?.trim();
       return value ? [[field, value]] : [];
     }),

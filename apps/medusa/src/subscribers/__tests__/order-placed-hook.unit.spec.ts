@@ -162,9 +162,18 @@ describe('the order-placed hook subscriber', () => {
   });
 
   it('still fails on anything that is not a contract refusal', async () => {
+    const { container } = containerFor([{ ...ORDER, total: 'abc' }]);
+
+    await expect(fire(container)).rejects.toThrow('unreadable amount');
+    expect(sendOrderHook).not.toHaveBeenCalled();
+  });
+
+  it('fails on a product row its read cannot parse, so the bus retries it', async () => {
     const { container } = containerFor([ORDER], [null]);
 
-    await expect(fire(container)).rejects.toThrow(TypeError);
+    await expect(fire(container)).rejects.toThrow(
+      'product (no id) does not fit its read',
+    );
     expect(sendOrderHook).not.toHaveBeenCalled();
   });
 

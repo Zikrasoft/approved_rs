@@ -9,52 +9,48 @@ import {
 import { z } from 'zod';
 
 import { CHANNEL_FIELD, COMMENT_FIELD, fullName } from '../api/store/contact';
-import { money } from './query';
+import { money } from './money';
 import { shopLocale } from './shop';
 
-export const ORDER_HOOK_FIELDS = [
-  'id',
-  'display_id',
-  'email',
-  'locale',
-  'total',
-  'metadata',
-  'shipping_address.first_name',
-  'shipping_address.last_name',
-  'shipping_address.phone',
-  'items.product_id',
-  'items.product_title',
-  'items.quantity',
-  'items.unit_price',
-];
+const nullableText = z.string().nullish();
 
-export type HookOrder = {
-  id: string;
-  display_id: number | string;
-  email?: string | null;
-  locale?: string | null;
-  total: unknown;
-  metadata?: Record<string, unknown> | null;
-  shipping_address?: {
-    first_name?: string | null;
-    last_name?: string | null;
-    phone?: string | null;
-  } | null;
-  items?:
-    | ({
-        product_id?: string | null;
-        product_title?: string | null;
-        quantity: unknown;
-        unit_price: unknown;
-      } | null)[]
-    | null;
-};
+export const hookOrderSchema = z.object({
+  id: z.string(),
+  display_id: z.union([z.number(), z.string()]),
+  email: nullableText,
+  locale: nullableText,
+  total: z.unknown(),
+  metadata: z.record(z.string(), z.unknown()).nullish(),
+  shipping_address: z
+    .object({
+      first_name: nullableText,
+      last_name: nullableText,
+      phone: nullableText,
+    })
+    .nullish(),
+  items: z
+    .array(
+      z
+        .object({
+          product_id: nullableText,
+          product_title: nullableText,
+          quantity: z.unknown(),
+          unit_price: z.unknown(),
+        })
+        .nullable(),
+    )
+    .nullish(),
+});
 
-export type HookProduct = {
-  id: string;
-  title: string;
-  type?: { value?: string | null } | null;
-};
+export type HookOrder = z.infer<typeof hookOrderSchema>;
+
+export const hookProductSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  type: z.object({ value: nullableText }).nullish(),
+});
+
+export type HookProduct = z.infer<typeof hookProductSchema>;
 
 const extrasSchema = z.object({
   [COMMENT_FIELD]: z.string().optional(),

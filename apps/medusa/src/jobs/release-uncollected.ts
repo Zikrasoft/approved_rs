@@ -3,12 +3,14 @@ import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import { cancelOrderWorkflow } from '@medusajs/medusa/core-flows';
 import { z } from 'zod';
 
-import { money, queryAll } from '../lib/query';
+import { money } from '../lib/money';
+import { selectAll } from '../lib/query';
 import { RESERVE_DAYS } from '../lib/shop';
 
 export { RESERVE_DAYS };
 
-const uncollectedOrderSchema = z.object({
+export const uncollectedOrderSchema = z.object({
+  id: z.string(),
   fulfillments: z.array(
     z.object({ canceled_at: z.union([z.string(), z.date()]).nullish() }),
   ),
@@ -16,12 +18,6 @@ const uncollectedOrderSchema = z.object({
 });
 
 type UncollectedOrder = z.infer<typeof uncollectedOrderSchema>;
-
-const ORDER_FIELDS = [
-  'id',
-  'fulfillments.canceled_at',
-  'payment_collections.captured_amount',
-];
 
 const isUncollected = (order: UncollectedOrder) =>
   order.fulfillments.every((fulfillment) => Boolean(fulfillment.canceled_at)) &&
@@ -33,17 +29,17 @@ export default async function releaseUncollected(
   container: MedusaContainer,
 ): Promise<void> {
   const cutoff = new Date(Date.now() - RESERVE_DAYS * 24 * 60 * 60 * 1000);
-  const orders = await queryAll<{ id: string }>(
+  const orders = await selectAll(
     container.resolve(ContainerRegistrationKeys.QUERY),
     'order',
-    ORDER_FIELDS,
+    uncollectedOrderSchema,
     { status: 'pending', created_at: { $lt: cutoff.toISOString() } },
   );
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
   let cancelled = 0;
   for (const order of orders) {
     try {
-      if (!isUncollected(uncollectedOrderSchema.parse(order))) continue;
+      if (!isUncollected(order)) continue;
       await cancelOrderWorkflow(container).run({
         input: { order_id: order.id },
       });
