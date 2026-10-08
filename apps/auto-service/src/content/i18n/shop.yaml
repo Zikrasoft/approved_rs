@@ -243,11 +243,6 @@ translations:
     eyebrow: Delovi
     heading: Delovi sa odabirom za vašu mašinu
     lead: Izaberite automobil — pokažemo samo ono što odgovara. Preuzimate u servisu, plaćate prilikom preuzimanja, a instaliraćemo odmah na licu mesta, ako je potrebno.
-    fitmentHeading: Vaša mašina
-    makeLabel: Marka
-    modelLabel: Model
-    yearLabel: Godina proizvodnje
-    anyOption: Nije važno
     resetLabel: Poništi
     matchCount:
       one: pronađen {count} proizvod
@@ -256,31 +251,16 @@ translations:
       other: pronađena {count} proizvoda
     noMatches: Pod ovim parametrima nema dostupnih proizvoda
     noMatchesHint: Pišite nam — nabavićemo na porudžbinu obično za jedan do dva dana.
-    emptyCatalog: Katalog će uskoro biti popunjen. Za sada pozovite — reći ćemo vam šta imamo na skladištu danas.
-    capacityLabel: Kapacitet
-    crankingLabel: Startni tok
-    polarityLabel: Polarnost
-    dimensionsLabel: Dimenzije
-    dimensionsUnit: mm
-    polarityLeft: obrnuta (minus levo)
-    polarityRight: direktna (plus levo)
-    warrantyLabel: Garancija
-    warrantyUnit: mes.
     fitsLabel: Pogodno za
     inStock: Na lageru
-    onOrder: Na porudžbinu
     addToCart: Dodaj u korpu
     inCart: U korpi
-    installNote: Instalacija i odlaganje starog akumulatora — besplatno uz kupovinu kod nas.
-    productMetaSuffix: akumulator u Beogradu
     typesHeading: Šta imamo u prodavnici
     productCount:
       one: '{count} proizvod'
       few: '{count} proizvoda'
       many: '{count} proizvoda'
       other: '{count} proizvoda'
-    carLead: Izaberite marku, model i godinu — katalog će pokazati samo ono što odgovara. Odabir ćemo zapamtiti na ovom uređaju.
-    carClear: Poništi automobil
     landingsLabel: Popularne opcije
     filterHeading: Filteri
     filterFrom: od
@@ -451,8 +431,6 @@ translations:
       removeLabel: Ukloni
       totalLabel: Ukupno
       totalNote: Cene su konačne, PDV se ne obračunava. Ugradnja — kao posebna stavka, ukoliko ste je dodali.
-      orderHeading: Postavi narudžbu
-      orderNote: Pozvaćemo vas, potvrdićemo dostupnost i dogovoriti vreme.
       badgeLabel: proizvoda u korpi
       checkoutHeading: Kontakt za narudžbu
       nameRequired: Ime je obavezno — tako ćemo vas prepoznati u servisu.
@@ -481,11 +459,6 @@ translations:
     eyebrow: Parts
     heading: Parts tailored for your vehicle
     lead: Select your car—we'll show you only what's compatible. Pick up at the service, pay upon receipt, and we'll install it right on the spot if needed.
-    fitmentHeading: Your vehicle
-    makeLabel: Make
-    modelLabel: Model
-    yearLabel: Year
-    anyOption: Any
     resetLabel: Reset
     matchCount:
       one: found {count} item
@@ -494,31 +467,16 @@ translations:
       other: found {count} items
     noMatches: No items available for these criteria
     noMatchesHint: Contact us—we can bring it under order usually in one or two days.
-    emptyCatalog: The catalog will be filled soon. For now, call us—we'll tell you what's in stock today.
-    capacityLabel: Capacity
-    crankingLabel: Cold Cranking Amps
-    polarityLabel: Polarity
-    dimensionsLabel: Dimensions
-    dimensionsUnit: mm
-    polarityLeft: reverse (negative on left)
-    polarityRight: standard (positive on left)
-    warrantyLabel: Warranty
-    warrantyUnit: months
     fitsLabel: Fits for
     inStock: In stock
-    onOrder: On order
     addToCart: Add to cart
     inCart: In cart
-    installNote: Installation and disposal of the old battery is free with purchase from us.
-    productMetaSuffix: battery in Belgrade
     typesHeading: What's in store
     productCount:
       one: '{count} item'
       few: '{count} items'
       many: '{count} items'
       other: '{count} items'
-    carLead: Select the make, model, and year—the catalog will show only what's suitable. We’ll remember your choice on this device.
-    carClear: Clear vehicle
     landingsLabel: Popular options
     filterHeading: Filters
     filterFrom: from
@@ -689,8 +647,6 @@ translations:
       removeLabel: Remove
       totalLabel: Total
       totalNote: Prices are final, VAT not included. Installation is listed separately if added.
-      orderHeading: Place Order
-      orderNote: We will call you to confirm availability and arrange a pickup time.
       badgeLabel: items in cart
       checkoutHeading: Order Contact Details
       nameRequired: Name is required — this helps us recognize you at the service.
