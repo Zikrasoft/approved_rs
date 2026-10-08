@@ -4,8 +4,12 @@ import { localeFrom } from '@/i18n/currentLocale';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
-import { CONTACT_LINKS } from '@/utils/contactLinks';
-import { PHONE_COUNTRY_SHORTLIST } from '@/utils/constants';
+import {
+  PHONE_COUNTRY_SHORTLIST,
+  PHONE_NUMBER,
+  WHATSAPP_NUMBER,
+} from '@/utils/constants';
+import { phoneLink, whatsappLink } from '@podbor/site-kit/contact-links';
 import type { ServiceSlug } from '@/utils/services';
 import { phoneCountryOptions } from '@podbor/lead-crm/phone';
 import { HONEYPOT_FIELD, SERVICE_FIELD } from '@podbor/lead-crm';
@@ -84,11 +88,11 @@ const noscriptLink =
     >
       <p>{site.form.noscriptNote}</p>
       <div class="mt-3 flex flex-wrap gap-2">
-        <a href={CONTACT_LINKS.phone} class={noscriptLink}>
+        <a href={phoneLink(PHONE_NUMBER)} class={noscriptLink}>
           <Icon name="phone" size={14} />
           {site.channels.call}
         </a>
-        <a href={CONTACT_LINKS.whatsapp} class={noscriptLink}>
+        <a href={whatsappLink(WHATSAPP_NUMBER)} class={noscriptLink}>
           <Icon name="whatsapp" size={14} />
           {site.channels.whatsapp}
         </a>
