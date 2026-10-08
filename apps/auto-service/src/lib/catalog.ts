@@ -6,6 +6,7 @@ import {
   SERVICE_TYPE,
   SHOP_CURRENCY,
   type FitmentEntry,
+  type ProductTypeDef,
   type Spec,
 } from '@podbor/shop-catalog/browser';
 import type { Locale } from '@/i18n/config';
@@ -37,7 +38,7 @@ export interface StoreEnv {
 export interface CatalogProduct {
   id: string;
   handle: string;
-  typeKey: string;
+  type: ProductTypeDef;
   title: string;
   description: string | null;
   image: string | null;
@@ -167,7 +168,7 @@ function buildCatalog(parsed: z.infer<typeof productsSchema>): {
     cards.push({
       id: product.id,
       handle: product.handle,
-      typeKey: attributes.type.key,
+      type: attributes.type,
       title: product.title,
       description: product.description ?? null,
       image: product.thumbnail ?? product.images?.[0]?.url ?? null,

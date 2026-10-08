@@ -1,6 +1,7 @@
 import {
-  ADMIN_IDS as adminIds,
-  OWNER_IDS as ownerIds,
+  adminIds,
+  ownerIds,
+  afterStatusChange,
   client,
   ensureLeadCard,
   formatter,
@@ -14,7 +15,7 @@ export const {
   safeEditMessage,
 } = client;
 
-export { ensureLeadCard };
+export { afterStatusChange, ensureLeadCard };
 
 export const {
   sendLeadNotification,
@@ -35,7 +36,6 @@ export const ADMIN_IDS = adminIds;
 
 export {
   canAddIncome,
-  isLeadStatusKey,
   statusLabel,
   formatMoney,
   formatDateRu,

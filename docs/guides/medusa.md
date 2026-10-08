@@ -46,11 +46,26 @@ apps/medusa/docker-compose.test.yml up -d --wait`; `DB_HOST` is the literal
 - **The release job filters fulfilment and capture in memory, not in the query.**
   `Order.fulfillment_status` is not a queryable property — `query.graph` throws
   `Trying to query by not existing property Order.fulfillment_status`, proven by
-  `release-uncollected.spec.ts`. It also validates the rows it got with zod and
-  skips any order whose `fulfillments`/`payment_collections` the query did not
-  return: `cancelOrderWorkflow` refuses an order with a live fulfilment, but it
-  **refunds** captured payments rather than refusing, so a missing relation read
-  as "nothing captured" would cancel and refund a paid order.
+  `release-uncollected.spec.ts`, and `fieldsOf` refuses a schema that names it.
+  An order whose `fulfillments`/`payment_collections` the query did not return
+  is logged (`Uncollected order skipped: …`) and left alone, never cancelled,
+  and the rest of the run goes on: `cancelOrderWorkflow` refuses an order with a
+  live fulfilment, but it **refunds** captured payments rather than refusing, so
+  a missing relation read as "nothing captured" would cancel and refund a paid
+  order. This job is the only read that skips through `selectAll`'s
+  `skipUnfit`; one bad order must not hold back every other release.
+- **Reads in subscribers, jobs, `src/lib`, the store routes and the admin
+  product guards go through `selectOne`/`selectAll`** (`src/lib/query.ts`). The
+  zod schema is both the field list and the parser: `fieldsOf` walks it into dot
+  paths, and a row that does not fit throws naming the entity, the row id and
+  the issue path. `fieldsOf` unwraps only optional, nullable and array; an
+  object behind any other wrapper (`.default()`, a transform, lazy, a union)
+  throws rather than being read as a leaf. Shared pieces (`nullableText`,
+  `metadataField`, `typeValueField`, `idRowSchema`) live in
+  `src/lib/row-schema.ts`. Medusa syntax a schema cannot spell goes through
+  `fieldPrefix` (`{ images: '*' }`, `{ 'variants.inventory_quantity': '+' }`),
+  keyed on a path the schema still parses. A new read adds a fixture row to
+  `src/lib/__tests__/reads.unit.spec.ts`.
 - **A 409 is written with `res.status(409).json(...)`, never thrown** — the
   error handler rewrites `CONFLICT` messages, so a thrown `MedusaError` of that
   type would not reach the client with the Russian reason intact.

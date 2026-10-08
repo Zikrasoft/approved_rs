@@ -15,7 +15,12 @@ import {
 } from '@podbor/shop-catalog';
 import { z } from 'zod';
 
-import { type Query, queryOne } from '../../../lib/query';
+import { type Query, selectOne } from '../../../lib/query';
+import {
+  idRowSchema,
+  metadataField,
+  typeValueField,
+} from '../../../lib/row-schema';
 import { SHOP } from '../../../lib/shop';
 import { isLatin, translit } from '../../../lib/translit';
 
@@ -28,12 +33,14 @@ export const draftSchema = z.looseObject({
     .nullish(),
   type_id: z.string().nullish(),
   status: z.string().nullish(),
-  metadata: z.record(z.string(), z.unknown()).nullish(),
+  metadata: metadataField,
 });
 
 export type ProductDraft = z.infer<typeof draftSchema>;
 
 const objectSchema = z.record(z.string(), z.unknown());
+
+export const typeValueSchema = z.object({ value: z.string() });
 
 export function requestBodies(req: MedusaRequest): Record<string, unknown>[] {
   return [...new Set([req.validatedBody, req.body])].filter(
@@ -57,7 +64,7 @@ async function freeHandle(query: Query, handle: string): Promise<string> {
   let candidate = handle;
   for (
     let suffix = 2;
-    await queryOne(query, 'product', ['id'], { handle: candidate });
+    await selectOne(query, 'product', idRowSchema, { handle: candidate });
     suffix += 1
   ) {
     candidate = `${handle}-${suffix}`;
@@ -72,22 +79,12 @@ export async function fillProductDefaults(
 ): Promise<void> {
   try {
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
-    const profile = await queryOne<{ id: string }>(
-      query,
-      'shipping_profile',
-      ['id'],
-      {
-        type: 'default',
-      },
-    );
-    const channel = await queryOne<{ id: string }>(
-      query,
-      'sales_channel',
-      ['id'],
-      {
-        name: SHOP.salesChannelName,
-      },
-    );
+    const profile = await selectOne(query, 'shipping_profile', idRowSchema, {
+      type: 'default',
+    });
+    const channel = await selectOne(query, 'sales_channel', idRowSchema, {
+      name: SHOP.salesChannelName,
+    });
 
     for (const body of requestBodies(req)) {
       const draft = draftSchema.safeParse(body);
@@ -135,12 +132,12 @@ const variantsSchema = z.array(variantSchema);
 
 const sentVariantsSchema = z.looseObject({ variants: variantsSchema });
 
-type Stored = {
-  status?: string | null;
-  metadata?: Record<string, unknown> | null;
-  type?: { value?: string | null } | null;
-  variants?: unknown;
-};
+export const storedProductSchema = z.object({
+  status: z.string().nullish(),
+  metadata: metadataField,
+  type: typeValueField,
+  variants: variantsSchema.nullish(),
+});
 
 type Inspected = {
   typeKey: string | undefined;
@@ -158,31 +155,17 @@ async function inspect(req: MedusaRequest): Promise<Inspected> {
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
   const id = req.params?.id;
   const stored = id
-    ? await queryOne<Stored>(
-        query,
-        'product',
-        [
-          'status',
-          'metadata',
-          'type.value',
-          'variants.id',
-          'variants.title',
-          'variants.prices.amount',
-          'variants.prices.currency_code',
-        ],
-        { id },
-      )
+    ? await selectOne(query, 'product', storedProductSchema, { id })
     : undefined;
   const changesType = 'type_id' in draft;
   const chosenType =
     typeof draft.type_id === 'string'
-      ? await queryOne<{ value: string }>(query, 'product_type', ['value'], {
+      ? await selectOne(query, 'product_type', typeValueSchema, {
           id: draft.type_id,
         })
       : undefined;
   const sent = sentVariantsSchema.safeParse(body);
-  const kept = variantsSchema.safeParse(stored?.variants);
-  const storedVariants = kept.success ? kept.data : [];
+  const storedVariants = stored?.variants ?? [];
 
   return {
     typeKey: changesType
@@ -312,7 +295,7 @@ export async function requireReadyToPublish(
 const batchItemSchema = z.looseObject({
   type_id: z.unknown().optional(),
   status: z.unknown().optional(),
-  metadata: z.record(z.string(), z.unknown()).nullish(),
+  metadata: metadataField,
 });
 
 const batchSchema = z.looseObject({
@@ -374,9 +357,7 @@ export async function refuseRegistryTypeEdits(
     const id = req.params?.id;
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
     const stored = id
-      ? await queryOne<{ value: string }>(query, 'product_type', ['value'], {
-          id,
-        })
+      ? await selectOne(query, 'product_type', typeValueSchema, { id })
       : undefined;
     if (stored && REGISTRY_TYPE_KEYS.includes(stored.value)) {
       next(

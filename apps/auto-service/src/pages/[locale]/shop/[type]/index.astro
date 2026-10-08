@@ -1,16 +1,15 @@
 ---
-import { productType } from '@podbor/shop-catalog/browser';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import ShopGate from '@/components/ShopGate.astro';
 import ShopFilter from '@/components/ShopFilter.astro';
 import ShopSearch from '@/components/ShopSearch.astro';
 import ProductGrid from '@/components/ProductGrid.astro';
-import { BCP47_BY_LOCALE, PRIMARY_LOCALE } from '@/i18n/config';
+import { PRIMARY_LOCALE } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
 import { shopCatalog } from '@/lib/catalog';
-import { formatValue, specCopy } from '@/lib/formatSpec';
-import { landingsFor, productsOfType, shopTypeKeys } from '@/lib/shopPages';
+import { landingsFor, productsOfType, shopTypes } from '@/lib/shopPages';
+import { typeView } from '@/lib/typeView';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { shopBuilt, shopIndexed } from '@/utils/shopStatus';
 import { content } from '@/i18n/content';
@@ -19,26 +18,20 @@ export async function getStaticPaths() {
   if (!shopBuilt()) return [];
   const { products } = await shopCatalog().catalog(PRIMARY_LOCALE);
   return withLocales(
-    shopTypeKeys(products).map((type) => ({ params: { type } })),
+    shopTypes(products).map((type) => ({ params: { type: type.key } })),
   );
 }
 
-const typeKey = Astro.params.type!;
 const locale = localeFrom(Astro.url.pathname);
 const shop = content(locale).shop;
 const site = content(locale).site;
-const type = productType(typeKey)!;
-const copy = shop.types[typeKey];
-const spec = specCopy(shop, typeKey, BCP47_BY_LOCALE[locale]);
+const view = typeView(Astro.params.type!, locale);
+const { type, copy } = view;
 const { products: all } = await shopCatalog().catalog(locale);
-const products = productsOfType(all, typeKey);
-const landings = landingsFor(all, typeKey).map((landing) => ({
-  href: PathBuilder.shopLanding(locale, typeKey, landing.slug),
-  label: formatValue(
-    type.fields.find((field) => field.key === landing.key)!,
-    landing.value,
-    spec,
-  ),
+const products = productsOfType(all, type);
+const landings = landingsFor(all, type).map((landing) => ({
+  href: PathBuilder.shopLanding(locale, type.key, landing.slug),
+  label: view.formatValue(landing.key, landing.value),
 }));
 ---
 
@@ -54,7 +47,7 @@ const landings = landingsFor(all, typeKey).map((landing) => ({
       lead={copy.lead}
       crumbs={[
         { href: PathBuilder.shop(locale), label: site.nav.shop },
-        { href: PathBuilder.shopType(locale, typeKey), label: copy.name },
+        { href: PathBuilder.shopType(locale, type.key), label: copy.name },
       ]}
     />
     <section class="wrap flex flex-col gap-6 py-band md:py-band-lg">
@@ -73,7 +66,7 @@ const landings = landingsFor(all, typeKey).map((landing) => ({
           </nav>
         )
       }
-      <ShopFilter typeKey={typeKey} products={products}>
+      <ShopFilter type={type} products={products}>
         <ProductGrid products={products} />
       </ShopFilter>
     </section>
