@@ -32,7 +32,7 @@ its own `api/telegram-capture.ts` webhook in its own project
 ([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
 All three apps write to the same `data/leads.json` in the same Vercel Blob store
 and are separated by the lead's `brand` field, which the server stamps on
-(`createNotifyLead({ brand })`) — a visitor cannot set it.
+(`createBrandBot({ brand })`) — a visitor cannot set it.
 
 > Unprefixed paths in this document are relative to the app being discussed
 > (`vercel.json` in the approved.rs section means
