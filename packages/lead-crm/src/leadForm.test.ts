@@ -174,6 +174,11 @@ describe('channel tabs', () => {
 });
 
 describe('fields', () => {
+  it("preselects the visitor's country", () => {
+    const f = mount({ deps: deps({ visitorCountry: () => 'de' }) });
+    expect(f.country.value).toBe('DE');
+  });
+
   it('masks the phone as it is typed', () => {
     const f = mount();
     type(f.phone, '0601234567');

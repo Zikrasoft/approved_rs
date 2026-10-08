@@ -1,6 +1,10 @@
 import type { CountryCode } from 'libphonenumber-js/min';
 import type { TrackedContactChannel } from './contactChannel.ts';
-import { bindPhoneCountry, fillCountrySelect } from './phoneInput.ts';
+import {
+  bindPhoneCountry,
+  fillCountrySelect,
+  selectCountry,
+} from './phoneInput.ts';
 import {
   deferSubmitUntilKit,
   loadPhoneKit,
@@ -13,6 +17,7 @@ export interface LeadFormDeps {
   visitorId: () => string;
   markFieldValidity: (control: Element, valid: boolean) => void;
   preferredChannel?: () => TrackedContactChannel | undefined;
+  visitorCountry?: () => string | undefined;
 }
 
 type ValidatedField = 'telegram' | 'phone' | 'consent';
@@ -119,6 +124,7 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
       : idleLabel;
   };
 
+  selectCountry(country, deps.visitorCountry?.());
   bindPhoneCountry(country, phone);
 
   const preferred = deps.preferredChannel?.();

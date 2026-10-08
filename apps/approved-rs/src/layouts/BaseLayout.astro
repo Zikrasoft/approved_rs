@@ -169,13 +169,26 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
         defineContactClickTracking,
         defineFunnelTracking,
         defineLanguageSuggestion,
+        getOrCreateVisitorId,
+        markFieldValidity,
       } from '@podbor/site-kit/browser';
-      import { applyPrimaryContactChannel } from '@podbor/site-kit/contact-preference';
+      import {
+        applyPrimaryContactChannel,
+        detectVisitorCountry,
+        visitorChannel,
+      } from '@podbor/site-kit/contact-preference';
+      import { defineLeadForm } from '@podbor/lead-crm/lead-form';
 
       defineLanguageSuggestion();
       applyPrimaryContactChannel();
       defineContactClickTracking(isTrackedContactChannel);
       defineFunnelTracking();
+      defineLeadForm({
+        visitorId: getOrCreateVisitorId,
+        markFieldValidity,
+        preferredChannel: visitorChannel,
+        visitorCountry: detectVisitorCountry,
+      });
     </script>
   </body>
 </html>
