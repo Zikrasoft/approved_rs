@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { SITE_URL, SITE_NAME } from '@/utils/constants';
+import { SITE_NAME } from '@/utils/constants';
 import type { CaseCardProps } from '@/components/CaseCard.astro';
 
 vi.mock('@/utils/casesQueries', () => ({
@@ -15,14 +15,12 @@ const { buildCasesTabPageData } = await import('./casesTabPage');
 const { getCasesTabCounts } = await import('@/utils/casesQueries');
 
 describe('buildCasesTabPageData', () => {
-  it('builds meta from the given content key and canonical path', async () => {
+  it('builds meta from the given content key', async () => {
     const { meta } = await buildCasesTabPageData(
       'ru',
       'casesVehicleSourcing',
-      '/ru/cases/vehicle-sourcing/',
       async () => [],
     );
-    expect(meta.canonical).toBe(`${SITE_URL}/ru/cases/vehicle-sourcing/`);
     expect(meta.title.endsWith(SITE_NAME)).toBe(true);
   });
 
@@ -33,7 +31,6 @@ describe('buildCasesTabPageData', () => {
     const result = await buildCasesTabPageData(
       'ru',
       'casesVehicleSourcing',
-      '/ru/cases/vehicle-import/',
       async () => items,
     );
     expect(result.items).toBe(items);

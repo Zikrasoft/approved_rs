@@ -205,6 +205,14 @@ describe('showContactValue', () => {
     expect(field[1].value).toBe('@ivan');
   });
 
+  it('shows the handle a pasted profile link carries', async () => {
+    const { showContactValue, loadPhoneKit } = await freshModule();
+    await loadPhoneKit();
+    const field = telegramField('https://t.me/ivan/');
+    expect(showContactValue('telegram', ...field)).toBe('@ivan');
+    expect(field[1].value).toBe('@ivan');
+  });
+
   it('never posts a bare @ for an empty field', async () => {
     const { showContactValue } = await freshModule();
     const field = telegramField('   ');

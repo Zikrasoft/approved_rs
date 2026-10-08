@@ -5,8 +5,12 @@ import {
   landingProducts,
   landingsFor,
   productsOfType,
-  shopTypeKeys,
+  shopTypes,
 } from './shopPages';
+import { typeView } from './typeView';
+
+const BATTERIES = typeView('batteries', 'ru').type;
+const FILTERS = typeView('filters', 'ru').type;
 
 const withCapacity = (handle: string, capacityAh: number, price = 10000) => {
   const product = battery(handle);
@@ -25,8 +29,8 @@ describe('shop pages', () => {
   it('lists only types that have something to sell, in registry order', () => {
     const { catalog } = readCatalog(products([withCapacity('a', 60)]));
 
-    expect(shopTypeKeys(catalog.products)).toEqual(['batteries']);
-    expect(productsOfType(catalog.products, 'filters')).toEqual([]);
+    expect(shopTypes(catalog.products)).toEqual([BATTERIES]);
+    expect(productsOfType(catalog.products, FILTERS)).toEqual([]);
   });
 
   it('opens a landing once enough priced products share a value', () => {
@@ -38,7 +42,7 @@ describe('shop pages', () => {
       ]),
     );
 
-    expect(landingsFor(catalog.products, 'batteries')).toEqual([
+    expect(landingsFor(catalog.products, BATTERIES)).toEqual([
       { slug: '60ah', key: 'capacityAh', value: 60 },
     ]);
   });
@@ -52,7 +56,7 @@ describe('shop pages', () => {
       ]),
     );
 
-    expect(landingsFor(catalog.products, 'batteries')).toEqual([]);
+    expect(landingsFor(catalog.products, BATTERIES)).toEqual([]);
   });
 
   it('puts exactly the landing value on the landing', () => {
@@ -61,7 +65,7 @@ describe('shop pages', () => {
     );
 
     expect(
-      landingProducts(catalog.products, 'batteries', {
+      landingProducts(catalog.products, BATTERIES, {
         key: 'capacityAh',
         value: 60,
       }).map((product) => product.handle),

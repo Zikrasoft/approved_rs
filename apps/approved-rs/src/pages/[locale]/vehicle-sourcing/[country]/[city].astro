@@ -1,4 +1,5 @@
 ---
+import { canonicalUrl } from '@/utils/pageHead';
 import ServicePageLayout from '@/layouts/ServicePageLayout.astro';
 import ChipLinks from '@/components/ChipLinks.astro';
 import Faq from '@/components/Faq.astro';
@@ -7,11 +8,12 @@ import { getCityPaths, withLocales, PathBuilder } from '@/utils/paths';
 import { getCountry, getCitiesForCountry } from '@/utils/geo';
 import {
   generateMeta,
+  ogImageFor,
   generateServiceSchema,
   buildLocation,
 } from '@/utils/seo';
-import { getCollection } from 'astro:content';
 import { SITE_URL } from '@/utils/constants';
+import { getCollection } from 'astro:content';
 import { content } from '@/i18n/content';
 import { servicesView } from '@/i18n/content/services';
 import { TrendingUp, History, UserCheck, BadgeCheck } from '@lucide/astro';
@@ -25,13 +27,14 @@ const sc = servicesView(locale).cityVehicleSourcing;
 const cityLocation = buildLocation(locale, undefined, city);
 const cityNote = sc.cityNoteFor(city.slug);
 const countryLocation = buildLocation(locale, country);
-const meta = generateMeta('vehicle-sourcing', {
-  country,
-  city,
-  baseUrl: SITE_URL,
-  path: PathBuilder.vehicleSourcingCity(locale, countryCode!, city.slug),
-  locale: locale,
-});
+const meta = {
+  ...generateMeta('vehicle-sourcing', {
+    country,
+    city,
+    locale: locale,
+  }),
+  ogImage: ogImageFor(SITE_URL, 'vehicle-sourcing', locale),
+};
 const cases = (await getCollection('cases'))
   .filter(
     (c) =>
@@ -43,7 +46,7 @@ const cases = (await getCollection('cases'))
 const schema = generateServiceSchema(
   `${sc.title} ${cityLocation}`,
   city[locale].name,
-  meta.canonical,
+  canonicalUrl(locale, Astro.url.pathname),
 );
 
 // DEKRA/TÜV are German-specific certification bodies — only true for country: 'de'.

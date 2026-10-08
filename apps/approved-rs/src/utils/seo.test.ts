@@ -36,21 +36,16 @@ describe('generateMeta', () => {
   it('generates vehicle-sourcing meta for country', () => {
     const meta = generateMeta('vehicle-sourcing', {
       country: de,
-      baseUrl: 'https://approved.rs',
-      path: '/vehicle-sourcing/de/',
       locale: 'ru',
     });
     expect(meta.title).toContain('Германии');
     expect(meta.title).toContain('Автоподбор');
-    expect(meta.canonical).toBe('https://approved.rs/vehicle-sourcing/de/');
   });
 
   it('generates vehicle-sourcing meta for city', () => {
     const meta = generateMeta('vehicle-sourcing', {
       country: de,
       city: berlin,
-      baseUrl: 'https://approved.rs',
-      path: '/vehicle-sourcing/de/berlin/',
       locale: 'ru',
     });
     expect(meta.title).toContain('Берлине');
@@ -59,8 +54,6 @@ describe('generateMeta', () => {
   it('generates vehicle-buyback meta', () => {
     const meta = generateMeta('vehicle-buyback', {
       country: de,
-      baseUrl: 'https://approved.rs',
-      path: '/vehicle-buyback/de/',
       locale: 'ru',
     });
     expect(meta.title).toContain('Выкуп');

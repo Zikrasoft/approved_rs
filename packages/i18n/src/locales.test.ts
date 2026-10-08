@@ -1,36 +1,88 @@
 import { describe, it, expect } from 'vitest';
 import { createLocaleSet, SOURCE_LOCALE } from './locales.ts';
 
+const OG_LOCALE = {
+  ru: 'ru_RU',
+  en: 'en_US',
+  sr: 'sr_RS',
+  es: 'es_ES',
+  de: 'de_DE',
+};
+
+const OG_SUFFIX = { ru: '', en: '-en', sr: '-sr', es: '-es', de: '-de' };
+
 const set = createLocaleSet({
   locales: ['ru', 'en', 'sr', 'es', 'de'] as const,
   primaryLocale: 'ru',
+  ogLocale: OG_LOCALE,
+  ogSuffix: OG_SUFFIX,
 });
 
 const srFirst = createLocaleSet({
   locales: ['ru', 'sr', 'en'] as const,
   primaryLocale: 'sr',
+  ogLocale: OG_LOCALE,
+  ogSuffix: OG_SUFFIX,
 });
 
 describe('createLocaleSet options', () => {
   it('rejects an empty locale list', () => {
     expect(() =>
-      // @ts-expect-error an empty list leaves no valid primary — caught at
-      // compile time too, this pins the runtime guard for untyped callers.
-      createLocaleSet({ locales: [] as const, primaryLocale: 'ru' }),
+      createLocaleSet({
+        locales: [] as const,
+        // @ts-expect-error an empty list leaves no valid primary
+        primaryLocale: 'ru',
+        ogLocale: {},
+        ogSuffix: {},
+      }),
     ).toThrow('locales must not be empty');
   });
 
   it('rejects a primary locale that is not one of the locales', () => {
     expect(() =>
-      // @ts-expect-error same guard, one layer down from the type system.
-      createLocaleSet({ locales: ['ru', 'en'] as const, primaryLocale: 'de' }),
+      createLocaleSet({
+        locales: ['ru', 'en'] as const,
+        // @ts-expect-error the primary must be one of the locales
+        primaryLocale: 'de',
+        ogLocale: OG_LOCALE,
+        ogSuffix: OG_SUFFIX,
+      }),
     ).toThrow('primaryLocale "de" is not in the locale list');
   });
 
   it('rejects a locale list that cannot hold the translation source', () => {
     expect(() =>
-      createLocaleSet({ locales: ['sr', 'en'] as const, primaryLocale: 'sr' }),
+      createLocaleSet({
+        locales: ['sr', 'en'] as const,
+        primaryLocale: 'sr',
+        ogLocale: OG_LOCALE,
+        ogSuffix: OG_SUFFIX,
+      }),
     ).toThrow(`SOURCE_LOCALE "${SOURCE_LOCALE}" is not in the locale list`);
+  });
+
+  it('rejects an og locale map that misses a locale', () => {
+    expect(() =>
+      createLocaleSet({
+        locales: ['ru', 'sr', 'en'] as const,
+        primaryLocale: 'ru',
+        // @ts-expect-error the map must cover every locale
+        ogLocale: { ru: 'ru_RU' },
+        ogSuffix: OG_SUFFIX,
+      }),
+    ).toThrow('ogLocale has no entry for sr, en');
+  });
+
+  it('rejects an og suffix map that misses a locale', () => {
+    expect(() =>
+      createLocaleSet({
+        locales: ['ru', 'sr', 'en'] as const,
+        primaryLocale: 'ru',
+        ogLocale: OG_LOCALE,
+        // @ts-expect-error the map must cover every locale
+        ogSuffix: { ru: '', en: '-en' },
+      }),
+    ).toThrow('ogSuffix has no entry for sr');
   });
 });
 
@@ -50,6 +102,8 @@ describe('TRANSLATABLE_LOCALES', () => {
     const small = createLocaleSet({
       locales: ['ru', 'sr'] as const,
       primaryLocale: 'ru',
+      ogLocale: OG_LOCALE,
+      ogSuffix: OG_SUFFIX,
     });
 
     expect(small.TRANSLATABLE_LOCALES).toEqual(['sr']);
@@ -199,6 +253,52 @@ describe('getAlternateLinks', () => {
     expect(links.at(-1)).toEqual({
       hreflang: 'x-default',
       href: 'https://details.rs/sr/works/',
+    });
+  });
+});
+
+describe('headLinks', () => {
+  it('builds canonical, alternates and og:locale for a page', () => {
+    expect(set.headLinks('https://approved.rs', 'en', '/en/contacts/')).toEqual(
+      {
+        canonical: 'https://approved.rs/en/contacts/',
+        alternates: set.getAlternateLinks(
+          'https://approved.rs',
+          '/en/contacts/',
+        ),
+        ogLocale: 'en_US',
+        ogImage: 'https://approved.rs/og-en.png',
+      },
+    );
+  });
+
+  it('defaults the og image to the locale one and keeps a supplied one', () => {
+    expect(set.headLinks('https://approved.rs', 'ru', '/ru/').ogImage).toBe(
+      'https://approved.rs/og.png',
+    );
+    expect(
+      set.headLinks('https://approved.rs', 'ru', '/ru/', 'https://x/y.png')
+        .ogImage,
+    ).toBe('https://x/y.png');
+  });
+
+  it('points the bare site root at the locale homepage', () => {
+    const head = srFirst.headLinks('https://details.rs', 'ru', '/');
+
+    expect(head.canonical).toBe('https://details.rs/ru/');
+    expect(head.alternates[0]).toEqual({
+      hreflang: 'ru',
+      href: 'https://details.rs/ru/',
+    });
+  });
+
+  it('keeps the 404 page on its own canonical', () => {
+    const head = srFirst.headLinks('https://details.rs', 'sr', '/404/');
+
+    expect(head.canonical).toBe('https://details.rs/404/');
+    expect(head.alternates.at(-1)).toEqual({
+      hreflang: 'x-default',
+      href: 'https://details.rs/sr/',
     });
   });
 });

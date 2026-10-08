@@ -1,12 +1,18 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
-import { localeConfig, OG_IMAGE } from '../src/i18n/config.ts';
+import { localeConfig, type Locale } from '../src/i18n/config.ts';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const out = (name) => new URL(`public/${name}`, `file://${root}`);
+const out = (name: string) => new URL(`public/${name}`, `file://${root}`);
 
-const COPY = {
+interface OgCopy {
+  headline: string;
+  accent: string;
+  services: string;
+}
+
+const COPY: Record<Locale, OgCopy> = {
   sr: {
     headline: 'Studio za detailing',
     accent: 'u Beogradu',
@@ -26,16 +32,7 @@ const COPY = {
   },
 };
 
-for (const [name, map] of Object.entries({ OG_IMAGE, COPY })) {
-  const missing = localeConfig.locales.filter((l) => !Object.hasOwn(map, l));
-  if (missing.length) {
-    throw new Error(
-      `gen-og: ${name} has no entry for ${missing.join(', ')} — add it before generating OG images`,
-    );
-  }
-}
-
-const GLYPHS = {
+const GLYPHS: Record<string, { advance: number; d: string; dot?: boolean }> = {
   D: { advance: 96, d: 'M6 94V6h32a44 44 0 0 1 0 88z' },
   e: { advance: 82, d: 'M66 61a33 33 0 1 0-9.7 23.3M0 61h66' },
   t: { advance: 62, d: 'M24 4v90M2 30h46' },
@@ -50,12 +47,22 @@ const GLYPHS = {
 
 const TRACKING = 10;
 
-function wordmark({ x, y, capHeight, fill }) {
+function wordmark({
+  x,
+  y,
+  capHeight,
+  fill,
+}: {
+  x: number;
+  y: number;
+  capHeight: number;
+  fill: string;
+}) {
   const scale = capHeight / 100;
   let cursor = 0;
   const parts = [];
   for (const char of 'Details') {
-    const glyph = GLYPHS[char];
+    const glyph = GLYPHS[char]!;
     parts.push(`<path transform="translate(${cursor} 0)" d="${glyph.d}"/>`);
     if (glyph.dot) {
       parts.push(`<circle cx="${cursor + 8}" cy="11" r="6" fill="${fill}"/>`);
@@ -65,7 +72,7 @@ function wordmark({ x, y, capHeight, fill }) {
   return `<g transform="translate(${x} ${y}) scale(${scale})" fill="none" stroke="${fill}" stroke-width="12" stroke-linecap="butt" stroke-linejoin="round">${parts.join('')}</g>`;
 }
 
-function svg({ headline, accent, services }) {
+function svg({ headline, accent, services }: OgCopy) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
   <defs>
     <linearGradient id="prism" x1="0" y1="0" x2="1" y2="1">
@@ -94,7 +101,7 @@ function svg({ headline, accent, services }) {
 }
 
 for (const locale of localeConfig.locales) {
-  const name = OG_IMAGE[locale].replace(/^\//, '');
+  const name = `og${localeConfig.ogSuffix[locale]}.png`;
   writeFileSync(
     out(name),
     await sharp(Buffer.from(svg(COPY[locale])))

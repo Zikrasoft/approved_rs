@@ -45,6 +45,11 @@ const panelIds = {
   telegram: `contact-panel-telegram-${uid}`,
   phone: `contact-panel-phone-${uid}`,
 };
+const errorIds = {
+  telegram: `contact-error-telegram-${uid}`,
+  phone: `contact-error-phone-${uid}`,
+  consent: `consent-error-${uid}`,
+};
 
 const channelTabs = [
   {
@@ -75,10 +80,11 @@ const channelTabs = [
 
 const fieldClass =
   'form-field py-3 rounded-sm text-sm outline-none bg-page border border-border-strong text-primary font-sans';
+const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#f87171]';
 ---
 
 <div
-  class="lead-form-card rounded-sm p-7 bg-surface-glass border border-border-strong backdrop-blur-[12px] in-[dialog]:min-h-0 in-[dialog]:overflow-y-auto in-[dialog]:overscroll-contain in-[dialog]:max-sm:flex-1 in-[dialog]:max-sm:rounded-none in-[dialog]:max-sm:border-0"
+  class="rounded-sm p-7 bg-surface-glass border border-border-strong backdrop-blur-[12px] in-[dialog]:min-h-0 in-[dialog]:overflow-y-auto in-[dialog]:overscroll-contain in-[dialog]:max-sm:flex-1 in-[dialog]:max-sm:rounded-none in-[dialog]:max-sm:border-0"
 >
   <div class="mb-6">
     <h2 class="font-display text-2xl leading-snug text-primary mb-1">
@@ -87,458 +93,196 @@ const fieldClass =
     <p class="text-xs text-muted">{lf.subtext}</p>
   </div>
 
-  <form
-    method="POST"
-    action="/api/leads"
-    data-lead-form
-    {...{ [DATA_DEFAULT_SERVICE]: service }}
-    data-err-tg-required={lf.errorTelegramRequired}
-    data-err-tg-format={lf.errorTelegramFormat}
-    data-err-phone-required={lf.errorPhoneRequired}
-    data-err-phone-invalid={lf.errorPhoneInvalid}
-    class="ym-hide-content ym-disable-keys"
-  >
-    <input type="hidden" name="locale" value={locale} />
-    <div class="hidden" aria-hidden="true">
-      <label>
-        {HONEYPOT_FIELD}
-        <input
-          type="text"
-          name={HONEYPOT_FIELD}
-          tabindex="-1"
-          autocomplete="off"
-        />
-      </label>
-    </div>
-    <input type="hidden" name={SERVICE_FIELD} value={service} />
-    <input type="hidden" name="country" value={country} />
-    <input type="hidden" name="city" value={city} />
-    <input type="hidden" name="source_url" value={sourceUrl} />
-    <input type="hidden" name="visitor_id" />
-
-    <div class="mb-5 contact-field">
-      <label
-        class="block text-xs font-medium mb-2 tracking-[0.14em] uppercase text-muted"
-      >
-        {lf.contactLabel}<span class="text-accent ml-0.5">*</span>
-      </label>
-
-      <div
-        class="grid grid-cols-2 gap-1 p-1 mb-2 rounded-sm bg-page border border-border-strong"
-        role="tablist"
-      >
-        {
-          channelTabs.map((tab, index) => (
-            <button
-              type="button"
-              data-tab={tab.tab}
-              data-panel={tab.panel}
-              title={tab.label}
-              aria-label={tab.label}
-              class="pill-tab flex min-w-0 items-center justify-center gap-2 rounded-sm px-2 py-2.5 text-[0.8125rem] font-medium text-muted cursor-pointer transition-colors duration-200 motion-reduce:transition-none hover:text-text-2 aria-selected:bg-surface-2 aria-selected:text-text aria-selected:shadow-[inset_0_-2px_0_var(--color-accent)]"
-              role="tab"
-              aria-selected={index === 0 ? 'true' : 'false'}
-              aria-controls={panelIds[tab.panel]}
-            >
-              <tab.Icon size={16} />
-              <span class="truncate">{tab.label}</span>
-            </button>
-          ))
-        }
+  <lead-form class="contents">
+    <form
+      method="POST"
+      action="/api/leads"
+      data-lead-form
+      {...{ [DATA_DEFAULT_SERVICE]: service }}
+      class="ym-hide-content ym-disable-keys"
+    >
+      <input type="hidden" name="locale" value={locale} />
+      <div class="hidden" aria-hidden="true">
+        <label>
+          {HONEYPOT_FIELD}
+          <input
+            type="text"
+            name={HONEYPOT_FIELD}
+            tabindex="-1"
+            autocomplete="off"
+          />
+        </label>
       </div>
+      <input type="hidden" name={SERVICE_FIELD} value={service} />
+      <input type="hidden" name="country" value={country} />
+      <input type="hidden" name="city" value={city} />
+      <input
+        type="hidden"
+        name="source_url"
+        value={sourceUrl}
+        data-source-url
+      />
+      <input type="hidden" name="visitor_id" data-visitor-id />
 
-      <div
-        id={panelIds.telegram}
-        class="contact-panel"
-        data-panel="telegram"
-        role="tabpanel"
-      >
-        <input
-          type="text"
-          data-contact-telegram
-          data-field="telegram"
-          name="contact"
-          autocomplete="username"
-          placeholder={lf.telegramPlaceholder}
-          class={`${fieldClass} w-full px-4`}
-        />
-      </div>
+      <div class="mb-5">
+        <label
+          class="block text-xs font-medium mb-2 tracking-[0.14em] uppercase text-muted"
+        >
+          {lf.contactLabel}<span class="text-accent ml-0.5">*</span>
+        </label>
 
-      <div
-        id={panelIds.phone}
-        class="contact-panel hidden"
-        data-panel="phone"
-        role="tabpanel"
-      >
-        <div class="flex gap-2">
-          <div class="relative min-w-0 max-w-[min(14rem,45%)] shrink-0">
-            <select
-              data-contact-phone-country
-              data-display-locale={displayLocale}
-              class={`${fieldClass} max-w-full pl-2 pr-6 appearance-none cursor-pointer overflow-hidden text-ellipsis`}
-            >
-              {
-                countryOptions.map((c) => (
-                  <option
-                    value={c.iso}
-                    data-dial={c.dial}
-                    data-dial-primary={c.primary ? '' : undefined}
-                    selected={c.iso === defaultPhoneCountry}
-                  >
-                    {c.flag} +{c.dial} {c.name}
-                  </option>
-                ))
-              }
-            </select>
-            <ChevronDown
-              size={14}
-              class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-muted"
+        <div
+          class="grid grid-cols-2 gap-1 p-1 mb-2 rounded-sm bg-page border border-border-strong"
+          role="tablist"
+        >
+          {
+            channelTabs.map((tab, index) => (
+              <button
+                type="button"
+                data-tab={tab.tab}
+                data-panel={tab.panel}
+                title={tab.label}
+                aria-label={tab.label}
+                class="flex min-w-0 items-center justify-center gap-2 rounded-sm px-2 py-2.5 text-[0.8125rem] font-medium text-muted cursor-pointer transition-colors duration-200 motion-reduce:transition-none hover:text-text-2 aria-selected:bg-surface-2 aria-selected:text-text aria-selected:shadow-[inset_0_-2px_0_var(--color-accent)]"
+                role="tab"
+                aria-selected={index === 0 ? 'true' : 'false'}
+                aria-controls={panelIds[tab.panel]}
+              >
+                <tab.Icon size={16} />
+                <span class="truncate">{tab.label}</span>
+              </button>
+            ))
+          }
+        </div>
+
+        <div id={panelIds.telegram} data-panel="telegram" role="tabpanel">
+          <input
+            type="text"
+            data-telegram
+            data-field="telegram"
+            autocomplete="username"
+            aria-describedby={errorIds.telegram}
+            placeholder={lf.telegramPlaceholder}
+            class={`${fieldClass} w-full px-4`}
+          />
+          <p
+            id={errorIds.telegram}
+            class={errorClass}
+            aria-live="polite"
+            data-error-telegram
+            hidden
+          >
+            {lf.errorTelegramFormat}
+          </p>
+        </div>
+
+        <div id={panelIds.phone} data-panel="phone" role="tabpanel" hidden>
+          <div class="flex gap-2">
+            <div class="relative min-w-0 max-w-[min(14rem,45%)] shrink-0">
+              <select
+                data-country
+                data-display-locale={displayLocale}
+                class={`${fieldClass} max-w-full pl-2 pr-6 appearance-none cursor-pointer overflow-hidden text-ellipsis`}
+              >
+                {
+                  countryOptions.map((c) => (
+                    <option
+                      value={c.iso}
+                      data-dial={c.dial}
+                      data-dial-primary={c.primary ? '' : undefined}
+                      selected={c.iso === defaultPhoneCountry}
+                    >
+                      {c.flag} +{c.dial} {c.name}
+                    </option>
+                  ))
+                }
+              </select>
+              <ChevronDown
+                size={14}
+                class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-muted"
+              />
+            </div>
+            <input
+              type="tel"
+              name="phone_number"
+              autocomplete="tel"
+              data-phone
+              data-field="phone"
+              aria-describedby={errorIds.phone}
+              inputmode="tel"
+              placeholder="060 123 4567"
+              class={`${fieldClass} min-w-0 flex-1 px-4`}
             />
           </div>
-          <input
-            type="tel"
-            name="phone_number"
-            autocomplete="tel"
-            data-contact-phone-number
-            data-field="phone"
-            inputmode="tel"
-            placeholder="060 123 4567"
-            class={`${fieldClass} min-w-0 flex-1 px-4`}
-          />
+          <p
+            id={errorIds.phone}
+            class={errorClass}
+            aria-live="polite"
+            data-error-phone
+            hidden
+          >
+            {lf.errorPhoneInvalid}
+          </p>
         </div>
+
+        <input type="hidden" name="contact" />
+        <input type="hidden" name="contact_channel" value="telegram" />
       </div>
 
-      <input type="hidden" name="contact" />
-      <input type="hidden" name="contact_channel" value="telegram" />
-    </div>
+      <FormField
+        name="name"
+        field="name"
+        autocomplete="name"
+        label={lf.nameLabel}
+        placeholder={lf.namePlaceholder}
+      />
 
-    <FormField
-      name="name"
-      field="name"
-      autocomplete="name"
-      label={lf.nameLabel}
-      placeholder={lf.namePlaceholder}
-    />
+      <FormField
+        name="comment"
+        label={commentLabel ?? lf.commentLabel}
+        placeholder={commentPlaceholder ?? lf.commentPlaceholder}
+        type="textarea"
+      />
 
-    <FormField
-      name="comment"
-      label={commentLabel ?? lf.commentLabel}
-      placeholder={commentPlaceholder ?? lf.commentPlaceholder}
-      type="textarea"
-    />
+      <div>
+        <label class="flex items-start gap-3 mb-3 cursor-pointer text-muted">
+          <input
+            type="checkbox"
+            name="consent"
+            required
+            aria-describedby={errorIds.consent}
+            data-consent
+            data-field="consent"
+            class="mt-0.5 shrink-0 w-4 h-4 cursor-pointer accent-accent"
+          />
+          <span class="text-xs leading-relaxed">
+            {lf.consentBefore}<a
+              href={PathBuilder.privacy(locale)}
+              target="_blank"
+              class="underline text-muted">{lf.consentLinkText}</a
+            >
+          </span>
+        </label>
+        <p
+          id={errorIds.consent}
+          class={`${errorClass} mb-3`}
+          aria-live="polite"
+          data-error-consent
+          hidden
+        >
+          {lf.consentError}
+        </p>
+        <p class={`${errorClass} mb-3`} role="alert" data-error-submit hidden>
+          {lf.errorSubmit}
+        </p>
 
-    <div>
-      <label
-        class="flex items-start gap-3 mb-3 cursor-pointer text-muted consent-label"
-      >
-        <input
-          type="checkbox"
-          name="consent"
-          required
-          data-field="consent"
-          class="mt-0.5 shrink-0 w-4 h-4 cursor-pointer accent-accent"
-        />
-        <span class="text-xs leading-relaxed">
-          {lf.consentBefore}<a
-            href={PathBuilder.privacy(locale)}
-            target="_blank"
-            class="underline text-muted">{lf.consentLinkText}</a
-          >
-        </span>
-      </label>
-      <p class="field-error consent-error mb-3" style="display:none">
-        {lf.consentError}
-      </p>
-      <p
-        class="field-error submit-error mb-3"
-        role="alert"
-        data-error-submit
-        hidden
-      >
-        {lf.errorSubmit}
-      </p>
-
-      <Button
-        type="submit"
-        class="lead-btn w-full py-3.5 justify-center tracking-[0.06em]"
-      >
-        {lf.submitLabel}
-      </Button>
-    </div>
-  </form>
+        <Button
+          type="submit"
+          class="w-full py-3.5 justify-center tracking-[0.06em]"
+        >
+          <span data-submit-label>{lf.submitLabel}</span>
+        </Button>
+      </div>
+    </form>
+  </lead-form>
 </div>
-
-<script>
-  import type { CountryCode } from 'libphonenumber-js/min';
-  import {
-    bindPhoneCountry,
-    fillCountrySelect,
-    selectCountry,
-  } from '@podbor/lead-crm/phone-input';
-  import {
-    contactValue,
-    deferSubmitUntilKit,
-    loadPhoneKit,
-    phoneKit,
-    showContactValue,
-  } from '@podbor/lead-crm/phone-kit';
-  import { submitLeadForm } from '@podbor/lead-crm/submit';
-  import {
-    isTrackedContactChannel,
-    detectVisitorCountry,
-    preferredContactChannel,
-    type TrackedContactChannel,
-  } from '@/utils/contactChannel';
-  import { markFieldValidity } from '@podbor/site-kit/browser';
-  import { getOrCreateVisitorId } from '@/utils/visitorId';
-
-  function initAllLeadForms() {
-    document
-      .querySelectorAll<HTMLElement>('.lead-form-card')
-      .forEach((card) => {
-        const form = card.querySelector<HTMLFormElement>('form');
-        if (form && !form.dataset.validated) {
-          form.dataset.validated = '1';
-          initLeadForm(form);
-        }
-      });
-  }
-  initAllLeadForms();
-
-  function initLeadForm(form: HTMLFormElement) {
-    form.noValidate = true;
-    const visitorIdInput = form.querySelector<HTMLInputElement>(
-      'input[type="hidden"][name="visitor_id"]',
-    );
-
-    const errTgRequired = form.dataset.errTgRequired!;
-    const errTgFormat = form.dataset.errTgFormat!;
-    const errPhoneRequired = form.dataset.errPhoneRequired!;
-    const errPhoneInvalid = form.dataset.errPhoneInvalid!;
-
-    function fieldWrap(input: HTMLElement) {
-      return input.closest('.mb-5') || input.parentElement!;
-    }
-
-    function setError(input: HTMLElement, msg: string) {
-      input.classList.add('has-error');
-      markFieldValidity(input, false);
-      const wrap = fieldWrap(input);
-      let err = wrap.querySelector('.field-error');
-      if (!err) {
-        err = document.createElement('p');
-        err.className = 'field-error';
-        wrap.appendChild(err);
-      }
-      err.textContent = msg;
-    }
-
-    function clearError(input: HTMLElement) {
-      input.classList.remove('has-error');
-      markFieldValidity(input, true);
-      const err = fieldWrap(input).querySelector('.field-error');
-      if (err) err.remove();
-    }
-
-    const contactField = form.querySelector('.contact-field')!;
-    const tabs = contactField.querySelectorAll<HTMLButtonElement>('.pill-tab');
-    const panels = contactField.querySelectorAll<HTMLElement>('.contact-panel');
-    const hiddenContact = form.querySelector<HTMLInputElement>(
-      'input[type="hidden"][name="contact"]',
-    )!;
-    const hiddenChannel = form.querySelector<HTMLInputElement>(
-      'input[type="hidden"][name="contact_channel"]',
-    )!;
-    const tgInput = contactField.querySelector<HTMLInputElement>(
-      '[data-contact-telegram]',
-    )!;
-    const phoneCountry = contactField.querySelector<HTMLSelectElement>(
-      '[data-contact-phone-country]',
-    )!;
-    const phoneNumber = contactField.querySelector<HTMLInputElement>(
-      '[data-contact-phone-number]',
-    )!;
-    const consent = form.querySelector<HTMLInputElement>('[name="consent"]')!;
-    const consentErr = form.querySelector<HTMLElement>('.consent-error');
-    const submitErr = form.querySelector<HTMLElement>('[data-error-submit]');
-
-    function setBusy(busy: boolean) {
-      const button = form.querySelector<HTMLButtonElement>(
-        'button[type="submit"]',
-      );
-      if (!button) return;
-      button.classList.toggle('is-loading', busy);
-      button.disabled = busy;
-      if (busy) button.setAttribute('aria-busy', 'true');
-      else button.removeAttribute('aria-busy');
-    }
-
-    tgInput.removeAttribute('name');
-
-    const PANEL_FOR: Record<TrackedContactChannel, 'telegram' | 'phone'> = {
-      telegram: 'telegram',
-      whatsapp: 'phone',
-      viber: 'phone',
-      phone: 'phone',
-    };
-    let activeTab: TrackedContactChannel = 'telegram';
-
-    const detectedCountry = detectVisitorCountry();
-    selectCountry(phoneCountry, detectedCountry);
-
-    bindPhoneCountry(phoneCountry, phoneNumber);
-
-    const expandCountries = () =>
-      loadPhoneKit().then(() => {
-        const kit = phoneKit();
-        if (kit)
-          fillCountrySelect(
-            phoneCountry,
-            kit.countryOptions(phoneCountry.dataset.displayLocale ?? 'ru'),
-          );
-      });
-
-    // TODO: re-masks from raw digits on every keystroke; a caret-aware mask if the caret jump bites.
-    function formatPhone() {
-      const kit = phoneKit();
-      if (!kit) return;
-      const value = phoneNumber.value;
-      if (value.trim().startsWith('+')) {
-        const digits = '+' + value.replace(/[^\d]/g, '');
-        phoneNumber.value = new kit.AsYouType().input(digits);
-        return;
-      }
-      const raw = value.replace(/[^\d]/g, '');
-      phoneNumber.value = new kit.AsYouType(
-        phoneCountry.value as CountryCode,
-      ).input(raw);
-    }
-
-    function syncContact() {
-      hiddenChannel.value = activeTab;
-      hiddenContact.value = contactValue(
-        activeTab,
-        phoneCountry,
-        activeTab === 'telegram' ? tgInput : phoneNumber,
-      );
-    }
-
-    function selectTab(tab: HTMLButtonElement, focusField: boolean) {
-      activeTab = isTrackedContactChannel(tab.dataset.tab)
-        ? tab.dataset.tab
-        : 'telegram';
-      tabs.forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
-      const panel = PANEL_FOR[activeTab];
-      panels.forEach((p) =>
-        p.classList.toggle('hidden', p.dataset.panel !== panel),
-      );
-      clearError(tgInput);
-      clearError(phoneNumber);
-      syncContact();
-      if (focusField) (panel === 'telegram' ? tgInput : phoneNumber).focus();
-    }
-
-    form.addEventListener('pointerenter', () => void expandCountries(), {
-      once: true,
-    });
-
-    tabs.forEach((tab) => {
-      tab.addEventListener('click', (event) => {
-        selectTab(tab, event.isTrusted);
-        if (PANEL_FOR[activeTab] === 'phone') void expandCountries();
-      });
-    });
-
-    const preferredChannel = preferredContactChannel(
-      detectedCountry,
-      document.documentElement.lang,
-    );
-    if (preferredChannel !== 'telegram') {
-      const preferredTab = Array.from(tabs).find(
-        (t) => t.dataset.tab === preferredChannel,
-      );
-      if (preferredTab) selectTab(preferredTab, false);
-    }
-
-    form.addEventListener('input', () => {
-      if (submitErr) submitErr.hidden = true;
-    });
-    tgInput.addEventListener('input', () => {
-      clearError(tgInput);
-      syncContact();
-    });
-    tgInput.addEventListener('blur', () => {
-      showContactValue('telegram', phoneCountry, tgInput);
-      syncContact();
-    });
-    phoneNumber.addEventListener('input', () => {
-      formatPhone();
-      clearError(phoneNumber);
-      syncContact();
-    });
-    phoneCountry.addEventListener('change', (event) => {
-      if (phoneNumber.value.trim().startsWith('+')) phoneNumber.value = '';
-      formatPhone();
-      syncContact();
-      if (event.isTrusted) phoneNumber.focus();
-    });
-
-    form.addEventListener(
-      'focusin',
-      () => {
-        expandCountries().then(() => {
-          if (phoneNumber !== document.activeElement) formatPhone();
-          syncContact();
-        });
-      },
-      { once: true },
-    );
-
-    form.addEventListener('submit', (e) => {
-      if (deferSubmitUntilKit(form)) {
-        e.preventDefault();
-        return;
-      }
-      const kit = phoneKit();
-      if (visitorIdInput) visitorIdInput.value = getOrCreateVisitorId();
-
-      const isTelegram = activeTab === 'telegram';
-      const contactInput = isTelegram ? tgInput : phoneNumber;
-      const typed = contactInput.value.trim();
-      if (isTelegram) showContactValue('telegram', phoneCountry, tgInput);
-      syncContact();
-
-      let ok = true;
-      if (!typed) {
-        setError(contactInput, isTelegram ? errTgRequired : errPhoneRequired);
-        ok = false;
-      } else if (kit && !kit.isValidContact(hiddenContact.value, activeTab)) {
-        setError(contactInput, isTelegram ? errTgFormat : errPhoneInvalid);
-        ok = false;
-      } else clearError(contactInput);
-
-      if (consentErr) consentErr.style.display = consent.checked ? 'none' : '';
-      markFieldValidity(consent, consent.checked);
-      if (!consent.checked) ok = false;
-
-      e.preventDefault();
-      if (!ok) return;
-
-      setBusy(true);
-      void submitLeadForm(form).then((sent) => {
-        if (sent) return;
-        setBusy(false);
-        if (submitErr) submitErr.hidden = false;
-      });
-    });
-
-    if (consentErr) {
-      consent.addEventListener('change', () => {
-        consentErr.style.display = consent.checked ? 'none' : '';
-        markFieldValidity(consent, consent.checked);
-      });
-    }
-
-    syncContact();
-  }
-</script>

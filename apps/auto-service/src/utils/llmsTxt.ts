@@ -3,7 +3,7 @@ import { mapPlaceUrl } from '@podbor/site-kit';
 import { renderBrandLlmsTxt, type LlmsLinkList } from '@podbor/i18n';
 import { SITE_URL, SITE_NAME, GARAGE_ADDRESS } from '@/utils/constants';
 import { shopCatalog } from '@/lib/catalog';
-import { shopTypeKeys } from '@/lib/shopPages';
+import { shopTypes } from '@/lib/shopPages';
 import { shopIndexed } from '@/utils/shopStatus';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { localizedWork, publishedWorks } from '@/utils/works';
@@ -28,7 +28,7 @@ async function shopList(
         href: url(PathBuilder.shop(locale)),
         note: shop.lead,
       },
-      entries: shopTypeKeys(products).map((key) => ({
+      entries: shopTypes(products).map(({ key }) => ({
         label: shop.types[key].name,
         href: url(PathBuilder.shopType(locale, key)),
         note: shop.types[key].lead,

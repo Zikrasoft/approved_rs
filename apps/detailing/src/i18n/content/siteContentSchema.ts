@@ -89,7 +89,6 @@ const formSchema = z
     errorConsent: z.string(),
     errorSubmit: z.string(),
     modalTitle: z.string(),
-    noscriptNote: z.string(),
   })
   .strict();
 

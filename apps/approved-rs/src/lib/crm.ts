@@ -1,21 +1,12 @@
 import { APPROVED, COMMISSION_PERCENT } from '@podbor/brands';
 import {
-  createLeadSchema,
-  createLeadStore,
-  createQuarantine,
-  LEADS_PATH,
+  createBrandStore,
   LOCAL_DATA_DIR,
-  QUARANTINE_PATH,
   type LeadStorage,
 } from '@podbor/lead-crm';
 import { createVercelBlobStorage } from '@podbor/lead-crm/storage/vercel-blob';
 
-export const DEFAULT_COMMISSION_PERCENT = COMMISSION_PERCENT.approved;
 export const BRAND = APPROVED.name;
-
-export const leadSchema = createLeadSchema({
-  defaultCommissionPercent: DEFAULT_COMMISSION_PERCENT,
-});
 
 const storageFor = (path: string): LeadStorage => {
   if (import.meta.env.DEV) {
@@ -31,12 +22,9 @@ const storageFor = (path: string): LeadStorage => {
   return createVercelBlobStorage({ path });
 };
 
-export const leadStore = createLeadStore({
-  storage: storageFor(LEADS_PATH),
-  schema: leadSchema,
-  quarantine: createQuarantine({
-    storage: storageFor(QUARANTINE_PATH),
-    brand: BRAND,
-    getNotifier: () => import('./crmBot'),
-  }),
+export const { leadStore } = createBrandStore({
+  brand: BRAND,
+  commissionPercent: COMMISSION_PERCENT.approved,
+  storageFor,
+  getNotifier: () => import('./crmBot'),
 });

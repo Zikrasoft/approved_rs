@@ -19,16 +19,6 @@ const {
 const Tag = href ? 'a' : 'button';
 ---
 
-{
-  /*
-  .btn-label/.btn-spinner: every Button ships a spinner slot, hidden by
-  default (display:none in global.css) — toggling one shared `.is-loading`
-  class (see global.css) is how any async action anywhere in the site
-  shows a loading state on its trigger button, without each call site
-  re-implementing spinner markup/CSS. See LeadForm.astro's submit handler
-  for the reference usage.
-*/
-}
 <Tag
   href={href}
   type={!href ? type : undefined}

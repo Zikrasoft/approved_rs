@@ -1,5 +1,5 @@
 ---
-import { jsonLdText, mapPlaceUrl } from '@podbor/site-kit';
+import { jsonLdText, localBusinessSchema, mapPlaceUrl } from '@podbor/site-kit';
 import '@/styles/global.css';
 import displayLatinUrl from '@fontsource-variable/unbounded/files/unbounded-latin-wght-normal.woff2?url';
 import displayLatinExtUrl from '@fontsource-variable/unbounded/files/unbounded-latin-ext-wght-normal.woff2?url';
@@ -12,7 +12,9 @@ import SiteFooter from '@/components/SiteFooter.astro';
 import LeadModal from '@/components/LeadModal.astro';
 import FloatingCta from '@/components/FloatingCta.astro';
 import CookieConsent from '@/components/CookieConsent.astro';
-import { BCP47_BY_LOCALE, OG_IMAGE, OG_LOCALE, localeSet } from '@/i18n/config';
+import { BCP47_BY_LOCALE } from '@/i18n/config';
+import { pageHead } from '@/utils/pageHead';
+import { BUSINESS_ID } from '@/utils/schema';
 import { localeFrom } from '@/i18n/currentLocale';
 import {
   SITE_NAME,
@@ -50,16 +52,17 @@ const FONT_URLS: Record<typeof locale, string[]> = {
   en: [displayLatinUrl, bodyLatinUrl],
 };
 const fontUrls = FONT_URLS[locale];
-const canonical = new URL(Astro.url.pathname, SITE_URL).href;
-const alternates = localeSet.getAlternateLinks(SITE_URL, Astro.url.pathname);
-const ogImage = new URL(OG_IMAGE[locale], SITE_URL).href;
+const { canonical, alternates, ogLocale, ogImage } = pageHead(
+  locale,
+  Astro.url.pathname,
+  { title, description },
+);
 
 const googleMapsUrl = mapPlaceUrl(STUDIO_ADDRESS.googleMapsCid);
 
-const businessSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'AutomotiveBusiness',
-  '@id': `${SITE_URL}/#studio`,
+const businessSchema = localBusinessSchema({
+  type: 'AutomotiveBusiness',
+  id: BUSINESS_ID,
   name: SITE_NAME,
   legalName: SITE_LEGAL_NAME,
   url: SITE_URL,
@@ -67,31 +70,13 @@ const businessSchema = {
   logo: new URL('/apple-touch-icon.png', SITE_URL).href,
   description: site.footer.tagline,
   telephone: `+${PHONE_NUMBER}`,
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: STUDIO_ADDRESS.street,
-    addressLocality: STUDIO_ADDRESS.city,
-    addressRegion: STUDIO_ADDRESS.district,
-    addressCountry: STUDIO_ADDRESS.country,
-  },
-  geo: {
-    '@type': 'GeoCoordinates',
-    latitude: STUDIO_ADDRESS.lat,
-    longitude: STUDIO_ADDRESS.lon,
-  },
+  address: STUDIO_ADDRESS,
   hasMap: googleMapsUrl,
   areaServed: 'Beograd',
   currenciesAccepted: 'RSD, EUR',
-  openingHoursSpecification: [
-    {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: [...OPENING_HOURS.days],
-      opens: OPENING_HOURS.opens,
-      closes: OPENING_HOURS.closes,
-    },
-  ],
+  openingHours: [OPENING_HOURS],
   sameAs: [googleMapsUrl, ...SOCIAL_SAME_AS],
-};
+});
 ---
 
 <!doctype html>
@@ -142,7 +127,7 @@ const businessSchema = {
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
-    <meta property="og:locale" content={OG_LOCALE[locale]} />
+    <meta property="og:locale" content={ogLocale} />
     <meta name="twitter:card" content="summary_large_image" />
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -221,13 +206,20 @@ const businessSchema = {
 
     <script>
       import { isTrackedContactChannel } from '@podbor/lead-crm/contact-channel';
+      import { defineLeadForm } from '@podbor/lead-crm/lead-form';
       import {
         defineAnalytics,
         defineContactClickTracking,
         defineFunnelTracking,
         defineLanguageSuggestion,
+        getOrCreateVisitorId,
+        markFieldValidity,
       } from '@podbor/site-kit/browser';
-      import { applyPreferredContactOrder } from '@podbor/site-kit/contact-preference';
+      import {
+        applyPreferredContactOrder,
+        detectVisitorCountry,
+        visitorChannel,
+      } from '@podbor/site-kit/contact-preference';
       import { YM_COUNTER_ID } from '@/utils/metrika';
 
       if (!import.meta.env.DEV) defineAnalytics({ ymCounterId: YM_COUNTER_ID });
@@ -235,6 +227,12 @@ const businessSchema = {
       applyPreferredContactOrder();
       defineLanguageSuggestion();
       defineFunnelTracking();
+      defineLeadForm({
+        visitorId: getOrCreateVisitorId,
+        markFieldValidity,
+        preferredChannel: visitorChannel,
+        visitorCountry: detectVisitorCountry,
+      });
     </script>
   </body>
 </html>

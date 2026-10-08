@@ -30,306 +30,197 @@ const channels = [
     value: 'phone',
     icon: 'phone',
     label: site.form.channelPhone,
-    panel: 'ph',
+    panel: 'phone',
   },
-  { value: 'whatsapp', icon: 'whatsapp', label: 'WhatsApp', panel: 'ph' },
-  { value: 'viber', icon: 'viber', label: 'Viber', panel: 'ph' },
-  { value: 'telegram', icon: 'telegram', label: 'Telegram', panel: 'tg' },
+  { value: 'whatsapp', icon: 'whatsapp', label: 'WhatsApp', panel: 'phone' },
+  { value: 'viber', icon: 'viber', label: 'Viber', panel: 'phone' },
+  { value: 'telegram', icon: 'telegram', label: 'Telegram', panel: 'telegram' },
 ] as const;
 
+const channelLabelId = `channel-${uid}`;
+const panelId = {
+  telegram: `panel-telegram-${uid}`,
+  phone: `panel-phone-${uid}`,
+};
+
 const chip =
-  'flex min-h-11 items-center justify-center gap-2 rounded-control border border-line-field bg-card px-3 text-center text-[0.8125rem] font-medium leading-tight text-ink-2 transition-colors duration-150 peer-hover:border-ink peer-checked:border-signal peer-checked:bg-signal peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal';
+  'flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-control border border-line-field bg-card px-3 text-center text-[0.8125rem] font-medium leading-tight text-ink-2 transition-colors duration-150 hover:border-ink aria-selected:border-signal-ink aria-selected:bg-signal-ink aria-selected:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal';
 const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
 ---
 
-<form
-  method="POST"
-  action="/api/leads"
-  data-lead-form
-  data-submitting-label={site.form.submitting}
-  class={`ym-hide-content ym-disable-keys flex flex-col gap-4 ${className}`}
->
-  <input type="hidden" name="locale" value={locale} />
-  <div class="hidden" aria-hidden="true">
-    <label>
-      {HONEYPOT_FIELD}
-      <input
-        type="text"
-        name={HONEYPOT_FIELD}
-        tabindex="-1"
-        autocomplete="off"
-      />
-    </label>
-  </div>
-
-  <input type="hidden" name="source_url" data-source-url />
-  <input type="hidden" name="visitor_id" data-visitor-id />
-
-  <fieldset class="group m-0 border-0 p-0">
-    <legend class="field-label p-0">{site.form.contactChannelLabel}</legend>
-
-    <div
-      data-contact-order
-      class:list={[
-        'grid gap-2',
-        channels.length === 4
-          ? 'grid-cols-2 sm:grid-cols-4'
-          : 'grid-cols-3 sm:grid-cols-3',
-      ]}
-    >
-      {
-        channels.map((channel, index) => (
-          <label class="block" data-channel={channel.value}>
-            <input
-              type="radio"
-              name="contact_channel"
-              value={channel.value}
-              checked={index === 0}
-              class={`peer sr-only ch-${channel.panel}`}
-            />
-            <span class={chip}>
-              <Icon name={channel.icon} size={14} />
-              {channel.label}
-            </span>
-          </label>
-        ))
-      }
-    </div>
-
-    <div class="mt-3 hidden group-has-[.ch-tg:checked]:block">
-      <label class="block">
-        <span class="sr-only">Telegram</span>
+<lead-form class="contents">
+  <form
+    method="POST"
+    action="/api/leads"
+    data-lead-form
+    data-submitting-label={site.form.submitting}
+    class={`ym-hide-content ym-disable-keys flex flex-col gap-4 ${className}`}
+  >
+    <input type="hidden" name="locale" value={locale} />
+    <div class="hidden" aria-hidden="true">
+      <label>
+        {HONEYPOT_FIELD}
         <input
           type="text"
-          autocomplete="username"
-          placeholder={site.form.telegramPlaceholder}
-          aria-describedby={`telegram-error-${uid}`}
-          class="field"
-          data-telegram
-          data-field="telegram"
+          name={HONEYPOT_FIELD}
+          tabindex="-1"
+          autocomplete="off"
         />
       </label>
-      <p
-        id={`telegram-error-${uid}`}
-        class={errorText}
-        aria-live="polite"
-        data-error-telegram
-        hidden
-      >
-        {site.form.errorTelegram}
-      </p>
     </div>
 
-    <div class="mt-3 hidden group-has-[.ch-ph:checked]:block">
-      <PhoneInput errorId={`phone-error-${uid}`} />
-      <p
-        id={`phone-error-${uid}`}
-        class={errorText}
-        aria-live="polite"
-        data-error-phone
-        hidden
-      >
-        {site.form.errorPhone}
-      </p>
-    </div>
-  </fieldset>
+    <input type="hidden" name="source_url" data-source-url />
+    <input type="hidden" name="visitor_id" data-visitor-id />
 
-  <label class="block">
-    <span class="field-label">{site.form.nameLabel}</span>
-    <input
-      name="name"
-      type="text"
-      autocomplete="name"
-      placeholder={site.form.namePlaceholder}
-      class="field"
-    />
-  </label>
+    <input type="hidden" name="contact" />
+    <input type="hidden" name="contact_channel" value={channels[0].value} />
 
-  {service && <input type="hidden" name={SERVICE_FIELD} value={service} />}
-
-  <label class="block">
-    <span class="field-label">{site.form.commentLabel}</span>
-    <textarea
-      name="comment"
-      rows={compact ? 2 : 3}
-      placeholder={site.form.commentPlaceholder}
-      class="field resize-none">{comment}</textarea
-    >
-  </label>
-
-  <div class="lead-submit">
     <div>
-      <label class="flex min-h-11 items-start gap-3 py-1.5">
-        <input
-          type="checkbox"
-          name="consent"
-          value="1"
-          required
-          aria-describedby={`consent-error-${uid}`}
-          class="peer sr-only"
-          data-consent
-          data-field="consent"
-        />
-        <span
-          class="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-[3px] border border-line-field bg-card text-white transition-colors duration-150 peer-checked:border-signal peer-checked:bg-signal peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100"
-        >
-          <Icon name="check" size={10} />
-        </span>
-        <span class="text-xs leading-relaxed text-muted">
-          {site.form.privacyNote}{' '}
-          <a
-            href={PathBuilder.privacy(locale)}
-            target="_blank"
-            class="underline underline-offset-2 transition-colors duration-150 hover:text-signal-ink"
-            >{site.form.privacyLinkText}</a
-          >.
-        </span>
-      </label>
-      <p
-        id={`consent-error-${uid}`}
-        class={errorText}
-        aria-live="polite"
-        data-error-consent
+      <p id={channelLabelId} class="field-label">
+        {site.form.contactChannelLabel}
+      </p>
+
+      <div
+        class="grid grid-cols-2 gap-2 sm:grid-cols-4"
+        role="tablist"
+        aria-labelledby={channelLabelId}
+        data-contact-order
+      >
+        {
+          channels.map((channel, index) => (
+            <button
+              type="button"
+              role="tab"
+              class={chip}
+              data-channel={channel.value}
+              data-tab={channel.value}
+              data-panel={channel.panel}
+              aria-selected={index === 0 ? 'true' : 'false'}
+              aria-controls={panelId[channel.panel]}
+            >
+              <Icon name={channel.icon} size={14} />
+              {channel.label}
+            </button>
+          ))
+        }
+      </div>
+
+      <div
+        id={panelId.telegram}
+        class="mt-3"
+        role="tabpanel"
+        data-panel="telegram"
         hidden
       >
-        {site.form.errorConsent}
-      </p>
-      <p class={errorText} role="alert" data-error-submit hidden>
-        {site.form.errorSubmit}
-      </p>
+        <label class="block">
+          <span class="sr-only">Telegram</span>
+          <input
+            type="text"
+            autocomplete="username"
+            placeholder={site.form.telegramPlaceholder}
+            aria-describedby={`telegram-error-${uid}`}
+            class="field"
+            data-telegram
+            data-field="telegram"
+          />
+        </label>
+        <p
+          id={`telegram-error-${uid}`}
+          class={errorText}
+          aria-live="polite"
+          data-error-telegram
+          hidden
+        >
+          {site.form.errorTelegram}
+        </p>
+      </div>
+
+      <div id={panelId.phone} class="mt-3" role="tabpanel" data-panel="phone">
+        <PhoneInput name="phone_number" errorId={`phone-error-${uid}`} />
+        <p
+          id={`phone-error-${uid}`}
+          class={errorText}
+          aria-live="polite"
+          data-error-phone
+          hidden
+        >
+          {site.form.errorPhone}
+        </p>
+      </div>
     </div>
 
-    <button type="submit" class="btn btn-primary w-full sm:w-auto">
-      <span data-submit-label>{site.form.submit}</span>
-      <Icon name="arrowRight" />
-    </button>
-  </div>
-</form>
+    <label class="block">
+      <span class="field-label">{site.form.nameLabel}</span>
+      <input
+        name="name"
+        type="text"
+        autocomplete="name"
+        placeholder={site.form.namePlaceholder}
+        class="field"
+      />
+    </label>
 
-<script>
-  import {
-    getOrCreateVisitorId,
-    markFieldValidity,
-  } from '@podbor/site-kit/browser';
-  import {
-    bindPhoneCountry,
-    fillCountrySelect,
-  } from '@podbor/lead-crm/phone-input';
-  import {
-    deferSubmitUntilKit,
-    loadPhoneKit,
-    phoneKit,
-    showContactValue,
-  } from '@podbor/lead-crm/phone-kit';
-  import { submitLeadForm } from '@podbor/lead-crm/submit';
-  import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
+    {service && <input type="hidden" name={SERVICE_FIELD} value={service} />}
 
-  document
-    .querySelectorAll<HTMLFormElement>('[data-lead-form]')
-    .forEach(initLeadForm);
+    <label class="block">
+      <span class="field-label">{site.form.commentLabel}</span>
+      <textarea
+        name="comment"
+        rows={compact ? 2 : 3}
+        placeholder={site.form.commentPlaceholder}
+        class="field resize-none">{comment}</textarea
+      >
+    </label>
 
-  function setInvalid(
-    error: HTMLElement,
-    field: HTMLElement,
-    invalid: boolean,
-  ) {
-    error.hidden = !invalid;
-    markFieldValidity(field, !invalid);
-  }
+    <div class="lead-submit">
+      <div>
+        <label class="flex min-h-11 items-start gap-3 py-1.5">
+          <input
+            type="checkbox"
+            name="consent"
+            value="1"
+            required
+            aria-describedby={`consent-error-${uid}`}
+            class="peer sr-only"
+            data-consent
+            data-field="consent"
+          />
+          <span
+            class="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-[3px] border border-line-field bg-card text-white transition-colors duration-150 peer-checked:border-signal peer-checked:bg-signal peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100"
+          >
+            <Icon name="check" size={10} />
+          </span>
+          <span class="text-xs leading-relaxed text-muted">
+            {site.form.privacyNote}{' '}
+            <a
+              href={PathBuilder.privacy(locale)}
+              target="_blank"
+              class="underline underline-offset-2 transition-colors duration-150 hover:text-signal-ink"
+              >{site.form.privacyLinkText}</a
+            >.
+          </span>
+        </label>
+        <p
+          id={`consent-error-${uid}`}
+          class={errorText}
+          aria-live="polite"
+          data-error-consent
+          hidden
+        >
+          {site.form.errorConsent}
+        </p>
+        <p class={errorText} role="alert" data-error-submit hidden>
+          {site.form.errorSubmit}
+        </p>
+      </div>
 
-  function initLeadForm(form: HTMLFormElement) {
-    const pick = <T extends HTMLElement>(selector: string) =>
-      form.querySelector<T>(selector)!;
-
-    form.noValidate = true;
-    pick<HTMLInputElement>('[data-source-url]').value = location.href;
-    const visitor = pick<HTMLInputElement>('[data-visitor-id]');
-
-    const telegram = pick<HTMLInputElement>('[data-telegram]');
-    const country = pick<HTMLSelectElement>('[data-country]');
-    const phone = pick<HTMLInputElement>('[data-phone]');
-    const consent = pick<HTMLInputElement>('[data-consent]');
-
-    bindPhoneCountry(country, phone);
-
-    const fields: Record<string, [HTMLElement, HTMLElement]> = {
-      telegram: [pick('[data-error-telegram]'), telegram],
-      phone: [pick('[data-error-phone]'), phone],
-      consent: [pick('[data-error-consent]'), consent],
-    };
-    const submitError = pick('[data-error-submit]');
-    const button = pick<HTMLButtonElement>('button[type="submit"]');
-    const submitLabel = pick('[data-submit-label]');
-    const idleLabel = submitLabel.textContent;
-
-    const expandCountries = () =>
-      loadPhoneKit().then(() => {
-        const kit = phoneKit();
-        if (kit)
-          fillCountrySelect(
-            country,
-            kit.countryOptions(country.dataset.displayLocale ?? 'sr-RS'),
-          );
-      });
-
-    form.addEventListener('focusin', expandCountries, { once: true });
-    form.addEventListener('pointerenter', () => void expandCountries(), {
-      once: true,
-    });
-    form.addEventListener('input', () => {
-      Object.values(fields).forEach(([error, field]) =>
-        setInvalid(error, field, false),
-      );
-      submitError.hidden = true;
-    });
-
-    form.addEventListener('submit', (event) => {
-      if (deferSubmitUntilKit(form)) {
-        event.preventDefault();
-        return;
-      }
-      const kit = phoneKit();
-      visitor.value = getOrCreateVisitorId();
-
-      const channel = pick<HTMLInputElement>('[name="contact_channel"]:checked')
-        .value as TrackedContactChannel;
-      const viaTelegram = channel === 'telegram';
-      const input = viaTelegram ? telegram : phone;
-      const typed = input.value.trim();
-      const value = showContactValue(channel, country, input);
-
-      const checks: [HTMLElement, HTMLElement, boolean][] = [
-        [
-          ...(viaTelegram ? fields.telegram : fields.phone),
-          typed.length === 0 || (!!kit && !kit.isValidContact(value, channel)),
-        ],
-        [...fields.consent, !consent.checked],
-      ];
-      checks.forEach(([error, field, invalid]) =>
-        setInvalid(error, field, invalid),
-      );
-
-      const firstInvalid = checks.find(([, , invalid]) => invalid);
-      if (firstInvalid) {
-        event.preventDefault();
-        firstInvalid[1].focus();
-        return;
-      }
-
-      phone.value = value;
-
-      event.preventDefault();
-      submitError.hidden = true;
-      button.disabled = true;
-      if (form.dataset.submittingLabel) {
-        submitLabel.textContent = form.dataset.submittingLabel;
-      }
-      void submitLeadForm(form).then((sent) => {
-        if (sent) return;
-        button.disabled = false;
-        submitLabel.textContent = idleLabel;
-        submitError.hidden = false;
-      });
-    });
-  }
-</script>
+      <button
+        type="submit"
+        class="btn btn-primary w-full aria-busy:cursor-progress aria-busy:opacity-60 sm:w-auto"
+      >
+        <span data-submit-label>{site.form.submit}</span>
+        <Icon name="arrowRight" />
+      </button>
+    </div>
+  </form>
+</lead-form>

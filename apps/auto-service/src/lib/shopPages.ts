@@ -2,46 +2,39 @@ import {
   PRODUCT_TYPES,
   landingPages,
   matchesFacets,
-  productType,
   type LandingPage,
+  type ProductTypeDef,
 } from '@podbor/shop-catalog/browser';
 import type { CatalogProduct } from './catalog';
 
 export const productsOfType = (
   products: CatalogProduct[],
-  typeKey: string,
+  type: ProductTypeDef,
 ): CatalogProduct[] =>
-  products.filter((product) => product.typeKey === typeKey);
+  products.filter((product) => product.type.key === type.key);
 
-export const shopTypeKeys = (products: CatalogProduct[]): string[] =>
-  PRODUCT_TYPES.map((type) => type.key).filter(
-    (key) => productsOfType(products, key).length > 0,
-  );
+export const shopTypes = (products: CatalogProduct[]): ProductTypeDef[] =>
+  PRODUCT_TYPES.filter((type) => productsOfType(products, type).length > 0);
 
-export function landingsFor(
+export const landingsFor = (
   products: CatalogProduct[],
-  typeKey: string,
-): LandingPage[] {
-  const type = productType(typeKey);
-  return type
-    ? landingPages(
-        type,
-        productsOfType(products, typeKey).map((product) => product.spec),
-      )
-    : [];
-}
+  type: ProductTypeDef,
+): LandingPage[] =>
+  landingPages(
+    type,
+    productsOfType(products, type).map((product) => product.spec),
+  );
 
 export function landingProducts(
   products: CatalogProduct[],
-  typeKey: string,
+  type: ProductTypeDef,
   landing: { key: string; value: string | number },
 ): CatalogProduct[] {
-  const type = productType(typeKey)!;
   const selection =
     typeof landing.value === 'number'
       ? { min: landing.value, max: landing.value }
       : { values: [landing.value] };
-  return productsOfType(products, typeKey).filter((product) =>
+  return productsOfType(products, type).filter((product) =>
     matchesFacets(type, product.spec, { [landing.key]: selection }),
   );
 }

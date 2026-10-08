@@ -41,6 +41,24 @@ describe('telegramContact', () => {
   it('leaves an empty field empty instead of posting a bare @', () => {
     expect(telegramContact('   ')).toBe('');
   });
+
+  it.each([
+    'https://t.me/ivan',
+    'http://t.me/ivan/',
+    't.me/ivan',
+    'https://telegram.me/ivan',
+    'telegram.me/@ivan/',
+    'https://www.t.me/ivan',
+    ' T.ME/ivan ',
+  ])('takes the handle out of a profile link: %s', (link) => {
+    expect(telegramContact(link)).toBe('@ivan');
+  });
+
+  it('leaves a link that is not a profile link for validation to reject', () => {
+    expect(telegramContact('https://example.com/ivan')).toBe(
+      '@https://example.com/ivan',
+    );
+  });
 });
 
 describe('isTelegramIdContact', () => {

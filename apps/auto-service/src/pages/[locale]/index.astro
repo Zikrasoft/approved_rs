@@ -1,6 +1,7 @@
 ---
 import { getImage } from 'astro:assets';
 import { getCollection } from 'astro:content';
+import { faqPageSchema } from '@podbor/site-kit';
 import heroImage from '@/assets/hero-workshop.jpg';
 import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
@@ -36,15 +37,7 @@ const site = content(locale).site;
 const pages = content(locale).pages;
 const latestWorks = publishedWorks(await getCollection('works')).slice(0, 3);
 
-const faqSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: home.faq.map((item) => ({
-    '@type': 'Question',
-    name: item.q,
-    acceptedAnswer: { '@type': 'Answer', text: item.a },
-  })),
-};
+const faqSchema = faqPageSchema(home.faq);
 ---
 
 <Shell

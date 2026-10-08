@@ -14,7 +14,7 @@ import {
 import { content } from '@/i18n/content';
 import { pagesView } from '@/i18n/content/pages';
 import { getI18n } from '@/i18n/getI18n';
-import { withLocales, PathBuilder } from '@/utils/paths';
+import { withLocales } from '@/utils/paths';
 import { generateOrganizationSchema } from '@/utils/seo';
 
 export const getStaticPaths = () => withLocales([{ params: {} }]);
@@ -25,7 +25,6 @@ const t = getI18n(locale);
 const meta = {
   title: `${p.metaTitle} | ${SITE_NAME}`,
   description: p.metaDescription,
-  canonical: `${SITE_URL}${PathBuilder.contacts(locale)}`,
 };
 
 const info = p.info;
@@ -73,7 +72,9 @@ const schema = {
       </div>
 
       <div class="fade-up fade-up-2 space-y-10">
-        <LeadForm />
+        <div data-contact-cta>
+          <LeadForm />
+        </div>
 
         <div
           class="rounded-sm p-8 border border-t-2 bg-surface border-border-strong border-t-accent"
