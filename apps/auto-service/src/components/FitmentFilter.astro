@@ -1,9 +1,9 @@
 ---
 import SelectField from './SelectField.astro';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getShopContent } from '@/i18n/content/shop';
 import type { FitmentIndex } from '@podbor/shop-catalog/browser';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
+import { content } from '@/i18n/content';
 
 interface Props {
   index: FitmentIndex;
@@ -11,7 +11,7 @@ interface Props {
 
 const { index } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const shop = getShopContent(locale);
+const shop = content(locale).shop;
 
 const fields = [
   { name: 'make', label: shop.makeLabel, options: index.makes },

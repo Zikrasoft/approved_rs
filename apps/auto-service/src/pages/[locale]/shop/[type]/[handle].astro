@@ -10,8 +10,6 @@ import ProductCard from '@/components/ProductCard.astro';
 import AddToCart from '@/components/AddToCart.astro';
 import { BCP47_BY_LOCALE, PRIMARY_LOCALE } from '@/i18n/config';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getShopContent } from '@/i18n/content/shop';
-import { getSiteContent } from '@/i18n/content/site';
 import { shopCatalog } from '@/lib/catalog';
 import { formatSpec, specCopy } from '@/lib/formatSpec';
 import { productJsonLd } from '@/lib/productJsonLd';
@@ -19,6 +17,7 @@ import { productsOfType } from '@/lib/shopPages';
 import { SITE_NAME, SITE_URL } from '@/utils/constants';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { shopBuilt, shopIndexed } from '@/utils/shopStatus';
+import { content } from '@/i18n/content';
 
 export async function getStaticPaths() {
   if (!shopBuilt()) return [];
@@ -34,8 +33,8 @@ const typeKey = Astro.params.type!;
 const handle = Astro.params.handle!;
 const locale = localeFrom(Astro.url.pathname);
 const bcp47 = BCP47_BY_LOCALE[locale];
-const shop = getShopContent(locale);
-const site = getSiteContent(locale);
+const shop = content(locale).shop;
+const site = content(locale).site;
 const catalog = await shopCatalog().catalog(locale);
 const product = catalog.products.find(
   (candidate) => candidate.handle === handle,

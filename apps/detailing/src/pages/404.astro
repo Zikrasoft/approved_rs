@@ -2,11 +2,11 @@
 import Shell from '@/layouts/Shell.astro';
 import Cta from '@/components/Cta.astro';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getPagesContent } from '@/i18n/content/pages';
+import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 
 const locale = localeFrom(Astro.url.pathname);
-const pages = getPagesContent(locale);
+const pages = content(locale).pages;
 ---
 
 <Shell

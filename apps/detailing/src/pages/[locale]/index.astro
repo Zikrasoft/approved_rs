@@ -15,8 +15,7 @@ import LeadForm from '@/components/LeadForm.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import Cta from '@/components/Cta.astro';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getHomeContent } from '@/i18n/content/home';
-import { getSiteContent } from '@/i18n/content/site';
+import { content } from '@/i18n/content';
 import { PathBuilder, localePaths } from '@/utils/paths';
 import { localizedWork, publishedWorks } from '@/utils/works';
 import { HERO_SIZES, getHeroPicture } from '@/utils/heroImage';
@@ -26,8 +25,8 @@ export function getStaticPaths() {
 }
 
 const locale = localeFrom(Astro.url.pathname);
-const home = getHomeContent(locale);
-const site = getSiteContent(locale);
+const home = content(locale).home;
+const site = content(locale).site;
 
 const heroPicture = await getHeroPicture();
 const works = publishedWorks(await getCollection('works'));

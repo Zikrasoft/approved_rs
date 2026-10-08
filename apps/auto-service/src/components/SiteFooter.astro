@@ -2,18 +2,17 @@
 import Icon from './Icon.astro';
 import Wordmark from './Wordmark.astro';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
-import { getServicesContent } from '@/i18n/content/services';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { GARAGE_ADDRESS, SITE_NAME } from '@/utils/constants';
 import { devOnly, shopBuilt } from '@/utils/shopStatus';
 import { contactChannels } from '@/utils/contactLinks';
 import { contactPlacement } from '@podbor/site-kit';
+import { content } from '@/i18n/content';
 
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
-const services = getServicesContent(locale);
+const site = content(locale).site;
+const services = content(locale).services;
 const year = new Date().getFullYear();
 
 const channels = contactChannels(site, locale);

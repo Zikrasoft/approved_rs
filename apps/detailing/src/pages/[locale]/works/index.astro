@@ -6,9 +6,7 @@ import WorkGrid from '@/components/WorkGrid.astro';
 import EmptyState from '@/components/EmptyState.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getPagesContent } from '@/i18n/content/pages';
-import { getServicesContent } from '@/i18n/content/services';
-import { getSiteContent } from '@/i18n/content/site';
+import { content } from '@/i18n/content';
 import { PathBuilder, localePaths } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { publishedWorks } from '@/utils/works';
@@ -18,9 +16,9 @@ export function getStaticPaths() {
 }
 
 const locale = localeFrom(Astro.url.pathname);
-const pages = getPagesContent(locale);
-const services = getServicesContent(locale);
-const site = getSiteContent(locale);
+const pages = content(locale).pages;
+const services = content(locale).services;
+const site = content(locale).site;
 const works = publishedWorks(await getCollection('works'));
 
 const usedSlugs = SERVICE_SLUGS.filter((slug) =>

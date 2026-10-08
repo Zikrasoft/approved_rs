@@ -16,14 +16,14 @@ vi.mock('@/lib/catalog', async () => {
 });
 
 const { generateLlmsTxt } = await import('./llmsTxt');
-const { getShopContent } = await import('@/i18n/content/shop');
+const { content } = await import('@/i18n/content');
 
 describe('llms.txt when the shop is live', () => {
   it('lists each type that has products, and no other', async () => {
     const body = await generateLlmsTxt('sr');
 
     expect(body).toContain(
-      `[${getShopContent('sr').types.batteries.name}](https://carlab.rs/sr/shop/batteries/)`,
+      `[${content('sr').shop.types.batteries.name}](https://carlab.rs/sr/shop/batteries/)`,
     );
     expect(body).not.toContain('/sr/shop/filters/');
   });

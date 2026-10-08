@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { pluralLabel } from './plural';
 import { BCP47_BY_LOCALE, SUPPORTED_LOCALES } from '@/i18n/config';
-import { getShopContent } from '@/i18n/content/shop';
+import { content } from '@/i18n/content';
 
 describe('pluralLabel', () => {
   it.each(SUPPORTED_LOCALES)(
     'picks a form the %s reader would actually write',
     (locale) => {
-      const forms = getShopContent(locale).matchCount;
+      const forms = content(locale).shop.matchCount;
       [0, 1, 2, 5, 21, 101].forEach((count) => {
         const label = pluralLabel(forms, BCP47_BY_LOCALE[locale], count);
         expect(label).toContain(String(count));
@@ -17,7 +17,7 @@ describe('pluralLabel', () => {
   );
 
   it('declines the Russian noun by count, not by a single plural form', () => {
-    const forms = getShopContent('ru').matchCount;
+    const forms = content('ru').shop.matchCount;
     const label = (n: number) => pluralLabel(forms, 'ru-RS', n);
     expect(label(1)).toBe('найден 1 товар');
     expect(label(2)).toBe('найдено 2 товара');
@@ -37,7 +37,7 @@ describe('pluralLabel', () => {
   });
 
   it('keeps every plural category the Serbian shop copy needs', () => {
-    const forms = getShopContent('sr').matchCount;
+    const forms = content('sr').shop.matchCount;
     for (const key of ['one', 'few', 'many', 'other'] as const) {
       expect(forms[key]).toContain('{count}');
     }

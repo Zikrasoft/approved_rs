@@ -1,7 +1,7 @@
 ---
 import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
+import { content } from '@/i18n/content';
 import { CONTACT_LINKS, telegramBotHref } from '@/utils/contactLinks';
 import { PHONE_NUMBER } from '@/utils/constants';
 import type { ServiceSlug } from '@/utils/services';
@@ -16,7 +16,7 @@ interface Props {
 
 const { class: className = '', placement = 'bar', service } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
+const site = content(locale).site;
 
 const channels = [
   {

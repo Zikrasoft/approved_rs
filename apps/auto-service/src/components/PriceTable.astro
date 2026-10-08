@@ -1,11 +1,11 @@
 ---
 import { localeFrom } from '@/i18n/currentLocale';
-import { getServicesContent } from '@/i18n/content/services';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
+import { content } from '@/i18n/content';
 
 const locale = localeFrom(Astro.url.pathname);
-const services = getServicesContent(locale);
+const services = content(locale).services;
 ---
 
 <div class="mt-8 overflow-hidden rounded-block border border-line">

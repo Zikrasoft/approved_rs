@@ -1,4 +1,4 @@
-import type { SiteContent } from '@/i18n/content/site';
+import type { SiteContent } from '@/i18n/content/siteContentSchema';
 import type { Locale } from '@/i18n/config';
 import type { ServiceSlug } from './services';
 import {

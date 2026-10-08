@@ -10,9 +10,7 @@ import SectionHead from '@/components/SectionHead.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/currentLocale';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
-import { getPagesContent } from '@/i18n/content/pages';
-import { getServicesContent } from '@/i18n/content/services';
-import { getSiteContent } from '@/i18n/content/site';
+import { content } from '@/i18n/content';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { localizedWork, publishedWorks, workExcerpt } from '@/utils/works';
 import { safeMarkdown, relatedEntries } from '@podbor/site-kit';
@@ -38,9 +36,9 @@ export async function getStaticPaths() {
 
 const { work, related } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const pages = getPagesContent(locale);
-const services = getServicesContent(locale);
-const site = getSiteContent(locale);
+const pages = content(locale).pages;
+const services = content(locale).services;
+const site = content(locale).site;
 const { title, body, car } = localizedWork(work, locale);
 
 const articleSchema = {

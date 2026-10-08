@@ -1,8 +1,7 @@
 ---
 import Cta from './Cta.astro';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getHomeContent } from '@/i18n/content/home';
-import { getSiteContent } from '@/i18n/content/site';
+import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 import {
   HERO_HEIGHT,
@@ -12,8 +11,8 @@ import {
 } from '@/utils/heroImage';
 
 const locale = localeFrom(Astro.url.pathname);
-const { hero } = getHomeContent(locale);
-const site = getSiteContent(locale);
+const { hero } = content(locale).home;
+const site = content(locale).site;
 const picture = await getHeroPicture();
 ---
 

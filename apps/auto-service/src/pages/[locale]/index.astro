@@ -14,12 +14,10 @@ import WorkGrid from '@/components/WorkGrid.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import ContactChannels from '@/components/ContactChannels.astro';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getHomeContent } from '@/i18n/content/home';
-import { getSiteContent } from '@/i18n/content/site';
-import { getPagesContent } from '@/i18n/content/pages';
 import { publishedWorks } from '@/utils/works';
 import { localePaths, PathBuilder } from '@/utils/paths';
 import { devOnly, shopBuilt, shopIndexed } from '@/utils/shopStatus';
+import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
   return localePaths();
@@ -33,9 +31,9 @@ const heroPicture = await getImage({
   format: 'webp',
 });
 const locale = localeFrom(Astro.url.pathname);
-const home = getHomeContent(locale);
-const site = getSiteContent(locale);
-const pages = getPagesContent(locale);
+const home = content(locale).home;
+const site = content(locale).site;
+const pages = content(locale).pages;
 const latestWorks = publishedWorks(await getCollection('works')).slice(0, 3);
 
 const faqSchema = {

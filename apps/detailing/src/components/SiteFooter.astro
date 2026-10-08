@@ -2,8 +2,7 @@
 import Wordmark from './Wordmark.astro';
 import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
-import { getServicesContent } from '@/i18n/content/services';
+import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { INSTAGRAM, SITE_NAME, STUDIO_ADDRESS } from '@/utils/constants';
@@ -11,8 +10,8 @@ import { CONTACT_LINKS, telegramBotHref } from '@/utils/contactLinks';
 import { contactPlacement } from '@podbor/site-kit';
 
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
-const services = getServicesContent(locale);
+const site = content(locale).site;
+const services = content(locale).services;
 const year = new Date().getFullYear();
 
 const columnHeading = 'font-display text-xs font-medium text-mute';
