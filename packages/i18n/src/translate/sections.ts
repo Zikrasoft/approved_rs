@@ -23,6 +23,10 @@ export interface Section {
   promptSubject: string;
 }
 
+export interface RegistryEntry extends Section {
+  key: string;
+}
+
 export type SectionOutcome = 'translated' | 'backfilled' | 'skipped';
 
 export interface SectionTranslatorOptions<L extends string> {

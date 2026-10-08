@@ -1,4 +1,4 @@
-import type { Section } from '@podbor/i18n/translate';
+import type { RegistryEntry } from '@podbor/i18n';
 import { siteContentSchema } from './content/siteContentSchema.ts';
 import { captureCopySchema } from '@podbor/lead-capture/copy';
 import { homeContentSchema } from './content/homeContentSchema.ts';
@@ -49,4 +49,4 @@ export const SECTIONS = [
     promptSubject:
       'copy for the recent-jobs, contact, thank-you, privacy-policy and not-found pages',
   },
-] as const satisfies readonly (Section & { key: string })[];
+] as const satisfies readonly RegistryEntry[];
