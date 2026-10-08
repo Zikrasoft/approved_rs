@@ -154,10 +154,12 @@ Approved's trust/verification semantics.
   `packages/site-kit/src` are the shape: idempotent `define(tagName?)`, no
   auto-registration on import, no styles shipped, the app supplying the markup.
   A run-once page effect with no per-instance state is the one exception —
-  analytics, contact-click tracking, contact preference, the language
-  suggestion and funnel tracking are armed by `bootSiteKit` from
-  `@podbor/site-kit/browser`, called once from each app's layout with its
-  `ymCounterId` and `analytics: !import.meta.env.DEV`. No app imports the five
+  analytics, contact-click tracking, contact preference and funnel tracking
+  are armed by `bootSiteKit` from `@podbor/site-kit/browser`, called once from
+  each app's layout with its `ymCounterId` and
+  `analytics: !import.meta.env.DEV`. `bootSiteKit` also registers the
+  language-suggestion custom element (`defineLanguageSuggestion`), which keeps
+  its own instance state like any other element. No app imports the five
   parts, so none can arm one twice or forget one. `bootSiteKit` and each
   part guard against being armed twice — a second call that re-attaches
   listeners doubles whatever it counts, silently. A new page-level effect joins
@@ -577,7 +579,7 @@ This site is Astro SSG (`output: 'static'`/prerendered, no SSR) — `.astro` fro
 
 Don't reach for a library reflexively, though — a hand-rolled ~10-line helper that's already correct and purpose-built to one exact call site (e.g. `src/lib/store.ts`'s jittered CAS-retry backoff) doesn't get simpler by wrapping it in a generic library's config API. The bar is: does an existing library solve a real edge case this code either gets wrong today or would have to re-solve by hand, not "is there a package for this."
 
-**No bot framework (grammy/telegraf)** — why: `docs/adr/0006-no-telegram-bot-framework.md`. If the regex chain in `handleCallbackQuery` (`apps/approved-rs/src/pages/api/telegram-webhook.ts`) starts to hurt, the fix is a `[pattern, requiredRole, handler]` table in that file.
+**No bot framework (grammy/telegraf)** — why: `docs/adr/0006-no-telegram-bot-framework.md`. Callback dispatch is the `[pattern, requiredRole, handler]` table `CALLBACKS`, walked by `dispatchCallback` in `apps/approved-rs/src/pages/api/telegram-webhook.ts`; a new callback is a row there, not a framework.
 
 This only applies to build-time code (`.astro` frontmatter, `src/lib/`, `scripts/`). Code that ships to the browser (client-side `<script>`, hydrated islands) still carries a real bundle-size cost — weigh a new client dependency normally there.
 
