@@ -88,6 +88,36 @@ describe('getLocale', () => {
   });
 });
 
+describe('localeFrom', () => {
+  it.each(['ru', 'en', 'sr', 'es', 'de'] as const)(
+    'reads %s off the first path segment',
+    (locale) => {
+      expect(set.localeFrom(`/${locale}/services/`)).toBe(locale);
+    },
+  );
+
+  it('works for a bare locale root', () => {
+    expect(srFirst.localeFrom('/en/')).toBe('en');
+  });
+
+  it('falls back to the primary locale at the site root', () => {
+    expect(set.localeFrom('/')).toBe('ru');
+    expect(srFirst.localeFrom('/')).toBe('sr');
+  });
+
+  it('falls back to the primary locale outside the [locale] tree', () => {
+    expect(srFirst.localeFrom('/404')).toBe('sr');
+  });
+
+  it('falls back to the primary locale for an unsupported language', () => {
+    expect(srFirst.localeFrom('/zh/services/')).toBe('sr');
+  });
+
+  it('falls back to the primary locale for a prototype key', () => {
+    expect(srFirst.localeFrom('/constructor/')).toBe('sr');
+  });
+});
+
 describe('detectLocale', () => {
   it('prefers the cookie over the browser header', () => {
     expect(set.detectLocale('de,en;q=0.9', 'sr')).toBe('sr');

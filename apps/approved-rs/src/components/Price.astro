@@ -1,5 +1,5 @@
 ---
-import { getLocale } from '@/i18n/config';
+import { localeFrom } from '@/i18n/config';
 import { formatPrice, type CasePrice } from '@/utils/price';
 
 interface Props {
@@ -7,7 +7,7 @@ interface Props {
   class?: string;
 }
 const { price, class: className } = Astro.props;
-const locale = getLocale(Astro.currentLocale);
+const locale = localeFrom(Astro.url.pathname);
 ---
 
 <p class={className}>{formatPrice(price, locale)}</p>

@@ -1,7 +1,7 @@
 ---
 import { X } from '@lucide/astro';
 import LeadForm from './LeadForm.astro';
-import { getLocale } from '@/i18n/config';
+import { localeFrom } from '@/i18n/config';
 import { getI18n } from '@/i18n/getI18n';
 import {
   DATA_OPEN_LEAD_MODAL,
@@ -25,7 +25,7 @@ const {
   commentLabel,
   commentPlaceholder,
 } = Astro.props;
-const locale = getLocale(Astro.currentLocale);
+const locale = localeFrom(Astro.url.pathname);
 const closeLabel = getI18n(locale).common.closeLabel;
 ---
 

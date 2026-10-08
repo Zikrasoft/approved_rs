@@ -3,7 +3,7 @@ import Button from './Button.astro';
 import { Image } from 'astro:assets';
 import { X, ChevronLeft, ChevronRight } from '@lucide/astro';
 import type { ImageMetadata } from 'astro';
-import { getLocale } from '@/i18n/config';
+import { localeFrom } from '@/i18n/config';
 import { getI18n } from '@/i18n/getI18n';
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 
 const { images, name } = Astro.props;
 const VISIBLE = 6;
-const locale = getLocale(Astro.currentLocale);
+const locale = localeFrom(Astro.url.pathname);
 const t = getI18n(locale);
 const gallery = t.common.gallery;
 const closeLabel = t.common.closeLabel;

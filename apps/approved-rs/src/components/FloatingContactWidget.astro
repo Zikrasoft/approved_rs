@@ -3,13 +3,13 @@ import { MessageCircle, X } from '@lucide/astro';
 import ContactIcon from './ContactIcon.astro';
 import ContactControl from './ContactControl.astro';
 import { servicesView } from '@/i18n/content/services';
-import { getLocale } from '@/i18n/config';
+import { localeFrom } from '@/i18n/config';
 import { callbackTrigger } from '@/utils/contactChannel';
 import { navCurrent } from '@podbor/site-kit';
 import { contactRegion } from '@podbor/site-kit/contact-control';
 import { PathBuilder } from '@/utils/paths';
 
-const locale = getLocale(Astro.currentLocale);
+const locale = localeFrom(Astro.url.pathname);
 const cc = servicesView(locale).caseChrome;
 const onThanks =
   navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page';
@@ -170,7 +170,6 @@ const onThanks =
     padding: 0.75rem 0.9rem;
     background: none;
     border: none;
-    border-bottom: 1px solid var(--color-border);
     color: var(--color-text-2);
     font-size: 0.8125rem;
     font-weight: 500;
@@ -182,8 +181,8 @@ const onThanks =
       background-color 0.2s,
       color 0.2s;
   }
-  .floating-cell:last-child {
-    border-bottom: none;
+  .floating-cell + .floating-cell {
+    border-top: 1px solid var(--color-border);
   }
   .floating-cell:hover,
   .floating-cell:focus-visible {
