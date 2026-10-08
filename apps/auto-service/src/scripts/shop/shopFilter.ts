@@ -1,3 +1,4 @@
+import * as z from 'zod/mini';
 import {
   fitmentMatches,
   matchesFacets,
@@ -10,6 +11,53 @@ import {
 import { pluralLabel, type PluralForms } from '@/utils/plural';
 import { CAR_EVENT, readCar } from './car';
 
+const flags = {
+  key: z.string(),
+  label: z.string(),
+  required: z.optional(z.boolean()),
+  facet: z.optional(z.boolean()),
+  card: z.optional(z.boolean()),
+  landing: z.optional(z.boolean()),
+};
+
+const typeDefSchema: z.ZodMiniType<ProductTypeDef> = z.object({
+  key: z.string(),
+  label: z.string(),
+  fitment: z.enum(['none', 'optional', 'required']),
+  installation: z.optional(z.string()),
+  fields: z.array(
+    z.discriminatedUnion('kind', [
+      z.object({
+        ...flags,
+        kind: z.literal('enum'),
+        values: z.array(z.object({ value: z.string(), label: z.string() })),
+      }),
+      z.object({
+        ...flags,
+        kind: z.literal('number'),
+        unit: z.enum(['Ah', 'A', 'mm', 'l', 'months']),
+        integer: z.optional(z.boolean()),
+        min: z.optional(z.number()),
+        max: z.optional(z.number()),
+      }),
+      z.object({ ...flags, kind: z.literal('boolean') }),
+      z.object({
+        ...flags,
+        kind: z.literal('codes'),
+        multiple: z.optional(z.boolean()),
+      }),
+    ]),
+  ),
+});
+
+const parseTypeDef = (raw: string): ProductTypeDef | undefined => {
+  try {
+    return typeDefSchema.parse(JSON.parse(raw));
+  } catch {
+    return undefined;
+  }
+};
+
 export function defineShopFilter(tagName = 'shop-filter'): void {
   if (customElements.get(tagName)) return;
   customElements.define(
@@ -19,14 +67,13 @@ export function defineShopFilter(tagName = 'shop-filter'): void {
 
       connectedCallback(): void {
         if (this.controller) return;
-        const typeDef = this.dataset.typeDef;
+        const type = parseTypeDef(this.dataset.typeDef ?? '');
         const form = this.querySelector<HTMLFormElement>('form[data-facets]');
         const items = [...this.querySelectorAll<HTMLElement>('[data-product]')];
-        if (!typeDef || !form || items.length === 0) return;
+        if (!type || !form || items.length === 0) return;
 
         this.controller = new AbortController();
         const { signal } = this.controller;
-        const type = JSON.parse(typeDef) as ProductTypeDef;
         const count = this.querySelector<HTMLElement>('[data-filter-count]');
         const empty = this.querySelector<HTMLElement>('[data-filter-empty]');
         const forms = JSON.parse(

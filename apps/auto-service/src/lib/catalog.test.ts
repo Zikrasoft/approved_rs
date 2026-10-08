@@ -5,6 +5,7 @@ import {
   readCatalog,
   readStoreEnv,
 } from './catalog';
+import { typeView } from './typeView';
 import {
   BATTERY,
   INSTALLATION,
@@ -53,7 +54,7 @@ describe('readCatalog', () => {
       {
         id: BATTERY.id,
         handle: 'bosch-s4-024',
-        typeKey: 'batteries',
+        type: typeView('batteries', 'ru').type,
         title: 'Bosch S4 024',
         description: BATTERY.description,
         image: BATTERY.thumbnail,

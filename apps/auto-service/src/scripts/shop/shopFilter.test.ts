@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { productType } from '@podbor/shop-catalog/browser';
-import { facetTypeDef } from '@/lib/facetTypeDef';
+import { typeView } from '@/lib/typeView';
 import { writeCar } from './car';
 import { defineShopFilter } from './shopFilter';
 
@@ -13,8 +12,8 @@ const FORMS = JSON.stringify({
 });
 
 const TYPE_DEF: Record<string, string> = {
-  batteries: JSON.stringify(facetTypeDef(productType('batteries')!)),
-  'motor-oils': JSON.stringify(facetTypeDef(productType('motor-oils')!)),
+  batteries: JSON.stringify(typeView('batteries', 'ru').type),
+  'motor-oils': JSON.stringify(typeView('motor-oils', 'ru').type),
 };
 
 const item = (handle: string, spec: object, fitment: object[] = []) =>
@@ -150,7 +149,7 @@ describe('<shop-filter>', () => {
     writeCar({ make: 'Toyota', model: 'Corolla', year: 2015 });
     history.replaceState(null, '', '/sr/shop/batteries/');
     document.body.innerHTML = `
-      <shop-filter data-type="batteries" data-type-def='${JSON.stringify({ fitment: 'optional', fields: [] })}' data-bcp47="ru-RS" data-count-forms='${FORMS}'>
+      <shop-filter data-type="batteries" data-type-def='${JSON.stringify({ ...typeView('batteries', 'ru').type, fields: [] })}' data-bcp47="ru-RS" data-count-forms='${FORMS}'>
         <form data-facets></form>
         <p data-filter-count></p>
         <ul>
@@ -177,6 +176,17 @@ describe('<shop-filter>', () => {
 
     expect(shown()).toEqual(['a', 'b', 'c']);
     expect(location.search).toBe('');
+  });
+
+  it.each([
+    ['is not JSON', '{'],
+    ['does not match a product type', JSON.stringify({ fitment: 'optional' })],
+  ])('stays inert when the type definition %s', (_label, def) => {
+    TYPE_DEF.broken = def;
+    mount('?brand=Bosch', 'broken');
+
+    expect(shown()).toEqual(['a', 'b', 'c']);
+    expect(document.querySelector('[data-filter-count]')!.textContent).toBe('');
   });
 
   it('defines itself once', () => {

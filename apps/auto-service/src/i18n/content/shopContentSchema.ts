@@ -79,10 +79,13 @@ const typeCopy = (type: ProductTypeDef): z.ZodType<TypeCopy> =>
           metaDescription: text,
         })
         .strict(),
-      fields: keyed(
-        type.fields.map((field) => field.key),
-        (key) => fieldCopy(type.fields.find((field) => field.key === key)!),
-      ),
+      fields: z
+        .object(
+          Object.fromEntries(
+            type.fields.map((field) => [field.key, fieldCopy(field)]),
+          ),
+        )
+        .strict(),
     })
     .strict();
 
