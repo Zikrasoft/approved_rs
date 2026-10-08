@@ -14,7 +14,8 @@ import { shopCatalog } from '@/lib/catalog';
 import { productJsonLd } from '@/lib/productJsonLd';
 import { productsOfType } from '@/lib/shopPages';
 import { typeView } from '@/lib/typeView';
-import { SITE_NAME, SITE_URL } from '@/utils/constants';
+import { SITE_NAME } from '@/utils/constants';
+import { canonicalUrl } from '@/utils/pageHead';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { shopBuilt, shopIndexed } from '@/utils/shopStatus';
 import { content } from '@/i18n/content';
@@ -66,7 +67,7 @@ const searchTerms = [
   jsonLd={[
     productJsonLd({
       product,
-      url: new URL(href, SITE_URL).href,
+      url: canonicalUrl(locale, href),
       description,
     }),
   ]}

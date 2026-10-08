@@ -25,17 +25,11 @@ export const GARAGE_ADDRESS = WORKSHOP_ADDRESS;
 
 export const OPENING_HOURS = [
   {
-    '@type': 'OpeningHoursSpecification',
-    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+    days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
     opens: '08:00',
     closes: '18:00',
   },
-  {
-    '@type': 'OpeningHoursSpecification',
-    dayOfWeek: ['Saturday'],
-    opens: '09:00',
-    closes: '14:00',
-  },
+  { days: ['Saturday'], opens: '09:00', closes: '14:00' },
 ];
 
 export const PHONE_NUMBER = env.PUBLIC_PHONE_NUMBER;

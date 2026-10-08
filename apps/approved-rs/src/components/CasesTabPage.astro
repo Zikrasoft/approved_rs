@@ -16,7 +16,7 @@ interface Props {
   active: ServiceSlug;
   items: CaseCardProps[];
   counts: Record<ServiceSlug, number>;
-  meta: { title: string; description: string; canonical: string };
+  meta: { title: string; description: string };
 }
 
 const { active, items, counts, meta } = Astro.props;
