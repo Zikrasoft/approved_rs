@@ -13,7 +13,7 @@ import PartnerBrands from '@/components/PartnerBrands.astro';
 import { getCollection, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
-import { getPromoBanners } from '@/i18n/content/promoBanners';
+import { content } from '@/i18n/content';
 import {
   excerptFromMarkdown,
   generateArticleSchema,
@@ -52,7 +52,7 @@ const translation = getCaseTranslation(c.data, locale);
 const title = translation?.title ?? c.data.title;
 const { Content } = await render(c);
 const translatedHtml = translation ? safeMarkdown(translation.body) : null;
-const banners = getPromoBanners(locale);
+const banners = content(locale).promoBanners.sourcing;
 
 const CASES_TAB_PATH: Record<
   CollectionEntry<'cases'>['data']['service'],
