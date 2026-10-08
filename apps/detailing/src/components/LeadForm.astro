@@ -4,7 +4,6 @@ import { localeFrom } from '@/i18n/currentLocale';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
-import { CONTACT_LINKS } from '@/utils/contactLinks';
 import { PHONE_COUNTRY_SHORTLIST } from '@/utils/constants';
 import type { ServiceSlug } from '@/utils/services';
 import { phoneCountryOptions } from '@podbor/lead-crm/phone';
@@ -60,8 +59,6 @@ const label =
 const chip =
   'flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-white/35 px-2 text-center text-xs text-mute transition-colors duration-400 hover:border-line-strong aria-selected:border-champagne/60 aria-selected:bg-champagne/10 aria-selected:text-chalk focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-champagne';
 const errorText = 'mt-2 text-xs leading-relaxed text-[#e0876c]';
-const noscriptLink =
-  'inline-flex min-h-11 items-center gap-2 rounded-full border border-white/35 px-4 text-xs text-chalk transition-colors duration-400 hover:border-champagne';
 ---
 
 <lead-form class="contents">
@@ -89,24 +86,6 @@ const noscriptLink =
     <input type="hidden" name="visitor_id" data-visitor-id />
     <input type="hidden" name="contact" />
     <input type="hidden" name="contact_channel" value={channels[0].value} />
-
-    <noscript>
-      <div
-        class="rounded-2xl border border-line bg-white/[0.03] p-4 text-sm leading-relaxed text-mute"
-      >
-        <p>{site.form.noscriptNote}</p>
-        <div class="mt-3 flex flex-wrap gap-2">
-          <a href={CONTACT_LINKS.phone} class={noscriptLink}>
-            <Icon name="phone" size={14} />
-            {site.channels.call}
-          </a>
-          <a href={CONTACT_LINKS.whatsapp} class={noscriptLink}>
-            <Icon name="whatsapp" size={14} />
-            {site.channels.whatsapp}
-          </a>
-        </div>
-      </div>
-    </noscript>
 
     <div>
       <p id={channelLabelId} class={label}>{site.form.contactChannelLabel}</p>

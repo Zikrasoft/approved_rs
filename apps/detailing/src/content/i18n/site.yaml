@@ -69,7 +69,6 @@ form:
   errorConsent: Отметьте согласие, чтобы отправить заявку
   errorSubmit: Заявка не ушла. Проверьте связь и попробуйте ещё раз
   modalTitle: Оставить заявку
-  noscriptNote: Форма работает только с включённым JavaScript. Если он выключен — свяжитесь с нами напрямую.
 cookie:
   notice: Мы используем cookie.
   more: Подробнее в
@@ -151,7 +150,6 @@ translations:
       errorConsent: Potvrdite saglasnost da biste poslali zahtev
       errorSubmit: Poruka nije poslata. Proverite vezu i pokušajte ponovo.
       modalTitle: Ostaviti zahtev
-      noscriptNote: Forma funkcioniše samo sa uključenim JavaScript-om. Ako je isključen — kontaktirajte nas direktno.
     cookie:
       notice: Koristimo kolačiće.
       more: Više informacija u
@@ -231,7 +229,6 @@ translations:
       errorConsent: Check the consent box to submit your request
       errorSubmit: The request didn't go through. Please check your connection and try again.
       modalTitle: Submit a Request
-      noscriptNote: The form works only with JavaScript enabled. If it’s disabled — contact us directly.
     cookie:
       notice: We use cookies.
       more: Learn more in
