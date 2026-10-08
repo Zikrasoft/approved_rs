@@ -20,6 +20,6 @@ function toPagesContent(data: PagesContentData): PagesContent {
   };
 }
 
-export function getPages(locale: Locale): PagesContent {
+export function pagesView(locale: Locale): PagesContent {
   return toPagesContent(content(locale).pages);
 }

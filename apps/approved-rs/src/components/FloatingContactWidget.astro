@@ -3,7 +3,7 @@ import { MessageCircle, X } from '@lucide/astro';
 import ContactIcon from './ContactIcon.astro';
 import { phoneLink, viberLink } from '@/utils/contactLinks';
 import { messengerHrefs } from '@/utils/messengerHrefs';
-import { getServices } from '@/i18n/content/services';
+import { servicesView } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
 import { VIBER_NUMBER, PHONE_NUMBER } from '@/utils/constants';
 import { callbackTrigger } from '@/utils/contactChannel';
@@ -11,7 +11,7 @@ import { contactPlacement, navCurrent } from '@podbor/site-kit';
 import { PathBuilder } from '@/utils/paths';
 
 const locale = getLocale(Astro.currentLocale);
-const cc = getServices(locale).caseChrome;
+const cc = servicesView(locale).caseChrome;
 const onThanks =
   navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page';
 const messenger = messengerHrefs(locale, undefined, { human: onThanks });

@@ -2,7 +2,7 @@
 import Button from './Button.astro';
 import ContactIcon from './ContactIcon.astro';
 import { messengerHrefs } from '@/utils/messengerHrefs';
-import { getServices } from '@/i18n/content/services';
+import { servicesView } from '@/i18n/content/services';
 import { getLocale } from '@/i18n/config';
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
 }
 
 const locale = getLocale(Astro.currentLocale);
-const cc = getServices(locale).caseChrome;
+const cc = servicesView(locale).caseChrome;
 const { service, variant = 'primary', class: className } = Astro.props;
 const messenger = messengerHrefs(locale, service);
 ---
