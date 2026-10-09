@@ -140,6 +140,9 @@ importers:
       '@types/sanitize-html':
         specifier: 2.16.1
         version: 2.16.1
+      playwright-core:
+        specifier: 1.63.0
+        version: 1.63.0
       sharp:
         specifier: 0.35.4
         version: 0.35.4(@types/node@24.13.2)
@@ -234,6 +237,9 @@ importers:
       pagefind:
         specifier: 1.5.2
         version: 1.5.2
+      playwright-core:
+        specifier: 1.63.0
+        version: 1.63.0
       sharp:
         specifier: 0.35.4
         version: 0.35.4(@types/node@24.13.2)
@@ -319,6 +325,9 @@ importers:
       '@tailwindcss/vite':
         specifier: 4.3.3
         version: 4.3.3(vite@8.1.2(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))
+      playwright-core:
+        specifier: 1.63.0
+        version: 1.63.0
       sharp:
         specifier: 0.35.4
         version: 0.35.4(@types/node@24.13.2)
@@ -549,6 +558,9 @@ importers:
       path-to-regexp:
         specifier: 6.1.0
         version: 6.1.0
+      playwright-core:
+        specifier: 1.63.0
+        version: 1.63.0
       sanitize-html:
         specifier: 2.17.7
         version: 2.17.7

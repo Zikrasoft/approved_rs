@@ -1,77 +1,81 @@
 import { readFileSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
+import { parse } from 'yaml';
+import {
+  dataUri,
+  escapeHtml as esc,
+  inlineFontCss,
+  renderOgImages,
+} from '@podbor/site-kit/og';
 import { localeConfig, type Locale } from '../src/i18n/config.ts';
 
-const root = fileURLToPath(new URL('..', import.meta.url));
-const asset = (name: string) => new URL(`public/${name}`, `file://${root}`);
+const app = (path: string) =>
+  fileURLToPath(new URL(`../${path}`, import.meta.url));
 
-interface OgCopy {
-  heading: string;
-  services: string;
-  extra: string;
-  badge: string;
+interface HomeCopy {
+  hero: { heading: string; badges: string[] };
 }
 
-const COPY: Record<Locale, OgCopy> = {
-  sr: {
-    heading: 'Auto servis u Beogradu',
-    services: 'Dijagnostika · Servis · Kočnice i vešanje · Motor i menjač',
-    extra: 'Limarija i lakiranje · Provera vozila pre kupovine',
-    badge: 'Predračun pre početka radova',
-  },
-  ru: {
-    heading: 'Автосервис в Белграде',
-    services: 'Диагностика · ТО · Тормоза и подвеска · Двигатель и коробка',
-    extra: 'Кузовной ремонт и покраска · Проверка перед покупкой',
-    badge: 'Смета до начала работ',
-  },
-  en: {
-    heading: 'Car service in Belgrade',
-    services: 'Diagnostics · Servicing · Brakes · Engine and gearbox',
-    extra: 'Bodywork and respray · Pre-purchase inspection',
-    badge: 'Quote before any work starts',
-  },
-};
+const home: HomeCopy & { translations?: Record<string, HomeCopy> } = parse(
+  readFileSync(app('src/content/i18n/home.yaml'), 'utf8'),
+);
+const inLocale = (locale: Locale) =>
+  locale === 'ru' ? home : (home.translations?.[locale] ?? home);
 
-const esc = (text: string) =>
-  text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const FONTS = inlineFontCss(
+  createRequire(import.meta.url).resolve('@fontsource-variable/onest/wght.css'),
+);
 
-function svg({ heading, services, extra, badge }: OgCopy) {
-  const badgeWidth = Math.round(badge.length * 12.2) + 48;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
-  <rect width="1200" height="630" fill="#F5F4F1"/>
-  <rect y="0" width="1200" height="10" fill="#CC4A16"/>
-  <text x="64" y="130" font-family="sans-serif" font-size="40" font-weight="600" letter-spacing="8" fill="#17191C">CAR</text>
-  <rect x="192" y="92" width="142" height="52" fill="#CC4A16"/>
-  <text x="208" y="130" font-family="sans-serif" font-size="40" font-weight="600" letter-spacing="8" fill="#FFFFFF">LAB</text>
-  <text x="64" y="330" font-family="sans-serif" font-size="64" font-weight="600" fill="#17191C">${esc(heading)}</text>
-  <text x="64" y="410" font-family="sans-serif" font-size="30" fill="#656B74">${esc(services)}</text>
-  <text x="64" y="470" font-family="sans-serif" font-size="30" fill="#656B74">${esc(extra)}</text>
-  <rect x="64" y="524" width="${badgeWidth}" height="54" fill="#17191C"/>
-  <text x="88" y="559" font-family="sans-serif" font-size="24" fill="#FFFFFF">${esc(badge)}</text>
-</svg>`;
+const photo = dataUri(
+  await sharp(app('src/assets/hero-workshop.jpg'))
+    .resize(900)
+    .jpeg({ quality: 82 })
+    .toBuffer(),
+  '.jpg',
+);
+
+function page({ hero }: HomeCopy) {
+  return `<!doctype html><html><head><meta charset="utf-8"><style>
+${FONTS}
+* { margin: 0; box-sizing: border-box; }
+body { width: 1200px; height: 630px; overflow: hidden; background: #ffffff; color: #14161a; font-family: 'Onest Variable', sans-serif; padding: 28px 40px 40px; display: flex; flex-direction: column; gap: 20px; }
+.logo { font-size: 48px; font-weight: 800; letter-spacing: -0.04em; }
+.logo span { color: #f4661e; }
+.card { flex: 1; display: grid; grid-template-columns: 1.3fr 0.7fr; border-radius: 28px; overflow: hidden; background: #1e2128; color: #fff; }
+.copy { padding: 56px 52px 48px; display: flex; flex-direction: column; }
+h1 { margin-top: auto; text-wrap: balance; font-size: 88px; font-weight: 800; line-height: 1.02; letter-spacing: -0.035em; }
+ul { margin-top: 36px; list-style: none; padding: 0; display: flex; flex-direction: column; gap: 14px; font-size: 28px; color: #c3c7d0; }
+li::before { content: '✓'; color: #f4661e; font-weight: 700; margin-right: 14px; }
+img { width: 100%; height: 100%; object-fit: cover; object-position: 40% 50%; }
+</style></head><body>
+<div class="logo">Car<span>Lab</span></div>
+<div class="card">
+  <div class="copy">
+    <h1>${esc(hero.heading)}</h1>
+    <ul>${hero.badges.map((badge) => `<li>${esc(badge)}</li>`).join('')}</ul>
+  </div>
+  <img src="${photo}" alt="">
+</div>
+</body></html>`;
 }
 
-for (const locale of localeConfig.locales) {
-  const name = `og${localeConfig.ogSuffix[locale]}.png`;
-  writeFileSync(
-    asset(name),
-    await sharp(Buffer.from(svg(COPY[locale])))
-      .png()
-      .toBuffer(),
-  );
-  console.log(`wrote public/${name}`);
-}
+await renderOgImages(
+  localeConfig.locales.map((locale) => ({
+    html: page(inLocale(locale)),
+    out: app(`public/og${localeConfig.ogSuffix[locale]}.png`),
+  })),
+);
 
-const favicon = readFileSync(asset('favicon.svg'));
+const favicon = readFileSync(app('public/favicon.svg'));
 for (const [name, size] of [
   ['apple-touch-icon.png', 180],
   ['icon-192.png', 192],
   ['icon-512.png', 512],
 ] as const) {
   writeFileSync(
-    asset(name),
+    app(`public/${name}`),
     await sharp(favicon, { density: 512 }).resize(size, size).png().toBuffer(),
   );
   console.log(`wrote public/${name}`);

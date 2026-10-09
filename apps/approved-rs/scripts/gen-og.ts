@@ -1,161 +1,114 @@
+import { mkdirSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+import { APPROVED } from '@podbor/brands';
 import sharp from 'sharp';
-import { writeFileSync, mkdirSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { parse } from 'yaml';
+import {
+  dataUri,
+  escapeHtml as esc,
+  inlineFontCss,
+  renderOgImages,
+  type OgImage,
+} from '@podbor/site-kit/og';
 import { localeConfig, type Locale } from '../src/i18n/config.ts';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const PUBLIC = join(__dirname, '../public');
+const app = (path: string) =>
+  fileURLToPath(new URL(`../${path}`, import.meta.url));
+const font = (spec: string) =>
+  inlineFontCss(createRequire(import.meta.url).resolve(spec));
 
-const W = 1200;
-const H = 630;
+const [BRAND_NAME, BRAND_TLD] = APPROVED.domain.split('.');
 
-interface OgCopy {
-  eyebrow: string;
-  tagline: string;
-  subtagline: string;
-}
+const yaml = (name: string) =>
+  parse(readFileSync(app(`src/content/i18n/${name}.yaml`), 'utf8'));
+const home = yaml('home');
+const services = yaml('services');
+const inLocale = <T>(
+  doc: { translations?: Record<string, T> } & T,
+  locale: Locale,
+): T => (locale === 'ru' ? doc : (doc.translations?.[locale] ?? doc));
 
-function renderSvg({ eyebrow, tagline, subtagline }: OgCopy) {
-  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+const FONTS = [
+  '@fontsource/unbounded/700.css',
+  '@fontsource/golos-text/400.css',
+  '@fontsource/golos-text/600.css',
+]
+  .map(font)
+  .join('\n');
 
-  <rect width="${W}" height="${H}" fill="#F4F6FA"/>
-
-  <ellipse cx="1050" cy="520" rx="380" ry="280"
-    fill="#1E3A5F" opacity="0.05"/>
-
-  <text x="${W + 20}" y="${H - 30}"
-    text-anchor="end"
-    font-family="Georgia, 'Times New Roman', serif"
-    font-size="320" font-weight="bold" font-style="italic"
-    fill="none" stroke="#1E3A5F" stroke-width="1.5" opacity="0.055"
-    letter-spacing="-12">AUTO</text>
-
-  <rect x="72" y="72" width="2.5" height="${H - 144}" fill="#1E3A5F" rx="1.5" opacity="0.35"/>
-
-  <text x="96" y="122"
-    font-family="Arial, Helvetica, sans-serif"
-    font-size="12" font-weight="600" fill="#6B7280"
-    letter-spacing="4">${eyebrow}</text>
-
-  <text x="90" y="290"
-    font-family="Georgia, 'Times New Roman', serif"
-    font-size="128" font-weight="bold" font-style="italic"
-    fill="#0D0F14" letter-spacing="-4">APPROVED</text>
-
-  <rect x="92" y="308" width="80" height="34" rx="3" fill="#1E3A5F"/>
-  <text x="132" y="332"
-    text-anchor="middle"
-    font-family="Arial, Helvetica, sans-serif"
-    font-size="14" font-weight="700" fill="#F4F6FA"
-    letter-spacing="3">.RS</text>
-
-  <text x="96" y="416"
-    font-family="Arial, Helvetica, sans-serif"
-    font-size="26" fill="#2D3448">
-    ${tagline}
-  </text>
-
-  <text x="96" y="462"
-    font-family="Arial, Helvetica, sans-serif"
-    font-size="17" fill="#6B7280" letter-spacing="0.5">
-    ${subtagline}
-  </text>
-
-  <line x1="96" y1="510" x2="520" y2="510" stroke="#D8DCE8" stroke-width="1"/>
-
-  <text x="96" y="553"
-    font-family="Arial, Helvetica, sans-serif"
-    font-size="18" font-weight="600" fill="#1E3A5F" letter-spacing="0.5">approved.rs</text>
-
-  <rect x="3" y="3" width="${W - 6}" height="${H - 6}"
-    fill="none" stroke="#D8DCE8" stroke-width="1.5" rx="2"/>
-
-</svg>`;
-}
-
-async function renderOg(outPath: string, options: OgCopy) {
-  const buf = await sharp(Buffer.from(renderSvg(options)))
-    .png({ quality: 95 })
-    .toBuffer();
-  writeFileSync(outPath, buf);
-  console.log(
-    `✓ saved (${(buf.length / 1024).toFixed(0)} KB) → ${outPath.replace(PUBLIC, 'public')}`,
+const photo = async (name: string) =>
+  dataUri(
+    await sharp(app(`src/assets/${name}.jpg`))
+      .resize(1600)
+      .jpeg({ quality: 82 })
+      .toBuffer(),
+    '.jpg',
   );
+const HOME_PHOTO = await photo('hero-delivery');
+const SERVICE_PHOTO = {
+  'vehicle-sourcing': await photo('service-sourcing'),
+  'vehicle-buyback': await photo('service-buyback'),
+  'vehicle-inspection': await photo('service-inspection'),
+};
+
+function page(
+  photo: string,
+  lines: string[],
+  stats: { value: string; label: string }[],
+) {
+  const last = lines.length - 1;
+  return `<!doctype html><html><head><meta charset="utf-8"><style>
+${FONTS}
+* { margin: 0; box-sizing: border-box; }
+body { width: 1200px; height: 630px; overflow: hidden; background: #0a0b0c; color: #f5f3ef; font-family: 'Golos Text', sans-serif; position: relative; }
+.photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 70% 62%; }
+.veil { position: absolute; inset: 0; background:
+  linear-gradient(90deg, rgba(10,11,12,.96) 0%, rgba(10,11,12,.86) 48%, rgba(10,11,12,.45) 100%),
+  linear-gradient(0deg, rgba(10,11,12,.9) 0%, rgba(10,11,12,0) 40%); }
+main { position: relative; height: 100%; padding: 60px 72px 56px; display: flex; flex-direction: column; }
+.logo { font-family: 'Unbounded', sans-serif; font-weight: 700; font-size: 40px; letter-spacing: -0.02em; }
+.logo span { color: #ef6247; }
+h1 { margin-top: auto; font-family: 'Unbounded', sans-serif; font-weight: 700; font-size: 84px; line-height: 1.02; letter-spacing: -0.035em; white-space: nowrap; overflow: hidden; }
+h1 span { display: block; }
+h1 .accent { color: #ef6247; }
+footer { margin-top: 44px; padding-top: 26px; border-top: 1px solid rgba(245,243,239,.14); display: flex; gap: 56px; font-size: 30px; color: #a9afae; }
+footer b { color: #f5f3ef; font-weight: 600; }
+</style></head><body>
+<img class="photo" src="${photo}" alt="">
+<div class="veil"></div>
+<main>
+  <div class="logo">${esc(BRAND_NAME!.toUpperCase())}<span>.${esc(BRAND_TLD!)}</span></div>
+  <h1 data-fit>${lines.map((line, i) => `<span${i === last ? ' class="accent"' : ''}>${esc(line)}</span>`).join('')}</h1>
+  <footer>${stats.map(({ value, label }) => `<div><b>${esc(value)}</b> ${esc(label)}</div>`).join('')}</footer>
+</main>
+</body></html>`;
 }
 
-const EYEBROW: Record<Locale, string> = {
-  ru: 'АВТОПОДБОР · ДОСТАВКА · ЕВРОПА',
-  en: 'CAR SOURCING · DELIVERY · EUROPE',
-  sr: 'ODABIR VOZILA · DOSTAVA · EVROPA',
-  es: 'BÚSQUEDA DE AUTOS · ENTREGA · EUROPA',
-  de: 'FAHRZEUGBESCHAFFUNG · LIEFERUNG · EUROPA',
-};
-
-const DEFAULT_SUB: Record<Locale, string> = {
-  ru: 'Германия · Испания · Сербия · Полностью удалённо, через Telegram',
-  en: 'Germany · Spain · Serbia · Fully remote, over Telegram',
-  sr: 'Nemačka · Španija · Srbija · Potpuno na daljinu, preko Telegrama',
-  es: 'Alemania · España · Serbia · Totalmente remoto, por Telegram',
-  de: 'Deutschland · Spanien · Serbien · Komplett aus der Ferne, über Telegram',
-};
-
-const DEFAULT_TAGLINE: Record<Locale, string> = {
-  ru: 'Подберём и доставим автомобиль из Европы',
-  en: "We'll source and deliver your car from Europe",
-  sr: 'Pronaći ćemo i dovesti vaše vozilo iz Evrope',
-  es: 'Buscamos y te entregamos tu auto desde Europa',
-  de: 'Wir suchen und liefern Ihr Auto aus Europa',
-};
-
-const SERVICE_VARIANTS: Record<Locale, Record<string, string>> = {
-  ru: {
-    'vehicle-sourcing': 'Подберём, проверим и доставим автомобиль под ключ',
-    'vehicle-buyback': 'Срочный выкуп авто на иностранных номерах',
-    'vehicle-inspection': 'Независимая проверка перед покупкой',
-  },
-  en: {
-    'vehicle-sourcing':
-      "We'll source, inspect, and deliver your car, fully turnkey",
-    'vehicle-buyback': 'Urgent car buyback on foreign plates',
-    'vehicle-inspection': 'Independent inspection before you buy',
-  },
-  sr: {
-    'vehicle-sourcing':
-      'Pronalazimo, proveravamo i dovozimo vozilo, ključ u ruke',
-    'vehicle-buyback': 'Hitan otkup vozila na stranim tablicama',
-    'vehicle-inspection': 'Nezavisna provera pre kupovine',
-  },
-  es: {
-    'vehicle-sourcing':
-      'Buscamos, inspeccionamos y entregamos tu auto, todo incluido',
-    'vehicle-buyback': 'Compra urgente de autos con matrícula extranjera',
-    'vehicle-inspection': 'Inspección independiente antes de comprar',
-  },
-  de: {
-    'vehicle-sourcing':
-      'Wir suchen, prüfen und liefern Ihr Auto — schlüsselfertig',
-    'vehicle-buyback':
-      'Dringender Ankauf von Autos mit ausländischem Kennzeichen',
-    'vehicle-inspection': 'Unabhängige Prüfung vor dem Kauf',
-  },
-};
-
+const images: OgImage[] = [];
+mkdirSync(app('public/og'), { recursive: true });
 for (const locale of localeConfig.locales) {
   const suffix = localeConfig.ogSuffix[locale];
+  const copy = inLocale(home, locale);
+  const stats = [copy.statClients, copy.statYears];
 
-  await renderOg(join(PUBLIC, `og${suffix}.png`), {
-    eyebrow: EYEBROW[locale],
-    tagline: DEFAULT_TAGLINE[locale],
-    subtagline: DEFAULT_SUB[locale],
+  images.push({
+    html: page(
+      HOME_PHOTO,
+      [copy.heroLine1, copy.heroLine2, copy.heroLine3],
+      stats,
+    ),
+    out: app(`public/og${suffix}.png`),
   });
 
-  mkdirSync(join(PUBLIC, 'og'), { recursive: true });
-  for (const [service, tagline] of Object.entries(SERVICE_VARIANTS[locale])) {
-    await renderOg(join(PUBLIC, 'og', `${service}${suffix}.png`), {
-      eyebrow: EYEBROW[locale],
-      tagline,
-      subtagline: DEFAULT_SUB[locale],
+  for (const [service, servicePhoto] of Object.entries(SERVICE_PHOTO)) {
+    const hub =
+      inLocale(services, locale)[service]?.hub ?? services[service].hub;
+    images.push({
+      html: page(servicePhoto, [hub.title, hub.titleHighlight], stats),
+      out: app(`public/og/${service}${suffix}.png`),
     });
   }
 }
+
+await renderOgImages(images);
