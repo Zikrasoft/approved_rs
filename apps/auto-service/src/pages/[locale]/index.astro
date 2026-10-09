@@ -1,6 +1,8 @@
 ---
+import { contactCta } from '@podbor/site-kit/contact-control';
 import { getImage } from 'astro:assets';
 import { getCollection } from 'astro:content';
+import { faqPageSchema } from '@podbor/site-kit';
 import heroImage from '@/assets/hero-workshop.jpg';
 import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
@@ -13,13 +15,11 @@ import LeadForm from '@/components/LeadForm.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import ContactChannels from '@/components/ContactChannels.astro';
-import { localeFrom } from '@/i18n/currentLocale';
-import { getHomeContent } from '@/i18n/content/home';
-import { getSiteContent } from '@/i18n/content/site';
-import { getPagesContent } from '@/i18n/content/pages';
+import { localeFrom } from '@/i18n/config';
 import { publishedWorks } from '@/utils/works';
 import { localePaths, PathBuilder } from '@/utils/paths';
 import { devOnly, shopBuilt, shopIndexed } from '@/utils/shopStatus';
+import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
   return localePaths();
@@ -33,20 +33,12 @@ const heroPicture = await getImage({
   format: 'webp',
 });
 const locale = localeFrom(Astro.url.pathname);
-const home = getHomeContent(locale);
-const site = getSiteContent(locale);
-const pages = getPagesContent(locale);
+const home = content(locale).home;
+const site = content(locale).site;
+const pages = content(locale).pages;
 const latestWorks = publishedWorks(await getCollection('works')).slice(0, 3);
 
-const faqSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: home.faq.map((item) => ({
-    '@type': 'Question',
-    name: item.q,
-    acceptedAnswer: { '@type': 'Answer', text: item.a },
-  })),
-};
+const faqSchema = faqPageSchema(home.faq);
 ---
 
 <Shell
@@ -70,7 +62,7 @@ const faqSchema = {
         <p class="max-w-xl leading-relaxed text-panel-ink sm:text-lg">
           {home.hero.lead}
         </p>
-        <div class="flex flex-wrap gap-3 pt-1" data-contact-cta>
+        <div class="flex flex-wrap gap-3 pt-1" {...contactCta}>
           <button type="button" data-open-lead-modal class="btn btn-primary">
             {home.hero.ctaPrimary}
           </button>
@@ -128,7 +120,7 @@ const faqSchema = {
     <PriceTable />
   </section>
 
-  <section class="wrap pb-band lg:hidden" data-contact-cta>
+  <section class="wrap pb-band lg:hidden" {...contactCta}>
     <div class="rounded-block bg-shade p-6">
       <h2 class="text-section mb-5">{site.form.heading}</h2>
       <LeadForm compact />

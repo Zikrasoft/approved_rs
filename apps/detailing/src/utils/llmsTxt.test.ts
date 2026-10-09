@@ -28,7 +28,7 @@ vi.mock('astro:content', () => ({
 const { generateLlmsTxt } = await import('./llmsTxt');
 const { SUPPORTED_LOCALES } = await import('@/i18n/config');
 const { SERVICE_SLUGS } = await import('./services');
-const { getSiteContent } = await import('@/i18n/content/site');
+const { content } = await import('@/i18n/content');
 const { STUDIO_ADDRESS } = await import('./constants');
 
 describe('generateLlmsTxt', () => {
@@ -67,6 +67,6 @@ describe('generateLlmsTxt', () => {
     const body = await generateLlmsTxt('sr');
     expect(body).toContain(STUDIO_ADDRESS.street);
     expect(body).toContain(mapPlaceUrl(STUDIO_ADDRESS.googleMapsCid));
-    expect(body).toContain(getSiteContent('sr').footer.hours);
+    expect(body).toContain(content('sr').site.footer.hours);
   });
 });

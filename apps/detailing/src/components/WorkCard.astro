@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
-import { localeFrom } from '@/i18n/currentLocale';
-import { getServicesContent } from '@/i18n/content/services';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 import { localizedWork, type Work } from '@/utils/works';
 
@@ -13,7 +13,7 @@ interface Props {
 
 const { work, eager = false, class: className = '' } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const services = getServicesContent(locale);
+const services = content(locale).services;
 const { title, car } = localizedWork(work, locale);
 ---
 

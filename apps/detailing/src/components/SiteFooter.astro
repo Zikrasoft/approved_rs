@@ -1,41 +1,25 @@
 ---
 import Wordmark from './Wordmark.astro';
 import Icon from './Icon.astro';
-import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
-import { getServicesContent } from '@/i18n/content/services';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { INSTAGRAM, SITE_NAME, STUDIO_ADDRESS } from '@/utils/constants';
-import { CONTACT_LINKS, telegramBotHref } from '@/utils/contactLinks';
-import { contactPlacement } from '@podbor/site-kit';
+import ContactControl from './ContactControl.astro';
+import { contactRegion } from '@podbor/site-kit/contact-control';
 
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
-const services = getServicesContent(locale);
+const site = content(locale).site;
+const services = content(locale).services;
 const year = new Date().getFullYear();
 
 const columnHeading = 'font-display text-xs font-medium text-mute';
 
 const messengers = [
-  {
-    href: CONTACT_LINKS.whatsapp,
-    icon: 'whatsapp',
-    label: site.channels.whatsapp,
-    track: 'whatsapp',
-  },
-  {
-    href: CONTACT_LINKS.viber,
-    icon: 'viber',
-    label: site.channels.viber,
-    track: 'viber',
-  },
-  {
-    href: telegramBotHref(locale),
-    icon: 'telegram',
-    label: site.channels.telegram,
-    track: 'telegram',
-  },
+  { icon: 'whatsapp', label: site.channels.whatsapp, track: 'whatsapp' },
+  { icon: 'viber', label: site.channels.viber, track: 'viber' },
+  { icon: 'telegram', label: site.channels.telegram, track: 'telegram' },
 ] as const;
 ---
 
@@ -106,34 +90,28 @@ const messengers = [
         >
       </nav>
 
-      <div
-        class="flex flex-col items-start gap-3"
-        {...contactPlacement('footer')}
-      >
+      <div class="flex flex-col items-start gap-3" {...contactRegion('footer')}>
         <span class={columnHeading}>
           {site.footer.contactHeading}
         </span>
-        <a
-          href={CONTACT_LINKS.phone}
-          data-contact-channel="phone"
-          class="inline-flex min-h-11 items-center gap-2.5 text-sm text-chalk transition-colors duration-400 hover:text-champagne pointer-fine:hidden!"
+        <ContactControl
+          channel="phone"
+          class="inline-flex min-h-11 items-center gap-2.5 text-sm text-chalk transition-colors duration-400 hover:text-champagne"
         >
           <Icon name="phone" size={16} class="shrink-0" />
           {site.channels.call}
-        </a>
+        </ContactControl>
         <ul class="-ml-3.5 flex flex-wrap items-center" data-contact-order>
           {
             messengers.map((messenger) => (
               <li data-channel={messenger.track}>
-                <a
-                  href={messenger.href}
-                  data-contact-channel={messenger.track}
-                  rel="noopener"
+                <ContactControl
+                  channel={messenger.track}
                   class="flex size-11 items-center justify-center text-mute transition-colors duration-400 hover:text-champagne"
                 >
                   <Icon name={messenger.icon} size={16} />
                   <span class="sr-only">{messenger.label}</span>
-                </a>
+                </ContactControl>
               </li>
             ))
           }

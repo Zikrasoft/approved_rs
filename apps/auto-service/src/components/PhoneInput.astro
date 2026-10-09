@@ -1,19 +1,18 @@
 ---
 import Icon from './Icon.astro';
 import { phoneCountryOptions } from '@podbor/lead-crm/phone';
-import { BCP47_BY_LOCALE } from '@/i18n/config';
-import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
+import { localeFrom, BCP47_BY_LOCALE } from '@/i18n/config';
 import { PHONE_COUNTRY_SHORTLIST } from '@/utils/constants';
+import { content } from '@/i18n/content';
 
 interface Props {
-  name?: string;
+  name: string;
   errorId: string;
 }
 
-const { name = 'contact', errorId } = Astro.props;
+const { name, errorId } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
+const site = content(locale).site;
 const DEFAULT_COUNTRY = 'RS';
 const displayLocale = BCP47_BY_LOCALE[locale];
 const countryOptions = phoneCountryOptions(displayLocale).filter(

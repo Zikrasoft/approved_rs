@@ -1,11 +1,11 @@
 ---
 import { breadcrumbListSchema, jsonLdText } from '@podbor/site-kit';
 import { SITE_URL } from '@/utils/constants';
-import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
+import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 import ContactChannels from './ContactChannels.astro';
 import type { ServiceSlug } from '@/utils/services';
+import { content } from '@/i18n/content';
 
 interface Props {
   eyebrow: string;
@@ -17,7 +17,7 @@ interface Props {
 
 const { eyebrow, heading, lead, crumbs = [], service } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
+const site = content(locale).site;
 const trail = [
   { href: PathBuilder.home(locale), label: site.common.homeLabel },
   ...crumbs,

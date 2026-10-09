@@ -1,7 +1,9 @@
 import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
+import { z } from 'zod';
 
-import { queryOne } from '../../src/lib/query';
+import { typeValueSchema } from '../../src/api/admin/products/require-fields';
+import { selectOne } from '../../src/lib/query';
 import { DEFAULT_OPTION, SHOP } from '../../src/lib/shop';
 import { seedBase } from '../../src/scripts/seed-base';
 import { adminHeaders } from './admin-session';
@@ -265,12 +267,15 @@ medusaIntegrationTestRunner({
 
       expect(data.product.handle).toBe('akkumulyator-test');
 
-      const row = await queryOne<{
-        shipping_profile?: { id: string } | null;
-        sales_channels: { name: string }[];
-      }>(query(), 'product', ['shipping_profile.id', 'sales_channels.name'], {
-        id: data.product.id,
-      });
+      const row = await selectOne(
+        query(),
+        'product',
+        z.object({
+          shipping_profile: z.object({ id: z.string() }).nullish(),
+          sales_channels: z.array(z.object({ name: z.string() })),
+        }),
+        { id: data.product.id },
+      );
       expect(row?.sales_channels.map((channel) => channel.name)).toEqual([
         SHOP.salesChannelName,
       ]);
@@ -308,12 +313,9 @@ medusaIntegrationTestRunner({
       expect(error.data.message).toBe(
         'Тип «batteries» задан каталогом сайта — его нельзя переименовать или удалить',
       );
-      const type = await queryOne<{ value: string }>(
-        query(),
-        'product_type',
-        ['value'],
-        { id: typeId },
-      );
+      const type = await selectOne(query(), 'product_type', typeValueSchema, {
+        id: typeId,
+      });
       expect(type?.value).toBe('batteries');
     });
   },

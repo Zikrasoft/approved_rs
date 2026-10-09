@@ -1,13 +1,4 @@
-export {
-  detectVisitorCountry,
-  preferredContactChannel,
-} from '@podbor/site-kit/contact-preference';
-
-export {
-  TRACKED_CONTACT_CHANNELS,
-  isTrackedContactChannel,
-  type TrackedContactChannel,
-} from '@podbor/lead-crm/contact-channel';
+export { detectVisitorCountry } from '@podbor/site-kit/contact-preference';
 
 export const DATA_LEAD_SERVICE = 'data-lead-service';
 export const DATA_DEFAULT_SERVICE = 'data-default-service';

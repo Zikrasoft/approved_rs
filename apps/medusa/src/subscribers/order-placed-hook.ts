@@ -5,13 +5,12 @@ import { z } from 'zod';
 
 import { parseEnv } from '../lib/env';
 import {
-  type HookOrder,
-  type HookProduct,
-  ORDER_HOOK_FIELDS,
   buildOrderHookPayload,
+  hookOrderSchema,
+  hookProductSchema,
   sendOrderHook,
 } from '../lib/order-hook';
-import { queryOne } from '../lib/query';
+import { selectAll, selectOne } from '../lib/query';
 
 export default async function orderPlacedHook({
   event,
@@ -27,7 +26,7 @@ export default async function orderPlacedHook({
   }
 
   const query = container.resolve(ContainerRegistrationKeys.QUERY);
-  const order = await queryOne<HookOrder>(query, 'order', ORDER_HOOK_FIELDS, {
+  const order = await selectOne(query, 'order', hookOrderSchema, {
     id: event.data.id,
   });
   if (!order) {
@@ -41,19 +40,13 @@ export default async function orderPlacedHook({
       ),
     ),
   ];
-  const { data: products } = await query.graph({
-    entity: 'product',
-    fields: ['id', 'title', 'type.value'],
-    filters: { id: productIds },
+  const products = await selectAll(query, 'product', hookProductSchema, {
+    id: productIds,
   });
 
   let payload: OrderHookPayload;
   try {
-    payload = buildOrderHookPayload(
-      order,
-      products as HookProduct[],
-      env.ADMIN_URL,
-    );
+    payload = buildOrderHookPayload(order, products, env.ADMIN_URL);
   } catch (error) {
     if (!(error instanceof z.ZodError)) {
       throw error;

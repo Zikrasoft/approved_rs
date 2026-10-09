@@ -18,9 +18,13 @@ import { errorMessage } from './errorMessage.ts';
 
 export interface Section {
   path: string;
-  fields: readonly string[];
+  fields?: readonly string[];
   schema: ZodObject;
   promptSubject: string;
+}
+
+export interface RegistryEntry extends Section {
+  key: string;
 }
 
 export type SectionOutcome = 'translated' | 'backfilled' | 'skipped';
@@ -84,7 +88,7 @@ export function createSectionTranslator<L extends string>({
 
     const plain = doc.toJS() as SectionData;
     const rawSource: SectionData = {};
-    for (const field of section.fields) {
+    for (const field of section.fields ?? section.schema.keyof().options) {
       if (plain[field] !== undefined) rawSource[field] = plain[field];
     }
     const source = section.schema.parse(rawSource) as SectionData;

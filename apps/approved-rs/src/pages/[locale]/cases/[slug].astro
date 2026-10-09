@@ -13,14 +13,14 @@ import PartnerBrands from '@/components/PartnerBrands.astro';
 import { getCollection, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
-import { getPromoBanners } from '@/i18n/content/promoBanners';
+import { content } from '@/i18n/content';
 import {
   excerptFromMarkdown,
   generateArticleSchema,
   buildLocation,
 } from '@/utils/seo';
 import { withLocales, PathBuilder } from '@/utils/paths';
-import { getServicesContent } from '@/i18n/content/services';
+import { servicesView } from '@/i18n/content/services';
 import { getI18n } from '@/i18n/getI18n';
 import { formatPrice } from '@/utils/price';
 import { getCountry } from '@/utils/geo';
@@ -40,19 +40,16 @@ export async function getStaticPaths() {
 }
 
 const { locale } = Astro.params;
-const cc = getServicesContent(locale).caseChrome;
+const cc = servicesView(locale).caseChrome;
 const t = getI18n(locale);
 const { case: c } = Astro.props;
 
-// No translation yet for this case/locale → fall back to the ru original
-// rather than leaving the page half-broken (see getCaseTranslation for why
-// this goes through a helper rather than an inline `as` cast).
 const translation = getCaseTranslation(c.data, locale);
 
 const title = translation?.title ?? c.data.title;
 const { Content } = await render(c);
 const translatedHtml = translation ? safeMarkdown(translation.body) : null;
-const banners = getPromoBanners(locale);
+const banners = content(locale).promoBanners.sourcing;
 
 const CASES_TAB_PATH: Record<
   CollectionEntry<'cases'>['data']['service'],
@@ -64,9 +61,6 @@ const CASES_TAB_PATH: Record<
   'vehicle-import': PathBuilder.casesVehicleImport(locale),
 };
 
-// China isn't in countries.json (it's a vehicle-import-only source, not a
-// full active market with its own [country] page) — same special case the
-// vehicle-import china spoke already handles via CHINA_COUNTRY_CODE.
 const caseCountry =
   c.data.country && c.data.country !== CHINA_COUNTRY_CODE
     ? getCountry(c.data.country)
@@ -96,12 +90,8 @@ const hook = excerptFromMarkdown(
   translation?.body ?? c.body ?? '',
   Math.max(156 - caseFacts.length, 60),
 );
-const canonical = `${SITE_URL}${PathBuilder.case(locale, c.id)}`;
 const imageUrl = c.data.image ? `${SITE_URL}${c.data.image.src}` : undefined;
 
-// A case page's most valuable SERP line was just the car name ("BMW X1"),
-// which also collided whenever two clients bought the same model. Year, service
-// and price make it unique and match how people actually search.
 const metaTitle = cc.metaTitleFor({
   car: c.data.car,
   year: String(c.data.year),
@@ -119,8 +109,6 @@ const meta = {
   description: hook
     ? `${hook} ${caseFacts}`
     : `${c.data.car} ${c.data.year}, ${c.data.price.value}. ${cc.realCaseFallback}`,
-  canonical,
-  // Real car photo makes a more compelling share preview than the generic template.
   ogImage: imageUrl,
   ogImageWidth: c.data.image?.width,
   ogImageHeight: c.data.image?.height,
@@ -131,7 +119,6 @@ const schema = generateArticleSchema({
   description: meta.description,
   image: imageUrl,
   datePublished: c.data.date,
-  url: canonical,
 });
 ---
 

@@ -3,6 +3,16 @@ import { createLocaleSet, SOURCE_LOCALE } from '@podbor/i18n';
 export const localeConfig = {
   locales: ['ru', 'sr', 'en'],
   primaryLocale: 'sr',
+  ogLocale: {
+    ru: 'ru_RU',
+    sr: 'sr_RS',
+    en: 'en_US',
+  },
+  ogSuffix: {
+    ru: '-ru',
+    sr: '',
+    en: '-en',
+  },
 } as const;
 
 export const localeSet = createLocaleSet(localeConfig);
@@ -13,6 +23,7 @@ export const {
   TRANSLATABLE_LOCALES,
   isLocale,
   getLocale,
+  localeFrom,
   detectLocale,
 } = localeSet;
 
@@ -25,18 +36,6 @@ export const BCP47_BY_LOCALE: Record<Locale, string> = {
   ru: 'ru-RS',
   sr: 'sr-Latn-RS',
   en: 'en-RS',
-};
-
-export const OG_LOCALE: Record<Locale, string> = {
-  ru: 'ru_RU',
-  sr: 'sr_RS',
-  en: 'en_US',
-};
-
-export const OG_IMAGE: Record<Locale, string> = {
-  sr: '/og.png',
-  ru: '/og-ru.png',
-  en: '/og-en.png',
 };
 
 export const LOCALE_NAME: Record<Locale, string> = {

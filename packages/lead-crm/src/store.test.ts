@@ -7,6 +7,10 @@ import { createLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
 import {
   createLeadStore,
   GHOST_LEAD_RETENTION_MS,
+  postponePatch,
+  resumePatch,
+  statusPatch,
+  wonPatch,
   VISITOR_MERGE_WINDOW_MS,
   type LeadStore,
 } from './store.ts';
@@ -560,6 +564,67 @@ describe('archiveLead / unarchiveLead', () => {
     expect(archived?.archived).toBe(true);
     const restored = await store.unarchiveLead(lead.id);
     expect(restored?.archived).toBe(false);
+  });
+});
+
+describe('status patch builders', () => {
+  const AT = new Date('2026-10-08T10:00:00.000Z');
+
+  beforeEach(() => {
+    vi.useFakeTimers({ now: AT });
+    return () => vi.useRealTimers();
+  });
+
+  async function storedLead(patch: Partial<StoredLead> = {}) {
+    const lead = await store.insertLead(baseData);
+    return { ...lead, ...patch };
+  }
+
+  it('statusPatch stamps the change time', () => {
+    expect(statusPatch('negotiations')).toEqual({
+      status: 'negotiations',
+      statusChangedAt: AT.toISOString(),
+    });
+    expect(statusPatch('lost', new Date(0)).statusChangedAt).toBe(
+      new Date(0).toISOString(),
+    );
+  });
+
+  it('postponePatch and resumePatch round-trip postponedFrom', async () => {
+    const lead = await storedLead({ status: 'negotiations' });
+
+    const postponed = { ...lead, ...postponePatch(lead, '2026-10-20', 'n') };
+
+    expect(postponed).toMatchObject({
+      status: 'postponed',
+      postponedFrom: 'negotiations',
+      remindAt: '2026-10-20',
+      statusChangedAt: AT.toISOString(),
+    });
+    expect(resumePatch(postponed)).toEqual({
+      status: 'negotiations',
+      postponedFrom: null,
+      remindAt: null,
+      statusChangedAt: AT.toISOString(),
+    });
+  });
+
+  it('resumePatch falls back to in_progress without postponedFrom', async () => {
+    const lead = await storedLead({ status: 'postponed', postponedFrom: null });
+
+    expect(resumePatch(lead).status).toBe('in_progress');
+  });
+
+  it('wonPatch appends a positive amount and keeps incomes on zero', async () => {
+    const lead = await storedLead();
+
+    const won = wonPatch(lead, 300);
+    expect(won).toMatchObject({
+      status: 'won',
+      statusChangedAt: AT.toISOString(),
+    });
+    expect(won.incomes?.map((i) => i.amount)).toEqual([300]);
+    expect(wonPatch(lead, 0).incomes).toBe(lead.incomes);
   });
 });
 

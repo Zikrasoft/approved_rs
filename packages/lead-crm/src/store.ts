@@ -1,8 +1,9 @@
 import { z } from 'zod';
 import { format } from 'date-fns';
 import {
+  appendIncome,
   getCommission,
-  hasIncome,
+  hasDealAmount,
   incomeCommission,
   roundMoney,
   unpaidIncomes,
@@ -133,11 +134,35 @@ export function postponePatch(
   note: string,
 ): Partial<StoredLead> {
   return {
-    status: 'postponed',
+    ...statusPatch('postponed'),
     postponedFrom: postponableStatus(lead.status),
     remindAt,
-    statusChangedAt: new Date().toISOString(),
     comment: appendNote(lead.comment, note),
+  };
+}
+
+export function statusPatch(
+  to: LeadStatus,
+  at: Date = new Date(),
+): Pick<StoredLead, 'status' | 'statusChangedAt'> {
+  return { status: to, statusChangedAt: at.toISOString() };
+}
+
+export function resumePatch(lead: StoredLead): Partial<StoredLead> {
+  return {
+    ...statusPatch(lead.postponedFrom ?? 'in_progress'),
+    postponedFrom: null,
+    remindAt: null,
+  };
+}
+
+export function wonPatch(
+  lead: StoredLead,
+  amount: number,
+): Partial<StoredLead> {
+  return {
+    ...statusPatch('won'),
+    incomes: amount > 0 ? appendIncome(lead.incomes, amount) : lead.incomes,
   };
 }
 
@@ -395,11 +420,7 @@ export function createLeadStore({
     },
 
     setStatus(id: number, status: LeadStatus): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({
-        ...l,
-        status,
-        statusChangedAt: new Date().toISOString(),
-      }));
+      return updateOne(id, (l) => ({ ...l, ...statusPatch(status) }));
     },
 
     setPendingPrompt(
@@ -494,10 +515,7 @@ export function createLeadStore({
     resumeLead(id: number): Promise<StoredLead | undefined> {
       return updateOneIfStatus(id, 'postponed', (l) => ({
         ...l,
-        status: l.postponedFrom ?? 'in_progress',
-        postponedFrom: null,
-        remindAt: null,
-        statusChangedAt: new Date().toISOString(),
+        ...resumePatch(l),
       }));
     },
 
@@ -613,7 +631,7 @@ export function createLeadStore({
       const next = await updateLeads((leads) =>
         leads.map((l) =>
           isGhostLead(l, now)
-            ? { ...l, status: 'lost' as const, archived: true, statusChangedAt }
+            ? { ...l, ...statusPatch('lost', now), archived: true }
             : l,
         ),
       );
@@ -623,7 +641,7 @@ export function createLeadStore({
     async getOwedSummary(): Promise<{ rows: OwedRow[]; total: number }> {
       const leads = await readLeads();
       const rows: OwedRow[] = leads
-        .filter(hasIncome)
+        .filter(hasDealAmount)
         .filter((l) => !l.archived)
         .map((l) => {
           const { commission, remaining } = getCommission(l);

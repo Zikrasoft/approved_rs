@@ -3,17 +3,13 @@ import { mapPlaceUrl } from '@podbor/site-kit';
 import { renderBrandLlmsTxt, type LlmsLinkList } from '@podbor/i18n';
 import { SITE_URL, SITE_NAME, GARAGE_ADDRESS } from '@/utils/constants';
 import { shopCatalog } from '@/lib/catalog';
-import { shopTypeKeys } from '@/lib/shopPages';
+import { shopTypes } from '@/lib/shopPages';
 import { shopIndexed } from '@/utils/shopStatus';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { localizedWork, publishedWorks } from '@/utils/works';
 import { PathBuilder } from '@/utils/paths';
-import { getHomeContent } from '@/i18n/content/home';
-import { getPagesContent } from '@/i18n/content/pages';
-import { getServicesContent } from '@/i18n/content/services';
-import { getShopContent } from '@/i18n/content/shop';
-import { getSiteContent } from '@/i18n/content/site';
 import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
+import { content } from '@/i18n/content';
 
 const url = (path: string) => `${SITE_URL}${path}`;
 
@@ -22,7 +18,7 @@ async function shopList(
   heading: string,
 ): Promise<LlmsLinkList[]> {
   if (!shopIndexed()) return [];
-  const shop = getShopContent(locale);
+  const shop = content(locale).shop;
   const { products } = await shopCatalog().catalog(locale);
   return [
     {
@@ -32,7 +28,7 @@ async function shopList(
         href: url(PathBuilder.shop(locale)),
         note: shop.lead,
       },
-      entries: shopTypeKeys(products).map((key) => ({
+      entries: shopTypes(products).map(({ key }) => ({
         label: shop.types[key].name,
         href: url(PathBuilder.shopType(locale, key)),
         note: shop.types[key].lead,
@@ -42,10 +38,10 @@ async function shopList(
 }
 
 export async function generateLlmsTxt(locale: Locale): Promise<string> {
-  const home = getHomeContent(locale);
-  const pages = getPagesContent(locale);
-  const services = getServicesContent(locale);
-  const site = getSiteContent(locale);
+  const home = content(locale).home;
+  const pages = content(locale).pages;
+  const services = content(locale).services;
+  const site = content(locale).site;
   const works = publishedWorks(await getCollection('works'));
 
   return renderBrandLlmsTxt({

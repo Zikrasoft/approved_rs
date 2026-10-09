@@ -4,19 +4,18 @@ import Icon from '@/components/Icon.astro';
 import PageHero from '@/components/PageHero.astro';
 import ShopGate from '@/components/ShopGate.astro';
 import CheckoutForm from '@/components/CheckoutForm.astro';
-import { BCP47_BY_LOCALE } from '@/i18n/config';
-import { localeFrom } from '@/i18n/currentLocale';
-import { getShopContent } from '@/i18n/content/shop';
+import { localeFrom, BCP47_BY_LOCALE } from '@/i18n/config';
 import { GARAGE_ADDRESS } from '@/utils/constants';
 import { localePaths, PathBuilder } from '@/utils/paths';
 import { shopBuilt } from '@/utils/shopStatus';
+import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
   return shopBuilt() ? localePaths() : [];
 }
 
 const locale = localeFrom(Astro.url.pathname);
-const shop = getShopContent(locale);
+const shop = content(locale).shop;
 const services = Object.fromEntries(
   Object.entries(shop.installations).map(([handle, copy]) => [
     handle,

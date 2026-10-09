@@ -1,7 +1,7 @@
 ---
 import { Check } from '@lucide/astro';
 import { LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
-import { SUPPORTED_LOCALES, getLocale, type Locale } from '@/i18n/config';
+import { SUPPORTED_LOCALES, localeFrom, type Locale } from '@/i18n/config';
 import { swapLocale } from '@/utils/paths';
 import CountryPlate from './CountryPlate.astro';
 import Dropdown from './Dropdown.astro';
@@ -16,7 +16,7 @@ interface Props {
 }
 const { variant = 'dropdown' } = Astro.props;
 
-const currentLocale = getLocale(Astro.currentLocale);
+const currentLocale = localeFrom(Astro.url.pathname);
 const pathname = Astro.url.pathname;
 
 const LOCALE_META: Record<Locale, { code: string; native: string }> = {

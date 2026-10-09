@@ -7,31 +7,29 @@ import { withLocales, PathBuilder } from '@/utils/paths';
 import { getCountry } from '@/utils/geo';
 import {
   generateMeta,
+  ogImageFor,
   generateServiceSchema,
   buildLocation,
 } from '@/utils/seo';
-import { getCollection } from 'astro:content';
 import { SITE_URL } from '@/utils/constants';
-import { getFaq } from '@/i18n/content/faq';
-import { getServicesContent } from '@/i18n/content/services';
+import { getCollection } from 'astro:content';
+import { content } from '@/i18n/content';
+import { servicesView } from '@/i18n/content/services';
 
-// Only Serbia: everywhere else the page said nothing a reader could not read
-// on the hub, so the other seven 301 to it (see middleware.ts). Serbia keeps
-// its own page because Serbian plates are a different offer and every buyback
-// case is Serbian.
 export const getStaticPaths = () =>
   withLocales([{ params: { country: 'rs' } }]);
 
 const { locale, country: countryCode } = Astro.params;
 const country = getCountry(countryCode!)!;
-const sc = getServicesContent(locale)['vehicle-buyback'];
+const sc = servicesView(locale)['vehicle-buyback'];
 const location = buildLocation(locale, country);
-const meta = generateMeta('vehicle-buyback', {
-  country,
-  baseUrl: SITE_URL,
-  path: PathBuilder.service(locale, 'vehicle-buyback', countryCode!),
-  locale: locale,
-});
+const meta = {
+  ...generateMeta('vehicle-buyback', {
+    country,
+    locale: locale,
+  }),
+  ogImage: ogImageFor(SITE_URL, 'vehicle-buyback', locale),
+};
 const cases = (await getCollection('cases'))
   .filter(
     (c) =>
@@ -43,7 +41,6 @@ const cases = (await getCollection('cases'))
 const schema = generateServiceSchema(
   `${sc.title} ${location}`,
   country[locale].name,
-  meta.canonical,
 );
 const isSerbia = countryCode === 'rs';
 const description = isSerbia
@@ -91,6 +88,6 @@ const description = isSerbia
       lead={sc.hub.includedLead}
       items={sc.hub.included}
     />
-    <Faq items={getFaq(locale)['vehicle-buyback']} />
+    <Faq items={content(locale).faq['vehicle-buyback']} />
   </Fragment>
 </ServicePageLayout>

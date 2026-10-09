@@ -1,8 +1,8 @@
 ---
 import Icon from './Icon.astro';
 import Cta from './Cta.astro';
-import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
 
 interface Props {
   plans: { name: string; price: string; unit: string; features: string[] }[];
@@ -10,7 +10,7 @@ interface Props {
 }
 const { plans, note } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
+const site = content(locale).site;
 ---
 
 <div class="mt-14 grid gap-4 lg:grid-cols-3">

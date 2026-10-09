@@ -2,8 +2,8 @@
 import Icon from './Icon.astro';
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
-import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
 
 interface Props {
   before: ImageMetadata;
@@ -14,7 +14,7 @@ interface Props {
 
 const { before, after, alt, class: className = '' } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
+const site = content(locale).site;
 ---
 
 <div class={`shell ${className}`}>

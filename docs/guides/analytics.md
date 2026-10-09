@@ -16,8 +16,8 @@ written there once, all three sites take it from there, and exactly that string 
 registered as a goal in Metrika. There should be no `'form_view'` literals in the
 apps.
 
-`packages/site-kit/src/funnel.ts` (`defineFunnelTracking`) wires everything up from
-the markup and is called once from each app's layout. Contact clicks live
+`packages/site-kit/src/funnel.ts` wires everything up from
+the markup and is armed by `bootSiteKit` from each app's layout. Contact clicks live
 separately in `contactClick.ts`, because they also write a lead to the server.
 
 ## Event vocabulary
@@ -66,8 +66,8 @@ component renders it: `hero`, `bar`, `floating`, `footer`, `header`, `thanks` â€
 one word can therefore be stamped by several components (`bar` is every full
 contact bar, wherever it is rendered) and `thanks` is a whole page, because that
 page is one region. The closed set is `CONTACT_PLACEMENTS`
-in `packages/site-kit/src/goals.ts`, stamped through `contactPlacement()` so a
-typo is a build error. It goes on a container, and the tracker reads the nearest
+in `packages/site-kit/src/goals.ts`, stamped through `contactRegion()` in
+`@podbor/site-kit/contact-control` so a typo is a build error. It goes on a container, and the tracker reads the nearest
 one above the tapped control, so one attribute covers a whole bar. A rename of
 the component that renders a region must not move the word, or a year of data
 splits in two. `placement` rides on the existing goal, so there is nothing to
@@ -155,7 +155,7 @@ language banner keeps `from` / `to`, so grouping by `to` would mix locale codes
 into the same report. Apply the standing exclusions from
 [analytics-exclusions.md](analytics-exclusions.md) before reading the numbers.
 
-Nothing from a dev server. All three layouts skip `defineAnalytics` when
+Nothing from a dev server. All three layouts pass `analytics: false` to `bootSiteKit` when
 `import.meta.env.DEV`, so no Metrika script is loaded locally and `reachGoal` is a
 no-op â€” verify an event against a build (`pnpm build`, then
 `pnpm --filter <app> preview`), never against `pnpm dev`. A preview serves the

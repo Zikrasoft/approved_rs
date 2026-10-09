@@ -1,9 +1,8 @@
 ---
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
-import { localeFrom } from '@/i18n/currentLocale';
-import { getPagesContent } from '@/i18n/content/pages';
-import { getSiteContent } from '@/i18n/content/site';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
 import { PathBuilder, localePaths } from '@/utils/paths';
 
 export function getStaticPaths() {
@@ -11,8 +10,8 @@ export function getStaticPaths() {
 }
 
 const locale = localeFrom(Astro.url.pathname);
-const pages = getPagesContent(locale);
-const site = getSiteContent(locale);
+const pages = content(locale).pages;
+const site = content(locale).site;
 ---
 
 <Shell

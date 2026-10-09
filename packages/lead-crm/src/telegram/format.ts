@@ -1,7 +1,7 @@
 import { format, parseISO } from 'date-fns';
 import {
   getCommission,
-  hasIncome,
+  hasDealAmount,
   incomeCommission,
   roundMoney,
   unpaidIncomes,
@@ -36,10 +36,6 @@ export const LEAD_STATUS_ACTIONS = [
   { key: 'lost', emoji: '❌', label: 'Отказ' },
 ] as const;
 export type LeadStatusKey = (typeof LEAD_STATUS_ACTIONS)[number]['key'];
-
-export function isLeadStatusKey(key: string): key is LeadStatusKey {
-  return LEAD_STATUS_ACTIONS.some((s) => s.key === key);
-}
 
 const NEW_STATUS_META = { emoji: '🆕', label: 'Новая' } as const;
 const POSTPONED_STATUS_META = { emoji: '⏸️', label: 'Отложена' } as const;
@@ -268,7 +264,7 @@ function paidStatusMark(
 
 export function formatDealsList(leads: StoredLead[]): string {
   const deals = leads
-    .filter(hasIncome)
+    .filter(hasDealAmount)
     .filter((l) => !l.archived)
     .sort((a, b) => b.id - a.id)
     .slice(0, MAX_LIST_ROWS);
@@ -302,7 +298,7 @@ export function buildStats(leads: StoredLead[], role: Role): string {
   const active = leads.filter((l) => !l.archived);
   const archivedCount = leads.length - active.length;
   const count = (s: LeadStatus) => active.filter((l) => l.status === s).length;
-  const earningLeads = active.filter(hasIncome);
+  const earningLeads = active.filter(hasDealAmount);
   const sum = (pick: (l: StoredLead & { dealAmount: number }) => number) =>
     roundMoney(earningLeads.reduce((acc, l) => acc + pick(l), 0));
 
@@ -658,7 +654,7 @@ export function createFormatter({
         };
       }
 
-      const commission = hasIncome(lead) ? getCommission(lead) : null;
+      const commission = hasDealAmount(lead) ? getCommission(lead) : null;
       const lines = [
         formatLeadText(lead, role),
         ...(commission ? moneyStatusLines(lead, commission) : []),

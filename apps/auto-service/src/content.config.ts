@@ -11,45 +11,6 @@ const translationSchema = z
   })
   .optional();
 
-const products = defineCollection({
-  loader: glob({ pattern: '*/index.md', base: './src/content/products' }),
-  schema: ({ image }) =>
-    z.object({
-      title: z.string().trim().min(1),
-      translations: z
-        .object({ sr: translationSchema, en: translationSchema })
-        .optional(),
-      brand: z.string(),
-      price: z.number().positive(),
-      capacityAh: z.number().positive(),
-      crankingA: z.number().positive(),
-      polarity: z.enum(['left', 'right']),
-      lengthMm: z.number().positive(),
-      widthMm: z.number().positive(),
-      heightMm: z.number().positive(),
-      warrantyMonths: z.number().positive(),
-      inStock: z.boolean().default(true),
-      image: image(),
-      fitment: z
-        .array(
-          z
-            .object({
-              make: z.string(),
-              model: z.string(),
-              yearFrom: z.number().int().min(1950).max(2100),
-              yearTo: z.number().int().min(1950).max(2100),
-            })
-            .strict()
-            .refine((entry) => entry.yearTo >= entry.yearFrom, {
-              message: 'yearTo must not be earlier than yearFrom',
-            }),
-        )
-        .default([]),
-      published: z.boolean().default(true),
-      translatedFrom: z.string().optional(),
-    }),
-});
-
 const works = defineCollection({
   loader: glob({ pattern: '*/index.md', base: './src/content/works' }),
   schema: ({ image }) =>
@@ -69,4 +30,4 @@ const works = defineCollection({
     }),
 });
 
-export const collections = { products, works };
+export const collections = { works };

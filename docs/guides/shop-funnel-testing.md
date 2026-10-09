@@ -71,7 +71,12 @@ is why a green run is not a reason to stop walking the forms.
 The unit spec can show an aged Order being cancelled but structurally cannot
 show an Order _inside_ the window surviving: the query does the filtering and a
 mocked query returns whatever the test hands it. `cancelOrderWorkflow` does not
-come back, so the untested half was the dangerous one.
+come back, so the untested half was the dangerous one. The shape of what it
+hands back is no longer free: `selectAll` parses every row against the read's
+schema, logs a row that misfits as `Uncollected order skipped: …` and leaves
+that Order alone while the rest are released, and `apps/medusa/src/lib/__tests__/reads.unit.spec.ts` holds each
+read's schema against a row shaped the way `query.graph` returns it. The
+filtering is still only provable here.
 
 Four real Orders are placed through the full store checkout chain on
 `bosch-s4-024`:
@@ -108,10 +113,10 @@ with no `refused cancellation` line, so `paid` and `fulfilled` were skipped by
 - **Nothing about the boundary.** `RESERVE_DAYS + 1` and "now" sit comfortably
   either side, so an off-by-one in the cutoff arithmetic (hours versus days,
   `$lt` versus `$lte`) survives this layer.
-- **Nothing about scale.** Four Orders, so `queryAll`'s `QUERY_PAGE = 200`
+- **Nothing about scale.** Four Orders, so `selectAll`'s `QUERY_PAGE = 200`
   paging loop never takes a second page.
-- **The unreadable-amount path stays mocked.** `money()` throwing is reachable
-  only from a corrupt `captured_amount`, which the real database will not store,
+- **The unreadable-amount path stays mocked.** `moneyField` refusing a row is
+  reachable only from a corrupt `captured_amount`, which the real database will not store,
   so `113b3bc`'s per-Order survival remains a unit assertion.
 - **Inventory arithmetic.** The assertion is scoped to those two Orders' own
   line items, so a cancellation that removed the reservation without crediting
@@ -404,8 +409,8 @@ allowed to find anything.
       not a script, so `medusa exec` cannot drive it — its default export takes
       the container, not `{ container }`. Watch the container log instead of
       inventing a hand-run path.
-- [ ] Read the log: exactly `Uncollected orders: 1 order(s) cancelled`, and no
-      `refused cancellation` line.
+- [ ] Read the log: exactly `Uncollected orders: 1 of 1 cancelled`, and no
+      `refused cancellation` or `Uncollected order skipped` line.
 - [ ] In the admin: the aged Order is `canceled`, the second is untouched, and
       the aged Order's stock is back on the shelf.
 - [ ] Cancel the second Order by hand afterwards, so the rehearsal leaves no

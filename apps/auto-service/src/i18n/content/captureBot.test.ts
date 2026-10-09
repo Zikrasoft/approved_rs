@@ -1,19 +1,19 @@
 import { describe, it, expect } from 'vitest';
-import { getCaptureBotCopy } from './captureBot';
 import { SUPPORTED_LOCALES } from '@/i18n/config';
+import { content } from '@/i18n/content';
 
-describe('getCaptureBotCopy', () => {
+describe('captureBot copy', () => {
   it('has every line the capture dialog sends, in every locale', () => {
     for (const locale of SUPPORTED_LOCALES) {
-      const copy = getCaptureBotCopy(locale);
+      const copy = content(locale).captureBot;
       for (const line of Object.values(copy)) expect(line.trim()).not.toBe('');
     }
   });
 
   it('is written for each language rather than copied from ru', () => {
     for (const locale of SUPPORTED_LOCALES.filter((l) => l !== 'ru')) {
-      expect(getCaptureBotCopy(locale).lookingFor).not.toBe(
-        getCaptureBotCopy('ru').lookingFor,
+      expect(content(locale).captureBot.lookingFor).not.toBe(
+        content('ru').captureBot.lookingFor,
       );
     }
   });

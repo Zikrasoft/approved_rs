@@ -1,11 +1,11 @@
 ---
-import { localeFrom } from '@/i18n/currentLocale';
-import { getServicesContent } from '@/i18n/content/services';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
 
 const locale = localeFrom(Astro.url.pathname);
-const services = getServicesContent(locale);
+const services = content(locale).services;
 
 const FEATURED = 'paint-protection-film';
 

@@ -5,19 +5,18 @@ import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
 import ContactChannels from '@/components/ContactChannels.astro';
 import MapEmbed from '@/components/MapEmbed.astro';
-import { localeFrom } from '@/i18n/currentLocale';
-import { getPagesContent } from '@/i18n/content/pages';
-import { getSiteContent } from '@/i18n/content/site';
+import { localeFrom } from '@/i18n/config';
 import { localePaths, PathBuilder } from '@/utils/paths';
 import { GARAGE_ADDRESS } from '@/utils/constants';
+import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
   return localePaths();
 }
 
 const locale = localeFrom(Astro.url.pathname);
-const pages = getPagesContent(locale);
-const site = getSiteContent(locale);
+const pages = content(locale).pages;
+const site = content(locale).site;
 
 const mapLink = mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid);
 ---

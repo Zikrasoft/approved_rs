@@ -8,9 +8,13 @@
     ".": "./src/index.ts",
     "./browser": "./src/browser.ts",
     "./contact-links": "./src/contactLinks.ts",
+    "./contact-control": "./src/contactControl.ts",
     "./format-phone": "./src/formatPhone.ts",
     "./contact-preference": "./src/contactPreference.ts",
-    "./public-env": "./src/publicEnv.ts"
+    "./lead-form": "./src/leadForm.ts",
+    "./public-env": "./src/publicEnv.ts",
+    "./redirects": "./src/redirects.ts",
+    "./og": "./src/ogImage.ts"
   },
   "scripts": {
     "test": "vitest run --coverage",
@@ -20,6 +24,8 @@
     "@podbor/lead-crm": "workspace:*",
     "libphonenumber-js": "1.13.12",
     "marked": "18.0.11",
+    "path-to-regexp": "6.1.0",
+    "playwright-core": "1.63.0",
     "sanitize-html": "2.17.7",
     "zod": "4.5.4"
   },

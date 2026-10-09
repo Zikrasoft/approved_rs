@@ -9,52 +9,52 @@ import {
 import { z } from 'zod';
 
 import { CHANNEL_FIELD, COMMENT_FIELD, fullName } from '../api/store/contact';
-import { money } from './query';
+import {
+  metadataField,
+  moneyField,
+  nullableText,
+  quantityField,
+  typeValueField,
+} from './row-schema';
 import { shopLocale } from './shop';
 
-export const ORDER_HOOK_FIELDS = [
-  'id',
-  'display_id',
-  'email',
-  'locale',
-  'total',
-  'metadata',
-  'shipping_address.first_name',
-  'shipping_address.last_name',
-  'shipping_address.phone',
-  'items.product_id',
-  'items.product_title',
-  'items.quantity',
-  'items.unit_price',
-];
+export const hookOrderSchema = z.object({
+  id: z.string(),
+  display_id: z.union([z.number(), z.string()]),
+  email: nullableText,
+  locale: nullableText,
+  total: moneyField,
+  metadata: metadataField,
+  shipping_address: z
+    .object({
+      first_name: nullableText,
+      last_name: nullableText,
+      phone: nullableText,
+    })
+    .nullish(),
+  items: z
+    .array(
+      z
+        .object({
+          product_id: nullableText,
+          product_title: nullableText,
+          quantity: quantityField,
+          unit_price: moneyField,
+        })
+        .nullable(),
+    )
+    .nullish(),
+});
 
-export type HookOrder = {
-  id: string;
-  display_id: number | string;
-  email?: string | null;
-  locale?: string | null;
-  total: unknown;
-  metadata?: Record<string, unknown> | null;
-  shipping_address?: {
-    first_name?: string | null;
-    last_name?: string | null;
-    phone?: string | null;
-  } | null;
-  items?:
-    | ({
-        product_id?: string | null;
-        product_title?: string | null;
-        quantity: unknown;
-        unit_price: unknown;
-      } | null)[]
-    | null;
-};
+export type HookOrder = z.infer<typeof hookOrderSchema>;
 
-export type HookProduct = {
-  id: string;
-  title: string;
-  type?: { value?: string | null } | null;
-};
+export const hookProductSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  type: typeValueField,
+});
+
+export type HookProduct = z.infer<typeof hookProductSchema>;
 
 const extrasSchema = z.object({
   [COMMENT_FIELD]: z.string().optional(),
@@ -100,13 +100,13 @@ export function buildOrderHookPayload(
       return [
         {
           title,
-          quantity: money(item.quantity),
-          unitPrice: money(item.unit_price),
+          quantity: item.quantity,
+          unitPrice: item.unit_price,
           isService: product?.type?.value === SERVICE_TYPE,
         },
       ];
     }),
-    total: money(order.total),
+    total: order.total,
     comment: comment || undefined,
     adminUrl: `${adminUrl}/orders/${order.id}`,
   });

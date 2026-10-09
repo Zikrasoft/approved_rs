@@ -1,7 +1,7 @@
 ---
 import { X } from '@lucide/astro';
 import LeadForm from './LeadForm.astro';
-import { getLocale } from '@/i18n/config';
+import { localeFrom } from '@/i18n/config';
 import { getI18n } from '@/i18n/getI18n';
 import {
   DATA_OPEN_LEAD_MODAL,
@@ -25,7 +25,7 @@ const {
   commentLabel,
   commentPlaceholder,
 } = Astro.props;
-const locale = getLocale(Astro.currentLocale);
+const locale = localeFrom(Astro.url.pathname);
 const closeLabel = getI18n(locale).common.closeLabel;
 ---
 
@@ -81,9 +81,7 @@ const closeLabel = getI18n(locale).common.closeLabel;
     const { trigger } = (event as CustomEvent<ModalOpenDetail>).detail;
     const tab = trigger.getAttribute(DATA_OPEN_LEAD_MODAL);
     const tabButton = tab
-      ? host.querySelector<HTMLElement>(
-          `.pill-tab[data-tab="${CSS.escape(tab)}"]`,
-        )
+      ? host.querySelector<HTMLElement>(`[data-tab="${CSS.escape(tab)}"]`)
       : null;
     if (tabButton) tabButton.click();
     const form = host.querySelector<HTMLFormElement>('[data-lead-form]');
@@ -97,8 +95,9 @@ const closeLabel = getI18n(locale).common.closeLabel;
         '';
     }
     host
-      .querySelector('.contact-panel:not(.hidden)')
-      ?.querySelector<HTMLInputElement>('input')
+      .querySelector<HTMLInputElement>(
+        '[data-panel]:not([data-tab]):not([hidden]) input',
+      )
       ?.focus();
     reachGoal(GOALS.leadModalOpen, {
       tab: tabButton ? tab : 'default',

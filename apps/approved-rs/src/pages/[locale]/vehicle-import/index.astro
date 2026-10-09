@@ -5,8 +5,8 @@ import heroPhoto from '@/assets/service-import.jpg';
 import PageSection from '@/components/PageSection.astro';
 import StepsList from '@/components/StepsList.astro';
 import IncludedGrid from '@/components/IncludedGrid.astro';
-import { getFaq } from '@/i18n/content/faq';
-import { getServicesContent } from '@/i18n/content/services';
+import { content } from '@/i18n/content';
+import { servicesView } from '@/i18n/content/services';
 import { withLocales, PathBuilder } from '@/utils/paths';
 import { getCountry } from '@/utils/geo';
 import CountryPlate from '@/components/CountryPlate.astro';
@@ -23,17 +23,13 @@ import type { VehicleImportSpoke } from '@/utils/vehicleImportCrossSell';
 export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const { locale } = Astro.params;
-const sc = getServicesContent(locale)['vehicle-import'];
+const sc = servicesView(locale)['vehicle-import'];
 const pc = sc.hub;
 const meta = {
   title: `${pc.metaTitle} | ${SITE_NAME}`,
   description: pc.metaDescription,
-  canonical: `${SITE_URL}${PathBuilder.vehicleImportHub(locale)}`,
   ogImage: placeholderOgImage(SITE_URL, locale),
 };
-// Explicit — every real spoke this hub fans out to (Germany + the EU
-// whitelist + China), not "every active country" — countries.json can grow
-// with destination-only markets (e.g. Portugal) that aren't sourcing spokes.
 const sourceNames = [
   getCountry('de')![locale].name,
   ...VEHICLE_IMPORT_EU_SOURCE_CODES.map(
@@ -44,16 +40,12 @@ const sourceNames = [
 const schema = generateServiceSchema(
   `${pc.title} ${pc.titleHighlight}`,
   sourceNames,
-  meta.canonical,
 );
 
 const cases = (await getCollection('cases'))
   .filter((c) => c.data.published && c.data.service === 'vehicle-import')
   .slice(0, 6);
 
-// Germany isn't its own hub card anymore — it lives one level down, inside
-// the Europe spoke's source-country chips (see eu/index.astro) — since the
-// /eu/de/ URL move already nests it under "Europe" there.
 const cards: {
   slug: VehicleImportSpoke;
   title: string;
@@ -124,7 +116,7 @@ const cards: {
       items={pc.included}
     />
 
-    <Faq items={getFaq(locale)['vehicle-import']} />
+    <Faq items={content(locale).faq['vehicle-import']} />
   </Fragment>
 </ServicePageLayout>
 

@@ -1,5 +1,4 @@
 ---
-import { productType } from '@podbor/shop-catalog/browser';
 import { withPlaceholder } from '@podbor/i18n';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
@@ -7,23 +6,21 @@ import ShopGate from '@/components/ShopGate.astro';
 import ShopFilter from '@/components/ShopFilter.astro';
 import ProductGrid from '@/components/ProductGrid.astro';
 import Icon from '@/components/Icon.astro';
-import { BCP47_BY_LOCALE, PRIMARY_LOCALE } from '@/i18n/config';
-import { localeFrom } from '@/i18n/currentLocale';
-import { getShopContent } from '@/i18n/content/shop';
-import { getSiteContent } from '@/i18n/content/site';
+import { localeFrom, PRIMARY_LOCALE } from '@/i18n/config';
 import { shopCatalog } from '@/lib/catalog';
-import { formatValue, specCopy } from '@/lib/formatSpec';
-import { landingProducts, landingsFor, shopTypeKeys } from '@/lib/shopPages';
+import { landingProducts, landingsFor, shopTypes } from '@/lib/shopPages';
+import { typeView } from '@/lib/typeView';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { shopBuilt, shopIndexed } from '@/utils/shopStatus';
+import { content } from '@/i18n/content';
 
 export async function getStaticPaths() {
   if (!shopBuilt()) return [];
   const { products } = await shopCatalog().catalog(PRIMARY_LOCALE);
   return withLocales(
-    shopTypeKeys(products).flatMap((type) =>
+    shopTypes(products).flatMap((type) =>
       landingsFor(products, type).map((landing) => ({
-        params: { type, landing: landing.slug },
+        params: { type: type.key, landing: landing.slug },
         props: { key: landing.key, value: landing.value },
       })),
     ),
@@ -31,21 +28,16 @@ export async function getStaticPaths() {
 }
 
 const { key, value } = Astro.props;
-const typeKey = Astro.params.type!;
 const landingSlug = Astro.params.landing!;
 const locale = localeFrom(Astro.url.pathname);
-const shop = getShopContent(locale);
-const site = getSiteContent(locale);
-const type = productType(typeKey)!;
-const copy = shop.types[typeKey];
-const label = formatValue(
-  type.fields.find((field) => field.key === key)!,
-  value,
-  specCopy(shop, typeKey, BCP47_BY_LOCALE[locale]),
-);
+const shop = content(locale).shop;
+const site = content(locale).site;
+const view = typeView(Astro.params.type!, locale);
+const { type, copy } = view;
+const label = view.formatValue(key, value);
 const fill = (template: string) => withPlaceholder(template, 'value', label);
 const { products: all } = await shopCatalog().catalog(locale);
-const products = landingProducts(all, typeKey, { key, value });
+const products = landingProducts(all, type, { key, value });
 const heading = fill(copy.landing.heading);
 ---
 
@@ -61,19 +53,19 @@ const heading = fill(copy.landing.heading);
       lead={fill(copy.landing.lead)}
       crumbs={[
         { href: PathBuilder.shop(locale), label: site.nav.shop },
-        { href: PathBuilder.shopType(locale, typeKey), label: copy.name },
+        { href: PathBuilder.shopType(locale, type.key), label: copy.name },
         {
-          href: PathBuilder.shopLanding(locale, typeKey, landingSlug),
+          href: PathBuilder.shopLanding(locale, type.key, landingSlug),
           label: heading,
         },
       ]}
     />
     <section class="wrap flex flex-col gap-6 py-band md:py-band-lg">
-      <ShopFilter typeKey={typeKey} products={products} omit={key}>
+      <ShopFilter type={type} products={products} omit={key}>
         <ProductGrid products={products} />
       </ShopFilter>
       <a
-        href={PathBuilder.shopType(locale, typeKey)}
+        href={PathBuilder.shopType(locale, type.key)}
         class="btn btn-secondary w-full sm:w-fit"
       >
         {withPlaceholder(shop.allOfType, 'type', copy.name)}

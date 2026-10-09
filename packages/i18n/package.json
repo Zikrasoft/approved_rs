@@ -21,7 +21,8 @@
       },
       "default": "./src/section.ts"
     },
-    "./translate/testing": "./src/translate/mockOpenAiFetch.ts"
+    "./translate/testing": "./src/translate/mockOpenAiFetch.ts",
+    "./testing": "./src/describeSectionRegistry.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.cjs.json && node -e \"require('node:fs').writeFileSync('dist/cjs/package.json','{\\\"type\\\":\\\"commonjs\\\"}')\"",

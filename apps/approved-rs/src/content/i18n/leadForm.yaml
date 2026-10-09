@@ -15,9 +15,7 @@ consentBefore: 'Согласен с '
 consentLinkText: политикой конфиденциальности
 consentError: Необходимо ваше согласие
 submitLabel: Рассчитать стоимость
-errorTelegramRequired: Введите Telegram
 errorTelegramFormat: 'Формат: @username или номер телефона'
-errorPhoneRequired: Введите номер телефона
 errorPhoneInvalid: Проверьте номер телефона
 errorSubmit: Заявка не ушла. Проверьте связь и попробуйте ещё раз
 translations:
@@ -39,9 +37,7 @@ translations:
     consentLinkText: privacy policy
     consentError: Your consent is required
     submitLabel: Get a Quote
-    errorTelegramRequired: Enter your Telegram
     errorTelegramFormat: 'Format: @username or phone number'
-    errorPhoneRequired: Enter your phone number
     errorPhoneInvalid: Check your phone number
     errorSubmit: The submission failed. Please check your connection and try again.
   sr:
@@ -62,9 +58,7 @@ translations:
     consentLinkText: politikom privatnosti
     consentError: Potrebna je vaša saglasnost
     submitLabel: Izračunaj cenu
-    errorTelegramRequired: Unesite Telegram
     errorTelegramFormat: 'Format: @username ili broj telefona'
-    errorPhoneRequired: Unesite broj telefona
     errorPhoneInvalid: Proverite broj telefona
     errorSubmit: Zahtjev nije poslat. Proverite vezu i pokušajte ponovo
   es:
@@ -85,9 +79,7 @@ translations:
     consentLinkText: política de privacidad
     consentError: Tu consentimiento es necesario
     submitLabel: Calcular el precio
-    errorTelegramRequired: Introduce tu Telegram
     errorTelegramFormat: 'Formato: @username o número de teléfono'
-    errorPhoneRequired: Introduce tu número de teléfono
     errorPhoneInvalid: Revisa tu número de teléfono
     errorSubmit: La solicitud no se envió. Verifique la conexión y pruebe de nuevo.
   de:
@@ -108,9 +100,7 @@ translations:
     consentLinkText: Datenschutzerklärung
     consentError: Ihre Zustimmung ist erforderlich
     submitLabel: Preis berechnen
-    errorTelegramRequired: Bitte geben Sie Ihren Telegram-Namen ein
     errorTelegramFormat: 'Format: @Benutzername oder Telefonnummer'
-    errorPhoneRequired: Bitte geben Sie Ihre Telefonnummer ein
     errorPhoneInvalid: Bitte überprüfen Sie Ihre Telefonnummer
     errorSubmit: Die Anfrage konnte nicht gesendet werden. Bitte überprüfen Sie die Verbindung und versuchen Sie es erneut.
-translatedFrom: 833f69c120134e64
+translatedFrom: f19e1d1a771f6292

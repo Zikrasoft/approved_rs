@@ -1,5 +1,7 @@
 ---
+import { contactCta } from '@podbor/site-kit/contact-control';
 import { getCollection } from 'astro:content';
+import { faqPageSchema } from '@podbor/site-kit';
 import Shell from '@/layouts/Shell.astro';
 import Hero from '@/components/Hero.astro';
 import Marquee from '@/components/Marquee.astro';
@@ -14,9 +16,8 @@ import Faq from '@/components/Faq.astro';
 import LeadForm from '@/components/LeadForm.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import Cta from '@/components/Cta.astro';
-import { localeFrom } from '@/i18n/currentLocale';
-import { getHomeContent } from '@/i18n/content/home';
-import { getSiteContent } from '@/i18n/content/site';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
 import { PathBuilder, localePaths } from '@/utils/paths';
 import { localizedWork, publishedWorks } from '@/utils/works';
 import { HERO_SIZES, getHeroPicture } from '@/utils/heroImage';
@@ -26,23 +27,15 @@ export function getStaticPaths() {
 }
 
 const locale = localeFrom(Astro.url.pathname);
-const home = getHomeContent(locale);
-const site = getSiteContent(locale);
+const home = content(locale).home;
+const site = content(locale).site;
 
 const heroPicture = await getHeroPicture();
 const works = publishedWorks(await getCollection('works'));
 const featured = works.slice(0, 3);
 const comparable = works.find((w) => w.data.beforeImage);
 
-const faqSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: home.faq.map((item) => ({
-    '@type': 'Question',
-    name: item.q,
-    acceptedAnswer: { '@type': 'Answer', text: item.a },
-  })),
-};
+const faqSchema = faqPageSchema(home.faq);
 ---
 
 <Shell
@@ -80,7 +73,7 @@ const faqSchema = {
     </div>
   </section>
 
-  <section class="wrap mt-32 lg:hidden" data-contact-cta>
+  <section class="wrap mt-32 lg:hidden" {...contactCta}>
     <div class="shell">
       <div class="core flex flex-col gap-6 p-6">
         <h2 class="text-big">{site.form.heading}</h2>

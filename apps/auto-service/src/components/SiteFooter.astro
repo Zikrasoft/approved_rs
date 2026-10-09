@@ -1,22 +1,26 @@
 ---
 import Icon from './Icon.astro';
 import Wordmark from './Wordmark.astro';
-import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
-import { getServicesContent } from '@/i18n/content/services';
+import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { GARAGE_ADDRESS, SITE_NAME } from '@/utils/constants';
 import { devOnly, shopBuilt } from '@/utils/shopStatus';
-import { contactChannels } from '@/utils/contactLinks';
-import { contactPlacement } from '@podbor/site-kit';
+import ContactControl from './ContactControl.astro';
+import { contactRegion } from '@podbor/site-kit/contact-control';
+import { content } from '@/i18n/content';
 
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
-const services = getServicesContent(locale);
+const site = content(locale).site;
+const services = content(locale).services;
 const year = new Date().getFullYear();
 
-const channels = contactChannels(site, locale);
+const channels = [
+  { icon: 'phone', label: site.channels.call, track: 'phone' },
+  { icon: 'whatsapp', label: site.channels.whatsapp, track: 'whatsapp' },
+  { icon: 'viber', label: site.channels.viber, track: 'viber' },
+  { icon: 'telegram', label: site.channels.telegram, track: 'telegram' },
+] as const;
 ---
 
 <footer class="mt-20 border-t border-line bg-card">
@@ -77,31 +81,21 @@ const channels = contactChannels(site, locale);
       >
         {site.footer.contactHeading}
       </span>
-      <ul
-        class="flex flex-col"
-        data-contact-order
-        {...contactPlacement('footer')}
-      >
+      <ul class="flex flex-col" data-contact-order {...contactRegion('footer')}>
         {
           channels.map((channel) => (
-            <li
-              data-channel={channel.track}
-              class:list={[channel.track === 'phone' && 'pointer-fine:hidden!']}
+            <ContactControl
+              channel={channel.track}
+              listItem
+              class="link-muted group flex min-h-11 items-center gap-2.5"
             >
-              <a
-                href={channel.href}
-                data-contact-channel={channel.track}
-                rel="noopener"
-                class="link-muted group flex min-h-11 items-center gap-2.5"
-              >
-                <Icon
-                  name={channel.icon}
-                  size={16}
-                  class="shrink-0 text-muted transition-colors duration-150 group-hover:text-signal group-focus-visible:text-signal"
-                />
-                <span class="spec">{channel.label}</span>
-              </a>
-            </li>
+              <Icon
+                name={channel.icon}
+                size={16}
+                class="shrink-0 text-muted transition-colors duration-150 group-hover:text-signal group-focus-visible:text-signal"
+              />
+              <span class="spec">{channel.label}</span>
+            </ContactControl>
           ))
         }
       </ul>

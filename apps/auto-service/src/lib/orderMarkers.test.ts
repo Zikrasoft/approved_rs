@@ -3,7 +3,10 @@ import { afterAll, describe, expect, it, vi } from 'vitest';
 const local = vi.hoisted(() => ({
   dir: `${process.env.TMPDIR?.replace(/\/$/, '') ?? '/tmp'}/carlab-markers-${process.pid}`,
 }));
-vi.mock('@podbor/lead-crm', () => ({ LOCAL_DATA_DIR: local.dir }));
+vi.mock('@podbor/lead-crm', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@podbor/lead-crm')>()),
+  LOCAL_DATA_DIR: local.dir,
+}));
 
 const { orderMarkers } = await import('./orderMarkers');
 

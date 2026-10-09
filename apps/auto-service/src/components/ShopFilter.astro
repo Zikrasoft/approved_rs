@@ -1,39 +1,29 @@
 ---
-import { facetIndex, productType } from '@podbor/shop-catalog/browser';
-import { BCP47_BY_LOCALE } from '@/i18n/config';
-import { localeFrom } from '@/i18n/currentLocale';
-import { getShopContent } from '@/i18n/content/shop';
+import type { ProductTypeDef } from '@podbor/shop-catalog/browser';
+import { localeFrom, BCP47_BY_LOCALE } from '@/i18n/config';
 import type { CatalogProduct } from '@/lib/catalog';
-import { facetTypeDef } from '@/lib/facetTypeDef';
-import { optionLabel, specCopy } from '@/lib/formatSpec';
+import { filterDef, typeView } from '@/lib/typeView';
+import { content } from '@/i18n/content';
 
 interface Props {
-  typeKey: string;
+  type: ProductTypeDef;
   products: CatalogProduct[];
   omit?: string;
 }
 
-const { typeKey, products, omit } = Astro.props;
+const { type, products, omit } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const shop = getShopContent(locale);
-const type = productType(typeKey)!;
-const copy = specCopy(shop, typeKey, BCP47_BY_LOCALE[locale]);
-const facets = facetIndex(
-  type,
+const shop = content(locale).shop;
+const view = typeView(type, locale);
+const facets = view.facets(
   products.map((product) => product.spec),
-).filter((facet) => facet.key !== omit);
-const fieldOf = (key: string) =>
-  type.fields.find((field) => field.key === key)!;
-const unitOf = (key: string) => {
-  const field = fieldOf(key);
-  return field.kind === 'number' ? copy.units[field.unit] : '';
-};
-const typeDef = facetTypeDef(type);
+  omit,
+);
 ---
 
 <shop-filter
-  data-type={typeKey}
-  data-type-def={JSON.stringify(typeDef)}
+  data-type={type.key}
+  data-filter-def={JSON.stringify(filterDef(type))}
   data-bcp47={BCP47_BY_LOCALE[locale]}
   data-count-forms={JSON.stringify(shop.matchCount)}
   class="flex flex-col gap-5"
@@ -44,9 +34,7 @@ const typeDef = facetTypeDef(type);
       facets.map((facet) =>
         facet.kind === 'options' ? (
           <fieldset class="m-0 flex min-w-0 flex-col gap-1 border-0 p-0">
-            <legend class="field-label p-0">
-              {copy.type.fields[facet.key].label}
-            </legend>
+            <legend class="field-label p-0">{view.label(facet.key)}</legend>
             {facet.options.map((choice) => (
               <label class="flex min-h-11 items-center gap-2.5 text-sm text-ink-2">
                 <input
@@ -56,7 +44,7 @@ const typeDef = facetTypeDef(type);
                   class="size-4 shrink-0 accent-signal"
                 />
                 <span>
-                  {optionLabel(fieldOf(facet.key), choice.value, copy)}
+                  {view.optionLabel(facet.key, choice.value)}
                   <span class="spec text-xs text-muted"> {choice.count}</span>
                 </span>
               </label>
@@ -65,7 +53,7 @@ const typeDef = facetTypeDef(type);
         ) : (
           <fieldset class="m-0 flex min-w-0 flex-col gap-1 border-0 p-0">
             <legend class="field-label p-0">
-              {`${copy.type.fields[facet.key].label}, ${unitOf(facet.key)}`}
+              {`${view.label(facet.key)}, ${view.unit(facet.key)}`}
             </legend>
             <div class="flex gap-2">
               {(['min', 'max'] as const).map((bound) => (

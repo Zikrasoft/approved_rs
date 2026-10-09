@@ -2,14 +2,24 @@ export const SOURCE_LOCALE = 'ru';
 
 export type SourceLocale = typeof SOURCE_LOCALE;
 
+export interface PageHeadInput {
+  title: string;
+  description: string;
+  ogImage?: string;
+}
+
 export interface LocaleSetOptions<L extends string, P extends L> {
   locales: readonly L[];
   primaryLocale: P;
+  ogLocale: Readonly<Record<L, string>>;
+  ogSuffix: Readonly<Record<L, string>>;
 }
 
 export function createLocaleSet<L extends string, P extends L>({
   locales,
   primaryLocale,
+  ogLocale,
+  ogSuffix,
 }: LocaleSetOptions<L, P>) {
   if (locales.length === 0) {
     throw new Error('[i18n] locales must not be empty');
@@ -25,9 +35,35 @@ export function createLocaleSet<L extends string, P extends L>({
     );
   }
 
+  for (const [name, map] of Object.entries({ ogLocale, ogSuffix })) {
+    const missing = locales.filter((l) => !Object.hasOwn(map, l));
+    if (missing.length) {
+      throw new Error(`[i18n] ${name} has no entry for ${missing.join(', ')}`);
+    }
+  }
+
   const translatable = locales.filter(
     (l): l is Exclude<L, SourceLocale> => l !== SOURCE_LOCALE,
   );
+
+  const alternateLinks = (
+    siteUrl: string,
+    pathname: string,
+  ): { hreflang: string; href: string }[] => {
+    const segments = pathname.split('/').filter(Boolean);
+    const rest = segments.slice(1).join('/');
+    const suffix = rest ? `/${rest}/` : '/';
+
+    const links = locales.map((locale) => ({
+      hreflang: locale as string,
+      href: `${siteUrl}/${locale}${suffix}`,
+    }));
+    links.push({
+      hreflang: 'x-default',
+      href: `${siteUrl}/${primaryLocale}${suffix}`,
+    });
+    return links;
+  };
 
   const isLocale = (value: string): value is L =>
     (locales as readonly string[]).includes(value);
@@ -42,6 +78,11 @@ export function createLocaleSet<L extends string, P extends L>({
       return currentLocale && isLocale(currentLocale)
         ? currentLocale
         : primaryLocale;
+    },
+
+    localeFrom(pathname: string): L {
+      const first = pathname.split('/').filter(Boolean)[0];
+      return first && isLocale(first) ? first : primaryLocale;
     },
 
     detectLocale(
@@ -70,23 +111,23 @@ export function createLocaleSet<L extends string, P extends L>({
       return primaryLocale;
     },
 
-    getAlternateLinks(
-      siteUrl: string,
-      pathname: string,
-    ): { hreflang: string; href: string }[] {
-      const segments = pathname.split('/').filter(Boolean);
-      const rest = segments.slice(1).join('/');
-      const suffix = rest ? `/${rest}/` : '/';
-
-      const links = locales.map((locale) => ({
-        hreflang: locale as string,
-        href: `${siteUrl}/${locale}${suffix}`,
-      }));
-      links.push({
-        hreflang: 'x-default',
-        href: `${siteUrl}/${primaryLocale}${suffix}`,
-      });
-      return links;
+    createPageHead(siteUrl: string) {
+      return (
+        locale: L,
+        pathname: string,
+        { title, description, ogImage }: PageHeadInput,
+      ) => {
+        const path = pathname === '/' ? `/${locale}/` : pathname;
+        return {
+          title,
+          description,
+          canonical: new URL(path, siteUrl).href,
+          alternates: alternateLinks(siteUrl, path),
+          ogLocale: ogLocale[locale],
+          ogImage:
+            ogImage ?? new URL(`/og${ogSuffix[locale]}.png`, siteUrl).href,
+        };
+      };
     },
   };
 }

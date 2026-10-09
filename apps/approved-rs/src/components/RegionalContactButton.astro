@@ -1,9 +1,8 @@
 ---
-import Button from './Button.astro';
+import ContactControl from './ContactControl.astro';
 import ContactIcon from './ContactIcon.astro';
-import { messengerHrefs } from '@/utils/messengerHrefs';
-import { getServicesContent } from '@/i18n/content/services';
-import { getLocale } from '@/i18n/config';
+import { servicesView } from '@/i18n/content/services';
+import { localeFrom } from '@/i18n/config';
 
 interface Props {
   service?: string;
@@ -11,36 +10,30 @@ interface Props {
   class?: string;
 }
 
-const locale = getLocale(Astro.currentLocale);
-const cc = getServicesContent(locale).caseChrome;
+const cc = servicesView(localeFrom(Astro.url.pathname)).caseChrome;
 const { service, variant = 'primary', class: className } = Astro.props;
-const messenger = messengerHrefs(locale, service);
 ---
 
 <div data-primary-contact class="contents">
-  <Button
+  <ContactControl
+    channel="telegram"
+    {service}
     {variant}
     data-primary-channel="telegram"
-    data-contact-channel="telegram"
-    href={messenger.telegram}
-    target="_blank"
-    rel="noopener"
     class={className}
   >
     <ContactIcon channel="telegram" size={16} />
     {cc.ctaButtonLabel}
-  </Button>
-  <Button
+  </ContactControl>
+  <ContactControl
+    channel="whatsapp"
+    {service}
     {variant}
     data-primary-channel="whatsapp"
-    data-contact-channel="whatsapp"
-    href={messenger.whatsapp}
-    target="_blank"
-    rel="noopener"
     hidden
     class={className}
   >
     <ContactIcon channel="whatsapp" size={16} />
     {cc.whatsappButtonLabel}
-  </Button>
+  </ContactControl>
 </div>

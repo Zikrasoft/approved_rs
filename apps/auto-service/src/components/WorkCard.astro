@@ -1,10 +1,10 @@
 ---
 import { Image } from 'astro:assets';
-import { localeFrom } from '@/i18n/currentLocale';
+import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 import { localizedWork, type Work } from '@/utils/works';
-import { getServicesContent } from '@/i18n/content/services';
 import { isServiceSlug } from '@/utils/services';
+import { content } from '@/i18n/content';
 
 interface Props {
   work: Work;
@@ -14,7 +14,7 @@ interface Props {
 const { work, eager = false } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const { title, car } = localizedWork(work, locale);
-const services = getServicesContent(locale);
+const services = content(locale).services;
 const applied = work.data.servicesApplied
   .filter(isServiceSlug)
   .map((slug) => services[slug].name);

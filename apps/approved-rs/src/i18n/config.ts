@@ -3,6 +3,20 @@ import { createLocaleSet, SOURCE_LOCALE } from '@podbor/i18n';
 export const localeConfig = {
   locales: ['ru', 'en', 'sr', 'es', 'de'],
   primaryLocale: 'ru',
+  ogLocale: {
+    ru: 'ru_RU',
+    en: 'en_US',
+    sr: 'sr_RS',
+    es: 'es_ES',
+    de: 'de_DE',
+  },
+  ogSuffix: {
+    ru: '',
+    en: '-en',
+    sr: '-sr',
+    es: '-es',
+    de: '-de',
+  },
 } as const;
 
 export const localeSet = createLocaleSet(localeConfig);
@@ -13,6 +27,7 @@ export const {
   TRANSLATABLE_LOCALES,
   isLocale,
   getLocale,
+  localeFrom,
   detectLocale,
 } = localeSet;
 
@@ -29,9 +44,6 @@ export const BCP47_BY_LOCALE: Record<Locale, string> = {
   de: 'de-DE',
 };
 
-// Separate from BCP47_BY_LOCALE on purpose: that one feeds sitemap hreflang,
-// where a script subtag is not wanted. This one drives Intl formatting, where
-// bare "sr" resolves to Cyrillic while the site is written in Latin.
 export const DISPLAY_LOCALE: Record<Locale, string> = {
   ...BCP47_BY_LOCALE,
   sr: 'sr-Latn-RS',

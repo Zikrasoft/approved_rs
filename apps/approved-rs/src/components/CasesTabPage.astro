@@ -5,25 +5,25 @@ import CaseCategoryTabs from './CaseCategoryTabs.astro';
 import PageHero from './PageHero.astro';
 import ClosingBand from './ClosingBand.astro';
 import closingImage from '@/assets/closing.jpg';
-import { getHomeContent } from '@/i18n/content/home';
+import { content } from '@/i18n/content';
 import type { CaseCardProps } from './CaseCard.astro';
-import { getPagesContent } from '@/i18n/content/pages';
+import { pagesView } from '@/i18n/content/pages';
 import { getI18n } from '@/i18n/getI18n';
-import { getLocale } from '@/i18n/config';
+import { localeFrom } from '@/i18n/config';
 import type { ServiceSlug } from '@/utils/labels';
 
 interface Props {
   active: ServiceSlug;
   items: CaseCardProps[];
   counts: Record<ServiceSlug, number>;
-  meta: { title: string; description: string; canonical: string };
+  meta: { title: string; description: string };
 }
 
 const { active, items, counts, meta } = Astro.props;
-const locale = getLocale(Astro.currentLocale);
-const cs = getPagesContent(locale).casesShared;
+const locale = localeFrom(Astro.url.pathname);
+const cs = pagesView(locale).casesShared;
 const t = getI18n(locale);
-const h = getHomeContent(locale);
+const h = content(locale).home;
 const intro = cs.tabIntros[active];
 ---
 

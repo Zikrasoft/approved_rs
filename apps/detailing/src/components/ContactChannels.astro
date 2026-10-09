@@ -1,12 +1,11 @@
 ---
 import Icon from './Icon.astro';
-import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
-import { CONTACT_LINKS, telegramBotHref } from '@/utils/contactLinks';
-import { PHONE_NUMBER } from '@/utils/constants';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import ContactControl from './ContactControl.astro';
 import type { ServiceSlug } from '@/utils/services';
-import { contactPlacement, type ContactPlacement } from '@podbor/site-kit';
-import { formatPhone } from '@podbor/site-kit/format-phone';
+import type { ContactPlacement } from '@podbor/site-kit';
+import { contactRegion } from '@podbor/site-kit/contact-control';
 
 interface Props {
   class?: string;
@@ -16,33 +15,13 @@ interface Props {
 
 const { class: className = '', placement = 'bar', service } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
+const site = content(locale).site;
 
 const channels = [
-  {
-    href: CONTACT_LINKS.phone,
-    icon: 'phone',
-    label: site.channels.call,
-    track: 'phone',
-  },
-  {
-    href: CONTACT_LINKS.whatsapp,
-    icon: 'whatsapp',
-    label: site.channels.whatsapp,
-    track: 'whatsapp',
-  },
-  {
-    href: CONTACT_LINKS.viber,
-    icon: 'viber',
-    label: site.channels.viber,
-    track: 'viber',
-  },
-  {
-    href: telegramBotHref(locale, service),
-    icon: 'telegram',
-    label: site.channels.telegram,
-    track: 'telegram',
-  },
+  { icon: 'phone', label: site.channels.call, track: 'phone' },
+  { icon: 'whatsapp', label: site.channels.whatsapp, track: 'whatsapp' },
+  { icon: 'viber', label: site.channels.viber, track: 'viber' },
+  { icon: 'telegram', label: site.channels.telegram, track: 'telegram' },
 ] as const;
 
 const CHANNEL_CLASS =
@@ -51,37 +30,26 @@ const CHANNEL_CLASS =
 
 <div
   class={`grid gap-2 sm:grid-cols-2 lg:grid-cols-1 ${className}`}
-  data-contact-cta
   data-contact-order
-  {...contactPlacement(placement)}
+  {...contactRegion(placement)}
 >
   {
     channels.map((channel) => (
-      <>
-        <a
-          href={channel.href}
-          data-channel={channel.track}
-          data-contact-channel={channel.track}
-          rel="noopener"
-          class:list={[
-            CHANNEL_CLASS,
-            channel.track === 'phone' && 'pointer-fine:hidden!',
-          ]}
-        >
-          <Icon
-            name={channel.icon}
-            size={18}
-            class="shrink-0 text-mute transition-colors duration-500 ease-spring group-hover:text-champagne group-focus-visible:text-champagne"
-          />
-          {channel.label}
-        </a>
-        {channel.track === 'phone' && placement === 'thanks' && (
-          <span class={`${CHANNEL_CLASS} pointer-coarse:hidden!`}>
-            <Icon name="phone" size={18} class="shrink-0 text-mute" />
-            <span class="whitespace-nowrap">{formatPhone(PHONE_NUMBER)}</span>
-          </span>
-        )}
-      </>
+      <ContactControl
+        channel={channel.track}
+        region="contacts"
+        service={service}
+        data-channel={channel.track}
+        class={CHANNEL_CLASS}
+      >
+        <Icon
+          name={channel.icon}
+          size={18}
+          class="shrink-0 text-mute transition-colors duration-500 ease-spring group-hover:text-champagne group-focus-visible:text-champagne"
+        />
+        {channel.label}
+        <Icon slot="plain" name="phone" size={18} class="shrink-0 text-mute" />
+      </ContactControl>
     ))
   }
 </div>

@@ -1,11 +1,11 @@
 ---
 import Icon from './Icon.astro';
 import LeadForm from './LeadForm.astro';
-import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
 
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
+const site = content(locale).site;
 ---
 
 <details-modal trigger="[data-open-lead-modal]">

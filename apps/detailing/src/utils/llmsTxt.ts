@@ -5,19 +5,16 @@ import { SITE_URL, SITE_NAME, STUDIO_ADDRESS } from '@/utils/constants';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { localizedWork, publishedWorks } from '@/utils/works';
 import { PathBuilder } from '@/utils/paths';
-import { getHomeContent } from '@/i18n/content/home';
-import { getPagesContent } from '@/i18n/content/pages';
-import { getServicesContent } from '@/i18n/content/services';
-import { getSiteContent } from '@/i18n/content/site';
+import { content } from '@/i18n/content';
 import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 
 const url = (path: string) => `${SITE_URL}${path}`;
 
 export async function generateLlmsTxt(locale: Locale): Promise<string> {
-  const home = getHomeContent(locale);
-  const pages = getPagesContent(locale);
-  const services = getServicesContent(locale);
-  const site = getSiteContent(locale);
+  const home = content(locale).home;
+  const pages = content(locale).pages;
+  const services = content(locale).services;
+  const site = content(locale).site;
   const works = publishedWorks(await getCollection('works'));
 
   return renderBrandLlmsTxt({

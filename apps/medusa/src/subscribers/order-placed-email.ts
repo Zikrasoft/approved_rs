@@ -4,41 +4,35 @@ import {
   Modules,
   NotificationStatus,
 } from '@medusajs/framework/utils';
+import { z } from 'zod';
 
 import { buildOrderEmail } from '../lib/order-email';
-import { money, queryOne } from '../lib/query';
+import { selectOne } from '../lib/query';
+import { moneyField, nullableText, quantityField } from '../lib/row-schema';
 import { shopLocale } from '../lib/shop';
 
-type EmailOrder = {
-  id: string;
-  display_id: number | string;
-  email?: string | null;
-  locale?: string | null;
-  total: unknown;
-  items?:
-    | ({
-        product_title?: string | null;
-        title?: string | null;
-        quantity: unknown;
-        total: unknown;
-      } | null)[]
-    | null;
-};
+export const emailOrderSchema = z.object({
+  id: z.string(),
+  display_id: z.union([z.number(), z.string()]),
+  email: nullableText,
+  locale: nullableText,
+  total: moneyField,
+  items: z
+    .array(
+      z
+        .object({
+          product_title: nullableText,
+          title: nullableText,
+          quantity: quantityField,
+          total: moneyField,
+        })
+        .nullable(),
+    )
+    .nullish(),
+});
 
 const TEMPLATE = 'order-placed';
 const TRIGGER = 'order.placed';
-
-const EMAIL_FIELDS = [
-  'id',
-  'display_id',
-  'email',
-  'locale',
-  'total',
-  'items.product_title',
-  'items.title',
-  'items.quantity',
-  'items.total',
-];
 
 export default async function orderPlacedEmail({
   event,
@@ -46,7 +40,7 @@ export default async function orderPlacedEmail({
 }: SubscriberArgs<{ id: string }>) {
   const query = container.resolve(ContainerRegistrationKeys.QUERY);
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
-  const order = await queryOne<EmailOrder>(query, 'order', EMAIL_FIELDS, {
+  const order = await selectOne(query, 'order', emailOrderSchema, {
     id: event.data.id,
   });
   if (!order) {
@@ -75,13 +69,13 @@ export default async function orderPlacedEmail({
         ? [
             {
               title: item.product_title ?? item.title ?? '',
-              quantity: money(item.quantity),
-              total: money(item.total),
+              quantity: item.quantity,
+              total: item.total,
             },
           ]
         : [],
     ),
-    total: money(order.total),
+    total: order.total,
   });
 
   await notifications.createNotifications({

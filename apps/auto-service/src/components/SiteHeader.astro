@@ -2,20 +2,16 @@
 import Icon from './Icon.astro';
 import Wordmark from './Wordmark.astro';
 import CartButton from './CartButton.astro';
-import { SUPPORTED_LOCALES, LOCALE_NAME } from '@/i18n/config';
-import { localeFrom } from '@/i18n/currentLocale';
-import { getSiteContent } from '@/i18n/content/site';
+import { localeFrom, SUPPORTED_LOCALES, LOCALE_NAME } from '@/i18n/config';
 import { PathBuilder, swapLocale } from '@/utils/paths';
-import {
-  contactPlacement,
-  navCurrent,
-  LOCALE_CHOICE_ATTRIBUTE,
-} from '@podbor/site-kit';
-import { CONTACT_LINKS } from '@/utils/contactLinks';
+import { navCurrent, LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
+import { contactRegion } from '@podbor/site-kit/contact-control';
+import ContactControl from './ContactControl.astro';
 import { devOnly, shopBuilt } from '@/utils/shopStatus';
+import { content } from '@/i18n/content';
 
 const locale = localeFrom(Astro.url.pathname);
-const site = getSiteContent(locale);
+const site = content(locale).site;
 const pathname = Astro.url.pathname;
 
 const links = [
@@ -43,7 +39,7 @@ const links = [
   class="group contents"
   data-lock-scroll
   data-desktop-media="(min-width: 768px)"
-  {...contactPlacement('header')}
+  {...contactRegion('header')}
 >
   <header
     class="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur"
@@ -111,14 +107,13 @@ const links = [
           )
         }
 
-        <a
-          href={CONTACT_LINKS.phone}
-          data-contact-channel="phone"
-          class="btn btn-secondary hidden h-10 py-0 lg:inline-flex pointer-fine:hidden!"
+        <ContactControl
+          channel="phone"
+          class="btn btn-secondary hidden h-10 py-0 lg:inline-flex"
         >
           <Icon name="phone" />
           <span class="spec text-xs">{site.header.phoneLabel}</span>
-        </a>
+        </ContactControl>
 
         <button
           type="button"
@@ -175,14 +170,10 @@ const links = [
     </nav>
 
     <div class="flex flex-col gap-4">
-      <a
-        href={CONTACT_LINKS.phone}
-        data-contact-channel="phone"
-        class="btn btn-secondary w-full pointer-fine:hidden!"
-      >
+      <ContactControl channel="phone" class="btn btn-secondary w-full">
         <Icon name="phone" />
         <span class="spec">{site.header.phoneLabel}</span>
-      </a>
+      </ContactControl>
       <carlab-lang class="flex items-center gap-2">
         <span class="text-xs text-muted">{site.header.languageLabel}</span>
         {

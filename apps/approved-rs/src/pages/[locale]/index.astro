@@ -21,7 +21,7 @@ import {
   CHINA_NAME,
 } from '@/utils/constants';
 import { generateOrganizationSchema } from '@/utils/seo';
-import { getHomeContent } from '@/i18n/content/home';
+import { content } from '@/i18n/content';
 import { getI18n } from '@/i18n/getI18n';
 import { PathBuilder } from '@/utils/paths';
 import { SLUG } from '@/utils/labels';
@@ -33,12 +33,11 @@ import closingImage from '@/assets/closing.jpg';
 
 const hero = await heroImageAttrs(heroImage);
 const locale = getLocale(Astro.params.locale);
-const h = getHomeContent(locale);
+const h = content(locale).home;
 const t = getI18n(locale);
 const meta = {
   title: `${h.metaTitle} | ${SITE_NAME}`,
   description: h.metaDescription,
-  canonical: `${SITE_URL}${PathBuilder.home(locale)}`,
 };
 
 const allCases = await getCollection('cases');
