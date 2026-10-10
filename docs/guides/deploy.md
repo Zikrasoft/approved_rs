@@ -343,10 +343,10 @@ Without a sibling token the reply button is simply absent on that brand's cards.
 
 ### Storage and cron
 
-| Variable                | approved.rs | carlab.rs | details.rs | Without it                                            |
-| ----------------------- | ----------- | --------- | ---------- | ----------------------------------------------------- |
-| `BLOB_READ_WRITE_TOKEN` | ✅ auto     | ✅ auto   | ✅ auto    | leads are not stored and the routes fail              |
-| `CRON_SECRET`           | ✅          | —         | —          | `/api/reminders` answers 401 — reminders never go out |
+| Variable                | approved.rs | carlab.rs | details.rs | Without it                                               |
+| ----------------------- | ----------- | --------- | ---------- | -------------------------------------------------------- |
+| `BLOB_READ_WRITE_TOKEN` | ✅ auto     | ✅ auto   | ✅ auto    | leads are not stored and the routes fail                 |
+| `CRON_SECRET`           | ✅          | —         | —          | `/api/reminders` answers 401 — the digest never goes out |
 
 **Do not set `BLOB_READ_WRITE_TOKEN` by hand** — it appears on its own once the Blob
 store is connected to the project (see the next section).
@@ -921,15 +921,16 @@ Each is registered once per bot, four registrations in total.
 ### The CRM bot
 
 The group receives a short teaser of the lead ("#123 · Ivan · Vehicle
-sourcing · status") with the outcome buttons (✅ deal / ❌ lost / ⏳ in work) and
+sourcing · status") with the outcome buttons (✅ deal / ❌ lost, and ⏳, a touch that
+changes no status) and
 an "Open in the bot" link button; postponing, replying to the visitor and
 deleting happen in a DM with the bot. Statuses are open / won / lost /
 postponed, and lost is the archive. Leads are stored
 in Vercel Blob (`data/leads.json`, private access), with no external database.
 
 The owner and the admin each have to message the bot `/start` once before it can
-send them direct messages (including the cron's reminders) — Telegram forbids a bot
-from starting a conversation.
+send them direct messages (including the notice of a Balance operation the other
+one recorded) — Telegram forbids a bot from starting a conversation.
 
 In the group the bot needs **admin rights to pin messages**: every new card is
 pinned and a closed one is unpinned; without the right both calls fail and are

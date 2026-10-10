@@ -26,9 +26,10 @@ absorb a placeholder.
 
 **Ghost lead** — a Contact click on a channel whose outcome we cannot observe
 — WhatsApp, Viber or the phone — that never gained a contact: still the
-placeholder contact, still `new`, and older than the retention window. Nothing
+placeholder contact, still open with no `lastActivityAt`, and older than the
+retention window. Nothing
 on our side can tell whether the person wrote, so a Ghost lead retires itself —
-the daily reminder cron marks it lost
+the daily digest cron marks it lost
 ([ADR-0029](docs/adr/0029-ghost-leads-retire-themselves.md)). Because the sweep
 runs daily against a 24-hour window, a Ghost lead actually lives 24 to 48 hours.
 
@@ -52,7 +53,8 @@ _Avoid_: operator, partner, manager
 Payouts are owed to.
 
 **CRM bot** — the single bot the owner and the admin work in: cards, statuses,
-money, reminders and order notifications, for all three brands in one chat.
+money, the daily digest and order notifications, for all three brands in one
+chat.
 
 **Payout** — an operation that raises the Balance (➕ Зачислить): an amount
 the owner will send the admin. The person recording it states the amount;
