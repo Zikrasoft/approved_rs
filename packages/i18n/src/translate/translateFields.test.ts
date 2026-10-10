@@ -45,6 +45,27 @@ describe('translateFields', () => {
     );
   });
 
+  it('copies a field without Cyrillic and never sends it', async () => {
+    stubOpenAiResponse({ title: 'Akumulator' });
+    const result = await translateFields({
+      ...OPTIONS,
+      fields: { title: 'Аккумулятор', brand: 'Varta' },
+      targetLocales: ['sr'],
+    });
+    expect(result).toEqual({ sr: { title: 'Akumulator', brand: 'Varta' } });
+  });
+
+  it('makes no request when no field holds Cyrillic', async () => {
+    stubTranslate((text) => text);
+    const result = await translateFields({
+      ...OPTIONS,
+      fields: { brand: 'Varta' },
+      targetLocales: ['sr'],
+    });
+    expect(result).toEqual({ sr: { brand: 'Varta' } });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it('passes a chosen model through', async () => {
     stubTranslate((text) => text);
     await translateFields({

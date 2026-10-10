@@ -62,7 +62,7 @@ jobs:
       contents: read
     services:
       postgres:
-        image: postgres:16.15-alpine
+        image: public.ecr.aws/docker/library/postgres:16.15-alpine
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -72,7 +72,7 @@ jobs:
           --health-cmd "pg_isready -U postgres" --health-interval 2s
           --health-timeout 5s --health-retries 30
       redis:
-        image: redis:7.4.9-alpine
+        image: public.ecr.aws/docker/library/redis:7.4.9-alpine
         ports: ['56379:6379']
         options: >-
           --health-cmd "redis-cli ping" --health-interval 2s
@@ -212,7 +212,7 @@ jobs:
       packages: write
     services:
       postgres:
-        image: postgres:16.15-alpine
+        image: public.ecr.aws/docker/library/postgres:16.15-alpine
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -222,7 +222,7 @@ jobs:
           --health-cmd "pg_isready -U postgres" --health-interval 2s
           --health-timeout 5s --health-retries 30
       redis:
-        image: redis:7.4.9-alpine
+        image: public.ecr.aws/docker/library/redis:7.4.9-alpine
         ports: ['56379:6379']
         options: >-
           --health-cmd "redis-cli ping" --health-interval 2s

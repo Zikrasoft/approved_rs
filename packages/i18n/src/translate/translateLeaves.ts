@@ -14,6 +14,7 @@ const MAX_REQUEST_CHARS = 8_000;
 const CHUNK_ATTEMPTS = 3;
 
 const PATH_SYNTAX = /[[\].\\]/g;
+const CYRILLIC = /\p{Script=Cyrillic}/u;
 
 const escapeKey = (key: string): string => key.replace(PATH_SYNTAX, '\\$&');
 
@@ -144,6 +145,7 @@ export async function translateLeaves({
     if (leaf.text.trim() === '') continue;
     const key = leafKey(fingerprint, leaf.text);
     used.add(key);
+    if (!CYRILLIC.test(leaf.text)) block[key] ??= leaf.text;
 
     const cached = block[key];
     const adopted = adoptable(

@@ -1,6 +1,8 @@
 import { assertSafeTranslation } from './assertSafeTranslation.ts';
 import { callOpenAiJson } from './openaiChat.ts';
 
+const CYRILLIC = /\p{Script=Cyrillic}/u;
+
 export interface TranslateFieldsOptions<L extends string> {
   fields: Record<string, string>;
   targetLocales: readonly L[];
@@ -39,9 +41,13 @@ export async function translateFields<L extends string>(
     model,
   } = options;
   const keys = Object.keys(fields);
+  const russian = Object.fromEntries(
+    Object.entries(fields).filter(([, text]) => CYRILLIC.test(text)),
+  );
   const entries = await Promise.all(
     targetLocales.map(async (locale) => {
-      if (keys.length === 0) return [locale, {}] as const;
+      if (Object.keys(russian).length === 0)
+        return [locale, { ...fields }] as const;
       const chunk = `${subject}.${locale}`;
       const answer = await callOpenAiJson({
         apiKey,
@@ -51,13 +57,15 @@ export async function translateFields<L extends string>(
           businessDescription,
           subject,
         ),
-        userContent: JSON.stringify(fields),
+        userContent: JSON.stringify(russian),
         chunk,
       });
-      assertSafeTranslation(fields, answer, chunk);
+      assertSafeTranslation(russian, answer, chunk);
       return [
         locale,
-        Object.fromEntries(keys.map((key) => [key, answer[key]])),
+        Object.fromEntries(
+          keys.map((key) => [key, key in russian ? answer[key] : fields[key]]),
+        ),
       ] as const;
     }),
   );

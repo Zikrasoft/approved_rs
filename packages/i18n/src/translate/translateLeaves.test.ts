@@ -261,6 +261,19 @@ describe('translateLeaves', () => {
     expect(Object.keys(block)).toHaveLength(2);
   });
 
+  it('serves a leaf without Cyrillic as it is, with no request', async () => {
+    stubTranslate((text) => text.toUpperCase());
+    const result = await translateLeaves({
+      ...base,
+      source: { car: 'Peugeot 208' },
+      existing: undefined,
+      block: {},
+      translationsAreCurrent: true,
+    });
+    expect(result.value).toEqual({ car: 'Peugeot 208' });
+    expect(result.requests).toBe(0);
+  });
+
   it('makes no request at all on the second run', async () => {
     stubTranslate((text) => text.toUpperCase());
     const block = {};

@@ -20,7 +20,7 @@ import {
   systemPrompts,
 } from './mockOpenAiFetch.ts';
 
-const RU_CASE = { title: 'Honda Accord', body: 'Полное описание кейса.' };
+const RU_CASE = { title: 'Хонда Аккорд', body: 'Полное описание кейса.' };
 
 let dir: string;
 let cachePath: string;
@@ -94,7 +94,7 @@ describe('hashSource', () => {
   });
 
   it('matches the pre-extraFields hash when no extras are given', () => {
-    expect(hashSource({ ...RU_CASE, car: 'Honda Accord' }, [])).toBe(
+    expect(hashSource({ ...RU_CASE, car: 'Хонда Аккорд' }, [])).toBe(
       hashSource(RU_CASE),
     );
   });
@@ -130,8 +130,8 @@ describe('processFile', () => {
     const written = frontmatterOf(file);
     expect(written.translatedFrom).toBe(hashSource(RU_CASE));
     expect(written.translations).toEqual({
-      en: { title: 't:Honda Accord', body: 't:Полное описание кейса.' },
-      sr: { title: 't:Honda Accord', body: 't:Полное описание кейса.' },
+      en: { title: 't:Хонда Аккорд', body: 't:Полное описание кейса.' },
+      sr: { title: 't:Хонда Аккорд', body: 't:Полное описание кейса.' },
     });
     expect(readFileSync(file, 'utf-8')).toContain(`\n---\n${RU_CASE.body}\n`);
   });
@@ -162,15 +162,15 @@ describe('processFile', () => {
     await processFile(file, 'key', cache);
 
     rewriteFrontmatter(file, (data) => {
-      data.title = 'Honda Accord 2019';
+      data.title = 'Хонда Аккорд 2019';
     });
 
     vi.unstubAllGlobals();
     stubTranslate((text) => `t:${text}`);
     expect(await processFile(file, 'key', cache)).toBe('translated');
     expect(sentPayloads()).toEqual([
-      { title: 'Honda Accord 2019' },
-      { title: 'Honda Accord 2019' },
+      { title: 'Хонда Аккорд 2019' },
+      { title: 'Хонда Аккорд 2019' },
     ]);
   });
 
@@ -191,14 +191,14 @@ describe('processFile', () => {
     await processFile(file, 'key', cache);
     expect(Object.keys(cache[file] as object)).toHaveLength(4);
     expect(Object.values(cache[file] as object)).not.toContain(
-      't:Honda Accord',
+      't:Хонда Аккорд',
     );
   });
 
   it('adopts what is committed when it first meets a case with a current hash', async () => {
     stubTranslate((text) => `t:${text}`);
     const translated = {
-      title: 'Honda Accord',
+      title: 'Хонда Аккорд',
       body: 'Full case description.',
     };
     const file = caseFile('honda-accord', {
@@ -255,7 +255,7 @@ describe('processFile', () => {
     expect(
       (frontmatterOf(file).translations as Record<string, { title: string }>).en
         ?.title,
-    ).toBe('v2:Honda Accord');
+    ).toBe('v2:Хонда Аккорд');
   });
 
   it('keeps paid-for entries when a later locale fails', async () => {
@@ -302,7 +302,7 @@ describe('processFile', () => {
     expect(
       (frontmatterOf(file).translations as Record<string, { title: string }>).en
         ?.title,
-    ).toBe('t:Honda Accord');
+    ).toBe('t:Хонда Аккорд');
   });
 
   it('discards a cache entry that would not have passed as a fresh one', async () => {
@@ -422,6 +422,20 @@ describe('extraFields', () => {
       (frontmatterOf(file).translations as Record<string, { car: string }>).en
         ?.car,
     ).toBe('t:БМВ Х3');
+  });
+
+  it('copies a Latin-only extra verbatim instead of asking the model', async () => {
+    stubOpenAiFetch(() => ({ title: 'Ok', body: 'Ok' }));
+    const file = caseFile('peugeot', {
+      title: RU_CASE.title,
+      car: 'Peugeot 208',
+    });
+    await translator(['car']).processFile(file, 'key', {});
+    expect(sentPayloads()[0]).not.toHaveProperty('car');
+    expect(
+      (frontmatterOf(file).translations as Record<string, { car: string }>).en
+        ?.car,
+    ).toBe('Peugeot 208');
   });
 
   it('rejects a response that omits an extra field', async () => {
