@@ -30,13 +30,13 @@ const siblingTokensSchema = z.object({
 
 export function siblingTokens(
   env: Record<string, unknown>,
-): ReadonlyMap<string, string> {
+): ReadonlyMap<typeof CARLAB | typeof DETAILS, string> {
   const parsed = siblingTokensSchema.parse(env);
-  const tokens = new Map<string, string>();
+  const tokens = new Map<typeof CARLAB | typeof DETAILS, string>();
   if (parsed.TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB)
-    tokens.set(CARLAB.name, parsed.TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB);
+    tokens.set(CARLAB, parsed.TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB);
   if (parsed.TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS)
-    tokens.set(DETAILS.name, parsed.TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS);
+    tokens.set(DETAILS, parsed.TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS);
   return tokens;
 }
 
@@ -44,7 +44,7 @@ const clients = new Map<string, TelegramClient>([
   [APPROVED.name, captureClient],
 ]);
 for (const [brand, token] of siblingTokens(process.env))
-  clients.set(brand, createTelegramClient(token));
+  clients.set(brand.name, createTelegramClient(token, brand.captureBot));
 
 export const captureClientFor = (brand: string): TelegramClient | undefined =>
   clients.get(brand);

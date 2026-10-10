@@ -81,6 +81,10 @@ export type PendingCommissionClaim = z.infer<
 
 export const LEGACY_BRAND = 'Approved.rs';
 
+export const REFERRERS = ['approved'] as const;
+
+export type Referrer = (typeof REFERRERS)[number];
+
 export const MAX_COMMISSION_PERCENT = 100;
 
 const baseStoredLeadSchema = z.object({
@@ -110,6 +114,7 @@ const baseStoredLeadSchema = z.object({
   pendingPrompt: pendingPromptSchema.nullable().default(null).catch(null),
   capturePrompt: capturePromptSchema.nullable().default(null).catch(null),
   telegramId: z.number().int().nullable().default(null).catch(null),
+  referredBy: z.enum(REFERRERS).nullable().default(null).catch(null),
   archived: z.boolean().default(false),
   pendingCommissionClaim: pendingCommissionClaimSchema.nullable().default(null),
   remindAt: z.string().nullable().default(null),
@@ -174,7 +179,11 @@ export type LeadInput = Pick<
   Partial<
     Pick<
       StoredLead,
-      'services' | 'commissionPercent' | 'capturePrompt' | 'telegramId'
+      | 'services'
+      | 'commissionPercent'
+      | 'capturePrompt'
+      | 'telegramId'
+      | 'referredBy'
     >
   >;
 

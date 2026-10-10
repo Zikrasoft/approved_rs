@@ -62,7 +62,7 @@ export interface Tap {
   arg: string;
 }
 
-export const SWITCH_SCREEN = 'locale';
+export const LANGUAGE_SWITCH_TAP = 'locale';
 
 const TAP_PATTERN = /^([a-z]+):([a-z]{2})(?::([a-z0-9-]+))?$/;
 
@@ -182,7 +182,7 @@ export function createScreens<L extends string, S extends string>({
       text: words.language.text,
       keyboard: [
         ...served.map((code) =>
-          tap(languages[code], SWITCH_SCREEN, code, target),
+          tap(languages[code], LANGUAGE_SWITCH_TAP, code, target),
         ),
         tap(words.menu.back, screen, locale, arg),
       ],

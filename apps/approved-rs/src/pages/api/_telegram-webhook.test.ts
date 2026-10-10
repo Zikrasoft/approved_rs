@@ -94,6 +94,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     pendingPrompt: null,
     capturePrompt: null,
     telegramId: null,
+    referredBy: null,
     archived: false,
     pendingCommissionClaim: null,
     remindAt: null,
@@ -262,6 +263,17 @@ describe('POST /api/telegram-webhook', () => {
     ['wrong field types', { update_id: 'x', message: 5 }],
     ['a non-object', JSON.stringify('just a string')],
     ['a callback without an id', { callback_query: { data: 'st:5:won' } }],
+    [
+      'an update without an update_id',
+      {
+        callback_query: {
+          id: 'cb-noid',
+          data: 'st:5:lost',
+          from: { id: OWNER_ID },
+          message: { message_id: 1, chat: { id: DM_CHAT_ID } },
+        },
+      },
+    ],
   ])(
     'acks with 200 on a well-formed JSON body of the wrong shape (%s) without running a handler',
     async (_label, body) => {
@@ -290,22 +302,6 @@ describe('POST /api/telegram-webhook', () => {
       expect(answers()).toEqual([
         { callback_query_id: 'cb', text: 'Статус обновлён' },
       ]);
-    });
-
-    it('processes updates with no update_id normally (field is optional)', async () => {
-      const body = {
-        callback_query: {
-          id: 'cb-noid',
-          data: 'st:5:lost',
-          from: { id: OWNER_ID },
-          message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-        },
-      };
-      await POST(makeCtx(body));
-      seed(makeLead());
-      await POST(makeCtx(body));
-      expect((await stored()).status).toBe('lost');
-      expect(answers()).toHaveLength(2);
     });
   });
 
@@ -915,6 +911,7 @@ describe('POST /api/telegram-webhook', () => {
   it('acks without acting when a callback has no message attached', async () => {
     await POST(
       makeCtx({
+        update_id: 2_400_000_024,
         callback_query: {
           id: 'cb-24',
           data: 'st:5:won',

@@ -14,6 +14,7 @@ export type {
   PendingCommissionClaim,
   PendingPrompt,
   Payment,
+  Referrer,
   StoredLead,
 } from './schema.ts';
 

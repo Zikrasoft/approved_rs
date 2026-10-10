@@ -35,7 +35,7 @@ const SERVICE_LABELS: Record<string, string> = {
   'vehicle-sourcing': 'Автоподбор',
 };
 
-const client = createTelegramClient('test-bot-token');
+const client = createTelegramClient('test-bot-token', 'test_bot');
 const formatter = createFormatter({
   serviceLabel: (slug) => SERVICE_LABELS[slug] ?? slug,
   botUsername: 'approved_test_bot',
@@ -89,6 +89,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     pendingPrompt: null,
     capturePrompt: null,
     telegramId: null,
+    referredBy: null,
     archived: false,
     pendingCommissionClaim: null,
     remindAt: null,
@@ -160,10 +161,18 @@ describe('sendLeadNotification', () => {
 
   it('says in the teaser that the Approved bot referred the lead', async () => {
     await sendLeadNotification(
-      makeLead({ telegramId: 77, comment: `${REFERRAL_NOTE}\nИщет: BMW` }),
+      makeLead({ telegramId: 77, referredBy: 'approved' }),
     );
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).toContain('🤖 через бота · 🤝 из бота Approved.rs');
+  });
+
+  it('ignores a comment that only quotes the referral note', async () => {
+    await sendLeadNotification(
+      makeLead({ telegramId: 77, comment: `Сообщение: ${REFERRAL_NOTE}` }),
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).not.toContain('🤝');
   });
 
   it('leaves the bot mark off a lead the site wrote', async () => {

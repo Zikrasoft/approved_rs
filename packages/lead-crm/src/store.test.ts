@@ -271,6 +271,23 @@ describe('insertOrMergeLead', () => {
     expect(lead.comment).not.toContain('Также пробовал');
   });
 
+  it('hands back the Lead as it was before the merge, and null for an insert', async () => {
+    const first = await store.insertOrMergeLead(clickData('telegram'));
+    const second = await store.insertOrMergeLead({
+      ...clickData('telegram'),
+      contact: '@petr',
+      telegramId: 77,
+      referredBy: 'approved',
+    });
+
+    expect(first.before).toBeNull();
+    expect(second.before).toEqual(first.lead);
+    expect(second.lead).toMatchObject({
+      contact: '@petr',
+      referredBy: 'approved',
+    });
+  });
+
   it('hands a Telegram click over to the capture bot that picks up the same visitor', async () => {
     await store.insertOrMergeLead({
       ...clickData('telegram'),
@@ -2005,6 +2022,21 @@ describe('the capture lookups', () => {
 });
 
 describe('updateCapture', () => {
+  it('marks the Lead as referred and keeps the mark on later writes', async () => {
+    const lead = await store.insertLead(baseData);
+
+    await store.updateCapture(lead.id, {
+      referredBy: 'approved',
+      capturePrompt: null,
+    });
+    const updated = await store.updateCapture(lead.id, {
+      note: 'Сообщение: привет',
+      capturePrompt: null,
+    });
+
+    expect(updated?.referredBy).toBe('approved');
+  });
+
   it('switches the Lead to the locale the visitor picked', async () => {
     const lead = await store.insertLead({ ...baseData, locale: 'ru' });
 

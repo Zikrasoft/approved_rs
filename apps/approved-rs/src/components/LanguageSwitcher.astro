@@ -1,12 +1,7 @@
 ---
 import { Check } from '@lucide/astro';
 import { LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
-import {
-  LOCALE_NAME,
-  SUPPORTED_LOCALES,
-  localeFrom,
-  type Locale,
-} from '@/i18n/config';
+import { LOCALE_NAME, SUPPORTED_LOCALES, localeFrom } from '@/i18n/config';
 import { swapLocale } from '@/utils/paths';
 import CountryPlate from './CountryPlate.astro';
 import Dropdown from './Dropdown.astro';
@@ -18,15 +13,6 @@ const { variant = 'dropdown' } = Astro.props;
 
 const currentLocale = localeFrom(Astro.url.pathname);
 const pathname = Astro.url.pathname;
-
-const LOCALE_META: Record<Locale, { code: string; native: string }> = {
-  ru: { code: 'RU', native: LOCALE_NAME.ru },
-  en: { code: 'EN', native: LOCALE_NAME.en },
-  sr: { code: 'SR', native: LOCALE_NAME.sr },
-  es: { code: 'ES', native: LOCALE_NAME.es },
-  de: { code: 'DE', native: LOCALE_NAME.de },
-};
-const current = LOCALE_META[currentLocale];
 ---
 
 <approved-locale-choice>
@@ -34,7 +20,6 @@ const current = LOCALE_META[currentLocale];
     variant === 'inline' ? (
       <div class="lang-switcher-inline grid grid-cols-3 gap-1.5">
         {SUPPORTED_LOCALES.map((locale) => {
-          const meta = LOCALE_META[locale];
           const active = locale === currentLocale;
           return (
             <a
@@ -46,7 +31,7 @@ const current = LOCALE_META[currentLocale];
               ]}
             >
               <CountryPlate code={locale} />
-              <span>{meta.native}</span>
+              <span>{LOCALE_NAME[locale]}</span>
             </a>
           );
         })}
@@ -60,10 +45,9 @@ const current = LOCALE_META[currentLocale];
       >
         <Fragment slot="trigger">
           <CountryPlate code={currentLocale} />
-          <span class="text-sm">{current.code}</span>
+          <span class="text-sm">{currentLocale.toUpperCase()}</span>
         </Fragment>
         {SUPPORTED_LOCALES.map((locale) => {
-          const meta = LOCALE_META[locale];
           const active = locale === currentLocale;
           return (
             <li role="option" aria-selected={active}>
@@ -76,7 +60,7 @@ const current = LOCALE_META[currentLocale];
                 ]}
               >
                 <CountryPlate code={locale} />
-                <span class="flex-1">{meta.native}</span>
+                <span class="flex-1">{LOCALE_NAME[locale]}</span>
                 {active && <Check size={14} class="text-accent shrink-0" />}
               </a>
             </li>

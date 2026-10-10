@@ -409,21 +409,6 @@ export const REFERRAL_NOTE = 'Пришёл из бота Approved.rs (Партн
 
 const VISITOR_CHANGE_MARK = '🤖 Посетитель через бота';
 
-export function fieldChangeText(
-  lead: StoredLead,
-  field: EditField,
-  before: string | null | undefined,
-  author: FieldChangeAuthor = 'operator',
-): string {
-  return [
-    `✏️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${EDIT_FIELD_LABELS[field]}`,
-    ...(author === 'visitor' ? [VISITOR_CHANGE_MARK] : []),
-    ``,
-    `Было: ${fieldPreview(before)}`,
-    `Стало: ${fieldPreview(lead[field])}`,
-  ].join('\n');
-}
-
 export function quarantinedLeadsText(
   count: number,
   path: string,
@@ -493,9 +478,8 @@ export function createFormatter({
 
   function brandLine(lead: StoredLead): string {
     const via = lead.telegramId == null ? '' : ' · 🤖 через бота';
-    const referred = lead.comment?.includes(REFERRAL_NOTE)
-      ? ' · 🤝 из бота Approved.rs'
-      : '';
+    const referred =
+      lead.referredBy === 'approved' ? ' · 🤝 из бота Approved.rs' : '';
     return `🏷 ${escapeHtml(lead.brand)}${via}${referred}`;
   }
 
@@ -581,9 +565,30 @@ export function createFormatter({
       : [];
   }
 
+  function shownValue(
+    field: EditField,
+    value: string | null | undefined,
+  ): string | null | undefined {
+    return field === 'service' && value ? serviceLabel(value) : value;
+  }
+
   return {
     formatLeadText,
-    serviceLabel,
+
+    fieldChangeText(
+      lead: StoredLead,
+      field: EditField,
+      before: string | null | undefined,
+      author: FieldChangeAuthor = 'operator',
+    ): string {
+      return [
+        `✏️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${EDIT_FIELD_LABELS[field]}`,
+        ...(author === 'visitor' ? [VISITOR_CHANGE_MARK] : []),
+        ``,
+        `Было: ${fieldPreview(shownValue(field, before))}`,
+        `Стало: ${fieldPreview(shownValue(field, lead[field]))}`,
+      ].join('\n');
+    },
 
     formatTeaser(lead: StoredLead): string {
       return `${archivedMark(lead)}🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusEmoji(lead.status)} ${statusLabel(lead.status)}\n${brandLine(lead)}`;

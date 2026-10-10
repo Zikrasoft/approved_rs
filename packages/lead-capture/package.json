@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@podbor/i18n": "workspace:*",
     "@podbor/lead-crm": "workspace:*",
     "@podbor/site-kit": "workspace:*",
     "grammy": "1.46.0",

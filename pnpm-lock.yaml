@@ -477,6 +477,9 @@ importers:
 
   packages/lead-capture:
     dependencies:
+      '@podbor/i18n':
+        specifier: workspace:*
+        version: link:../i18n
       '@podbor/lead-crm':
         specifier: workspace:*
         version: link:../lead-crm

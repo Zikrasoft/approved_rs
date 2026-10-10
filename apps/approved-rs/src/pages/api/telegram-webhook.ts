@@ -2,7 +2,6 @@ export const prerender = false;
 
 import type { APIContext } from 'astro';
 import { Composer, type Context } from 'grammy';
-import type { Update } from 'grammy/types';
 import { z } from 'zod';
 import {
   parse,
@@ -86,8 +85,7 @@ const messageSchema = z.object({
   reply_to_message: z.object({ message_id: z.number().int() }).optional(),
 });
 
-const updateSchema = z.object({
-  update_id: z.number().int().optional(),
+const readFieldsSchema = z.object({
   message: messageSchema.optional(),
   callback_query: z
     .object({
@@ -98,6 +96,10 @@ const updateSchema = z.object({
     })
     .optional(),
 });
+
+const updateSchema = z
+  .looseObject({ update_id: z.number().int() })
+  .refine((update) => readFieldsSchema.safeParse(update).success);
 
 type TelegramMessage = z.infer<typeof messageSchema>;
 
@@ -736,8 +738,7 @@ async function handlePrivateMessage(msg: TelegramMessage): Promise<void> {
 }
 
 bot.use(async (ctx, next) => {
-  const updateId = ctx.update.update_id;
-  if (updateId !== undefined && alreadyProcessed(updateId)) return;
+  if (alreadyProcessed(ctx.update.update_id)) return;
   await next();
 });
 
@@ -785,7 +786,7 @@ export async function POST({ request }: APIContext): Promise<Response> {
   }
 
   try {
-    await bot.handleUpdate(parsed.data as Update);
+    await bot.handleUpdate(parsed.data);
   } catch (err) {
     console.error('[telegram-webhook] unhandled error processing update', {
       error: err,

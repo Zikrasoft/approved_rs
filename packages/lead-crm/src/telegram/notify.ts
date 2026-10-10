@@ -9,7 +9,6 @@ import {
   commissionResultText,
   dealNotificationText,
   incomeNotificationText,
-  fieldChangeText,
   quarantinedLeadsText,
   statusChangeText,
   type EditField,
@@ -140,16 +139,10 @@ export function createNotifier({
       author?: FieldChangeAuthor,
     ): Promise<void> {
       if ((before ?? '') === (lead[field] ?? '')) return;
-      const text =
-        field === 'service'
-          ? fieldChangeText(
-              { ...lead, service: formatter.serviceLabel(lead.service) },
-              field,
-              before && formatter.serviceLabel(before),
-              author,
-            )
-          : fieldChangeText(lead, field, before, author);
-      await sendToAll(adminIds, text);
+      await sendToAll(
+        adminIds,
+        formatter.fieldChangeText(lead, field, before, author),
+      );
     },
 
     async sendQuarantinedLeadsToAdmin(
