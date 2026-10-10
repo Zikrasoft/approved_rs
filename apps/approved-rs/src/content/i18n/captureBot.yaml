@@ -16,6 +16,9 @@ services:
 card:
   request: Оставить заявку
   site: Подробнее на сайте
+partners:
+  button: Партнёры
+  text: Ремонт и детейлинг — у партнёров, которым мы доверяем. Выберите, кому написать.
 translations:
   en:
     greeting: Hello! Thanks for getting in touch — we can see your enquiry and we'll come back to you shortly.

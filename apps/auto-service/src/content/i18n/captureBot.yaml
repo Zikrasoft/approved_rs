@@ -16,6 +16,9 @@ services:
 card:
   request: Оставить заявку
   site: Подробнее на сайте
+partners:
+  button: Партнёры
+  text: Наши партнёры — выберите, кому написать.
 translations:
   sr:
     greeting: Zdravo! Hvala što ste nam pisali — upit je kod nas i majstor će vam se uskoro javiti.

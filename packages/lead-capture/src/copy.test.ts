@@ -14,6 +14,7 @@ const COPY = {
   menu: { text: 'Чем помочь?', back: 'Назад' },
   services: { button: 'Услуги', text: 'Выберите услугу' },
   card: { request: 'Оставить заявку', site: 'На сайте' },
+  partners: { button: 'Партнёры', text: 'Кому написать?' },
 };
 
 describe('the dialog copy a site supplies', () => {

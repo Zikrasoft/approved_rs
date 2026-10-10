@@ -15,6 +15,9 @@ import {
   type RecordedBotApi,
 } from '@podbor/lead-crm/testing';
 
+import { stampStartVisitor } from '@podbor/site-kit/contact-links';
+
+import { referralLink } from './menu.ts';
 import { captureStore, createCaptureWebhookRoute } from './route.ts';
 
 const SECRET = 'capture-webhook-secret';
@@ -40,6 +43,7 @@ const COPY = {
   menu: { text: 'MENU', back: 'BACK' },
   services: { button: 'SERVICES', text: 'PICK_A_SERVICE' },
   card: { request: 'LEAVE_A_REQUEST', site: 'ON_THE_SITE' },
+  partners: { button: 'PARTNERS', text: 'PICK_A_PARTNER' },
 };
 
 const MENU_KEYBOARD = {
@@ -1292,5 +1296,114 @@ describe('the admin hearing about every change the visitor makes', () => {
     await say('BMW X5');
 
     expect(adminNotes()).toEqual([]);
+  });
+});
+
+describe('the Partners screen', () => {
+  function partnerRoute() {
+    return createCaptureWebhookRoute({
+      secret: SECRET,
+      store: captureStore(leadStore),
+      ensureLeadCard,
+      sendFieldChangeToAdmin: notifier.sendFieldChangeToAdmin,
+      bot: createTelegramClient(CAPTURE_TOKEN, 'capture_bot').bot,
+      brand: BRAND,
+      isLocale: (value): value is TestLocale => LOCALES.includes(value),
+      primaryLocale: 'ru',
+      copy: () => COPY,
+      menu: ['services', 'partners'],
+      services: SERVICES,
+      serviceCard: (slug) => ({ title: slug, lines: [], url: 'https://x/' }),
+      partners: (locale) => [
+        { name: 'CarLab', url: referralLink('CarLabRsBot', `${locale}-x`) },
+      ],
+    });
+  }
+
+  it('sits in the menu where the brand enables it', async () => {
+    POST = partnerRoute();
+    await POST(makeCtx(startUpdate('en')));
+
+    expect(lastMarkup()).toEqual({
+      inline_keyboard: [
+        [{ text: 'SERVICES', callback_data: 'services:en' }],
+        [{ text: 'PARTNERS', callback_data: 'partners:en' }],
+      ],
+    });
+  });
+
+  it('opens the partner bots with a referral payload in the mapped locale', async () => {
+    POST = partnerRoute();
+    const writes = storage.writeAttempts();
+
+    await tap('partners:sr');
+
+    expect(edits()).toEqual([
+      expect.objectContaining({
+        text: 'PICK_A_PARTNER',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: 'CarLab',
+                url: 'https://t.me/CarLabRsBot?start=from-approved_sr-x',
+              },
+            ],
+            [{ text: 'BACK', callback_data: 'menu:sr' }],
+          ],
+        },
+      }),
+    ]);
+    expect(storage.writeAttempts()).toBe(writes);
+  });
+
+  it('does not open where the brand has no partners', async () => {
+    await tap('partners:ru');
+
+    expect(edits()).toHaveLength(0);
+  });
+});
+
+describe('a visitor referred by the Approved bot', () => {
+  it('lands on a Lead of the receiving brand that says where they came from', async () => {
+    await POST(makeCtx(startUpdate('from-approved_sr')));
+
+    expect(stored()[0]).toMatchObject({
+      brand: BRAND,
+      commissionPercent: 10,
+      service: '',
+      locale: 'sr',
+      comment: 'Пришёл из бота Approved.rs (Партнёры)',
+    });
+    expect(lastSent()).toEqual([42, 'GREETING_sr\n\nMENU']);
+  });
+
+  it.each([
+    'from-approved_CarLab_sr',
+    'from-approved_brand-CarLab_commissionPercent-0_sr',
+    'brand-CarLab_from-approved_sr',
+  ])('cannot be filed under another brand or rate: %s', async (payload) => {
+    await POST(makeCtx(startUpdate(payload)));
+
+    expect(stored()[0]).toMatchObject({
+      brand: BRAND,
+      commissionPercent: 10,
+    });
+  });
+
+  it('keeps the payload inside the Telegram limit with a visitor id on it', async () => {
+    const link = referralLink('CarLabRsBot', 'sr');
+    const payload = stampStartVisitor(
+      new URL(link).searchParams.get('start') ?? '',
+      '0f8fad5b-d9cb-469f-a165-70867728950e',
+    );
+
+    expect(payload).toMatch(/^[A-Za-z0-9_-]{1,64}$/);
+    await POST(makeCtx(startUpdate(payload ?? '')));
+    expect(stored()[0]).toMatchObject({
+      visitorId: '0f8fad5b-d9cb-469f-a165-70867728950e',
+      locale: 'sr',
+      comment: 'Пришёл из бота Approved.rs (Партнёры)',
+    });
   });
 });

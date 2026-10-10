@@ -1,5 +1,6 @@
 import type { InlineKeyboardButton } from 'grammy/types';
 import { escapeHtml } from '@podbor/lead-crm';
+import { captureBotLink } from '@podbor/site-kit/contact-links';
 import type { CaptureCopy } from './copy.ts';
 
 export interface ServiceCard {
@@ -19,11 +20,23 @@ export interface Screen {
   keyboard: InlineKeyboardButton[][];
 }
 
+export interface PartnerBot {
+  name: string;
+  url: string;
+}
+
 export interface MenuConfig<L extends string, S extends string> {
   menu: readonly MenuButton[];
   services: readonly S[];
   serviceCard: (slug: S, locale: L) => ServiceCard;
   copy: (locale: L) => CaptureCopy;
+  partners?: (locale: L) => readonly PartnerBot[];
+}
+
+export const REFERRAL = 'from-approved';
+
+export function referralLink(botUsername: string, locale: string): string {
+  return captureBotLink(botUsername, locale, REFERRAL);
 }
 
 export interface Tap {
@@ -49,6 +62,7 @@ export function createScreens<L extends string, S extends string>({
   services,
   serviceCard,
   copy,
+  partners,
 }: MenuConfig<L, S>) {
   const isService = (value: string): value is S =>
     (services as readonly string[]).includes(value);
@@ -100,10 +114,23 @@ export function createScreens<L extends string, S extends string>({
     };
   }
 
+  function partnerList(locale: L): Screen | null {
+    if (!partners) return null;
+    const words = copy(locale);
+    return {
+      text: words.partners.text,
+      keyboard: [
+        ...partners(locale).map(({ name, url }) => [{ text: name, url }]),
+        tap(words.menu.back, 'menu', locale),
+      ],
+    };
+  }
+
   const screens: Record<string, (locale: L, arg: string) => Screen | null> = {
     menu: mainMenu,
     services: serviceList,
     service: (locale, slug) => (isService(slug) ? service(locale, slug) : null),
+    partners: partnerList,
   };
 
   function render(screen: string, locale: L, arg: string): Screen | null {

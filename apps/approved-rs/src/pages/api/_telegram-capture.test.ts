@@ -86,4 +86,51 @@ describe('the Approved capture bot', () => {
       }),
     ]);
   });
+
+  it('sends the visitor to the sister bots from Partners, in their locale', async () => {
+    await POST({
+      request: new Request('http://localhost/api/telegram-capture', {
+        method: 'POST',
+        headers: {
+          'x-telegram-bot-api-secret-token': 'test-capture-webhook-secret',
+        },
+        body: JSON.stringify({
+          update_id: 2,
+          callback_query: {
+            id: 'tap',
+            from: { id: 42, first_name: 'Ivan' },
+            chat_instance: 'instance',
+            data: 'partners:de',
+            message: {
+              message_id: 900,
+              date: 0,
+              chat: { id: 42, type: 'private' },
+            },
+          },
+        }),
+      }),
+    });
+
+    const edit = api.callsTo('editMessageText', 'test-capture-bot-token').at(-1)
+      ?.payload as { text: string; reply_markup: unknown };
+    const { captureBot } = content('de');
+    expect(edit.text).toBe(captureBot.partners.text);
+    expect(edit.reply_markup).toEqual({
+      inline_keyboard: [
+        [
+          {
+            text: 'CarLab',
+            url: 'https://t.me/CarLabRsBot?start=from-approved_en',
+          },
+        ],
+        [
+          {
+            text: 'Details',
+            url: 'https://t.me/DetailsRsBot?start=from-approved_en',
+          },
+        ],
+        [{ text: captureBot.menu.back, callback_data: 'menu:de' }],
+      ],
+    });
+  });
 });
