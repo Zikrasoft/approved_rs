@@ -161,6 +161,27 @@ describe('capturePrompt on a lead', () => {
   });
 });
 
+describe('referredBy on a lead', () => {
+  const schema = createLeadSchema({ defaultCommissionPercent: 10 });
+
+  it('reads a record written before referrals as not referred', () => {
+    expect(schema.parse(base).referredBy).toBeNull();
+  });
+
+  it('keeps an Approved referral', () => {
+    expect(schema.parse({ ...base, referredBy: 'approved' }).referredBy).toBe(
+      'approved',
+    );
+  });
+
+  it('drops an unknown referrer instead of quarantining the lead', () => {
+    const lead = schema.parse({ ...base, referredBy: 'someone' });
+
+    expect(lead.referredBy).toBeNull();
+    expect(lead.contact).toBe('@ivan');
+  });
+});
+
 describe('pendingPrompt on a lead', () => {
   const schema = createLeadSchema({ defaultCommissionPercent: 10 });
 

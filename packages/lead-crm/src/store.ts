@@ -13,6 +13,7 @@ import { channelLabel } from './channelLabels.ts';
 import { postponableStatus } from './schema.ts';
 import type {
   CapturePrompt,
+  Referrer,
   LeadInput,
   LeadStatus,
   PendingCommissionClaim,
@@ -45,7 +46,16 @@ export interface OwedRow {
 export interface CaptureUpdate {
   note?: string;
   contact?: string;
+  service?: string;
+  locale?: string;
+  referredBy?: Referrer;
   capturePrompt: CapturePrompt | null;
+}
+
+export interface MergeOutcome {
+  lead: StoredLead;
+  merged: boolean;
+  before: StoredLead | null;
 }
 
 export interface LeadStoreOptions {
@@ -334,10 +344,8 @@ export function createLeadStore({
       return inserted;
     },
 
-    async insertOrMergeLead(
-      data: LeadInput,
-    ): Promise<{ lead: StoredLead; merged: boolean }> {
-      let outcome!: { lead: StoredLead; merged: boolean };
+    async insertOrMergeLead(data: LeadInput): Promise<MergeOutcome> {
+      let outcome!: MergeOutcome;
       await updateLeads((leads, idFloor) => {
         const now = Date.now();
         const existing = data.visitorId
@@ -355,7 +363,7 @@ export function createLeadStore({
 
         if (!existing) {
           const inserted = newStoredLead(data, nextId(leads, idFloor));
-          outcome = { lead: inserted, merged: false };
+          outcome = { lead: inserted, merged: false, before: null };
           return [...leads, inserted];
         }
 
@@ -389,6 +397,7 @@ export function createLeadStore({
             : {}),
           source_url: existing.source_url ?? data.source_url,
           telegramId: data.telegramId ?? existing.telegramId,
+          referredBy: data.referredBy ?? existing.referredBy,
           capturePrompt: data.capturePrompt ?? existing.capturePrompt,
           comment: appendNote(
             existing.comment,
@@ -401,7 +410,7 @@ export function createLeadStore({
               .join('\n'),
           ),
         };
-        outcome = { lead: merged, merged: true };
+        outcome = { lead: merged, merged: true, before: existing };
         return leads.map((l) => (l.id === existing.id ? merged : l));
       });
       return outcome;
@@ -457,12 +466,22 @@ export function createLeadStore({
 
     updateCapture(
       id: number,
-      { note, contact, capturePrompt }: CaptureUpdate,
+      {
+        note,
+        contact,
+        service,
+        locale,
+        referredBy,
+        capturePrompt,
+      }: CaptureUpdate,
     ): Promise<StoredLead | undefined> {
       return updateOne(id, (l) => ({
         ...l,
         comment: note ? appendNote(l.comment, note) : l.comment,
         contact: contact ?? l.contact,
+        ...(service ? { service, services: [service] } : {}),
+        locale: locale ?? l.locale,
+        referredBy: referredBy ?? l.referredBy,
         capturePrompt,
       }));
     },

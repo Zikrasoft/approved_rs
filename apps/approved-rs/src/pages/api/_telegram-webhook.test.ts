@@ -1,159 +1,77 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { APIContext } from 'astro';
+import { addDays, format } from 'date-fns';
+import { LEADS_PATH } from '@podbor/lead-crm';
+import {
+  createMemoryStorage,
+  recordBotApi,
+  type BotApiResponse,
+  type MemoryStorage,
+} from '@podbor/lead-crm/testing';
 import type { StoredLead } from '@/lib/store';
 
-vi.mock('@/lib/telegram', async () => {
-  const actual =
-    await vi.importActual<typeof import('@podbor/lead-crm')>(
-      '@podbor/lead-crm',
-    );
+const memory = vi.hoisted(() => {
+  process.env.TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB = 'test-carlab-capture-token';
+  const storages = new Map<string, MemoryStorage>();
   return {
-    canAddIncome: actual.canAddIncome,
-    LEAD_STATUS_ACTIONS: actual.LEAD_STATUS_ACTIONS,
-    answerCallback: vi.fn(),
-    afterStatusChange: vi.fn(),
-    ensureLeadCard: vi.fn(),
-    sendForceReplyPrompt: vi.fn(),
-    formatMoney: (n: number) => `${n} €`,
-    formatDateRu: (iso: string) => {
-      const [y, m, d] = iso.split('-');
-      return `${d}.${m}.${y}`;
+    storages,
+    async module(name: string) {
+      const { createMemoryStorage } = await import('@podbor/lead-crm/testing');
+      const storageAt = ({ path }: { path: string }) => {
+        if (!storages.has(path)) storages.set(path, createMemoryStorage());
+        return storages.get(path)!;
+      };
+      return { [name]: storageAt };
     },
-    sendIncomeNotificationToAdmin: vi.fn(),
-    sendCommissionClaimToAdmin: vi.fn(),
-    sendCommissionResultToOwner: vi.fn(),
-    sendFieldChangeToAdmin: vi.fn(),
-    EDIT_COPY: actual.EDIT_COPY,
-    escapeHtml: actual.escapeHtml,
-    REPLY_COPY: actual.REPLY_COPY,
-    sendMessage: vi.fn(),
-    buildOwedList: vi.fn().mockReturnValue({
-      text: 'OWED_LIST',
-      reply_markup: { inline_keyboard: [] },
-    }),
-    formatDealsList: vi.fn().mockReturnValue('DEALS_LIST'),
-    buildSearchResults: vi.fn().mockReturnValue({
-      text: 'SEARCH_RESULTS',
-      reply_markup: { inline_keyboard: [] },
-    }),
-    buildMenu: vi.fn((role: string) => ({
-      text: `MENU_${role}`,
-      reply_markup: { inline_keyboard: [] },
-    })),
-    buildHelp: vi.fn((role: string) => `HELP_${role}`),
-    buildLeadList: vi.fn((_leads: unknown[], status: string) => ({
-      text: `LIST_${status}`,
-      reply_markup: { inline_keyboard: [] },
-    })),
-    buildStats: vi.fn().mockReturnValue('STATS'),
-    buildLeadDetail: vi.fn((lead: { id: number }, role: string) => ({
-      text: `DETAIL_${lead.id}_${role}`,
-      reply_markup: { inline_keyboard: [] },
-    })),
-    buildDeleteConfirm: vi.fn((lead: { id: number }) => ({
-      text: `DELCONFIRM_${lead.id}`,
-      reply_markup: { inline_keyboard: [] },
-    })),
-    buildRemindPicker: vi.fn((id: number) => ({
-      text: `REMINDPICKER_${id}`,
-      reply_markup: { inline_keyboard: [] },
-    })),
-    editLeadDetailMessage: vi.fn(),
-    safeEditMessage: vi.fn(),
-    OWNER_IDS: [111],
-    ADMIN_IDS: [222],
   };
 });
 
-const capture = vi.hoisted(() => ({
-  approved: { sendMessage: vi.fn() },
-  carlab: { sendMessage: vi.fn() },
-}));
-
-vi.mock('@/lib/captureBot', () => ({
-  captureClient: capture.approved,
-  REPLY_RELAY_BRANDS: ['Approved.rs', 'CarLab'],
-  captureClientFor: (brand: string) =>
-    new Map([
-      ['Approved.rs', capture.approved],
-      ['CarLab', capture.carlab],
-    ]).get(brand),
-}));
-
-vi.mock('@/lib/store', async () => {
-  const actual =
-    await vi.importActual<typeof import('@podbor/lead-crm')>(
-      '@podbor/lead-crm',
-    );
-  return {
-    appendIncome: actual.appendIncome,
-    appendNote: actual.appendNote,
-    getLead: vi.fn(),
-    setStatus: vi.fn(),
-    archiveLead: vi.fn(),
-    unarchiveLead: vi.fn(),
-    deleteLead: vi.fn(),
-    resumeLead: vi.fn(),
-    postponeLead: vi.fn(),
-    canPostpone: actual.canPostpone,
-    postponePatch: actual.postponePatch,
-    wonPatch: actual.wonPatch,
-    claimCommission: vi.fn(),
-    confirmCommissionPayment: vi.fn(),
-    rejectCommissionPayment: vi.fn(),
-    setPendingPrompt: vi.fn(),
-    findByPendingPrompt: vi.fn(),
-    resolvePendingPrompt: vi.fn(),
-    searchLeads: vi.fn(),
-    getOwedSummary: vi.fn(),
-    readLeads: vi.fn(),
-    getCommission: vi.fn(),
-  };
-});
+vi.mock('@podbor/lead-crm/storage/vercel-blob', () =>
+  memory.module('createVercelBlobStorage'),
+);
+vi.mock('@podbor/lead-crm/storage/file', () =>
+  memory.module('createFileStorage'),
+);
 
 import { POST, CALLBACKS } from './telegram-webhook';
-import { captureClient } from '@/lib/captureBot';
 import {
-  afterStatusChange,
-  answerCallback,
-  ensureLeadCard,
-  sendForceReplyPrompt,
-  sendIncomeNotificationToAdmin,
-  sendCommissionClaimToAdmin,
-  sendCommissionResultToOwner,
-  sendFieldChangeToAdmin,
-  sendMessage,
+  buildDeleteConfirm,
+  buildHelp,
   buildLeadDetail,
   buildLeadList,
-  editLeadDetailMessage,
-  safeEditMessage,
+  buildMenu,
+  buildOwedList,
   buildRemindPicker,
+  buildSearchResults,
+  buildStats,
+  formatDealsList,
 } from '@/lib/telegram';
-import {
-  getLead,
-  setStatus,
-  archiveLead,
-  unarchiveLead,
-  deleteLead,
-  resumeLead,
-  postponeLead,
-  claimCommission,
-  confirmCommissionPayment,
-  rejectCommissionPayment,
-  setPendingPrompt,
-  findByPendingPrompt,
-  resolvePendingPrompt,
-  searchLeads,
-  getOwedSummary,
-  readLeads,
-  getCommission,
-} from '@/lib/store';
+import { getLead, getOwedSummary, readLeads, searchLeads } from '@/lib/store';
+
+const api = recordBotApi();
+vi.stubGlobal('fetch', api.fetch);
 
 const SECRET = 'test-webhook-secret';
+const CRM_TOKEN = 'test-bot-token';
+const APPROVED_CAPTURE_TOKEN = 'test-capture-bot-token';
+const CARLAB_CAPTURE_TOKEN = 'test-carlab-capture-token';
+const GROUP_ID = '-1009876543210';
 const OWNER_ID = 111;
 const ADMIN_ID = 222;
 const OTHER_ID = 999;
 const DM_CHAT_ID = 111;
+const CARD_CHAT_ID = -100123;
+const CARD_MESSAGE_ID = 555;
+const PROMPT_ID = 888;
+const LATER = '20.10.2099';
+
+let nextUpdateId = 1;
+
+function leadsStorage(): MemoryStorage {
+  if (!memory.storages.has(LEADS_PATH))
+    memory.storages.set(LEADS_PATH, createMemoryStorage());
+  return memory.storages.get(LEADS_PATH)!;
+}
 
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
   return {
@@ -169,13 +87,14 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     commissionPercent: 10,
     paidAmount: 0,
     payments: [],
-    telegramChatId: -100123,
-    telegramMessageId: 555,
+    telegramChatId: CARD_CHAT_ID,
+    telegramMessageId: CARD_MESSAGE_ID,
     statusChangedAt: '2026-01-01T00:00:00.000Z',
     createdAt: '2026-01-01T00:00:00.000Z',
     pendingPrompt: null,
     capturePrompt: null,
     telegramId: null,
+    referredBy: null,
     archived: false,
     pendingCommissionClaim: null,
     remindAt: null,
@@ -185,11 +104,18 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
   };
 }
 
-function mockResolveFromBase(base: StoredLead) {
-  vi.mocked(resolvePendingPrompt).mockImplementation(async (_c, _m, apply) => ({
-    ...base,
-    ...apply(base),
-  }));
+function seed(...leads: StoredLead[]): void {
+  leadsStorage().seed(leads);
+}
+
+function income(id: number, amount: number, paidAt: string | null = null) {
+  return { id, amount, at: '2026-01-01T00:00:00.000Z', paidAt };
+}
+
+const PAID_AT = '2026-01-03T00:00:00.000Z';
+
+function awaiting(kind: NonNullable<StoredLead['pendingPrompt']>['kind']) {
+  return { chatId: DM_CHAT_ID, messageId: PROMPT_ID, kind };
 }
 
 function makeCtx(
@@ -202,106 +128,122 @@ function makeCtx(
     request: new Request('http://localhost/api/telegram-webhook', {
       method: 'POST',
       headers,
-      body: JSON.stringify(body),
+      body: typeof body === 'string' ? body : JSON.stringify(body),
     }),
   } as Pick<APIContext, 'request'> as APIContext;
 }
 
-function makeRawCtx(rawBody: string) {
-  return {
-    request: new Request('http://localhost/api/telegram-webhook', {
-      method: 'POST',
-      headers: { 'x-telegram-bot-api-secret-token': SECRET },
-      body: rawBody,
+function tap(
+  data: string,
+  from: number,
+  {
+    id = 'cb',
+    messageId = 1,
+    chatId = DM_CHAT_ID,
+    updateId = nextUpdateId++,
+  }: {
+    id?: string;
+    messageId?: number;
+    chatId?: number;
+    updateId?: number;
+  } = {},
+) {
+  return POST(
+    makeCtx({
+      update_id: updateId,
+      callback_query: {
+        id,
+        data,
+        from: { id: from },
+        message: { message_id: messageId, chat: { id: chatId } },
+      },
     }),
-  } as Pick<APIContext, 'request'> as APIContext;
+  );
+}
+
+function message(
+  text: string,
+  from: number,
+  {
+    chatId = from,
+    type = 'private',
+    replyTo,
+  }: { chatId?: number; type?: string; replyTo?: number } = {},
+) {
+  return POST(
+    makeCtx({
+      update_id: nextUpdateId++,
+      message: {
+        message_id: 2,
+        text,
+        chat: { id: chatId, type },
+        from: { id: from },
+        ...(replyTo == null
+          ? {}
+          : { reply_to_message: { message_id: replyTo } }),
+      },
+    }),
+  );
+}
+
+const answerPrompt = (text: string) =>
+  message(text, OWNER_ID, { chatId: DM_CHAT_ID, replyTo: PROMPT_ID });
+
+const crm = (method: string) =>
+  api.callsTo(method, CRM_TOKEN).map((c) => c.payload);
+
+const answers = () => crm('answerCallbackQuery');
+
+const sentTo = (chatId: number | string) =>
+  crm('sendMessage').filter((p) => p.chat_id === chatId);
+
+const textsTo = (chatId: number | string) => sentTo(chatId).map((p) => p.text);
+
+const forceReplies = () =>
+  crm('sendMessage').filter(
+    (p) => (p.reply_markup as { force_reply?: boolean })?.force_reply,
+  );
+
+const edits = (chatId: number, messageId: number) =>
+  crm('editMessageText').filter(
+    (p) => p.chat_id === chatId && p.message_id === messageId,
+  );
+
+const view = ({
+  text,
+  reply_markup,
+}: {
+  text: string;
+  reply_markup: unknown;
+}) => expect.objectContaining({ text, reply_markup });
+
+async function stored(id = 5): Promise<StoredLead> {
+  const lead = await getLead(id);
+  expect(lead).toBeDefined();
+  return lead!;
 }
 
 describe('POST /api/telegram-webhook', () => {
   beforeEach(() => {
-    vi.mocked(getLead).mockReset().mockResolvedValue(makeLead());
-    vi.mocked(setStatus)
-      .mockReset()
-      .mockResolvedValue(makeLead({ status: 'lost' }));
-    vi.mocked(archiveLead)
-      .mockReset()
-      .mockResolvedValue(makeLead({ archived: true }));
-    vi.mocked(unarchiveLead)
-      .mockReset()
-      .mockResolvedValue(makeLead({ archived: false }));
-    vi.mocked(deleteLead).mockReset().mockResolvedValue(true);
-    vi.mocked(resumeLead)
-      .mockReset()
-      .mockResolvedValue(makeLead({ status: 'in_progress', remindAt: null }));
-    vi.mocked(postponeLead)
-      .mockReset()
-      .mockResolvedValue(
-        makeLead({ status: 'postponed', remindAt: '2026-10-20' }),
-      );
-    vi.mocked(claimCommission)
-      .mockReset()
-      .mockResolvedValue(
-        makeLead({
-          status: 'won',
-          dealAmount: 100000,
-          pendingCommissionClaim: {
-            amount: 10000,
-            claimedAt: '2026-01-02T00:00:00.000Z',
-            incomeIds: [1],
-          },
-        }),
-      );
-    vi.mocked(confirmCommissionPayment)
-      .mockReset()
-      .mockResolvedValue(
-        makeLead({ status: 'won', dealAmount: 100000, paidAmount: 4000 }),
-      );
-    vi.mocked(rejectCommissionPayment)
-      .mockReset()
-      .mockResolvedValue(makeLead({ status: 'won', dealAmount: 100000 }));
-    vi.mocked(setPendingPrompt).mockReset().mockResolvedValue(makeLead());
-    vi.mocked(findByPendingPrompt).mockReset().mockResolvedValue(undefined);
-    vi.mocked(resolvePendingPrompt).mockReset().mockResolvedValue(undefined);
-    vi.mocked(searchLeads).mockReset().mockResolvedValue([]);
-    vi.mocked(getOwedSummary)
-      .mockReset()
-      .mockResolvedValue({ rows: [], total: 0 });
-    vi.mocked(readLeads).mockReset().mockResolvedValue([]);
-    vi.mocked(getCommission).mockReset().mockReturnValue({
-      commission: 10000,
-      remaining: 10000,
-      isPaidOff: false,
-    });
-    vi.mocked(answerCallback).mockReset().mockResolvedValue(undefined);
-    vi.mocked(ensureLeadCard).mockReset().mockResolvedValue(undefined);
-    vi.mocked(editLeadDetailMessage).mockReset().mockResolvedValue(undefined);
-    vi.mocked(safeEditMessage).mockReset().mockResolvedValue(undefined);
-    vi.mocked(buildRemindPicker).mockClear();
-    vi.mocked(sendForceReplyPrompt).mockReset().mockResolvedValue(888);
-    vi.mocked(afterStatusChange).mockReset().mockResolvedValue(undefined);
-    vi.mocked(sendIncomeNotificationToAdmin)
-      .mockReset()
-      .mockResolvedValue(undefined);
-    vi.mocked(sendCommissionClaimToAdmin)
-      .mockReset()
-      .mockResolvedValue(undefined);
-    vi.mocked(sendCommissionResultToOwner)
-      .mockReset()
-      .mockResolvedValue(undefined);
-    vi.mocked(sendMessage).mockReset().mockResolvedValue(undefined);
-    vi.mocked(sendFieldChangeToAdmin).mockReset().mockResolvedValue(undefined);
-    vi.mocked(captureClient.sendMessage)
-      .mockReset()
-      .mockResolvedValue(undefined);
-    vi.mocked(capture.carlab.sendMessage)
-      .mockReset()
-      .mockResolvedValue(undefined);
+    api.reset();
+    api.respond(
+      'sendMessage',
+      (payload: Record<string, unknown>): BotApiResponse => ({
+        ok: true,
+        result: {
+          message_id: PROMPT_ID,
+          date: 0,
+          chat: { id: Number(payload.chat_id), type: 'private' },
+        },
+      }),
+    );
+    seed(makeLead());
   });
 
   it('rejects a request without the secret token header', async () => {
     const res = await POST(makeCtx({}, {}));
     expect(res.status).toBe(401);
-    expect(getLead).not.toHaveBeenCalled();
+    expect(api.calls).toEqual([]);
   });
 
   it('rejects a request with the wrong secret token', async () => {
@@ -312,1264 +254,664 @@ describe('POST /api/telegram-webhook', () => {
   });
 
   it('acks with 200 on a malformed JSON body instead of throwing, so Telegram stops retrying', async () => {
-    const res = await POST(makeRawCtx('not json'));
+    const res = await POST(makeCtx('not json'));
     expect(res.status).toBe(200);
-    expect(getLead).not.toHaveBeenCalled();
+    expect(api.calls).toEqual([]);
   });
 
   it.each([
     ['wrong field types', { update_id: 'x', message: 5 }],
-    ['a non-object', 'just a string'],
+    ['a non-object', JSON.stringify('just a string')],
     ['a callback without an id', { callback_query: { data: 'st:5:won' } }],
+    [
+      'an update without an update_id',
+      {
+        callback_query: {
+          id: 'cb-noid',
+          data: 'st:5:lost',
+          from: { id: OWNER_ID },
+          message: { message_id: 1, chat: { id: DM_CHAT_ID } },
+        },
+      },
+    ],
   ])(
     'acks with 200 on a well-formed JSON body of the wrong shape (%s) without running a handler',
     async (_label, body) => {
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const before = leadsStorage().writeAttempts();
       const res = await POST(makeCtx(body));
       expect(res.status).toBe(200);
       expect(warn).toHaveBeenCalledOnce();
-      expect(getLead).not.toHaveBeenCalled();
-      expect(setStatus).not.toHaveBeenCalled();
-      expect(findByPendingPrompt).not.toHaveBeenCalled();
-      expect(answerCallback).not.toHaveBeenCalled();
-      expect(sendMessage).not.toHaveBeenCalled();
+      expect(api.calls).toEqual([]);
+      expect(leadsStorage().writeAttempts()).toBe(before);
       warn.mockRestore();
     },
   );
 
   describe('duplicate delivery — same update_id is only processed once', () => {
     it('skips a redelivered update_id instead of writing twice', async () => {
-      const body = {
-        update_id: 918273645,
-        callback_query: {
-          id: 'cb-dup',
-          data: 'st:5:lost',
-          from: { id: OWNER_ID },
-          message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-        },
-      };
-      const first = await POST(makeCtx(body));
-      const second = await POST(makeCtx(body));
+      const first = await tap('st:5:lost', OWNER_ID, { updateId: 918273645 });
+      const writes = leadsStorage().writeAttempts();
+      const calls = api.calls.length;
+      const second = await tap('st:5:lost', OWNER_ID, { updateId: 918273645 });
 
       expect(first.status).toBe(200);
       expect(second.status).toBe(200);
-      expect(setStatus).toHaveBeenCalledTimes(1);
-    });
-
-    it('processes updates with no update_id normally (field is optional)', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-noid',
-            data: 'st:5:lost',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(setStatus).toHaveBeenCalledTimes(1);
+      expect(leadsStorage().writeAttempts()).toBe(writes);
+      expect(api.calls).toHaveLength(calls);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb', text: 'Статус обновлён' },
+      ]);
     });
   });
 
   describe('trust boundary — callbacks are gated on from.id, not chat', () => {
     it('rejects a status callback from someone who is neither owner nor admin', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-x',
-            data: 'st:5:lost',
-            from: { id: OTHER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
+      const res = await tap('st:5:lost', OTHER_ID, { id: 'cb-x' });
       expect(res.status).toBe(200);
-      expect(setStatus).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-x');
+      expect((await stored()).status).toBe('in_progress');
+      expect(answers()).toEqual([{ callback_query_id: 'cb-x' }]);
     });
   });
 
   describe('status callbacks (st:<id>:<key>)', () => {
     it('admin cannot finalize (won) — only the owner knows the deal amount', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-won-admin',
-            data: 'st:5:won',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
-      expect(setStatus).not.toHaveBeenCalled();
+      await tap('st:5:won', ADMIN_ID);
+      expect(forceReplies()).toEqual([]);
+      expect(await stored()).toMatchObject({
+        status: 'in_progress',
+        pendingPrompt: null,
+      });
     });
 
     it('admin cannot finalize (lost)', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-lost-admin',
-            data: 'st:5:lost',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(setStatus).not.toHaveBeenCalled();
+      await tap('st:5:lost', ADMIN_ID);
+      expect((await stored()).status).toBe('in_progress');
     });
 
     it('sets status directly for in_progress/lost and refreshes both surfaces', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-1',
-            data: 'st:5:lost',
-            from: { id: OWNER_ID },
-            message: { message_id: 555, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
+      const res = await tap('st:5:lost', OWNER_ID, {
+        id: 'cb-1',
+        messageId: 555,
+      });
       expect(res.status).toBe(200);
-      expect(setStatus).toHaveBeenCalledWith(5, 'lost');
-      expect(afterStatusChange).toHaveBeenCalledWith(
-        expect.objectContaining({ status: 'lost' }),
-        { surface: { chatId: DM_CHAT_ID, messageId: 555, role: 'owner' } },
-      );
-      expect(answerCallback).toHaveBeenCalledWith('cb-1', 'Статус обновлён');
+      const lead = await stored();
+      expect(lead.status).toBe('lost');
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+      expect(edits(DM_CHAT_ID, 555)).toEqual([
+        expect.objectContaining({
+          text: buildLeadDetail(lead, 'owner').text,
+        }),
+      ]);
+      expect(sentTo(ADMIN_ID)).toHaveLength(1);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-1', text: 'Статус обновлён' },
+      ]);
     });
 
     it('starts a deal-amount prompt on "won" instead of setting status directly, when no amount is set yet', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-2',
-            data: 'st:5:won',
-            from: { id: OWNER_ID },
-            message: { message_id: 555, chat: { id: DM_CHAT_ID } },
-          },
+      await tap('st:5:won', OWNER_ID, { id: 'cb-2' });
+      expect(forceReplies()).toEqual([
+        expect.objectContaining({
+          chat_id: DM_CHAT_ID,
+          text: expect.stringContaining('заработал'),
         }),
-      );
-      expect(res.status).toBe(200);
-      expect(setStatus).not.toHaveBeenCalled();
-      expect(sendForceReplyPrompt).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        expect.stringContaining('заработал'),
-      );
-      expect(setPendingPrompt).toHaveBeenCalledWith(5, {
-        chatId: DM_CHAT_ID,
-        messageId: 888,
-        kind: 'deal_amount',
+      ]);
+      expect(await stored()).toMatchObject({
+        status: 'in_progress',
+        pendingPrompt: awaiting('deal_amount'),
       });
-      expect(answerCallback).toHaveBeenCalledWith('cb-2', 'Жду сумму');
-      expect(afterStatusChange).not.toHaveBeenCalled();
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-2', text: 'Жду сумму' },
+      ]);
+      expect(crm('editMessageText')).toEqual([]);
     });
 
     it('asks for the amount on top when prepayments are already booked', async () => {
-      vi.mocked(getLead).mockResolvedValue(
-        makeLead({
-          id: 5,
-          incomes: [
-            {
-              id: 1,
-              amount: 50000,
-              at: '2026-01-01T00:00:00.000Z',
-              paidAt: null,
-            },
-          ],
-        }),
-      );
-
-      await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-2c',
-            data: 'st:5:won',
-            from: { id: OWNER_ID },
-            message: { message_id: 555, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-
-      expect(sendForceReplyPrompt).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        expect.stringContaining('сверх'),
-      );
+      seed(makeLead({ incomes: [income(1, 50000)] }));
+      await tap('st:5:won', OWNER_ID);
+      expect(forceReplies()).toEqual([
+        expect.objectContaining({ text: expect.stringContaining('сверх') }),
+      ]);
     });
 
     it('does not re-open the amount prompt on a stale "won" button for a closed deal', async () => {
-      vi.mocked(getLead).mockResolvedValue(
+      seed(
         makeLead({
-          id: 5,
           status: 'won',
           dealAmount: 50000,
-          incomes: [
-            {
-              id: 1,
-              amount: 50000,
-              at: '2026-01-01T00:00:00.000Z',
-              paidAt: null,
-            },
-          ],
+          incomes: [income(1, 50000)],
         }),
       );
-
-      await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-2d',
-            data: 'st:5:won',
-            from: { id: OWNER_ID },
-            message: { message_id: 555, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-
-      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
-      expect(setPendingPrompt).not.toHaveBeenCalled();
+      await tap('st:5:won', OWNER_ID);
+      expect(forceReplies()).toEqual([]);
+      expect((await stored()).pendingPrompt).toBeNull();
     });
 
     it('resends a fresh deal-amount prompt on a second "won" tap, replacing a stale pending one', async () => {
-      vi.mocked(getLead).mockResolvedValue(
+      seed(
         makeLead({
-          id: 5,
-          dealAmount: null,
-          pendingPrompt: {
-            chatId: DM_CHAT_ID,
-            messageId: 500,
-            kind: 'deal_amount',
-          },
+          pendingPrompt: { ...awaiting('deal_amount'), messageId: 500 },
         }),
       );
-
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-2b',
-            data: 'st:5:won',
-            from: { id: OWNER_ID },
-            message: { message_id: 555, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-
-      expect(res.status).toBe(200);
-      expect(sendForceReplyPrompt).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        expect.stringContaining('заработал'),
-      );
-      expect(setPendingPrompt).toHaveBeenCalledWith(5, {
-        chatId: DM_CHAT_ID,
-        messageId: 888,
-        kind: 'deal_amount',
-      });
-      expect(answerCallback).toHaveBeenCalledWith('cb-2b', 'Жду сумму');
+      await tap('st:5:won', OWNER_ID, { id: 'cb-2b' });
+      expect(forceReplies()).toHaveLength(1);
+      expect((await stored()).pendingPrompt).toEqual(awaiting('deal_amount'));
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-2b', text: 'Жду сумму' },
+      ]);
     });
 
     it('does nothing when the lead is not found', async () => {
-      vi.mocked(getLead).mockResolvedValue(undefined);
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-3',
-            data: 'st:99:in_progress',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(setStatus).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-3');
+      const writes = leadsStorage().writeAttempts();
+      await tap('st:99:in_progress', OWNER_ID, { id: 'cb-3' });
+      expect(leadsStorage().writeAttempts()).toBe(writes);
+      expect(answers()).toEqual([{ callback_query_id: 'cb-3' }]);
     });
 
     it('acks without updating for an unrecognized status key', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-4',
-            data: 'st:5:bogus',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(setStatus).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-4');
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      await tap('st:5:bogus', OWNER_ID, { id: 'cb-4' });
+      expect((await stored()).status).toBe('in_progress');
+      expect(answers()).toEqual([{ callback_query_id: 'cb-4' }]);
+      warn.mockRestore();
     });
 
-    it('acks with an error message and does not throw if setStatus fails', async () => {
-      vi.mocked(setStatus).mockRejectedValueOnce(new Error('down'));
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-5',
-            data: 'st:5:lost',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
+    it('acks with an error message and does not throw if the store write fails', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(leadsStorage(), 'write').mockRejectedValueOnce(
+        new Error('down'),
       );
+      const res = await tap('st:5:lost', OWNER_ID, { id: 'cb-5' });
       expect(res.status).toBe(200);
-      expect(answerCallback).toHaveBeenCalledWith(
-        'cb-5',
-        'Ошибка, попробуйте ещё раз',
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-5', text: 'Ошибка, попробуйте ещё раз' },
+      ]);
+      error.mockRestore();
+    });
+  });
+
+  describe('Bot API errors the edits swallow', () => {
+    it('treats "message is not modified" as a successful edit', async () => {
+      api.fail(
+        'editMessageText',
+        'Bad Request: message is not modified: specified new message content and reply markup are exactly the same',
       );
+      await tap('arch:5', OWNER_ID, { id: 'cb-nm' });
+      expect((await stored()).archived).toBe(true);
+      expect(crm('editMessageText')).toHaveLength(2);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-nm', text: 'Архивировано' },
+      ]);
+    });
+
+    it('posts a fresh group card when the old one is gone ("message to edit not found")', async () => {
+      api.fail('editMessageText', 'Bad Request: message to edit not found');
+      seed(makeLead({ pendingPrompt: awaiting('edit_name') }));
+
+      await answerPrompt('Пётр');
+
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+      expect(sentTo(GROUP_ID)).toHaveLength(1);
+      expect(crm('pinChatMessage')).toEqual([
+        expect.objectContaining({
+          chat_id: Number(GROUP_ID),
+          message_id: PROMPT_ID,
+        }),
+      ]);
+      expect(await stored()).toMatchObject({
+        name: 'Пётр',
+        telegramChatId: Number(GROUP_ID),
+        telegramMessageId: PROMPT_ID,
+      });
+      expect(textsTo(DM_CHAT_ID)).toEqual([
+        expect.stringContaining('✅ Обновлено'),
+      ]);
+    });
+
+    it('still fails the tap on any other edit error', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+      api.fail('editMessageText', 'Bad Request: chat not found');
+      await tap('arch:5', OWNER_ID, { id: 'cb-err' });
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-err', text: 'Ошибка, попробуйте ещё раз' },
+      ]);
+      error.mockRestore();
     });
   });
 
   describe('archive / unarchive', () => {
     it('arch:<id> archives and refreshes both surfaces', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-6',
-            data: 'arch:5',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(archiveLead).toHaveBeenCalledWith(5);
-      expect(ensureLeadCard).toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-6', 'Архивировано');
+      await tap('arch:5', OWNER_ID, { id: 'cb-6' });
+      expect((await stored()).archived).toBe(true);
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+      expect(edits(DM_CHAT_ID, 1)).toHaveLength(1);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-6', text: 'Архивировано' },
+      ]);
     });
 
     it('unarch:<id> restores and refreshes both surfaces', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-7',
-            data: 'unarch:5',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(unarchiveLead).toHaveBeenCalledWith(5);
-      expect(answerCallback).toHaveBeenCalledWith('cb-7', 'Восстановлено');
+      seed(makeLead({ archived: true }));
+      await tap('unarch:5', ADMIN_ID, { id: 'cb-7' });
+      expect((await stored()).archived).toBe(false);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-7', text: 'Восстановлено' },
+      ]);
     });
   });
 
   describe('postpone: — owner only, opens the picker in place of the card', () => {
     it('replaces the card with the quick-pick/calendar/type menu', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-pp1',
-            data: 'postpone:5',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(buildRemindPicker).toHaveBeenCalledWith(5);
-      expect(safeEditMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        1,
-        'REMINDPICKER_5',
-        { inline_keyboard: [] },
-      );
-      expect(answerCallback).toHaveBeenCalledWith('cb-pp1');
+      await tap('postpone:5', OWNER_ID, { id: 'cb-pp1' });
+      const picker = buildRemindPicker(5);
+      expect(edits(DM_CHAT_ID, 1)).toEqual([view(picker)]);
+      expect(answers()).toEqual([{ callback_query_id: 'cb-pp1' }]);
     });
 
     it('admin cannot postpone', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-pp2',
-            data: 'postpone:5',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(buildRemindPicker).not.toHaveBeenCalled();
+      await tap('postpone:5', ADMIN_ID);
+      expect(crm('editMessageText')).toEqual([]);
     });
 
     it('acks without opening the picker when the lead is not found', async () => {
-      vi.mocked(getLead).mockResolvedValue(undefined);
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-pp3',
-            data: 'postpone:5',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(buildRemindPicker).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-pp3');
+      seed();
+      await tap('postpone:5', OWNER_ID, { id: 'cb-pp3' });
+      expect(crm('editMessageText')).toEqual([]);
+      expect(answers()).toEqual([{ callback_query_id: 'cb-pp3' }]);
     });
   });
 
   describe('remindpick: — quick preset, applies immediately', () => {
     it('postpones with a date N days out and refreshes both surfaces', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-rp1',
-            data: 'remindpick:5:7',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(postponeLead).toHaveBeenCalledWith(
-        5,
-        expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
-        expect.stringContaining('Отложено до'),
-      );
-      expect(afterStatusChange).toHaveBeenCalledWith(expect.anything(), {
-        surface: { chatId: DM_CHAT_ID, messageId: 1, role: 'owner' },
+      await tap('remindpick:5:7', OWNER_ID, { id: 'cb-rp1' });
+      const lead = await stored();
+      expect(lead).toMatchObject({
+        status: 'postponed',
+        remindAt: format(addDays(new Date(), 7), 'yyyy-MM-dd'),
+        comment: expect.stringContaining('Отложено до'),
       });
-      expect(answerCallback).toHaveBeenCalledWith('cb-rp1', 'Отложено');
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+      expect(edits(DM_CHAT_ID, 1)).toHaveLength(1);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-rp1', text: 'Отложено' },
+      ]);
     });
 
     it('admin cannot use a quick pick', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-rp2',
-            data: 'remindpick:5:7',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(postponeLead).not.toHaveBeenCalled();
+      await tap('remindpick:5:7', ADMIN_ID);
+      expect((await stored()).status).toBe('in_progress');
     });
 
-    it('acks without refreshing anything when postponeLead no-ops (not found or stale status)', async () => {
-      vi.mocked(postponeLead).mockResolvedValueOnce(undefined);
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-rp3',
-            data: 'remindpick:5:7',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(afterStatusChange).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-rp3');
+    it('acks without refreshing anything when the lead cannot be postponed', async () => {
+      seed(makeLead({ status: 'lost' }));
+      await tap('remindpick:5:7', OWNER_ID, { id: 'cb-rp3' });
+      expect((await stored()).status).toBe('lost');
+      expect(crm('editMessageText')).toEqual([]);
+      expect(answers()).toEqual([{ callback_query_id: 'cb-rp3' }]);
     });
   });
 
   describe('remindtype: — falls back to the typed-date prompt', () => {
     it('sends the date prompt and remembers it as a "postpone" pending prompt', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-rt1',
-            data: 'remindtype:5',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
+      await tap('remindtype:5', OWNER_ID, { id: 'cb-rt1' });
+      expect(forceReplies()).toEqual([
+        expect.objectContaining({
+          chat_id: DM_CHAT_ID,
+          text: expect.stringContaining('ДД.ММ.ГГГГ'),
         }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendForceReplyPrompt).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        expect.stringContaining('ДД.ММ.ГГГГ'),
-      );
-      expect(setPendingPrompt).toHaveBeenCalledWith(5, {
-        chatId: DM_CHAT_ID,
-        messageId: 888,
-        kind: 'postpone',
-      });
-      expect(answerCallback).toHaveBeenCalledWith('cb-rt1', 'Жду дату');
+      ]);
+      expect((await stored()).pendingPrompt).toEqual(awaiting('postpone'));
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-rt1', text: 'Жду дату' },
+      ]);
     });
 
     it('acks without prompting when the lead is not found', async () => {
-      vi.mocked(getLead).mockResolvedValue(undefined);
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-rt2',
-            data: 'remindtype:5',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-rt2');
+      seed();
+      await tap('remindtype:5', OWNER_ID, { id: 'cb-rt2' });
+      expect(forceReplies()).toEqual([]);
+      expect(answers()).toEqual([{ callback_query_id: 'cb-rt2' }]);
     });
   });
 
   describe('remindcancel: — back out to the normal lead card', () => {
     it('restores the detail view without postponing', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-rx1',
-            data: 'remindcancel:5',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(postponeLead).not.toHaveBeenCalled();
-      expect(editLeadDetailMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        1,
-        expect.objectContaining({ id: 5 }),
-        'owner',
-      );
+      await tap('remindcancel:5', OWNER_ID);
+      const lead = await stored();
+      expect(lead.status).toBe('in_progress');
+      expect(edits(DM_CHAT_ID, 1)).toEqual([
+        view(buildLeadDetail(lead, 'owner')),
+      ]);
     });
   });
 
   describe('resume: — either role, returns a postponed lead to in_progress', () => {
-    it('owner can resume', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-rs1',
-            data: 'resume:5',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(resumeLead).toHaveBeenCalledWith(5);
-      expect(afterStatusChange).toHaveBeenCalledWith(expect.anything(), {
-        surface: { chatId: DM_CHAT_ID, messageId: 1, role: 'owner' },
+    const postponed = () =>
+      makeLead({
+        status: 'postponed',
+        remindAt: '2099-10-20',
+        postponedFrom: 'in_progress',
       });
-      expect(answerCallback).toHaveBeenCalledWith('cb-rs1', 'Возобновлено');
+
+    it('owner can resume', async () => {
+      seed(postponed());
+      await tap('resume:5', OWNER_ID, { id: 'cb-rs1' });
+      expect(await stored()).toMatchObject({
+        status: 'in_progress',
+        remindAt: null,
+      });
+      expect(edits(DM_CHAT_ID, 1)).toHaveLength(1);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-rs1', text: 'Возобновлено' },
+      ]);
     });
 
     it('admin can resume too', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-rs2',
-            data: 'resume:5',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(resumeLead).toHaveBeenCalledWith(5);
+      seed(postponed());
+      await tap('resume:5', ADMIN_ID);
+      expect((await stored()).status).toBe('in_progress');
     });
   });
 
   describe('del: / delconfirm: / delcancel: — admin only, permanent delete', () => {
     it('del:<id> shows a confirm prompt in place, does not delete yet', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-del1',
-            data: 'del:5',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(deleteLead).not.toHaveBeenCalled();
-      expect(safeEditMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        1,
-        'DELCONFIRM_5',
-        { inline_keyboard: [] },
-      );
+      await tap('del:5', ADMIN_ID);
+      const lead = await stored();
+      expect(edits(DM_CHAT_ID, 1)).toEqual([view(buildDeleteConfirm(lead))]);
     });
 
     it('owner cannot even open the confirm prompt', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-del2',
-            data: 'del:5',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(safeEditMessage).not.toHaveBeenCalled();
+      await tap('del:5', OWNER_ID);
+      expect(crm('editMessageText')).toEqual([]);
     });
 
     it('delconfirm:<id> actually deletes and clears the message', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-del3',
-            data: 'delconfirm:5',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
+      await tap('delconfirm:5', ADMIN_ID, { id: 'cb-del3' });
+      expect(await getLead(5)).toBeUndefined();
+      expect(edits(DM_CHAT_ID, 1)).toEqual([
+        expect.objectContaining({
+          text: '🗑 Заявка удалена.',
+          reply_markup: { inline_keyboard: [] },
         }),
-      );
-      expect(res.status).toBe(200);
-      expect(deleteLead).toHaveBeenCalledWith(5);
-      expect(safeEditMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        1,
-        '🗑 Заявка удалена.',
-        { inline_keyboard: [] },
-      );
-      expect(answerCallback).toHaveBeenCalledWith('cb-del3', 'Удалено');
+      ]);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-del3', text: 'Удалено' },
+      ]);
     });
 
     it('owner cannot confirm a delete', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-del4',
-            data: 'delconfirm:5',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(deleteLead).not.toHaveBeenCalled();
+      await tap('delconfirm:5', OWNER_ID);
+      expect(await getLead(5)).toBeDefined();
     });
 
     it('delcancel:<id> restores the normal detail view without deleting', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-del5',
-            data: 'delcancel:5',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(deleteLead).not.toHaveBeenCalled();
-      expect(editLeadDetailMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        1,
-        expect.objectContaining({ id: 5 }),
-        'admin',
-      );
+      await tap('delcancel:5', ADMIN_ID);
+      const lead = await stored();
+      expect(edits(DM_CHAT_ID, 1)).toEqual([
+        view(buildLeadDetail(lead, 'admin')),
+      ]);
     });
   });
 
   describe('income:<id> — owner only', () => {
     it('opens an amount prompt the owner can answer mid-job', async () => {
-      vi.mocked(getLead).mockResolvedValue(
-        makeLead({ id: 9, status: 'in_progress' }),
-      );
-
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-inc',
-            data: 'income:9',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-
-      expect(res.status).toBe(200);
-      expect(sendForceReplyPrompt).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        expect.stringContaining('получил'),
-      );
-      expect(setPendingPrompt).toHaveBeenCalledWith(9, {
-        chatId: DM_CHAT_ID,
-        messageId: 888,
-        kind: 'add_income',
-      });
+      seed(makeLead({ id: 9 }));
+      await tap('income:9', OWNER_ID);
+      expect(forceReplies()).toEqual([
+        expect.objectContaining({ text: expect.stringContaining('получил') }),
+      ]);
+      expect((await stored(9)).pendingPrompt).toEqual(awaiting('add_income'));
     });
 
     it('acks an unknown lead without prompting', async () => {
-      vi.mocked(getLead).mockResolvedValue(undefined);
-
-      await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-inc2',
-            data: 'income:9',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-
-      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-inc2');
+      await tap('income:9', OWNER_ID, { id: 'cb-inc2' });
+      expect(forceReplies()).toEqual([]);
+      expect(answers()).toEqual([{ callback_query_id: 'cb-inc2' }]);
     });
 
     it('ignores a stale add-income button on a lead nobody is working on', async () => {
-      vi.mocked(getLead).mockResolvedValue(makeLead({ id: 9, status: 'lost' }));
-
-      await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-inc4',
-            data: 'income:9',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-
-      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
-      expect(setPendingPrompt).not.toHaveBeenCalled();
+      seed(makeLead({ id: 9, status: 'lost' }));
+      await tap('income:9', OWNER_ID);
+      expect(forceReplies()).toEqual([]);
+      expect((await stored(9)).pendingPrompt).toBeNull();
     });
 
     it('admin cannot add an income', async () => {
-      await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-inc3',
-            data: 'income:9',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-
-      expect(setPendingPrompt).not.toHaveBeenCalled();
+      seed(makeLead({ id: 9 }));
+      await tap('income:9', ADMIN_ID);
+      expect((await stored(9)).pendingPrompt).toBeNull();
     });
   });
 
   describe('claimpay:<id> — owner only', () => {
-    it('owner claims the full remaining balance immediately, no amount prompt', async () => {
-      const lead = makeLead({ id: 9, status: 'won', dealAmount: 100000 });
-      vi.mocked(getLead).mockResolvedValue(lead);
-      vi.mocked(getCommission).mockReturnValue({
-        commission: 10000,
-        remaining: 10000,
-        isPaidOff: false,
-      });
-      const claimed = makeLead({
+    const won = (overrides: Partial<StoredLead> = {}) =>
+      makeLead({
         id: 9,
         status: 'won',
-        dealAmount: 100000,
-        pendingCommissionClaim: {
-          amount: 10000,
-          claimedAt: '2026-01-02T00:00:00.000Z',
-          incomeIds: [1],
-        },
+        dealAmount: 1000,
+        incomes: [income(1, 1000)],
+        ...overrides,
       });
-      vi.mocked(claimCommission).mockResolvedValue(claimed);
 
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-10',
-            data: 'claimpay:9',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
+    it('owner claims the full remaining balance immediately, no amount prompt', async () => {
+      seed(won());
+      await tap('claimpay:9', OWNER_ID, { id: 'cb-10' });
+      expect(forceReplies()).toEqual([]);
+      const lead = await stored(9);
+      expect(lead.pendingCommissionClaim).toMatchObject({
+        amount: 100,
+        incomeIds: [1],
+      });
+      expect(sentTo(ADMIN_ID)).toEqual([
+        expect.objectContaining({
+          reply_markup: {
+            inline_keyboard: [
+              [
+                expect.objectContaining({ callback_data: 'confirmpay:9' }),
+                expect.objectContaining({ callback_data: 'rejectpay:9' }),
+              ],
+            ],
           },
         }),
-      );
-
-      expect(res.status).toBe(200);
-      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
-      expect(claimCommission).toHaveBeenCalledWith(9, null);
-      expect(sendCommissionClaimToAdmin).toHaveBeenCalledWith(claimed);
-      expect(answerCallback).toHaveBeenCalledWith('cb-10', expect.any(String));
+      ]);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-10', text: 'Отмечено — ждём подтверждения' },
+      ]);
     });
 
     it('claims just the income the owner tapped', async () => {
-      const lead = makeLead({
-        id: 9,
-        status: 'won',
-        dealAmount: 500,
-        incomes: [
-          { id: 1, amount: 300, at: '2026-01-01T00:00:00.000Z', paidAt: 'x' },
-          { id: 2, amount: 200, at: '2026-01-02T00:00:00.000Z', paidAt: null },
-        ],
+      seed(won({ incomes: [income(1, 300, PAID_AT), income(2, 200)] }));
+      await tap('claimpay:9:2', OWNER_ID);
+      expect((await stored(9)).pendingCommissionClaim).toMatchObject({
+        amount: 20,
+        incomeIds: [2],
       });
-      vi.mocked(getLead).mockResolvedValue(lead);
-      vi.mocked(getCommission).mockReturnValue({
-        commission: 50,
-        remaining: 20,
-        isPaidOff: false,
-      });
-
-      await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-10b',
-            data: 'claimpay:9:2',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-
-      expect(claimCommission).toHaveBeenCalledWith(9, [2]);
     });
 
     it('tells nobody when the store reports the income was already settled', async () => {
-      const lead = makeLead({
-        id: 9,
-        status: 'won',
-        dealAmount: 300,
-        incomes: [
-          { id: 1, amount: 300, at: '2026-01-01T00:00:00.000Z', paidAt: 'x' },
-        ],
-      });
-      vi.mocked(getLead).mockResolvedValue(lead);
-      vi.mocked(getCommission).mockReturnValue({
-        commission: 30,
-        remaining: 30,
-        isPaidOff: false,
-      });
-
-      vi.mocked(claimCommission).mockResolvedValue(undefined);
-
-      await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-10c',
-            data: 'claimpay:9:1',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-
-      expect(claimCommission).toHaveBeenCalledWith(9, [1]);
-      expect(sendCommissionClaimToAdmin).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-10c');
+      seed(won({ dealAmount: 300, incomes: [income(1, 300, PAID_AT)] }));
+      await tap('claimpay:9:1', OWNER_ID, { id: 'cb-10c' });
+      expect((await stored(9)).pendingCommissionClaim).toBeNull();
+      expect(sentTo(ADMIN_ID)).toEqual([]);
+      expect(answers()).toEqual([{ callback_query_id: 'cb-10c' }]);
     });
 
     it('acks without claiming once nothing remains', async () => {
-      vi.mocked(getLead).mockResolvedValue(
-        makeLead({
-          id: 9,
-          status: 'won',
-          dealAmount: 100000,
-          paidAmount: 10000,
-        }),
-      );
-      vi.mocked(getCommission).mockReturnValue({
-        commission: 10000,
-        remaining: 0,
-        isPaidOff: true,
-      });
-
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-11',
-            data: 'claimpay:9',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-
-      expect(res.status).toBe(200);
-      expect(claimCommission).not.toHaveBeenCalled();
+      seed(won({ incomes: [income(1, 1000, PAID_AT)] }));
+      await tap('claimpay:9', OWNER_ID);
+      expect((await stored(9)).pendingCommissionClaim).toBeNull();
+      expect(sentTo(ADMIN_ID)).toEqual([]);
     });
 
     it('admin cannot claim', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-12',
-            data: 'claimpay:9',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(claimCommission).not.toHaveBeenCalled();
+      seed(won());
+      await tap('claimpay:9', ADMIN_ID);
+      expect((await stored(9)).pendingCommissionClaim).toBeNull();
     });
 
     it('a second tap while a claim is already pending is a no-op, not a double-claim', async () => {
-      vi.mocked(getLead).mockResolvedValue(
-        makeLead({
-          id: 9,
-          status: 'won',
-          dealAmount: 100000,
-          pendingCommissionClaim: {
-            amount: 10000,
-            claimedAt: '2026-01-01T00:00:00.000Z',
-            incomeIds: [1],
-          },
-        }),
-      );
-      vi.mocked(getCommission).mockReturnValue({
-        commission: 10000,
-        remaining: 10000,
-        isPaidOff: false,
-      });
-
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-12b',
-            data: 'claimpay:9',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-
-      expect(res.status).toBe(200);
-      expect(claimCommission).not.toHaveBeenCalled();
+      const claim = {
+        amount: 100,
+        claimedAt: '2026-01-01T00:00:00.000Z',
+        incomeIds: [1],
+      };
+      seed(won({ pendingCommissionClaim: claim }));
+      await tap('claimpay:9', OWNER_ID);
+      expect((await stored(9)).pendingCommissionClaim).toEqual(claim);
+      expect(sentTo(ADMIN_ID)).toEqual([]);
     });
   });
 
   describe('confirmpay: / rejectpay: — admin only', () => {
+    const claimed = () =>
+      makeLead({
+        status: 'won',
+        dealAmount: 1000,
+        incomes: [income(1, 1000)],
+        pendingCommissionClaim: {
+          amount: 100,
+          claimedAt: '2026-01-02T00:00:00.000Z',
+          incomeIds: [1],
+        },
+      });
+
     it('admin confirms: moves the money and tells the owner', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-13',
-            data: 'confirmpay:5',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(confirmCommissionPayment).toHaveBeenCalledWith(5);
-      expect(sendCommissionResultToOwner).toHaveBeenCalledWith(
-        expect.objectContaining({ paidAmount: 4000 }),
-        true,
-      );
+      seed(claimed());
+      await tap('confirmpay:5', ADMIN_ID);
+      const lead = await stored();
+      expect(lead.pendingCommissionClaim).toBeNull();
+      expect(lead.incomes[0]!.paidAt).not.toBeNull();
+      expect(sentTo(OWNER_ID)).toHaveLength(1);
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
     });
 
     it('admin rejects: clears the claim and tells the owner', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-14',
-            data: 'rejectpay:5',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(rejectCommissionPayment).toHaveBeenCalledWith(5);
-      expect(sendCommissionResultToOwner).toHaveBeenCalledWith(
-        expect.anything(),
-        false,
-      );
+      seed(claimed());
+      await tap('rejectpay:5', ADMIN_ID);
+      const lead = await stored();
+      expect(lead.pendingCommissionClaim).toBeNull();
+      expect(lead.incomes[0]!.paidAt).toBeNull();
+      expect(sentTo(OWNER_ID)).toHaveLength(1);
     });
 
     it('owner cannot confirm or reject', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-15',
-            data: 'confirmpay:5',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(confirmCommissionPayment).not.toHaveBeenCalled();
+      seed(claimed());
+      await tap('confirmpay:5', OWNER_ID);
+      expect((await stored()).pendingCommissionClaim).not.toBeNull();
     });
 
-    it('does not notify the owner a second time when confirm is a no-op (duplicate delivery)', async () => {
-      vi.mocked(confirmCommissionPayment).mockResolvedValue(undefined);
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-15b',
-            data: 'confirmpay:5',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendCommissionResultToOwner).not.toHaveBeenCalled();
-      expect(ensureLeadCard).not.toHaveBeenCalled();
-    });
-
-    it('does not notify the owner a second time when reject is a no-op (duplicate delivery)', async () => {
-      vi.mocked(rejectCommissionPayment).mockResolvedValue(undefined);
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-15c',
-            data: 'rejectpay:5',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendCommissionResultToOwner).not.toHaveBeenCalled();
-      expect(ensureLeadCard).not.toHaveBeenCalled();
-    });
+    it.each(['confirmpay', 'rejectpay'])(
+      'does not notify the owner a second time when %s is a no-op (duplicate delivery)',
+      async (action) => {
+        await tap(`${action}:5`, ADMIN_ID);
+        expect(sentTo(OWNER_ID)).toEqual([]);
+        expect(crm('editMessageText')).toEqual([]);
+        expect(answers()).toEqual([{ callback_query_id: 'cb' }]);
+      },
+    );
   });
 
   describe('edit:<id>:<field>', () => {
     it('starts a field-edit prompt', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-16',
-            data: 'edit:5:contact',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
+      await tap('edit:5:contact', OWNER_ID);
+      expect(forceReplies()).toEqual([
+        expect.objectContaining({
+          chat_id: DM_CHAT_ID,
+          text: expect.stringContaining('контакт'),
         }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendForceReplyPrompt).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        expect.stringContaining('контакт'),
-      );
-      expect(setPendingPrompt).toHaveBeenCalledWith(5, {
-        chatId: DM_CHAT_ID,
-        messageId: 888,
-        kind: 'edit_contact',
-      });
+      ]);
+      expect((await stored()).pendingPrompt).toEqual(awaiting('edit_contact'));
     });
   });
 
   describe('reply:<id>', () => {
     it('starts a reply-to-visitor prompt', async () => {
-      vi.mocked(getLead).mockResolvedValue(
-        makeLead({ id: 5, contact: 'tg://user?id=4242', telegramId: 4242 }),
-      );
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-reply',
-            data: 'reply:5',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
+      seed(makeLead({ contact: 'tg://user?id=4242', telegramId: 4242 }));
+      await tap('reply:5', OWNER_ID);
+      expect(forceReplies()).toEqual([
+        expect.objectContaining({
+          text: expect.stringContaining('посетителю'),
         }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendForceReplyPrompt).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        expect.stringContaining('посетителю'),
-      );
-      expect(setPendingPrompt).toHaveBeenCalledWith(5, {
-        chatId: DM_CHAT_ID,
-        messageId: 888,
-        kind: 'reply_visitor',
-      });
+      ]);
+      expect((await stored()).pendingPrompt).toEqual(awaiting('reply_visitor'));
     });
   });
 
   describe('list: / open: / menu:stats', () => {
-    it('list:<status> sends the filtered list', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-17',
-            data: 'list:new',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).toHaveBeenCalledWith(DM_CHAT_ID, 'LIST_new', {
-        reply_markup: { inline_keyboard: [] },
-      });
-    });
-
-    it('list:postponed sends the filtered list too', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-17b',
-            data: 'list:postponed',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).toHaveBeenCalledWith(DM_CHAT_ID, 'LIST_postponed', {
-        reply_markup: { inline_keyboard: [] },
-      });
-    });
-
-    it('list:in_progress+postponed merges both statuses into one list', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-17c',
-            data: 'list:in_progress+postponed',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        'LIST_in_progress,postponed',
-        { reply_markup: { inline_keyboard: [] } },
-      );
+    it.each([
+      ['list:new', ['new']],
+      ['list:postponed', ['postponed']],
+      ['list:in_progress+postponed', ['in_progress', 'postponed']],
+    ] as const)('%s sends the filtered list', async (data, statuses) => {
+      await tap(data, OWNER_ID);
+      expect(sentTo(DM_CHAT_ID)).toEqual([
+        view(buildLeadList(await readLeads(), [...statuses])),
+      ]);
     });
 
     it("open:<id> sends the detail view for the tapper's role", async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-18',
-            data: 'open:5',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(buildLeadDetail).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 5 }),
-        'admin',
-      );
-      expect(sendMessage).toHaveBeenCalledWith(DM_CHAT_ID, 'DETAIL_5_admin', {
-        reply_markup: { inline_keyboard: [] },
-      });
+      await tap('open:5', ADMIN_ID);
+      expect(sentTo(DM_CHAT_ID)).toEqual([
+        view(buildLeadDetail(await stored(), 'admin')),
+      ]);
     });
 
     it('open:<id> for a missing lead just acks', async () => {
-      vi.mocked(getLead).mockResolvedValue(undefined);
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-19',
-            data: 'open:404',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).not.toHaveBeenCalled();
+      await tap('open:404', OWNER_ID, { id: 'cb-19' });
+      expect(crm('sendMessage')).toEqual([]);
+      expect(answers()).toEqual([{ callback_query_id: 'cb-19' }]);
     });
 
     it('menu:stats sends the stats view', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-20',
-            data: 'menu:stats',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).toHaveBeenCalledWith(DM_CHAT_ID, 'STATS');
+      await tap('menu:stats', OWNER_ID);
+      expect(textsTo(DM_CHAT_ID)).toEqual([
+        buildStats(await readLeads(), 'owner'),
+      ]);
     });
   });
 
   describe('menu:debt — both roles', () => {
-    it('shows the owed list to the admin', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-21',
-            data: 'menu:debt',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: ADMIN_ID } },
-          },
+    it.each([ADMIN_ID, OWNER_ID])('shows the owed list to %i', async (who) => {
+      seed(
+        makeLead({
+          status: 'won',
+          dealAmount: 1000,
+          incomes: [income(1, 1000)],
         }),
       );
-      expect(res.status).toBe(200);
-      expect(sendMessage).toHaveBeenCalledWith(ADMIN_ID, 'OWED_LIST', {
-        reply_markup: { inline_keyboard: [] },
-      });
-    });
-
-    it('shows the same owed list to the owner', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-21b',
-            data: 'menu:debt',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: OWNER_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).toHaveBeenCalledWith(OWNER_ID, 'OWED_LIST', {
-        reply_markup: { inline_keyboard: [] },
-      });
+      await tap('menu:debt', who, { chatId: who });
+      const { rows, total } = await getOwedSummary();
+      expect(rows).toHaveLength(1);
+      expect(sentTo(who)).toEqual([view(buildOwedList(rows, total))]);
     });
   });
 
   describe('menu:deals — admin only', () => {
     it('shows the deals list to the admin', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-22',
-            data: 'menu:deals',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: ADMIN_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).toHaveBeenCalledWith(ADMIN_ID, 'DEALS_LIST');
+      await tap('menu:deals', ADMIN_ID, { chatId: ADMIN_ID });
+      expect(textsTo(ADMIN_ID)).toEqual([formatDealsList(await readLeads())]);
     });
 
     it('ignores menu:deals from the owner', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-22b',
-            data: 'menu:deals',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: OWNER_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-22b');
+      await tap('menu:deals', OWNER_ID, { id: 'cb-22b', chatId: OWNER_ID });
+      expect(crm('sendMessage')).toEqual([]);
+      expect(answers()).toEqual([{ callback_query_id: 'cb-22b' }]);
     });
   });
 
   it('acks an unrecognized callback without touching any lead', async () => {
-    const res = await POST(
-      makeCtx({
-        callback_query: {
-          id: 'cb-23',
-          data: 'unknown:thing',
-          from: { id: OWNER_ID },
-          message: { message_id: 1, chat: { id: 1 } },
-        },
-      }),
-    );
-    expect(res.status).toBe(200);
-    expect(getLead).not.toHaveBeenCalled();
-    expect(answerCallback).toHaveBeenCalledWith('cb-23');
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    await tap('unknown:thing', OWNER_ID, { id: 'cb-23', chatId: 1 });
+    expect(api.calls.map((c) => c.method)).toEqual(['answerCallbackQuery']);
+    expect(answers()).toEqual([{ callback_query_id: 'cb-23' }]);
+    warn.mockRestore();
   });
 
   it('acks without acting when a callback has no message attached', async () => {
-    const res = await POST(
+    await POST(
       makeCtx({
+        update_id: 2_400_000_024,
         callback_query: {
           id: 'cb-24',
           data: 'st:5:won',
@@ -1577,108 +919,32 @@ describe('POST /api/telegram-webhook', () => {
         },
       }),
     );
-    expect(res.status).toBe(200);
-    expect(getLead).not.toHaveBeenCalled();
-    expect(answerCallback).toHaveBeenCalledWith('cb-24');
+    expect(api.calls.map((c) => c.method)).toEqual(['answerCallbackQuery']);
+    expect(answers()).toEqual([{ callback_query_id: 'cb-24' }]);
   });
 
   describe('malformed callback_data — none of these should reach a handler', () => {
-    it('non-numeric id in st: falls through to unrecognized', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-25',
-            data: 'st:abc:won',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
+    it.each([
+      'st:abc:won',
+      'arch:xx',
+      'edit:5:bogus',
+      'list:archived',
+      '',
+      'pay:5',
+    ])('%j falls through to unrecognized', async (data) => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const before = await stored();
+      await tap(data, data === 'pay:5' ? ADMIN_ID : OWNER_ID, {
+        id: 'cb-bad',
+      });
+      expect(api.calls.map((c) => c.method)).toEqual(['answerCallbackQuery']);
+      expect(answers()).toEqual([{ callback_query_id: 'cb-bad' }]);
+      expect(await stored()).toEqual(before);
+      expect(warn).toHaveBeenCalledWith(
+        '[telegram-webhook] unknown callback data',
+        { data },
       );
-      expect(res.status).toBe(200);
-      expect(getLead).not.toHaveBeenCalled();
-      expect(setStatus).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-25');
-    });
-
-    it('non-numeric id in arch: falls through to unrecognized', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-26',
-            data: 'arch:xx',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(archiveLead).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-26');
-    });
-
-    it('unlisted edit field falls through to unrecognized', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-27',
-            data: 'edit:5:bogus',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-27');
-    });
-
-    it('unlisted list status falls through to unrecognized', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-28',
-            data: 'list:archived',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(readLeads).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-28');
-    });
-
-    it('an empty callback_data string is unrecognized, not misparsed as any route', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-29',
-            data: '',
-            from: { id: OWNER_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(getLead).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-29');
-    });
-
-    it('the retired pay: route (superseded by claimpay:/confirmpay:) no longer does anything', async () => {
-      const res = await POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-30',
-            data: 'pay:5',
-            from: { id: ADMIN_ID },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(confirmCommissionPayment).not.toHaveBeenCalled();
-      expect(sendForceReplyPrompt).not.toHaveBeenCalled();
-      expect(answerCallback).toHaveBeenCalledWith('cb-30');
+      warn.mockRestore();
     });
   });
 
@@ -1713,1218 +979,460 @@ describe('POST /api/telegram-webhook', () => {
       ['menu:deals', 'admin'],
     ];
 
-    const tap = (data: string, from: number) =>
-      POST(
-        makeCtx({
-          callback_query: {
-            id: 'cb-table',
-            data,
-            from: { id: from },
-            message: { message_id: 1, chat: { id: DM_CHAT_ID } },
-          },
-        }),
-      );
-
     it('has one row per sample, each matched first by its own row and role', () => {
       expect(CALLBACKS).toHaveLength(ROWS.length);
       ROWS.forEach(([data, role], i) => {
         expect(CALLBACKS.findIndex(([pattern]) => pattern.test(data))).toBe(i);
-        expect(CALLBACKS[i][1]).toBe(role);
+        expect(CALLBACKS[i]![1]).toBe(role);
       });
     });
 
     it.each(ROWS.filter(([, role]) => role !== 'any'))(
       '%s refuses the other role with a bare ack',
       async (data, role) => {
-        await tap(data, role === 'owner' ? ADMIN_ID : OWNER_ID);
-        expect(answerCallback).toHaveBeenCalledExactlyOnceWith('cb-table');
-        for (const fn of [
-          getLead,
-          setStatus,
-          postponeLead,
-          deleteLead,
-          claimCommission,
-          confirmCommissionPayment,
-          rejectCommissionPayment,
-          readLeads,
-          sendMessage,
-          safeEditMessage,
-          sendForceReplyPrompt,
-        ])
-          expect(fn).not.toHaveBeenCalled();
+        const before = leadsStorage().current();
+        const writes = leadsStorage().writeAttempts();
+        await tap(data, role === 'owner' ? ADMIN_ID : OWNER_ID, {
+          id: 'cb-table',
+        });
+        expect(api.calls.map((c) => c.method)).toEqual(['answerCallbackQuery']);
+        expect(answers()).toEqual([{ callback_query_id: 'cb-table' }]);
+        expect(leadsStorage().writeAttempts()).toBe(writes);
+        expect(leadsStorage().current()).toEqual(before);
       },
     );
 
-    it('acks unknown data with no text and warns naming it', async () => {
-      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      await tap('nope:5', OWNER_ID);
-      expect(answerCallback).toHaveBeenCalledExactlyOnceWith('cb-table');
-      expect(warn).toHaveBeenCalledWith(
-        '[telegram-webhook] unknown callback data',
-        { data: 'nope:5' },
-      );
-      warn.mockRestore();
-    });
-
     it('passes the captured groups to the handler', async () => {
-      vi.mocked(getLead).mockResolvedValue(makeLead({ dealAmount: 1000 }));
-      vi.mocked(getCommission).mockReturnValue({
-        commission: 100,
-        remaining: 100,
-        isPaidOff: false,
-      });
-      vi.mocked(claimCommission).mockResolvedValue(makeLead());
+      seed(
+        makeLead({
+          status: 'won',
+          dealAmount: 1000,
+          incomes: [income(6, 500), income(7, 500)],
+        }),
+        makeLead({ id: 6 }),
+      );
       await tap('claimpay:5:7', OWNER_ID);
-      expect(claimCommission).toHaveBeenCalledWith(5, [7]);
+      expect((await stored(5)).pendingCommissionClaim?.incomeIds).toEqual([7]);
 
       await tap('edit:6:contact', ADMIN_ID);
-      expect(getLead).toHaveBeenLastCalledWith(6);
-      expect(setPendingPrompt).toHaveBeenLastCalledWith(
-        6,
-        expect.objectContaining({ kind: 'edit_contact' }),
-      );
+      expect((await stored(6)).pendingPrompt?.kind).toBe('edit_contact');
+      expect((await stored(5)).pendingPrompt).toBeNull();
 
+      api.reset();
       await tap('list:in_progress+postponed', ADMIN_ID);
-      expect(buildLeadList).toHaveBeenLastCalledWith(expect.anything(), [
-        'in_progress',
-        'postponed',
+      expect(sentTo(DM_CHAT_ID)).toEqual([
+        view(buildLeadList(await readLeads(), ['in_progress', 'postponed'])),
       ]);
     });
   });
 
   describe('/start in a private chat', () => {
-    it('shows the owner menu to TELEGRAM_OWNER_ID', async () => {
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 1,
-            text: '/start',
-            chat: { id: OWNER_ID, type: 'private' },
-            from: { id: OWNER_ID },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).toHaveBeenCalledWith(OWNER_ID, 'MENU_owner', {
-        reply_markup: { inline_keyboard: [] },
-      });
-    });
-
-    it('shows the admin menu to TELEGRAM_ADMIN_ID', async () => {
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 1,
-            text: '/start',
-            chat: { id: ADMIN_ID, type: 'private' },
-            from: { id: ADMIN_ID },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).toHaveBeenCalledWith(ADMIN_ID, 'MENU_admin', {
-        reply_markup: { inline_keyboard: [] },
-      });
+    it.each([
+      [OWNER_ID, 'owner'],
+      [ADMIN_ID, 'admin'],
+    ] as const)('shows %i the %s menu', async (who, role) => {
+      await message('/start', who);
+      expect(sentTo(who)).toEqual([view(buildMenu(role))]);
     });
 
     it('denies /start from anyone else', async () => {
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 1,
-            text: '/start',
-            chat: { id: OTHER_ID, type: 'private' },
-            from: { id: OTHER_ID },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).toHaveBeenCalledWith(OTHER_ID, '⛔ Доступ запрещён.');
+      await message('/start', OTHER_ID);
+      expect(textsTo(OTHER_ID)).toEqual(['⛔ Доступ запрещён.']);
     });
 
     it('/start lead_<id> opens the lead detail directly for an authorized sender', async () => {
-      vi.mocked(getLead).mockResolvedValue(makeLead({ id: 5 }));
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 1,
-            text: '/start lead_5',
-            chat: { id: OWNER_ID, type: 'private' },
-            from: { id: OWNER_ID },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).toHaveBeenCalledWith(OWNER_ID, 'DETAIL_5_owner', {
-        reply_markup: { inline_keyboard: [] },
-      });
+      await message('/start lead_5', OWNER_ID);
+      expect(sentTo(OWNER_ID)).toEqual([
+        view(buildLeadDetail(await stored(), 'owner')),
+      ]);
     });
 
     it('/start lead_<id> for an unknown lead falls back to the menu', async () => {
-      vi.mocked(getLead).mockResolvedValue(undefined);
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 1,
-            text: '/start lead_404',
-            chat: { id: OWNER_ID, type: 'private' },
-            from: { id: OWNER_ID },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).toHaveBeenCalledWith(OWNER_ID, 'MENU_owner', {
-        reply_markup: { inline_keyboard: [] },
-      });
+      await message('/start lead_404', OWNER_ID);
+      expect(sentTo(OWNER_ID)).toEqual([view(buildMenu('owner'))]);
     });
 
     it('/start lead_<id> denies an unauthorized sender even with a valid payload', async () => {
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 1,
-            text: '/start lead_5',
-            chat: { id: OTHER_ID, type: 'private' },
-            from: { id: OTHER_ID },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(getLead).not.toHaveBeenCalled();
-      expect(sendMessage).toHaveBeenCalledWith(OTHER_ID, '⛔ Доступ запрещён.');
+      await message('/start lead_5', OTHER_ID);
+      expect(textsTo(OTHER_ID)).toEqual(['⛔ Доступ запрещён.']);
     });
   });
 
   describe('/menu — same as bare /start, never takes a payload', () => {
-    it('shows the owner menu', async () => {
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 1,
-            text: '/menu',
-            chat: { id: OWNER_ID, type: 'private' },
-            from: { id: OWNER_ID },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).toHaveBeenCalledWith(OWNER_ID, 'MENU_owner', {
-        reply_markup: { inline_keyboard: [] },
-      });
-    });
-
-    it('shows the admin menu', async () => {
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 1,
-            text: '/menu',
-            chat: { id: ADMIN_ID, type: 'private' },
-            from: { id: ADMIN_ID },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).toHaveBeenCalledWith(ADMIN_ID, 'MENU_admin', {
-        reply_markup: { inline_keyboard: [] },
-      });
+    it.each([
+      [OWNER_ID, 'owner'],
+      [ADMIN_ID, 'admin'],
+    ] as const)('shows %i the %s menu', async (who, role) => {
+      await message('/menu', who);
+      expect(sentTo(who)).toEqual([view(buildMenu(role))]);
     });
 
     it('denies an unauthorized sender', async () => {
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 1,
-            text: '/menu',
-            chat: { id: OTHER_ID, type: 'private' },
-            from: { id: OTHER_ID },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).toHaveBeenCalledWith(OTHER_ID, '⛔ Доступ запрещён.');
+      await message('/menu', OTHER_ID);
+      expect(textsTo(OTHER_ID)).toEqual(['⛔ Доступ запрещён.']);
     });
   });
 
   describe('/help', () => {
     it('shows role-specific help text', async () => {
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 1,
-            text: '/help',
-            chat: { id: OWNER_ID, type: 'private' },
-            from: { id: OWNER_ID },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).toHaveBeenCalledWith(OWNER_ID, 'HELP_owner');
+      await message('/help', OWNER_ID);
+      expect(textsTo(OWNER_ID)).toEqual([buildHelp('owner')]);
     });
 
     it('denies an unauthorized sender', async () => {
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 1,
-            text: '/help',
-            chat: { id: OTHER_ID, type: 'private' },
-            from: { id: OTHER_ID },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).toHaveBeenCalledWith(OTHER_ID, '⛔ Доступ запрещён.');
+      await message('/help', OTHER_ID);
+      expect(textsTo(OTHER_ID)).toEqual(['⛔ Доступ запрещён.']);
     });
   });
 
   describe('replying to a pending force_reply prompt', () => {
     it('completes the deal, refreshes the group card, and notifies the admin on a valid deal-amount reply', async () => {
-      const lead = makeLead({
-        id: 5,
-        pendingPrompt: {
-          chatId: DM_CHAT_ID,
-          messageId: 888,
-          kind: 'deal_amount',
-        },
-      });
-      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
-      mockResolveFromBase(lead);
+      seed(makeLead({ pendingPrompt: awaiting('deal_amount') }));
 
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: '150000',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
+      await answerPrompt('150000');
 
-      expect(res.status).toBe(200);
-      expect(resolvePendingPrompt).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        888,
-        expect.any(Function),
-      );
-      const updated = vi.mocked(afterStatusChange).mock.calls[0][0];
-      expect(updated.incomes).toEqual([
+      const lead = await stored();
+      expect(lead).toMatchObject({ status: 'won', pendingPrompt: null });
+      expect(lead.incomes).toEqual([
         expect.objectContaining({ id: 1, amount: 150000, paidAt: null }),
       ]);
-      expect(updated.status).toBe('won');
-      expect(vi.mocked(afterStatusChange).mock.calls[0][1]).toBeUndefined();
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+      expect(sentTo(ADMIN_ID)).toHaveLength(1);
+      expect(sentTo(DM_CHAT_ID)).toEqual([]);
     });
 
     it('books the closing amount on top of the prepayments already taken', async () => {
-      const lead = makeLead({
-        id: 5,
-        incomes: [
-          {
-            id: 1,
-            amount: 50000,
-            at: '2026-01-01T00:00:00.000Z',
-            paidAt: null,
-          },
-        ],
-        pendingPrompt: {
-          chatId: DM_CHAT_ID,
-          messageId: 888,
-          kind: 'deal_amount',
-        },
-      });
-      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
-      mockResolveFromBase(lead);
-
-      await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: '100000',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
+      seed(
+        makeLead({
+          incomes: [income(1, 50000)],
+          pendingPrompt: awaiting('deal_amount'),
         }),
       );
-
-      const updated = vi.mocked(afterStatusChange).mock.calls[0][0];
-      expect(updated.incomes.map((i) => i.amount)).toEqual([50000, 100000]);
-      expect(updated.status).toBe('won');
+      await answerPrompt('100000');
+      const lead = await stored();
+      expect(lead.incomes.map((i) => i.amount)).toEqual([50000, 100000]);
+      expect(lead.status).toBe('won');
     });
 
     it('accepts a zero closing amount when prepayments already cover the deal', async () => {
-      const lead = makeLead({
-        id: 5,
-        incomes: [
-          {
-            id: 1,
-            amount: 50000,
-            at: '2026-01-01T00:00:00.000Z',
-            paidAt: null,
-          },
-        ],
-        pendingPrompt: {
-          chatId: DM_CHAT_ID,
-          messageId: 888,
-          kind: 'deal_amount',
-        },
-      });
-      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
-      mockResolveFromBase(lead);
-
-      await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: '0',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
+      seed(
+        makeLead({
+          incomes: [income(1, 50000)],
+          pendingPrompt: awaiting('deal_amount'),
         }),
       );
-
-      const updated = vi.mocked(afterStatusChange).mock.calls[0][0];
-      expect(updated.incomes.map((i) => i.amount)).toEqual([50000]);
-      expect(updated.status).toBe('won');
-      expect(sendMessage).not.toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        expect.stringContaining('⚠️'),
-      );
+      await answerPrompt('0');
+      const lead = await stored();
+      expect(lead.incomes.map((i) => i.amount)).toEqual([50000]);
+      expect(lead.status).toBe('won');
+      expect(textsTo(DM_CHAT_ID)).toEqual([]);
     });
 
     it('refuses a closing reply with no number in it, even when prepayments allow zero', async () => {
-      const lead = makeLead({
-        id: 5,
-        incomes: [
-          {
-            id: 1,
-            amount: 50000,
-            at: '2026-01-01T00:00:00.000Z',
-            paidAt: null,
-          },
-        ],
-        pendingPrompt: {
-          chatId: DM_CHAT_ID,
-          messageId: 888,
-          kind: 'deal_amount',
-        },
-      });
-      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
-      mockResolveFromBase(lead);
-
-      await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: 'не знаю',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
+      seed(
+        makeLead({
+          incomes: [income(1, 50000)],
+          pendingPrompt: awaiting('deal_amount'),
         }),
       );
-
-      expect(resolvePendingPrompt).not.toHaveBeenCalled();
-      expect(sendMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        expect.stringContaining('сумма'),
-      );
+      await answerPrompt('не знаю');
+      expect((await stored()).pendingPrompt).toEqual(awaiting('deal_amount'));
+      expect(textsTo(DM_CHAT_ID)).toEqual([expect.stringContaining('сумма')]);
     });
 
     it('records a mid-job income and tells the admin about it', async () => {
-      const lead = makeLead({
-        id: 5,
-        pendingPrompt: {
-          chatId: DM_CHAT_ID,
-          messageId: 888,
-          kind: 'add_income',
-        },
-      });
-      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
-      mockResolveFromBase(lead);
-
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: '300',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      expect(res.status).toBe(200);
-      const updated = vi.mocked(ensureLeadCard).mock.calls[0][0];
-      expect(updated.incomes.map((i) => i.amount)).toEqual([300]);
-      expect(updated.status).toBe('in_progress');
-      expect(sendIncomeNotificationToAdmin).toHaveBeenCalledWith(
-        updated,
-        updated.incomes[0],
-      );
+      seed(makeLead({ pendingPrompt: awaiting('add_income') }));
+      await answerPrompt('300');
+      const lead = await stored();
+      expect(lead.incomes.map((i) => i.amount)).toEqual([300]);
+      expect(lead.status).toBe('in_progress');
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+      expect(sentTo(ADMIN_ID)).toHaveLength(1);
+      expect(textsTo(DM_CHAT_ID)).toEqual([
+        `✅ Доход добавлен\n\n${buildLeadDetail(lead, 'owner').text}`,
+      ]);
     });
 
     it('ignores a mid-job income answered after the lead was lost', async () => {
-      const lead = makeLead({
-        id: 5,
-        status: 'lost',
-        pendingPrompt: {
-          chatId: DM_CHAT_ID,
-          messageId: 888,
-          kind: 'add_income',
-        },
-      });
-      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
-      mockResolveFromBase(lead);
-
-      await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: '300',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      expect(ensureLeadCard).not.toHaveBeenCalled();
-      expect(sendIncomeNotificationToAdmin).not.toHaveBeenCalled();
+      seed(makeLead({ status: 'lost', pendingPrompt: awaiting('add_income') }));
+      await answerPrompt('300');
+      expect((await stored()).incomes).toEqual([]);
+      expect(crm('editMessageText')).toEqual([]);
+      expect(sentTo(ADMIN_ID)).toEqual([]);
     });
 
     it('rejects a zero mid-job income without recording anything', async () => {
-      const lead = makeLead({
-        id: 5,
-        pendingPrompt: {
-          chatId: DM_CHAT_ID,
-          messageId: 888,
-          kind: 'add_income',
-        },
-      });
-      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
-      mockResolveFromBase(lead);
-
-      await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: '0',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      expect(resolvePendingPrompt).not.toHaveBeenCalled();
-      expect(sendMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        expect.stringContaining('сумма'),
-      );
+      seed(makeLead({ pendingPrompt: awaiting('add_income') }));
+      await answerPrompt('0');
+      expect((await stored()).pendingPrompt).toEqual(awaiting('add_income'));
+      expect(textsTo(DM_CHAT_ID)).toEqual([expect.stringContaining('сумма')]);
     });
 
     it('postpones with the given date, appends a comment note, and notifies the admin', async () => {
-      const lead = makeLead({
-        id: 5,
-        comment: 'BMW X5',
-        pendingPrompt: { chatId: DM_CHAT_ID, messageId: 888, kind: 'postpone' },
-      });
-      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
-      mockResolveFromBase(lead);
-
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: '20.10.2026',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
+      seed(
+        makeLead({ comment: 'BMW X5', pendingPrompt: awaiting('postpone') }),
       );
-
-      expect(res.status).toBe(200);
-      const updated = vi.mocked(afterStatusChange).mock.calls[0][0];
-      expect(updated.status).toBe('postponed');
-      expect(updated.remindAt).toBe('2026-10-20');
-      expect(updated.comment).toBe('BMW X5\nОтложено до 20.10.2026');
-      expect(vi.mocked(afterStatusChange).mock.calls[0][1]).toBeUndefined();
+      await answerPrompt(LATER);
+      expect(await stored()).toMatchObject({
+        status: 'postponed',
+        remindAt: '2099-10-20',
+        comment: `BMW X5\nОтложено до ${LATER}`,
+      });
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+      expect(sentTo(ADMIN_ID)).toHaveLength(1);
     });
 
     it('postpones a lead that is still in negotiations and remembers the stage', async () => {
-      const lead = makeLead({
-        id: 5,
-        status: 'negotiations',
-        pendingPrompt: { chatId: DM_CHAT_ID, messageId: 888, kind: 'postpone' },
-      });
-      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
-      mockResolveFromBase(lead);
-
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: '20.10.2026',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
+      seed(
+        makeLead({
+          status: 'negotiations',
+          pendingPrompt: awaiting('postpone'),
         }),
       );
-
-      expect(res.status).toBe(200);
-      const updated = vi.mocked(afterStatusChange).mock.calls[0][0];
-      expect(updated.status).toBe('postponed');
-      expect(updated.postponedFrom).toBe('negotiations');
+      await answerPrompt(LATER);
+      expect(await stored()).toMatchObject({
+        status: 'postponed',
+        postponedFrom: 'negotiations',
+      });
     });
 
     it('does not postpone via typed reply if the lead moved on while the prompt sat unanswered (stale guard)', async () => {
-      const lead = makeLead({
-        id: 5,
-        status: 'won',
-        pendingPrompt: { chatId: DM_CHAT_ID, messageId: 888, kind: 'postpone' },
+      seed(makeLead({ status: 'won', pendingPrompt: awaiting('postpone') }));
+      await answerPrompt(LATER);
+      expect((await stored()).status).toBe('won');
+      expect(crm('editMessageText')).toEqual([]);
+      expect(sentTo(ADMIN_ID)).toEqual([]);
+    });
+
+    it.each([
+      ['a malformed date', 'завтра'],
+      ['a past date', '01.01.2020'],
+      ['an impossible calendar date', '31.02.2099'],
+    ])('rejects %s without resolving the prompt', async (_label, text) => {
+      seed(makeLead({ pendingPrompt: awaiting('postpone') }));
+      await answerPrompt(text);
+      expect(await stored()).toMatchObject({
+        status: 'in_progress',
+        pendingPrompt: awaiting('postpone'),
       });
-      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
-      mockResolveFromBase(lead);
-
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: '20.10.2026',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      expect(res.status).toBe(200);
-      expect(afterStatusChange).not.toHaveBeenCalled();
-    });
-
-    it('rejects a malformed date without resolving the prompt', async () => {
-      vi.mocked(findByPendingPrompt).mockResolvedValue(
-        makeLead({
-          id: 5,
-          pendingPrompt: {
-            chatId: DM_CHAT_ID,
-            messageId: 888,
-            kind: 'postpone',
-          },
-        }),
-      );
-
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: 'завтра',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      expect(res.status).toBe(200);
-      expect(resolvePendingPrompt).not.toHaveBeenCalled();
-      expect(sendMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
+      expect(textsTo(DM_CHAT_ID)).toEqual([
         expect.stringContaining('ДД.ММ.ГГГГ'),
-      );
+      ]);
     });
 
-    it('rejects a past date', async () => {
-      vi.mocked(findByPendingPrompt).mockResolvedValue(
-        makeLead({
-          id: 5,
-          pendingPrompt: {
-            chatId: DM_CHAT_ID,
-            messageId: 888,
-            kind: 'postpone',
-          },
-        }),
-      );
-
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: '01.01.2020',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      expect(res.status).toBe(200);
-      expect(resolvePendingPrompt).not.toHaveBeenCalled();
-    });
-
-    it('rejects an impossible calendar date instead of silently rolling it over', async () => {
-      vi.mocked(findByPendingPrompt).mockResolvedValue(
-        makeLead({
-          id: 5,
-          pendingPrompt: {
-            chatId: DM_CHAT_ID,
-            messageId: 888,
-            kind: 'postpone',
-          },
-        }),
-      );
-
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: '31.02.2026',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      expect(res.status).toBe(200);
-      expect(resolvePendingPrompt).not.toHaveBeenCalled();
-    });
-
-    it('rejects a non-numeric deal-amount reply without resolving the prompt', async () => {
-      vi.mocked(findByPendingPrompt).mockResolvedValue(
-        makeLead({
-          id: 5,
-          pendingPrompt: {
-            chatId: DM_CHAT_ID,
-            messageId: 888,
-            kind: 'deal_amount',
-          },
-        }),
-      );
-
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: 'много',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      expect(res.status).toBe(200);
-      expect(resolvePendingPrompt).not.toHaveBeenCalled();
-      expect(sendMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        expect.stringContaining('сумма'),
-      );
-    });
-
-    it('rejects a negative amount instead of silently making it positive', async () => {
-      vi.mocked(findByPendingPrompt).mockResolvedValue(
-        makeLead({
-          id: 5,
-          pendingPrompt: {
-            chatId: DM_CHAT_ID,
-            messageId: 888,
-            kind: 'deal_amount',
-          },
-        }),
-      );
-
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: '-500',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      expect(res.status).toBe(200);
-      expect(resolvePendingPrompt).not.toHaveBeenCalled();
-    });
-
-    it('rejects a zero amount (must be strictly positive)', async () => {
-      vi.mocked(findByPendingPrompt).mockResolvedValue(
-        makeLead({
-          id: 5,
-          pendingPrompt: {
-            chatId: DM_CHAT_ID,
-            messageId: 888,
-            kind: 'deal_amount',
-          },
-        }),
-      );
-
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: '0',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      expect(res.status).toBe(200);
-      expect(resolvePendingPrompt).not.toHaveBeenCalled();
-      expect(sendMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        expect.stringContaining('сумма'),
-      );
-    });
-
-    it('rejects empty/whitespace text as an amount reply', async () => {
-      vi.mocked(findByPendingPrompt).mockResolvedValue(
-        makeLead({
-          id: 5,
-          pendingPrompt: {
-            chatId: DM_CHAT_ID,
-            messageId: 888,
-            kind: 'deal_amount',
-          },
-        }),
-      );
-
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: '   ',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      expect(res.status).toBe(200);
-      expect(resolvePendingPrompt).not.toHaveBeenCalled();
-    });
+    it.each([
+      ['a non-numeric reply', 'много'],
+      ['a negative amount', '-500'],
+      ['a zero amount', '0'],
+      ['blank text', '   '],
+    ])(
+      'rejects %s as a deal amount without resolving the prompt',
+      async (_label, text) => {
+        seed(makeLead({ pendingPrompt: awaiting('deal_amount') }));
+        await answerPrompt(text);
+        expect(await stored()).toMatchObject({
+          status: 'in_progress',
+          pendingPrompt: awaiting('deal_amount'),
+        });
+        expect(textsTo(DM_CHAT_ID)).toEqual([expect.stringContaining('сумма')]);
+      },
+    );
 
     it('edit:name reply updates the field, refreshes the card, and confirms', async () => {
-      const lead = makeLead({
-        id: 5,
-        name: 'Old',
-        pendingPrompt: {
-          chatId: DM_CHAT_ID,
-          messageId: 888,
-          kind: 'edit_name',
-        },
-      });
-      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
-      mockResolveFromBase(lead);
-
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: 'Новое Имя',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
+      seed(makeLead({ name: 'Old', pendingPrompt: awaiting('edit_name') }));
+      await answerPrompt('Новое Имя');
+      const lead = await stored();
+      expect(lead.name).toBe('Новое Имя');
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+      expect(sentTo(DM_CHAT_ID)).toEqual([
+        view({
+          text: `✅ Обновлено\n\n${buildLeadDetail(lead, 'owner').text}`,
+          reply_markup: buildLeadDetail(lead, 'owner').reply_markup,
         }),
-      );
-
-      expect(res.status).toBe(200);
-      const updated = vi.mocked(ensureLeadCard).mock.calls[0][0];
-      expect(updated.name).toBe('Новое Имя');
-      expect(sendMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        `✅ Обновлено\n\nDETAIL_${updated.id}_owner`,
-        { reply_markup: { inline_keyboard: [] } },
-      );
+      ]);
     });
 
     it('tells the admin what the field was and what it became', async () => {
-      const lead = makeLead({
-        id: 5,
-        comment: 'Старый',
-        pendingPrompt: {
-          chatId: DM_CHAT_ID,
-          messageId: 888,
-          kind: 'edit_comment',
-        },
-      });
-      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
-      mockResolveFromBase(lead);
-
-      await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: 'Перезвонить в среду',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      const call = vi.mocked(sendFieldChangeToAdmin).mock.calls.at(-1);
-      expect(call).toBeDefined();
-      const [updated, field, before] = call!;
-      expect(field).toBe('comment');
-      expect(before).toBe('Старый');
-      expect(updated.comment).toBe('Перезвонить в среду');
-    });
-
-    it('reply_visitor reply goes to the visitor through the capture bot, not into a lead field', async () => {
-      const lead = makeLead({
-        id: 5,
-        name: 'Иван',
-        contact: 'tg://user?id=4242',
-        telegramId: 4242,
-        comment: 'Ищу Golf 7',
-        pendingPrompt: {
-          chatId: DM_CHAT_ID,
-          messageId: 888,
-          kind: 'reply_visitor',
-        },
-      });
-      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
-      mockResolveFromBase(lead);
-
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: 'Нашёл вариант <до 10k>',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      expect(res.status).toBe(200);
-      expect(captureClient.sendMessage).toHaveBeenCalledWith(
-        4242,
-        'Нашёл вариант &lt;до 10k&gt;',
-      );
-      expect(sendFieldChangeToAdmin).not.toHaveBeenCalled();
-      const updated = vi.mocked(ensureLeadCard).mock.calls[0][0];
-      expect(updated).toMatchObject({
-        name: 'Иван',
-        contact: 'tg://user?id=4242',
-        comment: 'Ищу Golf 7\nОтвет: Нашёл вариант <до 10k>',
-      });
-      expect(Object.keys(updated)).toEqual(Object.keys(lead));
-      expect(sendMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        `✅ Отправлено\n\nDETAIL_5_owner`,
-        { reply_markup: { inline_keyboard: [] } },
-      );
-    });
-
-    it('reports a reply the capture bot could not deliver instead of recording it', async () => {
-      vi.mocked(findByPendingPrompt).mockResolvedValue(
+      seed(
         makeLead({
-          id: 5,
-          contact: 'tg://user?id=4242',
-          telegramId: 4242,
-          pendingPrompt: {
-            chatId: DM_CHAT_ID,
-            messageId: 888,
-            kind: 'reply_visitor',
-          },
+          comment: 'Старый',
+          pendingPrompt: awaiting('edit_comment'),
         }),
       );
-      vi.mocked(captureClient.sendMessage).mockRejectedValueOnce(
-        new Error('Telegram sendMessage failed: 403 Forbidden'),
-      );
-
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: 'Нашёл вариант',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      expect(res.status).toBe(200);
-      expect(resolvePendingPrompt).not.toHaveBeenCalled();
-      expect(ensureLeadCard).not.toHaveBeenCalled();
-      expect(sendMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        expect.stringContaining('Не доставлено'),
-      );
-    });
-
-    it("sends a sibling brand's reply through that brand's capture bot", async () => {
-      const lead = makeLead({
-        id: 5,
-        brand: 'CarLab',
-        contact: 'tg://user?id=4242',
-        telegramId: 4242,
-        pendingPrompt: {
-          chatId: DM_CHAT_ID,
-          messageId: 888,
-          kind: 'reply_visitor',
-        },
-      });
-      vi.mocked(findByPendingPrompt).mockResolvedValue(lead);
-      mockResolveFromBase(lead);
-
-      await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: 'Запчасть есть',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      expect(capture.carlab.sendMessage).toHaveBeenCalledWith(
-        4242,
-        'Запчасть есть',
-      );
-      expect(captureClient.sendMessage).not.toHaveBeenCalled();
-      expect(ensureLeadCard).toHaveBeenCalled();
-    });
-
-    it('reports a reply as undelivered when the brand has no capture bot configured', async () => {
-      vi.mocked(findByPendingPrompt).mockResolvedValue(
-        makeLead({
-          id: 5,
-          brand: 'Details',
-          contact: 'tg://user?id=4242',
-          telegramId: 4242,
-          pendingPrompt: {
-            chatId: DM_CHAT_ID,
-            messageId: 888,
-            kind: 'reply_visitor',
-          },
-        }),
-      );
-
-      await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: 'Нашёл вариант',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      expect(captureClient.sendMessage).not.toHaveBeenCalled();
-      expect(capture.carlab.sendMessage).not.toHaveBeenCalled();
-      expect(resolvePendingPrompt).not.toHaveBeenCalled();
-      expect(sendMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        expect.stringContaining('Не доставлено'),
-      );
-    });
-
-    it('reports a reply as undelivered when the lead carries no telegramId', async () => {
-      vi.mocked(findByPendingPrompt).mockResolvedValue(
-        makeLead({
-          id: 5,
-          contact: 'tg://user?id=4242',
-          telegramId: null,
-          pendingPrompt: {
-            chatId: DM_CHAT_ID,
-            messageId: 888,
-            kind: 'reply_visitor',
-          },
-        }),
-      );
-
-      await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: 'Нашёл вариант',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      expect(captureClient.sendMessage).not.toHaveBeenCalled();
-      expect(resolvePendingPrompt).not.toHaveBeenCalled();
-      expect(sendMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        expect.stringContaining('Не доставлено'),
-      );
-    });
-
-    it('rejects an empty reply to the visitor', async () => {
-      vi.mocked(findByPendingPrompt).mockResolvedValue(
-        makeLead({
-          id: 5,
-          contact: 'tg://user?id=4242',
-          telegramId: 4242,
-          pendingPrompt: {
-            chatId: DM_CHAT_ID,
-            messageId: 888,
-            kind: 'reply_visitor',
-          },
-        }),
-      );
-
-      await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: '   ',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      expect(captureClient.sendMessage).not.toHaveBeenCalled();
-      expect(resolvePendingPrompt).not.toHaveBeenCalled();
-      expect(sendMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        expect.stringContaining('пустым'),
-      );
+      await answerPrompt('Перезвонить в среду');
+      expect((await stored()).comment).toBe('Перезвонить в среду');
+      expect(textsTo(ADMIN_ID)).toEqual([
+        expect.stringMatching(/Старый[\s\S]*Перезвонить в среду/),
+      ]);
     });
 
     it('rejects an empty edit value for name/contact', async () => {
-      vi.mocked(findByPendingPrompt).mockResolvedValue(
-        makeLead({
-          id: 5,
-          pendingPrompt: {
-            chatId: DM_CHAT_ID,
-            messageId: 888,
-            kind: 'edit_name',
-          },
-        }),
-      );
-
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: '   ',
-            chat: { id: DM_CHAT_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 888 },
-          },
-        }),
-      );
-
-      expect(res.status).toBe(200);
-      expect(resolvePendingPrompt).not.toHaveBeenCalled();
-      expect(sendMessage).toHaveBeenCalledWith(
-        DM_CHAT_ID,
-        expect.stringContaining('пустым'),
-      );
+      seed(makeLead({ pendingPrompt: awaiting('edit_name') }));
+      await answerPrompt('   ');
+      expect(await stored()).toMatchObject({
+        name: 'Иван',
+        pendingPrompt: awaiting('edit_name'),
+      });
+      expect(textsTo(DM_CHAT_ID)).toEqual([expect.stringContaining('пустым')]);
     });
 
     it('ignores a reply that matches no pending prompt', async () => {
-      vi.mocked(findByPendingPrompt).mockResolvedValue(undefined);
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: 'random reply',
-            chat: { id: OWNER_ID, type: 'private' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 42 },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(sendMessage).not.toHaveBeenCalled();
+      await message('random reply', OWNER_ID, { replyTo: 42 });
+      expect(api.calls).toEqual([]);
     });
 
     it('reply correlation is attempted regardless of chat type (not gated behind private-only) — defense in depth', async () => {
-      vi.mocked(findByPendingPrompt).mockResolvedValue(undefined);
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 2,
-            text: 'random',
-            chat: { id: -100999, type: 'group' },
-            from: { id: OWNER_ID },
-            reply_to_message: { message_id: 42 },
-          },
+      seed(
+        makeLead({
+          pendingPrompt: { chatId: -100999, messageId: 42, kind: 'edit_name' },
         }),
       );
-      expect(res.status).toBe(200);
-      expect(findByPendingPrompt).toHaveBeenCalledWith(-100999, 42);
+      await message('Пётр', OWNER_ID, {
+        chatId: -100999,
+        type: 'group',
+        replyTo: 42,
+      });
+      expect((await stored()).name).toBe('Пётр');
+    });
+  });
+
+  describe('replying to a visitor through the capture bot', () => {
+    const visitorLead = (overrides: Partial<StoredLead> = {}) =>
+      makeLead({
+        contact: 'tg://user?id=4242',
+        telegramId: 4242,
+        comment: 'Ищу Golf 7',
+        pendingPrompt: awaiting('reply_visitor'),
+        ...overrides,
+      });
+
+    const captureSends = (token: string) =>
+      api.callsTo('sendMessage', token).map((c) => c.payload);
+
+    it('goes to the visitor through the capture bot, not into a lead field', async () => {
+      seed(visitorLead());
+      const before = await stored();
+
+      await answerPrompt('Нашёл вариант <до 10k>');
+
+      expect(captureSends(APPROVED_CAPTURE_TOKEN)).toEqual([
+        {
+          chat_id: 4242,
+          text: 'Нашёл вариант &lt;до 10k&gt;',
+          parse_mode: 'HTML',
+        },
+      ]);
+      expect(captureSends(CARLAB_CAPTURE_TOKEN)).toEqual([]);
+      expect(sentTo(4242)).toEqual([]);
+      const lead = await stored();
+      expect(lead).toEqual({
+        ...before,
+        comment: 'Ищу Golf 7\nОтвет: Нашёл вариант <до 10k>',
+        pendingPrompt: null,
+      });
+      expect(sentTo(ADMIN_ID)).toEqual([]);
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+      expect(sentTo(DM_CHAT_ID)).toEqual([
+        view({
+          text: `✅ Отправлено\n\n${buildLeadDetail(lead, 'owner').text}`,
+          reply_markup: buildLeadDetail(lead, 'owner').reply_markup,
+        }),
+      ]);
+    });
+
+    it("sends a sibling brand's reply through that brand's capture bot", async () => {
+      seed(visitorLead({ brand: 'CarLab' }));
+
+      await answerPrompt('Запчасть есть');
+
+      expect(captureSends(CARLAB_CAPTURE_TOKEN)).toEqual([
+        expect.objectContaining({ chat_id: 4242, text: 'Запчасть есть' }),
+      ]);
+      expect(captureSends(APPROVED_CAPTURE_TOKEN)).toEqual([]);
+      expect((await stored()).pendingPrompt).toBeNull();
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+    });
+
+    it('reports a reply the capture bot could not deliver instead of recording it', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+      api.respond(
+        'sendMessage',
+        (payload: Record<string, unknown>): BotApiResponse =>
+          payload.chat_id === 4242
+            ? {
+                ok: false,
+                error_code: 403,
+                description: 'Forbidden: bot was blocked by the user',
+              }
+            : {
+                ok: true,
+                result: { message_id: 1, chat: { id: payload.chat_id } },
+              },
+      );
+      seed(visitorLead());
+
+      await answerPrompt('Нашёл вариант');
+
+      expect(captureSends(APPROVED_CAPTURE_TOKEN)).toHaveLength(1);
+      expect((await stored()).pendingPrompt).toEqual(awaiting('reply_visitor'));
+      expect(crm('editMessageText')).toEqual([]);
+      expect(textsTo(DM_CHAT_ID)).toEqual([
+        expect.stringContaining('Не доставлено'),
+      ]);
+      error.mockRestore();
+    });
+
+    it.each([
+      ['the brand has no capture bot configured', { brand: 'Details' }],
+      ['the lead carries no telegramId', { telegramId: null }],
+    ])(
+      'reports a reply as undelivered when %s',
+      async (_label, overrides: Partial<StoredLead>) => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        seed(visitorLead(overrides));
+
+        await answerPrompt('Нашёл вариант');
+
+        expect(captureSends(APPROVED_CAPTURE_TOKEN)).toEqual([]);
+        expect(captureSends(CARLAB_CAPTURE_TOKEN)).toEqual([]);
+        expect((await stored()).pendingPrompt).toEqual(
+          awaiting('reply_visitor'),
+        );
+        expect(textsTo(DM_CHAT_ID)).toEqual([
+          expect.stringContaining('Не доставлено'),
+        ]);
+        warn.mockRestore();
+      },
+    );
+
+    it('rejects an empty reply to the visitor', async () => {
+      seed(visitorLead());
+      await answerPrompt('   ');
+      expect(captureSends(APPROVED_CAPTURE_TOKEN)).toEqual([]);
+      expect((await stored()).pendingPrompt).toEqual(awaiting('reply_visitor'));
+      expect(textsTo(DM_CHAT_ID)).toEqual([expect.stringContaining('пустым')]);
     });
   });
 
   describe('plain DM text (search)', () => {
     it('treats plain DM text from the owner as a search query', async () => {
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 3,
-            text: 'Иван',
-            chat: { id: OWNER_ID, type: 'private' },
-            from: { id: OWNER_ID },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(searchLeads).toHaveBeenCalledWith('Иван');
-      expect(sendMessage).toHaveBeenCalledWith(OWNER_ID, 'SEARCH_RESULTS', {
-        reply_markup: { inline_keyboard: [] },
-      });
+      await message('Иван', OWNER_ID);
+      const results = await searchLeads('Иван');
+      expect(results).toHaveLength(1);
+      expect(sentTo(OWNER_ID)).toEqual([view(buildSearchResults(results))]);
     });
 
     it('denies plain DM text from an unknown user', async () => {
-      const res = await POST(
-        makeCtx({
-          message: {
-            message_id: 3,
-            text: 'hi',
-            chat: { id: OTHER_ID, type: 'private' },
-            from: { id: OTHER_ID },
-          },
-        }),
-      );
-      expect(res.status).toBe(200);
-      expect(searchLeads).not.toHaveBeenCalled();
-      expect(sendMessage).toHaveBeenCalledWith(OTHER_ID, '⛔ Доступ запрещён.');
+      await message('hi', OTHER_ID);
+      expect(textsTo(OTHER_ID)).toEqual(['⛔ Доступ запрещён.']);
     });
   });
 
   it('ignores group chatter that is not a button press or a prompt reply', async () => {
-    const res = await POST(
-      makeCtx({
-        message: {
-          message_id: 4,
-          text: 'hi everyone',
-          chat: { id: -100123, type: 'group' },
-          from: { id: OWNER_ID },
-        },
-      }),
-    );
-    expect(res.status).toBe(200);
-    expect(sendMessage).not.toHaveBeenCalled();
+    await message('hi everyone', OWNER_ID, {
+      chatId: CARD_CHAT_ID,
+      type: 'group',
+    });
+    expect(api.calls).toEqual([]);
   });
 });

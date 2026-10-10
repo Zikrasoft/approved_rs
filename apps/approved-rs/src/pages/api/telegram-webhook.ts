@@ -1,6 +1,7 @@
 export const prerender = false;
 
 import type { APIContext } from 'astro';
+import { Composer, type Context } from 'grammy';
 import { z } from 'zod';
 import {
   parse,
@@ -14,6 +15,7 @@ import { secretMatches } from '@/lib/verifySecret';
 import {
   afterStatusChange,
   answerCallback,
+  bot,
   ensureLeadCard,
   sendForceReplyPrompt,
   safeEditMessage,
@@ -83,8 +85,7 @@ const messageSchema = z.object({
   reply_to_message: z.object({ message_id: z.number().int() }).optional(),
 });
 
-const updateSchema = z.object({
-  update_id: z.number().int().optional(),
+const readFieldsSchema = z.object({
   message: messageSchema.optional(),
   callback_query: z
     .object({
@@ -96,8 +97,11 @@ const updateSchema = z.object({
     .optional(),
 });
 
+const updateSchema = z
+  .looseObject({ update_id: z.number().int() })
+  .refine((update) => readFieldsSchema.safeParse(update).success);
+
 type TelegramMessage = z.infer<typeof messageSchema>;
-type TelegramUpdate = z.infer<typeof updateSchema>;
 
 const ACK = new Response(null, { status: 200 });
 
@@ -151,10 +155,12 @@ function quickRemindDate(days: number): string {
 }
 
 type Ctx = { chatId: number; messageId: number; role: Role; cbId: string };
+type CrmContext = Context & { crm: Ctx };
 type Handler = (ctx: Ctx, ...groups: string[]) => Promise<void>;
 type LeadHandler = (ctx: Ctx, id: number, ...rest: string[]) => Promise<void>;
 type CallbackRow = [RegExp, Role | 'any', Handler];
 type PromptKind = PendingPrompt['kind'];
+type OperatorEditField = Exclude<EditField, 'service'>;
 
 function onLead(handler: LeadHandler): Handler {
   return (ctx, id, ...rest) => handler(ctx, Number(id), ...rest);
@@ -366,7 +372,7 @@ function statusRow(key: LeadStatus, role: Role | 'any'): CallbackRow {
   ];
 }
 
-function editRow(field: EditField): CallbackRow {
+function editRow(field: OperatorEditField): CallbackRow {
   return [
     new RegExp(`^edit:(\\d+):${field}$`),
     'any',
@@ -465,37 +471,39 @@ export const CALLBACKS: CallbackRow[] = [
   ],
 ];
 
-async function dispatchCallback(ctx: Ctx, data: string): Promise<void> {
-  for (const [pattern, needed, handler] of CALLBACKS) {
-    const match = pattern.exec(data);
-    if (!match) continue;
-    if (needed !== 'any' && needed !== ctx.role) return ack(ctx);
-    return withErrorAck(ctx.cbId, { data }, () =>
-      handler(ctx, ...match.slice(1)),
-    );
-  }
-  console.warn('[telegram-webhook] unknown callback data', { data });
-  await ack(ctx);
+function callbackCtx(cb: {
+  id: string;
+  from?: { id: number };
+  message?: { message_id: number; chat: { id: number } };
+}): Ctx | undefined {
+  const role = roleOf(cb.from?.id);
+  if (!cb.message || !role) return undefined;
+  return {
+    chatId: cb.message.chat.id,
+    messageId: cb.message.message_id,
+    role,
+    cbId: cb.id,
+  };
 }
 
-async function handleCallbackQuery(
-  cb: NonNullable<TelegramUpdate['callback_query']>,
-): Promise<void> {
-  const role = roleOf(cb.from?.id);
-  if (!cb.message || !role) {
-    await answerCallback(cb.id).catch(() => {});
-    return;
-  }
-  await dispatchCallback(
-    {
-      chatId: cb.message.chat.id,
-      messageId: cb.message.message_id,
-      role,
-      cbId: cb.id,
-    },
-    cb.data ?? '',
+const callbacks = new Composer<CrmContext>();
+
+for (const [pattern, needed, handler] of CALLBACKS) {
+  callbacks.callbackQuery(pattern, ({ crm, match, callbackQuery }) =>
+    needed !== 'any' && needed !== crm.role
+      ? ack(crm)
+      : withErrorAck(crm.cbId, { data: callbackQuery.data }, () =>
+          handler(crm, ...match.slice(1)),
+        ),
   );
 }
+
+callbacks.use(async ({ crm, callbackQuery }) => {
+  console.warn('[telegram-webhook] unknown callback data', {
+    data: callbackQuery?.data ?? '',
+  });
+  await ack(crm);
+});
 
 async function replyWithCard(
   chatId: number,
@@ -632,7 +640,7 @@ async function replyVisitor({
   }
 }
 
-function replyEdit(field: EditField): PromptHandler {
+function replyEdit(field: OperatorEditField): PromptHandler {
   return async ({ chatId, replyToMessageId, text }) => {
     const value = text.trim();
     if ((field === 'name' || field === 'contact') && !value) {
@@ -729,6 +737,34 @@ async function handlePrivateMessage(msg: TelegramMessage): Promise<void> {
   await sendMessage(chatId, resultsText, { reply_markup });
 }
 
+bot.use(async (ctx, next) => {
+  if (alreadyProcessed(ctx.update.update_id)) return;
+  await next();
+});
+
+bot.on('callback_query', async (ctx, next) => {
+  const crm = callbackCtx(ctx.callbackQuery);
+  if (!crm) {
+    await ctx.answerCallbackQuery().catch(() => {});
+    return;
+  }
+  await callbacks.middleware()(Object.assign(ctx, { crm }), next);
+});
+
+bot.on('message', async (ctx, next) => {
+  const repliedTo = ctx.message.reply_to_message;
+  if (!repliedTo) return next();
+  await handlePromptReply(
+    ctx.chat.id,
+    repliedTo.message_id,
+    ctx.message.text ?? '',
+  );
+});
+
+bot
+  .chatType('private')
+  .on('message', (ctx) => handlePrivateMessage(ctx.message));
+
 export async function POST({ request }: APIContext): Promise<Response> {
   if (
     !secretMatches(
@@ -748,24 +784,9 @@ export async function POST({ request }: APIContext): Promise<Response> {
     });
     return ACK;
   }
-  const update = parsed.data;
-
-  if (update.update_id !== undefined && alreadyProcessed(update.update_id)) {
-    return ACK;
-  }
 
   try {
-    if (update.callback_query) {
-      await handleCallbackQuery(update.callback_query);
-    } else if (update.message?.reply_to_message) {
-      await handlePromptReply(
-        update.message.chat.id,
-        update.message.reply_to_message.message_id,
-        update.message.text ?? '',
-      );
-    } else if (update.message && update.message.chat.type === 'private') {
-      await handlePrivateMessage(update.message);
-    }
+    await bot.handleUpdate(parsed.data);
   } catch (err) {
     console.error('[telegram-webhook] unhandled error processing update', {
       error: err,

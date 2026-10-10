@@ -9,6 +9,7 @@ import {
 } from '@/lib/crmBot';
 
 export const {
+  bot,
   sendMessage,
   sendForceReplyPrompt,
   answerCallback,

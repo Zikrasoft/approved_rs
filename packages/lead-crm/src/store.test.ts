@@ -271,6 +271,23 @@ describe('insertOrMergeLead', () => {
     expect(lead.comment).not.toContain('Также пробовал');
   });
 
+  it('hands back the Lead as it was before the merge, and null for an insert', async () => {
+    const first = await store.insertOrMergeLead(clickData('telegram'));
+    const second = await store.insertOrMergeLead({
+      ...clickData('telegram'),
+      contact: '@petr',
+      telegramId: 77,
+      referredBy: 'approved',
+    });
+
+    expect(first.before).toBeNull();
+    expect(second.before).toEqual(first.lead);
+    expect(second.lead).toMatchObject({
+      contact: '@petr',
+      referredBy: 'approved',
+    });
+  });
+
   it('hands a Telegram click over to the capture bot that picks up the same visitor', async () => {
     await store.insertOrMergeLead({
       ...clickData('telegram'),
@@ -1845,6 +1862,45 @@ describe('capturePrompt', () => {
   });
 });
 
+describe('a capturePrompt stored before the per-brand Questionnaires', () => {
+  const legacy = (id: number, step: string) => ({
+    id,
+    brand: baseData.brand,
+    name: 'Иван',
+    contact: '@ivan',
+    service: '',
+    locale: 'ru',
+    statusChangedAt: 'x',
+    createdAt: 'x',
+    capturePrompt: { chatId: 700 + id, step },
+  });
+
+  it('still parses an old step and clears an unknown one without quarantining the lead', async () => {
+    const quarantine = vi.fn().mockResolvedValue(undefined);
+    const guarded = createLeadStore({
+      storage,
+      schema: createLeadSchema({ defaultCommissionPercent: 10 }),
+      quarantine,
+    });
+    storage.seed([
+      legacy(1, 'looking_for'),
+      legacy(2, 'budget'),
+      legacy(3, 'phone'),
+      legacy(4, 'model_year'),
+    ]);
+
+    const steps = (await guarded.readLeads()).map((l) => l.capturePrompt);
+
+    expect(quarantine).not.toHaveBeenCalled();
+    expect(steps).toEqual([
+      { chatId: 701, step: 'looking_for' },
+      { chatId: 702, step: 'budget' },
+      { chatId: 703, step: 'phone' },
+      null,
+    ]);
+  });
+});
+
 describe('the capture lookups', () => {
   const fromTelegram = (id: number, overrides: Partial<LeadInput> = {}) =>
     store.insertLead({ ...baseData, telegramId: id, ...overrides });
@@ -1966,6 +2022,50 @@ describe('the capture lookups', () => {
 });
 
 describe('updateCapture', () => {
+  it('marks the Lead as referred and keeps the mark on later writes', async () => {
+    const lead = await store.insertLead(baseData);
+
+    await store.updateCapture(lead.id, {
+      referredBy: 'approved',
+      capturePrompt: null,
+    });
+    const updated = await store.updateCapture(lead.id, {
+      note: 'Сообщение: привет',
+      capturePrompt: null,
+    });
+
+    expect(updated?.referredBy).toBe('approved');
+  });
+
+  it('switches the Lead to the locale the visitor picked', async () => {
+    const lead = await store.insertLead({ ...baseData, locale: 'ru' });
+
+    const updated = await store.updateCapture(lead.id, {
+      locale: 'en',
+      capturePrompt: null,
+    });
+
+    expect(updated?.locale).toBe('en');
+  });
+
+  it("makes a picked service the Lead's only one", async () => {
+    const lead = await store.insertLead({
+      ...baseData,
+      service: 'vehicle-import',
+      services: ['vehicle-import'],
+    });
+
+    const updated = await store.updateCapture(lead.id, {
+      service: 'vehicle-sourcing',
+      capturePrompt: { chatId: 777, step: 'looking_for' },
+    });
+
+    expect(updated).toMatchObject({
+      service: 'vehicle-sourcing',
+      services: ['vehicle-sourcing'],
+    });
+  });
+
   it('appends the answer and moves the dialog on in one write', async () => {
     const lead = await store.insertLead({ ...baseData, comment: 'Было' });
 

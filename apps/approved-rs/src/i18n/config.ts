@@ -23,6 +23,7 @@ export const localeSet = createLocaleSet(localeConfig);
 
 export const {
   SUPPORTED_LOCALES,
+  LOCALE_NAME,
   PRIMARY_LOCALE,
   TRANSLATABLE_LOCALES,
   isLocale,

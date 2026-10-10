@@ -46,7 +46,10 @@ export function createBrandBot({
   const env = readBotEnv();
   const ownerIds = env.TELEGRAM_OWNER_ID;
   const adminIds = env.TELEGRAM_ADMIN_ID;
-  const client = createTelegramClient(env.TELEGRAM_BOT_TOKEN);
+  const client = createTelegramClient(
+    env.TELEGRAM_BOT_TOKEN,
+    env.TELEGRAM_BOT_USERNAME,
+  );
   const formatter = createFormatter({
     serviceLabel,
     botUsername: env.TELEGRAM_BOT_USERNAME,

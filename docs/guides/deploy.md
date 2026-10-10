@@ -979,6 +979,25 @@ Equivalently, by hand, once per brand:
 curl "https://api.telegram.org/bot<TELEGRAM_CAPTURE_BOT_TOKEN>/setWebhook?url=https://carlab.rs/api/telegram-capture&secret_token=<TELEGRAM_CAPTURE_WEBHOOK_SECRET>"
 ```
 
+### The capture bots' profile
+
+Each app's `scripts/capture-bot-profile.ts` sets its capture bot's description,
+short description and the `/menu` and `/lang` commands, once with no language
+code (the app's primary locale, what a Telegram client in any other language
+sees) and once per locale the site serves. The texts are the `profile` group of
+that app's `captureBot.yaml` — written in Russian, translated by the CI
+`translate` job like the rest of the capture copy. Run it by hand, from inside
+the app, after a change to that group has been translated and merged; until
+then a locale without a translation gets the Russian text. It is not a CI step,
+and a missing `TELEGRAM_CAPTURE_BOT_TOKEN` exits non-zero without calling
+Telegram:
+
+```bash
+cd apps/approved-rs && node --env-file=.env.local --experimental-strip-types scripts/capture-bot-profile.ts
+cd apps/auto-service && node --env-file=.env.local --experimental-strip-types scripts/capture-bot-profile.ts
+cd apps/detailing && node --env-file=.env.local --experimental-strip-types scripts/capture-bot-profile.ts
+```
+
 ---
 
 ## The reminder cron (approved.rs only)

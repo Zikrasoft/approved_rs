@@ -11,6 +11,24 @@ const COPY = {
   phoneSkip: 'Пропустить',
   thanks: 'Спасибо',
   received: 'Получили',
+  menu: { text: 'Чем помочь?', back: 'Назад' },
+  services: { button: 'Услуги', text: 'Выберите услугу' },
+  card: { request: 'Оставить заявку', site: 'На сайте' },
+  contacts: { button: 'Контакты', text: 'Мы здесь', hours: 'Пн–Пт' },
+  manager: { button: 'Менеджер', text: 'Напишите вопрос' },
+  partners: { button: 'Партнёры', text: 'Кому написать?' },
+  request: {
+    button: 'Оставить заявку',
+    car: 'Какая машина?',
+    service: 'Какая услуга?',
+  },
+  language: { button: 'Язык', text: 'Выберите язык' },
+  profile: {
+    description: 'Отвечаем на заявки с сайта',
+    shortDescription: 'Заявки с сайта',
+    menuCommand: 'Меню',
+    langCommand: 'Язык',
+  },
 };
 
 describe('the dialog copy a site supplies', () => {
@@ -19,7 +37,7 @@ describe('the dialog copy a site supplies', () => {
   });
 
   it('refuses a set with a question missing', () => {
-    const incomplete: Record<string, string> = { ...COPY };
+    const incomplete: Record<string, unknown> = { ...COPY };
     delete incomplete.budget;
 
     expect(captureCopySchema.safeParse(incomplete).success).toBe(false);

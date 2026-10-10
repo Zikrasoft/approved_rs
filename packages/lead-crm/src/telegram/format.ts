@@ -15,7 +15,10 @@ import { MAX_LIST_ROWS, isPlaceholderContact, type OwedRow } from '../store.ts';
 
 export type Role = 'owner' | 'admin';
 
-export type Btn = { text: string; callback_data?: string; url?: string };
+export type Btn = { text: string } & (
+  | { callback_data: string; url?: never }
+  | { url: string; callback_data?: never }
+);
 export type Keyboard = { inline_keyboard: Btn[][] };
 
 export interface FormatterOptions {
@@ -367,6 +370,7 @@ export const EDIT_FIELD_LABELS = {
   name: 'имя',
   contact: 'контакт',
   comment: 'комментарий',
+  service: 'услуга',
 } as const;
 
 export type EditField = keyof typeof EDIT_FIELD_LABELS;
@@ -399,18 +403,11 @@ function fieldPreview(value: string | null | undefined): string {
   );
 }
 
-export function fieldChangeText(
-  lead: StoredLead,
-  field: EditField,
-  before: string | null | undefined,
-): string {
-  return [
-    `✏️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${EDIT_FIELD_LABELS[field]}`,
-    ``,
-    `Было: ${fieldPreview(before)}`,
-    `Стало: ${fieldPreview(lead[field])}`,
-  ].join('\n');
-}
+export type FieldChangeAuthor = 'operator' | 'visitor';
+
+export const REFERRAL_NOTE = 'Пришёл из бота Approved.rs (Партнёры)';
+
+const VISITOR_CHANGE_MARK = '🤖 Посетитель через бота';
 
 export function quarantinedLeadsText(
   count: number,
@@ -481,7 +478,9 @@ export function createFormatter({
 
   function brandLine(lead: StoredLead): string {
     const via = lead.telegramId == null ? '' : ' · 🤖 через бота';
-    return `🏷 ${escapeHtml(lead.brand)}${via}`;
+    const referred =
+      lead.referredBy === 'approved' ? ' · 🤝 из бота Approved.rs' : '';
+    return `🏷 ${escapeHtml(lead.brand)}${via}${referred}`;
   }
 
   function formatLeadText(lead: StoredLead, role: Role): string {
@@ -566,8 +565,30 @@ export function createFormatter({
       : [];
   }
 
+  function shownValue(
+    field: EditField,
+    value: string | null | undefined,
+  ): string | null | undefined {
+    return field === 'service' && value ? serviceLabel(value) : value;
+  }
+
   return {
     formatLeadText,
+
+    fieldChangeText(
+      lead: StoredLead,
+      field: EditField,
+      before: string | null | undefined,
+      author: FieldChangeAuthor = 'operator',
+    ): string {
+      return [
+        `✏️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${EDIT_FIELD_LABELS[field]}`,
+        ...(author === 'visitor' ? [VISITOR_CHANGE_MARK] : []),
+        ``,
+        `Было: ${fieldPreview(shownValue(field, before))}`,
+        `Стало: ${fieldPreview(shownValue(field, lead[field]))}`,
+      ].join('\n');
+    },
 
     formatTeaser(lead: StoredLead): string {
       return `${archivedMark(lead)}🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusEmoji(lead.status)} ${statusLabel(lead.status)}\n${brandLine(lead)}`;

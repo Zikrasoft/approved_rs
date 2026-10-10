@@ -1,4 +1,8 @@
-export { createLocaleSet, SOURCE_LOCALE } from './locales.ts';
+export {
+  createLocaleSet,
+  NATIVE_LOCALE_NAMES,
+  SOURCE_LOCALE,
+} from './locales.ts';
 export type { LocaleSet, LocaleSetOptions, SourceLocale } from './locales.ts';
 
 export { createSectionLoader } from './loadSection.ts';

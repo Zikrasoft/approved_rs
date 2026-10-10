@@ -6,6 +6,7 @@ export type { BrandBotOptions } from './brandBot.ts';
 export { LEADS_PATH } from './quarantine.ts';
 export type {
   CapturePrompt,
+  CaptureStep,
   LeadInput,
   LeadSubmission,
   Income,
@@ -13,6 +14,7 @@ export type {
   PendingCommissionClaim,
   PendingPrompt,
   Payment,
+  Referrer,
   StoredLead,
 } from './schema.ts';
 
@@ -56,6 +58,7 @@ export {
   createFormatter,
   EDIT_COPY,
   EDIT_FIELD_LABELS,
+  REFERRAL_NOTE,
   REPLY_COPY,
   escapeHtml,
   formatDateRu,
@@ -67,6 +70,7 @@ export {
 export type {
   Btn,
   EditField,
+  FieldChangeAuthor,
   Keyboard,
   LeadStatusKey,
   Role,
