@@ -9,6 +9,8 @@ import { createFormatter } from './format.ts';
 import { createNotifier } from './notify.ts';
 import { LEAD_STATUSES, withDerivedMoney } from '../schema.ts';
 import type { StoredLead } from '../schema.ts';
+import type { Payout } from '../ledger.ts';
+import type { MonthlySummary } from '../store.ts';
 
 import {
   PAYOUT_COPY,
@@ -20,6 +22,9 @@ import {
   SETTLEMENT_COPY,
   settleKeyboard,
   settlementText,
+  monthlySummaryText,
+  MAX_SUMMARY_ROWS,
+  TELEGRAM_TEXT_LIMIT,
   buildSearchResults,
   buildMenu,
   buildOpenList,
@@ -57,6 +62,7 @@ const {
   sendDealNotificationToAdmin,
   sendPayoutNotificationToAdmin,
   sendSettlementToOwner,
+  sendMonthlySummary,
   sendQuarantinedLeadsToAdmin,
   sendStatusChangeToAdmin,
   sendFieldChangeToAdmin,
@@ -768,6 +774,135 @@ describe('settleKeyboard', () => {
     expect(settleKeyboard(0).inline_keyboard).toEqual([
       [{ text: SETTLEMENT_COPY.otherButton, callback_data: 'settle:other' }],
     ]);
+  });
+});
+
+describe('monthlySummaryText', () => {
+  const payout = (id: number, extra: Partial<Payout> = {}): Payout => ({
+    type: 'payout',
+    id,
+    amount: 30,
+    note: '',
+    createdAt: '2026-10-05T10:00:00.000Z',
+    createdBy: 'owner',
+    leadId: null,
+    brand: null,
+    edits: [],
+    pendingPrompt: null,
+    ...extra,
+  });
+  const summary = (extra: Partial<MonthlySummary> = {}): MonthlySummary => ({
+    month: '2026-11',
+    since: '2026-10-01T08:00:00.000Z',
+    balance: 143.3,
+    payouts: [],
+    leads: [],
+    ...extra,
+  });
+
+  it('shows the balance, the Payouts since the last summary and the Leads without an outcome', () => {
+    expect(
+      monthlySummaryText(
+        summary({
+          payouts: [
+            payout(1, { leadId: 42, brand: 'CarLab', note: 'тормоза <&>' }),
+            payout(2, { amount: 113.3 }),
+          ],
+          leads: [
+            makeLead({ id: 7, name: '' }),
+            makeLead({ id: 9, status: 'postponed', brand: 'Details' }),
+          ],
+        }),
+      ),
+    ).toBe(
+      [
+        '<b>📅 Итоги месяца</b>',
+        '',
+        `💶 К оплате: ${money(143.3)}`,
+        '',
+        '<b>Выплаты с 01.10.2026: 2</b>',
+        `• ${money(30)} · #42 · CarLab · 05.10.2026 · тормоза &lt;&amp;&gt;`,
+        `• ${money(113.3)} · без заявки · 05.10.2026`,
+        '',
+        '<b>Без итога: 2</b>',
+        '• #9 Иван · Details · ⏸️',
+        '• #7 — · Approved.rs · 🔵',
+      ].join('\n'),
+    );
+  });
+
+  it('says so when there was nothing, and counts every Payout before the first summary', () => {
+    expect(monthlySummaryText(summary({ since: null, balance: 0 }))).toBe(
+      [
+        '<b>📅 Итоги месяца</b>',
+        '',
+        `💶 К оплате: ${money(0)}`,
+        '',
+        '<b>Выплаты за всё время: 0</b>',
+        'Выплат не было.',
+        '',
+        '<b>Без итога: 0</b>',
+        'Открытых заявок нет.',
+      ].join('\n'),
+    );
+  });
+
+  it('caps each list and names how many more there are', () => {
+    const text = monthlySummaryText(
+      summary({
+        payouts: Array.from({ length: MAX_SUMMARY_ROWS + 3 }, (_, i) =>
+          payout(i + 1),
+        ),
+        leads: Array.from({ length: MAX_SUMMARY_ROWS + 1 }, (_, i) =>
+          makeLead({ id: i + 1 }),
+        ),
+      }),
+    );
+    expect(text.split('\n').filter((l) => l.startsWith('• '))).toHaveLength(
+      2 * MAX_SUMMARY_ROWS,
+    );
+    expect(text).toContain('\n+3 ещё\n');
+    expect(text.endsWith('\n+1 ещё')).toBe(true);
+  });
+
+  it('stays inside one Telegram message however long the names and notes are', () => {
+    const long = '&'.repeat(500);
+    const text = monthlySummaryText(
+      summary({
+        payouts: Array.from({ length: 50 }, (_, i) =>
+          payout(i + 1, { note: long, brand: long }),
+        ),
+        leads: Array.from({ length: 50 }, (_, i) =>
+          makeLead({ id: i + 1, name: long, brand: long }),
+        ),
+      }),
+    );
+    expect(text.length).toBeLessThanOrEqual(TELEGRAM_TEXT_LIMIT);
+    expect(text).toContain('…');
+    expect(text).toMatch(/\+\d+ ещё$/);
+  });
+});
+
+describe('sendMonthlySummary', () => {
+  beforeEach(() => mockFetchOk());
+  afterEach(() => mockFetch.mockReset());
+
+  it('posts the summary to the group with the settle buttons', async () => {
+    const summary: MonthlySummary = {
+      month: '2026-11',
+      since: null,
+      balance: 50,
+      payouts: [],
+      leads: [],
+    };
+    await sendMonthlySummary(summary);
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body).toMatchObject({
+      chat_id: '-1009876543210',
+      text: monthlySummaryText(summary),
+      parse_mode: 'HTML',
+      reply_markup: settleKeyboard(50),
+    });
   });
 });
 

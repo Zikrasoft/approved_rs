@@ -910,6 +910,26 @@ describe('POST /api/telegram-webhook', () => {
       expect(textsTo(OWNER_ID)).toHaveLength(1);
     });
 
+    it('[💸 Paid] on the monthly summary in the group answers the admin only', async () => {
+      owed(100);
+      const onSummary = (from: number, id: string) =>
+        tap('settle:100', from, {
+          id,
+          chatId: Number(GROUP_ID),
+          messageId: TO_PAY_ID,
+        });
+
+      await onSummary(OWNER_ID, 'cb-owner');
+      expect((await readLedger()).settlements).toEqual([]);
+      expect(api.calls.map((c) => c.method)).toEqual(['answerCallbackQuery']);
+
+      await onSummary(ADMIN_ID, 'cb-admin');
+      expect((await readLedger()).settlements).toEqual([
+        expect.objectContaining({ amount: 100, createdBy: 'admin' }),
+      ]);
+      expect(edits(Number(GROUP_ID), TO_PAY_ID)).toHaveLength(1);
+    });
+
     it('another amount asks the admin by reply', async () => {
       await tap('settle:other', ADMIN_ID, { id: 'cb-other', chatId: ADMIN_ID });
       expect(forceReplies()).toEqual([

@@ -2,14 +2,40 @@ export const prerender = false;
 
 import type { APIContext } from 'astro';
 import { secretMatches } from '@/lib/verifySecret';
-import { expireGhostLeads, getDuePostponed, resumeLead } from '@/lib/store';
-import { sendPostponeReminderToOwner, afterStatusChange } from '@/lib/telegram';
+import {
+  claimMonthlySummary,
+  expireGhostLeads,
+  getDuePostponed,
+  releaseMonthlySummary,
+  resumeLead,
+} from '@/lib/store';
+import {
+  sendMonthlySummary,
+  sendPostponeReminderToOwner,
+  afterStatusChange,
+} from '@/lib/telegram';
 
 const CRON_SECRET = process.env.CRON_SECRET;
 
 function extractBearer(header: string | null): string | null {
   if (!header?.startsWith('Bearer ')) return null;
   return header.slice('Bearer '.length);
+}
+
+async function postMonthlySummary(now: Date): Promise<boolean> {
+  const summary = await claimMonthlySummary(now);
+  if (!summary) return false;
+  try {
+    await sendMonthlySummary(summary);
+    return true;
+  } catch (err) {
+    console.error('[reminders] failed to post the monthly summary', {
+      error: err,
+      month: summary.month,
+    });
+    await releaseMonthlySummary(summary.month);
+    return false;
+  }
 }
 
 export async function GET({ request }: APIContext): Promise<Response> {
@@ -51,8 +77,14 @@ export async function GET({ request }: APIContext): Promise<Response> {
     }
   }
 
+  const monthlySummary = await postMonthlySummary(now);
+
   return new Response(
-    JSON.stringify({ remindedPostponed, expiredGhosts: expired.length }),
+    JSON.stringify({
+      remindedPostponed,
+      expiredGhosts: expired.length,
+      monthlySummary,
+    }),
     {
       status: 200,
       headers: { 'Content-Type': 'application/json' },

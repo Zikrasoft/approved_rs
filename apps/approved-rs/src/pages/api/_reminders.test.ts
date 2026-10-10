@@ -8,6 +8,7 @@ import {
   type MemoryStorage,
 } from '@podbor/lead-crm/testing';
 import type { StoredLead } from '@/lib/store';
+import { settleKeyboard } from '@/lib/telegram';
 
 const memory = vi.hoisted(() => {
   const storages = new Map<string, MemoryStorage>();
@@ -161,6 +162,7 @@ describe('GET /api/reminders', () => {
     expect(await res.json()).toEqual({
       remindedPostponed: 1,
       expiredGhosts: 0,
+      monthlySummary: false,
     });
     expect(textsTo(OWNER_ID)).toEqual([
       expect.stringContaining('⏰ Напоминание по заявке #9'),
@@ -182,6 +184,7 @@ describe('GET /api/reminders', () => {
     expect(await res.json()).toEqual({
       remindedPostponed: 0,
       expiredGhosts: 0,
+      monthlySummary: false,
     });
     expect(api.calls).toEqual([]);
     expect((await stored(9)).status).toBe('postponed');
@@ -210,6 +213,7 @@ describe('GET /api/reminders', () => {
     expect(await res.json()).toEqual({
       remindedPostponed: 1,
       expiredGhosts: 0,
+      monthlySummary: false,
     });
     expect((await stored(9)).status).toBe('postponed');
     expect((await stored(10)).status).toBe('open');
@@ -224,6 +228,7 @@ describe('GET /api/reminders', () => {
     expect(await res.json()).toEqual({
       remindedPostponed: 0,
       expiredGhosts: 1,
+      monthlySummary: false,
     });
     const lead = await stored(7);
     expect(lead).toMatchObject({
@@ -255,6 +260,7 @@ describe('GET /api/reminders', () => {
     expect(await res.json()).toEqual({
       remindedPostponed: 0,
       expiredGhosts: 0,
+      monthlySummary: false,
     });
     expect((await stored(7)).status).toBe('open');
     expect((await stored(8)).status).toBe('open');
@@ -271,10 +277,93 @@ describe('GET /api/reminders', () => {
     expect(await res.json()).toEqual({
       remindedPostponed: 0,
       expiredGhosts: 2,
+      monthlySummary: false,
     });
     expect((await stored(7)).status).toBe('lost');
     expect((await stored(8)).status).toBe('lost');
     expect(error).toHaveBeenCalledTimes(2);
     error.mockRestore();
+  });
+
+  describe('monthly summary', () => {
+    const NOV_1 = new Date('2026-11-01T08:00:00.000Z');
+    const GROUP_ID = '-1009876543210';
+    const posted = () =>
+      crm('sendMessage').filter((p) => p.chat_id === GROUP_ID);
+    const summaries = () =>
+      (leadsStorage().current() as { type?: string }[]).filter(
+        (r) => r.type === 'summary',
+      );
+
+    beforeEach(() => {
+      vi.setSystemTime(NOV_1);
+      leadsStorage().seed([
+        makeLead({ id: 9, remindAt: '2026-12-01' }),
+        makeLead({ id: 10, status: 'won', remindAt: null }),
+        {
+          type: 'payout',
+          id: 1,
+          amount: 80,
+          createdAt: '2026-10-15T10:00:00.000Z',
+          createdBy: 'owner',
+          leadId: 10,
+        },
+      ]);
+    });
+
+    it('posts the balance, the Payouts and the Leads without an outcome to the group on the 1st', async () => {
+      const res = await GET(makeCtx());
+
+      expect(await res.json()).toEqual({
+        remindedPostponed: 0,
+        expiredGhosts: 0,
+        monthlySummary: true,
+      });
+      expect(posted()).toEqual([
+        expect.objectContaining({ reply_markup: settleKeyboard(80) }),
+      ]);
+      const text = String(posted()[0]!.text);
+      expect(text).toContain('💶 К оплате: 80 €');
+      expect(text).toContain('#10');
+      expect(text).toContain('<b>Без итога: 1</b>\n• #9 Иван');
+      expect(summaries()).toEqual([
+        expect.objectContaining({ month: '2026-11' }),
+      ]);
+    });
+
+    it('posts once a month, however often the cron runs', async () => {
+      await GET(makeCtx());
+      vi.setSystemTime(new Date('2026-11-01T20:00:00.000Z'));
+      const res = await GET(makeCtx());
+
+      expect((await res.json()).monthlySummary).toBe(false);
+      expect(posted()).toHaveLength(1);
+      expect(summaries()).toHaveLength(1);
+    });
+
+    it('stays quiet on the 2nd', async () => {
+      vi.setSystemTime(new Date('2026-11-02T08:00:00.000Z'));
+      const res = await GET(makeCtx());
+
+      expect((await res.json()).monthlySummary).toBe(false);
+      expect(api.calls).toEqual([]);
+      expect(summaries()).toEqual([]);
+    });
+
+    it('gives the month back when the post fails, so the next run sends it', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+      api.fail('sendMessage', 'Bad Request: chat not found');
+      const failed = await GET(makeCtx());
+
+      expect((await failed.json()).monthlySummary).toBe(false);
+      expect(summaries()).toEqual([]);
+      expect(error).toHaveBeenCalledOnce();
+
+      api.reset();
+      const retried = await GET(makeCtx());
+      expect((await retried.json()).monthlySummary).toBe(true);
+      expect(posted()).toHaveLength(1);
+      error.mockRestore();
+    });
   });
 });

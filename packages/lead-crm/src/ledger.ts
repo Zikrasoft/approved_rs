@@ -64,10 +64,19 @@ export const draftSchema = z.object({
 });
 export type Draft = z.infer<typeof draftSchema>;
 
+export const summaryMarkSchema = z.object({
+  type: z.literal('summary'),
+  id: z.number().int().positive(),
+  month: z.string().regex(/^\d{4}-\d{2}$/),
+  createdAt: z.string(),
+});
+export type SummaryMark = z.infer<typeof summaryMarkSchema>;
+
 export const ledgerRecordSchema = z.discriminatedUnion('type', [
   payoutSchema,
   settlementSchema,
   draftSchema,
+  summaryMarkSchema,
 ]);
 
 export interface Ledger {

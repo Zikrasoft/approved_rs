@@ -587,3 +587,92 @@ describe('drafts', () => {
     expect(records().map((r) => r.type ?? 'lead')).toEqual(['lead', 'draft']);
   });
 });
+
+describe('claimMonthlySummary', () => {
+  const NOV_1 = new Date('2026-11-01T08:00:00.000Z');
+
+  it('claims nothing and writes nothing on any day but the 1st in Belgrade', async () => {
+    const writes = storage.writeAttempts();
+    expect(
+      await store.claimMonthlySummary(new Date('2026-11-02T08:00:00.000Z')),
+    ).toBeUndefined();
+    expect(
+      await store.claimMonthlySummary(new Date('2026-10-01T22:30:00.000Z')),
+    ).toBeUndefined();
+    expect(storage.writeAttempts()).toBe(writes);
+  });
+
+  it('counts the 1st by the Belgrade calendar, not UTC', async () => {
+    const summary = await store.claimMonthlySummary(
+      new Date('2026-10-31T23:30:00.000Z'),
+    );
+    expect(summary?.month).toBe('2026-11');
+  });
+
+  it('collects the balance, every Payout and the Leads without an outcome the first time', async () => {
+    const open = await store.insertLead(baseData);
+    const postponed = await store.insertLead(baseData);
+    const won = await store.insertLead(baseData);
+    const lost = await store.insertLead(baseData);
+    await store.setStatus(postponed.id, 'postponed');
+    await store.setStatus(won.id, 'won');
+    await store.setStatus(lost.id, 'lost');
+    const payout = await store.addPayout({ amount: 80, by: 'owner' });
+    await store.addSettlement(30);
+
+    const summary = await store.claimMonthlySummary(NOV_1);
+
+    expect(summary).toEqual({
+      month: '2026-11',
+      since: null,
+      balance: 50,
+      payouts: [payout],
+      leads: [
+        expect.objectContaining({ id: open.id }),
+        expect.objectContaining({ id: postponed.id }),
+      ],
+    });
+    expect(records()).toContainEqual({
+      type: 'summary',
+      id: 1,
+      month: '2026-11',
+      createdAt: NOV_1.toISOString(),
+    });
+    expect(await store.readLeads()).toHaveLength(4);
+  });
+
+  it('claims a month once, however often the cron runs that day', async () => {
+    expect(await store.claimMonthlySummary(NOV_1)).toBeDefined();
+    expect(
+      await store.claimMonthlySummary(new Date('2026-11-01T20:00:00.000Z')),
+    ).toBeUndefined();
+    expect(records().filter((r) => r.type === 'summary')).toHaveLength(1);
+  });
+
+  it('lists only the Payouts recorded since the previous summary', async () => {
+    await store.addPayout({ amount: 10, by: 'owner' });
+    await store.claimMonthlySummary(NOV_1);
+    vi.setSystemTime(new Date('2026-11-15T00:00:00.000Z'));
+    const later = await store.addPayout({ amount: 20, by: 'owner' });
+
+    const summary = await store.claimMonthlySummary(
+      new Date('2026-12-01T08:00:00.000Z'),
+    );
+
+    expect(summary).toMatchObject({
+      month: '2026-12',
+      since: NOV_1.toISOString(),
+      balance: 30,
+      payouts: [later],
+    });
+  });
+
+  it('gives the month back once released, so a failed post is retried', async () => {
+    await store.claimMonthlySummary(NOV_1);
+    await store.releaseMonthlySummary('2026-11');
+    expect(records().filter((r) => r.type === 'summary')).toEqual([]);
+    expect(await store.claimMonthlySummary(NOV_1)).toMatchObject({
+      since: null,
+    });
+  });
+});

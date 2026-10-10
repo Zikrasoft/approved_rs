@@ -24,6 +24,7 @@ export const {
   sendDealNotificationToAdmin,
   sendPayoutNotificationToAdmin,
   sendSettlementToOwner,
+  sendMonthlySummary,
   sendStatusChangeToAdmin,
   editLeadDetailMessage,
   unpinLeadCard,
