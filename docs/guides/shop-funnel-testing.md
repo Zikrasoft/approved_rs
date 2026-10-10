@@ -36,10 +36,10 @@ Two things it establishes that are worth not relearning:
 - **No stored shape fails the read except the ones meant to.** The Lead schema
   no longer carries money (ADR-0032), but the store still reads the retired
   income fields as legacy input to migrate them into Payouts and Settlements.
-  A record whose legacy money cannot be priced — a rate over 100%, or money
-  with no rate at all — is written back verbatim, copied into the quarantine
-  store, and goes invisible to listing and statistics. Visibility and
-  duplication, not loss.
+  Money stored without a rate is priced at the former default of 10%. A record
+  whose legacy money cannot be priced — a rate over 100% — is written back
+  verbatim, copied into the quarantine store, and goes invisible to listing
+  and statistics. Visibility and duplication, not loss.
 - **Retired fields are dropped on read, and so on the next write.**
   `baseStoredLeadSchema` is not `.strict()`, so `lastRemindedAt` (v0–v3),
   `customerPaidAt` and the old money fields (`dealAmount`, `commissionPercent`,

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { roundMoney } from './money.ts';
 
 const PAID_EPSILON = 0.005;
+export const LEGACY_COMMISSION_PERCENT = 10;
 
 const incomeSchema = z.object({
   id: z.number().int().positive(),
@@ -53,12 +54,7 @@ function incomesOf(money: LegacyMoney, percent: number): Income[] {
 }
 
 export const legacyIncomesSchema: z.ZodType<LegacyIncomes, unknown> =
-  legacyMoneySchema.transform((money, ctx) => {
-    const percent = money.commissionPercent ?? 0;
-    const incomes = incomesOf(money, percent);
-    if (incomes.length > 0 && money.commissionPercent === undefined) {
-      ctx.addIssue({ code: 'custom', message: 'legacy incomes carry no rate' });
-      return z.NEVER;
-    }
-    return { percent, incomes };
+  legacyMoneySchema.transform((money) => {
+    const percent = money.commissionPercent ?? LEGACY_COMMISSION_PERCENT;
+    return { percent, incomes: incomesOf(money, percent) };
   });

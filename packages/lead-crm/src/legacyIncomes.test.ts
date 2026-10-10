@@ -21,7 +21,7 @@ describe('legacyPayoutAmount', () => {
 describe('legacy money on a stored Lead', () => {
   it('has nothing to migrate on a Lead without money', () => {
     expect(legacyIncomesSchema.parse({ statusChangedAt: WON })).toEqual({
-      percent: 0,
+      percent: 10,
       incomes: [],
     });
   });
@@ -85,10 +85,12 @@ describe('legacy money on a stored Lead', () => {
     ]);
   });
 
-  it('refuses money it has no rate to price', () => {
+  it('prices money stored without a rate at the former 10% default', () => {
     expect(
-      legacyIncomesSchema.safeParse({ statusChangedAt: WON, dealAmount: 300 })
-        .success,
-    ).toBe(false);
+      legacyIncomesSchema.parse({ statusChangedAt: WON, dealAmount: 300 }),
+    ).toEqual({
+      percent: 10,
+      incomes: [{ id: 1, amount: 300, at: WON, paidAt: null }],
+    });
   });
 });

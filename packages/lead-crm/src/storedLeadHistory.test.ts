@@ -478,6 +478,24 @@ const HISTORY: StoredShape[] = [
       lastActivityAt: '2026-09-20T08:00:00.000Z',
     },
   },
+  {
+    label: 'money with no stored rate, priced at the former 10% default',
+    record: {
+      id: 15,
+      name: 'Luka',
+      contact: '@luka',
+      service: 'podbor-auto',
+      locale: 'ru',
+      status: 'won',
+      dealAmount: 300,
+      statusChangedAt: '2026-03-17T10:00:00.000Z',
+      createdAt: '2026-03-03T10:00:00.000Z',
+    },
+    keeps: { id: 15, brand: 'Approved.rs', status: 'won' },
+    incomes: [
+      { id: 1, amount: 300, at: '2026-03-17T10:00:00.000Z', paidAt: null },
+    ],
+  },
 ];
 
 const REFUSED: RefusedShape[] = [
@@ -504,20 +522,6 @@ const REFUSED: RefusedShape[] = [
       pendingPrompt: null,
       archived: false,
       pendingCommissionClaim: null,
-    },
-  },
-  {
-    label: 'money with no rate to price it, which no version wrote',
-    record: {
-      id: 15,
-      name: 'Luka',
-      contact: '@luka',
-      service: 'podbor-auto',
-      locale: 'ru',
-      status: 'won',
-      dealAmount: 300,
-      statusChangedAt: '2026-03-17T10:00:00.000Z',
-      createdAt: '2026-03-03T10:00:00.000Z',
     },
   },
 ];
