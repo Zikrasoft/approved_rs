@@ -2196,6 +2196,25 @@ describe('POST /api/telegram-webhook', () => {
       expect(await listPayouts()).toEqual([]);
     });
 
+    it('answers a pending amount prompt with a spoken amount', async () => {
+      seed(
+        makeLead({
+          status: 'won',
+          pendingPrompt: {
+            ...awaiting('deal_amount'),
+            chatId: CARD_CHAT_ID,
+          },
+        }),
+      );
+      parser.transcribe.mockResolvedValue('300 евро.');
+      await speak(OWNER_ID, { messageId: PROMPT_ID, isBot: true });
+
+      expect(await listPayouts(5)).toEqual([
+        expect.objectContaining({ amount: 300, leadId: 5 }),
+      ]);
+      expect((await stored()).pendingPrompt).toBeNull();
+    });
+
     it('ignores a voice reply to a message the bot did not send', async () => {
       await speak(OWNER_ID, { messageId: 77, isBot: false });
       expect(parser.transcribe).not.toHaveBeenCalled();

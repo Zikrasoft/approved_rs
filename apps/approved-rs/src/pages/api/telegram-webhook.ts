@@ -154,7 +154,12 @@ const MAX_AMOUNT = 1_000_000;
 
 const amountSchema = z
   .string()
-  .transform((text) => text.replace(/[^\d.,-]/g, '').replace(',', '.'))
+  .transform((text) =>
+    text
+      .replace(/[^\d.,-]/g, '')
+      .replace(/\.$/, '')
+      .replace(',', '.'),
+  )
   .refine((digits) => /^\d+(\.\d+)?$/.test(digits))
   .transform((digits) => Number(digits))
   .pipe(z.number().max(MAX_AMOUNT));
@@ -172,6 +177,7 @@ const plainAmountSchema = z
   .transform((text) =>
     text
       .replace(/\s+/g, '')
+      .replace(/\.$/, '')
       .replace(/(€|eur|евро)$/i, '')
       .replace(',', '.'),
   )
