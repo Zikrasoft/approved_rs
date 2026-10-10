@@ -220,7 +220,8 @@ created by itself on the first run, with no protection rules.
 `.vercel/.env.production.local`, and `vercel build` builds with them. Which means:
 
 - **variables are set in the Vercel dashboard, not in GitHub secrets.** GitHub only
-  holds the token/IDs for reaching Vercel plus `OPENAI_API_KEY` (see below);
+  holds the token/IDs for reaching Vercel plus `OPENAI_API_KEY` (see below),
+  which approved.rs also needs in its Vercel project for free-form Payouts;
 - **a missing public variable fails the build, a missing server-side one fails the
   route.** `PUBLIC_*` variables are inlined into the HTML at build time, so each
   app's `src/utils/constants.ts` parses them through a zod schema at module load
@@ -339,6 +340,17 @@ the operator's reply to a handle-less visitor lands on the CRM webhook there, an
 only the visitor's own brand's bot can deliver it, so the webhook picks the bot by
 the lead's `brand` ([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
 Without a sibling token the reply button is simply absent on that brand's cards.
+
+### OpenAI (approved.rs only)
+
+| Variable         | approved.rs | carlab.rs | details.rs | Without it                                                                                 |
+| ---------------- | ----------- | --------- | ---------- | ------------------------------------------------------------------------------------------ |
+| `OPENAI_API_KEY` | ✅          | —         | —          | an owner message with an amount in the group gets "could not read the amount" and no draft |
+
+The CRM webhook reads the owner's free-form group messages (`Иван, сервис
+повторно, 30`) through an OpenAI model into a draft Payout. It is the same key
+as the GitHub secret below; the webhook still answers buttons and card replies
+without it, and only the free-form path fails.
 
 ### Storage and cron
 
@@ -465,7 +477,7 @@ Settings → Secrets and variables → Actions:
 
 | Secret                           | For what                                       | Where to get it                                                        |
 | -------------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------- |
-| `OPENAI_API_KEY`                 | the `translate` job (content auto-translation) | OpenAI. **GitHub only, not needed on Vercel**                          |
+| `OPENAI_API_KEY`                 | the `translate` job (content auto-translation) | OpenAI. Also set on approved.rs in Vercel, for free-form Payouts       |
 | `VERCEL_TOKEN`                   | every deploy job                               | [vercel.com/account/tokens](https://vercel.com/account/tokens)         |
 | `VERCEL_ORG_ID`                  | every deploy job                               | `.vercel/project.json` → `orgId` after `vercel link`                   |
 | `VERCEL_PROJECT_ID`              | the approved.rs deploy                         | Project Settings → General of that project                             |
@@ -927,6 +939,18 @@ in Vercel Blob (`data/leads.json`, private access), with no external database.
 The owner and the admin each have to message the bot `/start` once before it can
 send them direct messages (including the cron's reminders) — Telegram forbids a bot
 from starting a conversation.
+
+In the group the bot needs two things a default bot does not have:
+
+- **Privacy mode off.** The owner records a Payout by writing a plain message with
+  an amount in the group, not only by replying to a card, and a bot in privacy
+  mode never receives such messages. In @BotFather: `/setprivacy` → `@SerbCRMBot`
+  → `Disable`. Telegram applies the change only to groups the bot joins
+  afterwards, so remove the bot from the group and add it back (an admin bot
+  receives every message regardless, which also works). Replies to the bot's own
+  cards arrive either way.
+- **Admin rights to pin messages.** Every new card is pinned and a closed one is
+  unpinned; without the right both calls fail and are only logged.
 
 The webhook must carry a `secret_token` equal to the approved.rs project's
 `TELEGRAM_WEBHOOK_SECRET` — without a match the endpoint answers 401 to every

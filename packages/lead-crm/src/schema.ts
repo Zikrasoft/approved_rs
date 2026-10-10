@@ -31,14 +31,12 @@ export const PROMPT_KINDS = [
   'edit_comment',
   'postpone',
   'reply_visitor',
-  'correct_payout',
 ] as const;
 
 const pendingPromptSchema = z.object({
   chatId: z.number().int(),
   messageId: z.number().int(),
   kind: z.enum(PROMPT_KINDS),
-  payoutId: z.number().int().positive().optional(),
 });
 export type PendingPrompt = z.infer<typeof pendingPromptSchema>;
 

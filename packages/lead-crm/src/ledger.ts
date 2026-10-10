@@ -14,6 +14,12 @@ const payoutEditSchema = z.object({
 });
 export type PayoutEdit = z.infer<typeof payoutEditSchema>;
 
+const recordPromptSchema = z.object({
+  chatId: z.number().int(),
+  messageId: z.number().int(),
+});
+export type RecordPrompt = z.infer<typeof recordPromptSchema>;
+
 export const payoutSchema = z.object({
   type: z.literal('payout'),
   id: z.number().int().positive(),
@@ -24,6 +30,7 @@ export const payoutSchema = z.object({
   leadId: z.number().int().positive().nullable().default(null),
   brand: z.string().nullable().default(null),
   edits: z.array(payoutEditSchema).default(() => []),
+  pendingPrompt: recordPromptSchema.nullable().catch(null),
   migratedFrom: z.string().optional(),
 });
 export type Payout = z.infer<typeof payoutSchema>;
@@ -38,9 +45,29 @@ export const settlementSchema = z.object({
 });
 export type Settlement = z.infer<typeof settlementSchema>;
 
+const draftPromptSchema = recordPromptSchema.extend({
+  draftMessageId: z.number().int(),
+});
+export type DraftPrompt = z.infer<typeof draftPromptSchema>;
+
+export const draftSchema = z.object({
+  type: z.literal('draft'),
+  id: z.number().int().positive(),
+  amount: z.number().positive(),
+  note: z.string().default(''),
+  brand: z.string().nullable().default(null),
+  leadId: z.number().int().positive().nullable().default(null),
+  matchPending: z.boolean().default(false),
+  createdAt: z.string(),
+  createdBy: ledgerAuthorSchema,
+  pendingPrompt: draftPromptSchema.nullable().catch(null),
+});
+export type Draft = z.infer<typeof draftSchema>;
+
 export const ledgerRecordSchema = z.discriminatedUnion('type', [
   payoutSchema,
   settlementSchema,
+  draftSchema,
 ]);
 
 export interface Ledger {
@@ -97,7 +124,12 @@ export function correction(
   };
   return {
     ok: true,
-    payout: { ...payout, amount, edits: [...payout.edits, edit] },
+    payout: {
+      ...payout,
+      amount,
+      edits: [...payout.edits, edit],
+      pendingPrompt: null,
+    },
   };
 }
 
@@ -125,6 +157,7 @@ export function withMigratedIncomes(
           leadId: lead.id,
           brand: lead.brand,
           edits: [],
+          pendingPrompt: null,
           migratedFrom: key,
         });
       }

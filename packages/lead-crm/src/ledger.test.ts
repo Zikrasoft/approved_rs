@@ -70,6 +70,7 @@ describe('addPayout', () => {
       leadId: null,
       brand: null,
       edits: [],
+      pendingPrompt: null,
     });
     expect(records()).toEqual([
       expect.objectContaining({ id: 1, name: 'Иван' }),
@@ -406,5 +407,170 @@ describe('reading ledger records', () => {
       'payout',
       'settlement',
     ]);
+  });
+});
+
+describe('payout prompts', () => {
+  const prompt = { chatId: -100, messageId: 88 };
+
+  it('holds a correction prompt on the Payout and clears it on correction', async () => {
+    const payout = await store.addPayout({ amount: 80, by: 'owner' });
+    expect(await store.setPayoutPrompt(payout!.id, prompt)).toMatchObject({
+      pendingPrompt: prompt,
+    });
+    expect(await store.findPayoutByPrompt(-100, 88)).toMatchObject({
+      id: payout!.id,
+    });
+    expect(await store.findPayoutByPrompt(-100, 89)).toBeUndefined();
+
+    await store.correctPayout(payout!.id, 90, 'owner');
+    expect(await store.findPayoutByPrompt(-100, 88)).toBeUndefined();
+  });
+
+  it('finds no Payout to hold a prompt for an unknown id', async () => {
+    await store.addPayout({ amount: 80, by: 'owner' });
+    expect(await store.setPayoutPrompt(9, prompt)).toBeUndefined();
+  });
+});
+
+describe('findPastLead', () => {
+  beforeEach(() => {
+    storage.seed([
+      storedLead(1, { name: 'Иван Петров', contact: '+381641234567' }),
+      storedLead(2, { name: 'Иван Сидоров', contact: '@sidorov' }),
+      storedLead(3, { name: 'Пётр', contact: '—' }),
+    ]);
+  });
+
+  it('prefers a phone match, comparing the trailing digits', async () => {
+    expect(
+      await store.findPastLead({ name: 'Иван', phone: '064 123 4567' }),
+    ).toMatchObject({ id: 1 });
+  });
+
+  it('takes the newest Lead whose name holds every word named', async () => {
+    expect(
+      await store.findPastLead({ name: 'иван', phone: null }),
+    ).toMatchObject({ id: 2 });
+    expect(
+      await store.findPastLead({ name: 'Петров Иван', phone: null }),
+    ).toMatchObject({ id: 1 });
+    expect(
+      await store.findPastLead({ name: 'Петр', phone: null }),
+    ).toMatchObject({ id: 3 });
+  });
+
+  it('finds nothing for a short phone, an unknown name or no hints', async () => {
+    expect(
+      await store.findPastLead({ name: 'Марко', phone: '4567' }),
+    ).toBeUndefined();
+    expect(
+      await store.findPastLead({ name: null, phone: null }),
+    ).toBeUndefined();
+  });
+});
+
+describe('drafts', () => {
+  const input = {
+    amount: 30,
+    by: 'owner' as const,
+    note: 'сервис повторно',
+    brand: 'CarLab',
+    leadId: null,
+    matchPending: false,
+  };
+
+  it('keeps a draft out of the ledger until it is confirmed', async () => {
+    const draft = await store.addDraft(input);
+    expect(draft).toEqual({
+      type: 'draft',
+      amount: 30,
+      note: 'сервис повторно',
+      brand: 'CarLab',
+      leadId: null,
+      matchPending: false,
+      id: Date.parse(at(1)),
+      createdAt: at(1),
+      createdBy: 'owner',
+      pendingPrompt: null,
+    });
+    expect(await store.getDraft(draft.id)).toEqual(draft);
+    expect(await store.listPayouts()).toEqual([]);
+    expect(await store.getBalance()).toBe(0);
+
+    const payout = await store.confirmDraft(draft.id);
+    expect(payout).toMatchObject({
+      amount: 30,
+      note: 'сервис повторно',
+      brand: 'CarLab',
+      leadId: null,
+    });
+    expect(await store.getDraft(draft.id)).toBeUndefined();
+    expect(await store.confirmDraft(draft.id)).toBeUndefined();
+    expect(await store.listPayouts()).toHaveLength(1);
+  });
+
+  it('gives drafts made in the same millisecond distinct ids', async () => {
+    const first = await store.addDraft(input);
+    const second = await store.addDraft(input);
+    expect(second.id).toBe(first.id + 1);
+  });
+
+  it('drops drafts a week old when a new one arrives', async () => {
+    const old = await store.addDraft(input);
+    onDay(8);
+    const fresh = await store.addDraft(input);
+    expect(await store.getDraft(old.id)).toBeUndefined();
+    expect(await store.getDraft(fresh.id)).toEqual(fresh);
+  });
+
+  it('stores a confirmed draft on its Lead with the Lead brand', async () => {
+    const lead = await store.insertLead(baseData);
+    const draft = await store.addDraft({
+      ...input,
+      brand: 'Details',
+      leadId: lead.id,
+    });
+    expect(await store.confirmDraft(draft.id)).toMatchObject({
+      leadId: lead.id,
+      brand: 'CarLab',
+    });
+  });
+
+  it('stores a draft whose Lead was deleted without a Lead', async () => {
+    const lead = await store.insertLead(baseData);
+    const draft = await store.addDraft({ ...input, leadId: lead.id });
+    await store.deleteLead(lead.id);
+    expect(await store.confirmDraft(draft.id)).toMatchObject({
+      leadId: null,
+      brand: 'CarLab',
+    });
+  });
+
+  it('updates a draft and finds it by its prompt', async () => {
+    const draft = await store.addDraft(input);
+    const pendingPrompt = { chatId: -100, messageId: 90, draftMessageId: 89 };
+    expect(
+      await store.updateDraft(draft.id, { amount: 35, pendingPrompt }),
+    ).toMatchObject({ amount: 35, pendingPrompt });
+    expect(await store.findDraftByPrompt(-100, 90)).toMatchObject({
+      id: draft.id,
+    });
+    expect(await store.findDraftByPrompt(-100, 89)).toBeUndefined();
+    expect(await store.updateDraft(7, { amount: 1 })).toBeUndefined();
+  });
+
+  it('discards a draft once', async () => {
+    const draft = await store.addDraft(input);
+    expect(await store.discardDraft(draft.id)).toBe(true);
+    expect(await store.discardDraft(draft.id)).toBe(false);
+    expect(records()).toEqual([]);
+  });
+
+  it('keeps drafts through a Lead-only update', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.addDraft(input);
+    await store.setStatus(lead.id, 'won');
+    expect(records().map((r) => r.type ?? 'lead')).toEqual(['lead', 'draft']);
   });
 });
