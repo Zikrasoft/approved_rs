@@ -19,7 +19,7 @@ export const {
   postponeLead,
   deleteLead,
   searchLeads,
-  getDuePostponed,
+  getDigest,
   readLedger,
   getBalance,
   listPayouts,

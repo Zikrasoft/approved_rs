@@ -1472,6 +1472,7 @@ describe('POST /api/telegram-webhook', () => {
         ...before,
         comment: 'Ищу Golf 7\nОтвет: Нашёл вариант <до 10k>',
         pendingPrompt: null,
+        lastActivityAt: expect.any(String),
       });
       expect(sentTo(ADMIN_ID)).toEqual([]);
       expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);

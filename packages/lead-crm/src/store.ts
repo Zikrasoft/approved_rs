@@ -88,6 +88,21 @@ export interface PastLeadHints {
 
 export const DRAFT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
+const STALE_AFTER_MS = 7 * 24 * 60 * 60 * 1000;
+
+export interface Digest {
+  stale: StoredLead[];
+  unpaid: StoredLead[];
+  due: StoredLead[];
+}
+
+function lastActionAt(lead: StoredLead): number {
+  return Math.max(
+    Date.parse(lead.statusChangedAt),
+    lead.lastActivityAt ? Date.parse(lead.lastActivityAt) : 0,
+  );
+}
+
 interface StoreRecords {
   leads: StoredLead[];
   ledger: Ledger;
@@ -278,12 +293,13 @@ function withPayout(
 ): { records: Partial<StoreRecords>; added?: Payout } {
   const lead = leads.find((l) => l.id === leadId);
   if (leadId != null && !lead) return { records: {} };
+  const now = new Date();
   const added = payoutSchema.parse({
     type: 'payout',
     id: nextLedgerId(ledger.payouts),
     amount,
     note,
-    createdAt: new Date().toISOString(),
+    createdAt: now.toISOString(),
     createdBy: by,
     leadId,
     brand: brand ?? lead?.brand ?? null,
@@ -292,7 +308,13 @@ function withPayout(
     added,
     records: {
       leads: leads.map((l) =>
-        l === lead && l.status === 'lost' ? { ...l, ...statusPatch('won') } : l,
+        l === lead
+          ? {
+              ...l,
+              ...(l.status === 'lost' ? statusPatch('won', now) : {}),
+              lastActivityAt: now.toISOString(),
+            }
+          : l,
       ),
       ledger: { ...ledger, payouts: [...ledger.payouts, added] },
     },
@@ -519,11 +541,16 @@ export function createLeadStore({
       by: LedgerAuthor,
     ): Promise<PayoutCorrection> {
       let outcome!: PayoutCorrection;
-      await updateRecords(({ ledger }) => {
+      await updateRecords(({ leads, ledger }) => {
         outcome = correction(ledger, id, amount, by);
         if (!outcome.ok) return {};
         const { payout } = outcome;
         return {
+          leads: leads.map((l) =>
+            l.id === payout.leadId
+              ? { ...l, lastActivityAt: new Date().toISOString() }
+              : l,
+          ),
           ledger: {
             ...ledger,
             payouts: ledger.payouts.map((p) => (p.id === id ? payout : p)),
@@ -780,6 +807,7 @@ export function createLeadStore({
       return updateOne(id, (l) => ({
         ...l,
         comment: appendNote(l.comment, note),
+        lastActivityAt: new Date().toISOString(),
       }));
     },
 
@@ -828,7 +856,12 @@ export function createLeadStore({
         (l) =>
           l.pendingPrompt?.chatId === chatId &&
           l.pendingPrompt?.messageId === messageId,
-        (l) => ({ ...l, ...apply(l), pendingPrompt: null }),
+        (l) => ({
+          ...l,
+          lastActivityAt: new Date().toISOString(),
+          ...apply(l),
+          pendingPrompt: null,
+        }),
       );
     },
 
@@ -973,13 +1006,24 @@ export function createLeadStore({
       }));
     },
 
-    async getDuePostponed(now: Date = new Date()): Promise<StoredLead[]> {
+    async getDigest(now: Date): Promise<Digest> {
       const today = format(now, 'yyyy-MM-dd');
-      const leads = await readLeads();
-      return leads.filter(
-        (l) =>
-          l.status === 'postponed' && l.remindAt != null && l.remindAt <= today,
-      );
+      const { leads, ledger } = await readSnapshot();
+      const paid = new Set(ledger.payouts.map((p) => p.leadId));
+      return {
+        stale: leads.filter(
+          (l) =>
+            l.status === 'open' &&
+            now.getTime() - lastActionAt(l) >= STALE_AFTER_MS,
+        ),
+        unpaid: leads.filter((l) => l.status === 'won' && !paid.has(l.id)),
+        due: leads.filter(
+          (l) =>
+            l.status === 'postponed' &&
+            l.remindAt != null &&
+            l.remindAt <= today,
+        ),
+      };
     },
 
     async expireGhostLeads(now: Date): Promise<StoredLead[]> {

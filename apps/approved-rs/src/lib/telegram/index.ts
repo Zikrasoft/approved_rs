@@ -21,7 +21,7 @@ export { afterStatusChange, ensureLeadCard };
 
 export const {
   sendLeadNotification,
-  sendPostponeReminderToOwner,
+  sendDigest,
   sendDealNotificationToAdmin,
   sendPayoutNotificationToAdmin,
   sendSettlementToOwner,
