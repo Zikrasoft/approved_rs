@@ -490,7 +490,7 @@ describe('POST /api/telegram-webhook', () => {
       expect(await listPayouts(5)).toEqual([
         expect.objectContaining({ amount: 80, createdBy: 'owner', leadId: 5 }),
       ]);
-      expect(textsTo(CARD_CHAT_ID)).toEqual([OUTCOME_COPY.recorded(80)]);
+      expect(textsTo(CARD_CHAT_ID)).toEqual(['✅ 80 € записано']);
       expect(textsTo(ADMIN_ID)).toEqual([
         expect.stringContaining('Стало: 80 €'),
       ]);
@@ -1277,7 +1277,7 @@ describe('POST /api/telegram-webhook', () => {
       expect(textsTo(ADMIN_ID)).toEqual([
         expect.stringContaining('Стало: 150 €'),
       ]);
-      expect(textsTo(DM_CHAT_ID)).toEqual([OUTCOME_COPY.recorded(150)]);
+      expect(textsTo(DM_CHAT_ID)).toEqual(['✅ 150 € записано']);
     });
 
     it('records a zero Payout for a won lead that brings no money', async () => {
@@ -1645,6 +1645,7 @@ describe('POST /api/telegram-webhook', () => {
         }),
       ]);
       expect(textsTo(CARD_CHAT_ID)).toEqual(['✅ 80 € записано']);
+      expect((await stored()).lastActivityAt).not.toBeNull();
     });
 
     it('tells the admin about the new Payout, before and after', async () => {
@@ -1679,6 +1680,7 @@ describe('POST /api/telegram-webhook', () => {
       );
       expect(textsTo(CARD_CHAT_ID)).toEqual([PAYOUT_COPY.noteAdded]);
       expect(sentTo(ADMIN_ID)).toEqual([]);
+      expect((await stored()).lastActivityAt).not.toBeNull();
     });
 
     it('turns a lost Lead won and refreshes its card', async () => {

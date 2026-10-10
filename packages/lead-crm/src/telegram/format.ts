@@ -380,7 +380,6 @@ export const OUTCOME_COPY = {
   wonAck: 'Сделка ✅ — жду сумму',
   workAck: 'В работе ⏳',
   badAmount: '⚠️ Нужна сумма в евро. Попробуйте ещё раз.',
-  recorded: (amount: number) => `✅ ${formatMoney(amount)} записано`,
 } as const;
 
 const FIELD_PREVIEW_LIMIT = 120;

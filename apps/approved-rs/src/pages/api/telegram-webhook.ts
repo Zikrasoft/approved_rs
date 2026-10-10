@@ -589,6 +589,7 @@ type PromptHandler = (reply: PromptReply) => Promise<void>;
 async function replyDealAmount({
   role,
   chatId,
+  messageId,
   replyToMessageId,
   text,
 }: PromptReply): Promise<void> {
@@ -606,7 +607,7 @@ async function replyDealAmount({
   const payout = await addPayout({ amount, by: role, leadId: resolved.id });
   if (!payout) return;
   await sendPayoutNotificationToAdmin(resolved, payout);
-  await sendMessage(chatId, OUTCOME_COPY.recorded(amount));
+  await sendPayoutRecorded(chatId, messageId, payout);
 }
 
 async function replyAddIncome({
@@ -802,6 +803,7 @@ async function replyToCard(reply: Reply): Promise<boolean> {
   if (!lead) return false;
   const text = reply.text.trim();
   if (!text) return true;
+  await touchLead(lead.id);
   const amount = parsePlainAmount(text);
   if (amount == null) {
     await addNote(lead.id, text);

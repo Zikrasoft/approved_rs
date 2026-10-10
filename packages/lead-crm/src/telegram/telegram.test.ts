@@ -18,7 +18,6 @@ import {
   EDIT_COPY,
   PAYOUT_COPY,
   payoutRecordedMessage,
-  OUTCOME_COPY,
   REFERRAL_NOTE,
   statusLabel,
   buildStatusKeyboard,
@@ -336,12 +335,6 @@ describe('buildStatusKeyboard', () => {
       buildStatusKeyboard(makeLead({ id: 7, status: 'postponed' }), 'admin')
         .inline_keyboard,
     ).toEqual([[{ text: '▶️ Возобновить', callback_data: 'resume:7' }]]);
-  });
-});
-
-describe('OUTCOME_COPY', () => {
-  it('confirms a recorded amount in euros', () => {
-    expect(OUTCOME_COPY.recorded(1500)).toBe(`✅ ${money(1500)} записано`);
   });
 });
 
