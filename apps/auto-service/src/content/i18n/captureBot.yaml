@@ -47,14 +47,14 @@ translations:
     phoneOffer: Ako vam više odgovara poziv, podelite broj pa će vas majstor pozvati. Ako ne, slobodno preskočite.
     phoneButton: Podeli broj
     phoneSkip: Preskoči
-    thanks: Hvala! Proslijedili smo majstoru — uskoro će vas kontaktirati.
+    thanks: Hvala! Prosledili smo majstoru — uskoro će vas kontaktirati.
     received: Primili smo, majstor će videti vašu poruku.
     menu:
       text: Kako možemo pomoći? Izaberite šta vas zanima.
       back: « Nazad
     services:
       button: Usluge
-      text: Evo šta radimo u servisu. Izaberite uslugu — pokažaćemo cenu, rokove i šta je uključeno.
+      text: Evo šta radimo u servisu. Izaberite uslugu — pokazaćemo cenu, rokove i šta je uključeno.
     card:
       request: Poslati zahtev
       site: Više informacija na sajtu
@@ -76,8 +76,8 @@ translations:
       button: 🌐 Jezik
       text: Izaberite jezik kojim vam je lakše da komunicirate.
     profile:
-      description: Autoserivis u Beogradu — dijagnostika, popravka i servisiranje. Pritisnite „Start“ — recite šta nije u redu s autom, a majstor će ovde odgovoriti.
-      shortDescription: Autoserivis u Beogradu — dijagnostika, popravka, servisiranje
+      description: Autoservis u Beogradu — dijagnostika, popravka i servisiranje. Pritisnite „Start“ — recite šta nije u redu s autom, a majstor će ovde odgovoriti.
+      shortDescription: Autoservis u Beogradu — dijagnostika, popravka, servisiranje
       menuCommand: Glavni meni
       langCommand: Promeni jezik
   en:

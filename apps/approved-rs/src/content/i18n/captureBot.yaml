@@ -97,7 +97,7 @@ translations:
       button: Usluge
       text: Evo u čemu možemo da pomognemo. Izaberite uslugu — objasnićemo detaljnije.
     card:
-      request: Podnijeti zahtev
+      request: Podneti zahtev
       site: Više informacija na sajtu
     contacts:
       button: Kontakti
@@ -110,7 +110,7 @@ translations:
       button: Partneri
       text: Popravka i detailing — kod partnera kojima verujemo. Izaberite kome želite da pišete.
     request:
-      button: Podnijeti zahtev
+      button: Podneti zahtev
       car: Koja je vaša kola? Napišite marku, model i godište.
       service: Koju uslugu želite? Izaberite ispod.
     language:
