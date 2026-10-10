@@ -19,6 +19,7 @@ export { storedLeadSchema } from './schema.ts';
 export {
   appendNote,
   canPostpone,
+  isFreshLead,
   postponePatch,
   resumePatch,
   statusPatch,

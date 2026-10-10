@@ -7,7 +7,7 @@ import {
 import {
   REFERRAL_NOTE,
   secretMatches,
-  VISITOR_MERGE_WINDOW_MS,
+  isFreshLead,
   type CapturePrompt,
   type CaptureStep,
   type EditField,
@@ -267,11 +267,6 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     await send(chatId, text, extra);
   }
 
-  function isFresh(lead: StoredLead): boolean {
-    const lastSeen = Date.parse(lead.visitorActiveAt ?? lead.createdAt);
-    return Date.now() - lastSeen < VISITOR_MERGE_WINDOW_MS;
-  }
-
   async function dropPhoneKeyboard(
     chatId: number,
     ended: CapturePrompt | null,
@@ -408,7 +403,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     payload: string | undefined,
   ): Promise<void> {
     const open = await store.findOpenLeadByTelegramId(sender.id, brand);
-    if (!open || !isFresh(open)) return start(chatId, sender, payload);
+    if (!open || !isFreshLead(open)) return start(chatId, sender, payload);
     const locale = localeOf(open);
     const fields = startFields(payload, sender);
     if (fields.service || fields.referred)
@@ -471,7 +466,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     picked: S | '',
   ): Promise<void> {
     const open = await store.findOpenLeadByTelegramId(sender.id, brand);
-    if (!open || !isFresh(open)) {
+    if (!open || !isFreshLead(open)) {
       const contact = await contactOf(sender);
       const step = firstStep(contact, picked);
       const fields = { service: picked, locale, visitorId: null };
@@ -546,7 +541,8 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     text: string,
   ): Promise<void> {
     const open = await store.findOpenLeadByTelegramId(sender.id, brand);
-    if (!open || !isFresh(open)) return start(chatId, sender, undefined, text);
+    if (!open || !isFreshLead(open))
+      return start(chatId, sender, undefined, text);
     const updated = await store.updateCapture(open.id, {
       note: `${MESSAGE_NOTE}: ${text}`,
       capturePrompt: open.capturePrompt,

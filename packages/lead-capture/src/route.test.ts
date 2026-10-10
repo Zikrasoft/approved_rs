@@ -1313,6 +1313,39 @@ describe('free text outside the dialog', () => {
     expect(lastSent()).toEqual([42, 'GREETING_ru\n\nMENU']);
   });
 
+  it('resumes the Lead when the owner replied within the hour, two hours after the visitor', async () => {
+    await begin();
+    await say('BMW X5');
+    await say('20 000');
+    await say('SKIP');
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    editLead(1, {
+      createdAt: twoHoursAgo,
+      visitorActiveAt: twoHoursAgo,
+      lastActivityAt: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
+    });
+
+    await say('спасибо, жду звонка');
+
+    expect(stored()).toHaveLength(1);
+    expect(stored()[0].comment).toContain('Сообщение: спасибо, жду звонка');
+  });
+
+  it('opens a new enquiry when the owner went quiet over the hour too', async () => {
+    await begin();
+    await say('BMW X5');
+    await say('20 000');
+    await say('SKIP');
+    abandon(1);
+    editLead(1, {
+      lastActivityAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    });
+
+    await say('я снова ищу машину');
+
+    expect(stored()).toHaveLength(2);
+  });
+
   it('opens a new enquiry when the only Lead is lost', async () => {
     await begin();
     await say('BMW X5');
@@ -1396,6 +1429,17 @@ describe('a second enquiry once the hour has passed', () => {
 
     expect(stored()[0].contact).toBe('tg://user?id=777');
     expect(stored()[1].contact).toBe('+381601234567');
+  });
+
+  it('lets an abandoned dialog expire instead of capturing new free text', async () => {
+    await begin();
+    abandon(1);
+
+    await say('Golf 7');
+
+    expect(stored()).toHaveLength(2);
+    expect(stored()[0]).toMatchObject({ comment: null, capturePrompt: null });
+    expect(stored()[1].comment).toBe('Сообщение: Golf 7');
   });
 
   it('ends the abandoned dialog when a request opens the new Lead', async () => {

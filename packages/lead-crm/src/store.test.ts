@@ -7,6 +7,7 @@ import { storedLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
 import {
   createLeadStore,
   GHOST_LEAD_RETENTION_MS,
+  isFreshLead,
   postponePatch,
   resumePatch,
   statusPatch,
@@ -442,6 +443,25 @@ describe('insertOrMergeLead', () => {
     expect(merged).toBe(false);
   });
 
+  it('still merges into an old click whose visitor came back within the hour', async () => {
+    const { lead } = await store.insertOrMergeLead(clickData('telegram'));
+    await store.updateLeads((leads) =>
+      leads.map((l) =>
+        l.id === lead.id
+          ? {
+              ...l,
+              createdAt: '2000-01-01T00:00:00.000Z',
+              visitorActiveAt: new Date().toISOString(),
+            }
+          : l,
+      ),
+    );
+
+    const { merged } = await store.insertOrMergeLead(clickData('whatsapp'));
+
+    expect(merged).toBe(true);
+  });
+
   it('never merges without a visitorId to correlate on', async () => {
     await store.insertOrMergeLead({
       ...clickData('telegram'),
@@ -452,6 +472,37 @@ describe('insertOrMergeLead', () => {
       visitorId: null,
     });
     expect(merged).toBe(false);
+  });
+});
+
+describe('isFreshLead', () => {
+  const NOW = Date.parse('2026-10-11T12:00:00.000Z');
+  const ago = (minutes: number) =>
+    new Date(NOW - minutes * 60 * 1000).toISOString();
+  const lead = (patch: Partial<StoredLead>): StoredLead =>
+    storedLeadSchema.parse({
+      ...baseData,
+      id: 1,
+      statusChangedAt: ago(180),
+      createdAt: ago(180),
+      ...patch,
+    });
+
+  it('is stale once every clock is past the hour', () => {
+    expect(
+      isFreshLead(
+        lead({ visitorActiveAt: ago(120), lastActivityAt: ago(90) }),
+        NOW,
+      ),
+    ).toBe(false);
+  });
+
+  it.each([
+    ['createdAt', { createdAt: ago(59) }],
+    ['visitorActiveAt', { visitorActiveAt: ago(59) }],
+    ['lastActivityAt', { lastActivityAt: ago(59) }],
+  ] as const)('is fresh while %s is within the hour', (_, patch) => {
+    expect(isFreshLead(lead(patch), NOW)).toBe(true);
   });
 });
 
@@ -1322,6 +1373,28 @@ describe('a newer Lead for the same Telegram visitor', () => {
     expect(await store.getLead(old.id)).toMatchObject({ capturePrompt: null });
   });
 
+  it('leaves the running dialog alone when a site form merges into a bot Lead', async () => {
+    const old = await store.insertLead({
+      ...bot,
+      capturePrompt: { chatId: 42, step: 'budget' },
+    });
+    await store.insertLead({
+      ...bot,
+      name: '',
+      contact: '—',
+      visitorId: 'visitor-1',
+      kind: 'call_click',
+    });
+
+    const { merged } = await store.insertOrMergeLead({
+      ...baseData,
+      visitorId: 'visitor-1',
+    });
+
+    expect(merged).toBe(true);
+    expect((await store.getLead(old.id))?.capturePrompt).not.toBeNull();
+  });
+
   it('leaves other Leads alone when the new one has no Telegram id', async () => {
     const old = await store.insertLead({
       ...bot,
@@ -1379,6 +1452,22 @@ describe('the capture lookups', () => {
 
   it('is the visitor merge window that decides a returning visitor', () => {
     expect(VISITOR_MERGE_WINDOW_MS).toBe(60 * 60 * 1000);
+  });
+
+  it('lets a stale dialog expire', async () => {
+    const lead = await fromTelegram(42, {
+      capturePrompt: { chatId: 42, step: 'budget' },
+    });
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    await store.updateLeads((leads) =>
+      leads.map((l) =>
+        l.id === lead.id
+          ? { ...l, createdAt: twoHoursAgo, visitorActiveAt: twoHoursAgo }
+          : l,
+      ),
+    );
+
+    expect(await store.findByCapturePrompt(42, baseData.brand)).toBeUndefined();
   });
 
   it('finds the lead carrying the sender id', async () => {

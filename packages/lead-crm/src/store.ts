@@ -20,6 +20,18 @@ export const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
 
 export const MAX_LIST_ROWS = 20;
 
+export function isFreshLead(
+  lead: StoredLead,
+  now: number = Date.now(),
+): boolean {
+  const lastSeen = Math.max(
+    ...[lead.visitorActiveAt, lead.lastActivityAt, lead.createdAt].map((at) =>
+      at ? Date.parse(at) : 0,
+    ),
+  );
+  return now - lastSeen < VISITOR_MERGE_WINDOW_MS;
+}
+
 export interface CaptureUpdate {
   note?: string;
   contact?: string;
@@ -365,8 +377,7 @@ export function createLeadStore({
                 l.visitorId === data.visitorId &&
                 l.brand === data.brand &&
                 untouched(l) &&
-                now - new Date(l.createdAt).getTime() <
-                  VISITOR_MERGE_WINDOW_MS &&
+                isFreshLead(l, now) &&
                 (data.telegramId == null || isPlaceholderContact(l.contact)),
             )
           : undefined;
@@ -425,10 +436,8 @@ export function createLeadStore({
           ),
         };
         outcome = { lead: merged, merged: true, before: existing };
-        return supersede(
-          leads.map((l) => (l.id === existing.id ? merged : l)),
-          merged,
-        );
+        const replaced = leads.map((l) => (l.id === existing.id ? merged : l));
+        return data.telegramId == null ? replaced : supersede(replaced, merged);
       });
       return outcome;
     },
@@ -553,7 +562,7 @@ export function createLeadStore({
       return newestOpen(
         await readLeads(),
         brand,
-        (l) => l.capturePrompt?.chatId === chatId,
+        (l) => l.capturePrompt?.chatId === chatId && isFreshLead(l),
       );
     },
 
