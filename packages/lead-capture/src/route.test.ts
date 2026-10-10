@@ -20,6 +20,7 @@ const SECRET = 'capture-webhook-secret';
 const CAPTURE_TOKEN = 'capture-token';
 const CRM_TOKEN = 'crm-token';
 const GROUP_ID = '-100500';
+const ADMIN_IDS = [501, 502];
 const BRAND = 'Approved.rs';
 const SERVICES = ['vehicle-sourcing', 'vehicle-import'];
 const LOCALES = ['ru', 'en', 'sr', 'es', 'de'];
@@ -41,6 +42,7 @@ let api: RecordedBotApi;
 let storage: MemoryStorage;
 let leadStore: LeadStore;
 let ensureLeadCard: (lead: StoredLead) => Promise<void>;
+let notifier: ReturnType<typeof createBrandBot>['notifier'];
 let POST: ReturnType<typeof createCaptureWebhookRoute>;
 
 function route(secret: string | undefined) {
@@ -48,6 +50,7 @@ function route(secret: string | undefined) {
     secret,
     store: captureStore(leadStore),
     ensureLeadCard,
+    sendFieldChangeToAdmin: notifier.sendFieldChangeToAdmin,
     bot: createCaptureBot(CAPTURE_TOKEN, 'capture_bot'),
     brand: BRAND,
     isService: (value) => SERVICES.includes(value),
@@ -83,7 +86,18 @@ function lastMarkup(): unknown {
 }
 
 function cards() {
-  return api.callsTo('sendMessage', CRM_TOKEN).map((c) => c.payload);
+  return api
+    .callsTo('sendMessage', CRM_TOKEN)
+    .map((c) => c.payload)
+    .filter((p) => p.chat_id === GROUP_ID);
+}
+
+function adminNotes(chatId = ADMIN_IDS[0]) {
+  return api
+    .callsTo('sendMessage', CRM_TOKEN)
+    .map((c) => c.payload)
+    .filter((p) => p.chat_id === chatId)
+    .map((p) => String(p.text));
 }
 
 function cardEdits() {
@@ -182,6 +196,7 @@ beforeEach(() => {
   vi.stubEnv('TELEGRAM_BOT_TOKEN', CRM_TOKEN);
   vi.stubEnv('TELEGRAM_BOT_USERNAME', 'crm_bot');
   vi.stubEnv('TELEGRAM_GROUP_ID', GROUP_ID);
+  vi.stubEnv('TELEGRAM_ADMIN_ID', ADMIN_IDS.join(','));
   api = recordBotApi();
   vi.stubGlobal('fetch', api.fetch);
   const storages: Record<string, MemoryStorage> = {};
@@ -192,7 +207,7 @@ beforeEach(() => {
     getNotifier: vi.fn(),
   }));
   storage = storages[LEADS_PATH];
-  ({ ensureLeadCard } = createBrandBot({
+  ({ ensureLeadCard, notifier } = createBrandBot({
     store: leadStore,
     brand: BRAND,
     serviceLabel: (slug) => slug,
@@ -848,5 +863,76 @@ describe('a visitor who already handed over a number', () => {
 
     expect(stored()[1].contact).toBe('@ivan');
     expect(stored()[1].capturePrompt?.step).toBe('looking_for');
+  });
+});
+
+describe('the admin hearing about every change the visitor makes', () => {
+  const VIA_BOT = '🤖 Посетитель через бота';
+
+  it('gets one contact change per admin when a phone is shared', async () => {
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+
+    await POST(makeCtx(contactUpdate('381601234567')));
+
+    for (const id of ADMIN_IDS)
+      expect(adminNotes(id)).toEqual([
+        [
+          '✏️ Заявка #1 Лена: контакт',
+          VIA_BOT,
+          '',
+          'Было: tg://user?id=777',
+          'Стало: +381601234567',
+        ].join('\n'),
+      ]);
+  });
+
+  it('gets one comment change for each Questionnaire answer', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+
+    await say('BMW X5');
+    await say('20 000');
+    await POST(makeCtx(contactUpdate('381601234567', HANDLED)));
+
+    const notes = adminNotes();
+    expect(notes).toHaveLength(3);
+    expect(notes.every((n) => n.includes(': комментарий\n' + VIA_BOT))).toBe(
+      true,
+    );
+    expect(notes[0]).toContain('Стало: Ищет: BMW X5');
+    expect(notes[1]).toContain('Было: Ищет: BMW X5');
+    expect(notes[2]).toContain('Телефон: +381601234567');
+  });
+
+  it('gets one for each free-form message on an open Lead', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    await say('BMW X5');
+    await say('20 000');
+    await say('SKIP');
+    api.reset();
+
+    await say('а можно в рассрочку?');
+    await say('и ещё вопрос');
+
+    const notes = adminNotes();
+    expect(notes).toHaveLength(2);
+    expect(notes[0]).toContain('Сообщение: а можно в рассрочку?');
+    expect(notes[1]).toContain('Сообщение: и ещё вопрос');
+  });
+
+  it('hears nothing when the visitor declines the phone', async () => {
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+
+    await say('SKIP', ANONYMOUS);
+
+    expect(adminNotes()).toEqual([]);
+  });
+
+  it('hears nothing when the Lead vanished before the write', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    vanishOnNextWrite();
+
+    await say('BMW X5');
+
+    expect(adminNotes()).toEqual([]);
   });
 });

@@ -67,6 +67,7 @@ export {
 export type {
   Btn,
   EditField,
+  FieldChangeAuthor,
   Keyboard,
   LeadStatusKey,
   Role,

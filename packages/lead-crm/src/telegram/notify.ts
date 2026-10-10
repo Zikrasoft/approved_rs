@@ -9,6 +9,7 @@ import {
   quarantinedLeadsText,
   statusChangeText,
   type EditField,
+  type FieldChangeAuthor,
   type Formatter,
   type Role,
 } from './format.ts';
@@ -133,15 +134,14 @@ export function createNotifier({
       await sendToAll(ownerIds, commissionResultText(lead.id, confirmed));
     },
 
-    // The owner edits a lead's name, contact or comment straight from the
-    // card; without this the admin only ever heard about status moves.
     async sendFieldChangeToAdmin(
       lead: StoredLead,
       field: EditField,
       before: string | null | undefined,
+      author?: FieldChangeAuthor,
     ): Promise<void> {
       if ((before ?? '') === (lead[field] ?? '')) return;
-      await sendToAll(adminIds, fieldChangeText(lead, field, before));
+      await sendToAll(adminIds, fieldChangeText(lead, field, before, author));
     },
 
     async sendQuarantinedLeadsToAdmin(

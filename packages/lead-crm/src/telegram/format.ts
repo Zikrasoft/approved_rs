@@ -367,6 +367,7 @@ export const EDIT_FIELD_LABELS = {
   name: 'имя',
   contact: 'контакт',
   comment: 'комментарий',
+  service: 'услуга',
 } as const;
 
 export type EditField = keyof typeof EDIT_FIELD_LABELS;
@@ -399,13 +400,19 @@ function fieldPreview(value: string | null | undefined): string {
   );
 }
 
+export type FieldChangeAuthor = 'operator' | 'visitor';
+
+const VISITOR_CHANGE_MARK = '🤖 Посетитель через бота';
+
 export function fieldChangeText(
   lead: StoredLead,
   field: EditField,
   before: string | null | undefined,
+  author: FieldChangeAuthor = 'operator',
 ): string {
   return [
     `✏️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${EDIT_FIELD_LABELS[field]}`,
+    ...(author === 'visitor' ? [VISITOR_CHANGE_MARK] : []),
     ``,
     `Было: ${fieldPreview(before)}`,
     `Стало: ${fieldPreview(lead[field])}`,

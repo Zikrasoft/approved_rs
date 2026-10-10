@@ -155,6 +155,7 @@ type Handler = (ctx: Ctx, ...groups: string[]) => Promise<void>;
 type LeadHandler = (ctx: Ctx, id: number, ...rest: string[]) => Promise<void>;
 type CallbackRow = [RegExp, Role | 'any', Handler];
 type PromptKind = PendingPrompt['kind'];
+type OperatorEditField = Exclude<EditField, 'service'>;
 
 function onLead(handler: LeadHandler): Handler {
   return (ctx, id, ...rest) => handler(ctx, Number(id), ...rest);
@@ -366,7 +367,7 @@ function statusRow(key: LeadStatus, role: Role | 'any'): CallbackRow {
   ];
 }
 
-function editRow(field: EditField): CallbackRow {
+function editRow(field: OperatorEditField): CallbackRow {
   return [
     new RegExp(`^edit:(\\d+):${field}$`),
     'any',
@@ -632,7 +633,7 @@ async function replyVisitor({
   }
 }
 
-function replyEdit(field: EditField): PromptHandler {
+function replyEdit(field: OperatorEditField): PromptHandler {
   return async ({ chatId, replyToMessageId, text }) => {
     const value = text.trim();
     if ((field === 'name' || field === 'contact') && !value) {

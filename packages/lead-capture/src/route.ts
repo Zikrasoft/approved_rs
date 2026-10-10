@@ -8,6 +8,8 @@ import {
   secretMatches,
   VISITOR_MERGE_WINDOW_MS,
   type CapturePrompt,
+  type EditField,
+  type FieldChangeAuthor,
   type LeadStore,
   type StoredLead,
 } from '@podbor/lead-crm';
@@ -45,6 +47,8 @@ const STEPS_WITH_HANDLE: CaptureStep[] = ['looking_for', 'budget', 'phone'];
 const STEPS_WITHOUT_HANDLE: CaptureStep[] = ['phone', 'looking_for', 'budget'];
 
 const MESSAGE_NOTE = 'Сообщение';
+
+const VISITOR_FIELDS: EditField[] = ['contact', 'comment', 'service'];
 
 interface PhoneKeyboardExtra {
   reply_markup: {
@@ -87,6 +91,12 @@ export interface CaptureWebhookRouteOptions<L extends string> {
   secret: string | undefined;
   store: CaptureStore;
   ensureLeadCard: (lead: StoredLead) => Promise<void>;
+  sendFieldChangeToAdmin: (
+    lead: StoredLead,
+    field: EditField,
+    before: string | null | undefined,
+    author: FieldChangeAuthor,
+  ) => Promise<void>;
   bot: Bot;
   brand: string;
   isService: (value: string) => boolean;
@@ -167,6 +177,7 @@ export function createCaptureWebhookRoute<L extends string>({
   secret,
   store,
   ensureLeadCard,
+  sendFieldChangeToAdmin,
   bot,
   brand,
   isService,
@@ -176,6 +187,16 @@ export function createCaptureWebhookRoute<L extends string>({
 }: CaptureWebhookRouteOptions<L>) {
   function send(chatId: number, text: string, extra?: CaptureExtra) {
     return bot.api.sendMessage(chatId, text, { parse_mode: 'HTML', ...extra });
+  }
+
+  async function refresh(
+    lead: StoredLead,
+    updated: StoredLead | undefined,
+  ): Promise<void> {
+    await ensureLeadCard(updated ?? lead);
+    if (!updated) return;
+    for (const field of VISITOR_FIELDS)
+      await sendFieldChangeToAdmin(updated, field, lead[field], 'visitor');
   }
 
   function startFields(
@@ -252,7 +273,7 @@ export function createCaptureWebhookRoute<L extends string>({
       contact: takesPhone && !keepsHandle ? phone : undefined,
       capturePrompt: next ? { chatId: prompt.chatId, step: next } : null,
     });
-    await ensureLeadCard(updated ?? lead);
+    await refresh(lead, updated);
     const [reply, extra] = nextMessage(next, prompt.step, lead.contact, words);
     await send(prompt.chatId, reply, extra);
   }
@@ -288,7 +309,7 @@ export function createCaptureWebhookRoute<L extends string>({
       note: `${MESSAGE_NOTE}: ${text}`,
       capturePrompt: open.capturePrompt,
     });
-    await ensureLeadCard(updated ?? open);
+    await refresh(open, updated);
     await send(chatId, copy(localeOf(open)).received);
   }
 
@@ -304,7 +325,7 @@ export function createCaptureWebhookRoute<L extends string>({
       contact: keepsHandle ? undefined : phone,
       capturePrompt: prompt,
     });
-    await ensureLeadCard(updated ?? lead);
+    await refresh(lead, updated);
     await send(prompt.chatId, words.received);
   }
 

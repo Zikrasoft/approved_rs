@@ -512,6 +512,28 @@ describe('sendFieldChangeToAdmin', () => {
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).toContain('&lt;b&gt;ivan&lt;/b&gt;');
   });
+
+  it('says when the visitor made the change through the bot', async () => {
+    await sendFieldChangeToAdmin(
+      makeLead({ service: 'vehicle-import' }),
+      'service',
+      '',
+      'visitor',
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain(': услуга\n🤖 Посетитель через бота');
+    expect(body.text).toContain('Стало: vehicle-import');
+  });
+
+  it('leaves the bot marker off an operator edit', async () => {
+    await sendFieldChangeToAdmin(
+      makeLead({ comment: 'после' }),
+      'comment',
+      'до',
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).not.toContain('через бота');
+  });
 });
 
 describe('sendDealNotificationToAdmin', () => {
