@@ -40,13 +40,13 @@ import {
   buildLeadDetail,
   buildLeadList,
   buildMenu,
-  buildOwedList,
+  buildToPay,
   buildRemindPicker,
   buildSearchResults,
   buildStats,
   formatDealsList,
 } from '@/lib/telegram';
-import { getLead, getOwedSummary, readLeads, searchLeads } from '@/lib/store';
+import { getLead, listPayouts, readLeads, searchLeads } from '@/lib/store';
 
 const api = recordBotApi();
 vi.stubGlobal('fetch', api.fetch);
@@ -871,20 +871,35 @@ describe('POST /api/telegram-webhook', () => {
     });
   });
 
-  describe('menu:debt — both roles', () => {
-    it.each([ADMIN_ID, OWNER_ID])('shows the owed list to %i', async (who) => {
-      seed(
-        makeLead({
-          status: 'won',
-          dealAmount: 1000,
-          incomes: [income(1, 1000)],
-        }),
-      );
-      await tap('menu:debt', who, { chatId: who });
-      const { rows, total } = await getOwedSummary();
-      expect(rows).toHaveLength(1);
-      expect(sentTo(who)).toEqual([view(buildOwedList(rows, total))]);
-    });
+  describe('menu:debt — To pay, both roles', () => {
+    it.each([ADMIN_ID, OWNER_ID])(
+      'shows all Payouts minus all Settlements to %i',
+      async (who) => {
+        leadsStorage().seed([
+          makeLead({
+            status: 'won',
+            commissionPercent: 10,
+            incomes: [income(1, 1000, PAID_AT), income(2, 500)],
+          }),
+          {
+            type: 'payout',
+            id: 9,
+            amount: 80,
+            createdAt: PAID_AT,
+            createdBy: 'owner',
+          },
+          {
+            type: 'settlement',
+            id: 9,
+            amount: 30,
+            createdAt: PAID_AT,
+            createdBy: 'admin',
+          },
+        ]);
+        await tap('menu:debt', who, { chatId: who });
+        expect(textsTo(who)).toEqual([buildToPay(100)]);
+      },
+    );
   });
 
   describe('menu:deals — admin only', () => {
@@ -1140,14 +1155,21 @@ describe('POST /api/telegram-webhook', () => {
       expect(textsTo(DM_CHAT_ID)).toEqual([expect.stringContaining('сумма')]);
     });
 
-    it('records a mid-job income and tells the admin about it', async () => {
+    it('records a mid-job income as a Payout of the typed amount and tells the admin', async () => {
       seed(makeLead({ pendingPrompt: awaiting('add_income') }));
       await answerPrompt('300');
       const lead = await stored();
-      expect(lead.incomes.map((i) => i.amount)).toEqual([300]);
-      expect(lead.status).toBe('in_progress');
-      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
-      expect(sentTo(ADMIN_ID)).toHaveLength(1);
+      expect(lead).toMatchObject({
+        status: 'in_progress',
+        pendingPrompt: null,
+        incomes: [],
+      });
+      expect(await listPayouts(5)).toEqual([
+        expect.objectContaining({ amount: 300, createdBy: 'owner', leadId: 5 }),
+      ]);
+      expect(textsTo(ADMIN_ID)).toEqual([
+        expect.stringContaining('К оплате: 300 €'),
+      ]);
       expect(textsTo(DM_CHAT_ID)).toEqual([
         `✅ Доход добавлен\n\n${buildLeadDetail(lead, 'owner').text}`,
       ]);
@@ -1156,7 +1178,7 @@ describe('POST /api/telegram-webhook', () => {
     it('ignores a mid-job income answered after the lead was lost', async () => {
       seed(makeLead({ status: 'lost', pendingPrompt: awaiting('add_income') }));
       await answerPrompt('300');
-      expect((await stored()).incomes).toEqual([]);
+      expect(await listPayouts()).toEqual([]);
       expect(crm('editMessageText')).toEqual([]);
       expect(sentTo(ADMIN_ID)).toEqual([]);
     });

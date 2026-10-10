@@ -1101,44 +1101,6 @@ describe('confirmCommissionPayment / rejectCommissionPayment', () => {
   });
 });
 
-describe('getOwedSummary', () => {
-  it('sums remaining commission across leads with a balance, skipping fully-paid ones', async () => {
-    const a = await store.insertLead(baseData);
-    await forceComplete(a.id, 100_000); // 10% commission = 10 000
-    const b = await store.insertLead(baseData);
-    await forceComplete(b.id, 50_000); // commission 5 000
-    await forcePay(b.id); // fully paid — excluded
-
-    const { rows, total } = await store.getOwedSummary();
-    expect(rows).toEqual([
-      expect.objectContaining({ id: a.id, remaining: 10_000 }),
-    ]);
-    expect(total).toBe(10_000);
-  });
-
-  it('excludes an archived lead even with an outstanding balance', async () => {
-    const lead = await store.insertLead(baseData);
-    await forceComplete(lead.id, 100_000);
-    await store.archiveLead(lead.id);
-
-    const { rows, total } = await store.getOwedSummary();
-    expect(rows).toEqual([]);
-    expect(total).toBe(0);
-  });
-
-  it('caps displayed rows at 20 but still totals every owed lead', async () => {
-    for (let i = 0; i < 25; i++) {
-      const lead = await store.insertLead(baseData);
-      await forceComplete(lead.id, 10_000); // commission 1 000 each
-    }
-
-    const { rows, total } = await store.getOwedSummary();
-
-    expect(rows).toHaveLength(20);
-    expect(total).toBe(25_000);
-  });
-});
-
 describe('searchLeads', () => {
   it('still finds an archived lead', async () => {
     const lead = await store.insertLead(baseData);

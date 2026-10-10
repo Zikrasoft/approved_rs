@@ -2,12 +2,9 @@ import { z } from 'zod';
 import { format } from 'date-fns';
 import {
   appendIncome,
-  getCommission,
-  hasDealAmount,
   incomeCommission,
   roundMoney,
   unpaidIncomes,
-  PAID_EPSILON,
 } from './money.ts';
 import { channelLabel } from './channelLabels.ts';
 import { postponableStatus } from './schema.ts';
@@ -27,21 +24,25 @@ import {
   type LeadStorage,
 } from './storage/types.ts';
 import { LEADS_PATH } from './quarantine.ts';
+import {
+  correction,
+  ledgerBalance,
+  ledgerRecordSchema,
+  nextLedgerId,
+  payoutSchema,
+  settlementSchema,
+  withMigratedIncomes,
+  type Ledger,
+  type LedgerAuthor,
+  type Payout,
+  type PayoutCorrection,
+  type Settlement,
+} from './ledger.ts';
 
 const MAX_RETRIES = 6;
 export const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
 
 export const MAX_LIST_ROWS = 20;
-
-export interface OwedRow {
-  id: number;
-  name: string;
-  brand: string;
-  dealAmount: number;
-  commissionAmount: number;
-  paidAmount: number;
-  remaining: number;
-}
 
 export interface CaptureUpdate {
   note?: string;
@@ -56,6 +57,19 @@ export interface MergeOutcome {
   lead: StoredLead;
   merged: boolean;
   before: StoredLead | null;
+}
+
+export interface PayoutInput {
+  amount: number;
+  by: LedgerAuthor;
+  note?: string;
+  leadId?: number | null;
+  brand?: string | null;
+}
+
+interface StoreRecords {
+  leads: StoredLead[];
+  ledger: Ledger;
 }
 
 export interface LeadStoreOptions {
@@ -201,13 +215,18 @@ export function createLeadStore({
     return schema.parse({ ...data, id, statusChangedAt: now, createdAt: now });
   }
 
-  async function readSnapshot(): Promise<{
-    leads: StoredLead[];
-    unreadable: unknown[];
-    version: string | undefined;
-  }> {
+  async function readSnapshot(): Promise<
+    StoreRecords & { unreadable: unknown[]; version: string | undefined }
+  > {
     const { raw, version } = await storage.read();
-    if (raw === undefined) return { leads: [], unreadable: [], version };
+    if (raw === undefined) {
+      return {
+        leads: [],
+        ledger: { payouts: [], settlements: [] },
+        unreadable: [],
+        version,
+      };
+    }
     const records = storedRecordsSchema.safeParse(raw);
     if (!records.success) {
       console.error('[lead-crm] stored leads are not an array', {
@@ -219,30 +238,57 @@ export function createLeadStore({
       );
     }
     const leads: StoredLead[] = [];
+    const ledger: Ledger = { payouts: [], settlements: [] };
     const unreadable: unknown[] = [];
     for (const entry of records.data) {
+      const record = ledgerRecordSchema.safeParse(entry);
+      if (record.success) {
+        if (record.data.type === 'payout') ledger.payouts.push(record.data);
+        else ledger.settlements.push(record.data);
+        continue;
+      }
       const parsed = schema.safeParse(entry);
       if (parsed.success) leads.push(parsed.data);
       else unreadable.push(entry);
     }
-    return { leads, unreadable, version };
+    return {
+      leads,
+      ledger: withMigratedIncomes(leads, ledger),
+      unreadable,
+      version,
+    };
   }
 
-  async function updateLeads(
-    mutate: (leads: StoredLead[], idFloor: number) => StoredLead[],
-  ): Promise<StoredLead[]> {
+  async function updateRecords(
+    mutate: (records: StoreRecords, idFloor: number) => StoreRecords,
+  ): Promise<StoreRecords> {
     let lastErr = new StorageConflictError(
       'updateLeads: conflict retry limit exceeded',
     );
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       if (attempt > 0) await sleep(backoffDelay(attempt - 1));
-      const { leads, unreadable, version } = await readSnapshot();
-      const next = mutate(leads, unreadableIdFloor(unreadable)).map((lead) =>
-        schema.parse(lead),
-      );
+      const { unreadable, version, ...current } = await readSnapshot();
+      const mutated = mutate(current, unreadableIdFloor(unreadable));
+      const next: StoreRecords = {
+        leads: mutated.leads.map((lead) => schema.parse(lead)),
+        ledger: {
+          payouts: mutated.ledger.payouts.map((p) => payoutSchema.parse(p)),
+          settlements: mutated.ledger.settlements.map((s) =>
+            settlementSchema.parse(s),
+          ),
+        },
+      };
       await copyToQuarantine(unreadable);
       try {
-        await storage.write([...next, ...unreadable], version);
+        await storage.write(
+          [
+            ...next.leads,
+            ...next.ledger.payouts,
+            ...next.ledger.settlements,
+            ...unreadable,
+          ],
+          version,
+        );
         return next;
       } catch (err) {
         if (err instanceof StorageConflictError) {
@@ -253,6 +299,21 @@ export function createLeadStore({
       }
     }
     throw lastErr;
+  }
+
+  async function updateLeads(
+    mutate: (leads: StoredLead[], idFloor: number) => StoredLead[],
+  ): Promise<StoredLead[]> {
+    const { leads } = await updateRecords(({ leads, ledger }, idFloor) => ({
+      leads: mutate(leads, idFloor),
+      ledger,
+    }));
+    return leads;
+  }
+
+  async function readLedger(): Promise<Ledger> {
+    const { ledger } = await readSnapshot();
+    return ledger;
   }
 
   async function readLeads(): Promise<StoredLead[]> {
@@ -334,6 +395,91 @@ export function createLeadStore({
     readLeads,
     getLead,
     newStoredLead,
+    readLedger,
+
+    async getBalance(): Promise<number> {
+      return ledgerBalance(await readLedger());
+    },
+
+    async listPayouts(leadId?: number): Promise<Payout[]> {
+      const { payouts } = await readLedger();
+      return leadId == null
+        ? payouts
+        : payouts.filter((p) => p.leadId === leadId);
+    },
+
+    async addPayout({
+      amount,
+      by,
+      note = '',
+      leadId = null,
+      brand = null,
+    }: PayoutInput): Promise<Payout | undefined> {
+      let added: Payout | undefined;
+      await updateRecords(({ leads, ledger }) => {
+        added = undefined;
+        const lead = leads.find((l) => l.id === leadId);
+        if (leadId != null && !lead) return { leads, ledger };
+        added = payoutSchema.parse({
+          type: 'payout',
+          id: nextLedgerId(ledger.payouts),
+          amount,
+          note,
+          createdAt: new Date().toISOString(),
+          createdBy: by,
+          leadId,
+          brand: brand ?? lead?.brand ?? null,
+        });
+        return {
+          leads: leads.map((l) =>
+            l === lead && l.status === 'lost'
+              ? { ...l, ...statusPatch('won') }
+              : l,
+          ),
+          ledger: { ...ledger, payouts: [...ledger.payouts, added] },
+        };
+      });
+      return added;
+    },
+
+    async correctPayout(
+      id: number,
+      amount: number,
+      by: LedgerAuthor,
+    ): Promise<PayoutCorrection> {
+      let outcome!: PayoutCorrection;
+      await updateRecords(({ leads, ledger }) => {
+        outcome = correction(ledger, id, amount, by);
+        if (!outcome.ok) return { leads, ledger };
+        const { payout } = outcome;
+        return {
+          leads,
+          ledger: {
+            ...ledger,
+            payouts: ledger.payouts.map((p) => (p.id === id ? payout : p)),
+          },
+        };
+      });
+      return outcome;
+    },
+
+    async addSettlement(amount: number): Promise<Settlement> {
+      let added!: Settlement;
+      await updateRecords(({ leads, ledger }) => {
+        added = settlementSchema.parse({
+          type: 'settlement',
+          id: nextLedgerId(ledger.settlements),
+          amount,
+          createdAt: new Date().toISOString(),
+          createdBy: 'admin',
+        });
+        return {
+          leads,
+          ledger: { ...ledger, settlements: [...ledger.settlements, added] },
+        };
+      });
+      return added;
+    },
 
     async insertLead(data: LeadInput): Promise<StoredLead> {
       let inserted!: StoredLead;
@@ -655,31 +801,6 @@ export function createLeadStore({
         ),
       );
       return next.filter(expired);
-    },
-
-    async getOwedSummary(): Promise<{ rows: OwedRow[]; total: number }> {
-      const leads = await readLeads();
-      const rows: OwedRow[] = leads
-        .filter(hasDealAmount)
-        .filter((l) => !l.archived)
-        .map((l) => {
-          const { commission, remaining } = getCommission(l);
-          return {
-            id: l.id,
-            name: l.name,
-            brand: l.brand,
-            dealAmount: l.dealAmount,
-            commissionAmount: commission,
-            paidAmount: l.paidAmount,
-            remaining,
-          };
-        })
-        .filter((row) => row.remaining > PAID_EPSILON)
-        .sort((a, b) =>
-          a.remaining === b.remaining ? a.id - b.id : b.remaining - a.remaining,
-        );
-      const total = roundMoney(rows.reduce((sum, r) => sum + r.remaining, 0));
-      return { rows: rows.slice(0, MAX_LIST_ROWS), total };
     },
   };
 }

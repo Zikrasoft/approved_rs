@@ -19,7 +19,7 @@ import {
   REFERRAL_NOTE,
   statusLabel,
   buildStatusKeyboard,
-  buildOwedList,
+  buildToPay,
   formatDealsList,
   buildSearchResults,
   buildMenu,
@@ -55,7 +55,7 @@ const {
   sendLeadNotification,
   refreshLeadCard,
   sendDealNotificationToAdmin,
-  sendIncomeNotificationToAdmin,
+  sendPayoutNotificationToAdmin,
   sendCommissionClaimToAdmin,
   sendCommissionResultToOwner,
   sendQuarantinedLeadsToAdmin,
@@ -547,25 +547,27 @@ describe('sendDealNotificationToAdmin', () => {
   });
 });
 
-describe('sendIncomeNotificationToAdmin', () => {
+describe('sendPayoutNotificationToAdmin', () => {
   beforeEach(() => mockFetchOk({ message_id: 1 }));
   afterEach(() => mockFetch.mockReset());
 
-  it('tells the admin what came in mid-job and the commission on it', async () => {
-    const lead = makeLead({
-      id: 9,
-      status: 'in_progress',
-      incomes: [
-        { id: 1, amount: 300, at: '2026-03-01T00:00:00.000Z', paidAt: null },
-      ],
+  it('tells the admin the Payout as stated, with no rate applied', async () => {
+    await sendPayoutNotificationToAdmin(makeLead({ id: 9 }), {
+      type: 'payout',
+      id: 1,
+      amount: 80,
+      note: '',
+      createdAt: '2026-03-01T00:00:00.000Z',
+      createdBy: 'owner',
+      leadId: 9,
+      brand: null,
+      edits: [],
     });
-
-    await sendIncomeNotificationToAdmin(lead, lead.incomes[0]);
 
     const body = JSON.parse(mockFetch.mock.calls[0][1].body as string);
     expect(body.chat_id).toBe(222);
-    expect(body.text).toContain(money(300));
-    expect(body.text).toContain(`(10%): ${money(30)}`);
+    expect(body.text).toContain('#9');
+    expect(body.text).toContain(`К оплате: ${money(80)}`);
   });
 });
 
@@ -692,39 +694,9 @@ describe('sendQuarantinedLeadsToAdmin', () => {
   });
 });
 
-describe('buildOwedList', () => {
-  it('renders each row as a tappable button opening that lead, plus a total', () => {
-    const { text, reply_markup } = buildOwedList(
-      [
-        {
-          id: 1,
-          name: 'Иван',
-          brand: 'Approved.rs',
-          dealAmount: 100000,
-          commissionAmount: 10000,
-          paidAmount: 0,
-          remaining: 10000,
-        },
-      ],
-      10000,
-    );
-    expect(text).toContain(`Итого: ${money(10000)}`);
-    expect(reply_markup.inline_keyboard).toEqual([
-      [
-        {
-          text: `#1 Иван · Approved.rs — ${money(10000)}`,
-          callback_data: 'open:1',
-        },
-      ],
-    ]);
-  });
-
-  it('reports no debt when there are no rows, with no buttons', () => {
-    const { text, reply_markup } = buildOwedList([], 0);
-    expect(text).toBe(
-      '<b>🔴 Долг по комиссии</b>\n\n🟢 Всё оплачено, долгов нет.',
-    );
-    expect(reply_markup.inline_keyboard).toEqual([]);
+describe('buildToPay', () => {
+  it('shows the balance owed', () => {
+    expect(buildToPay(1234.5)).toBe(`<b>💶 К оплате</b>\n\n${money(1234.5)}`);
   });
 });
 

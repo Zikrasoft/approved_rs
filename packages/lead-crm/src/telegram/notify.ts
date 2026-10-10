@@ -1,4 +1,5 @@
-import type { Income, StoredLead } from '../schema.ts';
+import type { Payout } from '../ledger.ts';
+import type { StoredLead } from '../schema.ts';
 import {
   isMessageGone,
   type SendExtra,
@@ -8,7 +9,7 @@ import {
   commissionClaimText,
   commissionResultText,
   dealNotificationText,
-  incomeNotificationText,
+  payoutNotificationText,
   quarantinedLeadsText,
   statusChangeText,
   type EditField,
@@ -94,11 +95,11 @@ export function createNotifier({
       );
     },
 
-    async sendIncomeNotificationToAdmin(
+    async sendPayoutNotificationToAdmin(
       lead: StoredLead,
-      income: Income,
+      payout: Payout,
     ): Promise<void> {
-      await sendToAll(adminIds, incomeNotificationText(lead, income));
+      await sendToAll(adminIds, payoutNotificationText(lead, payout));
     },
 
     async sendCommissionClaimToAdmin(lead: StoredLead): Promise<void> {

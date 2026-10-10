@@ -11,7 +11,8 @@ import { channelLabel } from '../channelLabels.ts';
 import { isTelegramIdContact } from '../contactShape.ts';
 import { LEADS_PATH } from '../quarantine.ts';
 import type { Income, LeadStatus, StoredLead } from '../schema.ts';
-import { MAX_LIST_ROWS, isPlaceholderContact, type OwedRow } from '../store.ts';
+import { MAX_LIST_ROWS, isPlaceholderContact } from '../store.ts';
+import type { Payout } from '../ledger.ts';
 
 export type Role = 'owner' | 'admin';
 
@@ -233,26 +234,8 @@ export function buildMenu(role: Role): {
   };
 }
 
-export function buildOwedList(
-  rows: OwedRow[],
-  total: number,
-): { text: string; reply_markup: Keyboard } {
-  if (rows.length === 0) {
-    return {
-      text: '<b>🔴 Долг по комиссии</b>\n\n🟢 Всё оплачено, долгов нет.',
-      reply_markup: { inline_keyboard: [] },
-    };
-  }
-  const buttons: Btn[][] = rows.map((r) => [
-    {
-      text: `#${r.id} ${leadDisplayName(r)} · ${r.brand} — ${formatMoney(r.remaining)}`,
-      callback_data: `open:${r.id}`,
-    },
-  ]);
-  return {
-    text: `<b>🔴 Долг по комиссии</b>\n\nИтого: ${formatMoney(total)}`,
-    reply_markup: { inline_keyboard: buttons },
-  };
+export function buildToPay(balance: number): string {
+  return `<b>💶 К оплате</b>\n\n${formatMoney(balance)}`;
 }
 
 function paidStatusMark(
@@ -427,15 +410,14 @@ export function statusChangeText(lead: StoredLead): string {
   return `🔔 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: статус — ${meta.emoji} ${meta.label}`;
 }
 
-export function incomeNotificationText(
+export function payoutNotificationText(
   lead: StoredLead,
-  income: Income,
+  payout: Payout,
 ): string {
   return [
-    `💶 Доход по заявке #${lead.id} ${escapeHtml(leadDisplayName(lead))}`,
+    `💶 Выплата по заявке #${lead.id} ${escapeHtml(leadDisplayName(lead))}`,
     ``,
-    `Получено: ${formatMoney(income.amount)}`,
-    `Твоя комиссия (${lead.commissionPercent}%): ${formatMoney(incomeCommission(income.amount, lead.commissionPercent))}`,
+    `К оплате: ${formatMoney(payout.amount)}`,
   ].join('\n');
 }
 

@@ -31,7 +31,16 @@ export {
   MAX_LIST_ROWS,
   VISITOR_MERGE_WINDOW_MS,
 } from './store.ts';
-export type { CaptureUpdate, LeadStore, OwedRow } from './store.ts';
+export type { CaptureUpdate, LeadStore, PayoutInput } from './store.ts';
+export { isSettled, ledgerBalance } from './ledger.ts';
+export type {
+  Ledger,
+  LedgerAuthor,
+  Payout,
+  PayoutCorrection,
+  PayoutEdit,
+  Settlement,
+} from './ledger.ts';
 
 export type { OrderMarkers } from './orderMarkers.ts';
 
@@ -50,7 +59,7 @@ export {
   canAddIncome,
   buildLeadList,
   buildMenu,
-  buildOwedList,
+  buildToPay,
   buildRemindPicker,
   buildSearchResults,
   buildStats,

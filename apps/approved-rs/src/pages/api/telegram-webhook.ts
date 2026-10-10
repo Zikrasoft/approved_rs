@@ -19,12 +19,12 @@ import {
   ensureLeadCard,
   sendForceReplyPrompt,
   safeEditMessage,
-  sendIncomeNotificationToAdmin,
+  sendPayoutNotificationToAdmin,
   sendCommissionClaimToAdmin,
   sendCommissionResultToOwner,
   sendFieldChangeToAdmin,
   sendMessage,
-  buildOwedList,
+  buildToPay,
   formatDealsList,
   buildSearchResults,
   buildMenu,
@@ -65,10 +65,10 @@ import {
   canPostpone,
   postponePatch,
   wonPatch,
-  getOwedSummary,
+  addPayout,
+  getBalance,
   readLeads,
   getCommission,
-  appendIncome,
   appendNote,
   type LeadStatus,
   type PendingPrompt,
@@ -455,9 +455,7 @@ export const CALLBACKS: CallbackRow[] = [
     /^menu:debt$/,
     'any',
     async (ctx) => {
-      const { rows, total } = await getOwedSummary();
-      const { text, reply_markup } = buildOwedList(rows, total);
-      await sendMessage(ctx.chatId, text, { reply_markup });
+      await sendMessage(ctx.chatId, buildToPay(await getBalance()));
       await ack(ctx);
     },
   ],
@@ -554,21 +552,16 @@ async function replyAddIncome({
     await sendMessage(chatId, '⚠️ Нужна сумма в евро. Попробуйте ещё раз.');
     return;
   }
-  let added = false;
-  const updated = await resolvePendingPrompt(
+  const resolved = await resolvePendingPrompt(
     chatId,
     replyToMessageId,
-    (lead) => {
-      added = canAddIncome(lead, 'owner');
-      return added ? { incomes: appendIncome(lead.incomes, amount) } : {};
-    },
+    () => ({}),
   );
-  const income = updated?.incomes.at(-1);
-  if (updated && added && income) {
-    await ensureLeadCard(updated);
-    await sendIncomeNotificationToAdmin(updated, income);
-    await replyWithCard(chatId, updated, '✅ Доход добавлен');
-  }
+  if (!resolved || !canAddIncome(resolved, 'owner')) return;
+  const payout = await addPayout({ amount, by: 'owner', leadId: resolved.id });
+  if (!payout) return;
+  await sendPayoutNotificationToAdmin(resolved, payout);
+  await replyWithCard(chatId, resolved, '✅ Доход добавлен');
 }
 
 async function replyPostpone({
