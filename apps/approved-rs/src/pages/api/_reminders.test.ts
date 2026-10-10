@@ -430,6 +430,26 @@ describe('GET /api/reminders', () => {
       ]);
     });
 
+    it('expires Ghosts, then posts the digest, then the summary', async () => {
+      leadsStorage().seed([
+        ghost({ createdAt: '2026-10-01T00:00:00.000Z' }),
+        makeLead({ id: 9, status: 'open', remindAt: null }),
+      ]);
+
+      const res = await GET(makeCtx());
+
+      expect(await res.json()).toEqual({
+        expiredGhosts: 1,
+        digestSent: true,
+        monthlySummary: true,
+      });
+      const [digest, summary] = posted().map((p) => String(p.text));
+      expect(posted()).toHaveLength(2);
+      expect(digest).toContain('🕐 Без движения 7 дней');
+      expect(summary).toContain('<b>Без итога: 1</b>\n• #9 Иван');
+      expect(summary).not.toContain('#7');
+    });
+
     it('posts once a month, however often the cron runs', async () => {
       await GET(makeCtx());
       vi.setSystemTime(new Date('2026-11-01T20:00:00.000Z'));

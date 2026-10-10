@@ -743,6 +743,20 @@ describe('every action on a Lead resets its clock', () => {
     expect((await store.getLead(1))?.lastActivityAt).toBe(at(12));
   });
 
+  it('a confirmed draft Payout', async () => {
+    const draft = await store.addDraft({
+      amount: 30,
+      by: 'owner',
+      note: '',
+      brand: null,
+      leadId: 1,
+      matchPending: false,
+    });
+    onDay(12);
+    await store.confirmDraft(draft.id);
+    expect((await store.getLead(1))?.lastActivityAt).toBe(at(12));
+  });
+
   it('a note', async () => {
     await store.addNote(1, 'Звонил');
     expect((await store.getLead(1))?.lastActivityAt).toBe(at(9));
