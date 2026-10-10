@@ -25,12 +25,9 @@ const missingKey = async (): Promise<never> => {
 export const parsePayout: PayoutParser = OPENAI_API_KEY
   ? createPayoutParser({
       apiKey: OPENAI_API_KEY,
-      brands: {
-        [APPROVED.name]: 'car selection, inspection and import for a buyer',
-        [CARLAB.name]: 'car service, repairs and car parts',
-        [DETAILS.name]:
-          'detailing: polishing, ceramic coating, interior cleaning',
-      },
+      brands: Object.fromEntries(
+        [APPROVED, CARLAB, DETAILS].map((b) => [b.name, b.lineOfWork]),
+      ),
     })
   : missingKey;
 

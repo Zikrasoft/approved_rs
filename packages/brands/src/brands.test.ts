@@ -40,6 +40,12 @@ describe('brand registry', () => {
     );
   });
 
+  it('gives every brand its own line of work', () => {
+    expect(new Set(KEYS.map((key) => BRANDS[key].lineOfWork)).size).toBe(
+      KEYS.length,
+    );
+  });
+
   it('gives every brand a distinct domain', () => {
     expect(new Set(KEYS.map((key) => BRANDS[key].domain)).size).toBe(
       KEYS.length,

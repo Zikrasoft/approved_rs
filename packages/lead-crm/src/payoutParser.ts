@@ -22,17 +22,18 @@ export interface PayoutParserOptions {
   fetch?: typeof fetch;
 }
 
-const NUMBER_WORD =
-  /\d|(?<!\p{L})(?:сто|сотк|сотн|двест|трист|четырест|пятьсот|шестьсот|семьсот|восемьсот|девятьсот|тысяч|штук|косар|полтин|десят|двадцат|тридцат|сорок|пятьдесят|шестьдесят|семьдесят|восемьдесят|девяносто|sto|stotin|dvest|trist|četrist|petsto|šeststo|sedamsto|osamsto|devetsto|hiljad|iljad|soma|deset|dvadeset|trideset|četrdeset|pedeset|šezdeset|sedamdeset|osamdeset|devedeset)/iu;
+const WORDS_OR_DIGITS = /[\p{L}\d]/u;
 
-export function mentionsAmount(text: string): boolean {
-  return NUMBER_WORD.test(text);
+function brandHint(brands: Readonly<Record<string, string>>): string[] {
+  const entries = Object.entries(brands);
+  if (entries.length === 0) return [];
+  return [
+    '- brand: the business the message is about, exactly one of the names below, only when the message names it or its line of work; null otherwise.',
+    ...entries.map(([name, about]) => `- ${name}: ${about}`),
+  ];
 }
 
 function systemPrompt(brands: Readonly<Record<string, string>>): string {
-  const brandList = Object.entries(brands)
-    .map(([name, about]) => `- ${name}: ${about}`)
-    .join('\n');
   return [
     'You read one message the owner of a car business posts in a work chat, in Russian or Serbian, typed or transcribed from voice.',
     'Decide whether it records a payout: money the owner states he owes his partner for a client, in euros.',
@@ -43,20 +44,25 @@ function systemPrompt(brands: Readonly<Record<string, string>>): string {
     '- note: what the money was for, short, in the language of the message, without the amount, the name or the phone; empty when nothing is said.',
     "- clientName: the client's name in the nominative case, as written in a CRM; null when none is named.",
     "- clientPhone: the client's phone number as written; null when none is given.",
-    '- brand: the business the message is about, exactly one of the names below, only when the message names it or its line of work; null otherwise.',
-    brandList,
+    ...brandHint(brands),
   ].join('\n');
 }
 
+const brandNamesSchema = z.tuple([z.string()], z.string());
+
+function brandSchema(brands: Readonly<Record<string, string>>) {
+  const names = brandNamesSchema.safeParse(Object.keys(brands));
+  return names.success ? z.enum(names.data).nullable() : z.null();
+}
+
 function replySchema(brands: Readonly<Record<string, string>>) {
-  const names = Object.keys(brands) as [string, ...string[]];
   return z.object({
     isPayout: z.boolean(),
     amount: z.number().nullable(),
     note: z.string(),
     clientName: z.string().nullable(),
     clientPhone: z.string().nullable(),
-    brand: z.enum(names).nullable(),
+    brand: brandSchema(brands),
   });
 }
 
@@ -73,7 +79,7 @@ export function createPayoutParser({
   const instructions = systemPrompt(brands);
 
   return async (text) => {
-    if (!mentionsAmount(text)) return null;
+    if (!WORDS_OR_DIGITS.test(text)) return null;
     const completion = await client.chat.completions.parse({
       model,
       response_format: responseFormat,

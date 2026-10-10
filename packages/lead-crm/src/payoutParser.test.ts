@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createPayoutParser, mentionsAmount } from './payoutParser.ts';
+import { createPayoutParser } from './payoutParser.ts';
 
 const BRANDS = {
   'Approved.rs': 'car selection and import',
@@ -99,6 +99,42 @@ describe('createPayoutParser', () => {
       },
     ],
     [
+      'a Russian teen amount in words',
+      'Сергею пятнадцать за диагностику',
+      recorded({ amount: 15, note: 'за диагностику', clientName: 'Сергей' }),
+      {
+        amount: 15,
+        note: 'за диагностику',
+        clientName: 'Сергей',
+        clientPhone: null,
+        brand: null,
+      },
+    ],
+    [
+      'a Russian unit amount in words',
+      'Олег, пять',
+      recorded({ amount: 5, clientName: 'Олег' }),
+      {
+        amount: 5,
+        note: '',
+        clientName: 'Олег',
+        clientPhone: null,
+        brand: null,
+      },
+    ],
+    [
+      'a Serbian unit amount in words',
+      'Jovan osam evra',
+      recorded({ amount: 8, clientName: 'Jovan' }),
+      {
+        amount: 8,
+        note: '',
+        clientName: 'Jovan',
+        clientPhone: null,
+        brand: null,
+      },
+    ],
+    [
       'a Serbian transcript with a phone and no name',
       'delovi za kupca sa brojem 064 123 4567 sto dvadeset',
       recorded({
@@ -138,10 +174,31 @@ describe('createPayoutParser', () => {
     expect(await parse(text)).toBeNull();
   });
 
-  it('never asks the model about a message without a number', async () => {
+  it('never asks the model about a message without a word or a digit', async () => {
     const { parse, fetch } = parserAnswering(recorded({ amount: 30 }));
-    expect(await parse('Привет, как дела у клиента?')).toBeNull();
+    expect(await parse('👍 ?!')).toBeNull();
     expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('asks the model about number words, not only digits', async () => {
+    const { parse, fetch } = parserAnswering(recorded({ amount: 15 }));
+    await parse('Марко petnaest');
+    expect(fetch).toHaveBeenCalledOnce();
+  });
+
+  it('gives no brand hint and takes no brand when there are no brands', async () => {
+    const fetch = vi.fn(async () =>
+      completion(recorded({ amount: 30, brand: null })),
+    );
+    const parse = createPayoutParser({ apiKey: 'test', brands: {}, fetch });
+
+    expect(await parse('Иван 30')).toMatchObject({ amount: 30, brand: null });
+    const [, init] = fetch.mock.calls[0] as unknown as [string, RequestInit];
+    const body = JSON.parse(init.body as string);
+    expect(body.messages[0].content).not.toContain('- brand:');
+    expect(
+      body.response_format.json_schema.schema.properties.brand,
+    ).toMatchObject({ type: 'null' });
   });
 
   it('sends the brands and asks for a strict schema', async () => {
@@ -168,18 +225,5 @@ describe('createPayoutParser', () => {
   it('throws on a reply cut off at the token limit', async () => {
     const { parse } = parserAnswering('{"isPayout": tr', 'length');
     await expect(parse('Иван 30')).rejects.toThrow();
-  });
-});
-
-describe('mentionsAmount', () => {
-  it.each([
-    ['Иван 30', true],
-    ['триста за подбор', true],
-    ['Marko dvesta', true],
-    ['pet hiljada', true],
-    ['просто место', false],
-    ['hvala, vidimo se', false],
-  ])('%s → %s', (text, expected) => {
-    expect(mentionsAmount(text)).toBe(expected);
   });
 });
