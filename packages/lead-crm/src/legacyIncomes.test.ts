@@ -1,9 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import {
-  legacyIncomesSchema,
-  legacyOwed,
-  legacyPayoutAmount,
-} from './legacyIncomes.ts';
+import { legacyIncomesSchema, legacyOwed } from './legacyIncomes.ts';
 
 const WON = '2026-01-01T00:00:00.000Z';
 const PAID = '2026-02-02T00:00:00.000Z';
@@ -15,12 +11,6 @@ function read(money: Record<string, unknown>) {
     ...money,
   });
 }
-
-describe('legacyPayoutAmount', () => {
-  it('rounds each income to the cent', () => {
-    expect(legacyPayoutAmount(10.05, 33)).toBe(3.32);
-  });
-});
 
 describe('legacy money on a stored Lead', () => {
   it('has nothing to migrate on a Lead without money', () => {
@@ -105,7 +95,7 @@ describe('legacyOwed', () => {
     ...money,
   });
 
-  it('is every income times its rate, less what was confirmed paid, rounded once', () => {
+  it('is every unpaid income times its rate, each rounded to the cent', () => {
     const entries = [
       lead({
         commissionPercent: 33,
@@ -119,7 +109,7 @@ describe('legacyOwed', () => {
       lead({ dealAmount: 300, commissionPercent: 150 }),
     ];
 
-    expect(legacyOwed(entries)).toBe(6.63 + 30 + 450);
+    expect(legacyOwed(entries)).toBe(486.64);
   });
 
   it('owes nothing when everything was paid', () => {

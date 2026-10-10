@@ -14,6 +14,7 @@ describe('parseOperationReply', () => {
     ['0,01', 0.01, ''],
     ['1000000', 1_000_000, ''],
     ['40\nИван\nсервис', 40, 'Иван\nсервис'],
+    ['40 € 2 шины', 40, '2 шины'],
   ])('reads %j as %d with note %j', (text, amount, note) => {
     expect(parseOperationReply(text)).toEqual({ ok: true, amount, note });
   });
@@ -28,13 +29,20 @@ describe('parseOperationReply', () => {
     },
   );
 
-  it.each(['0', '0,00', '12.345', '0,001', '1000000.01', '1000001'])(
-    'refuses %j as an amount instead of rounding or capping it',
-    (text) => {
-      expect(parseOperationReply(text)).toEqual({
-        ok: false,
-        reason: 'bad_amount',
-      });
-    },
-  );
+  it.each([
+    '0',
+    '0,00',
+    '12.345',
+    '0,001',
+    '1000000.01',
+    '1000001',
+    '1 000 Иван',
+    '1 000',
+    '40. 5',
+  ])('refuses %j as an amount instead of rounding or capping it', (text) => {
+    expect(parseOperationReply(text)).toEqual({
+      ok: false,
+      reason: 'bad_amount',
+    });
+  });
 });

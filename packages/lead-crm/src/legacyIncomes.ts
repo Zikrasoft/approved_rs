@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { roundMoney } from './money.ts';
+import { roundMoney, toCents } from './money.ts';
 
 const PAID_EPSILON = 0.005;
-export const LEGACY_COMMISSION_PERCENT = 10;
+const LEGACY_COMMISSION_PERCENT = 10;
 
 const incomeSchema = z.object({
   id: z.number().int().positive(),
@@ -17,7 +17,7 @@ export interface LegacyIncomes {
   incomes: Income[];
 }
 
-export function legacyPayoutAmount(amount: number, percent: number): number {
+function legacyPayoutAmount(amount: number, percent: number): number {
   return roundMoney((amount * percent) / 100);
 }
 
@@ -70,8 +70,7 @@ function carriesMoney(entry: unknown): boolean {
 }
 
 export function legacyOwed(entries: unknown[]): number {
-  let earned = 0;
-  let paid = 0;
+  let owedCents = 0;
   for (const entry of entries) {
     const money = legacyIncomesSchema.safeParse(entry);
     if (!money.success) {
@@ -84,10 +83,9 @@ export function legacyOwed(entries: unknown[]): number {
     }
     const { percent, incomes } = money.data;
     for (const income of incomes) {
-      const share = (income.amount * percent) / 100;
-      earned += share;
-      if (income.paidAt !== null) paid += share;
+      if (income.paidAt === null)
+        owedCents += toCents(legacyPayoutAmount(income.amount, percent));
     }
   }
-  return Math.max(0, roundMoney(earned - paid));
+  return owedCents / 100;
 }

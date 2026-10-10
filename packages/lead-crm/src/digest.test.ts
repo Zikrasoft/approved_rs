@@ -103,6 +103,23 @@ describe('claimDigest', () => {
     ]);
   });
 
+  it('turns the day at midnight in Belgrade, not UTC', async () => {
+    storage.seed([
+      storedLead(1, { status: 'postponed', remindAt: '2026-10-06' }),
+    ]);
+
+    const beforeMidnight = new Date('2026-10-05T21:59:00.000Z');
+    const afterMidnight = new Date('2026-10-05T22:01:00.000Z');
+    expect(await store.claimDigest(beforeMidnight)).toEqual({
+      stale: [],
+      due: [],
+    });
+    expect(ids((await store.claimDigest(afterMidnight))!.due)).toEqual([1]);
+    expect(records().filter((r) => r.type === 'digest')).toEqual([
+      expect.objectContaining({ day: '2026-10-06' }),
+    ]);
+  });
+
   it('claims a day once, however often the cron runs that day', async () => {
     storage.seed([storedLead(1)]);
 

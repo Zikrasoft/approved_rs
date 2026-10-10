@@ -960,7 +960,7 @@ describe('updateLeads conflict retry', () => {
         leads.map((l) => ({ ...l, name: 'Пётр' })),
       );
       const assertion = expect(pending).rejects.toThrow(
-        'storage write conflict',
+        'updateLeads: conflict retry limit exceeded',
       );
       await vi.runAllTimersAsync();
       await assertion;
@@ -968,7 +968,7 @@ describe('updateLeads conflict retry', () => {
       vi.useRealTimers();
     }
 
-    expect(storage.writeAttempts() - before).toBe(6); // MAX_RETRIES, no more
+    expect(storage.writeAttempts() - before).toBe(6);
   });
 });
 

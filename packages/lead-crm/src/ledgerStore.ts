@@ -62,14 +62,6 @@ export interface LedgerStoreOptions {
   opening?: () => Promise<OperationInput[]>;
 }
 
-export function balanceOf(operations: LedgerOperation[]): number {
-  const cents = operations.reduce(
-    (sum, op) => sum + (op.type === 'payout' ? 1 : -1) * toCents(op.amount),
-    0,
-  );
-  return cents / 100;
-}
-
 function monthOf(iso: string | Date): string {
   return new Intl.DateTimeFormat('en-CA', {
     timeZone: LEDGER_TIME_ZONE,
@@ -91,6 +83,11 @@ function sumsOf(operations: LedgerOperation[]): FlowSums {
   return { credited: total('payout'), debited: total('settlement') };
 }
 
+export function balanceOf(operations: LedgerOperation[]): number {
+  const { credited, debited } = sumsOf(operations);
+  return (toCents(credited) - toCents(debited)) / 100;
+}
+
 export function operationSums(
   operations: LedgerOperation[],
   now: Date,
@@ -106,6 +103,12 @@ const promptIs =
   ({ chatId, messageId }: PromptKey) =>
   (p: OperationPrompt) =>
     p.chatId === chatId && p.messageId === messageId;
+
+const isLive = (p: OperationPrompt, now = Date.now()) =>
+  now - Date.parse(p.createdAt) < PROMPT_TTL_MS;
+
+const liveAt = (key: PromptKey) => (p: OperationPrompt) =>
+  promptIs(key)(p) && isLive(p);
 
 function appended(
   file: LedgerFile,
@@ -210,7 +213,7 @@ export function createLedgerStore({ storage, opening }: LedgerStoreOptions) {
         const added = { ...prompt, createdAt: new Date(now).toISOString() };
         const replaced = replacing ? promptIs(replacing) : () => false;
         const fresh = file.prompts.filter(
-          (p) => now - Date.parse(p.createdAt) < PROMPT_TTL_MS && !replaced(p),
+          (p) => isLive(p, now) && !replaced(p),
         );
         return {
           next: { ...file, prompts: [...fresh, added] },
@@ -222,7 +225,7 @@ export function createLedgerStore({ storage, opening }: LedgerStoreOptions) {
     async findOperationPrompt(
       key: PromptKey,
     ): Promise<OperationPrompt | undefined> {
-      return (await read()).file.prompts.find(promptIs(key));
+      return (await read()).file.prompts.find(liveAt(key));
     },
 
     answerOperationPrompt(
@@ -230,7 +233,7 @@ export function createLedgerStore({ storage, opening }: LedgerStoreOptions) {
       answer: Omit<OperationInput, 'type'>,
     ): Promise<RecordOutcome> {
       return update((file) => {
-        const prompt = file.prompts.find(promptIs(key));
+        const prompt = file.prompts.find(liveAt(key));
         if (!prompt)
           return { result: { ok: false, reason: 'no_prompt' } as const };
         const { next, result } = appended(file, {

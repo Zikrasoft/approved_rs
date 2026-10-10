@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { format } from 'date-fns';
 import { channelLabel } from './channelLabels.ts';
 import { isClosed } from './schema.ts';
 import type {
@@ -14,6 +13,7 @@ import type { StoredLeadSchema } from './schema.ts';
 import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
 import { retryOnConflict } from './storage/retry.ts';
 import { LEADS_PATH } from './quarantine.ts';
+import { LEDGER_TIME_ZONE } from './ledgerStore.ts';
 
 export const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
 
@@ -60,7 +60,10 @@ interface StoreRecords {
   digests: DigestMark[];
 }
 
-const digestDay = (now: Date) => format(now, 'yyyy-MM-dd');
+const dayFormat = new Intl.DateTimeFormat('en-CA', {
+  timeZone: LEDGER_TIME_ZONE,
+});
+const digestDay = (now: Date) => dayFormat.format(now);
 
 function digestOf(leads: StoredLead[], now: Date): Digest {
   const today = digestDay(now);
@@ -231,7 +234,7 @@ export function createLeadStore({
   async function updateRecords(
     mutate: (records: StoreRecords, idFloor: number) => Partial<StoreRecords>,
   ): Promise<StoreRecords> {
-    return retryOnConflict(async () => {
+    const { next, unreadable } = await retryOnConflict(async () => {
       const { unreadable, version, ...current } = await readSnapshot();
       const mutated = {
         ...current,
@@ -242,13 +245,14 @@ export function createLeadStore({
         digests: mutated.digests.map((m) => digestMarkSchema.parse(m)),
       };
       await beforeWrite?.();
-      await copyToQuarantine(unreadable);
       await storage.write(
         [...next.leads, ...next.digests, ...unreadable],
         version,
       );
-      return next;
+      return { next, unreadable };
     }, 'updateLeads: conflict retry limit exceeded');
+    await copyToQuarantine(unreadable);
+    return next;
   }
 
   async function updateLeads(

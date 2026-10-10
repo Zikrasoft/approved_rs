@@ -11,7 +11,6 @@ export type {
   LeadSubmission,
   LeadStatus,
   PendingPrompt,
-  Referrer,
   StoredLead,
 } from './schema.ts';
 export { storedLeadSchema } from './schema.ts';
@@ -25,25 +24,14 @@ export {
   MAX_LIST_ROWS,
   VISITOR_MERGE_WINDOW_MS,
 } from './store.ts';
-export type { CaptureUpdate, Digest, LeadStore } from './store.ts';
-export {
-  balanceOf,
-  operationSums,
-  LEDGER_PATH,
-  LEDGER_TIME_ZONE,
-} from './ledgerStore.ts';
+export type { CaptureUpdate, LeadStore } from './store.ts';
+export { LEDGER_PATH } from './ledgerStore.ts';
 export type {
-  FlowSums,
-  LedgerAuthor,
   LedgerOperation,
-  LedgerStore,
-  OperationInput,
-  OperationPrompt,
   OperationType,
-  RecordOutcome,
+  PromptKey,
 } from './ledgerStore.ts';
 export { parseOperationReply } from './operationReply.ts';
-export type { OperationRefusal, OperationReply } from './operationReply.ts';
 
 export type { OrderMarkers } from './orderMarkers.ts';
 
@@ -64,7 +52,6 @@ export {
   buildBalance,
   buildMenu,
   LEDGER_COPY,
-  operationNoticeText,
   operationRecordedText,
   operationRefusedText,
   reAskOperationText,

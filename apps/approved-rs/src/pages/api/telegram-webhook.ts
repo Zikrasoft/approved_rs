@@ -70,6 +70,7 @@ import {
   type OperationType,
   type LeadStatus,
   type PendingPrompt,
+  type PromptKey,
   type StoredLead,
 } from '@/lib/store';
 
@@ -284,7 +285,7 @@ async function askOperation(
   chatId: number,
   type: OperationType,
   text: string = LEDGER_COPY.prompt[type],
-  replacing?: { chatId: number; messageId: number },
+  replacing?: PromptKey,
 ): Promise<void> {
   const messageId = await sendForceReplyPrompt(chatId, text);
   await openOperationPrompt({ chatId, messageId, type }, replacing);
@@ -381,6 +382,7 @@ export const CALLBACKS: CallbackRow[] = [
       await ack(ctx);
     },
   ],
+  // TODO: drop once no chat still shows a menu with the old 💰 debt button (menus sent before #240).
   [/^menu:debt$/, 'any', showBalance],
   operationRow('payout'),
   operationRow('settlement'),

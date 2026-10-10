@@ -35,8 +35,9 @@ async function expireGhosts(now: Date): Promise<number> {
 async function postDigest(now: Date): Promise<boolean> {
   const digest = await claimDigest(now);
   if (!digest) return false;
+  let sent: boolean;
   try {
-    if (!(await sendDigest(digest))) return false;
+    sent = await sendDigest(digest);
   } catch (err) {
     console.error('[reminders] failed to send the digest', { error: err });
     await releaseDigest(now);
@@ -53,7 +54,7 @@ async function postDigest(now: Date): Promise<boolean> {
       });
     }
   }
-  return true;
+  return sent;
 }
 
 export async function GET({ request }: APIContext): Promise<Response> {

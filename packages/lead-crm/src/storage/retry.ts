@@ -15,7 +15,7 @@ export async function retryOnConflict<T>(
   attempt: () => Promise<T>,
   exhausted: string,
 ): Promise<T> {
-  let lastErr = new StorageConflictError(exhausted);
+  let lastErr: StorageConflictError | undefined;
   for (let tries = 0; tries < MAX_RETRIES; tries++) {
     if (tries > 0) await sleep(backoffDelay(tries - 1));
     try {
@@ -25,5 +25,5 @@ export async function retryOnConflict<T>(
       lastErr = err;
     }
   }
-  throw lastErr;
+  throw new StorageConflictError(exhausted, { cause: lastErr });
 }

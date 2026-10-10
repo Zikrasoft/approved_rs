@@ -158,9 +158,10 @@ describe('recordOperation', () => {
 
   it('gives up after repeated conflicts', async () => {
     storage.failNextWrites(6);
-    await expect(ledger.recordOperation(credit(10))).rejects.toBeInstanceOf(
-      StorageConflictError,
-    );
+    const error = await ledger.recordOperation(credit(10)).catch((e) => e);
+    expect(error).toBeInstanceOf(StorageConflictError);
+    expect(error.message).toBe('ledger: conflict retry limit exceeded');
+    expect(error.cause).toBeInstanceOf(StorageConflictError);
     expect(storage.writeAttempts()).toBe(6);
   });
 
@@ -268,6 +269,17 @@ describe('operation prompts', () => {
     expect(
       await ledger.findOperationPrompt({ ...PROMPT, messageId: 8 }),
     ).toBeUndefined();
+  });
+
+  it('treats a prompt older than a week as gone', async () => {
+    await ledger.recordOperation(credit(50));
+    await ledger.openOperationPrompt({ ...PROMPT, type: 'settlement' });
+    vi.setSystemTime(Date.parse(NOW) + 7 * 24 * 60 * 60 * 1000);
+    expect(await ledger.findOperationPrompt(PROMPT)).toBeUndefined();
+    expect(
+      await ledger.answerOperationPrompt(PROMPT, { amount: 5, by: 'owner' }),
+    ).toEqual({ ok: false, reason: 'no_prompt' });
+    expect(await ledger.readBalance()).toBe(50);
   });
 
   it('drops prompts older than a week when a new one opens', async () => {

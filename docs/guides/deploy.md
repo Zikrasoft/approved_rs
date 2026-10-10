@@ -466,7 +466,7 @@ Settings → Secrets and variables → Actions:
 
 | Secret                           | For what                                       | Where to get it                                                        |
 | -------------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------- |
-| `OPENAI_API_KEY`                 | the `translate` job (content auto-translation) | OpenAI                                                                 |
+| `OPENAI_API_KEY`                 | the `translate` job (content auto-translation) | OpenAI. **GitHub only, not needed on Vercel**                          |
 | `VERCEL_TOKEN`                   | every deploy job                               | [vercel.com/account/tokens](https://vercel.com/account/tokens)         |
 | `VERCEL_ORG_ID`                  | every deploy job                               | `.vercel/project.json` → `orgId` after `vercel link`                   |
 | `VERCEL_PROJECT_ID`              | the approved.rs deploy                         | Project Settings → General of that project                             |
