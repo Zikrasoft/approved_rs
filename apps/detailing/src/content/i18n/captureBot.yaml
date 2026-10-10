@@ -68,6 +68,18 @@ translations:
     partners:
       button: Partneri
       text: Naši partneri — izaberite kome da pišete.
+    request:
+      button: Ostavite zahtev
+      car: Koja je vaša kola? Napišite marku, model i godinu.
+      service: Šta želite da uradite sa autom? Izaberite uslugu ispod — ili napišite svojim rečima.
+    language:
+      button: 🌐 Jezik
+      text: Izaberite jezik koji vam najbolje odgovara.
+    profile:
+      description: Detaljerska studija u Beogradu — oblaganje folijom, poliranje, keramika. Kliknite „Start“ — recite šta želite da uradite sa autom, i majstor će vam ovde odgovoriti.
+      shortDescription: Detaljerska studija u Beogradu — folija, poliranje, keramika
+      menuCommand: Glavni meni
+      langCommand: Promeni jezik
   en:
     greeting: Hello! Thanks for getting in touch — we can see your enquiry and we'll come back to you shortly.
     lookingFor: Tell us which car you have and what you would like done to it — paint protection film, polishing, ceramic coating or something else.
@@ -97,4 +109,16 @@ translations:
     partners:
       button: Partners
       text: Our partners — choose who to reach out to.
-translatedFrom: b2dbfbdd1efb4e04
+    request:
+      button: Submit a request
+      car: What car do you have? Please provide the make, model, and year.
+      service: What would you like to do with your car? Choose a service below or write it in your words.
+    language:
+      button: 🌐 Language
+      text: Select the language you prefer to communicate in.
+    profile:
+      description: A detailing studio in Belgrade — film wrapping, polishing, ceramic coating. Click 'Start' — tell us what you want to do with your car, and the specialist will respond here.
+      shortDescription: Detailing studio in Belgrade — film, polishing, ceramic
+      menuCommand: Main menu
+      langCommand: Change language
+translatedFrom: ea738c9345d0a602

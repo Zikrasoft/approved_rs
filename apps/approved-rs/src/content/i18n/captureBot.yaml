@@ -68,6 +68,18 @@ translations:
     partners:
       button: Partners
       text: Repairs and detailing — with partners we trust. Choose who to contact.
+    request:
+      button: Submit an inquiry
+      car: What car do you have? Please provide the make, model, and year.
+      service: What service do you need? Please select from below.
+    language:
+      button: 🌐 Language
+      text: Choose the language you're most comfortable communicating in.
+    profile:
+      description: We source, inspect, and import cars in Serbia. Click 'Start' to tell us what kind of car you need, and a manager will respond here.
+      shortDescription: Sourcing, inspecting, and importing cars in Serbia
+      menuCommand: Main Menu
+      langCommand: Change Language
   sr:
     greeting: Zdravo! Hvala što ste se javili — već smo primili vašu poruku i uskoro ćemo odgovoriti.
     lookingFor: Recite nam ukratko koju mašinu tražite ili u čemu vam treba pomoć.
@@ -97,6 +109,18 @@ translations:
     partners:
       button: Partneri
       text: Popravka i detailing — kod partnera kojima verujemo. Izaberite kome želite da pišete.
+    request:
+      button: Podnijeti zahtev
+      car: Koja je vaša kola? Napišite marku, model i godište.
+      service: Koju uslugu želite? Izaberite ispod.
+    language:
+      button: 🌐 Jezik
+      text: Izaberite jezik koji vam više odgovara.
+    profile:
+      description: Biramo, proveravamo i dopremamo automobile u Srbiji. Kliknite na 'Start' - recite nam koja kola su vam potrebna, a menadžer će vam odgovoriti ovde.
+      shortDescription: Izbor, provera i doprema automobila u Srbiji
+      menuCommand: Glavni meni
+      langCommand: Promeni jezik
   es:
     greeting: ¡Hola! Gracias por escribirnos, ya vemos tu consulta y te respondemos enseguida.
     lookingFor: Cuéntanos en dos palabras qué coche te interesa o en qué necesitas ayuda.
@@ -126,6 +150,18 @@ translations:
     partners:
       button: Socios
       text: Reparación y detailing — con socios en los que confiamos. Elige a quién contactar.
+    request:
+      button: Enviar solicitud
+      car: ¿Cuál es tu coche? Escribe la marca, el modelo y el año.
+      service: ¿Qué servicio necesitas? Elige a continuación.
+    language:
+      button: 🌐 Idioma
+      text: Elige el idioma con el que te sientas más cómodo.
+    profile:
+      description: Seleccionamos, inspeccionamos y traemos coches en Serbia. Haz clic en «Iniciar» — cuéntanos qué coche necesitas y un gerente te responderá aquí.
+      shortDescription: Selección, inspección y entrega de coches en Serbia
+      menuCommand: Menú principal
+      langCommand: Cambiar idioma
   de:
     greeting: Hallo! Danke für Ihre Nachricht – Ihre Anfrage liegt uns vor, wir melden uns gleich.
     lookingFor: Sagen Sie uns kurz, welches Auto Sie interessiert oder wobei Sie Hilfe brauchen.
@@ -155,4 +191,16 @@ translations:
     partners:
       button: Partner
       text: Reparatur und Pflege – bei Partnern, denen wir vertrauen. Wählen Sie, wem Sie schreiben möchten.
-translatedFrom: f42c9b16d47b08e7
+    request:
+      button: Anfrage senden
+      car: Welches Auto haben Sie? Bitte geben Sie Marke, Modell und Baujahr an.
+      service: Welche Dienstleistung benötigen Sie? Wählen Sie unten aus.
+    language:
+      button: 🌐 Sprache
+      text: Wählen Sie die Sprache, in der Sie kommunizieren möchten.
+    profile:
+      description: Wir suchen, prüfen und bringen Autos nach Serbien. Klicken Sie auf „Start“ – erzählen Sie, welches Auto Sie brauchen, und der Manager wird hier antworten.
+      shortDescription: Auswahl, Prüfung und Anlieferung von Autos in Serbien
+      menuCommand: Hauptmenü
+      langCommand: Sprache wechseln
+translatedFrom: 18133557df2824d6

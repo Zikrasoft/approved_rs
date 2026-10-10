@@ -68,6 +68,18 @@ translations:
     partners:
       button: Partneri
       text: Naši partneri — izaberite kome da pišete.
+    request:
+      button: Poslati zahtev
+      car: Koja je vaša mašina? Napišite marku, model i godinu.
+      service: Koje radove trebate? Izaberite ispod.
+    language:
+      button: 🌐 Jezik
+      text: Izaberite jezik kojim vam je lakše da komunicirate.
+    profile:
+      description: Autoserivis u Beogradu — dijagnostika, popravka i servisiranje. Pritisnite „Start“ — recite šta nije u redu s autom, a majstor će ovde odgovoriti.
+      shortDescription: Autoserivis u Beogradu — dijagnostika, popravka, servisiranje
+      menuCommand: Glavni meni
+      langCommand: Promeni jezik
   en:
     greeting: Hello! Thanks for getting in touch — we have your enquiry and a mechanic will reply shortly.
     lookingFor: Tell us which car you drive — make, model and year — and what is wrong with it or what work it needs.
@@ -97,4 +109,16 @@ translations:
     partners:
       button: Partners
       text: Our partners — choose who to contact.
-translatedFrom: fa2bd9cfa3e89c56
+    request:
+      button: Submit a request
+      car: What kind of car do you have? Please provide the make, model, and year.
+      service: What services do you need? Please choose below.
+    language:
+      button: 🌐 Language
+      text: Select the language you prefer to communicate in.
+    profile:
+      description: Car service in Belgrade — diagnostics, repairs, and servicing. Click ‘Start’ — tell us what’s wrong with your car, and a mechanic will respond here.
+      shortDescription: Car service in Belgrade — diagnostics, repairs, servicing
+      menuCommand: Main menu
+      langCommand: Change language
+translatedFrom: 5f3bfd218a518c14
