@@ -27,6 +27,15 @@ translations:
     phoneSkip: Preskoči
     thanks: Hvala! Proslijedili smo majstoru — uskoro će vas kontaktirati.
     received: Primili smo, majstor će videti vašu poruku.
+    menu:
+      text: Kako možemo pomoći? Izaberite šta vas zanima.
+      back: « Nazad
+    services:
+      button: Usluge
+      text: Evo šta radimo u servisu. Izaberite uslugu — pokažaćemo cenu, rokove i šta je uključeno.
+    card:
+      request: Poslati zahtev
+      site: Više informacija na sajtu
   en:
     greeting: Hello! Thanks for getting in touch — we have your enquiry and a mechanic will reply shortly.
     lookingFor: Tell us which car you drive — make, model and year — and what is wrong with it or what work it needs.
@@ -37,4 +46,13 @@ translations:
     phoneSkip: Skip
     thanks: Thank you! I’ve passed your message to the technician — he’ll be in touch with you shortly.
     received: Got it, a mechanic will see your message.
-translatedFrom: fe84a3a052ce6aea
+    menu:
+      text: How can we assist you? Please select what you’re interested in.
+      back: « Back
+    services:
+      button: Services
+      text: Here’s what we offer at the service. Choose a service — we’ll show you the price, timeframe, and what's included.
+    card:
+      request: Submit a request
+      site: Learn more on the site
+translatedFrom: 9d01a40680e4ecd5
