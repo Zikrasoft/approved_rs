@@ -76,8 +76,8 @@ translations:
       button: 🌐 Language
       text: Choose the language you're most comfortable communicating in.
     profile:
-      description: We source, inspect, and import cars in Serbia. Click 'Start' to tell us what kind of car you need, and a manager will respond here.
-      shortDescription: Sourcing, inspecting, and importing cars in Serbia
+      description: We source and inspect cars in Germany, Spain, Switzerland, and Serbia, bringing them in from Europe and China. Click 'Start' — tell us what kind of car you need, and a manager will respond right here.
+      shortDescription: Car sourcing, import, and buyback in Europe
       menuCommand: Main Menu
       langCommand: Change Language
   sr:
@@ -117,8 +117,8 @@ translations:
       button: 🌐 Jezik
       text: Izaberite jezik koji vam više odgovara.
     profile:
-      description: Biramo, proveravamo i dopremamo automobile u Srbiji. Kliknite na 'Start' - recite nam koja kola su vam potrebna, a menadžer će vam odgovoriti ovde.
-      shortDescription: Izbor, provera i doprema automobila u Srbiji
+      description: Biramo i proveravamo automobile u Nemačkoj, Španiji, Švajcarskoj i Srbiji, uvozimo iz Evrope i Kine. Kliknite na 'Start' — recite nam koju vrstu automobila želite, a menadžer će vam ovde odgovoriti.
+      shortDescription: Provera auta pre kupovine, uvoz i otkup automobila u Evropi
       menuCommand: Glavni meni
       langCommand: Promeni jezik
   es:
@@ -158,8 +158,8 @@ translations:
       button: 🌐 Idioma
       text: Elige el idioma con el que te sientas más cómodo.
     profile:
-      description: Seleccionamos, inspeccionamos y traemos coches en Serbia. Haz clic en «Iniciar» — cuéntanos qué coche necesitas y un gerente te responderá aquí.
-      shortDescription: Selección, inspección y entrega de coches en Serbia
+      description: Seleccionamos y verificamos vehículos en Alemania, España, Suiza y Serbia, los traemos de Europa y China. Haz clic en 'Iniciar' y cuéntanos qué coche necesitas, y un gestor te responderá aquí mismo.
+      shortDescription: Selección de coches, transporte y compra de vehículos en Europa
       menuCommand: Menú principal
       langCommand: Cambiar idioma
   de:
@@ -199,8 +199,8 @@ translations:
       button: 🌐 Sprache
       text: Wählen Sie die Sprache, in der Sie kommunizieren möchten.
     profile:
-      description: Wir suchen, prüfen und bringen Autos nach Serbien. Klicken Sie auf „Start“ – erzählen Sie, welches Auto Sie brauchen, und der Manager wird hier antworten.
-      shortDescription: Auswahl, Prüfung und Anlieferung von Autos in Serbien
+      description: Wir suchen und prüfen Autos in Deutschland, Spanien, der Schweiz und Serbien und importieren sie aus Europa und China. Klicken Sie auf „Start“ – erzählen Sie uns, welches Auto Sie benötigen, und unser Manager wird Ihnen hier antworten.
+      shortDescription: Autosourcing, Import und Rückkauf von Fahrzeugen in Europa
       menuCommand: Hauptmenü
       langCommand: Sprache wechseln
-translatedFrom: 18133557df2824d6
+translatedFrom: c2cf0e2b52fcc6fd
