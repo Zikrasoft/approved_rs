@@ -5,26 +5,20 @@ import { StorageConflictError, type LeadStorage } from './storage/types.ts';
 
 export const LEDGER_PATH = 'data/ledger.json';
 export const LEDGER_TIME_ZONE = 'Europe/Belgrade';
-export const MAX_OPERATION_AMOUNT = 1_000_000;
-export const MAX_OPERATION_NOTE = 500;
+const MAX_OPERATION_NOTE = 500;
 const PROMPT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
-export const ledgerAuthorSchema = z.enum(['owner', 'admin']);
+const ledgerAuthorSchema = z.enum(['owner', 'admin']);
 export type LedgerAuthor = z.infer<typeof ledgerAuthorSchema>;
 
 const operationTypeSchema = z.enum(['payout', 'settlement']);
 export type OperationType = z.infer<typeof operationTypeSchema>;
 
-export const operationAmountSchema = z
-  .number()
-  .transform(roundMoney)
-  .pipe(z.number().positive().max(MAX_OPERATION_AMOUNT));
-
 const operationSchema = z
   .object({
     id: z.number().int().positive(),
     type: operationTypeSchema,
-    amount: operationAmountSchema,
+    amount: z.number().transform(roundMoney).pipe(z.number().positive()),
     note: z.string().max(MAX_OPERATION_NOTE),
     createdAt: z.string(),
     createdBy: ledgerAuthorSchema,
@@ -207,12 +201,16 @@ export function createLedgerStore({ storage, opening }: LedgerStoreOptions) {
       return update((file) => appended(file, input));
     },
 
-    openOperationPrompt(prompt: PromptKey & { type: OperationType }) {
+    openOperationPrompt(
+      prompt: PromptKey & { type: OperationType },
+      replacing?: PromptKey,
+    ) {
       return update((file) => {
         const now = Date.now();
         const added = { ...prompt, createdAt: new Date(now).toISOString() };
+        const replaced = replacing ? promptIs(replacing) : () => false;
         const fresh = file.prompts.filter(
-          (p) => now - Date.parse(p.createdAt) < PROMPT_TTL_MS,
+          (p) => now - Date.parse(p.createdAt) < PROMPT_TTL_MS && !replaced(p),
         );
         return {
           next: { ...file, prompts: [...fresh, added] },

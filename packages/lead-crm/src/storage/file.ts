@@ -1,6 +1,7 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import {
   access,
+  link,
   mkdir,
   readFile,
   rename,
@@ -54,16 +55,19 @@ export function createFileStorage({
 
     async write(leads: unknown, version: string | undefined): Promise<void> {
       await mkdir(dirname(file), { recursive: true });
+      const staging = `${file}.${randomUUID()}.tmp`;
       if (version === undefined) {
-        await writeFile(file, JSON.stringify(leads), { flag: 'wx' }).catch(
-          (error: unknown) => {
-            throw isExisting(error) ? new StorageConflictError() : error;
-          },
-        );
+        await writeFile(staging, JSON.stringify(leads));
+        try {
+          await link(staging, file);
+        } catch (error) {
+          throw isExisting(error) ? new StorageConflictError() : error;
+        } finally {
+          await unlink(staging);
+        }
         return;
       }
       if (version !== (await read()).version) throw new StorageConflictError();
-      const staging = `${file}.tmp`;
       await writeFile(staging, JSON.stringify(leads));
       await rename(staging, file);
     },

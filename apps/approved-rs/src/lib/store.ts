@@ -3,7 +3,6 @@ import { leadStore, ledgerStore } from './crm';
 export const {
   readOperations,
   readBalance,
-  recordOperation,
   openOperationPrompt,
   findOperationPrompt,
   answerOperationPrompt,

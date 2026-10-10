@@ -29,7 +29,7 @@ The admin's cut is a percentage of the owner's net profit, and the rates vary: 1
 
 Spec #241. Money tied to Leads — a Payout per card, the settled lock, the monthly summary — was noise around the one number the two people care about: how much the owner owes right now.
 
-**The owner still states the amount, with no rate, but as a Balance operation independent of Leads.** A Payout (➕ Зачислить) raises the Balance and a Settlement (➖ Списать) lowers it; neither names a Lead or a Brand. Both the owner and the admin may record either, from the CRM bot's private chat, and the other party is told of every one. Operations are append-only: no edit, no delete, a mistake is fixed with an opposite operation. A Settlement that would take the Balance below zero is refused, checked inside the same compare-and-swap write that appends it.
+**The owner still states the amount, with no rate, but as a Balance operation independent of Leads.** A Payout (➕ Зачислить) raises the Balance and a Settlement (➖ Списать) lowers it; neither names a Lead or a Brand. Both the owner and the admin may record either, from the CRM bot's private chat, and everyone else on either side — every other owner and admin id — is told of every one. Operations are append-only: no edit, no delete, a mistake is fixed with an opposite operation. A Settlement that would take the Balance below zero is refused, checked inside the same compare-and-swap write that appends it.
 
 **Operations live in their own blob, `data/ledger.json`, not in the Lead file**, so money history survives Lead cleanup and a Lead schema change cannot quarantine it. It uses the same storage interface and compare-and-swap retry as the Lead store.
 

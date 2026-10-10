@@ -17,27 +17,28 @@ export interface VercelBlobStorageOptions {
   path: string;
 }
 
-async function exists(path: string): Promise<boolean> {
+async function etagOf(path: string): Promise<string | undefined> {
   try {
-    await head(path);
-    return true;
+    return (await head(path)).etag;
   } catch (error) {
-    if (error instanceof BlobNotFoundError) return false;
+    if (error instanceof BlobNotFoundError) return undefined;
     throw error;
   }
 }
+
+const exists = async (path: string) => (await etagOf(path)) !== undefined;
 
 export function createVercelBlobStorage({
   path,
 }: VercelBlobStorageOptions): LeadStorage {
   return {
     async read(): Promise<StorageSnapshot> {
+      const version = await etagOf(path);
+      if (version === undefined) return { raw: undefined, version };
       const result = await get(path, { access: 'private', useCache: false });
       if (!result) return { raw: undefined, version: undefined };
       const text = await new Response(result.stream).text();
-      const raw: unknown = JSON.parse(text);
-      const version = (await head(path)).etag;
-      return { raw, version };
+      return { raw: JSON.parse(text) as unknown, version };
     },
 
     async write(leads: unknown, version: string | undefined): Promise<void> {
@@ -46,7 +47,7 @@ export function createVercelBlobStorage({
         allowOverwrite: version !== undefined,
         contentType: 'application/json',
       };
-      if (version) options.ifMatch = version;
+      if (version !== undefined) options.ifMatch = version;
       try {
         await put(path, JSON.stringify(leads), options);
       } catch (err) {

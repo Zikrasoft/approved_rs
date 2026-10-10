@@ -10,11 +10,6 @@ interface StoredShape {
   incomes?: LegacyIncomes['incomes'];
 }
 
-interface RefusedShape {
-  label: string;
-  record: unknown;
-}
-
 const HISTORY: StoredShape[] = [
   {
     label:
@@ -496,12 +491,9 @@ const HISTORY: StoredShape[] = [
       { id: 1, amount: 300, at: '2026-03-17T10:00:00.000Z', paidAt: null },
     ],
   },
-];
-
-const REFUSED: RefusedShape[] = [
   {
     label:
-      'a commission rate worth more than the deal, writable before the cap landed',
+      'a commission rate worth more than the deal, writable before the cap landed, carried at that rate',
     record: {
       id: 12,
       brand: 'Approved.rs',
@@ -523,6 +515,10 @@ const REFUSED: RefusedShape[] = [
       archived: false,
       pendingCommissionClaim: null,
     },
+    keeps: { id: 12, brand: 'Approved.rs', status: 'won' },
+    incomes: [
+      { id: 1, amount: 300, at: '2026-03-17T10:00:00.000Z', paidAt: null },
+    ],
   },
 ];
 
@@ -544,10 +540,6 @@ describe('every stored lead shape the system has written', () => {
       expect(legacyIncomesSchema.parse(record).incomes).toEqual(incomes);
     },
   );
-
-  it.each(REFUSED)('$label is refused, not read differently', ({ record }) => {
-    expect(legacyIncomesSchema.safeParse(record).success).toBe(false);
-  });
 
   it('writes none of the retired money fields back', () => {
     for (const { record } of HISTORY) {

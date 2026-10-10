@@ -149,6 +149,16 @@ describe('the opening carry-over', () => {
     expect(await ledgerStore.readBalance()).toBe(173.3);
   });
 
+  it('carries an owed amount above what a reply may type, and lets Lead writes through', async () => {
+    const { leadStore, ledgerStore } = seeded([
+      legacyLead(1, { dealAmount: 20_000_000 }),
+    ]);
+
+    await leadStore.insertLead({ ...submission, brand: 'CarLab' });
+
+    expect(await ledgerStore.readBalance()).toBe(2_000_000);
+  });
+
   it('opens with no Payout when nothing was owed', async () => {
     const { leadStore, ledgerStore } = seeded([
       legacyLead(1, {

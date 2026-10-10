@@ -284,9 +284,10 @@ async function askOperation(
   chatId: number,
   type: OperationType,
   text: string = LEDGER_COPY.prompt[type],
+  replacing?: { chatId: number; messageId: number },
 ): Promise<void> {
   const messageId = await sendForceReplyPrompt(chatId, text);
-  await openOperationPrompt({ chatId, messageId, type });
+  await openOperationPrompt({ chatId, messageId, type }, replacing);
 }
 
 function operationRow(type: OperationType): CallbackRow {
@@ -435,6 +436,7 @@ async function replyWithCard(
 
 type PromptReply = {
   role: Role;
+  authorId: number;
   chatId: number;
   messageId: number;
   replyToMessageId: number;
@@ -558,16 +560,18 @@ async function replyToOperationPrompt(reply: Reply): Promise<boolean> {
   const prompt = await findOperationPrompt(key);
   if (!prompt) return false;
   const parsed = parseOperationReply(reply.text);
-  if (!parsed) {
+  if (!parsed.ok) {
     await askOperation(
       reply.chatId,
       prompt.type,
-      reAskOperationText(prompt.type),
+      reAskOperationText(prompt.type, parsed.reason),
+      key,
     );
     return true;
   }
   const outcome = await answerOperationPrompt(key, {
-    ...parsed,
+    amount: parsed.amount,
+    note: parsed.note,
     by: reply.role,
   });
   if (outcome.ok) {
@@ -576,7 +580,11 @@ async function replyToOperationPrompt(reply: Reply): Promise<boolean> {
       operationRecordedText(outcome.operation, outcome.balance),
       threadedTo(reply.messageId),
     );
-    await sendOperationNotice(outcome.operation, outcome.balance);
+    await sendOperationNotice(
+      outcome.operation,
+      outcome.balance,
+      reply.authorId,
+    );
   } else if (outcome.reason === 'insufficient') {
     await sendMessage(reply.chatId, operationRefusedText(outcome.balance));
   }
@@ -652,9 +660,10 @@ bot.on('message', async (ctx, next) => {
   const repliedTo = ctx.message.reply_to_message;
   if (!repliedTo) return next();
   const role = roleOf(ctx.from?.id);
-  if (!role) return;
+  if (!role || !ctx.from) return;
   await routeReply({
     role,
+    authorId: ctx.from.id,
     chatId: ctx.chat.id,
     messageId: ctx.message.message_id,
     replyToMessageId: repliedTo.message_id,

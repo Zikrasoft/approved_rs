@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { roundMoney, toCents } from './money.ts';
+import { roundMoney } from './money.ts';
 
 const PAID_EPSILON = 0.005;
 export const LEGACY_COMMISSION_PERCENT = 10;
@@ -23,7 +23,7 @@ export function legacyPayoutAmount(amount: number, percent: number): number {
 
 const legacyMoneySchema = z.object({
   statusChangedAt: z.string(),
-  commissionPercent: z.number().nonnegative().max(100).optional(),
+  commissionPercent: z.number().nonnegative().optional(),
   dealAmount: z.number().nonnegative().nullable().default(null),
   paidAmount: z.number().nonnegative().default(0),
   payments: z
@@ -59,18 +59,35 @@ export const legacyIncomesSchema: z.ZodType<LegacyIncomes, unknown> =
     return { percent, incomes: incomesOf(money, percent) };
   });
 
+const MONEY_FIELDS = ['dealAmount', 'paidAmount', 'payments', 'incomes'];
+const recordSchema = z.record(z.string(), z.unknown());
+
+function carriesMoney(entry: unknown): boolean {
+  const record = recordSchema.safeParse(entry);
+  return (
+    record.success && MONEY_FIELDS.some((field) => record.data[field] != null)
+  );
+}
+
 export function legacyOwed(entries: unknown[]): number {
-  const cents = entries.reduce<number>((sum, entry) => {
+  let earned = 0;
+  let paid = 0;
+  for (const entry of entries) {
     const money = legacyIncomesSchema.safeParse(entry);
-    if (!money.success) return sum;
+    if (!money.success) {
+      if (carriesMoney(entry))
+        console.error('[lead-crm] legacy money left out of the opening', {
+          entry,
+          issues: money.error.issues,
+        });
+      continue;
+    }
     const { percent, incomes } = money.data;
-    return incomes
-      .filter((income) => income.paidAt === null)
-      .reduce(
-        (owed, income) =>
-          owed + toCents(legacyPayoutAmount(income.amount, percent)),
-        sum,
-      );
-  }, 0);
-  return cents / 100;
+    for (const income of incomes) {
+      const share = (income.amount * percent) / 100;
+      earned += share;
+      if (income.paidAt !== null) paid += share;
+    }
+  }
+  return Math.max(0, roundMoney(earned - paid));
 }

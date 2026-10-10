@@ -96,11 +96,11 @@ export function createNotifier({
     async sendOperationNotice(
       operation: LedgerOperation,
       balance: number,
+      authorId: number,
     ): Promise<void> {
-      await sendToAll(
-        operation.createdBy === 'owner' ? adminIds : ownerIds,
-        operationNoticeText(operation, balance),
-      );
+      const others = new Set([...ownerIds, ...adminIds]);
+      others.delete(authorId);
+      await sendToAll([...others], operationNoticeText(operation, balance));
     },
 
     async sendFieldChangeToAdmin(

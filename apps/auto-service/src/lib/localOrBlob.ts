@@ -1,17 +1,10 @@
-import { LOCAL_DATA_DIR } from '@podbor/lead-crm';
-
-type FileStorageModule = typeof import('@podbor/lead-crm/storage/file');
-
-let fileStorage: Promise<FileStorageModule> | undefined;
+import { fromLocalFiles } from '@podbor/lead-crm';
 
 export function localOrBlob<T>(
   blob: () => T,
-  local: (file: FileStorageModule, dir: string) => T,
+  local: Parameters<typeof fromLocalFiles<T>>[0],
   defer: (opened: Promise<T>) => T,
 ): T {
-  if (import.meta.env.DEV) {
-    fileStorage ??= import('@podbor/lead-crm/storage/file');
-    return defer(fileStorage.then((file) => local(file, LOCAL_DATA_DIR)));
-  }
+  if (import.meta.env.DEV) return defer(fromLocalFiles(local));
   return blob();
 }

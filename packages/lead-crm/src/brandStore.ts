@@ -42,6 +42,7 @@ export function createBrandStore({
       brand,
       getNotifier,
     }),
+    // TODO: drop beforeWrite, the opening and legacyIncomes.ts once data/ledger.json exists in production.
     beforeWrite: () => ledgerStore.ensureOpened(),
   });
   return { leadStore, ledgerStore };

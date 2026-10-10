@@ -19,9 +19,10 @@ Written after the tests landed (#87, #88, #89), so it describes what is there.
 | Command | `pnpm --filter @podbor/lead-crm test`                                                  |
 | Cost    | seconds, in CI on every push, under the package's 100% coverage gate                   |
 
-Thirteen historical stored shapes — v0 onward, including the field generations
-since retired — plus two shapes whose legacy money must be refused. Each is
-read as a Lead and as the legacy money the ledger's opening carries over. The
+Fifteen historical stored shapes — v0 onward, including the field generations
+since retired and a commission rate over 100% written before the cap landed.
+Each is read as a Lead and as the legacy money the ledger's opening carries
+over. The
 assertion is that a Lead one
 version wrote is still readable by the version deploying now, because the deploy
 filter ships a changed `@podbor/lead-crm` to all three sites at once and a
@@ -33,15 +34,17 @@ schema is built.
 
 Two things it establishes that are worth not relearning:
 
-- **No stored shape fails the read except the ones meant to.** The Lead schema
-  no longer carries money (ADR-0032), and the Lead store never reads the
-  retired income fields. Only the ledger's opening does: while
-  `data/ledger.json` does not exist, `legacyOwed` in `legacyIncomes.ts` sums
-  every unpaid income times its Lead's rate from the raw `data/leads.json`
-  (money stored without a rate is priced at the former default of 10%), and the
-  ledger opens with one Payout, `Перенос со старой системы`, for that sum —
-  none when it is zero. A record whose legacy money cannot be priced — a rate
-  over 100% — is still read as a Lead, and its money is left out of the sum.
+- **No stored shape fails the read.** The Lead schema no longer carries money
+  (ADR-0032), and the Lead store never reads the retired income fields. Only
+  the ledger's opening does: while `data/ledger.json` does not exist,
+  `legacyOwed` in `legacyIncomes.ts` takes every income times its Lead's
+  stored rate, less what was confirmed paid, from the raw `data/leads.json`,
+  totalled across all Leads, rounded to the cent once and never below zero.
+  Money stored without a rate is priced at the former default of 10%, and a
+  rate over 100% is priced as stored, not left out. The ledger opens with one
+  Payout, `Перенос со старой системы`, for that sum — none when it is zero —
+  and no cap on a typed amount applies to it. A record whose money does not
+  parse at all is left out of the sum and logged, never dropped quietly.
 - **Retired fields are dropped on read, and so on the next write.**
   `baseStoredLeadSchema` is not `.strict()`, so `lastRemindedAt` (v0–v3),
   `customerPaidAt` and the old money fields (`dealAmount`, `commissionPercent`,

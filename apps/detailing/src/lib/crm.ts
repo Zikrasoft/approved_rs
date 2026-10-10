@@ -1,7 +1,7 @@
 import {
   createBrandStore,
   deferStorage,
-  LOCAL_DATA_DIR,
+  fromLocalFiles,
   type LeadStorage,
 } from '@podbor/lead-crm';
 import { createVercelBlobStorage } from '@podbor/lead-crm/storage/vercel-blob';
@@ -9,15 +9,11 @@ import { SITE_NAME } from '@/utils/constants';
 
 export const BRAND = SITE_NAME;
 
-let fileStorage:
-  Promise<typeof import('@podbor/lead-crm/storage/file')> | undefined;
-
 const storageFor = (path: string): LeadStorage => {
   if (import.meta.env.DEV) {
-    fileStorage ??= import('@podbor/lead-crm/storage/file');
     return deferStorage(
-      fileStorage.then(({ createFileStorage }) =>
-        createFileStorage({ path, dir: LOCAL_DATA_DIR }),
+      fromLocalFiles(({ createFileStorage }, dir) =>
+        createFileStorage({ path, dir }),
       ),
     );
   }

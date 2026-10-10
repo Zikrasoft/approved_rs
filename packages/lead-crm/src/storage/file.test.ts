@@ -1,4 +1,4 @@
-import { chmod, mkdir, mkdtemp, writeFile } from 'node:fs/promises';
+import { chmod, mkdir, mkdtemp, readdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -67,6 +67,17 @@ describe('createFileStorage', () => {
       StorageConflictError,
     );
     await expect(store.read()).resolves.toMatchObject({ raw: [{ id: 'a' }] });
+  });
+
+  it('creates the file whole, in one step, and leaves no staging file behind', async () => {
+    const store = storage();
+    await Promise.allSettled([
+      store.write([{ id: 'a' }], undefined),
+      store.write([{ id: 'b' }], undefined),
+    ]);
+    const { raw } = await store.read();
+    expect([[{ id: 'a' }], [{ id: 'b' }]]).toContainEqual(raw);
+    expect(await readdir(join(dir, 'data'))).toEqual(['leads.json']);
   });
 
   it('lets any other create failure through', async () => {

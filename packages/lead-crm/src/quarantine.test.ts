@@ -47,6 +47,16 @@ describe('createQuarantine', () => {
     expect(send).toHaveBeenLastCalledWith(1, QUARANTINE_PATH, 'CarLab');
   });
 
+  it('keeps a competing first copy and adds its own on the retry', async () => {
+    const { storage, quarantine, send } = build();
+    storage.failNextWrites(1, () => storage.seed([{ id: 1 }]));
+
+    await quarantine([{ id: 1 }, { id: 2 }]);
+
+    expect(storage.current()).toEqual([{ id: 1 }, { id: 2 }]);
+    expect(send).toHaveBeenCalledWith(1, QUARANTINE_PATH, 'CarLab');
+  });
+
   it('refuses to overwrite a quarantine file that is not a list', async () => {
     const { storage, quarantine } = build();
     storage.seed('not a list');
@@ -67,13 +77,5 @@ describe('createQuarantine', () => {
 
     await expect(quarantine([{ id: 3 }])).resolves.toBeUndefined();
     expect(storage.current()).toEqual([{ id: 3 }]);
-  });
-
-  it('lets a write conflict surface so the caller can retry', async () => {
-    const { storage, quarantine, send } = build();
-    storage.failNextWrites(1);
-
-    await expect(quarantine([{ id: 4 }])).rejects.toThrow();
-    expect(send).not.toHaveBeenCalled();
   });
 });

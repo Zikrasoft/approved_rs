@@ -43,6 +43,7 @@ export type {
   RecordOutcome,
 } from './ledgerStore.ts';
 export { parseOperationReply } from './operationReply.ts';
+export type { OperationRefusal, OperationReply } from './operationReply.ts';
 
 export type { OrderMarkers } from './orderMarkers.ts';
 
@@ -52,6 +53,7 @@ export {
   type LeadStorage,
 } from './storage/types.ts';
 export { deferOrderMarkers, deferStorage } from './storage/deferred.ts';
+export { fromLocalFiles } from './storage/localFiles.ts';
 
 export { createTelegramClient } from './telegram/client.ts';
 export type { TelegramClient } from './telegram/client.ts';

@@ -13,6 +13,10 @@ import {
   type LedgerOperation,
   type OperationType,
 } from '../ledgerStore.ts';
+import {
+  MAX_OPERATION_AMOUNT,
+  type OperationRefusal,
+} from '../operationReply.ts';
 
 export type Role = 'owner' | 'admin';
 
@@ -143,6 +147,7 @@ export const LEDGER_COPY = {
   },
   ack: 'Жду сумму',
   badAmount: '⚠️ Нужна сумма числом.',
+  amountLimits: `⚠️ Сумма — от 0,01 до ${formatMoney(MAX_OPERATION_AMOUNT)}, не больше двух знаков после запятой.`,
 } as const;
 
 const BALANCE_LABELS: Record<Role, string> = {
@@ -188,8 +193,16 @@ export function buildBalance(
   };
 }
 
-export function reAskOperationText(type: OperationType): string {
-  return `${LEDGER_COPY.badAmount}\n\n${LEDGER_COPY.prompt[type]}`;
+const RE_ASK: Record<OperationRefusal, string> = {
+  no_number: LEDGER_COPY.badAmount,
+  bad_amount: LEDGER_COPY.amountLimits,
+};
+
+export function reAskOperationText(
+  type: OperationType,
+  reason: OperationRefusal,
+): string {
+  return `${RE_ASK[reason]}\n\n${LEDGER_COPY.prompt[type]}`;
 }
 
 function signedMoney({ type, amount }: LedgerOperation): string {

@@ -243,6 +243,23 @@ describe('operation prompts', () => {
     expect(await ledger.findOperationPrompt(PROMPT)).toBeDefined();
   });
 
+  it('closes the prompt it replaces in the same write', async () => {
+    await ledger.openOperationPrompt({ ...PROMPT, type: 'payout' });
+    const other = { ...PROMPT, messageId: 9 };
+    await ledger.openOperationPrompt({ ...other, type: 'payout' });
+
+    await ledger.openOperationPrompt(
+      { ...PROMPT, messageId: 8, type: 'payout' },
+      PROMPT,
+    );
+
+    expect(await ledger.findOperationPrompt(PROMPT)).toBeUndefined();
+    expect(await ledger.findOperationPrompt(other)).toBeDefined();
+    expect(
+      await ledger.findOperationPrompt({ ...PROMPT, messageId: 8 }),
+    ).toBeDefined();
+  });
+
   it('tells prompts apart by chat and message', async () => {
     await ledger.openOperationPrompt({ ...PROMPT, type: 'payout' });
     expect(

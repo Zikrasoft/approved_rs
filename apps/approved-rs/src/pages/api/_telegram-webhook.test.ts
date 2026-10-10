@@ -55,8 +55,8 @@ import {
   searchLeads,
   readBalance,
   readOperations,
-  recordOperation,
 } from '@/lib/store';
+import { ledgerStore } from '@/lib/crm';
 
 const api = recordBotApi();
 vi.stubGlobal('fetch', api.fetch);
@@ -804,8 +804,16 @@ describe('POST /api/telegram-webhook', () => {
       [ADMIN_ID, 'admin'],
       [OWNER_ID, 'owner'],
     ] as const)('shows %i the %s Balance with ➕/➖', async (who, role) => {
-      await recordOperation({ type: 'payout', amount: 80, by: 'owner' });
-      await recordOperation({ type: 'settlement', amount: 30, by: 'admin' });
+      await ledgerStore.recordOperation({
+        type: 'payout',
+        amount: 80,
+        by: 'owner',
+      });
+      await ledgerStore.recordOperation({
+        type: 'settlement',
+        amount: 30,
+        by: 'admin',
+      });
       await tap('menu:debt', who, { chatId: who });
       expect(sentTo(who)).toEqual([view(buildBalance(role, 50))]);
     });
@@ -863,7 +871,11 @@ describe('POST /api/telegram-webhook', () => {
     });
 
     it('takes a debit from the admin and tells the owner', async () => {
-      await recordOperation({ type: 'payout', amount: 80, by: 'owner' });
+      await ledgerStore.recordOperation({
+        type: 'payout',
+        amount: 80,
+        by: 'owner',
+      });
       await ask(ADMIN_ID, 'settlement');
       await answerAs(ADMIN_ID, '30');
       expect(await readBalance()).toBe(50);
@@ -890,7 +902,11 @@ describe('POST /api/telegram-webhook', () => {
     });
 
     it('refuses a debit above the Balance, naming the Balance, and stores nothing', async () => {
-      await recordOperation({ type: 'payout', amount: 10, by: 'owner' });
+      await ledgerStore.recordOperation({
+        type: 'payout',
+        amount: 10,
+        by: 'owner',
+      });
       await ask(OWNER_ID, 'settlement');
       await answerAs(OWNER_ID, '30');
       expect(textsTo(OWNER_ID)).toEqual([operationRefusedText(10)]);
@@ -904,10 +920,46 @@ describe('POST /api/telegram-webhook', () => {
       expect(forceReplies()).toEqual([
         expect.objectContaining({
           chat_id: OWNER_ID,
-          text: reAskOperationText('settlement'),
+          text: reAskOperationText('settlement', 'no_number'),
         }),
       ]);
       expect(await readOperations()).toEqual([]);
+    });
+
+    it.each(['12.345', '0', '1000001'])(
+      'asks again naming the limits when %j is not an amount it can take',
+      async (text) => {
+        await ask(OWNER_ID, 'payout');
+        await answerAs(OWNER_ID, text);
+        expect(forceReplies()).toEqual([
+          expect.objectContaining({
+            chat_id: OWNER_ID,
+            text: reAskOperationText('payout', 'bad_amount'),
+          }),
+        ]);
+        expect(await readOperations()).toEqual([]);
+      },
+    );
+
+    it('retires the prompt it asks again for, so only the new one takes an answer', async () => {
+      await ask(OWNER_ID, 'payout');
+      api.respond(
+        'sendMessage',
+        (payload: Record<string, unknown>): BotApiResponse => ({
+          ok: true,
+          result: {
+            message_id: PROMPT_ID + 1,
+            date: 0,
+            chat: { id: Number(payload.chat_id), type: 'private' },
+          },
+        }),
+      );
+      await answerAs(OWNER_ID, 'сорок');
+      await answerAs(OWNER_ID, '40');
+      expect(await readOperations()).toEqual([]);
+
+      await message('40', OWNER_ID, { replyTo: PROMPT_ID + 1 });
+      expect(await readBalance()).toBe(40);
     });
 
     it('records one operation per prompt', async () => {

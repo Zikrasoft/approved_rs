@@ -735,8 +735,14 @@ describe('operation messages', () => {
   });
 
   it('re-asks with the prompt of the same operation', () => {
-    expect(reAskOperationText('settlement')).toBe(
+    expect(reAskOperationText('settlement', 'no_number')).toBe(
       `${LEDGER_COPY.badAmount}\n\n${LEDGER_COPY.prompt.settlement}`,
+    );
+  });
+
+  it('re-asks an unacceptable amount naming the limits', () => {
+    expect(reAskOperationText('payout', 'bad_amount')).toBe(
+      `⚠️ Сумма — от 0,01 до ${money(1_000_000)}, не больше двух знаков после запятой.\n\n${LEDGER_COPY.prompt.payout}`,
     );
   });
 
@@ -763,17 +769,26 @@ describe('sendOperationNotice', () => {
   };
 
   it("tells the admin of the owner's operation", async () => {
-    await sendOperationNotice({ ...operation, createdBy: 'owner' }, 40);
+    await sendOperationNotice({ ...operation, createdBy: 'owner' }, 40, 111);
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(body.chat_id).toBe(222);
     expect(body.text).toBe(`💶 Владелец: +${money(40)} · баланс ${money(40)}`);
   });
 
-  it("tells the owner of the admin's operation", async () => {
-    await sendOperationNotice({ ...operation, createdBy: 'admin' }, 40);
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.chat_id).toBe(111);
+  it('tells everyone on both sides except the author', async () => {
+    const { sendOperationNotice: notify } = createNotifier({
+      client,
+      formatter,
+      groupId: '-1009876543210',
+      ownerIds: [111, 112],
+      adminIds: [222, 223],
+    });
+    await notify({ ...operation, createdBy: 'admin' }, 40, 222);
+    const chats = mockFetch.mock.calls.map(
+      ([, init]) => JSON.parse(init.body).chat_id,
+    );
+    expect(chats.sort()).toEqual([111, 112, 223]);
   });
 });
 
