@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { format } from 'date-fns';
 import { legacyIncomesSchema } from './legacyIncomes.ts';
 import { toCents } from './money.ts';
+import { LEDGER_TIME_ZONE } from './ledgerStore.ts';
 import { channelLabel } from './channelLabels.ts';
 import { isClosed } from './schema.ts';
 import type {
@@ -13,11 +14,8 @@ import type {
   StoredLead,
 } from './schema.ts';
 import type { StoredLeadSchema } from './schema.ts';
-import {
-  StorageConflictError,
-  storedRecordsSchema,
-  type LeadStorage,
-} from './storage/types.ts';
+import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
+import { retryOnConflict } from './storage/retry.ts';
 import { LEADS_PATH } from './quarantine.ts';
 import {
   correction,
@@ -43,7 +41,6 @@ import {
   type SummaryMark,
 } from './ledger.ts';
 
-const MAX_RETRIES = 6;
 export const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
 
 export const MAX_LIST_ROWS = 20;
@@ -103,7 +100,7 @@ export interface MonthlySummary {
   leads: StoredLead[];
 }
 
-export const SUMMARY_TIME_ZONE = 'Europe/Belgrade';
+export const SUMMARY_TIME_ZONE = LEDGER_TIME_ZONE;
 
 function summaryMonth(now: Date): string | null {
   const [year, month, day] = new Intl.DateTimeFormat('en-CA', {
@@ -137,15 +134,6 @@ export interface LeadStoreOptions {
   storage: LeadStorage;
   schema: StoredLeadSchema;
   quarantine?: (entries: unknown[]) => Promise<void>;
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function backoffDelay(attempt: number): number {
-  const base = 25 * 2 ** attempt;
-  return base + Math.random() * base;
 }
 
 export function isPlaceholderContact(contact: string): boolean {
@@ -363,11 +351,7 @@ export function createLeadStore({
   async function updateRecords(
     mutate: (records: StoreRecords, idFloor: number) => Partial<StoreRecords>,
   ): Promise<StoreRecords> {
-    let lastErr = new StorageConflictError(
-      'updateLeads: conflict retry limit exceeded',
-    );
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      if (attempt > 0) await sleep(backoffDelay(attempt - 1));
+    return retryOnConflict(async () => {
       const { unreadable, version, ...current } = await readSnapshot();
       const mutated = {
         ...current,
@@ -388,29 +372,20 @@ export function createLeadStore({
         ),
       };
       await copyToQuarantine(unreadable);
-      try {
-        await storage.write(
-          [
-            ...next.leads,
-            ...next.ledger.payouts,
-            ...next.ledger.settlements,
-            ...next.summaries,
-            ...next.digests,
-            ...next.settlePrompts,
-            ...unreadable,
-          ],
-          version,
-        );
-        return next;
-      } catch (err) {
-        if (err instanceof StorageConflictError) {
-          lastErr = err;
-          continue;
-        }
-        throw err;
-      }
-    }
-    throw lastErr;
+      await storage.write(
+        [
+          ...next.leads,
+          ...next.ledger.payouts,
+          ...next.ledger.settlements,
+          ...next.summaries,
+          ...next.digests,
+          ...next.settlePrompts,
+          ...unreadable,
+        ],
+        version,
+      );
+      return next;
+    }, 'updateLeads: conflict retry limit exceeded');
   }
 
   async function updateLeads(

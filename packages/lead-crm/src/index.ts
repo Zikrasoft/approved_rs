@@ -34,6 +34,22 @@ export type {
   PayoutInput,
 } from './store.ts';
 export { isSettled, ledgerBalance } from './ledger.ts';
+export {
+  balanceOf,
+  operationSums,
+  LEDGER_PATH,
+  LEDGER_TIME_ZONE,
+} from './ledgerStore.ts';
+export type {
+  FlowSums,
+  LedgerOperation,
+  LedgerStore,
+  OperationInput,
+  OperationPrompt,
+  OperationType,
+  RecordOutcome,
+} from './ledgerStore.ts';
+export { parseOperationReply } from './operationReply.ts';
 export type {
   Ledger,
   LedgerAuthor,
@@ -60,8 +76,14 @@ export type { TelegramClient } from './telegram/client.ts';
 export {
   buildDeleteConfirm,
   buildOpenList,
+  buildBalance,
   buildMenu,
   buildToPay,
+  LEDGER_COPY,
+  operationNoticeText,
+  operationRecordedText,
+  operationRefusedText,
+  reAskOperationText,
   buildRemindPicker,
   buildSearchResults,
   buildStats,

@@ -1,4 +1,13 @@
-import { leadStore } from './crm';
+import { leadStore, ledgerStore } from './crm';
+
+export const {
+  readOperations,
+  readBalance,
+  recordOperation,
+  openOperationPrompt,
+  findOperationPrompt,
+  answerOperationPrompt,
+} = ledgerStore;
 
 export const {
   updateLeads,
@@ -42,11 +51,14 @@ export {
   canPostpone,
   isSettled,
   postponePatch,
+  parseOperationReply,
   MAX_LIST_ROWS,
 } from '@podbor/lead-crm';
 
 export type {
   LeadStatus,
+  LedgerOperation,
+  OperationType,
   Payout,
   Settlement,
   PendingPrompt,

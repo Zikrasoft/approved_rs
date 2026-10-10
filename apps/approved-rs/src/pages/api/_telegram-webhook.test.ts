@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { APIContext } from 'astro';
 import { addDays, format } from 'date-fns';
-import { LEADS_PATH } from '@podbor/lead-crm';
+import { LEADS_PATH, LEDGER_PATH } from '@podbor/lead-crm';
 import {
   createMemoryStorage,
   recordBotApi,
@@ -40,7 +40,13 @@ import {
   buildLeadDetail,
   buildOpenList,
   buildMenu,
+  buildBalance,
   buildToPay,
+  formatMoney,
+  LEDGER_COPY,
+  operationRecordedText,
+  operationRefusedText,
+  reAskOperationText,
   buildRemindPicker,
   buildSearchResults,
   buildStats,
@@ -58,6 +64,9 @@ import {
   readLedger,
   readLeads,
   searchLeads,
+  readBalance,
+  readOperations,
+  recordOperation,
 } from '@/lib/store';
 
 const api = recordBotApi();
@@ -83,6 +92,12 @@ function leadsStorage(): MemoryStorage {
   if (!memory.storages.has(LEADS_PATH))
     memory.storages.set(LEADS_PATH, createMemoryStorage());
   return memory.storages.get(LEADS_PATH)!;
+}
+
+function ledgerStorage(): MemoryStorage {
+  if (!memory.storages.has(LEDGER_PATH))
+    memory.storages.set(LEDGER_PATH, createMemoryStorage());
+  return memory.storages.get(LEDGER_PATH)!;
 }
 
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
@@ -251,6 +266,7 @@ describe('POST /api/telegram-webhook', () => {
       }),
     );
     seed(makeLead());
+    ledgerStorage().seed({ operations: [], prompts: [] });
   });
 
   it('rejects a request without the secret token header', async () => {
@@ -1027,35 +1043,139 @@ describe('POST /api/telegram-webhook', () => {
     });
   });
 
-  describe('menu:debt — To pay, both roles', () => {
+  describe('menu:debt — the Balance, both roles', () => {
     it.each([
-      [ADMIN_ID, settleKeyboard(50)],
-      [OWNER_ID, undefined],
-    ])(
-      'shows all Payouts minus all Settlements to %i, [💸 Paid] to the admin only',
-      async (who, keyboard) => {
-        leadsStorage().seed([
-          makeLead({ status: 'won' }),
-          {
-            type: 'payout',
-            id: 9,
-            amount: 80,
-            createdAt: PAID_AT,
-            createdBy: 'owner',
-          },
-          {
-            type: 'settlement',
-            id: 9,
-            amount: 30,
-            createdAt: PAID_AT,
-            createdBy: 'admin',
-          },
+      [ADMIN_ID, 'admin'],
+      [OWNER_ID, 'owner'],
+    ] as const)('shows %i the %s Balance with ➕/➖', async (who, role) => {
+      await recordOperation({ type: 'payout', amount: 80, by: 'owner' });
+      await recordOperation({ type: 'settlement', amount: 30, by: 'admin' });
+      await tap('menu:debt', who, { chatId: who });
+      expect(sentTo(who)).toEqual([view(buildBalance(role, 50))]);
+    });
+  });
+
+  describe('Balance operations — ➕ Зачислить / ➖ Списать in the private chat', () => {
+    const answerAs = (who: number, text: string) =>
+      message(text, who, { replyTo: PROMPT_ID });
+
+    async function ask(who: number, type: 'payout' | 'settlement') {
+      await tap(`ledger:${type}`, who, { id: 'cb-ledger', chatId: who });
+      api.calls.length = 0;
+    }
+
+    it.each([OWNER_ID, ADMIN_ID])(
+      'asks %i for the amount by a force reply',
+      async (who) => {
+        const writes = leadsStorage().writeAttempts();
+        await tap('ledger:payout', who, { id: 'cb-ledger', chatId: who });
+        expect(forceReplies()).toEqual([
+          expect.objectContaining({
+            chat_id: who,
+            text: LEDGER_COPY.prompt.payout,
+          }),
         ]);
-        await tap('menu:debt', who, { chatId: who });
-        expect(textsTo(who)).toEqual([buildToPay(50)]);
-        expect(sentTo(who)[0]?.reply_markup).toEqual(keyboard);
+        expect(answers()).toEqual([
+          { callback_query_id: 'cb-ledger', text: LEDGER_COPY.ack },
+        ]);
+        expect(leadsStorage().writeAttempts()).toBe(writes);
       },
     );
+
+    it('stores the owner credit at once, confirms with the Balance and tells the admin', async () => {
+      await ask(OWNER_ID, 'payout');
+      await answerAs(OWNER_ID, '40 Иван сервис');
+      const [operation] = await readOperations();
+      expect(operation).toMatchObject({
+        type: 'payout',
+        amount: 40,
+        note: 'Иван сервис',
+        createdBy: 'owner',
+      });
+      expect(sentTo(OWNER_ID)).toEqual([
+        expect.objectContaining({
+          text: operationRecordedText(operation!, 40),
+          reply_parameters: {
+            message_id: 2,
+            allow_sending_without_reply: true,
+          },
+        }),
+      ]);
+      expect(textsTo(ADMIN_ID)).toEqual([
+        `💶 Владелец: +${formatMoney(40)} · Иван сервис · баланс ${formatMoney(40)}`,
+      ]);
+    });
+
+    it('takes a debit from the admin and tells the owner', async () => {
+      await recordOperation({ type: 'payout', amount: 80, by: 'owner' });
+      await ask(ADMIN_ID, 'settlement');
+      await answerAs(ADMIN_ID, '30');
+      expect(await readBalance()).toBe(50);
+      expect(textsTo(ADMIN_ID)).toEqual([
+        `✅ −${formatMoney(30)} · баланс ${formatMoney(50)}`,
+      ]);
+      expect(textsTo(OWNER_ID)).toEqual([
+        `💶 Админ: −${formatMoney(30)} · баланс ${formatMoney(50)}`,
+      ]);
+    });
+
+    it('lets the owner debit and the admin credit too', async () => {
+      await ask(ADMIN_ID, 'payout');
+      await answerAs(ADMIN_ID, '15 забыл');
+      await ask(OWNER_ID, 'settlement');
+      await answerAs(OWNER_ID, '15');
+      expect(
+        (await readOperations()).map((o) => [o.type, o.createdBy]),
+      ).toEqual([
+        ['payout', 'admin'],
+        ['settlement', 'owner'],
+      ]);
+      expect(await readBalance()).toBe(0);
+    });
+
+    it('refuses a debit above the Balance, naming the Balance, and stores nothing', async () => {
+      await recordOperation({ type: 'payout', amount: 10, by: 'owner' });
+      await ask(OWNER_ID, 'settlement');
+      await answerAs(OWNER_ID, '30');
+      expect(textsTo(OWNER_ID)).toEqual([operationRefusedText(10)]);
+      expect(textsTo(ADMIN_ID)).toEqual([]);
+      expect(await readOperations()).toHaveLength(1);
+    });
+
+    it('asks again when the reply has no amount', async () => {
+      await ask(OWNER_ID, 'settlement');
+      await answerAs(OWNER_ID, 'Иван сервис');
+      expect(forceReplies()).toEqual([
+        expect.objectContaining({
+          chat_id: OWNER_ID,
+          text: reAskOperationText('settlement'),
+        }),
+      ]);
+      expect(await readOperations()).toEqual([]);
+    });
+
+    it('records one operation per prompt', async () => {
+      await ask(OWNER_ID, 'payout');
+      await answerAs(OWNER_ID, '40');
+      await answerAs(OWNER_ID, '40');
+      expect(await readBalance()).toBe(40);
+      expect(textsTo(ADMIN_ID)).toHaveLength(1);
+    });
+
+    it('ignores a stranger answering the prompt', async () => {
+      await ask(OWNER_ID, 'payout');
+      await message('40', OTHER_ID, { chatId: OWNER_ID, replyTo: PROMPT_ID });
+      expect(await readOperations()).toEqual([]);
+      expect(api.calls).toEqual([]);
+    });
+
+    it('shows the new Balance in the menu', async () => {
+      await ask(OWNER_ID, 'payout');
+      await answerAs(OWNER_ID, '40,5 €');
+      api.calls.length = 0;
+      await message('/menu', OWNER_ID);
+      expect(sentTo(OWNER_ID)).toEqual([view(buildMenu('owner', 40.5))]);
+    });
   });
 
   it('acks an unrecognized callback without touching any lead', async () => {
@@ -1132,6 +1252,8 @@ describe('POST /api/telegram-webhook', () => {
       ['open:5', 'any'],
       ['menu:stats', 'admin'],
       ['menu:debt', 'any'],
+      ['ledger:payout', 'any'],
+      ['ledger:settlement', 'any'],
     ];
 
     it('has one row per sample, each matched first by its own row and role', () => {
@@ -1189,7 +1311,7 @@ describe('POST /api/telegram-webhook', () => {
       [ADMIN_ID, 'admin'],
     ] as const)('shows %i the %s menu', async (who, role) => {
       await message('/start', who);
-      expect(sentTo(who)).toEqual([view(buildMenu(role))]);
+      expect(sentTo(who)).toEqual([view(buildMenu(role, 0))]);
     });
 
     it('denies /start from anyone else', async () => {
@@ -1206,7 +1328,7 @@ describe('POST /api/telegram-webhook', () => {
 
     it('/start lead_<id> for an unknown lead falls back to the menu', async () => {
       await message('/start lead_404', OWNER_ID);
-      expect(sentTo(OWNER_ID)).toEqual([view(buildMenu('owner'))]);
+      expect(sentTo(OWNER_ID)).toEqual([view(buildMenu('owner', 0))]);
     });
 
     it('/start lead_<id> denies an unauthorized sender even with a valid payload', async () => {
@@ -1221,7 +1343,7 @@ describe('POST /api/telegram-webhook', () => {
       [ADMIN_ID, 'admin'],
     ] as const)('shows %i the %s menu', async (who, role) => {
       await message('/menu', who);
-      expect(sentTo(who)).toEqual([view(buildMenu(role))]);
+      expect(sentTo(who)).toEqual([view(buildMenu(role, 0))]);
     });
 
     it('denies an unauthorized sender', async () => {

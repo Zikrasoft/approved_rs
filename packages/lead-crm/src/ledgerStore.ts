@@ -1,0 +1,233 @@
+import { z } from 'zod';
+import { roundMoney, toCents } from './money.ts';
+import { retryOnConflict } from './storage/retry.ts';
+import type { LeadStorage } from './storage/types.ts';
+
+export const LEDGER_PATH = 'data/ledger.json';
+export const LEDGER_TIME_ZONE = 'Europe/Belgrade';
+export const MAX_OPERATION_AMOUNT = 1_000_000;
+export const MAX_OPERATION_NOTE = 500;
+const PROMPT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+export const ledgerAuthorSchema = z.enum(['owner', 'admin']);
+export type LedgerAuthor = z.infer<typeof ledgerAuthorSchema>;
+
+const operationTypeSchema = z.enum(['payout', 'settlement']);
+export type OperationType = z.infer<typeof operationTypeSchema>;
+
+export const operationAmountSchema = z
+  .number()
+  .transform(roundMoney)
+  .pipe(z.number().positive().max(MAX_OPERATION_AMOUNT));
+
+const operationSchema = z
+  .object({
+    id: z.number().int().positive(),
+    type: operationTypeSchema,
+    amount: operationAmountSchema,
+    note: z.string().max(MAX_OPERATION_NOTE),
+    createdAt: z.string(),
+    createdBy: ledgerAuthorSchema,
+  })
+  .strict();
+export type LedgerOperation = z.infer<typeof operationSchema>;
+
+const promptSchema = z
+  .object({
+    chatId: z.number().int(),
+    messageId: z.number().int(),
+    type: operationTypeSchema,
+    createdAt: z.string(),
+  })
+  .strict();
+export type OperationPrompt = z.infer<typeof promptSchema>;
+export type PromptKey = Pick<OperationPrompt, 'chatId' | 'messageId'>;
+
+const ledgerFileSchema = z
+  .object({
+    operations: z.array(operationSchema),
+    prompts: z.array(promptSchema),
+  })
+  .strict();
+type LedgerFile = z.infer<typeof ledgerFileSchema>;
+
+export interface OperationInput {
+  type: OperationType;
+  amount: number;
+  note?: string;
+  by: LedgerAuthor;
+}
+
+export type RecordOutcome =
+  | { ok: true; operation: LedgerOperation; balance: number }
+  | { ok: false; reason: 'insufficient'; balance: number }
+  | { ok: false; reason: 'no_prompt' };
+
+export interface LedgerStoreOptions {
+  storage: LeadStorage;
+  opening?: () => Promise<OperationInput[]>;
+}
+
+export function balanceOf(operations: LedgerOperation[]): number {
+  const cents = operations.reduce(
+    (sum, op) => sum + (op.type === 'payout' ? 1 : -1) * toCents(op.amount),
+    0,
+  );
+  return cents / 100;
+}
+
+function monthOf(iso: string | Date): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: LEDGER_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+  }).format(new Date(iso));
+}
+
+export interface FlowSums {
+  credited: number;
+  debited: number;
+}
+
+function sumsOf(operations: LedgerOperation[]): FlowSums {
+  const total = (type: OperationType) =>
+    operations
+      .filter((op) => op.type === type)
+      .reduce((cents, op) => cents + toCents(op.amount), 0) / 100;
+  return { credited: total('payout'), debited: total('settlement') };
+}
+
+export function operationSums(
+  operations: LedgerOperation[],
+  now: Date,
+): { month: FlowSums; total: FlowSums } {
+  const month = monthOf(now);
+  return {
+    month: sumsOf(operations.filter((op) => monthOf(op.createdAt) === month)),
+    total: sumsOf(operations),
+  };
+}
+
+const promptIs =
+  ({ chatId, messageId }: PromptKey) =>
+  (p: OperationPrompt) =>
+    p.chatId === chatId && p.messageId === messageId;
+
+function appended(
+  file: LedgerFile,
+  { type, amount, note = '', by }: OperationInput,
+): { next?: LedgerFile; result: RecordOutcome } {
+  const balance = balanceOf(file.operations);
+  const operation = operationSchema.parse({
+    id: file.operations.reduce((max, op) => Math.max(max, op.id), 0) + 1,
+    type,
+    amount,
+    note: note.trim().slice(0, MAX_OPERATION_NOTE),
+    createdAt: new Date().toISOString(),
+    createdBy: by,
+  });
+  if (type === 'settlement' && toCents(operation.amount) > toCents(balance))
+    return { result: { ok: false, reason: 'insufficient', balance } };
+  const operations = [...file.operations, operation];
+  return {
+    next: { ...file, operations },
+    result: { ok: true, operation, balance: balanceOf(operations) },
+  };
+}
+
+export function createLedgerStore({ storage, opening }: LedgerStoreOptions) {
+  async function openingFile(): Promise<LedgerFile> {
+    let file: LedgerFile = { operations: [], prompts: [] };
+    for (const input of (await opening?.()) ?? []) {
+      file = appended(file, input).next ?? file;
+    }
+    return file;
+  }
+
+  async function read(): Promise<{
+    file: LedgerFile;
+    version: string | undefined;
+  }> {
+    const { raw, version } = await storage.read();
+    if (raw === undefined) return { file: await openingFile(), version };
+    const parsed = ledgerFileSchema.safeParse(raw);
+    if (!parsed.success) {
+      console.error('[lead-crm] the ledger file does not parse', {
+        path: LEDGER_PATH,
+        issues: parsed.error.issues,
+      });
+      throw new Error(
+        '[lead-crm] the ledger file does not parse — refusing to overwrite',
+      );
+    }
+    return { file: parsed.data, version };
+  }
+
+  function update<T>(
+    mutate: (file: LedgerFile) => { next?: LedgerFile; result: T },
+  ): Promise<T> {
+    return retryOnConflict(async () => {
+      const { file, version } = await read();
+      const { next, result } = mutate(file);
+      // TODO: the first write (no blob, no version) is unconditional, so two racing first writers can lose one; make it create-only.
+      if (next) await storage.write(next, version);
+      return result;
+    }, 'ledger: conflict retry limit exceeded');
+  }
+
+  async function readOperations(): Promise<LedgerOperation[]> {
+    return (await read()).file.operations;
+  }
+
+  return {
+    readOperations,
+
+    async readBalance(): Promise<number> {
+      return balanceOf(await readOperations());
+    },
+
+    recordOperation(input: OperationInput): Promise<RecordOutcome> {
+      return update((file) => appended(file, input));
+    },
+
+    openOperationPrompt(prompt: PromptKey & { type: OperationType }) {
+      return update((file) => {
+        const now = Date.now();
+        const added = { ...prompt, createdAt: new Date(now).toISOString() };
+        const fresh = file.prompts.filter(
+          (p) => now - Date.parse(p.createdAt) < PROMPT_TTL_MS,
+        );
+        return {
+          next: { ...file, prompts: [...fresh, added] },
+          result: added,
+        };
+      });
+    },
+
+    async findOperationPrompt(
+      key: PromptKey,
+    ): Promise<OperationPrompt | undefined> {
+      return (await read()).file.prompts.find(promptIs(key));
+    },
+
+    answerOperationPrompt(
+      key: PromptKey,
+      answer: Omit<OperationInput, 'type'>,
+    ): Promise<RecordOutcome> {
+      return update((file) => {
+        const prompt = file.prompts.find(promptIs(key));
+        if (!prompt)
+          return { result: { ok: false, reason: 'no_prompt' } as const };
+        const { next, result } = appended(file, {
+          ...answer,
+          type: prompt.type,
+        });
+        if (!next) return { result };
+        const prompts = next.prompts.filter((p) => p !== prompt);
+        return { next: { ...next, prompts }, result };
+      });
+    },
+  };
+}
+
+export type LedgerStore = ReturnType<typeof createLedgerStore>;

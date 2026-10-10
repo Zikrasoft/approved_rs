@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createBrandStore } from './brandStore.ts';
 import { createBrandBot } from './brandBot.ts';
 import { LEADS_PATH, QUARANTINE_PATH } from './quarantine.ts';
+import { LEDGER_PATH } from './ledgerStore.ts';
 import { recordBotApi } from './testing/botApi.ts';
 import {
   createMemoryStorage,
@@ -49,7 +50,11 @@ afterEach(() => {
 describe('createBrandStore', () => {
   it('builds without any Telegram env', () => {
     expect(() => brandStore()).not.toThrow();
-    expect(Object.keys(storages)).toEqual([LEADS_PATH, QUARANTINE_PATH]);
+    expect(Object.keys(storages)).toEqual([
+      LEADS_PATH,
+      QUARANTINE_PATH,
+      LEDGER_PATH,
+    ]);
   });
 
   it('reaches the notifier only once a record is quarantined', async () => {

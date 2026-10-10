@@ -25,6 +25,12 @@ import {
   TELEGRAM_TEXT_LIMIT,
   buildSearchResults,
   buildMenu,
+  buildBalance,
+  LEDGER_COPY,
+  operationNoticeText,
+  operationRecordedText,
+  operationRefusedText,
+  reAskOperationText,
   buildOpenList,
   buildStats,
   buildDeleteConfirm,
@@ -59,6 +65,7 @@ const {
   unpinLeadCard,
   sendPayoutNotificationToAdmin,
   sendSettlementToOwner,
+  sendOperationNotice,
   sendMonthlySummary,
   sendQuarantinedLeadsToAdmin,
   sendStatusChangeToAdmin,
@@ -932,24 +939,124 @@ describe('buildSearchResults', () => {
 
 describe('buildMenu', () => {
   const data = (role: 'owner' | 'admin') =>
-    buildMenu(role)
+    buildMenu(role, 80)
       .reply_markup.inline_keyboard.flat()
       .map((b) => `${b.text} ${b.callback_data}`);
 
-  it('gives the owner only Open and To pay, and says search finds lost Leads', () => {
+  it('shows the owner what they owe, with credit, debit and Open, and says search finds lost Leads', () => {
     expect(data('owner')).toEqual([
+      '➕ Зачислить ledger:payout',
+      '➖ Списать ledger:settlement',
       '📂 Открытые menu:open',
-      '💶 К оплате menu:debt',
     ]);
-    expect(buildMenu('owner').text).toContain('найдёт и отказы');
+    const { text } = buildMenu('owner', 80);
+    expect(text).toContain(`<b>💶 Мой долг: ${money(80)}</b>`);
+    expect(text).toContain('найдёт и отказы');
   });
 
-  it('adds statistics for the admin only', () => {
+  it('shows the admin what they are owed, plus statistics', () => {
     expect(data('admin')).toEqual([
+      '➕ Зачислить ledger:payout',
+      '➖ Списать ledger:settlement',
       '📂 Открытые menu:open',
-      '💶 К оплате menu:debt',
       '📊 Статистика menu:stats',
     ]);
+    expect(buildMenu('admin', 80).text).toContain(
+      `<b>💶 Мне должны: ${money(80)}</b>`,
+    );
+  });
+});
+
+describe('buildBalance', () => {
+  it('names the Balance per role and offers credit and debit', () => {
+    expect(buildBalance('owner', 12.5)).toEqual({
+      text: `<b>💶 Мой долг: ${money(12.5)}</b>`,
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: '➕ Зачислить', callback_data: 'ledger:payout' },
+            { text: '➖ Списать', callback_data: 'ledger:settlement' },
+          ],
+        ],
+      },
+    });
+    expect(buildBalance('admin', 0).text).toBe(
+      `<b>💶 Мне должны: ${money(0)}</b>`,
+    );
+  });
+});
+
+describe('operation messages', () => {
+  const payout = {
+    id: 1,
+    type: 'payout' as const,
+    amount: 40,
+    note: 'Иван <сервис>',
+    createdAt: '2026-10-10T00:00:00.000Z',
+    createdBy: 'owner' as const,
+  };
+  const settlement = {
+    ...payout,
+    type: 'settlement' as const,
+    note: '',
+    createdBy: 'admin' as const,
+  };
+
+  it('confirms with the signed amount and the new Balance', () => {
+    expect(operationRecordedText(payout, 80)).toBe(
+      `✅ +${money(40)} · баланс ${money(80)}`,
+    );
+    expect(operationRecordedText(settlement, 40)).toBe(
+      `✅ −${money(40)} · баланс ${money(40)}`,
+    );
+  });
+
+  it('refuses a debit naming the Balance', () => {
+    expect(operationRefusedText(30)).toBe(
+      `⚠️ Списать можно не больше баланса: ${money(30)}`,
+    );
+  });
+
+  it('re-asks with the prompt of the same operation', () => {
+    expect(reAskOperationText('settlement')).toBe(
+      `${LEDGER_COPY.badAmount}\n\n${LEDGER_COPY.prompt.settlement}`,
+    );
+  });
+
+  it('notifies naming the author, the escaped note and the Balance', () => {
+    expect(operationNoticeText(payout, 80)).toBe(
+      `💶 Владелец: +${money(40)} · Иван &lt;сервис&gt; · баланс ${money(80)}`,
+    );
+    expect(operationNoticeText(settlement, 40)).toBe(
+      `💶 Админ: −${money(40)} · баланс ${money(40)}`,
+    );
+  });
+});
+
+describe('sendOperationNotice', () => {
+  beforeEach(() => mockFetchOk());
+  afterEach(() => mockFetch.mockReset());
+
+  const operation = {
+    id: 1,
+    type: 'payout' as const,
+    amount: 40,
+    note: '',
+    createdAt: '2026-10-10T00:00:00.000Z',
+  };
+
+  it("tells the admin of the owner's operation", async () => {
+    await sendOperationNotice({ ...operation, createdBy: 'owner' }, 40);
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(body.chat_id).toBe(222);
+    expect(body.text).toBe(`💶 Владелец: +${money(40)} · баланс ${money(40)}`);
+  });
+
+  it("tells the owner of the admin's operation", async () => {
+    await sendOperationNotice({ ...operation, createdBy: 'admin' }, 40);
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.chat_id).toBe(111);
   });
 });
 
@@ -960,7 +1067,8 @@ describe('buildHelp', () => {
     expect(text).toContain('Ответь на карточку');
     expect(text).not.toContain('Голосовое');
     expect(text).toContain('⏰ Отложить');
-    expect(text).toContain('📂 Открытые, 💶 К оплате');
+    expect(text).toContain('💶 Мой долг. ➕ Зачислить');
+    expect(text).toContain('➖ Списать');
     expect(text).not.toContain('Статистика');
     expect(text).not.toContain('Архив');
   });
@@ -969,7 +1077,7 @@ describe('buildHelp', () => {
     const text = buildHelp('admin');
     expect(text).toContain('📊 Статистика');
     expect(text).toContain('Удалить навсегда');
-    expect(text).toContain('💸 Оплачено');
+    expect(text).toContain('💶 Мне должны. ➖ Списать');
     expect(text).not.toContain('Архив');
   });
 });

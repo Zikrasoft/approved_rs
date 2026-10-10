@@ -9,10 +9,14 @@ import { createVercelBlobStorage } from '@podbor/lead-crm/storage/vercel-blob';
 
 export const BRAND = APPROVED.name;
 
+let fileStorage:
+  Promise<typeof import('@podbor/lead-crm/storage/file')> | undefined;
+
 const storageFor = (path: string): LeadStorage => {
   if (import.meta.env.DEV) {
+    fileStorage ??= import('@podbor/lead-crm/storage/file');
     return deferStorage(
-      import('@podbor/lead-crm/storage/file').then(({ createFileStorage }) =>
+      fileStorage.then(({ createFileStorage }) =>
         createFileStorage({ path, dir: LOCAL_DATA_DIR }),
       ),
     );
@@ -20,7 +24,7 @@ const storageFor = (path: string): LeadStorage => {
   return createVercelBlobStorage({ path });
 };
 
-export const { leadStore } = createBrandStore({
+export const { leadStore, ledgerStore } = createBrandStore({
   brand: BRAND,
   storageFor,
   getNotifier: () => import('./crmBot'),

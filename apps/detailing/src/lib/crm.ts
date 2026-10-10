@@ -9,10 +9,14 @@ import { SITE_NAME } from '@/utils/constants';
 
 export const BRAND = SITE_NAME;
 
+let fileStorage:
+  Promise<typeof import('@podbor/lead-crm/storage/file')> | undefined;
+
 const storageFor = (path: string): LeadStorage => {
   if (import.meta.env.DEV) {
+    fileStorage ??= import('@podbor/lead-crm/storage/file');
     return deferStorage(
-      import('@podbor/lead-crm/storage/file').then(({ createFileStorage }) =>
+      fileStorage.then(({ createFileStorage }) =>
         createFileStorage({ path, dir: LOCAL_DATA_DIR }),
       ),
     );

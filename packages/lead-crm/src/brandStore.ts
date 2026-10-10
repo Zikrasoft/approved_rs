@@ -6,6 +6,7 @@ import {
   type QuarantineOptions,
 } from './quarantine.ts';
 import { createLeadStore } from './store.ts';
+import { createLedgerStore, LEDGER_PATH } from './ledgerStore.ts';
 import type { LeadStorage } from './storage/types.ts';
 
 export interface BrandStoreOptions {
@@ -28,5 +29,6 @@ export function createBrandStore({
       getNotifier,
     }),
   });
-  return { leadStore };
+  const ledgerStore = createLedgerStore({ storage: storageFor(LEDGER_PATH) });
+  return { leadStore, ledgerStore };
 }

@@ -2,10 +2,9 @@ import { z } from 'zod';
 import { legacyPayoutAmount, type LegacyIncomes } from './legacyIncomes.ts';
 import { roundMoney } from './money.ts';
 import type { StoredLead } from './schema.ts';
+import { ledgerAuthorSchema, type LedgerAuthor } from './ledgerStore.ts';
 
-export const LEDGER_AUTHORS = ['owner', 'admin'] as const;
-const ledgerAuthorSchema = z.enum(LEDGER_AUTHORS);
-export type LedgerAuthor = z.infer<typeof ledgerAuthorSchema>;
+export type { LedgerAuthor };
 
 const payoutEditSchema = z.object({
   before: z.number().nonnegative(),

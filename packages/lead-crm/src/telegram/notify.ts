@@ -1,4 +1,5 @@
 import type { Payout, Settlement } from '../ledger.ts';
+import type { LedgerOperation } from '../ledgerStore.ts';
 import { isClosed, type StoredLead } from '../schema.ts';
 import type { Digest, MonthlySummary } from '../store.ts';
 import {
@@ -8,6 +9,7 @@ import {
 } from './client.ts';
 import {
   monthlySummaryText,
+  operationNoticeText,
   payoutNotificationText,
   quarantinedLeadsText,
   settleKeyboard,
@@ -109,6 +111,16 @@ export function createNotifier({
       payout: Payout,
     ): Promise<void> {
       await sendToAll(adminIds, payoutNotificationText(lead, payout));
+    },
+
+    async sendOperationNotice(
+      operation: LedgerOperation,
+      balance: number,
+    ): Promise<void> {
+      await sendToAll(
+        operation.createdBy === 'owner' ? adminIds : ownerIds,
+        operationNoticeText(operation, balance),
+      );
     },
 
     async sendSettlementToOwner(

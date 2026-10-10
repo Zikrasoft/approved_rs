@@ -21,7 +21,13 @@ import {
   safeEditMessage,
   sendPayoutNotificationToAdmin,
   sendSettlementToOwner,
+  sendOperationNotice,
   sendMessage,
+  buildBalance,
+  LEDGER_COPY,
+  operationRecordedText,
+  operationRefusedText,
+  reAskOperationText,
   buildToPay,
   buildSearchResults,
   buildMenu,
@@ -75,6 +81,12 @@ import {
   isSettled,
   readLeads,
   appendNote,
+  readBalance,
+  openOperationPrompt,
+  findOperationPrompt,
+  answerOperationPrompt,
+  parseOperationReply,
+  type OperationType,
   type LeadStatus,
   type PendingPrompt,
   type Payout,
@@ -349,12 +361,30 @@ async function askPayoutFix(ctx: Ctx, payoutId: number): Promise<void> {
   });
 }
 
-async function showToPay(ctx: Ctx): Promise<void> {
-  const balance = await getBalance();
-  await sendMessage(ctx.chatId, buildToPay(balance), {
-    reply_markup: ctx.role === 'admin' ? settleKeyboard(balance) : undefined,
-  });
+async function showBalance(ctx: Ctx): Promise<void> {
+  const { text, reply_markup } = buildBalance(ctx.role, await readBalance());
+  await sendMessage(ctx.chatId, text, { reply_markup });
   await ack(ctx);
+}
+
+async function askOperation(
+  chatId: number,
+  type: OperationType,
+  text: string = LEDGER_COPY.prompt[type],
+): Promise<void> {
+  const messageId = await sendForceReplyPrompt(chatId, text);
+  await openOperationPrompt({ chatId, messageId, type });
+}
+
+function operationRow(type: OperationType): CallbackRow {
+  return [
+    new RegExp(`^ledger:${type}$`),
+    'any',
+    async (ctx) => {
+      await askOperation(ctx.chatId, type);
+      await answerCallback(ctx.cbId, LEDGER_COPY.ack);
+    },
+  ];
 }
 
 const leadOf = async (leadId: number | null) =>
@@ -476,7 +506,9 @@ export const CALLBACKS: CallbackRow[] = [
       await ack(ctx);
     },
   ],
-  [/^menu:debt$/, 'any', showToPay],
+  [/^menu:debt$/, 'any', showBalance],
+  operationRow('payout'),
+  operationRow('settlement'),
 ];
 
 function callbackCtx(cb: {
@@ -732,7 +764,38 @@ async function replyToSettlementPrompt(reply: Reply): Promise<boolean> {
   return true;
 }
 
+async function replyToOperationPrompt(reply: Reply): Promise<boolean> {
+  const key = { chatId: reply.chatId, messageId: reply.replyToMessageId };
+  const prompt = await findOperationPrompt(key);
+  if (!prompt) return false;
+  const parsed = parseOperationReply(reply.text);
+  if (!parsed) {
+    await askOperation(
+      reply.chatId,
+      prompt.type,
+      reAskOperationText(prompt.type),
+    );
+    return true;
+  }
+  const outcome = await answerOperationPrompt(key, {
+    ...parsed,
+    by: reply.role,
+  });
+  if (outcome.ok) {
+    await sendMessage(
+      reply.chatId,
+      operationRecordedText(outcome.operation, outcome.balance),
+      threadedTo(reply.messageId),
+    );
+    await sendOperationNotice(outcome.operation, outcome.balance);
+  } else if (outcome.reason === 'insufficient') {
+    await sendMessage(reply.chatId, operationRefusedText(outcome.balance));
+  }
+  return true;
+}
+
 const REPLY_ROUTES = [
+  replyToOperationPrompt,
   replyToPrompt,
   replyToPayoutPrompt,
   replyToSettlementPrompt,
@@ -744,7 +807,7 @@ async function routeReply(reply: Reply): Promise<void> {
 }
 
 async function sendMenuMessage(chatId: number, role: Role): Promise<void> {
-  const menu = buildMenu(role);
+  const menu = buildMenu(role, await readBalance());
   await sendMessage(chatId, menu.text, { reply_markup: menu.reply_markup });
 }
 

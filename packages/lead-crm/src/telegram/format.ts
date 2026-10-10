@@ -9,7 +9,12 @@ import {
   type Digest,
   type MonthlySummary,
 } from '../store.ts';
-import type { LedgerAuthor, Payout, Settlement } from '../ledger.ts';
+import type { Payout, Settlement } from '../ledger.ts';
+import type {
+  LedgerAuthor,
+  LedgerOperation,
+  OperationType,
+} from '../ledgerStore.ts';
 
 export type Role = 'owner' | 'admin';
 
@@ -131,20 +136,93 @@ export function buildOpenList(leads: StoredLead[]): {
   };
 }
 
-export function buildMenu(role: Role): {
+export const LEDGER_COPY = {
+  credit: '➕ Зачислить',
+  debit: '➖ Списать',
+  prompt: {
+    payout: '➕ Сколько зачислить (в евро)?\n\nНапример: 40 или 40 Иван сервис',
+    settlement: '➖ Сколько списать (в евро)?\n\nНапример: 40 или 40 перевод',
+  },
+  ack: 'Жду сумму',
+  badAmount: '⚠️ Нужна сумма числом.',
+} as const;
+
+const BALANCE_LABELS: Record<Role, string> = {
+  owner: '💶 Мой долг',
+  admin: '💶 Мне должны',
+};
+
+const LEDGER_ROW: Btn[] = [
+  { text: LEDGER_COPY.credit, callback_data: 'ledger:payout' },
+  { text: LEDGER_COPY.debit, callback_data: 'ledger:settlement' },
+];
+
+function balanceLine(role: Role, balance: number): string {
+  return `<b>${BALANCE_LABELS[role]}: ${formatMoney(balance)}</b>`;
+}
+
+export function buildMenu(
+  role: Role,
+  balance: number,
+): {
   text: string;
   reply_markup: Keyboard;
 } {
   const rows: Btn[][] = [
+    LEDGER_ROW,
     [{ text: '📂 Открытые', callback_data: 'menu:open' }],
-    [{ text: '💶 К оплате', callback_data: 'menu:debt' }],
   ];
   if (role === 'admin')
     rows.push([{ text: '📊 Статистика', callback_data: 'menu:stats' }]);
   return {
-    text: '📋 Заявки\n\nЧтобы найти заявку, пришли имя, телефон или #номер — найдёт и отказы.',
+    text: `${balanceLine(role, balance)}\n\n📋 Чтобы найти заявку, пришли имя, телефон или #номер — найдёт и отказы.`,
     reply_markup: { inline_keyboard: rows },
   };
+}
+
+export function buildBalance(
+  role: Role,
+  balance: number,
+): { text: string; reply_markup: Keyboard } {
+  return {
+    text: balanceLine(role, balance),
+    reply_markup: { inline_keyboard: [LEDGER_ROW] },
+  };
+}
+
+export function reAskOperationText(type: OperationType): string {
+  return `${LEDGER_COPY.badAmount}\n\n${LEDGER_COPY.prompt[type]}`;
+}
+
+function signedMoney({ type, amount }: LedgerOperation): string {
+  return `${type === 'payout' ? '+' : '−'}${formatMoney(amount)}`;
+}
+
+export function operationRecordedText(
+  operation: LedgerOperation,
+  balance: number,
+): string {
+  return `✅ ${signedMoney(operation)} · баланс ${formatMoney(balance)}`;
+}
+
+export function operationRefusedText(balance: number): string {
+  return `⚠️ Списать можно не больше баланса: ${formatMoney(balance)}`;
+}
+
+const OPERATION_AUTHORS: Record<LedgerAuthor, string> = {
+  owner: 'Владелец',
+  admin: 'Админ',
+};
+
+export function operationNoticeText(
+  operation: LedgerOperation,
+  balance: number,
+): string {
+  return [
+    `💶 ${OPERATION_AUTHORS[operation.createdBy]}: ${signedMoney(operation)}`,
+    ...(operation.note ? [escapeHtml(operation.note)] : []),
+    `баланс ${formatMoney(balance)}`,
+  ].join(' · ');
 }
 
 export function buildToPay(balance: number): string {
@@ -574,7 +652,8 @@ export function createFormatter({
           '📂 Открыть в боте — вся заявка: ⏰ Отложить до даты (в этот день вернётся в открытые) и 💬 ответить посетителю через бота.',
           '',
           '<b>Меню</b>',
-          '📂 Открытые, 💶 К оплате. Найти заявку — пришли имя, телефон или номер (найдёт и отказы).',
+          'Сверху — 💶 Мой долг. ➕ Зачислить — добавить, сколько должен; ➖ Списать — убрать, что уже отправил. Бот спросит сумму: ответь 40 или 40 Иван сервис. Ошибся — исправь обратной операцией.',
+          '📂 Открытые. Найти заявку — пришли имя, телефон или номер (найдёт и отказы).',
         ].join('\n');
       }
       return [
@@ -583,8 +662,8 @@ export function createFormatter({
         'Заявки ведёт владелец: ✅ Сделка, ❌ Отказ, ⏳ В работе на карточке в группе. О каждой выплате тебе приходит уведомление.',
         '',
         '<b>Меню</b>',
-        '📂 Открытые, 💶 К оплате, 📊 Статистика. Найти заявку — пришли имя, телефон или номер (найдёт и отказы).',
-        'Получил оплату — в 💶 К оплате жми 💸 Оплачено или ✏️ Другая сумма, владельцу придёт уведомление.',
+        'Сверху — 💶 Мне должны. ➖ Списать — когда деньги пришли, ➕ Зачислить — если владелец что-то забыл. Бот спросит сумму: ответь 40 или 40 перевод. О каждой операции владельца тебе придёт уведомление.',
+        '📂 Открытые, 📊 Статистика. Найти заявку — пришли имя, телефон или номер (найдёт и отказы).',
         '',
         '<b>Удаление</b>',
         '❌ Удалить навсегда — только у тебя. Спросит подтверждение и стирает заявку без возврата.',
