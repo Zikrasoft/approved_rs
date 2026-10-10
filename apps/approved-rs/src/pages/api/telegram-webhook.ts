@@ -22,14 +22,12 @@ import {
   sendPayoutNotificationToAdmin,
   sendCommissionClaimToAdmin,
   sendCommissionResultToOwner,
-  sendFieldChangeToAdmin,
   sendMessage,
   buildToPay,
-  formatDealsList,
   buildSearchResults,
   buildMenu,
   buildHelp,
-  buildLeadList,
+  buildOpenList,
   buildStats,
   formatDateRu,
   buildLeadDetail,
@@ -38,24 +36,19 @@ import {
   editLeadDetailMessage,
   OWNER_IDS,
   ADMIN_IDS,
-  EDIT_COPY,
   REPLY_COPY,
   PAYOUT_COPY,
   payoutRecordedMessage,
   OUTCOME_COPY,
   escapeHtml,
   canAddIncome,
-  LEAD_STATUS_ACTIONS,
   type Role,
-  type EditField,
 } from '@/lib/telegram';
 import { captureClientFor } from '@/lib/captureBot';
 import {
   getLead,
   setStatus,
   touchLead,
-  archiveLead,
-  unarchiveLead,
   deleteLead,
   confirmCommissionPayment,
   claimCommission,
@@ -185,7 +178,6 @@ type Handler = (ctx: Ctx, ...groups: string[]) => Promise<void>;
 type LeadHandler = (ctx: Ctx, id: number, ...rest: string[]) => Promise<void>;
 type CallbackRow = [RegExp, Role | 'any', Handler];
 type PromptKind = PendingPrompt['kind'];
-type OperatorEditField = Exclude<EditField, 'service'>;
 
 function onLead(handler: LeadHandler): Handler {
   return (ctx, id, ...rest) => handler(ctx, Number(id), ...rest);
@@ -280,16 +272,6 @@ async function changeStatus(
 async function markInWork(ctx: Ctx, id: number): Promise<void> {
   await touchLead(id);
   await answerCallback(ctx.cbId, OUTCOME_COPY.workAck);
-}
-
-async function archive(ctx: Ctx, id: number): Promise<void> {
-  await refreshBothSurfaces(ctx, await archiveLead(id));
-  await answerCallback(ctx.cbId, 'Архивировано');
-}
-
-async function unarchive(ctx: Ctx, id: number): Promise<void> {
-  await refreshBothSurfaces(ctx, await unarchiveLead(id));
-  await answerCallback(ctx.cbId, 'Восстановлено');
 }
 
 async function openRemindPicker(ctx: Ctx, id: number): Promise<void> {
@@ -393,11 +375,8 @@ async function settlePay(ctx: Ctx, id: number, paid: boolean): Promise<void> {
   await answerCallback(ctx.cbId);
 }
 
-async function listLeads(ctx: Ctx, statuses: string): Promise<void> {
-  const { text, reply_markup } = buildLeadList(
-    await readLeads(),
-    statuses.split('+') as LeadStatus[],
-  );
+async function listOpen(ctx: Ctx): Promise<void> {
+  const { text, reply_markup } = buildOpenList(await readLeads());
   await sendMessage(ctx.chatId, text, { reply_markup });
   await ack(ctx);
 }
@@ -411,32 +390,17 @@ async function openLead(ctx: Ctx, id: number): Promise<void> {
   await ack(ctx);
 }
 
-function statusRow(key: LeadStatus, role: Role | 'any'): CallbackRow {
+function statusRow(key: LeadStatus): CallbackRow {
   return [
     new RegExp(`^st:(\\d+):${key}$`),
-    role,
+    'owner',
     onLead((ctx, id) => changeStatus(ctx, id, key)),
   ];
 }
 
-function editRow(field: OperatorEditField): CallbackRow {
-  return [
-    new RegExp(`^edit:(\\d+):${field}$`),
-    'any',
-    onLead((ctx, id) =>
-      startLeadPrompt(ctx, id, {
-        prompt: EDIT_COPY.prompt(field),
-        kind: `edit_${field}`,
-        ackText: EDIT_COPY.ack,
-      }),
-    ),
-  ];
-}
-
 export const CALLBACKS: CallbackRow[] = [
-  ...LEAD_STATUS_ACTIONS.map(({ key }) =>
-    statusRow(key, key === 'won' || key === 'lost' ? 'owner' : 'any'),
-  ),
+  statusRow('won'),
+  statusRow('lost'),
   [
     /^won:(\d+)$/,
     'owner',
@@ -448,8 +412,6 @@ export const CALLBACKS: CallbackRow[] = [
     onLead((ctx, id) => changeStatus(ctx, id, 'lost', false)),
   ],
   [/^work:(\d+)$/, 'owner', onLead(markInWork)],
-  [/^arch:(\d+)$/, 'any', onLead(archive)],
-  [/^unarch:(\d+)$/, 'any', onLead(unarchive)],
   [/^postpone:(\d+)$/, 'owner', onLead(openRemindPicker)],
   [/^remindpick:(\d+):(\d+)$/, 'owner', onLead(remindIn)],
   [
@@ -482,9 +444,6 @@ export const CALLBACKS: CallbackRow[] = [
     'admin',
     onLead((ctx, id) => settlePay(ctx, id, false)),
   ],
-  editRow('name'),
-  editRow('contact'),
-  editRow('comment'),
   [
     /^reply:(\d+)$/,
     'any',
@@ -496,17 +455,13 @@ export const CALLBACKS: CallbackRow[] = [
       }),
     ),
   ],
-  [
-    /^list:(new|negotiations|in_progress|won|lost|postponed|in_progress\+postponed)$/,
-    'any',
-    listLeads,
-  ],
+  [/^menu:open$/, 'any', listOpen],
   [/^open:(\d+)$/, 'any', onLead(openLead)],
   [
     /^menu:stats$/,
-    'any',
+    'admin',
     async (ctx) => {
-      await sendMessage(ctx.chatId, buildStats(await readLeads(), ctx.role));
+      await sendMessage(ctx.chatId, buildStats(await readLeads()));
       await ack(ctx);
     },
   ],
@@ -515,14 +470,6 @@ export const CALLBACKS: CallbackRow[] = [
     'any',
     async (ctx) => {
       await sendMessage(ctx.chatId, buildToPay(await getBalance()));
-      await ack(ctx);
-    },
-  ],
-  [
-    /^menu:deals$/,
-    'admin',
-    async (ctx) => {
-      await sendMessage(ctx.chatId, formatDealsList(await readLeads()));
       await ack(ctx);
     },
   ],
@@ -702,33 +649,6 @@ async function replyVisitor({
   }
 }
 
-function replyEdit(field: OperatorEditField): PromptHandler {
-  return async ({ chatId, replyToMessageId, text }) => {
-    const value = text.trim();
-    if ((field === 'name' || field === 'contact') && !value) {
-      await sendMessage(
-        chatId,
-        '⚠️ Значение не может быть пустым. Попробуйте ещё раз.',
-      );
-      return;
-    }
-    let before: string | null | undefined;
-    const updated = await resolvePendingPrompt(
-      chatId,
-      replyToMessageId,
-      (lead) => {
-        before = lead[field];
-        return { [field]: value || null } as Partial<StoredLead>;
-      },
-    );
-    if (updated) {
-      await ensureLeadCard(updated);
-      await sendFieldChangeToAdmin(updated, field, before);
-      await replyWithCard(chatId, updated, '✅ Обновлено');
-    }
-  };
-}
-
 function threadedTo(messageId: number) {
   return {
     reply_parameters: {
@@ -780,9 +700,6 @@ const PROMPT_REPLIES: Record<PromptKind, PromptHandler> = {
   add_income: replyAddIncome,
   postpone: replyPostpone,
   reply_visitor: replyVisitor,
-  edit_name: replyEdit('name'),
-  edit_contact: replyEdit('contact'),
-  edit_comment: replyEdit('comment'),
   correct_payout: replyCorrectPayout,
 };
 

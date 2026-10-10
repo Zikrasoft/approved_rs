@@ -22,7 +22,8 @@ export async function GET({ request }: APIContext): Promise<Response> {
     return new Response(null, { status: 401 });
   }
 
-  const due = await getDuePostponed();
+  const now = new Date();
+  const due = await getDuePostponed(now);
   let remindedPostponed = 0;
   for (const lead of due) {
     try {
@@ -38,7 +39,7 @@ export async function GET({ request }: APIContext): Promise<Response> {
     }
   }
 
-  const expired = await expireGhostLeads(new Date());
+  const expired = await expireGhostLeads(now);
   for (const lead of expired) {
     try {
       await afterStatusChange(lead, { notice: false });

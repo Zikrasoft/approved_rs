@@ -57,15 +57,13 @@ export type { TelegramClient } from './telegram/client.ts';
 export {
   buildDeleteConfirm,
   canAddIncome,
-  buildLeadList,
+  buildOpenList,
   buildMenu,
   buildToPay,
   buildRemindPicker,
   buildSearchResults,
   buildStats,
-  buildStatusKeyboard,
   createFormatter,
-  EDIT_COPY,
   EDIT_FIELD_LABELS,
   REFERRAL_NOTE,
   REPLY_COPY,
@@ -74,17 +72,13 @@ export {
   OUTCOME_COPY,
   escapeHtml,
   formatDateRu,
-  formatDealsList,
   formatMoney,
-  statusLabel,
-  LEAD_STATUS_ACTIONS,
 } from './telegram/format.ts';
 export type {
   Btn,
   EditField,
   FieldChangeAuthor,
   Keyboard,
-  LeadStatusKey,
   Role,
 } from './telegram/format.ts';
 

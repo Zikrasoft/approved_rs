@@ -1,34 +1,20 @@
 import { z } from 'zod';
 import { incomeCommission, roundMoney, PAID_EPSILON } from './money.ts';
 
-export const LEAD_STATUSES = [
-  'new',
-  'negotiations',
-  'in_progress',
-  'won',
-  'lost',
-  'postponed',
-] as const;
+export const LEAD_STATUSES = ['open', 'won', 'lost', 'postponed'] as const;
 const leadStatusSchema = z.enum(LEAD_STATUSES);
 export type LeadStatus = z.infer<typeof leadStatusSchema>;
 
-export const POSTPONABLE_STATUSES = ['negotiations', 'in_progress'] as const;
-const postponableStatusSchema = z.enum(POSTPONABLE_STATUSES);
-export type PostponableStatus = z.infer<typeof postponableStatusSchema>;
-
-export function postponableStatus(
-  status: LeadStatus,
-): PostponableStatus | null {
-  const parsed = postponableStatusSchema.safeParse(status);
-  return parsed.success ? parsed.data : null;
-}
+const storedStatusSchema = z.enum([
+  ...LEAD_STATUSES,
+  'new',
+  'negotiations',
+  'in_progress',
+]);
 
 export const PROMPT_KINDS = [
   'deal_amount',
   'add_income',
-  'edit_name',
-  'edit_contact',
-  'edit_comment',
   'postpone',
   'reply_visitor',
   'correct_payout',
@@ -103,7 +89,7 @@ const baseStoredLeadSchema = z.object({
   visitorId: z.string().nullable().optional(),
   locale: z.string(),
   kind: z.enum(['lead', 'call_click']).optional(),
-  status: leadStatusSchema.default('new'),
+  status: storedStatusSchema.default('open'),
   dealAmount: z.number().nonnegative().nullable().default(null),
   commissionPercent: z.number().nonnegative().max(MAX_COMMISSION_PERCENT),
   paidAmount: z.number().nonnegative().default(0),
@@ -118,16 +104,34 @@ const baseStoredLeadSchema = z.object({
   capturePrompt: capturePromptSchema.nullable().default(null).catch(null),
   telegramId: z.number().int().nullable().default(null).catch(null),
   referredBy: z.enum(REFERRERS).nullable().default(null).catch(null),
-  archived: z.boolean().default(false),
+  archived: z.boolean().optional(),
   pendingCommissionClaim: pendingCommissionClaimSchema.nullable().default(null),
   remindAt: z.string().nullable().default(null),
-  postponedFrom: postponableStatusSchema.nullable().default(null),
 });
 
-export type StoredLead = z.infer<typeof baseStoredLeadSchema>;
+type StoredShape = z.infer<typeof baseStoredLeadSchema>;
+
+export type StoredLead = Omit<StoredShape, 'archived' | 'status'> & {
+  status: LeadStatus;
+};
 
 export function isClosed(lead: Pick<StoredLead, 'status'>): boolean {
   return lead.status === 'won' || lead.status === 'lost';
+}
+
+function withFourStatuses({
+  archived,
+  status,
+  ...lead
+}: StoredShape): StoredLead {
+  const advanced = status === 'negotiations' || status === 'in_progress';
+  const current = leadStatusSchema.catch('open').parse(status);
+  return {
+    ...lead,
+    status: archived && !isClosed({ status: current }) ? 'lost' : current,
+    lastActivityAt:
+      lead.lastActivityAt ?? (advanced ? lead.statusChangedAt : null),
+  };
 }
 
 function migratedIncomes(lead: StoredLead): Income[] {
@@ -221,5 +225,5 @@ export function createLeadSchema({
         .max(MAX_COMMISSION_PERCENT)
         .default(defaultCommissionPercent),
     })
-    .transform(withDerivedMoney);
+    .transform((lead) => withDerivedMoney(withFourStatuses(lead)));
 }

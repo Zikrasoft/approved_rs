@@ -889,8 +889,7 @@ describe('abandoning the dialog', () => {
     expect(stored()[0]).toMatchObject({
       contact: 'tg://user?id=777',
       service: 'vehicle-sourcing',
-      status: 'new',
-      archived: false,
+      status: 'open',
     });
     expect(cards()).toHaveLength(1);
   });
@@ -912,13 +911,13 @@ describe('an operator editing the same Lead mid-dialog', () => {
     await begin();
     editLead(1, {
       name: 'Иван Петрович',
-      pendingPrompt: { chatId: 111, messageId: 555, kind: 'edit_name' },
+      pendingPrompt: { chatId: 111, messageId: 555, kind: 'reply_visitor' },
     });
 
     await say('BMW X5');
 
     expect(stored()[0].name).toBe('Иван Петрович');
-    expect(stored()[0].pendingPrompt?.kind).toBe('edit_name');
+    expect(stored()[0].pendingPrompt?.kind).toBe('reply_visitor');
     expect(stored()[0].comment).toContain('Ищет: BMW X5');
     expect(stored()[0].capturePrompt?.step).toBe('budget');
   });
@@ -1205,12 +1204,12 @@ describe('free text outside the dialog', () => {
     expect(lastSent()).toEqual([42, 'GREETING_ru\n\nMENU']);
   });
 
-  it('opens a new enquiry when the only Lead is archived', async () => {
+  it('opens a new enquiry when the only Lead is lost', async () => {
     await begin();
     await say('BMW X5');
     await say('20 000');
     await say('SKIP');
-    editLead(1, { archived: true });
+    editLead(1, { status: 'lost' });
 
     await say('я вернулся');
 

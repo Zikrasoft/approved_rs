@@ -7,7 +7,7 @@ import {
   unpaidIncomes,
 } from './money.ts';
 import { channelLabel } from './channelLabels.ts';
-import { postponableStatus } from './schema.ts';
+import { isClosed } from './schema.ts';
 import type {
   CapturePrompt,
   Referrer,
@@ -87,10 +87,6 @@ function backoffDelay(attempt: number): number {
   return base + Math.random() * base;
 }
 
-function todayISODate(): string {
-  return format(new Date(), 'yyyy-MM-dd');
-}
-
 export function isPlaceholderContact(contact: string): boolean {
   return contact === '' || contact === '—';
 }
@@ -101,12 +97,15 @@ function isPhoneContact(contact: string): boolean {
 
 export const GHOST_LEAD_RETENTION_MS = 24 * 60 * 60 * 1000;
 
+function untouched(lead: StoredLead): boolean {
+  return lead.status === 'open' && lead.lastActivityAt == null;
+}
+
 function isGhostLead(lead: StoredLead, now: Date): boolean {
   return (
     lead.kind === 'call_click' &&
     isPlaceholderContact(lead.contact) &&
-    lead.status === 'new' &&
-    !lead.archived &&
+    untouched(lead) &&
     now.getTime() - new Date(lead.createdAt).getTime() >=
       GHOST_LEAD_RETENTION_MS
   );
@@ -118,14 +117,7 @@ function newestOpen(
   matches: (lead: StoredLead) => boolean,
 ): StoredLead | undefined {
   return leads
-    .filter(
-      (l) =>
-        l.brand === brand &&
-        !l.archived &&
-        l.status !== 'won' &&
-        l.status !== 'lost' &&
-        matches(l),
-    )
+    .filter((l) => l.brand === brand && !isClosed(l) && matches(l))
     .sort((a, b) => a.id - b.id)
     .at(-1);
 }
@@ -149,7 +141,7 @@ export function appendNote(
 }
 
 export function canPostpone(lead: StoredLead): boolean {
-  return postponableStatus(lead.status) !== null;
+  return lead.status === 'open';
 }
 
 export function postponePatch(
@@ -159,7 +151,6 @@ export function postponePatch(
 ): Partial<StoredLead> {
   return {
     ...statusPatch('postponed'),
-    postponedFrom: postponableStatus(lead.status),
     remindAt,
     comment: appendNote(lead.comment, note),
   };
@@ -172,12 +163,8 @@ export function statusPatch(
   return { status: to, statusChangedAt: at.toISOString() };
 }
 
-export function resumePatch(lead: StoredLead): Partial<StoredLead> {
-  return {
-    ...statusPatch(lead.postponedFrom ?? 'in_progress'),
-    postponedFrom: null,
-    remindAt: null,
-  };
+export function resumePatch(): Partial<StoredLead> {
+  return { ...statusPatch('open'), remindAt: null };
 }
 
 export function wonPatch(
@@ -499,8 +486,7 @@ export function createLeadStore({
               (l) =>
                 l.visitorId === data.visitorId &&
                 l.brand === data.brand &&
-                l.status === 'new' &&
-                !l.archived &&
+                untouched(l) &&
                 now - new Date(l.createdAt).getTime() <
                   VISITOR_MERGE_WINDOW_MS &&
                 (data.telegramId == null || isPlaceholderContact(l.contact)),
@@ -693,18 +679,10 @@ export function createLeadStore({
       );
     },
 
-    archiveLead(id: number): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({ ...l, archived: true }));
-    },
-
-    unarchiveLead(id: number): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({ ...l, archived: false }));
-    },
-
     resumeLead(id: number): Promise<StoredLead | undefined> {
       return updateOneIfStatus(id, 'postponed', (l) => ({
         ...l,
-        ...resumePatch(l),
+        ...resumePatch(),
       }));
     },
 
@@ -798,33 +776,27 @@ export function createLeadStore({
         .slice(0, limit);
     },
 
-    async getDuePostponed(): Promise<StoredLead[]> {
-      const today = todayISODate();
+    async getDuePostponed(now: Date = new Date()): Promise<StoredLead[]> {
+      const today = format(now, 'yyyy-MM-dd');
       const leads = await readLeads();
       return leads.filter(
         (l) =>
-          l.status === 'postponed' &&
-          !l.archived &&
-          l.remindAt != null &&
-          l.remindAt <= today,
+          l.status === 'postponed' && l.remindAt != null && l.remindAt <= today,
       );
     },
 
     async expireGhostLeads(now: Date): Promise<StoredLead[]> {
-      const statusChangedAt = now.toISOString();
-      const expired = (l: StoredLead) =>
-        l.archived &&
-        l.status === 'lost' &&
-        l.statusChangedAt === statusChangedAt;
       if (!(await readLeads()).some((l) => isGhostLead(l, now))) return [];
-      const next = await updateLeads((leads) =>
-        leads.map((l) =>
-          isGhostLead(l, now)
-            ? { ...l, ...statusPatch('lost', now), archived: true }
-            : l,
-        ),
-      );
-      return next.filter(expired);
+      let expiredIds = new Set<number>();
+      const next = await updateLeads((leads) => {
+        expiredIds = new Set(
+          leads.filter((l) => isGhostLead(l, now)).map((l) => l.id),
+        );
+        return leads.map((l) =>
+          expiredIds.has(l.id) ? { ...l, ...statusPatch('lost', now) } : l,
+        );
+      });
+      return next.filter((l) => expiredIds.has(l.id));
     },
   };
 }
