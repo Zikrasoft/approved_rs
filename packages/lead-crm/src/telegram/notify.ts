@@ -1,5 +1,6 @@
 import type { Payout, Settlement } from '../ledger.ts';
 import { isClosed, type StoredLead } from '../schema.ts';
+import type { MonthlySummary } from '../store.ts';
 import {
   isMessageGone,
   type SendExtra,
@@ -7,8 +8,10 @@ import {
 } from './client.ts';
 import {
   dealNotificationText,
+  monthlySummaryText,
   payoutNotificationText,
   quarantinedLeadsText,
+  settleKeyboard,
   settlementText,
   statusChangeText,
   type EditField,
@@ -122,6 +125,12 @@ export function createNotifier({
       balance: number,
     ): Promise<void> {
       await sendToAll(ownerIds, settlementText(settlement, balance));
+    },
+
+    async sendMonthlySummary(summary: MonthlySummary): Promise<void> {
+      await client.sendMessage(groupId, monthlySummaryText(summary), {
+        reply_markup: settleKeyboard(summary.balance),
+      });
     },
 
     async sendFieldChangeToAdmin(

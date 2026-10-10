@@ -27,6 +27,7 @@ import {
   nextLedgerId,
   payoutSchema,
   settlementSchema,
+  summaryMarkSchema,
   withMigratedIncomes,
   type Draft,
   type DraftPrompt,
@@ -36,6 +37,7 @@ import {
   type PayoutCorrection,
   type RecordPrompt,
   type Settlement,
+  type SummaryMark,
 } from './ledger.ts';
 
 const MAX_RETRIES = 6;
@@ -90,6 +92,26 @@ interface StoreRecords {
   leads: StoredLead[];
   ledger: Ledger;
   drafts: Draft[];
+  summaries: SummaryMark[];
+}
+
+export interface MonthlySummary {
+  month: string;
+  since: string | null;
+  balance: number;
+  payouts: Payout[];
+  leads: StoredLead[];
+}
+
+export const SUMMARY_TIME_ZONE = 'Europe/Belgrade';
+
+function summaryMonth(now: Date): string | null {
+  const [year, month, day] = new Intl.DateTimeFormat('en-CA', {
+    timeZone: SUMMARY_TIME_ZONE,
+  })
+    .format(now)
+    .split('-');
+  return day === '01' ? `${year}-${month}` : null;
 }
 
 function nameTokens(name: string): string[] {
@@ -296,6 +318,7 @@ export function createLeadStore({
         leads: [],
         ledger: { payouts: [], settlements: [] },
         drafts: [],
+        summaries: [],
         unreadable: [],
         version,
       };
@@ -313,6 +336,7 @@ export function createLeadStore({
     const leads: StoredLead[] = [];
     const ledger: Ledger = { payouts: [], settlements: [] };
     const drafts: Draft[] = [];
+    const summaries: SummaryMark[] = [];
     const unreadable: unknown[] = [];
     for (const entry of records.data) {
       const record = ledgerRecordSchema.safeParse(entry);
@@ -320,7 +344,8 @@ export function createLeadStore({
         if (record.data.type === 'payout') ledger.payouts.push(record.data);
         else if (record.data.type === 'settlement')
           ledger.settlements.push(record.data);
-        else drafts.push(record.data);
+        else if (record.data.type === 'draft') drafts.push(record.data);
+        else summaries.push(record.data);
         continue;
       }
       const parsed = schema.safeParse(entry);
@@ -331,6 +356,7 @@ export function createLeadStore({
       leads,
       ledger: withMigratedIncomes(leads, ledger),
       drafts,
+      summaries,
       unreadable,
       version,
     };
@@ -358,6 +384,7 @@ export function createLeadStore({
           ),
         },
         drafts: mutated.drafts.map((d) => draftSchema.parse(d)),
+        summaries: mutated.summaries.map((m) => summaryMarkSchema.parse(m)),
       };
       await copyToQuarantine(unreadable);
       try {
@@ -367,6 +394,7 @@ export function createLeadStore({
             ...next.ledger.payouts,
             ...next.ledger.settlements,
             ...next.drafts,
+            ...next.summaries,
             ...unreadable,
           ],
           version,
@@ -905,6 +933,44 @@ export function createLeadStore({
         )
         .sort((a, b) => b.id - a.id)
         .slice(0, limit);
+    },
+
+    async claimMonthlySummary(now: Date): Promise<MonthlySummary | undefined> {
+      const month = summaryMonth(now);
+      if (!month) return undefined;
+      let claimed: MonthlySummary | undefined;
+      await updateRecords(({ leads, ledger, summaries }) => {
+        claimed = undefined;
+        if (summaries.some((m) => m.month === month)) return {};
+        const since =
+          summaries
+            .map((m) => m.createdAt)
+            .sort()
+            .at(-1) ?? null;
+        claimed = {
+          month,
+          since,
+          balance: ledgerBalance(ledger),
+          payouts: ledger.payouts.filter(
+            (p) => since == null || p.createdAt > since,
+          ),
+          leads: leads.filter((l) => !isClosed(l)),
+        };
+        const mark = {
+          type: 'summary' as const,
+          id: nextLedgerId(summaries),
+          month,
+          createdAt: now.toISOString(),
+        };
+        return { summaries: [...summaries, mark] };
+      });
+      return claimed;
+    },
+
+    async releaseMonthlySummary(month: string): Promise<void> {
+      await updateRecords(({ summaries }) => ({
+        summaries: summaries.filter((m) => m.month !== month),
+      }));
     },
 
     async getDuePostponed(now: Date = new Date()): Promise<StoredLead[]> {

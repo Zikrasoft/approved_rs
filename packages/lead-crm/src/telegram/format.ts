@@ -15,7 +15,11 @@ import {
   type LeadStatus,
   type StoredLead,
 } from '../schema.ts';
-import { MAX_LIST_ROWS, isPlaceholderContact } from '../store.ts';
+import {
+  MAX_LIST_ROWS,
+  isPlaceholderContact,
+  type MonthlySummary,
+} from '../store.ts';
 import type { Draft, LedgerAuthor, Payout, Settlement } from '../ledger.ts';
 
 export type Role = 'owner' | 'admin';
@@ -197,6 +201,63 @@ export function settlementText(
   balance: number,
 ): string {
   return `💸 Оплата получена: ${formatMoney(settlement.amount)}\nОсталось к оплате: ${formatMoney(balance)}`;
+}
+
+export const TELEGRAM_TEXT_LIMIT = 4096;
+export const MAX_SUMMARY_ROWS = 20;
+const MAX_SUMMARY_FIELD = 60;
+
+function clip(text: string): string {
+  return escapeHtml(
+    text.length > MAX_SUMMARY_FIELD
+      ? `${text.slice(0, MAX_SUMMARY_FIELD - 1)}…`
+      : text,
+  );
+}
+
+function summaryPayoutLine(payout: Payout): string {
+  return [
+    `• ${formatMoney(payout.amount)}`,
+    payout.leadId == null ? 'без заявки' : `#${payout.leadId}`,
+    ...(payout.brand ? [clip(payout.brand)] : []),
+    formatDateRu(payout.createdAt),
+    ...(payout.note ? [clip(payout.note)] : []),
+  ].join(' · ');
+}
+
+function summaryLeadLine(lead: StoredLead): string {
+  return `• #${lead.id} ${clip(leadDisplayName(lead))} · ${clip(lead.brand)} · ${STATUS_META[lead.status].emoji}`;
+}
+
+function cappedLines(lines: string[], rows: number, empty: string): string[] {
+  if (!lines.length) return [empty];
+  const rest = lines.length - rows;
+  return rest > 0 ? [...lines.slice(0, rows), `+${rest} ещё`] : lines;
+}
+
+export function monthlySummaryText({
+  since,
+  balance,
+  payouts,
+  leads,
+}: MonthlySummary): string {
+  const payoutLines = payouts.map(summaryPayoutLine);
+  const leadLines = [...leads].sort((a, b) => b.id - a.id).map(summaryLeadLine);
+  const render = (rows: number) =>
+    [
+      '<b>📅 Итоги месяца</b>',
+      '',
+      `💶 К оплате: ${formatMoney(balance)}`,
+      '',
+      `<b>Выплаты ${since ? `с ${formatDateRu(since)}` : 'за всё время'}: ${payouts.length}</b>`,
+      ...cappedLines(payoutLines, rows, 'Выплат не было.'),
+      '',
+      `<b>Без итога: ${leads.length}</b>`,
+      ...cappedLines(leadLines, rows, 'Открытых заявок нет.'),
+    ].join('\n');
+  let rows = MAX_SUMMARY_ROWS;
+  while (rows > 0 && render(rows).length > TELEGRAM_TEXT_LIMIT) rows--;
+  return render(rows);
 }
 
 export function buildSearchResults(leads: StoredLead[]): {
