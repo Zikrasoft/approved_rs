@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   createBrandBot,
   createBrandStore,
+  createTelegramClient,
   LEADS_PATH,
   type LeadInput,
   type LeadStore,
@@ -13,7 +14,7 @@ import {
   type MemoryStorage,
   type RecordedBotApi,
 } from '@podbor/lead-crm/testing';
-import { createCaptureBot } from './bot.ts';
+
 import { captureStore, createCaptureWebhookRoute } from './route.ts';
 
 const SECRET = 'capture-webhook-secret';
@@ -51,7 +52,7 @@ function route(secret: string | undefined) {
     store: captureStore(leadStore),
     ensureLeadCard,
     sendFieldChangeToAdmin: notifier.sendFieldChangeToAdmin,
-    bot: createCaptureBot(CAPTURE_TOKEN, 'capture_bot'),
+    bot: createTelegramClient(CAPTURE_TOKEN, 'capture_bot').bot,
     brand: BRAND,
     isService: (value) => SERVICES.includes(value),
     isLocale: (value): value is TestLocale => LOCALES.includes(value),
