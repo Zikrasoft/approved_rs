@@ -17,6 +17,11 @@ const COPY = {
   contacts: { button: 'Контакты', text: 'Мы здесь', hours: 'Пн–Пт' },
   manager: { button: 'Менеджер', text: 'Напишите вопрос' },
   partners: { button: 'Партнёры', text: 'Кому написать?' },
+  request: {
+    button: 'Оставить заявку',
+    car: 'Какая машина?',
+    service: 'Какая услуга?',
+  },
 };
 
 describe('the dialog copy a site supplies', () => {

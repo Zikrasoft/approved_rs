@@ -24,7 +24,8 @@ export const POST = createCaptureWebhookRoute({
   isLocale,
   primaryLocale: PRIMARY_LOCALE,
   copy: (locale) => content(locale).captureBot,
-  menu: ['services', 'contacts', 'manager'],
+  menu: ['services', 'request', 'contacts', 'manager'],
+  questionnaire: ['car', 'service', 'phone'],
   services: SERVICE_SLUGS,
   contacts: {
     phone: PHONE_NUMBER,

@@ -46,6 +46,7 @@ const COPY = {
   contacts: { button: 'CONTACTS', text: 'REACH_US', hours: 'HOURS' },
   manager: { button: 'MANAGER', text: 'WRITE_YOUR_QUESTION' },
   partners: { button: 'PARTNERS', text: 'PICK_A_PARTNER' },
+  request: { button: 'REQUEST', car: 'CAR', service: 'WHICH_SERVICE' },
 };
 
 const WORKSHOP = {
@@ -67,15 +68,16 @@ let ensureLeadCard: (lead: StoredLead) => Promise<void>;
 let notifier: ReturnType<typeof createBrandBot>['notifier'];
 let POST: ReturnType<typeof createCaptureWebhookRoute>;
 
+type RouteOptions = Parameters<
+  typeof createCaptureWebhookRoute<string, string>
+>[0];
+
 function route(
   secret: string | undefined,
-  contacts: Parameters<typeof createCaptureWebhookRoute>[0]['contacts'] = {
-    phone: '381601234567',
-    site: 'https://example.test',
-  },
+  overrides: Partial<RouteOptions> = {},
 ) {
   return createCaptureWebhookRoute({
-    contacts,
+    contacts: { phone: '381601234567', site: 'https://example.test' },
     secret,
     store: captureStore(leadStore),
     ensureLeadCard,
@@ -92,6 +94,8 @@ function route(
       lines: ['ABOUT <it>', '', 'FROM 100 €'],
       url: `https://example.test/${locale}/${slug}/`,
     }),
+    questionnaire: ['looking_for', 'budget', 'phone'],
+    ...overrides,
   });
 }
 
@@ -1319,9 +1323,11 @@ describe('the admin hearing about every change the visitor makes', () => {
 describe('the Contacts screen', () => {
   it('sends the workshop as a venue, then hours, phone and site', async () => {
     POST = route(SECRET, {
-      phone: '381601234567',
-      site: 'https://carlab.test',
-      venue: WORKSHOP,
+      contacts: {
+        phone: '381601234567',
+        site: 'https://carlab.test',
+        venue: WORKSHOP,
+      },
     });
     await POST(makeCtx(startUpdate()));
     api.reset();
@@ -1406,19 +1412,9 @@ describe('talking to a manager', () => {
 
 describe('the Partners screen', () => {
   function partnerRoute() {
-    return createCaptureWebhookRoute({
-      contacts: { phone: '381601234567', site: 'https://example.test' },
-      secret: SECRET,
-      store: captureStore(leadStore),
-      ensureLeadCard,
-      sendFieldChangeToAdmin: notifier.sendFieldChangeToAdmin,
-      bot: createTelegramClient(CAPTURE_TOKEN, 'capture_bot').bot,
-      brand: BRAND,
-      isLocale: (value): value is TestLocale => LOCALES.includes(value),
-      primaryLocale: 'ru',
+    return route(SECRET, {
       copy: () => COPY,
       menu: ['services', 'partners'],
-      services: SERVICES,
       serviceCard: (slug) => ({ title: slug, lines: [], url: 'https://x/' }),
       partners: (locale) => [
         { name: 'CarLab', url: referralLink('CarLabRsBot', `${locale}-x`) },
@@ -1515,6 +1511,194 @@ describe('a visitor referred by the Approved bot', () => {
       visitorId: '0f8fad5b-d9cb-469f-a165-70867728950e',
       locale: 'sr',
       comment: 'Пришёл из бота Approved.rs (Партнёры)',
+    });
+  });
+});
+
+describe("CarLab's Questionnaire: the car and what happened, then the phone", () => {
+  beforeEach(() => {
+    POST = route(SECRET, { questionnaire: ['car_issue', 'phone'] });
+  });
+
+  it('never asks for a budget', async () => {
+    await begin();
+    expect(lastSent()).toEqual([42, 'LOOKING_FOR']);
+
+    await say('Golf 2012, стучит подвеска');
+    expect(lastSent()).toEqual([42, 'PHONE_OFFER']);
+    expect(lastMarkup()).toHaveProperty('keyboard');
+
+    await say('SKIP');
+    expect(lastSent()).toEqual([42, 'THANKS']);
+    expect(replies().map((p) => p.text)).not.toContain('BUDGET');
+    expect(stored()[0]).toMatchObject({
+      comment: 'Машина и проблема: Golf 2012, стучит подвеска',
+      capturePrompt: null,
+    });
+    expect(adminNotes()).toEqual([
+      expect.stringContaining(
+        'Стало: Машина и проблема: Golf 2012, стучит подвеска',
+      ),
+    ]);
+  });
+});
+
+describe("Details' Questionnaire: the car, the service as buttons, then the phone", () => {
+  const PICKER = {
+    inline_keyboard: [
+      [
+        {
+          text: 'CARD_vehicle-sourcing_ru',
+          callback_data: 'pick:ru:vehicle-sourcing',
+        },
+      ],
+      [
+        {
+          text: 'CARD_vehicle-import_ru',
+          callback_data: 'pick:ru:vehicle-import',
+        },
+      ],
+    ],
+  };
+
+  beforeEach(() => {
+    POST = route(SECRET, {
+      questionnaire: ['car', 'service', 'phone'],
+      menu: ['services', 'request'],
+    });
+  });
+
+  async function beginFromMenu(from: Record<string, unknown> = HANDLED) {
+    await POST(makeCtx(startUpdate(undefined, from)));
+    await tap('request:ru', from);
+  }
+
+  it('offers Leave a request on the main menu', async () => {
+    await POST(makeCtx(startUpdate()));
+
+    expect(lastMarkup()).toEqual({
+      inline_keyboard: [
+        [{ text: 'SERVICES', callback_data: 'services:ru' }],
+        [{ text: 'REQUEST', callback_data: 'request:ru' }],
+      ],
+    });
+  });
+
+  it('asks for the service as buttons and files the tap as the service', async () => {
+    await beginFromMenu();
+    expect(lastSent()).toEqual([42, 'CAR']);
+
+    await say('Audi A6 2019');
+    expect(lastSent()).toEqual([42, 'WHICH_SERVICE']);
+    expect(lastMarkup()).toEqual(PICKER);
+    api.reset();
+
+    await tap('pick:ru:vehicle-import');
+
+    expect(stored()[0]).toMatchObject({
+      comment: 'Машина: Audi A6 2019',
+      service: 'vehicle-import',
+      services: ['vehicle-import'],
+      capturePrompt: { chatId: 42, step: 'phone' },
+    });
+    expect(adminNotes()).toEqual([
+      expect.stringContaining(': услуга\n🤖 Посетитель через бота'),
+    ]);
+    expect(lastSent()).toEqual([42, 'PHONE_OFFER']);
+    expect(edits()).toHaveLength(0);
+
+    await say('SKIP');
+    expect(lastSent()).toEqual([42, 'THANKS']);
+    expect(stored()[0].capturePrompt).toBeNull();
+  });
+
+  it('takes a typed service as an answer too', async () => {
+    await beginFromMenu();
+    await say('Audi A6 2019');
+
+    await say('полировка');
+
+    expect(stored()[0]).toMatchObject({
+      comment: 'Машина: Audi A6 2019\nУслуга: полировка',
+      service: '',
+      capturePrompt: { chatId: 42, step: 'phone' },
+    });
+  });
+
+  it('skips the service when the request came from a service card', async () => {
+    await begin();
+    expect(lastSent()).toEqual([42, 'CAR']);
+
+    await say('Audi A6 2019');
+
+    expect(lastSent()).toEqual([42, 'PHONE_OFFER']);
+    expect(replies().map((p) => p.text)).not.toContain('WHICH_SERVICE');
+  });
+
+  it('skips the service when the open Lead already has one', async () => {
+    await POST(makeCtx(startUpdate('vehicle-import_ru')));
+    await tap('request:ru');
+
+    await say('Audi A6 2019');
+
+    expect(stored()[0]).toMatchObject({
+      service: 'vehicle-import',
+      capturePrompt: { chatId: 42, step: 'phone' },
+    });
+  });
+
+  it('asks a visitor with no handle for the phone first, then the rest', async () => {
+    await beginFromMenu(ANONYMOUS);
+    expect(lastSent()).toEqual([777, 'PHONE_ASK']);
+
+    await POST(makeCtx(contactUpdate('381601234567')));
+    expect(lastSent()).toEqual([777, 'CAR']);
+    expect(lastMarkup()).toEqual({ remove_keyboard: true });
+
+    await say('Audi A6 2019', ANONYMOUS);
+    expect(lastSent()).toEqual([777, 'WHICH_SERVICE']);
+
+    await tap('pick:ru:vehicle-sourcing', ANONYMOUS);
+    expect(lastSent()).toEqual([777, 'THANKS']);
+    expect(stored()[0]).toMatchObject({
+      contact: '+381601234567',
+      service: 'vehicle-sourcing',
+      capturePrompt: null,
+    });
+  });
+
+  it('ignores a service tap outside the service question', async () => {
+    await beginFromMenu();
+    api.reset();
+
+    await tap('pick:ru:vehicle-import');
+    await say('Audi A6 2019');
+    await tap('pick:ru:no-such-service');
+
+    expect(stored()[0]).toMatchObject({
+      service: '',
+      capturePrompt: { chatId: 42, step: 'service' },
+    });
+    expect(replies().map((p) => p.text)).toEqual(['WHICH_SERVICE']);
+  });
+
+  it('ignores a request for a service it does not offer', async () => {
+    await tap('request:ru:no-such-service');
+
+    expect(stored()).toHaveLength(0);
+    expect(replies()).toHaveLength(0);
+  });
+
+  it('finishes a step left over from an older Questionnaire', async () => {
+    await beginFromMenu();
+    editLead(1, { capturePrompt: { chatId: 42, step: 'budget' } });
+
+    await say('20 000');
+
+    expect(lastSent()).toEqual([42, 'THANKS']);
+    expect(stored()[0]).toMatchObject({
+      comment: 'Бюджет: 20 000',
+      capturePrompt: null,
     });
   });
 });

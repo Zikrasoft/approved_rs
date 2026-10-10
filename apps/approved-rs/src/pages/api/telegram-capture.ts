@@ -25,12 +25,13 @@ export const POST = createCaptureWebhookRoute({
   isLocale,
   primaryLocale: PRIMARY_LOCALE,
   copy: (locale) => content(locale).captureBot,
-  menu: ['services', 'contacts', 'manager', 'partners'],
+  menu: ['services', 'request', 'contacts', 'manager', 'partners'],
   partners: (locale) =>
     [CARLAB, DETAILS].map(({ name, captureBot }) => ({
       name,
       url: referralLink(captureBot, brandLocale(locale)),
     })),
+  questionnaire: ['looking_for', 'budget', 'phone'],
   services: SERVICE_SLUGS,
   contacts: { phone: PHONE_NUMBER, site: SITE_URL },
   serviceCard: (slug, locale) => {

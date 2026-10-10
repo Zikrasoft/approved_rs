@@ -9,6 +9,7 @@ import {
   secretMatches,
   VISITOR_MERGE_WINDOW_MS,
   type CapturePrompt,
+  type CaptureStep,
   type EditField,
   type FieldChangeAuthor,
   type LeadStore,
@@ -46,8 +47,6 @@ const startPayloadSchema = z
   .catch('')
   .transform(readStartVisitor);
 
-type CaptureStep = CapturePrompt['step'];
-
 interface StartFields<L extends string, S extends string> {
   service: S | '';
   locale: L;
@@ -59,10 +58,20 @@ const ANSWER_NOTE: Record<CaptureStep, string> = {
   looking_for: 'Ищет',
   budget: 'Бюджет',
   phone: 'Телефон',
+  car_issue: 'Машина и проблема',
+  car: 'Машина',
+  service: 'Услуга',
 };
 
-const STEPS_WITH_HANDLE: CaptureStep[] = ['looking_for', 'budget', 'phone'];
-const STEPS_WITHOUT_HANDLE: CaptureStep[] = ['phone', 'looking_for', 'budget'];
+const QUESTION: Record<
+  Exclude<CaptureStep, 'phone' | 'service'>,
+  (words: CaptureCopy) => string
+> = {
+  looking_for: (words) => words.lookingFor,
+  car_issue: (words) => words.lookingFor,
+  budget: (words) => words.budget,
+  car: (words) => words.request.car,
+};
 
 const MESSAGE_NOTE = 'Сообщение';
 
@@ -80,7 +89,12 @@ interface ClearKeyboardExtra {
   reply_markup: { remove_keyboard: true };
 }
 
-type CaptureExtra = PhoneKeyboardExtra | ClearKeyboardExtra | undefined;
+interface InlineKeyboardExtra {
+  reply_markup: { inline_keyboard: Screen['keyboard'] };
+}
+
+type CaptureExtra =
+  PhoneKeyboardExtra | ClearKeyboardExtra | InlineKeyboardExtra | undefined;
 
 const CLEAR_KEYBOARD: ClearKeyboardExtra = {
   reply_markup: { remove_keyboard: true },
@@ -122,6 +136,7 @@ export interface CaptureWebhookRouteOptions<
   brand: string;
   isLocale: (value: string) => value is L;
   primaryLocale: L;
+  questionnaire: readonly CaptureStep[];
 }
 
 function senderName(sender: CaptureSender): string {
@@ -138,19 +153,6 @@ function hasHandle(contact: string): boolean {
   return contact.startsWith('@');
 }
 
-function stepOrder(contact: string): CaptureStep[] {
-  return hasHandle(contact) ? STEPS_WITH_HANDLE : STEPS_WITHOUT_HANDLE;
-}
-
-function firstStep(contact: string): CaptureStep {
-  return contact.startsWith(TELEGRAM_USER_LINK) ? 'phone' : 'looking_for';
-}
-
-function stepAfter(contact: string, step: CaptureStep): CaptureStep | null {
-  const steps = stepOrder(contact);
-  return steps[steps.indexOf(step) + 1] ?? null;
-}
-
 function phoneKeyboard(words: CaptureCopy): PhoneKeyboardExtra {
   return {
     reply_markup: {
@@ -162,23 +164,6 @@ function phoneKeyboard(words: CaptureCopy): PhoneKeyboardExtra {
       one_time_keyboard: true,
     },
   };
-}
-
-function nextMessage(
-  next: CaptureStep | null,
-  leaving: CaptureStep | null,
-  contact: string,
-  words: CaptureCopy,
-): [string, CaptureExtra] {
-  if (next === 'phone')
-    return [
-      hasHandle(contact) ? words.phoneOffer : words.phoneAsk,
-      phoneKeyboard(words),
-    ];
-  const extra = leaving === 'phone' ? CLEAR_KEYBOARD : undefined;
-  if (next === 'looking_for') return [words.lookingFor, extra];
-  if (next === 'budget') return [words.budget, extra];
-  return [words.thanks, extra];
 }
 
 function answerNote(
@@ -207,11 +192,58 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   brand,
   isLocale,
   primaryLocale,
+  questionnaire,
   ...menuConfig
 }: CaptureWebhookRouteOptions<L, S>) {
   const { copy } = menuConfig;
-  const { isService, mainMenu, service, contactsScreen, render } =
-    createScreens(menuConfig);
+  const {
+    isService,
+    mainMenu,
+    service,
+    contactsScreen,
+    render,
+    servicePicker,
+  } = createScreens(menuConfig);
+
+  function stepOrder(contact: string, picked: string): CaptureStep[] {
+    if (hasHandle(contact))
+      return questionnaire.filter((step) => step !== 'service' || !picked);
+    const asked = questionnaire.filter(
+      (step) => step !== 'phone' && (step !== 'service' || !picked),
+    );
+    return contact.startsWith(TELEGRAM_USER_LINK) ? ['phone', ...asked] : asked;
+  }
+
+  function firstStep(contact: string, picked: string): CaptureStep {
+    return stepOrder(contact, picked)[0];
+  }
+
+  function stepAfter(lead: StoredLead, step: CaptureStep): CaptureStep | null {
+    const steps = stepOrder(lead.contact, lead.service);
+    const at = steps.indexOf(step);
+    return at < 0 ? null : (steps[at + 1] ?? null);
+  }
+
+  function nextMessage(
+    next: CaptureStep | null,
+    leaving: CaptureStep | null,
+    contact: string,
+    locale: L,
+  ): [string, CaptureExtra] {
+    const words = copy(locale);
+    if (next === 'phone')
+      return [
+        hasHandle(contact) ? words.phoneOffer : words.phoneAsk,
+        phoneKeyboard(words),
+      ];
+    if (next === 'service')
+      return [
+        words.request.service,
+        { reply_markup: { inline_keyboard: servicePicker(locale) } },
+      ];
+    const extra = leaving === 'phone' ? CLEAR_KEYBOARD : undefined;
+    return [next ? QUESTION[next](words) : words.thanks, extra];
+  }
 
   function send(chatId: number, text: string, extra?: CaptureExtra) {
     return bot.api.sendMessage(chatId, text, { parse_mode: 'HTML', ...extra });
@@ -230,7 +262,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     contact: string,
     locale: L,
   ): Promise<void> {
-    const [text, extra] = nextMessage(step, null, contact, copy(locale));
+    const [text, extra] = nextMessage(step, null, contact, locale);
     await send(chatId, text, extra);
   }
 
@@ -328,18 +360,23 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     prompt: CapturePrompt,
     text: string | undefined,
     phone: string | undefined,
+    picked?: S,
   ): Promise<void> {
-    const words = copy(localeOf(lead));
+    const locale = localeOf(lead);
+    const words = copy(locale);
     const keepsHandle = hasHandle(lead.contact);
     const takesPhone = prompt.step === 'phone' && phone !== undefined;
-    const next = stepAfter(lead.contact, prompt.step);
+    const next = stepAfter(lead, prompt.step);
     const updated = await store.updateCapture(lead.id, {
-      note: answerNote(prompt.step, words, keepsHandle, text, phone),
+      note: picked
+        ? undefined
+        : answerNote(prompt.step, words, keepsHandle, text, phone),
       contact: takesPhone && !keepsHandle ? phone : undefined,
+      service: picked,
       capturePrompt: next ? { chatId: prompt.chatId, step: next } : null,
     });
     await refresh(lead, updated);
-    const [reply, extra] = nextMessage(next, prompt.step, lead.contact, words);
+    const [reply, extra] = nextMessage(next, prompt.step, lead.contact, locale);
     await send(prompt.chatId, reply, extra);
   }
 
@@ -376,17 +413,17 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     chatId: number,
     sender: CaptureSender,
     locale: L,
-    picked: S,
+    picked: S | '',
   ): Promise<void> {
     const open = await store.findOpenLeadByTelegramId(sender.id, brand);
     if (!open) {
       const contact = await contactOf(sender);
-      const step = firstStep(contact);
+      const step = firstStep(contact, picked);
       const fields = { service: picked, locale, visitorId: null };
       await newLead(sender, contact, fields, null, { chatId, step });
       return ask(chatId, step, contact, locale);
     }
-    const step = firstStep(open.contact);
+    const step = firstStep(open.contact, picked || open.service);
     const updated = await store.updateCapture(open.id, {
       service: picked,
       capturePrompt: { chatId, step },
@@ -409,6 +446,13 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     await show(chatId, contactsScreen(locale));
   }
 
+  async function pickService(chatId: number, picked: string): Promise<void> {
+    const lead = await store.findByCapturePrompt(chatId, brand);
+    const prompt = lead?.capturePrompt;
+    if (!lead || prompt?.step !== 'service' || !isService(picked)) return;
+    await answer(lead, prompt, undefined, undefined, picked);
+  }
+
   async function tapped(
     chatId: number,
     messageId: number,
@@ -419,11 +463,12 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     if (!tap) return;
     const locale = isLocale(tap.locale) ? tap.locale : primaryLocale;
     if (tap.screen === 'request') {
-      if (isService(tap.arg))
+      if (tap.arg === '' || isService(tap.arg))
         await leaveRequest(chatId, sender, locale, tap.arg);
       return;
     }
     if (tap.screen === 'contacts') return showContacts(chatId, locale);
+    if (tap.screen === 'pick') return pickService(chatId, tap.arg);
     const screen = render(tap.screen, locale, tap.arg);
     if (!screen) return;
     await endQuestionnaire(chatId);

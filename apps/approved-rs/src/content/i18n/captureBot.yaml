@@ -26,6 +26,10 @@ manager:
 partners:
   button: Партнёры
   text: Ремонт и детейлинг — у партнёров, которым мы доверяем. Выберите, кому написать.
+request:
+  button: Оставить заявку
+  car: Какая у вас машина? Напишите марку, модель и год.
+  service: Какая услуга вам нужна? Выберите ниже.
 translations:
   en:
     greeting: Hello! Thanks for getting in touch — we can see your enquiry and we'll come back to you shortly.

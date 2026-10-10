@@ -53,29 +53,75 @@ function start(payload: string) {
   });
 }
 
-function tap(data: string) {
+function visitorUpdate(update: Record<string, unknown>) {
   return POST({
     request: new Request('http://localhost/api/telegram-capture', {
       method: 'POST',
       headers: {
         'x-telegram-bot-api-secret-token': 'test-capture-webhook-secret',
       },
-      body: JSON.stringify({
-        update_id: 2,
-        callback_query: {
-          id: 'tap-1',
-          from: { id: 42, first_name: 'Ivan', username: 'ivan' },
-          chat_instance: 'instance',
-          data,
-          message: {
-            message_id: 900,
-            date: 0,
-            chat: { id: 42, type: 'private' },
-            text: 'MENU',
-          },
-        },
-      }),
+      body: JSON.stringify({ update_id: 1, ...update }),
     }),
+  });
+}
+
+const VISITOR = { id: 61, first_name: 'Ana', username: 'ana' };
+
+function answer(text: string) {
+  return visitorUpdate({
+    message: {
+      message_id: 2,
+      chat: { id: VISITOR.id, type: 'private' },
+      from: VISITOR,
+      text,
+    },
+  });
+}
+
+function press(data: string) {
+  return visitorUpdate({
+    callback_query: {
+      id: 'tap',
+      from: VISITOR,
+      chat_instance: 'chat',
+      data,
+      message: {
+        message_id: 3,
+        date: 0,
+        chat: { id: VISITOR.id, type: 'private' },
+      },
+    },
+  });
+}
+
+function questions(): unknown[] {
+  return api
+    .callsTo('sendMessage', 'test-capture-bot-token')
+    .filter((call) => call.payload.chat_id === VISITOR.id)
+    .map((call) => call.payload.text);
+}
+
+function visitorLead() {
+  return (
+    memory.storages.get(LEADS_PATH)?.current() as { telegramId: number }[]
+  ).find((lead) => lead.telegramId === VISITOR.id);
+}
+
+function tap(data: string) {
+  return visitorUpdate({
+    update_id: 2,
+    callback_query: {
+      id: 'tap-1',
+      from: { id: 42, first_name: 'Ivan', username: 'ivan' },
+      chat_instance: 'instance',
+      data,
+      message: {
+        message_id: 900,
+        date: 0,
+        chat: { id: 42, type: 'private' },
+        text: 'MENU',
+      },
+    },
   });
 }
 
@@ -131,5 +177,26 @@ describe('the CarLab capture bot', () => {
     expect(reply.text).toContain(content('sr').captureBot.contacts.hours);
     expect(reply.text).toContain(formatPhone(PHONE_NUMBER));
     expect(reply.text).toContain(SITE_URL);
+  });
+});
+
+describe('the CarLab Questionnaire', () => {
+  it('asks about the car and what happened, then the phone, never a budget', async () => {
+    const words = content('ru').captureBot;
+
+    await press('request:ru:diagnostics');
+    await answer('Golf 2012, стучит подвеска');
+    await answer(words.phoneSkip);
+
+    expect(questions()).toEqual([
+      words.lookingFor,
+      words.phoneOffer,
+      words.thanks,
+    ]);
+    expect(visitorLead()).toMatchObject({
+      service: 'diagnostics',
+      comment: 'Машина и проблема: Golf 2012, стучит подвеска',
+      capturePrompt: null,
+    });
   });
 });

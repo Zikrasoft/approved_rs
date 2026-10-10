@@ -19,6 +19,7 @@ export const captureCopySchema = z
     contacts: z.object({ button: line, text: line, hours: line }).strict(),
     manager: z.object({ button: line, text: line }).strict(),
     partners: z.object({ button: line, text: line }).strict(),
+    request: z.object({ button: line, car: line, service: line }).strict(),
   })
   .strict();
 
