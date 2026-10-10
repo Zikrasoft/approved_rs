@@ -11,11 +11,7 @@ const storedStatusSchema = z.enum([
   'in_progress',
 ]);
 
-export const PROMPT_KINDS = [
-  'deal_amount',
-  'postpone',
-  'reply_visitor',
-] as const;
+export const PROMPT_KINDS = ['postpone', 'reply_visitor'] as const;
 
 const pendingPromptSchema = z.object({
   chatId: z.number().int(),

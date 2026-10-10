@@ -1024,11 +1024,9 @@ cd apps/detailing && node --env-file=.env.local --experimental-strip-types scrip
 Every day at 08:00 UTC, Vercel calls `/api/reminders` with
 `Authorization: Bearer $CRON_SECRET` — the route marks expired Ghost leads lost,
 then posts one digest to the group: postponed leads whose day has come (reopened
-once listed), won leads with no Payout, and open leads with no action for 7 days,
-each with ✅ ❌ ⏳ — once per day, however often the cron runs. Nothing is
-posted when the list is empty. On the 1st (Belgrade
-calendar) it then posts the monthly summary — balance, Payouts since the last
-one, open leads — once per month. Without
+once listed) and open leads with no action for 7 days, each with ✅ ❌ ⏳ — once
+per day, however often the cron runs. Nothing is posted when the list is empty.
+There is no monthly summary: the Balance is in the bot's menu. Without
 `CRON_SECRET` in the project the route answers 401 and the digest silently never
 arrives.
 

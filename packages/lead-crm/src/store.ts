@@ -1,7 +1,5 @@
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { toCents } from './money.ts';
-import { LEDGER_TIME_ZONE } from './ledgerStore.ts';
 import { channelLabel } from './channelLabels.ts';
 import { isClosed } from './schema.ts';
 import type {
@@ -16,27 +14,6 @@ import type { StoredLeadSchema } from './schema.ts';
 import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
 import { retryOnConflict } from './storage/retry.ts';
 import { LEADS_PATH } from './quarantine.ts';
-import {
-  correction,
-  digestMarkSchema,
-  ledgerBalance,
-  ledgerRecordSchema,
-  newSettlement,
-  nextLedgerId,
-  payoutSchema,
-  settlePromptSchema,
-  settlementSchema,
-  summaryMarkSchema,
-  type DigestMark,
-  type Ledger,
-  type LedgerAuthor,
-  type Payout,
-  type PayoutCorrection,
-  type RecordPrompt,
-  type SettlePrompt,
-  type Settlement,
-  type SummaryMark,
-} from './ledger.ts';
 
 export const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
 
@@ -57,22 +34,19 @@ export interface MergeOutcome {
   before: StoredLead | null;
 }
 
-export interface PayoutInput {
-  amount: number;
-  by: LedgerAuthor;
-  note?: string;
-  leadId?: number | null;
-  brand?: string | null;
-}
-
-const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-const STALE_AFTER_MS = WEEK_MS;
+const STALE_AFTER_MS = 7 * 24 * 60 * 60 * 1000;
 
 export interface Digest {
   stale: StoredLead[];
-  unpaid: StoredLead[];
   due: StoredLead[];
 }
+
+const digestMarkSchema = z.object({
+  type: z.literal('digest'),
+  day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  createdAt: z.string(),
+});
+type DigestMark = z.infer<typeof digestMarkSchema>;
 
 function lastActionAt(lead: StoredLead): number {
   return Math.max(
@@ -83,43 +57,19 @@ function lastActionAt(lead: StoredLead): number {
 
 interface StoreRecords {
   leads: StoredLead[];
-  ledger: Ledger;
-  summaries: SummaryMark[];
   digests: DigestMark[];
-  settlePrompts: SettlePrompt[];
-}
-
-export interface MonthlySummary {
-  month: string;
-  since: string | null;
-  balance: number;
-  payouts: Payout[];
-  leads: StoredLead[];
-}
-
-export const SUMMARY_TIME_ZONE = LEDGER_TIME_ZONE;
-
-function summaryMonth(now: Date): string | null {
-  const [year, month, day] = new Intl.DateTimeFormat('en-CA', {
-    timeZone: SUMMARY_TIME_ZONE,
-  })
-    .format(now)
-    .split('-');
-  return day === '01' ? `${year}-${month}` : null;
 }
 
 const digestDay = (now: Date) => format(now, 'yyyy-MM-dd');
 
-function digestOf({ leads, ledger }: StoreRecords, now: Date): Digest {
+function digestOf(leads: StoredLead[], now: Date): Digest {
   const today = digestDay(now);
-  const paid = new Set(ledger.payouts.map((p) => p.leadId));
   return {
     stale: leads.filter(
       (l) =>
         l.status === 'open' &&
         now.getTime() - lastActionAt(l) >= STALE_AFTER_MS,
     ),
-    unpaid: leads.filter((l) => l.status === 'won' && !paid.has(l.id)),
     due: leads.filter(
       (l) =>
         l.status === 'postponed' && l.remindAt != null && l.remindAt <= today,
@@ -214,7 +164,9 @@ export function resumePatch(): Partial<StoredLead> {
   return { ...statusPatch('open'), remindAt: null };
 }
 
-const retiredDraft = z.looseObject({ type: z.literal('draft') });
+const retiredRecord = z.looseObject({
+  type: z.enum(['draft', 'payout', 'settlement', 'summary', 'settle_prompt']),
+});
 
 const unreadableId = z.object({
   id: z.coerce
@@ -229,48 +181,6 @@ function unreadableIdFloor(entries: unknown[]): number {
     const parsed = unreadableId.safeParse(entry);
     return parsed.success && parsed.data.id > max ? parsed.data.id : max;
   }, 0);
-}
-
-function promptIs(
-  prompt: RecordPrompt | null,
-  chatId: number,
-  messageId: number,
-): boolean {
-  return prompt?.chatId === chatId && prompt.messageId === messageId;
-}
-
-function withPayout(
-  { leads, ledger }: StoreRecords,
-  { amount, by, note = '', leadId = null, brand = null }: PayoutInput,
-): { records: Partial<StoreRecords>; added?: Payout } {
-  const lead = leads.find((l) => l.id === leadId);
-  if (leadId != null && !lead) return { records: {} };
-  const now = new Date();
-  const added = payoutSchema.parse({
-    type: 'payout',
-    id: nextLedgerId(ledger.payouts),
-    amount,
-    note,
-    createdAt: now.toISOString(),
-    createdBy: by,
-    leadId,
-    brand: brand ?? lead?.brand ?? null,
-  });
-  return {
-    added,
-    records: {
-      leads: leads.map((l) =>
-        l === lead
-          ? {
-              ...l,
-              ...(l.status === 'lost' ? statusPatch('won', now) : {}),
-              lastActivityAt: now.toISOString(),
-            }
-          : l,
-      ),
-      ledger: { ...ledger, payouts: [...ledger.payouts, added] },
-    },
-  };
 }
 
 export function createLeadStore({
@@ -289,15 +199,7 @@ export function createLeadStore({
   > {
     const { raw, version } = await storage.read();
     if (raw === undefined) {
-      return {
-        leads: [],
-        ledger: { payouts: [], settlements: [] },
-        summaries: [],
-        digests: [],
-        settlePrompts: [],
-        unreadable: [],
-        version,
-      };
+      return { leads: [], digests: [], unreadable: [], version };
     }
     const records = storedRecordsSchema.safeParse(raw);
     if (!records.success) {
@@ -310,37 +212,20 @@ export function createLeadStore({
       );
     }
     const leads: StoredLead[] = [];
-    const ledger: Ledger = { payouts: [], settlements: [] };
-    const summaries: SummaryMark[] = [];
     const digests: DigestMark[] = [];
-    const settlePrompts: SettlePrompt[] = [];
     const unreadable: unknown[] = [];
     for (const entry of records.data) {
-      if (retiredDraft.safeParse(entry).success) continue;
-      const record = ledgerRecordSchema.safeParse(entry);
-      if (record.success) {
-        if (record.data.type === 'payout') ledger.payouts.push(record.data);
-        else if (record.data.type === 'settlement')
-          ledger.settlements.push(record.data);
-        else if (record.data.type === 'digest') digests.push(record.data);
-        else if (record.data.type === 'settle_prompt')
-          settlePrompts.push(record.data);
-        else summaries.push(record.data);
+      if (retiredRecord.safeParse(entry).success) continue;
+      const digest = digestMarkSchema.safeParse(entry);
+      if (digest.success) {
+        digests.push(digest.data);
         continue;
       }
       const parsed = schema.safeParse(entry);
       if (parsed.success) leads.push(parsed.data);
       else unreadable.push(entry);
     }
-    return {
-      leads,
-      ledger,
-      summaries,
-      digests,
-      settlePrompts,
-      unreadable,
-      version,
-    };
+    return { leads, digests, unreadable, version };
   }
 
   async function updateRecords(
@@ -354,30 +239,12 @@ export function createLeadStore({
       };
       const next: StoreRecords = {
         leads: mutated.leads.map((lead) => schema.parse(lead)),
-        ledger: {
-          payouts: mutated.ledger.payouts.map((p) => payoutSchema.parse(p)),
-          settlements: mutated.ledger.settlements.map((s) =>
-            settlementSchema.parse(s),
-          ),
-        },
-        summaries: mutated.summaries.map((m) => summaryMarkSchema.parse(m)),
         digests: mutated.digests.map((m) => digestMarkSchema.parse(m)),
-        settlePrompts: mutated.settlePrompts.map((p) =>
-          settlePromptSchema.parse(p),
-        ),
       };
       await beforeWrite?.();
       await copyToQuarantine(unreadable);
       await storage.write(
-        [
-          ...next.leads,
-          ...next.ledger.payouts,
-          ...next.ledger.settlements,
-          ...next.summaries,
-          ...next.digests,
-          ...next.settlePrompts,
-          ...unreadable,
-        ],
+        [...next.leads, ...next.digests, ...unreadable],
         version,
       );
       return next;
@@ -391,11 +258,6 @@ export function createLeadStore({
       leads: mutate(leads, idFloor),
     }));
     return leads;
-  }
-
-  async function readLedger(): Promise<Ledger> {
-    const { ledger } = await readSnapshot();
-    return ledger;
   }
 
   async function readLeads(): Promise<StoredLead[]> {
@@ -463,137 +325,6 @@ export function createLeadStore({
     readLeads,
     getLead,
     newStoredLead,
-    readLedger,
-
-    async getBalance(): Promise<number> {
-      return ledgerBalance(await readLedger());
-    },
-
-    async listPayouts(leadId?: number): Promise<Payout[]> {
-      const { payouts } = await readLedger();
-      return leadId == null
-        ? payouts
-        : payouts.filter((p) => p.leadId === leadId);
-    },
-
-    async addPayout(input: PayoutInput): Promise<Payout | undefined> {
-      let added: Payout | undefined;
-      await updateRecords((records) => {
-        const outcome = withPayout(records, input);
-        added = outcome.added;
-        return outcome.records;
-      });
-      return added;
-    },
-
-    async correctPayout(
-      id: number,
-      amount: number,
-      by: LedgerAuthor,
-    ): Promise<PayoutCorrection> {
-      let outcome!: PayoutCorrection;
-      await updateRecords(({ leads, ledger }) => {
-        outcome = correction(ledger, id, amount, by);
-        if (!outcome.ok) return {};
-        const { payout } = outcome;
-        return {
-          leads: leads.map((l) =>
-            l.id === payout.leadId
-              ? { ...l, lastActivityAt: new Date().toISOString() }
-              : l,
-          ),
-          ledger: {
-            ...ledger,
-            payouts: ledger.payouts.map((p) => (p.id === id ? payout : p)),
-          },
-        };
-      });
-      return outcome;
-    },
-
-    async setPayoutPrompt(
-      id: number,
-      prompt: RecordPrompt | null,
-    ): Promise<Payout | undefined> {
-      let touched: Payout | undefined;
-      await updateRecords(({ ledger }) => {
-        touched = undefined;
-        return {
-          ledger: {
-            ...ledger,
-            payouts: ledger.payouts.map((p) => {
-              if (p.id !== id) return p;
-              touched = { ...p, pendingPrompt: prompt };
-              return touched;
-            }),
-          },
-        };
-      });
-      return touched;
-    },
-
-    async findPayoutByPrompt(
-      chatId: number,
-      messageId: number,
-    ): Promise<Payout | undefined> {
-      const { payouts } = await readLedger();
-      return payouts.find((p) => promptIs(p.pendingPrompt, chatId, messageId));
-    },
-
-    async addSettlePrompt(prompt: RecordPrompt): Promise<void> {
-      await updateRecords(({ settlePrompts }) => {
-        const now = Date.now();
-        const fresh = settlePrompts.filter(
-          (p) => now - new Date(p.createdAt).getTime() < WEEK_MS,
-        );
-        const added = {
-          type: 'settle_prompt' as const,
-          ...prompt,
-          createdAt: new Date(now).toISOString(),
-        };
-        return { settlePrompts: [...fresh, added] };
-      });
-    },
-
-    async findSettlePrompt(
-      chatId: number,
-      messageId: number,
-    ): Promise<boolean> {
-      const { settlePrompts } = await readSnapshot();
-      return settlePrompts.some((p) => promptIs(p, chatId, messageId));
-    },
-
-    async addSettlement(
-      amount: number,
-      answered?: RecordPrompt,
-    ): Promise<Settlement> {
-      let added!: Settlement;
-      await updateRecords(({ ledger, settlePrompts }) => {
-        added = newSettlement(ledger, amount);
-        return {
-          ledger: { ...ledger, settlements: [...ledger.settlements, added] },
-          settlePrompts: settlePrompts.filter(
-            (p) =>
-              !answered || !promptIs(p, answered.chatId, answered.messageId),
-          ),
-        };
-      });
-      return added;
-    },
-
-    async settleBalance(balance: number): Promise<Settlement | undefined> {
-      let added: Settlement | undefined;
-      await updateRecords(({ ledger }) => {
-        added = undefined;
-        const owed = ledgerBalance(ledger);
-        if (owed <= 0 || toCents(owed) !== toCents(balance)) return {};
-        added = newSettlement(ledger, owed);
-        return {
-          ledger: { ...ledger, settlements: [...ledger.settlements, added] },
-        };
-      });
-      return added;
-    },
 
     async insertLead(data: LeadInput): Promise<StoredLead> {
       let inserted!: StoredLead;
@@ -856,56 +587,17 @@ export function createLeadStore({
         .slice(0, limit);
     },
 
-    async claimMonthlySummary(now: Date): Promise<MonthlySummary | undefined> {
-      const month = summaryMonth(now);
-      if (!month) return undefined;
-      let claimed: MonthlySummary | undefined;
-      await updateRecords(({ leads, ledger, summaries }) => {
-        claimed = undefined;
-        if (summaries.some((m) => m.month === month)) return {};
-        const since =
-          summaries
-            .map((m) => m.createdAt)
-            .sort()
-            .at(-1) ?? null;
-        claimed = {
-          month,
-          since,
-          balance: ledgerBalance(ledger),
-          payouts: ledger.payouts.filter(
-            (p) => since == null || p.createdAt > since,
-          ),
-          leads: leads.filter((l) => !isClosed(l)),
-        };
-        const mark = {
-          type: 'summary' as const,
-          id: nextLedgerId(summaries),
-          month,
-          createdAt: now.toISOString(),
-        };
-        return { summaries: [...summaries, mark] };
-      });
-      return claimed;
-    },
-
-    async releaseMonthlySummary(month: string): Promise<void> {
-      await updateRecords(({ summaries }) => ({
-        summaries: summaries.filter((m) => m.month !== month),
-      }));
-    },
-
     async claimDigest(now: Date): Promise<Digest | undefined> {
       const day = digestDay(now);
       let claimed: Digest | undefined;
-      await updateRecords((records) => {
+      await updateRecords(({ leads, digests }) => {
         claimed = undefined;
-        if (records.digests.some((d) => d.day === day)) return {};
-        claimed = digestOf(records, now);
-        if (Object.values(claimed).every((leads) => leads.length === 0))
+        if (digests.some((d) => d.day === day)) return {};
+        claimed = digestOf(leads, now);
+        if (Object.values(claimed).every((list) => list.length === 0))
           return {};
         const mark = {
           type: 'digest' as const,
-          id: nextLedgerId(records.digests),
           day,
           createdAt: now.toISOString(),
         };

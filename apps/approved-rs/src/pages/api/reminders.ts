@@ -4,17 +4,11 @@ import type { APIContext } from 'astro';
 import { secretMatches } from '@/lib/verifySecret';
 import {
   claimDigest,
-  claimMonthlySummary,
   expireGhostLeads,
   releaseDigest,
-  releaseMonthlySummary,
   resumeLead,
 } from '@/lib/store';
-import {
-  sendDigest,
-  sendMonthlySummary,
-  afterStatusChange,
-} from '@/lib/telegram';
+import { sendDigest, afterStatusChange } from '@/lib/telegram';
 
 const CRON_SECRET = process.env.CRON_SECRET;
 
@@ -62,22 +56,6 @@ async function postDigest(now: Date): Promise<boolean> {
   return true;
 }
 
-async function postMonthlySummary(now: Date): Promise<boolean> {
-  const summary = await claimMonthlySummary(now);
-  if (!summary) return false;
-  try {
-    await sendMonthlySummary(summary);
-    return true;
-  } catch (err) {
-    console.error('[reminders] failed to post the monthly summary', {
-      error: err,
-      month: summary.month,
-    });
-    await releaseMonthlySummary(summary.month);
-    return false;
-  }
-}
-
 export async function GET({ request }: APIContext): Promise<Response> {
   if (
     !secretMatches(
@@ -91,13 +69,9 @@ export async function GET({ request }: APIContext): Promise<Response> {
   const now = new Date();
   const expiredGhosts = await expireGhosts(now);
   const digestSent = await postDigest(now);
-  const monthlySummary = await postMonthlySummary(now);
 
-  return new Response(
-    JSON.stringify({ expiredGhosts, digestSent, monthlySummary }),
-    {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    },
-  );
+  return new Response(JSON.stringify({ expiredGhosts, digestSent }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
 }

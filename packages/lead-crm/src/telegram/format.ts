@@ -3,13 +3,7 @@ import { channelLabel } from '../channelLabels.ts';
 import { isTelegramIdContact } from '../contactShape.ts';
 import { LEADS_PATH } from '../quarantine.ts';
 import { isClosed, type LeadStatus, type StoredLead } from '../schema.ts';
-import {
-  MAX_LIST_ROWS,
-  isPlaceholderContact,
-  type Digest,
-  type MonthlySummary,
-} from '../store.ts';
-import type { Payout, Settlement } from '../ledger.ts';
+import { MAX_LIST_ROWS, isPlaceholderContact, type Digest } from '../store.ts';
 import {
   LEDGER_TIME_ZONE,
   balanceOf,
@@ -229,99 +223,6 @@ export function operationNoticeText(
   ].join(' · ');
 }
 
-export function buildToPay(balance: number): string {
-  return `<b>💶 К оплате</b>\n\n${formatMoney(balance)}`;
-}
-
-export const SETTLEMENT_COPY = {
-  otherButton: '✏️ Другая сумма',
-  prompt: '💸 Сколько получено (в евро)?\n\nНапример: 200',
-  ack: 'Жду сумму',
-  stale: 'Сумма к оплате изменилась',
-} as const;
-
-export function settleKeyboard(balance: number): Keyboard {
-  return {
-    inline_keyboard: [
-      ...(balance > 0
-        ? [
-            [
-              {
-                text: `💸 Оплачено ${formatMoney(balance)}`,
-                callback_data: `settle:${balance}`,
-              },
-            ],
-          ]
-        : []),
-      [{ text: SETTLEMENT_COPY.otherButton, callback_data: 'settle:other' }],
-    ],
-  };
-}
-
-export function settlementText(
-  settlement: Settlement,
-  balance: number,
-): string {
-  return `💸 Оплата получена: ${formatMoney(settlement.amount)}\nОсталось к оплате: ${formatMoney(balance)}`;
-}
-
-export const TELEGRAM_TEXT_LIMIT = 4096;
-export const MAX_SUMMARY_ROWS = 20;
-const MAX_SUMMARY_FIELD = 60;
-
-function clip(text: string): string {
-  return escapeHtml(
-    text.length > MAX_SUMMARY_FIELD
-      ? `${text.slice(0, MAX_SUMMARY_FIELD - 1)}…`
-      : text,
-  );
-}
-
-function summaryPayoutLine(payout: Payout): string {
-  return [
-    `• ${formatMoney(payout.amount)}`,
-    payout.leadId == null ? 'без заявки' : `#${payout.leadId}`,
-    ...(payout.brand ? [clip(payout.brand)] : []),
-    formatDateRu(payout.createdAt),
-    ...(payout.note ? [clip(payout.note)] : []),
-  ].join(' · ');
-}
-
-function summaryLeadLine(lead: StoredLead): string {
-  return `• #${lead.id} ${clip(leadDisplayName(lead))} · ${clip(lead.brand)} · ${STATUS_META[lead.status].emoji}`;
-}
-
-function cappedLines(lines: string[], rows: number, empty: string): string[] {
-  if (!lines.length) return [empty];
-  const rest = lines.length - rows;
-  return rest > 0 ? [...lines.slice(0, rows), `+${rest} ещё`] : lines;
-}
-
-export function monthlySummaryText({
-  since,
-  balance,
-  payouts,
-  leads,
-}: MonthlySummary): string {
-  const payoutLines = payouts.map(summaryPayoutLine);
-  const leadLines = [...leads].sort((a, b) => b.id - a.id).map(summaryLeadLine);
-  const render = (rows: number) =>
-    [
-      '<b>📅 Итоги месяца</b>',
-      '',
-      `💶 К оплате: ${formatMoney(balance)}`,
-      '',
-      `<b>Выплаты ${since ? `с ${formatDateRu(since)}` : 'за всё время'}: ${payouts.length}</b>`,
-      ...cappedLines(payoutLines, rows, 'Выплат не было.'),
-      '',
-      `<b>Без итога: ${leads.length}</b>`,
-      ...cappedLines(leadLines, rows, 'Открытых заявок нет.'),
-    ].join('\n');
-  let rows = MAX_SUMMARY_ROWS;
-  while (rows > 0 && render(rows).length > TELEGRAM_TEXT_LIMIT) rows--;
-  return render(rows);
-}
-
 export function buildSearchResults(leads: StoredLead[]): {
   text: string;
   reply_markup: Keyboard;
@@ -349,6 +250,16 @@ const ledgerDate = new Intl.DateTimeFormat('ru-RU', {
 
 function flowLine(label: string, { credited, debited }: FlowSums): string {
   return `${label}: +${formatMoney(credited)} · −${formatMoney(debited)}`;
+}
+
+const MAX_STATS_NOTE = 60;
+
+function clip(text: string): string {
+  return escapeHtml(
+    text.length > MAX_STATS_NOTE
+      ? `${text.slice(0, MAX_STATS_NOTE - 1)}…`
+      : text,
+  );
 }
 
 function statsOperationLine(operation: LedgerOperation): string {
@@ -424,7 +335,6 @@ export const REPLY_COPY = {
 
 const DIGEST_SECTIONS: [keyof Digest, string][] = [
   ['due', '⏰ Пора вернуться'],
-  ['unpaid', '💶 Сделка без суммы — ответь 0, если ничего'],
   ['stale', '🕐 Без движения 7 дней'],
 ];
 
@@ -445,14 +355,8 @@ export const LEAD_ACTION_COPY = {
   deleted: '🗑 Заявка удалена.',
   deleteAck: 'Удалено',
   denied: '⛔ Доступ запрещён.',
-} as const;
-
-export const OUTCOME_COPY = {
-  wonPrompt:
-    '💰 Сколько переведёшь админу с этой заявки (в евро)? Ответь на это сообщение суммой.\n\nДеньги будут позже — просто не отвечай. Ничего не будет — ответь 0.',
-  wonAck: 'Сделка ✅ — жду сумму',
-  workAck: 'В работе ⏳',
-  badAmount: '⚠️ Нужна сумма в евро. Попробуйте ещё раз.',
+  inWork: 'В работе ⏳',
+  noteAdded: '📝 Заметка добавлена',
 } as const;
 
 const FIELD_PREVIEW_LIMIT = 120;
@@ -488,62 +392,6 @@ export function quarantinedLeadsText(
 
 export function statusChangeText(lead: StoredLead): string {
   return `🔔 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: статус — ${statusMark(lead.status)}`;
-}
-
-const LEDGER_AUTHOR_LABELS: Record<LedgerAuthor, string> = {
-  owner: 'владелец',
-  admin: 'админ',
-};
-
-function payoutSubject(
-  lead: StoredLead | undefined,
-  brand: string | null,
-): string {
-  if (lead) return `по заявке #${lead.id} ${escapeHtml(leadDisplayName(lead))}`;
-  return brand ? `без заявки · ${escapeHtml(brand)}` : 'без заявки';
-}
-
-function noteLines(note: string): string[] {
-  return note ? [`За что: ${escapeHtml(note)}`] : [];
-}
-
-export function payoutNotificationText(
-  lead: StoredLead | undefined,
-  payout: Payout,
-): string {
-  const last = payout.edits.at(-1);
-  return [
-    `${last ? '✏️ Исправлена выплата' : '💶 Новая выплата'} ${payoutSubject(lead, payout.brand)}`,
-    `Записал: ${LEDGER_AUTHOR_LABELS[last?.by ?? payout.createdBy]}`,
-    ...noteLines(payout.note),
-    ``,
-    `Было: ${last ? formatMoney(last.before) : '—'}`,
-    `Стало: ${formatMoney(payout.amount)}`,
-  ].join('\n');
-}
-
-export const PAYOUT_COPY = {
-  fixButton: '✏️ Исправить',
-  fixPrompt: '✏️ Какая сумма верная (в евро)?\n\nНапример: 80',
-  fixAck: 'Жду сумму',
-  invalidAmount: '⚠️ Нужна сумма в евро. Попробуйте ещё раз.',
-  settled:
-    '🔒 Эта выплата уже вошла в расчёт — исправить её может только админ.',
-  noteAdded: '📝 Заметка добавлена',
-} as const;
-
-export function payoutRecordedMessage(payout: Payout): {
-  text: string;
-  reply_markup: Keyboard;
-} {
-  return {
-    text: `✅ ${formatMoney(payout.amount)} записано`,
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: PAYOUT_COPY.fixButton, callback_data: `payfix:${payout.id}` }],
-      ],
-    },
-  };
 }
 
 export function createFormatter({
@@ -687,8 +535,8 @@ export function createFormatter({
           '<b>❓ Как пользоваться</b>',
           '',
           '<b>Карточка в группе</b>',
-          '✅ Сделка — бот спросит, сколько переведёшь админу (0 — если ничего). ❌ Отказ — заявка уходит из списков. ⏳ В работе — отметить, что занимаешься.',
-          'Ответь на карточку суммой — запишется выплата, любым другим текстом — заметка. Сумму можно поправить кнопкой ✏️ Исправить.',
+          '✅ Сделка, ❌ Отказ — итог заявки, она уходит из списков. ⏳ В работе — отметить, что занимаешься.',
+          'Ответь на карточку текстом — он сохранится заметкой в заявке.',
           '',
           '<b>В боте</b>',
           '📂 Открыть в боте — вся заявка: ⏰ Отложить до даты (в этот день вернётся в открытые) и 💬 ответить посетителю через бота.',
@@ -701,7 +549,7 @@ export function createFormatter({
       return [
         '<b>❓ Как пользоваться</b>',
         '',
-        'Заявки ведёт владелец: ✅ Сделка, ❌ Отказ, ⏳ В работе на карточке в группе. О каждой выплате тебе приходит уведомление.',
+        'Заявки ведёт владелец: ✅ Сделка, ❌ Отказ, ⏳ В работе на карточке в группе.',
         '',
         '<b>Меню</b>',
         'Сверху — 💶 Мне должны. ➖ Списать — когда деньги пришли, ➕ Зачислить — если владелец что-то забыл. Бот спросит сумму: ответь 40 или 40 перевод. О каждой операции владельца тебе придёт уведомление.',

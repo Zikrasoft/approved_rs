@@ -19,8 +19,6 @@ import {
   ensureLeadCard,
   sendForceReplyPrompt,
   safeEditMessage,
-  sendPayoutNotificationToAdmin,
-  sendSettlementToOwner,
   sendOperationNotice,
   sendMessage,
   buildBalance,
@@ -28,7 +26,6 @@ import {
   operationRecordedText,
   operationRefusedText,
   reAskOperationText,
-  buildToPay,
   buildSearchResults,
   buildMenu,
   buildHelp,
@@ -42,13 +39,7 @@ import {
   OWNER_IDS,
   ADMIN_IDS,
   REPLY_COPY,
-  PAYOUT_COPY,
-  payoutRecordedMessage,
-  OUTCOME_COPY,
   LEAD_ACTION_COPY,
-  SETTLEMENT_COPY,
-  settleKeyboard,
-  settlementText,
   escapeHtml,
   type Role,
 } from '@/lib/telegram';
@@ -62,23 +53,12 @@ import {
   findByPendingPrompt,
   findByCard,
   addNote,
-  readLedger,
-  correctPayout,
-  setPayoutPrompt,
-  findPayoutByPrompt,
   resolvePendingPrompt,
   searchLeads,
   resumeLead,
   postponeLead,
   canPostpone,
   postponePatch,
-  addPayout,
-  getBalance,
-  addSettlement,
-  addSettlePrompt,
-  findSettlePrompt,
-  settleBalance,
-  isSettled,
   readLeads,
   appendNote,
   readBalance,
@@ -90,8 +70,6 @@ import {
   type OperationType,
   type LeadStatus,
   type PendingPrompt,
-  type Payout,
-  type Settlement,
   type StoredLead,
 } from '@/lib/store';
 
@@ -145,43 +123,6 @@ function roleOf(id: number | undefined): Role | undefined {
   if (OWNER_IDS.includes(id)) return 'owner';
   if (ADMIN_IDS.includes(id)) return 'admin';
   return undefined;
-}
-
-const MAX_PAYOUT_AMOUNT = 1_000_000;
-
-const AMOUNT_NOISE = {
-  prompt: /[^\d.,-]/g,
-  plain: /\s+|(?:€|eur|евро)\.?$/gi,
-};
-
-function amountSchema(noise: RegExp) {
-  return z
-    .string()
-    .transform((text) =>
-      text.replace(noise, '').replace(/\.$/, '').replace(',', '.'),
-    )
-    .pipe(z.string().regex(/^\d+(\.\d+)?$/))
-    .transform(Number)
-    .pipe(z.number().max(MAX_PAYOUT_AMOUNT));
-}
-
-const AMOUNT_SCHEMAS = {
-  prompt: amountSchema(AMOUNT_NOISE.prompt),
-  plain: amountSchema(AMOUNT_NOISE.plain),
-};
-
-function parseAmount(
-  text: string,
-  {
-    mode = 'prompt',
-    allowZero = false,
-  }: { mode?: keyof typeof AMOUNT_SCHEMAS; allowZero?: boolean } = {},
-): number | null {
-  const parsed = AMOUNT_SCHEMAS[mode].safeParse(text);
-  if (!parsed.success) return null;
-  return parsed.data > 0 || (allowZero && parsed.data === 0)
-    ? parsed.data
-    : null;
 }
 
 function parseReminderDate(text: string): string | null {
@@ -268,18 +209,12 @@ async function changeStatus(
     await (fromDetail
       ? afterStatusChangeOn(ctx, updated)
       : afterStatusChange(updated));
-  if (key !== 'won')
-    return answerCallback(ctx.cbId, LEAD_ACTION_COPY.statusUpdated);
-  await startPrompt(ctx, id, {
-    prompt: OUTCOME_COPY.wonPrompt,
-    kind: 'deal_amount',
-    ackText: OUTCOME_COPY.wonAck,
-  });
+  await answerCallback(ctx.cbId, LEAD_ACTION_COPY.statusUpdated);
 }
 
 async function markInWork(ctx: Ctx, id: number): Promise<void> {
   await touchLead(id);
-  await answerCallback(ctx.cbId, OUTCOME_COPY.workAck);
+  await answerCallback(ctx.cbId, LEAD_ACTION_COPY.inWork);
 }
 
 async function openRemindPicker(ctx: Ctx, id: number): Promise<void> {
@@ -339,29 +274,6 @@ async function confirmDelete(ctx: Ctx, id: number): Promise<void> {
   await answerCallback(ctx.cbId, LEAD_ACTION_COPY.deleteAck);
 }
 
-async function askAmount(ctx: Ctx): Promise<number> {
-  const promptId = await sendForceReplyPrompt(
-    ctx.chatId,
-    PAYOUT_COPY.fixPrompt,
-  );
-  await answerCallback(ctx.cbId, PAYOUT_COPY.fixAck);
-  return promptId;
-}
-
-async function askPayoutFix(ctx: Ctx, payoutId: number): Promise<void> {
-  const { payouts, settlements } = await readLedger();
-  const payout = payouts.find((p) => p.id === payoutId);
-  if (!payout) return ack(ctx);
-  if (ctx.role === 'owner' && isSettled(payout, settlements)) {
-    await answerCallback(ctx.cbId, PAYOUT_COPY.settled);
-    return;
-  }
-  await setPayoutPrompt(payoutId, {
-    chatId: ctx.chatId,
-    messageId: await askAmount(ctx),
-  });
-}
-
 async function showBalance(ctx: Ctx): Promise<void> {
   const { text, reply_markup } = buildBalance(ctx.role, await readBalance());
   await sendMessage(ctx.chatId, text, { reply_markup });
@@ -386,46 +298,6 @@ function operationRow(type: OperationType): CallbackRow {
       await answerCallback(ctx.cbId, LEDGER_COPY.ack);
     },
   ];
-}
-
-const leadOf = async (leadId: number | null) =>
-  leadId == null ? undefined : getLead(leadId);
-
-async function recordedSettlement(settlement: Settlement): Promise<string> {
-  const balance = await getBalance();
-  await sendSettlementToOwner(settlement, balance);
-  return settlementText(settlement, balance);
-}
-
-async function settle(ctx: Ctx, shownBalance: string): Promise<void> {
-  const settlement = await settleBalance(Number(shownBalance));
-  await bot.api.editMessageReplyMarkup(ctx.chatId, ctx.messageId, {
-    reply_markup: { inline_keyboard: [] },
-  });
-  if (!settlement) {
-    const balance = await getBalance();
-    await sendMessage(ctx.chatId, buildToPay(balance), {
-      reply_markup: settleKeyboard(balance),
-      ...threadedTo(ctx.messageId),
-    });
-    await answerCallback(ctx.cbId, SETTLEMENT_COPY.stale);
-    return;
-  }
-  await sendMessage(
-    ctx.chatId,
-    await recordedSettlement(settlement),
-    threadedTo(ctx.messageId),
-  );
-  await ack(ctx);
-}
-
-async function askSettlement(ctx: Ctx): Promise<void> {
-  const messageId = await sendForceReplyPrompt(
-    ctx.chatId,
-    SETTLEMENT_COPY.prompt,
-  );
-  await addSettlePrompt({ chatId: ctx.chatId, messageId });
-  await answerCallback(ctx.cbId, SETTLEMENT_COPY.ack);
 }
 
 async function listOpen(ctx: Ctx): Promise<void> {
@@ -483,9 +355,6 @@ export const CALLBACKS: CallbackRow[] = [
   [/^del:(\d+)$/, 'admin', withId(askDelete)],
   [/^delconfirm:(\d+)$/, 'admin', withId(confirmDelete)],
   [/^delcancel:(\d+)$/, 'admin', withId(backToLead)],
-  [/^payfix:(\d+)$/, 'any', withId(askPayoutFix)],
-  [/^settle:other$/, 'admin', askSettlement],
-  [/^settle:(\d+(?:\.\d+)?)$/, 'admin', settle],
   [
     /^reply:(\d+)$/,
     'any',
@@ -574,30 +443,6 @@ type PromptReply = {
 };
 type PromptHandler = (reply: PromptReply) => Promise<void>;
 
-async function replyDealAmount({
-  role,
-  chatId,
-  messageId,
-  replyToMessageId,
-  text,
-}: PromptReply): Promise<void> {
-  const amount = parseAmount(text, { allowZero: true });
-  if (amount == null) {
-    await sendMessage(chatId, OUTCOME_COPY.badAmount);
-    return;
-  }
-  const resolved = await resolvePendingPrompt(
-    chatId,
-    replyToMessageId,
-    () => ({}),
-  );
-  if (!resolved) return;
-  const payout = await addPayout({ amount, by: role, leadId: resolved.id });
-  if (!payout) return;
-  await sendPayoutNotificationToAdmin(resolved, payout);
-  await sendPayoutRecorded(chatId, messageId, payout);
-}
-
 async function replyPostpone({
   chatId,
   replyToMessageId,
@@ -677,17 +522,7 @@ function threadedTo(messageId: number) {
   };
 }
 
-async function sendPayoutRecorded(
-  chatId: number,
-  replyTo: number,
-  payout: Payout,
-): Promise<void> {
-  const { text, reply_markup } = payoutRecordedMessage(payout);
-  await sendMessage(chatId, text, { reply_markup, ...threadedTo(replyTo) });
-}
-
 const PROMPT_REPLIES: Record<PromptKind, PromptHandler> = {
-  deal_amount: replyDealAmount,
   postpone: replyPostpone,
   reply_visitor: replyVisitor,
 };
@@ -704,66 +539,15 @@ async function replyToPrompt(reply: Reply): Promise<boolean> {
   return true;
 }
 
-async function replyToPayoutPrompt(reply: Reply): Promise<boolean> {
-  const payout = await findPayoutByPrompt(reply.chatId, reply.replyToMessageId);
-  if (!payout) return false;
-  const amount = parseAmount(reply.text, { allowZero: true });
-  if (amount == null) {
-    await sendMessage(reply.chatId, PAYOUT_COPY.invalidAmount);
-    return true;
-  }
-  const outcome = await correctPayout(payout.id, amount, reply.role);
-  if (!outcome.ok) {
-    await setPayoutPrompt(payout.id, null);
-    await sendMessage(reply.chatId, PAYOUT_COPY.settled);
-    return true;
-  }
-  await sendPayoutNotificationToAdmin(
-    await leadOf(payout.leadId),
-    outcome.payout,
-  );
-  await sendPayoutRecorded(reply.chatId, reply.messageId, outcome.payout);
-  return true;
-}
-
 async function replyToCard(reply: Reply): Promise<boolean> {
   const lead = await findByCard(reply.chatId, reply.replyToMessageId);
   if (!lead) return false;
   const text = reply.text.trim();
   if (!text) return true;
-  const amount = parseAmount(text, { mode: 'plain', allowZero: true });
-  if (amount == null) {
-    await addNote(lead.id, text);
-    await sendMessage(
-      reply.chatId,
-      PAYOUT_COPY.noteAdded,
-      threadedTo(reply.messageId),
-    );
-    return true;
-  }
-  const payout = await addPayout({ amount, by: reply.role, leadId: lead.id });
-  const updated = await getLead(lead.id);
-  if (!payout || !updated) return true;
-  if (updated.status !== lead.status)
-    await afterStatusChange(updated, { notice: false });
-  await sendPayoutNotificationToAdmin(updated, payout);
-  await sendPayoutRecorded(reply.chatId, reply.messageId, payout);
-  return true;
-}
-
-async function replyToSettlementPrompt(reply: Reply): Promise<boolean> {
-  const prompt = { chatId: reply.chatId, messageId: reply.replyToMessageId };
-  if (!(await findSettlePrompt(prompt.chatId, prompt.messageId))) return false;
-  if (reply.role !== 'admin') return true;
-  const amount = parseAmount(reply.text);
-  if (amount == null) {
-    await sendMessage(reply.chatId, PAYOUT_COPY.invalidAmount);
-    return true;
-  }
-  const settlement = await addSettlement(amount, prompt);
+  await addNote(lead.id, text);
   await sendMessage(
     reply.chatId,
-    await recordedSettlement(settlement),
+    LEAD_ACTION_COPY.noteAdded,
     threadedTo(reply.messageId),
   );
   return true;
@@ -799,13 +583,7 @@ async function replyToOperationPrompt(reply: Reply): Promise<boolean> {
   return true;
 }
 
-const REPLY_ROUTES = [
-  replyToOperationPrompt,
-  replyToPrompt,
-  replyToPayoutPrompt,
-  replyToSettlementPrompt,
-  replyToCard,
-];
+const REPLY_ROUTES = [replyToOperationPrompt, replyToPrompt, replyToCard];
 
 async function routeReply(reply: Reply): Promise<void> {
   for (const route of REPLY_ROUTES) if (await route(reply)) return;
