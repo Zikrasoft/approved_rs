@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { roundMoney, toCents } from './money.ts';
 import { retryOnConflict } from './storage/retry.ts';
-import type { LeadStorage } from './storage/types.ts';
+import { StorageConflictError, type LeadStorage } from './storage/types.ts';
 
 export const LEDGER_PATH = 'data/ledger.json';
 export const LEDGER_TIME_ZONE = 'Europe/Belgrade';
@@ -169,7 +169,6 @@ export function createLedgerStore({ storage, opening }: LedgerStoreOptions) {
     return retryOnConflict(async () => {
       const { file, version } = await read();
       const { next, result } = mutate(file);
-      // TODO: the first write (no blob, no version) is unconditional, so two racing first writers can lose one; make it create-only.
       if (next) await storage.write(next, version);
       return result;
     }, 'ledger: conflict retry limit exceeded');
@@ -179,8 +178,26 @@ export function createLedgerStore({ storage, opening }: LedgerStoreOptions) {
     return (await read()).file.operations;
   }
 
+  async function createIfMissing(): Promise<void> {
+    const { file, version } = await read();
+    if (version !== undefined) return;
+    await storage.write(file, undefined).catch((error: unknown) => {
+      if (!(error instanceof StorageConflictError)) throw error;
+    });
+  }
+
+  let opened: Promise<void> | undefined;
+
   return {
     readOperations,
+
+    ensureOpened(): Promise<void> {
+      opened ??= createIfMissing().catch((error: unknown) => {
+        opened = undefined;
+        throw error;
+      });
+      return opened;
+    },
 
     async readBalance(): Promise<number> {
       return balanceOf(await readOperations());

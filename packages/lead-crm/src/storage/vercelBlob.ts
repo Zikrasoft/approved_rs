@@ -17,6 +17,16 @@ export interface VercelBlobStorageOptions {
   path: string;
 }
 
+async function exists(path: string): Promise<boolean> {
+  try {
+    await head(path);
+    return true;
+  } catch (error) {
+    if (error instanceof BlobNotFoundError) return false;
+    throw error;
+  }
+}
+
 export function createVercelBlobStorage({
   path,
 }: VercelBlobStorageOptions): LeadStorage {
@@ -33,7 +43,7 @@ export function createVercelBlobStorage({
     async write(leads: unknown, version: string | undefined): Promise<void> {
       const options: Parameters<typeof put>[2] = {
         access: 'private',
-        allowOverwrite: true,
+        allowOverwrite: version !== undefined,
         contentType: 'application/json',
       };
       if (version) options.ifMatch = version;
@@ -43,6 +53,9 @@ export function createVercelBlobStorage({
         if (err instanceof BlobPreconditionFailedError) {
           throw new StorageConflictError(err.message);
         }
+        if (version === undefined && (await exists(path))) {
+          throw new StorageConflictError('blob already exists');
+        }
         throw err;
       }
     },
@@ -51,15 +64,7 @@ export function createVercelBlobStorage({
 
 export function createBlobOrderMarkers(): OrderMarkers {
   return {
-    async has(orderId: string): Promise<boolean> {
-      try {
-        await head(markerPath(orderId));
-        return true;
-      } catch (error) {
-        if (error instanceof BlobNotFoundError) return false;
-        throw error;
-      }
-    },
+    has: (orderId: string) => exists(markerPath(orderId)),
 
     async add(orderId: string): Promise<void> {
       await put(markerPath(orderId), markerBody(orderId), {

@@ -29,6 +29,15 @@ describe('createMemoryStorage', () => {
     );
   });
 
+  it('refuses a write without a version once something is stored', async () => {
+    const storage = createMemoryStorage();
+    await storage.write([], undefined);
+
+    await expect(storage.write([], undefined)).rejects.toBeInstanceOf(
+      StorageConflictError,
+    );
+  });
+
   it('stores a copy, so mutating the written array cannot change what is stored', async () => {
     const storage = createMemoryStorage();
     const leads = [{ id: 1 }];

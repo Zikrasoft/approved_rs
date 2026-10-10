@@ -33,7 +33,7 @@ export function createMemoryStorage(): MemoryStorage {
         hook?.();
         return Promise.reject(new StorageConflictError());
       }
-      if (expectedVersion !== undefined && expectedVersion !== version) {
+      if (expectedVersion !== version) {
         return Promise.reject(new StorageConflictError());
       }
       raw = JSON.parse(JSON.stringify(leads));

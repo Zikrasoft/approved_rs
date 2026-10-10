@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { roundMoney } from './money.ts';
+import { roundMoney, toCents } from './money.ts';
 
 const PAID_EPSILON = 0.005;
 export const LEGACY_COMMISSION_PERCENT = 10;
@@ -58,3 +58,19 @@ export const legacyIncomesSchema: z.ZodType<LegacyIncomes, unknown> =
     const percent = money.commissionPercent ?? LEGACY_COMMISSION_PERCENT;
     return { percent, incomes: incomesOf(money, percent) };
   });
+
+export function legacyOwed(entries: unknown[]): number {
+  const cents = entries.reduce<number>((sum, entry) => {
+    const money = legacyIncomesSchema.safeParse(entry);
+    if (!money.success) return sum;
+    const { percent, incomes } = money.data;
+    return incomes
+      .filter((income) => income.paidAt === null)
+      .reduce(
+        (owed, income) =>
+          owed + toCents(legacyPayoutAmount(income.amount, percent)),
+        sum,
+      );
+  }, 0);
+  return cents / 100;
+}

@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { legacyIncomesSchema } from './legacyIncomes.ts';
 import { toCents } from './money.ts';
 import { LEDGER_TIME_ZONE } from './ledgerStore.ts';
 import { channelLabel } from './channelLabels.ts';
@@ -28,9 +27,7 @@ import {
   settlePromptSchema,
   settlementSchema,
   summaryMarkSchema,
-  withMigratedIncomes,
   type DigestMark,
-  type LegacyLeadMoney,
   type Ledger,
   type LedgerAuthor,
   type Payout,
@@ -134,6 +131,7 @@ export interface LeadStoreOptions {
   storage: LeadStorage;
   schema: StoredLeadSchema;
   quarantine?: (entries: unknown[]) => Promise<void>;
+  beforeWrite?: () => Promise<void>;
 }
 
 export function isPlaceholderContact(contact: string): boolean {
@@ -279,6 +277,7 @@ export function createLeadStore({
   storage,
   schema,
   quarantine,
+  beforeWrite,
 }: LeadStoreOptions) {
   function newStoredLead(data: LeadInput, id: number): StoredLead {
     const now = new Date().toISOString();
@@ -311,7 +310,6 @@ export function createLeadStore({
       );
     }
     const leads: StoredLead[] = [];
-    const legacy: LegacyLeadMoney[] = [];
     const ledger: Ledger = { payouts: [], settlements: [] };
     const summaries: SummaryMark[] = [];
     const digests: DigestMark[] = [];
@@ -331,15 +329,12 @@ export function createLeadStore({
         continue;
       }
       const parsed = schema.safeParse(entry);
-      const money = legacyIncomesSchema.safeParse(entry);
-      if (parsed.success && money.success) {
-        leads.push(parsed.data);
-        legacy.push({ lead: parsed.data, money: money.data });
-      } else unreadable.push(entry);
+      if (parsed.success) leads.push(parsed.data);
+      else unreadable.push(entry);
     }
     return {
       leads,
-      ledger: withMigratedIncomes(legacy, ledger),
+      ledger,
       summaries,
       digests,
       settlePrompts,
@@ -371,6 +366,7 @@ export function createLeadStore({
           settlePromptSchema.parse(p),
         ),
       };
+      await beforeWrite?.();
       await copyToQuarantine(unreadable);
       await storage.write(
         [

@@ -28,8 +28,10 @@ export interface FileStorageOptions {
 const versionOf = (text: string): string =>
   createHash('sha1').update(text).digest('hex');
 
-const isMissing = (error: unknown): boolean =>
-  error instanceof Error && 'code' in error && error.code === 'ENOENT';
+const hasCode = (error: unknown, code: string): boolean =>
+  error instanceof Error && 'code' in error && error.code === code;
+const isMissing = (error: unknown) => hasCode(error, 'ENOENT');
+const isExisting = (error: unknown) => hasCode(error, 'EEXIST');
 
 export function createFileStorage({
   path,
@@ -51,11 +53,17 @@ export function createFileStorage({
     read,
 
     async write(leads: unknown, version: string | undefined): Promise<void> {
-      if (version !== undefined && version !== (await read()).version) {
-        throw new StorageConflictError();
-      }
-      const staging = `${file}.tmp`;
       await mkdir(dirname(file), { recursive: true });
+      if (version === undefined) {
+        await writeFile(file, JSON.stringify(leads), { flag: 'wx' }).catch(
+          (error: unknown) => {
+            throw isExisting(error) ? new StorageConflictError() : error;
+          },
+        );
+        return;
+      }
+      if (version !== (await read()).version) throw new StorageConflictError();
+      const staging = `${file}.tmp`;
       await writeFile(staging, JSON.stringify(leads));
       await rename(staging, file);
     },

@@ -1,7 +1,5 @@
 import { z } from 'zod';
-import { legacyPayoutAmount, type LegacyIncomes } from './legacyIncomes.ts';
 import { roundMoney } from './money.ts';
-import type { StoredLead } from './schema.ts';
 import { ledgerAuthorSchema, type LedgerAuthor } from './ledgerStore.ts';
 
 export type { LedgerAuthor };
@@ -31,7 +29,6 @@ export const payoutSchema = z.object({
   brand: z.string().nullable().default(null),
   edits: z.array(payoutEditSchema).default(() => []),
   pendingPrompt: recordPromptSchema.nullable().catch(null),
-  migratedFrom: z.string().optional(),
 });
 export type Payout = z.infer<typeof payoutSchema>;
 
@@ -41,7 +38,6 @@ export const settlementSchema = z.object({
   amount: z.number().positive(),
   createdAt: z.string(),
   createdBy: ledgerAuthorSchema,
-  migratedFrom: z.string().optional(),
 });
 export type Settlement = z.infer<typeof settlementSchema>;
 
@@ -136,52 +132,4 @@ export function correction(
       pendingPrompt: null,
     },
   };
-}
-
-export interface LegacyLeadMoney {
-  lead: Pick<StoredLead, 'id' | 'brand'>;
-  money: LegacyIncomes;
-}
-
-export function withMigratedIncomes(
-  legacy: LegacyLeadMoney[],
-  ledger: Ledger,
-): Ledger {
-  const payouts = [...ledger.payouts];
-  const settlements = [...ledger.settlements];
-  const paidOut = new Set(payouts.map((p) => p.migratedFrom));
-  const settled = new Set(settlements.map((s) => s.migratedFrom));
-  for (const { lead, money } of legacy) {
-    for (const income of money.incomes) {
-      const key = `income:${lead.id}:${income.id}`;
-      const amount = legacyPayoutAmount(income.amount, money.percent);
-      if (amount <= 0) continue;
-      if (!paidOut.has(key)) {
-        payouts.push({
-          type: 'payout',
-          id: nextLedgerId(payouts),
-          amount,
-          note: '',
-          createdAt: income.at,
-          createdBy: 'owner',
-          leadId: lead.id,
-          brand: lead.brand,
-          edits: [],
-          pendingPrompt: null,
-          migratedFrom: key,
-        });
-      }
-      if (income.paidAt && !settled.has(key)) {
-        settlements.push({
-          type: 'settlement',
-          id: nextLedgerId(settlements),
-          amount,
-          createdAt: income.paidAt,
-          createdBy: 'admin',
-          migratedFrom: key,
-        });
-      }
-    }
-  }
-  return { payouts, settlements };
 }
