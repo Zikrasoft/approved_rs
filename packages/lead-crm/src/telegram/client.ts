@@ -1,10 +1,8 @@
-export interface TelegramCredentials {
-  botToken: string;
-  groupId: string;
-  botUsername: string;
-  ownerIds: number[];
-  adminIds: number[];
-}
+import { Bot, GrammyError, type Api, type Transformer } from 'grammy';
+import type { UserFromGetMe } from 'grammy/types';
+import type { Keyboard } from './format.ts';
+
+export type SendExtra = Parameters<Api['sendMessage']>[2];
 
 export function parseIds(value: string | undefined): number[] {
   if (!value) return [];
@@ -16,105 +14,93 @@ export function parseIds(value: string | undefined): number[] {
     .filter(Number.isFinite);
 }
 
-export function expectMessageId(sent: unknown, context: string): number {
-  const messageId = (sent as { message_id?: unknown } | null)?.message_id;
-  if (typeof messageId !== 'number')
-    throw new Error(`[telegram] ${context} response missing message_id`);
-  return messageId;
+export function isMessageGone(err: unknown): boolean {
+  return (
+    err instanceof GrammyError &&
+    /message to edit not found|message can't be edited/.test(err.description)
+  );
 }
 
-export function expectMessageAndChatId(
-  sent: unknown,
-  context: string,
-): { messageId: number; chatId: number } {
-  const result = sent as {
-    message_id?: unknown;
-    chat?: { id?: unknown };
-  } | null;
-  const chatId = result?.chat?.id;
-  if (typeof chatId !== 'number')
-    throw new Error(`[telegram] ${context} response missing chat.id`);
-  return { messageId: expectMessageId(sent, context), chatId };
+const ignoreNotModified: Transformer = async (
+  prev,
+  method,
+  payload,
+  signal,
+) => {
+  const response = await prev(method, payload, signal);
+  if (
+    method === 'editMessageText' &&
+    !response.ok &&
+    response.description.includes('message is not modified')
+  )
+    return { ok: true, result: true as never };
+  return response;
+};
+
+function staticBotInfo(botToken: string, username: string): UserFromGetMe {
+  return {
+    id: Number(botToken.split(':', 1)[0]),
+    is_bot: true,
+    first_name: username,
+    username,
+    can_join_groups: true,
+    can_read_all_group_messages: false,
+    supports_inline_queries: false,
+    can_connect_to_business: false,
+    has_main_web_app: false,
+    has_topics_enabled: false,
+    allows_users_to_create_topics: false,
+    can_manage_bots: false,
+    supports_join_request_queries: false,
+  };
 }
 
-export function createTelegramClient(botToken: string) {
-  const api = `https://api.telegram.org/bot${botToken}`;
-
-  async function tgPost(method: string, body: object): Promise<unknown> {
-    const response = await fetch(`${api}/${method}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    const data = (await response.json()) as {
-      result: unknown;
-      description?: string;
-    };
-    if (!response.ok) {
-      throw new Error(
-        `Telegram ${method} failed: ${response.status} ${data.description ?? ''}`.trim(),
-      );
-    }
-    return data.result;
-  }
+export function createTelegramClient(botToken: string, botUsername = '') {
+  const bot = new Bot(botToken, {
+    botInfo: staticBotInfo(botToken, botUsername),
+    client: {
+      fetch: (...args: Parameters<typeof fetch>) => globalThis.fetch(...args),
+    },
+  });
+  bot.api.config.use(ignoreNotModified);
+  const { api } = bot;
 
   return {
-    tgPost,
+    bot,
+    api,
 
     async safeEditMessage(
       chatId: number,
       messageId: number,
       text: string,
-      keyboard: object,
+      keyboard: Keyboard,
     ): Promise<void> {
-      try {
-        await tgPost('editMessageText', {
-          chat_id: chatId,
-          message_id: messageId,
-          text,
-          parse_mode: 'HTML',
-          reply_markup: keyboard,
-        });
-      } catch (err) {
-        if (
-          err instanceof Error &&
-          err.message.includes('message is not modified')
-        )
-          return;
-        throw err;
-      }
+      await api.editMessageText(chatId, messageId, text, {
+        parse_mode: 'HTML',
+        reply_markup: keyboard,
+      });
     },
 
     async sendMessage(
       chatId: number | string,
       text: string,
-      extra?: object,
+      extra?: SendExtra,
     ): Promise<void> {
-      await tgPost('sendMessage', {
-        chat_id: chatId,
-        text,
-        parse_mode: 'HTML',
-        ...extra,
-      });
+      await api.sendMessage(chatId, text, { parse_mode: 'HTML', ...extra });
     },
 
     async sendForceReplyPrompt(chatId: number, text: string): Promise<number> {
-      const sent = await tgPost('sendMessage', {
-        chat_id: chatId,
-        text,
+      const sent = await api.sendMessage(chatId, text, {
         reply_markup: { force_reply: true, selective: true },
       });
-      return expectMessageId(sent, 'force-reply prompt');
+      return sent.message_id;
     },
 
     async answerCallback(
       callbackQueryId: string,
       text?: string,
     ): Promise<void> {
-      await tgPost('answerCallbackQuery', {
-        callback_query_id: callbackQueryId,
-        text,
-      });
+      await api.answerCallbackQuery(callbackQueryId, { text });
     },
   };
 }

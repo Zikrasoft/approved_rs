@@ -25,6 +25,7 @@
   "dependencies": {
     "@podbor/brands": "workspace:*",
     "date-fns": "4.4.0",
+    "grammy": "1.46.0",
     "libphonenumber-js": "1.13.12",
     "zod": "4.5.4"
   },
