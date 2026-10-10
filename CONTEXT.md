@@ -54,17 +54,22 @@ Payouts are owed to.
 **CRM bot** — the single bot the owner and the admin work in: cards, statuses,
 money, reminders and order notifications, for all three brands in one chat.
 
-**Payout** — an amount the owner owes the admin for one piece of work: a
-deal, a repeat visit, an upsell. The owner states the amount; nothing derives
-it from a rate or a profit. A Lead can carry several Payouts, and a Payout can
-belong to no Lead, in which case it need not name a Brand either. A Payout recorded before a
-Settlement is settled, whether or not that Settlement covered all of it.
-_Avoid_: commission, income, profit, share
+**Payout** — an operation that raises the Balance (➕ Зачислить): an amount
+the owner will send the admin. The person recording it states the amount;
+nothing derives it from a rate or a profit. It carries no Lead and no Brand,
+only an optional note, and either the owner or the admin may record one.
+_Avoid_: commission, income, profit, share, credit
 
-**Settlement** — an amount the admin has received from the owner. The
-balance owed is all Payouts minus all Settlements, so a partial payment simply
-leaves the rest owed.
-_Avoid_: payment confirmation, paid flag
+**Settlement** — an operation that lowers the Balance (➖ Списать): money that
+reached the admin. Either the owner or the admin may record one; one that
+would take the Balance below zero is refused.
+_Avoid_: payment confirmation, paid flag, debit
+
+**Balance** — all Payouts minus all Settlements: how much the owner owes the
+admin right now. Operations are never edited or deleted; a mistake is undone
+with an opposite operation. The owner sees it as «Мой долг», the admin as
+«Мне должны».
+_Avoid_: debt, to pay, ledger total
 
 ## Shop
 
