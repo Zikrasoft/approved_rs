@@ -40,6 +40,16 @@ const COPY = {
   menu: { text: 'MENU', back: 'BACK' },
   services: { button: 'SERVICES', text: 'PICK_A_SERVICE' },
   card: { request: 'LEAVE_A_REQUEST', site: 'ON_THE_SITE' },
+  contacts: { button: 'CONTACTS', text: 'REACH_US', hours: 'HOURS' },
+  manager: { button: 'MANAGER', text: 'WRITE_YOUR_QUESTION' },
+};
+
+const WORKSHOP = {
+  title: 'CarLab',
+  street: 'Jovana Ćirilova 23a',
+  city: 'Beograd',
+  lat: 44.8054581,
+  lon: 20.4858424,
 };
 
 const MENU_KEYBOARD = {
@@ -53,8 +63,15 @@ let ensureLeadCard: (lead: StoredLead) => Promise<void>;
 let notifier: ReturnType<typeof createBrandBot>['notifier'];
 let POST: ReturnType<typeof createCaptureWebhookRoute>;
 
-function route(secret: string | undefined) {
+function route(
+  secret: string | undefined,
+  contacts: Parameters<typeof createCaptureWebhookRoute>[0]['contacts'] = {
+    phone: '381601234567',
+    site: 'https://example.test',
+  },
+) {
   return createCaptureWebhookRoute({
+    contacts,
     secret,
     store: captureStore(leadStore),
     ensureLeadCard,
@@ -583,7 +600,7 @@ describe('browsing the menu', () => {
   it.each([
     'service:ru:wheel-polishing',
     'request:ru:wheel-polishing',
-    'contacts:ru',
+    'nowhere:ru',
     'hasOwnProperty:ru',
     'services',
     'services:ru:a:b',
@@ -1292,5 +1309,93 @@ describe('the admin hearing about every change the visitor makes', () => {
     await say('BMW X5');
 
     expect(adminNotes()).toEqual([]);
+  });
+});
+
+describe('the Contacts screen', () => {
+  it('sends the workshop as a venue, then hours, phone and site', async () => {
+    POST = route(SECRET, {
+      phone: '381601234567',
+      site: 'https://carlab.test',
+      venue: WORKSHOP,
+    });
+    await POST(makeCtx(startUpdate()));
+    api.reset();
+
+    await tap('contacts:ru');
+
+    expect(
+      api.callsTo('sendVenue', CAPTURE_TOKEN).map((c) => c.payload),
+    ).toEqual([
+      expect.objectContaining({
+        chat_id: 42,
+        latitude: 44.8054581,
+        longitude: 20.4858424,
+        title: 'CarLab',
+        address: 'Jovana Ćirilova 23a, Beograd',
+      }),
+    ]);
+    expect(lastSent()).toEqual([
+      42,
+      'REACH_US\n\nHOURS\n+381 60 1234567\nhttps://carlab.test',
+    ]);
+    expect(lastMarkup()).toEqual({
+      inline_keyboard: [[{ text: 'BACK', callback_data: 'menu:ru' }]],
+    });
+  });
+
+  it('sends no venue for a brand without a workshop', async () => {
+    await POST(makeCtx(startUpdate()));
+    api.reset();
+
+    await tap('contacts:en');
+
+    expect(api.callsTo('sendVenue', CAPTURE_TOKEN)).toEqual([]);
+    expect(lastSent()).toEqual([
+      42,
+      'REACH_US\n\nHOURS\n+381 60 1234567\nhttps://example.test',
+    ]);
+  });
+
+  it('ends a running Questionnaire', async () => {
+    await begin();
+
+    await tap('contacts:ru');
+
+    expect(stored()[0].capturePrompt).toBeNull();
+  });
+});
+
+describe('talking to a manager', () => {
+  it('asks for the question and ends a running Questionnaire', async () => {
+    await begin();
+    api.reset();
+
+    await tap('manager:ru');
+
+    expect(edits()).toEqual([
+      expect.objectContaining({
+        text: 'WRITE_YOUR_QUESTION',
+        reply_markup: {
+          inline_keyboard: [[{ text: 'BACK', callback_data: 'menu:ru' }]],
+        },
+      }),
+    ]);
+    expect(stored()[0].capturePrompt).toBeNull();
+  });
+
+  it('stores the next message on the Lead and tells the admin', async () => {
+    await begin();
+    await tap('manager:ru');
+    api.reset();
+
+    await say('BMW X5');
+
+    expect(stored()[0].comment).toContain('Сообщение: BMW X5');
+    expect(stored()[0].comment).not.toContain('Ищет');
+    expect(adminNotes()).toEqual([
+      expect.stringContaining('Сообщение: BMW X5'),
+    ]);
+    expect(lastSent()).toEqual([42, 'RECEIVED']);
   });
 });

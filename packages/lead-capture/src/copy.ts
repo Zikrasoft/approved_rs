@@ -16,6 +16,8 @@ export const captureCopySchema = z
     menu: z.object({ text: line, back: line }).strict(),
     services: z.object({ button: line, text: line }).strict(),
     card: z.object({ request: line, site: line }).strict(),
+    contacts: z.object({ button: line, text: line, hours: line }).strict(),
+    manager: z.object({ button: line, text: line }).strict(),
   })
   .strict();
 

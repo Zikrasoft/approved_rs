@@ -16,6 +16,13 @@ services:
 card:
   request: Оставить заявку
   site: Подробнее на сайте
+contacts:
+  button: Контакты
+  text: Мы в Белграде, ждём вас в сервисе.
+  hours: Пн–Пт 08:00–18:00 · Сб 09:00–14:00
+manager:
+  button: Написать мастеру
+  text: Напишите ваш вопрос одним сообщением — мастер ответит здесь же.
 translations:
   sr:
     greeting: Zdravo! Hvala što ste nam pisali — upit je kod nas i majstor će vam se uskoro javiti.

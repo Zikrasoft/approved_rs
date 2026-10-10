@@ -207,7 +207,8 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   ...menuConfig
 }: CaptureWebhookRouteOptions<L, S>) {
   const { copy } = menuConfig;
-  const { isService, mainMenu, service, render } = createScreens(menuConfig);
+  const { isService, mainMenu, service, contactsScreen, render } =
+    createScreens(menuConfig);
 
   function send(chatId: number, text: string, extra?: CaptureExtra) {
     return bot.api.sendMessage(chatId, text, { parse_mode: 'HTML', ...extra });
@@ -389,6 +390,20 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     await ask(chatId, step, open.contact, locale);
   }
 
+  async function showContacts(chatId: number, locale: L): Promise<void> {
+    await endQuestionnaire(chatId);
+    const { venue } = menuConfig.contacts;
+    if (venue)
+      await bot.api.sendVenue(
+        chatId,
+        venue.lat,
+        venue.lon,
+        venue.title,
+        `${venue.street}, ${venue.city}`,
+      );
+    await show(chatId, contactsScreen(locale));
+  }
+
   async function tapped(
     chatId: number,
     messageId: number,
@@ -403,6 +418,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
         await leaveRequest(chatId, sender, locale, tap.arg);
       return;
     }
+    if (tap.screen === 'contacts') return showContacts(chatId, locale);
     const screen = render(tap.screen, locale, tap.arg);
     if (!screen) return;
     await endQuestionnaire(chatId);

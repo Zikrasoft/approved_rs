@@ -10,7 +10,7 @@ import { CAPTURE_WEBHOOK_SECRET, captureBot } from '@/lib/captureBot';
 import { ensureLeadCard, notifier } from '@/lib/crmBot';
 import { PRIMARY_LOCALE, isLocale } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { SITE_URL } from '@/utils/constants';
+import { GARAGE_ADDRESS, PHONE_NUMBER, SITE_URL } from '@/utils/constants';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
 
@@ -24,8 +24,13 @@ export const POST = createCaptureWebhookRoute({
   isLocale,
   primaryLocale: PRIMARY_LOCALE,
   copy: (locale) => content(locale).captureBot,
-  menu: ['services'],
+  menu: ['services', 'contacts', 'manager'],
   services: SERVICE_SLUGS,
+  contacts: {
+    phone: PHONE_NUMBER,
+    site: SITE_URL,
+    venue: { title: BRAND, ...GARAGE_ADDRESS },
+  },
   serviceCard: (slug, locale) => {
     const services = content(locale).services;
     const url = new URL(PathBuilder.service(locale, slug), SITE_URL).href;

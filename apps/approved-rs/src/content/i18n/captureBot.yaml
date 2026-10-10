@@ -16,6 +16,13 @@ services:
 card:
   request: Оставить заявку
   site: Подробнее на сайте
+contacts:
+  button: Контакты
+  text: Мы на связи — пишите или звоните.
+  hours: Круглосуточно, без выходных
+manager:
+  button: Написать менеджеру
+  text: Напишите ваш вопрос одним сообщением — менеджер ответит здесь же.
 translations:
   en:
     greeting: Hello! Thanks for getting in touch — we can see your enquiry and we'll come back to you shortly.

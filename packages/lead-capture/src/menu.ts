@@ -1,5 +1,6 @@
 import type { InlineKeyboardButton } from 'grammy/types';
 import { escapeHtml } from '@podbor/lead-crm';
+import { formatPhone } from '@podbor/site-kit/format-phone';
 import type { CaptureCopy } from './copy.ts';
 
 export interface ServiceCard {
@@ -19,8 +20,23 @@ export interface Screen {
   keyboard: InlineKeyboardButton[][];
 }
 
+export interface Venue {
+  title: string;
+  street: string;
+  city: string;
+  lat: number;
+  lon: number;
+}
+
+export interface Contacts {
+  phone: string;
+  site: string;
+  venue?: Venue;
+}
+
 export interface MenuConfig<L extends string, S extends string> {
   menu: readonly MenuButton[];
+  contacts: Contacts;
   services: readonly S[];
   serviceCard: (slug: S, locale: L) => ServiceCard;
   copy: (locale: L) => CaptureCopy;
@@ -49,6 +65,7 @@ export function createScreens<L extends string, S extends string>({
   services,
   serviceCard,
   copy,
+  contacts,
 }: MenuConfig<L, S>) {
   const isService = (value: string): value is S =>
     (services as readonly string[]).includes(value);
@@ -100,17 +117,40 @@ export function createScreens<L extends string, S extends string>({
     };
   }
 
+  function contactsScreen(locale: L): Screen {
+    const words = copy(locale);
+    return {
+      text: [
+        words.contacts.text,
+        '',
+        words.contacts.hours,
+        formatPhone(contacts.phone),
+        contacts.site,
+      ].join('\n'),
+      keyboard: [tap(words.menu.back, 'menu', locale)],
+    };
+  }
+
+  function manager(locale: L): Screen {
+    const words = copy(locale);
+    return {
+      text: words.manager.text,
+      keyboard: [tap(words.menu.back, 'menu', locale)],
+    };
+  }
+
   const screens: Record<string, (locale: L, arg: string) => Screen | null> = {
     menu: mainMenu,
     services: serviceList,
     service: (locale, slug) => (isService(slug) ? service(locale, slug) : null),
+    manager,
   };
 
   function render(screen: string, locale: L, arg: string): Screen | null {
     return Object.hasOwn(screens, screen) ? screens[screen](locale, arg) : null;
   }
 
-  return { isService, mainMenu, service, render };
+  return { isService, mainMenu, service, contactsScreen, render };
 }
 
 export interface ServiceSpecs {
