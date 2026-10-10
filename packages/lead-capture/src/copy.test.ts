@@ -23,6 +23,12 @@ const COPY = {
     service: 'Какая услуга?',
   },
   language: { button: 'Язык', text: 'Выберите язык' },
+  profile: {
+    description: 'Отвечаем на заявки с сайта',
+    shortDescription: 'Заявки с сайта',
+    menuCommand: 'Меню',
+    langCommand: 'Язык',
+  },
 };
 
 describe('the dialog copy a site supplies', () => {

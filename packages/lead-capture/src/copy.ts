@@ -21,6 +21,14 @@ export const captureCopySchema = z
     partners: z.object({ button: line, text: line }).strict(),
     request: z.object({ button: line, car: line, service: line }).strict(),
     language: z.object({ button: line, text: line }).strict(),
+    profile: z
+      .object({
+        description: line.max(512),
+        shortDescription: line.max(120),
+        menuCommand: line.min(1).max(256),
+        langCommand: line.min(1).max(256),
+      })
+      .strict(),
   })
   .strict();
 

@@ -48,6 +48,12 @@ const COPY = {
   partners: { button: 'PARTNERS', text: 'PICK_A_PARTNER' },
   request: { button: 'REQUEST', car: 'CAR', service: 'WHICH_SERVICE' },
   language: { button: 'LANGUAGE', text: 'PICK_A_LANGUAGE' },
+  profile: {
+    description: 'DESCRIPTION',
+    shortDescription: 'SHORT_DESCRIPTION',
+    menuCommand: 'MENU_COMMAND',
+    langCommand: 'LANG_COMMAND',
+  },
 };
 
 const WORKSHOP = {
