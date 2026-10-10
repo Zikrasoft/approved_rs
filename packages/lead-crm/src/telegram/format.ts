@@ -2,10 +2,10 @@ import { format, parseISO } from 'date-fns';
 import { channelLabel } from '../channelLabels.ts';
 import { isTelegramIdContact } from '../contactShape.ts';
 import { LEADS_PATH } from '../quarantine.ts';
+import { BUSINESS_TIME_ZONE } from '../businessTime.ts';
 import { isClosed, type LeadStatus, type StoredLead } from '../schema.ts';
 import { MAX_LIST_ROWS, isPlaceholderContact, type Digest } from '../store.ts';
 import {
-  LEDGER_TIME_ZONE,
   balanceOf,
   operationSums,
   type FlowSums,
@@ -146,6 +146,7 @@ export const LEDGER_COPY = {
     settlement: '➖ Сколько списать (в евро)?\n\nНапример: 40 или 40 перевод',
   },
   ack: 'Жду сумму',
+  expired: '⌛ Этот запрос уже закрыт — нажмите ➕ или ➖ ещё раз.',
   badAmount: '⚠️ Нужна сумма числом.',
   amountLimits: `⚠️ Сумма — от 0,01 до ${formatMoney(MAX_OPERATION_AMOUNT)}, не больше двух знаков после запятой.`,
 } as const;
@@ -217,7 +218,7 @@ export function operationRecordedText(
 }
 
 export function operationRefusedText(balance: number): string {
-  return `⚠️ Списать можно не больше баланса: ${formatMoney(balance)}`;
+  return `⚠️ Списать можно не больше баланса: ${formatMoney(balance)}\n\n${LEDGER_COPY.prompt.settlement}`;
 }
 
 const OPERATION_AUTHORS: Record<LedgerAuthor, string> = {
@@ -255,7 +256,7 @@ export function buildSearchResults(leads: StoredLead[]): {
 const STATS_OPERATION_ROWS = 20;
 
 const ledgerDate = new Intl.DateTimeFormat('ru-RU', {
-  timeZone: LEDGER_TIME_ZONE,
+  timeZone: BUSINESS_TIME_ZONE,
   day: '2-digit',
   month: '2-digit',
   year: 'numeric',

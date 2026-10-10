@@ -3,14 +3,7 @@ export const prerender = false;
 import type { APIContext } from 'astro';
 import { Composer, type Context } from 'grammy';
 import { z } from 'zod';
-import {
-  parse,
-  isValid,
-  isBefore,
-  startOfDay,
-  format,
-  addDays,
-} from 'date-fns';
+import { parse, isValid, format } from 'date-fns';
 import { secretMatches } from '@/lib/verifySecret';
 import {
   afterStatusChange,
@@ -67,6 +60,7 @@ import {
   findOperationPrompt,
   answerOperationPrompt,
   parseOperationReply,
+  businessDay,
   type OperationType,
   type LeadStatus,
   type PendingPrompt,
@@ -128,12 +122,9 @@ function roleOf(id: number | undefined): Role | undefined {
 
 function parseReminderDate(text: string): string | null {
   const parsed = parse(text.trim(), 'dd.MM.yyyy', new Date());
-  if (!isValid(parsed) || isBefore(parsed, startOfDay(new Date()))) return null;
-  return format(parsed, 'yyyy-MM-dd');
-}
-
-function quickRemindDate(days: number): string {
-  return format(addDays(new Date(), days), 'yyyy-MM-dd');
+  if (!isValid(parsed)) return null;
+  const day = format(parsed, 'yyyy-MM-dd');
+  return day < businessDay(new Date()) ? null : day;
 }
 
 type Ctx = { chatId: number; messageId: number; role: Role; cbId: string };
@@ -226,7 +217,7 @@ async function openRemindPicker(ctx: Ctx, id: number): Promise<void> {
 }
 
 async function remindIn(ctx: Ctx, id: number, days: string): Promise<void> {
-  const remindAt = quickRemindDate(Number(days));
+  const remindAt = businessDay(new Date(), Number(days));
   const updated = await postponeLead(
     id,
     remindAt,
@@ -588,7 +579,14 @@ async function replyToOperationPrompt(reply: Reply): Promise<boolean> {
       reply.authorId,
     );
   } else if (outcome.reason === 'insufficient') {
-    await sendMessage(reply.chatId, operationRefusedText(outcome.balance));
+    await askOperation(
+      reply.chatId,
+      prompt.type,
+      operationRefusedText(outcome.balance),
+      key,
+    );
+  } else {
+    await sendMessage(reply.chatId, LEDGER_COPY.expired);
   }
   return true;
 }

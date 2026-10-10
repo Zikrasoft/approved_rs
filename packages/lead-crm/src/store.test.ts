@@ -1030,8 +1030,7 @@ describe('updateLeads — failures that are not write conflicts', () => {
       schema: storedLeadSchema,
     });
 
-    await expect(brokenStore.updateLeads((leads) => leads)).rejects.toBe(boom);
-    // One attempt, not MAX_RETRIES — a broken backend is not a lost race.
+    await expect(brokenStore.updateLeads(() => [])).rejects.toBe(boom);
     expect(failing.write).toHaveBeenCalledTimes(1);
   });
 });

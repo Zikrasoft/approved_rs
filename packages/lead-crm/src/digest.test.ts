@@ -151,6 +151,18 @@ describe('claimDigest', () => {
     expect(records().filter((r) => r.type === 'digest')).toEqual([]);
     expect(await store.claimDigest(new Date(at(9)))).toBeDefined();
   });
+
+  it('writes nothing when a claim or a release changes nothing', async () => {
+    storage.seed([storedLead(1)]);
+    await store.claimDigest(new Date(at(9)));
+    const writes = storage.writeAttempts();
+
+    await store.claimDigest(new Date(at(9)));
+    await store.releaseDigest(new Date(at(10)));
+    await store.updateLeads((leads) => leads.map((l) => ({ ...l })));
+
+    expect(storage.writeAttempts()).toBe(writes);
+  });
 });
 
 describe('every action on a Lead resets its clock', () => {

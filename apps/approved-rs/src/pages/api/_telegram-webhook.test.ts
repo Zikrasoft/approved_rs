@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { APIContext } from 'astro';
-import { addDays, format } from 'date-fns';
-import { LEADS_PATH, LEDGER_PATH } from '@podbor/lead-crm';
+import { businessDay, LEADS_PATH, LEDGER_PATH } from '@podbor/lead-crm';
 import {
   createMemoryStorage,
   recordBotApi,
@@ -584,7 +583,7 @@ describe('POST /api/telegram-webhook', () => {
       const lead = await stored();
       expect(lead).toMatchObject({
         status: 'postponed',
-        remindAt: format(addDays(new Date(), 7), 'yyyy-MM-dd'),
+        remindAt: businessDay(new Date(), 7),
         comment: expect.stringContaining('Отложено до'),
       });
       expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
@@ -592,6 +591,19 @@ describe('POST /api/telegram-webhook', () => {
       expect(answers()).toEqual([
         { callback_query_id: 'cb-rp1', text: 'Отложено' },
       ]);
+    });
+
+    it('counts the days from the Belgrade date between 00:00 and 02:00 there', async () => {
+      vi.useFakeTimers({
+        toFake: ['Date'],
+        now: new Date('2026-10-15T23:30:00Z'),
+      });
+      try {
+        await tap('remindpick:5:1', OWNER_ID);
+      } finally {
+        vi.useRealTimers();
+      }
+      expect((await stored()).remindAt).toBe('2026-10-17');
     });
 
     it('admin cannot use a quick pick', async () => {
@@ -901,17 +913,53 @@ describe('POST /api/telegram-webhook', () => {
       expect(await readBalance()).toBe(0);
     });
 
-    it('refuses a debit above the Balance, naming the Balance, and stores nothing', async () => {
+    it('refuses a debit above the Balance by asking again, naming the Balance, and stores nothing', async () => {
       await ledgerStore.recordOperation({
         type: 'payout',
         amount: 10,
         by: 'owner',
       });
       await ask(OWNER_ID, 'settlement');
+      api.respond(
+        'sendMessage',
+        (payload: Record<string, unknown>): BotApiResponse => ({
+          ok: true,
+          result: {
+            message_id: PROMPT_ID + 1,
+            date: 0,
+            chat: { id: Number(payload.chat_id), type: 'private' },
+          },
+        }),
+      );
       await answerAs(OWNER_ID, '30');
-      expect(textsTo(OWNER_ID)).toEqual([operationRefusedText(10)]);
+      expect(forceReplies()).toEqual([
+        expect.objectContaining({
+          chat_id: OWNER_ID,
+          text: operationRefusedText(10),
+        }),
+      ]);
       expect(textsTo(ADMIN_ID)).toEqual([]);
       expect(await readOperations()).toHaveLength(1);
+
+      await answerAs(OWNER_ID, '5');
+      expect(await readBalance()).toBe(10);
+      await message('5', OWNER_ID, { replyTo: PROMPT_ID + 1 });
+      expect(await readBalance()).toBe(5);
+    });
+
+    it('tells the user to tap again when the prompt has expired', async () => {
+      await ask(OWNER_ID, 'payout');
+      vi.useFakeTimers({
+        toFake: ['Date'],
+        now: Date.now() + 7 * 24 * 60 * 60 * 1000,
+      });
+      try {
+        await answerAs(OWNER_ID, '40');
+      } finally {
+        vi.useRealTimers();
+      }
+      expect(textsTo(OWNER_ID)).toEqual([LEDGER_COPY.expired]);
+      expect(await readOperations()).toEqual([]);
     });
 
     it('asks again when the reply has no amount', async () => {
@@ -1092,7 +1140,7 @@ describe('POST /api/telegram-webhook', () => {
       await tap('remindpick:6:3', OWNER_ID);
       expect(await stored(6)).toMatchObject({
         status: 'postponed',
-        remindAt: format(addDays(new Date(), 3), 'yyyy-MM-dd'),
+        remindAt: businessDay(new Date(), 3),
       });
       expect((await stored(5)).status).toBe('open');
     });
@@ -1210,6 +1258,26 @@ describe('POST /api/telegram-webhook', () => {
         expect.stringContaining('ДД.ММ.ГГГГ'),
       ]);
     });
+
+    it.each([
+      ['15.10.2026', 'open'],
+      ['16.10.2026', 'postponed'],
+    ])(
+      'judges %s against the Belgrade date between 00:00 and 02:00 there',
+      async (text, status) => {
+        seed(makeLead({ pendingPrompt: awaiting('postpone') }));
+        vi.useFakeTimers({
+          toFake: ['Date'],
+          now: new Date('2026-10-15T22:30:00Z'),
+        });
+        try {
+          await answerPrompt(text);
+        } finally {
+          vi.useRealTimers();
+        }
+        expect((await stored()).status).toBe(status);
+      },
+    );
 
     it('drops a field-edit prompt left over from before the edit buttons went', async () => {
       leadsStorage().seed([

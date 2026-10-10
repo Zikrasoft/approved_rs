@@ -32,6 +32,7 @@ export type {
   PromptKey,
 } from './ledgerStore.ts';
 export { parseOperationReply } from './operationReply.ts';
+export { BUSINESS_TIME_ZONE, businessDay } from './businessTime.ts';
 
 export type { OrderMarkers } from './orderMarkers.ts';
 

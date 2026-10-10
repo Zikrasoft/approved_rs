@@ -13,7 +13,7 @@ import type { StoredLeadSchema } from './schema.ts';
 import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
 import { retryOnConflict } from './storage/retry.ts';
 import { LEADS_PATH } from './quarantine.ts';
-import { LEDGER_TIME_ZONE } from './ledgerStore.ts';
+import { businessDay } from './businessTime.ts';
 
 export const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
 
@@ -60,13 +60,8 @@ interface StoreRecords {
   digests: DigestMark[];
 }
 
-const dayFormat = new Intl.DateTimeFormat('en-CA', {
-  timeZone: LEDGER_TIME_ZONE,
-});
-const digestDay = (now: Date) => dayFormat.format(now);
-
 function digestOf(leads: StoredLead[], now: Date): Digest {
-  const today = digestDay(now);
+  const today = businessDay(now);
   return {
     stale: leads.filter(
       (l) =>
@@ -244,6 +239,8 @@ export function createLeadStore({
         leads: mutated.leads.map((lead) => schema.parse(lead)),
         digests: mutated.digests.map((m) => digestMarkSchema.parse(m)),
       };
+      if (JSON.stringify(next) === JSON.stringify(current))
+        return { next, unreadable };
       await beforeWrite?.();
       await storage.write(
         [...next.leads, ...next.digests, ...unreadable],
@@ -592,7 +589,7 @@ export function createLeadStore({
     },
 
     async claimDigest(now: Date): Promise<Digest | undefined> {
-      const day = digestDay(now);
+      const day = businessDay(now);
       let claimed: Digest | undefined;
       await updateRecords(({ leads, digests }) => {
         claimed = undefined;
@@ -611,7 +608,7 @@ export function createLeadStore({
     },
 
     async releaseDigest(now: Date): Promise<void> {
-      const day = digestDay(now);
+      const day = businessDay(now);
       await updateRecords(({ digests }) => ({
         digests: digests.filter((d) => d.day !== day),
       }));

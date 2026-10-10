@@ -271,11 +271,11 @@ describe('operation prompts', () => {
     ).toBeUndefined();
   });
 
-  it('treats a prompt older than a week as gone', async () => {
+  it('still finds a prompt older than a week but takes no answer to it', async () => {
     await ledger.recordOperation(credit(50));
     await ledger.openOperationPrompt({ ...PROMPT, type: 'settlement' });
     vi.setSystemTime(Date.parse(NOW) + 7 * 24 * 60 * 60 * 1000);
-    expect(await ledger.findOperationPrompt(PROMPT)).toBeUndefined();
+    expect(await ledger.findOperationPrompt(PROMPT)).toBeDefined();
     expect(
       await ledger.answerOperationPrompt(PROMPT, { amount: 5, by: 'owner' }),
     ).toEqual({ ok: false, reason: 'no_prompt' });
@@ -298,6 +298,27 @@ describe('operation prompts', () => {
         createdAt: '2026-10-17T12:00:00.000Z',
       },
     ]);
+  });
+});
+
+describe('ledger file timestamps', () => {
+  it.each([
+    [
+      'an operation',
+      { operations: [op(1, { createdAt: 'yesterday' })], prompts: [] },
+    ],
+    [
+      'a prompt',
+      {
+        operations: [],
+        prompts: [{ ...PROMPT, type: 'payout', createdAt: '10.10.2026' }],
+      },
+    ],
+  ])('refuses %s whose createdAt is not an ISO datetime', async (_, raw) => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    storage.seed(raw);
+    await expect(ledger.readOperations()).rejects.toThrow('does not parse');
+    error.mockRestore();
   });
 });
 

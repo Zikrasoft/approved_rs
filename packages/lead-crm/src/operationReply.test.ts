@@ -15,6 +15,10 @@ describe('parseOperationReply', () => {
     ['1000000', 1_000_000, ''],
     ['40\nИван\nсервис', 40, 'Иван\nсервис'],
     ['40 € 2 шины', 40, '2 шины'],
+    ['40 2 шины', 40, '2 шины'],
+    ['40 3-й платёж', 40, '3-й платёж'],
+    ['40 12 Иван', 40, '12 Иван'],
+    ['40 1234 Иван', 40, '1234 Иван'],
   ])('reads %j as %d with note %j', (text, amount, note) => {
     expect(parseOperationReply(text)).toEqual({ ok: true, amount, note });
   });
@@ -38,6 +42,9 @@ describe('parseOperationReply', () => {
     '1000001',
     '1 000 Иван',
     '1 000',
+    '12 500 Иван',
+    '1 000,50',
+    '1 000 000',
     '40. 5',
   ])('refuses %j as an amount instead of rounding or capping it', (text) => {
     expect(parseOperationReply(text)).toEqual({

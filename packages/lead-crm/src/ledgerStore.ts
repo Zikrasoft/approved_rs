@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import { roundMoney, toCents } from './money.ts';
+import { BUSINESS_TIME_ZONE } from './businessTime.ts';
 import { retryOnConflict } from './storage/retry.ts';
 import { StorageConflictError, type LeadStorage } from './storage/types.ts';
 
 export const LEDGER_PATH = 'data/ledger.json';
-export const LEDGER_TIME_ZONE = 'Europe/Belgrade';
 const MAX_OPERATION_NOTE = 500;
 const PROMPT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -20,7 +20,7 @@ const operationSchema = z
     type: operationTypeSchema,
     amount: z.number().transform(roundMoney).pipe(z.number().positive()),
     note: z.string().max(MAX_OPERATION_NOTE),
-    createdAt: z.string(),
+    createdAt: z.iso.datetime(),
     createdBy: ledgerAuthorSchema,
   })
   .strict();
@@ -31,7 +31,7 @@ const promptSchema = z
     chatId: z.number().int(),
     messageId: z.number().int(),
     type: operationTypeSchema,
-    createdAt: z.string(),
+    createdAt: z.iso.datetime(),
   })
   .strict();
 export type OperationPrompt = z.infer<typeof promptSchema>;
@@ -64,7 +64,7 @@ export interface LedgerStoreOptions {
 
 function monthOf(iso: string | Date): string {
   return new Intl.DateTimeFormat('en-CA', {
-    timeZone: LEDGER_TIME_ZONE,
+    timeZone: BUSINESS_TIME_ZONE,
     year: 'numeric',
     month: '2-digit',
   }).format(new Date(iso));
@@ -75,17 +75,23 @@ export interface FlowSums {
   debited: number;
 }
 
+function centsOf(operations: LedgerOperation[], type: OperationType): number {
+  return operations
+    .filter((op) => op.type === type)
+    .reduce((cents, op) => cents + toCents(op.amount), 0);
+}
+
 function sumsOf(operations: LedgerOperation[]): FlowSums {
-  const total = (type: OperationType) =>
-    operations
-      .filter((op) => op.type === type)
-      .reduce((cents, op) => cents + toCents(op.amount), 0) / 100;
-  return { credited: total('payout'), debited: total('settlement') };
+  return {
+    credited: centsOf(operations, 'payout') / 100,
+    debited: centsOf(operations, 'settlement') / 100,
+  };
 }
 
 export function balanceOf(operations: LedgerOperation[]): number {
-  const { credited, debited } = sumsOf(operations);
-  return (toCents(credited) - toCents(debited)) / 100;
+  return (
+    (centsOf(operations, 'payout') - centsOf(operations, 'settlement')) / 100
+  );
 }
 
 export function operationSums(
@@ -104,11 +110,11 @@ const promptIs =
   (p: OperationPrompt) =>
     p.chatId === chatId && p.messageId === messageId;
 
-const isLive = (p: OperationPrompt, now = Date.now()) =>
+const isLive = (p: OperationPrompt, now: number) =>
   now - Date.parse(p.createdAt) < PROMPT_TTL_MS;
 
-const liveAt = (key: PromptKey) => (p: OperationPrompt) =>
-  promptIs(key)(p) && isLive(p);
+const liveAt = (key: PromptKey, now: number) => (p: OperationPrompt) =>
+  promptIs(key)(p) && isLive(p, now);
 
 function appended(
   file: LedgerFile,
@@ -225,7 +231,7 @@ export function createLedgerStore({ storage, opening }: LedgerStoreOptions) {
     async findOperationPrompt(
       key: PromptKey,
     ): Promise<OperationPrompt | undefined> {
-      return (await read()).file.prompts.find(liveAt(key));
+      return (await read()).file.prompts.find(promptIs(key));
     },
 
     answerOperationPrompt(
@@ -233,7 +239,7 @@ export function createLedgerStore({ storage, opening }: LedgerStoreOptions) {
       answer: Omit<OperationInput, 'type'>,
     ): Promise<RecordOutcome> {
       return update((file) => {
-        const prompt = file.prompts.find(liveAt(key));
+        const prompt = file.prompts.find(liveAt(key, Date.now()));
         if (!prompt)
           return { result: { ok: false, reason: 'no_prompt' } as const };
         const { next, result } = appended(file, {

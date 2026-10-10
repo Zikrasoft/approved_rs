@@ -37,6 +37,7 @@ export {
   canPostpone,
   postponePatch,
   parseOperationReply,
+  businessDay,
   MAX_LIST_ROWS,
 } from '@podbor/lead-crm';
 

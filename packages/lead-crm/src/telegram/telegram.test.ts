@@ -728,9 +728,9 @@ describe('operation messages', () => {
     );
   });
 
-  it('refuses a debit naming the Balance', () => {
+  it('refuses a debit naming the Balance and asks for the amount again', () => {
     expect(operationRefusedText(30)).toBe(
-      `⚠️ Списать можно не больше баланса: ${money(30)}`,
+      `⚠️ Списать можно не больше баланса: ${money(30)}\n\n${LEDGER_COPY.prompt.settlement}`,
     );
   });
 
