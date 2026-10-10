@@ -12,7 +12,9 @@ export const captureMessageSchema = z.object({
   chat: z.object({ id: z.number().int(), type: z.string() }),
   from: senderSchema,
   text: z.string().optional(),
-  contact: z.object({ phone_number: z.string() }).optional(),
+  contact: z
+    .object({ phone_number: z.string(), user_id: z.number().int().optional() })
+    .optional(),
 });
 
 export const captureTapSchema = z.object({

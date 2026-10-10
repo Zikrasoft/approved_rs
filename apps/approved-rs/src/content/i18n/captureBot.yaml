@@ -88,7 +88,7 @@ translations:
     phoneOffer: Ako vam je lakše putem telefona, podelite broj, pa ćemo pozvati. Ako ne, samo preskočite.
     phoneButton: Podeliti broj
     phoneSkip: Preskočiti
-    thanks: Hvala! Prosledili smo manageru — uskoro će vas kontaktirati.
+    thanks: Hvala! Prosledili smo menadžeru — uskoro će vas kontaktirati.
     received: Primili smo, manager će videti vašu poruku.
     menu:
       text: Kako možemo pomoći? Izaberite šta vas interesuje.
@@ -97,7 +97,7 @@ translations:
       button: Usluge
       text: Evo u čemu možemo da pomognemo. Izaberite uslugu — objasnićemo detaljnije.
     card:
-      request: Podnijeti zahtev
+      request: Podneti zahtev
       site: Više informacija na sajtu
     contacts:
       button: Kontakti
@@ -105,13 +105,13 @@ translations:
       hours: Non-stop, bez praznika
     manager:
       button: Pitati menadžera
-      text: Postavite vaše pitanje u jednom poruci — menadžer će odgovoriti ovde.
+      text: Postavite vaše pitanje u jednoj poruci — menadžer će odgovoriti ovde.
     partners:
       button: Partneri
       text: Popravka i detailing — kod partnera kojima verujemo. Izaberite kome želite da pišete.
     request:
-      button: Podnijeti zahtev
-      car: Koja je vaša kola? Napišite marku, model i godište.
+      button: Podneti zahtev
+      car: Koja su vaša kola? Napišite marku, model i godište.
       service: Koju uslugu želite? Izaberite ispod.
     language:
       button: 🌐 Jezik

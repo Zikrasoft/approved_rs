@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { roundMoney, toCents } from './money.ts';
 import { businessMonth, DAY_MS } from './businessTime.ts';
-import type { PromptKey } from './schema.ts';
+import type { PromptKey } from './promptKey.ts';
 import { retryOnConflict } from './storage/retry.ts';
 import { StorageConflictError, type LeadStorage } from './storage/types.ts';
 

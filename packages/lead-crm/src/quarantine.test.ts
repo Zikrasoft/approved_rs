@@ -25,6 +25,20 @@ describe('createQuarantine', () => {
     expect(send).toHaveBeenCalledWith(1, QUARANTINE_PATH, 'CarLab');
   });
 
+  it('keeps the copy and logs the notice failure under its own message', async () => {
+    const { storage, quarantine } = build(
+      vi.fn().mockRejectedValue(new Error('telegram down')),
+    );
+
+    await quarantine([{ id: 1 }]);
+
+    expect(storage.current()).toEqual([{ id: 1 }]);
+    expect(vi.mocked(console.error)).toHaveBeenCalledWith(
+      '[lead-crm] could not tell the admin about the copy',
+      expect.objectContaining({ count: 1 }),
+    );
+  });
+
   it('appends rather than replacing, and counts only what it added', async () => {
     const { storage, quarantine, send } = build();
     storage.seed([{ id: 1 }]);
@@ -69,13 +83,5 @@ describe('createQuarantine', () => {
       '[lead-crm] the quarantine file is not an array',
       { path: QUARANTINE_PATH, type: 'string' },
     );
-  });
-
-  it('treats the copy as done even when the notice cannot be sent', async () => {
-    const send = vi.fn().mockRejectedValue(new Error('telegram down'));
-    const { storage, quarantine } = build(send);
-
-    await expect(quarantine([{ id: 3 }])).resolves.toBeUndefined();
-    expect(storage.current()).toEqual([{ id: 3 }]);
   });
 });

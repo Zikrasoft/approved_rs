@@ -416,6 +416,16 @@ deleted** from `data/leads.json` in the process: the records stay where they are
 until someone sorts them out by hand. Nothing ever disappears from the blob
 automatically.
 
+`data/ledger.json` is the third file: the Balance. It appears on the first Lead
+write after the release that introduced it, opened with whatever the old
+records said the owner still owed, and the same write drops those old money
+fields from `data/leads.json`. So that release needs three things around it —
+a backup of `data/leads.json` before it deploys, a check that `data/ledger.json`
+exists and «💶 Мне должны» matches the old «🔴 Мне должны» after the first Lead
+write, and the expectation that the first digest lists every open Lead untouched
+for 7+ days, bare capture-bot `/start` Leads included. Steps 1 and 8 of
+[`crm-bot-migration.md`](crm-bot-migration.md) walk through them.
+
 ---
 
 ## Keystatic: three GitHub Apps

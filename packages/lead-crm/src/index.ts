@@ -11,14 +11,15 @@ export type {
   LeadSubmission,
   LeadStatus,
   PendingPrompt,
-  PromptKey,
   StoredLead,
 } from './schema.ts';
+export type { PromptKey } from './promptKey.ts';
 export { storedLeadSchema } from './schema.ts';
 
 export {
   appendNote,
   canPostpone,
+  isFreshLead,
   postponePatch,
   resumePatch,
   statusPatch,

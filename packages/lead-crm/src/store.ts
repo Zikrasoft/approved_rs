@@ -7,9 +7,9 @@ import type {
   LeadInput,
   LeadStatus,
   PendingPrompt,
-  PromptKey,
   StoredLead,
 } from './schema.ts';
+import type { PromptKey } from './promptKey.ts';
 import type { StoredLeadSchema } from './schema.ts';
 import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
 import { retryOnConflict } from './storage/retry.ts';
@@ -19,6 +19,18 @@ import { businessDay, DAY_MS } from './businessTime.ts';
 export const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
 
 export const MAX_LIST_ROWS = 20;
+
+export function isFreshLead(
+  lead: StoredLead,
+  now: number = Date.now(),
+): boolean {
+  const lastSeen = Math.max(
+    ...[lead.visitorActiveAt, lead.lastActivityAt, lead.createdAt].map((at) =>
+      at ? Date.parse(at) : 0,
+    ),
+  );
+  return now - lastSeen < VISITOR_MERGE_WINDOW_MS;
+}
 
 export interface CaptureUpdate {
   note?: string;
@@ -122,6 +134,18 @@ function newestOpen(
     .filter((l) => l.brand === brand && !isClosed(l) && matches(l))
     .sort((a, b) => a.id - b.id)
     .at(-1);
+}
+
+function supersede(leads: StoredLead[], landed: StoredLead): StoredLead[] {
+  if (landed.telegramId == null) return leads;
+  return leads.map((l) =>
+    l.id !== landed.id &&
+    l.brand === landed.brand &&
+    l.telegramId === landed.telegramId &&
+    l.capturePrompt
+      ? { ...l, capturePrompt: null }
+      : l,
+  );
 }
 
 const MAX_STORED_COMMENT_LENGTH = 4000;
@@ -353,8 +377,7 @@ export function createLeadStore({
                 l.visitorId === data.visitorId &&
                 l.brand === data.brand &&
                 untouched(l) &&
-                now - new Date(l.createdAt).getTime() <
-                  VISITOR_MERGE_WINDOW_MS &&
+                isFreshLead(l, now) &&
                 (data.telegramId == null || isPlaceholderContact(l.contact)),
             )
           : undefined;
@@ -362,7 +385,7 @@ export function createLeadStore({
         if (!existing) {
           const inserted = newStoredLead(data, nextId(leads, idFloor));
           outcome = { lead: inserted, merged: false, before: null };
-          return [...leads, inserted];
+          return supersede([...leads, inserted], inserted);
         }
 
         const upgradeContact =
@@ -397,6 +420,10 @@ export function createLeadStore({
           telegramId: data.telegramId ?? existing.telegramId,
           referredBy: data.referredBy ?? existing.referredBy,
           capturePrompt: data.capturePrompt ?? existing.capturePrompt,
+          visitorActiveAt:
+            data.telegramId == null
+              ? existing.visitorActiveAt
+              : new Date(now).toISOString(),
           comment: appendNote(
             existing.comment,
             [
@@ -409,7 +436,8 @@ export function createLeadStore({
           ),
         };
         outcome = { lead: merged, merged: true, before: existing };
-        return leads.map((l) => (l.id === existing.id ? merged : l));
+        const replaced = leads.map((l) => (l.id === existing.id ? merged : l));
+        return data.telegramId == null ? replaced : supersede(replaced, merged);
       });
       return outcome;
     },
@@ -497,6 +525,7 @@ export function createLeadStore({
         locale: locale ?? l.locale,
         referredBy: referredBy ?? l.referredBy,
         capturePrompt,
+        visitorActiveAt: new Date().toISOString(),
       }));
     },
 
@@ -533,7 +562,7 @@ export function createLeadStore({
       return newestOpen(
         await readLeads(),
         brand,
-        (l) => l.capturePrompt?.chatId === chatId,
+        (l) => l.capturePrompt?.chatId === chatId && isFreshLead(l),
       );
     },
 

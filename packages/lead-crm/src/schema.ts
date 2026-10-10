@@ -19,7 +19,6 @@ const pendingPromptSchema = z.object({
   kind: z.enum(PROMPT_KINDS),
 });
 export type PendingPrompt = z.infer<typeof pendingPromptSchema>;
-export type PromptKey = Pick<PendingPrompt, 'chatId' | 'messageId'>;
 
 export const CAPTURE_STEPS = [
   'looking_for',
@@ -62,6 +61,7 @@ const baseStoredLeadSchema = z.object({
   telegramMessageId: z.number().int().nullable().default(null),
   statusChangedAt: z.string(),
   lastActivityAt: z.string().nullable().default(null),
+  visitorActiveAt: z.string().optional(),
   createdAt: z.string(),
   pendingPrompt: pendingPromptSchema.nullable().default(null).catch(null),
   capturePrompt: capturePromptSchema.nullable().default(null).catch(null),
