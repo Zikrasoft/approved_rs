@@ -1,5 +1,6 @@
 import type { Payout, Settlement } from '../ledger.ts';
 import { isClosed, type StoredLead } from '../schema.ts';
+import type { Digest } from '../store.ts';
 import {
   isMessageGone,
   type SendExtra,
@@ -149,17 +150,13 @@ export function createNotifier({
       await sendToAll(adminIds, statusChangeText(lead));
     },
 
-    async sendPostponeReminderToOwner(lead: StoredLead): Promise<void> {
-      const results = await Promise.allSettled(
-        ownerIds.map((id) =>
-          client.sendMessage(id, formatter.postponeReminderText(lead), {
-            reply_markup: formatter.deepLinkKeyboard(lead.id),
-          }),
-        ),
-      );
-      if (results.length > 0 && results.every((r) => r.status === 'rejected')) {
-        throw (results[0] as PromiseRejectedResult).reason;
-      }
+    async sendDigest(digest: Digest): Promise<boolean> {
+      const message = formatter.digestMessage(digest);
+      if (!message) return false;
+      await client.sendMessage(groupId, message.text, {
+        reply_markup: message.reply_markup,
+      });
+      return true;
     },
 
     async editLeadDetailMessage(

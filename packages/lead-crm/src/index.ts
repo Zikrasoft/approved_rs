@@ -33,6 +33,7 @@ export {
 } from './store.ts';
 export type {
   CaptureUpdate,
+  Digest,
   DraftInput,
   DraftPatch,
   LeadStore,

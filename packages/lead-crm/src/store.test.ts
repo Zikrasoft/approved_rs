@@ -646,51 +646,6 @@ describe('postponeLead', () => {
   });
 });
 
-describe('getDuePostponed', () => {
-  async function forcePostpone(id: number, remindAt: string): Promise<void> {
-    await store.updateLeads((leads) =>
-      leads.map((l) =>
-        l.id === id ? { ...l, status: 'postponed' as const, remindAt } : l,
-      ),
-    );
-  }
-
-  it('finds a postponed lead whose remindAt is today or earlier', async () => {
-    const lead = await store.insertLead(baseData);
-    await forcePostpone(lead.id, '2000-01-01');
-
-    const due = await store.getDuePostponed();
-
-    expect(due.map((l) => l.id)).toEqual([lead.id]);
-  });
-
-  it('excludes a postponed lead whose remindAt is still in the future', async () => {
-    const lead = await store.insertLead(baseData);
-    await forcePostpone(lead.id, '2999-01-01');
-
-    expect(await store.getDuePostponed()).toEqual([]);
-  });
-
-  it('includes a lead whose remindAt is exactly the given day (boundary, <=)', async () => {
-    const lead = await store.insertLead(baseData);
-    await forcePostpone(lead.id, '2026-10-20');
-
-    expect(
-      (await store.getDuePostponed(new Date('2026-10-20T12:00:00'))).map(
-        (l) => l.id,
-      ),
-    ).toEqual([lead.id]);
-    expect(
-      await store.getDuePostponed(new Date('2026-10-19T12:00:00')),
-    ).toEqual([]);
-  });
-
-  it('excludes leads that are not postponed', async () => {
-    await store.insertLead(baseData);
-    expect(await store.getDuePostponed()).toEqual([]);
-  });
-});
-
 describe('expireGhostLeads', () => {
   const clickData: LeadInput = {
     ...baseData,

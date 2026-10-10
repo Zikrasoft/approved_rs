@@ -15,7 +15,7 @@ import {
   type LeadStatus,
   type StoredLead,
 } from '../schema.ts';
-import { MAX_LIST_ROWS, isPlaceholderContact } from '../store.ts';
+import { MAX_LIST_ROWS, isPlaceholderContact, type Digest } from '../store.ts';
 import type { Draft, LedgerAuthor, Payout, Settlement } from '../ledger.ts';
 
 export type Role = 'owner' | 'admin';
@@ -270,6 +270,14 @@ export const REPLY_COPY = {
   sent: '✅ Отправлено',
   notePrefix: 'Ответ: ',
 } as const;
+
+const DIGEST_SECTIONS: [keyof Digest, string][] = [
+  ['due', '⏰ Пора вернуться'],
+  ['unpaid', '💶 Сделка без суммы — ответь 0, если ничего'],
+  ['stale', '🕐 Без движения 7 дней'],
+];
+
+const MAX_DIGEST_NAME = 40;
 
 export const OUTCOME_COPY = {
   wonPrompt:
@@ -553,13 +561,36 @@ export function createFormatter({
       };
     },
 
-    postponeReminderText(lead: StoredLead): string {
-      return [
-        `⏰ Напоминание по заявке #${lead.id}`,
-        ``,
-        `${escapeHtml(leadDisplayName(lead))} — ${escapeHtml(servicesLabel(lead))}`,
-        `Ты просил напомнить сегодня — заявка снова активна.`,
-      ].join('\n');
+    digestMessage(
+      digest: Digest,
+    ): { text: string; reply_markup: Keyboard } | null {
+      const lines = ['<b>📋 Заявки ждут решения</b>'];
+      const rows: Btn[][] = [];
+      let hidden = 0;
+      for (const [key, title] of DIGEST_SECTIONS) {
+        const leads = digest[key];
+        const shown = leads.slice(0, MAX_LIST_ROWS - rows.length);
+        hidden += leads.length - shown.length;
+        if (shown.length === 0) continue;
+        lines.push('', `<b>${title}</b>`);
+        for (const l of shown) {
+          const name = leadDisplayName(l).slice(0, MAX_DIGEST_NAME);
+          lines.push(
+            `<a href="https://t.me/${botUsername}?start=lead_${l.id}">#${l.id}</a> ${escapeHtml(name)} · ${escapeHtml(l.brand)}`,
+          );
+          rows.push([
+            { text: `✅ #${l.id}`, callback_data: `won:${l.id}` },
+            { text: `❌ #${l.id}`, callback_data: `lost:${l.id}` },
+            { text: `⏳ #${l.id}`, callback_data: `work:${l.id}` },
+          ]);
+        }
+      }
+      if (rows.length === 0) return null;
+      if (hidden > 0) lines.push('', `+${hidden} ещё`);
+      return {
+        text: lines.join('\n'),
+        reply_markup: { inline_keyboard: rows },
+      };
     },
 
     buildHelp(role: Role): string {

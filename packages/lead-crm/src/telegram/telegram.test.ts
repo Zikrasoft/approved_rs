@@ -60,7 +60,7 @@ const {
   sendQuarantinedLeadsToAdmin,
   sendStatusChangeToAdmin,
   sendFieldChangeToAdmin,
-  sendPostponeReminderToOwner,
+  sendDigest,
   editLeadDetailMessage,
 } = notifier;
 
@@ -677,26 +677,77 @@ describe('sendSettlementToOwner', () => {
   });
 });
 
-describe('sendPostponeReminderToOwner', () => {
+describe('sendDigest', () => {
   beforeEach(() => mockFetchOk());
   afterEach(() => mockFetch.mockReset());
 
-  it('sends the reminder to the owner with a deep-link button', async () => {
-    await sendPostponeReminderToOwner(makeLead({ id: 9 }));
-    expect(mockFetch).toHaveBeenCalledTimes(1);
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.chat_id).toBe(111);
-    expect(body.reply_markup.inline_keyboard[0][0].url).toContain('lead_9');
+  const empty = { stale: [], unpaid: [], due: [] };
+
+  it('posts nothing when no Lead needs a decision', async () => {
+    expect(await sendDigest(empty)).toBe(false);
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it('throws when every owner send fails, so the cron keeps the lead due for retry', async () => {
+  it('posts one message to the group, a section per reason and a ✅ ❌ ⏳ row per Lead', async () => {
+    const sent = await sendDigest({
+      stale: [makeLead({ id: 3, name: '<Пётр>' })],
+      unpaid: [makeLead({ id: 4, status: 'won', name: '' })],
+      due: [makeLead({ id: 5, status: 'postponed' })],
+    });
+
+    expect(sent).toBe(true);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.chat_id).toBe('-1009876543210');
+    expect(body.parse_mode).toBe('HTML');
+    expect(body.text.split('\n')).toEqual([
+      '<b>📋 Заявки ждут решения</b>',
+      '',
+      '<b>⏰ Пора вернуться</b>',
+      '<a href="https://t.me/approved_test_bot?start=lead_5">#5</a> Иван · Approved.rs',
+      '',
+      '<b>💶 Сделка без суммы — ответь 0, если ничего</b>',
+      '<a href="https://t.me/approved_test_bot?start=lead_4">#4</a> — · Approved.rs',
+      '',
+      '<b>🕐 Без движения 7 дней</b>',
+      '<a href="https://t.me/approved_test_bot?start=lead_3">#3</a> &lt;Пётр&gt; · Approved.rs',
+    ]);
+    expect(body.reply_markup.inline_keyboard).toEqual(
+      [5, 4, 3].map((id) => [
+        { text: `✅ #${id}`, callback_data: `won:${id}` },
+        { text: `❌ #${id}`, callback_data: `lost:${id}` },
+        { text: `⏳ #${id}`, callback_data: `work:${id}` },
+      ]),
+    );
+  });
+
+  it('caps the rows inside the keyboard and length limits and counts the rest', async () => {
+    const many = (from: number, n: number) =>
+      Array.from({ length: n }, (_, i) =>
+        makeLead({ id: from + i, name: 'Я'.repeat(500) }),
+      );
+
+    await sendDigest({
+      due: many(1, 15),
+      unpaid: many(100, 10),
+      stale: many(200, 5),
+    });
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.reply_markup.inline_keyboard).toHaveLength(20);
+    expect(body.text).not.toContain('Без движения');
+    expect(body.text.endsWith('+10 ещё')).toBe(true);
+    expect(body.text.length).toBeLessThan(4096);
+  });
+
+  it('lets a failed send reach the cron', async () => {
     mockFetch.mockResolvedValue({
       ok: false,
       status: 400,
       json: () => Promise.resolve({ description: 'Bad Request' }),
     });
     await expect(
-      sendPostponeReminderToOwner(makeLead({ id: 9 })),
+      sendDigest({ ...empty, stale: [makeLead()] }),
     ).rejects.toThrow();
   });
 });
@@ -1232,12 +1283,6 @@ describe('a lead that asked for several services at once', () => {
     );
   });
 
-  it('names every service in the postpone reminder', () => {
-    expect(formatter.postponeReminderText(multi)).toContain(
-      'Автоподбор · vehicle-inspection',
-    );
-  });
-
   it('falls back to the single stored service for a lead saved before multi-select', () => {
     expect(formatter.formatTeaser(makeLead({ services: [] }))).toContain(
       'Автоподбор',
@@ -1319,7 +1364,6 @@ describe('a lead that asked for several services at once', () => {
     });
     expect(buildLeadDetail(flooded, 'owner').text.length).toBeLessThan(1000);
     expect(formatter.formatTeaser(flooded).length).toBeLessThan(1000);
-    expect(formatter.postponeReminderText(flooded).length).toBeLessThan(1000);
   });
 });
 

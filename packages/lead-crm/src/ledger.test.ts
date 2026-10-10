@@ -587,3 +587,85 @@ describe('drafts', () => {
     expect(records().map((r) => r.type ?? 'lead')).toEqual(['lead', 'draft']);
   });
 });
+
+describe('getDigest', () => {
+  const ids = (leads: { id: number }[]) => leads.map((l) => l.id);
+
+  it('lists open Leads idle for 7 days, measured from their last action', async () => {
+    storage.seed([
+      storedLead(1),
+      storedLead(2, { lastActivityAt: at(5) }),
+      storedLead(3, { statusChangedAt: at(5) }),
+      storedLead(4, { lastActivityAt: at(3) }),
+      storedLead(5, { status: 'lost' }),
+    ]);
+
+    const digest = await store.getDigest(new Date(at(11)));
+
+    expect(ids(digest.stale)).toEqual([1, 4]);
+  });
+
+  it('lists won Leads until a Payout, even 0, is recorded for them', async () => {
+    storage.seed([
+      storedLead(1, { status: 'won' }),
+      storedLead(2, { status: 'won' }),
+      storedLead(3, { status: 'won' }),
+    ]);
+    await store.addPayout({ amount: 0, by: 'owner', leadId: 2 });
+    await store.addPayout({ amount: 50, by: 'owner', leadId: 3 });
+
+    expect(ids((await store.getDigest(new Date(at(2)))).unpaid)).toEqual([1]);
+  });
+
+  it('lists postponed Leads only once their day has come', async () => {
+    storage.seed([
+      storedLead(1, { status: 'postponed', remindAt: '2026-10-05' }),
+      storedLead(2, { status: 'postponed', remindAt: '2026-10-06' }),
+      storedLead(3, { status: 'postponed', remindAt: null }),
+    ]);
+
+    expect(ids((await store.getDigest(new Date(at(5)))).due)).toEqual([1]);
+    expect(ids((await store.getDigest(new Date(at(6)))).due)).toEqual([1, 2]);
+  });
+});
+
+describe('every action on a Lead resets its clock', () => {
+  beforeEach(() => {
+    storage.seed([storedLead(1, { status: 'lost' })]);
+    onDay(9);
+  });
+
+  it('a Payout, and the lost Lead it reopens as won', async () => {
+    await store.addPayout({ amount: 10, by: 'owner', leadId: 1 });
+    expect(await store.getLead(1)).toMatchObject({
+      status: 'won',
+      statusChangedAt: at(9),
+      lastActivityAt: at(9),
+    });
+  });
+
+  it('a Payout correction', async () => {
+    const payout = await store.addPayout({ amount: 10, by: 'owner' });
+    const linked = await store.addPayout({ amount: 0, by: 'owner', leadId: 1 });
+    onDay(12);
+    await store.correctPayout(payout!.id, 20, 'owner');
+    expect((await store.getLead(1))?.lastActivityAt).toBe(at(9));
+    await store.correctPayout(linked!.id, 20, 'owner');
+    expect((await store.getLead(1))?.lastActivityAt).toBe(at(12));
+  });
+
+  it('a note', async () => {
+    await store.addNote(1, 'Звонил');
+    expect((await store.getLead(1))?.lastActivityAt).toBe(at(9));
+  });
+
+  it('an answered prompt', async () => {
+    await store.setPendingPrompt(1, {
+      chatId: 5,
+      messageId: 6,
+      kind: 'reply_visitor',
+    });
+    await store.resolvePendingPrompt(5, 6, () => ({}));
+    expect((await store.getLead(1))?.lastActivityAt).toBe(at(9));
+  });
+});
