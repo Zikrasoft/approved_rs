@@ -1589,6 +1589,28 @@ describe('setTelegramMessage', () => {
   });
 });
 
+describe('touchLead', () => {
+  it('records activity without touching the outcome', async () => {
+    const lead = await store.insertLead(baseData);
+    expect(lead.lastActivityAt).toBeNull();
+    const at = new Date('2026-10-10T09:00:00.000Z');
+
+    await store.touchLead(lead.id, at);
+
+    expect(await store.getLead(lead.id)).toMatchObject({
+      status: 'new',
+      statusChangedAt: lead.statusChangedAt,
+      lastActivityAt: at.toISOString(),
+    });
+  });
+
+  it('stamps the current time by default', async () => {
+    const lead = await store.insertLead(baseData);
+    const updated = await store.touchLead(lead.id);
+    expect(updated?.lastActivityAt).toEqual(expect.any(String));
+  });
+});
+
 describe('updateLeads — failures that are not write conflicts', () => {
   it('propagates a storage failure instead of burning retries on it', async () => {
     await store.insertLead(baseData);

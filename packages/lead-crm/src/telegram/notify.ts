@@ -1,5 +1,5 @@
 import type { Payout } from '../ledger.ts';
-import type { StoredLead } from '../schema.ts';
+import { isClosed, type StoredLead } from '../schema.ts';
 import {
   isMessageGone,
   type SendExtra,
@@ -55,6 +55,7 @@ export function createNotifier({
       );
       const messageId = sent.message_id;
       const chatId = sent.chat.id;
+      if (isClosed(lead)) return { chatId, messageId };
 
       try {
         await client.api.pinChatMessage(chatId, messageId, {
@@ -68,6 +69,21 @@ export function createNotifier({
       }
 
       return { chatId, messageId };
+    },
+
+    async unpinLeadCard(lead: StoredLead): Promise<void> {
+      if (lead.telegramChatId == null || lead.telegramMessageId == null) return;
+      try {
+        await client.api.unpinChatMessage(
+          lead.telegramChatId,
+          lead.telegramMessageId,
+        );
+      } catch (err) {
+        console.error('[telegram] unpinChatMessage failed', {
+          error: err,
+          messageId: lead.telegramMessageId,
+        });
+      }
     },
 
     async refreshLeadCard(lead: StoredLead): Promise<boolean> {

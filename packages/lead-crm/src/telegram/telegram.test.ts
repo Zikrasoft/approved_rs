@@ -16,6 +16,7 @@ import type { LeadStatus, StoredLead } from '../schema.ts';
 
 import {
   EDIT_COPY,
+  OUTCOME_COPY,
   REFERRAL_NOTE,
   statusLabel,
   buildStatusKeyboard,
@@ -54,6 +55,7 @@ const { buildHelp, buildLeadDetail } = formatter;
 const {
   sendLeadNotification,
   refreshLeadCard,
+  unpinLeadCard,
   sendDealNotificationToAdmin,
   sendPayoutNotificationToAdmin,
   sendCommissionClaimToAdmin,
@@ -85,6 +87,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     telegramChatId: null,
     telegramMessageId: null,
     statusChangedAt: '2026-01-01T00:00:00.000Z',
+    lastActivityAt: null,
     createdAt: '2026-01-01T00:00:00.000Z',
     pendingPrompt: null,
     capturePrompt: null,
@@ -181,15 +184,31 @@ describe('sendLeadNotification', () => {
     expect(body.text).not.toContain('через бота');
   });
 
-  it('attaches exactly one deep-link url button, no callback_data, no status buttons', async () => {
+  it('attaches the deep link and the three outcome buttons', async () => {
     await sendLeadNotification(makeLead({ id: 42 }));
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    const kb = body.reply_markup.inline_keyboard;
-    expect(kb).toHaveLength(1);
-    expect(kb[0]).toHaveLength(1);
-    expect(kb[0][0].callback_data).toBeUndefined();
-    expect(kb[0][0].url).toBe('https://t.me/approved_test_bot?start=lead_42');
+    expect(body.reply_markup.inline_keyboard).toEqual([
+      [
+        {
+          text: '📂 Открыть в боте',
+          url: 'https://t.me/approved_test_bot?start=lead_42',
+        },
+      ],
+      [
+        { text: '✅ Сделка', callback_data: 'won:42' },
+        { text: '❌ Отказ', callback_data: 'lost:42' },
+        { text: '⏳ В работе', callback_data: 'work:42' },
+      ],
+    ]);
   });
+
+  it.each(['won', 'lost'] as const)(
+    'posts a %s lead unpinned',
+    async (status) => {
+      await sendLeadNotification(makeLead({ status }));
+      expect(api.callsTo('pinChatMessage')).toHaveLength(0);
+    },
+  );
 
   it('sends the message with parse_mode HTML', async () => {
     await sendLeadNotification(makeLead());
@@ -318,6 +337,41 @@ describe('buildStatusKeyboard', () => {
   });
 });
 
+describe('OUTCOME_COPY', () => {
+  it('confirms a recorded amount in euros', () => {
+    expect(OUTCOME_COPY.recorded(1500)).toBe(`✅ ${money(1500)} записано`);
+  });
+});
+
+describe('unpinLeadCard', () => {
+  beforeEach(() => mockFetchOk());
+  afterEach(() => mockFetch.mockReset());
+
+  it('unpins the stored card', async () => {
+    await unpinLeadCard(
+      makeLead({ telegramChatId: -1009876543210, telegramMessageId: 555 }),
+    );
+    expect(api.callsTo('unpinChatMessage').map((c) => c.payload)).toEqual([
+      { chat_id: -1009876543210, message_id: 555 },
+    ]);
+  });
+
+  it('does nothing for a lead without a card', async () => {
+    await unpinLeadCard(makeLead());
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('only logs when unpinning fails', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    api.fail('unpinChatMessage', 'Bad Request: not enough rights');
+    await expect(
+      unpinLeadCard(makeLead({ telegramChatId: -1, telegramMessageId: 1 })),
+    ).resolves.toBeUndefined();
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
+});
+
 describe('refreshLeadCard', () => {
   beforeEach(() => mockFetchOk());
   afterEach(() => mockFetch.mockReset());
@@ -400,7 +454,7 @@ describe('sendForceReplyPrompt', () => {
     expect(id).toBe(777);
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.chat_id).toBe(111);
-    expect(body.reply_markup).toEqual({ force_reply: true, selective: true });
+    expect(body.reply_markup).toEqual({ force_reply: true });
   });
 });
 

@@ -49,6 +49,7 @@ const storedLead: StoredLead = {
   telegramChatId: null,
   telegramMessageId: null,
   statusChangedAt: '2026-01-01T00:00:00.000Z',
+  lastActivityAt: null,
   createdAt: '2026-01-01T00:00:00.000Z',
   pendingPrompt: null,
   capturePrompt: null,
@@ -342,6 +343,7 @@ describe('afterStatusChange', () => {
       },
       sendStatusChangeToAdmin: record('status'),
       sendDealNotificationToAdmin: record('deal'),
+      unpinLeadCard: record('unpin'),
     },
   });
 
@@ -362,25 +364,25 @@ describe('afterStatusChange', () => {
       'a change from a DM',
       { status: 'lost' as const },
       { surface },
-      ['card:42', 'dm:7:8:42:owner', 'status:42'],
+      ['card:42', 'unpin:42', 'dm:7:8:42:owner', 'status:42'],
     ],
     [
       'won with an amount',
       { status: 'won' as const, dealAmount: 300 },
       {},
-      ['card:42', 'deal:42'],
+      ['card:42', 'unpin:42', 'deal:42'],
     ],
     [
       'won without an amount',
       { status: 'won' as const },
       {},
-      ['card:42', 'status:42'],
+      ['card:42', 'unpin:42', 'status:42'],
     ],
     [
       'the ghost sweep',
       { status: 'lost' as const },
       { notice: false },
-      ['card:42'],
+      ['card:42', 'unpin:42'],
     ],
   ])('%s', async (_, patch, options, expected) => {
     await afterStatusChange({ ...storedLead, ...patch }, options);

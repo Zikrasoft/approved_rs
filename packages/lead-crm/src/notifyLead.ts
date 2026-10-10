@@ -1,5 +1,10 @@
 import { hasDealAmount } from './money.ts';
-import type { LeadInput, LeadSubmission, StoredLead } from './schema.ts';
+import {
+  isClosed,
+  type LeadInput,
+  type LeadSubmission,
+  type StoredLead,
+} from './schema.ts';
 import type { LeadStore } from './store.ts';
 import type { Role } from './telegram/format.ts';
 import type { Notifier } from './telegram/notify.ts';
@@ -46,6 +51,7 @@ interface AfterStatusChangeOptions {
     | 'editLeadDetailMessage'
     | 'sendStatusChangeToAdmin'
     | 'sendDealNotificationToAdmin'
+    | 'unpinLeadCard'
   >;
 }
 
@@ -58,6 +64,7 @@ export function createAfterStatusChange({
     { surface, notice = true }: StatusChangeOptions = {},
   ): Promise<void> {
     await ensureLeadCard(lead);
+    if (isClosed(lead)) await notifier.unpinLeadCard(lead);
     if (surface)
       await notifier.editLeadDetailMessage(
         surface.chatId,

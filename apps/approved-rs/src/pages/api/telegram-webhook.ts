@@ -40,6 +40,7 @@ import {
   ADMIN_IDS,
   EDIT_COPY,
   REPLY_COPY,
+  OUTCOME_COPY,
   escapeHtml,
   canAddIncome,
   LEAD_STATUS_ACTIONS,
@@ -50,6 +51,7 @@ import { captureClientFor } from '@/lib/captureBot';
 import {
   getLead,
   setStatus,
+  touchLead,
   archiveLead,
   unarchiveLead,
   deleteLead,
@@ -64,7 +66,6 @@ import {
   postponeLead,
   canPostpone,
   postponePatch,
-  wonPatch,
   addPayout,
   getBalance,
   readLeads,
@@ -229,22 +230,26 @@ async function changeStatus(
   ctx: Ctx,
   id: number,
   key: LeadStatus,
+  fromDetail = true,
 ): Promise<void> {
   const lead = await getLead(id);
   if (!lead) return ack(ctx);
-  if (key === 'won' && lead.status !== 'won') {
-    await startPrompt(ctx, id, {
-      prompt: lead.incomes.length
-        ? '💰 Сколько ты заработал сверх уже добавленных доходов (в евро)?\n\nЕсли больше ничего — 0'
-        : '💰 Сколько ты заработал с этой заявки (в евро)? Не стоимость машины, а твоя прибыль.\n\nНапример: 300',
-      kind: 'deal_amount',
-      ackText: 'Жду сумму',
-    });
-    return;
-  }
-  const updated = await setStatus(id, key);
-  if (updated) await afterStatusChangeOn(ctx, updated);
-  await answerCallback(ctx.cbId, 'Статус обновлён');
+  const updated = lead.status === key ? undefined : await setStatus(id, key);
+  if (updated)
+    await (fromDetail
+      ? afterStatusChangeOn(ctx, updated)
+      : afterStatusChange(updated));
+  if (key !== 'won') return answerCallback(ctx.cbId, 'Статус обновлён');
+  await startPrompt(ctx, id, {
+    prompt: OUTCOME_COPY.wonPrompt,
+    kind: 'deal_amount',
+    ackText: OUTCOME_COPY.wonAck,
+  });
+}
+
+async function markInWork(ctx: Ctx, id: number): Promise<void> {
+  await touchLead(id);
+  await answerCallback(ctx.cbId, OUTCOME_COPY.workAck);
 }
 
 async function archive(ctx: Ctx, id: number): Promise<void> {
@@ -390,6 +395,17 @@ export const CALLBACKS: CallbackRow[] = [
   ...LEAD_STATUS_ACTIONS.map(({ key }) =>
     statusRow(key, key === 'won' || key === 'lost' ? 'owner' : 'any'),
   ),
+  [
+    /^won:(\d+)$/,
+    'owner',
+    onLead((ctx, id) => changeStatus(ctx, id, 'won', false)),
+  ],
+  [
+    /^lost:(\d+)$/,
+    'owner',
+    onLead((ctx, id) => changeStatus(ctx, id, 'lost', false)),
+  ],
+  [/^work:(\d+)$/, 'owner', onLead(markInWork)],
   [/^arch:(\d+)$/, 'any', onLead(archive)],
   [/^unarch:(\d+)$/, 'any', onLead(unarchive)],
   [/^postpone:(\d+)$/, 'owner', onLead(openRemindPicker)],
@@ -518,6 +534,7 @@ async function replyWithCard(
 }
 
 type PromptReply = {
+  by: Role;
   chatId: number;
   replyToMessageId: number;
   text: string;
@@ -526,23 +543,30 @@ type PromptReply = {
 type PromptHandler = (reply: PromptReply) => Promise<void>;
 
 async function replyDealAmount({
+  by,
   chatId,
   replyToMessageId,
   text,
-  pending,
 }: PromptReply): Promise<void> {
-  const amount = parseAmount(text, pending.incomes.length > 0);
+  const amount = parseAmount(text, true);
   if (amount == null) {
-    await sendMessage(chatId, '⚠️ Нужна сумма в евро. Попробуйте ещё раз.');
+    await sendMessage(chatId, OUTCOME_COPY.badAmount);
     return;
   }
-  const updated = await resolvePendingPrompt(chatId, replyToMessageId, (lead) =>
-    wonPatch(lead, amount),
+  const resolved = await resolvePendingPrompt(
+    chatId,
+    replyToMessageId,
+    () => ({}),
   );
-  if (updated) await afterStatusChange(updated);
+  if (!resolved) return;
+  const payout = await addPayout({ amount, by, leadId: resolved.id });
+  if (!payout) return;
+  await sendPayoutNotificationToAdmin(resolved, payout);
+  await sendMessage(chatId, OUTCOME_COPY.recorded(amount));
 }
 
 async function replyAddIncome({
+  by,
   chatId,
   replyToMessageId,
   text,
@@ -558,7 +582,7 @@ async function replyAddIncome({
     () => ({}),
   );
   if (!resolved || !canAddIncome(resolved, 'owner')) return;
-  const payout = await addPayout({ amount, by: 'owner', leadId: resolved.id });
+  const payout = await addPayout({ amount, by, leadId: resolved.id });
   if (!payout) return;
   await sendPayoutNotificationToAdmin(resolved, payout);
   await replyWithCard(chatId, resolved, '✅ Доход добавлен');
@@ -671,6 +695,7 @@ const PROMPT_REPLIES: Record<PromptKind, PromptHandler> = {
 };
 
 async function handlePromptReply(
+  by: Role,
   chatId: number,
   replyToMessageId: number,
   text: string,
@@ -678,6 +703,7 @@ async function handlePromptReply(
   const pending = await findByPendingPrompt(chatId, replyToMessageId);
   if (!pending?.pendingPrompt) return;
   await PROMPT_REPLIES[pending.pendingPrompt.kind]({
+    by,
     chatId,
     replyToMessageId,
     text,
@@ -747,7 +773,10 @@ bot.on('callback_query', async (ctx, next) => {
 bot.on('message', async (ctx, next) => {
   const repliedTo = ctx.message.reply_to_message;
   if (!repliedTo) return next();
+  const role = roleOf(ctx.from?.id);
+  if (!role) return;
   await handlePromptReply(
+    role,
     ctx.chat.id,
     repliedTo.message_id,
     ctx.message.text ?? '',

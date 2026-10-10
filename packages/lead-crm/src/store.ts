@@ -578,6 +578,13 @@ export function createLeadStore({
       return updateOne(id, (l) => ({ ...l, ...statusPatch(status) }));
     },
 
+    touchLead(
+      id: number,
+      at: Date = new Date(),
+    ): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) => ({ ...l, lastActivityAt: at.toISOString() }));
+    },
+
     setPendingPrompt(
       id: number,
       prompt: PendingPrompt | null,

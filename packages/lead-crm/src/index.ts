@@ -69,6 +69,7 @@ export {
   EDIT_FIELD_LABELS,
   REFERRAL_NOTE,
   REPLY_COPY,
+  OUTCOME_COPY,
   escapeHtml,
   formatDateRu,
   formatDealsList,
