@@ -49,6 +49,7 @@ export {
   PAYOUT_COPY,
   payoutRecordedMessage,
   OUTCOME_COPY,
+  LEAD_ACTION_COPY,
   SETTLEMENT_COPY,
   settleKeyboard,
   settlementText,

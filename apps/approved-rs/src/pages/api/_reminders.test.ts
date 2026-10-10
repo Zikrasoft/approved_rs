@@ -296,6 +296,36 @@ describe('GET /api/reminders', () => {
     error.mockRestore();
   });
 
+  it('posts the digest once a day, however often the cron runs', async () => {
+    leadsStorage().seed([makeLead({ status: 'won', remindAt: null })]);
+
+    await GET(makeCtx());
+    vi.setSystemTime(new Date(NOW.getTime() + 2 * HOUR_MS));
+    const rerun = await GET(makeCtx());
+
+    expect((await rerun.json()).digestSent).toBe(false);
+    expect(digestIds()).toEqual([9]);
+
+    api.reset();
+    vi.setSystemTime(new Date(NOW.getTime() + DAY_MS));
+    await GET(makeCtx());
+    expect(digestIds()).toEqual([9]);
+  });
+
+  it('gives the day back when the digest fails, so the next run sends it', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    leadsStorage().seed([makeLead()]);
+    api.fail('sendMessage', 'Bad Request: chat not found');
+    await GET(makeCtx());
+
+    api.reset();
+    const retried = await GET(makeCtx());
+
+    expect((await retried.json()).digestSent).toBe(true);
+    expect(digestIds()).toEqual([9]);
+    error.mockRestore();
+  });
+
   it('still lists the rest when reopening one due Lead fails', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
     leadsStorage().seed([makeLead({ id: 9 }), makeLead({ id: 10 })]);

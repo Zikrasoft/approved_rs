@@ -3,9 +3,10 @@ export const prerender = false;
 import type { APIContext } from 'astro';
 import { secretMatches } from '@/lib/verifySecret';
 import {
+  claimDigest,
   claimMonthlySummary,
   expireGhostLeads,
-  getDigest,
+  releaseDigest,
   releaseMonthlySummary,
   resumeLead,
 } from '@/lib/store';
@@ -38,11 +39,13 @@ async function expireGhosts(now: Date): Promise<number> {
 }
 
 async function postDigest(now: Date): Promise<boolean> {
-  const digest = await getDigest(now);
+  const digest = await claimDigest(now);
+  if (!digest) return false;
   try {
     if (!(await sendDigest(digest))) return false;
   } catch (err) {
     console.error('[reminders] failed to send the digest', { error: err });
+    await releaseDigest(now);
     return false;
   }
   for (const lead of digest.due) {

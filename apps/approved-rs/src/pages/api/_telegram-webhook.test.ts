@@ -181,12 +181,10 @@ function message(
     chatId = from,
     type = 'private',
     replyTo,
-    repliedText,
   }: {
     chatId?: number;
     type?: string;
     replyTo?: number;
-    repliedText?: string;
   } = {},
 ) {
   return POST(
@@ -199,9 +197,7 @@ function message(
         from: { id: from },
         ...(replyTo == null
           ? {}
-          : {
-              reply_to_message: { message_id: replyTo, text: repliedText },
-            }),
+          : { reply_to_message: { message_id: replyTo } }),
       },
     }),
   );
@@ -829,12 +825,25 @@ describe('POST /api/telegram-webhook', () => {
         chatId: ADMIN_ID,
         messageId: TO_PAY_ID,
       });
-    const answerSettlement = (text: string, from = ADMIN_ID) =>
-      message(text, from, {
-        chatId: from,
-        replyTo: PROMPT_ID,
-        repliedText: SETTLEMENT_COPY.prompt,
-      });
+    const settlePrompt = (chatId = ADMIN_ID) => ({
+      type: 'settle_prompt',
+      chatId,
+      messageId: PROMPT_ID,
+      createdAt: new Date().toISOString(),
+    });
+    const promptSettlement = (chatId = ADMIN_ID) =>
+      leadsStorage().seed([
+        ...(leadsStorage().current() as unknown[]),
+        settlePrompt(chatId),
+      ]);
+    const answerSettlement = async (
+      text: string,
+      from = ADMIN_ID,
+      chatId = ADMIN_ID,
+    ) => {
+      promptSettlement(chatId);
+      await message(text, from, { chatId, replyTo: PROMPT_ID });
+    };
 
     it('[💸 Paid] records the balance shown, clears the balance and tells the owner', async () => {
       owed(143.3);
@@ -921,6 +930,26 @@ describe('POST /api/telegram-webhook', () => {
       expect(answers()).toEqual([
         { callback_query_id: 'cb-other', text: SETTLEMENT_COPY.ack },
       ]);
+
+      await message('70', ADMIN_ID, { chatId: ADMIN_ID, replyTo: PROMPT_ID });
+      expect((await readLedger()).settlements).toEqual([
+        expect.objectContaining({ amount: 70 }),
+      ]);
+    });
+
+    it('takes no Settlement from a reply to a prompt it did not store', async () => {
+      owed(100);
+      await message('100', ADMIN_ID, { chatId: ADMIN_ID, replyTo: 4242 });
+      expect((await readLedger()).settlements).toEqual([]);
+    });
+
+    it('closes the prompt once answered, so a second reply settles nothing', async () => {
+      owed(100);
+      await answerSettlement('60');
+      await message('40', ADMIN_ID, { chatId: ADMIN_ID, replyTo: PROMPT_ID });
+      expect((await readLedger()).settlements).toEqual([
+        expect.objectContaining({ amount: 60 }),
+      ]);
     });
 
     it('a partial amount leaves the rest owed, and the owner hears of it', async () => {
@@ -949,9 +978,10 @@ describe('POST /api/telegram-webhook', () => {
 
     it('ignores the owner answering the Settlement prompt', async () => {
       owed(100);
-      await answerSettlement('100', OWNER_ID);
+      await answerSettlement('100', OWNER_ID, Number(GROUP_ID));
       expect((await readLedger()).settlements).toEqual([]);
       expect(api.calls).toEqual([]);
+      expect(parser.parse).not.toHaveBeenCalled();
     });
   });
 
@@ -1112,11 +1142,11 @@ describe('POST /api/telegram-webhook', () => {
       ['payfix:5', 'any'],
       ['settle:other', 'admin'],
       ['settle:143.3', 'admin'],
-      ['draft:5:ok', 'owner'],
-      ['draft:5:edit', 'owner'],
-      ['draft:5:no', 'owner'],
-      ['draft:5:him', 'owner'],
-      ['draft:5:other', 'owner'],
+      ['draft:5:ok', 'any'],
+      ['draft:5:edit', 'any'],
+      ['draft:5:no', 'any'],
+      ['draft:5:him', 'any'],
+      ['draft:5:other', 'any'],
       ['reply:5', 'any'],
       ['menu:open', 'any'],
       ['open:5', 'any'],
@@ -1615,12 +1645,56 @@ describe('POST /api/telegram-webhook', () => {
       expect(await listPayouts(5)).toEqual([]);
     });
 
-    it('ignores a reply to a message that is no card', async () => {
+    it('ignores a reply to a message that is no card when it names no Payout', async () => {
       await message('80', OWNER_ID, {
         chatId: CARD_CHAT_ID,
         type: 'supergroup',
         replyTo: 4242,
       });
+      expect(parser.parse).toHaveBeenCalledWith('80');
+      expect(api.calls).toEqual([]);
+    });
+
+    it.each([
+      ['the owner', OWNER_ID],
+      ['the admin', ADMIN_ID],
+    ])(
+      'drafts a Payout from %s replying to any other message, such as ✅ записано or the digest',
+      async (_who, from) => {
+        parser.parse.mockResolvedValue({
+          amount: 40,
+          note: '',
+          clientName: null,
+          clientPhone: null,
+          brand: null,
+        });
+        await message('Петя 40', from, {
+          chatId: CARD_CHAT_ID,
+          type: 'supergroup',
+          replyTo: 4242,
+        });
+
+        expect(textsTo(CARD_CHAT_ID)).toEqual([
+          '📝 Выплата: 40 €\nКлиент: без заявки',
+        ]);
+        expect(await listPayouts()).toEqual([]);
+      },
+    );
+
+    it('drafts nothing from a stranger replying to any message', async () => {
+      parser.parse.mockResolvedValue({
+        amount: 40,
+        note: '',
+        clientName: null,
+        clientPhone: null,
+        brand: null,
+      });
+      await message('Петя 40', OTHER_ID, {
+        chatId: CARD_CHAT_ID,
+        type: 'supergroup',
+        replyTo: 4242,
+      });
+      expect(parser.parse).not.toHaveBeenCalled();
       expect(api.calls).toEqual([]);
     });
 
@@ -2132,9 +2206,9 @@ describe('POST /api/telegram-webhook', () => {
       ]);
     });
 
-    it('drafts an admin voice reply to a card as the admin', async () => {
+    it('drafts an admin voice reply to a card as the admin, who can confirm it', async () => {
       await speak(ADMIN_ID, toCard);
-      await tap(`draft:${lastDraft().id}:ok`, OWNER_ID, {
+      await tap(`draft:${lastDraft().id}:ok`, ADMIN_ID, {
         chatId: CARD_CHAT_ID,
         messageId: PROMPT_ID,
       });
@@ -2172,10 +2246,11 @@ describe('POST /api/telegram-webhook', () => {
       expect((await stored()).pendingPrompt).toBeNull();
     });
 
-    it('ignores a voice reply to a message the bot did not send', async () => {
+    it('drafts a Payout from a voice reply to a message a person sent', async () => {
       await speak(OWNER_ID, { messageId: 77, isBot: false });
-      expect(parser.transcribe).not.toHaveBeenCalled();
-      expect(api.calls).toEqual([]);
+      expect(parser.transcribe).toHaveBeenCalledWith(VOICE);
+      expect(lastDraft().text).toContain('📝 Выплата: 30 €');
+      expect(await listPayouts()).toEqual([]);
     });
 
     it.each([

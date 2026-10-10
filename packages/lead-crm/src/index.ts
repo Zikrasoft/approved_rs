@@ -46,6 +46,7 @@ export type {
   PayoutEdit,
   Settlement,
   SummaryMark,
+  DigestMark,
 } from './ledger.ts';
 
 export type { OrderMarkers } from './orderMarkers.ts';
@@ -75,6 +76,7 @@ export {
   PAYOUT_COPY,
   payoutRecordedMessage,
   OUTCOME_COPY,
+  LEAD_ACTION_COPY,
   SETTLEMENT_COPY,
   settleKeyboard,
   settlementText,

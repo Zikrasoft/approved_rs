@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { format } from 'date-fns';
 import { legacyIncomesSchema } from './legacyIncomes.ts';
+import { toCents } from './money.ts';
 import { channelLabel } from './channelLabels.ts';
 import { isClosed } from './schema.ts';
 import type {
@@ -20,15 +21,18 @@ import {
 import { LEADS_PATH } from './quarantine.ts';
 import {
   correction,
+  digestMarkSchema,
   draftSchema,
   ledgerBalance,
   ledgerRecordSchema,
   newSettlement,
   nextLedgerId,
   payoutSchema,
+  settlePromptSchema,
   settlementSchema,
   summaryMarkSchema,
   withMigratedIncomes,
+  type DigestMark,
   type Draft,
   type LegacyLeadMoney,
   type DraftPrompt,
@@ -37,6 +41,7 @@ import {
   type Payout,
   type PayoutCorrection,
   type RecordPrompt,
+  type SettlePrompt,
   type Settlement,
   type SummaryMark,
 } from './ledger.ts';
@@ -87,9 +92,9 @@ export interface PastLeadHints {
   phone: string | null;
 }
 
-export const DRAFT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-
-const STALE_AFTER_MS = 7 * 24 * 60 * 60 * 1000;
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+const DRAFT_TTL_MS = WEEK_MS;
+const STALE_AFTER_MS = WEEK_MS;
 
 export interface Digest {
   stale: StoredLead[];
@@ -109,6 +114,8 @@ interface StoreRecords {
   ledger: Ledger;
   drafts: Draft[];
   summaries: SummaryMark[];
+  digests: DigestMark[];
+  settlePrompts: SettlePrompt[];
 }
 
 export interface MonthlySummary {
@@ -128,6 +135,25 @@ function summaryMonth(now: Date): string | null {
     .format(now)
     .split('-');
   return day === '01' ? `${year}-${month}` : null;
+}
+
+const digestDay = (now: Date) => format(now, 'yyyy-MM-dd');
+
+function digestOf({ leads, ledger }: StoreRecords, now: Date): Digest {
+  const today = digestDay(now);
+  const paid = new Set(ledger.payouts.map((p) => p.leadId));
+  return {
+    stale: leads.filter(
+      (l) =>
+        l.status === 'open' &&
+        now.getTime() - lastActionAt(l) >= STALE_AFTER_MS,
+    ),
+    unpaid: leads.filter((l) => l.status === 'won' && !paid.has(l.id)),
+    due: leads.filter(
+      (l) =>
+        l.status === 'postponed' && l.remindAt != null && l.remindAt <= today,
+    ),
+  };
 }
 
 function nameTokens(name: string): string[] {
@@ -332,6 +358,8 @@ export function createLeadStore({
         ledger: { payouts: [], settlements: [] },
         drafts: [],
         summaries: [],
+        digests: [],
+        settlePrompts: [],
         unreadable: [],
         version,
       };
@@ -351,6 +379,8 @@ export function createLeadStore({
     const ledger: Ledger = { payouts: [], settlements: [] };
     const drafts: Draft[] = [];
     const summaries: SummaryMark[] = [];
+    const digests: DigestMark[] = [];
+    const settlePrompts: SettlePrompt[] = [];
     const unreadable: unknown[] = [];
     for (const entry of records.data) {
       const record = ledgerRecordSchema.safeParse(entry);
@@ -359,6 +389,9 @@ export function createLeadStore({
         else if (record.data.type === 'settlement')
           ledger.settlements.push(record.data);
         else if (record.data.type === 'draft') drafts.push(record.data);
+        else if (record.data.type === 'digest') digests.push(record.data);
+        else if (record.data.type === 'settle_prompt')
+          settlePrompts.push(record.data);
         else summaries.push(record.data);
         continue;
       }
@@ -374,6 +407,8 @@ export function createLeadStore({
       ledger: withMigratedIncomes(legacy, ledger),
       drafts,
       summaries,
+      digests,
+      settlePrompts,
       unreadable,
       version,
     };
@@ -402,6 +437,10 @@ export function createLeadStore({
         },
         drafts: mutated.drafts.map((d) => draftSchema.parse(d)),
         summaries: mutated.summaries.map((m) => summaryMarkSchema.parse(m)),
+        digests: mutated.digests.map((m) => digestMarkSchema.parse(m)),
+        settlePrompts: mutated.settlePrompts.map((p) =>
+          settlePromptSchema.parse(p),
+        ),
       };
       await copyToQuarantine(unreadable);
       try {
@@ -412,6 +451,8 @@ export function createLeadStore({
             ...next.ledger.settlements,
             ...next.drafts,
             ...next.summaries,
+            ...next.digests,
+            ...next.settlePrompts,
             ...unreadable,
           ],
           version,
@@ -678,12 +719,42 @@ export function createLeadStore({
       return added;
     },
 
-    async addSettlement(amount: number): Promise<Settlement> {
+    async addSettlePrompt(prompt: RecordPrompt): Promise<void> {
+      await updateRecords(({ settlePrompts }) => {
+        const now = Date.now();
+        const fresh = settlePrompts.filter(
+          (p) => now - new Date(p.createdAt).getTime() < WEEK_MS,
+        );
+        const added = {
+          type: 'settle_prompt' as const,
+          ...prompt,
+          createdAt: new Date(now).toISOString(),
+        };
+        return { settlePrompts: [...fresh, added] };
+      });
+    },
+
+    async findSettlePrompt(
+      chatId: number,
+      messageId: number,
+    ): Promise<boolean> {
+      const { settlePrompts } = await readSnapshot();
+      return settlePrompts.some((p) => promptIs(p, chatId, messageId));
+    },
+
+    async addSettlement(
+      amount: number,
+      answered?: RecordPrompt,
+    ): Promise<Settlement> {
       let added!: Settlement;
-      await updateRecords(({ ledger }) => {
+      await updateRecords(({ ledger, settlePrompts }) => {
         added = newSettlement(ledger, amount);
         return {
           ledger: { ...ledger, settlements: [...ledger.settlements, added] },
+          settlePrompts: settlePrompts.filter(
+            (p) =>
+              !answered || !promptIs(p, answered.chatId, answered.messageId),
+          ),
         };
       });
       return added;
@@ -693,8 +764,9 @@ export function createLeadStore({
       let added: Settlement | undefined;
       await updateRecords(({ ledger }) => {
         added = undefined;
-        if (balance <= 0 || ledgerBalance(ledger) !== balance) return {};
-        added = newSettlement(ledger, balance);
+        const owed = ledgerBalance(ledger);
+        if (owed <= 0 || toCents(owed) !== toCents(balance)) return {};
+        added = newSettlement(ledger, owed);
         return {
           ledger: { ...ledger, settlements: [...ledger.settlements, added] },
         };
@@ -1001,24 +1073,31 @@ export function createLeadStore({
       }));
     },
 
-    async getDigest(now: Date): Promise<Digest> {
-      const today = format(now, 'yyyy-MM-dd');
-      const { leads, ledger } = await readSnapshot();
-      const paid = new Set(ledger.payouts.map((p) => p.leadId));
-      return {
-        stale: leads.filter(
-          (l) =>
-            l.status === 'open' &&
-            now.getTime() - lastActionAt(l) >= STALE_AFTER_MS,
-        ),
-        unpaid: leads.filter((l) => l.status === 'won' && !paid.has(l.id)),
-        due: leads.filter(
-          (l) =>
-            l.status === 'postponed' &&
-            l.remindAt != null &&
-            l.remindAt <= today,
-        ),
-      };
+    async claimDigest(now: Date): Promise<Digest | undefined> {
+      const day = digestDay(now);
+      let claimed: Digest | undefined;
+      await updateRecords((records) => {
+        claimed = undefined;
+        if (records.digests.some((d) => d.day === day)) return {};
+        claimed = digestOf(records, now);
+        if (Object.values(claimed).every((leads) => leads.length === 0))
+          return {};
+        const mark = {
+          type: 'digest' as const,
+          id: nextLedgerId(records.digests),
+          day,
+          createdAt: now.toISOString(),
+        };
+        return { digests: [mark] };
+      });
+      return claimed;
+    },
+
+    async releaseDigest(now: Date): Promise<void> {
+      const day = digestDay(now);
+      await updateRecords(({ digests }) => ({
+        digests: digests.filter((d) => d.day !== day),
+      }));
     },
 
     async expireGhostLeads(now: Date): Promise<StoredLead[]> {

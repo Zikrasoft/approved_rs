@@ -73,11 +73,27 @@ export const summaryMarkSchema = z.object({
 });
 export type SummaryMark = z.infer<typeof summaryMarkSchema>;
 
+export const digestMarkSchema = z.object({
+  type: z.literal('digest'),
+  id: z.number().int().positive(),
+  day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  createdAt: z.string(),
+});
+export type DigestMark = z.infer<typeof digestMarkSchema>;
+
+export const settlePromptSchema = recordPromptSchema.extend({
+  type: z.literal('settle_prompt'),
+  createdAt: z.string(),
+});
+export type SettlePrompt = z.infer<typeof settlePromptSchema>;
+
 export const ledgerRecordSchema = z.discriminatedUnion('type', [
   payoutSchema,
   settlementSchema,
   draftSchema,
   summaryMarkSchema,
+  digestMarkSchema,
+  settlePromptSchema,
 ]);
 
 export interface Ledger {

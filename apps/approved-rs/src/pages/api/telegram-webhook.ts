@@ -40,6 +40,7 @@ import {
   PAYOUT_COPY,
   payoutRecordedMessage,
   OUTCOME_COPY,
+  LEAD_ACTION_COPY,
   SETTLEMENT_COPY,
   settleKeyboard,
   settlementText,
@@ -50,6 +51,7 @@ import {
 } from '@/lib/telegram';
 import { captureClientFor } from '@/lib/captureBot';
 import { parsePayout, transcribeVoice } from '@/lib/payoutParser';
+import { MAX_PAYOUT_AMOUNT } from '@podbor/lead-crm/payout-parser';
 import {
   getLead,
   setStatus,
@@ -79,6 +81,8 @@ import {
   addPayout,
   getBalance,
   addSettlement,
+  addSettlePrompt,
+  findSettlePrompt,
   settleBalance,
   isSettled,
   readLeads,
@@ -99,12 +103,7 @@ const messageSchema = z.object({
   voice: z.object({ file_id: z.string() }).optional(),
   chat: z.object({ id: z.number().int(), type: z.string().optional() }),
   from: z.object({ id: z.number().int() }).optional(),
-  reply_to_message: z
-    .object({
-      message_id: z.number().int(),
-      from: z.object({ is_bot: z.boolean() }).optional(),
-    })
-    .optional(),
+  reply_to_message: z.object({ message_id: z.number().int() }).optional(),
 });
 
 const readFieldsSchema = z.object({
@@ -149,44 +148,39 @@ function roleOf(id: number | undefined): Role | undefined {
   return undefined;
 }
 
-const MAX_AMOUNT = 1_000_000;
+const AMOUNT_NOISE = {
+  prompt: /[^\d.,-]/g,
+  plain: /\s+|(?:€|eur|евро)\.?$/gi,
+};
 
-const amountSchema = z
-  .string()
-  .transform((text) =>
-    text
-      .replace(/[^\d.,-]/g, '')
-      .replace(/\.$/, '')
-      .replace(',', '.'),
-  )
-  .refine((digits) => /^\d+(\.\d+)?$/.test(digits))
-  .transform((digits) => Number(digits))
-  .pipe(z.number().max(MAX_AMOUNT));
+function amountSchema(noise: RegExp) {
+  return z
+    .string()
+    .transform((text) =>
+      text.replace(noise, '').replace(/\.$/, '').replace(',', '.'),
+    )
+    .pipe(z.string().regex(/^\d+(\.\d+)?$/))
+    .transform(Number)
+    .pipe(z.number().max(MAX_PAYOUT_AMOUNT));
+}
 
-function parseAmount(text: string, allowZero = false): number | null {
-  const parsed = amountSchema.safeParse(text);
+const AMOUNT_SCHEMAS = {
+  prompt: amountSchema(AMOUNT_NOISE.prompt),
+  plain: amountSchema(AMOUNT_NOISE.plain),
+};
+
+function parseAmount(
+  text: string,
+  {
+    mode = 'prompt',
+    allowZero = false,
+  }: { mode?: keyof typeof AMOUNT_SCHEMAS; allowZero?: boolean } = {},
+): number | null {
+  const parsed = AMOUNT_SCHEMAS[mode].safeParse(text);
   if (!parsed.success) return null;
   return parsed.data > 0 || (allowZero && parsed.data === 0)
     ? parsed.data
     : null;
-}
-
-const plainAmountSchema = z
-  .string()
-  .transform((text) =>
-    text
-      .replace(/\s+/g, '')
-      .replace(/\.$/, '')
-      .replace(/(€|eur|евро)$/i, '')
-      .replace(',', '.'),
-  )
-  .pipe(z.string().regex(/^\d+(\.\d+)?$/))
-  .transform(Number)
-  .pipe(z.number().max(MAX_AMOUNT));
-
-function parsePlainAmount(text: string): number | null {
-  const parsed = plainAmountSchema.safeParse(text);
-  return parsed.success ? parsed.data : null;
 }
 
 function parseReminderDate(text: string): string | null {
@@ -202,11 +196,11 @@ function quickRemindDate(days: number): string {
 type Ctx = { chatId: number; messageId: number; role: Role; cbId: string };
 type CrmContext = Context & { crm: Ctx };
 type Handler = (ctx: Ctx, ...groups: string[]) => Promise<void>;
-type LeadHandler = (ctx: Ctx, id: number, ...rest: string[]) => Promise<void>;
+type IdHandler = (ctx: Ctx, id: number, ...rest: string[]) => Promise<void>;
 type CallbackRow = [RegExp, Role | 'any', Handler];
 type PromptKind = PendingPrompt['kind'];
 
-function onLead(handler: LeadHandler): Handler {
+function withId(handler: IdHandler): Handler {
   return (ctx, id, ...rest) => handler(ctx, Number(id), ...rest);
 }
 
@@ -226,7 +220,7 @@ async function withErrorAck(
       error: err,
       ...logCtx,
     });
-    await answerCallback(cbId, 'Ошибка, попробуйте ещё раз').catch(() => {});
+    await answerCallback(cbId, LEAD_ACTION_COPY.failed).catch(() => {});
   }
 }
 
@@ -273,7 +267,8 @@ async function changeStatus(
     await (fromDetail
       ? afterStatusChangeOn(ctx, updated)
       : afterStatusChange(updated));
-  if (key !== 'won') return answerCallback(ctx.cbId, 'Статус обновлён');
+  if (key !== 'won')
+    return answerCallback(ctx.cbId, LEAD_ACTION_COPY.statusUpdated);
   await startPrompt(ctx, id, {
     prompt: OUTCOME_COPY.wonPrompt,
     kind: 'deal_amount',
@@ -298,18 +293,18 @@ async function remindIn(ctx: Ctx, id: number, days: string): Promise<void> {
   const updated = await postponeLead(
     id,
     remindAt,
-    `Отложено до ${formatDateRu(remindAt)}`,
+    `${LEAD_ACTION_COPY.postponedUntil}${formatDateRu(remindAt)}`,
   );
   if (!updated) return ack(ctx);
   await afterStatusChangeOn(ctx, updated);
-  await answerCallback(ctx.cbId, 'Отложено');
+  await answerCallback(ctx.cbId, LEAD_ACTION_COPY.postponed);
 }
 
 async function resume(ctx: Ctx, id: number): Promise<void> {
   const updated = await resumeLead(id);
   if (!updated) return ack(ctx);
   await afterStatusChangeOn(ctx, updated);
-  await answerCallback(ctx.cbId, 'Возобновлено');
+  await answerCallback(ctx.cbId, LEAD_ACTION_COPY.resumed);
 }
 
 async function backToLead(ctx: Ctx, id: number): Promise<void> {
@@ -317,9 +312,12 @@ async function backToLead(ctx: Ctx, id: number): Promise<void> {
   if (lead) {
     await editLeadDetailMessage(ctx.chatId, ctx.messageId, lead, ctx.role);
   } else {
-    await safeEditMessage(ctx.chatId, ctx.messageId, 'Заявка не найдена.', {
-      inline_keyboard: [],
-    });
+    await safeEditMessage(
+      ctx.chatId,
+      ctx.messageId,
+      LEAD_ACTION_COPY.notFound,
+      { inline_keyboard: [] },
+    );
   }
   await answerCallback(ctx.cbId);
 }
@@ -334,10 +332,10 @@ async function askDelete(ctx: Ctx, id: number): Promise<void> {
 
 async function confirmDelete(ctx: Ctx, id: number): Promise<void> {
   await deleteLead(id);
-  await safeEditMessage(ctx.chatId, ctx.messageId, '🗑 Заявка удалена.', {
+  await safeEditMessage(ctx.chatId, ctx.messageId, LEAD_ACTION_COPY.deleted, {
     inline_keyboard: [],
   });
-  await answerCallback(ctx.cbId, 'Удалено');
+  await answerCallback(ctx.cbId, LEAD_ACTION_COPY.deleteAck);
 }
 
 async function askAmount(ctx: Ctx): Promise<number> {
@@ -461,7 +459,11 @@ async function settle(ctx: Ctx, shownBalance: string): Promise<void> {
 }
 
 async function askSettlement(ctx: Ctx): Promise<void> {
-  await sendForceReplyPrompt(ctx.chatId, SETTLEMENT_COPY.prompt);
+  const messageId = await sendForceReplyPrompt(
+    ctx.chatId,
+    SETTLEMENT_COPY.prompt,
+  );
+  await addSettlePrompt({ chatId: ctx.chatId, messageId });
   await answerCallback(ctx.cbId, SETTLEMENT_COPY.ack);
 }
 
@@ -484,7 +486,7 @@ function statusRow(key: LeadStatus): CallbackRow {
   return [
     new RegExp(`^st:(\\d+):${key}$`),
     'owner',
-    onLead((ctx, id) => changeStatus(ctx, id, key)),
+    withId((ctx, id) => changeStatus(ctx, id, key)),
   ];
 }
 
@@ -494,53 +496,48 @@ export const CALLBACKS: CallbackRow[] = [
   [
     /^won:(\d+)$/,
     'owner',
-    onLead((ctx, id) => changeStatus(ctx, id, 'won', false)),
+    withId((ctx, id) => changeStatus(ctx, id, 'won', false)),
   ],
   [
     /^lost:(\d+)$/,
     'owner',
-    onLead((ctx, id) => changeStatus(ctx, id, 'lost', false)),
+    withId((ctx, id) => changeStatus(ctx, id, 'lost', false)),
   ],
-  [/^work:(\d+)$/, 'owner', onLead(markInWork)],
-  [/^postpone:(\d+)$/, 'owner', onLead(openRemindPicker)],
-  [/^remindpick:(\d+):(\d+)$/, 'owner', onLead(remindIn)],
+  [/^work:(\d+)$/, 'owner', withId(markInWork)],
+  [/^postpone:(\d+)$/, 'owner', withId(openRemindPicker)],
+  [/^remindpick:(\d+):(\d+)$/, 'owner', withId(remindIn)],
   [
     /^remindtype:(\d+)$/,
     'owner',
-    onLead((ctx, id) =>
+    withId((ctx, id) =>
       startLeadPrompt(ctx, id, {
-        prompt:
-          '⏰ На какую дату напомнить? (ДД.ММ.ГГГГ)\n\nНапример: 20.10.2026',
+        prompt: LEAD_ACTION_COPY.remindPrompt,
         kind: 'postpone',
-        ackText: 'Жду дату',
+        ackText: LEAD_ACTION_COPY.remindAck,
       }),
     ),
   ],
-  [/^remindcancel:(\d+)$/, 'owner', onLead(backToLead)],
-  [/^resume:(\d+)$/, 'any', onLead(resume)],
-  [/^del:(\d+)$/, 'admin', onLead(askDelete)],
-  [/^delconfirm:(\d+)$/, 'admin', onLead(confirmDelete)],
-  [/^delcancel:(\d+)$/, 'admin', onLead(backToLead)],
-  [/^payfix:(\d+)$/, 'any', onLead(askPayoutFix)],
+  [/^remindcancel:(\d+)$/, 'owner', withId(backToLead)],
+  [/^resume:(\d+)$/, 'any', withId(resume)],
+  [/^del:(\d+)$/, 'admin', withId(askDelete)],
+  [/^delconfirm:(\d+)$/, 'admin', withId(confirmDelete)],
+  [/^delcancel:(\d+)$/, 'admin', withId(backToLead)],
+  [/^payfix:(\d+)$/, 'any', withId(askPayoutFix)],
   [/^settle:other$/, 'admin', askSettlement],
   [/^settle:(\d+(?:\.\d+)?)$/, 'admin', settle],
-  [/^draft:(\d+):ok$/, 'owner', onLead(confirmDraftTap)],
-  [/^draft:(\d+):edit$/, 'owner', onLead(askDraftFix)],
-  [/^draft:(\d+):no$/, 'owner', onLead(discardDraftTap)],
-  [
-    /^draft:(\d+):him$/,
-    'owner',
-    onLead((ctx, id) => settleMatch(ctx, id, true)),
-  ],
+  [/^draft:(\d+):ok$/, 'any', withId(confirmDraftTap)],
+  [/^draft:(\d+):edit$/, 'any', withId(askDraftFix)],
+  [/^draft:(\d+):no$/, 'any', withId(discardDraftTap)],
+  [/^draft:(\d+):him$/, 'any', withId((ctx, id) => settleMatch(ctx, id, true))],
   [
     /^draft:(\d+):other$/,
-    'owner',
-    onLead((ctx, id) => settleMatch(ctx, id, false)),
+    'any',
+    withId((ctx, id) => settleMatch(ctx, id, false)),
   ],
   [
     /^reply:(\d+)$/,
     'any',
-    onLead((ctx, id) =>
+    withId((ctx, id) =>
       startLeadPrompt(ctx, id, {
         prompt: REPLY_COPY.prompt,
         kind: 'reply_visitor',
@@ -549,7 +546,7 @@ export const CALLBACKS: CallbackRow[] = [
     ),
   ],
   [/^menu:open$/, 'any', listOpen],
-  [/^open:(\d+)$/, 'any', onLead(openLead)],
+  [/^open:(\d+)$/, 'any', withId(openLead)],
   [
     /^menu:stats$/,
     'admin',
@@ -626,7 +623,7 @@ async function replyDealAmount({
   replyToMessageId,
   text,
 }: PromptReply): Promise<void> {
-  const amount = parseAmount(text, true);
+  const amount = parseAmount(text, { allowZero: true });
   if (amount == null) {
     await sendMessage(chatId, OUTCOME_COPY.badAmount);
     return;
@@ -650,10 +647,7 @@ async function replyPostpone({
 }: PromptReply): Promise<void> {
   const remindAt = parseReminderDate(text);
   if (remindAt == null) {
-    await sendMessage(
-      chatId,
-      '⚠️ Нужна дата в формате ДД.ММ.ГГГГ, не в прошлом. Попробуйте ещё раз.',
-    );
+    await sendMessage(chatId, LEAD_ACTION_COPY.badDate);
     return;
   }
   const updated = await resolvePendingPrompt(
@@ -661,7 +655,11 @@ async function replyPostpone({
     replyToMessageId,
     (lead) =>
       canPostpone(lead)
-        ? postponePatch(lead, remindAt, `Отложено до ${formatDateRu(remindAt)}`)
+        ? postponePatch(
+            lead,
+            remindAt,
+            `${LEAD_ACTION_COPY.postponedUntil}${formatDateRu(remindAt)}`,
+          )
         : {},
   );
   if (updated?.status === 'postponed') await afterStatusChange(updated);
@@ -736,10 +734,7 @@ const PROMPT_REPLIES: Record<PromptKind, PromptHandler> = {
   reply_visitor: replyVisitor,
 };
 
-type Reply = Omit<PromptReply, 'pending'> & {
-  repliedText: string;
-  spoken: boolean;
-};
+type Reply = Omit<PromptReply, 'pending'> & { spoken: boolean };
 
 async function replyToPrompt(reply: Reply): Promise<boolean> {
   const pending = await findByPendingPrompt(
@@ -754,7 +749,7 @@ async function replyToPrompt(reply: Reply): Promise<boolean> {
 async function replyToPayoutPrompt(reply: Reply): Promise<boolean> {
   const payout = await findPayoutByPrompt(reply.chatId, reply.replyToMessageId);
   if (!payout) return false;
-  const amount = parseAmount(reply.text, true);
+  const amount = parseAmount(reply.text, { allowZero: true });
   if (amount == null) {
     await sendMessage(reply.chatId, PAYOUT_COPY.invalidAmount);
     return true;
@@ -794,7 +789,7 @@ async function replyToCard(reply: Reply): Promise<boolean> {
   if (!text) return true;
   if (reply.spoken && (await draftPayout({ ...reply, text, lead })))
     return true;
-  const amount = parsePlainAmount(text);
+  const amount = parseAmount(text, { mode: 'plain', allowZero: true });
   if (amount == null) {
     await addNote(lead.id, text);
     await sendMessage(
@@ -815,14 +810,15 @@ async function replyToCard(reply: Reply): Promise<boolean> {
 }
 
 async function replyToSettlementPrompt(reply: Reply): Promise<boolean> {
-  if (reply.repliedText !== SETTLEMENT_COPY.prompt) return false;
+  const prompt = { chatId: reply.chatId, messageId: reply.replyToMessageId };
+  if (!(await findSettlePrompt(prompt.chatId, prompt.messageId))) return false;
   if (reply.role !== 'admin') return true;
   const amount = parseAmount(reply.text);
   if (amount == null) {
     await sendMessage(reply.chatId, PAYOUT_COPY.invalidAmount);
     return true;
   }
-  const settlement = await addSettlement(amount);
+  const settlement = await addSettlement(amount, prompt);
   await sendMessage(
     reply.chatId,
     await recordedSettlement(settlement),
@@ -898,6 +894,7 @@ async function heard(
 
 async function routeReply(reply: Reply): Promise<void> {
   for (const route of REPLY_ROUTES) if (await route(reply)) return;
+  await draftPayout(reply);
 }
 
 async function sendMenuMessage(chatId: number, role: Role): Promise<void> {
@@ -913,7 +910,7 @@ async function handlePrivateMessage(msg: TelegramMessage): Promise<void> {
   const startMatch = /^\/start(?:\s+(\S+))?$/.exec(text);
   if (startMatch || text === '/menu') {
     if (!role) {
-      await sendMessage(chatId, '⛔ Доступ запрещён.');
+      await sendMessage(chatId, LEAD_ACTION_COPY.denied);
       return;
     }
     const payload = startMatch?.[1];
@@ -931,7 +928,7 @@ async function handlePrivateMessage(msg: TelegramMessage): Promise<void> {
   }
 
   if (!role) {
-    await sendMessage(chatId, '⛔ Доступ запрещён.');
+    await sendMessage(chatId, LEAD_ACTION_COPY.denied);
     return;
   }
 
@@ -964,8 +961,6 @@ bot.on('message', async (ctx, next) => {
   if (!repliedTo) return next();
   const role = roleOf(ctx.from?.id);
   if (!role) return;
-  const spoken = ctx.message.voice != null;
-  if (spoken && !repliedTo.from?.is_bot) return;
   const text = await heard(ctx.chat.id, ctx.message);
   if (text === undefined) return;
   await routeReply({
@@ -973,9 +968,8 @@ bot.on('message', async (ctx, next) => {
     chatId: ctx.chat.id,
     messageId: ctx.message.message_id,
     replyToMessageId: repliedTo.message_id,
-    repliedText: repliedTo.text ?? '',
     text,
-    spoken,
+    spoken: ctx.message.voice != null,
   });
 });
 

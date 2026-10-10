@@ -310,6 +310,23 @@ const DIGEST_SECTIONS: [keyof Digest, string][] = [
 
 const MAX_DIGEST_NAME = 40;
 
+export const LEAD_ACTION_COPY = {
+  failed: 'Ошибка, попробуйте ещё раз',
+  statusUpdated: 'Статус обновлён',
+  postponed: 'Отложено',
+  postponedUntil: 'Отложено до ',
+  resumed: 'Возобновлено',
+  remindPrompt:
+    '⏰ На какую дату напомнить? (ДД.ММ.ГГГГ)\n\nНапример: 20.10.2026',
+  remindAck: 'Жду дату',
+  badDate:
+    '⚠️ Нужна дата в формате ДД.ММ.ГГГГ, не в прошлом. Попробуйте ещё раз.',
+  notFound: 'Заявка не найдена.',
+  deleted: '🗑 Заявка удалена.',
+  deleteAck: 'Удалено',
+  denied: '⛔ Доступ запрещён.',
+} as const;
+
 export const OUTCOME_COPY = {
   wonPrompt:
     '💰 Сколько переведёшь админу с этой заявки (в евро)? Ответь на это сообщение суммой.\n\nДеньги будут позже — просто не отвечай. Ничего не будет — ответь 0.',

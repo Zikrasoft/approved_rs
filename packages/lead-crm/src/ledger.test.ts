@@ -163,6 +163,38 @@ describe('addSettlement and the balance', () => {
   });
 });
 
+describe('settlement prompts', () => {
+  const prompt = { chatId: 222, messageId: 9 };
+
+  it('answers only the prompt it stored, by chat and message', async () => {
+    await store.addSettlePrompt(prompt);
+
+    expect(await store.findSettlePrompt(222, 9)).toBe(true);
+    expect(await store.findSettlePrompt(222, 10)).toBe(false);
+    expect(await store.findSettlePrompt(111, 9)).toBe(false);
+  });
+
+  it('closes the prompt with the Settlement that answers it', async () => {
+    await store.addSettlePrompt(prompt);
+    await store.addSettlement(40);
+    expect(await store.findSettlePrompt(222, 9)).toBe(true);
+
+    await store.addSettlement(60, prompt);
+    expect(await store.findSettlePrompt(222, 9)).toBe(false);
+    expect(await store.getBalance()).toBe(-100);
+  });
+
+  it('forgets a prompt left unanswered for a week', async () => {
+    onDay(1);
+    await store.addSettlePrompt(prompt);
+    onDay(8);
+    await store.addSettlePrompt({ chatId: 222, messageId: 10 });
+
+    expect(await store.findSettlePrompt(222, 9)).toBe(false);
+    expect(await store.findSettlePrompt(222, 10)).toBe(true);
+  });
+});
+
 describe('settleBalance', () => {
   it('records the whole balance the admin was shown', async () => {
     await store.addPayout({ amount: 80, by: 'owner' });
@@ -172,6 +204,15 @@ describe('settleBalance', () => {
 
     expect(settlement).toMatchObject({ type: 'settlement', amount: 50 });
     expect(await store.getBalance()).toBe(0);
+  });
+
+  it('compares the shown balance to the cent, not as a float', async () => {
+    await store.addPayout({ amount: 0.1, by: 'owner' });
+    await store.addPayout({ amount: 0.2, by: 'owner' });
+
+    expect(await store.settleBalance(0.1 + 0.2)).toMatchObject({
+      amount: 0.3,
+    });
   });
 
   it('records nothing once the balance has moved, so a second tap is harmless', async () => {
@@ -354,16 +395,19 @@ describe('migration from incomes', () => {
     expect(await store.getBalance()).toBe(153.3);
   });
 
-  it('quarantines legacy money it cannot price instead of dropping it', async () => {
-    const unpriced = storedLead(9, { status: 'won', dealAmount: 300 });
-    storage.seed([...legacy, unpriced]);
-    const quarantine = vi.fn().mockResolvedValue(undefined);
-    store = createLeadStore({ storage, schema, quarantine });
+  it('prices legacy money stored without a rate at the former 10% default', async () => {
+    storage.seed([storedLead(9, { status: 'won', dealAmount: 300 })]);
 
-    await store.addPayout({ amount: 1, by: 'owner' });
-
-    expect(quarantine).toHaveBeenCalledWith([unpriced]);
-    expect(records()).toContainEqual(unpriced);
+    expect(await store.readLedger()).toEqual({
+      payouts: [
+        expect.objectContaining({
+          amount: 30,
+          leadId: 9,
+          migratedFrom: 'income:9:1',
+        }),
+      ],
+      settlements: [],
+    });
   });
 
   it('keeps a corrected migrated Payout corrected', async () => {
@@ -668,7 +712,7 @@ describe('claimMonthlySummary', () => {
   });
 });
 
-describe('getDigest', () => {
+describe('claimDigest', () => {
   const ids = (leads: { id: number }[]) => leads.map((l) => l.id);
 
   it('lists open Leads idle for 7 days, measured from their last action', async () => {
@@ -680,7 +724,7 @@ describe('getDigest', () => {
       storedLead(5, { status: 'lost' }),
     ]);
 
-    const digest = await store.getDigest(new Date(at(11)));
+    const digest = (await store.claimDigest(new Date(at(11))))!;
 
     expect(ids(digest.stale)).toEqual([1, 4]);
   });
@@ -694,7 +738,9 @@ describe('getDigest', () => {
     await store.addPayout({ amount: 0, by: 'owner', leadId: 2 });
     await store.addPayout({ amount: 50, by: 'owner', leadId: 3 });
 
-    expect(ids((await store.getDigest(new Date(at(2)))).unpaid)).toEqual([1]);
+    expect(ids((await store.claimDigest(new Date(at(2))))!.unpaid)).toEqual([
+      1,
+    ]);
   });
 
   it('lists postponed Leads only once their day has come', async () => {
@@ -704,8 +750,43 @@ describe('getDigest', () => {
       storedLead(3, { status: 'postponed', remindAt: null }),
     ]);
 
-    expect(ids((await store.getDigest(new Date(at(5)))).due)).toEqual([1]);
-    expect(ids((await store.getDigest(new Date(at(6)))).due)).toEqual([1, 2]);
+    expect(ids((await store.claimDigest(new Date(at(5))))!.due)).toEqual([1]);
+    expect(ids((await store.claimDigest(new Date(at(6))))!.due)).toEqual([
+      1, 2,
+    ]);
+  });
+
+  it('claims a day once, however often the cron runs that day', async () => {
+    storage.seed([storedLead(1, { status: 'won' })]);
+
+    expect(await store.claimDigest(new Date(at(2)))).toBeDefined();
+    expect(
+      await store.claimDigest(new Date(at(2).replace('T00', 'T12'))),
+    ).toBeUndefined();
+    expect(await store.claimDigest(new Date(at(3)))).toBeDefined();
+    expect(records().filter((r) => r.type === 'digest')).toEqual([
+      expect.objectContaining({ day: '2026-10-03' }),
+    ]);
+  });
+
+  it('claims no day when there is nothing to list', async () => {
+    storage.seed([storedLead(1, { status: 'lost' })]);
+
+    expect(await store.claimDigest(new Date(at(2)))).toEqual({
+      stale: [],
+      unpaid: [],
+      due: [],
+    });
+    expect(records().filter((r) => r.type === 'digest')).toEqual([]);
+  });
+
+  it('gives the day back once released, so a failed post is retried', async () => {
+    storage.seed([storedLead(1, { status: 'won' })]);
+    await store.claimDigest(new Date(at(2)));
+    await store.releaseDigest(new Date(at(2)));
+
+    expect(records().filter((r) => r.type === 'digest')).toEqual([]);
+    expect(await store.claimDigest(new Date(at(2)))).toBeDefined();
   });
 });
 
