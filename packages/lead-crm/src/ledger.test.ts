@@ -163,6 +163,31 @@ describe('addSettlement and the balance', () => {
   });
 });
 
+describe('settleBalance', () => {
+  it('records the whole balance the admin was shown', async () => {
+    await store.addPayout({ amount: 80, by: 'owner' });
+    await store.addSettlement(30);
+
+    const settlement = await store.settleBalance(50);
+
+    expect(settlement).toMatchObject({ type: 'settlement', amount: 50 });
+    expect(await store.getBalance()).toBe(0);
+  });
+
+  it('records nothing once the balance has moved, so a second tap is harmless', async () => {
+    await store.addPayout({ amount: 80, by: 'owner' });
+    await store.settleBalance(80);
+
+    expect(await store.settleBalance(80)).toBeUndefined();
+    expect((await store.readLedger()).settlements).toHaveLength(1);
+  });
+
+  it('records nothing when nothing is owed', async () => {
+    expect(await store.settleBalance(0)).toBeUndefined();
+    expect((await store.readLedger()).settlements).toEqual([]);
+  });
+});
+
 describe('listPayouts', () => {
   it('lists every Payout, or one Lead’s', async () => {
     const a = await store.insertLead(baseData);

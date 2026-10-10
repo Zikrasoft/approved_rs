@@ -1,4 +1,4 @@
-import type { Payout } from '../ledger.ts';
+import type { Payout, Settlement } from '../ledger.ts';
 import { isClosed, type StoredLead } from '../schema.ts';
 import {
   isMessageGone,
@@ -6,11 +6,10 @@ import {
   type TelegramClient,
 } from './client.ts';
 import {
-  commissionClaimText,
-  commissionResultText,
   dealNotificationText,
   payoutNotificationText,
   quarantinedLeadsText,
+  settlementText,
   statusChangeText,
   type EditField,
   type FieldChangeAuthor,
@@ -118,35 +117,11 @@ export function createNotifier({
       await sendToAll(adminIds, payoutNotificationText(lead, payout));
     },
 
-    async sendCommissionClaimToAdmin(lead: StoredLead): Promise<void> {
-      if (!lead.pendingCommissionClaim) return;
-      await sendToAll(
-        adminIds,
-        commissionClaimText({
-          ...lead,
-          pendingCommissionClaim: lead.pendingCommissionClaim,
-        }),
-        {
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: '✅ Подтвердить',
-                  callback_data: `confirmpay:${lead.id}`,
-                },
-                { text: '❌ Отклонить', callback_data: `rejectpay:${lead.id}` },
-              ],
-            ],
-          },
-        },
-      );
-    },
-
-    async sendCommissionResultToOwner(
-      lead: StoredLead,
-      confirmed: boolean,
+    async sendSettlementToOwner(
+      settlement: Settlement,
+      balance: number,
     ): Promise<void> {
-      await sendToAll(ownerIds, commissionResultText(lead.id, confirmed));
+      await sendToAll(ownerIds, settlementText(settlement, balance));
     },
 
     async sendFieldChangeToAdmin(

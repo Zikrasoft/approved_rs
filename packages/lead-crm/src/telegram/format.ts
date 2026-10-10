@@ -4,7 +4,6 @@ import {
   hasDealAmount,
   incomeCommission,
   roundMoney,
-  unpaidIncomes,
   type CommissionInfo,
 } from '../money.ts';
 import { channelLabel } from '../channelLabels.ts';
@@ -12,7 +11,7 @@ import { isTelegramIdContact } from '../contactShape.ts';
 import { LEADS_PATH } from '../quarantine.ts';
 import type { Income, LeadStatus, StoredLead } from '../schema.ts';
 import { MAX_LIST_ROWS, isPlaceholderContact } from '../store.ts';
-import type { LedgerAuthor, Payout } from '../ledger.ts';
+import type { LedgerAuthor, Payout, Settlement } from '../ledger.ts';
 
 export type Role = 'owner' | 'admin';
 
@@ -238,6 +237,38 @@ export function buildToPay(balance: number): string {
   return `<b>💶 К оплате</b>\n\n${formatMoney(balance)}`;
 }
 
+export const SETTLEMENT_COPY = {
+  otherButton: '✏️ Другая сумма',
+  prompt: '💸 Сколько получено (в евро)?\n\nНапример: 200',
+  ack: 'Жду сумму',
+  stale: 'Сумма к оплате изменилась',
+} as const;
+
+export function settleKeyboard(balance: number): Keyboard {
+  return {
+    inline_keyboard: [
+      ...(balance > 0
+        ? [
+            [
+              {
+                text: `💸 Оплачено ${formatMoney(balance)}`,
+                callback_data: `settle:${balance}`,
+              },
+            ],
+          ]
+        : []),
+      [{ text: SETTLEMENT_COPY.otherButton, callback_data: 'settle:other' }],
+    ],
+  };
+}
+
+export function settlementText(
+  settlement: Settlement,
+  balance: number,
+): string {
+  return `💸 Оплата получена: ${formatMoney(settlement.amount)}\nОсталось к оплате: ${formatMoney(balance)}`;
+}
+
 function paidStatusMark(
   l: StoredLead & { dealAmount: number },
   info: CommissionInfo,
@@ -330,23 +361,6 @@ export function buildStats(leads: StoredLead[], role: Role): string {
     '',
     ...moneyLines,
   ].join('\n');
-}
-
-export function commissionResultText(
-  leadId: number,
-  confirmed: boolean,
-): string {
-  return confirmed
-    ? `✅ Оплата по заявке #${leadId} подтверждена.`
-    : `❌ Оплата по заявке #${leadId} не подтверждена, свяжитесь с администратором.`;
-}
-
-export function commissionClaimText(
-  lead: StoredLead & {
-    pendingCommissionClaim: NonNullable<StoredLead['pendingCommissionClaim']>;
-  },
-): string {
-  return `🔔 Отмечена оплата комиссии по заявке #${lead.id}: ${formatMoney(lead.pendingCommissionClaim.amount)}.\n\nПодтвердить?`;
 }
 
 export const EDIT_FIELD_LABELS = {
@@ -546,45 +560,7 @@ export function createFormatter({
         : []),
       `💰 Комиссия Zikrasoft: ${formatMoney(info.commission)} · ${info.isPaidOff ? '🟢 Оплачено' : `Осталось: ${formatMoney(info.remaining)}`}`,
     ];
-    if (lead.pendingCommissionClaim)
-      lines.push(
-        `🕓 Ожидает подтверждения: ${formatMoney(lead.pendingCommissionClaim.amount)}`,
-      );
     return lines;
-  }
-
-  function moneyActionRows(
-    lead: StoredLead,
-    role: Role,
-    info: CommissionInfo,
-  ): Btn[][] {
-    if (role === 'owner') {
-      if (info.isPaidOff || lead.pendingCommissionClaim) return [];
-      const unpaid = unpaidIncomes(lead);
-      const rows: Btn[][] = unpaid.map((i) => [
-        {
-          text: `💸 Оплатил ${formatMoney(incomeCommission(i.amount, lead.commissionPercent))} с ${formatMoney(i.amount)} от ${formatDateRu(i.at)}`,
-          callback_data: `claimpay:${lead.id}:${i.id}`,
-        },
-      ]);
-      if (unpaid.length > 1) {
-        rows.unshift([
-          {
-            text: `💸 Оплатил всё — ${formatMoney(info.remaining)}`,
-            callback_data: `claimpay:${lead.id}`,
-          },
-        ]);
-      }
-      return rows;
-    }
-    return lead.pendingCommissionClaim
-      ? [
-          [
-            { text: '✅ Подтвердить', callback_data: `confirmpay:${lead.id}` },
-            { text: '❌ Отклонить', callback_data: `rejectpay:${lead.id}` },
-          ],
-        ]
-      : [];
   }
 
   function shownValue(
@@ -734,7 +710,6 @@ export function createFormatter({
               ],
             ]
           : []),
-        ...(commission ? moneyActionRows(lead, role, commission) : []),
         [{ text: '🗑 Архивировать', callback_data: `arch:${lead.id}` }],
         ...deleteRow,
       ];

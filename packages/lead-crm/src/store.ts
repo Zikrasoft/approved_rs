@@ -1,11 +1,6 @@
 import { z } from 'zod';
 import { format } from 'date-fns';
-import {
-  appendIncome,
-  incomeCommission,
-  roundMoney,
-  unpaidIncomes,
-} from './money.ts';
+import { appendIncome } from './money.ts';
 import { channelLabel } from './channelLabels.ts';
 import { postponableStatus } from './schema.ts';
 import type {
@@ -13,7 +8,6 @@ import type {
   Referrer,
   LeadInput,
   LeadStatus,
-  PendingCommissionClaim,
   PendingPrompt,
   StoredLead,
 } from './schema.ts';
@@ -28,6 +22,7 @@ import {
   correction,
   ledgerBalance,
   ledgerRecordSchema,
+  newSettlement,
   nextLedgerId,
   payoutSchema,
   settlementSchema,
@@ -376,20 +371,6 @@ export function createLeadStore({
     return leads.reduce((max, l) => Math.max(max, l.id), idFloor) + 1;
   }
 
-  async function settleCommissionClaim(
-    id: number,
-    apply: (lead: StoredLead, claim: PendingCommissionClaim) => StoredLead,
-  ): Promise<StoredLead | undefined> {
-    let acted = false;
-    const updated = await updateOne(id, (l) => {
-      acted = false;
-      if (!l.pendingCommissionClaim) return l;
-      acted = true;
-      return apply(l, l.pendingCommissionClaim);
-    });
-    return acted ? updated : undefined;
-  }
-
   return {
     updateLeads,
     readLeads,
@@ -466,13 +447,7 @@ export function createLeadStore({
     async addSettlement(amount: number): Promise<Settlement> {
       let added!: Settlement;
       await updateRecords(({ leads, ledger }) => {
-        added = settlementSchema.parse({
-          type: 'settlement',
-          id: nextLedgerId(ledger.settlements),
-          amount,
-          createdAt: new Date().toISOString(),
-          createdBy: 'admin',
-        });
+        added = newSettlement(ledger, amount);
         return {
           leads,
           ledger: { ...ledger, settlements: [...ledger.settlements, added] },
@@ -481,6 +456,21 @@ export function createLeadStore({
       return added;
     },
 
+    async settleBalance(balance: number): Promise<Settlement | undefined> {
+      let added: Settlement | undefined;
+      await updateRecords(({ leads, ledger }) => {
+        added = undefined;
+        if (balance <= 0 || ledgerBalance(ledger) !== balance) {
+          return { leads, ledger };
+        }
+        added = newSettlement(ledger, balance);
+        return {
+          leads,
+          ledger: { ...ledger, settlements: [...ledger.settlements, added] },
+        };
+      });
+      return added;
+    },
     async insertLead(data: LeadInput): Promise<StoredLead> {
       let inserted!: StoredLead;
       await updateLeads((leads, idFloor) => {
@@ -727,59 +717,6 @@ export function createLeadStore({
         return next;
       });
       return found;
-    },
-
-    async claimCommission(
-      id: number,
-      onlyIncomeIds: number[] | null,
-    ): Promise<StoredLead | undefined> {
-      let claimed = false;
-      const updated = await updateOne(id, (l) => {
-        claimed = false;
-        const targets = unpaidIncomes(l).filter(
-          (i) => onlyIncomeIds == null || onlyIncomeIds.includes(i.id),
-        );
-        const amount = roundMoney(
-          targets.reduce(
-            (sum, i) => sum + incomeCommission(i.amount, l.commissionPercent),
-            0,
-          ),
-        );
-        if (amount <= 0) return l;
-        claimed = true;
-        return {
-          ...l,
-          pendingCommissionClaim: {
-            amount,
-            claimedAt: new Date().toISOString(),
-            incomeIds: targets.map((i) => i.id),
-          },
-        };
-      });
-      return claimed ? updated : undefined;
-    },
-
-    confirmCommissionPayment(id: number): Promise<StoredLead | undefined> {
-      return settleCommissionClaim(id, (l, claim) => {
-        const now = new Date().toISOString();
-        const ids = claim.incomeIds.length
-          ? claim.incomeIds
-          : unpaidIncomes(l).map((i) => i.id);
-        return {
-          ...l,
-          incomes: l.incomes.map((i) =>
-            ids.includes(i.id) ? { ...i, paidAt: now } : i,
-          ),
-          pendingCommissionClaim: null,
-        };
-      });
-    },
-
-    rejectCommissionPayment(id: number): Promise<StoredLead | undefined> {
-      return settleCommissionClaim(id, (l) => ({
-        ...l,
-        pendingCommissionClaim: null,
-      }));
     },
 
     async searchLeads(query: string, limit = 10): Promise<StoredLead[]> {

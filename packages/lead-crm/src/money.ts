@@ -16,10 +16,6 @@ export function hasDealAmount(
   return lead.dealAmount != null;
 }
 
-export function unpaidIncomes(lead: Pick<StoredLead, 'incomes'>): Income[] {
-  return lead.incomes.filter((i) => i.paidAt == null);
-}
-
 export function appendIncome(incomes: Income[], amount: number): Income[] {
   const id = incomes.reduce((max, i) => Math.max(max, i.id), 0) + 1;
   return [

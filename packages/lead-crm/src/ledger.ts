@@ -52,6 +52,19 @@ export function nextLedgerId(records: { id: number }[]): number {
   return records.reduce((max, r) => Math.max(max, r.id), 0) + 1;
 }
 
+export function newSettlement(
+  { settlements }: Ledger,
+  amount: number,
+): Settlement {
+  return settlementSchema.parse({
+    type: 'settlement',
+    id: nextLedgerId(settlements),
+    amount,
+    createdAt: new Date().toISOString(),
+    createdBy: 'admin',
+  });
+}
+
 export function ledgerBalance({ payouts, settlements }: Ledger): number {
   const sum = (records: { amount: number }[]) =>
     records.reduce((total, r) => total + r.amount, 0);
