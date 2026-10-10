@@ -14,8 +14,6 @@ import type { MonthlySummary } from '../store.ts';
 
 import {
   PAYOUT_COPY,
-  DRAFT_COPY,
-  draftMessage,
   payoutRecordedMessage,
   REFERRAL_NOTE,
   buildToPay,
@@ -575,52 +573,6 @@ describe('sendPayoutNotificationToAdmin', () => {
     expect(second).not.toContain('За что');
   });
 
-  it('draws a draft with confirm, fix and discard buttons', () => {
-    const draft = {
-      type: 'draft' as const,
-      id: 77,
-      amount: 30,
-      note: 'сервис',
-      brand: null,
-      leadId: null,
-      matchPending: false,
-      createdAt: '2026-03-01T00:00:00.000Z',
-      createdBy: 'owner' as const,
-      pendingPrompt: null,
-    };
-    expect(draftMessage(draft, undefined)).toEqual({
-      text: `📝 Выплата: ${money(30)}\nЗа что: сервис\nКлиент: без заявки`,
-      reply_markup: {
-        inline_keyboard: [
-          [
-            { text: DRAFT_COPY.confirm, callback_data: 'draft:77:ok' },
-            { text: DRAFT_COPY.edit, callback_data: 'draft:77:edit' },
-            { text: DRAFT_COPY.discard, callback_data: 'draft:77:no' },
-          ],
-        ],
-      },
-    });
-
-    const lead = makeLead({ id: 9, name: 'Иван' });
-    expect(
-      draftMessage({ ...draft, leadId: 9, matchPending: true }, lead),
-    ).toEqual({
-      text: `📝 Выплата: ${money(30)}\nЗа что: сервис\nКлиент: #9 Иван — это он?`,
-      reply_markup: {
-        inline_keyboard: [
-          [
-            { text: DRAFT_COPY.thatsHim, callback_data: 'draft:77:him' },
-            { text: DRAFT_COPY.anotherClient, callback_data: 'draft:77:other' },
-          ],
-          [{ text: DRAFT_COPY.discard, callback_data: 'draft:77:no' }],
-        ],
-      },
-    });
-    expect(draftMessage({ ...draft, leadId: 9 }, lead).text).toContain(
-      'Клиент: #9 Иван',
-    );
-  });
-
   it('answers a recorded Payout with a fix button carrying its id', () => {
     expect(payoutRecordedMessage({ ...payout, id: 4 })).toEqual({
       text: `✅ ${money(80)} записано`,
@@ -1006,8 +958,8 @@ describe('buildHelp', () => {
     const text = buildHelp('owner');
     expect(text).toContain('✅ Сделка');
     expect(text).toContain('Ответь на карточку');
+    expect(text).not.toContain('Голосовое');
     expect(text).toContain('⏰ Отложить');
-    expect(text).toContain('черновик выплаты');
     expect(text).toContain('📂 Открытые, 💶 К оплате');
     expect(text).not.toContain('Статистика');
     expect(text).not.toContain('Архив');

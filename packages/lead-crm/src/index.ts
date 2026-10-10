@@ -29,16 +29,12 @@ export {
 export type {
   CaptureUpdate,
   Digest,
-  DraftInput,
-  DraftPatch,
   LeadStore,
   MonthlySummary,
-  PastLeadHints,
   PayoutInput,
 } from './store.ts';
 export { isSettled, ledgerBalance } from './ledger.ts';
 export type {
-  Draft,
   Ledger,
   LedgerAuthor,
   Payout,
@@ -83,8 +79,6 @@ export {
   monthlySummaryText,
   MAX_SUMMARY_ROWS,
   TELEGRAM_TEXT_LIMIT,
-  DRAFT_COPY,
-  draftMessage,
   escapeHtml,
   formatDateRu,
   formatMoney,

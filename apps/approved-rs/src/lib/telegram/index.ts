@@ -14,7 +14,6 @@ export const {
   sendForceReplyPrompt,
   answerCallback,
   safeEditMessage,
-  downloadFile,
 } = client;
 
 export { afterStatusChange, ensureLeadCard };
@@ -53,8 +52,6 @@ export {
   SETTLEMENT_COPY,
   settleKeyboard,
   settlementText,
-  DRAFT_COPY,
-  draftMessage,
   escapeHtml,
 } from '@podbor/lead-crm';
 

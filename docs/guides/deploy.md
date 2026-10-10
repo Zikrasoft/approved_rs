@@ -220,8 +220,8 @@ created by itself on the first run, with no protection rules.
 `.vercel/.env.production.local`, and `vercel build` builds with them. Which means:
 
 - **variables are set in the Vercel dashboard, not in GitHub secrets.** GitHub only
-  holds the token/IDs for reaching Vercel plus `OPENAI_API_KEY` (see below),
-  which approved.rs also needs in its Vercel project for free-form Payouts;
+  holds the token/IDs for reaching Vercel plus `OPENAI_API_KEY` for the
+  `translate` job (see below);
 - **a missing public variable fails the build, a missing server-side one fails the
   route.** `PUBLIC_*` variables are inlined into the HTML at build time, so each
   app's `src/utils/constants.ts` parses them through a zod schema at module load
@@ -340,20 +340,6 @@ the owner's reply to a handle-less visitor lands on the CRM webhook there, and
 only the visitor's own brand's bot can deliver it, so the webhook picks the bot by
 the lead's `brand` ([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
 Without a sibling token the reply button is simply absent on that brand's cards.
-
-### OpenAI (approved.rs only)
-
-| Variable         | approved.rs | carlab.rs | details.rs | Without it                                                                                                                                               |
-| ---------------- | ----------- | --------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OPENAI_API_KEY` | ✅          | —         | —          | an owner message with an amount in the group gets "could not read the amount" and no draft; a voice message gets "could not recognise the voice message" |
-
-The CRM webhook reads the owner's free-form group messages (`Иван, сервис
-повторно, 30`) through an OpenAI model into a draft Payout. It is the same key
-as the GitHub secret below; the webhook still answers buttons and card replies
-without it, and only the free-form path fails. An owner voice message, in the
-group or as a reply to a card, is transcribed first (`gpt-4o-mini-transcribe`,
-Telegram's OGG/Opus uploaded as-is) and then takes the same path; a voice reply
-to a card drafts the Payout on that card's Lead.
 
 ### Storage and cron
 
@@ -478,19 +464,19 @@ lived that way for twelve days. To check by hand:
 
 Settings → Secrets and variables → Actions:
 
-| Secret                           | For what                                       | Where to get it                                                            |
-| -------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------------- |
-| `OPENAI_API_KEY`                 | the `translate` job (content auto-translation) | OpenAI. Also set on approved.rs in Vercel, for free-form and voice Payouts |
-| `VERCEL_TOKEN`                   | every deploy job                               | [vercel.com/account/tokens](https://vercel.com/account/tokens)             |
-| `VERCEL_ORG_ID`                  | every deploy job                               | `.vercel/project.json` → `orgId` after `vercel link`                       |
-| `VERCEL_PROJECT_ID`              | the approved.rs deploy                         | Project Settings → General of that project                                 |
-| `VERCEL_PROJECT_ID_AUTO_SERVICE` | the carlab.rs deploy                           | the same, on the carlab.rs project                                         |
-| `VERCEL_PROJECT_ID_DETAILING`    | the details.rs deploy                          | the same, on the details.rs project                                        |
-| `MEDUSA_VPS_HOST`                | the Medusa deploy (the server's IPv4)          | Hetzner Console                                                            |
-| `MEDUSA_VPS_USER`                | the Medusa deploy                              | `deploy` (created by `bootstrap-host.sh`)                                  |
-| `MEDUSA_VPS_SSH_KEY`             | the Medusa deploy (CI's private key)           | `ssh-keygen -t ed25519`; the public half gets `restrict` on the server     |
-| `MEDUSA_VPS_KNOWN_HOSTS`         | the Medusa deploy (the host key)               | `ssh-keyscan -t ed25519 <IPv4>`, fingerprint verified separately           |
-| `MEDUSA_PUBLISHABLE_KEY`         | the `scope` step (the catalog version)         | Medusa admin → Settings → Publishable API Keys                             |
+| Secret                           | For what                                       | Where to get it                                                        |
+| -------------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------- |
+| `OPENAI_API_KEY`                 | the `translate` job (content auto-translation) | OpenAI                                                                 |
+| `VERCEL_TOKEN`                   | every deploy job                               | [vercel.com/account/tokens](https://vercel.com/account/tokens)         |
+| `VERCEL_ORG_ID`                  | every deploy job                               | `.vercel/project.json` → `orgId` after `vercel link`                   |
+| `VERCEL_PROJECT_ID`              | the approved.rs deploy                         | Project Settings → General of that project                             |
+| `VERCEL_PROJECT_ID_AUTO_SERVICE` | the carlab.rs deploy                           | the same, on the carlab.rs project                                     |
+| `VERCEL_PROJECT_ID_DETAILING`    | the details.rs deploy                          | the same, on the details.rs project                                    |
+| `MEDUSA_VPS_HOST`                | the Medusa deploy (the server's IPv4)          | Hetzner Console                                                        |
+| `MEDUSA_VPS_USER`                | the Medusa deploy                              | `deploy` (created by `bootstrap-host.sh`)                              |
+| `MEDUSA_VPS_SSH_KEY`             | the Medusa deploy (CI's private key)           | `ssh-keygen -t ed25519`; the public half gets `restrict` on the server |
+| `MEDUSA_VPS_KNOWN_HOSTS`         | the Medusa deploy (the host key)               | `ssh-keyscan -t ed25519 <IPv4>`, fingerprint verified separately       |
+| `MEDUSA_PUBLISHABLE_KEY`         | the `scope` step (the catalog version)         | Medusa admin → Settings → Publishable API Keys                         |
 
 `MEDUSA_VPS_*` are **repository** secrets, not `production` environment secrets:
 `medusa-image` has no environment, and with environment secrets it would not push
@@ -945,17 +931,15 @@ The owner and the admin each have to message the bot `/start` once before it can
 send them direct messages (including the cron's reminders) — Telegram forbids a bot
 from starting a conversation.
 
-In the group the bot needs two things a default bot does not have:
+In the group the bot needs **admin rights to pin messages**: every new card is
+pinned and a closed one is unpinned; without the right both calls fail and are
+only logged.
 
-- **Privacy mode off.** The owner records a Payout by writing a plain message with
-  an amount in the group, not only by replying to a card, and a bot in privacy
-  mode never receives such messages. In @BotFather: `/setprivacy` → `@SerbCRMBot`
-  → `Disable`. Telegram applies the change only to groups the bot joins
-  afterwards, so remove the bot from the group and add it back (an admin bot
-  receives every message regardless, which also works). Replies to the bot's own
-  cards arrive either way.
-- **Admin rights to pin messages.** Every new card is pinned and a closed one is
-  unpinned; without the right both calls fail and are only logged.
+Privacy mode can stay on. The bot only acts on replies to its own messages
+(cards and prompts), and Telegram delivers "replies to any messages implicitly
+or explicitly meant for this bot" to a bot in privacy mode
+([Bot features → Privacy mode](https://core.telegram.org/bots/features#privacy-mode));
+every other group message is ignored anyway.
 
 The webhook must carry a `secret_token` equal to the approved.rs project's
 `TELEGRAM_WEBHOOK_SECRET` — without a match the endpoint answers 401 to every

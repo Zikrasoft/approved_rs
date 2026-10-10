@@ -17,8 +17,6 @@
     "./submit": "./src/submitLeadForm.ts",
     "./lead-form": "./src/leadForm.ts",
     "./telegram-client": "./src/telegram/client.ts",
-    "./payout-parser": "./src/payoutParser.ts",
-    "./transcriber": "./src/transcriber.ts",
     "./testing": "./src/testing/index.ts"
   },
   "scripts": {
@@ -30,7 +28,6 @@
     "date-fns": "4.4.0",
     "grammy": "1.46.0",
     "libphonenumber-js": "1.13.12",
-    "openai": "7.10.0",
     "zod": "4.5.4"
   },
   "peerDependencies": {

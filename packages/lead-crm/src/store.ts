@@ -22,7 +22,6 @@ import { LEADS_PATH } from './quarantine.ts';
 import {
   correction,
   digestMarkSchema,
-  draftSchema,
   ledgerBalance,
   ledgerRecordSchema,
   newSettlement,
@@ -33,9 +32,7 @@ import {
   summaryMarkSchema,
   withMigratedIncomes,
   type DigestMark,
-  type Draft,
   type LegacyLeadMoney,
-  type DraftPrompt,
   type Ledger,
   type LedgerAuthor,
   type Payout,
@@ -74,26 +71,7 @@ export interface PayoutInput {
   brand?: string | null;
 }
 
-export interface DraftInput {
-  amount: number;
-  by: LedgerAuthor;
-  note: string;
-  brand: string | null;
-  leadId: number | null;
-  matchPending: boolean;
-}
-
-export type DraftPatch = Partial<
-  Pick<Draft, 'amount' | 'leadId' | 'matchPending' | 'pendingPrompt'>
->;
-
-export interface PastLeadHints {
-  name: string | null;
-  phone: string | null;
-}
-
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-const DRAFT_TTL_MS = WEEK_MS;
 const STALE_AFTER_MS = WEEK_MS;
 
 export interface Digest {
@@ -112,7 +90,6 @@ function lastActionAt(lead: StoredLead): number {
 interface StoreRecords {
   leads: StoredLead[];
   ledger: Ledger;
-  drafts: Draft[];
   summaries: SummaryMark[];
   digests: DigestMark[];
   settlePrompts: SettlePrompt[];
@@ -154,36 +131,6 @@ function digestOf({ leads, ledger }: StoreRecords, now: Date): Digest {
         l.status === 'postponed' && l.remindAt != null && l.remindAt <= today,
     ),
   };
-}
-
-function nameTokens(name: string): string[] {
-  return name
-    .toLowerCase()
-    .replaceAll('ё', 'е')
-    .split(/[^\p{L}]+/u)
-    .filter(Boolean);
-}
-
-const phoneDigits = (value: string) => value.replace(/\D/g, '');
-
-const MIN_PHONE_DIGITS = 6;
-const PHONE_TAIL_DIGITS = 9;
-
-function pastLeadMatchers({
-  name,
-  phone,
-}: PastLeadHints): ((lead: StoredLead) => boolean)[] {
-  const tail = phoneDigits(phone ?? '').slice(-PHONE_TAIL_DIGITS);
-  const wanted = nameTokens(name ?? '');
-  return [
-    (lead) =>
-      tail.length >= MIN_PHONE_DIGITS &&
-      phoneDigits(lead.contact).endsWith(tail),
-    (lead) => {
-      const tokens = nameTokens(lead.name);
-      return wanted.length > 0 && wanted.every((t) => tokens.includes(t));
-    },
-  ];
 }
 
 export interface LeadStoreOptions {
@@ -281,6 +228,8 @@ export function resumePatch(): Partial<StoredLead> {
   return { ...statusPatch('open'), remindAt: null };
 }
 
+const retiredDraft = z.looseObject({ type: z.literal('draft') });
+
 const unreadableId = z.object({
   id: z.coerce
     .number()
@@ -297,7 +246,7 @@ function unreadableIdFloor(entries: unknown[]): number {
 }
 
 function promptIs(
-  prompt: RecordPrompt | DraftPrompt | null,
+  prompt: RecordPrompt | null,
   chatId: number,
   messageId: number,
 ): boolean {
@@ -356,7 +305,6 @@ export function createLeadStore({
       return {
         leads: [],
         ledger: { payouts: [], settlements: [] },
-        drafts: [],
         summaries: [],
         digests: [],
         settlePrompts: [],
@@ -377,18 +325,17 @@ export function createLeadStore({
     const leads: StoredLead[] = [];
     const legacy: LegacyLeadMoney[] = [];
     const ledger: Ledger = { payouts: [], settlements: [] };
-    const drafts: Draft[] = [];
     const summaries: SummaryMark[] = [];
     const digests: DigestMark[] = [];
     const settlePrompts: SettlePrompt[] = [];
     const unreadable: unknown[] = [];
     for (const entry of records.data) {
+      if (retiredDraft.safeParse(entry).success) continue;
       const record = ledgerRecordSchema.safeParse(entry);
       if (record.success) {
         if (record.data.type === 'payout') ledger.payouts.push(record.data);
         else if (record.data.type === 'settlement')
           ledger.settlements.push(record.data);
-        else if (record.data.type === 'draft') drafts.push(record.data);
         else if (record.data.type === 'digest') digests.push(record.data);
         else if (record.data.type === 'settle_prompt')
           settlePrompts.push(record.data);
@@ -405,7 +352,6 @@ export function createLeadStore({
     return {
       leads,
       ledger: withMigratedIncomes(legacy, ledger),
-      drafts,
       summaries,
       digests,
       settlePrompts,
@@ -435,7 +381,6 @@ export function createLeadStore({
             settlementSchema.parse(s),
           ),
         },
-        drafts: mutated.drafts.map((d) => draftSchema.parse(d)),
         summaries: mutated.summaries.map((m) => summaryMarkSchema.parse(m)),
         digests: mutated.digests.map((m) => digestMarkSchema.parse(m)),
         settlePrompts: mutated.settlePrompts.map((p) =>
@@ -449,7 +394,6 @@ export function createLeadStore({
             ...next.leads,
             ...next.ledger.payouts,
             ...next.ledger.settlements,
-            ...next.drafts,
             ...next.summaries,
             ...next.digests,
             ...next.settlePrompts,
@@ -623,100 +567,6 @@ export function createLeadStore({
     ): Promise<Payout | undefined> {
       const { payouts } = await readLedger();
       return payouts.find((p) => promptIs(p.pendingPrompt, chatId, messageId));
-    },
-
-    async findPastLead(hints: PastLeadHints): Promise<StoredLead | undefined> {
-      const newestFirst = (await readLeads()).sort((a, b) => b.id - a.id);
-      for (const matches of pastLeadMatchers(hints)) {
-        const lead = newestFirst.find(matches);
-        if (lead) return lead;
-      }
-      return undefined;
-    },
-
-    async addDraft(input: DraftInput): Promise<Draft> {
-      let added!: Draft;
-      await updateRecords(({ drafts }) => {
-        const now = Date.now();
-        added = draftSchema.parse({
-          ...input,
-          type: 'draft',
-          id: Math.max(now, nextLedgerId(drafts)),
-          createdAt: new Date(now).toISOString(),
-          createdBy: input.by,
-          pendingPrompt: null,
-        });
-        const fresh = drafts.filter(
-          (d) => now - new Date(d.createdAt).getTime() < DRAFT_TTL_MS,
-        );
-        return { drafts: [...fresh, added] };
-      });
-      return added;
-    },
-
-    async getDraft(id: number): Promise<Draft | undefined> {
-      const { drafts } = await readSnapshot();
-      return drafts.find((d) => d.id === id);
-    },
-
-    async findDraftByPrompt(
-      chatId: number,
-      messageId: number,
-    ): Promise<Draft | undefined> {
-      const { drafts } = await readSnapshot();
-      return drafts.find((d) => promptIs(d.pendingPrompt, chatId, messageId));
-    },
-
-    async updateDraft(
-      id: number,
-      patch: DraftPatch,
-    ): Promise<Draft | undefined> {
-      let touched: Draft | undefined;
-      await updateRecords(({ drafts }) => {
-        touched = undefined;
-        return {
-          drafts: drafts.map((d) => {
-            if (d.id !== id) return d;
-            touched = { ...d, ...patch };
-            return touched;
-          }),
-        };
-      });
-      return touched;
-    },
-
-    async discardDraft(id: number): Promise<boolean> {
-      let found = false;
-      await updateRecords(({ drafts }) => {
-        found = drafts.some((d) => d.id === id);
-        return { drafts: drafts.filter((d) => d.id !== id) };
-      });
-      return found;
-    },
-
-    async confirmDraft(id: number): Promise<Payout | undefined> {
-      let added: Payout | undefined;
-      await updateRecords((records) => {
-        added = undefined;
-        const draft = records.drafts.find((d) => d.id === id);
-        if (!draft) return {};
-        const leadId = records.leads.some((l) => l.id === draft.leadId)
-          ? draft.leadId
-          : null;
-        const outcome = withPayout(records, {
-          amount: draft.amount,
-          by: draft.createdBy,
-          note: draft.note,
-          leadId,
-          brand: leadId == null ? draft.brand : null,
-        });
-        added = outcome.added;
-        return {
-          ...outcome.records,
-          drafts: records.drafts.filter((d) => d.id !== id),
-        };
-      });
-      return added;
     },
 
     async addSettlePrompt(prompt: RecordPrompt): Promise<void> {

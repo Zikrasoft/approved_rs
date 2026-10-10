@@ -9,7 +9,7 @@ import {
   type Digest,
   type MonthlySummary,
 } from '../store.ts';
-import type { Draft, LedgerAuthor, Payout, Settlement } from '../ledger.ts';
+import type { LedgerAuthor, Payout, Settlement } from '../ledger.ts';
 
 export type Role = 'owner' | 'admin';
 
@@ -426,56 +426,6 @@ export function payoutRecordedMessage(payout: Payout): {
   };
 }
 
-export const DRAFT_COPY = {
-  confirm: '✅ Верно',
-  edit: '✏️ Исправить',
-  discard: '✖ Не выплата',
-  thatsHim: '👤 Это он',
-  anotherClient: '🔄 Другой клиент',
-  discarded: '✖ Не выплата — ничего не записано',
-  unreadable:
-    '⚠️ Не получилось разобрать сумму. Ответьте суммой на карточку заявки или напишите ещё раз.',
-  unheard:
-    '⚠️ Не получилось распознать голосовое — ничего не записано. Запишите ещё раз или напишите текстом.',
-} as const;
-
-export function draftMessage(
-  draft: Draft,
-  lead: StoredLead | undefined,
-): { text: string; reply_markup: Keyboard } {
-  const button = (text: string, action: string) => ({
-    text,
-    callback_data: `draft:${draft.id}:${action}`,
-  });
-  const client = lead
-    ? `Клиент: #${lead.id} ${escapeHtml(leadDisplayName(lead))}${draft.matchPending ? ' — это он?' : ''}`
-    : `Клиент: ${payoutSubject(undefined, draft.brand)}`;
-  return {
-    text: [
-      `📝 Выплата: ${formatMoney(draft.amount)}`,
-      ...noteLines(draft.note),
-      client,
-    ].join('\n'),
-    reply_markup: {
-      inline_keyboard: draft.matchPending
-        ? [
-            [
-              button(DRAFT_COPY.thatsHim, 'him'),
-              button(DRAFT_COPY.anotherClient, 'other'),
-            ],
-            [button(DRAFT_COPY.discard, 'no')],
-          ]
-        : [
-            [
-              button(DRAFT_COPY.confirm, 'ok'),
-              button(DRAFT_COPY.edit, 'edit'),
-              button(DRAFT_COPY.discard, 'no'),
-            ],
-          ],
-    },
-  };
-}
-
 export function createFormatter({
   serviceLabel,
   botUsername,
@@ -619,8 +569,6 @@ export function createFormatter({
           '<b>Карточка в группе</b>',
           '✅ Сделка — бот спросит, сколько переведёшь админу (0 — если ничего). ❌ Отказ — заявка уходит из списков. ⏳ В работе — отметить, что занимаешься.',
           'Ответь на карточку суммой — запишется выплата, любым другим текстом — заметка. Сумму можно поправить кнопкой ✏️ Исправить.',
-          'Или просто напиши в группу, например «Иван 300 за ремонт», — бот покажет черновик выплаты: ✅ Верно, ✏️ Исправить или ✖ Не выплата.',
-          '🎤 Голосовое работает так же — и в группу, и ответом на карточку.',
           '',
           '<b>В боте</b>',
           '📂 Открыть в боте — вся заявка: ⏰ Отложить до даты (в этот день вернётся в открытые) и 💬 ответить посетителю через бота.',

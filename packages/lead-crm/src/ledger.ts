@@ -46,25 +46,6 @@ export const settlementSchema = z.object({
 });
 export type Settlement = z.infer<typeof settlementSchema>;
 
-const draftPromptSchema = recordPromptSchema.extend({
-  draftMessageId: z.number().int(),
-});
-export type DraftPrompt = z.infer<typeof draftPromptSchema>;
-
-export const draftSchema = z.object({
-  type: z.literal('draft'),
-  id: z.number().int().positive(),
-  amount: z.number().positive(),
-  note: z.string().default(''),
-  brand: z.string().nullable().default(null),
-  leadId: z.number().int().positive().nullable().default(null),
-  matchPending: z.boolean().default(false),
-  createdAt: z.string(),
-  createdBy: ledgerAuthorSchema,
-  pendingPrompt: draftPromptSchema.nullable().catch(null),
-});
-export type Draft = z.infer<typeof draftSchema>;
-
 export const summaryMarkSchema = z.object({
   type: z.literal('summary'),
   id: z.number().int().positive(),
@@ -90,7 +71,6 @@ export type SettlePrompt = z.infer<typeof settlePromptSchema>;
 export const ledgerRecordSchema = z.discriminatedUnion('type', [
   payoutSchema,
   settlementSchema,
-  draftSchema,
   summaryMarkSchema,
   digestMarkSchema,
   settlePromptSchema,

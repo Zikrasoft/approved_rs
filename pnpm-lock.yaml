@@ -517,9 +517,6 @@ importers:
       libphonenumber-js:
         specifier: 1.13.12
         version: 1.13.12
-      openai:
-        specifier: 7.10.0
-        version: 7.10.0(@aws-sdk/credential-provider-node@3.972.84)(@smithy/signature-v4@5.7.4)(undici@8.10.1)(ws@8.21.3)(zod@4.5.4)
       zod:
         specifier: 4.5.4
         version: 4.5.4

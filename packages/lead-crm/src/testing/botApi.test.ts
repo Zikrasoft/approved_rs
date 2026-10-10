@@ -112,22 +112,4 @@ describe('recordBotApi as the global fetch', () => {
       'query is too old',
     );
   });
-
-  it('serves a voice file through getFile and the file download URL', async () => {
-    const api = recordBotApi();
-    vi.stubGlobal('fetch', api.fetch);
-    const client = createTelegramClient('TOKEN', 'test_bot');
-    const voice = new Uint8Array([1, 2, 3]);
-    api.serveFile('voice-1', voice);
-
-    await expect(client.downloadFile('voice-1')).resolves.toEqual(voice);
-    expect(api.callsTo('getFile')[0].payload).toEqual({ file_id: 'voice-1' });
-
-    api.reset();
-    await expect(client.downloadFile('voice-1')).rejects.toThrow(
-      'file download failed: 404',
-    );
-    api.respond('getFile', { file_id: 'voice-1', file_unique_id: 'u' });
-    await expect(client.downloadFile('voice-1')).rejects.toThrow('has no path');
-  });
 });

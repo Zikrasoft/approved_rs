@@ -11,7 +11,6 @@ export type BotApiResponse =
 type Responder = (payload: Record<string, unknown>) => BotApiResponse;
 
 const URL_PATTERN = /\/bot([^/]+)\/([A-Za-z]+)$/;
-const FILE_URL_PATTERN = /\/file\/bot[^/]+\/(.+)$/;
 const NUMERIC_ID = /^-?\d+$/;
 
 function chatIdOf(value: unknown): unknown {
@@ -23,7 +22,6 @@ function chatIdOf(value: unknown): unknown {
 export function recordBotApi() {
   const calls: BotApiCall[] = [];
   const responders = new Map<string, Responder>();
-  const files = new Map<string, Uint8Array>();
   let nextMessageId = 1000;
 
   function defaultResponse(
@@ -41,15 +39,6 @@ export function recordBotApi() {
           can_join_groups: true,
           can_read_all_group_messages: false,
           supports_inline_queries: false,
-        },
-      };
-    if (method === 'getFile')
-      return {
-        ok: true,
-        result: {
-          file_id: payload.file_id,
-          file_unique_id: payload.file_id,
-          file_path: `voice/${String(payload.file_id)}.oga`,
         },
       };
     if (method.startsWith('send') || method === 'editMessageText')
@@ -71,13 +60,6 @@ export function recordBotApi() {
     init?: RequestInit,
   ): Promise<Response> {
     const url = input instanceof Request ? input.url : String(input);
-    const fileMatch = FILE_URL_PATTERN.exec(url);
-    if (fileMatch) {
-      const file = files.get(fileMatch[1]);
-      return file
-        ? new Response(file.slice(), { status: 200 })
-        : new Response(null, { status: 404 });
-    }
     const match = URL_PATTERN.exec(url);
     if (!match) throw new Error(`recordBotApi: not a Bot API URL: ${url}`);
     const [, token, method] = match;
@@ -118,13 +100,9 @@ export function recordBotApi() {
         description,
       }));
     },
-    serveFile(fileId: string, content: Uint8Array) {
-      files.set(`voice/${fileId}.oga`, content);
-    },
     reset() {
       calls.length = 0;
       responders.clear();
-      files.clear();
     },
   };
 }

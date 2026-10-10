@@ -7,7 +7,6 @@ export interface Brand {
   name: string;
   legalName: string;
   captureBot: string;
-  lineOfWork: string;
 }
 
 export const APPROVED = {
@@ -17,7 +16,6 @@ export const APPROVED = {
   name: 'Approved.rs',
   legalName: 'Approved.rs',
   captureBot: 'ApprovedRsBot',
-  lineOfWork: 'car selection, inspection and import for a buyer',
 } as const satisfies Brand;
 
 export const CARLAB = {
@@ -27,7 +25,6 @@ export const CARLAB = {
   name: 'CarLab',
   legalName: 'CarLab auto service',
   captureBot: 'CarLabRsBot',
-  lineOfWork: 'car service, repairs and car parts',
 } as const satisfies Brand;
 
 export const DETAILS = {
@@ -37,7 +34,6 @@ export const DETAILS = {
   name: 'Details',
   legalName: 'Details',
   captureBot: 'DetailsRsBot',
-  lineOfWork: 'detailing: polishing, ceramic coating, interior cleaning',
 } as const satisfies Brand;
 
 // TODO: postalCode is left out until the owner confirms it — Zvezdara spans several.

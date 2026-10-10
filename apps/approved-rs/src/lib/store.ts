@@ -28,13 +28,6 @@ export const {
   correctPayout,
   setPayoutPrompt,
   findPayoutByPrompt,
-  findPastLead,
-  addDraft,
-  getDraft,
-  findDraftByPrompt,
-  updateDraft,
-  discardDraft,
-  confirmDraft,
   addSettlement,
   addSettlePrompt,
   findSettlePrompt,
@@ -53,7 +46,6 @@ export {
 } from '@podbor/lead-crm';
 
 export type {
-  Draft,
   LeadStatus,
   Payout,
   Settlement,

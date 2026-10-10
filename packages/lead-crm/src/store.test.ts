@@ -1099,6 +1099,18 @@ describe('quarantine — nothing leaves the blob on its own', () => {
     expect(storage.current()).toContainEqual(corrupt);
   });
 
+  it('drops a retired draft record without quarantining it', async () => {
+    const quarantine = vi.fn().mockResolvedValue(undefined);
+    const draft = { type: 'draft', id: 5, amount: 30 };
+    storage.seed([draft]);
+
+    await guarded(quarantine).insertLead(baseData);
+
+    expect(quarantine).not.toHaveBeenCalled();
+    expect(storage.current()).not.toContainEqual(draft);
+    expect(storage.current()).toHaveLength(1);
+  });
+
   it('keeps it when the copy fails, and says so', async () => {
     const quarantine = vi.fn().mockRejectedValue(new Error('blob down'));
     seedOneGoodOneCorrupt();
