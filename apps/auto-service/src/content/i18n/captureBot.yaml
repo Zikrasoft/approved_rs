@@ -53,6 +53,9 @@ translations:
     manager:
       button: Pitanje za majstora
       text: Napišite vaše pitanje u jednom poruci — majstor će odgovoriti ovde.
+    partners:
+      button: Partneri
+      text: Naši partneri — izaberite kome da pišete.
   en:
     greeting: Hello! Thanks for getting in touch — we have your enquiry and a mechanic will reply shortly.
     lookingFor: Tell us which car you drive — make, model and year — and what is wrong with it or what work it needs.
@@ -79,4 +82,7 @@ translations:
     manager:
       button: Message the mechanic
       text: Send your question in one message — the mechanic will reply here.
-translatedFrom: 9d098b5d7d068819
+    partners:
+      button: Partners
+      text: Our partners — choose who to contact.
+translatedFrom: fa2bd9cfa3e89c56
