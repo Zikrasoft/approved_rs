@@ -19,6 +19,7 @@ const pendingPromptSchema = z.object({
   kind: z.enum(PROMPT_KINDS),
 });
 export type PendingPrompt = z.infer<typeof pendingPromptSchema>;
+export type PromptKey = Pick<PendingPrompt, 'chatId' | 'messageId'>;
 
 export const CAPTURE_STEPS = [
   'looking_for',

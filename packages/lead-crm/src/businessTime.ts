@@ -1,6 +1,6 @@
 export const BUSINESS_TIME_ZONE = 'Europe/Belgrade';
 
-const DAY_MS = 24 * 60 * 60 * 1000;
+export const DAY_MS = 24 * 60 * 60 * 1000;
 const dayFormat = new Intl.DateTimeFormat('en-CA', {
   timeZone: BUSINESS_TIME_ZONE,
 });

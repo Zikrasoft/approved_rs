@@ -11,6 +11,7 @@ export type {
   LeadSubmission,
   LeadStatus,
   PendingPrompt,
+  PromptKey,
   StoredLead,
 } from './schema.ts';
 export { storedLeadSchema } from './schema.ts';
@@ -26,11 +27,7 @@ export {
 } from './store.ts';
 export type { CaptureUpdate, LeadStore } from './store.ts';
 export { LEDGER_PATH } from './ledgerStore.ts';
-export type {
-  LedgerOperation,
-  OperationType,
-  PromptKey,
-} from './ledgerStore.ts';
+export type { LedgerOperation, OperationType } from './ledgerStore.ts';
 export { parseOperationReply } from './operationReply.ts';
 export { BUSINESS_TIME_ZONE, businessDay } from './businessTime.ts';
 

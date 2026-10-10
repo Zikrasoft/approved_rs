@@ -1,12 +1,12 @@
 import { z } from 'zod';
 import { roundMoney, toCents } from './money.ts';
-import { businessMonth } from './businessTime.ts';
+import { businessMonth, DAY_MS } from './businessTime.ts';
+import type { PromptKey } from './schema.ts';
 import { retryOnConflict } from './storage/retry.ts';
 import { StorageConflictError, type LeadStorage } from './storage/types.ts';
 
 export const LEDGER_PATH = 'data/ledger.json';
 const MAX_OPERATION_NOTE = 500;
-const DAY_MS = 24 * 60 * 60 * 1000;
 const PROMPT_TTL_MS = 7 * DAY_MS;
 const PROMPT_KEPT_MS = 90 * DAY_MS;
 
@@ -37,7 +37,6 @@ const promptSchema = z
   })
   .strict();
 export type OperationPrompt = z.infer<typeof promptSchema>;
-export type PromptKey = Pick<OperationPrompt, 'chatId' | 'messageId'>;
 export type FoundOperationPrompt = OperationPrompt & { expired: boolean };
 
 const ledgerFileSchema = z
