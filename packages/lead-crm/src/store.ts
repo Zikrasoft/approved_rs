@@ -46,6 +46,7 @@ export interface CaptureUpdate {
   note?: string;
   contact?: string;
   service?: string;
+  locale?: string;
   capturePrompt: CapturePrompt | null;
 }
 
@@ -458,13 +459,14 @@ export function createLeadStore({
 
     updateCapture(
       id: number,
-      { note, contact, service, capturePrompt }: CaptureUpdate,
+      { note, contact, service, locale, capturePrompt }: CaptureUpdate,
     ): Promise<StoredLead | undefined> {
       return updateOne(id, (l) => ({
         ...l,
         comment: note ? appendNote(l.comment, note) : l.comment,
         contact: contact ?? l.contact,
         ...(service ? { service, services: [service] } : {}),
+        locale: locale ?? l.locale,
         capturePrompt,
       }));
     },

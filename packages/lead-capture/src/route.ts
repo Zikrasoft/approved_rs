@@ -17,6 +17,7 @@ import type { CaptureCopy } from './copy.ts';
 import {
   createScreens,
   readTap,
+  SWITCH_SCREEN,
   type MenuConfig,
   type Screen,
 } from './menu.ts';
@@ -33,6 +34,7 @@ const UNAUTHORIZED = new Response(null, { status: 401 });
 const SECRET_HEADER = 'x-telegram-bot-api-secret-token';
 const START_PATTERN = /^\/start(?:\s+(\S+))?$/;
 const MENU_PATTERN = /^\/menu$/;
+const LANG_PATTERN = /^\/lang$/;
 const TELEGRAM_USER_LINK = 'tg://user?id=';
 
 const webhookSecretSchema = z.string().min(1);
@@ -207,7 +209,8 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   ...menuConfig
 }: CaptureWebhookRouteOptions<L, S>) {
   const { copy } = menuConfig;
-  const { isService, mainMenu, service, render } = createScreens(menuConfig);
+  const { isService, mainMenu, service, render, renderTarget, languagePicker } =
+    createScreens(menuConfig);
 
   function send(chatId: number, text: string, extra?: CaptureExtra) {
     return bot.api.sendMessage(chatId, text, { parse_mode: 'HTML', ...extra });
@@ -360,10 +363,23 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     if (running) await store.updateCapture(running.id, { capturePrompt: null });
   }
 
-  async function openMenu(chatId: number, sender: CaptureSender) {
+  async function openScreen(
+    chatId: number,
+    sender: CaptureSender,
+    screen: (locale: L) => Screen,
+  ) {
     await endQuestionnaire(chatId);
     const open = await store.findOpenLeadByTelegramId(sender.id, brand);
-    await show(chatId, mainMenu(open ? localeOf(open) : senderLocale(sender)));
+    await show(chatId, screen(open ? localeOf(open) : senderLocale(sender)));
+  }
+
+  async function switchLocale(sender: CaptureSender, locale: L) {
+    const open = await store.findOpenLeadByTelegramId(sender.id, brand);
+    if (open && open.locale !== locale)
+      await store.updateCapture(open.id, {
+        locale,
+        capturePrompt: open.capturePrompt,
+      });
   }
 
   async function leaveRequest(
@@ -403,9 +419,14 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
         await leaveRequest(chatId, sender, locale, tap.arg);
       return;
     }
-    const screen = render(tap.screen, locale, tap.arg);
+    const switching = tap.screen === SWITCH_SCREEN;
+    if (switching && !isLocale(tap.locale)) return;
+    const screen = switching
+      ? renderTarget(locale, tap.arg)
+      : render(tap.screen, locale, tap.arg);
     if (!screen) return;
     await endQuestionnaire(chatId);
+    if (switching) await switchLocale(sender, locale);
     await bot.api.editMessageText(chatId, messageId, screen.text, {
       parse_mode: 'HTML',
       reply_markup: { inline_keyboard: screen.keyboard },
@@ -452,7 +473,11 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     if (text !== undefined) {
       const started = START_PATTERN.exec(text);
       if (started) return startOrResume(chatId, sender, started[1]);
-      if (MENU_PATTERN.test(text)) return openMenu(chatId, sender);
+      if (MENU_PATTERN.test(text)) return openScreen(chatId, sender, mainMenu);
+      if (LANG_PATTERN.test(text))
+        return openScreen(chatId, sender, (locale) =>
+          languagePicker(locale, 'menu'),
+        );
     }
 
     const lead = await store.findByCapturePrompt(chatId, brand);

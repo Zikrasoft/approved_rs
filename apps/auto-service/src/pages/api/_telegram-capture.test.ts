@@ -86,3 +86,36 @@ describe('the CarLab capture bot', () => {
     ]);
   });
 });
+
+describe('the language switch', () => {
+  it('offers exactly the locales the site serves', async () => {
+    await POST({
+      request: new Request('http://localhost/api/telegram-capture', {
+        method: 'POST',
+        headers: {
+          'x-telegram-bot-api-secret-token': 'test-capture-webhook-secret',
+        },
+        body: JSON.stringify({
+          update_id: 2,
+          message: {
+            message_id: 2,
+            chat: { id: 43, type: 'private' },
+            from: { id: 43, first_name: 'Ana' },
+            text: '/lang',
+          },
+        }),
+      }),
+    });
+
+    const reply = api.callsTo('sendMessage', 'test-capture-bot-token').at(-1)
+      ?.payload as {
+      reply_markup: { inline_keyboard: { callback_data: string }[][] };
+    };
+    const offered = reply.reply_markup.inline_keyboard
+      .flat()
+      .map((b) => b.callback_data)
+      .filter((d) => d.startsWith('locale:'))
+      .map((d) => d.split(':')[1]);
+    expect(offered).toEqual(['ru', 'sr', 'en']);
+  });
+});

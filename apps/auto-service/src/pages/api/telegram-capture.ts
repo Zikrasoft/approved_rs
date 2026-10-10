@@ -8,7 +8,7 @@ import {
 import { BRAND, leadStore } from '@/lib/crm';
 import { CAPTURE_WEBHOOK_SECRET, captureBot } from '@/lib/captureBot';
 import { ensureLeadCard, notifier } from '@/lib/crmBot';
-import { PRIMARY_LOCALE, isLocale } from '@/i18n/config';
+import { LOCALE_NAME, PRIMARY_LOCALE, isLocale } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { SITE_URL } from '@/utils/constants';
 import { PathBuilder } from '@/utils/paths';
@@ -24,7 +24,8 @@ export const POST = createCaptureWebhookRoute({
   isLocale,
   primaryLocale: PRIMARY_LOCALE,
   copy: (locale) => content(locale).captureBot,
-  menu: ['services'],
+  menu: ['services', 'language'],
+  languages: LOCALE_NAME,
   services: SERVICE_SLUGS,
   serviceCard: (slug, locale) => {
     const services = content(locale).services;
