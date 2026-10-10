@@ -3,11 +3,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
-import {
-  createTelegramClient,
-  expectMessageAndChatId,
-  expectMessageId,
-} from './client.ts';
+import { recordBotApi } from '../testing/botApi.ts';
+import { createTelegramClient } from './client.ts';
 import { createFormatter } from './format.ts';
 import { createNotifier } from './notify.ts';
 import {
@@ -104,13 +101,14 @@ function money(n: number): string {
   return `${new Intl.NumberFormat('ru-RU').format(n)} €`;
 }
 
+const api = recordBotApi();
+
 function mockFetchOk(
   result: unknown = { message_id: 999, chat: { id: -1009876543210 } },
 ) {
-  mockFetch.mockResolvedValue({
-    ok: true,
-    json: () => Promise.resolve({ result }),
-  });
+  api.reset();
+  api.respond('sendMessage', result);
+  mockFetch.mockImplementation(api.fetch);
 }
 
 describe('sendLeadNotification', () => {
@@ -131,29 +129,11 @@ describe('sendLeadNotification', () => {
   });
 
   it('still returns the ids if pinning fails', async () => {
-    mockFetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            result: { message_id: 999, chat: { id: -1009876543210 } },
-          }),
-      })
-      .mockResolvedValueOnce({
-        ok: false,
-        status: 400,
-        json: () => Promise.resolve({ description: 'Bad Request' }),
-      });
+    api.fail('pinChatMessage', 'Bad Request');
     await expect(sendLeadNotification(makeLead())).resolves.toEqual({
       chatId: -1009876543210,
       messageId: 999,
     });
-  });
-
-  it('throws when the sendMessage response is missing message_id or chat.id', async () => {
-    mockFetchOk({});
-    await expect(sendLeadNotification(makeLead())).rejects.toThrow();
-    expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
   it('sends only a minimal teaser — id, name, service, status — no contact/comment/PII', async () => {
@@ -200,11 +180,7 @@ describe('sendLeadNotification', () => {
   });
 
   it('throws when Telegram returns ok: false', async () => {
-    mockFetch.mockResolvedValue({
-      ok: false,
-      status: 400,
-      json: () => Promise.resolve({ description: 'Bad Request' }),
-    });
+    api.fail('sendMessage', 'Bad Request');
     await expect(sendLeadNotification(makeLead())).rejects.toThrow();
   });
 });
@@ -367,11 +343,7 @@ describe('refreshLeadCard', () => {
     'Bad Request: message to edit not found',
     "Bad Request: message can't be edited",
   ])('reports no card when Telegram answers "%s"', async (description) => {
-    mockFetch.mockResolvedValue({
-      ok: false,
-      status: 400,
-      json: () => Promise.resolve({ description }),
-    });
+    api.fail('editMessageText', description);
     await expect(
       refreshLeadCard(
         makeLead({ telegramChatId: -1009876543210, telegramMessageId: 555 }),
@@ -380,15 +352,10 @@ describe('refreshLeadCard', () => {
   });
 
   it('resolves without throwing when Telegram rejects a no-op double-tap edit', async () => {
-    mockFetch.mockResolvedValue({
-      ok: false,
-      status: 400,
-      json: () =>
-        Promise.resolve({
-          description:
-            'Bad Request: message is not modified: specified new message content and reply markup are exactly the same',
-        }),
-    });
+    api.fail(
+      'editMessageText',
+      'Bad Request: message is not modified: specified new message content and reply markup are exactly the same',
+    );
     await expect(
       refreshLeadCard(
         makeLead({ telegramChatId: -1009876543210, telegramMessageId: 555 }),
@@ -397,14 +364,7 @@ describe('refreshLeadCard', () => {
   });
 
   it('still throws on a genuine editMessageText failure', async () => {
-    mockFetch.mockResolvedValue({
-      ok: false,
-      status: 400,
-      json: () =>
-        Promise.resolve({
-          description: 'Bad Request: chat not found',
-        }),
-    });
+    api.fail('editMessageText', 'Bad Request: chat not found');
     await expect(
       refreshLeadCard(
         makeLead({ telegramChatId: -1009876543210, telegramMessageId: 555 }),
@@ -1320,34 +1280,6 @@ describe('answerCallback', () => {
 describe('formatDateRu', () => {
   it('renders a stored ISO date the way the owner types it', () => {
     expect(formatDateRu('2026-03-09')).toBe('09.03.2026');
-  });
-});
-
-describe('expectMessageId', () => {
-  it('names the context when Telegram answers without a message_id', () => {
-    expect(() => expectMessageId({}, 'force-reply prompt')).toThrow(
-      'force-reply prompt response missing message_id',
-    );
-  });
-
-  it('names the context when Telegram answers without a chat id', () => {
-    expect(() =>
-      expectMessageAndChatId({ message_id: 1 }, 'sendMessage'),
-    ).toThrow('sendMessage response missing chat.id');
-  });
-});
-
-describe('tgPost error reporting', () => {
-  it('falls back to bare status when Telegram sends no description', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      status: 500,
-      json: async () => ({}),
-    });
-
-    await expect(client.tgPost('sendMessage', {})).rejects.toThrow(
-      'Telegram sendMessage failed: 500',
-    );
   });
 });
 

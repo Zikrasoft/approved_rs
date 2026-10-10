@@ -1,5 +1,9 @@
 import type { Income, StoredLead } from '../schema.ts';
-import { expectMessageAndChatId, type TelegramClient } from './client.ts';
+import {
+  isMessageGone,
+  type SendExtra,
+  type TelegramClient,
+} from './client.ts';
 import {
   commissionClaimText,
   commissionResultText,
@@ -32,7 +36,7 @@ export function createNotifier({
   async function sendToAll(
     ids: number[],
     text: string,
-    extra?: object,
+    extra?: SendExtra,
   ): Promise<void> {
     await Promise.all(ids.map((id) => client.sendMessage(id, text, extra)));
   }
@@ -41,18 +45,19 @@ export function createNotifier({
     async sendLeadNotification(
       lead: StoredLead,
     ): Promise<{ chatId: number; messageId: number }> {
-      const sent = await client.tgPost('sendMessage', {
-        chat_id: groupId,
-        text: formatter.formatTeaser(lead),
-        parse_mode: 'HTML',
-        reply_markup: formatter.deepLinkKeyboard(lead.id),
-      });
-      const { messageId, chatId } = expectMessageAndChatId(sent, 'sendMessage');
+      const sent = await client.api.sendMessage(
+        groupId,
+        formatter.formatTeaser(lead),
+        {
+          parse_mode: 'HTML',
+          reply_markup: formatter.deepLinkKeyboard(lead.id),
+        },
+      );
+      const messageId = sent.message_id;
+      const chatId = sent.chat.id;
 
       try {
-        await client.tgPost('pinChatMessage', {
-          chat_id: chatId,
-          message_id: messageId,
+        await client.api.pinChatMessage(chatId, messageId, {
           disable_notification: true,
         });
       } catch (err) {
@@ -76,13 +81,7 @@ export function createNotifier({
           formatter.deepLinkKeyboard(lead.id),
         );
       } catch (err) {
-        // Telegram refuses the edit outright once the message is deleted or
-        // too old to touch — there is no card left to refresh.
-        if (
-          err instanceof Error &&
-          /message to edit not found|message can't be edited/.test(err.message)
-        )
-          return false;
+        if (isMessageGone(err)) return false;
         throw err;
       }
       return true;
@@ -159,10 +158,7 @@ export function createNotifier({
     async sendPostponeReminderToOwner(lead: StoredLead): Promise<void> {
       const results = await Promise.allSettled(
         ownerIds.map((id) =>
-          client.tgPost('sendMessage', {
-            chat_id: id,
-            text: formatter.postponeReminderText(lead),
-            parse_mode: 'HTML',
+          client.sendMessage(id, formatter.postponeReminderText(lead), {
             reply_markup: formatter.deepLinkKeyboard(lead.id),
           }),
         ),

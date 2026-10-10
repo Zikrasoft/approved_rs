@@ -15,7 +15,10 @@ import { MAX_LIST_ROWS, isPlaceholderContact, type OwedRow } from '../store.ts';
 
 export type Role = 'owner' | 'admin';
 
-export type Btn = { text: string; callback_data?: string; url?: string };
+export type Btn = { text: string } & (
+  | { callback_data: string; url?: never }
+  | { url: string; callback_data?: never }
+);
 export type Keyboard = { inline_keyboard: Btn[][] };
 
 export interface FormatterOptions {

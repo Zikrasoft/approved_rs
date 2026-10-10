@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createBrandStore } from './brandStore.ts';
 import { createBrandBot } from './brandBot.ts';
 import { LEADS_PATH, QUARANTINE_PATH } from './quarantine.ts';
+import { recordBotApi } from './testing/botApi.ts';
 import {
   createMemoryStorage,
   type MemoryStorage,
@@ -114,13 +115,7 @@ describe('createBrandBot', () => {
 
   it('stamps its own brand over whatever the submission carries', async () => {
     for (const [name, value] of Object.entries(ENV)) vi.stubEnv(name, value);
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({ result: { message_id: 9, chat: { id: -100 } } }),
-      }),
-    );
+    vi.stubGlobal('fetch', recordBotApi().fetch);
     const { leadStore, bot: crm } = bot();
     const forged = { ...submission, brand: 'Approved.rs' };
 

@@ -112,6 +112,9 @@ importers:
       date-fns:
         specifier: 4.4.0
         version: 4.4.0
+      grammy:
+        specifier: 1.46.0
+        version: 1.46.0(supports-color@8.1.1)
       libphonenumber-js:
         specifier: 1.13.12
         version: 1.13.12
@@ -505,6 +508,9 @@ importers:
       date-fns:
         specifier: 4.4.0
         version: 4.4.0
+      grammy:
+        specifier: 1.46.0
+        version: 1.46.0(supports-color@8.1.1)
       libphonenumber-js:
         specifier: 1.13.12
         version: 1.13.12
