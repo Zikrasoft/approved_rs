@@ -19,17 +19,15 @@ describe('siblingTokens', () => {
   });
 
   it('keys each sibling token by its brand', () => {
-    expect(
-      siblingTokens({
+    expect([
+      ...siblingTokens({
         TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB: 'carlab-token',
         TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS: 'details-token',
       }),
-    ).toEqual(
-      new Map([
-        [CARLAB, 'carlab-token'],
-        [DETAILS, 'details-token'],
-      ]),
-    );
+    ]).toEqual([
+      [CARLAB, 'carlab-token'],
+      [DETAILS, 'details-token'],
+    ]);
   });
 });
 
