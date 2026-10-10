@@ -460,6 +460,19 @@ describe('findPastLead', () => {
     ).toMatchObject({ id: 3 });
   });
 
+  it('finds a lost Lead, an archived one included', async () => {
+    storage.seed([
+      storedLead(4, {
+        name: 'Марко',
+        status: 'negotiations',
+        archived: true,
+      }),
+    ]);
+    expect(
+      await store.findPastLead({ name: 'Марко', phone: null }),
+    ).toMatchObject({ id: 4, status: 'lost' });
+  });
+
   it('finds nothing for a short phone, an unknown name or no hints', async () => {
     expect(
       await store.findPastLead({ name: 'Марко', phone: '4567' }),

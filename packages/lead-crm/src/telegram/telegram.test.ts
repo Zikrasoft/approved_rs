@@ -857,6 +857,7 @@ describe('buildHelp', () => {
     expect(text).toContain('✅ Сделка');
     expect(text).toContain('Ответь на карточку');
     expect(text).toContain('⏰ Отложить');
+    expect(text).toContain('черновик выплаты');
     expect(text).toContain('📂 Открытые, 💶 К оплате');
     expect(text).not.toContain('Статистика');
     expect(text).not.toContain('Архив');
@@ -866,6 +867,7 @@ describe('buildHelp', () => {
     const text = buildHelp('admin');
     expect(text).toContain('📊 Статистика');
     expect(text).toContain('Удалить навсегда');
+    expect(text).toContain('💸 Оплачено');
     expect(text).not.toContain('Архив');
   });
 });

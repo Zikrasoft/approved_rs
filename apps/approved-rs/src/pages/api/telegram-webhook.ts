@@ -218,15 +218,6 @@ async function withErrorAck(
   }
 }
 
-async function refreshBothSurfaces(
-  ctx: Ctx,
-  updated: StoredLead | undefined,
-): Promise<void> {
-  if (!updated) return;
-  await ensureLeadCard(updated);
-  await editLeadDetailMessage(ctx.chatId, ctx.messageId, updated, ctx.role);
-}
-
 async function afterStatusChangeOn(
   { chatId, messageId, role }: Ctx,
   updated: StoredLead,
