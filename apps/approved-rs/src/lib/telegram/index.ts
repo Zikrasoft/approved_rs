@@ -53,6 +53,8 @@ export {
   EDIT_COPY,
   EDIT_FIELD_LABELS,
   REPLY_COPY,
+  PAYOUT_COPY,
+  payoutRecordedMessage,
   escapeHtml,
 } from '@podbor/lead-crm';
 

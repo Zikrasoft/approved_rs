@@ -16,6 +16,8 @@ import type { LeadStatus, StoredLead } from '../schema.ts';
 
 import {
   EDIT_COPY,
+  PAYOUT_COPY,
+  payoutRecordedMessage,
   REFERRAL_NOTE,
   statusLabel,
   buildStatusKeyboard,
@@ -551,23 +553,55 @@ describe('sendPayoutNotificationToAdmin', () => {
   beforeEach(() => mockFetchOk({ message_id: 1 }));
   afterEach(() => mockFetch.mockReset());
 
-  it('tells the admin the Payout as stated, with no rate applied', async () => {
-    await sendPayoutNotificationToAdmin(makeLead({ id: 9 }), {
-      type: 'payout',
-      id: 1,
-      amount: 80,
-      note: '',
-      createdAt: '2026-03-01T00:00:00.000Z',
-      createdBy: 'owner',
-      leadId: 9,
-      brand: null,
-      edits: [],
-    });
+  const payout = {
+    type: 'payout' as const,
+    id: 1,
+    amount: 80,
+    note: '',
+    createdAt: '2026-03-01T00:00:00.000Z',
+    createdBy: 'owner' as const,
+    leadId: 9,
+    brand: null,
+    edits: [],
+  };
+
+  it('tells the admin a new Payout as stated, with no rate applied', async () => {
+    await sendPayoutNotificationToAdmin(makeLead({ id: 9 }), payout);
 
     const body = JSON.parse(mockFetch.mock.calls[0][1].body as string);
     expect(body.chat_id).toBe(222);
-    expect(body.text).toContain('#9');
-    expect(body.text).toContain(`К оплате: ${money(80)}`);
+    expect(body.text).toContain('💶 Новая выплата по заявке #9');
+    expect(body.text).toContain('Записал: владелец');
+    expect(body.text).toContain('Было: —');
+    expect(body.text).toContain(`Стало: ${money(80)}`);
+  });
+
+  it('shows a correction as before → after, naming who made it', async () => {
+    await sendPayoutNotificationToAdmin(makeLead({ id: 9 }), {
+      ...payout,
+      amount: 60,
+      edits: [
+        { before: 90, after: 80, at: '2026-03-02T00:00:00.000Z', by: 'owner' },
+        { before: 80, after: 60, at: '2026-03-03T00:00:00.000Z', by: 'admin' },
+      ],
+    });
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body as string);
+    expect(body.text).toContain('✏️ Исправлена выплата по заявке #9');
+    expect(body.text).toContain('Записал: админ');
+    expect(body.text).toContain(`Было: ${money(80)}`);
+    expect(body.text).toContain(`Стало: ${money(60)}`);
+  });
+
+  it('answers a recorded Payout with a fix button carrying its id', () => {
+    expect(payoutRecordedMessage({ ...payout, id: 4 })).toEqual({
+      text: `✅ ${money(80)} записано`,
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: PAYOUT_COPY.fixButton, callback_data: 'payfix:4' }],
+        ],
+      },
+    });
   });
 });
 

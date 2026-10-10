@@ -578,6 +578,13 @@ export function createLeadStore({
       return updateOne(id, (l) => ({ ...l, ...statusPatch(status) }));
     },
 
+    addNote(id: number, note: string): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) => ({
+        ...l,
+        comment: appendNote(l.comment, note),
+      }));
+    },
+
     setPendingPrompt(
       id: number,
       prompt: PendingPrompt | null,
@@ -594,6 +601,16 @@ export function createLeadStore({
         (l) =>
           l.pendingPrompt?.chatId === chatId &&
           l.pendingPrompt?.messageId === messageId,
+      );
+    },
+
+    async findByCard(
+      chatId: number,
+      messageId: number,
+    ): Promise<StoredLead | undefined> {
+      const leads = await readLeads();
+      return leads.find(
+        (l) => l.telegramChatId === chatId && l.telegramMessageId === messageId,
       );
     },
 

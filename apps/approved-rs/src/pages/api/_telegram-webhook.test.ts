@@ -45,6 +45,8 @@ import {
   buildSearchResults,
   buildStats,
   formatDealsList,
+  payoutRecordedMessage,
+  PAYOUT_COPY,
 } from '@/lib/telegram';
 import { getLead, listPayouts, readLeads, searchLeads } from '@/lib/store';
 
@@ -981,6 +983,7 @@ describe('POST /api/telegram-webhook', () => {
       ['delcancel:5', 'admin'],
       ['claimpay:5:7', 'owner'],
       ['income:5', 'owner'],
+      ['payfix:5', 'any'],
       ['confirmpay:5', 'admin'],
       ['rejectpay:5', 'admin'],
       ['edit:5:name', 'any'],
@@ -1168,7 +1171,7 @@ describe('POST /api/telegram-webhook', () => {
         expect.objectContaining({ amount: 300, createdBy: 'owner', leadId: 5 }),
       ]);
       expect(textsTo(ADMIN_ID)).toEqual([
-        expect.stringContaining('К оплате: 300 €'),
+        expect.stringContaining('Стало: 300 €'),
       ]);
       expect(textsTo(DM_CHAT_ID)).toEqual([
         `✅ Доход добавлен\n\n${buildLeadDetail(lead, 'owner').text}`,
@@ -1447,6 +1450,244 @@ describe('POST /api/telegram-webhook', () => {
     it('denies plain DM text from an unknown user', async () => {
       await message('hi', OTHER_ID);
       expect(textsTo(OTHER_ID)).toEqual(['⛔ Доступ запрещён.']);
+    });
+  });
+
+  describe('replying to a Lead card in the group', () => {
+    const cardReply = (text: string, from = OWNER_ID) =>
+      message(text, from, {
+        chatId: CARD_CHAT_ID,
+        type: 'supergroup',
+        replyTo: CARD_MESSAGE_ID,
+      });
+
+    const payout = (overrides: Record<string, unknown> = {}) => ({
+      type: 'payout',
+      id: 1,
+      amount: 80,
+      note: '',
+      createdAt: '2026-01-02T00:00:00.000Z',
+      createdBy: 'owner',
+      leadId: 5,
+      brand: 'Approved.rs',
+      edits: [],
+      ...overrides,
+    });
+
+    const fixPromptOn = (payoutId: number) => ({
+      chatId: CARD_CHAT_ID,
+      messageId: PROMPT_ID,
+      kind: 'correct_payout' as const,
+      payoutId,
+    });
+
+    const answerFix = (text: string, from = OWNER_ID) =>
+      message(text, from, {
+        chatId: CARD_CHAT_ID,
+        type: 'supergroup',
+        replyTo: PROMPT_ID,
+      });
+
+    it('stores a plain amount as a Payout on that Lead and answers with a fix button', async () => {
+      await cardReply('80');
+
+      expect(await listPayouts(5)).toEqual([
+        expect.objectContaining({
+          id: 1,
+          amount: 80,
+          createdBy: 'owner',
+          leadId: 5,
+        }),
+      ]);
+      const [recorded] = await listPayouts(5);
+      expect(sentTo(CARD_CHAT_ID)).toEqual([
+        expect.objectContaining({
+          ...payoutRecordedMessage(recorded),
+          reply_parameters: expect.objectContaining({ message_id: 2 }),
+        }),
+      ]);
+      expect(textsTo(CARD_CHAT_ID)).toEqual(['✅ 80 € записано']);
+    });
+
+    it('tells the admin about the new Payout, before and after', async () => {
+      await cardReply('80 €');
+      const [notice] = textsTo(ADMIN_ID);
+      expect(notice).toContain('Новая выплата по заявке #5');
+      expect(notice).toContain('Записал: владелец');
+      expect(notice).toContain('Было: —');
+      expect(notice).toContain('Стало: 80 €');
+    });
+
+    it('adds another Payout on a second reply', async () => {
+      await cardReply('80');
+      await cardReply('1 200,5');
+      expect((await listPayouts(5)).map((p) => p.amount)).toEqual([80, 1200.5]);
+    });
+
+    it('records an admin reply as the admin', async () => {
+      await cardReply('80', ADMIN_ID);
+      expect(await listPayouts(5)).toEqual([
+        expect.objectContaining({ createdBy: 'admin' }),
+      ]);
+    });
+
+    it('appends any other text to the Lead as a note', async () => {
+      seed(makeLead({ comment: 'Звонил' }));
+      await cardReply('Иван 30, приедет в пятницу');
+
+      expect(await listPayouts(5)).toEqual([]);
+      expect((await stored()).comment).toBe(
+        'Звонил\nИван 30, приедет в пятницу',
+      );
+      expect(textsTo(CARD_CHAT_ID)).toEqual([PAYOUT_COPY.noteAdded]);
+      expect(sentTo(ADMIN_ID)).toEqual([]);
+    });
+
+    it('turns a lost Lead won and refreshes its card', async () => {
+      seed(makeLead({ status: 'lost' }));
+      await cardReply('50');
+
+      expect((await stored()).status).toBe('won');
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+      expect(textsTo(ADMIN_ID)).toEqual([
+        expect.stringContaining('Новая выплата'),
+      ]);
+    });
+
+    it('leaves the card alone when the status does not move', async () => {
+      await cardReply('50');
+      expect((await stored()).status).toBe('in_progress');
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toEqual([]);
+    });
+
+    it('ignores a reply with no text', async () => {
+      await cardReply('  ');
+      expect(api.calls).toEqual([]);
+      expect(await listPayouts(5)).toEqual([]);
+    });
+
+    it('ignores a reply from someone who is neither owner nor admin', async () => {
+      await cardReply('80', OTHER_ID);
+      expect(api.calls).toEqual([]);
+      expect(await listPayouts(5)).toEqual([]);
+    });
+
+    it('ignores a reply to a message that is no card', async () => {
+      await message('80', OWNER_ID, {
+        chatId: CARD_CHAT_ID,
+        type: 'supergroup',
+        replyTo: 4242,
+      });
+      expect(api.calls).toEqual([]);
+    });
+
+    it('gives a pending prompt priority over the card', async () => {
+      seed(
+        makeLead({
+          pendingPrompt: {
+            chatId: CARD_CHAT_ID,
+            messageId: CARD_MESSAGE_ID,
+            kind: 'postpone',
+          },
+        }),
+      );
+      await cardReply('80');
+      expect(await listPayouts(5)).toEqual([]);
+      expect(textsTo(CARD_CHAT_ID)).toEqual([
+        expect.stringContaining('ДД.ММ.ГГГГ'),
+      ]);
+    });
+
+    it('✏️ Исправить asks for the right amount, holding the Payout on the Lead', async () => {
+      leadsStorage().seed([makeLead(), payout()]);
+      await tap('payfix:1', OWNER_ID, { chatId: CARD_CHAT_ID });
+
+      expect(forceReplies()).toEqual([
+        expect.objectContaining({
+          chat_id: CARD_CHAT_ID,
+          text: PAYOUT_COPY.fixPrompt,
+        }),
+      ]);
+      expect((await stored()).pendingPrompt).toEqual(fixPromptOn(1));
+    });
+
+    it('acks a fix for a Payout that does not exist', async () => {
+      await tap('payfix:7', OWNER_ID, { id: 'cb-fix', chatId: CARD_CHAT_ID });
+      expect(forceReplies()).toEqual([]);
+      expect(answers()).toEqual([{ callback_query_id: 'cb-fix' }]);
+    });
+
+    it('corrects the Payout, keeps the edit, and tells the admin before → after', async () => {
+      leadsStorage().seed([
+        makeLead({ pendingPrompt: fixPromptOn(1) }),
+        payout(),
+      ]);
+      await answerFix('90');
+
+      const [fixed] = await listPayouts(5);
+      expect(fixed).toMatchObject({
+        amount: 90,
+        edits: [
+          expect.objectContaining({ before: 80, after: 90, by: 'owner' }),
+        ],
+      });
+      expect((await stored()).pendingPrompt).toBeNull();
+      const [notice] = textsTo(ADMIN_ID);
+      expect(notice).toContain('Исправлена выплата по заявке #5');
+      expect(notice).toContain('Было: 80 €');
+      expect(notice).toContain('Стало: 90 €');
+      expect(textsTo(CARD_CHAT_ID)).toEqual(['✅ 90 € записано']);
+    });
+
+    it('keeps the prompt open on a correction that is not an amount', async () => {
+      leadsStorage().seed([
+        makeLead({ pendingPrompt: fixPromptOn(1) }),
+        payout(),
+      ]);
+      await answerFix('не знаю');
+      expect((await stored()).pendingPrompt).toEqual(fixPromptOn(1));
+      expect(textsTo(CARD_CHAT_ID)).toEqual([PAYOUT_COPY.invalidAmount]);
+      expect((await listPayouts(5))[0].amount).toBe(80);
+    });
+
+    const settlement = {
+      type: 'settlement',
+      id: 1,
+      amount: 80,
+      createdAt: '2026-01-03T00:00:00.000Z',
+      createdBy: 'admin',
+    };
+
+    it('refuses the owner a correction once a Settlement follows the Payout', async () => {
+      leadsStorage().seed([
+        makeLead({ pendingPrompt: fixPromptOn(1) }),
+        payout(),
+        settlement,
+      ]);
+      await answerFix('90');
+      expect((await listPayouts(5))[0].amount).toBe(80);
+      expect(textsTo(CARD_CHAT_ID)).toEqual([PAYOUT_COPY.settled]);
+      expect(sentTo(ADMIN_ID)).toEqual([]);
+    });
+
+    it('lets the admin correct a settled Payout', async () => {
+      leadsStorage().seed([
+        makeLead({ pendingPrompt: fixPromptOn(1) }),
+        payout(),
+        settlement,
+      ]);
+      await answerFix('90', ADMIN_ID);
+      expect((await listPayouts(5))[0]).toMatchObject({
+        amount: 90,
+        edits: [expect.objectContaining({ by: 'admin' })],
+      });
+    });
+
+    it('drops a correction whose Payout is gone', async () => {
+      seed(makeLead({ pendingPrompt: fixPromptOn(1) }));
+      await answerFix('90');
+      expect((await stored()).pendingPrompt).toBeNull();
+      expect(api.calls).toEqual([]);
     });
   });
 

@@ -1148,6 +1148,23 @@ describe('getLead / findByPendingPrompt — not-found paths', () => {
   });
 });
 
+describe('findByCard / addNote', () => {
+  it('finds the Lead whose group card is the replied-to message', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.setTelegramMessage(lead.id, -100, 555);
+    expect((await store.findByCard(-100, 555))?.id).toBe(lead.id);
+    expect(await store.findByCard(-100, 556)).toBeUndefined();
+    expect(await store.findByCard(-101, 555)).toBeUndefined();
+  });
+
+  it('appends a note to the Lead comment', async () => {
+    const lead = await store.insertLead({ ...baseData, comment: 'Звонил' });
+    const noted = await store.addNote(lead.id, 'Приедет в пятницу');
+    expect(noted?.comment).toBe('Звонил\nПриедет в пятницу');
+    expect(await store.addNote(999, 'x')).toBeUndefined();
+  });
+});
+
 describe('appendIncome', () => {
   it('numbers each income after the highest id already on the lead', () => {
     const first = appendIncome([], 300);

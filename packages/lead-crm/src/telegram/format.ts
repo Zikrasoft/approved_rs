@@ -12,7 +12,7 @@ import { isTelegramIdContact } from '../contactShape.ts';
 import { LEADS_PATH } from '../quarantine.ts';
 import type { Income, LeadStatus, StoredLead } from '../schema.ts';
 import { MAX_LIST_ROWS, isPlaceholderContact } from '../store.ts';
-import type { Payout } from '../ledger.ts';
+import type { LedgerAuthor, Payout } from '../ledger.ts';
 
 export type Role = 'owner' | 'admin';
 
@@ -410,15 +410,47 @@ export function statusChangeText(lead: StoredLead): string {
   return `🔔 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: статус — ${meta.emoji} ${meta.label}`;
 }
 
+const LEDGER_AUTHOR_LABELS: Record<LedgerAuthor, string> = {
+  owner: 'владелец',
+  admin: 'админ',
+};
+
 export function payoutNotificationText(
   lead: StoredLead,
   payout: Payout,
 ): string {
+  const last = payout.edits.at(-1);
   return [
-    `💶 Выплата по заявке #${lead.id} ${escapeHtml(leadDisplayName(lead))}`,
+    `${last ? '✏️ Исправлена выплата' : '💶 Новая выплата'} по заявке #${lead.id} ${escapeHtml(leadDisplayName(lead))}`,
+    `Записал: ${LEDGER_AUTHOR_LABELS[last?.by ?? payout.createdBy]}`,
     ``,
-    `К оплате: ${formatMoney(payout.amount)}`,
+    `Было: ${last ? formatMoney(last.before) : '—'}`,
+    `Стало: ${formatMoney(payout.amount)}`,
   ].join('\n');
+}
+
+export const PAYOUT_COPY = {
+  fixButton: '✏️ Исправить',
+  fixPrompt: '✏️ Какая сумма верная (в евро)?\n\nНапример: 80',
+  fixAck: 'Жду сумму',
+  invalidAmount: '⚠️ Нужна сумма в евро. Попробуйте ещё раз.',
+  settled:
+    '🔒 Эта выплата уже вошла в расчёт — исправить её может только админ.',
+  noteAdded: '📝 Заметка добавлена',
+} as const;
+
+export function payoutRecordedMessage(payout: Payout): {
+  text: string;
+  reply_markup: Keyboard;
+} {
+  return {
+    text: `✅ ${formatMoney(payout.amount)} записано`,
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: PAYOUT_COPY.fixButton, callback_data: `payfix:${payout.id}` }],
+      ],
+    },
+  };
 }
 
 export function dealNotificationText(

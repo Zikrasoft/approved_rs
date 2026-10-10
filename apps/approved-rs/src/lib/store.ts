@@ -11,6 +11,8 @@ export const {
   setStatus,
   setPendingPrompt,
   findByPendingPrompt,
+  findByCard,
+  addNote,
   resolvePendingPrompt,
   archiveLead,
   unarchiveLead,

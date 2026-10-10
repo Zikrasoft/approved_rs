@@ -69,6 +69,8 @@ export {
   EDIT_FIELD_LABELS,
   REFERRAL_NOTE,
   REPLY_COPY,
+  PAYOUT_COPY,
+  payoutRecordedMessage,
   escapeHtml,
   formatDateRu,
   formatDealsList,

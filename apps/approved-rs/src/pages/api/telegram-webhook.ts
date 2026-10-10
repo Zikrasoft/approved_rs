@@ -40,6 +40,8 @@ import {
   ADMIN_IDS,
   EDIT_COPY,
   REPLY_COPY,
+  PAYOUT_COPY,
+  payoutRecordedMessage,
   escapeHtml,
   canAddIncome,
   LEAD_STATUS_ACTIONS,
@@ -58,6 +60,10 @@ import {
   rejectCommissionPayment,
   setPendingPrompt,
   findByPendingPrompt,
+  findByCard,
+  addNote,
+  listPayouts,
+  correctPayout,
   resolvePendingPrompt,
   searchLeads,
   resumeLead,
@@ -72,6 +78,7 @@ import {
   appendNote,
   type LeadStatus,
   type PendingPrompt,
+  type Payout,
   type StoredLead,
 } from '@/lib/store';
 
@@ -144,6 +151,23 @@ function parseAmount(text: string, allowZero = false): number | null {
     : null;
 }
 
+const plainAmountSchema = z
+  .string()
+  .transform((text) =>
+    text
+      .replace(/\s+/g, '')
+      .replace(/(€|eur|евро)$/i, '')
+      .replace(',', '.'),
+  )
+  .pipe(z.string().regex(/^\d+(\.\d+)?$/))
+  .transform(Number)
+  .pipe(z.number().max(MAX_AMOUNT));
+
+function parsePlainAmount(text: string): number | null {
+  const parsed = plainAmountSchema.safeParse(text);
+  return parsed.success ? parsed.data : null;
+}
+
 function parseReminderDate(text: string): string | null {
   const parsed = parse(text.trim(), 'dd.MM.yyyy', new Date());
   if (!isValid(parsed) || isBefore(parsed, startOfDay(new Date()))) return null;
@@ -209,17 +233,23 @@ async function startPrompt(
     prompt,
     kind,
     ackText,
-  }: { prompt: string; kind: PromptKind; ackText: string },
+    payoutId,
+  }: { prompt: string; kind: PromptKind; ackText: string; payoutId?: number },
 ): Promise<void> {
   const promptId = await sendForceReplyPrompt(ctx.chatId, prompt);
-  await setPendingPrompt(id, { chatId: ctx.chatId, messageId: promptId, kind });
+  await setPendingPrompt(id, {
+    chatId: ctx.chatId,
+    messageId: promptId,
+    kind,
+    payoutId,
+  });
   await answerCallback(ctx.cbId, ackText);
 }
 
 async function startLeadPrompt(
   ctx: Ctx,
   id: number,
-  prompt: { prompt: string; kind: PromptKind; ackText: string },
+  prompt: Parameters<typeof startPrompt>[2],
 ): Promise<void> {
   if (!(await getLead(id))) return ack(ctx);
   await startPrompt(ctx, id, prompt);
@@ -322,6 +352,18 @@ async function askIncome(ctx: Ctx, id: number): Promise<void> {
   });
 }
 
+async function askPayoutFix(ctx: Ctx, payoutId: number): Promise<void> {
+  const payout = (await listPayouts()).find((p) => p.id === payoutId);
+  // TODO: a Lead-less Payout has no Lead to hold the correction prompt (#237)
+  if (payout?.leadId == null) return ack(ctx);
+  await startLeadPrompt(ctx, payout.leadId, {
+    prompt: PAYOUT_COPY.fixPrompt,
+    kind: 'correct_payout',
+    ackText: PAYOUT_COPY.fixAck,
+    payoutId,
+  });
+}
+
 async function claimPay(ctx: Ctx, id: number, target?: string): Promise<void> {
   const lead = await getLead(id);
   if (!lead || lead.dealAmount == null) return ack(ctx);
@@ -413,6 +455,7 @@ export const CALLBACKS: CallbackRow[] = [
   [/^delcancel:(\d+)$/, 'admin', onLead(backToLead)],
   [/^claimpay:(\d+)(?::(\d+))?$/, 'owner', onLead(claimPay)],
   [/^income:(\d+)$/, 'owner', onLead(askIncome)],
+  [/^payfix:(\d+)$/, 'any', onLead(askPayoutFix)],
   [
     /^confirmpay:(\d+)$/,
     'admin',
@@ -518,7 +561,9 @@ async function replyWithCard(
 }
 
 type PromptReply = {
+  role: Role;
   chatId: number;
+  messageId: number;
   replyToMessageId: number;
   text: string;
   pending: StoredLead;
@@ -660,6 +705,52 @@ function replyEdit(field: OperatorEditField): PromptHandler {
   };
 }
 
+function threadedTo(messageId: number) {
+  return {
+    reply_parameters: {
+      message_id: messageId,
+      allow_sending_without_reply: true,
+    },
+  };
+}
+
+async function sendPayoutRecorded(
+  chatId: number,
+  replyTo: number,
+  payout: Payout,
+): Promise<void> {
+  const { text, reply_markup } = payoutRecordedMessage(payout);
+  await sendMessage(chatId, text, { reply_markup, ...threadedTo(replyTo) });
+}
+
+async function replyCorrectPayout({
+  role,
+  chatId,
+  replyToMessageId,
+  messageId,
+  text,
+  pending,
+}: PromptReply): Promise<void> {
+  const amount = parseAmount(text, true);
+  if (amount == null) {
+    await sendMessage(chatId, PAYOUT_COPY.invalidAmount);
+    return;
+  }
+  await resolvePendingPrompt(chatId, replyToMessageId, () => ({}));
+  const outcome = await correctPayout(
+    pending.pendingPrompt?.payoutId ?? 0,
+    amount,
+    role,
+  );
+  if (!outcome.ok) {
+    if (outcome.reason === 'settled')
+      await sendMessage(chatId, PAYOUT_COPY.settled);
+    return;
+  }
+  await sendPayoutNotificationToAdmin(pending, outcome.payout);
+  await sendPayoutRecorded(chatId, messageId, outcome.payout);
+}
+
 const PROMPT_REPLIES: Record<PromptKind, PromptHandler> = {
   deal_amount: replyDealAmount,
   add_income: replyAddIncome,
@@ -668,21 +759,50 @@ const PROMPT_REPLIES: Record<PromptKind, PromptHandler> = {
   edit_name: replyEdit('name'),
   edit_contact: replyEdit('contact'),
   edit_comment: replyEdit('comment'),
+  correct_payout: replyCorrectPayout,
 };
 
-async function handlePromptReply(
-  chatId: number,
-  replyToMessageId: number,
-  text: string,
-): Promise<void> {
-  const pending = await findByPendingPrompt(chatId, replyToMessageId);
-  if (!pending?.pendingPrompt) return;
-  await PROMPT_REPLIES[pending.pendingPrompt.kind]({
-    chatId,
-    replyToMessageId,
-    text,
-    pending,
-  });
+type Reply = Omit<PromptReply, 'pending'>;
+
+async function replyToPrompt(reply: Reply): Promise<boolean> {
+  const pending = await findByPendingPrompt(
+    reply.chatId,
+    reply.replyToMessageId,
+  );
+  if (!pending?.pendingPrompt) return false;
+  await PROMPT_REPLIES[pending.pendingPrompt.kind]({ ...reply, pending });
+  return true;
+}
+
+async function replyToCard(reply: Reply): Promise<boolean> {
+  const lead = await findByCard(reply.chatId, reply.replyToMessageId);
+  if (!lead) return false;
+  const text = reply.text.trim();
+  if (!text) return true;
+  const amount = parsePlainAmount(text);
+  if (amount == null) {
+    await addNote(lead.id, text);
+    await sendMessage(
+      reply.chatId,
+      PAYOUT_COPY.noteAdded,
+      threadedTo(reply.messageId),
+    );
+    return true;
+  }
+  const payout = await addPayout({ amount, by: reply.role, leadId: lead.id });
+  const updated = await getLead(lead.id);
+  if (!payout || !updated) return true;
+  if (updated.status !== lead.status)
+    await afterStatusChange(updated, { notice: false });
+  await sendPayoutNotificationToAdmin(updated, payout);
+  await sendPayoutRecorded(reply.chatId, reply.messageId, payout);
+  return true;
+}
+
+const REPLY_ROUTES = [replyToPrompt, replyToCard];
+
+async function routeReply(reply: Reply): Promise<void> {
+  for (const route of REPLY_ROUTES) if (await route(reply)) return;
 }
 
 async function sendMenuMessage(chatId: number, role: Role): Promise<void> {
@@ -747,11 +867,15 @@ bot.on('callback_query', async (ctx, next) => {
 bot.on('message', async (ctx, next) => {
   const repliedTo = ctx.message.reply_to_message;
   if (!repliedTo) return next();
-  await handlePromptReply(
-    ctx.chat.id,
-    repliedTo.message_id,
-    ctx.message.text ?? '',
-  );
+  const role = roleOf(ctx.from?.id);
+  if (!role) return;
+  await routeReply({
+    role,
+    chatId: ctx.chat.id,
+    messageId: ctx.message.message_id,
+    replyToMessageId: repliedTo.message_id,
+    text: ctx.message.text ?? '',
+  });
 });
 
 bot
