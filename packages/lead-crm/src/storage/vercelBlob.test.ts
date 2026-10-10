@@ -92,6 +92,17 @@ describe('read', () => {
   });
 });
 
+describe('exists', () => {
+  it('answers from head() alone', async () => {
+    head.mockResolvedValueOnce({ etag: 'e1' });
+    head.mockRejectedValueOnce(new FakeNotFoundError());
+
+    await expect(storage.exists()).resolves.toBe(true);
+    await expect(storage.exists()).resolves.toBe(false);
+    expect(get).not.toHaveBeenCalled();
+  });
+});
+
 describe('write', () => {
   it('sends a conditional write when a version is known', async () => {
     put.mockResolvedValue({ etag: 'e2' });

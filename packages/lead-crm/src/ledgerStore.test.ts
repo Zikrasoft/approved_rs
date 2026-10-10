@@ -169,6 +169,7 @@ describe('recordOperation', () => {
     const broken = createLedgerStore({
       storage: {
         read: () => Promise.resolve({ raw: undefined, version: undefined }),
+        exists: () => Promise.resolve(false),
         write: () => Promise.reject(new Error('blob down')),
       },
     });

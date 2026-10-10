@@ -184,11 +184,12 @@ export function createLedgerStore({ storage, opening }: LedgerStoreOptions) {
   }
 
   async function createIfMissing(): Promise<void> {
-    const { file, version } = await read();
-    if (version !== undefined) return;
-    await storage.write(file, undefined).catch((error: unknown) => {
-      if (!(error instanceof StorageConflictError)) throw error;
-    });
+    if (await storage.exists()) return;
+    await storage
+      .write(await openingFile(), undefined)
+      .catch((error: unknown) => {
+        if (!(error instanceof StorageConflictError)) throw error;
+      });
   }
 
   let opened: Promise<void> | undefined;

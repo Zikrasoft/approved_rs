@@ -18,5 +18,6 @@ export interface StorageSnapshot {
 
 export interface LeadStorage {
   read(): Promise<StorageSnapshot>;
+  exists(): Promise<boolean>;
   write(leads: unknown, version: string | undefined): Promise<void>;
 }
