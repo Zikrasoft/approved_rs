@@ -240,6 +240,14 @@ const edits = (chatId: number, messageId: number) =>
     (p) => p.chat_id === chatId && p.message_id === messageId,
   );
 
+const keyboardDrops = (chatId: number, messageId: number) =>
+  crm('editMessageReplyMarkup').filter(
+    (p) =>
+      p.chat_id === chatId &&
+      p.message_id === messageId &&
+      JSON.stringify(p.reply_markup) === '{"inline_keyboard":[]}',
+  );
+
 const view = ({
   text,
   reply_markup,
@@ -878,10 +886,12 @@ describe('POST /api/telegram-webhook', () => {
       ]);
       expect(await getBalance()).toBe(0);
       const text = settlementText(settlements[0]!, 0);
-      expect(edits(ADMIN_ID, TO_PAY_ID)).toEqual([
+      expect(edits(ADMIN_ID, TO_PAY_ID)).toEqual([]);
+      expect(keyboardDrops(ADMIN_ID, TO_PAY_ID)).toHaveLength(1);
+      expect(sentTo(ADMIN_ID)).toEqual([
         expect.objectContaining({
           text,
-          reply_markup: { inline_keyboard: [] },
+          reply_parameters: expect.objectContaining({ message_id: TO_PAY_ID }),
         }),
       ]);
       expect(textsTo(OWNER_ID)).toEqual([text]);
@@ -893,10 +903,13 @@ describe('POST /api/telegram-webhook', () => {
       await tapPaid(143.3);
 
       expect((await readLedger()).settlements).toEqual([]);
-      expect(edits(ADMIN_ID, TO_PAY_ID)).toEqual([
+      expect(edits(ADMIN_ID, TO_PAY_ID)).toEqual([]);
+      expect(keyboardDrops(ADMIN_ID, TO_PAY_ID)).toHaveLength(1);
+      expect(sentTo(ADMIN_ID)).toEqual([
         expect.objectContaining({
           text: buildToPay(200),
           reply_markup: settleKeyboard(200),
+          reply_parameters: expect.objectContaining({ message_id: TO_PAY_ID }),
         }),
       ]);
       expect(sentTo(OWNER_ID)).toEqual([]);
@@ -930,7 +943,11 @@ describe('POST /api/telegram-webhook', () => {
       expect((await readLedger()).settlements).toEqual([
         expect.objectContaining({ amount: 100, createdBy: 'admin' }),
       ]);
-      expect(edits(Number(GROUP_ID), TO_PAY_ID)).toHaveLength(1);
+      expect(edits(Number(GROUP_ID), TO_PAY_ID)).toEqual([]);
+      expect(keyboardDrops(Number(GROUP_ID), TO_PAY_ID)).toHaveLength(1);
+      expect(textsTo(Number(GROUP_ID))).toEqual([
+        settlementText((await readLedger()).settlements[0]!, 0),
+      ]);
     });
 
     it('another amount asks the admin by reply', async () => {

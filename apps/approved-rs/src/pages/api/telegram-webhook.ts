@@ -453,22 +453,22 @@ async function recordedSettlement(settlement: Settlement): Promise<string> {
 
 async function settle(ctx: Ctx, shownBalance: string): Promise<void> {
   const settlement = await settleBalance(Number(shownBalance));
+  await bot.api.editMessageReplyMarkup(ctx.chatId, ctx.messageId, {
+    reply_markup: { inline_keyboard: [] },
+  });
   if (!settlement) {
     const balance = await getBalance();
-    await safeEditMessage(
-      ctx.chatId,
-      ctx.messageId,
-      buildToPay(balance),
-      settleKeyboard(balance),
-    );
+    await sendMessage(ctx.chatId, buildToPay(balance), {
+      reply_markup: settleKeyboard(balance),
+      ...threadedTo(ctx.messageId),
+    });
     await answerCallback(ctx.cbId, SETTLEMENT_COPY.stale);
     return;
   }
-  await safeEditMessage(
+  await sendMessage(
     ctx.chatId,
-    ctx.messageId,
     await recordedSettlement(settlement),
-    { inline_keyboard: [] },
+    threadedTo(ctx.messageId),
   );
   await ack(ctx);
 }
