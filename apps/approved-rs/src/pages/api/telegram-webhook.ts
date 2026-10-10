@@ -449,8 +449,7 @@ async function replyPostpone({
     return;
   }
   const updated = await resolvePendingPrompt(
-    chatId,
-    replyToMessageId,
+    { chatId, messageId: replyToMessageId },
     (lead) =>
       canPostpone(lead)
         ? postponePatch(
@@ -460,7 +459,9 @@ async function replyPostpone({
           )
         : {},
   );
-  if (updated?.status === 'postponed') await afterStatusChange(updated);
+  if (!updated) return;
+  if (updated.status === 'postponed') await afterStatusChange(updated);
+  else await sendMessage(chatId, LEAD_ACTION_COPY.notPostponable);
 }
 
 async function replyVisitor({
@@ -496,8 +497,7 @@ async function replyVisitor({
     return;
   }
   const updated = await resolvePendingPrompt(
-    chatId,
-    replyToMessageId,
+    { chatId, messageId: replyToMessageId },
     (lead) => ({
       comment: appendNote(lead.comment, `${REPLY_COPY.notePrefix}${reply}`),
     }),
@@ -525,17 +525,20 @@ const PROMPT_REPLIES: Record<PromptKind, PromptHandler> = {
 type Reply = Omit<PromptReply, 'pending'>;
 
 async function replyToPrompt(reply: Reply): Promise<boolean> {
-  const pending = await findByPendingPrompt(
-    reply.chatId,
-    reply.replyToMessageId,
-  );
+  const pending = await findByPendingPrompt({
+    chatId: reply.chatId,
+    messageId: reply.replyToMessageId,
+  });
   if (!pending?.pendingPrompt) return false;
   await PROMPT_REPLIES[pending.pendingPrompt.kind]({ ...reply, pending });
   return true;
 }
 
 async function replyToCard(reply: Reply): Promise<boolean> {
-  const lead = await findByCard(reply.chatId, reply.replyToMessageId);
+  const lead = await findByCard({
+    chatId: reply.chatId,
+    messageId: reply.replyToMessageId,
+  });
   if (!lead) return false;
   const text = reply.text.trim();
   if (!text) return true;
@@ -597,8 +600,9 @@ async function replyToOperationPrompt(reply: Reply): Promise<boolean> {
 
 const REPLY_ROUTES = [replyToOperationPrompt, replyToPrompt, replyToCard];
 
-async function routeReply(reply: Reply): Promise<void> {
-  for (const route of REPLY_ROUTES) if (await route(reply)) return;
+async function routeReply(reply: Reply): Promise<boolean> {
+  for (const route of REPLY_ROUTES) if (await route(reply)) return true;
+  return false;
 }
 
 async function sendMenuMessage(chatId: number, role: Role): Promise<void> {
@@ -664,8 +668,8 @@ bot.on('message', async (ctx, next) => {
   const repliedTo = ctx.message.reply_to_message;
   if (!repliedTo) return next();
   const role = roleOf(ctx.from?.id);
-  if (!role || !ctx.from) return;
-  await routeReply({
+  if (!role || !ctx.from) return next();
+  const routed = await routeReply({
     role,
     authorId: ctx.from.id,
     chatId: ctx.chat.id,
@@ -673,6 +677,7 @@ bot.on('message', async (ctx, next) => {
     replyToMessageId: repliedTo.message_id,
     text: ctx.message.text ?? '',
   });
+  if (!routed) await next();
 });
 
 bot
