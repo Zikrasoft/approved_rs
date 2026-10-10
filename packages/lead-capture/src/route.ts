@@ -127,7 +127,7 @@ export interface CaptureWebhookRouteOptions<
   secret: string | undefined;
   store: CaptureStore;
   ensureLeadCard: (lead: StoredLead) => Promise<void>;
-  sendFieldChangeToAdmin: (
+  sendVisitorChangeToAdmin: (
     lead: StoredLead,
     field: EditField,
     before: string | null | undefined,
@@ -187,7 +187,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   secret,
   store,
   ensureLeadCard,
-  sendFieldChangeToAdmin,
+  sendVisitorChangeToAdmin,
   bot,
   brand,
   isLocale,
@@ -291,7 +291,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     await ensureLeadCard(updated ?? lead);
     if (!updated) return;
     for (const field of VISITOR_FIELDS)
-      await sendFieldChangeToAdmin(updated, field, lead[field]);
+      await sendVisitorChangeToAdmin(updated, field, lead[field]);
   }
 
   function startFields(

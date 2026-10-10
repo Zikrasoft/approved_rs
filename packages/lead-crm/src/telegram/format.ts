@@ -369,6 +369,7 @@ export const LEAD_ACTION_COPY = {
   badDate:
     '⚠️ Нужна дата в формате ДД.ММ.ГГГГ, не в прошлом. Попробуйте ещё раз.',
   notFound: 'Заявка не найдена.',
+  notPostponable: '⚠️ Заявку уже нельзя отложить: она больше не открыта.',
   deleted: '🗑 Заявка удалена.',
   deleteAck: 'Удалено',
   denied: '⛔ Доступ запрещён.',
@@ -475,7 +476,7 @@ export function createFormatter({
   return {
     formatLeadText,
 
-    fieldChangeText(
+    visitorChangeText(
       lead: StoredLead,
       field: EditField,
       before: string | null | undefined,

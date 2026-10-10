@@ -56,7 +56,7 @@ const {
   sendOperationNotice,
   sendQuarantinedLeadsToAdmin,
   sendStatusChangeToAdmin,
-  sendFieldChangeToAdmin,
+  sendVisitorChangeToAdmin,
   sendDigest,
   editLeadDetailMessage,
 } = notifier;
@@ -381,12 +381,12 @@ describe('sendForceReplyPrompt', () => {
   });
 });
 
-describe('sendFieldChangeToAdmin', () => {
+describe('sendVisitorChangeToAdmin', () => {
   beforeEach(() => mockFetchOk({ message_id: 1 }));
   afterEach(() => mockFetch.mockReset());
 
   it('tells the admin what the value was and what it became', async () => {
-    await sendFieldChangeToAdmin(
+    await sendVisitorChangeToAdmin(
       makeLead({ id: 9, name: 'Иван Петров' }),
       'name',
       'Иван',
@@ -400,7 +400,7 @@ describe('sendFieldChangeToAdmin', () => {
   });
 
   it('goes to the admin, never to the owner', async () => {
-    await sendFieldChangeToAdmin(
+    await sendVisitorChangeToAdmin(
       makeLead({ comment: 'после' }),
       'comment',
       'до',
@@ -412,7 +412,7 @@ describe('sendFieldChangeToAdmin', () => {
   });
 
   it('stays quiet when the value did not actually change', async () => {
-    await sendFieldChangeToAdmin(
+    await sendVisitorChangeToAdmin(
       makeLead({ comment: 'BMW X5' }),
       'comment',
       'BMW X5',
@@ -421,12 +421,12 @@ describe('sendFieldChangeToAdmin', () => {
   });
 
   it('treats a cleared field and an absent one as the same non-change', async () => {
-    await sendFieldChangeToAdmin(makeLead({ comment: null }), 'comment', '');
+    await sendVisitorChangeToAdmin(makeLead({ comment: null }), 'comment', '');
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it('reports a field that had no value before', async () => {
-    await sendFieldChangeToAdmin(
+    await sendVisitorChangeToAdmin(
       makeLead({ comment: 'перезвонить в среду' }),
       'comment',
       undefined,
@@ -437,7 +437,7 @@ describe('sendFieldChangeToAdmin', () => {
   });
 
   it('renders an emptied field as a dash rather than nothing', async () => {
-    await sendFieldChangeToAdmin(
+    await sendVisitorChangeToAdmin(
       makeLead({ comment: null }),
       'comment',
       'BMW X5',
@@ -448,7 +448,7 @@ describe('sendFieldChangeToAdmin', () => {
 
   it('truncates a comment too long to read at a glance', async () => {
     const long = 'а'.repeat(200);
-    await sendFieldChangeToAdmin(
+    await sendVisitorChangeToAdmin(
       makeLead({ comment: long }),
       'comment',
       'коротко',
@@ -459,7 +459,7 @@ describe('sendFieldChangeToAdmin', () => {
   });
 
   it('escapes html so a contact with angle brackets cannot break the message', async () => {
-    await sendFieldChangeToAdmin(
+    await sendVisitorChangeToAdmin(
       makeLead({ contact: '<b>ivan</b>' }),
       'contact',
       '@ivan',
@@ -469,7 +469,7 @@ describe('sendFieldChangeToAdmin', () => {
   });
 
   it('says when the visitor made the change through the bot', async () => {
-    await sendFieldChangeToAdmin(
+    await sendVisitorChangeToAdmin(
       makeLead({ service: 'vehicle-import' }),
       'service',
       '',
@@ -481,7 +481,7 @@ describe('sendFieldChangeToAdmin', () => {
   });
 
   it('names a service by its label rather than its slug', async () => {
-    await sendFieldChangeToAdmin(
+    await sendVisitorChangeToAdmin(
       makeLead({ service: 'vehicle-sourcing' }),
       'service',
       'vehicle-import',
@@ -777,6 +777,33 @@ describe('sendOperationNotice', () => {
       ([, init]) => JSON.parse(init.body).chat_id,
     );
     expect(chats.sort()).toEqual([111, 112, 223]);
+  });
+
+  it('logs a recipient it cannot reach and still resolves', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockFetch.mockImplementation(async (url, init) =>
+      JSON.parse(init.body).chat_id === 111
+        ? new Response(
+            JSON.stringify({ ok: false, error_code: 403, description: 'x' }),
+          )
+        : api.fetch(url, init),
+    );
+    const { sendOperationNotice: notify } = createNotifier({
+      client,
+      formatter,
+      groupId: '-1009876543210',
+      ownerIds: [111],
+      adminIds: [222],
+    });
+
+    await expect(
+      notify({ ...operation, createdBy: 'owner' }, 40, 0),
+    ).resolves.toBeUndefined();
+    expect(error).toHaveBeenCalledWith(
+      '[telegram] a staff notice was not delivered',
+      expect.objectContaining({ chatId: 111 }),
+    );
+    error.mockRestore();
   });
 });
 

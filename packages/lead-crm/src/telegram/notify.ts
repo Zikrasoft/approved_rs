@@ -27,7 +27,16 @@ export function createNotifier({
   adminIds,
 }: NotifierOptions) {
   async function sendToAll(ids: number[], text: string): Promise<void> {
-    await Promise.all(ids.map((id) => client.sendMessage(id, text)));
+    const sent = await Promise.allSettled(
+      ids.map((id) => client.sendMessage(id, text)),
+    );
+    sent.forEach((result, at) => {
+      if (result.status === 'rejected')
+        console.error('[telegram] a staff notice was not delivered', {
+          error: result.reason,
+          chatId: ids[at],
+        });
+    });
   }
 
   return {
@@ -102,13 +111,16 @@ export function createNotifier({
       await sendToAll([...others], operationNoticeText(operation, balance));
     },
 
-    async sendFieldChangeToAdmin(
+    async sendVisitorChangeToAdmin(
       lead: StoredLead,
       field: EditField,
       before: string | null | undefined,
     ): Promise<void> {
       if ((before ?? '') === (lead[field] ?? '')) return;
-      await sendToAll(adminIds, formatter.fieldChangeText(lead, field, before));
+      await sendToAll(
+        adminIds,
+        formatter.visitorChangeText(lead, field, before),
+      );
     },
 
     async sendQuarantinedLeadsToAdmin(

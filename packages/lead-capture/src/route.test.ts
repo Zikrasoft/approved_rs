@@ -96,7 +96,7 @@ function route(
     secret,
     store: captureStore(leadStore),
     ensureLeadCard,
-    sendFieldChangeToAdmin: notifier.sendFieldChangeToAdmin,
+    sendVisitorChangeToAdmin: notifier.sendVisitorChangeToAdmin,
     bot: createTelegramClient(CAPTURE_TOKEN, 'capture_bot').bot,
     brand: BRAND,
     isLocale: (value): value is TestLocale => LOCALES.includes(value),
