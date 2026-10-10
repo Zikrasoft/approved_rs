@@ -123,9 +123,9 @@ In the leads group and in a DM with `@SerbCRMBot`:
       `@SerbCRMBot`, not `@ApprovedRsBot`.
 - [ ] **Status change** — open a lead from the teaser, move it to «В работе»; the
       DM card redraws and the group teaser's status line follows.
-- [ ] **Payout** — mark a lead «Сделка», answer the amount prompt by replying
-      to it; the bot answers «записано» and the admin gets the Payout
-      notification.
+- [ ] **Payout** — in the DM menu tap «➕ Зачислить», reply `1 тест`; the bot
+      answers `✅ +1 € · баланс …` and the admin gets the notice. Undo it with
+      «➖ Списать» `1`.
 - [ ] **Postpone** — «Напомни мне», pick a date; the lead goes to `postponed` and
       `remindAt` is set. The cron (`/api/reminders`, daily) delivers it; to check
       it now, set the date to today and wait for the next run.
