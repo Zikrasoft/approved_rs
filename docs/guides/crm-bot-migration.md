@@ -1,6 +1,6 @@
 # Moving the CRM to `@SerbCRMBot`
 
-A runbook for one sitting. It moves the operator-facing CRM from `@ApprovedRsBot`
+A runbook for one sitting. It moves the owner-facing CRM from `@ApprovedRsBot`
 to `@SerbCRMBot` and gives every open lead a working card again. Why there are
 four bots at all: [ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md).
 
@@ -35,7 +35,12 @@ writes it to `apps/approved-rs/.local/leads-<timestamp>.json` (gitignored) and
 prints the path and the record count. It never writes to the blob.
 
 Note the record count — it is what you compare against if anything later looks
-wrong.
+wrong. Run this before the release deploys, not only before the bot switch: the
+first Lead write after it drops the old money fields from every record, and
+this file is the only copy of them.
+
+In the old bot, open «🔴 Мне должны» as the admin and write the total down —
+step 8 compares the Balance against it.
 
 ## 2. Unregister the old bot's webhook
 
@@ -103,7 +108,7 @@ Delete the dead ones by hand if they bother you.
 
 The direct-message cards from before the switch stay dead for good. Only the
 group teaser has a stored address; a DM card is rendered on demand when the
-operator taps «Открыть в боте». Repointing `TELEGRAM_BOT_USERNAME` in step 3 is
+owner taps «Открыть в боте». Repointing `TELEGRAM_BOT_USERNAME` in step 3 is
 what makes that link open `@SerbCRMBot` — ADR-0030 accepts the rest.
 
 ## 7. Check the CRM answers at all
@@ -121,14 +126,17 @@ In the leads group and in a DM with `@SerbCRMBot`:
 
 - [ ] A teaser from step 7 is in the group, and its «Открыть в боте» button opens
       `@SerbCRMBot`, not `@ApprovedRsBot`.
-- [ ] **Status change** — open a lead from the teaser, move it to «В работе»; the
-      DM card redraws and the group teaser's status line follows.
-- [ ] **Deal amount** — mark a lead «Успешно», answer the amount prompt by
-      replying in the DM; the amount and the commission appear on the card and the
-      admin gets the deal notification.
-- [ ] **Postpone** — «Напомни мне», pick a date; the lead goes to `postponed` and
-      `remindAt` is set. The cron (`/api/reminders`, daily) delivers it; to check
-      it now, set the date to today and wait for the next run.
+- [ ] **Status change** — open a lead from the teaser, close it as «✅ Сделка» or
+      «❌ Отказ»; the DM card redraws and the group teaser's status line follows.
+      «⏳» changes no status: it only records a touch, so the Lead drops out of
+      the stale list.
+- [ ] **Payout** — in the DM menu tap «➕ Зачислить», reply `1 тест`; the bot
+      answers `✅ +1 € · баланс …` and the admin gets the notice. Undo it with
+      «➖ Списать» `1`.
+- [ ] **Postpone** — «⏰ Отложить», pick a date; the lead goes to `postponed` and
+      `remindAt` is set. On that day it comes back through the group digest
+      (`/api/reminders`, daily), which lists it and reopens it; to check it now,
+      set the date to today and wait for the next run.
 - [ ] **A new form lead** — submit the lead form on approved.rs; a new teaser
       appears, posted by `@SerbCRMBot`.
 - [ ] **A shop order** — place a test order on carlab.rs (or re-fire the order
@@ -136,6 +144,13 @@ In the leads group and in a DM with `@SerbCRMBot`:
       proves the `auto-service` project picked up the new token too.
 - [ ] A lead submitted on details.rs produces a card — same proof for the third
       project.
+- [ ] **The Balance opened** — after the first Lead write, `data/ledger.json`
+      exists in the Blob store, and «💶 Мне должны» in `@SerbCRMBot` equals the
+      total noted in step 1.
+- [ ] **The first digest** — the next morning's group digest lists every open
+      Lead untouched for 7 days or more, the backlog included. Bare capture-bot
+      `/start` Leads are among them and stay in every digest until someone
+      closes them; that is by design (#226, #241), not a bug to filter out.
 
 ## 9. Done
 

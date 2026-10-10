@@ -9,6 +9,7 @@ import {
 } from '@/lib/crmBot';
 
 export const {
+  bot,
   sendMessage,
   sendForceReplyPrompt,
   answerCallback,
@@ -19,14 +20,11 @@ export { afterStatusChange, ensureLeadCard };
 
 export const {
   sendLeadNotification,
-  sendPostponeReminderToOwner,
-  sendDealNotificationToAdmin,
-  sendIncomeNotificationToAdmin,
-  sendCommissionClaimToAdmin,
-  sendCommissionResultToOwner,
+  sendDigest,
+  sendOperationNotice,
   sendStatusChangeToAdmin,
-  sendFieldChangeToAdmin,
   editLeadDetailMessage,
+  unpinLeadCard,
 } = notifier;
 
 export const { buildHelp, buildLeadDetail } = formatter;
@@ -35,30 +33,22 @@ export const OWNER_IDS = ownerIds;
 export const ADMIN_IDS = adminIds;
 
 export {
-  canAddIncome,
-  statusLabel,
   formatMoney,
   formatDateRu,
-  buildStatusKeyboard,
-  buildOwedList,
-  formatDealsList,
   buildSearchResults,
   buildMenu,
-  buildLeadList,
+  buildBalance,
+  LEDGER_COPY,
+  operationRecordedText,
+  operationRefusedText,
+  reAskOperationText,
+  buildOpenList,
   buildStats,
   buildDeleteConfirm,
   buildRemindPicker,
-  LEAD_STATUS_ACTIONS,
-  EDIT_COPY,
-  EDIT_FIELD_LABELS,
   REPLY_COPY,
+  LEAD_ACTION_COPY,
   escapeHtml,
 } from '@podbor/lead-crm';
 
-export type {
-  Role,
-  LeadStatusKey,
-  Btn,
-  Keyboard,
-  EditField,
-} from '@podbor/lead-crm';
+export type { Role, Btn, Keyboard } from '@podbor/lead-crm';

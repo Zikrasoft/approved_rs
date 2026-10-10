@@ -167,7 +167,7 @@ describe('createLeadsRoute', () => {
     );
   });
 
-  it('passes the comment through as the operator reads it', async () => {
+  it('passes the comment through as the owner reads it', async () => {
     await POST(makeCtx(valid({ comment: 'BMW X5 2019, стучит спереди' })));
     expect(notifyLead).toHaveBeenCalledWith(
       expect.objectContaining({ comment: 'BMW X5 2019, стучит спереди' }),

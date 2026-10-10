@@ -1,3 +1,4 @@
+import { retryOnConflict } from './storage/retry.ts';
 import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
 
 export const LEADS_PATH = 'data/leads.json';
@@ -22,7 +23,7 @@ export function createQuarantine({
   brand,
   getNotifier,
 }: QuarantineOptions) {
-  return async function quarantine(entries: unknown[]): Promise<void> {
+  async function copyFresh(entries: unknown[]): Promise<number> {
     const { raw, version } = await storage.read();
     const records = storedRecordsSchema.safeParse(raw ?? []);
     if (!records.success) {
@@ -37,18 +38,29 @@ export function createQuarantine({
     const stored = records.data;
     const seen = new Set(stored.map((entry) => JSON.stringify(entry)));
     const fresh = entries.filter((entry) => !seen.has(JSON.stringify(entry)));
-    if (fresh.length === 0) return;
+    if (fresh.length > 0) await storage.write([...stored, ...fresh], version);
+    return fresh.length;
+  }
 
-    await storage.write([...stored, ...fresh], version);
+  return async function quarantine(entries: unknown[]): Promise<void> {
+    const count = await retryOnConflict(
+      () => copyFresh(entries),
+      'quarantine: conflict retry limit exceeded',
+    );
+    if (count === 0) return;
+
     console.error('[lead-crm] copied records it cannot parse', {
-      count: fresh.length,
+      count,
       path: QUARANTINE_PATH,
     });
-    const { notifier } = await getNotifier();
-    await notifier
-      .sendQuarantinedLeadsToAdmin(fresh.length, QUARANTINE_PATH, brand)
-      .catch((error: unknown) =>
-        console.error('[lead-crm] quarantine notice failed', { error }),
-      );
+    try {
+      const { notifier } = await getNotifier();
+      await notifier.sendQuarantinedLeadsToAdmin(count, QUARANTINE_PATH, brand);
+    } catch (error) {
+      console.error('[lead-crm] could not tell the admin about the copy', {
+        count,
+        error,
+      });
+    }
   };
 }

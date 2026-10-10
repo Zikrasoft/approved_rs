@@ -1,3 +1,7 @@
+---
+status: superseded by ADR-0031
+---
+
 # No Telegram bot framework
 
 The bot (about fifteen callback handlers and a five-kind `pendingPrompt` state machine over `force_reply`) is hand-rolled on the Bot API, not built on grammy or telegraf. The webhook is a serverless function, so telegraf's long-running `bot.launch()` model collapses to `handleUpdate` plus a cold-start cost; a framework's scenes want a session store keyed by user, while `pendingPrompt` deliberately lives on the lead record in Blob because a prompt belongs to a lead and two operators can act on one lead; and the client already encodes domain knowledge no framework supplies (`safeEditMessage` swallowing "message is not modified", `notify.ts` swallowing "message to edit not found").

@@ -1,11 +1,9 @@
-import type { Income, StoredLead } from '../schema.ts';
-import { expectMessageAndChatId, type TelegramClient } from './client.ts';
+import type { LedgerOperation } from '../ledgerStore.ts';
+import { isClosed, type StoredLead } from '../schema.ts';
+import type { Digest } from '../store.ts';
+import { isMessageGone, type TelegramClient } from './client.ts';
 import {
-  commissionClaimText,
-  commissionResultText,
-  dealNotificationText,
-  incomeNotificationText,
-  fieldChangeText,
+  operationNoticeText,
   quarantinedLeadsText,
   statusChangeText,
   type EditField,
@@ -28,30 +26,37 @@ export function createNotifier({
   ownerIds,
   adminIds,
 }: NotifierOptions) {
-  async function sendToAll(
-    ids: number[],
-    text: string,
-    extra?: object,
-  ): Promise<void> {
-    await Promise.all(ids.map((id) => client.sendMessage(id, text, extra)));
+  async function sendToAll(ids: number[], text: string): Promise<void> {
+    const sent = await Promise.allSettled(
+      ids.map((id) => client.sendMessage(id, text)),
+    );
+    sent.forEach((result, at) => {
+      if (result.status === 'rejected')
+        console.error('[telegram] a staff notice was not delivered', {
+          error: result.reason,
+          chatId: ids[at],
+        });
+    });
   }
 
   return {
     async sendLeadNotification(
       lead: StoredLead,
     ): Promise<{ chatId: number; messageId: number }> {
-      const sent = await client.tgPost('sendMessage', {
-        chat_id: groupId,
-        text: formatter.formatTeaser(lead),
-        parse_mode: 'HTML',
-        reply_markup: formatter.deepLinkKeyboard(lead.id),
-      });
-      const { messageId, chatId } = expectMessageAndChatId(sent, 'sendMessage');
+      const sent = await client.api.sendMessage(
+        groupId,
+        formatter.formatTeaser(lead),
+        {
+          parse_mode: 'HTML',
+          reply_markup: formatter.deepLinkKeyboard(lead.id),
+        },
+      );
+      const messageId = sent.message_id;
+      const chatId = sent.chat.id;
+      if (isClosed(lead)) return { chatId, messageId };
 
       try {
-        await client.tgPost('pinChatMessage', {
-          chat_id: chatId,
-          message_id: messageId,
+        await client.api.pinChatMessage(chatId, messageId, {
           disable_notification: true,
         });
       } catch (err) {
@@ -62,6 +67,21 @@ export function createNotifier({
       }
 
       return { chatId, messageId };
+    },
+
+    async unpinLeadCard(lead: StoredLead): Promise<void> {
+      if (lead.telegramChatId == null || lead.telegramMessageId == null) return;
+      try {
+        await client.api.unpinChatMessage(
+          lead.telegramChatId,
+          lead.telegramMessageId,
+        );
+      } catch (err) {
+        console.error('[telegram] unpinChatMessage failed', {
+          error: err,
+          messageId: lead.telegramMessageId,
+        });
+      }
     },
 
     async refreshLeadCard(lead: StoredLead): Promise<boolean> {
@@ -75,73 +95,32 @@ export function createNotifier({
           formatter.deepLinkKeyboard(lead.id),
         );
       } catch (err) {
-        // Telegram refuses the edit outright once the message is deleted or
-        // too old to touch — there is no card left to refresh.
-        if (
-          err instanceof Error &&
-          /message to edit not found|message can't be edited/.test(err.message)
-        )
-          return false;
+        if (isMessageGone(err)) return false;
         throw err;
       }
       return true;
     },
 
-    async sendDealNotificationToAdmin(lead: StoredLead): Promise<void> {
-      if (lead.dealAmount == null) return;
-      await sendToAll(
-        adminIds,
-        dealNotificationText({ ...lead, dealAmount: lead.dealAmount }),
-      );
-    },
-
-    async sendIncomeNotificationToAdmin(
-      lead: StoredLead,
-      income: Income,
+    async sendOperationNotice(
+      operation: LedgerOperation,
+      balance: number,
+      authorId: number,
     ): Promise<void> {
-      await sendToAll(adminIds, incomeNotificationText(lead, income));
+      const others = new Set([...ownerIds, ...adminIds]);
+      others.delete(authorId);
+      await sendToAll([...others], operationNoticeText(operation, balance));
     },
 
-    async sendCommissionClaimToAdmin(lead: StoredLead): Promise<void> {
-      if (!lead.pendingCommissionClaim) return;
-      await sendToAll(
-        adminIds,
-        commissionClaimText({
-          ...lead,
-          pendingCommissionClaim: lead.pendingCommissionClaim,
-        }),
-        {
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: '✅ Подтвердить',
-                  callback_data: `confirmpay:${lead.id}`,
-                },
-                { text: '❌ Отклонить', callback_data: `rejectpay:${lead.id}` },
-              ],
-            ],
-          },
-        },
-      );
-    },
-
-    async sendCommissionResultToOwner(
-      lead: StoredLead,
-      confirmed: boolean,
-    ): Promise<void> {
-      await sendToAll(ownerIds, commissionResultText(lead.id, confirmed));
-    },
-
-    // The owner edits a lead's name, contact or comment straight from the
-    // card; without this the admin only ever heard about status moves.
-    async sendFieldChangeToAdmin(
+    async sendVisitorChangeToAdmin(
       lead: StoredLead,
       field: EditField,
       before: string | null | undefined,
     ): Promise<void> {
       if ((before ?? '') === (lead[field] ?? '')) return;
-      await sendToAll(adminIds, fieldChangeText(lead, field, before));
+      await sendToAll(
+        adminIds,
+        formatter.visitorChangeText(lead, field, before),
+      );
     },
 
     async sendQuarantinedLeadsToAdmin(
@@ -156,20 +135,13 @@ export function createNotifier({
       await sendToAll(adminIds, statusChangeText(lead));
     },
 
-    async sendPostponeReminderToOwner(lead: StoredLead): Promise<void> {
-      const results = await Promise.allSettled(
-        ownerIds.map((id) =>
-          client.tgPost('sendMessage', {
-            chat_id: id,
-            text: formatter.postponeReminderText(lead),
-            parse_mode: 'HTML',
-            reply_markup: formatter.deepLinkKeyboard(lead.id),
-          }),
-        ),
-      );
-      if (results.length > 0 && results.every((r) => r.status === 'rejected')) {
-        throw (results[0] as PromiseRejectedResult).reason;
-      }
+    async sendDigest(digest: Digest): Promise<boolean> {
+      const message = formatter.digestMessage(digest);
+      if (!message) return false;
+      await client.sendMessage(groupId, message.text, {
+        reply_markup: message.reply_markup,
+      });
+      return true;
     },
 
     async editLeadDetailMessage(

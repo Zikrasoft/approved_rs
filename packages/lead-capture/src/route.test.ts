@@ -1,9 +1,30 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { CaptureUpdate, LeadInput, StoredLead } from '@podbor/lead-crm';
-import type { LeadStore } from '@podbor/lead-crm';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  createBrandBot,
+  createBrandStore,
+  createTelegramClient,
+  LEADS_PATH,
+  type LeadInput,
+  type LeadStore,
+  type StoredLead,
+} from '@podbor/lead-crm';
+import {
+  createMemoryStorage,
+  recordBotApi,
+  type MemoryStorage,
+  type RecordedBotApi,
+} from '@podbor/lead-crm/testing';
+
+import { stampStartVisitor } from '@podbor/site-kit/contact-links';
+
+import { referralLink } from './menu.ts';
 import { captureStore, createCaptureWebhookRoute } from './route.ts';
 
 const SECRET = 'capture-webhook-secret';
+const CAPTURE_TOKEN = 'capture-token';
+const CRM_TOKEN = 'crm-token';
+const GROUP_ID = '-100500';
+const ADMIN_IDS = [501, 502];
 const BRAND = 'Approved.rs';
 const SERVICES = ['vehicle-sourcing', 'vehicle-import'];
 const LOCALES = ['ru', 'en', 'sr', 'es', 'de'];
@@ -19,122 +40,146 @@ const COPY = {
   phoneSkip: 'SKIP',
   thanks: 'THANKS',
   received: 'RECEIVED',
+  menu: { text: 'MENU', back: 'BACK' },
+  services: { button: 'SERVICES', text: 'PICK_A_SERVICE' },
+  card: { request: 'LEAVE_A_REQUEST', site: 'ON_THE_SITE' },
+  contacts: { button: 'CONTACTS', text: 'REACH_US', hours: 'HOURS' },
+  manager: { button: 'MANAGER', text: 'WRITE_YOUR_QUESTION' },
+  partners: { button: 'PARTNERS', text: 'PICK_A_PARTNER' },
+  request: { button: 'REQUEST', car: 'CAR', service: 'WHICH_SERVICE' },
+  language: { button: 'LANGUAGE', text: 'PICK_A_LANGUAGE' },
+  profile: {
+    description: 'DESCRIPTION',
+    shortDescription: 'SHORT_DESCRIPTION',
+    menuCommand: 'MENU_COMMAND',
+    langCommand: 'LANG_COMMAND',
+  },
 };
 
-function storedLead(data: LeadInput, id: number): StoredLead {
-  const now = new Date().toISOString();
-  return {
-    id,
-    brand: data.brand,
-    name: data.name,
-    contact: data.contact,
-    service: data.service,
-    services: data.services ?? [],
-    contactChannel: data.contactChannel,
-    comment: data.comment,
-    country: data.country,
-    source_url: data.source_url,
-    visitorId: data.visitorId,
-    locale: data.locale,
-    kind: data.kind,
-    status: 'new',
-    dealAmount: null,
-    commissionPercent: 10,
-    paidAmount: 0,
-    payments: [],
-    incomes: [],
-    telegramChatId: null,
-    telegramMessageId: null,
-    statusChangedAt: now,
-    createdAt: now,
-    pendingPrompt: null,
-    capturePrompt: data.capturePrompt ?? null,
-    telegramId: data.telegramId ?? null,
-    archived: false,
-    pendingCommissionClaim: null,
-    remindAt: null,
-    postponedFrom: null,
-  };
-}
+const WORKSHOP = {
+  title: 'CarLab',
+  street: 'Jovana Ćirilova 23a',
+  city: 'Beograd',
+  lat: 44.8054581,
+  lon: 20.4858424,
+};
 
-function makeStore() {
-  const leads: StoredLead[] = [];
-  const open = (brand: string) =>
-    leads.filter(
-      (l) =>
-        l.brand === brand &&
-        !l.archived &&
-        l.status !== 'won' &&
-        l.status !== 'lost',
-    );
-  const patch = (lead: StoredLead, next: StoredLead) => {
-    leads[leads.indexOf(lead)] = next;
-    return next;
-  };
-  return {
-    leads,
-    insertOrMergeLead: vi.fn(async (data: LeadInput) => {
-      const lead = storedLead(data, leads.length + 1);
-      leads.push(lead);
-      return { lead, merged: false };
-    }),
-    findByCapturePrompt: vi.fn(async (chatId: number, brand: string) =>
-      open(brand)
-        .filter((l) => l.capturePrompt?.chatId === chatId)
-        .at(-1),
-    ),
-    findOpenLeadByTelegramId: vi.fn(async (telegramId: number, brand: string) =>
-      open(brand)
-        .filter((l) => l.telegramId === telegramId)
-        .at(-1),
-    ),
-    findPhoneByTelegramId: vi.fn(
-      async (telegramId: number, brand: string) =>
-        leads
-          .filter(
-            (l) =>
-              l.brand === brand &&
-              l.telegramId === telegramId &&
-              l.contact.startsWith('+'),
-          )
-          .at(-1)?.contact,
-    ),
-    updateCapture: vi.fn(
-      async (id: number, { note, contact, capturePrompt }: CaptureUpdate) => {
-        const lead = leads.find((l) => l.id === id);
-        if (!lead) return undefined;
-        return patch(lead, {
-          ...lead,
-          comment: note
-            ? lead.comment
-              ? `${lead.comment}\n${note}`
-              : note
-            : lead.comment,
-          contact: contact ?? lead.contact,
-          capturePrompt,
-        });
-      },
-    ),
-  };
-}
+const LANGUAGES = {
+  ru: 'Русский',
+  en: 'English',
+  sr: 'Srpski',
+  es: 'Español',
+  de: 'Deutsch',
+};
 
-let store: ReturnType<typeof makeStore>;
-let ensureLeadCard: ReturnType<typeof vi.fn>;
-let bot: { sendMessage: ReturnType<typeof vi.fn> };
+const MENU_KEYBOARD = {
+  inline_keyboard: [[{ text: 'SERVICES', callback_data: 'services:ru' }]],
+};
+
+let api: RecordedBotApi;
+let storage: MemoryStorage;
+let leadStore: LeadStore;
+let ensureLeadCard: (lead: StoredLead) => Promise<void>;
+let notifier: ReturnType<typeof createBrandBot>['notifier'];
 let POST: ReturnType<typeof createCaptureWebhookRoute>;
 
-function route(secret: string | undefined) {
+type RouteOptions = Parameters<
+  typeof createCaptureWebhookRoute<string, string>
+>[0];
+
+function route(
+  secret: string | undefined,
+  overrides: Partial<RouteOptions> = {},
+) {
   return createCaptureWebhookRoute({
+    contacts: { phone: '381601234567', site: 'https://example.test' },
     secret,
-    store,
+    store: captureStore(leadStore),
     ensureLeadCard,
-    bot,
+    sendVisitorChangeToAdmin: notifier.sendVisitorChangeToAdmin,
+    bot: createTelegramClient(CAPTURE_TOKEN, 'capture_bot').bot,
     brand: BRAND,
-    isService: (value) => SERVICES.includes(value),
     isLocale: (value): value is TestLocale => LOCALES.includes(value),
     primaryLocale: 'ru',
     copy: (locale) => ({ ...COPY, greeting: `GREETING_${locale}` }),
+    menu: ['services'],
+    languages: LANGUAGES,
+    services: SERVICES,
+    serviceCard: (slug, locale) => ({
+      title: `CARD_${slug}_${locale}`,
+      lines: ['ABOUT <it>', '', 'FROM 100 €'],
+      url: `https://example.test/${locale}/${slug}/`,
+    }),
+    questionnaire: ['looking_for', 'budget', 'phone'],
+    ...overrides,
   });
+}
+
+function stored(): StoredLead[] {
+  return (storage.current() ?? []) as StoredLead[];
+}
+
+function editLead(id: number, patch: Partial<StoredLead>) {
+  storage.seed(stored().map((l) => (l.id === id ? { ...l, ...patch } : l)));
+}
+
+function abandon(id: number) {
+  const hourAgo = new Date(Date.now() - 60 * 60 * 1000 - 1000).toISOString();
+  editLead(id, { createdAt: hourAgo, visitorActiveAt: hourAgo });
+}
+
+function vanishOnNextWrite() {
+  storage.failNextWrites(1, () => storage.seed([]));
+}
+
+function replies() {
+  return api.callsTo('sendMessage', CAPTURE_TOKEN).map((c) => c.payload);
+}
+
+function lastSent(): [unknown, unknown] {
+  const last = replies().at(-1);
+  return [last?.chat_id, last?.text];
+}
+
+function lastMarkup(): unknown {
+  return replies().at(-1)?.reply_markup;
+}
+
+function cards() {
+  return api
+    .callsTo('sendMessage', CRM_TOKEN)
+    .map((c) => c.payload)
+    .filter((p) => p.chat_id === GROUP_ID);
+}
+
+function adminNotes(chatId = ADMIN_IDS[0]) {
+  return api
+    .callsTo('sendMessage', CRM_TOKEN)
+    .map((c) => c.payload)
+    .filter((p) => p.chat_id === chatId)
+    .map((p) => String(p.text));
+}
+
+function cardEdits() {
+  return api.callsTo('editMessageText', CRM_TOKEN).map((c) => c.payload);
+}
+
+function sisterLead(): LeadInput {
+  return {
+    brand: 'CarLab',
+    name: 'Иван Петров',
+    contact: '@ivan',
+    service: '',
+    locale: 'ru',
+    comment: null,
+    country: null,
+    source_url: null,
+    visitorId: null,
+    contactChannel: 'telegram',
+    kind: 'lead',
+    telegramId: 42,
+    capturePrompt: { chatId: 42, step: 'looking_for' },
+  };
 }
 
 function makeCtx(
@@ -188,21 +233,43 @@ function textUpdate(text: string, from: Record<string, unknown> = HANDLED) {
   };
 }
 
+function tapUpdate(data: string, from: Record<string, unknown> = HANDLED) {
+  return {
+    update_id: 4,
+    callback_query: {
+      id: 'tap-1',
+      from,
+      chat_instance: 'instance',
+      data,
+      message: {
+        message_id: 900,
+        date: 0,
+        chat: { id: from.id, type: 'private' },
+        text: 'MENU',
+      },
+    },
+  };
+}
+
+async function tap(data: string, from: Record<string, unknown> = HANDLED) {
+  await POST(makeCtx(tapUpdate(data, from)));
+}
+
+async function begin(
+  payload = 'vehicle-sourcing_ru',
+  from: Record<string, unknown> = HANDLED,
+) {
+  await POST(makeCtx(startUpdate(payload, from)));
+  const [service, locale] = payload.split('_');
+  await tap(`request:${locale}:${service}`, from);
+}
+
+function edits() {
+  return api.callsTo('editMessageText', CAPTURE_TOKEN).map((c) => c.payload);
+}
+
 async function say(text: string, from: Record<string, unknown> = HANDLED) {
   await POST(makeCtx(textUpdate(text, from)));
-}
-
-function lastSent(): [number, string] {
-  const calls = bot.sendMessage.mock.calls;
-  return (calls[calls.length - 1] as [number, string, unknown]).slice(0, 2) as [
-    number,
-    string,
-  ];
-}
-
-function lastExtra(): Record<string, unknown> | undefined {
-  const calls = bot.sendMessage.mock.calls;
-  return calls[calls.length - 1][2] as Record<string, unknown> | undefined;
 }
 
 function contactUpdate(
@@ -221,10 +288,31 @@ function contactUpdate(
 }
 
 beforeEach(() => {
-  store = makeStore();
-  ensureLeadCard = vi.fn(async () => {});
-  bot = { sendMessage: vi.fn(async () => {}) };
+  vi.stubEnv('TELEGRAM_BOT_TOKEN', CRM_TOKEN);
+  vi.stubEnv('TELEGRAM_BOT_USERNAME', 'crm_bot');
+  vi.stubEnv('TELEGRAM_GROUP_ID', GROUP_ID);
+  vi.stubEnv('TELEGRAM_ADMIN_ID', ADMIN_IDS.join(','));
+  api = recordBotApi();
+  vi.stubGlobal('fetch', api.fetch);
+  const storages: Record<string, MemoryStorage> = {};
+  ({ leadStore } = createBrandStore({
+    brand: BRAND,
+    storageFor: (path) => (storages[path] = createMemoryStorage()),
+    getNotifier: vi.fn(),
+  }));
+  storage = storages[LEADS_PATH];
+  ({ ensureLeadCard, notifier } = createBrandBot({
+    store: leadStore,
+    brand: BRAND,
+    serviceLabel: (slug) => slug,
+  }));
   POST = route(SECRET);
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
 
 describe('the webhook secret', () => {
@@ -233,13 +321,13 @@ describe('the webhook secret', () => {
       makeCtx(startUpdate(), { 'x-telegram-bot-api-secret-token': 'nope' }),
     );
     expect(res.status).toBe(401);
-    expect(store.insertOrMergeLead).not.toHaveBeenCalled();
+    expect(stored()).toHaveLength(0);
   });
 
   it('rejects every update when no secret is configured', async () => {
     const res = await route(undefined)(makeCtx(startUpdate()));
     expect(res.status).toBe(401);
-    expect(store.insertOrMergeLead).not.toHaveBeenCalled();
+    expect(stored()).toHaveLength(0);
   });
 
   it('acknowledges an update that carries the right secret', async () => {
@@ -252,12 +340,18 @@ describe('updates that are not a visitor pressing Start', () => {
   it('acknowledges a malformed body without storing anything', async () => {
     const res = await POST(makeCtx('not json'));
     expect(res.status).toBe(200);
-    expect(store.insertOrMergeLead).not.toHaveBeenCalled();
+    expect(stored()).toHaveLength(0);
+  });
+
+  it('acknowledges a body that is not an update object', async () => {
+    const res = await POST(makeCtx('null'));
+    expect(res.status).toBe(200);
+    expect(stored()).toHaveLength(0);
   });
 
   it('acknowledges an update with no message', async () => {
     await POST(makeCtx({ update_id: 2, callback_query: { id: 'x' } }));
-    expect(store.insertOrMergeLead).not.toHaveBeenCalled();
+    expect(stored()).toHaveLength(0);
   });
 
   it('acknowledges a message that is missing a sender', async () => {
@@ -266,12 +360,12 @@ describe('updates that are not a visitor pressing Start', () => {
         message: { chat: { id: 1, type: 'private' }, text: '/start' },
       }),
     );
-    expect(store.insertOrMergeLead).not.toHaveBeenCalled();
+    expect(stored()).toHaveLength(0);
   });
 
   it('ignores chatter in a group chat', async () => {
     await POST(makeCtx(startUpdate(undefined, HANDLED, 'supergroup')));
-    expect(store.insertOrMergeLead).not.toHaveBeenCalled();
+    expect(stored()).toHaveLength(0);
   });
 
   it('ignores a message with no text at all', async () => {
@@ -280,38 +374,41 @@ describe('updates that are not a visitor pressing Start', () => {
         message: { chat: { id: 42, type: 'private' }, from: HANDLED },
       }),
     );
-    expect(store.insertOrMergeLead).not.toHaveBeenCalled();
+    expect(stored()).toHaveLength(0);
   });
 
   it('acknowledges even when the store throws', async () => {
-    store.insertOrMergeLead.mockRejectedValueOnce(new Error('blob is down'));
+    vi.spyOn(storage, 'read').mockRejectedValueOnce(new Error('blob is down'));
     vi.spyOn(console, 'error').mockImplementation(() => {});
     const res = await POST(makeCtx(startUpdate()));
     expect(res.status).toBe(200);
-    expect(ensureLeadCard).not.toHaveBeenCalled();
+    expect(cards()).toHaveLength(0);
+    expect(replies()).toHaveLength(0);
   });
 });
 
 describe('the Lead written at /start', () => {
-  it('puts a card in front of the operator with the contact already on it', async () => {
+  it('puts a card in front of the owner with the contact already on it', async () => {
     await POST(makeCtx(startUpdate('vehicle-sourcing_sr')));
-    expect(ensureLeadCard).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 1, contact: '@ivan' }),
-    );
+    expect(cards()).toEqual([
+      expect.objectContaining({
+        chat_id: GROUP_ID,
+        text: expect.stringContaining('Заявка #1'),
+      }),
+    ]);
+    expect(stored()[0]).toMatchObject({ id: 1, contact: '@ivan' });
   });
 
   it('takes the @username as the contact, and the full name', async () => {
     await POST(makeCtx(startUpdate('ru')));
-    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
-      expect.objectContaining({
-        contact: '@ivan',
-        name: 'Иван Петров',
-        contactChannel: 'telegram',
-        kind: 'lead',
-        source_url: null,
-        visitorId: null,
-      }),
-    );
+    expect(stored()[0]).toMatchObject({
+      contact: '@ivan',
+      name: 'Иван Петров',
+      contactChannel: 'telegram',
+      kind: 'lead',
+      source_url: null,
+      visitorId: null,
+    });
   });
 
   it('takes the visitor id the site tile stamped on the start payload', async () => {
@@ -320,66 +417,59 @@ describe('the Lead written at /start', () => {
         startUpdate('vehicle-import_sr_0f8fad5bd9cb469fa16570867728950e'),
       ),
     );
-    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
-      expect.objectContaining({
-        visitorId: '0f8fad5b-d9cb-469f-a165-70867728950e',
-        service: 'vehicle-import',
-        locale: 'sr',
-      }),
-    );
+    expect(stored()[0]).toMatchObject({
+      visitorId: '0f8fad5b-d9cb-469f-a165-70867728950e',
+      service: 'vehicle-import',
+      locale: 'sr',
+    });
   });
 
   it('falls back to a tg://user link when the sender has no username', async () => {
     await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
-    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
-      expect.objectContaining({ contact: 'tg://user?id=777', name: 'Лена' }),
-    );
+    expect(stored()[0]).toMatchObject({
+      contact: 'tg://user?id=777',
+      name: 'Лена',
+    });
   });
 
   it('stores an empty name when the sender has none', async () => {
     await POST(makeCtx(startUpdate('ru', { id: 9 })));
-    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
-      expect.objectContaining({ name: '' }),
-    );
+    expect(stored()[0]).toMatchObject({ name: '' });
   });
 
   it('records the sender id so the visitor can be found again', async () => {
     await POST(makeCtx(startUpdate('ru')));
-    expect(store.leads[0].telegramId).toBe(42);
+    expect(stored()[0].telegramId).toBe(42);
   });
 
   it('stamps the bot owner brand, whatever the payload says', async () => {
     await POST(makeCtx(startUpdate('CarLab_sr')));
-    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
-      expect.objectContaining({ brand: BRAND }),
-    );
+    expect(stored()[0]).toMatchObject({ brand: BRAND });
   });
 });
 
 describe('the deep-link payload', () => {
   it('takes the service and the locale the page was in', async () => {
     await POST(makeCtx(startUpdate('vehicle-import_de')));
-    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
-      expect.objectContaining({
-        service: 'vehicle-import',
-        services: ['vehicle-import'],
-        locale: 'de',
-      }),
-    );
+    expect(stored()[0]).toMatchObject({
+      service: 'vehicle-import',
+      services: ['vehicle-import'],
+      locale: 'de',
+    });
   });
 
   it('carries the locale alone when the page had no service', async () => {
     await POST(makeCtx(startUpdate('es')));
-    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
-      expect.objectContaining({ service: '', services: [], locale: 'es' }),
-    );
+    expect(stored()[0]).toMatchObject({
+      service: '',
+      services: [],
+      locale: 'es',
+    });
   });
 
   it('drops a service it does not recognise but keeps the locale', async () => {
     await POST(makeCtx(startUpdate('wheel-polishing_en')));
-    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
-      expect.objectContaining({ service: '', locale: 'en' }),
-    );
+    expect(stored()[0]).toMatchObject({ service: '', locale: 'en' });
   });
 
   it('falls back to the client language when the locale is unknown', async () => {
@@ -388,76 +478,473 @@ describe('the deep-link payload', () => {
         startUpdate('vehicle-sourcing_fr', { ...HANDLED, language_code: 'en' }),
       ),
     );
-    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
-      expect.objectContaining({ service: 'vehicle-sourcing', locale: 'en' }),
-    );
+    expect(stored()[0]).toMatchObject({
+      service: 'vehicle-sourcing',
+      locale: 'en',
+    });
   });
 
   it('falls back to the primary locale when nothing else is usable', async () => {
     await POST(
       makeCtx(startUpdate(undefined, { ...HANDLED, language_code: 'fr' })),
     );
-    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
-      expect.objectContaining({ locale: 'ru' }),
-    );
+    expect(stored()[0]).toMatchObject({ locale: 'ru' });
   });
 
   it('never rejects a visitor over a hostile payload', async () => {
     await POST(makeCtx(startUpdate('<script>_'.repeat(20))));
-    expect(store.insertOrMergeLead).toHaveBeenCalledWith(
-      expect.objectContaining({ service: '', locale: 'ru' }),
+    expect(stored()[0]).toMatchObject({ service: '', locale: 'ru' });
+  });
+});
+
+describe('the screen /start opens', () => {
+  it('greets a cold visitor with the main menu', async () => {
+    await POST(makeCtx(startUpdate()));
+
+    expect(lastSent()).toEqual([42, 'GREETING_ru\n\nMENU']);
+    expect(lastMarkup()).toEqual(MENU_KEYBOARD);
+    expect(stored()[0].capturePrompt).toBeNull();
+  });
+
+  it('opens the card of the service the tile named, in its language', async () => {
+    await POST(
+      makeCtx(
+        startUpdate('vehicle-import_sr_0f8fad5bd9cb469fa16570867728950e'),
+      ),
     );
+
+    expect(lastSent()).toEqual([
+      42,
+      [
+        'GREETING_sr',
+        '',
+        '<b>CARD_vehicle-import_sr</b>',
+        '',
+        'ABOUT &lt;it&gt;',
+        '',
+        'FROM 100 €',
+      ].join('\n'),
+    ]);
+    expect(lastMarkup()).toEqual({
+      inline_keyboard: [
+        [
+          {
+            text: 'LEAVE_A_REQUEST',
+            callback_data: 'request:sr:vehicle-import',
+          },
+        ],
+        [
+          {
+            text: 'ON_THE_SITE',
+            url: 'https://example.test/sr/vehicle-import/',
+          },
+        ],
+        [{ text: 'BACK', callback_data: 'services:sr' }],
+      ],
+    });
+  });
+
+  it('still creates the Lead with the service on it', async () => {
+    await POST(makeCtx(startUpdate('vehicle-import_sr')));
+
+    expect(stored()[0]).toMatchObject({
+      service: 'vehicle-import',
+      locale: 'sr',
+      capturePrompt: null,
+    });
+    expect(cards()).toHaveLength(1);
+  });
+});
+
+describe('browsing the menu', () => {
+  it('lists every service on the Services screen, in place', async () => {
+    await POST(makeCtx(startUpdate('en')));
+    api.reset();
+
+    await tap('services:en');
+
+    expect(api.callsTo('answerCallbackQuery', CAPTURE_TOKEN)).toHaveLength(1);
+    expect(edits()).toEqual([
+      expect.objectContaining({
+        chat_id: 42,
+        message_id: 900,
+        text: 'PICK_A_SERVICE',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: 'CARD_vehicle-sourcing_en',
+                callback_data: 'service:en:vehicle-sourcing',
+              },
+            ],
+            [
+              {
+                text: 'CARD_vehicle-import_en',
+                callback_data: 'service:en:vehicle-import',
+              },
+            ],
+            [{ text: 'BACK', callback_data: 'menu:en' }],
+          ],
+        },
+      }),
+    ]);
+    expect(replies()).toHaveLength(0);
+  });
+
+  it('opens a card and goes back to the menu, writing nothing', async () => {
+    await POST(makeCtx(startUpdate('de')));
+    const writes = storage.writeAttempts();
+
+    await tap('service:de:vehicle-sourcing');
+    expect(edits().at(-1)?.text).toContain('<b>CARD_vehicle-sourcing_de</b>');
+
+    await tap('menu:de');
+    expect(edits().at(-1)).toMatchObject({
+      text: 'MENU',
+      reply_markup: {
+        inline_keyboard: [[{ text: 'SERVICES', callback_data: 'services:de' }]],
+      },
+    });
+    expect(storage.writeAttempts()).toBe(writes);
+  });
+
+  it('works for a visitor who never pressed Start', async () => {
+    await tap('services:ru');
+
+    expect(edits()).toHaveLength(1);
+    expect(stored()).toHaveLength(0);
+  });
+
+  it('falls back to the primary locale for a locale the site does not serve', async () => {
+    await tap('services:fr');
+
+    expect(edits()[0].reply_markup).toMatchObject({
+      inline_keyboard: expect.arrayContaining([
+        [{ text: 'BACK', callback_data: 'menu:ru' }],
+      ]),
+    });
+  });
+
+  it.each([
+    'service:ru:wheel-polishing',
+    'request:ru:wheel-polishing',
+    'nowhere:ru',
+    'hasOwnProperty:ru',
+    'services',
+    'services:ru:a:b',
+    'SERVICES:RU',
+  ])('only acknowledges a tap it cannot read: %s', async (data) => {
+    await tap(data);
+
+    expect(api.callsTo('answerCallbackQuery', CAPTURE_TOKEN)).toHaveLength(1);
+    expect(edits()).toHaveLength(0);
+    expect(replies()).toHaveLength(0);
+    expect(stored()).toHaveLength(0);
+  });
+
+  it('only acknowledges a tap it cannot trace back to a visitor', async () => {
+    await POST(
+      makeCtx({
+        update_id: 6,
+        callback_query: {
+          id: 'tap-3',
+          from: { first_name: 'no id' },
+          chat_instance: 'instance',
+          data: 'services:ru',
+          message: {
+            message_id: 900,
+            date: 0,
+            chat: { id: 42, type: 'private' },
+          },
+        },
+      }),
+    );
+
+    expect(api.callsTo('answerCallbackQuery', CAPTURE_TOKEN)).toHaveLength(1);
+    expect(edits()).toHaveLength(0);
+  });
+
+  it('keeps every button under the 64-byte callback limit', async () => {
+    await POST(makeCtx(startUpdate('vehicle-sourcing_de')));
+    await tap('services:de');
+
+    const markups = [
+      ...replies().map((p) => p.reply_markup),
+      ...edits().map((p) => p.reply_markup),
+    ] as { inline_keyboard: { callback_data?: string }[][] }[];
+    const data = markups.flatMap((m) =>
+      m.inline_keyboard.flat().flatMap((b) => b.callback_data ?? []),
+    );
+    expect(data.length).toBeGreaterThan(0);
+    for (const d of data)
+      expect(new TextEncoder().encode(d).length).toBeLessThanOrEqual(64);
+  });
+});
+
+describe('leaving a request from a service card', () => {
+  it('sets the service, tells the admin and asks the first question', async () => {
+    await POST(makeCtx(startUpdate('sr')));
+    api.reset();
+
+    await tap('request:sr:vehicle-import');
+
+    expect(stored()[0]).toMatchObject({
+      service: 'vehicle-import',
+      services: ['vehicle-import'],
+      capturePrompt: { chatId: 42, step: 'looking_for' },
+    });
+    for (const id of ADMIN_IDS)
+      expect(adminNotes(id)).toEqual([
+        [
+          '✏️ Заявка #1 Иван Петров: услуга',
+          '🤖 Посетитель через бота',
+          '',
+          'Было: —',
+          'Стало: vehicle-import',
+        ].join('\n'),
+      ]);
+    expect(cardEdits()).toHaveLength(1);
+    expect(lastSent()).toEqual([42, 'LOOKING_FOR']);
+  });
+
+  it('asks for the phone first when nothing else reaches the visitor', async () => {
+    await POST(makeCtx(startUpdate('vehicle-import_ru', ANONYMOUS)));
+
+    await tap('request:ru:vehicle-import', ANONYMOUS);
+
+    expect(adminNotes()).toEqual([]);
+    expect(lastSent()).toEqual([777, 'PHONE_ASK']);
+    expect(lastMarkup()).toHaveProperty('keyboard');
+  });
+
+  it('opens a Lead when the visitor has none open', async () => {
+    await tap('request:en:vehicle-sourcing');
+
+    expect(stored()).toEqual([
+      expect.objectContaining({
+        brand: BRAND,
+        contact: '@ivan',
+        service: 'vehicle-sourcing',
+        locale: 'en',
+        capturePrompt: { chatId: 42, step: 'looking_for' },
+      }),
+    ]);
+    expect(cards()).toHaveLength(1);
+    expect(lastSent()).toEqual([42, 'LOOKING_FOR']);
+  });
+
+  it('opens a new Lead when the open one is older than the hour', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    abandon(1);
+
+    await tap('request:ru:vehicle-import');
+
+    expect(stored()).toHaveLength(2);
+    expect(stored()[0].capturePrompt).toBeNull();
+    expect(stored()[1]).toMatchObject({
+      service: 'vehicle-import',
+      capturePrompt: { chatId: 42, step: 'looking_for' },
+    });
+    expect(lastSent()).toEqual([42, 'LOOKING_FOR']);
+  });
+
+  it('runs the whole Questionnaire in the language of the tapped card', async () => {
+    POST = route(SECRET, {
+      copy: (locale) => ({ ...COPY, lookingFor: `LOOKING_FOR_${locale}` }),
+    });
+    await POST(makeCtx(startUpdate('ru')));
+
+    await tap('request:en:vehicle-import');
+    expect(lastSent()).toEqual([42, 'LOOKING_FOR_en']);
+    expect(stored()[0].locale).toBe('en');
+
+    await tap('request:sr:vehicle-import');
+    await say('BMW X5');
+    expect(stored()[0].locale).toBe('sr');
+    expect(lastSent()).toEqual([42, 'BUDGET']);
+  });
+
+  it('asks the next question when the staff cannot be told', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    await begin();
+    POST = route(SECRET, {
+      ensureLeadCard: vi.fn().mockRejectedValue(new Error('group down')),
+    });
+
+    await say('BMW X5');
+
+    expect(stored()[0].comment).toContain('Ищет: BMW X5');
+    expect(lastSent()).toEqual([42, 'BUDGET']);
+    expect(adminNotes()).toEqual([expect.stringContaining('BMW X5')]);
+    expect(error).toHaveBeenCalledWith(
+      '[capture] could not update the card',
+      expect.objectContaining({ leadId: 1 }),
+    );
+  });
+
+  it('handles the tap when Telegram refuses to acknowledge it', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    await POST(makeCtx(startUpdate('ru')));
+    api.fail('answerCallbackQuery', 'query is too old');
+
+    await tap('request:ru:vehicle-import');
+
+    expect(lastSent()).toEqual([42, 'LOOKING_FOR']);
+    expect(error).toHaveBeenCalledWith(
+      '[capture] could not answer the tap',
+      expect.anything(),
+    );
+  });
+
+  it('opens a Lead with the phone the visitor gave before', async () => {
+    await begin(undefined, ANONYMOUS);
+    await POST(makeCtx(contactUpdate('381601234567')));
+    editLead(1, { status: 'won' });
+
+    await tap('request:ru:vehicle-import', ANONYMOUS);
+
+    expect(stored()[1]).toMatchObject({
+      contact: '+381601234567',
+      capturePrompt: { chatId: 777, step: 'looking_for' },
+    });
+  });
+});
+
+describe('leaving the Questionnaire through the menu', () => {
+  it('ends it on any screen, keeps the answers and files the next text as a message', async () => {
+    await begin();
+    await say('BMW X5');
+
+    await tap('services:ru');
+
+    expect(stored()[0].capturePrompt).toBeNull();
+    expect(stored()[0].comment).toBe('Ищет: BMW X5');
+
+    await say('а сколько по времени?');
+
+    expect(stored()[0].comment).toBe(
+      'Ищет: BMW X5\nСообщение: а сколько по времени?',
+    );
+    expect(lastSent()).toEqual([42, 'RECEIVED']);
+  });
+
+  it('takes the share-contact keyboard away when a screen ends the phone step', async () => {
+    await begin(undefined, ANONYMOUS);
+    api.reset();
+
+    await tap('services:ru', ANONYMOUS);
+
+    expect(replies()).toEqual([
+      expect.objectContaining({
+        chat_id: 777,
+        text: 'PICK_A_SERVICE',
+        reply_markup: { remove_keyboard: true },
+      }),
+    ]);
+    expect(api.callsTo('deleteMessage', CAPTURE_TOKEN)).toEqual([
+      expect.objectContaining({
+        payload: expect.objectContaining({ chat_id: 777 }),
+      }),
+    ]);
+    expect(edits()).toHaveLength(1);
+  });
+
+  it('takes the share-contact keyboard away on /menu too', async () => {
+    await begin(undefined, ANONYMOUS);
+    api.reset();
+
+    await say('/menu', ANONYMOUS);
+
+    expect(replies().map((r) => r.reply_markup)).toEqual([
+      { remove_keyboard: true },
+      MENU_KEYBOARD,
+    ]);
+  });
+
+  it('leaves the keyboard alone when the step it ends is not the phone', async () => {
+    await begin();
+    api.reset();
+
+    await say('/menu');
+
+    expect(api.callsTo('deleteMessage', CAPTURE_TOKEN)).toEqual([]);
+    expect(replies()).toHaveLength(1);
+  });
+
+  it('ends it on /menu and shows the menu in the language of the Lead', async () => {
+    await begin('vehicle-sourcing_sr');
+
+    await say('/menu');
+
+    expect(stored()[0].capturePrompt).toBeNull();
+    expect(stored()[0].comment).toBeNull();
+    expect(lastSent()).toEqual([42, 'MENU']);
+    expect(lastMarkup()).toEqual({
+      inline_keyboard: [[{ text: 'SERVICES', callback_data: 'services:sr' }]],
+    });
+  });
+
+  it('shows /menu in the Telegram language when there is no Lead, writing nothing', async () => {
+    await say('/menu', { ...HANDLED, language_code: 'de' });
+
+    expect(stored()).toHaveLength(0);
+    expect(lastSent()).toEqual([42, 'MENU']);
+    expect(lastMarkup()).toEqual({
+      inline_keyboard: [[{ text: 'SERVICES', callback_data: 'services:de' }]],
+    });
   });
 });
 
 describe('the two questions', () => {
-  it('greets and asks what the visitor is looking for, in the page locale', async () => {
-    await POST(makeCtx(startUpdate('vehicle-sourcing_sr')));
+  it('asks what the visitor is looking for once they leave a request, in the page locale', async () => {
+    await begin('vehicle-sourcing_sr');
 
-    expect(bot.sendMessage).toHaveBeenCalledTimes(1);
-    expect(lastSent()).toEqual([42, 'GREETING_sr\n\nLOOKING_FOR']);
+    expect(replies()).toHaveLength(2);
+    expect(lastSent()).toEqual([42, 'LOOKING_FOR']);
+    expect(stored()[0].capturePrompt).toEqual({
+      chatId: 42,
+      step: 'looking_for',
+    });
   });
 
   it('puts the first answer on the card and asks for the budget', async () => {
-    await POST(makeCtx(startUpdate('ru')));
-    ensureLeadCard.mockClear();
+    await begin();
+    api.reset();
 
     await say('BMW X5, не старше 2018');
 
-    expect(store.leads[0].comment).toContain('Ищет: BMW X5, не старше 2018');
-    expect(ensureLeadCard).toHaveBeenCalledTimes(1);
+    expect(stored()[0].comment).toContain('Ищет: BMW X5, не старше 2018');
+    expect(cardEdits()).toHaveLength(1);
     expect(lastSent()).toEqual([42, 'BUDGET']);
   });
 
   it('puts the budget on the card too', async () => {
-    await POST(makeCtx(startUpdate('ru')));
+    await begin();
     await say('BMW X5');
 
     await say('до 20 000 евро');
 
-    expect(store.leads[0].comment).toContain('Бюджет: до 20 000 евро');
+    expect(stored()[0].comment).toContain('Бюджет: до 20 000 евро');
   });
 
   it('answers in the locale the Lead was created in', async () => {
-    await POST(makeCtx(startUpdate('de')));
+    await begin('vehicle-sourcing_de');
 
     await say('ein Kombi');
 
     expect(lastSent()).toEqual([42, 'BUDGET']);
-    expect(store.leads[0].locale).toBe('de');
+    expect(stored()[0].locale).toBe('de');
   });
 });
 
 describe('a Lead that disappears mid-dialog', () => {
   it('still refreshes the card and keeps the conversation going', async () => {
-    await POST(makeCtx(startUpdate('ru')));
-    store.updateCapture.mockResolvedValueOnce(undefined);
+    await begin();
+    vanishOnNextWrite();
 
     await say('BMW X5');
 
-    expect(ensureLeadCard).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 1 }),
-    );
+    expect(cardEdits().at(-1)?.text).toContain('Заявка #1');
     expect(lastSent()).toEqual([42, 'BUDGET']);
   });
 });
@@ -466,82 +953,78 @@ describe('abandoning the dialog', () => {
   it('leaves the contact and the card intact after the first question', async () => {
     await POST(makeCtx(startUpdate('vehicle-sourcing_ru', ANONYMOUS)));
 
-    expect(store.leads[0]).toMatchObject({
+    expect(stored()[0]).toMatchObject({
       contact: 'tg://user?id=777',
       service: 'vehicle-sourcing',
-      status: 'new',
-      archived: false,
+      status: 'open',
     });
-    expect(ensureLeadCard).toHaveBeenCalledTimes(1);
+    expect(cards()).toHaveLength(1);
   });
 
   it('leaves the contact intact after the second question', async () => {
-    await POST(makeCtx(startUpdate('ru')));
+    await begin();
 
     await say('BMW X5');
 
-    expect(store.leads[0]).toMatchObject({
+    expect(stored()[0]).toMatchObject({
       contact: '@ivan',
       capturePrompt: { chatId: 42, step: 'budget' },
     });
   });
 });
 
-describe('an operator editing the same Lead mid-dialog', () => {
+describe('an owner editing the same Lead mid-dialog', () => {
   it('neither side overwrites the other', async () => {
-    await POST(makeCtx(startUpdate('ru')));
-    store.leads[0] = {
-      ...store.leads[0],
+    await begin();
+    editLead(1, {
       name: 'Иван Петрович',
-      pendingPrompt: { chatId: 111, messageId: 555, kind: 'edit_name' },
-    };
+      pendingPrompt: { chatId: 111, messageId: 555, kind: 'reply_visitor' },
+    });
 
     await say('BMW X5');
 
-    expect(store.leads[0].name).toBe('Иван Петрович');
-    expect(store.leads[0].pendingPrompt?.kind).toBe('edit_name');
-    expect(store.leads[0].comment).toContain('Ищет: BMW X5');
-    expect(store.leads[0].capturePrompt?.step).toBe('budget');
+    expect(stored()[0].name).toBe('Иван Петрович');
+    expect(stored()[0].pendingPrompt?.kind).toBe('reply_visitor');
+    expect(stored()[0].comment).toContain('Ищет: BMW X5');
+    expect(stored()[0].capturePrompt?.step).toBe('budget');
   });
 });
 
 describe('the phone, asked first when nothing else can reach the visitor', () => {
   it('asks for the number through a share-contact button before anything else', async () => {
-    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    await begin(undefined, ANONYMOUS);
 
-    expect(lastSent()).toEqual([777, 'GREETING_ru\n\nPHONE_ASK']);
-    expect(lastExtra()).toEqual({
-      reply_markup: {
-        keyboard: [
-          [{ text: 'SHARE_NUMBER', request_contact: true }],
-          [{ text: 'SKIP' }],
-        ],
-        resize_keyboard: true,
-        one_time_keyboard: true,
-      },
+    expect(lastSent()).toEqual([777, 'PHONE_ASK']);
+    expect(lastMarkup()).toEqual({
+      keyboard: [
+        [{ text: 'SHARE_NUMBER', request_contact: true }],
+        [{ text: 'SKIP' }],
+      ],
+      resize_keyboard: true,
+      one_time_keyboard: true,
     });
   });
 
   it('makes the shared number the contact, ahead of the tg://user fallback', async () => {
-    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    await begin(undefined, ANONYMOUS);
 
     await POST(makeCtx(contactUpdate('381601234567')));
 
-    expect(store.leads[0].contact).toBe('+381601234567');
+    expect(stored()[0].contact).toBe('+381601234567');
     expect(lastSent()).toEqual([777, 'LOOKING_FOR']);
-    expect(lastExtra()).toEqual({ reply_markup: { remove_keyboard: true } });
+    expect(lastMarkup()).toEqual({ remove_keyboard: true });
   });
 
   it('keeps a number that already carries its plus sign', async () => {
-    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    await begin(undefined, ANONYMOUS);
 
     await POST(makeCtx(contactUpdate('+381601234567')));
 
-    expect(store.leads[0].contact).toBe('+381601234567');
+    expect(stored()[0].contact).toBe('+381601234567');
   });
 
   it('carries on through the questions after the number', async () => {
-    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    await begin(undefined, ANONYMOUS);
     await POST(makeCtx(contactUpdate('381601234567')));
 
     await say('Golf 7', ANONYMOUS);
@@ -549,55 +1032,55 @@ describe('the phone, asked first when nothing else can reach the visitor', () =>
 
     await say('10 000', ANONYMOUS);
     expect(lastSent()).toEqual([777, 'THANKS']);
-    expect(store.leads[0].capturePrompt).toBeNull();
+    expect(stored()[0].capturePrompt).toBeNull();
   });
 
   it('moves on when the visitor declines, keeping the Lead reachable by bot', async () => {
-    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    await begin(undefined, ANONYMOUS);
 
     await say('SKIP', ANONYMOUS);
 
-    expect(store.leads[0].contact).toBe('tg://user?id=777');
-    expect(store.leads[0].capturePrompt?.step).toBe('looking_for');
+    expect(stored()[0].contact).toBe('tg://user?id=777');
+    expect(stored()[0].capturePrompt?.step).toBe('looking_for');
     expect(lastSent()).toEqual([777, 'LOOKING_FOR']);
   });
 });
 
 describe('the phone, offered last when the visitor has a handle', () => {
   it('comes after both questions, as a call offer', async () => {
-    await POST(makeCtx(startUpdate('ru')));
+    await begin();
     await say('BMW X5');
 
     await say('20 000');
 
     expect(lastSent()).toEqual([42, 'PHONE_OFFER']);
-    expect(store.leads[0].capturePrompt?.step).toBe('phone');
+    expect(stored()[0].capturePrompt?.step).toBe('phone');
   });
 
   it('puts a shared number in the comment and leaves the handle as the contact', async () => {
-    await POST(makeCtx(startUpdate('ru')));
+    await begin();
     await say('BMW X5');
     await say('20 000');
 
     await POST(makeCtx(contactUpdate('381601234567', HANDLED)));
 
-    expect(store.leads[0].contact).toBe('@ivan');
-    expect(store.leads[0].comment).toContain('Телефон: +381601234567');
-    expect(store.leads[0].capturePrompt).toBeNull();
+    expect(stored()[0].contact).toBe('@ivan');
+    expect(stored()[0].comment).toContain('Телефон: +381601234567');
+    expect(stored()[0].capturePrompt).toBeNull();
     expect(lastSent()).toEqual([42, 'THANKS']);
-    expect(lastExtra()).toEqual({ reply_markup: { remove_keyboard: true } });
+    expect(lastMarkup()).toEqual({ remove_keyboard: true });
   });
 
   it('ends the dialog intact when the visitor declines the call', async () => {
-    await POST(makeCtx(startUpdate('ru')));
+    await begin();
     await say('BMW X5');
     await say('20 000');
 
     await say('SKIP');
 
-    expect(store.leads[0].contact).toBe('@ivan');
-    expect(store.leads[0].comment).not.toContain('Телефон');
-    expect(store.leads[0].capturePrompt).toBeNull();
+    expect(stored()[0].contact).toBe('@ivan');
+    expect(stored()[0].comment).not.toContain('Телефон');
+    expect(stored()[0].capturePrompt).toBeNull();
     expect(lastSent()).toEqual([42, 'THANKS']);
   });
 });
@@ -606,272 +1089,452 @@ describe('a contact shared outside the phone step', () => {
   it('is ignored when the visitor has no dialog open at all', async () => {
     await POST(makeCtx(contactUpdate('381601234567')));
 
-    expect(store.insertOrMergeLead).not.toHaveBeenCalled();
-    expect(bot.sendMessage).not.toHaveBeenCalled();
+    expect(stored()).toHaveLength(0);
+    expect(api.calls).toHaveLength(0);
+  });
+
+  it('still becomes the contact of the open Lead after the Questionnaire ended', async () => {
+    await begin(undefined, ANONYMOUS);
+    await tap('services:ru', ANONYMOUS);
+
+    await POST(makeCtx(contactUpdate('381601234567')));
+
+    expect(stored()[0]).toMatchObject({
+      contact: '+381601234567',
+      capturePrompt: null,
+    });
+    expect(adminNotes()).toEqual([
+      expect.stringContaining('Стало: +381601234567'),
+    ]);
+    expect(lastSent()).toEqual([777, 'RECEIVED']);
+  });
+});
+
+describe("someone else's contact card", () => {
+  const friend = (from: Record<string, unknown> = ANONYMOUS) => {
+    const update = contactUpdate('381609999999', from);
+    return {
+      ...update,
+      message: {
+        ...update.message,
+        contact: { phone_number: '381609999999', user_id: 999 },
+      },
+    };
+  };
+
+  it('is not taken for the phone, and the phone question comes back', async () => {
+    await begin(undefined, ANONYMOUS);
+    api.reset();
+
+    await POST(makeCtx(friend()));
+
+    expect(stored()[0].contact).toBe('tg://user?id=777');
+    expect(stored()[0].capturePrompt?.step).toBe('phone');
+    expect(lastSent()).toEqual([777, 'PHONE_ASK']);
+  });
+
+  it('is not taken for the phone when the card carries no user at all', async () => {
+    await begin(undefined, ANONYMOUS);
+    const update = contactUpdate('381609999999');
+
+    await POST(
+      makeCtx({
+        ...update,
+        message: { ...update.message, contact: { phone_number: '1' } },
+      }),
+    );
+
+    expect(stored()[0].contact).toBe('tg://user?id=777');
+  });
+
+  it('is ignored outside a dialog', async () => {
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    api.reset();
+
+    await POST(makeCtx(friend()));
+
+    expect(stored()[0].contact).toBe('tg://user?id=777');
+    expect(api.calls).toHaveLength(0);
   });
 });
 
 describe('a visitor who presses Start again', () => {
-  const HOUR = 60 * 60 * 1000;
-
   it('continues the open Lead within the hour instead of capturing again', async () => {
-    await POST(makeCtx(startUpdate('ru')));
+    await begin();
     await say('BMW X5');
-    store.insertOrMergeLead.mockClear();
 
     await POST(makeCtx(startUpdate('ru')));
 
-    expect(store.insertOrMergeLead).not.toHaveBeenCalled();
-    expect(store.leads).toHaveLength(1);
+    expect(stored()).toHaveLength(1);
     expect(lastSent()).toEqual([42, 'BUDGET']);
   });
 
-  it('says nothing new when the dialog it rejoins is already done', async () => {
-    await POST(makeCtx(startUpdate('ru')));
+  it('opens the menu without a greeting when the dialog it rejoins is already done', async () => {
+    await begin();
     await say('BMW X5');
     await say('20 000');
     await say('SKIP');
 
     await POST(makeCtx(startUpdate('ru')));
 
-    expect(store.leads).toHaveLength(1);
-    expect(lastSent()).toEqual([42, 'THANKS']);
+    expect(stored()).toHaveLength(1);
+    expect(lastSent()).toEqual([42, 'MENU']);
+    expect(lastMarkup()).toEqual(MENU_KEYBOARD);
   });
 
-  it('starts a fresh enquiry once the hour has passed', async () => {
-    await POST(makeCtx(startUpdate('ru')));
-    store.leads[0] = {
-      ...store.leads[0],
-      createdAt: new Date(Date.now() - HOUR - 1000).toISOString(),
-    };
+  it('opens the card the new tile names, in the language of the open Lead', async () => {
+    await POST(makeCtx(startUpdate('sr')));
 
     await POST(makeCtx(startUpdate('vehicle-import_en')));
 
-    expect(store.leads).toHaveLength(2);
-    expect(store.leads[1].service).toBe('vehicle-import');
-    expect(lastSent()).toEqual([42, 'GREETING_en\n\nLOOKING_FOR']);
+    expect(stored()).toHaveLength(1);
+    expect(stored()[0]).toMatchObject({
+      service: 'vehicle-import',
+      services: ['vehicle-import'],
+      locale: 'sr',
+    });
+    expect(lastSent()[1]).toContain('CARD_vehicle-import_sr');
+    expect(adminNotes()).toEqual([
+      expect.stringContaining('Стало: vehicle-import'),
+    ]);
+  });
+
+  it('ends a running Questionnaire for the card the new tile names', async () => {
+    await begin();
+    await say('BMW X5');
+
+    await POST(makeCtx(startUpdate('vehicle-import_ru')));
+
+    expect(stored()).toHaveLength(1);
+    expect(stored()[0]).toMatchObject({
+      service: 'vehicle-import',
+      capturePrompt: null,
+    });
+    expect(lastSent()[1]).toContain('CARD_vehicle-import_ru');
+  });
+
+  it('takes the share-contact keyboard away when the tile ends the phone step', async () => {
+    await begin(undefined, ANONYMOUS);
+    api.reset();
+
+    await POST(makeCtx(startUpdate('vehicle-import_ru', ANONYMOUS)));
+
+    expect(replies()[0]).toMatchObject({
+      chat_id: 777,
+      reply_markup: { remove_keyboard: true },
+    });
+    expect(api.callsTo('deleteMessage', CAPTURE_TOKEN)).toHaveLength(1);
+    expect(lastSent()[1]).toContain('CARD_vehicle-import_ru');
+  });
+
+  it('marks a referral from the Approved bot on the open Lead, once', async () => {
+    await POST(makeCtx(startUpdate('sr')));
+
+    await POST(makeCtx(startUpdate('from-approved_sr')));
+    await POST(makeCtx(startUpdate('from-approved_sr')));
+
+    expect(stored()).toHaveLength(1);
+    expect(stored()[0]).toMatchObject({
+      referredBy: 'approved',
+      comment: 'Пришёл из бота Approved.rs (Партнёры)',
+    });
+    expect(lastSent()).toEqual([42, 'MENU']);
+  });
+
+  it('starts a fresh enquiry once the hour has passed', async () => {
+    await begin();
+    abandon(1);
+
+    await POST(makeCtx(startUpdate('vehicle-import_en')));
+
+    expect(stored()).toHaveLength(2);
+    expect(stored()[1].service).toBe('vehicle-import');
+    expect(lastSent()[1]).toMatch(/^GREETING_en\n\n<b>CARD_vehicle-import_en/);
   });
 
   it('skips the greeting and brings the share-contact keyboard back', async () => {
-    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
-    bot.sendMessage.mockClear();
+    await begin(undefined, ANONYMOUS);
+    api.reset();
 
     await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
 
-    expect(store.leads).toHaveLength(1);
+    expect(stored()).toHaveLength(1);
     expect(lastSent()).toEqual([777, 'PHONE_ASK']);
-    expect(lastExtra()).toHaveProperty('reply_markup.keyboard');
+    expect(lastMarkup()).toHaveProperty('keyboard');
   });
 });
 
 describe('free text outside the dialog', () => {
   it('lands on the open Lead and refreshes the card', async () => {
-    await POST(makeCtx(startUpdate('ru')));
+    await begin();
     await say('BMW X5');
     await say('20 000');
     await say('SKIP');
-    ensureLeadCard.mockClear();
+    api.reset();
 
     await say('а можно в рассрочку?');
 
-    expect(store.leads).toHaveLength(1);
-    expect(store.leads[0].comment).toContain('Сообщение: а можно в рассрочку?');
-    expect(ensureLeadCard).toHaveBeenCalledTimes(1);
+    expect(stored()).toHaveLength(1);
+    expect(stored()[0].comment).toContain('Сообщение: а можно в рассрочку?');
+    expect(cardEdits()).toHaveLength(1);
     expect(lastSent()).toEqual([42, 'RECEIVED']);
   });
 
   it('leaves a dialog that is still running alone', async () => {
-    await POST(makeCtx(startUpdate('ru')));
+    await begin();
     await say('BMW X5');
 
-    expect(store.leads[0].comment).not.toContain('Сообщение');
-    expect(store.leads[0].capturePrompt?.step).toBe('budget');
+    expect(stored()[0].comment).not.toContain('Сообщение');
+    expect(stored()[0].capturePrompt?.step).toBe('budget');
   });
 
   it('opens a new enquiry when the visitor has no open Lead', async () => {
     await say('привет, ищу машину');
 
-    expect(store.insertOrMergeLead).toHaveBeenCalledTimes(1);
-    expect(store.leads[0].comment).toBe('Сообщение: привет, ищу машину');
-    expect(lastSent()).toEqual([42, 'GREETING_ru\n\nLOOKING_FOR']);
+    expect(stored()).toHaveLength(1);
+    expect(stored()[0].comment).toBe('Сообщение: привет, ищу машину');
+    expect(stored()[0].capturePrompt).toBeNull();
+    expect(lastSent()).toEqual([42, 'GREETING_ru\n\nMENU']);
+    expect(lastMarkup()).toEqual(MENU_KEYBOARD);
   });
 
-  it('opens a new enquiry when the only Lead is archived', async () => {
-    await POST(makeCtx(startUpdate('ru')));
+  it('opens a new enquiry when the open Lead is older than the hour', async () => {
+    await begin();
     await say('BMW X5');
     await say('20 000');
     await say('SKIP');
-    store.leads[0] = { ...store.leads[0], archived: true };
+    abandon(1);
+
+    await say('я снова ищу машину');
+
+    expect(stored()).toHaveLength(2);
+    expect(stored()[0].comment).not.toContain('я снова ищу машину');
+    expect(stored()[1].comment).toBe('Сообщение: я снова ищу машину');
+    expect(lastSent()).toEqual([42, 'GREETING_ru\n\nMENU']);
+  });
+
+  it('resumes the Lead when the owner replied within the hour, two hours after the visitor', async () => {
+    await begin();
+    await say('BMW X5');
+    await say('20 000');
+    await say('SKIP');
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    editLead(1, {
+      createdAt: twoHoursAgo,
+      visitorActiveAt: twoHoursAgo,
+      lastActivityAt: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
+    });
+
+    await say('спасибо, жду звонка');
+
+    expect(stored()).toHaveLength(1);
+    expect(stored()[0].comment).toContain('Сообщение: спасибо, жду звонка');
+  });
+
+  it('opens a new enquiry when the owner went quiet over the hour too', async () => {
+    await begin();
+    await say('BMW X5');
+    await say('20 000');
+    await say('SKIP');
+    abandon(1);
+    editLead(1, {
+      lastActivityAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    });
+
+    await say('я снова ищу машину');
+
+    expect(stored()).toHaveLength(2);
+  });
+
+  it('opens a new enquiry when the only Lead is lost', async () => {
+    await begin();
+    await say('BMW X5');
+    await say('20 000');
+    await say('SKIP');
+    editLead(1, { status: 'lost' });
 
     await say('я вернулся');
 
-    expect(store.leads).toHaveLength(2);
+    expect(stored()).toHaveLength(2);
   });
 
   it('still records the message when the Lead vanishes mid-write', async () => {
-    await POST(makeCtx(startUpdate('ru')));
+    await begin();
     await say('BMW X5');
     await say('20 000');
     await say('SKIP');
-    store.updateCapture.mockResolvedValueOnce(undefined);
+    vanishOnNextWrite();
 
     await say('ещё вопрос');
 
-    expect(ensureLeadCard).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 1 }),
-    );
+    expect(cardEdits().at(-1)?.text).toContain('Заявка #1');
     expect(lastSent()).toEqual([42, 'RECEIVED']);
   });
 });
 
 describe("the same person tapping another brand's tile", () => {
   it("opens its own Lead instead of resuming the sister brand's", async () => {
-    store.leads.push(
-      storedLead(
-        {
-          brand: 'CarLab',
-          name: 'Иван Петров',
-          contact: '@ivan',
-          service: '',
-          locale: 'ru',
-          comment: null,
-          country: null,
-          source_url: null,
-          visitorId: null,
-          contactChannel: 'telegram',
-          kind: 'lead',
-          telegramId: 42,
-          capturePrompt: { chatId: 42, step: 'looking_for' },
-        },
-        1,
-      ),
-    );
+    await leadStore.insertLead(sisterLead());
 
-    await POST(makeCtx(startUpdate('vehicle-sourcing_ru')));
+    await POST(makeCtx(startUpdate('ru')));
 
-    expect(store.leads).toHaveLength(2);
-    expect(store.leads[1]).toMatchObject({ brand: BRAND, telegramId: 42 });
-    expect(lastSent()).toEqual([42, 'GREETING_ru\n\nLOOKING_FOR']);
+    expect(stored()).toHaveLength(2);
+    expect(stored()[1]).toMatchObject({ brand: BRAND, telegramId: 42 });
+    expect(lastSent()).toEqual([42, 'GREETING_ru\n\nMENU']);
   });
 
   it("answers onto its own Lead, never the sister brand's", async () => {
-    store.leads.push(
-      storedLead(
-        {
-          brand: 'CarLab',
-          name: 'Иван Петров',
-          contact: '@ivan',
-          service: '',
-          locale: 'ru',
-          comment: null,
-          country: null,
-          source_url: null,
-          visitorId: null,
-          contactChannel: 'telegram',
-          kind: 'lead',
-          telegramId: 42,
-          capturePrompt: { chatId: 42, step: 'looking_for' },
-        },
-        1,
-      ),
-    );
-    await POST(makeCtx(startUpdate('ru')));
+    await leadStore.insertLead(sisterLead());
+    await begin();
 
     await say('BMW X5');
 
-    expect(store.leads[0].comment).toBeNull();
-    expect(store.leads[1].comment).toContain('Ищет: BMW X5');
+    expect(stored()[0].comment).toBeNull();
+    expect(stored()[1].comment).toContain('Ищет: BMW X5');
   });
 });
 
 describe('a second enquiry once the hour has passed', () => {
-  const HOUR = 60 * 60 * 1000;
-
   it('puts the answers on the new Lead, not the one left open', async () => {
-    await POST(makeCtx(startUpdate('ru')));
-    store.leads[0] = {
-      ...store.leads[0],
-      createdAt: new Date(Date.now() - HOUR - 1000).toISOString(),
-    };
-    await POST(makeCtx(startUpdate('vehicle-import_ru')));
+    await begin();
+    abandon(1);
+    await begin('vehicle-import_ru');
 
     await say('Golf 7');
 
-    expect(store.leads).toHaveLength(2);
-    expect(store.leads[0].comment).toBeNull();
-    expect(store.leads[1].comment).toContain('Ищет: Golf 7');
-    expect(store.leads[1].capturePrompt?.step).toBe('budget');
+    expect(stored()).toHaveLength(2);
+    expect(stored()[0].comment).toBeNull();
+    expect(stored()[1].comment).toContain('Ищет: Golf 7');
+    expect(stored()[1].capturePrompt?.step).toBe('budget');
+  });
+
+  it('files the next text on the Lead /start opened, not the abandoned dialog', async () => {
+    await begin();
+    abandon(1);
+    await POST(makeCtx(startUpdate('ru')));
+
+    await say('Golf 7');
+
+    expect(stored()[0]).toMatchObject({ comment: null, capturePrompt: null });
+    expect(stored()[1].comment).toBe('Сообщение: Golf 7');
+    expect(lastSent()).toEqual([42, 'RECEIVED']);
+  });
+
+  it('files a shared number on the Lead /start opened too', async () => {
+    await begin(undefined, ANONYMOUS);
+    abandon(1);
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+
+    await POST(makeCtx(contactUpdate('381601234567')));
+
+    expect(stored()[0].contact).toBe('tg://user?id=777');
+    expect(stored()[1].contact).toBe('+381601234567');
+  });
+
+  it('lets an abandoned dialog expire instead of capturing new free text', async () => {
+    await begin();
+    abandon(1);
+
+    await say('Golf 7');
+
+    expect(stored()).toHaveLength(2);
+    expect(stored()[0]).toMatchObject({ comment: null, capturePrompt: null });
+    expect(stored()[1].comment).toBe('Сообщение: Golf 7');
+  });
+
+  it('ends the abandoned dialog when a request opens the new Lead', async () => {
+    await begin();
+    abandon(1);
+
+    await tap('request:ru:vehicle-import');
+
+    expect(stored()[0].capturePrompt).toBeNull();
+    expect(stored()[1].capturePrompt).toEqual({
+      chatId: 42,
+      step: 'looking_for',
+    });
+  });
+
+  it('keeps a dialog that is older than the hour but still being answered', async () => {
+    await begin();
+    editLead(1, {
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    });
+    await say('BMW X5');
+
+    await POST(makeCtx(startUpdate('ru')));
+
+    expect(stored()).toHaveLength(1);
+    expect(lastSent()).toEqual([42, 'BUDGET']);
   });
 
   it('leaves a closed Lead out of the lookup entirely', async () => {
-    await POST(makeCtx(startUpdate('ru')));
-    store.leads[0] = { ...store.leads[0], status: 'won' };
+    await begin();
+    editLead(1, { status: 'won' });
 
     await say('ещё одна машина');
 
-    expect(store.leads).toHaveLength(2);
-    expect(store.leads[1].comment).toBe('Сообщение: ещё одна машина');
+    expect(stored()).toHaveLength(2);
+    expect(stored()[1].comment).toBe('Сообщение: ещё одна машина');
   });
 });
 
 describe('a question typed instead of sharing a number', () => {
   it('reaches the card and the dialog carries on', async () => {
-    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    await begin(undefined, ANONYMOUS);
 
     await say('сколько стоит?', ANONYMOUS);
 
-    expect(store.leads[0].comment).toBe('Сообщение: сколько стоит?');
-    expect(store.leads[0].contact).toBe('tg://user?id=777');
-    expect(store.leads[0].capturePrompt?.step).toBe('looking_for');
+    expect(stored()[0].comment).toBe('Сообщение: сколько стоит?');
+    expect(stored()[0].contact).toBe('tg://user?id=777');
+    expect(stored()[0].capturePrompt?.step).toBe('looking_for');
     expect(lastSent()).toEqual([777, 'LOOKING_FOR']);
   });
 
   it('reaches the card when the call offer comes last too', async () => {
-    await POST(makeCtx(startUpdate('ru')));
+    await begin();
     await say('BMW X5');
     await say('20 000');
 
     await say('а в рассрочку можно?');
 
-    expect(store.leads[0].comment).toContain('Сообщение: а в рассрочку можно?');
-    expect(store.leads[0].capturePrompt).toBeNull();
+    expect(stored()[0].comment).toContain('Сообщение: а в рассрочку можно?');
+    expect(stored()[0].capturePrompt).toBeNull();
     expect(lastSent()).toEqual([42, 'THANKS']);
   });
 });
 
 describe('a number shared while another question is open', () => {
   it('records it, keeps the dialog where it was and says it arrived', async () => {
-    await POST(makeCtx(startUpdate('ru')));
+    await begin();
 
     await POST(makeCtx(contactUpdate('381601234567', HANDLED)));
 
-    expect(store.leads[0].comment).toBe('Телефон: +381601234567');
-    expect(store.leads[0].contact).toBe('@ivan');
-    expect(store.leads[0].capturePrompt?.step).toBe('looking_for');
+    expect(stored()[0].comment).toBe('Телефон: +381601234567');
+    expect(stored()[0].contact).toBe('@ivan');
+    expect(stored()[0].capturePrompt?.step).toBe('looking_for');
     expect(lastSent()).toEqual([42, 'RECEIVED']);
   });
 
   it('becomes the contact when the visitor has no handle', async () => {
-    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    await begin(undefined, ANONYMOUS);
     await say('SKIP', ANONYMOUS);
 
     await POST(makeCtx(contactUpdate('381601234567')));
 
-    expect(store.leads[0].contact).toBe('+381601234567');
-    expect(store.leads[0].capturePrompt?.step).toBe('looking_for');
+    expect(stored()[0].contact).toBe('+381601234567');
+    expect(stored()[0].capturePrompt?.step).toBe('looking_for');
     expect(lastSent()).toEqual([777, 'RECEIVED']);
   });
 
   it('still refreshes the card when the write finds nothing', async () => {
-    await POST(makeCtx(startUpdate('ru')));
-    store.updateCapture.mockResolvedValueOnce(undefined);
-    ensureLeadCard.mockClear();
+    await begin();
+    vanishOnNextWrite();
+    api.reset();
 
     await POST(makeCtx(contactUpdate('381601234567', HANDLED)));
 
-    expect(ensureLeadCard).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 1 }),
-    );
+    expect(cardEdits().at(-1)?.text).toContain('Заявка #1');
   });
 });
 
@@ -879,63 +1542,649 @@ describe('a visitor who already handed over a number', () => {
   const HOUR = 60 * 60 * 1000;
 
   const ageOut = () => {
-    store.leads[0] = {
-      ...store.leads[0],
+    editLead(1, {
       createdAt: new Date(Date.now() - HOUR - 1000).toISOString(),
       status: 'won',
-    };
+    });
   };
 
   it('is not asked for it again and keeps it as the contact', async () => {
-    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    await begin(undefined, ANONYMOUS);
     await POST(makeCtx(contactUpdate('381601234567')));
     ageOut();
 
-    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    await begin(undefined, ANONYMOUS);
 
-    expect(store.leads[1].contact).toBe('+381601234567');
-    expect(store.leads[1].capturePrompt?.step).toBe('looking_for');
-    expect(lastSent()).toEqual([777, 'GREETING_ru\n\nLOOKING_FOR']);
-    expect(lastExtra()).toBeUndefined();
+    expect(stored()[1].contact).toBe('+381601234567');
+    expect(stored()[1].capturePrompt?.step).toBe('looking_for');
+    expect(lastSent()).toEqual([777, 'LOOKING_FOR']);
+    expect(lastMarkup()).toBeUndefined();
   });
 
   it('answers the rest of the dialog from there', async () => {
-    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    await begin(undefined, ANONYMOUS);
     await POST(makeCtx(contactUpdate('381601234567')));
     ageOut();
-    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    await begin(undefined, ANONYMOUS);
 
     await say('Golf 7', ANONYMOUS);
     await say('10 000', ANONYMOUS);
 
-    expect(store.leads[1].comment).toBe('Ищет: Golf 7\nБюджет: 10 000');
-    expect(store.leads[1].capturePrompt).toBeNull();
+    expect(stored()[1].comment).toBe('Ищет: Golf 7\nБюджет: 10 000');
+    expect(stored()[1].capturePrompt).toBeNull();
     expect(lastSent()).toEqual([777, 'THANKS']);
   });
 
   it('leaves a sender with a handle on their handle', async () => {
-    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    await begin(undefined, ANONYMOUS);
     await POST(makeCtx(contactUpdate('381601234567')));
     ageOut();
 
-    await POST(makeCtx(startUpdate('ru', { ...HANDLED, id: ANONYMOUS.id })));
+    await begin(undefined, { ...HANDLED, id: ANONYMOUS.id });
 
-    expect(store.leads[1].contact).toBe('@ivan');
-    expect(store.leads[1].capturePrompt?.step).toBe('looking_for');
+    expect(stored()[1].contact).toBe('@ivan');
+    expect(stored()[1].capturePrompt?.step).toBe('looking_for');
   });
 });
 
-describe('captureStore', () => {
-  it('hands the route the write surface and nothing else', () => {
-    const full = { ...makeStore(), readLeads: vi.fn(), deleteLead: vi.fn() };
-    const narrowed = captureStore(full as unknown as LeadStore);
+describe('the admin hearing about every change the visitor makes', () => {
+  const VIA_BOT = '🤖 Посетитель через бота';
 
-    expect(Object.keys(narrowed).sort()).toEqual([
-      'findByCapturePrompt',
-      'findOpenLeadByTelegramId',
-      'findPhoneByTelegramId',
-      'insertOrMergeLead',
-      'updateCapture',
+  it('gets one contact change per admin when a phone is shared', async () => {
+    await begin(undefined, ANONYMOUS);
+
+    await POST(makeCtx(contactUpdate('381601234567')));
+
+    for (const id of ADMIN_IDS)
+      expect(adminNotes(id)).toEqual([
+        [
+          '✏️ Заявка #1 Лена: контакт',
+          VIA_BOT,
+          '',
+          'Было: tg://user?id=777',
+          'Стало: +381601234567',
+        ].join('\n'),
+      ]);
+  });
+
+  it('gets one comment change for each Questionnaire answer', async () => {
+    await begin();
+
+    await say('BMW X5');
+    await say('20 000');
+    await POST(makeCtx(contactUpdate('381601234567', HANDLED)));
+
+    const notes = adminNotes();
+    expect(notes).toHaveLength(3);
+    expect(notes.every((n) => n.includes(': комментарий\n' + VIA_BOT))).toBe(
+      true,
+    );
+    expect(notes[0]).toContain('Стало: Ищет: BMW X5');
+    expect(notes[1]).toContain('Было: Ищет: BMW X5');
+    expect(notes[2]).toContain('Телефон: +381601234567');
+  });
+
+  it('gets one for each free-form message on an open Lead', async () => {
+    await begin();
+    await say('BMW X5');
+    await say('20 000');
+    await say('SKIP');
+    api.reset();
+
+    await say('а можно в рассрочку?');
+    await say('и ещё вопрос');
+
+    const notes = adminNotes();
+    expect(notes).toHaveLength(2);
+    expect(notes[0]).toContain('Сообщение: а можно в рассрочку?');
+    expect(notes[1]).toContain('Сообщение: и ещё вопрос');
+  });
+
+  it('hears what the bot hand-off changed on the click it merged into', async () => {
+    await leadStore.insertOrMergeLead({
+      brand: BRAND,
+      name: '',
+      contact: '—',
+      service: '',
+      contactChannel: 'telegram',
+      comment: null,
+      country: null,
+      source_url: 'https://example.test/ru/',
+      visitorId: '0f8fad5b-d9cb-469f-a165-70867728950e',
+      locale: 'ru',
+      kind: 'call_click',
+    });
+    api.reset();
+
+    await POST(
+      makeCtx(
+        startUpdate('vehicle-import_ru_0f8fad5bd9cb469fa16570867728950e'),
+      ),
+    );
+
+    expect(stored()).toHaveLength(1);
+    const notes = adminNotes();
+    expect(notes).toEqual([
+      expect.stringContaining('Было: —\nСтало: @ivan'),
+      expect.stringContaining('Стало: vehicle-import'),
     ]);
+    expect(notes.every((n) => n.includes(VIA_BOT))).toBe(true);
+  });
+
+  it('hears nothing when the visitor declines the phone', async () => {
+    await begin(undefined, ANONYMOUS);
+
+    await say('SKIP', ANONYMOUS);
+
+    expect(adminNotes()).toEqual([]);
+  });
+
+  it('hears nothing when the Lead vanished before the write', async () => {
+    await begin();
+    vanishOnNextWrite();
+
+    await say('BMW X5');
+
+    expect(adminNotes()).toEqual([]);
+  });
+});
+
+describe('the Contacts screen', () => {
+  it('sends the workshop as a venue, then hours, phone and site', async () => {
+    POST = route(SECRET, {
+      contacts: {
+        phone: '381601234567',
+        site: 'https://carlab.test',
+        venue: WORKSHOP,
+      },
+    });
+    await POST(makeCtx(startUpdate()));
+    api.reset();
+
+    await tap('contacts:ru');
+
+    expect(
+      api.callsTo('sendVenue', CAPTURE_TOKEN).map((c) => c.payload),
+    ).toEqual([
+      expect.objectContaining({
+        chat_id: 42,
+        latitude: 44.8054581,
+        longitude: 20.4858424,
+        title: 'CarLab',
+        address: 'Jovana Ćirilova 23a, Beograd',
+      }),
+    ]);
+    expect(lastSent()).toEqual([
+      42,
+      'REACH_US\n\nHOURS\n+381 60 1234567\nhttps://carlab.test',
+    ]);
+    expect(lastMarkup()).toEqual({
+      inline_keyboard: [[{ text: 'BACK', callback_data: 'menu:ru' }]],
+    });
+  });
+
+  it('sends no venue for a brand without a workshop', async () => {
+    await POST(makeCtx(startUpdate()));
+    api.reset();
+
+    await tap('contacts:en');
+
+    expect(api.callsTo('sendVenue', CAPTURE_TOKEN)).toEqual([]);
+    expect(lastSent()).toEqual([
+      42,
+      'REACH_US\n\nHOURS\n+381 60 1234567\nhttps://example.test',
+    ]);
+  });
+
+  it('ends a running Questionnaire', async () => {
+    await begin();
+
+    await tap('contacts:ru');
+
+    expect(stored()[0].capturePrompt).toBeNull();
+  });
+});
+
+describe('talking to a manager', () => {
+  it('asks for the question and ends a running Questionnaire', async () => {
+    await begin();
+    api.reset();
+
+    await tap('manager:ru');
+
+    expect(edits()).toEqual([
+      expect.objectContaining({
+        text: 'WRITE_YOUR_QUESTION',
+        reply_markup: {
+          inline_keyboard: [[{ text: 'BACK', callback_data: 'menu:ru' }]],
+        },
+      }),
+    ]);
+    expect(stored()[0].capturePrompt).toBeNull();
+  });
+
+  it('stores the next message on the Lead and tells the admin', async () => {
+    await begin();
+    await tap('manager:ru');
+    api.reset();
+
+    await say('BMW X5');
+
+    expect(stored()[0].comment).toContain('Сообщение: BMW X5');
+    expect(stored()[0].comment).not.toContain('Ищет');
+    expect(adminNotes()).toEqual([
+      expect.stringContaining('Сообщение: BMW X5'),
+    ]);
+    expect(lastSent()).toEqual([42, 'RECEIVED']);
+  });
+});
+
+describe('the Partners screen', () => {
+  function partnerRoute() {
+    return route(SECRET, {
+      copy: () => COPY,
+      menu: ['services', 'partners'],
+      serviceCard: (slug) => ({ title: slug, lines: [], url: 'https://x/' }),
+      partners: (locale) => [
+        { name: 'CarLab', url: referralLink('CarLabRsBot', `${locale}-x`) },
+      ],
+    });
+  }
+
+  it('sits in the menu where the brand enables it', async () => {
+    POST = partnerRoute();
+    await POST(makeCtx(startUpdate('en')));
+
+    expect(lastMarkup()).toEqual({
+      inline_keyboard: [
+        [{ text: 'SERVICES', callback_data: 'services:en' }],
+        [{ text: 'PARTNERS', callback_data: 'partners:en' }],
+      ],
+    });
+  });
+
+  it('opens the partner bots with a referral payload in the mapped locale', async () => {
+    POST = partnerRoute();
+    const writes = storage.writeAttempts();
+
+    await tap('partners:sr');
+
+    expect(edits()).toEqual([
+      expect.objectContaining({
+        text: 'PICK_A_PARTNER',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: 'CarLab',
+                url: 'https://t.me/CarLabRsBot?start=from-approved_sr-x',
+              },
+            ],
+            [{ text: 'BACK', callback_data: 'menu:sr' }],
+          ],
+        },
+      }),
+    ]);
+    expect(storage.writeAttempts()).toBe(writes);
+  });
+
+  it('does not open where the brand has no partners', async () => {
+    await tap('partners:ru');
+
+    expect(edits()).toHaveLength(0);
+  });
+});
+
+describe('a visitor referred by the Approved bot', () => {
+  it('lands on a Lead of the receiving brand that says where they came from', async () => {
+    await POST(makeCtx(startUpdate('from-approved_sr')));
+
+    expect(stored()[0]).toMatchObject({
+      brand: BRAND,
+      service: '',
+      locale: 'sr',
+      referredBy: 'approved',
+      comment: 'Пришёл из бота Approved.rs (Партнёры)',
+    });
+    expect(cards()).toEqual([
+      expect.objectContaining({
+        text: expect.stringContaining('🤝 из бота Approved.rs'),
+      }),
+    ]);
+    expect(lastSent()).toEqual([42, 'GREETING_sr\n\nMENU']);
+  });
+
+  it('is not marked by a visitor typing the referral note', async () => {
+    await say('Пришёл из бота Approved.rs (Партнёры)');
+
+    expect(stored()[0].referredBy).toBeNull();
+    expect(cards()[0].text).not.toContain('🤝');
+  });
+
+  it.each([
+    'from-approved_CarLab_sr',
+    'from-approved_brand-CarLab_sr',
+    'brand-CarLab_from-approved_sr',
+  ])('cannot be filed under another brand: %s', async (payload) => {
+    await POST(makeCtx(startUpdate(payload)));
+
+    expect(stored()[0]).toMatchObject({
+      brand: BRAND,
+    });
+  });
+
+  it('keeps the payload inside the Telegram limit with a visitor id on it', async () => {
+    const link = referralLink('CarLabRsBot', 'sr');
+    const payload = stampStartVisitor(
+      new URL(link).searchParams.get('start') ?? '',
+      '0f8fad5b-d9cb-469f-a165-70867728950e',
+    );
+
+    expect(payload).toMatch(/^[A-Za-z0-9_-]{1,64}$/);
+    await POST(makeCtx(startUpdate(payload ?? '')));
+    expect(stored()[0]).toMatchObject({
+      visitorId: '0f8fad5b-d9cb-469f-a165-70867728950e',
+      locale: 'sr',
+      comment: 'Пришёл из бота Approved.rs (Партнёры)',
+    });
+  });
+});
+
+describe("CarLab's Questionnaire: the car and what happened, then the phone", () => {
+  beforeEach(() => {
+    POST = route(SECRET, { questionnaire: ['car_issue', 'phone'] });
+  });
+
+  it('never asks for a budget', async () => {
+    await begin();
+    expect(lastSent()).toEqual([42, 'LOOKING_FOR']);
+
+    await say('Golf 2012, стучит подвеска');
+    expect(lastSent()).toEqual([42, 'PHONE_OFFER']);
+    expect(lastMarkup()).toHaveProperty('keyboard');
+
+    await say('SKIP');
+    expect(lastSent()).toEqual([42, 'THANKS']);
+    expect(replies().map((p) => p.text)).not.toContain('BUDGET');
+    expect(stored()[0]).toMatchObject({
+      comment: 'Машина и проблема: Golf 2012, стучит подвеска',
+      capturePrompt: null,
+    });
+    expect(adminNotes()).toEqual([
+      expect.stringContaining(
+        'Стало: Машина и проблема: Golf 2012, стучит подвеска',
+      ),
+    ]);
+  });
+});
+
+describe("Details' Questionnaire: the car, the service as buttons, then the phone", () => {
+  const PICKER = {
+    inline_keyboard: [
+      [
+        {
+          text: 'CARD_vehicle-sourcing_ru',
+          callback_data: 'pick:ru:vehicle-sourcing',
+        },
+      ],
+      [
+        {
+          text: 'CARD_vehicle-import_ru',
+          callback_data: 'pick:ru:vehicle-import',
+        },
+      ],
+    ],
+  };
+
+  beforeEach(() => {
+    POST = route(SECRET, {
+      questionnaire: ['car', 'service', 'phone'],
+      menu: ['services', 'request'],
+    });
+  });
+
+  async function beginFromMenu(from: Record<string, unknown> = HANDLED) {
+    await POST(makeCtx(startUpdate(undefined, from)));
+    await tap('request:ru', from);
+  }
+
+  it('offers Leave a request on the main menu', async () => {
+    await POST(makeCtx(startUpdate()));
+
+    expect(lastMarkup()).toEqual({
+      inline_keyboard: [
+        [{ text: 'SERVICES', callback_data: 'services:ru' }],
+        [{ text: 'REQUEST', callback_data: 'request:ru' }],
+      ],
+    });
+  });
+
+  it('asks for the service as buttons and files the tap as the service', async () => {
+    await beginFromMenu();
+    expect(lastSent()).toEqual([42, 'CAR']);
+
+    await say('Audi A6 2019');
+    expect(lastSent()).toEqual([42, 'WHICH_SERVICE']);
+    expect(lastMarkup()).toEqual(PICKER);
+    api.reset();
+
+    await tap('pick:ru:vehicle-import');
+
+    expect(stored()[0]).toMatchObject({
+      comment: 'Машина: Audi A6 2019',
+      service: 'vehicle-import',
+      services: ['vehicle-import'],
+      capturePrompt: { chatId: 42, step: 'phone' },
+    });
+    expect(adminNotes()).toEqual([
+      expect.stringContaining(': услуга\n🤖 Посетитель через бота'),
+    ]);
+    expect(lastSent()).toEqual([42, 'PHONE_OFFER']);
+    expect(edits()).toHaveLength(0);
+
+    await say('SKIP');
+    expect(lastSent()).toEqual([42, 'THANKS']);
+    expect(stored()[0].capturePrompt).toBeNull();
+  });
+
+  it('takes a typed service as an answer too', async () => {
+    await beginFromMenu();
+    await say('Audi A6 2019');
+
+    await say('полировка');
+
+    expect(stored()[0]).toMatchObject({
+      comment: 'Машина: Audi A6 2019\nУслуга: полировка',
+      service: '',
+      capturePrompt: { chatId: 42, step: 'phone' },
+    });
+  });
+
+  it('skips the service when the request came from a service card', async () => {
+    await begin();
+    expect(lastSent()).toEqual([42, 'CAR']);
+
+    await say('Audi A6 2019');
+
+    expect(lastSent()).toEqual([42, 'PHONE_OFFER']);
+    expect(replies().map((p) => p.text)).not.toContain('WHICH_SERVICE');
+  });
+
+  it('skips the service when the open Lead already has one', async () => {
+    await POST(makeCtx(startUpdate('vehicle-import_ru')));
+    await tap('request:ru');
+
+    await say('Audi A6 2019');
+
+    expect(stored()[0]).toMatchObject({
+      service: 'vehicle-import',
+      capturePrompt: { chatId: 42, step: 'phone' },
+    });
+  });
+
+  it('asks a visitor with no handle for the phone first, then the rest', async () => {
+    await beginFromMenu(ANONYMOUS);
+    expect(lastSent()).toEqual([777, 'PHONE_ASK']);
+
+    await POST(makeCtx(contactUpdate('381601234567')));
+    expect(lastSent()).toEqual([777, 'CAR']);
+    expect(lastMarkup()).toEqual({ remove_keyboard: true });
+
+    await say('Audi A6 2019', ANONYMOUS);
+    expect(lastSent()).toEqual([777, 'WHICH_SERVICE']);
+
+    await tap('pick:ru:vehicle-sourcing', ANONYMOUS);
+    expect(lastSent()).toEqual([777, 'THANKS']);
+    expect(stored()[0]).toMatchObject({
+      contact: '+381601234567',
+      service: 'vehicle-sourcing',
+      capturePrompt: null,
+    });
+  });
+
+  it('ignores a service tap outside the service question', async () => {
+    await beginFromMenu();
+    api.reset();
+
+    await tap('pick:ru:vehicle-import');
+    await say('Audi A6 2019');
+    await tap('pick:ru:no-such-service');
+
+    expect(stored()[0]).toMatchObject({
+      service: '',
+      capturePrompt: { chatId: 42, step: 'service' },
+    });
+    expect(replies().map((p) => p.text)).toEqual(['WHICH_SERVICE']);
+  });
+
+  it('ignores a request for a service it does not offer', async () => {
+    await tap('request:ru:no-such-service');
+
+    expect(stored()).toHaveLength(0);
+    expect(replies()).toHaveLength(0);
+  });
+
+  it('finishes a step left over from an older Questionnaire', async () => {
+    await beginFromMenu();
+    editLead(1, { capturePrompt: { chatId: 42, step: 'budget' } });
+
+    await say('20 000');
+
+    expect(lastSent()).toEqual([42, 'THANKS']);
+    expect(stored()[0]).toMatchObject({
+      comment: 'Бюджет: 20 000',
+      capturePrompt: null,
+    });
+  });
+});
+
+describe('switching the language', () => {
+  it('offers every locale the site serves on /lang, in the Telegram language, writing nothing', async () => {
+    await say('/lang', { ...HANDLED, language_code: 'en' });
+
+    expect(stored()).toHaveLength(0);
+    expect(lastSent()).toEqual([42, 'PICK_A_LANGUAGE']);
+    expect(lastMarkup()).toEqual({
+      inline_keyboard: [
+        [{ text: 'Русский', callback_data: 'locale:ru:menu' }],
+        [{ text: 'English', callback_data: 'locale:en:menu' }],
+        [{ text: 'Srpski', callback_data: 'locale:sr:menu' }],
+        [{ text: 'Español', callback_data: 'locale:es:menu' }],
+        [{ text: 'Deutsch', callback_data: 'locale:de:menu' }],
+        [{ text: 'BACK', callback_data: 'menu:en' }],
+      ],
+    });
+  });
+
+  it('opens the picker in place from a menu button, aimed back at the menu', async () => {
+    await tap('language:sr');
+
+    expect(edits()[0]).toMatchObject({
+      text: 'PICK_A_LANGUAGE',
+      reply_markup: {
+        inline_keyboard: expect.arrayContaining([
+          [{ text: 'English', callback_data: 'locale:en:menu' }],
+          [{ text: 'BACK', callback_data: 'menu:sr' }],
+        ]),
+      },
+    });
+  });
+
+  it('re-renders the screen the visitor was on in the new locale', async () => {
+    await tap('language:ru:services');
+    expect(edits()[0].reply_markup).toMatchObject({
+      inline_keyboard: expect.arrayContaining([
+        [{ text: 'Deutsch', callback_data: 'locale:de:services' }],
+        [{ text: 'BACK', callback_data: 'services:ru' }],
+      ]),
+    });
+
+    await tap('locale:de:services');
+
+    expect(edits().at(-1)).toMatchObject({
+      text: 'PICK_A_SERVICE',
+      reply_markup: {
+        inline_keyboard: expect.arrayContaining([
+          [{ text: 'BACK', callback_data: 'menu:de' }],
+        ]),
+      },
+    });
+  });
+
+  it('brings a service card back with its service', async () => {
+    await tap('locale:es:service-vehicle-import');
+
+    expect(edits()[0].text).toContain('<b>CARD_vehicle-import_es</b>');
+  });
+
+  it('keeps every switch button under the 64-byte callback limit', async () => {
+    await tap('language:ru:service-vehicle-sourcing');
+
+    const data = (
+      edits()[0].reply_markup as {
+        inline_keyboard: { callback_data: string }[][];
+      }
+    ).inline_keyboard.flat();
+    for (const { callback_data } of data)
+      expect(
+        new TextEncoder().encode(callback_data).length,
+      ).toBeLessThanOrEqual(64);
+  });
+
+  it.each(['locale:fr:menu', 'locale:en', 'locale:en:request-vehicle-import'])(
+    'ignores a switch it cannot carry out: %s',
+    async (data) => {
+      await tap(data);
+
+      expect(edits()).toHaveLength(0);
+      expect(stored()).toHaveLength(0);
+    },
+  );
+
+  it('moves an open Lead to the new locale, and later messages follow it', async () => {
+    await begin('vehicle-sourcing_ru');
+
+    await tap('locale:sr:menu');
+
+    expect(stored()[0].locale).toBe('sr');
+    expect(stored()[0].capturePrompt).toBeNull();
+    expect(cards()).toHaveLength(1);
+    expect(adminNotes()).toHaveLength(0);
+
+    await say('/menu', { ...HANDLED, language_code: 'en' });
+
+    expect(lastMarkup()).toEqual({
+      inline_keyboard: [[{ text: 'SERVICES', callback_data: 'services:sr' }]],
+    });
+  });
+
+  it('leaves a Lead already in that locale untouched', async () => {
+    await POST(makeCtx(startUpdate('en')));
+    const writes = storage.writeAttempts();
+
+    await tap('locale:en:menu');
+
+    expect(storage.writeAttempts()).toBe(writes);
+    expect(edits()).toHaveLength(1);
   });
 });

@@ -92,12 +92,10 @@ Connect the same Blob store to all three Vercel projects.
 
 **A lead captured for a sister brand is stored as that brand's.** approved.rs's
 partner block can open its own form for CarLab or Details, and
-`src/lib/notifyLead.ts` maps the partner service slug onto that brand's name and
-commission rate (`PARTNER_SERVICE` and `COMMISSION_PERCENT` in
-`packages/brands`) before the store sees the lead. So `brand` still means "whose
-lead this is", the per-brand rate is right from the start — a stored lead keeps
-the rate it was created with — and `source_url` is what says the visitor came
-from approved.rs. The visitor still cannot name a brand: they can only pick one
+`src/lib/notifyLead.ts` maps the partner service slug onto that brand's name
+(`PARTNER_SERVICE` in `packages/brands`) before the store sees the lead. So
+`brand` still means "whose lead this is", and `source_url` is what says the
+visitor came from approved.rs. The visitor still cannot name a brand: they can only pick one
 of the two partner slugs the page renders, and every other value falls through
 to approved.rs itself.
 
@@ -170,8 +168,9 @@ Approved's trust/verification semantics.
   script runs `vitest run --coverage`, so the threshold is enforced by CI
   rather than being decorative.
 - Packages are configured per business, never per hardcoded assumption:
-  the commission rate, the locale list, the storage key and the service labels
-  are all config. Operator-facing Russian bot copy is _not_ — it is the same
+  the locale list, the storage key and the service labels are all config. There
+  is no commission rate to configure: the owner states each Payout and the
+  system computes nothing (`docs/adr/0032-the-owner-states-the-payout.md`). Owner-facing Russian bot copy is _not_ — it is the same
   for every brand and lives in the package, contact-channel labels included
   (`CHANNEL_LABELS` in `packages/lead-crm/src/telegram/format.ts`, after three
   byte-identical copies of it sat in the apps' `crmBot.ts`).
@@ -259,7 +258,7 @@ Both new apps follow the same shape, and a third should too:
   slug now is the page, through a hidden `SERVICE_FIELD` input: the service
   pages, CarLab's cart (`parts-order`) and Details' work pages
   (`servicesApplied[0]`). Everywhere else — the modal, the contact page, the
-  homepage forms — a lead carries no service **by design**, and the operator
+  homepage forms — a lead carries no service **by design**, and the owner
   card renders `—` for it with the visited page on the `Страница:` line. A
   contact click renders `Клик: <канал>` instead: the click has a channel worth
   naming, a form lead does not. The
@@ -337,7 +336,7 @@ Both new apps follow the same shape, and a third should too:
   with `readStartVisitor` from the same module, so the wire format has one
   owner. The bot then goes through `insertOrMergeLead`, which lets a Lead
   carrying a `telegramId` absorb only a placeholder click, never a form the
-  visitor already sent — that is how the operator card gets a `Страница:` line,
+  visitor already sent — that is how the owner card gets a `Страница:` line,
   and `telegramId` is what the card reads as `🤖 через бота`. A tap that cannot
   carry the id (analytics declined, or a payload past 64 characters) beacons
   nothing: the bot writes its Lead alone, without a page, rather than leaving a
@@ -509,11 +508,9 @@ anything under `apps/medusa/` or `infra/medusa/`.
 
 **Both content systems share one auto-translate mechanism:** admin/dev only ever hand-writes RU. The `translate` job in `.github/workflows/ci.yml` runs each app's `scripts/translate-i18n.ts` plus `scripts/translate-cases.ts` on approved.rs and `scripts/translate-works.ts` on the two brand sites, on every push (any branch, so translations land in a feature branch before merge, not after) and commits the result back. The `translate` job itself stays unconditional rather than path-filtered — every string is looked up in the leaf cache first, so a run with nothing new makes no OpenAI request at all, and every job downstream reads the SHA it left behind, so untranslated content cannot reach production. **Deploy filtering is a separate step** (`scope` in `verify`, against per-app `refs/tags/deployed/<app>` tags) — why: `docs/adr/0008-deploy-only-what-is-stale-in-production.md`. **The unit of work is one string, not one file.** `packages/i18n/src/translate/leafCache.ts` keys a committed cache on the triple (system prompt, model, Russian string), so a rerun asks the model only for the strings whose Russian actually moved — the rest come back from `apps/<app>/src/content/translations.cache.json`. It must stay committed: deleting it regenerates the whole corpus at OpenAI's price. The cache is keyed by file path, so renaming a case directory drops its block and the next run adopts the committed translations as if they were hand-written, which quietly exempts that file from the next prompt fix. Editing the prompt or the model changes the fingerprint and regenerates everything that prompt produced, which is the deliberate switch for a prompt fix. The prompt names the target language, so the fingerprint is per locale, and `localeGuidance` on either translator (approved.rs's `LOCALE_GUIDANCE` in `translateConfig.ts`, the Serbian search phrase) is how one locale's wording is steered and regenerated without touching the other three. `translatedFrom` still records the hash of the whole RU source, and is what tells the job whether the committed translations correspond to the Russian in the file right now — the condition a hand-written translation is adopted under. Both scripts call through `packages/i18n/src/translate/openaiChat.ts` (official `openai` SDK) and validate the AI's response with `packages/i18n/src/translate/assertSafeTranslation.ts`, which rejects a translation that introduces HTML the RU source didn't already have (a stored-XSS guard on an otherwise-unreviewed auto-commit path — case bodies are rendered as markdown via `src/lib/safeMarked.ts`, which itself sanitizes with `sanitize-html`). Needs `OPENAI_API_KEY` as a GitHub Actions secret (separate from Vercel's env vars); without it the job fails at the translate step but doesn't touch already-translated content.
 
-**Lead capture pipeline (`@podbor/lead-crm`, bound in `src/lib/crm.ts` + `src/lib/crmBot.ts`):** form submissions (`api/leads.ts`) and call-button clicks (`api/contact-click.ts`) both funnel through `notifyLead`, which stores the lead and notifies Telegram via `waitUntil()` (fire-and-forget after the response redirects). Leads live in a single JSON blob on Vercel Blob (`data/leads.json`), not a database — every mutation goes through `updateLeads()`, a compare-and-swap loop with jittered exponential backoff so two concurrent writers (e.g. a bot button edit racing a new form submission) desync instead of retry-colliding. Storage sits behind a `LeadStorage` interface, so moving to Postgres later is one adapter rather than a rewrite. `api/telegram-webhook.ts` handles the bot side (status changes, deal-amount/commission prompts, postpone/remind flow) driven by the same store. `api/reminders.ts` is a Vercel Cron job (needs `CRON_SECRET`) that pushes due `postponed` leads back to the owner.
+**Lead capture pipeline (`@podbor/lead-crm`, bound in `src/lib/crm.ts` + `src/lib/crmBot.ts`):** form submissions (`api/leads.ts`) and call-button clicks (`api/contact-click.ts`) both funnel through `notifyLead`, which stores the lead and notifies Telegram via `waitUntil()` (fire-and-forget after the response redirects). Leads live in a single JSON blob on Vercel Blob (`data/leads.json`), not a database: one array of Leads beside `digest` marks (the record that lets the daily digest claim its day once). Money is not in that file. Payouts and Settlements live in their own blob, `data/ledger.json`, behind `createLedgerStore` — the Balance has nothing to do with any Lead. While that blob does not exist, the ledger opens with one Payout, `Перенос со старой системы`, for what the old income × rate model left owed (`legacyOwed` over the raw Lead file), and the Lead store's `beforeWrite` hook creates the blob before any Lead write can strip those old money fields. The `payout`, `settlement`, `summary` and `settle_prompt` records an earlier version wrote into `data/leads.json` are dropped on read without quarantine or alert, and vanish on the next write. Every mutation goes through `updateRecords()` (`updateLeads()` is its Leads-only shorthand), a compare-and-swap loop with jittered exponential backoff so two concurrent writers (e.g. a bot button edit racing a new form submission) desync instead of retry-colliding. Storage sits behind a `LeadStorage` interface, so moving to Postgres later is one adapter rather than a rewrite. `api/telegram-webhook.ts` handles the bot side (status changes, ➕ Зачислить / ➖ Списать prompts, postpone/remind flow). `✅` marks a Lead won and asks nothing; a reply to a Lead card, a number included, is stored as a note. `api/reminders.ts` is a Vercel Cron job (needs `CRON_SECRET`) that expires Ghost leads and posts one daily digest to the group: due `postponed` leads and open leads with no action for 7 days. There is no monthly summary.
 
 The binding is split in two on purpose: `src/lib/crm.ts` builds the store and needs no Telegram credentials, while `src/lib/crmBot.ts` builds the bot and reads `TELEGRAM_*` at module load. Importing the store therefore cannot fail a build over a missing bot token. `src/lib/store.ts`, `src/lib/telegram/index.ts` and `src/lib/notifyLead.ts` are thin re-exports over those two.
-
-The commission rate is per business (`COMMISSION_PERCENT` in `packages/brands`, handed to `createBrandStore` in `src/lib/crm.ts`), and a lead stores the rate it was created with, so changing the default never rewrites history.
 
 **Keystatic admin (`keystatic.config.ts`):** local dev reads/writes the working tree directly (`storage: { kind: 'local' }`); production (`import.meta.env.PROD`) goes through GitHub's API (`storage: { kind: 'github' }`) since Vercel's filesystem is ephemeral. Service slugs live once, in `SERVICE_SLUGS_BY_BRAND` in `packages/brands/src/serviceLabels.ts`, typed against `SERVICE_LABELS_RU` so a slug without a label is a compile error. `src/utils/labels.ts` (`src/utils/services.ts` on the brand sites), `src/content.config.ts` and the Keystatic select options all read that list — Keystatic's config cannot import Astro-coupled modules, but `@podbor/brands` is plain TypeScript. Add a service there and its label in the same edit; `serviceLabel()` still echoes an unknown slug rather than throwing, which only a slug outside the list (the `vehicle-import-<spoke>` sub-slugs, `parts-order`, the partner and legacy slugs) can reach.
 
@@ -579,7 +576,7 @@ This site is Astro SSG (`output: 'static'`/prerendered, no SSR) — `.astro` fro
 
 Don't reach for a library reflexively, though — a hand-rolled ~10-line helper that's already correct and purpose-built to one exact call site (e.g. `src/lib/store.ts`'s jittered CAS-retry backoff) doesn't get simpler by wrapping it in a generic library's config API. The bar is: does an existing library solve a real edge case this code either gets wrong today or would have to re-solve by hand, not "is there a package for this."
 
-**No bot framework (grammy/telegraf)** — why: `docs/adr/0006-no-telegram-bot-framework.md`. Callback dispatch is the `[pattern, requiredRole, handler]` table `CALLBACKS`, walked by `dispatchCallback` in `apps/approved-rs/src/pages/api/telegram-webhook.ts`; a new callback is a row there, not a framework.
+**grammY for every bot, no sessions** — why: `docs/adr/0031-grammy-for-every-bot.md`. Callback dispatch is the `[pattern, requiredRole, handler]` table `CALLBACKS` in `apps/approved-rs/src/pages/api/telegram-webhook.ts`, each row registered as a grammY `callbackQuery` handler; a new callback is a row there. A prompt lives on the record it answers — `pendingPrompt` on a Lead, or an operation prompt in `data/ledger.json` for ➕/➖ — matched by chat id and message id, never in a grammY session and never by the replied-to text.
 
 This only applies to build-time code (`.astro` frontmatter, `src/lib/`, `scripts/`). Code that ships to the browser (client-side `<script>`, hydrated islands) still carries a real bundle-size cost — weigh a new client dependency normally there.
 

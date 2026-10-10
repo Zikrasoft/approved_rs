@@ -2,6 +2,14 @@ export const SOURCE_LOCALE = 'ru';
 
 export type SourceLocale = typeof SOURCE_LOCALE;
 
+const NATIVE_LOCALE_NAMES: Readonly<Record<string, string>> = {
+  ru: 'Русский',
+  en: 'English',
+  sr: 'Srpski',
+  es: 'Español',
+  de: 'Deutsch',
+};
+
 export interface PageHeadInput {
   title: string;
   description: string;
@@ -35,7 +43,8 @@ export function createLocaleSet<L extends string, P extends L>({
     );
   }
 
-  for (const [name, map] of Object.entries({ ogLocale, ogSuffix })) {
+  const maps = { ogLocale, ogSuffix, NATIVE_LOCALE_NAMES };
+  for (const [name, map] of Object.entries(maps)) {
     const missing = locales.filter((l) => !Object.hasOwn(map, l));
     if (missing.length) {
       throw new Error(`[i18n] ${name} has no entry for ${missing.join(', ')}`);
@@ -68,8 +77,13 @@ export function createLocaleSet<L extends string, P extends L>({
   const isLocale = (value: string): value is L =>
     (locales as readonly string[]).includes(value);
 
+  const localeNames = Object.fromEntries(
+    locales.map((locale) => [locale, NATIVE_LOCALE_NAMES[locale]]),
+  ) as Readonly<Record<L, string>>;
+
   return {
     SUPPORTED_LOCALES: locales,
+    LOCALE_NAME: localeNames,
     PRIMARY_LOCALE: primaryLocale,
     TRANSLATABLE_LOCALES: translatable,
     isLocale,

@@ -2,6 +2,10 @@
 status: accepted
 ---
 
+## Amended 2026-10-10: no archive, a Ghost lead is only marked lost
+
+Issue #226 removes the archive from the CRM bot: lost is the archive now, and only open Leads are listed. Expiring a Ghost lead sets `lost` alone, and "not archived" drops out of the predicate. `new` is gone with the other two pre-outcome statuses, so "still `new`" now reads "still `open` with no recorded activity" (`lastActivityAt` unset): ⏳ on the card, a card reply or a postpone takes a click out of the sweep the way moving it off `new` used to, and the migration stamps `lastActivityAt` on a Lead stored as negotiations or in_progress. See [ADR-0032](0032-the-owner-states-the-payout.md) for the same rework.
+
 ## Amended 2026-10-06: Telegram taps can be Ghost leads again
 
 The paragraph below that takes Telegram out of this no longer holds. [ADR-0030](0030-a-capture-bot-per-brand-takes-the-telegram-contact.md), amended the same day, has a Telegram tap store a contact click again so the bot's Lead can inherit its page. A tap whose visitor reaches Start is merged into the bot's Lead and gains a contact; one who never does leaves a placeholder click that this sweep retires like any other. Nothing in the predicate or the sweep changed.

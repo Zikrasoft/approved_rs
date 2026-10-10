@@ -220,7 +220,8 @@ created by itself on the first run, with no protection rules.
 `.vercel/.env.production.local`, and `vercel build` builds with them. Which means:
 
 - **variables are set in the Vercel dashboard, not in GitHub secrets.** GitHub only
-  holds the token/IDs for reaching Vercel plus `OPENAI_API_KEY` (see below);
+  holds the token/IDs for reaching Vercel plus `OPENAI_API_KEY` for the
+  `translate` job (see below);
 - **a missing public variable fails the build, a missing server-side one fails the
   route.** `PUBLIC_*` variables are inlined into the HTML at build time, so each
   app's `src/utils/constants.ts` parses them through a zod schema at module load
@@ -335,17 +336,17 @@ is per project too, and on approved.rs it is a **different** value from
 `TELEGRAM_WEBHOOK_SECRET` — the two webhooks there belong to two different bots
 and do not share a secret. approved.rs additionally holds the other two capture
 tokens as `TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB` and `TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS`:
-the operator's reply to a handle-less visitor lands on the CRM webhook there, and
+the owner's reply to a handle-less visitor lands on the CRM webhook there, and
 only the visitor's own brand's bot can deliver it, so the webhook picks the bot by
 the lead's `brand` ([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
 Without a sibling token the reply button is simply absent on that brand's cards.
 
 ### Storage and cron
 
-| Variable                | approved.rs | carlab.rs | details.rs | Without it                                            |
-| ----------------------- | ----------- | --------- | ---------- | ----------------------------------------------------- |
-| `BLOB_READ_WRITE_TOKEN` | ✅ auto     | ✅ auto   | ✅ auto    | leads are not stored and the routes fail              |
-| `CRON_SECRET`           | ✅          | —         | —          | `/api/reminders` answers 401 — reminders never go out |
+| Variable                | approved.rs | carlab.rs | details.rs | Without it                                               |
+| ----------------------- | ----------- | --------- | ---------- | -------------------------------------------------------- |
+| `BLOB_READ_WRITE_TOKEN` | ✅ auto     | ✅ auto   | ✅ auto    | leads are not stored and the routes fail                 |
+| `CRON_SECRET`           | ✅          | —         | —          | `/api/reminders` answers 401 — the digest never goes out |
 
 **Do not set `BLOB_READ_WRITE_TOKEN` by hand** — it appears on its own once the Blob
 store is connected to the project (see the next section).
@@ -414,6 +415,16 @@ Telegram message with the count and the name of the site that found it. **Nothin
 deleted** from `data/leads.json` in the process: the records stay where they are
 until someone sorts them out by hand. Nothing ever disappears from the blob
 automatically.
+
+`data/ledger.json` is the third file: the Balance. It appears on the first Lead
+write after the release that introduced it, opened with whatever the old
+records said the owner still owed, and the same write drops those old money
+fields from `data/leads.json`. So that release needs three things around it —
+a backup of `data/leads.json` before it deploys, a check that `data/ledger.json`
+exists and «💶 Мне должны» matches the old «🔴 Мне должны» after the first Lead
+write, and the expectation that the first digest lists every open Lead untouched
+for 7+ days, bare capture-bot `/start` Leads included. Steps 1 and 8 of
+[`crm-bot-migration.md`](crm-bot-migration.md) walk through them.
 
 ---
 
@@ -919,14 +930,27 @@ Each is registered once per bot, four registrations in total.
 
 ### The CRM bot
 
-The group receives only a short teaser of the lead ("#123 · Ivan · Vehicle
-sourcing · status") and an "Open in the bot" link button — all the handling
-(statuses, editing, archive, money) happens in a DM with the bot. Leads are stored
+The group receives a short teaser of the lead ("#123 · Ivan · Vehicle
+sourcing · status") with the outcome buttons (✅ deal / ❌ lost, and ⏳, a touch that
+changes no status) and
+an "Open in the bot" link button; postponing, replying to the visitor and
+deleting happen in a DM with the bot. Statuses are open / won / lost /
+postponed, and lost is the archive. Leads are stored
 in Vercel Blob (`data/leads.json`, private access), with no external database.
 
 The owner and the admin each have to message the bot `/start` once before it can
-send them direct messages (including the cron's reminders) — Telegram forbids a bot
-from starting a conversation.
+send them direct messages (including the notice of a Balance operation the other
+one recorded) — Telegram forbids a bot from starting a conversation.
+
+In the group the bot needs **admin rights to pin messages**: every new card is
+pinned and a closed one is unpinned; without the right both calls fail and are
+only logged.
+
+Privacy mode can stay on. The bot only acts on replies to its own messages
+(cards and prompts), and Telegram delivers "replies to any messages implicitly
+or explicitly meant for this bot" to a bot in privacy mode
+([Bot features → Privacy mode](https://core.telegram.org/bots/features#privacy-mode));
+every other group message is ignored anyway.
 
 The webhook must carry a `secret_token` equal to the approved.rs project's
 `TELEGRAM_WEBHOOK_SECRET` — without a match the endpoint answers 401 to every
@@ -979,6 +1003,25 @@ Equivalently, by hand, once per brand:
 curl "https://api.telegram.org/bot<TELEGRAM_CAPTURE_BOT_TOKEN>/setWebhook?url=https://carlab.rs/api/telegram-capture&secret_token=<TELEGRAM_CAPTURE_WEBHOOK_SECRET>"
 ```
 
+### The capture bots' profile
+
+Each app's `scripts/capture-bot-profile.ts` sets its capture bot's description,
+short description and the `/menu` and `/lang` commands, once with no language
+code (the app's primary locale, what a Telegram client in any other language
+sees) and once per locale the site serves. The texts are the `profile` group of
+that app's `captureBot.yaml` — written in Russian, translated by the CI
+`translate` job like the rest of the capture copy. Run it by hand, from inside
+the app, after a change to that group has been translated and merged; until
+then a locale without a translation gets the Russian text. It is not a CI step,
+and a missing `TELEGRAM_CAPTURE_BOT_TOKEN` exits non-zero without calling
+Telegram:
+
+```bash
+cd apps/approved-rs && node --env-file=.env.local --experimental-strip-types scripts/capture-bot-profile.ts
+cd apps/auto-service && node --env-file=.env.local --experimental-strip-types scripts/capture-bot-profile.ts
+cd apps/detailing && node --env-file=.env.local --experimental-strip-types scripts/capture-bot-profile.ts
+```
+
 ---
 
 ## The reminder cron (approved.rs only)
@@ -990,10 +1033,13 @@ curl "https://api.telegram.org/bot<TELEGRAM_CAPTURE_BOT_TOKEN>/setWebhook?url=ht
 ```
 
 Every day at 08:00 UTC, Vercel calls `/api/reminders` with
-`Authorization: Bearer $CRON_SECRET` — the route works through postponed
-("remind me") leads whose time has come and returns them to the owner. Without
-`CRON_SECRET` in the project the route answers 401 and the reminders silently never
-arrive.
+`Authorization: Bearer $CRON_SECRET` — the route marks expired Ghost leads lost,
+then posts one digest to the group: postponed leads whose day has come (reopened
+once listed) and open leads with no action for 7 days, each with ✅ ❌ ⏳ — once
+per day, however often the cron runs. Nothing is posted when the list is empty.
+There is no monthly summary: the Balance is in the bot's menu. Without
+`CRON_SECRET` in the project the route answers 401 and the digest silently never
+arrives.
 
 The cron belongs to a project, not to the bot: the other two projects have no
 `crons` section in `vercel.json` and do not need one — otherwise the same reminders

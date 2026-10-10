@@ -3,19 +3,18 @@ import {
   createMemoryStorage,
   type MemoryStorage,
 } from './storage/memory.testing.ts';
-import { createLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
+import { storedLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
 import {
   createLeadStore,
   GHOST_LEAD_RETENTION_MS,
+  isFreshLead,
   postponePatch,
   resumePatch,
   statusPatch,
-  wonPatch,
   VISITOR_MERGE_WINDOW_MS,
   type LeadStore,
 } from './store.ts';
 import { createQuarantine, LEADS_PATH } from './quarantine.ts';
-import { appendIncome, getCommission } from './money.ts';
 
 let storage: MemoryStorage;
 let store: LeadStore;
@@ -28,52 +27,9 @@ const baseData: LeadInput = {
   locale: 'ru',
 };
 
-// Test-only fixture helpers — write directly via updateLeads to arrange a
-// won/paid lead without going through the real force-reply flow, which is
-// exercised on its own terms by the resolvePendingPrompt/confirm tests below.
-async function forceComplete(id: number, dealAmount: number): Promise<void> {
+async function forceComplete(id: number): Promise<void> {
   await store.updateLeads((leads) =>
-    leads.map((l) =>
-      l.id === id ? { ...l, dealAmount, status: 'won' as const } : l,
-    ),
-  );
-}
-async function forcePay(id: number): Promise<void> {
-  await store.updateLeads((leads) =>
-    leads.map((l) =>
-      l.id === id
-        ? {
-            ...l,
-            incomes: l.incomes.map((i) => ({
-              ...i,
-              paidAt: new Date().toISOString(),
-            })),
-          }
-        : l,
-    ),
-  );
-}
-async function forceIncome(id: number, amount: number): Promise<void> {
-  await store.updateLeads((leads) =>
-    leads.map((l) =>
-      l.id === id ? { ...l, incomes: appendIncome(l.incomes, amount) } : l,
-    ),
-  );
-}
-async function forceClaim(id: number): Promise<void> {
-  await store.updateLeads((leads) =>
-    leads.map((l) =>
-      l.id === id
-        ? {
-            ...l,
-            pendingCommissionClaim: {
-              amount: getCommission(l).remaining,
-              claimedAt: new Date().toISOString(),
-              incomeIds: l.incomes.filter((i) => !i.paidAt).map((i) => i.id),
-            },
-          }
-        : l,
-    ),
+    leads.map((l) => (l.id === id ? { ...l, status: 'won' as const } : l)),
   );
 }
 
@@ -81,7 +37,7 @@ beforeEach(() => {
   storage = createMemoryStorage();
   store = createLeadStore({
     storage,
-    schema: createLeadSchema({ defaultCommissionPercent: 10 }),
+    schema: storedLeadSchema,
   });
 });
 
@@ -127,15 +83,13 @@ describe('insertLead', () => {
     expect(b.id).toBe(2);
   });
 
-  it('defaults status new, 10% commission, zero paid, empty payment log, not archived, no money-track state', async () => {
+  it('defaults status open, no prompt and no money on the Lead', async () => {
     const lead = await store.insertLead(baseData);
-    expect(lead.status).toBe('new');
-    expect(lead.commissionPercent).toBe(10);
-    expect(lead.paidAmount).toBe(0);
-    expect(lead.payments).toEqual([]);
+    expect(lead.status).toBe('open');
     expect(lead.pendingPrompt).toBeNull();
-    expect(lead.archived).toBe(false);
-    expect(lead.pendingCommissionClaim).toBeNull();
+    expect(lead).not.toHaveProperty('archived');
+    expect(lead).not.toHaveProperty('commissionPercent');
+    expect(lead).not.toHaveProperty('incomes');
   });
 });
 
@@ -269,6 +223,23 @@ describe('insertOrMergeLead', () => {
     });
 
     expect(lead.comment).not.toContain('Также пробовал');
+  });
+
+  it('hands back the Lead as it was before the merge, and null for an insert', async () => {
+    const first = await store.insertOrMergeLead(clickData('telegram'));
+    const second = await store.insertOrMergeLead({
+      ...clickData('telegram'),
+      contact: '@petr',
+      telegramId: 77,
+      referredBy: 'approved',
+    });
+
+    expect(first.before).toBeNull();
+    expect(second.before).toEqual(first.lead);
+    expect(second.lead).toMatchObject({
+      contact: '@petr',
+      referredBy: 'approved',
+    });
   });
 
   it('hands a Telegram click over to the capture bot that picks up the same visitor', async () => {
@@ -440,9 +411,9 @@ describe('insertOrMergeLead', () => {
     expect(await store.readLeads()).toHaveLength(2);
   });
 
-  it('does not merge into a lead that is already being worked (status !== new)', async () => {
+  it('does not merge into a lead the owner already marked in work', async () => {
     const { lead } = await store.insertOrMergeLead(clickData('telegram'));
-    await store.setStatus(lead.id, 'in_progress');
+    await store.touchLead(lead.id);
 
     const { merged } = await store.insertOrMergeLead(clickData('whatsapp'));
 
@@ -450,9 +421,9 @@ describe('insertOrMergeLead', () => {
     expect(await store.readLeads()).toHaveLength(2);
   });
 
-  it('does not merge into an archived lead', async () => {
+  it('does not merge into a lost lead', async () => {
     const { lead } = await store.insertOrMergeLead(clickData('telegram'));
-    await store.archiveLead(lead.id);
+    await store.setStatus(lead.id, 'lost');
 
     const { merged } = await store.insertOrMergeLead(clickData('whatsapp'));
 
@@ -472,6 +443,25 @@ describe('insertOrMergeLead', () => {
     expect(merged).toBe(false);
   });
 
+  it('still merges into an old click whose visitor came back within the hour', async () => {
+    const { lead } = await store.insertOrMergeLead(clickData('telegram'));
+    await store.updateLeads((leads) =>
+      leads.map((l) =>
+        l.id === lead.id
+          ? {
+              ...l,
+              createdAt: '2000-01-01T00:00:00.000Z',
+              visitorActiveAt: new Date().toISOString(),
+            }
+          : l,
+      ),
+    );
+
+    const { merged } = await store.insertOrMergeLead(clickData('whatsapp'));
+
+    expect(merged).toBe(true);
+  });
+
   it('never merges without a visitorId to correlate on', async () => {
     await store.insertOrMergeLead({
       ...clickData('telegram'),
@@ -485,21 +475,55 @@ describe('insertOrMergeLead', () => {
   });
 });
 
+describe('isFreshLead', () => {
+  const NOW = Date.parse('2026-10-11T12:00:00.000Z');
+  const ago = (minutes: number) =>
+    new Date(NOW - minutes * 60 * 1000).toISOString();
+  const lead = (patch: Partial<StoredLead>): StoredLead =>
+    storedLeadSchema.parse({
+      ...baseData,
+      id: 1,
+      statusChangedAt: ago(180),
+      createdAt: ago(180),
+      ...patch,
+    });
+
+  it('is stale once every clock is past the hour', () => {
+    expect(
+      isFreshLead(
+        lead({ visitorActiveAt: ago(120), lastActivityAt: ago(90) }),
+        NOW,
+      ),
+    ).toBe(false);
+  });
+
+  it.each([
+    ['createdAt', { createdAt: ago(59) }],
+    ['visitorActiveAt', { visitorActiveAt: ago(59) }],
+    ['lastActivityAt', { lastActivityAt: ago(59) }],
+  ] as const)('is fresh while %s is within the hour', (_, patch) => {
+    expect(isFreshLead(lead(patch), NOW)).toBe(true);
+  });
+});
+
 describe('resolvePendingPrompt', () => {
   it('applies the patch and clears the pending prompt in one write', async () => {
     const lead = await store.insertLead(baseData);
     await store.setPendingPrompt(lead.id, {
       chatId: 111,
       messageId: 999,
-      kind: 'deal_amount',
+      kind: 'postpone',
     });
 
-    const resolved = await store.resolvePendingPrompt(111, 999, () => ({
-      dealAmount: 5000,
-      status: 'won',
-    }));
+    const resolved = await store.resolvePendingPrompt(
+      { chatId: 111, messageId: 999 },
+      () => ({
+        comment: 'first',
+        status: 'won',
+      }),
+    );
 
-    expect(resolved?.dealAmount).toBe(5000);
+    expect(resolved?.comment).toBe('first');
     expect(resolved?.status).toBe('won');
     expect(resolved?.pendingPrompt).toBeNull();
   });
@@ -509,21 +533,24 @@ describe('resolvePendingPrompt', () => {
     await store.setPendingPrompt(lead.id, {
       chatId: 111,
       messageId: 999,
-      kind: 'deal_amount',
+      kind: 'postpone',
     });
-    await store.resolvePendingPrompt(111, 999, () => ({
-      dealAmount: 5000,
+    await store.resolvePendingPrompt({ chatId: 111, messageId: 999 }, () => ({
+      comment: 'first',
       status: 'won',
     }));
 
-    const second = await store.resolvePendingPrompt(111, 999, () => ({
-      dealAmount: 9999,
-      status: 'won',
-    }));
+    const second = await store.resolvePendingPrompt(
+      { chatId: 111, messageId: 999 },
+      () => ({
+        comment: 'second',
+        status: 'won',
+      }),
+    );
 
     expect(second).toBeUndefined();
     const after = await store.getLead(lead.id);
-    expect(after?.dealAmount).toBe(5000);
+    expect(after?.comment).toBe('first');
   });
 
   it('returns undefined when a concurrent write clears the prompt between retry attempts', async () => {
@@ -531,7 +558,7 @@ describe('resolvePendingPrompt', () => {
     await store.setPendingPrompt(lead.id, {
       chatId: 111,
       messageId: 999,
-      kind: 'deal_amount',
+      kind: 'postpone',
     });
     storage.failNextWrites(1, () => {
       const leads = storage.current() as StoredLead[];
@@ -539,31 +566,27 @@ describe('resolvePendingPrompt', () => {
       storage.seed(leads);
     });
 
-    const resolved = await store.resolvePendingPrompt(111, 999, () => ({
-      dealAmount: 5000,
-    }));
+    const resolved = await store.resolvePendingPrompt(
+      { chatId: 111, messageId: 999 },
+      () => ({
+        comment: 'late',
+      }),
+    );
 
     expect(resolved).toBeUndefined();
     const after = await store.getLead(lead.id);
-    expect(after?.dealAmount).toBeNull();
+    expect(after?.comment).toBeUndefined();
   });
 
   it('returns undefined when no lead has a matching pending prompt', async () => {
     await store.insertLead(baseData);
-    const resolved = await store.resolvePendingPrompt(1, 1, () => ({
-      dealAmount: 1,
-    }));
+    const resolved = await store.resolvePendingPrompt(
+      { chatId: 1, messageId: 1 },
+      () => ({
+        comment: 'x',
+      }),
+    );
     expect(resolved).toBeUndefined();
-  });
-});
-
-describe('archiveLead / unarchiveLead', () => {
-  it('toggles archived', async () => {
-    const lead = await store.insertLead(baseData);
-    const archived = await store.archiveLead(lead.id);
-    expect(archived?.archived).toBe(true);
-    const restored = await store.unarchiveLead(lead.id);
-    expect(restored?.archived).toBe(false);
   });
 });
 
@@ -581,8 +604,8 @@ describe('status patch builders', () => {
   }
 
   it('statusPatch stamps the change time', () => {
-    expect(statusPatch('negotiations')).toEqual({
-      status: 'negotiations',
+    expect(statusPatch('open')).toEqual({
+      status: 'open',
       statusChangedAt: AT.toISOString(),
     });
     expect(statusPatch('lost', new Date(0)).statusChangedAt).toBe(
@@ -590,46 +613,26 @@ describe('status patch builders', () => {
     );
   });
 
-  it('postponePatch and resumePatch round-trip postponedFrom', async () => {
-    const lead = await storedLead({ status: 'negotiations' });
+  it('postponePatch sets the date and resumePatch reopens', async () => {
+    const lead = await storedLead({ status: 'open' });
 
     const postponed = { ...lead, ...postponePatch(lead, '2026-10-20', 'n') };
 
     expect(postponed).toMatchObject({
       status: 'postponed',
-      postponedFrom: 'negotiations',
       remindAt: '2026-10-20',
       statusChangedAt: AT.toISOString(),
     });
-    expect(resumePatch(postponed)).toEqual({
-      status: 'negotiations',
-      postponedFrom: null,
+    expect(resumePatch()).toEqual({
+      status: 'open',
       remindAt: null,
       statusChangedAt: AT.toISOString(),
     });
   });
-
-  it('resumePatch falls back to in_progress without postponedFrom', async () => {
-    const lead = await storedLead({ status: 'postponed', postponedFrom: null });
-
-    expect(resumePatch(lead).status).toBe('in_progress');
-  });
-
-  it('wonPatch appends a positive amount and keeps incomes on zero', async () => {
-    const lead = await storedLead();
-
-    const won = wonPatch(lead, 300);
-    expect(won).toMatchObject({
-      status: 'won',
-      statusChangedAt: AT.toISOString(),
-    });
-    expect(won.incomes?.map((i) => i.amount)).toEqual([300]);
-    expect(wonPatch(lead, 0).incomes).toBe(lead.incomes);
-  });
 });
 
 describe('resumeLead', () => {
-  it('returns a postponed lead to in_progress and clears remindAt', async () => {
+  it('returns a postponed lead to open and clears remindAt', async () => {
     const lead = await store.insertLead(baseData);
     await store.updateLeads((leads) =>
       leads.map((l) =>
@@ -641,24 +644,13 @@ describe('resumeLead', () => {
 
     const resumed = await store.resumeLead(lead.id);
 
-    expect(resumed?.status).toBe('in_progress');
+    expect(resumed?.status).toBe('open');
     expect(resumed?.remindAt).toBeNull();
-  });
-
-  it('returns a lead postponed from negotiations back to negotiations', async () => {
-    const lead = await store.insertLead(baseData);
-    await store.setStatus(lead.id, 'negotiations');
-    await store.postponeLead(lead.id, '2026-10-20', 'Отложено');
-
-    const resumed = await store.resumeLead(lead.id);
-
-    expect(resumed?.status).toBe('negotiations');
-    expect(resumed?.postponedFrom).toBeNull();
   });
 
   it('no-ops when the lead is not postponed (stale button, already finalized elsewhere)', async () => {
     const lead = await store.insertLead(baseData);
-    await forceComplete(lead.id, 100_000); // status: 'won'
+    await forceComplete(lead.id);
 
     const resumed = await store.resumeLead(lead.id);
 
@@ -671,7 +663,6 @@ describe('resumeLead', () => {
 describe('postponeLead', () => {
   it('sets status/remindAt/comment on the given lead directly, no prompt correlation needed', async () => {
     const lead = await store.insertLead(baseData);
-    await store.setStatus(lead.id, 'in_progress');
 
     const postponed = await store.postponeLead(
       lead.id,
@@ -684,22 +675,9 @@ describe('postponeLead', () => {
     expect(postponed?.comment).toBe('Отложено до 20.10.2026');
   });
 
-  it('postpones a lead that is still in negotiations and remembers the stage', async () => {
+  it('no-ops when the lead is no longer open (stale button, already finalized elsewhere)', async () => {
     const lead = await store.insertLead(baseData);
-    await store.setStatus(lead.id, 'negotiations');
-
-    const postponed = await store.postponeLead(
-      lead.id,
-      '2026-10-20',
-      'Отложено до 20.10.2026',
-    );
-
-    expect(postponed?.status).toBe('postponed');
-    expect(postponed?.postponedFrom).toBe('negotiations');
-  });
-
-  it('no-ops when the lead is neither in negotiations nor in_progress (stale button, already finalized elsewhere)', async () => {
-    const lead = await store.insertLead(baseData); // status: 'new'
+    await store.setStatus(lead.id, 'lost');
 
     const postponed = await store.postponeLead(
       lead.id,
@@ -709,61 +687,7 @@ describe('postponeLead', () => {
 
     expect(postponed).toBeUndefined();
     const after = await store.getLead(lead.id);
-    expect(after?.status).toBe('new');
-  });
-});
-
-describe('getDuePostponed', () => {
-  async function forcePostpone(id: number, remindAt: string): Promise<void> {
-    await store.updateLeads((leads) =>
-      leads.map((l) =>
-        l.id === id ? { ...l, status: 'postponed' as const, remindAt } : l,
-      ),
-    );
-  }
-
-  it('finds a postponed lead whose remindAt is today or earlier', async () => {
-    const lead = await store.insertLead(baseData);
-    await forcePostpone(lead.id, '2000-01-01');
-
-    const due = await store.getDuePostponed();
-
-    expect(due.map((l) => l.id)).toEqual([lead.id]);
-  });
-
-  it('excludes a postponed lead whose remindAt is still in the future', async () => {
-    const lead = await store.insertLead(baseData);
-    await forcePostpone(lead.id, '2999-01-01');
-
-    expect(await store.getDuePostponed()).toEqual([]);
-  });
-
-  it('includes a lead whose remindAt is exactly today (boundary, <=)', async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-10-20T12:00:00.000Z'));
-    try {
-      const lead = await store.insertLead(baseData);
-      await forcePostpone(lead.id, '2026-10-20');
-
-      expect((await store.getDuePostponed()).map((l) => l.id)).toEqual([
-        lead.id,
-      ]);
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
-  it('excludes an archived lead even if its date is due', async () => {
-    const lead = await store.insertLead(baseData);
-    await forcePostpone(lead.id, '2000-01-01');
-    await store.archiveLead(lead.id);
-
-    expect(await store.getDuePostponed()).toEqual([]);
-  });
-
-  it('excludes leads that are not postponed', async () => {
-    await store.insertLead(baseData);
-    expect(await store.getDuePostponed()).toEqual([]);
+    expect(after?.status).toBe('lost');
   });
 });
 
@@ -798,7 +722,7 @@ describe('expireGhostLeads', () => {
     return lead;
   }
 
-  it('archives a ghost past the window and marks it lost', async () => {
+  it('marks a ghost past the window lost', async () => {
     const lead = await ghost();
 
     const expired = await store.expireGhostLeads(NOW);
@@ -806,13 +730,9 @@ describe('expireGhostLeads', () => {
     expect(expired.map((l) => l.id)).toEqual([lead.id]);
     expect(expired[0]).toMatchObject({
       status: 'lost',
-      archived: true,
       statusChangedAt: NOW.toISOString(),
     });
-    expect(await store.getLead(lead.id)).toMatchObject({
-      status: 'lost',
-      archived: true,
-    });
+    expect(await store.getLead(lead.id)).toMatchObject({ status: 'lost' });
   });
 
   it('leaves a click inside the retention window alone', async () => {
@@ -820,19 +740,17 @@ describe('expireGhostLeads', () => {
 
     expect(await store.expireGhostLeads(NOW)).toEqual([]);
     expect(await store.getLead(lead.id)).toMatchObject({
-      status: 'new',
-      archived: false,
+      status: 'open',
     });
   });
 
-  it('leaves a click the operator already moved off new alone', async () => {
+  it('leaves a click the owner already marked in work alone', async () => {
     const lead = await ghost();
-    await store.setStatus(lead.id, 'negotiations');
+    await store.touchLead(lead.id);
 
     expect(await store.expireGhostLeads(NOW)).toEqual([]);
     expect(await store.getLead(lead.id)).toMatchObject({
-      status: 'negotiations',
-      archived: false,
+      status: 'open',
     });
   });
 
@@ -860,12 +778,14 @@ describe('expireGhostLeads', () => {
     expect(await store.expireGhostLeads(NOW)).toEqual([]);
   });
 
-  it('does not touch an already-archived ghost', async () => {
+  it('leaves a click the owner postponed alone', async () => {
     const lead = await ghost();
-    await store.archiveLead(lead.id);
+    await store.postponeLead(lead.id, '2026-10-20', 'Отложено');
 
     expect(await store.expireGhostLeads(NOW)).toEqual([]);
-    expect(await store.getLead(lead.id)).toMatchObject({ status: 'new' });
+    expect(await store.getLead(lead.id)).toMatchObject({
+      status: 'postponed',
+    });
   });
 
   it('is idempotent — a second run writes nothing at all', async () => {
@@ -888,13 +808,13 @@ describe('expireGhostLeads', () => {
     const expired = await store.expireGhostLeads(NOW);
 
     expect(expired.map((l) => l.id).sort()).toEqual([a.id, b.id].sort());
-    expect(await store.getLead(c.id)).toMatchObject({ archived: false });
-    expect(await store.getLead(live.id)).toMatchObject({ status: 'new' });
+    expect(await store.getLead(c.id)).toMatchObject({ status: 'open' });
+    expect(await store.getLead(live.id)).toMatchObject({ status: 'open' });
   });
 });
 
 describe('deleteLead', () => {
-  it('permanently removes the record, unlike archiveLead', async () => {
+  it('permanently removes the record', async () => {
     const a = await store.insertLead(baseData);
     const b = await store.insertLead(baseData);
 
@@ -912,220 +832,10 @@ describe('deleteLead', () => {
   });
 });
 
-describe('claimCommission', () => {
-  it('claims every unpaid income when no ids are given', async () => {
-    const lead = await store.insertLead(baseData);
-    await forceComplete(lead.id, 100_000);
-    await forceIncome(lead.id, 50_000);
-
-    const claimed = await store.claimCommission(lead.id, null);
-
-    expect(claimed?.pendingCommissionClaim).toEqual({
-      amount: 15_000,
-      claimedAt: expect.any(String),
-      incomeIds: [1, 2],
-    });
-  });
-
-  it('claims one named income, leaving the other unpaid', async () => {
-    const lead = await store.insertLead(baseData);
-    await forceComplete(lead.id, 100_000);
-    await forceIncome(lead.id, 50_000);
-
-    const claimed = await store.claimCommission(lead.id, [2]);
-
-    expect(claimed?.pendingCommissionClaim).toEqual({
-      amount: 5000,
-      claimedAt: expect.any(String),
-      incomeIds: [2],
-    });
-  });
-
-  it('skips incomes already paid off', async () => {
-    const lead = await store.insertLead(baseData);
-    await forceComplete(lead.id, 100_000);
-    await forcePay(lead.id);
-    await forceIncome(lead.id, 50_000);
-
-    const claimed = await store.claimCommission(lead.id, null);
-
-    expect(claimed?.pendingCommissionClaim).toEqual({
-      amount: 5000,
-      claimedAt: expect.any(String),
-      incomeIds: [2],
-    });
-  });
-
-  it('reports nothing claimed when every income is already settled', async () => {
-    const lead = await store.insertLead(baseData);
-    await forceComplete(lead.id, 100_000);
-    await forcePay(lead.id);
-
-    const claimed = await store.claimCommission(lead.id, null);
-
-    expect(claimed).toBeUndefined();
-    const after = await store.getLead(lead.id);
-    expect(after?.pendingCommissionClaim).toBeNull();
-  });
-});
-
-describe('confirmCommissionPayment / rejectCommissionPayment', () => {
-  it('confirm settles the claimed incomes, moving them into paidAmount, and clears the claim', async () => {
-    const lead = await store.insertLead(baseData);
-    await forceComplete(lead.id, 100_000);
-    await forceClaim(lead.id);
-
-    const confirmed = await store.confirmCommissionPayment(lead.id);
-
-    expect(confirmed?.paidAmount).toBe(10_000);
-    expect(confirmed?.incomes[0]?.paidAt).toEqual(expect.any(String));
-    expect(confirmed?.pendingCommissionClaim).toBeNull();
-  });
-
-  it('marks only the claimed income paid, leaving the rest owed', async () => {
-    const lead = await store.insertLead(baseData);
-    await forceComplete(lead.id, 100_000);
-    await forceIncome(lead.id, 50_000);
-    await store.claimCommission(lead.id, [2]);
-
-    const confirmed = await store.confirmCommissionPayment(lead.id);
-
-    expect(confirmed?.incomes.map((i) => i.paidAt == null)).toEqual([
-      true,
-      false,
-    ]);
-    expect(confirmed?.paidAmount).toBe(5000);
-  });
-
-  it('falls back to every unpaid income for a legacy claim that carries no ids', async () => {
-    const lead = await store.insertLead(baseData);
-    await forceComplete(lead.id, 100_000);
-    await store.updateLeads((leads) =>
-      leads.map((l) =>
-        l.id === lead.id
-          ? {
-              ...l,
-              pendingCommissionClaim: {
-                amount: 10_000,
-                claimedAt: new Date().toISOString(),
-                incomeIds: [],
-              },
-            }
-          : l,
-      ),
-    );
-
-    const confirmed = await store.confirmCommissionPayment(lead.id);
-
-    expect(confirmed?.paidAmount).toBe(10_000);
-  });
-
-  it('confirm is a no-op the second time (TOCTOU regression)', async () => {
-    const lead = await store.insertLead(baseData);
-    await forceComplete(lead.id, 100_000);
-    await forceClaim(lead.id);
-    await store.confirmCommissionPayment(lead.id);
-
-    const second = await store.confirmCommissionPayment(lead.id);
-
-    expect(second).toBeUndefined();
-    const after = await store.getLead(lead.id);
-    expect(after?.paidAmount).toBe(10_000);
-  });
-
-  it('confirm returns undefined (not the unchanged lead) when there was never a claim to confirm', async () => {
-    const lead = await store.insertLead(baseData);
-    await forceComplete(lead.id, 100_000);
-
-    const result = await store.confirmCommissionPayment(lead.id);
-
-    expect(result).toBeUndefined();
-  });
-
-  it('returns undefined if the claim was cleared by a concurrent write between retry attempts', async () => {
-    const lead = await store.insertLead(baseData);
-    await forceComplete(lead.id, 100_000);
-    await forceClaim(lead.id);
-
-    // Forces one write conflict on the first attempt; right before it
-    // throws, simulate another process (e.g. a duplicate webhook delivery)
-    // having already resolved and cleared the claim.
-    storage.failNextWrites(1, () => {
-      const leads = storage.current() as StoredLead[];
-      leads[0]!.pendingCommissionClaim = null;
-      storage.seed(leads);
-    });
-
-    const result = await store.confirmCommissionPayment(lead.id);
-
-    expect(result).toBeUndefined();
-    const after = await store.getLead(lead.id);
-    expect(after?.paidAmount).toBe(0);
-  });
-
-  it('reject clears the claim without moving any money', async () => {
-    const lead = await store.insertLead(baseData);
-    await forceComplete(lead.id, 100_000);
-    await forceClaim(lead.id);
-
-    const rejected = await store.rejectCommissionPayment(lead.id);
-
-    expect(rejected?.paidAmount).toBe(0);
-    expect(rejected?.pendingCommissionClaim).toBeNull();
-  });
-
-  it('reject returns undefined when there was never a claim to reject (duplicate-delivery regression)', async () => {
-    const lead = await store.insertLead(baseData);
-    await forceComplete(lead.id, 100_000);
-
-    const result = await store.rejectCommissionPayment(lead.id);
-
-    expect(result).toBeUndefined();
-  });
-});
-
-describe('getOwedSummary', () => {
-  it('sums remaining commission across leads with a balance, skipping fully-paid ones', async () => {
-    const a = await store.insertLead(baseData);
-    await forceComplete(a.id, 100_000); // 10% commission = 10 000
-    const b = await store.insertLead(baseData);
-    await forceComplete(b.id, 50_000); // commission 5 000
-    await forcePay(b.id); // fully paid — excluded
-
-    const { rows, total } = await store.getOwedSummary();
-    expect(rows).toEqual([
-      expect.objectContaining({ id: a.id, remaining: 10_000 }),
-    ]);
-    expect(total).toBe(10_000);
-  });
-
-  it('excludes an archived lead even with an outstanding balance', async () => {
-    const lead = await store.insertLead(baseData);
-    await forceComplete(lead.id, 100_000);
-    await store.archiveLead(lead.id);
-
-    const { rows, total } = await store.getOwedSummary();
-    expect(rows).toEqual([]);
-    expect(total).toBe(0);
-  });
-
-  it('caps displayed rows at 20 but still totals every owed lead', async () => {
-    for (let i = 0; i < 25; i++) {
-      const lead = await store.insertLead(baseData);
-      await forceComplete(lead.id, 10_000); // commission 1 000 each
-    }
-
-    const { rows, total } = await store.getOwedSummary();
-
-    expect(rows).toHaveLength(20);
-    expect(total).toBe(25_000);
-  });
-});
-
 describe('searchLeads', () => {
-  it('still finds an archived lead', async () => {
+  it('still finds a lost lead', async () => {
     const lead = await store.insertLead(baseData);
-    await store.archiveLead(lead.id);
+    await store.setStatus(lead.id, 'lost');
     const results = await store.searchLeads('Иван');
     expect(results.map((l) => l.id)).toContain(lead.id);
   });
@@ -1154,7 +864,9 @@ describe('getLead / findByPendingPrompt — not-found paths', () => {
 
   it('findByPendingPrompt returns undefined when no lead has a pending prompt at all', async () => {
     await store.insertLead(baseData);
-    expect(await store.findByPendingPrompt(111, 999)).toBeUndefined();
+    expect(
+      await store.findByPendingPrompt({ chatId: 111, messageId: 999 }),
+    ).toBeUndefined();
   });
 
   it('findByPendingPrompt returns undefined for a chatId/messageId that does not match the pending one', async () => {
@@ -1162,122 +874,40 @@ describe('getLead / findByPendingPrompt — not-found paths', () => {
     await store.setPendingPrompt(lead.id, {
       chatId: 111,
       messageId: 555,
-      kind: 'deal_amount',
+      kind: 'postpone',
     });
-    expect(await store.findByPendingPrompt(111, 556)).toBeUndefined(); // wrong messageId
-    expect(await store.findByPendingPrompt(222, 555)).toBeUndefined(); // wrong chatId
+    expect(
+      await store.findByPendingPrompt({ chatId: 111, messageId: 556 }),
+    ).toBeUndefined();
+    expect(
+      await store.findByPendingPrompt({ chatId: 222, messageId: 555 }),
+    ).toBeUndefined();
   });
 });
 
-describe('appendIncome', () => {
-  it('numbers each income after the highest id already on the lead', () => {
-    const first = appendIncome([], 300);
-    const second = appendIncome(first, 150);
-
-    expect(second.map((i) => [i.id, i.amount, i.paidAt])).toEqual([
-      [1, 300, null],
-      [2, 150, null],
-    ]);
-  });
-
-  it('does not reuse the id of a removed income', () => {
-    const next = appendIncome(
-      [{ id: 7, amount: 100, at: 'x', paidAt: null }],
-      50,
+describe('findByCard / addNote', () => {
+  it('finds the Lead whose group card is the replied-to message', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.setTelegramMessage(lead.id, -100, 555);
+    expect((await store.findByCard({ chatId: -100, messageId: 555 }))?.id).toBe(
+      lead.id,
     );
+    expect(
+      await store.findByCard({ chatId: -100, messageId: 556 }),
+    ).toBeUndefined();
+    expect(
+      await store.findByCard({ chatId: -101, messageId: 555 }),
+    ).toBeUndefined();
+  });
 
-    expect(next[1].id).toBe(8);
+  it('appends a note to the Lead comment', async () => {
+    const lead = await store.insertLead({ ...baseData, comment: 'Звонил' });
+    const noted = await store.addNote(lead.id, 'Приедет в пятницу');
+    expect(noted?.comment).toBe('Звонил\nПриедет в пятницу');
+    expect(await store.addNote(999, 'x')).toBeUndefined();
   });
 });
 
-describe('getCommission', () => {
-  const income = (amount: number, paidAt: string | null = null) => ({
-    id: 1,
-    amount,
-    at: '2026-01-01T00:00:00.000Z',
-    paidAt,
-  });
-
-  it('sums the commission of each income rather than taxing the total', () => {
-    const info = getCommission({
-      commissionPercent: 10,
-      paidAmount: 15,
-      incomes: [
-        { ...income(300, '2026-02-01T00:00:00.000Z') },
-        { ...income(150), id: 2 },
-      ],
-    });
-
-    expect(info.commission).toBe(45);
-    expect(info.remaining).toBe(30);
-    expect(info.isPaidOff).toBe(false);
-  });
-
-  it('rounds each income separately, so the total can differ from taxing the sum', () => {
-    const perIncome = getCommission({
-      commissionPercent: 33,
-      paidAmount: 0,
-      incomes: [income(10.05), { ...income(10.05), id: 2 }],
-    });
-    const onTheTotal = getCommission({
-      commissionPercent: 33,
-      paidAmount: 0,
-      incomes: [income(20.1)],
-    });
-
-    expect(perIncome.commission).toBe(6.64);
-    expect(onTheTotal.commission).toBe(6.63);
-  });
-
-  it('uses the rate stored on the lead, so brands on different rates differ', () => {
-    const sourcing = getCommission({
-      commissionPercent: 10,
-      paidAmount: 0,
-      incomes: [income(1000)],
-    });
-    const detailing = getCommission({
-      commissionPercent: 50,
-      paidAmount: 0,
-      incomes: [income(1000)],
-    });
-
-    expect(sourcing.commission).toBe(100);
-    expect(detailing.commission).toBe(500);
-  });
-
-  it('owes nothing on a lead without incomes', () => {
-    const info = getCommission({
-      commissionPercent: 10,
-      paidAmount: 0,
-      incomes: [],
-    });
-    expect(info.commission).toBe(0);
-    expect(info.isPaidOff).toBe(true);
-  });
-
-  it('stays isPaidOff when overpaid (remaining goes negative) instead of flagging still-owed', () => {
-    const info = getCommission({
-      commissionPercent: 10,
-      paidAmount: 15_000,
-      incomes: [income(100_000)],
-    });
-    expect(info.remaining).toBe(-5000);
-    expect(info.isPaidOff).toBe(true);
-  });
-
-  it('is paid off within the rounding epsilon', () => {
-    const info = getCommission({
-      commissionPercent: 10,
-      paidAmount: 9999.999,
-      incomes: [income(100_000)],
-    });
-    expect(info.isPaidOff).toBe(true);
-  });
-});
-
-// Writes raw JSON directly into the fake blob, bypassing insertLead — the
-// only way to simulate a legacy record written before a schema field
-// existed, or a genuinely malformed one.
 function seedRawBlob(records: unknown[]): void {
   storage.seed(records);
 }
@@ -1293,20 +923,12 @@ describe('readLeads — schema validation on the way in', () => {
         locale: 'ru',
         statusChangedAt: '2026-01-01T00:00:00.000Z',
         createdAt: '2026-01-01T00:00:00.000Z',
-        // status, dealAmount, commissionPercent, paidAmount, payments, archived,
-        // pendingCommissionClaim, pendingPrompt — all omitted,
-        // as if written before this field existed.
       },
     ]);
 
     const [lead] = await store.readLeads();
 
-    expect(lead.status).toBe('new');
-    expect(lead.commissionPercent).toBe(10);
-    expect(lead.paidAmount).toBe(0);
-    expect(lead.payments).toEqual([]);
-    expect(lead.archived).toBe(false);
-    expect(lead.pendingCommissionClaim).toBeNull();
+    expect(lead.status).toBe('open');
     expect(lead.pendingPrompt).toBeNull();
   });
 
@@ -1320,6 +942,7 @@ describe('readLeads — schema validation on the way in', () => {
         locale: 'ru',
         status: 'won',
         dealAmount: 300,
+        commissionPercent: 10,
         statusChangedAt: 'x',
         createdAt: 'x',
         pendingPrompt: { chatId: 1, messageId: 1, kind: 'commission_claim' },
@@ -1329,171 +952,8 @@ describe('readLeads — schema validation on the way in', () => {
     const [lead] = await store.readLeads();
 
     expect(lead).toBeDefined();
-    expect(lead.dealAmount).toBe(300);
+    expect(lead.status).toBe('won');
     expect(lead.pendingPrompt).toBeNull();
-  });
-
-  it('turns a legacy paid-off deal into one settled income', async () => {
-    seedRawBlob([
-      {
-        id: 1,
-        name: 'Иван',
-        contact: '@ivan',
-        service: 'vehicle-sourcing',
-        locale: 'ru',
-        status: 'won',
-        dealAmount: 1000,
-        commissionPercent: 10,
-        paidAmount: 100,
-        payments: [{ amount: 100, at: '2026-02-02T00:00:00.000Z' }],
-        statusChangedAt: '2026-01-01T00:00:00.000Z',
-        createdAt: '2026-01-01T00:00:00.000Z',
-      },
-    ]);
-
-    const [lead] = await store.readLeads();
-
-    expect(lead.incomes).toEqual([
-      {
-        id: 1,
-        amount: 1000,
-        at: '2026-01-01T00:00:00.000Z',
-        paidAt: '2026-02-02T00:00:00.000Z',
-      },
-    ]);
-    expect(lead.dealAmount).toBe(1000);
-    expect(lead.paidAmount).toBe(100);
-  });
-
-  it('keeps a legacy unpaid deal owed, dating the income from the status change', async () => {
-    seedRawBlob([
-      {
-        id: 1,
-        name: 'Иван',
-        contact: '@ivan',
-        service: 'vehicle-sourcing',
-        locale: 'ru',
-        status: 'won',
-        dealAmount: 1000,
-        commissionPercent: 10,
-        statusChangedAt: '2026-01-01T00:00:00.000Z',
-        createdAt: '2026-01-01T00:00:00.000Z',
-      },
-    ]);
-
-    const [lead] = await store.readLeads();
-
-    expect(lead.incomes).toEqual([
-      { id: 1, amount: 1000, at: '2026-01-01T00:00:00.000Z', paidAt: null },
-    ]);
-    expect(lead.paidAmount).toBe(0);
-  });
-
-  it('leaves a legacy zero-euro deal without an income, keeping the amount as it was', async () => {
-    seedRawBlob([
-      {
-        id: 1,
-        name: 'Иван',
-        contact: '@ivan',
-        service: 'vehicle-sourcing',
-        locale: 'ru',
-        status: 'won',
-        dealAmount: 0,
-        statusChangedAt: 'x',
-        createdAt: 'x',
-      },
-    ]);
-
-    const [lead] = await store.readLeads();
-
-    expect(lead.incomes).toEqual([]);
-    expect(lead.dealAmount).toBe(0);
-  });
-
-  it('keeps a legacy partly-paid deal partly paid, splitting it at what the payment covered', async () => {
-    seedRawBlob([
-      {
-        id: 1,
-        name: 'Иван',
-        contact: '@ivan',
-        service: 'vehicle-sourcing',
-        locale: 'ru',
-        status: 'won',
-        dealAmount: 100_000,
-        commissionPercent: 10,
-        paidAmount: 3000,
-        payments: [{ amount: 3000, at: '2026-02-02T00:00:00.000Z' }],
-        statusChangedAt: '2026-01-01T00:00:00.000Z',
-        createdAt: '2026-01-01T00:00:00.000Z',
-      },
-    ]);
-
-    const [lead] = await store.readLeads();
-
-    expect(lead.incomes).toEqual([
-      {
-        id: 1,
-        amount: 30_000,
-        at: '2026-01-01T00:00:00.000Z',
-        paidAt: '2026-02-02T00:00:00.000Z',
-      },
-      {
-        id: 2,
-        amount: 70_000,
-        at: '2026-01-01T00:00:00.000Z',
-        paidAt: null,
-      },
-    ]);
-    expect(lead.dealAmount).toBe(100_000);
-    expect(lead.paidAmount).toBe(3000);
-    expect(getCommission(lead).remaining).toBe(7000);
-  });
-
-  it('leaves a legacy deal on a zero commission rate whole and unsettled', async () => {
-    seedRawBlob([
-      {
-        id: 1,
-        name: 'Иван',
-        contact: '@ivan',
-        service: 'vehicle-sourcing',
-        locale: 'ru',
-        status: 'won',
-        dealAmount: 1000,
-        commissionPercent: 0,
-        paidAmount: 0,
-        statusChangedAt: '2026-01-01T00:00:00.000Z',
-        createdAt: '2026-01-01T00:00:00.000Z',
-      },
-    ]);
-
-    const [lead] = await store.readLeads();
-
-    expect(lead.incomes).toEqual([
-      { id: 1, amount: 1000, at: '2026-01-01T00:00:00.000Z', paidAt: null },
-    ]);
-  });
-
-  it('keeps a legacy deal whole when the payment covers less than a euro of it', async () => {
-    seedRawBlob([
-      {
-        id: 1,
-        name: 'Иван',
-        contact: '@ivan',
-        service: 'vehicle-sourcing',
-        locale: 'ru',
-        status: 'won',
-        dealAmount: 1000,
-        commissionPercent: 10,
-        paidAmount: 0.001,
-        statusChangedAt: '2026-01-01T00:00:00.000Z',
-        createdAt: '2026-01-01T00:00:00.000Z',
-      },
-    ]);
-
-    const [lead] = await store.readLeads();
-
-    expect(lead.incomes).toHaveLength(1);
-    expect(lead.paidAmount).toBe(0);
   });
 
   it('hides a record missing a required field from callers', async () => {
@@ -1541,7 +1001,7 @@ describe('readLeads — schema validation on the way in', () => {
         locale: 'ru',
         statusChangedAt: 'x',
         createdAt: 'x',
-        paidAmount: '5000',
+        remindAt: 5000,
       },
     ]);
 
@@ -1575,7 +1035,7 @@ describe('updateLeads conflict retry', () => {
         leads.map((l) => ({ ...l, name: 'Пётр' })),
       );
       const assertion = expect(pending).rejects.toThrow(
-        'storage write conflict',
+        'updateLeads: conflict retry limit exceeded',
       );
       await vi.runAllTimersAsync();
       await assertion;
@@ -1583,7 +1043,7 @@ describe('updateLeads conflict retry', () => {
       vi.useRealTimers();
     }
 
-    expect(storage.writeAttempts() - before).toBe(6); // MAX_RETRIES, no more
+    expect(storage.writeAttempts() - before).toBe(6);
   });
 });
 
@@ -1610,21 +1070,43 @@ describe('setTelegramMessage', () => {
   });
 });
 
+describe('touchLead', () => {
+  it('records activity without touching the outcome', async () => {
+    const lead = await store.insertLead(baseData);
+    expect(lead.lastActivityAt).toBeNull();
+    const at = new Date('2026-10-10T09:00:00.000Z');
+
+    await store.touchLead(lead.id, at);
+
+    expect(await store.getLead(lead.id)).toMatchObject({
+      status: 'open',
+      statusChangedAt: lead.statusChangedAt,
+      lastActivityAt: at.toISOString(),
+    });
+  });
+
+  it('stamps the current time by default', async () => {
+    const lead = await store.insertLead(baseData);
+    const updated = await store.touchLead(lead.id);
+    expect(updated?.lastActivityAt).toEqual(expect.any(String));
+  });
+});
+
 describe('updateLeads — failures that are not write conflicts', () => {
   it('propagates a storage failure instead of burning retries on it', async () => {
     await store.insertLead(baseData);
     const boom = new Error('storage is down');
     const failing = {
       read: storage.read,
+      exists: storage.exists,
       write: vi.fn().mockRejectedValue(boom),
     };
     const brokenStore = createLeadStore({
       storage: failing,
-      schema: createLeadSchema({ defaultCommissionPercent: 10 }),
+      schema: storedLeadSchema,
     });
 
-    await expect(brokenStore.updateLeads((leads) => leads)).rejects.toBe(boom);
-    // One attempt, not MAX_RETRIES — a broken backend is not a lost race.
+    await expect(brokenStore.updateLeads(() => [])).rejects.toBe(boom);
     expect(failing.write).toHaveBeenCalledTimes(1);
   });
 });
@@ -1654,26 +1136,13 @@ describe('readLeads — a record that is not a list at all', () => {
   });
 });
 
-describe('per-business store defaults', () => {
-  it('stamps new leads with the business own commission rate', async () => {
-    const detailingStore = createLeadStore({
-      storage: createMemoryStorage(),
-      schema: createLeadSchema({ defaultCommissionPercent: 50 }),
-    });
-
-    const lead = await detailingStore.insertLead(baseData);
-
-    expect(lead.commissionPercent).toBe(50);
-  });
-});
-
 describe('quarantine — nothing leaves the blob on its own', () => {
   const corrupt = { id: 7, name: 'Пётр', service: 'x', locale: 'ru' };
 
   function guarded(quarantine: (entries: unknown[]) => Promise<void>) {
     return createLeadStore({
       storage,
-      schema: createLeadSchema({ defaultCommissionPercent: 10 }),
+      schema: storedLeadSchema,
       quarantine,
     });
   }
@@ -1703,6 +1172,18 @@ describe('quarantine — nothing leaves the blob on its own', () => {
 
     expect(quarantine).toHaveBeenCalledWith([corrupt]);
     expect(storage.current()).toContainEqual(corrupt);
+  });
+
+  it('drops a retired draft record without quarantining it', async () => {
+    const quarantine = vi.fn().mockResolvedValue(undefined);
+    const draft = { type: 'draft', id: 5, amount: 30 };
+    storage.seed([draft]);
+
+    await guarded(quarantine).insertLead(baseData);
+
+    expect(quarantine).not.toHaveBeenCalled();
+    expect(storage.current()).not.toContainEqual(draft);
+    expect(storage.current()).toHaveLength(1);
   });
 
   it('keeps it when the copy fails, and says so', async () => {
@@ -1825,23 +1306,143 @@ describe('capturePrompt', () => {
     ).toBeUndefined();
   });
 
-  it('does not disturb the operator prompt on the same lead', async () => {
+  it('does not disturb the owner prompt on the same lead', async () => {
     const lead = await store.insertLead(baseData);
     await store.setPendingPrompt(lead.id, {
       chatId: 111,
       messageId: 555,
-      kind: 'edit_name',
+      kind: 'reply_visitor',
     });
 
     await store.updateCapture(lead.id, {
       capturePrompt: { chatId: 777, step: 'budget' },
     });
 
-    expect(await store.findByPendingPrompt(111, 555)).toBeDefined();
+    expect(
+      await store.findByPendingPrompt({ chatId: 111, messageId: 555 }),
+    ).toBeDefined();
     expect(
       (await store.findByCapturePrompt(777, baseData.brand))?.pendingPrompt
         ?.kind,
-    ).toBe('edit_name');
+    ).toBe('reply_visitor');
+  });
+});
+
+describe('a newer Lead for the same Telegram visitor', () => {
+  const bot = { ...baseData, telegramId: 42, visitorId: null };
+
+  it('takes the running dialog off the Lead it supersedes', async () => {
+    const old = await store.insertLead({
+      ...bot,
+      capturePrompt: { chatId: 42, step: 'budget' },
+    });
+    const sister = await store.insertLead({
+      ...bot,
+      brand: 'Sister',
+      capturePrompt: { chatId: 42, step: 'budget' },
+    });
+
+    const { lead } = await store.insertOrMergeLead(bot);
+
+    expect(await store.getLead(old.id)).toMatchObject({ capturePrompt: null });
+    expect((await store.getLead(sister.id))?.capturePrompt).not.toBeNull();
+    expect(await store.findByCapturePrompt(42, bot.brand)).toBeUndefined();
+    expect(lead.id).toBe(3);
+  });
+
+  it('takes it off when the new one merges into a click', async () => {
+    const old = await store.insertLead({
+      ...bot,
+      capturePrompt: { chatId: 42, step: 'budget' },
+    });
+    await store.insertLead({
+      ...baseData,
+      name: '',
+      contact: '—',
+      visitorId: 'visitor-1',
+      kind: 'call_click',
+    });
+
+    const { merged, lead } = await store.insertOrMergeLead({
+      ...bot,
+      visitorId: 'visitor-1',
+    });
+
+    expect(merged).toBe(true);
+    expect(lead.visitorActiveAt).toEqual(expect.any(String));
+    expect(await store.getLead(old.id)).toMatchObject({ capturePrompt: null });
+  });
+
+  it('leaves the running dialog alone when a site form merges into a bot Lead', async () => {
+    const old = await store.insertLead({
+      ...bot,
+      capturePrompt: { chatId: 42, step: 'budget' },
+    });
+    await store.insertLead({
+      ...bot,
+      name: '',
+      contact: '—',
+      visitorId: 'visitor-1',
+      kind: 'call_click',
+    });
+
+    const { merged } = await store.insertOrMergeLead({
+      ...baseData,
+      visitorId: 'visitor-1',
+    });
+
+    expect(merged).toBe(true);
+    expect((await store.getLead(old.id))?.capturePrompt).not.toBeNull();
+  });
+
+  it('leaves other Leads alone when the new one has no Telegram id', async () => {
+    const old = await store.insertLead({
+      ...bot,
+      capturePrompt: { chatId: 42, step: 'budget' },
+    });
+
+    await store.insertOrMergeLead(baseData);
+
+    expect((await store.getLead(old.id))?.capturePrompt).not.toBeNull();
+  });
+});
+
+describe('a capturePrompt stored before the per-brand Questionnaires', () => {
+  const legacy = (id: number, step: string) => ({
+    id,
+    brand: baseData.brand,
+    name: 'Иван',
+    contact: '@ivan',
+    service: '',
+    locale: 'ru',
+    statusChangedAt: 'x',
+    createdAt: 'x',
+    capturePrompt: { chatId: 700 + id, step },
+  });
+
+  it('still parses an old step and clears an unknown one without quarantining the lead', async () => {
+    const quarantine = vi.fn().mockResolvedValue(undefined);
+    const guarded = createLeadStore({
+      storage,
+      schema: storedLeadSchema,
+      quarantine,
+    });
+    storage.seed([
+      legacy(1, 'looking_for'),
+      legacy(2, 'budget'),
+      legacy(3, 'phone'),
+      legacy(4, 'model_year'),
+    ]);
+
+    const steps = (await guarded.readLeads()).map((l) => l.capturePrompt);
+
+    expect(quarantine).not.toHaveBeenCalled();
+    expect(steps).toEqual([
+      { chatId: 701, step: 'looking_for' },
+      { chatId: 702, step: 'budget' },
+      { chatId: 703, step: 'phone' },
+      null,
+    ]);
   });
 });
 
@@ -1851,6 +1452,22 @@ describe('the capture lookups', () => {
 
   it('is the visitor merge window that decides a returning visitor', () => {
     expect(VISITOR_MERGE_WINDOW_MS).toBe(60 * 60 * 1000);
+  });
+
+  it('lets a stale dialog expire', async () => {
+    const lead = await fromTelegram(42, {
+      capturePrompt: { chatId: 42, step: 'budget' },
+    });
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    await store.updateLeads((leads) =>
+      leads.map((l) =>
+        l.id === lead.id
+          ? { ...l, createdAt: twoHoursAgo, visitorActiveAt: twoHoursAgo }
+          : l,
+      ),
+    );
+
+    expect(await store.findByCapturePrompt(42, baseData.brand)).toBeUndefined();
   });
 
   it('finds the lead carrying the sender id', async () => {
@@ -1909,19 +1526,6 @@ describe('the capture lookups', () => {
     );
   });
 
-  it('skips an archived lead', async () => {
-    const lead = await fromTelegram(42);
-    await store.updateCapture(lead.id, {
-      capturePrompt: { chatId: 42, step: 'budget' },
-    });
-    await store.archiveLead(lead.id);
-
-    expect(
-      await store.findOpenLeadByTelegramId(42, baseData.brand),
-    ).toBeUndefined();
-    expect(await store.findByCapturePrompt(42, baseData.brand)).toBeUndefined();
-  });
-
   it.each(['won', 'lost'] as const)('skips a %s lead', async (status) => {
     const lead = await fromTelegram(42);
     await store.updateCapture(lead.id, {
@@ -1935,9 +1539,9 @@ describe('the capture lookups', () => {
     expect(await store.findByCapturePrompt(42, baseData.brand)).toBeUndefined();
   });
 
-  it('keeps a lead the operator has moved along but not closed', async () => {
+  it('keeps a lead the owner has postponed but not closed', async () => {
     const lead = await fromTelegram(42);
-    await store.setStatus(lead.id, 'in_progress');
+    await store.setStatus(lead.id, 'postponed');
 
     expect((await store.findOpenLeadByTelegramId(42, baseData.brand))?.id).toBe(
       lead.id,
@@ -1966,6 +1570,61 @@ describe('the capture lookups', () => {
 });
 
 describe('updateCapture', () => {
+  it('marks the Lead as referred and keeps the mark on later writes', async () => {
+    const lead = await store.insertLead(baseData);
+
+    await store.updateCapture(lead.id, {
+      referredBy: 'approved',
+      capturePrompt: null,
+    });
+    const updated = await store.updateCapture(lead.id, {
+      note: 'Сообщение: привет',
+      capturePrompt: null,
+    });
+
+    expect(updated?.referredBy).toBe('approved');
+  });
+
+  it('stamps when the visitor last acted on the Lead', async () => {
+    const lead = await store.insertLead(baseData);
+
+    const updated = await store.updateCapture(lead.id, { capturePrompt: null });
+
+    expect(lead.visitorActiveAt).toBeUndefined();
+    expect(Date.parse(updated?.visitorActiveAt ?? '')).toBeGreaterThan(
+      Date.now() - 1000,
+    );
+  });
+
+  it('switches the Lead to the locale the visitor picked', async () => {
+    const lead = await store.insertLead({ ...baseData, locale: 'ru' });
+
+    const updated = await store.updateCapture(lead.id, {
+      locale: 'en',
+      capturePrompt: null,
+    });
+
+    expect(updated?.locale).toBe('en');
+  });
+
+  it("makes a picked service the Lead's only one", async () => {
+    const lead = await store.insertLead({
+      ...baseData,
+      service: 'vehicle-import',
+      services: ['vehicle-import'],
+    });
+
+    const updated = await store.updateCapture(lead.id, {
+      service: 'vehicle-sourcing',
+      capturePrompt: { chatId: 777, step: 'looking_for' },
+    });
+
+    expect(updated).toMatchObject({
+      service: 'vehicle-sourcing',
+      services: ['vehicle-sourcing'],
+    });
+  });
+
   it('appends the answer and moves the dialog on in one write', async () => {
     const lead = await store.insertLead({ ...baseData, comment: 'Было' });
 
@@ -1992,12 +1651,12 @@ describe('updateCapture', () => {
     expect(updated?.capturePrompt).toBeNull();
   });
 
-  it('leaves an operator edit made mid-dialog in place', async () => {
+  it('leaves an owner edit made mid-dialog in place', async () => {
     const lead = await store.insertLead(baseData);
     await store.setPendingPrompt(lead.id, {
       chatId: 111,
       messageId: 555,
-      kind: 'edit_comment',
+      kind: 'reply_visitor',
     });
 
     const updated = await store.updateCapture(lead.id, {
@@ -2005,7 +1664,7 @@ describe('updateCapture', () => {
       capturePrompt: null,
     });
 
-    expect(updated?.pendingPrompt?.kind).toBe('edit_comment');
+    expect(updated?.pendingPrompt?.kind).toBe('reply_visitor');
   });
 
   it('replaces the contact when the visitor shares a better one', async () => {

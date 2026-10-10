@@ -7,6 +7,37 @@ phoneButton: Поделиться номером
 phoneSkip: Пропустить
 thanks: Спасибо! Передали менеджеру — он скоро с вами свяжется.
 received: Приняли, менеджер увидит ваше сообщение.
+menu:
+  text: Чем можем помочь? Выберите, что вас интересует.
+  back: « Назад
+services:
+  button: Услуги
+  text: Вот с чем мы помогаем. Выберите услугу — расскажем подробнее.
+card:
+  request: Оставить заявку
+  site: Подробнее на сайте
+contacts:
+  button: Контакты
+  text: Мы на связи — пишите или звоните.
+  hours: Круглосуточно, без выходных
+manager:
+  button: Написать менеджеру
+  text: Напишите ваш вопрос одним сообщением — менеджер ответит здесь же.
+partners:
+  button: Партнёры
+  text: Ремонт и детейлинг — у партнёров, которым мы доверяем. Выберите, кому написать.
+request:
+  button: Оставить заявку
+  car: Какая у вас машина? Напишите марку, модель и год.
+  service: Какая услуга вам нужна? Выберите ниже.
+language:
+  button: 🌐 Язык
+  text: Выберите язык, на котором вам удобнее общаться.
+profile:
+  description: Подбираем и проверяем автомобили в Германии, Испании, Швейцарии и Сербии, привозим из Европы и Китая. Нажмите «Старт» — расскажите, какая машина вам нужна, и менеджер ответит здесь же.
+  shortDescription: Автоподбор, привоз и выкуп авто в Европе
+  menuCommand: Главное меню
+  langCommand: Сменить язык
 translations:
   en:
     greeting: Hello! Thanks for getting in touch — we can see your enquiry and we'll come back to you shortly.
@@ -18,6 +49,37 @@ translations:
     phoneSkip: Skip
     thanks: Thank you! I've passed this on to the manager — they'll be in touch with you soon.
     received: Got it, your manager will see your message.
+    menu:
+      text: How can we assist you? Choose what interests you.
+      back: « Back
+    services:
+      button: Services
+      text: Here’s how we can help. Select a service and we’ll provide more details.
+    card:
+      request: Submit an inquiry
+      site: Learn more on the site
+    contacts:
+      button: Contact Us
+      text: We're here for you — message or call us.
+      hours: Available 24/7, no days off
+    manager:
+      button: Message the manager
+      text: Send your question in one message — the manager will reply right here.
+    partners:
+      button: Partners
+      text: Repairs and detailing — with partners we trust. Choose who to contact.
+    request:
+      button: Submit an inquiry
+      car: What car do you have? Please provide the make, model, and year.
+      service: What service do you need? Please select from below.
+    language:
+      button: 🌐 Language
+      text: Choose the language you're most comfortable communicating in.
+    profile:
+      description: We source and inspect cars in Germany, Spain, Switzerland, and Serbia, bringing them in from Europe and China. Click 'Start' — tell us what kind of car you need, and a manager will respond right here.
+      shortDescription: Car sourcing, import, and buyback in Europe
+      menuCommand: Main Menu
+      langCommand: Change Language
   sr:
     greeting: Zdravo! Hvala što ste se javili — već smo primili vašu poruku i uskoro ćemo odgovoriti.
     lookingFor: Recite nam ukratko koju mašinu tražite ili u čemu vam treba pomoć.
@@ -26,8 +88,39 @@ translations:
     phoneOffer: Ako vam je lakše putem telefona, podelite broj, pa ćemo pozvati. Ako ne, samo preskočite.
     phoneButton: Podeliti broj
     phoneSkip: Preskočiti
-    thanks: Hvala! Prosledili smo manageru — uskoro će vas kontaktirati.
+    thanks: Hvala! Prosledili smo menadžeru — uskoro će vas kontaktirati.
     received: Primili smo, manager će videti vašu poruku.
+    menu:
+      text: Kako možemo pomoći? Izaberite šta vas interesuje.
+      back: « Nazad
+    services:
+      button: Usluge
+      text: Evo u čemu možemo da pomognemo. Izaberite uslugu — objasnićemo detaljnije.
+    card:
+      request: Podneti zahtev
+      site: Više informacija na sajtu
+    contacts:
+      button: Kontakti
+      text: Tu smo — pišite ili zovite.
+      hours: Non-stop, bez praznika
+    manager:
+      button: Pitati menadžera
+      text: Postavite vaše pitanje u jednoj poruci — menadžer će odgovoriti ovde.
+    partners:
+      button: Partneri
+      text: Popravka i detailing — kod partnera kojima verujemo. Izaberite kome želite da pišete.
+    request:
+      button: Podneti zahtev
+      car: Koja su vaša kola? Napišite marku, model i godište.
+      service: Koju uslugu želite? Izaberite ispod.
+    language:
+      button: 🌐 Jezik
+      text: Izaberite jezik koji vam više odgovara.
+    profile:
+      description: Biramo i proveravamo automobile u Nemačkoj, Španiji, Švajcarskoj i Srbiji, uvozimo iz Evrope i Kine. Kliknite na 'Start' — recite nam koju vrstu automobila želite, a menadžer će vam ovde odgovoriti.
+      shortDescription: Provera auta pre kupovine, uvoz i otkup automobila u Evropi
+      menuCommand: Glavni meni
+      langCommand: Promeni jezik
   es:
     greeting: ¡Hola! Gracias por escribirnos, ya vemos tu consulta y te respondemos enseguida.
     lookingFor: Cuéntanos en dos palabras qué coche te interesa o en qué necesitas ayuda.
@@ -38,6 +131,37 @@ translations:
     phoneSkip: Omitir
     thanks: ¡Gracias! Se lo hemos transmitido al gerente, pronto se pondrá en contacto contigo.
     received: Recibido, el gestor verá tu mensaje.
+    menu:
+      text: ¿En qué podemos ayudarte? Elige lo que te interesa.
+      back: « Atrás
+    services:
+      button: Servicios
+      text: Esto es en lo que te ayudamos. Elige un servicio y te contaremos más.
+    card:
+      request: Enviar solicitud
+      site: Más detalles en el sitio
+    contacts:
+      button: Contactos
+      text: Estamos aquí para ayudarte, escríbenos o llámanos.
+      hours: Disponible 24/7, sin días festivos
+    manager:
+      button: Escribir al gerente
+      text: Escribe tu pregunta en un solo mensaje — el gerente te responderá aquí.
+    partners:
+      button: Socios
+      text: Reparación y detailing — con socios en los que confiamos. Elige a quién contactar.
+    request:
+      button: Enviar solicitud
+      car: ¿Cuál es tu coche? Escribe la marca, el modelo y el año.
+      service: ¿Qué servicio necesitas? Elige a continuación.
+    language:
+      button: 🌐 Idioma
+      text: Elige el idioma con el que te sientas más cómodo.
+    profile:
+      description: Seleccionamos y verificamos vehículos en Alemania, España, Suiza y Serbia, los traemos de Europa y China. Haz clic en 'Iniciar' y cuéntanos qué coche necesitas, y un gestor te responderá aquí mismo.
+      shortDescription: Selección de coches, transporte y compra de vehículos en Europa
+      menuCommand: Menú principal
+      langCommand: Cambiar idioma
   de:
     greeting: Hallo! Danke für Ihre Nachricht – Ihre Anfrage liegt uns vor, wir melden uns gleich.
     lookingFor: Sagen Sie uns kurz, welches Auto Sie interessiert oder wobei Sie Hilfe brauchen.
@@ -48,4 +172,35 @@ translations:
     phoneSkip: Überspringen
     thanks: Danke! Wir haben es dem Manager weitergeleitet — er wird sich bald bei Ihnen melden.
     received: Angekommen, Ihr Ansprechpartner sieht Ihre Nachricht.
-translatedFrom: e4e962f84ccafd96
+    menu:
+      text: Wie können wir Ihnen helfen? Wählen Sie, was Sie interessiert.
+      back: « Zurück
+    services:
+      button: Dienstleistungen
+      text: Das sind die Bereiche, in denen wir helfen. Wählen Sie eine Dienstleistung – wir erzählen Ihnen mehr.
+    card:
+      request: Anfrage senden
+      site: Mehr auf der Website
+    contacts:
+      button: Kontakt
+      text: Wir sind für Sie da – schreiben Sie uns oder rufen Sie an.
+      hours: 24/7, ohne Feiertage
+    manager:
+      button: Manager kontaktieren
+      text: Stellen Sie Ihre Frage in einer Nachricht – der Manager antwortet hier.
+    partners:
+      button: Partner
+      text: Reparatur und Pflege – bei Partnern, denen wir vertrauen. Wählen Sie, wem Sie schreiben möchten.
+    request:
+      button: Anfrage senden
+      car: Welches Auto haben Sie? Bitte geben Sie Marke, Modell und Baujahr an.
+      service: Welche Dienstleistung benötigen Sie? Wählen Sie unten aus.
+    language:
+      button: 🌐 Sprache
+      text: Wählen Sie die Sprache, in der Sie kommunizieren möchten.
+    profile:
+      description: Wir suchen und prüfen Autos in Deutschland, Spanien, der Schweiz und Serbien und importieren sie aus Europa und China. Klicken Sie auf „Start“ – erzählen Sie uns, welches Auto Sie benötigen, und unser Manager wird Ihnen hier antworten.
+      shortDescription: Autosourcing, Import und Rückkauf von Fahrzeugen in Europa
+      menuCommand: Hauptmenü
+      langCommand: Sprache wechseln
+translatedFrom: c2cf0e2b52fcc6fd

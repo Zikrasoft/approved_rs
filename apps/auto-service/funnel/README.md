@@ -102,7 +102,7 @@ Both counts are per test. A full two-test run therefore leaves two Leads, two
 Order markers and three intercepted calls behind.
 
 1. **One order.** Exactly one Lead, exactly one Order marker, and exactly one
-   `sendMessage` to the group — with the operator card's payload: the group
+   `sendMessage` to the group — with the owner card's payload: the group
    chat, HTML parse mode, the buyer's name, the `parts-order` service under its
    label («Заказ из магазина») and a deep link carrying the stored Lead's id.
    The Lead itself carries `brand: CarLab`, `service: parts-order`,

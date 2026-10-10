@@ -20,6 +20,8 @@ export function createMemoryStorage(): MemoryStorage {
   let onConflict: (() => void) | undefined;
 
   return {
+    exists: () => Promise.resolve(version !== undefined),
+
     read(): Promise<StorageSnapshot> {
       return Promise.resolve({ raw, version });
     },
@@ -33,7 +35,7 @@ export function createMemoryStorage(): MemoryStorage {
         hook?.();
         return Promise.reject(new StorageConflictError());
       }
-      if (expectedVersion !== undefined && expectedVersion !== version) {
+      if (expectedVersion !== version) {
         return Promise.reject(new StorageConflictError());
       }
       raw = JSON.parse(JSON.stringify(leads));

@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createFormatter } from '@podbor/lead-crm';
+import { createFormatter, storedLeadSchema } from '@podbor/lead-crm';
 import { formatPrice } from '@podbor/shop-catalog/browser';
 import { ORDER_HOOK_HEADER, signHook } from '@podbor/shop-catalog/order-hook';
-import { leadSchema } from './crm';
 import {
   createShopOrderHandler,
   orderComment,
@@ -256,7 +255,7 @@ describe('the card text', () => {
       })),
       comment: '&'.repeat(2000),
     };
-    const lead = leadSchema.parse({
+    const lead = storedLeadSchema.parse({
       ...orderLead(worst as never),
       brand: 'CarLab',
       id: 1,
@@ -267,7 +266,7 @@ describe('the card text', () => {
     const card = createFormatter({
       serviceLabel: (slug) => slug,
       botUsername: 'carlab_bot',
-    }).formatLeadText(lead, 'owner');
+    }).formatLeadText(lead);
 
     expect(card.length).toBeLessThanOrEqual(4096);
     expect(card).toContain('&lt;');

@@ -1,6 +1,7 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import {
   access,
+  link,
   mkdir,
   readFile,
   rename,
@@ -28,8 +29,20 @@ export interface FileStorageOptions {
 const versionOf = (text: string): string =>
   createHash('sha1').update(text).digest('hex');
 
-const isMissing = (error: unknown): boolean =>
-  error instanceof Error && 'code' in error && error.code === 'ENOENT';
+const hasCode = (error: unknown, code: string): boolean =>
+  error instanceof Error && 'code' in error && error.code === code;
+const isMissing = (error: unknown) => hasCode(error, 'ENOENT');
+const isExisting = (error: unknown) => hasCode(error, 'EEXIST');
+
+async function fileExists(file: string): Promise<boolean> {
+  try {
+    await access(file);
+    return true;
+  } catch (error) {
+    if (isMissing(error)) return false;
+    throw error;
+  }
+}
 
 export function createFileStorage({
   path,
@@ -50,12 +63,23 @@ export function createFileStorage({
   return {
     read,
 
+    exists: () => fileExists(file),
+
     async write(leads: unknown, version: string | undefined): Promise<void> {
-      if (version !== undefined && version !== (await read()).version) {
-        throw new StorageConflictError();
-      }
-      const staging = `${file}.tmp`;
       await mkdir(dirname(file), { recursive: true });
+      const staging = `${file}.${randomUUID()}.tmp`;
+      if (version === undefined) {
+        await writeFile(staging, JSON.stringify(leads));
+        try {
+          await link(staging, file);
+        } catch (error) {
+          throw isExisting(error) ? new StorageConflictError() : error;
+        } finally {
+          await unlink(staging);
+        }
+        return;
+      }
+      if (version !== (await read()).version) throw new StorageConflictError();
       await writeFile(staging, JSON.stringify(leads));
       await rename(staging, file);
     },
@@ -66,14 +90,7 @@ export function createFileOrderMarkers({ dir }: { dir: string }): OrderMarkers {
   const fileFor = (orderId: string) => join(dir, markerPath(orderId));
 
   return {
-    async has(orderId: string): Promise<boolean> {
-      try {
-        await access(fileFor(orderId));
-        return true;
-      } catch {
-        return false;
-      }
-    },
+    has: (orderId: string) => fileExists(fileFor(orderId)),
 
     async add(orderId: string): Promise<void> {
       await mkdir(join(dir, ORDER_MARKER_PREFIX), { recursive: true });

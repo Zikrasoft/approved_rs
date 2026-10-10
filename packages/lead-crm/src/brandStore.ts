@@ -1,4 +1,4 @@
-import { createLeadSchema } from './schema.ts';
+import { storedLeadSchema } from './schema.ts';
 import {
   createQuarantine,
   LEADS_PATH,
@@ -6,32 +6,44 @@ import {
   type QuarantineOptions,
 } from './quarantine.ts';
 import { createLeadStore } from './store.ts';
-import type { LeadStorage } from './storage/types.ts';
+import { createLedgerStore, LEDGER_PATH } from './ledgerStore.ts';
+import { legacyOwed } from './legacyIncomes.ts';
+import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
+
+export const OPENING_NOTE = 'Перенос со старой системы';
 
 export interface BrandStoreOptions {
   brand: string;
-  commissionPercent: number;
   storageFor: (path: string) => LeadStorage;
   getNotifier: QuarantineOptions['getNotifier'];
 }
 
 export function createBrandStore({
   brand,
-  commissionPercent,
   storageFor,
   getNotifier,
 }: BrandStoreOptions) {
-  const leadSchema = createLeadSchema({
-    defaultCommissionPercent: commissionPercent,
+  const leadsStorage = storageFor(LEADS_PATH);
+  const ledgerStore = createLedgerStore({
+    storage: storageFor(LEDGER_PATH),
+    opening: async () => {
+      const { raw } = await leadsStorage.read();
+      const owed = legacyOwed(storedRecordsSchema.parse(raw ?? []));
+      return owed > 0
+        ? [{ type: 'payout', amount: owed, note: OPENING_NOTE, by: 'owner' }]
+        : [];
+    },
   });
   const leadStore = createLeadStore({
-    storage: storageFor(LEADS_PATH),
-    schema: leadSchema,
+    storage: leadsStorage,
+    schema: storedLeadSchema,
     quarantine: createQuarantine({
       storage: storageFor(QUARANTINE_PATH),
       brand,
       getNotifier,
     }),
+    // TODO: drop beforeWrite, the opening and legacyIncomes.ts once data/ledger.json exists in production.
+    beforeWrite: () => ledgerStore.ensureOpened(),
   });
-  return { leadStore, leadSchema };
+  return { leadStore, ledgerStore };
 }

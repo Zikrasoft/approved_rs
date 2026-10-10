@@ -7,6 +7,37 @@ phoneButton: Поделиться номером
 phoneSkip: Пропустить
 thanks: Спасибо! Передали мастеру — он скоро с вами свяжется.
 received: Приняли, мастер увидит ваше сообщение.
+menu:
+  text: Чем можем помочь? Выберите, что вас интересует.
+  back: « Назад
+services:
+  button: Услуги
+  text: Вот что мы делаем в сервисе. Выберите услугу — покажем цену, сроки и что входит.
+card:
+  request: Оставить заявку
+  site: Подробнее на сайте
+contacts:
+  button: Контакты
+  text: Мы в Белграде, ждём вас в сервисе.
+  hours: Пн–Пт 08:00–18:00 · Сб 09:00–14:00
+manager:
+  button: Написать мастеру
+  text: Напишите ваш вопрос одним сообщением — мастер ответит здесь же.
+partners:
+  button: Партнёры
+  text: Наши партнёры — выберите, кому написать.
+request:
+  button: Оставить заявку
+  car: Какая у вас машина? Напишите марку, модель и год.
+  service: Какие работы нужны? Выберите ниже.
+language:
+  button: 🌐 Язык
+  text: Выберите язык, на котором вам удобнее общаться.
+profile:
+  description: Автосервис в Белграде — диагностика, ремонт и обслуживание. Нажмите «Старт» — расскажите, что с машиной, и мастер ответит здесь же.
+  shortDescription: Автосервис в Белграде — диагностика, ремонт, обслуживание
+  menuCommand: Главное меню
+  langCommand: Сменить язык
 translations:
   sr:
     greeting: Zdravo! Hvala što ste nam pisali — upit je kod nas i majstor će vam se uskoro javiti.
@@ -16,8 +47,39 @@ translations:
     phoneOffer: Ako vam više odgovara poziv, podelite broj pa će vas majstor pozvati. Ako ne, slobodno preskočite.
     phoneButton: Podeli broj
     phoneSkip: Preskoči
-    thanks: Hvala! Proslijedili smo majstoru — uskoro će vas kontaktirati.
+    thanks: Hvala! Prosledili smo majstoru — uskoro će vas kontaktirati.
     received: Primili smo, majstor će videti vašu poruku.
+    menu:
+      text: Kako možemo pomoći? Izaberite šta vas zanima.
+      back: « Nazad
+    services:
+      button: Usluge
+      text: Evo šta radimo u servisu. Izaberite uslugu — pokazaćemo cenu, rokove i šta je uključeno.
+    card:
+      request: Poslati zahtev
+      site: Više informacija na sajtu
+    contacts:
+      button: Kontakti
+      text: Mi smo u Beogradu, čekamo vas u servisu.
+      hours: Ponedeljak–Petak 08:00–18:00 · Subota 09:00–14:00
+    manager:
+      button: Pitanje za majstora
+      text: Napišite vaše pitanje u jednoj poruci — majstor će odgovoriti ovde.
+    partners:
+      button: Partneri
+      text: Naši partneri — izaberite kome da pišete.
+    request:
+      button: Poslati zahtev
+      car: Koja je vaša mašina? Napišite marku, model i godinu.
+      service: Koje radove trebate? Izaberite ispod.
+    language:
+      button: 🌐 Jezik
+      text: Izaberite jezik kojim vam je lakše da komunicirate.
+    profile:
+      description: Autoservis u Beogradu — dijagnostika, popravka i servisiranje. Pritisnite „Start“ — recite šta nije u redu s autom, a majstor će ovde odgovoriti.
+      shortDescription: Autoservis u Beogradu — dijagnostika, popravka, servisiranje
+      menuCommand: Glavni meni
+      langCommand: Promeni jezik
   en:
     greeting: Hello! Thanks for getting in touch — we have your enquiry and a mechanic will reply shortly.
     lookingFor: Tell us which car you drive — make, model and year — and what is wrong with it or what work it needs.
@@ -28,4 +90,35 @@ translations:
     phoneSkip: Skip
     thanks: Thank you! I’ve passed your message to the technician — he’ll be in touch with you shortly.
     received: Got it, a mechanic will see your message.
-translatedFrom: fe84a3a052ce6aea
+    menu:
+      text: How can we assist you? Please select what you’re interested in.
+      back: « Back
+    services:
+      button: Services
+      text: Here’s what we offer at the service. Choose a service — we’ll show you the price, timeframe, and what's included.
+    card:
+      request: Submit a request
+      site: Learn more on the site
+    contacts:
+      button: Contact
+      text: We're in Belgrade, waiting for you at the service.
+      hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
+    manager:
+      button: Message the mechanic
+      text: Send your question in one message — the mechanic will reply here.
+    partners:
+      button: Partners
+      text: Our partners — choose who to contact.
+    request:
+      button: Submit a request
+      car: What kind of car do you have? Please provide the make, model, and year.
+      service: What services do you need? Please choose below.
+    language:
+      button: 🌐 Language
+      text: Select the language you prefer to communicate in.
+    profile:
+      description: Car service in Belgrade — diagnostics, repairs, and servicing. Click ‘Start’ — tell us what’s wrong with your car, and a mechanic will respond here.
+      shortDescription: Car service in Belgrade — diagnostics, repairs, servicing
+      menuCommand: Main menu
+      langCommand: Change language
+translatedFrom: 5f3bfd218a518c14

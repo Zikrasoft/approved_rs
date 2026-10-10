@@ -2,6 +2,10 @@
 status: accepted
 ---
 
+## Amended 2026-10-11: the 60 minutes slide
+
+The window below counted from the Lead's creation, so a visitor still mid-conversation lost their Lead an hour after `/start`, and the store and the capture route each kept their own copy of the rule. It now slides: a Lead is fresh while the latest of the visitor's activity (`visitorActiveAt`), the owner's activity (`lastActivityAt`) and its creation is under `VISITOR_MERGE_WINDOW_MS` old — one helper, `isFreshLead` in `@podbor/lead-crm`, used by the visitor-id merge, every capture-route lookup and the Questionnaire. Owner activity counts so that a conversation the owner is working stays one Lead. A Questionnaire left on a stale Lead stops taking answers; the next message opens a new Lead.
+
 ## Amended 2026-10-06: a Telegram tap stores a contact click again, for its page
 
 This ADR held that a Telegram tile creates no contact click, because the bot's Lead would only be duplicated by it. That left every bot Lead without a page: `/start` carries at most 64 characters of `[A-Za-z0-9_-]`, so the URL the visitor tapped from cannot ride in it, and the operator card had no `Страница:` line.
@@ -93,7 +97,7 @@ cannot fire a Metrika goal, having no browser, so the denominator is counted in 
 
 **A second `/start` from the same person is a second Lead**, matching "one request from one visitor",
 except within 60 minutes — `VISITOR_MERGE_WINDOW_MS`, the window the store already uses — where it
-continues the open one and skips the contact questions.
+continues the open one and skips the contact questions (sliding since 2026-10-11, see the amendment above).
 
 ## Considered Options
 
