@@ -21,7 +21,7 @@ Written after the tests landed (#87, #88, #89), so it describes what is there.
 
 Thirteen historical stored shapes — v0 onward, including the field generations
 since retired — plus two shapes whose legacy money must be refused. Each is
-read as a Lead and as the legacy money the store migrates into Payouts. The
+read as a Lead and as the legacy money the ledger's opening carries over. The
 assertion is that a Lead one
 version wrote is still readable by the version deploying now, because the deploy
 filter ships a changed `@podbor/lead-crm` to all three sites at once and a
@@ -34,20 +34,23 @@ schema is built.
 Two things it establishes that are worth not relearning:
 
 - **No stored shape fails the read except the ones meant to.** The Lead schema
-  no longer carries money (ADR-0032), but the store still reads the retired
-  income fields as legacy input to migrate them into Payouts and Settlements.
-  Money stored without a rate is priced at the former default of 10%. A record
-  whose legacy money cannot be priced — a rate over 100% — is written back
-  verbatim, copied into the quarantine store, and goes invisible to listing
-  and statistics. Visibility and duplication, not loss.
+  no longer carries money (ADR-0032), and the Lead store never reads the
+  retired income fields. Only the ledger's opening does: while
+  `data/ledger.json` does not exist, `legacyOwed` in `legacyIncomes.ts` sums
+  every unpaid income times its Lead's rate from the raw `data/leads.json`
+  (money stored without a rate is priced at the former default of 10%), and the
+  ledger opens with one Payout, `Перенос со старой системы`, for that sum —
+  none when it is zero. A record whose legacy money cannot be priced — a rate
+  over 100% — is still read as a Lead, and its money is left out of the sum.
 - **Retired fields are dropped on read, and so on the next write.**
   `baseStoredLeadSchema` is not `.strict()`, so `lastRemindedAt` (v0–v3),
   `customerPaidAt` and the old money fields (`dealAmount`, `commissionPercent`,
   `paidAmount`, `payments`, `incomes`, `pendingCommissionClaim`) are discarded
   by every read, and `store.ts` re-serialises parsed Leads on every write — the
   first mutation erases them from the blob permanently. The money is not lost:
-  the same read has already turned it into Payouts and Settlements, which that
-  write stores beside the Leads.
+  the Lead store's `beforeWrite` hook (`ledgerStore.ensureOpened()`, wired in
+  `brandStore.ts`) writes the ledger blob with its opening Payout before any
+  Lead write goes out.
 
 **What it cannot prove.** Version skew between deployed sites. Two sites on
 different package versions each pass their own copy of this suite; nothing here
