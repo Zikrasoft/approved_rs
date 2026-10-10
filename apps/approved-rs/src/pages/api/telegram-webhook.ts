@@ -46,7 +46,6 @@ import {
   DRAFT_COPY,
   draftMessage,
   escapeHtml,
-  canAddIncome,
   type Role,
 } from '@/lib/telegram';
 import { captureClientFor } from '@/lib/captureBot';
@@ -341,17 +340,6 @@ async function confirmDelete(ctx: Ctx, id: number): Promise<void> {
   await answerCallback(ctx.cbId, 'Удалено');
 }
 
-async function askIncome(ctx: Ctx, id: number): Promise<void> {
-  const lead = await getLead(id);
-  if (!lead || !canAddIncome(lead, 'owner')) return ack(ctx);
-  await startPrompt(ctx, id, {
-    prompt:
-      '💶 Сколько получил (в евро)? Предоплата или частичный расчёт — твоя прибыль, не стоимость машины.\n\nНапример: 150',
-    kind: 'add_income',
-    ackText: 'Жду сумму',
-  });
-}
-
 async function askAmount(ctx: Ctx): Promise<number> {
   const promptId = await sendForceReplyPrompt(
     ctx.chatId,
@@ -533,7 +521,6 @@ export const CALLBACKS: CallbackRow[] = [
   [/^del:(\d+)$/, 'admin', onLead(askDelete)],
   [/^delconfirm:(\d+)$/, 'admin', onLead(confirmDelete)],
   [/^delcancel:(\d+)$/, 'admin', onLead(backToLead)],
-  [/^income:(\d+)$/, 'owner', onLead(askIncome)],
   [/^payfix:(\d+)$/, 'any', onLead(askPayoutFix)],
   [/^settle:other$/, 'admin', askSettlement],
   [/^settle:(\d+(?:\.\d+)?)$/, 'admin', settle],
@@ -656,29 +643,6 @@ async function replyDealAmount({
   await sendPayoutRecorded(chatId, messageId, payout);
 }
 
-async function replyAddIncome({
-  role,
-  chatId,
-  replyToMessageId,
-  text,
-}: PromptReply): Promise<void> {
-  const amount = parseAmount(text);
-  if (amount == null) {
-    await sendMessage(chatId, '⚠️ Нужна сумма в евро. Попробуйте ещё раз.');
-    return;
-  }
-  const resolved = await resolvePendingPrompt(
-    chatId,
-    replyToMessageId,
-    () => ({}),
-  );
-  if (!resolved || !canAddIncome(resolved, 'owner')) return;
-  const payout = await addPayout({ amount, by: role, leadId: resolved.id });
-  if (!payout) return;
-  await sendPayoutNotificationToAdmin(resolved, payout);
-  await replyWithCard(chatId, resolved, '✅ Доход добавлен');
-}
-
 async function replyPostpone({
   chatId,
   replyToMessageId,
@@ -768,7 +732,6 @@ async function sendPayoutRecorded(
 
 const PROMPT_REPLIES: Record<PromptKind, PromptHandler> = {
   deal_amount: replyDealAmount,
-  add_income: replyAddIncome,
   postpone: replyPostpone,
   reply_visitor: replyVisitor,
 };

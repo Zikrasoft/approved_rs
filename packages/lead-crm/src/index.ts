@@ -9,17 +9,12 @@ export type {
   CaptureStep,
   LeadInput,
   LeadSubmission,
-  Income,
   LeadStatus,
-  PendingCommissionClaim,
   PendingPrompt,
-  Payment,
   Referrer,
   StoredLead,
 } from './schema.ts';
-
-export { appendIncome, getCommission } from './money.ts';
-export type { CommissionInfo } from './money.ts';
+export { storedLeadSchema } from './schema.ts';
 
 export {
   appendNote,
@@ -27,7 +22,6 @@ export {
   postponePatch,
   resumePatch,
   statusPatch,
-  wonPatch,
   MAX_LIST_ROWS,
   SUMMARY_TIME_ZONE,
   VISITOR_MERGE_WINDOW_MS,
@@ -68,7 +62,6 @@ export type { TelegramClient } from './telegram/client.ts';
 
 export {
   buildDeleteConfirm,
-  canAddIncome,
   buildOpenList,
   buildMenu,
   buildToPay,

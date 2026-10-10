@@ -7,7 +7,6 @@ import {
   type TelegramClient,
 } from './client.ts';
 import {
-  dealNotificationText,
   monthlySummaryText,
   payoutNotificationText,
   quarantinedLeadsText,
@@ -103,14 +102,6 @@ export function createNotifier({
         throw err;
       }
       return true;
-    },
-
-    async sendDealNotificationToAdmin(lead: StoredLead): Promise<void> {
-      if (lead.dealAmount == null) return;
-      await sendToAll(
-        adminIds,
-        dealNotificationText({ ...lead, dealAmount: lead.dealAmount }),
-      );
     },
 
     async sendPayoutNotificationToAdmin(

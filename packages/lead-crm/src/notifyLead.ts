@@ -1,4 +1,3 @@
-import { hasDealAmount } from './money.ts';
 import {
   isClosed,
   type LeadInput,
@@ -48,10 +47,7 @@ interface AfterStatusChangeOptions {
   ensureLeadCard: (lead: StoredLead) => Promise<void>;
   notifier: Pick<
     Notifier,
-    | 'editLeadDetailMessage'
-    | 'sendStatusChangeToAdmin'
-    | 'sendDealNotificationToAdmin'
-    | 'unpinLeadCard'
+    'editLeadDetailMessage' | 'sendStatusChangeToAdmin' | 'unpinLeadCard'
   >;
 }
 
@@ -73,9 +69,7 @@ export function createAfterStatusChange({
         surface.role,
       );
     if (!notice) return;
-    if (lead.status === 'won' && hasDealAmount(lead))
-      await notifier.sendDealNotificationToAdmin(lead);
-    else await notifier.sendStatusChangeToAdmin(lead);
+    await notifier.sendStatusChangeToAdmin(lead);
   };
 }
 
@@ -88,7 +82,7 @@ export interface NotifyLeadOptions {
   brand: string;
 }
 
-export type LeadHandOff = Pick<StoredLead, 'brand' | 'commissionPercent'>;
+export type LeadHandOff = Pick<StoredLead, 'brand'>;
 
 export interface NotifyLeadResult {
   stored: boolean;

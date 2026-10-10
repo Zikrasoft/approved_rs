@@ -336,7 +336,7 @@ is per project too, and on approved.rs it is a **different** value from
 `TELEGRAM_WEBHOOK_SECRET` — the two webhooks there belong to two different bots
 and do not share a secret. approved.rs additionally holds the other two capture
 tokens as `TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB` and `TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS`:
-the operator's reply to a handle-less visitor lands on the CRM webhook there, and
+the owner's reply to a handle-less visitor lands on the CRM webhook there, and
 only the visitor's own brand's bot can deliver it, so the webhook picks the bot by
 the lead's `brand` ([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
 Without a sibling token the reply button is simply absent on that brand's cards.

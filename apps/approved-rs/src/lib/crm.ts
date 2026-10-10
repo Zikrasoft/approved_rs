@@ -1,4 +1,4 @@
-import { APPROVED, COMMISSION_PERCENT } from '@podbor/brands';
+import { APPROVED } from '@podbor/brands';
 import {
   createBrandStore,
   deferStorage,
@@ -22,7 +22,6 @@ const storageFor = (path: string): LeadStorage => {
 
 export const { leadStore } = createBrandStore({
   brand: BRAND,
-  commissionPercent: COMMISSION_PERCENT.approved,
   storageFor,
   getNotifier: () => import('./crmBot'),
 });

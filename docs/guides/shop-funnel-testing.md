@@ -1,7 +1,7 @@
 # Testing the shop funnel: four layers, the seams they drive, and what none of them prove
 
 A visitor's path — product card, cart, checkout, Order in Medusa, signed hook,
-Lead, operator card in Telegram — crosses four workspaces. Every piece has unit
+Lead, owner card in Telegram — crosses four workspaces. Every piece has unit
 tests; both bugs found on #84 lived in the seams between them. This document
 names every layer, what it asserts, what it costs and what it cannot see, so
 that a change is tested at an existing seam instead of cutting a fifth one.
@@ -14,14 +14,15 @@ Written after the tests landed (#87, #88, #89), so it describes what is there.
 
 |         |                                                                                        |
 | ------- | -------------------------------------------------------------------------------------- |
-| Seam    | `createLeadSchema(options)`'s output, nothing else                                     |
+| Seam    | the output of `storedLeadSchema` and `legacyIncomesSchema`, nothing else               |
 | File    | `packages/lead-crm/src/storedLeadHistory.test.ts` (fixture and assertions in one file) |
 | Command | `pnpm --filter @podbor/lead-crm test`                                                  |
 | Cost    | seconds, in CI on every push, under the package's 100% coverage gate                   |
 
-Thirteen historical stored shapes — v0 onward, including the two field
-generations since retired — plus one shape that must be refused, each parsed
-under all three Brands' schema configurations. The assertion is that a Lead one
+Thirteen historical stored shapes — v0 onward, including the field generations
+since retired — plus two shapes whose legacy money must be refused. Each is
+read as a Lead and as the legacy money the store migrates into Payouts. The
+assertion is that a Lead one
 version wrote is still readable by the version deploying now, because the deploy
 filter ships a changed `@podbor/lead-crm` to all three sites at once and a
 schema change that orphans stored Leads would otherwise reach production green.
@@ -30,29 +31,23 @@ It is the shared catalog package's contract test pointed at stored records
 rather than at constants. It asserts what the system reads back, never how the
 schema is built.
 
-Three things it establishes that are worth not relearning:
+Two things it establishes that are worth not relearning:
 
-- **No stored shape fails the current schema except the one meant to.** The only
-  orphaning change in the history is v11's `commissionPercent.max(100)`
-  (`7428c97`); such a record is written back verbatim, copied into the
-  quarantine store, and goes invisible to listing and statistics on the sites
-  that cannot read it. Visibility and duplication, not loss.
-- **Two retired fields are dropped on read, and so on the next write.**
-  `baseStoredLeadSchema` is not `.strict()`, so `lastRemindedAt` (v0–v3) and
-  `customerPaidAt` are discarded by every read, and `store.ts` re-serialises
-  parsed Leads on every write — the first mutation erases them from the blob
-  permanently. A known, accepted consequence, not a parse failure.
-- **"All three Brands agree" is near-vacuous today.** `LeadSchemaOptions` has
-  one field (`defaultCommissionPercent`) and all three Brands pass `10`, so the
-  only row whose read can diverge is the one carrying no `commissionPercent` of
-  its own; the fixture labels it. **Add a row whenever a factory option is
-  added**, or this layer goes back to proving nothing.
-
-The three commission rates are duplicated into the test as data:
-`packages/lead-crm` has no dependency on `@podbor/brands`, and adding one
-rewrites `pnpm-lock.yaml`, which redeploys all four apps. The copy is accepted
-(`TODO:` in the file) — a rate change in `@podbor/brands` will not fail this
-test. Revisit only in a lockfile-only commit.
+- **No stored shape fails the read except the ones meant to.** The Lead schema
+  no longer carries money (ADR-0032), but the store still reads the retired
+  income fields as legacy input to migrate them into Payouts and Settlements.
+  A record whose legacy money cannot be priced — a rate over 100%, or money
+  with no rate at all — is written back verbatim, copied into the quarantine
+  store, and goes invisible to listing and statistics. Visibility and
+  duplication, not loss.
+- **Retired fields are dropped on read, and so on the next write.**
+  `baseStoredLeadSchema` is not `.strict()`, so `lastRemindedAt` (v0–v3),
+  `customerPaidAt` and the old money fields (`dealAmount`, `commissionPercent`,
+  `paidAmount`, `payments`, `incomes`, `pendingCommissionClaim`) are discarded
+  by every read, and `store.ts` re-serialises parsed Leads on every write — the
+  first mutation erases them from the blob permanently. The money is not lost:
+  the same read has already turned it into Payouts and Settlements, which that
+  write stores beside the Leads.
 
 **What it cannot prove.** Version skew between deployed sites. Two sites on
 different package versions each pass their own copy of this suite; nothing here
@@ -134,7 +129,7 @@ with no `refused cancellation` line, so `paid` and `fulfilled` were skipped by
 | Cost    | ~15 s of test time on top of the whole backend; **local only, never a CI job**                                      |
 
 Two tests. One Order leaves exactly one Lead, exactly one Order marker and
-exactly one `sendMessage` to the group, asserted against the operator card's
+exactly one `sendMessage` to the group, asserted against the owner card's
 payload and the stored Lead's fields. Then, with the fail switch on, a refused
 card: the Lead is still stored, the marker is still held, and a second signed
 hook for the same Order answers `200 {duplicate: true}` — no second Lead, no
@@ -197,10 +192,10 @@ A later change tests at one of these rather than cutting a new one.
 
 | Seam                                                           | Layer    | Shape                                                                                     |
 | -------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------- |
-| `createLeadSchema(options)` output                             | 1        | pure function, call it with each Brand's options                                          |
+| `storedLeadSchema` / `legacyIncomesSchema` output              | 1        | pure schemas, parse a stored record with each                                             |
 | `releaseUncollected(container)`                                | 2        | the job's default export, driven through the Medusa integration runner                    |
 | `createShopOrderHandler({ secret, notifyLead, markers, now })` | unit + 3 | already injectable; the route is thin wiring over it                                      |
-| `createFormatter({ serviceLabel, botUsername })`               | unit     | the operator card's text                                                                  |
+| `createFormatter({ serviceLabel, botUsername })`               | unit     | the owner card's text                                                                     |
 | `LeadStorage`                                                  | 1, 3     | Blob in production, filesystem in development; the walk reads the filesystem one's output |
 | `globalThis.fetch` in the dev server's process                 | 3        | where Telegram is intercepted (`funnel/telegramStub.ts`)                                  |
 
@@ -218,7 +213,7 @@ Decisions on the record, not oversights.
 - **A dry-run mode for the release job.** An environment variable for the
   Reserve window was already declined once; a second switch for the same job
   would contradict that. The rehearsal below covers the first run instead.
-- **The lost operator card when Telegram alone fails.** The Lead is stored, the
+- **The lost owner card when Telegram alone fails.** The Lead is stored, the
   Order marker is held, every retry answers as a duplicate, and the card is
   never re-delivered. Recorded as a consequence in
   [ADR-0022](../adr/0022-orders-reach-the-bot-through-a-signed-hook.md) and as a
@@ -240,7 +235,7 @@ Decisions on the record, not oversights.
   `bosch-s4-024` is exactly 4 and layer 2 places exactly 4 Orders. Lower that
   fixture stock, or add a fifth Order, and the spec fails on inventory rather
   than on the Reserve window. Recorded rather than fixed.
-- **The operator card's label for a slug no app offers.** `parts-order` is not in
+- **The owner card's label for a slug no app offers.** `parts-order` is not in
   any app's `SERVICE_SLUGS` on purpose — nothing should offer a shop order as a
   choosable service — so the Brand sites' formatters fall back to
   `@podbor/brands`'s `serviceLabel` for it. There are four copies of the
@@ -269,7 +264,7 @@ flowchart LR
 
   MED["Medusa 2.19<br/>api.carlab.rs, one VPS"]
   LEADS[("data/leads.json<br/>one Vercel Blob store")]
-  CHAT["One Telegram bot,<br/>one operator chat"]
+  CHAT["One Telegram bot,<br/>one owner chat"]
   PKG["@podbor/lead-crm"]
 
   AP -->|"/api/leads · /api/contact-click"| LEADS
@@ -333,7 +328,7 @@ sequenceDiagram
   API->>MK: has(orderId)? → no
   API->>MK: add(orderId) — allowOverwrite false
   API->>LS: store the Lead
-  API->>TG: sendMessage — the operator card
+  API->>TG: sendMessage — the owner card
   TG-->>API: ok
   API-->>HK: 202 {accepted: true}
 
@@ -376,11 +371,11 @@ because both versions pass their own suite. This walk is the only check for it.
       `servicesApplied[0]`).
 - [ ] carlab.rs: the same three, plus one service page (hidden `SERVICE_FIELD`).
 - [ ] One contact click per site, so the `Клик: <канал>` card line is exercised.
-- [ ] A lead with no service, so the operator card renders `—` and the
+- [ ] A lead with no service, so the owner card renders `—` and the
       `Страница:` line carries the visited page.
 - [ ] One partner-block lead from approved.rs into each sister Brand, and check
-      the stored `brand` and `commissionPercent` are the sister's.
-- [ ] Each operator card arrives with a readable service label, not a raw slug.
+      the stored `brand` is the sister's.
+- [ ] Each owner card arrives with a readable service label, not a raw slug.
 - [ ] After the first card, press one status button so the bot re-renders the
       card from the stored Lead — that read is the one layer 1 pins.
 - [ ] A non-Russian locale on at least one site, so the hidden `locale` field is

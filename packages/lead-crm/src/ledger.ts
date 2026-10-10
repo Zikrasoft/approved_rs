@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { incomeCommission, roundMoney } from './money.ts';
+import { legacyPayoutAmount, type LegacyIncomes } from './legacyIncomes.ts';
+import { roundMoney } from './money.ts';
 import type { StoredLead } from './schema.ts';
 
 export const LEDGER_AUTHORS = ['owner', 'admin'] as const;
@@ -142,18 +143,23 @@ export function correction(
   };
 }
 
+export interface LegacyLeadMoney {
+  lead: Pick<StoredLead, 'id' | 'brand'>;
+  money: LegacyIncomes;
+}
+
 export function withMigratedIncomes(
-  leads: StoredLead[],
+  legacy: LegacyLeadMoney[],
   ledger: Ledger,
 ): Ledger {
   const payouts = [...ledger.payouts];
   const settlements = [...ledger.settlements];
   const paidOut = new Set(payouts.map((p) => p.migratedFrom));
   const settled = new Set(settlements.map((s) => s.migratedFrom));
-  for (const lead of leads) {
-    for (const income of lead.incomes) {
+  for (const { lead, money } of legacy) {
+    for (const income of money.incomes) {
       const key = `income:${lead.id}:${income.id}`;
-      const amount = incomeCommission(income.amount, lead.commissionPercent);
+      const amount = legacyPayoutAmount(income.amount, money.percent);
       if (amount <= 0) continue;
       if (!paidOut.has(key)) {
         payouts.push({

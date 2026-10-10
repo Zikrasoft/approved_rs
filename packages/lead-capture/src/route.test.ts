@@ -292,7 +292,6 @@ beforeEach(() => {
   const storages: Record<string, MemoryStorage> = {};
   ({ leadStore } = createBrandStore({
     brand: BRAND,
-    commissionPercent: 10,
     storageFor: (path) => (storages[path] = createMemoryStorage()),
     getNotifier: vi.fn(),
   }));
@@ -384,7 +383,7 @@ describe('updates that are not a visitor pressing Start', () => {
 });
 
 describe('the Lead written at /start', () => {
-  it('puts a card in front of the operator with the contact already on it', async () => {
+  it('puts a card in front of the owner with the contact already on it', async () => {
     await POST(makeCtx(startUpdate('vehicle-sourcing_sr')));
     expect(cards()).toEqual([
       expect.objectContaining({
@@ -906,7 +905,7 @@ describe('abandoning the dialog', () => {
   });
 });
 
-describe('an operator editing the same Lead mid-dialog', () => {
+describe('an owner editing the same Lead mid-dialog', () => {
   it('neither side overwrites the other', async () => {
     await begin();
     editLead(1, {
@@ -1643,7 +1642,6 @@ describe('a visitor referred by the Approved bot', () => {
 
     expect(stored()[0]).toMatchObject({
       brand: BRAND,
-      commissionPercent: 10,
       service: '',
       locale: 'sr',
       referredBy: 'approved',
@@ -1666,14 +1664,13 @@ describe('a visitor referred by the Approved bot', () => {
 
   it.each([
     'from-approved_CarLab_sr',
-    'from-approved_brand-CarLab_commissionPercent-0_sr',
+    'from-approved_brand-CarLab_sr',
     'brand-CarLab_from-approved_sr',
-  ])('cannot be filed under another brand or rate: %s', async (payload) => {
+  ])('cannot be filed under another brand: %s', async (payload) => {
     await POST(makeCtx(startUpdate(payload)));
 
     expect(stored()[0]).toMatchObject({
       brand: BRAND,
-      commissionPercent: 10,
     });
   });
 

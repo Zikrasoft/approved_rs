@@ -3,14 +3,13 @@ import {
   createMemoryStorage,
   type MemoryStorage,
 } from './storage/memory.testing.ts';
-import { createLeadSchema, type LeadInput } from './schema.ts';
+import { storedLeadSchema, type LeadInput } from './schema.ts';
 import { createLeadStore, type LeadStore } from './store.ts';
-import { getCommission } from './money.ts';
 import { isSettled } from './ledger.ts';
 
 let storage: MemoryStorage;
 let store: LeadStore;
-const schema = createLeadSchema({ defaultCommissionPercent: 10 });
+const schema = storedLeadSchema;
 
 const baseData: LeadInput = {
   brand: 'CarLab',
@@ -289,6 +288,7 @@ describe('migration from incomes', () => {
     }),
     storedLead(4, {
       status: 'won',
+      commissionPercent: 10,
       dealAmount: 1000,
       paidAmount: 40,
       statusChangedAt: at(2),
@@ -296,15 +296,9 @@ describe('migration from incomes', () => {
     }),
   ];
 
-  function owedBefore(): number {
-    const leads = legacy.map((raw) => schema.parse(raw));
-    return leads.reduce((sum, l) => sum + getCommission(l).remaining, 0);
-  }
-
   beforeEach(() => storage.seed(legacy));
 
   it('keeps the balance owed', async () => {
-    expect(await store.getBalance()).toBeCloseTo(owedBefore(), 2);
     expect(await store.getBalance()).toBe(143.3);
   });
 
@@ -337,16 +331,39 @@ describe('migration from incomes', () => {
     ]);
   });
 
-  it('runs once: the next write persists it and later reads add nothing', async () => {
+  it('runs once: the next write persists it, drops the old fields, and later reads add nothing', async () => {
     const before = await store.readLedger();
     await store.addPayout({ amount: 10, by: 'owner' });
     const stored = records().filter((r) => r.type);
     expect(stored).toHaveLength(8);
+    for (const lead of records().filter((r) => !r.type)) {
+      for (const field of [
+        'incomes',
+        'payments',
+        'paidAmount',
+        'dealAmount',
+        'commissionPercent',
+        'pendingCommissionClaim',
+      ])
+        expect(lead).not.toHaveProperty(field);
+    }
     expect(await store.readLedger()).toEqual({
       payouts: [...before.payouts, expect.objectContaining({ id: 6 })],
       settlements: before.settlements,
     });
-    expect(await store.getBalance()).toBeCloseTo(owedBefore() + 10, 2);
+    expect(await store.getBalance()).toBe(153.3);
+  });
+
+  it('quarantines legacy money it cannot price instead of dropping it', async () => {
+    const unpriced = storedLead(9, { status: 'won', dealAmount: 300 });
+    storage.seed([...legacy, unpriced]);
+    const quarantine = vi.fn().mockResolvedValue(undefined);
+    store = createLeadStore({ storage, schema, quarantine });
+
+    await store.addPayout({ amount: 1, by: 'owner' });
+
+    expect(quarantine).toHaveBeenCalledWith([unpriced]);
+    expect(records()).toContainEqual(unpriced);
   });
 
   it('keeps a corrected migrated Payout corrected', async () => {
@@ -354,32 +371,6 @@ describe('migration from incomes', () => {
     expect((await store.listPayouts(1)).map((p) => p.amount)).toEqual([
       100, 30,
     ]);
-  });
-
-  it('picks up an income or a confirmed payment the old flow adds later', async () => {
-    await store.addPayout({ amount: 1, by: 'owner' });
-    await store.updateLeads((leads) =>
-      leads.map((l) =>
-        l.id === 2
-          ? {
-              ...l,
-              incomes: [
-                { ...l.incomes[0]!, paidAt: at(6) },
-                { id: 2, amount: 10, at: at(6), paidAt: null },
-              ],
-            }
-          : l,
-      ),
-    );
-    const { payouts, settlements } = await store.readLedger();
-    expect(payouts.at(-1)).toMatchObject({
-      amount: 5,
-      migratedFrom: 'income:2:2',
-    });
-    expect(settlements.at(-1)).toMatchObject({
-      amount: 50,
-      migratedFrom: 'income:2:1',
-    });
   });
 });
 

@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { incomeCommission, roundMoney, PAID_EPSILON } from './money.ts';
 
 export const LEAD_STATUSES = ['open', 'won', 'lost', 'postponed'] as const;
 const leadStatusSchema = z.enum(LEAD_STATUSES);
@@ -14,7 +13,6 @@ const storedStatusSchema = z.enum([
 
 export const PROMPT_KINDS = [
   'deal_amount',
-  'add_income',
   'postpone',
   'reply_visitor',
 ] as const;
@@ -42,36 +40,11 @@ const capturePromptSchema = z.object({
 });
 export type CapturePrompt = z.infer<typeof capturePromptSchema>;
 
-const paymentSchema = z.object({
-  amount: z.number().positive(),
-  at: z.string(),
-});
-export type Payment = z.infer<typeof paymentSchema>;
-
-const incomeSchema = z.object({
-  id: z.number().int().positive(),
-  amount: z.number().positive(),
-  at: z.string(),
-  paidAt: z.string().nullable().default(null),
-});
-export type Income = z.infer<typeof incomeSchema>;
-
-const pendingCommissionClaimSchema = z.object({
-  amount: z.number().positive(),
-  claimedAt: z.string(),
-  incomeIds: z.array(z.number().int().positive()).default(() => []),
-});
-export type PendingCommissionClaim = z.infer<
-  typeof pendingCommissionClaimSchema
->;
-
 export const LEGACY_BRAND = 'Approved.rs';
 
 export const REFERRERS = ['approved'] as const;
 
 export type Referrer = (typeof REFERRERS)[number];
-
-export const MAX_COMMISSION_PERCENT = 100;
 
 const baseStoredLeadSchema = z.object({
   id: z.number().int().positive(),
@@ -88,11 +61,6 @@ const baseStoredLeadSchema = z.object({
   locale: z.string(),
   kind: z.enum(['lead', 'call_click']).optional(),
   status: storedStatusSchema.default('open'),
-  dealAmount: z.number().nonnegative().nullable().default(null),
-  commissionPercent: z.number().nonnegative().max(MAX_COMMISSION_PERCENT),
-  paidAmount: z.number().nonnegative().default(0),
-  payments: z.array(paymentSchema).default(() => []),
-  incomes: z.array(incomeSchema).default(() => []),
   telegramChatId: z.number().int().nullable().default(null),
   telegramMessageId: z.number().int().nullable().default(null),
   statusChangedAt: z.string(),
@@ -103,7 +71,6 @@ const baseStoredLeadSchema = z.object({
   telegramId: z.number().int().nullable().default(null).catch(null),
   referredBy: z.enum(REFERRERS).nullable().default(null).catch(null),
   archived: z.boolean().optional(),
-  pendingCommissionClaim: pendingCommissionClaimSchema.nullable().default(null),
   remindAt: z.string().nullable().default(null),
 });
 
@@ -132,45 +99,6 @@ function withFourStatuses({
   };
 }
 
-function migratedIncomes(lead: StoredLead): Income[] {
-  if (lead.incomes.length > 0) return lead.incomes;
-  const total = lead.dealAmount;
-  if (total == null || total <= 0) return [];
-  const at = lead.statusChangedAt;
-  const paidAt = lead.payments.at(-1)?.at ?? at;
-  const commission = incomeCommission(total, lead.commissionPercent);
-  const whole = (settledAt: string | null): Income[] => [
-    { id: 1, amount: total, at, paidAt: settledAt },
-  ];
-  if (commission <= 0 || lead.paidAmount <= PAID_EPSILON) return whole(null);
-  if (lead.paidAmount >= commission - PAID_EPSILON) return whole(paidAt);
-  const covered = roundMoney((total * lead.paidAmount) / commission);
-  if (covered >= total) return whole(paidAt);
-  return [
-    { id: 1, amount: covered, at, paidAt },
-    { id: 2, amount: roundMoney(total - covered), at, paidAt: null },
-  ];
-}
-
-export function withDerivedMoney(lead: StoredLead): StoredLead {
-  const incomes = migratedIncomes(lead);
-  if (incomes.length === 0) return lead;
-  return {
-    ...lead,
-    incomes,
-    dealAmount: roundMoney(incomes.reduce((sum, i) => sum + i.amount, 0)),
-    paidAmount: roundMoney(
-      incomes.reduce(
-        (sum, i) =>
-          i.paidAt
-            ? sum + incomeCommission(i.amount, lead.commissionPercent)
-            : sum,
-        0,
-      ),
-    ),
-  };
-}
-
 export type LeadInput = Pick<
   StoredLead,
   | 'brand'
@@ -186,42 +114,12 @@ export type LeadInput = Pick<
   | 'kind'
 > &
   Partial<
-    Pick<
-      StoredLead,
-      | 'services'
-      | 'commissionPercent'
-      | 'capturePrompt'
-      | 'telegramId'
-      | 'referredBy'
-    >
+    Pick<StoredLead, 'services' | 'capturePrompt' | 'telegramId' | 'referredBy'>
   >;
 
 export type LeadSubmission = Omit<LeadInput, 'brand'>;
 
-export interface LeadSchemaOptions {
-  defaultCommissionPercent: number;
-}
-
 export type StoredLeadSchema = z.ZodType<StoredLead, unknown>;
 
-export function createLeadSchema({
-  defaultCommissionPercent,
-}: LeadSchemaOptions): StoredLeadSchema {
-  if (
-    defaultCommissionPercent < 0 ||
-    defaultCommissionPercent > MAX_COMMISSION_PERCENT
-  ) {
-    throw new Error(
-      `[lead-crm] defaultCommissionPercent must be between 0 and ${MAX_COMMISSION_PERCENT}`,
-    );
-  }
-  return baseStoredLeadSchema
-    .extend({
-      commissionPercent: z
-        .number()
-        .nonnegative()
-        .max(MAX_COMMISSION_PERCENT)
-        .default(defaultCommissionPercent),
-    })
-    .transform((lead) => withDerivedMoney(withFourStatuses(lead)));
-}
+export const storedLeadSchema: StoredLeadSchema =
+  baseStoredLeadSchema.transform(withFourStatuses);

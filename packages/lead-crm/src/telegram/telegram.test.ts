@@ -7,7 +7,7 @@ import { recordBotApi } from '../testing/botApi.ts';
 import { createTelegramClient } from './client.ts';
 import { createFormatter } from './format.ts';
 import { createNotifier } from './notify.ts';
-import { LEAD_STATUSES, withDerivedMoney } from '../schema.ts';
+import { LEAD_STATUSES } from '../schema.ts';
 import type { StoredLead } from '../schema.ts';
 import type { Payout } from '../ledger.ts';
 import type { MonthlySummary } from '../store.ts';
@@ -59,7 +59,6 @@ const {
   sendLeadNotification,
   refreshLeadCard,
   unpinLeadCard,
-  sendDealNotificationToAdmin,
   sendPayoutNotificationToAdmin,
   sendSettlementToOwner,
   sendMonthlySummary,
@@ -71,7 +70,7 @@ const {
 } = notifier;
 
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
-  return withDerivedMoney({
+  return {
     id: 42,
     brand: 'Approved.rs',
     name: 'Иван',
@@ -83,10 +82,6 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     source_url: '/ru/vehicle-sourcing/de/',
     locale: 'ru',
     status: 'open',
-    dealAmount: null,
-    commissionPercent: 10,
-    paidAmount: 0,
-    payments: [],
     telegramChatId: null,
     telegramMessageId: null,
     statusChangedAt: '2026-01-01T00:00:00.000Z',
@@ -96,11 +91,9 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     capturePrompt: null,
     telegramId: null,
     referredBy: null,
-    pendingCommissionClaim: null,
     remindAt: null,
-    incomes: [],
     ...overrides,
-  });
+  };
 }
 
 function money(n: number): string {
@@ -508,7 +501,7 @@ describe('sendFieldChangeToAdmin', () => {
     expect(body.text).toContain('Стало: Автоподбор');
   });
 
-  it('leaves the bot marker off an operator edit', async () => {
+  it('leaves the bot marker off an owner edit', async () => {
     await sendFieldChangeToAdmin(
       makeLead({ comment: 'после' }),
       'comment',
@@ -516,26 +509,6 @@ describe('sendFieldChangeToAdmin', () => {
     );
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).not.toContain('через бота');
-  });
-});
-
-describe('sendDealNotificationToAdmin', () => {
-  beforeEach(() => mockFetchOk({ message_id: 1 }));
-  afterEach(() => mockFetch.mockReset());
-
-  it('computes commission from commissionPercent — informational only, no button', async () => {
-    await sendDealNotificationToAdmin(
-      makeLead({ id: 9, dealAmount: 100000, commissionPercent: 10 }),
-    );
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.chat_id).toBe(222);
-    expect(body.text).toContain(`Твоя комиссия (10%): ${money(10000)}`);
-    expect(body.reply_markup).toBeUndefined();
-  });
-
-  it('does nothing when the deal has no amount yet', async () => {
-    await sendDealNotificationToAdmin(makeLead({ dealAmount: null }));
-    expect(mockFetch).not.toHaveBeenCalled();
   });
 });
 
@@ -989,15 +962,6 @@ describe('buildSearchResults', () => {
     ]);
   });
 
-  it('shows the deal amount of a won match', () => {
-    const { reply_markup } = buildSearchResults([
-      makeLead({ id: 5, status: 'won', dealAmount: 1000 }),
-    ]);
-    expect(reply_markup.inline_keyboard[0][0].text).toBe(
-      `✅ #5 Approved.rs Иван — @ivan — ${money(1000)}`,
-    );
-  });
-
   it('finds a lost lead and marks it lost', () => {
     const { reply_markup } = buildSearchResults([
       makeLead({ id: 5, name: 'Пётр', contact: '@petr', status: 'lost' }),
@@ -1086,28 +1050,18 @@ describe('buildStats', () => {
   const leads = [
     makeLead({ id: 1, status: 'open' }),
     makeLead({ id: 2, status: 'open' }),
-    makeLead({
-      id: 3,
-      status: 'won',
-      incomes: [
-        { id: 1, amount: 40000, at: 'x', paidAt: 'y' },
-        { id: 2, amount: 60000, at: 'x', paidAt: null },
-      ],
-    }),
+    makeLead({ id: 3, status: 'won' }),
     makeLead({ id: 4, status: 'lost' }),
     makeLead({ id: 5, status: 'postponed' }),
   ];
 
-  it('counts by status and sums money across won leads', () => {
+  it('counts by status and carries no money', () => {
     const text = buildStats(leads);
     expect(text).toContain('Всего заявок: 5');
     expect(text).toContain(
       '🔵 Открыта: 2   ⏸️ Отложена: 1   ✅ Сделка: 1   ❌ Отказ: 1',
     );
-    expect(text).toContain(`💰 Заработано (доход владельца): ${money(100000)}`);
-    expect(text).toContain(`Комиссия начислена: ${money(10000)}`);
-    expect(text).toContain(`Оплачено: ${money(4000)}`);
-    expect(text).toContain(`🔴 Осталось получить: ${money(6000)}`);
+    expect(text).not.toContain('€');
   });
 });
 
@@ -1118,11 +1072,11 @@ describe('buildLeadDetail', () => {
       'owner',
     );
     expect(text).toContain('#7');
-    expect(text).not.toContain('Комиссия Zikrasoft');
+    expect(text).not.toContain('€');
     const data = reply_markup.inline_keyboard
       .flat()
       .map((b) => b.callback_data);
-    expect(data).toEqual(['st:7:won', 'st:7:lost', 'postpone:7', 'income:7']);
+    expect(data).toEqual(['st:7:won', 'st:7:lost', 'postpone:7']);
   });
 
   it('offers a reply through the bot only when the contact is a Telegram id link', () => {
@@ -1155,22 +1109,11 @@ describe('buildLeadDetail', () => {
     );
   });
 
-  it('won lead: the money block, but no per-Lead pay buttons for either role', () => {
-    const lead = makeLead({
-      id: 7,
-      status: 'won',
-      dealAmount: 100000,
-      paidAmount: 0,
-      pendingCommissionClaim: {
-        amount: 3000,
-        claimedAt: '2026-01-01T00:00:00.000Z',
-        incomeIds: [1],
-      },
-    });
+  it('won lead: no money and no per-Lead pay buttons for either role', () => {
+    const lead = makeLead({ id: 7, status: 'won' });
     for (const role of ['owner', 'admin'] as const) {
       const { text, reply_markup } = buildLeadDetail(lead, role);
-      expect(text).toContain('Осталось:');
-      expect(text).not.toContain('Ожидает подтверждения');
+      expect(text).not.toContain('€');
       expect(
         reply_markup.inline_keyboard
           .flat()
@@ -1180,88 +1123,10 @@ describe('buildLeadDetail', () => {
       ).toBe(false);
     }
     expect(
-      buildLeadDetail(lead, 'owner').reply_markup.inline_keyboard[0].some((b) =>
-        b.callback_data?.startsWith('st:'),
-      ),
-    ).toBe(false);
-  });
-
-  it('lists every income with its own commission and paid mark', () => {
-    const lead = makeLead({
-      id: 7,
-      status: 'won',
-      incomes: [
-        { id: 1, amount: 300, at: '2026-03-01T00:00:00.000Z', paidAt: 'y' },
-        { id: 2, amount: 200, at: '2026-03-05T00:00:00.000Z', paidAt: null },
-      ],
-    });
-
-    const { text } = buildLeadDetail(lead, 'owner');
-
-    expect(text).toContain(
-      `• ${money(300)} от 01.03.2026 · комиссия ${money(30)} · 🟢 оплачена`,
-    );
-    expect(text).toContain(
-      `• ${money(200)} от 05.03.2026 · комиссия ${money(20)} · 🔴 не оплачена`,
-    );
-  });
-
-  it('lets the owner add an income while the job is still running, but not the admin', () => {
-    const lead = makeLead({ id: 7, status: 'open' });
-
-    expect(
       buildLeadDetail(lead, 'owner')
         .reply_markup.inline_keyboard.flat()
-        .map((b) => b.callback_data),
-    ).toContain('income:7');
-    expect(
-      buildLeadDetail(lead, 'admin')
-        .reply_markup.inline_keyboard.flat()
-        .map((b) => b.callback_data),
-    ).not.toContain('income:7');
-  });
-
-  it('keeps the add-income button off a lost lead', () => {
-    const { reply_markup } = buildLeadDetail(
-      makeLead({ id: 7, status: 'lost' }),
-      'owner',
-    );
-    expect(
-      reply_markup.inline_keyboard.flat().map((b) => b.callback_data),
-    ).not.toContain('income:7');
-  });
-
-  it('shows the commission block without an income list for a legacy zero-euro deal', () => {
-    const { text } = buildLeadDetail(
-      makeLead({ id: 7, status: 'won', dealAmount: 0 }),
-      'owner',
-    );
-
-    expect(text).toContain(`💰 Комиссия Zikrasoft: ${money(0)}`);
-    expect(text).not.toContain('💶 Доходы:');
-  });
-
-  it('deal-amount line is worded per role — owner sees "твой", admin sees "владельца"', () => {
-    const lead = makeLead({
-      id: 7,
-      status: 'won',
-      dealAmount: 100000,
-      paidAmount: 0,
-    });
-    expect(buildLeadDetail(lead, 'owner').text).toContain(
-      `💰 Твой доход с заявки: ${money(100000)}`,
-    );
-    expect(buildLeadDetail(lead, 'admin').text).toContain(
-      `💰 Доход владельца с заявки: ${money(100000)}`,
-    );
-  });
-
-  it('lost lead: no money row regardless of role', () => {
-    const { text } = buildLeadDetail(
-      makeLead({ id: 7, status: 'lost' }),
-      'admin',
-    );
-    expect(text).not.toContain('Комиссия Zikrasoft');
+        .some((b) => b.callback_data?.startsWith('st:')),
+    ).toBe(false);
   });
 
   it('active lead: admin gets a permanent-delete row, owner does not', () => {
@@ -1276,11 +1141,10 @@ describe('buildLeadDetail', () => {
     expect(adminData).toContain('del:7');
   });
 
-  it('reuses the full card body — name/contact/comment/deal amount present', () => {
+  it('reuses the full card body — name/contact/comment present', () => {
     const { text } = buildLeadDetail(
       makeLead({
         id: 7,
-        dealAmount: 50000,
         comment: 'BMW X5',
         contactChannel: 'whatsapp',
       }),
@@ -1289,7 +1153,6 @@ describe('buildLeadDetail', () => {
     expect(text).toContain('Иван');
     expect(text).toContain('@ivan (WhatsApp)');
     expect(text).toContain('BMW X5');
-    expect(text).toContain(money(50000));
   });
 });
 
@@ -1370,18 +1233,6 @@ describe('per-business formatter config', () => {
   it('does not quote one business rate in help text a shared bot shows every brand', () => {
     expect(detailingFormatter.buildHelp('owner')).not.toMatch(
       /\d+% от прибыли/,
-    );
-  });
-
-  it('computes the money line from the rate stored on the lead', () => {
-    const lead = makeLead({
-      status: 'won',
-      dealAmount: 1000,
-      commissionPercent: 50,
-    });
-
-    expect(detailingFormatter.buildLeadDetail(lead, 'owner').text).toContain(
-      '500',
     );
   });
 

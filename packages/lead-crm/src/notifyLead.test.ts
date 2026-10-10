@@ -4,7 +4,7 @@ import {
   createEnsureLeadCard,
   createNotifyLead,
 } from './notifyLead.ts';
-import { createLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
+import { storedLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
 import { createLeadStore } from './store.ts';
 import { createMemoryStorage } from './storage/memory.testing.ts';
 
@@ -15,7 +15,7 @@ const refreshLeadCard = vi.fn();
 
 const realStore = createLeadStore({
   storage: createMemoryStorage(),
-  schema: createLeadSchema({ defaultCommissionPercent: 10 }),
+  schema: storedLeadSchema,
 });
 
 const store = {
@@ -41,11 +41,6 @@ const storedLead: StoredLead = {
   services: [],
   id: 42,
   status: 'open',
-  dealAmount: null,
-  commissionPercent: 10,
-  paidAmount: 0,
-  incomes: [],
-  payments: [],
   telegramChatId: null,
   telegramMessageId: null,
   statusChangedAt: '2026-01-01T00:00:00.000Z',
@@ -55,7 +50,6 @@ const storedLead: StoredLead = {
   capturePrompt: null,
   telegramId: null,
   referredBy: null,
-  pendingCommissionClaim: null,
   remindAt: null,
 };
 
@@ -82,12 +76,10 @@ describe('notifyLead', () => {
   it('stores a lead handed to a sister brand under that brand and its rate', async () => {
     await notifyLead(baseData, '[test]', {
       brand: 'Details',
-      commissionPercent: 20,
     });
     expect(insertOrMergeLead).toHaveBeenCalledWith({
       ...baseData,
       brand: 'Details',
-      commissionPercent: 20,
     });
   });
 
@@ -340,7 +332,6 @@ describe('afterStatusChange', () => {
         calls.push(`dm:${chatId}:${messageId}:${lead.id}:${role}`);
       },
       sendStatusChangeToAdmin: record('status'),
-      sendDealNotificationToAdmin: record('deal'),
       unpinLeadCard: record('unpin'),
     },
   });
@@ -365,13 +356,7 @@ describe('afterStatusChange', () => {
       ['card:42', 'unpin:42', 'dm:7:8:42:owner', 'status:42'],
     ],
     [
-      'won with an amount',
-      { status: 'won' as const, dealAmount: 300 },
-      {},
-      ['card:42', 'unpin:42', 'deal:42'],
-    ],
-    [
-      'won without an amount',
+      'won',
       { status: 'won' as const },
       {},
       ['card:42', 'unpin:42', 'status:42'],

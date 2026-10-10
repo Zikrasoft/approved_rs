@@ -107,10 +107,6 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     services: ['vehicle-sourcing'],
     locale: 'ru',
     status: 'open',
-    dealAmount: null,
-    commissionPercent: 10,
-    paidAmount: 0,
-    payments: [],
     telegramChatId: CARD_CHAT_ID,
     telegramMessageId: CARD_MESSAGE_ID,
     statusChangedAt: '2026-01-01T00:00:00.000Z',
@@ -120,19 +116,13 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     capturePrompt: null,
     telegramId: null,
     referredBy: null,
-    pendingCommissionClaim: null,
     remindAt: null,
-    incomes: [],
     ...overrides,
   };
 }
 
 function seed(...leads: StoredLead[]): void {
   leadsStorage().seed(leads);
-}
-
-function income(id: number, amount: number, paidAt: string | null = null) {
-  return { id, amount, at: '2026-01-01T00:00:00.000Z', paidAt };
 }
 
 const PAID_AT = '2026-01-03T00:00:00.000Z';
@@ -819,36 +809,6 @@ describe('POST /api/telegram-webhook', () => {
     });
   });
 
-  describe('income:<id> — owner only', () => {
-    it('opens an amount prompt the owner can answer mid-job', async () => {
-      seed(makeLead({ id: 9 }));
-      await tap('income:9', OWNER_ID);
-      expect(forceReplies()).toEqual([
-        expect.objectContaining({ text: expect.stringContaining('получил') }),
-      ]);
-      expect((await stored(9)).pendingPrompt).toEqual(awaiting('add_income'));
-    });
-
-    it('acks an unknown lead without prompting', async () => {
-      await tap('income:9', OWNER_ID, { id: 'cb-inc2' });
-      expect(forceReplies()).toEqual([]);
-      expect(answers()).toEqual([{ callback_query_id: 'cb-inc2' }]);
-    });
-
-    it('ignores a stale add-income button on a lead nobody is working on', async () => {
-      seed(makeLead({ id: 9, status: 'lost' }));
-      await tap('income:9', OWNER_ID);
-      expect(forceReplies()).toEqual([]);
-      expect((await stored(9)).pendingPrompt).toBeNull();
-    });
-
-    it('admin cannot add an income', async () => {
-      seed(makeLead({ id: 9 }));
-      await tap('income:9', ADMIN_ID);
-      expect((await stored(9)).pendingPrompt).toBeNull();
-    });
-  });
-
   describe('settle: — the admin records a Settlement', () => {
     const TO_PAY_ID = 77;
     const owed = (amount: number) =>
@@ -1054,17 +1014,13 @@ describe('POST /api/telegram-webhook', () => {
 
   describe('menu:debt — To pay, both roles', () => {
     it.each([
-      [ADMIN_ID, settleKeyboard(100)],
+      [ADMIN_ID, settleKeyboard(50)],
       [OWNER_ID, undefined],
     ])(
       'shows all Payouts minus all Settlements to %i, [💸 Paid] to the admin only',
       async (who, keyboard) => {
         leadsStorage().seed([
-          makeLead({
-            status: 'won',
-            commissionPercent: 10,
-            incomes: [income(1, 1000, PAID_AT), income(2, 500)],
-          }),
+          makeLead({ status: 'won' }),
           {
             type: 'payout',
             id: 9,
@@ -1081,7 +1037,7 @@ describe('POST /api/telegram-webhook', () => {
           },
         ]);
         await tap('menu:debt', who, { chatId: who });
-        expect(textsTo(who)).toEqual([buildToPay(100)]);
+        expect(textsTo(who)).toEqual([buildToPay(50)]);
         expect(sentTo(who)[0]?.reply_markup).toEqual(keyboard);
       },
     );
@@ -1153,7 +1109,6 @@ describe('POST /api/telegram-webhook', () => {
       ['del:5', 'admin'],
       ['delconfirm:5', 'admin'],
       ['delcancel:5', 'admin'],
-      ['income:5', 'owner'],
       ['payfix:5', 'any'],
       ['settle:other', 'admin'],
       ['settle:143.3', 'admin'],
@@ -1286,7 +1241,6 @@ describe('POST /api/telegram-webhook', () => {
       expect(await stored()).toMatchObject({
         status: 'won',
         pendingPrompt: null,
-        incomes: [],
       });
       expect(await listPayouts(5)).toEqual([
         expect.objectContaining({ amount: 150, createdBy: 'owner', leadId: 5 }),
@@ -1312,41 +1266,6 @@ describe('POST /api/telegram-webhook', () => {
       expect((await stored()).pendingPrompt).toEqual(awaiting('deal_amount'));
       expect(await listPayouts()).toEqual([]);
       expect(textsTo(DM_CHAT_ID)).toEqual([OUTCOME_COPY.badAmount]);
-    });
-
-    it('records a mid-job income as a Payout of the typed amount and tells the admin', async () => {
-      seed(makeLead({ pendingPrompt: awaiting('add_income') }));
-      await answerPrompt('300');
-      const lead = await stored();
-      expect(lead).toMatchObject({
-        status: 'open',
-        pendingPrompt: null,
-        incomes: [],
-      });
-      expect(await listPayouts(5)).toEqual([
-        expect.objectContaining({ amount: 300, createdBy: 'owner', leadId: 5 }),
-      ]);
-      expect(textsTo(ADMIN_ID)).toEqual([
-        expect.stringContaining('Стало: 300 €'),
-      ]);
-      expect(textsTo(DM_CHAT_ID)).toEqual([
-        `✅ Доход добавлен\n\n${buildLeadDetail(lead, 'owner').text}`,
-      ]);
-    });
-
-    it('ignores a mid-job income answered after the lead was lost', async () => {
-      seed(makeLead({ status: 'lost', pendingPrompt: awaiting('add_income') }));
-      await answerPrompt('300');
-      expect(await listPayouts()).toEqual([]);
-      expect(crm('editMessageText')).toEqual([]);
-      expect(sentTo(ADMIN_ID)).toEqual([]);
-    });
-
-    it('rejects a zero mid-job income without recording anything', async () => {
-      seed(makeLead({ pendingPrompt: awaiting('add_income') }));
-      await answerPrompt('0');
-      expect((await stored()).pendingPrompt).toEqual(awaiting('add_income'));
-      expect(textsTo(DM_CHAT_ID)).toEqual([expect.stringContaining('сумма')]);
     });
 
     it('postpones with the given date, appends a comment note, and notifies the admin', async () => {

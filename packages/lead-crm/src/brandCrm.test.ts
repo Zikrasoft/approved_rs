@@ -29,7 +29,6 @@ const storageFor = (path: string) => (storages[path] = createMemoryStorage());
 function brandStore(getNotifier = vi.fn()) {
   return createBrandStore({
     brand: 'CarLab',
-    commissionPercent: 15,
     storageFor,
     getNotifier,
   });
@@ -51,18 +50,6 @@ describe('createBrandStore', () => {
   it('builds without any Telegram env', () => {
     expect(() => brandStore()).not.toThrow();
     expect(Object.keys(storages)).toEqual([LEADS_PATH, QUARANTINE_PATH]);
-  });
-
-  it('defaults the commission to the brand rate', async () => {
-    const { leadStore, leadSchema } = brandStore();
-
-    const lead = await leadStore.insertLead({ ...submission, brand: 'CarLab' });
-
-    expect(lead.commissionPercent).toBe(15);
-    expect(
-      leadSchema.parse({ ...lead, commissionPercent: undefined })
-        .commissionPercent,
-    ).toBe(15);
   });
 
   it('reaches the notifier only once a record is quarantined', async () => {
@@ -124,6 +111,5 @@ describe('createBrandBot', () => {
     expect(result.stored).toBe(true);
     const [lead] = await leadStore.readLeads();
     expect(lead?.brand).toBe('CarLab');
-    expect(lead?.commissionPercent).toBe(15);
   });
 });

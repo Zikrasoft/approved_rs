@@ -22,7 +22,6 @@ export { afterStatusChange, ensureLeadCard };
 export const {
   sendLeadNotification,
   sendDigest,
-  sendDealNotificationToAdmin,
   sendPayoutNotificationToAdmin,
   sendSettlementToOwner,
   sendMonthlySummary,
@@ -37,7 +36,6 @@ export const OWNER_IDS = ownerIds;
 export const ADMIN_IDS = adminIds;
 
 export {
-  canAddIncome,
   formatMoney,
   formatDateRu,
   buildToPay,

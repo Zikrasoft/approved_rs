@@ -3,19 +3,17 @@ import {
   createMemoryStorage,
   type MemoryStorage,
 } from './storage/memory.testing.ts';
-import { createLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
+import { storedLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
 import {
   createLeadStore,
   GHOST_LEAD_RETENTION_MS,
   postponePatch,
   resumePatch,
   statusPatch,
-  wonPatch,
   VISITOR_MERGE_WINDOW_MS,
   type LeadStore,
 } from './store.ts';
 import { createQuarantine, LEADS_PATH } from './quarantine.ts';
-import { appendIncome, getCommission } from './money.ts';
 
 let storage: MemoryStorage;
 let store: LeadStore;
@@ -28,11 +26,9 @@ const baseData: LeadInput = {
   locale: 'ru',
 };
 
-async function forceComplete(id: number, dealAmount: number): Promise<void> {
+async function forceComplete(id: number): Promise<void> {
   await store.updateLeads((leads) =>
-    leads.map((l) =>
-      l.id === id ? { ...l, dealAmount, status: 'won' as const } : l,
-    ),
+    leads.map((l) => (l.id === id ? { ...l, status: 'won' as const } : l)),
   );
 }
 
@@ -40,7 +36,7 @@ beforeEach(() => {
   storage = createMemoryStorage();
   store = createLeadStore({
     storage,
-    schema: createLeadSchema({ defaultCommissionPercent: 10 }),
+    schema: storedLeadSchema,
   });
 });
 
@@ -86,15 +82,13 @@ describe('insertLead', () => {
     expect(b.id).toBe(2);
   });
 
-  it('defaults status open, 10% commission, zero paid, empty payment log, no money-track state', async () => {
+  it('defaults status open, no prompt and no money on the Lead', async () => {
     const lead = await store.insertLead(baseData);
     expect(lead.status).toBe('open');
-    expect(lead.commissionPercent).toBe(10);
-    expect(lead.paidAmount).toBe(0);
-    expect(lead.payments).toEqual([]);
     expect(lead.pendingPrompt).toBeNull();
     expect(lead).not.toHaveProperty('archived');
-    expect(lead.pendingCommissionClaim).toBeNull();
+    expect(lead).not.toHaveProperty('commissionPercent');
+    expect(lead).not.toHaveProperty('incomes');
   });
 });
 
@@ -471,11 +465,11 @@ describe('resolvePendingPrompt', () => {
     });
 
     const resolved = await store.resolvePendingPrompt(111, 999, () => ({
-      dealAmount: 5000,
+      comment: 'first',
       status: 'won',
     }));
 
-    expect(resolved?.dealAmount).toBe(5000);
+    expect(resolved?.comment).toBe('first');
     expect(resolved?.status).toBe('won');
     expect(resolved?.pendingPrompt).toBeNull();
   });
@@ -488,18 +482,18 @@ describe('resolvePendingPrompt', () => {
       kind: 'deal_amount',
     });
     await store.resolvePendingPrompt(111, 999, () => ({
-      dealAmount: 5000,
+      comment: 'first',
       status: 'won',
     }));
 
     const second = await store.resolvePendingPrompt(111, 999, () => ({
-      dealAmount: 9999,
+      comment: 'second',
       status: 'won',
     }));
 
     expect(second).toBeUndefined();
     const after = await store.getLead(lead.id);
-    expect(after?.dealAmount).toBe(5000);
+    expect(after?.comment).toBe('first');
   });
 
   it('returns undefined when a concurrent write clears the prompt between retry attempts', async () => {
@@ -516,18 +510,18 @@ describe('resolvePendingPrompt', () => {
     });
 
     const resolved = await store.resolvePendingPrompt(111, 999, () => ({
-      dealAmount: 5000,
+      comment: 'late',
     }));
 
     expect(resolved).toBeUndefined();
     const after = await store.getLead(lead.id);
-    expect(after?.dealAmount).toBeNull();
+    expect(after?.comment).toBeUndefined();
   });
 
   it('returns undefined when no lead has a matching pending prompt', async () => {
     await store.insertLead(baseData);
     const resolved = await store.resolvePendingPrompt(1, 1, () => ({
-      dealAmount: 1,
+      comment: 'x',
     }));
     expect(resolved).toBeUndefined();
   });
@@ -572,18 +566,6 @@ describe('status patch builders', () => {
       statusChangedAt: AT.toISOString(),
     });
   });
-
-  it('wonPatch appends a positive amount and keeps incomes on zero', async () => {
-    const lead = await storedLead();
-
-    const won = wonPatch(lead, 300);
-    expect(won).toMatchObject({
-      status: 'won',
-      statusChangedAt: AT.toISOString(),
-    });
-    expect(won.incomes?.map((i) => i.amount)).toEqual([300]);
-    expect(wonPatch(lead, 0).incomes).toBe(lead.incomes);
-  });
 });
 
 describe('resumeLead', () => {
@@ -605,7 +587,7 @@ describe('resumeLead', () => {
 
   it('no-ops when the lead is not postponed (stale button, already finalized elsewhere)', async () => {
     const lead = await store.insertLead(baseData);
-    await forceComplete(lead.id, 100_000); // status: 'won'
+    await forceComplete(lead.id);
 
     const resumed = await store.resumeLead(lead.id);
 
@@ -851,115 +833,6 @@ describe('findByCard / addNote', () => {
   });
 });
 
-describe('appendIncome', () => {
-  it('numbers each income after the highest id already on the lead', () => {
-    const first = appendIncome([], 300);
-    const second = appendIncome(first, 150);
-
-    expect(second.map((i) => [i.id, i.amount, i.paidAt])).toEqual([
-      [1, 300, null],
-      [2, 150, null],
-    ]);
-  });
-
-  it('does not reuse the id of a removed income', () => {
-    const next = appendIncome(
-      [{ id: 7, amount: 100, at: 'x', paidAt: null }],
-      50,
-    );
-
-    expect(next[1].id).toBe(8);
-  });
-});
-
-describe('getCommission', () => {
-  const income = (amount: number, paidAt: string | null = null) => ({
-    id: 1,
-    amount,
-    at: '2026-01-01T00:00:00.000Z',
-    paidAt,
-  });
-
-  it('sums the commission of each income rather than taxing the total', () => {
-    const info = getCommission({
-      commissionPercent: 10,
-      paidAmount: 15,
-      incomes: [
-        { ...income(300, '2026-02-01T00:00:00.000Z') },
-        { ...income(150), id: 2 },
-      ],
-    });
-
-    expect(info.commission).toBe(45);
-    expect(info.remaining).toBe(30);
-    expect(info.isPaidOff).toBe(false);
-  });
-
-  it('rounds each income separately, so the total can differ from taxing the sum', () => {
-    const perIncome = getCommission({
-      commissionPercent: 33,
-      paidAmount: 0,
-      incomes: [income(10.05), { ...income(10.05), id: 2 }],
-    });
-    const onTheTotal = getCommission({
-      commissionPercent: 33,
-      paidAmount: 0,
-      incomes: [income(20.1)],
-    });
-
-    expect(perIncome.commission).toBe(6.64);
-    expect(onTheTotal.commission).toBe(6.63);
-  });
-
-  it('uses the rate stored on the lead, so brands on different rates differ', () => {
-    const sourcing = getCommission({
-      commissionPercent: 10,
-      paidAmount: 0,
-      incomes: [income(1000)],
-    });
-    const detailing = getCommission({
-      commissionPercent: 50,
-      paidAmount: 0,
-      incomes: [income(1000)],
-    });
-
-    expect(sourcing.commission).toBe(100);
-    expect(detailing.commission).toBe(500);
-  });
-
-  it('owes nothing on a lead without incomes', () => {
-    const info = getCommission({
-      commissionPercent: 10,
-      paidAmount: 0,
-      incomes: [],
-    });
-    expect(info.commission).toBe(0);
-    expect(info.isPaidOff).toBe(true);
-  });
-
-  it('stays isPaidOff when overpaid (remaining goes negative) instead of flagging still-owed', () => {
-    const info = getCommission({
-      commissionPercent: 10,
-      paidAmount: 15_000,
-      incomes: [income(100_000)],
-    });
-    expect(info.remaining).toBe(-5000);
-    expect(info.isPaidOff).toBe(true);
-  });
-
-  it('is paid off within the rounding epsilon', () => {
-    const info = getCommission({
-      commissionPercent: 10,
-      paidAmount: 9999.999,
-      incomes: [income(100_000)],
-    });
-    expect(info.isPaidOff).toBe(true);
-  });
-});
-
-// Writes raw JSON directly into the fake blob, bypassing insertLead — the
-// only way to simulate a legacy record written before a schema field
-// existed, or a genuinely malformed one.
 function seedRawBlob(records: unknown[]): void {
   storage.seed(records);
 }
@@ -981,10 +854,6 @@ describe('readLeads — schema validation on the way in', () => {
     const [lead] = await store.readLeads();
 
     expect(lead.status).toBe('open');
-    expect(lead.commissionPercent).toBe(10);
-    expect(lead.paidAmount).toBe(0);
-    expect(lead.payments).toEqual([]);
-    expect(lead.pendingCommissionClaim).toBeNull();
     expect(lead.pendingPrompt).toBeNull();
   });
 
@@ -998,6 +867,7 @@ describe('readLeads — schema validation on the way in', () => {
         locale: 'ru',
         status: 'won',
         dealAmount: 300,
+        commissionPercent: 10,
         statusChangedAt: 'x',
         createdAt: 'x',
         pendingPrompt: { chatId: 1, messageId: 1, kind: 'commission_claim' },
@@ -1007,171 +877,8 @@ describe('readLeads — schema validation on the way in', () => {
     const [lead] = await store.readLeads();
 
     expect(lead).toBeDefined();
-    expect(lead.dealAmount).toBe(300);
+    expect(lead.status).toBe('won');
     expect(lead.pendingPrompt).toBeNull();
-  });
-
-  it('turns a legacy paid-off deal into one settled income', async () => {
-    seedRawBlob([
-      {
-        id: 1,
-        name: 'Иван',
-        contact: '@ivan',
-        service: 'vehicle-sourcing',
-        locale: 'ru',
-        status: 'won',
-        dealAmount: 1000,
-        commissionPercent: 10,
-        paidAmount: 100,
-        payments: [{ amount: 100, at: '2026-02-02T00:00:00.000Z' }],
-        statusChangedAt: '2026-01-01T00:00:00.000Z',
-        createdAt: '2026-01-01T00:00:00.000Z',
-      },
-    ]);
-
-    const [lead] = await store.readLeads();
-
-    expect(lead.incomes).toEqual([
-      {
-        id: 1,
-        amount: 1000,
-        at: '2026-01-01T00:00:00.000Z',
-        paidAt: '2026-02-02T00:00:00.000Z',
-      },
-    ]);
-    expect(lead.dealAmount).toBe(1000);
-    expect(lead.paidAmount).toBe(100);
-  });
-
-  it('keeps a legacy unpaid deal owed, dating the income from the status change', async () => {
-    seedRawBlob([
-      {
-        id: 1,
-        name: 'Иван',
-        contact: '@ivan',
-        service: 'vehicle-sourcing',
-        locale: 'ru',
-        status: 'won',
-        dealAmount: 1000,
-        commissionPercent: 10,
-        statusChangedAt: '2026-01-01T00:00:00.000Z',
-        createdAt: '2026-01-01T00:00:00.000Z',
-      },
-    ]);
-
-    const [lead] = await store.readLeads();
-
-    expect(lead.incomes).toEqual([
-      { id: 1, amount: 1000, at: '2026-01-01T00:00:00.000Z', paidAt: null },
-    ]);
-    expect(lead.paidAmount).toBe(0);
-  });
-
-  it('leaves a legacy zero-euro deal without an income, keeping the amount as it was', async () => {
-    seedRawBlob([
-      {
-        id: 1,
-        name: 'Иван',
-        contact: '@ivan',
-        service: 'vehicle-sourcing',
-        locale: 'ru',
-        status: 'won',
-        dealAmount: 0,
-        statusChangedAt: 'x',
-        createdAt: 'x',
-      },
-    ]);
-
-    const [lead] = await store.readLeads();
-
-    expect(lead.incomes).toEqual([]);
-    expect(lead.dealAmount).toBe(0);
-  });
-
-  it('keeps a legacy partly-paid deal partly paid, splitting it at what the payment covered', async () => {
-    seedRawBlob([
-      {
-        id: 1,
-        name: 'Иван',
-        contact: '@ivan',
-        service: 'vehicle-sourcing',
-        locale: 'ru',
-        status: 'won',
-        dealAmount: 100_000,
-        commissionPercent: 10,
-        paidAmount: 3000,
-        payments: [{ amount: 3000, at: '2026-02-02T00:00:00.000Z' }],
-        statusChangedAt: '2026-01-01T00:00:00.000Z',
-        createdAt: '2026-01-01T00:00:00.000Z',
-      },
-    ]);
-
-    const [lead] = await store.readLeads();
-
-    expect(lead.incomes).toEqual([
-      {
-        id: 1,
-        amount: 30_000,
-        at: '2026-01-01T00:00:00.000Z',
-        paidAt: '2026-02-02T00:00:00.000Z',
-      },
-      {
-        id: 2,
-        amount: 70_000,
-        at: '2026-01-01T00:00:00.000Z',
-        paidAt: null,
-      },
-    ]);
-    expect(lead.dealAmount).toBe(100_000);
-    expect(lead.paidAmount).toBe(3000);
-    expect(getCommission(lead).remaining).toBe(7000);
-  });
-
-  it('leaves a legacy deal on a zero commission rate whole and unsettled', async () => {
-    seedRawBlob([
-      {
-        id: 1,
-        name: 'Иван',
-        contact: '@ivan',
-        service: 'vehicle-sourcing',
-        locale: 'ru',
-        status: 'won',
-        dealAmount: 1000,
-        commissionPercent: 0,
-        paidAmount: 0,
-        statusChangedAt: '2026-01-01T00:00:00.000Z',
-        createdAt: '2026-01-01T00:00:00.000Z',
-      },
-    ]);
-
-    const [lead] = await store.readLeads();
-
-    expect(lead.incomes).toEqual([
-      { id: 1, amount: 1000, at: '2026-01-01T00:00:00.000Z', paidAt: null },
-    ]);
-  });
-
-  it('keeps a legacy deal whole when the payment covers less than a euro of it', async () => {
-    seedRawBlob([
-      {
-        id: 1,
-        name: 'Иван',
-        contact: '@ivan',
-        service: 'vehicle-sourcing',
-        locale: 'ru',
-        status: 'won',
-        dealAmount: 1000,
-        commissionPercent: 10,
-        paidAmount: 0.001,
-        statusChangedAt: '2026-01-01T00:00:00.000Z',
-        createdAt: '2026-01-01T00:00:00.000Z',
-      },
-    ]);
-
-    const [lead] = await store.readLeads();
-
-    expect(lead.incomes).toHaveLength(1);
-    expect(lead.paidAmount).toBe(0);
   });
 
   it('hides a record missing a required field from callers', async () => {
@@ -1219,7 +926,7 @@ describe('readLeads — schema validation on the way in', () => {
         locale: 'ru',
         statusChangedAt: 'x',
         createdAt: 'x',
-        paidAmount: '5000',
+        remindAt: 5000,
       },
     ]);
 
@@ -1320,7 +1027,7 @@ describe('updateLeads — failures that are not write conflicts', () => {
     };
     const brokenStore = createLeadStore({
       storage: failing,
-      schema: createLeadSchema({ defaultCommissionPercent: 10 }),
+      schema: storedLeadSchema,
     });
 
     await expect(brokenStore.updateLeads((leads) => leads)).rejects.toBe(boom);
@@ -1354,26 +1061,13 @@ describe('readLeads — a record that is not a list at all', () => {
   });
 });
 
-describe('per-business store defaults', () => {
-  it('stamps new leads with the business own commission rate', async () => {
-    const detailingStore = createLeadStore({
-      storage: createMemoryStorage(),
-      schema: createLeadSchema({ defaultCommissionPercent: 50 }),
-    });
-
-    const lead = await detailingStore.insertLead(baseData);
-
-    expect(lead.commissionPercent).toBe(50);
-  });
-});
-
 describe('quarantine — nothing leaves the blob on its own', () => {
   const corrupt = { id: 7, name: 'Пётр', service: 'x', locale: 'ru' };
 
   function guarded(quarantine: (entries: unknown[]) => Promise<void>) {
     return createLeadStore({
       storage,
-      schema: createLeadSchema({ defaultCommissionPercent: 10 }),
+      schema: storedLeadSchema,
       quarantine,
     });
   }
@@ -1525,7 +1219,7 @@ describe('capturePrompt', () => {
     ).toBeUndefined();
   });
 
-  it('does not disturb the operator prompt on the same lead', async () => {
+  it('does not disturb the owner prompt on the same lead', async () => {
     const lead = await store.insertLead(baseData);
     await store.setPendingPrompt(lead.id, {
       chatId: 111,
@@ -1562,7 +1256,7 @@ describe('a capturePrompt stored before the per-brand Questionnaires', () => {
     const quarantine = vi.fn().mockResolvedValue(undefined);
     const guarded = createLeadStore({
       storage,
-      schema: createLeadSchema({ defaultCommissionPercent: 10 }),
+      schema: storedLeadSchema,
       quarantine,
     });
     storage.seed([
@@ -1762,7 +1456,7 @@ describe('updateCapture', () => {
     expect(updated?.capturePrompt).toBeNull();
   });
 
-  it('leaves an operator edit made mid-dialog in place', async () => {
+  it('leaves an owner edit made mid-dialog in place', async () => {
     const lead = await store.insertLead(baseData);
     await store.setPendingPrompt(lead.id, {
       chatId: 111,

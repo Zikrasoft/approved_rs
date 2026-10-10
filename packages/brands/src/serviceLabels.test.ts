@@ -115,7 +115,7 @@ describe('SERVICE_LABELS_RU', () => {
     expect(isPartnerService('diagnostics')).toBe(false);
   });
 
-  it('names a shop order the way the operator card should read it', () => {
+  it('names a shop order the way the owner card should read it', () => {
     expect(serviceLabel('parts-order')).toBe('Заказ из магазина');
   });
 });

@@ -1,6 +1,6 @@
 # Moving the CRM to `@SerbCRMBot`
 
-A runbook for one sitting. It moves the operator-facing CRM from `@ApprovedRsBot`
+A runbook for one sitting. It moves the owner-facing CRM from `@ApprovedRsBot`
 to `@SerbCRMBot` and gives every open lead a working card again. Why there are
 four bots at all: [ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md).
 
@@ -103,7 +103,7 @@ Delete the dead ones by hand if they bother you.
 
 The direct-message cards from before the switch stay dead for good. Only the
 group teaser has a stored address; a DM card is rendered on demand when the
-operator taps «Открыть в боте». Repointing `TELEGRAM_BOT_USERNAME` in step 3 is
+owner taps «Открыть в боте». Repointing `TELEGRAM_BOT_USERNAME` in step 3 is
 what makes that link open `@SerbCRMBot` — ADR-0030 accepts the rest.
 
 ## 7. Check the CRM answers at all
@@ -123,9 +123,9 @@ In the leads group and in a DM with `@SerbCRMBot`:
       `@SerbCRMBot`, not `@ApprovedRsBot`.
 - [ ] **Status change** — open a lead from the teaser, move it to «В работе»; the
       DM card redraws and the group teaser's status line follows.
-- [ ] **Deal amount** — mark a lead «Успешно», answer the amount prompt by
-      replying in the DM; the amount and the commission appear on the card and the
-      admin gets the deal notification.
+- [ ] **Payout** — mark a lead «Сделка», answer the amount prompt by replying
+      to it; the bot answers «записано» and the admin gets the Payout
+      notification.
 - [ ] **Postpone** — «Напомни мне», pick a date; the lead goes to `postponed` and
       `remindAt` is set. The cron (`/api/reminders`, daily) delivers it; to check
       it now, set the date to today and wait for the next run.

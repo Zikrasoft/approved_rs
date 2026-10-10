@@ -42,24 +42,18 @@ export const {
 } = leadStore;
 
 export {
-  appendIncome,
   appendNote,
   canPostpone,
-  getCommission,
   isSettled,
   postponePatch,
-  wonPatch,
   MAX_LIST_ROWS,
 } from '@podbor/lead-crm';
 
 export type {
-  CommissionInfo,
   Draft,
-  Income,
   LeadStatus,
   Payout,
   Settlement,
-  Payment,
   PendingPrompt,
   StoredLead,
 } from '@podbor/lead-crm';

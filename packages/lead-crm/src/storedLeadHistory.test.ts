@@ -1,18 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { BRANDS, COMMISSION_PERCENT } from '@podbor/brands';
-import { createLeadSchema, type StoredLead } from './schema.ts';
-
-const BRAND_COMMISSION_PERCENT = Object.fromEntries(
-  Object.entries(BRANDS).map(([key, brand]) => [
-    brand.name,
-    COMMISSION_PERCENT[key as keyof typeof COMMISSION_PERCENT],
-  ]),
-);
+import { BRANDS } from '@podbor/brands';
+import { legacyIncomesSchema, type LegacyIncomes } from './legacyIncomes.ts';
+import { storedLeadSchema, type StoredLead } from './schema.ts';
 
 interface StoredShape {
   label: string;
   record: unknown;
   keeps: Partial<StoredLead>;
+  incomes?: LegacyIncomes['incomes'];
 }
 
 interface RefusedShape {
@@ -65,10 +60,6 @@ const HISTORY: StoredShape[] = [
       locale: 'ru',
       kind: 'lead',
       status: 'open',
-      dealAmount: null,
-      paidAmount: 0,
-      commissionPercent: 10,
-      incomes: [],
       telegramChatId: -1001234567890,
       pendingPrompt: null,
       remindAt: null,
@@ -107,13 +98,6 @@ const HISTORY: StoredShape[] = [
       name: '',
       locale: 'en',
       status: 'won',
-      dealAmount: 0,
-      incomes: [],
-      pendingCommissionClaim: {
-        amount: 30,
-        claimedAt: '2026-03-09T12:00:00.000Z',
-        incomeIds: [],
-      },
     },
   },
   {
@@ -279,20 +263,15 @@ const HISTORY: StoredShape[] = [
       archived: false,
       pendingCommissionClaim: null,
     },
-    keeps: {
-      id: 7,
-      dealAmount: 300,
-      paidAmount: 30,
-      commissionPercent: 10,
-      incomes: [
-        {
-          id: 1,
-          amount: 300,
-          at: '2026-03-14T10:00:00.000Z',
-          paidAt: '2026-03-15T10:00:00.000Z',
-        },
-      ],
-    },
+    keeps: { id: 7 },
+    incomes: [
+      {
+        id: 1,
+        amount: 300,
+        at: '2026-03-14T10:00:00.000Z',
+        paidAt: '2026-03-15T10:00:00.000Z',
+      },
+    ],
   },
   {
     label:
@@ -319,25 +298,16 @@ const HISTORY: StoredShape[] = [
       archived: false,
       pendingCommissionClaim: null,
     },
-    keeps: {
-      id: 8,
-      dealAmount: 300,
-      paidAmount: 12,
-      incomes: [
-        {
-          id: 1,
-          amount: 120,
-          at: '2026-03-14T10:00:00.000Z',
-          paidAt: '2026-03-16T10:00:00.000Z',
-        },
-        {
-          id: 2,
-          amount: 180,
-          at: '2026-03-14T10:00:00.000Z',
-          paidAt: null,
-        },
-      ],
-    },
+    keeps: { id: 8 },
+    incomes: [
+      {
+        id: 1,
+        amount: 120,
+        at: '2026-03-14T10:00:00.000Z',
+        paidAt: '2026-03-16T10:00:00.000Z',
+      },
+      { id: 2, amount: 180, at: '2026-03-14T10:00:00.000Z', paidAt: null },
+    ],
   },
   {
     label:
@@ -377,26 +347,16 @@ const HISTORY: StoredShape[] = [
         incomeIds: [2],
       },
     },
-    keeps: {
-      id: 9,
-      brand: 'CarLab',
-      dealAmount: 500,
-      paidAmount: 20,
-      incomes: [
-        {
-          id: 1,
-          amount: 200,
-          at: '2026-03-18T10:00:00.000Z',
-          paidAt: '2026-03-19T10:00:00.000Z',
-        },
-        { id: 2, amount: 300, at: '2026-03-20T10:00:00.000Z', paidAt: null },
-      ],
-      pendingCommissionClaim: {
-        amount: 30,
-        claimedAt: '2026-03-20T11:00:00.000Z',
-        incomeIds: [2],
+    keeps: { id: 9, brand: 'CarLab' },
+    incomes: [
+      {
+        id: 1,
+        amount: 200,
+        at: '2026-03-18T10:00:00.000Z',
+        paidAt: '2026-03-19T10:00:00.000Z',
       },
-    },
+      { id: 2, amount: 300, at: '2026-03-20T10:00:00.000Z', paidAt: null },
+    ],
   },
   {
     label: 'v12: a postponed lead remembering the status it was postponed from',
@@ -472,8 +432,7 @@ const HISTORY: StoredShape[] = [
     },
   },
   {
-    label:
-      'a record carrying no rate of its own, the only shape whose read depends on which brand reads it',
+    label: 'a record carrying no rate of its own and no money to price',
     record: {
       id: 13,
       name: 'Vuk',
@@ -486,16 +445,10 @@ const HISTORY: StoredShape[] = [
     keeps: {
       id: 13,
       brand: 'Approved.rs',
-      commissionPercent: 10,
       status: 'open',
       services: [],
-      incomes: [],
-      payments: [],
-      dealAmount: null,
-      paidAmount: 0,
       remindAt: null,
       pendingPrompt: null,
-      pendingCommissionClaim: null,
       telegramChatId: null,
       telegramMessageId: null,
     },
@@ -553,39 +506,53 @@ const REFUSED: RefusedShape[] = [
       pendingCommissionClaim: null,
     },
   },
+  {
+    label: 'money with no rate to price it, which no version wrote',
+    record: {
+      id: 15,
+      name: 'Luka',
+      contact: '@luka',
+      service: 'podbor-auto',
+      locale: 'ru',
+      status: 'won',
+      dealAmount: 300,
+      statusChangedAt: '2026-03-17T10:00:00.000Z',
+      createdAt: '2026-03-03T10:00:00.000Z',
+    },
+  },
 ];
-
-const schemas = Object.entries(BRAND_COMMISSION_PERCENT).map(
-  ([brand, defaultCommissionPercent]) =>
-    [brand, createLeadSchema({ defaultCommissionPercent })] as const,
-);
 
 describe('every stored lead shape the system has written', () => {
   it('holds at least one record written by each brand', () => {
     const written = HISTORY.map(({ keeps }) => keeps.brand);
 
-    for (const brand of Object.keys(BRAND_COMMISSION_PERCENT)) {
-      expect(written).toContain(brand);
+    for (const { name } of Object.values(BRANDS)) {
+      expect(written).toContain(name);
     }
   });
 
-  it.each(HISTORY)('$label is still readable', ({ record, keeps }) => {
-    const read = schemas.map(([brand, schema]) => {
-      const parsed = schema.safeParse(record);
-      expect(parsed.success, `${brand} refused the record`).toBe(true);
-      return parsed.data;
-    });
-
-    for (const [index, lead] of read.entries()) {
-      expect(lead, `${schemas[index][0]} read it differently`).toEqual(read[0]);
-      expect(lead).toMatchObject(keeps);
-    }
-  });
+  it.each(HISTORY)(
+    '$label is still readable',
+    ({ record, keeps, incomes = [] }) => {
+      const parsed = storedLeadSchema.safeParse(record);
+      expect(parsed.success).toBe(true);
+      expect(parsed.data).toMatchObject(keeps);
+      expect(legacyIncomesSchema.parse(record).incomes).toEqual(incomes);
+    },
+  );
 
   it.each(REFUSED)('$label is refused, not read differently', ({ record }) => {
-    for (const [brand, schema] of schemas) {
-      expect(schema.safeParse(record).success, `${brand} accepted it`).toBe(
-        false,
+    expect(legacyIncomesSchema.safeParse(record).success).toBe(false);
+  });
+
+  it('writes none of the retired money fields back', () => {
+    for (const { record } of HISTORY) {
+      expect(Object.keys(storedLeadSchema.parse(record))).not.toEqual(
+        expect.arrayContaining([
+          expect.stringMatching(
+            /^(dealAmount|commissionPercent|paidAmount|payments|incomes|pendingCommissionClaim)$/,
+          ),
+        ]),
       );
     }
   });

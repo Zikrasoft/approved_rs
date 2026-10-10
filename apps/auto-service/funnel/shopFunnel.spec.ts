@@ -33,7 +33,7 @@ interface TelegramCall {
   body: string | null;
 }
 
-interface OperatorCard {
+interface OwnerCard {
   chat_id: string;
   text: string;
   parse_mode: string;
@@ -117,7 +117,7 @@ test.afterAll(() => {
   rmSync(TELEGRAM_FAIL, { force: true });
 });
 
-test('one order leaves one lead, one marker and one operator card', async ({
+test('one order leaves one lead, one marker and one owner card', async ({
   page,
 }) => {
   const displayId = await buyOneBattery(page);
@@ -142,7 +142,7 @@ test('one order leaves one lead, one marker and one operator card', async ({
 
   const sent = cardsSentSince(0);
   expect(sent).toHaveLength(1);
-  const card: OperatorCard = JSON.parse(sent[0].body ?? 'null');
+  const card: OwnerCard = JSON.parse(sent[0].body ?? 'null');
   expect(card.chat_id).toBe(process.env.TELEGRAM_GROUP_ID);
   expect(card.parse_mode).toBe('HTML');
   expect(card.text).toContain(BUYER.name);

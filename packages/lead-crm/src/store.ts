@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { appendIncome } from './money.ts';
+import { legacyIncomesSchema } from './legacyIncomes.ts';
 import { channelLabel } from './channelLabels.ts';
 import { isClosed } from './schema.ts';
 import type {
@@ -30,6 +30,7 @@ import {
   summaryMarkSchema,
   withMigratedIncomes,
   type Draft,
+  type LegacyLeadMoney,
   type DraftPrompt,
   type Ledger,
   type LedgerAuthor,
@@ -254,16 +255,6 @@ export function resumePatch(): Partial<StoredLead> {
   return { ...statusPatch('open'), remindAt: null };
 }
 
-export function wonPatch(
-  lead: StoredLead,
-  amount: number,
-): Partial<StoredLead> {
-  return {
-    ...statusPatch('won'),
-    incomes: amount > 0 ? appendIncome(lead.incomes, amount) : lead.incomes,
-  };
-}
-
 const unreadableId = z.object({
   id: z.coerce
     .number()
@@ -356,6 +347,7 @@ export function createLeadStore({
       );
     }
     const leads: StoredLead[] = [];
+    const legacy: LegacyLeadMoney[] = [];
     const ledger: Ledger = { payouts: [], settlements: [] };
     const drafts: Draft[] = [];
     const summaries: SummaryMark[] = [];
@@ -371,12 +363,15 @@ export function createLeadStore({
         continue;
       }
       const parsed = schema.safeParse(entry);
-      if (parsed.success) leads.push(parsed.data);
-      else unreadable.push(entry);
+      const money = legacyIncomesSchema.safeParse(entry);
+      if (parsed.success && money.success) {
+        leads.push(parsed.data);
+        legacy.push({ lead: parsed.data, money: money.data });
+      } else unreadable.push(entry);
     }
     return {
       leads,
-      ledger: withMigratedIncomes(leads, ledger),
+      ledger: withMigratedIncomes(legacy, ledger),
       drafts,
       summaries,
       unreadable,

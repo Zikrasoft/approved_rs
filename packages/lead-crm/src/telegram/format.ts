@@ -1,20 +1,8 @@
 import { format, parseISO } from 'date-fns';
-import {
-  getCommission,
-  hasDealAmount,
-  incomeCommission,
-  roundMoney,
-  type CommissionInfo,
-} from '../money.ts';
 import { channelLabel } from '../channelLabels.ts';
 import { isTelegramIdContact } from '../contactShape.ts';
 import { LEADS_PATH } from '../quarantine.ts';
-import {
-  isClosed,
-  type Income,
-  type LeadStatus,
-  type StoredLead,
-} from '../schema.ts';
+import { isClosed, type LeadStatus, type StoredLead } from '../schema.ts';
 import {
   MAX_LIST_ROWS,
   isPlaceholderContact,
@@ -68,15 +56,6 @@ export function formatMoney(n: number): string {
 
 export function formatDateRu(iso: string): string {
   return format(parseISO(iso), 'dd.MM.yyyy');
-}
-
-export function canAddIncome(lead: StoredLead, role: Role): boolean {
-  return role === 'owner' && lead.status !== 'lost';
-}
-
-function incomeLine(lead: StoredLead, income: Income): string {
-  const commission = incomeCommission(income.amount, lead.commissionPercent);
-  return `• ${formatMoney(income.amount)} от ${formatDateRu(income.at)} · комиссия ${formatMoney(commission)} · ${income.paidAt ? '🟢 оплачена' : '🔴 не оплачена'}`;
 }
 
 const QUICK_REMIND_DAYS = [
@@ -271,9 +250,7 @@ export function buildSearchResults(leads: StoredLead[]): {
       reply_markup: { inline_keyboard: [] },
     };
   const rows: Btn[][] = leads.slice(0, MAX_LIST_ROWS).map((l) => {
-    const amount =
-      l.dealAmount != null ? ` — ${formatMoney(l.dealAmount)}` : '';
-    const label = `${STATUS_META[l.status].emoji} #${l.id} ${l.brand} ${leadDisplayName(l)} — ${l.contact}${amount}`;
+    const label = `${STATUS_META[l.status].emoji} #${l.id} ${l.brand} ${leadDisplayName(l)} — ${l.contact}`;
     return [{ text: label, callback_data: `open:${l.id}` }];
   });
   return { text: 'Найдено:', reply_markup: { inline_keyboard: rows } };
@@ -281,9 +258,6 @@ export function buildSearchResults(leads: StoredLead[]): {
 
 export function buildStats(leads: StoredLead[]): string {
   const count = (s: LeadStatus) => leads.filter((l) => l.status === s).length;
-  const earningLeads = leads.filter(hasDealAmount);
-  const sum = (pick: (l: StoredLead & { dealAmount: number }) => number) =>
-    roundMoney(earningLeads.reduce((acc, l) => acc + pick(l), 0));
 
   const brands = [...new Set(leads.map((l) => l.brand))].sort();
   const brandLines =
@@ -306,11 +280,6 @@ export function buildStats(leads: StoredLead[]): string {
       .map((s) => `${statusMark(s)}: ${count(s)}`)
       .join('   '),
     ...brandLines,
-    '',
-    `💰 Заработано (доход владельца): ${formatMoney(sum((l) => l.dealAmount))}`,
-    `Комиссия начислена: ${formatMoney(sum((l) => getCommission(l).commission))}`,
-    `Оплачено: ${formatMoney(sum((l) => l.paidAmount))}`,
-    `🔴 Осталось получить: ${formatMoney(sum((l) => getCommission(l).remaining))}`,
   ].join('\n');
 }
 
@@ -361,7 +330,7 @@ function fieldPreview(value: string | null | undefined): string {
   );
 }
 
-export type FieldChangeAuthor = 'operator' | 'visitor';
+export type FieldChangeAuthor = 'owner' | 'visitor';
 
 export const REFERRAL_NOTE = 'Пришёл из бота Approved.rs (Партнёры)';
 
@@ -490,20 +459,6 @@ export function draftMessage(
   };
 }
 
-export function dealNotificationText(
-  lead: StoredLead & { dealAmount: number },
-): string {
-  const { commission } = getCommission(lead);
-  return [
-    `💰 Новая сделка`,
-    ``,
-    `#${lead.id} ${escapeHtml(leadDisplayName(lead))}`,
-    ``,
-    `Доход с заявки: ${formatMoney(lead.dealAmount)}`,
-    `Твоя комиссия (${lead.commissionPercent}%): ${formatMoney(commission)}`,
-  ].join('\n');
-}
-
 export function createFormatter({
   serviceLabel,
   botUsername,
@@ -534,7 +489,7 @@ export function createFormatter({
     return `🏷 ${escapeHtml(lead.brand)}${via}${referred}`;
   }
 
-  function formatLeadText(lead: StoredLead, role: Role): string {
+  function formatLeadText(lead: StoredLead): string {
     const contactLine = lead.contactChannel
       ? `${lead.contact} (${channelLabel(lead.contactChannel)})`
       : lead.contact;
@@ -543,13 +498,6 @@ export function createFormatter({
       brandLine(lead),
       statusLine(lead.status),
     ];
-    if (lead.dealAmount != null) {
-      lines.push(
-        role === 'owner'
-          ? `💰 Твой доход с заявки: ${formatMoney(lead.dealAmount)}`
-          : `💰 Доход владельца с заявки: ${formatMoney(lead.dealAmount)}`,
-      );
-    }
     if (lead.status === 'postponed' && lead.remindAt)
       lines.push(`⏰ Напомнить: ${formatDateRu(lead.remindAt)}`);
     lines.push(
@@ -567,17 +515,6 @@ export function createFormatter({
     return lines.join('\n');
   }
 
-  function moneyStatusLines(lead: StoredLead, info: CommissionInfo): string[] {
-    const lines = [
-      '',
-      ...(lead.incomes.length
-        ? ['💶 Доходы:', ...lead.incomes.map((i) => incomeLine(lead, i)), '']
-        : []),
-      `💰 Комиссия Zikrasoft: ${formatMoney(info.commission)} · ${info.isPaidOff ? '🟢 Оплачено' : `Осталось: ${formatMoney(info.remaining)}`}`,
-    ];
-    return lines;
-  }
-
   function shownValue(
     field: EditField,
     value: string | null | undefined,
@@ -592,7 +529,7 @@ export function createFormatter({
       lead: StoredLead,
       field: EditField,
       before: string | null | undefined,
-      author: FieldChangeAuthor = 'operator',
+      author: FieldChangeAuthor = 'owner',
     ): string {
       return [
         `✏️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${EDIT_FIELD_LABELS[field]}`,
@@ -698,23 +635,8 @@ export function createFormatter({
           ? [[{ text: '❌ Удалить навсегда', callback_data: `del:${lead.id}` }]]
           : [];
 
-      const commission = hasDealAmount(lead) ? getCommission(lead) : null;
-      const lines = [
-        formatLeadText(lead, role),
-        ...(commission ? moneyStatusLines(lead, commission) : []),
-      ];
       const rows: Btn[][] = [
         ...statusRows(lead, role),
-        ...(canAddIncome(lead, role)
-          ? [
-              [
-                {
-                  text: '➕ Добавить доход',
-                  callback_data: `income:${lead.id}`,
-                },
-              ],
-            ]
-          : []),
         ...(canReplyThroughBot(lead)
           ? [
               [
@@ -729,7 +651,7 @@ export function createFormatter({
       ];
 
       return {
-        text: lines.join('\n'),
+        text: formatLeadText(lead),
         reply_markup: { inline_keyboard: rows },
       };
     },

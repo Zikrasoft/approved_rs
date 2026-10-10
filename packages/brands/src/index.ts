@@ -9,7 +9,7 @@ export {
 } from './brands.ts';
 export type { Brand, BrandKey, BrandLocale } from './brands.ts';
 
-export { BRAND_SITES, BRANDS, COMMISSION_PERCENT } from './registry.ts';
+export { BRAND_SITES, BRANDS } from './registry.ts';
 
 export {
   PARTNER_SERVICE,
