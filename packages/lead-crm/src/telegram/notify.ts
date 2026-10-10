@@ -1,19 +1,10 @@
-import type { Payout, Settlement } from '../ledger.ts';
 import type { LedgerOperation } from '../ledgerStore.ts';
 import { isClosed, type StoredLead } from '../schema.ts';
-import type { Digest, MonthlySummary } from '../store.ts';
+import type { Digest } from '../store.ts';
+import { isMessageGone, type TelegramClient } from './client.ts';
 import {
-  isMessageGone,
-  type SendExtra,
-  type TelegramClient,
-} from './client.ts';
-import {
-  monthlySummaryText,
   operationNoticeText,
-  payoutNotificationText,
   quarantinedLeadsText,
-  settleKeyboard,
-  settlementText,
   statusChangeText,
   type EditField,
   type FieldChangeAuthor,
@@ -36,12 +27,8 @@ export function createNotifier({
   ownerIds,
   adminIds,
 }: NotifierOptions) {
-  async function sendToAll(
-    ids: number[],
-    text: string,
-    extra?: SendExtra,
-  ): Promise<void> {
-    await Promise.all(ids.map((id) => client.sendMessage(id, text, extra)));
+  async function sendToAll(ids: number[], text: string): Promise<void> {
+    await Promise.all(ids.map((id) => client.sendMessage(id, text)));
   }
 
   return {
@@ -106,13 +93,6 @@ export function createNotifier({
       return true;
     },
 
-    async sendPayoutNotificationToAdmin(
-      lead: StoredLead | undefined,
-      payout: Payout,
-    ): Promise<void> {
-      await sendToAll(adminIds, payoutNotificationText(lead, payout));
-    },
-
     async sendOperationNotice(
       operation: LedgerOperation,
       balance: number,
@@ -121,19 +101,6 @@ export function createNotifier({
         operation.createdBy === 'owner' ? adminIds : ownerIds,
         operationNoticeText(operation, balance),
       );
-    },
-
-    async sendSettlementToOwner(
-      settlement: Settlement,
-      balance: number,
-    ): Promise<void> {
-      await sendToAll(ownerIds, settlementText(settlement, balance));
-    },
-
-    async sendMonthlySummary(summary: MonthlySummary): Promise<void> {
-      await client.sendMessage(groupId, monthlySummaryText(summary), {
-        reply_markup: settleKeyboard(summary.balance),
-      });
     },
 
     async sendFieldChangeToAdmin(

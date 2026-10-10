@@ -21,10 +21,7 @@ export { afterStatusChange, ensureLeadCard };
 export const {
   sendLeadNotification,
   sendDigest,
-  sendPayoutNotificationToAdmin,
-  sendSettlementToOwner,
   sendOperationNotice,
-  sendMonthlySummary,
   sendStatusChangeToAdmin,
   editLeadDetailMessage,
   unpinLeadCard,
@@ -38,7 +35,6 @@ export const ADMIN_IDS = adminIds;
 export {
   formatMoney,
   formatDateRu,
-  buildToPay,
   buildSearchResults,
   buildMenu,
   buildBalance,
@@ -51,13 +47,7 @@ export {
   buildDeleteConfirm,
   buildRemindPicker,
   REPLY_COPY,
-  PAYOUT_COPY,
-  payoutRecordedMessage,
-  OUTCOME_COPY,
   LEAD_ACTION_COPY,
-  SETTLEMENT_COPY,
-  settleKeyboard,
-  settlementText,
   escapeHtml,
 } from '@podbor/lead-crm';
 

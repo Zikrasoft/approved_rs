@@ -461,7 +461,7 @@ describe('resolvePendingPrompt', () => {
     await store.setPendingPrompt(lead.id, {
       chatId: 111,
       messageId: 999,
-      kind: 'deal_amount',
+      kind: 'postpone',
     });
 
     const resolved = await store.resolvePendingPrompt(111, 999, () => ({
@@ -479,7 +479,7 @@ describe('resolvePendingPrompt', () => {
     await store.setPendingPrompt(lead.id, {
       chatId: 111,
       messageId: 999,
-      kind: 'deal_amount',
+      kind: 'postpone',
     });
     await store.resolvePendingPrompt(111, 999, () => ({
       comment: 'first',
@@ -501,7 +501,7 @@ describe('resolvePendingPrompt', () => {
     await store.setPendingPrompt(lead.id, {
       chatId: 111,
       messageId: 999,
-      kind: 'deal_amount',
+      kind: 'postpone',
     });
     storage.failNextWrites(1, () => {
       const leads = storage.current() as StoredLead[];
@@ -809,7 +809,7 @@ describe('getLead / findByPendingPrompt — not-found paths', () => {
     await store.setPendingPrompt(lead.id, {
       chatId: 111,
       messageId: 555,
-      kind: 'deal_amount',
+      kind: 'postpone',
     });
     expect(await store.findByPendingPrompt(111, 556)).toBeUndefined(); // wrong messageId
     expect(await store.findByPendingPrompt(222, 555)).toBeUndefined(); // wrong chatId

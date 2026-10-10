@@ -84,17 +84,26 @@ describe('capturePrompt on a lead', () => {
   it('leaves the owner prompt alone', () => {
     const lead = schema.parse({
       ...base,
-      pendingPrompt: { chatId: 1, messageId: 2, kind: 'deal_amount' },
+      pendingPrompt: { chatId: 1, messageId: 2, kind: 'postpone' },
       capturePrompt: { chatId: 42, step: 'phone' },
     });
 
     expect(lead.pendingPrompt).toEqual({
       chatId: 1,
       messageId: 2,
-      kind: 'deal_amount',
+      kind: 'postpone',
     });
     expect(lead.capturePrompt).toEqual({ chatId: 42, step: 'phone' });
   });
+});
+
+it('drops a retired amount prompt from a lead', () => {
+  const lead = schema.parse({
+    ...base,
+    pendingPrompt: { chatId: 1, messageId: 2, kind: 'deal_amount' },
+  });
+
+  expect(lead.pendingPrompt).toBeNull();
 });
 
 describe('referredBy on a lead', () => {

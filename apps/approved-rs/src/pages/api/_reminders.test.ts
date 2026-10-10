@@ -7,7 +7,6 @@ import {
   type MemoryStorage,
 } from '@podbor/lead-crm/testing';
 import type { StoredLead } from '@/lib/store';
-import { settleKeyboard } from '@/lib/telegram';
 
 const memory = vi.hoisted(() => {
   const storages = new Map<string, MemoryStorage>();
@@ -32,7 +31,7 @@ vi.mock('@podbor/lead-crm/storage/file', () =>
 );
 
 import { GET } from './reminders';
-import { addPayout, getLead, touchLead } from '@/lib/store';
+import { getLead, touchLead } from '@/lib/store';
 
 const api = recordBotApi();
 vi.stubGlobal('fetch', api.fetch);
@@ -157,7 +156,7 @@ describe('GET /api/reminders', () => {
     expect(leadsStorage().writeAttempts()).toBe(writes);
   });
 
-  it('posts one digest to the group: due postponed, won without a Payout, idle for 7 days', async () => {
+  it('posts one digest to the group: due postponed and idle for 7 days, never won ones', async () => {
     leadsStorage().seed([
       makeLead({ id: 9 }),
       makeLead({ id: 10, status: 'won' }),
@@ -181,17 +180,16 @@ describe('GET /api/reminders', () => {
     expect(await res.json()).toEqual({
       expiredGhosts: 0,
       digestSent: true,
-      monthlySummary: false,
     });
     const [digest] = crm('sendMessage');
     expect(crm('sendMessage')).toHaveLength(1);
     expect(digest).toMatchObject({ chat_id: GROUP_ID });
     expect(digest.text).toContain('⏰ Пора вернуться');
-    expect(digest.text).toContain('💶 Сделка без суммы');
+    expect(digest.text).not.toContain('💶');
     expect(digest.text).toContain('🕐 Без движения 7 дней');
-    expect(digestIds()).toEqual([9, 10, 11]);
+    expect(digestIds()).toEqual([9, 11]);
     expect(digest.reply_markup).toEqual({
-      inline_keyboard: [9, 10, 11].map((id) => [
+      inline_keyboard: [9, 11].map((id) => [
         { text: `✅ #${id}`, callback_data: `won:${id}` },
         { text: `❌ #${id}`, callback_data: `lost:${id}` },
         { text: `⏳ #${id}`, callback_data: `work:${id}` },
@@ -219,7 +217,6 @@ describe('GET /api/reminders', () => {
     expect(await next.json()).toEqual({
       expiredGhosts: 0,
       digestSent: false,
-      monthlySummary: false,
     });
     expect(api.calls).toEqual([]);
   });
@@ -231,7 +228,6 @@ describe('GET /api/reminders', () => {
       makeLead({ id: 11, status: 'lost', remindAt: null }),
       makeLead({ id: 12, status: 'won', remindAt: null }),
     ]);
-    await addPayout({ amount: 0, by: 'owner', leadId: 12 });
 
     vi.setSystemTime(new Date('2026-10-07T08:00:00.000Z'));
     const res = await GET(makeCtx());
@@ -239,7 +235,6 @@ describe('GET /api/reminders', () => {
     expect(await res.json()).toEqual({
       expiredGhosts: 0,
       digestSent: false,
-      monthlySummary: false,
     });
     expect(api.calls).toEqual([]);
     expect((await stored(9)).status).toBe('postponed');
@@ -273,7 +268,6 @@ describe('GET /api/reminders', () => {
     expect(await res.json()).toEqual({
       expiredGhosts: 1,
       digestSent: true,
-      monthlySummary: false,
     });
     expect((await stored(7)).status).toBe('lost');
     expect(digestIds()).toEqual([10]);
@@ -289,7 +283,6 @@ describe('GET /api/reminders', () => {
     expect(await res.json()).toEqual({
       expiredGhosts: 0,
       digestSent: false,
-      monthlySummary: false,
     });
     expect((await stored(9)).status).toBe('postponed');
     expect(error).toHaveBeenCalledTimes(1);
@@ -297,7 +290,7 @@ describe('GET /api/reminders', () => {
   });
 
   it('posts the digest once a day, however often the cron runs', async () => {
-    leadsStorage().seed([makeLead({ status: 'won', remindAt: null })]);
+    leadsStorage().seed([makeLead({ status: 'open', remindAt: null })]);
 
     await GET(makeCtx());
     vi.setSystemTime(new Date(NOW.getTime() + 2 * HOUR_MS));
@@ -336,7 +329,6 @@ describe('GET /api/reminders', () => {
     expect(await res.json()).toEqual({
       expiredGhosts: 0,
       digestSent: true,
-      monthlySummary: false,
     });
     expect((await stored(9)).status).toBe('open');
     expect((await stored(10)).status).toBe('open');
@@ -352,7 +344,6 @@ describe('GET /api/reminders', () => {
     expect(await res.json()).toEqual({
       expiredGhosts: 1,
       digestSent: false,
-      monthlySummary: false,
     });
     const lead = await stored(7);
     expect(lead).toMatchObject({
@@ -384,7 +375,6 @@ describe('GET /api/reminders', () => {
     expect(await res.json()).toEqual({
       expiredGhosts: 0,
       digestSent: false,
-      monthlySummary: false,
     });
     expect((await stored(7)).status).toBe('open');
     expect((await stored(8)).status).toBe('open');
@@ -401,7 +391,6 @@ describe('GET /api/reminders', () => {
     expect(await res.json()).toEqual({
       expiredGhosts: 2,
       digestSent: false,
-      monthlySummary: false,
     });
     expect((await stored(7)).status).toBe('lost');
     expect((await stored(8)).status).toBe('lost');
@@ -409,104 +398,32 @@ describe('GET /api/reminders', () => {
     error.mockRestore();
   });
 
-  describe('monthly summary', () => {
-    const NOV_1 = new Date('2026-11-01T08:00:00.000Z');
-    const posted = () =>
-      crm('sendMessage').filter((p) => p.chat_id === GROUP_ID);
-    const summaries = () =>
-      (leadsStorage().current() as { type?: string }[]).filter(
-        (r) => r.type === 'summary',
-      );
+  it('posts no monthly summary on the 1st and drops money records left in the Lead file', async () => {
+    vi.setSystemTime(new Date('2026-11-01T08:00:00.000Z'));
+    leadsStorage().seed([
+      makeLead({ id: 9, status: 'open', remindAt: null }),
+      {
+        type: 'payout',
+        id: 1,
+        amount: 80,
+        createdAt: '2026-10-15T10:00:00.000Z',
+        createdBy: 'owner',
+        leadId: 9,
+      },
+      { type: 'summary', id: 1, month: '2026-10', createdAt: '2026-10-01' },
+    ]);
 
-    beforeEach(() => {
-      vi.setSystemTime(NOV_1);
-      leadsStorage().seed([
-        makeLead({ id: 9, remindAt: '2026-12-01' }),
-        makeLead({ id: 10, status: 'won', remindAt: null }),
-        {
-          type: 'payout',
-          id: 1,
-          amount: 80,
-          createdAt: '2026-10-15T10:00:00.000Z',
-          createdBy: 'owner',
-          leadId: 10,
-        },
-      ]);
-    });
+    const res = await GET(makeCtx());
 
-    it('posts the balance, the Payouts and the Leads without an outcome to the group on the 1st', async () => {
-      const res = await GET(makeCtx());
-
-      expect(await res.json()).toEqual({
-        expiredGhosts: 0,
-        digestSent: false,
-        monthlySummary: true,
-      });
-      expect(posted()).toEqual([
-        expect.objectContaining({ reply_markup: settleKeyboard(80) }),
-      ]);
-      const text = String(posted()[0]!.text);
-      expect(text).toContain('💶 К оплате: 80 €');
-      expect(text).toContain('#10');
-      expect(text).toContain('<b>Без итога: 1</b>\n• #9 Иван');
-      expect(summaries()).toEqual([
-        expect.objectContaining({ month: '2026-11' }),
-      ]);
-    });
-
-    it('expires Ghosts, then posts the digest, then the summary', async () => {
-      leadsStorage().seed([
-        ghost({ createdAt: '2026-10-01T00:00:00.000Z' }),
-        makeLead({ id: 9, status: 'open', remindAt: null }),
-      ]);
-
-      const res = await GET(makeCtx());
-
-      expect(await res.json()).toEqual({
-        expiredGhosts: 1,
-        digestSent: true,
-        monthlySummary: true,
-      });
-      const [digest, summary] = posted().map((p) => String(p.text));
-      expect(posted()).toHaveLength(2);
-      expect(digest).toContain('🕐 Без движения 7 дней');
-      expect(summary).toContain('<b>Без итога: 1</b>\n• #9 Иван');
-      expect(summary).not.toContain('#7');
-    });
-
-    it('posts once a month, however often the cron runs', async () => {
-      await GET(makeCtx());
-      vi.setSystemTime(new Date('2026-11-01T20:00:00.000Z'));
-      const res = await GET(makeCtx());
-
-      expect((await res.json()).monthlySummary).toBe(false);
-      expect(posted()).toHaveLength(1);
-      expect(summaries()).toHaveLength(1);
-    });
-
-    it('stays quiet on the 2nd', async () => {
-      vi.setSystemTime(new Date('2026-11-02T08:00:00.000Z'));
-      const res = await GET(makeCtx());
-
-      expect((await res.json()).monthlySummary).toBe(false);
-      expect(api.calls).toEqual([]);
-      expect(summaries()).toEqual([]);
-    });
-
-    it('gives the month back when the post fails, so the next run sends it', async () => {
-      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
-      api.fail('sendMessage', 'Bad Request: chat not found');
-      const failed = await GET(makeCtx());
-
-      expect((await failed.json()).monthlySummary).toBe(false);
-      expect(summaries()).toEqual([]);
-      expect(error).toHaveBeenCalledOnce();
-
-      api.reset();
-      const retried = await GET(makeCtx());
-      expect((await retried.json()).monthlySummary).toBe(true);
-      expect(posted()).toHaveLength(1);
-      error.mockRestore();
-    });
+    expect(await res.json()).toEqual({ expiredGhosts: 0, digestSent: true });
+    const posted = crm('sendMessage');
+    expect(posted).toHaveLength(1);
+    expect(String(posted[0]!.text)).not.toContain('Итоги месяца');
+    expect(
+      (leadsStorage().current() as { type?: string }[]).map(
+        (r) => r.type ?? 'lead',
+      ),
+    ).toEqual(['lead', 'digest']);
+    expect(textsTo(ADMIN_ID)).toEqual([]);
   });
 });

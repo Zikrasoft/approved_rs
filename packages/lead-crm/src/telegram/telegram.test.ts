@@ -9,20 +9,9 @@ import { createFormatter } from './format.ts';
 import { createNotifier } from './notify.ts';
 import { LEAD_STATUSES } from '../schema.ts';
 import type { StoredLead } from '../schema.ts';
-import type { Payout } from '../ledger.ts';
-import type { MonthlySummary } from '../store.ts';
 
 import {
-  PAYOUT_COPY,
-  payoutRecordedMessage,
   REFERRAL_NOTE,
-  buildToPay,
-  SETTLEMENT_COPY,
-  settleKeyboard,
-  settlementText,
-  monthlySummaryText,
-  MAX_SUMMARY_ROWS,
-  TELEGRAM_TEXT_LIMIT,
   buildSearchResults,
   buildMenu,
   buildBalance,
@@ -63,10 +52,7 @@ const {
   sendLeadNotification,
   refreshLeadCard,
   unpinLeadCard,
-  sendPayoutNotificationToAdmin,
-  sendSettlementToOwner,
   sendOperationNotice,
-  sendMonthlySummary,
   sendQuarantinedLeadsToAdmin,
   sendStatusChangeToAdmin,
   sendFieldChangeToAdmin,
@@ -517,109 +503,11 @@ describe('sendFieldChangeToAdmin', () => {
   });
 });
 
-describe('sendPayoutNotificationToAdmin', () => {
-  beforeEach(() => mockFetchOk({ message_id: 1 }));
-  afterEach(() => mockFetch.mockReset());
-
-  const payout = {
-    type: 'payout' as const,
-    id: 1,
-    amount: 80,
-    note: '',
-    createdAt: '2026-03-01T00:00:00.000Z',
-    createdBy: 'owner' as const,
-    leadId: 9,
-    brand: null,
-    edits: [],
-    pendingPrompt: null,
-  };
-
-  it('tells the admin a new Payout as stated, with no rate applied', async () => {
-    await sendPayoutNotificationToAdmin(makeLead({ id: 9 }), payout);
-
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body as string);
-    expect(body.chat_id).toBe(222);
-    expect(body.text).toContain('💶 Новая выплата по заявке #9');
-    expect(body.text).toContain('Записал: владелец');
-    expect(body.text).toContain('Было: —');
-    expect(body.text).toContain(`Стало: ${money(80)}`);
-  });
-
-  it('shows a correction as before → after, naming who made it', async () => {
-    await sendPayoutNotificationToAdmin(makeLead({ id: 9 }), {
-      ...payout,
-      amount: 60,
-      edits: [
-        { before: 90, after: 80, at: '2026-03-02T00:00:00.000Z', by: 'owner' },
-        { before: 80, after: 60, at: '2026-03-03T00:00:00.000Z', by: 'admin' },
-      ],
-    });
-
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body as string);
-    expect(body.text).toContain('✏️ Исправлена выплата по заявке #9');
-    expect(body.text).toContain('Записал: админ');
-    expect(body.text).toContain(`Было: ${money(80)}`);
-    expect(body.text).toContain(`Стало: ${money(60)}`);
-  });
-
-  it('names a Lead-less Payout by its Brand, or by nothing, and shows its note', async () => {
-    await sendPayoutNotificationToAdmin(undefined, {
-      ...payout,
-      leadId: null,
-      brand: 'CarLab',
-      note: 'сервис <повторно>',
-    });
-    await sendPayoutNotificationToAdmin(undefined, { ...payout, leadId: null });
-
-    const [first, second] = mockFetch.mock.calls.map(
-      (call) => JSON.parse(call[1].body as string).text as string,
-    );
-    expect(first).toContain('💶 Новая выплата без заявки · CarLab');
-    expect(first).toContain('За что: сервис &lt;повторно&gt;');
-    expect(second).toContain('💶 Новая выплата без заявки\n');
-    expect(second).not.toContain('За что');
-  });
-
-  it('answers a recorded Payout with a fix button carrying its id', () => {
-    expect(payoutRecordedMessage({ ...payout, id: 4 })).toEqual({
-      text: `✅ ${money(80)} записано`,
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: PAYOUT_COPY.fixButton, callback_data: 'payfix:4' }],
-        ],
-      },
-    });
-  });
-});
-
-describe('sendSettlementToOwner', () => {
-  beforeEach(() => mockFetchOk());
-  afterEach(() => mockFetch.mockReset());
-
-  it('tells the owner what the admin received and what is still owed', async () => {
-    await sendSettlementToOwner(
-      {
-        type: 'settlement',
-        id: 1,
-        amount: 100,
-        createdAt: '2026-10-10T00:00:00.000Z',
-        createdBy: 'admin',
-      },
-      43.3,
-    );
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.chat_id).toBe(111);
-    expect(body.text).toBe(
-      `💸 Оплата получена: ${money(100)}\nОсталось к оплате: ${money(43.3)}`,
-    );
-  });
-});
-
 describe('sendDigest', () => {
   beforeEach(() => mockFetchOk());
   afterEach(() => mockFetch.mockReset());
 
-  const empty = { stale: [], unpaid: [], due: [] };
+  const empty = { stale: [], due: [] };
 
   it('posts nothing when no Lead needs a decision', async () => {
     expect(await sendDigest(empty)).toBe(false);
@@ -629,8 +517,7 @@ describe('sendDigest', () => {
   it('posts one message to the group, a section per reason and a ✅ ❌ ⏳ row per Lead', async () => {
     const sent = await sendDigest({
       stale: [makeLead({ id: 3, name: '<Пётр>' })],
-      unpaid: [makeLead({ id: 4, status: 'won', name: '' })],
-      due: [makeLead({ id: 5, status: 'postponed' })],
+      due: [makeLead({ id: 5, status: 'postponed', name: '' })],
     });
 
     expect(sent).toBe(true);
@@ -642,16 +529,13 @@ describe('sendDigest', () => {
       '<b>📋 Заявки ждут решения</b>',
       '',
       '<b>⏰ Пора вернуться</b>',
-      '<a href="https://t.me/approved_test_bot?start=lead_5">#5</a> Иван · Approved.rs',
-      '',
-      '<b>💶 Сделка без суммы — ответь 0, если ничего</b>',
-      '<a href="https://t.me/approved_test_bot?start=lead_4">#4</a> — · Approved.rs',
+      '<a href="https://t.me/approved_test_bot?start=lead_5">#5</a> — · Approved.rs',
       '',
       '<b>🕐 Без движения 7 дней</b>',
       '<a href="https://t.me/approved_test_bot?start=lead_3">#3</a> &lt;Пётр&gt; · Approved.rs',
     ]);
     expect(body.reply_markup.inline_keyboard).toEqual(
-      [5, 4, 3].map((id) => [
+      [5, 3].map((id) => [
         { text: `✅ #${id}`, callback_data: `won:${id}` },
         { text: `❌ #${id}`, callback_data: `lost:${id}` },
         { text: `⏳ #${id}`, callback_data: `work:${id}` },
@@ -667,13 +551,12 @@ describe('sendDigest', () => {
 
     await sendDigest({
       due: many(1, 15),
-      unpaid: many(100, 10),
-      stale: many(200, 5),
+      stale: many(200, 15),
     });
 
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.reply_markup.inline_keyboard).toHaveLength(20);
-    expect(body.text).not.toContain('Без движения');
+    expect(body.text).toContain('Без движения');
     expect(body.text.endsWith('+10 ещё')).toBe(true);
     expect(body.text.length).toBeLessThan(4096);
   });
@@ -736,173 +619,6 @@ describe('sendQuarantinedLeadsToAdmin', () => {
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).toContain('&lt;b&gt;');
     expect(body.text).toContain('&lt;i&gt;');
-  });
-});
-
-describe('buildToPay', () => {
-  it('shows the balance owed', () => {
-    expect(buildToPay(1234.5)).toBe(`<b>💶 К оплате</b>\n\n${money(1234.5)}`);
-  });
-});
-
-describe('settleKeyboard', () => {
-  it('offers the balance as one tap, and another amount by reply', () => {
-    expect(settleKeyboard(143.3).inline_keyboard).toEqual([
-      [{ text: `💸 Оплачено ${money(143.3)}`, callback_data: 'settle:143.3' }],
-      [{ text: SETTLEMENT_COPY.otherButton, callback_data: 'settle:other' }],
-    ]);
-  });
-
-  it('offers only another amount when nothing is owed', () => {
-    expect(settleKeyboard(0).inline_keyboard).toEqual([
-      [{ text: SETTLEMENT_COPY.otherButton, callback_data: 'settle:other' }],
-    ]);
-  });
-});
-
-describe('monthlySummaryText', () => {
-  const payout = (id: number, extra: Partial<Payout> = {}): Payout => ({
-    type: 'payout',
-    id,
-    amount: 30,
-    note: '',
-    createdAt: '2026-10-05T10:00:00.000Z',
-    createdBy: 'owner',
-    leadId: null,
-    brand: null,
-    edits: [],
-    pendingPrompt: null,
-    ...extra,
-  });
-  const summary = (extra: Partial<MonthlySummary> = {}): MonthlySummary => ({
-    month: '2026-11',
-    since: '2026-10-01T08:00:00.000Z',
-    balance: 143.3,
-    payouts: [],
-    leads: [],
-    ...extra,
-  });
-
-  it('shows the balance, the Payouts since the last summary and the Leads without an outcome', () => {
-    expect(
-      monthlySummaryText(
-        summary({
-          payouts: [
-            payout(1, { leadId: 42, brand: 'CarLab', note: 'тормоза <&>' }),
-            payout(2, { amount: 113.3 }),
-          ],
-          leads: [
-            makeLead({ id: 7, name: '' }),
-            makeLead({ id: 9, status: 'postponed', brand: 'Details' }),
-          ],
-        }),
-      ),
-    ).toBe(
-      [
-        '<b>📅 Итоги месяца</b>',
-        '',
-        `💶 К оплате: ${money(143.3)}`,
-        '',
-        '<b>Выплаты с 01.10.2026: 2</b>',
-        `• ${money(30)} · #42 · CarLab · 05.10.2026 · тормоза &lt;&amp;&gt;`,
-        `• ${money(113.3)} · без заявки · 05.10.2026`,
-        '',
-        '<b>Без итога: 2</b>',
-        '• #9 Иван · Details · ⏸️',
-        '• #7 — · Approved.rs · 🔵',
-      ].join('\n'),
-    );
-  });
-
-  it('says so when there was nothing, and counts every Payout before the first summary', () => {
-    expect(monthlySummaryText(summary({ since: null, balance: 0 }))).toBe(
-      [
-        '<b>📅 Итоги месяца</b>',
-        '',
-        `💶 К оплате: ${money(0)}`,
-        '',
-        '<b>Выплаты за всё время: 0</b>',
-        'Выплат не было.',
-        '',
-        '<b>Без итога: 0</b>',
-        'Открытых заявок нет.',
-      ].join('\n'),
-    );
-  });
-
-  it('caps each list and names how many more there are', () => {
-    const text = monthlySummaryText(
-      summary({
-        payouts: Array.from({ length: MAX_SUMMARY_ROWS + 3 }, (_, i) =>
-          payout(i + 1),
-        ),
-        leads: Array.from({ length: MAX_SUMMARY_ROWS + 1 }, (_, i) =>
-          makeLead({ id: i + 1 }),
-        ),
-      }),
-    );
-    expect(text.split('\n').filter((l) => l.startsWith('• '))).toHaveLength(
-      2 * MAX_SUMMARY_ROWS,
-    );
-    expect(text).toContain('\n+3 ещё\n');
-    expect(text.endsWith('\n+1 ещё')).toBe(true);
-  });
-
-  it('stays inside one Telegram message however long the names and notes are', () => {
-    const long = '&'.repeat(500);
-    const text = monthlySummaryText(
-      summary({
-        payouts: Array.from({ length: 50 }, (_, i) =>
-          payout(i + 1, { note: long, brand: long }),
-        ),
-        leads: Array.from({ length: 50 }, (_, i) =>
-          makeLead({ id: i + 1, name: long, brand: long }),
-        ),
-      }),
-    );
-    expect(text.length).toBeLessThanOrEqual(TELEGRAM_TEXT_LIMIT);
-    expect(text).toContain('…');
-    expect(text).toMatch(/\+\d+ ещё$/);
-  });
-});
-
-describe('sendMonthlySummary', () => {
-  beforeEach(() => mockFetchOk());
-  afterEach(() => mockFetch.mockReset());
-
-  it('posts the summary to the group with the settle buttons', async () => {
-    const summary: MonthlySummary = {
-      month: '2026-11',
-      since: null,
-      balance: 50,
-      payouts: [],
-      leads: [],
-    };
-    await sendMonthlySummary(summary);
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body).toMatchObject({
-      chat_id: '-1009876543210',
-      text: monthlySummaryText(summary),
-      parse_mode: 'HTML',
-      reply_markup: settleKeyboard(50),
-    });
-  });
-});
-
-describe('settlementText', () => {
-  it('shows the amount received and the balance left', () => {
-    expect(
-      settlementText(
-        {
-          type: 'settlement',
-          id: 2,
-          amount: 50,
-          createdAt: '2026-10-10T00:00:00.000Z',
-          createdBy: 'admin',
-        },
-        0,
-      ),
-    ).toBe(`💸 Оплата получена: ${money(50)}\nОсталось к оплате: ${money(0)}`);
   });
 });
 
@@ -1064,7 +780,8 @@ describe('buildHelp', () => {
   it('owner text walks the card buttons, card replies and the short menu', () => {
     const text = buildHelp('owner');
     expect(text).toContain('✅ Сделка');
-    expect(text).toContain('Ответь на карточку');
+    expect(text).toContain('Ответь на карточку текстом');
+    expect(text).not.toContain('Исправить');
     expect(text).not.toContain('Голосовое');
     expect(text).toContain('⏰ Отложить');
     expect(text).toContain('💶 Мой долг. ➕ Зачислить');
