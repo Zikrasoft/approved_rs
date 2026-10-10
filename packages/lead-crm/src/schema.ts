@@ -40,7 +40,15 @@ const pendingPromptSchema = z.object({
 });
 export type PendingPrompt = z.infer<typeof pendingPromptSchema>;
 
-export const CAPTURE_STEPS = ['looking_for', 'budget', 'phone'] as const;
+export const CAPTURE_STEPS = [
+  'looking_for',
+  'budget',
+  'phone',
+  'car_issue',
+  'car',
+  'service',
+] as const;
+export type CaptureStep = (typeof CAPTURE_STEPS)[number];
 
 const capturePromptSchema = z.object({
   chatId: z.number().int(),

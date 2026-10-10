@@ -110,7 +110,13 @@ export function createScreens<L extends string, S extends string>({
     return Object.hasOwn(screens, screen) ? screens[screen](locale, arg) : null;
   }
 
-  return { isService, mainMenu, service, render };
+  function servicePicker(locale: L): InlineKeyboardButton[][] {
+    return services.map((slug) =>
+      tap(serviceCard(slug, locale).title, 'pick', locale, slug),
+    );
+  }
+
+  return { isService, mainMenu, service, render, servicePicker };
 }
 
 export interface ServiceSpecs {

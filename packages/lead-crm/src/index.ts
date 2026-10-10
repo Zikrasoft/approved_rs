@@ -6,6 +6,7 @@ export type { BrandBotOptions } from './brandBot.ts';
 export { LEADS_PATH } from './quarantine.ts';
 export type {
   CapturePrompt,
+  CaptureStep,
   LeadInput,
   LeadSubmission,
   Income,

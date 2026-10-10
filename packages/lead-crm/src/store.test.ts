@@ -1845,6 +1845,45 @@ describe('capturePrompt', () => {
   });
 });
 
+describe('a capturePrompt stored before the per-brand Questionnaires', () => {
+  const legacy = (id: number, step: string) => ({
+    id,
+    brand: baseData.brand,
+    name: 'Иван',
+    contact: '@ivan',
+    service: '',
+    locale: 'ru',
+    statusChangedAt: 'x',
+    createdAt: 'x',
+    capturePrompt: { chatId: 700 + id, step },
+  });
+
+  it('still parses an old step and clears an unknown one without quarantining the lead', async () => {
+    const quarantine = vi.fn().mockResolvedValue(undefined);
+    const guarded = createLeadStore({
+      storage,
+      schema: createLeadSchema({ defaultCommissionPercent: 10 }),
+      quarantine,
+    });
+    storage.seed([
+      legacy(1, 'looking_for'),
+      legacy(2, 'budget'),
+      legacy(3, 'phone'),
+      legacy(4, 'model_year'),
+    ]);
+
+    const steps = (await guarded.readLeads()).map((l) => l.capturePrompt);
+
+    expect(quarantine).not.toHaveBeenCalled();
+    expect(steps).toEqual([
+      { chatId: 701, step: 'looking_for' },
+      { chatId: 702, step: 'budget' },
+      { chatId: 703, step: 'phone' },
+      null,
+    ]);
+  });
+});
+
 describe('the capture lookups', () => {
   const fromTelegram = (id: number, overrides: Partial<LeadInput> = {}) =>
     store.insertLead({ ...baseData, telegramId: id, ...overrides });

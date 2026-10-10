@@ -51,6 +51,60 @@ function start(payload: string) {
   });
 }
 
+function visitorUpdate(update: Record<string, unknown>) {
+  return POST({
+    request: new Request('http://localhost/api/telegram-capture', {
+      method: 'POST',
+      headers: {
+        'x-telegram-bot-api-secret-token': 'test-capture-webhook-secret',
+      },
+      body: JSON.stringify({ update_id: 1, ...update }),
+    }),
+  });
+}
+
+const VISITOR = { id: 61, first_name: 'Ana', username: 'ana' };
+
+function answer(text: string) {
+  return visitorUpdate({
+    message: {
+      message_id: 2,
+      chat: { id: VISITOR.id, type: 'private' },
+      from: VISITOR,
+      text,
+    },
+  });
+}
+
+function press(data: string) {
+  return visitorUpdate({
+    callback_query: {
+      id: 'tap',
+      from: VISITOR,
+      chat_instance: 'chat',
+      data,
+      message: {
+        message_id: 3,
+        date: 0,
+        chat: { id: VISITOR.id, type: 'private' },
+      },
+    },
+  });
+}
+
+function questions(): unknown[] {
+  return api
+    .callsTo('sendMessage', 'test-capture-bot-token')
+    .filter((call) => call.payload.chat_id === VISITOR.id)
+    .map((call) => call.payload.text);
+}
+
+function visitorLead() {
+  return (
+    memory.storages.get(LEADS_PATH)?.current() as { telegramId: number }[]
+  ).find((lead) => lead.telegramId === VISITOR.id);
+}
+
 describe('the Details capture bot', () => {
   it('opens a service card from the services content, in Serbian', async () => {
     await start('polishing-ceramic_sr');
@@ -84,5 +138,39 @@ describe('the Details capture bot', () => {
         locale: 'sr',
       }),
     ]);
+  });
+});
+
+describe('the Details Questionnaire', () => {
+  it('asks for the car, the service as buttons, then the phone', async () => {
+    const words = content('ru').captureBot;
+
+    await press('request:ru');
+    await answer('Audi A6 2019');
+    await press('pick:ru:polishing-ceramic');
+    await answer(words.phoneSkip);
+
+    expect(questions()).toEqual([
+      words.request.car,
+      words.request.service,
+      words.phoneOffer,
+      words.thanks,
+    ]);
+    expect(visitorLead()).toMatchObject({
+      service: 'polishing-ceramic',
+      comment: 'Машина: Audi A6 2019',
+      capturePrompt: null,
+    });
+  });
+
+  it('skips the service question when the card already named one', async () => {
+    const words = content('ru').captureBot;
+    api.reset();
+
+    await answer('/start');
+    await press('request:ru:polishing-ceramic');
+    await answer('Audi A6 2019');
+
+    expect(questions().slice(1)).toEqual([words.request.car, words.phoneOffer]);
   });
 });
