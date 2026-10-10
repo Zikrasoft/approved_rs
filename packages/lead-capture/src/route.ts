@@ -17,6 +17,7 @@ import type { CaptureCopy } from './copy.ts';
 import {
   createScreens,
   readTap,
+  REFERRAL,
   type MenuConfig,
   type Screen,
 } from './menu.ts';
@@ -50,6 +51,7 @@ interface StartFields<L extends string, S extends string> {
   service: S | '';
   locale: L;
   visitorId: string | null;
+  referred?: boolean;
 }
 
 const ANSWER_NOTE: Record<CaptureStep, string> = {
@@ -62,6 +64,8 @@ const STEPS_WITH_HANDLE: CaptureStep[] = ['looking_for', 'budget', 'phone'];
 const STEPS_WITHOUT_HANDLE: CaptureStep[] = ['phone', 'looking_for', 'budget'];
 
 const MESSAGE_NOTE = 'Сообщение';
+
+const REFERRAL_NOTE = 'Пришёл из бота Approved.rs (Партнёры)';
 
 const VISITOR_FIELDS: EditField[] = ['contact', 'comment', 'service'];
 
@@ -253,6 +257,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       service: parts.length > 1 && isService(head) ? head : '',
       locale: isLocale(tail) ? tail : senderLocale(sender),
       visitorId: start.visitorId,
+      referred: head === REFERRAL,
     };
   }
 
@@ -311,7 +316,8 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   ): Promise<void> {
     const fields = startFields(payload, sender);
     const contact = await contactOf(sender);
-    const comment = message ? `${MESSAGE_NOTE}: ${message}` : null;
+    const referral = fields.referred ? REFERRAL_NOTE : null;
+    const comment = message ? `${MESSAGE_NOTE}: ${message}` : referral;
     await newLead(sender, contact, fields, comment, null);
     const screen = startScreen(fields.locale, fields.service);
     const { greeting } = copy(fields.locale);

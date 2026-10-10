@@ -1,6 +1,11 @@
 export const prerender = false;
 
-import { captureStore, createCaptureWebhookRoute } from '@podbor/lead-capture';
+import { CARLAB, DETAILS, brandLocale } from '@podbor/brands';
+import {
+  captureStore,
+  createCaptureWebhookRoute,
+  referralLink,
+} from '@podbor/lead-capture';
 import { BRAND, leadStore } from '@/lib/crm';
 import { CAPTURE_WEBHOOK_SECRET, captureBot } from '@/lib/captureBot';
 import { ensureLeadCard, notifier } from '@/lib/crmBot';
@@ -20,7 +25,12 @@ export const POST = createCaptureWebhookRoute({
   isLocale,
   primaryLocale: PRIMARY_LOCALE,
   copy: (locale) => content(locale).captureBot,
-  menu: ['services', 'contacts', 'manager'],
+  menu: ['services', 'contacts', 'manager', 'partners'],
+  partners: (locale) =>
+    [CARLAB, DETAILS].map(({ name, captureBot }) => ({
+      name,
+      url: referralLink(captureBot, brandLocale(locale)),
+    })),
   services: SERVICE_SLUGS,
   contacts: { phone: PHONE_NUMBER, site: SITE_URL },
   serviceCard: (slug, locale) => {
