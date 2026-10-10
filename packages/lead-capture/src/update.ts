@@ -1,4 +1,3 @@
-import type { Update } from 'grammy/types';
 import { z } from 'zod';
 
 const senderSchema = z.object({
@@ -25,10 +24,8 @@ export const captureTapSchema = z.object({
   }),
 });
 
-const updateObjectSchema = z.object({});
-
-export const captureUpdateSchema = z.custom<Update>(
-  (value) => updateObjectSchema.safeParse(value).success,
-);
+export const captureUpdateSchema = z.looseObject({
+  update_id: z.number().int(),
+});
 
 export type CaptureSender = z.infer<typeof senderSchema>;

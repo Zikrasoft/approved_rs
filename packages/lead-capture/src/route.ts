@@ -20,7 +20,7 @@ import {
   createScreens,
   readTap,
   REFERRAL,
-  SWITCH_SCREEN,
+  LANGUAGE_SWITCH_TAP,
   type MenuConfig,
   type Screen,
 } from './menu.ts';
@@ -270,6 +270,22 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     await send(chatId, text, extra);
   }
 
+  function isFresh(lead: StoredLead): boolean {
+    return (
+      Date.now() - new Date(lead.createdAt).getTime() < VISITOR_MERGE_WINDOW_MS
+    );
+  }
+
+  async function dropPhoneKeyboard(
+    chatId: number,
+    ended: CapturePrompt | null,
+    text: string,
+  ): Promise<void> {
+    if (ended?.step !== 'phone') return;
+    const sent = await send(chatId, text, CLEAR_KEYBOARD);
+    await bot.api.deleteMessage(chatId, sent.message_id);
+  }
+
   async function refresh(
     lead: StoredLead,
     updated: StoredLead | undefined,
@@ -319,12 +335,12 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   async function newLead(
     sender: CaptureSender,
     contact: string,
-    { service: picked, locale, visitorId }: StartFields<L, S>,
+    { service: picked, locale, visitorId, referred }: StartFields<L, S>,
     comment: string | null,
     capturePrompt: CapturePrompt | null,
   ): Promise<void> {
     // TODO: merging before the click card saves its message id posts a second teaser.
-    const { lead } = await store.insertOrMergeLead({
+    const { lead, before } = await store.insertOrMergeLead({
       brand,
       name: senderName(sender),
       contact,
@@ -338,9 +354,10 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       visitorId,
       locale,
       kind: 'lead',
+      referredBy: referred ? 'approved' : null,
       capturePrompt,
     });
-    await ensureLeadCard(lead);
+    await (before ? refresh(before, lead) : ensureLeadCard(lead));
   }
 
   async function start(
@@ -390,21 +407,40 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     payload: string | undefined,
   ): Promise<void> {
     const open = await store.findOpenLeadByTelegramId(sender.id, brand);
-    const age = open ? Date.now() - new Date(open.createdAt).getTime() : 0;
-    if (!open || age >= VISITOR_MERGE_WINDOW_MS)
-      return start(chatId, sender, payload);
+    if (!open || !isFresh(open)) return start(chatId, sender, payload);
     const locale = localeOf(open);
+    const fields = startFields(payload, sender);
+    if (fields.service || fields.referred)
+      return resumeFromTile(chatId, open, fields, locale);
     if (open.capturePrompt)
       return ask(chatId, open.capturePrompt.step, open.contact, locale);
-    return show(
-      chatId,
-      startScreen(locale, startFields(payload, sender).service),
-    );
+    return show(chatId, mainMenu(locale));
   }
 
-  async function endQuestionnaire(chatId: number): Promise<void> {
+  async function resumeFromTile(
+    chatId: number,
+    open: StoredLead,
+    { service: picked, referred }: StartFields<L, S>,
+    locale: L,
+  ): Promise<void> {
+    const markReferral = referred && open.referredBy !== 'approved';
+    const updated = await store.updateCapture(open.id, {
+      service: picked,
+      referredBy: markReferral ? 'approved' : undefined,
+      note: markReferral ? REFERRAL_NOTE : undefined,
+      capturePrompt: null,
+    });
+    await refresh(open, updated);
+    const screen = startScreen(locale, picked);
+    await dropPhoneKeyboard(chatId, open.capturePrompt, screen.text);
+    await show(chatId, screen);
+  }
+
+  async function endQuestionnaire(chatId: number, text: string): Promise<void> {
     const running = await store.findByCapturePrompt(chatId, brand);
-    if (running) await store.updateCapture(running.id, { capturePrompt: null });
+    if (!running) return;
+    await store.updateCapture(running.id, { capturePrompt: null });
+    await dropPhoneKeyboard(chatId, running.capturePrompt, text);
   }
 
   async function openScreen(
@@ -412,9 +448,10 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     sender: CaptureSender,
     screen: (locale: L) => Screen,
   ) {
-    await endQuestionnaire(chatId);
     const open = await store.findOpenLeadByTelegramId(sender.id, brand);
-    await show(chatId, screen(open ? localeOf(open) : senderLocale(sender)));
+    const shown = screen(open ? localeOf(open) : senderLocale(sender));
+    await endQuestionnaire(chatId, shown.text);
+    await show(chatId, shown);
   }
 
   async function switchLocale(sender: CaptureSender, locale: L) {
@@ -450,7 +487,8 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   }
 
   async function showContacts(chatId: number, locale: L): Promise<void> {
-    await endQuestionnaire(chatId);
+    const screen = contactsScreen(locale);
+    await endQuestionnaire(chatId, screen.text);
     const { venue } = menuConfig.contacts;
     if (venue)
       await bot.api.sendVenue(
@@ -460,7 +498,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
         venue.title,
         `${venue.street}, ${venue.city}`,
       );
-    await show(chatId, contactsScreen(locale));
+    await show(chatId, screen);
   }
 
   async function pickService(chatId: number, picked: string): Promise<void> {
@@ -486,14 +524,14 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     }
     if (tap.screen === 'contacts') return showContacts(chatId, locale);
     if (tap.screen === 'pick') return pickService(chatId, tap.arg);
-    const switching = tap.screen === SWITCH_SCREEN;
-    if (switching && !isLocale(tap.locale)) return;
-    const screen = switching
+    const switchesLanguage = tap.screen === LANGUAGE_SWITCH_TAP;
+    if (switchesLanguage && !isLocale(tap.locale)) return;
+    const screen = switchesLanguage
       ? renderTarget(locale, tap.arg)
       : render(tap.screen, locale, tap.arg);
     if (!screen) return;
-    await endQuestionnaire(chatId);
-    if (switching) await switchLocale(sender, locale);
+    await endQuestionnaire(chatId, screen.text);
+    if (switchesLanguage) await switchLocale(sender, locale);
     await bot.api.editMessageText(chatId, messageId, screen.text, {
       parse_mode: 'HTML',
       reply_markup: { inline_keyboard: screen.keyboard },
@@ -506,7 +544,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     text: string,
   ): Promise<void> {
     const open = await store.findOpenLeadByTelegramId(sender.id, brand);
-    if (!open) return start(chatId, sender, undefined, text);
+    if (!open || !isFresh(open)) return start(chatId, sender, undefined, text);
     const updated = await store.updateCapture(open.id, {
       note: `${MESSAGE_NOTE}: ${text}`,
       capturePrompt: open.capturePrompt,
@@ -516,8 +554,8 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   }
 
   async function phoneAside(
+    chatId: number,
     lead: StoredLead,
-    prompt: CapturePrompt,
     phone: string,
   ): Promise<void> {
     const words = copy(localeOf(lead));
@@ -525,37 +563,42 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     const updated = await store.updateCapture(lead.id, {
       note: answerNote('phone', words, keepsHandle, undefined, phone),
       contact: keepsHandle ? undefined : phone,
-      capturePrompt: prompt,
+      capturePrompt: lead.capturePrompt,
     });
     await refresh(lead, updated);
-    await send(prompt.chatId, words.received);
+    await send(chatId, words.received);
+  }
+
+  async function sharedContact(
+    chatId: number,
+    sender: CaptureSender,
+    phone: string,
+  ): Promise<void> {
+    const running = await store.findByCapturePrompt(chatId, brand);
+    const prompt = running?.capturePrompt;
+    if (running && prompt?.step === 'phone')
+      return answer(running, prompt, undefined, phone);
+    const open =
+      running ?? (await store.findOpenLeadByTelegramId(sender.id, brand));
+    if (open) await phoneAside(chatId, open, phone);
   }
 
   async function handle(
     chatId: number,
     sender: CaptureSender,
-    text: string | undefined,
-    phone: string | undefined,
+    text: string,
   ): Promise<void> {
-    if (text !== undefined) {
-      const started = START_PATTERN.exec(text);
-      if (started) return startOrResume(chatId, sender, started[1]);
-      if (MENU_PATTERN.test(text)) return openScreen(chatId, sender, mainMenu);
-      if (LANG_PATTERN.test(text))
-        return openScreen(chatId, sender, (locale) =>
-          languagePicker(locale, 'menu'),
-        );
-    }
+    const started = START_PATTERN.exec(text);
+    if (started) return startOrResume(chatId, sender, started[1]);
+    if (MENU_PATTERN.test(text)) return openScreen(chatId, sender, mainMenu);
+    if (LANG_PATTERN.test(text))
+      return openScreen(chatId, sender, (locale) =>
+        languagePicker(locale, 'menu'),
+      );
 
     const lead = await store.findByCapturePrompt(chatId, brand);
     const prompt = lead?.capturePrompt;
-    if (lead && prompt) {
-      if (prompt.step !== 'phone' && phone !== undefined)
-        return phoneAside(lead, prompt, phone);
-      return answer(lead, prompt, text, phone);
-    }
-
-    if (text === undefined) return;
+    if (lead && prompt) return answer(lead, prompt, text, undefined);
     return aside(chatId, sender, text);
   }
 
@@ -564,10 +607,10 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     if (!message.success) return;
     const trimmed = message.data.text?.trim();
     const text = trimmed ? trimmed : undefined;
-    const contact = message.data.contact;
-    const phone = contact && sharedPhone(contact.phone_number);
-    if (text === undefined && phone === undefined) return;
-    await handle(message.data.chat.id, message.data.from, text, phone);
+    const { chat, from, contact } = message.data;
+    if (contact)
+      await sharedContact(chat.id, from, sharedPhone(contact.phone_number));
+    else if (text !== undefined) await handle(chat.id, from, text);
   });
 
   bot.chatType('private').on('callback_query:data', async (ctx) => {
