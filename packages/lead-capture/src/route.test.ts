@@ -47,6 +47,7 @@ const COPY = {
   manager: { button: 'MANAGER', text: 'WRITE_YOUR_QUESTION' },
   partners: { button: 'PARTNERS', text: 'PICK_A_PARTNER' },
   request: { button: 'REQUEST', car: 'CAR', service: 'WHICH_SERVICE' },
+  language: { button: 'LANGUAGE', text: 'PICK_A_LANGUAGE' },
 };
 
 const WORKSHOP = {
@@ -55,6 +56,14 @@ const WORKSHOP = {
   city: 'Beograd',
   lat: 44.8054581,
   lon: 20.4858424,
+};
+
+const LANGUAGES = {
+  ru: 'Русский',
+  en: 'English',
+  sr: 'Srpski',
+  es: 'Español',
+  de: 'Deutsch',
 };
 
 const MENU_KEYBOARD = {
@@ -88,6 +97,7 @@ function route(
     primaryLocale: 'ru',
     copy: (locale) => ({ ...COPY, greeting: `GREETING_${locale}` }),
     menu: ['services'],
+    languages: LANGUAGES,
     services: SERVICES,
     serviceCard: (slug, locale) => ({
       title: `CARD_${slug}_${locale}`,
@@ -1700,5 +1710,116 @@ describe("Details' Questionnaire: the car, the service as buttons, then the phon
       comment: 'Бюджет: 20 000',
       capturePrompt: null,
     });
+  });
+});
+
+describe('switching the language', () => {
+  it('offers every locale the site serves on /lang, in the Telegram language, writing nothing', async () => {
+    await say('/lang', { ...HANDLED, language_code: 'en' });
+
+    expect(stored()).toHaveLength(0);
+    expect(lastSent()).toEqual([42, 'PICK_A_LANGUAGE']);
+    expect(lastMarkup()).toEqual({
+      inline_keyboard: [
+        [{ text: 'Русский', callback_data: 'locale:ru:menu' }],
+        [{ text: 'English', callback_data: 'locale:en:menu' }],
+        [{ text: 'Srpski', callback_data: 'locale:sr:menu' }],
+        [{ text: 'Español', callback_data: 'locale:es:menu' }],
+        [{ text: 'Deutsch', callback_data: 'locale:de:menu' }],
+        [{ text: 'BACK', callback_data: 'menu:en' }],
+      ],
+    });
+  });
+
+  it('opens the picker in place from a menu button, aimed back at the menu', async () => {
+    await tap('language:sr');
+
+    expect(edits()[0]).toMatchObject({
+      text: 'PICK_A_LANGUAGE',
+      reply_markup: {
+        inline_keyboard: expect.arrayContaining([
+          [{ text: 'English', callback_data: 'locale:en:menu' }],
+          [{ text: 'BACK', callback_data: 'menu:sr' }],
+        ]),
+      },
+    });
+  });
+
+  it('re-renders the screen the visitor was on in the new locale', async () => {
+    await tap('language:ru:services');
+    expect(edits()[0].reply_markup).toMatchObject({
+      inline_keyboard: expect.arrayContaining([
+        [{ text: 'Deutsch', callback_data: 'locale:de:services' }],
+        [{ text: 'BACK', callback_data: 'services:ru' }],
+      ]),
+    });
+
+    await tap('locale:de:services');
+
+    expect(edits().at(-1)).toMatchObject({
+      text: 'PICK_A_SERVICE',
+      reply_markup: {
+        inline_keyboard: expect.arrayContaining([
+          [{ text: 'BACK', callback_data: 'menu:de' }],
+        ]),
+      },
+    });
+  });
+
+  it('brings a service card back with its service', async () => {
+    await tap('locale:es:service-vehicle-import');
+
+    expect(edits()[0].text).toContain('<b>CARD_vehicle-import_es</b>');
+  });
+
+  it('keeps every switch button under the 64-byte callback limit', async () => {
+    await tap('language:ru:service-vehicle-sourcing');
+
+    const data = (
+      edits()[0].reply_markup as {
+        inline_keyboard: { callback_data: string }[][];
+      }
+    ).inline_keyboard.flat();
+    for (const { callback_data } of data)
+      expect(
+        new TextEncoder().encode(callback_data).length,
+      ).toBeLessThanOrEqual(64);
+  });
+
+  it.each(['locale:fr:menu', 'locale:en', 'locale:en:request-vehicle-import'])(
+    'ignores a switch it cannot carry out: %s',
+    async (data) => {
+      await tap(data);
+
+      expect(edits()).toHaveLength(0);
+      expect(stored()).toHaveLength(0);
+    },
+  );
+
+  it('moves an open Lead to the new locale, and later messages follow it', async () => {
+    await begin('vehicle-sourcing_ru');
+
+    await tap('locale:sr:menu');
+
+    expect(stored()[0].locale).toBe('sr');
+    expect(stored()[0].capturePrompt).toBeNull();
+    expect(cards()).toHaveLength(1);
+    expect(adminNotes()).toHaveLength(0);
+
+    await say('/menu', { ...HANDLED, language_code: 'en' });
+
+    expect(lastMarkup()).toEqual({
+      inline_keyboard: [[{ text: 'SERVICES', callback_data: 'services:sr' }]],
+    });
+  });
+
+  it('leaves a Lead already in that locale untouched', async () => {
+    await POST(makeCtx(startUpdate('en')));
+    const writes = storage.writeAttempts();
+
+    await tap('locale:en:menu');
+
+    expect(storage.writeAttempts()).toBe(writes);
+    expect(edits()).toHaveLength(1);
   });
 });

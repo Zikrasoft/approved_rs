@@ -22,6 +22,7 @@ const COPY = {
     car: 'Какая машина?',
     service: 'Какая услуга?',
   },
+  language: { button: 'Язык', text: 'Выберите язык' },
 };
 
 describe('the dialog copy a site supplies', () => {

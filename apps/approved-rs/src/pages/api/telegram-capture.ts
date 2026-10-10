@@ -9,7 +9,7 @@ import {
 import { BRAND, leadStore } from '@/lib/crm';
 import { CAPTURE_WEBHOOK_SECRET, captureBot } from '@/lib/captureBot';
 import { ensureLeadCard, notifier } from '@/lib/crmBot';
-import { PRIMARY_LOCALE, isLocale } from '@/i18n/config';
+import { LOCALE_NAME, PRIMARY_LOCALE, isLocale } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PHONE_NUMBER, SITE_URL } from '@/utils/constants';
 import { SERVICE_SLUGS } from '@/utils/labels';
@@ -25,13 +25,14 @@ export const POST = createCaptureWebhookRoute({
   isLocale,
   primaryLocale: PRIMARY_LOCALE,
   copy: (locale) => content(locale).captureBot,
-  menu: ['services', 'request', 'contacts', 'manager', 'partners'],
+  menu: ['services', 'request', 'contacts', 'manager', 'partners', 'language'],
   partners: (locale) =>
     [CARLAB, DETAILS].map(({ name, captureBot }) => ({
       name,
       url: referralLink(captureBot, brandLocale(locale)),
     })),
   questionnaire: ['looking_for', 'budget', 'phone'],
+  languages: LOCALE_NAME,
   services: SERVICE_SLUGS,
   contacts: { phone: PHONE_NUMBER, site: SITE_URL },
   serviceCard: (slug, locale) => {

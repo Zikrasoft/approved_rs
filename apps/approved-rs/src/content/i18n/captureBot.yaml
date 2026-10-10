@@ -30,6 +30,9 @@ request:
   button: Оставить заявку
   car: Какая у вас машина? Напишите марку, модель и год.
   service: Какая услуга вам нужна? Выберите ниже.
+language:
+  button: 🌐 Язык
+  text: Выберите язык, на котором вам удобнее общаться.
 translations:
   en:
     greeting: Hello! Thanks for getting in touch — we can see your enquiry and we'll come back to you shortly.

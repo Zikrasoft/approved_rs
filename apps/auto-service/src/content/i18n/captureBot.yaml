@@ -30,6 +30,9 @@ request:
   button: Оставить заявку
   car: Какая у вас машина? Напишите марку, модель и год.
   service: Какие работы нужны? Выберите ниже.
+language:
+  button: 🌐 Язык
+  text: Выберите язык, на котором вам удобнее общаться.
 translations:
   sr:
     greeting: Zdravo! Hvala što ste nam pisali — upit je kod nas i majstor će vam se uskoro javiti.

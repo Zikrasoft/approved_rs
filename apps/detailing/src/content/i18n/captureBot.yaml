@@ -30,6 +30,9 @@ request:
   button: Оставить заявку
   car: Какая у вас машина? Напишите марку, модель и год.
   service: Что хотите сделать с машиной? Выберите услугу ниже — или напишите своими словами.
+language:
+  button: 🌐 Язык
+  text: Выберите язык, на котором вам удобнее общаться.
 translations:
   sr:
     greeting: Zdravo! Hvala što ste nam se javili — vidimo vaš upit i javljamo se uskoro.

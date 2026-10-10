@@ -48,3 +48,11 @@ export const DISPLAY_LOCALE: Record<Locale, string> = {
   ...BCP47_BY_LOCALE,
   sr: 'sr-Latn-RS',
 };
+
+export const LOCALE_NAME: Record<Locale, string> = {
+  ru: 'Русский',
+  en: 'English',
+  sr: 'Srpski',
+  es: 'Español',
+  de: 'Deutsch',
+};

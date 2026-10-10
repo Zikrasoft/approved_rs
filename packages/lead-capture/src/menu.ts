@@ -47,6 +47,7 @@ export interface MenuConfig<L extends string, S extends string> {
   serviceCard: (slug: S, locale: L) => ServiceCard;
   copy: (locale: L) => CaptureCopy;
   partners?: (locale: L) => readonly PartnerBot[];
+  languages: Readonly<Record<L, string>>;
 }
 
 export const REFERRAL = 'from-approved';
@@ -60,6 +61,8 @@ export interface Tap {
   locale: string;
   arg: string;
 }
+
+export const SWITCH_SCREEN = 'locale';
 
 const TAP_PATTERN = /^([a-z]+):([a-z]{2})(?::([a-z0-9-]+))?$/;
 
@@ -80,6 +83,7 @@ export function createScreens<L extends string, S extends string>({
   copy,
   contacts,
   partners,
+  languages,
 }: MenuConfig<L, S>) {
   const isService = (value: string): value is S =>
     (services as readonly string[]).includes(value);
@@ -165,12 +169,38 @@ export function createScreens<L extends string, S extends string>({
     };
   }
 
+  function splitTarget(target: string): [string, string] {
+    const [screen, ...arg] = target.split('-');
+    return [screen, arg.join('-')];
+  }
+
+  function languagePicker(locale: L, target: string): Screen {
+    const words = copy(locale);
+    const [screen, arg] = splitTarget(target);
+    const served = Object.keys(languages) as L[];
+    return {
+      text: words.language.text,
+      keyboard: [
+        ...served.map((code) =>
+          tap(languages[code], SWITCH_SCREEN, code, target),
+        ),
+        tap(words.menu.back, screen, locale, arg),
+      ],
+    };
+  }
+
+  function renderTarget(locale: L, target: string): Screen | null {
+    const [screen, arg] = splitTarget(target);
+    return render(screen, locale, arg);
+  }
+
   const screens: Record<string, (locale: L, arg: string) => Screen | null> = {
     menu: mainMenu,
     services: serviceList,
     service: (locale, slug) => (isService(slug) ? service(locale, slug) : null),
     manager,
     partners: partnerList,
+    language: (locale, target) => languagePicker(locale, target || 'menu'),
   };
 
   function render(screen: string, locale: L, arg: string): Screen | null {
@@ -190,6 +220,8 @@ export function createScreens<L extends string, S extends string>({
     contactsScreen,
     render,
     servicePicker,
+    renderTarget,
+    languagePicker,
   };
 }
 

@@ -2005,6 +2005,17 @@ describe('the capture lookups', () => {
 });
 
 describe('updateCapture', () => {
+  it('switches the Lead to the locale the visitor picked', async () => {
+    const lead = await store.insertLead({ ...baseData, locale: 'ru' });
+
+    const updated = await store.updateCapture(lead.id, {
+      locale: 'en',
+      capturePrompt: null,
+    });
+
+    expect(updated?.locale).toBe('en');
+  });
+
   it("makes a picked service the Lead's only one", async () => {
     const lead = await store.insertLead({
       ...baseData,
