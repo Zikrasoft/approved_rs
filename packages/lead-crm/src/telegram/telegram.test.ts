@@ -16,6 +16,7 @@ import type { LeadStatus, StoredLead } from '../schema.ts';
 
 import {
   EDIT_COPY,
+  REFERRAL_NOTE,
   statusLabel,
   buildStatusKeyboard,
   buildOwedList,
@@ -155,6 +156,14 @@ describe('sendLeadNotification', () => {
     await sendLeadNotification(makeLead({ telegramId: 77 }));
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).toContain('🤖 через бота');
+  });
+
+  it('says in the teaser that the Approved bot referred the lead', async () => {
+    await sendLeadNotification(
+      makeLead({ telegramId: 77, comment: `${REFERRAL_NOTE}\nИщет: BMW` }),
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('🤖 через бота · 🤝 из бота Approved.rs');
   });
 
   it('leaves the bot mark off a lead the site wrote', async () => {

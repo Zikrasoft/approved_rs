@@ -5,6 +5,7 @@ import {
   START_PAYLOAD_LIMIT,
 } from '@podbor/site-kit/contact-links';
 import {
+  REFERRAL_NOTE,
   secretMatches,
   VISITOR_MERGE_WINDOW_MS,
   type CapturePrompt,
@@ -64,8 +65,6 @@ const STEPS_WITH_HANDLE: CaptureStep[] = ['looking_for', 'budget', 'phone'];
 const STEPS_WITHOUT_HANDLE: CaptureStep[] = ['phone', 'looking_for', 'budget'];
 
 const MESSAGE_NOTE = 'Сообщение';
-
-const REFERRAL_NOTE = 'Пришёл из бота Approved.rs (Партнёры)';
 
 const VISITOR_FIELDS: EditField[] = ['contact', 'comment', 'service'];
 

@@ -405,6 +405,8 @@ function fieldPreview(value: string | null | undefined): string {
 
 export type FieldChangeAuthor = 'operator' | 'visitor';
 
+export const REFERRAL_NOTE = 'Пришёл из бота Approved.rs (Партнёры)';
+
 const VISITOR_CHANGE_MARK = '🤖 Посетитель через бота';
 
 export function fieldChangeText(
@@ -491,7 +493,10 @@ export function createFormatter({
 
   function brandLine(lead: StoredLead): string {
     const via = lead.telegramId == null ? '' : ' · 🤖 через бота';
-    return `🏷 ${escapeHtml(lead.brand)}${via}`;
+    const referred = lead.comment?.includes(REFERRAL_NOTE)
+      ? ' · 🤝 из бота Approved.rs'
+      : '';
+    return `🏷 ${escapeHtml(lead.brand)}${via}${referred}`;
   }
 
   function formatLeadText(lead: StoredLead, role: Role): string {

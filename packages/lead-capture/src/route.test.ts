@@ -1481,6 +1481,11 @@ describe('a visitor referred by the Approved bot', () => {
       locale: 'sr',
       comment: 'Пришёл из бота Approved.rs (Партнёры)',
     });
+    expect(cards()).toEqual([
+      expect.objectContaining({
+        text: expect.stringContaining('🤝 из бота Approved.rs'),
+      }),
+    ]);
     expect(lastSent()).toEqual([42, 'GREETING_sr\n\nMENU']);
   });
 

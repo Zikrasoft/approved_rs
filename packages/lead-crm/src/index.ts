@@ -56,6 +56,7 @@ export {
   createFormatter,
   EDIT_COPY,
   EDIT_FIELD_LABELS,
+  REFERRAL_NOTE,
   REPLY_COPY,
   escapeHtml,
   formatDateRu,
