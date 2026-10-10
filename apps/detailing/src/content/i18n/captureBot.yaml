@@ -37,6 +37,22 @@ translations:
     phoneSkip: Preskoči
     thanks: Hvala! Preneli smo majstoru — uskoro će vas kontaktirati.
     received: Primili smo, majstor će videti vašu poruku.
+    menu:
+      text: Kako možemo da pomognemo? Izaberite šta vas zanima.
+      back: « Nazad
+    services:
+      button: Usluge
+      text: Evo šta radimo u studiju. Izaberite uslugu — prikazaćemo cenu, rokove i šta je uključeno.
+    card:
+      request: Ostavite zahtev
+      site: Više na sajtu
+    contacts:
+      button: Kontakti
+      text: Mi smo u Beogradu, čekamo vas u studiju.
+      hours: Pon–Sub, 09:00–19:00
+    manager:
+      button: Pitajte majstora
+      text: Postavite vaše pitanje jednim porukom — majstor će odgovoriti ovde.
   en:
     greeting: Hello! Thanks for getting in touch — we can see your enquiry and we'll come back to you shortly.
     lookingFor: Tell us which car you have and what you would like done to it — paint protection film, polishing, ceramic coating or something else.
@@ -47,4 +63,20 @@ translations:
     phoneSkip: Skip
     thanks: Thank you! I've passed this on to the technician — they'll be in touch with you soon.
     received: Got it, our detailer will see your message.
-translatedFrom: 9689dcfbb66b3146
+    menu:
+      text: How can we help you? Please select what interests you.
+      back: « Back
+    services:
+      button: Services
+      text: Here’s what we offer at the studio. Choose a service — we'll show you the price, timeframe, and what's included.
+    card:
+      request: Submit a request
+      site: Learn more on the site
+    contacts:
+      button: Contacts
+      text: We’re in Belgrade, looking forward to welcoming you at the studio.
+      hours: Mon–Sat, 09:00–19:00
+    manager:
+      button: Message the specialist
+      text: Send your question in one message — the specialist will respond right here.
+translatedFrom: b7717e58e270875d
