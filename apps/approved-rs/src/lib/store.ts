@@ -19,9 +19,6 @@ export const {
   resumeLead,
   postponeLead,
   deleteLead,
-  claimCommission,
-  confirmCommissionPayment,
-  rejectCommissionPayment,
   searchLeads,
   getDuePostponed,
   readLedger,
@@ -30,6 +27,7 @@ export const {
   addPayout,
   correctPayout,
   addSettlement,
+  settleBalance,
   expireGhostLeads,
 } = leadStore;
 
@@ -38,6 +36,7 @@ export {
   appendNote,
   canPostpone,
   getCommission,
+  isSettled,
   postponePatch,
   wonPatch,
   MAX_LIST_ROWS,
@@ -50,7 +49,6 @@ export type {
   Payout,
   Settlement,
   Payment,
-  PendingCommissionClaim,
   PendingPrompt,
   StoredLead,
 } from '@podbor/lead-crm';

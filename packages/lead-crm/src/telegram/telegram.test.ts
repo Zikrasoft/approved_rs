@@ -22,6 +22,9 @@ import {
   statusLabel,
   buildStatusKeyboard,
   buildToPay,
+  SETTLEMENT_COPY,
+  settleKeyboard,
+  settlementText,
   formatDealsList,
   buildSearchResults,
   buildMenu,
@@ -58,8 +61,7 @@ const {
   refreshLeadCard,
   sendDealNotificationToAdmin,
   sendPayoutNotificationToAdmin,
-  sendCommissionClaimToAdmin,
-  sendCommissionResultToOwner,
+  sendSettlementToOwner,
   sendQuarantinedLeadsToAdmin,
   sendStatusChangeToAdmin,
   sendFieldChangeToAdmin,
@@ -605,53 +607,26 @@ describe('sendPayoutNotificationToAdmin', () => {
   });
 });
 
-describe('sendCommissionClaimToAdmin', () => {
-  beforeEach(() => mockFetchOk({ message_id: 1 }));
-  afterEach(() => mockFetch.mockReset());
-
-  it('notifies the admin with confirm/reject buttons for the claimed amount', async () => {
-    await sendCommissionClaimToAdmin(
-      makeLead({
-        id: 9,
-        pendingCommissionClaim: {
-          amount: 4000,
-          claimedAt: '2026-01-01T00:00:00.000Z',
-          incomeIds: [1],
-        },
-      }),
-    );
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.chat_id).toBe(222);
-    expect(body.text).toContain(money(4000));
-    const buttons = body.reply_markup.inline_keyboard[0];
-    expect(
-      buttons.map((b: { callback_data: string }) => b.callback_data),
-    ).toEqual(['confirmpay:9', 'rejectpay:9']);
-  });
-
-  it('does nothing without a pending claim', async () => {
-    await sendCommissionClaimToAdmin(
-      makeLead({ pendingCommissionClaim: null }),
-    );
-    expect(mockFetch).not.toHaveBeenCalled();
-  });
-});
-
-describe('sendCommissionResultToOwner', () => {
+describe('sendSettlementToOwner', () => {
   beforeEach(() => mockFetchOk());
   afterEach(() => mockFetch.mockReset());
 
-  it('tells the owner the payment was confirmed', async () => {
-    await sendCommissionResultToOwner(makeLead({ id: 9 }), true);
+  it('tells the owner what the admin received and what is still owed', async () => {
+    await sendSettlementToOwner(
+      {
+        type: 'settlement',
+        id: 1,
+        amount: 100,
+        createdAt: '2026-10-10T00:00:00.000Z',
+        createdBy: 'admin',
+      },
+      43.3,
+    );
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.chat_id).toBe(111);
-    expect(body.text).toContain('подтверждена');
-  });
-
-  it('tells the owner the payment was rejected', async () => {
-    await sendCommissionResultToOwner(makeLead({ id: 9 }), false);
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.text).toContain('не подтверждена');
+    expect(body.text).toBe(
+      `💸 Оплата получена: ${money(100)}\nОсталось к оплате: ${money(43.3)}`,
+    );
   });
 });
 
@@ -731,6 +706,38 @@ describe('sendQuarantinedLeadsToAdmin', () => {
 describe('buildToPay', () => {
   it('shows the balance owed', () => {
     expect(buildToPay(1234.5)).toBe(`<b>💶 К оплате</b>\n\n${money(1234.5)}`);
+  });
+});
+
+describe('settleKeyboard', () => {
+  it('offers the balance as one tap, and another amount by reply', () => {
+    expect(settleKeyboard(143.3).inline_keyboard).toEqual([
+      [{ text: `💸 Оплачено ${money(143.3)}`, callback_data: 'settle:143.3' }],
+      [{ text: SETTLEMENT_COPY.otherButton, callback_data: 'settle:other' }],
+    ]);
+  });
+
+  it('offers only another amount when nothing is owed', () => {
+    expect(settleKeyboard(0).inline_keyboard).toEqual([
+      [{ text: SETTLEMENT_COPY.otherButton, callback_data: 'settle:other' }],
+    ]);
+  });
+});
+
+describe('settlementText', () => {
+  it('shows the amount received and the balance left', () => {
+    expect(
+      settlementText(
+        {
+          type: 'settlement',
+          id: 2,
+          amount: 50,
+          createdAt: '2026-10-10T00:00:00.000Z',
+          createdBy: 'admin',
+        },
+        0,
+      ),
+    ).toBe(`💸 Оплата получена: ${money(50)}\nОсталось к оплате: ${money(0)}`);
   });
 });
 
@@ -1010,21 +1017,32 @@ describe('buildLeadDetail', () => {
     );
   });
 
-  it('won lead, owner, no claim pending: a claim button', () => {
+  it('won lead: the money block, but no per-Lead pay buttons for either role', () => {
     const lead = makeLead({
       id: 7,
       status: 'won',
       dealAmount: 100000,
       paidAmount: 0,
+      pendingCommissionClaim: {
+        amount: 3000,
+        claimedAt: '2026-01-01T00:00:00.000Z',
+        incomeIds: [1],
+      },
     });
-    const { text, reply_markup } = buildLeadDetail(lead, 'owner');
-    expect(text).toContain('Осталось:');
-    const data = reply_markup.inline_keyboard
-      .flat()
-      .map((b) => b.callback_data);
-    expect(data).toContain('claimpay:7:1');
+    for (const role of ['owner', 'admin'] as const) {
+      const { text, reply_markup } = buildLeadDetail(lead, role);
+      expect(text).toContain('Осталось:');
+      expect(text).not.toContain('Ожидает подтверждения');
+      expect(
+        reply_markup.inline_keyboard
+          .flat()
+          .some((b) =>
+            /^(claimpay|confirmpay|rejectpay):/.test(b.callback_data ?? ''),
+          ),
+      ).toBe(false);
+    }
     expect(
-      reply_markup.inline_keyboard[0].some((b) =>
+      buildLeadDetail(lead, 'owner').reply_markup.inline_keyboard[0].some((b) =>
         b.callback_data?.startsWith('st:'),
       ),
     ).toBe(false);
@@ -1040,49 +1058,13 @@ describe('buildLeadDetail', () => {
       ],
     });
 
-    const { text, reply_markup } = buildLeadDetail(lead, 'owner');
+    const { text } = buildLeadDetail(lead, 'owner');
 
     expect(text).toContain(
       `• ${money(300)} от 01.03.2026 · комиссия ${money(30)} · 🟢 оплачена`,
     );
     expect(text).toContain(
       `• ${money(200)} от 05.03.2026 · комиссия ${money(20)} · 🔴 не оплачена`,
-    );
-    expect(
-      reply_markup.inline_keyboard.flat().map((b) => b.callback_data),
-    ).toContain('claimpay:7:2');
-  });
-
-  it('offers a pay-everything button only when more than one income is owed', () => {
-    const one = buildLeadDetail(
-      makeLead({
-        id: 7,
-        status: 'won',
-        incomes: [
-          { id: 1, amount: 300, at: '2026-03-01T00:00:00.000Z', paidAt: null },
-        ],
-      }),
-      'owner',
-    );
-    const two = buildLeadDetail(
-      makeLead({
-        id: 7,
-        status: 'won',
-        incomes: [
-          { id: 1, amount: 300, at: '2026-03-01T00:00:00.000Z', paidAt: null },
-          { id: 2, amount: 200, at: '2026-03-05T00:00:00.000Z', paidAt: null },
-        ],
-      }),
-      'owner',
-    );
-
-    expect(
-      one.reply_markup.inline_keyboard.flat().map((b) => b.callback_data),
-    ).not.toContain('claimpay:7');
-    const rows = two.reply_markup.inline_keyboard.flat();
-    expect(rows.map((b) => b.callback_data)).toContain('claimpay:7');
-    expect(rows.find((b) => b.callback_data === 'claimpay:7')?.text).toBe(
-      `💸 Оплатил всё — ${money(50)}`,
     );
   });
 
@@ -1121,61 +1103,6 @@ describe('buildLeadDetail', () => {
 
     expect(text).toContain(`💰 Комиссия Zikrasoft: ${money(0)}`);
     expect(text).not.toContain('💶 Доходы:');
-  });
-
-  it('won lead, owner, claim pending: shows waiting line, no claim button', () => {
-    const lead = makeLead({
-      id: 7,
-      status: 'won',
-      dealAmount: 100000,
-      pendingCommissionClaim: {
-        amount: 3000,
-        claimedAt: '2026-01-01T00:00:00.000Z',
-        incomeIds: [1],
-      },
-    });
-    const { text, reply_markup } = buildLeadDetail(lead, 'owner');
-    expect(text).toContain(`🕓 Ожидает подтверждения: ${money(3000)}`);
-    expect(
-      reply_markup.inline_keyboard
-        .flat()
-        .some((b) => b.callback_data?.startsWith('claimpay:')),
-    ).toBe(false);
-  });
-
-  it('won lead, admin, no remaining and no pending claim: no money buttons at all', () => {
-    const lead = makeLead({
-      id: 7,
-      status: 'won',
-      dealAmount: 100000,
-      paidAmount: 10000,
-    });
-    const { reply_markup } = buildLeadDetail(lead, 'admin');
-    const data = reply_markup.inline_keyboard
-      .flat()
-      .map((b) => b.callback_data);
-    expect(data).not.toContain('confirmpay:7');
-    expect(data).not.toContain('rejectpay:7');
-  });
-
-  it('won lead, admin, claim pending: shows confirm/reject', () => {
-    const lead = makeLead({
-      id: 7,
-      status: 'won',
-      dealAmount: 100000,
-      pendingCommissionClaim: {
-        amount: 3000,
-        claimedAt: '2026-01-01T00:00:00.000Z',
-        incomeIds: [1],
-      },
-    });
-    const { reply_markup } = buildLeadDetail(lead, 'admin');
-    const data = reply_markup.inline_keyboard
-      .flat()
-      .map((b) => b.callback_data);
-    expect(data).toEqual(
-      expect.arrayContaining(['confirmpay:7', 'rejectpay:7']),
-    );
   });
 
   it('deal-amount line is worded per role — owner sees "твой", admin sees "владельца"', () => {

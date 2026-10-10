@@ -20,8 +20,7 @@ import {
   sendForceReplyPrompt,
   safeEditMessage,
   sendPayoutNotificationToAdmin,
-  sendCommissionClaimToAdmin,
-  sendCommissionResultToOwner,
+  sendSettlementToOwner,
   sendFieldChangeToAdmin,
   sendMessage,
   buildToPay,
@@ -42,6 +41,9 @@ import {
   REPLY_COPY,
   PAYOUT_COPY,
   payoutRecordedMessage,
+  SETTLEMENT_COPY,
+  settleKeyboard,
+  settlementText,
   escapeHtml,
   canAddIncome,
   LEAD_STATUS_ACTIONS,
@@ -55,14 +57,11 @@ import {
   archiveLead,
   unarchiveLead,
   deleteLead,
-  confirmCommissionPayment,
-  claimCommission,
-  rejectCommissionPayment,
   setPendingPrompt,
   findByPendingPrompt,
   findByCard,
   addNote,
-  listPayouts,
+  readLedger,
   correctPayout,
   resolvePendingPrompt,
   searchLeads,
@@ -73,12 +72,15 @@ import {
   wonPatch,
   addPayout,
   getBalance,
+  addSettlement,
+  settleBalance,
+  isSettled,
   readLeads,
-  getCommission,
   appendNote,
   type LeadStatus,
   type PendingPrompt,
   type Payout,
+  type Settlement,
   type StoredLead,
 } from '@/lib/store';
 
@@ -353,9 +355,14 @@ async function askIncome(ctx: Ctx, id: number): Promise<void> {
 }
 
 async function askPayoutFix(ctx: Ctx, payoutId: number): Promise<void> {
-  const payout = (await listPayouts()).find((p) => p.id === payoutId);
+  const { payouts, settlements } = await readLedger();
+  const payout = payouts.find((p) => p.id === payoutId);
   // TODO: a Lead-less Payout has no Lead to hold the correction prompt (#237)
   if (payout?.leadId == null) return ack(ctx);
+  if (ctx.role === 'owner' && isSettled(payout, settlements)) {
+    await answerCallback(ctx.cbId, PAYOUT_COPY.settled);
+    return;
+  }
   await startLeadPrompt(ctx, payout.leadId, {
     prompt: PAYOUT_COPY.fixPrompt,
     kind: 'correct_payout',
@@ -364,28 +371,45 @@ async function askPayoutFix(ctx: Ctx, payoutId: number): Promise<void> {
   });
 }
 
-async function claimPay(ctx: Ctx, id: number, target?: string): Promise<void> {
-  const lead = await getLead(id);
-  if (!lead || lead.dealAmount == null) return ack(ctx);
-  const { isPaidOff } = getCommission(lead);
-  if (isPaidOff || lead.pendingCommissionClaim) return ack(ctx);
-  const updated = await claimCommission(
-    id,
-    target == null ? null : [Number(target)],
-  );
-  if (!updated) return ack(ctx);
-  await refreshBothSurfaces(ctx, updated);
-  await sendCommissionClaimToAdmin(updated);
-  await answerCallback(ctx.cbId, 'Отмечено — ждём подтверждения');
+async function showToPay(ctx: Ctx): Promise<void> {
+  const balance = await getBalance();
+  await sendMessage(ctx.chatId, buildToPay(balance), {
+    reply_markup: ctx.role === 'admin' ? settleKeyboard(balance) : undefined,
+  });
+  await ack(ctx);
 }
 
-async function settlePay(ctx: Ctx, id: number, paid: boolean): Promise<void> {
-  const updated = await (paid
-    ? confirmCommissionPayment(id)
-    : rejectCommissionPayment(id));
-  await refreshBothSurfaces(ctx, updated);
-  if (updated) await sendCommissionResultToOwner(updated, paid);
-  await answerCallback(ctx.cbId);
+async function recordedSettlement(settlement: Settlement): Promise<string> {
+  const balance = await getBalance();
+  await sendSettlementToOwner(settlement, balance);
+  return settlementText(settlement, balance);
+}
+
+async function settle(ctx: Ctx, shownBalance: string): Promise<void> {
+  const settlement = await settleBalance(Number(shownBalance));
+  if (!settlement) {
+    const balance = await getBalance();
+    await safeEditMessage(
+      ctx.chatId,
+      ctx.messageId,
+      buildToPay(balance),
+      settleKeyboard(balance),
+    );
+    await answerCallback(ctx.cbId, SETTLEMENT_COPY.stale);
+    return;
+  }
+  await safeEditMessage(
+    ctx.chatId,
+    ctx.messageId,
+    await recordedSettlement(settlement),
+    { inline_keyboard: [] },
+  );
+  await ack(ctx);
+}
+
+async function askSettlement(ctx: Ctx): Promise<void> {
+  await sendForceReplyPrompt(ctx.chatId, SETTLEMENT_COPY.prompt);
+  await answerCallback(ctx.cbId, SETTLEMENT_COPY.ack);
 }
 
 async function listLeads(ctx: Ctx, statuses: string): Promise<void> {
@@ -453,19 +477,10 @@ export const CALLBACKS: CallbackRow[] = [
   [/^del:(\d+)$/, 'admin', onLead(askDelete)],
   [/^delconfirm:(\d+)$/, 'admin', onLead(confirmDelete)],
   [/^delcancel:(\d+)$/, 'admin', onLead(backToLead)],
-  [/^claimpay:(\d+)(?::(\d+))?$/, 'owner', onLead(claimPay)],
   [/^income:(\d+)$/, 'owner', onLead(askIncome)],
   [/^payfix:(\d+)$/, 'any', onLead(askPayoutFix)],
-  [
-    /^confirmpay:(\d+)$/,
-    'admin',
-    onLead((ctx, id) => settlePay(ctx, id, true)),
-  ],
-  [
-    /^rejectpay:(\d+)$/,
-    'admin',
-    onLead((ctx, id) => settlePay(ctx, id, false)),
-  ],
+  [/^settle:other$/, 'admin', askSettlement],
+  [/^settle:(\d+(?:\.\d+)?)$/, 'admin', settle],
   editRow('name'),
   editRow('contact'),
   editRow('comment'),
@@ -494,14 +509,7 @@ export const CALLBACKS: CallbackRow[] = [
       await ack(ctx);
     },
   ],
-  [
-    /^menu:debt$/,
-    'any',
-    async (ctx) => {
-      await sendMessage(ctx.chatId, buildToPay(await getBalance()));
-      await ack(ctx);
-    },
-  ],
+  [/^menu:debt$/, 'any', showToPay],
   [
     /^menu:deals$/,
     'admin',
@@ -762,7 +770,7 @@ const PROMPT_REPLIES: Record<PromptKind, PromptHandler> = {
   correct_payout: replyCorrectPayout,
 };
 
-type Reply = Omit<PromptReply, 'pending'>;
+type Reply = Omit<PromptReply, 'pending'> & { repliedText: string };
 
 async function replyToPrompt(reply: Reply): Promise<boolean> {
   const pending = await findByPendingPrompt(
@@ -799,7 +807,24 @@ async function replyToCard(reply: Reply): Promise<boolean> {
   return true;
 }
 
-const REPLY_ROUTES = [replyToPrompt, replyToCard];
+async function replyToSettlementPrompt(reply: Reply): Promise<boolean> {
+  if (reply.repliedText !== SETTLEMENT_COPY.prompt) return false;
+  if (reply.role !== 'admin') return true;
+  const amount = parseAmount(reply.text);
+  if (amount == null) {
+    await sendMessage(reply.chatId, PAYOUT_COPY.invalidAmount);
+    return true;
+  }
+  const settlement = await addSettlement(amount);
+  await sendMessage(
+    reply.chatId,
+    await recordedSettlement(settlement),
+    threadedTo(reply.messageId),
+  );
+  return true;
+}
+
+const REPLY_ROUTES = [replyToPrompt, replyToSettlementPrompt, replyToCard];
 
 async function routeReply(reply: Reply): Promise<void> {
   for (const route of REPLY_ROUTES) if (await route(reply)) return;
@@ -874,6 +899,7 @@ bot.on('message', async (ctx, next) => {
     chatId: ctx.chat.id,
     messageId: ctx.message.message_id,
     replyToMessageId: repliedTo.message_id,
+    repliedText: repliedTo.text ?? '',
     text: ctx.message.text ?? '',
   });
 });

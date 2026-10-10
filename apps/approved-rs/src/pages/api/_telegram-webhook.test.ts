@@ -47,8 +47,18 @@ import {
   formatDealsList,
   payoutRecordedMessage,
   PAYOUT_COPY,
+  SETTLEMENT_COPY,
+  settleKeyboard,
+  settlementText,
 } from '@/lib/telegram';
-import { getLead, listPayouts, readLeads, searchLeads } from '@/lib/store';
+import {
+  getBalance,
+  getLead,
+  listPayouts,
+  readLedger,
+  readLeads,
+  searchLeads,
+} from '@/lib/store';
 
 const api = recordBotApi();
 vi.stubGlobal('fetch', api.fetch);
@@ -170,7 +180,13 @@ function message(
     chatId = from,
     type = 'private',
     replyTo,
-  }: { chatId?: number; type?: string; replyTo?: number } = {},
+    repliedText,
+  }: {
+    chatId?: number;
+    type?: string;
+    replyTo?: number;
+    repliedText?: string;
+  } = {},
 ) {
   return POST(
     makeCtx({
@@ -182,7 +198,9 @@ function message(
         from: { id: from },
         ...(replyTo == null
           ? {}
-          : { reply_to_message: { message_id: replyTo } }),
+          : {
+              reply_to_message: { message_id: replyTo, text: repliedText },
+            }),
       },
     }),
   );
@@ -686,132 +704,121 @@ describe('POST /api/telegram-webhook', () => {
     });
   });
 
-  describe('claimpay:<id> — owner only', () => {
-    const won = (overrides: Partial<StoredLead> = {}) =>
-      makeLead({
-        id: 9,
-        status: 'won',
-        dealAmount: 1000,
-        incomes: [income(1, 1000)],
-        ...overrides,
+  describe('settle: — the admin records a Settlement', () => {
+    const TO_PAY_ID = 77;
+    const owed = (amount: number) =>
+      leadsStorage().seed([
+        makeLead(),
+        {
+          type: 'payout',
+          id: 1,
+          amount,
+          createdAt: PAID_AT,
+          createdBy: 'owner',
+          leadId: 5,
+        },
+      ]);
+    const tapPaid = (amount: number, id = 'cb-settle') =>
+      tap(`settle:${amount}`, ADMIN_ID, {
+        id,
+        chatId: ADMIN_ID,
+        messageId: TO_PAY_ID,
+      });
+    const answerSettlement = (text: string, from = ADMIN_ID) =>
+      message(text, from, {
+        chatId: from,
+        replyTo: PROMPT_ID,
+        repliedText: SETTLEMENT_COPY.prompt,
       });
 
-    it('owner claims the full remaining balance immediately, no amount prompt', async () => {
-      seed(won());
-      await tap('claimpay:9', OWNER_ID, { id: 'cb-10' });
-      expect(forceReplies()).toEqual([]);
-      const lead = await stored(9);
-      expect(lead.pendingCommissionClaim).toMatchObject({
-        amount: 100,
-        incomeIds: [1],
-      });
-      expect(sentTo(ADMIN_ID)).toEqual([
+    it('[💸 Paid] records the balance shown, clears the balance and tells the owner', async () => {
+      owed(143.3);
+      await tapPaid(143.3);
+
+      const { settlements } = await readLedger();
+      expect(settlements).toEqual([
+        expect.objectContaining({ amount: 143.3, createdBy: 'admin' }),
+      ]);
+      expect(await getBalance()).toBe(0);
+      const text = settlementText(settlements[0]!, 0);
+      expect(edits(ADMIN_ID, TO_PAY_ID)).toEqual([
         expect.objectContaining({
-          reply_markup: {
-            inline_keyboard: [
-              [
-                expect.objectContaining({ callback_data: 'confirmpay:9' }),
-                expect.objectContaining({ callback_data: 'rejectpay:9' }),
-              ],
-            ],
-          },
+          text,
+          reply_markup: { inline_keyboard: [] },
+        }),
+      ]);
+      expect(textsTo(OWNER_ID)).toEqual([text]);
+      expect(answers()).toEqual([{ callback_query_id: 'cb-settle' }]);
+    });
+
+    it('records nothing when the balance moved since the button was shown, and shows the new one', async () => {
+      owed(200);
+      await tapPaid(143.3);
+
+      expect((await readLedger()).settlements).toEqual([]);
+      expect(edits(ADMIN_ID, TO_PAY_ID)).toEqual([
+        expect.objectContaining({
+          text: buildToPay(200),
+          reply_markup: settleKeyboard(200),
+        }),
+      ]);
+      expect(sentTo(OWNER_ID)).toEqual([]);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-settle', text: SETTLEMENT_COPY.stale },
+      ]);
+    });
+
+    it('a second tap on the same button records nothing more', async () => {
+      owed(100);
+      await tapPaid(100, 'cb-1');
+      await tapPaid(100, 'cb-2');
+      expect((await readLedger()).settlements).toHaveLength(1);
+      expect(textsTo(OWNER_ID)).toHaveLength(1);
+    });
+
+    it('another amount asks the admin by reply', async () => {
+      await tap('settle:other', ADMIN_ID, { id: 'cb-other', chatId: ADMIN_ID });
+      expect(forceReplies()).toEqual([
+        expect.objectContaining({
+          chat_id: ADMIN_ID,
+          text: SETTLEMENT_COPY.prompt,
         }),
       ]);
       expect(answers()).toEqual([
-        { callback_query_id: 'cb-10', text: 'Отмечено — ждём подтверждения' },
+        { callback_query_id: 'cb-other', text: SETTLEMENT_COPY.ack },
       ]);
     });
 
-    it('claims just the income the owner tapped', async () => {
-      seed(won({ incomes: [income(1, 300, PAID_AT), income(2, 200)] }));
-      await tap('claimpay:9:2', OWNER_ID);
-      expect((await stored(9)).pendingCommissionClaim).toMatchObject({
-        amount: 20,
-        incomeIds: [2],
-      });
+    it('a partial amount leaves the rest owed, and the owner hears of it', async () => {
+      owed(143.3);
+      await answerSettlement('100');
+
+      const { settlements } = await readLedger();
+      expect(settlements).toEqual([expect.objectContaining({ amount: 100 })]);
+      expect(await getBalance()).toBe(43.3);
+      const text = settlementText(settlements[0]!, 43.3);
+      expect(textsTo(ADMIN_ID)).toEqual([text]);
+      expect(textsTo(OWNER_ID)).toEqual([text]);
     });
 
-    it('tells nobody when the store reports the income was already settled', async () => {
-      seed(won({ dealAmount: 300, incomes: [income(1, 300, PAID_AT)] }));
-      await tap('claimpay:9:1', OWNER_ID, { id: 'cb-10c' });
-      expect((await stored(9)).pendingCommissionClaim).toBeNull();
-      expect(sentTo(ADMIN_ID)).toEqual([]);
-      expect(answers()).toEqual([{ callback_query_id: 'cb-10c' }]);
+    it('accepts more than is owed', async () => {
+      owed(50);
+      await answerSettlement('80');
+      expect(await getBalance()).toBe(-30);
     });
 
-    it('acks without claiming once nothing remains', async () => {
-      seed(won({ incomes: [income(1, 1000, PAID_AT)] }));
-      await tap('claimpay:9', OWNER_ID);
-      expect((await stored(9)).pendingCommissionClaim).toBeNull();
-      expect(sentTo(ADMIN_ID)).toEqual([]);
+    it('asks again when the reply is not an amount', async () => {
+      await answerSettlement('завтра');
+      expect((await readLedger()).settlements).toEqual([]);
+      expect(textsTo(ADMIN_ID)).toEqual([PAYOUT_COPY.invalidAmount]);
     });
 
-    it('admin cannot claim', async () => {
-      seed(won());
-      await tap('claimpay:9', ADMIN_ID);
-      expect((await stored(9)).pendingCommissionClaim).toBeNull();
+    it('ignores the owner answering the Settlement prompt', async () => {
+      owed(100);
+      await answerSettlement('100', OWNER_ID);
+      expect((await readLedger()).settlements).toEqual([]);
+      expect(api.calls).toEqual([]);
     });
-
-    it('a second tap while a claim is already pending is a no-op, not a double-claim', async () => {
-      const claim = {
-        amount: 100,
-        claimedAt: '2026-01-01T00:00:00.000Z',
-        incomeIds: [1],
-      };
-      seed(won({ pendingCommissionClaim: claim }));
-      await tap('claimpay:9', OWNER_ID);
-      expect((await stored(9)).pendingCommissionClaim).toEqual(claim);
-      expect(sentTo(ADMIN_ID)).toEqual([]);
-    });
-  });
-
-  describe('confirmpay: / rejectpay: — admin only', () => {
-    const claimed = () =>
-      makeLead({
-        status: 'won',
-        dealAmount: 1000,
-        incomes: [income(1, 1000)],
-        pendingCommissionClaim: {
-          amount: 100,
-          claimedAt: '2026-01-02T00:00:00.000Z',
-          incomeIds: [1],
-        },
-      });
-
-    it('admin confirms: moves the money and tells the owner', async () => {
-      seed(claimed());
-      await tap('confirmpay:5', ADMIN_ID);
-      const lead = await stored();
-      expect(lead.pendingCommissionClaim).toBeNull();
-      expect(lead.incomes[0]!.paidAt).not.toBeNull();
-      expect(sentTo(OWNER_ID)).toHaveLength(1);
-      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
-    });
-
-    it('admin rejects: clears the claim and tells the owner', async () => {
-      seed(claimed());
-      await tap('rejectpay:5', ADMIN_ID);
-      const lead = await stored();
-      expect(lead.pendingCommissionClaim).toBeNull();
-      expect(lead.incomes[0]!.paidAt).toBeNull();
-      expect(sentTo(OWNER_ID)).toHaveLength(1);
-    });
-
-    it('owner cannot confirm or reject', async () => {
-      seed(claimed());
-      await tap('confirmpay:5', OWNER_ID);
-      expect((await stored()).pendingCommissionClaim).not.toBeNull();
-    });
-
-    it.each(['confirmpay', 'rejectpay'])(
-      'does not notify the owner a second time when %s is a no-op (duplicate delivery)',
-      async (action) => {
-        await tap(`${action}:5`, ADMIN_ID);
-        expect(sentTo(OWNER_ID)).toEqual([]);
-        expect(crm('editMessageText')).toEqual([]);
-        expect(answers()).toEqual([{ callback_query_id: 'cb' }]);
-      },
-    );
   });
 
   describe('edit:<id>:<field>', () => {
@@ -874,9 +881,12 @@ describe('POST /api/telegram-webhook', () => {
   });
 
   describe('menu:debt — To pay, both roles', () => {
-    it.each([ADMIN_ID, OWNER_ID])(
-      'shows all Payouts minus all Settlements to %i',
-      async (who) => {
+    it.each([
+      [ADMIN_ID, settleKeyboard(100)],
+      [OWNER_ID, undefined],
+    ])(
+      'shows all Payouts minus all Settlements to %i, [💸 Paid] to the admin only',
+      async (who, keyboard) => {
         leadsStorage().seed([
           makeLead({
             status: 'won',
@@ -900,6 +910,7 @@ describe('POST /api/telegram-webhook', () => {
         ]);
         await tap('menu:debt', who, { chatId: who });
         expect(textsTo(who)).toEqual([buildToPay(100)]);
+        expect(sentTo(who)[0]?.reply_markup).toEqual(keyboard);
       },
     );
   });
@@ -981,11 +992,10 @@ describe('POST /api/telegram-webhook', () => {
       ['del:5', 'admin'],
       ['delconfirm:5', 'admin'],
       ['delcancel:5', 'admin'],
-      ['claimpay:5:7', 'owner'],
       ['income:5', 'owner'],
       ['payfix:5', 'any'],
-      ['confirmpay:5', 'admin'],
-      ['rejectpay:5', 'admin'],
+      ['settle:other', 'admin'],
+      ['settle:143.3', 'admin'],
       ['edit:5:name', 'any'],
       ['edit:5:contact', 'any'],
       ['edit:5:comment', 'any'],
@@ -1021,16 +1031,21 @@ describe('POST /api/telegram-webhook', () => {
     );
 
     it('passes the captured groups to the handler', async () => {
-      seed(
-        makeLead({
-          status: 'won',
-          dealAmount: 1000,
-          incomes: [income(6, 500), income(7, 500)],
-        }),
+      leadsStorage().seed([
+        makeLead(),
         makeLead({ id: 6 }),
-      );
-      await tap('claimpay:5:7', OWNER_ID);
-      expect((await stored(5)).pendingCommissionClaim?.incomeIds).toEqual([7]);
+        {
+          type: 'payout',
+          id: 1,
+          amount: 12.5,
+          createdAt: PAID_AT,
+          createdBy: 'owner',
+        },
+      ]);
+      await tap('settle:12.5', ADMIN_ID);
+      expect((await readLedger()).settlements).toEqual([
+        expect.objectContaining({ amount: 12.5 }),
+      ]);
 
       await tap('edit:6:contact', ADMIN_ID);
       expect((await stored(6)).pendingPrompt?.kind).toBe('edit_contact');
@@ -1668,6 +1683,22 @@ describe('POST /api/telegram-webhook', () => {
       expect((await listPayouts(5))[0].amount).toBe(80);
       expect(textsTo(CARD_CHAT_ID)).toEqual([PAYOUT_COPY.settled]);
       expect(sentTo(ADMIN_ID)).toEqual([]);
+    });
+
+    it('✏️ Исправить on a settled Payout is refused to the owner at the tap', async () => {
+      leadsStorage().seed([makeLead(), payout(), settlement]);
+      await tap('payfix:1', OWNER_ID, { id: 'cb-lock', chatId: CARD_CHAT_ID });
+      expect(forceReplies()).toEqual([]);
+      expect((await stored()).pendingPrompt).toBeNull();
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-lock', text: PAYOUT_COPY.settled },
+      ]);
+    });
+
+    it('✏️ Исправить on a settled Payout still prompts the admin', async () => {
+      leadsStorage().seed([makeLead(), payout(), settlement]);
+      await tap('payfix:1', ADMIN_ID, { chatId: CARD_CHAT_ID });
+      expect((await stored()).pendingPrompt).toEqual(fixPromptOn(1));
     });
 
     it('lets the admin correct a settled Payout', async () => {

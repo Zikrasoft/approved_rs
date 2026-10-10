@@ -23,8 +23,7 @@ export const {
   sendPostponeReminderToOwner,
   sendDealNotificationToAdmin,
   sendPayoutNotificationToAdmin,
-  sendCommissionClaimToAdmin,
-  sendCommissionResultToOwner,
+  sendSettlementToOwner,
   sendStatusChangeToAdmin,
   sendFieldChangeToAdmin,
   editLeadDetailMessage,
@@ -55,6 +54,9 @@ export {
   REPLY_COPY,
   PAYOUT_COPY,
   payoutRecordedMessage,
+  SETTLEMENT_COPY,
+  settleKeyboard,
+  settlementText,
   escapeHtml,
 } from '@podbor/lead-crm';
 
