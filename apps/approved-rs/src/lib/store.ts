@@ -9,6 +9,7 @@ export const {
   insertOrMergeLead,
   setTelegramMessage,
   setStatus,
+  touchLead,
   setPendingPrompt,
   findByPendingPrompt,
   findByCard,

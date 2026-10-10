@@ -112,6 +112,7 @@ const baseStoredLeadSchema = z.object({
   telegramChatId: z.number().int().nullable().default(null),
   telegramMessageId: z.number().int().nullable().default(null),
   statusChangedAt: z.string(),
+  lastActivityAt: z.string().nullable().default(null),
   createdAt: z.string(),
   pendingPrompt: pendingPromptSchema.nullable().default(null).catch(null),
   capturePrompt: capturePromptSchema.nullable().default(null).catch(null),
@@ -124,6 +125,10 @@ const baseStoredLeadSchema = z.object({
 });
 
 export type StoredLead = z.infer<typeof baseStoredLeadSchema>;
+
+export function isClosed(lead: Pick<StoredLead, 'status'>): boolean {
+  return lead.status === 'won' || lead.status === 'lost';
+}
 
 function migratedIncomes(lead: StoredLead): Income[] {
   if (lead.incomes.length > 0) return lead.incomes;

@@ -28,6 +28,7 @@ export const {
   sendStatusChangeToAdmin,
   sendFieldChangeToAdmin,
   editLeadDetailMessage,
+  unpinLeadCard,
 } = notifier;
 
 export const { buildHelp, buildLeadDetail } = formatter;
@@ -55,6 +56,7 @@ export {
   REPLY_COPY,
   PAYOUT_COPY,
   payoutRecordedMessage,
+  OUTCOME_COPY,
   escapeHtml,
 } from '@podbor/lead-crm';
 

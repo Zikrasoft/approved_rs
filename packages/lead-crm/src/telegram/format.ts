@@ -374,6 +374,15 @@ export const REPLY_COPY = {
   notePrefix: 'Ответ: ',
 } as const;
 
+export const OUTCOME_COPY = {
+  wonPrompt:
+    '💰 Сколько переведёшь админу с этой заявки (в евро)? Ответь на это сообщение суммой.\n\nДеньги будут позже — просто не отвечай. Ничего не будет — ответь 0.',
+  wonAck: 'Сделка ✅ — жду сумму',
+  workAck: 'В работе ⏳',
+  badAmount: '⚠️ Нужна сумма в евро. Попробуйте ещё раз.',
+  recorded: (amount: number) => `✅ ${formatMoney(amount)} записано`,
+} as const;
+
 const FIELD_PREVIEW_LIMIT = 120;
 
 function fieldPreview(value: string | null | undefined): string {
@@ -616,6 +625,11 @@ export function createFormatter({
               text: '📂 Открыть в боте',
               url: `https://t.me/${botUsername}?start=lead_${id}`,
             },
+          ],
+          [
+            { text: '✅ Сделка', callback_data: `won:${id}` },
+            { text: '❌ Отказ', callback_data: `lost:${id}` },
+            { text: '⏳ В работе', callback_data: `work:${id}` },
           ],
         ],
       };

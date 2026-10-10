@@ -47,6 +47,7 @@ import {
   formatDealsList,
   payoutRecordedMessage,
   PAYOUT_COPY,
+  OUTCOME_COPY,
 } from '@/lib/telegram';
 import { getLead, listPayouts, readLeads, searchLeads } from '@/lib/store';
 
@@ -92,6 +93,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     telegramChatId: CARD_CHAT_ID,
     telegramMessageId: CARD_MESSAGE_ID,
     statusChangedAt: '2026-01-01T00:00:00.000Z',
+    lastActivityAt: null,
     createdAt: '2026-01-01T00:00:00.000Z',
     pendingPrompt: null,
     capturePrompt: null,
@@ -351,48 +353,45 @@ describe('POST /api/telegram-webhook', () => {
       ]);
     });
 
-    it('starts a deal-amount prompt on "won" instead of setting status directly, when no amount is set yet', async () => {
-      await tap('st:5:won', OWNER_ID, { id: 'cb-2' });
+    it('marks won at once, refreshes both surfaces, unpins the card and asks for the amount', async () => {
+      await tap('st:5:won', OWNER_ID, { id: 'cb-2', messageId: 556 });
+      const lead = await stored();
+      expect(lead).toMatchObject({
+        status: 'won',
+        pendingPrompt: awaiting('deal_amount'),
+      });
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+      expect(edits(DM_CHAT_ID, 556)).toHaveLength(1);
+      expect(crm('unpinChatMessage')).toEqual([
+        { chat_id: CARD_CHAT_ID, message_id: CARD_MESSAGE_ID },
+      ]);
       expect(forceReplies()).toEqual([
         expect.objectContaining({
           chat_id: DM_CHAT_ID,
-          text: expect.stringContaining('заработал'),
+          text: OUTCOME_COPY.wonPrompt,
         }),
       ]);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-2', text: OUTCOME_COPY.wonAck },
+      ]);
+    });
+
+    it('asks for another amount on a won lead without touching its status', async () => {
+      seed(makeLead({ status: 'won', statusChangedAt: PAID_AT }));
+      await tap('st:5:won', OWNER_ID);
       expect(await stored()).toMatchObject({
-        status: 'in_progress',
+        statusChangedAt: PAID_AT,
         pendingPrompt: awaiting('deal_amount'),
       });
-      expect(answers()).toEqual([
-        { callback_query_id: 'cb-2', text: 'Жду сумму' },
-      ]);
       expect(crm('editMessageText')).toEqual([]);
-    });
-
-    it('asks for the amount on top when prepayments are already booked', async () => {
-      seed(makeLead({ incomes: [income(1, 50000)] }));
-      await tap('st:5:won', OWNER_ID);
-      expect(forceReplies()).toEqual([
-        expect.objectContaining({ text: expect.stringContaining('сверх') }),
-      ]);
-    });
-
-    it('does not re-open the amount prompt on a stale "won" button for a closed deal', async () => {
-      seed(
-        makeLead({
-          status: 'won',
-          dealAmount: 50000,
-          incomes: [income(1, 50000)],
-        }),
-      );
-      await tap('st:5:won', OWNER_ID);
-      expect(forceReplies()).toEqual([]);
-      expect((await stored()).pendingPrompt).toBeNull();
+      expect(crm('unpinChatMessage')).toEqual([]);
+      expect(forceReplies()).toHaveLength(1);
     });
 
     it('resends a fresh deal-amount prompt on a second "won" tap, replacing a stale pending one', async () => {
       seed(
         makeLead({
+          status: 'won',
           pendingPrompt: { ...awaiting('deal_amount'), messageId: 500 },
         }),
       );
@@ -400,7 +399,7 @@ describe('POST /api/telegram-webhook', () => {
       expect(forceReplies()).toHaveLength(1);
       expect((await stored()).pendingPrompt).toEqual(awaiting('deal_amount'));
       expect(answers()).toEqual([
-        { callback_query_id: 'cb-2b', text: 'Жду сумму' },
+        { callback_query_id: 'cb-2b', text: OUTCOME_COPY.wonAck },
       ]);
     });
 
@@ -431,6 +430,161 @@ describe('POST /api/telegram-webhook', () => {
       ]);
       error.mockRestore();
     });
+  });
+
+  describe('outcome buttons on the group card', () => {
+    const onCard = { chatId: CARD_CHAT_ID, messageId: CARD_MESSAGE_ID };
+    const groupPrompt = {
+      chatId: CARD_CHAT_ID,
+      messageId: PROMPT_ID,
+      kind: 'deal_amount' as const,
+    };
+    const replyInGroup = (text: string, from = OWNER_ID) =>
+      message(text, from, {
+        chatId: CARD_CHAT_ID,
+        type: 'supergroup',
+        replyTo: PROMPT_ID,
+      });
+
+    it('✅ marks won, keeps the card a teaser, unpins it and prompts in the group', async () => {
+      await tap('won:5', OWNER_ID, { id: 'cb-won', ...onCard });
+
+      expect(await stored()).toMatchObject({
+        status: 'won',
+        pendingPrompt: groupPrompt,
+      });
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toEqual([
+        expect.objectContaining({
+          reply_markup: expect.objectContaining({
+            inline_keyboard: expect.arrayContaining([
+              [
+                { text: '✅ Сделка', callback_data: 'won:5' },
+                { text: '❌ Отказ', callback_data: 'lost:5' },
+                { text: '⏳ В работе', callback_data: 'work:5' },
+              ],
+            ]),
+          }),
+        }),
+      ]);
+      expect(crm('unpinChatMessage')).toEqual([
+        { chat_id: CARD_CHAT_ID, message_id: CARD_MESSAGE_ID },
+      ]);
+      expect(forceReplies()).toEqual([
+        {
+          chat_id: CARD_CHAT_ID,
+          text: OUTCOME_COPY.wonPrompt,
+          reply_markup: { force_reply: true },
+        },
+      ]);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-won', text: OUTCOME_COPY.wonAck },
+      ]);
+    });
+
+    it('✅ then a reply in the group stores the Payout under the replier', async () => {
+      await tap('won:5', OWNER_ID, onCard);
+      api.reset();
+
+      await replyInGroup('80');
+
+      expect(await listPayouts(5)).toEqual([
+        expect.objectContaining({ amount: 80, createdBy: 'owner', leadId: 5 }),
+      ]);
+      expect(textsTo(CARD_CHAT_ID)).toEqual([OUTCOME_COPY.recorded(80)]);
+      expect(textsTo(ADMIN_ID)).toEqual([
+        expect.stringContaining('Стало: 80 €'),
+      ]);
+      expect((await stored()).pendingPrompt).toBeNull();
+    });
+
+    it('stores an admin answer to the prompt as the admin', async () => {
+      seed(makeLead({ status: 'won', pendingPrompt: groupPrompt }));
+      await replyInGroup('40', ADMIN_ID);
+      expect(await listPayouts(5)).toEqual([
+        expect.objectContaining({ amount: 40, createdBy: 'admin' }),
+      ]);
+    });
+
+    it('ignores a stranger answering the prompt', async () => {
+      seed(makeLead({ status: 'won', pendingPrompt: groupPrompt }));
+      await replyInGroup('40', OTHER_ID);
+      expect(await listPayouts()).toEqual([]);
+      expect(api.calls).toEqual([]);
+    });
+
+    it('✅ without an answer leaves the lead won with no Payout', async () => {
+      await tap('won:5', OWNER_ID, onCard);
+      expect((await stored()).status).toBe('won');
+      expect(await listPayouts()).toEqual([]);
+    });
+
+    it('❌ marks lost, unpins the card and asks nothing', async () => {
+      await tap('lost:5', OWNER_ID, { id: 'cb-lost', ...onCard });
+
+      expect((await stored()).status).toBe('lost');
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+      expect(crm('unpinChatMessage')).toEqual([
+        { chat_id: CARD_CHAT_ID, message_id: CARD_MESSAGE_ID },
+      ]);
+      expect(forceReplies()).toEqual([]);
+      expect(sentTo(ADMIN_ID)).toHaveLength(1);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-lost', text: 'Статус обновлён' },
+      ]);
+    });
+
+    it('❌ on a lead already lost writes nothing and unpins nothing', async () => {
+      seed(makeLead({ status: 'lost' }));
+      const writes = leadsStorage().writeAttempts();
+      await tap('lost:5', OWNER_ID, onCard);
+      expect(leadsStorage().writeAttempts()).toBe(writes);
+      expect(crm('unpinChatMessage')).toEqual([]);
+    });
+
+    it('⏳ records activity without changing the outcome or the pin', async () => {
+      await tap('work:5', OWNER_ID, { id: 'cb-work', ...onCard });
+
+      const lead = await stored();
+      expect(lead).toMatchObject({
+        status: 'in_progress',
+        statusChangedAt: '2026-01-01T00:00:00.000Z',
+      });
+      expect(lead.lastActivityAt).toEqual(expect.any(String));
+      expect(crm('editMessageText')).toEqual([]);
+      expect(crm('unpinChatMessage')).toEqual([]);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-work', text: OUTCOME_COPY.workAck },
+      ]);
+    });
+
+    it('re-posts a won lead whose card is gone without pinning it', async () => {
+      api.fail('editMessageText', 'Bad Request: message to edit not found');
+      await tap('won:5', OWNER_ID, onCard);
+      expect(crm('pinChatMessage')).toEqual([]);
+      expect(sentTo(GROUP_ID)).toHaveLength(1);
+    });
+
+    it.each(['won:5', 'lost:5', 'work:5'])(
+      '%s from the admin is refused',
+      async (data) => {
+        await tap(data, ADMIN_ID, { id: 'cb-admin', ...onCard });
+        expect(await stored()).toMatchObject({
+          status: 'in_progress',
+          lastActivityAt: null,
+        });
+        expect(crm('unpinChatMessage')).toEqual([]);
+        expect(answers()).toEqual([{ callback_query_id: 'cb-admin' }]);
+      },
+    );
+
+    it.each(['won:99', 'lost:99'])(
+      '%s for an unknown lead is a bare ack',
+      async (data) => {
+        await tap(data, OWNER_ID, { id: 'cb-none', ...onCard });
+        expect(answers()).toEqual([{ callback_query_id: 'cb-none' }]);
+        expect(forceReplies()).toEqual([]);
+      },
+    );
   });
 
   describe('Bot API errors the edits swallow', () => {
@@ -971,6 +1125,9 @@ describe('POST /api/telegram-webhook', () => {
       ['st:5:in_progress', 'any'],
       ['st:5:won', 'owner'],
       ['st:5:lost', 'owner'],
+      ['won:5', 'owner'],
+      ['lost:5', 'owner'],
+      ['work:5', 'owner'],
       ['arch:5', 'any'],
       ['unarch:5', 'any'],
       ['postpone:5', 'owner'],
@@ -1104,58 +1261,40 @@ describe('POST /api/telegram-webhook', () => {
   });
 
   describe('replying to a pending force_reply prompt', () => {
-    it('completes the deal, refreshes the group card, and notifies the admin on a valid deal-amount reply', async () => {
-      seed(makeLead({ pendingPrompt: awaiting('deal_amount') }));
+    it('records the amount as a Payout, tells the admin and confirms', async () => {
+      seed(makeLead({ status: 'won', pendingPrompt: awaiting('deal_amount') }));
 
-      await answerPrompt('150000');
+      await answerPrompt('150');
 
-      const lead = await stored();
-      expect(lead).toMatchObject({ status: 'won', pendingPrompt: null });
-      expect(lead.incomes).toEqual([
-        expect.objectContaining({ id: 1, amount: 150000, paidAt: null }),
+      expect(await stored()).toMatchObject({
+        status: 'won',
+        pendingPrompt: null,
+        incomes: [],
+      });
+      expect(await listPayouts(5)).toEqual([
+        expect.objectContaining({ amount: 150, createdBy: 'owner', leadId: 5 }),
       ]);
-      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
-      expect(sentTo(ADMIN_ID)).toHaveLength(1);
-      expect(sentTo(DM_CHAT_ID)).toEqual([]);
+      expect(textsTo(ADMIN_ID)).toEqual([
+        expect.stringContaining('Стало: 150 €'),
+      ]);
+      expect(textsTo(DM_CHAT_ID)).toEqual([OUTCOME_COPY.recorded(150)]);
     });
 
-    it('books the closing amount on top of the prepayments already taken', async () => {
-      seed(
-        makeLead({
-          incomes: [income(1, 50000)],
-          pendingPrompt: awaiting('deal_amount'),
-        }),
-      );
-      await answerPrompt('100000');
-      const lead = await stored();
-      expect(lead.incomes.map((i) => i.amount)).toEqual([50000, 100000]);
-      expect(lead.status).toBe('won');
-    });
-
-    it('accepts a zero closing amount when prepayments already cover the deal', async () => {
-      seed(
-        makeLead({
-          incomes: [income(1, 50000)],
-          pendingPrompt: awaiting('deal_amount'),
-        }),
-      );
+    it('records a zero Payout for a won lead that brings no money', async () => {
+      seed(makeLead({ status: 'won', pendingPrompt: awaiting('deal_amount') }));
       await answerPrompt('0');
-      const lead = await stored();
-      expect(lead.incomes.map((i) => i.amount)).toEqual([50000]);
-      expect(lead.status).toBe('won');
-      expect(textsTo(DM_CHAT_ID)).toEqual([]);
+      expect(await listPayouts(5)).toEqual([
+        expect.objectContaining({ amount: 0 }),
+      ]);
+      expect((await stored()).pendingPrompt).toBeNull();
     });
 
-    it('refuses a closing reply with no number in it, even when prepayments allow zero', async () => {
-      seed(
-        makeLead({
-          incomes: [income(1, 50000)],
-          pendingPrompt: awaiting('deal_amount'),
-        }),
-      );
+    it('refuses an amount reply with no number in it', async () => {
+      seed(makeLead({ status: 'won', pendingPrompt: awaiting('deal_amount') }));
       await answerPrompt('не знаю');
       expect((await stored()).pendingPrompt).toEqual(awaiting('deal_amount'));
-      expect(textsTo(DM_CHAT_ID)).toEqual([expect.stringContaining('сумма')]);
+      expect(await listPayouts()).toEqual([]);
+      expect(textsTo(DM_CHAT_ID)).toEqual([OUTCOME_COPY.badAmount]);
     });
 
     it('records a mid-job income as a Payout of the typed amount and tells the admin', async () => {
@@ -1248,7 +1387,6 @@ describe('POST /api/telegram-webhook', () => {
     it.each([
       ['a non-numeric reply', 'много'],
       ['a negative amount', '-500'],
-      ['a zero amount', '0'],
       ['blank text', '   '],
     ])(
       'rejects %s as a deal amount without resolving the prompt',

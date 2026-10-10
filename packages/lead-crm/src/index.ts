@@ -71,6 +71,7 @@ export {
   REPLY_COPY,
   PAYOUT_COPY,
   payoutRecordedMessage,
+  OUTCOME_COPY,
   escapeHtml,
   formatDateRu,
   formatDealsList,
