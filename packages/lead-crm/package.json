@@ -16,6 +16,7 @@
     "./phone-kit": "./src/phoneKit.ts",
     "./submit": "./src/submitLeadForm.ts",
     "./lead-form": "./src/leadForm.ts",
+    "./telegram-client": "./src/telegram/client.ts",
     "./testing": "./src/testing/index.ts"
   },
   "scripts": {
