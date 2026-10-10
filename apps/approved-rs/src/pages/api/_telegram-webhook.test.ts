@@ -1982,6 +1982,7 @@ describe('POST /api/telegram-webhook', () => {
         brand: 'CarLab',
         createdBy: 'owner',
       });
+      expect((await stored()).lastActivityAt).toBeNull();
       expect(lastEdit()).toEqual(view(payoutRecordedMessage(payout!)));
       const [notice] = textsTo(ADMIN_ID);
       expect(notice).toContain('Новая выплата без заявки · CarLab');
@@ -2043,6 +2044,7 @@ describe('POST /api/telegram-webhook', () => {
         expect.objectContaining({ amount: 30, brand: 'Approved.rs' }),
       ]);
       expect(textsTo(ADMIN_ID)[0]).toContain('Новая выплата по заявке #5');
+      expect((await stored()).lastActivityAt).not.toBeNull();
     });
 
     it('matches a past Lead by phone ahead of a name', async () => {

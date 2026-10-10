@@ -61,6 +61,9 @@ belong to no Lead, in which case it need not name a Brand either. A Payout recor
 Settlement is settled, whether or not that Settlement covered all of it.
 _Avoid_: commission, income, profit, share
 
+**Draft Payout** — a Payout the bot read from an owner message, shown for the
+owner to confirm, fix or discard; it owes nothing until confirmed.
+
 **Settlement** — an amount the admin has received from the owner. The
 balance owed is all Payouts minus all Settlements, so a partial payment simply
 leaves the rest owed.

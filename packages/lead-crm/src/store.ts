@@ -654,19 +654,17 @@ export function createLeadStore({
 
     async settleBalance(balance: number): Promise<Settlement | undefined> {
       let added: Settlement | undefined;
-      await updateRecords(({ leads, ledger }) => {
+      await updateRecords(({ ledger }) => {
         added = undefined;
-        if (balance <= 0 || ledgerBalance(ledger) !== balance) {
-          return { leads, ledger };
-        }
+        if (balance <= 0 || ledgerBalance(ledger) !== balance) return {};
         added = newSettlement(ledger, balance);
         return {
-          leads,
           ledger: { ...ledger, settlements: [...ledger.settlements, added] },
         };
       });
       return added;
     },
+
     async insertLead(data: LeadInput): Promise<StoredLead> {
       let inserted!: StoredLead;
       await updateLeads((leads, idFloor) => {

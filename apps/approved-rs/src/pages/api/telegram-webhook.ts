@@ -449,7 +449,8 @@ async function confirmDraftTap(ctx: Ctx, id: number): Promise<void> {
   const before = await leadOf((await getDraft(id))?.leadId ?? null);
   const payout = await confirmDraft(id);
   if (!payout) return ack(ctx);
-  const lead = await leadOf(payout.leadId);
+  const lead =
+    payout.leadId == null ? undefined : await touchLead(payout.leadId);
   if (lead && lead.status !== before?.status)
     await afterStatusChange(lead, { notice: false });
   await sendPayoutNotificationToAdmin(lead, payout);
