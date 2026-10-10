@@ -15,7 +15,8 @@
     "./phone-input": "./src/phoneInput.ts",
     "./phone-kit": "./src/phoneKit.ts",
     "./submit": "./src/submitLeadForm.ts",
-    "./lead-form": "./src/leadForm.ts"
+    "./lead-form": "./src/leadForm.ts",
+    "./testing": "./src/testing/index.ts"
   },
   "scripts": {
     "test": "vitest run --coverage",
