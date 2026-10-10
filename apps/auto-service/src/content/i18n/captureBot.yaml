@@ -43,6 +43,13 @@ translations:
     card:
       request: Poslati zahtev
       site: Više informacija na sajtu
+    contacts:
+      button: Kontakti
+      text: Mi smo u Beogradu, čekamo vas u servisu.
+      hours: Ponedeljak–Petak 08:00–18:00 · Subota 09:00–14:00
+    manager:
+      button: Pitanje za majstora
+      text: Napišite vaše pitanje u jednom poruci — majstor će odgovoriti ovde.
   en:
     greeting: Hello! Thanks for getting in touch — we have your enquiry and a mechanic will reply shortly.
     lookingFor: Tell us which car you drive — make, model and year — and what is wrong with it or what work it needs.
@@ -62,4 +69,11 @@ translations:
     card:
       request: Submit a request
       site: Learn more on the site
-translatedFrom: 9d01a40680e4ecd5
+    contacts:
+      button: Contact
+      text: We're in Belgrade, waiting for you at the service.
+      hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
+    manager:
+      button: Message the mechanic
+      text: Send your question in one message — the mechanic will reply here.
+translatedFrom: 9d098b5d7d068819

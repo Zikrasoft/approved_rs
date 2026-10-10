@@ -43,6 +43,13 @@ translations:
     card:
       request: Submit an inquiry
       site: Learn more on the site
+    contacts:
+      button: Contact Us
+      text: We're here for you — message or call us.
+      hours: Available 24/7, no days off
+    manager:
+      button: Message the manager
+      text: Send your question in one message — the manager will reply right here.
   sr:
     greeting: Zdravo! Hvala što ste se javili — već smo primili vašu poruku i uskoro ćemo odgovoriti.
     lookingFor: Recite nam ukratko koju mašinu tražite ili u čemu vam treba pomoć.
@@ -62,6 +69,13 @@ translations:
     card:
       request: Podnijeti zahtev
       site: Više informacija na sajtu
+    contacts:
+      button: Kontakti
+      text: Tu smo — pišite ili zovite.
+      hours: Non-stop, bez praznika
+    manager:
+      button: Pitati menadžera
+      text: Postavite vaše pitanje u jednom poruci — menadžer će odgovoriti ovde.
   es:
     greeting: ¡Hola! Gracias por escribirnos, ya vemos tu consulta y te respondemos enseguida.
     lookingFor: Cuéntanos en dos palabras qué coche te interesa o en qué necesitas ayuda.
@@ -81,6 +95,13 @@ translations:
     card:
       request: Enviar solicitud
       site: Más detalles en el sitio
+    contacts:
+      button: Contactos
+      text: Estamos aquí para ayudarte, escríbenos o llámanos.
+      hours: Disponible 24/7, sin días festivos
+    manager:
+      button: Escribir al gerente
+      text: Escribe tu pregunta en un solo mensaje — el gerente te responderá aquí.
   de:
     greeting: Hallo! Danke für Ihre Nachricht – Ihre Anfrage liegt uns vor, wir melden uns gleich.
     lookingFor: Sagen Sie uns kurz, welches Auto Sie interessiert oder wobei Sie Hilfe brauchen.
@@ -100,4 +121,11 @@ translations:
     card:
       request: Anfrage senden
       site: Mehr auf der Website
-translatedFrom: a48ed2291cf239f6
+    contacts:
+      button: Kontakt
+      text: Wir sind für Sie da – schreiben Sie uns oder rufen Sie an.
+      hours: 24/7, ohne Feiertage
+    manager:
+      button: Manager kontaktieren
+      text: Stellen Sie Ihre Frage in einer Nachricht – der Manager antwortet hier.
+translatedFrom: f6e58021b13e8e41
