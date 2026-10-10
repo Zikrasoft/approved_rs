@@ -25,7 +25,6 @@ export const {
   sendPayoutNotificationToAdmin,
   sendSettlementToOwner,
   sendStatusChangeToAdmin,
-  sendFieldChangeToAdmin,
   editLeadDetailMessage,
   unpinLeadCard,
 } = notifier;
@@ -37,21 +36,15 @@ export const ADMIN_IDS = adminIds;
 
 export {
   canAddIncome,
-  statusLabel,
   formatMoney,
   formatDateRu,
-  buildStatusKeyboard,
   buildToPay,
-  formatDealsList,
   buildSearchResults,
   buildMenu,
-  buildLeadList,
+  buildOpenList,
   buildStats,
   buildDeleteConfirm,
   buildRemindPicker,
-  LEAD_STATUS_ACTIONS,
-  EDIT_COPY,
-  EDIT_FIELD_LABELS,
   REPLY_COPY,
   PAYOUT_COPY,
   payoutRecordedMessage,
@@ -64,10 +57,4 @@ export {
   escapeHtml,
 } from '@podbor/lead-crm';
 
-export type {
-  Role,
-  LeadStatusKey,
-  Btn,
-  Keyboard,
-  EditField,
-} from '@podbor/lead-crm';
+export type { Role, Btn, Keyboard } from '@podbor/lead-crm';

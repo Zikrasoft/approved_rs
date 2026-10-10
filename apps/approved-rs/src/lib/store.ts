@@ -15,8 +15,6 @@ export const {
   findByCard,
   addNote,
   resolvePendingPrompt,
-  archiveLead,
-  unarchiveLead,
   resumeLead,
   postponeLead,
   deleteLead,

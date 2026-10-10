@@ -9,7 +9,12 @@ import {
 import { channelLabel } from '../channelLabels.ts';
 import { isTelegramIdContact } from '../contactShape.ts';
 import { LEADS_PATH } from '../quarantine.ts';
-import type { Income, LeadStatus, StoredLead } from '../schema.ts';
+import {
+  isClosed,
+  type Income,
+  type LeadStatus,
+  type StoredLead,
+} from '../schema.ts';
 import { MAX_LIST_ROWS, isPlaceholderContact } from '../store.ts';
 import type { Draft, LedgerAuthor, Payout, Settlement } from '../ledger.ts';
 
@@ -32,39 +37,20 @@ const MAX_SERVICES_LABEL = 200;
 export const leadDisplayName = (lead: { name: string }): string =>
   lead.name || '—';
 
-export const LEAD_STATUS_ACTIONS = [
-  { key: 'negotiations', emoji: '🗣', label: 'Переговоры' },
-  { key: 'in_progress', emoji: '🔵', label: 'В работе' },
-  { key: 'won', emoji: '✅', label: 'Успешно' },
-  { key: 'lost', emoji: '❌', label: 'Отказ' },
-] as const;
-export type LeadStatusKey = (typeof LEAD_STATUS_ACTIONS)[number]['key'];
+const STATUS_META: Record<LeadStatus, { emoji: string; label: string }> = {
+  open: { emoji: '🔵', label: 'Открыта' },
+  won: { emoji: '✅', label: 'Сделка' },
+  lost: { emoji: '❌', label: 'Отказ' },
+  postponed: { emoji: '⏸️', label: 'Отложена' },
+};
 
-const NEW_STATUS_META = { emoji: '🆕', label: 'Новая' } as const;
-const POSTPONED_STATUS_META = { emoji: '⏸️', label: 'Отложена' } as const;
-const UNKNOWN_STATUS_META = { emoji: '⚪' };
-
-function statusMeta(status: LeadStatus): { emoji: string; label: string } {
-  if (status === 'new') return NEW_STATUS_META;
-  if (status === 'postponed') return POSTPONED_STATUS_META;
-  const found = LEAD_STATUS_ACTIONS.find((s) => s.key === status);
-  return found ?? { ...UNKNOWN_STATUS_META, label: status };
-}
-
-export function statusLabel(status: LeadStatus): string {
-  return statusMeta(status).label;
-}
-
-function statusEmoji(status: LeadStatus): string {
-  return statusMeta(status).emoji;
-}
-
-function archivedMark(lead: StoredLead): string {
-  return lead.archived ? '🗄 ' : '';
+function statusMark(status: LeadStatus): string {
+  const { emoji, label } = STATUS_META[status];
+  return `${emoji} ${label}`;
 }
 
 function statusLine(status: LeadStatus): string {
-  return `<b>Статус: ${statusEmoji(status)} ${statusLabel(status)}</b>`;
+  return `<b>Статус: ${statusMark(status)}</b>`;
 }
 
 export function escapeHtml(s: string): string {
@@ -79,17 +65,8 @@ export function formatDateRu(iso: string): string {
   return format(parseISO(iso), 'dd.MM.yyyy');
 }
 
-const INCOME_STATUSES: LeadStatus[] = [
-  'negotiations',
-  'in_progress',
-  'postponed',
-  'won',
-];
-
 export function canAddIncome(lead: StoredLead, role: Role): boolean {
-  return (
-    role === 'owner' && !lead.archived && INCOME_STATUSES.includes(lead.status)
-  );
+  return role === 'owner' && lead.status !== 'lost';
 }
 
 function incomeLine(lead: StoredLead, income: Income): string {
@@ -120,47 +97,17 @@ export function buildRemindPicker(id: number): {
   };
 }
 
-export function buildStatusKeyboard(lead: StoredLead, role: Role): Keyboard {
-  if (lead.status === 'new') {
-    const row: Btn[] = [
-      { text: '🗣 Переговоры', callback_data: `st:${lead.id}:negotiations` },
-    ];
-    if (role === 'owner')
-      row.push({ text: '❌ Отказ', callback_data: `st:${lead.id}:lost` });
-    return { inline_keyboard: [row] };
-  }
-  if (lead.status === 'negotiations') {
-    const row: Btn[] = [
-      { text: '🔵 В работу', callback_data: `st:${lead.id}:in_progress` },
-    ];
-    if (role !== 'owner') return { inline_keyboard: [row] };
-    row.push({ text: '❌ Отказ', callback_data: `st:${lead.id}:lost` });
-    return {
-      inline_keyboard: [
-        row,
-        [{ text: '⏰ Отложить', callback_data: `postpone:${lead.id}` }],
-      ],
-    };
-  }
-  if (lead.status === 'in_progress' && role === 'owner') {
-    return {
-      inline_keyboard: [
-        [
-          { text: '✅ Завершить', callback_data: `st:${lead.id}:won` },
-          { text: '❌ Отказ', callback_data: `st:${lead.id}:lost` },
-        ],
-        [{ text: '⏰ Отложить', callback_data: `postpone:${lead.id}` }],
-      ],
-    };
-  }
-  if (lead.status === 'postponed') {
-    return {
-      inline_keyboard: [
-        [{ text: '▶️ Возобновить', callback_data: `resume:${lead.id}` }],
-      ],
-    };
-  }
-  return { inline_keyboard: [] };
+function statusRows(lead: StoredLead, role: Role): Btn[][] {
+  if (lead.status === 'postponed')
+    return [[{ text: '▶️ Возобновить', callback_data: `resume:${lead.id}` }]];
+  if (lead.status !== 'open' || role !== 'owner') return [];
+  return [
+    [
+      { text: '✅ Сделка', callback_data: `st:${lead.id}:won` },
+      { text: '❌ Отказ', callback_data: `st:${lead.id}:lost` },
+    ],
+    [{ text: '⏰ Отложить', callback_data: `postpone:${lead.id}` }],
+  ];
 }
 
 export function buildDeleteConfirm(lead: StoredLead): {
@@ -180,23 +127,22 @@ export function buildDeleteConfirm(lead: StoredLead): {
   };
 }
 
-export function buildLeadList(
-  leads: StoredLead[],
-  status: LeadStatus | LeadStatus[],
-): { text: string; reply_markup: Keyboard } {
-  const statuses = Array.isArray(status) ? status : [status];
+export function buildOpenList(leads: StoredLead[]): {
+  text: string;
+  reply_markup: Keyboard;
+} {
   const rows: Btn[][] = leads
-    .filter((l) => statuses.includes(l.status) && !l.archived)
+    .filter((l) => !isClosed(l))
     .sort((a, b) => b.id - a.id)
     .slice(0, MAX_LIST_ROWS)
     .map((l) => [
       {
-        text: `#${l.id} ${leadDisplayName(l)} · ${l.brand} · ${statusEmoji(l.status)}`,
+        text: `#${l.id} ${leadDisplayName(l)} · ${l.brand} · ${STATUS_META[l.status].emoji}`,
         callback_data: `open:${l.id}`,
       },
     ]);
   return {
-    text: rows.length ? 'Выберите заявку:' : 'Пусто.',
+    text: rows.length ? 'Выберите заявку:' : 'Открытых заявок нет.',
     reply_markup: { inline_keyboard: rows },
   };
 }
@@ -206,29 +152,13 @@ export function buildMenu(role: Role): {
   reply_markup: Keyboard;
 } {
   const rows: Btn[][] = [
-    [{ text: '🆕 Новые', callback_data: 'list:new' }],
-    [{ text: '🗣 Переговоры', callback_data: 'list:negotiations' }],
-    [
-      {
-        text: '🔵 В работе / Отложенные',
-        callback_data: 'list:in_progress+postponed',
-      },
-    ],
-    [{ text: '✅ Успешные', callback_data: 'list:won' }],
-    [{ text: '❌ Отказы', callback_data: 'list:lost' }],
-    [{ text: '📊 Статистика', callback_data: 'menu:stats' }],
+    [{ text: '📂 Открытые', callback_data: 'menu:open' }],
+    [{ text: '💶 К оплате', callback_data: 'menu:debt' }],
   ];
-  rows.push([
-    {
-      text: role === 'owner' ? '🔴 Мой долг по комиссии' : '🔴 Мне должны',
-      callback_data: 'menu:debt',
-    },
-  ]);
-  if (role === 'admin') {
-    rows.push([{ text: '💰 Все сделки', callback_data: 'menu:deals' }]);
-  }
+  if (role === 'admin')
+    rows.push([{ text: '📊 Статистика', callback_data: 'menu:stats' }]);
   return {
-    text: '📋 Заявки\n\nМожно также прислать имя, телефон или #номер заявки для поиска (найдёт и архивные).',
+    text: '📋 Заявки\n\nЧтобы найти заявку, пришли имя, телефон или #номер — найдёт и отказы.',
     reply_markup: { inline_keyboard: rows },
   };
 }
@@ -269,30 +199,6 @@ export function settlementText(
   return `💸 Оплата получена: ${formatMoney(settlement.amount)}\nОсталось к оплате: ${formatMoney(balance)}`;
 }
 
-function paidStatusMark(
-  l: StoredLead & { dealAmount: number },
-  info: CommissionInfo,
-): string {
-  if (info.isPaidOff) return '🟢 Оплачено';
-  if (l.paidAmount > 0)
-    return `🟡 Оплачено ${formatMoney(l.paidAmount)} из ${formatMoney(info.commission)}`;
-  return '🔴 Не оплачено';
-}
-
-export function formatDealsList(leads: StoredLead[]): string {
-  const deals = leads
-    .filter(hasDealAmount)
-    .filter((l) => !l.archived)
-    .sort((a, b) => b.id - a.id)
-    .slice(0, MAX_LIST_ROWS);
-  if (deals.length === 0) return '<b>💰 Все сделки</b>\n\nСделок пока нет.';
-  const lines = deals.map((l) => {
-    const info = getCommission(l);
-    return `#${l.id} ${escapeHtml(leadDisplayName(l))} · ${escapeHtml(l.brand)}\nдоход ${formatMoney(l.dealAmount)} · комиссия ${formatMoney(info.commission)}\n${paidStatusMark(l, info)}`;
-  });
-  return ['<b>💰 Все сделки</b>', ...lines].join('\n\n');
-}
-
 export function buildSearchResults(leads: StoredLead[]): {
   text: string;
   reply_markup: Keyboard;
@@ -305,48 +211,26 @@ export function buildSearchResults(leads: StoredLead[]): {
   const rows: Btn[][] = leads.slice(0, MAX_LIST_ROWS).map((l) => {
     const amount =
       l.dealAmount != null ? ` — ${formatMoney(l.dealAmount)}` : '';
-    const label = `${archivedMark(l)}${statusEmoji(l.status)} #${l.id} ${l.brand} ${leadDisplayName(l)} — ${l.contact}${amount}`;
+    const label = `${STATUS_META[l.status].emoji} #${l.id} ${l.brand} ${leadDisplayName(l)} — ${l.contact}${amount}`;
     return [{ text: label, callback_data: `open:${l.id}` }];
   });
   return { text: 'Найдено:', reply_markup: { inline_keyboard: rows } };
 }
 
-export function buildStats(leads: StoredLead[], role: Role): string {
-  const active = leads.filter((l) => !l.archived);
-  const archivedCount = leads.length - active.length;
-  const count = (s: LeadStatus) => active.filter((l) => l.status === s).length;
-  const earningLeads = active.filter(hasDealAmount);
+export function buildStats(leads: StoredLead[]): string {
+  const count = (s: LeadStatus) => leads.filter((l) => l.status === s).length;
+  const earningLeads = leads.filter(hasDealAmount);
   const sum = (pick: (l: StoredLead & { dealAmount: number }) => number) =>
     roundMoney(earningLeads.reduce((acc, l) => acc + pick(l), 0));
 
-  const totalEarned = sum((l) => l.dealAmount);
-  const commissionTotal = sum((l) => getCommission(l).commission);
-  const paidTotal = sum((l) => l.paidAmount);
-  const remainingTotal = sum((l) => getCommission(l).remaining);
-
-  const moneyLines =
-    role === 'owner'
-      ? [
-          `💰 Заработано: ${formatMoney(totalEarned)}`,
-          `Комиссия к оплате: ${formatMoney(commissionTotal)}`,
-          `Оплачено: ${formatMoney(paidTotal)}`,
-          `🔴 Осталось оплатить: ${formatMoney(remainingTotal)}`,
-        ]
-      : [
-          `💰 Заработано (доход владельца): ${formatMoney(totalEarned)}`,
-          `Комиссия начислена: ${formatMoney(commissionTotal)}`,
-          `Оплачено: ${formatMoney(paidTotal)}`,
-          `🔴 Осталось получить: ${formatMoney(remainingTotal)}`,
-        ];
-
-  const brands = [...new Set(active.map((l) => l.brand))].sort();
+  const brands = [...new Set(leads.map((l) => l.brand))].sort();
   const brandLines =
     brands.length > 1
       ? [
           `По брендам: ${brands
             .map(
               (b) =>
-                `${escapeHtml(b)} — ${active.filter((l) => l.brand === b).length}`,
+                `${escapeHtml(b)} — ${leads.filter((l) => l.brand === b).length}`,
             )
             .join(' · ')}`,
         ]
@@ -355,11 +239,16 @@ export function buildStats(leads: StoredLead[], role: Role): string {
   return [
     '<b>📊 Статистика</b>',
     '',
-    `Всего заявок: ${active.length}${archivedCount ? ` (+${archivedCount} в архиве)` : ''}`,
-    `🆕 Новые: ${count('new')}   🗣 Переговоры: ${count('negotiations')}   🔵 В работе: ${count('in_progress')}   ✅ Завершено: ${count('won')}   ❌ Отказ: ${count('lost')}   ⏸ Отложено: ${count('postponed')}`,
+    `Всего заявок: ${leads.length}`,
+    (['open', 'postponed', 'won', 'lost'] as const)
+      .map((s) => `${statusMark(s)}: ${count(s)}`)
+      .join('   '),
     ...brandLines,
     '',
-    ...moneyLines,
+    `💰 Заработано (доход владельца): ${formatMoney(sum((l) => l.dealAmount))}`,
+    `Комиссия начислена: ${formatMoney(sum((l) => getCommission(l).commission))}`,
+    `Оплачено: ${formatMoney(sum((l) => l.paidAmount))}`,
+    `🔴 Осталось получить: ${formatMoney(sum((l) => getCommission(l).remaining))}`,
   ].join('\n');
 }
 
@@ -371,12 +260,6 @@ export const EDIT_FIELD_LABELS = {
 } as const;
 
 export type EditField = keyof typeof EDIT_FIELD_LABELS;
-
-export const EDIT_COPY = {
-  prompt: (field: EditField) =>
-    `✏️ Введите новое значение (${EDIT_FIELD_LABELS[field]}):`,
-  ack: 'Жду значение',
-} as const;
 
 export const REPLY_COPY = {
   prompt: '💬 Напишите ответ посетителю — бот отправит его в чат:',
@@ -428,8 +311,7 @@ export function quarantinedLeadsText(
 }
 
 export function statusChangeText(lead: StoredLead): string {
-  const meta = statusMeta(lead.status);
-  return `🔔 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: статус — ${meta.emoji} ${meta.label}`;
+  return `🔔 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: статус — ${statusMark(lead.status)}`;
 }
 
 const LEDGER_AUTHOR_LABELS: Record<LedgerAuthor, string> = {
@@ -650,7 +532,7 @@ export function createFormatter({
     },
 
     formatTeaser(lead: StoredLead): string {
-      return `${archivedMark(lead)}🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusEmoji(lead.status)} ${statusLabel(lead.status)}\n${brandLine(lead)}`;
+      return `🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusMark(lead.status)}\n${brandLine(lead)}`;
     },
 
     deepLinkKeyboard(id: number): Keyboard {
@@ -685,36 +567,27 @@ export function createFormatter({
         return [
           '<b>❓ Как пользоваться</b>',
           '',
-          '<b>Заявки</b>',
-          '🆕 Новая → 🗣 Переговоры → 🔵 В работу → ✅ Завершить (укажи свою прибыль в €) или ❌ Отказ.',
-          'Не договорились сейчас? ⏰ Отложить — укажи дату (ДД.ММ.ГГГГ), заявка сама вернётся на прежний этап в этот день, или жми ▶️ Возобновить раньше.',
-          'В заявке можно поправить имя/контакт/комментарий или архивировать.',
+          '<b>Карточка в группе</b>',
+          '✅ Сделка — бот спросит, сколько переведёшь админу (0 — если ничего). ❌ Отказ — заявка уходит из списков. ⏳ В работе — отметить, что занимаешься.',
+          'Ответь на карточку суммой — запишется выплата, любым другим текстом — заметка. Сумму можно поправить кнопкой ✏️ Исправить.',
           '',
-          '<b>Деньги</b>',
-          'Получил предоплату или частичный расчёт — ➕ Добавить доход прямо в работе, сколько угодно раз.',
-          'При ✅ Завершить бот спросит, сколько ты заработал сверх уже добавленного (0 — если больше ничего).',
-          '',
-          '<b>Комиссия</b>',
-          'Ставка указана в самой заявке — она своя у каждого бизнеса. Считается с каждого дохода отдельно.',
-          'Кнопка 💸 Оплатил — своя на каждый неоплаченный доход, плюс 💸 Оплатил всё, если их несколько. Админ подтвердит или отклонит.',
+          '<b>В боте</b>',
+          '📂 Открыть в боте — вся заявка: ⏰ Отложить до даты (в этот день вернётся в открытые) и 💬 ответить посетителю через бота.',
           '',
           '<b>Меню</b>',
-          'Списки заявок, 📊 Статистика, 🔴 Мой долг по комиссии. Найти заявку — просто пришли имя, телефон или номер.',
+          '📂 Открытые, 💶 К оплате. Найти заявку — пришли имя, телефон или номер (найдёт и отказы).',
         ].join('\n');
       }
       return [
         '<b>❓ Как пользоваться</b>',
         '',
-        'Заявки можно двигать в работу, но завершает или отказывает только владелец — у тебя таких кнопок нет.',
-        '',
-        '<b>Комиссия</b>',
-        'Когда владелец отмечает оплату — тебе приходит уведомление, жми ✅ Подтвердить или ❌ Отклонить.',
+        'Заявки ведёт владелец: ✅ Сделка, ❌ Отказ, ⏳ В работе на карточке в группе. О каждой выплате тебе приходит уведомление.',
         '',
         '<b>Меню</b>',
-        '📊 Статистика, 🔴 Мне должны (кто ещё не оплатил), 💰 Все сделки — полный список с суммами. Найти заявку — просто пришли имя, телефон или номер.',
+        '📂 Открытые, 💶 К оплате, 📊 Статистика. Найти заявку — пришли имя, телефон или номер (найдёт и отказы).',
         '',
         '<b>Удаление</b>',
-        '❌ Удалить навсегда — только у тебя, владелец такого не видит. Спросит подтверждение и стирает заявку без возврата (в отличие от 🗑 Архивировать).',
+        '❌ Удалить навсегда — только у тебя. Спросит подтверждение и стирает заявку без возврата.',
       ].join('\n');
     },
 
@@ -727,25 +600,13 @@ export function createFormatter({
           ? [[{ text: '❌ Удалить навсегда', callback_data: `del:${lead.id}` }]]
           : [];
 
-      if (lead.archived) {
-        return {
-          text: `${formatLeadText(lead, role)}\n\n🗄 В архиве`,
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: '♻️ Восстановить', callback_data: `unarch:${lead.id}` }],
-              ...deleteRow,
-            ],
-          },
-        };
-      }
-
       const commission = hasDealAmount(lead) ? getCommission(lead) : null;
       const lines = [
         formatLeadText(lead, role),
         ...(commission ? moneyStatusLines(lead, commission) : []),
       ];
       const rows: Btn[][] = [
-        ...buildStatusKeyboard(lead, role).inline_keyboard,
+        ...statusRows(lead, role),
         ...(canAddIncome(lead, role)
           ? [
               [
@@ -756,11 +617,6 @@ export function createFormatter({
               ],
             ]
           : []),
-        [
-          { text: '✏️ Имя', callback_data: `edit:${lead.id}:name` },
-          { text: '✏️ Контакт', callback_data: `edit:${lead.id}:contact` },
-          { text: '✏️ Комментарий', callback_data: `edit:${lead.id}:comment` },
-        ],
         ...(canReplyThroughBot(lead)
           ? [
               [
@@ -771,7 +627,6 @@ export function createFormatter({
               ],
             ]
           : []),
-        [{ text: '🗑 Архивировать', callback_data: `arch:${lead.id}` }],
         ...deleteRow,
       ];
 

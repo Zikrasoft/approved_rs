@@ -20,7 +20,7 @@ export function createEnsureLeadCard({
 }: EnsureLeadCardOptions) {
   return async function ensureLeadCard(lead: StoredLead): Promise<void> {
     if (await notifier.refreshLeadCard(lead)) return;
-    if (lead.archived) return;
+    if (lead.status === 'lost') return;
     const { chatId, messageId } = await notifier.sendLeadNotification(lead);
     try {
       const saved = await store.setTelegramMessage(lead.id, chatId, messageId);

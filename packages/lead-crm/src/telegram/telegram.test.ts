@@ -7,30 +7,22 @@ import { recordBotApi } from '../testing/botApi.ts';
 import { createTelegramClient } from './client.ts';
 import { createFormatter } from './format.ts';
 import { createNotifier } from './notify.ts';
-import {
-  LEAD_STATUSES,
-  POSTPONABLE_STATUSES,
-  withDerivedMoney,
-} from '../schema.ts';
-import type { LeadStatus, StoredLead } from '../schema.ts';
+import { LEAD_STATUSES, withDerivedMoney } from '../schema.ts';
+import type { StoredLead } from '../schema.ts';
 
 import {
-  EDIT_COPY,
   PAYOUT_COPY,
   DRAFT_COPY,
   draftMessage,
   payoutRecordedMessage,
   REFERRAL_NOTE,
-  statusLabel,
-  buildStatusKeyboard,
   buildToPay,
   SETTLEMENT_COPY,
   settleKeyboard,
   settlementText,
-  formatDealsList,
   buildSearchResults,
   buildMenu,
-  buildLeadList,
+  buildOpenList,
   buildStats,
   buildDeleteConfirm,
   buildRemindPicker,
@@ -84,7 +76,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     country: 'de',
     source_url: '/ru/vehicle-sourcing/de/',
     locale: 'ru',
-    status: 'new',
+    status: 'open',
     dealAmount: null,
     commissionPercent: 10,
     paidAmount: 0,
@@ -98,10 +90,8 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     capturePrompt: null,
     telegramId: null,
     referredBy: null,
-    archived: false,
     pendingCommissionClaim: null,
     remindAt: null,
-    postponedFrom: null,
     incomes: [],
     ...overrides,
   });
@@ -155,7 +145,7 @@ describe('sendLeadNotification', () => {
     expect(body.text).toContain('#42');
     expect(body.text).toContain('Автоподбор');
     expect(body.text).toContain('Иван');
-    expect(body.text).toContain('🆕 Новая');
+    expect(body.text).toContain('🔵 Открыта');
     expect(body.text).toContain(`🏷 ${makeLead().brand}`);
     expect(body.text).not.toContain('@ivan');
     expect(body.text).not.toContain('BMW X5');
@@ -237,108 +227,51 @@ describe('leadDisplayName', () => {
   });
 });
 
-describe('statusLabel', () => {
-  it('returns "Новая" for the new status', () => {
-    expect(statusLabel('new')).toBe('Новая');
-  });
+describe('status rows on the lead detail', () => {
+  const statusData = (lead: StoredLead, role: 'owner' | 'admin') =>
+    buildLeadDetail(lead, role)
+      .reply_markup.inline_keyboard.flat()
+      .map((b) => b.callback_data)
+      .filter((d) => /^(st|postpone|resume):/.test(d ?? ''));
 
-  it('maps known status keys to their Russian label', () => {
-    expect(statusLabel('negotiations')).toBe('Переговоры');
-    expect(statusLabel('in_progress')).toBe('В работе');
-    expect(statusLabel('won')).toBe('Успешно');
-    expect(statusLabel('lost')).toBe('Отказ');
-  });
-
-  it('falls back to the raw value for an unknown status (defensive, should not happen)', () => {
-    expect(statusLabel('bogus' as unknown as LeadStatus)).toBe('bogus');
-  });
-});
-
-describe('buildStatusKeyboard', () => {
-  it('owner: shows Переговоры/Отказ for a new lead, with the lead id embedded in callback_data', () => {
-    const kb = buildStatusKeyboard(makeLead({ id: 7, status: 'new' }), 'owner');
-    expect(kb.inline_keyboard[0].map((b) => b.callback_data)).toEqual([
-      'st:7:negotiations',
-      'st:7:lost',
-    ]);
-  });
-
-  it('owner: shows В работу/Отказ/Отложить for a lead in negotiations', () => {
-    const kb = buildStatusKeyboard(
-      makeLead({ id: 7, status: 'negotiations' }),
-      'owner',
-    );
-    expect(kb.inline_keyboard.flat().map((b) => b.callback_data)).toEqual([
-      'st:7:in_progress',
-      'st:7:lost',
-      'postpone:7',
-    ]);
-  });
-
-  it('owner: shows Завершить/Отказ/Отложить for an in-progress lead', () => {
-    const kb = buildStatusKeyboard(
-      makeLead({ id: 7, status: 'in_progress' }),
-      'owner',
-    );
-    expect(kb.inline_keyboard.flat().map((b) => b.callback_data)).toEqual([
+  it('owner: Сделка/Отказ/Отложить on an open lead, with the lead id embedded', () => {
+    expect(statusData(makeLead({ id: 7, status: 'open' }), 'owner')).toEqual([
       'st:7:won',
       'st:7:lost',
       'postpone:7',
     ]);
   });
 
-  it('owner: has no buttons for a terminal (won/lost) lead', () => {
-    expect(
-      buildStatusKeyboard(makeLead({ status: 'won' }), 'owner').inline_keyboard,
-    ).toEqual([]);
-    expect(
-      buildStatusKeyboard(makeLead({ status: 'lost' }), 'owner')
-        .inline_keyboard,
-    ).toEqual([]);
+  it('owner: no status buttons on a won or lost lead', () => {
+    expect(statusData(makeLead({ status: 'won' }), 'owner')).toEqual([]);
+    expect(statusData(makeLead({ status: 'lost' }), 'owner')).toEqual([]);
   });
 
-  it('admin: only Переговоры for a new lead, no Отказ', () => {
-    const kb = buildStatusKeyboard(makeLead({ id: 7, status: 'new' }), 'admin');
-    expect(kb.inline_keyboard[0].map((b) => b.callback_data)).toEqual([
-      'st:7:negotiations',
-    ]);
+  it('admin: no status buttons on an open lead — the owner closes deals', () => {
+    expect(statusData(makeLead({ status: 'open' }), 'admin')).toEqual([]);
   });
 
-  it('admin: only В работу for a lead in negotiations, no Отказ or Отложить', () => {
-    const kb = buildStatusKeyboard(
-      makeLead({ id: 7, status: 'negotiations' }),
-      'admin',
+  it('postponed: just Возобновить, for either role', () => {
+    for (const role of ['owner', 'admin'] as const) {
+      expect(
+        statusData(makeLead({ id: 7, status: 'postponed' }), role),
+      ).toEqual(['resume:7']);
+    }
+  });
+
+  it('labels every status in the card header', () => {
+    const labels = LEAD_STATUSES.map(
+      (status) =>
+        buildLeadDetail(makeLead({ status }), 'owner').text.match(
+          /Статус: ([^<]+)/,
+        )?.[1],
     );
-    expect(kb.inline_keyboard.flat().map((b) => b.callback_data)).toEqual([
-      'st:7:in_progress',
+    expect(labels).toEqual([
+      '🔵 Открыта',
+      '✅ Сделка',
+      '❌ Отказ',
+      '⏸️ Отложена',
     ]);
-  });
-
-  it("admin: no buttons at all for an in-progress lead — can't finalize/postpone", () => {
-    expect(
-      buildStatusKeyboard(makeLead({ status: 'in_progress' }), 'admin')
-        .inline_keyboard,
-    ).toEqual([]);
-  });
-
-  it('offers Отложить to the owner on exactly the postponable statuses', () => {
-    const withPostpone = LEAD_STATUSES.filter((status) =>
-      buildStatusKeyboard(makeLead({ id: 7, status }), 'owner')
-        .inline_keyboard.flat()
-        .some((b) => b.callback_data === 'postpone:7'),
-    );
-    expect(withPostpone).toEqual([...POSTPONABLE_STATUSES]);
-  });
-
-  it('postponed: shows just Возобновить, for either role', () => {
-    expect(
-      buildStatusKeyboard(makeLead({ id: 7, status: 'postponed' }), 'owner')
-        .inline_keyboard,
-    ).toEqual([[{ text: '▶️ Возобновить', callback_data: 'resume:7' }]]);
-    expect(
-      buildStatusKeyboard(makeLead({ id: 7, status: 'postponed' }), 'admin')
-        .inline_keyboard,
-    ).toEqual([[{ text: '▶️ Возобновить', callback_data: 'resume:7' }]]);
   });
 });
 
@@ -388,7 +321,7 @@ describe('refreshLeadCard', () => {
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.chat_id).toBe(-1009876543210);
     expect(body.message_id).toBe(555);
-    expect(body.text).toContain('✅ Успешно');
+    expect(body.text).toContain('✅ Сделка');
     expect(body.reply_markup.inline_keyboard[0][0].url).toBe(
       'https://t.me/approved_test_bot?start=lead_42',
     );
@@ -774,14 +707,14 @@ describe('sendStatusChangeToAdmin', () => {
 
   it("notifies every admin id with the lead's current status", async () => {
     await sendStatusChangeToAdmin(
-      makeLead({ id: 9, name: 'Пётр', status: 'in_progress' }),
+      makeLead({ id: 9, name: 'Пётр', status: 'open' }),
     );
     expect(mockFetch).toHaveBeenCalledTimes(1);
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.chat_id).toBe(222);
     expect(body.text).toContain('#9');
     expect(body.text).toContain('Пётр');
-    expect(body.text).toContain('🔵 В работе');
+    expect(body.text).toContain('🔵 Открыта');
   });
 });
 
@@ -855,59 +788,6 @@ describe('settlementText', () => {
   });
 });
 
-describe('formatDealsList', () => {
-  it('marks an unpaid deal 🔴', () => {
-    const text = formatDealsList([
-      makeLead({ id: 1, status: 'won', dealAmount: 100000, paidAmount: 0 }),
-    ]);
-    expect(text).toContain('🔴 Не оплачено');
-  });
-
-  it('marks a deal with one income settled and one still owed 🟡', () => {
-    const text = formatDealsList([
-      makeLead({
-        id: 1,
-        status: 'won',
-        incomes: [
-          { id: 1, amount: 70000, at: 'x', paidAt: 'y' },
-          { id: 2, amount: 30000, at: 'x', paidAt: null },
-        ],
-      }),
-    ]);
-    expect(text).toContain(`🟡 Оплачено ${money(7000)} из ${money(10000)}`);
-  });
-
-  it('marks a fully-paid deal 🟢', () => {
-    const text = formatDealsList([
-      makeLead({ id: 1, status: 'won', dealAmount: 100000, paidAmount: 10000 }),
-    ]);
-    expect(text).toContain('🟢 Оплачено');
-  });
-
-  it('excludes archived deals', () => {
-    const text = formatDealsList([
-      makeLead({ id: 1, status: 'won', dealAmount: 100000, archived: true }),
-    ]);
-    expect(text).toBe('<b>💰 Все сделки</b>\n\nСделок пока нет.');
-  });
-
-  it('reports nothing when there are no deals, with the same bold header as the non-empty case', () => {
-    expect(formatDealsList([])).toBe(
-      '<b>💰 Все сделки</b>\n\nСделок пока нет.',
-    );
-  });
-
-  it('caps at 20 deals, newest first', () => {
-    const leads = Array.from({ length: 25 }, (_, i) =>
-      makeLead({ id: i + 1, status: 'won', dealAmount: 10000 }),
-    );
-    const text = formatDealsList(leads);
-    const shown = [...text.matchAll(/#(\d+)/g)].map((m) => Number(m[1]));
-    expect(shown).toHaveLength(20);
-    expect(shown[0]).toBe(25);
-  });
-});
-
 describe('buildSearchResults', () => {
   it('renders each match as a tappable button: status emoji, id, name, contact', () => {
     const { reply_markup } = buildSearchResults([
@@ -915,7 +795,7 @@ describe('buildSearchResults', () => {
         id: 5,
         name: 'Пётр',
         contact: '@petr',
-        status: 'in_progress',
+        status: 'open',
       }),
     ]);
     expect(reply_markup.inline_keyboard).toEqual([
@@ -923,12 +803,21 @@ describe('buildSearchResults', () => {
     ]);
   });
 
-  it('prefixes an archived match with 🗄', () => {
+  it('shows the deal amount of a won match', () => {
     const { reply_markup } = buildSearchResults([
-      makeLead({ id: 5, name: 'Пётр', contact: '@petr', archived: true }),
+      makeLead({ id: 5, status: 'won', dealAmount: 1000 }),
     ]);
     expect(reply_markup.inline_keyboard[0][0].text).toBe(
-      '🗄 🆕 #5 Approved.rs Пётр — @petr',
+      `✅ #5 Approved.rs Иван — @ivan — ${money(1000)}`,
+    );
+  });
+
+  it('finds a lost lead and marks it lost', () => {
+    const { reply_markup } = buildSearchResults([
+      makeLead({ id: 5, name: 'Пётр', contact: '@petr', status: 'lost' }),
+    ]);
+    expect(reply_markup.inline_keyboard[0][0].text).toBe(
+      '❌ #5 Approved.rs Пётр — @petr',
     );
   });
 
@@ -940,102 +829,75 @@ describe('buildSearchResults', () => {
 });
 
 describe('buildMenu', () => {
-  it('gives the owner lead lists + stats + their own commission debt, no full deals ledger', () => {
-    const menu = buildMenu('owner');
-    const data = menu.reply_markup.inline_keyboard
-      .flat()
-      .map((b) => b.callback_data);
-    expect(data).toEqual([
-      'list:new',
-      'list:negotiations',
-      'list:in_progress+postponed',
-      'list:won',
-      'list:lost',
-      'menu:stats',
-      'menu:debt',
+  const data = (role: 'owner' | 'admin') =>
+    buildMenu(role)
+      .reply_markup.inline_keyboard.flat()
+      .map((b) => `${b.text} ${b.callback_data}`);
+
+  it('gives the owner only Open and To pay, and says search finds lost Leads', () => {
+    expect(data('owner')).toEqual([
+      '📂 Открытые menu:open',
+      '💶 К оплате menu:debt',
     ]);
-    const debtBtn = menu.reply_markup.inline_keyboard
-      .flat()
-      .find((b) => b.callback_data === 'menu:debt');
-    expect(debtBtn?.text).toBe('🔴 Мой долг по комиссии');
+    expect(buildMenu('owner').text).toContain('найдёт и отказы');
   });
 
-  it('gives the admin the same lists plus debt (admin-framed label) and the full deals ledger', () => {
-    const menu = buildMenu('admin');
-    const data = menu.reply_markup.inline_keyboard
-      .flat()
-      .map((b) => b.callback_data);
-    expect(data).toEqual([
-      'list:new',
-      'list:negotiations',
-      'list:in_progress+postponed',
-      'list:won',
-      'list:lost',
-      'menu:stats',
-      'menu:debt',
-      'menu:deals',
+  it('adds statistics for the admin only', () => {
+    expect(data('admin')).toEqual([
+      '📂 Открытые menu:open',
+      '💶 К оплате menu:debt',
+      '📊 Статистика menu:stats',
     ]);
-    const debtBtn = menu.reply_markup.inline_keyboard
-      .flat()
-      .find((b) => b.callback_data === 'menu:debt');
-    expect(debtBtn?.text).toBe('🔴 Мне должны');
   });
 });
 
 describe('buildHelp', () => {
-  it('owner text explains adding incomes, finalizing and the per-income claim', () => {
+  it('owner text walks the card buttons, card replies and the short menu', () => {
     const text = buildHelp('owner');
-    expect(text).toContain('Завершить');
-    expect(text).toContain('Добавить доход');
-    expect(text).toContain('Оплатил всё');
-    expect(text).not.toContain('Подтвердить');
+    expect(text).toContain('✅ Сделка');
+    expect(text).toContain('Ответь на карточку');
+    expect(text).toContain('⏰ Отложить');
+    expect(text).toContain('📂 Открытые, 💶 К оплате');
+    expect(text).not.toContain('Статистика');
+    expect(text).not.toContain('Архив');
   });
 
-  it('admin text explains they cannot finalize and must confirm/reject claims', () => {
+  it('admin text names statistics and the permanent delete', () => {
     const text = buildHelp('admin');
-    expect(text).toContain('только владелец');
-    expect(text).toContain('Подтвердить');
-    expect(text).toContain('Все сделки');
+    expect(text).toContain('📊 Статистика');
+    expect(text).toContain('Удалить навсегда');
+    expect(text).not.toContain('Архив');
   });
 });
 
-describe('buildLeadList', () => {
-  it('lists open buttons for leads in the given status, excluding archived, newest first', () => {
+describe('buildOpenList', () => {
+  it('lists open and postponed Leads newest first, leaving won and lost out', () => {
     const leads = [
-      makeLead({ id: 1, status: 'new' }),
-      makeLead({ id: 2, status: 'new', archived: true }),
-      makeLead({ id: 3, status: 'new' }),
+      makeLead({ id: 1, status: 'open' }),
+      makeLead({ id: 2, status: 'lost' }),
+      makeLead({ id: 3, status: 'postponed' }),
       makeLead({ id: 4, status: 'won' }),
     ];
-    const list = buildLeadList(leads, 'new');
-    const data = list.reply_markup.inline_keyboard.map(
-      (row) => row[0].callback_data,
+    const rows = buildOpenList(leads).reply_markup.inline_keyboard.map(
+      ([b]) => `${b.text} ${b.callback_data}`,
     );
-    expect(data).toEqual(['open:3', 'open:1']);
+    expect(rows).toEqual([
+      '#3 Иван · Approved.rs · ⏸️ open:3',
+      '#1 Иван · Approved.rs · 🔵 open:1',
+    ]);
   });
 
-  it('reports an empty bucket', () => {
-    expect(buildLeadList([], 'new').text).toBe('Пусто.');
-  });
-
-  it('accepts multiple statuses and merges them into one list', () => {
-    const leads = [
-      makeLead({ id: 1, status: 'in_progress' }),
-      makeLead({ id: 2, status: 'postponed' }),
-      makeLead({ id: 3, status: 'won' }),
-    ];
-    const list = buildLeadList(leads, ['in_progress', 'postponed']);
-    const data = list.reply_markup.inline_keyboard.map(
-      (row) => row[0].callback_data,
+  it('says when nothing is open', () => {
+    expect(buildOpenList([makeLead({ status: 'won' })]).text).toBe(
+      'Открытых заявок нет.',
     );
-    expect(data).toEqual(['open:2', 'open:1']);
   });
 });
 
 describe('buildStats', () => {
   const leads = [
-    makeLead({ id: 1, status: 'new' }),
-    makeLead({ id: 2, status: 'in_progress' }),
+    makeLead({ id: 1, status: 'open' }),
+    makeLead({ id: 2, status: 'open' }),
     makeLead({
       id: 3,
       status: 'won',
@@ -1045,50 +907,34 @@ describe('buildStats', () => {
       ],
     }),
     makeLead({ id: 4, status: 'lost' }),
-    makeLead({ id: 5, status: 'new', archived: true }),
+    makeLead({ id: 5, status: 'postponed' }),
   ];
 
-  it('admin: counts by status and sums money across won leads, excluding archived', () => {
-    const text = buildStats(leads, 'admin');
-    expect(text).toContain('Всего заявок: 4 (+1 в архиве)');
+  it('counts by status and sums money across won leads', () => {
+    const text = buildStats(leads);
+    expect(text).toContain('Всего заявок: 5');
+    expect(text).toContain(
+      '🔵 Открыта: 2   ⏸️ Отложена: 1   ✅ Сделка: 1   ❌ Отказ: 1',
+    );
     expect(text).toContain(`💰 Заработано (доход владельца): ${money(100000)}`);
     expect(text).toContain(`Комиссия начислена: ${money(10000)}`);
     expect(text).toContain(`Оплачено: ${money(4000)}`);
     expect(text).toContain(`🔴 Осталось получить: ${money(6000)}`);
   });
-
-  it('owner: same totals, worded from the owner\'s side (what he still owes, not "receives")', () => {
-    const text = buildStats(leads, 'owner');
-    expect(text).toContain(`💰 Заработано: ${money(100000)}`);
-    expect(text).toContain(`Комиссия к оплате: ${money(10000)}`);
-    expect(text).toContain(`Оплачено: ${money(4000)}`);
-    expect(text).toContain(`🔴 Осталось оплатить: ${money(6000)}`);
-    expect(text).not.toContain('доход владельца');
-    expect(text).not.toContain('Осталось получить');
-  });
 });
 
 describe('buildLeadDetail', () => {
-  it('new lead: status buttons + edit row + archive row, no money row', () => {
+  it('open lead: status rows, no edit or archive rows, no money row', () => {
     const { text, reply_markup } = buildLeadDetail(
-      makeLead({ id: 7, status: 'new' }),
+      makeLead({ id: 7, status: 'open' }),
       'owner',
     );
     expect(text).toContain('#7');
     expect(text).not.toContain('Комиссия Zikrasoft');
-    const rows = reply_markup.inline_keyboard;
-    expect(rows[0].map((b) => b.callback_data)).toEqual([
-      'st:7:negotiations',
-      'st:7:lost',
-    ]);
-    expect(rows[1].map((b) => b.callback_data)).toEqual([
-      'edit:7:name',
-      'edit:7:contact',
-      'edit:7:comment',
-    ]);
-    expect(rows[rows.length - 1]).toEqual([
-      { text: '🗑 Архивировать', callback_data: 'arch:7' },
-    ]);
+    const data = reply_markup.inline_keyboard
+      .flat()
+      .map((b) => b.callback_data);
+    expect(data).toEqual(['st:7:won', 'st:7:lost', 'postpone:7', 'income:7']);
   });
 
   it('offers a reply through the bot only when the contact is a Telegram id link', () => {
@@ -1118,16 +964,6 @@ describe('buildLeadDetail', () => {
     });
     expect(buttons(bare.buildLeadDetail(lead, 'owner'))).not.toContain(
       'reply:7',
-    );
-  });
-
-  it('in_progress lead: Завершить/Отказ status row', () => {
-    const { reply_markup } = buildLeadDetail(
-      makeLead({ id: 7, status: 'in_progress' }),
-      'owner',
-    );
-    expect(reply_markup.inline_keyboard[0].map((b) => b.callback_data)).toEqual(
-      ['st:7:won', 'st:7:lost'],
     );
   });
 
@@ -1183,7 +1019,7 @@ describe('buildLeadDetail', () => {
   });
 
   it('lets the owner add an income while the job is still running, but not the admin', () => {
-    const lead = makeLead({ id: 7, status: 'in_progress' });
+    const lead = makeLead({ id: 7, status: 'open' });
 
     expect(
       buildLeadDetail(lead, 'owner')
@@ -1197,16 +1033,14 @@ describe('buildLeadDetail', () => {
     ).not.toContain('income:7');
   });
 
-  it('keeps the add-income button off a lead nobody is working on', () => {
-    for (const status of ['new', 'lost'] as const) {
-      const { reply_markup } = buildLeadDetail(
-        makeLead({ id: 7, status }),
-        'owner',
-      );
-      expect(
-        reply_markup.inline_keyboard.flat().map((b) => b.callback_data),
-      ).not.toContain('income:7');
-    }
+  it('keeps the add-income button off a lost lead', () => {
+    const { reply_markup } = buildLeadDetail(
+      makeLead({ id: 7, status: 'lost' }),
+      'owner',
+    );
+    expect(
+      reply_markup.inline_keyboard.flat().map((b) => b.callback_data),
+    ).not.toContain('income:7');
   });
 
   it('shows the commission block without an income list for a legacy zero-euro deal', () => {
@@ -1242,30 +1076,8 @@ describe('buildLeadDetail', () => {
     expect(text).not.toContain('Комиссия Zikrasoft');
   });
 
-  it('archived lead, owner: only a restore button, no delete', () => {
-    const { text, reply_markup } = buildLeadDetail(
-      makeLead({ id: 7, status: 'won', dealAmount: 100000, archived: true }),
-      'owner',
-    );
-    expect(text).toContain('🗄 В архиве');
-    expect(reply_markup.inline_keyboard).toEqual([
-      [{ text: '♻️ Восстановить', callback_data: 'unarch:7' }],
-    ]);
-  });
-
-  it('archived lead, admin: restore button plus permanent delete', () => {
-    const { reply_markup } = buildLeadDetail(
-      makeLead({ id: 7, status: 'won', dealAmount: 100000, archived: true }),
-      'admin',
-    );
-    const data = reply_markup.inline_keyboard
-      .flat()
-      .map((b) => b.callback_data);
-    expect(data).toEqual(['unarch:7', 'del:7']);
-  });
-
   it('active lead: admin gets a permanent-delete row, owner does not', () => {
-    const lead = makeLead({ id: 7, status: 'new' });
+    const lead = makeLead({ id: 7, status: 'open' });
     const ownerData = buildLeadDetail(lead, 'owner')
       .reply_markup.inline_keyboard.flat()
       .map((b) => b.callback_data);
@@ -1474,7 +1286,7 @@ describe('a lead that asked for several services at once', () => {
     expect(formatter.formatTeaser(click)).toContain('Клик: signal');
   });
 
-  it('renders an expired ghost as archived and lost, keeping its channel line', () => {
+  it('renders an expired ghost as lost, keeping its channel line', () => {
     const ghost = makeLead({
       contact: '—',
       service: '',
@@ -1482,15 +1294,12 @@ describe('a lead that asked for several services at once', () => {
       kind: 'call_click',
       contactChannel: 'telegram',
       status: 'lost',
-      archived: true,
     });
 
     const detail = buildLeadDetail(ghost, 'owner').text;
-    expect(detail).toContain('🗄 В архиве');
-    expect(detail).toContain('Статус: ');
-    expect(detail).toContain(statusLabel('lost'));
+    expect(detail).toContain('Статус: ❌ Отказ');
     expect(detail).toContain('Клик: Telegram');
-    expect(formatter.formatTeaser(ghost)).toContain('🗄 ');
+    expect(formatter.formatTeaser(ghost)).toContain('❌ Отказ');
     expect(formatter.formatTeaser(ghost)).toContain('Клик: Telegram');
   });
 
@@ -1527,55 +1336,24 @@ describe('brand attribution — one bot, one chat, several businesses', () => {
     expect(text).not.toContain('<b>oops</b>');
   });
 
-  it('names the brand on every triage list row', () => {
-    const { reply_markup } = buildLeadList(
-      [makeLead({ id: 3, name: 'Petar', brand: 'AutoHub' })],
-      'new',
-    );
+  it('names the brand on every open list row', () => {
+    const { reply_markup } = buildOpenList([
+      makeLead({ id: 3, name: 'Petar', brand: 'AutoHub' }),
+    ]);
     expect(reply_markup.inline_keyboard[0][0].text).toContain('AutoHub');
   });
 
-  it('names the brand on every deal line', () => {
-    const text = formatDealsList([
-      makeLead({ status: 'won', dealAmount: 1000, brand: 'PRIZMA' }),
-    ]);
-    expect(text).toContain('PRIZMA');
-  });
-
   it('breaks the stats down per brand once more than one business has leads', () => {
-    const text = buildStats(
-      [
-        makeLead({ id: 1, brand: 'Approved.rs' }),
-        makeLead({ id: 2, brand: 'PRIZMA' }),
-        makeLead({ id: 3, brand: 'PRIZMA' }),
-      ],
-      'owner',
-    );
+    const text = buildStats([
+      makeLead({ id: 1, brand: 'Approved.rs' }),
+      makeLead({ id: 2, brand: 'PRIZMA' }),
+      makeLead({ id: 3, brand: 'PRIZMA' }),
+    ]);
     expect(text).toContain('По брендам: Approved.rs — 1 · PRIZMA — 2');
   });
 
   it('omits the per-brand breakdown for a single-business store', () => {
-    const text = buildStats([makeLead({ brand: 'Approved.rs' })], 'owner');
+    const text = buildStats([makeLead({ brand: 'Approved.rs' })]);
     expect(text).not.toContain('По брендам');
-  });
-
-  it('counts only active leads in the per-brand breakdown', () => {
-    const text = buildStats(
-      [
-        makeLead({ id: 1, brand: 'Approved.rs' }),
-        makeLead({ id: 2, brand: 'PRIZMA' }),
-        makeLead({ id: 3, brand: 'PRIZMA', archived: true }),
-      ],
-      'owner',
-    );
-    expect(text).toContain('По брендам: Approved.rs — 1 · PRIZMA — 1');
-  });
-});
-
-describe('EDIT_COPY', () => {
-  it('names the field in the prompt', () => {
-    expect(EDIT_COPY.prompt('contact')).toBe(
-      '✏️ Введите новое значение (контакт):',
-    );
   });
 });

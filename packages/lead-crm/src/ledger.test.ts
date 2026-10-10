@@ -96,7 +96,7 @@ describe('addPayout', () => {
       leadId: lead.id,
     });
     expect(payout).toMatchObject({ id: 1, leadId: lead.id, brand: 'CarLab' });
-    expect((await store.getLead(lead.id))?.status).toBe('new');
+    expect((await store.getLead(lead.id))?.status).toBe('open');
   });
 
   it('numbers Payouts one after another', async () => {
