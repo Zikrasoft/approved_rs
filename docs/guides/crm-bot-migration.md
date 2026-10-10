@@ -35,7 +35,12 @@ writes it to `apps/approved-rs/.local/leads-<timestamp>.json` (gitignored) and
 prints the path and the record count. It never writes to the blob.
 
 Note the record count — it is what you compare against if anything later looks
-wrong.
+wrong. Run this before the release deploys, not only before the bot switch: the
+first Lead write after it drops the old money fields from every record, and
+this file is the only copy of them.
+
+In the old bot, open «🔴 Мне должны» as the admin and write the total down —
+step 8 compares the Balance against it.
 
 ## 2. Unregister the old bot's webhook
 
@@ -139,6 +144,13 @@ In the leads group and in a DM with `@SerbCRMBot`:
       proves the `auto-service` project picked up the new token too.
 - [ ] A lead submitted on details.rs produces a card — same proof for the third
       project.
+- [ ] **The Balance opened** — after the first Lead write, `data/ledger.json`
+      exists in the Blob store, and «💶 Мне должны» in `@SerbCRMBot` equals the
+      total noted in step 1.
+- [ ] **The first digest** — the next morning's group digest lists every open
+      Lead untouched for 7 days or more, the backlog included. Bare capture-bot
+      `/start` Leads are among them and stay in every digest until someone
+      closes them; that is by design (#226, #241), not a bug to filter out.
 
 ## 9. Done
 

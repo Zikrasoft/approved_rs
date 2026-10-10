@@ -24,14 +24,34 @@ on approved.rs is the `/thanks/` tile when `PUBLIC_TG_MANAGER` is set — stores
 no Contact click: the visitor already has a Lead, and no bot will come to
 absorb a placeholder.
 
-**Ghost lead** — a Contact click on a channel whose outcome we cannot observe
-— WhatsApp, Viber or the phone — that never gained a contact: still the
-placeholder contact, still open with no `lastActivityAt`, and older than the
-retention window. Nothing
-on our side can tell whether the person wrote, so a Ghost lead retires itself —
-the daily digest cron marks it lost
+**Ghost lead** — a Contact click that never gained a contact: still the
+placeholder contact, still open with no owner activity, and older than the
+retention window. Mostly WhatsApp, Viber or the phone, whose outcome we cannot
+observe, but the channel does not matter: a Telegram-tile click whose visitor
+never pressed Start in the bot has no bot Lead to absorb it, and retires the
+same way. Nothing on our side can tell whether the person wrote, so a Ghost
+lead retires itself — the daily digest cron marks it lost
 ([ADR-0029](docs/adr/0029-ghost-leads-retire-themselves.md)). Because the sweep
 runs daily against a 24-hour window, a Ghost lead actually lives 24 to 48 hours.
+
+**Visitor activity** — the last time the visitor did something on a Lead
+through a Capture bot: pressed Start, answered, wrote (`visitorActiveAt`).
+
+**Owner activity** — the last time the owner worked the Lead in the CRM bot:
+marked it in work, added a note, answered a prompt on it (`lastActivityAt`).
+A status change alone is not owner activity, and neither is a reply sent from
+the owner's own Telegram account, which never reaches the store.
+
+**Fresh** — a Lead whose latest of visitor activity, owner activity and
+creation is within the last hour. A visitor who comes back to a fresh Lead
+continues it — a merged click, a resumed `/start`, a Questionnaire answer, a
+free-text message; once it is stale the next one opens a new Lead, and a
+Questionnaire left on a stale Lead no longer takes answers. Owner activity
+counts so that a conversation the owner is working stays one Lead.
+
+**Referral** — a Lead a sister brand's Capture bot received from the Approved
+bot's Partners screen (`referredBy: approved`). The card says so; brand and
+rate are still the receiving bot's.
 
 **Capture bot** — one per brand, and the whole of that brand inside Telegram:
 a visitor can read its services and answer its Questionnaire without opening
