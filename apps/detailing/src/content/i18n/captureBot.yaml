@@ -64,13 +64,13 @@ translations:
       hours: Pon–Sub, 09:00–19:00
     manager:
       button: Pitajte majstora
-      text: Postavite vaše pitanje jednim porukom — majstor će odgovoriti ovde.
+      text: Postavite vaše pitanje jednom porukom — majstor će odgovoriti ovde.
     partners:
       button: Partneri
       text: Naši partneri — izaberite kome da pišete.
     request:
       button: Ostavite zahtev
-      car: Koja je vaša kola? Napišite marku, model i godinu.
+      car: Koja su vaša kola? Napišite marku, model i godinu.
       service: Šta želite da uradite sa autom? Izaberite uslugu ispod — ili napišite svojim rečima.
     language:
       button: 🌐 Jezik
