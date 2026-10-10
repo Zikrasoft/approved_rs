@@ -55,7 +55,7 @@ function staticBotInfo(botToken: string, username: string): UserFromGetMe {
   };
 }
 
-export function createTelegramClient(botToken: string, botUsername = '') {
+export function createTelegramClient(botToken: string, botUsername: string) {
   const bot = new Bot(botToken, {
     botInfo: staticBotInfo(botToken, botUsername),
     client: {

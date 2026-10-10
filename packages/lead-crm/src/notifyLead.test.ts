@@ -53,6 +53,7 @@ const storedLead: StoredLead = {
   pendingPrompt: null,
   capturePrompt: null,
   telegramId: null,
+  referredBy: null,
   archived: false,
   pendingCommissionClaim: null,
   remindAt: null,

@@ -101,7 +101,7 @@ describe('recordBotApi as the global fetch', () => {
   it('sees what the Telegram client sends and surfaces a failure as an error', async () => {
     const api = recordBotApi();
     vi.stubGlobal('fetch', api.fetch);
-    const client = createTelegramClient('TOKEN');
+    const client = createTelegramClient('TOKEN', 'test_bot');
     await client.sendMessage(42, 'hello');
     expect(api.callsTo('sendMessage')[0].payload).toMatchObject({
       chat_id: 42,

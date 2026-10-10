@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { CARLAB, DETAILS } from '@podbor/brands';
 import {
   captureClient,
   captureClientFor,
@@ -17,7 +18,7 @@ describe('siblingTokens', () => {
     ).toEqual(new Map());
   });
 
-  it('keys each sibling token by its brand name', () => {
+  it('keys each sibling token by its brand', () => {
     expect(
       siblingTokens({
         TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB: 'carlab-token',
@@ -25,8 +26,8 @@ describe('siblingTokens', () => {
       }),
     ).toEqual(
       new Map([
-        ['CarLab', 'carlab-token'],
-        ['Details', 'details-token'],
+        [CARLAB, 'carlab-token'],
+        [DETAILS, 'details-token'],
       ]),
     );
   });
