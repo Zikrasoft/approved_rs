@@ -18,6 +18,7 @@
     "./lead-form": "./src/leadForm.ts",
     "./telegram-client": "./src/telegram/client.ts",
     "./payout-parser": "./src/payoutParser.ts",
+    "./transcriber": "./src/transcriber.ts",
     "./testing": "./src/testing/index.ts"
   },
   "scripts": {

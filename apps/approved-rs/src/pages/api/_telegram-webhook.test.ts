@@ -36,10 +36,12 @@ vi.mock('@podbor/lead-crm/storage/file', () =>
 
 const parser = vi.hoisted(() => ({
   parse: vi.fn<(text: string) => Promise<PayoutHints | null>>(),
+  transcribe: vi.fn<(voice: Uint8Array) => Promise<string>>(),
 }));
 
 vi.mock('@/lib/payoutParser', () => ({
   parsePayout: (text: string) => parser.parse(text),
+  transcribeVoice: (voice: Uint8Array) => parser.transcribe(voice),
 }));
 
 import { POST, CALLBACKS } from './telegram-webhook';
@@ -256,6 +258,7 @@ describe('POST /api/telegram-webhook', () => {
   beforeEach(() => {
     api.reset();
     parser.parse.mockReset().mockResolvedValue(null);
+    parser.transcribe.mockReset().mockResolvedValue('');
     api.respond(
       'sendMessage',
       (payload: Record<string, unknown>): BotApiResponse => ({
@@ -2057,5 +2060,170 @@ describe('POST /api/telegram-webhook', () => {
       );
       expect(await listPayouts()).toEqual([]);
     });
+  });
+
+  describe('voice messages', () => {
+    const VOICE = new Uint8Array([0x4f, 0x67, 0x67, 0x53]);
+    const TRANSCRIPT = 'Петя, сервис повторно, тридцать евро';
+    const HINTS: PayoutHints = {
+      amount: 30,
+      note: 'сервис повторно',
+      clientName: null,
+      clientPhone: null,
+      brand: 'CarLab',
+    };
+
+    const speak = (
+      from = OWNER_ID,
+      replyTo?: { messageId: number; isBot: boolean },
+    ) =>
+      POST(
+        makeCtx({
+          update_id: nextUpdateId++,
+          message: {
+            message_id: 2,
+            voice: { file_id: 'voice-1', file_unique_id: 'u', duration: 3 },
+            chat: { id: CARD_CHAT_ID, type: 'supergroup' },
+            from: { id: from },
+            ...(replyTo && {
+              reply_to_message: {
+                message_id: replyTo.messageId,
+                from: { id: 1, is_bot: replyTo.isBot, first_name: 'x' },
+              },
+            }),
+          },
+        }),
+      );
+
+    const toCard = { messageId: CARD_MESSAGE_ID, isBot: true };
+
+    const lastDraft = () => {
+      const sent = sentTo(CARD_CHAT_ID).at(-1)!;
+      const { inline_keyboard } = sent.reply_markup as {
+        inline_keyboard: { text: string; callback_data: string }[][];
+      };
+      return {
+        text: sent.text,
+        buttons: inline_keyboard.map((row) => row.map((b) => b.text)),
+        id: /^draft:(\d+):/.exec(inline_keyboard[0]![0]!.callback_data)![1],
+      };
+    };
+
+    const confirm = (id: string) =>
+      tap(`draft:${id}:ok`, OWNER_ID, {
+        chatId: CARD_CHAT_ID,
+        messageId: PROMPT_ID,
+      });
+
+    beforeEach(() => {
+      api.serveFile('voice-1', VOICE);
+      parser.transcribe.mockResolvedValue(TRANSCRIPT);
+      parser.parse.mockResolvedValue(HINTS);
+    });
+
+    it('drafts a Payout from a group voice exactly as from the same text', async () => {
+      await message(TRANSCRIPT, OWNER_ID, {
+        chatId: CARD_CHAT_ID,
+        type: 'supergroup',
+      });
+      const typed = lastDraft();
+      await speak();
+      const spoken = lastDraft();
+
+      expect(parser.transcribe).toHaveBeenCalledWith(VOICE);
+      expect(parser.parse).toHaveBeenLastCalledWith(TRANSCRIPT);
+      expect(spoken.text).toBe(typed.text);
+      expect(spoken.buttons).toEqual(typed.buttons);
+      expect(sentTo(CARD_CHAT_ID).at(-1)).toMatchObject({
+        reply_parameters: expect.objectContaining({ message_id: 2 }),
+      });
+      expect(await listPayouts()).toEqual([]);
+
+      await confirm(spoken.id);
+      expect(await listPayouts()).toEqual([
+        expect.objectContaining({ amount: 30, leadId: null, brand: 'CarLab' }),
+      ]);
+    });
+
+    it('ignores a group voice from anyone but the owner', async () => {
+      await speak(ADMIN_ID);
+      await speak(OTHER_ID);
+      expect(parser.transcribe).not.toHaveBeenCalled();
+      expect(api.calls).toEqual([]);
+    });
+
+    it('binds a voice reply to a card to that Lead and stores the Payout on it', async () => {
+      seed(
+        makeLead(),
+        makeLead({ id: 6, name: 'Петя', telegramMessageId: 600 }),
+      );
+      parser.parse.mockResolvedValue({ ...HINTS, clientName: 'Петя' });
+      await speak(OWNER_ID, toCard);
+
+      const draft = lastDraft();
+      expect(draft.text).toBe(
+        '📝 Выплата: 30 €\nЗа что: сервис повторно\nКлиент: #5 Иван',
+      );
+      expect(draft.buttons).toEqual([
+        [DRAFT_COPY.confirm, DRAFT_COPY.edit, DRAFT_COPY.discard],
+      ]);
+      expect(await listPayouts()).toEqual([]);
+
+      await confirm(draft.id);
+      expect(await listPayouts()).toEqual([
+        expect.objectContaining({ amount: 30, leadId: 5, createdBy: 'owner' }),
+      ]);
+    });
+
+    it('drafts an admin voice reply to a card as the admin', async () => {
+      await speak(ADMIN_ID, toCard);
+      await tap(`draft:${lastDraft().id}:ok`, OWNER_ID, {
+        chatId: CARD_CHAT_ID,
+        messageId: PROMPT_ID,
+      });
+      expect(await listPayouts()).toEqual([
+        expect.objectContaining({ leadId: 5, createdBy: 'admin' }),
+      ]);
+    });
+
+    it('adds a voice reply to a card with no Payout in it as a note', async () => {
+      parser.parse.mockResolvedValue(null);
+      parser.transcribe.mockResolvedValue('Приедет в пятницу');
+      await speak(OWNER_ID, toCard);
+
+      expect((await stored()).comment).toContain('Приедет в пятницу');
+      expect(textsTo(CARD_CHAT_ID)).toEqual([PAYOUT_COPY.noteAdded]);
+      expect(await listPayouts()).toEqual([]);
+    });
+
+    it('ignores a voice reply to a message the bot did not send', async () => {
+      await speak(OWNER_ID, { messageId: 77, isBot: false });
+      expect(parser.transcribe).not.toHaveBeenCalled();
+      expect(api.calls).toEqual([]);
+    });
+
+    it.each([
+      [
+        'the transcription fails',
+        () => parser.transcribe.mockRejectedValue(new Error('model down')),
+      ],
+      ['the download fails', () => api.reset()],
+      ['nothing was heard', () => parser.transcribe.mockResolvedValue('')],
+    ])(
+      'answers clearly and stores nothing when %s',
+      async (_label, breakIt) => {
+        vi.spyOn(console, 'error').mockImplementation(() => {});
+        breakIt();
+        await speak();
+        await speak(OWNER_ID, toCard);
+
+        expect(textsTo(CARD_CHAT_ID)).toEqual([
+          DRAFT_COPY.unheard,
+          DRAFT_COPY.unheard,
+        ]);
+        expect(parser.parse).not.toHaveBeenCalled();
+        expect(leadsStorage().current()).toEqual([makeLead()]);
+      },
+    );
   });
 });

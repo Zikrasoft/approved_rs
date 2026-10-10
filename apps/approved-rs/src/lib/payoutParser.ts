@@ -3,6 +3,10 @@ import {
   createPayoutParser,
   type PayoutParser,
 } from '@podbor/lead-crm/payout-parser';
+import {
+  createTranscriber,
+  type Transcriber,
+} from '@podbor/lead-crm/transcriber';
 import { z } from 'zod';
 
 const envSchema = z.object({
@@ -14,7 +18,7 @@ const envSchema = z.object({
 
 const { OPENAI_API_KEY } = envSchema.parse(process.env);
 
-const missingKey: PayoutParser = async () => {
+const missingKey = async (): Promise<never> => {
   throw new Error('[payout-parser] OPENAI_API_KEY is not set');
 };
 
@@ -28,4 +32,8 @@ export const parsePayout: PayoutParser = OPENAI_API_KEY
           'detailing: polishing, ceramic coating, interior cleaning',
       },
     })
+  : missingKey;
+
+export const transcribeVoice: Transcriber = OPENAI_API_KEY
+  ? createTranscriber({ apiKey: OPENAI_API_KEY })
   : missingKey;

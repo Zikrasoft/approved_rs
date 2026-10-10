@@ -22,6 +22,7 @@ import {
   sendPayoutNotificationToAdmin,
   sendSettlementToOwner,
   sendMessage,
+  downloadFile,
   buildToPay,
   buildSearchResults,
   buildMenu,
@@ -49,7 +50,7 @@ import {
   type Role,
 } from '@/lib/telegram';
 import { captureClientFor } from '@/lib/captureBot';
-import { parsePayout } from '@/lib/payoutParser';
+import { parsePayout, transcribeVoice } from '@/lib/payoutParser';
 import {
   getLead,
   setStatus,
@@ -96,9 +97,15 @@ const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
 const messageSchema = z.object({
   message_id: z.number().int(),
   text: z.string().optional(),
+  voice: z.object({ file_id: z.string() }).optional(),
   chat: z.object({ id: z.number().int(), type: z.string().optional() }),
   from: z.object({ id: z.number().int() }).optional(),
-  reply_to_message: z.object({ message_id: z.number().int() }).optional(),
+  reply_to_message: z
+    .object({
+      message_id: z.number().int(),
+      from: z.object({ is_bot: z.boolean() }).optional(),
+    })
+    .optional(),
 });
 
 const readFieldsSchema = z.object({
@@ -761,7 +768,10 @@ const PROMPT_REPLIES: Record<PromptKind, PromptHandler> = {
   reply_visitor: replyVisitor,
 };
 
-type Reply = Omit<PromptReply, 'pending'> & { repliedText: string };
+type Reply = Omit<PromptReply, 'pending'> & {
+  repliedText: string;
+  spoken: boolean;
+};
 
 async function replyToPrompt(reply: Reply): Promise<boolean> {
   const pending = await findByPendingPrompt(
@@ -815,6 +825,8 @@ async function replyToCard(reply: Reply): Promise<boolean> {
   const text = reply.text.trim();
   if (!text) return true;
   await touchLead(lead.id);
+  if (reply.spoken && (await draftPayout({ ...reply, text, lead })))
+    return true;
   const amount = parsePlainAmount(text);
   if (amount == null) {
     await addNote(lead.id, text);
@@ -860,36 +872,61 @@ const REPLY_ROUTES = [
   replyToCard,
 ];
 
-type OwnerMessage = { chatId: number; messageId: number; text: string };
+type OwnerMessage = {
+  chatId: number;
+  messageId: number;
+  text: string;
+  role: Role;
+  lead?: StoredLead;
+};
 
 async function draftPayout({
   chatId,
   messageId,
   text,
-}: OwnerMessage): Promise<void> {
+  role,
+  lead: cardLead,
+}: OwnerMessage): Promise<boolean> {
   let hints: Awaited<ReturnType<typeof parsePayout>>;
   try {
     hints = await parsePayout(text);
   } catch (error) {
     console.error('[telegram-webhook] payout parse failed', { error });
     await sendMessage(chatId, DRAFT_COPY.unreadable, threadedTo(messageId));
-    return;
+    return true;
   }
-  if (!hints) return;
-  const lead = await findPastLead({
-    name: hints.clientName,
-    phone: hints.clientPhone,
-  });
+  if (!hints) return false;
+  const lead =
+    cardLead ??
+    (await findPastLead({ name: hints.clientName, phone: hints.clientPhone }));
   const draft = await addDraft({
     amount: hints.amount,
     note: hints.note,
     brand: hints.brand,
     leadId: lead?.id ?? null,
-    matchPending: lead != null,
-    by: 'owner',
+    matchPending: lead != null && !cardLead,
+    by: role,
   });
   const { text: body, reply_markup } = draftMessage(draft, lead);
   await sendMessage(chatId, body, { reply_markup, ...threadedTo(messageId) });
+  return true;
+}
+
+async function heard(
+  chatId: number,
+  message: { message_id: number; text?: string; voice?: { file_id: string } },
+): Promise<string | undefined> {
+  if (!message.voice) return message.text ?? '';
+  try {
+    const text = await transcribeVoice(
+      await downloadFile(message.voice.file_id),
+    );
+    if (text) return text;
+  } catch (error) {
+    console.error('[telegram-webhook] voice transcription failed', { error });
+  }
+  await sendMessage(chatId, DRAFT_COPY.unheard, threadedTo(message.message_id));
+  return undefined;
 }
 
 async function routeReply(reply: Reply): Promise<void> {
@@ -960,13 +997,18 @@ bot.on('message', async (ctx, next) => {
   if (!repliedTo) return next();
   const role = roleOf(ctx.from?.id);
   if (!role) return;
+  const spoken = ctx.message.voice != null;
+  if (spoken && !repliedTo.from?.is_bot) return;
+  const text = await heard(ctx.chat.id, ctx.message);
+  if (text === undefined) return;
   await routeReply({
     role,
     chatId: ctx.chat.id,
     messageId: ctx.message.message_id,
     replyToMessageId: repliedTo.message_id,
     repliedText: repliedTo.text ?? '',
-    text: ctx.message.text ?? '',
+    text,
+    spoken,
   });
 });
 
@@ -974,14 +1016,19 @@ bot
   .chatType('private')
   .on('message', (ctx) => handlePrivateMessage(ctx.message));
 
-bot.chatType(['group', 'supergroup']).on('message:text', async (ctx) => {
-  if (roleOf(ctx.from.id) !== 'owner') return;
-  await draftPayout({
-    chatId: ctx.chat.id,
-    messageId: ctx.message.message_id,
-    text: ctx.message.text,
+bot
+  .chatType(['group', 'supergroup'])
+  .on(['message:text', 'message:voice'], async (ctx) => {
+    if (roleOf(ctx.from.id) !== 'owner') return;
+    const text = await heard(ctx.chat.id, ctx.message);
+    if (text === undefined) return;
+    await draftPayout({
+      chatId: ctx.chat.id,
+      messageId: ctx.message.message_id,
+      text,
+      role: 'owner',
+    });
   });
-});
 
 export async function POST({ request }: APIContext): Promise<Response> {
   if (
