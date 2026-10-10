@@ -7,7 +7,6 @@ import {
   quarantinedLeadsText,
   statusChangeText,
   type EditField,
-  type FieldChangeAuthor,
   type Formatter,
   type Role,
 } from './format.ts';
@@ -107,13 +106,9 @@ export function createNotifier({
       lead: StoredLead,
       field: EditField,
       before: string | null | undefined,
-      author?: FieldChangeAuthor,
     ): Promise<void> {
       if ((before ?? '') === (lead[field] ?? '')) return;
-      await sendToAll(
-        adminIds,
-        formatter.fieldChangeText(lead, field, before, author),
-      );
+      await sendToAll(adminIds, formatter.fieldChangeText(lead, field, before));
     },
 
     async sendQuarantinedLeadsToAdmin(

@@ -1,9 +1,9 @@
-import { deferOrderMarkers, type OrderMarkers } from '@podbor/lead-crm';
+import { localOrderMarkers, type OrderMarkers } from '@podbor/lead-crm';
 import { createBlobOrderMarkers } from '@podbor/lead-crm/storage/vercel-blob';
-import { localOrBlob } from './localOrBlob';
 
-export const orderMarkers = localOrBlob<OrderMarkers>(
-  createBlobOrderMarkers,
-  ({ createFileOrderMarkers }, dir) => createFileOrderMarkers({ dir }),
-  deferOrderMarkers,
-);
+function openOrderMarkers(): OrderMarkers {
+  if (import.meta.env.DEV) return localOrderMarkers();
+  return createBlobOrderMarkers();
+}
+
+export const orderMarkers = openOrderMarkers();

@@ -1,12 +1,14 @@
 import { z } from 'zod';
 import { roundMoney, toCents } from './money.ts';
-import { BUSINESS_TIME_ZONE } from './businessTime.ts';
+import { businessMonth } from './businessTime.ts';
 import { retryOnConflict } from './storage/retry.ts';
 import { StorageConflictError, type LeadStorage } from './storage/types.ts';
 
 export const LEDGER_PATH = 'data/ledger.json';
 const MAX_OPERATION_NOTE = 500;
-const PROMPT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+const PROMPT_TTL_MS = 7 * DAY_MS;
+const PROMPT_KEPT_MS = 90 * DAY_MS;
 
 const ledgerAuthorSchema = z.enum(['owner', 'admin']);
 export type LedgerAuthor = z.infer<typeof ledgerAuthorSchema>;
@@ -36,6 +38,7 @@ const promptSchema = z
   .strict();
 export type OperationPrompt = z.infer<typeof promptSchema>;
 export type PromptKey = Pick<OperationPrompt, 'chatId' | 'messageId'>;
+export type FoundOperationPrompt = OperationPrompt & { expired: boolean };
 
 const ledgerFileSchema = z
   .object({
@@ -60,14 +63,6 @@ export type RecordOutcome =
 export interface LedgerStoreOptions {
   storage: LeadStorage;
   opening?: () => Promise<OperationInput[]>;
-}
-
-function monthOf(iso: string | Date): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: BUSINESS_TIME_ZONE,
-    year: 'numeric',
-    month: '2-digit',
-  }).format(new Date(iso));
 }
 
 export interface FlowSums {
@@ -98,9 +93,13 @@ export function operationSums(
   operations: LedgerOperation[],
   now: Date,
 ): { month: FlowSums; total: FlowSums } {
-  const month = monthOf(now);
+  const month = businessMonth(now);
   return {
-    month: sumsOf(operations.filter((op) => monthOf(op.createdAt) === month)),
+    month: sumsOf(
+      operations.filter(
+        (op) => businessMonth(new Date(op.createdAt)) === month,
+      ),
+    ),
     total: sumsOf(operations),
   };
 }
@@ -110,8 +109,11 @@ const promptIs =
   (p: OperationPrompt) =>
     p.chatId === chatId && p.messageId === messageId;
 
+const ageOf = (p: OperationPrompt, now: number) =>
+  now - Date.parse(p.createdAt);
+
 const isLive = (p: OperationPrompt, now: number) =>
-  now - Date.parse(p.createdAt) < PROMPT_TTL_MS;
+  ageOf(p, now) < PROMPT_TTL_MS;
 
 const liveAt = (key: PromptKey, now: number) => (p: OperationPrompt) =>
   promptIs(key)(p) && isLive(p, now);
@@ -219,7 +221,7 @@ export function createLedgerStore({ storage, opening }: LedgerStoreOptions) {
         const added = { ...prompt, createdAt: new Date(now).toISOString() };
         const replaced = replacing ? promptIs(replacing) : () => false;
         const fresh = file.prompts.filter(
-          (p) => isLive(p, now) && !replaced(p),
+          (p) => ageOf(p, now) < PROMPT_KEPT_MS && !replaced(p),
         );
         return {
           next: { ...file, prompts: [...fresh, added] },
@@ -230,8 +232,9 @@ export function createLedgerStore({ storage, opening }: LedgerStoreOptions) {
 
     async findOperationPrompt(
       key: PromptKey,
-    ): Promise<OperationPrompt | undefined> {
-      return (await read()).file.prompts.find(promptIs(key));
+    ): Promise<FoundOperationPrompt | undefined> {
+      const prompt = (await read()).file.prompts.find(promptIs(key));
+      return prompt && { ...prompt, expired: !isLive(prompt, Date.now()) };
     },
 
     answerOperationPrompt(

@@ -473,7 +473,6 @@ describe('sendFieldChangeToAdmin', () => {
       makeLead({ service: 'vehicle-import' }),
       'service',
       '',
-      'visitor',
     );
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).toContain(': услуга\n🤖 Посетитель через бота');
@@ -486,21 +485,10 @@ describe('sendFieldChangeToAdmin', () => {
       makeLead({ service: 'vehicle-sourcing' }),
       'service',
       'vehicle-import',
-      'visitor',
     );
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).toContain('Было: vehicle-import');
     expect(body.text).toContain('Стало: Автоподбор');
-  });
-
-  it('leaves the bot marker off an owner edit', async () => {
-    await sendFieldChangeToAdmin(
-      makeLead({ comment: 'после' }),
-      'comment',
-      'до',
-    );
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.text).not.toContain('через бота');
   });
 });
 
@@ -729,7 +717,7 @@ describe('operation messages', () => {
   });
 
   it('refuses a debit naming the Balance and asks for the amount again', () => {
-    expect(operationRefusedText(30)).toBe(
+    expect(operationRefusedText('settlement', 30)).toBe(
       `⚠️ Списать можно не больше баланса: ${money(30)}\n\n${LEDGER_COPY.prompt.settlement}`,
     );
   });

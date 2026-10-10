@@ -552,6 +552,10 @@ async function replyToOperationPrompt(reply: Reply): Promise<boolean> {
   const key = { chatId: reply.chatId, messageId: reply.replyToMessageId };
   const prompt = await findOperationPrompt(key);
   if (!prompt) return false;
+  if (prompt.expired) {
+    await sendMessage(reply.chatId, LEDGER_COPY.expired);
+    return true;
+  }
   const parsed = parseOperationReply(reply.text);
   if (!parsed.ok) {
     await askOperation(
@@ -582,7 +586,7 @@ async function replyToOperationPrompt(reply: Reply): Promise<boolean> {
     await askOperation(
       reply.chatId,
       prompt.type,
-      operationRefusedText(outcome.balance),
+      operationRefusedText(prompt.type, outcome.balance),
       key,
     );
   } else {

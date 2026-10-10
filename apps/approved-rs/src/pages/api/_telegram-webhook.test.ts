@@ -935,7 +935,7 @@ describe('POST /api/telegram-webhook', () => {
       expect(forceReplies()).toEqual([
         expect.objectContaining({
           chat_id: OWNER_ID,
-          text: operationRefusedText(10),
+          text: operationRefusedText('settlement', 10),
         }),
       ]);
       expect(textsTo(ADMIN_ID)).toEqual([]);
@@ -958,6 +958,37 @@ describe('POST /api/telegram-webhook', () => {
       } finally {
         vi.useRealTimers();
       }
+      expect(textsTo(OWNER_ID)).toEqual([LEDGER_COPY.expired]);
+      expect(await readOperations()).toEqual([]);
+    });
+
+    it('keeps answering an expired prompt as expired, never asking again', async () => {
+      await ask(OWNER_ID, 'payout');
+      vi.useFakeTimers({
+        toFake: ['Date'],
+        now: Date.now() + 8 * 24 * 60 * 60 * 1000,
+      });
+      try {
+        await answerAs(OWNER_ID, 'Иван сервис');
+        expect(forceReplies()).toEqual([]);
+        expect(textsTo(OWNER_ID)).toEqual([LEDGER_COPY.expired]);
+        api.respond(
+          'sendMessage',
+          (payload: Record<string, unknown>): BotApiResponse => ({
+            ok: true,
+            result: {
+              message_id: PROMPT_ID + 1,
+              date: 0,
+              chat: { id: Number(payload.chat_id), type: 'private' },
+            },
+          }),
+        );
+        await ask(OWNER_ID, 'payout');
+        await answerAs(OWNER_ID, '40');
+      } finally {
+        vi.useRealTimers();
+      }
+      expect(forceReplies()).toEqual([]);
       expect(textsTo(OWNER_ID)).toEqual([LEDGER_COPY.expired]);
       expect(await readOperations()).toEqual([]);
     });

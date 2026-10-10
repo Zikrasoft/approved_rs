@@ -133,6 +133,21 @@ describe('claimDigest', () => {
     ]);
   });
 
+  it('drops every earlier mark when it claims a new day', async () => {
+    const mark = (day: string) => ({
+      type: 'digest',
+      day,
+      createdAt: `${day}T06:00:00.000Z`,
+    });
+    storage.seed([storedLead(1), mark('2026-10-01'), mark('2026-10-08')]);
+
+    await store.claimDigest(new Date(at(9)));
+
+    expect(records().filter((r) => r.type === 'digest')).toEqual([
+      expect.objectContaining({ day: '2026-10-09' }),
+    ]);
+  });
+
   it('claims no day when there is nothing to list', async () => {
     storage.seed([storedLead(1, { status: 'won' })]);
 

@@ -217,8 +217,11 @@ export function operationRecordedText(
   return `✅ ${signedMoney(operation)} · баланс ${formatMoney(balance)}`;
 }
 
-export function operationRefusedText(balance: number): string {
-  return `⚠️ Списать можно не больше баланса: ${formatMoney(balance)}\n\n${LEDGER_COPY.prompt.settlement}`;
+export function operationRefusedText(
+  type: OperationType,
+  balance: number,
+): string {
+  return `⚠️ Списать можно не больше баланса: ${formatMoney(balance)}\n\n${LEDGER_COPY.prompt[type]}`;
 }
 
 const OPERATION_AUTHORS: Record<LedgerAuthor, string> = {
@@ -385,8 +388,6 @@ function fieldPreview(value: string | null | undefined): string {
   );
 }
 
-export type FieldChangeAuthor = 'owner' | 'visitor';
-
 export const REFERRAL_NOTE = 'Пришёл из бота Approved.rs (Партнёры)';
 
 const VISITOR_CHANGE_MARK = '🤖 Посетитель через бота';
@@ -478,11 +479,10 @@ export function createFormatter({
       lead: StoredLead,
       field: EditField,
       before: string | null | undefined,
-      author: FieldChangeAuthor = 'owner',
     ): string {
       return [
         `✏️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${EDIT_FIELD_LABELS[field]}`,
-        ...(author === 'visitor' ? [VISITOR_CHANGE_MARK] : []),
+        VISITOR_CHANGE_MARK,
         ``,
         `Было: ${fieldPreview(shownValue(field, before))}`,
         `Стало: ${fieldPreview(shownValue(field, lead[field]))}`,

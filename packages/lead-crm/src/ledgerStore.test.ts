@@ -221,6 +221,7 @@ describe('operation prompts', () => {
       ...PROMPT,
       type: 'settlement',
       createdAt: NOW,
+      expired: false,
     });
     const answer = { amount: 20, note: 'перевод', by: 'owner' as const };
     expect(await ledger.answerOperationPrompt(PROMPT, answer)).toMatchObject({
@@ -271,32 +272,42 @@ describe('operation prompts', () => {
     ).toBeUndefined();
   });
 
-  it('still finds a prompt older than a week but takes no answer to it', async () => {
+  it('finds a prompt older than a week as expired and takes no answer to it', async () => {
     await ledger.recordOperation(credit(50));
     await ledger.openOperationPrompt({ ...PROMPT, type: 'settlement' });
     vi.setSystemTime(Date.parse(NOW) + 7 * 24 * 60 * 60 * 1000);
-    expect(await ledger.findOperationPrompt(PROMPT)).toBeDefined();
+    expect(await ledger.findOperationPrompt(PROMPT)).toMatchObject({
+      expired: true,
+    });
     expect(
       await ledger.answerOperationPrompt(PROMPT, { amount: 5, by: 'owner' }),
     ).toEqual({ ok: false, reason: 'no_prompt' });
+    expect(await ledger.findOperationPrompt(PROMPT)).toMatchObject({
+      expired: true,
+    });
     expect(await ledger.readBalance()).toBe(50);
   });
 
-  it('drops prompts older than a week when a new one opens', async () => {
+  it('keeps an expired prompt when a new one opens, and drops it after 90 days', async () => {
     await ledger.openOperationPrompt({ ...PROMPT, type: 'payout' });
-    vi.setSystemTime(new Date('2026-10-17T12:00:00.000Z'));
+    vi.setSystemTime(Date.parse(NOW) + 89 * 24 * 60 * 60 * 1000);
     await ledger.openOperationPrompt({
       ...PROMPT,
       messageId: 8,
       type: 'payout',
     });
+    expect(await ledger.findOperationPrompt(PROMPT)).toMatchObject({
+      expired: true,
+    });
+    vi.setSystemTime(Date.parse(NOW) + 90 * 24 * 60 * 60 * 1000);
+    await ledger.openOperationPrompt({
+      ...PROMPT,
+      messageId: 9,
+      type: 'payout',
+    });
     expect(file().prompts).toEqual([
-      {
-        ...PROMPT,
-        messageId: 8,
-        type: 'payout',
-        createdAt: '2026-10-17T12:00:00.000Z',
-      },
+      expect.objectContaining({ messageId: 8 }),
+      expect.objectContaining({ messageId: 9 }),
     ]);
   });
 });

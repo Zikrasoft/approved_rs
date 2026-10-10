@@ -41,8 +41,7 @@ export {
   storedRecordsSchema,
   type LeadStorage,
 } from './storage/types.ts';
-export { deferOrderMarkers, deferStorage } from './storage/deferred.ts';
-export { fromLocalFiles } from './storage/localFiles.ts';
+export { localLeadStorage, localOrderMarkers } from './storage/localFiles.ts';
 
 export { createTelegramClient } from './telegram/client.ts';
 export type { TelegramClient } from './telegram/client.ts';
@@ -68,13 +67,7 @@ export {
   formatDateRu,
   formatMoney,
 } from './telegram/format.ts';
-export type {
-  Btn,
-  EditField,
-  FieldChangeAuthor,
-  Keyboard,
-  Role,
-} from './telegram/format.ts';
+export type { Btn, EditField, Keyboard, Role } from './telegram/format.ts';
 
 export type {
   LeadHandOff,

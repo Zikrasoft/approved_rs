@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { businessDay } from './businessTime.ts';
+import { businessDay, businessMonth } from './businessTime.ts';
 
 describe('businessDay', () => {
   it.each([
@@ -12,5 +12,15 @@ describe('businessDay', () => {
     ['2026-10-24T23:00:00Z', 7, '2026-11-01'],
   ])('puts %s plus %d days on %s in Belgrade', (at, plus, day) => {
     expect(businessDay(new Date(at), plus)).toBe(day);
+  });
+});
+
+describe('businessMonth', () => {
+  it.each([
+    ['2026-10-31T22:59:00Z', '2026-10'],
+    ['2026-10-31T23:00:00Z', '2026-11'],
+    ['2026-12-31T23:30:00Z', '2027-01'],
+  ])('puts %s in the Belgrade month %s', (at, month) => {
+    expect(businessMonth(new Date(at))).toBe(month);
   });
 });

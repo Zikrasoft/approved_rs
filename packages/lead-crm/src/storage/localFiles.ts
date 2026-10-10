@@ -1,12 +1,17 @@
-import { LOCAL_DATA_DIR } from './types.ts';
+import type { OrderMarkers } from '../orderMarkers.ts';
+import { deferOrderMarkers, deferStorage } from './deferred.ts';
+import { LOCAL_DATA_DIR, type LeadStorage } from './types.ts';
 
-type FileStorageModule = typeof import('./file.ts');
+let loaded: Promise<typeof import('./file.ts')> | undefined;
+const fileModule = () => (loaded ??= import('./file.ts'));
 
-let loaded: Promise<FileStorageModule> | undefined;
+export const localLeadStorage = (
+  path: string,
+  dir = LOCAL_DATA_DIR,
+): LeadStorage =>
+  deferStorage(fileModule().then((f) => f.createFileStorage({ path, dir })));
 
-export function fromLocalFiles<T>(
-  open: (file: FileStorageModule, dir: string) => T,
-): Promise<T> {
-  loaded ??= import('./file.ts');
-  return loaded.then((file) => open(file, LOCAL_DATA_DIR));
-}
+export const localOrderMarkers = (dir = LOCAL_DATA_DIR): OrderMarkers =>
+  deferOrderMarkers(
+    fileModule().then((f) => f.createFileOrderMarkers({ dir })),
+  );

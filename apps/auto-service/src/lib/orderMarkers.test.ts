@@ -5,9 +5,7 @@ const local = vi.hoisted(() => ({
 }));
 vi.mock('@podbor/lead-crm', async (importOriginal) => {
   const crm = await importOriginal<typeof import('@podbor/lead-crm')>();
-  const fromLocalFiles: typeof crm.fromLocalFiles = async (open) =>
-    open(await import('@podbor/lead-crm/storage/file'), local.dir);
-  return { ...crm, fromLocalFiles };
+  return { ...crm, localOrderMarkers: () => crm.localOrderMarkers(local.dir) };
 });
 
 const { orderMarkers } = await import('./orderMarkers');
