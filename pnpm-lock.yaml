@@ -480,6 +480,9 @@ importers:
       '@podbor/site-kit':
         specifier: workspace:*
         version: link:../site-kit
+      grammy:
+        specifier: 1.46.0
+        version: 1.46.0(supports-color@8.1.1)
       zod:
         specifier: 4.5.4
         version: 4.5.4
@@ -1853,6 +1856,9 @@ packages:
 
   '@fontsource/unbounded@5.3.0':
     resolution: {integrity: sha512-pPD6hsTnjoQRr6pCsqMHbHBfauB4LZygCNQEUJHu+CO2wzDFHqELEFSG7sTwo5Z5Gr4q3OK0fIILOXBJDv6lcw==}
+
+  '@grammyjs/types@5.0.0':
+    resolution: {integrity: sha512-iq1Qrq1iPKkB8yAa0qSuIURMZOCuqTY5pWy5gHpCeL1oQ+GPadGhw/cDTVE8waJwuCzacUzuIjRv1sESvk7u7A==}
 
   '@graphql-codegen/core@4.0.2':
     resolution: {integrity: sha512-IZbpkhwVqgizcjNiaVzNAzm/xbWT6YnGgeOLwVjm4KbJn3V2jchVtuzHH09G5/WkkLSk2wgbXNdwjM41JxO6Eg==}
@@ -5772,6 +5778,10 @@ packages:
     resolution: {integrity: sha512-AO2ac6pjRB3SJmGJo+v5/aK6Omggp6fsLrs6wN9bd35ulu4cCwaAU9+7ZhXjeqHVkaHThLuzH0nZr0YpCDhygg==}
     engines: {node: ^18.17.0 || >=20.5.0}
 
+  abort-controller@3.0.0:
+    resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
+    engines: {node: '>=6.5'}
+
   accepts@1.3.8:
     resolution: {integrity: sha512-PYAthTa2m2VKxuvSD3DPC/Gy+U+sOA1LAuT8mkmRuvw+NACSaeXEQ+NHcVF7rONl6qcaxV3Uuemwawk+7+SJLw==}
     engines: {node: '>= 0.6'}
@@ -6978,6 +6988,10 @@ packages:
     resolution: {integrity: sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==}
     engines: {node: '>= 0.6'}
 
+  event-target-shim@5.0.1:
+    resolution: {integrity: sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ==}
+    engines: {node: '>=6'}
+
   event-target-shim@6.0.2:
     resolution: {integrity: sha512-8q3LsZjRezbFZ2PN+uP+Q7pnHUMmAOziU2vA2OwoFaKIXxlxl38IylhSSgUorWu/rf4er67w0ikBqjBFk/pomA==}
     engines: {node: '>=10.13.0'}
@@ -7313,6 +7327,10 @@ packages:
 
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
+
+  grammy@1.46.0:
+    resolution: {integrity: sha512-/8Qw+iisrUdOMk+p2mjEHouMm/BBdBEN1DHh16wiTpRUZkxDG3PxexdjCvR+wvK3LWPdrEvnQbdrwpU954sPhg==}
+    engines: {node: ^12.20.0 || >=14.13.1}
 
   graphql-tag@2.12.7:
     resolution: {integrity: sha512-xnE/NFzy+0eIesvAsREJZ284zTl/wYuBAvpsFSDhRGRdRHdnE90M21Q3xAWyYInb0J756c6x0pIQ62+vtvOs1Q==}
@@ -12158,6 +12176,8 @@ snapshots:
 
   '@fontsource/unbounded@5.3.0': {}
 
+  '@grammyjs/types@5.0.0': {}
+
   '@graphql-codegen/core@4.0.2(graphql@16.14.2)':
     dependencies:
       '@graphql-codegen/plugin-helpers': 5.1.1(graphql@16.14.2)
@@ -16343,11 +16363,11 @@ snapshots:
       - rollup
       - supports-color
 
-  '@vercel/fun@1.3.0(supports-color@7.2.0)':
+  '@vercel/fun@1.3.0(supports-color@8.1.1)':
     dependencies:
       '@tootallnate/once': 2.0.0
       async-listen: 1.2.0
-      debug: 4.3.4(supports-color@7.2.0)
+      debug: 4.3.4(supports-color@8.1.1)
       generic-pool: 3.4.2
       micro: 9.3.5-canary.3
       ms: 2.1.1
@@ -16833,6 +16853,10 @@ snapshots:
   '@workflow/serde@4.1.0-beta.2': {}
 
   abbrev@3.0.1: {}
+
+  abort-controller@3.0.0:
+    dependencies:
+      event-target-shim: 5.0.1
 
   accepts@1.3.8:
     dependencies:
@@ -17737,12 +17761,6 @@ snapshots:
     optionalDependencies:
       supports-color: 8.1.1
 
-  debug@4.3.4(supports-color@7.2.0):
-    dependencies:
-      ms: 2.1.2
-    optionalDependencies:
-      supports-color: 7.2.0
-
   debug@4.3.4(supports-color@8.1.1):
     dependencies:
       ms: 2.1.2
@@ -18199,6 +18217,8 @@ snapshots:
 
   etag@1.8.1: {}
 
+  event-target-shim@5.0.1: {}
+
   event-target-shim@6.0.2: {}
 
   eventemitter3@5.0.4: {}
@@ -18576,6 +18596,16 @@ snapshots:
   gopd@1.2.0: {}
 
   graceful-fs@4.2.11: {}
+
+  grammy@1.46.0(supports-color@8.1.1):
+    dependencies:
+      '@grammyjs/types': 5.0.0
+      abort-controller: 3.0.0
+      debug: 4.4.3(supports-color@8.1.1)
+      node-fetch: 2.7.0
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
 
   graphql-tag@2.12.7(graphql@16.14.2):
     dependencies:
@@ -22247,7 +22277,7 @@ snapshots:
       '@vercel/elysia': 7.0.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@vercel/build-utils@14.9.1)(rollup@4.62.2)(supports-color@8.1.1)
       '@vercel/express': 7.0.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@vercel/build-utils@14.9.1)(rollup@4.62.2)(supports-color@8.1.1)
       '@vercel/fastify': 7.0.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@vercel/build-utils@14.9.1)(rollup@4.62.2)(supports-color@8.1.1)
-      '@vercel/fun': 1.3.0(supports-color@7.2.0)
+      '@vercel/fun': 1.3.0(supports-color@8.1.1)
       '@vercel/go': 10.0.1(@vercel/build-utils@14.9.1)
       '@vercel/h3': 7.0.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@vercel/build-utils@14.9.1)(rollup@4.62.2)(supports-color@8.1.1)
       '@vercel/hono': 7.0.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@vercel/build-utils@14.9.1)(rollup@4.62.2)(supports-color@8.1.1)

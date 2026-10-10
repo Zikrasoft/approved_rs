@@ -1,3 +1,4 @@
+import type { Update } from 'grammy/types';
 import { z } from 'zod';
 
 const senderSchema = z.object({
@@ -8,16 +9,17 @@ const senderSchema = z.object({
   language_code: z.string().optional(),
 });
 
-const messageSchema = z.object({
+export const captureMessageSchema = z.object({
   chat: z.object({ id: z.number().int(), type: z.string() }),
   from: senderSchema,
   text: z.string().optional(),
   contact: z.object({ phone_number: z.string() }).optional(),
 });
 
-export const captureUpdateSchema = z
-  .object({ message: messageSchema.optional().catch(undefined) })
-  .catch({ message: undefined });
+const updateObjectSchema = z.object({});
 
-export type CaptureMessage = z.infer<typeof messageSchema>;
+export const captureUpdateSchema = z.custom<Update>(
+  (value) => updateObjectSchema.safeParse(value).success,
+);
+
 export type CaptureSender = z.infer<typeof senderSchema>;

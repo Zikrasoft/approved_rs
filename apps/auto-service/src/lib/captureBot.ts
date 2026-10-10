@@ -1,8 +1,11 @@
-import { createTelegramClient, requireEnv } from '@podbor/lead-crm';
+import { createCaptureBot } from '@podbor/lead-capture';
+import { requireEnv } from '@podbor/lead-crm';
+import { BRAND } from '@/utils/constants';
 
 export const CAPTURE_WEBHOOK_SECRET =
   process.env.TELEGRAM_CAPTURE_WEBHOOK_SECRET;
 
-export const captureClient = createTelegramClient(
+export const captureBot = createCaptureBot(
   requireEnv('TELEGRAM_CAPTURE_BOT_TOKEN'),
+  BRAND.captureBot,
 );
