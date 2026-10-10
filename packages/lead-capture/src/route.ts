@@ -1,3 +1,4 @@
+import type { Bot } from 'grammy';
 import { z } from 'zod';
 import {
   readStartVisitor,
@@ -9,10 +10,13 @@ import {
   type CapturePrompt,
   type LeadStore,
   type StoredLead,
-  type TelegramClient,
 } from '@podbor/lead-crm';
 import type { CaptureCopy } from './copy.ts';
-import { captureUpdateSchema, type CaptureSender } from './update.ts';
+import {
+  captureMessageSchema,
+  captureUpdateSchema,
+  type CaptureSender,
+} from './update.ts';
 
 const ACK = new Response(null, { status: 200 });
 const UNAUTHORIZED = new Response(null, { status: 401 });
@@ -83,7 +87,7 @@ export interface CaptureWebhookRouteOptions<L extends string> {
   secret: string | undefined;
   store: CaptureStore;
   ensureLeadCard: (lead: StoredLead) => Promise<void>;
-  bot: Pick<TelegramClient, 'sendMessage'>;
+  bot: Bot;
   brand: string;
   isService: (value: string) => boolean;
   isLocale: (value: string) => value is L;
@@ -170,6 +174,10 @@ export function createCaptureWebhookRoute<L extends string>({
   primaryLocale,
   copy,
 }: CaptureWebhookRouteOptions<L>) {
+  function send(chatId: number, text: string, extra?: CaptureExtra) {
+    return bot.api.sendMessage(chatId, text, { parse_mode: 'HTML', ...extra });
+  }
+
   function startFields(
     payload: string | undefined,
     sender: CaptureSender,
@@ -226,7 +234,7 @@ export function createCaptureWebhookRoute<L extends string>({
     });
     await ensureLeadCard(lead);
     const [text, extra] = nextMessage(step, null, contact, words);
-    await bot.sendMessage(chatId, `${words.greeting}\n\n${text}`, extra);
+    await send(chatId, `${words.greeting}\n\n${text}`, extra);
   }
 
   async function answer(
@@ -246,7 +254,7 @@ export function createCaptureWebhookRoute<L extends string>({
     });
     await ensureLeadCard(updated ?? lead);
     const [reply, extra] = nextMessage(next, prompt.step, lead.contact, words);
-    await bot.sendMessage(prompt.chatId, reply, extra);
+    await send(prompt.chatId, reply, extra);
   }
 
   async function resume(chatId: number, lead: StoredLead): Promise<void> {
@@ -255,7 +263,7 @@ export function createCaptureWebhookRoute<L extends string>({
     const [reply, extra]: [string, CaptureExtra] = prompt
       ? nextMessage(prompt.step, null, lead.contact, words)
       : [words.thanks, undefined];
-    await bot.sendMessage(chatId, reply, extra);
+    await send(chatId, reply, extra);
   }
 
   async function startOrResume(
@@ -281,7 +289,7 @@ export function createCaptureWebhookRoute<L extends string>({
       capturePrompt: open.capturePrompt,
     });
     await ensureLeadCard(updated ?? open);
-    await bot.sendMessage(chatId, copy(localeOf(open)).received);
+    await send(chatId, copy(localeOf(open)).received);
   }
 
   async function phoneAside(
@@ -297,7 +305,7 @@ export function createCaptureWebhookRoute<L extends string>({
       capturePrompt: prompt,
     });
     await ensureLeadCard(updated ?? lead);
-    await bot.sendMessage(prompt.chatId, words.received);
+    await send(prompt.chatId, words.received);
   }
 
   async function handle(
@@ -326,6 +334,17 @@ export function createCaptureWebhookRoute<L extends string>({
     return aside(chatId, sender, text);
   }
 
+  bot.chatType('private').on('message', async (ctx) => {
+    const message = captureMessageSchema.safeParse(ctx.message);
+    if (!message.success) return;
+    const trimmed = message.data.text?.trim();
+    const text = trimmed ? trimmed : undefined;
+    const contact = message.data.contact;
+    const phone = contact && sharedPhone(contact.phone_number);
+    if (text === undefined && phone === undefined) return;
+    await handle(message.data.chat.id, message.data.from, text, phone);
+  });
+
   return async function POST({
     request,
   }: {
@@ -345,16 +364,11 @@ export function createCaptureWebhookRoute<L extends string>({
       return ACK;
     }
 
-    const { message } = captureUpdateSchema.parse(body);
-    if (!message || message.chat.type !== 'private') return ACK;
-
-    const trimmed = message.text?.trim();
-    const text = trimmed ? trimmed : undefined;
-    const phone = message.contact && sharedPhone(message.contact.phone_number);
-    if (text === undefined && phone === undefined) return ACK;
+    const update = captureUpdateSchema.safeParse(body);
+    if (!update.success) return ACK;
 
     try {
-      await handle(message.chat.id, message.from, text, phone);
+      await bot.handleUpdate(update.data);
     } catch (error) {
       console.error('[capture] could not handle the update', { error });
     }

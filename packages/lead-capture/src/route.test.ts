@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   createBrandBot,
   createBrandStore,
-  createTelegramClient,
   LEADS_PATH,
   type LeadInput,
   type LeadStore,
@@ -14,6 +13,7 @@ import {
   type MemoryStorage,
   type RecordedBotApi,
 } from '@podbor/lead-crm/testing';
+import { createCaptureBot } from './bot.ts';
 import { captureStore, createCaptureWebhookRoute } from './route.ts';
 
 const SECRET = 'capture-webhook-secret';
@@ -48,7 +48,7 @@ function route(secret: string | undefined) {
     secret,
     store: captureStore(leadStore),
     ensureLeadCard,
-    bot: createTelegramClient(CAPTURE_TOKEN),
+    bot: createCaptureBot(CAPTURE_TOKEN, 'capture_bot'),
     brand: BRAND,
     isService: (value) => SERVICES.includes(value),
     isLocale: (value): value is TestLocale => LOCALES.includes(value),
@@ -230,6 +230,12 @@ describe('the webhook secret', () => {
 describe('updates that are not a visitor pressing Start', () => {
   it('acknowledges a malformed body without storing anything', async () => {
     const res = await POST(makeCtx('not json'));
+    expect(res.status).toBe(200);
+    expect(stored()).toHaveLength(0);
+  });
+
+  it('acknowledges a body that is not an update object', async () => {
+    const res = await POST(makeCtx('null'));
     expect(res.status).toBe(200);
     expect(stored()).toHaveLength(0);
   });

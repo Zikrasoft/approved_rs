@@ -1,4 +1,5 @@
 import { APPROVED, CARLAB, DETAILS } from '@podbor/brands';
+import { createCaptureBot } from '@podbor/lead-capture';
 import {
   createTelegramClient,
   requireEnv,
@@ -9,9 +10,11 @@ import { z } from 'zod';
 export const CAPTURE_WEBHOOK_SECRET =
   process.env.TELEGRAM_CAPTURE_WEBHOOK_SECRET;
 
-export const captureClient = createTelegramClient(
-  requireEnv('TELEGRAM_CAPTURE_BOT_TOKEN'),
-);
+const captureToken = requireEnv('TELEGRAM_CAPTURE_BOT_TOKEN');
+
+export const captureClient = createTelegramClient(captureToken);
+
+export const captureBot = createCaptureBot(captureToken, APPROVED.captureBot);
 
 const optionalToken = z
   .string()
