@@ -23,6 +23,11 @@ contacts:
 manager:
   button: Написать мастеру
   text: Напишите ваш вопрос одним сообщением — мастер ответит здесь же.
+profile:
+  description: Автосервис в Белграде — диагностика, ремонт и обслуживание. Нажмите «Старт» — расскажите, что с машиной, и мастер ответит здесь же.
+  shortDescription: Автосервис в Белграде — диагностика, ремонт, обслуживание
+  menuCommand: Главное меню
+  langCommand: Сменить язык
 translations:
   sr:
     greeting: Zdravo! Hvala što ste nam pisali — upit je kod nas i majstor će vam se uskoro javiti.

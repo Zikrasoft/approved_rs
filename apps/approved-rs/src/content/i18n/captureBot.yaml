@@ -23,6 +23,11 @@ contacts:
 manager:
   button: Написать менеджеру
   text: Напишите ваш вопрос одним сообщением — менеджер ответит здесь же.
+profile:
+  description: Подбираем, проверяем и пригоняем автомобили в Сербии. Нажмите «Старт» — расскажите, какая машина вам нужна, и менеджер ответит здесь же.
+  shortDescription: Подбор, проверка и пригон автомобилей в Сербии
+  menuCommand: Главное меню
+  langCommand: Сменить язык
 translations:
   en:
     greeting: Hello! Thanks for getting in touch — we can see your enquiry and we'll come back to you shortly.

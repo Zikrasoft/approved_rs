@@ -23,6 +23,11 @@ contacts:
 manager:
   button: Написать мастеру
   text: Напишите ваш вопрос одним сообщением — мастер ответит здесь же.
+profile:
+  description: Детейлинг-студия в Белграде — оклейка плёнкой, полировка, керамика. Нажмите «Старт» — расскажите, что хотите сделать с машиной, и мастер ответит здесь же.
+  shortDescription: Детейлинг-студия в Белграде — плёнка, полировка, керамика
+  menuCommand: Главное меню
+  langCommand: Сменить язык
 translations:
   sr:
     greeting: Zdravo! Hvala što ste nam se javili — vidimo vaš upit i javljamo se uskoro.

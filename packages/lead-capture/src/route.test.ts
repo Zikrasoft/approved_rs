@@ -42,6 +42,12 @@ const COPY = {
   card: { request: 'LEAVE_A_REQUEST', site: 'ON_THE_SITE' },
   contacts: { button: 'CONTACTS', text: 'REACH_US', hours: 'HOURS' },
   manager: { button: 'MANAGER', text: 'WRITE_YOUR_QUESTION' },
+  profile: {
+    description: 'DESCRIPTION',
+    shortDescription: 'SHORT_DESCRIPTION',
+    menuCommand: 'MENU_COMMAND',
+    langCommand: 'LANG_COMMAND',
+  },
 };
 
 const WORKSHOP = {
