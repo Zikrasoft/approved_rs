@@ -464,10 +464,13 @@ describe('resolvePendingPrompt', () => {
       kind: 'postpone',
     });
 
-    const resolved = await store.resolvePendingPrompt(111, 999, () => ({
-      comment: 'first',
-      status: 'won',
-    }));
+    const resolved = await store.resolvePendingPrompt(
+      { chatId: 111, messageId: 999 },
+      () => ({
+        comment: 'first',
+        status: 'won',
+      }),
+    );
 
     expect(resolved?.comment).toBe('first');
     expect(resolved?.status).toBe('won');
@@ -481,15 +484,18 @@ describe('resolvePendingPrompt', () => {
       messageId: 999,
       kind: 'postpone',
     });
-    await store.resolvePendingPrompt(111, 999, () => ({
+    await store.resolvePendingPrompt({ chatId: 111, messageId: 999 }, () => ({
       comment: 'first',
       status: 'won',
     }));
 
-    const second = await store.resolvePendingPrompt(111, 999, () => ({
-      comment: 'second',
-      status: 'won',
-    }));
+    const second = await store.resolvePendingPrompt(
+      { chatId: 111, messageId: 999 },
+      () => ({
+        comment: 'second',
+        status: 'won',
+      }),
+    );
 
     expect(second).toBeUndefined();
     const after = await store.getLead(lead.id);
@@ -509,9 +515,12 @@ describe('resolvePendingPrompt', () => {
       storage.seed(leads);
     });
 
-    const resolved = await store.resolvePendingPrompt(111, 999, () => ({
-      comment: 'late',
-    }));
+    const resolved = await store.resolvePendingPrompt(
+      { chatId: 111, messageId: 999 },
+      () => ({
+        comment: 'late',
+      }),
+    );
 
     expect(resolved).toBeUndefined();
     const after = await store.getLead(lead.id);
@@ -520,9 +529,12 @@ describe('resolvePendingPrompt', () => {
 
   it('returns undefined when no lead has a matching pending prompt', async () => {
     await store.insertLead(baseData);
-    const resolved = await store.resolvePendingPrompt(1, 1, () => ({
-      comment: 'x',
-    }));
+    const resolved = await store.resolvePendingPrompt(
+      { chatId: 1, messageId: 1 },
+      () => ({
+        comment: 'x',
+      }),
+    );
     expect(resolved).toBeUndefined();
   });
 });
@@ -801,7 +813,9 @@ describe('getLead / findByPendingPrompt — not-found paths', () => {
 
   it('findByPendingPrompt returns undefined when no lead has a pending prompt at all', async () => {
     await store.insertLead(baseData);
-    expect(await store.findByPendingPrompt(111, 999)).toBeUndefined();
+    expect(
+      await store.findByPendingPrompt({ chatId: 111, messageId: 999 }),
+    ).toBeUndefined();
   });
 
   it('findByPendingPrompt returns undefined for a chatId/messageId that does not match the pending one', async () => {
@@ -811,8 +825,12 @@ describe('getLead / findByPendingPrompt — not-found paths', () => {
       messageId: 555,
       kind: 'postpone',
     });
-    expect(await store.findByPendingPrompt(111, 556)).toBeUndefined(); // wrong messageId
-    expect(await store.findByPendingPrompt(222, 555)).toBeUndefined(); // wrong chatId
+    expect(
+      await store.findByPendingPrompt({ chatId: 111, messageId: 556 }),
+    ).toBeUndefined();
+    expect(
+      await store.findByPendingPrompt({ chatId: 222, messageId: 555 }),
+    ).toBeUndefined();
   });
 });
 
@@ -820,9 +838,15 @@ describe('findByCard / addNote', () => {
   it('finds the Lead whose group card is the replied-to message', async () => {
     const lead = await store.insertLead(baseData);
     await store.setTelegramMessage(lead.id, -100, 555);
-    expect((await store.findByCard(-100, 555))?.id).toBe(lead.id);
-    expect(await store.findByCard(-100, 556)).toBeUndefined();
-    expect(await store.findByCard(-101, 555)).toBeUndefined();
+    expect((await store.findByCard({ chatId: -100, messageId: 555 }))?.id).toBe(
+      lead.id,
+    );
+    expect(
+      await store.findByCard({ chatId: -100, messageId: 556 }),
+    ).toBeUndefined();
+    expect(
+      await store.findByCard({ chatId: -101, messageId: 555 }),
+    ).toBeUndefined();
   });
 
   it('appends a note to the Lead comment', async () => {
@@ -1023,6 +1047,7 @@ describe('updateLeads — failures that are not write conflicts', () => {
     const boom = new Error('storage is down');
     const failing = {
       read: storage.read,
+      exists: storage.exists,
       write: vi.fn().mockRejectedValue(boom),
     };
     const brokenStore = createLeadStore({
@@ -1242,7 +1267,9 @@ describe('capturePrompt', () => {
       capturePrompt: { chatId: 777, step: 'budget' },
     });
 
-    expect(await store.findByPendingPrompt(111, 555)).toBeDefined();
+    expect(
+      await store.findByPendingPrompt({ chatId: 111, messageId: 555 }),
+    ).toBeDefined();
     expect(
       (await store.findByCapturePrompt(777, baseData.brand))?.pendingPrompt
         ?.kind,

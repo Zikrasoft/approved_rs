@@ -18,7 +18,7 @@ export const POST = createCaptureWebhookRoute({
   secret: CAPTURE_WEBHOOK_SECRET,
   store: captureStore(leadStore),
   ensureLeadCard,
-  sendFieldChangeToAdmin: notifier.sendFieldChangeToAdmin,
+  sendVisitorChangeToAdmin: notifier.sendVisitorChangeToAdmin,
   bot: captureBot,
   brand: BRAND,
   isLocale,

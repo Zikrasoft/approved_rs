@@ -32,6 +32,8 @@ export function createVercelBlobStorage({
   path,
 }: VercelBlobStorageOptions): LeadStorage {
   return {
+    exists: () => exists(path),
+
     async read(): Promise<StorageSnapshot> {
       const version = await etagOf(path);
       if (version === undefined) return { raw: undefined, version };

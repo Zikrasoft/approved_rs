@@ -1,4 +1,5 @@
 import type { InlineKeyboardButton } from 'grammy/types';
+import { z } from 'zod';
 import { escapeHtml } from '@podbor/lead-crm';
 import { formatPhone } from '@podbor/site-kit/format-phone';
 import { captureBotLink } from '@podbor/site-kit/contact-links';
@@ -70,11 +71,15 @@ export function tapData(screen: string, locale: string, arg?: string): string {
   return arg ? `${screen}:${locale}:${arg}` : `${screen}:${locale}`;
 }
 
-export function readTap(data: string): Tap | undefined {
-  const match = TAP_PATTERN.exec(data);
-  if (!match) return undefined;
-  return { screen: match[1], locale: match[2], arg: match[3] ?? '' };
-}
+export const tapSchema = z
+  .string()
+  .regex(TAP_PATTERN)
+  .transform((data): Tap => {
+    const [screen = '', locale = '', arg = ''] = data.split(':');
+    return { screen, locale, arg };
+  })
+  .optional()
+  .catch(undefined);
 
 export function createScreens<L extends string, S extends string>({
   menu,

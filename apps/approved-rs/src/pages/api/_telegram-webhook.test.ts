@@ -41,6 +41,7 @@ import {
   buildMenu,
   buildBalance,
   formatMoney,
+  LEAD_ACTION_COPY,
   LEDGER_COPY,
   operationRecordedText,
   operationRefusedText,
@@ -1053,7 +1054,7 @@ describe('POST /api/telegram-webhook', () => {
       await ask(OWNER_ID, 'payout');
       await message('40', OTHER_ID, { chatId: OWNER_ID, replyTo: PROMPT_ID });
       expect(await readOperations()).toEqual([]);
-      expect(api.calls).toEqual([]);
+      expect(textsTo(OWNER_ID)).toEqual([LEAD_ACTION_COPY.denied]);
     });
 
     it('shows the new Balance in the menu', async () => {
@@ -1247,7 +1248,7 @@ describe('POST /api/telegram-webhook', () => {
 
       await answerPrompt('150');
 
-      expect(api.calls).toEqual([]);
+      expect(sentTo(DM_CHAT_ID)).toEqual([view(buildSearchResults([]))]);
       expect(await readOperations()).toEqual([]);
       expect((await stored()).pendingPrompt).toBeNull();
     });
@@ -1272,6 +1273,7 @@ describe('POST /api/telegram-webhook', () => {
       expect((await stored()).status).toBe('won');
       expect(crm('editMessageText')).toEqual([]);
       expect(sentTo(ADMIN_ID)).toEqual([]);
+      expect(textsTo(DM_CHAT_ID)).toEqual([LEAD_ACTION_COPY.notPostponable]);
     });
 
     it.each([
@@ -1322,12 +1324,19 @@ describe('POST /api/telegram-webhook', () => {
         name: 'Old',
         pendingPrompt: null,
       });
-      expect(api.calls).toEqual([]);
+      expect(sentTo(DM_CHAT_ID)).toEqual([view(buildSearchResults([]))]);
     });
 
-    it('ignores a reply that matches no pending prompt', async () => {
-      await message('random reply', OWNER_ID, { replyTo: 42 });
-      expect(api.calls).toEqual([]);
+    it('searches with a DM reply that matches no prompt or card', async () => {
+      await message('Иван', OWNER_ID, { replyTo: 42 });
+      const results = await searchLeads('Иван');
+      expect(results).toHaveLength(1);
+      expect(sentTo(OWNER_ID)).toEqual([view(buildSearchResults(results))]);
+    });
+
+    it('denies a DM reply from an unknown user like any other message', async () => {
+      await message('hi', OTHER_ID, { replyTo: 42 });
+      expect(textsTo(OTHER_ID)).toEqual([LEAD_ACTION_COPY.denied]);
     });
 
     it('reply correlation is attempted regardless of chat type (not gated behind private-only) — defense in depth', async () => {

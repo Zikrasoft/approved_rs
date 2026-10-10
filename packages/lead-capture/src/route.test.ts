@@ -96,7 +96,7 @@ function route(
     secret,
     store: captureStore(leadStore),
     ensureLeadCard,
-    sendFieldChangeToAdmin: notifier.sendFieldChangeToAdmin,
+    sendVisitorChangeToAdmin: notifier.sendVisitorChangeToAdmin,
     bot: createTelegramClient(CAPTURE_TOKEN, 'capture_bot').bot,
     brand: BRAND,
     isLocale: (value): value is TestLocale => LOCALES.includes(value),
@@ -726,6 +726,73 @@ describe('leaving a request from a service card', () => {
     ]);
     expect(cards()).toHaveLength(1);
     expect(lastSent()).toEqual([42, 'LOOKING_FOR']);
+  });
+
+  it('opens a new Lead when the open one is older than the hour', async () => {
+    await POST(makeCtx(startUpdate('ru')));
+    editLead(1, {
+      createdAt: new Date(Date.now() - 60 * 60 * 1000 - 1000).toISOString(),
+    });
+
+    await tap('request:ru:vehicle-import');
+
+    expect(stored()).toHaveLength(2);
+    expect(stored()[0].capturePrompt).toBeNull();
+    expect(stored()[1]).toMatchObject({
+      service: 'vehicle-import',
+      capturePrompt: { chatId: 42, step: 'looking_for' },
+    });
+    expect(lastSent()).toEqual([42, 'LOOKING_FOR']);
+  });
+
+  it('runs the whole Questionnaire in the language of the tapped card', async () => {
+    POST = route(SECRET, {
+      copy: (locale) => ({ ...COPY, lookingFor: `LOOKING_FOR_${locale}` }),
+    });
+    await POST(makeCtx(startUpdate('ru')));
+
+    await tap('request:en:vehicle-import');
+    expect(lastSent()).toEqual([42, 'LOOKING_FOR_en']);
+    expect(stored()[0].locale).toBe('en');
+
+    await tap('request:sr:vehicle-import');
+    await say('BMW X5');
+    expect(stored()[0].locale).toBe('sr');
+    expect(lastSent()).toEqual([42, 'BUDGET']);
+  });
+
+  it('asks the next question when the staff cannot be told', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    await begin();
+    POST = route(SECRET, {
+      ensureLeadCard: vi.fn().mockRejectedValue(new Error('group down')),
+      sendVisitorChangeToAdmin: vi
+        .fn()
+        .mockRejectedValue(new Error('admin blocked the bot')),
+    });
+
+    await say('BMW X5');
+
+    expect(stored()[0].comment).toContain('Ищет: BMW X5');
+    expect(lastSent()).toEqual([42, 'BUDGET']);
+    expect(error).toHaveBeenCalledWith(
+      '[capture] could not tell the staff',
+      expect.objectContaining({ leadId: 1 }),
+    );
+  });
+
+  it('handles the tap when Telegram refuses to acknowledge it', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    await POST(makeCtx(startUpdate('ru')));
+    api.fail('answerCallbackQuery', 'query is too old');
+
+    await tap('request:ru:vehicle-import');
+
+    expect(lastSent()).toEqual([42, 'LOOKING_FOR']);
+    expect(error).toHaveBeenCalledWith(
+      '[capture] could not answer the tap',
+      expect.anything(),
+    );
   });
 
   it('opens a Lead with the phone the visitor gave before', async () => {

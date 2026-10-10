@@ -96,6 +96,13 @@ describe('createFileStorage', () => {
     await writeFile(join(dir, 'data', 'leads.json'), 'not json');
     await expect(storage().read()).rejects.toThrow(SyntaxError);
   });
+
+  it('says a file exists without reading it', async () => {
+    await expect(storage().exists()).resolves.toBe(false);
+    await mkdir(join(dir, 'data'), { recursive: true });
+    await writeFile(join(dir, 'data', 'leads.json'), 'not json');
+    await expect(storage().exists()).resolves.toBe(true);
+  });
 });
 
 describe('createFileOrderMarkers', () => {

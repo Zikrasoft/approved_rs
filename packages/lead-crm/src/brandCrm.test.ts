@@ -208,6 +208,16 @@ describe('the opening carry-over', () => {
     expect(storages[LEDGER_PATH]!.writeAttempts()).toBe(2);
   });
 
+  it('lets Lead writes through over a Balance file that does not parse', async () => {
+    const { leadStore } = brandStore();
+    storages[LEDGER_PATH]!.seed('{corrupt');
+
+    await leadStore.insertLead({ ...submission, brand: 'CarLab' });
+
+    expect(storages[LEADS_PATH]!.current()).toHaveLength(1);
+    expect(storages[LEDGER_PATH]!.current()).toBe('{corrupt');
+  });
+
   it('refuses to open from a Lead file it cannot read', async () => {
     const { ledgerStore } = seeded({ not: 'an array' });
 

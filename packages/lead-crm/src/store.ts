@@ -7,13 +7,14 @@ import type {
   LeadInput,
   LeadStatus,
   PendingPrompt,
+  PromptKey,
   StoredLead,
 } from './schema.ts';
 import type { StoredLeadSchema } from './schema.ts';
 import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
 import { retryOnConflict } from './storage/retry.ts';
 import { LEADS_PATH } from './quarantine.ts';
-import { businessDay } from './businessTime.ts';
+import { businessDay, DAY_MS } from './businessTime.ts';
 
 export const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
 
@@ -34,7 +35,7 @@ export interface MergeOutcome {
   before: StoredLead | null;
 }
 
-const STALE_AFTER_MS = 7 * 24 * 60 * 60 * 1000;
+const STALE_AFTER_MS = 7 * DAY_MS;
 
 export interface Digest {
   stale: StoredLead[];
@@ -82,6 +83,12 @@ export interface LeadStoreOptions {
   beforeWrite?: () => Promise<void>;
 }
 
+const promptedAt =
+  ({ chatId, messageId }: PromptKey) =>
+  (lead: StoredLead) =>
+    lead.pendingPrompt?.chatId === chatId &&
+    lead.pendingPrompt?.messageId === messageId;
+
 export function isPlaceholderContact(contact: string): boolean {
   return contact === '' || contact === '—';
 }
@@ -90,7 +97,7 @@ function isPhoneContact(contact: string): boolean {
   return contact.startsWith('+');
 }
 
-export const GHOST_LEAD_RETENTION_MS = 24 * 60 * 60 * 1000;
+export const GHOST_LEAD_RETENTION_MS = DAY_MS;
 
 function untouched(lead: StoredLead): boolean {
   return lead.status === 'open' && lead.lastActivityAt == null;
@@ -445,22 +452,14 @@ export function createLeadStore({
       return updateOne(id, (l) => ({ ...l, pendingPrompt: prompt }));
     },
 
-    async findByPendingPrompt(
-      chatId: number,
-      messageId: number,
-    ): Promise<StoredLead | undefined> {
-      const leads = await readLeads();
-      return leads.find(
-        (l) =>
-          l.pendingPrompt?.chatId === chatId &&
-          l.pendingPrompt?.messageId === messageId,
-      );
+    async findByPendingPrompt(key: PromptKey): Promise<StoredLead | undefined> {
+      return (await readLeads()).find(promptedAt(key));
     },
 
-    async findByCard(
-      chatId: number,
-      messageId: number,
-    ): Promise<StoredLead | undefined> {
+    async findByCard({
+      chatId,
+      messageId,
+    }: PromptKey): Promise<StoredLead | undefined> {
       const leads = await readLeads();
       return leads.find(
         (l) => l.telegramChatId === chatId && l.telegramMessageId === messageId,
@@ -468,21 +467,15 @@ export function createLeadStore({
     },
 
     resolvePendingPrompt(
-      chatId: number,
-      messageId: number,
+      key: PromptKey,
       apply: (lead: StoredLead) => Partial<StoredLead>,
     ): Promise<StoredLead | undefined> {
-      return updateMatching(
-        (l) =>
-          l.pendingPrompt?.chatId === chatId &&
-          l.pendingPrompt?.messageId === messageId,
-        (l) => ({
-          ...l,
-          lastActivityAt: new Date().toISOString(),
-          ...apply(l),
-          pendingPrompt: null,
-        }),
-      );
+      return updateMatching(promptedAt(key), (l) => ({
+        ...l,
+        lastActivityAt: new Date().toISOString(),
+        ...apply(l),
+        pendingPrompt: null,
+      }));
     },
 
     updateCapture(

@@ -34,6 +34,15 @@ const hasCode = (error: unknown, code: string): boolean =>
 const isMissing = (error: unknown) => hasCode(error, 'ENOENT');
 const isExisting = (error: unknown) => hasCode(error, 'EEXIST');
 
+async function fileExists(file: string): Promise<boolean> {
+  try {
+    await access(file);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function createFileStorage({
   path,
   dir,
@@ -52,6 +61,8 @@ export function createFileStorage({
 
   return {
     read,
+
+    exists: () => fileExists(file),
 
     async write(leads: unknown, version: string | undefined): Promise<void> {
       await mkdir(dirname(file), { recursive: true });
@@ -78,14 +89,7 @@ export function createFileOrderMarkers({ dir }: { dir: string }): OrderMarkers {
   const fileFor = (orderId: string) => join(dir, markerPath(orderId));
 
   return {
-    async has(orderId: string): Promise<boolean> {
-      try {
-        await access(fileFor(orderId));
-        return true;
-      } catch {
-        return false;
-      }
-    },
+    has: (orderId: string) => fileExists(fileFor(orderId)),
 
     async add(orderId: string): Promise<void> {
       await mkdir(join(dir, ORDER_MARKER_PREFIX), { recursive: true });

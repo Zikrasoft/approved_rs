@@ -16,6 +16,7 @@ describe('deferStorage', () => {
 
     expect(storage.current()).toEqual([{ id: 'a' }]);
     expect((await deferred.read()).raw).toEqual([{ id: 'a' }]);
+    expect(await deferred.exists()).toBe(true);
   });
 
   it('surfaces a storage that failed to open on every call', async () => {
