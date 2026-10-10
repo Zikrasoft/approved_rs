@@ -1,16 +1,21 @@
 import { z } from 'zod';
 
+const line = z.string();
+
 export const captureCopySchema = z
   .object({
-    greeting: z.string(),
-    lookingFor: z.string(),
-    budget: z.string(),
-    phoneAsk: z.string(),
-    phoneOffer: z.string(),
-    phoneButton: z.string(),
-    phoneSkip: z.string(),
-    thanks: z.string(),
-    received: z.string(),
+    greeting: line,
+    lookingFor: line,
+    budget: line,
+    phoneAsk: line,
+    phoneOffer: line,
+    phoneButton: line,
+    phoneSkip: line,
+    thanks: line,
+    received: line,
+    menu: z.object({ text: line, back: line }).strict(),
+    services: z.object({ button: line, text: line }).strict(),
+    card: z.object({ request: line, site: line }).strict(),
   })
   .strict();
 

@@ -45,6 +45,7 @@ export interface OwedRow {
 export interface CaptureUpdate {
   note?: string;
   contact?: string;
+  service?: string;
   capturePrompt: CapturePrompt | null;
 }
 
@@ -457,12 +458,13 @@ export function createLeadStore({
 
     updateCapture(
       id: number,
-      { note, contact, capturePrompt }: CaptureUpdate,
+      { note, contact, service, capturePrompt }: CaptureUpdate,
     ): Promise<StoredLead | undefined> {
       return updateOne(id, (l) => ({
         ...l,
         comment: note ? appendNote(l.comment, note) : l.comment,
         contact: contact ?? l.contact,
+        ...(service ? { service, services: [service] } : {}),
         capturePrompt,
       }));
     },

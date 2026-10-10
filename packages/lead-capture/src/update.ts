@@ -16,6 +16,15 @@ export const captureMessageSchema = z.object({
   contact: z.object({ phone_number: z.string() }).optional(),
 });
 
+export const captureTapSchema = z.object({
+  from: senderSchema,
+  data: z.string(),
+  message: z.object({
+    message_id: z.number().int(),
+    chat: z.object({ id: z.number().int() }),
+  }),
+});
+
 const updateObjectSchema = z.object({});
 
 export const captureUpdateSchema = z.custom<Update>(

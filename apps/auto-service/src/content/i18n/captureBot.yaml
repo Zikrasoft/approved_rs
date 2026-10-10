@@ -7,6 +7,15 @@ phoneButton: Поделиться номером
 phoneSkip: Пропустить
 thanks: Спасибо! Передали мастеру — он скоро с вами свяжется.
 received: Приняли, мастер увидит ваше сообщение.
+menu:
+  text: Чем можем помочь? Выберите, что вас интересует.
+  back: « Назад
+services:
+  button: Услуги
+  text: Вот что мы делаем в сервисе. Выберите услугу — покажем цену, сроки и что входит.
+card:
+  request: Оставить заявку
+  site: Подробнее на сайте
 translations:
   sr:
     greeting: Zdravo! Hvala što ste nam pisali — upit je kod nas i majstor će vam se uskoro javiti.

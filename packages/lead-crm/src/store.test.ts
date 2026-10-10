@@ -1966,6 +1966,24 @@ describe('the capture lookups', () => {
 });
 
 describe('updateCapture', () => {
+  it("makes a picked service the Lead's only one", async () => {
+    const lead = await store.insertLead({
+      ...baseData,
+      service: 'vehicle-import',
+      services: ['vehicle-import'],
+    });
+
+    const updated = await store.updateCapture(lead.id, {
+      service: 'vehicle-sourcing',
+      capturePrompt: { chatId: 777, step: 'looking_for' },
+    });
+
+    expect(updated).toMatchObject({
+      service: 'vehicle-sourcing',
+      services: ['vehicle-sourcing'],
+    });
+  });
+
   it('appends the answer and moves the dialog on in one write', async () => {
     const lead = await store.insertLead({ ...baseData, comment: 'Было' });
 

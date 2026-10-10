@@ -7,6 +7,15 @@ phoneButton: Поделиться номером
 phoneSkip: Пропустить
 thanks: Спасибо! Передали менеджеру — он скоро с вами свяжется.
 received: Приняли, менеджер увидит ваше сообщение.
+menu:
+  text: Чем можем помочь? Выберите, что вас интересует.
+  back: « Назад
+services:
+  button: Услуги
+  text: Вот с чем мы помогаем. Выберите услугу — расскажем подробнее.
+card:
+  request: Оставить заявку
+  site: Подробнее на сайте
 translations:
   en:
     greeting: Hello! Thanks for getting in touch — we can see your enquiry and we'll come back to you shortly.

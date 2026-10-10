@@ -578,6 +578,7 @@ export function createFormatter({
 
   return {
     formatLeadText,
+    serviceLabel,
 
     formatTeaser(lead: StoredLead): string {
       return `${archivedMark(lead)}🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusEmoji(lead.status)} ${statusLabel(lead.status)}\n${brandLine(lead)}`;

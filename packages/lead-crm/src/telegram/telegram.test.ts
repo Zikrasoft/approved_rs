@@ -482,7 +482,20 @@ describe('sendFieldChangeToAdmin', () => {
     );
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).toContain(': услуга\n🤖 Посетитель через бота');
+    expect(body.text).toContain('Было: —');
     expect(body.text).toContain('Стало: vehicle-import');
+  });
+
+  it('names a service by its label rather than its slug', async () => {
+    await sendFieldChangeToAdmin(
+      makeLead({ service: 'vehicle-sourcing' }),
+      'service',
+      'vehicle-import',
+      'visitor',
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('Было: vehicle-import');
+    expect(body.text).toContain('Стало: Автоподбор');
   });
 
   it('leaves the bot marker off an operator edit', async () => {

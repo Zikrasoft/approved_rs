@@ -15,7 +15,14 @@ import {
 } from '@podbor/lead-crm';
 import type { CaptureCopy } from './copy.ts';
 import {
+  createScreens,
+  readTap,
+  type MenuConfig,
+  type Screen,
+} from './menu.ts';
+import {
   captureMessageSchema,
+  captureTapSchema,
   captureUpdateSchema,
   type CaptureSender,
 } from './update.ts';
@@ -25,6 +32,8 @@ const UNAUTHORIZED = new Response(null, { status: 401 });
 
 const SECRET_HEADER = 'x-telegram-bot-api-secret-token';
 const START_PATTERN = /^\/start(?:\s+(\S+))?$/;
+const MENU_PATTERN = /^\/menu$/;
+const TELEGRAM_USER_LINK = 'tg://user?id=';
 
 const webhookSecretSchema = z.string().min(1);
 
@@ -36,6 +45,12 @@ const startPayloadSchema = z
   .transform(readStartVisitor);
 
 type CaptureStep = CapturePrompt['step'];
+
+interface StartFields<L extends string, S extends string> {
+  service: S | '';
+  locale: L;
+  visitorId: string | null;
+}
 
 const ANSWER_NOTE: Record<CaptureStep, string> = {
   looking_for: 'Ищет',
@@ -87,7 +102,10 @@ export function captureStore(store: LeadStore): CaptureStore {
   };
 }
 
-export interface CaptureWebhookRouteOptions<L extends string> {
+export interface CaptureWebhookRouteOptions<
+  L extends string,
+  S extends string,
+> extends MenuConfig<L, S> {
   secret: string | undefined;
   store: CaptureStore;
   ensureLeadCard: (lead: StoredLead) => Promise<void>;
@@ -99,10 +117,8 @@ export interface CaptureWebhookRouteOptions<L extends string> {
   ) => Promise<void>;
   bot: Bot;
   brand: string;
-  isService: (value: string) => boolean;
   isLocale: (value: string) => value is L;
   primaryLocale: L;
-  copy: (locale: L) => CaptureCopy;
 }
 
 function senderName(sender: CaptureSender): string {
@@ -110,7 +126,9 @@ function senderName(sender: CaptureSender): string {
 }
 
 function senderContact(sender: CaptureSender): string {
-  return sender.username ? `@${sender.username}` : `tg://user?id=${sender.id}`;
+  return sender.username
+    ? `@${sender.username}`
+    : `${TELEGRAM_USER_LINK}${sender.id}`;
 }
 
 function hasHandle(contact: string): boolean {
@@ -119,6 +137,10 @@ function hasHandle(contact: string): boolean {
 
 function stepOrder(contact: string): CaptureStep[] {
   return hasHandle(contact) ? STEPS_WITH_HANDLE : STEPS_WITHOUT_HANDLE;
+}
+
+function firstStep(contact: string): CaptureStep {
+  return contact.startsWith(TELEGRAM_USER_LINK) ? 'phone' : 'looking_for';
 }
 
 function stepAfter(contact: string, step: CaptureStep): CaptureStep | null {
@@ -173,20 +195,39 @@ function sharedPhone(phoneNumber: string): string {
   return phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
 }
 
-export function createCaptureWebhookRoute<L extends string>({
+export function createCaptureWebhookRoute<L extends string, S extends string>({
   secret,
   store,
   ensureLeadCard,
   sendFieldChangeToAdmin,
   bot,
   brand,
-  isService,
   isLocale,
   primaryLocale,
-  copy,
-}: CaptureWebhookRouteOptions<L>) {
+  ...menuConfig
+}: CaptureWebhookRouteOptions<L, S>) {
+  const { copy } = menuConfig;
+  const { isService, mainMenu, service, render } = createScreens(menuConfig);
+
   function send(chatId: number, text: string, extra?: CaptureExtra) {
     return bot.api.sendMessage(chatId, text, { parse_mode: 'HTML', ...extra });
+  }
+
+  async function show(chatId: number, screen: Screen): Promise<void> {
+    await bot.api.sendMessage(chatId, screen.text, {
+      parse_mode: 'HTML',
+      reply_markup: { inline_keyboard: screen.keyboard },
+    });
+  }
+
+  async function ask(
+    chatId: number,
+    step: CaptureStep,
+    contact: string,
+    locale: L,
+  ): Promise<void> {
+    const [text, extra] = nextMessage(step, null, contact, copy(locale));
+    await send(chatId, text, extra);
   }
 
   async function refresh(
@@ -202,25 +243,63 @@ export function createCaptureWebhookRoute<L extends string>({
   function startFields(
     payload: string | undefined,
     sender: CaptureSender,
-  ): { service: string; locale: L; visitorId: string | null } {
+  ): StartFields<L, S> {
     const start = startPayloadSchema.parse(payload);
     const parts = start.payload.split('_');
     const head = parts[0];
     const tail = parts[parts.length - 1];
-    const fallback = sender.language_code ?? '';
     return {
       service: parts.length > 1 && isService(head) ? head : '',
-      locale: isLocale(tail)
-        ? tail
-        : isLocale(fallback)
-          ? fallback
-          : primaryLocale,
+      locale: isLocale(tail) ? tail : senderLocale(sender),
       visitorId: start.visitorId,
     };
   }
 
+  function senderLocale(sender: CaptureSender): L {
+    const language = sender.language_code ?? '';
+    return isLocale(language) ? language : primaryLocale;
+  }
+
   function localeOf(lead: StoredLead): L {
     return isLocale(lead.locale) ? lead.locale : primaryLocale;
+  }
+
+  function startScreen(locale: L, picked: S | ''): Screen {
+    return picked ? service(locale, picked) : mainMenu(locale);
+  }
+
+  async function contactOf(sender: CaptureSender): Promise<string> {
+    const known = sender.username
+      ? undefined
+      : await store.findPhoneByTelegramId(sender.id, brand);
+    return known ?? senderContact(sender);
+  }
+
+  async function newLead(
+    sender: CaptureSender,
+    contact: string,
+    { service: picked, locale, visitorId }: StartFields<L, S>,
+    comment: string | null,
+    capturePrompt: CapturePrompt | null,
+  ): Promise<void> {
+    // TODO: merging before the click card saves its message id posts a second teaser.
+    const { lead } = await store.insertOrMergeLead({
+      brand,
+      name: senderName(sender),
+      contact,
+      service: picked,
+      services: picked ? [picked] : [],
+      contactChannel: 'telegram',
+      comment,
+      telegramId: sender.id,
+      country: null,
+      source_url: null,
+      visitorId,
+      locale,
+      kind: 'lead',
+      capturePrompt,
+    });
+    await ensureLeadCard(lead);
   }
 
   async function start(
@@ -229,33 +308,13 @@ export function createCaptureWebhookRoute<L extends string>({
     payload: string | undefined,
     message?: string,
   ): Promise<void> {
-    const { service, locale, visitorId } = startFields(payload, sender);
-    const words = copy(locale);
-    const known = sender.username
-      ? undefined
-      : await store.findPhoneByTelegramId(sender.id, brand);
-    const contact = known ?? senderContact(sender);
-    const step = known ? 'looking_for' : stepOrder(contact)[0];
-    // TODO: merging before the click card saves its message id posts a second teaser.
-    const { lead } = await store.insertOrMergeLead({
-      brand,
-      name: senderName(sender),
-      contact,
-      service,
-      services: service ? [service] : [],
-      contactChannel: 'telegram',
-      comment: message ? `${MESSAGE_NOTE}: ${message}` : null,
-      telegramId: sender.id,
-      country: null,
-      source_url: null,
-      visitorId,
-      locale,
-      kind: 'lead',
-      capturePrompt: { chatId, step },
-    });
-    await ensureLeadCard(lead);
-    const [text, extra] = nextMessage(step, null, contact, words);
-    await send(chatId, `${words.greeting}\n\n${text}`, extra);
+    const fields = startFields(payload, sender);
+    const contact = await contactOf(sender);
+    const comment = message ? `${MESSAGE_NOTE}: ${message}` : null;
+    await newLead(sender, contact, fields, comment, null);
+    const screen = startScreen(fields.locale, fields.service);
+    const { greeting } = copy(fields.locale);
+    await show(chatId, { ...screen, text: `${greeting}\n\n${screen.text}` });
   }
 
   async function answer(
@@ -278,15 +337,6 @@ export function createCaptureWebhookRoute<L extends string>({
     await send(prompt.chatId, reply, extra);
   }
 
-  async function resume(chatId: number, lead: StoredLead): Promise<void> {
-    const words = copy(localeOf(lead));
-    const prompt = lead.capturePrompt;
-    const [reply, extra]: [string, CaptureExtra] = prompt
-      ? nextMessage(prompt.step, null, lead.contact, words)
-      : [words.thanks, undefined];
-    await send(chatId, reply, extra);
-  }
-
   async function startOrResume(
     chatId: number,
     sender: CaptureSender,
@@ -294,8 +344,72 @@ export function createCaptureWebhookRoute<L extends string>({
   ): Promise<void> {
     const open = await store.findOpenLeadByTelegramId(sender.id, brand);
     const age = open ? Date.now() - new Date(open.createdAt).getTime() : 0;
-    if (open && age < VISITOR_MERGE_WINDOW_MS) return resume(chatId, open);
-    return start(chatId, sender, payload);
+    if (!open || age >= VISITOR_MERGE_WINDOW_MS)
+      return start(chatId, sender, payload);
+    const locale = localeOf(open);
+    if (open.capturePrompt)
+      return ask(chatId, open.capturePrompt.step, open.contact, locale);
+    return show(
+      chatId,
+      startScreen(locale, startFields(payload, sender).service),
+    );
+  }
+
+  async function endQuestionnaire(chatId: number): Promise<void> {
+    const running = await store.findByCapturePrompt(chatId, brand);
+    if (running) await store.updateCapture(running.id, { capturePrompt: null });
+  }
+
+  async function openMenu(chatId: number, sender: CaptureSender) {
+    await endQuestionnaire(chatId);
+    const open = await store.findOpenLeadByTelegramId(sender.id, brand);
+    await show(chatId, mainMenu(open ? localeOf(open) : senderLocale(sender)));
+  }
+
+  async function leaveRequest(
+    chatId: number,
+    sender: CaptureSender,
+    locale: L,
+    picked: S,
+  ): Promise<void> {
+    const open = await store.findOpenLeadByTelegramId(sender.id, brand);
+    if (!open) {
+      const contact = await contactOf(sender);
+      const step = firstStep(contact);
+      const fields = { service: picked, locale, visitorId: null };
+      await newLead(sender, contact, fields, null, { chatId, step });
+      return ask(chatId, step, contact, locale);
+    }
+    const step = firstStep(open.contact);
+    const updated = await store.updateCapture(open.id, {
+      service: picked,
+      capturePrompt: { chatId, step },
+    });
+    await refresh(open, updated);
+    await ask(chatId, step, open.contact, locale);
+  }
+
+  async function tapped(
+    chatId: number,
+    messageId: number,
+    sender: CaptureSender,
+    data: string,
+  ): Promise<void> {
+    const tap = readTap(data);
+    if (!tap) return;
+    const locale = isLocale(tap.locale) ? tap.locale : primaryLocale;
+    if (tap.screen === 'request') {
+      if (isService(tap.arg))
+        await leaveRequest(chatId, sender, locale, tap.arg);
+      return;
+    }
+    const screen = render(tap.screen, locale, tap.arg);
+    if (!screen) return;
+    await endQuestionnaire(chatId);
+    await bot.api.editMessageText(chatId, messageId, screen.text, {
+      parse_mode: 'HTML',
+      reply_markup: { inline_keyboard: screen.keyboard },
+    });
   }
 
   async function aside(
@@ -338,11 +452,9 @@ export function createCaptureWebhookRoute<L extends string>({
     if (text !== undefined) {
       const started = START_PATTERN.exec(text);
       if (started) return startOrResume(chatId, sender, started[1]);
+      if (MENU_PATTERN.test(text)) return openMenu(chatId, sender);
     }
 
-    // TODO: a dialog abandoned long ago still answers here, so a question
-    // typed weeks later lands as that step's answer; bound it on the Lead's
-    // age if that shows up in the store.
     const lead = await store.findByCapturePrompt(chatId, brand);
     const prompt = lead?.capturePrompt;
     if (lead && prompt) {
@@ -364,6 +476,14 @@ export function createCaptureWebhookRoute<L extends string>({
     const phone = contact && sharedPhone(contact.phone_number);
     if (text === undefined && phone === undefined) return;
     await handle(message.data.chat.id, message.data.from, text, phone);
+  });
+
+  bot.chatType('private').on('callback_query:data', async (ctx) => {
+    await ctx.answerCallbackQuery();
+    const tap = captureTapSchema.safeParse(ctx.callbackQuery);
+    if (!tap.success) return;
+    const { message, from, data } = tap.data;
+    await tapped(message.chat.id, message.message_id, from, data);
   });
 
   return async function POST({

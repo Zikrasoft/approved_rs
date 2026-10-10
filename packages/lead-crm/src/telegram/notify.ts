@@ -140,7 +140,16 @@ export function createNotifier({
       author?: FieldChangeAuthor,
     ): Promise<void> {
       if ((before ?? '') === (lead[field] ?? '')) return;
-      await sendToAll(adminIds, fieldChangeText(lead, field, before, author));
+      const text =
+        field === 'service'
+          ? fieldChangeText(
+              { ...lead, service: formatter.serviceLabel(lead.service) },
+              field,
+              before && formatter.serviceLabel(before),
+              author,
+            )
+          : fieldChangeText(lead, field, before, author);
+      await sendToAll(adminIds, text);
     },
 
     async sendQuarantinedLeadsToAdmin(
