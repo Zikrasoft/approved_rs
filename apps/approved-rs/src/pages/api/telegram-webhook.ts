@@ -82,6 +82,7 @@ import {
   readLeads,
   appendNote,
   readBalance,
+  readOperations,
   openOperationPrompt,
   findOperationPrompt,
   answerOperationPrompt,
@@ -502,7 +503,11 @@ export const CALLBACKS: CallbackRow[] = [
     /^menu:stats$/,
     'admin',
     async (ctx) => {
-      await sendMessage(ctx.chatId, buildStats(await readLeads()));
+      const [leads, operations] = await Promise.all([
+        readLeads(),
+        readOperations(),
+      ]);
+      await sendMessage(ctx.chatId, buildStats(leads, operations, new Date()));
       await ack(ctx);
     },
   ],

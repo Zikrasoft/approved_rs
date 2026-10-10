@@ -49,7 +49,6 @@ import {
   reAskOperationText,
   buildRemindPicker,
   buildSearchResults,
-  buildStats,
   payoutRecordedMessage,
   PAYOUT_COPY,
   OUTCOME_COPY,
@@ -1031,9 +1030,45 @@ describe('POST /api/telegram-webhook', () => {
       expect(answers()).toEqual([{ callback_query_id: 'cb-19' }]);
     });
 
-    it('menu:stats sends the stats view to the admin', async () => {
-      await tap('menu:stats', ADMIN_ID, { chatId: ADMIN_ID });
-      expect(textsTo(ADMIN_ID)).toEqual([buildStats(await readLeads())]);
+    it('menu:stats sends Lead counts and the ledger to the admin', async () => {
+      vi.useFakeTimers({
+        toFake: ['Date'],
+        now: new Date('2026-10-15T12:00:00Z'),
+      });
+      ledgerStorage().seed({
+        operations: [
+          {
+            id: 1,
+            type: 'payout',
+            amount: 300,
+            note: 'за BMW',
+            createdAt: '2026-09-20T10:00:00.000Z',
+            createdBy: 'owner',
+          },
+          {
+            id: 2,
+            type: 'settlement',
+            amount: 100,
+            note: '',
+            createdAt: '2026-10-02T10:00:00.000Z',
+            createdBy: 'admin',
+          },
+        ],
+        prompts: [],
+      });
+      try {
+        await tap('menu:stats', ADMIN_ID, { chatId: ADMIN_ID });
+      } finally {
+        vi.useRealTimers();
+      }
+      const [text] = textsTo(ADMIN_ID);
+      expect(text).toContain('🔵 Открыта: 1');
+      expect(text).toContain('<b>💶 Мне должны: 200 €</b>');
+      expect(text).toContain('За месяц: +0 € · −100 €');
+      expect(text).toContain('За всё время: +300 € · −100 €');
+      expect(text).toContain(
+        '• 02.10.2026 · −100 € · Админ\n• 20.09.2026 · +300 € · Владелец · за BMW',
+      );
     });
 
     it('ignores menu:stats from the owner', async () => {

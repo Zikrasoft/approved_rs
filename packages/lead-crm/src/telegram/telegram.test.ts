@@ -10,6 +10,7 @@ import { createNotifier } from './notify.ts';
 import { LEAD_STATUSES } from '../schema.ts';
 import type { StoredLead } from '../schema.ts';
 import type { Payout } from '../ledger.ts';
+import type { LedgerOperation } from '../ledgerStore.ts';
 import type { MonthlySummary } from '../store.ts';
 
 import {
@@ -1115,13 +1116,72 @@ describe('buildStats', () => {
     makeLead({ id: 5, status: 'postponed' }),
   ];
 
-  it('counts by status and carries no money', () => {
-    const text = buildStats(leads);
+  const NOW = new Date('2026-10-15T12:00:00.000Z');
+  const op = (
+    over: Partial<LedgerOperation> & Pick<LedgerOperation, 'createdAt'>,
+  ): LedgerOperation => ({
+    id: 1,
+    type: 'payout',
+    amount: 100,
+    note: '',
+    createdBy: 'owner',
+    ...over,
+  });
+
+  it('counts by status and shows an empty ledger', () => {
+    const text = buildStats(leads, [], NOW);
     expect(text).toContain('Всего заявок: 5');
     expect(text).toContain(
       '🔵 Открыта: 2   ⏸️ Отложена: 1   ✅ Сделка: 1   ❌ Отказ: 1',
     );
-    expect(text).not.toContain('€');
+    expect(text).toContain('<b>💶 Мне должны: 0 €</b>');
+    expect(text).toContain('За месяц: +0 € · −0 €');
+    expect(text).toContain('Операций не было.');
+  });
+
+  it('shows the Balance, month and all-time sums in Belgrade time', () => {
+    const text = buildStats(
+      [],
+      [
+        op({ createdAt: '2026-09-30T22:30:00.000Z', amount: 300 }),
+        op({ createdAt: '2026-09-29T10:00:00.000Z', amount: 50 }),
+        op({
+          createdAt: '2026-10-05T10:00:00.000Z',
+          type: 'settlement',
+          amount: 120.5,
+          createdBy: 'admin',
+        }),
+      ],
+      NOW,
+    );
+    expect(text).toContain('<b>💶 Мне должны: 229,5 €</b>');
+    expect(text).toContain('За месяц: +300 € · −120,5 €');
+    expect(text).toContain('За всё время: +350 € · −120,5 €');
+  });
+
+  it('lists the last 20 operations newest first with date, sign, author and note', () => {
+    const operations = Array.from({ length: 22 }, (_, i) =>
+      op({
+        createdAt: new Date(Date.UTC(2026, 9, 1 + i, 10)).toISOString(),
+        amount: i + 1,
+      }),
+    );
+    operations.push(
+      op({
+        createdAt: '2026-10-23T22:30:00.000Z',
+        type: 'settlement',
+        amount: 5,
+        createdBy: 'admin',
+        note: '<cash>',
+      }),
+    );
+    const lines = buildStats([], operations, NOW)
+      .split('\n')
+      .filter((l) => l.startsWith('• '));
+    expect(lines).toHaveLength(20);
+    expect(lines[0]).toBe('• 24.10.2026 · −5 € · Админ · &lt;cash&gt;');
+    expect(lines[1]).toBe('• 22.10.2026 · +22 € · Владелец');
+    expect(lines.at(-1)).toBe('• 04.10.2026 · +4 € · Владелец');
   });
 });
 
@@ -1436,16 +1496,24 @@ describe('brand attribution — one bot, one chat, several businesses', () => {
   });
 
   it('breaks the stats down per brand once more than one business has leads', () => {
-    const text = buildStats([
-      makeLead({ id: 1, brand: 'Approved.rs' }),
-      makeLead({ id: 2, brand: 'PRIZMA' }),
-      makeLead({ id: 3, brand: 'PRIZMA' }),
-    ]);
+    const text = buildStats(
+      [
+        makeLead({ id: 1, brand: 'Approved.rs' }),
+        makeLead({ id: 2, brand: 'PRIZMA' }),
+        makeLead({ id: 3, brand: 'PRIZMA' }),
+      ],
+      [],
+      new Date(),
+    );
     expect(text).toContain('По брендам: Approved.rs — 1 · PRIZMA — 2');
   });
 
   it('omits the per-brand breakdown for a single-business store', () => {
-    const text = buildStats([makeLead({ brand: 'Approved.rs' })]);
+    const text = buildStats(
+      [makeLead({ brand: 'Approved.rs' })],
+      [],
+      new Date(),
+    );
     expect(text).not.toContain('По брендам');
   });
 });

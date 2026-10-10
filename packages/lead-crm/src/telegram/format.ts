@@ -10,10 +10,14 @@ import {
   type MonthlySummary,
 } from '../store.ts';
 import type { Payout, Settlement } from '../ledger.ts';
-import type {
-  LedgerAuthor,
-  LedgerOperation,
-  OperationType,
+import {
+  LEDGER_TIME_ZONE,
+  balanceOf,
+  operationSums,
+  type FlowSums,
+  type LedgerAuthor,
+  type LedgerOperation,
+  type OperationType,
 } from '../ledgerStore.ts';
 
 export type Role = 'owner' | 'admin';
@@ -334,7 +338,38 @@ export function buildSearchResults(leads: StoredLead[]): {
   return { text: 'Найдено:', reply_markup: { inline_keyboard: rows } };
 }
 
-export function buildStats(leads: StoredLead[]): string {
+const STATS_OPERATION_ROWS = 20;
+
+const ledgerDate = new Intl.DateTimeFormat('ru-RU', {
+  timeZone: LEDGER_TIME_ZONE,
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+});
+
+function flowLine(label: string, { credited, debited }: FlowSums): string {
+  return `${label}: +${formatMoney(credited)} · −${formatMoney(debited)}`;
+}
+
+function statsOperationLine(operation: LedgerOperation): string {
+  return [
+    `• ${ledgerDate.format(new Date(operation.createdAt))}`,
+    signedMoney(operation),
+    OPERATION_AUTHORS[operation.createdBy],
+    ...(operation.note ? [clip(operation.note)] : []),
+  ].join(' · ');
+}
+
+export function buildStats(
+  leads: StoredLead[],
+  operations: LedgerOperation[],
+  now: Date,
+): string {
+  const sums = operationSums(operations, now);
+  const recent = operations
+    .slice(-STATS_OPERATION_ROWS)
+    .reverse()
+    .map(statsOperationLine);
   const count = (s: LeadStatus) => leads.filter((l) => l.status === s).length;
 
   const brands = [...new Set(leads.map((l) => l.brand))].sort();
@@ -358,6 +393,13 @@ export function buildStats(leads: StoredLead[]): string {
       .map((s) => `${statusMark(s)}: ${count(s)}`)
       .join('   '),
     ...brandLines,
+    '',
+    balanceLine('admin', balanceOf(operations)),
+    flowLine('За месяц', sums.month),
+    flowLine('За всё время', sums.total),
+    '',
+    '<b>Последние операции</b>',
+    ...(recent.length ? recent : ['Операций не было.']),
   ].join('\n');
 }
 
