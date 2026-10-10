@@ -31,9 +31,17 @@ export {
   MAX_LIST_ROWS,
   VISITOR_MERGE_WINDOW_MS,
 } from './store.ts';
-export type { CaptureUpdate, LeadStore, PayoutInput } from './store.ts';
+export type {
+  CaptureUpdate,
+  DraftInput,
+  DraftPatch,
+  LeadStore,
+  PastLeadHints,
+  PayoutInput,
+} from './store.ts';
 export { isSettled, ledgerBalance } from './ledger.ts';
 export type {
+  Draft,
   Ledger,
   LedgerAuthor,
   Payout,
@@ -71,6 +79,8 @@ export {
   REPLY_COPY,
   PAYOUT_COPY,
   payoutRecordedMessage,
+  DRAFT_COPY,
+  draftMessage,
   escapeHtml,
   formatDateRu,
   formatDealsList,

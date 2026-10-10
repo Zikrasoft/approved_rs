@@ -55,6 +55,8 @@ export {
   REPLY_COPY,
   PAYOUT_COPY,
   payoutRecordedMessage,
+  DRAFT_COPY,
+  draftMessage,
   escapeHtml,
 } from '@podbor/lead-crm';
 

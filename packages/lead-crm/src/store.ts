@@ -26,16 +26,20 @@ import {
 import { LEADS_PATH } from './quarantine.ts';
 import {
   correction,
+  draftSchema,
   ledgerBalance,
   ledgerRecordSchema,
   nextLedgerId,
   payoutSchema,
   settlementSchema,
   withMigratedIncomes,
+  type Draft,
+  type DraftPrompt,
   type Ledger,
   type LedgerAuthor,
   type Payout,
   type PayoutCorrection,
+  type RecordPrompt,
   type Settlement,
 } from './ledger.ts';
 
@@ -67,9 +71,60 @@ export interface PayoutInput {
   brand?: string | null;
 }
 
+export interface DraftInput {
+  amount: number;
+  by: LedgerAuthor;
+  note: string;
+  brand: string | null;
+  leadId: number | null;
+  matchPending: boolean;
+}
+
+export type DraftPatch = Partial<
+  Pick<Draft, 'amount' | 'leadId' | 'matchPending' | 'pendingPrompt'>
+>;
+
+export interface PastLeadHints {
+  name: string | null;
+  phone: string | null;
+}
+
+export const DRAFT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
 interface StoreRecords {
   leads: StoredLead[];
   ledger: Ledger;
+  drafts: Draft[];
+}
+
+function nameTokens(name: string): string[] {
+  return name
+    .toLowerCase()
+    .replaceAll('ё', 'е')
+    .split(/[^\p{L}]+/u)
+    .filter(Boolean);
+}
+
+const phoneDigits = (value: string) => value.replace(/\D/g, '');
+
+const MIN_PHONE_DIGITS = 6;
+const PHONE_TAIL_DIGITS = 9;
+
+function pastLeadMatchers({
+  name,
+  phone,
+}: PastLeadHints): ((lead: StoredLead) => boolean)[] {
+  const tail = phoneDigits(phone ?? '').slice(-PHONE_TAIL_DIGITS);
+  const wanted = nameTokens(name ?? '');
+  return [
+    (lead) =>
+      tail.length >= MIN_PHONE_DIGITS &&
+      phoneDigits(lead.contact).endsWith(tail),
+    (lead) => {
+      const tokens = nameTokens(lead.name);
+      return wanted.length > 0 && wanted.every((t) => tokens.includes(t));
+    },
+  ];
 }
 
 export interface LeadStoreOptions {
@@ -205,6 +260,41 @@ function unreadableIdFloor(entries: unknown[]): number {
   }, 0);
 }
 
+function promptIs(
+  prompt: RecordPrompt | DraftPrompt | null,
+  chatId: number,
+  messageId: number,
+): boolean {
+  return prompt?.chatId === chatId && prompt.messageId === messageId;
+}
+
+function withPayout(
+  { leads, ledger }: StoreRecords,
+  { amount, by, note = '', leadId = null, brand = null }: PayoutInput,
+): { records: Partial<StoreRecords>; added?: Payout } {
+  const lead = leads.find((l) => l.id === leadId);
+  if (leadId != null && !lead) return { records: {} };
+  const added = payoutSchema.parse({
+    type: 'payout',
+    id: nextLedgerId(ledger.payouts),
+    amount,
+    note,
+    createdAt: new Date().toISOString(),
+    createdBy: by,
+    leadId,
+    brand: brand ?? lead?.brand ?? null,
+  });
+  return {
+    added,
+    records: {
+      leads: leads.map((l) =>
+        l === lead && l.status === 'lost' ? { ...l, ...statusPatch('won') } : l,
+      ),
+      ledger: { ...ledger, payouts: [...ledger.payouts, added] },
+    },
+  };
+}
+
 export function createLeadStore({
   storage,
   schema,
@@ -223,6 +313,7 @@ export function createLeadStore({
       return {
         leads: [],
         ledger: { payouts: [], settlements: [] },
+        drafts: [],
         unreadable: [],
         version,
       };
@@ -239,12 +330,15 @@ export function createLeadStore({
     }
     const leads: StoredLead[] = [];
     const ledger: Ledger = { payouts: [], settlements: [] };
+    const drafts: Draft[] = [];
     const unreadable: unknown[] = [];
     for (const entry of records.data) {
       const record = ledgerRecordSchema.safeParse(entry);
       if (record.success) {
         if (record.data.type === 'payout') ledger.payouts.push(record.data);
-        else ledger.settlements.push(record.data);
+        else if (record.data.type === 'settlement')
+          ledger.settlements.push(record.data);
+        else drafts.push(record.data);
         continue;
       }
       const parsed = schema.safeParse(entry);
@@ -254,13 +348,14 @@ export function createLeadStore({
     return {
       leads,
       ledger: withMigratedIncomes(leads, ledger),
+      drafts,
       unreadable,
       version,
     };
   }
 
   async function updateRecords(
-    mutate: (records: StoreRecords, idFloor: number) => StoreRecords,
+    mutate: (records: StoreRecords, idFloor: number) => Partial<StoreRecords>,
   ): Promise<StoreRecords> {
     let lastErr = new StorageConflictError(
       'updateLeads: conflict retry limit exceeded',
@@ -268,7 +363,10 @@ export function createLeadStore({
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       if (attempt > 0) await sleep(backoffDelay(attempt - 1));
       const { unreadable, version, ...current } = await readSnapshot();
-      const mutated = mutate(current, unreadableIdFloor(unreadable));
+      const mutated = {
+        ...current,
+        ...mutate(current, unreadableIdFloor(unreadable)),
+      };
       const next: StoreRecords = {
         leads: mutated.leads.map((lead) => schema.parse(lead)),
         ledger: {
@@ -277,6 +375,7 @@ export function createLeadStore({
             settlementSchema.parse(s),
           ),
         },
+        drafts: mutated.drafts.map((d) => draftSchema.parse(d)),
       };
       await copyToQuarantine(unreadable);
       try {
@@ -285,6 +384,7 @@ export function createLeadStore({
             ...next.leads,
             ...next.ledger.payouts,
             ...next.ledger.settlements,
+            ...next.drafts,
             ...unreadable,
           ],
           version,
@@ -304,9 +404,8 @@ export function createLeadStore({
   async function updateLeads(
     mutate: (leads: StoredLead[], idFloor: number) => StoredLead[],
   ): Promise<StoredLead[]> {
-    const { leads } = await updateRecords(({ leads, ledger }, idFloor) => ({
+    const { leads } = await updateRecords(({ leads }, idFloor) => ({
       leads: mutate(leads, idFloor),
-      ledger,
     }));
     return leads;
   }
@@ -408,36 +507,12 @@ export function createLeadStore({
         : payouts.filter((p) => p.leadId === leadId);
     },
 
-    async addPayout({
-      amount,
-      by,
-      note = '',
-      leadId = null,
-      brand = null,
-    }: PayoutInput): Promise<Payout | undefined> {
+    async addPayout(input: PayoutInput): Promise<Payout | undefined> {
       let added: Payout | undefined;
-      await updateRecords(({ leads, ledger }) => {
-        added = undefined;
-        const lead = leads.find((l) => l.id === leadId);
-        if (leadId != null && !lead) return { leads, ledger };
-        added = payoutSchema.parse({
-          type: 'payout',
-          id: nextLedgerId(ledger.payouts),
-          amount,
-          note,
-          createdAt: new Date().toISOString(),
-          createdBy: by,
-          leadId,
-          brand: brand ?? lead?.brand ?? null,
-        });
-        return {
-          leads: leads.map((l) =>
-            l === lead && l.status === 'lost'
-              ? { ...l, ...statusPatch('won') }
-              : l,
-          ),
-          ledger: { ...ledger, payouts: [...ledger.payouts, added] },
-        };
+      await updateRecords((records) => {
+        const outcome = withPayout(records, input);
+        added = outcome.added;
+        return outcome.records;
       });
       return added;
     },
@@ -448,12 +523,11 @@ export function createLeadStore({
       by: LedgerAuthor,
     ): Promise<PayoutCorrection> {
       let outcome!: PayoutCorrection;
-      await updateRecords(({ leads, ledger }) => {
+      await updateRecords(({ ledger }) => {
         outcome = correction(ledger, id, amount, by);
-        if (!outcome.ok) return { leads, ledger };
+        if (!outcome.ok) return {};
         const { payout } = outcome;
         return {
-          leads,
           ledger: {
             ...ledger,
             payouts: ledger.payouts.map((p) => (p.id === id ? payout : p)),
@@ -463,9 +537,132 @@ export function createLeadStore({
       return outcome;
     },
 
+    async setPayoutPrompt(
+      id: number,
+      prompt: RecordPrompt | null,
+    ): Promise<Payout | undefined> {
+      let touched: Payout | undefined;
+      await updateRecords(({ ledger }) => {
+        touched = undefined;
+        return {
+          ledger: {
+            ...ledger,
+            payouts: ledger.payouts.map((p) => {
+              if (p.id !== id) return p;
+              touched = { ...p, pendingPrompt: prompt };
+              return touched;
+            }),
+          },
+        };
+      });
+      return touched;
+    },
+
+    async findPayoutByPrompt(
+      chatId: number,
+      messageId: number,
+    ): Promise<Payout | undefined> {
+      const { payouts } = await readLedger();
+      return payouts.find((p) => promptIs(p.pendingPrompt, chatId, messageId));
+    },
+
+    async findPastLead(hints: PastLeadHints): Promise<StoredLead | undefined> {
+      const newestFirst = (await readLeads()).sort((a, b) => b.id - a.id);
+      for (const matches of pastLeadMatchers(hints)) {
+        const lead = newestFirst.find(matches);
+        if (lead) return lead;
+      }
+      return undefined;
+    },
+
+    async addDraft(input: DraftInput): Promise<Draft> {
+      let added!: Draft;
+      await updateRecords(({ drafts }) => {
+        const now = Date.now();
+        added = draftSchema.parse({
+          ...input,
+          type: 'draft',
+          id: Math.max(now, nextLedgerId(drafts)),
+          createdAt: new Date(now).toISOString(),
+          createdBy: input.by,
+          pendingPrompt: null,
+        });
+        const fresh = drafts.filter(
+          (d) => now - new Date(d.createdAt).getTime() < DRAFT_TTL_MS,
+        );
+        return { drafts: [...fresh, added] };
+      });
+      return added;
+    },
+
+    async getDraft(id: number): Promise<Draft | undefined> {
+      const { drafts } = await readSnapshot();
+      return drafts.find((d) => d.id === id);
+    },
+
+    async findDraftByPrompt(
+      chatId: number,
+      messageId: number,
+    ): Promise<Draft | undefined> {
+      const { drafts } = await readSnapshot();
+      return drafts.find((d) => promptIs(d.pendingPrompt, chatId, messageId));
+    },
+
+    async updateDraft(
+      id: number,
+      patch: DraftPatch,
+    ): Promise<Draft | undefined> {
+      let touched: Draft | undefined;
+      await updateRecords(({ drafts }) => {
+        touched = undefined;
+        return {
+          drafts: drafts.map((d) => {
+            if (d.id !== id) return d;
+            touched = { ...d, ...patch };
+            return touched;
+          }),
+        };
+      });
+      return touched;
+    },
+
+    async discardDraft(id: number): Promise<boolean> {
+      let found = false;
+      await updateRecords(({ drafts }) => {
+        found = drafts.some((d) => d.id === id);
+        return { drafts: drafts.filter((d) => d.id !== id) };
+      });
+      return found;
+    },
+
+    async confirmDraft(id: number): Promise<Payout | undefined> {
+      let added: Payout | undefined;
+      await updateRecords((records) => {
+        added = undefined;
+        const draft = records.drafts.find((d) => d.id === id);
+        if (!draft) return {};
+        const leadId = records.leads.some((l) => l.id === draft.leadId)
+          ? draft.leadId
+          : null;
+        const outcome = withPayout(records, {
+          amount: draft.amount,
+          by: draft.createdBy,
+          note: draft.note,
+          leadId,
+          brand: leadId == null ? draft.brand : null,
+        });
+        added = outcome.added;
+        return {
+          ...outcome.records,
+          drafts: records.drafts.filter((d) => d.id !== id),
+        };
+      });
+      return added;
+    },
+
     async addSettlement(amount: number): Promise<Settlement> {
       let added!: Settlement;
-      await updateRecords(({ leads, ledger }) => {
+      await updateRecords(({ ledger }) => {
         added = settlementSchema.parse({
           type: 'settlement',
           id: nextLedgerId(ledger.settlements),
@@ -474,7 +671,6 @@ export function createLeadStore({
           createdBy: 'admin',
         });
         return {
-          leads,
           ledger: { ...ledger, settlements: [...ledger.settlements, added] },
         };
       });

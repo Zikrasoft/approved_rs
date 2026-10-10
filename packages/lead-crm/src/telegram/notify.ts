@@ -96,7 +96,7 @@ export function createNotifier({
     },
 
     async sendPayoutNotificationToAdmin(
-      lead: StoredLead,
+      lead: StoredLead | undefined,
       payout: Payout,
     ): Promise<void> {
       await sendToAll(adminIds, payoutNotificationText(lead, payout));

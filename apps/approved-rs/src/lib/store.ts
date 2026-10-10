@@ -29,6 +29,15 @@ export const {
   listPayouts,
   addPayout,
   correctPayout,
+  setPayoutPrompt,
+  findPayoutByPrompt,
+  findPastLead,
+  addDraft,
+  getDraft,
+  findDraftByPrompt,
+  updateDraft,
+  discardDraft,
+  confirmDraft,
   addSettlement,
   expireGhostLeads,
 } = leadStore;
@@ -45,6 +54,7 @@ export {
 
 export type {
   CommissionInfo,
+  Draft,
   Income,
   LeadStatus,
   Payout,

@@ -12,7 +12,7 @@ import { isTelegramIdContact } from '../contactShape.ts';
 import { LEADS_PATH } from '../quarantine.ts';
 import type { Income, LeadStatus, StoredLead } from '../schema.ts';
 import { MAX_LIST_ROWS, isPlaceholderContact } from '../store.ts';
-import type { LedgerAuthor, Payout } from '../ledger.ts';
+import type { Draft, LedgerAuthor, Payout } from '../ledger.ts';
 
 export type Role = 'owner' | 'admin';
 
@@ -415,14 +415,27 @@ const LEDGER_AUTHOR_LABELS: Record<LedgerAuthor, string> = {
   admin: 'админ',
 };
 
+function payoutSubject(
+  lead: StoredLead | undefined,
+  brand: string | null,
+): string {
+  if (lead) return `по заявке #${lead.id} ${escapeHtml(leadDisplayName(lead))}`;
+  return brand ? `без заявки · ${escapeHtml(brand)}` : 'без заявки';
+}
+
+function noteLines(note: string): string[] {
+  return note ? [`За что: ${escapeHtml(note)}`] : [];
+}
+
 export function payoutNotificationText(
-  lead: StoredLead,
+  lead: StoredLead | undefined,
   payout: Payout,
 ): string {
   const last = payout.edits.at(-1);
   return [
-    `${last ? '✏️ Исправлена выплата' : '💶 Новая выплата'} по заявке #${lead.id} ${escapeHtml(leadDisplayName(lead))}`,
+    `${last ? '✏️ Исправлена выплата' : '💶 Новая выплата'} ${payoutSubject(lead, payout.brand)}`,
     `Записал: ${LEDGER_AUTHOR_LABELS[last?.by ?? payout.createdBy]}`,
+    ...noteLines(payout.note),
     ``,
     `Было: ${last ? formatMoney(last.before) : '—'}`,
     `Стало: ${formatMoney(payout.amount)}`,
@@ -449,6 +462,54 @@ export function payoutRecordedMessage(payout: Payout): {
       inline_keyboard: [
         [{ text: PAYOUT_COPY.fixButton, callback_data: `payfix:${payout.id}` }],
       ],
+    },
+  };
+}
+
+export const DRAFT_COPY = {
+  confirm: '✅ Верно',
+  edit: '✏️ Исправить',
+  discard: '✖ Не выплата',
+  thatsHim: '👤 Это он',
+  anotherClient: '🔄 Другой клиент',
+  discarded: '✖ Не выплата — ничего не записано',
+  unreadable:
+    '⚠️ Не получилось разобрать сумму. Ответьте суммой на карточку заявки или напишите ещё раз.',
+} as const;
+
+export function draftMessage(
+  draft: Draft,
+  lead: StoredLead | undefined,
+): { text: string; reply_markup: Keyboard } {
+  const button = (text: string, action: string) => ({
+    text,
+    callback_data: `draft:${draft.id}:${action}`,
+  });
+  const client = lead
+    ? `Клиент: #${lead.id} ${escapeHtml(leadDisplayName(lead))}${draft.matchPending ? ' — это он?' : ''}`
+    : `Клиент: ${payoutSubject(undefined, draft.brand)}`;
+  return {
+    text: [
+      `📝 Выплата: ${formatMoney(draft.amount)}`,
+      ...noteLines(draft.note),
+      client,
+    ].join('\n'),
+    reply_markup: {
+      inline_keyboard: draft.matchPending
+        ? [
+            [
+              button(DRAFT_COPY.thatsHim, 'him'),
+              button(DRAFT_COPY.anotherClient, 'other'),
+            ],
+            [button(DRAFT_COPY.discard, 'no')],
+          ]
+        : [
+            [
+              button(DRAFT_COPY.confirm, 'ok'),
+              button(DRAFT_COPY.edit, 'edit'),
+              button(DRAFT_COPY.discard, 'no'),
+            ],
+          ],
     },
   };
 }

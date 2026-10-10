@@ -17,6 +17,8 @@ import type { LeadStatus, StoredLead } from '../schema.ts';
 import {
   EDIT_COPY,
   PAYOUT_COPY,
+  DRAFT_COPY,
+  draftMessage,
   payoutRecordedMessage,
   REFERRAL_NOTE,
   statusLabel,
@@ -563,6 +565,7 @@ describe('sendPayoutNotificationToAdmin', () => {
     leadId: 9,
     brand: null,
     edits: [],
+    pendingPrompt: null,
   };
 
   it('tells the admin a new Payout as stated, with no rate applied', async () => {
@@ -591,6 +594,70 @@ describe('sendPayoutNotificationToAdmin', () => {
     expect(body.text).toContain('Записал: админ');
     expect(body.text).toContain(`Было: ${money(80)}`);
     expect(body.text).toContain(`Стало: ${money(60)}`);
+  });
+
+  it('names a Lead-less Payout by its Brand, or by nothing, and shows its note', async () => {
+    await sendPayoutNotificationToAdmin(undefined, {
+      ...payout,
+      leadId: null,
+      brand: 'CarLab',
+      note: 'сервис <повторно>',
+    });
+    await sendPayoutNotificationToAdmin(undefined, { ...payout, leadId: null });
+
+    const [first, second] = mockFetch.mock.calls.map(
+      (call) => JSON.parse(call[1].body as string).text as string,
+    );
+    expect(first).toContain('💶 Новая выплата без заявки · CarLab');
+    expect(first).toContain('За что: сервис &lt;повторно&gt;');
+    expect(second).toContain('💶 Новая выплата без заявки\n');
+    expect(second).not.toContain('За что');
+  });
+
+  it('draws a draft with confirm, fix and discard buttons', () => {
+    const draft = {
+      type: 'draft' as const,
+      id: 77,
+      amount: 30,
+      note: 'сервис',
+      brand: null,
+      leadId: null,
+      matchPending: false,
+      createdAt: '2026-03-01T00:00:00.000Z',
+      createdBy: 'owner' as const,
+      pendingPrompt: null,
+    };
+    expect(draftMessage(draft, undefined)).toEqual({
+      text: `📝 Выплата: ${money(30)}\nЗа что: сервис\nКлиент: без заявки`,
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: DRAFT_COPY.confirm, callback_data: 'draft:77:ok' },
+            { text: DRAFT_COPY.edit, callback_data: 'draft:77:edit' },
+            { text: DRAFT_COPY.discard, callback_data: 'draft:77:no' },
+          ],
+        ],
+      },
+    });
+
+    const lead = makeLead({ id: 9, name: 'Иван' });
+    expect(
+      draftMessage({ ...draft, leadId: 9, matchPending: true }, lead),
+    ).toEqual({
+      text: `📝 Выплата: ${money(30)}\nЗа что: сервис\nКлиент: #9 Иван — это он?`,
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: DRAFT_COPY.thatsHim, callback_data: 'draft:77:him' },
+            { text: DRAFT_COPY.anotherClient, callback_data: 'draft:77:other' },
+          ],
+          [{ text: DRAFT_COPY.discard, callback_data: 'draft:77:no' }],
+        ],
+      },
+    });
+    expect(draftMessage({ ...draft, leadId: 9 }, lead).text).toContain(
+      'Клиент: #9 Иван',
+    );
   });
 
   it('answers a recorded Payout with a fix button carrying its id', () => {

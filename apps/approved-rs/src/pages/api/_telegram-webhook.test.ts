@@ -9,6 +9,7 @@ import {
   type MemoryStorage,
 } from '@podbor/lead-crm/testing';
 import type { StoredLead } from '@/lib/store';
+import type { PayoutHints } from '@podbor/lead-crm/payout-parser';
 
 const memory = vi.hoisted(() => {
   process.env.TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB = 'test-carlab-capture-token';
@@ -33,6 +34,14 @@ vi.mock('@podbor/lead-crm/storage/file', () =>
   memory.module('createFileStorage'),
 );
 
+const parser = vi.hoisted(() => ({
+  parse: vi.fn<(text: string) => Promise<PayoutHints | null>>(),
+}));
+
+vi.mock('@/lib/payoutParser', () => ({
+  parsePayout: (text: string) => parser.parse(text),
+}));
+
 import { POST, CALLBACKS } from './telegram-webhook';
 import {
   buildDeleteConfirm,
@@ -47,6 +56,7 @@ import {
   formatDealsList,
   payoutRecordedMessage,
   PAYOUT_COPY,
+  DRAFT_COPY,
 } from '@/lib/telegram';
 import { getLead, listPayouts, readLeads, searchLeads } from '@/lib/store';
 
@@ -228,6 +238,7 @@ async function stored(id = 5): Promise<StoredLead> {
 describe('POST /api/telegram-webhook', () => {
   beforeEach(() => {
     api.reset();
+    parser.parse.mockReset().mockResolvedValue(null);
     api.respond(
       'sendMessage',
       (payload: Record<string, unknown>): BotApiResponse => ({
@@ -984,6 +995,11 @@ describe('POST /api/telegram-webhook', () => {
       ['claimpay:5:7', 'owner'],
       ['income:5', 'owner'],
       ['payfix:5', 'any'],
+      ['draft:5:ok', 'owner'],
+      ['draft:5:edit', 'owner'],
+      ['draft:5:no', 'owner'],
+      ['draft:5:him', 'owner'],
+      ['draft:5:other', 'owner'],
       ['confirmpay:5', 'admin'],
       ['rejectpay:5', 'admin'],
       ['edit:5:name', 'any'],
@@ -1474,12 +1490,7 @@ describe('POST /api/telegram-webhook', () => {
       ...overrides,
     });
 
-    const fixPromptOn = (payoutId: number) => ({
-      chatId: CARD_CHAT_ID,
-      messageId: PROMPT_ID,
-      kind: 'correct_payout' as const,
-      payoutId,
-    });
+    const fixPrompt = { chatId: CARD_CHAT_ID, messageId: PROMPT_ID };
 
     const answerFix = (text: string, from = OWNER_ID) =>
       message(text, from, {
@@ -1598,7 +1609,7 @@ describe('POST /api/telegram-webhook', () => {
       ]);
     });
 
-    it('✏️ Исправить asks for the right amount, holding the Payout on the Lead', async () => {
+    it('✏️ Исправить asks for the right amount, holding the prompt on the Payout', async () => {
       leadsStorage().seed([makeLead(), payout()]);
       await tap('payfix:1', OWNER_ID, { chatId: CARD_CHAT_ID });
 
@@ -1608,7 +1619,8 @@ describe('POST /api/telegram-webhook', () => {
           text: PAYOUT_COPY.fixPrompt,
         }),
       ]);
-      expect((await stored()).pendingPrompt).toEqual(fixPromptOn(1));
+      expect((await listPayouts(5))[0].pendingPrompt).toEqual(fixPrompt);
+      expect((await stored()).pendingPrompt).toBeNull();
     });
 
     it('acks a fix for a Payout that does not exist', async () => {
@@ -1618,10 +1630,7 @@ describe('POST /api/telegram-webhook', () => {
     });
 
     it('corrects the Payout, keeps the edit, and tells the admin before → after', async () => {
-      leadsStorage().seed([
-        makeLead({ pendingPrompt: fixPromptOn(1) }),
-        payout(),
-      ]);
+      leadsStorage().seed([makeLead(), payout({ pendingPrompt: fixPrompt })]);
       await answerFix('90');
 
       const [fixed] = await listPayouts(5);
@@ -1630,8 +1639,8 @@ describe('POST /api/telegram-webhook', () => {
         edits: [
           expect.objectContaining({ before: 80, after: 90, by: 'owner' }),
         ],
+        pendingPrompt: null,
       });
-      expect((await stored()).pendingPrompt).toBeNull();
       const [notice] = textsTo(ADMIN_ID);
       expect(notice).toContain('Исправлена выплата по заявке #5');
       expect(notice).toContain('Было: 80 €');
@@ -1640,12 +1649,9 @@ describe('POST /api/telegram-webhook', () => {
     });
 
     it('keeps the prompt open on a correction that is not an amount', async () => {
-      leadsStorage().seed([
-        makeLead({ pendingPrompt: fixPromptOn(1) }),
-        payout(),
-      ]);
+      leadsStorage().seed([makeLead(), payout({ pendingPrompt: fixPrompt })]);
       await answerFix('не знаю');
-      expect((await stored()).pendingPrompt).toEqual(fixPromptOn(1));
+      expect((await listPayouts(5))[0].pendingPrompt).toEqual(fixPrompt);
       expect(textsTo(CARD_CHAT_ID)).toEqual([PAYOUT_COPY.invalidAmount]);
       expect((await listPayouts(5))[0].amount).toBe(80);
     });
@@ -1660,20 +1666,23 @@ describe('POST /api/telegram-webhook', () => {
 
     it('refuses the owner a correction once a Settlement follows the Payout', async () => {
       leadsStorage().seed([
-        makeLead({ pendingPrompt: fixPromptOn(1) }),
-        payout(),
+        makeLead(),
+        payout({ pendingPrompt: fixPrompt }),
         settlement,
       ]);
       await answerFix('90');
-      expect((await listPayouts(5))[0].amount).toBe(80);
+      expect((await listPayouts(5))[0]).toMatchObject({
+        amount: 80,
+        pendingPrompt: null,
+      });
       expect(textsTo(CARD_CHAT_ID)).toEqual([PAYOUT_COPY.settled]);
       expect(sentTo(ADMIN_ID)).toEqual([]);
     });
 
     it('lets the admin correct a settled Payout', async () => {
       leadsStorage().seed([
-        makeLead({ pendingPrompt: fixPromptOn(1) }),
-        payout(),
+        makeLead(),
+        payout({ pendingPrompt: fixPrompt }),
         settlement,
       ]);
       await answerFix('90', ADMIN_ID);
@@ -1683,11 +1692,22 @@ describe('POST /api/telegram-webhook', () => {
       });
     });
 
-    it('drops a correction whose Payout is gone', async () => {
-      seed(makeLead({ pendingPrompt: fixPromptOn(1) }));
-      await answerFix('90');
-      expect((await stored()).pendingPrompt).toBeNull();
-      expect(api.calls).toEqual([]);
+    it('corrects a Payout that has no Lead', async () => {
+      leadsStorage().seed([
+        makeLead(),
+        payout({ leadId: null, brand: 'CarLab' }),
+      ]);
+      await tap('payfix:1', OWNER_ID, { chatId: CARD_CHAT_ID });
+      await answerFix('40');
+
+      expect((await listPayouts())[0]).toMatchObject({
+        amount: 40,
+        leadId: null,
+        pendingPrompt: null,
+      });
+      const [notice] = textsTo(ADMIN_ID);
+      expect(notice).toContain('Исправлена выплата без заявки · CarLab');
+      expect(notice).toContain('Было: 80 €');
     });
   });
 
@@ -1697,5 +1717,255 @@ describe('POST /api/telegram-webhook', () => {
       type: 'group',
     });
     expect(api.calls).toEqual([]);
+  });
+
+  describe('free-form Payouts in the group', () => {
+    const hints = (overrides: Partial<PayoutHints> = {}): PayoutHints => ({
+      amount: 30,
+      note: 'сервис повторно',
+      clientName: null,
+      clientPhone: null,
+      brand: 'CarLab',
+      ...overrides,
+    });
+
+    const say = (text: string, from = OWNER_ID) =>
+      message(text, from, { chatId: CARD_CHAT_ID, type: 'supergroup' });
+
+    const DRAFT_MESSAGE_ID = PROMPT_ID;
+
+    const draftButtons = (): string[][] => {
+      const sent = sentTo(CARD_CHAT_ID).at(-1)!;
+      const { inline_keyboard } = sent.reply_markup as {
+        inline_keyboard: { text: string; callback_data: string }[][];
+      };
+      return inline_keyboard.map((row) => row.map((b) => b.text));
+    };
+
+    const draftId = () => {
+      const sent = sentTo(CARD_CHAT_ID).at(-1)!;
+      const { inline_keyboard } = sent.reply_markup as {
+        inline_keyboard: { callback_data: string }[][];
+      };
+      return /^draft:(\d+):/.exec(inline_keyboard[0]![0]!.callback_data)![1];
+    };
+
+    const press = (action: string, id: string, from = OWNER_ID) =>
+      tap(`draft:${id}:${action}`, from, {
+        chatId: CARD_CHAT_ID,
+        messageId: DRAFT_MESSAGE_ID,
+      });
+
+    const lastEdit = () => edits(CARD_CHAT_ID, DRAFT_MESSAGE_ID).at(-1);
+
+    it('shows a draft under the owner message and stores nothing yet', async () => {
+      parser.parse.mockResolvedValue(hints());
+      await say('Петя, сервис повторно, 30');
+
+      expect(parser.parse).toHaveBeenCalledWith('Петя, сервис повторно, 30');
+      expect(sentTo(CARD_CHAT_ID)).toEqual([
+        expect.objectContaining({
+          text: '📝 Выплата: 30 €\nЗа что: сервис повторно\nКлиент: без заявки · CarLab',
+          reply_parameters: expect.objectContaining({ message_id: 2 }),
+        }),
+      ]);
+      expect(draftButtons()).toEqual([
+        [DRAFT_COPY.confirm, DRAFT_COPY.edit, DRAFT_COPY.discard],
+      ]);
+      expect(await listPayouts()).toEqual([]);
+      expect(sentTo(ADMIN_ID)).toEqual([]);
+    });
+
+    it('ignores a message the parser finds no Payout in', async () => {
+      await say('Клиент приедет в 10');
+      expect(api.calls).toEqual([]);
+      expect(leadsStorage().current()).toEqual([makeLead()]);
+    });
+
+    it('ignores free-form messages from anyone but the owner', async () => {
+      parser.parse.mockResolvedValue(hints());
+      await say('Петя 30', ADMIN_ID);
+      await say('Петя 30', OTHER_ID);
+      expect(parser.parse).not.toHaveBeenCalled();
+      expect(api.calls).toEqual([]);
+    });
+
+    it('tells the owner when the message could not be read', async () => {
+      parser.parse.mockRejectedValue(new Error('model down'));
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+      await say('Петя 30');
+      expect(textsTo(CARD_CHAT_ID)).toEqual([DRAFT_COPY.unreadable]);
+    });
+
+    it('✅ Верно stores a Lead-less Payout with the named Brand and tells the admin', async () => {
+      parser.parse.mockResolvedValue(hints());
+      await say('Петя, сервис повторно, 30');
+      const id = draftId();
+      await press('ok', id);
+
+      const [payout] = await listPayouts();
+      expect(payout).toMatchObject({
+        amount: 30,
+        note: 'сервис повторно',
+        leadId: null,
+        brand: 'CarLab',
+        createdBy: 'owner',
+      });
+      expect(lastEdit()).toEqual(view(payoutRecordedMessage(payout!)));
+      const [notice] = textsTo(ADMIN_ID);
+      expect(notice).toContain('Новая выплата без заявки · CarLab');
+      expect(notice).toContain('За что: сервис повторно');
+      expect(notice).toContain('Стало: 30 €');
+
+      await press('ok', id);
+      expect(await listPayouts()).toHaveLength(1);
+    });
+
+    it('stores a Lead-less Payout with no Brand when none was named', async () => {
+      parser.parse.mockResolvedValue(hints({ brand: null, note: '' }));
+      await say('30');
+      expect(textsTo(CARD_CHAT_ID)).toEqual([
+        '📝 Выплата: 30 €\nКлиент: без заявки',
+      ]);
+      await press('ok', draftId());
+      expect((await listPayouts())[0]).toMatchObject({ brand: null });
+    });
+
+    it('✖ Не выплата discards the draft', async () => {
+      parser.parse.mockResolvedValue(hints());
+      await say('Петя 30');
+      const id = draftId();
+      await press('no', id);
+
+      expect(lastEdit()).toEqual(
+        expect.objectContaining({
+          text: DRAFT_COPY.discarded,
+          reply_markup: { inline_keyboard: [] },
+        }),
+      );
+      await press('ok', id);
+      expect(await listPayouts()).toEqual([]);
+      expect(sentTo(ADMIN_ID)).toEqual([]);
+      expect(leadsStorage().current()).toEqual([makeLead()]);
+    });
+
+    it('offers the past Lead the name matches, and stores the Payout on it', async () => {
+      seed(makeLead({ name: 'Иван Петров' }));
+      parser.parse.mockResolvedValue(hints({ clientName: 'Иван' }));
+      await say('Иван, сервис повторно, 30');
+
+      expect(textsTo(CARD_CHAT_ID)).toEqual([
+        '📝 Выплата: 30 €\nЗа что: сервис повторно\nКлиент: #5 Иван Петров — это он?',
+      ]);
+      expect(draftButtons()).toEqual([
+        [DRAFT_COPY.thatsHim, DRAFT_COPY.anotherClient],
+        [DRAFT_COPY.discard],
+      ]);
+      const id = draftId();
+
+      await press('him', id);
+      expect(lastEdit()?.text).toBe(
+        '📝 Выплата: 30 €\nЗа что: сервис повторно\nКлиент: #5 Иван Петров',
+      );
+      await press('ok', id);
+      expect(await listPayouts(5)).toEqual([
+        expect.objectContaining({ amount: 30, brand: 'Approved.rs' }),
+      ]);
+      expect(textsTo(ADMIN_ID)[0]).toContain('Новая выплата по заявке #5');
+    });
+
+    it('matches a past Lead by phone ahead of a name', async () => {
+      seed(
+        makeLead({ id: 5, name: 'Марко', contact: '+381641234567' }),
+        makeLead({ id: 6, name: 'Марко' }),
+      );
+      parser.parse.mockResolvedValue(
+        hints({ clientName: 'Марко', clientPhone: '064 123 4567' }),
+      );
+      await say('Марко 064 123 4567 30');
+      expect(textsTo(CARD_CHAT_ID)[0]).toContain('#5 Марко — это он?');
+    });
+
+    it('🔄 Другой клиент drops the match and stores the Payout without a Lead', async () => {
+      parser.parse.mockResolvedValue(hints({ clientName: 'Иван' }));
+      await say('Иван 30');
+      const id = draftId();
+      await press('other', id);
+      expect(lastEdit()?.text).toContain('Клиент: без заявки · CarLab');
+      await press('ok', id);
+      expect((await listPayouts())[0]).toMatchObject({
+        leadId: null,
+        brand: 'CarLab',
+      });
+    });
+
+    it('turns a lost Lead won when the Payout lands on it', async () => {
+      seed(makeLead({ status: 'lost' }));
+      parser.parse.mockResolvedValue(hints({ clientName: 'Иван' }));
+      await say('Иван 30');
+      const id = draftId();
+      await press('him', id);
+      await press('ok', id);
+      expect((await stored()).status).toBe('won');
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+    });
+
+    it('✏️ Исправить takes a new amount and redraws the draft', async () => {
+      let nextId = 900;
+      api.respond(
+        'sendMessage',
+        (payload: Record<string, unknown>): BotApiResponse => ({
+          ok: true,
+          result: {
+            message_id: nextId++,
+            date: 0,
+            chat: { id: Number(payload.chat_id), type: 'supergroup' },
+          },
+        }),
+      );
+      parser.parse.mockResolvedValue(hints());
+      await say('Петя 30');
+      const id = draftId();
+      await tap(`draft:${id}:edit`, OWNER_ID, {
+        chatId: CARD_CHAT_ID,
+        messageId: 900,
+      });
+      expect(forceReplies()).toEqual([
+        expect.objectContaining({ text: PAYOUT_COPY.fixPrompt }),
+      ]);
+
+      const reply = (text: string) =>
+        message(text, OWNER_ID, {
+          chatId: CARD_CHAT_ID,
+          type: 'supergroup',
+          replyTo: 901,
+        });
+      await reply('много');
+      expect(textsTo(CARD_CHAT_ID).at(-1)).toBe(PAYOUT_COPY.invalidAmount);
+      await reply('35');
+      expect(edits(CARD_CHAT_ID, 900).at(-1)?.text).toContain(
+        '📝 Выплата: 35 €',
+      );
+      expect(await listPayouts()).toEqual([]);
+
+      await tap(`draft:${id}:ok`, OWNER_ID, {
+        chatId: CARD_CHAT_ID,
+        messageId: 900,
+      });
+      expect((await listPayouts())[0]).toMatchObject({ amount: 35 });
+    });
+
+    it('acks taps on a draft that is gone', async () => {
+      for (const action of ['ok', 'edit', 'no', 'him']) {
+        await tap(`draft:42:${action}`, OWNER_ID, {
+          id: 'cb-gone',
+          chatId: CARD_CHAT_ID,
+        });
+      }
+      expect(api.calls.map((c) => c.method)).toEqual(
+        Array(4).fill('answerCallbackQuery'),
+      );
+      expect(await listPayouts()).toEqual([]);
+    });
   });
 });
