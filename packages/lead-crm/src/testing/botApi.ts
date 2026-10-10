@@ -11,6 +11,13 @@ export type BotApiResponse =
 type Responder = (payload: Record<string, unknown>) => BotApiResponse;
 
 const URL_PATTERN = /\/bot([^/]+)\/([A-Za-z]+)$/;
+const NUMERIC_ID = /^-?\d+$/;
+
+function chatIdOf(value: unknown): unknown {
+  return typeof value === 'string' && NUMERIC_ID.test(value)
+    ? Number(value)
+    : value;
+}
 
 export function recordBotApi() {
   const calls: BotApiCall[] = [];
@@ -41,7 +48,7 @@ export function recordBotApi() {
           message_id:
             method === 'editMessageText' ? payload.message_id : nextMessageId++,
           date: 0,
-          chat: { id: payload.chat_id, type: 'private' },
+          chat: { id: chatIdOf(payload.chat_id), type: 'private' },
           text: payload.text,
         },
       };

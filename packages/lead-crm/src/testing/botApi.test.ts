@@ -72,6 +72,22 @@ describe('recordBotApi', () => {
     expect(await after.json()).toEqual({ ok: true, result: true });
   });
 
+  it('answers a numeric chat id sent as a string with a number, as Telegram does', async () => {
+    const api = recordBotApi();
+    const send = (chatId: string) =>
+      api
+        .fetch('https://api.telegram.org/botT/sendMessage', {
+          body: JSON.stringify({ chat_id: chatId }),
+        })
+        .then((res) => res.json());
+    expect(await send('-100500')).toMatchObject({
+      result: { chat: { id: -100500 } },
+    });
+    expect(await send('@channel')).toMatchObject({
+      result: { chat: { id: '@channel' } },
+    });
+  });
+
   it('rejects a URL that is not a Bot API method', async () => {
     await expect(recordBotApi().fetch('https://example.com/')).rejects.toThrow(
       'not a Bot API URL',
