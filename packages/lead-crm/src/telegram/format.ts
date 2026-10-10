@@ -1,17 +1,22 @@
 import { format, parseISO } from 'date-fns';
-import {
-  getCommission,
-  hasDealAmount,
-  incomeCommission,
-  roundMoney,
-  unpaidIncomes,
-  type CommissionInfo,
-} from '../money.ts';
 import { channelLabel } from '../channelLabels.ts';
 import { isTelegramIdContact } from '../contactShape.ts';
 import { LEADS_PATH } from '../quarantine.ts';
-import type { Income, LeadStatus, StoredLead } from '../schema.ts';
-import { MAX_LIST_ROWS, isPlaceholderContact, type OwedRow } from '../store.ts';
+import { BUSINESS_TIME_ZONE } from '../businessTime.ts';
+import { isClosed, type LeadStatus, type StoredLead } from '../schema.ts';
+import { MAX_LIST_ROWS, isPlaceholderContact, type Digest } from '../store.ts';
+import {
+  balanceOf,
+  operationSums,
+  type FlowSums,
+  type LedgerAuthor,
+  type LedgerOperation,
+  type OperationType,
+} from '../ledgerStore.ts';
+import {
+  MAX_OPERATION_AMOUNT,
+  type OperationRefusal,
+} from '../operationReply.ts';
 
 export type Role = 'owner' | 'admin';
 
@@ -32,39 +37,20 @@ const MAX_SERVICES_LABEL = 200;
 export const leadDisplayName = (lead: { name: string }): string =>
   lead.name || '—';
 
-export const LEAD_STATUS_ACTIONS = [
-  { key: 'negotiations', emoji: '🗣', label: 'Переговоры' },
-  { key: 'in_progress', emoji: '🔵', label: 'В работе' },
-  { key: 'won', emoji: '✅', label: 'Успешно' },
-  { key: 'lost', emoji: '❌', label: 'Отказ' },
-] as const;
-export type LeadStatusKey = (typeof LEAD_STATUS_ACTIONS)[number]['key'];
+const STATUS_META: Record<LeadStatus, { emoji: string; label: string }> = {
+  open: { emoji: '🔵', label: 'Открыта' },
+  won: { emoji: '✅', label: 'Сделка' },
+  lost: { emoji: '❌', label: 'Отказ' },
+  postponed: { emoji: '⏸️', label: 'Отложена' },
+};
 
-const NEW_STATUS_META = { emoji: '🆕', label: 'Новая' } as const;
-const POSTPONED_STATUS_META = { emoji: '⏸️', label: 'Отложена' } as const;
-const UNKNOWN_STATUS_META = { emoji: '⚪' };
-
-function statusMeta(status: LeadStatus): { emoji: string; label: string } {
-  if (status === 'new') return NEW_STATUS_META;
-  if (status === 'postponed') return POSTPONED_STATUS_META;
-  const found = LEAD_STATUS_ACTIONS.find((s) => s.key === status);
-  return found ?? { ...UNKNOWN_STATUS_META, label: status };
-}
-
-export function statusLabel(status: LeadStatus): string {
-  return statusMeta(status).label;
-}
-
-function statusEmoji(status: LeadStatus): string {
-  return statusMeta(status).emoji;
-}
-
-function archivedMark(lead: StoredLead): string {
-  return lead.archived ? '🗄 ' : '';
+function statusMark(status: LeadStatus): string {
+  const { emoji, label } = STATUS_META[status];
+  return `${emoji} ${label}`;
 }
 
 function statusLine(status: LeadStatus): string {
-  return `<b>Статус: ${statusEmoji(status)} ${statusLabel(status)}</b>`;
+  return `<b>Статус: ${statusMark(status)}</b>`;
 }
 
 export function escapeHtml(s: string): string {
@@ -77,24 +63,6 @@ export function formatMoney(n: number): string {
 
 export function formatDateRu(iso: string): string {
   return format(parseISO(iso), 'dd.MM.yyyy');
-}
-
-const INCOME_STATUSES: LeadStatus[] = [
-  'negotiations',
-  'in_progress',
-  'postponed',
-  'won',
-];
-
-export function canAddIncome(lead: StoredLead, role: Role): boolean {
-  return (
-    role === 'owner' && !lead.archived && INCOME_STATUSES.includes(lead.status)
-  );
-}
-
-function incomeLine(lead: StoredLead, income: Income): string {
-  const commission = incomeCommission(income.amount, lead.commissionPercent);
-  return `• ${formatMoney(income.amount)} от ${formatDateRu(income.at)} · комиссия ${formatMoney(commission)} · ${income.paidAt ? '🟢 оплачена' : '🔴 не оплачена'}`;
 }
 
 const QUICK_REMIND_DAYS = [
@@ -120,47 +88,17 @@ export function buildRemindPicker(id: number): {
   };
 }
 
-export function buildStatusKeyboard(lead: StoredLead, role: Role): Keyboard {
-  if (lead.status === 'new') {
-    const row: Btn[] = [
-      { text: '🗣 Переговоры', callback_data: `st:${lead.id}:negotiations` },
-    ];
-    if (role === 'owner')
-      row.push({ text: '❌ Отказ', callback_data: `st:${lead.id}:lost` });
-    return { inline_keyboard: [row] };
-  }
-  if (lead.status === 'negotiations') {
-    const row: Btn[] = [
-      { text: '🔵 В работу', callback_data: `st:${lead.id}:in_progress` },
-    ];
-    if (role !== 'owner') return { inline_keyboard: [row] };
-    row.push({ text: '❌ Отказ', callback_data: `st:${lead.id}:lost` });
-    return {
-      inline_keyboard: [
-        row,
-        [{ text: '⏰ Отложить', callback_data: `postpone:${lead.id}` }],
-      ],
-    };
-  }
-  if (lead.status === 'in_progress' && role === 'owner') {
-    return {
-      inline_keyboard: [
-        [
-          { text: '✅ Завершить', callback_data: `st:${lead.id}:won` },
-          { text: '❌ Отказ', callback_data: `st:${lead.id}:lost` },
-        ],
-        [{ text: '⏰ Отложить', callback_data: `postpone:${lead.id}` }],
-      ],
-    };
-  }
-  if (lead.status === 'postponed') {
-    return {
-      inline_keyboard: [
-        [{ text: '▶️ Возобновить', callback_data: `resume:${lead.id}` }],
-      ],
-    };
-  }
-  return { inline_keyboard: [] };
+function statusRows(lead: StoredLead, role: Role): Btn[][] {
+  if (lead.status === 'postponed')
+    return [[{ text: '▶️ Возобновить', callback_data: `resume:${lead.id}` }]];
+  if (lead.status !== 'open' || role !== 'owner') return [];
+  return [
+    [
+      { text: '✅ Сделка', callback_data: `st:${lead.id}:won` },
+      { text: '❌ Отказ', callback_data: `st:${lead.id}:lost` },
+    ],
+    [{ text: '⏰ Отложить', callback_data: `postpone:${lead.id}` }],
+  ];
 }
 
 export function buildDeleteConfirm(lead: StoredLead): {
@@ -180,103 +118,126 @@ export function buildDeleteConfirm(lead: StoredLead): {
   };
 }
 
-export function buildLeadList(
-  leads: StoredLead[],
-  status: LeadStatus | LeadStatus[],
-): { text: string; reply_markup: Keyboard } {
-  const statuses = Array.isArray(status) ? status : [status];
+export function buildOpenList(leads: StoredLead[]): {
+  text: string;
+  reply_markup: Keyboard;
+} {
   const rows: Btn[][] = leads
-    .filter((l) => statuses.includes(l.status) && !l.archived)
+    .filter((l) => !isClosed(l))
     .sort((a, b) => b.id - a.id)
     .slice(0, MAX_LIST_ROWS)
     .map((l) => [
       {
-        text: `#${l.id} ${leadDisplayName(l)} · ${l.brand} · ${statusEmoji(l.status)}`,
+        text: `#${l.id} ${leadDisplayName(l)} · ${l.brand} · ${STATUS_META[l.status].emoji}`,
         callback_data: `open:${l.id}`,
       },
     ]);
   return {
-    text: rows.length ? 'Выберите заявку:' : 'Пусто.',
+    text: rows.length ? 'Выберите заявку:' : 'Открытых заявок нет.',
     reply_markup: { inline_keyboard: rows },
   };
 }
 
-export function buildMenu(role: Role): {
+export const LEDGER_COPY = {
+  credit: '➕ Зачислить',
+  debit: '➖ Списать',
+  prompt: {
+    payout: '➕ Сколько зачислить (в евро)?\n\nНапример: 40 или 40 Иван сервис',
+    settlement: '➖ Сколько списать (в евро)?\n\nНапример: 40 или 40 перевод',
+  },
+  ack: 'Жду сумму',
+  expired: '⌛ Этот запрос уже закрыт — нажмите ➕ или ➖ ещё раз.',
+  badAmount: '⚠️ Нужна сумма числом.',
+  amountLimits: `⚠️ Сумма — от 0,01 до ${formatMoney(MAX_OPERATION_AMOUNT)}, не больше двух знаков после запятой.`,
+} as const;
+
+const BALANCE_LABELS: Record<Role, string> = {
+  owner: '💶 Мой долг',
+  admin: '💶 Мне должны',
+};
+
+const LEDGER_ROW: Btn[] = [
+  { text: LEDGER_COPY.credit, callback_data: 'ledger:payout' },
+  { text: LEDGER_COPY.debit, callback_data: 'ledger:settlement' },
+];
+
+function balanceLine(role: Role, balance: number): string {
+  return `<b>${BALANCE_LABELS[role]}: ${formatMoney(balance)}</b>`;
+}
+
+export function buildMenu(
+  role: Role,
+  balance: number,
+): {
   text: string;
   reply_markup: Keyboard;
 } {
   const rows: Btn[][] = [
-    [{ text: '🆕 Новые', callback_data: 'list:new' }],
-    [{ text: '🗣 Переговоры', callback_data: 'list:negotiations' }],
-    [
-      {
-        text: '🔵 В работе / Отложенные',
-        callback_data: 'list:in_progress+postponed',
-      },
-    ],
-    [{ text: '✅ Успешные', callback_data: 'list:won' }],
-    [{ text: '❌ Отказы', callback_data: 'list:lost' }],
-    [{ text: '📊 Статистика', callback_data: 'menu:stats' }],
+    LEDGER_ROW,
+    [{ text: '📂 Открытые', callback_data: 'menu:open' }],
   ];
-  rows.push([
-    {
-      text: role === 'owner' ? '🔴 Мой долг по комиссии' : '🔴 Мне должны',
-      callback_data: 'menu:debt',
-    },
-  ]);
-  if (role === 'admin') {
-    rows.push([{ text: '💰 Все сделки', callback_data: 'menu:deals' }]);
-  }
+  if (role === 'admin')
+    rows.push([{ text: '📊 Статистика', callback_data: 'menu:stats' }]);
   return {
-    text: '📋 Заявки\n\nМожно также прислать имя, телефон или #номер заявки для поиска (найдёт и архивные).',
+    text: `${balanceLine(role, balance)}\n\n📋 Чтобы найти заявку, пришли имя, телефон или #номер — найдёт и отказы.`,
     reply_markup: { inline_keyboard: rows },
   };
 }
 
-export function buildOwedList(
-  rows: OwedRow[],
-  total: number,
+export function buildBalance(
+  role: Role,
+  balance: number,
 ): { text: string; reply_markup: Keyboard } {
-  if (rows.length === 0) {
-    return {
-      text: '<b>🔴 Долг по комиссии</b>\n\n🟢 Всё оплачено, долгов нет.',
-      reply_markup: { inline_keyboard: [] },
-    };
-  }
-  const buttons: Btn[][] = rows.map((r) => [
-    {
-      text: `#${r.id} ${leadDisplayName(r)} · ${r.brand} — ${formatMoney(r.remaining)}`,
-      callback_data: `open:${r.id}`,
-    },
-  ]);
   return {
-    text: `<b>🔴 Долг по комиссии</b>\n\nИтого: ${formatMoney(total)}`,
-    reply_markup: { inline_keyboard: buttons },
+    text: balanceLine(role, balance),
+    reply_markup: { inline_keyboard: [LEDGER_ROW] },
   };
 }
 
-function paidStatusMark(
-  l: StoredLead & { dealAmount: number },
-  info: CommissionInfo,
+const RE_ASK: Record<OperationRefusal, string> = {
+  no_number: LEDGER_COPY.badAmount,
+  bad_amount: LEDGER_COPY.amountLimits,
+};
+
+export function reAskOperationText(
+  type: OperationType,
+  reason: OperationRefusal,
 ): string {
-  if (info.isPaidOff) return '🟢 Оплачено';
-  if (l.paidAmount > 0)
-    return `🟡 Оплачено ${formatMoney(l.paidAmount)} из ${formatMoney(info.commission)}`;
-  return '🔴 Не оплачено';
+  return `${RE_ASK[reason]}\n\n${LEDGER_COPY.prompt[type]}`;
 }
 
-export function formatDealsList(leads: StoredLead[]): string {
-  const deals = leads
-    .filter(hasDealAmount)
-    .filter((l) => !l.archived)
-    .sort((a, b) => b.id - a.id)
-    .slice(0, MAX_LIST_ROWS);
-  if (deals.length === 0) return '<b>💰 Все сделки</b>\n\nСделок пока нет.';
-  const lines = deals.map((l) => {
-    const info = getCommission(l);
-    return `#${l.id} ${escapeHtml(leadDisplayName(l))} · ${escapeHtml(l.brand)}\nдоход ${formatMoney(l.dealAmount)} · комиссия ${formatMoney(info.commission)}\n${paidStatusMark(l, info)}`;
-  });
-  return ['<b>💰 Все сделки</b>', ...lines].join('\n\n');
+function signedMoney({ type, amount }: LedgerOperation): string {
+  return `${type === 'payout' ? '+' : '−'}${formatMoney(amount)}`;
+}
+
+export function operationRecordedText(
+  operation: LedgerOperation,
+  balance: number,
+): string {
+  return `✅ ${signedMoney(operation)} · баланс ${formatMoney(balance)}`;
+}
+
+export function operationRefusedText(
+  type: OperationType,
+  balance: number,
+): string {
+  return `⚠️ Списать можно не больше баланса: ${formatMoney(balance)}\n\n${LEDGER_COPY.prompt[type]}`;
+}
+
+const OPERATION_AUTHORS: Record<LedgerAuthor, string> = {
+  owner: 'Владелец',
+  admin: 'Админ',
+};
+
+export function operationNoticeText(
+  operation: LedgerOperation,
+  balance: number,
+): string {
+  return [
+    `💶 ${OPERATION_AUTHORS[operation.createdBy]}: ${signedMoney(operation)}`,
+    ...(operation.note ? [escapeHtml(operation.note)] : []),
+    `баланс ${formatMoney(balance)}`,
+  ].join(' · ');
 }
 
 export function buildSearchResults(leads: StoredLead[]): {
@@ -289,50 +250,64 @@ export function buildSearchResults(leads: StoredLead[]): {
       reply_markup: { inline_keyboard: [] },
     };
   const rows: Btn[][] = leads.slice(0, MAX_LIST_ROWS).map((l) => {
-    const amount =
-      l.dealAmount != null ? ` — ${formatMoney(l.dealAmount)}` : '';
-    const label = `${archivedMark(l)}${statusEmoji(l.status)} #${l.id} ${l.brand} ${leadDisplayName(l)} — ${l.contact}${amount}`;
+    const label = `${STATUS_META[l.status].emoji} #${l.id} ${l.brand} ${leadDisplayName(l)} — ${l.contact}`;
     return [{ text: label, callback_data: `open:${l.id}` }];
   });
   return { text: 'Найдено:', reply_markup: { inline_keyboard: rows } };
 }
 
-export function buildStats(leads: StoredLead[], role: Role): string {
-  const active = leads.filter((l) => !l.archived);
-  const archivedCount = leads.length - active.length;
-  const count = (s: LeadStatus) => active.filter((l) => l.status === s).length;
-  const earningLeads = active.filter(hasDealAmount);
-  const sum = (pick: (l: StoredLead & { dealAmount: number }) => number) =>
-    roundMoney(earningLeads.reduce((acc, l) => acc + pick(l), 0));
+const STATS_OPERATION_ROWS = 20;
 
-  const totalEarned = sum((l) => l.dealAmount);
-  const commissionTotal = sum((l) => getCommission(l).commission);
-  const paidTotal = sum((l) => l.paidAmount);
-  const remainingTotal = sum((l) => getCommission(l).remaining);
+const ledgerDate = new Intl.DateTimeFormat('ru-RU', {
+  timeZone: BUSINESS_TIME_ZONE,
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+});
 
-  const moneyLines =
-    role === 'owner'
-      ? [
-          `💰 Заработано: ${formatMoney(totalEarned)}`,
-          `Комиссия к оплате: ${formatMoney(commissionTotal)}`,
-          `Оплачено: ${formatMoney(paidTotal)}`,
-          `🔴 Осталось оплатить: ${formatMoney(remainingTotal)}`,
-        ]
-      : [
-          `💰 Заработано (доход владельца): ${formatMoney(totalEarned)}`,
-          `Комиссия начислена: ${formatMoney(commissionTotal)}`,
-          `Оплачено: ${formatMoney(paidTotal)}`,
-          `🔴 Осталось получить: ${formatMoney(remainingTotal)}`,
-        ];
+function flowLine(label: string, { credited, debited }: FlowSums): string {
+  return `${label}: +${formatMoney(credited)} · −${formatMoney(debited)}`;
+}
 
-  const brands = [...new Set(active.map((l) => l.brand))].sort();
+const MAX_STATS_NOTE = 60;
+
+function clip(text: string): string {
+  return escapeHtml(
+    text.length > MAX_STATS_NOTE
+      ? `${text.slice(0, MAX_STATS_NOTE - 1)}…`
+      : text,
+  );
+}
+
+function statsOperationLine(operation: LedgerOperation): string {
+  return [
+    `• ${ledgerDate.format(new Date(operation.createdAt))}`,
+    signedMoney(operation),
+    OPERATION_AUTHORS[operation.createdBy],
+    ...(operation.note ? [clip(operation.note)] : []),
+  ].join(' · ');
+}
+
+export function buildStats(
+  leads: StoredLead[],
+  operations: LedgerOperation[],
+  now: Date,
+): string {
+  const sums = operationSums(operations, now);
+  const recent = operations
+    .slice(-STATS_OPERATION_ROWS)
+    .reverse()
+    .map(statsOperationLine);
+  const count = (s: LeadStatus) => leads.filter((l) => l.status === s).length;
+
+  const brands = [...new Set(leads.map((l) => l.brand))].sort();
   const brandLines =
     brands.length > 1
       ? [
           `По брендам: ${brands
             .map(
               (b) =>
-                `${escapeHtml(b)} — ${active.filter((l) => l.brand === b).length}`,
+                `${escapeHtml(b)} — ${leads.filter((l) => l.brand === b).length}`,
             )
             .join(' · ')}`,
         ]
@@ -341,29 +316,19 @@ export function buildStats(leads: StoredLead[], role: Role): string {
   return [
     '<b>📊 Статистика</b>',
     '',
-    `Всего заявок: ${active.length}${archivedCount ? ` (+${archivedCount} в архиве)` : ''}`,
-    `🆕 Новые: ${count('new')}   🗣 Переговоры: ${count('negotiations')}   🔵 В работе: ${count('in_progress')}   ✅ Завершено: ${count('won')}   ❌ Отказ: ${count('lost')}   ⏸ Отложено: ${count('postponed')}`,
+    `Всего заявок: ${leads.length}`,
+    (['open', 'postponed', 'won', 'lost'] as const)
+      .map((s) => `${statusMark(s)}: ${count(s)}`)
+      .join('   '),
     ...brandLines,
     '',
-    ...moneyLines,
+    balanceLine('admin', balanceOf(operations)),
+    flowLine('За месяц', sums.month),
+    flowLine('За всё время', sums.total),
+    '',
+    '<b>Последние операции</b>',
+    ...(recent.length ? recent : ['Операций не было.']),
   ].join('\n');
-}
-
-export function commissionResultText(
-  leadId: number,
-  confirmed: boolean,
-): string {
-  return confirmed
-    ? `✅ Оплата по заявке #${leadId} подтверждена.`
-    : `❌ Оплата по заявке #${leadId} не подтверждена, свяжитесь с администратором.`;
-}
-
-export function commissionClaimText(
-  lead: StoredLead & {
-    pendingCommissionClaim: NonNullable<StoredLead['pendingCommissionClaim']>;
-  },
-): string {
-  return `🔔 Отмечена оплата комиссии по заявке #${lead.id}: ${formatMoney(lead.pendingCommissionClaim.amount)}.\n\nПодтвердить?`;
 }
 
 export const EDIT_FIELD_LABELS = {
@@ -375,12 +340,6 @@ export const EDIT_FIELD_LABELS = {
 
 export type EditField = keyof typeof EDIT_FIELD_LABELS;
 
-export const EDIT_COPY = {
-  prompt: (field: EditField) =>
-    `✏️ Введите новое значение (${EDIT_FIELD_LABELS[field]}):`,
-  ack: 'Жду значение',
-} as const;
-
 export const REPLY_COPY = {
   prompt: '💬 Напишите ответ посетителю — бот отправит его в чат:',
   ack: 'Жду сообщение',
@@ -389,6 +348,32 @@ export const REPLY_COPY = {
     '⚠️ Не доставлено: посетитель заблокировал бота или чат недоступен.',
   sent: '✅ Отправлено',
   notePrefix: 'Ответ: ',
+} as const;
+
+const DIGEST_SECTIONS: [keyof Digest, string][] = [
+  ['due', '⏰ Пора вернуться'],
+  ['stale', '🕐 Без движения 7 дней'],
+];
+
+const MAX_DIGEST_NAME = 40;
+
+export const LEAD_ACTION_COPY = {
+  failed: 'Ошибка, попробуйте ещё раз',
+  statusUpdated: 'Статус обновлён',
+  postponed: 'Отложено',
+  postponedUntil: 'Отложено до ',
+  resumed: 'Возобновлено',
+  remindPrompt:
+    '⏰ На какую дату напомнить? (ДД.ММ.ГГГГ)\n\nНапример: 20.10.2026',
+  remindAck: 'Жду дату',
+  badDate:
+    '⚠️ Нужна дата в формате ДД.ММ.ГГГГ, не в прошлом. Попробуйте ещё раз.',
+  notFound: 'Заявка не найдена.',
+  deleted: '🗑 Заявка удалена.',
+  deleteAck: 'Удалено',
+  denied: '⛔ Доступ запрещён.',
+  inWork: 'В работе ⏳',
+  noteAdded: '📝 Заметка добавлена',
 } as const;
 
 const FIELD_PREVIEW_LIMIT = 120;
@@ -402,8 +387,6 @@ function fieldPreview(value: string | null | undefined): string {
       : `${text.slice(0, FIELD_PREVIEW_LIMIT)}…`,
   );
 }
-
-export type FieldChangeAuthor = 'operator' | 'visitor';
 
 export const REFERRAL_NOTE = 'Пришёл из бота Approved.rs (Партнёры)';
 
@@ -423,34 +406,7 @@ export function quarantinedLeadsText(
 }
 
 export function statusChangeText(lead: StoredLead): string {
-  const meta = statusMeta(lead.status);
-  return `🔔 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: статус — ${meta.emoji} ${meta.label}`;
-}
-
-export function incomeNotificationText(
-  lead: StoredLead,
-  income: Income,
-): string {
-  return [
-    `💶 Доход по заявке #${lead.id} ${escapeHtml(leadDisplayName(lead))}`,
-    ``,
-    `Получено: ${formatMoney(income.amount)}`,
-    `Твоя комиссия (${lead.commissionPercent}%): ${formatMoney(incomeCommission(income.amount, lead.commissionPercent))}`,
-  ].join('\n');
-}
-
-export function dealNotificationText(
-  lead: StoredLead & { dealAmount: number },
-): string {
-  const { commission } = getCommission(lead);
-  return [
-    `💰 Новая сделка`,
-    ``,
-    `#${lead.id} ${escapeHtml(leadDisplayName(lead))}`,
-    ``,
-    `Доход с заявки: ${formatMoney(lead.dealAmount)}`,
-    `Твоя комиссия (${lead.commissionPercent}%): ${formatMoney(commission)}`,
-  ].join('\n');
+  return `🔔 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: статус — ${statusMark(lead.status)}`;
 }
 
 export function createFormatter({
@@ -483,7 +439,7 @@ export function createFormatter({
     return `🏷 ${escapeHtml(lead.brand)}${via}${referred}`;
   }
 
-  function formatLeadText(lead: StoredLead, role: Role): string {
+  function formatLeadText(lead: StoredLead): string {
     const contactLine = lead.contactChannel
       ? `${lead.contact} (${channelLabel(lead.contactChannel)})`
       : lead.contact;
@@ -492,13 +448,6 @@ export function createFormatter({
       brandLine(lead),
       statusLine(lead.status),
     ];
-    if (lead.dealAmount != null) {
-      lines.push(
-        role === 'owner'
-          ? `💰 Твой доход с заявки: ${formatMoney(lead.dealAmount)}`
-          : `💰 Доход владельца с заявки: ${formatMoney(lead.dealAmount)}`,
-      );
-    }
     if (lead.status === 'postponed' && lead.remindAt)
       lines.push(`⏰ Напомнить: ${formatDateRu(lead.remindAt)}`);
     lines.push(
@@ -516,55 +465,6 @@ export function createFormatter({
     return lines.join('\n');
   }
 
-  function moneyStatusLines(lead: StoredLead, info: CommissionInfo): string[] {
-    const lines = [
-      '',
-      ...(lead.incomes.length
-        ? ['💶 Доходы:', ...lead.incomes.map((i) => incomeLine(lead, i)), '']
-        : []),
-      `💰 Комиссия Zikrasoft: ${formatMoney(info.commission)} · ${info.isPaidOff ? '🟢 Оплачено' : `Осталось: ${formatMoney(info.remaining)}`}`,
-    ];
-    if (lead.pendingCommissionClaim)
-      lines.push(
-        `🕓 Ожидает подтверждения: ${formatMoney(lead.pendingCommissionClaim.amount)}`,
-      );
-    return lines;
-  }
-
-  function moneyActionRows(
-    lead: StoredLead,
-    role: Role,
-    info: CommissionInfo,
-  ): Btn[][] {
-    if (role === 'owner') {
-      if (info.isPaidOff || lead.pendingCommissionClaim) return [];
-      const unpaid = unpaidIncomes(lead);
-      const rows: Btn[][] = unpaid.map((i) => [
-        {
-          text: `💸 Оплатил ${formatMoney(incomeCommission(i.amount, lead.commissionPercent))} с ${formatMoney(i.amount)} от ${formatDateRu(i.at)}`,
-          callback_data: `claimpay:${lead.id}:${i.id}`,
-        },
-      ]);
-      if (unpaid.length > 1) {
-        rows.unshift([
-          {
-            text: `💸 Оплатил всё — ${formatMoney(info.remaining)}`,
-            callback_data: `claimpay:${lead.id}`,
-          },
-        ]);
-      }
-      return rows;
-    }
-    return lead.pendingCommissionClaim
-      ? [
-          [
-            { text: '✅ Подтвердить', callback_data: `confirmpay:${lead.id}` },
-            { text: '❌ Отклонить', callback_data: `rejectpay:${lead.id}` },
-          ],
-        ]
-      : [];
-  }
-
   function shownValue(
     field: EditField,
     value: string | null | undefined,
@@ -579,11 +479,10 @@ export function createFormatter({
       lead: StoredLead,
       field: EditField,
       before: string | null | undefined,
-      author: FieldChangeAuthor = 'operator',
     ): string {
       return [
         `✏️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${EDIT_FIELD_LABELS[field]}`,
-        ...(author === 'visitor' ? [VISITOR_CHANGE_MARK] : []),
+        VISITOR_CHANGE_MARK,
         ``,
         `Было: ${fieldPreview(shownValue(field, before))}`,
         `Стало: ${fieldPreview(shownValue(field, lead[field]))}`,
@@ -591,7 +490,7 @@ export function createFormatter({
     },
 
     formatTeaser(lead: StoredLead): string {
-      return `${archivedMark(lead)}🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusEmoji(lead.status)} ${statusLabel(lead.status)}\n${brandLine(lead)}`;
+      return `🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusMark(lead.status)}\n${brandLine(lead)}`;
     },
 
     deepLinkKeyboard(id: number): Keyboard {
@@ -603,17 +502,45 @@ export function createFormatter({
               url: `https://t.me/${botUsername}?start=lead_${id}`,
             },
           ],
+          [
+            { text: '✅ Сделка', callback_data: `won:${id}` },
+            { text: '❌ Отказ', callback_data: `lost:${id}` },
+            { text: '⏳ В работе', callback_data: `work:${id}` },
+          ],
         ],
       };
     },
 
-    postponeReminderText(lead: StoredLead): string {
-      return [
-        `⏰ Напоминание по заявке #${lead.id}`,
-        ``,
-        `${escapeHtml(leadDisplayName(lead))} — ${escapeHtml(servicesLabel(lead))}`,
-        `Ты просил напомнить сегодня — заявка снова активна.`,
-      ].join('\n');
+    digestMessage(
+      digest: Digest,
+    ): { text: string; reply_markup: Keyboard } | null {
+      const lines = ['<b>📋 Заявки ждут решения</b>'];
+      const rows: Btn[][] = [];
+      let hidden = 0;
+      for (const [key, title] of DIGEST_SECTIONS) {
+        const leads = digest[key];
+        const shown = leads.slice(0, MAX_LIST_ROWS - rows.length);
+        hidden += leads.length - shown.length;
+        if (shown.length === 0) continue;
+        lines.push('', `<b>${title}</b>`);
+        for (const l of shown) {
+          const name = leadDisplayName(l).slice(0, MAX_DIGEST_NAME);
+          lines.push(
+            `<a href="https://t.me/${botUsername}?start=lead_${l.id}">#${l.id}</a> ${escapeHtml(name)} · ${escapeHtml(l.brand)}`,
+          );
+          rows.push([
+            { text: `✅ #${l.id}`, callback_data: `won:${l.id}` },
+            { text: `❌ #${l.id}`, callback_data: `lost:${l.id}` },
+            { text: `⏳ #${l.id}`, callback_data: `work:${l.id}` },
+          ]);
+        }
+      }
+      if (rows.length === 0) return null;
+      if (hidden > 0) lines.push('', `+${hidden} ещё`);
+      return {
+        text: lines.join('\n'),
+        reply_markup: { inline_keyboard: rows },
+      };
     },
 
     buildHelp(role: Role): string {
@@ -621,36 +548,29 @@ export function createFormatter({
         return [
           '<b>❓ Как пользоваться</b>',
           '',
-          '<b>Заявки</b>',
-          '🆕 Новая → 🗣 Переговоры → 🔵 В работу → ✅ Завершить (укажи свою прибыль в €) или ❌ Отказ.',
-          'Не договорились сейчас? ⏰ Отложить — укажи дату (ДД.ММ.ГГГГ), заявка сама вернётся на прежний этап в этот день, или жми ▶️ Возобновить раньше.',
-          'В заявке можно поправить имя/контакт/комментарий или архивировать.',
+          '<b>Карточка в группе</b>',
+          '✅ Сделка, ❌ Отказ — итог заявки, она уходит из списков. ⏳ В работе — отметить, что занимаешься.',
+          'Ответь на карточку текстом — он сохранится заметкой в заявке.',
           '',
-          '<b>Деньги</b>',
-          'Получил предоплату или частичный расчёт — ➕ Добавить доход прямо в работе, сколько угодно раз.',
-          'При ✅ Завершить бот спросит, сколько ты заработал сверх уже добавленного (0 — если больше ничего).',
-          '',
-          '<b>Комиссия</b>',
-          'Ставка указана в самой заявке — она своя у каждого бизнеса. Считается с каждого дохода отдельно.',
-          'Кнопка 💸 Оплатил — своя на каждый неоплаченный доход, плюс 💸 Оплатил всё, если их несколько. Админ подтвердит или отклонит.',
+          '<b>В боте</b>',
+          '📂 Открыть в боте — вся заявка: ⏰ Отложить до даты (в этот день вернётся в открытые) и 💬 ответить посетителю через бота.',
           '',
           '<b>Меню</b>',
-          'Списки заявок, 📊 Статистика, 🔴 Мой долг по комиссии. Найти заявку — просто пришли имя, телефон или номер.',
+          'Сверху — 💶 Мой долг. ➕ Зачислить — добавить, сколько должен; ➖ Списать — убрать, что уже отправил. Бот спросит сумму: ответь 40 или 40 Иван сервис. Ошибся — исправь обратной операцией.',
+          '📂 Открытые. Найти заявку — пришли имя, телефон или номер (найдёт и отказы).',
         ].join('\n');
       }
       return [
         '<b>❓ Как пользоваться</b>',
         '',
-        'Заявки можно двигать в работу, но завершает или отказывает только владелец — у тебя таких кнопок нет.',
-        '',
-        '<b>Комиссия</b>',
-        'Когда владелец отмечает оплату — тебе приходит уведомление, жми ✅ Подтвердить или ❌ Отклонить.',
+        'Заявки ведёт владелец: ✅ Сделка, ❌ Отказ, ⏳ В работе на карточке в группе.',
         '',
         '<b>Меню</b>',
-        '📊 Статистика, 🔴 Мне должны (кто ещё не оплатил), 💰 Все сделки — полный список с суммами. Найти заявку — просто пришли имя, телефон или номер.',
+        'Сверху — 💶 Мне должны. ➖ Списать — когда деньги пришли, ➕ Зачислить — если владелец что-то забыл. Бот спросит сумму: ответь 40 или 40 перевод. О каждой операции владельца тебе придёт уведомление.',
+        '📂 Открытые, 📊 Статистика. Найти заявку — пришли имя, телефон или номер (найдёт и отказы).',
         '',
         '<b>Удаление</b>',
-        '❌ Удалить навсегда — только у тебя, владелец такого не видит. Спросит подтверждение и стирает заявку без возврата (в отличие от 🗑 Архивировать).',
+        '❌ Удалить навсегда — только у тебя. Спросит подтверждение и стирает заявку без возврата.',
       ].join('\n');
     },
 
@@ -663,40 +583,8 @@ export function createFormatter({
           ? [[{ text: '❌ Удалить навсегда', callback_data: `del:${lead.id}` }]]
           : [];
 
-      if (lead.archived) {
-        return {
-          text: `${formatLeadText(lead, role)}\n\n🗄 В архиве`,
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: '♻️ Восстановить', callback_data: `unarch:${lead.id}` }],
-              ...deleteRow,
-            ],
-          },
-        };
-      }
-
-      const commission = hasDealAmount(lead) ? getCommission(lead) : null;
-      const lines = [
-        formatLeadText(lead, role),
-        ...(commission ? moneyStatusLines(lead, commission) : []),
-      ];
       const rows: Btn[][] = [
-        ...buildStatusKeyboard(lead, role).inline_keyboard,
-        ...(canAddIncome(lead, role)
-          ? [
-              [
-                {
-                  text: '➕ Добавить доход',
-                  callback_data: `income:${lead.id}`,
-                },
-              ],
-            ]
-          : []),
-        [
-          { text: '✏️ Имя', callback_data: `edit:${lead.id}:name` },
-          { text: '✏️ Контакт', callback_data: `edit:${lead.id}:contact` },
-          { text: '✏️ Комментарий', callback_data: `edit:${lead.id}:comment` },
-        ],
+        ...statusRows(lead, role),
         ...(canReplyThroughBot(lead)
           ? [
               [
@@ -707,13 +595,11 @@ export function createFormatter({
               ],
             ]
           : []),
-        ...(commission ? moneyActionRows(lead, role, commission) : []),
-        [{ text: '🗑 Архивировать', callback_data: `arch:${lead.id}` }],
         ...deleteRow,
       ];
 
       return {
-        text: lines.join('\n'),
+        text: formatLeadText(lead),
         reply_markup: { inline_keyboard: rows },
       };
     },

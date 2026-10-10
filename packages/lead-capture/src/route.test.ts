@@ -292,7 +292,6 @@ beforeEach(() => {
   const storages: Record<string, MemoryStorage> = {};
   ({ leadStore } = createBrandStore({
     brand: BRAND,
-    commissionPercent: 10,
     storageFor: (path) => (storages[path] = createMemoryStorage()),
     getNotifier: vi.fn(),
   }));
@@ -384,7 +383,7 @@ describe('updates that are not a visitor pressing Start', () => {
 });
 
 describe('the Lead written at /start', () => {
-  it('puts a card in front of the operator with the contact already on it', async () => {
+  it('puts a card in front of the owner with the contact already on it', async () => {
     await POST(makeCtx(startUpdate('vehicle-sourcing_sr')));
     expect(cards()).toEqual([
       expect.objectContaining({
@@ -889,8 +888,7 @@ describe('abandoning the dialog', () => {
     expect(stored()[0]).toMatchObject({
       contact: 'tg://user?id=777',
       service: 'vehicle-sourcing',
-      status: 'new',
-      archived: false,
+      status: 'open',
     });
     expect(cards()).toHaveLength(1);
   });
@@ -907,18 +905,18 @@ describe('abandoning the dialog', () => {
   });
 });
 
-describe('an operator editing the same Lead mid-dialog', () => {
+describe('an owner editing the same Lead mid-dialog', () => {
   it('neither side overwrites the other', async () => {
     await begin();
     editLead(1, {
       name: 'Иван Петрович',
-      pendingPrompt: { chatId: 111, messageId: 555, kind: 'edit_name' },
+      pendingPrompt: { chatId: 111, messageId: 555, kind: 'reply_visitor' },
     });
 
     await say('BMW X5');
 
     expect(stored()[0].name).toBe('Иван Петрович');
-    expect(stored()[0].pendingPrompt?.kind).toBe('edit_name');
+    expect(stored()[0].pendingPrompt?.kind).toBe('reply_visitor');
     expect(stored()[0].comment).toContain('Ищет: BMW X5');
     expect(stored()[0].capturePrompt?.step).toBe('budget');
   });
@@ -1205,12 +1203,12 @@ describe('free text outside the dialog', () => {
     expect(lastSent()).toEqual([42, 'GREETING_ru\n\nMENU']);
   });
 
-  it('opens a new enquiry when the only Lead is archived', async () => {
+  it('opens a new enquiry when the only Lead is lost', async () => {
     await begin();
     await say('BMW X5');
     await say('20 000');
     await say('SKIP');
-    editLead(1, { archived: true });
+    editLead(1, { status: 'lost' });
 
     await say('я вернулся');
 
@@ -1644,7 +1642,6 @@ describe('a visitor referred by the Approved bot', () => {
 
     expect(stored()[0]).toMatchObject({
       brand: BRAND,
-      commissionPercent: 10,
       service: '',
       locale: 'sr',
       referredBy: 'approved',
@@ -1667,14 +1664,13 @@ describe('a visitor referred by the Approved bot', () => {
 
   it.each([
     'from-approved_CarLab_sr',
-    'from-approved_brand-CarLab_commissionPercent-0_sr',
+    'from-approved_brand-CarLab_sr',
     'brand-CarLab_from-approved_sr',
-  ])('cannot be filed under another brand or rate: %s', async (payload) => {
+  ])('cannot be filed under another brand: %s', async (payload) => {
     await POST(makeCtx(startUpdate(payload)));
 
     expect(stored()[0]).toMatchObject({
       brand: BRAND,
-      commissionPercent: 10,
     });
   });
 

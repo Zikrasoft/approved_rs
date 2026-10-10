@@ -32,29 +32,51 @@ beforeEach(() => {
 
 describe('read', () => {
   it('reports an empty snapshot when nothing is stored yet', async () => {
+    head.mockRejectedValue(new FakeNotFoundError());
+
+    await expect(storage.read()).resolves.toEqual({
+      raw: undefined,
+      version: undefined,
+    });
+    expect(get).not.toHaveBeenCalled();
+  });
+
+  it('reports an empty snapshot when the blob goes between head() and get()', async () => {
+    head.mockResolvedValue({ etag: 'e1' });
     get.mockResolvedValue(null);
 
     await expect(storage.read()).resolves.toEqual({
       raw: undefined,
       version: undefined,
     });
-    // No blob means no etag to fetch.
-    expect(head).not.toHaveBeenCalled();
   });
 
-  it('parses the stored JSON and takes the version from head(), not from get()', async () => {
-    // get()'s own etag has been observed stale in production — the adapter
-    // must ignore it and use head()'s instead.
-    get.mockResolvedValue({
-      stream: new Response('[{"id":1}]').body,
-      blob: { etag: 'stale-etag' },
+  it('takes the version before the body, so a write in between costs a conflict, never a lost write', async () => {
+    const order: string[] = [];
+    head.mockImplementation(async () => {
+      order.push('head');
+      return { etag: 'older-etag' };
     });
-    head.mockResolvedValue({ etag: 'fresh-etag' });
+    get.mockImplementation(async () => {
+      order.push('get');
+      return {
+        stream: new Response('[{"id":1}]').body,
+        blob: { etag: 'newer-etag' },
+      };
+    });
 
     await expect(storage.read()).resolves.toEqual({
       raw: [{ id: 1 }],
-      version: 'fresh-etag',
+      version: 'older-etag',
     });
+    expect(order).toEqual(['head', 'get']);
+  });
+
+  it('lets a failing head() through', async () => {
+    const boom = new Error('store suspended');
+    head.mockRejectedValue(boom);
+
+    await expect(storage.read()).rejects.toBe(boom);
   });
 
   it('reads past the cache so a conditional write cannot be fed a stale etag', async () => {
@@ -88,12 +110,41 @@ describe('write', () => {
     );
   });
 
-  it('omits ifMatch on the very first write, when there is no blob to match', async () => {
+  it('conditions the write on any known version, an empty etag included', async () => {
+    put.mockResolvedValue({ etag: 'e2' });
+
+    await storage.write([], '');
+
+    expect(put.mock.calls[0]![2]).toMatchObject({
+      allowOverwrite: true,
+      ifMatch: '',
+    });
+  });
+
+  it('creates only on the very first write, when there is no blob to match', async () => {
     put.mockResolvedValue({ etag: 'e1' });
 
     await storage.write([], undefined);
 
     expect(put.mock.calls[0]![2]).not.toHaveProperty('ifMatch');
+    expect(put.mock.calls[0]![2]).toMatchObject({ allowOverwrite: false });
+  });
+
+  it('turns a refused create over an existing blob into a storage conflict', async () => {
+    put.mockRejectedValue(new Error('blob already exists'));
+    head.mockResolvedValue({ etag: 'e1' });
+
+    await expect(storage.write([], undefined)).rejects.toBeInstanceOf(
+      StorageConflictError,
+    );
+  });
+
+  it('lets a failed create through when no blob is there', async () => {
+    const boom = new Error('network down');
+    put.mockRejectedValue(boom);
+    head.mockRejectedValue(new FakeNotFoundError());
+
+    await expect(storage.write([], undefined)).rejects.toBe(boom);
   });
 
   it('translates a losing conditional write into a storage conflict', async () => {
@@ -133,7 +184,7 @@ describe('createBlobOrderMarkers', () => {
   });
 
   it('knows a taken marker from an untaken one', async () => {
-    head.mockResolvedValueOnce({});
+    head.mockResolvedValueOnce({ etag: 'm1' });
     await expect(markers.has('o1')).resolves.toBe(true);
 
     head.mockRejectedValueOnce(new FakeNotFoundError());

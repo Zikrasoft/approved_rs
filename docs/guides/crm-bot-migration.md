@@ -1,6 +1,6 @@
 # Moving the CRM to `@SerbCRMBot`
 
-A runbook for one sitting. It moves the operator-facing CRM from `@ApprovedRsBot`
+A runbook for one sitting. It moves the owner-facing CRM from `@ApprovedRsBot`
 to `@SerbCRMBot` and gives every open lead a working card again. Why there are
 four bots at all: [ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md).
 
@@ -103,7 +103,7 @@ Delete the dead ones by hand if they bother you.
 
 The direct-message cards from before the switch stay dead for good. Only the
 group teaser has a stored address; a DM card is rendered on demand when the
-operator taps «Открыть в боте». Repointing `TELEGRAM_BOT_USERNAME` in step 3 is
+owner taps «Открыть в боте». Repointing `TELEGRAM_BOT_USERNAME` in step 3 is
 what makes that link open `@SerbCRMBot` — ADR-0030 accepts the rest.
 
 ## 7. Check the CRM answers at all
@@ -121,14 +121,17 @@ In the leads group and in a DM with `@SerbCRMBot`:
 
 - [ ] A teaser from step 7 is in the group, and its «Открыть в боте» button opens
       `@SerbCRMBot`, not `@ApprovedRsBot`.
-- [ ] **Status change** — open a lead from the teaser, move it to «В работе»; the
-      DM card redraws and the group teaser's status line follows.
-- [ ] **Deal amount** — mark a lead «Успешно», answer the amount prompt by
-      replying in the DM; the amount and the commission appear on the card and the
-      admin gets the deal notification.
-- [ ] **Postpone** — «Напомни мне», pick a date; the lead goes to `postponed` and
-      `remindAt` is set. The cron (`/api/reminders`, daily) delivers it; to check
-      it now, set the date to today and wait for the next run.
+- [ ] **Status change** — open a lead from the teaser, close it as «✅ Сделка» or
+      «❌ Отказ»; the DM card redraws and the group teaser's status line follows.
+      «⏳» changes no status: it only records a touch, so the Lead drops out of
+      the stale list.
+- [ ] **Payout** — in the DM menu tap «➕ Зачислить», reply `1 тест`; the bot
+      answers `✅ +1 € · баланс …` and the admin gets the notice. Undo it with
+      «➖ Списать» `1`.
+- [ ] **Postpone** — «⏰ Отложить», pick a date; the lead goes to `postponed` and
+      `remindAt` is set. On that day it comes back through the group digest
+      (`/api/reminders`, daily), which lists it and reopens it; to check it now,
+      set the date to today and wait for the next run.
 - [ ] **A new form lead** — submit the lead form on approved.rs; a new teaser
       appears, posted by `@SerbCRMBot`.
 - [ ] **A shop order** — place a test order on carlab.rs (or re-fire the order

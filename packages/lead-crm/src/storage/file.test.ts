@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
+import { chmod, mkdir, mkdtemp, readdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -60,11 +60,30 @@ describe('createFileStorage', () => {
     await expect(store.read()).resolves.toMatchObject({ raw: [{ id: 'b' }] });
   });
 
-  it('overwrites unconditionally when no version is given', async () => {
+  it('creates only: a write without a version over an existing file is a conflict', async () => {
     const store = storage();
     await store.write([{ id: 'a' }], undefined);
-    await store.write([{ id: 'b' }], undefined);
-    await expect(store.read()).resolves.toMatchObject({ raw: [{ id: 'b' }] });
+    await expect(store.write([{ id: 'b' }], undefined)).rejects.toThrow(
+      StorageConflictError,
+    );
+    await expect(store.read()).resolves.toMatchObject({ raw: [{ id: 'a' }] });
+  });
+
+  it('creates the file whole, in one step, and leaves no staging file behind', async () => {
+    const store = storage();
+    await Promise.allSettled([
+      store.write([{ id: 'a' }], undefined),
+      store.write([{ id: 'b' }], undefined),
+    ]);
+    const { raw } = await store.read();
+    expect([[{ id: 'a' }], [{ id: 'b' }]]).toContainEqual(raw);
+    expect(await readdir(join(dir, 'data'))).toEqual(['leads.json']);
+  });
+
+  it('lets any other create failure through', async () => {
+    await mkdir(join(dir, 'data'), { recursive: true });
+    await chmod(join(dir, 'data'), 0o500);
+    await expect(storage().write([], undefined)).rejects.toThrow(/EACCES/);
   });
 
   it('rethrows a read failure that is not a missing file', async () => {

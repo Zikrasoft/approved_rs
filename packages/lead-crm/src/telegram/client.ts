@@ -91,7 +91,7 @@ export function createTelegramClient(botToken: string, botUsername: string) {
 
     async sendForceReplyPrompt(chatId: number, text: string): Promise<number> {
       const sent = await api.sendMessage(chatId, text, {
-        reply_markup: { force_reply: true, selective: true },
+        reply_markup: { force_reply: true },
       });
       return sent.message_id;
     },

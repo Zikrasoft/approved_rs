@@ -1,25 +1,20 @@
-import { COMMISSION_PERCENT } from '@podbor/brands';
 import {
   createBrandStore,
-  deferStorage,
+  localLeadStorage,
   type LeadStorage,
 } from '@podbor/lead-crm';
 import { createVercelBlobStorage } from '@podbor/lead-crm/storage/vercel-blob';
 import { SITE_NAME } from '@/utils/constants';
-import { localOrBlob } from './localOrBlob';
 
 export const BRAND = SITE_NAME;
 
-const storageFor = (path: string) =>
-  localOrBlob<LeadStorage>(
-    () => createVercelBlobStorage({ path }),
-    ({ createFileStorage }, dir) => createFileStorage({ path, dir }),
-    deferStorage,
-  );
+const storageFor = (path: string): LeadStorage => {
+  if (import.meta.env.DEV) return localLeadStorage(path);
+  return createVercelBlobStorage({ path });
+};
 
-export const { leadStore, leadSchema } = createBrandStore({
+export const { leadStore } = createBrandStore({
   brand: BRAND,
-  commissionPercent: COMMISSION_PERCENT.carlab,
   storageFor,
   getNotifier: () => import('./crmBot'),
 });

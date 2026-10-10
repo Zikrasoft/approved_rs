@@ -17,31 +17,45 @@ export interface VercelBlobStorageOptions {
   path: string;
 }
 
+async function etagOf(path: string): Promise<string | undefined> {
+  try {
+    return (await head(path)).etag;
+  } catch (error) {
+    if (error instanceof BlobNotFoundError) return undefined;
+    throw error;
+  }
+}
+
+const exists = async (path: string) => (await etagOf(path)) !== undefined;
+
 export function createVercelBlobStorage({
   path,
 }: VercelBlobStorageOptions): LeadStorage {
   return {
     async read(): Promise<StorageSnapshot> {
+      const version = await etagOf(path);
+      if (version === undefined) return { raw: undefined, version };
       const result = await get(path, { access: 'private', useCache: false });
       if (!result) return { raw: undefined, version: undefined };
       const text = await new Response(result.stream).text();
-      const raw: unknown = JSON.parse(text);
-      const version = (await head(path)).etag;
-      return { raw, version };
+      return { raw: JSON.parse(text) as unknown, version };
     },
 
     async write(leads: unknown, version: string | undefined): Promise<void> {
       const options: Parameters<typeof put>[2] = {
         access: 'private',
-        allowOverwrite: true,
+        allowOverwrite: version !== undefined,
         contentType: 'application/json',
       };
-      if (version) options.ifMatch = version;
+      if (version !== undefined) options.ifMatch = version;
       try {
         await put(path, JSON.stringify(leads), options);
       } catch (err) {
         if (err instanceof BlobPreconditionFailedError) {
           throw new StorageConflictError(err.message);
+        }
+        if (version === undefined && (await exists(path))) {
+          throw new StorageConflictError('blob already exists');
         }
         throw err;
       }
@@ -51,15 +65,7 @@ export function createVercelBlobStorage({
 
 export function createBlobOrderMarkers(): OrderMarkers {
   return {
-    async has(orderId: string): Promise<boolean> {
-      try {
-        await head(markerPath(orderId));
-        return true;
-      } catch (error) {
-        if (error instanceof BlobNotFoundError) return false;
-        throw error;
-      }
-    },
+    has: (orderId: string) => exists(markerPath(orderId)),
 
     async add(orderId: string): Promise<void> {
       await put(markerPath(orderId), markerBody(orderId), {

@@ -1,6 +1,7 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import {
   access,
+  link,
   mkdir,
   readFile,
   rename,
@@ -28,8 +29,10 @@ export interface FileStorageOptions {
 const versionOf = (text: string): string =>
   createHash('sha1').update(text).digest('hex');
 
-const isMissing = (error: unknown): boolean =>
-  error instanceof Error && 'code' in error && error.code === 'ENOENT';
+const hasCode = (error: unknown, code: string): boolean =>
+  error instanceof Error && 'code' in error && error.code === code;
+const isMissing = (error: unknown) => hasCode(error, 'ENOENT');
+const isExisting = (error: unknown) => hasCode(error, 'EEXIST');
 
 export function createFileStorage({
   path,
@@ -51,11 +54,20 @@ export function createFileStorage({
     read,
 
     async write(leads: unknown, version: string | undefined): Promise<void> {
-      if (version !== undefined && version !== (await read()).version) {
-        throw new StorageConflictError();
-      }
-      const staging = `${file}.tmp`;
       await mkdir(dirname(file), { recursive: true });
+      const staging = `${file}.${randomUUID()}.tmp`;
+      if (version === undefined) {
+        await writeFile(staging, JSON.stringify(leads));
+        try {
+          await link(staging, file);
+        } catch (error) {
+          throw isExisting(error) ? new StorageConflictError() : error;
+        } finally {
+          await unlink(staging);
+        }
+        return;
+      }
+      if (version !== (await read()).version) throw new StorageConflictError();
       await writeFile(staging, JSON.stringify(leads));
       await rename(staging, file);
     },

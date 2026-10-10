@@ -1,47 +1,23 @@
 import { z } from 'zod';
-import { format } from 'date-fns';
-import {
-  appendIncome,
-  getCommission,
-  hasDealAmount,
-  incomeCommission,
-  roundMoney,
-  unpaidIncomes,
-  PAID_EPSILON,
-} from './money.ts';
 import { channelLabel } from './channelLabels.ts';
-import { postponableStatus } from './schema.ts';
+import { isClosed } from './schema.ts';
 import type {
   CapturePrompt,
   Referrer,
   LeadInput,
   LeadStatus,
-  PendingCommissionClaim,
   PendingPrompt,
   StoredLead,
 } from './schema.ts';
 import type { StoredLeadSchema } from './schema.ts';
-import {
-  StorageConflictError,
-  storedRecordsSchema,
-  type LeadStorage,
-} from './storage/types.ts';
+import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
+import { retryOnConflict } from './storage/retry.ts';
 import { LEADS_PATH } from './quarantine.ts';
+import { businessDay } from './businessTime.ts';
 
-const MAX_RETRIES = 6;
 export const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
 
 export const MAX_LIST_ROWS = 20;
-
-export interface OwedRow {
-  id: number;
-  name: string;
-  brand: string;
-  dealAmount: number;
-  commissionAmount: number;
-  paidAmount: number;
-  remaining: number;
-}
 
 export interface CaptureUpdate {
   note?: string;
@@ -58,23 +34,52 @@ export interface MergeOutcome {
   before: StoredLead | null;
 }
 
+const STALE_AFTER_MS = 7 * 24 * 60 * 60 * 1000;
+
+export interface Digest {
+  stale: StoredLead[];
+  due: StoredLead[];
+}
+
+const digestMarkSchema = z.object({
+  type: z.literal('digest'),
+  day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  createdAt: z.string(),
+});
+type DigestMark = z.infer<typeof digestMarkSchema>;
+
+function lastActionAt(lead: StoredLead): number {
+  return Math.max(
+    Date.parse(lead.statusChangedAt),
+    lead.lastActivityAt ? Date.parse(lead.lastActivityAt) : 0,
+  );
+}
+
+interface StoreRecords {
+  leads: StoredLead[];
+  digests: DigestMark[];
+}
+
+function digestOf(leads: StoredLead[], now: Date): Digest {
+  const today = businessDay(now);
+  return {
+    stale: leads.filter(
+      (l) =>
+        l.status === 'open' &&
+        now.getTime() - lastActionAt(l) >= STALE_AFTER_MS,
+    ),
+    due: leads.filter(
+      (l) =>
+        l.status === 'postponed' && l.remindAt != null && l.remindAt <= today,
+    ),
+  };
+}
+
 export interface LeadStoreOptions {
   storage: LeadStorage;
   schema: StoredLeadSchema;
   quarantine?: (entries: unknown[]) => Promise<void>;
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function backoffDelay(attempt: number): number {
-  const base = 25 * 2 ** attempt;
-  return base + Math.random() * base;
-}
-
-function todayISODate(): string {
-  return format(new Date(), 'yyyy-MM-dd');
+  beforeWrite?: () => Promise<void>;
 }
 
 export function isPlaceholderContact(contact: string): boolean {
@@ -87,12 +92,15 @@ function isPhoneContact(contact: string): boolean {
 
 export const GHOST_LEAD_RETENTION_MS = 24 * 60 * 60 * 1000;
 
+function untouched(lead: StoredLead): boolean {
+  return lead.status === 'open' && lead.lastActivityAt == null;
+}
+
 function isGhostLead(lead: StoredLead, now: Date): boolean {
   return (
     lead.kind === 'call_click' &&
     isPlaceholderContact(lead.contact) &&
-    lead.status === 'new' &&
-    !lead.archived &&
+    untouched(lead) &&
     now.getTime() - new Date(lead.createdAt).getTime() >=
       GHOST_LEAD_RETENTION_MS
   );
@@ -104,14 +112,7 @@ function newestOpen(
   matches: (lead: StoredLead) => boolean,
 ): StoredLead | undefined {
   return leads
-    .filter(
-      (l) =>
-        l.brand === brand &&
-        !l.archived &&
-        l.status !== 'won' &&
-        l.status !== 'lost' &&
-        matches(l),
-    )
+    .filter((l) => l.brand === brand && !isClosed(l) && matches(l))
     .sort((a, b) => a.id - b.id)
     .at(-1);
 }
@@ -135,7 +136,7 @@ export function appendNote(
 }
 
 export function canPostpone(lead: StoredLead): boolean {
-  return postponableStatus(lead.status) !== null;
+  return lead.status === 'open';
 }
 
 export function postponePatch(
@@ -145,7 +146,6 @@ export function postponePatch(
 ): Partial<StoredLead> {
   return {
     ...statusPatch('postponed'),
-    postponedFrom: postponableStatus(lead.status),
     remindAt,
     comment: appendNote(lead.comment, note),
   };
@@ -158,23 +158,13 @@ export function statusPatch(
   return { status: to, statusChangedAt: at.toISOString() };
 }
 
-export function resumePatch(lead: StoredLead): Partial<StoredLead> {
-  return {
-    ...statusPatch(lead.postponedFrom ?? 'in_progress'),
-    postponedFrom: null,
-    remindAt: null,
-  };
+export function resumePatch(): Partial<StoredLead> {
+  return { ...statusPatch('open'), remindAt: null };
 }
 
-export function wonPatch(
-  lead: StoredLead,
-  amount: number,
-): Partial<StoredLead> {
-  return {
-    ...statusPatch('won'),
-    incomes: amount > 0 ? appendIncome(lead.incomes, amount) : lead.incomes,
-  };
-}
+const retiredRecord = z.looseObject({
+  type: z.enum(['draft', 'payout', 'settlement', 'summary', 'settle_prompt']),
+});
 
 const unreadableId = z.object({
   id: z.coerce
@@ -195,19 +185,20 @@ export function createLeadStore({
   storage,
   schema,
   quarantine,
+  beforeWrite,
 }: LeadStoreOptions) {
   function newStoredLead(data: LeadInput, id: number): StoredLead {
     const now = new Date().toISOString();
     return schema.parse({ ...data, id, statusChangedAt: now, createdAt: now });
   }
 
-  async function readSnapshot(): Promise<{
-    leads: StoredLead[];
-    unreadable: unknown[];
-    version: string | undefined;
-  }> {
+  async function readSnapshot(): Promise<
+    StoreRecords & { unreadable: unknown[]; version: string | undefined }
+  > {
     const { raw, version } = await storage.read();
-    if (raw === undefined) return { leads: [], unreadable: [], version };
+    if (raw === undefined) {
+      return { leads: [], digests: [], unreadable: [], version };
+    }
     const records = storedRecordsSchema.safeParse(raw);
     if (!records.success) {
       console.error('[lead-crm] stored leads are not an array', {
@@ -219,40 +210,55 @@ export function createLeadStore({
       );
     }
     const leads: StoredLead[] = [];
+    const digests: DigestMark[] = [];
     const unreadable: unknown[] = [];
     for (const entry of records.data) {
+      if (retiredRecord.safeParse(entry).success) continue;
+      const digest = digestMarkSchema.safeParse(entry);
+      if (digest.success) {
+        digests.push(digest.data);
+        continue;
+      }
       const parsed = schema.safeParse(entry);
       if (parsed.success) leads.push(parsed.data);
       else unreadable.push(entry);
     }
-    return { leads, unreadable, version };
+    return { leads, digests, unreadable, version };
+  }
+
+  async function updateRecords(
+    mutate: (records: StoreRecords, idFloor: number) => Partial<StoreRecords>,
+  ): Promise<StoreRecords> {
+    const { next, unreadable } = await retryOnConflict(async () => {
+      const { unreadable, version, ...current } = await readSnapshot();
+      const mutated = {
+        ...current,
+        ...mutate(current, unreadableIdFloor(unreadable)),
+      };
+      const next: StoreRecords = {
+        leads: mutated.leads.map((lead) => schema.parse(lead)),
+        digests: mutated.digests.map((m) => digestMarkSchema.parse(m)),
+      };
+      if (JSON.stringify(next) === JSON.stringify(current))
+        return { next, unreadable };
+      await beforeWrite?.();
+      await storage.write(
+        [...next.leads, ...next.digests, ...unreadable],
+        version,
+      );
+      return { next, unreadable };
+    }, 'updateLeads: conflict retry limit exceeded');
+    await copyToQuarantine(unreadable);
+    return next;
   }
 
   async function updateLeads(
     mutate: (leads: StoredLead[], idFloor: number) => StoredLead[],
   ): Promise<StoredLead[]> {
-    let lastErr = new StorageConflictError(
-      'updateLeads: conflict retry limit exceeded',
-    );
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      if (attempt > 0) await sleep(backoffDelay(attempt - 1));
-      const { leads, unreadable, version } = await readSnapshot();
-      const next = mutate(leads, unreadableIdFloor(unreadable)).map((lead) =>
-        schema.parse(lead),
-      );
-      await copyToQuarantine(unreadable);
-      try {
-        await storage.write([...next, ...unreadable], version);
-        return next;
-      } catch (err) {
-        if (err instanceof StorageConflictError) {
-          lastErr = err;
-          continue;
-        }
-        throw err;
-      }
-    }
-    throw lastErr;
+    const { leads } = await updateRecords(({ leads }, idFloor) => ({
+      leads: mutate(leads, idFloor),
+    }));
+    return leads;
   }
 
   async function readLeads(): Promise<StoredLead[]> {
@@ -315,20 +321,6 @@ export function createLeadStore({
     return leads.reduce((max, l) => Math.max(max, l.id), idFloor) + 1;
   }
 
-  async function settleCommissionClaim(
-    id: number,
-    apply: (lead: StoredLead, claim: PendingCommissionClaim) => StoredLead,
-  ): Promise<StoredLead | undefined> {
-    let acted = false;
-    const updated = await updateOne(id, (l) => {
-      acted = false;
-      if (!l.pendingCommissionClaim) return l;
-      acted = true;
-      return apply(l, l.pendingCommissionClaim);
-    });
-    return acted ? updated : undefined;
-  }
-
   return {
     updateLeads,
     readLeads,
@@ -353,8 +345,7 @@ export function createLeadStore({
               (l) =>
                 l.visitorId === data.visitorId &&
                 l.brand === data.brand &&
-                l.status === 'new' &&
-                !l.archived &&
+                untouched(l) &&
                 now - new Date(l.createdAt).getTime() <
                   VISITOR_MERGE_WINDOW_MS &&
                 (data.telegramId == null || isPlaceholderContact(l.contact)),
@@ -432,6 +423,21 @@ export function createLeadStore({
       return updateOne(id, (l) => ({ ...l, ...statusPatch(status) }));
     },
 
+    addNote(id: number, note: string): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) => ({
+        ...l,
+        comment: appendNote(l.comment, note),
+        lastActivityAt: new Date().toISOString(),
+      }));
+    },
+
+    touchLead(
+      id: number,
+      at: Date = new Date(),
+    ): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) => ({ ...l, lastActivityAt: at.toISOString() }));
+    },
+
     setPendingPrompt(
       id: number,
       prompt: PendingPrompt | null,
@@ -451,6 +457,16 @@ export function createLeadStore({
       );
     },
 
+    async findByCard(
+      chatId: number,
+      messageId: number,
+    ): Promise<StoredLead | undefined> {
+      const leads = await readLeads();
+      return leads.find(
+        (l) => l.telegramChatId === chatId && l.telegramMessageId === messageId,
+      );
+    },
+
     resolvePendingPrompt(
       chatId: number,
       messageId: number,
@@ -460,7 +476,12 @@ export function createLeadStore({
         (l) =>
           l.pendingPrompt?.chatId === chatId &&
           l.pendingPrompt?.messageId === messageId,
-        (l) => ({ ...l, ...apply(l), pendingPrompt: null }),
+        (l) => ({
+          ...l,
+          lastActivityAt: new Date().toISOString(),
+          ...apply(l),
+          pendingPrompt: null,
+        }),
       );
     },
 
@@ -523,18 +544,10 @@ export function createLeadStore({
       );
     },
 
-    archiveLead(id: number): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({ ...l, archived: true }));
-    },
-
-    unarchiveLead(id: number): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({ ...l, archived: false }));
-    },
-
     resumeLead(id: number): Promise<StoredLead | undefined> {
       return updateOneIfStatus(id, 'postponed', (l) => ({
         ...l,
-        ...resumePatch(l),
+        ...resumePatch(),
       }));
     },
 
@@ -559,59 +572,6 @@ export function createLeadStore({
       return found;
     },
 
-    async claimCommission(
-      id: number,
-      onlyIncomeIds: number[] | null,
-    ): Promise<StoredLead | undefined> {
-      let claimed = false;
-      const updated = await updateOne(id, (l) => {
-        claimed = false;
-        const targets = unpaidIncomes(l).filter(
-          (i) => onlyIncomeIds == null || onlyIncomeIds.includes(i.id),
-        );
-        const amount = roundMoney(
-          targets.reduce(
-            (sum, i) => sum + incomeCommission(i.amount, l.commissionPercent),
-            0,
-          ),
-        );
-        if (amount <= 0) return l;
-        claimed = true;
-        return {
-          ...l,
-          pendingCommissionClaim: {
-            amount,
-            claimedAt: new Date().toISOString(),
-            incomeIds: targets.map((i) => i.id),
-          },
-        };
-      });
-      return claimed ? updated : undefined;
-    },
-
-    confirmCommissionPayment(id: number): Promise<StoredLead | undefined> {
-      return settleCommissionClaim(id, (l, claim) => {
-        const now = new Date().toISOString();
-        const ids = claim.incomeIds.length
-          ? claim.incomeIds
-          : unpaidIncomes(l).map((i) => i.id);
-        return {
-          ...l,
-          incomes: l.incomes.map((i) =>
-            ids.includes(i.id) ? { ...i, paidAt: now } : i,
-          ),
-          pendingCommissionClaim: null,
-        };
-      });
-    },
-
-    rejectCommissionPayment(id: number): Promise<StoredLead | undefined> {
-      return settleCommissionClaim(id, (l) => ({
-        ...l,
-        pendingCommissionClaim: null,
-      }));
-    },
-
     async searchLeads(query: string, limit = 10): Promise<StoredLead[]> {
       const q = query.trim().toLowerCase();
       if (!q) return [];
@@ -628,58 +588,44 @@ export function createLeadStore({
         .slice(0, limit);
     },
 
-    async getDuePostponed(): Promise<StoredLead[]> {
-      const today = todayISODate();
-      const leads = await readLeads();
-      return leads.filter(
-        (l) =>
-          l.status === 'postponed' &&
-          !l.archived &&
-          l.remindAt != null &&
-          l.remindAt <= today,
-      );
+    async claimDigest(now: Date): Promise<Digest | undefined> {
+      const day = businessDay(now);
+      let claimed: Digest | undefined;
+      await updateRecords(({ leads, digests }) => {
+        claimed = undefined;
+        if (digests.some((d) => d.day === day)) return {};
+        claimed = digestOf(leads, now);
+        if (Object.values(claimed).every((list) => list.length === 0))
+          return {};
+        const mark = {
+          type: 'digest' as const,
+          day,
+          createdAt: now.toISOString(),
+        };
+        return { digests: [mark] };
+      });
+      return claimed;
+    },
+
+    async releaseDigest(now: Date): Promise<void> {
+      const day = businessDay(now);
+      await updateRecords(({ digests }) => ({
+        digests: digests.filter((d) => d.day !== day),
+      }));
     },
 
     async expireGhostLeads(now: Date): Promise<StoredLead[]> {
-      const statusChangedAt = now.toISOString();
-      const expired = (l: StoredLead) =>
-        l.archived &&
-        l.status === 'lost' &&
-        l.statusChangedAt === statusChangedAt;
       if (!(await readLeads()).some((l) => isGhostLead(l, now))) return [];
-      const next = await updateLeads((leads) =>
-        leads.map((l) =>
-          isGhostLead(l, now)
-            ? { ...l, ...statusPatch('lost', now), archived: true }
-            : l,
-        ),
-      );
-      return next.filter(expired);
-    },
-
-    async getOwedSummary(): Promise<{ rows: OwedRow[]; total: number }> {
-      const leads = await readLeads();
-      const rows: OwedRow[] = leads
-        .filter(hasDealAmount)
-        .filter((l) => !l.archived)
-        .map((l) => {
-          const { commission, remaining } = getCommission(l);
-          return {
-            id: l.id,
-            name: l.name,
-            brand: l.brand,
-            dealAmount: l.dealAmount,
-            commissionAmount: commission,
-            paidAmount: l.paidAmount,
-            remaining,
-          };
-        })
-        .filter((row) => row.remaining > PAID_EPSILON)
-        .sort((a, b) =>
-          a.remaining === b.remaining ? a.id - b.id : b.remaining - a.remaining,
+      let expiredIds = new Set<number>();
+      const next = await updateLeads((leads) => {
+        expiredIds = new Set(
+          leads.filter((l) => isGhostLead(l, now)).map((l) => l.id),
         );
-      const total = roundMoney(rows.reduce((sum, r) => sum + r.remaining, 0));
-      return { rows: rows.slice(0, MAX_LIST_ROWS), total };
+        return leads.map((l) =>
+          expiredIds.has(l.id) ? { ...l, ...statusPatch('lost', now) } : l,
+        );
+      });
+      return next.filter((l) => expiredIds.has(l.id));
     },
   };
 }

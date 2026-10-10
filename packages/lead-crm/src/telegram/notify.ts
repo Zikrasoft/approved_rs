@@ -1,18 +1,12 @@
-import type { Income, StoredLead } from '../schema.ts';
+import type { LedgerOperation } from '../ledgerStore.ts';
+import { isClosed, type StoredLead } from '../schema.ts';
+import type { Digest } from '../store.ts';
+import { isMessageGone, type TelegramClient } from './client.ts';
 import {
-  isMessageGone,
-  type SendExtra,
-  type TelegramClient,
-} from './client.ts';
-import {
-  commissionClaimText,
-  commissionResultText,
-  dealNotificationText,
-  incomeNotificationText,
+  operationNoticeText,
   quarantinedLeadsText,
   statusChangeText,
   type EditField,
-  type FieldChangeAuthor,
   type Formatter,
   type Role,
 } from './format.ts';
@@ -32,12 +26,8 @@ export function createNotifier({
   ownerIds,
   adminIds,
 }: NotifierOptions) {
-  async function sendToAll(
-    ids: number[],
-    text: string,
-    extra?: SendExtra,
-  ): Promise<void> {
-    await Promise.all(ids.map((id) => client.sendMessage(id, text, extra)));
+  async function sendToAll(ids: number[], text: string): Promise<void> {
+    await Promise.all(ids.map((id) => client.sendMessage(id, text)));
   }
 
   return {
@@ -54,6 +44,7 @@ export function createNotifier({
       );
       const messageId = sent.message_id;
       const chatId = sent.chat.id;
+      if (isClosed(lead)) return { chatId, messageId };
 
       try {
         await client.api.pinChatMessage(chatId, messageId, {
@@ -67,6 +58,21 @@ export function createNotifier({
       }
 
       return { chatId, messageId };
+    },
+
+    async unpinLeadCard(lead: StoredLead): Promise<void> {
+      if (lead.telegramChatId == null || lead.telegramMessageId == null) return;
+      try {
+        await client.api.unpinChatMessage(
+          lead.telegramChatId,
+          lead.telegramMessageId,
+        );
+      } catch (err) {
+        console.error('[telegram] unpinChatMessage failed', {
+          error: err,
+          messageId: lead.telegramMessageId,
+        });
+      }
     },
 
     async refreshLeadCard(lead: StoredLead): Promise<boolean> {
@@ -86,63 +92,23 @@ export function createNotifier({
       return true;
     },
 
-    async sendDealNotificationToAdmin(lead: StoredLead): Promise<void> {
-      if (lead.dealAmount == null) return;
-      await sendToAll(
-        adminIds,
-        dealNotificationText({ ...lead, dealAmount: lead.dealAmount }),
-      );
-    },
-
-    async sendIncomeNotificationToAdmin(
-      lead: StoredLead,
-      income: Income,
+    async sendOperationNotice(
+      operation: LedgerOperation,
+      balance: number,
+      authorId: number,
     ): Promise<void> {
-      await sendToAll(adminIds, incomeNotificationText(lead, income));
-    },
-
-    async sendCommissionClaimToAdmin(lead: StoredLead): Promise<void> {
-      if (!lead.pendingCommissionClaim) return;
-      await sendToAll(
-        adminIds,
-        commissionClaimText({
-          ...lead,
-          pendingCommissionClaim: lead.pendingCommissionClaim,
-        }),
-        {
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: '✅ Подтвердить',
-                  callback_data: `confirmpay:${lead.id}`,
-                },
-                { text: '❌ Отклонить', callback_data: `rejectpay:${lead.id}` },
-              ],
-            ],
-          },
-        },
-      );
-    },
-
-    async sendCommissionResultToOwner(
-      lead: StoredLead,
-      confirmed: boolean,
-    ): Promise<void> {
-      await sendToAll(ownerIds, commissionResultText(lead.id, confirmed));
+      const others = new Set([...ownerIds, ...adminIds]);
+      others.delete(authorId);
+      await sendToAll([...others], operationNoticeText(operation, balance));
     },
 
     async sendFieldChangeToAdmin(
       lead: StoredLead,
       field: EditField,
       before: string | null | undefined,
-      author?: FieldChangeAuthor,
     ): Promise<void> {
       if ((before ?? '') === (lead[field] ?? '')) return;
-      await sendToAll(
-        adminIds,
-        formatter.fieldChangeText(lead, field, before, author),
-      );
+      await sendToAll(adminIds, formatter.fieldChangeText(lead, field, before));
     },
 
     async sendQuarantinedLeadsToAdmin(
@@ -157,17 +123,13 @@ export function createNotifier({
       await sendToAll(adminIds, statusChangeText(lead));
     },
 
-    async sendPostponeReminderToOwner(lead: StoredLead): Promise<void> {
-      const results = await Promise.allSettled(
-        ownerIds.map((id) =>
-          client.sendMessage(id, formatter.postponeReminderText(lead), {
-            reply_markup: formatter.deepLinkKeyboard(lead.id),
-          }),
-        ),
-      );
-      if (results.length > 0 && results.every((r) => r.status === 'rejected')) {
-        throw (results[0] as PromiseRejectedResult).reason;
-      }
+    async sendDigest(digest: Digest): Promise<boolean> {
+      const message = formatter.digestMessage(digest);
+      if (!message) return false;
+      await client.sendMessage(groupId, message.text, {
+        reply_markup: message.reply_markup,
+      });
+      return true;
     },
 
     async editLeadDetailMessage(

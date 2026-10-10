@@ -11,7 +11,6 @@ import {
   type CapturePrompt,
   type CaptureStep,
   type EditField,
-  type FieldChangeAuthor,
   type LeadStore,
   type StoredLead,
 } from '@podbor/lead-crm';
@@ -132,7 +131,6 @@ export interface CaptureWebhookRouteOptions<
     lead: StoredLead,
     field: EditField,
     before: string | null | undefined,
-    author: FieldChangeAuthor,
   ) => Promise<void>;
   bot: Bot;
   brand: string;
@@ -293,7 +291,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     await ensureLeadCard(updated ?? lead);
     if (!updated) return;
     for (const field of VISITOR_FIELDS)
-      await sendFieldChangeToAdmin(updated, field, lead[field], 'visitor');
+      await sendFieldChangeToAdmin(updated, field, lead[field]);
   }
 
   function startFields(

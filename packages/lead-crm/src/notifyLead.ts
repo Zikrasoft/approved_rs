@@ -1,5 +1,9 @@
-import { hasDealAmount } from './money.ts';
-import type { LeadInput, LeadSubmission, StoredLead } from './schema.ts';
+import {
+  isClosed,
+  type LeadInput,
+  type LeadSubmission,
+  type StoredLead,
+} from './schema.ts';
 import type { LeadStore } from './store.ts';
 import type { Role } from './telegram/format.ts';
 import type { Notifier } from './telegram/notify.ts';
@@ -15,7 +19,7 @@ export function createEnsureLeadCard({
 }: EnsureLeadCardOptions) {
   return async function ensureLeadCard(lead: StoredLead): Promise<void> {
     if (await notifier.refreshLeadCard(lead)) return;
-    if (lead.archived) return;
+    if (lead.status === 'lost') return;
     const { chatId, messageId } = await notifier.sendLeadNotification(lead);
     try {
       const saved = await store.setTelegramMessage(lead.id, chatId, messageId);
@@ -43,9 +47,7 @@ interface AfterStatusChangeOptions {
   ensureLeadCard: (lead: StoredLead) => Promise<void>;
   notifier: Pick<
     Notifier,
-    | 'editLeadDetailMessage'
-    | 'sendStatusChangeToAdmin'
-    | 'sendDealNotificationToAdmin'
+    'editLeadDetailMessage' | 'sendStatusChangeToAdmin' | 'unpinLeadCard'
   >;
 }
 
@@ -58,6 +60,7 @@ export function createAfterStatusChange({
     { surface, notice = true }: StatusChangeOptions = {},
   ): Promise<void> {
     await ensureLeadCard(lead);
+    if (isClosed(lead)) await notifier.unpinLeadCard(lead);
     if (surface)
       await notifier.editLeadDetailMessage(
         surface.chatId,
@@ -66,9 +69,7 @@ export function createAfterStatusChange({
         surface.role,
       );
     if (!notice) return;
-    if (lead.status === 'won' && hasDealAmount(lead))
-      await notifier.sendDealNotificationToAdmin(lead);
-    else await notifier.sendStatusChangeToAdmin(lead);
+    await notifier.sendStatusChangeToAdmin(lead);
   };
 }
 
@@ -81,7 +82,7 @@ export interface NotifyLeadOptions {
   brand: string;
 }
 
-export type LeadHandOff = Pick<StoredLead, 'brand' | 'commissionPercent'>;
+export type LeadHandOff = Pick<StoredLead, 'brand'>;
 
 export interface NotifyLeadResult {
   stored: boolean;

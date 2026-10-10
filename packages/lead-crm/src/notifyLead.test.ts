@@ -4,7 +4,7 @@ import {
   createEnsureLeadCard,
   createNotifyLead,
 } from './notifyLead.ts';
-import { createLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
+import { storedLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
 import { createLeadStore } from './store.ts';
 import { createMemoryStorage } from './storage/memory.testing.ts';
 
@@ -15,7 +15,7 @@ const refreshLeadCard = vi.fn();
 
 const realStore = createLeadStore({
   storage: createMemoryStorage(),
-  schema: createLeadSchema({ defaultCommissionPercent: 10 }),
+  schema: storedLeadSchema,
 });
 
 const store = {
@@ -40,24 +40,17 @@ const storedLead: StoredLead = {
   ...baseData,
   services: [],
   id: 42,
-  status: 'new',
-  dealAmount: null,
-  commissionPercent: 10,
-  paidAmount: 0,
-  incomes: [],
-  payments: [],
+  status: 'open',
   telegramChatId: null,
   telegramMessageId: null,
   statusChangedAt: '2026-01-01T00:00:00.000Z',
+  lastActivityAt: null,
   createdAt: '2026-01-01T00:00:00.000Z',
   pendingPrompt: null,
   capturePrompt: null,
   telegramId: null,
   referredBy: null,
-  archived: false,
-  pendingCommissionClaim: null,
   remindAt: null,
-  postponedFrom: null,
 };
 
 beforeEach(() => {
@@ -83,12 +76,10 @@ describe('notifyLead', () => {
   it('stores a lead handed to a sister brand under that brand and its rate', async () => {
     await notifyLead(baseData, '[test]', {
       brand: 'Details',
-      commissionPercent: 20,
     });
     expect(insertOrMergeLead).toHaveBeenCalledWith({
       ...baseData,
       brand: 'Details',
-      commissionPercent: 20,
     });
   });
 
@@ -113,7 +104,7 @@ describe('notifyLead', () => {
     expect(sendLeadNotification).toHaveBeenCalledTimes(1);
     const notified = vi.mocked(sendLeadNotification).mock.calls[0][0];
     expect(notified.name).toBe('Иван');
-    expect(notified.status).toBe('new');
+    expect(notified.status).toBe('open');
     expect(typeof notified.id).toBe('number');
   });
 
@@ -216,8 +207,8 @@ describe('ensureLeadCard', () => {
     expect(setTelegramMessage).toHaveBeenCalledWith(42, -100, 999);
   });
 
-  it('leaves an archived lead without a card — deleting it is how it was retired', async () => {
-    await ensureLeadCard({ ...storedLead, archived: true });
+  it('leaves a lost lead without a card — deleting it is how it was retired', async () => {
+    await ensureLeadCard({ ...storedLead, status: 'lost' });
 
     expect(sendLeadNotification).not.toHaveBeenCalled();
   });
@@ -341,7 +332,7 @@ describe('afterStatusChange', () => {
         calls.push(`dm:${chatId}:${messageId}:${lead.id}:${role}`);
       },
       sendStatusChangeToAdmin: record('status'),
-      sendDealNotificationToAdmin: record('deal'),
+      unpinLeadCard: record('unpin'),
     },
   });
 
@@ -354,7 +345,7 @@ describe('afterStatusChange', () => {
   it.each([
     [
       'a plain change',
-      { status: 'in_progress' as const },
+      { status: 'open' as const },
       {},
       ['card:42', 'status:42'],
     ],
@@ -362,25 +353,19 @@ describe('afterStatusChange', () => {
       'a change from a DM',
       { status: 'lost' as const },
       { surface },
-      ['card:42', 'dm:7:8:42:owner', 'status:42'],
+      ['card:42', 'unpin:42', 'dm:7:8:42:owner', 'status:42'],
     ],
     [
-      'won with an amount',
-      { status: 'won' as const, dealAmount: 300 },
-      {},
-      ['card:42', 'deal:42'],
-    ],
-    [
-      'won without an amount',
+      'won',
       { status: 'won' as const },
       {},
-      ['card:42', 'status:42'],
+      ['card:42', 'unpin:42', 'status:42'],
     ],
     [
       'the ghost sweep',
       { status: 'lost' as const },
       { notice: false },
-      ['card:42'],
+      ['card:42', 'unpin:42'],
     ],
   ])('%s', async (_, patch, options, expected) => {
     await afterStatusChange({ ...storedLead, ...patch }, options);

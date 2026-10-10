@@ -3,14 +3,7 @@ export const prerender = false;
 import type { APIContext } from 'astro';
 import { Composer, type Context } from 'grammy';
 import { z } from 'zod';
-import {
-  parse,
-  isValid,
-  isBefore,
-  startOfDay,
-  format,
-  addDays,
-} from 'date-fns';
+import { parse, isValid, format } from 'date-fns';
 import { secretMatches } from '@/lib/verifySecret';
 import {
   afterStatusChange,
@@ -19,17 +12,17 @@ import {
   ensureLeadCard,
   sendForceReplyPrompt,
   safeEditMessage,
-  sendIncomeNotificationToAdmin,
-  sendCommissionClaimToAdmin,
-  sendCommissionResultToOwner,
-  sendFieldChangeToAdmin,
+  sendOperationNotice,
   sendMessage,
-  buildOwedList,
-  formatDealsList,
+  buildBalance,
+  LEDGER_COPY,
+  operationRecordedText,
+  operationRefusedText,
+  reAskOperationText,
   buildSearchResults,
   buildMenu,
   buildHelp,
-  buildLeadList,
+  buildOpenList,
   buildStats,
   formatDateRu,
   buildLeadDetail,
@@ -38,40 +31,40 @@ import {
   editLeadDetailMessage,
   OWNER_IDS,
   ADMIN_IDS,
-  EDIT_COPY,
   REPLY_COPY,
+  LEAD_ACTION_COPY,
   escapeHtml,
-  canAddIncome,
-  LEAD_STATUS_ACTIONS,
   type Role,
-  type EditField,
 } from '@/lib/telegram';
 import { captureClientFor } from '@/lib/captureBot';
 import {
   getLead,
   setStatus,
-  archiveLead,
-  unarchiveLead,
+  touchLead,
   deleteLead,
-  confirmCommissionPayment,
-  claimCommission,
-  rejectCommissionPayment,
   setPendingPrompt,
   findByPendingPrompt,
+  findByCard,
+  addNote,
   resolvePendingPrompt,
   searchLeads,
   resumeLead,
   postponeLead,
   canPostpone,
   postponePatch,
-  wonPatch,
-  getOwedSummary,
   readLeads,
-  getCommission,
-  appendIncome,
   appendNote,
+  readBalance,
+  readOperations,
+  openOperationPrompt,
+  findOperationPrompt,
+  answerOperationPrompt,
+  parseOperationReply,
+  businessDay,
+  type OperationType,
   type LeadStatus,
   type PendingPrompt,
+  type PromptKey,
   type StoredLead,
 } from '@/lib/store';
 
@@ -127,42 +120,21 @@ function roleOf(id: number | undefined): Role | undefined {
   return undefined;
 }
 
-const MAX_AMOUNT = 1_000_000;
-
-const amountSchema = z
-  .string()
-  .transform((text) => text.replace(/[^\d.,-]/g, '').replace(',', '.'))
-  .refine((digits) => /^\d+(\.\d+)?$/.test(digits))
-  .transform((digits) => Number(digits))
-  .pipe(z.number().max(MAX_AMOUNT));
-
-function parseAmount(text: string, allowZero = false): number | null {
-  const parsed = amountSchema.safeParse(text);
-  if (!parsed.success) return null;
-  return parsed.data > 0 || (allowZero && parsed.data === 0)
-    ? parsed.data
-    : null;
-}
-
 function parseReminderDate(text: string): string | null {
   const parsed = parse(text.trim(), 'dd.MM.yyyy', new Date());
-  if (!isValid(parsed) || isBefore(parsed, startOfDay(new Date()))) return null;
-  return format(parsed, 'yyyy-MM-dd');
-}
-
-function quickRemindDate(days: number): string {
-  return format(addDays(new Date(), days), 'yyyy-MM-dd');
+  if (!isValid(parsed)) return null;
+  const day = format(parsed, 'yyyy-MM-dd');
+  return day < businessDay(new Date()) ? null : day;
 }
 
 type Ctx = { chatId: number; messageId: number; role: Role; cbId: string };
 type CrmContext = Context & { crm: Ctx };
 type Handler = (ctx: Ctx, ...groups: string[]) => Promise<void>;
-type LeadHandler = (ctx: Ctx, id: number, ...rest: string[]) => Promise<void>;
+type IdHandler = (ctx: Ctx, id: number, ...rest: string[]) => Promise<void>;
 type CallbackRow = [RegExp, Role | 'any', Handler];
 type PromptKind = PendingPrompt['kind'];
-type OperatorEditField = Exclude<EditField, 'service'>;
 
-function onLead(handler: LeadHandler): Handler {
+function withId(handler: IdHandler): Handler {
   return (ctx, id, ...rest) => handler(ctx, Number(id), ...rest);
 }
 
@@ -182,17 +154,8 @@ async function withErrorAck(
       error: err,
       ...logCtx,
     });
-    await answerCallback(cbId, 'Ошибка, попробуйте ещё раз').catch(() => {});
+    await answerCallback(cbId, LEAD_ACTION_COPY.failed).catch(() => {});
   }
-}
-
-async function refreshBothSurfaces(
-  ctx: Ctx,
-  updated: StoredLead | undefined,
-): Promise<void> {
-  if (!updated) return;
-  await ensureLeadCard(updated);
-  await editLeadDetailMessage(ctx.chatId, ctx.messageId, updated, ctx.role);
 }
 
 async function afterStatusChangeOn(
@@ -219,7 +182,7 @@ async function startPrompt(
 async function startLeadPrompt(
   ctx: Ctx,
   id: number,
-  prompt: { prompt: string; kind: PromptKind; ackText: string },
+  prompt: Parameters<typeof startPrompt>[2],
 ): Promise<void> {
   if (!(await getLead(id))) return ack(ctx);
   await startPrompt(ctx, id, prompt);
@@ -229,32 +192,21 @@ async function changeStatus(
   ctx: Ctx,
   id: number,
   key: LeadStatus,
+  fromDetail = true,
 ): Promise<void> {
   const lead = await getLead(id);
   if (!lead) return ack(ctx);
-  if (key === 'won' && lead.status !== 'won') {
-    await startPrompt(ctx, id, {
-      prompt: lead.incomes.length
-        ? '💰 Сколько ты заработал сверх уже добавленных доходов (в евро)?\n\nЕсли больше ничего — 0'
-        : '💰 Сколько ты заработал с этой заявки (в евро)? Не стоимость машины, а твоя прибыль.\n\nНапример: 300',
-      kind: 'deal_amount',
-      ackText: 'Жду сумму',
-    });
-    return;
-  }
-  const updated = await setStatus(id, key);
-  if (updated) await afterStatusChangeOn(ctx, updated);
-  await answerCallback(ctx.cbId, 'Статус обновлён');
+  const updated = lead.status === key ? undefined : await setStatus(id, key);
+  if (updated)
+    await (fromDetail
+      ? afterStatusChangeOn(ctx, updated)
+      : afterStatusChange(updated));
+  await answerCallback(ctx.cbId, LEAD_ACTION_COPY.statusUpdated);
 }
 
-async function archive(ctx: Ctx, id: number): Promise<void> {
-  await refreshBothSurfaces(ctx, await archiveLead(id));
-  await answerCallback(ctx.cbId, 'Архивировано');
-}
-
-async function unarchive(ctx: Ctx, id: number): Promise<void> {
-  await refreshBothSurfaces(ctx, await unarchiveLead(id));
-  await answerCallback(ctx.cbId, 'Восстановлено');
+async function markInWork(ctx: Ctx, id: number): Promise<void> {
+  await touchLead(id);
+  await answerCallback(ctx.cbId, LEAD_ACTION_COPY.inWork);
 }
 
 async function openRemindPicker(ctx: Ctx, id: number): Promise<void> {
@@ -265,22 +217,22 @@ async function openRemindPicker(ctx: Ctx, id: number): Promise<void> {
 }
 
 async function remindIn(ctx: Ctx, id: number, days: string): Promise<void> {
-  const remindAt = quickRemindDate(Number(days));
+  const remindAt = businessDay(new Date(), Number(days));
   const updated = await postponeLead(
     id,
     remindAt,
-    `Отложено до ${formatDateRu(remindAt)}`,
+    `${LEAD_ACTION_COPY.postponedUntil}${formatDateRu(remindAt)}`,
   );
   if (!updated) return ack(ctx);
   await afterStatusChangeOn(ctx, updated);
-  await answerCallback(ctx.cbId, 'Отложено');
+  await answerCallback(ctx.cbId, LEAD_ACTION_COPY.postponed);
 }
 
 async function resume(ctx: Ctx, id: number): Promise<void> {
   const updated = await resumeLead(id);
   if (!updated) return ack(ctx);
   await afterStatusChangeOn(ctx, updated);
-  await answerCallback(ctx.cbId, 'Возобновлено');
+  await answerCallback(ctx.cbId, LEAD_ACTION_COPY.resumed);
 }
 
 async function backToLead(ctx: Ctx, id: number): Promise<void> {
@@ -288,9 +240,12 @@ async function backToLead(ctx: Ctx, id: number): Promise<void> {
   if (lead) {
     await editLeadDetailMessage(ctx.chatId, ctx.messageId, lead, ctx.role);
   } else {
-    await safeEditMessage(ctx.chatId, ctx.messageId, 'Заявка не найдена.', {
-      inline_keyboard: [],
-    });
+    await safeEditMessage(
+      ctx.chatId,
+      ctx.messageId,
+      LEAD_ACTION_COPY.notFound,
+      { inline_keyboard: [] },
+    );
   }
   await answerCallback(ctx.cbId);
 }
@@ -305,52 +260,41 @@ async function askDelete(ctx: Ctx, id: number): Promise<void> {
 
 async function confirmDelete(ctx: Ctx, id: number): Promise<void> {
   await deleteLead(id);
-  await safeEditMessage(ctx.chatId, ctx.messageId, '🗑 Заявка удалена.', {
+  await safeEditMessage(ctx.chatId, ctx.messageId, LEAD_ACTION_COPY.deleted, {
     inline_keyboard: [],
   });
-  await answerCallback(ctx.cbId, 'Удалено');
+  await answerCallback(ctx.cbId, LEAD_ACTION_COPY.deleteAck);
 }
 
-async function askIncome(ctx: Ctx, id: number): Promise<void> {
-  const lead = await getLead(id);
-  if (!lead || !canAddIncome(lead, 'owner')) return ack(ctx);
-  await startPrompt(ctx, id, {
-    prompt:
-      '💶 Сколько получил (в евро)? Предоплата или частичный расчёт — твоя прибыль, не стоимость машины.\n\nНапример: 150',
-    kind: 'add_income',
-    ackText: 'Жду сумму',
-  });
+async function showBalance(ctx: Ctx): Promise<void> {
+  const { text, reply_markup } = buildBalance(ctx.role, await readBalance());
+  await sendMessage(ctx.chatId, text, { reply_markup });
+  await ack(ctx);
 }
 
-async function claimPay(ctx: Ctx, id: number, target?: string): Promise<void> {
-  const lead = await getLead(id);
-  if (!lead || lead.dealAmount == null) return ack(ctx);
-  const { isPaidOff } = getCommission(lead);
-  if (isPaidOff || lead.pendingCommissionClaim) return ack(ctx);
-  const updated = await claimCommission(
-    id,
-    target == null ? null : [Number(target)],
-  );
-  if (!updated) return ack(ctx);
-  await refreshBothSurfaces(ctx, updated);
-  await sendCommissionClaimToAdmin(updated);
-  await answerCallback(ctx.cbId, 'Отмечено — ждём подтверждения');
+async function askOperation(
+  chatId: number,
+  type: OperationType,
+  text: string = LEDGER_COPY.prompt[type],
+  replacing?: PromptKey,
+): Promise<void> {
+  const messageId = await sendForceReplyPrompt(chatId, text);
+  await openOperationPrompt({ chatId, messageId, type }, replacing);
 }
 
-async function settlePay(ctx: Ctx, id: number, paid: boolean): Promise<void> {
-  const updated = await (paid
-    ? confirmCommissionPayment(id)
-    : rejectCommissionPayment(id));
-  await refreshBothSurfaces(ctx, updated);
-  if (updated) await sendCommissionResultToOwner(updated, paid);
-  await answerCallback(ctx.cbId);
+function operationRow(type: OperationType): CallbackRow {
+  return [
+    new RegExp(`^ledger:${type}$`),
+    'any',
+    async (ctx) => {
+      await askOperation(ctx.chatId, type);
+      await answerCallback(ctx.cbId, LEDGER_COPY.ack);
+    },
+  ];
 }
 
-async function listLeads(ctx: Ctx, statuses: string): Promise<void> {
-  const { text, reply_markup } = buildLeadList(
-    await readLeads(),
-    statuses.split('+') as LeadStatus[],
-  );
+async function listOpen(ctx: Ctx): Promise<void> {
+  const { text, reply_markup } = buildOpenList(await readLeads());
   await sendMessage(ctx.chatId, text, { reply_markup });
   await ack(ctx);
 }
@@ -364,72 +308,50 @@ async function openLead(ctx: Ctx, id: number): Promise<void> {
   await ack(ctx);
 }
 
-function statusRow(key: LeadStatus, role: Role | 'any'): CallbackRow {
+function statusRow(key: LeadStatus): CallbackRow {
   return [
     new RegExp(`^st:(\\d+):${key}$`),
-    role,
-    onLead((ctx, id) => changeStatus(ctx, id, key)),
-  ];
-}
-
-function editRow(field: OperatorEditField): CallbackRow {
-  return [
-    new RegExp(`^edit:(\\d+):${field}$`),
-    'any',
-    onLead((ctx, id) =>
-      startLeadPrompt(ctx, id, {
-        prompt: EDIT_COPY.prompt(field),
-        kind: `edit_${field}`,
-        ackText: EDIT_COPY.ack,
-      }),
-    ),
+    'owner',
+    withId((ctx, id) => changeStatus(ctx, id, key)),
   ];
 }
 
 export const CALLBACKS: CallbackRow[] = [
-  ...LEAD_STATUS_ACTIONS.map(({ key }) =>
-    statusRow(key, key === 'won' || key === 'lost' ? 'owner' : 'any'),
-  ),
-  [/^arch:(\d+)$/, 'any', onLead(archive)],
-  [/^unarch:(\d+)$/, 'any', onLead(unarchive)],
-  [/^postpone:(\d+)$/, 'owner', onLead(openRemindPicker)],
-  [/^remindpick:(\d+):(\d+)$/, 'owner', onLead(remindIn)],
+  statusRow('won'),
+  statusRow('lost'),
+  [
+    /^won:(\d+)$/,
+    'owner',
+    withId((ctx, id) => changeStatus(ctx, id, 'won', false)),
+  ],
+  [
+    /^lost:(\d+)$/,
+    'owner',
+    withId((ctx, id) => changeStatus(ctx, id, 'lost', false)),
+  ],
+  [/^work:(\d+)$/, 'owner', withId(markInWork)],
+  [/^postpone:(\d+)$/, 'owner', withId(openRemindPicker)],
+  [/^remindpick:(\d+):(\d+)$/, 'owner', withId(remindIn)],
   [
     /^remindtype:(\d+)$/,
     'owner',
-    onLead((ctx, id) =>
+    withId((ctx, id) =>
       startLeadPrompt(ctx, id, {
-        prompt:
-          '⏰ На какую дату напомнить? (ДД.ММ.ГГГГ)\n\nНапример: 20.10.2026',
+        prompt: LEAD_ACTION_COPY.remindPrompt,
         kind: 'postpone',
-        ackText: 'Жду дату',
+        ackText: LEAD_ACTION_COPY.remindAck,
       }),
     ),
   ],
-  [/^remindcancel:(\d+)$/, 'owner', onLead(backToLead)],
-  [/^resume:(\d+)$/, 'any', onLead(resume)],
-  [/^del:(\d+)$/, 'admin', onLead(askDelete)],
-  [/^delconfirm:(\d+)$/, 'admin', onLead(confirmDelete)],
-  [/^delcancel:(\d+)$/, 'admin', onLead(backToLead)],
-  [/^claimpay:(\d+)(?::(\d+))?$/, 'owner', onLead(claimPay)],
-  [/^income:(\d+)$/, 'owner', onLead(askIncome)],
-  [
-    /^confirmpay:(\d+)$/,
-    'admin',
-    onLead((ctx, id) => settlePay(ctx, id, true)),
-  ],
-  [
-    /^rejectpay:(\d+)$/,
-    'admin',
-    onLead((ctx, id) => settlePay(ctx, id, false)),
-  ],
-  editRow('name'),
-  editRow('contact'),
-  editRow('comment'),
+  [/^remindcancel:(\d+)$/, 'owner', withId(backToLead)],
+  [/^resume:(\d+)$/, 'any', withId(resume)],
+  [/^del:(\d+)$/, 'admin', withId(askDelete)],
+  [/^delconfirm:(\d+)$/, 'admin', withId(confirmDelete)],
+  [/^delcancel:(\d+)$/, 'admin', withId(backToLead)],
   [
     /^reply:(\d+)$/,
     'any',
-    onLead((ctx, id) =>
+    withId((ctx, id) =>
       startLeadPrompt(ctx, id, {
         prompt: REPLY_COPY.prompt,
         kind: 'reply_visitor',
@@ -437,38 +359,24 @@ export const CALLBACKS: CallbackRow[] = [
       }),
     ),
   ],
-  [
-    /^list:(new|negotiations|in_progress|won|lost|postponed|in_progress\+postponed)$/,
-    'any',
-    listLeads,
-  ],
-  [/^open:(\d+)$/, 'any', onLead(openLead)],
+  [/^menu:open$/, 'any', listOpen],
+  [/^open:(\d+)$/, 'any', withId(openLead)],
   [
     /^menu:stats$/,
-    'any',
-    async (ctx) => {
-      await sendMessage(ctx.chatId, buildStats(await readLeads(), ctx.role));
-      await ack(ctx);
-    },
-  ],
-  [
-    /^menu:debt$/,
-    'any',
-    async (ctx) => {
-      const { rows, total } = await getOwedSummary();
-      const { text, reply_markup } = buildOwedList(rows, total);
-      await sendMessage(ctx.chatId, text, { reply_markup });
-      await ack(ctx);
-    },
-  ],
-  [
-    /^menu:deals$/,
     'admin',
     async (ctx) => {
-      await sendMessage(ctx.chatId, formatDealsList(await readLeads()));
+      const [leads, operations] = await Promise.all([
+        readLeads(),
+        readOperations(),
+      ]);
+      await sendMessage(ctx.chatId, buildStats(leads, operations, new Date()));
       await ack(ctx);
     },
   ],
+  // TODO: drop once no chat still shows a menu with the old 💰 debt button (menus sent before #240).
+  [/^menu:debt$/, 'any', showBalance],
+  operationRow('payout'),
+  operationRow('settlement'),
 ];
 
 function callbackCtx(cb: {
@@ -520,56 +428,15 @@ async function replyWithCard(
 }
 
 type PromptReply = {
+  role: Role;
+  authorId: number;
   chatId: number;
+  messageId: number;
   replyToMessageId: number;
   text: string;
   pending: StoredLead;
 };
 type PromptHandler = (reply: PromptReply) => Promise<void>;
-
-async function replyDealAmount({
-  chatId,
-  replyToMessageId,
-  text,
-  pending,
-}: PromptReply): Promise<void> {
-  const amount = parseAmount(text, pending.incomes.length > 0);
-  if (amount == null) {
-    await sendMessage(chatId, '⚠️ Нужна сумма в евро. Попробуйте ещё раз.');
-    return;
-  }
-  const updated = await resolvePendingPrompt(chatId, replyToMessageId, (lead) =>
-    wonPatch(lead, amount),
-  );
-  if (updated) await afterStatusChange(updated);
-}
-
-async function replyAddIncome({
-  chatId,
-  replyToMessageId,
-  text,
-}: PromptReply): Promise<void> {
-  const amount = parseAmount(text);
-  if (amount == null) {
-    await sendMessage(chatId, '⚠️ Нужна сумма в евро. Попробуйте ещё раз.');
-    return;
-  }
-  let added = false;
-  const updated = await resolvePendingPrompt(
-    chatId,
-    replyToMessageId,
-    (lead) => {
-      added = canAddIncome(lead, 'owner');
-      return added ? { incomes: appendIncome(lead.incomes, amount) } : {};
-    },
-  );
-  const income = updated?.incomes.at(-1);
-  if (updated && added && income) {
-    await ensureLeadCard(updated);
-    await sendIncomeNotificationToAdmin(updated, income);
-    await replyWithCard(chatId, updated, '✅ Доход добавлен');
-  }
-}
 
 async function replyPostpone({
   chatId,
@@ -578,10 +445,7 @@ async function replyPostpone({
 }: PromptReply): Promise<void> {
   const remindAt = parseReminderDate(text);
   if (remindAt == null) {
-    await sendMessage(
-      chatId,
-      '⚠️ Нужна дата в формате ДД.ММ.ГГГГ, не в прошлом. Попробуйте ещё раз.',
-    );
+    await sendMessage(chatId, LEAD_ACTION_COPY.badDate);
     return;
   }
   const updated = await resolvePendingPrompt(
@@ -589,7 +453,11 @@ async function replyPostpone({
     replyToMessageId,
     (lead) =>
       canPostpone(lead)
-        ? postponePatch(lead, remindAt, `Отложено до ${formatDateRu(remindAt)}`)
+        ? postponePatch(
+            lead,
+            remindAt,
+            `${LEAD_ACTION_COPY.postponedUntil}${formatDateRu(remindAt)}`,
+          )
         : {},
   );
   if (updated?.status === 'postponed') await afterStatusChange(updated);
@@ -640,60 +508,101 @@ async function replyVisitor({
   }
 }
 
-function replyEdit(field: OperatorEditField): PromptHandler {
-  return async ({ chatId, replyToMessageId, text }) => {
-    const value = text.trim();
-    if ((field === 'name' || field === 'contact') && !value) {
-      await sendMessage(
-        chatId,
-        '⚠️ Значение не может быть пустым. Попробуйте ещё раз.',
-      );
-      return;
-    }
-    let before: string | null | undefined;
-    const updated = await resolvePendingPrompt(
-      chatId,
-      replyToMessageId,
-      (lead) => {
-        before = lead[field];
-        return { [field]: value || null } as Partial<StoredLead>;
-      },
-    );
-    if (updated) {
-      await ensureLeadCard(updated);
-      await sendFieldChangeToAdmin(updated, field, before);
-      await replyWithCard(chatId, updated, '✅ Обновлено');
-    }
+function threadedTo(messageId: number) {
+  return {
+    reply_parameters: {
+      message_id: messageId,
+      allow_sending_without_reply: true,
+    },
   };
 }
 
 const PROMPT_REPLIES: Record<PromptKind, PromptHandler> = {
-  deal_amount: replyDealAmount,
-  add_income: replyAddIncome,
   postpone: replyPostpone,
   reply_visitor: replyVisitor,
-  edit_name: replyEdit('name'),
-  edit_contact: replyEdit('contact'),
-  edit_comment: replyEdit('comment'),
 };
 
-async function handlePromptReply(
-  chatId: number,
-  replyToMessageId: number,
-  text: string,
-): Promise<void> {
-  const pending = await findByPendingPrompt(chatId, replyToMessageId);
-  if (!pending?.pendingPrompt) return;
-  await PROMPT_REPLIES[pending.pendingPrompt.kind]({
-    chatId,
-    replyToMessageId,
-    text,
-    pending,
+type Reply = Omit<PromptReply, 'pending'>;
+
+async function replyToPrompt(reply: Reply): Promise<boolean> {
+  const pending = await findByPendingPrompt(
+    reply.chatId,
+    reply.replyToMessageId,
+  );
+  if (!pending?.pendingPrompt) return false;
+  await PROMPT_REPLIES[pending.pendingPrompt.kind]({ ...reply, pending });
+  return true;
+}
+
+async function replyToCard(reply: Reply): Promise<boolean> {
+  const lead = await findByCard(reply.chatId, reply.replyToMessageId);
+  if (!lead) return false;
+  const text = reply.text.trim();
+  if (!text) return true;
+  await addNote(lead.id, text);
+  await sendMessage(
+    reply.chatId,
+    LEAD_ACTION_COPY.noteAdded,
+    threadedTo(reply.messageId),
+  );
+  return true;
+}
+
+async function replyToOperationPrompt(reply: Reply): Promise<boolean> {
+  const key = { chatId: reply.chatId, messageId: reply.replyToMessageId };
+  const prompt = await findOperationPrompt(key);
+  if (!prompt) return false;
+  if (prompt.expired) {
+    await sendMessage(reply.chatId, LEDGER_COPY.expired);
+    return true;
+  }
+  const parsed = parseOperationReply(reply.text);
+  if (!parsed.ok) {
+    await askOperation(
+      reply.chatId,
+      prompt.type,
+      reAskOperationText(prompt.type, parsed.reason),
+      key,
+    );
+    return true;
+  }
+  const outcome = await answerOperationPrompt(key, {
+    amount: parsed.amount,
+    note: parsed.note,
+    by: reply.role,
   });
+  if (outcome.ok) {
+    await sendMessage(
+      reply.chatId,
+      operationRecordedText(outcome.operation, outcome.balance),
+      threadedTo(reply.messageId),
+    );
+    await sendOperationNotice(
+      outcome.operation,
+      outcome.balance,
+      reply.authorId,
+    );
+  } else if (outcome.reason === 'insufficient') {
+    await askOperation(
+      reply.chatId,
+      prompt.type,
+      operationRefusedText(prompt.type, outcome.balance),
+      key,
+    );
+  } else {
+    await sendMessage(reply.chatId, LEDGER_COPY.expired);
+  }
+  return true;
+}
+
+const REPLY_ROUTES = [replyToOperationPrompt, replyToPrompt, replyToCard];
+
+async function routeReply(reply: Reply): Promise<void> {
+  for (const route of REPLY_ROUTES) if (await route(reply)) return;
 }
 
 async function sendMenuMessage(chatId: number, role: Role): Promise<void> {
-  const menu = buildMenu(role);
+  const menu = buildMenu(role, await readBalance());
   await sendMessage(chatId, menu.text, { reply_markup: menu.reply_markup });
 }
 
@@ -705,7 +614,7 @@ async function handlePrivateMessage(msg: TelegramMessage): Promise<void> {
   const startMatch = /^\/start(?:\s+(\S+))?$/.exec(text);
   if (startMatch || text === '/menu') {
     if (!role) {
-      await sendMessage(chatId, '⛔ Доступ запрещён.');
+      await sendMessage(chatId, LEAD_ACTION_COPY.denied);
       return;
     }
     const payload = startMatch?.[1];
@@ -723,7 +632,7 @@ async function handlePrivateMessage(msg: TelegramMessage): Promise<void> {
   }
 
   if (!role) {
-    await sendMessage(chatId, '⛔ Доступ запрещён.');
+    await sendMessage(chatId, LEAD_ACTION_COPY.denied);
     return;
   }
 
@@ -754,11 +663,16 @@ bot.on('callback_query', async (ctx, next) => {
 bot.on('message', async (ctx, next) => {
   const repliedTo = ctx.message.reply_to_message;
   if (!repliedTo) return next();
-  await handlePromptReply(
-    ctx.chat.id,
-    repliedTo.message_id,
-    ctx.message.text ?? '',
-  );
+  const role = roleOf(ctx.from?.id);
+  if (!role || !ctx.from) return;
+  await routeReply({
+    role,
+    authorId: ctx.from.id,
+    chatId: ctx.chat.id,
+    messageId: ctx.message.message_id,
+    replyToMessageId: repliedTo.message_id,
+    text: ctx.message.text ?? '',
+  });
 });
 
 bot
