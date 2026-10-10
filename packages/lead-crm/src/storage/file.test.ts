@@ -103,6 +103,13 @@ describe('createFileStorage', () => {
     await writeFile(join(dir, 'data', 'leads.json'), 'not json');
     await expect(storage().exists()).resolves.toBe(true);
   });
+
+  it('does not take a failed check for a missing file', async () => {
+    await writeFile(join(dir, 'data'), 'a file where the directory should be');
+    await expect(storage().exists()).rejects.toMatchObject({
+      code: 'ENOTDIR',
+    });
+  });
 });
 
 describe('createFileOrderMarkers', () => {

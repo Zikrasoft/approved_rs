@@ -70,12 +70,4 @@ describe('createQuarantine', () => {
       { path: QUARANTINE_PATH, type: 'string' },
     );
   });
-
-  it('treats the copy as done even when the notice cannot be sent', async () => {
-    const send = vi.fn().mockRejectedValue(new Error('telegram down'));
-    const { storage, quarantine } = build(send);
-
-    await expect(quarantine([{ id: 3 }])).resolves.toBeUndefined();
-    expect(storage.current()).toEqual([{ id: 3 }]);
-  });
 });

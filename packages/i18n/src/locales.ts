@@ -2,7 +2,7 @@ export const SOURCE_LOCALE = 'ru';
 
 export type SourceLocale = typeof SOURCE_LOCALE;
 
-export const NATIVE_LOCALE_NAMES: Readonly<Record<string, string>> = {
+const NATIVE_LOCALE_NAMES: Readonly<Record<string, string>> = {
   ru: 'Русский',
   en: 'English',
   sr: 'Srpski',

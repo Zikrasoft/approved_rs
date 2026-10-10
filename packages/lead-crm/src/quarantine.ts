@@ -54,10 +54,6 @@ export function createQuarantine({
       path: QUARANTINE_PATH,
     });
     const { notifier } = await getNotifier();
-    await notifier
-      .sendQuarantinedLeadsToAdmin(count, QUARANTINE_PATH, brand)
-      .catch((error: unknown) =>
-        console.error('[lead-crm] quarantine notice failed', { error }),
-      );
+    await notifier.sendQuarantinedLeadsToAdmin(count, QUARANTINE_PATH, brand);
   };
 }

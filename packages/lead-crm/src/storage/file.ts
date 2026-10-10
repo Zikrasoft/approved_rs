@@ -38,8 +38,9 @@ async function fileExists(file: string): Promise<boolean> {
   try {
     await access(file);
     return true;
-  } catch {
-    return false;
+  } catch (error) {
+    if (isMissing(error)) return false;
+    throw error;
   }
 }
 

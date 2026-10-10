@@ -658,7 +658,9 @@ bot.use(async (ctx, next) => {
 bot.on('callback_query', async (ctx, next) => {
   const crm = callbackCtx(ctx.callbackQuery);
   if (!crm) {
-    await ctx.answerCallbackQuery().catch(() => {});
+    await ctx.answerCallbackQuery().catch((error: unknown) => {
+      console.error('[telegram-webhook] could not answer the tap', { error });
+    });
     return;
   }
   await callbacks.middleware()(Object.assign(ctx, { crm }), next);

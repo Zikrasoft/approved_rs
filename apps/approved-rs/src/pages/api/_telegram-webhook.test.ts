@@ -1074,6 +1074,27 @@ describe('POST /api/telegram-webhook', () => {
     warn.mockRestore();
   });
 
+  it('logs a tap Telegram refuses to acknowledge', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    api.fail('answerCallbackQuery', 'query is too old');
+
+    await POST(
+      makeCtx({
+        update_id: 2_400_000_025,
+        callback_query: {
+          id: 'cb-25',
+          data: 'st:5:won',
+          from: { id: OWNER_ID },
+        },
+      }),
+    );
+
+    expect(error).toHaveBeenCalledWith(
+      '[telegram-webhook] could not answer the tap',
+      expect.anything(),
+    );
+  });
+
   it('acks without acting when a callback has no message attached', async () => {
     await POST(
       makeCtx({
