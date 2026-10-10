@@ -26,23 +26,51 @@ absorb a placeholder.
 
 **Ghost lead** — a Contact click on a channel whose outcome we cannot observe
 — WhatsApp, Viber or the phone — that never gained a contact: still the
-placeholder contact, still `new`, not archived, and older than the retention
-window. Nothing on our side can tell whether the person wrote, so a Ghost lead
-retires itself — the daily reminder cron archives it and marks it lost
+placeholder contact, still `new`, and older than the retention window. Nothing
+on our side can tell whether the person wrote, so a Ghost lead retires itself —
+the daily reminder cron marks it lost
 ([ADR-0029](docs/adr/0029-ghost-leads-retire-themselves.md)). Because the sweep
 runs daily against a 24-hour window, a Ghost lead actually lives 24 to 48 hours.
 
-**Capture bot** — one per brand. It talks to visitors and writes a Lead; it has
-no operator surface at all.
+**Capture bot** — one per brand, and the whole of that brand inside Telegram:
+a visitor can read its services and answer its Questionnaire without opening
+the site. It writes a Lead on every `/start`, and every change it makes to
+that Lead reaches the admin the same way an owner's edit does. It has no
+owner surface; the owner answers from their own account, or through it
+only for a visitor who has no username.
 
-**CRM bot** — the single bot the operator works in: cards, statuses, money,
-reminders and order notifications, for all three brands in one chat.
+**Questionnaire** — the short set of questions a Capture bot asks to turn a
+Lead into a request the owner can answer. Each brand has its own. Leaving
+it for the menu ends it, and the answers given so far stay on the Lead.
+_Avoid_: wizard, form (the site's form is a different thing)
+
+**Owner** — the business partner who serves the clients the sites bring and
+owes the admin a Payout for them. Not the owner of the sites.
+_Avoid_: operator, partner, manager
+
+**Admin** — the person who builds the sites and supplies the Leads; the one
+Payouts are owed to.
+
+**CRM bot** — the single bot the owner and the admin work in: cards, statuses,
+money, reminders and order notifications, for all three brands in one chat.
+
+**Payout** — an amount the owner owes the admin for one piece of work: a
+deal, a repeat visit, an upsell. The owner states the amount; nothing derives
+it from a rate or a profit. A Lead can carry several Payouts, and a Payout can
+belong to no Lead, in which case it need not name a Brand either. A Payout recorded before a
+Settlement is settled, whether or not that Settlement covered all of it.
+_Avoid_: commission, income, profit, share
+
+**Settlement** — an amount the admin has received from the owner. The
+balance owed is all Payouts minus all Settlements, so a partial payment simply
+leaves the rest owed.
+_Avoid_: payment confirmation, paid flag
 
 ## Shop
 
 **Order** — a purchase in Medusa. Medusa is its only source of truth: its
 status, its fulfillment and its inventory reservation all live there, and the
-operator advances it in the Medusa admin ([ADR-0027](docs/adr/0027-medusa-owns-the-order-the-bot-only-notifies.md)).
+owner advances it in the Medusa admin ([ADR-0027](docs/adr/0027-medusa-owns-the-order-the-bot-only-notifies.md)).
 An Order also produces a Lead so the conversation has a home, but that Lead's
 status is not the Order's state.
 

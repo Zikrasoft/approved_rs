@@ -171,7 +171,7 @@ Approved's trust/verification semantics.
   rather than being decorative.
 - Packages are configured per business, never per hardcoded assumption:
   the commission rate, the locale list, the storage key and the service labels
-  are all config. Operator-facing Russian bot copy is _not_ — it is the same
+  are all config. Owner-facing Russian bot copy is _not_ — it is the same
   for every brand and lives in the package, contact-channel labels included
   (`CHANNEL_LABELS` in `packages/lead-crm/src/telegram/format.ts`, after three
   byte-identical copies of it sat in the apps' `crmBot.ts`).
@@ -259,7 +259,7 @@ Both new apps follow the same shape, and a third should too:
   slug now is the page, through a hidden `SERVICE_FIELD` input: the service
   pages, CarLab's cart (`parts-order`) and Details' work pages
   (`servicesApplied[0]`). Everywhere else — the modal, the contact page, the
-  homepage forms — a lead carries no service **by design**, and the operator
+  homepage forms — a lead carries no service **by design**, and the owner
   card renders `—` for it with the visited page on the `Страница:` line. A
   contact click renders `Клик: <канал>` instead: the click has a channel worth
   naming, a form lead does not. The
@@ -337,7 +337,7 @@ Both new apps follow the same shape, and a third should too:
   with `readStartVisitor` from the same module, so the wire format has one
   owner. The bot then goes through `insertOrMergeLead`, which lets a Lead
   carrying a `telegramId` absorb only a placeholder click, never a form the
-  visitor already sent — that is how the operator card gets a `Страница:` line,
+  visitor already sent — that is how the owner card gets a `Страница:` line,
   and `telegramId` is what the card reads as `🤖 через бота`. A tap that cannot
   carry the id (analytics declined, or a payload past 64 characters) beacons
   nothing: the bot writes its Lead alone, without a page, rather than leaving a
