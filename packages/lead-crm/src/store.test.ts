@@ -1277,6 +1277,63 @@ describe('capturePrompt', () => {
   });
 });
 
+describe('a newer Lead for the same Telegram visitor', () => {
+  const bot = { ...baseData, telegramId: 42, visitorId: null };
+
+  it('takes the running dialog off the Lead it supersedes', async () => {
+    const old = await store.insertLead({
+      ...bot,
+      capturePrompt: { chatId: 42, step: 'budget' },
+    });
+    const sister = await store.insertLead({
+      ...bot,
+      brand: 'Sister',
+      capturePrompt: { chatId: 42, step: 'budget' },
+    });
+
+    const { lead } = await store.insertOrMergeLead(bot);
+
+    expect(await store.getLead(old.id)).toMatchObject({ capturePrompt: null });
+    expect((await store.getLead(sister.id))?.capturePrompt).not.toBeNull();
+    expect(await store.findByCapturePrompt(42, bot.brand)).toBeUndefined();
+    expect(lead.id).toBe(3);
+  });
+
+  it('takes it off when the new one merges into a click', async () => {
+    const old = await store.insertLead({
+      ...bot,
+      capturePrompt: { chatId: 42, step: 'budget' },
+    });
+    await store.insertLead({
+      ...baseData,
+      name: '',
+      contact: '—',
+      visitorId: 'visitor-1',
+      kind: 'call_click',
+    });
+
+    const { merged, lead } = await store.insertOrMergeLead({
+      ...bot,
+      visitorId: 'visitor-1',
+    });
+
+    expect(merged).toBe(true);
+    expect(lead.visitorActiveAt).toEqual(expect.any(String));
+    expect(await store.getLead(old.id)).toMatchObject({ capturePrompt: null });
+  });
+
+  it('leaves other Leads alone when the new one has no Telegram id', async () => {
+    const old = await store.insertLead({
+      ...bot,
+      capturePrompt: { chatId: 42, step: 'budget' },
+    });
+
+    await store.insertOrMergeLead(baseData);
+
+    expect((await store.getLead(old.id))?.capturePrompt).not.toBeNull();
+  });
+});
+
 describe('a capturePrompt stored before the per-brand Questionnaires', () => {
   const legacy = (id: number, step: string) => ({
     id,
@@ -1437,6 +1494,17 @@ describe('updateCapture', () => {
     });
 
     expect(updated?.referredBy).toBe('approved');
+  });
+
+  it('stamps when the visitor last acted on the Lead', async () => {
+    const lead = await store.insertLead(baseData);
+
+    const updated = await store.updateCapture(lead.id, { capturePrompt: null });
+
+    expect(lead.visitorActiveAt).toBeUndefined();
+    expect(Date.parse(updated?.visitorActiveAt ?? '')).toBeGreaterThan(
+      Date.now() - 1000,
+    );
   });
 
   it('switches the Lead to the locale the visitor picked', async () => {

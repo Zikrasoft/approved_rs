@@ -7,9 +7,9 @@ import type {
   LeadInput,
   LeadStatus,
   PendingPrompt,
-  PromptKey,
   StoredLead,
 } from './schema.ts';
+import type { PromptKey } from './promptKey.ts';
 import type { StoredLeadSchema } from './schema.ts';
 import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
 import { retryOnConflict } from './storage/retry.ts';
@@ -122,6 +122,18 @@ function newestOpen(
     .filter((l) => l.brand === brand && !isClosed(l) && matches(l))
     .sort((a, b) => a.id - b.id)
     .at(-1);
+}
+
+function supersede(leads: StoredLead[], landed: StoredLead): StoredLead[] {
+  if (landed.telegramId == null) return leads;
+  return leads.map((l) =>
+    l.id !== landed.id &&
+    l.brand === landed.brand &&
+    l.telegramId === landed.telegramId &&
+    l.capturePrompt
+      ? { ...l, capturePrompt: null }
+      : l,
+  );
 }
 
 const MAX_STORED_COMMENT_LENGTH = 4000;
@@ -362,7 +374,7 @@ export function createLeadStore({
         if (!existing) {
           const inserted = newStoredLead(data, nextId(leads, idFloor));
           outcome = { lead: inserted, merged: false, before: null };
-          return [...leads, inserted];
+          return supersede([...leads, inserted], inserted);
         }
 
         const upgradeContact =
@@ -397,6 +409,10 @@ export function createLeadStore({
           telegramId: data.telegramId ?? existing.telegramId,
           referredBy: data.referredBy ?? existing.referredBy,
           capturePrompt: data.capturePrompt ?? existing.capturePrompt,
+          visitorActiveAt:
+            data.telegramId == null
+              ? existing.visitorActiveAt
+              : new Date(now).toISOString(),
           comment: appendNote(
             existing.comment,
             [
@@ -409,7 +425,10 @@ export function createLeadStore({
           ),
         };
         outcome = { lead: merged, merged: true, before: existing };
-        return leads.map((l) => (l.id === existing.id ? merged : l));
+        return supersede(
+          leads.map((l) => (l.id === existing.id ? merged : l)),
+          merged,
+        );
       });
       return outcome;
     },
@@ -497,6 +516,7 @@ export function createLeadStore({
         locale: locale ?? l.locale,
         referredBy: referredBy ?? l.referredBy,
         capturePrompt,
+        visitorActiveAt: new Date().toISOString(),
       }));
     },
 

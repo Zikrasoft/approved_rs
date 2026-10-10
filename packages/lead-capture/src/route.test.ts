@@ -123,6 +123,11 @@ function editLead(id: number, patch: Partial<StoredLead>) {
   storage.seed(stored().map((l) => (l.id === id ? { ...l, ...patch } : l)));
 }
 
+function abandon(id: number) {
+  const hourAgo = new Date(Date.now() - 60 * 60 * 1000 - 1000).toISOString();
+  editLead(id, { createdAt: hourAgo, visitorActiveAt: hourAgo });
+}
+
 function vanishOnNextWrite() {
   storage.failNextWrites(1, () => storage.seed([]));
 }
@@ -730,9 +735,7 @@ describe('leaving a request from a service card', () => {
 
   it('opens a new Lead when the open one is older than the hour', async () => {
     await POST(makeCtx(startUpdate('ru')));
-    editLead(1, {
-      createdAt: new Date(Date.now() - 60 * 60 * 1000 - 1000).toISOString(),
-    });
+    abandon(1);
 
     await tap('request:ru:vehicle-import');
 
@@ -766,17 +769,15 @@ describe('leaving a request from a service card', () => {
     await begin();
     POST = route(SECRET, {
       ensureLeadCard: vi.fn().mockRejectedValue(new Error('group down')),
-      sendVisitorChangeToAdmin: vi
-        .fn()
-        .mockRejectedValue(new Error('admin blocked the bot')),
     });
 
     await say('BMW X5');
 
     expect(stored()[0].comment).toContain('Ищет: BMW X5');
     expect(lastSent()).toEqual([42, 'BUDGET']);
+    expect(adminNotes()).toEqual([expect.stringContaining('BMW X5')]);
     expect(error).toHaveBeenCalledWith(
-      '[capture] could not tell the staff',
+      '[capture] could not update the card',
       expect.objectContaining({ leadId: 1 }),
     );
   });
@@ -1109,9 +1110,55 @@ describe('a contact shared outside the phone step', () => {
   });
 });
 
-describe('a visitor who presses Start again', () => {
-  const HOUR = 60 * 60 * 1000;
+describe("someone else's contact card", () => {
+  const friend = (from: Record<string, unknown> = ANONYMOUS) => {
+    const update = contactUpdate('381609999999', from);
+    return {
+      ...update,
+      message: {
+        ...update.message,
+        contact: { phone_number: '381609999999', user_id: 999 },
+      },
+    };
+  };
 
+  it('is not taken for the phone, and the phone question comes back', async () => {
+    await begin(undefined, ANONYMOUS);
+    api.reset();
+
+    await POST(makeCtx(friend()));
+
+    expect(stored()[0].contact).toBe('tg://user?id=777');
+    expect(stored()[0].capturePrompt?.step).toBe('phone');
+    expect(lastSent()).toEqual([777, 'PHONE_ASK']);
+  });
+
+  it('is not taken for the phone when the card carries no user at all', async () => {
+    await begin(undefined, ANONYMOUS);
+    const update = contactUpdate('381609999999');
+
+    await POST(
+      makeCtx({
+        ...update,
+        message: { ...update.message, contact: { phone_number: '1' } },
+      }),
+    );
+
+    expect(stored()[0].contact).toBe('tg://user?id=777');
+  });
+
+  it('is ignored outside a dialog', async () => {
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+    api.reset();
+
+    await POST(makeCtx(friend()));
+
+    expect(stored()[0].contact).toBe('tg://user?id=777');
+    expect(api.calls).toHaveLength(0);
+  });
+});
+
+describe('a visitor who presses Start again', () => {
   it('continues the open Lead within the hour instead of capturing again', async () => {
     await begin();
     await say('BMW X5');
@@ -1196,9 +1243,7 @@ describe('a visitor who presses Start again', () => {
 
   it('starts a fresh enquiry once the hour has passed', async () => {
     await begin();
-    editLead(1, {
-      createdAt: new Date(Date.now() - HOUR - 1000).toISOString(),
-    });
+    abandon(1);
 
     await POST(makeCtx(startUpdate('vehicle-import_en')));
 
@@ -1258,9 +1303,7 @@ describe('free text outside the dialog', () => {
     await say('BMW X5');
     await say('20 000');
     await say('SKIP');
-    editLead(1, {
-      createdAt: new Date(Date.now() - 60 * 60 * 1000 - 1000).toISOString(),
-    });
+    abandon(1);
 
     await say('я снова ищу машину');
 
@@ -1319,13 +1362,9 @@ describe("the same person tapping another brand's tile", () => {
 });
 
 describe('a second enquiry once the hour has passed', () => {
-  const HOUR = 60 * 60 * 1000;
-
   it('puts the answers on the new Lead, not the one left open', async () => {
     await begin();
-    editLead(1, {
-      createdAt: new Date(Date.now() - HOUR - 1000).toISOString(),
-    });
+    abandon(1);
     await begin('vehicle-import_ru');
 
     await say('Golf 7');
@@ -1334,6 +1373,55 @@ describe('a second enquiry once the hour has passed', () => {
     expect(stored()[0].comment).toBeNull();
     expect(stored()[1].comment).toContain('Ищет: Golf 7');
     expect(stored()[1].capturePrompt?.step).toBe('budget');
+  });
+
+  it('files the next text on the Lead /start opened, not the abandoned dialog', async () => {
+    await begin();
+    abandon(1);
+    await POST(makeCtx(startUpdate('ru')));
+
+    await say('Golf 7');
+
+    expect(stored()[0]).toMatchObject({ comment: null, capturePrompt: null });
+    expect(stored()[1].comment).toBe('Сообщение: Golf 7');
+    expect(lastSent()).toEqual([42, 'RECEIVED']);
+  });
+
+  it('files a shared number on the Lead /start opened too', async () => {
+    await begin(undefined, ANONYMOUS);
+    abandon(1);
+    await POST(makeCtx(startUpdate('ru', ANONYMOUS)));
+
+    await POST(makeCtx(contactUpdate('381601234567')));
+
+    expect(stored()[0].contact).toBe('tg://user?id=777');
+    expect(stored()[1].contact).toBe('+381601234567');
+  });
+
+  it('ends the abandoned dialog when a request opens the new Lead', async () => {
+    await begin();
+    abandon(1);
+
+    await tap('request:ru:vehicle-import');
+
+    expect(stored()[0].capturePrompt).toBeNull();
+    expect(stored()[1].capturePrompt).toEqual({
+      chatId: 42,
+      step: 'looking_for',
+    });
+  });
+
+  it('keeps a dialog that is older than the hour but still being answered', async () => {
+    await begin();
+    editLead(1, {
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    });
+    await say('BMW X5');
+
+    await POST(makeCtx(startUpdate('ru')));
+
+    expect(stored()).toHaveLength(1);
+    expect(lastSent()).toEqual([42, 'BUDGET']);
   });
 
   it('leaves a closed Lead out of the lookup entirely', async () => {

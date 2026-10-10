@@ -268,9 +268,8 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   }
 
   function isFresh(lead: StoredLead): boolean {
-    return (
-      Date.now() - new Date(lead.createdAt).getTime() < VISITOR_MERGE_WINDOW_MS
-    );
+    const lastSeen = Date.parse(lead.visitorActiveAt ?? lead.createdAt);
+    return Date.now() - lastSeen < VISITOR_MERGE_WINDOW_MS;
   }
 
   async function dropPhoneKeyboard(
@@ -287,17 +286,15 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     lead: StoredLead,
     updated: StoredLead | undefined,
   ): Promise<void> {
-    try {
-      await ensureLeadCard(updated ?? lead);
-      if (!updated) return;
-      for (const field of VISITOR_FIELDS)
-        await sendVisitorChangeToAdmin(updated, field, lead[field]);
-    } catch (error) {
-      console.error('[capture] could not tell the staff', {
+    await ensureLeadCard(updated ?? lead).catch((error: unknown) => {
+      console.error('[capture] could not update the card', {
         error,
         leadId: lead.id,
       });
-    }
+    });
+    if (!updated) return;
+    for (const field of VISITOR_FIELDS)
+      await sendVisitorChangeToAdmin(updated, field, lead[field]);
   }
 
   function startFields(
@@ -588,6 +585,13 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     if (open) await phoneAside(chatId, open, phone);
   }
 
+  async function foreignContact(chatId: number): Promise<void> {
+    const running = await store.findByCapturePrompt(chatId, brand);
+    const prompt = running?.capturePrompt;
+    if (running && prompt)
+      await ask(chatId, prompt.step, running.contact, localeOf(running));
+  }
+
   async function handle(
     chatId: number,
     sender: CaptureSender,
@@ -613,8 +617,9 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     const trimmed = message.data.text?.trim();
     const text = trimmed ? trimmed : undefined;
     const { chat, from, contact } = message.data;
-    if (contact)
+    if (contact?.user_id === from.id)
       await sharedContact(chat.id, from, sharedPhone(contact.phone_number));
+    else if (contact) await foreignContact(chat.id);
     else if (text !== undefined) await handle(chat.id, from, text);
   });
 
