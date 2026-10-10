@@ -173,6 +173,19 @@ describe('the opening carry-over', () => {
     expect(await ledgerStore.readBalance()).toBe(0);
   });
 
+  it('skips an unparseable legacy record instead of blocking Lead writes', async () => {
+    const { leadStore, ledgerStore } = seeded([
+      ...owing,
+      null,
+      'garbage',
+      legacyLead(9, { incomes: 'not a list', dealAmount: -5 }),
+    ]);
+
+    await leadStore.insertLead({ ...submission, brand: 'CarLab' });
+
+    expect(await ledgerStore.readBalance()).toBe(173.3);
+  });
+
   it('opens with no Payout on a fresh store', async () => {
     const { leadStore } = brandStore();
 

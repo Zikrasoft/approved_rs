@@ -53,7 +53,14 @@ export function createQuarantine({
       count,
       path: QUARANTINE_PATH,
     });
-    const { notifier } = await getNotifier();
-    await notifier.sendQuarantinedLeadsToAdmin(count, QUARANTINE_PATH, brand);
+    try {
+      const { notifier } = await getNotifier();
+      await notifier.sendQuarantinedLeadsToAdmin(count, QUARANTINE_PATH, brand);
+    } catch (error) {
+      console.error('[lead-crm] could not tell the admin about the copy', {
+        count,
+        error,
+      });
+    }
   };
 }
