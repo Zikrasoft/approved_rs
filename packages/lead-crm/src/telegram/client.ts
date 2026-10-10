@@ -96,6 +96,17 @@ export function createTelegramClient(botToken: string, botUsername: string) {
       return sent.message_id;
     },
 
+    async downloadFile(fileId: string): Promise<Uint8Array> {
+      const { file_path } = await api.getFile(fileId);
+      if (!file_path) throw new Error(`[telegram] file ${fileId} has no path`);
+      const response = await globalThis.fetch(
+        `https://api.telegram.org/file/bot${botToken}/${file_path}`,
+      );
+      if (!response.ok)
+        throw new Error(`[telegram] file download failed: ${response.status}`);
+      return new Uint8Array(await response.arrayBuffer());
+    },
+
     async answerCallback(
       callbackQueryId: string,
       text?: string,

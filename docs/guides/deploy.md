@@ -343,14 +343,17 @@ Without a sibling token the reply button is simply absent on that brand's cards.
 
 ### OpenAI (approved.rs only)
 
-| Variable         | approved.rs | carlab.rs | details.rs | Without it                                                                                 |
-| ---------------- | ----------- | --------- | ---------- | ------------------------------------------------------------------------------------------ |
-| `OPENAI_API_KEY` | ✅          | —         | —          | an owner message with an amount in the group gets "could not read the amount" and no draft |
+| Variable         | approved.rs | carlab.rs | details.rs | Without it                                                                                                                                               |
+| ---------------- | ----------- | --------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OPENAI_API_KEY` | ✅          | —         | —          | an owner message with an amount in the group gets "could not read the amount" and no draft; a voice message gets "could not recognise the voice message" |
 
 The CRM webhook reads the owner's free-form group messages (`Иван, сервис
 повторно, 30`) through an OpenAI model into a draft Payout. It is the same key
 as the GitHub secret below; the webhook still answers buttons and card replies
-without it, and only the free-form path fails.
+without it, and only the free-form path fails. An owner voice message, in the
+group or as a reply to a card, is transcribed first (`gpt-4o-mini-transcribe`,
+Telegram's OGG/Opus uploaded as-is) and then takes the same path; a voice reply
+to a card drafts the Payout on that card's Lead.
 
 ### Storage and cron
 
@@ -475,19 +478,19 @@ lived that way for twelve days. To check by hand:
 
 Settings → Secrets and variables → Actions:
 
-| Secret                           | For what                                       | Where to get it                                                        |
-| -------------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------- |
-| `OPENAI_API_KEY`                 | the `translate` job (content auto-translation) | OpenAI. Also set on approved.rs in Vercel, for free-form Payouts       |
-| `VERCEL_TOKEN`                   | every deploy job                               | [vercel.com/account/tokens](https://vercel.com/account/tokens)         |
-| `VERCEL_ORG_ID`                  | every deploy job                               | `.vercel/project.json` → `orgId` after `vercel link`                   |
-| `VERCEL_PROJECT_ID`              | the approved.rs deploy                         | Project Settings → General of that project                             |
-| `VERCEL_PROJECT_ID_AUTO_SERVICE` | the carlab.rs deploy                           | the same, on the carlab.rs project                                     |
-| `VERCEL_PROJECT_ID_DETAILING`    | the details.rs deploy                          | the same, on the details.rs project                                    |
-| `MEDUSA_VPS_HOST`                | the Medusa deploy (the server's IPv4)          | Hetzner Console                                                        |
-| `MEDUSA_VPS_USER`                | the Medusa deploy                              | `deploy` (created by `bootstrap-host.sh`)                              |
-| `MEDUSA_VPS_SSH_KEY`             | the Medusa deploy (CI's private key)           | `ssh-keygen -t ed25519`; the public half gets `restrict` on the server |
-| `MEDUSA_VPS_KNOWN_HOSTS`         | the Medusa deploy (the host key)               | `ssh-keyscan -t ed25519 <IPv4>`, fingerprint verified separately       |
-| `MEDUSA_PUBLISHABLE_KEY`         | the `scope` step (the catalog version)         | Medusa admin → Settings → Publishable API Keys                         |
+| Secret                           | For what                                       | Where to get it                                                            |
+| -------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------------- |
+| `OPENAI_API_KEY`                 | the `translate` job (content auto-translation) | OpenAI. Also set on approved.rs in Vercel, for free-form and voice Payouts |
+| `VERCEL_TOKEN`                   | every deploy job                               | [vercel.com/account/tokens](https://vercel.com/account/tokens)             |
+| `VERCEL_ORG_ID`                  | every deploy job                               | `.vercel/project.json` → `orgId` after `vercel link`                       |
+| `VERCEL_PROJECT_ID`              | the approved.rs deploy                         | Project Settings → General of that project                                 |
+| `VERCEL_PROJECT_ID_AUTO_SERVICE` | the carlab.rs deploy                           | the same, on the carlab.rs project                                         |
+| `VERCEL_PROJECT_ID_DETAILING`    | the details.rs deploy                          | the same, on the details.rs project                                        |
+| `MEDUSA_VPS_HOST`                | the Medusa deploy (the server's IPv4)          | Hetzner Console                                                            |
+| `MEDUSA_VPS_USER`                | the Medusa deploy                              | `deploy` (created by `bootstrap-host.sh`)                                  |
+| `MEDUSA_VPS_SSH_KEY`             | the Medusa deploy (CI's private key)           | `ssh-keygen -t ed25519`; the public half gets `restrict` on the server     |
+| `MEDUSA_VPS_KNOWN_HOSTS`         | the Medusa deploy (the host key)               | `ssh-keyscan -t ed25519 <IPv4>`, fingerprint verified separately           |
+| `MEDUSA_PUBLISHABLE_KEY`         | the `scope` step (the catalog version)         | Medusa admin → Settings → Publishable API Keys                             |
 
 `MEDUSA_VPS_*` are **repository** secrets, not `production` environment secrets:
 `medusa-image` has no environment, and with environment secrets it would not push

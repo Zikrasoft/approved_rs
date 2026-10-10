@@ -14,6 +14,7 @@ export const {
   sendForceReplyPrompt,
   answerCallback,
   safeEditMessage,
+  downloadFile,
 } = client;
 
 export { afterStatusChange, ensureLeadCard };
