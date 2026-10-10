@@ -8,7 +8,9 @@
     "24236f2232185d5b": "Skip",
     "3d69751932dafde4": "Preskoči",
     "40c1ed0dc1727871": "Primili smo, majstor će videti vašu poruku.",
+    "410172731f4d14a6": "Naši partneri — izaberite kome da pišete.",
     "43b1554dfa2bb842": "« Nazad",
+    "45637c6854f6bcae": "Partneri",
     "45ce0f38bdb2e17d": "Share my number",
     "46344c1d90e9cf48": "A koji budžet imate na umu?",
     "4bc99708f4abf23a": "Here’s what we offer at the studio. Choose a service — we'll show you the price, timeframe, and what's included.",
@@ -30,6 +32,7 @@
     "b1305c0a5bf7e1b2": "Contacts",
     "b43c1c7d324a06b7": "Got it, our detailer will see your message.",
     "bb6be91db261aebe": "« Back",
+    "bec9757998b0ddae": "Our partners — choose who to reach out to.",
     "c1a8c1e0d60db4d5": "Hvala! Preneli smo majstoru — uskoro će vas kontaktirati.",
     "c25c679254d59f47": "Zdravo! Hvala što ste nam se javili — vidimo vaš upit i javljamo se uskoro.",
     "d76ece7fdc9228bb": "Podeli broj",
@@ -39,7 +42,8 @@
     "e36b0deefed3742e": "And what budget do you have in mind?",
     "e919770777f75427": "We’re in Belgrade, looking forward to welcoming you at the studio.",
     "ee03b488ba3a3e01": "Mi smo u Beogradu, čekamo vas u studiju.",
-    "f10cba0ab53f7c86": "Ostavite zahtev"
+    "f10cba0ab53f7c86": "Ostavite zahtev",
+    "f70fa4b6468df938": "Partners"
   },
   "src/content/i18n/home.yaml": {
     "00fde0795c085f24": "HEXIS",

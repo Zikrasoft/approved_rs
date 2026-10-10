@@ -65,6 +65,9 @@ translations:
     manager:
       button: Pitajte majstora
       text: Postavite vaše pitanje jednim porukom — majstor će odgovoriti ovde.
+    partners:
+      button: Partneri
+      text: Naši partneri — izaberite kome da pišete.
   en:
     greeting: Hello! Thanks for getting in touch — we can see your enquiry and we'll come back to you shortly.
     lookingFor: Tell us which car you have and what you would like done to it — paint protection film, polishing, ceramic coating or something else.
@@ -91,4 +94,7 @@ translations:
     manager:
       button: Message the specialist
       text: Send your question in one message — the specialist will respond right here.
-translatedFrom: b7717e58e270875d
+    partners:
+      button: Partners
+      text: Our partners — choose who to reach out to.
+translatedFrom: b2dbfbdd1efb4e04
