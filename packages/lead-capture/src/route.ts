@@ -17,8 +17,8 @@ import {
 import type { CaptureCopy } from './copy.ts';
 import {
   createScreens,
-  readTap,
   REFERRAL,
+  tapSchema,
   LANGUAGE_SWITCH_TAP,
   type MenuConfig,
   type Screen,
@@ -252,8 +252,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   }
 
   async function show(chatId: number, screen: Screen): Promise<void> {
-    await bot.api.sendMessage(chatId, screen.text, {
-      parse_mode: 'HTML',
+    await send(chatId, screen.text, {
       reply_markup: { inline_keyboard: screen.keyboard },
     });
   }
@@ -288,10 +287,17 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     lead: StoredLead,
     updated: StoredLead | undefined,
   ): Promise<void> {
-    await ensureLeadCard(updated ?? lead);
-    if (!updated) return;
-    for (const field of VISITOR_FIELDS)
-      await sendVisitorChangeToAdmin(updated, field, lead[field]);
+    try {
+      await ensureLeadCard(updated ?? lead);
+      if (!updated) return;
+      for (const field of VISITOR_FIELDS)
+        await sendVisitorChangeToAdmin(updated, field, lead[field]);
+    } catch (error) {
+      console.error('[capture] could not tell the staff', {
+        error,
+        leadId: lead.id,
+      });
+    }
   }
 
   function startFields(
@@ -355,7 +361,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       referredBy: referred ? 'approved' : null,
       capturePrompt,
     });
-    await (before ? refresh(before, lead) : ensureLeadCard(lead));
+    await (before ? refresh(before, lead) : refresh(lead, undefined));
   }
 
   async function start(
@@ -468,7 +474,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     picked: S | '',
   ): Promise<void> {
     const open = await store.findOpenLeadByTelegramId(sender.id, brand);
-    if (!open) {
+    if (!open || !isFresh(open)) {
       const contact = await contactOf(sender);
       const step = firstStep(contact, picked);
       const fields = { service: picked, locale, visitorId: null };
@@ -478,6 +484,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     const step = firstStep(open.contact, picked || open.service);
     const updated = await store.updateCapture(open.id, {
       service: picked,
+      locale,
       capturePrompt: { chatId, step },
     });
     await refresh(open, updated);
@@ -512,7 +519,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     sender: CaptureSender,
     data: string,
   ): Promise<void> {
-    const tap = readTap(data);
+    const tap = tapSchema.parse(data);
     if (!tap) return;
     const locale = isLocale(tap.locale) ? tap.locale : primaryLocale;
     if (tap.screen === 'request') {
@@ -612,7 +619,9 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   });
 
   bot.chatType('private').on('callback_query:data', async (ctx) => {
-    await ctx.answerCallbackQuery();
+    await ctx.answerCallbackQuery().catch((error: unknown) => {
+      console.error('[capture] could not answer the tap', { error });
+    });
     const tap = captureTapSchema.safeParse(ctx.callbackQuery);
     if (!tap.success) return;
     const { message, from, data } = tap.data;
