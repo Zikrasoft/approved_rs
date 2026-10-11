@@ -54,6 +54,7 @@ const {
   unpinLeadCard,
   sendOperationNotice,
   sendQuarantinedLeadsToAdmin,
+  sendUnreadableLedgerToAdmin,
   sendStatusChangeToAdmin,
   sendVisitorChangeToAdmin,
   sendDigest,
@@ -626,6 +627,19 @@ describe('sendQuarantinedLeadsToAdmin', () => {
   });
 });
 
+describe('sendUnreadableLedgerToAdmin', () => {
+  beforeEach(() => mockFetchOk());
+  afterEach(() => mockFetch.mockReset());
+
+  it('tells every admin which file does not parse and that it was left alone', async () => {
+    await sendUnreadableLedgerToAdmin('data/ledger.json', '<i>Brand</i>');
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.chat_id).toBe(222);
+    expect(body.text).toContain('data/ledger.json не читается');
+    expect(body.text).toContain('&lt;i&gt;');
+  });
+});
+
 describe('buildSearchResults', () => {
   it('renders each match as a tappable button: status emoji, id, name, contact', () => {
     const { reply_markup } = buildSearchResults([
@@ -684,6 +698,16 @@ describe('buildMenu', () => {
     expect(buildMenu('admin', 80).text).toContain(
       `<b>💶 Мне должны: ${money(80)}</b>`,
     );
+  });
+});
+
+describe('buildMenu without a readable ledger', () => {
+  it('says the Balance is unavailable and offers no operations', () => {
+    const { text, reply_markup } = buildMenu('owner', undefined);
+    expect(text).toContain('<b>💶 Мой долг: недоступен</b>');
+    expect(reply_markup.inline_keyboard).toEqual([
+      [{ text: '📂 Открытые', callback_data: 'menu:open' }],
+    ]);
   });
 });
 

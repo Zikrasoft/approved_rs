@@ -5,6 +5,7 @@ import { isMessageGone, type TelegramClient } from './client.ts';
 import {
   operationNoticeText,
   quarantinedLeadsText,
+  unreadableLedgerText,
   statusChangeText,
   type EditField,
   type Formatter,
@@ -129,6 +130,13 @@ export function createNotifier({
       brand: string,
     ): Promise<void> {
       await sendToAll(adminIds, quarantinedLeadsText(count, path, brand));
+    },
+
+    async sendUnreadableLedgerToAdmin(
+      path: string,
+      brand: string,
+    ): Promise<void> {
+      await sendToAll(adminIds, unreadableLedgerText(path, brand));
     },
 
     async sendStatusChangeToAdmin(lead: StoredLead): Promise<void> {

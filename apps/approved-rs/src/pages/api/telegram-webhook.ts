@@ -62,6 +62,7 @@ import {
   answerOperationPrompt,
   parseOperationReply,
   businessDay,
+  LedgerUnreadableError,
   type OperationType,
   type LeadStatus,
   type PendingPrompt,
@@ -155,7 +156,11 @@ async function withErrorAck(
       error: err,
       ...logCtx,
     });
-    await answerCallback(cbId, LEAD_ACTION_COPY.failed).catch(() => {});
+    const text =
+      err instanceof LedgerUnreadableError
+        ? LEDGER_COPY.unavailable
+        : LEAD_ACTION_COPY.failed;
+    await answerCallback(cbId, text).catch(() => {});
   }
 }
 
@@ -520,7 +525,7 @@ const PROMPT_REPLIES: Record<PromptKind, PromptHandler> = {
   reply_visitor: replyVisitor,
 };
 
-type Reply = Omit<PromptReply, 'pending'>;
+type Reply = Omit<PromptReply, 'pending'> & { inPrivateChat: boolean };
 
 async function replyToPrompt(reply: Reply): Promise<boolean> {
   const pending = await findByPendingPrompt({
@@ -549,9 +554,21 @@ async function replyToCard(reply: Reply): Promise<boolean> {
   return true;
 }
 
+async function findLiveOperationPrompt(reply: Reply, key: PromptKey) {
+  try {
+    return await findOperationPrompt(key);
+  } catch (err) {
+    if (!(err instanceof LedgerUnreadableError)) throw err;
+    await sendMessage(reply.chatId, LEDGER_COPY.unavailable);
+    return 'unavailable';
+  }
+}
+
 async function replyToOperationPrompt(reply: Reply): Promise<boolean> {
+  if (!reply.inPrivateChat) return false;
   const key = { chatId: reply.chatId, messageId: reply.replyToMessageId };
-  const prompt = await findOperationPrompt(key);
+  const prompt = await findLiveOperationPrompt(reply, key);
+  if (prompt === 'unavailable') return true;
   if (!prompt) return false;
   if (prompt.expired) {
     await sendMessage(reply.chatId, LEDGER_COPY.expired);
@@ -596,15 +613,24 @@ async function replyToOperationPrompt(reply: Reply): Promise<boolean> {
   return true;
 }
 
-const REPLY_ROUTES = [replyToOperationPrompt, replyToPrompt, replyToCard];
+const REPLY_ROUTES = [replyToPrompt, replyToCard, replyToOperationPrompt];
 
 async function routeReply(reply: Reply): Promise<boolean> {
   for (const route of REPLY_ROUTES) if (await route(reply)) return true;
   return false;
 }
 
+async function readBalanceIfReadable(): Promise<number | undefined> {
+  try {
+    return await readBalance();
+  } catch (err) {
+    if (err instanceof LedgerUnreadableError) return undefined;
+    throw err;
+  }
+}
+
 async function sendMenuMessage(chatId: number, role: Role): Promise<void> {
-  const menu = buildMenu(role, await readBalance());
+  const menu = buildMenu(role, await readBalanceIfReadable());
   await sendMessage(chatId, menu.text, { reply_markup: menu.reply_markup });
 }
 
@@ -673,6 +699,7 @@ bot.on('message', async (ctx, next) => {
     role,
     authorId: ctx.from.id,
     chatId: ctx.chat.id,
+    inPrivateChat: ctx.chat.type === 'private',
     messageId: ctx.message.message_id,
     replyToMessageId: repliedTo.message_id,
     text: ctx.message.text ?? '',

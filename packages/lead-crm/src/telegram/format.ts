@@ -149,6 +149,9 @@ export const LEDGER_COPY = {
   expired: '⌛ Этот запрос уже закрыт — нажмите ➕ или ➖ ещё раз.',
   badAmount: '⚠️ Нужна сумма числом.',
   amountLimits: `⚠️ Сумма — от 0,01 до ${formatMoney(MAX_OPERATION_AMOUNT)}, не больше двух знаков после запятой.`,
+  balanceUnavailable: 'недоступен',
+  unavailable:
+    '⚠️ Баланс сейчас недоступен: файл учёта не читается. Админ уже знает.',
 } as const;
 
 const BALANCE_LABELS: Record<Role, string> = {
@@ -161,19 +164,23 @@ const LEDGER_ROW: Btn[] = [
   { text: LEDGER_COPY.debit, callback_data: 'ledger:settlement' },
 ];
 
-function balanceLine(role: Role, balance: number): string {
-  return `<b>${BALANCE_LABELS[role]}: ${formatMoney(balance)}</b>`;
+function balanceLine(role: Role, balance: number | undefined): string {
+  const amount =
+    balance === undefined
+      ? LEDGER_COPY.balanceUnavailable
+      : formatMoney(balance);
+  return `<b>${BALANCE_LABELS[role]}: ${amount}</b>`;
 }
 
 export function buildMenu(
   role: Role,
-  balance: number,
+  balance: number | undefined,
 ): {
   text: string;
   reply_markup: Keyboard;
 } {
   const rows: Btn[][] = [
-    LEDGER_ROW,
+    ...(balance === undefined ? [] : [LEDGER_ROW]),
     [{ text: '📂 Открытые', callback_data: 'menu:open' }],
   ];
   if (role === 'admin')
@@ -401,6 +408,14 @@ export function quarantinedLeadsText(
     ``,
     `Нашёл сайт ${escapeHtml(brand)} и скопировал в ${escapeHtml(path)}.`,
     `Из ${escapeHtml(LEADS_PATH)} ничего не убирал — удалить можно только руками.`,
+  ].join('\n');
+}
+
+export function unreadableLedgerText(path: string, brand: string): string {
+  return [
+    `⚠️ Файл учёта ${escapeHtml(path)} не читается`,
+    ``,
+    `Заметил сайт ${escapeHtml(brand)}. Баланс и операции недоступны, файл не трогал — поправить можно только руками.`,
   ].join('\n');
 }
 

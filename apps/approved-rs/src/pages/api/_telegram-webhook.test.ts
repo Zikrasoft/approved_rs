@@ -1259,6 +1259,58 @@ describe('POST /api/telegram-webhook', () => {
     });
   });
 
+  describe('a ledger file that does not parse', () => {
+    const CORRUPT = { operations: 'oops' };
+
+    beforeEach(() => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+      ledgerStorage().seed(CORRUPT);
+    });
+
+    it('still opens the menu, with the Balance unavailable, and alerts the admin once', async () => {
+      await message('/start', OWNER_ID);
+      await message('/menu', OWNER_ID);
+      expect(sentTo(OWNER_ID)).toEqual([
+        view(buildMenu('owner', undefined)),
+        view(buildMenu('owner', undefined)),
+      ]);
+      expect(textsTo(ADMIN_ID)).toEqual([
+        expect.stringContaining(`${LEDGER_PATH} не читается`),
+      ]);
+      expect(ledgerStorage().current()).toEqual(CORRUPT);
+    });
+
+    it('refuses the Balance with a clear message', async () => {
+      await tap('menu:debt', OWNER_ID, { id: 'cb-debt' });
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-debt', text: LEDGER_COPY.unavailable },
+      ]);
+    });
+
+    it('refuses an amount reply in the private chat', async () => {
+      await message('40', OWNER_ID, { replyTo: PROMPT_ID });
+      expect(textsTo(OWNER_ID)).toEqual([LEDGER_COPY.unavailable]);
+      expect(ledgerStorage().current()).toEqual(CORRUPT);
+    });
+
+    it('still postpones from a typed reply', async () => {
+      seed(makeLead({ pendingPrompt: awaiting('postpone') }));
+      await answerPrompt(LATER);
+      expect((await stored()).status).toBe('postponed');
+    });
+
+    it('takes a note on a group card without reading the ledger', async () => {
+      const read = vi.spyOn(ledgerStorage(), 'read');
+      await message('Звонил', OWNER_ID, {
+        chatId: CARD_CHAT_ID,
+        type: 'supergroup',
+        replyTo: CARD_MESSAGE_ID,
+      });
+      expect((await stored()).comment).toBe('Звонил');
+      expect(read).not.toHaveBeenCalled();
+    });
+  });
+
   describe('replying to a pending force_reply prompt', () => {
     it('ignores an answer to an amount prompt left from before ✅ stopped asking', async () => {
       leadsStorage().seed([

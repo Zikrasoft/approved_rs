@@ -12,10 +12,18 @@ import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
 
 export const OPENING_NOTE = 'Перенос со старой системы';
 
+type QuarantineNotifier = Awaited<
+  ReturnType<QuarantineOptions['getNotifier']>
+>['notifier'];
+
 export interface BrandStoreOptions {
   brand: string;
   storageFor: (path: string) => LeadStorage;
-  getNotifier: QuarantineOptions['getNotifier'];
+  getNotifier: () => Promise<{
+    notifier: QuarantineNotifier & {
+      sendUnreadableLedgerToAdmin(path: string, brand: string): Promise<void>;
+    };
+  }>;
 }
 
 export function createBrandStore({
@@ -32,6 +40,10 @@ export function createBrandStore({
       return owed > 0
         ? [{ type: 'payout', amount: owed, note: OPENING_NOTE, by: 'owner' }]
         : [];
+    },
+    onUnreadable: async () => {
+      const { notifier } = await getNotifier();
+      await notifier.sendUnreadableLedgerToAdmin(LEDGER_PATH, brand);
     },
   });
   const leadStore = createLeadStore({

@@ -6,6 +6,7 @@ import {
 import { StorageConflictError } from './storage/types.ts';
 import {
   createLedgerStore,
+  LedgerUnreadableError,
   operationSums,
   type LedgerOperation,
   type LedgerStore,
@@ -185,6 +186,23 @@ describe('recordOperation', () => {
       'refusing to overwrite',
     );
     expect(storage.current()).toEqual([{ type: 'payout' }]);
+  });
+
+  it('alerts once per instance about an unreadable file and keeps throwing', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const onUnreadable = vi.fn().mockRejectedValue(new Error('telegram down'));
+    const watched = createLedgerStore({ storage, onUnreadable });
+    storage.seed({ operations: 'x' });
+    for (let i = 0; i < 2; i++)
+      await expect(watched.readBalance()).rejects.toBeInstanceOf(
+        LedgerUnreadableError,
+      );
+    expect(onUnreadable).toHaveBeenCalledOnce();
+    expect(error).toHaveBeenCalledWith(
+      '[lead-crm] could not tell the admin about the ledger',
+      expect.anything(),
+    );
+    expect(storage.current()).toEqual({ operations: 'x' });
   });
 });
 

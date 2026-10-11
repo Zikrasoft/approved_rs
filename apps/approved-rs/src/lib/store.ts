@@ -38,6 +38,7 @@ export {
   postponePatch,
   parseOperationReply,
   businessDay,
+  LedgerUnreadableError,
   MAX_LIST_ROWS,
 } from '@podbor/lead-crm';
 

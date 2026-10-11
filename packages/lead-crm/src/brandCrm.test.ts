@@ -71,6 +71,20 @@ describe('createBrandStore', () => {
     expect(storages[QUARANTINE_PATH]!.current()).toEqual([{ id: 7 }]);
     expect(send).toHaveBeenCalledWith(1, QUARANTINE_PATH, 'CarLab');
   });
+
+  it('tells the admin once that the ledger does not parse', async () => {
+    const send = vi.fn().mockResolvedValue(undefined);
+    const { ledgerStore } = brandStore(
+      vi.fn().mockResolvedValue({
+        notifier: { sendUnreadableLedgerToAdmin: send },
+      }),
+    );
+    storages[LEDGER_PATH]!.seed('garbage');
+    await expect(ledgerStore.readBalance()).rejects.toThrow();
+    await expect(ledgerStore.readBalance()).rejects.toThrow();
+    expect(send).toHaveBeenCalledOnce();
+    expect(send).toHaveBeenCalledWith(LEDGER_PATH, 'CarLab');
+  });
 });
 
 describe('the opening carry-over', () => {

@@ -33,7 +33,7 @@ export {
   VISITOR_MERGE_WINDOW_MS,
 } from './store.ts';
 export type { CaptureUpdate, LeadStore } from './store.ts';
-export { LEDGER_PATH } from './ledgerStore.ts';
+export { LEDGER_PATH, LedgerUnreadableError } from './ledgerStore.ts';
 export type { LedgerOperation, OperationType } from './ledgerStore.ts';
 export { parseOperationReply } from './operationReply.ts';
 export { BUSINESS_TIME_ZONE, businessDay } from './businessTime.ts';

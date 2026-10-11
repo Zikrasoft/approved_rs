@@ -62,6 +62,14 @@ export type RecordOutcome =
 export interface LedgerStoreOptions {
   storage: LeadStorage;
   opening?: () => Promise<OperationInput[]>;
+  onUnreadable?: () => Promise<void>;
+}
+
+export class LedgerUnreadableError extends Error {
+  constructor() {
+    super('[lead-crm] the ledger file does not parse — refusing to overwrite');
+    this.name = 'LedgerUnreadableError';
+  }
 }
 
 export interface FlowSums {
@@ -139,7 +147,23 @@ function appended(
   };
 }
 
-export function createLedgerStore({ storage, opening }: LedgerStoreOptions) {
+export function createLedgerStore({
+  storage,
+  opening,
+  onUnreadable,
+}: LedgerStoreOptions) {
+  let alerted = false;
+
+  async function alertOnce(): Promise<void> {
+    if (alerted) return;
+    alerted = true;
+    await onUnreadable?.().catch((error: unknown) => {
+      console.error('[lead-crm] could not tell the admin about the ledger', {
+        error,
+      });
+    });
+  }
+
   async function openingFile(): Promise<LedgerFile> {
     let file: LedgerFile = { operations: [], prompts: [] };
     for (const input of (await opening?.()) ?? []) {
@@ -160,9 +184,8 @@ export function createLedgerStore({ storage, opening }: LedgerStoreOptions) {
         path: LEDGER_PATH,
         issues: parsed.error.issues,
       });
-      throw new Error(
-        '[lead-crm] the ledger file does not parse — refusing to overwrite',
-      );
+      await alertOnce();
+      throw new LedgerUnreadableError();
     }
     return { file: parsed.data, version };
   }
