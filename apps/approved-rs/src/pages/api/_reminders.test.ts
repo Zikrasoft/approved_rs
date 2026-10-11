@@ -433,20 +433,9 @@ describe('GET /api/reminders', () => {
     expect(digestIds()).toEqual([8, 10, 11, 12]);
   });
 
-  it('posts no monthly summary on the 1st and drops money records left in the Lead file', async () => {
+  it('posts no monthly summary on the 1st', async () => {
     vi.setSystemTime(new Date('2026-11-01T08:00:00.000Z'));
-    leadsStorage().seed([
-      makeLead({ id: 9, status: 'open', remindAt: null }),
-      {
-        type: 'payout',
-        id: 1,
-        amount: 80,
-        createdAt: '2026-10-15T10:00:00.000Z',
-        createdBy: 'owner',
-        leadId: 9,
-      },
-      { type: 'summary', id: 1, month: '2026-10', createdAt: '2026-10-01' },
-    ]);
+    leadsStorage().seed([makeLead({ id: 9, status: 'open', remindAt: null })]);
 
     const res = await GET(makeCtx());
 

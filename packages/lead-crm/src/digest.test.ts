@@ -49,28 +49,6 @@ beforeEach(() => {
 
 afterEach(() => vi.useRealTimers());
 
-describe('money records left in the Lead file', () => {
-  const retired = [
-    { type: 'payout', id: 1, amount: 40, createdAt: at(1) },
-    { type: 'settlement', id: 1, amount: 40, createdAt: at(1) },
-    { type: 'summary', id: 1, month: '2026-10', createdAt: at(1) },
-    { type: 'settle_prompt', chatId: 1, messageId: 2, createdAt: at(1) },
-    { type: 'payout', id: 'broken' },
-  ];
-
-  it('are dropped on the next write without quarantine', async () => {
-    storage.seed([storedLead(1), ...retired]);
-    const quarantine = vi.fn().mockResolvedValue(undefined);
-    store = createLeadStore({ storage, schema, quarantine });
-
-    await store.addNote(1, 'Звонил');
-
-    expect(quarantine).not.toHaveBeenCalled();
-    expect(records()).toEqual([expect.objectContaining({ id: 1 })]);
-    expect(await store.readLeads()).toHaveLength(1);
-  });
-});
-
 describe('claimDigest', () => {
   const ids = (leads: { id: number }[]) => leads.map((l) => l.id);
 

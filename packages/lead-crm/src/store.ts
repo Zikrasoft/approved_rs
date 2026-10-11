@@ -211,10 +211,6 @@ export function resumePatch(): Partial<StoredLead> {
   return { ...statusPatch('open'), remindAt: null };
 }
 
-const retiredRecord = z.looseObject({
-  type: z.enum(['draft', 'payout', 'settlement', 'summary', 'settle_prompt']),
-});
-
 const unreadableId = z.object({
   id: z.coerce
     .number()
@@ -262,7 +258,6 @@ export function createLeadStore({
     const digests: DigestMark[] = [];
     const unreadable: unknown[] = [];
     for (const entry of records.data) {
-      if (retiredRecord.safeParse(entry).success) continue;
       const digest = digestMarkSchema.safeParse(entry);
       if (digest.success) {
         digests.push(digest.data);
