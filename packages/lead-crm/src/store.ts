@@ -116,6 +116,10 @@ function untouched(lead: StoredLead): boolean {
   return lead.status === 'open' && lead.lastActivityAt == null;
 }
 
+function hasNoContact(contact: string): boolean {
+  return isPlaceholderContact(contact) || isTelegramIdContact(contact);
+}
+
 function neverGainedContact(lead: StoredLead): boolean {
   return (
     (lead.kind === 'call_click' && isPlaceholderContact(lead.contact)) ||
@@ -396,8 +400,7 @@ export function createLeadStore({
         }
 
         const upgradeContact =
-          isPlaceholderContact(existing.contact) &&
-          !isPlaceholderContact(data.contact);
+          hasNoContact(existing.contact) && !hasNoContact(data.contact);
         const botHandOff =
           (data.telegramId ?? existing.telegramId) != null &&
           data.contactChannel === existing.contactChannel;
@@ -413,7 +416,7 @@ export function createLeadStore({
           ...existing,
           ...(upgradeContact
             ? {
-                name: data.name,
+                name: data.name || existing.name,
                 contact: data.contact,
                 contactChannel: data.contactChannel ?? existing.contactChannel,
                 service: data.service || existing.service,

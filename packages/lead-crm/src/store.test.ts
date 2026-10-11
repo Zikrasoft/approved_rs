@@ -875,6 +875,53 @@ describe('expireGhostLeads', () => {
       expect(await store.expireGhostLeads(NOW)).toEqual([]);
     });
 
+    it('takes the phone of a form sent within the window, and keeps it', async () => {
+      const lead = await store.insertLead({
+        ...startData,
+        name: 'Ivan Tg',
+        visitorId: 'v-start',
+      });
+      const { merged, lead: after } = await store.insertOrMergeLead({
+        ...baseData,
+        name: '',
+        contact: '+381601234567',
+        contactChannel: 'phone',
+        visitorId: 'v-start',
+      });
+      await forceAge(lead.id, DAY_MS + 1);
+
+      expect(merged).toBe(true);
+      expect(after).toMatchObject({
+        id: lead.id,
+        name: 'Ivan Tg',
+        contact: '+381601234567',
+        contactChannel: 'phone',
+        telegramId: 42,
+      });
+      expect(await store.expireGhostLeads(NOW)).toEqual([]);
+      expect(await store.getLead(lead.id)).toMatchObject({ status: 'open' });
+    });
+
+    it('never lets a form overwrite a username', async () => {
+      await store.insertLead({
+        ...startData,
+        contact: '@ivan',
+        visitorId: 'v-handle',
+      });
+      const { merged, lead } = await store.insertOrMergeLead({
+        ...baseData,
+        contact: '+381601234567',
+        contactChannel: 'phone',
+        visitorId: 'v-handle',
+      });
+
+      expect(merged).toBe(true);
+      expect(lead).toMatchObject({
+        contact: '@ivan',
+        contactChannel: 'telegram',
+      });
+    });
+
     it('spares one whose visitor was active inside the window', async () => {
       const lead = await started();
       await store.updateCapture(lead.id, {
