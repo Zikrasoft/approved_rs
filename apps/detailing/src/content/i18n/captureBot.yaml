@@ -1,6 +1,5 @@
 greeting: Здравствуйте! Спасибо, что написали — мы уже видим ваше обращение и скоро ответим.
 lookingFor: Расскажите, какая у вас машина и что хотелось бы сделать — оклейка плёнкой, полировка, керамика или что-то другое.
-budget: И на какой бюджет вы ориентируетесь?
 phoneAsk: Чтобы мы могли с вами связаться, поделитесь номером телефона — или пропустите этот шаг.
 phoneOffer: Если удобнее по телефону, поделитесь номером, и мы позвоним. Если нет, просто пропустите.
 phoneButton: Поделиться номером
@@ -42,7 +41,6 @@ translations:
   sr:
     greeting: Zdravo! Hvala što ste nam se javili — vidimo vaš upit i javljamo se uskoro.
     lookingFor: Recite nam koji automobil imate i šta biste želeli da uradimo — folija, poliranje, keramika ili nešto drugo.
-    budget: A koji budžet imate na umu?
     phoneAsk: Podelite broj telefona da bismo mogli da vas kontaktiramo — ili preskočite ovaj korak.
     phoneOffer: Ako vam više odgovara telefonski razgovor, podelite broj pa ćemo vas pozvati. Ako ne, slobodno preskočite.
     phoneButton: Podeli broj
@@ -83,7 +81,6 @@ translations:
   en:
     greeting: Hello! Thanks for getting in touch — we can see your enquiry and we'll come back to you shortly.
     lookingFor: Tell us which car you have and what you would like done to it — paint protection film, polishing, ceramic coating or something else.
-    budget: And what budget do you have in mind?
     phoneAsk: Share your phone number so we can reach you — or skip this step.
     phoneOffer: If a call suits you better, share your number and we'll ring you. If not, just skip it.
     phoneButton: Share my number

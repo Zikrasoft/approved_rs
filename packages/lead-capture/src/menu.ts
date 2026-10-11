@@ -12,7 +12,7 @@ export interface ServiceCard {
 }
 
 export type MenuButton = {
-  [K in keyof CaptureCopy]: CaptureCopy[K] extends { button: string }
+  [K in keyof CaptureCopy]-?: CaptureCopy[K] extends { button: string }
     ? K
     : never;
 }[keyof CaptureCopy];

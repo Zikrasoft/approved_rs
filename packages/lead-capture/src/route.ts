@@ -84,11 +84,13 @@ const QUESTION: Record<
 > = {
   looking_for: (words) => words.lookingFor,
   car_issue: (words) => words.lookingFor,
-  budget: (words) => words.budget,
+  budget: (words) => budgetLine.parse(words.budget),
   car: (words) => words.request.car,
 };
 
 const MESSAGE_NOTE = 'Сообщение';
+
+const budgetLine = z.string();
 
 const VISITOR_FIELDS: EditField[] = ['contact', 'comment', 'service'];
 

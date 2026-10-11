@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const line = z.string();
 
-export const captureCopySchema = z
+export const captureCopyWithBudgetSchema = z
   .object({
     greeting: line,
     lookingFor: line,
@@ -32,4 +32,10 @@ export const captureCopySchema = z
   })
   .strict();
 
-export type CaptureCopy = z.infer<typeof captureCopySchema>;
+export const captureCopySchema = captureCopyWithBudgetSchema
+  .omit({ budget: true })
+  .strict();
+
+export type CaptureCopy = z.infer<typeof captureCopySchema> & {
+  budget?: string;
+};
