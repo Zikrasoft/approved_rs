@@ -1,7 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import {
+  isHandleContact,
+  isPhoneContact,
   isTelegramIdContact,
   telegramContact,
+  telegramIdContact,
   typedAsPhone,
 } from './contactShape.ts';
 
@@ -63,10 +66,31 @@ describe('telegramContact', () => {
 
 describe('isTelegramIdContact', () => {
   it('matches the id link the capture bot stores for a visitor without a handle', () => {
-    expect(isTelegramIdContact('tg://user?id=123456')).toBe(true);
+    expect(isTelegramIdContact(telegramIdContact(123456))).toBe(true);
+    expect(telegramIdContact(123456)).toBe('tg://user?id=123456');
   });
 
   it.each(['@ivan', '+381601234567', ''])('rejects %p', (contact) => {
     expect(isTelegramIdContact(contact)).toBe(false);
+  });
+});
+
+describe('isHandleContact', () => {
+  it('matches a stored @username', () => {
+    expect(isHandleContact('@ivan')).toBe(true);
+  });
+
+  it.each(['tg://user?id=1', '+381601234567', ''])('rejects %p', (contact) => {
+    expect(isHandleContact(contact)).toBe(false);
+  });
+});
+
+describe('isPhoneContact', () => {
+  it('matches a stored E.164 phone', () => {
+    expect(isPhoneContact('+381601234567')).toBe(true);
+  });
+
+  it.each(['@ivan', 'tg://user?id=1', ''])('rejects %p', (contact) => {
+    expect(isPhoneContact(contact)).toBe(false);
   });
 });

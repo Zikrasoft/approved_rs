@@ -8,16 +8,26 @@ const senderSchema = z.object({
   language_code: z.string().optional(),
 });
 
-const messageSchema = z.object({
+export const captureMessageSchema = z.object({
   chat: z.object({ id: z.number().int(), type: z.string() }),
   from: senderSchema,
   text: z.string().optional(),
-  contact: z.object({ phone_number: z.string() }).optional(),
+  contact: z
+    .object({ phone_number: z.string(), user_id: z.number().int().optional() })
+    .optional(),
 });
 
-export const captureUpdateSchema = z
-  .object({ message: messageSchema.optional().catch(undefined) })
-  .catch({ message: undefined });
+export const captureTapSchema = z.object({
+  from: senderSchema,
+  data: z.string(),
+  message: z.object({
+    message_id: z.number().int(),
+    chat: z.object({ id: z.number().int() }),
+  }),
+});
 
-export type CaptureMessage = z.infer<typeof messageSchema>;
+export const captureUpdateSchema = z.looseObject({
+  update_id: z.number().int(),
+});
+
 export type CaptureSender = z.infer<typeof senderSchema>;

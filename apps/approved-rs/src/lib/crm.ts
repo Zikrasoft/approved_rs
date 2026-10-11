@@ -1,28 +1,17 @@
-import { APPROVED, COMMISSION_PERCENT } from '@podbor/brands';
-import {
-  createBrandStore,
-  deferStorage,
-  LOCAL_DATA_DIR,
-  type LeadStorage,
-} from '@podbor/lead-crm';
+import { APPROVED } from '@podbor/brands';
+import { createBrandStore, type LeadStorage } from '@podbor/lead-crm';
+import { localLeadStorage } from '@podbor/lead-crm/storage/local';
 import { createVercelBlobStorage } from '@podbor/lead-crm/storage/vercel-blob';
 
 export const BRAND = APPROVED.name;
 
 const storageFor = (path: string): LeadStorage => {
-  if (import.meta.env.DEV) {
-    return deferStorage(
-      import('@podbor/lead-crm/storage/file').then(({ createFileStorage }) =>
-        createFileStorage({ path, dir: LOCAL_DATA_DIR }),
-      ),
-    );
-  }
+  if (import.meta.env.DEV) return localLeadStorage(path);
   return createVercelBlobStorage({ path });
 };
 
-export const { leadStore } = createBrandStore({
+export const { leadStore, ledgerStore } = createBrandStore({
   brand: BRAND,
-  commissionPercent: COMMISSION_PERCENT.approved,
   storageFor,
   getNotifier: () => import('./crmBot'),
 });

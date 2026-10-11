@@ -2,6 +2,18 @@
 status: accepted
 ---
 
+## Amended 2026-10-11 (later): only a bare `/start` retires
+
+The owner narrowed the amendment below. A Capture bot Lead without a phone or a username retires only when it is a bare `/start`: no comment — which is where every Questionnaire answer and every message the visitor sends the bot lands — and no service the visitor chose in the bot (`serviceChosenInBot`, set by «Leave a request» on a service card and by the Questionnaire's service buttons). Any visitor answer keeps the Lead open for the owner, who can reach such a visitor through the reply-through-the-bot button. A service that only came with the site tile's `/start` payload, or a Partners referral, is not an answer. A phone or a username still never auto-closes. `isBareStart` in `packages/lead-crm/src/store.ts` is the definition. A no-username `/start` merged into the visitor's Telegram-tile click now also takes the click's place with the `tg://user?id=…` contact, so a contact ranks placeholder < bare id < phone or username on merge, and a merge only ever moves it up.
+
+## Amended 2026-10-11: a contactless `/start` is a Ghost lead too
+
+A Capture bot Lead whose contact is still `tg://user?id=…` — the visitor has no Telegram username and never shared a phone — gives the owner nobody to write to, the same dead end as a placeholder click. The owner decided it retires the same way: same `GHOST_LEAD_RETENTION_MS`, same `expireGhostLeads` sweep in the reminder cron, same `lost`. The predicate is still the one `isGhostLead`: open, no owner activity (`lastActivityAt` unset), never gained a contact, and the retention window measured from the last visitor activity (`visitorActiveAt ?? createdAt`) — a visitor still answering the Questionnaire keeps the Lead alive. "Never gained a contact" is the `contact` field alone: the Capture bot writes `@username` when there is one and replaces the bare id with the phone when one is shared, so a Lead with a phone or a username has a contact that is neither, and never auto-closes. Such bare `/start` Leads therefore no longer sit in the 7-day digest. For that to hold, a site form merged into a bare `/start` inside the visitor-merge window now takes the bare id's place with its own contact, the way it already replaced a placeholder click's; a username or a phone already on the Lead is never overwritten.
+
+## Amended 2026-10-10: no archive, a Ghost lead is only marked lost
+
+Issue #226 removes the archive from the CRM bot: lost is the archive now, and only open Leads are listed. Expiring a Ghost lead sets `lost` alone, and "not archived" drops out of the predicate. `new` is gone with the other two pre-outcome statuses, so "still `new`" now reads "still `open` with no recorded activity" (`lastActivityAt` unset): ⏳ on the card, a card reply or a postpone takes a click out of the sweep the way moving it off `new` used to, and the migration stamps `lastActivityAt` on a Lead stored as negotiations or in_progress. See [ADR-0032](0032-the-owner-states-the-payout.md) for the same rework.
+
 ## Amended 2026-10-06: Telegram taps can be Ghost leads again
 
 The paragraph below that takes Telegram out of this no longer holds. [ADR-0030](0030-a-capture-bot-per-brand-takes-the-telegram-contact.md), amended the same day, has a Telegram tap store a contact click again so the bot's Lead can inherit its page. A tap whose visitor reaches Start is merged into the bot's Lead and gains a contact; one who never does leaves a placeholder click that this sweep retires like any other. Nothing in the predicate or the sweep changed.

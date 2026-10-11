@@ -25,6 +25,28 @@ const srFirst = createLocaleSet({
   ogSuffix: OG_SUFFIX,
 });
 
+describe('native locale names', () => {
+  it('names exactly the locales of the set, each in its own language', () => {
+    expect(srFirst.LOCALE_NAME).toEqual({
+      ru: 'Русский',
+      sr: 'Srpski',
+      en: 'English',
+    });
+    expect(Object.keys(srFirst.LOCALE_NAME)).toEqual(['ru', 'sr', 'en']);
+  });
+
+  it('rejects a locale it has no native name for', () => {
+    expect(() =>
+      createLocaleSet({
+        locales: ['ru', 'xx'] as const,
+        primaryLocale: 'ru',
+        ogLocale: { ru: 'ru_RU', xx: 'xx_XX' },
+        ogSuffix: { ru: '', xx: '-xx' },
+      }),
+    ).toThrow('NATIVE_LOCALE_NAMES has no entry for xx');
+  });
+});
+
 describe('createLocaleSet options', () => {
   it('rejects an empty locale list', () => {
     expect(() =>

@@ -126,10 +126,6 @@ decision ([ADR-0024](../adr/0024-hand-collected-vehicle-dictionary.md)).
   unfixable file on one site fails the job and nothing ships. It can be untangled
   with a matrix over `apps/*`, at the price of three parallel commits into one
   branch.
-- **A `get`+`head` race in the Blob CAS**
-  (`packages/lead-crm/src/storage/vercelBlob.ts`): a write between the two calls
-  yields the etag of somebody else's version. Needs a check of etag behaviour in
-  production.
 - **The weight of the brands' contact pages.** 490 server-rendered `<option>`
   elements plus a second copy of the form inside a closed `<dialog>`: ~26 KB gzip
   where ~7 would do. `bindPhoneCountry`'s country list could come from a chunk that

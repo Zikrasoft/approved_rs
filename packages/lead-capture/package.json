@@ -6,15 +6,18 @@
   "version": "0.0.1",
   "exports": {
     ".": "./src/index.ts",
-    "./copy": "./src/copy.ts"
+    "./copy": "./src/copy.ts",
+    "./profile": "./src/profile.ts"
   },
   "scripts": {
     "test": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@podbor/i18n": "workspace:*",
     "@podbor/lead-crm": "workspace:*",
     "@podbor/site-kit": "workspace:*",
+    "grammy": "1.46.0",
     "zod": "4.5.4"
   },
   "devDependencies": {

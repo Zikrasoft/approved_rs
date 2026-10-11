@@ -4,6 +4,8 @@ All three sites write leads to the same `data/leads.json` on one Vercel Blob sto
 
 **Amended by [ADR-0030](0030-a-capture-bot-per-brand-takes-the-telegram-contact.md): the single bot is now the CRM bot, and each brand has its own visitor-facing capture bot.** The store is still one and `brand` still separates it, but the brand is no longer stamped only by a site's route — which capture bot received the update identifies it, and that is what keeps the brand a server fact once a `?start=` payload the visitor controls is in play. The rejected option below stays rejected: it was three _CRM_ bots, with three chats and no single money summary.
 
+**Amended 2026-10-11 by [ADR-0032](0032-the-owner-states-the-payout.md) (#226, #241): a Lead no longer carries a commission rate or any money.** The owner states each Payout as an amount, and money lives in one Balance outside the Leads. The rate in the last consequence below is history.
+
 ## Considered Options
 
 - **A storage key per business** (the original split plan): rejected — the single webhook would need a registry of stores and a store prefix in every `callback_data`. Splitting later is a migration of one JSON file.

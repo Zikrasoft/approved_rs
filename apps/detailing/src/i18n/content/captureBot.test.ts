@@ -6,7 +6,10 @@ describe('captureBot copy', () => {
   it('has every line the capture dialog sends, in every locale', () => {
     for (const locale of SUPPORTED_LOCALES) {
       const copy = content(locale).captureBot;
-      for (const line of Object.values(copy)) expect(line.trim()).not.toBe('');
+      for (const line of Object.values(copy).flatMap((group) =>
+        typeof group === 'string' ? group : Object.values(group),
+      ))
+        expect(line.trim()).not.toBe('');
     }
   });
 

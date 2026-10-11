@@ -65,7 +65,9 @@ Required, or the walk refuses to start and names what is missing:
 `SHOP_ORDER_HOOK_SECRET`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_GROUP_ID`,
 `TELEGRAM_BOT_USERNAME`. The bot token is never used against the real API — the
 walk intercepts `api.telegram.org` — but `src/lib/crmBot.ts` demands it at
-module load.
+module load, and it must keep BotFather's `<digits>:<secret>` shape (`1:fake`
+will do): the Telegram client reads the bot id before the colon at module load
+and throws on anything else.
 
 ### 5. The browser, once per machine
 
@@ -102,7 +104,7 @@ Both counts are per test. A full two-test run therefore leaves two Leads, two
 Order markers and three intercepted calls behind.
 
 1. **One order.** Exactly one Lead, exactly one Order marker, and exactly one
-   `sendMessage` to the group — with the operator card's payload: the group
+   `sendMessage` to the group — with the owner card's payload: the group
    chat, HTML parse mode, the buyer's name, the `parts-order` service under its
    label («Заказ из магазина») and a deep link carrying the stored Lead's id.
    The Lead itself carries `brand: CarLab`, `service: parts-order`,

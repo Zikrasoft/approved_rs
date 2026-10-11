@@ -1,6 +1,6 @@
 import type { RegistryEntry } from '@podbor/i18n';
 import { dictionaryContentSchema } from './dictionaryContentSchema.ts';
-import { captureCopySchema } from '@podbor/lead-capture/copy';
+import { captureCopyWithBudgetSchema } from '@podbor/lead-capture/copy';
 import { faqContentSchema } from './content/faqContentSchema.ts';
 import { leadFormContentSchema } from './content/leadFormContentSchema.ts';
 import { homeContentSchema } from './content/homeContentSchema.ts';
@@ -60,7 +60,7 @@ export const SECTIONS = [
   {
     key: 'captureBot',
     path: 'src/content/i18n/captureBot.yaml',
-    schema: captureCopySchema,
+    schema: captureCopyWithBudgetSchema,
     promptSubject:
       'what the Telegram capture bot says to a visitor who opened it from the site (a greeting and short questions, written as one person messaging another)',
   },

@@ -63,7 +63,9 @@ describe.each(SUPPORTED_LOCALES)('content for %s', (locale) => {
   });
 
   it('has every line the capture dialog sends', () => {
-    for (const line of Object.values(content(locale).captureBot)) {
+    for (const line of Object.values(content(locale).captureBot).flatMap(
+      (group) => (typeof group === 'string' ? group : Object.values(group)),
+    )) {
       expect(line.trim()).not.toBe('');
     }
   });

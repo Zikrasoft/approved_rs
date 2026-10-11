@@ -19,6 +19,7 @@ export const localeSet = createLocaleSet(localeConfig);
 
 export const {
   SUPPORTED_LOCALES,
+  LOCALE_NAME,
   PRIMARY_LOCALE,
   TRANSLATABLE_LOCALES,
   isLocale,
@@ -36,10 +37,4 @@ export const BCP47_BY_LOCALE: Record<Locale, string> = {
   ru: 'ru-RS',
   sr: 'sr-Latn-RS',
   en: 'en-RS',
-};
-
-export const LOCALE_NAME: Record<Locale, string> = {
-  ru: 'Русский',
-  sr: 'Srpski',
-  en: 'English',
 };

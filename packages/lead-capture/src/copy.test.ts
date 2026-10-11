@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { captureCopySchema } from './copy.ts';
+import { captureCopySchema, captureCopyWithBudgetSchema } from './copy.ts';
 
 const COPY = {
   greeting: 'Привет',
@@ -11,23 +11,48 @@ const COPY = {
   phoneSkip: 'Пропустить',
   thanks: 'Спасибо',
   received: 'Получили',
+  menu: { text: 'Чем помочь?', back: 'Назад' },
+  services: { button: 'Услуги', text: 'Выберите услугу' },
+  card: { request: 'Оставить заявку', site: 'На сайте' },
+  contacts: { button: 'Контакты', text: 'Мы здесь', hours: 'Пн–Пт' },
+  manager: { button: 'Менеджер', text: 'Напишите вопрос' },
+  partners: { button: 'Партнёры', text: 'Кому написать?' },
+  request: {
+    button: 'Оставить заявку',
+    car: 'Какая машина?',
+    service: 'Какая услуга?',
+  },
+  language: { button: 'Язык', text: 'Выберите язык' },
+  profile: {
+    description: 'Отвечаем на заявки с сайта',
+    shortDescription: 'Заявки с сайта',
+    menuCommand: 'Меню',
+    langCommand: 'Язык',
+  },
 };
 
 describe('the dialog copy a site supplies', () => {
   it('accepts a complete set of questions', () => {
-    expect(captureCopySchema.parse(COPY)).toEqual(COPY);
+    expect(captureCopyWithBudgetSchema.parse(COPY)).toEqual(COPY);
   });
 
   it('refuses a set with a question missing', () => {
-    const incomplete: Record<string, string> = { ...COPY };
+    const incomplete: Record<string, unknown> = { ...COPY };
     delete incomplete.budget;
 
-    expect(captureCopySchema.safeParse(incomplete).success).toBe(false);
+    expect(captureCopyWithBudgetSchema.safeParse(incomplete).success).toBe(
+      false,
+    );
+  });
+
+  it('refuses the budget question where the questionnaire never asks it', () => {
+    expect(captureCopySchema.safeParse(COPY).success).toBe(false);
   });
 
   it('refuses a key the dialog would never ask for', () => {
     expect(
-      captureCopySchema.safeParse({ ...COPY, farewell: 'Пока' }).success,
+      captureCopyWithBudgetSchema.safeParse({ ...COPY, farewell: 'Пока' })
+        .success,
     ).toBe(false);
   });
 });
