@@ -1099,6 +1099,19 @@ describe('the phone, offered last when the visitor has a handle', () => {
     expect(lastMarkup()).toEqual({ remove_keyboard: true });
   });
 
+  it('takes the Skip button of a keyboard sent in another language', async () => {
+    POST = route(SECRET, {
+      copy: (locale) => ({ ...COPY, phoneSkip: `SKIP_${locale}` }),
+    });
+    await begin(undefined, ANONYMOUS);
+    await tap('request:en:vehicle-import', ANONYMOUS);
+
+    await say('SKIP_ru', ANONYMOUS);
+
+    expect(stored()[0].locale).toBe('en');
+    expect(stored()[0].comment ?? '').not.toContain('SKIP');
+  });
+
   it('ends the dialog intact when the visitor declines the call', async () => {
     await begin();
     await say('BMW X5');
@@ -1114,11 +1127,25 @@ describe('the phone, offered last when the visitor has a handle', () => {
 });
 
 describe('a contact shared outside the phone step', () => {
-  it('is ignored when the visitor has no dialog open at all', async () => {
+  it('starts a Lead with that phone when the visitor has no dialog open at all', async () => {
     await POST(makeCtx(contactUpdate('381601234567')));
 
-    expect(stored()).toHaveLength(0);
-    expect(api.calls).toHaveLength(0);
+    expect(stored()).toHaveLength(1);
+    expect(stored()[0]).toMatchObject({
+      contact: '+381601234567',
+      telegramId: 777,
+      comment: null,
+    });
+    expect(lastSent()).toEqual([777, 'GREETING_ru\n\nMENU']);
+  });
+
+  it('keeps the handle as the contact and the shared phone as a note', async () => {
+    await POST(makeCtx(contactUpdate('381601234567', HANDLED)));
+
+    expect(stored()[0]).toMatchObject({
+      contact: '@ivan',
+      comment: 'Телефон: +381601234567',
+    });
   });
 
   it('still becomes the contact of the open Lead after the Questionnaire ended', async () => {
