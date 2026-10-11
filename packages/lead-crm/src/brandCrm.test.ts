@@ -10,7 +10,7 @@ import {
 } from './storage/memory.testing.ts';
 
 const ENV = {
-  TELEGRAM_BOT_TOKEN: 'token',
+  TELEGRAM_BOT_TOKEN: '3001:token',
   TELEGRAM_BOT_USERNAME: 'crm_bot',
   TELEGRAM_GROUP_ID: '-100',
   TELEGRAM_OWNER_ID: '1,2',

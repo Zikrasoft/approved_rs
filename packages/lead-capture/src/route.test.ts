@@ -18,11 +18,15 @@ import {
 import { stampStartVisitor } from '@podbor/site-kit/contact-links';
 
 import { referralLink } from './menu.ts';
-import { captureStore, createCaptureWebhookRoute } from './route.ts';
+import {
+  captureStore,
+  captureWebhookSecret,
+  createCaptureWebhookRoute,
+} from './route.ts';
 
 const SECRET = 'capture-webhook-secret';
-const CAPTURE_TOKEN = 'capture-token';
-const CRM_TOKEN = 'crm-token';
+const CAPTURE_TOKEN = '2001:capture-token';
+const CRM_TOKEN = '2002:crm-token';
 const GROUP_ID = '-100500';
 const ADMIN_IDS = [501, 502];
 const BRAND = 'Approved.rs';
@@ -333,6 +337,22 @@ describe('the webhook secret', () => {
   it('acknowledges an update that carries the right secret', async () => {
     const res = await POST(makeCtx(startUpdate()));
     expect(res.status).toBe(200);
+  });
+});
+
+describe('captureWebhookSecret', () => {
+  it('reads the secret from the environment', () => {
+    expect(
+      captureWebhookSecret({ TELEGRAM_CAPTURE_WEBHOOK_SECRET: 's3cret' }),
+    ).toBe('s3cret');
+  });
+
+  it.each([
+    {},
+    { TELEGRAM_CAPTURE_WEBHOOK_SECRET: '' },
+    { TELEGRAM_CAPTURE_WEBHOOK_SECRET: 42 },
+  ])('treats a missing or malformed secret as unset: %o', (env) => {
+    expect(captureWebhookSecret(env)).toBeUndefined();
   });
 });
 
@@ -691,6 +711,7 @@ describe('leaving a request from a service card', () => {
     expect(stored()[0]).toMatchObject({
       service: 'vehicle-import',
       services: ['vehicle-import'],
+      serviceChosenInBot: true,
       capturePrompt: { chatId: 42, step: 'looking_for' },
     });
     for (const id of ADMIN_IDS)
@@ -705,6 +726,16 @@ describe('leaving a request from a service card', () => {
       ]);
     expect(cardEdits()).toHaveLength(1);
     expect(lastSent()).toEqual([42, 'LOOKING_FOR']);
+  });
+
+  it('does not count a service that came with the site tile as chosen in the bot', async () => {
+    await POST(makeCtx(startUpdate('vehicle-import_ru')));
+    await POST(makeCtx(startUpdate('vehicle-sourcing_ru')));
+    await tap('request:ru');
+
+    expect(stored()).toHaveLength(1);
+    expect(stored()[0].service).toBe('vehicle-sourcing');
+    expect(stored()[0]).not.toHaveProperty('serviceChosenInBot', true);
   });
 
   it('asks for the phone first when nothing else reaches the visitor', async () => {
@@ -725,6 +756,7 @@ describe('leaving a request from a service card', () => {
         brand: BRAND,
         contact: '@ivan',
         service: 'vehicle-sourcing',
+        serviceChosenInBot: true,
         locale: 'en',
         capturePrompt: { chatId: 42, step: 'looking_for' },
       }),
@@ -1227,7 +1259,7 @@ describe('a visitor who presses Start again', () => {
     expect(lastSent()[1]).toContain('CARD_vehicle-import_ru');
   });
 
-  it('marks a referral from the Approved bot on the open Lead, once', async () => {
+  it('marks a referral from the Approved bot on the open Lead without a note', async () => {
     await POST(makeCtx(startUpdate('sr')));
 
     await POST(makeCtx(startUpdate('from-approved_sr')));
@@ -1236,7 +1268,7 @@ describe('a visitor who presses Start again', () => {
     expect(stored()).toHaveLength(1);
     expect(stored()[0]).toMatchObject({
       referredBy: 'approved',
-      comment: 'Пришёл из бота Approved.rs (Партнёры)',
+      comment: null,
     });
     expect(lastSent()).toEqual([42, 'MENU']);
   });
@@ -1844,7 +1876,7 @@ describe('a visitor referred by the Approved bot', () => {
       service: '',
       locale: 'sr',
       referredBy: 'approved',
-      comment: 'Пришёл из бота Approved.rs (Партнёры)',
+      comment: null,
     });
     expect(cards()).toEqual([
       expect.objectContaining({
@@ -1885,7 +1917,7 @@ describe('a visitor referred by the Approved bot', () => {
     expect(stored()[0]).toMatchObject({
       visitorId: '0f8fad5b-d9cb-469f-a165-70867728950e',
       locale: 'sr',
-      comment: 'Пришёл из бота Approved.rs (Партнёры)',
+      comment: null,
     });
   });
 });
@@ -1974,6 +2006,7 @@ describe("Details' Questionnaire: the car, the service as buttons, then the phon
       comment: 'Машина: Audi A6 2019',
       service: 'vehicle-import',
       services: ['vehicle-import'],
+      serviceChosenInBot: true,
       capturePrompt: { chatId: 42, step: 'phone' },
     });
     expect(adminNotes()).toEqual([

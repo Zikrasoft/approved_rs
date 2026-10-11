@@ -16,5 +16,16 @@ export const telegramContact = (typed: string): string => {
   return handle ? `@${handle}` : '';
 };
 
+const TELEGRAM_ID_LINK = 'tg://user?id=';
+
+export const telegramIdContact = (id: number): string =>
+  `${TELEGRAM_ID_LINK}${id}`;
+
 export const isTelegramIdContact = (contact: string): boolean =>
-  contact.startsWith('tg://user?id=');
+  contact.startsWith(TELEGRAM_ID_LINK);
+
+export const isHandleContact = (contact: string): boolean =>
+  contact.startsWith('@');
+
+export const isPhoneContact = (contact: string): boolean =>
+  contact.startsWith('+');

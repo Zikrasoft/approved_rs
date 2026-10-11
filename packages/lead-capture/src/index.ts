@@ -1,4 +1,8 @@
-export { captureStore, createCaptureWebhookRoute } from './route.ts';
+export {
+  captureStore,
+  captureWebhookSecret,
+  createCaptureWebhookRoute,
+} from './route.ts';
 export type { CaptureStore, CaptureWebhookRouteOptions } from './route.ts';
 
 export { captureCopySchema } from './copy.ts';

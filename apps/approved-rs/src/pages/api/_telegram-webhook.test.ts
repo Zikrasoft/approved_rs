@@ -10,7 +10,8 @@ import {
 import type { StoredLead } from '@/lib/store';
 
 const memory = vi.hoisted(() => {
-  process.env.TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB = 'test-carlab-capture-token';
+  process.env.TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB =
+    '1003:test-carlab-capture-token';
   const storages = new Map<string, MemoryStorage>();
   return {
     storages,
@@ -62,9 +63,9 @@ const api = recordBotApi();
 vi.stubGlobal('fetch', api.fetch);
 
 const SECRET = 'test-webhook-secret';
-const CRM_TOKEN = 'test-bot-token';
-const APPROVED_CAPTURE_TOKEN = 'test-capture-bot-token';
-const CARLAB_CAPTURE_TOKEN = 'test-carlab-capture-token';
+const CRM_TOKEN = '1001:test-bot-token';
+const APPROVED_CAPTURE_TOKEN = '1002:test-capture-bot-token';
+const CARLAB_CAPTURE_TOKEN = '1003:test-carlab-capture-token';
 const GROUP_ID = '-1009876543210';
 const OWNER_ID = 111;
 const ADMIN_ID = 222;
@@ -1416,6 +1417,32 @@ describe('POST /api/telegram-webhook', () => {
         view({
           text: `✅ Отправлено\n\n${buildLeadDetail(lead, 'owner').text}`,
           reply_markup: buildLeadDetail(lead, 'owner').reply_markup,
+        }),
+      ]);
+    });
+
+    it('shows the card to the author when the prompt was answered in the group', async () => {
+      seed(
+        visitorLead({
+          pendingPrompt: {
+            chatId: Number(GROUP_ID),
+            messageId: PROMPT_ID,
+            kind: 'reply_visitor',
+          },
+        }),
+      );
+
+      await message('Нашёл вариант', ADMIN_ID, {
+        chatId: Number(GROUP_ID),
+        type: 'supergroup',
+        replyTo: PROMPT_ID,
+      });
+
+      const lead = await stored();
+      expect(sentTo(Number(GROUP_ID))).toEqual([
+        view({
+          text: `✅ Отправлено\n\n${buildLeadDetail(lead, 'admin').text}`,
+          reply_markup: buildLeadDetail(lead, 'admin').reply_markup,
         }),
       ]);
     });

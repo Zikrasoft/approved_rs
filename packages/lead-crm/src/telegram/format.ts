@@ -389,8 +389,6 @@ function fieldPreview(value: string | null | undefined): string {
   );
 }
 
-export const REFERRAL_NOTE = 'Пришёл из бота Approved.rs (Партнёры)';
-
 const VISITOR_CHANGE_MARK = '🤖 Посетитель через бота';
 
 export function quarantinedLeadsText(

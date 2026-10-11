@@ -1,5 +1,6 @@
 import { Bot, GrammyError, type Api, type Transformer } from 'grammy';
 import type { UserFromGetMe } from 'grammy/types';
+import { z } from 'zod';
 import type { Keyboard } from './format.ts';
 
 export type SendExtra = Parameters<Api['sendMessage']>[2];
@@ -37,9 +38,11 @@ const ignoreNotModified: Transformer = async (
   return response;
 };
 
+const botIdSchema = z.coerce.number().int().positive();
+
 function staticBotInfo(botToken: string, username: string): UserFromGetMe {
   return {
-    id: Number(botToken.split(':', 1)[0]),
+    id: botIdSchema.parse(botToken.split(':', 1)[0]),
     is_bot: true,
     first_name: username,
     username,

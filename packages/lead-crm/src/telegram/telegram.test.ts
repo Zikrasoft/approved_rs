@@ -12,7 +12,6 @@ import type { StoredLead } from '../schema.ts';
 import type { LedgerOperation } from '../ledgerStore.ts';
 
 import {
-  REFERRAL_NOTE,
   buildSearchResults,
   buildMenu,
   buildBalance,
@@ -33,7 +32,7 @@ const SERVICE_LABELS: Record<string, string> = {
   'vehicle-sourcing': 'Автоподбор',
 };
 
-const client = createTelegramClient('test-bot-token', 'test_bot');
+const client = createTelegramClient('1001:test-bot-token', 'test_bot');
 const formatter = createFormatter({
   serviceLabel: (slug) => SERVICE_LABELS[slug] ?? slug,
   botUsername: 'approved_test_bot',
@@ -102,6 +101,19 @@ function mockFetchOk(
   mockFetch.mockImplementation(api.fetch);
 }
 
+describe('createTelegramClient', () => {
+  it('takes the bot id from the token', () => {
+    expect(client.bot.botInfo.id).toBe(1001);
+  });
+
+  it.each(['no-id-token', ':secret', 'abc:secret', '0:secret'])(
+    'refuses a token without a bot id: %s',
+    (token) => {
+      expect(() => createTelegramClient(token, 'test_bot')).toThrow();
+    },
+  );
+});
+
 describe('sendLeadNotification', () => {
   beforeEach(() => mockFetchOk());
   afterEach(() => mockFetch.mockReset());
@@ -158,7 +170,10 @@ describe('sendLeadNotification', () => {
 
   it('ignores a comment that only quotes the referral note', async () => {
     await sendLeadNotification(
-      makeLead({ telegramId: 77, comment: `Сообщение: ${REFERRAL_NOTE}` }),
+      makeLead({
+        telegramId: 77,
+        comment: 'Сообщение: Пришёл из бота Approved.rs (Партнёры)',
+      }),
     );
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).not.toContain('🤝');

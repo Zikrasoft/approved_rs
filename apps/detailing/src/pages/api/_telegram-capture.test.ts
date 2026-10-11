@@ -96,7 +96,7 @@ function press(data: string) {
 
 function questions(): unknown[] {
   return api
-    .callsTo('sendMessage', 'test-capture-bot-token')
+    .callsTo('sendMessage', '1002:test-capture-bot-token')
     .filter((call) => call.payload.chat_id === VISITOR.id)
     .map((call) => call.payload.text);
 }
@@ -130,8 +130,9 @@ describe('the Details capture bot', () => {
     await start('polishing-ceramic_sr');
 
     const { services, captureBot } = content('sr');
-    const reply = api.callsTo('sendMessage', 'test-capture-bot-token').at(-1)
-      ?.payload as { text: string; reply_markup: unknown };
+    const reply = api
+      .callsTo('sendMessage', '1002:test-capture-bot-token')
+      .at(-1)?.payload as { text: string; reply_markup: unknown };
     expect(reply.text).toContain(services['polishing-ceramic'].short);
     expect(reply.text).toContain(services['polishing-ceramic'].priceFrom);
     expect(reply.reply_markup).toEqual({
@@ -164,7 +165,7 @@ describe('the Details capture bot', () => {
     api.reset();
     await tap('contacts:sr');
 
-    expect(api.callsTo('sendVenue', 'test-capture-bot-token')).toEqual([
+    expect(api.callsTo('sendVenue', '1002:test-capture-bot-token')).toEqual([
       expect.objectContaining({
         payload: expect.objectContaining({
           latitude: WORKSHOP_ADDRESS.lat,
@@ -172,8 +173,9 @@ describe('the Details capture bot', () => {
         }),
       }),
     ]);
-    const reply = api.callsTo('sendMessage', 'test-capture-bot-token').at(-1)
-      ?.payload as { text: string };
+    const reply = api
+      .callsTo('sendMessage', '1002:test-capture-bot-token')
+      .at(-1)?.payload as { text: string };
     expect(reply.text).toContain(content('sr').captureBot.contacts.hours);
     expect(reply.text).toContain(formatPhone(PHONE_NUMBER));
     expect(reply.text).toContain(SITE_URL);
@@ -234,8 +236,9 @@ describe('the language switch', () => {
       }),
     });
 
-    const reply = api.callsTo('sendMessage', 'test-capture-bot-token').at(-1)
-      ?.payload as {
+    const reply = api
+      .callsTo('sendMessage', '1002:test-capture-bot-token')
+      .at(-1)?.payload as {
       reply_markup: { inline_keyboard: { callback_data: string }[][] };
     };
     const offered = reply.reply_markup.inline_keyboard

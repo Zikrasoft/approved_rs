@@ -37,7 +37,7 @@ const api = recordBotApi();
 vi.stubGlobal('fetch', api.fetch);
 
 const SECRET = 'test-cron-secret';
-const CRM_TOKEN = 'test-bot-token';
+const CRM_TOKEN = '1001:test-bot-token';
 const OWNER_ID = 111;
 const ADMIN_ID = 222;
 const CARD_CHAT_ID = -100123;
@@ -398,8 +398,12 @@ describe('GET /api/reminders', () => {
     error.mockRestore();
   });
 
-  it('retires a bare /start with no contact and keeps one with a phone or a username', async () => {
-    const start = (id: number, contact: string) =>
+  it('retires only a bare /start: no contact, no answer, no service chosen in the bot', async () => {
+    const start = (
+      id: number,
+      contact: string,
+      extra: Partial<StoredLead> = {},
+    ) =>
       ghost({
         id,
         contact,
@@ -407,20 +411,26 @@ describe('GET /api/reminders', () => {
         contactChannel: 'telegram',
         telegramId: 40 + id,
         createdAt: '2026-10-01T00:00:00.000Z',
+        ...extra,
       });
     leadsStorage().seed([
-      start(7, 'tg://user?id=47'),
+      start(7, 'tg://user?id=47', { service: 'vehicle-import' }),
       start(8, '+381601234567'),
       start(10, '@ivan'),
+      start(11, 'tg://user?id=51', { comment: 'Ищет: Golf 7' }),
+      start(12, 'tg://user?id=52', {
+        service: 'vehicle-import',
+        serviceChosenInBot: true,
+      }),
     ]);
 
     const res = await GET(makeCtx());
 
     expect(await res.json()).toEqual({ expiredGhosts: 1, digestSent: true });
     expect((await stored(7)).status).toBe('lost');
-    expect((await stored(8)).status).toBe('open');
-    expect((await stored(10)).status).toBe('open');
-    expect(digestIds()).toEqual([8, 10]);
+    for (const id of [8, 10, 11, 12])
+      expect((await stored(id)).status).toBe('open');
+    expect(digestIds()).toEqual([8, 10, 11, 12]);
   });
 
   it('posts no monthly summary on the 1st and drops money records left in the Lead file', async () => {

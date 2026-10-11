@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { applyBotProfile, runBotProfileScript } from './profile.ts';
 
-const TOKEN = 'capture-token';
+const TOKEN = '2001:capture-token';
 
 const copyFor = (locale: 'ru' | 'sr' | 'en') =>
   ({

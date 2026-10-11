@@ -4,6 +4,12 @@ export { createBrandBot } from './brandBot.ts';
 export type { BrandBotOptions } from './brandBot.ts';
 
 export { LEADS_PATH } from './quarantine.ts';
+export {
+  isHandleContact,
+  isPhoneContact,
+  isTelegramIdContact,
+  telegramIdContact,
+} from './contactShape.ts';
 export type {
   CapturePrompt,
   CaptureStep,
@@ -58,7 +64,6 @@ export {
   buildStats,
   createFormatter,
   EDIT_FIELD_LABELS,
-  REFERRAL_NOTE,
   REPLY_COPY,
   LEAD_ACTION_COPY,
   escapeHtml,

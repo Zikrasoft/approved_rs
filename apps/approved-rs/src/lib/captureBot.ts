@@ -1,3 +1,4 @@
+import { captureWebhookSecret } from '@podbor/lead-capture';
 import { APPROVED, CARLAB, DETAILS } from '@podbor/brands';
 import {
   createTelegramClient,
@@ -6,8 +7,7 @@ import {
 } from '@podbor/lead-crm';
 import { z } from 'zod';
 
-export const CAPTURE_WEBHOOK_SECRET =
-  process.env.TELEGRAM_CAPTURE_WEBHOOK_SECRET;
+export const CAPTURE_WEBHOOK_SECRET = captureWebhookSecret(process.env);
 
 const captureToken = requireEnv('TELEGRAM_CAPTURE_BOT_TOKEN');
 

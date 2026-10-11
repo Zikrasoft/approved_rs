@@ -272,6 +272,31 @@ describe('insertOrMergeLead', () => {
     expect(lead.comment ?? '').not.toContain('Сначала кликнул');
   });
 
+  it('hands a Telegram click over to a visitor with no username, as a bot Lead', async () => {
+    await store.insertOrMergeLead(clickData('telegram'));
+    const { lead } = await store.insertOrMergeLead({
+      brand: 'Test',
+      name: 'Петр',
+      contact: 'tg://user?id=77',
+      service: 'detailing',
+      contactChannel: 'telegram',
+      source_url: null,
+      visitorId: 'visitor-1',
+      locale: 'sr',
+      kind: 'lead',
+      telegramId: 77,
+      serviceChosenInBot: true,
+    });
+
+    expect(lead).toMatchObject({
+      name: 'Петр',
+      contact: 'tg://user?id=77',
+      kind: 'lead',
+      service: 'detailing',
+      serviceChosenInBot: true,
+    });
+  });
+
   it('keeps a bot lead apart from a form the same visitor already sent', async () => {
     await store.insertOrMergeLead({
       ...clickData('phone'),
@@ -920,6 +945,74 @@ describe('expireGhostLeads', () => {
         contact: '@ivan',
         contactChannel: 'telegram',
       });
+    });
+
+    async function quietSince(id: number, ms = DAY_MS + 1): Promise<void> {
+      const at = new Date(NOW.getTime() - ms).toISOString();
+      await store.updateLeads((leads) =>
+        leads.map((l) =>
+          l.id === id ? { ...l, createdAt: at, visitorActiveAt: at } : l,
+        ),
+      );
+    }
+
+    it('never retires one with a Questionnaire answer', async () => {
+      const lead = await started();
+      await store.updateCapture(lead.id, {
+        note: 'Ищет: седан',
+        capturePrompt: null,
+      });
+      await quietSince(lead.id);
+
+      expect(await store.expireGhostLeads(NOW)).toEqual([]);
+      expect(await store.getLead(lead.id)).toMatchObject({ status: 'open' });
+    });
+
+    it('never retires one whose visitor wrote a message at /start', async () => {
+      await started({ comment: 'Сообщение: есть Golf?' });
+
+      expect(await store.expireGhostLeads(NOW)).toEqual([]);
+    });
+
+    it('never retires one whose service the visitor chose in the bot', async () => {
+      const lead = await started();
+      await store.updateCapture(lead.id, {
+        chosenService: 'detailing',
+        capturePrompt: null,
+      });
+      await quietSince(lead.id);
+
+      expect(await store.getLead(lead.id)).toMatchObject({
+        service: 'detailing',
+        services: ['detailing'],
+        serviceChosenInBot: true,
+      });
+      expect(await store.expireGhostLeads(NOW)).toEqual([]);
+    });
+
+    it('never retires one that opened on a service chosen in the bot', async () => {
+      await started({ service: 'detailing', serviceChosenInBot: true });
+
+      expect(await store.expireGhostLeads(NOW)).toEqual([]);
+    });
+
+    it('retires one whose service only came with the site tile or a referral', async () => {
+      const tile = await started({ service: 'detailing' });
+      const resumed = await started({ telegramId: 43, referredBy: 'approved' });
+      await store.updateCapture(resumed.id, {
+        service: 'detailing',
+        referredBy: 'approved',
+        capturePrompt: null,
+      });
+      await quietSince(resumed.id);
+
+      const expired = await store.expireGhostLeads(NOW);
+
+      expect(expired.map((l) => l.id)).toEqual([tile.id, resumed.id]);
+      expect(await store.getLead(resumed.id)).not.toHaveProperty(
+        'serviceChosenInBot',
+        true,
+      );
     });
 
     it('spares one whose visitor was active inside the window', async () => {

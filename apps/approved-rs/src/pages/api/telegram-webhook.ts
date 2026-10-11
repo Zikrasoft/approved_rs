@@ -4,6 +4,7 @@ import type { APIContext } from 'astro';
 import { Composer, type Context } from 'grammy';
 import { z } from 'zod';
 import { parse, isValid, format } from 'date-fns';
+import { START_COMMAND } from '@podbor/site-kit/contact-links';
 import { secretMatches } from '@/lib/verifySecret';
 import {
   afterStatusChange,
@@ -415,14 +416,10 @@ callbacks.use(async ({ crm, callbackQuery }) => {
 
 async function replyWithCard(
   chatId: number,
+  role: Role,
   lead: StoredLead,
   headline: string,
 ): Promise<void> {
-  const role = roleOf(chatId);
-  if (!role) {
-    await sendMessage(chatId, headline);
-    return;
-  }
   const { text, reply_markup } = buildLeadDetail(lead, role);
   await sendMessage(chatId, `${headline}\n\n${text}`, { reply_markup });
 }
@@ -466,6 +463,7 @@ async function replyPostpone({
 
 async function replyVisitor({
   chatId,
+  role,
   replyToMessageId,
   text,
   pending,
@@ -504,7 +502,7 @@ async function replyVisitor({
   );
   if (updated) {
     await ensureLeadCard(updated);
-    await replyWithCard(chatId, updated, REPLY_COPY.sent);
+    await replyWithCard(chatId, role, updated, REPLY_COPY.sent);
   }
 }
 
@@ -615,7 +613,7 @@ async function handlePrivateMessage(msg: TelegramMessage): Promise<void> {
   const role = roleOf(msg.from?.id);
   const text = (msg.text ?? '').trim();
 
-  const startMatch = /^\/start(?:\s+(\S+))?$/.exec(text);
+  const startMatch = START_COMMAND.exec(text);
   if (startMatch || text === '/menu') {
     if (!role) {
       await sendMessage(chatId, LEAD_ACTION_COPY.denied);
