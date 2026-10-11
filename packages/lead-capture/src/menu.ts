@@ -174,29 +174,18 @@ export function createScreens<L extends string, S extends string>({
     };
   }
 
-  function splitTarget(target: string): [string, string] {
-    const [screen, ...arg] = target.split('-');
-    return [screen, arg.join('-')];
-  }
-
-  function languagePicker(locale: L, target: string): Screen {
+  function languagePicker(locale: L): Screen {
     const words = copy(locale);
-    const [screen, arg] = splitTarget(target);
     const served = Object.keys(languages) as L[];
     return {
       text: words.language.text,
       keyboard: [
         ...served.map((code) =>
-          tap(languages[code], LANGUAGE_SWITCH_TAP, code, target),
+          tap(languages[code], LANGUAGE_SWITCH_TAP, code),
         ),
-        tap(words.menu.back, screen, locale, arg),
+        tap(words.menu.back, 'menu', locale),
       ],
     };
-  }
-
-  function renderTarget(locale: L, target: string): Screen | null {
-    const [screen, arg] = splitTarget(target);
-    return render(screen, locale, arg);
   }
 
   const screens: Record<string, (locale: L, arg: string) => Screen | null> = {
@@ -205,7 +194,7 @@ export function createScreens<L extends string, S extends string>({
     service: (locale, slug) => (isService(slug) ? service(locale, slug) : null),
     manager,
     partners: partnerList,
-    language: (locale, target) => languagePicker(locale, target || 'menu'),
+    language: languagePicker,
   };
 
   function render(screen: string, locale: L, arg: string): Screen | null {
@@ -225,7 +214,6 @@ export function createScreens<L extends string, S extends string>({
     contactsScreen,
     render,
     servicePicker,
-    renderTarget,
     languagePicker,
   };
 }

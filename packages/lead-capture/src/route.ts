@@ -124,16 +124,6 @@ export type CaptureStore = Pick<
   | 'updateCapture'
 >;
 
-export function captureStore(store: LeadStore): CaptureStore {
-  return {
-    insertOrMergeLead: store.insertOrMergeLead,
-    findByCapturePrompt: store.findByCapturePrompt,
-    findOpenLeadByTelegramId: store.findOpenLeadByTelegramId,
-    findPhoneByTelegramId: store.findPhoneByTelegramId,
-    updateCapture: store.updateCapture,
-  };
-}
-
 export interface CaptureWebhookRouteOptions<
   L extends string,
   S extends string,
@@ -211,7 +201,6 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     contactsScreen,
     render,
     servicePicker,
-    renderTarget,
     languagePicker,
   } = createScreens(menuConfig);
 
@@ -546,7 +535,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     const switchesLanguage = tap.screen === LANGUAGE_SWITCH_TAP;
     if (switchesLanguage && !isLocale(tap.locale)) return;
     const screen = switchesLanguage
-      ? renderTarget(locale, tap.arg)
+      ? mainMenu(locale)
       : render(tap.screen, locale, tap.arg);
     if (!screen) return;
     await endQuestionnaire(chatId, screen.text);
@@ -621,9 +610,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     if (started) return startOrResume(chatId, sender, started[1]);
     if (MENU_PATTERN.test(text)) return openScreen(chatId, sender, mainMenu);
     if (LANG_PATTERN.test(text))
-      return openScreen(chatId, sender, (locale) =>
-        languagePicker(locale, 'menu'),
-      );
+      return openScreen(chatId, sender, languagePicker);
 
     const running = await runningQuestionnaire(chatId);
     if (running) return answer(running.lead, running.prompt, text, undefined);

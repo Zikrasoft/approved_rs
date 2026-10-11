@@ -1,10 +1,6 @@
 export const prerender = false;
 
-import {
-  captureStore,
-  createCaptureWebhookRoute,
-  specsCard,
-} from '@podbor/lead-capture';
+import { createCaptureWebhookRoute, specsCard } from '@podbor/lead-capture';
 import { BRAND, leadStore } from '@/lib/crm';
 import { CAPTURE_WEBHOOK_SECRET, captureBot } from '@/lib/captureBot';
 import { ensureLeadCard, notifier } from '@/lib/crmBot';
@@ -16,7 +12,7 @@ import { SERVICE_SLUGS } from '@/utils/services';
 
 export const POST = createCaptureWebhookRoute({
   secret: CAPTURE_WEBHOOK_SECRET,
-  store: captureStore(leadStore),
+  store: leadStore,
   ensureLeadCard,
   sendVisitorChangeToAdmin: notifier.sendVisitorChangeToAdmin,
   bot: captureBot,

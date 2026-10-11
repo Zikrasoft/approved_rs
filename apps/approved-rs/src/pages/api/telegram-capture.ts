@@ -1,11 +1,7 @@
 export const prerender = false;
 
 import { CARLAB, DETAILS, brandLocale } from '@podbor/brands';
-import {
-  captureStore,
-  createCaptureWebhookRoute,
-  referralLink,
-} from '@podbor/lead-capture';
+import { createCaptureWebhookRoute, referralLink } from '@podbor/lead-capture';
 import { BRAND, leadStore } from '@/lib/crm';
 import { CAPTURE_WEBHOOK_SECRET, captureBot } from '@/lib/captureBot';
 import { ensureLeadCard, notifier } from '@/lib/crmBot';
@@ -17,7 +13,7 @@ import { PathBuilder } from '@/utils/paths';
 
 export const POST = createCaptureWebhookRoute({
   secret: CAPTURE_WEBHOOK_SECRET,
-  store: captureStore(leadStore),
+  store: leadStore,
   ensureLeadCard,
   sendVisitorChangeToAdmin: notifier.sendVisitorChangeToAdmin,
   bot: captureBot,

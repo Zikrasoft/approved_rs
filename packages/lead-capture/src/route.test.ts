@@ -18,11 +18,7 @@ import {
 import { stampStartVisitor } from '@podbor/site-kit/contact-links';
 
 import { referralLink } from './menu.ts';
-import {
-  captureStore,
-  captureWebhookSecret,
-  createCaptureWebhookRoute,
-} from './route.ts';
+import { captureWebhookSecret, createCaptureWebhookRoute } from './route.ts';
 
 const SECRET = 'capture-webhook-secret';
 const CAPTURE_TOKEN = '2001:capture-token';
@@ -98,7 +94,7 @@ function route(
   return createCaptureWebhookRoute({
     contacts: { phone: '381601234567', site: 'https://example.test' },
     secret,
-    store: captureStore(leadStore),
+    store: leadStore,
     ensureLeadCard,
     sendVisitorChangeToAdmin: notifier.sendVisitorChangeToAdmin,
     bot: createTelegramClient(CAPTURE_TOKEN, 'capture_bot').bot,
@@ -2119,11 +2115,11 @@ describe('switching the language', () => {
     expect(lastSent()).toEqual([42, 'PICK_A_LANGUAGE']);
     expect(lastMarkup()).toEqual({
       inline_keyboard: [
-        [{ text: 'Русский', callback_data: 'locale:ru:menu' }],
-        [{ text: 'English', callback_data: 'locale:en:menu' }],
-        [{ text: 'Srpski', callback_data: 'locale:sr:menu' }],
-        [{ text: 'Español', callback_data: 'locale:es:menu' }],
-        [{ text: 'Deutsch', callback_data: 'locale:de:menu' }],
+        [{ text: 'Русский', callback_data: 'locale:ru' }],
+        [{ text: 'English', callback_data: 'locale:en' }],
+        [{ text: 'Srpski', callback_data: 'locale:sr' }],
+        [{ text: 'Español', callback_data: 'locale:es' }],
+        [{ text: 'Deutsch', callback_data: 'locale:de' }],
         [{ text: 'BACK', callback_data: 'menu:en' }],
       ],
     });
@@ -2136,55 +2132,25 @@ describe('switching the language', () => {
       text: 'PICK_A_LANGUAGE',
       reply_markup: {
         inline_keyboard: expect.arrayContaining([
-          [{ text: 'English', callback_data: 'locale:en:menu' }],
+          [{ text: 'English', callback_data: 'locale:en' }],
           [{ text: 'BACK', callback_data: 'menu:sr' }],
         ]),
       },
     });
   });
 
-  it('re-renders the screen the visitor was on in the new locale', async () => {
-    await tap('language:ru:services');
-    expect(edits()[0].reply_markup).toMatchObject({
-      inline_keyboard: expect.arrayContaining([
-        [{ text: 'Deutsch', callback_data: 'locale:de:services' }],
-        [{ text: 'BACK', callback_data: 'services:ru' }],
-      ]),
-    });
+  it('shows the menu in the new locale', async () => {
+    await tap('locale:de');
 
-    await tap('locale:de:services');
-
-    expect(edits().at(-1)).toMatchObject({
-      text: 'PICK_A_SERVICE',
+    expect(edits()[0]).toMatchObject({
+      text: 'MENU',
       reply_markup: {
-        inline_keyboard: expect.arrayContaining([
-          [{ text: 'BACK', callback_data: 'menu:de' }],
-        ]),
+        inline_keyboard: [[{ text: 'SERVICES', callback_data: 'services:de' }]],
       },
     });
   });
 
-  it('brings a service card back with its service', async () => {
-    await tap('locale:es:service-vehicle-import');
-
-    expect(edits()[0].text).toContain('<b>CARD_vehicle-import_es</b>');
-  });
-
-  it('keeps every switch button under the 64-byte callback limit', async () => {
-    await tap('language:ru:service-vehicle-sourcing');
-
-    const data = (
-      edits()[0].reply_markup as {
-        inline_keyboard: { callback_data: string }[][];
-      }
-    ).inline_keyboard.flat();
-    for (const { callback_data } of data)
-      expect(
-        new TextEncoder().encode(callback_data).length,
-      ).toBeLessThanOrEqual(64);
-  });
-
-  it.each(['locale:fr:menu', 'locale:en', 'locale:en:request-vehicle-import'])(
+  it.each(['locale:fr', 'locale:xx:menu'])(
     'ignores a switch it cannot carry out: %s',
     async (data) => {
       await tap(data);
@@ -2197,7 +2163,7 @@ describe('switching the language', () => {
   it('moves an open Lead to the new locale, and later messages follow it', async () => {
     await begin('vehicle-sourcing_ru');
 
-    await tap('locale:sr:menu');
+    await tap('locale:sr');
 
     expect(stored()[0].locale).toBe('sr');
     expect(stored()[0].capturePrompt).toBeNull();
@@ -2215,7 +2181,7 @@ describe('switching the language', () => {
     await POST(makeCtx(startUpdate('en')));
     const writes = storage.writeAttempts();
 
-    await tap('locale:en:menu');
+    await tap('locale:en');
 
     expect(storage.writeAttempts()).toBe(writes);
     expect(edits()).toHaveLength(1);
