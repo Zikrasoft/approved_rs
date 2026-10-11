@@ -316,6 +316,10 @@ one bot shared by the three projects; each brand's capture bot is its own.
 > the first real request in production is what fails. It is easy to ship a "green"
 > deploy with a dead form.
 
+Every bot token, CRM and capture alike, must be BotFather's `<digits>:<secret>`
+shape — even a placeholder for local runs (`1:fake`). The Telegram client reads
+the bot id before the colon when the module loads and throws on anything else.
+
 `TELEGRAM_OWNER_ID` / `TELEGRAM_ADMIN_ID` are numeric Telegram user ids (not
 `@username` — get them from [@userinfobot](https://t.me/userinfobot)),
 comma-separated if a person has several accounts (`111,222`). Their absence does not

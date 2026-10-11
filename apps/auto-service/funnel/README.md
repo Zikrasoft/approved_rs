@@ -65,7 +65,9 @@ Required, or the walk refuses to start and names what is missing:
 `SHOP_ORDER_HOOK_SECRET`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_GROUP_ID`,
 `TELEGRAM_BOT_USERNAME`. The bot token is never used against the real API — the
 walk intercepts `api.telegram.org` — but `src/lib/crmBot.ts` demands it at
-module load.
+module load, and it must keep BotFather's `<digits>:<secret>` shape (`1:fake`
+will do): the Telegram client reads the bot id before the colon at module load
+and throws on anything else.
 
 ### 5. The browser, once per machine
 
