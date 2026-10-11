@@ -24,12 +24,16 @@ on approved.rs is the `/thanks/` tile when `PUBLIC_TG_MANAGER` is set — stores
 no Contact click: the visitor already has a Lead, and no bot will come to
 absorb a placeholder.
 
-**Ghost lead** — a Contact click that never gained a contact: still the
-placeholder contact, still open with no owner activity, and older than the
-retention window. Mostly WhatsApp, Viber or the phone, whose outcome we cannot
-observe, but the channel does not matter: a Telegram-tile click whose visitor
-never pressed Start in the bot has no bot Lead to absorb it, and retires the
-same way. Nothing on our side can tell whether the person wrote, so a Ghost
+**Ghost lead** — a Lead that never gained a contact: still open with no owner
+activity, and no visitor activity (or, without any, no creation) within the
+retention window. Two kinds. A Contact click still on the placeholder
+contact: mostly WhatsApp, Viber or the phone, whose outcome we cannot observe,
+but the channel does not matter — a Telegram-tile click whose visitor never
+pressed Start in the bot has no bot Lead to absorb it, and retires the same
+way. And a Capture bot Lead whose contact is still the bare Telegram id
+(`tg://user?id=…`): the visitor pressed Start but has no username and never
+shared a phone, so there is no one to write to. A Lead with a phone or a
+username is never a Ghost lead. Nothing on our side can tell whether the person wrote, so a Ghost
 lead retires itself — the daily digest cron marks it lost
 ([ADR-0029](docs/adr/0029-ghost-leads-retire-themselves.md)). Because the sweep
 runs daily against a 24-hour window, a Ghost lead actually lives 24 to 48 hours.

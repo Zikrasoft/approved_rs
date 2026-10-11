@@ -398,6 +398,31 @@ describe('GET /api/reminders', () => {
     error.mockRestore();
   });
 
+  it('retires a bare /start with no contact and keeps one with a phone or a username', async () => {
+    const start = (id: number, contact: string) =>
+      ghost({
+        id,
+        contact,
+        kind: 'lead',
+        contactChannel: 'telegram',
+        telegramId: 40 + id,
+        createdAt: '2026-10-01T00:00:00.000Z',
+      });
+    leadsStorage().seed([
+      start(7, 'tg://user?id=47'),
+      start(8, '+381601234567'),
+      start(10, '@ivan'),
+    ]);
+
+    const res = await GET(makeCtx());
+
+    expect(await res.json()).toEqual({ expiredGhosts: 1, digestSent: true });
+    expect((await stored(7)).status).toBe('lost');
+    expect((await stored(8)).status).toBe('open');
+    expect((await stored(10)).status).toBe('open');
+    expect(digestIds()).toEqual([8, 10]);
+  });
+
   it('posts no monthly summary on the 1st and drops money records left in the Lead file', async () => {
     vi.setSystemTime(new Date('2026-11-01T08:00:00.000Z'));
     leadsStorage().seed([
