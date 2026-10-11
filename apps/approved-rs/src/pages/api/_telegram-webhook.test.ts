@@ -17,7 +17,7 @@ const memory = vi.hoisted(() => {
     storages,
     async module(name: string) {
       const { createMemoryStorage } = await import('@podbor/lead-crm/testing');
-      const storageAt = ({ path }: { path: string }) => {
+      const storageAt = (path: string) => {
         if (!storages.has(path)) storages.set(path, createMemoryStorage());
         return storages.get(path)!;
       };
@@ -26,11 +26,8 @@ const memory = vi.hoisted(() => {
   };
 });
 
-vi.mock('@podbor/lead-crm/storage/vercel-blob', () =>
-  memory.module('createVercelBlobStorage'),
-);
-vi.mock('@podbor/lead-crm/storage/file', () =>
-  memory.module('createFileStorage'),
+vi.mock('@podbor/lead-crm/storage/local', () =>
+  memory.module('localLeadStorage'),
 );
 
 import { POST, CALLBACKS } from './telegram-webhook';

@@ -3,9 +3,13 @@ import { afterAll, describe, expect, it, vi } from 'vitest';
 const local = vi.hoisted(() => ({
   dir: `${process.env.TMPDIR?.replace(/\/$/, '') ?? '/tmp'}/carlab-markers-${process.pid}`,
 }));
-vi.mock('@podbor/lead-crm', async (importOriginal) => {
-  const crm = await importOriginal<typeof import('@podbor/lead-crm')>();
-  return { ...crm, localOrderMarkers: () => crm.localOrderMarkers(local.dir) };
+vi.mock('@podbor/lead-crm/storage/local', async (importOriginal) => {
+  const files =
+    await importOriginal<typeof import('@podbor/lead-crm/storage/local')>();
+  return {
+    ...files,
+    localOrderMarkers: () => files.localOrderMarkers(local.dir),
+  };
 });
 
 const { orderMarkers } = await import('./orderMarkers');

@@ -1,9 +1,6 @@
 import { APPROVED } from '@podbor/brands';
-import {
-  createBrandStore,
-  localLeadStorage,
-  type LeadStorage,
-} from '@podbor/lead-crm';
+import { createBrandStore, type LeadStorage } from '@podbor/lead-crm';
+import { localLeadStorage } from '@podbor/lead-crm/storage/local';
 import { createVercelBlobStorage } from '@podbor/lead-crm/storage/vercel-blob';
 
 export const BRAND = APPROVED.name;

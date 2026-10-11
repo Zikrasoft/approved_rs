@@ -1,4 +1,5 @@
-import { localOrderMarkers, type OrderMarkers } from '@podbor/lead-crm';
+import type { OrderMarkers } from '@podbor/lead-crm';
+import { localOrderMarkers } from '@podbor/lead-crm/storage/local';
 import { createBlobOrderMarkers } from '@podbor/lead-crm/storage/vercel-blob';
 
 function openOrderMarkers(): OrderMarkers {

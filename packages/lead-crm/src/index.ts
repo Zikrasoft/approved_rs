@@ -45,7 +45,6 @@ export {
   storedRecordsSchema,
   type LeadStorage,
 } from './storage/types.ts';
-export { localLeadStorage, localOrderMarkers } from './storage/localFiles.ts';
 
 export { createTelegramClient } from './telegram/client.ts';
 export type { TelegramClient } from './telegram/client.ts';
