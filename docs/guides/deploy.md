@@ -423,8 +423,9 @@ fields from `data/leads.json`. So that release needs three things around it —
 a backup of `data/leads.json` before it deploys, a check that `data/ledger.json`
 exists and «💶 Мне должны» matches the old «🔴 Мне должны» after the first Lead
 write, and the expectation that the first digest lists every open Lead untouched
-for 7+ days. A bare capture-bot `/start` Lead with a phone or a username is
-among them; one with neither has already retired as a Ghost lead. Steps 1 and 8 of
+for 7+ days. A capture-bot `/start` Lead with a phone, a username or any
+answer from the visitor is among them; a bare one with none of those has already
+retired as a Ghost lead. Steps 1 and 8 of
 [`crm-bot-migration.md`](crm-bot-migration.md) walk through them.
 
 ---

@@ -150,9 +150,10 @@ In the leads group and in a DM with `@SerbCRMBot`:
 - [ ] **The first digest** — the next morning's group digest lists every open
       Lead untouched for 7 days or more, the backlog included. A bare
       capture-bot `/start` Lead with a phone or a username is among them and
-      stays in every digest until someone closes it (#226, #241). One with
-      neither is a Ghost lead: the same cron marks it lost after 24 hours, so
-      it never reaches the digest.
+      stays in every digest until someone closes it (#226, #241), and so is one
+      with neither whose visitor answered anything in the bot. One with
+      neither and no answer is a Ghost lead: the same cron marks it lost after
+      24 hours, so it never reaches the digest.
 
 ## 9. Done
 

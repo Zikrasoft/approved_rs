@@ -31,9 +31,10 @@ contact: mostly WhatsApp, Viber or the phone, whose outcome we cannot observe,
 but the channel does not matter — a Telegram-tile click whose visitor never
 pressed Start in the bot has no bot Lead to absorb it, and retires the same
 way. And a Capture bot Lead whose contact is still the bare Telegram id
-(`tg://user?id=…`): the visitor pressed Start but has no username and never
-shared a phone, so there is no one to write to. A Lead with a phone or a
-username is never a Ghost lead. Nothing on our side can tell whether the person wrote, so a Ghost
+(`tg://user?id=…`) and that is a bare `/start`: the visitor has no username,
+never shared a phone, and gave the bot nothing — no Questionnaire answer, no
+message, no service chosen in the bot. Any answer keeps it open, and a Lead
+with a phone or a username is never a Ghost lead. Nothing on our side can tell whether the person wrote, so a Ghost
 lead retires itself — the daily digest cron marks it lost
 ([ADR-0029](docs/adr/0029-ghost-leads-retire-themselves.md)). Because the sweep
 runs daily against a 24-hour window, a Ghost lead actually lives 24 to 48 hours.
@@ -54,7 +55,8 @@ Questionnaire left on a stale Lead no longer takes answers. Owner activity
 counts so that a conversation the owner is working stays one Lead.
 
 **Referral** — a Lead a sister brand's Capture bot received from the Approved
-bot's Partners screen (`referredBy: approved`). The card says so; brand and
+bot's Partners screen. `referredBy: approved` is the only record of it — the
+card renders that field, and no note is written to the comment. Brand and
 rate are still the receiving bot's.
 
 **Capture bot** — one per brand, and the whole of that brand inside Telegram:

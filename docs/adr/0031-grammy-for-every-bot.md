@@ -4,6 +4,8 @@ status: accepted
 
 # grammY for every bot, state still on the Lead
 
+Amended 2026-10-11: the routes do not use `webhookCallback`. Each one checks the secret header, validates the body with zod and calls `bot.handleUpdate` itself, so a bad secret answers 401 and a malformed body or a failed handler still answers 200 without grammY's default error handling deciding the status.
+
 Decided 2026-10-09. Supersedes [ADR-0006](0006-no-telegram-bot-framework.md) and the telegraf option rejected in [ADR-0030](0030-a-capture-bot-per-brand-takes-the-telegram-contact.md).
 
 The Capture bots are becoming the whole brand inside Telegram: an inline menu of services and contacts, a Questionnaire per brand and `/lang`. That is a large enough Bot API surface across four bots that a typed client and one dispatch idiom pay for themselves, so both the CRM bot and the three Capture bots move to grammY, CRM first and with no change in behaviour. grammY over telegraf because it is typed against the current Bot API and its `webhookCallback` takes a standard `Request`, which is what a Vercel function hands us.
