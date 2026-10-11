@@ -113,6 +113,46 @@ describe('createTelegramClient', () => {
       expect(() => createTelegramClient(token, 'test_bot')).toThrow();
     },
   );
+
+  describe('the signal it hands to fetch', () => {
+    type CallerSignal = Parameters<typeof client.api.sendMessage>[3];
+    beforeEach(() => mockFetchOk());
+    afterEach(() => mockFetch.mockReset());
+
+    it('is a native AbortSignal', async () => {
+      await client.api.sendMessage(1, 'hi');
+      expect(mockFetch.mock.calls[0][1].signal).toBeInstanceOf(AbortSignal);
+    });
+
+    it('aborts when the caller aborts mid-request', async () => {
+      const caller = new AbortController();
+      let received: AbortSignal | undefined;
+      mockFetch.mockImplementation((_url: string, init: RequestInit) => {
+        received = init.signal ?? undefined;
+        caller.abort();
+        return api.fetch(_url, init);
+      });
+      await client.api.sendMessage(
+        1,
+        'hi',
+        undefined,
+        caller.signal as CallerSignal,
+      );
+      expect(received?.aborted).toBe(true);
+    });
+
+    it('starts aborted when the caller already aborted', async () => {
+      const caller = new AbortController();
+      caller.abort();
+      await client.api.sendMessage(
+        1,
+        'hi',
+        undefined,
+        caller.signal as CallerSignal,
+      );
+      expect(mockFetch.mock.calls[0][1].signal.aborted).toBe(true);
+    });
+  });
 });
 
 describe('sendLeadNotification', () => {

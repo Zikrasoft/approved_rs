@@ -38,6 +38,17 @@ const ignoreNotModified: Transformer = async (
   return response;
 };
 
+function withNativeSignal(init?: RequestInit): RequestInit {
+  const controller = new AbortController();
+  const signal = init?.signal;
+  if (signal?.aborted) controller.abort();
+  else
+    signal?.addEventListener('abort', () => controller.abort(), {
+      once: true,
+    });
+  return { ...init, signal: controller.signal };
+}
+
 const botIdSchema = z.coerce.number().int().positive();
 
 function staticBotInfo(botToken: string, username: string): UserFromGetMe {
@@ -62,7 +73,8 @@ export function createTelegramClient(botToken: string, botUsername: string) {
   const bot = new Bot(botToken, {
     botInfo: staticBotInfo(botToken, botUsername),
     client: {
-      fetch: (...args: Parameters<typeof fetch>) => globalThis.fetch(...args),
+      fetch: (input: Parameters<typeof fetch>[0], init?: RequestInit) =>
+        globalThis.fetch(input, withNativeSignal(init)),
     },
   });
   bot.api.config.use(ignoreNotModified);
