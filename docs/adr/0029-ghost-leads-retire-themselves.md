@@ -2,6 +2,10 @@
 status: accepted
 ---
 
+## Amended 2026-10-11: a contactless `/start` is a Ghost lead too
+
+A Capture bot Lead whose contact is still `tg://user?id=…` — the visitor has no Telegram username and never shared a phone — gives the owner nobody to write to, the same dead end as a placeholder click. The owner decided it retires the same way: same `GHOST_LEAD_RETENTION_MS`, same `expireGhostLeads` sweep in the reminder cron, same `lost`. The predicate is still the one `isGhostLead`: open, no owner activity (`lastActivityAt` unset), never gained a contact, and the retention window measured from the last visitor activity (`visitorActiveAt ?? createdAt`) — a visitor still answering the Questionnaire keeps the Lead alive. "Never gained a contact" is the `contact` field alone: the Capture bot writes `@username` when there is one and replaces the bare id with the phone when one is shared, so a Lead with a phone or a username has a contact that is neither, and never auto-closes. Such bare `/start` Leads therefore no longer sit in the 7-day digest. For that to hold, a site form merged into a bare `/start` inside the visitor-merge window now takes the bare id's place with its own contact, the way it already replaced a placeholder click's; a username or a phone already on the Lead is never overwritten.
+
 ## Amended 2026-10-10: no archive, a Ghost lead is only marked lost
 
 Issue #226 removes the archive from the CRM bot: lost is the archive now, and only open Leads are listed. Expiring a Ghost lead sets `lost` alone, and "not archived" drops out of the predicate. `new` is gone with the other two pre-outcome statuses, so "still `new`" now reads "still `open` with no recorded activity" (`lastActivityAt` unset): ⏳ on the card, a card reply or a postpone takes a click out of the sweep the way moving it off `new` used to, and the migration stamps `lastActivityAt` on a Lead stored as negotiations or in_progress. See [ADR-0032](0032-the-owner-states-the-payout.md) for the same rework.

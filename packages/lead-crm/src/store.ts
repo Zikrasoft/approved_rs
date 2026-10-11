@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { channelLabel } from './channelLabels.ts';
+import { isTelegramIdContact } from './contactShape.ts';
 import { isClosed } from './schema.ts';
 import type {
   CapturePrompt,
@@ -115,12 +116,22 @@ function untouched(lead: StoredLead): boolean {
   return lead.status === 'open' && lead.lastActivityAt == null;
 }
 
+function hasNoContact(contact: string): boolean {
+  return isPlaceholderContact(contact) || isTelegramIdContact(contact);
+}
+
+function neverGainedContact(lead: StoredLead): boolean {
+  return (
+    (lead.kind === 'call_click' && isPlaceholderContact(lead.contact)) ||
+    (lead.telegramId != null && isTelegramIdContact(lead.contact))
+  );
+}
+
 function isGhostLead(lead: StoredLead, now: Date): boolean {
   return (
-    lead.kind === 'call_click' &&
-    isPlaceholderContact(lead.contact) &&
+    neverGainedContact(lead) &&
     untouched(lead) &&
-    now.getTime() - new Date(lead.createdAt).getTime() >=
+    now.getTime() - Date.parse(lead.visitorActiveAt ?? lead.createdAt) >=
       GHOST_LEAD_RETENTION_MS
   );
 }
@@ -389,8 +400,7 @@ export function createLeadStore({
         }
 
         const upgradeContact =
-          isPlaceholderContact(existing.contact) &&
-          !isPlaceholderContact(data.contact);
+          hasNoContact(existing.contact) && !hasNoContact(data.contact);
         const botHandOff =
           (data.telegramId ?? existing.telegramId) != null &&
           data.contactChannel === existing.contactChannel;
@@ -406,7 +416,7 @@ export function createLeadStore({
           ...existing,
           ...(upgradeContact
             ? {
-                name: data.name,
+                name: data.name || existing.name,
                 contact: data.contact,
                 contactChannel: data.contactChannel ?? existing.contactChannel,
                 service: data.service || existing.service,

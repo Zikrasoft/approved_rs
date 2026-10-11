@@ -811,6 +811,141 @@ describe('expireGhostLeads', () => {
     expect(await store.getLead(c.id)).toMatchObject({ status: 'open' });
     expect(await store.getLead(live.id)).toMatchObject({ status: 'open' });
   });
+
+  describe('a bare capture-bot /start', () => {
+    const startData: LeadInput = {
+      ...baseData,
+      contact: 'tg://user?id=42',
+      contactChannel: 'telegram',
+      kind: 'lead',
+      telegramId: 42,
+    };
+
+    async function started(
+      overrides: Partial<LeadInput> = {},
+      ageMs = DAY_MS + 1,
+    ): Promise<StoredLead> {
+      const lead = await store.insertLead({ ...startData, ...overrides });
+      await forceAge(lead.id, ageMs);
+      return lead;
+    }
+
+    it('retires one with neither a phone nor a username', async () => {
+      const lead = await started();
+
+      const expired = await store.expireGhostLeads(NOW);
+
+      expect(expired.map((l) => l.id)).toEqual([lead.id]);
+      expect(await store.getLead(lead.id)).toMatchObject({ status: 'lost' });
+    });
+
+    it.each([
+      ['a phone only', { contact: '+381601234567' }],
+      ['a username only', { contact: '@ivan' }],
+      [
+        'both a username and a phone',
+        { contact: '@ivan', comment: 'Телефон: +381601234567' },
+      ],
+    ])('never retires one with %s', async (_, overrides) => {
+      const lead = await started(overrides);
+
+      expect(await store.expireGhostLeads(NOW)).toEqual([]);
+      expect(await store.getLead(lead.id)).toMatchObject({ status: 'open' });
+    });
+
+    it('never retires one whose phone the Questionnaire took', async () => {
+      const lead = await started();
+      await store.updateCapture(lead.id, {
+        contact: '+381601234567',
+        capturePrompt: null,
+      });
+      await store.updateLeads((leads) =>
+        leads.map((l) =>
+          l.id === lead.id
+            ? {
+                ...l,
+                visitorActiveAt: new Date(
+                  NOW.getTime() - DAY_MS - 1,
+                ).toISOString(),
+              }
+            : l,
+        ),
+      );
+
+      expect(await store.expireGhostLeads(NOW)).toEqual([]);
+    });
+
+    it('takes the phone of a form sent within the window, and keeps it', async () => {
+      const lead = await store.insertLead({
+        ...startData,
+        name: 'Ivan Tg',
+        visitorId: 'v-start',
+      });
+      const { merged, lead: after } = await store.insertOrMergeLead({
+        ...baseData,
+        name: '',
+        contact: '+381601234567',
+        contactChannel: 'phone',
+        visitorId: 'v-start',
+      });
+      await forceAge(lead.id, DAY_MS + 1);
+
+      expect(merged).toBe(true);
+      expect(after).toMatchObject({
+        id: lead.id,
+        name: 'Ivan Tg',
+        contact: '+381601234567',
+        contactChannel: 'phone',
+        telegramId: 42,
+      });
+      expect(await store.expireGhostLeads(NOW)).toEqual([]);
+      expect(await store.getLead(lead.id)).toMatchObject({ status: 'open' });
+    });
+
+    it('never lets a form overwrite a username', async () => {
+      await store.insertLead({
+        ...startData,
+        contact: '@ivan',
+        visitorId: 'v-handle',
+      });
+      const { merged, lead } = await store.insertOrMergeLead({
+        ...baseData,
+        contact: '+381601234567',
+        contactChannel: 'phone',
+        visitorId: 'v-handle',
+      });
+
+      expect(merged).toBe(true);
+      expect(lead).toMatchObject({
+        contact: '@ivan',
+        contactChannel: 'telegram',
+      });
+    });
+
+    it('spares one whose visitor was active inside the window', async () => {
+      const lead = await started();
+      await store.updateCapture(lead.id, {
+        note: 'Ищу: седан',
+        capturePrompt: null,
+      });
+
+      expect(await store.expireGhostLeads(NOW)).toEqual([]);
+      expect(await store.getLead(lead.id)).toMatchObject({ status: 'open' });
+    });
+
+    it('spares one the owner worked', async () => {
+      const lead = await started();
+      await store.touchLead(lead.id);
+
+      expect(await store.expireGhostLeads(NOW)).toEqual([]);
+    });
+
+    it('spares one still inside the window', async () => {
+      await started({}, DAY_MS - 1000);
+
+      expect(await store.expireGhostLeads(NOW)).toEqual([]);
+    });
+  });
 });
 
 describe('deleteLead', () => {
