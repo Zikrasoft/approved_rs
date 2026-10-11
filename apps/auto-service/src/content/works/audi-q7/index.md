@@ -5,6 +5,7 @@ year: 2008
 servicesApplied:
   - brakes-suspension
   - servicing
+  - engine-gearbox
 image: image.jpg
 gallery:
   - gallery/0.jpg
