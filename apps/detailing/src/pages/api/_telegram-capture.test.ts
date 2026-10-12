@@ -198,13 +198,14 @@ describe('the Details Questionnaire', () => {
     const words = content('ru').captureBot;
 
     await press('request:ru', NO_HANDLE);
-    await answer('Audi A6 2019', NO_HANDLE);
     await press('pick:ru:polishing-ceramic', NO_HANDLE);
+    await press('done:ru', NO_HANDLE);
+    await answer('Audi A6 2019', NO_HANDLE);
     await answer('064 123 4567', NO_HANDLE);
 
     expect(questions(NO_HANDLE)).toEqual([
-      words.request.car,
       words.request.service,
+      words.request.car,
       words.phoneAsk,
       words.thanks,
       words.menu.text,
@@ -225,16 +226,33 @@ describe('the Details Questionnaire', () => {
     });
   });
 
-  it('asks a visitor with a username for the car and the service as buttons, never the phone', async () => {
+  it('asks a visitor with a username for the services as toggles, then the car, never the phone', async () => {
     const words = content('ru').captureBot;
 
     await press('request:ru');
-    await answer('Audi A6 2019');
+    expect(lastReply().reply_markup.inline_keyboard.at(-1)).toEqual([
+      {
+        text: words.request.unsure,
+        callback_data: 'done:ru',
+        style: 'success',
+      },
+    ]);
     await press('pick:ru:polishing-ceramic');
+    await press('pick:ru:paint-protection-film');
+
+    const edited = api
+      .callsTo('editMessageText', '1002:test-capture-bot-token')
+      .at(-1)?.payload as { reply_markup: { inline_keyboard: unknown[][] } };
+    expect(edited.reply_markup.inline_keyboard[0]).toEqual([
+      expect.objectContaining({ text: expect.stringMatching(/^✅ /) }),
+    ]);
+
+    await press('done:ru');
+    await answer('Audi A6 2019');
 
     expect(questions()).toEqual([
-      words.request.car,
       words.request.service,
+      words.request.car,
       words.thanks,
     ]);
     expect(lastReply().reply_markup.inline_keyboard[0]).toEqual([
@@ -247,20 +265,30 @@ describe('the Details Questionnaire', () => {
     expect(words.request.button).toMatch(/^📝 /);
     expect(visitorLead()).toMatchObject({
       service: 'polishing-ceramic',
+      services: ['polishing-ceramic', 'paint-protection-film'],
       comment: 'Машина: Audi A6 2019',
       capturePrompt: null,
     });
   });
 
-  it('skips the service question when the card already named one', async () => {
+  it('opens the services step with the card already ticked', async () => {
     const words = content('ru').captureBot;
     api.reset();
 
     await answer('/start');
     await press('request:ru:polishing-ceramic');
-    await answer('Audi A6 2019');
 
-    expect(questions().slice(1)).toEqual([words.request.car, words.thanks]);
+    const picker = lastReply().reply_markup.inline_keyboard;
+    expect(picker).toHaveLength(4 + 1);
+    expect(picker[2]).toEqual([
+      expect.objectContaining({
+        text: expect.stringMatching(/^✅ /),
+        callback_data: 'pick:ru:polishing-ceramic',
+      }),
+    ]);
+    expect(picker.at(-1)).toEqual([
+      { text: words.request.done, callback_data: 'done:ru', style: 'success' },
+    ]);
   });
 });
 

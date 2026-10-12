@@ -44,7 +44,13 @@ const COPY = {
   contacts: { button: 'CONTACTS', text: 'REACH_US', hours: 'HOURS' },
   manager: { button: 'MANAGER', text: 'WRITE_YOUR_QUESTION' },
   partners: { button: 'PARTNERS', text: 'PICK_A_PARTNER' },
-  request: { button: 'REQUEST', car: 'CAR', service: 'WHICH_SERVICE' },
+  request: {
+    button: 'REQUEST',
+    car: 'CAR',
+    service: 'WHICH_SERVICES',
+    done: 'DONE',
+    unsure: 'NOT_SURE',
+  },
   language: { button: 'LANGUAGE', text: 'PICK_A_LANGUAGE' },
   profile: {
     description: 'DESCRIPTION',
@@ -144,6 +150,27 @@ function lastSent(): [unknown, unknown] {
 
 function lastMarkup(): unknown {
   return replies().at(-1)?.reply_markup;
+}
+
+function picker(locale: string, picked: string[] = []) {
+  const toggle = (slug: string) => [
+    {
+      text: `${picked.includes(slug) ? '✅ ' : ''}CARD_${slug}_${locale}`,
+      callback_data: `pick:${locale}:${slug}`,
+    },
+  ];
+  return {
+    inline_keyboard: [
+      ...SERVICES.map(toggle),
+      [
+        {
+          text: picked.length > 0 ? 'DONE' : 'NOT_SURE',
+          callback_data: `done:${locale}`,
+          style: 'success',
+        },
+      ],
+    ],
+  };
 }
 
 function expectThanksThenMenu(chatId: number, menu: unknown = MENU_KEYBOARD) {
@@ -299,6 +326,7 @@ async function begin(
   await POST(makeCtx(startUpdate(payload, from)));
   const [service, locale] = payload.split('_');
   await tap(`request:${locale}:${service}`, from);
+  await tap(`done:${locale}`, from);
 }
 
 function edits() {
@@ -727,6 +755,8 @@ describe('browsing the menu', () => {
   it('keeps every button under the 64-byte callback limit', async () => {
     await POST(makeCtx(startUpdate('vehicle-sourcing_de')));
     await tap('services:de');
+    await tap('request:de:vehicle-sourcing');
+    await tap('pick:de:vehicle-import');
 
     const markups = [
       ...replies().map((p) => p.reply_markup),
@@ -742,7 +772,7 @@ describe('browsing the menu', () => {
 });
 
 describe('leaving a request from a service card', () => {
-  it('sets the service, tells the admin and asks the first question', async () => {
+  it('sets the service, tells the admin and opens the services step with it ticked', async () => {
     await POST(makeCtx(startUpdate('sr')));
     api.reset();
 
@@ -751,7 +781,7 @@ describe('leaving a request from a service card', () => {
     expect(stored()[0]).toMatchObject({
       service: 'vehicle-import',
       services: ['vehicle-import'],
-      capturePrompt: { chatId: 42, step: 'looking_for' },
+      capturePrompt: { chatId: 42, step: 'service' },
     });
     for (const id of ADMIN_IDS)
       expect(adminNotes(id)).toEqual([
@@ -764,7 +794,8 @@ describe('leaving a request from a service card', () => {
         ].join('\n'),
       ]);
     expect(cardEdits()).toHaveLength(1);
-    expect(lastSent()).toEqual([42, 'LOOKING_FOR']);
+    expect(lastSent()).toEqual([42, 'WHICH_SERVICES']);
+    expect(lastMarkup()).toEqual(picker('sr', ['vehicle-import']));
   });
 
   it('asks the questions first even when nothing else reaches the visitor', async () => {
@@ -773,7 +804,7 @@ describe('leaving a request from a service card', () => {
     await tap('request:ru:vehicle-import', ANONYMOUS);
 
     expect(adminNotes()).toEqual([]);
-    expect(lastSent()).toEqual([777, 'LOOKING_FOR']);
+    expect(lastSent()).toEqual([777, 'WHICH_SERVICES']);
   });
 
   it('opens a Lead when the visitor has none open', async () => {
@@ -785,11 +816,12 @@ describe('leaving a request from a service card', () => {
         contact: '@ivan',
         service: 'vehicle-sourcing',
         locale: 'en',
-        capturePrompt: { chatId: 42, step: 'looking_for' },
+        capturePrompt: { chatId: 42, step: 'service' },
       }),
     ]);
     expect(cards()).toHaveLength(1);
-    expect(lastSent()).toEqual([42, 'LOOKING_FOR']);
+    expect(lastSent()).toEqual([42, 'WHICH_SERVICES']);
+    expect(lastMarkup()).toEqual(picker('en', ['vehicle-sourcing']));
   });
 
   it('opens a new Lead when the open one is older than the hour', async () => {
@@ -802,9 +834,9 @@ describe('leaving a request from a service card', () => {
     expect(stored()[0].capturePrompt).toBeNull();
     expect(stored()[1]).toMatchObject({
       service: 'vehicle-import',
-      capturePrompt: { chatId: 42, step: 'looking_for' },
+      capturePrompt: { chatId: 42, step: 'service' },
     });
-    expect(lastSent()).toEqual([42, 'LOOKING_FOR']);
+    expect(lastSent()).toEqual([42, 'WHICH_SERVICES']);
   });
 
   it('runs the whole Questionnaire in the language of the tapped card', async () => {
@@ -814,10 +846,12 @@ describe('leaving a request from a service card', () => {
     await POST(makeCtx(startUpdate('ru')));
 
     await tap('request:en:vehicle-import');
+    await tap('done:en');
     expect(lastSent()).toEqual([42, 'LOOKING_FOR_en']);
     expect(stored()[0].locale).toBe('en');
 
     await tap('request:sr:vehicle-import');
+    await tap('done:sr');
     await say('BMW X5');
     expect(stored()[0].locale).toBe('sr');
     expect(lastSent()).toEqual([42, 'BUDGET']);
@@ -848,7 +882,7 @@ describe('leaving a request from a service card', () => {
 
     await tap('request:ru:vehicle-import');
 
-    expect(lastSent()).toEqual([42, 'LOOKING_FOR']);
+    expect(lastSent()).toEqual([42, 'WHICH_SERVICES']);
     expect(error).toHaveBeenCalledWith(
       '[capture] could not answer the tap',
       expect.anything(),
@@ -864,7 +898,7 @@ describe('leaving a request from a service card', () => {
 
     expect(stored()[1]).toMatchObject({
       contact: '+381601234567',
-      capturePrompt: { chatId: 777, step: 'looking_for' },
+      capturePrompt: { chatId: 777, step: 'service' },
     });
   });
 });
@@ -959,7 +993,7 @@ describe('the two questions', () => {
   it('asks what the visitor is looking for once they leave a request, in the page locale', async () => {
     await begin('vehicle-sourcing_sr');
 
-    expect(replies()).toHaveLength(2);
+    expect(replies()).toHaveLength(3);
     expect(lastSent()).toEqual([42, 'LOOKING_FOR']);
     expect(stored()[0].capturePrompt).toEqual({
       chatId: 42,
@@ -1120,6 +1154,7 @@ describe('the phone, asked last when nothing else can reach the visitor', () => 
   it('skips the step when the Lead already has a phone', async () => {
     await POST(makeCtx(contactUpdate('381601234567')));
     await tap('request:ru:vehicle-import', ANONYMOUS);
+    await tap('done:ru', ANONYMOUS);
     await say('BMW X5', ANONYMOUS);
 
     await say('до 30k', ANONYMOUS);
@@ -1532,7 +1567,7 @@ describe('a second enquiry once the hour has passed', () => {
     expect(stored()[0].capturePrompt).toBeNull();
     expect(stored()[1].capturePrompt).toEqual({
       chatId: 42,
-      step: 'looking_for',
+      step: 'service',
     });
   });
 
@@ -1988,7 +2023,7 @@ describe("CarLab's Questionnaire: the car and what happened, then the phone", ()
   });
 });
 
-describe("Details' Questionnaire: the car, the service as buttons, then the phone", () => {
+describe('the services step that opens every Questionnaire', () => {
   const DETAILS_MENU = {
     inline_keyboard: [
       [{ text: 'REQUEST', callback_data: 'request:ru', style: 'success' }],
@@ -1996,26 +2031,9 @@ describe("Details' Questionnaire: the car, the service as buttons, then the phon
     ],
   };
 
-  const PICKER = {
-    inline_keyboard: [
-      [
-        {
-          text: 'CARD_vehicle-sourcing_ru',
-          callback_data: 'pick:ru:vehicle-sourcing',
-        },
-      ],
-      [
-        {
-          text: 'CARD_vehicle-import_ru',
-          callback_data: 'pick:ru:vehicle-import',
-        },
-      ],
-    ],
-  };
-
   beforeEach(() => {
     POST = route(SECRET, {
-      questionnaire: ['car', 'service'],
+      questionnaire: ['car'],
       menu: ['request', 'services'],
     });
   });
@@ -2031,73 +2049,126 @@ describe("Details' Questionnaire: the car, the service as buttons, then the phon
     expect(lastMarkup()).toEqual(DETAILS_MENU);
   });
 
-  it('asks for the service as buttons and files the tap as the service', async () => {
+  it('asks which services first, with a green Not sure while nothing is picked', async () => {
     await beginFromMenu();
-    expect(lastSent()).toEqual([42, 'CAR']);
 
-    await say('Audi A6 2019');
-    expect(lastSent()).toEqual([42, 'WHICH_SERVICE']);
-    expect(lastMarkup()).toEqual(PICKER);
+    expect(lastSent()).toEqual([42, 'WHICH_SERVICES']);
+    expect(lastMarkup()).toEqual(picker('ru'));
+    expect(stored()[0].capturePrompt).toEqual({ chatId: 42, step: 'service' });
+  });
+
+  it('ticks and unticks services in place and keeps the picked set on the Lead', async () => {
+    await beginFromMenu();
     api.reset();
+
+    await tap('pick:ru:vehicle-import');
+    await tap('pick:ru:vehicle-sourcing');
+
+    expect(stored()[0]).toMatchObject({
+      service: 'vehicle-import',
+      services: ['vehicle-import', 'vehicle-sourcing'],
+      capturePrompt: { chatId: 42, step: 'service' },
+    });
+    expect(edits().at(-1)).toMatchObject({
+      chat_id: 42,
+      message_id: 900,
+      text: 'WHICH_SERVICES',
+      reply_markup: picker('ru', ['vehicle-import', 'vehicle-sourcing']),
+    });
 
     await tap('pick:ru:vehicle-import');
 
     expect(stored()[0]).toMatchObject({
-      comment: 'Машина: Audi A6 2019',
-      service: 'vehicle-import',
-      services: ['vehicle-import'],
-      capturePrompt: null,
+      service: 'vehicle-sourcing',
+      services: ['vehicle-sourcing'],
     });
-    expect(adminNotes()).toEqual([
-      expect.stringContaining(': услуга\n🤖 Посетитель через бота'),
-    ]);
-    expect(lastSent()).toEqual([42, 'THANKS']);
-    expect(edits()).toHaveLength(0);
+    expect(edits()).toHaveLength(3);
+    expect(edits().at(-1)?.reply_markup).toEqual(
+      picker('ru', ['vehicle-sourcing']),
+    );
+    expect(replies()).toHaveLength(0);
+    expect(cardEdits().at(-1)?.text).toContain('vehicle-sourcing');
   });
 
-  it('takes a typed service as an answer too', async () => {
+  it('moves on to the next question on Done, keeping every picked service', async () => {
     await beginFromMenu();
-    await say('Audi A6 2019');
+    await tap('pick:ru:vehicle-sourcing');
+    await tap('pick:ru:vehicle-import');
 
-    await say('полировка');
-
-    expect(stored()[0]).toMatchObject({
-      comment: 'Машина: Audi A6 2019\nУслуга: полировка',
-      service: '',
-      capturePrompt: null,
-    });
-  });
-
-  it('skips the service when the request came from a service card', async () => {
-    await begin();
+    await tap('done:ru');
     expect(lastSent()).toEqual([42, 'CAR']);
 
     await say('Audi A6 2019');
 
-    expect(lastSent()).toEqual([42, 'THANKS']);
-    expect(replies().map((p) => p.text)).not.toContain('WHICH_SERVICE');
-  });
-
-  it('skips the service when the open Lead already has one', async () => {
-    await POST(makeCtx(startUpdate('vehicle-import_ru')));
-    await tap('request:ru');
-
-    await say('Audi A6 2019');
-
     expect(stored()[0]).toMatchObject({
-      service: 'vehicle-import',
+      comment: 'Машина: Audi A6 2019',
+      service: 'vehicle-sourcing',
+      services: ['vehicle-sourcing', 'vehicle-import'],
       capturePrompt: null,
     });
+    expect(lastSent()).toEqual([42, 'THANKS']);
+  });
+
+  it('leaves the services empty when the visitor is not sure', async () => {
+    await beginFromMenu();
+
+    await tap('done:ru');
+
+    expect(stored()[0]).toMatchObject({
+      service: '',
+      services: [],
+      comment: null,
+      capturePrompt: { chatId: 42, step: 'car' },
+    });
+    expect(lastSent()).toEqual([42, 'CAR']);
+  });
+
+  it('takes a typed answer as the services too', async () => {
+    await beginFromMenu();
+
+    await say('полировка');
+
+    expect(stored()[0]).toMatchObject({
+      comment: 'Услуга: полировка',
+      service: '',
+      capturePrompt: { chatId: 42, step: 'car' },
+    });
+  });
+
+  it('starts with the service card ticked and does not skip the step', async () => {
+    await POST(makeCtx(startUpdate('vehicle-import_ru')));
+
+    await tap('request:ru:vehicle-import');
+
+    expect(lastSent()).toEqual([42, 'WHICH_SERVICES']);
+    expect(lastMarkup()).toEqual(picker('ru', ['vehicle-import']));
+  });
+
+  it('shows the services already on the open Lead ticked', async () => {
+    await POST(makeCtx(startUpdate('vehicle-import_ru')));
+
+    await tap('request:ru');
+
+    expect(lastMarkup()).toEqual(picker('ru', ['vehicle-import']));
+  });
+
+  it('shows the picked set again when the visitor presses Start mid-step', async () => {
+    await beginFromMenu();
+    await tap('pick:ru:vehicle-sourcing');
+
+    await say('/start');
+
+    expect(lastSent()).toEqual([42, 'WHICH_SERVICES']);
+    expect(lastMarkup()).toEqual(picker('ru', ['vehicle-sourcing']));
   });
 
   it('asks a visitor with no handle the rest first, then the phone', async () => {
     await beginFromMenu(ANONYMOUS);
+    await tap('pick:ru:vehicle-sourcing', ANONYMOUS);
+    await tap('done:ru', ANONYMOUS);
     expect(lastSent()).toEqual([777, 'CAR']);
 
     await say('Audi A6 2019', ANONYMOUS);
-    expect(lastSent()).toEqual([777, 'WHICH_SERVICE']);
-
-    await tap('pick:ru:vehicle-sourcing', ANONYMOUS);
     expect(lastSent()).toEqual([777, 'PHONE_ASK']);
 
     await POST(makeCtx(contactUpdate('381601234567')));
@@ -2109,19 +2180,21 @@ describe("Details' Questionnaire: the car, the service as buttons, then the phon
     });
   });
 
-  it('ignores a service tap outside the service question', async () => {
+  it('ignores service taps outside the services step and services it does not offer', async () => {
     await beginFromMenu();
+    await tap('pick:ru:no-such-service');
+    await tap('done:ru');
     api.reset();
 
     await tap('pick:ru:vehicle-import');
-    await say('Audi A6 2019');
-    await tap('pick:ru:no-such-service');
+    await tap('done:ru');
 
     expect(stored()[0]).toMatchObject({
-      service: '',
-      capturePrompt: { chatId: 42, step: 'service' },
+      services: [],
+      capturePrompt: { chatId: 42, step: 'car' },
     });
-    expect(replies().map((p) => p.text)).toEqual(['WHICH_SERVICE']);
+    expect(edits()).toHaveLength(0);
+    expect(replies()).toHaveLength(0);
   });
 
   it('ignores a request for a service it does not offer', async () => {

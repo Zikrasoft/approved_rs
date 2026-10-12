@@ -37,6 +37,7 @@ export interface CaptureUpdate {
   note?: string;
   contact?: string;
   service?: string;
+  services?: string[];
   locale?: string;
   referredBy?: Referrer;
   capturePrompt: CapturePrompt | null;
@@ -514,6 +515,7 @@ export function createLeadStore({
         note,
         contact,
         service,
+        services,
         locale,
         referredBy,
         capturePrompt,
@@ -524,6 +526,7 @@ export function createLeadStore({
         comment: note ? appendNote(l.comment, note) : l.comment,
         contact: contact ?? l.contact,
         ...(service ? { service, services: [service] } : {}),
+        ...(services ? { service: services[0] ?? '', services } : {}),
         locale: locale ?? l.locale,
         referredBy: referredBy ?? l.referredBy,
         capturePrompt,

@@ -239,11 +239,13 @@ describe('the Approved Questionnaire', () => {
     const words = content('ru').captureBot;
 
     await press('request:ru:vehicle-import', NO_HANDLE);
+    await press('done:ru', NO_HANDLE);
     await answer('BMW X5 2019', NO_HANDLE);
     await answer('40 000 €', NO_HANDLE);
     await answer('064 123 4567', NO_HANDLE);
 
     expect(questions(NO_HANDLE)).toEqual([
+      words.request.service,
       words.lookingFor,
       words.budget,
       words.phoneAsk,
@@ -270,10 +272,38 @@ describe('the Approved Questionnaire', () => {
     const words = content('ru').captureBot;
 
     await press('request:ru:vehicle-import');
+
+    const picker = lastReply().reply_markup.inline_keyboard;
+    expect(picker).toHaveLength(4 + 1);
+    expect(picker[3]).toEqual([
+      expect.objectContaining({
+        text: expect.stringMatching(/^✅ /),
+        callback_data: 'pick:ru:vehicle-import',
+      }),
+    ]);
+    expect(picker.at(-1)).toEqual([
+      { text: words.request.done, callback_data: 'done:ru', style: 'success' },
+    ]);
+
+    await press('pick:ru:vehicle-sourcing');
+
+    const edited = api
+      .callsTo('editMessageText', '1002:test-capture-bot-token')
+      .at(-1)?.payload as { reply_markup: { inline_keyboard: unknown[][] } };
+    expect(edited.reply_markup.inline_keyboard[0]).toEqual([
+      expect.objectContaining({ text: expect.stringMatching(/^✅ /) }),
+    ]);
+
+    await press('done:ru');
     await answer('BMW X5 2019');
     await answer('40 000 €');
 
-    expect(questions()).toEqual([words.lookingFor, words.budget, words.thanks]);
+    expect(questions()).toEqual([
+      words.request.service,
+      words.lookingFor,
+      words.budget,
+      words.thanks,
+    ]);
     expect(lastReply().reply_markup.inline_keyboard[0]).toEqual([
       {
         text: words.request.button,
@@ -284,6 +314,7 @@ describe('the Approved Questionnaire', () => {
     expect(words.request.button).toMatch(/^📝 /);
     expect(visitorLead()).toMatchObject({
       service: 'vehicle-import',
+      services: ['vehicle-import', 'vehicle-sourcing'],
       comment: 'Ищет: BMW X5 2019\nБюджет: 40 000 €',
       capturePrompt: null,
     });

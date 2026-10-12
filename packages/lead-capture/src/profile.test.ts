@@ -100,7 +100,7 @@ const FULL_COPY = {
   contacts: { button: 'C', text: 'CT', hours: 'CH' },
   manager: { button: 'MG', text: 'MGT' },
   partners: { button: 'P', text: 'PT' },
-  request: { button: 'RQ', car: 'RC', service: 'RS' },
+  request: { button: 'RQ', car: 'RC', service: 'RS', done: 'RD', unsure: 'RU' },
   language: { button: 'LG', text: 'LGT' },
   profile: {
     description: 'DESCRIPTION',
