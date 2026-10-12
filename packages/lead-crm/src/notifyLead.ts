@@ -42,7 +42,10 @@ interface EnsureLeadTopicOptions {
   store: Pick<LeadStore, 'setTopic' | 'setTopicSummary'>;
   notifier: Pick<
     Notifier,
-    'openLeadTopic' | 'postLeadTopicSummary' | 'refreshLeadTopic'
+    | 'openLeadTopic'
+    | 'deleteLeadTopic'
+    | 'postLeadTopicSummary'
+    | 'refreshLeadTopic'
   >;
 }
 
@@ -50,25 +53,37 @@ export function createEnsureLeadTopic({
   store,
   notifier,
 }: EnsureLeadTopicOptions) {
-  async function openTopic(lead: StoredLead) {
-    // TODO: two racing updates on a topicless Lead each open a topic; the later setTopic wins.
-    const topicId = await notifier.openLeadTopic(lead);
-    return store.setTopic(lead.id, topicId);
-  }
-
-  return async function ensureLeadTopic(lead: StoredLead): Promise<StoredLead> {
-    if (lead.telegramId == null) return lead;
-    const opened = lead.topicId == null ? await openTopic(lead) : lead;
-    if (opened?.topicId == null) return lead;
+  async function summarise(
+    opened: StoredLead,
+    topicId: number,
+  ): Promise<StoredLead> {
     if (opened.topicMessageId != null) {
       await notifier.refreshLeadTopic(opened);
       return opened;
     }
-    const messageId = await notifier.postLeadTopicSummary(
-      opened,
-      opened.topicId,
-    );
+    const messageId = await notifier.postLeadTopicSummary(opened, topicId);
     return (await store.setTopicSummary(opened.id, messageId)) ?? opened;
+  }
+
+  async function dropDuplicate(lead: StoredLead, topicId: number) {
+    await notifier.deleteLeadTopic(topicId).catch((error: unknown) => {
+      console.error('[lead-crm] could not delete a duplicate topic', {
+        error,
+        leadId: lead.id,
+        topicId,
+      });
+    });
+  }
+
+  return async function ensureLeadTopic(lead: StoredLead): Promise<StoredLead> {
+    if (lead.telegramId == null) return lead;
+    if (lead.topicId != null) return summarise(lead, lead.topicId);
+    const topicId = await notifier.openLeadTopic(lead);
+    const stored = await store.setTopic(lead.id, topicId);
+    if (!stored) return lead;
+    if (stored.topicId === topicId) return summarise(stored, topicId);
+    await dropDuplicate(lead, topicId);
+    return stored;
   };
 }
 

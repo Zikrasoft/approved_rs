@@ -4,6 +4,7 @@ import {
   afterStatusChange,
   client,
   ensureLeadCard,
+  ensureLeadTopic,
   formatter,
   groupId,
   notifier,
@@ -19,7 +20,13 @@ export const {
   safeEditMessage,
 } = client;
 
-export { afterStatusChange, closeLeadTopic, ensureLeadCard, touchLeadTopic };
+export {
+  afterStatusChange,
+  closeLeadTopic,
+  ensureLeadCard,
+  ensureLeadTopic,
+  touchLeadTopic,
+};
 
 export const {
   sendLeadNotification,

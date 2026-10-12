@@ -35,6 +35,7 @@ const coverageLine = getActiveCountries()
             <ContactControl
               data-primary-channel="telegram"
               channel="telegram"
+              manager
               class="footer-cta inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-medium no-underline bg-accent-strong text-on-accent"
             >
               <ContactIcon channel="telegram" size={14} />
@@ -54,6 +55,7 @@ const coverageLine = getActiveCountries()
             <ContactControl
               data-primary-channel="whatsapp"
               channel="telegram"
+              manager
               hidden
               aria-label={t.footer.contactManagerLabel}
               class="footer-channel-btn inline-flex items-center gap-2 px-3 py-2 rounded-sm text-xs font-medium no-underline border border-default text-muted"

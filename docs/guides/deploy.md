@@ -249,7 +249,14 @@ Production environment; Preview is unused — there are no preview deploys).
 | `PUBLIC_PHONE_NUMBER`    | —           | ✅ required | ✅ required | none                         | the build fails              |
 | `PUBLIC_THREADS_CHANNEL` | ✅ required | —           | —           | none                         | the build fails              |
 | `PUBLIC_INSTAGRAM`       | —           | —           | ✅          | none (optional)              | the Instagram tile is hidden |
-| `PUBLIC_TG_MANAGER`      | ✅          | —           | —           | none                         | `/thanks/` opens the bot     |
+| `PUBLIC_TG_MANAGER`      | ✅          | ✅          | ✅          | none (optional)              | see below                    |
+
+`PUBLIC_TG_MANAGER` is the manager's own Telegram handle, without `@`:
+`approvedrs` on approved.rs and details.rs, `carlabrs` on carlab.rs. Each
+capture bot's «Написать менеджеру» menu button links to it; unset, the button
+opens the in-bot manager screen instead. On approved.rs the footer's «Написать
+менеджеру» and the Telegram tile on `/thanks/` link to it too; unset, they open
+the capture bot.
 
 ### Analytics — no environment variables
 

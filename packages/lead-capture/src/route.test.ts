@@ -1940,6 +1940,35 @@ describe('the Contacts screen', () => {
 });
 
 describe('talking to a manager', () => {
+  it('opens the manager account straight from the menu when the brand names one', async () => {
+    POST = route(SECRET, {
+      menu: ['services', 'manager'],
+      humanTelegram: 'brand_manager',
+    });
+
+    await POST(makeCtx(startUpdate('ru')));
+
+    expect(lastMarkup()).toEqual({
+      inline_keyboard: [
+        [{ text: 'SERVICES', callback_data: 'services:ru' }],
+        [{ text: 'MANAGER', url: 'https://t.me/brand_manager' }],
+      ],
+    });
+  });
+
+  it('keeps the in-bot manager screen when the brand names no account', async () => {
+    POST = route(SECRET, { menu: ['services', 'manager'] });
+
+    await POST(makeCtx(startUpdate('ru')));
+
+    expect(lastMarkup()).toEqual({
+      inline_keyboard: [
+        [{ text: 'SERVICES', callback_data: 'services:ru' }],
+        [{ text: 'MANAGER', callback_data: 'manager:ru' }],
+      ],
+    });
+  });
+
   it('asks for the question and ends a running Questionnaire', async () => {
     await begin();
     api.reset();

@@ -728,6 +728,17 @@ describe('findByTopic', () => {
       topicMessageId: 43,
     });
   });
+
+  it('keeps the first topic when a second one is set', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.setTopic(lead.id, 42);
+    await store.setTopicSummary(lead.id, 43);
+
+    expect(await store.setTopic(lead.id, 50)).toMatchObject({
+      topicId: 42,
+      topicMessageId: 43,
+    });
+  });
 });
 
 describe('postponeLead', () => {

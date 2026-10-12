@@ -55,6 +55,7 @@ const {
   sendDigest,
   editLeadDetailMessage,
   openLeadTopic,
+  deleteLeadTopic,
   postLeadTopicSummary,
   refreshLeadTopic,
 } = notifier;
@@ -1270,6 +1271,33 @@ describe('the Lead topic', () => {
         'Контакт: <a href="https://t.me/ivan">@ivan</a> (Telegram)',
       ),
     });
+  });
+
+  it('deletes a topic by id', async () => {
+    await deleteLeadTopic(7);
+    expect(api.callsTo('deleteForumTopic')[0].payload).toEqual({
+      chat_id: '-1009876543210',
+      message_thread_id: 7,
+    });
+  });
+
+  it('offers to start a conversation only with a Lead the bot knows and no topic', () => {
+    const START = { text: '💬 Начать переписку', callback_data: 'topic:42' };
+    const buttons = (keyboard: { inline_keyboard: object[][] }) =>
+      keyboard.inline_keyboard.flat();
+    const known = makeLead({ telegramId: 777 });
+    expect(buttons(formatter.deepLinkKeyboard(known))).toContainEqual(START);
+    expect(
+      buttons(buildLeadDetail(known, 'admin').reply_markup),
+    ).toContainEqual(START);
+    expect(
+      buttons(
+        formatter.deepLinkKeyboard(makeLead({ telegramId: 777, topicId: 9 })),
+      ),
+    ).not.toContainEqual(START);
+    expect(buttons(formatter.deepLinkKeyboard(makeLead()))).not.toContainEqual(
+      START,
+    );
   });
 
   it('caps the topic name at Telegram limit', () => {

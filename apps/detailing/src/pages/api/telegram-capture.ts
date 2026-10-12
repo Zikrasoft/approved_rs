@@ -11,7 +11,12 @@ import {
 } from '@/lib/crmBot';
 import { LOCALE_NAME, PRIMARY_LOCALE, isLocale } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { STUDIO_ADDRESS, PHONE_NUMBER, SITE_URL } from '@/utils/constants';
+import {
+  PHONE_NUMBER,
+  SITE_URL,
+  STUDIO_ADDRESS,
+  TG_MANAGER,
+} from '@/utils/constants';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
 
@@ -28,6 +33,7 @@ export const POST = createCaptureWebhookRoute({
   primaryLocale: PRIMARY_LOCALE,
   copy: (locale) => content(locale).captureBot,
   menu: ['request', 'services', 'contacts', 'manager', 'language'],
+  humanTelegram: TG_MANAGER,
   questionnaire: ['car'],
   phoneRegion: 'RS',
   languages: LOCALE_NAME,

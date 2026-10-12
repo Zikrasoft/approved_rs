@@ -340,19 +340,27 @@ Both new apps follow the same shape, and a third should too:
   and `telegramId` is what the card reads as `🤖 через бота`. A tap that cannot
   carry the id (analytics declined, or a payload past 64 characters) beacons
   nothing: the bot writes its Lead alone, without a page, rather than leaving a
-  second, unmergeable card in the chat. **`/thanks/` on approved.rs is the one
-  carve-out**: the visitor there has just sent the form, so its Telegram tile
-  opens the manager's own account (`PUBLIC_TG_MANAGER`, an app variable and
+  second, unmergeable card in the chat. **approved.rs has two human-account
+  carve-outs.** The first is `/thanks/`: the visitor there has just sent the
+  form, so its Telegram tile opens the manager's own account (`PUBLIC_TG_MANAGER`, an app variable and
   never a `packages/brands` field, because it is a staff account rather than
   brand identity) through `telegramLink`, with no `?start=`, and falls back to
   the capture bot when the variable is unset. The bound `contactControl`
   carries the handle as `humanTelegram` and picks it when `ContactControl.astro`
-  reads `/thanks/` off the route — no prop says where a component is. A tap there fires `contact_click` and writes no Lead:
+  reads `/thanks/` off the route — no prop says where a component is. The
+  second is the footer's «Написать менеджеру» control and its icon twin: the
+  label promises the manager, so the call site passes `manager`, which names
+  the control rather than the page, and `createContactControls` picks the same
+  `humanTelegram` on any page. Each capture bot's «Написать менеджеру» menu
+  button follows the same rule: `humanTelegram` in the app's
+  `telegram-capture.ts`, read from that app's `PUBLIC_TG_MANAGER`, turns it into
+  a URL button to the manager, and unset it stays the in-bot manager screen. A
+  tap on either site carve-out fires `contact_click` and writes no Lead:
   `defineContactClickTracking` skips the beacon for a `telegram` link whose
   href carries no `start` parameter — a human account, which a capture-bot
   link never is — so the rule is keyed on the link, not on the placement, and
-  the fallback bot link on the same page beacons its placeholder like
-  everywhere else. The other channels on that page keep their click Lead,
+  the fallback bot link beacons its placeholder like everywhere else. The
+  other channels on `/thanks/` keep their click Lead,
   which merges into the form Lead on the visitor id.
 - **The lead modal takes its service from the trigger.** `data-lead-service` on
   a button sets the form's `service` when the modal opens; `data-default-service`

@@ -35,6 +35,8 @@ import {
   REPLY_COPY,
   LEAD_ACTION_COPY,
   touchLeadTopic,
+  ensureLeadCard,
+  ensureLeadTopic,
   type Role,
 } from '@/lib/telegram';
 import { captureClientFor } from '@/lib/captureBot';
@@ -318,6 +320,30 @@ async function openLead(ctx: Ctx, id: number): Promise<void> {
   await ack(ctx);
 }
 
+async function startTopic(ctx: Ctx, id: number): Promise<void> {
+  const lead = await getLead(id);
+  if (!lead) return ack(ctx);
+  const opened =
+    lead.topicId != null
+      ? lead
+      : await ensureLeadTopic(lead).catch((error: unknown) => {
+          console.error('[telegram-webhook] could not open the topic', {
+            error,
+            leadId: id,
+          });
+          return lead;
+        });
+  if (opened.topicId == null)
+    return answerCallback(ctx.cbId, LEAD_ACTION_COPY.topicFailed);
+  await ensureLeadCard(opened);
+  const onGroupCard =
+    ctx.chatId === opened.telegramChatId &&
+    ctx.messageId === opened.telegramMessageId;
+  if (!onGroupCard)
+    await editLeadDetailMessage(ctx.chatId, ctx.messageId, opened, ctx.role);
+  await answerCallback(ctx.cbId, LEAD_ACTION_COPY.topicOpened);
+}
+
 function statusRow(key: LeadStatus): CallbackRow {
   return [
     new RegExp(`^st:(\\d+):${key}$`),
@@ -366,6 +392,7 @@ export const CALLBACKS: CallbackRow[] = [
   [/^delcancel:(\d+)$/, 'admin', withId(backToLead)],
   [/^menu:open$/, 'any', listOpen],
   [/^open:(\d+)$/, 'any', withId(openLead)],
+  [/^topic:(\d+)$/, 'any', withId(startTopic)],
   [
     /^menu:stats$/,
     'admin',
