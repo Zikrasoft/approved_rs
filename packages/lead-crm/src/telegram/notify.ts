@@ -48,7 +48,7 @@ export function createNotifier({
         formatter.formatTeaser(lead),
         {
           parse_mode: 'HTML',
-          reply_markup: formatter.deepLinkKeyboard(lead.id),
+          reply_markup: formatter.deepLinkKeyboard(lead),
         },
       );
       const messageId = sent.message_id;
@@ -67,6 +67,32 @@ export function createNotifier({
       }
 
       return { chatId, messageId };
+    },
+
+    async openLeadTopic(
+      lead: StoredLead,
+    ): Promise<{ topicId: number; messageId: number }> {
+      const topic = await client.api.createForumTopic(
+        groupId,
+        formatter.topicName(lead),
+      );
+      const topicId = topic.message_thread_id;
+      const sent = await client.api.sendMessage(
+        groupId,
+        formatter.topicSummaryText(lead),
+        { parse_mode: 'HTML', message_thread_id: topicId },
+      );
+      return { topicId, messageId: sent.message_id };
+    },
+
+    async refreshLeadTopic(lead: StoredLead): Promise<void> {
+      if (lead.topicMessageId == null) return;
+      await client.api.editMessageText(
+        groupId,
+        lead.topicMessageId,
+        formatter.topicSummaryText(lead),
+        { parse_mode: 'HTML' },
+      );
     },
 
     async unpinLeadCard(lead: StoredLead): Promise<void> {
@@ -92,7 +118,7 @@ export function createNotifier({
           lead.telegramChatId,
           lead.telegramMessageId,
           formatter.formatTeaser(lead),
-          formatter.deepLinkKeyboard(lead.id),
+          formatter.deepLinkKeyboard(lead),
         );
       } catch (err) {
         if (isMessageGone(err)) return false;

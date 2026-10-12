@@ -164,8 +164,12 @@ describe('the Approved capture bot', () => {
         brand: 'Approved.rs',
         service: 'vehicle-import',
         locale: 'sr',
+        topicId: 1,
       }),
     ]);
+    expect(
+      api.callsTo('createForumTopic', '1001:test-bot-token')[0]?.payload,
+    ).toMatchObject({ chat_id: '-1009876543210' });
   });
 
   it('sends hours, phone and site with no venue', async () => {

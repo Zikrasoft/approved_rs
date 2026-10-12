@@ -164,8 +164,12 @@ describe('the Details capture bot', () => {
         brand: 'Details',
         service: 'polishing-ceramic',
         locale: 'sr',
+        topicId: 1,
       }),
     ]);
+    expect(
+      api.callsTo('createForumTopic', '1001:test-bot-token')[0]?.payload,
+    ).toMatchObject({ chat_id: '-1009876543210' });
   });
 
   it('sends the workshop venue, then hours, phone and site', async () => {

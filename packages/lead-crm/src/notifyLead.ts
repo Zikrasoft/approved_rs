@@ -38,6 +38,27 @@ export function createEnsureLeadCard({
   };
 }
 
+interface EnsureLeadTopicOptions {
+  store: Pick<LeadStore, 'setTopic'>;
+  notifier: Pick<Notifier, 'openLeadTopic' | 'refreshLeadTopic'>;
+}
+
+export function createEnsureLeadTopic({
+  store,
+  notifier,
+}: EnsureLeadTopicOptions) {
+  return async function ensureLeadTopic(lead: StoredLead): Promise<StoredLead> {
+    if (lead.telegramId == null) return lead;
+    if (lead.topicId != null) {
+      await notifier.refreshLeadTopic(lead);
+      return lead;
+    }
+    // TODO: two racing updates on a topicless Lead each open a topic; the later setTopic wins.
+    const { topicId, messageId } = await notifier.openLeadTopic(lead);
+    return (await store.setTopic(lead.id, topicId, messageId)) ?? lead;
+  };
+}
+
 export interface StatusChangeOptions {
   surface?: { chatId: number; messageId: number; role: Role };
   notice?: boolean;

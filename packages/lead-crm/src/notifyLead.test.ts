@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   createAfterStatusChange,
   createEnsureLeadCard,
+  createEnsureLeadTopic,
   createNotifyLead,
 } from './notifyLead.ts';
 import { storedLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
@@ -49,6 +50,8 @@ const storedLead: StoredLead = {
   pendingPrompt: null,
   capturePrompt: null,
   telegramId: null,
+  topicId: null,
+  topicMessageId: null,
   referredBy: null,
   remindAt: null,
 };
@@ -371,5 +374,47 @@ describe('afterStatusChange', () => {
     await afterStatusChange({ ...storedLead, ...patch }, options);
 
     expect(calls).toEqual(expected);
+  });
+});
+
+describe('ensureLeadTopic', () => {
+  const openLeadTopic = vi.fn();
+  const refreshLeadTopic = vi.fn();
+  const topicStore = createLeadStore({
+    storage: createMemoryStorage(),
+    schema: storedLeadSchema,
+  });
+  const ensureLeadTopic = createEnsureLeadTopic({
+    store: topicStore,
+    notifier: { openLeadTopic, refreshLeadTopic },
+  });
+
+  beforeEach(() => {
+    openLeadTopic.mockReset().mockResolvedValue({ topicId: 5, messageId: 77 });
+    refreshLeadTopic.mockReset().mockResolvedValue(undefined);
+  });
+
+  it('opens no topic for a Lead the bot never saw', async () => {
+    const lead = await topicStore.insertLead(baseData);
+    await expect(ensureLeadTopic(lead)).resolves.toBe(lead);
+    expect(openLeadTopic).not.toHaveBeenCalled();
+  });
+
+  it('opens one topic and stores it, then only edits the summary', async () => {
+    const lead = await topicStore.insertLead({ ...baseData, telegramId: 9 });
+    const opened = await ensureLeadTopic(lead);
+    expect(opened).toMatchObject({ topicId: 5, topicMessageId: 77 });
+    expect(await topicStore.getLead(lead.id)).toMatchObject({
+      topicId: 5,
+      topicMessageId: 77,
+    });
+    await expect(ensureLeadTopic(opened)).resolves.toBe(opened);
+    expect(openLeadTopic).toHaveBeenCalledOnce();
+    expect(refreshLeadTopic).toHaveBeenCalledWith(opened);
+  });
+
+  it('hands back the Lead when its row is gone', async () => {
+    const lead = { ...storedLead, id: 999, telegramId: 9 };
+    await expect(ensureLeadTopic(lead)).resolves.toBe(lead);
   });
 });

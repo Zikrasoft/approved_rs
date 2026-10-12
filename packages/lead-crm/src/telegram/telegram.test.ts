@@ -32,6 +32,7 @@ const client = createTelegramClient('1001:test-bot-token', 'test_bot');
 const formatter = createFormatter({
   serviceLabel: (slug) => SERVICE_LABELS[slug] ?? slug,
   botUsername: 'approved_test_bot',
+  groupId: '-1009876543210',
   replyRelayBrands: ['Approved.rs', 'Details'],
 });
 const notifier = createNotifier({
@@ -55,6 +56,8 @@ const {
   sendVisitorChangeToAdmin,
   sendDigest,
   editLeadDetailMessage,
+  openLeadTopic,
+  refreshLeadTopic,
 } = notifier;
 
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
@@ -78,6 +81,8 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     pendingPrompt: null,
     capturePrompt: null,
     telegramId: null,
+    topicId: null,
+    topicMessageId: null,
     referredBy: null,
     remindAt: null,
     ...overrides,
@@ -1074,6 +1079,7 @@ describe('buildLeadDetail', () => {
     const bare = createFormatter({
       serviceLabel: (slug) => slug,
       botUsername: 'carlab_test_bot',
+      groupId: '-1009876543210',
     });
     expect(buttons(bare.buildLeadDetail(lead, 'owner'))).not.toContain(
       'reply:7',
@@ -1199,6 +1205,7 @@ describe('per-business formatter config', () => {
   const detailingFormatter = createFormatter({
     serviceLabel: () => 'Оклейка плёнкой',
     botUsername: 'detailing_bot',
+    groupId: '-1009876543210',
   });
 
   it('does not quote one business rate in help text a shared bot shows every brand', () => {
@@ -1209,7 +1216,8 @@ describe('per-business formatter config', () => {
 
   it('builds its deep link from its own bot username', () => {
     expect(
-      detailingFormatter.deepLinkKeyboard(7).inline_keyboard[0][0].url,
+      detailingFormatter.deepLinkKeyboard(makeLead({ id: 7 }))
+        .inline_keyboard[0][0].url,
     ).toBe('https://t.me/detailing_bot?start=lead_7');
   });
 
@@ -1366,5 +1374,72 @@ describe('brand attribution — one bot, one chat, several businesses', () => {
       new Date(),
     );
     expect(text).not.toContain('По брендам');
+  });
+});
+
+describe('the Lead topic', () => {
+  beforeEach(() => {
+    api.reset();
+    mockFetch.mockImplementation(api.fetch);
+  });
+  afterEach(() => mockFetch.mockReset());
+
+  it('opens a topic named after the Lead and posts the summary into it', async () => {
+    const lead = makeLead({ telegramId: 777, contactChannel: 'telegram' });
+    await expect(openLeadTopic(lead)).resolves.toEqual({
+      topicId: 1,
+      messageId: 1000,
+    });
+    expect(api.callsTo('createForumTopic')[0].payload).toEqual({
+      chat_id: '-1009876543210',
+      name: '#42 · Иван · Approved.rs',
+    });
+    expect(api.callsTo('sendMessage')[0].payload).toMatchObject({
+      chat_id: '-1009876543210',
+      message_thread_id: 1,
+      parse_mode: 'HTML',
+      text: expect.stringContaining(
+        'Контакт: <a href="https://t.me/ivan">@ivan</a> (Telegram)',
+      ),
+    });
+  });
+
+  it('caps the topic name at Telegram limit', () => {
+    expect(
+      formatter.topicName(makeLead({ name: 'Я'.repeat(300) })),
+    ).toHaveLength(128);
+  });
+
+  it('leaves a phone or an id contact as plain text in the summary', () => {
+    expect(
+      formatter.topicSummaryText(
+        makeLead({ contact: '+381601234567', contactChannel: null }),
+      ),
+    ).toContain('Контакт: +381601234567\n');
+  });
+
+  it('edits the summary in place, and does nothing without one', async () => {
+    await refreshLeadTopic(makeLead({ topicId: 3, topicMessageId: 55 }));
+    expect(api.callsTo('editMessageText')[0].payload).toMatchObject({
+      chat_id: '-1009876543210',
+      message_id: 55,
+      parse_mode: 'HTML',
+    });
+    await refreshLeadTopic(makeLead({ topicId: 3 }));
+    expect(api.callsTo('editMessageText')).toHaveLength(1);
+  });
+
+  it('links the card and the detail to the topic once there is one', () => {
+    const urls = (keyboard: { inline_keyboard: { url?: string }[][] }) =>
+      keyboard.inline_keyboard.flat().map((b) => b.url);
+    expect(
+      urls(formatter.deepLinkKeyboard(makeLead({ topicId: 9 }))),
+    ).toContain('https://t.me/c/9876543210/9');
+    expect(
+      urls(buildLeadDetail(makeLead({ topicId: 9 }), 'owner').reply_markup),
+    ).toContain('https://t.me/c/9876543210/9');
+    expect(urls(formatter.deepLinkKeyboard(makeLead()))).not.toContain(
+      'https://t.me/c/9876543210/9',
+    );
   });
 });

@@ -448,6 +448,14 @@ export function createLeadStore({
       }));
     },
 
+    setTopic(
+      id: number,
+      topicId: number,
+      topicMessageId: number,
+    ): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) => ({ ...l, topicId, topicMessageId }));
+    },
+
     setStatus(id: number, status: LeadStatus): Promise<StoredLead | undefined> {
       return updateOne(id, (l) => ({ ...l, ...statusPatch(status) }));
     },
