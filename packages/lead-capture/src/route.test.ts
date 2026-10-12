@@ -2341,6 +2341,16 @@ describe('the Lead topic', () => {
     expect(String(summaryEdits().at(-1)?.text)).toContain('Ищет: BMW X5');
   });
 
+  it('lists every picked service in the summary', async () => {
+    await POST(makeCtx(startUpdate('vehicle-sourcing_ru')));
+    await tap('request:ru:vehicle-sourcing');
+    await tap('pick:ru:vehicle-import');
+
+    expect(String(summaryEdits().at(-1)?.text)).toContain(
+      'vehicle-sourcing · vehicle-import',
+    );
+  });
+
   it('opens the topic when /start merges into a placeholder click, not before', async () => {
     await leadStore.insertOrMergeLead({
       brand: BRAND,
