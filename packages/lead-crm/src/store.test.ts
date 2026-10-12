@@ -285,7 +285,6 @@ describe('insertOrMergeLead', () => {
       locale: 'sr',
       kind: 'lead',
       telegramId: 77,
-      serviceChosenInBot: true,
     });
 
     expect(lead).toMatchObject({
@@ -293,7 +292,6 @@ describe('insertOrMergeLead', () => {
       contact: 'tg://user?id=77',
       kind: 'lead',
       service: 'detailing',
-      serviceChosenInBot: true,
     });
   });
 
@@ -855,22 +853,10 @@ describe('expireGhostLeads', () => {
       return lead;
     }
 
-    it('retires one with neither a phone nor a username', async () => {
-      const lead = await started();
-
-      const expired = await store.expireGhostLeads(NOW);
-
-      expect(expired.map((l) => l.id)).toEqual([lead.id]);
-      expect(await store.getLead(lead.id)).toMatchObject({ status: 'lost' });
-    });
-
     it.each([
-      ['a phone only', { contact: '+381601234567' }],
-      ['a username only', { contact: '@ivan' }],
-      [
-        'both a username and a phone',
-        { contact: '@ivan', comment: 'Телефон: +381601234567' },
-      ],
+      ['only the Telegram id', {}],
+      ['a phone', { contact: '+381601234567' }],
+      ['a username', { contact: '@ivan' }],
     ])('never retires one with %s', async (_, overrides) => {
       const lead = await started(overrides);
 
@@ -878,29 +864,7 @@ describe('expireGhostLeads', () => {
       expect(await store.getLead(lead.id)).toMatchObject({ status: 'open' });
     });
 
-    it('never retires one whose phone the Questionnaire took', async () => {
-      const lead = await started();
-      await store.updateCapture(lead.id, {
-        contact: '+381601234567',
-        capturePrompt: null,
-      });
-      await store.updateLeads((leads) =>
-        leads.map((l) =>
-          l.id === lead.id
-            ? {
-                ...l,
-                visitorActiveAt: new Date(
-                  NOW.getTime() - DAY_MS - 1,
-                ).toISOString(),
-              }
-            : l,
-        ),
-      );
-
-      expect(await store.expireGhostLeads(NOW)).toEqual([]);
-    });
-
-    it('takes the phone of a form sent within the window, and keeps it', async () => {
+    it('takes the phone of a form sent within the window', async () => {
       const lead = await store.insertLead({
         ...startData,
         name: 'Ivan Tg',
@@ -913,7 +877,6 @@ describe('expireGhostLeads', () => {
         contactChannel: 'phone',
         visitorId: 'v-start',
       });
-      await forceAge(lead.id, DAY_MS + 1);
 
       expect(merged).toBe(true);
       expect(after).toMatchObject({
@@ -923,8 +886,6 @@ describe('expireGhostLeads', () => {
         contactChannel: 'phone',
         telegramId: 42,
       });
-      expect(await store.expireGhostLeads(NOW)).toEqual([]);
-      expect(await store.getLead(lead.id)).toMatchObject({ status: 'open' });
     });
 
     it('never lets a form overwrite a username', async () => {
@@ -945,98 +906,6 @@ describe('expireGhostLeads', () => {
         contact: '@ivan',
         contactChannel: 'telegram',
       });
-    });
-
-    async function quietSince(id: number, ms = DAY_MS + 1): Promise<void> {
-      const at = new Date(NOW.getTime() - ms).toISOString();
-      await store.updateLeads((leads) =>
-        leads.map((l) =>
-          l.id === id ? { ...l, createdAt: at, visitorActiveAt: at } : l,
-        ),
-      );
-    }
-
-    it('never retires one with a Questionnaire answer', async () => {
-      const lead = await started();
-      await store.updateCapture(lead.id, {
-        note: 'Ищет: седан',
-        capturePrompt: null,
-      });
-      await quietSince(lead.id);
-
-      expect(await store.expireGhostLeads(NOW)).toEqual([]);
-      expect(await store.getLead(lead.id)).toMatchObject({ status: 'open' });
-    });
-
-    it('never retires one whose visitor wrote a message at /start', async () => {
-      await started({ comment: 'Сообщение: есть Golf?' });
-
-      expect(await store.expireGhostLeads(NOW)).toEqual([]);
-    });
-
-    it('never retires one whose service the visitor chose in the bot', async () => {
-      const lead = await started();
-      await store.updateCapture(lead.id, {
-        chosenService: 'detailing',
-        capturePrompt: null,
-      });
-      await quietSince(lead.id);
-
-      expect(await store.getLead(lead.id)).toMatchObject({
-        service: 'detailing',
-        services: ['detailing'],
-        serviceChosenInBot: true,
-      });
-      expect(await store.expireGhostLeads(NOW)).toEqual([]);
-    });
-
-    it('never retires one that opened on a service chosen in the bot', async () => {
-      await started({ service: 'detailing', serviceChosenInBot: true });
-
-      expect(await store.expireGhostLeads(NOW)).toEqual([]);
-    });
-
-    it('retires one whose service only came with the site tile or a referral', async () => {
-      const tile = await started({ service: 'detailing' });
-      const resumed = await started({ telegramId: 43, referredBy: 'approved' });
-      await store.updateCapture(resumed.id, {
-        service: 'detailing',
-        referredBy: 'approved',
-        capturePrompt: null,
-      });
-      await quietSince(resumed.id);
-
-      const expired = await store.expireGhostLeads(NOW);
-
-      expect(expired.map((l) => l.id)).toEqual([tile.id, resumed.id]);
-      expect(await store.getLead(resumed.id)).not.toHaveProperty(
-        'serviceChosenInBot',
-        true,
-      );
-    });
-
-    it('spares one whose visitor was active inside the window', async () => {
-      const lead = await started();
-      await store.updateCapture(lead.id, {
-        note: 'Ищу: седан',
-        capturePrompt: null,
-      });
-
-      expect(await store.expireGhostLeads(NOW)).toEqual([]);
-      expect(await store.getLead(lead.id)).toMatchObject({ status: 'open' });
-    });
-
-    it('spares one the owner worked', async () => {
-      const lead = await started();
-      await store.touchLead(lead.id);
-
-      expect(await store.expireGhostLeads(NOW)).toEqual([]);
-    });
-
-    it('spares one still inside the window', async () => {
-      await started({}, DAY_MS - 1000);
-
-      expect(await store.expireGhostLeads(NOW)).toEqual([]);
     });
   });
 });

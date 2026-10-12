@@ -2,6 +2,10 @@
 status: accepted
 ---
 
+## Amended 2026-10-12: a Capture bot Lead never retires
+
+The owner reverted both 2026-10-11 amendments below. A Capture bot Lead whose contact is `tg://user?id=…` is a real, reachable Lead — the owner can answer it through the reply-through-the-bot button — so the sweep never retires it, bare `/start` or not. `isGhostLead` is back to the placeholder Contact click alone, and `serviceChosenInBot` is gone with `isBareStart`. What stays from 2026-10-11: the retention window is measured from the last visitor activity (`visitorActiveAt ?? createdAt`), and a contact only ever moves up on merge — placeholder < `tg://user?id=…` < phone or username. The Questionnaire now asks a visitor with no username for a phone as its last step ([ADR-0030](0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)), so fewer such Leads reach the owner on the bare id at all.
+
 ## Amended 2026-10-11 (later): only a bare `/start` retires
 
 The owner narrowed the amendment below. A Capture bot Lead without a phone or a username retires only when it is a bare `/start`: no comment — which is where every Questionnaire answer and every message the visitor sends the bot lands — and no service the visitor chose in the bot (`serviceChosenInBot`, set by «Leave a request» on a service card and by the Questionnaire's service buttons). Any visitor answer keeps the Lead open for the owner, who can reach such a visitor through the reply-through-the-bot button. A service that only came with the site tile's `/start` payload, or a Partners referral, is not an answer. A phone or a username still never auto-closes. `isBareStart` in `packages/lead-crm/src/store.ts` is the definition. A no-username `/start` merged into the visitor's Telegram-tile click now also takes the click's place with the `tg://user?id=…` contact, so a contact ranks placeholder < bare id < phone or username on merge, and a merge only ever moves it up.

@@ -354,7 +354,6 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     { service: picked, locale, visitorId, referred }: StartFields<L, S>,
     comment: string | null,
     capturePrompt: CapturePrompt | null,
-    chosenInBot = false,
   ): Promise<void> {
     // TODO: merging before the click card saves its message id posts a second teaser.
     const { lead, before } = await store.insertOrMergeLead({
@@ -372,7 +371,6 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       locale,
       kind: 'lead',
       referredBy: referred ? 'approved' : null,
-      serviceChosenInBot: chosenInBot && picked !== '' ? true : undefined,
       capturePrompt,
     });
     await (before ? refresh(before, lead) : refresh(lead, undefined));
@@ -414,7 +412,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
         ? undefined
         : answerNote(prompt.step, skipLabels, keepsHandle, text, phone),
       contact: takesPhone && !keepsHandle ? phone : undefined,
-      chosenService: picked,
+      service: picked,
       capturePrompt: next ? { chatId: prompt.chatId, step: next } : null,
     });
     await refresh(lead, updated);
@@ -493,12 +491,12 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       const contact = await contactOf(sender);
       const step = firstStep(contact, picked);
       const fields = { service: picked, locale, visitorId: null };
-      await newLead(sender, contact, fields, null, { chatId, step }, true);
+      await newLead(sender, contact, fields, null, { chatId, step });
       return ask(chatId, step, contact, locale);
     }
     const step = firstStep(open.contact, picked || open.service);
     const updated = await store.updateCapture(open.id, {
-      chosenService: picked,
+      service: picked,
       locale,
       capturePrompt: { chatId, step },
     });

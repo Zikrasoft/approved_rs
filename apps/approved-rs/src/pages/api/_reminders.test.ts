@@ -395,12 +395,8 @@ describe('GET /api/reminders', () => {
     error.mockRestore();
   });
 
-  it('retires only a bare /start: no contact, no answer, no service chosen in the bot', async () => {
-    const start = (
-      id: number,
-      contact: string,
-      extra: Partial<StoredLead> = {},
-    ) =>
+  it('retires a placeholder click and never a capture-bot Lead, even a bare /start', async () => {
+    const start = (id: number, contact: string) =>
       ghost({
         id,
         contact,
@@ -408,26 +404,20 @@ describe('GET /api/reminders', () => {
         contactChannel: 'telegram',
         telegramId: 40 + id,
         createdAt: '2026-10-01T00:00:00.000Z',
-        ...extra,
       });
     leadsStorage().seed([
-      start(7, 'tg://user?id=47', { service: 'vehicle-import' }),
+      ghost({ id: 6, createdAt: '2026-10-01T00:00:00.000Z' }),
+      start(7, 'tg://user?id=47'),
       start(8, '+381601234567'),
       start(10, '@ivan'),
-      start(11, 'tg://user?id=51', { comment: 'Ищет: Golf 7' }),
-      start(12, 'tg://user?id=52', {
-        service: 'vehicle-import',
-        serviceChosenInBot: true,
-      }),
     ]);
 
     const res = await GET(makeCtx());
 
     expect(await res.json()).toEqual({ expiredGhosts: 1, digestSent: true });
-    expect((await stored(7)).status).toBe('lost');
-    for (const id of [8, 10, 11, 12])
-      expect((await stored(id)).status).toBe('open');
-    expect(digestIds()).toEqual([8, 10, 11, 12]);
+    expect((await stored(6)).status).toBe('lost');
+    for (const id of [7, 8, 10]) expect((await stored(id)).status).toBe('open');
+    expect(digestIds()).toEqual([7, 8, 10]);
   });
 
   it('posts no monthly summary on the 1st', async () => {

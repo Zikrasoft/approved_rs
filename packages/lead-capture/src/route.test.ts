@@ -707,7 +707,6 @@ describe('leaving a request from a service card', () => {
     expect(stored()[0]).toMatchObject({
       service: 'vehicle-import',
       services: ['vehicle-import'],
-      serviceChosenInBot: true,
       capturePrompt: { chatId: 42, step: 'looking_for' },
     });
     for (const id of ADMIN_IDS)
@@ -722,16 +721,6 @@ describe('leaving a request from a service card', () => {
       ]);
     expect(cardEdits()).toHaveLength(1);
     expect(lastSent()).toEqual([42, 'LOOKING_FOR']);
-  });
-
-  it('does not count a service that came with the site tile as chosen in the bot', async () => {
-    await POST(makeCtx(startUpdate('vehicle-import_ru')));
-    await POST(makeCtx(startUpdate('vehicle-sourcing_ru')));
-    await tap('request:ru');
-
-    expect(stored()).toHaveLength(1);
-    expect(stored()[0].service).toBe('vehicle-sourcing');
-    expect(stored()[0]).not.toHaveProperty('serviceChosenInBot', true);
   });
 
   it('asks for the phone first when nothing else reaches the visitor', async () => {
@@ -752,7 +741,6 @@ describe('leaving a request from a service card', () => {
         brand: BRAND,
         contact: '@ivan',
         service: 'vehicle-sourcing',
-        serviceChosenInBot: true,
         locale: 'en',
         capturePrompt: { chatId: 42, step: 'looking_for' },
       }),
@@ -2029,7 +2017,6 @@ describe("Details' Questionnaire: the car, the service as buttons, then the phon
       comment: 'Машина: Audi A6 2019',
       service: 'vehicle-import',
       services: ['vehicle-import'],
-      serviceChosenInBot: true,
       capturePrompt: { chatId: 42, step: 'phone' },
     });
     expect(adminNotes()).toEqual([

@@ -37,7 +37,6 @@ export interface CaptureUpdate {
   note?: string;
   contact?: string;
   service?: string;
-  chosenService?: string;
   locale?: string;
   referredBy?: Referrer;
   capturePrompt: CapturePrompt | null;
@@ -118,25 +117,10 @@ function contactRank(contact: string): number {
   return isTelegramIdContact(contact) ? 1 : 2;
 }
 
-function isBareStart(lead: StoredLead): boolean {
-  return (
-    lead.telegramId != null &&
-    isTelegramIdContact(lead.contact) &&
-    !lead.comment &&
-    !lead.serviceChosenInBot
-  );
-}
-
-function leftNothingToAnswer(lead: StoredLead): boolean {
-  return (
-    (lead.kind === 'call_click' && isPlaceholderContact(lead.contact)) ||
-    isBareStart(lead)
-  );
-}
-
 function isGhostLead(lead: StoredLead, now: Date): boolean {
   return (
-    leftNothingToAnswer(lead) &&
+    lead.kind === 'call_click' &&
+    isPlaceholderContact(lead.contact) &&
     untouched(lead) &&
     now.getTime() - Date.parse(lead.visitorActiveAt ?? lead.createdAt) >=
       GHOST_LEAD_RETENTION_MS
@@ -426,8 +410,6 @@ export function createLeadStore({
                   ? data.services
                   : existing.services,
                 kind: data.kind ?? existing.kind,
-                serviceChosenInBot:
-                  data.serviceChosenInBot ?? existing.serviceChosenInBot,
               }
             : {}),
           source_url: existing.source_url ?? data.source_url,
@@ -526,21 +508,16 @@ export function createLeadStore({
         note,
         contact,
         service,
-        chosenService,
         locale,
         referredBy,
         capturePrompt,
       }: CaptureUpdate,
     ): Promise<StoredLead | undefined> {
-      const nextService = chosenService || service;
       return updateOne(id, (l) => ({
         ...l,
         comment: note ? appendNote(l.comment, note) : l.comment,
         contact: contact ?? l.contact,
-        ...(nextService
-          ? { service: nextService, services: [nextService] }
-          : {}),
-        ...(chosenService ? { serviceChosenInBot: true } : {}),
+        ...(service ? { service, services: [service] } : {}),
         locale: locale ?? l.locale,
         referredBy: referredBy ?? l.referredBy,
         capturePrompt,

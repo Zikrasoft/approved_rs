@@ -67,7 +67,6 @@ const baseStoredLeadSchema = z.object({
   capturePrompt: capturePromptSchema.nullable().default(null).catch(null),
   telegramId: z.number().int().nullable().default(null).catch(null),
   referredBy: z.enum(REFERRERS).nullable().default(null).catch(null),
-  serviceChosenInBot: z.boolean().optional(),
   archived: z.boolean().optional(),
   remindAt: z.string().nullable().default(null),
 });
@@ -112,14 +111,7 @@ export type LeadInput = Pick<
   | 'kind'
 > &
   Partial<
-    Pick<
-      StoredLead,
-      | 'services'
-      | 'capturePrompt'
-      | 'telegramId'
-      | 'referredBy'
-      | 'serviceChosenInBot'
-    >
+    Pick<StoredLead, 'services' | 'capturePrompt' | 'telegramId' | 'referredBy'>
   >;
 
 export type LeadSubmission = Omit<LeadInput, 'brand'>;
