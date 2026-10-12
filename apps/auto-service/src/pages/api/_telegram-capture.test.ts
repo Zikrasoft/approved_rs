@@ -279,3 +279,31 @@ describe('the language switch', () => {
     expect(offered).toEqual(['ru', 'sr', 'en']);
   });
 });
+
+describe('a photo from the visitor', () => {
+  it('is copied by the capture bot into the visitor topic', async () => {
+    const from = { id: 63, first_name: 'Vera' };
+
+    await visitorUpdate({
+      message: {
+        message_id: 7,
+        chat: { id: from.id, type: 'private' },
+        from,
+        photo: [{ file_id: 'p', file_unique_id: 'u', width: 1, height: 1 }],
+      },
+    });
+
+    const { topicId } = visitorLead(from) as unknown as { topicId: number };
+    expect(topicId).toEqual(expect.any(Number));
+    expect(
+      api
+        .callsTo('copyMessage', '1002:test-capture-bot-token')
+        .map((call) => call.payload),
+    ).toContainEqual({
+      chat_id: '-1009876543210',
+      from_chat_id: from.id,
+      message_id: 7,
+      message_thread_id: topicId,
+    });
+  });
+});

@@ -14,7 +14,6 @@ import {
   telegramIdContact,
   type CapturePrompt,
   type CaptureStep,
-  type EditField,
   type LeadStore,
   type StoredLead,
 } from '@podbor/lead-crm';
@@ -93,8 +92,6 @@ const MESSAGE_NOTE = 'Сообщение';
 
 const budgetLine = z.string();
 
-const VISITOR_FIELDS: EditField[] = ['contact', 'comment', 'service'];
-
 interface PhoneKeyboardExtra {
   reply_markup: {
     keyboard: { text: string; request_contact?: true }[][];
@@ -123,6 +120,7 @@ export type CaptureStore = Pick<
   | 'insertOrMergeLead'
   | 'findByCapturePrompt'
   | 'findOpenLeadByTelegramId'
+  | 'findLatestLeadByTelegramId'
   | 'findPhoneByTelegramId'
   | 'updateCapture'
 >;
@@ -135,12 +133,8 @@ export interface CaptureWebhookRouteOptions<
   store: CaptureStore;
   ensureLeadTopic: (lead: StoredLead) => Promise<StoredLead>;
   ensureLeadCard: (lead: StoredLead) => Promise<void>;
-  sendVisitorChangeToAdmin: (
-    lead: StoredLead,
-    field: EditField,
-    before: string | null | undefined,
-  ) => Promise<void>;
   bot: Bot;
+  groupId: string;
   brand: string;
   isLocale: (value: string) => value is L;
   primaryLocale: L;
@@ -184,8 +178,8 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   store,
   ensureLeadTopic,
   ensureLeadCard,
-  sendVisitorChangeToAdmin,
   bot,
+  groupId,
   brand,
   isLocale,
   primaryLocale,
@@ -281,9 +275,27 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
         leadId: lead.id,
       });
     });
-    if (!updated) return;
-    for (const field of VISITOR_FIELDS)
-      await sendVisitorChangeToAdmin(updated, field, lead[field]);
+  }
+
+  async function postToTopic(
+    sender: CaptureSender,
+    chatId: number,
+    messageId: number,
+  ): Promise<void> {
+    const lead = await store.findLatestLeadByTelegramId(sender.id, brand);
+    if (!lead) return;
+    try {
+      const topical = lead.topicId == null ? await ensureLeadTopic(lead) : lead;
+      if (topical.topicId == null) return;
+      await bot.api.copyMessage(groupId, chatId, messageId, {
+        message_thread_id: topical.topicId,
+      });
+    } catch (error) {
+      console.error('[capture] could not copy the message to the topic', {
+        error,
+        leadId: lead.id,
+      });
+    }
   }
 
   function startFields(
@@ -582,17 +594,11 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   async function recordFreeMessage(
     chatId: number,
     sender: CaptureSender,
-    text: string,
+    comment: string | null,
   ): Promise<void> {
-    const open = await freshOpenLead(sender);
-    if (!open)
-      return start(chatId, sender, undefined, `${MESSAGE_NOTE}: ${text}`);
-    const updated = await store.updateCapture(open.id, {
-      note: `${MESSAGE_NOTE}: ${text}`,
-      capturePrompt: open.capturePrompt,
-    });
-    await publishLeadChange(open, updated);
-    const locale = localeOf(open);
+    const lead = await store.findLatestLeadByTelegramId(sender.id, brand);
+    if (!lead) return start(chatId, sender, undefined, comment);
+    const locale = localeOf(lead);
     await send(chatId, copy(locale).received, withMainMenu(locale));
   }
 
@@ -626,9 +632,20 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     return start(chatId, sender, undefined, null, phone);
   }
 
-  async function handleForeignContact(chatId: number): Promise<void> {
+  async function handleOtherMessage(
+    chatId: number,
+    sender: CaptureSender,
+  ): Promise<void> {
     const running = await runningQuestionnaire(chatId);
-    if (running) await ask(chatId, running.prompt.step, localeOf(running.lead));
+    if (running)
+      return ask(chatId, running.prompt.step, localeOf(running.lead));
+    await recordFreeMessage(chatId, sender, null);
+  }
+
+  function isCommand(text: string): boolean {
+    return [START_COMMAND, MENU_PATTERN, LANG_PATTERN].some((pattern) =>
+      pattern.test(text),
+    );
   }
 
   async function handleText(
@@ -644,7 +661,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
 
     const running = await runningQuestionnaire(chatId);
     if (running) return typedAnswer(running.lead, running.prompt, text);
-    return recordFreeMessage(chatId, sender, text);
+    return recordFreeMessage(chatId, sender, `${MESSAGE_NOTE}: ${text}`);
   }
 
   bot.chatType('private').on('message', async (ctx) => {
@@ -652,11 +669,14 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     if (!message.success) return;
     const trimmed = message.data.text?.trim();
     const text = trimmed ? trimmed : undefined;
-    const { chat, from, contact } = message.data;
+    const { chat, from, contact, message_id } = message.data;
     if (contact?.user_id === from.id)
       await handleOwnContact(chat.id, from, sharedPhone(contact.phone_number));
-    else if (contact) await handleForeignContact(chat.id);
-    else if (text !== undefined) await handleText(chat.id, from, text);
+    else if (contact || text === undefined)
+      await handleOtherMessage(chat.id, from);
+    else await handleText(chat.id, from, text);
+    if (text === undefined || !isCommand(text))
+      await postToTopic(from, chat.id, message_id);
   });
 
   bot.chatType('private').on('callback_query:data', async (ctx) => {

@@ -75,5 +75,6 @@ export function createBrandBot({
     formatter,
     ownerIds,
     adminIds,
+    groupId: env.TELEGRAM_GROUP_ID,
   };
 }

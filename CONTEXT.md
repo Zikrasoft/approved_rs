@@ -64,17 +64,21 @@ rate are still the receiving bot's.
 
 **Capture bot** — one per brand, and the whole of that brand inside Telegram:
 a visitor can read its services and answer its Questionnaire without opening
-the site. It writes a Lead on every `/start`, and every change it makes to
-that Lead reaches the admin the same way an owner's edit does. It has no
-owner surface; the owner answers from their own account, or through it
-only for a visitor who has no username.
+the site. It writes a Lead on every `/start`, and copies everything else the
+visitor sends — answers, free text, a shared phone, photos, voice, files —
+into the visitor's Topic as it arrives; a visitor with no Lead yet gets one
+first, and a Lead from before Topics gets its Topic then. It has no owner
+surface; the owner answers from their own account, or through it only for a
+visitor who has no username.
 
 **Questionnaire** — the short set of questions a Capture bot asks to turn a
 Lead into a request the owner can answer. Each brand has its own. A visitor
 with no Telegram username whose Lead has no phone yet is asked for one last,
 with no skip — shared from the keyboard button or typed; a visitor with a
 username is never asked, the username is the contact. Leaving it for the menu
-ends it, and the answers given so far stay on the Lead.
+ends it, and the answers given so far stay on the Lead. Once it is done the
+Lead stops changing on what the visitor writes: messages go to the Topic only.
+A shared phone is the one exception — it still becomes the contact.
 _Avoid_: wizard, form (the site's form is a different thing)
 
 **Topic** — the forum topic in the CRM group that holds one Lead's

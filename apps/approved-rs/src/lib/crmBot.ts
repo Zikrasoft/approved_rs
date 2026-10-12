@@ -13,6 +13,7 @@ export const {
   formatter,
   ownerIds,
   adminIds,
+  groupId,
 } = createBrandBot({
   store: leadStore,
   brand: BRAND,

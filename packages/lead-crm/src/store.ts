@@ -542,6 +542,16 @@ export function createLeadStore({
       );
     },
 
+    async findLatestLeadByTelegramId(
+      telegramId: number,
+      brand: string,
+    ): Promise<StoredLead | undefined> {
+      const leads = (await readLeads())
+        .filter((l) => l.brand === brand && l.telegramId === telegramId)
+        .sort((a, b) => a.id - b.id);
+      return leads.filter((l) => !isClosed(l)).at(-1) ?? leads.at(-1);
+    },
+
     async findPhoneByTelegramId(
       telegramId: number,
       brand: string,
