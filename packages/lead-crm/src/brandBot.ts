@@ -35,14 +35,12 @@ export interface BrandBotOptions {
   store: LeadStore;
   brand: string;
   serviceLabel: (slug: string) => string;
-  replyRelayBrands?: readonly string[];
 }
 
 export function createBrandBot({
   store,
   brand,
   serviceLabel,
-  replyRelayBrands,
 }: BrandBotOptions) {
   const env = readBotEnv();
   const ownerIds = env.TELEGRAM_OWNER_ID;
@@ -55,7 +53,6 @@ export function createBrandBot({
     serviceLabel,
     botUsername: env.TELEGRAM_BOT_USERNAME,
     groupId: env.TELEGRAM_GROUP_ID,
-    replyRelayBrands,
   });
   const notifier = createNotifier({
     client,
@@ -73,6 +70,7 @@ export function createBrandBot({
     notifyLead: createNotifyLead({ store, notifier, brand }),
     client,
     formatter,
+    groupId: env.TELEGRAM_GROUP_ID,
     ownerIds,
     adminIds,
   };

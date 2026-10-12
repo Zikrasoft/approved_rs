@@ -290,11 +290,12 @@ describe('createBrandBot', () => {
     },
   );
 
-  it('reads the owner and admin ids', () => {
+  it('reads the group, owner and admin ids', () => {
     for (const [name, value] of Object.entries(ENV)) vi.stubEnv(name, value);
 
-    const { ownerIds, adminIds } = bot().bot;
+    const { groupId, ownerIds, adminIds } = bot().bot;
 
+    expect(groupId).toBe(ENV.TELEGRAM_GROUP_ID);
     expect(ownerIds).toEqual([1, 2]);
     expect(adminIds).toEqual([3]);
   });

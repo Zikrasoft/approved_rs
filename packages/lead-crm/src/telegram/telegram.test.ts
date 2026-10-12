@@ -33,7 +33,6 @@ const formatter = createFormatter({
   serviceLabel: (slug) => SERVICE_LABELS[slug] ?? slug,
   botUsername: 'approved_test_bot',
   groupId: '-1009876543210',
-  replyRelayBrands: ['Approved.rs', 'Details'],
 });
 const notifier = createNotifier({
   client,
@@ -1055,35 +1054,14 @@ describe('buildLeadDetail', () => {
     ]);
   });
 
-  it('offers a reply through the bot only when the contact is a Telegram id link', () => {
-    const buttons = (contact: string) =>
-      buildLeadDetail(makeLead({ id: 7, contact }), 'owner')
-        .reply_markup.inline_keyboard.flat()
-        .map((b) => b.callback_data);
-    expect(buttons('tg://user?id=123456')).toContain('reply:7');
-    expect(buttons('@ivan')).not.toContain('reply:7');
-    expect(buttons('+381601234567')).not.toContain('reply:7');
-  });
-
-  it('offers a reply only for the brands whose capture bot this app relays through', () => {
-    const lead = makeLead({ id: 7, contact: 'tg://user?id=123456' });
-    const buttons = (detail: ReturnType<typeof buildLeadDetail>) =>
-      detail.reply_markup.inline_keyboard.flat().map((b) => b.callback_data);
-    expect(buttons(buildLeadDetail(lead, 'owner'))).toContain('reply:7');
-    expect(
-      buttons(buildLeadDetail({ ...lead, brand: 'Details' }, 'owner')),
-    ).toContain('reply:7');
-    expect(
-      buttons(buildLeadDetail({ ...lead, brand: 'CarLab' }, 'owner')),
-    ).not.toContain('reply:7');
-    const bare = createFormatter({
-      serviceLabel: (slug) => slug,
-      botUsername: 'carlab_test_bot',
-      groupId: '-1009876543210',
-    });
-    expect(buttons(bare.buildLeadDetail(lead, 'owner'))).not.toContain(
-      'reply:7',
-    );
+  it('offers no one-shot reply through the bot, even for a Telegram id contact', () => {
+    const buttons = buildLeadDetail(
+      makeLead({ id: 7, contact: 'tg://user?id=123456' }),
+      'owner',
+    )
+      .reply_markup.inline_keyboard.flat()
+      .map((b) => b.callback_data);
+    expect(buttons).not.toContain('reply:7');
   });
 
   it('won lead: no money and no per-Lead pay buttons for either role', () => {

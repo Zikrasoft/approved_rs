@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CARLAB, DETAILS } from '@podbor/brands';
-import {
-  captureClient,
-  captureClientFor,
-  REPLY_RELAY_BRANDS,
-  siblingTokens,
-} from './captureBot';
+import { captureClient, captureClientFor, siblingTokens } from './captureBot';
 
 describe('siblingTokens', () => {
   it('holds no sibling without its token', () => {
@@ -33,7 +28,6 @@ describe('siblingTokens', () => {
 
 describe('captureClientFor', () => {
   it('relays through approved.rs and nobody else under the test env', () => {
-    expect(REPLY_RELAY_BRANDS).toEqual(['Approved.rs']);
     expect(captureClientFor('Approved.rs')).toBe(captureClient);
     expect(captureClientFor('CarLab')).toBeUndefined();
     expect(captureClientFor('Unknown')).toBeUndefined();

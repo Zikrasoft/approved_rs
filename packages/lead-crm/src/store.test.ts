@@ -683,6 +683,39 @@ describe('resumeLead', () => {
   });
 });
 
+describe('recordOwnerReply', () => {
+  it('counts as owner activity and moves only an open lead to negotiations', async () => {
+    const open = await store.insertLead(baseData);
+    const done = await store.insertLead(baseData);
+    await forceComplete(done.id);
+    const at = new Date('2026-10-12T10:00:00.000Z');
+
+    expect(await store.recordOwnerReply(open.id, at)).toMatchObject({
+      status: 'negotiations',
+      statusChangedAt: at.toISOString(),
+      lastActivityAt: at.toISOString(),
+    });
+    expect(await store.recordOwnerReply(done.id, at)).toMatchObject({
+      status: 'won',
+      lastActivityAt: at.toISOString(),
+    });
+    expect((await store.recordOwnerReply(open.id))?.statusChangedAt).toBe(
+      at.toISOString(),
+    );
+  });
+});
+
+describe('findByTopic', () => {
+  it('finds the lead that owns a topic', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.insertLead(baseData);
+    await store.setTopic(lead.id, 42, 43);
+
+    expect((await store.findByTopic(42))?.id).toBe(lead.id);
+    expect(await store.findByTopic(7)).toBeUndefined();
+  });
+});
+
 describe('postponeLead', () => {
   it('sets status/remindAt/comment on the given lead directly, no prompt correlation needed', async () => {
     const lead = await store.insertLead(baseData);

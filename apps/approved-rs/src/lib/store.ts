@@ -23,6 +23,8 @@ export const {
   findByCard,
   addNote,
   resolvePendingPrompt,
+  findByTopic,
+  recordOwnerReply,
   resumeLead,
   postponeLead,
   deleteLead,
