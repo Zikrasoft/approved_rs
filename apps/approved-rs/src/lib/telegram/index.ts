@@ -35,7 +35,7 @@ export const {
   sendOperationNotice,
   sendStatusChangeToAdmin,
   sendFieldChange,
-  sendContactNote,
+  sendNoteNotice,
   renameLeadTopic,
   editLeadDetailMessage,
   unpinLeadCard,

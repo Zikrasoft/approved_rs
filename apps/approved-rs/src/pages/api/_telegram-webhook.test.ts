@@ -451,23 +451,18 @@ describe('POST /api/telegram-webhook', () => {
         status: 'won',
         pendingPrompt: null,
       });
-      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toEqual([
-        expect.objectContaining({
-          reply_markup: expect.objectContaining({
-            inline_keyboard: expect.arrayContaining([
-              [
-                { text: '✅ Сделка', callback_data: 'won:5' },
-                { text: '❌ Отказ', callback_data: 'lost:5' },
-              ],
-              [
-                { text: '🗣 Переговоры', callback_data: 'talk:5' },
-                { text: '🔵 В работе', callback_data: 'work:5' },
-                { text: '⏰ Отложить', callback_data: 'postpone:5' },
-              ],
-            ]),
-          }),
-        }),
-      ]);
+      const [card] = edits(CARD_CHAT_ID, CARD_MESSAGE_ID);
+      expect(card?.reply_markup).toMatchObject({
+        inline_keyboard: expect.arrayContaining([
+          [
+            { text: '✅ Сделка', callback_data: 'won:5' },
+            { text: '❌ Отказ', callback_data: 'lost:5' },
+          ],
+        ]),
+      });
+      expect(JSON.stringify(card?.reply_markup)).not.toMatch(
+        /talk:5|work:5|postpone:5/,
+      );
       expect(crm('unpinChatMessage')).toEqual([
         { chat_id: CARD_CHAT_ID, message_id: CARD_MESSAGE_ID },
       ]);
@@ -588,6 +583,45 @@ describe('POST /api/telegram-webhook', () => {
 
       await tap('menu:open', OWNER_ID);
       expect(JSON.stringify(sentTo(DM_CHAT_ID))).toContain('open:5');
+    });
+
+    it.each([
+      ['talk:5', 'won'],
+      ['work:5', 'lost'],
+      ['st:5:negotiations', 'won'],
+      ['st:5:in_progress', 'lost'],
+    ] as const)(
+      '%s from a stale button never reopens a %s Lead',
+      async (data, status) => {
+        seed(makeLead({ status, statusChangedAt: PAID_AT }));
+        await tap(data, OWNER_ID, { id: 'cb-stale', ...onCard });
+
+        expect(await stored()).toMatchObject({
+          status,
+          statusChangedAt: PAID_AT,
+        });
+        expect(crm('editMessageText')).toEqual([]);
+        expect(answers()).toEqual([
+          { callback_query_id: 'cb-stale', text: LEAD_ACTION_COPY.closed },
+        ]);
+      },
+    );
+
+    it('🗣 on a postponed Lead moves it and drops the reminder', async () => {
+      seed(
+        makeLead({
+          status: 'postponed',
+          postponedFrom: 'in_progress',
+          remindAt: '2026-10-20',
+        }),
+      );
+      await tap('talk:5', OWNER_ID, onCard);
+
+      expect(await stored()).toMatchObject({
+        status: 'negotiations',
+        postponedFrom: null,
+        remindAt: null,
+      });
     });
 
     it('re-posts a won lead whose card is gone without pinning it', async () => {
@@ -992,7 +1026,7 @@ describe('POST /api/telegram-webhook', () => {
         vi.useRealTimers();
       }
       const [text] = textsTo(ADMIN_ID);
-      expect(text).toContain('🆕 Новые: 1');
+      expect(text).toContain('🆕 Новая: 1');
       expect(text).toContain('<b>💶 Мне должны: 200 €</b>');
       expect(text).toContain('За месяц: +0 € · −100 €');
       expect(text).toContain('За всё время: +300 € · −100 €');
@@ -1913,13 +1947,25 @@ describe('POST /api/telegram-webhook', () => {
         }),
       );
       expect(notices(OWNER_ID)).toEqual([]);
+      expect(textsTo(OWNER_ID)).toEqual([
+        '📝 Заявка #5 Иван · Админ: Перезвонить в пятницу',
+      ]);
+      expect(textsTo(ADMIN_ID)).not.toContainEqual(
+        expect.stringContaining('📝 Заявка'),
+      );
     });
 
-    it('keeps the note prompt open on an empty answer', async () => {
+    it('asks again for the note on an empty answer', async () => {
       await tap('note:5', OWNER_ID);
       await message('  ', OWNER_ID, { replyTo: PROMPT_ID });
-      expect((await stored()).pendingPrompt?.kind).toBe('note');
+      expect(await stored()).toMatchObject({
+        pendingPrompt: { chatId: OWNER_ID, kind: 'note' },
+      });
       expect((await stored()).comment).toBeUndefined();
+      expect(forceReplies().at(-1)).toEqual(
+        expect.objectContaining({ text: reAskEditText('note') }),
+      );
+      expect(textsTo(ADMIN_ID)).toEqual([]);
     });
 
     it.each(['edit:404:name', 'note:404'])(

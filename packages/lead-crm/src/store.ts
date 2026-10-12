@@ -40,9 +40,10 @@ export interface CaptureUpdate {
   questionnaireDone?: boolean;
   locale?: string;
   referredBy?: Referrer;
-  managerHandoff?: string;
   capturePrompt: CapturePrompt | null;
 }
+
+export type ClaimedMetaLead = StoredLead & { metaLeadSentAt: string };
 
 export interface MergeOutcome {
   lead: StoredLead;
@@ -209,6 +210,10 @@ export function statusPatch(
   at: Date = new Date(),
 ): Pick<StoredLead, 'status' | 'statusChangedAt'> {
   return { status: to, statusChangedAt: at.toISOString() };
+}
+
+export function canMoveTo(lead: StoredLead, to: LeadStatus): boolean {
+  return isClosed({ status: to }) || !isClosed(lead);
 }
 
 export function resumePatch(lead: StoredLead): Partial<StoredLead> {
@@ -513,7 +518,14 @@ export function createLeadStore({
     },
 
     setStatus(id: number, status: LeadStatus): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({ ...l, ...statusPatch(status) }));
+      return updateMatching(
+        (l) => l.id === id && canMoveTo(l, status),
+        (l) => ({
+          ...l,
+          ...(l.status === 'postponed' ? resumePatch(l) : {}),
+          ...statusPatch(status),
+        }),
+      );
     },
 
     recordOwnerReply(
@@ -588,7 +600,6 @@ export function createLeadStore({
         questionnaireDone,
         locale,
         referredBy,
-        managerHandoff,
         capturePrompt,
       }: CaptureUpdate,
     ): Promise<StoredLead | undefined> {
@@ -601,20 +612,29 @@ export function createLeadStore({
         questionnaireDone: questionnaireDone ?? l.questionnaireDone,
         locale: locale ?? l.locale,
         referredBy: referredBy ?? l.referredBy,
-        managerHandoff:
-          l.managerHandoff ??
-          (managerHandoff ? { at: now, handle: managerHandoff } : null),
         capturePrompt,
         visitorActiveAt: now,
       }));
     },
 
-    claimMetaLead(id: number): Promise<StoredLead | undefined> {
+    markManagerHandoff(
+      id: number,
+      handle: string,
+    ): Promise<StoredLead | undefined> {
       const at = new Date().toISOString();
       return updateMatching(
+        (l) => l.id === id && l.managerHandoff == null,
+        (l) => ({ ...l, managerHandoff: { at, handle }, visitorActiveAt: at }),
+      );
+    },
+
+    async claimMetaLead(id: number): Promise<ClaimedMetaLead | undefined> {
+      const at = new Date().toISOString();
+      const claimed = await updateMatching(
         (l) => l.id === id && l.metaIds != null && l.metaLeadSentAt == null,
         (l) => ({ ...l, metaLeadSentAt: at }),
       );
+      return claimed && { ...claimed, metaLeadSentAt: at };
     },
 
     async findOpenLeadByTelegramId(

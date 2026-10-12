@@ -92,6 +92,7 @@ export {
   AD_SOURCE_FIELD,
   contactChannelSchema,
   HONEYPOT_FIELD,
+  MAX_FIELD_LENGTH,
   META_IDS_FIELD,
   SERVICE_FIELD,
 } from './form.ts';

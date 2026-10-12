@@ -1,12 +1,12 @@
 import { BUSINESS_TIME_ZONE } from '../businessTime.ts';
-import type { LeadStatus, StoredLead } from '../schema.ts';
+import { LEAD_STATUSES, type LeadStatus, type StoredLead } from '../schema.ts';
 import {
   balanceOf,
   operationSums,
   type FlowSums,
   type LedgerOperation,
 } from '../ledgerStore.ts';
-import { escapeHtml, formatMoney } from './markup.ts';
+import { escapeHtml, formatMoney, statusMark } from './markup.ts';
 import { balanceLine, OPERATION_AUTHORS, signedMoney } from './ledger.ts';
 
 const STATS_OPERATION_ROWS = 20;
@@ -70,7 +70,7 @@ export function buildStats(
     '<b>📊 Статистика</b>',
     '',
     `Всего заявок: ${leads.length}`,
-    `🆕 Новые: ${count('new')}   🗣 Переговоры: ${count('negotiations')}   🔵 В работе: ${count('in_progress')}   ✅ Завершено: ${count('won')}   ❌ Отказ: ${count('lost')}   ⏸ Отложено: ${count('postponed')}`,
+    LEAD_STATUSES.map((s) => `${statusMark(s)}: ${count(s)}`).join('   '),
     ...brandLines,
     '',
     balanceLine('admin', balanceOf(operations)),

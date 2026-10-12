@@ -1,7 +1,7 @@
 import { channelLabel } from '../channelLabels.ts';
 import { isHandleContact } from '../contactShape.ts';
 import { LEADS_PATH } from '../quarantine.ts';
-import { isInWork, type StoredLead } from '../schema.ts';
+import { isClosed, isInWork, type StoredLead } from '../schema.ts';
 import { isPlaceholderContact, type Digest } from '../store.ts';
 import { businessDay } from '../businessTime.ts';
 import {
@@ -122,9 +122,11 @@ export const EDIT_COPY = {
   noteAck: 'Жду заметку',
 } as const;
 
-export function reAskEditText(field: EditField): string {
+export function reAskEditText(field: EditField | 'note'): string {
   const refusal = field === 'contact' ? EDIT_COPY.badContact : EDIT_COPY.empty;
-  return `${refusal}\n\n${EDIT_COPY.prompt(field)}`;
+  const prompt =
+    field === 'note' ? EDIT_COPY.notePrompt : EDIT_COPY.prompt(field);
+  return `${refusal}\n\n${prompt}`;
 }
 
 export function noteLine(text: string, by: Role, at = new Date()): string {
@@ -135,12 +137,12 @@ export function extraContactNote(contact: string): string {
   return `Доп. контакт: ${contact}`;
 }
 
-export function contactNoteText(
+export function noteNoticeText(
   lead: StoredLead,
-  contact: string,
+  note: string,
   by: Role,
 ): string {
-  return `📝 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))} · ${OPERATION_AUTHORS[by]}: ${escapeHtml(extraContactNote(contact))}`;
+  return `📝 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))} · ${OPERATION_AUTHORS[by]}: ${escapeHtml(note)}`;
 }
 
 const FIELD_PREVIEW_LIMIT = 120;
@@ -198,6 +200,7 @@ export const LEAD_ACTION_COPY = {
     '⚠️ Нужна дата в формате ДД.ММ.ГГГГ, не в прошлом. Попробуйте ещё раз.',
   notFound: 'Заявка не найдена.',
   notPostponable: '⚠️ Заявку уже нельзя отложить: она больше не открыта.',
+  closed: '⚠️ Заявка уже закрыта.',
   deleted: '🗑 Заявка удалена.',
   deleteAck: 'Удалено',
   denied: '⛔ Доступ запрещён.',
@@ -243,10 +246,15 @@ const AD_HASHTAG = '#реклама';
 
 function adLine({ adSource }: StoredLead): string {
   if (!adSource) return '';
-  const source =
-    AD_SOURCE_LABELS[adSource.source.toLowerCase()] ?? adSource.source;
-  const parts = [source, adSource.campaign, adSource.content].filter(Boolean);
-  return `\n📣 Реклама: ${escapeHtml(parts.join(' · '))}`;
+  const { source, campaign, content } = adSource;
+  const parts = [
+    source && (AD_SOURCE_LABELS[source.toLowerCase()] ?? source),
+    campaign,
+    content,
+  ].filter(Boolean);
+  return parts.length
+    ? `\n📣 Реклама: ${escapeHtml(parts.join(' · '))}`
+    : '\n📣 Реклама';
 }
 
 function adHashtag(lead: StoredLead, separator: string): string {
@@ -373,11 +381,15 @@ export function createFormatter({
             { text: '✅ Сделка', callback_data: `won:${id}` },
             { text: '❌ Отказ', callback_data: `lost:${id}` },
           ],
-          [
-            { text: '🗣 Переговоры', callback_data: `talk:${id}` },
-            { text: '🔵 В работе', callback_data: `work:${id}` },
-            { text: '⏰ Отложить', callback_data: `postpone:${id}` },
-          ],
+          ...(isClosed(lead)
+            ? []
+            : [
+                [
+                  { text: '🗣 Переговоры', callback_data: `talk:${id}` },
+                  { text: '🔵 В работе', callback_data: `work:${id}` },
+                  { text: '⏰ Отложить', callback_data: `postpone:${id}` },
+                ],
+              ]),
         ],
       };
     },

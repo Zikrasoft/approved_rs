@@ -877,6 +877,39 @@ describe('postponeLead', () => {
     },
   );
 
+  it.each(['won', 'lost', 'negotiations'] as const)(
+    'clears the reminder when a postponed Lead moves to %s',
+    async (status) => {
+      const lead = await store.insertLead(baseData);
+      await store.postponeLead(lead.id, '2026-10-20', 'n');
+
+      expect(await store.setStatus(lead.id, status)).toMatchObject({
+        status,
+        postponedFrom: null,
+        remindAt: null,
+      });
+    },
+  );
+
+  it.each([
+    ['won', 'in_progress'],
+    ['lost', 'negotiations'],
+    ['won', 'new'],
+  ] as const)('never moves a %s Lead back to %s', async (closed, to) => {
+    const lead = await store.insertLead(baseData);
+    await store.setStatus(lead.id, closed);
+
+    expect(await store.setStatus(lead.id, to)).toBeUndefined();
+    expect((await store.getLead(lead.id))?.status).toBe(closed);
+  });
+
+  it('still moves a closed Lead between the outcomes', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.setStatus(lead.id, 'won');
+
+    expect((await store.setStatus(lead.id, 'lost'))?.status).toBe('lost');
+  });
+
   it('no-ops when the lead is no longer open (stale button, already finalized elsewhere)', async () => {
     const lead = await store.insertLead(baseData);
     await store.setStatus(lead.id, 'lost');
@@ -1625,21 +1658,22 @@ describe('capturePrompt', () => {
   it('keeps the first manager hand-off', async () => {
     const lead = await store.insertLead(baseData);
 
-    const first = await store.updateCapture(lead.id, {
-      managerHandoff: 'approvedrs',
-      capturePrompt: null,
+    await store.updateCapture(lead.id, {
+      capturePrompt: { chatId: 777, step: 'car' },
     });
-    const second = await store.updateCapture(lead.id, {
-      managerHandoff: 'someone_else',
-      capturePrompt: null,
-    });
+    const first = await store.markManagerHandoff(lead.id, 'approvedrs');
+    const second = await store.markManagerHandoff(lead.id, 'someone_else');
 
     expect(lead.managerHandoff).toBeNull();
     expect(first?.managerHandoff).toEqual({
       at: expect.any(String),
       handle: 'approvedrs',
     });
-    expect(second?.managerHandoff).toEqual(first?.managerHandoff);
+    expect(first?.capturePrompt).toEqual({ chatId: 777, step: 'car' });
+    expect(second).toBeUndefined();
+    expect((await store.getLead(lead.id))?.managerHandoff).toEqual(
+      first?.managerHandoff,
+    );
   });
 
   it('clears the prompt when set to null', async () => {

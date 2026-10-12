@@ -38,7 +38,7 @@ import {
   noteLine,
   reAskEditText,
   sendFieldChange,
-  sendContactNote,
+  sendNoteNotice,
   extraContactNote,
   renameLeadTopic,
   touchLeadTopic,
@@ -77,6 +77,7 @@ import {
   parseOperationReply,
   businessDay,
   LedgerUnreadableError,
+  MAX_FIELD_LENGTH,
   type OperationType,
   type LeadStatus,
   type PendingPrompt,
@@ -87,8 +88,6 @@ import {
 const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
 
 const PHONE_REGION = 'RS';
-
-const MAX_NAME_LENGTH = 200;
 
 const messageSchema = z.object({
   message_id: z.number().int(),
@@ -234,11 +233,13 @@ async function changeStatus(
 ): Promise<void> {
   const lead = await getLead(id);
   if (!lead) return ack(ctx);
-  const updated = lead.status === key ? undefined : await setStatus(id, key);
-  if (updated)
+  if (lead.status !== key) {
+    const updated = await setStatus(id, key);
+    if (!updated) return answerCallback(ctx.cbId, LEAD_ACTION_COPY.closed);
     await (fromDetail
       ? afterStatusChangeOn(ctx, updated)
       : afterStatusChange(updated));
+  }
   await answerCallback(ctx.cbId, LEAD_ACTION_COPY.statusUpdated);
 }
 
@@ -571,7 +572,7 @@ async function afterEdit(
 async function reAskEdit(
   reply: Reply,
   id: number,
-  field: EditField,
+  field: EditField | 'note',
 ): Promise<void> {
   const messageId = await sendForceReplyPrompt(
     reply.chatId,
@@ -580,12 +581,12 @@ async function reAskEdit(
   await setPendingPrompt(id, {
     chatId: reply.chatId,
     messageId,
-    kind: `edit_${field}`,
+    kind: field === 'note' ? field : `edit_${field}`,
   });
 }
 
 const replyName: PromptHandler = async (reply, lead) => {
-  const name = reply.text.trim().slice(0, MAX_NAME_LENGTH);
+  const name = reply.text.trim().slice(0, MAX_FIELD_LENGTH);
   if (!name) return reAskEdit(reply, lead.id, 'name');
   let before = '';
   const updated = await resolvePendingPrompt(promptKey(reply), (current) => {
@@ -613,20 +614,27 @@ const replyContact: PromptHandler = async (reply, lead) => {
   if (!updated) return;
   if (noted) {
     await afterEdit(reply, updated, EDIT_COPY.contactNoted);
-    await sendContactNote(updated, edited.contact, reply.role, reply.authorId);
+    await sendNoteNotice(
+      updated,
+      extraContactNote(edited.contact),
+      reply.role,
+      reply.authorId,
+    );
     return;
   }
   await afterEdit(reply, updated, EDIT_COPY.updated);
   await sendFieldChange(updated, 'contact', before, reply.role, reply.authorId);
 };
 
-const replyNote: PromptHandler = async (reply) => {
+const replyNote: PromptHandler = async (reply, lead) => {
   const text = reply.text.trim();
-  if (!text) return;
-  const updated = await resolvePendingPrompt(promptKey(reply), (lead) => ({
-    comment: appendNote(lead.comment, noteLine(text, reply.role)),
+  if (!text) return reAskEdit(reply, lead.id, 'note');
+  const updated = await resolvePendingPrompt(promptKey(reply), (current) => ({
+    comment: appendNote(current.comment, noteLine(text, reply.role)),
   }));
-  if (updated) await afterEdit(reply, updated, LEAD_ACTION_COPY.noteAdded);
+  if (!updated) return;
+  await afterEdit(reply, updated, LEAD_ACTION_COPY.noteAdded);
+  await sendNoteNotice(updated, text, reply.role, reply.authorId);
 };
 
 const PROMPT_REPLIES: Record<PromptKind, PromptHandler> = {

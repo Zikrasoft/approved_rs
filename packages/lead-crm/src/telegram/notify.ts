@@ -8,8 +8,8 @@ import {
 } from './client.ts';
 import { operationNoticeText, unreadableLedgerText } from './ledger.ts';
 import {
-  contactNoteText,
   fieldChangeText,
+  noteNoticeText,
   quarantinedLeadsText,
   statusChangeText,
   type EditField,
@@ -49,7 +49,7 @@ export function createNotifier({
     });
   }
 
-  function otherRole(by: Role, authorId: number): number[] {
+  function counterpartIds(by: Role, authorId: number): number[] {
     return (by === 'owner' ? adminIds : ownerIds).filter(
       (id) => id !== authorId,
     );
@@ -213,20 +213,20 @@ export function createNotifier({
     ): Promise<void> {
       if (before === lead[field]) return;
       await sendToAll(
-        otherRole(by, authorId),
+        counterpartIds(by, authorId),
         fieldChangeText(lead, field, before, by),
       );
     },
 
-    async sendContactNote(
+    async sendNoteNotice(
       lead: StoredLead,
-      contact: string,
+      note: string,
       by: Role,
       authorId: number,
     ): Promise<void> {
       await sendToAll(
-        otherRole(by, authorId),
-        contactNoteText(lead, contact, by),
+        counterpartIds(by, authorId),
+        noteNoticeText(lead, note, by),
       );
     },
 

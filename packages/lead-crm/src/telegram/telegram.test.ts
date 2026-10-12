@@ -26,6 +26,7 @@ import {
   buildRemindPicker,
   EDIT_COPY,
   noteLine,
+  extraContactNote,
   reAskEditText,
 } from './cards.ts';
 import { formatDateRu, leadDisplayName } from './markup.ts';
@@ -59,7 +60,7 @@ const {
   sendUnreadableLedgerToAdmin,
   sendStatusChangeToAdmin,
   sendFieldChange,
-  sendContactNote,
+  sendNoteNotice,
   sendDigest,
   sendPostponeReminder,
   editLeadDetailMessage,
@@ -278,6 +279,17 @@ describe('sendLeadNotification', () => {
     expect(body.text).toContain('📣 Реклама: tiktok');
   });
 
+  it('shows a visit only its medium identifies as a bare ad mark', async () => {
+    await sendLeadNotification(
+      makeLead({
+        adSource: { medium: 'cpc', at: '2026-10-01T10:00:00.000Z' },
+      }),
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('📣 Реклама\n');
+    expect(body.text).not.toContain('cpc');
+  });
+
   it('leaves the ad marks off a Lead that did not come from an ad', async () => {
     await sendLeadNotification(makeLead());
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
@@ -323,6 +335,18 @@ describe('sendLeadNotification', () => {
       ],
     ]);
   });
+
+  it.each(['won', 'lost'] as const)(
+    'offers a %s lead no move back into work',
+    async (status) => {
+      await sendLeadNotification(makeLead({ id: 42, status }));
+      const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+      const data = body.reply_markup.inline_keyboard
+        .flat()
+        .map((b: { callback_data?: string }) => b.callback_data);
+      expect(data).toEqual([undefined, 'won:42', 'lost:42']);
+    },
+  );
 
   it.each(['won', 'lost'] as const)(
     'posts a %s lead unpinned',
@@ -655,21 +679,22 @@ describe('sendStatusChangeToAdmin', () => {
   });
 });
 
-describe('sendContactNote', () => {
+describe('sendNoteNotice', () => {
   beforeEach(() => mockFetchOk());
   afterEach(() => mockFetch.mockReset());
 
-  it('tells the other role a contact went into the notes', async () => {
-    await sendContactNote(
+  it('tells the other role about the note, never the author', async () => {
+    await sendNoteNotice(
       makeLead({ id: 9, name: 'Пётр' }),
-      '+381641234567',
+      'Перезвонить <завтра>',
       'admin',
       222,
     );
+    expect(mockFetch).toHaveBeenCalledTimes(1);
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body).toMatchObject({
       chat_id: 111,
-      text: '📝 Заявка #9 Пётр · Админ: Доп. контакт: +381641234567',
+      text: '📝 Заявка #9 Пётр · Админ: Перезвонить &lt;завтра&gt;',
     });
   });
 });
@@ -741,6 +766,15 @@ describe('edit copy', () => {
     );
     expect(reAskEditText('name')).toBe(
       `${EDIT_COPY.empty}\n\n✏️ Введите новое значение (имя):`,
+    );
+    expect(reAskEditText('note')).toBe(
+      `${EDIT_COPY.empty}\n\n${EDIT_COPY.notePrompt}`,
+    );
+  });
+
+  it('labels a second contact for the notes', () => {
+    expect(extraContactNote('+381641234567')).toBe(
+      'Доп. контакт: +381641234567',
     );
   });
 
@@ -1083,7 +1117,7 @@ describe('buildStats', () => {
     const text = buildStats(leads, [], NOW);
     expect(text).toContain('Всего заявок: 7');
     expect(text).toContain(
-      '🆕 Новые: 2   🗣 Переговоры: 1   🔵 В работе: 1   ✅ Завершено: 1   ❌ Отказ: 1   ⏸ Отложено: 1',
+      '🆕 Новая: 2   🗣 Переговоры: 1   🔵 В работе: 1   ✅ Успешно: 1   ❌ Отказ: 1   ⏸️ Отложена: 1',
     );
     expect(text).toContain('<b>💶 Мне должны: 0 €</b>');
     expect(text).toContain('За месяц: +0 € · −0 €');
