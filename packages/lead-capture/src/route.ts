@@ -256,7 +256,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     await bot.api.deleteMessage(chatId, sent.message_id);
   }
 
-  async function refresh(
+  async function publishLeadChange(
     lead: StoredLead,
     updated: StoredLead | undefined,
   ): Promise<void> {
@@ -348,7 +348,9 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       referredBy: referred ? 'approved' : null,
       capturePrompt,
     });
-    await (before ? refresh(before, lead) : refresh(lead, undefined));
+    await (before
+      ? publishLeadChange(before, lead)
+      : publishLeadChange(lead, undefined));
   }
 
   async function start(
@@ -371,7 +373,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     await show(chatId, { ...screen, text: `${greeting}\n\n${screen.text}` });
   }
 
-  async function answer(
+  async function recordAnswer(
     lead: StoredLead,
     prompt: CapturePrompt,
     text: string | undefined,
@@ -383,7 +385,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       service: picked,
       capturePrompt: next ? { chatId: prompt.chatId, step: next } : null,
     });
-    await refresh(lead, updated);
+    await publishLeadChange(lead, updated);
     const [reply, extra] = nextMessage(next, localeOf(lead));
     await send(prompt.chatId, reply, extra);
   }
@@ -397,7 +399,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       ...phonePatch(lead, phone),
       capturePrompt: null,
     });
-    await refresh(lead, updated);
+    await publishLeadChange(lead, updated);
     await send(prompt.chatId, copy(localeOf(lead)).thanks, CLEAR_KEYBOARD);
   }
 
@@ -410,7 +412,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       note: `${MESSAGE_NOTE}: ${text}`,
       capturePrompt: prompt,
     });
-    await refresh(lead, updated);
+    await publishLeadChange(lead, updated);
     await ask(prompt.chatId, 'phone', localeOf(lead));
   }
 
@@ -419,7 +421,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     prompt: CapturePrompt,
     text: string,
   ): Promise<void> {
-    if (prompt.step !== 'phone') return answer(lead, prompt, text);
+    if (prompt.step !== 'phone') return recordAnswer(lead, prompt, text);
     const phone = typedPhone(text, phoneRegion);
     return phone
       ? takePhone(lead, prompt, phone)
@@ -452,7 +454,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       referredBy: referred ? 'approved' : undefined,
       capturePrompt: null,
     });
-    await refresh(open, updated);
+    await publishLeadChange(open, updated);
     const screen = startScreen(locale, picked);
     await dropPhoneKeyboard(chatId, open.capturePrompt, screen.text);
     await show(chatId, screen);
@@ -505,7 +507,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       locale,
       capturePrompt: { chatId, step },
     });
-    await refresh(open, updated);
+    await publishLeadChange(open, updated);
     await ask(chatId, step, locale);
   }
 
@@ -527,10 +529,10 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   async function pickService(chatId: number, picked: string): Promise<void> {
     const running = await runningQuestionnaire(chatId);
     if (running?.prompt.step !== 'service' || !isService(picked)) return;
-    await answer(running.lead, running.prompt, undefined, picked);
+    await recordAnswer(running.lead, running.prompt, undefined, picked);
   }
 
-  async function tapped(
+  async function handleTap(
     chatId: number,
     messageId: number,
     sender: CaptureSender,
@@ -560,7 +562,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     });
   }
 
-  async function aside(
+  async function recordFreeMessage(
     chatId: number,
     sender: CaptureSender,
     text: string,
@@ -572,11 +574,11 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       note: `${MESSAGE_NOTE}: ${text}`,
       capturePrompt: open.capturePrompt,
     });
-    await refresh(open, updated);
+    await publishLeadChange(open, updated);
     await send(chatId, copy(localeOf(open)).received);
   }
 
-  async function phoneAside(
+  async function recordPhoneOnOpenLead(
     chatId: number,
     lead: StoredLead,
     phone: string,
@@ -585,11 +587,11 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       ...phonePatch(lead, phone),
       capturePrompt: lead.capturePrompt,
     });
-    await refresh(lead, updated);
+    await publishLeadChange(lead, updated);
     await send(chatId, copy(localeOf(lead)).received);
   }
 
-  async function sharedContact(
+  async function handleOwnContact(
     chatId: number,
     sender: CaptureSender,
     phone: string,
@@ -599,18 +601,18 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       return takePhone(running.lead, running.prompt, phone);
     const open =
       running?.lead ?? (await store.findOpenLeadByTelegramId(sender.id, brand));
-    if (open) return phoneAside(chatId, open, phone);
+    if (open) return recordPhoneOnOpenLead(chatId, open, phone);
     if (sender.username)
       return start(chatId, sender, undefined, `${ANSWER_NOTE.phone}: ${phone}`);
     return start(chatId, sender, undefined, null, phone);
   }
 
-  async function foreignContact(chatId: number): Promise<void> {
+  async function handleForeignContact(chatId: number): Promise<void> {
     const running = await runningQuestionnaire(chatId);
     if (running) await ask(chatId, running.prompt.step, localeOf(running.lead));
   }
 
-  async function handle(
+  async function handleText(
     chatId: number,
     sender: CaptureSender,
     text: string,
@@ -623,7 +625,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
 
     const running = await runningQuestionnaire(chatId);
     if (running) return typedAnswer(running.lead, running.prompt, text);
-    return aside(chatId, sender, text);
+    return recordFreeMessage(chatId, sender, text);
   }
 
   bot.chatType('private').on('message', async (ctx) => {
@@ -633,9 +635,9 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     const text = trimmed ? trimmed : undefined;
     const { chat, from, contact } = message.data;
     if (contact?.user_id === from.id)
-      await sharedContact(chat.id, from, sharedPhone(contact.phone_number));
-    else if (contact) await foreignContact(chat.id);
-    else if (text !== undefined) await handle(chat.id, from, text);
+      await handleOwnContact(chat.id, from, sharedPhone(contact.phone_number));
+    else if (contact) await handleForeignContact(chat.id);
+    else if (text !== undefined) await handleText(chat.id, from, text);
   });
 
   bot.chatType('private').on('callback_query:data', async (ctx) => {
@@ -645,7 +647,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     const tap = captureTapSchema.safeParse(ctx.callbackQuery);
     if (!tap.success) return;
     const { message, from, data } = tap.data;
-    await tapped(message.chat.id, message.message_id, from, data);
+    await handleTap(message.chat.id, message.message_id, from, data);
   });
 
   return async function POST({
