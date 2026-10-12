@@ -5,7 +5,6 @@
     "0d1ed17f1784d007": "Pon–Sub, 09:00–19:00",
     "0d26b79afe7f9119": "You don't have a username in Telegram, so our manager won't be able to contact you. Please leave your phone number so we can reach out.",
     "12fb333477dbad63": "Detaljerska studija u Beogradu — folija, poliranje, keramika",
-    "1de4e528f321a9d3": "Submit a request",
     "22e63449c5134c48": "Nemate korisničko ime (username) na Telegramu, pa vam menadžer ne može pisati. Ostavite broj telefona kako bismo mogli da vas kontaktiramo.",
     "3826cae68b4c7426": "Main menu",
     "4048b6d338631e97": "Koja su vaša kola? Napišite marku, model i godinu.",
@@ -34,6 +33,7 @@
     "99fa171e85c079aa": "Change language",
     "a39a179a45d47a01": "Izaberite jezik koji vam najbolje odgovara.",
     "a980d127e54ee652": "Usluge",
+    "abe632c53db41600": "📝 Ostaviti zahtev",
     "acf71fb9918de7d2": "Mon–Sat, 09:00–19:00",
     "af6cc21030114d4e": "A detailing studio in Belgrade — film wrapping, polishing, ceramic coating. Click 'Start' — tell us what you want to do with your car, and the specialist will respond here.",
     "b1305c0a5bf7e1b2": "Contacts",
@@ -49,10 +49,10 @@
     "e00139c0c5a90afe": "Glavni meni",
     "e012b3971218a791": "Learn more on the site",
     "e32c7d9d5a5491a4": "Više na sajtu",
+    "e892d680e94d1dc8": "📝 Submit a request",
     "e919770777f75427": "We’re in Belgrade, looking forward to welcoming you at the studio.",
     "ee03b488ba3a3e01": "Mi smo u Beogradu, čekamo vas u studiju.",
     "f0760931633710dc": "📱 Podeli broj",
-    "f10cba0ab53f7c86": "Ostavite zahtev",
     "f70fa4b6468df938": "Partners"
   },
   "src/content/i18n/home.yaml": {

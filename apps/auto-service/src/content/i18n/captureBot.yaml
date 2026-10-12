@@ -52,7 +52,7 @@ translations:
       button: Usluge
       text: Evo šta radimo u servisu. Izaberite uslugu — pokazaćemo cenu, rokove i šta je uključeno.
     card:
-      request: Poslati zahtev
+      request: 📝 Ostaviti zahtev
       site: Više informacija na sajtu
     contacts:
       button: Kontakti
@@ -65,7 +65,7 @@ translations:
       button: Partneri
       text: Naši partneri — izaberite kome da pišete.
     request:
-      button: Poslati zahtev
+      button: 📝 Ostaviti zahtev
       car: Koja je vaša mašina? Napišite marku, model i godinu.
       service: Koje radove trebate? Izaberite ispod.
     language:
@@ -90,7 +90,7 @@ translations:
       button: Services
       text: Here’s what we offer at the service. Choose a service — we’ll show you the price, timeframe, and what's included.
     card:
-      request: Submit a request
+      request: 📝 Submit a request
       site: Learn more on the site
     contacts:
       button: Contact
@@ -103,7 +103,7 @@ translations:
       button: Partners
       text: Our partners — choose who to contact.
     request:
-      button: Submit a request
+      button: 📝 Submit a request
       car: What kind of car do you have? Please provide the make, model, and year.
       service: What services do you need? Please choose below.
     language:
@@ -114,4 +114,4 @@ translations:
       shortDescription: Car service in Belgrade — diagnostics, repairs, servicing
       menuCommand: Main menu
       langCommand: Change language
-translatedFrom: 379c48d5009deba9
+translatedFrom: 6b37311d4a8b181e

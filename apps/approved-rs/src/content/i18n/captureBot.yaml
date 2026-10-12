@@ -54,7 +54,7 @@ translations:
       button: Services
       text: Here’s how we can help. Select a service and we’ll provide more details.
     card:
-      request: Submit an inquiry
+      request: 📝 Submit a request
       site: Learn more on the site
     contacts:
       button: Contact Us
@@ -67,7 +67,7 @@ translations:
       button: Partners
       text: Repairs and detailing — with partners we trust. Choose who to contact.
     request:
-      button: Submit an inquiry
+      button: 📝 Submit a request
       car: What car do you have? Please provide the make, model, and year.
       service: What service do you need? Please select from below.
     language:
@@ -93,7 +93,7 @@ translations:
       button: Usluge
       text: Evo u čemu možemo da pomognemo. Izaberite uslugu — objasnićemo detaljnije.
     card:
-      request: Podneti zahtev
+      request: 📝 Ostaviti zahtev
       site: Više informacija na sajtu
     contacts:
       button: Kontakti
@@ -106,7 +106,7 @@ translations:
       button: Partneri
       text: Popravka i detailing — kod partnera kojima verujemo. Izaberite kome želite da pišete.
     request:
-      button: Podneti zahtev
+      button: 📝 Ostaviti zahtev
       car: Koja su vaša kola? Napišite marku, model i godište.
       service: Koju uslugu želite? Izaberite ispod.
     language:
@@ -132,7 +132,7 @@ translations:
       button: Servicios
       text: Esto es en lo que te ayudamos. Elige un servicio y te contaremos más.
     card:
-      request: Enviar solicitud
+      request: 📝 Enviar solicitud
       site: Más detalles en el sitio
     contacts:
       button: Contactos
@@ -145,7 +145,7 @@ translations:
       button: Socios
       text: Reparación y detailing — con socios en los que confiamos. Elige a quién contactar.
     request:
-      button: Enviar solicitud
+      button: 📝 Enviar solicitud
       car: ¿Cuál es tu coche? Escribe la marca, el modelo y el año.
       service: ¿Qué servicio necesitas? Elige a continuación.
     language:
@@ -171,7 +171,7 @@ translations:
       button: Dienstleistungen
       text: Das sind die Bereiche, in denen wir helfen. Wählen Sie eine Dienstleistung – wir erzählen Ihnen mehr.
     card:
-      request: Anfrage senden
+      request: 📝 Anfrage stellen
       site: Mehr auf der Website
     contacts:
       button: Kontakt
@@ -184,7 +184,7 @@ translations:
       button: Partner
       text: Reparatur und Pflege – bei Partnern, denen wir vertrauen. Wählen Sie, wem Sie schreiben möchten.
     request:
-      button: Anfrage senden
+      button: 📝 Anfrage stellen
       car: Welches Auto haben Sie? Bitte geben Sie Marke, Modell und Baujahr an.
       service: Welche Dienstleistung benötigen Sie? Wählen Sie unten aus.
     language:
@@ -195,4 +195,4 @@ translations:
       shortDescription: Autosourcing, Import und Rückkauf von Fahrzeugen in Europa
       menuCommand: Hauptmenü
       langCommand: Sprache wechseln
-translatedFrom: 1d6a491cf37b5bfc
+translatedFrom: c039716c271ed413

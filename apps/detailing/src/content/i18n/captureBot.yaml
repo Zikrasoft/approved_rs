@@ -52,7 +52,7 @@ translations:
       button: Usluge
       text: Evo šta radimo u studiju. Izaberite uslugu — prikazaćemo cenu, rokove i šta je uključeno.
     card:
-      request: Ostavite zahtev
+      request: 📝 Ostaviti zahtev
       site: Više na sajtu
     contacts:
       button: Kontakti
@@ -65,7 +65,7 @@ translations:
       button: Partneri
       text: Naši partneri — izaberite kome da pišete.
     request:
-      button: Ostavite zahtev
+      button: 📝 Ostaviti zahtev
       car: Koja su vaša kola? Napišite marku, model i godinu.
       service: Šta želite da uradite sa autom? Izaberite uslugu ispod — ili napišite svojim rečima.
     language:
@@ -90,7 +90,7 @@ translations:
       button: Services
       text: Here’s what we offer at the studio. Choose a service — we'll show you the price, timeframe, and what's included.
     card:
-      request: Submit a request
+      request: 📝 Submit a request
       site: Learn more on the site
     contacts:
       button: Contacts
@@ -103,7 +103,7 @@ translations:
       button: Partners
       text: Our partners — choose who to reach out to.
     request:
-      button: Submit a request
+      button: 📝 Submit a request
       car: What car do you have? Please provide the make, model, and year.
       service: What would you like to do with your car? Choose a service below or write it in your words.
     language:
@@ -114,4 +114,4 @@ translations:
       shortDescription: Detailing studio in Belgrade — film, polishing, ceramic
       menuCommand: Main menu
       langCommand: Change language
-translatedFrom: 765811a0047230e6
+translatedFrom: f7c03437f437192f
