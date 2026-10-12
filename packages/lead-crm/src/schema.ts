@@ -12,7 +12,7 @@ export type LeadStatus = z.infer<typeof leadStatusSchema>;
 
 const storedStatusSchema = z.enum([...LEAD_STATUSES, 'new', 'in_progress']);
 
-export const PROMPT_KINDS = ['postpone', 'reply_visitor'] as const;
+export const PROMPT_KINDS = ['postpone'] as const;
 
 const pendingPromptSchema = z.object({
   chatId: z.number().int(),
@@ -71,6 +71,7 @@ const baseStoredLeadSchema = z.object({
   topicMessageId: z.number().int().nullable().default(null).catch(null),
   topicClosed: z.boolean().default(false).catch(false),
   topicActiveAt: z.string().nullable().default(null).catch(null),
+  questionnaireDone: z.boolean().default(false).catch(false),
   referredBy: z.enum(REFERRERS).nullable().default(null).catch(null),
   archived: z.boolean().optional(),
   remindAt: z.string().nullable().default(null),

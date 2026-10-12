@@ -36,8 +36,8 @@ export function isFreshLead(
 export interface CaptureUpdate {
   note?: string;
   contact?: string;
-  service?: string;
-  services?: string[];
+  services?: (picked: string[]) => string[];
+  questionnaireDone?: boolean;
   locale?: string;
   referredBy?: Referrer;
   capturePrompt: CapturePrompt | null;
@@ -120,6 +120,10 @@ function isIdleTopic(lead: StoredLead, now: Date): boolean {
     now.getTime() - Date.parse(lead.topicActiveAt ?? lead.createdAt) >=
       TOPIC_IDLE_MS
   );
+}
+
+function pickedServices(services: string[]) {
+  return { service: services[0] ?? '', services };
 }
 
 function contactRank(contact: string): number {
@@ -460,18 +464,21 @@ export function createLeadStore({
       }));
     },
 
-    setTopic(
-      id: number,
-      topicId: number,
-      topicMessageId: number,
-    ): Promise<StoredLead | undefined> {
+    setTopic(id: number, topicId: number): Promise<StoredLead | undefined> {
       return updateOne(id, (l) => ({
         ...l,
         topicId,
-        topicMessageId,
+        topicMessageId: null,
         topicClosed: false,
         topicActiveAt: new Date().toISOString(),
       }));
+    },
+
+    setTopicSummary(
+      id: number,
+      topicMessageId: number,
+    ): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) => ({ ...l, topicMessageId }));
     },
 
     touchTopic(
@@ -561,8 +568,8 @@ export function createLeadStore({
       {
         note,
         contact,
-        service,
         services,
+        questionnaireDone,
         locale,
         referredBy,
         capturePrompt,
@@ -572,8 +579,8 @@ export function createLeadStore({
         ...l,
         comment: note ? appendNote(l.comment, note) : l.comment,
         contact: contact ?? l.contact,
-        ...(service ? { service, services: [service] } : {}),
-        ...(services ? { service: services[0] ?? '', services } : {}),
+        ...(services ? pickedServices(services(l.services)) : {}),
+        questionnaireDone: questionnaireDone ?? l.questionnaireDone,
         locale: locale ?? l.locale,
         referredBy: referredBy ?? l.referredBy,
         capturePrompt,
@@ -712,18 +719,8 @@ export function createLeadStore({
       return next.filter((l) => expiredIds.has(l.id));
     },
 
-    async closeIdleTopics(now: Date): Promise<StoredLead[]> {
-      if (!(await readLeads()).some((l) => isIdleTopic(l, now))) return [];
-      let idleIds = new Set<number>();
-      const next = await updateLeads((leads) => {
-        idleIds = new Set(
-          leads.filter((l) => isIdleTopic(l, now)).map((l) => l.id),
-        );
-        return leads.map((l) =>
-          idleIds.has(l.id) ? { ...l, topicClosed: true } : l,
-        );
-      });
-      return next.filter((l) => idleIds.has(l.id));
+    async findIdleTopics(now: Date): Promise<StoredLead[]> {
+      return (await readLeads()).filter((l) => isIdleTopic(l, now));
     },
   };
 }

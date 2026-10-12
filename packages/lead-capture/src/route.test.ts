@@ -1071,13 +1071,13 @@ describe('an owner editing the same Lead mid-dialog', () => {
     await begin();
     editLead(1, {
       name: 'Иван Петрович',
-      pendingPrompt: { chatId: 111, messageId: 555, kind: 'reply_visitor' },
+      pendingPrompt: { chatId: 111, messageId: 555, kind: 'postpone' },
     });
 
     await say('BMW X5');
 
     expect(stored()[0].name).toBe('Иван Петрович');
-    expect(stored()[0].pendingPrompt?.kind).toBe('reply_visitor');
+    expect(stored()[0].pendingPrompt?.kind).toBe('postpone');
     expect(stored()[0].comment).toContain('Ищет: BMW X5');
     expect(stored()[0].capturePrompt?.step).toBe('budget');
   });
@@ -1311,6 +1311,18 @@ describe('a visitor who presses Start again', () => {
     expect(lastMarkup()).toEqual(MENU_KEYBOARD);
   });
 
+  it('opens the card a new tile names on a finished Questionnaire without touching the Lead', async () => {
+    await begin();
+    await say('BMW X5');
+    await say('20 000');
+    const before = stored()[0];
+
+    await POST(makeCtx(startUpdate('vehicle-import_ru')));
+
+    expect(stored()).toEqual([before]);
+    expect(lastSent()[1]).toContain('CARD_vehicle-import_ru');
+  });
+
   it('opens the card the new tile names, in the language of the open Lead', async () => {
     await POST(makeCtx(startUpdate('sr')));
 
@@ -1325,7 +1337,7 @@ describe('a visitor who presses Start again', () => {
     expect(lastSent()[1]).toContain('CARD_vehicle-import_sr');
   });
 
-  it('ends a running Questionnaire for the card the new tile names', async () => {
+  it('ends a running Questionnaire for the card the new tile names, keeping the picks', async () => {
     await begin();
     await say('BMW X5');
 
@@ -1333,7 +1345,8 @@ describe('a visitor who presses Start again', () => {
 
     expect(stored()).toHaveLength(1);
     expect(stored()[0]).toMatchObject({
-      service: 'vehicle-import',
+      service: 'vehicle-sourcing',
+      services: ['vehicle-sourcing', 'vehicle-import'],
       capturePrompt: null,
     });
     expect(lastSent()[1]).toContain('CARD_vehicle-import_ru');
@@ -2156,6 +2169,35 @@ describe('the services step that opens every Questionnaire', () => {
     expect(cardEdits().at(-1)?.text).toContain('vehicle-sourcing');
   });
 
+  it('keeps both picks when two taps race', async () => {
+    await beginFromMenu();
+
+    await Promise.all([
+      tap('pick:ru:vehicle-import'),
+      tap('pick:ru:vehicle-sourcing'),
+    ]);
+
+    expect([...stored()[0].services].sort()).toEqual([
+      'vehicle-import',
+      'vehicle-sourcing',
+    ]);
+  });
+
+  it("adds a card's service to the picks already made instead of replacing them", async () => {
+    await beginFromMenu();
+    await tap('pick:ru:vehicle-import');
+
+    await tap('request:ru:vehicle-sourcing');
+
+    expect(stored()[0]).toMatchObject({
+      service: 'vehicle-import',
+      services: ['vehicle-import', 'vehicle-sourcing'],
+    });
+    expect(lastMarkup()).toEqual(
+      picker('ru', ['vehicle-import', 'vehicle-sourcing']),
+    );
+  });
+
   it('moves on to the next question on Done, keeping every picked service', async () => {
     await beginFromMenu();
     await tap('pick:ru:vehicle-sourcing');
@@ -2441,6 +2483,43 @@ describe('the Lead topic', () => {
 
     expect(stored()).toHaveLength(1);
     expect(stored()[0].topicId).toBe(1);
+  });
+
+  it('opens the topic for a fresh Lead that has none when the visitor presses /start again', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    api.fail('createForumTopic', 'Bad Request: not enough rights');
+    await POST(makeCtx(startUpdate('ru')));
+    expect(stored()[0].topicId).toBeNull();
+    api.reset();
+
+    await POST(makeCtx(startUpdate('ru')));
+
+    expect(api.callsTo('createForumTopic', CRM_TOKEN)).toHaveLength(1);
+    expect(stored()[0]).toMatchObject({
+      topicId: 1,
+      topicMessageId: expect.any(Number),
+    });
+    expect(error).toHaveBeenCalled();
+  });
+
+  it('keeps a topic whose summary failed and posts the summary on the next message', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    api.fail('sendMessage', 'Bad Request: try later');
+    await POST(makeCtx(startUpdate('ru')));
+    expect(stored()[0]).toMatchObject({ topicId: 1, topicMessageId: null });
+    api.reset();
+
+    await say('Есть вопрос');
+
+    expect(api.callsTo('createForumTopic', CRM_TOKEN)).toEqual([]);
+    expect(topicPosts()).toEqual([
+      expect.objectContaining({ message_thread_id: 1 }),
+    ]);
+    expect(stored()[0].topicMessageId).toEqual(expect.any(Number));
+    expect(topicCopies()).toEqual([
+      expect.objectContaining({ message_thread_id: 1 }),
+    ]);
+    expect(error).toHaveBeenCalled();
   });
 
   it('still posts the card when the topic cannot be opened', async () => {

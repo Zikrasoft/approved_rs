@@ -64,14 +64,17 @@ export function createBrandBot({
     adminIds,
   });
   const ensureLeadCard = createEnsureLeadCard({ store, notifier });
+  const ensureLeadTopic = createEnsureLeadTopic({ store, notifier });
   const closeLeadTopic = createCloseLeadTopic({ store, notifier });
   return {
     notifier,
     ensureLeadCard,
-    ensureLeadTopic: createEnsureLeadTopic({ store, notifier }),
+    ensureLeadTopic,
     touchLeadTopic: createTouchLeadTopic({ store, notifier }),
+    closeLeadTopic,
     afterStatusChange: createAfterStatusChange({
       ensureLeadCard,
+      ensureLeadTopic,
       closeLeadTopic,
       notifier,
     }),

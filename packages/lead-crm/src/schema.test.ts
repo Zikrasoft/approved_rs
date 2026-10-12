@@ -126,21 +126,25 @@ describe('referredBy on a lead', () => {
 });
 
 describe('pendingPrompt on a lead', () => {
-  it('accepts the reply-to-visitor prompt', () => {
+  it('accepts the postpone prompt', () => {
     const lead = schema.parse({
       ...base,
-      pendingPrompt: { chatId: 1, messageId: 2, kind: 'reply_visitor' },
+      pendingPrompt: { chatId: 1, messageId: 2, kind: 'postpone' },
     });
 
-    expect(lead.pendingPrompt?.kind).toBe('reply_visitor');
+    expect(lead.pendingPrompt?.kind).toBe('postpone');
   });
 
-  it('drops a prompt for the retired add-income action', () => {
-    const lead = schema.parse({
-      ...base,
-      pendingPrompt: { chatId: 1, messageId: 2, kind: 'add_income' },
-    });
+  it.each(['add_income', 'reply_visitor'])(
+    'drops a prompt for the retired %s action',
+    (kind) => {
+      const lead = schema.parse({
+        ...base,
+        pendingPrompt: { chatId: 1, messageId: 2, kind },
+      });
 
-    expect(lead.pendingPrompt).toBeNull();
-  });
+      expect(lead.pendingPrompt).toBeNull();
+      expect(lead.contact).toBe('@ivan');
+    },
+  );
 });

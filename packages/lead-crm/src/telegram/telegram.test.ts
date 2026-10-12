@@ -55,6 +55,7 @@ const {
   sendDigest,
   editLeadDetailMessage,
   openLeadTopic,
+  postLeadTopicSummary,
   refreshLeadTopic,
 } = notifier;
 
@@ -83,6 +84,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     topicMessageId: null,
     topicClosed: false,
     topicActiveAt: null,
+    questionnaireDone: false,
     referredBy: null,
     remindAt: null,
     ...overrides,
@@ -1254,10 +1256,8 @@ describe('the Lead topic', () => {
 
   it('opens a topic named after the Lead and posts the summary into it', async () => {
     const lead = makeLead({ telegramId: 777, contactChannel: 'telegram' });
-    await expect(openLeadTopic(lead)).resolves.toEqual({
-      topicId: 1,
-      messageId: 1000,
-    });
+    await expect(openLeadTopic(lead)).resolves.toBe(1);
+    await expect(postLeadTopicSummary(lead, 1)).resolves.toBe(1000);
     expect(api.callsTo('createForumTopic')[0].payload).toEqual({
       chat_id: '-1009876543210',
       name: '#42 · Иван · Approved.rs',

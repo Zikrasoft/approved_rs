@@ -71,6 +71,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     topicMessageId: null,
     topicClosed: false,
     topicActiveAt: null,
+    questionnaireDone: false,
     referredBy: null,
     remindAt: '2026-10-20',
     ...overrides,
@@ -486,17 +487,24 @@ describe('GET /api/reminders', () => {
       expect((await stored(7)).topicClosed).toBe(true);
     });
 
-    it('logs a topic it could not close and goes on', async () => {
+    it('logs a topic it could not close and tries it again on the next run', async () => {
       const error = vi.spyOn(console, 'error').mockImplementation(() => {});
       leadsStorage().seed([topical(7, DAY_MS), topical(8, DAY_MS)]);
       api.fail('closeForumTopic', 'Bad Request: not enough rights');
 
       const res = await GET(makeCtx());
 
-      expect(await res.json()).toMatchObject({ closedTopics: 2 });
+      expect(await res.json()).toMatchObject({ closedTopics: 0 });
       expect(crm('closeForumTopic')).toHaveLength(2);
       expect(error).toHaveBeenCalledTimes(2);
+      expect((await stored(7)).topicClosed).toBe(false);
       error.mockRestore();
+
+      api.reset();
+      const again = await GET(makeCtx());
+
+      expect(await again.json()).toMatchObject({ closedTopics: 2 });
+      expect((await stored(8)).topicClosed).toBe(true);
     });
   });
 

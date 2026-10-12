@@ -54,6 +54,7 @@ const storedLead: StoredLead = {
   topicMessageId: null,
   topicClosed: false,
   topicActiveAt: null,
+  questionnaireDone: false,
   referredBy: null,
   remindAt: null,
 };
@@ -332,8 +333,14 @@ describe('afterStatusChange', () => {
     ensureLeadCard: async (lead) => {
       calls.push(`card:${lead.id}`);
     },
+    ensureLeadTopic: async (lead) => {
+      calls.push(`summary:${lead.id}`);
+      if (lead.name === 'broken') throw new Error('telegram down');
+      return { ...lead, topicMessageId: 99 };
+    },
     closeLeadTopic: async (lead) => {
-      calls.push(`topic:${lead.id}`);
+      calls.push(`topic:${lead.id}:${lead.topicMessageId}`);
+      return true;
     },
     notifier: {
       editLeadDetailMessage: async (chatId, messageId, lead, role) => {
@@ -361,29 +368,44 @@ describe('afterStatusChange', () => {
       'a change from a DM',
       { status: 'lost' as const },
       { surface },
-      ['card:42', 'unpin:42', 'topic:42', 'dm:7:8:42:owner', 'status:42'],
+      ['card:42', 'unpin:42', 'topic:42:null', 'dm:7:8:42:owner', 'status:42'],
     ],
     [
       'won',
       { status: 'won' as const },
       {},
-      ['card:42', 'unpin:42', 'topic:42', 'status:42'],
+      ['card:42', 'unpin:42', 'topic:42:null', 'status:42'],
+    ],
+    [
+      'a Lead with a topic',
+      { status: 'won' as const, topicId: 5 },
+      { notice: false },
+      ['card:42', 'summary:42', 'unpin:42', 'topic:42:99'],
+    ],
+    [
+      'a topic whose summary could not be refreshed',
+      { status: 'negotiations' as const, topicId: 5, name: 'broken' },
+      { notice: false },
+      ['card:42', 'summary:42'],
     ],
     [
       'the ghost sweep',
       { status: 'lost' as const },
       { notice: false },
-      ['card:42', 'unpin:42', 'topic:42'],
+      ['card:42', 'unpin:42', 'topic:42:null'],
     ],
   ])('%s', async (_, patch, options, expected) => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
     await afterStatusChange({ ...storedLead, ...patch }, options);
 
     expect(calls).toEqual(expected);
+    error.mockRestore();
   });
 });
 
 describe('ensureLeadTopic', () => {
   const openLeadTopic = vi.fn();
+  const postLeadTopicSummary = vi.fn();
   const refreshLeadTopic = vi.fn();
   const topicStore = createLeadStore({
     storage: createMemoryStorage(),
@@ -391,11 +413,12 @@ describe('ensureLeadTopic', () => {
   });
   const ensureLeadTopic = createEnsureLeadTopic({
     store: topicStore,
-    notifier: { openLeadTopic, refreshLeadTopic },
+    notifier: { openLeadTopic, postLeadTopicSummary, refreshLeadTopic },
   });
 
   beforeEach(() => {
-    openLeadTopic.mockReset().mockResolvedValue({ topicId: 5, messageId: 77 });
+    openLeadTopic.mockReset().mockResolvedValue(5);
+    postLeadTopicSummary.mockReset().mockResolvedValue(77);
     refreshLeadTopic.mockReset().mockResolvedValue(undefined);
   });
 
@@ -418,8 +441,27 @@ describe('ensureLeadTopic', () => {
     expect(refreshLeadTopic).toHaveBeenCalledWith(opened);
   });
 
+  it('keeps a topic whose summary failed, and posts the summary next time', async () => {
+    const lead = await topicStore.insertLead({ ...baseData, telegramId: 9 });
+    postLeadTopicSummary.mockRejectedValueOnce(new Error('telegram down'));
+
+    await expect(ensureLeadTopic(lead)).rejects.toThrow('telegram down');
+    const orphan = (await topicStore.getLead(lead.id))!;
+    expect(orphan).toMatchObject({ topicId: 5, topicMessageId: null });
+
+    await expect(ensureLeadTopic(orphan)).resolves.toMatchObject({
+      topicId: 5,
+      topicMessageId: 77,
+    });
+    expect(openLeadTopic).toHaveBeenCalledOnce();
+    expect(postLeadTopicSummary).toHaveBeenLastCalledWith(orphan, 5);
+    expect(refreshLeadTopic).not.toHaveBeenCalled();
+  });
+
   it('hands back the Lead when its row is gone', async () => {
     const lead = { ...storedLead, id: 999, telegramId: 9 };
     await expect(ensureLeadTopic(lead)).resolves.toBe(lead);
+    const topical = { ...lead, topicId: 5 };
+    await expect(ensureLeadTopic(topical)).resolves.toBe(topical);
   });
 });

@@ -68,20 +68,24 @@ export function createNotifier({
       return { chatId, messageId };
     },
 
-    async openLeadTopic(
-      lead: StoredLead,
-    ): Promise<{ topicId: number; messageId: number }> {
+    async openLeadTopic(lead: StoredLead): Promise<number> {
       const topic = await client.api.createForumTopic(
         groupId,
         formatter.topicName(lead),
       );
-      const topicId = topic.message_thread_id;
+      return topic.message_thread_id;
+    },
+
+    async postLeadTopicSummary(
+      lead: StoredLead,
+      topicId: number,
+    ): Promise<number> {
       const sent = await client.api.sendMessage(
         groupId,
         formatter.topicSummaryText(lead),
         { parse_mode: 'HTML', message_thread_id: topicId },
       );
-      return { topicId, messageId: sent.message_id };
+      return sent.message_id;
     },
 
     async refreshLeadTopic(lead: StoredLead): Promise<void> {

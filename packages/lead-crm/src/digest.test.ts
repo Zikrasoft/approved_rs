@@ -175,7 +175,7 @@ describe('every action on a Lead resets its clock', () => {
     await store.setPendingPrompt(1, {
       chatId: 5,
       messageId: 6,
-      kind: 'reply_visitor',
+      kind: 'postpone',
     });
     await store.resolvePendingPrompt({ chatId: 5, messageId: 6 }, () => ({}));
     expect((await store.getLead(1))?.lastActivityAt).toBe(at(9));

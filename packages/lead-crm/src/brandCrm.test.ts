@@ -359,6 +359,38 @@ describe('the Lead topic lifecycle', () => {
     });
   });
 
+  it('refreshes the topic summary with the new status', async () => {
+    const { leadStore, crm, lead } = await withTopic();
+
+    const won = await leadStore.setStatus(lead.id, 'won');
+    await crm.afterStatusChange(won!, { notice: false });
+
+    expect(api.callsTo('editMessageText')).toContainEqual(
+      expect.objectContaining({
+        payload: expect.objectContaining({
+          message_id: lead.topicMessageId,
+          text: expect.stringContaining('Сделка'),
+        }),
+      }),
+    );
+  });
+
+  it('keeps the topic open in the store when Telegram would not close it, and carries on', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { leadStore, crm, lead } = await withTopic();
+    api.fail('closeForumTopic', 'Bad Request: not enough rights');
+
+    const lost = await leadStore.setStatus(lead.id, 'lost');
+    await expect(
+      crm.afterStatusChange(lost!, { notice: false }),
+    ).resolves.toBeUndefined();
+    expect(await leadStore.getLead(lead.id)).toMatchObject({
+      topicClosed: false,
+    });
+    await expect(crm.closeLeadTopic(lost!)).resolves.toBe(false);
+    error.mockRestore();
+  });
+
   it.each(['postponed', 'negotiations'] as const)(
     'leaves the topic open on %s',
     async (status) => {

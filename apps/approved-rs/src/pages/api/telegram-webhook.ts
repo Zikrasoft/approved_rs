@@ -671,23 +671,33 @@ async function relayTopicMessage(
     await afterStatusChange(updated);
 }
 
-bot.on('message', async (ctx, next) => {
-  const topicId = ctx.message.message_thread_id;
-  if (
-    topicId == null ||
-    String(ctx.chat.id) !== GROUP_ID ||
-    ctx.from?.is_bot ||
-    !roleOf(ctx.from?.id)
-  )
-    return next();
-  const lead = await findByTopic(topicId);
-  if (!lead) return next();
-  await relayTopicMessage(lead, {
-    chatId: ctx.chat.id,
-    messageId: ctx.message.message_id,
-    topicId,
-  });
-});
+bot.on(
+  [
+    'message:text',
+    'message:file',
+    'message:contact',
+    'message:location',
+    'message:poll',
+    'message:dice',
+  ],
+  async (ctx, next) => {
+    const topicId = ctx.message.message_thread_id;
+    if (
+      topicId == null ||
+      String(ctx.chat.id) !== GROUP_ID ||
+      ctx.from?.is_bot ||
+      !roleOf(ctx.from?.id)
+    )
+      return next();
+    const lead = await findByTopic(topicId);
+    if (!lead) return next();
+    await relayTopicMessage(lead, {
+      chatId: ctx.chat.id,
+      messageId: ctx.message.message_id,
+      topicId,
+    });
+  },
+);
 
 bot.on('message', async (ctx, next) => {
   const repliedTo = ctx.message.reply_to_message;

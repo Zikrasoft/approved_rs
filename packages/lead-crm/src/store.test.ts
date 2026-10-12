@@ -710,10 +710,23 @@ describe('findByTopic', () => {
   it('finds the lead that owns a topic', async () => {
     const lead = await store.insertLead(baseData);
     await store.insertLead(baseData);
-    await store.setTopic(lead.id, 42, 43);
+    await store.setTopic(lead.id, 42);
 
     expect((await store.findByTopic(42))?.id).toBe(lead.id);
     expect(await store.findByTopic(7)).toBeUndefined();
+  });
+
+  it('opens a topic with no summary yet and attaches one later', async () => {
+    const lead = await store.insertLead(baseData);
+
+    expect(await store.setTopic(lead.id, 42)).toMatchObject({
+      topicId: 42,
+      topicMessageId: null,
+    });
+    expect(await store.setTopicSummary(lead.id, 43)).toMatchObject({
+      topicId: 42,
+      topicMessageId: 43,
+    });
   });
 });
 
@@ -963,12 +976,12 @@ describe('expireGhostLeads', () => {
   });
 });
 
-describe('closeIdleTopics', () => {
+describe('findIdleTopics', () => {
   const NOW = new Date('2026-10-02T12:00:00.000Z');
 
   async function topicLead(activeMsAgo: number | null): Promise<StoredLead> {
     const lead = await store.insertLead({ ...baseData, telegramId: 9 });
-    await store.setTopic(lead.id, lead.id + 100, 1);
+    await store.setTopic(lead.id, lead.id + 100);
     await store.updateLeads((leads) =>
       leads.map((l) =>
         l.id === lead.id
@@ -986,22 +999,24 @@ describe('closeIdleTopics', () => {
     return lead;
   }
 
-  it('closes a topic quiet for a day, once', async () => {
+  it('finds a topic quiet for a day until it is closed', async () => {
     const quiet = await topicLead(TOPIC_IDLE_MS);
     await topicLead(TOPIC_IDLE_MS - 1);
 
-    const closed = await store.closeIdleTopics(NOW);
+    const idle = await store.findIdleTopics(NOW);
 
-    expect(closed.map((l) => [l.id, l.topicClosed])).toEqual([
-      [quiet.id, true],
+    expect(idle.map((l) => l.id)).toEqual([quiet.id]);
+    expect((await store.findIdleTopics(NOW)).map((l) => l.id)).toEqual([
+      quiet.id,
     ]);
-    expect(await store.closeIdleTopics(NOW)).toEqual([]);
+    await store.closeTopic(quiet.id);
+    expect(await store.findIdleTopics(NOW)).toEqual([]);
   });
 
   it('dates a topic with no activity stamp from the Lead', async () => {
     const lead = await topicLead(null);
 
-    expect((await store.closeIdleTopics(NOW)).map((l) => l.id)).toEqual([
+    expect((await store.findIdleTopics(NOW)).map((l) => l.id)).toEqual([
       lead.id,
     ]);
   });
@@ -1014,7 +1029,7 @@ describe('closeIdleTopics', () => {
       ),
     );
 
-    expect(await store.closeIdleTopics(NOW)).toEqual([]);
+    expect(await store.findIdleTopics(NOW)).toEqual([]);
   });
 });
 
@@ -1504,7 +1519,7 @@ describe('capturePrompt', () => {
     await store.setPendingPrompt(lead.id, {
       chatId: 111,
       messageId: 555,
-      kind: 'reply_visitor',
+      kind: 'postpone',
     });
 
     await store.updateCapture(lead.id, {
@@ -1517,7 +1532,7 @@ describe('capturePrompt', () => {
     expect(
       (await store.findByCapturePrompt(777, baseData.brand))?.pendingPrompt
         ?.kind,
-    ).toBe('reply_visitor');
+    ).toBe('postpone');
   });
 });
 
@@ -1822,21 +1837,49 @@ describe('updateCapture', () => {
     expect(updated?.locale).toBe('en');
   });
 
-  it("makes a picked service the Lead's only one", async () => {
+  it('computes the new picks from the stored ones, inside the write', async () => {
     const lead = await store.insertLead({
       ...baseData,
       service: 'vehicle-import',
       services: ['vehicle-import'],
     });
+    const add = (slug: string) => (picked: string[]) => [...picked, slug];
+
+    await Promise.all([
+      store.updateCapture(lead.id, {
+        services: add('vehicle-sourcing'),
+        capturePrompt: { chatId: 777, step: 'service' },
+      }),
+      store.updateCapture(lead.id, {
+        services: add('vehicle-inspection'),
+        capturePrompt: { chatId: 777, step: 'service' },
+      }),
+    ]);
+
+    expect((await store.getLead(lead.id))?.services).toEqual(
+      expect.arrayContaining([
+        'vehicle-import',
+        'vehicle-sourcing',
+        'vehicle-inspection',
+      ]),
+    );
+  });
+
+  it('keeps the service of a Lead from before the picks list when nothing is picked', async () => {
+    const lead = await store.insertLead({
+      ...baseData,
+      service: 'vehicle-import',
+      services: [],
+    });
 
     const updated = await store.updateCapture(lead.id, {
-      service: 'vehicle-sourcing',
-      capturePrompt: { chatId: 777, step: 'looking_for' },
+      questionnaireDone: true,
+      capturePrompt: null,
     });
 
     expect(updated).toMatchObject({
-      service: 'vehicle-sourcing',
-      services: ['vehicle-sourcing'],
+      service: 'vehicle-import',
+      questionnaireDone: true,
     });
   });
 
@@ -1844,11 +1887,11 @@ describe('updateCapture', () => {
     const lead = await store.insertLead(baseData);
 
     const picked = await store.updateCapture(lead.id, {
-      services: ['vehicle-sourcing', 'vehicle-import'],
+      services: () => ['vehicle-sourcing', 'vehicle-import'],
       capturePrompt: { chatId: 777, step: 'service' },
     });
     const cleared = await store.updateCapture(lead.id, {
-      services: [],
+      services: () => [],
       capturePrompt: { chatId: 777, step: 'service' },
     });
 
@@ -1890,7 +1933,7 @@ describe('updateCapture', () => {
     await store.setPendingPrompt(lead.id, {
       chatId: 111,
       messageId: 555,
-      kind: 'reply_visitor',
+      kind: 'postpone',
     });
 
     const updated = await store.updateCapture(lead.id, {
@@ -1898,7 +1941,7 @@ describe('updateCapture', () => {
       capturePrompt: null,
     });
 
-    expect(updated?.pendingPrompt?.kind).toBe('reply_visitor');
+    expect(updated?.pendingPrompt?.kind).toBe('postpone');
   });
 
   it('replaces the contact when the visitor shares a better one', async () => {

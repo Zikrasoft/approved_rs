@@ -32,7 +32,7 @@ export const {
   claimDigest,
   releaseDigest,
   expireGhostLeads,
-  closeIdleTopics,
+  findIdleTopics,
 } = leadStore;
 
 export {

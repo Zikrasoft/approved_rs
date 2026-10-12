@@ -4,7 +4,7 @@ import type { APIContext } from 'astro';
 import { secretMatches } from '@/lib/verifySecret';
 import {
   claimDigest,
-  closeIdleTopics,
+  findIdleTopics,
   expireGhostLeads,
   releaseDigest,
   resumeLead,
@@ -34,18 +34,10 @@ async function expireGhosts(now: Date): Promise<number> {
 }
 
 async function closeIdle(now: Date): Promise<number> {
-  const idle = await closeIdleTopics(now);
-  for (const lead of idle) {
-    try {
-      await closeLeadTopic(lead);
-    } catch (err) {
-      console.error('[reminders] failed to close an idle topic', {
-        error: err,
-        leadId: lead.id,
-      });
-    }
-  }
-  return idle.length;
+  let closed = 0;
+  for (const lead of await findIdleTopics(now))
+    if (await closeLeadTopic(lead)) closed++;
+  return closed;
 }
 
 async function postDigest(now: Date): Promise<boolean> {

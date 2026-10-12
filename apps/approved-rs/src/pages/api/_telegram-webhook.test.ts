@@ -110,6 +110,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     topicMessageId: null,
     topicClosed: false,
     topicActiveAt: null,
+    questionnaireDone: false,
     referredBy: null,
     remindAt: null,
     ...overrides,
@@ -1545,6 +1546,22 @@ describe('POST /api/telegram-webhook', () => {
         { chat_id: GROUP_ID, message_thread_id: TOPIC_ID },
       ]);
       expect((await stored()).topicClosed).toBe(true);
+      expect(
+        crm('editMessageText').filter((p) => p.message_id === 78),
+      ).toHaveLength(1);
+    });
+
+    it('keeps the topic marked open and still answers the tap when Telegram will not close it', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+      api.fail('closeForumTopic', 'Bad Request: not enough rights');
+      seed(topicLead());
+
+      await tap('st:5:won', OWNER_ID);
+
+      expect((await stored()).status).toBe('won');
+      expect((await stored()).topicClosed).toBe(false);
+      expect(crm('answerCallbackQuery')).toHaveLength(1);
+      error.mockRestore();
     });
 
     it('leaves the topic open on negotiations', async () => {
@@ -1654,6 +1671,23 @@ describe('POST /api/telegram-webhook', () => {
       ['a group member without a role', () => topicMessage(OTHER_ID)],
       ['a topic no Lead owns', () => topicMessage(OWNER_ID, { topicId: 5 })],
       ['another chat', () => topicMessage(OWNER_ID, { chatId: -100777 })],
+      [
+        'a topic closed notice',
+        () => topicMessage(OWNER_ID, { content: { forum_topic_closed: {} } }),
+      ],
+      [
+        'a pin notice',
+        () =>
+          topicMessage(OWNER_ID, {
+            content: {
+              pinned_message: {
+                message_id: 9,
+                date: 0,
+                chat: { id: Number(GROUP_ID), type: 'supergroup' },
+              },
+            },
+          }),
+      ],
     ])('relays nothing from %s', async (_label, send) => {
       seed(topicLead());
       const before = await stored();
@@ -1666,7 +1700,12 @@ describe('POST /api/telegram-webhook', () => {
     });
 
     it('treats an answer to a left-over reply-through-bot prompt as a search', async () => {
-      seed(topicLead({ pendingPrompt: awaiting('reply_visitor') }));
+      leadsStorage().seed([
+        {
+          ...topicLead(),
+          pendingPrompt: { ...awaiting('postpone'), kind: 'reply_visitor' },
+        },
+      ]);
 
       await answerPrompt('Нашёл вариант');
 

@@ -173,6 +173,18 @@ function phonePatch(
     : { contact: phone };
 }
 
+function withPicked(slug: string) {
+  return (services: string[]) =>
+    services.includes(slug) ? services : [...services, slug];
+}
+
+function toggled(slug: string) {
+  return (services: string[]) =>
+    services.includes(slug)
+      ? services.filter((picked) => picked !== slug)
+      : [...services, slug];
+}
+
 function sharedPhone(phoneNumber: string): string {
   return isPhoneContact(phoneNumber) ? phoneNumber : `+${phoneNumber}`;
 }
@@ -269,14 +281,14 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     updated: StoredLead | undefined,
   ): Promise<void> {
     const latest = updated ?? lead;
-    const topical = await ensureLeadTopic(latest).catch((error: unknown) => {
+    const withTopic = await ensureLeadTopic(latest).catch((error: unknown) => {
       console.error('[capture] could not update the topic', {
         error,
         leadId: lead.id,
       });
       return latest;
     });
-    await ensureLeadCard(topical).catch((error: unknown) => {
+    await ensureLeadCard(withTopic).catch((error: unknown) => {
       console.error('[capture] could not update the card', {
         error,
         leadId: lead.id,
@@ -292,12 +304,12 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     const lead = await store.findLatestLeadByTelegramId(sender.id, brand);
     if (!lead) return;
     try {
-      const topical = await touchLeadTopic(
-        lead.topicId == null ? await ensureLeadTopic(lead) : lead,
+      const withTopic = await touchLeadTopic(
+        lead.topicMessageId == null ? await ensureLeadTopic(lead) : lead,
       );
-      if (topical.topicId == null) return;
+      if (withTopic.topicId == null) return;
       await bot.api.copyMessage(groupId, chatId, messageId, {
-        message_thread_id: topical.topicId,
+        message_thread_id: withTopic.topicId,
       });
     } catch (error) {
       console.error('[capture] could not copy the message to the topic', {
@@ -419,6 +431,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       note:
         text === undefined ? undefined : `${ANSWER_NOTE[prompt.step]}: ${text}`,
       capturePrompt: next ? { chatId: prompt.chatId, step: next } : null,
+      questionnaireDone: next === null,
     });
     await publishLeadChange(lead, updated);
     const [reply, extra] = nextMessage(next, localeOf(lead));
@@ -433,6 +446,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     const updated = await store.updateCapture(lead.id, {
       ...phonePatch(lead, phone),
       capturePrompt: null,
+      questionnaireDone: true,
     });
     await publishLeadChange(lead, updated);
     const locale = localeOf(lead);
@@ -474,11 +488,12 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     if (!open) return start(chatId, sender, payload);
     const locale = localeOf(open);
     const fields = startFields(payload, sender);
-    if (fields.service || fields.referred)
+    if ((fields.service || fields.referred) && !open.questionnaireDone)
       return resumeFromTile(chatId, open, fields, locale);
+    await publishLeadChange(open, undefined);
     if (open.capturePrompt)
       return ask(chatId, open.capturePrompt.step, locale, open.services);
-    return show(chatId, mainMenu(locale));
+    return show(chatId, startScreen(locale, fields.service));
   }
 
   async function resumeFromTile(
@@ -488,7 +503,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     locale: L,
   ): Promise<void> {
     const updated = await store.updateCapture(open.id, {
-      service: picked,
+      services: picked ? withPicked(picked) : undefined,
       referredBy: referred ? 'approved' : undefined,
       capturePrompt: null,
     });
@@ -540,7 +555,8 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       return ask(chatId, FIRST_STEP, locale, picked ? [picked] : []);
     }
     const updated = await store.updateCapture(open.id, {
-      service: picked,
+      services: picked ? withPicked(picked) : undefined,
+      questionnaireDone: false,
       locale,
       capturePrompt,
     });
@@ -576,15 +592,13 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     const running = await runningServicesStep(chatId);
     if (!running || !isService(slug)) return;
     const { lead, prompt } = running;
-    const services = lead.services.includes(slug)
-      ? lead.services.filter((picked) => picked !== slug)
-      : [...lead.services, slug];
     const updated = await store.updateCapture(lead.id, {
-      services,
+      services: toggled(slug),
       capturePrompt: prompt,
     });
     await publishLeadChange(lead, updated);
     const locale = localeOf(lead);
+    const services = (updated ?? lead).services;
     await bot.api.editMessageText(
       chatId,
       messageId,
@@ -632,13 +646,13 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     });
   }
 
-  async function recordFreeMessage(
+  async function acknowledgeMessage(
     chatId: number,
     sender: CaptureSender,
-    comment: string | null,
+    firstLeadComment: string | null,
   ): Promise<void> {
     const lead = await store.findLatestLeadByTelegramId(sender.id, brand);
-    if (!lead) return start(chatId, sender, undefined, comment);
+    if (!lead) return start(chatId, sender, undefined, firstLeadComment);
     const locale = localeOf(lead);
     await send(chatId, copy(locale).received, withMainMenu(locale));
   }
@@ -685,7 +699,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
         localeOf(running.lead),
         running.lead.services,
       );
-    await recordFreeMessage(chatId, sender, null);
+    await acknowledgeMessage(chatId, sender, null);
   }
 
   function isCommand(text: string): boolean {
@@ -707,7 +721,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
 
     const running = await runningQuestionnaire(chatId);
     if (running) return typedAnswer(running.lead, running.prompt, text);
-    return recordFreeMessage(chatId, sender, `${MESSAGE_NOTE}: ${text}`);
+    return acknowledgeMessage(chatId, sender, `${MESSAGE_NOTE}: ${text}`);
   }
 
   bot.chatType('private').on('message', async (ctx) => {
