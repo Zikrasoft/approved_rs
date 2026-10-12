@@ -12,6 +12,7 @@ export default defineConfig({
     include: ['src/**/*.test.ts'],
     env: {
       PUBLIC_PHONE_NUMBER: '381677210533',
+      PUBLIC_TG_MANAGER: 'carlabrs',
       TELEGRAM_BOT_TOKEN: '1001:test-bot-token',
       TELEGRAM_GROUP_ID: '-1009876543210',
       TELEGRAM_OWNER_ID: '111',

@@ -17,6 +17,16 @@ describe('createPublicEnvSchema', () => {
     });
   });
 
+  it('keeps the manager handle when set and refuses an empty one', () => {
+    expect(
+      schema.parse({ ...VALID, PUBLIC_TG_MANAGER: 'carlabrs' })
+        .PUBLIC_TG_MANAGER,
+    ).toBe('carlabrs');
+    expect(schema.safeParse({ ...VALID, PUBLIC_TG_MANAGER: '' }).success).toBe(
+      false,
+    );
+  });
+
   it('keeps a messenger number that is set on its own', () => {
     expect(
       schema.parse({

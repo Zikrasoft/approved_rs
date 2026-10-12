@@ -22,5 +22,6 @@ export function createPublicEnvSchema({
     PUBLIC_PHONE_NUMBER: z.string().min(1),
     PUBLIC_WHATSAPP_NUMBER: z.string().min(1).optional(),
     PUBLIC_VIBER_NUMBER: z.string().min(1).optional(),
+    PUBLIC_TG_MANAGER: z.string().min(1).optional(),
   });
 }

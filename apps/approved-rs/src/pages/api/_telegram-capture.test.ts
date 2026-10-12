@@ -382,3 +382,16 @@ describe('a photo from the visitor', () => {
     });
   });
 });
+
+describe('the Approved main menu', () => {
+  it('links «Написать менеджеру» straight to the manager account', async () => {
+    await answer('/start ru', { id: 71, first_name: 'Menu', username: 'menu' });
+
+    expect(lastReply().reply_markup.inline_keyboard).toContainEqual([
+      {
+        text: content('ru').captureBot.manager.button,
+        url: 'https://t.me/approvedrs',
+      },
+    ]);
+  });
+});

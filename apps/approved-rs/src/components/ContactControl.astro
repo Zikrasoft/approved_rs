@@ -14,6 +14,7 @@ interface Props extends Omit<
 > {
   channel: TrackedContactChannel;
   region?: 'contacts';
+  manager?: boolean;
   service?: string;
   variant?: 'primary' | 'secondary';
 }
@@ -21,6 +22,7 @@ interface Props extends Omit<
 const {
   channel,
   region,
+  manager,
   service,
   variant,
   class: className,
@@ -31,6 +33,7 @@ const control = contactControl({
   channel,
   onThanks:
     navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page',
+  manager,
   region,
   locale,
   service,

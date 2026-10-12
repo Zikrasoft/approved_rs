@@ -14,6 +14,7 @@ export default defineConfig({
       PUBLIC_WHATSAPP_NUMBER: '381677702100',
       PUBLIC_VIBER_NUMBER: '381677702100',
       PUBLIC_THREADS_CHANNEL: 'approved_test',
+      PUBLIC_TG_MANAGER: 'approvedrs',
       TELEGRAM_BOT_TOKEN: '1001:test-bot-token',
       TELEGRAM_CHANNEL_ID: '-1001234567890',
       TELEGRAM_GROUP_ID: '-1009876543210',

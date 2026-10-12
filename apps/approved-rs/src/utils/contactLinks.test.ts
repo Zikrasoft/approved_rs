@@ -29,6 +29,18 @@ describe('contactControl', () => {
     ).toBe('https://t.me/approved_manager');
   });
 
+  it('opens the manager account from the manager control on any page', async () => {
+    const contactControl = await load('approved_manager');
+    expect(
+      contactControl({
+        ...telegram,
+        manager: true,
+        onThanks: false,
+        locale: 'ru',
+      }).href,
+    ).toBe('https://t.me/approved_manager');
+  });
+
   it('falls back to the capture bot on the thanks page when no manager handle is set', async () => {
     const contactControl = await load(undefined);
     expect(

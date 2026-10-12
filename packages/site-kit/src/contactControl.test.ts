@@ -66,6 +66,17 @@ describe('createContactControls', () => {
     },
   );
 
+  it('opens the human Telegram from the manager control on any page, falling back to the bot', () => {
+    const request = {
+      channel: 'telegram',
+      manager: true,
+      onThanks: false,
+      locale: 'ru',
+    } as const;
+    expect(full(request).href).toBe('https://t.me/brand_manager');
+    expect(bare(request).href).toBe('https://t.me/brand_capture_bot?start=ru');
+  });
+
   it('prefills WhatsApp only when the brand configures a message', () => {
     const request = {
       channel: 'whatsapp',

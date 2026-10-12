@@ -35,6 +35,7 @@ export const OPENING_HOURS = [
 export const PHONE_NUMBER = env.PUBLIC_PHONE_NUMBER;
 export const WHATSAPP_NUMBER = env.PUBLIC_WHATSAPP_NUMBER;
 export const VIBER_NUMBER = env.PUBLIC_VIBER_NUMBER;
+export const TG_MANAGER = env.PUBLIC_TG_MANAGER;
 export const TELEGRAM_BOT_URL = telegramBotLink(BRAND.captureBot);
 
 export const SOCIAL_SAME_AS = [TELEGRAM_BOT_URL];

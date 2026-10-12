@@ -40,6 +40,7 @@ export const OPENING_HOURS = {
 export const PHONE_NUMBER = env.PUBLIC_PHONE_NUMBER;
 export const WHATSAPP_NUMBER = env.PUBLIC_WHATSAPP_NUMBER;
 export const VIBER_NUMBER = env.PUBLIC_VIBER_NUMBER;
+export const TG_MANAGER = env.PUBLIC_TG_MANAGER;
 export const INSTAGRAM =
   env.PUBLIC_INSTAGRAM === undefined
     ? undefined

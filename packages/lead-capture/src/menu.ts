@@ -2,7 +2,7 @@ import type { InlineKeyboardButton } from 'grammy/types';
 import { z } from 'zod';
 import { escapeHtml } from '@podbor/lead-crm';
 import { formatPhone } from '@podbor/site-kit/format-phone';
-import { captureBotLink } from '@podbor/site-kit/contact-links';
+import { captureBotLink, telegramLink } from '@podbor/site-kit/contact-links';
 import type { CaptureCopy } from './copy.ts';
 
 export interface ServiceCard {
@@ -49,6 +49,7 @@ export interface MenuConfig<L extends string, S extends string> {
   copy: (locale: L) => CaptureCopy;
   partners?: (locale: L) => readonly PartnerBot[];
   languages: Readonly<Record<L, string>>;
+  humanTelegram?: string;
 }
 
 export const REFERRAL = 'from-approved';
@@ -93,6 +94,7 @@ export function createScreens<L extends string, S extends string>({
   contacts,
   partners,
   languages,
+  humanTelegram,
 }: MenuConfig<L, S>) {
   const isService = (value: string): value is S =>
     (services as readonly string[]).includes(value);
@@ -114,7 +116,11 @@ export function createScreens<L extends string, S extends string>({
     const words = copy(locale);
     return {
       text: words.menu.text,
-      keyboard: menu.map((id) => tap(words[id].button, id, locale)),
+      keyboard: menu.map((id) =>
+        id === 'manager' && humanTelegram
+          ? [{ text: words.manager.button, url: telegramLink(humanTelegram) }]
+          : tap(words[id].button, id, locale),
+      ),
     };
   }
 
