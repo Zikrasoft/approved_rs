@@ -1,4 +1,6 @@
 import {
+  AD_SOURCE_FIELD,
+  adSourceFieldSchema,
   contactChannelSchema,
   sourceUrlSchema,
   visitorIdSchema,
@@ -53,6 +55,7 @@ export function createContactClickRoute({
           comment: '',
           source_url: sourceUrl,
           visitorId: visitorIdSchema.parse(form.get('visitor_id')),
+          adSource: adSourceFieldSchema.parse(form.get(AD_SOURCE_FIELD)),
           locale: localeFromUrl(sourceUrl, isLocale) ?? defaultLocale,
           kind: 'call_click',
         },

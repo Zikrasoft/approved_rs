@@ -1,3 +1,4 @@
+import { rememberAdTouch } from './adTouch.ts';
 import { defineAnalytics } from './analytics.ts';
 import { defineContactClickTracking } from './contactClick.ts';
 import { applyContactPreference } from './contactPreference.ts';
@@ -15,6 +16,7 @@ export function bootSiteKit({ ymCounterId, analytics }: SiteKitConfig): void {
   if (booted) return;
   booted = true;
   if (analytics) defineAnalytics({ ymCounterId });
+  rememberAdTouch();
   defineContactClickTracking();
   applyContactPreference();
   defineLanguageSuggestion();

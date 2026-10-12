@@ -2,6 +2,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { defineContactClickTracking } from './contactClick.ts';
 import { VISITOR_ID_STORAGE_KEY } from './visitorId.ts';
+import { AD_TOUCH_STORAGE_KEY } from './adTouch.ts';
 
 const UUID = '0f8fad5b-d9cb-469f-a165-70867728950e';
 const EARLIER_UUID = '7c9e6679-7425-40de-944b-e07fc1f90ae7';
@@ -55,6 +56,17 @@ describe('defineContactClickTracking', () => {
     expect(body.get('channel')).toBe('telegram');
     expect(body.get('source_url')).toBe(location.href);
     expect(body.get('visitor_id')).toBe(UUID);
+  });
+
+  it('carries the ad visit this browser remembered', () => {
+    const touch = JSON.stringify({
+      source: 'facebook',
+      at: new Date().toISOString(),
+    });
+    localStorage.setItem(AD_TOUCH_STORAGE_KEY, touch);
+    track();
+    click('viber');
+    expect(sent[0]![1].get('ad_source')).toBe(touch);
   });
 
   it('reuses the visitor id a previous click already minted', () => {

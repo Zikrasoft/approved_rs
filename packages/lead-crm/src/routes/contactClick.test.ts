@@ -126,10 +126,29 @@ describe('createContactClickRoute', () => {
     );
   });
 
+  it('passes the ad visit through as adSource', async () => {
+    const adSource = {
+      source: 'google',
+      campaign: 'brakes',
+      at: '2026-10-01T10:00:00.000Z',
+    };
+    await POST(
+      makeCtx({ channel: 'whatsapp', ad_source: JSON.stringify(adSource) }),
+    );
+    expect(notifyLead).toHaveBeenCalledWith(
+      expect.objectContaining({ adSource }),
+      '[contact-click]',
+    );
+  });
+
   it('sends null for a missing source_url rather than an empty string', async () => {
     await POST(makeCtx({ channel: 'phone' }));
     expect(notifyLead).toHaveBeenCalledWith(
-      expect.objectContaining({ source_url: null, visitorId: null }),
+      expect.objectContaining({
+        source_url: null,
+        visitorId: null,
+        adSource: null,
+      }),
       '[contact-click]',
     );
   });

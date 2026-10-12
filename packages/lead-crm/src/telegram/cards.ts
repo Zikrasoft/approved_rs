@@ -231,6 +231,28 @@ function handoffLine(lead: StoredLead): string {
     : '';
 }
 
+const AD_SOURCE_LABELS: Record<string, string> = {
+  facebook: 'Facebook',
+  fb: 'Facebook',
+  instagram: 'Instagram',
+  ig: 'Instagram',
+  google: 'Google',
+};
+
+const AD_HASHTAG = '#реклама';
+
+function adLine({ adSource }: StoredLead): string {
+  if (!adSource) return '';
+  const source =
+    AD_SOURCE_LABELS[adSource.source.toLowerCase()] ?? adSource.source;
+  const parts = [source, adSource.campaign, adSource.content].filter(Boolean);
+  return `\n📣 Реклама: ${escapeHtml(parts.join(' · '))}`;
+}
+
+function adHashtag(lead: StoredLead, separator: string): string {
+  return lead.adSource ? `${separator}${AD_HASHTAG}` : '';
+}
+
 function remindLine(lead: StoredLead): string {
   return lead.status === 'postponed' && lead.remindAt
     ? `\n⏰ Напомнить: ${formatDateRu(lead.remindAt)}`
@@ -265,7 +287,7 @@ export function createFormatter({
     const via = lead.telegramId == null ? '' : ' · 🤖 через бота';
     const referred =
       lead.referredBy === 'approved' ? ' · 🤝 из бота Approved.rs' : '';
-    return `🏷 ${escapeHtml(lead.brand)}${via}${referred}${handoffLine(lead)}`;
+    return `🏷 ${escapeHtml(lead.brand)}${via}${referred}${adLine(lead)}${handoffLine(lead)}`;
   }
 
   function formatLeadText(
@@ -293,7 +315,7 @@ export function createFormatter({
     if (lead.source_url) lines.push(`Страница: ${escapeHtml(lead.source_url)}`);
     if (lead.visitorId)
       lines.push(`ID посетителя: ${escapeHtml(lead.visitorId.slice(0, 100))}`);
-    lines.push(``, `#заявка`);
+    lines.push(``, `#заявка${adHashtag(lead, ' ')}`);
     return lines.join('\n');
   }
 
@@ -324,7 +346,7 @@ export function createFormatter({
     },
 
     formatTeaser(lead: StoredLead): string {
-      return `🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusMark(lead.status)}${remindLine(lead)}\n${brandLine(lead)}`;
+      return `🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusMark(lead.status)}${remindLine(lead)}\n${brandLine(lead)}${adHashtag(lead, '\n')}`;
     },
 
     postponeReminderText(lead: StoredLead): string {

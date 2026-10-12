@@ -227,6 +227,45 @@ describe('insertOrMergeLead', () => {
     expect(lead.comment).not.toContain('Также пробовал');
   });
 
+  it('keeps the first ad visit, and lets the capture bot inherit it from the click', async () => {
+    const first = {
+      source: 'facebook',
+      campaign: 'spring',
+      at: '2026-10-01T10:00:00.000Z',
+    };
+    await store.insertOrMergeLead({
+      ...clickData('telegram'),
+      adSource: first,
+    });
+    const { lead: bot } = await store.insertOrMergeLead({
+      ...clickData('telegram'),
+      contact: '@petr',
+      telegramId: 77,
+    });
+    const { lead: later } = await store.insertOrMergeLead({
+      ...clickData('whatsapp'),
+      adSource: { ...first, source: 'google' },
+    });
+
+    expect(bot.adSource).toEqual(first);
+    expect(later.adSource).toEqual(first);
+  });
+
+  it('takes the ad visit a later Lead brings when the first had none', async () => {
+    await store.insertOrMergeLead(clickData('telegram'));
+    const adSource = { source: 'google', at: '2026-10-01T10:00:00.000Z' };
+    const { lead } = await store.insertOrMergeLead({
+      ...clickData('whatsapp'),
+      adSource,
+    });
+    expect(lead.adSource).toEqual(adSource);
+  });
+
+  it('stores no ad visit for a Lead that came without one', async () => {
+    const { lead } = await store.insertOrMergeLead(clickData('telegram'));
+    expect(lead.adSource).toBeNull();
+  });
+
   it('hands back the Lead as it was before the merge, and null for an insert', async () => {
     const first = await store.insertOrMergeLead(clickData('telegram'));
     const second = await store.insertOrMergeLead({

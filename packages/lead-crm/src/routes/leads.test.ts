@@ -115,6 +115,15 @@ describe('createLeadsRoute', () => {
     expect(lead.source_url).toHaveLength(500);
   });
 
+  it('stores a lead without an ad visit when the field is missing or forged', async () => {
+    await POST(makeCtx(valid()));
+    await POST(makeCtx(valid({ ad_source: '<script>' })));
+    expect(notifyLead.mock.calls.map(([lead]) => lead.adSource)).toEqual([
+      null,
+      null,
+    ]);
+  });
+
   it('drops a visitor id that is not one this site could have issued', async () => {
     await POST(makeCtx(valid({ visitor_id: 'a'.repeat(5000) })));
     expect(notifyLead).toHaveBeenCalledWith(
@@ -240,6 +249,11 @@ describe('createLeadsRoute', () => {
         consent: 'on',
         source_url: '/ru/vehicle-buyback/de/',
         visitor_id: '9f1c2b7e-4a3d-4c9e-8b21-6f0d5a7c3e11',
+        ad_source: JSON.stringify({
+          source: 'facebook',
+          campaign: 'spring_buyback',
+          at: '2026-10-01T10:00:00.000Z',
+        }),
       }),
     );
     expect(waitUntil).toHaveBeenCalledTimes(1);
@@ -254,6 +268,11 @@ describe('createLeadsRoute', () => {
         country: 'de',
         source_url: '/ru/vehicle-buyback/de/',
         visitorId: '9f1c2b7e-4a3d-4c9e-8b21-6f0d5a7c3e11',
+        adSource: {
+          source: 'facebook',
+          campaign: 'spring_buyback',
+          at: '2026-10-01T10:00:00.000Z',
+        },
         locale: 'ru',
       },
       '[leads]',

@@ -4,7 +4,11 @@ import Icon from './Icon.astro';
 import PhoneInput from './PhoneInput.astro';
 import { PathBuilder } from '@/utils/paths';
 import { SHOP_SERVICE, type ServiceSlug } from '@/utils/services';
-import { HONEYPOT_FIELD, SERVICE_FIELD } from '@podbor/lead-crm';
+import {
+  AD_SOURCE_FIELD,
+  HONEYPOT_FIELD,
+  SERVICE_FIELD,
+} from '@podbor/lead-crm';
 import { content } from '@/i18n/content';
 
 interface Props {
@@ -71,6 +75,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
 
     <input type="hidden" name="source_url" data-source-url />
     <input type="hidden" name="visitor_id" data-visitor-id />
+    <input type="hidden" name={AD_SOURCE_FIELD} data-ad-source />
 
     <input type="hidden" name="contact" />
     <input type="hidden" name="contact_channel" value={channels[0].value} />

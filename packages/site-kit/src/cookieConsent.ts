@@ -6,6 +6,7 @@ import {
   type Consent,
   type ConsentDetail,
 } from './consent.ts';
+import { forgetAdTouch } from './adTouch.ts';
 import { forgetVisitorId } from './visitorId.ts';
 
 export { CONSENT_EVENT, type ConsentDetail };
@@ -39,8 +40,6 @@ export function defineCookieConsent(tagName = 'cookie-consent'): void {
       private controller?: AbortController;
 
       connectedCallback(): void {
-        // Node.moveBefore() reconnects without disconnecting, so without this
-        // the previous listeners survive and one click answers twice.
         this.controller?.abort();
         this.controller = new AbortController();
         const { signal } = this.controller;
@@ -58,7 +57,10 @@ export function defineCookieConsent(tagName = 'cookie-consent'): void {
             if (!button) return;
             const analytics = button.hasAttribute(CONSENT_ACCEPT_ATTRIBUTE);
             saveConsent(analytics, version);
-            if (!analytics) forgetVisitorId(localStorage);
+            if (!analytics) {
+              forgetVisitorId(localStorage);
+              forgetAdTouch(localStorage);
+            }
             this.hidden = true;
             this.dispatchEvent(
               new CustomEvent<ConsentDetail>(CONSENT_EVENT, {

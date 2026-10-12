@@ -15,6 +15,7 @@ import { submitLeadForm } from './submitLeadForm.ts';
 
 export interface LeadFormDeps {
   visitorId: () => string;
+  adSource: () => string;
   markFieldValidity: (control: Element, valid: boolean) => void;
   preferredChannel?: () => TrackedContactChannel | undefined;
   visitorCountry?: () => string | undefined;
@@ -177,6 +178,7 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
       setBusy(false);
     } else if (button.hasAttribute('aria-busy')) return;
     pick<HTMLInputElement>('[data-visitor-id]').value = deps.visitorId();
+    pick<HTMLInputElement>('[data-ad-source]').value = deps.adSource();
     pick<HTMLInputElement>('[data-source-url]').value = location.href;
 
     const field = contactField();

@@ -2629,6 +2629,40 @@ describe('the Lead topic', () => {
     expect(stored()[0].topicId).toBe(1);
   });
 
+  it('keeps the ad visit of the click /start merges into, and shows it on the cards', async () => {
+    const adSource = {
+      source: 'facebook',
+      campaign: 'spring',
+      at: '2026-10-01T10:00:00.000Z',
+    };
+    await leadStore.insertOrMergeLead({
+      brand: BRAND,
+      name: '',
+      contact: '—',
+      service: '',
+      contactChannel: 'telegram',
+      comment: null,
+      country: null,
+      source_url: 'https://example.test/ru/',
+      visitorId: '0f8fad5b-d9cb-469f-a165-70867728950e',
+      locale: 'ru',
+      kind: 'call_click',
+      adSource,
+    });
+
+    await POST(makeCtx(startUpdate('ru_0f8fad5bd9cb469fa16570867728950e')));
+
+    expect(stored()).toHaveLength(1);
+    expect(stored()[0].adSource).toEqual(adSource);
+    expect(
+      api
+        .callsTo('sendMessage', CRM_TOKEN)
+        .some((call) =>
+          String(call.payload.text).includes('📣 Реклама: Facebook · spring'),
+        ),
+    ).toBe(true);
+  });
+
   it('opens the topic for a fresh Lead that has none when the visitor presses /start again', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
     api.fail('createForumTopic', 'Bad Request: not enough rights');

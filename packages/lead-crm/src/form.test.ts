@@ -7,6 +7,7 @@ import {
   sourceUrlSchema,
   serviceSlugSchema,
   visitorIdSchema,
+  adSourceFieldSchema,
   MAX_COMMENT_LENGTH,
   MAX_FIELD_LENGTH,
   MAX_SERVICES,
@@ -91,6 +92,54 @@ describe('visitorIdSchema', () => {
       expect(visitorIdSchema.parse(value)).toBeNull();
     },
   );
+});
+
+describe('adSourceFieldSchema', () => {
+  const AT = '2026-10-01T10:00:00.000Z';
+  const field = (value: unknown) => JSON.stringify(value);
+
+  it('reads the ad visit the site posted', () => {
+    expect(
+      adSourceFieldSchema.parse(
+        field({
+          source: 'instagram',
+          campaign: 'Spring | RS (v2)',
+          content: 'reel-1',
+          at: AT,
+        }),
+      ),
+    ).toEqual({
+      source: 'instagram',
+      campaign: 'Spring | RS (v2)',
+      content: 'reel-1',
+      at: AT,
+    });
+  });
+
+  it('keeps the visit when only a campaign or content is unreadable', () => {
+    expect(
+      adSourceFieldSchema.parse(
+        field({
+          source: 'facebook',
+          campaign: '<b>x</b>',
+          content: 'x'.repeat(101),
+          at: AT,
+        }),
+      ),
+    ).toEqual({ source: 'facebook', at: AT });
+  });
+
+  it.each([
+    null,
+    '',
+    'not json',
+    field(null),
+    field({ source: '', at: AT }),
+    field({ source: 'facebook<script>', at: AT }),
+    field({ source: 'facebook', at: 'yesterday' }),
+  ])('drops %p rather than failing the whole submission', (value) => {
+    expect(adSourceFieldSchema.parse(value)).toBeNull();
+  });
 });
 
 describe('sourceUrlSchema', () => {

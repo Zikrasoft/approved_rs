@@ -142,6 +142,15 @@ describe('defineCookieConsent', () => {
     expect(el.hidden).toBe(true);
   });
 
+  it('forgets the visitor id and the ad visit on a refusal', () => {
+    localStorage.setItem('visitor_id', 'v');
+    localStorage.setItem('ad_touch', '{}');
+    mount();
+    click('[data-consent-decline]');
+    expect(localStorage.getItem('visitor_id')).toBeNull();
+    expect(localStorage.getItem('ad_touch')).toBeNull();
+  });
+
   it('answers for a click that lands on markup inside the button', () => {
     const el = mount();
     click('[data-consent-accept] span');

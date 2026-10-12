@@ -80,6 +80,30 @@ to know which field is to blame. A form that marks an error with a class alone g
 no `form_error`. `aria-invalid` is also read by screen readers, so it has to be
 cleared as soon as the visitor fixes the field.
 
+## How an ad visit is recognised
+
+`rememberAdTouch` in `packages/site-kit/src/adTouch.ts`, armed by
+`bootSiteKit`, reads the landing URL. It is an ad when the URL carries
+`fbclid` or `gclid`, or `utm_medium` is `paid`, `cpc`, `ppc` or `paid_social`
+(any case). The source is `utm_source`, else `facebook` for `fbclid` and
+`google` for `gclid`; `utm_campaign` and `utm_content` ride along. The first
+such landing is kept in `localStorage` for 30 days and never overwritten while
+it is fresh; a visitor who declined analytics stores none, and declining
+clears it. Every Lead the site then creates carries it, and the CRM card shows
+«📣 Реклама: Facebook · <campaign>» with `#реклама`.
+
+Tag every ad link with UTM even where the network adds its own click id:
+
+```
+?utm_source=facebook&utm_medium=paid&utm_campaign=<campaign>&utm_content=<ad>
+```
+
+`utm_medium=paid` is what makes a link an ad when the click id is stripped.
+Keep campaign and content to letters, digits, spaces and `._-+|:/()&,#`, at
+most 100 characters each — anything else is dropped on the server, and only
+that field is lost. Instagram placements bought through Meta are
+`utm_source=instagram`.
+
 ## How a form submission is counted
 
 All three forms post through `submitLeadForm` from `@podbor/lead-crm/submit`,

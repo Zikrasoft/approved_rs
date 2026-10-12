@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const calls: string[] = [];
 const record = (name: string) => vi.fn(() => void calls.push(name));
 
+vi.mock('./adTouch.ts', () => ({ rememberAdTouch: record('adTouch') }));
 vi.mock('./analytics.ts', () => ({ defineAnalytics: record('analytics') }));
 vi.mock('./contactClick.ts', () => ({
   defineContactClickTracking: record('contactClick'),
@@ -28,6 +29,7 @@ describe('bootSiteKit', () => {
     (await boot())({ ymCounterId: 42, analytics: true });
     expect(calls).toEqual([
       'analytics',
+      'adTouch',
       'contactClick',
       'contactPreference',
       'languageSuggestion',
@@ -40,12 +42,12 @@ describe('bootSiteKit', () => {
     const bootSiteKit = await boot();
     bootSiteKit({ ymCounterId: 42, analytics: true });
     bootSiteKit({ ymCounterId: 42, analytics: true });
-    expect(calls).toHaveLength(5);
+    expect(calls).toHaveLength(6);
   });
 
   it('skips the counter when analytics is off', async () => {
     (await boot())({ ymCounterId: 42, analytics: false });
     expect(calls).not.toContain('analytics');
-    expect(calls).toHaveLength(4);
+    expect(calls).toHaveLength(5);
   });
 });

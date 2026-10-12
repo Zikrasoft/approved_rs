@@ -2,7 +2,8 @@ import { z } from 'zod';
 import { SERVICE_LABELS_RU, type LabelledService } from '@podbor/brands';
 import { TRACKED_CONTACT_CHANNELS } from './contactChannel.ts';
 import { isValidContact } from './phone.ts';
-import { HONEYPOT_FIELD, SERVICE_FIELD } from './fields.ts';
+import { adSourceSchema } from './schema.ts';
+import { AD_SOURCE_FIELD, HONEYPOT_FIELD, SERVICE_FIELD } from './fields.ts';
 
 export {
   isValidContact,
@@ -15,7 +16,7 @@ export const MAX_FIELD_LENGTH = 200;
 export const MAX_COMMENT_LENGTH = 2000;
 export const MAX_URL_LENGTH = 500;
 export const MAX_SERVICES = 20;
-export { HONEYPOT_FIELD, SERVICE_FIELD } from './fields.ts';
+export { AD_SOURCE_FIELD, HONEYPOT_FIELD, SERVICE_FIELD } from './fields.ts';
 
 export const contactChannelSchema = z.enum(TRACKED_CONTACT_CHANNELS);
 
@@ -56,6 +57,18 @@ const optionalText = (max: number) =>
 
 export const sourceUrlSchema = optionalText(MAX_URL_LENGTH);
 
+function parseJson(value: unknown): unknown {
+  try {
+    return JSON.parse(String(value));
+  } catch {
+    return null;
+  }
+}
+
+export const adSourceFieldSchema = z
+  .preprocess(parseJson, adSourceSchema.nullable())
+  .catch(null);
+
 function formRecord(value: unknown): unknown {
   if (!(value instanceof FormData)) return value;
   const record: Record<string, unknown> = Object.create(null);
@@ -91,6 +104,7 @@ const submissionObject = z
     country: optionalText(MAX_FIELD_LENGTH),
     source_url: sourceUrlSchema,
     visitor_id: visitorIdSchema,
+    [AD_SOURCE_FIELD]: adSourceFieldSchema,
     // TODO: LeadForm.astro posts `city` on every city landing page and it is discarded here.
     consent: z.string().trim().min(1),
   })
@@ -110,6 +124,7 @@ const submissionObject = z
       country: value.country,
       source_url: value.source_url,
       visitorId: value.visitor_id,
+      adSource: value[AD_SOURCE_FIELD],
     };
   });
 

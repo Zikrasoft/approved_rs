@@ -439,6 +439,7 @@ export function createLeadStore({
           source_url: existing.source_url ?? data.source_url,
           telegramId: data.telegramId ?? existing.telegramId,
           referredBy: data.referredBy ?? existing.referredBy,
+          adSource: existing.adSource ?? data.adSource ?? null,
           capturePrompt: data.capturePrompt ?? existing.capturePrompt,
           visitorActiveAt:
             data.telegramId == null

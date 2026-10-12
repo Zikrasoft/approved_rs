@@ -57,6 +57,7 @@ const storedLead: StoredLead = {
   questionnaireDone: false,
   referredBy: null,
   managerHandoff: null,
+  adSource: null,
   remindAt: null,
   postponedFrom: null,
 };

@@ -88,7 +88,12 @@ export type {
   StatusChangeOptions,
 } from './notifyLead.ts';
 
-export { contactChannelSchema, HONEYPOT_FIELD, SERVICE_FIELD } from './form.ts';
+export {
+  AD_SOURCE_FIELD,
+  contactChannelSchema,
+  HONEYPOT_FIELD,
+  SERVICE_FIELD,
+} from './form.ts';
 
 export { createLeadsRoute } from './routes/leads.ts';
 

@@ -53,6 +53,17 @@ const managerHandoffSchema = z.object({
 });
 export type ManagerHandoff = z.infer<typeof managerHandoffSchema>;
 
+const AD_TEXT = /^[\p{L}\p{N} ._\-+|:/()&,#]{1,100}$/u;
+const adTextSchema = z.string().trim().regex(AD_TEXT);
+
+export const adSourceSchema = z.object({
+  source: adTextSchema,
+  campaign: adTextSchema.optional().catch(undefined),
+  content: adTextSchema.optional().catch(undefined),
+  at: z.iso.datetime(),
+});
+export type AdSource = z.infer<typeof adSourceSchema>;
+
 export const LEGACY_BRAND = 'Approved.rs';
 
 export const REFERRERS = ['approved'] as const;
@@ -90,6 +101,7 @@ const baseStoredLeadSchema = z.object({
   questionnaireDone: z.boolean().default(false).catch(false),
   referredBy: z.enum(REFERRERS).nullable().default(null).catch(null),
   managerHandoff: managerHandoffSchema.nullable().default(null).catch(null),
+  adSource: adSourceSchema.nullable().default(null).catch(null),
   archived: z.boolean().optional(),
   remindAt: z.string().nullable().default(null),
   postponedFrom: inWorkStatusSchema.nullable().default(null).catch(null),
@@ -143,7 +155,10 @@ export type LeadInput = Pick<
   | 'kind'
 > &
   Partial<
-    Pick<StoredLead, 'services' | 'capturePrompt' | 'telegramId' | 'referredBy'>
+    Pick<
+      StoredLead,
+      'services' | 'capturePrompt' | 'telegramId' | 'referredBy' | 'adSource'
+    >
   >;
 
 export type LeadSubmission = Omit<LeadInput, 'brand'>;

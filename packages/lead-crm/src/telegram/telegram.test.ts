@@ -98,6 +98,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     questionnaireDone: false,
     referredBy: null,
     managerHandoff: null,
+    adSource: null,
     remindAt: null,
     postponedFrom: null,
     ...overrides,
@@ -247,6 +248,39 @@ describe('sendLeadNotification', () => {
     );
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).toContain('👤 Ушёл к менеджеру @approvedrs · 12.10.2026');
+  });
+
+  it('marks an ad visit in the teaser with its source and campaign', async () => {
+    await sendLeadNotification(
+      makeLead({
+        adSource: {
+          source: 'fb',
+          campaign: 'spring',
+          content: 'reel',
+          at: '2026-10-01T10:00:00.000Z',
+        },
+      }),
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('📣 Реклама: Facebook · spring · reel');
+    expect(body.text.endsWith('\n#реклама')).toBe(true);
+  });
+
+  it('names an unknown ad source as the site sent it', async () => {
+    await sendLeadNotification(
+      makeLead({
+        adSource: { source: 'tiktok', at: '2026-10-01T10:00:00.000Z' },
+      }),
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('📣 Реклама: tiktok');
+  });
+
+  it('leaves the ad marks off a Lead that did not come from an ad', async () => {
+    await sendLeadNotification(makeLead());
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).not.toContain('Реклама');
+    expect(body.text).not.toContain('#реклама');
   });
 
   it('ignores a comment that only quotes the referral note', async () => {
@@ -1513,6 +1547,23 @@ describe('the Lead topic', () => {
     expect(
       formatter.topicName(makeLead({ name: 'Я'.repeat(300) })),
     ).toHaveLength(128);
+  });
+
+  it('marks an ad visit in the topic summary and the DM detail', () => {
+    const lead = makeLead({
+      adSource: {
+        source: 'instagram',
+        campaign: 'spring',
+        at: '2026-10-01T10:00:00.000Z',
+      },
+    });
+    for (const text of [
+      formatter.topicSummaryText(lead),
+      buildLeadDetail(lead, 'owner').text,
+    ]) {
+      expect(text).toContain('📣 Реклама: Instagram · spring');
+      expect(text).toContain('#заявка #реклама');
+    }
   });
 
   it('leaves a phone or an id contact as plain text in the summary', () => {
