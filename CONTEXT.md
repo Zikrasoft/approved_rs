@@ -77,6 +77,15 @@ username is never asked, the username is the contact. Leaving it for the menu
 ends it, and the answers given so far stay on the Lead.
 _Avoid_: wizard, form (the site's form is a different thing)
 
+**Topic** — the forum topic in the CRM group that holds one Lead's
+conversation. The CRM bot opens it the first time a Capture bot touches a
+Lead the visitor started from Telegram, names it after the Lead's id, name and
+brand, and keeps the Lead summary as its first message, edited as the
+Questionnaire fills in. The Lead's card in General and its detail link to it.
+A Lead from the site form or a placeholder click has no Topic until a bot
+`/start` merges into it.
+_Avoid_: thread, chat
+
 **Owner** — the business partner who serves the clients the sites bring and
 owes the admin a Payout for them. Not the owner of the sites.
 _Avoid_: operator, partner, manager

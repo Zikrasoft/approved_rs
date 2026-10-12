@@ -67,6 +67,8 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     pendingPrompt: null,
     capturePrompt: null,
     telegramId: null,
+    topicId: null,
+    topicMessageId: null,
     referredBy: null,
     remindAt: '2026-10-20',
     ...overrides,

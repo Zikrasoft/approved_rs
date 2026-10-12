@@ -6,9 +6,10 @@ import { BRAND, leadStore } from './crm';
 
 const ruServices = content('ru').services;
 
-export const { notifier, ensureLeadCard, notifyLead } = createBrandBot({
-  store: leadStore,
-  brand: BRAND,
-  serviceLabel: (slug) =>
-    isServiceSlug(slug) ? ruServices[slug].name : brandServiceLabel(slug),
-});
+export const { notifier, ensureLeadCard, ensureLeadTopic, notifyLead } =
+  createBrandBot({
+    store: leadStore,
+    brand: BRAND,
+    serviceLabel: (slug) =>
+      isServiceSlug(slug) ? ruServices[slug].name : brandServiceLabel(slug),
+  });

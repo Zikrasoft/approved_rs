@@ -6,6 +6,7 @@ import { REPLY_RELAY_BRANDS } from './captureBot';
 export const {
   notifier,
   ensureLeadCard,
+  ensureLeadTopic,
   afterStatusChange,
   notifyLead,
   client,

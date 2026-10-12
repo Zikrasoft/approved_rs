@@ -45,6 +45,28 @@ describe('recordBotApi', () => {
     expect(await answer.json()).toEqual({ ok: true, result: true });
   });
 
+  it('opens forum topics with incrementing thread ids and copies messages', async () => {
+    const api = recordBotApi();
+    const topic = (name: string) =>
+      api.fetch('https://api.telegram.org/botT/createForumTopic', {
+        body: JSON.stringify({ chat_id: -100500, name }),
+      });
+    expect(await (await topic('#1')).json()).toMatchObject({
+      result: { message_thread_id: 1, name: '#1' },
+    });
+    expect(await (await topic('#2')).json()).toMatchObject({
+      result: { message_thread_id: 2 },
+    });
+    const copied = await api.fetch(
+      'https://api.telegram.org/botT/copyMessage',
+      { body: JSON.stringify({ chat_id: -100500, message_id: 3 }) },
+    );
+    expect(await copied.json()).toEqual({
+      ok: true,
+      result: { message_id: 1000 },
+    });
+  });
+
   it('serves canned results and failures, and resets them', async () => {
     const api = recordBotApi();
     api.respond('getChat', { id: 9 });

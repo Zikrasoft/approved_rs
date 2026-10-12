@@ -952,6 +952,18 @@ In the group the bot needs **admin rights to pin messages**: every new card is
 pinned and a closed one is unpinned; without the right both calls fail and are
 only logged.
 
+The group runs as a **forum** (group settings → Topics on): every Lead a
+visitor starts in a Capture bot gets its own Topic, which the CRM bot opens and
+keeps the Lead summary in, while cards and the digest stay in General. Give the
+CRM bot the **Manage topics** admin right as well — without it
+`createForumTopic` fails, the failure is only logged, and the Lead carries on
+without a Topic. Add the three Capture bots to the same group as admins with
+**Manage topics** too: each one copies its visitors' messages into their Topic
+and owner replies back out, which needs it to see the group, and posting into a
+closed Topic needs that right. The CRM bot must also receive group messages
+(admin in the group, or privacy mode off) so it hears the owner write inside a
+Topic.
+
 Privacy mode can stay on. The bot only acts on replies to its own messages
 (cards and prompts), and Telegram delivers "replies to any messages implicitly
 or explicitly meant for this bot" to a bot in privacy mode

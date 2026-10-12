@@ -133,6 +133,7 @@ export interface CaptureWebhookRouteOptions<
 > extends MenuConfig<L, S> {
   secret: string | undefined;
   store: CaptureStore;
+  ensureLeadTopic: (lead: StoredLead) => Promise<StoredLead>;
   ensureLeadCard: (lead: StoredLead) => Promise<void>;
   sendVisitorChangeToAdmin: (
     lead: StoredLead,
@@ -181,6 +182,7 @@ function sharedPhone(phoneNumber: string): string {
 export function createCaptureWebhookRoute<L extends string, S extends string>({
   secret,
   store,
+  ensureLeadTopic,
   ensureLeadCard,
   sendVisitorChangeToAdmin,
   bot,
@@ -260,7 +262,15 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     lead: StoredLead,
     updated: StoredLead | undefined,
   ): Promise<void> {
-    await ensureLeadCard(updated ?? lead).catch((error: unknown) => {
+    const latest = updated ?? lead;
+    const topical = await ensureLeadTopic(latest).catch((error: unknown) => {
+      console.error('[capture] could not update the topic', {
+        error,
+        leadId: lead.id,
+      });
+      return latest;
+    });
+    await ensureLeadCard(topical).catch((error: unknown) => {
       console.error('[capture] could not update the card', {
         error,
         leadId: lead.id,

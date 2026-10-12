@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
   createAfterStatusChange,
   createEnsureLeadCard,
+  createEnsureLeadTopic,
   createNotifyLead,
 } from './notifyLead.ts';
 import type { LeadStore } from './store.ts';
@@ -53,6 +54,7 @@ export function createBrandBot({
   const formatter = createFormatter({
     serviceLabel,
     botUsername: env.TELEGRAM_BOT_USERNAME,
+    groupId: env.TELEGRAM_GROUP_ID,
     replyRelayBrands,
   });
   const notifier = createNotifier({
@@ -66,6 +68,7 @@ export function createBrandBot({
   return {
     notifier,
     ensureLeadCard,
+    ensureLeadTopic: createEnsureLeadTopic({ store, notifier }),
     afterStatusChange: createAfterStatusChange({ ensureLeadCard, notifier }),
     notifyLead: createNotifyLead({ store, notifier, brand }),
     client,

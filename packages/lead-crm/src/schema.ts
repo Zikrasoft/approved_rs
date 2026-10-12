@@ -67,6 +67,8 @@ const baseStoredLeadSchema = z.object({
   pendingPrompt: pendingPromptSchema.nullable().default(null).catch(null),
   capturePrompt: capturePromptSchema.nullable().default(null).catch(null),
   telegramId: z.number().int().nullable().default(null).catch(null),
+  topicId: z.number().int().nullable().default(null).catch(null),
+  topicMessageId: z.number().int().nullable().default(null).catch(null),
   referredBy: z.enum(REFERRERS).nullable().default(null).catch(null),
   archived: z.boolean().optional(),
   remindAt: z.string().nullable().default(null),

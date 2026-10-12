@@ -78,6 +78,7 @@ let api: RecordedBotApi;
 let storage: MemoryStorage;
 let leadStore: LeadStore;
 let ensureLeadCard: (lead: StoredLead) => Promise<void>;
+let ensureLeadTopic: (lead: StoredLead) => Promise<StoredLead>;
 let notifier: ReturnType<typeof createBrandBot>['notifier'];
 let POST: ReturnType<typeof createCaptureWebhookRoute>;
 
@@ -93,6 +94,7 @@ function route(
     contacts: { phone: '381601234567', site: 'https://example.test' },
     secret,
     store: leadStore,
+    ensureLeadTopic,
     ensureLeadCard,
     sendVisitorChangeToAdmin: notifier.sendVisitorChangeToAdmin,
     bot: createTelegramClient(CAPTURE_TOKEN, 'capture_bot').bot,
@@ -148,7 +150,14 @@ function cards() {
   return api
     .callsTo('sendMessage', CRM_TOKEN)
     .map((c) => c.payload)
-    .filter((p) => p.chat_id === GROUP_ID);
+    .filter((p) => p.chat_id === GROUP_ID && p.message_thread_id === undefined);
+}
+
+function topicPosts() {
+  return api
+    .callsTo('sendMessage', CRM_TOKEN)
+    .map((c) => c.payload)
+    .filter((p) => p.message_thread_id !== undefined);
 }
 
 function adminNotes(chatId = ADMIN_IDS[0]) {
@@ -159,8 +168,22 @@ function adminNotes(chatId = ADMIN_IDS[0]) {
     .map((p) => String(p.text));
 }
 
+function isSummary(payload: Record<string, unknown>): boolean {
+  return stored().some((l) => l.topicMessageId === payload.message_id);
+}
+
 function cardEdits() {
-  return api.callsTo('editMessageText', CRM_TOKEN).map((c) => c.payload);
+  return api
+    .callsTo('editMessageText', CRM_TOKEN)
+    .map((c) => c.payload)
+    .filter((p) => !isSummary(p));
+}
+
+function summaryEdits() {
+  return api
+    .callsTo('editMessageText', CRM_TOKEN)
+    .map((c) => c.payload)
+    .filter(isSummary);
 }
 
 function sisterLead(): LeadInput {
@@ -306,7 +329,7 @@ beforeEach(() => {
     getNotifier: vi.fn(),
   }));
   storage = storages[LEADS_PATH];
-  ({ ensureLeadCard, notifier } = createBrandBot({
+  ({ ensureLeadCard, ensureLeadTopic, notifier } = createBrandBot({
     store: leadStore,
     brand: BRAND,
     serviceLabel: (slug) => slug,
@@ -2182,5 +2205,88 @@ describe('switching the language', () => {
 
     expect(storage.writeAttempts()).toBe(writes);
     expect(edits()).toHaveLength(1);
+  });
+});
+
+describe('the Lead topic', () => {
+  it('opens one topic per Lead at /start, with the summary as its first message', async () => {
+    await POST(makeCtx(startUpdate('vehicle-sourcing_ru')));
+
+    expect(api.callsTo('createForumTopic', CRM_TOKEN)).toEqual([
+      expect.objectContaining({
+        payload: { chat_id: GROUP_ID, name: '#1 · Иван Петров · Approved.rs' },
+      }),
+    ]);
+    expect(topicPosts()).toEqual([
+      expect.objectContaining({
+        chat_id: GROUP_ID,
+        message_thread_id: 1,
+        text: expect.stringContaining(
+          'Контакт: <a href="https://t.me/ivan">@ivan</a> (Telegram)',
+        ),
+      }),
+    ]);
+    const [lead] = stored();
+    expect(lead).toMatchObject({ topicId: 1, topicMessageId: 1000 });
+    expect(JSON.stringify(cards()[0].reply_markup)).toContain(
+      'https://t.me/c/500/1',
+    );
+  });
+
+  it('reuses the topic when the visitor presses /start again', async () => {
+    await POST(makeCtx(startUpdate('vehicle-sourcing_ru')));
+    await POST(makeCtx(startUpdate('vehicle-import_ru')));
+    await POST(makeCtx(startUpdate()));
+
+    expect(api.callsTo('createForumTopic', CRM_TOKEN)).toHaveLength(1);
+    expect(stored()).toHaveLength(1);
+  });
+
+  it('edits the summary as the Questionnaire fills in', async () => {
+    await begin();
+    await say('BMW X5');
+
+    expect(api.callsTo('createForumTopic', CRM_TOKEN)).toHaveLength(1);
+    expect(String(summaryEdits().at(-1)?.text)).toContain('Ищет: BMW X5');
+  });
+
+  it('opens the topic when /start merges into a placeholder click, not before', async () => {
+    await leadStore.insertOrMergeLead({
+      brand: BRAND,
+      name: '',
+      contact: '—',
+      service: '',
+      contactChannel: 'telegram',
+      comment: null,
+      country: null,
+      source_url: 'https://example.test/ru/',
+      visitorId: '0f8fad5b-d9cb-469f-a165-70867728950e',
+      locale: 'ru',
+      kind: 'call_click',
+    });
+    expect(stored()[0].topicId).toBeNull();
+
+    await POST(
+      makeCtx(
+        startUpdate('vehicle-import_ru_0f8fad5bd9cb469fa16570867728950e'),
+      ),
+    );
+
+    expect(stored()).toHaveLength(1);
+    expect(stored()[0].topicId).toBe(1);
+  });
+
+  it('still posts the card when the topic cannot be opened', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    api.fail('createForumTopic', 'Bad Request: not enough rights');
+
+    await POST(makeCtx(startUpdate('vehicle-sourcing_ru')));
+
+    expect(cards()).toHaveLength(1);
+    expect(stored()[0].topicId).toBeNull();
+    expect(error).toHaveBeenCalledWith(
+      '[capture] could not update the topic',
+      expect.objectContaining({ leadId: 1 }),
+    );
   });
 });

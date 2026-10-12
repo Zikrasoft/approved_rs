@@ -1,5 +1,5 @@
 import { channelLabel } from '../channelLabels.ts';
-import { isTelegramIdContact } from '../contactShape.ts';
+import { isHandleContact, isTelegramIdContact } from '../contactShape.ts';
 import { LEADS_PATH } from '../quarantine.ts';
 import { isInWork, type StoredLead } from '../schema.ts';
 import { isPlaceholderContact, type Digest } from '../store.ts';
@@ -19,10 +19,22 @@ import { buildHelp } from './menu.ts';
 export interface FormatterOptions {
   serviceLabel: (slug: string) => string;
   botUsername: string;
+  groupId: string;
   replyRelayBrands?: readonly string[];
 }
 
 const MAX_SERVICES_LABEL = 200;
+const MAX_TOPIC_NAME = 128;
+
+export function topicLink(groupId: string, topicId: number): string {
+  return `https://t.me/c/${groupId.replace(/^-100/, '')}/${topicId}`;
+}
+
+function linkedContact(contact: string): string {
+  return isHandleContact(contact)
+    ? `<a href="https://t.me/${escapeHtml(contact.slice(1))}">${escapeHtml(contact)}</a>`
+    : escapeHtml(contact);
+}
 
 const QUICK_REMIND_DAYS = [
   { label: 'Завтра', days: 1 },
@@ -154,6 +166,7 @@ export function statusChangeText(lead: StoredLead): string {
 export function createFormatter({
   serviceLabel,
   botUsername,
+  groupId,
   replyRelayBrands = [],
 }: FormatterOptions) {
   const canReplyThroughBot = (lead: StoredLead): boolean =>
@@ -181,10 +194,13 @@ export function createFormatter({
     return `🏷 ${escapeHtml(lead.brand)}${via}${referred}`;
   }
 
-  function formatLeadText(lead: StoredLead): string {
-    const contactLine = lead.contactChannel
-      ? `${lead.contact} (${channelLabel(lead.contactChannel)})`
-      : lead.contact;
+  function formatLeadText(
+    lead: StoredLead,
+    showContact: (contact: string) => string = escapeHtml,
+  ): string {
+    const channel = lead.contactChannel
+      ? ` (${escapeHtml(channelLabel(lead.contactChannel))})`
+      : '';
     const lines: string[] = [
       `🚗 Заявка #${lead.id} — ${escapeHtml(servicesLabel(lead))}`,
       brandLine(lead),
@@ -195,7 +211,7 @@ export function createFormatter({
     lines.push(
       ``,
       `Имя: ${escapeHtml(leadDisplayName(lead))}`,
-      `Контакт: ${escapeHtml(contactLine)}`,
+      `Контакт: ${showContact(lead.contact)}${channel}`,
     );
     if (lead.country)
       lines.push(`Страна: ${escapeHtml(lead.country.toUpperCase())}`);
@@ -214,8 +230,25 @@ export function createFormatter({
     return field === 'service' && value ? serviceLabel(value) : value;
   }
 
+  function topicButtons(lead: StoredLead): Btn[][] {
+    return lead.topicId == null
+      ? []
+      : [[{ text: '💬 Открыть тему', url: topicLink(groupId, lead.topicId) }]];
+  }
+
   return {
     formatLeadText,
+
+    topicName(lead: StoredLead): string {
+      return `#${lead.id} · ${leadDisplayName(lead)} · ${lead.brand}`.slice(
+        0,
+        MAX_TOPIC_NAME,
+      );
+    },
+
+    topicSummaryText(lead: StoredLead): string {
+      return formatLeadText(lead, linkedContact);
+    },
 
     visitorChangeText(
       lead: StoredLead,
@@ -235,7 +268,8 @@ export function createFormatter({
       return `🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusMark(lead.status)}\n${brandLine(lead)}`;
     },
 
-    deepLinkKeyboard(id: number): Keyboard {
+    deepLinkKeyboard(lead: StoredLead): Keyboard {
+      const { id } = lead;
       return {
         inline_keyboard: [
           [
@@ -244,6 +278,7 @@ export function createFormatter({
               url: `https://t.me/${botUsername}?start=lead_${id}`,
             },
           ],
+          ...topicButtons(lead),
           [
             { text: '✅ Сделка', callback_data: `won:${id}` },
             { text: '❌ Отказ', callback_data: `lost:${id}` },
@@ -271,6 +306,7 @@ export function createFormatter({
 
       const rows: Btn[][] = [
         ...statusRows(lead, role),
+        ...topicButtons(lead),
         ...(canReplyThroughBot(lead)
           ? [
               [
