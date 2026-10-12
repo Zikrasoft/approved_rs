@@ -66,6 +66,16 @@ export interface Tap {
 
 export const LANGUAGE_SWITCH_TAP = 'locale';
 
+const LOCALE_FLAGS: Readonly<Record<string, string>> = {
+  ru: '🇷🇺',
+  sr: '🇷🇸',
+  en: '🇬🇧',
+  es: '🇪🇸',
+  de: '🇩🇪',
+};
+
+const flagOf = (locale: string): string => LOCALE_FLAGS[locale] ?? '🏳️';
+
 export const SERVICES_DONE_TAP = 'done';
 
 export const MANAGER_TAP = 'manager';
@@ -121,11 +131,16 @@ export function createScreens<L extends string, S extends string>({
     ];
   };
 
+  const served = Object.keys(languages) as L[];
+  const languageButton = `🌐 ${served.map(flagOf).join(' ')}`;
+
   function mainMenu(locale: L): Screen {
     const words = copy(locale);
+    const label = (id: MenuButton) =>
+      id === 'language' ? languageButton : words[id].button;
     return {
       text: words.menu.text,
-      keyboard: menu.map((id) => tap(words[id].button, id, locale)),
+      keyboard: menu.map((id) => tap(label(id), id, locale)),
     };
   }
 
@@ -200,12 +215,11 @@ export function createScreens<L extends string, S extends string>({
 
   function languagePicker(locale: L): Screen {
     const words = copy(locale);
-    const served = Object.keys(languages) as L[];
     return {
       text: words.language.text,
       keyboard: [
         ...served.map((code) =>
-          tap(languages[code], LANGUAGE_SWITCH_TAP, code),
+          tap(`${flagOf(code)} ${languages[code]}`, LANGUAGE_SWITCH_TAP, code),
         ),
         tap(words.menu.back, 'menu', locale),
       ],

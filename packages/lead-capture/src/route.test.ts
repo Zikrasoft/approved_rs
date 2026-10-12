@@ -2446,11 +2446,11 @@ describe('switching the language', () => {
     expect(lastSent()).toEqual([42, 'PICK_A_LANGUAGE']);
     expect(lastMarkup()).toEqual({
       inline_keyboard: [
-        [{ text: 'Русский', callback_data: 'locale:ru' }],
-        [{ text: 'English', callback_data: 'locale:en' }],
-        [{ text: 'Srpski', callback_data: 'locale:sr' }],
-        [{ text: 'Español', callback_data: 'locale:es' }],
-        [{ text: 'Deutsch', callback_data: 'locale:de' }],
+        [{ text: '🇷🇺 Русский', callback_data: 'locale:ru' }],
+        [{ text: '🇬🇧 English', callback_data: 'locale:en' }],
+        [{ text: '🇷🇸 Srpski', callback_data: 'locale:sr' }],
+        [{ text: '🇪🇸 Español', callback_data: 'locale:es' }],
+        [{ text: '🇩🇪 Deutsch', callback_data: 'locale:de' }],
         [{ text: 'BACK', callback_data: 'menu:en' }],
       ],
     });
@@ -2463,10 +2463,42 @@ describe('switching the language', () => {
       text: 'PICK_A_LANGUAGE',
       reply_markup: {
         inline_keyboard: expect.arrayContaining([
-          [{ text: 'English', callback_data: 'locale:en' }],
+          [{ text: '🇬🇧 English', callback_data: 'locale:en' }],
           [{ text: 'BACK', callback_data: 'menu:sr' }],
         ]),
       },
+    });
+  });
+
+  it.each(['ru', 'de'])(
+    'labels the menu button with every locale flag, the same in %s',
+    async (locale) => {
+      POST = route(SECRET, { menu: ['services', 'language'] });
+      await say('/menu', { ...HANDLED, language_code: locale });
+
+      expect(lastMarkup()).toEqual({
+        inline_keyboard: [
+          [{ text: 'SERVICES', callback_data: `services:${locale}` }],
+          [
+            {
+              text: '🌐 🇷🇺 🇬🇧 🇷🇸 🇪🇸 🇩🇪',
+              callback_data: `language:${locale}`,
+            },
+          ],
+        ],
+      });
+    },
+  );
+
+  it('marks a locale it has no flag for with a plain one', async () => {
+    POST = route(SECRET, {
+      menu: ['language'],
+      languages: { ru: 'Русский', xx: 'Xx' },
+    });
+    await say('/menu');
+
+    expect(lastMarkup()).toEqual({
+      inline_keyboard: [[{ text: '🌐 🇷🇺 🏳️', callback_data: 'language:ru' }]],
     });
   });
 
