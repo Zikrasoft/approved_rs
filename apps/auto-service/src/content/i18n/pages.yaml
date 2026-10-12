@@ -113,7 +113,7 @@ translations:
         - title: Koliko ih čuvamo
           text: Do tri godine od poslednje posete — istorija servisa pomaže prilikom sledeće popravke. Na vaš zahtev, obrišemo ih ranije.
         - title: Kolačići
-          text: Sajt postavlja tehnički kolačić sa izabranim jezikom, analitički — Yandex.Metriku — i reklamni — Meta piksel. Analitika i piksel se aktiviraju prilikom prvog učitavanja stranice; u baneru na dnu ekrana možete se odjaviti, i tada se od sledećeg učitavanja ne uključuju. Metrika beleži sesije — pomeranje kursora, skrolovanje i klikove, — ali obrazac za prijavu je isključen iz beleženja. Piksel obaveštava Meta o pregledu stranice i o tome da ste poslali prijavu, napisali nam ili napravili nalog, — tako vidimo koja reklama na Facebook-u i Instagram-u dovodi klijente. Sadržaj obrasca se ne predaje. Korpa i anonimni identifikator se čuvaju u memoriji pretraživača (localStorage) i ne odlaze sami na naš server.
+          text: Sajt postavlja tehnički kolačić sa izabranim jezikom, analitički — Yandex.Metrika — i reklamni — Meta piksel. Analitika i piksel se aktiviraju pri prvom učitavanju stranice; u baneru na dnu ekrana možete odbiti, i tada se pri sledećem učitavanju ne uključuju. Metrika beleži seanse — kretanje kursora, skrolovanje i klikove, — ali formu zahteva iz beleženja smo isključili. Piksel obaveštava Meta o pregledu stranice i o tome što ste poslali zahtev, napisali nam ili izvršili narudžbinu — tako vidimo koja reklama na Facebook-u i Instagram-u dovodi klijente. Sadržaj forme mu se ne predaje. Ako nakon sajta nastavite u našem Telegram botu i ostavite zahtev, naš server će obavestiti Meta samo o samom faktu zahteva — bez njegovog sadržaja i bez vaših kontakata. Korpa i anonimni identifikator se čuvaju u memoriji pregledača (localStorage) i na naš server sami po sebi ne odlaze.
         - title: Vaša prava
           text: Možete zatražiti kopiju svojih podataka, njihovo ispravljenje ili brisanje. Dovoljno je da nas pozovete ili napišete u bilo koji messenger.
       shopSections:
@@ -177,7 +177,7 @@ translations:
         - title: How Long We Store It
           text: Up to three years from the last visit — service history helps with future repairs. We will delete it earlier upon your request.
         - title: Cookies
-          text: The website sets a technical cookie for the chosen language, an analytical one for Yandex.Metrica, and an advertising one for the Meta pixel. The analytics and pixel activate upon the first page load; you can opt out using the banner at the bottom of the screen, and they won't activate on subsequent loads. Metrica records sessions—cursor movement, scrolling, and clicks—but we exclude the application form from the recording. The pixel informs Meta about page views and your actions like submitting a request, contacting us, or placing an order, allowing us to see which Facebook and Instagram advertisements bring in clients. The content of the form is not transmitted. The cart and an anonymous identifier are stored in the browser's localStorage and are not sent to our server by themselves.
+          text: The site sets a technical cookie for the chosen language, an analytical one for Yandex.Metrics, and a marketing pixel for Meta. The analytics and pixel activate upon the first page load; you can opt out via the banner at the bottom of the screen, which will prevent them from activating on subsequent loads. Metrics records sessions — mouse movements, scrolling, and clicks — but we exclude the application form from this data. The pixel notifies Meta about page views and indicates if you submitted an application, contacted us, or made an order — this helps us understand which ads on Facebook and Instagram attract clients. The contents of the form are not shared with it. If you continue in our Telegram bot after visiting the site and leave an application there, our server will only inform Meta about the fact of the application — without its contents or your contact details. The shopping cart and anonymous identifier are stored in the browser's memory (localStorage) and do not get sent to our server.
         - title: Your Rights
           text: You can request a copy of your data, their correction, or deletion. Just call or message us on any messenger.
       shopSections:
@@ -190,4 +190,4 @@ translations:
       heading: This Page Does Not Exist
       body: The link may be outdated or there could be a typo in the address. Check out our services or message us — we can help.
       cta: Go to Homepage
-translatedFrom: 662d141a6d60ef56
+translatedFrom: 3bdc73a90f07e95f
