@@ -40,6 +40,7 @@ export interface CaptureUpdate {
   questionnaireDone?: boolean;
   locale?: string;
   referredBy?: Referrer;
+  adTag?: string | null;
   managerHandoff?: string;
   capturePrompt: CapturePrompt | null;
 }
@@ -439,6 +440,7 @@ export function createLeadStore({
           source_url: existing.source_url ?? data.source_url,
           telegramId: data.telegramId ?? existing.telegramId,
           referredBy: data.referredBy ?? existing.referredBy,
+          adTag: existing.adTag ?? data.adTag ?? null,
           capturePrompt: data.capturePrompt ?? existing.capturePrompt,
           visitorActiveAt:
             data.telegramId == null
@@ -586,6 +588,7 @@ export function createLeadStore({
         questionnaireDone,
         locale,
         referredBy,
+        adTag,
         managerHandoff,
         capturePrompt,
       }: CaptureUpdate,
@@ -599,6 +602,7 @@ export function createLeadStore({
         questionnaireDone: questionnaireDone ?? l.questionnaireDone,
         locale: locale ?? l.locale,
         referredBy: referredBy ?? l.referredBy,
+        adTag: l.adTag ?? adTag ?? null,
         managerHandoff:
           l.managerHandoff ??
           (managerHandoff ? { at: now, handle: managerHandoff } : null),

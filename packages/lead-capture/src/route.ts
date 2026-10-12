@@ -6,6 +6,7 @@ import {
   START_PAYLOAD_LIMIT,
 } from '@podbor/site-kit/contact-links';
 import {
+  adTagSchema,
   isHandleContact,
   isPhoneContact,
   isTelegramIdContact,
@@ -70,6 +71,7 @@ interface StartFields<L extends string, S extends string> {
   locale: L;
   visitorId: string | null;
   referred?: boolean;
+  adTag?: string | null;
 }
 
 const ANSWER_NOTE: Record<CaptureStep, string> = {
@@ -363,6 +365,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       locale: isLocale(tail) ? tail : senderLocale(sender),
       visitorId: start.visitorId,
       referred: head === REFERRAL,
+      adTag: parts.find((part) => adTagSchema.safeParse(part).success) ?? null,
     };
   }
 
@@ -405,7 +408,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   async function newLead(
     sender: CaptureSender,
     contact: string,
-    { service: picked, locale, visitorId, referred }: StartFields<L, S>,
+    { service: picked, locale, visitorId, referred, adTag }: StartFields<L, S>,
     comment: string | null,
     capturePrompt: CapturePrompt | null,
   ): Promise<void> {
@@ -425,6 +428,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       locale,
       kind: 'lead',
       referredBy: referred ? 'approved' : null,
+      adTag,
       capturePrompt,
     });
     await (before
@@ -521,7 +525,14 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     const fields = startFields(payload, sender);
     if ((fields.service || fields.referred) && !open.questionnaireDone)
       return resumeFromTile(chatId, open, fields, locale);
-    await publishLeadChange(open, undefined);
+    const tagged =
+      fields.adTag && !open.adTag
+        ? await store.updateCapture(open.id, {
+            adTag: fields.adTag,
+            capturePrompt: open.capturePrompt,
+          })
+        : undefined;
+    await publishLeadChange(open, tagged);
     if (open.capturePrompt)
       return ask(chatId, open.capturePrompt.step, locale, open.services);
     return show(chatId, startScreen(locale, fields.service));
@@ -530,12 +541,13 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   async function resumeFromTile(
     chatId: number,
     open: StoredLead,
-    { service: picked, referred }: StartFields<L, S>,
+    { service: picked, referred, adTag }: StartFields<L, S>,
     locale: L,
   ): Promise<void> {
     const updated = await store.updateCapture(open.id, {
       services: picked ? withPicked(picked) : undefined,
       referredBy: referred ? 'approved' : undefined,
+      adTag,
       capturePrompt: null,
     });
     await publishLeadChange(open, updated);

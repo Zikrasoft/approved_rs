@@ -467,3 +467,22 @@ describe('the Approved main menu', () => {
     );
   });
 });
+
+describe('a visitor arriving from an ad', () => {
+  const AD_VISITOR = { id: 70, first_name: 'Ad', username: 'ad' };
+
+  it('stores the ad tag on the Lead and names it on the card', async () => {
+    await answer('/start vehicle-import_fb-spring1_sr', AD_VISITOR);
+
+    expect(visitorLead(AD_VISITOR)).toMatchObject({
+      service: 'vehicle-import',
+      locale: 'sr',
+      adTag: 'fb-spring1',
+    });
+    expect(
+      api
+        .callsTo('sendMessage', '1001:test-bot-token')
+        .map((call) => call.payload.text),
+    ).toContainEqual(expect.stringContaining('📣 Реклама: fb · spring1'));
+  });
+});

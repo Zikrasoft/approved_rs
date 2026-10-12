@@ -231,6 +231,10 @@ function handoffLine(lead: StoredLead): string {
     : '';
 }
 
+function adLine({ adTag }: StoredLead): string {
+  return adTag ? `\n📣 Реклама: ${escapeHtml(adTag.replace('-', ' · '))}` : '';
+}
+
 function remindLine(lead: StoredLead): string {
   return lead.status === 'postponed' && lead.remindAt
     ? `\n⏰ Напомнить: ${formatDateRu(lead.remindAt)}`
@@ -265,7 +269,7 @@ export function createFormatter({
     const via = lead.telegramId == null ? '' : ' · 🤖 через бота';
     const referred =
       lead.referredBy === 'approved' ? ' · 🤝 из бота Approved.rs' : '';
-    return `🏷 ${escapeHtml(lead.brand)}${via}${referred}${handoffLine(lead)}`;
+    return `🏷 ${escapeHtml(lead.brand)}${via}${referred}${adLine(lead)}${handoffLine(lead)}`;
   }
 
   function formatLeadText(

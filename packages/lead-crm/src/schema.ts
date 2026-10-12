@@ -59,6 +59,8 @@ export const REFERRERS = ['approved'] as const;
 
 export type Referrer = (typeof REFERRERS)[number];
 
+export const adTagSchema = z.string().regex(/^(fb|ig|tg)-[A-Za-z0-9]{1,16}$/);
+
 const baseStoredLeadSchema = z.object({
   id: z.number().int().positive(),
   brand: z.string().default(LEGACY_BRAND),
@@ -89,6 +91,7 @@ const baseStoredLeadSchema = z.object({
   topicActiveAt: z.string().nullable().default(null).catch(null),
   questionnaireDone: z.boolean().default(false).catch(false),
   referredBy: z.enum(REFERRERS).nullable().default(null).catch(null),
+  adTag: adTagSchema.nullable().default(null).catch(null),
   managerHandoff: managerHandoffSchema.nullable().default(null).catch(null),
   archived: z.boolean().optional(),
   remindAt: z.string().nullable().default(null),
@@ -143,7 +146,10 @@ export type LeadInput = Pick<
   | 'kind'
 > &
   Partial<
-    Pick<StoredLead, 'services' | 'capturePrompt' | 'telegramId' | 'referredBy'>
+    Pick<
+      StoredLead,
+      'services' | 'capturePrompt' | 'telegramId' | 'referredBy' | 'adTag'
+    >
   >;
 
 export type LeadSubmission = Omit<LeadInput, 'brand'>;

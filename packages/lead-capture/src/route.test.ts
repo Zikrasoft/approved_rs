@@ -595,6 +595,67 @@ describe('the deep-link payload', () => {
   });
 });
 
+describe("an ad's campaign tag on the payload", () => {
+  const VISITOR = '0f8fad5bd9cb469fa16570867728950e';
+
+  it.each([
+    ['fb-spring1_sr', { service: '', locale: 'sr', adTag: 'fb-spring1' }],
+    [
+      'vehicle-sourcing_fb-spring1_ru',
+      { service: 'vehicle-sourcing', locale: 'ru', adTag: 'fb-spring1' },
+    ],
+    [
+      `vehicle-import_ig-x1_sr_${VISITOR}`,
+      {
+        service: 'vehicle-import',
+        locale: 'sr',
+        adTag: 'ig-x1',
+        visitorId: '0f8fad5b-d9cb-469f-a165-70867728950e',
+      },
+    ],
+    ['ru', { service: '', locale: 'ru', adTag: null }],
+    [
+      'vehicle-import_de',
+      { service: 'vehicle-import', locale: 'de', adTag: null },
+    ],
+    [`vehicle-import_sr_${VISITOR}`, { locale: 'sr', adTag: null }],
+    ['from-approved_sr', { locale: 'sr', referredBy: 'approved', adTag: null }],
+    ['yt-spring1_sr', { locale: 'sr', adTag: null }],
+    [`fb-${'a'.repeat(17)}_sr`, { locale: 'sr', adTag: null }],
+    [`vehicle-import_fb-a_sr_${'x'.repeat(42)}`, { locale: 'ru', adTag: null }],
+  ])('reads %s', async (payload, expected) => {
+    await POST(makeCtx(startUpdate(payload)));
+    expect(stored()[0]).toMatchObject(expected);
+  });
+
+  it('shows the ad on the card', async () => {
+    await POST(makeCtx(startUpdate('tg-launch_en')));
+    expect(cards()[0].text).toContain('📣 Реклама: tg · launch');
+  });
+
+  it.each([
+    'sr',
+    'vehicle-import_sr',
+    'ig-later_sr',
+    'vehicle-import_ig-later_sr',
+  ])('keeps the first tag through a later /start %s', async (payload) => {
+    await POST(makeCtx(startUpdate('fb-spring1_sr')));
+    await POST(makeCtx(startUpdate(payload)));
+    expect(stored()).toHaveLength(1);
+    expect(stored()[0].adTag).toBe('fb-spring1');
+  });
+
+  it.each(['fb-late_sr', 'vehicle-import_fb-late_sr'])(
+    'tags an untagged open Lead on a later /start %s',
+    async (payload) => {
+      await POST(makeCtx(startUpdate('sr')));
+      await POST(makeCtx(startUpdate(payload)));
+      expect(stored()).toHaveLength(1);
+      expect(stored()[0].adTag).toBe('fb-late');
+    },
+  );
+});
+
 describe('the screen /start opens', () => {
   it('greets a cold visitor with the main menu', async () => {
     await POST(makeCtx(startUpdate()));
