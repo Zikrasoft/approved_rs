@@ -129,6 +129,7 @@ export type CaptureStore = Pick<
   | 'findLatestLeadByTelegramId'
   | 'findPhoneByTelegramId'
   | 'updateCapture'
+  | 'markManagerHandoff'
   | 'claimMetaLead'
 >;
 
@@ -347,10 +348,8 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   ): Promise<void> {
     const lead = await store.findLatestLeadByTelegramId(sender.id, brand);
     if (!lead || lead.managerHandoff) return;
-    const updated = await store.updateCapture(lead.id, {
-      managerHandoff: handle,
-      capturePrompt: lead.capturePrompt,
-    });
+    const updated = await store.markManagerHandoff(lead.id, handle);
+    if (!updated) return;
     const current = await publishLeadChange(lead, updated);
     await postToTopic(current, (topicId) =>
       bot.api.sendMessage(groupId, managerHandoffText(handle), {

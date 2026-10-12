@@ -438,7 +438,14 @@ describe('the Meta Lead event from the CarLab bot', () => {
       const url = String(input);
       if (!url.startsWith('https://graph.facebook.com/'))
         return api.fetch(input, init);
-      graph.push({ url, body: JSON.parse(String(init?.body)) });
+      const form = new URLSearchParams(String(init?.body));
+      graph.push({
+        url,
+        body: {
+          access_token: form.get('access_token'),
+          data: JSON.parse(form.get('data') ?? 'null'),
+        },
+      });
       return Promise.resolve(new Response('{}'));
     });
   });
@@ -473,8 +480,9 @@ describe('the Meta Lead event from the CarLab bot', () => {
     const lead = visitorLead(FROM_SITE) as unknown as { id: number };
     expect(graph).toEqual([
       {
-        url: `https://graph.facebook.com/v25.0/${META_PIXEL_ID}/events?access_token=test-capi-token`,
+        url: `https://graph.facebook.com/v25.0/${META_PIXEL_ID}/events`,
         body: {
+          access_token: 'test-capi-token',
           data: [
             {
               event_name: 'Lead',

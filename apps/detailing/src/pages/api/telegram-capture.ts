@@ -41,7 +41,11 @@ export const POST = createCaptureWebhookRoute({
   questionnaire: ['car'],
   phoneRegion: 'RS',
   reportMetaLead,
-  languages: LOCALE_NAME,
+  languages: {
+    ru: { name: LOCALE_NAME.ru, flag: '🇷🇺' },
+    sr: { name: LOCALE_NAME.sr, flag: '🇷🇸' },
+    en: { name: LOCALE_NAME.en, flag: '🇬🇧' },
+  },
   services: SERVICE_SLUGS,
   contacts: {
     phone: PHONE_NUMBER,

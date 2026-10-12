@@ -83,27 +83,39 @@ describe('createMetaLeadReporter', () => {
     await Promise.all(pending);
     expect(pending).toHaveLength(1);
     const [url, init] = fetchMock.mock.calls[0]!;
-    expect(String(url)).toBe(
-      `https://graph.facebook.com/${META_GRAPH_VERSION}/${PIXEL}/events?access_token=tok`,
+    expect(url).toBe(
+      `https://graph.facebook.com/${META_GRAPH_VERSION}/${PIXEL}/events`,
     );
     expect(init.method).toBe('POST');
-    expect(init.headers).toEqual({ 'content-type': 'application/json' });
     expect(init.signal).toBeInstanceOf(AbortSignal);
-    expect(JSON.parse(init.body)).toEqual({
-      ...metaLeadEvent(lead),
-      test_event_code: 'TEST123',
-    });
+    const body = init.body as URLSearchParams;
+    expect(body.get('access_token')).toBe('tok');
+    expect(body.get('test_event_code')).toBe('TEST123');
+    expect(JSON.parse(body.get('data')!)).toEqual(metaLeadEvent(lead).data);
   });
 
   it('sends no contact data', async () => {
     reporter()!({ ...lead, contact: '+381601234567', name: 'Ivan' } as never);
     await Promise.all(pending);
-    const body = fetchMock.mock.calls[0]![1].body as string;
-    expect(body).not.toMatch(/381601234567|Ivan|"em"|"ph"|"fn"|external_id/);
-    expect(Object.keys(JSON.parse(body).data[0].user_data)).toEqual([
+    const body = fetchMock.mock.calls[0]![1].body as URLSearchParams;
+    expect(body.toString()).not.toMatch(
+      /381601234567|Ivan|em|ph|fn|external_id/,
+    );
+    expect([...body.keys()]).toEqual(['data', 'access_token']);
+    expect(Object.keys(JSON.parse(body.get('data')!)[0].user_data)).toEqual([
       'fbc',
       'fbp',
     ]);
+  });
+
+  it('keeps the token out of the URL and the logs', async () => {
+    fetchMock.mockRejectedValueOnce(new Error('network down'));
+    reporter({ META_CAPI_TOKEN: 'secret-token' })!(lead);
+    await Promise.all(pending);
+    expect(String(fetchMock.mock.calls[0]![0])).not.toContain('secret-token');
+    expect(JSON.stringify(vi.mocked(console.error).mock.calls)).not.toContain(
+      'secret-token',
+    );
   });
 
   it('logs a refusal', async () => {

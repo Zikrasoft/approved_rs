@@ -74,11 +74,11 @@ const WORKSHOP = {
 };
 
 const LANGUAGES = {
-  ru: 'Русский',
-  en: 'English',
-  sr: 'Srpski',
-  es: 'Español',
-  de: 'Deutsch',
+  ru: { name: 'Русский', flag: '🇷🇺' },
+  en: { name: 'English', flag: '🇬🇧' },
+  sr: { name: 'Srpski', flag: '🇷🇸' },
+  es: { name: 'Español', flag: '🇪🇸' },
+  de: { name: 'Deutsch', flag: '🇩🇪' },
 };
 
 const MENU_KEYBOARD = {
@@ -2019,6 +2019,46 @@ describe('talking to a manager', () => {
     );
   });
 
+  it('writes only the hand-off, never a prompt it read before', async () => {
+    withManager();
+    await POST(makeCtx(startUpdate('ru')));
+    const fresh = { chatId: 999, step: 'car' } as const;
+    POST = route(SECRET, {
+      menu: ['services', 'manager'],
+      humanTelegram: 'brand_manager',
+      store: {
+        ...leadStore,
+        markManagerHandoff: async (id, handle) => {
+          await leadStore.updateCapture(id, { capturePrompt: fresh });
+          return leadStore.markManagerHandoff(id, handle);
+        },
+      },
+    });
+
+    await tap('manager:ru');
+
+    expect(stored()[0].capturePrompt).toEqual(fresh);
+    expect(stored()[0].managerHandoff?.handle).toBe('brand_manager');
+  });
+
+  it('tells the topic nothing when another tap already won the hand-off', async () => {
+    withManager();
+    await POST(makeCtx(startUpdate('ru')));
+    api.reset();
+    POST = route(SECRET, {
+      menu: ['services', 'manager'],
+      humanTelegram: 'brand_manager',
+      store: { ...leadStore, markManagerHandoff: async () => undefined },
+    });
+
+    await tap('manager:ru');
+
+    expect(handoffPosts()).toEqual([]);
+    expect(edits()).toEqual([
+      expect.objectContaining({ text: 'MANAGER_IN_TELEGRAM' }),
+    ]);
+  });
+
   it('marks a Lead whose Questionnaire is already finished', async () => {
     withManager();
     await begin();
@@ -2490,10 +2530,10 @@ describe('switching the language', () => {
     },
   );
 
-  it('marks a locale it has no flag for with a plain one', async () => {
+  it("takes each locale's flag from the brand's config", async () => {
     POST = route(SECRET, {
       menu: ['language'],
-      languages: { ru: 'Русский', xx: 'Xx' },
+      languages: { ru: LANGUAGES.ru, xx: { name: 'Xx', flag: '🏳️' } },
     });
     await say('/menu');
 

@@ -36,6 +36,11 @@ export interface Contacts {
   venue?: Venue;
 }
 
+export interface Language {
+  name: string;
+  flag: string;
+}
+
 export interface PartnerBot {
   name: string;
   url: string;
@@ -48,7 +53,7 @@ export interface MenuConfig<L extends string, S extends string> {
   serviceCard: (slug: S, locale: L) => ServiceCard;
   copy: (locale: L) => CaptureCopy;
   partners?: (locale: L) => readonly PartnerBot[];
-  languages: Readonly<Record<L, string>>;
+  languages: Readonly<Record<L, Language>>;
   humanTelegram?: string;
 }
 
@@ -65,16 +70,6 @@ export interface Tap {
 }
 
 export const LANGUAGE_SWITCH_TAP = 'locale';
-
-const LOCALE_FLAGS: Readonly<Record<string, string>> = {
-  ru: '🇷🇺',
-  sr: '🇷🇸',
-  en: '🇬🇧',
-  es: '🇪🇸',
-  de: '🇩🇪',
-};
-
-const flagOf = (locale: string): string => LOCALE_FLAGS[locale] ?? '🏳️';
 
 export const SERVICES_DONE_TAP = 'done';
 
@@ -132,7 +127,7 @@ export function createScreens<L extends string, S extends string>({
   };
 
   const served = Object.keys(languages) as L[];
-  const languageButton = `🌐 ${served.map(flagOf).join(' ')}`;
+  const languageButton = `🌐 ${served.map((code) => languages[code].flag).join(' ')}`;
 
   function mainMenu(locale: L): Screen {
     const words = copy(locale);
@@ -219,7 +214,11 @@ export function createScreens<L extends string, S extends string>({
       text: words.language.text,
       keyboard: [
         ...served.map((code) =>
-          tap(`${flagOf(code)} ${languages[code]}`, LANGUAGE_SWITCH_TAP, code),
+          tap(
+            `${languages[code].flag} ${languages[code].name}`,
+            LANGUAGE_SWITCH_TAP,
+            code,
+          ),
         ),
         tap(words.menu.back, 'menu', locale),
       ],

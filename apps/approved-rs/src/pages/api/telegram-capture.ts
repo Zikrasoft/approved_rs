@@ -42,7 +42,13 @@ export const POST = createCaptureWebhookRoute({
   questionnaire: ['looking_for', 'budget'],
   phoneRegion: 'RS',
   reportMetaLead,
-  languages: LOCALE_NAME,
+  languages: {
+    ru: { name: LOCALE_NAME.ru, flag: '🇷🇺' },
+    en: { name: LOCALE_NAME.en, flag: '🇬🇧' },
+    sr: { name: LOCALE_NAME.sr, flag: '🇷🇸' },
+    es: { name: LOCALE_NAME.es, flag: '🇪🇸' },
+    de: { name: LOCALE_NAME.de, flag: '🇩🇪' },
+  },
   services: SERVICE_SLUGS,
   contacts: { phone: PHONE_NUMBER, site: SITE_URL },
   serviceCard: (slug, locale) => {

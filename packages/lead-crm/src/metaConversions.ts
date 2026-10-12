@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { StoredLead } from './schema.ts';
+import type { ClaimedMetaLead } from './store.ts';
 
 export const META_GRAPH_VERSION = 'v25.0';
 const TIMEOUT_MS = 5000;
@@ -9,7 +9,7 @@ const metaEnvSchema = z.object({
   META_CAPI_TEST_CODE: z.string().trim().min(1).optional().catch(undefined),
 });
 
-type SentLead = Pick<StoredLead, 'id' | 'metaIds' | 'metaLeadSentAt'>;
+type SentLead = Pick<ClaimedMetaLead, 'id' | 'metaIds' | 'metaLeadSentAt'>;
 
 export function metaLeadEvent(lead: SentLead, testEventCode?: string) {
   const { fbc, fbp } = lead.metaIds ?? {};
@@ -17,7 +17,7 @@ export function metaLeadEvent(lead: SentLead, testEventCode?: string) {
     data: [
       {
         event_name: 'Lead',
-        event_time: Math.floor(Date.parse(lead.metaLeadSentAt ?? '') / 1000),
+        event_time: Math.floor(Date.parse(lead.metaLeadSentAt) / 1000),
         event_id: `lead-${lead.id}`,
         action_source: 'chat',
         user_data: { ...(fbc ? { fbc } : {}), ...(fbp ? { fbp } : {}) },
@@ -48,17 +48,19 @@ export function createMetaLeadReporter({
     console.info('[meta-capi] off: no pixel id or META_CAPI_TOKEN');
     return undefined;
   }
-  const endpoint = new URL(
-    `https://graph.facebook.com/${META_GRAPH_VERSION}/${pixelId}/events`,
-  );
-  endpoint.searchParams.set('access_token', token);
+  const auth = { access_token: token };
+  const endpoint = `https://graph.facebook.com/${META_GRAPH_VERSION}/${pixelId}/events`;
 
   async function send(lead: SentLead): Promise<void> {
     try {
+      const { data, ...rest } = metaLeadEvent(lead, testCode);
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(metaLeadEvent(lead, testCode)),
+        body: new URLSearchParams({
+          ...rest,
+          data: JSON.stringify(data),
+          ...auth,
+        }),
         signal: AbortSignal.timeout(timeoutMs),
       });
       if (!response.ok)
