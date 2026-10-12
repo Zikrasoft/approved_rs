@@ -172,7 +172,7 @@ Approved's trust/verification semantics.
   is no commission rate to configure: the owner states each Payout and the
   system computes nothing (`docs/adr/0032-the-owner-states-the-payout.md`). Owner-facing Russian bot copy is _not_ — it is the same
   for every brand and lives in the package, contact-channel labels included
-  (`CHANNEL_LABELS` in `packages/lead-crm/src/telegram/format.ts`, after three
+  (`channelLabel` in `packages/lead-crm/src/channelLabels.ts`, after three
   byte-identical copies of it sat in the apps' `crmBot.ts`).
 - **`SOURCE_LOCALE = 'ru'` in `packages/i18n` is a deliberate exception** to that
   rule. It is the language content is authored in, not a locale a site serves,

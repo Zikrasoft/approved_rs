@@ -5,7 +5,7 @@ import {
   type StoredLead,
 } from './schema.ts';
 import type { LeadStore } from './store.ts';
-import type { Role } from './telegram/format.ts';
+import type { Role } from './telegram/markup.ts';
 import type { Notifier } from './telegram/notify.ts';
 
 interface EnsureLeadCardOptions {

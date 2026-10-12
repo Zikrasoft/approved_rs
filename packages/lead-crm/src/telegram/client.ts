@@ -1,7 +1,7 @@
 import { Bot, GrammyError, type Api, type Transformer } from 'grammy';
 import type { UserFromGetMe } from 'grammy/types';
 import { z } from 'zod';
-import type { Keyboard } from './format.ts';
+import type { Keyboard } from './markup.ts';
 
 export type SendExtra = Parameters<Api['sendMessage']>[2];
 

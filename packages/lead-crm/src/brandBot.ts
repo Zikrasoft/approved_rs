@@ -6,7 +6,7 @@ import {
 } from './notifyLead.ts';
 import type { LeadStore } from './store.ts';
 import { createTelegramClient, parseIds } from './telegram/client.ts';
-import { createFormatter } from './telegram/format.ts';
+import { createFormatter } from './telegram/cards.ts';
 import { createNotifier } from './telegram/notify.ts';
 
 const required = (name: string) =>

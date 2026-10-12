@@ -5,28 +5,24 @@ vi.stubGlobal('fetch', mockFetch);
 
 import { recordBotApi } from '../testing/botApi.ts';
 import { createTelegramClient } from './client.ts';
-import { createFormatter } from './format.ts';
+import { createFormatter } from './cards.ts';
 import { createNotifier } from './notify.ts';
 import { LEAD_STATUSES } from '../schema.ts';
 import type { StoredLead } from '../schema.ts';
 import type { LedgerOperation } from '../ledgerStore.ts';
 
+import { buildSearchResults, buildMenu, buildOpenList } from './menu.ts';
 import {
-  buildSearchResults,
-  buildMenu,
   buildBalance,
   LEDGER_COPY,
   operationNoticeText,
   operationRecordedText,
   operationRefusedText,
   reAskOperationText,
-  buildOpenList,
-  buildStats,
-  buildDeleteConfirm,
-  buildRemindPicker,
-  formatDateRu,
-  leadDisplayName,
-} from './format.ts';
+} from './ledger.ts';
+import { buildStats } from './stats.ts';
+import { buildDeleteConfirm, buildRemindPicker } from './cards.ts';
+import { formatDateRu, leadDisplayName } from './markup.ts';
 
 const SERVICE_LABELS: Record<string, string> = {
   'vehicle-sourcing': 'Автоподбор',

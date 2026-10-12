@@ -2,15 +2,14 @@ import type { LedgerOperation } from '../ledgerStore.ts';
 import { isClosed, type StoredLead } from '../schema.ts';
 import type { Digest } from '../store.ts';
 import { isMessageGone, type TelegramClient } from './client.ts';
+import { operationNoticeText, unreadableLedgerText } from './ledger.ts';
 import {
-  operationNoticeText,
   quarantinedLeadsText,
-  unreadableLedgerText,
   statusChangeText,
   type EditField,
   type Formatter,
-  type Role,
-} from './format.ts';
+} from './cards.ts';
+import type { Role } from './markup.ts';
 
 export interface NotifierOptions {
   client: TelegramClient;
