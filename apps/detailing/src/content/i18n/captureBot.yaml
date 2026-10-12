@@ -39,8 +39,8 @@ translations:
   sr:
     greeting: Zdravo! Hvala što ste nam se javili — vidimo vaš upit i javljamo se uskoro.
     lookingFor: Recite nam koji automobil imate i šta biste želeli da uradimo — folija, poliranje, keramika ili nešto drugo.
-    phoneAsk: Podelite broj telefona da bismo mogli da vas kontaktiramo — ili preskočite ovaj korak.
-    phoneButton: Podeli broj
+    phoneAsk: Nemate korisničko ime (username) na Telegramu, pa vam menadžer ne može pisati. Ostavite broj telefona kako bismo mogli da vas kontaktiramo.
+    phoneButton: 📱 Podeli broj
     thanks: Hvala! Preneli smo majstoru — uskoro će vas kontaktirati.
     received: Primili smo, majstor će videti vašu poruku.
     menu:
@@ -77,8 +77,8 @@ translations:
   en:
     greeting: Hello! Thanks for getting in touch — we can see your enquiry and we'll come back to you shortly.
     lookingFor: Tell us which car you have and what you would like done to it — paint protection film, polishing, ceramic coating or something else.
-    phoneAsk: Share your phone number so we can reach you — or skip this step.
-    phoneButton: Share my number
+    phoneAsk: You don't have a username in Telegram, so our manager won't be able to contact you. Please leave your phone number so we can reach out.
+    phoneButton: 📱 Share phone number
     thanks: Thank you! I've passed this on to the technician — they'll be in touch with you soon.
     received: Got it, our detailer will see your message.
     menu:
@@ -112,4 +112,4 @@ translations:
       shortDescription: Detailing studio in Belgrade — film, polishing, ceramic
       menuCommand: Main menu
       langCommand: Change language
-translatedFrom: 0ff93624fd0bc8ec
+translatedFrom: 765811a0047230e6
