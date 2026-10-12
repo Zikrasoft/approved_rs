@@ -343,10 +343,8 @@ describe('the Lead topic lifecycle', () => {
     expect(lead).toMatchObject({ topicClosed: false, topicActiveAt: null });
 
     const won = await leadStore.setStatus(lead.id, 'won');
-    await crm.afterStatusChange(won!, { notice: false });
-    await crm.afterStatusChange((await leadStore.getLead(lead.id))!, {
-      notice: false,
-    });
+    await crm.afterStatusChange(won!);
+    await crm.afterStatusChange((await leadStore.getLead(lead.id))!);
 
     expect(api.callsTo('closeForumTopic')).toEqual([
       expect.objectContaining({
@@ -362,7 +360,7 @@ describe('the Lead topic lifecycle', () => {
     const { leadStore, crm, lead } = await withTopic();
 
     const won = await leadStore.setStatus(lead.id, 'won');
-    await crm.afterStatusChange(won!, { notice: false });
+    await crm.afterStatusChange(won!);
 
     expect(api.callsTo('editMessageText')).toContainEqual(
       expect.objectContaining({
@@ -380,9 +378,7 @@ describe('the Lead topic lifecycle', () => {
     api.fail('closeForumTopic', 'Bad Request: not enough rights');
 
     const lost = await leadStore.setStatus(lead.id, 'lost');
-    await expect(
-      crm.afterStatusChange(lost!, { notice: false }),
-    ).resolves.toBeUndefined();
+    await expect(crm.afterStatusChange(lost!)).resolves.toBeUndefined();
     expect(await leadStore.getLead(lead.id)).toMatchObject({
       topicClosed: false,
     });
@@ -397,9 +393,6 @@ describe('the Lead topic lifecycle', () => {
 
       await crm.afterStatusChange(
         (await leadStore.setStatus(lead.id, status))!,
-        {
-          notice: false,
-        },
       );
 
       expect(api.callsTo('closeForumTopic')).toEqual([]);
@@ -411,9 +404,7 @@ describe('the Lead topic lifecycle', () => {
     api.fail('closeForumTopic', 'Bad Request: TOPIC_NOT_MODIFIED');
 
     const lost = await leadStore.setStatus(lead.id, 'lost');
-    await expect(
-      crm.afterStatusChange(lost!, { notice: false }),
-    ).resolves.toBeUndefined();
+    await expect(crm.afterStatusChange(lost!)).resolves.toBeUndefined();
   });
 
   it('reopens a closed topic and stamps the activity', async () => {

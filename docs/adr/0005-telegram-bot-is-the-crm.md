@@ -1,5 +1,7 @@
 # The Telegram bot is the CRM, and lead capture never fails for the visitor
 
+**Amended 2026-10-12 a third time: statuses are no longer owner-only.** The owner and the admin both change a Lead's status — ✅ ❌ 🗣 🔵 ⏰ on the group card, the DM detail and the digest — and the other one gets a DM naming who changed it. A won or lost Lead still cannot be reopened; deleting stays the admin's. A role-gated button tapped by the wrong role answers with a toast saying whose it is. The digest's buttons read «✅ Сделка #N» / «❌ Отказ #N» / «🔵 В работе #N», and a tap redraws the digest from the stored Leads. The «owner-only» wording below is superseded.
+
 **Amended by [ADR-0030](0030-a-capture-bot-per-brand-takes-the-telegram-contact.md): the CRM bot is `@SerbCRMBot`.** `@ApprovedRsBot` held this role until then and is now approved.rs's visitor-facing capture bot, with every operator surface removed. Capture bots write Leads and never manage them.
 
 **Amended 2026-10-11 by [ADR-0032](0032-the-owner-states-the-payout.md) (#226, #241): the DM no longer edits a Lead's fields, keeps a separate archive, or asks for a deal amount or commission** — lost is the archive, and money is one Balance changed by ➕/➖ operations, off the Leads. The cron no longer DMs reminders: it posts one digest to the group, and a due postponed Lead reopens through it.

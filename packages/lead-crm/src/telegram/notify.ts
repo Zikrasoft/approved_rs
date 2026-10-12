@@ -200,8 +200,12 @@ export function createNotifier({
       await sendToAll(adminIds, unreadableLedgerText(path, brand));
     },
 
-    async sendStatusChangeToAdmin(lead: StoredLead): Promise<void> {
-      await sendToAll(adminIds, statusChangeText(lead));
+    async sendStatusChange(
+      lead: StoredLead,
+      by: Role,
+      authorId: number,
+    ): Promise<void> {
+      await sendToAll(counterpartIds(by, authorId), statusChangeText(lead, by));
     },
 
     async sendFieldChange(

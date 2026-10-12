@@ -199,9 +199,9 @@ describe('GET /api/reminders', () => {
     expect(digestIds()).toEqual([9, 11]);
     expect(digest.reply_markup).toEqual({
       inline_keyboard: [9, 11].map((id) => [
-        { text: `✅ #${id}`, callback_data: `won:${id}` },
-        { text: `❌ #${id}`, callback_data: `lost:${id}` },
-        { text: `🔵 #${id}`, callback_data: `work:${id}` },
+        { text: `✅ Сделка #${id}`, callback_data: `won:${id}` },
+        { text: `❌ Отказ #${id}`, callback_data: `lost:${id}` },
+        { text: `🔵 В работе #${id}`, callback_data: `work:${id}` },
       ]),
     });
     expect(textsTo(OWNER_ID)).toEqual([expect.stringContaining('#9')]);
@@ -529,6 +529,73 @@ describe('GET /api/reminders', () => {
       digestSent: false,
     });
     expect((await stored(7)).status).toBe('new');
+  });
+
+  it('redraws the digest after a tap on it, row by row, until all is sorted', async () => {
+    leadsStorage().seed([
+      makeLead({ id: 9, status: 'new', remindAt: null }),
+      makeLead({
+        id: 11,
+        status: 'new',
+        remindAt: null,
+        telegramMessageId: 511,
+      }),
+    ]);
+    await GET(makeCtx());
+    const [posted] = crm('sendMessage');
+    let shown = {
+      text: String(posted!.text).replace(/<[^>]+>/g, ''),
+      reply_markup: posted!.reply_markup,
+    };
+    const tapDigest = async (data: string, updateId: number) => {
+      api.reset();
+      await webhook({
+        request: new Request('http://localhost/api/telegram-webhook', {
+          method: 'POST',
+          headers: { 'x-telegram-bot-api-secret-token': 'test-webhook-secret' },
+          body: JSON.stringify({
+            update_id: updateId,
+            callback_query: {
+              id: 'cb',
+              data,
+              from: { id: ADMIN_ID },
+              message: {
+                message_id: 4321,
+                chat: { id: Number(GROUP_ID) },
+                ...shown,
+              },
+            },
+          }),
+        }),
+      } as Pick<APIContext, 'request'> as APIContext);
+      const [edit] = crm('editMessageText').filter(
+        (p) => p.message_id === 4321,
+      );
+      shown = {
+        text: String(edit!.text).replace(/<[^>]+>/g, ''),
+        reply_markup: edit!.reply_markup,
+      };
+      return edit!;
+    };
+
+    const first = await tapDigest('lost:9', 71001);
+    expect((await stored(9)).status).toBe('lost');
+    expect(first.text).not.toContain('#9<');
+    expect(first.reply_markup).toEqual({
+      inline_keyboard: [
+        [
+          { text: '✅ Сделка #11', callback_data: 'won:11' },
+          { text: '❌ Отказ #11', callback_data: 'lost:11' },
+          { text: '🔵 В работе #11', callback_data: 'work:11' },
+        ],
+      ],
+    });
+    expect(textsTo(OWNER_ID)).toEqual([expect.stringContaining('✍️ Админ')]);
+
+    const last = await tapDigest('work:11', 71002);
+    expect((await stored(11)).status).toBe('in_progress');
+    expect(last.text).toContain('✅ Всё разобрано');
+    expect(last.reply_markup).toEqual({ inline_keyboard: [] });
   });
 
   describe('topics nobody wrote in for a day', () => {

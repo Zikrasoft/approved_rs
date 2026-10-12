@@ -128,6 +128,8 @@ In the leads group and in a DM with `@SerbCRMBot`:
       `@SerbCRMBot`, not `@ApprovedRsBot`.
 - [ ] **Status change** — open a lead from the teaser, close it as «✅ Сделка» or
       «❌ Отказ»; the DM card redraws and the group teaser's status line follows.
+      The admin can do the same; whichever of the two did not tap gets a DM
+      naming who changed it.
       «🗣 Переговоры» and «🔵 В работе» move it without closing it; «🔵» on a
       Lead already in progress records a touch, so the Lead drops out of the
       stale list.
@@ -150,7 +152,9 @@ In the leads group and in a DM with `@SerbCRMBot`:
       exists in the Blob store, and «💶 Мне должны» in `@SerbCRMBot` equals the
       total noted in step 1.
 - [ ] **The first digest** — the next morning's group digest lists every open
-      Lead untouched for 7 days or more, the backlog included. Every
+      Lead untouched for 7 days or more, the backlog included. A tap on one of
+      its «✅ Сделка #N» / «❌ Отказ #N» / «🔵 В работе #N» buttons — the owner's
+      or the admin's — drops that row from the message. Every
       capture-bot `/start` Lead is among them, a bare one included, and stays
       in every digest until someone closes it (#226, #241): only a placeholder
       Contact click retires itself as a Ghost lead.

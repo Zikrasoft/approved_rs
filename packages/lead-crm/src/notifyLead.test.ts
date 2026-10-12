@@ -351,7 +351,9 @@ describe('afterStatusChange', () => {
       editLeadDetailMessage: async (chatId, messageId, lead, role) => {
         calls.push(`dm:${chatId}:${messageId}:${lead.id}:${role}`);
       },
-      sendStatusChangeToAdmin: record('status'),
+      sendStatusChange: async (lead, by, authorId) => {
+        calls.push(`status:${lead.id}:${by}:${authorId}`);
+      },
       unpinLeadCard: record('unpin'),
     },
   });
@@ -361,42 +363,49 @@ describe('afterStatusChange', () => {
   });
 
   const surface = { chatId: 7, messageId: 8, role: 'owner' as const };
+  const author = { role: 'admin' as const, id: 222 };
 
   it.each([
     [
       'a plain change',
       { status: 'new' as const },
-      {},
-      ['card:42', 'status:42'],
+      { author },
+      ['card:42', 'status:42:admin:222'],
     ],
     [
       'a change from a DM',
       { status: 'lost' as const },
-      { surface },
-      ['card:42', 'unpin:42', 'topic:42:null', 'dm:7:8:42:owner', 'status:42'],
+      { surface, author },
+      [
+        'card:42',
+        'unpin:42',
+        'topic:42:null',
+        'dm:7:8:42:owner',
+        'status:42:admin:222',
+      ],
     ],
     [
       'won',
       { status: 'won' as const },
-      {},
-      ['card:42', 'unpin:42', 'topic:42:null', 'status:42'],
+      { author },
+      ['card:42', 'unpin:42', 'topic:42:null', 'status:42:admin:222'],
     ],
     [
       'a Lead with a topic',
       { status: 'won' as const, topicId: 5 },
-      { notice: false },
+      {},
       ['card:42', 'summary:42', 'unpin:42', 'topic:42:99'],
     ],
     [
       'a topic whose summary could not be refreshed',
       { status: 'negotiations' as const, topicId: 5, name: 'broken' },
-      { notice: false },
+      {},
       ['card:42', 'summary:42'],
     ],
     [
       'the ghost sweep',
       { status: 'lost' as const },
-      { notice: false },
+      undefined,
       ['card:42', 'unpin:42', 'topic:42:null'],
     ],
   ])('%s', async (_, patch, options, expected) => {

@@ -29,6 +29,7 @@ import {
   buildDeleteConfirm,
   buildRemindPicker,
   editLeadDetailMessage,
+  redrawDigest,
   OWNER_IDS,
   ADMIN_IDS,
   GROUP_ID,
@@ -149,7 +150,14 @@ function parseReminderDate(text: string): string | null {
   return day < businessDay(new Date()) ? null : day;
 }
 
-type Ctx = { chatId: number; messageId: number; role: Role; cbId: string };
+type Ctx = {
+  chatId: number;
+  messageId: number;
+  role: Role;
+  authorId: number;
+  cbId: string;
+  message: unknown;
+};
 type CrmContext = Context & { crm: Ctx };
 type Handler = (ctx: Ctx, ...groups: string[]) => Promise<void>;
 type IdHandler = (ctx: Ctx, id: number, ...rest: string[]) => Promise<void>;
@@ -191,15 +199,32 @@ function onGroupCard(ctx: Ctx, lead: StoredLead): boolean {
   );
 }
 
+function authorOf({ role, authorId }: Ctx) {
+  return { role, id: authorId };
+}
+
 async function afterStatusChangeOn(
   ctx: Ctx,
   updated: StoredLead,
 ): Promise<void> {
   const { chatId, messageId, role } = ctx;
-  await afterStatusChange(
-    updated,
-    onGroupCard(ctx, updated) ? {} : { surface: { chatId, messageId, role } },
-  );
+  await afterStatusChange(updated, {
+    author: authorOf(ctx),
+    ...(onGroupCard(ctx, updated)
+      ? {}
+      : { surface: { chatId, messageId, role } }),
+  });
+}
+
+async function redrawDigestOn(ctx: Ctx, id: number): Promise<void> {
+  const redrawn = redrawDigest(ctx.message, await readLeads(), id);
+  if (redrawn)
+    await safeEditMessage(
+      ctx.chatId,
+      ctx.messageId,
+      redrawn.text,
+      redrawn.reply_markup,
+    );
 }
 
 async function startPrompt(
@@ -233,14 +258,16 @@ async function changeStatus(
 ): Promise<void> {
   const lead = await getLead(id);
   if (!lead) return ack(ctx);
-  if (lead.status !== key) {
-    const updated = await setStatus(id, key);
-    if (!updated) return answerCallback(ctx.cbId, LEAD_ACTION_COPY.closed);
+  const updated = lead.status === key ? lead : await setStatus(id, key);
+  if (updated && updated !== lead)
     await (fromDetail
       ? afterStatusChangeOn(ctx, updated)
-      : afterStatusChange(updated));
-  }
-  await answerCallback(ctx.cbId, LEAD_ACTION_COPY.statusUpdated);
+      : afterStatusChange(updated, { author: authorOf(ctx) }));
+  if (!fromDetail) await redrawDigestOn(ctx, id);
+  await answerCallback(
+    ctx.cbId,
+    updated ? LEAD_ACTION_COPY.statusUpdated : LEAD_ACTION_COPY.closed,
+  );
 }
 
 async function markInWork(ctx: Ctx, id: number): Promise<void> {
@@ -248,6 +275,7 @@ async function markInWork(ctx: Ctx, id: number): Promise<void> {
   if (lead?.status !== 'in_progress')
     return changeStatus(ctx, id, 'in_progress', false);
   await touchLead(id);
+  await redrawDigestOn(ctx, id);
   await answerCallback(ctx.cbId, LEAD_ACTION_COPY.inWork);
 }
 
@@ -396,7 +424,7 @@ function editRow(field: EditField): CallbackRow {
 function statusRow(key: LeadStatus): CallbackRow {
   return [
     new RegExp(`^st:(\\d+):${key}$`),
-    'owner',
+    'any',
     withId((ctx, id) => changeStatus(ctx, id, key)),
   ];
 }
@@ -408,25 +436,25 @@ export const CALLBACKS: CallbackRow[] = [
   statusRow('in_progress'),
   [
     /^won:(\d+)$/,
-    'owner',
+    'any',
     withId((ctx, id) => changeStatus(ctx, id, 'won', false)),
   ],
   [
     /^lost:(\d+)$/,
-    'owner',
+    'any',
     withId((ctx, id) => changeStatus(ctx, id, 'lost', false)),
   ],
   [
     /^talk:(\d+)$/,
-    'owner',
+    'any',
     withId((ctx, id) => changeStatus(ctx, id, 'negotiations', false)),
   ],
-  [/^work:(\d+)$/, 'owner', withId(markInWork)],
-  [/^postpone:(\d+)$/, 'owner', withId(openRemindPicker)],
-  [/^remindpick:(\d+):(\d+)$/, 'owner', withId(remindIn)],
+  [/^work:(\d+)$/, 'any', withId(markInWork)],
+  [/^postpone:(\d+)$/, 'any', withId(openRemindPicker)],
+  [/^remindpick:(\d+):(\d+)$/, 'any', withId(remindIn)],
   [
     /^remindtype:(\d+)$/,
-    'owner',
+    'any',
     withId((ctx, id) =>
       startLeadPrompt(ctx, id, {
         prompt: LEAD_ACTION_COPY.remindPrompt,
@@ -435,7 +463,7 @@ export const CALLBACKS: CallbackRow[] = [
       }),
     ),
   ],
-  [/^remindcancel:(\d+)$/, 'owner', withId(backToLead)],
+  [/^remindcancel:(\d+)$/, 'any', withId(backToLead)],
   [/^resume:(\d+)$/, 'any', withId(resume)],
   [/^del:(\d+)$/, 'admin', withId(askDelete)],
   [/^delconfirm:(\d+)$/, 'admin', withId(confirmDelete)],
@@ -479,13 +507,16 @@ function callbackCtx(cb: {
   from?: { id: number };
   message?: { message_id: number; chat: { id: number } };
 }): Ctx | undefined {
-  const role = roleOf(cb.from?.id);
-  if (!cb.message || !role) return undefined;
+  const authorId = cb.from?.id;
+  const role = roleOf(authorId);
+  if (!cb.message || !role || authorId == null) return undefined;
   return {
     chatId: cb.message.chat.id,
     messageId: cb.message.message_id,
     role,
+    authorId,
     cbId: cb.id,
+    message: cb.message,
   };
 }
 
@@ -494,7 +525,9 @@ const callbacks = new Composer<CrmContext>();
 for (const [pattern, needed, handler] of CALLBACKS) {
   callbacks.callbackQuery(pattern, ({ crm, match, callbackQuery }) =>
     needed !== 'any' && needed !== crm.role
-      ? ack(crm)
+      ? answerCallback(crm.cbId, LEAD_ACTION_COPY.roleOnly[needed]).catch(
+          () => {},
+        )
       : withErrorAck(crm.cbId, { data: callbackQuery.data }, () =>
           handler(crm, ...match.slice(1)),
         ),
@@ -521,6 +554,8 @@ type Reply = {
 type PromptHandler = (reply: Reply, lead: StoredLead) => Promise<void>;
 
 async function replyPostpone({
+  role,
+  authorId,
   chatId,
   replyToMessageId,
   text,
@@ -542,7 +577,8 @@ async function replyPostpone({
         : {},
   );
   if (!updated) return;
-  if (updated.status === 'postponed') await afterStatusChange(updated);
+  if (updated.status === 'postponed')
+    await afterStatusChange(updated, { author: { role, id: authorId } });
   else await sendMessage(chatId, LEAD_ACTION_COPY.notPostponable);
 }
 
@@ -564,7 +600,7 @@ async function afterEdit(
   lead: StoredLead,
   headline: string,
 ): Promise<void> {
-  await afterStatusChange(lead, { notice: false });
+  await afterStatusChange(lead);
   const { text, reply_markup } = buildLeadDetail(lead, reply.role);
   await sendMessage(reply.chatId, `${headline}\n\n${text}`, { reply_markup });
 }
@@ -831,11 +867,16 @@ async function deliverToVisitor(
   }
 }
 
-type TopicMessage = { chatId: number; messageId: number; topicId: number };
+type TopicMessage = {
+  chatId: number;
+  messageId: number;
+  topicId: number;
+  author: { role: Role; id: number };
+};
 
 async function relayTopicMessage(
   lead: StoredLead,
-  { chatId, messageId, topicId }: TopicMessage,
+  { chatId, messageId, topicId, author }: TopicMessage,
 ): Promise<void> {
   await touchLeadTopic(lead);
   if (!(await deliverToVisitor(lead, chatId, messageId))) {
@@ -847,7 +888,7 @@ async function relayTopicMessage(
   }
   const updated = await recordOwnerReply(lead.id);
   if (updated && updated.status !== lead.status)
-    await afterStatusChange(updated);
+    await afterStatusChange(updated, { author });
 }
 
 bot.on(
@@ -861,11 +902,13 @@ bot.on(
   ],
   async (ctx, next) => {
     const topicId = ctx.message.message_thread_id;
+    const role = roleOf(ctx.from?.id);
     if (
       topicId == null ||
       String(ctx.chat.id) !== GROUP_ID ||
       ctx.from?.is_bot ||
-      !roleOf(ctx.from?.id)
+      !role ||
+      !ctx.from
     )
       return next();
     const lead = await findByTopic(topicId);
@@ -874,6 +917,7 @@ bot.on(
       chatId: ctx.chat.id,
       messageId: ctx.message.message_id,
       topicId,
+      author: { role, id: ctx.from.id },
     });
   },
 );
