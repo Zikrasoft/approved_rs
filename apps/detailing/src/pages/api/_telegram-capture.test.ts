@@ -64,44 +64,48 @@ function visitorUpdate(update: Record<string, unknown>) {
 
 const VISITOR = { id: 61, first_name: 'Ana', username: 'ana' };
 
-function answer(text: string) {
+const NO_HANDLE = { id: 62, first_name: 'Mila' };
+
+type Visitor = { id: number; first_name: string; username?: string };
+
+function answer(text: string, from: Visitor = VISITOR) {
   return visitorUpdate({
     message: {
       message_id: 2,
-      chat: { id: VISITOR.id, type: 'private' },
-      from: VISITOR,
+      chat: { id: from.id, type: 'private' },
+      from,
       text,
     },
   });
 }
 
-function press(data: string) {
+function press(data: string, from: Visitor = VISITOR) {
   return visitorUpdate({
     callback_query: {
       id: 'tap',
-      from: VISITOR,
+      from,
       chat_instance: 'chat',
       data,
       message: {
         message_id: 3,
         date: 0,
-        chat: { id: VISITOR.id, type: 'private' },
+        chat: { id: from.id, type: 'private' },
       },
     },
   });
 }
 
-function questions(): unknown[] {
+function questions(from: Visitor = VISITOR): unknown[] {
   return api
     .callsTo('sendMessage', '1002:test-capture-bot-token')
-    .filter((call) => call.payload.chat_id === VISITOR.id)
+    .filter((call) => call.payload.chat_id === from.id)
     .map((call) => call.payload.text);
 }
 
-function visitorLead() {
+function visitorLead(from: Visitor = VISITOR) {
   return (
     memory.storages.get(LEADS_PATH)?.current() as { telegramId: number }[]
-  ).find((lead) => lead.telegramId === VISITOR.id);
+  ).find((lead) => lead.telegramId === from.id);
 }
 
 function tap(data: string) {
@@ -180,18 +184,46 @@ describe('the Details capture bot', () => {
 });
 
 describe('the Details Questionnaire', () => {
-  it('asks for the car, the service as buttons, then the phone', async () => {
+  it('asks a visitor with no username for the phone last, with no skip, and takes a typed number', async () => {
+    const words = content('ru').captureBot;
+
+    await press('request:ru', NO_HANDLE);
+    await answer('Audi A6 2019', NO_HANDLE);
+    await press('pick:ru:polishing-ceramic', NO_HANDLE);
+    await answer('064 123 4567', NO_HANDLE);
+
+    expect(questions(NO_HANDLE)).toEqual([
+      words.request.car,
+      words.request.service,
+      words.phoneAsk,
+      words.thanks,
+    ]);
+    expect(
+      api
+        .callsTo('sendMessage', '1002:test-capture-bot-token')
+        .find((call) => call.payload.text === words.phoneAsk)?.payload
+        .reply_markup,
+    ).toEqual({
+      keyboard: [[{ text: words.phoneButton, request_contact: true }]],
+      resize_keyboard: true,
+      one_time_keyboard: true,
+    });
+    expect(visitorLead(NO_HANDLE)).toMatchObject({
+      contact: '+381641234567',
+      capturePrompt: null,
+    });
+  });
+
+  it('asks a visitor with a username for the car and the service as buttons, never the phone', async () => {
     const words = content('ru').captureBot;
 
     await press('request:ru');
     await answer('Audi A6 2019');
     await press('pick:ru:polishing-ceramic');
-    await answer(words.phoneSkip);
 
     expect(questions()).toEqual([
       words.request.car,
       words.request.service,
-      words.phoneOffer,
       words.thanks,
     ]);
     expect(visitorLead()).toMatchObject({
@@ -209,7 +241,7 @@ describe('the Details Questionnaire', () => {
     await press('request:ru:polishing-ceramic');
     await answer('Audi A6 2019');
 
-    expect(questions().slice(1)).toEqual([words.request.car, words.phoneOffer]);
+    expect(questions().slice(1)).toEqual([words.request.car, words.thanks]);
   });
 });
 

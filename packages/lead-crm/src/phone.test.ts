@@ -9,7 +9,25 @@ import {
   isValidContact,
   DIAL_CODE_OWNER,
   PHONE_COUNTRIES,
+  typedPhone,
 } from './phone.ts';
+
+describe('typedPhone', () => {
+  it.each([
+    ['064 123 4567', '+381641234567'],
+    ['+381 60 123 4567', '+381601234567'],
+    ['+49 151 2345678', '+491512345678'],
+  ])('reads %s as %s', (typed, e164) => {
+    expect(typedPhone(typed, 'RS')).toBe(e164);
+  });
+
+  it.each(['позвоните мне', 'call me on 0641234567', '123', ''])(
+    'refuses %j',
+    (typed) => {
+      expect(typedPhone(typed, 'RS')).toBeUndefined();
+    },
+  );
+});
 
 describe('DIAL_CODE_OWNER', () => {
   const sharedDials = [

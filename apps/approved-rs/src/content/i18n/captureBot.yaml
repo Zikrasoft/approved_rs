@@ -1,10 +1,8 @@
 greeting: Здравствуйте! Спасибо, что написали — мы уже видим ваше обращение и скоро ответим.
 lookingFor: Расскажите в двух словах, какая машина вас интересует или с чем нужна помощь.
 budget: И на какой бюджет вы рассчитываете?
-phoneAsk: Чтобы мы могли с вами связаться, поделитесь номером телефона — или пропустите этот шаг.
-phoneOffer: Если удобнее по телефону, поделитесь номером, и мы позвоним. Если нет, просто пропустите.
-phoneButton: Поделиться номером
-phoneSkip: Пропустить
+phoneAsk: У вас в Telegram нет имени пользователя (username), поэтому менеджер не сможет вам написать. Оставьте номер телефона, чтобы мы могли связаться.
+phoneButton: 📱 Поделиться номером
 thanks: Спасибо! Передали менеджеру — он скоро с вами свяжется.
 received: Приняли, менеджер увидит ваше сообщение.
 menu:
@@ -44,9 +42,7 @@ translations:
     lookingFor: Tell us in a couple of words which car you have in mind, or what you need a hand with.
     budget: And what budget are you working with?
     phoneAsk: Share your phone number so we can reach you — or skip this step.
-    phoneOffer: If a call suits you better, share your number and we'll ring you. If not, just skip it.
     phoneButton: Share my number
-    phoneSkip: Skip
     thanks: Thank you! I've passed this on to the manager — they'll be in touch with you soon.
     received: Got it, your manager will see your message.
     menu:
@@ -85,9 +81,7 @@ translations:
     lookingFor: Recite nam ukratko koju mašinu tražite ili u čemu vam treba pomoć.
     budget: Koji je vaš budžet?
     phoneAsk: Da bismo mogli da vas kontaktiramo, podelite nam svoj broj telefona — ili preskočite ovaj korak.
-    phoneOffer: Ako vam je lakše putem telefona, podelite broj, pa ćemo pozvati. Ako ne, samo preskočite.
     phoneButton: Podeliti broj
-    phoneSkip: Preskočiti
     thanks: Hvala! Prosledili smo menadžeru — uskoro će vas kontaktirati.
     received: Primili smo, manager će videti vašu poruku.
     menu:
@@ -126,9 +120,7 @@ translations:
     lookingFor: Cuéntanos en dos palabras qué coche te interesa o en qué necesitas ayuda.
     budget: ¿Y con qué presupuesto cuentas?
     phoneAsk: Comparte tu número de teléfono para que podamos contactarte, o salta este paso.
-    phoneOffer: Si prefieres que te llamemos, comparte tu número. Si no, sáltatelo sin problema.
     phoneButton: Compartir mi número
-    phoneSkip: Omitir
     thanks: ¡Gracias! Se lo hemos transmitido al gerente, pronto se pondrá en contacto contigo.
     received: Recibido, el gestor verá tu mensaje.
     menu:
@@ -167,9 +159,7 @@ translations:
     lookingFor: Sagen Sie uns kurz, welches Auto Sie interessiert oder wobei Sie Hilfe brauchen.
     budget: Und mit welchem Budget rechnen Sie?
     phoneAsk: Teilen Sie Ihre Telefonnummer, damit wir Sie erreichen können – oder überspringen Sie diesen Schritt.
-    phoneOffer: Wenn Ihnen ein Anruf lieber ist, teilen Sie Ihre Nummer, dann rufen wir an. Wenn nicht, einfach überspringen.
     phoneButton: Nummer teilen
-    phoneSkip: Überspringen
     thanks: Danke! Wir haben es dem Manager weitergeleitet — er wird sich bald bei Ihnen melden.
     received: Angekommen, Ihr Ansprechpartner sieht Ihre Nachricht.
     menu:

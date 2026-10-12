@@ -64,44 +64,48 @@ function visitorUpdate(update: Record<string, unknown>) {
 
 const VISITOR = { id: 61, first_name: 'Ana', username: 'ana' };
 
-function answer(text: string) {
+const NO_HANDLE = { id: 62, first_name: 'Mila' };
+
+type Visitor = { id: number; first_name: string; username?: string };
+
+function answer(text: string, from: Visitor = VISITOR) {
   return visitorUpdate({
     message: {
       message_id: 2,
-      chat: { id: VISITOR.id, type: 'private' },
-      from: VISITOR,
+      chat: { id: from.id, type: 'private' },
+      from,
       text,
     },
   });
 }
 
-function press(data: string) {
+function press(data: string, from: Visitor = VISITOR) {
   return visitorUpdate({
     callback_query: {
       id: 'tap',
-      from: VISITOR,
+      from,
       chat_instance: 'chat',
       data,
       message: {
         message_id: 3,
         date: 0,
-        chat: { id: VISITOR.id, type: 'private' },
+        chat: { id: from.id, type: 'private' },
       },
     },
   });
 }
 
-function questions(): unknown[] {
+function questions(from: Visitor = VISITOR): unknown[] {
   return api
     .callsTo('sendMessage', '1002:test-capture-bot-token')
-    .filter((call) => call.payload.chat_id === VISITOR.id)
+    .filter((call) => call.payload.chat_id === from.id)
     .map((call) => call.payload.text);
 }
 
-function visitorLead() {
+function visitorLead(from: Visitor = VISITOR) {
   return (
     memory.storages.get(LEADS_PATH)?.current() as { telegramId: number }[]
-  ).find((lead) => lead.telegramId === VISITOR.id);
+  ).find((lead) => lead.telegramId === from.id);
 }
 
 function tap(data: string) {
@@ -180,18 +184,41 @@ describe('the CarLab capture bot', () => {
 });
 
 describe('the CarLab Questionnaire', () => {
-  it('asks about the car and what happened, then the phone, never a budget', async () => {
+  it('asks a visitor with no username for the phone last, with no skip, and takes a typed number', async () => {
+    const words = content('ru').captureBot;
+
+    await press('request:ru:diagnostics', NO_HANDLE);
+    await answer('Golf 2012, стучит подвеска', NO_HANDLE);
+    await answer('064 123 4567', NO_HANDLE);
+
+    expect(questions(NO_HANDLE)).toEqual([
+      words.lookingFor,
+      words.phoneAsk,
+      words.thanks,
+    ]);
+    expect(
+      api
+        .callsTo('sendMessage', '1002:test-capture-bot-token')
+        .find((call) => call.payload.text === words.phoneAsk)?.payload
+        .reply_markup,
+    ).toEqual({
+      keyboard: [[{ text: words.phoneButton, request_contact: true }]],
+      resize_keyboard: true,
+      one_time_keyboard: true,
+    });
+    expect(visitorLead(NO_HANDLE)).toMatchObject({
+      contact: '+381641234567',
+      capturePrompt: null,
+    });
+  });
+
+  it('asks a visitor with a username about the car and what happened, never a budget or the phone', async () => {
     const words = content('ru').captureBot;
 
     await press('request:ru:diagnostics');
     await answer('Golf 2012, стучит подвеска');
-    await answer(words.phoneSkip);
 
-    expect(questions()).toEqual([
-      words.lookingFor,
-      words.phoneOffer,
-      words.thanks,
-    ]);
+    expect(questions()).toEqual([words.lookingFor, words.thanks]);
     expect(visitorLead()).toMatchObject({
       service: 'diagnostics',
       comment: 'Машина и проблема: Golf 2012, стучит подвеска',

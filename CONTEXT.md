@@ -70,8 +70,11 @@ owner surface; the owner answers from their own account, or through it
 only for a visitor who has no username.
 
 **Questionnaire** — the short set of questions a Capture bot asks to turn a
-Lead into a request the owner can answer. Each brand has its own. Leaving
-it for the menu ends it, and the answers given so far stay on the Lead.
+Lead into a request the owner can answer. Each brand has its own. A visitor
+with no Telegram username whose Lead has no phone yet is asked for one last,
+with no skip — shared from the keyboard button or typed; a visitor with a
+username is never asked, the username is the contact. Leaving it for the menu
+ends it, and the answers given so far stay on the Lead.
 _Avoid_: wizard, form (the site's form is a different thing)
 
 **Owner** — the business partner who serves the clients the sites bring and

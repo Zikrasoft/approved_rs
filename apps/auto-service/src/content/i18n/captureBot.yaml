@@ -1,9 +1,7 @@
 greeting: Здравствуйте! Спасибо, что написали — заявка у нас, мастер скоро ответит.
 lookingFor: Расскажите, какая у вас машина — марка, модель, год — и что с ней случилось или какие работы нужны.
-phoneAsk: Чтобы мастер мог с вами связаться, поделитесь номером телефона — или пропустите этот шаг.
-phoneOffer: Если удобнее созвониться, поделитесь номером, и мастер вам позвонит. Если нет, просто пропустите.
-phoneButton: Поделиться номером
-phoneSkip: Пропустить
+phoneAsk: У вас в Telegram нет имени пользователя (username), поэтому мастер не сможет вам написать. Оставьте номер телефона, чтобы мы могли связаться.
+phoneButton: 📱 Поделиться номером
 thanks: Спасибо! Передали мастеру — он скоро с вами свяжется.
 received: Приняли, мастер увидит ваше сообщение.
 menu:
@@ -42,9 +40,7 @@ translations:
     greeting: Zdravo! Hvala što ste nam pisali — upit je kod nas i majstor će vam se uskoro javiti.
     lookingFor: Recite nam koji automobil vozite — marka, model i godište — i šta se dešava s njim ili koji radovi su potrebni.
     phoneAsk: Podelite broj telefona da bi majstor mogao da vas kontaktira — ili preskočite ovaj korak.
-    phoneOffer: Ako vam više odgovara poziv, podelite broj pa će vas majstor pozvati. Ako ne, slobodno preskočite.
     phoneButton: Podeli broj
-    phoneSkip: Preskoči
     thanks: Hvala! Prosledili smo majstoru — uskoro će vas kontaktirati.
     received: Primili smo, majstor će videti vašu poruku.
     menu:
@@ -82,9 +78,7 @@ translations:
     greeting: Hello! Thanks for getting in touch — we have your enquiry and a mechanic will reply shortly.
     lookingFor: Tell us which car you drive — make, model and year — and what is wrong with it or what work it needs.
     phoneAsk: Share your phone number so a mechanic can reach you — or skip this step.
-    phoneOffer: If a call suits you better, share your number and a mechanic will ring you. If not, just skip it.
     phoneButton: Share my number
-    phoneSkip: Skip
     thanks: Thank you! I’ve passed your message to the technician — he’ll be in touch with you shortly.
     received: Got it, a mechanic will see your message.
     menu:
