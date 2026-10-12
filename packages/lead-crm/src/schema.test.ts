@@ -125,23 +125,6 @@ describe('referredBy on a lead', () => {
   });
 });
 
-describe('adTag on a lead', () => {
-  it('reads a record written before ad tags as untagged', () => {
-    expect(schema.parse(base).adTag).toBeNull();
-  });
-
-  it('keeps a well-formed tag', () => {
-    expect(schema.parse({ ...base, adTag: 'ig-x1' }).adTag).toBe('ig-x1');
-  });
-
-  it.each(['yt-spring1', 'fb-', 'fb-spring.1', `fb-${'a'.repeat(17)}`])(
-    'drops a malformed tag instead of quarantining the lead: %s',
-    (adTag) => {
-      expect(schema.parse({ ...base, adTag }).adTag).toBeNull();
-    },
-  );
-});
-
 describe('pendingPrompt on a lead', () => {
   it('accepts the postpone prompt', () => {
     const lead = schema.parse({

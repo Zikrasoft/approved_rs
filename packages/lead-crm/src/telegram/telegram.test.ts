@@ -97,7 +97,6 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     topicActiveAt: null,
     questionnaireDone: false,
     referredBy: null,
-    adTag: null,
     managerHandoff: null,
     remindAt: null,
     postponedFrom: null,
@@ -234,20 +233,6 @@ describe('sendLeadNotification', () => {
     );
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).toContain('🤖 через бота · 🤝 из бота Approved.rs');
-  });
-
-  it('names the ad a bot Lead came from on the teaser, the detail and the topic summary', async () => {
-    const lead = makeLead({ telegramId: 77, adTag: 'fb-spring1' });
-    await sendLeadNotification(lead);
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-
-    for (const text of [
-      body.text,
-      buildLeadDetail(lead, 'owner').text,
-      formatter.topicSummaryText(lead),
-    ])
-      expect(text).toContain('🤖 через бота\n📣 Реклама: fb · spring1');
-    expect(formatter.formatTeaser(makeLead())).not.toContain('📣');
   });
 
   it('says in the teaser when the visitor went to the manager', async () => {

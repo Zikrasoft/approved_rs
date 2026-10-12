@@ -244,24 +244,6 @@ describe('insertOrMergeLead', () => {
     });
   });
 
-  it('takes the ad tag the bot Lead carries, and keeps the first one', async () => {
-    await store.insertOrMergeLead(clickData('telegram'));
-    const tagged = await store.insertOrMergeLead({
-      ...clickData('telegram'),
-      contact: '@petr',
-      telegramId: 77,
-      adTag: 'fb-spring1',
-    });
-    const retagged = await store.insertOrMergeLead({
-      ...clickData('telegram'),
-      contact: '+381601234567',
-      adTag: 'ig-other',
-    });
-
-    expect(tagged.lead.adTag).toBe('fb-spring1');
-    expect(retagged.lead.adTag).toBe('fb-spring1');
-  });
-
   it('hands a Telegram click over to the capture bot that picks up the same visitor', async () => {
     await store.insertOrMergeLead({
       ...clickData('telegram'),
@@ -1907,25 +1889,6 @@ describe('updateCapture', () => {
     });
 
     expect(updated?.referredBy).toBe('approved');
-  });
-
-  it('sets the first ad tag and keeps it through later tags and writes', async () => {
-    const lead = await store.insertLead(baseData);
-
-    await store.updateCapture(lead.id, {
-      adTag: 'tg-a1',
-      capturePrompt: null,
-    });
-    await store.updateCapture(lead.id, {
-      adTag: 'fb-b2',
-      capturePrompt: null,
-    });
-    const updated = await store.updateCapture(lead.id, {
-      adTag: null,
-      capturePrompt: null,
-    });
-
-    expect(updated?.adTag).toBe('tg-a1');
   });
 
   it('stamps when the visitor last acted on the Lead', async () => {

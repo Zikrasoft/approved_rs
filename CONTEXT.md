@@ -71,12 +71,6 @@ bot's Partners screen. `referredBy: approved` is the only record of it — the
 card renders that field, and no note is written to the comment. Brand and
 rate are still the receiving bot's.
 
-**Ad tag** — the campaign a Capture bot Lead came from, as `adTag` (`fb-spring1`:
-source `fb`/`ig`/`tg` and a short id). It rides in the `/start` payload of a
-hand-built ad link, never a site tile; the first tag a Lead gets is kept, and
-the card shows it as «📣 Реклама». How to build the links:
-`docs/guides/ad-links.md`.
-
 **Capture bot** — one per brand, and the whole of that brand inside Telegram:
 a visitor can read its services and answer its Questionnaire without opening
 the site. It writes a Lead on every `/start`, and copies everything else the

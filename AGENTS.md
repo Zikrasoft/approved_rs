@@ -329,15 +329,7 @@ Both new apps follow the same shape, and a third should too:
   Telegram. The payload is `<service>_<locale>`, or the locale alone where the
   page has no service (the homepage, the footer, the floating widget, the
   contacts page); a component that sits on a service page takes the slug as a
-  prop rather than reading it off the path. An ad link may add an Ad tag
-  segment before the locale — the full grammar is
-  `[<service>_|from-approved_][<source>-<id>_]<locale>[_<visitor>]`, with
-  `<source>` one of `fb`/`ig`/`tg` and `<id>` 1–16 of `[A-Za-z0-9]`, the
-  whole payload at most 64 of `[A-Za-z0-9_-]`. `adTagSchema` in
-  `packages/lead-crm` owns the tag, `startFields` in `packages/lead-capture`
-  finds it, and a malformed one is ignored rather than breaking the rest.
-  No site tile writes one; `docs/guides/ad-links.md` is how the owner builds
-  them. A Telegram tap stores a click Lead
+  prop rather than reading it off the path. A Telegram tap stores a click Lead
   like every other channel, carrying the page and the visitor id, and
   `defineContactClickTracking` appends that id to the payload through
   `stampStartVisitor` in `@podbor/site-kit/contact-links` — the bot decodes it

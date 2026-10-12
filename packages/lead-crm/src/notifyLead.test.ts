@@ -56,7 +56,6 @@ const storedLead: StoredLead = {
   topicActiveAt: null,
   questionnaireDone: false,
   referredBy: null,
-  adTag: null,
   managerHandoff: null,
   remindAt: null,
   postponedFrom: null,

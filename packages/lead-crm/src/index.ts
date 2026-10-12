@@ -21,7 +21,7 @@ export type {
   StoredLead,
 } from './schema.ts';
 export type { PromptKey } from './promptKey.ts';
-export { adTagSchema, storedLeadSchema } from './schema.ts';
+export { storedLeadSchema } from './schema.ts';
 
 export {
   appendNote,
