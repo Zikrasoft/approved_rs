@@ -33,7 +33,7 @@ export const {
   sendDigest,
   sendPostponeReminder,
   sendOperationNotice,
-  sendStatusChangeToAdmin,
+  sendStatusChange,
   sendFieldChange,
   sendNoteNotice,
   renameLeadTopic,
@@ -41,7 +41,7 @@ export const {
   unpinLeadCard,
 } = notifier;
 
-export const { buildHelp, buildLeadDetail } = formatter;
+export const { buildHelp, buildLeadDetail, redrawDigest } = formatter;
 
 export const OWNER_IDS = ownerIds;
 export const ADMIN_IDS = adminIds;

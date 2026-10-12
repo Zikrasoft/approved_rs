@@ -135,7 +135,7 @@ export function createCloseLeadTopic({
 
 export interface StatusChangeOptions {
   surface?: { chatId: number; messageId: number; role: Role };
-  notice?: boolean;
+  author?: { role: Role; id: number };
 }
 
 interface AfterStatusChangeOptions {
@@ -144,7 +144,7 @@ interface AfterStatusChangeOptions {
   closeLeadTopic: (lead: StoredLead) => Promise<boolean>;
   notifier: Pick<
     Notifier,
-    'editLeadDetailMessage' | 'sendStatusChangeToAdmin' | 'unpinLeadCard'
+    'editLeadDetailMessage' | 'sendStatusChange' | 'unpinLeadCard'
   >;
 }
 
@@ -167,7 +167,7 @@ export function createAfterStatusChange({
 
   return async function afterStatusChange(
     lead: StoredLead,
-    { surface, notice = true }: StatusChangeOptions = {},
+    { surface, author }: StatusChangeOptions = {},
   ): Promise<void> {
     await ensureLeadCard(lead);
     const current = await refreshTopic(lead);
@@ -182,8 +182,7 @@ export function createAfterStatusChange({
         lead,
         surface.role,
       );
-    if (!notice) return;
-    await notifier.sendStatusChangeToAdmin(lead);
+    if (author) await notifier.sendStatusChange(lead, author.role, author.id);
   };
 }
 

@@ -958,7 +958,9 @@ Each is registered once per bot, four registrations in total.
 The group receives a short teaser of the lead ("#123 · Ivan · Vehicle
 sourcing · status") with the status buttons (✅ deal / ❌ lost, then 🗣 negotiations, 🔵 in progress
 and ⏰ postpone) and
-an "Open in the bot" link button; deleting happens in a DM with
+an "Open in the bot" link button; the owner and the admin may both change a
+status, and whoever did not gets a DM saying who did. Deleting is the admin's
+alone and happens in a DM with
 the bot, and the visitor is answered in the Lead's Topic. Statuses are new / negotiations /
 in_progress / won / lost / postponed, and lost is the archive. 🗣 on the card, or the
 owner's first message in the Lead's Topic, moves a new Lead into negotiations. A
@@ -1083,7 +1085,9 @@ closes every Topic nobody has written in a day after its Lead was created (once;
 a quiet conversation stays open; the next message reopens it), then posts one digest to the group: postponed leads whose day has come (returned
 to the status they were postponed from once listed, with a DM reminder to the
 owner) and new, negotiating or in-progress leads with no action for 7 days, each
-with ✅ ❌ 🔵 — once per day, however often the cron runs. Nothing is posted when the list is empty.
+with «✅ Сделка #N» «❌ Отказ #N» «🔵 В работе #N» — once per day, however often the cron runs.
+A tap on a digest button redraws that message: the Lead's row goes, the other
+rows show their current status, and «✅ Всё разобрано» replaces the last one. Nothing is posted when the list is empty.
 There is no monthly summary: the Balance is in the bot's menu. Without
 `CRON_SECRET` in the project the route answers 401 and the digest silently never
 arrives.

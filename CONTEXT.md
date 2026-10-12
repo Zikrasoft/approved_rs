@@ -19,8 +19,8 @@ negotiations and in progress are **in work**: the open list, search, the
 on the CRM card, and on its own the first time the owner or the admin replies
 to a new Lead's visitor through the bot. Never a Ghost lead.
 
-**Postponed** — a Lead the owner set aside until a date with ⏰ on the card or
-the detail. On that day it goes back to the status it was postponed from (new
+**Postponed** — a Lead the owner or the admin set aside until a date with ⏰ on
+the card or the detail. On that day it goes back to the status it was postponed from (new
 when none is recorded), the owner gets a DM reminder and the group digest lists
 it.
 
@@ -151,8 +151,10 @@ Payouts are owed to.
 money, the daily digest and order notifications, for all three brands in one
 chat. For every Lead, whatever channel it came from, its card and its detail
 in the bot (status buttons, ✏️ Имя, ➕ Контакт, 📝 Заметка) are the
-workspace that must always work; either of the two may correct a Lead's name or
-give a Lead without a real contact one, and the other is told what changed. A
+workspace that must always work; either of the two may change a Lead's status
+(✅ ❌ 🗣 🔵 ⏰, on the card, the detail or the digest), correct its name or give
+a Lead without a real contact one, and the other is told what changed and by
+whom. Only the admin deletes a Lead. A
 real contact — a phone, @username, link or e-mail — is never overwritten: a
 second one goes into the notes. The visitor's comment is read-only: staff add
 their own text as a note, signed and dated, beside it.

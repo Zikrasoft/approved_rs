@@ -58,7 +58,7 @@ const {
   sendOperationNotice,
   sendQuarantinedLeadsToAdmin,
   sendUnreadableLedgerToAdmin,
-  sendStatusChangeToAdmin,
+  sendStatusChange,
   sendFieldChange,
   sendNoteNotice,
   sendDigest,
@@ -412,8 +412,14 @@ describe('status rows on the lead detail', () => {
     expect(statusData(makeLead({ status: 'lost' }), 'owner')).toEqual([]);
   });
 
-  it('admin: no status buttons on an open lead — the owner closes deals', () => {
-    expect(statusData(makeLead({ status: 'new' }), 'admin')).toEqual([]);
+  it('admin: the same status buttons as the owner', () => {
+    expect(statusData(makeLead({ id: 7, status: 'new' }), 'admin')).toEqual([
+      'st:7:won',
+      'st:7:lost',
+      'st:7:negotiations',
+      'st:7:in_progress',
+      'postpone:7',
+    ]);
   });
 
   it('postponed: just Возобновить, for either role', () => {
@@ -590,9 +596,9 @@ describe('sendDigest', () => {
     ]);
     expect(body.reply_markup.inline_keyboard).toEqual(
       [5, 3].map((id) => [
-        { text: `✅ #${id}`, callback_data: `won:${id}` },
-        { text: `❌ #${id}`, callback_data: `lost:${id}` },
-        { text: `🔵 #${id}`, callback_data: `work:${id}` },
+        { text: `✅ Сделка #${id}`, callback_data: `won:${id}` },
+        { text: `❌ Отказ #${id}`, callback_data: `lost:${id}` },
+        { text: `🔵 В работе #${id}`, callback_data: `work:${id}` },
       ]),
     );
   });
@@ -624,6 +630,92 @@ describe('sendDigest', () => {
     await expect(
       sendDigest({ ...empty, stale: [makeLead()] }),
     ).rejects.toThrow();
+  });
+});
+
+describe('redrawDigest', () => {
+  const posted = async (digest: { due: StoredLead[]; stale: StoredLead[] }) => {
+    mockFetchOk();
+    await sendDigest(digest);
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    mockFetch.mockReset();
+    return {
+      text: (body.text as string).replace(/<[^>]+>/g, ''),
+      reply_markup: body.reply_markup,
+    };
+  };
+  const lines = (view: { text: string } | null) => view?.text.split('\n');
+
+  it('drops the tapped Lead and keeps the rest in their sections with their status', async () => {
+    const message = await posted({
+      due: [makeLead({ id: 5, status: 'postponed' })],
+      stale: [makeLead({ id: 3 }), makeLead({ id: 4 })],
+    });
+    const leads = [
+      makeLead({ id: 5, status: 'in_progress' }),
+      makeLead({ id: 3, status: 'won' }),
+      makeLead({ id: 4, status: 'negotiations' }),
+    ];
+
+    const redrawn = formatter.redrawDigest(message, leads, 3);
+
+    expect(lines(redrawn)).toEqual([
+      '<b>📋 Заявки ждут решения</b>',
+      '',
+      '<b>⏰ Пора вернуться</b>',
+      '<a href="https://t.me/approved_test_bot?start=lead_5">#5</a> Иван · Approved.rs · 🔵 В работе',
+      '',
+      '<b>🕐 Без движения 7 дней</b>',
+      '<a href="https://t.me/approved_test_bot?start=lead_4">#4</a> Иван · Approved.rs · 🗣 Переговоры',
+    ]);
+    expect(
+      redrawn?.reply_markup.inline_keyboard.map(([b]) => b!.callback_data),
+    ).toEqual(['won:5', 'won:4']);
+  });
+
+  it('drops Leads that closed or vanished elsewhere and says when nothing is left', async () => {
+    const message = await posted({
+      due: [],
+      stale: [makeLead({ id: 3 }), makeLead({ id: 4 })],
+    });
+
+    const redrawn = formatter.redrawDigest(
+      message,
+      [makeLead({ id: 4, status: 'lost' })],
+      9,
+    );
+
+    expect(redrawn).toEqual({
+      text: '<b>📋 Заявки ждут решения</b>\n\n✅ Всё разобрано',
+      reply_markup: { inline_keyboard: [] },
+    });
+  });
+
+  it('keeps the count of Leads the message never showed', async () => {
+    const many = Array.from({ length: 21 }, (_, i) => makeLead({ id: i + 1 }));
+    const message = await posted({ due: [], stale: many });
+
+    const redrawn = formatter.redrawDigest(message, many, 1);
+
+    expect(redrawn?.reply_markup.inline_keyboard).toHaveLength(19);
+    expect(redrawn?.text.endsWith('\n\n+1 ещё')).toBe(true);
+  });
+
+  it.each([
+    ['a group card', formatter.deepLinkKeyboard(makeLead())],
+    [
+      'a lead detail',
+      formatter.buildLeadDetail(makeLead(), 'owner').reply_markup,
+    ],
+    ['an empty keyboard', { inline_keyboard: [] }],
+  ])('leaves %s alone', (_, reply_markup) => {
+    expect(
+      formatter.redrawDigest({ text: 'x', reply_markup }, [makeLead()], 5),
+    ).toBeNull();
+  });
+
+  it('leaves a message without a keyboard alone', () => {
+    expect(formatter.redrawDigest({ text: 'x' }, [], 5)).toBeNull();
   });
 });
 
@@ -662,21 +754,29 @@ describe('sendPostponeReminder', () => {
   });
 });
 
-describe('sendStatusChangeToAdmin', () => {
+describe('sendStatusChange', () => {
   beforeEach(() => mockFetchOk());
   afterEach(() => mockFetch.mockReset());
 
-  it("notifies every admin id with the lead's current status", async () => {
-    await sendStatusChangeToAdmin(
-      makeLead({ id: 9, name: 'Пётр', status: 'new' }),
-    );
-    expect(mockFetch).toHaveBeenCalledTimes(1);
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.chat_id).toBe(222);
-    expect(body.text).toContain('#9');
-    expect(body.text).toContain('Пётр');
-    expect(body.text).toContain('🆕 Новая');
-  });
+  it.each([
+    ['owner', 111, 222, 'Владелец'],
+    ['admin', 222, 111, 'Админ'],
+  ] as const)(
+    'tells the other role what the %s set, naming the author',
+    async (by, authorId, recipient, author) => {
+      await sendStatusChange(
+        makeLead({ id: 9, name: 'Пётр', status: 'lost' }),
+        by,
+        authorId,
+      );
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(body).toMatchObject({
+        chat_id: recipient,
+        text: `🔔 Заявка #9 Пётр: статус — ❌ Отказ\n✍️ ${author}`,
+      });
+    },
+  );
 });
 
 describe('sendNoteNotice', () => {

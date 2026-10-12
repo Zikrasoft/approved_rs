@@ -14,7 +14,7 @@ import {
   type Keyboard,
   type Role,
 } from './markup.ts';
-import { digestMessage } from './digest.ts';
+import { digestMessage, redrawDigest } from './digest.ts';
 import { OPERATION_AUTHORS } from './ledger.ts';
 import { buildHelp } from './menu.ts';
 
@@ -65,10 +65,10 @@ const IN_WORK_MOVES = [
   { status: 'in_progress', text: '🔵 В работе' },
 ] as const;
 
-function statusRows(lead: StoredLead, role: Role): Btn[][] {
+function statusRows(lead: StoredLead): Btn[][] {
   if (lead.status === 'postponed')
     return [[{ text: '▶️ Возобновить', callback_data: `resume:${lead.id}` }]];
-  if (!isInWork(lead) || role !== 'owner') return [];
+  if (!isInWork(lead)) return [];
   const moves = IN_WORK_MOVES.filter((m) => m.status !== lead.status).map(
     (m) => ({ text: m.text, callback_data: `st:${lead.id}:${m.status}` }),
   );
@@ -204,6 +204,10 @@ export const LEAD_ACTION_COPY = {
   deleted: '🗑 Заявка удалена.',
   deleteAck: 'Удалено',
   denied: '⛔ Доступ запрещён.',
+  roleOnly: {
+    owner: 'Это действие доступно владельцу',
+    admin: 'Это действие доступно админу',
+  } satisfies Record<Role, string>,
   inWork: 'В работе 🔵',
   noteAdded: '📝 Заметка добавлена',
   topicOpened: '💬 Тема открыта',
@@ -267,8 +271,8 @@ function remindLine(lead: StoredLead): string {
     : '';
 }
 
-export function statusChangeText(lead: StoredLead): string {
-  return `🔔 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: статус — ${statusMark(lead.status)}`;
+export function statusChangeText(lead: StoredLead, by: Role): string {
+  return `🔔 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: статус — ${statusMark(lead.status)}\n✍️ ${OPERATION_AUTHORS[by]}`;
 }
 
 export function createFormatter({
@@ -396,6 +400,9 @@ export function createFormatter({
 
     digestMessage: (digest: Digest) => digestMessage(digest, botUsername),
 
+    redrawDigest: (message: unknown, leads: StoredLead[], actedOn: number) =>
+      redrawDigest(message, leads, actedOn, botUsername),
+
     buildHelp,
 
     buildLeadDetail(
@@ -408,7 +415,7 @@ export function createFormatter({
           : [];
 
       const rows: Btn[][] = [
-        ...statusRows(lead, role),
+        ...statusRows(lead),
         ...editRows(lead),
         ...topicButtons(lead),
         ...deleteRow,

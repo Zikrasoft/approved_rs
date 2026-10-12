@@ -27,7 +27,7 @@ async function expireGhosts(now: Date): Promise<number> {
   const expired = await expireGhostLeads(now);
   for (const lead of expired) {
     try {
-      await afterStatusChange(lead, { notice: false });
+      await afterStatusChange(lead);
     } catch (err) {
       console.error('[reminders] failed to refresh an expired ghost card', {
         error: err,
@@ -61,7 +61,7 @@ async function postDigest(now: Date): Promise<boolean> {
       const resumed = await resumeLead(lead.id);
       if (!resumed) continue;
       await sendPostponeReminder(resumed);
-      await afterStatusChange(resumed, { notice: false });
+      await afterStatusChange(resumed);
     } catch (err) {
       console.error('[reminders] failed to resume a due postponed lead', {
         error: err,
