@@ -124,6 +124,9 @@ export const LEAD_ACTION_COPY = {
   denied: '⛔ Доступ запрещён.',
   inWork: 'В работе ⏳',
   noteAdded: '📝 Заметка добавлена',
+  topicOpened: '💬 Тема открыта',
+  topicFailed:
+    '⚠️ Тему открыть не удалось: включите темы в группе и дайте боту право «Управление темами».',
 } as const;
 
 export function quarantinedLeadsText(
@@ -200,9 +203,15 @@ export function createFormatter({
   }
 
   function topicButtons(lead: StoredLead): Btn[][] {
-    return lead.topicId == null
-      ? []
-      : [[{ text: '💬 Открыть тему', url: topicLink(groupId, lead.topicId) }]];
+    if (lead.topicId != null)
+      return [
+        [{ text: '💬 Открыть тему', url: topicLink(groupId, lead.topicId) }],
+      ];
+    if (lead.telegramId != null)
+      return [
+        [{ text: '💬 Начать переписку', callback_data: `topic:${lead.id}` }],
+      ];
+    return [];
   }
 
   return {

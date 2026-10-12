@@ -91,7 +91,9 @@ _Avoid_: wizard, form (the site's form is a different thing)
 conversation. The CRM bot opens it the first time a Capture bot touches a
 Lead the visitor started from Telegram, names it after the Lead's id, name and
 brand, and keeps the Lead summary as its first message, edited as the
-Questionnaire fills in. The Lead's card in General and its detail link to it.
+Questionnaire fills in. The Lead's card in General and its detail link to it;
+a Lead the bot knows (`telegramId`) without one shows «💬 Начать переписку»
+there instead, which opens the Topic the same way.
 Whatever the owner or admin writes there — text or media — reaches the visitor
 through the brand's Capture bot, the first message moves an open Lead into
 negotiations, and a copy that cannot be delivered is reported in the Topic.

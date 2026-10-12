@@ -535,6 +535,106 @@ describe('POST /api/telegram-webhook', () => {
     );
   });
 
+  describe('topic: — 💬 Начать переписку on a Lead the bot knows', () => {
+    const onCard = { chatId: CARD_CHAT_ID, messageId: CARD_MESSAGE_ID };
+    const START = { text: '💬 Начать переписку', callback_data: 'topic:5' };
+    const buttons = (payload: Record<string, unknown> | undefined) =>
+      (
+        payload?.reply_markup as { inline_keyboard: Record<string, string>[][] }
+      ).inline_keyboard.flat();
+
+    beforeEach(() => seed(makeLead({ telegramId: 777 })));
+
+    it('offers the button only to a Lead with a telegramId and no topic', async () => {
+      await tap('open:5', OWNER_ID);
+      seed(makeLead({ telegramId: 777, topicId: 9 }));
+      await tap('open:5', OWNER_ID);
+      seed(makeLead());
+      await tap('open:5', OWNER_ID);
+      const [bare, topical, plain] = sentTo(DM_CHAT_ID).map(buttons);
+      expect(bare).toContainEqual(START);
+      expect(topical).not.toContainEqual(START);
+      expect(topical).toContainEqual({
+        text: '💬 Открыть тему',
+        url: 'https://t.me/c/9876543210/9',
+      });
+      expect(plain).not.toContainEqual(START);
+    });
+
+    it('opens one topic with the summary, stores it and links the card', async () => {
+      await tap('topic:5', ADMIN_ID, { id: 'cb-topic', ...onCard });
+
+      expect(crm('createForumTopic')).toEqual([
+        { chat_id: GROUP_ID, name: '#5 · Иван · Approved.rs' },
+      ]);
+      const lead = await stored();
+      expect(lead.topicId).toEqual(expect.any(Number));
+      expect(lead.topicMessageId).toBe(PROMPT_ID);
+      expect(sentTo(GROUP_ID)).toEqual([
+        expect.objectContaining({
+          message_thread_id: lead.topicId,
+          text: expect.stringContaining('Заявка #5'),
+        }),
+      ]);
+      const [card] = edits(CARD_CHAT_ID, CARD_MESSAGE_ID);
+      expect(buttons(card)).toContainEqual({
+        text: '💬 Открыть тему',
+        url: `https://t.me/c/9876543210/${lead.topicId}`,
+      });
+      expect(buttons(card)).not.toContainEqual(START);
+      expect(crm('editMessageText')).toHaveLength(1);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-topic', text: LEAD_ACTION_COPY.topicOpened },
+      ]);
+    });
+
+    it('redraws the detail it was tapped on as well as the group card', async () => {
+      await tap('topic:5', OWNER_ID, { messageId: 42 });
+      const lead = await stored();
+      expect(edits(DM_CHAT_ID, 42)).toEqual([
+        view(buildLeadDetail(lead, 'owner')),
+      ]);
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+    });
+
+    it('opens no second topic on a second tap', async () => {
+      await tap('topic:5', OWNER_ID, onCard);
+      const { topicId } = await stored();
+      await tap('topic:5', OWNER_ID, { id: 'cb-again', ...onCard });
+
+      expect(crm('createForumTopic')).toHaveLength(1);
+      expect((await stored()).topicId).toBe(topicId);
+      expect(answers()).toContainEqual({
+        callback_query_id: 'cb-again',
+        text: LEAD_ACTION_COPY.topicOpened,
+      });
+    });
+
+    it('answers with the reason when the group cannot open topics', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+      api.fail('createForumTopic', 'Bad Request: the chat is not a forum');
+
+      await tap('topic:5', OWNER_ID, { id: 'cb-fail', ...onCard });
+
+      expect((await stored()).topicId).toBeNull();
+      expect(crm('editMessageText')).toEqual([]);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-fail', text: LEAD_ACTION_COPY.topicFailed },
+      ]);
+      expect(error).toHaveBeenCalledWith(
+        '[telegram-webhook] could not open the topic',
+        expect.objectContaining({ leadId: 5 }),
+      );
+      error.mockRestore();
+    });
+
+    it('is a bare ack for an unknown Lead', async () => {
+      await tap('topic:99', OWNER_ID, { id: 'cb-none' });
+      expect(crm('createForumTopic')).toEqual([]);
+      expect(answers()).toEqual([{ callback_query_id: 'cb-none' }]);
+    });
+  });
+
   describe('Bot API errors the edits swallow', () => {
     it('treats "message is not modified" as a successful edit', async () => {
       api.fail(
@@ -1171,6 +1271,7 @@ describe('POST /api/telegram-webhook', () => {
       ['delcancel:5', 'admin'],
       ['menu:open', 'any'],
       ['open:5', 'any'],
+      ['topic:5', 'any'],
       ['menu:stats', 'admin'],
       ['menu:debt', 'any'],
       ['ledger:payout', 'any'],

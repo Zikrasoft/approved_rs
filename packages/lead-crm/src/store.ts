@@ -465,13 +465,17 @@ export function createLeadStore({
     },
 
     setTopic(id: number, topicId: number): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({
-        ...l,
-        topicId,
-        topicMessageId: null,
-        topicClosed: false,
-        topicActiveAt: null,
-      }));
+      return updateOne(id, (l) =>
+        l.topicId != null
+          ? l
+          : {
+              ...l,
+              topicId,
+              topicMessageId: null,
+              topicClosed: false,
+              topicActiveAt: null,
+            },
+      );
     },
 
     setTopicSummary(

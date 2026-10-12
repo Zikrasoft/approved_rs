@@ -407,19 +407,26 @@ describe('ensureLeadTopic', () => {
   const openLeadTopic = vi.fn();
   const postLeadTopicSummary = vi.fn();
   const refreshLeadTopic = vi.fn();
+  const deleteLeadTopic = vi.fn();
   const topicStore = createLeadStore({
     storage: createMemoryStorage(),
     schema: storedLeadSchema,
   });
   const ensureLeadTopic = createEnsureLeadTopic({
     store: topicStore,
-    notifier: { openLeadTopic, postLeadTopicSummary, refreshLeadTopic },
+    notifier: {
+      openLeadTopic,
+      deleteLeadTopic,
+      postLeadTopicSummary,
+      refreshLeadTopic,
+    },
   });
 
   beforeEach(() => {
     openLeadTopic.mockReset().mockResolvedValue(5);
     postLeadTopicSummary.mockReset().mockResolvedValue(77);
     refreshLeadTopic.mockReset().mockResolvedValue(undefined);
+    deleteLeadTopic.mockReset().mockResolvedValue(undefined);
   });
 
   it('opens no topic for a Lead the bot never saw', async () => {
@@ -456,6 +463,32 @@ describe('ensureLeadTopic', () => {
     expect(openLeadTopic).toHaveBeenCalledOnce();
     expect(postLeadTopicSummary).toHaveBeenLastCalledWith(orphan, 5);
     expect(refreshLeadTopic).not.toHaveBeenCalled();
+  });
+
+  it('deletes the topic it lost a race for and keeps the first one', async () => {
+    const lead = await topicStore.insertLead({ ...baseData, telegramId: 9 });
+    await topicStore.setTopic(lead.id, 4);
+
+    await expect(ensureLeadTopic(lead)).resolves.toMatchObject({
+      topicId: 4,
+      topicMessageId: null,
+    });
+    expect(deleteLeadTopic).toHaveBeenCalledWith(5);
+    expect(postLeadTopicSummary).not.toHaveBeenCalled();
+  });
+
+  it('logs a duplicate topic it could not delete', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const lead = await topicStore.insertLead({ ...baseData, telegramId: 9 });
+    await topicStore.setTopic(lead.id, 4);
+    deleteLeadTopic.mockRejectedValueOnce(new Error('no rights'));
+
+    await expect(ensureLeadTopic(lead)).resolves.toMatchObject({ topicId: 4 });
+    expect(error).toHaveBeenCalledWith(
+      '[lead-crm] could not delete a duplicate topic',
+      expect.objectContaining({ leadId: lead.id, topicId: 5 }),
+    );
+    error.mockRestore();
   });
 
   it('hands back the Lead when its row is gone', async () => {

@@ -76,6 +76,10 @@ export function createNotifier({
       return topic.message_thread_id;
     },
 
+    async deleteLeadTopic(topicId: number): Promise<void> {
+      await client.api.deleteForumTopic(groupId, topicId);
+    },
+
     async postLeadTopicSummary(
       lead: StoredLead,
       topicId: number,
