@@ -87,6 +87,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     topicActiveAt: null,
     questionnaireDone: false,
     referredBy: null,
+    managerHandoff: null,
     remindAt: null,
     ...overrides,
   };
@@ -211,6 +212,20 @@ describe('sendLeadNotification', () => {
     );
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).toContain('🤖 через бота · 🤝 из бота Approved.rs');
+  });
+
+  it('says in the teaser when the visitor went to the manager', async () => {
+    await sendLeadNotification(
+      makeLead({
+        telegramId: 77,
+        managerHandoff: {
+          at: '2026-10-12T10:00:00.000Z',
+          handle: 'approvedrs',
+        },
+      }),
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('👤 Ушёл к менеджеру @approvedrs · 12.10.2026');
   });
 
   it('ignores a comment that only quotes the referral note', async () => {

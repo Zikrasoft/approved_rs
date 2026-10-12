@@ -37,6 +37,12 @@ const capturePromptSchema = z.object({
 });
 export type CapturePrompt = z.infer<typeof capturePromptSchema>;
 
+const managerHandoffSchema = z.object({
+  at: z.string(),
+  handle: z.string().min(1),
+});
+export type ManagerHandoff = z.infer<typeof managerHandoffSchema>;
+
 export const LEGACY_BRAND = 'Approved.rs';
 
 export const REFERRERS = ['approved'] as const;
@@ -73,6 +79,7 @@ const baseStoredLeadSchema = z.object({
   topicActiveAt: z.string().nullable().default(null).catch(null),
   questionnaireDone: z.boolean().default(false).catch(false),
   referredBy: z.enum(REFERRERS).nullable().default(null).catch(null),
+  managerHandoff: managerHandoffSchema.nullable().default(null).catch(null),
   archived: z.boolean().optional(),
   remindAt: z.string().nullable().default(null),
 });

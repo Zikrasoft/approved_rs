@@ -70,7 +70,13 @@ visitor sends — answers, free text, a shared phone, photos, voice, files —
 into the visitor's Topic as it arrives; a visitor with no Lead yet gets one
 first, and a Lead from before Topics gets its Topic then. It has no owner
 surface of its own: the owner answers in the Lead's Topic, and the Capture
-bot copies each message to the visitor, username or not.
+bot copies each message to the visitor, username or not. Its menu ends with a
+blue «Написать менеджеру» (CarLab and Details: «мастеру») tap. Where the brand
+names a staff account it is a manager hand-off: the first tap stamps
+`managerHandoff` on the visitor's Lead — even once the Questionnaire is
+finished — shows it on the card and posts it to the Topic, then turns the menu
+into a link to that account; with no account named it stays the in-bot
+question screen.
 
 **Questionnaire** — the short set of questions a Capture bot asks to turn a
 Lead into a request the owner can answer. Every brand's opens with «Какие

@@ -40,6 +40,7 @@ export interface CaptureUpdate {
   questionnaireDone?: boolean;
   locale?: string;
   referredBy?: Referrer;
+  managerHandoff?: string;
   capturePrompt: CapturePrompt | null;
 }
 
@@ -576,9 +577,11 @@ export function createLeadStore({
         questionnaireDone,
         locale,
         referredBy,
+        managerHandoff,
         capturePrompt,
       }: CaptureUpdate,
     ): Promise<StoredLead | undefined> {
+      const now = new Date().toISOString();
       return updateOne(id, (l) => ({
         ...l,
         comment: note ? appendNote(l.comment, note) : l.comment,
@@ -587,8 +590,11 @@ export function createLeadStore({
         questionnaireDone: questionnaireDone ?? l.questionnaireDone,
         locale: locale ?? l.locale,
         referredBy: referredBy ?? l.referredBy,
+        managerHandoff:
+          l.managerHandoff ??
+          (managerHandoff ? { at: now, handle: managerHandoff } : null),
         capturePrompt,
-        visitorActiveAt: new Date().toISOString(),
+        visitorActiveAt: now,
       }));
     },
 

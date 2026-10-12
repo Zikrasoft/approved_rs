@@ -56,6 +56,7 @@ export {
   EDIT_FIELD_LABELS,
   REPLY_COPY,
   LEAD_ACTION_COPY,
+  managerHandoffText,
   topicLink,
 } from './telegram/cards.ts';
 export type { EditField } from './telegram/cards.ts';

@@ -56,6 +56,7 @@ const storedLead: StoredLead = {
   topicActiveAt: null,
   questionnaireDone: false,
   referredBy: null,
+  managerHandoff: null,
   remindAt: null,
 };
 

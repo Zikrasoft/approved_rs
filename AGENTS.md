@@ -353,8 +353,10 @@ Both new apps follow the same shape, and a third should too:
   the control rather than the page, and `createContactControls` picks the same
   `humanTelegram` on any page. Each capture bot's «Написать менеджеру» menu
   button follows the same rule: `humanTelegram` in the app's
-  `telegram-capture.ts`, read from that app's `PUBLIC_TG_MANAGER`, turns it into
-  a URL button to the manager, and unset it stays the in-bot manager screen. A
+  `telegram-capture.ts`, read from that app's `PUBLIC_TG_MANAGER`, makes it a
+  hand-off: the button stays a callback so the tap can first stamp
+  `managerHandoff` on the Lead and post it to the Topic, then the screen offers
+  the URL to the manager; unset it stays the in-bot manager screen. A
   tap on either site carve-out fires `contact_click` and writes no Lead:
   `defineContactClickTracking` skips the beacon for a `telegram` link whose
   href carries no `start` parameter — a human account, which a capture-bot

@@ -355,14 +355,49 @@ describe('a photo from the visitor', () => {
 });
 
 describe('the Details main menu', () => {
-  it('links «Написать менеджеру» straight to the manager account', async () => {
-    await answer('/start ru', { id: 71, first_name: 'Menu', username: 'menu' });
+  const MENU_VISITOR = { id: 71, first_name: 'Menu', username: 'menu' };
+  const CAPTURE_TOKEN = '1002:test-capture-bot-token';
 
-    expect(lastReply().reply_markup.inline_keyboard).toContainEqual([
-      {
-        text: content('ru').captureBot.manager.button,
-        url: 'https://t.me/approvedrs',
-      },
+  it('ends with a blue manager tap that marks the Lead and opens @approvedrs', async () => {
+    const words = content('ru').captureBot.manager;
+    await answer('/start ru', MENU_VISITOR);
+
+    expect(lastReply().reply_markup.inline_keyboard.at(-1)).toEqual([
+      { text: words.button, callback_data: 'manager:ru', style: 'primary' },
     ]);
+
+    await press('manager:ru', MENU_VISITOR);
+
+    const lead = visitorLead(MENU_VISITOR) as unknown as {
+      managerHandoff: { handle: string };
+      topicId: number;
+    };
+    expect(lead.managerHandoff.handle).toBe('approvedrs');
+    expect(
+      api.callsTo('sendMessage', CAPTURE_TOKEN).map((call) => call.payload),
+    ).toContainEqual(
+      expect.objectContaining({
+        text: '👤 Ушёл к менеджеру @approvedrs',
+        message_thread_id: lead.topicId,
+      }),
+    );
+    expect(
+      api.callsTo('editMessageText', CAPTURE_TOKEN).at(-1)?.payload,
+    ).toEqual(
+      expect.objectContaining({
+        text: words.handoff,
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: words.chat, url: 'https://t.me/approvedrs' }],
+            [
+              {
+                text: content('ru').captureBot.menu.back,
+                callback_data: 'menu:ru',
+              },
+            ],
+          ],
+        },
+      }),
+    );
   });
 });

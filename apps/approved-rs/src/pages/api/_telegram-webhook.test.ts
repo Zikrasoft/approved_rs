@@ -112,6 +112,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     topicActiveAt: null,
     questionnaireDone: false,
     referredBy: null,
+    managerHandoff: null,
     remindAt: null,
     ...overrides,
   };

@@ -11,6 +11,7 @@ import {
   isTelegramIdContact,
   secretMatches,
   isFreshLead,
+  managerHandoffText,
   telegramIdContact,
   type CapturePrompt,
   type CaptureStep,
@@ -24,6 +25,7 @@ import {
   REFERRAL,
   tapSchema,
   LANGUAGE_SWITCH_TAP,
+  MANAGER_TAP,
   SERVICES_DONE_TAP,
   type MenuConfig,
   type Screen,
@@ -279,7 +281,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   async function publishLeadChange(
     lead: StoredLead,
     updated: StoredLead | undefined,
-  ): Promise<void> {
+  ): Promise<StoredLead> {
     const latest = updated ?? lead;
     const withTopic = await ensureLeadTopic(latest).catch((error: unknown) => {
       console.error('[capture] could not update the topic', {
@@ -294,29 +296,58 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
         leadId: lead.id,
       });
     });
+    return withTopic;
   }
 
   async function postToTopic(
+    lead: StoredLead,
+    post: (topicId: number) => Promise<unknown>,
+  ): Promise<void> {
+    try {
+      const withTopic = await touchLeadTopic(
+        lead.topicMessageId == null ? await ensureLeadTopic(lead) : lead,
+      );
+      if (withTopic.topicId == null) return;
+      await post(withTopic.topicId);
+    } catch (error) {
+      console.error('[capture] could not post to the topic', {
+        error,
+        leadId: lead.id,
+      });
+    }
+  }
+
+  async function copyToTopic(
     sender: CaptureSender,
     chatId: number,
     messageId: number,
   ): Promise<void> {
     const lead = await store.findLatestLeadByTelegramId(sender.id, brand);
     if (!lead) return;
-    try {
-      const withTopic = await touchLeadTopic(
-        lead.topicMessageId == null ? await ensureLeadTopic(lead) : lead,
-      );
-      if (withTopic.topicId == null) return;
-      await bot.api.copyMessage(groupId, chatId, messageId, {
-        message_thread_id: withTopic.topicId,
-      });
-    } catch (error) {
-      console.error('[capture] could not copy the message to the topic', {
-        error,
-        leadId: lead.id,
-      });
-    }
+    await postToTopic(lead, (topicId) =>
+      bot.api.copyMessage(groupId, chatId, messageId, {
+        message_thread_id: topicId,
+      }),
+    );
+  }
+
+  async function markManagerHandoff(
+    sender: CaptureSender,
+    handle: string,
+  ): Promise<void> {
+    const lead = await store.findLatestLeadByTelegramId(sender.id, brand);
+    if (!lead || lead.managerHandoff) return;
+    const updated = await store.updateCapture(lead.id, {
+      managerHandoff: handle,
+      capturePrompt: lead.capturePrompt,
+    });
+    const current = await publishLeadChange(lead, updated);
+    await postToTopic(current, (topicId) =>
+      bot.api.sendMessage(groupId, managerHandoffText(handle), {
+        parse_mode: 'HTML',
+        message_thread_id: topicId,
+      }),
+    );
   }
 
   function startFields(
@@ -632,6 +663,8 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     if (tap.screen === 'contacts') return showContacts(chatId, locale);
     if (tap.screen === 'pick') return toggleService(chatId, messageId, tap.arg);
     if (tap.screen === SERVICES_DONE_TAP) return finishServices(chatId);
+    if (tap.screen === MANAGER_TAP && menuConfig.humanTelegram)
+      await markManagerHandoff(sender, menuConfig.humanTelegram);
     const switchesLanguage = tap.screen === LANGUAGE_SWITCH_TAP;
     if (switchesLanguage && !isLocale(tap.locale)) return;
     const screen = switchesLanguage
@@ -736,7 +769,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       await handleOtherMessage(chat.id, from);
     else await handleText(chat.id, from, text);
     if (text === undefined || !isCommand(text))
-      await postToTopic(from, chat.id, message_id);
+      await copyToTopic(from, chat.id, message_id);
   });
 
   bot.chatType('private').on('callback_query:data', async (ctx) => {

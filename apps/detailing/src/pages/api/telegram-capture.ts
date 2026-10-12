@@ -32,7 +32,7 @@ export const POST = createCaptureWebhookRoute({
   isLocale,
   primaryLocale: PRIMARY_LOCALE,
   copy: (locale) => content(locale).captureBot,
-  menu: ['request', 'services', 'contacts', 'manager', 'language'],
+  menu: ['request', 'services', 'contacts', 'language', 'manager'],
   humanTelegram: TG_MANAGER,
   questionnaire: ['car'],
   phoneRegion: 'RS',

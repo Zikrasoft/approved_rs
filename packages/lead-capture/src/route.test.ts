@@ -42,7 +42,12 @@ const COPY = {
   services: { button: 'SERVICES', text: 'PICK_A_SERVICE' },
   card: { request: 'LEAVE_A_REQUEST', site: 'ON_THE_SITE' },
   contacts: { button: 'CONTACTS', text: 'REACH_US', hours: 'HOURS' },
-  manager: { button: 'MANAGER', text: 'WRITE_YOUR_QUESTION' },
+  manager: {
+    button: 'MANAGER',
+    text: 'WRITE_YOUR_QUESTION',
+    handoff: 'MANAGER_IN_TELEGRAM',
+    chat: 'OPEN_MANAGER_CHAT',
+  },
   partners: { button: 'PARTNERS', text: 'PICK_A_PARTNER' },
   request: {
     button: 'REQUEST',
@@ -1514,7 +1519,7 @@ describe('free text outside the dialog', () => {
 
     expect(lastSent()).toEqual([42, 'RECEIVED']);
     expect(error).toHaveBeenCalledWith(
-      '[capture] could not copy the message to the topic',
+      '[capture] could not post to the topic',
       expect.objectContaining({ leadId: 1 }),
     );
   });
@@ -1940,33 +1945,111 @@ describe('the Contacts screen', () => {
 });
 
 describe('talking to a manager', () => {
-  it('opens the manager account straight from the menu when the brand names one', async () => {
+  const MANAGER_MENU = {
+    inline_keyboard: [
+      [{ text: 'SERVICES', callback_data: 'services:ru' }],
+      [{ text: 'MANAGER', callback_data: 'manager:ru', style: 'primary' }],
+    ],
+  };
+
+  function handoffPosts() {
+    return api
+      .callsTo('sendMessage', CAPTURE_TOKEN)
+      .map((c) => c.payload)
+      .filter((p) => p.chat_id === GROUP_ID);
+  }
+
+  function withManager() {
     POST = route(SECRET, {
       menu: ['services', 'manager'],
       humanTelegram: 'brand_manager',
     });
+  }
 
+  it('puts the manager last as a blue tap whether or not the brand names an account', async () => {
+    withManager();
     await POST(makeCtx(startUpdate('ru')));
+    expect(lastMarkup()).toEqual(MANAGER_MENU);
 
-    expect(lastMarkup()).toEqual({
-      inline_keyboard: [
-        [{ text: 'SERVICES', callback_data: 'services:ru' }],
-        [{ text: 'MANAGER', url: 'https://t.me/brand_manager' }],
-      ],
-    });
+    POST = route(SECRET, { menu: ['services', 'manager'] });
+    await POST(makeCtx(startUpdate('ru')));
+    expect(lastMarkup()).toEqual(MANAGER_MENU);
   });
 
-  it('keeps the in-bot manager screen when the brand names no account', async () => {
-    POST = route(SECRET, { menu: ['services', 'manager'] });
+  it('marks the hand-off once, tells the topic and opens the chat link in place', async () => {
+    withManager();
+    await POST(makeCtx(startUpdate('ru')));
+    api.reset();
 
+    await tap('manager:ru');
+    const [first] = stored();
+    await tap('manager:ru');
+
+    expect(first.managerHandoff).toEqual({
+      at: expect.any(String),
+      handle: 'brand_manager',
+    });
+    expect(stored()[0].managerHandoff).toEqual(first.managerHandoff);
+    expect(handoffPosts()).toEqual([
+      expect.objectContaining({
+        text: '👤 Ушёл к менеджеру @brand_manager',
+        message_thread_id: 1,
+      }),
+    ]);
+    expect(summaryEdits().at(-1)?.text).toContain(
+      '👤 Ушёл к менеджеру @brand_manager',
+    );
+    expect(edits()).toEqual(
+      Array(2).fill(
+        expect.objectContaining({
+          text: 'MANAGER_IN_TELEGRAM',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: 'OPEN_MANAGER_CHAT',
+                  url: 'https://t.me/brand_manager',
+                },
+              ],
+              [{ text: 'BACK', callback_data: 'menu:ru' }],
+            ],
+          },
+        }),
+      ),
+    );
+  });
+
+  it('marks a Lead whose Questionnaire is already finished', async () => {
+    withManager();
+    await begin();
+    await say('BMW X5');
+    await say('до 30k');
+    expect(stored()[0].questionnaireDone).toBe(true);
+
+    await tap('manager:ru');
+
+    expect(stored()[0].managerHandoff?.handle).toBe('brand_manager');
+  });
+
+  it('only opens the chat link when the visitor has no Lead yet', async () => {
+    withManager();
+
+    await tap('manager:ru');
+
+    expect(stored()).toEqual([]);
+    expect(handoffPosts()).toEqual([]);
+    expect(edits()).toEqual([
+      expect.objectContaining({ text: 'MANAGER_IN_TELEGRAM' }),
+    ]);
+  });
+
+  it('records no hand-off when the brand names no account', async () => {
     await POST(makeCtx(startUpdate('ru')));
 
-    expect(lastMarkup()).toEqual({
-      inline_keyboard: [
-        [{ text: 'SERVICES', callback_data: 'services:ru' }],
-        [{ text: 'MANAGER', callback_data: 'manager:ru' }],
-      ],
-    });
+    await tap('manager:ru');
+
+    expect(stored()[0].managerHandoff).toBeNull();
+    expect(handoffPosts()).toEqual([]);
   });
 
   it('asks for the question and ends a running Questionnaire', async () => {

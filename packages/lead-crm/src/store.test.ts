@@ -1510,6 +1510,26 @@ describe('capturePrompt', () => {
     expect(found?.capturePrompt).toEqual({ chatId: 777, step: 'looking_for' });
   });
 
+  it('keeps the first manager hand-off', async () => {
+    const lead = await store.insertLead(baseData);
+
+    const first = await store.updateCapture(lead.id, {
+      managerHandoff: 'approvedrs',
+      capturePrompt: null,
+    });
+    const second = await store.updateCapture(lead.id, {
+      managerHandoff: 'someone_else',
+      capturePrompt: null,
+    });
+
+    expect(lead.managerHandoff).toBeNull();
+    expect(first?.managerHandoff).toEqual({
+      at: expect.any(String),
+      handle: 'approvedrs',
+    });
+    expect(second?.managerHandoff).toEqual(first?.managerHandoff);
+  });
+
   it('clears the prompt when set to null', async () => {
     const lead = await store.insertLead(baseData);
     await store.updateCapture(lead.id, {

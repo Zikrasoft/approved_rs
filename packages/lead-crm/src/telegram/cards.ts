@@ -142,6 +142,16 @@ export function quarantinedLeadsText(
   ].join('\n');
 }
 
+export function managerHandoffText(handle: string): string {
+  return `👤 Ушёл к менеджеру @${escapeHtml(handle)}`;
+}
+
+function handoffLine(lead: StoredLead): string {
+  return lead.managerHandoff
+    ? `\n${managerHandoffText(lead.managerHandoff.handle)} · ${formatDateRu(lead.managerHandoff.at)}`
+    : '';
+}
+
 export function statusChangeText(lead: StoredLead): string {
   return `🔔 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: статус — ${statusMark(lead.status)}`;
 }
@@ -170,7 +180,7 @@ export function createFormatter({
     const via = lead.telegramId == null ? '' : ' · 🤖 через бота';
     const referred =
       lead.referredBy === 'approved' ? ' · 🤝 из бота Approved.rs' : '';
-    return `🏷 ${escapeHtml(lead.brand)}${via}${referred}`;
+    return `🏷 ${escapeHtml(lead.brand)}${via}${referred}${handoffLine(lead)}`;
   }
 
   function formatLeadText(

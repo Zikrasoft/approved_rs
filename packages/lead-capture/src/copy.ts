@@ -15,7 +15,9 @@ export const captureCopyWithBudgetSchema = z
     services: z.object({ button: line, text: line }).strict(),
     card: z.object({ request: line, site: line }).strict(),
     contacts: z.object({ button: line, text: line, hours: line }).strict(),
-    manager: z.object({ button: line, text: line }).strict(),
+    manager: z
+      .object({ button: line, text: line, handoff: line, chat: line })
+      .strict(),
     partners: z.object({ button: line, text: line }).strict(),
     request: z
       .object({
