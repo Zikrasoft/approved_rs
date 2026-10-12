@@ -1,1 +1,2 @@
 export const YM_COUNTER_ID = 112647692;
+export const META_PIXEL_ID = '29229430643330595';

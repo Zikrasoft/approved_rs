@@ -5,7 +5,12 @@ import TelegramIcon from './icons/TelegramIcon.astro';
 import WhatsAppIcon from './icons/WhatsAppIcon.astro';
 import ViberIcon from './icons/ViberIcon.astro';
 import { Phone, ChevronDown } from '@lucide/astro';
-import { HONEYPOT_FIELD, SERVICE_FIELD } from '@podbor/lead-crm';
+import {
+  AD_SOURCE_FIELD,
+  HONEYPOT_FIELD,
+  META_IDS_FIELD,
+  SERVICE_FIELD,
+} from '@podbor/lead-crm';
 import { phoneCountryOptions } from '@podbor/lead-crm/phone';
 import { content } from '@/i18n/content';
 import { localeFrom, DISPLAY_LOCALE } from '@/i18n/config';
@@ -123,6 +128,8 @@ const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#dc2626]';
         data-source-url
       />
       <input type="hidden" name="visitor_id" data-visitor-id />
+      <input type="hidden" name={AD_SOURCE_FIELD} data-ad-source />
+      <input type="hidden" name={META_IDS_FIELD} data-meta-ids />
 
       <div class="mb-5">
         <label

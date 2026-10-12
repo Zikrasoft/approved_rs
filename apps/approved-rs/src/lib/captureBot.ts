@@ -1,11 +1,14 @@
 import { captureWebhookSecret } from '@podbor/lead-capture';
 import { APPROVED, CARLAB, DETAILS } from '@podbor/brands';
 import {
+  createMetaLeadReporter,
   createTelegramClient,
   requireEnv,
   type TelegramClient,
 } from '@podbor/lead-crm';
+import { waitUntil } from '@vercel/functions';
 import { z } from 'zod';
+import { META_PIXEL_ID } from '@/utils/metrika';
 
 export const CAPTURE_WEBHOOK_SECRET = captureWebhookSecret(process.env);
 
@@ -48,3 +51,9 @@ for (const [brand, token] of siblingTokens(process.env))
 
 export const captureClientFor = (brand: string): TelegramClient | undefined =>
   clients.get(brand);
+
+export const reportMetaLead = createMetaLeadReporter({
+  pixelId: META_PIXEL_ID,
+  env: process.env,
+  waitUntil,
+});

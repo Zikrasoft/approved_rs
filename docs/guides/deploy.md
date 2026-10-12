@@ -260,16 +260,16 @@ the capture bot.
 
 ### Analytics — no environment variables
 
-The counters are baked into each `src/utils/constants.ts` and are never read from
+The counters and the Meta Pixel ids are baked into each `src/utils/metrika.ts` and are never read from
 the environment: they are not secrets, they are publicly visible in any request from
 the site, and spreading them across three Vercel dashboards would create a third
 place to get them wrong.
 
-| Site        | Yandex Metrika |
-| ----------- | -------------- |
-| approved.rs | `111800377`    |
-| carlab.rs   | `112647692`    |
-| details.rs  | `112647721`    |
+| Site        | Yandex Metrika | Meta Pixel          |
+| ----------- | -------------- | ------------------- |
+| approved.rs | `111800377`    | —                   |
+| carlab.rs   | `112647692`    | `29229430643330595` |
+| details.rs  | `112647721`    | —                   |
 
 Each domain has its own counter; reusing another's is not allowed. Google Analytics
 was removed from all three — 167 KiB of gtag.js left the bundle entirely.
@@ -352,6 +352,18 @@ only the visitor's own brand's bot can deliver it, so the webhook picks the bot 
 the lead's `brand` ([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
 Without a sibling token every owner message in that brand's Topics is answered
 with an "undelivered" notice in the Topic.
+
+### Meta Conversions API
+
+| Variable              | approved.rs | carlab.rs | details.rs | Without it                                                              |
+| --------------------- | ----------- | --------- | ---------- | ----------------------------------------------------------------------- |
+| `META_CAPI_TOKEN`     | —           | ✅        | —          | no server `Lead` event reaches Meta; `[meta-capi] off` in the logs      |
+| `META_CAPI_TEST_CODE` | —           | testing   | —          | events go to production; set it only while checking Events Manager Test |
+
+The token is a Conversions API access token generated in Events Manager for the
+site's own pixel (`META_PIXEL_ID` in `src/utils/metrika.ts`) — a secret, server
+only, never `PUBLIC_`. A site without a pixel id sends nothing even with a
+token. What fires and when: [analytics.md](analytics.md#the-server-lead-event-from-a-capture-bot).
 
 ### Storage and cron
 
@@ -944,12 +956,14 @@ Each is registered once per bot, four registrations in total.
 ### The CRM bot
 
 The group receives a short teaser of the lead ("#123 · Ivan · Vehicle
-sourcing · status") with the outcome buttons (✅ deal / ❌ lost, 🗣 negotiations, and ⏳, a touch that
-changes no status) and
-an "Open in the bot" link button; postponing and deleting happen in a DM with
-the bot, and the visitor is answered in the Lead's Topic. Statuses are open / negotiations /
-won / lost / postponed, and lost is the archive. 🗣 on the card, or the
-owner's first message in the Lead's Topic, moves an open Lead into negotiations. Leads are stored
+sourcing · status") with the status buttons (✅ deal / ❌ lost, then 🗣 negotiations, 🔵 in progress
+and ⏰ postpone) and
+an "Open in the bot" link button; deleting happens in a DM with
+the bot, and the visitor is answered in the Lead's Topic. Statuses are new / negotiations /
+in_progress / won / lost / postponed, and lost is the archive. 🗣 on the card, or the
+owner's first message in the Lead's Topic, moves a new Lead into negotiations. A
+postponed Lead comes back on its date to the status it left, with a DM reminder
+to the owner. Leads are stored
 in Vercel Blob (`data/leads.json`, private access), with no external database.
 
 The owner and the admin each have to message the bot `/start` once before it can
@@ -1066,9 +1080,10 @@ cd apps/detailing && node --env-file=.env.local --experimental-strip-types scrip
 Every day at 08:00 UTC, Vercel calls `/api/reminders` with
 `Authorization: Bearer $CRON_SECRET` — the route marks expired Ghost leads lost,
 closes every Topic nobody has written in a day after its Lead was created (once;
-a quiet conversation stays open; the next message reopens it), then posts one digest to the group: postponed leads whose day has come (reopened
-once listed) and open leads with no action for 7 days, each with ✅ ❌ ⏳ — once
-per day, however often the cron runs. Nothing is posted when the list is empty.
+a quiet conversation stays open; the next message reopens it), then posts one digest to the group: postponed leads whose day has come (returned
+to the status they were postponed from once listed, with a DM reminder to the
+owner) and new, negotiating or in-progress leads with no action for 7 days, each
+with ✅ ❌ 🔵 — once per day, however often the cron runs. Nothing is posted when the list is empty.
 There is no monthly summary: the Balance is in the bot's menu. Without
 `CRON_SECRET` in the project the route answers 401 and the digest silently never
 arrives.

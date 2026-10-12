@@ -39,7 +39,11 @@ literal). `packages/lead-crm` owns the `<lead-form>` hooks `leadForm.ts`
 picks with a non-null assertion, so a missing one is a `TypeError`:
 `data-telegram`, `data-country` (with `data-display-locale`), `data-phone`,
 `data-consent`, the hidden `contact` and `contact_channel` inputs,
-`data-source-url`, `data-visitor-id`, `data-submit-label` inside the submit
+`data-source-url`, `data-visitor-id`, `data-ad-source` (the hidden
+`name={AD_SOURCE_FIELD}` input the Ad visit rides in — the contact-click
+beacon posts the same field), `data-meta-ids` (the hidden
+`name={META_IDS_FIELD}` input for the Meta `fbc`/`fbp`, likewise),
+`data-submit-label` inside the submit
 button, `data-error-telegram` / `data-error-phone` / `data-error-consent` /
 `data-error-submit`, tab buttons carrying `data-tab` + `data-panel` +
 `aria-selected`, panels carrying `data-panel` alone, and the form's own
@@ -152,12 +156,12 @@ Approved's trust/verification semantics.
   `packages/site-kit/src` are the shape: idempotent `define(tagName?)`, no
   auto-registration on import, no styles shipped, the app supplying the markup.
   A run-once page effect with no per-instance state is the one exception —
-  analytics, contact-click tracking, contact preference and funnel tracking
-  are armed by `bootSiteKit` from `@podbor/site-kit/browser`, called once from
+  analytics, the Ad visit (`rememberAdTouch`), contact-click tracking,
+  contact preference and funnel tracking are armed by `bootSiteKit` from `@podbor/site-kit/browser`, called once from
   each app's layout with its `ymCounterId` and
   `analytics: !import.meta.env.DEV`. `bootSiteKit` also registers the
   language-suggestion custom element (`defineLanguageSuggestion`), which keeps
-  its own instance state like any other element. No app imports the five
+  its own instance state like any other element. No app imports the six
   parts, so none can arm one twice or forget one. `bootSiteKit` and each
   part guard against being armed twice — a second call that re-attaches
   listeners doubles whatever it counts, silently. A new page-level effect joins
@@ -353,8 +357,10 @@ Both new apps follow the same shape, and a third should too:
   the control rather than the page, and `createContactControls` picks the same
   `humanTelegram` on any page. Each capture bot's «Написать менеджеру» menu
   button follows the same rule: `humanTelegram` in the app's
-  `telegram-capture.ts`, read from that app's `PUBLIC_TG_MANAGER`, turns it into
-  a URL button to the manager, and unset it stays the in-bot manager screen. A
+  `telegram-capture.ts`, read from that app's `PUBLIC_TG_MANAGER`, makes it a
+  hand-off: the button stays a callback so the tap can first stamp
+  `managerHandoff` on the Lead and post it to the Topic, then the screen offers
+  the URL to the manager; unset it stays the in-bot manager screen. A
   tap on either site carve-out fires `contact_click` and writes no Lead:
   `defineContactClickTracking` skips the beacon for a `telegram` link whose
   href carries no `start` parameter — a human account, which a capture-bot
@@ -516,7 +522,7 @@ anything under `apps/medusa/` or `infra/medusa/`.
 
 **Both content systems share one auto-translate mechanism:** admin/dev only ever hand-writes RU. The `translate` job in `.github/workflows/ci.yml` runs each app's `scripts/translate-i18n.ts` plus `scripts/translate-cases.ts` on approved.rs and `scripts/translate-works.ts` on the two brand sites, on every push (any branch, so translations land in a feature branch before merge, not after) and commits the result back. The `translate` job itself stays unconditional rather than path-filtered — every string is looked up in the leaf cache first, so a run with nothing new makes no OpenAI request at all, and every job downstream reads the SHA it left behind, so untranslated content cannot reach production. **Deploy filtering is a separate step** (`scope` in `verify`, against per-app `refs/tags/deployed/<app>` tags) — why: `docs/adr/0008-deploy-only-what-is-stale-in-production.md`. **The unit of work is one string, not one file.** `packages/i18n/src/translate/leafCache.ts` keys a committed cache on the triple (system prompt, model, Russian string), so a rerun asks the model only for the strings whose Russian actually moved — the rest come back from `apps/<app>/src/content/translations.cache.json`. It must stay committed: deleting it regenerates the whole corpus at OpenAI's price. The cache is keyed by file path, so renaming a case directory drops its block and the next run adopts the committed translations as if they were hand-written, which quietly exempts that file from the next prompt fix. Editing the prompt or the model changes the fingerprint and regenerates everything that prompt produced, which is the deliberate switch for a prompt fix. The prompt names the target language, so the fingerprint is per locale, and `localeGuidance` on either translator (approved.rs's `LOCALE_GUIDANCE` in `translateConfig.ts`, the Serbian search phrase) is how one locale's wording is steered and regenerated without touching the other three. `translatedFrom` still records the hash of the whole RU source, and is what tells the job whether the committed translations correspond to the Russian in the file right now — the condition a hand-written translation is adopted under. Both scripts call through `packages/i18n/src/translate/openaiChat.ts` (official `openai` SDK) and validate the AI's response with `packages/i18n/src/translate/assertSafeTranslation.ts`, which rejects a translation that introduces HTML the RU source didn't already have (a stored-XSS guard on an otherwise-unreviewed auto-commit path — case bodies are rendered as markdown via `src/lib/safeMarked.ts`, which itself sanitizes with `sanitize-html`). Needs `OPENAI_API_KEY` as a GitHub Actions secret (separate from Vercel's env vars); without it the job fails at the translate step but doesn't touch already-translated content.
 
-**Lead capture pipeline (`@podbor/lead-crm`, bound in `src/lib/crm.ts` + `src/lib/crmBot.ts`):** form submissions (`api/leads.ts`) and call-button clicks (`api/contact-click.ts`) both funnel through `notifyLead`, which stores the lead and notifies Telegram via `waitUntil()` (fire-and-forget after the response redirects). Leads live in a single JSON blob on Vercel Blob (`data/leads.json`), not a database: one array of Leads beside `digest` marks (the record that lets the daily digest claim its day once). Money is not in that file. Payouts and Settlements live in their own blob, `data/ledger.json`, behind `createLedgerStore` — the Balance has nothing to do with any Lead. While that blob does not exist, the ledger opens with one Payout, `Перенос со старой системы`, for what the old income × rate model left owed (`legacyOwed` over the raw Lead file), and the Lead store's `beforeWrite` hook creates the blob before any Lead write can strip those old money fields. Every mutation goes through `updateRecords()` (`updateLeads()` is its Leads-only shorthand), a compare-and-swap loop with jittered exponential backoff so two concurrent writers (e.g. a bot button edit racing a new form submission) desync instead of retry-colliding. Storage sits behind a `LeadStorage` interface, so moving to Postgres later is one adapter rather than a rewrite. `api/telegram-webhook.ts` handles the bot side (status changes, ➕ Зачислить / ➖ Списать prompts, postpone/remind flow). `✅` marks a Lead won and asks nothing; a reply to a Lead card, a number included, is stored as a note. `api/reminders.ts` is a Vercel Cron job (needs `CRON_SECRET`) that expires Ghost leads and posts one daily digest to the group: due `postponed` leads and open leads with no action for 7 days. There is no monthly summary.
+**Lead capture pipeline (`@podbor/lead-crm`, bound in `src/lib/crm.ts` + `src/lib/crmBot.ts`):** form submissions (`api/leads.ts`) and call-button clicks (`api/contact-click.ts`) both funnel through `notifyLead`, which stores the lead and notifies Telegram via `waitUntil()` (fire-and-forget after the response redirects). Leads live in a single JSON blob on Vercel Blob (`data/leads.json`), not a database: one array of Leads beside `digest` marks (the record that lets the daily digest claim its day once). Money is not in that file. Payouts and Settlements live in their own blob, `data/ledger.json`, behind `createLedgerStore` — the Balance has nothing to do with any Lead. While that blob does not exist, the ledger opens with one Payout, `Перенос со старой системы`, for what the old income × rate model left owed (`legacyOwed` over the raw Lead file), and the Lead store's `beforeWrite` hook creates the blob before any Lead write can strip those old money fields. Every mutation goes through `updateRecords()` (`updateLeads()` is its Leads-only shorthand), a compare-and-swap loop with jittered exponential backoff so two concurrent writers (e.g. a bot button edit racing a new form submission) desync instead of retry-colliding. Storage sits behind a `LeadStorage` interface, so moving to Postgres later is one adapter rather than a rewrite. `api/telegram-webhook.ts` handles the bot side (status changes, ➕ Зачислить / ➖ Списать prompts, postpone/remind flow). `✅` marks a Lead won and asks nothing; a reply to a Lead card, a number included, is stored as a note, and the DM detail edits a Lead's name or gives a Lead without a real contact one (`pendingPrompt` `edit_*`, telling the other role what changed; a contact typed for a Lead that already has a real one — `hasRealContact` — is appended as a note, never written over it) or appends a 📝 note signed with author and date, which the other role is told about too. A status move into work (🗣, 🔵) never reopens a won or lost Lead — `setStatus` refuses it, and leaving `postponed` clears the reminder. The visitor's comment is read-only — staff text goes in only as a note. **Every Lead the site creates carries the Ad visit** (CONTEXT.md): `bootSiteKit` remembers a paid landing in `localStorage` for 30 days under the visitor id's consent, the form and the click beacon post it as `AD_SOURCE_FIELD` (JSON), `adSourceFieldSchema` validates it in both routes, and it lands as `adSource` on the Lead, `null` when absent or unreadable. `insertOrMergeLead` keeps the first one, so a Capture bot Lead absorbing a Telegram click inherits it; the card, the DM detail and the Topic summary show «📣 Реклама» and `#реклама`. **A Topic exists only for a Lead that came through a Capture bot in Telegram** — WhatsApp, Viber, phone and form Leads have none, so a Lead feature must work on the card and the DM detail and never assume a Topic. `api/reminders.ts` is a Vercel Cron job (needs `CRON_SECRET`) that expires Ghost leads and posts one daily digest to the group: due `postponed` leads and open leads with no action for 7 days. There is no monthly summary.
 
 The binding is split in two on purpose: `src/lib/crm.ts` builds the store and needs no Telegram credentials, while `src/lib/crmBot.ts` builds the bot and reads `TELEGRAM_*` at module load. Importing the store therefore cannot fail a build over a missing bot token. `src/lib/store.ts`, `src/lib/telegram/index.ts` and `src/lib/notifyLead.ts` are thin re-exports over those two.
 
@@ -542,7 +548,9 @@ This site supports 5 locales: `ru` (default), `en`, `sr`, `es`, `de`. Translatio
 ## Analytics
 
 Event names live once in `packages/site-kit/src/goals.ts` and are fired through
-`reachGoal` from `@podbor/site-kit/browser`, never as string literals in an app. Every event must also exist as a goal in **all three** Metrika counters —
+`reachGoal` from `@podbor/site-kit/browser`, never as string literals in an app.
+`reachGoal` reaches Metrika and, where a site sets `META_PIXEL_ID`, the Meta Pixel
+(standard events only, `META_EVENTS` in `analytics.ts`). Every event must also exist as a goal in **all three** Metrika counters —
 one created in code but not in a counter is silently lost. The shop funnel
 (`add_to_cart`, `begin_checkout`, `order_placed`) is the exception: carlab.rs
 only, created when the shop goes live — see `docs/analytics.md`. The vocabulary, the

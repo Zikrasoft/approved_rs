@@ -46,6 +46,10 @@ import {
   reAskOperationText,
   buildRemindPicker,
   buildSearchResults,
+  EDIT_COPY,
+  noteLine,
+  extraContactNote,
+  reAskEditText,
   REPLY_COPY,
 } from '@/lib/telegram';
 import {
@@ -97,7 +101,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     service: 'vehicle-sourcing',
     services: ['vehicle-sourcing'],
     locale: 'ru',
-    status: 'open',
+    status: 'new',
     telegramChatId: CARD_CHAT_ID,
     telegramMessageId: CARD_MESSAGE_ID,
     statusChangedAt: '2026-01-01T00:00:00.000Z',
@@ -112,7 +116,12 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     topicActiveAt: null,
     questionnaireDone: false,
     referredBy: null,
+    managerHandoff: null,
+    adSource: null,
+    metaIds: null,
+    metaLeadSentAt: null,
     remindAt: null,
+    postponedFrom: null,
     ...overrides,
   };
 }
@@ -323,7 +332,7 @@ describe('POST /api/telegram-webhook', () => {
     it('rejects a status callback from someone who is neither owner nor admin', async () => {
       const res = await tap('st:5:lost', OTHER_ID, { id: 'cb-x' });
       expect(res.status).toBe(200);
-      expect((await stored()).status).toBe('open');
+      expect((await stored()).status).toBe('new');
       expect(answers()).toEqual([{ callback_query_id: 'cb-x' }]);
     });
   });
@@ -331,12 +340,12 @@ describe('POST /api/telegram-webhook', () => {
   describe('status callbacks (st:<id>:<key>)', () => {
     it('admin cannot finalize (won) — the owner closes deals', async () => {
       await tap('st:5:won', ADMIN_ID);
-      expect((await stored()).status).toBe('open');
+      expect((await stored()).status).toBe('new');
     });
 
     it('admin cannot finalize (lost)', async () => {
       await tap('st:5:lost', ADMIN_ID);
-      expect((await stored()).status).toBe('open');
+      expect((await stored()).status).toBe('new');
     });
 
     it('sets status directly for in_progress/lost and refreshes both surfaces', async () => {
@@ -358,6 +367,25 @@ describe('POST /api/telegram-webhook', () => {
         { callback_query_id: 'cb-1', text: 'Статус обновлён' },
       ]);
     });
+
+    it.each([
+      ['negotiations', '🗣 Переговоры'],
+      ['in_progress', '🔵 В работе'],
+    ])(
+      'moves the Lead into %s from the DM detail and redraws it',
+      async (key, mark) => {
+        await tap(`st:5:${key}`, OWNER_ID, { id: 'cb-move', messageId: 557 });
+        const lead = await stored();
+        expect(lead.status).toBe(key);
+        expect(edits(DM_CHAT_ID, 557)).toEqual([
+          expect.objectContaining({
+            text: expect.stringContaining(`Статус: ${mark}`),
+          }),
+        ]);
+        expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+        expect(crm('unpinChatMessage')).toEqual([]);
+      },
+    );
 
     it('marks won at once, refreshes both surfaces, unpins the card and asks for no amount', async () => {
       await tap('st:5:won', OWNER_ID, { id: 'cb-2', messageId: 556 });
@@ -394,7 +422,7 @@ describe('POST /api/telegram-webhook', () => {
     it('acks without updating for an unrecognized status key', async () => {
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
       await tap('st:5:bogus', OWNER_ID, { id: 'cb-4' });
-      expect((await stored()).status).toBe('open');
+      expect((await stored()).status).toBe('new');
       expect(answers()).toEqual([{ callback_query_id: 'cb-4' }]);
       warn.mockRestore();
     });
@@ -423,22 +451,18 @@ describe('POST /api/telegram-webhook', () => {
         status: 'won',
         pendingPrompt: null,
       });
-      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toEqual([
-        expect.objectContaining({
-          reply_markup: expect.objectContaining({
-            inline_keyboard: expect.arrayContaining([
-              [
-                { text: '✅ Сделка', callback_data: 'won:5' },
-                { text: '❌ Отказ', callback_data: 'lost:5' },
-              ],
-              [
-                { text: '⏳ В работе', callback_data: 'work:5' },
-                { text: '🗣 Переговоры', callback_data: 'talk:5' },
-              ],
-            ]),
-          }),
-        }),
-      ]);
+      const [card] = edits(CARD_CHAT_ID, CARD_MESSAGE_ID);
+      expect(card?.reply_markup).toMatchObject({
+        inline_keyboard: expect.arrayContaining([
+          [
+            { text: '✅ Сделка', callback_data: 'won:5' },
+            { text: '❌ Отказ', callback_data: 'lost:5' },
+          ],
+        ]),
+      });
+      expect(JSON.stringify(card?.reply_markup)).not.toMatch(
+        /talk:5|work:5|postpone:5/,
+      );
       expect(crm('unpinChatMessage')).toEqual([
         { chat_id: CARD_CHAT_ID, message_id: CARD_MESSAGE_ID },
       ]);
@@ -472,19 +496,75 @@ describe('POST /api/telegram-webhook', () => {
       expect(crm('unpinChatMessage')).toEqual([]);
     });
 
-    it('⏳ records activity without changing the outcome or the pin', async () => {
+    it('🔵 moves the Lead into in_progress, keeps it pinned and the card a teaser', async () => {
+      await tap('work:5', OWNER_ID, { id: 'cb-work', ...onCard });
+
+      expect(await stored()).toMatchObject({ status: 'in_progress' });
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toEqual([
+        expect.objectContaining({
+          text: expect.stringContaining('🔵 В работе'),
+        }),
+      ]);
+      expect(crm('unpinChatMessage')).toEqual([]);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-work', text: 'Статус обновлён' },
+      ]);
+    });
+
+    it('🔵 on a Lead already in progress records a touch and changes nothing else', async () => {
+      seed(makeLead({ status: 'in_progress' }));
       await tap('work:5', OWNER_ID, { id: 'cb-work', ...onCard });
 
       const lead = await stored();
       expect(lead).toMatchObject({
-        status: 'open',
+        status: 'in_progress',
         statusChangedAt: '2026-01-01T00:00:00.000Z',
       });
       expect(lead.lastActivityAt).toEqual(expect.any(String));
       expect(crm('editMessageText')).toEqual([]);
-      expect(crm('unpinChatMessage')).toEqual([]);
       expect(answers()).toEqual([
-        { callback_query_id: 'cb-work', text: 'В работе ⏳' },
+        { callback_query_id: 'cb-work', text: 'В работе 🔵' },
+      ]);
+    });
+
+    it('⏰ opens the remind picker on the card and a quick pick restores the teaser', async () => {
+      await tap('postpone:5', OWNER_ID, { id: 'cb-pp', ...onCard });
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toEqual([
+        expect.objectContaining({ text: '⏰ Когда напомнить?' }),
+      ]);
+
+      await tap('remindpick:5:3', OWNER_ID, { id: 'cb-pick', ...onCard });
+
+      expect(await stored()).toMatchObject({
+        status: 'postponed',
+        postponedFrom: 'new',
+      });
+      const teaser = edits(CARD_CHAT_ID, CARD_MESSAGE_ID).at(-1);
+      expect(teaser?.text).toContain('⏸️ Отложена');
+      expect(teaser?.text).toContain('⏰ Напомнить: ');
+      expect(teaser?.text).not.toContain('Контакт:');
+    });
+
+    it('◀️ Назад on the card puts the teaser back', async () => {
+      await tap('postpone:5', OWNER_ID, onCard);
+      await tap('remindcancel:5', OWNER_ID, onCard);
+
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID).at(-1)?.text).toContain(
+        '🆕 Новая',
+      );
+      expect((await stored()).status).toBe('new');
+    });
+
+    it('⏰ on a Lead that cannot be postponed says so and keeps the card', async () => {
+      seed(makeLead({ status: 'won' }));
+      await tap('postpone:5', OWNER_ID, { id: 'cb-pp', ...onCard });
+
+      expect(crm('editMessageText')).toEqual([]);
+      expect(answers()).toEqual([
+        {
+          callback_query_id: 'cb-pp',
+          text: '⚠️ Заявку уже нельзя отложить: она больше не открыта.',
+        },
       ]);
     });
 
@@ -505,6 +585,45 @@ describe('POST /api/telegram-webhook', () => {
       expect(JSON.stringify(sentTo(DM_CHAT_ID))).toContain('open:5');
     });
 
+    it.each([
+      ['talk:5', 'won'],
+      ['work:5', 'lost'],
+      ['st:5:negotiations', 'won'],
+      ['st:5:in_progress', 'lost'],
+    ] as const)(
+      '%s from a stale button never reopens a %s Lead',
+      async (data, status) => {
+        seed(makeLead({ status, statusChangedAt: PAID_AT }));
+        await tap(data, OWNER_ID, { id: 'cb-stale', ...onCard });
+
+        expect(await stored()).toMatchObject({
+          status,
+          statusChangedAt: PAID_AT,
+        });
+        expect(crm('editMessageText')).toEqual([]);
+        expect(answers()).toEqual([
+          { callback_query_id: 'cb-stale', text: LEAD_ACTION_COPY.closed },
+        ]);
+      },
+    );
+
+    it('🗣 on a postponed Lead moves it and drops the reminder', async () => {
+      seed(
+        makeLead({
+          status: 'postponed',
+          postponedFrom: 'in_progress',
+          remindAt: '2026-10-20',
+        }),
+      );
+      await tap('talk:5', OWNER_ID, onCard);
+
+      expect(await stored()).toMatchObject({
+        status: 'negotiations',
+        postponedFrom: null,
+        remindAt: null,
+      });
+    });
+
     it('re-posts a won lead whose card is gone without pinning it', async () => {
       api.fail('editMessageText', 'Bad Request: message to edit not found');
       await tap('won:5', OWNER_ID, onCard);
@@ -517,7 +636,7 @@ describe('POST /api/telegram-webhook', () => {
       async (data) => {
         await tap(data, ADMIN_ID, { id: 'cb-admin', ...onCard });
         expect(await stored()).toMatchObject({
-          status: 'open',
+          status: 'new',
           lastActivityAt: null,
         });
         expect(crm('unpinChatMessage')).toEqual([]);
@@ -733,7 +852,7 @@ describe('POST /api/telegram-webhook', () => {
 
     it('admin cannot use a quick pick', async () => {
       await tap('remindpick:5:7', ADMIN_ID);
-      expect((await stored()).status).toBe('open');
+      expect((await stored()).status).toBe('new');
     });
 
     it('acks without refreshing anything when the lead cannot be postponed', async () => {
@@ -772,7 +891,7 @@ describe('POST /api/telegram-webhook', () => {
     it('restores the detail view without postponing', async () => {
       await tap('remindcancel:5', OWNER_ID);
       const lead = await stored();
-      expect(lead.status).toBe('open');
+      expect(lead.status).toBe('new');
       expect(edits(DM_CHAT_ID, 1)).toEqual([
         view(buildLeadDetail(lead, 'owner')),
       ]);
@@ -787,7 +906,7 @@ describe('POST /api/telegram-webhook', () => {
       seed(postponed());
       await tap('resume:5', OWNER_ID, { id: 'cb-rs1' });
       expect(await stored()).toMatchObject({
-        status: 'open',
+        status: 'new',
         remindAt: null,
       });
       expect(edits(DM_CHAT_ID, 1)).toHaveLength(1);
@@ -799,7 +918,7 @@ describe('POST /api/telegram-webhook', () => {
     it('admin can resume too', async () => {
       seed(postponed());
       await tap('resume:5', ADMIN_ID);
-      expect((await stored()).status).toBe('open');
+      expect((await stored()).status).toBe('new');
     });
   });
 
@@ -907,7 +1026,7 @@ describe('POST /api/telegram-webhook', () => {
         vi.useRealTimers();
       }
       const [text] = textsTo(ADMIN_ID);
-      expect(text).toContain('🔵 Открыта: 1');
+      expect(text).toContain('🆕 Новая: 1');
       expect(text).toContain('<b>💶 Мне должны: 200 €</b>');
       expect(text).toContain('За месяц: +0 € · −100 €');
       expect(text).toContain('За всё время: +300 € · −100 €');
@@ -1226,8 +1345,11 @@ describe('POST /api/telegram-webhook', () => {
       'st:abc:won',
       'arch:5',
       'unarch:5',
-      'edit:5:name',
-      'st:5:in_progress',
+      'edit:5:service',
+      'edit:5:comment',
+      'note:x',
+      'st:5:open',
+      'st:5:postponed',
       'list:new',
       'menu:deals',
       '',
@@ -1257,6 +1379,7 @@ describe('POST /api/telegram-webhook', () => {
       ['st:5:won', 'owner'],
       ['st:5:lost', 'owner'],
       ['st:5:negotiations', 'owner'],
+      ['st:5:in_progress', 'owner'],
       ['won:5', 'owner'],
       ['lost:5', 'owner'],
       ['talk:5', 'owner'],
@@ -1272,6 +1395,9 @@ describe('POST /api/telegram-webhook', () => {
       ['menu:open', 'any'],
       ['open:5', 'any'],
       ['topic:5', 'any'],
+      ['edit:5:name', 'any'],
+      ['edit:5:contact', 'any'],
+      ['note:5', 'any'],
       ['menu:stats', 'admin'],
       ['menu:debt', 'any'],
       ['ledger:payout', 'any'],
@@ -1308,7 +1434,7 @@ describe('POST /api/telegram-webhook', () => {
         status: 'postponed',
         remindAt: businessDay(new Date(), 3),
       });
-      expect((await stored(5)).status).toBe('open');
+      expect((await stored(5)).status).toBe('new');
     });
   });
 
@@ -1418,7 +1544,7 @@ describe('POST /api/telegram-webhook', () => {
         type: 'supergroup',
         replyTo: CARD_MESSAGE_ID,
       });
-      expect((await stored()).comment).toBe('Звонил');
+      expect((await stored()).comment).toBe(noteLine('Звонил', 'owner'));
       expect(read).not.toHaveBeenCalled();
     });
   });
@@ -1470,7 +1596,7 @@ describe('POST /api/telegram-webhook', () => {
       seed(makeLead({ pendingPrompt: awaiting('postpone') }));
       await answerPrompt(text);
       expect(await stored()).toMatchObject({
-        status: 'open',
+        status: 'new',
         pendingPrompt: awaiting('postpone'),
       });
       expect(textsTo(DM_CHAT_ID)).toEqual([
@@ -1479,7 +1605,7 @@ describe('POST /api/telegram-webhook', () => {
     });
 
     it.each([
-      ['15.10.2026', 'open'],
+      ['15.10.2026', 'new'],
       ['16.10.2026', 'postponed'],
     ])(
       'judges %s against the Belgrade date between 00:00 and 02:00 there',
@@ -1497,21 +1623,6 @@ describe('POST /api/telegram-webhook', () => {
         expect((await stored()).status).toBe(status);
       },
     );
-
-    it('drops a field-edit prompt left over from before the edit buttons went', async () => {
-      leadsStorage().seed([
-        {
-          ...makeLead({ name: 'Old' }),
-          pendingPrompt: { ...awaiting('postpone'), kind: 'edit_name' },
-        },
-      ]);
-      await answerPrompt('Новое Имя');
-      expect(await stored()).toMatchObject({
-        name: 'Old',
-        pendingPrompt: null,
-      });
-      expect(sentTo(DM_CHAT_ID)).toEqual([view(buildSearchResults([]))]);
-    });
 
     it('searches with a DM reply that matches no prompt or card', async () => {
       await message('Иван', OWNER_ID, { replyTo: 42 });
@@ -1538,6 +1649,332 @@ describe('POST /api/telegram-webhook', () => {
       });
       expect((await stored()).status).toBe('postponed');
     });
+  });
+
+  describe('editing a Lead from the bot DM', () => {
+    const editKeys = ['edit:5:name', 'edit:5:contact'];
+    const callbackData = (markup: unknown) =>
+      (
+        markup as { inline_keyboard: { callback_data?: string }[][] }
+      ).inline_keyboard
+        .flat()
+        .map((b) => b.callback_data);
+    const notices = (chatId: number) =>
+      textsTo(chatId).filter((t) => String(t).startsWith('✏️ Заявка'));
+    const edit = async (
+      field: 'name' | 'contact',
+      text: string,
+      who = OWNER_ID,
+    ) => {
+      await tap(`edit:5:${field}`, who, { chatId: who });
+      await message(text, who, { replyTo: PROMPT_ID });
+    };
+
+    it.each([
+      [OWNER_ID, 'owner'],
+      [ADMIN_ID, 'admin'],
+    ] as const)(
+      'offers ✏️ and 📝 to %i (%s) on the detail',
+      async (who, role) => {
+        await tap('open:5', who, { chatId: who });
+        const [detail] = sentTo(who);
+        expect(detail).toEqual(view(buildLeadDetail(await stored(), role)));
+        expect(callbackData(detail!.reply_markup)).toEqual(
+          expect.arrayContaining([...editKeys, 'note:5']),
+        );
+      },
+    );
+
+    it('asks for the value with a force-reply prompt kept on the Lead', async () => {
+      await tap('edit:5:contact', ADMIN_ID, { chatId: ADMIN_ID });
+      expect(forceReplies()).toEqual([
+        expect.objectContaining({
+          chat_id: ADMIN_ID,
+          text: EDIT_COPY.prompt('contact'),
+        }),
+      ]);
+      expect(answers()).toEqual([
+        expect.objectContaining({ text: EDIT_COPY.ack }),
+      ]);
+      expect((await stored()).pendingPrompt).toEqual({
+        chatId: ADMIN_ID,
+        messageId: PROMPT_ID,
+        kind: 'edit_contact',
+      });
+    });
+
+    const noContact = (contact: string) =>
+      makeLead({
+        name: '',
+        contact,
+        kind: 'call_click',
+        contactChannel: null,
+        service: '',
+        services: [],
+      });
+
+    it.each([
+      ['name', 'Пётр', { name: 'Пётр' }, 'Иван', '@ivan'],
+      [
+        'contact',
+        '064 123 4567',
+        { contact: '+381641234567', contactChannel: 'phone' },
+        '—',
+        '—',
+      ],
+    ] as const)(
+      'stores the new %s, refreshes the card and tells the admin, not the owner',
+      async (field, text, patch, before, contact) => {
+        seed(makeLead({ contact }));
+        await edit(field, text);
+        const lead = await stored();
+        expect(lead).toMatchObject({ ...patch, pendingPrompt: null });
+        expect(lead.lastActivityAt).not.toBeNull();
+        const [card] = edits(CARD_CHAT_ID, CARD_MESSAGE_ID);
+        expect(card).toBeDefined();
+        expect(callbackData(card!.reply_markup)).not.toEqual(
+          expect.arrayContaining(['edit:5:name']),
+        );
+        expect(callbackData(card!.reply_markup)).not.toContain('note:5');
+        expect(sentTo(OWNER_ID).at(-1)).toEqual(
+          expect.objectContaining({
+            text: `${EDIT_COPY.updated}\n\n${buildLeadDetail(lead, 'owner').text}`,
+          }),
+        );
+        expect(notices(OWNER_ID)).toEqual([]);
+        expect(notices(ADMIN_ID)).toEqual([
+          expect.stringContaining(`Было: ${before}`),
+        ]);
+        expect(notices(ADMIN_ID)[0]).toContain('✍️ Владелец');
+      },
+    );
+
+    it('tells the owner, not the admin, when the admin edits', async () => {
+      await edit('name', 'Пётр', ADMIN_ID);
+      expect((await stored()).name).toBe('Пётр');
+      expect(notices(ADMIN_ID)).toEqual([]);
+      expect(notices(OWNER_ID)).toEqual([expect.stringContaining('✍️ Админ')]);
+      expect(notices(OWNER_ID)[0]).toContain('Стало: Пётр');
+    });
+
+    it('refreshes the Topic summary as well', async () => {
+      seed(makeLead({ telegramId: 42, topicId: 77, topicMessageId: 78 }));
+      await edit('name', 'Пётр');
+      expect(
+        crm('editMessageText').filter(
+          (p) => p.chat_id === GROUP_ID && p.message_id === 78,
+        ),
+      ).toEqual([
+        expect.objectContaining({
+          text: expect.stringContaining('Имя: Пётр'),
+        }),
+      ]);
+    });
+
+    it('renames the Topic after a new name', async () => {
+      seed(makeLead({ telegramId: 42, topicId: 77, topicMessageId: 78 }));
+      await edit('name', 'Пётр');
+      expect(crm('editForumTopic')).toEqual([
+        {
+          chat_id: GROUP_ID,
+          message_thread_id: 77,
+          name: '#5 · Пётр · Approved.rs',
+        },
+      ]);
+    });
+
+    it('renames nothing for a Lead without a Topic or on a contact edit', async () => {
+      await edit('name', 'Пётр');
+      seed(makeLead({ telegramId: 42, topicId: 77, topicMessageId: 78 }));
+      await edit('contact', '@petr');
+      expect(crm('editForumTopic')).toEqual([]);
+    });
+
+    it('still stores the name when Telegram will not rename the Topic', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+      seed(makeLead({ telegramId: 42, topicId: 77, topicMessageId: 78 }));
+      api.fail('editForumTopic', 'Bad Request: not enough rights');
+      await edit('name', 'Пётр');
+      expect((await stored()).name).toBe('Пётр');
+      expect(error).toHaveBeenCalledWith(
+        '[telegram] editForumTopic failed',
+        expect.objectContaining({ topicId: 77 }),
+      );
+      expect(notices(ADMIN_ID)).toHaveLength(1);
+      error.mockRestore();
+    });
+
+    it('sends no notice when the value did not change', async () => {
+      await edit('name', 'Иван');
+      expect(notices(ADMIN_ID)).toEqual([]);
+    });
+
+    it('offers no way to edit the visitor comment', async () => {
+      seed(makeLead({ comment: 'от посетителя' }));
+      await tap('open:5', OWNER_ID);
+      const [detail] = sentTo(OWNER_ID);
+      expect(callbackData(detail!.reply_markup)).not.toContain(
+        'edit:5:comment',
+      );
+    });
+
+    it.each([
+      ['@petr', { contact: '@petr', contactChannel: 'telegram' }],
+      ['https://t.me/petr', { contact: '@petr', contactChannel: 'telegram' }],
+      ['petr@mail.rs', { contact: 'petr@mail.rs', contactChannel: null }],
+      [
+        'https://instagram.com/petr',
+        { contact: 'https://instagram.com/petr', contactChannel: null },
+      ],
+    ])('takes %s as a contact', async (text, patch) => {
+      seed(noContact('—'));
+      await edit('contact', text);
+      expect(await stored()).toMatchObject(patch);
+    });
+
+    it('turns a placeholder click into a real contact, keeping its channel', async () => {
+      seed(
+        makeLead({
+          name: '',
+          contact: '—',
+          kind: 'call_click',
+          contactChannel: 'whatsapp',
+          service: '',
+          services: [],
+        }),
+      );
+      await edit('contact', '+381 64 123 4567');
+      expect(await stored()).toMatchObject({
+        contact: '+381641234567',
+        contactChannel: 'whatsapp',
+        kind: 'call_click',
+      });
+      expect(notices(ADMIN_ID)).toEqual([
+        expect.stringContaining('Было: —\nСтало: +381641234567'),
+      ]);
+    });
+
+    it.each([
+      ['contact', 'не знаю'],
+      ['contact', '+381 1'],
+      ['name', '   '],
+    ] as const)(
+      'asks again for %s on %j and changes nothing',
+      async (field, text) => {
+        await edit(field, text);
+        expect(await stored()).toMatchObject({
+          name: 'Иван',
+          contact: '@ivan',
+          pendingPrompt: {
+            chatId: OWNER_ID,
+            messageId: PROMPT_ID,
+            kind: `edit_${field}`,
+          },
+        });
+        expect(forceReplies().at(-1)).toEqual(
+          expect.objectContaining({ text: reAskEditText(field) }),
+        );
+        expect(crm('editMessageText')).toEqual([]);
+        expect(notices(ADMIN_ID)).toEqual([]);
+      },
+    );
+
+    it('replaces a bare Telegram id with a real contact', async () => {
+      seed(noContact('tg://user?id=42'));
+      await edit('contact', '@petr');
+      expect(await stored()).toMatchObject({
+        contact: '@petr',
+        contactChannel: 'telegram',
+      });
+      expect(notices(ADMIN_ID)).toEqual([
+        expect.stringContaining('Стало: @petr'),
+      ]);
+    });
+
+    it.each([
+      ['@ivan', '+381 64 123 4567', '+381641234567'],
+      ['+381641234567', '@petr', '@petr'],
+    ])(
+      'keeps the real contact %s and notes %s beside it',
+      async (contact, text, added) => {
+        seed(makeLead({ contact, comment: 'BMW X5' }));
+        await edit('contact', text);
+        const lead = await stored();
+        expect(lead).toMatchObject({
+          contact,
+          comment: `BMW X5\n${noteLine(extraContactNote(added), 'owner')}`,
+          pendingPrompt: null,
+        });
+        expect(sentTo(OWNER_ID).at(-1)).toEqual(
+          expect.objectContaining({
+            text: `${EDIT_COPY.contactNoted}\n\n${buildLeadDetail(lead, 'owner').text}`,
+          }),
+        );
+        expect(notices(ADMIN_ID)).toEqual([]);
+        expect(textsTo(ADMIN_ID)).toEqual([
+          `📝 Заявка #5 Иван · Владелец: Доп. контакт: ${added}`,
+        ]);
+        expect(textsTo(OWNER_ID)).not.toContainEqual(
+          expect.stringContaining('📝 Заявка'),
+        );
+      },
+    );
+
+    it('stores the answer to the prompt it asked again with', async () => {
+      seed(noContact('—'));
+      await edit('contact', 'не знаю');
+      await message('@petr', OWNER_ID, { replyTo: PROMPT_ID });
+      expect((await stored()).contact).toBe('@petr');
+    });
+
+    it('appends a 📝 note with its author and date, keeping the comment', async () => {
+      seed(makeLead({ comment: 'BMW X5' }));
+      await tap('note:5', ADMIN_ID, { chatId: ADMIN_ID });
+      expect(forceReplies()).toEqual([
+        expect.objectContaining({ text: EDIT_COPY.notePrompt }),
+      ]);
+      expect((await stored()).pendingPrompt?.kind).toBe('note');
+      await message('Перезвонить в пятницу', ADMIN_ID, { replyTo: PROMPT_ID });
+      const lead = await stored();
+      expect(lead).toMatchObject({
+        comment: `BMW X5\n${noteLine('Перезвонить в пятницу', 'admin')}`,
+        pendingPrompt: null,
+      });
+      expect(lead.lastActivityAt).not.toBeNull();
+      expect(sentTo(ADMIN_ID).at(-1)).toEqual(
+        expect.objectContaining({
+          text: `${LEAD_ACTION_COPY.noteAdded}\n\n${buildLeadDetail(lead, 'admin').text}`,
+        }),
+      );
+      expect(notices(OWNER_ID)).toEqual([]);
+      expect(textsTo(OWNER_ID)).toEqual([
+        '📝 Заявка #5 Иван · Админ: Перезвонить в пятницу',
+      ]);
+      expect(textsTo(ADMIN_ID)).not.toContainEqual(
+        expect.stringContaining('📝 Заявка'),
+      );
+    });
+
+    it('asks again for the note on an empty answer', async () => {
+      await tap('note:5', OWNER_ID);
+      await message('  ', OWNER_ID, { replyTo: PROMPT_ID });
+      expect(await stored()).toMatchObject({
+        pendingPrompt: { chatId: OWNER_ID, kind: 'note' },
+      });
+      expect((await stored()).comment).toBeUndefined();
+      expect(forceReplies().at(-1)).toEqual(
+        expect.objectContaining({ text: reAskEditText('note') }),
+      );
+      expect(textsTo(ADMIN_ID)).toEqual([]);
+    });
+
+    it.each(['edit:404:name', 'note:404'])(
+      '%s on a missing Lead just acks',
+      async (data) => {
+        await tap(data, OWNER_ID, { id: 'cb-missing' });
+        expect(api.calls.map((c) => c.method)).toEqual(['answerCallbackQuery']);
+      },
+    );
   });
 
   describe("a message in a Lead's topic", () => {
@@ -1739,7 +2176,7 @@ describe('POST /api/telegram-webhook', () => {
           message_thread_id: TOPIC_ID,
         }),
       ]);
-      expect((await stored()).status).toBe('open');
+      expect((await stored()).status).toBe('new');
       error.mockRestore();
     });
 
@@ -1758,7 +2195,7 @@ describe('POST /api/telegram-webhook', () => {
         expect(sentTo(Number(GROUP_ID))).toEqual([
           expect.objectContaining({ text: REPLY_COPY.undelivered }),
         ]);
-        expect((await stored()).status).toBe('open');
+        expect((await stored()).status).toBe('new');
         warn.mockRestore();
       },
     );
@@ -1849,7 +2286,9 @@ describe('POST /api/telegram-webhook', () => {
       seed(makeLead({ comment: 'Звонил' }));
       await cardReply('80');
 
-      expect((await stored()).comment).toBe('Звонил\n80');
+      expect((await stored()).comment).toBe(
+        `Звонил\n${noteLine('80', 'owner')}`,
+      );
       expect(await readOperations()).toEqual([]);
       expect(sentTo(CARD_CHAT_ID)).toEqual([
         expect.objectContaining({
@@ -1863,7 +2302,9 @@ describe('POST /api/telegram-webhook', () => {
 
     it('appends any other text to the Lead as a note', async () => {
       await cardReply('Иван 30, приедет в пятницу', ADMIN_ID);
-      expect((await stored()).comment).toBe('Иван 30, приедет в пятницу');
+      expect((await stored()).comment).toBe(
+        noteLine('Иван 30, приедет в пятницу', 'admin'),
+      );
     });
 
     it('leaves a lost Lead lost', async () => {

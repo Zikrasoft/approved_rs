@@ -7,6 +7,7 @@ import { storedLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
 import {
   createLeadStore,
   GHOST_LEAD_RETENTION_MS,
+  hasRealContact,
   TOPIC_IDLE_MS,
   isFreshLead,
   postponePatch,
@@ -84,9 +85,9 @@ describe('insertLead', () => {
     expect(b.id).toBe(2);
   });
 
-  it('defaults status open, no prompt and no money on the Lead', async () => {
+  it('defaults status new, no prompt and no money on the Lead', async () => {
     const lead = await store.insertLead(baseData);
-    expect(lead.status).toBe('open');
+    expect(lead.status).toBe('new');
     expect(lead.pendingPrompt).toBeNull();
     expect(lead).not.toHaveProperty('archived');
     expect(lead).not.toHaveProperty('commissionPercent');
@@ -224,6 +225,85 @@ describe('insertOrMergeLead', () => {
     });
 
     expect(lead.comment).not.toContain('Также пробовал');
+  });
+
+  it('keeps the first ad visit, and lets the capture bot inherit it from the click', async () => {
+    const first = {
+      source: 'facebook',
+      campaign: 'spring',
+      at: '2026-10-01T10:00:00.000Z',
+    };
+    await store.insertOrMergeLead({
+      ...clickData('telegram'),
+      adSource: first,
+    });
+    const { lead: bot } = await store.insertOrMergeLead({
+      ...clickData('telegram'),
+      contact: '@petr',
+      telegramId: 77,
+    });
+    const { lead: later } = await store.insertOrMergeLead({
+      ...clickData('whatsapp'),
+      adSource: { ...first, source: 'google' },
+    });
+
+    expect(bot.adSource).toEqual(first);
+    expect(later.adSource).toEqual(first);
+  });
+
+  it('keeps the first Meta ids, and lets the capture bot inherit them from the click', async () => {
+    const first = { fbc: 'fb.1.1760000000000.IwAR2F4-dbP0l7Mn' };
+    await store.insertOrMergeLead({ ...clickData('telegram'), metaIds: first });
+    const { lead: bot } = await store.insertOrMergeLead({
+      ...clickData('telegram'),
+      contact: '@petr',
+      telegramId: 77,
+    });
+    const { lead: later } = await store.insertOrMergeLead({
+      ...clickData('whatsapp'),
+      metaIds: { fbp: 'fb.1.1596403881668.1116446470' },
+    });
+
+    expect(bot.metaIds).toEqual(first);
+    expect(later.metaIds).toEqual(first);
+  });
+
+  it('takes the Meta ids a later Lead brings when the first had none', async () => {
+    await store.insertOrMergeLead(clickData('telegram'));
+    const { lead } = await store.insertOrMergeLead({
+      ...clickData('whatsapp'),
+      metaIds: { fbp: 'fb.1.1596403881668.1116446470' },
+    });
+    expect(lead.metaIds).toEqual({ fbp: 'fb.1.1596403881668.1116446470' });
+  });
+
+  it('claims the Meta Lead event once, and only for a Lead with Meta ids', async () => {
+    const { lead: withIds } = await store.insertOrMergeLead({
+      ...clickData('telegram'),
+      metaIds: { fbp: 'fb.1.1596403881668.1116446470' },
+    });
+    const plain = await store.insertLead(clickData('whatsapp'));
+
+    const claimed = await store.claimMetaLead(withIds.id);
+    expect(claimed?.metaLeadSentAt).toEqual(expect.any(String));
+    expect(await store.claimMetaLead(withIds.id)).toBeUndefined();
+    expect(await store.claimMetaLead(plain.id)).toBeUndefined();
+    expect((await store.getLead(plain.id))?.metaLeadSentAt).toBeNull();
+  });
+
+  it('takes the ad visit a later Lead brings when the first had none', async () => {
+    await store.insertOrMergeLead(clickData('telegram'));
+    const adSource = { source: 'google', at: '2026-10-01T10:00:00.000Z' };
+    const { lead } = await store.insertOrMergeLead({
+      ...clickData('whatsapp'),
+      adSource,
+    });
+    expect(lead.adSource).toEqual(adSource);
+  });
+
+  it('stores no ad visit for a Lead that came without one', async () => {
+    const { lead } = await store.insertOrMergeLead(clickData('telegram'));
+    expect(lead.adSource).toBeNull();
   });
 
   it('hands back the Lead as it was before the merge, and null for an insert', async () => {
@@ -628,8 +708,8 @@ describe('status patch builders', () => {
   }
 
   it('statusPatch stamps the change time', () => {
-    expect(statusPatch('open')).toEqual({
-      status: 'open',
+    expect(statusPatch('new')).toEqual({
+      status: 'new',
       statusChangedAt: AT.toISOString(),
     });
     expect(statusPatch('lost', new Date(0)).statusChangedAt).toBe(
@@ -637,26 +717,41 @@ describe('status patch builders', () => {
     );
   });
 
-  it('postponePatch sets the date and resumePatch reopens', async () => {
-    const lead = await storedLead({ status: 'open' });
+  it.each(['new', 'negotiations', 'in_progress'] as const)(
+    'postponePatch remembers %s and resumePatch returns to it',
+    async (status) => {
+      const lead = await storedLead({ status });
 
-    const postponed = { ...lead, ...postponePatch(lead, '2026-10-20', 'n') };
+      const postponed = { ...lead, ...postponePatch(lead, '2026-10-20', 'n') };
 
-    expect(postponed).toMatchObject({
-      status: 'postponed',
-      remindAt: '2026-10-20',
-      statusChangedAt: AT.toISOString(),
-    });
-    expect(resumePatch()).toEqual({
-      status: 'open',
-      remindAt: null,
-      statusChangedAt: AT.toISOString(),
-    });
+      expect(postponed).toMatchObject({
+        status: 'postponed',
+        postponedFrom: status,
+        remindAt: '2026-10-20',
+        statusChangedAt: AT.toISOString(),
+      });
+      expect(resumePatch(postponed)).toEqual({
+        status,
+        postponedFrom: null,
+        remindAt: null,
+        statusChangedAt: AT.toISOString(),
+      });
+    },
+  );
+
+  it('resumePatch falls back to new when nothing was remembered', async () => {
+    const lead = await storedLead({ status: 'postponed', postponedFrom: null });
+    expect(resumePatch(lead)).toMatchObject({ status: 'new' });
+  });
+
+  it('postponePatch refuses a Lead that is not in work', async () => {
+    const lead = await storedLead({ status: 'won' });
+    expect(() => postponePatch(lead, '2026-10-20', 'n')).toThrow();
   });
 });
 
 describe('resumeLead', () => {
-  it('returns a postponed lead to open and clears remindAt', async () => {
+  it('returns a postponed lead to new when it remembers nothing, and clears remindAt', async () => {
     const lead = await store.insertLead(baseData);
     await store.updateLeads((leads) =>
       leads.map((l) =>
@@ -668,7 +763,7 @@ describe('resumeLead', () => {
 
     const resumed = await store.resumeLead(lead.id);
 
-    expect(resumed?.status).toBe('open');
+    expect(resumed?.status).toBe('new');
     expect(resumed?.remindAt).toBeNull();
   });
 
@@ -685,7 +780,7 @@ describe('resumeLead', () => {
 });
 
 describe('recordOwnerReply', () => {
-  it('counts as owner activity and moves only an open lead to negotiations', async () => {
+  it('counts as owner activity and moves only a new lead to negotiations', async () => {
     const open = await store.insertLead(baseData);
     const done = await store.insertLead(baseData);
     await forceComplete(done.id);
@@ -703,6 +798,15 @@ describe('recordOwnerReply', () => {
     expect((await store.recordOwnerReply(open.id))?.statusChangedAt).toBe(
       at.toISOString(),
     );
+  });
+
+  it('leaves a Lead already in work at its status', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.setStatus(lead.id, 'in_progress');
+
+    expect(await store.recordOwnerReply(lead.id)).toMatchObject({
+      status: 'in_progress',
+    });
   });
 });
 
@@ -756,13 +860,54 @@ describe('postponeLead', () => {
     expect(postponed?.comment).toBe('Отложено до 20.10.2026');
   });
 
-  it('postpones a Lead in negotiations too', async () => {
+  it.each(['negotiations', 'in_progress'] as const)(
+    'postpones a Lead in %s and resumes it there',
+    async (status) => {
+      const lead = await store.insertLead(baseData);
+      await store.setStatus(lead.id, status);
+
+      const postponed = await store.postponeLead(lead.id, '2026-10-20', 'n');
+      expect(postponed?.status).toBe('postponed');
+
+      expect(await store.resumeLead(lead.id)).toMatchObject({
+        status,
+        postponedFrom: null,
+        remindAt: null,
+      });
+    },
+  );
+
+  it.each(['won', 'lost', 'negotiations'] as const)(
+    'clears the reminder when a postponed Lead moves to %s',
+    async (status) => {
+      const lead = await store.insertLead(baseData);
+      await store.postponeLead(lead.id, '2026-10-20', 'n');
+
+      expect(await store.setStatus(lead.id, status)).toMatchObject({
+        status,
+        postponedFrom: null,
+        remindAt: null,
+      });
+    },
+  );
+
+  it.each([
+    ['won', 'in_progress'],
+    ['lost', 'negotiations'],
+    ['won', 'new'],
+  ] as const)('never moves a %s Lead back to %s', async (closed, to) => {
     const lead = await store.insertLead(baseData);
-    await store.setStatus(lead.id, 'negotiations');
+    await store.setStatus(lead.id, closed);
 
-    const postponed = await store.postponeLead(lead.id, '2026-10-20', 'note');
+    expect(await store.setStatus(lead.id, to)).toBeUndefined();
+    expect((await store.getLead(lead.id))?.status).toBe(closed);
+  });
 
-    expect(postponed?.status).toBe('postponed');
+  it('still moves a closed Lead between the outcomes', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.setStatus(lead.id, 'won');
+
+    expect((await store.setStatus(lead.id, 'lost'))?.status).toBe('lost');
   });
 
   it('no-ops when the lead is no longer open (stale button, already finalized elsewhere)', async () => {
@@ -840,7 +985,7 @@ describe('expireGhostLeads', () => {
 
     expect(await store.expireGhostLeads(NOW)).toEqual([]);
     expect(await store.getLead(lead.id)).toMatchObject({
-      status: 'open',
+      status: 'new',
     });
   });
 
@@ -850,7 +995,7 @@ describe('expireGhostLeads', () => {
 
     expect(await store.expireGhostLeads(NOW)).toEqual([]);
     expect(await store.getLead(lead.id)).toMatchObject({
-      status: 'open',
+      status: 'new',
     });
   });
 
@@ -908,8 +1053,8 @@ describe('expireGhostLeads', () => {
     const expired = await store.expireGhostLeads(NOW);
 
     expect(expired.map((l) => l.id).sort()).toEqual([a.id, b.id].sort());
-    expect(await store.getLead(c.id)).toMatchObject({ status: 'open' });
-    expect(await store.getLead(live.id)).toMatchObject({ status: 'open' });
+    expect(await store.getLead(c.id)).toMatchObject({ status: 'new' });
+    expect(await store.getLead(live.id)).toMatchObject({ status: 'new' });
   });
 
   describe('a bare capture-bot /start', () => {
@@ -938,7 +1083,7 @@ describe('expireGhostLeads', () => {
       const lead = await started(overrides);
 
       expect(await store.expireGhostLeads(NOW)).toEqual([]);
-      expect(await store.getLead(lead.id)).toMatchObject({ status: 'open' });
+      expect(await store.getLead(lead.id)).toMatchObject({ status: 'new' });
     });
 
     it('takes the phone of a form sent within the window', async () => {
@@ -1171,7 +1316,7 @@ describe('readLeads — schema validation on the way in', () => {
 
     const [lead] = await store.readLeads();
 
-    expect(lead.status).toBe('open');
+    expect(lead.status).toBe('new');
     expect(lead.pendingPrompt).toBeNull();
   });
 
@@ -1322,7 +1467,7 @@ describe('touchLead', () => {
     await store.touchLead(lead.id, at);
 
     expect(await store.getLead(lead.id)).toMatchObject({
-      status: 'open',
+      status: 'new',
       statusChangedAt: lead.statusChangedAt,
       lastActivityAt: at.toISOString(),
     });
@@ -1508,6 +1653,27 @@ describe('capturePrompt', () => {
     const found = await store.findByCapturePrompt(777, baseData.brand);
     expect(found?.id).toBe(lead.id);
     expect(found?.capturePrompt).toEqual({ chatId: 777, step: 'looking_for' });
+  });
+
+  it('keeps the first manager hand-off', async () => {
+    const lead = await store.insertLead(baseData);
+
+    await store.updateCapture(lead.id, {
+      capturePrompt: { chatId: 777, step: 'car' },
+    });
+    const first = await store.markManagerHandoff(lead.id, 'approvedrs');
+    const second = await store.markManagerHandoff(lead.id, 'someone_else');
+
+    expect(lead.managerHandoff).toBeNull();
+    expect(first?.managerHandoff).toEqual({
+      at: expect.any(String),
+      handle: 'approvedrs',
+    });
+    expect(first?.capturePrompt).toEqual({ chatId: 777, step: 'car' });
+    expect(second).toBeUndefined();
+    expect((await store.getLead(lead.id))?.managerHandoff).toEqual(
+      first?.managerHandoff,
+    );
   });
 
   it('clears the prompt when set to null', async () => {
@@ -1985,5 +2151,18 @@ describe('updateCapture', () => {
     expect(
       await store.updateCapture(999, { capturePrompt: null }),
     ).toBeUndefined();
+  });
+});
+
+describe('hasRealContact', () => {
+  it.each([
+    ['', false],
+    ['—', false],
+    ['tg://user?id=42', false],
+    ['+381641234567', true],
+    ['@ivan', true],
+    ['petr@mail.rs', true],
+  ])('%j → %s', (contact, real) => {
+    expect(hasRealContact(contact)).toBe(real);
   });
 });

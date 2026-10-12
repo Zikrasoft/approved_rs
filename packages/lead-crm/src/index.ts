@@ -4,6 +4,7 @@ export { createBrandBot } from './brandBot.ts';
 export type { BrandBotOptions } from './brandBot.ts';
 
 export { LEADS_PATH } from './quarantine.ts';
+export { editedContact } from './editedContact.ts';
 export {
   isHandleContact,
   isPhoneContact,
@@ -25,6 +26,7 @@ export { storedLeadSchema } from './schema.ts';
 export {
   appendNote,
   canPostpone,
+  hasRealContact,
   isFreshLead,
   postponePatch,
   resumePatch,
@@ -53,9 +55,14 @@ export {
   buildDeleteConfirm,
   buildRemindPicker,
   createFormatter,
+  EDIT_COPY,
   EDIT_FIELD_LABELS,
+  noteLine,
+  extraContactNote,
+  reAskEditText,
   REPLY_COPY,
   LEAD_ACTION_COPY,
+  managerHandoffText,
   topicLink,
 } from './telegram/cards.ts';
 export type { EditField } from './telegram/cards.ts';
@@ -81,7 +88,14 @@ export type {
   StatusChangeOptions,
 } from './notifyLead.ts';
 
-export { contactChannelSchema, HONEYPOT_FIELD, SERVICE_FIELD } from './form.ts';
+export {
+  AD_SOURCE_FIELD,
+  contactChannelSchema,
+  HONEYPOT_FIELD,
+  MAX_FIELD_LENGTH,
+  META_IDS_FIELD,
+  SERVICE_FIELD,
+} from './form.ts';
 
 export { createLeadsRoute } from './routes/leads.ts';
 
@@ -90,3 +104,6 @@ export { requireEnv } from './requireEnv.ts';
 export { secretMatches } from './verifySecret.ts';
 
 export { createContactClickRoute } from './routes/contactClick.ts';
+
+export { createMetaLeadReporter } from './metaConversions.ts';
+export type { ReportMetaLead } from './metaConversions.ts';

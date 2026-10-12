@@ -96,6 +96,7 @@ describe('<checkout-form>', () => {
     });
     expect(goals.reachGoal).toHaveBeenCalledWith('order_placed', {
       total: 12690,
+      currency: 'rsd',
     });
   });
 

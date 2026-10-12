@@ -80,6 +80,34 @@ to know which field is to blame. A form that marks an error with a class alone g
 no `form_error`. `aria-invalid` is also read by screen readers, so it has to be
 cleared as soon as the visitor fixes the field.
 
+## How an ad visit is recognised
+
+`rememberAdTouch` in `packages/site-kit/src/adTouch.ts`, armed by
+`bootSiteKit`, reads the landing URL. It is an ad when the URL carries
+`fbclid` or `gclid`, or `utm_medium` is `paid`, `cpc`, `ppc` or `paid_social`
+(any case). The source is `utm_source`, else `facebook` for `fbclid` and
+`google` for `gclid`, else none; `utm_medium`, `utm_campaign` and
+`utm_content` ride along. The first
+such landing is kept in `localStorage` for 30 days and never overwritten while
+it is fresh; a visitor who declined analytics stores none, and declining
+clears it. Every Lead the site then creates carries it, and the CRM card shows
+«📣 Реклама: Facebook · <campaign> · <content>» with `#реклама`; a visit only
+its `utm_medium` identifies shows a bare «📣 Реклама», never the raw medium.
+
+Tag every ad link with UTM even where the network adds its own click id:
+
+```
+?utm_source=facebook&utm_medium=paid&utm_campaign=<campaign>&utm_content=<ad>
+```
+
+`utm_medium=paid` is what makes a link an ad when the click id is stripped.
+Keep source, campaign and content to letters, digits, spaces and
+`._-+|:/()&,#`, at most 100 characters each. Anything else is stripped from
+the value, in the browser and again on the server (`cleanAdText` in
+`packages/lead-crm/src/adText.ts`); a field left empty is dropped, and the
+visit only when none of source, medium, campaign or content is left. Instagram placements bought through Meta are
+`utm_source=instagram`.
+
 ## How a form submission is counted
 
 All three forms post through `submitLeadForm` from `@podbor/lead-crm/submit`,
@@ -128,6 +156,112 @@ are carlab.rs only. The goals are created in the counters when the shop moves to
 `live`, not before: while it is in `preview`, those events are only sent by
 developers with `?dev=true`, and such visits are excluded from samples the same way
 as everything else in `docs/analytics-exclusions.md`.
+
+## Meta Pixel
+
+Every goal goes through `reachGoal`, which reaches Metrika and, on a site with a
+pixel id, the Meta Pixel. The pixel shares Metrika's gate in
+`packages/site-kit/src/analytics.ts`: never in dev, never under a refusal, queued
+on the first page view (`init` + `PageView`) with `fbevents.js` fetched while the
+browser is idle. There is no `<noscript>` image: the sites count nothing without
+JavaScript anyway.
+
+Only goals with a Meta standard event reach the pixel — `META_EVENTS` in the same
+file is the one table:
+
+| Goal             | Meta event                                      |
+| ---------------- | ----------------------------------------------- |
+| `form_submit`    | `Lead`                                          |
+| `contact_click`  | `Contact` (every channel)                       |
+| `add_to_cart`    | `AddToCart`                                     |
+| `begin_checkout` | `InitiateCheckout`                              |
+| `order_placed`   | `Purchase`, with `value` and `currency` (`RSD`) |
+
+The rest (scroll depth, form steps, language offer, case views) stay
+Metrika-only: an ads optimiser learns nothing from them and custom events only
+clutter Events Manager. To send one, add its row to `META_EVENTS`. Parameters
+other than an order's `total` + `currency` never reach Meta.
+
+The pixel id sits beside the counter id in each app's `src/utils/metrika.ts` as
+`META_PIXEL_ID` and is passed to `bootSiteKit` by the layout. carlab.rs has
+`29229430643330595`; approved.rs and details.rs are `undefined`, so no pixel
+loads there. To add one, set the constant, and update that site's privacy copy
+and `COOKIE_POLICY_VERSION` (see [deploy.md](deploy.md)) in the same change.
+
+### The server `Lead` event from a Capture bot
+
+The pixel cannot run inside Telegram, so a visitor who goes from the site to a
+Capture bot and leaves a request there is reported to Meta by the server,
+through the [Conversions API](https://developers.facebook.com/documentation/ads-commerce/conversions-api/using-the-api).
+
+**What the site keeps.** Every contact-click beacon and every lead form posts
+`meta_ids` beside `ad_source`: the `_fbc` and `_fbp` cookies the pixel set, or,
+without `_fbc`, an fbc built from the `fbclid` of the first Ad visit as
+`fb.1.<landing time in ms>.<fbclid>`, the fbclid unmodified — Meta's own
+[recipe](https://developers.facebook.com/documentation/ads-commerce/conversions-api/parameters/fbp-and-fbc).
+Under a refusal nothing is sent, the same gate as the pixel
+(`storedMetaIds` in `packages/site-kit/src/adTouch.ts`). The Lead stores them
+as `metaIds`, zod-checked against the `fb.<n>.<time>.<value>` shape; a Capture
+bot Lead that absorbs the click inherits them, and the first one wins.
+
+**When it fires.** Once per Lead, when the bot request becomes real: the
+Questionnaire is completed, or the visitor shares a phone, whichever comes
+first. A bare `/start` sends nothing. The Lead's `metaLeadSentAt` is set in the
+same compare-and-swap write that claims the event (`claimMetaLead`), so a second
+completion, a second phone or a retry never sends it again. A Lead without
+`metaIds` (the visitor never came through the site, or refused) sends nothing.
+
+**What is sent** (`packages/lead-crm/src/metaConversions.ts`), `POST
+https://graph.facebook.com/v25.0/<pixel id>/events` with a form-encoded body:
+`access_token`, `data` (the JSON array below) and, while testing,
+`test_event_code`. The token rides in the body, as the form-field form of
+Meta's own example request does
+([using the API](https://developers.facebook.com/documentation/ads-commerce/conversions-api/using-the-api)),
+rather than in the query string, so a logged URL or a fetch error never
+carries it. `data` decoded:
+
+```json
+{
+  "data": [
+    {
+      "event_name": "Lead",
+      "event_time": 1760261400,
+      "event_id": "lead-42",
+      "action_source": "chat",
+      "user_data": { "fbc": "fb.1.…", "fbp": "fb.1.…" }
+    }
+  ]
+}
+```
+
+- `action_source: "chat"` — "Conversion was made via a messaging app, SMS, or
+  online messaging feature"
+  ([server event parameters](https://developers.facebook.com/documentation/ads-commerce/conversions-api/parameters/server-event)).
+  `event_source_url` and `client_user_agent` are required only for `website`
+  events ([best practices](https://developers.facebook.com/documentation/ads-commerce/conversions-api/best-practices)),
+  and we have neither for a chat, so neither is sent.
+- `event_time` is the moment of the claim, in seconds; Meta refuses one older
+  than 7 days, which a request sent at once never is.
+- `event_id` is `lead-<Lead id>`, stable for dedup.
+- `user_data` carries `fbc`/`fbp` only, unhashed as Meta asks
+  ([customer information parameters](https://developers.facebook.com/documentation/ads-commerce/conversions-api/parameters/customer-information-parameters)).
+  **No phone, email, name or any hashed contact** — an owner decision, so
+  `external_id` is not sent either.
+- `test_event_code` is added only while `META_CAPI_TEST_CODE` is set.
+- `v25.0` is the version Meta's own examples use; `META_GRAPH_VERSION` holds it.
+
+The call is fire-and-forget through `waitUntil`, after the visitor's reply, with
+a 5 s timeout; a refusal or a network failure is logged as `[meta-capi]` and
+never retried. Without `META_CAPI_TOKEN` or a pixel id the app logs
+`[meta-capi] off` once per cold start and sends nothing. Whether Meta attributes
+a `chat` event that carries only `fbc`/`fbp` well enough to optimise on is not
+established ([research](../research/meta-ads-to-telegram-capture-bot.md)).
+
+**Verify.** Set `META_CAPI_TEST_CODE` to the code from Events Manager → the
+pixel → **Test events**, redeploy, open the site from a URL with `?fbclid=test`,
+tap the Telegram tile and finish the Questionnaire: the `Lead` with source
+"Server" appears in the Test events tab within a minute. Remove the variable and
+redeploy afterwards — Meta says test codes must not ride on production events.
 
 ## How to add an event
 

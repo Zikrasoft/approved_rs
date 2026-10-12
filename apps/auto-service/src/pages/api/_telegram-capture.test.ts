@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { WORKSHOP_ADDRESS } from '@podbor/brands';
 import { formatPhone } from '@podbor/site-kit/format-phone';
+import { stampStartVisitor } from '@podbor/site-kit/contact-links';
 import { LEADS_PATH } from '@podbor/lead-crm';
 import { recordBotApi, type MemoryStorage } from '@podbor/lead-crm/testing';
 
@@ -25,6 +26,8 @@ vi.mock('@podbor/lead-crm/storage/local', () =>
 
 import { POST } from './telegram-capture';
 import { content } from '@/i18n/content';
+import { leadStore } from '@/lib/crm';
+import { META_PIXEL_ID } from '@/utils/metrika';
 import { PHONE_NUMBER, SITE_URL } from '@/utils/constants';
 
 const api = recordBotApi();
@@ -277,6 +280,43 @@ describe('the CarLab Questionnaire', () => {
 });
 
 describe('the language switch', () => {
+  it.each(['ru', 'en'])(
+    'labels the menu button with the flags, the same in %s',
+    async (locale) => {
+      await POST({
+        request: new Request('http://localhost/api/telegram-capture', {
+          method: 'POST',
+          headers: {
+            'x-telegram-bot-api-secret-token': 'test-capture-webhook-secret',
+          },
+          body: JSON.stringify({
+            update_id: 3,
+            message: {
+              message_id: 3,
+              chat: { id: 44, type: 'private' },
+              from: { id: 44, first_name: 'Lea', language_code: locale },
+              text: '/menu',
+            },
+          }),
+        }),
+      });
+
+      const reply = api
+        .callsTo('sendMessage', '1002:test-capture-bot-token')
+        .at(-1)?.payload as {
+        reply_markup: {
+          inline_keyboard: { text: string; callback_data?: string }[][];
+        };
+      };
+      expect(reply.reply_markup.inline_keyboard.flat()).toContainEqual(
+        expect.objectContaining({
+          text: '🌐 🇷🇺 🇷🇸 🇬🇧',
+          callback_data: `language:${locale}`,
+        }),
+      );
+    },
+  );
+
   it('offers exactly the locales the site serves', async () => {
     await POST({
       request: new Request('http://localhost/api/telegram-capture', {
@@ -339,13 +379,120 @@ describe('a photo from the visitor', () => {
 });
 
 describe('the CarLab main menu', () => {
-  it('links «Написать менеджеру» straight to the manager account', async () => {
-    await answer('/start ru', { id: 71, first_name: 'Menu', username: 'menu' });
+  const MENU_VISITOR = { id: 71, first_name: 'Menu', username: 'menu' };
+  const CAPTURE_TOKEN = '1002:test-capture-bot-token';
 
-    expect(lastReply().reply_markup.inline_keyboard).toContainEqual([
+  it('ends with a blue manager tap that marks the Lead and opens @carlabrs', async () => {
+    const words = content('ru').captureBot.manager;
+    await answer('/start ru', MENU_VISITOR);
+
+    expect(lastReply().reply_markup.inline_keyboard.at(-1)).toEqual([
+      { text: words.button, callback_data: 'manager:ru', style: 'primary' },
+    ]);
+
+    await press('manager:ru', MENU_VISITOR);
+
+    const lead = visitorLead(MENU_VISITOR) as unknown as {
+      managerHandoff: { handle: string };
+      topicId: number;
+    };
+    expect(lead.managerHandoff.handle).toBe('carlabrs');
+    expect(
+      api.callsTo('sendMessage', CAPTURE_TOKEN).map((call) => call.payload),
+    ).toContainEqual(
+      expect.objectContaining({
+        text: '👤 Ушёл к менеджеру @carlabrs',
+        message_thread_id: lead.topicId,
+      }),
+    );
+    expect(
+      api.callsTo('editMessageText', CAPTURE_TOKEN).at(-1)?.payload,
+    ).toEqual(
+      expect.objectContaining({
+        text: words.handoff,
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: words.chat, url: 'https://t.me/carlabrs' }],
+            [
+              {
+                text: content('ru').captureBot.menu.back,
+                callback_data: 'menu:ru',
+              },
+            ],
+          ],
+        },
+      }),
+    );
+  });
+});
+
+describe('the Meta Lead event from the CarLab bot', () => {
+  const VISITOR_ID = '0f8fad5b-d9cb-469f-a165-70867728950e';
+  const FBC = 'fb.1.1760000000000.IwAR2F4-dbP0l7Mn';
+  const FROM_SITE = { id: 6301, first_name: 'Nika', username: 'nika' };
+  let graph: { url: string; body: unknown }[];
+
+  beforeEach(() => {
+    graph = [];
+    vi.stubGlobal('fetch', (input: string | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (!url.startsWith('https://graph.facebook.com/'))
+        return api.fetch(input, init);
+      const form = new URLSearchParams(String(init?.body));
+      graph.push({
+        url,
+        body: {
+          access_token: form.get('access_token'),
+          data: JSON.parse(form.get('data') ?? 'null'),
+        },
+      });
+      return Promise.resolve(new Response('{}'));
+    });
+  });
+
+  afterEach(() => {
+    vi.stubGlobal('fetch', api.fetch);
+  });
+
+  it('tells Meta once the visitor from the site finishes the Questionnaire', async () => {
+    await leadStore.insertOrMergeLead({
+      brand: 'CarLab',
+      name: '',
+      contact: '—',
+      service: '',
+      services: [],
+      contactChannel: 'telegram',
+      comment: '',
+      source_url: 'https://carlab.rs/ru/',
+      visitorId: VISITOR_ID,
+      locale: 'ru',
+      kind: 'call_click',
+      metaIds: { fbc: FBC },
+    });
+    await answer(`/start ${stampStartVisitor('ru', VISITOR_ID)}`, FROM_SITE);
+    expect(graph).toEqual([]);
+
+    await press('request:ru:diagnostics', FROM_SITE);
+    await press('done:ru', FROM_SITE);
+    await answer('Golf 2012, стучит подвеска', FROM_SITE);
+    await answer('ещё и тормоза', FROM_SITE);
+
+    const lead = visitorLead(FROM_SITE) as unknown as { id: number };
+    expect(graph).toEqual([
       {
-        text: content('ru').captureBot.manager.button,
-        url: 'https://t.me/carlabrs',
+        url: `https://graph.facebook.com/v25.0/${META_PIXEL_ID}/events`,
+        body: {
+          access_token: 'test-capi-token',
+          data: [
+            {
+              event_name: 'Lead',
+              event_time: expect.any(Number),
+              event_id: `lead-${lead.id}`,
+              action_source: 'chat',
+              user_data: { fbc: FBC },
+            },
+          ],
+        },
       },
     ]);
   });

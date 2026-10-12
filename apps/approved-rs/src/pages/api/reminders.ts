@@ -9,7 +9,12 @@ import {
   releaseDigest,
   resumeLead,
 } from '@/lib/store';
-import { sendDigest, afterStatusChange, closeLeadTopic } from '@/lib/telegram';
+import {
+  sendDigest,
+  sendPostponeReminder,
+  afterStatusChange,
+  closeLeadTopic,
+} from '@/lib/telegram';
 
 const CRON_SECRET = process.env.CRON_SECRET;
 
@@ -54,7 +59,9 @@ async function postDigest(now: Date): Promise<boolean> {
   for (const lead of digest.due) {
     try {
       const resumed = await resumeLead(lead.id);
-      if (resumed) await afterStatusChange(resumed, { notice: false });
+      if (!resumed) continue;
+      await sendPostponeReminder(resumed);
+      await afterStatusChange(resumed, { notice: false });
     } catch (err) {
       console.error('[reminders] failed to resume a due postponed lead', {
         error: err,

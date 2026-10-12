@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { defineLeadForm } from '@podbor/lead-crm/lead-form';
+import { storedAdTouch, storedMetaIds } from './adTouch.ts';
 import { getOrCreateVisitorId } from './browser.ts';
 import { detectVisitorCountry, visitorChannel } from './contactPreference.ts';
 import { markFieldValidity } from './fieldValidity.ts';
@@ -13,6 +14,8 @@ describe('defineSiteLeadForm', () => {
     expect(defineLeadForm).toHaveBeenCalledWith(
       {
         visitorId: getOrCreateVisitorId,
+        adSource: storedAdTouch,
+        metaIds: storedMetaIds,
         markFieldValidity,
         preferredChannel: visitorChannel,
         visitorCountry: detectVisitorCountry,

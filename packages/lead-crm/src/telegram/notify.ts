@@ -1,11 +1,18 @@
 import type { LedgerOperation } from '../ledgerStore.ts';
 import { isClosed, type StoredLead } from '../schema.ts';
 import type { Digest } from '../store.ts';
-import { isMessageGone, type TelegramClient } from './client.ts';
+import {
+  isMessageGone,
+  type SendExtra,
+  type TelegramClient,
+} from './client.ts';
 import { operationNoticeText, unreadableLedgerText } from './ledger.ts';
 import {
+  fieldChangeText,
+  noteNoticeText,
   quarantinedLeadsText,
   statusChangeText,
+  type EditField,
   type Formatter,
 } from './cards.ts';
 import type { Role } from './markup.ts';
@@ -25,9 +32,13 @@ export function createNotifier({
   ownerIds,
   adminIds,
 }: NotifierOptions) {
-  async function sendToAll(ids: number[], text: string): Promise<void> {
+  async function sendToAll(
+    ids: number[],
+    text: string,
+    extra?: SendExtra,
+  ): Promise<void> {
     const sent = await Promise.allSettled(
-      ids.map((id) => client.sendMessage(id, text)),
+      ids.map((id) => client.sendMessage(id, text, extra)),
     );
     sent.forEach((result, at) => {
       if (result.status === 'rejected')
@@ -36,6 +47,12 @@ export function createNotifier({
           chatId: ids[at],
         });
     });
+  }
+
+  function counterpartIds(by: Role, authorId: number): number[] {
+    return (by === 'owner' ? adminIds : ownerIds).filter(
+      (id) => id !== authorId,
+    );
   }
 
   return {
@@ -78,6 +95,20 @@ export function createNotifier({
 
     async deleteLeadTopic(topicId: number): Promise<void> {
       await client.api.deleteForumTopic(groupId, topicId);
+    },
+
+    async renameLeadTopic(lead: StoredLead): Promise<void> {
+      if (lead.topicId == null) return;
+      try {
+        await client.api.editForumTopic(groupId, lead.topicId, {
+          name: formatter.topicName(lead),
+        });
+      } catch (err) {
+        console.error('[telegram] editForumTopic failed', {
+          error: err,
+          topicId: lead.topicId,
+        });
+      }
     },
 
     async postLeadTopicSummary(
@@ -171,6 +202,42 @@ export function createNotifier({
 
     async sendStatusChangeToAdmin(lead: StoredLead): Promise<void> {
       await sendToAll(adminIds, statusChangeText(lead));
+    },
+
+    async sendFieldChange(
+      lead: StoredLead,
+      field: EditField,
+      before: string,
+      by: Role,
+      authorId: number,
+    ): Promise<void> {
+      if (before === lead[field]) return;
+      await sendToAll(
+        counterpartIds(by, authorId),
+        fieldChangeText(lead, field, before, by),
+      );
+    },
+
+    async sendNoteNotice(
+      lead: StoredLead,
+      note: string,
+      by: Role,
+      authorId: number,
+    ): Promise<void> {
+      await sendToAll(
+        counterpartIds(by, authorId),
+        noteNoticeText(lead, note, by),
+      );
+    },
+
+    async sendPostponeReminder(lead: StoredLead): Promise<void> {
+      const text = formatter.postponeReminderText(lead);
+      const reply_markup = {
+        inline_keyboard: [
+          [{ text: '📂 Открыть заявку', callback_data: `open:${lead.id}` }],
+        ],
+      };
+      await sendToAll(ownerIds, text, { reply_markup });
     },
 
     async sendDigest(digest: Digest): Promise<boolean> {

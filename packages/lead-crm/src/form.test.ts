@@ -7,6 +7,8 @@ import {
   sourceUrlSchema,
   serviceSlugSchema,
   visitorIdSchema,
+  adSourceFieldSchema,
+  metaIdsFieldSchema,
   MAX_COMMENT_LENGTH,
   MAX_FIELD_LENGTH,
   MAX_SERVICES,
@@ -91,6 +93,111 @@ describe('visitorIdSchema', () => {
       expect(visitorIdSchema.parse(value)).toBeNull();
     },
   );
+});
+
+describe('adSourceFieldSchema', () => {
+  const AT = '2026-10-01T10:00:00.000Z';
+  const field = (value: unknown) => JSON.stringify(value);
+
+  it('reads the ad visit the site posted', () => {
+    expect(
+      adSourceFieldSchema.parse(
+        field({
+          source: 'instagram',
+          campaign: 'Spring | RS (v2)',
+          content: 'reel-1',
+          at: AT,
+        }),
+      ),
+    ).toEqual({
+      source: 'instagram',
+      campaign: 'Spring | RS (v2)',
+      content: 'reel-1',
+      at: AT,
+    });
+  });
+
+  it('cleans a campaign or content instead of dropping it', () => {
+    expect(
+      adSourceFieldSchema.parse(
+        field({
+          source: 'facebook',
+          campaign: '<b>x</b>',
+          content: 'x'.repeat(101),
+          at: AT,
+        }),
+      ),
+    ).toEqual({
+      source: 'facebook',
+      campaign: 'bx/b',
+      content: 'x'.repeat(100),
+      at: AT,
+    });
+  });
+
+  it('strips what it cannot keep instead of dropping the visit', () => {
+    expect(
+      adSourceFieldSchema.parse(
+        field({ source: ' facebook<script>\n', campaign: 42, at: AT }),
+      ),
+    ).toEqual({ source: 'facebookscript', at: AT });
+  });
+
+  it('keeps a visit only its medium identifies', () => {
+    expect(adSourceFieldSchema.parse(field({ medium: 'cpc', at: AT }))).toEqual(
+      { medium: 'cpc', at: AT },
+    );
+  });
+
+  it.each([
+    null,
+    '',
+    'not json',
+    field(null),
+    field({ source: '', at: AT }),
+    field({ source: '<>', campaign: ' ', at: AT }),
+    field({ at: AT }),
+    field({ source: 'facebook', at: 'yesterday' }),
+  ])('drops %p rather than failing the whole submission', (value) => {
+    expect(adSourceFieldSchema.parse(value)).toBeNull();
+  });
+});
+
+describe('metaIdsFieldSchema', () => {
+  const field = (value: unknown) => JSON.stringify(value);
+
+  it('reads the Meta cookies the site posted', () => {
+    expect(
+      metaIdsFieldSchema.parse(
+        field({
+          fbc: 'fb.1.1760000000000.IwAR2F4-dbP0l7Mn',
+          fbp: 'fb.1.1596403881668.1116446470',
+        }),
+      ),
+    ).toEqual({
+      fbc: 'fb.1.1760000000000.IwAR2F4-dbP0l7Mn',
+      fbp: 'fb.1.1596403881668.1116446470',
+    });
+  });
+
+  it('keeps one id when the other is malformed', () => {
+    expect(
+      metaIdsFieldSchema.parse(
+        field({ fbc: 'IwAR2F4', fbp: 'fb.1.1596403881668.1116446470' }),
+      ),
+    ).toEqual({ fbp: 'fb.1.1596403881668.1116446470' });
+  });
+
+  it.each([
+    null,
+    '',
+    'not json',
+    field({}),
+    field({ fbc: 'fb.1.x.y', fbp: '<script>' }),
+    field({ fbp: `fb.1.1596403881668.${'1'.repeat(501)}` }),
+  ])('drops %p rather than failing the whole submission', (value) => {
+    expect(metaIdsFieldSchema.parse(value)).toBeNull();
+  });
 });
 
 describe('sourceUrlSchema', () => {

@@ -13,7 +13,12 @@ const COPY = {
   services: { button: 'Услуги', text: 'Выберите услугу' },
   card: { request: 'Оставить заявку', site: 'На сайте' },
   contacts: { button: 'Контакты', text: 'Мы здесь', hours: 'Пн–Пт' },
-  manager: { button: 'Менеджер', text: 'Напишите вопрос' },
+  manager: {
+    button: 'Менеджер',
+    text: 'Напишите вопрос',
+    handoff: 'Менеджер на связи',
+    chat: 'Открыть чат',
+  },
   partners: { button: 'Партнёры', text: 'Кому написать?' },
   request: {
     button: 'Оставить заявку',

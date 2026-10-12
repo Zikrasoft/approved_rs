@@ -18,8 +18,10 @@ contacts:
   text: Мы в Белграде, ждём вас в студии.
   hours: Пн–Сб, 09:00–19:00
 manager:
-  button: Написать мастеру
+  button: 👤 Написать мастеру
   text: Напишите ваш вопрос одним сообщением — мастер ответит здесь же.
+  handoff: Мастер на связи в Telegram — нажмите, чтобы открыть чат.
+  chat: Открыть чат с мастером ↗
 partners:
   button: Партнёры
   text: Наши партнёры — выберите, кому написать.
@@ -59,8 +61,10 @@ translations:
       text: Mi smo u Beogradu, čekamo vas u studiju.
       hours: Pon–Sub, 09:00–19:00
     manager:
-      button: Pitajte majstora
+      button: 👤 Pisati majstoru
       text: Postavite vaše pitanje jednom porukom — majstor će odgovoriti ovde.
+      handoff: Majstor je dostupan na Telegramu — kliknite da otvorite čat.
+      chat: Otvorite čat sa majstorom ↗
     partners:
       button: Partneri
       text: Naši partneri — izaberite kome da pišete.
@@ -99,8 +103,10 @@ translations:
       text: We’re in Belgrade, looking forward to welcoming you at the studio.
       hours: Mon–Sat, 09:00–19:00
     manager:
-      button: Message the specialist
+      button: 👤 Message the technician
       text: Send your question in one message — the specialist will respond right here.
+      handoff: The technician is available on Telegram — click to open the chat.
+      chat: Open chat with the technician ↗
     partners:
       button: Partners
       text: Our partners — choose who to reach out to.
@@ -118,4 +124,4 @@ translations:
       shortDescription: Detailing studio in Belgrade — film, polishing, ceramic
       menuCommand: Main menu
       langCommand: Change language
-translatedFrom: 073f600b8ec5d7ea
+translatedFrom: 37dfc94dfc5f26a0

@@ -1,5 +1,9 @@
 import {
+  AD_SOURCE_FIELD,
+  adSourceFieldSchema,
   contactChannelSchema,
+  META_IDS_FIELD,
+  metaIdsFieldSchema,
   sourceUrlSchema,
   visitorIdSchema,
 } from '../form.ts';
@@ -53,6 +57,8 @@ export function createContactClickRoute({
           comment: '',
           source_url: sourceUrl,
           visitorId: visitorIdSchema.parse(form.get('visitor_id')),
+          adSource: adSourceFieldSchema.parse(form.get(AD_SOURCE_FIELD)),
+          metaIds: metaIdsFieldSchema.parse(form.get(META_IDS_FIELD)),
           locale: localeFromUrl(sourceUrl, isLocale) ?? defaultLocale,
           kind: 'call_click',
         },

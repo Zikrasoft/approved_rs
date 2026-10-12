@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const calls: string[] = [];
 const record = (name: string) => vi.fn(() => void calls.push(name));
 
+vi.mock('./adTouch.ts', () => ({ rememberAdTouch: record('adTouch') }));
 vi.mock('./analytics.ts', () => ({ defineAnalytics: record('analytics') }));
 vi.mock('./contactClick.ts', () => ({
   defineContactClickTracking: record('contactClick'),
@@ -25,27 +26,31 @@ beforeEach(() => {
 describe('bootSiteKit', () => {
   it('arms every part once, in order', async () => {
     const { defineAnalytics } = await import('./analytics.ts');
-    (await boot())({ ymCounterId: 42, analytics: true });
+    (await boot())({ ymCounterId: 42, metaPixelId: '7', analytics: true });
     expect(calls).toEqual([
       'analytics',
+      'adTouch',
       'contactClick',
       'contactPreference',
       'languageSuggestion',
       'funnel',
     ]);
-    expect(defineAnalytics).toHaveBeenCalledWith({ ymCounterId: 42 });
+    expect(defineAnalytics).toHaveBeenCalledWith({
+      ymCounterId: 42,
+      metaPixelId: '7',
+    });
   });
 
   it('makes a second boot a no-op', async () => {
     const bootSiteKit = await boot();
     bootSiteKit({ ymCounterId: 42, analytics: true });
     bootSiteKit({ ymCounterId: 42, analytics: true });
-    expect(calls).toHaveLength(5);
+    expect(calls).toHaveLength(6);
   });
 
   it('skips the counter when analytics is off', async () => {
-    (await boot())({ ymCounterId: 42, analytics: false });
+    (await boot())({ ymCounterId: 42, metaPixelId: '7', analytics: false });
     expect(calls).not.toContain('analytics');
-    expect(calls).toHaveLength(4);
+    expect(calls).toHaveLength(5);
   });
 });

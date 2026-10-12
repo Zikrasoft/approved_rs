@@ -31,8 +31,12 @@ export {
 export const {
   sendLeadNotification,
   sendDigest,
+  sendPostponeReminder,
   sendOperationNotice,
   sendStatusChangeToAdmin,
+  sendFieldChange,
+  sendNoteNotice,
+  renameLeadTopic,
   editLeadDetailMessage,
   unpinLeadCard,
 } = notifier;
@@ -59,7 +63,11 @@ export {
   buildRemindPicker,
   REPLY_COPY,
   LEAD_ACTION_COPY,
+  EDIT_COPY,
+  noteLine,
+  extraContactNote,
+  reAskEditText,
   escapeHtml,
 } from '@podbor/lead-crm';
 
-export type { Role, Btn, Keyboard } from '@podbor/lead-crm';
+export type { Role, Btn, Keyboard, EditField } from '@podbor/lead-crm';

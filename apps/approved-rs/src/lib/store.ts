@@ -38,11 +38,14 @@ export const {
 export {
   appendNote,
   canPostpone,
+  editedContact,
+  hasRealContact,
   postponePatch,
   statusPatch,
   parseOperationReply,
   businessDay,
   LedgerUnreadableError,
+  MAX_FIELD_LENGTH,
   MAX_LIST_ROWS,
 } from '@podbor/lead-crm';
 

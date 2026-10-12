@@ -14,9 +14,10 @@ export const leadDisplayName = (lead: { name: string }): string =>
 
 export const STATUS_META: Record<LeadStatus, { emoji: string; label: string }> =
   {
-    open: { emoji: '🔵', label: 'Открыта' },
+    new: { emoji: '🆕', label: 'Новая' },
     negotiations: { emoji: '🗣', label: 'Переговоры' },
-    won: { emoji: '✅', label: 'Сделка' },
+    in_progress: { emoji: '🔵', label: 'В работе' },
+    won: { emoji: '✅', label: 'Успешно' },
     lost: { emoji: '❌', label: 'Отказ' },
     postponed: { emoji: '⏸️', label: 'Отложена' },
   };

@@ -1,4 +1,4 @@
-import { CART_METADATA } from '@podbor/shop-catalog/browser';
+import { CART_METADATA, SHOP_CURRENCY } from '@podbor/shop-catalog/browser';
 import { GOALS, markFieldValidity, reachGoal } from '@podbor/site-kit/browser';
 import {
   bindPhoneCountry,
@@ -149,7 +149,10 @@ export function defineCheckoutForm(tagName = 'checkout-form'): void {
                 },
                 currentCart()?.total ?? 0,
               );
-              reachGoal(GOALS.orderPlaced, { total: order.total });
+              reachGoal(GOALS.orderPlaced, {
+                total: order.total,
+                currency: SHOP_CURRENCY,
+              });
               queue.stop();
               this.dispatchEvent(
                 new CustomEvent('order-placed', {

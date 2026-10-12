@@ -1,5 +1,5 @@
 import { BUSINESS_TIME_ZONE } from '../businessTime.ts';
-import type { LeadStatus, StoredLead } from '../schema.ts';
+import { LEAD_STATUSES, type LeadStatus, type StoredLead } from '../schema.ts';
 import {
   balanceOf,
   operationSums,
@@ -70,9 +70,7 @@ export function buildStats(
     '<b>📊 Статистика</b>',
     '',
     `Всего заявок: ${leads.length}`,
-    (['open', 'negotiations', 'postponed', 'won', 'lost'] as const)
-      .map((s) => `${statusMark(s)}: ${count(s)}`)
-      .join('   '),
+    LEAD_STATUSES.map((s) => `${statusMark(s)}: ${count(s)}`).join('   '),
     ...brandLines,
     '',
     balanceLine('admin', balanceOf(operations)),

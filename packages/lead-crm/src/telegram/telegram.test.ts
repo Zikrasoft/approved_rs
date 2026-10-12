@@ -21,7 +21,14 @@ import {
   reAskOperationText,
 } from './ledger.ts';
 import { buildStats } from './stats.ts';
-import { buildDeleteConfirm, buildRemindPicker } from './cards.ts';
+import {
+  buildDeleteConfirm,
+  buildRemindPicker,
+  EDIT_COPY,
+  noteLine,
+  extraContactNote,
+  reAskEditText,
+} from './cards.ts';
 import { formatDateRu, leadDisplayName } from './markup.ts';
 
 const SERVICE_LABELS: Record<string, string> = {
@@ -52,10 +59,14 @@ const {
   sendQuarantinedLeadsToAdmin,
   sendUnreadableLedgerToAdmin,
   sendStatusChangeToAdmin,
+  sendFieldChange,
+  sendNoteNotice,
   sendDigest,
+  sendPostponeReminder,
   editLeadDetailMessage,
   openLeadTopic,
   deleteLeadTopic,
+  renameLeadTopic,
   postLeadTopicSummary,
   refreshLeadTopic,
 } = notifier;
@@ -72,7 +83,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     country: 'de',
     source_url: '/ru/vehicle-sourcing/de/',
     locale: 'ru',
-    status: 'open',
+    status: 'new',
     telegramChatId: null,
     telegramMessageId: null,
     statusChangedAt: '2026-01-01T00:00:00.000Z',
@@ -87,7 +98,12 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     topicActiveAt: null,
     questionnaireDone: false,
     referredBy: null,
+    managerHandoff: null,
+    adSource: null,
+    metaIds: null,
+    metaLeadSentAt: null,
     remindAt: null,
+    postponedFrom: null,
     ...overrides,
   };
 }
@@ -193,10 +209,20 @@ describe('sendLeadNotification', () => {
     expect(body.text).toContain('#42');
     expect(body.text).toContain('Автоподбор');
     expect(body.text).toContain('Иван');
-    expect(body.text).toContain('🔵 Открыта');
+    expect(body.text).toContain('🆕 Новая');
     expect(body.text).toContain(`🏷 ${makeLead().brand}`);
     expect(body.text).not.toContain('@ivan');
     expect(body.text).not.toContain('BMW X5');
+  });
+
+  it('shows the reminder date on a postponed card', () => {
+    const text = formatter.formatTeaser(
+      makeLead({ id: 42, status: 'postponed', remindAt: '2026-10-20' }),
+    );
+    expect(text.split('\n').slice(0, 2)).toEqual([
+      '🚗 Заявка #42 · Иван · Автоподбор · ⏸️ Отложена',
+      '⏰ Напомнить: 20.10.2026',
+    ]);
   });
 
   it('says in the teaser that the lead came through the capture bot', async () => {
@@ -211,6 +237,64 @@ describe('sendLeadNotification', () => {
     );
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).toContain('🤖 через бота · 🤝 из бота Approved.rs');
+  });
+
+  it('says in the teaser when the visitor went to the manager', async () => {
+    await sendLeadNotification(
+      makeLead({
+        telegramId: 77,
+        managerHandoff: {
+          at: '2026-10-12T10:00:00.000Z',
+          handle: 'approvedrs',
+        },
+      }),
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('👤 Ушёл к менеджеру @approvedrs · 12.10.2026');
+  });
+
+  it('marks an ad visit in the teaser with its source and campaign', async () => {
+    await sendLeadNotification(
+      makeLead({
+        adSource: {
+          source: 'fb',
+          campaign: 'spring',
+          content: 'reel',
+          at: '2026-10-01T10:00:00.000Z',
+        },
+      }),
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('📣 Реклама: Facebook · spring · reel');
+    expect(body.text.endsWith('\n#реклама')).toBe(true);
+  });
+
+  it('names an unknown ad source as the site sent it', async () => {
+    await sendLeadNotification(
+      makeLead({
+        adSource: { source: 'tiktok', at: '2026-10-01T10:00:00.000Z' },
+      }),
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('📣 Реклама: tiktok');
+  });
+
+  it('shows a visit only its medium identifies as a bare ad mark', async () => {
+    await sendLeadNotification(
+      makeLead({
+        adSource: { medium: 'cpc', at: '2026-10-01T10:00:00.000Z' },
+      }),
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toContain('📣 Реклама\n');
+    expect(body.text).not.toContain('cpc');
+  });
+
+  it('leaves the ad marks off a Lead that did not come from an ad', async () => {
+    await sendLeadNotification(makeLead());
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).not.toContain('Реклама');
+    expect(body.text).not.toContain('#реклама');
   });
 
   it('ignores a comment that only quotes the referral note', async () => {
@@ -230,7 +314,7 @@ describe('sendLeadNotification', () => {
     expect(body.text).not.toContain('через бота');
   });
 
-  it('attaches the deep link and the three outcome buttons', async () => {
+  it('attaches the deep link and the status buttons in two rows', async () => {
     await sendLeadNotification(makeLead({ id: 42 }));
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.reply_markup.inline_keyboard).toEqual([
@@ -245,11 +329,24 @@ describe('sendLeadNotification', () => {
         { text: '❌ Отказ', callback_data: 'lost:42' },
       ],
       [
-        { text: '⏳ В работе', callback_data: 'work:42' },
         { text: '🗣 Переговоры', callback_data: 'talk:42' },
+        { text: '🔵 В работе', callback_data: 'work:42' },
+        { text: '⏰ Отложить', callback_data: 'postpone:42' },
       ],
     ]);
   });
+
+  it.each(['won', 'lost'] as const)(
+    'offers a %s lead no move back into work',
+    async (status) => {
+      await sendLeadNotification(makeLead({ id: 42, status }));
+      const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+      const data = body.reply_markup.inline_keyboard
+        .flat()
+        .map((b: { callback_data?: string }) => b.callback_data);
+      expect(data).toEqual([undefined, 'won:42', 'lost:42']);
+    },
+  );
 
   it.each(['won', 'lost'] as const)(
     'posts a %s lead unpinned',
@@ -288,19 +385,26 @@ describe('status rows on the lead detail', () => {
       .map((b) => b.callback_data)
       .filter((d) => /^(st|postpone|resume):/.test(d ?? ''));
 
-  it('owner: Сделка/Отказ/Переговоры/Отложить on an open lead, with the lead id embedded', () => {
-    expect(statusData(makeLead({ id: 7, status: 'open' }), 'owner')).toEqual([
+  it('owner: Сделка/Отказ/Переговоры/В работе/Отложить on a new lead, with the lead id embedded', () => {
+    expect(statusData(makeLead({ id: 7, status: 'new' }), 'owner')).toEqual([
       'st:7:won',
       'st:7:lost',
       'st:7:negotiations',
+      'st:7:in_progress',
       'postpone:7',
     ]);
   });
 
-  it('owner: Сделка/Отказ/Отложить in negotiations, no second 🗣', () => {
+  it('owner: no second 🗣 in negotiations', () => {
     expect(
       statusData(makeLead({ id: 7, status: 'negotiations' }), 'owner'),
-    ).toEqual(['st:7:won', 'st:7:lost', 'postpone:7']);
+    ).toEqual(['st:7:won', 'st:7:lost', 'st:7:in_progress', 'postpone:7']);
+  });
+
+  it('owner: no second 🔵 in progress', () => {
+    expect(
+      statusData(makeLead({ id: 7, status: 'in_progress' }), 'owner'),
+    ).toEqual(['st:7:won', 'st:7:lost', 'st:7:negotiations', 'postpone:7']);
   });
 
   it('owner: no status buttons on a won or lost lead', () => {
@@ -309,7 +413,7 @@ describe('status rows on the lead detail', () => {
   });
 
   it('admin: no status buttons on an open lead — the owner closes deals', () => {
-    expect(statusData(makeLead({ status: 'open' }), 'admin')).toEqual([]);
+    expect(statusData(makeLead({ status: 'new' }), 'admin')).toEqual([]);
   });
 
   it('postponed: just Возобновить, for either role', () => {
@@ -328,9 +432,10 @@ describe('status rows on the lead detail', () => {
         )?.[1],
     );
     expect(labels).toEqual([
-      '🔵 Открыта',
+      '🆕 Новая',
       '🗣 Переговоры',
-      '✅ Сделка',
+      '🔵 В работе',
+      '✅ Успешно',
       '❌ Отказ',
       '⏸️ Отложена',
     ]);
@@ -383,7 +488,7 @@ describe('refreshLeadCard', () => {
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.chat_id).toBe(-1009876543210);
     expect(body.message_id).toBe(555);
-    expect(body.text).toContain('✅ Сделка');
+    expect(body.text).toContain('✅ Успешно');
     expect(body.reply_markup.inline_keyboard[0][0].url).toBe(
       'https://t.me/approved_test_bot?start=lead_42',
     );
@@ -463,7 +568,7 @@ describe('sendDigest', () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it('posts one message to the group, a section per reason and a ✅ ❌ ⏳ row per Lead', async () => {
+  it('posts one message to the group, a section per reason and a ✅ ❌ 🔵 row per Lead', async () => {
     const sent = await sendDigest({
       stale: [makeLead({ id: 3, name: '<Пётр>' })],
       due: [makeLead({ id: 5, status: 'postponed', name: '' })],
@@ -487,7 +592,7 @@ describe('sendDigest', () => {
       [5, 3].map((id) => [
         { text: `✅ #${id}`, callback_data: `won:${id}` },
         { text: `❌ #${id}`, callback_data: `lost:${id}` },
-        { text: `⏳ #${id}`, callback_data: `work:${id}` },
+        { text: `🔵 #${id}`, callback_data: `work:${id}` },
       ]),
     );
   });
@@ -522,20 +627,164 @@ describe('sendDigest', () => {
   });
 });
 
+describe('sendPostponeReminder', () => {
+  beforeEach(() => mockFetchOk());
+  afterEach(() => mockFetch.mockReset());
+
+  it('reminds every owner in a DM with a button to the Lead', async () => {
+    await sendPostponeReminder(
+      makeLead({ id: 9, name: '<Пётр>', status: 'negotiations' }),
+    );
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.chat_id).toBe(111);
+    expect(body.text.split('\n')).toEqual([
+      '⏰ Напоминание по заявке #9',
+      '',
+      '&lt;Пётр&gt; — Автоподбор',
+      'Ты просил напомнить сегодня — заявка снова активна.',
+    ]);
+    expect(body.reply_markup.inline_keyboard).toEqual([
+      [{ text: '📂 Открыть заявку', callback_data: 'open:9' }],
+    ]);
+  });
+
+  it('logs an undelivered reminder instead of throwing', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 403,
+      json: () => Promise.resolve({ description: 'Forbidden' }),
+    });
+    await expect(sendPostponeReminder(makeLead())).resolves.toBeUndefined();
+    expect(error).toHaveBeenCalled();
+    error.mockRestore();
+  });
+});
+
 describe('sendStatusChangeToAdmin', () => {
   beforeEach(() => mockFetchOk());
   afterEach(() => mockFetch.mockReset());
 
   it("notifies every admin id with the lead's current status", async () => {
     await sendStatusChangeToAdmin(
-      makeLead({ id: 9, name: 'Пётр', status: 'open' }),
+      makeLead({ id: 9, name: 'Пётр', status: 'new' }),
     );
     expect(mockFetch).toHaveBeenCalledTimes(1);
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.chat_id).toBe(222);
     expect(body.text).toContain('#9');
     expect(body.text).toContain('Пётр');
-    expect(body.text).toContain('🔵 Открыта');
+    expect(body.text).toContain('🆕 Новая');
+  });
+});
+
+describe('sendNoteNotice', () => {
+  beforeEach(() => mockFetchOk());
+  afterEach(() => mockFetch.mockReset());
+
+  it('tells the other role about the note, never the author', async () => {
+    await sendNoteNotice(
+      makeLead({ id: 9, name: 'Пётр' }),
+      'Перезвонить <завтра>',
+      'admin',
+      222,
+    );
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body).toMatchObject({
+      chat_id: 111,
+      text: '📝 Заявка #9 Пётр · Админ: Перезвонить &lt;завтра&gt;',
+    });
+  });
+});
+
+describe('sendFieldChange', () => {
+  beforeEach(() => mockFetchOk());
+  afterEach(() => mockFetch.mockReset());
+
+  const sent = () =>
+    mockFetch.mock.calls.map(([, init]) => JSON.parse(init.body));
+
+  it('tells the admins what the owner changed, before and after', async () => {
+    await sendFieldChange(
+      makeLead({ id: 9, name: 'Пётр', contact: '+381641234567' }),
+      'contact',
+      '—',
+      'owner',
+      111,
+    );
+    expect(sent()).toEqual([
+      expect.objectContaining({
+        chat_id: 222,
+        text: '✏️ Заявка #9 Пётр: контакт\n✍️ Владелец\n\nБыло: —\nСтало: +381641234567',
+      }),
+    ]);
+  });
+
+  it('tells the owners what the admin changed, never the author', async () => {
+    const both = createNotifier({
+      client,
+      formatter,
+      groupId: '-1009876543210',
+      ownerIds: [111, 222],
+      adminIds: [222],
+    });
+    await both.sendFieldChange(
+      makeLead({ name: 'x'.repeat(130) }),
+      'name',
+      '',
+      'admin',
+      222,
+    );
+    expect(sent()).toEqual([
+      expect.objectContaining({
+        chat_id: 111,
+        text: expect.stringContaining(
+          `✍️ Админ\n\nБыло: —\nСтало: ${'x'.repeat(120)}…`,
+        ),
+      }),
+    ]);
+  });
+
+  it('sends nothing when the value did not change', async () => {
+    await sendFieldChange(
+      makeLead({ name: 'Иван' }),
+      'name',
+      'Иван',
+      'owner',
+      111,
+    );
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+});
+
+describe('edit copy', () => {
+  it('asks again naming what a contact may be, or that a value is required', () => {
+    expect(reAskEditText('contact')).toBe(
+      `${EDIT_COPY.badContact}\n\n${EDIT_COPY.prompt('contact')}`,
+    );
+    expect(reAskEditText('name')).toBe(
+      `${EDIT_COPY.empty}\n\n✏️ Введите новое значение (имя):`,
+    );
+    expect(reAskEditText('note')).toBe(
+      `${EDIT_COPY.empty}\n\n${EDIT_COPY.notePrompt}`,
+    );
+  });
+
+  it('labels a second contact for the notes', () => {
+    expect(extraContactNote('+381641234567')).toBe(
+      'Доп. контакт: +381641234567',
+    );
+  });
+
+  it('signs a note with the Belgrade date and the author', () => {
+    expect(noteLine('Звонил', 'admin', new Date('2026-10-15T22:30:00Z'))).toBe(
+      '16.10.2026 · Админ: Звонил',
+    );
+    expect(noteLine('Звонил', 'owner')).toMatch(
+      /^\d{2}\.\d{2}\.\d{4} · Владелец: Звонил$/,
+    );
   });
 });
 
@@ -591,11 +840,11 @@ describe('buildSearchResults', () => {
         id: 5,
         name: 'Пётр',
         contact: '@petr',
-        status: 'open',
+        status: 'new',
       }),
     ]);
     expect(reply_markup.inline_keyboard).toEqual([
-      [{ text: '🔵 #5 Approved.rs Пётр — @petr', callback_data: 'open:5' }],
+      [{ text: '🆕 #5 Approved.rs Пётр — @petr', callback_data: 'open:5' }],
     ]);
   });
 
@@ -814,9 +1063,10 @@ describe('buildHelp', () => {
 });
 
 describe('buildOpenList', () => {
-  it('lists open, negotiating and postponed Leads newest first, leaving won and lost out', () => {
+  it('lists new, negotiating, in-progress and postponed Leads newest first, leaving won and lost out', () => {
     const leads = [
-      makeLead({ id: 1, status: 'open' }),
+      makeLead({ id: 1, status: 'new' }),
+      makeLead({ id: 6, status: 'in_progress' }),
       makeLead({ id: 2, status: 'lost' }),
       makeLead({ id: 3, status: 'postponed' }),
       makeLead({ id: 4, status: 'won' }),
@@ -826,9 +1076,10 @@ describe('buildOpenList', () => {
       ([b]) => `${b.text} ${b.callback_data}`,
     );
     expect(rows).toEqual([
+      '#6 Иван · Approved.rs · 🔵 open:6',
       '#5 Иван · Approved.rs · 🗣 open:5',
       '#3 Иван · Approved.rs · ⏸️ open:3',
-      '#1 Иван · Approved.rs · 🔵 open:1',
+      '#1 Иван · Approved.rs · 🆕 open:1',
     ]);
   });
 
@@ -841,12 +1092,13 @@ describe('buildOpenList', () => {
 
 describe('buildStats', () => {
   const leads = [
-    makeLead({ id: 1, status: 'open' }),
-    makeLead({ id: 2, status: 'open' }),
+    makeLead({ id: 1, status: 'new' }),
+    makeLead({ id: 2, status: 'new' }),
     makeLead({ id: 3, status: 'won' }),
     makeLead({ id: 4, status: 'lost' }),
     makeLead({ id: 5, status: 'postponed' }),
     makeLead({ id: 6, status: 'negotiations' }),
+    makeLead({ id: 7, status: 'in_progress' }),
   ];
 
   const NOW = new Date('2026-10-15T12:00:00.000Z');
@@ -863,9 +1115,9 @@ describe('buildStats', () => {
 
   it('counts by status and shows an empty ledger', () => {
     const text = buildStats(leads, [], NOW);
-    expect(text).toContain('Всего заявок: 6');
+    expect(text).toContain('Всего заявок: 7');
     expect(text).toContain(
-      '🔵 Открыта: 2   🗣 Переговоры: 1   ⏸️ Отложена: 1   ✅ Сделка: 1   ❌ Отказ: 1',
+      '🆕 Новая: 2   🗣 Переговоры: 1   🔵 В работе: 1   ✅ Успешно: 1   ❌ Отказ: 1   ⏸️ Отложена: 1',
     );
     expect(text).toContain('<b>💶 Мне должны: 0 €</b>');
     expect(text).toContain('За месяц: +0 € · −0 €');
@@ -929,9 +1181,9 @@ describe('buildStats', () => {
 });
 
 describe('buildLeadDetail', () => {
-  it('open lead: status rows, no edit or archive rows, no money row', () => {
+  it('open lead: status rows, then edit and note rows, no money row', () => {
     const { text, reply_markup } = buildLeadDetail(
-      makeLead({ id: 7, status: 'open' }),
+      makeLead({ id: 7, status: 'new' }),
       'owner',
     );
     expect(text).toContain('#7');
@@ -943,7 +1195,11 @@ describe('buildLeadDetail', () => {
       'st:7:won',
       'st:7:lost',
       'st:7:negotiations',
+      'st:7:in_progress',
       'postpone:7',
+      'edit:7:name',
+      'edit:7:contact',
+      'note:7',
     ]);
   });
 
@@ -978,7 +1234,7 @@ describe('buildLeadDetail', () => {
   });
 
   it('active lead: admin gets a permanent-delete row, owner does not', () => {
-    const lead = makeLead({ id: 7, status: 'open' });
+    const lead = makeLead({ id: 7, status: 'new' });
     const ownerData = buildLeadDetail(lead, 'owner')
       .reply_markup.inline_keyboard.flat()
       .map((b) => b.callback_data);
@@ -1273,6 +1529,29 @@ describe('the Lead topic', () => {
     });
   });
 
+  it('renames a topic after the Lead, and leaves a Lead without one alone', async () => {
+    await renameLeadTopic(makeLead({ topicId: 7, name: 'Пётр' }));
+    await renameLeadTopic(makeLead());
+    expect(api.callsTo('editForumTopic').map((c) => c.payload)).toEqual([
+      {
+        chat_id: '-1009876543210',
+        message_thread_id: 7,
+        name: '#42 · Пётр · Approved.rs',
+      },
+    ]);
+  });
+
+  it('logs a topic it could not rename', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    api.fail('editForumTopic', 'Bad Request: TOPIC_NOT_MODIFIED');
+    await renameLeadTopic(makeLead({ topicId: 7 }));
+    expect(error).toHaveBeenCalledWith(
+      '[telegram] editForumTopic failed',
+      expect.objectContaining({ topicId: 7 }),
+    );
+    error.mockRestore();
+  });
+
   it('deletes a topic by id', async () => {
     await deleteLeadTopic(7);
     expect(api.callsTo('deleteForumTopic')[0].payload).toEqual({
@@ -1304,6 +1583,23 @@ describe('the Lead topic', () => {
     expect(
       formatter.topicName(makeLead({ name: 'Я'.repeat(300) })),
     ).toHaveLength(128);
+  });
+
+  it('marks an ad visit in the topic summary and the DM detail', () => {
+    const lead = makeLead({
+      adSource: {
+        source: 'instagram',
+        campaign: 'spring',
+        at: '2026-10-01T10:00:00.000Z',
+      },
+    });
+    for (const text of [
+      formatter.topicSummaryText(lead),
+      buildLeadDetail(lead, 'owner').text,
+    ]) {
+      expect(text).toContain('📣 Реклама: Instagram · spring');
+      expect(text).toContain('#заявка #реклама');
+    }
   });
 
   it('leaves a phone or an id contact as plain text in the summary', () => {

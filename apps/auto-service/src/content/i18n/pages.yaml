@@ -37,7 +37,7 @@ privacy:
   metaTitle: Политика конфиденциальности — CarLab
   metaDescription: Какие данные собирает сайт автосервиса CarLab, зачем и как долго они хранятся.
   heading: Политика конфиденциальности
-  lastUpdated: Обновлено 12 сентября 2026
+  lastUpdated: Обновлено 12 октября 2026
   sections:
     - title: Какие данные мы собираем
       text: Только то, что вы сами вводите в форму — имя, телефон, описание проблемы и данные автомобиля, — а также адрес страницы, с которой отправлена заявка, и анонимный идентификатор браузера. Идентификатор случайный, хранится в вашем браузере и нужен, чтобы одна и та же заявка не превратилась в три карточки.
@@ -48,7 +48,7 @@ privacy:
     - title: Сколько мы их храним
       text: До трёх лет с момента последнего визита — сервисная история помогает при следующем ремонте. По вашему запросу удалим раньше.
     - title: Куки
-      text: Сайт ставит техническую куку с выбранным языком и аналитическую — Яндекс.Метрику. Аналитика запускается при первой загрузке страницы; в баннере внизу экрана можно отказаться, и тогда со следующей загрузки она не включается. Метрика записывает сессии — движение курсора, прокрутку и клики, — но форму заявки из записи мы исключили. Рекламных кук здесь нет. Корзина и анонимный идентификатор хранятся в памяти браузера (localStorage) и на наш сервер сами по себе не уходят.
+      text: Сайт ставит техническую куку с выбранным языком, аналитическую — Яндекс.Метрику — и рекламную — пиксель Meta. Аналитика и пиксель запускаются при первой загрузке страницы; в баннере внизу экрана можно отказаться, и тогда со следующей загрузки они не включаются. Метрика записывает сессии — движение курсора, прокрутку и клики, — но форму заявки из записи мы исключили. Пиксель сообщает Meta о просмотре страницы и о том, что вы отправили заявку, написали нам или оформили заказ, — так мы видим, какая реклама в Facebook и Instagram приводит клиентов. Содержимое формы ему не передаётся. Если после сайта вы продолжите в нашем Telegram-боте и оставите там заявку, наш сервер сообщит Meta только сам факт заявки — без её содержания и без ваших контактов. Корзина и анонимный идентификатор хранятся в памяти браузера (localStorage) и на наш сервер сами по себе не уходят.
     - title: Ваши права
       text: Вы можете запросить копию своих данных, их исправление или удаление. Достаточно позвонить или написать нам в любой мессенджер.
   shopSections:
@@ -102,7 +102,7 @@ translations:
       metaTitle: Politika privatnosti — CarLab
       metaDescription: Koje podatke prikuplja sajt auto servisa CarLab, zašto i koliko dugo ih čuva.
       heading: Politika privatnosti
-      lastUpdated: Ažurirano 12. septembra 2026.
+      lastUpdated: Ažurirano 12. oktobra 2026
       sections:
         - title: Koje podatke prikupljamo
           text: Samo ono što sami unesete u formu — ime, telefon, opis problema i podaci o vozilu, — kao i adresa stranice sa koje je poslat zahtev i anonimni identifikator pretraživača. Identifikator je nasumičan, čuva se u vašem pretraživaču i potreban je da jedan zahtev ne postane tri kartice.
@@ -113,7 +113,7 @@ translations:
         - title: Koliko ih čuvamo
           text: Do tri godine od poslednje posete — istorija servisa pomaže prilikom sledeće popravke. Na vaš zahtev, obrišemo ih ranije.
         - title: Kolačići
-          text: Sajt postavlja tehnički kolačić sa izabranim jezikom i analitički — Yandex.Metriku. Analitika se pokreće prilikom prvog učitavanja stranice; u banneru na dnu ekrana možete je odbiti, i tako prilikom sledećeg učitavanja se ne aktivira. Metrika beleži sesije — kretanje kursora, skrolovanje i klikove, — ali smo formu zahteva isključili iz beleženja. Reklamni kolačići ovde ne postoje. Korpa i anonimni identifikator se čuvaju u memoriji pretraživača (localStorage) i ne odlaze na naš server same od sebe.
+          text: Sajt postavlja tehnički kolačić sa izabranim jezikom, analitički — Yandex.Metrika — i reklamni — Meta piksel. Analitika i piksel se aktiviraju pri prvom učitavanju stranice; u baneru na dnu ekrana možete odbiti, i tada se pri sledećem učitavanju ne uključuju. Metrika beleži seanse — kretanje kursora, skrolovanje i klikove, — ali formu zahteva iz beleženja smo isključili. Piksel obaveštava Meta o pregledu stranice i o tome što ste poslali zahtev, napisali nam ili izvršili narudžbinu — tako vidimo koja reklama na Facebook-u i Instagram-u dovodi klijente. Sadržaj forme mu se ne predaje. Ako nakon sajta nastavite u našem Telegram botu i ostavite zahtev, naš server će obavestiti Meta samo o samom faktu zahteva — bez njegovog sadržaja i bez vaših kontakata. Korpa i anonimni identifikator se čuvaju u memoriji pregledača (localStorage) i na naš server sami po sebi ne odlaze.
         - title: Vaša prava
           text: Možete zatražiti kopiju svojih podataka, njihovo ispravljenje ili brisanje. Dovoljno je da nas pozovete ili napišete u bilo koji messenger.
       shopSections:
@@ -166,7 +166,7 @@ translations:
       metaTitle: Privacy Policy — CarLab
       metaDescription: What data the CarLab car service website collects, why, and how long they are stored.
       heading: Privacy Policy
-      lastUpdated: Updated September 12, 2026
+      lastUpdated: Last updated October 12, 2026
       sections:
         - title: What Data We Collect
           text: Only what you enter in the form — name, phone number, issue description, and vehicle information — as well as the page address from which the application is submitted, and an anonymous browser identifier. The identifier is random, stored in your browser, and needed to ensure that the same application doesn't turn into three cards.
@@ -177,7 +177,7 @@ translations:
         - title: How Long We Store It
           text: Up to three years from the last visit — service history helps with future repairs. We will delete it earlier upon your request.
         - title: Cookies
-          text: The site sets a technical cookie for the selected language and an analytical one — Yandex.Metrica. Analytics start on the first page load; you can refuse it in the banner at the bottom of the screen, and then it won't activate on the next load. The metrics record sessions — cursor movement, scrolling, and clicks — but we excluded the application form from the recording. There are no advertising cookies here. The cart and anonymous identifier are stored in the browser's memory (localStorage) and do not leave our server by themselves.
+          text: The site sets a technical cookie for the chosen language, an analytical one for Yandex.Metrics, and a marketing pixel for Meta. The analytics and pixel activate upon the first page load; you can opt out via the banner at the bottom of the screen, which will prevent them from activating on subsequent loads. Metrics records sessions — mouse movements, scrolling, and clicks — but we exclude the application form from this data. The pixel notifies Meta about page views and indicates if you submitted an application, contacted us, or made an order — this helps us understand which ads on Facebook and Instagram attract clients. The contents of the form are not shared with it. If you continue in our Telegram bot after visiting the site and leave an application there, our server will only inform Meta about the fact of the application — without its contents or your contact details. The shopping cart and anonymous identifier are stored in the browser's memory (localStorage) and do not get sent to our server.
         - title: Your Rights
           text: You can request a copy of your data, their correction, or deletion. Just call or message us on any messenger.
       shopSections:
@@ -190,4 +190,4 @@ translations:
       heading: This Page Does Not Exist
       body: The link may be outdated or there could be a typo in the address. Check out our services or message us — we can help.
       cta: Go to Homepage
-translatedFrom: cadc960cb6f2bd23
+translatedFrom: 3bdc73a90f07e95f

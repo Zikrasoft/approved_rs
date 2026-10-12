@@ -3,7 +3,11 @@ export const prerender = false;
 import { CARLAB, DETAILS, brandLocale } from '@podbor/brands';
 import { createCaptureWebhookRoute, referralLink } from '@podbor/lead-capture';
 import { BRAND, leadStore } from '@/lib/crm';
-import { CAPTURE_WEBHOOK_SECRET, captureBot } from '@/lib/captureBot';
+import {
+  CAPTURE_WEBHOOK_SECRET,
+  captureBot,
+  reportMetaLead,
+} from '@/lib/captureBot';
 import {
   ensureLeadCard,
   ensureLeadTopic,
@@ -28,7 +32,7 @@ export const POST = createCaptureWebhookRoute({
   isLocale,
   primaryLocale: PRIMARY_LOCALE,
   copy: (locale) => content(locale).captureBot,
-  menu: ['request', 'services', 'contacts', 'manager', 'partners', 'language'],
+  menu: ['request', 'services', 'contacts', 'partners', 'language', 'manager'],
   humanTelegram: TG_MANAGER,
   partners: (locale) =>
     [CARLAB, DETAILS].map(({ name, captureBot }) => ({
@@ -37,7 +41,14 @@ export const POST = createCaptureWebhookRoute({
     })),
   questionnaire: ['looking_for', 'budget'],
   phoneRegion: 'RS',
-  languages: LOCALE_NAME,
+  reportMetaLead,
+  languages: {
+    ru: { name: LOCALE_NAME.ru, flag: '🇷🇺' },
+    en: { name: LOCALE_NAME.en, flag: '🇬🇧' },
+    sr: { name: LOCALE_NAME.sr, flag: '🇷🇸' },
+    es: { name: LOCALE_NAME.es, flag: '🇪🇸' },
+    de: { name: LOCALE_NAME.de, flag: '🇩🇪' },
+  },
   services: SERVICE_SLUGS,
   contacts: { phone: PHONE_NUMBER, site: SITE_URL },
   serviceCard: (slug, locale) => {

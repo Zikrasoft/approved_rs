@@ -43,7 +43,7 @@ privacy:
     - title: Хранение данных
       text: Заявки хранятся в защищённом облачном хранилище Vercel Blob; доступ к ним есть только у нашей команды. Вы можете запросить удаление ваших данных в любое время, написав нам в Telegram.
     - title: Cookies
-      text: Сайт использует технические cookies, без которых он не работает, и аналитические. В баннере внизу экрана можно отказаться; выбор сохраняется в браузере. Метрика записывает сессии — движение курсора, прокрутку и клики. Форма заявки из записи исключена — имя, телефон, ник и комментарий в неё не попадают.
+      text: Сайт использует технические cookies, без которых он не работает, и аналитические. В баннере внизу экрана можно отказаться; выбор сохраняется в браузере. Метрика записывает сессии — движение курсора, прокрутку и клики. Форма заявки из записи исключена — имя, телефон, ник и комментарий в неё не попадают. Если вы пришли по рекламе и не отказались от аналитики, сайт запоминает это — источник и кампанию — на 30 дней, чтобы мы видели, какая реклама приводит заявки.
   contactTitle: Контакт
   contactBefore: 'По вопросам конфиденциальности обратитесь к нам через '
   contactLinkText: Telegram
@@ -134,7 +134,7 @@ translations:
         - title: Data Storage
           text: Requests are stored in a secure cloud storage system, Vercel Blob; access is limited to our team. You can request deletion of your data anytime by contacting us on Telegram.
         - title: Cookies
-          text: The site uses essential technical cookies that are necessary for its functionality, as well as analytical cookies. You can opt out using the banner at the bottom of the screen; your choice will be saved in your browser. The metrics track sessions — cursor movement, scrolling, and clicks. The application form is excluded from this recording — name, phone, username, and comments are not included.
+          text: The site uses essential cookies that are necessary for it to function, as well as analytical cookies. You can opt-out via the banner at the bottom of the screen; your choice will be saved in your browser. Metrics track sessions — mouse movements, scrolling, and clicks. Application form data is excluded from this tracking — name, phone number, nickname, and comments are not recorded. If you arrived through an advertisement and did not opt-out of analytics, the site remembers this — the source and campaign — for 30 days, so we can see which advertisements generate applications.
       contactTitle: Contact
       contactBefore: 'For privacy inquiries, reach out to us via '
       contactLinkText: Telegram
@@ -219,7 +219,7 @@ translations:
         - title: Čuvanje podataka
           text: Zahtevi se čuvaju u zaštićenoj cloud memoriji Vercel Blob; pristup imaju samo članovi našeg tima. Možete zatražiti brisanje vaših podataka bilo kada, pišući nam na Telegram.
         - title: Cookies
-          text: Sajt koristi tehničke cookies, bez kojih ne funkcioniše, i analitičke. U banneru na dnu ekrana možete se odjaviti; izbor se čuva u pretraživaču. Metrija beleži sesije — kretanje kursora, skrolovanje i klikove. Forma zahteva se ne beleži — ime, telefon, nadimak i komentar ne ulaze u to.
+          text: Sajt koristi tehničke kolačiće bez kojih ne može raditi, kao i analitičke. U baneru na dnu ekrana možete se odjaviti; izbor se čuva u pretraživaču. Metika beleži sesije — kretanje kursora, skrolovanje i klikove. Forma za prijavu nije uključena u snimak — ime, telefon, nadimak i komentar se ne beleže. Ako ste došli putem reklame i niste se odjavili od analitike, sajt pamti to — izvor i kampanju — na 30 dana, kako bismo videli koja reklama donosi prijave.
       contactTitle: Kontakt
       contactBefore: 'Za pitanja o privatnosti obratite nam se preko '
       contactLinkText: Telegram
@@ -304,7 +304,7 @@ translations:
         - title: Almacenamiento de datos
           text: Las solicitudes se almacenan en un espacio en la nube protegido (Vercel Blob); solo nuestro equipo tiene acceso. Puedes solicitar la eliminación de tus datos en cualquier momento escribiéndonos por Telegram.
         - title: Cookies
-          text: 'El sitio utiliza cookies técnicas, sin las cuales no funciona, y analíticas. Se puede rechazar en el banner en la parte inferior de la pantalla; la elección se guarda en el navegador. Métrica registra sesiones: movimiento del cursor, desplazamiento y clics. El formulario de solicitud está excluido de la grabación; el nombre, teléfono, apodo y comentario no se incluyen.'
+          text: 'El sitio utiliza cookies técnicas, sin las cuales no funciona, y analíticas. Puedes rechazarlas en el banner en la parte inferior de la pantalla; la elección se guarda en el navegador. La métrica registra las sesiones: el movimiento del cursor, el desplazamiento y los clics. El formulario de solicitud está excluido de esta grabación: el nombre, el teléfono, el apodo y el comentario no se registran. Si llegaste a través de un anuncio y no rechazaste las cookies analíticas, el sitio lo recuerda: la fuente y la campaña, durante 30 días, para que podamos ver qué anuncio genera solicitudes.'
       contactTitle: Contacto
       contactBefore: 'Para cuestiones de privacidad, contáctanos a través de '
       contactLinkText: Telegram
@@ -389,7 +389,7 @@ translations:
         - title: Datenaufbewahrung
           text: Anfragen werden in einem gesicherten Cloud-Speicher von Vercel Blob aufbewahrt; nur unser Team hat Zugriff darauf. Sie können jederzeit die Löschung Ihrer Daten anfordern, indem Sie uns über Telegram kontaktieren.
         - title: Cookies
-          text: Die Webseite verwendet technische Cookies, ohne die sie nicht funktioniert, sowie analytische Cookies. Im Banner am unteren Bildschirmrand kann man ablehnen; die Auswahl wird im Browser gespeichert. Die Metrik erfasst Sitzungen - Mausbewegungen, Scrollen und Klicks. Das Antragsformular ist von der Aufzeichnung ausgeschlossen - Name, Telefon, Nickname und Kommentare gelangen nicht hinein.
+          text: Die Website verwendet technische Cookies, ohne die sie nicht funktioniert, sowie analytische Cookies. Im Banner am unteren Bildschirmrand können Sie ablehnen; die Auswahl wird im Browser gespeichert. Das Tracking erfasst Sitzungen – Mausbewegungen, Scrollen und Klicks. Die Antragsformulare sind davon ausgeschlossen – Name, Telefonnummer, Nickname und Kommentare gelangen nicht hinein. Wenn Sie über Werbung gekommen sind und nicht von der Analyse abgelehnt haben, merkt sich die Website dies – Quelle und Kampagne – für 30 Tage, damit wir sehen, welche Werbung Anfragen generiert.
       contactTitle: Kontakt
       contactBefore: 'Für Datenschutzfragen kontaktieren Sie uns über '
       contactLinkText: Telegram
@@ -428,4 +428,4 @@ translations:
       closingLine2: wonach Sie suchen, —
       closingLine3: wir finden auch für Sie
       closingText: Marke, Budget und ein paar Wünsche genügen. Wir antworten innerhalb von zwei Stunden und sagen Ihnen ehrlich, ob das für diesen Preis realistisch ist.
-translatedFrom: b19dc54d24bf57ce
+translatedFrom: 2747c8c2bca630c1

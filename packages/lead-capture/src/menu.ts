@@ -36,6 +36,11 @@ export interface Contacts {
   venue?: Venue;
 }
 
+export interface Language {
+  name: string;
+  flag: string;
+}
+
 export interface PartnerBot {
   name: string;
   url: string;
@@ -48,7 +53,7 @@ export interface MenuConfig<L extends string, S extends string> {
   serviceCard: (slug: S, locale: L) => ServiceCard;
   copy: (locale: L) => CaptureCopy;
   partners?: (locale: L) => readonly PartnerBot[];
-  languages: Readonly<Record<L, string>>;
+  languages: Readonly<Record<L, Language>>;
   humanTelegram?: string;
 }
 
@@ -68,7 +73,13 @@ export const LANGUAGE_SWITCH_TAP = 'locale';
 
 export const SERVICES_DONE_TAP = 'done';
 
-const GREEN_TAPS = new Set(['request', SERVICES_DONE_TAP]);
+export const MANAGER_TAP = 'manager';
+
+const TAP_STYLES = new Map<string, 'success' | 'primary'>([
+  ['request', 'success'],
+  [SERVICES_DONE_TAP, 'success'],
+  [MANAGER_TAP, 'primary'],
+]);
 
 const TAP_PATTERN = /^([a-z]+):([a-z]{2})(?::([a-z0-9-]+))?$/;
 
@@ -104,23 +115,27 @@ export function createScreens<L extends string, S extends string>({
     screen: string,
     locale: L,
     arg?: string,
-  ): InlineKeyboardButton[] => [
-    {
-      text,
-      callback_data: tapData(screen, locale, arg),
-      ...(GREEN_TAPS.has(screen) && { style: 'success' as const }),
-    },
-  ];
+  ): InlineKeyboardButton[] => {
+    const style = TAP_STYLES.get(screen);
+    return [
+      {
+        text,
+        callback_data: tapData(screen, locale, arg),
+        ...(style && { style }),
+      },
+    ];
+  };
+
+  const served = Object.keys(languages) as L[];
+  const languageButton = `🌐 ${served.map((code) => languages[code].flag).join(' ')}`;
 
   function mainMenu(locale: L): Screen {
     const words = copy(locale);
+    const label = (id: MenuButton) =>
+      id === 'language' ? languageButton : words[id].button;
     return {
       text: words.menu.text,
-      keyboard: menu.map((id) =>
-        id === 'manager' && humanTelegram
-          ? [{ text: words.manager.button, url: telegramLink(humanTelegram) }]
-          : tap(words[id].button, id, locale),
-      ),
+      keyboard: menu.map((id) => tap(label(id), id, locale)),
     };
   }
 
@@ -170,9 +185,14 @@ export function createScreens<L extends string, S extends string>({
 
   function manager(locale: L): Screen {
     const words = copy(locale);
+    const back = tap(words.menu.back, 'menu', locale);
+    if (!humanTelegram) return { text: words.manager.text, keyboard: [back] };
     return {
-      text: words.manager.text,
-      keyboard: [tap(words.menu.back, 'menu', locale)],
+      text: words.manager.handoff,
+      keyboard: [
+        [{ text: words.manager.chat, url: telegramLink(humanTelegram) }],
+        back,
+      ],
     };
   }
 
@@ -190,12 +210,15 @@ export function createScreens<L extends string, S extends string>({
 
   function languagePicker(locale: L): Screen {
     const words = copy(locale);
-    const served = Object.keys(languages) as L[];
     return {
       text: words.language.text,
       keyboard: [
         ...served.map((code) =>
-          tap(languages[code], LANGUAGE_SWITCH_TAP, code),
+          tap(
+            `${languages[code].flag} ${languages[code].name}`,
+            LANGUAGE_SWITCH_TAP,
+            code,
+          ),
         ),
         tap(words.menu.back, 'menu', locale),
       ],
@@ -206,7 +229,7 @@ export function createScreens<L extends string, S extends string>({
     menu: mainMenu,
     services: serviceList,
     service: (locale, slug) => (isService(slug) ? service(locale, slug) : null),
-    manager,
+    [MANAGER_TAP]: manager,
     partners: partnerList,
     language: languagePicker,
   };

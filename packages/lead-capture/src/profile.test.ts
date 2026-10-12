@@ -98,7 +98,7 @@ const FULL_COPY = {
   services: { button: 'S', text: 'ST' },
   card: { request: 'CR', site: 'CS' },
   contacts: { button: 'C', text: 'CT', hours: 'CH' },
-  manager: { button: 'MG', text: 'MGT' },
+  manager: { button: 'MG', text: 'MGT', handoff: 'MGH', chat: 'MGC' },
   partners: { button: 'P', text: 'PT' },
   request: { button: 'RQ', car: 'RC', service: 'RS', done: 'RD', unsure: 'RU' },
   language: { button: 'LG', text: 'LGT' },

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { channelLabel } from './channelLabels.ts';
 import { isPhoneContact, isTelegramIdContact } from './contactShape.ts';
-import { isClosed, isInWork } from './schema.ts';
+import { inWorkStatus, isClosed, isInWork } from './schema.ts';
 import type {
   CapturePrompt,
   Referrer,
@@ -42,6 +42,8 @@ export interface CaptureUpdate {
   referredBy?: Referrer;
   capturePrompt: CapturePrompt | null;
 }
+
+export type ClaimedMetaLead = StoredLead & { metaLeadSentAt: string };
 
 export interface MergeOutcome {
   lead: StoredLead;
@@ -110,7 +112,7 @@ export const GHOST_LEAD_RETENTION_MS = DAY_MS;
 export const TOPIC_IDLE_MS = DAY_MS;
 
 function untouched(lead: StoredLead): boolean {
-  return lead.status === 'open' && lead.lastActivityAt == null;
+  return lead.status === 'new' && lead.lastActivityAt == null;
 }
 
 function isIdleTopic(lead: StoredLead, now: Date): boolean {
@@ -129,6 +131,10 @@ function pickedServices(services: string[]) {
 function contactRank(contact: string): number {
   if (isPlaceholderContact(contact)) return 0;
   return isTelegramIdContact(contact) ? 1 : 2;
+}
+
+export function hasRealContact(contact: string): boolean {
+  return contactRank(contact) === 2;
 }
 
 function isGhostLead(lead: StoredLead, now: Date): boolean {
@@ -193,6 +199,7 @@ export function postponePatch(
 ): Partial<StoredLead> {
   return {
     ...statusPatch('postponed'),
+    postponedFrom: inWorkStatus(lead),
     remindAt,
     comment: appendNote(lead.comment, note),
   };
@@ -205,8 +212,16 @@ export function statusPatch(
   return { status: to, statusChangedAt: at.toISOString() };
 }
 
-export function resumePatch(): Partial<StoredLead> {
-  return { ...statusPatch('open'), remindAt: null };
+export function canMoveTo(lead: StoredLead, to: LeadStatus): boolean {
+  return isClosed({ status: to }) || !isClosed(lead);
+}
+
+export function resumePatch(lead: StoredLead): Partial<StoredLead> {
+  return {
+    ...statusPatch(lead.postponedFrom ?? 'new'),
+    postponedFrom: null,
+    remindAt: null,
+  };
 }
 
 const unreadableId = z.object({
@@ -429,6 +444,8 @@ export function createLeadStore({
           source_url: existing.source_url ?? data.source_url,
           telegramId: data.telegramId ?? existing.telegramId,
           referredBy: data.referredBy ?? existing.referredBy,
+          adSource: existing.adSource ?? data.adSource ?? null,
+          metaIds: existing.metaIds ?? data.metaIds ?? null,
           capturePrompt: data.capturePrompt ?? existing.capturePrompt,
           visitorActiveAt:
             data.telegramId == null
@@ -501,7 +518,14 @@ export function createLeadStore({
     },
 
     setStatus(id: number, status: LeadStatus): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({ ...l, ...statusPatch(status) }));
+      return updateMatching(
+        (l) => l.id === id && canMoveTo(l, status),
+        (l) => ({
+          ...l,
+          ...(l.status === 'postponed' ? resumePatch(l) : {}),
+          ...statusPatch(status),
+        }),
+      );
     },
 
     recordOwnerReply(
@@ -511,7 +535,7 @@ export function createLeadStore({
       return updateOne(id, (l) => ({
         ...l,
         lastActivityAt: at.toISOString(),
-        ...(l.status === 'open' ? statusPatch('negotiations', at) : {}),
+        ...(l.status === 'new' ? statusPatch('negotiations', at) : {}),
       }));
     },
 
@@ -579,6 +603,7 @@ export function createLeadStore({
         capturePrompt,
       }: CaptureUpdate,
     ): Promise<StoredLead | undefined> {
+      const now = new Date().toISOString();
       return updateOne(id, (l) => ({
         ...l,
         comment: note ? appendNote(l.comment, note) : l.comment,
@@ -588,8 +613,28 @@ export function createLeadStore({
         locale: locale ?? l.locale,
         referredBy: referredBy ?? l.referredBy,
         capturePrompt,
-        visitorActiveAt: new Date().toISOString(),
+        visitorActiveAt: now,
       }));
+    },
+
+    markManagerHandoff(
+      id: number,
+      handle: string,
+    ): Promise<StoredLead | undefined> {
+      const at = new Date().toISOString();
+      return updateMatching(
+        (l) => l.id === id && l.managerHandoff == null,
+        (l) => ({ ...l, managerHandoff: { at, handle }, visitorActiveAt: at }),
+      );
+    },
+
+    async claimMetaLead(id: number): Promise<ClaimedMetaLead | undefined> {
+      const at = new Date().toISOString();
+      const claimed = await updateMatching(
+        (l) => l.id === id && l.metaIds != null && l.metaLeadSentAt == null,
+        (l) => ({ ...l, metaLeadSentAt: at }),
+      );
+      return claimed && { ...claimed, metaLeadSentAt: at };
     },
 
     async findOpenLeadByTelegramId(
@@ -642,7 +687,7 @@ export function createLeadStore({
     resumeLead(id: number): Promise<StoredLead | undefined> {
       return updateOneIfStatus(id, 'postponed', (l) => ({
         ...l,
-        ...resumePatch(),
+        ...resumePatch(l),
       }));
     },
 

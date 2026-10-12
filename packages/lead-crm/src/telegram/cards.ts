@@ -1,8 +1,9 @@
 import { channelLabel } from '../channelLabels.ts';
 import { isHandleContact } from '../contactShape.ts';
 import { LEADS_PATH } from '../quarantine.ts';
-import { isInWork, type StoredLead } from '../schema.ts';
+import { isClosed, isInWork, type StoredLead } from '../schema.ts';
 import { isPlaceholderContact, type Digest } from '../store.ts';
+import { businessDay } from '../businessTime.ts';
 import {
   escapeHtml,
   formatDateRu,
@@ -14,6 +15,7 @@ import {
   type Role,
 } from './markup.ts';
 import { digestMessage } from './digest.ts';
+import { OPERATION_AUTHORS } from './ledger.ts';
 import { buildHelp } from './menu.ts';
 
 export interface FormatterOptions {
@@ -58,20 +60,24 @@ export function buildRemindPicker(id: number): {
   };
 }
 
+const IN_WORK_MOVES = [
+  { status: 'negotiations', text: '🗣 Переговоры' },
+  { status: 'in_progress', text: '🔵 В работе' },
+] as const;
+
 function statusRows(lead: StoredLead, role: Role): Btn[][] {
   if (lead.status === 'postponed')
     return [[{ text: '▶️ Возобновить', callback_data: `resume:${lead.id}` }]];
   if (!isInWork(lead) || role !== 'owner') return [];
-  const talk: Btn[] =
-    lead.status === 'open'
-      ? [{ text: '🗣 Переговоры', callback_data: `st:${lead.id}:negotiations` }]
-      : [];
+  const moves = IN_WORK_MOVES.filter((m) => m.status !== lead.status).map(
+    (m) => ({ text: m.text, callback_data: `st:${lead.id}:${m.status}` }),
+  );
   return [
     [
       { text: '✅ Сделка', callback_data: `st:${lead.id}:won` },
       { text: '❌ Отказ', callback_data: `st:${lead.id}:lost` },
     ],
-    [...talk, { text: '⏰ Отложить', callback_data: `postpone:${lead.id}` }],
+    [...moves, { text: '⏰ Отложить', callback_data: `postpone:${lead.id}` }],
   ];
 }
 
@@ -95,11 +101,86 @@ export function buildDeleteConfirm(lead: StoredLead): {
 export const EDIT_FIELD_LABELS = {
   name: 'имя',
   contact: 'контакт',
-  comment: 'комментарий',
-  service: 'услуга',
 } as const;
 
 export type EditField = keyof typeof EDIT_FIELD_LABELS;
+
+const EDIT_PROMPTS: Record<EditField, string> = {
+  name: '✏️ Введите новое значение (имя):',
+  contact:
+    '➕ Пришлите контакт: телефон, @username, ссылку или e-mail. Если контакт уже есть, новый добавится в заметки.',
+};
+
+export const EDIT_COPY = {
+  prompt: (field: EditField) => EDIT_PROMPTS[field],
+  ack: 'Жду значение',
+  empty: '⚠️ Значение не может быть пустым.',
+  badContact: '⚠️ Нужен телефон, @username, ссылка или e-mail.',
+  updated: '✅ Обновлено',
+  contactNoted: '📝 Контакт добавлен в заметки — основной не меняется',
+  notePrompt: '📝 Напишите заметку:',
+  noteAck: 'Жду заметку',
+} as const;
+
+export function reAskEditText(field: EditField | 'note'): string {
+  const refusal = field === 'contact' ? EDIT_COPY.badContact : EDIT_COPY.empty;
+  const prompt =
+    field === 'note' ? EDIT_COPY.notePrompt : EDIT_COPY.prompt(field);
+  return `${refusal}\n\n${prompt}`;
+}
+
+export function noteLine(text: string, by: Role, at = new Date()): string {
+  return `${formatDateRu(businessDay(at))} · ${OPERATION_AUTHORS[by]}: ${text}`;
+}
+
+export function extraContactNote(contact: string): string {
+  return `Доп. контакт: ${contact}`;
+}
+
+export function noteNoticeText(
+  lead: StoredLead,
+  note: string,
+  by: Role,
+): string {
+  return `📝 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))} · ${OPERATION_AUTHORS[by]}: ${escapeHtml(note)}`;
+}
+
+const FIELD_PREVIEW_LIMIT = 120;
+
+function fieldPreview(value: string): string {
+  const text = value.trim();
+  if (!text) return '—';
+  return escapeHtml(
+    text.length <= FIELD_PREVIEW_LIMIT
+      ? text
+      : `${text.slice(0, FIELD_PREVIEW_LIMIT)}…`,
+  );
+}
+
+export function fieldChangeText(
+  lead: StoredLead,
+  field: EditField,
+  before: string,
+  by: Role,
+): string {
+  return [
+    `✏️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${EDIT_FIELD_LABELS[field]}`,
+    `✍️ ${OPERATION_AUTHORS[by]}`,
+    ``,
+    `Было: ${fieldPreview(before)}`,
+    `Стало: ${fieldPreview(lead[field])}`,
+  ].join('\n');
+}
+
+function editRows({ id }: StoredLead): Btn[][] {
+  return [
+    [
+      { text: '✏️ Имя', callback_data: `edit:${id}:name` },
+      { text: '➕ Контакт', callback_data: `edit:${id}:contact` },
+    ],
+    [{ text: '📝 Заметка', callback_data: `note:${id}` }],
+  ];
+}
 
 export const REPLY_COPY = {
   undelivered:
@@ -119,10 +200,11 @@ export const LEAD_ACTION_COPY = {
     '⚠️ Нужна дата в формате ДД.ММ.ГГГГ, не в прошлом. Попробуйте ещё раз.',
   notFound: 'Заявка не найдена.',
   notPostponable: '⚠️ Заявку уже нельзя отложить: она больше не открыта.',
+  closed: '⚠️ Заявка уже закрыта.',
   deleted: '🗑 Заявка удалена.',
   deleteAck: 'Удалено',
   denied: '⛔ Доступ запрещён.',
-  inWork: 'В работе ⏳',
+  inWork: 'В работе 🔵',
   noteAdded: '📝 Заметка добавлена',
   topicOpened: '💬 Тема открыта',
   topicFailed:
@@ -140,6 +222,49 @@ export function quarantinedLeadsText(
     `Нашёл сайт ${escapeHtml(brand)} и скопировал в ${escapeHtml(path)}.`,
     `Из ${escapeHtml(LEADS_PATH)} ничего не убирал — удалить можно только руками.`,
   ].join('\n');
+}
+
+export function managerHandoffText(handle: string): string {
+  return `👤 Ушёл к менеджеру @${escapeHtml(handle)}`;
+}
+
+function handoffLine(lead: StoredLead): string {
+  return lead.managerHandoff
+    ? `\n${managerHandoffText(lead.managerHandoff.handle)} · ${formatDateRu(lead.managerHandoff.at)}`
+    : '';
+}
+
+const AD_SOURCE_LABELS: Record<string, string> = {
+  facebook: 'Facebook',
+  fb: 'Facebook',
+  instagram: 'Instagram',
+  ig: 'Instagram',
+  google: 'Google',
+};
+
+const AD_HASHTAG = '#реклама';
+
+function adLine({ adSource }: StoredLead): string {
+  if (!adSource) return '';
+  const { source, campaign, content } = adSource;
+  const parts = [
+    source && (AD_SOURCE_LABELS[source.toLowerCase()] ?? source),
+    campaign,
+    content,
+  ].filter(Boolean);
+  return parts.length
+    ? `\n📣 Реклама: ${escapeHtml(parts.join(' · '))}`
+    : '\n📣 Реклама';
+}
+
+function adHashtag(lead: StoredLead, separator: string): string {
+  return lead.adSource ? `${separator}${AD_HASHTAG}` : '';
+}
+
+function remindLine(lead: StoredLead): string {
+  return lead.status === 'postponed' && lead.remindAt
+    ? `\n⏰ Напомнить: ${formatDateRu(lead.remindAt)}`
+    : '';
 }
 
 export function statusChangeText(lead: StoredLead): string {
@@ -170,7 +295,7 @@ export function createFormatter({
     const via = lead.telegramId == null ? '' : ' · 🤖 через бота';
     const referred =
       lead.referredBy === 'approved' ? ' · 🤝 из бота Approved.rs' : '';
-    return `🏷 ${escapeHtml(lead.brand)}${via}${referred}`;
+    return `🏷 ${escapeHtml(lead.brand)}${via}${referred}${adLine(lead)}${handoffLine(lead)}`;
   }
 
   function formatLeadText(
@@ -185,8 +310,8 @@ export function createFormatter({
       brandLine(lead),
       statusLine(lead.status),
     ];
-    if (lead.status === 'postponed' && lead.remindAt)
-      lines.push(`⏰ Напомнить: ${formatDateRu(lead.remindAt)}`);
+    const remind = remindLine(lead);
+    if (remind) lines.push(remind.trim());
     lines.push(
       ``,
       `Имя: ${escapeHtml(leadDisplayName(lead))}`,
@@ -198,7 +323,7 @@ export function createFormatter({
     if (lead.source_url) lines.push(`Страница: ${escapeHtml(lead.source_url)}`);
     if (lead.visitorId)
       lines.push(`ID посетителя: ${escapeHtml(lead.visitorId.slice(0, 100))}`);
-    lines.push(``, `#заявка`);
+    lines.push(``, `#заявка${adHashtag(lead, ' ')}`);
     return lines.join('\n');
   }
 
@@ -229,7 +354,16 @@ export function createFormatter({
     },
 
     formatTeaser(lead: StoredLead): string {
-      return `🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusMark(lead.status)}\n${brandLine(lead)}`;
+      return `🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusMark(lead.status)}${remindLine(lead)}\n${brandLine(lead)}${adHashtag(lead, '\n')}`;
+    },
+
+    postponeReminderText(lead: StoredLead): string {
+      return [
+        `⏰ Напоминание по заявке #${lead.id}`,
+        ``,
+        `${escapeHtml(leadDisplayName(lead))} — ${escapeHtml(servicesLabel(lead))}`,
+        `Ты просил напомнить сегодня — заявка снова активна.`,
+      ].join('\n');
     },
 
     deepLinkKeyboard(lead: StoredLead): Keyboard {
@@ -247,10 +381,15 @@ export function createFormatter({
             { text: '✅ Сделка', callback_data: `won:${id}` },
             { text: '❌ Отказ', callback_data: `lost:${id}` },
           ],
-          [
-            { text: '⏳ В работе', callback_data: `work:${id}` },
-            { text: '🗣 Переговоры', callback_data: `talk:${id}` },
-          ],
+          ...(isClosed(lead)
+            ? []
+            : [
+                [
+                  { text: '🗣 Переговоры', callback_data: `talk:${id}` },
+                  { text: '🔵 В работе', callback_data: `work:${id}` },
+                  { text: '⏰ Отложить', callback_data: `postpone:${id}` },
+                ],
+              ]),
         ],
       };
     },
@@ -270,6 +409,7 @@ export function createFormatter({
 
       const rows: Btn[][] = [
         ...statusRows(lead, role),
+        ...editRows(lead),
         ...topicButtons(lead),
         ...deleteRow,
       ];

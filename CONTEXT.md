@@ -9,13 +9,20 @@ Decisions live in [`docs/adr/`](docs/adr/), conventions in
 **Lead** — one request from one visitor, stored once and owned by exactly one
 brand. A form submission and a contact click both become Leads. A Lead's
 `status` describes the **conversation** with that person, never the state of
-anything they bought: open, negotiations (🗣, the owner is talking to the
-visitor), postponed, and the two outcomes, won and lost, that close it.
+anything they bought: new (🆕 Новая), negotiations (🗣 Переговоры, the owner
+is talking to the visitor), in progress (🔵 В работе), postponed (⏸️ Отложена),
+and the two outcomes, won (✅ Успешно) and lost (❌ Отказ), that close it. New,
+negotiations and in progress are **in work**: the open list, search, the
+7-day digest and postponing treat them alike.
 
 **Negotiations** — a Lead the owner is already talking to. Set by hand with 🗣
 on the CRM card, and on its own the first time the owner or the admin replies
-to the visitor through the bot. Not closed: it stays in the open list, the
-digest and search like an open Lead, and is never a Ghost lead.
+to a new Lead's visitor through the bot. Never a Ghost lead.
+
+**Postponed** — a Lead the owner set aside until a date with ⏰ on the card or
+the detail. On that day it goes back to the status it was postponed from (new
+when none is recorded), the owner gets a DM reminder and the group digest lists
+it.
 
 **Brand** — one of the three businesses (Approved, CarLab, Details). Stamped on
 a Lead by the server; a visitor can never name one.
@@ -31,7 +38,7 @@ no Contact click: the visitor already has a Lead, and no bot will come to
 absorb a placeholder.
 
 **Ghost lead** — a Contact click that never gained a contact: still the
-placeholder contact, still open with no owner activity, and older than the
+placeholder contact, still new with no owner activity, and older than the
 retention window. Mostly WhatsApp, Viber or the phone, whose outcome we cannot
 observe, but the channel does not matter: a Telegram-tile click whose visitor
 never pressed Start in the bot has no bot Lead to absorb it, and retires the
@@ -46,8 +53,9 @@ runs daily against a 24-hour window, a Ghost lead actually lives 24 to 48 hours.
 through a Capture bot: pressed Start, answered, wrote (`visitorActiveAt`).
 
 **Owner activity** — the last time the owner worked the Lead in the CRM bot:
-marked it in work, added a note, answered a prompt on it, wrote to the visitor
-in its Topic (`lastActivityAt`).
+marked it in work, added a note, edited its name or contact, answered
+a prompt on it, wrote to the visitor in its Topic (`lastActivityAt`). An edit
+or note by the admin counts the same.
 A status change alone is not owner activity, and neither is a reply sent from
 the owner's own Telegram account, which never reaches the store.
 
@@ -63,6 +71,23 @@ bot's Partners screen. `referredBy: approved` is the only record of it — the
 card renders that field, and no note is written to the comment. Brand and
 rate are still the receiving bot's.
 
+**Ad visit** — the first time, in the last 30 days, this browser landed on the
+site from a paid ad: a `fbclid` or `gclid` in the URL, or `utm_medium` of
+`paid`, `cpc`, `ppc` or `paid_social`. Kept in the browser beside the visitor
+id and under the same consent, and sent with every Lead the site creates —
+form or Contact click. It lands on the Lead as `adSource` (source, medium,
+campaign, content, when); a Capture bot Lead that absorbs a Contact click inherits it,
+and on a merge the first one wins. The card, the detail and the Topic summary
+show it as «📣 Реклама» with `#реклама`. A visitor who reaches a Capture bot
+without passing through the site has no Ad visit: ads send people to the site.
+
+**Meta Lead event** — the one `Lead` the server reports to Meta's Conversions
+API for a Capture bot Lead, since the pixel cannot run in Telegram. It fires
+once, when the bot request becomes real (the Questionnaire is completed or the
+visitor shares a phone), and only for a Lead carrying the Meta browser ids
+(`metaIds`: `fbc`/`fbp`) the site sent with consent. It carries those ids and
+nothing about the person. `metaLeadSentAt` on the Lead marks it sent.
+
 **Capture bot** — one per brand, and the whole of that brand inside Telegram:
 a visitor can read its services and answer its Questionnaire without opening
 the site. It writes a Lead on every `/start`, and copies everything else the
@@ -70,7 +95,13 @@ visitor sends — answers, free text, a shared phone, photos, voice, files —
 into the visitor's Topic as it arrives; a visitor with no Lead yet gets one
 first, and a Lead from before Topics gets its Topic then. It has no owner
 surface of its own: the owner answers in the Lead's Topic, and the Capture
-bot copies each message to the visitor, username or not.
+bot copies each message to the visitor, username or not. Its menu ends with a
+blue «Написать менеджеру» (CarLab and Details: «мастеру») tap. Where the brand
+names a staff account it is a manager hand-off: the first tap stamps
+`managerHandoff` on the visitor's Lead — even once the Questionnaire is
+finished — shows it on the card and posts it to the Topic, then turns the menu
+into a link to that account; with no account named it stays the in-bot
+question screen.
 
 **Questionnaire** — the short set of questions a Capture bot asks to turn a
 Lead into a request the owner can answer. Every brand's opens with «Какие
@@ -88,20 +119,23 @@ A shared phone is the one exception — it still becomes the contact.
 _Avoid_: wizard, form (the site's form is a different thing)
 
 **Topic** — the forum topic in the CRM group that holds one Lead's
-conversation. The CRM bot opens it the first time a Capture bot touches a
+conversation, and only for a Lead that came through a Capture bot in
+Telegram. Telegram is one convenient channel, not the only one: a Lead from
+WhatsApp, Viber, a phone call or the site form has no Topic and no relay, and
+nothing about a Lead may assume it has one. The CRM bot opens it the first time a Capture bot touches a
 Lead the visitor started from Telegram, names it after the Lead's id, name and
-brand, and keeps the Lead summary as its first message, edited as the
+brand (renamed when staff correct the name), and keeps the Lead summary as its first message, edited as the
 Questionnaire fills in. The Lead's card in General and its detail link to it;
 a Lead the bot knows (`telegramId`) without one shows «💬 Начать переписку»
 there instead, which opens the Topic the same way.
 Whatever the owner or admin writes there — text or media — reaches the visitor
-through the brand's Capture bot, the first message moves an open Lead into
+through the brand's Capture bot, the first message moves a new Lead into
 negotiations, and a copy that cannot be delivered is reported in the Topic.
 Open Topics are the clients being worked with: the daily cron closes a Topic
 nobody has ever written in — neither the visitor nor the owner — a day after the
 Lead was created, a conversation that merely goes quiet stays open, ✅ won and
 ❌ lost close it, and the next message from either side reopens it before it is
-posted. ⏳ and 🗣 leave it open, and an edit of the summary is not a message.
+posted. 🗣, 🔵 and ⏰ leave it open, and an edit of the summary is not a message.
 A Lead from the site form or a placeholder click has no Topic until a bot
 `/start` merges into it.
 _Avoid_: thread, chat
@@ -115,7 +149,13 @@ Payouts are owed to.
 
 **CRM bot** — the single bot the owner and the admin work in: cards, statuses,
 money, the daily digest and order notifications, for all three brands in one
-chat.
+chat. For every Lead, whatever channel it came from, its card and its detail
+in the bot (status buttons, ✏️ Имя, ➕ Контакт, 📝 Заметка) are the
+workspace that must always work; either of the two may correct a Lead's name or
+give a Lead without a real contact one, and the other is told what changed. A
+real contact — a phone, @username, link or e-mail — is never overwritten: a
+second one goes into the notes. The visitor's comment is read-only: staff add
+their own text as a note, signed and dated, beside it.
 
 **Payout** — an operation that raises the Balance (➕ Зачислить): an amount
 the owner will send the admin. The person recording it states the amount;

@@ -42,7 +42,12 @@ const COPY = {
   services: { button: 'SERVICES', text: 'PICK_A_SERVICE' },
   card: { request: 'LEAVE_A_REQUEST', site: 'ON_THE_SITE' },
   contacts: { button: 'CONTACTS', text: 'REACH_US', hours: 'HOURS' },
-  manager: { button: 'MANAGER', text: 'WRITE_YOUR_QUESTION' },
+  manager: {
+    button: 'MANAGER',
+    text: 'WRITE_YOUR_QUESTION',
+    handoff: 'MANAGER_IN_TELEGRAM',
+    chat: 'OPEN_MANAGER_CHAT',
+  },
   partners: { button: 'PARTNERS', text: 'PICK_A_PARTNER' },
   request: {
     button: 'REQUEST',
@@ -69,11 +74,11 @@ const WORKSHOP = {
 };
 
 const LANGUAGES = {
-  ru: 'Русский',
-  en: 'English',
-  sr: 'Srpski',
-  es: 'Español',
-  de: 'Deutsch',
+  ru: { name: 'Русский', flag: '🇷🇺' },
+  en: { name: 'English', flag: '🇬🇧' },
+  sr: { name: 'Srpski', flag: '🇷🇸' },
+  es: { name: 'Español', flag: '🇪🇸' },
+  de: { name: 'Deutsch', flag: '🇩🇪' },
 };
 
 const MENU_KEYBOARD = {
@@ -1049,7 +1054,7 @@ describe('abandoning the dialog', () => {
     expect(stored()[0]).toMatchObject({
       contact: 'tg://user?id=777',
       service: 'vehicle-sourcing',
-      status: 'open',
+      status: 'new',
     });
     expect(cards()).toHaveLength(1);
   });
@@ -1514,7 +1519,7 @@ describe('free text outside the dialog', () => {
 
     expect(lastSent()).toEqual([42, 'RECEIVED']);
     expect(error).toHaveBeenCalledWith(
-      '[capture] could not copy the message to the topic',
+      '[capture] could not post to the topic',
       expect.objectContaining({ leadId: 1 }),
     );
   });
@@ -1940,33 +1945,151 @@ describe('the Contacts screen', () => {
 });
 
 describe('talking to a manager', () => {
-  it('opens the manager account straight from the menu when the brand names one', async () => {
+  const MANAGER_MENU = {
+    inline_keyboard: [
+      [{ text: 'SERVICES', callback_data: 'services:ru' }],
+      [{ text: 'MANAGER', callback_data: 'manager:ru', style: 'primary' }],
+    ],
+  };
+
+  function handoffPosts() {
+    return api
+      .callsTo('sendMessage', CAPTURE_TOKEN)
+      .map((c) => c.payload)
+      .filter((p) => p.chat_id === GROUP_ID);
+  }
+
+  function withManager() {
     POST = route(SECRET, {
       menu: ['services', 'manager'],
       humanTelegram: 'brand_manager',
     });
+  }
 
+  it('puts the manager last as a blue tap whether or not the brand names an account', async () => {
+    withManager();
     await POST(makeCtx(startUpdate('ru')));
+    expect(lastMarkup()).toEqual(MANAGER_MENU);
 
-    expect(lastMarkup()).toEqual({
-      inline_keyboard: [
-        [{ text: 'SERVICES', callback_data: 'services:ru' }],
-        [{ text: 'MANAGER', url: 'https://t.me/brand_manager' }],
-      ],
-    });
+    POST = route(SECRET, { menu: ['services', 'manager'] });
+    await POST(makeCtx(startUpdate('ru')));
+    expect(lastMarkup()).toEqual(MANAGER_MENU);
   });
 
-  it('keeps the in-bot manager screen when the brand names no account', async () => {
-    POST = route(SECRET, { menu: ['services', 'manager'] });
+  it('marks the hand-off once, tells the topic and opens the chat link in place', async () => {
+    withManager();
+    await POST(makeCtx(startUpdate('ru')));
+    api.reset();
 
+    await tap('manager:ru');
+    const [first] = stored();
+    await tap('manager:ru');
+
+    expect(first.managerHandoff).toEqual({
+      at: expect.any(String),
+      handle: 'brand_manager',
+    });
+    expect(stored()[0].managerHandoff).toEqual(first.managerHandoff);
+    expect(handoffPosts()).toEqual([
+      expect.objectContaining({
+        text: '👤 Ушёл к менеджеру @brand_manager',
+        message_thread_id: 1,
+      }),
+    ]);
+    expect(summaryEdits().at(-1)?.text).toContain(
+      '👤 Ушёл к менеджеру @brand_manager',
+    );
+    expect(edits()).toEqual(
+      Array(2).fill(
+        expect.objectContaining({
+          text: 'MANAGER_IN_TELEGRAM',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: 'OPEN_MANAGER_CHAT',
+                  url: 'https://t.me/brand_manager',
+                },
+              ],
+              [{ text: 'BACK', callback_data: 'menu:ru' }],
+            ],
+          },
+        }),
+      ),
+    );
+  });
+
+  it('writes only the hand-off, never a prompt it read before', async () => {
+    withManager();
+    await POST(makeCtx(startUpdate('ru')));
+    const fresh = { chatId: 999, step: 'car' } as const;
+    POST = route(SECRET, {
+      menu: ['services', 'manager'],
+      humanTelegram: 'brand_manager',
+      store: {
+        ...leadStore,
+        markManagerHandoff: async (id, handle) => {
+          await leadStore.updateCapture(id, { capturePrompt: fresh });
+          return leadStore.markManagerHandoff(id, handle);
+        },
+      },
+    });
+
+    await tap('manager:ru');
+
+    expect(stored()[0].capturePrompt).toEqual(fresh);
+    expect(stored()[0].managerHandoff?.handle).toBe('brand_manager');
+  });
+
+  it('tells the topic nothing when another tap already won the hand-off', async () => {
+    withManager();
+    await POST(makeCtx(startUpdate('ru')));
+    api.reset();
+    POST = route(SECRET, {
+      menu: ['services', 'manager'],
+      humanTelegram: 'brand_manager',
+      store: { ...leadStore, markManagerHandoff: async () => undefined },
+    });
+
+    await tap('manager:ru');
+
+    expect(handoffPosts()).toEqual([]);
+    expect(edits()).toEqual([
+      expect.objectContaining({ text: 'MANAGER_IN_TELEGRAM' }),
+    ]);
+  });
+
+  it('marks a Lead whose Questionnaire is already finished', async () => {
+    withManager();
+    await begin();
+    await say('BMW X5');
+    await say('до 30k');
+    expect(stored()[0].questionnaireDone).toBe(true);
+
+    await tap('manager:ru');
+
+    expect(stored()[0].managerHandoff?.handle).toBe('brand_manager');
+  });
+
+  it('only opens the chat link when the visitor has no Lead yet', async () => {
+    withManager();
+
+    await tap('manager:ru');
+
+    expect(stored()).toEqual([]);
+    expect(handoffPosts()).toEqual([]);
+    expect(edits()).toEqual([
+      expect.objectContaining({ text: 'MANAGER_IN_TELEGRAM' }),
+    ]);
+  });
+
+  it('records no hand-off when the brand names no account', async () => {
     await POST(makeCtx(startUpdate('ru')));
 
-    expect(lastMarkup()).toEqual({
-      inline_keyboard: [
-        [{ text: 'SERVICES', callback_data: 'services:ru' }],
-        [{ text: 'MANAGER', callback_data: 'manager:ru' }],
-      ],
-    });
+    await tap('manager:ru');
+
+    expect(stored()[0].managerHandoff).toBeNull();
+    expect(handoffPosts()).toEqual([]);
   });
 
   it('asks for the question and ends a running Questionnaire', async () => {
@@ -2363,11 +2486,11 @@ describe('switching the language', () => {
     expect(lastSent()).toEqual([42, 'PICK_A_LANGUAGE']);
     expect(lastMarkup()).toEqual({
       inline_keyboard: [
-        [{ text: 'Русский', callback_data: 'locale:ru' }],
-        [{ text: 'English', callback_data: 'locale:en' }],
-        [{ text: 'Srpski', callback_data: 'locale:sr' }],
-        [{ text: 'Español', callback_data: 'locale:es' }],
-        [{ text: 'Deutsch', callback_data: 'locale:de' }],
+        [{ text: '🇷🇺 Русский', callback_data: 'locale:ru' }],
+        [{ text: '🇬🇧 English', callback_data: 'locale:en' }],
+        [{ text: '🇷🇸 Srpski', callback_data: 'locale:sr' }],
+        [{ text: '🇪🇸 Español', callback_data: 'locale:es' }],
+        [{ text: '🇩🇪 Deutsch', callback_data: 'locale:de' }],
         [{ text: 'BACK', callback_data: 'menu:en' }],
       ],
     });
@@ -2380,10 +2503,42 @@ describe('switching the language', () => {
       text: 'PICK_A_LANGUAGE',
       reply_markup: {
         inline_keyboard: expect.arrayContaining([
-          [{ text: 'English', callback_data: 'locale:en' }],
+          [{ text: '🇬🇧 English', callback_data: 'locale:en' }],
           [{ text: 'BACK', callback_data: 'menu:sr' }],
         ]),
       },
+    });
+  });
+
+  it.each(['ru', 'de'])(
+    'labels the menu button with every locale flag, the same in %s',
+    async (locale) => {
+      POST = route(SECRET, { menu: ['services', 'language'] });
+      await say('/menu', { ...HANDLED, language_code: locale });
+
+      expect(lastMarkup()).toEqual({
+        inline_keyboard: [
+          [{ text: 'SERVICES', callback_data: `services:${locale}` }],
+          [
+            {
+              text: '🌐 🇷🇺 🇬🇧 🇷🇸 🇪🇸 🇩🇪',
+              callback_data: `language:${locale}`,
+            },
+          ],
+        ],
+      });
+    },
+  );
+
+  it("takes each locale's flag from the brand's config", async () => {
+    POST = route(SECRET, {
+      menu: ['language'],
+      languages: { ru: LANGUAGES.ru, xx: { name: 'Xx', flag: '🏳️' } },
+    });
+    await say('/menu');
+
+    expect(lastMarkup()).toEqual({
+      inline_keyboard: [[{ text: '🌐 🇷🇺 🏳️', callback_data: 'language:ru' }]],
     });
   });
 
@@ -2514,6 +2669,40 @@ describe('the Lead topic', () => {
     expect(stored()[0].topicId).toBe(1);
   });
 
+  it('keeps the ad visit of the click /start merges into, and shows it on the cards', async () => {
+    const adSource = {
+      source: 'facebook',
+      campaign: 'spring',
+      at: '2026-10-01T10:00:00.000Z',
+    };
+    await leadStore.insertOrMergeLead({
+      brand: BRAND,
+      name: '',
+      contact: '—',
+      service: '',
+      contactChannel: 'telegram',
+      comment: null,
+      country: null,
+      source_url: 'https://example.test/ru/',
+      visitorId: '0f8fad5b-d9cb-469f-a165-70867728950e',
+      locale: 'ru',
+      kind: 'call_click',
+      adSource,
+    });
+
+    await POST(makeCtx(startUpdate('ru_0f8fad5bd9cb469fa16570867728950e')));
+
+    expect(stored()).toHaveLength(1);
+    expect(stored()[0].adSource).toEqual(adSource);
+    expect(
+      api
+        .callsTo('sendMessage', CRM_TOKEN)
+        .some((call) =>
+          String(call.payload.text).includes('📣 Реклама: Facebook · spring'),
+        ),
+    ).toBe(true);
+  });
+
   it('opens the topic for a fresh Lead that has none when the visitor presses /start again', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
     api.fail('createForumTopic', 'Bad Request: not enough rights');
@@ -2563,5 +2752,111 @@ describe('the Lead topic', () => {
       '[capture] could not update the topic',
       expect.objectContaining({ leadId: 1 }),
     );
+  });
+});
+
+describe('the Meta Lead event', () => {
+  const VISITOR_ID = '0f8fad5b-d9cb-469f-a165-70867728950e';
+  const META_IDS = { fbp: 'fb.1.1596403881668.1116446470' };
+  let reportMetaLead: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    reportMetaLead = vi.fn();
+    POST = route(SECRET, { reportMetaLead });
+  });
+
+  async function arriveFromSite(
+    from: Record<string, unknown>,
+    metaIds: typeof META_IDS | null = META_IDS,
+  ) {
+    await leadStore.insertOrMergeLead({
+      brand: BRAND,
+      name: '',
+      contact: '—',
+      service: '',
+      services: [],
+      contactChannel: 'telegram',
+      comment: '',
+      source_url: 'https://example.test/ru/',
+      visitorId: VISITOR_ID,
+      locale: 'ru',
+      kind: 'call_click',
+      metaIds,
+    });
+    const payload = stampStartVisitor('vehicle-sourcing_ru', VISITOR_ID);
+    await POST(makeCtx(startUpdate(payload ?? '', from)));
+  }
+
+  async function completeQuestionnaire(from: Record<string, unknown>) {
+    await tap('request:ru:vehicle-sourcing', from);
+    await tap('done:ru', from);
+    await say('BMW X5', from);
+    await say('до 30k', from);
+  }
+
+  const sentLead = expect.objectContaining({
+    metaIds: META_IDS,
+    metaLeadSentAt: expect.any(String),
+  });
+
+  it('is not sent for a bare /start', async () => {
+    await arriveFromSite(HANDLED);
+    expect(stored()).toHaveLength(1);
+    expect(stored()[0]).toMatchObject({ telegramId: 42, metaIds: META_IDS });
+    expect(reportMetaLead).not.toHaveBeenCalled();
+  });
+
+  it('is sent once the Questionnaire is completed, and never again', async () => {
+    await arriveFromSite(HANDLED);
+    await completeQuestionnaire(HANDLED);
+    expect(lastSent()).toEqual([42, 'THANKS']);
+    expect(reportMetaLead).toHaveBeenCalledTimes(1);
+    expect(reportMetaLead).toHaveBeenCalledWith(sentLead);
+
+    await completeQuestionnaire(HANDLED);
+    expect(reportMetaLead).toHaveBeenCalledTimes(1);
+  });
+
+  it('is sent once the visitor shares a phone, and never again', async () => {
+    await arriveFromSite(ANONYMOUS);
+    await POST(makeCtx(contactUpdate('381601234567')));
+    expect(reportMetaLead).toHaveBeenCalledTimes(1);
+    expect(reportMetaLead).toHaveBeenCalledWith(sentLead);
+
+    await POST(makeCtx(contactUpdate('381601234568')));
+    await completeQuestionnaire(ANONYMOUS);
+    expect(reportMetaLead).toHaveBeenCalledTimes(1);
+  });
+
+  it('is sent when the phone answers the last question', async () => {
+    await arriveFromSite(ANONYMOUS);
+    await completeQuestionnaire(ANONYMOUS);
+    expect(lastSent()).toEqual([777, 'PHONE_ASK']);
+    expect(reportMetaLead).not.toHaveBeenCalled();
+
+    await POST(makeCtx(contactUpdate('381601234567')));
+    expect(reportMetaLead).toHaveBeenCalledTimes(1);
+    expect(reportMetaLead).toHaveBeenCalledWith(sentLead);
+  });
+
+  it('is not sent for a Lead that carries no Meta ids', async () => {
+    await arriveFromSite(HANDLED, null);
+    await completeQuestionnaire(HANDLED);
+    await POST(makeCtx(contactUpdate('381601234567', HANDLED)));
+    expect(reportMetaLead).not.toHaveBeenCalled();
+    expect(stored()[0]!.metaLeadSentAt).toBeNull();
+  });
+
+  it('is not claimed when the brand has no reporter', async () => {
+    POST = route(SECRET);
+    await arriveFromSite(HANDLED);
+    await completeQuestionnaire(HANDLED);
+    expect(stored()[0]!.metaLeadSentAt).toBeNull();
+  });
+
+  it('is not sent for a phone that opens the dialog', async () => {
+    await POST(makeCtx(contactUpdate('381601234567')));
+    expect(stored()).toHaveLength(1);
+    expect(reportMetaLead).not.toHaveBeenCalled();
   });
 });

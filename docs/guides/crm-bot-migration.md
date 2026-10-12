@@ -128,15 +128,17 @@ In the leads group and in a DM with `@SerbCRMBot`:
       `@SerbCRMBot`, not `@ApprovedRsBot`.
 - [ ] **Status change** — open a lead from the teaser, close it as «✅ Сделка» or
       «❌ Отказ»; the DM card redraws and the group teaser's status line follows.
-      «⏳» changes no status: it only records a touch, so the Lead drops out of
-      the stale list.
+      «🗣 Переговоры» and «🔵 В работе» move it without closing it; «🔵» on a
+      Lead already in progress records a touch, so the Lead drops out of the
+      stale list.
 - [ ] **Payout** — in the DM menu tap «➕ Зачислить», reply `1 тест`; the bot
       answers `✅ +1 € · баланс …` and the admin gets the notice. Undo it with
       «➖ Списать» `1`.
-- [ ] **Postpone** — «⏰ Отложить», pick a date; the lead goes to `postponed` and
-      `remindAt` is set. On that day it comes back through the group digest
-      (`/api/reminders`, daily), which lists it and reopens it; to check it now,
-      set the date to today and wait for the next run.
+- [ ] **Postpone** — «⏰ Отложить» on the group card or the DM detail, pick a
+      date; the lead goes to `postponed` and `remindAt` is set. On that day
+      `/api/reminders` (daily) lists it in the group digest, returns it to the
+      status it was postponed from and DMs the owner a reminder; to check it
+      now, set the date to today and wait for the next run.
 - [ ] **A new form lead** — submit the lead form on approved.rs; a new teaser
       appears, posted by `@SerbCRMBot`.
 - [ ] **A shop order** — place a test order on carlab.rs (or re-fire the order
