@@ -1685,6 +1685,28 @@ describe('the capture lookups', () => {
     );
   });
 
+  it('picks the open lead over a newer closed one as the latest', async () => {
+    const open = await fromTelegram(42);
+    const closed = await fromTelegram(42);
+    await store.setStatus(closed.id, 'won');
+
+    expect(
+      (await store.findLatestLeadByTelegramId(42, baseData.brand))?.id,
+    ).toBe(open.id);
+  });
+
+  it('falls back to the newest closed lead when none is open', async () => {
+    const lost = await fromTelegram(42);
+    const won = await fromTelegram(42);
+    await store.setStatus(lost.id, 'lost');
+    await store.setStatus(won.id, 'won');
+    await fromTelegram(42, { brand: 'CarLab' });
+
+    expect(
+      (await store.findLatestLeadByTelegramId(42, baseData.brand))?.id,
+    ).toBe(won.id);
+  });
+
   it('finds the newest number a closed lead of the same brand holds', async () => {
     await fromTelegram(42, { contact: '+381600000001' });
     const newer = await fromTelegram(42, { contact: '+381600000002' });

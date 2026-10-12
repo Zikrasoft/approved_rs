@@ -6,7 +6,6 @@ import { operationNoticeText, unreadableLedgerText } from './ledger.ts';
 import {
   quarantinedLeadsText,
   statusChangeText,
-  type EditField,
   type Formatter,
 } from './cards.ts';
 import type { Role } from './markup.ts';
@@ -135,18 +134,6 @@ export function createNotifier({
       const others = new Set([...ownerIds, ...adminIds]);
       others.delete(authorId);
       await sendToAll([...others], operationNoticeText(operation, balance));
-    },
-
-    async sendVisitorChangeToAdmin(
-      lead: StoredLead,
-      field: EditField,
-      before: string | null | undefined,
-    ): Promise<void> {
-      if ((before ?? '') === (lead[field] ?? '')) return;
-      await sendToAll(
-        adminIds,
-        formatter.visitorChangeText(lead, field, before),
-      );
     },
 
     async sendQuarantinedLeadsToAdmin(

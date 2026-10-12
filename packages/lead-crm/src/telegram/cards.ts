@@ -126,20 +126,6 @@ export const LEAD_ACTION_COPY = {
   noteAdded: '📝 Заметка добавлена',
 } as const;
 
-const FIELD_PREVIEW_LIMIT = 120;
-
-function fieldPreview(value: string | null | undefined): string {
-  const text = (value ?? '').trim();
-  if (!text) return '—';
-  return escapeHtml(
-    text.length <= FIELD_PREVIEW_LIMIT
-      ? text
-      : `${text.slice(0, FIELD_PREVIEW_LIMIT)}…`,
-  );
-}
-
-const VISITOR_CHANGE_MARK = '🤖 Посетитель через бота';
-
 export function quarantinedLeadsText(
   count: number,
   path: string,
@@ -213,13 +199,6 @@ export function createFormatter({
     return lines.join('\n');
   }
 
-  function shownValue(
-    field: EditField,
-    value: string | null | undefined,
-  ): string | null | undefined {
-    return field === 'service' && value ? serviceLabel(value) : value;
-  }
-
   function topicButtons(lead: StoredLead): Btn[][] {
     return lead.topicId == null
       ? []
@@ -238,20 +217,6 @@ export function createFormatter({
 
     topicSummaryText(lead: StoredLead): string {
       return formatLeadText(lead, linkedContact);
-    },
-
-    visitorChangeText(
-      lead: StoredLead,
-      field: EditField,
-      before: string | null | undefined,
-    ): string {
-      return [
-        `✏️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${EDIT_FIELD_LABELS[field]}`,
-        VISITOR_CHANGE_MARK,
-        ``,
-        `Было: ${fieldPreview(shownValue(field, before))}`,
-        `Стало: ${fieldPreview(shownValue(field, lead[field]))}`,
-      ].join('\n');
     },
 
     formatTeaser(lead: StoredLead): string {

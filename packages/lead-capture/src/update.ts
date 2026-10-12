@@ -9,6 +9,7 @@ const senderSchema = z.object({
 });
 
 export const captureMessageSchema = z.object({
+  message_id: z.number().int(),
   chat: z.object({ id: z.number().int(), type: z.string() }),
   from: senderSchema,
   text: z.string().optional(),
