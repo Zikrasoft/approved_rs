@@ -461,6 +461,17 @@ export function createLeadStore({
       return updateOne(id, (l) => ({ ...l, ...statusPatch(status) }));
     },
 
+    recordOwnerReply(
+      id: number,
+      at: Date = new Date(),
+    ): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) => ({
+        ...l,
+        lastActivityAt: at.toISOString(),
+        ...(l.status === 'open' ? statusPatch('negotiations', at) : {}),
+      }));
+    },
+
     addNote(id: number, note: string): Promise<StoredLead | undefined> {
       return updateOne(id, (l) => ({
         ...l,
@@ -495,6 +506,10 @@ export function createLeadStore({
       return leads.find(
         (l) => l.telegramChatId === chatId && l.telegramMessageId === messageId,
       );
+    },
+
+    async findByTopic(topicId: number): Promise<StoredLead | undefined> {
+      return (await readLeads()).find((l) => l.topicId === topicId);
     },
 
     resolvePendingPrompt(

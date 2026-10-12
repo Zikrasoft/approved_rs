@@ -1,5 +1,5 @@
 import { channelLabel } from '../channelLabels.ts';
-import { isHandleContact, isTelegramIdContact } from '../contactShape.ts';
+import { isHandleContact } from '../contactShape.ts';
 import { LEADS_PATH } from '../quarantine.ts';
 import { isInWork, type StoredLead } from '../schema.ts';
 import { isPlaceholderContact, type Digest } from '../store.ts';
@@ -20,7 +20,6 @@ export interface FormatterOptions {
   serviceLabel: (slug: string) => string;
   botUsername: string;
   groupId: string;
-  replyRelayBrands?: readonly string[];
 }
 
 const MAX_SERVICES_LABEL = 200;
@@ -103,13 +102,8 @@ export const EDIT_FIELD_LABELS = {
 export type EditField = keyof typeof EDIT_FIELD_LABELS;
 
 export const REPLY_COPY = {
-  prompt: '💬 Напишите ответ посетителю — бот отправит его в чат:',
-  ack: 'Жду сообщение',
-  empty: '⚠️ Сообщение не может быть пустым. Попробуйте ещё раз.',
   undelivered:
     '⚠️ Не доставлено: посетитель заблокировал бота или чат недоступен.',
-  sent: '✅ Отправлено',
-  notePrefix: 'Ответ: ',
 } as const;
 
 export const LEAD_ACTION_COPY = {
@@ -167,11 +161,7 @@ export function createFormatter({
   serviceLabel,
   botUsername,
   groupId,
-  replyRelayBrands = [],
 }: FormatterOptions) {
-  const canReplyThroughBot = (lead: StoredLead): boolean =>
-    replyRelayBrands.includes(lead.brand) && isTelegramIdContact(lead.contact);
-
   function clickLabel(lead: StoredLead): string {
     const channel = lead.contactChannel;
     return lead.kind === 'call_click' &&
@@ -307,16 +297,6 @@ export function createFormatter({
       const rows: Btn[][] = [
         ...statusRows(lead, role),
         ...topicButtons(lead),
-        ...(canReplyThroughBot(lead)
-          ? [
-              [
-                {
-                  text: '💬 Ответить через бота',
-                  callback_data: `reply:${lead.id}`,
-                },
-              ],
-            ]
-          : []),
         ...deleteRow,
       ];
 

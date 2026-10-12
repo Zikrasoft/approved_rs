@@ -46,7 +46,8 @@ runs daily against a 24-hour window, a Ghost lead actually lives 24 to 48 hours.
 through a Capture bot: pressed Start, answered, wrote (`visitorActiveAt`).
 
 **Owner activity** — the last time the owner worked the Lead in the CRM bot:
-marked it in work, added a note, answered a prompt on it (`lastActivityAt`).
+marked it in work, added a note, answered a prompt on it, wrote to the visitor
+in its Topic (`lastActivityAt`).
 A status change alone is not owner activity, and neither is a reply sent from
 the owner's own Telegram account, which never reaches the store.
 
@@ -66,8 +67,8 @@ rate are still the receiving bot's.
 a visitor can read its services and answer its Questionnaire without opening
 the site. It writes a Lead on every `/start`, and every change it makes to
 that Lead reaches the admin the same way an owner's edit does. It has no
-owner surface; the owner answers from their own account, or through it
-only for a visitor who has no username.
+owner surface of its own: the owner answers in the Lead's Topic, and the
+Capture bot copies each message to the visitor, username or not.
 
 **Questionnaire** — the short set of questions a Capture bot asks to turn a
 Lead into a request the owner can answer. Every brand's opens with «Какие
@@ -87,6 +88,9 @@ conversation. The CRM bot opens it the first time a Capture bot touches a
 Lead the visitor started from Telegram, names it after the Lead's id, name and
 brand, and keeps the Lead summary as its first message, edited as the
 Questionnaire fills in. The Lead's card in General and its detail link to it.
+Whatever the owner or admin writes there — text or media — reaches the visitor
+through the brand's Capture bot, the first message moves an open Lead into
+negotiations, and a copy that cannot be delivered is reported in the Topic.
 A Lead from the site form or a placeholder click has no Topic until a bot
 `/start` merges into it.
 _Avoid_: thread, chat

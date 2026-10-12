@@ -5,6 +5,7 @@ import {
   client,
   ensureLeadCard,
   formatter,
+  groupId,
   notifier,
 } from '@/lib/crmBot';
 
@@ -31,6 +32,7 @@ export const { buildHelp, buildLeadDetail } = formatter;
 
 export const OWNER_IDS = ownerIds;
 export const ADMIN_IDS = adminIds;
+export const GROUP_ID = groupId;
 
 export {
   formatMoney,

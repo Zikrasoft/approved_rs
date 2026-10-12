@@ -48,5 +48,3 @@ for (const [brand, token] of siblingTokens(process.env))
 
 export const captureClientFor = (brand: string): TelegramClient | undefined =>
   clients.get(brand);
-
-export const REPLY_RELAY_BRANDS: readonly string[] = [...clients.keys()];

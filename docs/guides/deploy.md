@@ -306,8 +306,8 @@ one bot shared by the three projects; each brand's capture bot is its own.
 | `TELEGRAM_WEBHOOK_SECRET`            | ✅          | —         | —          | CRM     | `/api/telegram-webhook` answers 401 to everything — the bot's buttons are dead |
 | `TELEGRAM_CAPTURE_BOT_TOKEN`         | ✅          | ✅        | ✅         | capture | this brand's capture bot never answers a visitor and no lead is written        |
 | `TELEGRAM_CAPTURE_WEBHOOK_SECRET`    | ✅          | ✅        | ✅         | capture | `/api/telegram-capture` answers 401 to everything — the Telegram tile is dead  |
-| `TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB`  | optional    | —         | —          | capture | the reply button is absent on CarLab's cards                                   |
-| `TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS` | optional    | —         | —          | capture | the reply button is absent on Details' cards                                   |
+| `TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB`  | optional    | —         | —          | capture | owner messages in a CarLab Topic are reported undelivered                      |
+| `TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS` | optional    | —         | —          | capture | owner messages in a Details Topic are reported undelivered                     |
 
 > **The main trap when setting up new projects.** All three `src/lib/crmBot.ts`
 > call `requireEnv('TELEGRAM_BOT_TOKEN')`, `requireEnv('TELEGRAM_BOT_USERNAME')` and
@@ -340,10 +340,11 @@ is per project too, and on approved.rs it is a **different** value from
 `TELEGRAM_WEBHOOK_SECRET` — the two webhooks there belong to two different bots
 and do not share a secret. approved.rs additionally holds the other two capture
 tokens as `TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB` and `TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS`:
-the owner's reply to a handle-less visitor lands on the CRM webhook there, and
+whatever the owner writes in a Lead's Topic lands on the CRM webhook there, and
 only the visitor's own brand's bot can deliver it, so the webhook picks the bot by
 the lead's `brand` ([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
-Without a sibling token the reply button is simply absent on that brand's cards.
+Without a sibling token every owner message in that brand's Topics is answered
+with an "undelivered" notice in the Topic.
 
 ### Storage and cron
 
@@ -938,10 +939,10 @@ Each is registered once per bot, four registrations in total.
 The group receives a short teaser of the lead ("#123 · Ivan · Vehicle
 sourcing · status") with the outcome buttons (✅ deal / ❌ lost, 🗣 negotiations, and ⏳, a touch that
 changes no status) and
-an "Open in the bot" link button; postponing, replying to the visitor and
-deleting happen in a DM with the bot. Statuses are open / negotiations /
-won / lost / postponed, and lost is the archive. 🗣 on the card, or a reply to
-the visitor through the bot, moves an open Lead into negotiations. Leads are stored
+an "Open in the bot" link button; postponing and deleting happen in a DM with
+the bot, and the visitor is answered in the Lead's Topic. Statuses are open / negotiations /
+won / lost / postponed, and lost is the archive. 🗣 on the card, or the
+owner's first message in the Lead's Topic, moves an open Lead into negotiations. Leads are stored
 in Vercel Blob (`data/leads.json`, private access), with no external database.
 
 The owner and the admin each have to message the bot `/start` once before it can
@@ -959,16 +960,20 @@ CRM bot the **Manage topics** admin right as well — without it
 `createForumTopic` fails, the failure is only logged, and the Lead carries on
 without a Topic. Add the three Capture bots to the same group as admins with
 **Manage topics** too: each one copies its visitors' messages into their Topic
-and owner replies back out, which needs it to see the group, and posting into a
-closed Topic needs that right. The CRM bot must also receive group messages
-(admin in the group, or privacy mode off) so it hears the owner write inside a
-Topic.
+and copies the owner's messages there — text, photos, voice, files — back out to
+the visitor, which needs it to see the group, and posting into a closed Topic
+needs that right.
 
-Privacy mode can stay on. The bot only acts on replies to its own messages
-(cards and prompts), and Telegram delivers "replies to any messages implicitly
-or explicitly meant for this bot" to a bot in privacy mode
-([Bot features → Privacy mode](https://core.telegram.org/bots/features#privacy-mode));
-every other group message is ignored anyway.
+The CRM bot must receive **every** group message, not only replies to its own:
+the owner writes in a Topic without replying to anything, and that is the
+message the CRM webhook routes by its Topic to the Lead and hands to the brand's
+Capture bot. Make it an admin of the group or turn privacy mode off (BotFather →
+Bot Settings → Group Privacy); a bot in privacy mode only sees replies and
+commands meant for it
+([Bot features → Privacy mode](https://core.telegram.org/bots/features#privacy-mode)).
+Messages from bots — the Capture bots' copies of the visitor —
+and from anyone who is neither owner nor admin are ignored, so the relay cannot
+loop.
 
 The webhook must carry a `secret_token` equal to the approved.rs project's
 `TELEGRAM_WEBHOOK_SECRET` — without a match the endpoint answers 401 to every
