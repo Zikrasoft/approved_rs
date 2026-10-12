@@ -61,8 +61,10 @@ translations:
       text: Mi smo u Beogradu, čekamo vas u servisu.
       hours: Ponedeljak–Petak 08:00–18:00 · Subota 09:00–14:00
     manager:
-      button: Pitanje za majstora
+      button: 👤 Pisati majstoru
       text: Napišite vaše pitanje u jednoj poruci — majstor će odgovoriti ovde.
+      handoff: Majstor je dostupan na Telegramu — pritisnite da otvorite chat.
+      chat: Otvorite chat s majstorom ↗
     partners:
       button: Partneri
       text: Naši partneri — izaberite kome da pišete.
@@ -101,8 +103,10 @@ translations:
       text: We're in Belgrade, waiting for you at the service.
       hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
     manager:
-      button: Message the mechanic
+      button: 👤 Message the mechanic
       text: Send your question in one message — the mechanic will reply here.
+      handoff: The mechanic is available on Telegram — click to open the chat.
+      chat: Open chat with the mechanic ↗
     partners:
       button: Partners
       text: Our partners — choose who to contact.
@@ -120,4 +124,4 @@ translations:
       shortDescription: Car service in Belgrade — diagnostics, repairs, servicing
       menuCommand: Main menu
       langCommand: Change language
-translatedFrom: c74da072000a8505
+translatedFrom: e894bd7a77f929d2

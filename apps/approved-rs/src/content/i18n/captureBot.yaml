@@ -63,8 +63,10 @@ translations:
       text: We're here for you — message or call us.
       hours: Available 24/7, no days off
     manager:
-      button: Message the manager
+      button: 👤 Message the manager
       text: Send your question in one message — the manager will reply right here.
+      handoff: The manager is available on Telegram — click to open the chat.
+      chat: Open chat with the manager ↗
     partners:
       button: Partners
       text: Repairs and detailing — with partners we trust. Choose who to contact.
@@ -104,8 +106,10 @@ translations:
       text: Tu smo — pišite ili zovite.
       hours: Non-stop, bez praznika
     manager:
-      button: Pitati menadžera
+      button: 👤 Napisati menadžeru
       text: Postavite vaše pitanje u jednoj poruci — menadžer će odgovoriti ovde.
+      handoff: Menadžer je dostupan na Telegramu — kliknite da otvorite čat.
+      chat: Otvoriti čat s menadžerom ↗
     partners:
       button: Partneri
       text: Popravka i detailing — kod partnera kojima verujemo. Izaberite kome želite da pišete.
@@ -145,8 +149,10 @@ translations:
       text: Estamos aquí para ayudarte, escríbenos o llámanos.
       hours: Disponible 24/7, sin días festivos
     manager:
-      button: Escribir al gerente
+      button: 👤 Escribir al administrador
       text: Escribe tu pregunta en un solo mensaje — el gerente te responderá aquí.
+      handoff: El administrador está disponible en Telegram — haz clic para abrir el chat.
+      chat: Abrir chat con el administrador ↗
     partners:
       button: Socios
       text: Reparación y detailing — con socios en los que confiamos. Elige a quién contactar.
@@ -186,8 +192,10 @@ translations:
       text: Wir sind für Sie da – schreiben Sie uns oder rufen Sie an.
       hours: 24/7, ohne Feiertage
     manager:
-      button: Manager kontaktieren
+      button: 👤 Manager kontaktieren
       text: Stellen Sie Ihre Frage in einer Nachricht – der Manager antwortet hier.
+      handoff: Der Manager ist über Telegram erreichbar – klicken Sie, um den Chat zu öffnen.
+      chat: Chat mit dem Manager öffnen ↗
     partners:
       button: Partner
       text: Reparatur und Pflege – bei Partnern, denen wir vertrauen. Wählen Sie, wem Sie schreiben möchten.
@@ -205,4 +213,4 @@ translations:
       shortDescription: Autosourcing, Import und Rückkauf von Fahrzeugen in Europa
       menuCommand: Hauptmenü
       langCommand: Sprache wechseln
-translatedFrom: 418b5d65fc8d66a1
+translatedFrom: 69151eaa7ce25825
