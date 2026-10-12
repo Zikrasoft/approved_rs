@@ -1,3 +1,4 @@
+import { GOALS } from './goals.ts';
 import {
   analyticsDeclined,
   CONSENT_EVENT,
@@ -6,16 +7,35 @@ import {
 } from './consent.ts';
 
 const YM_TAG_SRC = 'https://mc.yandex.ru/metrika/tag.js?id=';
+const META_PIXEL_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
+
+const META_EVENTS: Readonly<Record<string, string>> = {
+  [GOALS.formSubmit]: 'Lead',
+  [GOALS.contactClick]: 'Contact',
+  [GOALS.addToCart]: 'AddToCart',
+  [GOALS.beginCheckout]: 'InitiateCheckout',
+  [GOALS.orderPlaced]: 'Purchase',
+};
 
 export interface AnalyticsConfig {
   ymCounterId?: number;
+  metaPixelId?: string;
 }
 
 type YmQueue = ((...args: unknown[]) => void) & { a?: unknown[][]; l?: number };
+type FbqQueue = ((...args: unknown[]) => void) & {
+  callMethod?: (...args: unknown[]) => void;
+  queue: unknown[][];
+  push: FbqQueue;
+  loaded: boolean;
+  version: string;
+};
 
 declare global {
   interface Window {
     ym?: (...args: unknown[]) => void;
+    fbq?: (...args: unknown[]) => void;
+    _fbq?: (...args: unknown[]) => void;
     ymReachGoal?: (goal: string, params?: Record<string, unknown>) => void;
     loadAnalytics?: () => void;
   }
@@ -50,6 +70,51 @@ function stubYm(): void {
   window.ym = ym;
 }
 
+function stubFbq(): void {
+  if (window.fbq) return;
+  const fbq = ((...args: unknown[]) => {
+    if (fbq.callMethod) fbq.callMethod(...args);
+    else fbq.queue.push(args);
+  }) as FbqQueue;
+  fbq.queue = [];
+  fbq.push = fbq;
+  fbq.loaded = true;
+  fbq.version = '2.0';
+  window.fbq = fbq;
+  window._fbq = fbq;
+}
+
+function startYm(ymCounterId: number): void {
+  stubYm();
+  window.ym?.(ymCounterId, 'init', {
+    ssr: true,
+    webvisor: true,
+    clickmap: true,
+    accurateTrackBounce: true,
+    trackLinks: true,
+  });
+  whenIdle(() => loadOnce(`${YM_TAG_SRC}${ymCounterId}`));
+}
+
+function startMetaPixel(metaPixelId: string): void {
+  stubFbq();
+  window.fbq?.('init', metaPixelId);
+  window.fbq?.('track', 'PageView');
+  whenIdle(() => loadOnce(META_PIXEL_SRC));
+}
+
+function trackMetaGoal(goal: string, params?: Record<string, unknown>): void {
+  const event = META_EVENTS[goal];
+  if (!event) return;
+  const { total, currency } = params ?? {};
+  if (typeof total === 'number' && typeof currency === 'string')
+    window.fbq?.('track', event, {
+      value: total,
+      currency: currency.toUpperCase(),
+    });
+  else window.fbq?.('track', event);
+}
+
 let pendingStart: (() => void) | undefined;
 let listening = false;
 
@@ -70,27 +135,23 @@ function refused(): boolean {
   }
 }
 
-export function defineAnalytics({ ymCounterId }: AnalyticsConfig): void {
+export function defineAnalytics({
+  ymCounterId,
+  metaPixelId,
+}: AnalyticsConfig): void {
   if (window.loadAnalytics) return;
 
   window.ymReachGoal = (goal, params) => {
     if (ymCounterId) window.ym?.(ymCounterId, 'reachGoal', goal, params);
+    if (metaPixelId) trackMetaGoal(goal, params);
   };
 
   let started = false;
   const start = (): void => {
-    if (started || !ymCounterId) return;
+    if (started) return;
     started = true;
-
-    stubYm();
-    window.ym?.(ymCounterId, 'init', {
-      ssr: true,
-      webvisor: true,
-      clickmap: true,
-      accurateTrackBounce: true,
-      trackLinks: true,
-    });
-    whenIdle(() => loadOnce(`${YM_TAG_SRC}${ymCounterId}`));
+    if (ymCounterId) startYm(ymCounterId);
+    if (metaPixelId) startMetaPixel(metaPixelId);
   };
   window.loadAnalytics = start;
   pendingStart = start;

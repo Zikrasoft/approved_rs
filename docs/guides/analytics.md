@@ -129,6 +129,37 @@ are carlab.rs only. The goals are created in the counters when the shop moves to
 developers with `?dev=true`, and such visits are excluded from samples the same way
 as everything else in `docs/analytics-exclusions.md`.
 
+## Meta Pixel
+
+Every goal goes through `reachGoal`, which reaches Metrika and, on a site with a
+pixel id, the Meta Pixel. The pixel shares Metrika's gate in
+`packages/site-kit/src/analytics.ts`: never in dev, never under a refusal, queued
+on the first page view (`init` + `PageView`) with `fbevents.js` fetched while the
+browser is idle. There is no `<noscript>` image: the sites count nothing without
+JavaScript anyway.
+
+Only goals with a Meta standard event reach the pixel — `META_EVENTS` in the same
+file is the one table:
+
+| Goal             | Meta event                                      |
+| ---------------- | ----------------------------------------------- |
+| `form_submit`    | `Lead`                                          |
+| `contact_click`  | `Contact` (every channel)                       |
+| `add_to_cart`    | `AddToCart`                                     |
+| `begin_checkout` | `InitiateCheckout`                              |
+| `order_placed`   | `Purchase`, with `value` and `currency` (`RSD`) |
+
+The rest (scroll depth, form steps, language offer, case views) stay
+Metrika-only: an ads optimiser learns nothing from them and custom events only
+clutter Events Manager. To send one, add its row to `META_EVENTS`. Parameters
+other than an order's `total` + `currency` never reach Meta.
+
+The pixel id sits beside the counter id in each app's `src/utils/metrika.ts` as
+`META_PIXEL_ID` and is passed to `bootSiteKit` by the layout. carlab.rs has
+`29229430643330595`; approved.rs and details.rs are `undefined`, so no pixel
+loads there. To add one, set the constant, and update that site's privacy copy
+and `COOKIE_POLICY_VERSION` (see [deploy.md](deploy.md)) in the same change.
+
 ## How to add an event
 
 1. Add the identifier to `GOALS` and call `reachGoal` where it happens.

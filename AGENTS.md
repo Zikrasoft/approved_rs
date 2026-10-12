@@ -544,7 +544,9 @@ This site supports 5 locales: `ru` (default), `en`, `sr`, `es`, `de`. Translatio
 ## Analytics
 
 Event names live once in `packages/site-kit/src/goals.ts` and are fired through
-`reachGoal` from `@podbor/site-kit/browser`, never as string literals in an app. Every event must also exist as a goal in **all three** Metrika counters —
+`reachGoal` from `@podbor/site-kit/browser`, never as string literals in an app.
+`reachGoal` reaches Metrika and, where a site sets `META_PIXEL_ID`, the Meta Pixel
+(standard events only, `META_EVENTS` in `analytics.ts`). Every event must also exist as a goal in **all three** Metrika counters —
 one created in code but not in a counter is silently lost. The shop funnel
 (`add_to_cart`, `begin_checkout`, `order_placed`) is the exception: carlab.rs
 only, created when the shop goes live — see `docs/analytics.md`. The vocabulary, the

@@ -40,7 +40,7 @@ export const TELEGRAM_BOT_URL = telegramBotLink(BRAND.captureBot);
 
 export const SOCIAL_SAME_AS = [TELEGRAM_BOT_URL];
 
-export const COOKIE_POLICY_VERSION = '2026-09-15';
+export const COOKIE_POLICY_VERSION = '2026-10-12';
 
 export const PHONE_COUNTRY_SHORTLIST = [
   'RS',

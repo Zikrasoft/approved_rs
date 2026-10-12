@@ -25,7 +25,7 @@ beforeEach(() => {
 describe('bootSiteKit', () => {
   it('arms every part once, in order', async () => {
     const { defineAnalytics } = await import('./analytics.ts');
-    (await boot())({ ymCounterId: 42, analytics: true });
+    (await boot())({ ymCounterId: 42, metaPixelId: '7', analytics: true });
     expect(calls).toEqual([
       'analytics',
       'contactClick',
@@ -33,7 +33,10 @@ describe('bootSiteKit', () => {
       'languageSuggestion',
       'funnel',
     ]);
-    expect(defineAnalytics).toHaveBeenCalledWith({ ymCounterId: 42 });
+    expect(defineAnalytics).toHaveBeenCalledWith({
+      ymCounterId: 42,
+      metaPixelId: '7',
+    });
   });
 
   it('makes a second boot a no-op', async () => {
@@ -44,7 +47,7 @@ describe('bootSiteKit', () => {
   });
 
   it('skips the counter when analytics is off', async () => {
-    (await boot())({ ymCounterId: 42, analytics: false });
+    (await boot())({ ymCounterId: 42, metaPixelId: '7', analytics: false });
     expect(calls).not.toContain('analytics');
     expect(calls).toHaveLength(4);
   });

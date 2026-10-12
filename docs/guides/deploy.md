@@ -260,16 +260,16 @@ the capture bot.
 
 ### Analytics — no environment variables
 
-The counters are baked into each `src/utils/constants.ts` and are never read from
+The counters and the Meta Pixel ids are baked into each `src/utils/metrika.ts` and are never read from
 the environment: they are not secrets, they are publicly visible in any request from
 the site, and spreading them across three Vercel dashboards would create a third
 place to get them wrong.
 
-| Site        | Yandex Metrika |
-| ----------- | -------------- |
-| approved.rs | `111800377`    |
-| carlab.rs   | `112647692`    |
-| details.rs  | `112647721`    |
+| Site        | Yandex Metrika | Meta Pixel          |
+| ----------- | -------------- | ------------------- |
+| approved.rs | `111800377`    | —                   |
+| carlab.rs   | `112647692`    | `29229430643330595` |
+| details.rs  | `112647721`    | —                   |
 
 Each domain has its own counter; reusing another's is not allowed. Google Analytics
 was removed from all three — 167 KiB of gtag.js left the bundle entirely.
