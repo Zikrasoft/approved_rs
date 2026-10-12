@@ -107,8 +107,19 @@ export function isPlaceholderContact(contact: string): boolean {
 
 export const GHOST_LEAD_RETENTION_MS = DAY_MS;
 
+export const TOPIC_IDLE_MS = DAY_MS;
+
 function untouched(lead: StoredLead): boolean {
   return lead.status === 'open' && lead.lastActivityAt == null;
+}
+
+function isIdleTopic(lead: StoredLead, now: Date): boolean {
+  return (
+    lead.topicId != null &&
+    !lead.topicClosed &&
+    now.getTime() - Date.parse(lead.topicActiveAt ?? lead.createdAt) >=
+      TOPIC_IDLE_MS
+  );
 }
 
 function contactRank(contact: string): number {
@@ -454,7 +465,28 @@ export function createLeadStore({
       topicId: number,
       topicMessageId: number,
     ): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({ ...l, topicId, topicMessageId }));
+      return updateOne(id, (l) => ({
+        ...l,
+        topicId,
+        topicMessageId,
+        topicClosed: false,
+        topicActiveAt: new Date().toISOString(),
+      }));
+    },
+
+    touchTopic(
+      id: number,
+      at: Date = new Date(),
+    ): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) => ({
+        ...l,
+        topicClosed: false,
+        topicActiveAt: at.toISOString(),
+      }));
+    },
+
+    closeTopic(id: number): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) => ({ ...l, topicClosed: true }));
     },
 
     setStatus(id: number, status: LeadStatus): Promise<StoredLead | undefined> {
@@ -678,6 +710,20 @@ export function createLeadStore({
         );
       });
       return next.filter((l) => expiredIds.has(l.id));
+    },
+
+    async closeIdleTopics(now: Date): Promise<StoredLead[]> {
+      if (!(await readLeads()).some((l) => isIdleTopic(l, now))) return [];
+      let idleIds = new Set<number>();
+      const next = await updateLeads((leads) => {
+        idleIds = new Set(
+          leads.filter((l) => isIdleTopic(l, now)).map((l) => l.id),
+        );
+        return leads.map((l) =>
+          idleIds.has(l.id) ? { ...l, topicClosed: true } : l,
+        );
+      });
+      return next.filter((l) => idleIds.has(l.id));
     },
   };
 }

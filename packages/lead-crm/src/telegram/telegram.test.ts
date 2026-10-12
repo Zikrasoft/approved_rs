@@ -81,6 +81,8 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     telegramId: null,
     topicId: null,
     topicMessageId: null,
+    topicClosed: false,
+    topicActiveAt: null,
     referredBy: null,
     remindAt: null,
     ...overrides,

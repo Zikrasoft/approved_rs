@@ -1,9 +1,11 @@
 import { z } from 'zod';
 import {
   createAfterStatusChange,
+  createCloseLeadTopic,
   createEnsureLeadCard,
   createEnsureLeadTopic,
   createNotifyLead,
+  createTouchLeadTopic,
 } from './notifyLead.ts';
 import type { LeadStore } from './store.ts';
 import { createTelegramClient, parseIds } from './telegram/client.ts';
@@ -62,11 +64,17 @@ export function createBrandBot({
     adminIds,
   });
   const ensureLeadCard = createEnsureLeadCard({ store, notifier });
+  const closeLeadTopic = createCloseLeadTopic({ store, notifier });
   return {
     notifier,
     ensureLeadCard,
     ensureLeadTopic: createEnsureLeadTopic({ store, notifier }),
-    afterStatusChange: createAfterStatusChange({ ensureLeadCard, notifier }),
+    touchLeadTopic: createTouchLeadTopic({ store, notifier }),
+    afterStatusChange: createAfterStatusChange({
+      ensureLeadCard,
+      closeLeadTopic,
+      notifier,
+    }),
     notifyLead: createNotifyLead({ store, notifier, brand }),
     client,
     formatter,

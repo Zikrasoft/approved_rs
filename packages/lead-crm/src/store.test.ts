@@ -7,6 +7,7 @@ import { storedLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
 import {
   createLeadStore,
   GHOST_LEAD_RETENTION_MS,
+  TOPIC_IDLE_MS,
   isFreshLead,
   postponePatch,
   resumePatch,
@@ -959,6 +960,61 @@ describe('expireGhostLeads', () => {
         contactChannel: 'telegram',
       });
     });
+  });
+});
+
+describe('closeIdleTopics', () => {
+  const NOW = new Date('2026-10-02T12:00:00.000Z');
+
+  async function topicLead(activeMsAgo: number | null): Promise<StoredLead> {
+    const lead = await store.insertLead({ ...baseData, telegramId: 9 });
+    await store.setTopic(lead.id, lead.id + 100, 1);
+    await store.updateLeads((leads) =>
+      leads.map((l) =>
+        l.id === lead.id
+          ? {
+              ...l,
+              createdAt: new Date(NOW.getTime() - TOPIC_IDLE_MS).toISOString(),
+              topicActiveAt:
+                activeMsAgo == null
+                  ? null
+                  : new Date(NOW.getTime() - activeMsAgo).toISOString(),
+            }
+          : l,
+      ),
+    );
+    return lead;
+  }
+
+  it('closes a topic quiet for a day, once', async () => {
+    const quiet = await topicLead(TOPIC_IDLE_MS);
+    await topicLead(TOPIC_IDLE_MS - 1);
+
+    const closed = await store.closeIdleTopics(NOW);
+
+    expect(closed.map((l) => [l.id, l.topicClosed])).toEqual([
+      [quiet.id, true],
+    ]);
+    expect(await store.closeIdleTopics(NOW)).toEqual([]);
+  });
+
+  it('dates a topic with no activity stamp from the Lead', async () => {
+    const lead = await topicLead(null);
+
+    expect((await store.closeIdleTopics(NOW)).map((l) => l.id)).toEqual([
+      lead.id,
+    ]);
+  });
+
+  it('skips a Lead without a topic', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.updateLeads((leads) =>
+      leads.map((l) =>
+        l.id === lead.id ? { ...l, createdAt: '2026-01-01T00:00:00.000Z' } : l,
+      ),
+    );
+
+    expect(await store.closeIdleTopics(NOW)).toEqual([]);
   });
 });
 

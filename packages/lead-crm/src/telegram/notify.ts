@@ -94,6 +94,16 @@ export function createNotifier({
       );
     },
 
+    async closeLeadTopic(lead: StoredLead): Promise<void> {
+      if (lead.topicId == null) return;
+      await client.api.closeForumTopic(groupId, lead.topicId);
+    },
+
+    async reopenLeadTopic(lead: StoredLead): Promise<void> {
+      if (lead.topicId == null) return;
+      await client.api.reopenForumTopic(groupId, lead.topicId);
+    },
+
     async unpinLeadCard(lead: StoredLead): Promise<void> {
       if (lead.telegramChatId == null || lead.telegramMessageId == null) return;
       try {

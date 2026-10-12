@@ -52,6 +52,8 @@ const storedLead: StoredLead = {
   telegramId: null,
   topicId: null,
   topicMessageId: null,
+  topicClosed: false,
+  topicActiveAt: null,
   referredBy: null,
   remindAt: null,
 };
@@ -330,6 +332,9 @@ describe('afterStatusChange', () => {
     ensureLeadCard: async (lead) => {
       calls.push(`card:${lead.id}`);
     },
+    closeLeadTopic: async (lead) => {
+      calls.push(`topic:${lead.id}`);
+    },
     notifier: {
       editLeadDetailMessage: async (chatId, messageId, lead, role) => {
         calls.push(`dm:${chatId}:${messageId}:${lead.id}:${role}`);
@@ -356,19 +361,19 @@ describe('afterStatusChange', () => {
       'a change from a DM',
       { status: 'lost' as const },
       { surface },
-      ['card:42', 'unpin:42', 'dm:7:8:42:owner', 'status:42'],
+      ['card:42', 'unpin:42', 'topic:42', 'dm:7:8:42:owner', 'status:42'],
     ],
     [
       'won',
       { status: 'won' as const },
       {},
-      ['card:42', 'unpin:42', 'status:42'],
+      ['card:42', 'unpin:42', 'topic:42', 'status:42'],
     ],
     [
       'the ghost sweep',
       { status: 'lost' as const },
       { notice: false },
-      ['card:42', 'unpin:42'],
+      ['card:42', 'unpin:42', 'topic:42'],
     ],
   ])('%s', async (_, patch, options, expected) => {
     await afterStatusChange({ ...storedLead, ...patch }, options);

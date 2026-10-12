@@ -22,18 +22,20 @@ export function isMessageGone(err: unknown): boolean {
   );
 }
 
-const ignoreNotModified: Transformer = async (
+const UNCHANGED_STATE = new Map([
+  ['editMessageText', /message is not modified/],
+  ['closeForumTopic', /TOPIC_NOT_MODIFIED|TOPIC_CLOSED/],
+  ['reopenForumTopic', /TOPIC_NOT_MODIFIED/],
+]);
+
+const ignoreUnchangedState: Transformer = async (
   prev,
   method,
   payload,
   signal,
 ) => {
   const response = await prev(method, payload, signal);
-  if (
-    method === 'editMessageText' &&
-    !response.ok &&
-    response.description.includes('message is not modified')
-  )
+  if (!response.ok && UNCHANGED_STATE.get(method)?.test(response.description))
     return { ok: true, result: true as never };
   return response;
 };
@@ -77,7 +79,7 @@ export function createTelegramClient(botToken: string, botUsername: string) {
         globalThis.fetch(input, withNativeSignal(init)),
     },
   });
-  bot.api.config.use(ignoreNotModified);
+  bot.api.config.use(ignoreUnchangedState);
   const { api } = bot;
 
   return {
