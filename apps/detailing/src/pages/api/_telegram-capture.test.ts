@@ -102,6 +102,11 @@ function questions(from: Visitor = VISITOR): unknown[] {
     .map((call) => call.payload.text);
 }
 
+function lastReply() {
+  return api.callsTo('sendMessage', '1002:test-capture-bot-token').at(-1)
+    ?.payload as { reply_markup: { inline_keyboard: unknown[][] } };
+}
+
 function visitorLead(from: Visitor = VISITOR) {
   return (
     memory.storages.get(LEADS_PATH)?.current() as { telegramId: number }[]
@@ -142,6 +147,7 @@ describe('the Details capture bot', () => {
           {
             text: captureBot.card.request,
             callback_data: 'request:sr:polishing-ceramic',
+            style: 'success',
           },
         ],
         [
@@ -197,6 +203,7 @@ describe('the Details Questionnaire', () => {
       words.request.service,
       words.phoneAsk,
       words.thanks,
+      words.menu.text,
     ]);
     expect(
       api
@@ -226,6 +233,14 @@ describe('the Details Questionnaire', () => {
       words.request.service,
       words.thanks,
     ]);
+    expect(lastReply().reply_markup.inline_keyboard[0]).toEqual([
+      {
+        text: words.request.button,
+        callback_data: 'request:ru',
+        style: 'success',
+      },
+    ]);
+    expect(words.request.button).toMatch(/^📝 /);
     expect(visitorLead()).toMatchObject({
       service: 'polishing-ceramic',
       comment: 'Машина: Audi A6 2019',

@@ -99,7 +99,11 @@ export function createScreens<L extends string, S extends string>({
     locale: L,
     arg?: string,
   ): InlineKeyboardButton[] => [
-    { text, callback_data: tapData(screen, locale, arg) },
+    {
+      text,
+      callback_data: tapData(screen, locale, arg),
+      ...(screen === 'request' && { style: 'success' as const }),
+    },
   ];
 
   function mainMenu(locale: L): Screen {

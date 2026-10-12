@@ -228,7 +228,12 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
         words.request.service,
         { reply_markup: { inline_keyboard: servicePicker(locale) } },
       ];
-    return [next ? QUESTION[next](words) : words.thanks, undefined];
+    if (next) return [QUESTION[next](words), undefined];
+    return [words.thanks, withMainMenu(locale)];
+  }
+
+  function withMainMenu(locale: L): InlineKeyboardExtra {
+    return { reply_markup: { inline_keyboard: mainMenu(locale).keyboard } };
   }
 
   function send(chatId: number, text: string, extra?: CaptureExtra) {
@@ -400,7 +405,9 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       capturePrompt: null,
     });
     await publishLeadChange(lead, updated);
-    await send(prompt.chatId, copy(localeOf(lead)).thanks, CLEAR_KEYBOARD);
+    const locale = localeOf(lead);
+    await send(prompt.chatId, copy(locale).thanks, CLEAR_KEYBOARD);
+    await show(prompt.chatId, mainMenu(locale));
   }
 
   async function reAskPhone(
@@ -575,7 +582,8 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       capturePrompt: open.capturePrompt,
     });
     await publishLeadChange(open, updated);
-    await send(chatId, copy(localeOf(open)).received);
+    const locale = localeOf(open);
+    await send(chatId, copy(locale).received, withMainMenu(locale));
   }
 
   async function recordPhoneOnOpenLead(
@@ -588,7 +596,8 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       capturePrompt: lead.capturePrompt,
     });
     await publishLeadChange(lead, updated);
-    await send(chatId, copy(localeOf(lead)).received);
+    const locale = localeOf(lead);
+    await send(chatId, copy(locale).received, withMainMenu(locale));
   }
 
   async function handleOwnContact(

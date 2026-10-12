@@ -144,6 +144,21 @@ function lastMarkup(): unknown {
   return replies().at(-1)?.reply_markup;
 }
 
+function expectThanksThenMenu(chatId: number, menu: unknown = MENU_KEYBOARD) {
+  expect(replies().slice(-2)).toEqual([
+    expect.objectContaining({
+      chat_id: chatId,
+      text: 'THANKS',
+      reply_markup: { remove_keyboard: true },
+    }),
+    expect.objectContaining({
+      chat_id: chatId,
+      text: 'MENU',
+      reply_markup: menu,
+    }),
+  ]);
+}
+
 function cards() {
   return api
     .callsTo('sendMessage', CRM_TOKEN)
@@ -552,6 +567,7 @@ describe('the screen /start opens', () => {
           {
             text: 'LEAVE_A_REQUEST',
             callback_data: 'request:sr:vehicle-import',
+            style: 'success',
           },
         ],
         [
@@ -846,6 +862,7 @@ describe('leaving the Questionnaire through the menu', () => {
       'Ищет: BMW X5\nСообщение: а сколько по времени?',
     );
     expect(lastSent()).toEqual([42, 'RECEIVED']);
+    expect(lastMarkup()).toEqual(MENU_KEYBOARD);
   });
 
   it('takes the share-contact keyboard away when a screen ends the phone step', async () => {
@@ -1038,8 +1055,7 @@ describe('the phone, asked last when nothing else can reach the visitor', () => 
       comment: 'Ищет: BMW X5\nБюджет: до 30k',
       capturePrompt: null,
     });
-    expect(lastSent()).toEqual([777, 'THANKS']);
-    expect(lastMarkup()).toEqual({ remove_keyboard: true });
+    expectThanksThenMenu(777);
   });
 
   it('keeps a number that already carries its plus sign', async () => {
@@ -1060,8 +1076,7 @@ describe('the phone, asked last when nothing else can reach the visitor', () => 
 
     expect(stored()[0]).toMatchObject({ contact: e164, capturePrompt: null });
     expect(stored()[0].comment).not.toContain(typed);
-    expect(lastSent()).toEqual([777, 'THANKS']);
-    expect(lastMarkup()).toEqual({ remove_keyboard: true });
+    expectThanksThenMenu(777);
   });
 
   it('files anything else as a message and asks for the number again', async () => {
@@ -1103,7 +1118,7 @@ describe('a visitor with a handle', () => {
       capturePrompt: null,
     });
     expect(lastSent()).toEqual([42, 'THANKS']);
-    expect(lastMarkup()).toBeUndefined();
+    expect(lastMarkup()).toEqual(MENU_KEYBOARD);
   });
 
   it('puts a number shared on a dialog left at the old phone step in the comment', async () => {
@@ -1115,7 +1130,7 @@ describe('a visitor with a handle', () => {
     expect(stored()[0].contact).toBe('@ivan');
     expect(stored()[0].comment).toContain('Телефон: +381601234567');
     expect(stored()[0].capturePrompt).toBeNull();
-    expect(lastSent()).toEqual([42, 'THANKS']);
+    expectThanksThenMenu(42);
   });
 });
 
@@ -1155,6 +1170,7 @@ describe('a contact shared outside the phone step', () => {
       expect.stringContaining('Стало: +381601234567'),
     ]);
     expect(lastSent()).toEqual([777, 'RECEIVED']);
+    expect(lastMarkup()).toEqual(MENU_KEYBOARD);
   });
 });
 
@@ -1324,6 +1340,7 @@ describe('free text outside the dialog', () => {
     expect(stored()[0].comment).toContain('Сообщение: а можно в рассрочку?');
     expect(cardEdits()).toHaveLength(1);
     expect(lastSent()).toEqual([42, 'RECEIVED']);
+    expect(lastMarkup()).toEqual(MENU_KEYBOARD);
   });
 
   it('leaves a dialog that is still running alone', async () => {
@@ -1949,6 +1966,13 @@ describe("CarLab's Questionnaire: the car and what happened, then the phone", ()
 });
 
 describe("Details' Questionnaire: the car, the service as buttons, then the phone", () => {
+  const DETAILS_MENU = {
+    inline_keyboard: [
+      [{ text: 'REQUEST', callback_data: 'request:ru', style: 'success' }],
+      [{ text: 'SERVICES', callback_data: 'services:ru' }],
+    ],
+  };
+
   const PICKER = {
     inline_keyboard: [
       [
@@ -1969,7 +1993,7 @@ describe("Details' Questionnaire: the car, the service as buttons, then the phon
   beforeEach(() => {
     POST = route(SECRET, {
       questionnaire: ['car', 'service'],
-      menu: ['services', 'request'],
+      menu: ['request', 'services'],
     });
   });
 
@@ -1978,15 +2002,10 @@ describe("Details' Questionnaire: the car, the service as buttons, then the phon
     await tap('request:ru', from);
   }
 
-  it('offers Leave a request on the main menu', async () => {
+  it('offers Leave a request first on the main menu, alone on its row and green', async () => {
     await POST(makeCtx(startUpdate()));
 
-    expect(lastMarkup()).toEqual({
-      inline_keyboard: [
-        [{ text: 'SERVICES', callback_data: 'services:ru' }],
-        [{ text: 'REQUEST', callback_data: 'request:ru' }],
-      ],
-    });
+    expect(lastMarkup()).toEqual(DETAILS_MENU);
   });
 
   it('asks for the service as buttons and files the tap as the service', async () => {
@@ -2059,8 +2078,7 @@ describe("Details' Questionnaire: the car, the service as buttons, then the phon
     expect(lastSent()).toEqual([777, 'PHONE_ASK']);
 
     await POST(makeCtx(contactUpdate('381601234567')));
-    expect(lastSent()).toEqual([777, 'THANKS']);
-    expect(lastMarkup()).toEqual({ remove_keyboard: true });
+    expectThanksThenMenu(777, DETAILS_MENU);
     expect(stored()[0]).toMatchObject({
       contact: '+381601234567',
       service: 'vehicle-sourcing',
