@@ -189,10 +189,11 @@ const businessSchema = localBusinessSchema({
     <script>
       import { bootSiteKit } from '@podbor/site-kit/browser';
       import { defineSiteLeadForm } from '@podbor/site-kit/lead-form';
-      import { YM_COUNTER_ID } from '@/utils/metrika';
+      import { META_PIXEL_ID, YM_COUNTER_ID } from '@/utils/metrika';
 
       bootSiteKit({
         ymCounterId: YM_COUNTER_ID,
+        metaPixelId: META_PIXEL_ID,
         analytics: !import.meta.env.DEV,
       });
       defineSiteLeadForm();

@@ -31,6 +31,8 @@ beforeEach(() => {
   delete (window as Partial<Window>).ym;
   delete (window as Partial<Window>).loadAnalytics;
   delete (window as Partial<Window>).ymReachGoal;
+  delete (window as Partial<Window>).fbq;
+  delete (window as Partial<Window>)._fbq;
 });
 
 afterEach(() => {
@@ -198,5 +200,106 @@ describe('defineAnalytics', () => {
     defineAnalytics({ ymCounterId: YM });
     runIdle();
     expect(srcs()).toEqual([TAG]);
+  });
+});
+
+const PIXEL = '29229430643330595';
+const FBQ = 'https://connect.facebook.net/en_US/fbevents.js';
+const fbqQueue = () => (window.fbq as unknown as { queue: unknown[][] }).queue;
+
+describe('defineAnalytics with a Meta Pixel', () => {
+  it('loads the pixel beside the counter once the browser goes idle', () => {
+    defineAnalytics({ ymCounterId: YM, metaPixelId: PIXEL });
+    expect(srcs()).toEqual([]);
+    runIdle();
+    expect(srcs()).toEqual([TAG, FBQ]);
+  });
+
+  it('loads the pixel alone on a site with no Metrika counter', () => {
+    defineAnalytics({ metaPixelId: PIXEL });
+    runIdle();
+    expect(srcs()).toEqual([FBQ]);
+    expect(window.ym).toBeUndefined();
+  });
+
+  it('records init and the page view once before the script downloads', () => {
+    defineAnalytics({ metaPixelId: PIXEL });
+    window.loadAnalytics?.();
+    window.loadAnalytics?.();
+    runIdle();
+    expect(fbqQueue()).toEqual([
+      ['init', PIXEL],
+      ['track', 'PageView'],
+    ]);
+    expect(window._fbq).toBe(window.fbq);
+    expect(srcs()).toEqual([FBQ]);
+  });
+
+  it('leaves the pixel out on a site with no pixel id', () => {
+    defineAnalytics({ ymCounterId: YM });
+    runIdle();
+    expect(srcs()).toEqual([TAG]);
+    expect(window.fbq).toBeUndefined();
+  });
+
+  it('holds the pixel back under the same refusal as the counter', () => {
+    refuse();
+    defineAnalytics({ ymCounterId: YM, metaPixelId: PIXEL });
+    window.ymReachGoal?.('form_submit');
+    runIdle();
+    expect(srcs()).toEqual([]);
+    expect(window.fbq).toBeUndefined();
+    document.dispatchEvent(
+      new CustomEvent(CONSENT_EVENT, { detail: { analytics: true } }),
+    );
+    runIdle();
+    expect(srcs()).toEqual([TAG, FBQ]);
+  });
+
+  it('keeps an already-installed fbq instead of replacing it', () => {
+    const existing = vi.fn();
+    window.fbq = existing;
+    defineAnalytics({ metaPixelId: PIXEL });
+    expect(window.fbq).toBe(existing);
+    expect(existing).toHaveBeenCalledWith('init', PIXEL);
+  });
+
+  it('hands calls to the loaded script once it takes over the queue', () => {
+    defineAnalytics({ metaPixelId: PIXEL });
+    const callMethod = vi.fn();
+    (window.fbq as unknown as { callMethod: typeof callMethod }).callMethod =
+      callMethod;
+    window.ymReachGoal?.('contact_click', { channel: 'phone' });
+    expect(callMethod).toHaveBeenCalledWith('track', 'Contact');
+  });
+
+  it.each([
+    ['form_submit', { service: 'brakes' }, 'Lead'],
+    ['contact_click', { channel: 'viber', placement: 'hero' }, 'Contact'],
+    ['add_to_cart', { type: 'battery' }, 'AddToCart'],
+    ['begin_checkout', undefined, 'InitiateCheckout'],
+    ['order_placed', { total: 12690 }, 'Purchase'],
+  ])('maps %s onto the standard %s event', (goal, params, event) => {
+    defineAnalytics({ ymCounterId: YM, metaPixelId: PIXEL });
+    window.ymReachGoal?.(goal, params);
+    expect(fbqQueue().at(-1)).toEqual(['track', event]);
+    expect(ymQueue().at(-1)).toEqual([YM, 'reachGoal', goal, params]);
+  });
+
+  it('sends the order value and currency with a purchase', () => {
+    defineAnalytics({ metaPixelId: PIXEL });
+    window.ymReachGoal?.('order_placed', { total: 12690, currency: 'rsd' });
+    expect(fbqQueue().at(-1)).toEqual([
+      'track',
+      'Purchase',
+      { value: 12690, currency: 'RSD' },
+    ]);
+  });
+
+  it('keeps goals without a standard event off the pixel', () => {
+    defineAnalytics({ metaPixelId: PIXEL });
+    window.ymReachGoal?.('scroll_50');
+    window.ymReachGoal?.('form_view');
+    expect(fbqQueue()).toHaveLength(2);
   });
 });
