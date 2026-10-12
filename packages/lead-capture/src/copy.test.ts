@@ -18,7 +18,9 @@ const COPY = {
   request: {
     button: 'Оставить заявку',
     car: 'Какая машина?',
-    service: 'Какая услуга?',
+    service: 'Какие услуги?',
+    done: 'Готово →',
+    unsure: 'Не знаю',
   },
   language: { button: 'Язык', text: 'Выберите язык' },
   profile: {

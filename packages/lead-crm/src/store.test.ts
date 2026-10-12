@@ -1729,6 +1729,25 @@ describe('updateCapture', () => {
     });
   });
 
+  it('keeps every picked service, the first as the primary one', async () => {
+    const lead = await store.insertLead(baseData);
+
+    const picked = await store.updateCapture(lead.id, {
+      services: ['vehicle-sourcing', 'vehicle-import'],
+      capturePrompt: { chatId: 777, step: 'service' },
+    });
+    const cleared = await store.updateCapture(lead.id, {
+      services: [],
+      capturePrompt: { chatId: 777, step: 'service' },
+    });
+
+    expect(picked).toMatchObject({
+      service: 'vehicle-sourcing',
+      services: ['vehicle-sourcing', 'vehicle-import'],
+    });
+    expect(cleared).toMatchObject({ service: '', services: [] });
+  });
+
   it('appends the answer and moves the dialog on in one write', async () => {
     const lead = await store.insertLead({ ...baseData, comment: 'Было' });
 

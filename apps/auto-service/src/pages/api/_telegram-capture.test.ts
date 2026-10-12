@@ -194,10 +194,12 @@ describe('the CarLab Questionnaire', () => {
     const words = content('ru').captureBot;
 
     await press('request:ru:diagnostics', NO_HANDLE);
+    await press('done:ru', NO_HANDLE);
     await answer('Golf 2012, стучит подвеска', NO_HANDLE);
     await answer('064 123 4567', NO_HANDLE);
 
     expect(questions(NO_HANDLE)).toEqual([
+      words.request.service,
       words.lookingFor,
       words.phoneAsk,
       words.thanks,
@@ -223,9 +225,36 @@ describe('the CarLab Questionnaire', () => {
     const words = content('ru').captureBot;
 
     await press('request:ru:diagnostics');
+
+    const picker = lastReply().reply_markup.inline_keyboard;
+    expect(picker).toHaveLength(6 + 1);
+    expect(picker[0]).toEqual([
+      expect.objectContaining({
+        text: expect.stringMatching(/^✅ /),
+        callback_data: 'pick:ru:diagnostics',
+      }),
+    ]);
+    expect(picker.at(-1)).toEqual([
+      { text: words.request.done, callback_data: 'done:ru', style: 'success' },
+    ]);
+
+    await press('pick:ru:brakes-suspension');
+
+    const edited = api
+      .callsTo('editMessageText', '1002:test-capture-bot-token')
+      .at(-1)?.payload as { reply_markup: { inline_keyboard: unknown[][] } };
+    expect(edited.reply_markup.inline_keyboard[2]).toEqual([
+      expect.objectContaining({ text: expect.stringMatching(/^✅ /) }),
+    ]);
+
+    await press('done:ru');
     await answer('Golf 2012, стучит подвеска');
 
-    expect(questions()).toEqual([words.lookingFor, words.thanks]);
+    expect(questions()).toEqual([
+      words.request.service,
+      words.lookingFor,
+      words.thanks,
+    ]);
     expect(lastReply().reply_markup.inline_keyboard[0]).toEqual([
       {
         text: words.request.button,
@@ -236,6 +265,7 @@ describe('the CarLab Questionnaire', () => {
     expect(words.request.button).toMatch(/^📝 /);
     expect(visitorLead()).toMatchObject({
       service: 'diagnostics',
+      services: ['diagnostics', 'brakes-suspension'],
       comment: 'Машина и проблема: Golf 2012, стучит подвеска',
       capturePrompt: null,
     });
