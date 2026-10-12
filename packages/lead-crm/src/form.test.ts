@@ -8,6 +8,7 @@ import {
   serviceSlugSchema,
   visitorIdSchema,
   adSourceFieldSchema,
+  metaIdsFieldSchema,
   MAX_COMMENT_LENGTH,
   MAX_FIELD_LENGTH,
   MAX_SERVICES,
@@ -139,6 +140,43 @@ describe('adSourceFieldSchema', () => {
     field({ source: 'facebook', at: 'yesterday' }),
   ])('drops %p rather than failing the whole submission', (value) => {
     expect(adSourceFieldSchema.parse(value)).toBeNull();
+  });
+});
+
+describe('metaIdsFieldSchema', () => {
+  const field = (value: unknown) => JSON.stringify(value);
+
+  it('reads the Meta cookies the site posted', () => {
+    expect(
+      metaIdsFieldSchema.parse(
+        field({
+          fbc: 'fb.1.1760000000000.IwAR2F4-dbP0l7Mn',
+          fbp: 'fb.1.1596403881668.1116446470',
+        }),
+      ),
+    ).toEqual({
+      fbc: 'fb.1.1760000000000.IwAR2F4-dbP0l7Mn',
+      fbp: 'fb.1.1596403881668.1116446470',
+    });
+  });
+
+  it('keeps one id when the other is malformed', () => {
+    expect(
+      metaIdsFieldSchema.parse(
+        field({ fbc: 'IwAR2F4', fbp: 'fb.1.1596403881668.1116446470' }),
+      ),
+    ).toEqual({ fbp: 'fb.1.1596403881668.1116446470' });
+  });
+
+  it.each([
+    null,
+    '',
+    'not json',
+    field({}),
+    field({ fbc: 'fb.1.x.y', fbp: '<script>' }),
+    field({ fbp: `fb.1.1596403881668.${'1'.repeat(501)}` }),
+  ])('drops %p rather than failing the whole submission', (value) => {
+    expect(metaIdsFieldSchema.parse(value)).toBeNull();
   });
 });
 

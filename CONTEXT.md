@@ -81,6 +81,13 @@ and on a merge the first one wins. The card, the detail and the Topic summary
 show it as «📣 Реклама» with `#реклама`. A visitor who reaches a Capture bot
 without passing through the site has no Ad visit: ads send people to the site.
 
+**Meta Lead event** — the one `Lead` the server reports to Meta's Conversions
+API for a Capture bot Lead, since the pixel cannot run in Telegram. It fires
+once, when the bot request becomes real (the Questionnaire is completed or the
+visitor shares a phone), and only for a Lead carrying the Meta browser ids
+(`metaIds`: `fbc`/`fbp`) the site sent with consent. It carries those ids and
+nothing about the person. `metaLeadSentAt` on the Lead marks it sent.
+
 **Capture bot** — one per brand, and the whole of that brand inside Telegram:
 a visitor can read its services and answer its Questionnaire without opening
 the site. It writes a Lead on every `/start`, and copies everything else the

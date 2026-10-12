@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { WORKSHOP_ADDRESS } from '@podbor/brands';
 import { formatPhone } from '@podbor/site-kit/format-phone';
+import { stampStartVisitor } from '@podbor/site-kit/contact-links';
 import { LEADS_PATH } from '@podbor/lead-crm';
 import { recordBotApi, type MemoryStorage } from '@podbor/lead-crm/testing';
 
@@ -25,6 +26,8 @@ vi.mock('@podbor/lead-crm/storage/local', () =>
 
 import { POST } from './telegram-capture';
 import { content } from '@/i18n/content';
+import { leadStore } from '@/lib/crm';
+import { META_PIXEL_ID } from '@/utils/metrika';
 import { PHONE_NUMBER, SITE_URL } from '@/utils/constants';
 
 const api = recordBotApi();
@@ -420,5 +423,69 @@ describe('the CarLab main menu', () => {
         },
       }),
     );
+  });
+});
+
+describe('the Meta Lead event from the CarLab bot', () => {
+  const VISITOR_ID = '0f8fad5b-d9cb-469f-a165-70867728950e';
+  const FBC = 'fb.1.1760000000000.IwAR2F4-dbP0l7Mn';
+  const FROM_SITE = { id: 6301, first_name: 'Nika', username: 'nika' };
+  let graph: { url: string; body: unknown }[];
+
+  beforeEach(() => {
+    graph = [];
+    vi.stubGlobal('fetch', (input: string | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (!url.startsWith('https://graph.facebook.com/'))
+        return api.fetch(input, init);
+      graph.push({ url, body: JSON.parse(String(init?.body)) });
+      return Promise.resolve(new Response('{}'));
+    });
+  });
+
+  afterEach(() => {
+    vi.stubGlobal('fetch', api.fetch);
+  });
+
+  it('tells Meta once the visitor from the site finishes the Questionnaire', async () => {
+    await leadStore.insertOrMergeLead({
+      brand: 'CarLab',
+      name: '',
+      contact: '—',
+      service: '',
+      services: [],
+      contactChannel: 'telegram',
+      comment: '',
+      source_url: 'https://carlab.rs/ru/',
+      visitorId: VISITOR_ID,
+      locale: 'ru',
+      kind: 'call_click',
+      metaIds: { fbc: FBC },
+    });
+    await answer(`/start ${stampStartVisitor('ru', VISITOR_ID)}`, FROM_SITE);
+    expect(graph).toEqual([]);
+
+    await press('request:ru:diagnostics', FROM_SITE);
+    await press('done:ru', FROM_SITE);
+    await answer('Golf 2012, стучит подвеска', FROM_SITE);
+    await answer('ещё и тормоза', FROM_SITE);
+
+    const lead = visitorLead(FROM_SITE) as unknown as { id: number };
+    expect(graph).toEqual([
+      {
+        url: `https://graph.facebook.com/v25.0/${META_PIXEL_ID}/events?access_token=test-capi-token`,
+        body: {
+          data: [
+            {
+              event_name: 'Lead',
+              event_time: expect.any(Number),
+              event_id: `lead-${lead.id}`,
+              action_source: 'chat',
+              user_data: { fbc: FBC },
+            },
+          ],
+        },
+      },
+    ]);
   });
 });

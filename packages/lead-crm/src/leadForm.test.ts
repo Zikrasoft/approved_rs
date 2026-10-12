@@ -25,6 +25,7 @@ function markup(tag: string, selected = 'whatsapp'): string {
     <input type="hidden" name="source_url" data-source-url>
     <input type="hidden" name="visitor_id" data-visitor-id>
     <input type="hidden" name="ad_source" data-ad-source>
+    <input type="hidden" name="meta_ids" data-meta-ids>
     <input type="hidden" name="contact">
     <input type="hidden" name="contact_channel" value="${selected}">
     <div role="tablist">${tabs}</div>
@@ -47,6 +48,7 @@ function deps(overrides: Partial<LeadFormDeps> = {}): LeadFormDeps {
   return {
     visitorId: () => 'visitor-1',
     adSource: () => '{"source":"facebook"}',
+    metaIds: () => '{"fbp":"fb.1.1700000000000.123"}',
     markFieldValidity: (control, valid) => {
       if (valid) control.removeAttribute('aria-invalid');
       else control.setAttribute('aria-invalid', 'true');
@@ -75,6 +77,7 @@ function mount(options: { deps?: LeadFormDeps; selected?: string } = {}) {
     channel: q<HTMLInputElement>('[name="contact_channel"]'),
     visitor: q<HTMLInputElement>('[data-visitor-id]'),
     adSource: q<HTMLInputElement>('[data-ad-source]'),
+    metaIds: q<HTMLInputElement>('[data-meta-ids]'),
     source: q<HTMLInputElement>('[data-source-url]'),
     error: (field: string) => q(`[data-error-${field}]`),
     button: q<HTMLButtonElement>('button[type="submit"]'),
@@ -312,6 +315,7 @@ describe('submit', () => {
     expect(f.channel.value).toBe(channel);
     expect(f.visitor.value).toBe('visitor-1');
     expect(f.adSource.value).toBe('{"source":"facebook"}');
+    expect(f.metaIds.value).toBe('{"fbp":"fb.1.1700000000000.123"}');
     expect(f.source.value).toBe(location.href);
     expect(submitLeadForm).toHaveBeenCalledWith(f.form);
     await Promise.resolve();

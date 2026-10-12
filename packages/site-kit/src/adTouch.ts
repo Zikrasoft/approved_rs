@@ -15,6 +15,7 @@ export interface AdTouch {
   campaign?: string;
   content?: string;
   at: string;
+  fbc?: string;
 }
 
 type StorageLike = Pick<Storage, 'getItem' | 'setItem'>;
@@ -35,6 +36,9 @@ export function paidTouch(href: string, at: Date): AdTouch | null {
     campaign: param('utm_campaign'),
     content: param('utm_content'),
     at: at.toISOString(),
+    fbc: params.has('fbclid')
+      ? `fb.1.${at.getTime()}.${params.get('fbclid')}`
+      : undefined,
   };
 }
 
@@ -79,4 +83,30 @@ export function forgetAdTouch(storage: Pick<Storage, 'removeItem'>): void {
   } catch {
     return;
   }
+}
+
+function cookie(cookies: string, name: string): string | undefined {
+  for (const pair of cookies.split(';')) {
+    const [key, ...value] = pair.trim().split('=');
+    if (key === name) return value.join('=') || undefined;
+  }
+  return undefined;
+}
+
+export function storedMetaIds(
+  cookies = document.cookie,
+  storage: () => StorageLike = browserStorage,
+  now = new Date(),
+): string {
+  try {
+    if (analyticsDeclined(storage().getItem(CONSENT_KEY))) return '';
+  } catch {
+    return '';
+  }
+  const touch = storedAdTouch(storage, now);
+  const fbc =
+    cookie(cookies, '_fbc') ??
+    (touch ? (JSON.parse(touch) as AdTouch).fbc : undefined);
+  const fbp = cookie(cookies, '_fbp');
+  return fbc || fbp ? JSON.stringify({ fbc, fbp }) : '';
 }

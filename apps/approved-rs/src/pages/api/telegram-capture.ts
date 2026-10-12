@@ -3,7 +3,11 @@ export const prerender = false;
 import { CARLAB, DETAILS, brandLocale } from '@podbor/brands';
 import { createCaptureWebhookRoute, referralLink } from '@podbor/lead-capture';
 import { BRAND, leadStore } from '@/lib/crm';
-import { CAPTURE_WEBHOOK_SECRET, captureBot } from '@/lib/captureBot';
+import {
+  CAPTURE_WEBHOOK_SECRET,
+  captureBot,
+  reportMetaLead,
+} from '@/lib/captureBot';
 import {
   ensureLeadCard,
   ensureLeadTopic,
@@ -37,6 +41,7 @@ export const POST = createCaptureWebhookRoute({
     })),
   questionnaire: ['looking_for', 'budget'],
   phoneRegion: 'RS',
+  reportMetaLead,
   languages: LOCALE_NAME,
   services: SERVICE_SLUGS,
   contacts: { phone: PHONE_NUMBER, site: SITE_URL },

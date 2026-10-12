@@ -184,6 +184,75 @@ The pixel id sits beside the counter id in each app's `src/utils/metrika.ts` as
 loads there. To add one, set the constant, and update that site's privacy copy
 and `COOKIE_POLICY_VERSION` (see [deploy.md](deploy.md)) in the same change.
 
+### The server `Lead` event from a Capture bot
+
+The pixel cannot run inside Telegram, so a visitor who goes from the site to a
+Capture bot and leaves a request there is reported to Meta by the server,
+through the [Conversions API](https://developers.facebook.com/documentation/ads-commerce/conversions-api/using-the-api).
+
+**What the site keeps.** Every contact-click beacon and every lead form posts
+`meta_ids` beside `ad_source`: the `_fbc` and `_fbp` cookies the pixel set, or,
+without `_fbc`, an fbc built from the `fbclid` of the first Ad visit as
+`fb.1.<landing time in ms>.<fbclid>`, the fbclid unmodified — Meta's own
+[recipe](https://developers.facebook.com/documentation/ads-commerce/conversions-api/parameters/fbp-and-fbc).
+Under a refusal nothing is sent, the same gate as the pixel
+(`storedMetaIds` in `packages/site-kit/src/adTouch.ts`). The Lead stores them
+as `metaIds`, zod-checked against the `fb.<n>.<time>.<value>` shape; a Capture
+bot Lead that absorbs the click inherits them, and the first one wins.
+
+**When it fires.** Once per Lead, when the bot request becomes real: the
+Questionnaire is completed, or the visitor shares a phone, whichever comes
+first. A bare `/start` sends nothing. The Lead's `metaLeadSentAt` is set in the
+same compare-and-swap write that claims the event (`claimMetaLead`), so a second
+completion, a second phone or a retry never sends it again. A Lead without
+`metaIds` (the visitor never came through the site, or refused) sends nothing.
+
+**What is sent** (`packages/lead-crm/src/metaConversions.ts`), `POST
+https://graph.facebook.com/v25.0/<pixel id>/events?access_token=<token>`:
+
+```json
+{
+  "data": [
+    {
+      "event_name": "Lead",
+      "event_time": 1760261400,
+      "event_id": "lead-42",
+      "action_source": "chat",
+      "user_data": { "fbc": "fb.1.…", "fbp": "fb.1.…" }
+    }
+  ]
+}
+```
+
+- `action_source: "chat"` — "Conversion was made via a messaging app, SMS, or
+  online messaging feature"
+  ([server event parameters](https://developers.facebook.com/documentation/ads-commerce/conversions-api/parameters/server-event)).
+  `event_source_url` and `client_user_agent` are required only for `website`
+  events ([best practices](https://developers.facebook.com/documentation/ads-commerce/conversions-api/best-practices)),
+  and we have neither for a chat, so neither is sent.
+- `event_time` is the moment of the claim, in seconds; Meta refuses one older
+  than 7 days, which a request sent at once never is.
+- `event_id` is `lead-<Lead id>`, stable for dedup.
+- `user_data` carries `fbc`/`fbp` only, unhashed as Meta asks
+  ([customer information parameters](https://developers.facebook.com/documentation/ads-commerce/conversions-api/parameters/customer-information-parameters)).
+  **No phone, email, name or any hashed contact** — an owner decision, so
+  `external_id` is not sent either.
+- `test_event_code` is added only while `META_CAPI_TEST_CODE` is set.
+- `v25.0` is the version Meta's own examples use; `META_GRAPH_VERSION` holds it.
+
+The call is fire-and-forget through `waitUntil`, after the visitor's reply, with
+a 5 s timeout; a refusal or a network failure is logged as `[meta-capi]` and
+never retried. Without `META_CAPI_TOKEN` or a pixel id the app logs
+`[meta-capi] off` once per cold start and sends nothing. Whether Meta attributes
+a `chat` event that carries only `fbc`/`fbp` well enough to optimise on is not
+established ([research](../research/meta-ads-to-telegram-capture-bot.md)).
+
+**Verify.** Set `META_CAPI_TEST_CODE` to the code from Events Manager → the
+pixel → **Test events**, redeploy, open the site from a URL with `?fbclid=test`,
+tap the Telegram tile and finish the Questionnaire: the `Lead` with source
+"Server" appears in the Test events tab within a minute. Remove the variable and
+redeploy afterwards — Meta says test codes must not ride on production events.
+
 ## How to add an event
 
 1. Add the identifier to `GOALS` and call `reachGoal` where it happens.

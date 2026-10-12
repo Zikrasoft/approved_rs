@@ -2,7 +2,11 @@ export const prerender = false;
 
 import { createCaptureWebhookRoute, specsCard } from '@podbor/lead-capture';
 import { BRAND, leadStore } from '@/lib/crm';
-import { CAPTURE_WEBHOOK_SECRET, captureBot } from '@/lib/captureBot';
+import {
+  CAPTURE_WEBHOOK_SECRET,
+  captureBot,
+  reportMetaLead,
+} from '@/lib/captureBot';
 import {
   ensureLeadCard,
   ensureLeadTopic,
@@ -36,6 +40,7 @@ export const POST = createCaptureWebhookRoute({
   humanTelegram: TG_MANAGER,
   questionnaire: ['car_issue'],
   phoneRegion: 'RS',
+  reportMetaLead,
   languages: LOCALE_NAME,
   services: SERVICE_SLUGS,
   contacts: {

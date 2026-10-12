@@ -118,6 +118,8 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     referredBy: null,
     managerHandoff: null,
     adSource: null,
+    metaIds: null,
+    metaLeadSentAt: null,
     remindAt: null,
     postponedFrom: null,
     ...overrides,

@@ -1,6 +1,6 @@
 import { isTrackedContactChannel } from '@podbor/lead-crm/contact-channel';
-import { AD_SOURCE_FIELD } from '@podbor/lead-crm/fields';
-import { storedAdTouch } from './adTouch.ts';
+import { AD_SOURCE_FIELD, META_IDS_FIELD } from '@podbor/lead-crm/fields';
+import { storedAdTouch, storedMetaIds } from './adTouch.ts';
 import { CONTACT_PLACEMENT_ATTRIBUTE, GOALS, reachGoal } from './goals.ts';
 import { stampStartVisitor } from './contactLinks.ts';
 import { readOrCreateVisitorId } from './visitorId.ts';
@@ -55,6 +55,7 @@ export function defineContactClickTracking(
           body.set('source_url', location.href);
           body.set('visitor_id', visitorId);
           body.set(AD_SOURCE_FIELD, storedAdTouch());
+          body.set(META_IDS_FIELD, storedMetaIds());
           navigator.sendBeacon(CONTACT_CLICK_ENDPOINT, body);
         },
         { signal },

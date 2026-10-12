@@ -92,6 +92,7 @@ export {
   AD_SOURCE_FIELD,
   contactChannelSchema,
   HONEYPOT_FIELD,
+  META_IDS_FIELD,
   SERVICE_FIELD,
 } from './form.ts';
 
@@ -102,3 +103,6 @@ export { requireEnv } from './requireEnv.ts';
 export { secretMatches } from './verifySecret.ts';
 
 export { createContactClickRoute } from './routes/contactClick.ts';
+
+export { createMetaLeadReporter } from './metaConversions.ts';
+export type { ReportMetaLead } from './metaConversions.ts';

@@ -251,6 +251,46 @@ describe('insertOrMergeLead', () => {
     expect(later.adSource).toEqual(first);
   });
 
+  it('keeps the first Meta ids, and lets the capture bot inherit them from the click', async () => {
+    const first = { fbc: 'fb.1.1760000000000.IwAR2F4-dbP0l7Mn' };
+    await store.insertOrMergeLead({ ...clickData('telegram'), metaIds: first });
+    const { lead: bot } = await store.insertOrMergeLead({
+      ...clickData('telegram'),
+      contact: '@petr',
+      telegramId: 77,
+    });
+    const { lead: later } = await store.insertOrMergeLead({
+      ...clickData('whatsapp'),
+      metaIds: { fbp: 'fb.1.1596403881668.1116446470' },
+    });
+
+    expect(bot.metaIds).toEqual(first);
+    expect(later.metaIds).toEqual(first);
+  });
+
+  it('takes the Meta ids a later Lead brings when the first had none', async () => {
+    await store.insertOrMergeLead(clickData('telegram'));
+    const { lead } = await store.insertOrMergeLead({
+      ...clickData('whatsapp'),
+      metaIds: { fbp: 'fb.1.1596403881668.1116446470' },
+    });
+    expect(lead.metaIds).toEqual({ fbp: 'fb.1.1596403881668.1116446470' });
+  });
+
+  it('claims the Meta Lead event once, and only for a Lead with Meta ids', async () => {
+    const { lead: withIds } = await store.insertOrMergeLead({
+      ...clickData('telegram'),
+      metaIds: { fbp: 'fb.1.1596403881668.1116446470' },
+    });
+    const plain = await store.insertLead(clickData('whatsapp'));
+
+    const claimed = await store.claimMetaLead(withIds.id);
+    expect(claimed?.metaLeadSentAt).toEqual(expect.any(String));
+    expect(await store.claimMetaLead(withIds.id)).toBeUndefined();
+    expect(await store.claimMetaLead(plain.id)).toBeUndefined();
+    expect((await store.getLead(plain.id))?.metaLeadSentAt).toBeNull();
+  });
+
   it('takes the ad visit a later Lead brings when the first had none', async () => {
     await store.insertOrMergeLead(clickData('telegram'));
     const adSource = { source: 'google', at: '2026-10-01T10:00:00.000Z' };

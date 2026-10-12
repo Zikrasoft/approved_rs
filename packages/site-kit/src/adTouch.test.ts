@@ -7,6 +7,7 @@ import {
   paidTouch,
   rememberAdTouch,
   storedAdTouch,
+  storedMetaIds,
 } from './adTouch.ts';
 import { STORAGE_KEY as CONSENT_KEY } from './consent.ts';
 
@@ -58,7 +59,15 @@ describe('paidTouch', () => {
       campaign: 'c'.repeat(100),
       content: 'reel',
       at: AT,
+      fbc: `fb.1.${NOW.getTime()}.x`,
     });
+  });
+
+  it('builds fbc from the fbclid exactly as it came, case kept', () => {
+    expect(paidTouch(page('fbclid=IwAR2F4-dbP0_l7Mn'), NOW)?.fbc).toBe(
+      `fb.1.${NOW.getTime()}.IwAR2F4-dbP0_l7Mn`,
+    );
+    expect(paidTouch(page('gclid=1'), NOW)?.fbc).toBeUndefined();
   });
 });
 
@@ -132,6 +141,61 @@ describe('rememberAdTouch / storedAdTouch', () => {
     history.replaceState(null, '', '/sr/?fbclid=1');
     rememberAdTouch();
     expect(JSON.parse(storedAdTouch()).source).toBe('facebook');
+  });
+});
+
+describe('storedMetaIds', () => {
+  const FBC = 'fb.1.1760000000000.IwAR2F4';
+  const cookies = `_ga=1; _fbp=fb.1.1596403881668.1116446470; _fbc=${FBC}`;
+
+  it('reads _fbc and _fbp from the cookies', () => {
+    const { storage } = memoryStorage();
+    expect(JSON.parse(storedMetaIds(cookies, storage, NOW))).toEqual({
+      fbc: FBC,
+      fbp: 'fb.1.1596403881668.1116446470',
+    });
+  });
+
+  it('falls back to the fbc built from the first ad landing', () => {
+    const { storage } = memoryStorage();
+    rememberAdTouch(page('fbclid=IwAR9'), storage, NOW);
+    expect(
+      JSON.parse(
+        storedMetaIds('_fbp=fb.1.1596403881668.1116446470', storage, NOW),
+      ),
+    ).toEqual({
+      fbc: `fb.1.${NOW.getTime()}.IwAR9`,
+      fbp: 'fb.1.1596403881668.1116446470',
+    });
+  });
+
+  it('prefers the cookie over the stored landing', () => {
+    const { storage } = memoryStorage();
+    rememberAdTouch(page('fbclid=IwAR9'), storage, NOW);
+    expect(JSON.parse(storedMetaIds(`_fbc=${FBC}`, storage, NOW))).toEqual({
+      fbc: FBC,
+    });
+  });
+
+  it('sends nothing without any Meta id', () => {
+    const { storage } = memoryStorage();
+    rememberAdTouch(page('gclid=1'), storage, NOW);
+    expect(storedMetaIds('_ga=1; _fbp=', storage, NOW)).toBe('');
+  });
+
+  it('sends nothing once analytics was declined, or with blocked storage', () => {
+    const declined = JSON.stringify({ analytics: false });
+    const { storage } = memoryStorage({ [CONSENT_KEY]: declined });
+    expect(storedMetaIds(cookies, storage, NOW)).toBe('');
+    expect(storedMetaIds(cookies, blocked, NOW)).toBe('');
+  });
+
+  it('reads document.cookie and localStorage by default', () => {
+    localStorage.clear();
+    document.cookie = '_fbp=fb.1.1596403881668.1116446470';
+    expect(JSON.parse(storedMetaIds())).toEqual({
+      fbp: 'fb.1.1596403881668.1116446470',
+    });
   });
 });
 

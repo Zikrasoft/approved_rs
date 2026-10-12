@@ -69,6 +69,28 @@ describe('defineContactClickTracking', () => {
     expect(sent[0]![1].get('ad_source')).toBe(touch);
   });
 
+  it('carries the Meta ids this browser holds', () => {
+    document.cookie = '_fbp=fb.1.1596403881668.1116446470';
+    track();
+    click('telegram');
+    expect(JSON.parse(String(sent[0]![1].get('meta_ids')))).toEqual({
+      fbp: 'fb.1.1596403881668.1116446470',
+    });
+    document.cookie = '_fbp=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  });
+
+  it('carries no Meta ids once analytics was declined', () => {
+    document.cookie = '_fbp=fb.1.1596403881668.1116446470';
+    localStorage.setItem(
+      'cookie_consent',
+      JSON.stringify({ analytics: false }),
+    );
+    track();
+    click('viber');
+    expect(sent[0]![1].get('meta_ids')).toBe('');
+    document.cookie = '_fbp=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  });
+
   it('reuses the visitor id a previous click already minted', () => {
     localStorage.setItem(VISITOR_ID_STORAGE_KEY, EARLIER_UUID);
     track();

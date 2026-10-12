@@ -64,6 +64,17 @@ export const adSourceSchema = z.object({
 });
 export type AdSource = z.infer<typeof adSourceSchema>;
 
+const metaIdSchema = z
+  .string()
+  .regex(/^fb\.\d\.\d{10,13}\.[\w.-]{1,500}$/)
+  .optional()
+  .catch(undefined);
+
+export const metaIdsSchema = z
+  .object({ fbc: metaIdSchema, fbp: metaIdSchema })
+  .refine(({ fbc, fbp }) => fbc != null || fbp != null);
+export type MetaIds = z.infer<typeof metaIdsSchema>;
+
 export const LEGACY_BRAND = 'Approved.rs';
 
 export const REFERRERS = ['approved'] as const;
@@ -102,6 +113,8 @@ const baseStoredLeadSchema = z.object({
   referredBy: z.enum(REFERRERS).nullable().default(null).catch(null),
   managerHandoff: managerHandoffSchema.nullable().default(null).catch(null),
   adSource: adSourceSchema.nullable().default(null).catch(null),
+  metaIds: metaIdsSchema.nullable().default(null).catch(null),
+  metaLeadSentAt: z.string().nullable().default(null).catch(null),
   archived: z.boolean().optional(),
   remindAt: z.string().nullable().default(null),
   postponedFrom: inWorkStatusSchema.nullable().default(null).catch(null),
@@ -157,7 +170,12 @@ export type LeadInput = Pick<
   Partial<
     Pick<
       StoredLead,
-      'services' | 'capturePrompt' | 'telegramId' | 'referredBy' | 'adSource'
+      | 'services'
+      | 'capturePrompt'
+      | 'telegramId'
+      | 'referredBy'
+      | 'adSource'
+      | 'metaIds'
     >
   >;
 

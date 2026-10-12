@@ -14,6 +14,7 @@ import {
   managerHandoffText,
   telegramIdContact,
   type CapturePrompt,
+  type ReportMetaLead,
   type CaptureStep,
   type LeadStore,
   type StoredLead,
@@ -128,6 +129,7 @@ export type CaptureStore = Pick<
   | 'findLatestLeadByTelegramId'
   | 'findPhoneByTelegramId'
   | 'updateCapture'
+  | 'claimMetaLead'
 >;
 
 export interface CaptureWebhookRouteOptions<
@@ -146,6 +148,7 @@ export interface CaptureWebhookRouteOptions<
   primaryLocale: L;
   questionnaire: readonly Exclude<CaptureStep, 'phone' | 'service'>[];
   phoneRegion: PhoneRegion;
+  reportMetaLead?: ReportMetaLead;
 }
 
 function senderName(sender: CaptureSender): string {
@@ -204,6 +207,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   primaryLocale,
   questionnaire,
   phoneRegion,
+  reportMetaLead,
   ...menuConfig
 }: CaptureWebhookRouteOptions<L, S>) {
   const { copy } = menuConfig;
@@ -331,6 +335,12 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     );
   }
 
+  async function reportRequest(lead: StoredLead): Promise<void> {
+    if (!reportMetaLead || !lead.metaIds) return;
+    const claimed = await store.claimMetaLead(lead.id);
+    if (claimed) reportMetaLead(claimed);
+  }
+
   async function markManagerHandoff(
     sender: CaptureSender,
     handle: string,
@@ -408,7 +418,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     { service: picked, locale, visitorId, referred }: StartFields<L, S>,
     comment: string | null,
     capturePrompt: CapturePrompt | null,
-  ): Promise<void> {
+  ): Promise<StoredLead> {
     // TODO: merging before the click card saves its message id posts a second teaser.
     const { lead, before } = await store.insertOrMergeLead({
       brand,
@@ -430,6 +440,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     await (before
       ? publishLeadChange(before, lead)
       : publishLeadChange(lead, undefined));
+    return lead;
   }
 
   async function start(
@@ -438,9 +449,9 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     payload: string | undefined,
     comment: string | null = null,
     contact?: string,
-  ): Promise<void> {
+  ): Promise<StoredLead> {
     const fields = startFields(payload, sender);
-    await newLead(
+    const lead = await newLead(
       sender,
       contact ?? (await contactOf(sender)),
       fields,
@@ -450,6 +461,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     const screen = startScreen(fields.locale, fields.service);
     const { greeting } = copy(fields.locale);
     await show(chatId, { ...screen, text: `${greeting}\n\n${screen.text}` });
+    return lead;
   }
 
   async function recordAnswer(
@@ -467,6 +479,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     await publishLeadChange(lead, updated);
     const [reply, extra] = nextMessage(next, localeOf(lead));
     await send(prompt.chatId, reply, extra);
+    if (next === null && updated) await reportRequest(updated);
   }
 
   async function takePhone(
@@ -483,6 +496,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     const locale = localeOf(lead);
     await send(prompt.chatId, copy(locale).thanks, CLEAR_KEYBOARD);
     await show(prompt.chatId, mainMenu(locale));
+    if (updated) await reportRequest(updated);
   }
 
   async function reAskPhone(
@@ -516,7 +530,10 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     payload: string | undefined,
   ): Promise<void> {
     const open = await freshOpenLead(sender);
-    if (!open) return start(chatId, sender, payload);
+    if (!open) {
+      await start(chatId, sender, payload);
+      return;
+    }
     const locale = localeOf(open);
     const fields = startFields(payload, sender);
     if ((fields.service || fields.referred) && !open.questionnaireDone)
@@ -685,7 +702,10 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     firstLeadComment: string | null,
   ): Promise<void> {
     const lead = await store.findLatestLeadByTelegramId(sender.id, brand);
-    if (!lead) return start(chatId, sender, undefined, firstLeadComment);
+    if (!lead) {
+      await start(chatId, sender, undefined, firstLeadComment);
+      return;
+    }
     const locale = localeOf(lead);
     await send(chatId, copy(locale).received, withMainMenu(locale));
   }
@@ -702,6 +722,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     await publishLeadChange(lead, updated);
     const locale = localeOf(lead);
     await send(chatId, copy(locale).received, withMainMenu(locale));
+    if (updated) await reportRequest(updated);
   }
 
   async function handleOwnContact(
@@ -715,9 +736,10 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     const open =
       running?.lead ?? (await store.findOpenLeadByTelegramId(sender.id, brand));
     if (open) return recordPhoneOnOpenLead(chatId, open, phone);
-    if (sender.username)
-      return start(chatId, sender, undefined, `${ANSWER_NOTE.phone}: ${phone}`);
-    return start(chatId, sender, undefined, null, phone);
+    const lead = await (sender.username
+      ? start(chatId, sender, undefined, `${ANSWER_NOTE.phone}: ${phone}`)
+      : start(chatId, sender, undefined, null, phone));
+    await reportRequest(lead);
   }
 
   async function handleOtherMessage(

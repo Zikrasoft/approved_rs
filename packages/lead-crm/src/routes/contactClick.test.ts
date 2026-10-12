@@ -126,6 +126,17 @@ describe('createContactClickRoute', () => {
     );
   });
 
+  it('passes the Meta ids through as metaIds', async () => {
+    const metaIds = { fbp: 'fb.1.1596403881668.1116446470' };
+    await POST(
+      makeCtx({ channel: 'telegram', meta_ids: JSON.stringify(metaIds) }),
+    );
+    expect(notifyLead).toHaveBeenCalledWith(
+      expect.objectContaining({ metaIds }),
+      '[contact-click]',
+    );
+  });
+
   it('passes the ad visit through as adSource', async () => {
     const adSource = {
       source: 'google',
@@ -148,6 +159,7 @@ describe('createContactClickRoute', () => {
         source_url: null,
         visitorId: null,
         adSource: null,
+        metaIds: null,
       }),
       '[contact-click]',
     );

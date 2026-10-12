@@ -7,6 +7,7 @@ import { SHOP_SERVICE, type ServiceSlug } from '@/utils/services';
 import {
   AD_SOURCE_FIELD,
   HONEYPOT_FIELD,
+  META_IDS_FIELD,
   SERVICE_FIELD,
 } from '@podbor/lead-crm';
 import { content } from '@/i18n/content';
@@ -76,6 +77,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     <input type="hidden" name="source_url" data-source-url />
     <input type="hidden" name="visitor_id" data-visitor-id />
     <input type="hidden" name={AD_SOURCE_FIELD} data-ad-source />
+    <input type="hidden" name={META_IDS_FIELD} data-meta-ids />
 
     <input type="hidden" name="contact" />
     <input type="hidden" name="contact_channel" value={channels[0].value} />

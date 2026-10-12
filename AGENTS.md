@@ -41,7 +41,9 @@ picks with a non-null assertion, so a missing one is a `TypeError`:
 `data-consent`, the hidden `contact` and `contact_channel` inputs,
 `data-source-url`, `data-visitor-id`, `data-ad-source` (the hidden
 `name={AD_SOURCE_FIELD}` input the Ad visit rides in — the contact-click
-beacon posts the same field), `data-submit-label` inside the submit
+beacon posts the same field), `data-meta-ids` (the hidden
+`name={META_IDS_FIELD}` input for the Meta `fbc`/`fbp`, likewise),
+`data-submit-label` inside the submit
 button, `data-error-telegram` / `data-error-phone` / `data-error-consent` /
 `data-error-submit`, tab buttons carrying `data-tab` + `data-panel` +
 `aria-selected`, panels carrying `data-panel` alone, and the form's own

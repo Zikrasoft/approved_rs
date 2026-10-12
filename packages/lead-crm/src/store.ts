@@ -440,6 +440,7 @@ export function createLeadStore({
           telegramId: data.telegramId ?? existing.telegramId,
           referredBy: data.referredBy ?? existing.referredBy,
           adSource: existing.adSource ?? data.adSource ?? null,
+          metaIds: existing.metaIds ?? data.metaIds ?? null,
           capturePrompt: data.capturePrompt ?? existing.capturePrompt,
           visitorActiveAt:
             data.telegramId == null
@@ -606,6 +607,14 @@ export function createLeadStore({
         capturePrompt,
         visitorActiveAt: now,
       }));
+    },
+
+    claimMetaLead(id: number): Promise<StoredLead | undefined> {
+      const at = new Date().toISOString();
+      return updateMatching(
+        (l) => l.id === id && l.metaIds != null && l.metaLeadSentAt == null,
+        (l) => ({ ...l, metaLeadSentAt: at }),
+      );
     },
 
     async findOpenLeadByTelegramId(

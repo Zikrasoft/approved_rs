@@ -2714,3 +2714,109 @@ describe('the Lead topic', () => {
     );
   });
 });
+
+describe('the Meta Lead event', () => {
+  const VISITOR_ID = '0f8fad5b-d9cb-469f-a165-70867728950e';
+  const META_IDS = { fbp: 'fb.1.1596403881668.1116446470' };
+  let reportMetaLead: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    reportMetaLead = vi.fn();
+    POST = route(SECRET, { reportMetaLead });
+  });
+
+  async function arriveFromSite(
+    from: Record<string, unknown>,
+    metaIds: typeof META_IDS | null = META_IDS,
+  ) {
+    await leadStore.insertOrMergeLead({
+      brand: BRAND,
+      name: '',
+      contact: '—',
+      service: '',
+      services: [],
+      contactChannel: 'telegram',
+      comment: '',
+      source_url: 'https://example.test/ru/',
+      visitorId: VISITOR_ID,
+      locale: 'ru',
+      kind: 'call_click',
+      metaIds,
+    });
+    const payload = stampStartVisitor('vehicle-sourcing_ru', VISITOR_ID);
+    await POST(makeCtx(startUpdate(payload ?? '', from)));
+  }
+
+  async function completeQuestionnaire(from: Record<string, unknown>) {
+    await tap('request:ru:vehicle-sourcing', from);
+    await tap('done:ru', from);
+    await say('BMW X5', from);
+    await say('до 30k', from);
+  }
+
+  const sentLead = expect.objectContaining({
+    metaIds: META_IDS,
+    metaLeadSentAt: expect.any(String),
+  });
+
+  it('is not sent for a bare /start', async () => {
+    await arriveFromSite(HANDLED);
+    expect(stored()).toHaveLength(1);
+    expect(stored()[0]).toMatchObject({ telegramId: 42, metaIds: META_IDS });
+    expect(reportMetaLead).not.toHaveBeenCalled();
+  });
+
+  it('is sent once the Questionnaire is completed, and never again', async () => {
+    await arriveFromSite(HANDLED);
+    await completeQuestionnaire(HANDLED);
+    expect(lastSent()).toEqual([42, 'THANKS']);
+    expect(reportMetaLead).toHaveBeenCalledTimes(1);
+    expect(reportMetaLead).toHaveBeenCalledWith(sentLead);
+
+    await completeQuestionnaire(HANDLED);
+    expect(reportMetaLead).toHaveBeenCalledTimes(1);
+  });
+
+  it('is sent once the visitor shares a phone, and never again', async () => {
+    await arriveFromSite(ANONYMOUS);
+    await POST(makeCtx(contactUpdate('381601234567')));
+    expect(reportMetaLead).toHaveBeenCalledTimes(1);
+    expect(reportMetaLead).toHaveBeenCalledWith(sentLead);
+
+    await POST(makeCtx(contactUpdate('381601234568')));
+    await completeQuestionnaire(ANONYMOUS);
+    expect(reportMetaLead).toHaveBeenCalledTimes(1);
+  });
+
+  it('is sent when the phone answers the last question', async () => {
+    await arriveFromSite(ANONYMOUS);
+    await completeQuestionnaire(ANONYMOUS);
+    expect(lastSent()).toEqual([777, 'PHONE_ASK']);
+    expect(reportMetaLead).not.toHaveBeenCalled();
+
+    await POST(makeCtx(contactUpdate('381601234567')));
+    expect(reportMetaLead).toHaveBeenCalledTimes(1);
+    expect(reportMetaLead).toHaveBeenCalledWith(sentLead);
+  });
+
+  it('is not sent for a Lead that carries no Meta ids', async () => {
+    await arriveFromSite(HANDLED, null);
+    await completeQuestionnaire(HANDLED);
+    await POST(makeCtx(contactUpdate('381601234567', HANDLED)));
+    expect(reportMetaLead).not.toHaveBeenCalled();
+    expect(stored()[0]!.metaLeadSentAt).toBeNull();
+  });
+
+  it('is not claimed when the brand has no reporter', async () => {
+    POST = route(SECRET);
+    await arriveFromSite(HANDLED);
+    await completeQuestionnaire(HANDLED);
+    expect(stored()[0]!.metaLeadSentAt).toBeNull();
+  });
+
+  it('is not sent for a phone that opens the dialog', async () => {
+    await POST(makeCtx(contactUpdate('381601234567')));
+    expect(stored()).toHaveLength(1);
+    expect(reportMetaLead).not.toHaveBeenCalled();
+  });
+});

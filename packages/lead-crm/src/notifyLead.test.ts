@@ -58,6 +58,8 @@ const storedLead: StoredLead = {
   referredBy: null,
   managerHandoff: null,
   adSource: null,
+  metaIds: null,
+  metaLeadSentAt: null,
   remindAt: null,
   postponedFrom: null,
 };

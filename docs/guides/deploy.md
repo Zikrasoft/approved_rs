@@ -353,6 +353,18 @@ the lead's `brand` ([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-tel
 Without a sibling token every owner message in that brand's Topics is answered
 with an "undelivered" notice in the Topic.
 
+### Meta Conversions API
+
+| Variable              | approved.rs | carlab.rs | details.rs | Without it                                                              |
+| --------------------- | ----------- | --------- | ---------- | ----------------------------------------------------------------------- |
+| `META_CAPI_TOKEN`     | —           | ✅        | —          | no server `Lead` event reaches Meta; `[meta-capi] off` in the logs      |
+| `META_CAPI_TEST_CODE` | —           | testing   | —          | events go to production; set it only while checking Events Manager Test |
+
+The token is a Conversions API access token generated in Events Manager for the
+site's own pixel (`META_PIXEL_ID` in `src/utils/metrika.ts`) — a secret, server
+only, never `PUBLIC_`. A site without a pixel id sends nothing even with a
+token. What fires and when: [analytics.md](analytics.md#the-server-lead-event-from-a-capture-bot).
+
 ### Storage and cron
 
 | Variable                | approved.rs | carlab.rs | details.rs | Without it                                               |

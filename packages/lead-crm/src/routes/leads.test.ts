@@ -254,6 +254,10 @@ describe('createLeadsRoute', () => {
           campaign: 'spring_buyback',
           at: '2026-10-01T10:00:00.000Z',
         }),
+        meta_ids: JSON.stringify({
+          fbc: 'fb.1.1760000000000.IwAR2F4-dbP0l7Mn',
+          fbp: 'fb.1.1596403881668.1116446470',
+        }),
       }),
     );
     expect(waitUntil).toHaveBeenCalledTimes(1);
@@ -272,6 +276,10 @@ describe('createLeadsRoute', () => {
           source: 'facebook',
           campaign: 'spring_buyback',
           at: '2026-10-01T10:00:00.000Z',
+        },
+        metaIds: {
+          fbc: 'fb.1.1760000000000.IwAR2F4-dbP0l7Mn',
+          fbp: 'fb.1.1596403881668.1116446470',
         },
         locale: 'ru',
       },
