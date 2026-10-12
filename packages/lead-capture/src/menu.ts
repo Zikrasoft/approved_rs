@@ -65,6 +65,10 @@ export interface Tap {
 
 export const LANGUAGE_SWITCH_TAP = 'locale';
 
+export const SERVICES_DONE_TAP = 'done';
+
+const GREEN_TAPS = new Set(['request', SERVICES_DONE_TAP]);
+
 const TAP_PATTERN = /^([a-z]+):([a-z]{2})(?::([a-z0-9-]+))?$/;
 
 export function tapData(screen: string, locale: string, arg?: string): string {
@@ -99,7 +103,11 @@ export function createScreens<L extends string, S extends string>({
     locale: L,
     arg?: string,
   ): InlineKeyboardButton[] => [
-    { text, callback_data: tapData(screen, locale, arg) },
+    {
+      text,
+      callback_data: tapData(screen, locale, arg),
+      ...(GREEN_TAPS.has(screen) && { style: 'success' as const }),
+    },
   ];
 
   function mainMenu(locale: L): Screen {
@@ -201,10 +209,25 @@ export function createScreens<L extends string, S extends string>({
     return Object.hasOwn(screens, screen) ? screens[screen](locale, arg) : null;
   }
 
-  function servicePicker(locale: L): InlineKeyboardButton[][] {
-    return services.map((slug) =>
-      tap(serviceCard(slug, locale).title, 'pick', locale, slug),
-    );
+  function servicePicker(
+    locale: L,
+    picked: readonly string[],
+  ): InlineKeyboardButton[][] {
+    const { request } = copy(locale);
+    return [
+      ...services.map((slug) => {
+        const { title } = serviceCard(slug, locale);
+        const label = picked.includes(slug) ? `✅ ${title}` : title;
+        return tap(label, 'pick', locale, slug);
+      }),
+      tap(
+        services.some((slug) => picked.includes(slug))
+          ? request.done
+          : request.unsure,
+        SERVICES_DONE_TAP,
+        locale,
+      ),
+    ];
   }
 
   return {

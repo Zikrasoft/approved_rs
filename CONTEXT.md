@@ -9,7 +9,13 @@ Decisions live in [`docs/adr/`](docs/adr/), conventions in
 **Lead** — one request from one visitor, stored once and owned by exactly one
 brand. A form submission and a contact click both become Leads. A Lead's
 `status` describes the **conversation** with that person, never the state of
-anything they bought.
+anything they bought: open, negotiations (🗣, the owner is talking to the
+visitor), postponed, and the two outcomes, won and lost, that close it.
+
+**Negotiations** — a Lead the owner is already talking to. Set by hand with 🗣
+on the CRM card, and on its own the first time the owner or the admin replies
+to the visitor through the bot. Not closed: it stays in the open list, the
+digest and search like an open Lead, and is never a Ghost lead.
 
 **Brand** — one of the three businesses (Approved, CarLab, Details). Stamped on
 a Lead by the server; a visitor can never name one.
@@ -24,17 +30,14 @@ on approved.rs is the `/thanks/` tile when `PUBLIC_TG_MANAGER` is set — stores
 no Contact click: the visitor already has a Lead, and no bot will come to
 absorb a placeholder.
 
-**Ghost lead** — a Lead that never gained a contact: still open with no owner
-activity, and no visitor activity (or, without any, no creation) within the
-retention window. Two kinds. A Contact click still on the placeholder
-contact: mostly WhatsApp, Viber or the phone, whose outcome we cannot observe,
-but the channel does not matter — a Telegram-tile click whose visitor never
-pressed Start in the bot has no bot Lead to absorb it, and retires the same
-way. And a Capture bot Lead whose contact is still the bare Telegram id
-(`tg://user?id=…`) and that is a bare `/start`: the visitor has no username,
-never shared a phone, and gave the bot nothing — no Questionnaire answer, no
-message, no service chosen in the bot. Any answer keeps it open, and a Lead
-with a phone or a username is never a Ghost lead. Nothing on our side can tell whether the person wrote, so a Ghost
+**Ghost lead** — a Contact click that never gained a contact: still the
+placeholder contact, still open with no owner activity, and older than the
+retention window. Mostly WhatsApp, Viber or the phone, whose outcome we cannot
+observe, but the channel does not matter: a Telegram-tile click whose visitor
+never pressed Start in the bot has no bot Lead to absorb it, and retires the
+same way. A Capture bot Lead is never a Ghost lead, a bare `/start` on the
+`tg://user?id=…` contact included: the owner can still reach that visitor
+through the bot. Nothing on our side can tell whether the person wrote, so a Ghost
 lead retires itself — the daily digest cron marks it lost
 ([ADR-0029](docs/adr/0029-ghost-leads-retire-themselves.md)). Because the sweep
 runs daily against a 24-hour window, a Ghost lead actually lives 24 to 48 hours.
@@ -43,7 +46,8 @@ runs daily against a 24-hour window, a Ghost lead actually lives 24 to 48 hours.
 through a Capture bot: pressed Start, answered, wrote (`visitorActiveAt`).
 
 **Owner activity** — the last time the owner worked the Lead in the CRM bot:
-marked it in work, added a note, answered a prompt on it (`lastActivityAt`).
+marked it in work, added a note, answered a prompt on it, wrote to the visitor
+in its Topic (`lastActivityAt`).
 A status change alone is not owner activity, and neither is a reply sent from
 the owner's own Telegram account, which never reaches the store.
 
@@ -61,15 +65,44 @@ rate are still the receiving bot's.
 
 **Capture bot** — one per brand, and the whole of that brand inside Telegram:
 a visitor can read its services and answer its Questionnaire without opening
-the site. It writes a Lead on every `/start`, and every change it makes to
-that Lead reaches the admin the same way an owner's edit does. It has no
-owner surface; the owner answers from their own account, or through it
-only for a visitor who has no username.
+the site. It writes a Lead on every `/start`, and copies everything else the
+visitor sends — answers, free text, a shared phone, photos, voice, files —
+into the visitor's Topic as it arrives; a visitor with no Lead yet gets one
+first, and a Lead from before Topics gets its Topic then. It has no owner
+surface of its own: the owner answers in the Lead's Topic, and the Capture
+bot copies each message to the visitor, username or not.
 
 **Questionnaire** — the short set of questions a Capture bot asks to turn a
-Lead into a request the owner can answer. Each brand has its own. Leaving
-it for the menu ends it, and the answers given so far stay on the Lead.
+Lead into a request the owner can answer. Every brand's opens with «Какие
+услуги?»: the brand's services as toggles, a card's service already ticked,
+and one action — «Готово →» once something is picked, «Не знаю, нужна
+консультация» while nothing is. The picked set lives on the Lead, the first
+pick as its primary service; «Не знаю» leaves it empty. The questions after
+it are each brand's own. A visitor
+with no Telegram username whose Lead has no phone yet is asked for one last,
+with no skip — shared from the keyboard button or typed; a visitor with a
+username is never asked, the username is the contact. Leaving it for the menu
+ends it, and the answers given so far stay on the Lead. Once it is done the
+Lead stops changing on what the visitor writes: messages go to the Topic only.
+A shared phone is the one exception — it still becomes the contact.
 _Avoid_: wizard, form (the site's form is a different thing)
+
+**Topic** — the forum topic in the CRM group that holds one Lead's
+conversation. The CRM bot opens it the first time a Capture bot touches a
+Lead the visitor started from Telegram, names it after the Lead's id, name and
+brand, and keeps the Lead summary as its first message, edited as the
+Questionnaire fills in. The Lead's card in General and its detail link to it.
+Whatever the owner or admin writes there — text or media — reaches the visitor
+through the brand's Capture bot, the first message moves an open Lead into
+negotiations, and a copy that cannot be delivered is reported in the Topic.
+Open Topics are the clients being worked with: the daily cron closes a Topic
+nobody has ever written in — neither the visitor nor the owner — a day after the
+Lead was created, a conversation that merely goes quiet stays open, ✅ won and
+❌ lost close it, and the next message from either side reopens it before it is
+posted. ⏳ and 🗣 leave it open, and an edit of the summary is not a message.
+A Lead from the site form or a placeholder click has no Topic until a bot
+`/start` merges into it.
+_Avoid_: thread, chat
 
 **Owner** — the business partner who serves the clients the sites bring and
 owes the admin a Payout for them. Not the owner of the sites.

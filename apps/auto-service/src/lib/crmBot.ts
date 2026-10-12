@@ -6,7 +6,14 @@ import { content } from '@/i18n/content';
 
 const ruServices = content('ru').services;
 
-export const { notifier, ensureLeadCard, notifyLead } = createBrandBot({
+export const {
+  notifier,
+  ensureLeadCard,
+  ensureLeadTopic,
+  touchLeadTopic,
+  notifyLead,
+  groupId,
+} = createBrandBot({
   store: leadStore,
   brand: BRAND,
   serviceLabel: (slug) =>

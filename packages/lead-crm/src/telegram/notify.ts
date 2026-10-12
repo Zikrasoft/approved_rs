@@ -2,15 +2,13 @@ import type { LedgerOperation } from '../ledgerStore.ts';
 import { isClosed, type StoredLead } from '../schema.ts';
 import type { Digest } from '../store.ts';
 import { isMessageGone, type TelegramClient } from './client.ts';
+import { operationNoticeText, unreadableLedgerText } from './ledger.ts';
 import {
-  operationNoticeText,
   quarantinedLeadsText,
-  unreadableLedgerText,
   statusChangeText,
-  type EditField,
   type Formatter,
-  type Role,
-} from './format.ts';
+} from './cards.ts';
+import type { Role } from './markup.ts';
 
 export interface NotifierOptions {
   client: TelegramClient;
@@ -49,7 +47,7 @@ export function createNotifier({
         formatter.formatTeaser(lead),
         {
           parse_mode: 'HTML',
-          reply_markup: formatter.deepLinkKeyboard(lead.id),
+          reply_markup: formatter.deepLinkKeyboard(lead),
         },
       );
       const messageId = sent.message_id;
@@ -68,6 +66,46 @@ export function createNotifier({
       }
 
       return { chatId, messageId };
+    },
+
+    async openLeadTopic(lead: StoredLead): Promise<number> {
+      const topic = await client.api.createForumTopic(
+        groupId,
+        formatter.topicName(lead),
+      );
+      return topic.message_thread_id;
+    },
+
+    async postLeadTopicSummary(
+      lead: StoredLead,
+      topicId: number,
+    ): Promise<number> {
+      const sent = await client.api.sendMessage(
+        groupId,
+        formatter.topicSummaryText(lead),
+        { parse_mode: 'HTML', message_thread_id: topicId },
+      );
+      return sent.message_id;
+    },
+
+    async refreshLeadTopic(lead: StoredLead): Promise<void> {
+      if (lead.topicMessageId == null) return;
+      await client.api.editMessageText(
+        groupId,
+        lead.topicMessageId,
+        formatter.topicSummaryText(lead),
+        { parse_mode: 'HTML' },
+      );
+    },
+
+    async closeLeadTopic(lead: StoredLead): Promise<void> {
+      if (lead.topicId == null) return;
+      await client.api.closeForumTopic(groupId, lead.topicId);
+    },
+
+    async reopenLeadTopic(lead: StoredLead): Promise<void> {
+      if (lead.topicId == null) return;
+      await client.api.reopenForumTopic(groupId, lead.topicId);
     },
 
     async unpinLeadCard(lead: StoredLead): Promise<void> {
@@ -93,7 +131,7 @@ export function createNotifier({
           lead.telegramChatId,
           lead.telegramMessageId,
           formatter.formatTeaser(lead),
-          formatter.deepLinkKeyboard(lead.id),
+          formatter.deepLinkKeyboard(lead),
         );
       } catch (err) {
         if (isMessageGone(err)) return false;
@@ -110,18 +148,6 @@ export function createNotifier({
       const others = new Set([...ownerIds, ...adminIds]);
       others.delete(authorId);
       await sendToAll([...others], operationNoticeText(operation, balance));
-    },
-
-    async sendVisitorChangeToAdmin(
-      lead: StoredLead,
-      field: EditField,
-      before: string | null | undefined,
-    ): Promise<void> {
-      if ((before ?? '') === (lead[field] ?? '')) return;
-      await sendToAll(
-        adminIds,
-        formatter.visitorChangeText(lead, field, before),
-      );
     },
 
     async sendQuarantinedLeadsToAdmin(

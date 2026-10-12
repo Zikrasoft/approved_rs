@@ -91,9 +91,7 @@ const FULL_COPY = {
   lookingFor: 'L',
   budget: 'B',
   phoneAsk: 'PA',
-  phoneOffer: 'PO',
   phoneButton: 'PB',
-  phoneSkip: 'PS',
   thanks: 'T',
   received: 'R',
   menu: { text: 'M', back: 'MB' },
@@ -102,7 +100,7 @@ const FULL_COPY = {
   contacts: { button: 'C', text: 'CT', hours: 'CH' },
   manager: { button: 'MG', text: 'MGT' },
   partners: { button: 'P', text: 'PT' },
-  request: { button: 'RQ', car: 'RC', service: 'RS' },
+  request: { button: 'RQ', car: 'RC', service: 'RS', done: 'RD', unsure: 'RU' },
   language: { button: 'LG', text: 'LGT' },
   profile: {
     description: 'DESCRIPTION',

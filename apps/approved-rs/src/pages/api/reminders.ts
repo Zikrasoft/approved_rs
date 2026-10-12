@@ -4,11 +4,12 @@ import type { APIContext } from 'astro';
 import { secretMatches } from '@/lib/verifySecret';
 import {
   claimDigest,
+  findIdleTopics,
   expireGhostLeads,
   releaseDigest,
   resumeLead,
 } from '@/lib/store';
-import { sendDigest, afterStatusChange } from '@/lib/telegram';
+import { sendDigest, afterStatusChange, closeLeadTopic } from '@/lib/telegram';
 
 const CRON_SECRET = process.env.CRON_SECRET;
 
@@ -30,6 +31,13 @@ async function expireGhosts(now: Date): Promise<number> {
     }
   }
   return expired.length;
+}
+
+async function closeIdle(now: Date): Promise<number> {
+  let closed = 0;
+  for (const lead of await findIdleTopics(now))
+    if (await closeLeadTopic(lead)) closed++;
+  return closed;
 }
 
 async function postDigest(now: Date): Promise<boolean> {
@@ -69,10 +77,14 @@ export async function GET({ request }: APIContext): Promise<Response> {
 
   const now = new Date();
   const expiredGhosts = await expireGhosts(now);
+  const closedTopics = await closeIdle(now);
   const digestSent = await postDigest(now);
 
-  return new Response(JSON.stringify({ expiredGhosts, digestSent }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return new Response(
+    JSON.stringify({ expiredGhosts, closedTopics, digestSent }),
+    {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
 }

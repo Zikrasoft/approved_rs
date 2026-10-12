@@ -266,6 +266,7 @@ describe('the card text', () => {
     const card = createFormatter({
       serviceLabel: (slug) => slug,
       botUsername: 'carlab_bot',
+      groupId: '-1009876543210',
     }).formatLeadText(lead);
 
     expect(card.length).toBeLessThanOrEqual(4096);

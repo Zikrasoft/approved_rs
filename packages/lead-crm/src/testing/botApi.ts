@@ -23,6 +23,7 @@ export function recordBotApi() {
   const calls: BotApiCall[] = [];
   const responders = new Map<string, Responder>();
   let nextMessageId = 1000;
+  let nextThreadId = 1;
 
   function defaultResponse(
     method: string,
@@ -52,6 +53,17 @@ export function recordBotApi() {
           text: payload.text,
         },
       };
+    if (method === 'createForumTopic')
+      return {
+        ok: true,
+        result: {
+          message_thread_id: nextThreadId++,
+          name: payload.name,
+          icon_color: 7322096,
+        },
+      };
+    if (method === 'copyMessage')
+      return { ok: true, result: { message_id: nextMessageId++ } };
     return { ok: true, result: true };
   }
 

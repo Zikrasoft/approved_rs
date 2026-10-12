@@ -67,6 +67,11 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     pendingPrompt: null,
     capturePrompt: null,
     telegramId: null,
+    topicId: null,
+    topicMessageId: null,
+    topicClosed: false,
+    topicActiveAt: null,
+    questionnaireDone: false,
     referredBy: null,
     remindAt: '2026-10-20',
     ...overrides,
@@ -176,6 +181,7 @@ describe('GET /api/reminders', () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({
       expiredGhosts: 0,
+      closedTopics: 0,
       digestSent: true,
     });
     const [digest] = crm('sendMessage');
@@ -213,6 +219,7 @@ describe('GET /api/reminders', () => {
     const next = await GET(makeCtx());
     expect(await next.json()).toEqual({
       expiredGhosts: 0,
+      closedTopics: 0,
       digestSent: false,
     });
     expect(api.calls).toEqual([]);
@@ -231,6 +238,7 @@ describe('GET /api/reminders', () => {
 
     expect(await res.json()).toEqual({
       expiredGhosts: 0,
+      closedTopics: 0,
       digestSent: false,
     });
     expect(api.calls).toEqual([]);
@@ -264,6 +272,7 @@ describe('GET /api/reminders', () => {
 
     expect(await res.json()).toEqual({
       expiredGhosts: 1,
+      closedTopics: 0,
       digestSent: true,
     });
     expect((await stored(7)).status).toBe('lost');
@@ -279,6 +288,7 @@ describe('GET /api/reminders', () => {
 
     expect(await res.json()).toEqual({
       expiredGhosts: 0,
+      closedTopics: 0,
       digestSent: false,
     });
     expect((await stored(9)).status).toBe('postponed');
@@ -325,6 +335,7 @@ describe('GET /api/reminders', () => {
 
     expect(await res.json()).toEqual({
       expiredGhosts: 0,
+      closedTopics: 0,
       digestSent: true,
     });
     expect((await stored(9)).status).toBe('open');
@@ -340,6 +351,7 @@ describe('GET /api/reminders', () => {
 
     expect(await res.json()).toEqual({
       expiredGhosts: 1,
+      closedTopics: 0,
       digestSent: false,
     });
     const lead = await stored(7);
@@ -371,6 +383,7 @@ describe('GET /api/reminders', () => {
 
     expect(await res.json()).toEqual({
       expiredGhosts: 0,
+      closedTopics: 0,
       digestSent: false,
     });
     expect((await stored(7)).status).toBe('open');
@@ -387,6 +400,7 @@ describe('GET /api/reminders', () => {
 
     expect(await res.json()).toEqual({
       expiredGhosts: 2,
+      closedTopics: 0,
       digestSent: false,
     });
     expect((await stored(7)).status).toBe('lost');
@@ -395,12 +409,8 @@ describe('GET /api/reminders', () => {
     error.mockRestore();
   });
 
-  it('retires only a bare /start: no contact, no answer, no service chosen in the bot', async () => {
-    const start = (
-      id: number,
-      contact: string,
-      extra: Partial<StoredLead> = {},
-    ) =>
+  it('retires a placeholder click and never a capture-bot Lead, even a bare /start', async () => {
+    const start = (id: number, contact: string) =>
       ghost({
         id,
         contact,
@@ -408,26 +418,109 @@ describe('GET /api/reminders', () => {
         contactChannel: 'telegram',
         telegramId: 40 + id,
         createdAt: '2026-10-01T00:00:00.000Z',
-        ...extra,
       });
     leadsStorage().seed([
-      start(7, 'tg://user?id=47', { service: 'vehicle-import' }),
+      ghost({ id: 6, createdAt: '2026-10-01T00:00:00.000Z' }),
+      start(7, 'tg://user?id=47'),
       start(8, '+381601234567'),
       start(10, '@ivan'),
-      start(11, 'tg://user?id=51', { comment: 'Ищет: Golf 7' }),
-      start(12, 'tg://user?id=52', {
-        service: 'vehicle-import',
-        serviceChosenInBot: true,
-      }),
     ]);
 
     const res = await GET(makeCtx());
 
-    expect(await res.json()).toEqual({ expiredGhosts: 1, digestSent: true });
-    expect((await stored(7)).status).toBe('lost');
-    for (const id of [8, 10, 11, 12])
-      expect((await stored(id)).status).toBe('open');
-    expect(digestIds()).toEqual([8, 10, 11, 12]);
+    expect(await res.json()).toEqual({
+      expiredGhosts: 1,
+      closedTopics: 0,
+      digestSent: true,
+    });
+    expect((await stored(6)).status).toBe('lost');
+    for (const id of [7, 8, 10]) expect((await stored(id)).status).toBe('open');
+    expect(digestIds()).toEqual([7, 8, 10]);
+  });
+
+  describe('topics nobody wrote in for a day', () => {
+    const emptyTopic = (id: number, openedMsAgo: number) =>
+      makeLead({
+        id,
+        status: 'open',
+        remindAt: null,
+        createdAt: new Date(NOW.getTime() - openedMsAgo).toISOString(),
+        statusChangedAt: NOW.toISOString(),
+        telegramId: 40 + id,
+        topicId: 300 + id,
+        topicMessageId: 400 + id,
+        topicActiveAt: null,
+      });
+
+    it('closes an empty topic once and leaves a younger one open', async () => {
+      leadsStorage().seed([emptyTopic(7, DAY_MS), emptyTopic(8, DAY_MS - 1)]);
+
+      const res = await GET(makeCtx());
+
+      expect(await res.json()).toEqual({
+        expiredGhosts: 0,
+        closedTopics: 1,
+        digestSent: false,
+      });
+      expect(crm('closeForumTopic')).toEqual([
+        { chat_id: GROUP_ID, message_thread_id: 307 },
+      ]);
+      expect(await stored(7)).toMatchObject({
+        topicClosed: true,
+        status: 'open',
+      });
+      expect((await stored(8)).topicClosed).toBe(false);
+
+      api.reset();
+      const again = await GET(makeCtx());
+
+      expect(await again.json()).toMatchObject({ closedTopics: 0 });
+      expect(crm('closeForumTopic')).toEqual([]);
+    });
+
+    it('counts a topic Telegram already had closed', async () => {
+      leadsStorage().seed([emptyTopic(7, DAY_MS)]);
+      api.fail('closeForumTopic', 'Bad Request: TOPIC_CLOSED');
+
+      const res = await GET(makeCtx());
+
+      expect(await res.json()).toMatchObject({ closedTopics: 1 });
+      expect((await stored(7)).topicClosed).toBe(true);
+    });
+
+    it('logs a topic it could not close and tries it again on the next run', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+      leadsStorage().seed([emptyTopic(7, DAY_MS), emptyTopic(8, DAY_MS)]);
+      api.fail('closeForumTopic', 'Bad Request: not enough rights');
+
+      const res = await GET(makeCtx());
+
+      expect(await res.json()).toMatchObject({ closedTopics: 0 });
+      expect(crm('closeForumTopic')).toHaveLength(2);
+      expect(error).toHaveBeenCalledTimes(2);
+      expect((await stored(7)).topicClosed).toBe(false);
+      error.mockRestore();
+
+      api.reset();
+      const again = await GET(makeCtx());
+
+      expect(await again.json()).toMatchObject({ closedTopics: 2 });
+      expect((await stored(8)).topicClosed).toBe(true);
+    });
+
+    it('never closes a topic with a conversation in it, however long it is quiet', async () => {
+      leadsStorage().seed([
+        {
+          ...emptyTopic(7, 14 * DAY_MS),
+          topicActiveAt: new Date(NOW.getTime() - 14 * DAY_MS).toISOString(),
+        },
+      ]);
+
+      const res = await GET(makeCtx());
+
+      expect(await res.json()).toMatchObject({ closedTopics: 0 });
+      expect(crm('closeForumTopic')).toEqual([]);
+    });
   });
 
   it('posts no monthly summary on the 1st', async () => {
@@ -436,7 +529,11 @@ describe('GET /api/reminders', () => {
 
     const res = await GET(makeCtx());
 
-    expect(await res.json()).toEqual({ expiredGhosts: 0, digestSent: true });
+    expect(await res.json()).toEqual({
+      expiredGhosts: 0,
+      closedTopics: 0,
+      digestSent: true,
+    });
     const posted = crm('sendMessage');
     expect(posted).toHaveLength(1);
     expect(String(posted[0]!.text)).not.toContain('Итоги месяца');

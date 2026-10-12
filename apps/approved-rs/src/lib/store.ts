@@ -23,6 +23,8 @@ export const {
   findByCard,
   addNote,
   resolvePendingPrompt,
+  findByTopic,
+  recordOwnerReply,
   resumeLead,
   postponeLead,
   deleteLead,
@@ -30,12 +32,14 @@ export const {
   claimDigest,
   releaseDigest,
   expireGhostLeads,
+  findIdleTopics,
 } = leadStore;
 
 export {
   appendNote,
   canPostpone,
   postponePatch,
+  statusPatch,
   parseOperationReply,
   businessDay,
   LedgerUnreadableError,

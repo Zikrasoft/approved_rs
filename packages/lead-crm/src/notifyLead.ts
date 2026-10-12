@@ -5,7 +5,7 @@ import {
   type StoredLead,
 } from './schema.ts';
 import type { LeadStore } from './store.ts';
-import type { Role } from './telegram/format.ts';
+import type { Role } from './telegram/markup.ts';
 import type { Notifier } from './telegram/notify.ts';
 
 interface EnsureLeadCardOptions {
@@ -38,6 +38,86 @@ export function createEnsureLeadCard({
   };
 }
 
+interface EnsureLeadTopicOptions {
+  store: Pick<LeadStore, 'setTopic' | 'setTopicSummary'>;
+  notifier: Pick<
+    Notifier,
+    'openLeadTopic' | 'postLeadTopicSummary' | 'refreshLeadTopic'
+  >;
+}
+
+export function createEnsureLeadTopic({
+  store,
+  notifier,
+}: EnsureLeadTopicOptions) {
+  async function openTopic(lead: StoredLead) {
+    // TODO: two racing updates on a topicless Lead each open a topic; the later setTopic wins.
+    const topicId = await notifier.openLeadTopic(lead);
+    return store.setTopic(lead.id, topicId);
+  }
+
+  return async function ensureLeadTopic(lead: StoredLead): Promise<StoredLead> {
+    if (lead.telegramId == null) return lead;
+    const opened = lead.topicId == null ? await openTopic(lead) : lead;
+    if (opened?.topicId == null) return lead;
+    if (opened.topicMessageId != null) {
+      await notifier.refreshLeadTopic(opened);
+      return opened;
+    }
+    const messageId = await notifier.postLeadTopicSummary(
+      opened,
+      opened.topicId,
+    );
+    return (await store.setTopicSummary(opened.id, messageId)) ?? opened;
+  };
+}
+
+interface LeadTopicStateOptions {
+  store: Pick<LeadStore, 'touchTopic' | 'closeTopic'>;
+  notifier: Pick<Notifier, 'reopenLeadTopic' | 'closeLeadTopic'>;
+}
+
+export function createTouchLeadTopic({
+  store,
+  notifier,
+}: LeadTopicStateOptions) {
+  return async function touchLeadTopic(lead: StoredLead): Promise<StoredLead> {
+    if (lead.topicId == null) return lead;
+    if (lead.topicClosed) {
+      try {
+        await notifier.reopenLeadTopic(lead);
+      } catch (error) {
+        console.error('[lead-crm] could not reopen the topic', {
+          error,
+          leadId: lead.id,
+        });
+        return lead;
+      }
+    }
+    return (await store.touchTopic(lead.id)) ?? lead;
+  };
+}
+
+export function createCloseLeadTopic({
+  store,
+  notifier,
+}: LeadTopicStateOptions) {
+  return async function closeLeadTopic(lead: StoredLead): Promise<boolean> {
+    if (lead.topicId == null || lead.topicClosed) return false;
+    try {
+      await notifier.closeLeadTopic(lead);
+      await store.closeTopic(lead.id);
+      return true;
+    } catch (error) {
+      console.error('[lead-crm] could not close the topic', {
+        error,
+        leadId: lead.id,
+      });
+      return false;
+    }
+  };
+}
+
 export interface StatusChangeOptions {
   surface?: { chatId: number; messageId: number; role: Role };
   notice?: boolean;
@@ -45,6 +125,8 @@ export interface StatusChangeOptions {
 
 interface AfterStatusChangeOptions {
   ensureLeadCard: (lead: StoredLead) => Promise<void>;
+  ensureLeadTopic: (lead: StoredLead) => Promise<StoredLead>;
+  closeLeadTopic: (lead: StoredLead) => Promise<boolean>;
   notifier: Pick<
     Notifier,
     'editLeadDetailMessage' | 'sendStatusChangeToAdmin' | 'unpinLeadCard'
@@ -53,14 +135,31 @@ interface AfterStatusChangeOptions {
 
 export function createAfterStatusChange({
   ensureLeadCard,
+  ensureLeadTopic,
+  closeLeadTopic,
   notifier,
 }: AfterStatusChangeOptions) {
+  async function refreshTopic(lead: StoredLead): Promise<StoredLead> {
+    if (lead.topicId == null) return lead;
+    return ensureLeadTopic(lead).catch((error: unknown) => {
+      console.error('[lead-crm] could not refresh the topic summary', {
+        error,
+        leadId: lead.id,
+      });
+      return lead;
+    });
+  }
+
   return async function afterStatusChange(
     lead: StoredLead,
     { surface, notice = true }: StatusChangeOptions = {},
   ): Promise<void> {
     await ensureLeadCard(lead);
-    if (isClosed(lead)) await notifier.unpinLeadCard(lead);
+    const current = await refreshTopic(lead);
+    if (isClosed(lead)) {
+      await notifier.unpinLeadCard(lead);
+      await closeLeadTopic(current);
+    }
     if (surface)
       await notifier.editLeadDetailMessage(
         surface.chatId,

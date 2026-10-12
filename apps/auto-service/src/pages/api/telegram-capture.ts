@@ -3,7 +3,12 @@ export const prerender = false;
 import { createCaptureWebhookRoute, specsCard } from '@podbor/lead-capture';
 import { BRAND, leadStore } from '@/lib/crm';
 import { CAPTURE_WEBHOOK_SECRET, captureBot } from '@/lib/captureBot';
-import { ensureLeadCard, notifier } from '@/lib/crmBot';
+import {
+  ensureLeadCard,
+  ensureLeadTopic,
+  groupId,
+  touchLeadTopic,
+} from '@/lib/crmBot';
 import { LOCALE_NAME, PRIMARY_LOCALE, isLocale } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { GARAGE_ADDRESS, PHONE_NUMBER, SITE_URL } from '@/utils/constants';
@@ -13,15 +18,18 @@ import { SERVICE_SLUGS } from '@/utils/services';
 export const POST = createCaptureWebhookRoute({
   secret: CAPTURE_WEBHOOK_SECRET,
   store: leadStore,
+  ensureLeadTopic,
+  touchLeadTopic,
   ensureLeadCard,
-  sendVisitorChangeToAdmin: notifier.sendVisitorChangeToAdmin,
   bot: captureBot,
+  groupId,
   brand: BRAND,
   isLocale,
   primaryLocale: PRIMARY_LOCALE,
   copy: (locale) => content(locale).captureBot,
-  menu: ['services', 'request', 'contacts', 'manager', 'language'],
-  questionnaire: ['car_issue', 'phone'],
+  menu: ['request', 'services', 'contacts', 'manager', 'language'],
+  questionnaire: ['car_issue'],
+  phoneRegion: 'RS',
   languages: LOCALE_NAME,
   services: SERVICE_SLUGS,
   contacts: {

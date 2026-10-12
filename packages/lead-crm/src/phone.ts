@@ -9,6 +9,17 @@ import { TELEGRAM_HANDLE, typedAsPhone } from './contactShape.ts';
 
 export { composeE164 } from './composeE164.ts';
 
+export type PhoneRegion = CountryCode;
+
+export function typedPhone(
+  typed: string,
+  region: PhoneRegion,
+): string | undefined {
+  if (!typedAsPhone(typed)) return undefined;
+  const phone = parsePhoneNumberFromString(typed.trim(), region);
+  return phone?.isValid() ? phone.number : undefined;
+}
+
 export interface PhoneCountry {
   iso: CountryCode;
   dial: string;

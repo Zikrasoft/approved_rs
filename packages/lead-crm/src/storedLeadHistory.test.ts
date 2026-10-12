@@ -157,7 +157,7 @@ const HISTORY: StoredShape[] = [
       brand: 'Approved.rs',
       locale: 'de',
       country: 'DE',
-      status: 'open',
+      status: 'negotiations',
       lastActivityAt: '2026-09-10T08:00:00.000Z',
     },
   },

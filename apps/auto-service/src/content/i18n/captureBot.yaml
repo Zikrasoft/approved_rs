@@ -1,9 +1,7 @@
 greeting: Здравствуйте! Спасибо, что написали — заявка у нас, мастер скоро ответит.
 lookingFor: Расскажите, какая у вас машина — марка, модель, год — и что с ней случилось или какие работы нужны.
-phoneAsk: Чтобы мастер мог с вами связаться, поделитесь номером телефона — или пропустите этот шаг.
-phoneOffer: Если удобнее созвониться, поделитесь номером, и мастер вам позвонит. Если нет, просто пропустите.
-phoneButton: Поделиться номером
-phoneSkip: Пропустить
+phoneAsk: У вас в Telegram нет имени пользователя (username), поэтому мастер не сможет вам написать. Оставьте номер телефона, чтобы мы могли связаться.
+phoneButton: 📱 Поделиться номером
 thanks: Спасибо! Передали мастеру — он скоро с вами свяжется.
 received: Приняли, мастер увидит ваше сообщение.
 menu:
@@ -13,7 +11,7 @@ services:
   button: Услуги
   text: Вот что мы делаем в сервисе. Выберите услугу — покажем цену, сроки и что входит.
 card:
-  request: Оставить заявку
+  request: 📝 Оставить заявку
   site: Подробнее на сайте
 contacts:
   button: Контакты
@@ -26,9 +24,11 @@ partners:
   button: Партнёры
   text: Наши партнёры — выберите, кому написать.
 request:
-  button: Оставить заявку
+  button: 📝 Оставить заявку
   car: Какая у вас машина? Напишите марку, модель и год.
-  service: Какие работы нужны? Выберите ниже.
+  service: Какие работы нужны? Отметьте одну или несколько.
+  done: Готово →
+  unsure: Не знаю, нужна консультация
 language:
   button: 🌐 Язык
   text: Выберите язык, на котором вам удобнее общаться.
@@ -41,10 +41,8 @@ translations:
   sr:
     greeting: Zdravo! Hvala što ste nam pisali — upit je kod nas i majstor će vam se uskoro javiti.
     lookingFor: Recite nam koji automobil vozite — marka, model i godište — i šta se dešava s njim ili koji radovi su potrebni.
-    phoneAsk: Podelite broj telefona da bi majstor mogao da vas kontaktira — ili preskočite ovaj korak.
-    phoneOffer: Ako vam više odgovara poziv, podelite broj pa će vas majstor pozvati. Ako ne, slobodno preskočite.
-    phoneButton: Podeli broj
-    phoneSkip: Preskoči
+    phoneAsk: Nemate korisničko ime na Telegramu, pa vam majstor ne može napisati. Ostavite broj telefona kako bismo mogli da vas kontaktiramo.
+    phoneButton: 📱 Podeli broj
     thanks: Hvala! Prosledili smo majstoru — uskoro će vas kontaktirati.
     received: Primili smo, majstor će videti vašu poruku.
     menu:
@@ -54,7 +52,7 @@ translations:
       button: Usluge
       text: Evo šta radimo u servisu. Izaberite uslugu — pokazaćemo cenu, rokove i šta je uključeno.
     card:
-      request: Poslati zahtev
+      request: 📝 Ostaviti zahtev
       site: Više informacija na sajtu
     contacts:
       button: Kontakti
@@ -67,9 +65,11 @@ translations:
       button: Partneri
       text: Naši partneri — izaberite kome da pišete.
     request:
-      button: Poslati zahtev
+      button: 📝 Ostaviti zahtev
       car: Koja je vaša mašina? Napišite marku, model i godinu.
-      service: Koje radove trebate? Izaberite ispod.
+      service: Koje usluge su potrebne? Obeležite jednu ili više opcija.
+      done: Završeno →
+      unsure: Nisam siguran, potrebna mi je konsultacija
     language:
       button: 🌐 Jezik
       text: Izaberite jezik kojim vam je lakše da komunicirate.
@@ -81,10 +81,8 @@ translations:
   en:
     greeting: Hello! Thanks for getting in touch — we have your enquiry and a mechanic will reply shortly.
     lookingFor: Tell us which car you drive — make, model and year — and what is wrong with it or what work it needs.
-    phoneAsk: Share your phone number so a mechanic can reach you — or skip this step.
-    phoneOffer: If a call suits you better, share your number and a mechanic will ring you. If not, just skip it.
-    phoneButton: Share my number
-    phoneSkip: Skip
+    phoneAsk: You don’t have a username in Telegram, so the mechanic can't message you. Please leave your phone number so we can get in touch.
+    phoneButton: 📱 Share my number
     thanks: Thank you! I’ve passed your message to the technician — he’ll be in touch with you shortly.
     received: Got it, a mechanic will see your message.
     menu:
@@ -94,7 +92,7 @@ translations:
       button: Services
       text: Here’s what we offer at the service. Choose a service — we’ll show you the price, timeframe, and what's included.
     card:
-      request: Submit a request
+      request: 📝 Submit a request
       site: Learn more on the site
     contacts:
       button: Contact
@@ -107,9 +105,11 @@ translations:
       button: Partners
       text: Our partners — choose who to contact.
     request:
-      button: Submit a request
+      button: 📝 Submit a request
       car: What kind of car do you have? Please provide the make, model, and year.
-      service: What services do you need? Please choose below.
+      service: What services do you need? Please select one or more.
+      done: Done →
+      unsure: I'm not sure, I need advice
     language:
       button: 🌐 Language
       text: Select the language you prefer to communicate in.
@@ -118,4 +118,4 @@ translations:
       shortDescription: Car service in Belgrade — diagnostics, repairs, servicing
       menuCommand: Main menu
       langCommand: Change language
-translatedFrom: e8112b7b4a8ac2b4
+translatedFrom: c74da072000a8505

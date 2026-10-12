@@ -60,11 +60,13 @@ describe('claimDigest', () => {
       storedLead(4, { lastActivityAt: at(3) }),
       storedLead(5, { status: 'lost' }),
       storedLead(6, { status: 'won' }),
+      storedLead(7, { status: 'negotiations' }),
+      storedLead(8, { status: 'negotiations', lastActivityAt: at(5) }),
     ]);
 
     const digest = (await store.claimDigest(new Date(at(11))))!;
 
-    expect(ids(digest.stale)).toEqual([1, 4]);
+    expect(ids(digest.stale)).toEqual([1, 4, 7]);
     expect(Object.keys(digest)).toEqual(['stale', 'due']);
   });
 
@@ -173,7 +175,7 @@ describe('every action on a Lead resets its clock', () => {
     await store.setPendingPrompt(1, {
       chatId: 5,
       messageId: 6,
-      kind: 'reply_visitor',
+      kind: 'postpone',
     });
     await store.resolvePendingPrompt({ chatId: 5, messageId: 6 }, () => ({}));
     expect((await store.getLead(1))?.lastActivityAt).toBe(at(9));

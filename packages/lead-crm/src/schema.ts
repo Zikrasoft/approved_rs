@@ -1,17 +1,18 @@
 import { z } from 'zod';
 
-export const LEAD_STATUSES = ['open', 'won', 'lost', 'postponed'] as const;
+export const LEAD_STATUSES = [
+  'open',
+  'negotiations',
+  'won',
+  'lost',
+  'postponed',
+] as const;
 const leadStatusSchema = z.enum(LEAD_STATUSES);
 export type LeadStatus = z.infer<typeof leadStatusSchema>;
 
-const storedStatusSchema = z.enum([
-  ...LEAD_STATUSES,
-  'new',
-  'negotiations',
-  'in_progress',
-]);
+const storedStatusSchema = z.enum([...LEAD_STATUSES, 'new', 'in_progress']);
 
-export const PROMPT_KINDS = ['postpone', 'reply_visitor'] as const;
+export const PROMPT_KINDS = ['postpone'] as const;
 
 const pendingPromptSchema = z.object({
   chatId: z.number().int(),
@@ -66,8 +67,12 @@ const baseStoredLeadSchema = z.object({
   pendingPrompt: pendingPromptSchema.nullable().default(null).catch(null),
   capturePrompt: capturePromptSchema.nullable().default(null).catch(null),
   telegramId: z.number().int().nullable().default(null).catch(null),
+  topicId: z.number().int().nullable().default(null).catch(null),
+  topicMessageId: z.number().int().nullable().default(null).catch(null),
+  topicClosed: z.boolean().default(false).catch(false),
+  topicActiveAt: z.string().nullable().default(null).catch(null),
+  questionnaireDone: z.boolean().default(false).catch(false),
   referredBy: z.enum(REFERRERS).nullable().default(null).catch(null),
-  serviceChosenInBot: z.boolean().optional(),
   archived: z.boolean().optional(),
   remindAt: z.string().nullable().default(null),
 });
@@ -82,7 +87,11 @@ export function isClosed(lead: Pick<StoredLead, 'status'>): boolean {
   return lead.status === 'won' || lead.status === 'lost';
 }
 
-function withFourStatuses({
+export function isInWork(lead: Pick<StoredLead, 'status'>): boolean {
+  return lead.status === 'open' || lead.status === 'negotiations';
+}
+
+function withCurrentStatuses({
   archived,
   status,
   ...lead
@@ -112,14 +121,7 @@ export type LeadInput = Pick<
   | 'kind'
 > &
   Partial<
-    Pick<
-      StoredLead,
-      | 'services'
-      | 'capturePrompt'
-      | 'telegramId'
-      | 'referredBy'
-      | 'serviceChosenInBot'
-    >
+    Pick<StoredLead, 'services' | 'capturePrompt' | 'telegramId' | 'referredBy'>
   >;
 
 export type LeadSubmission = Omit<LeadInput, 'brand'>;
@@ -127,4 +129,4 @@ export type LeadSubmission = Omit<LeadInput, 'brand'>;
 export type StoredLeadSchema = z.ZodType<StoredLead, unknown>;
 
 export const storedLeadSchema: StoredLeadSchema =
-  baseStoredLeadSchema.transform(withFourStatuses);
+  baseStoredLeadSchema.transform(withCurrentStatuses);

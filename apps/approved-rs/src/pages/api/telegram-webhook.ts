@@ -10,7 +10,6 @@ import {
   afterStatusChange,
   answerCallback,
   bot,
-  ensureLeadCard,
   sendForceReplyPrompt,
   safeEditMessage,
   sendOperationNotice,
@@ -32,9 +31,10 @@ import {
   editLeadDetailMessage,
   OWNER_IDS,
   ADMIN_IDS,
+  GROUP_ID,
   REPLY_COPY,
   LEAD_ACTION_COPY,
-  escapeHtml,
+  touchLeadTopic,
   type Role,
 } from '@/lib/telegram';
 import { captureClientFor } from '@/lib/captureBot';
@@ -48,13 +48,14 @@ import {
   findByCard,
   addNote,
   resolvePendingPrompt,
+  findByTopic,
+  recordOwnerReply,
   searchLeads,
   resumeLead,
   postponeLead,
   canPostpone,
   postponePatch,
   readLeads,
-  appendNote,
   readBalance,
   readOperations,
   openOperationPrompt,
@@ -76,7 +77,10 @@ const messageSchema = z.object({
   message_id: z.number().int(),
   text: z.string().optional(),
   chat: z.object({ id: z.number().int(), type: z.string().optional() }),
-  from: z.object({ id: z.number().int() }).optional(),
+  message_thread_id: z.number().int().optional(),
+  from: z
+    .object({ id: z.number().int(), is_bot: z.boolean().optional() })
+    .optional(),
   reply_to_message: z.object({ message_id: z.number().int() }).optional(),
 });
 
@@ -325,6 +329,7 @@ function statusRow(key: LeadStatus): CallbackRow {
 export const CALLBACKS: CallbackRow[] = [
   statusRow('won'),
   statusRow('lost'),
+  statusRow('negotiations'),
   [
     /^won:(\d+)$/,
     'owner',
@@ -334,6 +339,11 @@ export const CALLBACKS: CallbackRow[] = [
     /^lost:(\d+)$/,
     'owner',
     withId((ctx, id) => changeStatus(ctx, id, 'lost', false)),
+  ],
+  [
+    /^talk:(\d+)$/,
+    'owner',
+    withId((ctx, id) => changeStatus(ctx, id, 'negotiations', false)),
   ],
   [/^work:(\d+)$/, 'owner', withId(markInWork)],
   [/^postpone:(\d+)$/, 'owner', withId(openRemindPicker)],
@@ -354,17 +364,6 @@ export const CALLBACKS: CallbackRow[] = [
   [/^del:(\d+)$/, 'admin', withId(askDelete)],
   [/^delconfirm:(\d+)$/, 'admin', withId(confirmDelete)],
   [/^delcancel:(\d+)$/, 'admin', withId(backToLead)],
-  [
-    /^reply:(\d+)$/,
-    'any',
-    withId((ctx, id) =>
-      startLeadPrompt(ctx, id, {
-        prompt: REPLY_COPY.prompt,
-        kind: 'reply_visitor',
-        ackText: REPLY_COPY.ack,
-      }),
-    ),
-  ],
   [/^menu:open$/, 'any', listOpen],
   [/^open:(\d+)$/, 'any', withId(openLead)],
   [
@@ -419,32 +418,21 @@ callbacks.use(async ({ crm, callbackQuery }) => {
   await ack(crm);
 });
 
-async function replyWithCard(
-  chatId: number,
-  role: Role,
-  lead: StoredLead,
-  headline: string,
-): Promise<void> {
-  const { text, reply_markup } = buildLeadDetail(lead, role);
-  await sendMessage(chatId, `${headline}\n\n${text}`, { reply_markup });
-}
-
-type PromptReply = {
+type Reply = {
   role: Role;
   authorId: number;
   chatId: number;
   messageId: number;
   replyToMessageId: number;
   text: string;
-  pending: StoredLead;
+  inPrivateChat: boolean;
 };
-type PromptHandler = (reply: PromptReply) => Promise<void>;
 
 async function replyPostpone({
   chatId,
   replyToMessageId,
   text,
-}: PromptReply): Promise<void> {
+}: Reply): Promise<void> {
   const remindAt = parseReminderDate(text);
   if (remindAt == null) {
     await sendMessage(chatId, LEAD_ACTION_COPY.badDate);
@@ -466,51 +454,6 @@ async function replyPostpone({
   else await sendMessage(chatId, LEAD_ACTION_COPY.notPostponable);
 }
 
-async function replyVisitor({
-  chatId,
-  role,
-  replyToMessageId,
-  text,
-  pending,
-}: PromptReply): Promise<void> {
-  const reply = text.trim();
-  if (!reply) {
-    await sendMessage(chatId, REPLY_COPY.empty);
-    return;
-  }
-  const undelivered = () => sendMessage(chatId, REPLY_COPY.undelivered);
-  const client = captureClientFor(pending.brand);
-  if (pending.telegramId == null || !client) {
-    console.warn('[telegram-webhook] reply to visitor has no route', {
-      id: pending.id,
-      brand: pending.brand,
-      reason: client ? 'no telegramId' : 'no capture bot for brand',
-    });
-    await undelivered();
-    return;
-  }
-  try {
-    await client.sendMessage(pending.telegramId, escapeHtml(reply));
-  } catch (err) {
-    console.error('[telegram-webhook] reply to visitor failed', {
-      id: pending.id,
-      error: err,
-    });
-    await undelivered();
-    return;
-  }
-  const updated = await resolvePendingPrompt(
-    { chatId, messageId: replyToMessageId },
-    (lead) => ({
-      comment: appendNote(lead.comment, `${REPLY_COPY.notePrefix}${reply}`),
-    }),
-  );
-  if (updated) {
-    await ensureLeadCard(updated);
-    await replyWithCard(chatId, role, updated, REPLY_COPY.sent);
-  }
-}
-
 function threadedTo(messageId: number) {
   return {
     reply_parameters: {
@@ -520,20 +463,13 @@ function threadedTo(messageId: number) {
   };
 }
 
-const PROMPT_REPLIES: Record<PromptKind, PromptHandler> = {
-  postpone: replyPostpone,
-  reply_visitor: replyVisitor,
-};
-
-type Reply = Omit<PromptReply, 'pending'> & { inPrivateChat: boolean };
-
 async function replyToPrompt(reply: Reply): Promise<boolean> {
   const pending = await findByPendingPrompt({
     chatId: reply.chatId,
     messageId: reply.replyToMessageId,
   });
-  if (!pending?.pendingPrompt) return false;
-  await PROMPT_REPLIES[pending.pendingPrompt.kind]({ ...reply, pending });
+  if (pending?.pendingPrompt?.kind !== 'postpone') return false;
+  await replyPostpone(reply);
   return true;
 }
 
@@ -689,6 +625,79 @@ bot.on('callback_query', async (ctx, next) => {
   }
   await callbacks.middleware()(Object.assign(ctx, { crm }), next);
 });
+
+async function deliverToVisitor(
+  lead: StoredLead,
+  chatId: number,
+  messageId: number,
+): Promise<boolean> {
+  const client = captureClientFor(lead.brand);
+  if (lead.telegramId == null || !client) {
+    console.warn('[telegram-webhook] topic message has no route', {
+      id: lead.id,
+      brand: lead.brand,
+      reason: client ? 'no telegramId' : 'no capture bot for brand',
+    });
+    return false;
+  }
+  try {
+    await client.api.copyMessage(lead.telegramId, chatId, messageId);
+    return true;
+  } catch (err) {
+    console.error('[telegram-webhook] topic message not delivered', {
+      id: lead.id,
+      error: err,
+    });
+    return false;
+  }
+}
+
+type TopicMessage = { chatId: number; messageId: number; topicId: number };
+
+async function relayTopicMessage(
+  lead: StoredLead,
+  { chatId, messageId, topicId }: TopicMessage,
+): Promise<void> {
+  await touchLeadTopic(lead);
+  if (!(await deliverToVisitor(lead, chatId, messageId))) {
+    await sendMessage(chatId, REPLY_COPY.undelivered, {
+      message_thread_id: topicId,
+      ...threadedTo(messageId),
+    });
+    return;
+  }
+  const updated = await recordOwnerReply(lead.id);
+  if (updated && updated.status !== lead.status)
+    await afterStatusChange(updated);
+}
+
+bot.on(
+  [
+    'message:text',
+    'message:file',
+    'message:contact',
+    'message:location',
+    'message:poll',
+    'message:dice',
+  ],
+  async (ctx, next) => {
+    const topicId = ctx.message.message_thread_id;
+    if (
+      topicId == null ||
+      String(ctx.chat.id) !== GROUP_ID ||
+      ctx.from?.is_bot ||
+      !roleOf(ctx.from?.id)
+    )
+      return next();
+    const lead = await findByTopic(topicId);
+    if (!lead) return next();
+    await relayTopicMessage(lead, {
+      chatId: ctx.chat.id,
+      messageId: ctx.message.message_id,
+      topicId,
+    });
+  },
+);
 
 bot.on('message', async (ctx, next) => {
   const repliedTo = ctx.message.reply_to_message;

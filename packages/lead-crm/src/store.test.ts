@@ -7,6 +7,7 @@ import { storedLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
 import {
   createLeadStore,
   GHOST_LEAD_RETENTION_MS,
+  TOPIC_IDLE_MS,
   isFreshLead,
   postponePatch,
   resumePatch,
@@ -285,7 +286,6 @@ describe('insertOrMergeLead', () => {
       locale: 'sr',
       kind: 'lead',
       telegramId: 77,
-      serviceChosenInBot: true,
     });
 
     expect(lead).toMatchObject({
@@ -293,7 +293,6 @@ describe('insertOrMergeLead', () => {
       contact: 'tg://user?id=77',
       kind: 'lead',
       service: 'detailing',
-      serviceChosenInBot: true,
     });
   });
 
@@ -685,6 +684,52 @@ describe('resumeLead', () => {
   });
 });
 
+describe('recordOwnerReply', () => {
+  it('counts as owner activity and moves only an open lead to negotiations', async () => {
+    const open = await store.insertLead(baseData);
+    const done = await store.insertLead(baseData);
+    await forceComplete(done.id);
+    const at = new Date('2026-10-12T10:00:00.000Z');
+
+    expect(await store.recordOwnerReply(open.id, at)).toMatchObject({
+      status: 'negotiations',
+      statusChangedAt: at.toISOString(),
+      lastActivityAt: at.toISOString(),
+    });
+    expect(await store.recordOwnerReply(done.id, at)).toMatchObject({
+      status: 'won',
+      lastActivityAt: at.toISOString(),
+    });
+    expect((await store.recordOwnerReply(open.id))?.statusChangedAt).toBe(
+      at.toISOString(),
+    );
+  });
+});
+
+describe('findByTopic', () => {
+  it('finds the lead that owns a topic', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.insertLead(baseData);
+    await store.setTopic(lead.id, 42);
+
+    expect((await store.findByTopic(42))?.id).toBe(lead.id);
+    expect(await store.findByTopic(7)).toBeUndefined();
+  });
+
+  it('opens a topic with no summary yet and attaches one later', async () => {
+    const lead = await store.insertLead(baseData);
+
+    expect(await store.setTopic(lead.id, 42)).toMatchObject({
+      topicId: 42,
+      topicMessageId: null,
+    });
+    expect(await store.setTopicSummary(lead.id, 43)).toMatchObject({
+      topicId: 42,
+      topicMessageId: 43,
+    });
+  });
+});
+
 describe('postponeLead', () => {
   it('sets status/remindAt/comment on the given lead directly, no prompt correlation needed', async () => {
     const lead = await store.insertLead(baseData);
@@ -698,6 +743,15 @@ describe('postponeLead', () => {
     expect(postponed?.status).toBe('postponed');
     expect(postponed?.remindAt).toBe('2026-10-20');
     expect(postponed?.comment).toBe('Отложено до 20.10.2026');
+  });
+
+  it('postpones a Lead in negotiations too', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.setStatus(lead.id, 'negotiations');
+
+    const postponed = await store.postponeLead(lead.id, '2026-10-20', 'note');
+
+    expect(postponed?.status).toBe('postponed');
   });
 
   it('no-ops when the lead is no longer open (stale button, already finalized elsewhere)', async () => {
@@ -758,6 +812,16 @@ describe('expireGhostLeads', () => {
       statusChangedAt: NOW.toISOString(),
     });
     expect(await store.getLead(lead.id)).toMatchObject({ status: 'lost' });
+  });
+
+  it('never retires a placeholder click the owner moved into negotiations', async () => {
+    const lead = await ghost();
+    await store.setStatus(lead.id, 'negotiations');
+
+    expect(await store.expireGhostLeads(NOW)).toEqual([]);
+    expect(await store.getLead(lead.id)).toMatchObject({
+      status: 'negotiations',
+    });
   });
 
   it('leaves a click inside the retention window alone', async () => {
@@ -855,22 +919,10 @@ describe('expireGhostLeads', () => {
       return lead;
     }
 
-    it('retires one with neither a phone nor a username', async () => {
-      const lead = await started();
-
-      const expired = await store.expireGhostLeads(NOW);
-
-      expect(expired.map((l) => l.id)).toEqual([lead.id]);
-      expect(await store.getLead(lead.id)).toMatchObject({ status: 'lost' });
-    });
-
     it.each([
-      ['a phone only', { contact: '+381601234567' }],
-      ['a username only', { contact: '@ivan' }],
-      [
-        'both a username and a phone',
-        { contact: '@ivan', comment: 'Телефон: +381601234567' },
-      ],
+      ['only the Telegram id', {}],
+      ['a phone', { contact: '+381601234567' }],
+      ['a username', { contact: '@ivan' }],
     ])('never retires one with %s', async (_, overrides) => {
       const lead = await started(overrides);
 
@@ -878,29 +930,7 @@ describe('expireGhostLeads', () => {
       expect(await store.getLead(lead.id)).toMatchObject({ status: 'open' });
     });
 
-    it('never retires one whose phone the Questionnaire took', async () => {
-      const lead = await started();
-      await store.updateCapture(lead.id, {
-        contact: '+381601234567',
-        capturePrompt: null,
-      });
-      await store.updateLeads((leads) =>
-        leads.map((l) =>
-          l.id === lead.id
-            ? {
-                ...l,
-                visitorActiveAt: new Date(
-                  NOW.getTime() - DAY_MS - 1,
-                ).toISOString(),
-              }
-            : l,
-        ),
-      );
-
-      expect(await store.expireGhostLeads(NOW)).toEqual([]);
-    });
-
-    it('takes the phone of a form sent within the window, and keeps it', async () => {
+    it('takes the phone of a form sent within the window', async () => {
       const lead = await store.insertLead({
         ...startData,
         name: 'Ivan Tg',
@@ -913,7 +943,6 @@ describe('expireGhostLeads', () => {
         contactChannel: 'phone',
         visitorId: 'v-start',
       });
-      await forceAge(lead.id, DAY_MS + 1);
 
       expect(merged).toBe(true);
       expect(after).toMatchObject({
@@ -923,8 +952,6 @@ describe('expireGhostLeads', () => {
         contactChannel: 'phone',
         telegramId: 42,
       });
-      expect(await store.expireGhostLeads(NOW)).toEqual([]);
-      expect(await store.getLead(lead.id)).toMatchObject({ status: 'open' });
     });
 
     it('never lets a form overwrite a username', async () => {
@@ -946,98 +973,75 @@ describe('expireGhostLeads', () => {
         contactChannel: 'telegram',
       });
     });
+  });
+});
 
-    async function quietSince(id: number, ms = DAY_MS + 1): Promise<void> {
-      const at = new Date(NOW.getTime() - ms).toISOString();
-      await store.updateLeads((leads) =>
-        leads.map((l) =>
-          l.id === id ? { ...l, createdAt: at, visitorActiveAt: at } : l,
-        ),
-      );
-    }
+describe('findIdleTopics', () => {
+  const NOW = new Date('2026-10-02T12:00:00.000Z');
 
-    it('never retires one with a Questionnaire answer', async () => {
-      const lead = await started();
-      await store.updateCapture(lead.id, {
-        note: 'Ищет: седан',
-        capturePrompt: null,
-      });
-      await quietSince(lead.id);
+  async function topicLead(activeMsAgo: number | null): Promise<StoredLead> {
+    const lead = await store.insertLead({ ...baseData, telegramId: 9 });
+    await store.setTopic(lead.id, lead.id + 100);
+    await store.updateLeads((leads) =>
+      leads.map((l) =>
+        l.id === lead.id
+          ? {
+              ...l,
+              createdAt: new Date(NOW.getTime() - TOPIC_IDLE_MS).toISOString(),
+              topicActiveAt:
+                activeMsAgo == null
+                  ? null
+                  : new Date(NOW.getTime() - activeMsAgo).toISOString(),
+            }
+          : l,
+      ),
+    );
+    return lead;
+  }
 
-      expect(await store.expireGhostLeads(NOW)).toEqual([]);
-      expect(await store.getLead(lead.id)).toMatchObject({ status: 'open' });
-    });
+  it('finds a topic nobody wrote in for a day until it is closed', async () => {
+    const empty = await topicLead(null);
 
-    it('never retires one whose visitor wrote a message at /start', async () => {
-      await started({ comment: 'Сообщение: есть Golf?' });
+    expect((await store.findIdleTopics(NOW)).map((l) => l.id)).toEqual([
+      empty.id,
+    ]);
+    await store.closeTopic(empty.id);
+    expect(await store.findIdleTopics(NOW)).toEqual([]);
+  });
 
-      expect(await store.expireGhostLeads(NOW)).toEqual([]);
-    });
+  it('never closes a topic someone wrote in, however long it is quiet', async () => {
+    await topicLead(14 * TOPIC_IDLE_MS);
 
-    it('never retires one whose service the visitor chose in the bot', async () => {
-      const lead = await started();
-      await store.updateCapture(lead.id, {
-        chosenService: 'detailing',
-        capturePrompt: null,
-      });
-      await quietSince(lead.id);
+    expect(await store.findIdleTopics(NOW)).toEqual([]);
+  });
 
-      expect(await store.getLead(lead.id)).toMatchObject({
-        service: 'detailing',
-        services: ['detailing'],
-        serviceChosenInBot: true,
-      });
-      expect(await store.expireGhostLeads(NOW)).toEqual([]);
-    });
+  it('waits a full day before closing an empty topic', async () => {
+    const lead = await topicLead(null);
+    await store.updateLeads((leads) =>
+      leads.map((l) =>
+        l.id === lead.id
+          ? {
+              ...l,
+              createdAt: new Date(
+                NOW.getTime() - TOPIC_IDLE_MS + 1,
+              ).toISOString(),
+            }
+          : l,
+      ),
+    );
 
-    it('never retires one that opened on a service chosen in the bot', async () => {
-      await started({ service: 'detailing', serviceChosenInBot: true });
+    expect(await store.findIdleTopics(NOW)).toEqual([]);
+  });
 
-      expect(await store.expireGhostLeads(NOW)).toEqual([]);
-    });
+  it('skips a Lead without a topic', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.updateLeads((leads) =>
+      leads.map((l) =>
+        l.id === lead.id ? { ...l, createdAt: '2026-01-01T00:00:00.000Z' } : l,
+      ),
+    );
 
-    it('retires one whose service only came with the site tile or a referral', async () => {
-      const tile = await started({ service: 'detailing' });
-      const resumed = await started({ telegramId: 43, referredBy: 'approved' });
-      await store.updateCapture(resumed.id, {
-        service: 'detailing',
-        referredBy: 'approved',
-        capturePrompt: null,
-      });
-      await quietSince(resumed.id);
-
-      const expired = await store.expireGhostLeads(NOW);
-
-      expect(expired.map((l) => l.id)).toEqual([tile.id, resumed.id]);
-      expect(await store.getLead(resumed.id)).not.toHaveProperty(
-        'serviceChosenInBot',
-        true,
-      );
-    });
-
-    it('spares one whose visitor was active inside the window', async () => {
-      const lead = await started();
-      await store.updateCapture(lead.id, {
-        note: 'Ищу: седан',
-        capturePrompt: null,
-      });
-
-      expect(await store.expireGhostLeads(NOW)).toEqual([]);
-      expect(await store.getLead(lead.id)).toMatchObject({ status: 'open' });
-    });
-
-    it('spares one the owner worked', async () => {
-      const lead = await started();
-      await store.touchLead(lead.id);
-
-      expect(await store.expireGhostLeads(NOW)).toEqual([]);
-    });
-
-    it('spares one still inside the window', async () => {
-      await started({}, DAY_MS - 1000);
-
-      expect(await store.expireGhostLeads(NOW)).toEqual([]);
-    });
+    expect(await store.findIdleTopics(NOW)).toEqual([]);
   });
 });
 
@@ -1527,7 +1531,7 @@ describe('capturePrompt', () => {
     await store.setPendingPrompt(lead.id, {
       chatId: 111,
       messageId: 555,
-      kind: 'reply_visitor',
+      kind: 'postpone',
     });
 
     await store.updateCapture(lead.id, {
@@ -1540,7 +1544,7 @@ describe('capturePrompt', () => {
     expect(
       (await store.findByCapturePrompt(777, baseData.brand))?.pendingPrompt
         ?.kind,
-    ).toBe('reply_visitor');
+    ).toBe('postpone');
   });
 });
 
@@ -1764,6 +1768,28 @@ describe('the capture lookups', () => {
     );
   });
 
+  it('picks the open lead over a newer closed one as the latest', async () => {
+    const open = await fromTelegram(42);
+    const closed = await fromTelegram(42);
+    await store.setStatus(closed.id, 'won');
+
+    expect(
+      (await store.findLatestLeadByTelegramId(42, baseData.brand))?.id,
+    ).toBe(open.id);
+  });
+
+  it('falls back to the newest closed lead when none is open', async () => {
+    const lost = await fromTelegram(42);
+    const won = await fromTelegram(42);
+    await store.setStatus(lost.id, 'lost');
+    await store.setStatus(won.id, 'won');
+    await fromTelegram(42, { brand: 'CarLab' });
+
+    expect(
+      (await store.findLatestLeadByTelegramId(42, baseData.brand))?.id,
+    ).toBe(won.id);
+  });
+
   it('finds the newest number a closed lead of the same brand holds', async () => {
     await fromTelegram(42, { contact: '+381600000001' });
     const newer = await fromTelegram(42, { contact: '+381600000002' });
@@ -1823,22 +1849,69 @@ describe('updateCapture', () => {
     expect(updated?.locale).toBe('en');
   });
 
-  it("makes a picked service the Lead's only one", async () => {
+  it('computes the new picks from the stored ones, inside the write', async () => {
     const lead = await store.insertLead({
       ...baseData,
       service: 'vehicle-import',
       services: ['vehicle-import'],
     });
+    const add = (slug: string) => (picked: string[]) => [...picked, slug];
+
+    await Promise.all([
+      store.updateCapture(lead.id, {
+        services: add('vehicle-sourcing'),
+        capturePrompt: { chatId: 777, step: 'service' },
+      }),
+      store.updateCapture(lead.id, {
+        services: add('vehicle-inspection'),
+        capturePrompt: { chatId: 777, step: 'service' },
+      }),
+    ]);
+
+    expect((await store.getLead(lead.id))?.services).toEqual(
+      expect.arrayContaining([
+        'vehicle-import',
+        'vehicle-sourcing',
+        'vehicle-inspection',
+      ]),
+    );
+  });
+
+  it('keeps the service of a Lead from before the picks list when nothing is picked', async () => {
+    const lead = await store.insertLead({
+      ...baseData,
+      service: 'vehicle-import',
+      services: [],
+    });
 
     const updated = await store.updateCapture(lead.id, {
-      service: 'vehicle-sourcing',
-      capturePrompt: { chatId: 777, step: 'looking_for' },
+      questionnaireDone: true,
+      capturePrompt: null,
     });
 
     expect(updated).toMatchObject({
-      service: 'vehicle-sourcing',
-      services: ['vehicle-sourcing'],
+      service: 'vehicle-import',
+      questionnaireDone: true,
     });
+  });
+
+  it('keeps every picked service, the first as the primary one', async () => {
+    const lead = await store.insertLead(baseData);
+
+    const picked = await store.updateCapture(lead.id, {
+      services: () => ['vehicle-sourcing', 'vehicle-import'],
+      capturePrompt: { chatId: 777, step: 'service' },
+    });
+    const cleared = await store.updateCapture(lead.id, {
+      services: () => [],
+      capturePrompt: { chatId: 777, step: 'service' },
+    });
+
+    expect(picked).toMatchObject({
+      service: 'vehicle-sourcing',
+      services: ['vehicle-sourcing', 'vehicle-import'],
+    });
+    expect(cleared).toMatchObject({ service: '', services: [] });
   });
 
   it('appends the answer and moves the dialog on in one write', async () => {
@@ -1872,7 +1945,7 @@ describe('updateCapture', () => {
     await store.setPendingPrompt(lead.id, {
       chatId: 111,
       messageId: 555,
-      kind: 'reply_visitor',
+      kind: 'postpone',
     });
 
     const updated = await store.updateCapture(lead.id, {
@@ -1880,7 +1953,7 @@ describe('updateCapture', () => {
       capturePrompt: null,
     });
 
-    expect(updated?.pendingPrompt?.kind).toBe('reply_visitor');
+    expect(updated?.pendingPrompt?.kind).toBe('postpone');
   });
 
   it('replaces the contact when the visitor shares a better one', async () => {

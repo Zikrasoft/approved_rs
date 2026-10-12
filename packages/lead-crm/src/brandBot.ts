@@ -1,12 +1,15 @@
 import { z } from 'zod';
 import {
   createAfterStatusChange,
+  createCloseLeadTopic,
   createEnsureLeadCard,
+  createEnsureLeadTopic,
   createNotifyLead,
+  createTouchLeadTopic,
 } from './notifyLead.ts';
 import type { LeadStore } from './store.ts';
 import { createTelegramClient, parseIds } from './telegram/client.ts';
-import { createFormatter } from './telegram/format.ts';
+import { createFormatter } from './telegram/cards.ts';
 import { createNotifier } from './telegram/notify.ts';
 
 const required = (name: string) =>
@@ -34,14 +37,12 @@ export interface BrandBotOptions {
   store: LeadStore;
   brand: string;
   serviceLabel: (slug: string) => string;
-  replyRelayBrands?: readonly string[];
 }
 
 export function createBrandBot({
   store,
   brand,
   serviceLabel,
-  replyRelayBrands,
 }: BrandBotOptions) {
   const env = readBotEnv();
   const ownerIds = env.TELEGRAM_OWNER_ID;
@@ -53,7 +54,7 @@ export function createBrandBot({
   const formatter = createFormatter({
     serviceLabel,
     botUsername: env.TELEGRAM_BOT_USERNAME,
-    replyRelayBrands,
+    groupId: env.TELEGRAM_GROUP_ID,
   });
   const notifier = createNotifier({
     client,
@@ -63,13 +64,24 @@ export function createBrandBot({
     adminIds,
   });
   const ensureLeadCard = createEnsureLeadCard({ store, notifier });
+  const ensureLeadTopic = createEnsureLeadTopic({ store, notifier });
+  const closeLeadTopic = createCloseLeadTopic({ store, notifier });
   return {
     notifier,
     ensureLeadCard,
-    afterStatusChange: createAfterStatusChange({ ensureLeadCard, notifier }),
+    ensureLeadTopic,
+    touchLeadTopic: createTouchLeadTopic({ store, notifier }),
+    closeLeadTopic,
+    afterStatusChange: createAfterStatusChange({
+      ensureLeadCard,
+      ensureLeadTopic,
+      closeLeadTopic,
+      notifier,
+    }),
     notifyLead: createNotifyLead({ store, notifier, brand }),
     client,
     formatter,
+    groupId: env.TELEGRAM_GROUP_ID,
     ownerIds,
     adminIds,
   };

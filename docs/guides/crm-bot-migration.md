@@ -148,12 +148,10 @@ In the leads group and in a DM with `@SerbCRMBot`:
       exists in the Blob store, and «💶 Мне должны» in `@SerbCRMBot` equals the
       total noted in step 1.
 - [ ] **The first digest** — the next morning's group digest lists every open
-      Lead untouched for 7 days or more, the backlog included. A bare
-      capture-bot `/start` Lead with a phone or a username is among them and
-      stays in every digest until someone closes it (#226, #241), and so is one
-      with neither whose visitor answered anything in the bot. One with
-      neither and no answer is a Ghost lead: the same cron marks it lost after
-      24 hours, so it never reaches the digest.
+      Lead untouched for 7 days or more, the backlog included. Every
+      capture-bot `/start` Lead is among them, a bare one included, and stays
+      in every digest until someone closes it (#226, #241): only a placeholder
+      Contact click retires itself as a Ghost lead.
 
 ## 9. Done
 

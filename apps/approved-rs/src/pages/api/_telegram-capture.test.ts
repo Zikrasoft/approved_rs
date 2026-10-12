@@ -63,44 +63,53 @@ function visitorUpdate(update: Record<string, unknown>) {
 
 const VISITOR = { id: 61, first_name: 'Ana', username: 'ana' };
 
-function answer(text: string) {
+const NO_HANDLE = { id: 62, first_name: 'Mila' };
+
+type Visitor = { id: number; first_name: string; username?: string };
+
+function answer(text: string, from: Visitor = VISITOR) {
   return visitorUpdate({
     message: {
       message_id: 2,
-      chat: { id: VISITOR.id, type: 'private' },
-      from: VISITOR,
+      chat: { id: from.id, type: 'private' },
+      from,
       text,
     },
   });
 }
 
-function press(data: string) {
+function press(data: string, from: Visitor = VISITOR) {
   return visitorUpdate({
     callback_query: {
       id: 'tap',
-      from: VISITOR,
+      from,
       chat_instance: 'chat',
       data,
       message: {
         message_id: 3,
         date: 0,
-        chat: { id: VISITOR.id, type: 'private' },
+        chat: { id: from.id, type: 'private' },
       },
     },
   });
 }
 
-function questions(): unknown[] {
+function questions(from: Visitor = VISITOR): unknown[] {
   return api
     .callsTo('sendMessage', '1002:test-capture-bot-token')
-    .filter((call) => call.payload.chat_id === VISITOR.id)
+    .filter((call) => call.payload.chat_id === from.id)
     .map((call) => call.payload.text);
 }
 
-function visitorLead() {
+function lastReply() {
+  return api.callsTo('sendMessage', '1002:test-capture-bot-token').at(-1)
+    ?.payload as { reply_markup: { inline_keyboard: unknown[][] } };
+}
+
+function visitorLead(from: Visitor = VISITOR) {
   return (
     memory.storages.get(LEADS_PATH)?.current() as { telegramId: number }[]
-  ).find((lead) => lead.telegramId === VISITOR.id);
+  ).find((lead) => lead.telegramId === from.id);
 }
 
 function tap(data: string) {
@@ -138,6 +147,7 @@ describe('the Approved capture bot', () => {
           {
             text: captureBot.card.request,
             callback_data: 'request:sr:vehicle-import',
+            style: 'success',
           },
         ],
         [
@@ -154,8 +164,12 @@ describe('the Approved capture bot', () => {
         brand: 'Approved.rs',
         service: 'vehicle-import',
         locale: 'sr',
+        topicId: 1,
       }),
     ]);
+    expect(
+      api.callsTo('createForumTopic', '1001:test-bot-token')[0]?.payload,
+    ).toMatchObject({ chat_id: '-1009876543210' });
   });
 
   it('sends hours, phone and site with no venue', async () => {
@@ -221,22 +235,86 @@ describe('the Approved capture bot', () => {
 });
 
 describe('the Approved Questionnaire', () => {
-  it('asks what the visitor is looking for, the budget, then the phone', async () => {
+  it('asks a visitor with no username for the phone last, with no skip, and takes a typed number', async () => {
+    const words = content('ru').captureBot;
+
+    await press('request:ru:vehicle-import', NO_HANDLE);
+    await press('done:ru', NO_HANDLE);
+    await answer('BMW X5 2019', NO_HANDLE);
+    await answer('40 000 €', NO_HANDLE);
+    await answer('064 123 4567', NO_HANDLE);
+
+    expect(questions(NO_HANDLE)).toEqual([
+      words.request.service,
+      words.lookingFor,
+      words.budget,
+      words.phoneAsk,
+      words.thanks,
+      words.menu.text,
+    ]);
+    expect(
+      api
+        .callsTo('sendMessage', '1002:test-capture-bot-token')
+        .find((call) => call.payload.text === words.phoneAsk)?.payload
+        .reply_markup,
+    ).toEqual({
+      keyboard: [[{ text: words.phoneButton, request_contact: true }]],
+      resize_keyboard: true,
+      one_time_keyboard: true,
+    });
+    expect(visitorLead(NO_HANDLE)).toMatchObject({
+      contact: '+381641234567',
+      capturePrompt: null,
+    });
+  });
+
+  it('asks a visitor with a username what they are looking for and the budget, never the phone', async () => {
     const words = content('ru').captureBot;
 
     await press('request:ru:vehicle-import');
+
+    const picker = lastReply().reply_markup.inline_keyboard;
+    expect(picker).toHaveLength(4 + 1);
+    expect(picker[3]).toEqual([
+      expect.objectContaining({
+        text: expect.stringMatching(/^✅ /),
+        callback_data: 'pick:ru:vehicle-import',
+      }),
+    ]);
+    expect(picker.at(-1)).toEqual([
+      { text: words.request.done, callback_data: 'done:ru', style: 'success' },
+    ]);
+
+    await press('pick:ru:vehicle-sourcing');
+
+    const edited = api
+      .callsTo('editMessageText', '1002:test-capture-bot-token')
+      .at(-1)?.payload as { reply_markup: { inline_keyboard: unknown[][] } };
+    expect(edited.reply_markup.inline_keyboard[0]).toEqual([
+      expect.objectContaining({ text: expect.stringMatching(/^✅ /) }),
+    ]);
+
+    await press('done:ru');
     await answer('BMW X5 2019');
     await answer('40 000 €');
-    await answer(words.phoneSkip);
 
     expect(questions()).toEqual([
+      words.request.service,
       words.lookingFor,
       words.budget,
-      words.phoneOffer,
       words.thanks,
     ]);
+    expect(lastReply().reply_markup.inline_keyboard[0]).toEqual([
+      {
+        text: words.request.button,
+        callback_data: 'request:ru',
+        style: 'success',
+      },
+    ]);
+    expect(words.request.button).toMatch(/^📝 /);
     expect(visitorLead()).toMatchObject({
       service: 'vehicle-import',
+      services: ['vehicle-import', 'vehicle-sourcing'],
       comment: 'Ищет: BMW X5 2019\nБюджет: 40 000 €',
       capturePrompt: null,
     });
@@ -274,5 +352,33 @@ describe('the language switch', () => {
       .filter((d) => d.startsWith('locale:'))
       .map((d) => d.split(':')[1]);
     expect(offered).toEqual(['ru', 'en', 'sr', 'es', 'de']);
+  });
+});
+
+describe('a photo from the visitor', () => {
+  it('is copied by the capture bot into the visitor topic', async () => {
+    const from = { id: 63, first_name: 'Vera' };
+
+    await visitorUpdate({
+      message: {
+        message_id: 7,
+        chat: { id: from.id, type: 'private' },
+        from,
+        photo: [{ file_id: 'p', file_unique_id: 'u', width: 1, height: 1 }],
+      },
+    });
+
+    const { topicId } = visitorLead(from) as unknown as { topicId: number };
+    expect(topicId).toEqual(expect.any(Number));
+    expect(
+      api
+        .callsTo('copyMessage', '1002:test-capture-bot-token')
+        .map((call) => call.payload),
+    ).toContainEqual({
+      chat_id: '-1009876543210',
+      from_chat_id: from.id,
+      message_id: 7,
+      message_thread_id: topicId,
+    });
   });
 });

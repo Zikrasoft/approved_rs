@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { channelLabel } from './channelLabels.ts';
 import { isPhoneContact, isTelegramIdContact } from './contactShape.ts';
-import { isClosed } from './schema.ts';
+import { isClosed, isInWork } from './schema.ts';
 import type {
   CapturePrompt,
   Referrer,
@@ -36,8 +36,8 @@ export function isFreshLead(
 export interface CaptureUpdate {
   note?: string;
   contact?: string;
-  service?: string;
-  chosenService?: string;
+  services?: (picked: string[]) => string[];
+  questionnaireDone?: boolean;
   locale?: string;
   referredBy?: Referrer;
   capturePrompt: CapturePrompt | null;
@@ -79,9 +79,7 @@ function digestOf(leads: StoredLead[], now: Date): Digest {
   const today = businessDay(now);
   return {
     stale: leads.filter(
-      (l) =>
-        l.status === 'open' &&
-        now.getTime() - lastActionAt(l) >= STALE_AFTER_MS,
+      (l) => isInWork(l) && now.getTime() - lastActionAt(l) >= STALE_AFTER_MS,
     ),
     due: leads.filter(
       (l) =>
@@ -109,8 +107,23 @@ export function isPlaceholderContact(contact: string): boolean {
 
 export const GHOST_LEAD_RETENTION_MS = DAY_MS;
 
+export const TOPIC_IDLE_MS = DAY_MS;
+
 function untouched(lead: StoredLead): boolean {
   return lead.status === 'open' && lead.lastActivityAt == null;
+}
+
+function isIdleTopic(lead: StoredLead, now: Date): boolean {
+  return (
+    lead.topicId != null &&
+    !lead.topicClosed &&
+    lead.topicActiveAt == null &&
+    now.getTime() - Date.parse(lead.createdAt) >= TOPIC_IDLE_MS
+  );
+}
+
+function pickedServices(services: string[]) {
+  return { service: services[0] ?? '', services };
 }
 
 function contactRank(contact: string): number {
@@ -118,25 +131,10 @@ function contactRank(contact: string): number {
   return isTelegramIdContact(contact) ? 1 : 2;
 }
 
-function isBareStart(lead: StoredLead): boolean {
-  return (
-    lead.telegramId != null &&
-    isTelegramIdContact(lead.contact) &&
-    !lead.comment &&
-    !lead.serviceChosenInBot
-  );
-}
-
-function leftNothingToAnswer(lead: StoredLead): boolean {
-  return (
-    (lead.kind === 'call_click' && isPlaceholderContact(lead.contact)) ||
-    isBareStart(lead)
-  );
-}
-
 function isGhostLead(lead: StoredLead, now: Date): boolean {
   return (
-    leftNothingToAnswer(lead) &&
+    lead.kind === 'call_click' &&
+    isPlaceholderContact(lead.contact) &&
     untouched(lead) &&
     now.getTime() - Date.parse(lead.visitorActiveAt ?? lead.createdAt) >=
       GHOST_LEAD_RETENTION_MS
@@ -185,7 +183,7 @@ export function appendNote(
 }
 
 export function canPostpone(lead: StoredLead): boolean {
-  return lead.status === 'open';
+  return isInWork(lead);
 }
 
 export function postponePatch(
@@ -426,8 +424,6 @@ export function createLeadStore({
                   ? data.services
                   : existing.services,
                 kind: data.kind ?? existing.kind,
-                serviceChosenInBot:
-                  data.serviceChosenInBot ?? existing.serviceChosenInBot,
               }
             : {}),
           source_url: existing.source_url ?? data.source_url,
@@ -468,8 +464,51 @@ export function createLeadStore({
       }));
     },
 
+    setTopic(id: number, topicId: number): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) => ({
+        ...l,
+        topicId,
+        topicMessageId: null,
+        topicClosed: false,
+        topicActiveAt: null,
+      }));
+    },
+
+    setTopicSummary(
+      id: number,
+      topicMessageId: number,
+    ): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) => ({ ...l, topicMessageId }));
+    },
+
+    touchTopic(
+      id: number,
+      at: Date = new Date(),
+    ): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) => ({
+        ...l,
+        topicClosed: false,
+        topicActiveAt: at.toISOString(),
+      }));
+    },
+
+    closeTopic(id: number): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) => ({ ...l, topicClosed: true }));
+    },
+
     setStatus(id: number, status: LeadStatus): Promise<StoredLead | undefined> {
       return updateOne(id, (l) => ({ ...l, ...statusPatch(status) }));
+    },
+
+    recordOwnerReply(
+      id: number,
+      at: Date = new Date(),
+    ): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) => ({
+        ...l,
+        lastActivityAt: at.toISOString(),
+        ...(l.status === 'open' ? statusPatch('negotiations', at) : {}),
+      }));
     },
 
     addNote(id: number, note: string): Promise<StoredLead | undefined> {
@@ -508,6 +547,10 @@ export function createLeadStore({
       );
     },
 
+    async findByTopic(topicId: number): Promise<StoredLead | undefined> {
+      return (await readLeads()).find((l) => l.topicId === topicId);
+    },
+
     resolvePendingPrompt(
       key: PromptKey,
       apply: (lead: StoredLead) => Partial<StoredLead>,
@@ -525,22 +568,19 @@ export function createLeadStore({
       {
         note,
         contact,
-        service,
-        chosenService,
+        services,
+        questionnaireDone,
         locale,
         referredBy,
         capturePrompt,
       }: CaptureUpdate,
     ): Promise<StoredLead | undefined> {
-      const nextService = chosenService || service;
       return updateOne(id, (l) => ({
         ...l,
         comment: note ? appendNote(l.comment, note) : l.comment,
         contact: contact ?? l.contact,
-        ...(nextService
-          ? { service: nextService, services: [nextService] }
-          : {}),
-        ...(chosenService ? { serviceChosenInBot: true } : {}),
+        ...(services ? pickedServices(services(l.services)) : {}),
+        questionnaireDone: questionnaireDone ?? l.questionnaireDone,
         locale: locale ?? l.locale,
         referredBy: referredBy ?? l.referredBy,
         capturePrompt,
@@ -557,6 +597,16 @@ export function createLeadStore({
         brand,
         (l) => l.telegramId === telegramId,
       );
+    },
+
+    async findLatestLeadByTelegramId(
+      telegramId: number,
+      brand: string,
+    ): Promise<StoredLead | undefined> {
+      const leads = (await readLeads())
+        .filter((l) => l.brand === brand && l.telegramId === telegramId)
+        .sort((a, b) => a.id - b.id);
+      return leads.filter((l) => !isClosed(l)).at(-1) ?? leads.at(-1);
     },
 
     async findPhoneByTelegramId(
@@ -667,6 +717,10 @@ export function createLeadStore({
         );
       });
       return next.filter((l) => expiredIds.has(l.id));
+    },
+
+    async findIdleTopics(now: Date): Promise<StoredLead[]> {
+      return (await readLeads()).filter((l) => isIdleTopic(l, now));
     },
   };
 }

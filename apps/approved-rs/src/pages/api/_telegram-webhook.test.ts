@@ -46,6 +46,7 @@ import {
   reAskOperationText,
   buildRemindPicker,
   buildSearchResults,
+  REPLY_COPY,
 } from '@/lib/telegram';
 import {
   getLead,
@@ -105,6 +106,11 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     pendingPrompt: null,
     capturePrompt: null,
     telegramId: null,
+    topicId: null,
+    topicMessageId: null,
+    topicClosed: false,
+    topicActiveAt: null,
+    questionnaireDone: false,
     referredBy: null,
     remindAt: null,
     ...overrides,
@@ -424,7 +430,10 @@ describe('POST /api/telegram-webhook', () => {
               [
                 { text: '✅ Сделка', callback_data: 'won:5' },
                 { text: '❌ Отказ', callback_data: 'lost:5' },
+              ],
+              [
                 { text: '⏳ В работе', callback_data: 'work:5' },
+                { text: '🗣 Переговоры', callback_data: 'talk:5' },
               ],
             ]),
           }),
@@ -479,6 +488,23 @@ describe('POST /api/telegram-webhook', () => {
       ]);
     });
 
+    it('🗣 moves the Lead into negotiations, keeps it pinned and listed', async () => {
+      await tap('talk:5', OWNER_ID, { id: 'cb-talk', ...onCard });
+
+      expect(await stored()).toMatchObject({
+        status: 'negotiations',
+        lastActivityAt: expect.any(String),
+      });
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+      expect(crm('unpinChatMessage')).toEqual([]);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-talk', text: 'Статус обновлён' },
+      ]);
+
+      await tap('menu:open', OWNER_ID);
+      expect(JSON.stringify(sentTo(DM_CHAT_ID))).toContain('open:5');
+    });
+
     it('re-posts a won lead whose card is gone without pinning it', async () => {
       api.fail('editMessageText', 'Bad Request: message to edit not found');
       await tap('won:5', OWNER_ID, onCard);
@@ -486,7 +512,7 @@ describe('POST /api/telegram-webhook', () => {
       expect(sentTo(GROUP_ID)).toHaveLength(1);
     });
 
-    it.each(['won:5', 'lost:5', 'work:5'])(
+    it.each(['won:5', 'lost:5', 'talk:5', 'work:5'])(
       '%s from the admin is refused',
       async (data) => {
         await tap(data, ADMIN_ID, { id: 'cb-admin', ...onCard });
@@ -714,19 +740,6 @@ describe('POST /api/telegram-webhook', () => {
       expect(edits(DM_CHAT_ID, 1)).toEqual([
         view(buildLeadDetail(lead, 'admin')),
       ]);
-    });
-  });
-
-  describe('reply:<id>', () => {
-    it('starts a reply-to-visitor prompt', async () => {
-      seed(makeLead({ contact: 'tg://user?id=4242', telegramId: 4242 }));
-      await tap('reply:5', OWNER_ID);
-      expect(forceReplies()).toEqual([
-        expect.objectContaining({
-          text: expect.stringContaining('посетителю'),
-        }),
-      ]);
-      expect((await stored()).pendingPrompt).toEqual(awaiting('reply_visitor'));
     });
   });
 
@@ -1143,8 +1156,10 @@ describe('POST /api/telegram-webhook', () => {
     const ROWS: [string, 'owner' | 'admin' | 'any'][] = [
       ['st:5:won', 'owner'],
       ['st:5:lost', 'owner'],
+      ['st:5:negotiations', 'owner'],
       ['won:5', 'owner'],
       ['lost:5', 'owner'],
+      ['talk:5', 'owner'],
       ['work:5', 'owner'],
       ['postpone:5', 'owner'],
       ['remindpick:5:3', 'owner'],
@@ -1154,7 +1169,6 @@ describe('POST /api/telegram-webhook', () => {
       ['del:5', 'admin'],
       ['delconfirm:5', 'admin'],
       ['delcancel:5', 'admin'],
-      ['reply:5', 'any'],
       ['menu:open', 'any'],
       ['open:5', 'any'],
       ['menu:stats', 'admin'],
@@ -1425,116 +1439,206 @@ describe('POST /api/telegram-webhook', () => {
     });
   });
 
-  describe('replying to a visitor through the capture bot', () => {
-    const visitorLead = (overrides: Partial<StoredLead> = {}) =>
+  describe("a message in a Lead's topic", () => {
+    const TOPIC_ID = 77;
+
+    const topicLead = (overrides: Partial<StoredLead> = {}) =>
       makeLead({
         contact: 'tg://user?id=4242',
         telegramId: 4242,
-        comment: 'Ищу Golf 7',
-        pendingPrompt: awaiting('reply_visitor'),
+        topicId: TOPIC_ID,
+        topicMessageId: 78,
         ...overrides,
       });
 
-    const captureSends = (token: string) =>
-      api.callsTo('sendMessage', token).map((c) => c.payload);
-
-    it('goes to the visitor through the capture bot, not into a lead field', async () => {
-      seed(visitorLead());
-      const before = await stored();
-
-      await answerPrompt('Нашёл вариант <до 10k>');
-
-      expect(captureSends(APPROVED_CAPTURE_TOKEN)).toEqual([
-        {
-          chat_id: 4242,
-          text: 'Нашёл вариант &lt;до 10k&gt;',
-          parse_mode: 'HTML',
-        },
-      ]);
-      expect(captureSends(CARLAB_CAPTURE_TOKEN)).toEqual([]);
-      expect(sentTo(4242)).toEqual([]);
-      const lead = await stored();
-      expect(lead).toEqual({
-        ...before,
-        comment: 'Ищу Golf 7\nОтвет: Нашёл вариант <до 10k>',
-        pendingPrompt: null,
-        lastActivityAt: expect.any(String),
-      });
-      expect(sentTo(ADMIN_ID)).toEqual([]);
-      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
-      expect(sentTo(DM_CHAT_ID)).toEqual([
-        view({
-          text: `✅ Отправлено\n\n${buildLeadDetail(lead, 'owner').text}`,
-          reply_markup: buildLeadDetail(lead, 'owner').reply_markup,
-        }),
-      ]);
-    });
-
-    it('shows the card to the author when the prompt was answered in the group', async () => {
-      seed(
-        visitorLead({
-          pendingPrompt: {
-            chatId: Number(GROUP_ID),
-            messageId: PROMPT_ID,
-            kind: 'reply_visitor',
+    function topicMessage(
+      from: number,
+      {
+        topicId = TOPIC_ID,
+        chatId = Number(GROUP_ID),
+        isBot = false,
+        content = { text: 'Нашёл вариант' },
+      }: {
+        topicId?: number;
+        chatId?: number;
+        isBot?: boolean;
+        content?: Record<string, unknown>;
+      } = {},
+    ) {
+      return POST(
+        makeCtx({
+          update_id: nextUpdateId++,
+          message: {
+            message_id: 2,
+            ...content,
+            message_thread_id: topicId,
+            is_topic_message: true,
+            chat: { id: chatId, type: 'supergroup', is_forum: true },
+            from: { id: from, is_bot: isBot, first_name: 'X' },
+            reply_to_message: {
+              message_id: topicId,
+              chat: { id: chatId, type: 'supergroup' },
+            },
           },
         }),
       );
+    }
 
-      await message('Нашёл вариант', ADMIN_ID, {
-        chatId: Number(GROUP_ID),
-        type: 'supergroup',
-        replyTo: PROMPT_ID,
+    const copies = (token: string) =>
+      api.callsTo('copyMessage', token).map((c) => c.payload);
+
+    const copiedToVisitor = {
+      chat_id: 4242,
+      from_chat_id: Number(GROUP_ID),
+      message_id: 2,
+    };
+
+    it('copies the owner message to the visitor and opens negotiations', async () => {
+      seed(topicLead());
+
+      await topicMessage(OWNER_ID);
+
+      expect(copies(APPROVED_CAPTURE_TOKEN)).toEqual([copiedToVisitor]);
+      expect(copies(CARLAB_CAPTURE_TOKEN)).toEqual([]);
+      expect(await stored()).toMatchObject({
+        status: 'negotiations',
+        lastActivityAt: expect.any(String),
+      });
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+      expect(sentTo(ADMIN_ID)).toHaveLength(1);
+      expect(sentTo(Number(GROUP_ID))).toEqual([]);
+    });
+
+    it('reopens a closed topic before relaying the owner message', async () => {
+      seed(topicLead({ topicClosed: true }));
+
+      await topicMessage(OWNER_ID);
+
+      expect(
+        api.calls
+          .filter((c) => /ForumTopic|copyMessage/.test(c.method))
+          .map((c) => c.method),
+      ).toEqual(['reopenForumTopic', 'copyMessage']);
+      expect(crm('reopenForumTopic')).toEqual([
+        { chat_id: GROUP_ID, message_thread_id: TOPIC_ID },
+      ]);
+      expect(await stored()).toMatchObject({
+        topicClosed: false,
+        topicActiveAt: expect.any(String),
+      });
+    });
+
+    it('stamps an open topic without reopening it', async () => {
+      seed(topicLead());
+
+      await topicMessage(OWNER_ID);
+
+      expect(crm('reopenForumTopic')).toEqual([]);
+      expect((await stored()).topicActiveAt).toEqual(expect.any(String));
+    });
+
+    it.each(['won', 'lost'])('closes the topic on %s', async (key) => {
+      seed(topicLead());
+
+      await tap(`st:5:${key}`, OWNER_ID);
+
+      expect(crm('closeForumTopic')).toEqual([
+        { chat_id: GROUP_ID, message_thread_id: TOPIC_ID },
+      ]);
+      expect((await stored()).topicClosed).toBe(true);
+      expect(
+        crm('editMessageText').filter((p) => p.message_id === 78),
+      ).toHaveLength(1);
+    });
+
+    it('keeps the topic marked open and still answers the tap when Telegram will not close it', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+      api.fail('closeForumTopic', 'Bad Request: not enough rights');
+      seed(topicLead());
+
+      await tap('st:5:won', OWNER_ID);
+
+      expect((await stored()).status).toBe('won');
+      expect((await stored()).topicClosed).toBe(false);
+      expect(crm('answerCallbackQuery')).toHaveLength(1);
+      error.mockRestore();
+    });
+
+    it('leaves the topic open on negotiations', async () => {
+      seed(topicLead());
+
+      await tap('st:5:negotiations', OWNER_ID);
+
+      expect((await stored()).status).toBe('negotiations');
+      expect(crm('closeForumTopic')).toEqual([]);
+    });
+
+    it('copies media from an admin just like text', async () => {
+      seed(topicLead());
+
+      await topicMessage(ADMIN_ID, {
+        content: {
+          photo: [{ file_id: 'p', file_unique_id: 'u', width: 1, height: 1 }],
+        },
       });
 
-      const lead = await stored();
+      expect(copies(APPROVED_CAPTURE_TOKEN)).toEqual([copiedToVisitor]);
+    });
+
+    it.each(['@ivan', '+381601234567', 'tg://user?id=4242'])(
+      'reaches a visitor whose contact is %s',
+      async (contact) => {
+        seed(topicLead({ contact }));
+
+        await topicMessage(OWNER_ID);
+
+        expect(copies(APPROVED_CAPTURE_TOKEN)).toEqual([copiedToVisitor]);
+      },
+    );
+
+    it.each(['negotiations', 'postponed'] as const)(
+      'leaves a %s Lead where it is',
+      async (status) => {
+        seed(topicLead({ status }));
+        const before = await stored();
+
+        await topicMessage(OWNER_ID);
+
+        expect(copies(APPROVED_CAPTURE_TOKEN)).toEqual([copiedToVisitor]);
+        expect(await stored()).toEqual({
+          ...before,
+          lastActivityAt: expect.any(String),
+          topicActiveAt: expect.any(String),
+        });
+        expect(crm('editMessageText')).toEqual([]);
+        expect(sentTo(ADMIN_ID)).toEqual([]);
+      },
+    );
+
+    it("copies a sibling brand's topic through that brand's capture bot", async () => {
+      seed(topicLead({ brand: 'CarLab' }));
+
+      await topicMessage(OWNER_ID);
+
+      expect(copies(CARLAB_CAPTURE_TOKEN)).toEqual([copiedToVisitor]);
+      expect(copies(APPROVED_CAPTURE_TOKEN)).toEqual([]);
+    });
+
+    it('reports an undelivered copy in the topic and keeps the Lead open', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+      api.fail('copyMessage', 'Forbidden: bot was blocked by the user', 403);
+      seed(topicLead());
+
+      await topicMessage(OWNER_ID);
+
+      expect(copies(APPROVED_CAPTURE_TOKEN)).toHaveLength(1);
       expect(sentTo(Number(GROUP_ID))).toEqual([
-        view({
-          text: `✅ Отправлено\n\n${buildLeadDetail(lead, 'admin').text}`,
-          reply_markup: buildLeadDetail(lead, 'admin').reply_markup,
+        expect.objectContaining({
+          text: REPLY_COPY.undelivered,
+          message_thread_id: TOPIC_ID,
         }),
       ]);
-    });
-
-    it("sends a sibling brand's reply through that brand's capture bot", async () => {
-      seed(visitorLead({ brand: 'CarLab' }));
-
-      await answerPrompt('Запчасть есть');
-
-      expect(captureSends(CARLAB_CAPTURE_TOKEN)).toEqual([
-        expect.objectContaining({ chat_id: 4242, text: 'Запчасть есть' }),
-      ]);
-      expect(captureSends(APPROVED_CAPTURE_TOKEN)).toEqual([]);
-      expect((await stored()).pendingPrompt).toBeNull();
-      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
-    });
-
-    it('reports a reply the capture bot could not deliver instead of recording it', async () => {
-      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
-      api.respond(
-        'sendMessage',
-        (payload: Record<string, unknown>): BotApiResponse =>
-          payload.chat_id === 4242
-            ? {
-                ok: false,
-                error_code: 403,
-                description: 'Forbidden: bot was blocked by the user',
-              }
-            : {
-                ok: true,
-                result: { message_id: 1, chat: { id: payload.chat_id } },
-              },
-      );
-      seed(visitorLead());
-
-      await answerPrompt('Нашёл вариант');
-
-      expect(captureSends(APPROVED_CAPTURE_TOKEN)).toHaveLength(1);
-      expect((await stored()).pendingPrompt).toEqual(awaiting('reply_visitor'));
-      expect(crm('editMessageText')).toEqual([]);
-      expect(textsTo(DM_CHAT_ID)).toEqual([
-        expect.stringContaining('Не доставлено'),
-      ]);
+      expect((await stored()).status).toBe('open');
       error.mockRestore();
     });
 
@@ -1542,31 +1646,71 @@ describe('POST /api/telegram-webhook', () => {
       ['the brand has no capture bot configured', { brand: 'Details' }],
       ['the lead carries no telegramId', { telegramId: null }],
     ])(
-      'reports a reply as undelivered when %s',
+      'reports the copy as undelivered when %s',
       async (_label, overrides: Partial<StoredLead>) => {
         const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-        seed(visitorLead(overrides));
+        seed(topicLead(overrides));
 
-        await answerPrompt('Нашёл вариант');
+        await topicMessage(OWNER_ID);
 
-        expect(captureSends(APPROVED_CAPTURE_TOKEN)).toEqual([]);
-        expect(captureSends(CARLAB_CAPTURE_TOKEN)).toEqual([]);
-        expect((await stored()).pendingPrompt).toEqual(
-          awaiting('reply_visitor'),
-        );
-        expect(textsTo(DM_CHAT_ID)).toEqual([
-          expect.stringContaining('Не доставлено'),
+        expect(api.callsTo('copyMessage')).toEqual([]);
+        expect(sentTo(Number(GROUP_ID))).toEqual([
+          expect.objectContaining({ text: REPLY_COPY.undelivered }),
         ]);
+        expect((await stored()).status).toBe('open');
         warn.mockRestore();
       },
     );
 
-    it('rejects an empty reply to the visitor', async () => {
-      seed(visitorLead());
-      await answerPrompt('   ');
-      expect(captureSends(APPROVED_CAPTURE_TOKEN)).toEqual([]);
-      expect((await stored()).pendingPrompt).toEqual(awaiting('reply_visitor'));
-      expect(textsTo(DM_CHAT_ID)).toEqual([expect.stringContaining('пустым')]);
+    it.each([
+      ['a bot', () => topicMessage(OTHER_ID, { isBot: true })],
+      [
+        'a bot carrying an owner id',
+        () => topicMessage(OWNER_ID, { isBot: true }),
+      ],
+      ['a group member without a role', () => topicMessage(OTHER_ID)],
+      ['a topic no Lead owns', () => topicMessage(OWNER_ID, { topicId: 5 })],
+      ['another chat', () => topicMessage(OWNER_ID, { chatId: -100777 })],
+      [
+        'a topic closed notice',
+        () => topicMessage(OWNER_ID, { content: { forum_topic_closed: {} } }),
+      ],
+      [
+        'a pin notice',
+        () =>
+          topicMessage(OWNER_ID, {
+            content: {
+              pinned_message: {
+                message_id: 9,
+                date: 0,
+                chat: { id: Number(GROUP_ID), type: 'supergroup' },
+              },
+            },
+          }),
+      ],
+    ])('relays nothing from %s', async (_label, send) => {
+      seed(topicLead());
+      const before = await stored();
+
+      await send();
+
+      expect(api.callsTo('copyMessage')).toEqual([]);
+      expect(crm('sendMessage')).toEqual([]);
+      expect(await stored()).toEqual(before);
+    });
+
+    it('treats an answer to a left-over reply-through-bot prompt as a search', async () => {
+      leadsStorage().seed([
+        {
+          ...topicLead(),
+          pendingPrompt: { ...awaiting('postpone'), kind: 'reply_visitor' },
+        },
+      ]);
+
+      await answerPrompt('Нашёл вариант');
+
+      expect(api.callsTo('copyMessage')).toEqual([]);
+      expect(sentTo(DM_CHAT_ID)).toEqual([view(buildSearchResults([]))]);
     });
   });
 

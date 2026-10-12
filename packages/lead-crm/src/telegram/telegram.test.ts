@@ -5,28 +5,24 @@ vi.stubGlobal('fetch', mockFetch);
 
 import { recordBotApi } from '../testing/botApi.ts';
 import { createTelegramClient } from './client.ts';
-import { createFormatter } from './format.ts';
+import { createFormatter } from './cards.ts';
 import { createNotifier } from './notify.ts';
 import { LEAD_STATUSES } from '../schema.ts';
 import type { StoredLead } from '../schema.ts';
 import type { LedgerOperation } from '../ledgerStore.ts';
 
+import { buildSearchResults, buildMenu, buildOpenList } from './menu.ts';
 import {
-  buildSearchResults,
-  buildMenu,
   buildBalance,
   LEDGER_COPY,
   operationNoticeText,
   operationRecordedText,
   operationRefusedText,
   reAskOperationText,
-  buildOpenList,
-  buildStats,
-  buildDeleteConfirm,
-  buildRemindPicker,
-  formatDateRu,
-  leadDisplayName,
-} from './format.ts';
+} from './ledger.ts';
+import { buildStats } from './stats.ts';
+import { buildDeleteConfirm, buildRemindPicker } from './cards.ts';
+import { formatDateRu, leadDisplayName } from './markup.ts';
 
 const SERVICE_LABELS: Record<string, string> = {
   'vehicle-sourcing': 'Автоподбор',
@@ -36,7 +32,7 @@ const client = createTelegramClient('1001:test-bot-token', 'test_bot');
 const formatter = createFormatter({
   serviceLabel: (slug) => SERVICE_LABELS[slug] ?? slug,
   botUsername: 'approved_test_bot',
-  replyRelayBrands: ['Approved.rs', 'Details'],
+  groupId: '-1009876543210',
 });
 const notifier = createNotifier({
   client,
@@ -56,9 +52,11 @@ const {
   sendQuarantinedLeadsToAdmin,
   sendUnreadableLedgerToAdmin,
   sendStatusChangeToAdmin,
-  sendVisitorChangeToAdmin,
   sendDigest,
   editLeadDetailMessage,
+  openLeadTopic,
+  postLeadTopicSummary,
+  refreshLeadTopic,
 } = notifier;
 
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
@@ -82,6 +80,11 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     pendingPrompt: null,
     capturePrompt: null,
     telegramId: null,
+    topicId: null,
+    topicMessageId: null,
+    topicClosed: false,
+    topicActiveAt: null,
+    questionnaireDone: false,
     referredBy: null,
     remindAt: null,
     ...overrides,
@@ -239,7 +242,10 @@ describe('sendLeadNotification', () => {
       [
         { text: '✅ Сделка', callback_data: 'won:42' },
         { text: '❌ Отказ', callback_data: 'lost:42' },
+      ],
+      [
         { text: '⏳ В работе', callback_data: 'work:42' },
+        { text: '🗣 Переговоры', callback_data: 'talk:42' },
       ],
     ]);
   });
@@ -281,12 +287,19 @@ describe('status rows on the lead detail', () => {
       .map((b) => b.callback_data)
       .filter((d) => /^(st|postpone|resume):/.test(d ?? ''));
 
-  it('owner: Сделка/Отказ/Отложить on an open lead, with the lead id embedded', () => {
+  it('owner: Сделка/Отказ/Переговоры/Отложить on an open lead, with the lead id embedded', () => {
     expect(statusData(makeLead({ id: 7, status: 'open' }), 'owner')).toEqual([
       'st:7:won',
       'st:7:lost',
+      'st:7:negotiations',
       'postpone:7',
     ]);
+  });
+
+  it('owner: Сделка/Отказ/Отложить in negotiations, no second 🗣', () => {
+    expect(
+      statusData(makeLead({ id: 7, status: 'negotiations' }), 'owner'),
+    ).toEqual(['st:7:won', 'st:7:lost', 'postpone:7']);
   });
 
   it('owner: no status buttons on a won or lost lead', () => {
@@ -315,6 +328,7 @@ describe('status rows on the lead detail', () => {
     );
     expect(labels).toEqual([
       '🔵 Открыта',
+      '🗣 Переговоры',
       '✅ Сделка',
       '❌ Отказ',
       '⏸️ Отложена',
@@ -434,117 +448,6 @@ describe('sendForceReplyPrompt', () => {
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.chat_id).toBe(111);
     expect(body.reply_markup).toEqual({ force_reply: true });
-  });
-});
-
-describe('sendVisitorChangeToAdmin', () => {
-  beforeEach(() => mockFetchOk({ message_id: 1 }));
-  afterEach(() => mockFetch.mockReset());
-
-  it('tells the admin what the value was and what it became', async () => {
-    await sendVisitorChangeToAdmin(
-      makeLead({ id: 9, name: 'Иван Петров' }),
-      'name',
-      'Иван',
-    );
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.chat_id).toBe(222);
-    expect(body.text).toContain('#9');
-    expect(body.text).toContain('имя');
-    expect(body.text).toContain('Было: Иван');
-    expect(body.text).toContain('Стало: Иван Петров');
-  });
-
-  it('goes to the admin, never to the owner', async () => {
-    await sendVisitorChangeToAdmin(
-      makeLead({ comment: 'после' }),
-      'comment',
-      'до',
-    );
-    const recipients = mockFetch.mock.calls.map(
-      (c) => JSON.parse(c[1].body).chat_id,
-    );
-    expect(recipients).toEqual([222]);
-  });
-
-  it('stays quiet when the value did not actually change', async () => {
-    await sendVisitorChangeToAdmin(
-      makeLead({ comment: 'BMW X5' }),
-      'comment',
-      'BMW X5',
-    );
-    expect(mockFetch).not.toHaveBeenCalled();
-  });
-
-  it('treats a cleared field and an absent one as the same non-change', async () => {
-    await sendVisitorChangeToAdmin(makeLead({ comment: null }), 'comment', '');
-    expect(mockFetch).not.toHaveBeenCalled();
-  });
-
-  it('reports a field that had no value before', async () => {
-    await sendVisitorChangeToAdmin(
-      makeLead({ comment: 'перезвонить в среду' }),
-      'comment',
-      undefined,
-    );
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.text).toContain('Было: —');
-    expect(body.text).toContain('Стало: перезвонить в среду');
-  });
-
-  it('renders an emptied field as a dash rather than nothing', async () => {
-    await sendVisitorChangeToAdmin(
-      makeLead({ comment: null }),
-      'comment',
-      'BMW X5',
-    );
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.text).toContain('Стало: —');
-  });
-
-  it('truncates a comment too long to read at a glance', async () => {
-    const long = 'а'.repeat(200);
-    await sendVisitorChangeToAdmin(
-      makeLead({ comment: long }),
-      'comment',
-      'коротко',
-    );
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.text).toContain('…');
-    expect(body.text).not.toContain(long);
-  });
-
-  it('escapes html so a contact with angle brackets cannot break the message', async () => {
-    await sendVisitorChangeToAdmin(
-      makeLead({ contact: '<b>ivan</b>' }),
-      'contact',
-      '@ivan',
-    );
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.text).toContain('&lt;b&gt;ivan&lt;/b&gt;');
-  });
-
-  it('says when the visitor made the change through the bot', async () => {
-    await sendVisitorChangeToAdmin(
-      makeLead({ service: 'vehicle-import' }),
-      'service',
-      '',
-    );
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.text).toContain(': услуга\n🤖 Посетитель через бота');
-    expect(body.text).toContain('Было: —');
-    expect(body.text).toContain('Стало: vehicle-import');
-  });
-
-  it('names a service by its label rather than its slug', async () => {
-    await sendVisitorChangeToAdmin(
-      makeLead({ service: 'vehicle-sourcing' }),
-      'service',
-      'vehicle-import',
-    );
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.text).toContain('Было: vehicle-import');
-    expect(body.text).toContain('Стало: Автоподбор');
   });
 });
 
@@ -910,17 +813,19 @@ describe('buildHelp', () => {
 });
 
 describe('buildOpenList', () => {
-  it('lists open and postponed Leads newest first, leaving won and lost out', () => {
+  it('lists open, negotiating and postponed Leads newest first, leaving won and lost out', () => {
     const leads = [
       makeLead({ id: 1, status: 'open' }),
       makeLead({ id: 2, status: 'lost' }),
       makeLead({ id: 3, status: 'postponed' }),
       makeLead({ id: 4, status: 'won' }),
+      makeLead({ id: 5, status: 'negotiations' }),
     ];
     const rows = buildOpenList(leads).reply_markup.inline_keyboard.map(
       ([b]) => `${b.text} ${b.callback_data}`,
     );
     expect(rows).toEqual([
+      '#5 Иван · Approved.rs · 🗣 open:5',
       '#3 Иван · Approved.rs · ⏸️ open:3',
       '#1 Иван · Approved.rs · 🔵 open:1',
     ]);
@@ -940,6 +845,7 @@ describe('buildStats', () => {
     makeLead({ id: 3, status: 'won' }),
     makeLead({ id: 4, status: 'lost' }),
     makeLead({ id: 5, status: 'postponed' }),
+    makeLead({ id: 6, status: 'negotiations' }),
   ];
 
   const NOW = new Date('2026-10-15T12:00:00.000Z');
@@ -956,9 +862,9 @@ describe('buildStats', () => {
 
   it('counts by status and shows an empty ledger', () => {
     const text = buildStats(leads, [], NOW);
-    expect(text).toContain('Всего заявок: 5');
+    expect(text).toContain('Всего заявок: 6');
     expect(text).toContain(
-      '🔵 Открыта: 2   ⏸️ Отложена: 1   ✅ Сделка: 1   ❌ Отказ: 1',
+      '🔵 Открыта: 2   🗣 Переговоры: 1   ⏸️ Отложена: 1   ✅ Сделка: 1   ❌ Отказ: 1',
     );
     expect(text).toContain('<b>💶 Мне должны: 0 €</b>');
     expect(text).toContain('За месяц: +0 € · −0 €');
@@ -1032,37 +938,22 @@ describe('buildLeadDetail', () => {
     const data = reply_markup.inline_keyboard
       .flat()
       .map((b) => b.callback_data);
-    expect(data).toEqual(['st:7:won', 'st:7:lost', 'postpone:7']);
+    expect(data).toEqual([
+      'st:7:won',
+      'st:7:lost',
+      'st:7:negotiations',
+      'postpone:7',
+    ]);
   });
 
-  it('offers a reply through the bot only when the contact is a Telegram id link', () => {
-    const buttons = (contact: string) =>
-      buildLeadDetail(makeLead({ id: 7, contact }), 'owner')
-        .reply_markup.inline_keyboard.flat()
-        .map((b) => b.callback_data);
-    expect(buttons('tg://user?id=123456')).toContain('reply:7');
-    expect(buttons('@ivan')).not.toContain('reply:7');
-    expect(buttons('+381601234567')).not.toContain('reply:7');
-  });
-
-  it('offers a reply only for the brands whose capture bot this app relays through', () => {
-    const lead = makeLead({ id: 7, contact: 'tg://user?id=123456' });
-    const buttons = (detail: ReturnType<typeof buildLeadDetail>) =>
-      detail.reply_markup.inline_keyboard.flat().map((b) => b.callback_data);
-    expect(buttons(buildLeadDetail(lead, 'owner'))).toContain('reply:7');
-    expect(
-      buttons(buildLeadDetail({ ...lead, brand: 'Details' }, 'owner')),
-    ).toContain('reply:7');
-    expect(
-      buttons(buildLeadDetail({ ...lead, brand: 'CarLab' }, 'owner')),
-    ).not.toContain('reply:7');
-    const bare = createFormatter({
-      serviceLabel: (slug) => slug,
-      botUsername: 'carlab_test_bot',
-    });
-    expect(buttons(bare.buildLeadDetail(lead, 'owner'))).not.toContain(
-      'reply:7',
-    );
+  it('offers no one-shot reply through the bot, even for a Telegram id contact', () => {
+    const buttons = buildLeadDetail(
+      makeLead({ id: 7, contact: 'tg://user?id=123456' }),
+      'owner',
+    )
+      .reply_markup.inline_keyboard.flat()
+      .map((b) => b.callback_data);
+    expect(buttons).not.toContain('reply:7');
   });
 
   it('won lead: no money and no per-Lead pay buttons for either role', () => {
@@ -1184,6 +1075,7 @@ describe('per-business formatter config', () => {
   const detailingFormatter = createFormatter({
     serviceLabel: () => 'Оклейка плёнкой',
     botUsername: 'detailing_bot',
+    groupId: '-1009876543210',
   });
 
   it('does not quote one business rate in help text a shared bot shows every brand', () => {
@@ -1194,7 +1086,8 @@ describe('per-business formatter config', () => {
 
   it('builds its deep link from its own bot username', () => {
     expect(
-      detailingFormatter.deepLinkKeyboard(7).inline_keyboard[0][0].url,
+      detailingFormatter.deepLinkKeyboard(makeLead({ id: 7 }))
+        .inline_keyboard[0][0].url,
     ).toBe('https://t.me/detailing_bot?start=lead_7');
   });
 
@@ -1351,5 +1244,70 @@ describe('brand attribution — one bot, one chat, several businesses', () => {
       new Date(),
     );
     expect(text).not.toContain('По брендам');
+  });
+});
+
+describe('the Lead topic', () => {
+  beforeEach(() => {
+    api.reset();
+    mockFetch.mockImplementation(api.fetch);
+  });
+  afterEach(() => mockFetch.mockReset());
+
+  it('opens a topic named after the Lead and posts the summary into it', async () => {
+    const lead = makeLead({ telegramId: 777, contactChannel: 'telegram' });
+    await expect(openLeadTopic(lead)).resolves.toBe(1);
+    await expect(postLeadTopicSummary(lead, 1)).resolves.toBe(1000);
+    expect(api.callsTo('createForumTopic')[0].payload).toEqual({
+      chat_id: '-1009876543210',
+      name: '#42 · Иван · Approved.rs',
+    });
+    expect(api.callsTo('sendMessage')[0].payload).toMatchObject({
+      chat_id: '-1009876543210',
+      message_thread_id: 1,
+      parse_mode: 'HTML',
+      text: expect.stringContaining(
+        'Контакт: <a href="https://t.me/ivan">@ivan</a> (Telegram)',
+      ),
+    });
+  });
+
+  it('caps the topic name at Telegram limit', () => {
+    expect(
+      formatter.topicName(makeLead({ name: 'Я'.repeat(300) })),
+    ).toHaveLength(128);
+  });
+
+  it('leaves a phone or an id contact as plain text in the summary', () => {
+    expect(
+      formatter.topicSummaryText(
+        makeLead({ contact: '+381601234567', contactChannel: null }),
+      ),
+    ).toContain('Контакт: +381601234567\n');
+  });
+
+  it('edits the summary in place, and does nothing without one', async () => {
+    await refreshLeadTopic(makeLead({ topicId: 3, topicMessageId: 55 }));
+    expect(api.callsTo('editMessageText')[0].payload).toMatchObject({
+      chat_id: '-1009876543210',
+      message_id: 55,
+      parse_mode: 'HTML',
+    });
+    await refreshLeadTopic(makeLead({ topicId: 3 }));
+    expect(api.callsTo('editMessageText')).toHaveLength(1);
+  });
+
+  it('links the card and the detail to the topic once there is one', () => {
+    const urls = (keyboard: { inline_keyboard: { url?: string }[][] }) =>
+      keyboard.inline_keyboard.flat().map((b) => b.url);
+    expect(
+      urls(formatter.deepLinkKeyboard(makeLead({ topicId: 9 }))),
+    ).toContain('https://t.me/c/9876543210/9');
+    expect(
+      urls(buildLeadDetail(makeLead({ topicId: 9 }), 'owner').reply_markup),
+    ).toContain('https://t.me/c/9876543210/9');
+    expect(urls(formatter.deepLinkKeyboard(makeLead()))).not.toContain(
+      'https://t.me/c/9876543210/9',
+    );
   });
 });
