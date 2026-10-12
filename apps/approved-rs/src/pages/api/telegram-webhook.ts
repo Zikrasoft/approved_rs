@@ -34,9 +34,14 @@ import {
   GROUP_ID,
   REPLY_COPY,
   LEAD_ACTION_COPY,
+  EDIT_COPY,
+  noteLine,
+  reAskEditText,
+  sendFieldChange,
   touchLeadTopic,
   ensureLeadCard,
   ensureLeadTopic,
+  type EditField,
   type Role,
 } from '@/lib/telegram';
 import { captureClientFor } from '@/lib/captureBot';
@@ -56,6 +61,8 @@ import {
   resumeLead,
   postponeLead,
   canPostpone,
+  appendNote,
+  editedContact,
   postponePatch,
   readLeads,
   readBalance,
@@ -74,6 +81,10 @@ import {
 } from '@/lib/store';
 
 const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
+
+const PHONE_REGION = 'RS';
+
+const MAX_NAME_LENGTH = 200;
 
 const messageSchema = z.object({
   message_id: z.number().int(),
@@ -344,6 +355,20 @@ async function startTopic(ctx: Ctx, id: number): Promise<void> {
   await answerCallback(ctx.cbId, LEAD_ACTION_COPY.topicOpened);
 }
 
+function editRow(field: EditField): CallbackRow {
+  return [
+    new RegExp(`^edit:(\\d+):${field}$`),
+    'any',
+    withId((ctx, id) =>
+      startLeadPrompt(ctx, id, {
+        prompt: EDIT_COPY.prompt(field),
+        kind: `edit_${field}`,
+        ackText: EDIT_COPY.ack,
+      }),
+    ),
+  ];
+}
+
 function statusRow(key: LeadStatus): CallbackRow {
   return [
     new RegExp(`^st:(\\d+):${key}$`),
@@ -393,6 +418,20 @@ export const CALLBACKS: CallbackRow[] = [
   [/^menu:open$/, 'any', listOpen],
   [/^open:(\d+)$/, 'any', withId(openLead)],
   [/^topic:(\d+)$/, 'any', withId(startTopic)],
+  editRow('name'),
+  editRow('contact'),
+  editRow('comment'),
+  [
+    /^note:(\d+)$/,
+    'any',
+    withId((ctx, id) =>
+      startLeadPrompt(ctx, id, {
+        prompt: EDIT_COPY.notePrompt,
+        kind: 'note',
+        ackText: EDIT_COPY.noteAck,
+      }),
+    ),
+  ],
   [
     /^menu:stats$/,
     'admin',
@@ -455,6 +494,8 @@ type Reply = {
   inPrivateChat: boolean;
 };
 
+type PromptHandler = (reply: Reply, lead: StoredLead) => Promise<void>;
+
 async function replyPostpone({
   chatId,
   replyToMessageId,
@@ -490,13 +531,81 @@ function threadedTo(messageId: number) {
   };
 }
 
+function promptKey({ chatId, replyToMessageId }: Reply): PromptKey {
+  return { chatId, messageId: replyToMessageId };
+}
+
+async function afterEdit(
+  reply: Reply,
+  lead: StoredLead,
+  headline: string,
+): Promise<void> {
+  await afterStatusChange(lead, { notice: false });
+  const { text, reply_markup } = buildLeadDetail(lead, reply.role);
+  await sendMessage(reply.chatId, `${headline}\n\n${text}`, { reply_markup });
+}
+
+function editPatch(
+  field: EditField,
+  text: string,
+  lead: StoredLead,
+): Partial<StoredLead> | undefined {
+  const value = text.trim();
+  if (field === 'contact')
+    return editedContact(value, lead.contactChannel, PHONE_REGION);
+  if (field === 'name')
+    return value ? { name: value.slice(0, MAX_NAME_LENGTH) } : undefined;
+  return { comment: value || null };
+}
+
+function replyEdit(field: EditField): PromptHandler {
+  return async (reply, lead) => {
+    const patch = editPatch(field, reply.text, lead);
+    if (!patch) {
+      const messageId = await sendForceReplyPrompt(
+        reply.chatId,
+        reAskEditText(field),
+      );
+      await setPendingPrompt(lead.id, {
+        chatId: reply.chatId,
+        messageId,
+        kind: `edit_${field}`,
+      });
+      return;
+    }
+    let before: string | null | undefined;
+    const updated = await resolvePendingPrompt(promptKey(reply), (current) => {
+      before = current[field];
+      return patch;
+    });
+    if (!updated) return;
+    await afterEdit(reply, updated, EDIT_COPY.updated);
+    await sendFieldChange(updated, field, before, reply.role, reply.authorId);
+  };
+}
+
+const replyNote: PromptHandler = async (reply) => {
+  const text = reply.text.trim();
+  if (!text) return;
+  const updated = await resolvePendingPrompt(promptKey(reply), (lead) => ({
+    comment: appendNote(lead.comment, noteLine(text, reply.role)),
+  }));
+  if (updated) await afterEdit(reply, updated, LEAD_ACTION_COPY.noteAdded);
+};
+
+const PROMPT_REPLIES: Record<PromptKind, PromptHandler> = {
+  postpone: replyPostpone,
+  edit_name: replyEdit('name'),
+  edit_contact: replyEdit('contact'),
+  edit_comment: replyEdit('comment'),
+  note: replyNote,
+};
+
 async function replyToPrompt(reply: Reply): Promise<boolean> {
-  const pending = await findByPendingPrompt({
-    chatId: reply.chatId,
-    messageId: reply.replyToMessageId,
-  });
-  if (pending?.pendingPrompt?.kind !== 'postpone') return false;
-  await replyPostpone(reply);
+  const pending = await findByPendingPrompt(promptKey(reply));
+  const kind = pending?.pendingPrompt?.kind;
+  if (!pending || !kind) return false;
+  await PROMPT_REPLIES[kind](reply, pending);
   return true;
 }
 
@@ -508,7 +617,7 @@ async function replyToCard(reply: Reply): Promise<boolean> {
   if (!lead) return false;
   const text = reply.text.trim();
   if (!text) return true;
-  await addNote(lead.id, text);
+  await addNote(lead.id, noteLine(text, reply.role));
   await sendMessage(
     reply.chatId,
     LEAD_ACTION_COPY.noteAdded,

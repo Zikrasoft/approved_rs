@@ -46,8 +46,9 @@ runs daily against a 24-hour window, a Ghost lead actually lives 24 to 48 hours.
 through a Capture bot: pressed Start, answered, wrote (`visitorActiveAt`).
 
 **Owner activity** — the last time the owner worked the Lead in the CRM bot:
-marked it in work, added a note, answered a prompt on it, wrote to the visitor
-in its Topic (`lastActivityAt`).
+marked it in work, added a note, edited its name, contact or comment, answered
+a prompt on it, wrote to the visitor in its Topic (`lastActivityAt`). An edit
+or note by the admin counts the same.
 A status change alone is not owner activity, and neither is a reply sent from
 the owner's own Telegram account, which never reaches the store.
 
@@ -94,7 +95,10 @@ A shared phone is the one exception — it still becomes the contact.
 _Avoid_: wizard, form (the site's form is a different thing)
 
 **Topic** — the forum topic in the CRM group that holds one Lead's
-conversation. The CRM bot opens it the first time a Capture bot touches a
+conversation, and only for a Lead that came through a Capture bot in
+Telegram. Telegram is one convenient channel, not the only one: a Lead from
+WhatsApp, Viber, a phone call or the site form has no Topic and no relay, and
+nothing about a Lead may assume it has one. The CRM bot opens it the first time a Capture bot touches a
 Lead the visitor started from Telegram, names it after the Lead's id, name and
 brand, and keeps the Lead summary as its first message, edited as the
 Questionnaire fills in. The Lead's card in General and its detail link to it;
@@ -121,7 +125,10 @@ Payouts are owed to.
 
 **CRM bot** — the single bot the owner and the admin work in: cards, statuses,
 money, the daily digest and order notifications, for all three brands in one
-chat.
+chat. For every Lead, whatever channel it came from, its card and its detail
+in the bot (status buttons, ✏️ Имя / Контакт / Комментарий, 📝 Заметка) are the
+workspace that must always work; either of the two may edit a Lead, and the
+other is told what changed.
 
 **Payout** — an operation that raises the Balance (➕ Зачислить): an amount
 the owner will send the admin. The person recording it states the amount;

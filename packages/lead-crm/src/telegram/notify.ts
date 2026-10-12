@@ -4,8 +4,10 @@ import type { Digest } from '../store.ts';
 import { isMessageGone, type TelegramClient } from './client.ts';
 import { operationNoticeText, unreadableLedgerText } from './ledger.ts';
 import {
+  fieldChangeText,
   quarantinedLeadsText,
   statusChangeText,
+  type EditField,
   type Formatter,
 } from './cards.ts';
 import type { Role } from './markup.ts';
@@ -171,6 +173,20 @@ export function createNotifier({
 
     async sendStatusChangeToAdmin(lead: StoredLead): Promise<void> {
       await sendToAll(adminIds, statusChangeText(lead));
+    },
+
+    async sendFieldChange(
+      lead: StoredLead,
+      field: EditField,
+      before: string | null | undefined,
+      by: Role,
+      authorId: number,
+    ): Promise<void> {
+      if ((before ?? '') === (lead[field] ?? '')) return;
+      const others = (by === 'owner' ? adminIds : ownerIds).filter(
+        (id) => id !== authorId,
+      );
+      await sendToAll(others, fieldChangeText(lead, field, before, by));
     },
 
     async sendDigest(digest: Digest): Promise<boolean> {

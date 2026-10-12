@@ -4,6 +4,7 @@ export { createBrandBot } from './brandBot.ts';
 export type { BrandBotOptions } from './brandBot.ts';
 
 export { LEADS_PATH } from './quarantine.ts';
+export { editedContact } from './editedContact.ts';
 export {
   isHandleContact,
   isPhoneContact,
@@ -53,7 +54,10 @@ export {
   buildDeleteConfirm,
   buildRemindPicker,
   createFormatter,
+  EDIT_COPY,
   EDIT_FIELD_LABELS,
+  noteLine,
+  reAskEditText,
   REPLY_COPY,
   LEAD_ACTION_COPY,
   managerHandoffText,

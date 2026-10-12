@@ -12,7 +12,13 @@ export type LeadStatus = z.infer<typeof leadStatusSchema>;
 
 const storedStatusSchema = z.enum([...LEAD_STATUSES, 'new', 'in_progress']);
 
-export const PROMPT_KINDS = ['postpone'] as const;
+export const PROMPT_KINDS = [
+  'postpone',
+  'edit_name',
+  'edit_contact',
+  'edit_comment',
+  'note',
+] as const;
 
 const pendingPromptSchema = z.object({
   chatId: z.number().int(),

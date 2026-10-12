@@ -3,6 +3,7 @@ import { isHandleContact } from '../contactShape.ts';
 import { LEADS_PATH } from '../quarantine.ts';
 import { isInWork, type StoredLead } from '../schema.ts';
 import { isPlaceholderContact, type Digest } from '../store.ts';
+import { businessDay } from '../businessTime.ts';
 import {
   escapeHtml,
   formatDateRu,
@@ -14,6 +15,7 @@ import {
   type Role,
 } from './markup.ts';
 import { digestMessage } from './digest.ts';
+import { OPERATION_AUTHORS } from './ledger.ts';
 import { buildHelp } from './menu.ts';
 
 export interface FormatterOptions {
@@ -96,10 +98,67 @@ export const EDIT_FIELD_LABELS = {
   name: 'имя',
   contact: 'контакт',
   comment: 'комментарий',
-  service: 'услуга',
 } as const;
 
 export type EditField = keyof typeof EDIT_FIELD_LABELS;
+
+export const EDIT_COPY = {
+  prompt: (field: EditField) =>
+    `✏️ Введите новое значение (${EDIT_FIELD_LABELS[field]}):`,
+  ack: 'Жду значение',
+  empty: '⚠️ Значение не может быть пустым.',
+  badContact: '⚠️ Нужен телефон, @username, ссылка или e-mail.',
+  updated: '✅ Обновлено',
+  notePrompt: '📝 Напишите заметку:',
+  noteAck: 'Жду заметку',
+} as const;
+
+export function reAskEditText(field: EditField): string {
+  const refusal = field === 'contact' ? EDIT_COPY.badContact : EDIT_COPY.empty;
+  return `${refusal}\n\n${EDIT_COPY.prompt(field)}`;
+}
+
+export function noteLine(text: string, by: Role, at = new Date()): string {
+  return `${formatDateRu(businessDay(at))} · ${OPERATION_AUTHORS[by]}: ${text}`;
+}
+
+const FIELD_PREVIEW_LIMIT = 120;
+
+function fieldPreview(value: string | null | undefined): string {
+  const text = (value ?? '').trim();
+  if (!text) return '—';
+  return escapeHtml(
+    text.length <= FIELD_PREVIEW_LIMIT
+      ? text
+      : `${text.slice(0, FIELD_PREVIEW_LIMIT)}…`,
+  );
+}
+
+export function fieldChangeText(
+  lead: StoredLead,
+  field: EditField,
+  before: string | null | undefined,
+  by: Role,
+): string {
+  return [
+    `✏️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${EDIT_FIELD_LABELS[field]}`,
+    `✍️ ${OPERATION_AUTHORS[by]}`,
+    ``,
+    `Было: ${fieldPreview(before)}`,
+    `Стало: ${fieldPreview(lead[field])}`,
+  ].join('\n');
+}
+
+function editRows({ id }: StoredLead): Btn[][] {
+  return [
+    [
+      { text: '✏️ Имя', callback_data: `edit:${id}:name` },
+      { text: '✏️ Контакт', callback_data: `edit:${id}:contact` },
+      { text: '✏️ Комментарий', callback_data: `edit:${id}:comment` },
+    ],
+    [{ text: '📝 Заметка', callback_data: `note:${id}` }],
+  ];
+}
 
 export const REPLY_COPY = {
   undelivered:
@@ -280,6 +339,7 @@ export function createFormatter({
 
       const rows: Btn[][] = [
         ...statusRows(lead, role),
+        ...editRows(lead),
         ...topicButtons(lead),
         ...deleteRow,
       ];

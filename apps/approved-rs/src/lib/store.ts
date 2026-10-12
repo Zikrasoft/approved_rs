@@ -38,6 +38,7 @@ export const {
 export {
   appendNote,
   canPostpone,
+  editedContact,
   postponePatch,
   statusPatch,
   parseOperationReply,

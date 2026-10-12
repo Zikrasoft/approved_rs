@@ -28,6 +28,7 @@ vi.mock('@podbor/lead-crm/storage/local', () =>
 );
 
 import { GET } from './reminders';
+import { POST as webhook } from './telegram-webhook';
 import { getLead, touchLead } from '@/lib/store';
 
 const api = recordBotApi();
@@ -437,6 +438,61 @@ describe('GET /api/reminders', () => {
     expect((await stored(6)).status).toBe('lost');
     for (const id of [7, 8, 10]) expect((await stored(id)).status).toBe('open');
     expect(digestIds()).toEqual([7, 8, 10]);
+  });
+
+  it('spares a click the owner gave a contact to in the bot', async () => {
+    leadsStorage().seed([ghost({ createdAt: '2026-10-01T00:00:00.000Z' })]);
+    api.respond('sendMessage', (payload: Record<string, unknown>) => ({
+      ok: true,
+      result: {
+        message_id: 900,
+        date: 0,
+        chat: { id: Number(payload.chat_id), type: 'private' },
+      },
+    }));
+    const update = (body: Record<string, unknown>, updateId: number) =>
+      webhook({
+        request: new Request('http://localhost/api/telegram-webhook', {
+          method: 'POST',
+          headers: { 'x-telegram-bot-api-secret-token': 'test-webhook-secret' },
+          body: JSON.stringify({ update_id: updateId, ...body }),
+        }),
+      } as Pick<APIContext, 'request'> as APIContext);
+    const dm = { id: OWNER_ID, type: 'private' };
+    await update(
+      {
+        callback_query: {
+          id: 'cb',
+          data: 'edit:7:contact',
+          from: { id: OWNER_ID },
+          message: { message_id: 1, chat: dm },
+        },
+      },
+      70001,
+    );
+    await update(
+      {
+        message: {
+          message_id: 2,
+          text: '+381 64 123 4567',
+          chat: dm,
+          from: { id: OWNER_ID },
+          reply_to_message: { message_id: 900 },
+        },
+      },
+      70002,
+    );
+    expect((await stored(7)).contact).toBe('+381641234567');
+    api.reset();
+
+    const res = await GET(makeCtx());
+
+    expect(await res.json()).toEqual({
+      expiredGhosts: 0,
+      closedTopics: 0,
+      digestSent: false,
+    });
+    expect((await stored(7)).status).toBe('open');
   });
 
   describe('topics nobody wrote in for a day', () => {

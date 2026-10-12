@@ -21,7 +21,13 @@ import {
   reAskOperationText,
 } from './ledger.ts';
 import { buildStats } from './stats.ts';
-import { buildDeleteConfirm, buildRemindPicker } from './cards.ts';
+import {
+  buildDeleteConfirm,
+  buildRemindPicker,
+  EDIT_COPY,
+  noteLine,
+  reAskEditText,
+} from './cards.ts';
 import { formatDateRu, leadDisplayName } from './markup.ts';
 
 const SERVICE_LABELS: Record<string, string> = {
@@ -52,6 +58,7 @@ const {
   sendQuarantinedLeadsToAdmin,
   sendUnreadableLedgerToAdmin,
   sendStatusChangeToAdmin,
+  sendFieldChange,
   sendDigest,
   editLeadDetailMessage,
   openLeadTopic,
@@ -554,6 +561,86 @@ describe('sendStatusChangeToAdmin', () => {
   });
 });
 
+describe('sendFieldChange', () => {
+  beforeEach(() => mockFetchOk());
+  afterEach(() => mockFetch.mockReset());
+
+  const sent = () =>
+    mockFetch.mock.calls.map(([, init]) => JSON.parse(init.body));
+
+  it('tells the admins what the owner changed, before and after', async () => {
+    await sendFieldChange(
+      makeLead({ id: 9, name: 'Пётр', contact: '+381641234567' }),
+      'contact',
+      '—',
+      'owner',
+      111,
+    );
+    expect(sent()).toEqual([
+      expect.objectContaining({
+        chat_id: 222,
+        text: '✏️ Заявка #9 Пётр: контакт\n✍️ Владелец\n\nБыло: —\nСтало: +381641234567',
+      }),
+    ]);
+  });
+
+  it('tells the owners what the admin changed, never the author', async () => {
+    const both = createNotifier({
+      client,
+      formatter,
+      groupId: '-1009876543210',
+      ownerIds: [111, 222],
+      adminIds: [222],
+    });
+    await both.sendFieldChange(
+      makeLead({ comment: 'x'.repeat(130) }),
+      'comment',
+      null,
+      'admin',
+      222,
+    );
+    expect(sent()).toEqual([
+      expect.objectContaining({
+        chat_id: 111,
+        text: expect.stringContaining(
+          `✍️ Админ\n\nБыло: —\nСтало: ${'x'.repeat(120)}…`,
+        ),
+      }),
+    ]);
+  });
+
+  it('sends nothing when the value did not change', async () => {
+    await sendFieldChange(
+      makeLead({ comment: null }),
+      'comment',
+      '',
+      'owner',
+      111,
+    );
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+});
+
+describe('edit copy', () => {
+  it('asks again naming what a contact may be, or that a value is required', () => {
+    expect(reAskEditText('contact')).toBe(
+      `${EDIT_COPY.badContact}\n\n${EDIT_COPY.prompt('contact')}`,
+    );
+    expect(reAskEditText('name')).toBe(
+      `${EDIT_COPY.empty}\n\n✏️ Введите новое значение (имя):`,
+    );
+  });
+
+  it('signs a note with the Belgrade date and the author', () => {
+    expect(noteLine('Звонил', 'admin', new Date('2026-10-15T22:30:00Z'))).toBe(
+      '16.10.2026 · Админ: Звонил',
+    );
+    expect(noteLine('Звонил', 'owner')).toMatch(
+      /^\d{2}\.\d{2}\.\d{4} · Владелец: Звонил$/,
+    );
+  });
+});
+
 describe('sendQuarantinedLeadsToAdmin', () => {
   beforeEach(() => mockFetchOk());
   afterEach(() => mockFetch.mockReset());
@@ -944,7 +1031,7 @@ describe('buildStats', () => {
 });
 
 describe('buildLeadDetail', () => {
-  it('open lead: status rows, no edit or archive rows, no money row', () => {
+  it('open lead: status rows, then edit and note rows, no money row', () => {
     const { text, reply_markup } = buildLeadDetail(
       makeLead({ id: 7, status: 'open' }),
       'owner',
@@ -959,6 +1046,10 @@ describe('buildLeadDetail', () => {
       'st:7:lost',
       'st:7:negotiations',
       'postpone:7',
+      'edit:7:name',
+      'edit:7:contact',
+      'edit:7:comment',
+      'note:7',
     ]);
   });
 
