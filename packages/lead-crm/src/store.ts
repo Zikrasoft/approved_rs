@@ -539,14 +539,6 @@ export function createLeadStore({
       }));
     },
 
-    addNote(id: number, note: string): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({
-        ...l,
-        comment: appendNote(l.comment, note),
-        lastActivityAt: new Date().toISOString(),
-      }));
-    },
-
     touchLead(
       id: number,
       at: Date = new Date(),
@@ -563,16 +555,6 @@ export function createLeadStore({
 
     async findByPendingPrompt(key: PromptKey): Promise<StoredLead | undefined> {
       return (await readLeads()).find(promptedAt(key));
-    },
-
-    async findByCard({
-      chatId,
-      messageId,
-    }: PromptKey): Promise<StoredLead | undefined> {
-      const leads = await readLeads();
-      return leads.find(
-        (l) => l.telegramChatId === chatId && l.telegramMessageId === messageId,
-      );
     },
 
     async findByTopic(topicId: number): Promise<StoredLead | undefined> {

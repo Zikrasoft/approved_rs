@@ -1728,14 +1728,14 @@ describe('POST /api/telegram-webhook', () => {
       expect((await stored()).status).toBe('postponed');
     });
 
-    it('takes a note on a group card without reading the ledger', async () => {
+    it('reads no ledger for a reply on a group card', async () => {
       const read = vi.spyOn(ledgerStorage(), 'read');
       await message('Звонил', OWNER_ID, {
         chatId: CARD_CHAT_ID,
         type: 'supergroup',
         replyTo: CARD_MESSAGE_ID,
       });
-      expect((await stored()).comment).toBe(noteLine('Звонил', 'owner'));
+      expect((await stored()).comment).toBeUndefined();
       expect(read).not.toHaveBeenCalled();
     });
   });
@@ -2473,58 +2473,22 @@ describe('POST /api/telegram-webhook', () => {
         replyTo: CARD_MESSAGE_ID,
       });
 
-    it('keeps a number as a note and moves no money', async () => {
+    it('is group discussion: stores no note, sends nothing, moves no money', async () => {
       seed(makeLead({ comment: 'Звонил' }));
-      await cardReply('80');
-
-      expect((await stored()).comment).toBe(
-        `Звонил\n${noteLine('80', 'owner')}`,
-      );
+      for (const from of [OWNER_ID, ADMIN_ID]) {
+        await cardReply('80', from);
+        await cardReply('Иван 30, приедет в пятницу', from);
+      }
+      expect((await stored()).comment).toBe('Звонил');
+      expect((await stored()).lastActivityAt).toBeNull();
       expect(await readOperations()).toEqual([]);
-      expect(sentTo(CARD_CHAT_ID)).toEqual([
-        expect.objectContaining({
-          text: '📝 Заметка добавлена',
-          reply_parameters: expect.objectContaining({ message_id: 2 }),
-        }),
-      ]);
-      expect(sentTo(ADMIN_ID)).toEqual([]);
-      expect((await stored()).lastActivityAt).not.toBeNull();
-    });
-
-    it('appends any other text to the Lead as a note', async () => {
-      await cardReply('Иван 30, приедет в пятницу', ADMIN_ID);
-      expect((await stored()).comment).toBe(
-        noteLine('Иван 30, приедет в пятницу', 'admin'),
-      );
-    });
-
-    it('leaves a lost Lead lost', async () => {
-      seed(makeLead({ status: 'lost' }));
-      await cardReply('50');
-      expect((await stored()).status).toBe('lost');
-      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toEqual([]);
-    });
-
-    it('ignores a reply with no text', async () => {
-      await cardReply('  ');
       expect(api.calls).toEqual([]);
-      expect((await stored()).comment).toBeUndefined();
     });
 
     it('ignores a reply from someone who is neither owner nor admin', async () => {
       await cardReply('80', OTHER_ID);
       expect(api.calls).toEqual([]);
       expect((await stored()).comment).toBeUndefined();
-    });
-
-    it('ignores an owner or admin reply to any other message', async () => {
-      for (const from of [OWNER_ID, ADMIN_ID])
-        await message('Петя 40', from, {
-          chatId: CARD_CHAT_ID,
-          type: 'supergroup',
-          replyTo: 4242,
-        });
-      expect(api.calls).toEqual([]);
     });
 
     it('gives a pending prompt priority over the card', async () => {
