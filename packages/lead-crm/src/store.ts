@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { channelLabel } from './channelLabels.ts';
 import { isPhoneContact, isTelegramIdContact } from './contactShape.ts';
-import { isClosed, isInWork } from './schema.ts';
+import { inWorkStatus, isClosed, isInWork } from './schema.ts';
 import type {
   CapturePrompt,
   Referrer,
@@ -111,7 +111,7 @@ export const GHOST_LEAD_RETENTION_MS = DAY_MS;
 export const TOPIC_IDLE_MS = DAY_MS;
 
 function untouched(lead: StoredLead): boolean {
-  return lead.status === 'open' && lead.lastActivityAt == null;
+  return lead.status === 'new' && lead.lastActivityAt == null;
 }
 
 function isIdleTopic(lead: StoredLead, now: Date): boolean {
@@ -198,6 +198,7 @@ export function postponePatch(
 ): Partial<StoredLead> {
   return {
     ...statusPatch('postponed'),
+    postponedFrom: inWorkStatus(lead),
     remindAt,
     comment: appendNote(lead.comment, note),
   };
@@ -210,8 +211,12 @@ export function statusPatch(
   return { status: to, statusChangedAt: at.toISOString() };
 }
 
-export function resumePatch(): Partial<StoredLead> {
-  return { ...statusPatch('open'), remindAt: null };
+export function resumePatch(lead: StoredLead): Partial<StoredLead> {
+  return {
+    ...statusPatch(lead.postponedFrom ?? 'new'),
+    postponedFrom: null,
+    remindAt: null,
+  };
 }
 
 const unreadableId = z.object({
@@ -516,7 +521,7 @@ export function createLeadStore({
       return updateOne(id, (l) => ({
         ...l,
         lastActivityAt: at.toISOString(),
-        ...(l.status === 'open' ? statusPatch('negotiations', at) : {}),
+        ...(l.status === 'new' ? statusPatch('negotiations', at) : {}),
       }));
     },
 
@@ -652,7 +657,7 @@ export function createLeadStore({
     resumeLead(id: number): Promise<StoredLead | undefined> {
       return updateOneIfStatus(id, 'postponed', (l) => ({
         ...l,
-        ...resumePatch(),
+        ...resumePatch(l),
       }));
     },
 

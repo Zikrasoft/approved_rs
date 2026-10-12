@@ -34,7 +34,7 @@ export function digestMessage(
       rows.push([
         { text: `✅ #${l.id}`, callback_data: `won:${l.id}` },
         { text: `❌ #${l.id}`, callback_data: `lost:${l.id}` },
-        { text: `⏳ #${l.id}`, callback_data: `work:${l.id}` },
+        { text: `🔵 #${l.id}`, callback_data: `work:${l.id}` },
       ]);
     }
   }

@@ -31,6 +31,7 @@ export {
 export const {
   sendLeadNotification,
   sendDigest,
+  sendPostponeReminder,
   sendOperationNotice,
   sendStatusChangeToAdmin,
   sendFieldChange,

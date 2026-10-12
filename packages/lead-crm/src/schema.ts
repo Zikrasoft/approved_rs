@@ -1,8 +1,9 @@
 import { z } from 'zod';
 
 export const LEAD_STATUSES = [
-  'open',
+  'new',
   'negotiations',
+  'in_progress',
   'won',
   'lost',
   'postponed',
@@ -10,7 +11,11 @@ export const LEAD_STATUSES = [
 const leadStatusSchema = z.enum(LEAD_STATUSES);
 export type LeadStatus = z.infer<typeof leadStatusSchema>;
 
-const storedStatusSchema = z.enum([...LEAD_STATUSES, 'new', 'in_progress']);
+const IN_WORK_STATUSES = ['new', 'negotiations', 'in_progress'] as const;
+const inWorkStatusSchema = z.enum(IN_WORK_STATUSES);
+export type InWorkStatus = z.infer<typeof inWorkStatusSchema>;
+
+const storedStatusSchema = z.enum([...LEAD_STATUSES, 'open']);
 
 export const PROMPT_KINDS = [
   'postpone',
@@ -68,7 +73,7 @@ const baseStoredLeadSchema = z.object({
   visitorId: z.string().nullable().optional(),
   locale: z.string(),
   kind: z.enum(['lead', 'call_click']).optional(),
-  status: storedStatusSchema.default('open'),
+  status: storedStatusSchema.default('new'),
   telegramChatId: z.number().int().nullable().default(null),
   telegramMessageId: z.number().int().nullable().default(null),
   statusChangedAt: z.string(),
@@ -87,6 +92,7 @@ const baseStoredLeadSchema = z.object({
   managerHandoff: managerHandoffSchema.nullable().default(null).catch(null),
   archived: z.boolean().optional(),
   remindAt: z.string().nullable().default(null),
+  postponedFrom: inWorkStatusSchema.nullable().default(null).catch(null),
 });
 
 type StoredShape = z.infer<typeof baseStoredLeadSchema>;
@@ -100,7 +106,11 @@ export function isClosed(lead: Pick<StoredLead, 'status'>): boolean {
 }
 
 export function isInWork(lead: Pick<StoredLead, 'status'>): boolean {
-  return lead.status === 'open' || lead.status === 'negotiations';
+  return inWorkStatusSchema.safeParse(lead.status).success;
+}
+
+export function inWorkStatus(lead: Pick<StoredLead, 'status'>): InWorkStatus {
+  return inWorkStatusSchema.parse(lead.status);
 }
 
 function withCurrentStatuses({
@@ -109,7 +119,7 @@ function withCurrentStatuses({
   ...lead
 }: StoredShape): StoredLead {
   const advanced = status === 'negotiations' || status === 'in_progress';
-  const current = leadStatusSchema.catch('open').parse(status);
+  const current = leadStatusSchema.catch('new').parse(status);
   return {
     ...lead,
     status: archived && !isClosed({ status: current }) ? 'lost' : current,

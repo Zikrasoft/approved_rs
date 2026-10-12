@@ -368,7 +368,7 @@ describe('the Lead topic lifecycle', () => {
       expect.objectContaining({
         payload: expect.objectContaining({
           message_id: lead.topicMessageId,
-          text: expect.stringContaining('Сделка'),
+          text: expect.stringContaining('✅ Успешно'),
         }),
       }),
     );

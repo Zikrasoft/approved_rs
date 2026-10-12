@@ -1054,7 +1054,7 @@ describe('abandoning the dialog', () => {
     expect(stored()[0]).toMatchObject({
       contact: 'tg://user?id=777',
       service: 'vehicle-sourcing',
-      status: 'open',
+      status: 'new',
     });
     expect(cards()).toHaveLength(1);
   });

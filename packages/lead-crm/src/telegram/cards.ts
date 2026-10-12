@@ -60,20 +60,24 @@ export function buildRemindPicker(id: number): {
   };
 }
 
+const IN_WORK_MOVES = [
+  { status: 'negotiations', text: '🗣 Переговоры' },
+  { status: 'in_progress', text: '🔵 В работе' },
+] as const;
+
 function statusRows(lead: StoredLead, role: Role): Btn[][] {
   if (lead.status === 'postponed')
     return [[{ text: '▶️ Возобновить', callback_data: `resume:${lead.id}` }]];
   if (!isInWork(lead) || role !== 'owner') return [];
-  const talk: Btn[] =
-    lead.status === 'open'
-      ? [{ text: '🗣 Переговоры', callback_data: `st:${lead.id}:negotiations` }]
-      : [];
+  const moves = IN_WORK_MOVES.filter((m) => m.status !== lead.status).map(
+    (m) => ({ text: m.text, callback_data: `st:${lead.id}:${m.status}` }),
+  );
   return [
     [
       { text: '✅ Сделка', callback_data: `st:${lead.id}:won` },
       { text: '❌ Отказ', callback_data: `st:${lead.id}:lost` },
     ],
-    [...talk, { text: '⏰ Отложить', callback_data: `postpone:${lead.id}` }],
+    [...moves, { text: '⏰ Отложить', callback_data: `postpone:${lead.id}` }],
   ];
 }
 
@@ -197,7 +201,7 @@ export const LEAD_ACTION_COPY = {
   deleted: '🗑 Заявка удалена.',
   deleteAck: 'Удалено',
   denied: '⛔ Доступ запрещён.',
-  inWork: 'В работе ⏳',
+  inWork: 'В работе 🔵',
   noteAdded: '📝 Заметка добавлена',
   topicOpened: '💬 Тема открыта',
   topicFailed:
@@ -224,6 +228,12 @@ export function managerHandoffText(handle: string): string {
 function handoffLine(lead: StoredLead): string {
   return lead.managerHandoff
     ? `\n${managerHandoffText(lead.managerHandoff.handle)} · ${formatDateRu(lead.managerHandoff.at)}`
+    : '';
+}
+
+function remindLine(lead: StoredLead): string {
+  return lead.status === 'postponed' && lead.remindAt
+    ? `\n⏰ Напомнить: ${formatDateRu(lead.remindAt)}`
     : '';
 }
 
@@ -270,8 +280,8 @@ export function createFormatter({
       brandLine(lead),
       statusLine(lead.status),
     ];
-    if (lead.status === 'postponed' && lead.remindAt)
-      lines.push(`⏰ Напомнить: ${formatDateRu(lead.remindAt)}`);
+    const remind = remindLine(lead);
+    if (remind) lines.push(remind.trim());
     lines.push(
       ``,
       `Имя: ${escapeHtml(leadDisplayName(lead))}`,
@@ -314,7 +324,16 @@ export function createFormatter({
     },
 
     formatTeaser(lead: StoredLead): string {
-      return `🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusMark(lead.status)}\n${brandLine(lead)}`;
+      return `🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusMark(lead.status)}${remindLine(lead)}\n${brandLine(lead)}`;
+    },
+
+    postponeReminderText(lead: StoredLead): string {
+      return [
+        `⏰ Напоминание по заявке #${lead.id}`,
+        ``,
+        `${escapeHtml(leadDisplayName(lead))} — ${escapeHtml(servicesLabel(lead))}`,
+        `Ты просил напомнить сегодня — заявка снова активна.`,
+      ].join('\n');
     },
 
     deepLinkKeyboard(lead: StoredLead): Keyboard {
@@ -333,8 +352,9 @@ export function createFormatter({
             { text: '❌ Отказ', callback_data: `lost:${id}` },
           ],
           [
-            { text: '⏳ В работе', callback_data: `work:${id}` },
             { text: '🗣 Переговоры', callback_data: `talk:${id}` },
+            { text: '🔵 В работе', callback_data: `work:${id}` },
+            { text: '⏰ Отложить', callback_data: `postpone:${id}` },
           ],
         ],
       };

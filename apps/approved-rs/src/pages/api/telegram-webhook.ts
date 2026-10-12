@@ -185,11 +185,22 @@ async function withErrorAck(
   }
 }
 
+function onGroupCard(ctx: Ctx, lead: StoredLead): boolean {
+  return (
+    ctx.chatId === lead.telegramChatId &&
+    ctx.messageId === lead.telegramMessageId
+  );
+}
+
 async function afterStatusChangeOn(
-  { chatId, messageId, role }: Ctx,
+  ctx: Ctx,
   updated: StoredLead,
 ): Promise<void> {
-  await afterStatusChange(updated, { surface: { chatId, messageId, role } });
+  const { chatId, messageId, role } = ctx;
+  await afterStatusChange(
+    updated,
+    onGroupCard(ctx, updated) ? {} : { surface: { chatId, messageId, role } },
+  );
 }
 
 async function startPrompt(
@@ -232,12 +243,18 @@ async function changeStatus(
 }
 
 async function markInWork(ctx: Ctx, id: number): Promise<void> {
+  const lead = await getLead(id);
+  if (lead?.status !== 'in_progress')
+    return changeStatus(ctx, id, 'in_progress', false);
   await touchLead(id);
   await answerCallback(ctx.cbId, LEAD_ACTION_COPY.inWork);
 }
 
 async function openRemindPicker(ctx: Ctx, id: number): Promise<void> {
-  if (!(await getLead(id))) return ack(ctx);
+  const lead = await getLead(id);
+  if (!lead) return ack(ctx);
+  if (!canPostpone(lead))
+    return answerCallback(ctx.cbId, LEAD_ACTION_COPY.notPostponable);
   const { text, reply_markup } = buildRemindPicker(id);
   await safeEditMessage(ctx.chatId, ctx.messageId, text, reply_markup);
   await answerCallback(ctx.cbId);
@@ -264,7 +281,9 @@ async function resume(ctx: Ctx, id: number): Promise<void> {
 
 async function backToLead(ctx: Ctx, id: number): Promise<void> {
   const lead = await getLead(id);
-  if (lead) {
+  if (lead && onGroupCard(ctx, lead)) {
+    await ensureLeadCard(lead);
+  } else if (lead) {
     await editLeadDetailMessage(ctx.chatId, ctx.messageId, lead, ctx.role);
   } else {
     await safeEditMessage(
@@ -385,6 +404,7 @@ export const CALLBACKS: CallbackRow[] = [
   statusRow('won'),
   statusRow('lost'),
   statusRow('negotiations'),
+  statusRow('in_progress'),
   [
     /^won:(\d+)$/,
     'owner',

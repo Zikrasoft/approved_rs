@@ -6,7 +6,7 @@ import {
   type FlowSums,
   type LedgerOperation,
 } from '../ledgerStore.ts';
-import { escapeHtml, formatMoney, statusMark } from './markup.ts';
+import { escapeHtml, formatMoney } from './markup.ts';
 import { balanceLine, OPERATION_AUTHORS, signedMoney } from './ledger.ts';
 
 const STATS_OPERATION_ROWS = 20;
@@ -70,9 +70,7 @@ export function buildStats(
     '<b>📊 Статистика</b>',
     '',
     `Всего заявок: ${leads.length}`,
-    (['open', 'negotiations', 'postponed', 'won', 'lost'] as const)
-      .map((s) => `${statusMark(s)}: ${count(s)}`)
-      .join('   '),
+    `🆕 Новые: ${count('new')}   🗣 Переговоры: ${count('negotiations')}   🔵 В работе: ${count('in_progress')}   ✅ Завершено: ${count('won')}   ❌ Отказ: ${count('lost')}   ⏸ Отложено: ${count('postponed')}`,
     ...brandLines,
     '',
     balanceLine('admin', balanceOf(operations)),

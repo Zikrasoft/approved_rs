@@ -85,9 +85,9 @@ describe('insertLead', () => {
     expect(b.id).toBe(2);
   });
 
-  it('defaults status open, no prompt and no money on the Lead', async () => {
+  it('defaults status new, no prompt and no money on the Lead', async () => {
     const lead = await store.insertLead(baseData);
-    expect(lead.status).toBe('open');
+    expect(lead.status).toBe('new');
     expect(lead.pendingPrompt).toBeNull();
     expect(lead).not.toHaveProperty('archived');
     expect(lead).not.toHaveProperty('commissionPercent');
@@ -629,8 +629,8 @@ describe('status patch builders', () => {
   }
 
   it('statusPatch stamps the change time', () => {
-    expect(statusPatch('open')).toEqual({
-      status: 'open',
+    expect(statusPatch('new')).toEqual({
+      status: 'new',
       statusChangedAt: AT.toISOString(),
     });
     expect(statusPatch('lost', new Date(0)).statusChangedAt).toBe(
@@ -638,26 +638,41 @@ describe('status patch builders', () => {
     );
   });
 
-  it('postponePatch sets the date and resumePatch reopens', async () => {
-    const lead = await storedLead({ status: 'open' });
+  it.each(['new', 'negotiations', 'in_progress'] as const)(
+    'postponePatch remembers %s and resumePatch returns to it',
+    async (status) => {
+      const lead = await storedLead({ status });
 
-    const postponed = { ...lead, ...postponePatch(lead, '2026-10-20', 'n') };
+      const postponed = { ...lead, ...postponePatch(lead, '2026-10-20', 'n') };
 
-    expect(postponed).toMatchObject({
-      status: 'postponed',
-      remindAt: '2026-10-20',
-      statusChangedAt: AT.toISOString(),
-    });
-    expect(resumePatch()).toEqual({
-      status: 'open',
-      remindAt: null,
-      statusChangedAt: AT.toISOString(),
-    });
+      expect(postponed).toMatchObject({
+        status: 'postponed',
+        postponedFrom: status,
+        remindAt: '2026-10-20',
+        statusChangedAt: AT.toISOString(),
+      });
+      expect(resumePatch(postponed)).toEqual({
+        status,
+        postponedFrom: null,
+        remindAt: null,
+        statusChangedAt: AT.toISOString(),
+      });
+    },
+  );
+
+  it('resumePatch falls back to new when nothing was remembered', async () => {
+    const lead = await storedLead({ status: 'postponed', postponedFrom: null });
+    expect(resumePatch(lead)).toMatchObject({ status: 'new' });
+  });
+
+  it('postponePatch refuses a Lead that is not in work', async () => {
+    const lead = await storedLead({ status: 'won' });
+    expect(() => postponePatch(lead, '2026-10-20', 'n')).toThrow();
   });
 });
 
 describe('resumeLead', () => {
-  it('returns a postponed lead to open and clears remindAt', async () => {
+  it('returns a postponed lead to new when it remembers nothing, and clears remindAt', async () => {
     const lead = await store.insertLead(baseData);
     await store.updateLeads((leads) =>
       leads.map((l) =>
@@ -669,7 +684,7 @@ describe('resumeLead', () => {
 
     const resumed = await store.resumeLead(lead.id);
 
-    expect(resumed?.status).toBe('open');
+    expect(resumed?.status).toBe('new');
     expect(resumed?.remindAt).toBeNull();
   });
 
@@ -686,7 +701,7 @@ describe('resumeLead', () => {
 });
 
 describe('recordOwnerReply', () => {
-  it('counts as owner activity and moves only an open lead to negotiations', async () => {
+  it('counts as owner activity and moves only a new lead to negotiations', async () => {
     const open = await store.insertLead(baseData);
     const done = await store.insertLead(baseData);
     await forceComplete(done.id);
@@ -704,6 +719,15 @@ describe('recordOwnerReply', () => {
     expect((await store.recordOwnerReply(open.id))?.statusChangedAt).toBe(
       at.toISOString(),
     );
+  });
+
+  it('leaves a Lead already in work at its status', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.setStatus(lead.id, 'in_progress');
+
+    expect(await store.recordOwnerReply(lead.id)).toMatchObject({
+      status: 'in_progress',
+    });
   });
 });
 
@@ -757,14 +781,22 @@ describe('postponeLead', () => {
     expect(postponed?.comment).toBe('Отложено до 20.10.2026');
   });
 
-  it('postpones a Lead in negotiations too', async () => {
-    const lead = await store.insertLead(baseData);
-    await store.setStatus(lead.id, 'negotiations');
+  it.each(['negotiations', 'in_progress'] as const)(
+    'postpones a Lead in %s and resumes it there',
+    async (status) => {
+      const lead = await store.insertLead(baseData);
+      await store.setStatus(lead.id, status);
 
-    const postponed = await store.postponeLead(lead.id, '2026-10-20', 'note');
+      const postponed = await store.postponeLead(lead.id, '2026-10-20', 'n');
+      expect(postponed?.status).toBe('postponed');
 
-    expect(postponed?.status).toBe('postponed');
-  });
+      expect(await store.resumeLead(lead.id)).toMatchObject({
+        status,
+        postponedFrom: null,
+        remindAt: null,
+      });
+    },
+  );
 
   it('no-ops when the lead is no longer open (stale button, already finalized elsewhere)', async () => {
     const lead = await store.insertLead(baseData);
@@ -841,7 +873,7 @@ describe('expireGhostLeads', () => {
 
     expect(await store.expireGhostLeads(NOW)).toEqual([]);
     expect(await store.getLead(lead.id)).toMatchObject({
-      status: 'open',
+      status: 'new',
     });
   });
 
@@ -851,7 +883,7 @@ describe('expireGhostLeads', () => {
 
     expect(await store.expireGhostLeads(NOW)).toEqual([]);
     expect(await store.getLead(lead.id)).toMatchObject({
-      status: 'open',
+      status: 'new',
     });
   });
 
@@ -909,8 +941,8 @@ describe('expireGhostLeads', () => {
     const expired = await store.expireGhostLeads(NOW);
 
     expect(expired.map((l) => l.id).sort()).toEqual([a.id, b.id].sort());
-    expect(await store.getLead(c.id)).toMatchObject({ status: 'open' });
-    expect(await store.getLead(live.id)).toMatchObject({ status: 'open' });
+    expect(await store.getLead(c.id)).toMatchObject({ status: 'new' });
+    expect(await store.getLead(live.id)).toMatchObject({ status: 'new' });
   });
 
   describe('a bare capture-bot /start', () => {
@@ -939,7 +971,7 @@ describe('expireGhostLeads', () => {
       const lead = await started(overrides);
 
       expect(await store.expireGhostLeads(NOW)).toEqual([]);
-      expect(await store.getLead(lead.id)).toMatchObject({ status: 'open' });
+      expect(await store.getLead(lead.id)).toMatchObject({ status: 'new' });
     });
 
     it('takes the phone of a form sent within the window', async () => {
@@ -1172,7 +1204,7 @@ describe('readLeads — schema validation on the way in', () => {
 
     const [lead] = await store.readLeads();
 
-    expect(lead.status).toBe('open');
+    expect(lead.status).toBe('new');
     expect(lead.pendingPrompt).toBeNull();
   });
 
@@ -1323,7 +1355,7 @@ describe('touchLead', () => {
     await store.touchLead(lead.id, at);
 
     expect(await store.getLead(lead.id)).toMatchObject({
-      status: 'open',
+      status: 'new',
       statusChangedAt: lead.statusChangedAt,
       lastActivityAt: at.toISOString(),
     });

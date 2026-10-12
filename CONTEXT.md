@@ -9,13 +9,20 @@ Decisions live in [`docs/adr/`](docs/adr/), conventions in
 **Lead** — one request from one visitor, stored once and owned by exactly one
 brand. A form submission and a contact click both become Leads. A Lead's
 `status` describes the **conversation** with that person, never the state of
-anything they bought: open, negotiations (🗣, the owner is talking to the
-visitor), postponed, and the two outcomes, won and lost, that close it.
+anything they bought: new (🆕 Новая), negotiations (🗣 Переговоры, the owner
+is talking to the visitor), in progress (🔵 В работе), postponed (⏸️ Отложена),
+and the two outcomes, won (✅ Успешно) and lost (❌ Отказ), that close it. New,
+negotiations and in progress are **in work**: the open list, search, the
+7-day digest and postponing treat them alike.
 
 **Negotiations** — a Lead the owner is already talking to. Set by hand with 🗣
 on the CRM card, and on its own the first time the owner or the admin replies
-to the visitor through the bot. Not closed: it stays in the open list, the
-digest and search like an open Lead, and is never a Ghost lead.
+to a new Lead's visitor through the bot. Never a Ghost lead.
+
+**Postponed** — a Lead the owner set aside until a date with ⏰ on the card or
+the detail. On that day it goes back to the status it was postponed from (new
+when none is recorded), the owner gets a DM reminder and the group digest lists
+it.
 
 **Brand** — one of the three businesses (Approved, CarLab, Details). Stamped on
 a Lead by the server; a visitor can never name one.
@@ -31,7 +38,7 @@ no Contact click: the visitor already has a Lead, and no bot will come to
 absorb a placeholder.
 
 **Ghost lead** — a Contact click that never gained a contact: still the
-placeholder contact, still open with no owner activity, and older than the
+placeholder contact, still new with no owner activity, and older than the
 retention window. Mostly WhatsApp, Viber or the phone, whose outcome we cannot
 observe, but the channel does not matter: a Telegram-tile click whose visitor
 never pressed Start in the bot has no bot Lead to absorb it, and retires the
@@ -105,13 +112,13 @@ Questionnaire fills in. The Lead's card in General and its detail link to it;
 a Lead the bot knows (`telegramId`) without one shows «💬 Начать переписку»
 there instead, which opens the Topic the same way.
 Whatever the owner or admin writes there — text or media — reaches the visitor
-through the brand's Capture bot, the first message moves an open Lead into
+through the brand's Capture bot, the first message moves a new Lead into
 negotiations, and a copy that cannot be delivered is reported in the Topic.
 Open Topics are the clients being worked with: the daily cron closes a Topic
 nobody has ever written in — neither the visitor nor the owner — a day after the
 Lead was created, a conversation that merely goes quiet stays open, ✅ won and
 ❌ lost close it, and the next message from either side reopens it before it is
-posted. ⏳ and 🗣 leave it open, and an edit of the summary is not a message.
+posted. 🗣, 🔵 and ⏰ leave it open, and an edit of the summary is not a message.
 A Lead from the site form or a placeholder click has no Topic until a bot
 `/start` merges into it.
 _Avoid_: thread, chat

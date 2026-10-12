@@ -1,7 +1,11 @@
 import type { LedgerOperation } from '../ledgerStore.ts';
 import { isClosed, type StoredLead } from '../schema.ts';
 import type { Digest } from '../store.ts';
-import { isMessageGone, type TelegramClient } from './client.ts';
+import {
+  isMessageGone,
+  type SendExtra,
+  type TelegramClient,
+} from './client.ts';
 import { operationNoticeText, unreadableLedgerText } from './ledger.ts';
 import {
   contactNoteText,
@@ -28,9 +32,13 @@ export function createNotifier({
   ownerIds,
   adminIds,
 }: NotifierOptions) {
-  async function sendToAll(ids: number[], text: string): Promise<void> {
+  async function sendToAll(
+    ids: number[],
+    text: string,
+    extra?: SendExtra,
+  ): Promise<void> {
     const sent = await Promise.allSettled(
-      ids.map((id) => client.sendMessage(id, text)),
+      ids.map((id) => client.sendMessage(id, text, extra)),
     );
     sent.forEach((result, at) => {
       if (result.status === 'rejected')
@@ -220,6 +228,16 @@ export function createNotifier({
         otherRole(by, authorId),
         contactNoteText(lead, contact, by),
       );
+    },
+
+    async sendPostponeReminder(lead: StoredLead): Promise<void> {
+      const text = formatter.postponeReminderText(lead);
+      const reply_markup = {
+        inline_keyboard: [
+          [{ text: '📂 Открыть заявку', callback_data: `open:${lead.id}` }],
+        ],
+      };
+      await sendToAll(ownerIds, text, { reply_markup });
     },
 
     async sendDigest(digest: Digest): Promise<boolean> {

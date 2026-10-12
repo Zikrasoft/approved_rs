@@ -41,7 +41,7 @@ const storedLead: StoredLead = {
   ...baseData,
   services: [],
   id: 42,
-  status: 'open',
+  status: 'new',
   telegramChatId: null,
   telegramMessageId: null,
   statusChangedAt: '2026-01-01T00:00:00.000Z',
@@ -58,6 +58,7 @@ const storedLead: StoredLead = {
   referredBy: null,
   managerHandoff: null,
   remindAt: null,
+  postponedFrom: null,
 };
 
 beforeEach(() => {
@@ -111,7 +112,7 @@ describe('notifyLead', () => {
     expect(sendLeadNotification).toHaveBeenCalledTimes(1);
     const notified = vi.mocked(sendLeadNotification).mock.calls[0][0];
     expect(notified.name).toBe('Иван');
-    expect(notified.status).toBe('open');
+    expect(notified.status).toBe('new');
     expect(typeof notified.id).toBe('number');
   });
 
@@ -361,7 +362,7 @@ describe('afterStatusChange', () => {
   it.each([
     [
       'a plain change',
-      { status: 'open' as const },
+      { status: 'new' as const },
       {},
       ['card:42', 'status:42'],
     ],

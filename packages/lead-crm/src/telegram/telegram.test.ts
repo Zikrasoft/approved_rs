@@ -61,6 +61,7 @@ const {
   sendFieldChange,
   sendContactNote,
   sendDigest,
+  sendPostponeReminder,
   editLeadDetailMessage,
   openLeadTopic,
   deleteLeadTopic,
@@ -81,7 +82,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     country: 'de',
     source_url: '/ru/vehicle-sourcing/de/',
     locale: 'ru',
-    status: 'open',
+    status: 'new',
     telegramChatId: null,
     telegramMessageId: null,
     statusChangedAt: '2026-01-01T00:00:00.000Z',
@@ -98,6 +99,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     referredBy: null,
     managerHandoff: null,
     remindAt: null,
+    postponedFrom: null,
     ...overrides,
   };
 }
@@ -203,10 +205,20 @@ describe('sendLeadNotification', () => {
     expect(body.text).toContain('#42');
     expect(body.text).toContain('Автоподбор');
     expect(body.text).toContain('Иван');
-    expect(body.text).toContain('🔵 Открыта');
+    expect(body.text).toContain('🆕 Новая');
     expect(body.text).toContain(`🏷 ${makeLead().brand}`);
     expect(body.text).not.toContain('@ivan');
     expect(body.text).not.toContain('BMW X5');
+  });
+
+  it('shows the reminder date on a postponed card', () => {
+    const text = formatter.formatTeaser(
+      makeLead({ id: 42, status: 'postponed', remindAt: '2026-10-20' }),
+    );
+    expect(text.split('\n').slice(0, 2)).toEqual([
+      '🚗 Заявка #42 · Иван · Автоподбор · ⏸️ Отложена',
+      '⏰ Напомнить: 20.10.2026',
+    ]);
   });
 
   it('says in the teaser that the lead came through the capture bot', async () => {
@@ -254,7 +266,7 @@ describe('sendLeadNotification', () => {
     expect(body.text).not.toContain('через бота');
   });
 
-  it('attaches the deep link and the three outcome buttons', async () => {
+  it('attaches the deep link and the status buttons in two rows', async () => {
     await sendLeadNotification(makeLead({ id: 42 }));
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.reply_markup.inline_keyboard).toEqual([
@@ -269,8 +281,9 @@ describe('sendLeadNotification', () => {
         { text: '❌ Отказ', callback_data: 'lost:42' },
       ],
       [
-        { text: '⏳ В работе', callback_data: 'work:42' },
         { text: '🗣 Переговоры', callback_data: 'talk:42' },
+        { text: '🔵 В работе', callback_data: 'work:42' },
+        { text: '⏰ Отложить', callback_data: 'postpone:42' },
       ],
     ]);
   });
@@ -312,19 +325,26 @@ describe('status rows on the lead detail', () => {
       .map((b) => b.callback_data)
       .filter((d) => /^(st|postpone|resume):/.test(d ?? ''));
 
-  it('owner: Сделка/Отказ/Переговоры/Отложить on an open lead, with the lead id embedded', () => {
-    expect(statusData(makeLead({ id: 7, status: 'open' }), 'owner')).toEqual([
+  it('owner: Сделка/Отказ/Переговоры/В работе/Отложить on a new lead, with the lead id embedded', () => {
+    expect(statusData(makeLead({ id: 7, status: 'new' }), 'owner')).toEqual([
       'st:7:won',
       'st:7:lost',
       'st:7:negotiations',
+      'st:7:in_progress',
       'postpone:7',
     ]);
   });
 
-  it('owner: Сделка/Отказ/Отложить in negotiations, no second 🗣', () => {
+  it('owner: no second 🗣 in negotiations', () => {
     expect(
       statusData(makeLead({ id: 7, status: 'negotiations' }), 'owner'),
-    ).toEqual(['st:7:won', 'st:7:lost', 'postpone:7']);
+    ).toEqual(['st:7:won', 'st:7:lost', 'st:7:in_progress', 'postpone:7']);
+  });
+
+  it('owner: no second 🔵 in progress', () => {
+    expect(
+      statusData(makeLead({ id: 7, status: 'in_progress' }), 'owner'),
+    ).toEqual(['st:7:won', 'st:7:lost', 'st:7:negotiations', 'postpone:7']);
   });
 
   it('owner: no status buttons on a won or lost lead', () => {
@@ -333,7 +353,7 @@ describe('status rows on the lead detail', () => {
   });
 
   it('admin: no status buttons on an open lead — the owner closes deals', () => {
-    expect(statusData(makeLead({ status: 'open' }), 'admin')).toEqual([]);
+    expect(statusData(makeLead({ status: 'new' }), 'admin')).toEqual([]);
   });
 
   it('postponed: just Возобновить, for either role', () => {
@@ -352,9 +372,10 @@ describe('status rows on the lead detail', () => {
         )?.[1],
     );
     expect(labels).toEqual([
-      '🔵 Открыта',
+      '🆕 Новая',
       '🗣 Переговоры',
-      '✅ Сделка',
+      '🔵 В работе',
+      '✅ Успешно',
       '❌ Отказ',
       '⏸️ Отложена',
     ]);
@@ -407,7 +428,7 @@ describe('refreshLeadCard', () => {
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.chat_id).toBe(-1009876543210);
     expect(body.message_id).toBe(555);
-    expect(body.text).toContain('✅ Сделка');
+    expect(body.text).toContain('✅ Успешно');
     expect(body.reply_markup.inline_keyboard[0][0].url).toBe(
       'https://t.me/approved_test_bot?start=lead_42',
     );
@@ -487,7 +508,7 @@ describe('sendDigest', () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it('posts one message to the group, a section per reason and a ✅ ❌ ⏳ row per Lead', async () => {
+  it('posts one message to the group, a section per reason and a ✅ ❌ 🔵 row per Lead', async () => {
     const sent = await sendDigest({
       stale: [makeLead({ id: 3, name: '<Пётр>' })],
       due: [makeLead({ id: 5, status: 'postponed', name: '' })],
@@ -511,7 +532,7 @@ describe('sendDigest', () => {
       [5, 3].map((id) => [
         { text: `✅ #${id}`, callback_data: `won:${id}` },
         { text: `❌ #${id}`, callback_data: `lost:${id}` },
-        { text: `⏳ #${id}`, callback_data: `work:${id}` },
+        { text: `🔵 #${id}`, callback_data: `work:${id}` },
       ]),
     );
   });
@@ -546,20 +567,55 @@ describe('sendDigest', () => {
   });
 });
 
+describe('sendPostponeReminder', () => {
+  beforeEach(() => mockFetchOk());
+  afterEach(() => mockFetch.mockReset());
+
+  it('reminds every owner in a DM with a button to the Lead', async () => {
+    await sendPostponeReminder(
+      makeLead({ id: 9, name: '<Пётр>', status: 'negotiations' }),
+    );
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.chat_id).toBe(111);
+    expect(body.text.split('\n')).toEqual([
+      '⏰ Напоминание по заявке #9',
+      '',
+      '&lt;Пётр&gt; — Автоподбор',
+      'Ты просил напомнить сегодня — заявка снова активна.',
+    ]);
+    expect(body.reply_markup.inline_keyboard).toEqual([
+      [{ text: '📂 Открыть заявку', callback_data: 'open:9' }],
+    ]);
+  });
+
+  it('logs an undelivered reminder instead of throwing', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 403,
+      json: () => Promise.resolve({ description: 'Forbidden' }),
+    });
+    await expect(sendPostponeReminder(makeLead())).resolves.toBeUndefined();
+    expect(error).toHaveBeenCalled();
+    error.mockRestore();
+  });
+});
+
 describe('sendStatusChangeToAdmin', () => {
   beforeEach(() => mockFetchOk());
   afterEach(() => mockFetch.mockReset());
 
   it("notifies every admin id with the lead's current status", async () => {
     await sendStatusChangeToAdmin(
-      makeLead({ id: 9, name: 'Пётр', status: 'open' }),
+      makeLead({ id: 9, name: 'Пётр', status: 'new' }),
     );
     expect(mockFetch).toHaveBeenCalledTimes(1);
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.chat_id).toBe(222);
     expect(body.text).toContain('#9');
     expect(body.text).toContain('Пётр');
-    expect(body.text).toContain('🔵 Открыта');
+    expect(body.text).toContain('🆕 Новая');
   });
 });
 
@@ -714,11 +770,11 @@ describe('buildSearchResults', () => {
         id: 5,
         name: 'Пётр',
         contact: '@petr',
-        status: 'open',
+        status: 'new',
       }),
     ]);
     expect(reply_markup.inline_keyboard).toEqual([
-      [{ text: '🔵 #5 Approved.rs Пётр — @petr', callback_data: 'open:5' }],
+      [{ text: '🆕 #5 Approved.rs Пётр — @petr', callback_data: 'open:5' }],
     ]);
   });
 
@@ -937,9 +993,10 @@ describe('buildHelp', () => {
 });
 
 describe('buildOpenList', () => {
-  it('lists open, negotiating and postponed Leads newest first, leaving won and lost out', () => {
+  it('lists new, negotiating, in-progress and postponed Leads newest first, leaving won and lost out', () => {
     const leads = [
-      makeLead({ id: 1, status: 'open' }),
+      makeLead({ id: 1, status: 'new' }),
+      makeLead({ id: 6, status: 'in_progress' }),
       makeLead({ id: 2, status: 'lost' }),
       makeLead({ id: 3, status: 'postponed' }),
       makeLead({ id: 4, status: 'won' }),
@@ -949,9 +1006,10 @@ describe('buildOpenList', () => {
       ([b]) => `${b.text} ${b.callback_data}`,
     );
     expect(rows).toEqual([
+      '#6 Иван · Approved.rs · 🔵 open:6',
       '#5 Иван · Approved.rs · 🗣 open:5',
       '#3 Иван · Approved.rs · ⏸️ open:3',
-      '#1 Иван · Approved.rs · 🔵 open:1',
+      '#1 Иван · Approved.rs · 🆕 open:1',
     ]);
   });
 
@@ -964,12 +1022,13 @@ describe('buildOpenList', () => {
 
 describe('buildStats', () => {
   const leads = [
-    makeLead({ id: 1, status: 'open' }),
-    makeLead({ id: 2, status: 'open' }),
+    makeLead({ id: 1, status: 'new' }),
+    makeLead({ id: 2, status: 'new' }),
     makeLead({ id: 3, status: 'won' }),
     makeLead({ id: 4, status: 'lost' }),
     makeLead({ id: 5, status: 'postponed' }),
     makeLead({ id: 6, status: 'negotiations' }),
+    makeLead({ id: 7, status: 'in_progress' }),
   ];
 
   const NOW = new Date('2026-10-15T12:00:00.000Z');
@@ -986,9 +1045,9 @@ describe('buildStats', () => {
 
   it('counts by status and shows an empty ledger', () => {
     const text = buildStats(leads, [], NOW);
-    expect(text).toContain('Всего заявок: 6');
+    expect(text).toContain('Всего заявок: 7');
     expect(text).toContain(
-      '🔵 Открыта: 2   🗣 Переговоры: 1   ⏸️ Отложена: 1   ✅ Сделка: 1   ❌ Отказ: 1',
+      '🆕 Новые: 2   🗣 Переговоры: 1   🔵 В работе: 1   ✅ Завершено: 1   ❌ Отказ: 1   ⏸ Отложено: 1',
     );
     expect(text).toContain('<b>💶 Мне должны: 0 €</b>');
     expect(text).toContain('За месяц: +0 € · −0 €');
@@ -1054,7 +1113,7 @@ describe('buildStats', () => {
 describe('buildLeadDetail', () => {
   it('open lead: status rows, then edit and note rows, no money row', () => {
     const { text, reply_markup } = buildLeadDetail(
-      makeLead({ id: 7, status: 'open' }),
+      makeLead({ id: 7, status: 'new' }),
       'owner',
     );
     expect(text).toContain('#7');
@@ -1066,6 +1125,7 @@ describe('buildLeadDetail', () => {
       'st:7:won',
       'st:7:lost',
       'st:7:negotiations',
+      'st:7:in_progress',
       'postpone:7',
       'edit:7:name',
       'edit:7:contact',
@@ -1104,7 +1164,7 @@ describe('buildLeadDetail', () => {
   });
 
   it('active lead: admin gets a permanent-delete row, owner does not', () => {
-    const lead = makeLead({ id: 7, status: 'open' });
+    const lead = makeLead({ id: 7, status: 'new' });
     const ownerData = buildLeadDetail(lead, 'owner')
       .reply_markup.inline_keyboard.flat()
       .map((b) => b.callback_data);
