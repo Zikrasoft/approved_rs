@@ -439,20 +439,21 @@ describe('GET /api/reminders', () => {
   });
 
   describe('topics nobody wrote in for a day', () => {
-    const topical = (id: number, activeMsAgo: number) =>
+    const emptyTopic = (id: number, openedMsAgo: number) =>
       makeLead({
         id,
         status: 'open',
         remindAt: null,
+        createdAt: new Date(NOW.getTime() - openedMsAgo).toISOString(),
         statusChangedAt: NOW.toISOString(),
         telegramId: 40 + id,
         topicId: 300 + id,
         topicMessageId: 400 + id,
-        topicActiveAt: new Date(NOW.getTime() - activeMsAgo).toISOString(),
+        topicActiveAt: null,
       });
 
-    it('closes a quiet topic once and leaves a live one open', async () => {
-      leadsStorage().seed([topical(7, DAY_MS), topical(8, DAY_MS - 1)]);
+    it('closes an empty topic once and leaves a younger one open', async () => {
+      leadsStorage().seed([emptyTopic(7, DAY_MS), emptyTopic(8, DAY_MS - 1)]);
 
       const res = await GET(makeCtx());
 
@@ -478,7 +479,7 @@ describe('GET /api/reminders', () => {
     });
 
     it('counts a topic Telegram already had closed', async () => {
-      leadsStorage().seed([topical(7, DAY_MS)]);
+      leadsStorage().seed([emptyTopic(7, DAY_MS)]);
       api.fail('closeForumTopic', 'Bad Request: TOPIC_CLOSED');
 
       const res = await GET(makeCtx());
@@ -489,7 +490,7 @@ describe('GET /api/reminders', () => {
 
     it('logs a topic it could not close and tries it again on the next run', async () => {
       const error = vi.spyOn(console, 'error').mockImplementation(() => {});
-      leadsStorage().seed([topical(7, DAY_MS), topical(8, DAY_MS)]);
+      leadsStorage().seed([emptyTopic(7, DAY_MS), emptyTopic(8, DAY_MS)]);
       api.fail('closeForumTopic', 'Bad Request: not enough rights');
 
       const res = await GET(makeCtx());
@@ -505,6 +506,20 @@ describe('GET /api/reminders', () => {
 
       expect(await again.json()).toMatchObject({ closedTopics: 2 });
       expect((await stored(8)).topicClosed).toBe(true);
+    });
+
+    it('never closes a topic with a conversation in it, however long it is quiet', async () => {
+      leadsStorage().seed([
+        {
+          ...emptyTopic(7, 14 * DAY_MS),
+          topicActiveAt: new Date(NOW.getTime() - 14 * DAY_MS).toISOString(),
+        },
+      ]);
+
+      const res = await GET(makeCtx());
+
+      expect(await res.json()).toMatchObject({ closedTopics: 0 });
+      expect(crm('closeForumTopic')).toEqual([]);
     });
   });
 

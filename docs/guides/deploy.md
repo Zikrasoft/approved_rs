@@ -962,7 +962,7 @@ without a Topic. Add the three Capture bots to the same group as admins with
 **Manage topics** too: each one copies its visitors' messages into their Topic
 and copies the owner's messages there — text, photos, voice, files — back out to
 the visitor, which needs it to see the group, and posting into a closed Topic
-needs that right. The CRM bot closes Topics (24 hours of silence, ✅, ❌) and
+needs that right. The CRM bot closes Topics (empty after a day, ✅, ❌) and
 reopens them on the next message, which is the same **Manage topics** right.
 
 The CRM bot must receive **every** group message, not only replies to its own:
@@ -1058,8 +1058,8 @@ cd apps/detailing && node --env-file=.env.local --experimental-strip-types scrip
 
 Every day at 08:00 UTC, Vercel calls `/api/reminders` with
 `Authorization: Bearer $CRON_SECRET` — the route marks expired Ghost leads lost,
-closes every Topic nobody wrote in for 24 hours (once; the next message reopens
-it), then posts one digest to the group: postponed leads whose day has come (reopened
+closes every Topic nobody has written in a day after its Lead was created (once;
+a quiet conversation stays open; the next message reopens it), then posts one digest to the group: postponed leads whose day has come (reopened
 once listed) and open leads with no action for 7 days, each with ✅ ❌ ⏳ — once
 per day, however often the cron runs. Nothing is posted when the list is empty.
 There is no monthly summary: the Balance is in the bot's menu. Without

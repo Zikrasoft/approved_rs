@@ -999,26 +999,38 @@ describe('findIdleTopics', () => {
     return lead;
   }
 
-  it('finds a topic quiet for a day until it is closed', async () => {
-    const quiet = await topicLead(TOPIC_IDLE_MS);
-    await topicLead(TOPIC_IDLE_MS - 1);
+  it('finds a topic nobody wrote in for a day until it is closed', async () => {
+    const empty = await topicLead(null);
 
-    const idle = await store.findIdleTopics(NOW);
-
-    expect(idle.map((l) => l.id)).toEqual([quiet.id]);
     expect((await store.findIdleTopics(NOW)).map((l) => l.id)).toEqual([
-      quiet.id,
+      empty.id,
     ]);
-    await store.closeTopic(quiet.id);
+    await store.closeTopic(empty.id);
     expect(await store.findIdleTopics(NOW)).toEqual([]);
   });
 
-  it('dates a topic with no activity stamp from the Lead', async () => {
-    const lead = await topicLead(null);
+  it('never closes a topic someone wrote in, however long it is quiet', async () => {
+    await topicLead(14 * TOPIC_IDLE_MS);
 
-    expect((await store.findIdleTopics(NOW)).map((l) => l.id)).toEqual([
-      lead.id,
-    ]);
+    expect(await store.findIdleTopics(NOW)).toEqual([]);
+  });
+
+  it('waits a full day before closing an empty topic', async () => {
+    const lead = await topicLead(null);
+    await store.updateLeads((leads) =>
+      leads.map((l) =>
+        l.id === lead.id
+          ? {
+              ...l,
+              createdAt: new Date(
+                NOW.getTime() - TOPIC_IDLE_MS + 1,
+              ).toISOString(),
+            }
+          : l,
+      ),
+    );
+
+    expect(await store.findIdleTopics(NOW)).toEqual([]);
   });
 
   it('skips a Lead without a topic', async () => {

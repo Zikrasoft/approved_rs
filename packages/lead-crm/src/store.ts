@@ -117,8 +117,8 @@ function isIdleTopic(lead: StoredLead, now: Date): boolean {
   return (
     lead.topicId != null &&
     !lead.topicClosed &&
-    now.getTime() - Date.parse(lead.topicActiveAt ?? lead.createdAt) >=
-      TOPIC_IDLE_MS
+    lead.topicActiveAt == null &&
+    now.getTime() - Date.parse(lead.createdAt) >= TOPIC_IDLE_MS
   );
 }
 
@@ -470,7 +470,7 @@ export function createLeadStore({
         topicId,
         topicMessageId: null,
         topicClosed: false,
-        topicActiveAt: new Date().toISOString(),
+        topicActiveAt: null,
       }));
     },
 

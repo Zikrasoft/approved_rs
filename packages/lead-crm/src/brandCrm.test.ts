@@ -338,10 +338,9 @@ describe('the Lead topic lifecycle', () => {
     return { leadStore, crm, lead: topical };
   }
 
-  it('opens a topic as active and closes it once when the Lead is won', async () => {
+  it('opens a topic with nothing in it and closes it once when the Lead is won', async () => {
     const { leadStore, crm, lead } = await withTopic();
-    expect(lead).toMatchObject({ topicClosed: false });
-    expect(lead.topicActiveAt).not.toBeNull();
+    expect(lead).toMatchObject({ topicClosed: false, topicActiveAt: null });
 
     const won = await leadStore.setStatus(lead.id, 'won');
     await crm.afterStatusChange(won!, { notice: false });
