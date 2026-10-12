@@ -126,10 +126,12 @@ Payouts are owed to.
 **CRM bot** — the single bot the owner and the admin work in: cards, statuses,
 money, the daily digest and order notifications, for all three brands in one
 chat. For every Lead, whatever channel it came from, its card and its detail
-in the bot (status buttons, ✏️ Имя / Контакт, 📝 Заметка) are the
+in the bot (status buttons, ✏️ Имя, ➕ Контакт, 📝 Заметка) are the
 workspace that must always work; either of the two may correct a Lead's name or
-contact, and the other is told what changed. The visitor's comment is
-read-only: staff add their own text as a note, signed and dated, beside it.
+give a Lead without a real contact one, and the other is told what changed. A
+real contact — a phone, @username, link or e-mail — is never overwritten: a
+second one goes into the notes. The visitor's comment is read-only: staff add
+their own text as a note, signed and dated, beside it.
 
 **Payout** — an operation that raises the Balance (➕ Зачислить): an amount
 the owner will send the admin. The person recording it states the amount;

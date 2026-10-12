@@ -38,6 +38,8 @@ import {
   noteLine,
   reAskEditText,
   sendFieldChange,
+  sendContactNote,
+  extraContactNote,
   renameLeadTopic,
   touchLeadTopic,
   ensureLeadCard,
@@ -64,6 +66,7 @@ import {
   canPostpone,
   appendNote,
   editedContact,
+  hasRealContact,
   postponePatch,
   readLeads,
   readBalance,
@@ -545,43 +548,57 @@ async function afterEdit(
   await sendMessage(reply.chatId, `${headline}\n\n${text}`, { reply_markup });
 }
 
-function editPatch(
+async function reAskEdit(
+  reply: Reply,
+  id: number,
   field: EditField,
-  text: string,
-  lead: StoredLead,
-): Partial<StoredLead> | undefined {
-  const value = text.trim();
-  if (field === 'contact')
-    return editedContact(value, lead.contactChannel, PHONE_REGION);
-  return value ? { name: value.slice(0, MAX_NAME_LENGTH) } : undefined;
+): Promise<void> {
+  const messageId = await sendForceReplyPrompt(
+    reply.chatId,
+    reAskEditText(field),
+  );
+  await setPendingPrompt(id, {
+    chatId: reply.chatId,
+    messageId,
+    kind: `edit_${field}`,
+  });
 }
 
-function replyEdit(field: EditField): PromptHandler {
-  return async (reply, lead) => {
-    const patch = editPatch(field, reply.text, lead);
-    if (!patch) {
-      const messageId = await sendForceReplyPrompt(
-        reply.chatId,
-        reAskEditText(field),
-      );
-      await setPendingPrompt(lead.id, {
-        chatId: reply.chatId,
-        messageId,
-        kind: `edit_${field}`,
-      });
-      return;
-    }
-    let before = '';
-    const updated = await resolvePendingPrompt(promptKey(reply), (current) => {
-      before = current[field];
-      return patch;
-    });
-    if (!updated) return;
-    if (field === 'name') await renameLeadTopic(updated);
-    await afterEdit(reply, updated, EDIT_COPY.updated);
-    await sendFieldChange(updated, field, before, reply.role, reply.authorId);
-  };
-}
+const replyName: PromptHandler = async (reply, lead) => {
+  const name = reply.text.trim().slice(0, MAX_NAME_LENGTH);
+  if (!name) return reAskEdit(reply, lead.id, 'name');
+  let before = '';
+  const updated = await resolvePendingPrompt(promptKey(reply), (current) => {
+    before = current.name;
+    return { name };
+  });
+  if (!updated) return;
+  await renameLeadTopic(updated);
+  await afterEdit(reply, updated, EDIT_COPY.updated);
+  await sendFieldChange(updated, 'name', before, reply.role, reply.authorId);
+};
+
+const replyContact: PromptHandler = async (reply, lead) => {
+  const edited = editedContact(reply.text, lead.contactChannel, PHONE_REGION);
+  if (!edited) return reAskEdit(reply, lead.id, 'contact');
+  let before = '';
+  let noted = false;
+  const updated = await resolvePendingPrompt(promptKey(reply), (current) => {
+    before = current.contact;
+    noted = hasRealContact(current.contact);
+    if (!noted) return edited;
+    const line = noteLine(extraContactNote(edited.contact), reply.role);
+    return { comment: appendNote(current.comment, line) };
+  });
+  if (!updated) return;
+  if (noted) {
+    await afterEdit(reply, updated, EDIT_COPY.contactNoted);
+    await sendContactNote(updated, edited.contact, reply.role, reply.authorId);
+    return;
+  }
+  await afterEdit(reply, updated, EDIT_COPY.updated);
+  await sendFieldChange(updated, 'contact', before, reply.role, reply.authorId);
+};
 
 const replyNote: PromptHandler = async (reply) => {
   const text = reply.text.trim();
@@ -594,8 +611,8 @@ const replyNote: PromptHandler = async (reply) => {
 
 const PROMPT_REPLIES: Record<PromptKind, PromptHandler> = {
   postpone: replyPostpone,
-  edit_name: replyEdit('name'),
-  edit_contact: replyEdit('contact'),
+  edit_name: replyName,
+  edit_contact: replyContact,
   note: replyNote,
 };
 

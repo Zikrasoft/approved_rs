@@ -101,13 +101,19 @@ export const EDIT_FIELD_LABELS = {
 
 export type EditField = keyof typeof EDIT_FIELD_LABELS;
 
+const EDIT_PROMPTS: Record<EditField, string> = {
+  name: '✏️ Введите новое значение (имя):',
+  contact:
+    '➕ Пришлите контакт: телефон, @username, ссылку или e-mail. Если контакт уже есть, новый добавится в заметки.',
+};
+
 export const EDIT_COPY = {
-  prompt: (field: EditField) =>
-    `✏️ Введите новое значение (${EDIT_FIELD_LABELS[field]}):`,
+  prompt: (field: EditField) => EDIT_PROMPTS[field],
   ack: 'Жду значение',
   empty: '⚠️ Значение не может быть пустым.',
   badContact: '⚠️ Нужен телефон, @username, ссылка или e-mail.',
   updated: '✅ Обновлено',
+  contactNoted: '📝 Контакт добавлен в заметки — основной не меняется',
   notePrompt: '📝 Напишите заметку:',
   noteAck: 'Жду заметку',
 } as const;
@@ -119,6 +125,18 @@ export function reAskEditText(field: EditField): string {
 
 export function noteLine(text: string, by: Role, at = new Date()): string {
   return `${formatDateRu(businessDay(at))} · ${OPERATION_AUTHORS[by]}: ${text}`;
+}
+
+export function extraContactNote(contact: string): string {
+  return `Доп. контакт: ${contact}`;
+}
+
+export function contactNoteText(
+  lead: StoredLead,
+  contact: string,
+  by: Role,
+): string {
+  return `📝 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))} · ${OPERATION_AUTHORS[by]}: ${escapeHtml(extraContactNote(contact))}`;
 }
 
 const FIELD_PREVIEW_LIMIT = 120;
@@ -152,7 +170,7 @@ function editRows({ id }: StoredLead): Btn[][] {
   return [
     [
       { text: '✏️ Имя', callback_data: `edit:${id}:name` },
-      { text: '✏️ Контакт', callback_data: `edit:${id}:contact` },
+      { text: '➕ Контакт', callback_data: `edit:${id}:contact` },
     ],
     [{ text: '📝 Заметка', callback_data: `note:${id}` }],
   ];

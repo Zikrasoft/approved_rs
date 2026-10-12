@@ -39,6 +39,7 @@ export {
   appendNote,
   canPostpone,
   editedContact,
+  hasRealContact,
   postponePatch,
   statusPatch,
   parseOperationReply,

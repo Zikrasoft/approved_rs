@@ -132,6 +132,10 @@ function contactRank(contact: string): number {
   return isTelegramIdContact(contact) ? 1 : 2;
 }
 
+export function hasRealContact(contact: string): boolean {
+  return contactRank(contact) === 2;
+}
+
 function isGhostLead(lead: StoredLead, now: Date): boolean {
   return (
     lead.kind === 'call_click' &&

@@ -26,6 +26,7 @@ export { storedLeadSchema } from './schema.ts';
 export {
   appendNote,
   canPostpone,
+  hasRealContact,
   isFreshLead,
   postponePatch,
   resumePatch,
@@ -57,6 +58,7 @@ export {
   EDIT_COPY,
   EDIT_FIELD_LABELS,
   noteLine,
+  extraContactNote,
   reAskEditText,
   REPLY_COPY,
   LEAD_ACTION_COPY,

@@ -48,6 +48,7 @@ import {
   buildSearchResults,
   EDIT_COPY,
   noteLine,
+  extraContactNote,
   reAskEditText,
   REPLY_COPY,
 } from '@/lib/telegram';
@@ -1586,17 +1587,29 @@ describe('POST /api/telegram-webhook', () => {
       });
     });
 
+    const noContact = (contact: string) =>
+      makeLead({
+        name: '',
+        contact,
+        kind: 'call_click',
+        contactChannel: null,
+        service: '',
+        services: [],
+      });
+
     it.each([
-      ['name', 'Пётр', { name: 'Пётр' }, 'Иван'],
+      ['name', 'Пётр', { name: 'Пётр' }, 'Иван', '@ivan'],
       [
         'contact',
         '064 123 4567',
         { contact: '+381641234567', contactChannel: 'phone' },
-        '@ivan',
+        '—',
+        '—',
       ],
     ] as const)(
       'stores the new %s, refreshes the card and tells the admin, not the owner',
-      async (field, text, patch, before) => {
+      async (field, text, patch, before, contact) => {
+        seed(makeLead({ contact }));
         await edit(field, text);
         const lead = await stored();
         expect(lead).toMatchObject({ ...patch, pendingPrompt: null });
@@ -1698,6 +1711,7 @@ describe('POST /api/telegram-webhook', () => {
         { contact: 'https://instagram.com/petr', contactChannel: null },
       ],
     ])('takes %s as a contact', async (text, patch) => {
+      seed(noContact('—'));
       await edit('contact', text);
       expect(await stored()).toMatchObject(patch);
     });
@@ -1749,7 +1763,49 @@ describe('POST /api/telegram-webhook', () => {
       },
     );
 
+    it('replaces a bare Telegram id with a real contact', async () => {
+      seed(noContact('tg://user?id=42'));
+      await edit('contact', '@petr');
+      expect(await stored()).toMatchObject({
+        contact: '@petr',
+        contactChannel: 'telegram',
+      });
+      expect(notices(ADMIN_ID)).toEqual([
+        expect.stringContaining('Стало: @petr'),
+      ]);
+    });
+
+    it.each([
+      ['@ivan', '+381 64 123 4567', '+381641234567'],
+      ['+381641234567', '@petr', '@petr'],
+    ])(
+      'keeps the real contact %s and notes %s beside it',
+      async (contact, text, added) => {
+        seed(makeLead({ contact, comment: 'BMW X5' }));
+        await edit('contact', text);
+        const lead = await stored();
+        expect(lead).toMatchObject({
+          contact,
+          comment: `BMW X5\n${noteLine(extraContactNote(added), 'owner')}`,
+          pendingPrompt: null,
+        });
+        expect(sentTo(OWNER_ID).at(-1)).toEqual(
+          expect.objectContaining({
+            text: `${EDIT_COPY.contactNoted}\n\n${buildLeadDetail(lead, 'owner').text}`,
+          }),
+        );
+        expect(notices(ADMIN_ID)).toEqual([]);
+        expect(textsTo(ADMIN_ID)).toEqual([
+          `📝 Заявка #5 Иван · Владелец: Доп. контакт: ${added}`,
+        ]);
+        expect(textsTo(OWNER_ID)).not.toContainEqual(
+          expect.stringContaining('📝 Заявка'),
+        );
+      },
+    );
+
     it('stores the answer to the prompt it asked again with', async () => {
+      seed(noContact('—'));
       await edit('contact', 'не знаю');
       await message('@petr', OWNER_ID, { replyTo: PROMPT_ID });
       expect((await stored()).contact).toBe('@petr');

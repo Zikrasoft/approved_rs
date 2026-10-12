@@ -34,6 +34,7 @@ export const {
   sendOperationNotice,
   sendStatusChangeToAdmin,
   sendFieldChange,
+  sendContactNote,
   renameLeadTopic,
   editLeadDetailMessage,
   unpinLeadCard,
@@ -63,6 +64,7 @@ export {
   LEAD_ACTION_COPY,
   EDIT_COPY,
   noteLine,
+  extraContactNote,
   reAskEditText,
   escapeHtml,
 } from '@podbor/lead-crm';

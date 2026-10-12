@@ -7,6 +7,7 @@ import { storedLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
 import {
   createLeadStore,
   GHOST_LEAD_RETENTION_MS,
+  hasRealContact,
   TOPIC_IDLE_MS,
   isFreshLead,
   postponePatch,
@@ -2005,5 +2006,18 @@ describe('updateCapture', () => {
     expect(
       await store.updateCapture(999, { capturePrompt: null }),
     ).toBeUndefined();
+  });
+});
+
+describe('hasRealContact', () => {
+  it.each([
+    ['', false],
+    ['—', false],
+    ['tg://user?id=42', false],
+    ['+381641234567', true],
+    ['@ivan', true],
+    ['petr@mail.rs', true],
+  ])('%j → %s', (contact, real) => {
+    expect(hasRealContact(contact)).toBe(real);
   });
 });

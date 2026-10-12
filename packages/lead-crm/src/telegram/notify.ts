@@ -4,6 +4,7 @@ import type { Digest } from '../store.ts';
 import { isMessageGone, type TelegramClient } from './client.ts';
 import { operationNoticeText, unreadableLedgerText } from './ledger.ts';
 import {
+  contactNoteText,
   fieldChangeText,
   quarantinedLeadsText,
   statusChangeText,
@@ -38,6 +39,12 @@ export function createNotifier({
           chatId: ids[at],
         });
     });
+  }
+
+  function otherRole(by: Role, authorId: number): number[] {
+    return (by === 'owner' ? adminIds : ownerIds).filter(
+      (id) => id !== authorId,
+    );
   }
 
   return {
@@ -197,10 +204,22 @@ export function createNotifier({
       authorId: number,
     ): Promise<void> {
       if (before === lead[field]) return;
-      const others = (by === 'owner' ? adminIds : ownerIds).filter(
-        (id) => id !== authorId,
+      await sendToAll(
+        otherRole(by, authorId),
+        fieldChangeText(lead, field, before, by),
       );
-      await sendToAll(others, fieldChangeText(lead, field, before, by));
+    },
+
+    async sendContactNote(
+      lead: StoredLead,
+      contact: string,
+      by: Role,
+      authorId: number,
+    ): Promise<void> {
+      await sendToAll(
+        otherRole(by, authorId),
+        contactNoteText(lead, contact, by),
+      );
     },
 
     async sendDigest(digest: Digest): Promise<boolean> {

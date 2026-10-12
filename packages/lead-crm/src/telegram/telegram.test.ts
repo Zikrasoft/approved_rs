@@ -59,6 +59,7 @@ const {
   sendUnreadableLedgerToAdmin,
   sendStatusChangeToAdmin,
   sendFieldChange,
+  sendContactNote,
   sendDigest,
   editLeadDetailMessage,
   openLeadTopic,
@@ -559,6 +560,25 @@ describe('sendStatusChangeToAdmin', () => {
     expect(body.text).toContain('#9');
     expect(body.text).toContain('Пётр');
     expect(body.text).toContain('🔵 Открыта');
+  });
+});
+
+describe('sendContactNote', () => {
+  beforeEach(() => mockFetchOk());
+  afterEach(() => mockFetch.mockReset());
+
+  it('tells the other role a contact went into the notes', async () => {
+    await sendContactNote(
+      makeLead({ id: 9, name: 'Пётр' }),
+      '+381641234567',
+      'admin',
+      222,
+    );
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body).toMatchObject({
+      chat_id: 111,
+      text: '📝 Заявка #9 Пётр · Админ: Доп. контакт: +381641234567',
+    });
   });
 });
 
