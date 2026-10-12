@@ -936,11 +936,12 @@ Each is registered once per bot, four registrations in total.
 ### The CRM bot
 
 The group receives a short teaser of the lead ("#123 · Ivan · Vehicle
-sourcing · status") with the outcome buttons (✅ deal / ❌ lost, and ⏳, a touch that
+sourcing · status") with the outcome buttons (✅ deal / ❌ lost, 🗣 negotiations, and ⏳, a touch that
 changes no status) and
 an "Open in the bot" link button; postponing, replying to the visitor and
-deleting happen in a DM with the bot. Statuses are open / won / lost /
-postponed, and lost is the archive. Leads are stored
+deleting happen in a DM with the bot. Statuses are open / negotiations /
+won / lost / postponed, and lost is the archive. 🗣 on the card, or a reply to
+the visitor through the bot, moves an open Lead into negotiations. Leads are stored
 in Vercel Blob (`data/leads.json`, private access), with no external database.
 
 The owner and the admin each have to message the bot `/start` once before it can

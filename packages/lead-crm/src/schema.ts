@@ -1,15 +1,16 @@
 import { z } from 'zod';
 
-export const LEAD_STATUSES = ['open', 'won', 'lost', 'postponed'] as const;
+export const LEAD_STATUSES = [
+  'open',
+  'negotiations',
+  'won',
+  'lost',
+  'postponed',
+] as const;
 const leadStatusSchema = z.enum(LEAD_STATUSES);
 export type LeadStatus = z.infer<typeof leadStatusSchema>;
 
-const storedStatusSchema = z.enum([
-  ...LEAD_STATUSES,
-  'new',
-  'negotiations',
-  'in_progress',
-]);
+const storedStatusSchema = z.enum([...LEAD_STATUSES, 'new', 'in_progress']);
 
 export const PROMPT_KINDS = ['postpone', 'reply_visitor'] as const;
 
@@ -81,7 +82,11 @@ export function isClosed(lead: Pick<StoredLead, 'status'>): boolean {
   return lead.status === 'won' || lead.status === 'lost';
 }
 
-function withFourStatuses({
+export function isInWork(lead: Pick<StoredLead, 'status'>): boolean {
+  return lead.status === 'open' || lead.status === 'negotiations';
+}
+
+function withCurrentStatuses({
   archived,
   status,
   ...lead
@@ -119,4 +124,4 @@ export type LeadSubmission = Omit<LeadInput, 'brand'>;
 export type StoredLeadSchema = z.ZodType<StoredLead, unknown>;
 
 export const storedLeadSchema: StoredLeadSchema =
-  baseStoredLeadSchema.transform(withFourStatuses);
+  baseStoredLeadSchema.transform(withCurrentStatuses);

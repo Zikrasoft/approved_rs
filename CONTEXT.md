@@ -9,7 +9,13 @@ Decisions live in [`docs/adr/`](docs/adr/), conventions in
 **Lead** — one request from one visitor, stored once and owned by exactly one
 brand. A form submission and a contact click both become Leads. A Lead's
 `status` describes the **conversation** with that person, never the state of
-anything they bought.
+anything they bought: open, negotiations (🗣, the owner is talking to the
+visitor), postponed, and the two outcomes, won and lost, that close it.
+
+**Negotiations** — a Lead the owner is already talking to. Set by hand with 🗣
+on the CRM card, and on its own the first time the owner or the admin replies
+to the visitor through the bot. Not closed: it stays in the open list, the
+digest and search like an open Lead, and is never a Ghost lead.
 
 **Brand** — one of the three businesses (Approved, CarLab, Details). Stamped on
 a Lead by the server; a visitor can never name one.

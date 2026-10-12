@@ -3,7 +3,12 @@ import { channelLabel } from '../channelLabels.ts';
 import { isTelegramIdContact } from '../contactShape.ts';
 import { LEADS_PATH } from '../quarantine.ts';
 import { BUSINESS_TIME_ZONE } from '../businessTime.ts';
-import { isClosed, type LeadStatus, type StoredLead } from '../schema.ts';
+import {
+  isClosed,
+  isInWork,
+  type LeadStatus,
+  type StoredLead,
+} from '../schema.ts';
 import { MAX_LIST_ROWS, isPlaceholderContact, type Digest } from '../store.ts';
 import {
   balanceOf,
@@ -39,6 +44,7 @@ export const leadDisplayName = (lead: { name: string }): string =>
 
 const STATUS_META: Record<LeadStatus, { emoji: string; label: string }> = {
   open: { emoji: '🔵', label: 'Открыта' },
+  negotiations: { emoji: '🗣', label: 'Переговоры' },
   won: { emoji: '✅', label: 'Сделка' },
   lost: { emoji: '❌', label: 'Отказ' },
   postponed: { emoji: '⏸️', label: 'Отложена' },
@@ -91,13 +97,17 @@ export function buildRemindPicker(id: number): {
 function statusRows(lead: StoredLead, role: Role): Btn[][] {
   if (lead.status === 'postponed')
     return [[{ text: '▶️ Возобновить', callback_data: `resume:${lead.id}` }]];
-  if (lead.status !== 'open' || role !== 'owner') return [];
+  if (!isInWork(lead) || role !== 'owner') return [];
+  const talk: Btn[] =
+    lead.status === 'open'
+      ? [{ text: '🗣 Переговоры', callback_data: `st:${lead.id}:negotiations` }]
+      : [];
   return [
     [
       { text: '✅ Сделка', callback_data: `st:${lead.id}:won` },
       { text: '❌ Отказ', callback_data: `st:${lead.id}:lost` },
     ],
-    [{ text: '⏰ Отложить', callback_data: `postpone:${lead.id}` }],
+    [...talk, { text: '⏰ Отложить', callback_data: `postpone:${lead.id}` }],
   ];
 }
 
@@ -324,7 +334,7 @@ export function buildStats(
     '<b>📊 Статистика</b>',
     '',
     `Всего заявок: ${leads.length}`,
-    (['open', 'postponed', 'won', 'lost'] as const)
+    (['open', 'negotiations', 'postponed', 'won', 'lost'] as const)
       .map((s) => `${statusMark(s)}: ${count(s)}`)
       .join('   '),
     ...brandLines,
@@ -519,7 +529,10 @@ export function createFormatter({
           [
             { text: '✅ Сделка', callback_data: `won:${id}` },
             { text: '❌ Отказ', callback_data: `lost:${id}` },
+          ],
+          [
             { text: '⏳ В работе', callback_data: `work:${id}` },
+            { text: '🗣 Переговоры', callback_data: `talk:${id}` },
           ],
         ],
       };
@@ -563,7 +576,7 @@ export function createFormatter({
           '<b>❓ Как пользоваться</b>',
           '',
           '<b>Карточка в группе</b>',
-          '✅ Сделка, ❌ Отказ — итог заявки, она уходит из списков. ⏳ В работе — отметить, что занимаешься.',
+          '✅ Сделка, ❌ Отказ — итог заявки, она уходит из списков. ⏳ В работе — отметить, что занимаешься. 🗣 Переговоры — идёт разговор с клиентом; ставится и сама, когда отвечаешь посетителю через бота.',
           'Ответь на карточку текстом — он сохранится заметкой в заявке.',
           '',
           '<b>В боте</b>',
@@ -577,7 +590,7 @@ export function createFormatter({
       return [
         '<b>❓ Как пользоваться</b>',
         '',
-        'Заявки ведёт владелец: ✅ Сделка, ❌ Отказ, ⏳ В работе на карточке в группе.',
+        'Заявки ведёт владелец: ✅ Сделка, ❌ Отказ, ⏳ В работе, 🗣 Переговоры на карточке в группе.',
         '',
         '<b>Меню</b>',
         'Сверху — 💶 Мне должны. ➖ Списать — когда деньги пришли, ➕ Зачислить — если владелец что-то забыл. Бот спросит сумму: ответь 40 или 40 перевод. О каждой операции владельца тебе придёт уведомление.',

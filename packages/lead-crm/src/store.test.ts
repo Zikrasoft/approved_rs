@@ -698,6 +698,15 @@ describe('postponeLead', () => {
     expect(postponed?.comment).toBe('Отложено до 20.10.2026');
   });
 
+  it('postpones a Lead in negotiations too', async () => {
+    const lead = await store.insertLead(baseData);
+    await store.setStatus(lead.id, 'negotiations');
+
+    const postponed = await store.postponeLead(lead.id, '2026-10-20', 'note');
+
+    expect(postponed?.status).toBe('postponed');
+  });
+
   it('no-ops when the lead is no longer open (stale button, already finalized elsewhere)', async () => {
     const lead = await store.insertLead(baseData);
     await store.setStatus(lead.id, 'lost');
@@ -756,6 +765,16 @@ describe('expireGhostLeads', () => {
       statusChangedAt: NOW.toISOString(),
     });
     expect(await store.getLead(lead.id)).toMatchObject({ status: 'lost' });
+  });
+
+  it('never retires a placeholder click the owner moved into negotiations', async () => {
+    const lead = await ghost();
+    await store.setStatus(lead.id, 'negotiations');
+
+    expect(await store.expireGhostLeads(NOW)).toEqual([]);
+    expect(await store.getLead(lead.id)).toMatchObject({
+      status: 'negotiations',
+    });
   });
 
   it('leaves a click inside the retention window alone', async () => {

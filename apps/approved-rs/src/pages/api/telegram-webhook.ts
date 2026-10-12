@@ -53,6 +53,7 @@ import {
   postponeLead,
   canPostpone,
   postponePatch,
+  statusPatch,
   readLeads,
   appendNote,
   readBalance,
@@ -325,6 +326,7 @@ function statusRow(key: LeadStatus): CallbackRow {
 export const CALLBACKS: CallbackRow[] = [
   statusRow('won'),
   statusRow('lost'),
+  statusRow('negotiations'),
   [
     /^won:(\d+)$/,
     'owner',
@@ -334,6 +336,11 @@ export const CALLBACKS: CallbackRow[] = [
     /^lost:(\d+)$/,
     'owner',
     withId((ctx, id) => changeStatus(ctx, id, 'lost', false)),
+  ],
+  [
+    /^talk:(\d+)$/,
+    'owner',
+    withId((ctx, id) => changeStatus(ctx, id, 'negotiations', false)),
   ],
   [/^work:(\d+)$/, 'owner', withId(markInWork)],
   [/^postpone:(\d+)$/, 'owner', withId(openRemindPicker)],
@@ -503,6 +510,7 @@ async function replyVisitor({
     { chatId, messageId: replyToMessageId },
     (lead) => ({
       comment: appendNote(lead.comment, `${REPLY_COPY.notePrefix}${reply}`),
+      ...(lead.status === 'open' ? statusPatch('negotiations') : {}),
     }),
   );
   if (updated) {

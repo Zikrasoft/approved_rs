@@ -424,7 +424,10 @@ describe('POST /api/telegram-webhook', () => {
               [
                 { text: '✅ Сделка', callback_data: 'won:5' },
                 { text: '❌ Отказ', callback_data: 'lost:5' },
+              ],
+              [
                 { text: '⏳ В работе', callback_data: 'work:5' },
+                { text: '🗣 Переговоры', callback_data: 'talk:5' },
               ],
             ]),
           }),
@@ -479,6 +482,20 @@ describe('POST /api/telegram-webhook', () => {
       ]);
     });
 
+    it('🗣 moves the Lead into negotiations, keeps it pinned and listed', async () => {
+      await tap('talk:5', OWNER_ID, { id: 'cb-talk', ...onCard });
+
+      expect((await stored()).status).toBe('negotiations');
+      expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
+      expect(crm('unpinChatMessage')).toEqual([]);
+      expect(answers()).toEqual([
+        { callback_query_id: 'cb-talk', text: 'Статус обновлён' },
+      ]);
+
+      await tap('menu:open', OWNER_ID);
+      expect(JSON.stringify(sentTo(DM_CHAT_ID))).toContain('open:5');
+    });
+
     it('re-posts a won lead whose card is gone without pinning it', async () => {
       api.fail('editMessageText', 'Bad Request: message to edit not found');
       await tap('won:5', OWNER_ID, onCard);
@@ -486,7 +503,7 @@ describe('POST /api/telegram-webhook', () => {
       expect(sentTo(GROUP_ID)).toHaveLength(1);
     });
 
-    it.each(['won:5', 'lost:5', 'work:5'])(
+    it.each(['won:5', 'lost:5', 'talk:5', 'work:5'])(
       '%s from the admin is refused',
       async (data) => {
         await tap(data, ADMIN_ID, { id: 'cb-admin', ...onCard });
@@ -1143,8 +1160,10 @@ describe('POST /api/telegram-webhook', () => {
     const ROWS: [string, 'owner' | 'admin' | 'any'][] = [
       ['st:5:won', 'owner'],
       ['st:5:lost', 'owner'],
+      ['st:5:negotiations', 'owner'],
       ['won:5', 'owner'],
       ['lost:5', 'owner'],
+      ['talk:5', 'owner'],
       ['work:5', 'owner'],
       ['postpone:5', 'owner'],
       ['remindpick:5:3', 'owner'],
@@ -1459,6 +1478,8 @@ describe('POST /api/telegram-webhook', () => {
         comment: 'Ищу Golf 7\nОтвет: Нашёл вариант <до 10k>',
         pendingPrompt: null,
         lastActivityAt: expect.any(String),
+        status: 'negotiations',
+        statusChangedAt: expect.any(String),
       });
       expect(sentTo(ADMIN_ID)).toEqual([]);
       expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
@@ -1468,6 +1489,14 @@ describe('POST /api/telegram-webhook', () => {
           reply_markup: buildLeadDetail(lead, 'owner').reply_markup,
         }),
       ]);
+    });
+
+    it('leaves a postponed Lead postponed', async () => {
+      seed(visitorLead({ status: 'postponed', remindAt: '2026-01-20' }));
+
+      await answerPrompt('Напишу позже');
+
+      expect((await stored()).status).toBe('postponed');
     });
 
     it('shows the card to the author when the prompt was answered in the group', async () => {

@@ -60,11 +60,13 @@ describe('claimDigest', () => {
       storedLead(4, { lastActivityAt: at(3) }),
       storedLead(5, { status: 'lost' }),
       storedLead(6, { status: 'won' }),
+      storedLead(7, { status: 'negotiations' }),
+      storedLead(8, { status: 'negotiations', lastActivityAt: at(5) }),
     ]);
 
     const digest = (await store.claimDigest(new Date(at(11))))!;
 
-    expect(ids(digest.stale)).toEqual([1, 4]);
+    expect(ids(digest.stale)).toEqual([1, 4, 7]);
     expect(Object.keys(digest)).toEqual(['stale', 'due']);
   });
 

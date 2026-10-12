@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { channelLabel } from './channelLabels.ts';
 import { isPhoneContact, isTelegramIdContact } from './contactShape.ts';
-import { isClosed } from './schema.ts';
+import { isClosed, isInWork } from './schema.ts';
 import type {
   CapturePrompt,
   Referrer,
@@ -78,9 +78,7 @@ function digestOf(leads: StoredLead[], now: Date): Digest {
   const today = businessDay(now);
   return {
     stale: leads.filter(
-      (l) =>
-        l.status === 'open' &&
-        now.getTime() - lastActionAt(l) >= STALE_AFTER_MS,
+      (l) => isInWork(l) && now.getTime() - lastActionAt(l) >= STALE_AFTER_MS,
     ),
     due: leads.filter(
       (l) =>
@@ -169,7 +167,7 @@ export function appendNote(
 }
 
 export function canPostpone(lead: StoredLead): boolean {
-  return lead.status === 'open';
+  return isInWork(lead);
 }
 
 export function postponePatch(

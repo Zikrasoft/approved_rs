@@ -239,7 +239,10 @@ describe('sendLeadNotification', () => {
       [
         { text: '✅ Сделка', callback_data: 'won:42' },
         { text: '❌ Отказ', callback_data: 'lost:42' },
+      ],
+      [
         { text: '⏳ В работе', callback_data: 'work:42' },
+        { text: '🗣 Переговоры', callback_data: 'talk:42' },
       ],
     ]);
   });
@@ -281,12 +284,19 @@ describe('status rows on the lead detail', () => {
       .map((b) => b.callback_data)
       .filter((d) => /^(st|postpone|resume):/.test(d ?? ''));
 
-  it('owner: Сделка/Отказ/Отложить on an open lead, with the lead id embedded', () => {
+  it('owner: Сделка/Отказ/Переговоры/Отложить on an open lead, with the lead id embedded', () => {
     expect(statusData(makeLead({ id: 7, status: 'open' }), 'owner')).toEqual([
       'st:7:won',
       'st:7:lost',
+      'st:7:negotiations',
       'postpone:7',
     ]);
+  });
+
+  it('owner: Сделка/Отказ/Отложить in negotiations, no second 🗣', () => {
+    expect(
+      statusData(makeLead({ id: 7, status: 'negotiations' }), 'owner'),
+    ).toEqual(['st:7:won', 'st:7:lost', 'postpone:7']);
   });
 
   it('owner: no status buttons on a won or lost lead', () => {
@@ -315,6 +325,7 @@ describe('status rows on the lead detail', () => {
     );
     expect(labels).toEqual([
       '🔵 Открыта',
+      '🗣 Переговоры',
       '✅ Сделка',
       '❌ Отказ',
       '⏸️ Отложена',
@@ -910,17 +921,19 @@ describe('buildHelp', () => {
 });
 
 describe('buildOpenList', () => {
-  it('lists open and postponed Leads newest first, leaving won and lost out', () => {
+  it('lists open, negotiating and postponed Leads newest first, leaving won and lost out', () => {
     const leads = [
       makeLead({ id: 1, status: 'open' }),
       makeLead({ id: 2, status: 'lost' }),
       makeLead({ id: 3, status: 'postponed' }),
       makeLead({ id: 4, status: 'won' }),
+      makeLead({ id: 5, status: 'negotiations' }),
     ];
     const rows = buildOpenList(leads).reply_markup.inline_keyboard.map(
       ([b]) => `${b.text} ${b.callback_data}`,
     );
     expect(rows).toEqual([
+      '#5 Иван · Approved.rs · 🗣 open:5',
       '#3 Иван · Approved.rs · ⏸️ open:3',
       '#1 Иван · Approved.rs · 🔵 open:1',
     ]);
@@ -940,6 +953,7 @@ describe('buildStats', () => {
     makeLead({ id: 3, status: 'won' }),
     makeLead({ id: 4, status: 'lost' }),
     makeLead({ id: 5, status: 'postponed' }),
+    makeLead({ id: 6, status: 'negotiations' }),
   ];
 
   const NOW = new Date('2026-10-15T12:00:00.000Z');
@@ -956,9 +970,9 @@ describe('buildStats', () => {
 
   it('counts by status and shows an empty ledger', () => {
     const text = buildStats(leads, [], NOW);
-    expect(text).toContain('Всего заявок: 5');
+    expect(text).toContain('Всего заявок: 6');
     expect(text).toContain(
-      '🔵 Открыта: 2   ⏸️ Отложена: 1   ✅ Сделка: 1   ❌ Отказ: 1',
+      '🔵 Открыта: 2   🗣 Переговоры: 1   ⏸️ Отложена: 1   ✅ Сделка: 1   ❌ Отказ: 1',
     );
     expect(text).toContain('<b>💶 Мне должны: 0 €</b>');
     expect(text).toContain('За месяц: +0 € · −0 €');
@@ -1032,7 +1046,12 @@ describe('buildLeadDetail', () => {
     const data = reply_markup.inline_keyboard
       .flat()
       .map((b) => b.callback_data);
-    expect(data).toEqual(['st:7:won', 'st:7:lost', 'postpone:7']);
+    expect(data).toEqual([
+      'st:7:won',
+      'st:7:lost',
+      'st:7:negotiations',
+      'postpone:7',
+    ]);
   });
 
   it('offers a reply through the bot only when the contact is a Telegram id link', () => {

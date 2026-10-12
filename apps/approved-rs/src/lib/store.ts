@@ -36,6 +36,7 @@ export {
   appendNote,
   canPostpone,
   postponePatch,
+  statusPatch,
   parseOperationReply,
   businessDay,
   LedgerUnreadableError,
