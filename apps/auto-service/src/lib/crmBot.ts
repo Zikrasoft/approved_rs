@@ -10,6 +10,7 @@ export const {
   notifier,
   ensureLeadCard,
   ensureLeadTopic,
+  touchLeadTopic,
   notifyLead,
   groupId,
 } = createBrandBot({

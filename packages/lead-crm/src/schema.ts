@@ -69,6 +69,8 @@ const baseStoredLeadSchema = z.object({
   telegramId: z.number().int().nullable().default(null).catch(null),
   topicId: z.number().int().nullable().default(null).catch(null),
   topicMessageId: z.number().int().nullable().default(null).catch(null),
+  topicClosed: z.boolean().default(false).catch(false),
+  topicActiveAt: z.string().nullable().default(null).catch(null),
   referredBy: z.enum(REFERRERS).nullable().default(null).catch(null),
   archived: z.boolean().optional(),
   remindAt: z.string().nullable().default(null),

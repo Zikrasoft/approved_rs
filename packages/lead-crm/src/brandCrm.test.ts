@@ -45,6 +45,7 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 
 describe('createBrandStore', () => {
@@ -311,5 +312,151 @@ describe('createBrandBot', () => {
     expect(result.stored).toBe(true);
     const [lead] = await leadStore.readLeads();
     expect(lead?.brand).toBe('CarLab');
+  });
+});
+
+describe('the Lead topic lifecycle', () => {
+  let api: ReturnType<typeof recordBotApi>;
+
+  async function withTopic() {
+    for (const [name, value] of Object.entries(ENV)) vi.stubEnv(name, value);
+    api = recordBotApi();
+    vi.stubGlobal('fetch', api.fetch);
+    const { leadStore } = brandStore();
+    const crm = createBrandBot({
+      store: leadStore,
+      brand: 'CarLab',
+      serviceLabel: (slug) => slug,
+    });
+    const lead = await leadStore.insertLead({
+      ...submission,
+      brand: 'CarLab',
+      telegramId: 9,
+    });
+    const topical = await crm.ensureLeadTopic(lead);
+    api.reset();
+    return { leadStore, crm, lead: topical };
+  }
+
+  it('opens a topic as active and closes it once when the Lead is won', async () => {
+    const { leadStore, crm, lead } = await withTopic();
+    expect(lead).toMatchObject({ topicClosed: false });
+    expect(lead.topicActiveAt).not.toBeNull();
+
+    const won = await leadStore.setStatus(lead.id, 'won');
+    await crm.afterStatusChange(won!, { notice: false });
+    await crm.afterStatusChange((await leadStore.getLead(lead.id))!, {
+      notice: false,
+    });
+
+    expect(api.callsTo('closeForumTopic')).toEqual([
+      expect.objectContaining({
+        payload: { chat_id: '-100', message_thread_id: lead.topicId },
+      }),
+    ]);
+    expect(await leadStore.getLead(lead.id)).toMatchObject({
+      topicClosed: true,
+    });
+  });
+
+  it.each(['postponed', 'negotiations'] as const)(
+    'leaves the topic open on %s',
+    async (status) => {
+      const { leadStore, crm, lead } = await withTopic();
+
+      await crm.afterStatusChange(
+        (await leadStore.setStatus(lead.id, status))!,
+        {
+          notice: false,
+        },
+      );
+
+      expect(api.callsTo('closeForumTopic')).toEqual([]);
+    },
+  );
+
+  it('closes a topic Telegram already reports closed without failing', async () => {
+    const { leadStore, crm, lead } = await withTopic();
+    api.fail('closeForumTopic', 'Bad Request: TOPIC_NOT_MODIFIED');
+
+    const lost = await leadStore.setStatus(lead.id, 'lost');
+    await expect(
+      crm.afterStatusChange(lost!, { notice: false }),
+    ).resolves.toBeUndefined();
+  });
+
+  it('reopens a closed topic and stamps the activity', async () => {
+    vi.useFakeTimers({ now: new Date('2026-10-20T08:00:00.000Z') });
+    const { leadStore, crm, lead } = await withTopic();
+    const closed = await leadStore.closeTopic(lead.id);
+
+    const touched = await crm.touchLeadTopic(closed!);
+
+    expect(api.callsTo('reopenForumTopic')).toEqual([
+      expect.objectContaining({
+        payload: { chat_id: '-100', message_thread_id: lead.topicId },
+      }),
+    ]);
+    expect(touched).toMatchObject({
+      topicClosed: false,
+      topicActiveAt: '2026-10-20T08:00:00.000Z',
+    });
+  });
+
+  it('only stamps an open topic, and leaves a topicless Lead alone', async () => {
+    const { crm, lead } = await withTopic();
+
+    await crm.touchLeadTopic(lead);
+    const bare = { ...lead, topicId: null };
+
+    await expect(crm.touchLeadTopic(bare)).resolves.toBe(bare);
+    expect(api.callsTo('reopenForumTopic')).toEqual([]);
+  });
+
+  it('tolerates a topic Telegram already reports open', async () => {
+    const { leadStore, crm, lead } = await withTopic();
+    api.fail('reopenForumTopic', 'Bad Request: TOPIC_NOT_MODIFIED');
+
+    const touched = await crm.touchLeadTopic(
+      (await leadStore.closeTopic(lead.id))!,
+    );
+
+    expect(touched.topicClosed).toBe(false);
+  });
+
+  it('keeps the topic marked closed when it could not be reopened', async () => {
+    const { leadStore, crm, lead } = await withTopic();
+    api.fail('reopenForumTopic', 'Bad Request: not enough rights');
+    const closed = (await leadStore.closeTopic(lead.id))!;
+
+    await expect(crm.touchLeadTopic(closed)).resolves.toBe(closed);
+    expect(await leadStore.getLead(lead.id)).toMatchObject({
+      topicClosed: true,
+    });
+  });
+
+  it('hands back the Lead when its row is gone', async () => {
+    const { crm, lead } = await withTopic();
+    const gone = { ...lead, id: 999 };
+
+    await expect(crm.touchLeadTopic(gone)).resolves.toBe(gone);
+  });
+
+  it('asks Telegram nothing for a topicless Lead', async () => {
+    const { crm, lead } = await withTopic();
+
+    await crm.notifier.closeLeadTopic({ ...lead, topicId: null });
+    await crm.notifier.reopenLeadTopic({ ...lead, topicId: null });
+
+    expect(api.calls).toEqual([]);
+  });
+
+  it('still fails on a Bot API error that is not about the topic state', async () => {
+    const { crm, lead } = await withTopic();
+    api.fail('closeForumTopic', 'Bad Request: not enough rights');
+
+    await expect(crm.notifier.closeLeadTopic(lead)).rejects.toThrow(
+      'not enough rights',
+    );
   });
 });

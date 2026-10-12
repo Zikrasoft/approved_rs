@@ -108,6 +108,8 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     telegramId: null,
     topicId: null,
     topicMessageId: null,
+    topicClosed: false,
+    topicActiveAt: null,
     referredBy: null,
     remindAt: null,
     ...overrides,
@@ -1506,6 +1508,54 @@ describe('POST /api/telegram-webhook', () => {
       expect(sentTo(Number(GROUP_ID))).toEqual([]);
     });
 
+    it('reopens a closed topic before relaying the owner message', async () => {
+      seed(topicLead({ topicClosed: true }));
+
+      await topicMessage(OWNER_ID);
+
+      expect(
+        api.calls
+          .filter((c) => /ForumTopic|copyMessage/.test(c.method))
+          .map((c) => c.method),
+      ).toEqual(['reopenForumTopic', 'copyMessage']);
+      expect(crm('reopenForumTopic')).toEqual([
+        { chat_id: GROUP_ID, message_thread_id: TOPIC_ID },
+      ]);
+      expect(await stored()).toMatchObject({
+        topicClosed: false,
+        topicActiveAt: expect.any(String),
+      });
+    });
+
+    it('stamps an open topic without reopening it', async () => {
+      seed(topicLead());
+
+      await topicMessage(OWNER_ID);
+
+      expect(crm('reopenForumTopic')).toEqual([]);
+      expect((await stored()).topicActiveAt).toEqual(expect.any(String));
+    });
+
+    it.each(['won', 'lost'])('closes the topic on %s', async (key) => {
+      seed(topicLead());
+
+      await tap(`st:5:${key}`, OWNER_ID);
+
+      expect(crm('closeForumTopic')).toEqual([
+        { chat_id: GROUP_ID, message_thread_id: TOPIC_ID },
+      ]);
+      expect((await stored()).topicClosed).toBe(true);
+    });
+
+    it('leaves the topic open on negotiations', async () => {
+      seed(topicLead());
+
+      await tap('st:5:negotiations', OWNER_ID);
+
+      expect((await stored()).status).toBe('negotiations');
+      expect(crm('closeForumTopic')).toEqual([]);
+    });
+
     it('copies media from an admin just like text', async () => {
       seed(topicLead());
 
@@ -1541,6 +1591,7 @@ describe('POST /api/telegram-webhook', () => {
         expect(await stored()).toEqual({
           ...before,
           lastActivityAt: expect.any(String),
+          topicActiveAt: expect.any(String),
         });
         expect(crm('editMessageText')).toEqual([]);
         expect(sentTo(ADMIN_ID)).toEqual([]);

@@ -6,6 +6,7 @@ export const {
   notifier,
   ensureLeadCard,
   ensureLeadTopic,
+  touchLeadTopic,
   afterStatusChange,
   notifyLead,
   client,

@@ -95,6 +95,10 @@ Questionnaire fills in. The Lead's card in General and its detail link to it.
 Whatever the owner or admin writes there — text or media — reaches the visitor
 through the brand's Capture bot, the first message moves an open Lead into
 negotiations, and a copy that cannot be delivered is reported in the Topic.
+Open Topics are the clients being worked with: the daily cron closes a Topic
+nobody wrote in — neither the visitor nor the owner — for 24 hours, ✅ won and
+❌ lost close it, and the next message from either side reopens it before it is
+posted. ⏳ and 🗣 leave it open, and an edit of the summary is not a message.
 A Lead from the site form or a placeholder click has no Topic until a bot
 `/start` merges into it.
 _Avoid_: thread, chat

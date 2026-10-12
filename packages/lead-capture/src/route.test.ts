@@ -85,6 +85,7 @@ let storage: MemoryStorage;
 let leadStore: LeadStore;
 let ensureLeadCard: (lead: StoredLead) => Promise<void>;
 let ensureLeadTopic: (lead: StoredLead) => Promise<StoredLead>;
+let touchLeadTopic: (lead: StoredLead) => Promise<StoredLead>;
 let POST: ReturnType<typeof createCaptureWebhookRoute>;
 
 type RouteOptions = Parameters<
@@ -100,6 +101,7 @@ function route(
     secret,
     store: leadStore,
     ensureLeadTopic,
+    touchLeadTopic,
     ensureLeadCard,
     bot: createTelegramClient(CAPTURE_TOKEN, 'capture_bot').bot,
     groupId: GROUP_ID,
@@ -375,7 +377,7 @@ beforeEach(() => {
     getNotifier: vi.fn(),
   }));
   storage = storages[LEADS_PATH];
-  ({ ensureLeadCard, ensureLeadTopic } = createBrandBot({
+  ({ ensureLeadCard, ensureLeadTopic, touchLeadTopic } = createBrandBot({
     store: leadStore,
     brand: BRAND,
     serviceLabel: (slug) => slug,
@@ -387,6 +389,7 @@ afterEach(() => {
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
+  vi.useRealTimers();
 });
 
 describe('the webhook secret', () => {
@@ -1274,7 +1277,10 @@ describe("someone else's contact card", () => {
 
     await POST(makeCtx(friend()));
 
-    expect(stored()[0]).toEqual(before);
+    expect(stored()[0]).toEqual({
+      ...before,
+      topicActiveAt: expect.any(String),
+    });
     expect(topicCopies()).toEqual([
       expect.objectContaining({ message_id: 12, message_thread_id: 1 }),
     ]);
@@ -1394,7 +1400,9 @@ describe('free text outside the dialog', () => {
 
     await say('а можно в рассрочку?');
 
-    expect(stored()).toEqual([before]);
+    expect(stored()).toEqual([
+      { ...before, topicActiveAt: expect.any(String) },
+    ]);
     expect(topicCopies()).toEqual([
       {
         chat_id: GROUP_ID,
@@ -1769,7 +1777,9 @@ describe('every message the visitor sends', () => {
 
       await POST(makeCtx(media(content)));
 
-      expect(stored()).toEqual([before]);
+      expect(stored()).toEqual([
+        { ...before, topicActiveAt: expect.any(String) },
+      ]);
       expect(topicCopies()).toEqual([
         {
           chat_id: GROUP_ID,
@@ -1788,7 +1798,10 @@ describe('every message the visitor sends', () => {
 
     await POST(makeCtx(media(PHOTO)));
 
-    expect(stored()[0]).toEqual(before);
+    expect(stored()[0]).toEqual({
+      ...before,
+      topicActiveAt: expect.any(String),
+    });
     expect(topicCopies()).toEqual([
       expect.objectContaining({ message_id: 13, message_thread_id: 1 }),
     ]);
@@ -1805,6 +1818,43 @@ describe('every message the visitor sends', () => {
       expect.objectContaining({ from_chat_id: 777, message_thread_id: 1 }),
     ]);
     expect(lastSent()).toEqual([777, 'GREETING_ru\n\nMENU']);
+  });
+
+  it('reopens a closed topic before copying the message into it', async () => {
+    vi.useFakeTimers({
+      now: new Date('2026-10-20T08:00:00.000Z'),
+      toFake: ['Date'],
+    });
+    await begin();
+    await say('BMW X5');
+    await say('20 000');
+    editLead(stored()[0].id, { topicClosed: true });
+    api.reset();
+
+    await POST(makeCtx(media(PHOTO)));
+
+    expect(
+      api.calls
+        .filter((c) => /ForumTopic|copyMessage/.test(c.method))
+        .map((c) => [c.method, c.payload.message_thread_id]),
+    ).toEqual([
+      ['reopenForumTopic', 1],
+      ['copyMessage', 1],
+    ]);
+    expect(stored()[0]).toMatchObject({
+      topicClosed: false,
+      topicActiveAt: '2026-10-20T08:00:00.000Z',
+    });
+  });
+
+  it('copies into an open topic without reopening it', async () => {
+    await begin();
+    api.reset();
+
+    await POST(makeCtx(media(PHOTO)));
+
+    expect(api.callsTo('reopenForumTopic')).toEqual([]);
+    expect(topicCopies()).toHaveLength(1);
   });
 
   it('copies nothing when the topic cannot be opened', async () => {

@@ -34,6 +34,7 @@ import {
   GROUP_ID,
   REPLY_COPY,
   LEAD_ACTION_COPY,
+  touchLeadTopic,
   type Role,
 } from '@/lib/telegram';
 import { captureClientFor } from '@/lib/captureBot';
@@ -657,6 +658,7 @@ async function relayTopicMessage(
   lead: StoredLead,
   { chatId, messageId, topicId }: TopicMessage,
 ): Promise<void> {
+  await touchLeadTopic(lead);
   if (!(await deliverToVisitor(lead, chatId, messageId))) {
     await sendMessage(chatId, REPLY_COPY.undelivered, {
       message_thread_id: topicId,

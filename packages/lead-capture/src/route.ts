@@ -135,6 +135,7 @@ export interface CaptureWebhookRouteOptions<
   secret: string | undefined;
   store: CaptureStore;
   ensureLeadTopic: (lead: StoredLead) => Promise<StoredLead>;
+  touchLeadTopic: (lead: StoredLead) => Promise<StoredLead>;
   ensureLeadCard: (lead: StoredLead) => Promise<void>;
   bot: Bot;
   groupId: string;
@@ -180,6 +181,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   secret,
   store,
   ensureLeadTopic,
+  touchLeadTopic,
   ensureLeadCard,
   bot,
   groupId,
@@ -290,7 +292,9 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     const lead = await store.findLatestLeadByTelegramId(sender.id, brand);
     if (!lead) return;
     try {
-      const topical = lead.topicId == null ? await ensureLeadTopic(lead) : lead;
+      const topical = await touchLeadTopic(
+        lead.topicId == null ? await ensureLeadTopic(lead) : lead,
+      );
       if (topical.topicId == null) return;
       await bot.api.copyMessage(groupId, chatId, messageId, {
         message_thread_id: topical.topicId,

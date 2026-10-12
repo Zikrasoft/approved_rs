@@ -7,6 +7,7 @@ import {
   formatter,
   groupId,
   notifier,
+  touchLeadTopic,
 } from '@/lib/crmBot';
 
 export const {
@@ -17,7 +18,7 @@ export const {
   safeEditMessage,
 } = client;
 
-export { afterStatusChange, ensureLeadCard };
+export { afterStatusChange, ensureLeadCard, touchLeadTopic };
 
 export const {
   sendLeadNotification,
@@ -26,6 +27,7 @@ export const {
   sendStatusChangeToAdmin,
   editLeadDetailMessage,
   unpinLeadCard,
+  closeLeadTopic,
 } = notifier;
 
 export const { buildHelp, buildLeadDetail } = formatter;
