@@ -69,7 +69,9 @@ translations:
     request:
       button: 📝 Submit a request
       car: What car do you have? Please provide the make, model, and year.
-      service: What service do you need? Please select from below.
+      service: What services are you interested in? Please select one or more.
+      done: Done →
+      unsure: Not sure, I need some advice
     language:
       button: 🌐 Language
       text: Choose the language you're most comfortable communicating in.
@@ -108,7 +110,9 @@ translations:
     request:
       button: 📝 Ostaviti zahtev
       car: Koja su vaša kola? Napišite marku, model i godište.
-      service: Koju uslugu želite? Izaberite ispod.
+      service: Koje usluge vas zanimaju? Označite jednu ili više.
+      done: Gotovo →
+      unsure: Nisam siguran, treba mi konsultacija
     language:
       button: 🌐 Jezik
       text: Izaberite jezik koji vam više odgovara.
@@ -147,7 +151,9 @@ translations:
     request:
       button: 📝 Enviar solicitud
       car: ¿Cuál es tu coche? Escribe la marca, el modelo y el año.
-      service: ¿Qué servicio necesitas? Elige a continuación.
+      service: ¿Qué servicios te interesan? Marca uno o varios.
+      done: Listo →
+      unsure: No estoy seguro, necesito una consulta
     language:
       button: 🌐 Idioma
       text: Elige el idioma con el que te sientas más cómodo.
@@ -186,7 +192,9 @@ translations:
     request:
       button: 📝 Anfrage stellen
       car: Welches Auto haben Sie? Bitte geben Sie Marke, Modell und Baujahr an.
-      service: Welche Dienstleistung benötigen Sie? Wählen Sie unten aus.
+      service: Welche Dienstleistungen interessieren Sie? Wählen Sie eine oder mehrere aus.
+      done: Fertig →
+      unsure: Ich bin mir nicht sicher, ich benötige eine Beratung
     language:
       button: 🌐 Sprache
       text: Wählen Sie die Sprache, in der Sie kommunizieren möchten.
@@ -195,4 +203,4 @@ translations:
       shortDescription: Autosourcing, Import und Rückkauf von Fahrzeugen in Europa
       menuCommand: Hauptmenü
       langCommand: Sprache wechseln
-translatedFrom: c039716c271ed413
+translatedFrom: 418b5d65fc8d66a1

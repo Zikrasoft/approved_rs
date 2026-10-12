@@ -67,7 +67,9 @@ translations:
     request:
       button: 📝 Ostaviti zahtev
       car: Koja je vaša mašina? Napišite marku, model i godinu.
-      service: Koje radove trebate? Izaberite ispod.
+      service: Koje usluge su potrebne? Obeležite jednu ili više opcija.
+      done: Završeno →
+      unsure: Nisam siguran, potrebna mi je konsultacija
     language:
       button: 🌐 Jezik
       text: Izaberite jezik kojim vam je lakše da komunicirate.
@@ -105,7 +107,9 @@ translations:
     request:
       button: 📝 Submit a request
       car: What kind of car do you have? Please provide the make, model, and year.
-      service: What services do you need? Please choose below.
+      service: What services do you need? Please select one or more.
+      done: Done →
+      unsure: I'm not sure, I need advice
     language:
       button: 🌐 Language
       text: Select the language you prefer to communicate in.
@@ -114,4 +118,4 @@ translations:
       shortDescription: Car service in Belgrade — diagnostics, repairs, servicing
       menuCommand: Main menu
       langCommand: Change language
-translatedFrom: 6b37311d4a8b181e
+translatedFrom: c74da072000a8505

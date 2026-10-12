@@ -67,7 +67,9 @@ translations:
     request:
       button: 📝 Ostaviti zahtev
       car: Koja su vaša kola? Napišite marku, model i godinu.
-      service: Šta želite da uradite sa autom? Izaberite uslugu ispod — ili napišite svojim rečima.
+      service: Šta želite da uradite sa autom? Označite jednu ili više usluga — ili napišite svojim rečima.
+      done: Gotovo →
+      unsure: Nisam siguran, treba mi konsultacija
     language:
       button: 🌐 Jezik
       text: Izaberite jezik koji vam najbolje odgovara.
@@ -105,7 +107,9 @@ translations:
     request:
       button: 📝 Submit a request
       car: What car do you have? Please provide the make, model, and year.
-      service: What would you like to do with your car? Choose a service below or write it in your words.
+      service: What do you want to do with your car? Please select one or more services — or write in your own words.
+      done: Done →
+      unsure: I'm not sure, I need a consultation
     language:
       button: 🌐 Language
       text: Select the language you prefer to communicate in.
@@ -114,4 +118,4 @@ translations:
       shortDescription: Detailing studio in Belgrade — film, polishing, ceramic
       menuCommand: Main menu
       langCommand: Change language
-translatedFrom: f7c03437f437192f
+translatedFrom: 073f600b8ec5d7ea
