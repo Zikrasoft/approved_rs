@@ -86,11 +86,13 @@ cleared as soon as the visitor fixes the field.
 `bootSiteKit`, reads the landing URL. It is an ad when the URL carries
 `fbclid` or `gclid`, or `utm_medium` is `paid`, `cpc`, `ppc` or `paid_social`
 (any case). The source is `utm_source`, else `facebook` for `fbclid` and
-`google` for `gclid`; `utm_campaign` and `utm_content` ride along. The first
+`google` for `gclid`, else none; `utm_medium`, `utm_campaign` and
+`utm_content` ride along. The first
 such landing is kept in `localStorage` for 30 days and never overwritten while
 it is fresh; a visitor who declined analytics stores none, and declining
 clears it. Every Lead the site then creates carries it, and the CRM card shows
-«📣 Реклама: Facebook · <campaign>» with `#реклама`.
+«📣 Реклама: Facebook · <campaign> · <content>» with `#реклама`; a visit only
+its `utm_medium` identifies shows a bare «📣 Реклама», never the raw medium.
 
 Tag every ad link with UTM even where the network adds its own click id:
 
@@ -99,9 +101,11 @@ Tag every ad link with UTM even where the network adds its own click id:
 ```
 
 `utm_medium=paid` is what makes a link an ad when the click id is stripped.
-Keep campaign and content to letters, digits, spaces and `._-+|:/()&,#`, at
-most 100 characters each — anything else is dropped on the server, and only
-that field is lost. Instagram placements bought through Meta are
+Keep source, campaign and content to letters, digits, spaces and
+`._-+|:/()&,#`, at most 100 characters each. Anything else is stripped from
+the value, in the browser and again on the server (`cleanAdText` in
+`packages/lead-crm/src/adText.ts`); a field left empty is dropped, and the
+visit only when none of source, medium, campaign or content is left. Instagram placements bought through Meta are
 `utm_source=instagram`.
 
 ## How a form submission is counted
@@ -208,7 +212,13 @@ completion, a second phone or a retry never sends it again. A Lead without
 `metaIds` (the visitor never came through the site, or refused) sends nothing.
 
 **What is sent** (`packages/lead-crm/src/metaConversions.ts`), `POST
-https://graph.facebook.com/v25.0/<pixel id>/events?access_token=<token>`:
+https://graph.facebook.com/v25.0/<pixel id>/events` with a form-encoded body:
+`access_token`, `data` (the JSON array below) and, while testing,
+`test_event_code`. The token rides in the body, as the form-field form of
+Meta's own example request does
+([using the API](https://developers.facebook.com/documentation/ads-commerce/conversions-api/using-the-api)),
+rather than in the query string, so a logged URL or a fetch error never
+carries it. `data` decoded:
 
 ```json
 {

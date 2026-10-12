@@ -34,11 +34,31 @@ describe('paidTouch', () => {
     ['gclid=abc', 'google'],
     ['fbclid=abc&utm_source=Instagram', 'instagram'],
     ['utm_medium=CPC&utm_source=google', 'google'],
-    ['utm_medium=paid_social', 'paid_social'],
-    ['utm_medium=ppc', 'ppc'],
     ['utm_medium=paid&utm_source=facebook', 'facebook'],
+    ['fbclid=abc&utm_source=%3C%3E', 'facebook'],
   ])('recognises %s as an ad from %s', (query, source) => {
     expect(paidTouch(page(query), NOW)?.source).toBe(source);
+  });
+
+  it.each(['paid_social', 'ppc', 'CPC'])(
+    'keeps a visit only utm_medium=%s identifies, with no source',
+    (medium) => {
+      expect(paidTouch(page(`utm_medium=${medium}`), NOW)).toEqual({
+        medium: medium.toLowerCase(),
+        at: AT,
+      });
+    },
+  );
+
+  it('strips what an ad label may not carry instead of dropping the visit', () => {
+    expect(
+      paidTouch(
+        page(
+          'gclid=1&utm_source=Google%3Cx%3E&utm_campaign=Spring%F0%9F%9A%97',
+        ),
+        NOW,
+      ),
+    ).toMatchObject({ source: 'googlex', campaign: 'Spring' });
   });
 
   it.each(['', 'utm_source=facebook', 'utm_medium=organic', 'utm_medium='])(

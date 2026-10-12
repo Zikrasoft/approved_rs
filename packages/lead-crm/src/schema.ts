@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { cleanAdText } from './adText.ts';
 
 export const LEAD_STATUSES = [
   'new',
@@ -53,15 +54,23 @@ const managerHandoffSchema = z.object({
 });
 export type ManagerHandoff = z.infer<typeof managerHandoffSchema>;
 
-const AD_TEXT = /^[\p{L}\p{N} ._\-+|:/()&,#]{1,100}$/u;
-const adTextSchema = z.string().trim().regex(AD_TEXT);
+const adTextSchema = z
+  .string()
+  .transform(cleanAdText)
+  .optional()
+  .catch(undefined);
 
-export const adSourceSchema = z.object({
-  source: adTextSchema,
-  campaign: adTextSchema.optional().catch(undefined),
-  content: adTextSchema.optional().catch(undefined),
-  at: z.iso.datetime(),
-});
+export const adSourceSchema = z
+  .object({
+    source: adTextSchema,
+    medium: adTextSchema,
+    campaign: adTextSchema,
+    content: adTextSchema,
+    at: z.iso.datetime(),
+  })
+  .refine(({ source, medium, campaign, content }) =>
+    [source, medium, campaign, content].some(Boolean),
+  );
 export type AdSource = z.infer<typeof adSourceSchema>;
 
 const metaIdSchema = z

@@ -75,8 +75,8 @@ rate are still the receiving bot's.
 site from a paid ad: a `fbclid` or `gclid` in the URL, or `utm_medium` of
 `paid`, `cpc`, `ppc` or `paid_social`. Kept in the browser beside the visitor
 id and under the same consent, and sent with every Lead the site creates —
-form or Contact click. It lands on the Lead as `adSource` (source, campaign,
-content, when); a Capture bot Lead that absorbs a Contact click inherits it,
+form or Contact click. It lands on the Lead as `adSource` (source, medium,
+campaign, content, when); a Capture bot Lead that absorbs a Contact click inherits it,
 and on a merge the first one wins. The card, the detail and the Topic summary
 show it as «📣 Реклама» with `#реклама`. A visitor who reaches a Capture bot
 without passing through the site has no Ad visit: ads send people to the site.

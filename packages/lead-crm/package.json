@@ -10,6 +10,7 @@
     "./storage/local": "./src/storage/localFiles.ts",
     "./contact-channel": "./src/contactChannel.ts",
     "./fields": "./src/fields.ts",
+    "./ad-text": "./src/adText.ts",
     "./phone": "./src/phone.ts",
     "./compose-e164": "./src/composeE164.ts",
     "./phone-input": "./src/phoneInput.ts",

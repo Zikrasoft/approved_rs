@@ -117,7 +117,7 @@ describe('adSourceFieldSchema', () => {
     });
   });
 
-  it('keeps the visit when only a campaign or content is unreadable', () => {
+  it('cleans a campaign or content instead of dropping it', () => {
     expect(
       adSourceFieldSchema.parse(
         field({
@@ -127,7 +127,26 @@ describe('adSourceFieldSchema', () => {
           at: AT,
         }),
       ),
-    ).toEqual({ source: 'facebook', at: AT });
+    ).toEqual({
+      source: 'facebook',
+      campaign: 'bx/b',
+      content: 'x'.repeat(100),
+      at: AT,
+    });
+  });
+
+  it('strips what it cannot keep instead of dropping the visit', () => {
+    expect(
+      adSourceFieldSchema.parse(
+        field({ source: ' facebook<script>\n', campaign: 42, at: AT }),
+      ),
+    ).toEqual({ source: 'facebookscript', at: AT });
+  });
+
+  it('keeps a visit only its medium identifies', () => {
+    expect(adSourceFieldSchema.parse(field({ medium: 'cpc', at: AT }))).toEqual(
+      { medium: 'cpc', at: AT },
+    );
   });
 
   it.each([
@@ -136,7 +155,8 @@ describe('adSourceFieldSchema', () => {
     'not json',
     field(null),
     field({ source: '', at: AT }),
-    field({ source: 'facebook<script>', at: AT }),
+    field({ source: '<>', campaign: ' ', at: AT }),
+    field({ at: AT }),
     field({ source: 'facebook', at: 'yesterday' }),
   ])('drops %p rather than failing the whole submission', (value) => {
     expect(adSourceFieldSchema.parse(value)).toBeNull();

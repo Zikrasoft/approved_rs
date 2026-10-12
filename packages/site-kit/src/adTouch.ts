@@ -1,9 +1,9 @@
+import { cleanAdText } from '@podbor/lead-crm/ad-text';
 import { STORAGE_KEY as CONSENT_KEY, analyticsDeclined } from './consent.ts';
 
 export const AD_TOUCH_STORAGE_KEY = 'ad_touch';
 export const AD_TOUCH_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
-const MAX_TEXT = 100;
 const PAID_MEDIUMS = ['paid', 'cpc', 'ppc', 'paid_social'];
 const CLICK_IDS = [
   ['fbclid', 'facebook'],
@@ -11,7 +11,8 @@ const CLICK_IDS = [
 ] as const;
 
 export interface AdTouch {
-  source: string;
+  source?: string;
+  medium?: string;
   campaign?: string;
   content?: string;
   at: string;
@@ -25,14 +26,14 @@ const browserStorage = (): StorageLike => localStorage;
 export function paidTouch(href: string, at: Date): AdTouch | null {
   const params = new URL(href).searchParams;
   const param = (name: string): string | undefined =>
-    params.get(name)?.trim().slice(0, MAX_TEXT) || undefined;
+    cleanAdText(params.get(name));
+  const clickSource = CLICK_IDS.find(([id]) => params.has(id))?.[1];
   const medium = param('utm_medium')?.toLowerCase();
-  const fallback =
-    CLICK_IDS.find(([id]) => params.has(id))?.[1] ??
-    PAID_MEDIUMS.find((paid) => paid === medium);
-  if (!fallback) return null;
+  if (!clickSource && !PAID_MEDIUMS.some((paid) => paid === medium))
+    return null;
   return {
-    source: param('utm_source')?.toLowerCase() ?? fallback,
+    source: param('utm_source')?.toLowerCase() ?? clickSource,
+    medium,
     campaign: param('utm_campaign'),
     content: param('utm_content'),
     at: at.toISOString(),
