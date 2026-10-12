@@ -38,6 +38,7 @@ import {
   noteLine,
   reAskEditText,
   sendFieldChange,
+  renameLeadTopic,
   touchLeadTopic,
   ensureLeadCard,
   ensureLeadTopic,
@@ -420,7 +421,6 @@ export const CALLBACKS: CallbackRow[] = [
   [/^topic:(\d+)$/, 'any', withId(startTopic)],
   editRow('name'),
   editRow('contact'),
-  editRow('comment'),
   [
     /^note:(\d+)$/,
     'any',
@@ -553,9 +553,7 @@ function editPatch(
   const value = text.trim();
   if (field === 'contact')
     return editedContact(value, lead.contactChannel, PHONE_REGION);
-  if (field === 'name')
-    return value ? { name: value.slice(0, MAX_NAME_LENGTH) } : undefined;
-  return { comment: value || null };
+  return value ? { name: value.slice(0, MAX_NAME_LENGTH) } : undefined;
 }
 
 function replyEdit(field: EditField): PromptHandler {
@@ -573,12 +571,13 @@ function replyEdit(field: EditField): PromptHandler {
       });
       return;
     }
-    let before: string | null | undefined;
+    let before = '';
     const updated = await resolvePendingPrompt(promptKey(reply), (current) => {
       before = current[field];
       return patch;
     });
     if (!updated) return;
+    if (field === 'name') await renameLeadTopic(updated);
     await afterEdit(reply, updated, EDIT_COPY.updated);
     await sendFieldChange(updated, field, before, reply.role, reply.authorId);
   };
@@ -597,7 +596,6 @@ const PROMPT_REPLIES: Record<PromptKind, PromptHandler> = {
   postpone: replyPostpone,
   edit_name: replyEdit('name'),
   edit_contact: replyEdit('contact'),
-  edit_comment: replyEdit('comment'),
   note: replyNote,
 };
 

@@ -1231,6 +1231,7 @@ describe('POST /api/telegram-webhook', () => {
       'arch:5',
       'unarch:5',
       'edit:5:service',
+      'edit:5:comment',
       'note:x',
       'st:5:in_progress',
       'list:new',
@@ -1279,7 +1280,6 @@ describe('POST /api/telegram-webhook', () => {
       ['topic:5', 'any'],
       ['edit:5:name', 'any'],
       ['edit:5:contact', 'any'],
-      ['edit:5:comment', 'any'],
       ['note:5', 'any'],
       ['menu:stats', 'admin'],
       ['menu:debt', 'any'],
@@ -1535,7 +1535,7 @@ describe('POST /api/telegram-webhook', () => {
   });
 
   describe('editing a Lead from the bot DM', () => {
-    const editKeys = ['edit:5:name', 'edit:5:contact', 'edit:5:comment'];
+    const editKeys = ['edit:5:name', 'edit:5:contact'];
     const callbackData = (markup: unknown) =>
       (
         markup as { inline_keyboard: { callback_data?: string }[][] }
@@ -1545,7 +1545,7 @@ describe('POST /api/telegram-webhook', () => {
     const notices = (chatId: number) =>
       textsTo(chatId).filter((t) => String(t).startsWith('✏️ Заявка'));
     const edit = async (
-      field: 'name' | 'contact' | 'comment',
+      field: 'name' | 'contact',
       text: string,
       who = OWNER_ID,
     ) => {
@@ -1594,7 +1594,6 @@ describe('POST /api/telegram-webhook', () => {
         { contact: '+381641234567', contactChannel: 'phone' },
         '@ivan',
       ],
-      ['comment', 'Хочет X5', { comment: 'Хочет X5' }, '—'],
     ] as const)(
       'stores the new %s, refreshes the card and tells the admin, not the owner',
       async (field, text, patch, before) => {
@@ -1631,16 +1630,49 @@ describe('POST /api/telegram-webhook', () => {
 
     it('refreshes the Topic summary as well', async () => {
       seed(makeLead({ telegramId: 42, topicId: 77, topicMessageId: 78 }));
-      await edit('comment', 'Перезвонить вечером');
+      await edit('name', 'Пётр');
       expect(
         crm('editMessageText').filter(
           (p) => p.chat_id === GROUP_ID && p.message_id === 78,
         ),
       ).toEqual([
         expect.objectContaining({
-          text: expect.stringContaining('Комментарий: Перезвонить вечером'),
+          text: expect.stringContaining('Имя: Пётр'),
         }),
       ]);
+    });
+
+    it('renames the Topic after a new name', async () => {
+      seed(makeLead({ telegramId: 42, topicId: 77, topicMessageId: 78 }));
+      await edit('name', 'Пётр');
+      expect(crm('editForumTopic')).toEqual([
+        {
+          chat_id: GROUP_ID,
+          message_thread_id: 77,
+          name: '#5 · Пётр · Approved.rs',
+        },
+      ]);
+    });
+
+    it('renames nothing for a Lead without a Topic or on a contact edit', async () => {
+      await edit('name', 'Пётр');
+      seed(makeLead({ telegramId: 42, topicId: 77, topicMessageId: 78 }));
+      await edit('contact', '@petr');
+      expect(crm('editForumTopic')).toEqual([]);
+    });
+
+    it('still stores the name when Telegram will not rename the Topic', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+      seed(makeLead({ telegramId: 42, topicId: 77, topicMessageId: 78 }));
+      api.fail('editForumTopic', 'Bad Request: not enough rights');
+      await edit('name', 'Пётр');
+      expect((await stored()).name).toBe('Пётр');
+      expect(error).toHaveBeenCalledWith(
+        '[telegram] editForumTopic failed',
+        expect.objectContaining({ topicId: 77 }),
+      );
+      expect(notices(ADMIN_ID)).toHaveLength(1);
+      error.mockRestore();
     });
 
     it('sends no notice when the value did not change', async () => {
@@ -1648,10 +1680,13 @@ describe('POST /api/telegram-webhook', () => {
       expect(notices(ADMIN_ID)).toEqual([]);
     });
 
-    it('clears the comment on an empty answer', async () => {
-      seed(makeLead({ comment: 'старое' }));
-      await edit('comment', '  ');
-      expect((await stored()).comment).toBeNull();
+    it('offers no way to edit the visitor comment', async () => {
+      seed(makeLead({ comment: 'от посетителя' }));
+      await tap('open:5', OWNER_ID);
+      const [detail] = sentTo(OWNER_ID);
+      expect(callbackData(detail!.reply_markup)).not.toContain(
+        'edit:5:comment',
+      );
     });
 
     it.each([

@@ -82,6 +82,20 @@ export function createNotifier({
       await client.api.deleteForumTopic(groupId, topicId);
     },
 
+    async renameLeadTopic(lead: StoredLead): Promise<void> {
+      if (lead.topicId == null) return;
+      try {
+        await client.api.editForumTopic(groupId, lead.topicId, {
+          name: formatter.topicName(lead),
+        });
+      } catch (err) {
+        console.error('[telegram] editForumTopic failed', {
+          error: err,
+          topicId: lead.topicId,
+        });
+      }
+    },
+
     async postLeadTopicSummary(
       lead: StoredLead,
       topicId: number,
@@ -178,11 +192,11 @@ export function createNotifier({
     async sendFieldChange(
       lead: StoredLead,
       field: EditField,
-      before: string | null | undefined,
+      before: string,
       by: Role,
       authorId: number,
     ): Promise<void> {
-      if ((before ?? '') === (lead[field] ?? '')) return;
+      if (before === lead[field]) return;
       const others = (by === 'owner' ? adminIds : ownerIds).filter(
         (id) => id !== authorId,
       );

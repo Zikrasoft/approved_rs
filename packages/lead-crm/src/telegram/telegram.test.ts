@@ -63,6 +63,7 @@ const {
   editLeadDetailMessage,
   openLeadTopic,
   deleteLeadTopic,
+  renameLeadTopic,
   postLeadTopicSummary,
   refreshLeadTopic,
 } = notifier;
@@ -593,9 +594,9 @@ describe('sendFieldChange', () => {
       adminIds: [222],
     });
     await both.sendFieldChange(
-      makeLead({ comment: 'x'.repeat(130) }),
-      'comment',
-      null,
+      makeLead({ name: 'x'.repeat(130) }),
+      'name',
+      '',
       'admin',
       222,
     );
@@ -611,9 +612,9 @@ describe('sendFieldChange', () => {
 
   it('sends nothing when the value did not change', async () => {
     await sendFieldChange(
-      makeLead({ comment: null }),
-      'comment',
-      '',
+      makeLead({ name: 'Иван' }),
+      'name',
+      'Иван',
       'owner',
       111,
     );
@@ -1048,7 +1049,6 @@ describe('buildLeadDetail', () => {
       'postpone:7',
       'edit:7:name',
       'edit:7:contact',
-      'edit:7:comment',
       'note:7',
     ]);
   });
@@ -1377,6 +1377,29 @@ describe('the Lead topic', () => {
         'Контакт: <a href="https://t.me/ivan">@ivan</a> (Telegram)',
       ),
     });
+  });
+
+  it('renames a topic after the Lead, and leaves a Lead without one alone', async () => {
+    await renameLeadTopic(makeLead({ topicId: 7, name: 'Пётр' }));
+    await renameLeadTopic(makeLead());
+    expect(api.callsTo('editForumTopic').map((c) => c.payload)).toEqual([
+      {
+        chat_id: '-1009876543210',
+        message_thread_id: 7,
+        name: '#42 · Пётр · Approved.rs',
+      },
+    ]);
+  });
+
+  it('logs a topic it could not rename', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    api.fail('editForumTopic', 'Bad Request: TOPIC_NOT_MODIFIED');
+    await renameLeadTopic(makeLead({ topicId: 7 }));
+    expect(error).toHaveBeenCalledWith(
+      '[telegram] editForumTopic failed',
+      expect.objectContaining({ topicId: 7 }),
+    );
+    error.mockRestore();
   });
 
   it('deletes a topic by id', async () => {

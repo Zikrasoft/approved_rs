@@ -46,7 +46,7 @@ runs daily against a 24-hour window, a Ghost lead actually lives 24 to 48 hours.
 through a Capture bot: pressed Start, answered, wrote (`visitorActiveAt`).
 
 **Owner activity** — the last time the owner worked the Lead in the CRM bot:
-marked it in work, added a note, edited its name, contact or comment, answered
+marked it in work, added a note, edited its name or contact, answered
 a prompt on it, wrote to the visitor in its Topic (`lastActivityAt`). An edit
 or note by the admin counts the same.
 A status change alone is not owner activity, and neither is a reply sent from
@@ -100,7 +100,7 @@ Telegram. Telegram is one convenient channel, not the only one: a Lead from
 WhatsApp, Viber, a phone call or the site form has no Topic and no relay, and
 nothing about a Lead may assume it has one. The CRM bot opens it the first time a Capture bot touches a
 Lead the visitor started from Telegram, names it after the Lead's id, name and
-brand, and keeps the Lead summary as its first message, edited as the
+brand (renamed when staff correct the name), and keeps the Lead summary as its first message, edited as the
 Questionnaire fills in. The Lead's card in General and its detail link to it;
 a Lead the bot knows (`telegramId`) without one shows «💬 Начать переписку»
 there instead, which opens the Topic the same way.
@@ -126,9 +126,10 @@ Payouts are owed to.
 **CRM bot** — the single bot the owner and the admin work in: cards, statuses,
 money, the daily digest and order notifications, for all three brands in one
 chat. For every Lead, whatever channel it came from, its card and its detail
-in the bot (status buttons, ✏️ Имя / Контакт / Комментарий, 📝 Заметка) are the
-workspace that must always work; either of the two may edit a Lead, and the
-other is told what changed.
+in the bot (status buttons, ✏️ Имя / Контакт, 📝 Заметка) are the
+workspace that must always work; either of the two may correct a Lead's name or
+contact, and the other is told what changed. The visitor's comment is
+read-only: staff add their own text as a note, signed and dated, beside it.
 
 **Payout** — an operation that raises the Balance (➕ Зачислить): an amount
 the owner will send the admin. The person recording it states the amount;

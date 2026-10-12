@@ -34,6 +34,7 @@ export const {
   sendOperationNotice,
   sendStatusChangeToAdmin,
   sendFieldChange,
+  renameLeadTopic,
   editLeadDetailMessage,
   unpinLeadCard,
 } = notifier;

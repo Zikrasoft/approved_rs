@@ -16,7 +16,6 @@ export const PROMPT_KINDS = [
   'postpone',
   'edit_name',
   'edit_contact',
-  'edit_comment',
   'note',
 ] as const;
 

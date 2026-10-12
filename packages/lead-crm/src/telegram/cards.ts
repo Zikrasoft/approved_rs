@@ -97,7 +97,6 @@ export function buildDeleteConfirm(lead: StoredLead): {
 export const EDIT_FIELD_LABELS = {
   name: 'имя',
   contact: 'контакт',
-  comment: 'комментарий',
 } as const;
 
 export type EditField = keyof typeof EDIT_FIELD_LABELS;
@@ -124,8 +123,8 @@ export function noteLine(text: string, by: Role, at = new Date()): string {
 
 const FIELD_PREVIEW_LIMIT = 120;
 
-function fieldPreview(value: string | null | undefined): string {
-  const text = (value ?? '').trim();
+function fieldPreview(value: string): string {
+  const text = value.trim();
   if (!text) return '—';
   return escapeHtml(
     text.length <= FIELD_PREVIEW_LIMIT
@@ -137,7 +136,7 @@ function fieldPreview(value: string | null | undefined): string {
 export function fieldChangeText(
   lead: StoredLead,
   field: EditField,
-  before: string | null | undefined,
+  before: string,
   by: Role,
 ): string {
   return [
@@ -154,7 +153,6 @@ function editRows({ id }: StoredLead): Btn[][] {
     [
       { text: '✏️ Имя', callback_data: `edit:${id}:name` },
       { text: '✏️ Контакт', callback_data: `edit:${id}:contact` },
-      { text: '✏️ Комментарий', callback_data: `edit:${id}:comment` },
     ],
     [{ text: '📝 Заметка', callback_data: `note:${id}` }],
   ];
