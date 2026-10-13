@@ -33,6 +33,8 @@ beforeEach(() => {
   delete (window as Partial<Window>).ymReachGoal;
   delete (window as Partial<Window>).fbq;
   delete (window as Partial<Window>)._fbq;
+  delete (window as Partial<Window>).gtag;
+  delete (window as Partial<Window>).dataLayer;
 });
 
 afterEach(() => {
@@ -301,5 +303,115 @@ describe('defineAnalytics with a Meta Pixel', () => {
     window.ymReachGoal?.('scroll_50');
     window.ymReachGoal?.('form_view');
     expect(fbqQueue()).toHaveLength(2);
+  });
+});
+
+const AW = 'AW-123456789';
+const GTAG_SRC = `https://www.googletagmanager.com/gtag/js?id=${AW}`;
+const LABELS = { form_submit: 'Lead123', contact_click: 'Contact456' };
+const dataLayer = () => window.dataLayer as unknown[][];
+
+describe('defineAnalytics with Google Ads', () => {
+  it('loads the tag beside the others once the browser goes idle', () => {
+    defineAnalytics({
+      ymCounterId: YM,
+      metaPixelId: PIXEL,
+      googleAdsId: AW,
+      googleConversionLabels: LABELS,
+    });
+    expect(srcs()).toEqual([]);
+    runIdle();
+    expect(srcs()).toEqual([TAG, FBQ, GTAG_SRC]);
+  });
+
+  it('loads the tag alone on a site with no Metrika counter or pixel', () => {
+    defineAnalytics({ googleAdsId: AW, googleConversionLabels: LABELS });
+    runIdle();
+    expect(srcs()).toEqual([GTAG_SRC]);
+    expect(window.ym).toBeUndefined();
+    expect(window.fbq).toBeUndefined();
+  });
+
+  it('queues config before the script downloads, so nothing is lost', () => {
+    defineAnalytics({ googleAdsId: AW, googleConversionLabels: LABELS });
+    expect(
+      dataLayer().some((call) => call[0] === 'config' && call[1] === AW),
+    ).toBe(true);
+    runIdle();
+    expect(srcs()).toEqual([GTAG_SRC]);
+  });
+
+  it('leaves the tag out on a site with no Google Ads id', () => {
+    defineAnalytics({ ymCounterId: YM });
+    runIdle();
+    expect(srcs()).toEqual([TAG]);
+    expect(window.gtag).toBeUndefined();
+  });
+
+  it('holds the tag back under the same refusal as the others', () => {
+    refuse();
+    defineAnalytics({ googleAdsId: AW, googleConversionLabels: LABELS });
+    window.ymReachGoal?.('form_submit');
+    runIdle();
+    expect(srcs()).toEqual([]);
+    expect(window.gtag).toBeUndefined();
+    document.dispatchEvent(
+      new CustomEvent(CONSENT_EVENT, { detail: { analytics: true } }),
+    );
+    runIdle();
+    expect(srcs()).toEqual([GTAG_SRC]);
+  });
+
+  it('keeps an already-installed gtag/dataLayer instead of replacing it', () => {
+    const existing = vi.fn();
+    window.gtag = existing;
+    defineAnalytics({ googleAdsId: AW, googleConversionLabels: LABELS });
+    expect(window.gtag).toBe(existing);
+    expect(existing).toHaveBeenCalledWith('config', AW);
+  });
+
+  it('sends the composed send_to for a form submit and a contact click', () => {
+    defineAnalytics({ googleAdsId: AW, googleConversionLabels: LABELS });
+    window.ymReachGoal?.('form_submit');
+    expect(dataLayer().at(-1)).toEqual([
+      'event',
+      'conversion',
+      { send_to: `${AW}/Lead123` },
+    ]);
+    window.ymReachGoal?.('contact_click', { channel: 'phone' });
+    expect(dataLayer().at(-1)).toEqual([
+      'event',
+      'conversion',
+      { send_to: `${AW}/Contact456` },
+    ]);
+  });
+
+  it('sends value and currency alongside a conversion that carries one', () => {
+    defineAnalytics({
+      googleAdsId: AW,
+      googleConversionLabels: { order_placed: 'Buy1' },
+    });
+    window.ymReachGoal?.('order_placed', { total: 12690, currency: 'rsd' });
+    expect(dataLayer().at(-1)).toEqual([
+      'event',
+      'conversion',
+      { send_to: `${AW}/Buy1`, value: 12690, currency: 'RSD' },
+    ]);
+  });
+
+  it('silently skips a goal with no configured label', () => {
+    defineAnalytics({ googleAdsId: AW, googleConversionLabels: LABELS });
+    expect(() => window.ymReachGoal?.('scroll_50')).not.toThrow();
+    expect(dataLayer().some((call) => call[0] === 'event')).toBe(false);
+  });
+
+  it('swallows a goal on a site with no Google Ads id instead of throwing', () => {
+    defineAnalytics({});
+    expect(() => window.ymReachGoal?.('form_submit')).not.toThrow();
+  });
+
+  it('swallows a goal when no label map was passed at all', () => {
+    defineAnalytics({ googleAdsId: AW });
+    expect(() => window.ymReachGoal?.('form_submit')).not.toThrow();
   });
 });

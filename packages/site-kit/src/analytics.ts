@@ -8,6 +8,7 @@ import {
 
 const YM_TAG_SRC = 'https://mc.yandex.ru/metrika/tag.js?id=';
 const META_PIXEL_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
+const GOOGLE_ADS_SRC = 'https://www.googletagmanager.com/gtag/js?id=';
 
 const META_EVENTS: Readonly<Record<string, string>> = {
   [GOALS.formSubmit]: 'Lead',
@@ -20,6 +21,8 @@ const META_EVENTS: Readonly<Record<string, string>> = {
 export interface AnalyticsConfig {
   ymCounterId?: number;
   metaPixelId?: string;
+  googleAdsId?: string;
+  googleConversionLabels?: Partial<Record<string, string>>;
 }
 
 type YmQueue = ((...args: unknown[]) => void) & { a?: unknown[][]; l?: number };
@@ -36,6 +39,8 @@ declare global {
     ym?: (...args: unknown[]) => void;
     fbq?: (...args: unknown[]) => void;
     _fbq?: (...args: unknown[]) => void;
+    gtag?: (...args: unknown[]) => void;
+    dataLayer?: unknown[];
     ymReachGoal?: (goal: string, params?: Record<string, unknown>) => void;
     loadAnalytics?: () => void;
   }
@@ -84,6 +89,14 @@ function stubFbq(): void {
   window._fbq = fbq;
 }
 
+function stubGtag(): void {
+  if (window.gtag) return;
+  const dataLayer = (window.dataLayer ??= []);
+  window.gtag = (...args: unknown[]) => {
+    dataLayer.push(args);
+  };
+}
+
 function startYm(ymCounterId: number): void {
   stubYm();
   window.ym?.(ymCounterId, 'init', {
@@ -115,6 +128,30 @@ function trackMetaGoal(goal: string, params?: Record<string, unknown>): void {
   else window.fbq?.('track', event);
 }
 
+function startGoogleAds(googleAdsId: string): void {
+  stubGtag();
+  window.gtag?.('js', new Date());
+  window.gtag?.('config', googleAdsId);
+  whenIdle(() => loadOnce(`${GOOGLE_ADS_SRC}${googleAdsId}`));
+}
+
+function trackGoogleAdsGoal(
+  googleAdsId: string,
+  labels: Partial<Record<string, string>>,
+  goal: string,
+  params?: Record<string, unknown>,
+): void {
+  const label = labels[goal];
+  if (!label) return;
+  const { total, currency } = params ?? {};
+  const event: Record<string, unknown> = { send_to: `${googleAdsId}/${label}` };
+  if (typeof total === 'number' && typeof currency === 'string') {
+    event.value = total;
+    event.currency = currency.toUpperCase();
+  }
+  window.gtag?.('event', 'conversion', event);
+}
+
 let pendingStart: (() => void) | undefined;
 let listening = false;
 
@@ -138,12 +175,21 @@ function refused(): boolean {
 export function defineAnalytics({
   ymCounterId,
   metaPixelId,
+  googleAdsId,
+  googleConversionLabels,
 }: AnalyticsConfig): void {
   if (window.loadAnalytics) return;
 
   window.ymReachGoal = (goal, params) => {
     if (ymCounterId) window.ym?.(ymCounterId, 'reachGoal', goal, params);
     if (metaPixelId) trackMetaGoal(goal, params);
+    if (googleAdsId)
+      trackGoogleAdsGoal(
+        googleAdsId,
+        googleConversionLabels ?? {},
+        goal,
+        params,
+      );
   };
 
   let started = false;
@@ -152,6 +198,7 @@ export function defineAnalytics({
     started = true;
     if (ymCounterId) startYm(ymCounterId);
     if (metaPixelId) startMetaPixel(metaPixelId);
+    if (googleAdsId) startGoogleAds(googleAdsId);
   };
   window.loadAnalytics = start;
   pendingStart = start;
