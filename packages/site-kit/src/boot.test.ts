@@ -26,7 +26,13 @@ beforeEach(() => {
 describe('bootSiteKit', () => {
   it('arms every part once, in order', async () => {
     const { defineAnalytics } = await import('./analytics.ts');
-    (await boot())({ ymCounterId: 42, metaPixelId: '7', analytics: true });
+    (await boot())({
+      ymCounterId: 42,
+      metaPixelId: '7',
+      googleAdsId: 'AW-1',
+      googleConversionLabels: { form_submit: 'Lead1' },
+      analytics: true,
+    });
     expect(calls).toEqual([
       'analytics',
       'adTouch',
@@ -38,6 +44,8 @@ describe('bootSiteKit', () => {
     expect(defineAnalytics).toHaveBeenCalledWith({
       ymCounterId: 42,
       metaPixelId: '7',
+      googleAdsId: 'AW-1',
+      googleConversionLabels: { form_submit: 'Lead1' },
     });
   });
 

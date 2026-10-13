@@ -1,4 +1,4 @@
-import { GOALS } from './goals.ts';
+import { GOALS, type Goal } from './goals.ts';
 import {
   analyticsDeclined,
   CONSENT_EVENT,
@@ -22,7 +22,7 @@ export interface AnalyticsConfig {
   ymCounterId?: number;
   metaPixelId?: string;
   googleAdsId?: string;
-  googleConversionLabels?: Partial<Record<string, string>>;
+  googleConversionLabels?: Partial<Record<Goal, string>>;
 }
 
 type YmQueue = ((...args: unknown[]) => void) & { a?: unknown[][]; l?: number };
@@ -137,11 +137,11 @@ function startGoogleAds(googleAdsId: string): void {
 
 function trackGoogleAdsGoal(
   googleAdsId: string,
-  labels: Partial<Record<string, string>>,
+  labels: Partial<Record<Goal, string>>,
   goal: string,
   params?: Record<string, unknown>,
 ): void {
-  const label = labels[goal];
+  const label = labels[goal as Goal];
   if (!label) return;
   const { total, currency } = params ?? {};
   const event: Record<string, unknown> = { send_to: `${googleAdsId}/${label}` };

@@ -1,5 +1,6 @@
 import { rememberAdTouch } from './adTouch.ts';
 import { defineAnalytics } from './analytics.ts';
+import type { Goal } from './goals.ts';
 import { defineContactClickTracking } from './contactClick.ts';
 import { applyContactPreference } from './contactPreference.ts';
 import { defineFunnelTracking } from './funnel.ts';
@@ -9,7 +10,7 @@ export interface SiteKitConfig {
   ymCounterId?: number;
   metaPixelId?: string;
   googleAdsId?: string;
-  googleConversionLabels?: Partial<Record<string, string>>;
+  googleConversionLabels?: Partial<Record<Goal, string>>;
   analytics: boolean;
 }
 
