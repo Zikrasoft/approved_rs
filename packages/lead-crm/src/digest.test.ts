@@ -166,11 +166,6 @@ describe('every action on a Lead resets its clock', () => {
     onDay(9);
   });
 
-  it('a note', async () => {
-    await store.addNote(1, 'Звонил');
-    expect((await store.getLead(1))?.lastActivityAt).toBe(at(9));
-  });
-
   it('an answered prompt', async () => {
     await store.setPendingPrompt(1, {
       chatId: 5,

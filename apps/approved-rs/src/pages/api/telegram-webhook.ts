@@ -56,8 +56,6 @@ import {
   deleteLead,
   setPendingPrompt,
   findByPendingPrompt,
-  findByCard,
-  addNote,
   resolvePendingPrompt,
   findByTopic,
   recordOwnerReply,
@@ -688,23 +686,6 @@ async function replyToPrompt(reply: Reply): Promise<boolean> {
   return true;
 }
 
-async function replyToCard(reply: Reply): Promise<boolean> {
-  const lead = await findByCard({
-    chatId: reply.chatId,
-    messageId: reply.replyToMessageId,
-  });
-  if (!lead) return false;
-  const text = reply.text.trim();
-  if (!text) return true;
-  await addNote(lead.id, noteLine(text, reply.role));
-  await sendMessage(
-    reply.chatId,
-    LEAD_ACTION_COPY.noteAdded,
-    threadedTo(reply.messageId),
-  );
-  return true;
-}
-
 async function findLiveOperationPrompt(reply: Reply, key: PromptKey) {
   try {
     return await findOperationPrompt(key);
@@ -764,7 +745,7 @@ async function replyToOperationPrompt(reply: Reply): Promise<boolean> {
   return true;
 }
 
-const REPLY_ROUTES = [replyToPrompt, replyToCard, replyToOperationPrompt];
+const REPLY_ROUTES = [replyToPrompt, replyToOperationPrompt];
 
 async function routeReply(reply: Reply): Promise<boolean> {
   for (const route of REPLY_ROUTES) if (await route(reply)) return true;

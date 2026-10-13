@@ -1143,7 +1143,7 @@ describe('buildHelp', () => {
   it('owner text walks the card buttons, card replies and the short menu', () => {
     const text = buildHelp('owner');
     expect(text).toContain('✅ Сделка');
-    expect(text).toContain('Ответь на карточку текстом');
+    expect(text).toContain('ответы на карточку в заявку не попадают');
     expect(text).not.toContain('Исправить');
     expect(text).not.toContain('Голосовое');
     expect(text).toContain('⏰ Отложить');

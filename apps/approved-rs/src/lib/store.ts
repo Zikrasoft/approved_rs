@@ -20,8 +20,6 @@ export const {
   touchLead,
   setPendingPrompt,
   findByPendingPrompt,
-  findByCard,
-  addNote,
   resolvePendingPrompt,
   findByTopic,
   recordOwnerReply,
