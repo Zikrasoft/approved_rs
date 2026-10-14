@@ -62,9 +62,9 @@ translations:
       cities: Vehicle Sourcing by City
       vehicleImport: Vehicle Import
     navHint:
-      vehicle-sourcing: We'll find and check the car
-      vehicle-import: We'll import and clear customs
-      vehicle-buyback: We'll buy your car
+      vehicle-sourcing: We'll find and inspect a car
+      vehicle-import: We'll bring and clear customs for it
+      vehicle-buyback: We'll buy back your car
       vehicle-inspection: We'll inspect the one you found
     nav:
       vehicle-sourcing: Vehicle Sourcing
@@ -77,30 +77,30 @@ translations:
       menuLabel: Menu
       menuCloseLabel: Close Menu
       languageLabel: Language
-      ctaShort: Application
-      ctaLong: Submit Application
+      ctaShort: Request
+      ctaLong: Submit a Request
     footer:
       servicesHeading: Services
       companyHeading: Company
       privacyLabel: Privacy
-      tagline: We'll source, inspect, and deliver cars from Europe. We handle the entire process — from search to delivery.
-      contactManagerLabel: Contact Manager
-      hoursLine: 24/7, no days off
+      tagline: We'll source, inspect, and deliver a car from Europe. We handle everything from searching to delivery.
+      contactManagerLabel: Message the Manager
+      hoursLine: Available 24/7
       copyrightSuffix: Vehicle sourcing, inspection, and delivery from Europe
       cookieSettingsLabel: Cookie Settings
       channelLinkLabel: Our Channel
     common:
       otherServicesLabel: 'Other Services:'
-      alsoWorkingInLabel: 'Also Operating In:'
+      alsoWorkingInLabel: 'Also operating in:'
       homeLabel: Home
       faqHeading: Frequently Asked Questions
-      viewAllCasesLabel: View All Transactions
+      viewAllCasesLabel: All Transactions
       closeLabel: Close
       channelLabel: Our Channel
       cookie:
         notice: We use cookies.
-        more: More in
-        policyLink: privacy policy
+        more: More details in
+        policyLink: the privacy policy
         accept: Accept
         decline: Decline
       gallery:
@@ -111,21 +111,21 @@ translations:
     llms:
       keyFacts: Ključne činjenice
       other: Ostalo
-      languages: Drugi jezici
+      languages: Ostali jezici
       countries: Usluge po zemljama
       cities: Autopodbor po gradovima
       vehicleImport: Uvoz automobila
     navHint:
-      vehicle-sourcing: Naći ćemo i proveriti auto
+      vehicle-sourcing: Naći ćemo i provere auto
       vehicle-import: Dovozimo i carinimo
-      vehicle-buyback: Otkupljujemo vašu mašinu
+      vehicle-buyback: Otkupićemo vaš auto
       vehicle-inspection: Proverićemo onaj koji ste našli
     nav:
       vehicle-sourcing: Autopodbor
       vehicle-import: Automobili iz Evrope i Kine
-      vehicle-buyback: Otkupljenje
+      vehicle-buyback: Otkup
       vehicle-inspection: Provera
-      cases: Stvarni poslovi
+      cases: Pravi poslovi
       contacts: Kontakti
     header:
       menuLabel: Meni
@@ -137,43 +137,43 @@ translations:
       servicesHeading: Usluge
       companyHeading: Kompanija
       privacyLabel: Privatnost
-      tagline: Naći ćemo, proveriti i dostaviti automobil iz Evrope. Preuzimamo celu proceduru — od pretrage do dostave.
+      tagline: Podbićemo, proverićemo i dostaviti automobil iz Evrope. Preuzimamo ceo proces - od pretrage do dostave.
       contactManagerLabel: Pitajte menadžera
-      hoursLine: Non-stop, bez vikenda
+      hoursLine: Non-stop, bez slobodnih dana
       copyrightSuffix: Autopodbor, provera i dostava automobila iz Evrope
-      cookieSettingsLabel: Podešavanja kolačića
+      cookieSettingsLabel: Postavke kolačića
       channelLinkLabel: Naš kanal
     common:
       otherServicesLabel: 'Ostale usluge:'
       alsoWorkingInLabel: 'Takođe radimo u:'
       homeLabel: Početna
       faqHeading: Česta pitanja
-      viewAllCasesLabel: Sve transakcije
+      viewAllCasesLabel: Svi poslovi
       closeLabel: Zatvori
       channelLabel: Naš kanal
       cookie:
         notice: Koristimo kolačiće.
-        more: Više o
+        more: Više informacija u
         policyLink: politici privatnosti
-        accept: Prihvatiti
-        decline: Odbiti
+        accept: Prihvati
+        decline: Odbij
       gallery:
-        morePhotos: Više slika
-        prev: Prethodna slika
-        next: Sledeća slika
+        morePhotos: Više fotografija
+        prev: Prethodna fotografija
+        next: Sledeća fotografija
   es:
     llms:
       keyFacts: Datos clave
       other: Otros
       languages: Otros idiomas
-      countries: Servicios por país
-      cities: Selección de coches por ciudad
+      countries: Servicios por países
+      cities: Selección de coches por ciudades
       vehicleImport: Importación de vehículos
     navHint:
-      vehicle-sourcing: Encontraremos y verificaremos el coche
-      vehicle-import: Importaremos y haremos la aduana
-      vehicle-buyback: Compraremos tu coche
-      vehicle-inspection: Inspeccionaremos el que encontraste
+      vehicle-sourcing: Buscamos y verificamos el coche
+      vehicle-import: Importamos y hacemos la aduana
+      vehicle-buyback: Compramos tu coche
+      vehicle-inspection: Inspeccionamos el que encontraste
     nav:
       vehicle-sourcing: Selección de coches
       vehicle-import: Coches de Europa y China
@@ -191,10 +191,10 @@ translations:
       servicesHeading: Servicios
       companyHeading: Empresa
       privacyLabel: Privacidad
-      tagline: Seleccionamos, verificamos y entregamos coches de Europa. Nos encargamos de todo el proceso, desde la búsqueda hasta la entrega.
+      tagline: Buscamos, verificamos y entregamos coches de Europa. Nos encargamos de todo el proceso, desde la búsqueda hasta la entrega.
       contactManagerLabel: Escribir al gerente
-      hoursLine: 24/7, sin días libres
-      copyrightSuffix: Selección, inspección y entrega de coches de Europa
+      hoursLine: Atención 24/7
+      copyrightSuffix: Selección, verificación y entrega de coches de Europa
       cookieSettingsLabel: Configuración de cookies
       channelLinkLabel: Nuestro canal
     common:
@@ -202,12 +202,12 @@ translations:
       alsoWorkingInLabel: 'También trabajamos en:'
       homeLabel: Inicio
       faqHeading: Preguntas frecuentes
-      viewAllCasesLabel: Ver todas las transacciones
+      viewAllCasesLabel: Todas las transacciones
       closeLabel: Cerrar
       channelLabel: Nuestro canal
       cookie:
         notice: Utilizamos cookies.
-        more: Más información en
+        more: Más detalles en
         policyLink: la política de privacidad
         accept: Aceptar
         decline: Rechazar
@@ -219,20 +219,20 @@ translations:
     llms:
       keyFacts: Wichtige Fakten
       other: Sonstiges
-      languages: Andere Sprachen
+      languages: Weitere Sprachen
       countries: Dienstleistungen nach Ländern
       cities: Fahrzeugauswahl nach Städten
-      vehicleImport: Fahrzeugimport
+      vehicleImport: Autoimport
     navHint:
       vehicle-sourcing: Wir finden und prüfen das Auto
-      vehicle-import: Wir importieren und verzollen
-      vehicle-buyback: Wir kaufen Ihr Auto zurück
-      vehicle-inspection: Wir inspizieren das gefundene Auto
+      vehicle-import: Wir bringen und verzollen
+      vehicle-buyback: Wir kaufen Ihr Auto
+      vehicle-inspection: Wir inspizieren das, was Sie gefunden haben
     nav:
       vehicle-sourcing: Fahrzeugauswahl
       vehicle-import: Autos aus Europa und China
       vehicle-buyback: Rückkauf
-      vehicle-inspection: Überprüfung
+      vehicle-inspection: Inspektion
       cases: Echte Geschäfte
       contacts: Kontakte
     header:
@@ -245,15 +245,15 @@ translations:
       servicesHeading: Dienstleistungen
       companyHeading: Unternehmen
       privacyLabel: Datenschutz
-      tagline: Wir finden, prüfen und liefern Autos aus Europa. Wir übernehmen den gesamten Prozess – von der Suche bis zur Lieferung.
+      tagline: Wir wählen, prüfen und liefern Autos aus Europa. Wir übernehmen den kompletten Prozess - von der Suche bis zur Lieferung.
       contactManagerLabel: Manager kontaktieren
-      hoursLine: Rund um die Uhr, ohne Feiertage
-      copyrightSuffix: Fahrzeugauswahl, Prüfung und Lieferung von Autos aus Europa
+      hoursLine: 24 Stunden, ohne Feiertage
+      copyrightSuffix: Fahrzeugauswahl, Inspektion und Lieferung von Autos aus Europa
       cookieSettingsLabel: Cookie-Einstellungen
       channelLinkLabel: Unser Kanal
     common:
       otherServicesLabel: 'Weitere Dienstleistungen:'
-      alsoWorkingInLabel: 'Wir sind auch tätig in:'
+      alsoWorkingInLabel: 'Wir arbeiten auch in:'
       homeLabel: Startseite
       faqHeading: Häufige Fragen
       viewAllCasesLabel: Alle Geschäfte
@@ -261,12 +261,12 @@ translations:
       channelLabel: Unser Kanal
       cookie:
         notice: Wir verwenden Cookies.
-        more: Mehr erfahren in
-        policyLink: der Datenschutzerklärung
+        more: Mehr dazu in
+        policyLink: der Datenschutzrichtlinie
         accept: Akzeptieren
         decline: Ablehnen
       gallery:
-        morePhotos: Weitere Fotos
+        morePhotos: Mehr Fotos
         prev: Vorheriges Foto
         next: Nächstes Foto
 translatedFrom: 3fb6c0f8742e985e

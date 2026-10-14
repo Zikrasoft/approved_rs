@@ -216,76 +216,76 @@ cart:
 translatedFrom: ba6b54fd46888b82
 translations:
   sr:
-    metaTitle: 'Delovi u Beogradu: akumulatori, ulja, filteri, kočnice — CarLab'
-    metaDescription: Akumulatori, motorna ulja, filteri i delovi kočnica dostupni u Beogradu. Odabir po vašem automobilu, lično preuzimanje, instalacija na licu mesta.
+    metaTitle: 'Delovi u Beogradu: akumulatori, ulja, filteri, kočnice - CarLab'
+    metaDescription: Akumulatori, motorna ulja, filteri i kočione stvari dostupni u Beogradu. Izbor po vašem automobilu, preuzimanje iz servisa, instalacija na licu mesta.
     eyebrow: Delovi
-    heading: Delovi sa odabirom za vašu mašinu
-    lead: Izaberite automobil — pokažemo samo ono što odgovara. Preuzimate u servisu, plaćate prilikom preuzimanja, a instaliraćemo odmah na licu mesta, ako je potrebno.
-    resetLabel: Poništi
+    heading: Delovi s izborom po vašem automobilu
+    lead: Odaberite automobil — prikazujemo samo ono što mu odgovara. Preuzimanje u servisu, plaćate prilikom preuzimanja, a instaliraćemo odmah na licu mesta ako je potrebno.
+    resetLabel: Resetovati
     matchCount:
-      one: pronađen {count} proizvod
-      few: pronađena {count} proizvoda
-      many: pronađeno {count} proizvoda
-      other: pronađena {count} proizvoda
-    noMatches: Pod ovim parametrima nema dostupnih proizvoda
-    noMatchesHint: Pišite nam — nabavićemo na porudžbinu obično za jedan do dva dana.
-    fitsLabel: Pogodno za
-    inStock: Na lageru
-    addToCart: Dodaj u korpu
+      one: pronađen {count} artikal
+      few: pronađena {count} artikla
+      many: pronađeno {count} artikala
+      other: pronađena {count} artikla
+    noMatches: Nema odgovarajućih stavki na skladištu
+    noMatchesHint: Pišite nam — dovićemo po narudžbini obično za jedan do dva dana.
+    fitsLabel: Prikladno za
+    inStock: Na skladištu
+    addToCart: U korpu
     inCart: U korpi
     typesHeading: Šta imamo u prodavnici
     productCount:
-      one: '{count} proizvod'
-      few: '{count} proizvoda'
-      many: '{count} proizvoda'
-      other: '{count} proizvoda'
+      one: '{count} artikal'
+      few: '{count} artikla'
+      many: '{count} artikala'
+      other: '{count} artikla'
     landingsLabel: Popularne opcije
     filterHeading: Filteri
     filterFrom: od
     filterTo: do
     booleanYes: Da
     booleanNo: Ne
-    allOfType: Svi proizvodi iz kategorije «{type}»
-    specsHeading: Specifikacije
-    outOfStock: Nema na lageru
-    lowStock: Preostalo {count} kom.
+    allOfType: Svi artikli u kategoriji „{type}”
+    specsHeading: Karakteristike
+    outOfStock: Nema na skladištu
+    lowStock: Ostalo {count} kom.
     goToCart: Pređi u korpu
-    addError: Nije moguće dodati u korpu. Pokušajte ponovo.
-    soldOutError: Ovoliko nema na lageru — smanjite količinu ili pišite nam.
-    installError: Proizvod je dodat, ali instalacija nije. Proizvod je u korpi, pokušajte ponovo da dodate instalaciju.
-    previewHeading: Prodavnica će uskoro biti otvorena
-    previewBody: Završavamo popunjavanje kataloga. Za sada pozovite ili pišite — reći ćemo vam šta imamo na lageru danas.
+    addError: Nije uspelo dodavanje u korpu. Molimo pokušajte ponovo.
+    soldOutError: Toliko nema na skladištu — smanjite količinu ili nam pišite.
+    installError: Artikal je dodat, ali instalacija nije. Artikal je u korpi, pokušajte ponovo da dodate instalaciju.
+    previewHeading: Prodavnica će se uskoro otvoriti
+    previewBody: Završavamo popunjavanje kataloga. Za sada nas pozovite ili pišite — reci ćemo vam šta imamo trenutno na skladištu.
     searchLabel: Pretraga po prodavnici
-    searchPlaceholder: Naziv, brend ili OEM-broj
-    searchEmpty: Nije pronađeno. Pokušajte sa drugom rečju ili brojem.
+    searchPlaceholder: Ime, brend ili OEM-broj
+    searchEmpty: Nije pronađeno ništa. Pokušajte s drugom reči ili brojem.
     types:
       batteries:
         name: Akumulatori
-        heading: Akumulatori sa odabirom po mašini
-        lead: Izabiraćemo po marki, modelu i godini — da odgovaraju dimenzije, polaritet i startni tok. Instaliraćemo za 20 minuta, stari ćemo preuzeti na odlaganje.
-        metaTitle: Akumulatori u Beogradu sa instalacijom — CarLab
-        metaDescription: Akumulatori dostupni u Beogradu. Odabir po marki, modelu i godini, instalacija u servisu za 20 minuta, plaćanje prilikom preuzimanja.
+        heading: Akumulatori s izborom po automobilu
+        lead: Izaberi prema brendu, modelu i godini — da odgovaraju dimenzije, polaritet i startni struja. Instaliraćemo za 20 minuta, stari uzimamo na reciklažu.
+        metaTitle: Akumulatori u Beogradu s instalacijom - CarLab
+        metaDescription: Akumulatori dostupni u Beogradu. Izbor po brendu, modelu i godini, instalacija u servisu za 20 minuta, plaćanje prilikom preuzimanja.
         landing:
           heading: Akumulatori {value}
-          lead: Akumulatori kapaciteta {value} dostupni u Beogradu — izabiraćemo po dimenzijama i polaritetu. Instaliraćemo za 20 minuta, stari ćemo preuzeti na odlaganje.
-          metaTitle: Akumulatori {value} u Beogradu — CarLab
-          metaDescription: Akumulatori {value} dostupni u Beogradu. Odabir po vašem automobilu, instalacija u servisu CarLab, plaćanje prilikom preuzimanja.
+          lead: Akumulatori kapaciteta {value} dostupni u Beogradu — izabiraćemo i po dimenzijama, i po polaritetu. Instaliraćemo za 20 minuta, stari uzimamo na reciklažu.
+          metaTitle: Akumulatori {value} u Beogradu - CarLab
+          metaDescription: Akumulatori {value} dostupni u Beogradu. Izbor po vašem automobilu, instalacija u servisu CarLab, plaćanje prilikom preuzimanja.
         fields:
           brand:
             label: Brend
           capacityAh:
             label: Kapacitet
           crankingA:
-            label: Startni tok
+            label: Startni struja
           polarity:
-            label: Polarnost
+            label: Polaritet
             values:
               left: obrnuta (minus levo)
-              right: direktna (plus levo)
+              right: prava (plus levo)
           technology:
             label: Tehnologija
             values:
-              flooded: tečni
+              flooded: tečnost
               efb: EFB
               agm: AGM
           lengthMm:
@@ -299,14 +299,14 @@ translations:
       motor-oils:
         name: Motorna ulja
         heading: Motorna ulja
-        lead: Ulja sa potrebnom viskoznošću i odobrenjima proizvođača. Recite koju mašinu imate — sugerisaćemo šta odgovara, i zameniti u servisu.
-        metaTitle: Motorno ulje u Beogradu — CarLab
-        metaDescription: Motorna ulja dostupna u Beogradu — sintetička, polusintetička i mineralna, sa odobrenjima proizvođača. Lično preuzimanje i zamena na licu mesta.
+        lead: Ulja s potrebnom viskoznošću i odobrenjima proizvođača. Recite nam automobil — sugerisaćemo koje odgovara i zameniti u servisu.
+        metaTitle: Motorno ulje u Beogradu - CarLab
+        metaDescription: Motorna ulja dostupna u Beogradu — sintetička, polusintetička i mineralna, s odobrenjima proizvođača. Preuzimanje iz servisa, zamena na licu mesta.
         landing:
           heading: Motorno ulje {value}
-          lead: Ulje {value} dostupno u Beogradu — sa odobrenjima glavnih proizvođača. Recite koju mašinu imate, izabiraćemo potrebne količine i zameniti u servisu.
-          metaTitle: Motorno ulje {value} u Beogradu — CarLab
-          metaDescription: Motorno ulje {value} dostupno u Beogradu. Lično preuzimanje iz servisa CarLab, plaćanje prilikom preuzimanja, zamena ulja na licu mesta.
+          lead: Ulje {value} dostupno u Beogradu — s odobrenjima glavnih proizvođača. Recite nam automobil, izabrati ćemo potrebnu količinu i zameniti u servisu.
+          metaTitle: Motorno ulje {value} u Beogradu - CarLab
+          metaDescription: Motorno ulje {value} dostupno u Beogradu. Preuzimanje iz servisa CarLab, plaćanje prilikom preuzimanja, zamena ulja na licu mesta.
         fields:
           brand:
             label: Brend
@@ -324,7 +324,7 @@ translations:
               10w-60: 10W-60
               15w-40: 15W-40
           volumeL:
-            label: Obim
+            label: Zapremina
           base:
             label: Osnova
             values:
@@ -335,38 +335,38 @@ translations:
             label: Odobrenja
       filters:
         name: Filteri
-        heading: Filteri sa odabirom po mašini
-        lead: Uljarni, vazdušni, kabinski i filteri goriva — odabiramo po mašini i OEM-broju.
-        metaTitle: Filteri za automobile u Beogradu — CarLab
-        metaDescription: Uljarni, vazdušni, kabinski i filteri goriva dostupni u Beogradu. Odabir po mašini i OEM-broju, lično preuzimanje iz servisa CarLab.
+        heading: Filteri s izborom po automobilu
+        lead: Ulji, vazdušni, kabinski i gorivni filteri — biramo po automobilu i po OEM-broju.
+        metaTitle: Filteri za auto u Beogradu - CarLab
+        metaDescription: Ulji, vazdušni, kabinski i gorivni filteri dostupni u Beogradu. Izbor po automobilu i OEM-broju, preuzimanje iz servisa CarLab.
         landing:
           heading: 'Filteri: {value}'
-          lead: Filteri «{value}» odabiramo po mašini i OEM-broju — dostupni u Beogradu, lično preuzimanje iz servisa.
-          metaTitle: 'Filteri: {value} — u Beogradu, CarLab'
-          metaDescription: Filteri ({value}) dostupni u Beogradu. Odabir po mašini i OEM-broju, lično preuzimanje iz servisa CarLab, plaćanje prilikom preuzimanja.
+          lead: Filteri „{value}” biramo po automobilu i po OEM-broju — dostupni u Beogradu, preuzimanje iz servisa.
+          metaTitle: 'Filteri: {value} - u Beogradu, CarLab'
+          metaDescription: Filteri ({value}) dostupni u Beogradu. Izbor po automobilu i OEM-broju, preuzimanje iz servisa CarLab, plaćanje prilikom preuzimanja.
         fields:
           brand:
             label: Brend
           filterKind:
             label: Tip filtera
             values:
-              oil: uljarni
+              oil: uljni
               air: vazdušni
               cabin: kabinski
-              fuel: filter goriva
+              fuel: gorivni
           oemNumbers:
             label: OEM-brojevi
       brakes:
         name: Kočnice
         heading: Kočione pločice i diskovi
-        lead: Pločice i diskovi za vašu mašinu — odabiramo po osovini i prečniku. Postavićemo u servisu i proveriti kočnice.
-        metaTitle: Kočione pločice i diskovi u Beogradu — CarLab
-        metaDescription: Kočione pločice i diskovi dostupni u Beogradu. Odabir po mašini, osovini i prečniku, instalacija u servisu CarLab, plaćanje prilikom preuzimanja.
+        lead: Pločice i diskovi po vašem automobilu — biramo po osovini i prečniku. Instaliraćemo u servisu i proveriti kočnice.
+        metaTitle: Kočione pločice i diskovi u Beogradu - CarLab
+        metaDescription: Kočione pločice i diskovi dostupni u Beogradu. Izbor po automobilu, osovini i prečniku, instalacija u servisu CarLab, plaćanje prilikom preuzimanja.
         landing:
           heading: 'Kočnice: {value}'
-          lead: '{value} za vašu mašinu odabiramo po osovini i prečniku — dostupni u Beogradu. Postavićemo u servisu i proveriti kočnice.'
-          metaTitle: 'Kočnice: {value} — u Beogradu, CarLab'
-          metaDescription: Kočnice ({value}) dostupne u Beogradu. Izbor po automobilu, ugradnja u servisu CarLab, plaćanje prilikom preuzimanja.
+          lead: '{value} po vašem automobilu biramo po osovini i prečniku — dostupni u Beogradu. Instaliraćemo u servisu i proveriti kočnice.'
+          metaTitle: 'Kočnice: {value} - u Beogradu, CarLab'
+          metaDescription: Kočnice ({value}) dostupne u Beogradu. Izbor po automobilu, instalacija u servisu CarLab, plaćanje prilikom preuzimanja narudžbine.
         fields:
           brand:
             label: Brend
@@ -385,71 +385,71 @@ translations:
           oemNumbers:
             label: OEM-brojevi
     units:
-      Ah: Ah
-      A: A
-      mm: mm
-      months: mes.
-      l: l
+      Ah: А·ч
+      A: А
+      mm: мм
+      months: мес.
+      l: л
     installations:
       battery-installation:
-        name: Ugradnja akumulatora
-        note: Ugradit ćemo u servisu prilikom preuzimanja i proveriti napunjenost.
+        name: Instalacija akumulatora
+        note: Instaliraćemo u servisu, kada preuzmete narudžbinu, i proveriti naplatu.
       brake-installation:
-        name: Ugradnja kočnica
-        note: Ugradit ćemo u servisu prilikom preuzimanja i proveriti kočnice.
+        name: Instalacija kočnica
+        note: Instaliraćemo u servisu, kada preuzmete narudžbinu, i proveriti kočnice.
     cart:
-      metaTitle: Korpa — CarLab
-      metaDescription: Vaša narudžba delova. Bez avansa — plaćanje prilikom preuzimanja u servisu.
+      metaTitle: Korpa - CarLab
+      metaDescription: Vaša narudžbina delova. Bez predujma - plaćate prilikom preuzimanja u servisu.
       eyebrow: Korpa
-      heading: Vaša narudžba
-      lead: Nema avansa. Potvrdićemo dostupnost, odložiti robu i dogovoriti vreme — plaćanje u servisu prilikom preuzimanja.
-      empty: Korpa je trenutno prazna.
-      emptyCta: Pređi na katalog
+      heading: Vaša narudžbina
+      lead: Preplata nije potrebna. Potvrdićemo dostupnost, odložiti proizvod i dogovoriti vreme - plaćanje u servisu prilikom preuzimanja.
+      empty: Korpa je za sada prazna.
+      emptyCta: Pogledajte katalog
       quantityLabel: Količina
       removeLabel: Ukloni
       totalLabel: Ukupno
-      totalNote: Cene su konačne, PDV se ne obračunava. Ugradnja — kao posebna stavka, ukoliko ste je dodali.
+      totalNote: Cene su konačne, PDV se ne obračunava. Ugradnja - dodatno, ako ste je dodali.
       badgeLabel: proizvoda u korpi
-      checkoutHeading: Kontakt za narudžbu
-      nameRequired: Ime je obavezno — tako ćemo vas prepoznati u servisu.
-      commentLabel: Komentar za narudžbu
+      checkoutHeading: Kontakti za narudžbinu
+      nameRequired: Ime je obavezno - tako ćemo vas prepoznati u servisu.
+      commentLabel: Komentar na narudžbinu
       emailLabel: Email
       emailPlaceholder: name@example.com
-      errorEmail: Proverite email — na njega će doći potvrda narudžbe
+      errorEmail: Proverite email - potvrda narudžbine će stići na njega
       errorName: Unesite ime
-      submit: Postavi narudžbu
-      submitting: Postavljamo…
+      submit: Narudžbinu potvrdi
+      submitting: Potvrđujemo…
       pickupHeading: Preuzimanje iz servisa
-      pickupNote: Preuzećete narudžbu u servisu CarLab. Plaćanje prilikom preuzimanja — gotovinom ili karticom.
-      successHeading: Narudžba br. {number} prihvaćena
-      successBody: Potvrda je poslata na email. Javićemo se da dogovorimo kada da preuzmete.
-      successCta: Vratite se u prodavnicu
+      pickupNote: Preuzećete narudžbinu u servisu CarLab. Plaćanje prilikom preuzimanja - gotovinom ili karticom.
+      successHeading: Narudžbina br.{number} primljena
+      successBody: Potvrda je poslata na email. Javićemo se da se dogovorimo kada da je preuzmete.
+      successCta: Vrati se u prodavnicu
       errors:
-        stock: Neki proizvodi su završeni — osvežili smo korpu, proverite je još jednom.
-        tooMany: Previše pokušaja. Sačekajte minut i probajte ponovo.
-        network: Nema veze sa prodavnicom. Proverite internet i probajte ponovo.
-        invalid: Proverite ime, telefon i email — nešto je uneseno pogrešno.
-        changed: Iznos narudžbe se promenio — proverite korpu i kliknite ponovo.
-        generic: Nije uspelo sa postavljanjem narudžbe. Pokušajte ponovo ili nas pozovite.
+        stock: Neki proizvodi su isteknuli - osvežili smo korpu, proverite je ponovo.
+        tooMany: Previše pokušaja. Sačekajte minut i pokušajte ponovo.
+        network: Nema veze sa prodavnicom. Proverite internet i pokušajte ponovo.
+        invalid: Proverite ime, telefon i email - nešto je pogrešno ispunjeno.
+        changed: Iznos narudžbine se promenio - proverite korpu i pokušajte ponovo.
+        generic: Nije uspelo da se potvrdi narudžbina. Pokušajte ponovo ili nas pozovite.
   en:
-    metaTitle: 'Parts in Belgrade: batteries, oils, filters, brakes — CarLab'
-    metaDescription: Batteries, motor oils, filters, and brake parts available in Belgrade. Select your car, pick up at the service, installation on site.
+    metaTitle: 'Parts in Belgrade: batteries, oils, filters, brakes - CarLab'
+    metaDescription: Batteries, motor oils, filters, and brake parts available in Belgrade. Select by your car, pickup at the service, installation on-site.
     eyebrow: Parts
-    heading: Parts tailored for your vehicle
-    lead: Select your car—we'll show you only what's compatible. Pick up at the service, pay upon receipt, and we'll install it right on the spot if needed.
+    heading: Parts tailored for your car
+    lead: Choose your car — we’ll show only what fits. Pick up at the service, pay upon receipt, and we can install it on-site if needed.
     resetLabel: Reset
     matchCount:
-      one: found {count} item
-      few: found {count} items
-      many: found {count} items
-      other: found {count} items
-    noMatches: No items available for these criteria
-    noMatchesHint: Contact us—we can bring it under order usually in one or two days.
+      one: '{count} item found'
+      few: '{count} items found'
+      many: '{count} items found'
+      other: '{count} items found'
+    noMatches: No items available for these parameters
+    noMatchesHint: Contact us — we usually bring items upon request in one or two days.
     fitsLabel: Fits for
     inStock: In stock
     addToCart: Add to cart
     inCart: In cart
-    typesHeading: What's in store
+    typesHeading: What's available in the shop
     productCount:
       one: '{count} item'
       few: '{count} items'
@@ -464,40 +464,40 @@ translations:
     allOfType: All items in the section '{type}'
     specsHeading: Specifications
     outOfStock: Out of stock
-    lowStock: Only {count} left in stock.
+    lowStock: Only {count} left
     goToCart: Go to cart
-    addError: Unable to add to cart. Please try again.
-    soldOutError: Not enough in stock—reduce quantity or contact us.
-    installError: The item was added, but the installation wasn’t. The item is in the cart; please try adding installation again.
-    previewHeading: Store opening soon
-    previewBody: We're finishing filling the catalog. For now, call or write to us—we'll tell you what's available today.
-    searchLabel: Search the store
-    searchPlaceholder: Name, brand or OEM number
+    addError: Could not add to cart. Please try again.
+    soldOutError: Not enough in stock — reduce quantity or contact us.
+    installError: Item added, but installation not included. The item is in the cart, please try adding installation again.
+    previewHeading: Shop opening soon
+    previewBody: We are finishing the catalog. For now, call or message us — we’ll tell you what’s available today.
+    searchLabel: Search in the shop
+    searchPlaceholder: Name, brand, or OEM number
     searchEmpty: Nothing found. Try another word or number.
     types:
       batteries:
         name: Batteries
-        heading: Batteries tailored for your vehicle
-        lead: We’ll match it based on make, model, and year—ensuring dimensions, polarity, and cold cranking amps fit. Installation takes 20 minutes, and we'll take the old one for disposal.
-        metaTitle: Batteries in Belgrade with installation — CarLab
-        metaDescription: Batteries available in Belgrade. Match by make, model, and year, installation at the service in 20 minutes, payment upon receipt.
+        heading: Batteries tailored for your car
+        lead: We’ll match by brand, model, and year — ensuring dimensions, polarity, and starting current fit. Installation takes 20 minutes, and we’ll take the old one for recycling.
+        metaTitle: Batteries in Belgrade with installation - CarLab
+        metaDescription: Batteries available in Belgrade. Choose by brand, model, and year, installation at the service in 20 minutes, payment upon receipt.
         landing:
           heading: Batteries {value}
-          lead: Batteries with capacity {value} available in Belgrade—we’ll match it for dimensions and polarity. Installation takes 20 minutes, and we'll take the old one for disposal.
-          metaTitle: Batteries {value} in Belgrade — CarLab
-          metaDescription: Batteries {value} available in Belgrade. Match for your vehicle, installation at CarLab, payment upon receipt.
+          lead: Batteries with {value} capacity available in Belgrade — we’ll match based on dimensions and polarity. Installation takes 20 minutes, and we’ll take the old one for recycling.
+          metaTitle: Batteries {value} in Belgrade - CarLab
+          metaDescription: Batteries {value} available in Belgrade. Match for your car, installation at CarLab, payment upon receipt.
         fields:
           brand:
             label: Brand
           capacityAh:
             label: Capacity
           crankingA:
-            label: Cold Cranking Amps
+            label: Starting current
           polarity:
             label: Polarity
             values:
               left: reverse (negative on left)
-              right: standard (positive on left)
+              right: regular (positive on left)
           technology:
             label: Technology
             values:
@@ -515,14 +515,14 @@ translations:
       motor-oils:
         name: Motor oils
         heading: Motor oils
-        lead: Oils with the right viscosity and manufacturer approvals. Tell us your car—we’ll suggest what's suitable and replace it at the service.
-        metaTitle: Motor oil in Belgrade — CarLab
-        metaDescription: Motor oils in stock in Belgrade—synthetic, semi-synthetic, and mineral, with manufacturer approvals. Pickup at the service, replacement on site.
+        lead: Oils with the right viscosity and manufacturer approvals. Tell us your car — we’ll suggest what fits and replace it at the service.
+        metaTitle: Motor oil in Belgrade - CarLab
+        metaDescription: Motor oils available in Belgrade — synthetic, semi-synthetic, and mineral, with manufacturer approvals. Pickup at the service, replacement on-site.
         landing:
           heading: Motor oil {value}
-          lead: Oil {value} available in Belgrade—with approvals from major manufacturers. Tell us your car, and we’ll find the right volume and replace it at the service.
-          metaTitle: Motor oil {value} in Belgrade — CarLab
-          metaDescription: Motor oil {value} available in Belgrade. Pickup at CarLab, payment upon receipt, oil replacement on site.
+          lead: Oil {value} available in Belgrade — with approvals from major manufacturers. Tell us your car, we’ll match the correct volume and replace it at the service.
+          metaTitle: Motor oil {value} in Belgrade - CarLab
+          metaDescription: Motor oil {value} available in Belgrade. Pickup at CarLab, payment upon receipt, oil replacement on-site.
         fields:
           brand:
             label: Brand
@@ -551,15 +551,15 @@ translations:
             label: Approvals
       filters:
         name: Filters
-        heading: Filters tailored for your vehicle
-        lead: Oil, air, cabin, and fuel filters—matched by vehicle and OEM number.
-        metaTitle: Car filters in Belgrade — CarLab
-        metaDescription: Oil, air, cabin, and fuel filters available in Belgrade. Matched by vehicle and OEM number, pickup at CarLab.
+        heading: Filters tailored for your car
+        lead: Oil, air, cabin, and fuel filters — we match based on your car and OEM number.
+        metaTitle: Filters for cars in Belgrade - CarLab
+        metaDescription: Oil, air, cabin, and fuel filters available in Belgrade. Matching by car and OEM number, pickup from CarLab service.
         landing:
           heading: 'Filters: {value}'
-          lead: Filters '{value}' matched by vehicle and OEM number—available in Belgrade, pickup at the service.
-          metaTitle: 'Filters: {value} — in Belgrade, CarLab'
-          metaDescription: Filters ({value}) available in Belgrade. Matched by vehicle and OEM number, pickup at CarLab, payment upon receipt.
+          lead: Filters '{value}' matched for your car and OEM number — available in Belgrade, pickup from the service.
+          metaTitle: 'Filters: {value} - in Belgrade, CarLab'
+          metaDescription: Filters ({value}) available in Belgrade. Matching by car and OEM number, pickup from CarLab service, payment upon receipt.
         fields:
           brand:
             label: Brand
@@ -575,14 +575,14 @@ translations:
       brakes:
         name: Brakes
         heading: Brake pads and discs
-        lead: Pads and discs for your car—matched by axle and diameter. We’ll install them at the service and check the brakes.
-        metaTitle: Brake pads and discs in Belgrade — CarLab
-        metaDescription: Brake pads and discs in stock in Belgrade. Matched by vehicle, axle, and diameter, installation at CarLab, payment upon receipt.
+        lead: Pads and discs for your car — matched by axle and diameter. Installed at the service and brakes checked.
+        metaTitle: Brake pads and discs in Belgrade - CarLab
+        metaDescription: Brake pads and discs available in Belgrade. Matching by car, axle, and diameter, installation at CarLab service, payment upon receipt.
         landing:
           heading: 'Brakes: {value}'
-          lead: '{value} tailored for your car matched by axle and diameter—available in Belgrade. We’ll install them at the service and check the brakes.'
-          metaTitle: 'Brakes: {value} — in Belgrade, CarLab'
-          metaDescription: Brakes ({value}) available in Belgrade. Select by car, installation at CarLab service, payment upon order pickup.
+          lead: '{value} matched for your car by axle and diameter — available in Belgrade. Installed at the service and brakes checked.'
+          metaTitle: 'Brakes: {value} - in Belgrade, CarLab'
+          metaDescription: Brakes ({value}) available in Belgrade. Matching by car, installation at CarLab service, payment upon order receipt.
         fields:
           brand:
             label: Brand
@@ -597,53 +597,53 @@ translations:
               front: front
               rear: rear
           diameterMm:
-            label: Disc Diameter
+            label: Disc diameter
           oemNumbers:
             label: OEM numbers
     units:
-      Ah: Ah
+      Ah: A·h
       A: A
       mm: mm
       months: months
-      l: l
+      l: L
     installations:
       battery-installation:
-        name: Battery Installation
+        name: Battery installation
         note: We'll install it at the service when you pick up your order and check the charge.
       brake-installation:
-        name: Brake Installation
+        name: Brake installation
         note: We'll install it at the service when you pick up your order and check the brakes.
     cart:
-      metaTitle: Basket — CarLab
-      metaDescription: Your spare parts order. No prepayment — pay upon pickup at the service.
-      eyebrow: Basket
-      heading: Your Order
-      lead: No prepayment. We will confirm availability, reserve the item, and arrange a pickup time — payment at service upon collection.
+      metaTitle: Cart - CarLab
+      metaDescription: Your parts order. No prepayment — pay upon receipt at the service.
+      eyebrow: Cart
+      heading: Your order
+      lead: No deposit required. We will confirm availability, reserve the items, and arrange a time - payment at the service upon pickup.
       empty: Your basket is currently empty.
       emptyCta: Browse the catalog
       quantityLabel: Quantity
       removeLabel: Remove
       totalLabel: Total
-      totalNote: Prices are final, VAT not included. Installation is listed separately if added.
-      badgeLabel: items in cart
-      checkoutHeading: Order Contact Details
-      nameRequired: Name is required — this helps us recognize you at the service.
-      commentLabel: Order Comment
+      totalNote: Prices are final, VAT is not applicable. Installation is listed separately if you added it.
+      badgeLabel: items in the basket
+      checkoutHeading: Order contact details
+      nameRequired: Name is required - this helps us identify you at the service.
+      commentLabel: Order comment
       emailLabel: Email
       emailPlaceholder: name@example.com
-      errorEmail: Please check your email — order confirmation will be sent there.
+      errorEmail: Please check your email - the order confirmation will be sent there
       errorName: Please provide your name
-      submit: Place Order
-      submitting: Placing order...
-      pickupHeading: Pickup from Service
-      pickupNote: You will collect your order at CarLab service. Payment upon pickup — cash or card.
-      successHeading: Order No. {number} Accepted
-      successBody: A confirmation has been sent to your email. We will contact you to arrange pickup time.
-      successCta: Return to Shop
+      submit: Place the order
+      submitting: Placing order…
+      pickupHeading: Pickup from the service
+      pickupNote: You will collect the order at CarLab. Payment upon pickup - cash or card.
+      successHeading: Order No.{number} accepted
+      successBody: Confirmation has been sent to your email. We will contact you to arrange a pickup time.
+      successCta: Return to the shop
       errors:
-        stock: Some items are out of stock — we've updated the basket, please check again.
+        stock: Some items are out of stock - we have updated the basket, please check it again.
         tooMany: Too many attempts. Please wait a minute and try again.
         network: No connection to the shop. Please check your internet and try again.
-        invalid: Check your name, phone, and email — something is filled out incorrectly.
-        changed: The order total has changed — please check the basket and submit again.
+        invalid: Please check your name, phone number, and email - something is filled out incorrectly.
+        changed: The order amount has changed - please check your basket and try again.
         generic: Failed to place the order. Please try again or call us.

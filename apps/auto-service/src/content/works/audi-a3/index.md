@@ -4,24 +4,24 @@ translations:
   en:
     title: Major Service for Audi A3 1.5 TFSI in Belgrade
     body: |-
-      An Audi A3 with a **1.5 TFSI engine producing 150 hp** and a DQ200 dual-clutch transmission arrived at our Russian car service in Belgrade for a major service. We replaced the timing belt.
+      The Audi A3 with a **1.5 TFSI engine producing 150 hp** and a DQ200 dual-clutch transmission came into our Russian auto service in Belgrade for a major service. We replaced the timing belt.
 
-      Following diagnostic results, we also replaced the electric water pump. This component is separate from the timing belt service, and its replacement isn't connected to that. The diagnostics indicated that the pump had lost its efficiency and was no longer circulating the coolant properly, and we decided against waiting for it to impact the engine's temperature regulation. We filled the system with new antifreeze after completing the work.
+      During the diagnostics, we also replaced the cooling system electric water pump. This is an independent unit that is not connected to the timing belt service. The diagnostics indicated that the pump was losing efficiency and was no longer circulating the coolant properly, and we didn’t want to wait for this to impact the engine's temperature management. We filled it with new antifreeze after the job.
 
-      In parallel, we performed a minor service as well, changing the engine oil and all necessary filters.
+      In parallel, we performed a minor service: changing the engine oil and all necessary filters.
 
-      Next up was the transmission. The DQ200 is a dry-clutch robot, and we replaced the oil in the mechanical section as well as the working fluid in the mechatronics. Our recommendation for this transmission is straightforward: both the oil and mechatronics should be serviced at least once every **60,000 km**. Following this interval helps prolong the life of the unit and reduces the need for costly repairs.
+      Next up was the transmission. The DQ200 is a dry-clutch automatic, and we changed the oil in the mechanical part and the fluid in the mechatronics. Our simple recommendation for this transmission is to service both the oil and mechatronics at least once every **60,000 km**. At this interval, the unit lasts longer and requires costly repairs less frequently.
     car: AUDI A3
   sr:
     title: Veliki servis Audi A3 1.5 TFSI u Beogradu
     body: |-
-      Audi A3 sa benzinskim **1.5 TFSI od 150 KS** i robotizovanom transmisijom DQ200 stigao je u naš auto servis u Beogradu na veliki servis. Zamijenjen je zupčasti remen GRA. 
+      Audi A3 sa benzinskim **1.5 TFSI od 150 KS** i robotizovanom transmisijom DQ200 došao je u naš nezavisni auto servis u Beogradu na veliki servis. Zamenili smo zupčasti remen prednjeg dela motora.
 
-      Na osnovu rezultata dijagnostike, zamijenili smo i električnu pumpu sistema hlađenja. To je poseban sklop, čija zamjena nije povezana sa velikim servisom i remenom GRA. Dijagnostika je pokazala da pumpa više ne ispunjava svoje funkcije i ne cirkuliše rashladnu tečnost kako treba, te nismo želeli da čekamo da to utiče na radnu temperaturu motora. Novi antifriz je dodan nakon radova. 
+      Na osnovu rezultata dijagnostike, zamenjena je i električna pumpa sistema hlađenja. To je poseban sklop, a zamena se ne povezuje sa velikim servisom ili zupčastim remenom. Dijagnostika je pokazala da je pumpa izgubila kapacitet i više ne doprema rashladnu tečnost kako treba, a nismo hteli da čekamo da se to odrazi na temperaturu motora. Novi antifriz je stavljen nakon radova.
 
-      Paralelno smo uradili i manji servis: motorno ulje i sve potrebne filtre. 
+      Paralelno smo uradili i mali servis: motorno ulje i sve potrebne filtre.
 
-      Što se tiče transmisije, DQ200 je robot sa suvim spojkama. Zamijenjeno je ulje u mehaničkom dijelu i radna tečnost u mehatronici. Naša preporuka za ovu transmisiju je jednostavna: održavanje ulja i mehatronike ne ređe od jednom na **60 000 km**. Uz ovakav interval, agregat traje duže i ređe dolazi na skupi popravak.
+      Sledeće je transmisija. DQ200 je robot sa suvim spojnicama, njemu je zamenjeno ulje u mehaničkom delu i radna tečnost u mehatronici. Preporuka za ovu transmisiju je jednostavna: i ulje i mehatroniku servisirati ne ređe od **60 000 km**. Na takvom intervalu sklop traje duže i ređe dolazi na skupu popravku.
     car: AUDI A3
 car: AUDI A3
 year: 2019

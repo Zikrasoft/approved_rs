@@ -1,20 +1,20 @@
 {
   "src/content/i18n/emails.yaml": {
-    "04fd606fcad61989": "Order #{displayId} Confirmed",
-    "07f3ef069c1b4f38": "Sadržaj porudžbine",
-    "1692036410944329": "Plaćanje prilikom preuzimanja u servisu.",
-    "1ecd20cd14e8d241": "Order Details",
-    "206370ca8384ef9a": "Thank you! We have received your order. We'll contact you to arrange pickup.",
-    "8a59a28740d4ab0f": "Pickup from Workshop",
-    "8eee3b3983beb101": "Hvala! Porudžbina je kod nas. Javićemo vam se da se dogovorimo kada da je preuzmete.",
-    "997dee9e4616f5b1": "Payment upon pickup at the workshop.",
-    "bd81fe1b75d33351": "We will hold your order for 3 days. If not picked up, it will be canceled and the parts will go back on sale.",
-    "c6aeaaee1ef000c1": "Preuzimanje u servisu",
-    "cfddc331e89f96d1": "Porudžbina br. {displayId} primljena — CarLab",
-    "d38424ed905fc375": "Porudžbina br. {displayId} primljena",
-    "d6c4b0c888b37280": "Order #{displayId} Confirmed — CarLab",
-    "d8d68274c2aff609": "Držimo porudžbinu 3 dana. Ako je ne preuzmete, porudžbina će biti otkazana, a delovi će se vratiti u prodaju.",
-    "e9c9258f01d91006": "Total",
-    "fe4409ba8235a062": "Ukupno"
+    "2d7108626a6a6f34": "Thank you! We have received your order. We will contact you to arrange pickup.",
+    "324cd53715e5dc74": "Plaćanje prilikom preuzimanja u servisu.",
+    "33933d28cdcfa44f": "Payment upon pickup at the workshop.",
+    "4c858982e1e40c4e": "Order Details",
+    "5e7d9abe89e664c8": "Samopretraga iz servisa",
+    "67eebb81b4359ad5": "Držimo porudžbinu 3 dana. Ako ne preuzmete, porudžbina će biti otkazana, a delovi vraćeni u prodaju.",
+    "7c97accf549be608": "Porudžbina №{displayId} primljena",
+    "8345954f4a863dda": "Total",
+    "9bf32b7ffd91f0c8": "Ukupno",
+    "9f8be0b5dec67037": "Hvala! Porudžbina je kod nas. Javićemo se da se dogovorimo kada da je preuzmete.",
+    "a82b8237dea72904": "Porudžbina №{displayId} primljena - CarLab",
+    "ce3bbf0f5a85aabc": "Pickup at the Workshop",
+    "ce9c0091a345d2ca": "We will hold your order for 3 days. If not picked up, the order will be canceled, and the parts will be returned to stock.",
+    "de436f3418f99b55": "Order #{displayId} Confirmed - CarLab",
+    "f0f9fea24c69976a": "Order #{displayId} Confirmed",
+    "fe8d95eaacc54a68": "Sastav porudžbine"
   }
 }

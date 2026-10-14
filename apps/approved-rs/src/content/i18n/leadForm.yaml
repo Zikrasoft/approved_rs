@@ -20,28 +20,28 @@ errorPhoneInvalid: Проверьте номер телефона
 errorSubmit: Заявка не ушла. Проверьте связь и попробуйте ещё раз
 translations:
   en:
-    headingLine1: We'll be in touch
+    headingLine1: We will contact you
     headingEmphasis: within 2 hours
     subtext: Free consultation
     nameLabel: Your name
-    namePlaceholder: John
-    contactLabel: How to reach you
+    namePlaceholder: Ivan
+    contactLabel: How can we reach you
     telegramTab: Telegram
-    telegramPlaceholder: '@username or phone number'
+    telegramPlaceholder: '@username or phone'
     whatsappTab: WhatsApp
     viberTab: Viber
     phoneTab: Phone
     commentLabel: Make, model, budget
     commentPlaceholder: BMW 3, 2020–2022, up to €25,000…
-    consentBefore: 'I agree to the '
-    consentLinkText: privacy policy
+    consentBefore: 'I agree with '
+    consentLinkText: the privacy policy
     consentError: Your consent is required
-    submitLabel: Get a Quote
+    submitLabel: Calculate cost
     errorTelegramFormat: 'Format: @username or phone number'
-    errorPhoneInvalid: Check your phone number
-    errorSubmit: The submission failed. Please check your connection and try again.
+    errorPhoneInvalid: Please check the phone number
+    errorSubmit: The request did not go through. Please check your connection and try again.
   sr:
-    headingLine1: Javićemo se
+    headingLine1: Javićemo se sa vama
     headingEmphasis: u roku od 2 sata
     subtext: Besplatna konsultacija
     nameLabel: Vaše ime
@@ -54,53 +54,53 @@ translations:
     phoneTab: Telefon
     commentLabel: Marka, model, budžet
     commentPlaceholder: BMW 3, 2020–2022, do €25 000…
-    consentBefore: 'Slažem se sa '
+    consentBefore: 'Saglasan sam sa '
     consentLinkText: politikom privatnosti
-    consentError: Potrebna je vaša saglasnost
+    consentError: Neophodna je vaša saglasnost
     submitLabel: Izračunaj cenu
     errorTelegramFormat: 'Format: @username ili broj telefona'
     errorPhoneInvalid: Proverite broj telefona
-    errorSubmit: Zahtjev nije poslat. Proverite vezu i pokušajte ponovo
+    errorSubmit: Zahtev nije otišao. Proverite vezu i pokušajte ponovo
   es:
     headingLine1: Nos pondremos en contacto contigo
-    headingEmphasis: en menos de 2 horas
+    headingEmphasis: dentro de 2 horas
     subtext: Consulta gratuita
     nameLabel: Tu nombre
-    namePlaceholder: Juan
-    contactLabel: Cómo prefieres que te contactemos
+    namePlaceholder: Iván
+    contactLabel: Cómo contactarte
     telegramTab: Telegram
-    telegramPlaceholder: '@username o teléfono'
+    telegramPlaceholder: '@usuario o teléfono'
     whatsappTab: WhatsApp
     viberTab: Viber
     phoneTab: Teléfono
     commentLabel: Marca, modelo, presupuesto
-    commentPlaceholder: BMW Serie 3, 2020–2022, hasta 25.000 €…
+    commentPlaceholder: BMW 3, 2020–2022, hasta €25 000…
     consentBefore: 'Acepto la '
     consentLinkText: política de privacidad
-    consentError: Tu consentimiento es necesario
-    submitLabel: Calcular el precio
-    errorTelegramFormat: 'Formato: @username o número de teléfono'
-    errorPhoneInvalid: Revisa tu número de teléfono
-    errorSubmit: La solicitud no se envió. Verifique la conexión y pruebe de nuevo.
+    consentError: Se requiere tu consentimiento
+    submitLabel: Calcular costo
+    errorTelegramFormat: 'Formato: @usuario o número de teléfono'
+    errorPhoneInvalid: Verifica el número de teléfono
+    errorSubmit: La solicitud no se ha enviado. Verifica la conexión y vuelve a intentarlo
   de:
-    headingLine1: Wir melden uns bei Ihnen
+    headingLine1: Wir kontaktieren Sie
     headingEmphasis: innerhalb von 2 Stunden
     subtext: Kostenlose Beratung
     nameLabel: Ihr Name
-    namePlaceholder: Max
+    namePlaceholder: Ivan
     contactLabel: Wie können wir Sie erreichen
     telegramTab: Telegram
-    telegramPlaceholder: '@Benutzername oder Telefonnummer'
+    telegramPlaceholder: '@Benutzername oder Telefon'
     whatsappTab: WhatsApp
     viberTab: Viber
     phoneTab: Telefon
     commentLabel: Marke, Modell, Budget
-    commentPlaceholder: BMW 3er, 2020–2022, bis 25.000 €…
-    consentBefore: 'Ich akzeptiere die '
-    consentLinkText: Datenschutzerklärung
+    commentPlaceholder: BMW 3, 2020–2022, bis €25.000…
+    consentBefore: 'Ich stimme der '
+    consentLinkText: Datenschutzrichtlinie zu
     consentError: Ihre Zustimmung ist erforderlich
-    submitLabel: Preis berechnen
+    submitLabel: Kosten berechnen
     errorTelegramFormat: 'Format: @Benutzername oder Telefonnummer'
-    errorPhoneInvalid: Bitte überprüfen Sie Ihre Telefonnummer
-    errorSubmit: Die Anfrage konnte nicht gesendet werden. Bitte überprüfen Sie die Verbindung und versuchen Sie es erneut.
+    errorPhoneInvalid: Überprüfen Sie die Telefonnummer
+    errorSubmit: Die Anfrage wurde nicht gesendet. Bitte überprüfen Sie die Verbindung und versuchen Sie es erneut
 translatedFrom: f19e1d1a771f6292

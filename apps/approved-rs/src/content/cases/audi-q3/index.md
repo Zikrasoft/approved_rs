@@ -18,41 +18,41 @@ translations:
     body: |-
       Another car has been successfully inspected, purchased, and delivered from Germany to Portugal.
 
-      This time, a client from **Lisbon** reached out to us for assistance in finding, checking, and buying a car in Germany. After evaluating various options, we settled on a **used Audi Q3 with a mileage of 102,000 km**.
+      This time, we were approached by a client from **Lisbon**, who needed assistance with finding, inspecting, and buying a car in Germany. After searching for a suitable option, we decided on a **used Audi Q3 with 102,000 km** on the clock.
 
-      Before the purchase, the vehicle underwent a thorough inspection: we assessed its technical condition, service history, documentation, and verified that it matched the seller's claims. After the client approved, the Audi Q3 was purchased in Germany, processed, and shipped to Portugal.
+      Before the purchase, the car underwent an inspection: we assessed its technical condition, usage history, documents, and ensured it matched the information provided by the seller. After confirming everything with the client, the Audi Q3 was purchased in Germany, documented, and sent to Portugal.
 
-      As a result, the client received the car right in Portugal, saving time on traveling to Germany, conducting inspections, negotiating with the seller, and handling paperwork.
+      As a result, the client received the car right in Portugal and did not waste time traveling to Germany, inspecting vehicles, negotiating with the seller, and handling paperwork.
   sr:
     title: Audi Q3
     body: |-
       Još jedno vozilo je uspešno provereno, kupljeno i dostavljeno iz Nemačke u Portugal.
 
-      Ovaj put nam se obratio klijent iz **Lisabona**, kojem je bila potrebna pomoć u pretrazi, provali i kupovini automobila u Nemačkoj. Nakon pronalaska odgovarajućeg modela odlučili smo se za **Audi Q3 sa pređenih 102 000 km**.
+      Ovaj put nam se obratio klijent iz **Lisabona**, koji je tražio pomoć u pronalaženju, proverenju i kupovini automobila u Nemačkoj. Nakon odabira odgovarajuće opcije odlučili smo se za **Audi Q3 sa pređenih 102 000 km**.
 
-      Pre kupovine, auto je prošao provalu: procenili smo njegovo tehničko stanje, istoriju korišćenja, dokumentaciju i usklađenost sa podacima koje je prodavac naveo. Nakon saglasnosti sa klijentom, Audi Q3 je kupljen u Nemačkoj, registrovan i poslat u Portugal.
+      Pre kupovine, automobil je prošao provere: procenili smo njegovo tehničko stanje, istoriju korišćenja, dokumentaciju i usklađenost sa podacima koje je naveo prodavac. Nakon odobrenja automobila od strane klijenta, Audi Q3 je kupljen u Nemačkoj, registrovan i upućen u Portugal.
 
-      Kao rezultat, klijent je dobio automobil direktno u Portugaliji i nije trošio vreme na putovanje u Nemačku, preglede, pregovore sa prodavcem i rešavanje dokumentacije.
+      Kao rezultat, klijent je primio automobil direktno u Portugalu i nije morao da gubi vreme na putovanje u Nemačku, preglede, pregovore sa prodavcem i sređivanje dokumentacije.
   es:
     title: Audi Q3
     body: |-
-      Otro automóvil ha sido exitosamente inspeccionado, comprado y entregado desde Alemania a Portugal.
+      Un nuevo automóvil ha sido exitosamente revisado, comprado y entregado desde Alemania a Portugal.
 
-      Esta vez, un cliente de **Lisboa** se puso en contacto con nosotros para solicitar ayuda en la búsqueda, inspección y compra de un vehículo en Alemania. Después de buscar las opciones adecuadas, nos decidimos por un **Audi Q3 con 102,000 km** de recorrido.
+      Esta vez, un cliente de **Lisboa** se acercó a nosotros pidiendo ayuda para encontrar, revisar y comprar un automóvil en Alemania. Después de buscar la opción adecuada, nos decidimos por un **Audi Q3 con un kilometraje de 102,000 km**.
 
-      Antes de la compra, el automóvil fue inspeccionado: evaluamos su estado técnico, historial de uso, documentos y la veracidad de la información proporcionada por el vendedor. Tras la aprobación del vehículo por parte del cliente, el Audi Q3 fue comprado en Alemania, registrado y enviado a Portugal.
+      Antes de la compra, el automóvil pasó por una revisión: evaluamos su estado técnico, la historia de uso, la documentación y la coincidencia con la información proporcionada por el vendedor. Una vez que el cliente aprobó el vehículo, el Audi Q3 fue comprado en Alemania, registrado y enviado a Portugal.
 
-      Como resultado, el cliente recibió el automóvil directamente en Portugal, evitando perder tiempo viajando a Alemania, realizando inspecciones, negociando con el vendedor y tramitando los documentos.
+      Como resultado, el cliente recibió su automóvil directamente en Portugal y no tuvo que perder tiempo viajando a Alemania, realizando inspecciones, negociando con el vendedor y gestionando la documentación.
   de:
     title: Audi Q3
     body: |-
       Ein weiteres Fahrzeug wurde erfolgreich geprüft, gekauft und aus Deutschland nach Portugal geliefert.
 
-      Diesmal kontaktiert uns ein Kunde aus **Lissabon**, der Hilfe bei der Suche, Prüfung und dem Kauf eines Autos in Deutschland benötigte. Nach der Auswahl eines passenden Modells entschieden wir uns für einen **Audi Q3 mit einer Laufleistung von 102.000 km**.
+      Diesmal wandte sich ein Kunde aus **Lissabon** an uns, der Unterstützung bei der Suche, Überprüfung und dem Kauf eines Fahrzeugs in Deutschland benötigte. Nach der Auswahl des passenden Modells entschieden wir uns für einen **Audi Q3 mit einer Laufleistung von 102.000 km**.
 
-      Vor dem Kauf wurde das Fahrzeug einer Prüfung unterzogen: Wir haben den technischen Zustand, die Nutzungshistorie, die Unterlagen und die Übereinstimmung der vom Verkäufer angegebenen Daten bewertet. Nachdem wir das Auto mit dem Kunden abgestimmt hatten, wurde der Audi Q3 in Deutschland gekauft, angemeldet und nach Portugal verschickt.
+      Vor dem Kauf wurde das Fahrzeug gründlich überprüft: Wir bewerteten seinen technischen Zustand, die Nutzungshistorie, die Unterlagen und die Übereinstimmung der Angaben des Verkäufers. Nach der Absprache über das Fahrzeug mit dem Kunden wurde der Audi Q3 in Deutschland gekauft, registriert und nach Portugal versendet.
 
-      Infolgedessen erhielt der Kunde das Fahrzeug direkt in Portugal und musste keine Zeit für eine Reise nach Deutschland, Besichtigungen, Verhandlungen mit dem Verkäufer und die Dokumentenabwicklung aufwenden.
+      Infolgedessen erhielt der Kunde das Fahrzeug direkt in Portugal und musste keine Zeit für eine Reise nach Deutschland, Besichtigungen, Verhandlungen mit dem Verkäufer und die Formalitäten aufwenden.
 translatedFrom: b90c3a1b7ea85a10
 ---
 

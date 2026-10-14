@@ -4,21 +4,21 @@ translations:
   en:
     title: Cooling System and Swirl Flaps for BMW
     body: |-
-      A BMW came into our Russian car service in Belgrade for maintenance on its cooling system and engine preventative care.
+      A BMW came into our independent car service in Belgrade for maintenance of the cooling system and engine preventative care.
 
-      We performed a partial coolant replacement, which typically requires **5–7 liters** for engines like the **B47**. This time, we used the green HT-12 coolant from Valvoline.
+      We performed a partial coolant replacement. On **B47** engines, a partial replacement typically requires **5–7 liters**. This time, we used Valvoline's green HT-12 coolant.
 
-      Additionally, we cleaned the swirl flaps and the intake system. Over time, diesel engines accumulate carbon deposits in the intake and on the flaps, which can hinder engine performance.
+      We also cleaned the swirl flaps and the intake system. Over time, diesel engines accumulate carbon deposits in the intake and on the flaps, which can hinder engine performance.
     car: BMW
 
   sr:
-    title: Sistem hlađenja i vortex klapne BMW
+    title: Hladni sistem i vortex zaklopke za BMW
     body: |-
-      BMW je došao u našu servisnu radionicu u Beogradu na servis sistema hlađenja i preventivnu kontrolu motora.
+      BMW je došao u naš nezavisni auto servis u Beogradu na servisiranje hladnog sistema i preventivnu proveru motora.
 
-      Izvršena je delimična zamena rashladne tečnosti. Na motorima **B47** obično se koristi **5–7 litara** prilikom delimične zamene. Ovog puta smo sipali zelenu HT-12 od Valvoline.
+      Izvršena je delimična zamena rashladne tečnosti. Na motorima **B47** obično je potrebno **5–7 litara** pri delimičnoj zameni. Ovaj put smo sipali zelenu HT-12 od Valvoline.
 
-      Uz to, očišćene su vortex klapne i usisni sistem. Na dizelskim motorima se vremenom nakuplja čađa u usisnom sistemu i na klapnama, što ometa rad motora.
+      Pored toga, očišćene su vortex zaklopke i usisni sistem. Na dizel motorima vremenom se nakuplja čađa u usisnom sistemu i na zaklopkama, što otežava rad motora.
     car: BMW
 car: BMW
 year: 2020

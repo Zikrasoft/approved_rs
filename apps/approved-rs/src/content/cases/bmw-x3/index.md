@@ -4,67 +4,67 @@ translations:
   en:
     title: BMW X3
     body: |-
-      ## Importing Cars from Germany to Serbia — 2020 BMW X3
+      ## Importing Cars from Germany to Serbia – 2020 BMW X3
 
-      Importing cars from Germany to Serbia is one of our specialties. We don’t rely on just photos or listings; every vehicle undergoes a thorough inspection before purchase.
+      Importing cars from Germany to Serbia is one of our business areas. We don’t purchase vehicles based solely on photos and listings; every car undergoes a thorough inspection before buying.
 
-      In this instance, we sourced a **2020 BMW X3** in white with a mileage of **140,000 km**. This vehicle features **xDrive** all-wheel drive, a 2.0-liter **B47 diesel engine** with **190 hp**, and a well-equipped package. Moreover, the car had no painted parts whatsoever.
+      This time, we sourced a **2020 BMW X3** in white with a mileage of **140,000 km** from Germany. The vehicle features all-wheel drive **xDrive**, a two-liter diesel engine **B47 with a power output of 190 hp**, and comes with a good set of options. Notably, there were no painted parts on the car.
 
-      Our specialist traveled to the German city where the vehicle was located to inspect it personally. We negotiated with the seller to connect the vehicle to the factory diagnostic program **BMW ISTA**. This allowed us to conduct a comprehensive check on the car's technical condition, including the state of the timing chain, injectors, and the accuracy of the mileage.
+      Our specialist personally traveled to the German city where the car was located to inspect it. We were able to negotiate with the seller to connect the factory diagnostic program **BMW ISTA**. This allowed us to further check the technical condition of the vehicle, including the status of the timing chain, injectors, and to verify the actual mileage.
 
-      Only after a complete inspection and confirmation of the car’s condition did we proceed with the purchase. After acquiring the vehicle, we organized the **delivery of the BMW X3 from Germany to Serbia**, facilitated the customs procedures, and handled the subsequent registration in Belgrade for the new owner.
+      Only after a complete inspection and confirmation of the car's condition was the deal made. After the purchase, we organized the **delivery of the BMW X3 from Germany to Serbia**, handled the customs procedures, and facilitated the subsequent registration of the vehicle in Belgrade for the new owner.
 
-      As a result, the client received a technically verified vehicle with a confirmed history, delivered straight from Germany to Serbia. The BMW X3 is now registered in Belgrade, and its owner is enjoying the ride and is very pleased with the purchase.
+      As a result, the client received a technically verified car with a confirmed history, delivered directly from Germany to Serbia. The BMW X3 is now registered in Belgrade, and its owner is enjoying their purchase.
 
-      If you are planning to **buy a car in Germany and import it to Serbia**, we can manage the entire process for you: searching for and selecting the vehicle, arranging for an inspection by a specialist, conducting diagnostics, checking the history and mileage, negotiating with the seller, purchasing, delivering, customs clearance, and registration in Serbia.
+      If you are planning to **buy a car in Germany and import it to Serbia**, we can manage the entire process: searching for and selecting the vehicle, sending a specialist for inspection, diagnostics, history and mileage verification, negotiations with the seller, purchasing, delivery, customs clearance, and registration in Serbia.
   sr:
     title: BMW X3
     body: |-
-      ## Uvoz automobila iz Nemačke u Srbiju — BMW X3 iz 2020. godine
+      ## Prigon automobila iz Nemačke u Srbiju — BMW X3 2020. godine
 
-      Uvoz automobila iz Nemačke u Srbiju je jedno od područja našeg rada. Ne kupujemo automobile samo na osnovu fotografija i oglasa: pre kupovine svaki automobil prolazi kompletnu provere auta pre kupovine.
+      Prigon automobila iz Nemačke u Srbiju predstavlja jedno od naših glavnih delatnosti. Na osnovu fotografija i oglasa ne kupujemo vozila: pre kupovine svaki automobil prolazi kompletnu proveru.
 
-      Ovoga puta smo u Nemačkoj pronašli **BMW X3 iz 2020. godine** u beloj boji sa pređenih **140 000 km**. Automobil je opremljen pogonom na sva četiri točka **xDrive**, dvolitarskim dizel motorom **B47 snage 190 KS** i dobrom opremom. Pored toga, automobil nije imao nijedan obojen deo.
+      Ovoga puta u Nemačkoj smo pronašli **BMW X3 2020. godište** u beloj boji sa pređenih **140 000 km**. Vozilo je opremljeno pogonom na sve točkove **xDrive**, dizel motorom zapremine dva litra **B47 snage 190 ks**, kao i dobrom opremom. Uz to, automobil nije imao nijednu ofarbanu detalj.
 
-      Naš stručnjak je lično otišao u nemački grad gde se automobil nalazio i obavio njegov pregled. Uspeli smo da se dogovorimo sa prodavcem o povezivanju na fabrični dijagnostički program **BMW ISTA**. Uz njegovu pomoć dodatno smo proverili tehničko stanje automobila, uključujući stanje razvodne lance, ubrizgivače i usklađenost stvarnog pređenog broja kilometara.
+      Naš stručnjak je lično otišao u nemački grad gde se nalazio automobil i obavio njegov pregled. Uspeli smo da se dogovorimo sa prodavcem o povezivanju na fabričnu dijagnostičku platformu **BMW ISTA**. Pomoću nje smo dodatno proverili tehničko stanje automobila, uključujući stanje lanca razvodnog sistema, ubrizgavača i usklađenost stvarnog pređenog broja kilometara.
 
-      Tek nakon kompletne provere i potvrde stanja automobila, obavljena je transakcija. Nakon kupovine organizovali smo **dostavu BMW X3 iz Nemačke u Srbiju**, kao i sprovođenje carinskih procedura i kasniju registraciju automobila u Beogradu na novog vlasnika.
+      Tek nakon potpune provere i potvrde stanja automobila obavljena je kupovina. Nakon kupovine organizovali smo **dostavu BMW X3 iz Nemačke u Srbiju**, pripremu carinskih procedura i naknadnu registraciju vozila u Beogradu na novog vlasnika.
 
-      Kao rezultat, klijent je dobio tehnički provereni automobil sa potvrđenom istorijom, dostavljen iz Nemačke direktno u Srbiju. Sada je BMW X3 već registrovan u Beogradu, a njegov vlasnik uživa u vožnji i zadovoljan je kupovinom.
+      Kao rezultat, klijent je dobio tehnički provereno vozilo sa potvrđenom istorijom, koje je direktno dopremljeno iz Nemačke u Srbiju. Sada je BMW X3 već registrovan u Beogradu, a njegov vlasnik vozi i zadovoljan je kupovinom.
 
-      Ako planirate **kupovinu automobila u Nemačkoj i njegov uvoz u Srbiju**, možemo preuzeti ceo proces: potragu i odabir automobila, izlazak stručnjaka na pregled, dijagnostiku, proveru istorije i prevoza, pregovore s prodavcem, kupovinu, dostavu, carinjenje i registraciju u Srbiji.
+      Ako planirate da **kupite automobil u Nemačkoj i uvezete ga u Srbiju**, možemo preuzeti čitav proces: pretragu i odabir automobila, dolazak stručnjaka na pregled, dijagnostiku, proveru istorije i pređenih kilometara, pregovore sa prodavcem, kupovinu, dostavu, carinjenje i registraciju u Srbiji.
   es:
     title: BMW X3
     body: |-
-      ## Importación de Automóviles desde Alemania a Serbia — BMW X3 2020
+      ## Importación de automóviles desde Alemania a Serbia - BMW X3 2020
 
-      La importación de automóviles desde Alemania a Serbia es una de nuestras especialidades. No compramos vehículos basándonos únicamente en fotos o anuncios; antes de realizar cualquier compra, cada automóvil pasa por una inspección exhaustiva.
+      La importación de automóviles desde Alemania a Serbia es una de nuestras áreas de actividad. No compramos vehículos solo basándonos en fotos y anuncios: cada automóvil pasa por una revisión exhaustiva antes de adquirirlo.
 
-      En esta ocasión, encontramos en Alemania un **BMW X3 2020** en color blanco con un kilometraje de **140,000 km**. El vehículo cuenta con tracción a las cuatro ruedas **xDrive**, un motor diésel de 2.0 litros **B47 con 190 caballos de fuerza**, y una excelente dotación de equipamiento. Además, el coche no tenía ninguna pieza repintada.
+      En esta ocasión, seleccionamos en Alemania un **BMW X3 del año 2020** en color blanco y con un kilometraje de **140 000 km**. El vehículo cuenta con tracción total **xDrive**, un motor diésel de 2 litros **B47 con una potencia de 190 CV** y una buena equipación. Además, el automóvil no tenía ninguna pieza pintada.
 
-      Nuestro especialista se trasladó personalmente a la ciudad alemana donde se encontraba el vehículo y realizó una inspección completa. Logramos acordar con el vendedor la conexión a la herramienta de diagnóstico oficial **BMW ISTA**. Esto nos permitió verificar el estado técnico del automóvil, incluyendo la condición de la cadena de distribución, los inyectores y la verificación del kilometraje real.
+      Nuestro especialista viajó personalmente a la ciudad alemana donde se encontraba el vehículo y realizó una inspección detallada. Logramos acordar con el vendedor la utilización del programa de diagnóstico oficial **BMW ISTA**. Gracias a esta herramienta, pudimos verificar el estado técnico del vehículo, incluyendo el estado de la cadena de distribución, los inyectores y la veracidad del kilometraje.
 
-      Sólo después de una revisión completa y confirmación del estado del vehículo se realizó la transacción. Tras la compra, organizamos la **entrega del BMW X3 desde Alemania a Serbia**, así como los trámites aduaneros y el posterior registro del automóvil en Belgrado a nombre del nuevo propietario.
+      Solo después de una revisión completa y la confirmación del estado del automóvil, se llevó a cabo la transacción. Tras la compra, organizamos la **entrega del BMW X3 desde Alemania a Serbia**, la gestión de los trámites aduaneros y el posterior registro del vehículo en Belgrado a nombre del nuevo propietario.
 
-      Como resultado, el cliente recibió un automóvil técnicamente revisado con un historial confirmado, entregado directamente desde Alemania a Serbia. Actualmente, el BMW X3 ya está registrado en Belgrado y su propietario está muy satisfecho con la compra.
+      Como resultado, el cliente recibió un automóvil técnicamente revisado con un historial verificado, entregado directamente desde Alemania a Serbia. Ahora, el BMW X3 ya está registrado en Belgrado y su propietario está disfrutando de su compra.
 
-      Si estás pensando en **comprar un automóvil en Alemania y traerlo a Serbia**, podemos gestionarlo todo: búsqueda y selección del vehículo, visita de un especialista para la inspección, diagnóstico, verificación de la historia y el kilometraje, negociaciones con el vendedor, compra, entrega, tramitación aduanera y registro en Serbia.
+      Si estás planeando **comprar un automóvil en Alemania y traerlo a Serbia**, nosotros podemos encargarnos de todo el proceso: búsqueda y selección del automóvil, visita del especialista para inspección, diagnóstico, verificación del historial y kilometraje, negociaciones con el vendedor, compra, entrega, desaduanización y registro en Serbia.
   de:
     title: BMW X3
     body: |-
-      ## Autoimporte aus Deutschland nach Serbien – BMW X3 Baujahr 2020
+      ## Autoimport aus Deutschland nach Serbien — BMW X3 Baujahr 2020
 
-      Der Import von Fahrzeugen aus Deutschland nach Serbien ist ein wesentlicher Teil unserer Arbeit. Wir kaufen Autos nicht nur aufgrund von Fotos und Anzeigen: Jedes Fahrzeug wird vor dem Kauf einer umfassenden Überprüfung unterzogen.
+      Der Autoimport aus Deutschland nach Serbien ist ein wichtiger Teil unserer Dienstleistungen. Fahrzeuge kaufen wir nicht nur basierend auf Fotos und Anzeigen: Bevor wir einen Kauf tätigen, unterziehen wir jedes Auto einer umfassenden Prüfung.
 
-      In diesem Fall haben wir einen **BMW X3 Baujahr 2020** in Weiß mit einer Laufleistung von **140.000 km** ausgewählt. Das Auto verfügt über den Allradantrieb **xDrive**, einen zwei Liter großen Dieselmotor **B47 mit 190 PS** und eine gute Ausstattung. Zudem hatte das Fahrzeug keine lackierten Teile.
+      Diesmal haben wir in Deutschland einen **BMW X3 aus dem Jahr 2020** in Weiß mit einer Laufleistung von **140.000 km** ausgewählt. Das Fahrzeug ist mit dem Allradantrieb **xDrive**, einem 2-Liter-Dieselmotor **B47 mit 190 PS** und einer guten Ausstattung ausgestattet. Zudem hatte das Auto keine lackierten Teile.
 
-      Unser Spezialist reiste persönlich in die deutsche Stadt, in der sich das Fahrzeug befand, um es zu inspizieren. Wir konnten mit dem Verkäufer vereinbaren, dass die werkseitige Diagnosesoftware **BMW ISTA** zum Einsatz kommt. Damit haben wir den technischen Zustand des Fahrzeugs zusätzlich überprüft, einschließlich des Zustands der Steuerkette, der Einspritzdüsen und die Übereinstimmung mit der tatsächlichen Laufleistung.
+      Unser Spezialist reiste persönlich in die deutsche Stadt, in der sich das Auto befand, und führte eine Inspektion durch. Wir konnten mit dem Verkäufer eine Verbindung zur werkseigenen Diagnosesoftware **BMW ISTA** herstellen. Damit überprüften wir den technischen Zustand des Fahrzeugs zusätzlich, einschließlich des Zustands der Steuerkette, der Einspritzdüsen und der Übereinstimmung der tatsächlichen Laufleistung.
 
-      Erst nach einer vollständigen Überprüfung und Bestätigung des Fahrzeugzustandes wurde der Kauf abgeschlossen. Nach dem Kauf organisierten wir die **Lieferung des BMW X3 aus Deutschland nach Serbien**, kümmerten uns um die Zollformalitäten und die anschließende Registrierung des Fahrzeugs in Belgrad auf den neuen Besitzer.
+      Erst nach der vollständigen Überprüfung und Bestätigung des Fahrzeugzustands wurde der Kaufvertrag ausgeführt. Nach dem Kauf organisierten wir die **Lieferung des BMW X3 aus Deutschland nach Serbien**, kümmerten uns um die Zollformalitäten und die anschließende Anmeldung des Autos in Belgrad auf den neuen Eigentümer.
 
-      Das Ergebnis: Der Kunde erhielt ein technisch geprüftes Fahrzeug mit bestätigter Historie, das direkt aus Deutschland nach Serbien geliefert wurde. Der BMW X3 ist jetzt bereits in Belgrad registriert, und sein Besitzer fährt glücklich mit seinem neuen Auto.
+      Das Ergebnis: Der Kunde erhielt ein technisch überprüftes Fahrzeug mit bestätigter Geschichte, das direkt aus Deutschland nach Serbien geliefert wurde. Der BMW X3 ist mittlerweile in Belgrad angemeldet, und sein Besitzer fährt zufrieden mit dem Kauf.
 
-      Wenn Sie planen, **ein Auto in Deutschland zu kaufen und es nach Serbien zu importieren**, können wir den gesamten Prozess für Sie übernehmen: von der Suche und Auswahl des Fahrzeugs über die Inspektion durch unseren Spezialisten, Diagnosen, Überprüfung der Geschichte und Laufleistung, Verhandlungen mit dem Verkäufer, Kauf, Lieferung, Zollabfertigung bis hin zur Registrierung in Serbien.
+      Wenn Sie planen, **ein Auto in Deutschland zu kaufen und nach Serbien zu importieren**, übernehmen wir den gesamten Prozess für Sie: die Suche und Auswahl des Fahrzeugs, die Inspektion durch einen Spezialisten, die Diagnose, die Überprüfung der Geschichte und Laufleistung, die Verhandlungen mit dem Verkäufer, den Kauf, die Lieferung, die Zollabwicklung und die Anmeldung in Serbien.
 car: BMW X3
 year: 2020
 price:
