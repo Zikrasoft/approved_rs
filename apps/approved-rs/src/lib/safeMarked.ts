@@ -1,1 +1,5 @@
-export { safeMarkdown, safeMarkdownInline } from '@podbor/site-kit';
+export {
+  safeMarkdown,
+  safeMarkdownInline,
+  pickRandomBanner,
+} from '@podbor/site-kit';

@@ -117,6 +117,31 @@ describe('<add-to-cart>', () => {
     });
   });
 
+  it('reports quantity 1 even when the line already held more units before this click', async () => {
+    cart.addToCart.mockResolvedValue({
+      id: 'cart_1',
+      items: [{ ...LINE, quantity: 3 }],
+    });
+    const { button } = mount();
+
+    button.click();
+    await settle();
+
+    expect(goals.reachGoal).toHaveBeenCalledWith('add_to_cart', {
+      currency: 'rsd',
+      value: 5990,
+      items: [
+        {
+          item_id: 'var_1',
+          item_name: 'Akumulator 60Ah',
+          price: 5990,
+          quantity: 1,
+          item_category: 'batteries',
+        },
+      ],
+    });
+  });
+
   it('marks the cart as preview on a preview build', async () => {
     const { button } = mount('data-preview');
 

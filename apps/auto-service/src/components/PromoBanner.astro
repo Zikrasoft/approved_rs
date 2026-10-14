@@ -1,6 +1,6 @@
 ---
 import Icon from './Icon.astro';
-import { safeMarkdownInline } from '@podbor/site-kit';
+import { pickRandomBanner } from '@podbor/site-kit';
 
 interface Props {
   label: string;
@@ -8,9 +8,7 @@ interface Props {
 }
 
 const { label, banners } = Astro.props;
-const banner = safeMarkdownInline(
-  banners[Math.floor(Math.random() * banners.length)],
-);
+const banner = pickRandomBanner(banners);
 ---
 
 <div class="wrap border-t border-line py-8">

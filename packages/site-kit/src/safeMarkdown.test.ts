@@ -1,5 +1,9 @@
-import { describe, it, expect } from 'vitest';
-import { safeMarkdown, safeMarkdownInline } from './safeMarkdown.ts';
+import { describe, it, expect, vi } from 'vitest';
+import {
+  safeMarkdown,
+  safeMarkdownInline,
+  pickRandomBanner,
+} from './safeMarkdown.ts';
 
 describe('safeMarkdown', () => {
   it('renders a normal https link', () => {
@@ -90,5 +94,21 @@ describe('safeMarkdownInline', () => {
     expect(safeMarkdownInline('[click me](//evil.com/phish)')).toBe(
       '<a>click me</a>',
     );
+  });
+});
+
+describe('pickRandomBanner', () => {
+  it('picks the banner at the random index', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    expect(pickRandomBanner(['first', 'second', 'third'])).toBe('second');
+    vi.restoreAllMocks();
+  });
+
+  it('sanitizes the picked banner like safeMarkdownInline', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+    expect(pickRandomBanner(['[click me](javascript:alert(1))'])).toBe(
+      '<a>click me</a>',
+    );
+    vi.restoreAllMocks();
   });
 });

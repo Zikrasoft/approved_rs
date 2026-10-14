@@ -58,7 +58,9 @@ export function defineAddToCart(tagName = 'add-to-cart'): void {
               const line = cart.items.find(
                 (item) => item.variant_id === variant,
               );
-              const item = line ? cartLineItem(line, type) : undefined;
+              const item = line
+                ? { ...cartLineItem(line, type), quantity: 1 }
+                : undefined;
               reachGoal(GOALS.addToCart, {
                 currency: SHOP_CURRENCY,
                 value: item?.price,
