@@ -2,23 +2,23 @@
 title: Система охлаждения и вихревые заслонки BMW
 translations:
   en:
-    title: Cooling System and Swirl Flaps for BMW
+    title: Cooling System and Swirl Flaps Service for BMW
     body: |-
-      A BMW came into our Russian car service in Belgrade for maintenance on its cooling system and engine preventative care.
+      A BMW came to our Russian car service in Belgrade for cooling system maintenance and engine preventative work.
 
-      We performed a partial coolant replacement, which typically requires **5–7 liters** for engines like the **B47**. This time, we used the green HT-12 coolant from Valvoline.
+      We performed a partial coolant replacement. On **B47** engines, a partial replacement usually requires **5–7 liters**. This time, we used green HT-12 from Valvoline.
 
-      Additionally, we cleaned the swirl flaps and the intake system. Over time, diesel engines accumulate carbon deposits in the intake and on the flaps, which can hinder engine performance.
+      We also cleaned the swirl flaps and the intake system. Diesel engines tend to accumulate carbon build-up in the intake and on the flaps over time, which can hinder engine performance.
     car: BMW
 
   sr:
-    title: Sistem hlađenja i vortex klapne BMW
+    title: Sistem hlađenja i vortex ventili BMW
     body: |-
-      BMW je došao u našu servisnu radionicu u Beogradu na servis sistema hlađenja i preventivnu kontrolu motora.
+      BMW je došao u našu rusku autoservis u Beogradu na servisiranje sistema hlađenja i preventivu motora.
 
-      Izvršena je delimična zamena rashladne tečnosti. Na motorima **B47** obično se koristi **5–7 litara** prilikom delimične zamene. Ovog puta smo sipali zelenu HT-12 od Valvoline.
+      Izvršena je delimična zamena rashladne tečnosti. Na motorima **B47** obično je potrebno **5–7 litara** prilikom delimične zamene. Ovaj put smo koristili zelenu HT-12 od Valvoline-a.
 
-      Uz to, očišćene su vortex klapne i usisni sistem. Na dizelskim motorima se vremenom nakuplja čađa u usisnom sistemu i na klapnama, što ometa rad motora.
+      Uz to, očišćeni su vortex ventili i usisni sistem. Na dizel motorima se tokom vremena na usisu i na ventilima nagomilava čađ, što ometa rad motora.
     car: BMW
 car: BMW
 year: 2020

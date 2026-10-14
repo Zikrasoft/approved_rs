@@ -4,83 +4,83 @@ translations:
   en:
     title: Ineos Grenadier
     body: |-
-      **Car Sourcing in Germany: INEOS Grenadier for a Client from Munich**
+      Car Sourcing in Germany: INEOS Grenadier for a Client from Munich
 
-      This time, Grigory, the owner of a construction company in **Munich**, reached out to us for car sourcing services in Germany. His request was intriguing and somewhat unconventional: to find a quality **INEOS Grenadier** in excellent technical condition.
+      This time, Grigory, the owner of a construction company in **Munich**, reached out to us for car sourcing services in Germany. The task was both interesting and somewhat unconventional: to find a well-maintained **INEOS Grenadier** in excellent condition.
 
-      The INEOS Grenadier is a true body-on-frame SUV designed for those who prioritize reliability, off-road capability, and the confidence to venture off the pavement. A key highlight of this model is its robust BMW powertrains. The Grenadier is equipped with **3.0-liter inline six-cylinder BMW engines**, which we’re quite familiar with due to our years of experience with this brand.
+      The INEOS Grenadier is a true body-on-frame SUV, designed for those who value reliability, off-road capability, and the ability to confidently venture off the pavement. A notable advantage of this model is the trusted BMW powertrains. The Grenadier is equipped with **3.0-liter inline-six BMW engines**, which we know very well thanks to our years of experience with this brand.
 
-      During our sourcing process, we inspected **two INEOS Grenadiers**. As always, our task was to thoroughly assess the condition and history of each vehicle and determine which one was truly worth purchasing.
+      During the sourcing process, we inspected **two INEOS Grenadiers**. As always, our goal was to thoroughly assess the condition and history of each vehicle and determine which one was truly worth purchasing.
 
-      After evaluating the options, we selected the best one — an INEOS Grenadier in top-notch condition with approximately **80,000 km** on the odometer.
+      After our inspections, we selected the best option—a well-maintained INEOS Grenadier with a mileage of approximately **80,000 km**.
 
-      Now, the Grenadier has become the fourth vehicle in Grigory's family. Its primary role will be outdoor excursions, travels, and adventures wherever the good asphalt ends.
+      Now the Grenadier is the fourth car in Grigory's family. Its primary purpose is to take trips out of the city, travel adventures, and excursions where good asphalt ends.
 
-      We congratulate Grigory on his excellent purchase and wish him exciting routes and memorable experiences behind the wheel of his new SUV!
+      Congratulations to Grigory on his excellent purchase, and we wish him exciting routes and vivid experiences behind the wheel of his new SUV!
 
-      We specialize in professional car sourcing in Germany and can find and inspect a vehicle in nearly any region of the country.
+      We specialize in professional car sourcing in Germany and can find and inspect cars in virtually any region of the country.
 
-      If you’re looking to buy a car in Germany and want an independent professional inspection before making a purchase — get in touch. We’ll find suitable options, conduct an inspection, and help you choose a truly great car.
+      If you're looking to buy a car in Germany and want an independent professional inspection before your purchase—get in touch. We will find suitable options, conduct inspections, and assist in choosing a truly great vehicle.
   sr:
     title: Ineos Grenadier
     body: |-
-      Auto-sourcing u Nemačkoj: INEOS Grenadier za klijenta iz **Minhena**
+      Autopodbor u Nemačkoj: INEOS Grenadier za klijenta iz **Minhena**
 
-      Ovog puta za uslugu auto-sourcinga u Nemačkoj obratio nam se Grigorije — vlasnik građevinske kompanije u **Minhenu**. Zadatak je bio zanimljiv i ne baš standardan: pronaći dobar **INEOS Grenadier** u odličnom tehničkom stanju.
+      Ovaj put nam se za uslugu autopodbora u Nemačkoj obratio Grigorij — vlasnik građevinske kompanije u **Minhenu**. Zadatak je bio zanimljiv i pomalo neobičan: pronaći dobar **INEOS Grenadier** u odličnom tehničkom stanju.
 
-      INEOS Grenadier je pravi ramni SUV, stvoren za one kojima su važni pouzdanost, prohodnost i mogućnost da se bez problema skrene sa asfalta. Dodatni plus ove modele su proverenih motora BMW. Grenadier je opremljen **3,0-litarskim rednim šestocilindričnim motorima BMW**, sa kojima smo veoma dobro upoznati zahvaljujući višegodišnjem radu s automobilima ove marke.
+      INEOS Grenadier je pravi rameni SUV, stvoren za one kojima su važni pouzdanost, prohodnost i mogućnost da sigurno skrenu s asfalta. Dodatna prednost ovog modela su provereni motori od BMW-a. Grenadier je opremljen **3,0-litarskim rednim šestocilindričnim motorima BMW**, sa kojima smo veoma dobro upoznati zahvaljujući višegodišnjem radu sa automobilima ove marke.
 
-      U okviru auto-sourcinga pregledali smo **dva INEOS Grenadier**. Kao i obično, zadatak je bio da pažljivo proverimo stanje i istoriju svakog od njih i shvatimo koji primerak zaista vredi kupiti.
+      Tokom autopodbora pregledali smo **dva INEOS Grenadier**. Kao i obično, zadatak je bio da temeljno proverimo stanje i istoriju svakog vozila i da shvatimo koji primerak zaista vredi kupiti.
 
-      Na osnovu pregleda izabrali smo najbolju opciju — INEOS Grenadier u maksimalno dobrom stanju sa pređenih oko **80 000 km**.
+      Na osnovu pregleda odabrali smo najbolju opciju — INEOS Grenadier u maksimalno dobrom stanju sa pređenih oko **80 000 km**.
 
-      Sada je Grenadier već četvrti automobil u Grigorijevoj porodici. Njegova glavna svrha su izleti van grada, putovanja i vožnje na mestima gde se završava dobar asfalt.
+      Sada je Grenadier već četvrti automobil u Grigorijevoj porodici. Njegova glavna svrha su putovanja van grada, izleti i vožnje na mestima gde dobrog asfalta nema.
 
-      Čestitamo Grigoriju na odličnom kupovini i želimo zanimljive rute i nezaboravne trenutke za volanom novog SUV-a!
+      Čestitamo Grigoriju na odličnom kupovinu i želimo mu zanimljive rute i živopisne utiske za volanom novog SUV-a!
 
-      Bavimo se profesionalnim auto-sourcingom u Nemačkoj i možemo pronaći i proveriti automobil praktično u bilo kojoj regiji zemlje.
+      Zabavljamo se profesionalnim autopodborom u Nemačkoj i možemo pronaći i proveriti automobil praktično u bilo kojem regionu zemlje.
 
-      Ako želite da kupite automobil u Nemačkoj i dobijete nezavisnu profesionalnu proveru pre kupovine — obratite se. Pronaći ćemo odgovarajuće opcije, izvršićemo provere i pomoći da izaberete zaista dobar automobil.
+      Ako želite da kupite automobil u Nemačkoj i dobijete nezavisnu profesionalnu proveru pre kupovine — obratite se. Pronaći ćemo odgovarajuće opcije, izvršiti pregled i pomoći vam da izaberete zaista dobar automobil.
   es:
     title: Ineos Grenadier
     body: |-
-      **Selección de Automóviles en Alemania: INEOS Grenadier para un Cliente de Múnich**
+      Selección de coches en Alemania: INEOS Grenadier para un cliente de Múnich
 
-      Esta vez, para nuestros servicios de selección de automóviles en Alemania, nos contactó Grigori, dueño de una empresa de construcción en **Múnich**. La tarea fue interesante y un poco fuera de lo común: encontrar un buen **INEOS Grenadier** en excelentes condiciones técnicas.
+      En esta ocasión, Grigori, propietario de una empresa de construcción en **Múnich**, se acercó a nosotros para solicitar los servicios de selección de coches en Alemania. La tarea era interesante y un poco inusual: encontrar un buen **INEOS Grenadier** en excelentes condiciones técnicas.
 
-      El INEOS Grenadier es un verdadero SUV con chasis, diseñado para aquellos que valoran la fiabilidad, la capacidad de manejo y la posibilidad de aventurarse fuera del asfalto. Un aspecto destacado de este modelo son los motores BMW bien probados. El Grenadier está equipado con **motores BMW de seis cilindros en línea de 3.0 litros**, con los cuales estamos muy familiarizados debido a nuestros años de trabajo con vehículos de esta marca.
+      El INEOS Grenadier es un auténtico todoterreno con chasis de carrocería, diseñado para aquellos que valoran la fiabilidad, la capacidad para afrontar terrenos difíciles y la posibilidad de salir con confianza del asfalto. Un punto a favor de este modelo son sus motores BMW de probada eficacia. El Grenadier está equipado con **motores de seis cilindros en línea de 3,0 litros de BMW**, con los que estamos muy familiarizados gracias a nuestros muchos años de experiencia trabajando con coches de esta marca.
 
-      En el proceso de selección, inspeccionamos **dos INEOS Grenadier**. Como siempre, el objetivo fue revisar minuciosamente el estado y la historia de cada uno y determinar cuál realmente valía la pena comprar.
+      Durante el proceso de selección, revisamos **dos INEOS Grenadier**. Como siempre, la tarea consistió en examinar minuciosamente el estado y la historia de cada uno y determinar cuál valía realmente la pena comprar.
 
-      Como resultado de nuestras inspecciones, elegimos la mejor opción: un INEOS Grenadier en condiciones destacadas y con un kilometraje de aproximadamente **80,000 km**.
+      Tras las inspecciones, elegimos la mejor opción: un INEOS Grenadier en un estado óptimo con un kilometraje de aproximadamente **80.000 km**.
 
-      Ahora, el Grenadier se ha convertido en el cuarto vehículo de la familia de Grigori. Su función principal será excursiones fuera de la ciudad, viajes y aventuras en terrenos donde el asfalto termina.
+      Ahora el Grenadier se ha convertido en el cuarto coche de la familia de Grigori. Su principal propósito es realizar viajes fuera de la ciudad, exploraciones y aventuras en lugares donde termina el buen asfalto.
 
-      ¡Felicitamos a Grigori por su excelente compra y le deseamos rutas emocionantes y experiencias memorables al volante de su nuevo SUV!  
+      ¡Felicitamos a Grigori por esta excelente compra y le deseamos rutas emocionantes y experiencias inolvidables al volante de su nuevo todoterreno!
 
-      Nos dedicamos a la selección profesional de automóviles en Alemania y podemos encontrar y verificar vehículos en prácticamente cualquier región del país.  
+      Nos especializamos en la selección profesional de coches en Alemania y podemos encontrar y verificar vehículos en prácticamente cualquier región del país.
 
-      Si deseas comprar un automóvil en Alemania y recibir una revisión profesional e independiente antes de la compra, ¡contáctanos! Encontraremos opciones adecuadas, realizaremos la inspección y te ayudaremos a elegir un vehículo realmente bueno.
+      Si deseas comprar un automóvil en Alemania y obtener una inspección profesional e independiente antes de la compra, no dudes en contactarnos. Encontraremos opciones adecuadas, realizaremos la inspección y te ayudaremos a elegir un automóvil realmente bueno.
   de:
     title: Ineos Grenadier
     body: |-
-      Autoauswahl in Deutschland: INEOS Grenadier für einen Kunden aus München
+      Fahrzeugbeschaffung in Deutschland: INEOS Grenadier für einen Kunden aus München
 
-      Dieses Mal wandte sich Grigorij, der Eigentümer eines Bauunternehmens in **München**, an uns, um unsere Autoauswahl-Dienstleistung in Deutschland in Anspruch zu nehmen. Die Aufgabe war interessant und nicht ganz alltäglich: einen guten **INEOS Grenadier** in einem hervorragenden technischen Zustand zu finden.
+      Diesmal wandte sich Grigorij, der Besitzer eines Bauunternehmens in **München**, an uns mit der Bitte um Fahrzeugbeschaffung in Deutschland. Die Aufgabe war interessant und etwas unkonventionell: Einen guten **INEOS Grenadier** in hervorragendem technischen Zustand zu finden.
 
-      Der INEOS Grenadier ist ein echter Geländewagen mit Rahmenbauweise, entwickelt für diejenigen, die Wert auf Zuverlässigkeit, Geländetauglichkeit und die Fähigkeit legen, sicher vom Asphalt abzufahren. Ein weiterer Pluspunkt dieses Modells sind die bewährten BMW-Motoren. Der Grenadier ist mit **3,0-Liter-Reihen-Sechszylindermotoren von BMW** ausgestattet, mit denen wir durch unsere langjährige Erfahrung mit dieser Marke bestens vertraut sind.
+      Der INEOS Grenadier ist ein echter Geländewagen mit Rahmenbauweise, der für diejenigen entwickelt wurde, die Wert auf Zuverlässigkeit, Geländetauglichkeit und die Möglichkeit legen, sicher das Asphaltierte zu verlassen. Ein weiterer Pluspunkt dieses Modells sind die bewährten BMW-Motoren. Der Grenadier ist mit **3,0-Liter-Reihen-Sechszylindermotoren von BMW** ausgestattet, mit denen wir dank unserer langjährigen Zusammenarbeit mit Fahrzeugen dieser Marke gut vertraut sind.
 
-      Im Rahmen der Autoauswahl haben wir **zwei INEOS Grenadier** besichtigt. Wie immer lag die Herausforderung darin, den Zustand und die Geschichte jedes Fahrzeugs sorgfältig zu überprüfen und festzustellen, welcher Exemplar wirklich einen Kauf wert ist.
+      Im Rahmen der Fahrzeugbeschaffung haben wir **zwei INEOS Grenadier** betrachtet. Wie immer bestand die Aufgabe darin, den Zustand und die Geschichte jedes Fahrzeugs sorgfältig zu überprüfen und zu verstehen, welches Exemplar wirklich eine Anschaffung wert ist.
 
-      Nach den Besichtigungen wählten wir die beste Option aus – einen INEOS Grenadier in einem maximal guten Zustand mit einer Laufleistung von etwa **80.000 km**.
+      Nach den Besichtigungen haben wir die beste Option gewählt — einen INEOS Grenadier in ausgezeichnetem Zustand mit einer Laufleistung von etwa **80.000 km**.
 
-      Jetzt ist der Grenadier bereits das vierte Auto in Grigorijs Familie. Sein Hauptzweck ist es, Ausflüge ins Grüne, Reisen und Fahrten dort zu unternehmen, wo die Straßen enden.
+      Jetzt ist der Grenadier bereits das vierte Fahrzeug in Grigorijs Familie. Seine Hauptaufgabe ist es, Fahrten ins Grüne, Reisen und Ausflüge dorthin zu unternehmen, wo der gute Asphalt endet.
 
-      Wir gratulieren Grigorij zu diesem großartigen Kauf und wünschen ihm spannende Strecken und unvergessliche Erlebnisse hinter dem Steuer seines neuen Geländewagens!
+      Wir gratulieren Grigorij zu seinem großartigen Kauf und wünschen ihm interessante Routen und unvergessliche Erlebnisse hinter dem Steuer des neuen Geländewagens!
 
-      Wir sind auf professionelle Autoauswahl in Deutschland spezialisiert und können nahezu jedes Fahrzeug in der ganzen Region des Landes finden und überprüfen.
+      Wir bieten professionelle Fahrzeugbeschaffungsdienste in Deutschland an und können nahezu jedes Fahrzeug in jeder Region des Landes finden und überprüfen.
 
-      Wenn Sie ein Auto in Deutschland kaufen möchten und eine unabhängige professionelle Überprüfung vor dem Kauf wünschen, zögern Sie nicht, uns zu kontaktieren. Wir finden geeignete Optionen, führen Besichtigungen durch und helfen Ihnen, wirklich ein gutes Auto auszuwählen.
+      Wenn Sie ein Fahrzeug in Deutschland kaufen möchten und eine unabhängige professionelle Prüfung vor dem Kauf erhalten wollen — kontaktieren Sie uns. Wir finden geeignete Optionen, führen eine Besichtigung durch und helfen Ihnen, wirklich gute Fahrzeuge auszuwählen.
 car: Ineos Grenadier
 year: 2022
 price:

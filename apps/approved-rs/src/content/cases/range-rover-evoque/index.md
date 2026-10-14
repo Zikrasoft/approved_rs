@@ -14,43 +14,43 @@ translations:
   en:
     title: Range Rover Evoque
     body: |-
-      ## Sourcing Cars from Germany to Serbia — Accompanied All the Way to a Ready Vehicle
+      ## Importing Cars from Germany to Serbia — With Support Until the Car is Ready
 
-      A client reached out to us for a **Range Rover Evoque from Germany**. We found a suitable vehicle and conducted a pre-purchase inspection, where we immediately identified a common issue with this engine — a **stretched timing chain**. The client was made aware of all the nuances, but considering the car's condition, equipment, and attractive price, decided to go with this option.
+      A client approached us regarding a **Range Rover Evoque from Germany**. We selected a suitable vehicle, conducted a pre-purchase inspection, and immediately identified a common issue with this engine — **a stretched timing chain**. The client was informed of all the details beforehand, but considering the car's condition, features, and attractive price, they decided to proceed with this option.
 
-      After the purchase, we organized the vehicle's delivery to Serbia, handled the customs clearance, and carried out a complete technical preparation at our service center. We replaced the **timing chain**, performed **turbo repairs**, and conducted a full technical maintenance, including an oil change for the engine and the **oil change in the ZF 9HP 9-speed transmission**.
+      After the purchase, we arranged for the car's delivery to Serbia, completed the customs clearance, and performed a full technical preparation at our service center. We replaced the **timing chain**, repaired the **turbocharger**, and conducted a comprehensive technical maintenance, which included an oil change in the engine and **an oil change in the ZF 9HP 9-speed transmission**.
 
       As a result, the client received a fully serviced and reliable vehicle, ready for use without any unpleasant surprises.
   sr:
     title: Range Rover Evoque
     body: |-
-      ## Uvoz automobila iz Nemačke u Srbiju — uz pratnju do gotovog vozila
+      ## Uvoz automobila iz Nemačke u Srbiju — sa pratnjom do gotovog vozila
 
-      Obratio nam se klijent za **Range Rover Evoque iz Nemačke**. Pronašli smo odgovarajući automobil, izvršili provere auta pre kupovine i odmah otkrili karakterističan problem za ovaj motor — **proširenu lanac GPRM**. Klijent je bio unapred obavešten o svim nijansama, ali uzimajući u obzir stanje automobila, opremu i privlačnu cenu, odlučio je da se opredeli baš za ovu opciju.
+      Javio nam se klijent za **Range Rover Evoque iz Nemačke**. Pronašli smo odgovarajući automobil, sproveli provere auta pre kupovine i odmah otkrili problem karakterističan za ovaj motor — **produžena lance GRM**. Klijent je unapred bio obavešten o svim nijansama, ali s obzirom na stanje automobila, opremu i atraktivnu cenu, odlučio je da se odluči baš za ovu opciju.
 
-      Nakon kupovine organizovali smo transport automobila u Srbiju, izvršili carinjenje i sproveli kompletnu tehničku pripremu u našem servisu. Zamenjeni su **lanac GPRM**, izvršen je **popravak turbine**, obavljeno je potpuno tehničko održavanje, uključujući zamenu ulja u motoru i **zamenu ulja u 9-stepenoj menjacu ZF 9HP**.
+      Nakon kupovine organizovali smo dostavu automobila u Srbiju, obavili carinjenje i sproveli potpunu tehničku pripremu u našoj radionici. Zamenjen je **lance GRM**, izvršen je **popravak turbine**, obavljeno je potpuno tehničko održavanje, uključujući zamenu ulja u motoru i **zamenu ulja u 9-stepenoj automatskoj transmisiji ZF 9HP**.
 
-      Na kraju je klijent dobio potpuno servisiran i pouzdan automobil, spreman za korišćenje bez neprijatnih iznenađenja.
+      Na kraju, klijent je dobio potpuno održavan i pouzdan automobil, spreman za korišćenje bez neprijatnih iznenađenja.
   es:
     title: Range Rover Evoque
     body: |-
-      ## Importación de coches desde Alemania a Serbia — con acompañamiento hasta tener el coche listo
+      ## Importación de coches desde Alemania a Serbia — con acompañamiento hasta el coche listo
 
-      Un cliente se puso en contacto con nosotros para adquirir un **Range Rover Evoque de Alemania**. Seleccionamos el coche adecuado, realizamos una inspección previa a la compra y descubrimos de inmediato un problema típico de este motor: **la cadena de distribución estirada**. El cliente fue informado de todos los detalles de antemano, pero teniendo en cuenta el estado del vehículo, el equipamiento y el atractivo precio, decidió optar por esta opción.
+      Un cliente se puso en contacto con nosotros para adquirir un **Range Rover Evoque de Alemania**. Seleccionamos un coche adecuado, realizamos la inspección previa a la compra y detectamos de inmediato un problema típico de este motor: **una cadena de distribución estirada**. Se informaron al cliente sobre todos los detalles relevantes, pero teniendo en cuenta el estado del coche, la equipación y el atractivo precio, decidió optar por esta opción en particular.
 
-      Tras la compra, organizamos la entrega del coche a Serbia, llevamos a cabo la aduana y realizamos una preparación técnica completa en nuestro taller. Se reemplazó la **cadena de distribución**, se realizó la **reparación del turbo**, y se llevó a cabo un mantenimiento técnico completo, incluyendo el cambio de aceite del motor y **el cambio de aceite en la transmisión automática de 9 velocidades ZF 9HP**.
+      Tras la compra, organizamos la entrega del vehículo a Serbia, realizamos el proceso de aduana y realizamos una preparación técnica completa en nuestro taller. Se sustituyó la **cadena de distribución**, se llevó a cabo una **reparación del turbo**, y se realizó un mantenimiento completo que incluyó el cambio de aceite del motor y **el cambio de aceite de la caja de cambios automática de 9 velocidades ZF 9HP**.
 
-      Como resultado, el cliente recibió un coche completamente revisado y fiable, listo para su uso sin sorpresas desagradables.
+      Al final, el cliente recibió un coche completamente mantenido y fiable, listo para usar sin sorpresas desagradables.
   de:
     title: Range Rover Evoque
     body: |-
-      ## Fahrzeugbeschaffung aus Deutschland nach Serbien – inklusive Begleitung bis zur Fertigstellung
+      ## Import von Fahrzeugen aus Deutschland nach Serbien – mit Begleitung bis zum fertigen Auto
 
-      Ein Kunde wandte sich an uns, um einen **Range Rover Evoque aus Deutschland** zu kaufen. Wir haben das passende Fahrzeug ausgewählt, eine Vorabprüfung des Autos durchgeführt und sofort ein typisches Problem dieser Motoren festgestellt – **dehnende Steuerkette**. Der Kunde wurde über alle Besonderheiten im Vorfeld informiert, entschied sich jedoch aufgrund des Zustands des Fahrzeugs, der Ausstattung und des attraktiven Preises für genau dieses Modell.
+      Ein Kunde wandte sich an uns wegen eines **Range Rover Evoque aus Deutschland**. Wir haben das passende Fahrzeug ausgewählt, eine Überprüfung vor dem Kauf durchgeführt und sofort ein typisches Problem dieses Motors festgestellt – **dehnung der Steuerkette**. Der Kunde wurde im Vorfeld über alle Facetten informiert, entschied sich jedoch aufgrund des Gesamtzustands des Autos, der Ausstattung und des attraktiven Preises für dieses Angebot.
 
-      Nach dem Kauf organisierten wir den Transport des Fahrzeugs nach Serbien, führten die Zollabfertigung durch und kümmerten uns um die umfassende technische Vorbereitung in unserer Werkstatt. Es wurden die **Steuerkette** ersetzt, **die Turbine repariert** und eine komplette technische Wartung durchgeführt, einschließlich Ölwechsel im Motor und der **Ölwechsel im 9-Gang-ZF 9HP-Getriebe**.
+      Nach dem Kauf organisierten wir den Transport des Fahrzeugs nach Serbien, erledigten die Zollabfertigung und führten eine umfassende technische Vorbereitung in unserem Service durch. Die **Steuerkette** wurde ersetzt, die **Turbo-Reparatur** wurde durchgeführt, und es wurde eine vollständige technische Wartung vorgenommen, einschließlich des Ölwechsels im Motor und der **Ölwechsel im 9-Gang-Getriebe ZF 9HP**.
 
-      Am Ende erhielt der Kunde ein voll gewartetes und zuverlässiges Fahrzeug, das bereit für den Einsatz ohne unangenehme Überraschungen ist.
+      Am Ende erhielt der Kunde ein komplett gewartetes und zuverlässiges Fahrzeug, bereit für den Einsatz ohne unangenehme Überraschungen.
 translatedFrom: 748989e8eab28339
 ---
 

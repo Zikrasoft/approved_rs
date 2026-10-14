@@ -15,42 +15,42 @@ translations:
   sr:
     title: "Audi Q7 "
     body: |-
-      **Audi Q7 2008. Obimna lista radova u našem servisu u Beogradu, Srbija.**
+      **Audi Q7 2008. Opsežan popis radova u našoj autoservisu u Beogradu, Srbija.**
 
-      Dovezen je Audi Q7 2008. godine sa značajnim brojem kvarova. Automobil je zahtevao ozbiljnu pažnju kako na sistemu ovjesa, tako i na motoru.
+      U naš servis je stigla Audi Q7 2008. godine sa impresivnim spiskom kvarova. Automobil je zahtevao ozbiljnu pažnju kako na delu oslanjanja, tako i na motoru.
 
       Šta je urađeno:
 
-      - zamena kugličnih zgloba;
-      - zamena kočionih diskova i pločica;
-      - radovi na podešavanju motora;
-      - ponovno zaptivanje usisnog sistema;
-      - zamena EGR creva;
-      - osnovno tehničko održavanje sa promenom ulja i filtera.
+      - zamena opruga oslanjanja;
+      - zamena kočionih diskova i obloge;
+      - radovi na razvodu motora;
+      - ponovno brtvljenje usisnog sistema;
+      - zamena EGR cevi;
+      - mali tehnički pregled uz zamenu ulja i filtera.
 
-      Posebni problem je bila stalna promaja motornog ulja. Nakon prethodnog servisa, drenažna čepova je bila postavljena pogrešno, i ulje je neprekidno kapalo iz motora. Problem je rešen, sve je dovedeno u red.
+      Poseban problem je bio povezan sa stalnim curenjem motornog ulja. Nakon prethodnog servisa, drenažna čepka je bila postavljena pogrešno, pa je ulje neprekidno kapalo iz motora. Problem je rešen, sve je dovedeno u red.
 
-      Audi Q7 prve generacije zahteva stručno održavanje, posebno na starim vozilima sa velikim pređenim kilometrima: važno je razjasniti uzrok kvara i otkloniti ga, a ne samo zameniti deo.
+      Audi Q7 prve generacije zahteva stručno održavanje, posebno na starijim vozilima sa velikim pređenim kilometrima: važno je razjasniti uzrok kvara i otkloniti problem, a ne samo zameniti deo.
     car: Audi Q7
   en:
     title: "Audi Q7 "
     body: |-
-      **2008 Audi Q7. Extensive work list at our car service in Belgrade, Serbia.**
+      **2008 Audi Q7. Extensive list of services at our car service in Belgrade, Serbia.**
 
-      We had a 2008 Audi Q7 come in with an impressive list of issues. The vehicle needed serious attention both in the suspension and engine departments. 
+      We received a 2008 Audi Q7 with a significant list of issues. The vehicle needed serious attention both in terms of the suspension and the engine.
 
       What was done:
 
-      - Replaced suspension arms;
-      - Replaced brake discs and pads;
-      - Engine alignment work;
-      - Resealed the intake system;
-      - Replaced EGR pipe;
-      - Basic maintenance with oil and filter changes.
+      - suspension arm replacement;
+      - brake disc and pad replacement;
+      - engine alignment work;
+      - intake system resealing;
+      - EGR tube replacement;
+      - minor maintenance including oil and filter changes.
 
-      One particular issue was a persistent engine oil leak. After a previous service, the drain plug had been improperly installed, causing oil to drip continuously from the engine. We resolved the issue and got everything back in order.
+      An additional problem involved a persistent engine oil leak. During previous servicing, the drain plug was improperly installed, causing oil to continuously drip from the engine. We resolved the issue and corrected everything.
 
-      The first-generation Audi Q7 requires careful maintenance, especially for older models with high mileage: it’s essential to diagnose the cause of the malfunction and address the root problem rather than simply replacing a part.
+      The first-generation Audi Q7 requires careful maintenance, especially for older vehicles with high mileage: it is important to understand the root cause of the malfunction and address it, rather than just replacing the part.
     car: Audi Q7
 translatedFrom: 14e4c2206072c5e2
 ---

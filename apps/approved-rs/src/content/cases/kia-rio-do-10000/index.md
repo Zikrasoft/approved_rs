@@ -17,99 +17,99 @@ translations:
   en:
     title: Kia Rio under €10,000
     body: |-
-      # Car Sourcing in Serbia: A Bright Kia Rio for Anna and Her Family
+      # Car sourcing in Serbia. A vibrant Kia Rio for Anna and her family
 
-      Anna and her husband approached us with a request to find a fresh, reliable, and economical vehicle with a budget of up to €10,000. Their requirements were straightforward yet challenging in the Serbian market: mileage under 100,000 km, good technical condition, and an automatic transmission.
+      Anna and her husband approached us with the goal of finding a fresh, reliable, and economical vehicle with a budget of up to €10,000. Their requirements were simple, yet challenging in the Serbian market: mileage up to 100,000 km, good technical condition, and an automatic transmission.
 
-      Anyone searching for an automatic vehicle in Serbia knows that truly worthy options in the budget segment are limited, especially if you are looking for a car with low mileage, free of serious technical issues, and a clear history.
+      Anyone who has searched for a car with an automatic transmission in Serbia knows that there are not many worthy options in the budget segment, especially when looking for a car with low mileage, without serious technical issues, and with a transparent history.
 
-      We suggested focusing on vehicles from the Hyundai-Kia group featuring a 1.4-liter gasoline engine and a six-speed automated transmission: when properly maintained and in good technical shape, this is a solid choice for everyday use.
+      We suggested focusing on vehicles from the Hyundai-Kia group with a 1.4-liter gasoline engine and a six-speed automated transmission: with proper maintenance and in good technical condition, this can be a solid option for everyday use.
 
-      As a result, we found Anna and her husband a Kia Rio 1.4 with an automated transmission, low mileage, and a striking blue color.
+      As a result, we found Anna and her husband a Kia Rio 1.4 with an automated transmission, low mileage, and in a vibrant blue color.
 
-      Now this family looks forward to new trips across Serbia and Europe, especially since Anna and her husband have a couple of dogs that will be joining them on their adventures.
+      Now this family has new trips ahead of them throughout Serbia and Europe, especially since Anna and her husband have several dogs, who will also join them on their adventures.
 
-      Congratulations on the purchase, and we wish you joyful and reliable journeys with your Kia Rio. Thank you for trusting our team.
+      Congratulations on the purchase, and we wish that the Kia Rio will provide reliability on long journeys. Thank you for trusting our team.
 
-      **Need Car Sourcing in Serbia?**
+      **Need car sourcing in Serbia?**
 
-      We can help you find and inspect a vehicle that meets your budget and requirements. We source gasoline, diesel, and hybrid cars, as well as vehicles with manual and automatic transmissions. Before you buy, we check the technical condition, history, mileage, body, engine, and transmission.
+      We can help find and inspect a vehicle that suits your budget and requirements. We source gasoline, diesel, and hybrid cars, as well as vehicles with manual and automatic transmissions. We check the technical condition, history, mileage, body, engine, and transmission before purchase.
 
-      We operate throughout Serbia: Belgrade, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Sremska Mitrovica, Zrenjanin, Čačak, Kraljevo, and other cities.
+      We operate all over Serbia: Belgrade, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Sremska Mitrovica, Zrenjanin, Čačak, Kraljevo, and other cities.
 
-      Contact us, and we'll help you find a car that will bring you joy for many years to come.
+      Contact us, and we will help you find a car that will bring you joy for many years.
   sr:
-    title: Kia Rio do 10.000€
+    title: Kia Rio do 10000€
     body: |-
-      # Autopodbor u Srbiji. Sjajni Kia Rio za Anu i njenu porodicu
+      # Car-sourcing u Srbiji. Sjajan Kia Rio za Anu i njenu porodicu
 
-      Obratila nam se Ana sa suprugom sa zadatkom da nađu svež, pouzdan i ekonomičan automobil sa budžetom do 10.000 evra. Zahtevi su bili jednostavni, ali ne i laki za srpsko tržište: pređenih do 100.000 km, dobro tehničko stanje i obavezno automatski menjač.
+      Ana se obratila sa suprugom sa zahtevom da nađu svež, pouzdan i ekonomičan automobil sa budžetom do 10 000 evra. Zahtevi su bili jednostavni, ali teški za srpsko tržište: pređeno do 100 000 km, dobro tehničko stanje i obavezno automatski menjač.
 
-      Ko je tražio automobil sa automatskim menjačem u Srbiji, zna da zaista ima malo kvalitetnih opcija u budžetskom segmentu, posebno ako je potrebna kola sa malim pređenim kilometrima, bez ozbiljnih tehničkih problema i sa transparentnom istorijom.
+      Svi koji su tražili automobil sa automatskim menjačem u Srbiji znaju da zaista kvalitetnih opcija u budžetskom segmentu ima malo, posebno ako vam je potrebna mašina sa malim pređenim kilometrima, bez ozbiljnih tehničkih problema i sa prozračnom istorijom.
 
-      Predložili smo da se obrate pažnja na automobile koncerna Hyundai-Kia sa benzinskim motorom 1.4 i šestostepenim robotizovanim menjačem: uz pravilno održavanje i dobro tehničko stanje, to je dobar izbor za svakodnevnu upotrebu.
+      Preporučili smo da se obrati na automobile koncerna Hyundai-Kia sa benzinačkim motorom 1.4 i šestostepenim robotizovanim menjačem: uz pravilno održavanje i dobro tehničko stanje, to je dobra opcija za svakodnevnu upotrebu.
 
-      Na kraju smo pronašli za Anu i njenog supruga Kia Rio 1.4 sa automatizovanim menjačem, malim pređenim kilometrima i u svetloplavoj boji.
+      Na kraju smo za Anu i njenog supruga pronašli Kia Rio 1.4 sa automatskim menjačem, malim pređenim kilometrima i u jarko plavoj boji.
 
-      Sada su ispred ove porodice nove avanture po Srbiji i Evropi, pogotovo što Ana i njen suprug imaju nekoliko pasa koji će takođe ići s njima na nova putovanja.
+      Sada ovoj porodici predstoje nove vožnje kroz Srbiju i Evropu, posebno jer Ana i njen suprug imaju nekoliko pasa koji će sa njima ići na nova putovanja.
 
-      Čestitamo na kupovini i želimo da Kia Rio bude pouzdan u dugim vožnjama. Hvala što ste ukazali poverenje našem timu.
+      Čestitamo na kupovini i želimo da Kia Rio pruži pouzdanost u dugim vožnjama. Hvala na poverenju našoj ekipi.
 
-      **Potrebna vam je provera auta pre kupovine u Srbiji?**
+      **Treba vam car-sourcing u Srbiji?**
 
-      Pomoći ćemo vam da pronađete i proverite automobil prema vašem budžetu i zahtevima. Biramo benzinske, dizel i hibridne automobile, kola sa mehaničkim i automatskim menjačem. Proveravamo tehničko stanje, istoriju, pređene kilometre, karoseriju, motor i menjač pre kupovine.
+      Pomoći ćemo vam da pronađete i proverite automobil prema vašem budžetu i zahtevima. Pronalazimo benzinaće, dizelaše i hibridne automobile, automobile sa manuelnim i automatskim menjačem. Proveravamo tehničko stanje, istoriju, pređene kilometre, karoseriju, motor i menjač pre kupovine.
 
       Radimo širom Srbije: Beograd, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Sremska Mitrovica, Zrenjanin, Čačak, Kraljevo i drugi gradovi.
 
-      Obratite se, pomoći ćemo vam da nađete automobil koji će vas radovati dugi niz godina.
+      Obratite se, pomoći ćemo vam da pronađete automobil koji će vas veseliti dugi niz godina.
   es:
-    title: Kia Rio hasta 10,000€
+    title: Kia Rio hasta 10000€
     body: |-
-      # Selección de Automóviles en Serbia. Un brillante Kia Rio para Anna y su familia
+      # Selección de vehículos en Serbia. Un vibrante Kia Rio para Anna y su familia
 
-      Anna y su esposo se pusieron en contacto con nosotros para que les ayudáramos a encontrar un automóvil nuevo, confiable y económico, con un presupuesto de hasta 10,000 euros. Los requisitos eran simples, pero complicados para el mercado serbio: un kilometraje de hasta 100,000 km, buen estado técnico y, por supuesto, una transmisión automática.
+      Anna y su esposo nos contactaron con la tarea de encontrar un coche nuevo, fiable y económico con un presupuesto de hasta 10 000 euros. Los requisitos eran simples, aunque difíciles de cumplir en el mercado serbio: un kilometraje de hasta 100 000 km, buen estado técnico y, obligatoriamente, transmisión automática.
 
-      Quien ha buscado un automóvil con transmisión automática en Serbia sabe que realmente hay pocas opciones adecuadas en el segmento económico, especialmente si se necesita un coche con bajo kilometraje, sin problemas técnicos serios y con una historia clara.
+      Quien ha buscado un coche automático en Serbia sabe que las opciones realmente dignas en el segmento económico son limitadas, especialmente si se busca un automóvil con poco kilometraje, sin problemas técnicos graves y con un historial claro.
 
-      Sugerimos prestar atención a los automóviles del consorcio Hyundai-Kia con motores de gasolina de 1.4 y transmisión robotizada de seis velocidades: con el mantenimiento adecuado y en buen estado técnico, son una buena opción para el uso diario.
+      Sugerimos prestar atención a los vehículos del grupo Hyundai-Kia con un motor de gasolina de 1.4 y una transmisión robotizada de seis velocidades: con el mantenimiento adecuado y un buen estado técnico, es una opción decente para el uso diario.
 
-      Finalmente, encontramos para Anna y su esposo un Kia Rio 1.4 con transmisión automática, bajo kilometraje y en un color azul brillante.
+      Como resultado, seleccionamos para Anna y su esposo un Kia Rio 1.4 con transmisión automatizada, bajo kilometraje y en un color azul vibrante.
 
-      Ahora esta familia tiene nuevas aventuras por Serbia y Europa por delante, especialmente considerando que Anna y su esposo tienen varios perros que también viajarán con ellos en sus nuevas travesías.
+      Ahora esta familia tiene por delante nuevos viajes por Serbia y Europa, sobre todo porque Anna y su esposo tienen varios perros que también los acompañarán en sus nuevas aventuras.
 
-      Felicitamos por la compra y deseamos que el Kia Rio les brinde confiabilidad en sus largos viajes. Gracias por confiar en nuestro equipo.
+      Felicitaciones por la compra, y les deseamos que el Kia Rio les brinde fiabilidad en los largos viajes. Gracias por confiar en nuestro equipo.
 
-      **¿Necesitas ayuda para seleccionar un automóvil en Serbia?**
+      **¿Necesitas selección de vehículos en Serbia?**
 
-      Te ayudaremos a encontrar y verificar un automóvil que se ajuste a tu presupuesto y requisitos. Seleccionamos automóviles de gasolina, diésel e híbridos, tanto con transmisión manual como automática. Verificamos el estado técnico, la historia, el kilometraje, la carrocería, el motor y la transmisión antes de la compra.
+      Te ayudaremos a encontrar y verificar un coche acorde a tu presupuesto y requisitos. Seleccionamos vehículos de gasolina, diésel e híbridos, coches con transmisión manual y automática. Verificamos el estado técnico, historial, kilometraje, carrocería, motor y transmisión antes de la compra.
 
       Trabajamos en toda Serbia: Belgrado, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Sremska Mitrovica, Zrenjanin, Čačak, Kraljevo y otras ciudades.
 
-      Contáctanos, te ayudaremos a encontrar el automóvil que te hará feliz durante muchos años.
+      Contáctanos, te ayudaremos a encontrar un coche que te alegre durante muchos años.
   de:
-    title: Kia Rio bis 10.000 €
+    title: Kia Rio bis 10.000€
     body: |-
-      # Autoauswahl in Serbien. Ein strahlender Kia Rio für Anna und ihre Familie
+      # Autoauswahl in Serbien. Der auffällige Kia Rio für Anna und ihre Familie
 
-      Anna und ihr Ehemann wandten sich an uns mit der Aufgabe, ein frisches, zuverlässiges und wirtschaftliches Auto mit einem Budget von bis zu 10.000 Euro zu finden. Die Anforderungen waren einfach, aber für den serbischen Markt nicht unkompliziert: Eine Laufleistung von bis zu 100.000 km, ein guter technischer Zustand und unbedingt eine Automatik.
+      Anna und ihr Ehemann wandten sich an uns mit der Aufgabe, ein frisches, zuverlässiges und wirtschaftliches Auto mit einem Budget von bis zu 10.000 Euro zu finden. Die Anforderungen waren einfach, aber auf dem serbischen Markt nicht leicht zu erfüllen: eine Laufleistung von bis zu 100.000 km, ein guter technischer Zustand und auf jeden Fall ein Automatikgetriebe.
 
-      Wer in Serbien nach einem Auto mit Automatik sucht, weiß, dass es im Budgetsegment nur wenige wirklich brauchbare Optionen gibt, besonders wenn eine Maschine mit niedriger Laufleistung, ohne ernste technische Probleme und mit transparenter Geschichte benötigt wird.
+      Wer in Serbien nach einem Auto mit Automatikgetriebe sucht, weiß, dass es wirklich zuverlässige Optionen im Budgetsegment nur wenige gibt, besonders wenn man ein Fahrzeug mit geringer Laufleistung, ohne ernsthafte technische Probleme und mit einer transparenten Historie benötigt.
 
-      Wir haben vorgeschlagen, einen Blick auf Fahrzeuge der Hyundai-Kia Gruppe mit einem 1.4 Benzinmotor und einem 6-Gang-Doppelkupplungsgetriebe zu werfen: Bei richtiger Wartung und gutem technischen Zustand ist dies eine gute Option für den Alltag.
+      Wir empfahlen, auf Fahrzeuge des Hyundai-Kia-Konzerns mit einem 1,4-Liter-Benzinmotor und einem sechsgängigen automatisierten Getriebe zu schauen: Bei ordnungsgemäßer Wartung und gutem technischen Zustand ist dies eine solide Wahl für den Alltag.
 
-      Letztendlich haben wir für Anna und ihren Ehemann einen Kia Rio 1.4 mit Automatikgetriebe, geringer Laufleistung und in strahlend blauer Farbe ausgewählt.
+      Als Ergebnis fanden wir für Anna und ihren Ehemann einen Kia Rio 1.4 mit automatisiertem Getriebe, geringer Laufleistung und in einem leuchtend blauen Farbton.
 
-      Jetzt stehen diesem Familie neue Reisen durch Serbien und Europa bevor, zumal Anna und ihr Ehemann mehrere Hunde haben, die ebenfalls mit ihnen auf die neuen Abenteuer mitreisen werden.
+      Nun stehen dieser Familie neue Reisen durch Serbien und Europa bevor, insbesondere da Anna und ihr Ehemann mehrere Hunde haben, die sie ebenfalls auf ihre neuen Abenteuer mitnehmen werden.
 
-      Herzlichen Glückwunsch zum Kauf und wir wünschen, dass der Kia Rio auf langen Fahrten zuverlässig bleibt. Vielen Dank für das Vertrauen in unser Team.
+      Herzlichen Glückwunsch zum Kauf und wir wünschen, dass der Kia Rio sie bei langen Fahrten zuverlässig begleitet. Vielen Dank für das Vertrauen in unser Team.
 
-      **Brauchen Sie eine Autoauswahl in Serbien?**
+      **Brauchen Sie Autoauswahl in Serbien?**
 
-      Wir helfen Ihnen, ein Auto nach Ihrem Budget und Ihren Anforderungen zu finden und zu überprüfen. Wir wählen Benzin-, Diesel- und Hybridfahrzeuge aus, sowie Autos mit Schalt- und Automatikgetrieben. Wir prüfen den technischen Zustand, die Geschichte, die Laufleistung, die Karosserie, den Motor und das Getriebe vor dem Kauf.
+      Wir helfen Ihnen, ein Auto nach Ihrem Budget und Ihren Anforderungen zu finden und zu prüfen. Wir bieten Benzin-, Diesel- und Hybridfahrzeuge an, sowohl mit mechanischem als auch mit automatischem Getriebe. Vor dem Kauf überprüfen wir den technischen Zustand, die Historie, die Laufleistung, die Karosserie, den Motor und das Getriebe.
 
-      Wir arbeiten in ganz Serbien: Belgrad, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Sremska Mitrovica, Zrenjanin, Čačak, Kraljevo und anderen Städten.
+      Wir arbeiten in ganz Serbien: Belgrad, Novi Sad, Niš, Kragujevac, Subotica, Pančevo, Sremska Mitrovica, Zrenjanin, Čačak, Kraljevo und weiteren Städten.
 
-      Kontaktieren Sie uns, wir helfen Ihnen, ein Auto zu finden, das Ihnen viele Jahre Freude bereiten wird.
+      Kontaktieren Sie uns, wir helfen Ihnen, ein Auto zu finden, das Sie viele Jahre erfreuen wird.
 translatedFrom: 36463bacbc3b9e5c
 ---
 # Автоподбор в Сербии. Яркий Kia Rio для Анны и её семьи

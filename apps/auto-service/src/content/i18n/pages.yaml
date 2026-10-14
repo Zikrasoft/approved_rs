@@ -89,180 +89,180 @@ bmw:
 translations:
   sr:
     works:
-      metaTitle: Primeri radova auto servisa u Beogradu — CarLab
-      metaDescription: Šta smo našli na dijagnostici, šta smo uradili i koliko je trajalo. Stvarni rad auto servisa CarLab u Beogradu.
+      metaTitle: Primeri radova auto servisa u Beogradu – CarLab
+      metaDescription: Šta smo otkrili tokom dijagnostike, šta smo uradili i koliko je to trajalo. Stvarni rad auto servisa CarLab u Beogradu.
       eyebrow: Primeri radova
       heading: Šta smo radili i kako je završilo
-      lead: 'Analiza konkretnih slučajeva iz našeg auto servisa u Beogradu: s čim je došlo vozilo, šta smo našli na dijagnostici, šta smo uradili i koliko je trajalo.'
+      lead: 'Analiza konkretnih slučajeva iz našeg auto servisa u Beogradu: s čim je došla mašina, šta smo otkrili tokom dijagnostike, šta smo uradili i koliko je to trajalo.'
       detailMetaSuffix: CarLab
-      detailCtaHeading: Imate sličan problem?
-      detailCtaBody: Opisajte simptome — na šta to liči i koliko će koštati dijagnostika.
+      detailCtaHeading: Ista ili slična problema?
+      detailCtaBody: Opisujte simptome – recimo, na šta to liči i koliko će koštati dijagnostika.
       detailCtaVariants:
-        - heading: Imate sličan problem?
-          body: Opišite simptome, na šta to liči i koliko košta dijagnostika.
-        - heading: Da li vaš automobil radi nešto slično?
-          body: Pišite nam ili nas pozovite, daćemo vam preliminarnu informaciju i dogovoriti vreme za dijagnostiku.
-        - heading: Želite isti rezultat?
-          body: Opišite šta se dešava sa automobilom, a mi ćemo vam reći odakle da počnemo i koliko će trajati.
-      usefulInfoLabel: Koriste informacije
-      doorHeading: Slična situacija sa vašim autom?
-      doorText: Opisujte simptome — pomoći ćemo vam odakle da počnete.
+        - heading: Ista ili slična problema?
+          body: Opisujte simptome, recimo, na šta to liči i koliko će koštati dijagnostika.
+        - heading: Mašina ima sličan problem?
+          body: Javite nam se ili nazovite, savetovaćemo vas preliminarno i dogovoriti vreme za dijagnostiku.
+        - heading: Želite slične rezultate?
+          body: Opisujte šta je s mašinom, i reći ćemo vam odakle da krenemo i koliko će trajati.
+      usefulInfoLabel: Koristne informacije
+      doorHeading: Ista priča s vašom mašinom?
+      doorText: Opisujte simptome – savetovaćemo vas odakle da krenete.
       doorButtonLabel: Opisati problem
     contact:
-      metaTitle: Kontakti auto servisa CarLab u Beogradu — adresa i telefon
-      metaDescription: Adresa, radno vreme i telefon auto servisa CarLab u Beogradu. Zakazivanje dijagnostike i popravke putem telefona, na WhatsApp ili Viber.
+      metaTitle: Kontakti auto servisa CarLab u Beogradu – adresa i telefon
+      metaDescription: Adresa, radno vreme i telefon auto servisa CarLab u Beogradu. Zakazivanje za dijagnostiku i popravku putem telefona, WhatsApp-a ili Vibera.
       eyebrow: Kontakti
-      heading: Dođite — pogledajmo auto zajedno
-      lead: Prvi pregled je besplatan i traje petnaestak minuta — to nije dijagnostika, već brz uvid u auto prilikom prijema. To obično dovoljno da se shvati šta nije u redu i koliko će koštati popravka.
+      heading: Dođite – pregledajmo mašinu zajedno
+      lead: Prvi pregled je besplatan i traje oko petnaest minuta – nije dijagnostika, već brzi pregled mašine prilikom prijema. Obično je to dovoljno da razumemo šta je s mašinom i koliko će koštati popravka.
       addressLabel: Adresa
       hoursLabel: Radno vreme
       mapHeading: Kako doći
-      mapNote: Orijentisite se prema tački na mapi — navigacija vas dovodi na pravo mesto. Ima parking za klijente.
+      mapNote: Orijentacija na tačku na mapi – navigator vas dovodi do mesta. Ima parking za klijente.
       arrivalHeading: Šta poneti sa sobom
       arrival:
-        - Servisnu knjigu, ako je imate — to štedi vreme na dijagnostici.
-        - Ključ od tajni na točkovima, ako ste ih postavljali.
-        - Ako je problem povremeni — dođite na 'hladnom' vozilu, tako je lakše uočiti.
+        - Servisnu knjigu, ako je imate – štedi vreme na dijagnostici.
+        - Ključ od sigurnosnih vijaka na točkovima, ako ste ih postavili.
+        - Ako je problem sporadičan – dođite s „hladnom“ mašinom, tako je lakše uhvatiti.
     thanks:
-      metaTitle: Prijava primljena — CarLab
-      metaDescription: Hvala na prijavi. Javićemo se u radno vreme da dogovorimo vreme posete.
+      metaTitle: Zahtev primljen – CarLab
+      metaDescription: Hvala na zahtevu. Javićemo se u radno vreme i dogovoriti vreme posete.
       eyebrow: Gotovo
-      heading: Prijava je kod nas
-      body: Javićemo se u radno vreme — obično u roku od sat vremena. Ako auto nije u voznom stanju, pišite nam u poruku, savetovaćemo vas oko vučne službe.
-      note: Ako se ne javimo dva puta, kontaktiraćemo vas u poruci — ne gubite se.
-      cta: Povratak na početnu
+      heading: Zahtev je kod nas
+      body: Javićemo se u radno vreme – obično u roku od jednog sata. Ako mašina ne može da vozi, javite nam to putem poruke, savetovaćemo vas o vučnoj službi.
+      note: Ako ne uspemo da vas dobijemo dva puta, javićemo se u poruci – ne gubite se.
+      cta: Vrati se na početnu
     privacy:
-      metaTitle: Politika privatnosti — CarLab
+      metaTitle: Politika privatnosti – CarLab
       metaDescription: Koje podatke prikuplja sajt auto servisa CarLab, zašto i koliko dugo ih čuva.
       heading: Politika privatnosti
       lastUpdated: Ažurirano 12. oktobra 2026
       sections:
         - title: Koje podatke prikupljamo
-          text: Samo ono što sami unesete u formu — ime, telefon, opis problema i podaci o vozilu, — kao i adresa stranice sa koje je poslat zahtev i anonimni identifikator pretraživača. Identifikator je nasumičan, čuva se u vašem pretraživaču i potreban je da jedan zahtev ne postane tri kartice.
-        - title: Zašto su nam ti podaci
-          text: Da bismo se javili povodom zahteva, dogovorili vreme i vodili istoriju održavanja vašeg vozila. Ne koristimo ih za slanje reklamnih poruka i ne prosledjujemo trećim licima u reklamne svrhe.
+          text: Samo ono što sami unesete u obrazac – ime, telefon, opis problema i podaci o automobilu, kao i adresa stranice sa koje je poslat zahtev, i anonimni identifikator pretraživača. Identifikator je nasumičan, čuva se u vašem pretraživaču i potreban je da ista prijava ne postane tri kartice.
+        - title: Zašto nam ti podaci
+          text: Da bismo se javili po prijavi, dogovorili vreme i vodili evidenciju o servisiranju vaše mašine. Ne koristimo ih za slanje obaveštenja i ne prosleđujemo trećim stranama u reklamne svrhe.
         - title: Gde se čuvaju
-          text: U enkriptovanoj bazi podataka našeg hosting provajdera i u zatvorenom radnom četu servisa. Pristup imaju samo zaposleni.
+          text: U enkriptovanoj arhivi našeg hosting provajdera i u zatvorenoj radnoj grupi servisa. Pristup imaju samo zaposleni.
         - title: Koliko ih čuvamo
-          text: Do tri godine od poslednje posete — istorija servisa pomaže prilikom sledeće popravke. Na vaš zahtev, obrišemo ih ranije.
+          text: Do tri godine od poslednje posete – servisna istorija pomaže kod sledeće popravke. Na vaš zahtev, uklonićemo ih ranije.
         - title: Kolačići
-          text: Sajt postavlja tehnički kolačić sa izabranim jezikom, analitički — Yandex.Metrika — i reklamni — Meta piksel. Analitika i piksel se aktiviraju pri prvom učitavanju stranice; u baneru na dnu ekrana možete odbiti, i tada se pri sledećem učitavanju ne uključuju. Metrika beleži seanse — kretanje kursora, skrolovanje i klikove, — ali formu zahteva iz beleženja smo isključili. Piksel obaveštava Meta o pregledu stranice i o tome što ste poslali zahtev, napisali nam ili izvršili narudžbinu — tako vidimo koja reklama na Facebook-u i Instagram-u dovodi klijente. Sadržaj forme mu se ne predaje. Ako nakon sajta nastavite u našem Telegram botu i ostavite zahtev, naš server će obavestiti Meta samo o samom faktu zahteva — bez njegovog sadržaja i bez vaših kontakata. Korpa i anonimni identifikator se čuvaju u memoriji pregledača (localStorage) i na naš server sami po sebi ne odlaze.
+          text: Sajt postavlja tehnički kolačić sa izabranim jezikom, analitički – Yandex.Metrika – i reklamni – Meta piksel. Analitika i piksel se aktiviraju prilikom prvog učitavanja stranice; u baneru na dnu ekrana možete odbiti, a tada se prilikom sledećeg učitavanja ne aktiviraju. Metrika beleži sesije – kretanje kursora, skrolovanje i klikove, ali obrazac zahteva nisu uključili. Piksel obaveštava Meta o pregledu stranice i o tome da ste poslali zahtev, javili se ili izvršili porudžbinu – tako vidimo koja reklama na Facebook-u i Instagram-u privlači klijente. Sadržaj obrasca mu se ne prenosi. Ako nakon sajta nastavite u našem Telegram botu i ostavite zahtev, naš server će obavestiti Meta samo o samom zahtevu – bez sadržaja i bez vaših kontakata. Korpa i anonimni identifikator čuvaju se u memoriji pretraživača (localStorage) i sami ne odlaze na naš server.
         - title: Vaša prava
-          text: Možete zatražiti kopiju svojih podataka, njihovo ispravljenje ili brisanje. Dovoljno je da nas pozovete ili napišete u bilo koji messenger.
+          text: Možete zatražiti kopiju svojih podataka, njihovo ispravljenje ili uklanjanje. Dovoljno je da nas pozovete ili napišete u bilo kojoj poruci.
       shopSections:
-        - title: Naručivanje delova
-          text: Sadržaj narudžbine iz korpe odlazi sa zahtevom, kako bismo znali šta da pripremimo. Podatke o plaćanju ne prikupljamo — plaćanje se vrši u servisu.
+        - title: Porudžbine delova
+          text: Sadržaj porudžbine iz korpe odlazi zajedno s zahtevom, da bismo razumeli šta da pripremimo. Podatke o plaćanju ne prikupljamo – uplata se vrši u servisu.
       contactTitle: Pitanja o podacima
       contactBefore: Pozovite ili pišite, kontakti su na stranici
     notFound:
-      metaTitle: Stranica nije pronađena — CarLab
-      heading: Takva stranica ne postoji
-      body: Moguće je da je link zastareo ili se u adresi nalazi greška. Pogledajte usluge ili nam pišite — pomoći ćemo.
+      metaTitle: Stranica nije pronađena – CarLab
+      heading: Takve stranice nema
+      body: Moguće je da je link zastareo ili da je došlo do greške u adresi. Pogledajte usluge ili nam pišite – savetovaćemo.
       cta: Na početnu
     bmw:
-      metaTitle: Popravka i servis BMW u Beogradu - CarLab
-      metaDescription: Dijagnostika i popravka BMW na originalnoj opremi ISTA. Znamo tipične probleme prema motoru i godini proizvodnje, ne nagađamo odakle da krenemo.
+      metaTitle: Popravka i servisiranje BMW u Beogradu - CarLab
+      metaDescription: Dijagnostika i popravka BMW na originalnoj opremi ISTA. Poznajemo tipične probleme po motoru i godini proizvodnje, ne nagađamo s čim da krenemo.
       eyebrow: BMW
-      heading: Popravka i servis BMW
-      lead: 'Znamo specifične probleme N47, N20, N55: od lancaZR do EGR ventila. Dijagnostika na originalnoj opremi ISTA, ne na adapteru s Aliexpress.'
-      trustHeading: Zašto kod nas, a ne u ovlašćeni servis
+      heading: Popravka i servisiranje BMW
+      lead: 'Poznajemo karakteristične probleme N47, N20, N55: od lanca bregaste osovine do EGR ventila. Dijagnostika na originalnoj opremi ISTA, a ne adapteru s Aliexpress-a.'
+      trustHeading: Zašto kod nas, a ne u ovlašćenom servisu
       trust:
-        - 'Dijagnostika na ISTA/ISTA+: vidimo isto što vidi i ovlašćeni servis, bez njihove marže'
-        - Znamo tipične probleme prema motoru i godini proizvodnje, ne nagađamo odakle da krenemo
-        - 'Originalni i kvalitetni neoriginalni delovi: iskreno govorimo šta imamo na skladištu'
-        - 'Kodiranje i adaptacije posle popravke: auto se ne žali na instrument tabli'
-      worksHeading: Šta smo već radili sa BMW
+        - 'Dijagnostika na ISTA/ISTA+: vidimo isto što i ovlašćeni servis, bez njihove marže'
+        - Poznajemo tipične probleme po motoru i godini proizvodnje, ne nagađamo s čim da krenemo
+        - 'Originalni i kvalitetni neoriginalni delovi: iskreno govorimo šta imamo u ponudi'
+        - 'Kodiranje i adaptacije nakon popravke: mašina se ne žali na instrument tabli'
+      worksHeading: Šta smo već uradili s BMW
       ctaEyebrow: BMW
-      ctaHeading: Opisuje šta je sa autom
-      ctaBody: 'Model, godina, motor i šta vas muči: reći ćemo vam preliminarno odakle da krenemo i koliko će koštati dijagnostika.'
-      ctaCommentPlaceholder: Model, godina i šta vas muči
+      ctaHeading: Opisujte šta je s mašinom
+      ctaBody: 'Model, godina, motor i šta vas brine: reći ćemo preliminarno odakle da krenete i koliko će koštati dijagnostika.'
+      ctaCommentPlaceholder: Model, godina i šta vas brine
   en:
     works:
-      metaTitle: Examples of Car Service Work in Belgrade — CarLab
-      metaDescription: What we found during diagnostics, what we did, and how long it took. Real work from CarLab in Belgrade.
-      eyebrow: Work Samples
-      heading: What We Did and How It Turned Out
-      lead: 'An analysis of specific cases from our car service in Belgrade: what the vehicle arrived with, what we found during diagnostics, what we did, and how long it took.'
+      metaTitle: CarLab Auto Service Work Examples in Belgrade
+      metaDescription: Diagnostic findings, repairs made, and time taken. Real work from CarLab in Belgrade.
+      eyebrow: Work Examples
+      heading: What We Did and How It Ended
+      lead: 'Analyzing specific cases from our auto service in Belgrade: what the car came in with, diagnostic findings, repairs made, and the time taken.'
       detailMetaSuffix: CarLab
-      detailCtaHeading: Similar Issue?
-      detailCtaBody: Describe the symptoms — for instance, what it feels like, and how much the diagnostics will cost.
+      detailCtaHeading: Similar Problem?
+      detailCtaBody: Describe the symptoms — for instance, what it feels like and the estimated diagnostic cost.
       detailCtaVariants:
-        - heading: Similar Issue?
-          body: Describe the symptoms, for example, what it feels like and how much the diagnostics will cost.
-        - heading: Is your car doing something similar?
-          body: Contact us via message or call, and we'll provide preliminary advice and schedule a time for diagnostics.
-        - heading: Want the same result?
-          body: Let us know what's wrong with your car, and we’ll explain how we’ll start and how long it will take.
+        - heading: Similar Problem?
+          body: Describe the symptoms, like what it feels like and the estimated cost for diagnostics.
+        - heading: Is Your Car Experiencing Something Similar?
+          body: Contact us via message or call, we can provide a preliminary suggestion and schedule a diagnostic appointment.
+        - heading: Want the Same Result?
+          body: Describe the issue with your car, and we will let you know how we will proceed and the estimated time required.
       usefulInfoLabel: Useful Information
-      doorHeading: Is your car having a similar issue?
-      doorText: Describe the symptoms — we'll help you figure out where to start.
-      doorButtonLabel: Describe the problem
+      doorHeading: Similar Story with Your Car?
+      doorText: Describe the symptoms — we’ll tell you where to start.
+      doorButtonLabel: Describe the Problem
     contact:
-      metaTitle: Contact CarLab Car Service in Belgrade — Address and Phone
-      metaDescription: Address, operating hours, and phone number of CarLab in Belgrade. Make an appointment for diagnostics and repairs via phone, WhatsApp, or Viber.
+      metaTitle: Contact CarLab Auto Service in Belgrade - Address and Phone
+      metaDescription: Address, operating hours, and phone number for CarLab in Belgrade. Schedule diagnostics and repairs via phone, WhatsApp, or Viber.
       eyebrow: Contact
-      heading: Come by — Let's Check the Car Together
-      lead: The initial inspection is free and takes about fifteen minutes — it's not diagnostics but a quick look at the car upon arrival. This usually suffices to understand what’s wrong and how much repairs will cost.
+      heading: Stop By — Let’s Check Your Car Together
+      lead: The initial inspection is free and takes about fifteen minutes — this is not a diagnostic, but a quick look at the car during check-in. This is usually enough to understand what’s wrong with the car and what the repair costs will be.
       addressLabel: Address
       hoursLabel: Operating Hours
       mapHeading: How to Get Here
-      mapNote: Refer to the point on the map — the navigator will get you to the location. There is parking for customers.
+      mapNote: Follow the location on the map — the navigator will lead you to the spot. There is parking available for customers.
       arrivalHeading: What to Bring
       arrival:
-        - The service book, if available — it saves time on diagnostics.
-        - The key for wheel locks, if installed.
-        - If the problem is intermittent — come in with a 'cold' car, it's easier to diagnose that way.
+        - The service book, if you have one — it saves time on diagnostics.
+        - The key to any locking wheel bolts, if installed.
+        - If the issue is intermittent — come with a ‘cold’ car, this makes it easier to diagnose.
     thanks:
-      metaTitle: Application Received — CarLab
-      metaDescription: Thank you for your application. We will call you during business hours to arrange a visit time.
+      metaTitle: Application Received - CarLab
+      metaDescription: Thank you for your submission. We’ll call back during working hours to schedule your visit.
       eyebrow: Done
-      heading: We've Got Your Application
-      body: We'll call you during business hours — usually within an hour. If the car is immobile, please mention that in the messenger, and we'll advise you regarding towing.
-      note: If we can't reach you after two attempts, we'll send a message in the messenger — don't worry.
-      cta: Return to Homepage
+      heading: We Have Your Application
+      body: We will call back during working hours — usually within an hour. If the car is not operational, please inform us via messenger, and we can assist you with towing.
+      note: If we can't reach you after two tries, we will message you — don’t get lost.
+      cta: Return to Home
     privacy:
-      metaTitle: Privacy Policy — CarLab
-      metaDescription: What data the CarLab car service website collects, why, and how long they are stored.
+      metaTitle: Privacy Policy - CarLab
+      metaDescription: What data the CarLab website collects, why, and how long it is stored.
       heading: Privacy Policy
       lastUpdated: Last updated October 12, 2026
       sections:
         - title: What Data We Collect
-          text: Only what you enter in the form — name, phone number, issue description, and vehicle information — as well as the page address from which the application is submitted, and an anonymous browser identifier. The identifier is random, stored in your browser, and needed to ensure that the same application doesn't turn into three cards.
+          text: Only what you enter in the form — name, phone, problem description, and vehicle details — as well as the page address from which the application was submitted, and an anonymous browser identifier. The identifier is random, stored in your browser, and is needed to ensure the same application does not create multiple records.
         - title: Why We Need This Data
-          text: To call back regarding the application, agree on a time, and keep a service history for your car. We do not use it for mailing lists and do not share it with third parties for advertising purposes.
+          text: To return your call regarding the application, schedule an appointment, and maintain a service history for your vehicle. We do not use this data for mailing lists or share it with third parties for advertising purposes.
         - title: Where It Is Stored
-          text: In the encrypted storage of our hosting provider and in a closed working chat for the service. Access is only available to employees.
-        - title: How Long We Store It
-          text: Up to three years from the last visit — service history helps with future repairs. We will delete it earlier upon your request.
+          text: In an encrypted storage of our hosting provider and in a private work chat for the service. Access is restricted to employees only.
+        - title: How Long We Keep It
+          text: Up to three years from the last visit — the service history is useful for the next repair. We will delete it sooner upon your request.
         - title: Cookies
-          text: The site sets a technical cookie for the chosen language, an analytical one for Yandex.Metrics, and a marketing pixel for Meta. The analytics and pixel activate upon the first page load; you can opt out via the banner at the bottom of the screen, which will prevent them from activating on subsequent loads. Metrics records sessions — mouse movements, scrolling, and clicks — but we exclude the application form from this data. The pixel notifies Meta about page views and indicates if you submitted an application, contacted us, or made an order — this helps us understand which ads on Facebook and Instagram attract clients. The contents of the form are not shared with it. If you continue in our Telegram bot after visiting the site and leave an application there, our server will only inform Meta about the fact of the application — without its contents or your contact details. The shopping cart and anonymous identifier are stored in the browser's memory (localStorage) and do not get sent to our server.
+          text: The site sets a technical cookie for the chosen language, an analytical one — Yandex.Metrica — and a marketing one — Meta pixel. The analytics and pixel activate upon the first page load; you can decline it in the banner at the bottom of the screen, and it will not activate again on the next load. Metrica tracks sessions — mouse movements, scrolls, and clicks — but we exclude the application form from the recording. The pixel notifies Meta about page views and when you submitted an application, contacted us, or placed an order — this helps us track which ads on Facebook and Instagram bring in customers. The form contents are not sent to it. If you continue in our Telegram bot after the website and leave an application there, our server will inform Meta only about the submission without its content or your contact details. The cart and anonymous identifier are stored in the browser’s local storage and do not leave to our server by themselves.
         - title: Your Rights
-          text: You can request a copy of your data, their correction, or deletion. Just call or message us on any messenger.
+          text: You can request a copy of your data, its correction, or deletion. Just call or write to us on any messenger.
       shopSections:
         - title: Parts Orders
-          text: The order from the cart is sent along with your application, so we know what to prepare. We do not collect payment information — payments are made at the service.
-      contactTitle: Data Questions
-      contactBefore: Call or message us, contacts are available on the page
+          text: Order details from the cart are sent along with the application, so we understand what to prepare. We do not collect payment data — payment is made at the service.
+      contactTitle: Questions About Data
+      contactBefore: Call or write, contact info is available on the page.
     notFound:
-      metaTitle: Page Not Found — CarLab
+      metaTitle: Page Not Found - CarLab
       heading: This Page Does Not Exist
-      body: The link may be outdated or there could be a typo in the address. Check out our services or message us — we can help.
-      cta: Go to Homepage
+      body: The link may be outdated or there could be a typo in the address. Check our services or contact us — we will assist.
+      cta: Back to Home
     bmw:
-      metaTitle: BMW Repair and Service in Belgrade - CarLab
-      metaDescription: Diagnostics and repair of BMW using original ISTA equipment. We know the common issues based on engine type and model year.
+      metaTitle: BMW Repair and Maintenance in Belgrade - CarLab
+      metaDescription: Diagnosis and repair of BMW using original ISTA equipment. We know the common issues by engine and production year, no guesswork.
       eyebrow: BMW
-      heading: BMW Repair and Service
-      lead: 'We understand the typical problems with N47, N20, N55: from timing chain to EGR valve. Diagnostics with original ISTA equipment, not an adapter from Aliexpress.'
-      trustHeading: Why choose us over a dealership
+      heading: BMW Repair and Maintenance
+      lead: 'We know the typical issues with N47, N20, N55: from the timing chain to the EGR valve. Diagnostics use original ISTA equipment, not an adapter from Aliexpress.'
+      trustHeading: Why Choose Us Over a Dealer Center
       trust:
-        - 'Diagnostics with ISTA/ISTA+: we see what the dealer sees, without the dealership markup'
-        - We know the common engine problems based on model year, no guessing where to start
-        - 'Original and high-quality aftermarket parts: we honestly share what’s in stock'
-        - 'Coding and adaptations after repairs: no warning lights on the dashboard'
-      worksHeading: What we've done with BMWs
+        - 'Diagnostics on ISTA/ISTA+: we see the same as the dealer, without dealer markup.'
+        - We know common problems by engine and production year, so no guesswork.
+        - 'Original and high-quality aftermarket parts: we are transparent about what we have in stock.'
+        - 'Coding and adaptations after repairs: the car won’t throw errors on the dashboard.'
+      worksHeading: What We Have Already Done with BMW
       ctaEyebrow: BMW
-      ctaHeading: Describe the issue with your car
-      ctaBody: 'Model, year, engine, and what concerns you: we’ll give preliminary advice on what to begin with and the cost of diagnostics.'
-      ctaCommentPlaceholder: Model, year, and what concerns you
+      ctaHeading: Describe What's Wrong with Your Car
+      ctaBody: 'Model, year, engine, and what’s bothering you: we’ll provide a preliminary idea of where to start and the diagnostic cost.'
+      ctaCommentPlaceholder: Model, year, and what's bothering you
 translatedFrom: 66b01269ec9786d0

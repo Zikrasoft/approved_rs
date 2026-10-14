@@ -4,35 +4,35 @@ translations:
   en:
     title: Minor Service for Mercedes-Benz C-Class W205 in Belgrade
     body: |-
-      The Mercedes-Benz C-Class W205 arrived at our service center in Belgrade for a minor service.
+      The Mercedes-Benz C-Class W205 came to our car service in Belgrade for a minor service.
 
-      We carried out the following tasks:
+      We completed the following:
 
-      - Oil change;
-      - Replacement of the oil filter;
-      - Replacement of the engine air filter;
-      - Replacement of the cabin filter;
-      - Replacement of all brake pads;
-      - Inspection and maintenance of the braking system.
+      - oil change;
+      - oil filter replacement;
+      - engine air filter replacement;
+      - cabin filter replacement;
+      - all brake pad replacements;
+      - brake system maintenance and inspection.
 
-      A note on the brakes: Brake pads are one of the key safety components, and it's essential to monitor their condition regularly. When replacing pads, we also check the **discs, calipers, and guides**: if any of these parts are corroded or worn, the vehicle will not brake evenly.
+      A note about the brakes. Brake pads are one of the key safety components, and it's essential to check them regularly. When replacing the pads, we always inspect **the discs, calipers, and guide pins**: if any of these parts are corroded or worn, the car will brake unevenly.
     car: Mercedes-Benz C-Class
 
   sr:
-    title: Malo TO Mercedes-Benz C-Class W205 u Beogradu
+    title: Malo održavanje Mercedes-Benz C-Class W205 u Beogradu
     body: |-
-      Mercedes-Benz C-Class W205 je stigao u naš auto servis u Beogradu na malo tehničko održavanje.
+      Mercedes-Benz C-Class W205 je došao u naš servis u Beogradu na malo održavanje.
 
       Uradili smo:
 
-      - zamenu motorno ulja;
+      - zamenu motornog ulja;
       - zamenu uljnog filtera;
-      - zamenu filtera za vazduh u motoru;
-      - zamenu kabinskog filtera;
-      - zamenu svih kočionih pločica;
-      - servisiranje i proveru kočionog sistema.
+      - zamenu vazdušnog filtera motora;
+      - zamenu filtera kabine;
+      - zamenu svih kočionih obloga;
+      - održavanje i proveru kočionog sistema.
 
-      Posebno o kočnicama. Pločice su jedan od ključnih elemenata sigurnosti, i treba ih redovno proveravati. Kada menjamo pločice, uvek gledamo i **diskove, čeljusti i vođice**: ako je nešto od toga zahrđalo ili istrošeno, kočenje će biti neravnomerno.
+      Posebno o kočnicama. Obloge su jedan od ključnih elemenata bezbednosti, i potrebno ih je redovno proveravati. Kada menjamo obloge, uvek gledamo i **diskove, čeljusti i vođice**: ako je nešto od toga zarđalo ili istrošeno, kočenje vozila će biti nerazmjerno.
     car: Mercedes-Benz C-Class
 car: Mercedes-Benz C-Class
 year: 2018

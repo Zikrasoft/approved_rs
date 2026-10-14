@@ -84,167 +84,167 @@ translations:
   sr:
     meta:
       title: 'CarLab — autoservis u Beogradu: dijagnostika, popravka, limarija'
-      description: 'Autoservis u Beogradu: kompjuterska dijagnostika, redovno održavanje i zamena ulja, popravka ovSuspensiona i kočnica, motor i menjač, limarijski radovi posle nezgode.'
+      description: 'Autoservis u Beogradu: kompjuterska dijagnostika, redovno održavanje i zamena ulja, popravka šasije i kočnica, motor i menjač, limarski radovi nakon udesa.'
     hero:
-      heading: Prvo cena, zatim popravka
-      lead: Besplatno očitavanje grešaka, pisana ponuda pre početka radova, garancija 12 meseci. Govorimo šta treba raditi sada, a šta može da sačeka.
-      ctaPrimary: Zakazati servis
-      ctaSecondary: Pogledati usluge
+      heading: Prvo cena, pa popravka
+      lead: Provera grešaka besplatno, pisana procena pre početka radova, garancija 12 meseci. Kažemo šta treba uraditi odmah, a šta može da sačeka.
+      ctaPrimary: Zakaži servis
+      ctaSecondary: Pogledaj usluge
       badges:
-        - Ponuda pre radova
+        - Procena pre radova
         - Garancija 12 meseci
-        - Radimo sa osiguravajućim društvima
+        - Radimo sa osiguranjima
     trust:
       - value: 12 mes
         label: garancija na radove i delove
       - value: 1 dan
-        label: uobičajeno vreme za redovno održavanje
+        label: uobičajeni rok za redovno održavanje
       - value: besplatno
-        label: cena prvobitnog pregleda
+        label: cena prvobitne provere
     servicesHead:
       eyebrow: Usluge
       heading: Šta radimo
-      body: Od zamene ulja do obnavljanja geometrije karoserije posle udara. Sve na jednom mestu — nema potrebe za vožnjom automobila na tri adrese.
+      body: Od zamene ulja do obnavljanja geometrije karoserije nakon udarca. Sve na jednom mestu — ne morate da vozite auto na tri adrese.
     why:
       eyebrow: Zašto kod nas
-      heading: Autoservis bez iznenađenja u računu
-      body: Glavni problem sa servisima — nije cena, već nepredvidivost. Mi to obezbeđujemo.
+      heading: Autoservis bez iznenađenja na računu
+      body: Glavni problem sa servisima nije cena, već nepredvidivost. Mi je uklanjamo.
       points:
-        - title: Ponuda pre radova
-          text: Prvo dijagnostika i pisana ponuda, zatim vaše „da”, i tek tada ključevi u rad.
+        - title: Procena pre radova
+          text: Prvo dijagnostika i pisana procena, zatim vaše „da“, i tek onda ključevi u rad.
         - title: Stare delove vraćamo
-          text: Sve što smo skinuli sa automobila vraćamo u kutiji. Ako želite — proverite da li je deo zaista bio dotrajao.
-        - title: Ne forsiramo zamene
-          text: Ako se može doći do sledećeg održavanja — reći ćemo vam, umesto da prodajemo zamenu danas.
-        - title: Upisujemo u kartu
-          text: Šta je menjano, koji pređeni put, koje delove. Prilikom sledeće posete ne počinjemo iznova.
+          text: Sve što je skinuto sa autom, vraćamo u kutiji. Želite — proverite, da li je deo zaista bio istrošen.
+        - title: Ne namećemo
+          text: Ako je moguće doći do sledećeg održavanja — reći ćemo vam, a ne prodati zamenu danas.
+        - title: Pomažemo sa kartom
+          text: Šta smo menjali, koji je pređeni put, koji delovi. Pri sledećoj poseti ne počinjemo ispočetka.
     process:
       eyebrow: Kako radimo
       heading: Četiri koraka bez nerviranja
-      body: Nema „ostavite auto, zvaćemo vas kasnije”. Znate šta se dešava na svakoj etapi.
+      body: Nema „ostavite auto, javićemo se kasnije“. Znate šta se dešava na svakom koraku.
       steps:
-        - title: Prijavljivanje i zakazivanje
-          text: Opisujete problem telefonom ili u poruci. Pronalazimo vreme da auto ne stoji u redu.
+        - title: Zahtev i zakazivanje
+          text: Opisujete problem telefonom ili putem poruka. Usaglašavamo vreme, da auto ne čeka u redovima.
         - title: Dijagnostika
-          text: Pronalazimo uzrok, a ne simptom. Pokazujemo na automobilu šta nije u redu.
-        - title: Ponuda i odobravanje
-          text: Šaljemo spisak radova i delova sa cenama. Radovi počinju samo posle vašeg odobrenja.
-        - title: Rad i izdavanje
-          text: Radimo, proveravamo u hodu, vraćamo auto sa starim delovima i zapisom u servisnoj knjizi.
+          text: Pronalažemo uzrok, a ne simptom. Pokazujemo na autu šta nije u redu.
+        - title: Procena i odobrenje
+          text: Šaljemo spisak radova i delova sa cenama. Radovi počinju tek nakon vašeg odobrenja.
+        - title: Rad i predaja
+          text: Radimo, proveravamo u vožnji, predajemo auto sa starim delovima i beleškom u servisnoj kartici.
     shopTeaser:
       eyebrow: Delovi
       heading: Akumulatori na stanju, sa ugradnjom za 20 minuta
-      body: Pronalazimo po marki, modelu i godištu — ne po „približno sličnom”. Postavljamo na licu mesta, stari preuzimamo za reciklažu.
-      cta: Izabrati akumulator
+      body: Biramo po marki, modelu i godini — ne po „približno sličnom“. Ugrađujemo na licu mesta, stari uzimamo na reciklažu.
+      cta: Izaberi akumulator
     accident:
-      eyebrow: Posle nezgode
-      heading: Limarijski radovi i farbanje
-      body: Obnavljamo geometriju, ispravljamo i farbamo uz izbor boje po kodu i prema trošenju. Radimo sa osiguravajućim društvima — pomažemo u sakupljanju dokumentacije.
+      eyebrow: Nakon udesa
+      heading: Limarski radovi i farbanje
+      body: Obnavljamo geometriju, ravnamo i farbamo uz odabir boje po kodu i po činjenici izbleđivanja. Radimo sa osiguranjima — pomažemo u prikupljanju dokumenata.
       points:
-        - Stapel i merenje geometrije karoserije
-        - Izbor boje po kodu i kompjuterskim spektrom
-        - Poliranje prelaza da se granica ne vidi
+        - Stanica i merenje geometrije karoserije
+        - Odabir boje po kodu i kompjuterskim spektrima
+        - Poliranje prelaza, da se granice ne vide
         - Pomoć sa dokumentima za osiguranje
       cta: Procena popravke
     faq:
       - q: Koliko košta dijagnostika?
-        a: Prvobitni pregled i očitavanje grešaka — besplatno. Plaćena postaje samo dubinska dijagnostika, kada je potrebno rastavljati deo ili stavljati auto na stanac; o ceni obaveštavamo unapred.
+        a: Prvobitna provera i čitanje grešaka — besplatno. Plaćena postaje samo dublja dijagnostika, kada treba rastaviti sklop ili staviti auto na test; o ceni obaveštavamo unapred.
       - q: Mogu li doći sa svojim delovima?
-        a: Možete. U tom slučaju, garancija se odnosi samo na naš rad, a ne na deo — to je pošteno i funkcioniše u oba smera.
-      - q: Da li radite sa osiguravajućim kompanijama?
-        a: Da, za limarijske radove. Pomažemo u obradi dokumenata i odobravanju ponude, a ako osiguranje ne pokriva sve — odmah ćemo reći koliko će ostati na vama.
-      - q: Kako brzo mogu doći na održavanje?
-        a: Obično u roku od dva do tri radna dana, a za zamenu ulja ili akumulatora često se uspeva uzeti u istom danu. Pozovite — reći ćemo tačno.
+        a: Možete. U tom slučaju garancija se odnosi samo na našu uslugu, a ne na deo — to je pošteno i važi za obe strane.
+      - q: Radite li sa osiguravajućim kompanijama?
+        a: Da, za limarske popravke. Pomažemo u izradi dokumenata i usaglašavanju procene, a ako osiguranje ne pokriva sve — odmah ćemo reći koliko ostaje na vama.
+      - q: Koliko brzo mogu doći na održavanje?
+        a: Obično u roku od dva do tri radna dana, a za zamenu ulja ili akumulatora često možete doći istog dana. Pozovite — reći ćemo tačno.
       - q: Da li dajete garanciju?
-        a: 'Dvanaest meseci na obavljene radove i na delove koje smo sami postavili. Garancijski slučaj rešavamo bez sporova: ako je to naša greška, radimo ponovo besplatno.'
-      - q: Auto na stranim tablicama — da li je problem?
-        a: Ne. Za popravku dokumenta o registraciji nisu potrebna, dođite kako jeste.
+        a: 'Dvanaest meseci na izvršene radove i na delove koje smo mi ugradili. Garancijski slučaj rešavamo bez rasprava: ako je to naša greška, radimo besplatno.'
+      - q: Auto na stranim registarskim tablicama — da li je to problem?
+        a: Ne. Za popravku dokumenti o registraciji nisu potrebni, dođite kako jeste.
     finalCta:
-      eyebrow: Zakazati
-      heading: Recite nam šta je sa autom
-      body: Povratićemo se u radno vreme, razjasniti detalje i pronaći vreme. Ako je pitanje hitno — jednostavno pozovite.
-      cta: Ostaviti prijavu
+      eyebrow: Zakaži
+      heading: Recite nam šta nije u redu sa automobilom
+      body: Javićemo se u radno vreme, razjasnićemo detalje i usaglasiti vreme. Ako je pitanje hitno — jednostavno pozovite.
+      cta: Ostavi zahtev
   en:
     meta:
       title: 'CarLab — car service in Belgrade: diagnostics, repairs, bodywork'
-      description: 'Car service in Belgrade: computer diagnostics, scheduled maintenance, brake and suspension repairs, engine and gearbox work, accident repairs.'
+      description: 'Car service in Belgrade: computer diagnostics, scheduled maintenance, brake and suspension repairs, engine and gearbox work, accident repair.'
     hero:
-      heading: First the price, then the repair
-      lead: Free error reading, written estimate before work begins, 12-month warranty. We tell you what's urgent and what can wait.
-      ctaPrimary: Schedule a service
+      heading: Price first, then repairs
+      lead: Error reading is free, written estimate before work starts, 12-month guarantee. We tell you what needs immediate attention and what can wait.
+      ctaPrimary: Book a service appointment
       ctaSecondary: View services
       badges:
-        - Estimate before work
-        - 12-month warranty
-        - We work with insurance
+        - Estimate before work begins
+        - 12-month guarantee
+        - We work with insurance companies
     trust:
       - value: 12 months
-        label: warranty on work and parts
+        label: guarantee on work and parts
       - value: 1 day
-        label: average time for scheduled maintenance
-      - value: free
+        label: typical scheduled maintenance duration
+      - value: free of charge
         label: initial inspection cost
     servicesHead:
       eyebrow: Services
       heading: What we do
-      body: From oil changes to restoring body geometry after a collision. Everything in one place — no need to visit three different locations.
+      body: From oil changes to restoring body geometry after an impact. Everything in one place—no need to drive around to three different addresses.
     why:
       eyebrow: Why choose us
-      heading: A car service with no surprises in the bill
-      body: The main issue with services is not the price, but unpredictability. We eliminate that.
+      heading: A service without invoice surprises
+      body: The main issue with car services isn't the price, but unpredictability. We eliminate that.
       points:
         - title: Estimate before work
-          text: First diagnostics and written estimate, then your ‘yes’, and only then do we start working.
-        - title: Return old parts
-          text: Everything removed from your car is returned in a box. Feel free to check if the part was indeed worn out.
-        - title: No upselling
-          text: If you can wait until the next maintenance, we’ll let you know instead of pushing for a replacement today.
-        - title: Record in service card
-          text: What was replaced, mileage, which parts were used. We don’t start from scratch on your next visit.
+          text: First diagnostics and a written estimate, then your 'yes', and only then do we start working.
+        - title: We return old parts
+          text: Everything removed from your vehicle will be returned in a box. Feel free to check if the part was truly worn out.
+        - title: No pressure to replace
+          text: If you can wait until the next scheduled maintenance, we'll let you know instead of pushing a replacement today.
+        - title: We keep records
+          text: What was changed, how many kilometers, what parts were used. We don't start from scratch on your next visit.
     process:
-      eyebrow: How we work
-      heading: Four steps with no stress
-      body: No ‘leave the car and we’ll call you later’. You know what’s happening at every stage.
+      eyebrow: Our process
+      heading: Four steps without hassle
+      body: No 'drop off your car and we'll call you later'. You’ll know what’s happening at every stage.
       steps:
-        - title: Request and booking
-          text: Describe the issue over the phone or via messenger. We find a time so your car isn’t waiting in line.
+        - title: Request and appointment
+          text: Describe your problem over the phone or via messenger. We’ll schedule a time to avoid waiting.
         - title: Diagnostics
-          text: We identify the cause, not just the symptom. We show you on the car what exactly is wrong.
+          text: We find the cause, not just the symptoms. We show you on the car what the issue is.
         - title: Estimate and approval
-          text: We send a list of work and parts along with prices. Work only begins after your confirmation.
-        - title: Work and pickup
-          text: We complete the work, check it on the go, and return the car with old parts and an updated service record.
+          text: We send a list of work and parts with prices. Work begins only after your confirmation.
+        - title: Completion and delivery
+          text: We perform the work, check it on the go, and return the car with old parts and an update in the service record.
     shopTeaser:
       eyebrow: Parts
-      heading: Akumulator in stock, installed in 20 minutes
-      body: We tailor our selection by brand, model, and year — not by ‘about the same’. We install on site and take the old one for recycling.
+      heading: Akumulator available, installed in 20 minutes
+      body: We match by brand, model, and year—not just ‘a similar one’. We install on the spot and take the old one for recycling.
       cta: Find an akumulator
     accident:
       eyebrow: After an accident
-      heading: Body repair and painting
-      body: We restore geometry, fix and paint with color matching by code and actual fading. We work with insurance — helping you gather documents.
+      heading: Body repairs and painting
+      body: We restore geometry, straighten, and paint matching the color code and actual fading. We work with insurers and help with documentation.
       points:
-        - Dolly and geometry measurement
-        - Color matching by code and computer spectrometer
-        - Polishing transition so borders aren't visible
-        - Assistance with documents for insurance
-      cta: Evaluate repairs
+        - Alignment and measurement of body geometry
+        - Color matching by code and computerized spectrometry
+        - Polishing transitions to make borders invisible
+        - Assistance with insurance paperwork
+      cta: Estimate repair costs
     faq:
-      - q: How much does diagnostics cost?
-        a: The initial inspection and error reading are free. Only in-depth diagnostics, which require disassembly or using a stand, are chargeable; we inform you of the price in advance.
-      - q: Can I come with my own parts?
-        a: Yes. In this case, the warranty only covers our work, not the part — it's fair and works both ways.
+      - q: How much is diagnostics?
+        a: The initial inspection and error reading are free. Only in-depth diagnostics requiring disassembly or on a stand incurs a charge; we inform you of the price beforehand.
+      - q: Can I bring my own parts?
+        a: Yes, you can. In this case, our guarantee applies only to our work, not to the part—this is fair and works both ways.
       - q: Do you work with insurance companies?
-        a: Yes, for body repairs. We help you prepare documents and approve the estimate, and if insurance doesn’t cover everything — we promptly inform you of the remaining costs.
-      - q: How fast can I get a service appointment?
-        a: Usually within two to three business days, and for an oil change or akumulator replacement, we often can take you the same day. Call us for an exact time.
-      - q: Do you offer a warranty?
-        a: 'Twelve months on completed work and parts we install. Warranty cases are handled without disputes: if it’s our fault, we fix it for free.'
+        a: Yes, for body repairs. We will help you complete the paperwork and agree on the estimate, and if the insurance doesn't cover everything, we will immediately inform you of the remaining balance.
+      - q: How quickly can I get scheduled maintenance?
+        a: Typically within two to three business days, and for oil or akumulator replacement, it’s often possible to do it the same day. Call us and we’ll confirm.
+      - q: Do you offer a guarantee?
+        a: "Twelve months on work performed and parts we installed. Warranty cases are handled without disputes: if it's our fault, we redo it for free."
       - q: Is having a foreign license plate a problem?
-        a: No. For repairs, registration documents aren’t needed; come as you are.
+        a: No. For repairs, registration documents are not needed, just come as you are.
     finalCta:
-      eyebrow: Sign up
+      eyebrow: Book now
       heading: Tell us what's wrong with your car
-      body: We’ll call back during business hours to confirm details and schedule a time. If it’s urgent, just give us a call.
+      body: We'll call you back during business hours to clarify details and schedule a time. If it’s urgent, just call us.
       cta: Submit a request
 translatedFrom: 62abbce4c863ad39

@@ -6,145 +6,145 @@ translations:
     body: |-
       ## Car Sourcing in Switzerland: We Found a BMW 120d with Original Mileage for Our Client
 
-      Buying a used car in Switzerland requires a particularly careful approach. The cost of maintenance and repairs is quite high here, so making a mistake when choosing a vehicle can lead to serious additional expenses shortly after the purchase.
+      Buying a used car in Switzerland requires a particularly careful approach. The costs of maintenance and repairs are quite high here, so making a mistake in choosing a vehicle can lead to significant additional expenses shortly after the purchase.
 
-      We were approached by a client who had recently moved to Switzerland and wanted to buy their first car here. Their main requirements were reliability, reasonable purchase and operating costs, an economical diesel engine, and good technical condition without the need for expensive repairs immediately after the purchase.
+      We received a request from a client who had recently moved to Switzerland and wanted to buy his first car here. The main requirements were reliability, reasonable purchase and operating costs, an economical diesel engine, and good technical condition without the need for costly repairs immediately after the purchase.
 
-      One of the suitable options we considered was the **BMW 1 Series 120d**.
+      We considered **BMW 1 Series 120d** as one of the suitable options.
 
       ## Sourcing BMW 120d in Switzerland
 
-      We needed to find a BMW with a transparent history, original mileage, and normal technical condition.
+      We needed to find a BMW with a clear history, original mileage, and acceptable technical condition.
 
-      When sourcing used BMWs, we utilize professional diagnostic software **BMW ISTA**. This provides significantly more information about the vehicle's condition than a standard universal diagnostic scanner.
+      When sourcing used BMWs, we utilize professional computer diagnostics with **BMW ISTA**. This allows us to obtain significantly more information about the vehicle's condition than a standard universal diagnostic scanner.
 
-      We check the electronic modules of the car, stored error codes, the performance parameters of the systems, and any other available diagnostic information. The data obtained is compared with the mileage, documents, vehicle history reports, and results from physical inspections.
+      We check the car's electronic control units, stored faults, system operation parameters, and other available diagnostic information. The data we gather is then compared with the mileage, documents, vehicle history reports, and results from the physical inspection.
 
-      In this case, all the information aligned well. The mileage on the car was original, and we found no signs of it being tampered with.
+      In this case, all the data matched up well. The mileage turned out to be original, and we found no signs of it being tampered with.
 
-      ## Has the Car Had Repairs?
+      ## Were There Any Repairs on the Vehicle?
 
-      Yes. As with most used vehicles, the selected BMW had certain signs of wear and some minor defects and repairs in its history.
+      Yes. Like most used cars, the selected BMW showed certain signs of use, minor defects, and past repairs.
 
-      The fact that a car has been repaired does not necessarily mean we would immediately reject the purchase. It’s much more important to understand what was repaired, how severe the damages were, and the quality of the work done.
+      The mere fact of previous repairs does not immediately disqualify a car from purchase for us. What is much more important is understanding what was repaired, how serious the damages were, and how well the work was done.
 
-      After our inspection, we concluded that the issues we found were not critical and did not prevent us from considering the car for purchase.
+      After our inspection, we concluded that the discovered issues were not critical and did not hinder considering the vehicle for purchase.
 
-      As a result, the client received a BMW 120d with verified original mileage, a clear history, and good technical condition.
+      As a result, the client acquired a BMW 120d with confirmed original mileage, a clear history, and good technical condition.
 
-      ## Why is Professional Car Sourcing Especially Important in Switzerland?
+      ## Why is Professional Car Sourcing Particularly Relevant in Switzerland?
 
-      When repairs and maintenance for a car are expensive, it's much more cost-effective to check the vehicle before buying rather than discovering issues after the deal and having to cover the repairs yourself.
+      When repairs and maintenance of a car are expensive, it is much more cost-effective to check the vehicle before the purchase rather than discovering faults afterwards and having to cover the repair costs yourself.
 
-      Therefore, during our car sourcing process, we strive to thoroughly check the vehicle before making a decision: its technical condition, bodywork, history, mileage, diagnostic reports, and all available documents.
+      Therefore, during the sourcing process, we strive to thoroughly inspect the car before making a decision: assessing its technical condition, bodywork, history, mileage, computer diagnostics, and available documents.
   sr:
     title: BMW 120d
     body: |-
-      ## Odabir automobila u Švajcarskoj: pronašli smo BMW 120d sa originalnim pređenim kilometrima za našeg klijenta
+      ## Auto-sourcing u Švajcarskoj: pronašli smo BMW 120d sa originalnim pređenim kilometrima za našeg klijenta
 
-      Kupovina polovnog automobila u Švajcarskoj zahteva posebno pažljiv pristup. Troškovi održavanja i popravke su ovde prilično visoki, pa greška pri izboru vozila može dovesti do ozbiljnih dodatnih troškova već nakon kupovine.
+      Kupovina polovnog automobila u Švajcarskoj zahteva posebno pažljiv pristup. Troškovi održavanja i popravke su ovde relativno visoki, te greška prilikom izbora vozila može dovesti do ozbiljnih dodatnih troškova već nakon kupovine.
 
-      Obratio nam se klijent koji je nedavno prešao u Švajcarsku i želeo je da kupi svoj prvi automobil ovde. Glavni zahtevi bili su pouzdanost, razumna cena kupovine i korišćenja, štedljiv dizel motor i dobro tehničko stanje bez potrebe da odmah posle kupovine ide na skupu popravku.
+      Obratio nam se klijent koji je nedavno prešao u Švajcarsku i želeo da kupi svoj prvi automobil ovde. Njegovi glavni zahtevi su bili pouzdanost, razumna cena kupovine i korišćenja, ekonomski dizel motor i dobro tehničko stanje, bez potrebe da odmah posle kupovine odlazi na skupe popravke.
 
-      Kao jedan od odgovarajućih modela razmatrali smo **BMW 1 serije 120d**.
+      Kao jedan od odgovarajućih opcija razmatrali smo **BMW serije 1 120d**.
 
-      ## Odabir BMW 120d u Švajcarskoj
+      ## Auto-sourcing BMW 120d u Švajcarskoj
 
-      Potrebno je bilo odabrati BMW sa transparentnom istorijom, originalnim pređenim kilometrima i normalnim tehničkim stanjem.
+      Bilo je potrebno pronaći BMW sa transparentnom istorijom, originalnim pređenim kilometrima i normalnim tehničkim stanjem.
 
-      Prilikom odabira polovnih BMW-ova koristimo profesionalnu kompjutersku dijagnostiku **BMW ISTA**. Ona nam omogućava da dobijemo znatno više informacija o stanju automobila nego što bi to učinila obična univerzalna dijagnostička oprema.
+      Prilikom selekcije polovnih BMW-a koristimo profesionalnu kompjutersku dijagnostiku **BMW ISTA**. Ova dijagnostika nam omogućava da dobijemo znatno više informacija o stanju automobila u odnosu na običnu povezanost sa univerzalnim dijagnostičkim skenerom.
 
-      Proveravamo elektronske module vozila, sačuvane greške, parametre rada sistema i druge dostupne dijagnostičke informacije. Dobijeni podaci se porede sa pređenim kilometrima, dokumentacijom, izveštajima o istoriji automobila i rezultatima fizičke provere.
+      Proveravamo elektronske module vozila, sačuvane greške, parametre rada sistema i druge dostupne dijagnostičke informacije. Prikupljeni podaci se upoređuju sa pređenim kilometrima, dokumentima, izveštajima o istoriji vozila i rezultatima fizičkog pregleda.
 
-      U ovom slučaju, svi podaci su se dobro poklapali. Pređeni kilometri su se pokazali kao originalni, a znake vraćanja na manje kilometre nismo otkrili.
+      U ovom slučaju, svi podaci su se dobro poklapali. Pređeni kilometri automobila su bili originalni, a tragovi njegovog obrtanja nisu ustanovljeni.
 
       ## Da li je automobil imao popravke?
 
-      Da. Kao i kod većine polovnih automobila, odabrani BMW je imao određene tragove korišćenja, male defekte i popravke u prošlosti.
+      Da. Kao i kod većine polovnih automobila, izabrani BMW je imao određene tragove korišćenja, male defekte i popravke iz prošlosti.
 
-      Sama činjenica o popravci automobila za nas nije razlog da odmah odustanemo od kupovine. Puno je važnije razumeti šta je tačno popravljano, kakva su bila oštećenja i koliko je kvalitetno izvršen posao.
+      Sama činjenica o popravci automobila za nas nije razlog da odmah odustanemo od kupovine. Mnogo je važnije razumeti šta je tačno popravljano, koliko su oštećenja bila ozbiljna i koliko je kvalitetno obavljen posao.
 
-      Nakon provere došli smo do zaključka da otkriveni momenti nisu kritični i ne ometaju nas da razmatramo automobil za kupovinu.
+      Nakon provere, došli smo do zaključka da otkrivene stavke nisu kritične i ne sprečavaju nas da razmatramo automobil za kupovinu.
 
       Kao rezultat, klijent je dobio BMW 120d sa potvrđenim originalnim pređenim kilometrima, jasnom istorijom i dobrim tehničkim stanjem.
 
-      ## Zašto je profesionalni odabir automobila posebno značajan u Švajcarskoj?
+      ## Zašto je profesionalni auto-sourcing posebno relevantan u Švajcarskoj?
 
-      Kada popravke i održavanje automobila koštaju puno, daleko je isplativije proveriti automobil pre kupovine, nego nakon transakcije otkrivati kvarove i plaćati njihovo otklanjanje samostalno.
+      Kada su troškovi popravke i održavanja automobila visoki, daleko je isplativije proveriti automobil pre kupovine nego nakon transakcije otkrivati kvarove i plaćati njihovo otklanjanje sami.
 
-      Zato se prilikom odabira automobila trudimo da što detaljnije proverimo vozilo pre donošenja odluke: tehničko stanje, karoseriju, istoriju, pređene kilometre, kompjutersku dijagnostiku i dostupnu dokumentaciju.
+      Zbog toga prilikom auto-sourcinga nastojimo da što detaljnije proverimo automobil pre donošenja odluke: tehničko stanje, karoseriju, istoriju, pređene kilometre, kompjutersku dijagnostiku i dostupnu dokumentaciju.
   es:
     title: BMW 120d
     body: |-
-      ## Selección de Automóviles en Suiza: encontramos un BMW 120d con kilometraje original para nuestro cliente
+      ## Selección de vehículos en Suiza: encontramos un BMW 120d con kilometraje original para nuestro cliente
 
-      La compra de un automóvil de segunda mano en Suiza requiere un enfoque muy cuidadoso. El costo de mantenimiento y reparación aquí es bastante alto, por lo que un error al elegir el coche puede traducirse en gastos adicionales significativos después de la compra.
+      Comprar un coche de segunda mano en Suiza requiere un enfoque especialmente cuidadoso. Los costos de mantenimiento y reparación aquí son bastante altos, así que un error al elegir el vehículo puede acarrear gastos adicionales serios después de la compra.
 
-      Un cliente se acercó a nosotros, quien recientemente se mudó a Suiza y quería adquirir su primer automóvil aquí. Sus requisitos principales eran fiabilidad, un precio de compra y de uso razonable, un motor diésel económico y un buen estado técnico, sin la necesidad de hacer reparaciones costosas inmediatamente después de la compra.
+      Un cliente se puso en contacto con nosotros, quien recientemente se mudó a Suiza y quería adquirir su primer coche aquí. Sus principales requisitos eran fiabilidad, un precio razonable de compra y operación, un motor diésel económico y un buen estado técnico sin necesidad de ir de inmediato a reparaciones costosas tras la compra.
 
-      Entre las opciones consideradas, estaba el **BMW Serie 1 120d**.
+      Un modelo adecuado que consideramos fue el **BMW Serie 1 120d**.
 
       ## Selección del BMW 120d en Suiza
 
-      Era necesario encontrar un BMW con un historial transparente, kilometraje original y un estado técnico adecuado.
+      Era necesario encontrar un BMW con un historial transparente, kilometraje original y un estado técnico aceptable.
 
-      Para la selección de BMW de segunda mano, utilizamos un diagnóstico informático profesional **BMW ISTA**. Este sistema permite obtener mucha más información sobre el estado del automóvil que una conexión estándar a un escáner de diagnóstico universal.
+      Para la selección de coches de segunda mano, utilizamos el diagnóstico computarizado profesional **BMW ISTA**. Esto permite obtener mucha más información sobre el estado del vehículo que una simple conexión con un escáner de diagnóstico universal.
 
-      Revisamos los módulos electrónicos del vehículo, guardamos errores, parámetros de funcionamiento de los sistemas y otra información diagnóstica disponible. Los datos obtenidos se comparan con el kilometraje, la documentación, los informes de historial del automóvil y los resultados de la inspección física.
+      Revisamos los módulos electrónicos del coche, errores guardados, parámetros de funcionamiento de los sistemas y otra información diagnóstica disponible. Los datos obtenidos se comparan con el kilometraje, la documentación, los informes sobre el historial del coche y los resultados de la inspección física.
 
-      En este caso, todos los datos coincidían adecuadamente. El kilometraje del vehículo resultó ser original, y no encontramos signos de manipulación.
+      En este caso, todos los datos concordaban. El kilometraje del coche resultó ser original y no encontramos signos de manipulación.
 
-      ## ¿El vehículo ha tenido reparaciones?
+      ## ¿Se realizaron reparaciones en el coche?
 
-      Sí. Al igual que muchos automóviles de segunda mano, el BMW seleccionado tenía ciertos signos de uso, pequeñas imperfecciones y reparaciones en el pasado.
+      Sí. Como ocurre con la mayoría de los coches de segunda mano, el BMW seleccionado presentó ciertos signos de uso, pequeños defectos y reparaciones en el pasado.
 
-      El hecho de que el automóvil haya sido reparado no es una razón para rechazar inmediatamente la compra. Es mucho más importante entender qué se reparó, qué tan graves fueron los daños y con qué calidad se realizaron las reparaciones.
+      El simple hecho de que un coche haya sido reparado no es razón suficiente para rechazar la compra de inmediato. Es mucho más importante entender qué fue lo que se reparó, la gravedad de los daños y la calidad del trabajo realizado.
 
-      Después de la revisión, concluimos que los puntos encontrados no eran críticos y no impedían considerar el automóvil para la compra.
+      Tras la verificación, llegamos a la conclusión de que los puntos encontrados no son críticos y no impiden considerar el coche para la compra.
 
-      Como resultado, el cliente adquirió un BMW 120d con kilometraje original verificado, un historial claro y un buen estado técnico.
+      Como resultado, el cliente recibió un BMW 120d con kilometraje original confirmado, un historial claro y un buen estado técnico.
 
-      ## ¿Por qué la selección profesional de automóviles es especialmente relevante en Suiza?
+      ## ¿Por qué es tan relevante la selección profesional de vehículos en Suiza?
 
-      Cuando las reparaciones y el mantenimiento de los automóviles son costosos, es mucho más rentable verificar el coche antes de la compra que descubrir fallos tras la transacción y tener que pagar por su reparación por cuenta propia.
+      Cuando la reparación y mantenimiento de un coche son costosos, es mucho más rentable comprobar el vehículo antes de la compra que descubrir fallos después de la transacción y tener que pagar por su reparación por tu cuenta.
 
-      Por lo tanto, en nuestra selección de automóviles, nos esforzamos por verificar exhaustivamente el vehículo antes de tomar una decisión: estado técnico, carrocería, historial, kilometraje, diagnóstico informático y documentos disponibles.
+      Por eso, en la selección de vehículos procuramos revisar el coche de forma detallada antes de tomar una decisión: estado técnico, carrocería, historial, kilometraje, diagnóstico computarizado y documentación disponible.
   de:
     title: BMW 120d
     body: |-
-      ## Fahrzeugauswahl in der Schweiz: Wir haben für unseren Kunden einen BMW 120d mit originalem Kilometerstand gefunden
+      ## Autoauswahl in der Schweiz: Wir haben einen BMW 120d mit originalem Kilometerstand für unseren Kunden gefunden
 
-      Der Kauf eines gebrauchten Fahrzeugs in der Schweiz erfordert einen besonders sorgfältigen Ansatz. Die Kosten für Wartung und Reparatur sind hier relativ hoch, sodass ein Fehler bei der Fahrzeugwahl nach dem Kauf zu erheblichen zusätzlichen Ausgaben führen kann.
+      Der Kauf eines gebrauchten Fahrzeugs in der Schweiz erfordert einen besonders sorgfältigen Ansatz. Die Kosten für Wartung und Reparatur sind hier recht hoch, daher kann ein Fehler bei der Fahrzeugwahl ernste zusätzliche Ausgaben nach dem Kauf nach sich ziehen.
 
-      Ein Kunde hat sich an uns gewandt, der kürzlich in die Schweiz gezogen ist und hier sein erstes Auto kaufen wollte. Die Hauptanforderungen waren Zuverlässigkeit, ein angemessener Kaufpreis und Betriebskosten, ein sparsamer Dieselmotor sowie ein guter technischer Zustand, ohne dass er direkt nach dem Kauf zur teuren Reparatur fahren musste.
+      Ein Kunde, der vor kurzem in die Schweiz gezogen war, wandte sich an uns, um hier sein erstes Auto zu kaufen. Die Hauptkriterien waren Zuverlässigkeit, ein angemessener Kaufpreis und Betriebskosten, ein sparsamer Dieselmotor sowie ein guter technischer Zustand, ohne dass sofort nach dem Kauf eine kostspielige Reparatur erforderlich ist.
 
-      Eine der geeigneten Optionen war der **BMW 1er 120d**.
+      Als eine der passenden Optionen zogen wir den **BMW 1er 120d** in Betracht.
 
-      ## Fahrzeugauswahl BMW 120d in der Schweiz
+      ## Autoauswahl BMW 120d in der Schweiz
 
-      Es musste ein BMW mit transparentem Werdegang, originalem Kilometerstand und gutem technischen Zustand ausgewählt werden.
+      Es galt, einen BMW mit transparenter Geschichte, originalem Kilometerstand und normalem technischen Zustand zu finden.
 
-      Bei der Auswahl von gebrauchten BMW setzen wir die professionelle Computerdiagnose **BMW ISTA** ein. Damit erhalten wir deutlich mehr Informationen über den Zustand des Fahrzeugs als mit einem herkömmlichen universellen Diagnosescanner.
+      Bei der Auswahl von gebrauchten BMWs verwenden wir die professionelle Computerdiagnose **BMW ISTA**. Diese ermöglicht es uns, wesentlich mehr Informationen über den Zustand des Fahrzeugs zu erhalten als eine gewöhnliche Verbindung mit einem universellen Diagnosescanner.
 
-      Wir prüfen die elektronischen Steuergeräte des Fahrzeugs, gespeicherte Fehler, Systemparameter und andere verfügbare Diagnosedaten. Die erhaltenen Informationen werden mit dem Kilometerstand, den Dokumenten, den Berichten über die Fahrzeughistorie und den Ergebnissen der physischen Inspektion verglichen.
+      Wir überprüfen die elektronischen Steuergeräte des Fahrzeugs, gespeicherte Fehler, Systemparameter und andere verfügbare Diagnosedaten. Die gesammelten Informationen werden mit dem Kilometerstand, den Dokumenten, den Fahrzeughistorienberichten und den Ergebnissen der physischen Inspektion abgeglichen.
 
-      In diesem Fall stimmten alle Daten gut überein. Der Kilometerstand des Fahrzeugs war original und Anzeichen einer Manipulation wurden nicht gefunden.
+      In diesem Fall stimmten alle Daten gut überein. Der Kilometerstand des Fahrzeugs stellte sich als original heraus, Anzeichen einer Manipulation konnten wir nicht feststellen.
 
-      ## Gab es Reparaturen am Fahrzeug?
+      ## Hatte das Fahrzeug Reparaturen?
 
-      Ja. Wie bei den meisten gebrauchten Fahrzeugen, wies der ausgewählte BMW bestimmte Gebrauchsspuren, kleinere Mängel und frühere Reparaturen auf.
+      Ja. Wie bei den meisten gebrauchten Fahrzeugen wies der gewählte BMW bestimmte Gebrauchsspuren, kleine Mängel und frühere Reparaturen auf.
 
-      Die Tatsache, dass das Fahrzeug Reparaturen hatte, ist für uns kein Grund, sofort vom Kauf abzusehen. Es ist viel wichtiger zu verstehen, was genau repariert wurde, wie schwer die Schäden waren und wie qualitativ die Arbeiten durchgeführt wurden.
+      Der Umstand, dass ein Fahrzeug repariert wurde, ist für uns kein Grund, sofort von einem Kauf abzusehen. Weitaus wichtiger ist es zu verstehen, was genau repariert wurde, wie erheblich die Schäden waren und wie qualitativ die Arbeiten durchgeführt wurden.
 
-      Nach der Überprüfung sind wir zu dem Schluss gekommen, dass die festgestellten Punkte nicht kritisch sind und einer Kaufentscheidung nicht im Wege stehen.
+      Nach der Prüfung kamen wir zu dem Schluss, dass die gefundenen Punkte nicht kritisch sind und dem Kauf des Fahrzeugs nicht im Wege stehen.
 
-      Insgesamt erhielt der Kunde einen BMW 120d mit bestätigt originalem Kilometerstand, klarer Geschichte und gutem technischen Zustand.
+      In der Folge erhielt der Kunde einen BMW 120d mit bestätigtem originalen Kilometerstand, verständlicher Historie und gutem technischen Zustand.
 
-      ## Warum ist professionelle Fahrzeugauswahl in der Schweiz besonders relevant?
+      ## Warum ist professionelle Autoauswahl besonders wichtig in der Schweiz?
 
-      Wenn Wartung und Reparatur des Fahrzeugs teuer sind, ist es viel vorteilhafter, das Auto vor dem Kauf zu überprüfen, als nach dem Deal Mängel zu entdecken und deren Behebung selbst zu bezahlen.
+      Wenn Reparaturen und Wartungen teuer sind, ist es viel vorteilhafter, das Fahrzeug vor dem Kauf zu prüfen, als nach dem Abschluss der Transaktion Defekte zu entdecken und deren Behebung selbst zu bezahlen.
 
-      Deshalb bemühen wir uns bei der Fahrzeugauswahl, das Auto so gründlich wie möglich zu überprüfen, bevor wir eine Entscheidung treffen: technischer Zustand, Karosserie, Historie, Kilometerstand, Computerdiagnose und verfügbare Dokumente.
+      Deshalb bemühen wir uns bei der Autoauswahl, das Fahrzeug vor der Entscheidungsfindung so umfassend wie möglich zu überprüfen: technischen Zustand, Karosserie, Historie, Kilometerstand, Computerdiagnose und verfügbare Dokumente.
 car: BMW 120d
 year: 2018
 price:
