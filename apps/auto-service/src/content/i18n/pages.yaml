@@ -143,6 +143,23 @@ translations:
       heading: Takva stranica ne postoji
       body: Moguće je da je link zastareo ili se u adresi nalazi greška. Pogledajte usluge ili nam pišite — pomoći ćemo.
       cta: Na početnu
+    bmw:
+      metaTitle: Popravka i servis BMW u Beogradu - CarLab
+      metaDescription: Dijagnostika i popravka BMW na originalnoj opremi ISTA. Znamo tipične probleme prema motoru i godini proizvodnje, ne nagađamo odakle da krenemo.
+      eyebrow: BMW
+      heading: Popravka i servis BMW
+      lead: 'Znamo specifične probleme N47, N20, N55: od lancaZR do EGR ventila. Dijagnostika na originalnoj opremi ISTA, ne na adapteru s Aliexpress.'
+      trustHeading: Zašto kod nas, a ne u ovlašćeni servis
+      trust:
+        - 'Dijagnostika na ISTA/ISTA+: vidimo isto što vidi i ovlašćeni servis, bez njihove marže'
+        - Znamo tipične probleme prema motoru i godini proizvodnje, ne nagađamo odakle da krenemo
+        - 'Originalni i kvalitetni neoriginalni delovi: iskreno govorimo šta imamo na skladištu'
+        - 'Kodiranje i adaptacije posle popravke: auto se ne žali na instrument tabli'
+      worksHeading: Šta smo već radili sa BMW
+      ctaEyebrow: BMW
+      ctaHeading: Opisuje šta je sa autom
+      ctaBody: 'Model, godina, motor i šta vas muči: reći ćemo vam preliminarno odakle da krenemo i koliko će koštati dijagnostika.'
+      ctaCommentPlaceholder: Model, godina i šta vas muči
   en:
     works:
       metaTitle: Examples of Car Service Work in Belgrade — CarLab
@@ -207,4 +224,21 @@ translations:
       heading: This Page Does Not Exist
       body: The link may be outdated or there could be a typo in the address. Check out our services or message us — we can help.
       cta: Go to Homepage
-translatedFrom: 3bdc73a90f07e95f
+    bmw:
+      metaTitle: BMW Repair and Service in Belgrade - CarLab
+      metaDescription: Diagnostics and repair of BMW using original ISTA equipment. We know the common issues based on engine type and model year.
+      eyebrow: BMW
+      heading: BMW Repair and Service
+      lead: 'We understand the typical problems with N47, N20, N55: from timing chain to EGR valve. Diagnostics with original ISTA equipment, not an adapter from Aliexpress.'
+      trustHeading: Why choose us over a dealership
+      trust:
+        - 'Diagnostics with ISTA/ISTA+: we see what the dealer sees, without the dealership markup'
+        - We know the common engine problems based on model year, no guessing where to start
+        - 'Original and high-quality aftermarket parts: we honestly share what’s in stock'
+        - 'Coding and adaptations after repairs: no warning lights on the dashboard'
+      worksHeading: What we've done with BMWs
+      ctaEyebrow: BMW
+      ctaHeading: Describe the issue with your car
+      ctaBody: 'Model, year, engine, and what concerns you: we’ll give preliminary advice on what to begin with and the cost of diagnostics.'
+      ctaCommentPlaceholder: Model, year, and what concerns you
+translatedFrom: 3e5421ecb1686213
