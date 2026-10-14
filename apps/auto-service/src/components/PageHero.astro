@@ -55,15 +55,13 @@ const breadcrumbSchema = breadcrumbListSchema(SITE_URL, trail);
         </p>
       )
     }
-    {
-      service && (
-        <div class="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap sm:items-center">
-          <button type="button" data-open-lead-modal class="btn btn-primary">
-            {site.header.cta}
-          </button>
-          <ContactChannels placement="hero" service={service} />
-        </div>
-      )
-    }
+    <div
+      class="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap sm:items-center"
+    >
+      <button type="button" data-open-lead-modal class="btn btn-primary">
+        {site.header.cta}
+      </button>
+      <ContactChannels placement="hero" service={service} />
+    </div>
   </div>
 </section>
