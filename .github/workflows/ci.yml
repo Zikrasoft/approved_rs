@@ -28,6 +28,7 @@ jobs:
       - uses: ./.github/actions/setup-pnpm
       - run: pnpm lint
       - run: pnpm exec prettier --check .
+      - run: node --experimental-strip-types .github/scripts/yaml-content-valid.ts
       - run: pnpm typecheck
       - run: pnpm test
       - run: sh .github/scripts/pinned-deps.sh

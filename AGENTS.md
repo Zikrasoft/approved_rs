@@ -403,7 +403,14 @@ Both new apps follow the same shape, and a third should too:
   Cyrillic ending, a blank — is refused with a warning; the cached translation
   is served instead, or the string is retranslated if there is none. Adopting
   it would fail the whole-file guard on every subsequent run and wedge the
-  pipeline.
+  pipeline. **Never hand-compute a matching `translatedFrom` yourself to quiet
+  a failing test.** A correct-looking hash with no real translate run behind
+  it tells `apps/*/src/i18n/content/content.test.ts` every section is now fully
+  translated, which un-skips its deep fallback checks (`it.skipIf(!translated)`)
+  across the _whole app_ — including sections you didn't touch — and they will
+  fail honestly on any section still RU-only. Leave the hash stale until a real
+  CI translate run produces the backing translations; a stale hash keeps those
+  checks correctly skipped.
 
 ## Commands
 
