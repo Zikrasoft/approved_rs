@@ -20,6 +20,7 @@ describe('redirects', () => {
     ['/contact/', '/sr/contact/'],
     ['/thanks', '/sr/thanks/'],
     ['/privacy/', '/sr/privacy/'],
+    ['/bmw', '/sr/bmw/'],
   ])('sends %s to %s', (path, target) => {
     expect(redirectFor(path)).toBe(target);
   });
