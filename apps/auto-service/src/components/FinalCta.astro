@@ -8,8 +8,9 @@ interface Props {
   heading: string;
   body: string;
   service?: ServiceSlug;
+  commentPlaceholder?: string;
 }
-const { eyebrow, heading, body, service } = Astro.props;
+const { eyebrow, heading, body, service, commentPlaceholder } = Astro.props;
 ---
 
 <section id="lead" class="wrap scroll-mt-24 mt-band">
@@ -20,6 +21,6 @@ const { eyebrow, heading, body, service } = Astro.props;
       <p class="max-w-md text-base leading-relaxed text-muted">{body}</p>
       <ContactChannels class="mt-2" service={service} />
     </div>
-    <LeadForm service={service} />
+    <LeadForm service={service} commentPlaceholder={commentPlaceholder} />
   </div>
 </section>

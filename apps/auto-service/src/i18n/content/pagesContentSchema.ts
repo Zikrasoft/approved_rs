@@ -16,6 +16,10 @@ export const pagesContentSchema = z
         detailMetaSuffix: z.string(),
         detailCtaHeading: z.string(),
         detailCtaBody: z.string(),
+        detailCtaVariants: z
+          .array(z.object({ heading: z.string(), body: z.string() }))
+          .min(1),
+        usefulInfoLabel: z.string(),
         doorHeading: z.string(),
         doorText: z.string(),
         doorButtonLabel: z.string(),
@@ -65,6 +69,22 @@ export const pagesContentSchema = z
         heading: z.string(),
         body: z.string(),
         cta: z.string(),
+      })
+      .strict(),
+    bmw: z
+      .object({
+        metaTitle: z.string(),
+        metaDescription: z.string(),
+        eyebrow: z.string(),
+        heading: z.string(),
+        lead: z.string(),
+        trustHeading: z.string(),
+        trust: z.array(z.string()),
+        worksHeading: z.string(),
+        ctaEyebrow: z.string(),
+        ctaHeading: z.string(),
+        ctaBody: z.string(),
+        ctaCommentPlaceholder: z.string(),
       })
       .strict(),
   })

@@ -73,4 +73,9 @@ describe('generateLlmsTxt', () => {
   it('leaves the shop out of llms.txt unless the shop is live', async () => {
     expect(await generateLlmsTxt('sr')).not.toContain('/sr/shop/');
   });
+
+  it('links the BMW landing page', async () => {
+    const body = await generateLlmsTxt('sr');
+    expect(body).toContain(`](https://carlab.rs/sr/bmw/)`);
+  });
 });

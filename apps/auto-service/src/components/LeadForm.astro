@@ -16,6 +16,7 @@ interface Props {
   service?: ServiceSlug | typeof SHOP_SERVICE;
   compact?: boolean;
   comment?: string;
+  commentPlaceholder?: string;
   class?: string;
 }
 
@@ -23,6 +24,7 @@ const {
   service,
   compact = false,
   comment = '',
+  commentPlaceholder,
   class: className = '',
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
@@ -172,7 +174,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
       <textarea
         name="comment"
         rows={compact ? 2 : 3}
-        placeholder={site.form.commentPlaceholder}
+        placeholder={commentPlaceholder ?? site.form.commentPlaceholder}
         class="field resize-none">{comment}</textarea
       >
     </label>

@@ -81,6 +81,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
     ],
     other: [
       { label: site.common.homeLabel, href: url(PathBuilder.home(locale)) },
+      { label: pages.bmw.heading, href: url(PathBuilder.bmw(locale)) },
       { label: site.nav.contact, href: url(PathBuilder.contact(locale)) },
       {
         label: site.footer.privacyLabel,

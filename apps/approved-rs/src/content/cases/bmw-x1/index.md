@@ -14,52 +14,52 @@ translations:
   en:
     title: BMW X1
     body: |-
-      ## Car Sourcing in Serbia: Viktor Came for a Peugeot but Left with a BMW X1
+      ## Car Sourcing in Serbia: Viktor Came for a Peugeot, Left with a BMW X1
 
-      Viktor reached out to us before receiving his residence permit in Serbia. We informed him right away that he could only register a vehicle in his name after obtaining the permit, which meant we had to temporarily pause the car search. A few months later, in July 2026, after he received his documents, we began hunting for a car.
+      Viktor reached out to us even before he received his residency permit in Serbia. We immediately informed him that he could only register a vehicle in his name after obtaining his residency, so we had to temporarily pause the search. A few months later, in July 2026, after receiving the necessary documents, we began the car hunt.
 
-      During that time, Viktor's requirements for his future vehicle evolved. Initially, he was focused on a **Peugeot**, but after discussing the pros and cons, he decided to consider a more reliable option—the **BMW X1**.
+      During this time, his requirements for the future vehicle changed. Initially, Viktor was considering a **Peugeot**, but after discussing the pros and cons, he decided to focus on a more reliable option — the **BMW X1**.
 
-      Thanks to our use of **official BMW ISTA diagnostics**, the vehicle was checked thoroughly. The diagnostics revealed that the engine was in excellent condition: the **timing chain**, **injectors**, **EGR system**, and other parameters were all within specifications. The car is equipped with a dependable **2.0-liter B47 diesel engine** and an **8-speed Aisin automatic transmission**, both of which are well-regarded in their class.
+      Thanks to our use of **official BMW ISTA diagnostic tools**, the car was thoroughly checked. The diagnostics revealed excellent engine condition: the **timing chain**, **injectors**, **EGR system**, and other parameters were all within normal limits. The car is equipped with a robust **2.0-liter diesel engine B47** and an **8-speed automatic transmission Aisin**: a common and trusted combination for this class of vehicles.
 
-      As a result, Viktor walked away with a fully inspected vehicle boasting a transparent history and no hidden mechanical issues.
+      Viktor took home a vehicle with a clean history, fully aware of the engine and transmission's exact condition down to the last detail.
   sr:
     title: BMW X1
     body: |-
-      ## Auto-sourcing u Srbiji: Viktor je došao po Peugeot, a otišao u BMW X1
+      ## Autopodbor u Srbiji: Viktor je došao po Peugeot, a odvezao se u BMW X1
 
-      Viktor nam se obratio još pre nego što je dobio boravišnu dozvolu u Srbiji. Odmah smo ga obavestili da može registrovati automobil na svoje ime tek nakon dobijanja boravišne dozvole, pa smo morali malo odložiti pretragu. Nakon nekoliko meseci, u julu 2026. godine, kada su dokumenti konačno bili u redu, krenuli smo u potragu za automobilom.
+      Viktor nam se obratio još pre nego što je dobio boravišnu dozvolu u Srbiji. Odmah smo ga obavestili da može registrovati automobil na sebe tek nakon dobijanja boravišne dozvole, pa je izbor automobila morao biti malo odložen. Nakon nekoliko meseci, već u julu 2026. godine, posle dobijanja dokumenata krenuli smo u potragu za automobilom.
 
-      Tokom tog vremena, Viktorove želje za automobilom su se promenile. Prvobitno je razmatrao **Peugeot**, ali nakon razgovora o svim prednostima i manama odlučio je da se fokusira na pouzdaniju opciju — **BMW X1**.
+      Tokom tog vremena, zahtevi za budući automobil su se promenili. U početku je Viktor razmatrao **Peugeot**, ali nakon razgovora o svim prednostima i nedostacima odlučio je da obrate pažnju na pouzdaniju opciju — **BMW X1**.
 
-      Zahvaljujući tome što koristimo **zvaničnu BMW ISTA dijagnostiku**, automobil je proveren na maksimalno detaljan način. Dijagnostika je pokazala odlično stanje motora: **razvodna lančanik**, **mlaznice**, **EGR sistem** i drugi parametri su bili u skladu sa normama. Automobil je opremljen pouzdanim **2,0-litarskim dizel motorom B47** i **8-stepenom automatskom transmisijom Aisin**, koji su se pokazali kao neki od najuspešnijih u svojoj klasi.
+      Zahvaljujući tome što koristimo **službenu BMW ISTA dijagnostiku**, automobil je detaljno pregledan. Dijagnostika je pokazala odlično stanje motora: **lanac bregaste osovine**, **mlaznice**, **EGR sistem** i ostali parametri su bili u normi. Automobil je opremljen pouzdanim **2,0-litarskim dizel motorom B47** i **8-stepenom automatskom transmisijom Aisin**: rasprostranjena i proverena kombinacija za ovu klasu vozila.
 
-      Kao rezultat, Viktor je dobio potpuno provereni automobil sa transparentnom istorijom i bez skrivenih tehničkih problema.
+      Viktor je preuzeo automobil sa čistom istorijom, znajući tačno stanje motora i menjača do najmanjih detalja.
   es:
     title: BMW X1
     body: |-
-      ## Sourcing de automóviles en Serbia: Víktor vino por un Peugeot y se marchó con un BMW X1
+      ## Selección de coches en Serbia: Víktor vino por un Peugeot, pero se llevó un BMW X1
 
-      Víktor se puso en contacto con nosotros incluso antes de recibir su permiso de residencia en Serbia. Desde el principio, le advertimos que no podría registrar un automóvil a su nombre antes de obtener dicho permiso, por lo que tuvimos que posponer la búsqueda temporalmente. Unos meses más tarde, en julio de 2026, tras recibir la documentación, comenzamos la búsqueda del vehículo.
+      Víktor se puso en contacto con nosotros incluso antes de recibir su permiso de residencia en Serbia. Desde el principio le advertimos que no podría registrar el automóvil a su nombre hasta tener el permiso, por lo que la búsqueda tuvo que ser pospuesta temporalmente. Después de unos meses, en julio de 2026, y tras recibir la documentación, comenzamos la búsqueda del coche.
 
-      Durante este tiempo, las exigencias sobre su futuro automóvil cambiaron. Inicialmente, Víktor pensaba en un **Peugeot**, pero tras discutir los pros y los contras, decidió optar por una opción más confiable: el **BMW X1**.
+      Durante este tiempo, los requisitos para el futuro vehículo cambiaron. Inicialmente, Víktor había considerado un **Peugeot**, pero tras discutir todas las ventajas y desventajas, decidió centrarse en una opción más confiable: un **BMW X1**.
 
-      Gracias a que utilizamos la **diagnostico oficial del concesionario BMW ISTA**, el automóvil fue verificado en su totalidad. La revisión mostró que el estado del motor era excelente: la **cadena de distribución**, **inyectores**, **sistema EGR** y otros parámetros estaban dentro de lo normal. El vehículo cuenta con un confiable **motor diésel B47 de 2.0 litros** y una **transmisión automática de 8 velocidades Aisin**, que se han destacado como unos de los mejores en su categoría.
+      Gracias a que utilizamos la **diagnóstica oficial de concesionario BMW ISTA**, el automóvil fue inspeccionado de manera exhaustiva. La evaluación mostró un excelente estado del motor: la **cadena del árbol de levas**, los **inyectores**, el **sistema EGR** y otros parámetros estaban dentro de los estándares. El vehículo cuenta con un **motor diésel B47 de 2.0 litros** y una **transmisión automática de 8 velocidades Aisin**: una combinación común y probada para este tipo de coches.
 
-      Como resultado, Víktor recibió un automóvil completamente verificado, con un historial transparente y sin problemas técnicos ocultos.
+      Víktor recogió el automóvil con un historial limpio, conociendo el estado del motor y la caja de cambios hasta el último detalle.
   de:
     title: BMW X1
     body: |-
-      ## Autokauf in Serbien: Viktor kam wegen eines Peugeot und fuhr mit einem BMW X1 weg
+      ## Autowahl in Serbien: Viktor kam für einen Peugeot, fuhr aber mit einem BMW X1
 
-      Viktor hat sich an uns gewandt, noch bevor er seinen Aufenthaltstitel in Serbien erhalten hat. Wir haben ihn sofort darüber informiert, dass er ein Auto erst nach Erhalt des Aufenthaltstitels auf seinen Namen anmelden kann, weshalb der Autokauf vorübergehend aufgeschoben werden musste. Einige Monate später, im Juli 2026, nachdem er die Dokumente erhalten hatte, begannen wir mit der Suche nach einem Fahrzeug.
+      Viktor hat sich an uns gewandt, noch bevor er seinen Aufenthaltstitel in Serbien erhalten hatte. Wir haben ihn sofort darauf hingewiesen, dass er ein Auto erst nach Erhalt des Aufenthaltstitels auf sich anmelden kann, weshalb die Suche kurzfristig ausgesetzt werden musste. Einige Monate später, im Juli 2026, nach Erhalt der Dokumente, haben wir mit der Autosuche begonnen.
 
-      In der Zwischenzeit hatten sich die Anforderungen an das zukünftige Auto geändert. Ursprünglich dachte Viktor an einen **Peugeot**, entschied sich jedoch nach Abwägung aller Vor- und Nachteile, auf eine zuverlässigere Option zu setzen — den **BMW X1**.
+      In der Zwischenzeit hatten sich die Anforderungen an das zukünftige Auto geändert. Ursprünglich hatte Viktor einen **Peugeot** im Blick, entschied sich jedoch nach der Diskussion über alle Vor- und Nachteile für eine zuverlässigere Option — den **BMW X1**.
 
-      Dank unserer Verwendung der **offiziellen BMW-Händlerdiagnose ISTA** konnten wir das Fahrzeug äußerst gründlich überprüfen. Die Diagnose ergab einen ausgezeichneten Zustand des Motors: **Steuerkette**, **Einspritzdüsen**, **EGR-System** und weitere Parameter entsprachen den Normen. Das Fahrzeug verfügt über einen robusten **2,0-Liter-Dieselmotor B47** und ein **8-Gang-Automatikgetriebe Aisin**, die sich als einige der besten in ihrer Klasse etabliert haben.
+      Dank der Nutzung der **offiziellen BMW ISTA-Diagnose** wurde das Fahrzeug äußerst gründlich überprüft. Die Diagnosetests zeigten einen hervorragenden Zustand des Motors: **Steuerkette**, **Düsen**, **EGR-System** und andere Parameter entsprachen den Normen. Das Auto ist mit einem robusten **2,0-Liter-Dieselmotor B47** und einem **8-Gang-Automatikgetriebe Aisin** ausgestattet: eine weitverbreitete und bewährte Kombination für diese Fahrzeugklasse.
 
-      Insgesamt erhielt Viktor ein umfassend geprüftes Fahrzeug mit einer transparenten Historie und ohne versteckte technische Probleme.
-translatedFrom: 5037a426ce9b0ba6
+      Viktor hat ein Auto mit klarer Historie übernommen, wobei er den genauen Zustand von Motor und Getriebe bis ins kleinste Detail kannte.
+translatedFrom: 1a6bf85c508a38b7
 ---
 
 ## Автоподбор в Сербии: Виктор приходил за Peugeot, а уехал на BMW X1
@@ -68,6 +68,6 @@ translatedFrom: 5037a426ce9b0ba6
 
 За это время требования к будущему автомобилю изменились. Изначально Виктор рассматривал **Peugeot**, однако после обсуждения всех плюсов и минусов решил обратить внимание на более надежный вариант — **BMW X1**.
 
-Благодаря тому, что мы используем **официальную дилерскую диагностику BMW ISTA**, автомобиль был проверен максимально подробно. Диагностика показала отличное состояние двигателя: **цепь ГРМ**, **форсунки**, **система EGR** и остальные параметры соответствовали норме. Автомобиль оснащен надежным **2,0-литровым дизельным двигателем B47** и **8-ступенчатой автоматической коробкой передач Aisin**, которые зарекомендовали себя как одни из самых удачных в своем классе.
+Благодаря тому, что мы используем **официальную дилерскую диагностику BMW ISTA**, автомобиль был проверен максимально подробно. Диагностика показала отличное состояние двигателя: **цепь ГРМ**, **форсунки**, **система EGR** и остальные параметры соответствовали норме. Автомобиль оснащен надежным **2,0-литровым дизельным двигателем B47** и **8-ступенчатой автоматической коробкой передач Aisin**: распространенное и проверенное сочетание для этого класса машин.
 
-В результате Виктор получил полностью проверенный автомобиль с прозрачной историей и без скрытых технических проблем.
+Виктор забрал автомобиль с чистой историей, зная точное состояние двигателя и коробки до последней детали.
