@@ -80,6 +80,7 @@ export const pagesContentSchema = z
         ctaEyebrow: z.string(),
         ctaHeading: z.string(),
         ctaBody: z.string(),
+        ctaCommentPlaceholder: z.string(),
       })
       .strict(),
   })
