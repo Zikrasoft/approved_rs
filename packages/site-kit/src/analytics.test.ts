@@ -41,7 +41,8 @@ afterEach(() => {
 
 const GTAG_SRC = (id: string) =>
   `https://www.googletagmanager.com/gtag/js?id=${id}`;
-const dataLayer = () => window.dataLayer as unknown[][];
+const dataLayer = () =>
+  (window.dataLayer as ArrayLike<unknown>[]).map((entry) => Array.from(entry));
 
 describe('defineAnalytics with GA4', () => {
   it('loads the tag on the first page view when nothing was refused', () => {
@@ -55,6 +56,12 @@ describe('defineAnalytics with GA4', () => {
     expect(srcs()).toEqual([]);
     runIdle();
     expect(srcs()).toEqual([GTAG_SRC(GA)]);
+  });
+
+  it('queues each command as an arguments object, the only shape gtag.js executes', () => {
+    defineAnalytics({ gaMeasurementId: GA });
+    for (const entry of window.dataLayer as unknown[])
+      expect(Object.prototype.toString.call(entry)).toBe('[object Arguments]');
   });
 
   it('queues config before the script downloads, so nothing is lost', () => {

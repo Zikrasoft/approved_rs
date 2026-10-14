@@ -42,5 +42,9 @@ export default defineConfig(
     files: ['apps/medusa/**/*.js'],
     rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
+  {
+    files: ['packages/site-kit/src/analytics.ts'],
+    rules: { 'prefer-rest-params': 'off' },
+  },
   eslintConfigPrettier,
 );

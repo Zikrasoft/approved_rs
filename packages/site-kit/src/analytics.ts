@@ -78,8 +78,8 @@ function stubFbq(): void {
 function stubGtag(): void {
   if (window.gtag) return;
   const dataLayer = (window.dataLayer ??= []);
-  window.gtag = (...args: unknown[]) => {
-    dataLayer.push(args);
+  window.gtag = function gtag() {
+    dataLayer.push(arguments);
   };
 }
 
