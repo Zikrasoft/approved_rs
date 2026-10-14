@@ -5,6 +5,7 @@ import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import FinalCta from '@/components/FinalCta.astro';
+import PromoBanner from '@/components/PromoBanner.astro';
 import { localeFrom, BCP47_BY_LOCALE } from '@/i18n/config';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { localizedWork, publishedWorks } from '@/utils/works';
@@ -34,6 +35,11 @@ const services = content(locale).services;
 const { title, body, car } = localizedWork(work, locale);
 
 const schema = workSchema(work, title);
+
+const ctaVariantIndex =
+  [...work.id].reduce((sum, char) => sum + char.charCodeAt(0), 0) %
+  pages.works.detailCtaVariants.length;
+const ctaVariant = pages.works.detailCtaVariants[ctaVariantIndex];
 
 const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
   year: 'numeric',
@@ -154,10 +160,15 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
     )
   }
 
+  <PromoBanner
+    label={pages.works.usefulInfoLabel}
+    banners={content(locale).promoBanners.works}
+  />
+
   <FinalCta
     eyebrow={pages.works.eyebrow}
-    heading={pages.works.detailCtaHeading}
-    body={pages.works.detailCtaBody}
+    heading={ctaVariant.heading}
+    body={ctaVariant.body}
     service={work.data.servicesApplied[0]}
   />
   <script>

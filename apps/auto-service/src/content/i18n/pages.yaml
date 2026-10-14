@@ -7,6 +7,14 @@ works:
   detailMetaSuffix: CarLab
   detailCtaHeading: Похожая проблема?
   detailCtaBody: Опишите симптомы — скажем, на что это похоже и сколько будет стоить диагностика.
+  detailCtaVariants:
+    - heading: Похожая проблема?
+      body: Опишите симптомы, скажем, на что это похоже и сколько будет стоить диагностика.
+    - heading: Машина делает что-то похожее?
+      body: Напишите нам или позвоните, подскажем предварительно и согласуем время на диагностику.
+    - heading: Хотите такой же результат?
+      body: Опишите, что с машиной, и мы скажем, с чего начнём и сколько это займёт.
+  usefulInfoLabel: Полезная информация
   doorHeading: Похожая история с вашей машиной?
   doorText: Опишите симптомы — подскажем, с чего начать.
   doorButtonLabel: Описать проблему
@@ -72,6 +80,14 @@ translations:
       detailMetaSuffix: CarLab
       detailCtaHeading: Imate sličan problem?
       detailCtaBody: Opisajte simptome — na šta to liči i koliko će koštati dijagnostika.
+      detailCtaVariants:
+        - heading: Imate sličan problem?
+          body: Opišite simptome, na šta to liči i koliko košta dijagnostika.
+        - heading: Da li vaš automobil radi nešto slično?
+          body: Pišite nam ili nas pozovite, daćemo vam preliminarnu informaciju i dogovoriti vreme za dijagnostiku.
+        - heading: Želite isti rezultat?
+          body: Opišite šta se dešava sa automobilom, a mi ćemo vam reći odakle da počnemo i koliko će trajati.
+      usefulInfoLabel: Koriste informacije
       doorHeading: Slična situacija sa vašim autom?
       doorText: Opisujte simptome — pomoći ćemo vam odakle da počnete.
       doorButtonLabel: Opisati problem
@@ -136,6 +152,14 @@ translations:
       detailMetaSuffix: CarLab
       detailCtaHeading: Similar Issue?
       detailCtaBody: Describe the symptoms — for instance, what it feels like, and how much the diagnostics will cost.
+      detailCtaVariants:
+        - heading: Similar Issue?
+          body: Describe the symptoms, for example, what it feels like and how much the diagnostics will cost.
+        - heading: Is your car doing something similar?
+          body: Contact us via message or call, and we'll provide preliminary advice and schedule a time for diagnostics.
+        - heading: Want the same result?
+          body: Let us know what's wrong with your car, and we’ll explain how we’ll start and how long it will take.
+      usefulInfoLabel: Useful Information
       doorHeading: Is your car having a similar issue?
       doorText: Describe the symptoms — we'll help you figure out where to start.
       doorButtonLabel: Describe the problem
@@ -190,4 +214,4 @@ translations:
       heading: This Page Does Not Exist
       body: The link may be outdated or there could be a typo in the address. Check out our services or message us — we can help.
       cta: Go to Homepage
-translatedFrom: 3bdc73a90f07e95f
+translatedFrom: 55c7e9097e6c7395
