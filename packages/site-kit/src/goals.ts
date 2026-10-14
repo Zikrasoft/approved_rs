@@ -13,7 +13,7 @@ export const GOALS = {
   langOfferDismissed: 'lang_offer_dismissed',
   addToCart: 'add_to_cart',
   beginCheckout: 'begin_checkout',
-  orderPlaced: 'order_placed',
+  purchase: 'purchase',
   caseView: 'case_view',
 } as const;
 
@@ -33,5 +33,5 @@ export type ContactPlacement = (typeof CONTACT_PLACEMENTS)[number];
 export const CONTACT_PLACEMENT_ATTRIBUTE = 'data-contact-placement';
 
 export function reachGoal(goal: Goal, params?: Record<string, unknown>): void {
-  window.ymReachGoal?.(goal, params);
+  window.trackGoal?.(goal, params);
 }

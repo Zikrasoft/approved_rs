@@ -18,59 +18,59 @@ translations:
   en:
     title: Skoda Octavia RS
     body: |-
-      Car sourcing and inspection in France prior to purchase and export
+      Car Sourcing and Inspection in France Prior to Purchase and Export
 
-      During an inspection in France, we evaluated a **Skoda Octavia RS** featuring a **1.4 TSI** engine and plug-in hybrid powertrain. This vehicle was being prepared for export to another country, making it crucial to gain a complete understanding of its actual condition before any purchase.
+      We inspected a **Skoda Octavia RS** with a **1.4 TSI** engine and plug-in hybrid powertrain in France. This vehicle is being sourced for export to another country, making it essential to gain a comprehensive understanding of its actual condition before proceeding with the purchase.
 
-      The French market offers a wide variety of vehicles, including interesting configurations and hybrid versions. However, it also has its own set of challenges. Urban parking, narrow streets, and frequent contact between bumpers and body panels with neighboring cars often leave their marks. As a result, pretty photos and descriptions from the seller are not enough, especially when the car is destined for export right after purchase.
+      The French market offers a wide selection of vehicles, including unique trims and hybrid versions. However, there are specific challenges in terms of usage. Urban parking, narrow streets, and constant contact between bumpers and body parts of neighboring vehicles often leave noticeable marks. Therefore, beautiful photos and seller descriptions are not enough, especially if the vehicle is set to be exported right after the purchase.
 
-      Before making a purchase, we conduct a thorough inspection of the vehicle: we check the body and paintwork, look for signs of previous repairs and accidents, and assess the condition of the interior, engine, transmission, suspension, and other components. For plug-in hybrids, we pay special attention to the hybrid system, **high-voltage battery**, and electronics. We also review documents, service history, and ensure that the actual condition corresponds to the stated mileage.
+      Before buying, we conduct a thorough inspection of the vehicle: we check the body and paintwork, look for signs of previous repairs and accidents, assess the condition of the interior, engine, transmission, suspension, and other components. For plug-in hybrids, we pay special attention to the hybrid system's operation, the **high-voltage battery**, and electronics. We also verify the documents, maintenance history, and the actual mileage against the seller's claims.
 
-      When buying a vehicle for export, such an inspection is especially important. Once the car has left France, addressing any issues that arise post-purchase becomes significantly more complex and costly. Our goal is to identify these issues before the deal is finalized and provide the client with objective information, enabling them to make an informed purchasing decision.
+      This type of inspection is particularly crucial when purchasing a vehicle for export. Once the car has left France, addressing any issues that arise post-purchase becomes significantly more complex and costly. Our goal is to identify these issues before the sale and provide the client with objective information to assist in their purchasing decision.
 
-      If you have found a car in France and are planning to buy it for yourself or for export, we can conduct an independent on-site inspection. You will receive photographs and videos, diagnostic results, a list of identified defects, and our assessment of the vehicle's real condition before you make a decision.
+      If you have found a vehicle in France and plan to buy it for yourself or for export, we can carry out an independent on-site inspection. You will receive photos and videos, diagnostic results, a list of identified defects, and our assessment of the actual condition before making your decision.
   sr:
     title: Skoda Octavia RS
     body: |-
-      Usluga izbora i provere automobila u Francuskoj pre kupovine i izvoza
+      Autopodbor i provera automobila u Francuskoj pre kupovine i izvoza
 
-      Na pro veri u Francuskoj je **Skoda Octavia RS** sa motorom **1.4 TSI** i plug-in hibridnim sistemom. Automobil se bira za dalji izvoz u drugu zemlju, pa je posebno važno još pre kupovine dobiti potpuni uvid u njegovo stvarno stanje.
+      Na proveri u Francuskoj — **Skoda Octavia RS** sa motorom **1.4 TSI** i plug-in hibridnim pogonom. Automobil se bira za dalji izvoz u drugu zemlju, pa je posebno važno još pre kupovine dobiti potpunu sliku o njegovom stvarnom stanju.
 
-      Francusko tržište nudi veliki izbor automobila, uključujući zanimljive verzije i hibridne modele. No, postoji i svoja specifičnost korišćenja. Gradski parking, uske ulice, stalni kontakt branika i karoserije sa susednim vozilima — sve to često ostavlja tragove. Zbog toga, lepe fotografije i opis prodavca nisu dovoljne, posebno ako se automobil odmah nakon kupovine šalje na izvoz.
+      Francusko tržište nudi širok spektar automobila, uključujući zanimljive opreme i hibridne verzije. Ali postoje i svoja obeležja eksploatacije. Gradska parkiranja, uske ulice, stalni kontakt branika i karoserije sa susednim vozilima — sve to često ostavlja tragove. Zato lepe fotografije i opis prodavca nisu dovoljne, posebno ako se automobil odmah nakon kupovine šalje na izvoz.
 
-      Pre kupovine vršimo sveobuhvatnu pro veru automobila: proveravamo karoseriju i farbu, tražimo tragove prethodnih popravki i saobraćajnih nezgoda, procenjujemo stanje enterijera, motora, menjača, vešanja i drugih delova. Za plug-in hibride posebno se fokusiramo na rad hibridnog sistema, **visokonaponsku bateriju** i elektroniku. Takođe, proveravamo dokumente, istoriju servisiranja i usklađenost stvarnog stanja sa navedenim pređenim kilometrima.
+      Pre kupovine vršimo temeljnu proveru automobila: proveravamo karoseriju i lak, tražimo tragove prethodnih popravki i saobraćajnih nezgoda, ocenjujemo stanje enterijera, motora, menjača, suspenzije i drugih sklopova. Za plug-in hibride posebno obraćamo pažnju na rad hibridnog sistema, **visokonaponsku bateriju** i elektroniku. Takođe proveravamo dokumente, istoriju servisa i usklađenost stvarnog stanja sa deklarisanim pređenim kilometrima.
 
-      Kada kupujete automobil za izvoz, ovakva pro vera je posebno važna. Kada vozilo napusti Francusku, rešavanje problema koji su otkriveni nakon kupovine postaje znatno složenije i skuplje. Naša misija je da ih otkrijemo pre transakcije i pružimo klijentu objektivne informacije kako bi mogao doneti odluku o kupovini.
+      Prilikom kupovine automobila za izvoz ova provera je posebno važna. Kada automobil napusti Francusku, rešavanje problema otkrivenih nakon kupovine postaje znatno komplikovanije i skuplje. Naša misija je da ih pronađemo pre realizacije transakcije i pružimo klijentu objektivne informacije kako bi mogao doneti odluku o kupovini.
 
-      Ako ste pronašli automobil u Francuskoj i planirate da ga kupite za sebe ili na izvoz, možemo izvršiti nezavisnu pro veru na licu mesta. Dobićete fotografije i video, rezultate dijagnostike, listu otkrivenih nedostataka i našu procenu stvarnog stanja pre nego što donesete odluku.
+      Ako ste našli automobil u Francuskoj i planirate da ga kupite za sebe ili za izvoz, možemo izvršiti nezavisnu proveru na licu mesta. Dobićete fotografije i videa, rezultate dijagnostike, listu uočenih nedostataka i našu procenu stvarnog stanja pre nego što donesete odluku.
   es:
     title: Skoda Octavia RS
     body: |-
-      Selección y revisión de automóviles en Francia antes de la compra y exportación
+      Selección y verificación de automóviles en Francia antes de la compra y exportación
 
-      En la revisión en Francia - **Skoda Octavia RS** con motor **1.4 TSI** y un sistema de propulsión híbrido enchufable. Este vehículo se selecciona para su posterior exportación a otro país, por lo que es especialmente importante obtener una comprensión completa de su estado real antes de la compra.
+      En la inspección en Francia se encuentra un **Skoda Octavia RS** con motor **1.4 TSI** y un sistema de propulsión híbrido enchufable. Este automóvil se selecciona para ser exportado a otro país, por lo que es especialmente importante obtener una visión completa de su estado real antes de la compra.
 
-      El mercado francés ofrece una amplia variedad de automóviles, incluidas configuraciones interesantes y versiones híbridas. Pero también tiene sus propias particularidades de uso. Los estacionamientos urbanos, las calles estrechas y el contacto constante entre defensas y elementos de la carrocería con coches vecinos, a menudo dejan sus huellas. Por eso, unas fotografías atractivas y la descripción del vendedor no son suficientes, especialmente si el coche se envía directamente a la exportación tras la compra.
+      El mercado francés ofrece una amplia variedad de automóviles, incluyendo configuraciones interesantes y versiones híbridas. Sin embargo, también tiene sus particularidades de uso. Los estacionamientos urbanos, calles estrechas y el constante contacto entre los parachoques y elementos de la carrocería con otros vehículos a menudo dejan huellas. Por lo tanto, no son suficientes las fotos atractivas y la descripción del vendedor, especialmente si el automóvil se enviará inmediatamente a la exportación después de la compra.
 
-      Antes de la compra, realizamos una inspección exhaustiva del vehículo: verificamos la carrocería y la pintura, buscamos señales de reparaciones anteriores y accidentes, evaluamos el estado del interior, motor, transmisión, suspensión y otros componentes. Para los híbridos enchufables, prestamos especial atención al funcionamiento del sistema híbrido, la **batería de alto voltaje** y la electrónica. También revisamos los documentos, el historial de mantenimiento y la congruencia entre el estado real y el kilometraje declarado.
+      Antes de la compra, realizamos una inspección completa del vehículo: revisamos la carrocería y la pintura, buscamos señales de reparaciones anteriores y accidentes, evaluamos el estado del interior, el motor, la caja de cambios, la suspensión y otros componentes. Para los híbridos enchufables, prestamos especial atención al funcionamiento del sistema híbrido, a la **batería de alto voltaje** y a la electrónica. También verificamos la documentación, el historial de mantenimiento y la congruencia entre el estado real y el kilometraje declarado.
 
-      Al comprar un vehículo para exportación, esta revisión es especialmente importante. Una vez que el coche ha salido de Francia, resolver cualquier problema detectado tras la compra se vuelve significativamente más complicado y costoso. Nuestra tarea es identificarlos antes de cerrar el trato y proporcionar al cliente información objetiva para que pueda tomar una decisión de compra bien informada.
+      Cuando se compra un vehículo para exportación, esta revisión es especialmente crucial. Una vez que el coche ha salido de Francia, resolver los problemas descubiertos después de la compra se vuelve considerablemente más difícil y costoso. Nuestra tarea es identificarlos antes de la transacción y proporcionar al cliente información objetiva para que pueda tomar una decisión informada sobre la compra.
 
-      Si has encontrado un automóvil en Francia y planeas comprarlo para ti o para exportación, podemos llevar a cabo una inspección independiente en el lugar. Recibirás fotografías y videos, los resultados del diagnóstico, una lista de defectos encontrados y nuestra evaluación del estado real antes de tomar una decisión.
+      Si ha encontrado un vehículo en Francia y planea comprarlo para usted o para exportación, podemos realizar una inspección independiente en el lugar. Recibirá fotografías y vídeos, los resultados del diagnóstico, una lista de defectos detectados y nuestra evaluación del estado real antes de que tome una decisión.
   de:
     title: Skoda Octavia RS
     body: |-
-      Autosourcing und Fahrzeuginspektion in Frankreich vor dem Kauf und Export
+      Fahrzeugauswahl und -prüfung in Frankreich vor dem Kauf und Export
 
-      Bei der Inspektion in Frankreich befindet sich eine **Skoda Octavia RS** mit einem **1.4 TSI** Motor und einem Plug-in-Hybridantrieb. Das Fahrzeug wird für den weiteren Export in ein anderes Land ausgewählt, daher ist es besonders wichtig, bereits vor dem Kauf ein umfassendes Bild seines tatsächlichen Zustands zu erhalten.
+      Bei der Besichtigung in Frankreich - **Skoda Octavia RS** mit **1.4 TSI** Motor und Plug-in-Hybridantrieb. Das Fahrzeug wird für den späteren Export in ein anderes Land ausgewählt, weshalb es wichtig ist, bereits vor dem Kauf einen umfassenden Eindruck von seinem tatsächlichen Zustand zu erhalten.
 
-      Der französische Markt bietet eine große Auswahl an Fahrzeugen, einschließlich interessanter Ausstattungen und Hybridversionen. Es gibt jedoch auch spezifische Besonderheiten bei der Nutzung. Enge Parkplätze, enge Straßen und ständiger Kontakt zwischen Stoßfängern und Karosserieelementen mit benachbarten Fahrzeugen hinterlassen häufig ihre Spuren. Daher sind schöne Fotos und die Beschreibung des Verkäufers oft nicht ausreichend, insbesondere wenn das Fahrzeug nach dem Kauf sofort exportiert wird.
+      Der französische Markt bietet eine große Auswahl an Fahrzeugen, darunter interessante Ausstattungen und Hybridversionen. Doch es gibt auch besondere Bedingungen bei der Nutzung. Stadtparkplätze, enge Straßen und ständiger Kontakt von Stoßfängern und Karosserieteilen mit benachbarten Fahrzeugen hinterlassen häufig ihre Spuren. Daher sind schöne Fotos und die Beschreibung des Verkäufers nicht ausreichend, insbesondere wenn das Auto nach dem Kauf sofort exportiert wird.
 
-      Vor dem Kauf führen wir eine umfassende Inspektion des Fahrzeugs durch: wir überprüfen die Karosserie und die Lackierung, suchen nach Spuren früherer Reparaturen und Unfälle, bewerten den Zustand des Innenraums, des Motors, des Getriebes, der Federung und anderer Baugruppen. Bei Plug-in-Hybriden legen wir besonderen Wert auf die Funktion des Hybridsystems, der **Hochvoltbatterie** und der Elektronik. Außerdem überprüfen wir die Dokumente, die Serviceregeschichte und die Übereinstimmung des tatsächlichen Zustands mit der angegebenen Kilometerleistung.
+      Vor dem Kauf führen wir eine umfassende Inspektion des Fahrzeugs durch: Wir überprüfen die Karosserie und die Lackierung, suchen nach Spuren vorheriger Reparaturen und Unfälle, bewerten den Zustand des Innenraums, des Motors, des Getriebes, der Aufhängung und anderer Teile. Bei Plug-in-Hybriden richten wir besondere Aufmerksamkeit auf das Funktionieren des Hybridsystems, der **Hochvoltbatterie** und der Elektronik. Außerdem überprüfen wir die Dokumente, die Wartungshistorie und die Übereinstimmung des tatsächlichen Zustands mit dem angegebenen Kilometerstand.
 
-      Bei einem Exportfahrzeug ist eine solche Inspektion besonders wichtig. Wenn das Fahrzeug Frankreich bereits verlassen hat, wird es deutlich schwieriger und teurer, nach dem Kauf festgestellte Probleme zu lösen. Unsere Aufgabe ist es, diese Probleme vor dem Geschäft zu erkennen und dem Kunden objektive Informationen zu liefern, damit er eine informierte Kaufentscheidung treffen kann.
+      Bei einem Fahrzeugkauf für den Export ist eine solche Prüfung besonders wichtig. Wenn das Auto Frankreich bereits verlassen hat, wird es deutlich komplizierter und teurer, nach dem Kauf auftretende Probleme zu lösen. Unsere Aufgabe ist es, diese Probleme vor dem Abschluss des Geschäfts zu identifizieren und dem Kunden objektive Informationen zu geben, damit er eine fundierte Kaufentscheidung treffen kann.
 
-      Wenn Sie ein Fahrzeug in Frankreich gefunden haben und es für sich selbst oder für den Export kaufen möchten, können wir eine unabhängige Inspektion vor Ort durchführen. Sie erhalten Fotos und Videos, die Diagnoseresultate, eine Liste der festgestellten Mängel und unsere Bewertung des tatsächlichen Zustands, bevor Sie eine Entscheidung treffen.
+      Wenn Sie ein Auto in Frankreich gefunden haben und planen, es für sich selbst oder für den Export zu kaufen, können wir vor Ort eine unabhängige Inspektion durchführen. Sie erhalten Fotos und Videos, die Diagnoseresultate, eine Liste der festgestellten Mängel und unsere Einschätzung des tatsächlichen Zustands, bevor Sie eine Entscheidung treffen.
 translatedFrom: 2774350b9725945e
 ---
 Автоподбор и проверка автомобилей во Франции перед покупкой и экспортом

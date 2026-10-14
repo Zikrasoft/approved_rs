@@ -4,67 +4,67 @@ translations:
   en:
     title: BMW X3
     body: |-
-      ## Sourcing a BMW X3 in Serbia — Finding the Perfect Car for Nikolai and Julia
+      ## Sourcing a BMW X3 in Serbia — we found a great car for Nikolai and Julia
 
-      Nikolai and his wife Julia approached us with the desire to find a BMW X3 in Serbia. They had already identified an interesting option on the marketplace, but before making a purchase, they decided it would be safer to conduct a thorough professional inspection of the vehicle.
+      Nikolai and his wife Julia reached out to us with the goal of sourcing a BMW X3 in Serbia. They had already found an interesting option on their own, but before making a purchase, they decided to play it safe and conduct a thorough professional inspection of the vehicle.
 
-      We ended up inspecting two BMW X3 models. The first car looked decent at first glance, but diagnostics revealed **wear in the timing chain**. Such a purchase would have meant additional costs almost immediately after acquiring the vehicle.
+      In the end, we arrived for the inspection and checked two BMW X3s. The first car looked decent at first glance, but diagnostics revealed **wear on the timing chain**. Buying this vehicle would mean incurring additional expenses almost immediately after purchase.
 
-      We suggested considering a different approach: instead of buying a cheaper car and then spending money on expensive maintenance and repairs, it often makes sense to slightly increase the budget and choose a vehicle in better technical condition with a richer configuration. In this case, the money is spent not on fixing the previous owner's problems but on a better car.
+      We suggested considering a different approach: instead of purchasing a cheaper car and then spending money on costly maintenance and repairs, it sometimes makes more sense to slightly increase the budget and choose a vehicle in better technical condition and with a more luxurious package. In this case, the money goes towards a better car instead of fixing issues from the previous owner.
 
-      This is exactly the type of BMW X3 we managed to find. The car was in excellent technical condition, came with a very good configuration, and didn't require significant investments after the purchase.
+      This is exactly the kind of BMW X3 we managed to find. The vehicle turned out to be in excellent technical condition, with a very good trim level and no need for significant investment after the purchase.
 
-      The chosen BMW X3 is equipped with a two-liter diesel engine **B47** and a reliable 8-speed automatic transmission **ZF**. Before finalizing the purchase, we thoroughly inspected the vehicle, including computer diagnostics using the original BMW ISTA diagnostic equipment.
+      The selected BMW X3 is equipped with a two-liter diesel engine **B47** and a reliable 8-speed automatic transmission **ZF**. Before the purchase, we meticulously inspected the car, including a computer diagnostic using the original BMW ISTA diagnostic equipment.
 
-      Nikolai and Julia were pleased with the result and decided to go with this particular BMW X3.
+      Nikolai and Julia were pleased with the outcome and chose this specific BMW X3.
   sr:
     title: BMW X3
     body: |-
-      ## Odabir BMW X3 u Srbiji — pronašli smo izvrstan automobil za Nikolaja i Juliju
+      ## Odabir BMW X3 u Srbiji — našli smo odličan automobil za Nikolu i Juliju
 
-      Obratili su nam se Nikolaj i njegova supruga Julija sa željom da pronađu BMW X3 u Srbiji. Oni su već sami pronašli zanimljivu opciju na platformi, ali pre kupovine su odlučili da ne rizikuju i da izvedu potpunu profesionalnu provere auta pre kupovine.
+      Obratili su nam se Nikola i njegova supruga Julija sa željom da pronađu BMW X3 u Srbiji. Već su sami našli zanimljivu opciju na platformi, ali su pre kupovine odlučili da ne rizikuju i da obave kompletnu profesionalnu provere auta pre kupovine.
 
-      Na kraju smo došli na pregled i proverili dva BMW X3. Prvi automobil je na prvi pogled izgledao pristojno, međutim, dijagnostika je pokazala **habanje razvodne lance**. Takva kupovina bi značila dodatne troškove praktično odmah nakon sticanja automobila.
+      Na kraju smo došli na pregled i proverili dva BMW X3. Prvi automobil je na prvi pogled izgledao dobro, međutim, dijagnostika je pokazala **habanje lanca razvodnog mehanizma**. Takva kupovina bi značila dodatne troškove gotovo odmah posle sticanja automobila.
 
-      Predložili smo da razmotre drugi pristup: umesto da kupe jeftiniji automobil, a zatim ulažu novac u skupo održavanje i popravke, ponekad je razumnije malo povećati budžet i izabrati automobil u boljem tehničkom stanju, uz istovremeno kvalitetniju opremu. Na taj način, novac se ne troši na rešavanje problema prethodnog vlasnika, već na bolji automobil.
+      Predložili smo da razmotre drugačiji pristup: umesto da kupe jeftiniju mašinu, a zatim ulažu novac u skupo održavanje i popravke, ponekad je mudrije malo povećati budžet i izabrati auto koji je u boljem tehničkom stanju i istovremeno u bogatijoj opremi. U tom slučaju novac ide ne na otklanjanje problema prethodnog vlasnika, već na kvalitetniji automobil.
 
-      Tako smo uspeli da pronađemo upravo takav BMW X3. Automobil se ispostavio kao u odličnom tehničkom stanju, sa veoma dobrom opremom i bez potrebe za ozbiljnim ulaganjima nakon kupovine.
+      Upravo takav BMW X3 smo i uspeli da pronađemo. Automobil se pokazao u odličnom tehničkom stanju, sa veoma dobrom opremom i bez potrebe za ozbiljnim ulaganjima nakon kupovine.
 
-      Izabrani BMW X3 je opremljen dvolitarskim dizel motorom **B47** i pouzdanim 8-stepenim automatskim menjačem **ZF**. Pre kupovine smo temeljno proverili automobil, uključujući računarsku dijagnostiku uz korišćenje originalne dijagnostičke opreme BMW ISTA.
+      Izabrani BMW X3 je opremljen dvolitarskim dizel motorom **B47** i pouzdanim 8-stepenim automatskim menjačem **ZF**. Pre kupovine smo detaljno proverili automobil, uključujući računarstvo dijagnostike uz korišćenje originalne dijagnostičke opreme BMW ISTA.
 
-      Nikolaj i Julija su bili zadovoljni rezultatom i izabrali su baš ovaj BMW X3.
+      Nikola i Julija su bili zadovoljni rezultatom i izabrali upravo ovaj BMW X3.
   es:
     title: BMW X3
     body: |-
       ## Selección de un BMW X3 en Serbia - encontramos un excelente automóvil para Nikolai y Yulia
 
-      Nikolai y su esposa Yulia se pusieron en contacto con nosotros con el deseo de encontrar un BMW X3 en Serbia. Ya habían encontrado de manera independiente una opción interesante en el mercado, pero decidieron no arriesgarse y realizar una inspección profesional completa del vehículo antes de comprarlo.
+      Nikolai y su esposa Yulia se pusieron en contacto con nosotros con el deseo de encontrar un BMW X3 en Serbia. Ya habían encontrado por su cuenta una opción interesante en el mercado, pero antes de realizar la compra decidieron no arriesgarse y llevar a cabo una revisión profesional completa del automóvil.
 
-      Al final, llegamos para la revisión y examinamos dos BMW X3. El primer automóvil, a primera vista, parecía estar en buenas condiciones, sin embargo, el diagnóstico mostró **desgaste de la cadena de distribución**. Comprar este vehículo significaría gastos adicionales casi de inmediato tras la adquisición.
+      Como resultado, fuimos a la inspección y verificamos dos BMW X3. El primer vehículo, a simple vista, se veía bien, sin embargo, el diagnóstico reveló **desgaste en la cadena de distribución**. Comprar este coche significaría gastos adicionales casi inmediatamente después de adquirirlo.
 
-      Les propusimos considerar un enfoque diferente: en vez de comprar un coche más barato y luego gastar dinero en mantenimiento y reparaciones costosas, a veces es más sensato aumentar un poco el presupuesto y optar por un vehículo en mejor estado técnico y con un equipamiento más completo. De esta manera, el dinero no se destina a solucionar problemas del propietario anterior, sino a adquirir un automóvil de mejor calidad.
+      Les propusimos considerar un enfoque diferente: en lugar de comprar un coche más barato y luego invertir dinero en costosos mantenimientos y reparaciones, a veces es más sensato aumentar un poco el presupuesto y optar por un vehículo en mejor estado técnico y con una equipación más completa. En este caso, el dinero se destina no a solucionar problemas del propietario anterior, sino a adquirir un coche de mejor calidad.
 
-      Fue precisamente un BMW X3 de este tipo el que logramos encontrar. El vehículo se encontraba en excelente estado técnico, con un equipamiento muy bueno y sin necesidad de inversiones importantes tras la compra.
+      Justamente, conseguimos encontrar un BMW X3 así. El vehículo se encontraba en excelente estado técnico, con una equipación muy buena y sin necesidad de inversiones importantes tras la compra.
 
-      El BMW X3 seleccionado está equipado con un motor diésel de dos litros **B47** y una fiable transmisión automática de 8 velocidades **ZF**. Antes de la compra, realizamos una inspección exhaustiva del automóvil, incluida la diagnosis computarizada utilizando el equipo de diagnóstico original BMW ISTA.
+      El BMW X3 seleccionado cuenta con un motor diésel de dos litros **B47** y una confiable transmisión automática de 8 velocidades **ZF**. Antes de la compra, revisamos minuciosamente el vehículo, incluyendo un diagnóstico informático con el uso del equipo de diagnóstico original BMW ISTA.
 
-      Nikolai y Yulia quedaron muy satisfechos con el resultado y eligieron este BMW X3 en particular.
+      Nikolai y Yulia quedaron satisfechos con el resultado y eligieron precisamente este BMW X3.
   de:
     title: BMW X3
     body: |-
-      ## Auswahl eines BMW X3 in Serbien – ein hervorragendes Auto für Nikolai und Julia gefunden
+      ## Auswahl eines BMW X3 in Serbien – wir haben ein tolles Auto für Nikolai und Julia gefunden
 
-      Nikolai und seine Frau Julia wandten sich an uns mit dem Wunsch, einen BMW X3 in Serbien zu finden. Sie hatten bereits selbst einen interessanten Wagen auf einer Plattform entdeckt, doch vor dem Kauf entschieden sie sich, kein Risiko einzugehen und eine umfassende professionelle Prüfung des Fahrzeugs durchführen zu lassen.
+      Nikolai und seine Frau Julia haben sich an uns gewandt mit dem Wunsch, einen BMW X3 in Serbien zu finden. Sie hatten bereits selbst ein interessantes Angebot auf einer Plattform entdeckt, aber vor dem Kauf entschieden sie sich, kein Risiko einzugehen und eine umfassende professionelle Überprüfung des Fahrzeugs durchführen zu lassen.
 
-      Letztendlich kamen wir zur Besichtigung und überprüften zwei BMW X3. Das erste Fahrzeug machte auf den ersten Blick einen ordentlichen Eindruck, jedoch zeigte die Diagnose **Verschleiß der Steuerkette**. Ein solch Kauf hätte zusätzliche Kosten fast sofort nach dem Erwerb des Fahrzeugs bedeutet.
+      Letztendlich sind wir zur Besichtigung gekommen und haben zwei BMW X3 überprüft. Das erste Fahrzeug machte auf den ersten Blick einen guten Eindruck, doch die Diagnose zeigte **Verschleiß an der Steuerkette**. Ein solches Kauf könnte sofort nach dem Erwerb zusätzliche Kosten verursachen.
 
-      Wir schlugen vor, einen anderen Ansatz in Betracht zu ziehen: Anstatt ein günstigeres Auto zu kaufen und dann Geld in teure Wartung und Reparaturen zu investieren, kann es manchmal sinnvoller sein, das Budget leicht zu erhöhen und ein Fahrzeug in besserem technischen Zustand und gleichzeitig mit einer reichhaltigeren Ausstattung zu wählen. In diesem Fall fließt das Geld nicht in die Behebung von Problemen des Vorbesitzers, sondern in ein qualitativ hochwertigeres Auto.
+      Wir haben vorgeschlagen, einen anderen Ansatz zu verfolgen: Anstatt ein günstiges Auto zu kaufen und dann Geld für teure Wartung und Reparaturen zu investieren, ist es manchmal sinnvoller, das Budget etwas zu erhöhen und ein Fahrzeug in besserem technischen Zustand und gleichzeitig besserer Ausstattung zu wählen. In diesem Fall fließen die Mittel nicht in die Behebung von Problemen des Vorbesitzers, sondern in ein qualitativ hochwertigeres Auto.
 
-      Genau so einen BMW X3 gelang es uns zu finden. Das Fahrzeug war in ausgezeichnetem technischen Zustand, mit einer sehr guten Ausstattung und ohne die Notwendigkeit größerer Investitionen nach dem Kauf.
+      Genau so einen BMW X3 haben wir auch gefunden. Das Fahrzeug befand sich in ausgezeichnetem technischen Zustand, mit einer sehr guten Ausstattung und ohne dass nach dem Kauf ernsthafte Investitionen nötig waren.
 
-      Der ausgewählte BMW X3 ist mit einem zwei Liter **B47** Diesel-Motor und einem zuverlässigen 8-Gang-Automatikgetriebe **ZF** ausgestattet. Vor dem Kauf überprüften wir das Auto gründlich, einschließlich einer computergestützten Diagnose mit original BMW ISTA Diagnosetechnologie.
+      Der ausgewählte BMW X3 ist mit einem zwei Litern Diesel-Motor **B47** und einer zuverlässigen 8-Gang-Automatik **ZF** ausgestattet. Vor dem Kauf haben wir das Fahrzeug sorgfältig überprüft, einschließlich einer computergestützten Diagnose mit original BMW ISTA-Diagnosewerkzeugen.
 
-      Nikolai und Julia waren mit dem Ergebnis zufrieden und wählten genau diesen BMW X3.
+      Nikolai und Julia waren mit dem Ergebnis zufrieden und haben genau diesen BMW X3 gewählt.
 car: BMW X3
 year: 2022
 price:

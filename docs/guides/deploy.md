@@ -260,31 +260,35 @@ the capture bot.
 
 ### Analytics — no environment variables
 
-The counters and the Meta Pixel ids are baked into each `src/utils/metrika.ts` and are never read from
-the environment: they are not secrets, they are publicly visible in any request from
-the site, and spreading them across three Vercel dashboards would create a third
-place to get them wrong.
+The GA4 measurement ids and the Meta Pixel id are baked into each
+`src/utils/analytics.ts` and are never read from the environment: they are not
+secrets, they are publicly visible in any request from the site, and spreading
+them across three Vercel dashboards would create a third place to get them
+wrong.
 
-| Site        | Yandex Metrika | Meta Pixel          |
-| ----------- | -------------- | ------------------- |
-| approved.rs | `111800377`    | —                   |
-| carlab.rs   | `112647692`    | `29229430643330595` |
-| details.rs  | `112647721`    | —                   |
+| Site        | GA4 Measurement ID | Meta Pixel          | Google Ads       |
+| ----------- | ------------------ | ------------------- | ---------------- |
+| approved.rs | `G-KRZTP1VX7D`     | —                   | —                |
+| carlab.rs   | `G-DNDDCQWYRR`     | `29229430643330595` | `AW-18508613563` |
+| details.rs  | `G-XH3F0PZNCC`     | —                   | —                |
 
-Each domain has its own counter; reusing another's is not allowed. Google Analytics
-was removed from all three — 167 KiB of gtag.js left the bundle entirely.
+Each domain has its own GA4 property, under the "Zikrasoft" Analytics account;
+reusing another's is not allowed. Yandex Metrika was removed from all three —
+see [ADR-0033](../adr/0033-google-analytics-instead-of-yandex-metrica.md) for
+why, superseding [ADR-0012](../adr/0012-yandex-metrica-only-starting-before-consent.md).
 
-All three behave the same way: the hit goes into the `ym` queue on the first page
-load, and `tag.js` itself is fetched after `load`, while the browser is idle — it is
-off the critical path, but not one pageview is lost because of it. An explicit
-refusal in the banner takes effect from the next load — there is no way to unload a
-Metrika counter that has already started. Metrika is initialised with
-`webvisor: true`, meaning it records sessions; the enquiry form is excluded from the
-recording by the `ym-hide-content ym-disable-keys` classes on `LeadForm.astro` in
-all three apps.
+All three behave the same way: `gtag('config', …)` is queued on the first page
+load, and `gtag/js` itself is fetched after `load`, while the browser is idle —
+it is off the critical path, but not one pageview is lost because of it. On
+carlab.rs, the same already-installed gtag.js (loaded for the `AW-18508613563`
+Google Ads tag) also carries the GA4 config — no second script. An explicit
+refusal in the banner takes effect from the next load — there is no way to
+unload a tag that has already started. **GA4 has no equivalent to Metrika's
+`webvisor` session recording** — that capability was dropped, not replaced; see
+the open issue tracking a Microsoft Clarity add-on.
 
-**If you change a counter, or enable analytics somewhere it was absent**, three
-things travel with it: the Russian `privacy` section in
+**If you change a measurement id, or enable analytics somewhere it was
+absent**, three things travel with it: the Russian `privacy` section in
 `src/content/i18n/pages.yaml`, the `cookie.notice` string in
 `site.yaml`/`dictionary.yaml`, and `COOKIE_POLICY_VERSION` in
 `src/utils/constants.ts`. Without bumping the version, consent quietly starts
@@ -361,7 +365,7 @@ with an "undelivered" notice in the Topic.
 | `META_CAPI_TEST_CODE` | —           | testing   | —          | events go to production; set it only while checking Events Manager Test |
 
 The token is a Conversions API access token generated in Events Manager for the
-site's own pixel (`META_PIXEL_ID` in `src/utils/metrika.ts`) — a secret, server
+site's own pixel (`META_PIXEL_ID` in `src/utils/analytics.ts`) — a secret, server
 only, never `PUBLIC_`. A site without a pixel id sends nothing even with a
 token. What fires and when: [analytics.md](analytics.md#the-server-lead-event-from-a-capture-bot).
 

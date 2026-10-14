@@ -4,71 +4,71 @@ translations:
   en:
     title: BMW X4
     body: |-
-      ## Purchasing a 2019 BMW X4 in Serbia — Car Sourcing with Inspection
+      ## Purchase of a 2019 BMW X4 in Serbia - Car sourcing with inspection
 
-      Alexey and his wife came to us with the task of finding a **BMW in Serbia** in excellent technical and visual condition. Their budget for the vehicle was up to **35,000 euros**.
+      Alexey and his wife approached us with the task of finding a **BMW in Serbia** that was in excellent technical and visual condition. Their budget for the car was up to **35,000 euros**.
 
-      Our goal was to find a BMW X4 within this budget — with a transparent history, good equipment, and minimal expenses after the purchase.
+      Our objective was to find a BMW X4 within the specified budget - with a clear history, good equipment, and minimal investment needed after purchase.
 
-      During the sourcing process, we reviewed **5 BMW X4s** and then selected the most suitable option.
+      During the selection process, we reviewed **5 BMW X4 vehicles**, ultimately choosing the most suitable option.
 
-      ## 2019 BMW X4 — An Excellent Choice
+      ## 2019 BMW X4 - a great choice for purchase
 
-      In the end, we chose a **2019 BMW X4** in a striking red color. The car immediately stands out due to its appearance, and its good specifications make it even more appealing for everyday use.
+      We selected a **2019 BMW X4** in a striking red color. The car stands out immediately due to its appearance, and the high-quality features make it even more appealing for everyday use.
 
-      Under the hood, it has a **BMW B48** gasoline engine. The mileage at the time of purchase was approximately **130,000 kilometers**.
+      Under the hood is a **BMW B48** gasoline engine. At the time of purchase, the car had a mileage of around **130,000 kilometers**.
 
-      One of the main advantages of this vehicle was its **official dealership service history**, which allowed us to verify its maintenance and actual mileage.
+      One of the main advantages of this vehicle was its **official dealer service history**, which allowed us to confirm the servicing and the car’s actual mileage.
 
-      Upon inspection, the car was found to be in **excellent condition** — both technically and visually.
+      During the inspection, the vehicle demonstrated **excellent condition** - both technically and visually.
 
-      ## BMW X4 Specifications
+      ## BMW X4 Features
 
-      The selected BMW X4 comes with popular features:
+      The selected BMW X4 comes with a desirable set of features:
 
       <ul class="icon-check">
-      <li>panoramic sunroof</li>
+      <li>panoramic roof</li>
       <li>BMW iDrive ID6 multimedia system</li>
-      <li>towbar</li>
+      <li>tow hitch</li>
       <li>B48 gasoline engine</li>
       <li>striking red body color</li>
       </ul>
 
-      After the purchase, we also installed and set up **Apple CarPlay**, which made the standard multimedia system significantly more convenient for daily use.
+      After the purchase, we also installed and configured **Apple CarPlay**, which significantly enhanced the usability of the stock multimedia system for daily use.
 
-      ## Why This Car?
+      ## Why did we choose this car?
 
-      When sourcing a vehicle, we always evaluate not only the price and specifications but also a combination of factors: technical condition, service history, actual mileage, body condition, and potential investments.
+      When sourcing a vehicle, we always assess not only the price and features but also a combination of factors: technical condition, service history, actual mileage, body condition, and potential future investments.
 
-      Of the five BMW X4s we considered, this vehicle turned out to be the **most balanced option**. Its good history, verified mileage, excellent condition, favorable specifications, and attractive appearance made it the best choice within the established budget.
+      Out of the five BMW X4s we considered, this particular vehicle turned out to be the **most balanced option**. A solid history, verified mileage, excellent condition, favorable features, and attractive appearance made it the best choice within the established budget.
 
-      As a result, Alexey and his wife received a **2019 BMW X4** that meets their initial requirements regarding budget, condition, and specifications.
+      As a result, Alexey and his wife received a **2019 BMW X4** that meets their original requirements regarding budget, condition, and features.
 
-      ### Car Sourcing for BMW in Serbia
+      ### BMW Sourcing in Serbia
 
-      If you are planning to buy a **BMW X4, BMW X3, or another BMW model in Serbia**, independently searching may not always allow you to quickly distinguish a truly good car from one with a problematic history.
+      If you plan to buy a **BMW X4, BMW X3, or any other BMW model in Serbia**, searching on your own doesn't always allow you to quickly distinguish a genuinely good car from one with a problematic history.
 
-      **Need help sourcing a BMW in Serbia? Contact us, and we will find a car within your budget and inspect it before purchase.**
+      **Need assistance with BMW sourcing in Serbia? Contact us, and we will find a car that fits your budget and check it before purchase.**
   sr:
     title: BMW X4
     body: |-
-      ## Kupovina BMW X4 iz 2019. godine u Srbiji — autopodbor automobila sa proverom
+      ## Kupovina BMW X4 iz 2019. godine u Srbiji — automatski izbor automobila sa proverom
 
-      Obratili su nam se Aleksej i njegova supruga sa zadatkom da pronađu **BMW u Srbiji** u odličnom tehničkom i vizuelnom stanju. Budžet za kupovinu automobila iznosio je do **35 000 evra**.
+      Obratili su nam se Aleksei i njegova supruga sa zadatkom da pronađu **BMW u Srbiji** u odličnom tehničkom i vizuelnom stanju. Budžet za kupovinu automobila iznosio je do **35 000 evra**.
 
-      Pred nama je bio zadatak da pronađemo BMW X4 u datom budžetu — sa prozirnom istorijom, dobrom opremom i minimalnim ulaganjima nakon kupovine.
+      Pred nama je bio zadatak da pronađemo BMW X4 unutar zadatog budžeta — sa jasnom istorijom, dobrom opremom i minimalnim ulaganjima nakon kupovine.
 
-      Tokom procesa odabira, razmotrili smo **5 automobila BMW X4**, nakon čega smo se odlučili za najpovoljniju opciju.
+      U procesu izbora razmotrili smo **5 automobila BMW X4**, a zatim smo se odlučili za najpovoljniju opciju.
 
-      ## BMW X4 iz 2019. godine — odličan izbor za kupovinu
+      ## BMW X4 iz 2019. godine — odlična opcija za kupovinu
 
-      Na kraju je izabran **BMW X4 iz 2019. godine** u veoma upečatljivoj crvenoj boji. Automobil se odmah ističe svojim spoljnim izgledom, a dobra oprema čini ga još privlačnijom opcijom za svakodnevnu upotrebu.
+      Na kraju je izabran **BMW X4 iz 2019. godine** u veoma upečatljivoj crvenoj boji. Automobil se odmah ističe svojim izgledom, a dobra oprema ga čini još privlačnijom opcijom za svakodnevnu upotrebu.
 
-      Pod haubom se nalazi benzinski motor **BMW B48**. Prešao je oko **130 000 kilometara** u trenutku kupovine.
+      Pod haubom se nalazi benzinski motor **BMW B48**. Pređašnja kilometraža automobila u trenutku kupovine iznosila je oko **130 000 kilometara**.
 
-      Jedna od glavnih prednosti automobila bila je **službena servisna istorija**, koja je omogućila potvrdu održavanja i stvarnog pređenog broja kilometara.
+      Jedna od glavnih prednosti automobila bila je **službena istorija servisiranja**, koja je omogućila da se potvrdi servis i realna kilometraža automobila.
 
-      Prilikom provere, automobil se pokazao u **odličnom stanju** — i tehnički i vizuelno.
+      Prilikom provere, automobil se pokazao u **odličnom stanju** — kako tehnički, tako i vizuelno.
 
       ## Oprema BMW X4
 
@@ -76,123 +76,123 @@ translations:
 
       <ul class="icon-check">
       <li>panoramski krov</li>
-      <li>multimedijalni sistem BMW iDrive ID6</li>
-      <li>prikolica</li>
-      <li>benzinac B48</li>
+      <li>BMW iDrive ID6 infotainment sistem</li>
+      <li>vučena kuka</li>
+      <li>benzinski motor B48</li>
       <li>upečatljiva crvena boja karoserije</li>
       </ul>
 
-      Nakon kupovine, instalirali smo i podesili **Apple CarPlay**, što je učinilo ugrađeni multimedijalni sistem znatno praktičnijim za svakodnevnu upotrebu.
+      Nakon kupovine takođe smo instalirali i podesili **Apple CarPlay**, što je značajno olakšalo korišćenje ugrađenog infotainment sistema za svakodnevnu primenu.
 
-      ## Zašto smo izabrali baš ovaj automobil?
+      ## Zašto je odabran baš ovaj automobil?
 
-      Prilikom odabira automobila, uvek procenjujemo ne samo cenu i opremu, već i skup faktora: tehničko stanje, istoriju održavanja, stvarni pređeni broj kilometara, stanje karoserije i perspective ulaganja.
+      Pri biranju automobila, uvek procenjemo ne samo cenu i opremu, već i skup faktora: tehničko stanje, istoriju servisiranja, realnu kilometražu, stanje karoserije i perspektivna ulaganja.
 
-      Od pet razmatranih BMW X4, ovaj automobil se pokazao kao **najbalansiranija opcija**. Dobra istorija, potvrđen pređeni broj kilometara, odlično stanje, pogodna oprema i lep spoljašnji izgled učinili su ga najboljim izborom u okviru postavljenog budžeta.
+      Od pet razmatranih BMW X4, baš je ovaj automobil bio **najbolje izbalansirana opcija**. Dobra istorija, potvrđena kilometraža, odlično stanje, pogodna oprema i lep izgled učinili su ga najboljim izborom u okviru zadatog budžeta.
 
-      Kao rezultat, Aleksej i njegova supruga su dobili **BMW X4 iz 2019. godine**, koji odgovara inicijalnim zahtevima po budžetu, stanju i opremi.
+      Rezultate su Aleksei i njegova supruga dobili **BMW X4 iz 2019. godine**, koji odgovara početnim zahtevima u vezi budžeta, stanja i opreme.
 
-      ### Autopodbor BMW u Srbiji
+      ### Automatski izbor BMW u Srbiji
 
-      Ako planirate da kupite **BMW X4, BMW X3 ili neki drugi model BMW u Srbiji**, samostalna potraga ne može uvek brzo da razlikuje zaista dobar automobil od automobila sa problematičnom istorijom.
+      Ako planirate da kupite **BMW X4, BMW X3 ili neki drugi model BMW u Srbiji**, samostalna pretraga ne omogućava uvek brzu diferencijaciju između stvarno dobrog automobila i vozila sa problematičnom istorijom.
 
-      **Treba vam autopodbor BMW u Srbiji? Javite nam se, i mi ćemo pronaći automobil prema vašem budžetu i izvršiti proveru auta pre kupovine.**
+      **Treba vam izbor BMW u Srbiji? Pišite nam, i mi ćemo izabrati automobil prema vašem budžetu i proveriti ga pre kupovine.**
   es:
     title: BMW X4
     body: |-
-      ## Compra de un BMW X4 2019 en Serbia - selección de automóvil con inspección
+      ## Compra de un BMW X4 2019 en Serbia - selección de automóvil con verificación
 
-      Alexey y su esposa se pusieron en contacto con nosotros para que les ayudáramos a encontrar un **BMW en Serbia** en excelentes condiciones técnicas y estéticas. El presupuesto para la compra del automóvil era de hasta **35 000 euros**.
+      Alexey y su esposa se pusieron en contacto con nosotros para que les ayudáramos a encontrar un **BMW en Serbia** en excelente estado técnico y visual. El presupuesto para la compra del automóvil era de hasta **35,000 euros**.
 
-      La tarea consistía en localizar un BMW X4 dentro del presupuesto establecido, con una historia transparente, buenas características y mínimas inversiones adicionales tras la compra.
+      Nuestra tarea era encontrar un BMW X4 dentro de ese presupuesto, con una historia transparente, buena equipación y mínimas inversiones posteriores a la compra.
 
-      Durante el proceso de selección, consideramos **5 automóviles BMW X4**, y finalmente optamos por la opción más adecuada.
+      Durante el proceso de selección, consideramos **5 vehículos BMW X4**, y finalmente elegimos la opción más acertada.
 
       ## BMW X4 2019 - una excelente opción de compra
 
-      Al final, se eligió un **BMW X4 2019** en un llamativo color rojo. El automóvil destaca inmediatamente por su apariencia, y una buena configuración lo convierte en una opción aún más atractiva para el uso diario.
+      Al final, seleccionamos un **BMW X4 de 2019** en un color rojo muy llamativo. El automóvil destaca inmediatamente por su apariencia, y su buena equipación lo convierte en una opción aún más atractiva para el uso diario.
 
-      Bajo el capó, cuenta con un motor de gasolina **BMW B48**. La cifra de kilómetros recorridos por el automóvil en el momento de la compra era de alrededor de **130 000 kilómetros**.
+      Bajo el capó, se encuentra el motor de gasolina **BMW B48**. El kilometraje del vehículo al momento de la compra era de aproximadamente **130,000 kilómetros**.
 
-      Una de las principales ventajas del automóvil fue su **historia de servicio oficial de concesionario**, que permitió confirmar el mantenimiento y el kilometraje real del vehículo.
+      Una de las principales ventajas de este automóvil fue la **historia de servicio oficial del concesionario**, que permitió confirmar el mantenimiento y el kilometraje real del vehículo.
 
-      Durante la inspección, el automóvil se presentó en **excelente estado** tanto técnico como estético.
+      Durante la inspección, el automóvil demostró estar en **excelente estado**, tanto técnica como visualmente.
 
-      ## Equipamiento del BMW X4
+      ## Equipación del BMW X4
 
-      El BMW X4 elegido tiene un equipamiento muy demandado:
+      El BMW X4 elegido cuenta con una equipación muy apreciada:
 
       <ul class="icon-check">
       <li>techo panorámico</li>
-      <li>sistema multimedia BMW iDrive ID6</li>
-      <li>enganches de remolque</li>
+      <li>sistema de infoentretenimiento BMW iDrive ID6</li>
+      <li>enganche de remolque</li>
       <li>motor de gasolina B48</li>
-      <li>llamativo color rojo de la carrocería</li>
+      <li>impactante color rojo de la carrocería</li>
       </ul>
 
-      Después de la compra, también instalamos y configuramos **Apple CarPlay**, lo que hizo que el sistema multimedia original fuera mucho más conveniente para el uso diario.
+      Después de la compra, también instalamos y configuramos **Apple CarPlay**, lo que hizo que el sistema de infoentretenimiento de fábrica fuera mucho más cómodo para el uso diario.
 
       ## ¿Por qué elegimos este automóvil?
 
-      Al seleccionar un automóvil, siempre evaluamos no solo el precio y el equipamiento, sino también un conjunto de factores: estado técnico, historia de mantenimiento, kilometraje real, estado de la carrocería y posibles inversiones futuras.
+      Al seleccionar un automóvil, siempre evaluamos no solo el precio y la equipación, sino también una serie de factores: estado técnico, historia de servicio, kilometraje real, estado de la carrocería e inversiones futuras.
 
-      De los cinco BMW X4 considerados, este automóvil resultó ser la **opción más equilibrada**. Su buena historia, kilometraje confirmado, excelente estado, equipamiento favorable y bonita apariencia lo convirtieron en la mejor elección dentro del presupuesto establecido.
+      De los cinco BMW X4 que consideramos, este vehículo resultó ser la **opción más equilibrada**. Su buena historia, kilometraje confirmado, excelente estado, buena equipación y hermoso diseño lo convirtieron en la mejor elección dentro del presupuesto establecido.
 
-      Como resultado, Alexey y su esposa obtuvieron un **BMW X4 2019** que cumple con los requisitos iniciales en cuanto a presupuesto, estado y equipamiento.
+      Como resultado, Alexey y su esposa obtuvieron un **BMW X4 2019**, que cumplía con los requisitos iniciales de presupuesto, estado y equipación.
 
       ### Selección de BMW en Serbia
 
-      Si planeas comprar un **BMW X4, BMW X3 o cualquier otro modelo de BMW en Serbia**, buscar por tu cuenta no siempre te ayuda a distinguir rápidamente un buen automóvil de uno con un historial problemático.
+      Si planeas comprar un **BMW X4, BMW X3 o cualquier otro modelo de BMW en Serbia**, buscar por cuenta propia no siempre permite distinguir rápidamente un buen automóvil de uno con una historia problemática.
 
-      **¿Necesitas ayuda para encontrar un BMW en Serbia? Escríbenos y encontraremos un automóvil que se ajuste a tu presupuesto y lo inspeccionaremos antes de la compra.**
+      **¿Necesitas ayuda para encontrar un BMW en Serbia? Escríbenos y buscaremos un automóvil que se ajuste a tu presupuesto y lo verificaremos antes de la compra.**
   de:
     title: BMW X4
     body: |-
-      ## Kauf eines BMW X4 aus dem Jahr 2019 in Serbien – Autoselektion mit Inspektion
+      ## Kauf eines BMW X4 Baujahr 2019 in Serbien – Fahrzeugsuche mit Überprüfung
 
-      Alexey und seine Frau haben uns kontaktiert mit dem Anliegen, einen **BMW in Serbien** in hervorragendem technischen und optischen Zustand zu finden. Das Budget für den Kauf des Fahrzeugs betrug bis zu **35.000 Euro**.
+      Alexey und seine Frau wendeten sich an uns mit der Aufgabe, einen **BMW in Serbien** in hervorragendem technischen und optischen Zustand zu finden. Das Budget für den Autokauf betrug bis zu **35.000 Euro**.
 
-      Unsere Aufgabe war es, einen BMW X4 innerhalb des vorgegebenen Budgets zu finden – mit transparenter Geschichte, guter Ausstattung und minimalen Investitionen nach dem Kauf.
+      Die Herausforderung bestand darin, einen BMW X4 innerhalb des vorgegebenen Budgets zu finden – mit transparenter Geschichte, guter Ausstattung und minimalen Investitionen nach dem Kauf.
 
-      Im Auswahlprozess haben wir **5 BMW X4 Fahrzeuge** betrachtet und uns schließlich für die beste Option entschieden.
+      Während des Auswahlprozesses haben wir **5 BMW X4 Fahrzeuge** untersucht und schließlich die beste Option ausgesucht.
 
-      ## BMW X4 aus dem Jahr 2019 – eine hervorragende Kaufoption
+      ## BMW X4 Baujahr 2019 – eine ausgezeichnete Kaufentscheidung
 
-      Letztendlich wurde ein **BMW X4 2019** in einer sehr auffälligen roten Farbe ausgewählt. Das Fahrzeug sticht sofort durch sein äußeres Erscheinungsbild hervor, und die gute Ausstattung macht es zu einer noch attraktiveren Option für den täglichen Gebrauch.
+      Letztendlich wurde ein **BMW X4 aus dem Jahr 2019** in einer sehr auffälligen roten Farbe gewählt. Das Fahrzeug hebt sich sofort durch sein äußeres Erscheinungsbild ab, und die gute Ausstattung macht es zu einer noch attraktivere Wahl für den täglichen Gebrauch.
 
-      Unter der Haube befindet sich der Benzinmotor **BMW B48**. Der Kilometerstand des Fahrzeugs betrug zum Zeitpunkt des Kaufs etwa **130.000 Kilometer**.
+      Unter der Haube arbeitet der Benzinmotor **BMW B48**. Der Kilometerstand des Fahrzeugs zum Zeitpunkt des Kaufs betrug etwa **130.000 Kilometer**.
 
-      Eines der Hauptmerkmale des Fahrzeugs war die **offizielle Servicegeschichte des Händlers**, die eine Bestätigung der Wartung und des tatsächlichen Kilometerstands des Fahrzeugs ermöglichte.
+      Eines der größten Vorteile des Fahrzeugs war die **offizielle Servicehistorie des Händlers**, die es ermöglichte, die Wartung sowie den tatsächlichen Kilometerstand des Autos zu bestätigen.
 
       Bei der Besichtigung zeigte sich das Auto in **ausgezeichnetem Zustand** – sowohl technisch als auch optisch.
 
       ## Ausstattung des BMW X4
 
-      Der ausgewählte BMW X4 verfügt über begehrte Ausstattungsmerkmale:
+      Der gewählte BMW X4 hat eine beliebte Ausstattung:
 
       <ul class="icon-check">
       <li>Panoramadach</li>
       <li>Multimedia-System BMW iDrive ID6</li>
-      <li>Anhängerkupplung</li>
+      <li>Anhängekupplung</li>
       <li>Benzinmotor B48</li>
-      <li>auffällige rote Karosseriefarbe</li>
+      <li>Auffällige rote Karosseriefarbe</li>
       </ul>
 
-      Nach dem Kauf haben wir zudem **Apple CarPlay** installiert und konfiguriert, was das serienmäßige Multimedia-System deutlich benutzerfreundlicher für die tägliche Nutzung gemacht hat.
+      Nach dem Kauf haben wir außerdem **Apple CarPlay** installiert und konfiguriert, was das standardmäßige Multimedia-System erheblich benutzerfreundlicher für den Alltagsgebrauch gemacht hat.
 
-      ## Warum haben wir uns gerade für dieses Fahrzeug entschieden?
+      ## Warum haben wir gerade dieses Fahrzeug ausgewählt?
 
-      Bei der Auswahl eines Fahrzeugs bewerten wir nicht nur den Preis und die Ausstattung, sondern auch eine Vielzahl von Faktoren: technischen Zustand, Wartungsgeschichte, tatsächliche Laufleistung, Zustand der Karosserie und zukünftige Investitionen.
+      Bei der Auswahl eines Fahrzeugs bewerten wir nicht nur den Preis und die Ausstattung, sondern auch die Gesamtheit der Faktoren: technischen Zustand, Wartungshistorie, tatsächlichen Kilometerstand, Karosseriezustand und zukünftige Investitionen.
 
-      Von den fünf betrachteten BMW X4 Fahrzeugen erwies sich dieses Modell als **am ausgewogensten**. Eine gute Geschichte, nachweisbare Laufleistung, hervorragender Zustand, gelungene Ausstattung und ein schönes äußeres Erscheinungsbild machten es zur besten Wahl innerhalb des festgelegten Budgets.
+      Von den fünf betrachteten BMW X4 stellte sich dieses Fahrzeug als **die am besten ausgewogene Option** heraus. Eine gute Historie, bestätigter Kilometerstand, hervorragender Zustand, gelungene Ausstattung und ein schönes äußeres Erscheinungsbild machten es zur besten Wahl im Rahmen des festgelegten Budgets.
 
-      So erhielten Alexey und seine Frau einen **BMW X4 2019**, der den ursprünglichen Anforderungen an Budget, Zustand und Ausstattung entspricht.
+      Somit erhielten Alexey und seine Frau einen **BMW X4 Baujahr 2019**, der den ursprünglichen Anforderungen hinsichtlich Budget, Zustand und Ausstattung entspricht.
 
-      ### Autoselektion BMW in Serbien
+      ### Fahrzeugsuche BMW in Serbien
 
-      Wenn Sie planen, einen **BMW X4, BMW X3 oder ein anderes BMW Modell in Serbien** zu kaufen, ermöglicht die eigene Suche nicht immer eine schnelle Unterscheidung zwischen einem wirklich guten Fahrzeug und einem Auto mit problematischer Geschichte.
+      Wenn Sie planen, einen **BMW X4, BMW X3 oder ein anderes BMW-Modell in Serbien** zu kaufen, ermöglicht die eigenständige Suche nicht immer, ein wirklich gutes Fahrzeug von einem Auto mit problematischer Geschichte schnell zu unterscheiden.
 
-      **Benötigen Sie eine Fahrzeugauswahl für BMW in Serbien? Schreiben Sie uns, und wir finden das passende Fahrzeug für Ihr Budget und überprüfen es vor dem Kauf.**
+      **Benötigen Sie eine Fahrzeugsuche für BMW in Serbien? Schreiben Sie uns, und wir finden das passende Fahrzeug für Ihr Budget und prüfen es vor dem Kauf.**
 car: BMW X4
 year: 2019
 price:

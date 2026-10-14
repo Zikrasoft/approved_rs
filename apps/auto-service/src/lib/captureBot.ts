@@ -6,7 +6,7 @@ import {
   requireEnv,
 } from '@podbor/lead-crm';
 import { BRAND } from '@/utils/constants';
-import { META_PIXEL_ID } from '@/utils/metrika';
+import { META_PIXEL_ID } from '@/utils/analytics';
 
 export const CAPTURE_WEBHOOK_SECRET = captureWebhookSecret(process.env);
 

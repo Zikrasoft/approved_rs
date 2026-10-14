@@ -190,14 +190,14 @@ const businessSchema = localBusinessSchema({
       import { bootSiteKit } from '@podbor/site-kit/browser';
       import { defineSiteLeadForm } from '@podbor/site-kit/lead-form';
       import {
+        GA_MEASUREMENT_ID,
         GOOGLE_ADS_ID,
         GOOGLE_CONVERSION_LABELS,
         META_PIXEL_ID,
-        YM_COUNTER_ID,
-      } from '@/utils/metrika';
+      } from '@/utils/analytics';
 
       bootSiteKit({
-        ymCounterId: YM_COUNTER_ID,
+        gaMeasurementId: GA_MEASUREMENT_ID,
         metaPixelId: META_PIXEL_ID,
         googleAdsId: GOOGLE_ADS_ID,
         googleConversionLabels: GOOGLE_CONVERSION_LABELS,

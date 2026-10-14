@@ -24,3 +24,9 @@ export function safeMarkdownInline(markdown: string): string {
     SANITIZE_OPTIONS,
   );
 }
+
+export function pickRandomBanner(banners: string[]): string {
+  return safeMarkdownInline(
+    banners[Math.floor(Math.random() * banners.length)],
+  );
+}

@@ -8,7 +8,7 @@ import {
 } from '@podbor/lead-crm';
 import { waitUntil } from '@vercel/functions';
 import { z } from 'zod';
-import { META_PIXEL_ID } from '@/utils/metrika';
+import { META_PIXEL_ID } from '@/utils/analytics';
 
 export const CAPTURE_WEBHOOK_SECRET = captureWebhookSecret(process.env);
 

@@ -1,7 +1,27 @@
 // @vitest-environment jsdom
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const cart = vi.hoisted(() => ({ addToCart: vi.fn(), loadCart: vi.fn() }));
+const cart = vi.hoisted(() => ({
+  addToCart: vi.fn(),
+  loadCart: vi.fn(),
+  cartLineItem: (
+    line: {
+      id: string;
+      variant_id: string | null;
+      product_handle: string | null;
+      product_title: string | null;
+      quantity: number;
+      unit_price: number;
+    },
+    category?: string,
+  ) => ({
+    item_id: line.variant_id ?? line.id,
+    item_name: line.product_title ?? line.product_handle ?? line.id,
+    price: line.unit_price,
+    quantity: line.quantity,
+    ...(category && { item_category: category }),
+  }),
+}));
 const api = vi.hoisted(() => ({ isOutOfStock: vi.fn() }));
 const goals = vi.hoisted(() => ({
   GOALS: { addToCart: 'add_to_cart' },
@@ -49,9 +69,19 @@ const deferred = <T>() => {
 
 beforeAll(() => defineAddToCart());
 
+const LINE = {
+  id: 'li_1',
+  variant_id: 'var_1',
+  product_handle: 'akb-60ah',
+  product_title: 'Akumulator 60Ah',
+  quantity: 1,
+  unit_price: 5990,
+  total: 5990,
+};
+
 beforeEach(() => {
   vi.clearAllMocks();
-  cart.addToCart.mockResolvedValue({ id: 'cart_1', items: [] });
+  cart.addToCart.mockResolvedValue({ id: 'cart_1', items: [LINE] });
   cart.loadCart.mockResolvedValue(null);
   api.isOutOfStock.mockReturnValue(false);
 });
@@ -73,7 +103,42 @@ describe('<add-to-cart>', () => {
     expect(goCart.hidden).toBe(false);
     expect(goals.reachGoal).toHaveBeenCalledTimes(1);
     expect(goals.reachGoal).toHaveBeenCalledWith('add_to_cart', {
-      type: 'batteries',
+      currency: 'rsd',
+      value: 5990,
+      items: [
+        {
+          item_id: 'var_1',
+          item_name: 'Akumulator 60Ah',
+          price: 5990,
+          quantity: 1,
+          item_category: 'batteries',
+        },
+      ],
+    });
+  });
+
+  it('reports quantity 1 even when the line already held more units before this click', async () => {
+    cart.addToCart.mockResolvedValue({
+      id: 'cart_1',
+      items: [{ ...LINE, quantity: 3 }],
+    });
+    const { button } = mount();
+
+    button.click();
+    await settle();
+
+    expect(goals.reachGoal).toHaveBeenCalledWith('add_to_cart', {
+      currency: 'rsd',
+      value: 5990,
+      items: [
+        {
+          item_id: 'var_1',
+          item_name: 'Akumulator 60Ah',
+          price: 5990,
+          quantity: 1,
+          item_category: 'batteries',
+        },
+      ],
     });
   });
 

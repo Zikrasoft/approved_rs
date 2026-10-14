@@ -14,43 +14,43 @@ translations:
   en:
     title: Mini One for Stanislav
     body: |-
-      ## Car Sourcing in Serbia: Mini One for a Driver Standing 195 cm Tall
+      ## Car Sourcing in Serbia: Mini One for a Driver 195 cm Tall
 
-      Stanislav approached us with an interesting request. Despite his height of **195 cm**, after trying out various vehicles, it turned out that the **Mini** fits him best in terms of seating and comfort. His main criteria were low mileage and a good technical condition.
+      Stanislav came to us with an interesting challenge. Despite his height of **195 cm**, after trying various vehicles, it turned out that the **Mini** suited him best in terms of seating and comfort. His main requirements were low mileage and excellent technical condition.
 
-      During the sourcing process, we found a **Mini One** with just **60,000 km** on the odometer. A pre-purchase inspection revealed only **two painted parts**, an excellent service history confirmed by **BMW AIR**, and a good report from **CarVertical** with no major issues.
+      During the search, we found a **Mini One** with only **60,000 km** on the clock. The pre-purchase inspection revealed just **two painted parts**, an excellent service history confirmed by **BMW AIR**, and a solid **CarVertical** report with no serious issues.
 
-      The only downside was the very dirty interior — the previous owner hadn’t paid much attention to keeping the car clean. After a professional detailing job that Stanislav handled himself, the Mini was completely transformed: the interior looked brand new, smelled great, and now brings joy to the owner every day.
+      The only downside was the very dirty interior— the previous owner hadn't paid much attention to the car's cleanliness. After a professional detailing job, which Stanislav did himself, the Mini was completely transformed: the interior looks brand new, it smells pleasant, and the car now brings joy to its owner every day.
   sr:
     title: Mini One za Stanislava
     body: |-
-      ## Autoprodaja u Srbiji: Mini One za vozača visine 195 cm
+      ## Odabir automobila u Srbiji: Mini One za vozača visokog 195 cm
 
-      Obratio nam se Stanislav sa zanimljivim zadatkom. Iako je visok **195 cm**, nakon probne vožnje različitih automobila, ispostavilo se da mu **Mini** najbolje odgovara po udobnosti i poziciji sedenja. Glavni zahtev je bio mali pređeni put i dobro tehničko stanje.
+      Stanislav nam se obratio sa zanimljivim zadatkom. Iako je visok **195 cm**, nakon isprobavanja različitih automobila, ispostavilo se da mu **Mini** najbolje odgovara po pitanju udobnosti i pozicije sedenja. Glavni zahtev bio je mali pređeni put i dobro tehničko stanje.
 
-      Tokom pretrage pronađen je **Mini One** sa pređenih samo **60 000 km**. Provera auta pre kupovine pokazala je samo **dve farbane delove**, odličnu servisnu istoriju, potvrđenu od strane **BMW AIR**, kao i dobar izveštaj **CarVertical** bez ozbiljnih nedostataka.
+      Tokom odabira pronađen je **Mini One** sa pređenih samo **60 000 km**. Provera auta pre kupovine pokazala je samo **dve farbane delove**, odličnu servisnu historiju, potvrđenu od strane **BMW AIR**, kao i dobar izveštaj **CarVertical** bez ozbiljnih zamerki.
 
-      Jedini nedostatak bio je vrlo prljav enterijer — prethodna vlasnica nije previše brinula o čistoći automobila. Nakon profesionalnog pranja, koje je Stanislav uradio samostalno, Mini je potpuno promenjen: enterijer izgleda kao nov, prijatno miriše, a automobil sada raduje vlasnika svakog dana.
+      Jedini nedostatak bila je veoma prljava unutrašnjost — prethodna vlasnica nije previše vodila računa o čistoći automobila. Nakon profesionalnog hemijskog čišćenja, koje je Stanislav uradio sam, Mini se potpuno transformisao: unutrašnjost izgleda kao nova, prijatno miriše, a automobil sada svaki dan raduje vlasnika.
   es:
     title: Mini One para Stanislav
     body: |-
-      ## Selección de autos en Serbia: Mini One para un conductor de 195 cm de altura
+      ## Selección de autos en Serbia: Mini One para un conductor de 195 cm
 
-      Stanislav se acercó a nosotros con una tarea interesante. A pesar de medir **195 cm**, tras probar varios automóviles, resultó que el **Mini** es el que mejor se adaptaba a su altura y comodidad. La principal condición era un bajo kilometraje y un buen estado técnico.
+      Stanislav se puso en contacto con nosotros con una tarea interesante. A pesar de medir **195 cm**, después de probar varios autos, resultó que el **Mini** era el que mejor se adaptaba a él en términos de ajuste y comodidad. La principal condición era un bajo kilometraje y un buen estado técnico.
 
-      Durante la búsqueda encontramos un **Mini One** con tan solo **60 000 km** de recorrido. La inspección del auto antes de la compra reveló solo **dos partes pintadas**, un excelente historial de mantenimiento confirmado por **BMW AIR**, así como un buen informe de **CarVertical** sin observaciones graves.
+      Durante la búsqueda, encontramos un **Mini One** con solo **60 000 km** recorridos. La inspección del automóvil antes de la compra reveló únicamente **dos piezas pintadas**, una excelente historia de mantenimiento confirmada por **BMW AIR**, así como un buen informe de **CarVertical** sin observaciones serias.
 
-      La única desventaja fue el interior muy sucio — la anterior propietaria no se preocupo mucho por la limpieza del automóvil. Después de una limpieza química profesional que Stanislav realizó por su cuenta, el Mini se transformó por completo: el interior parece nuevo, tiene un agradable aroma y el coche ahora alegra a su dueño cada día.
+      El único inconveniente fue el interior muy sucio: la anterior dueña no prestaba mucha atención a la limpieza del vehículo. Después de una limpieza profesional que Stanislav realizó por su cuenta, el Mini se transformó completamente: el interior ahora parece nuevo, huele bien y el automóvil brinda alegría a su dueño todos los días.
   de:
     title: Mini One für Stanislav
     body: |-
-      ## Autoauswahl in Serbien: Mini One für einen 195 cm großen Fahrer
+      ## Autobeschaffung in Serbien: Mini One für einen Fahrer mit einer Körpergröße von 195 cm
 
-      Stanislav hat sich mit einer interessanten Aufgabe an uns gewandt. Trotz seiner Größe von **195 cm** stellte sich nach der Anprobe verschiedener Fahrzeuge heraus, dass der **Mini** ihm am besten hinsichtlich Sitzposition und Komfort passt. Die Hauptanforderung war ein geringer Kilometerstand und ein guter technischer Zustand.
+      Stanislav hat sich mit einer interessanten Anfrage an uns gewandt. Trotz seiner Größe von **195 cm** stellte sich bei der Anprobe verschiedener Autos heraus, dass der **Mini** für ihn am besten passt – sowohl hinsichtlich Sitzposition als auch Komfort. Das Hauptkriterium war ein geringer Kilometerstand und ein guter technischer Zustand.
 
-      Bei der Suche wurde ein **Mini One** mit lediglich **60 000 km** Laufleistung gefunden. Die Überprüfung des Autos vor dem Kauf ergab nur **zwei lackierte Teile**, eine hervorragende Wartungshistorie, die von **BMW AIR** bestätigt wurde, sowie einen guten Bericht von **CarVertical** ohne ernsthafte Beanstandungen.
+      Während der Suche wurde ein **Mini One** mit nur **60 000 km** Laufleistung gefunden. Die Überprüfung des Fahrzeugs vor dem Kauf ergab nur **zwei lackierte Teile**, eine hervorragende Servicehistorie, die durch **BMW AIR** bestätigt wurde, sowie einen guten **CarVertical**-Bericht ohne ernsthafte Mängel.
 
-      Der einzige Nachteil war das sehr schmutzige Innere – die vorherige Besitzerin hatte nicht besonders auf die Sauberkeit des Fahrzeugs geachtet. Nach einer professionellen Innenreinigung, die Stanislav selbst durchgeführt hat, erstrahlt der Mini jetzt in neuem Glanz: das Interieur sieht aus wie neu, riecht angenehm und bereitet dem Besitzer nun jeden Tag Freude.
+      Der einzige Nachteil war der sehr schmutzige Innenraum – die vorherige Besitzerin hatte nicht besonders auf die Sauberkeit des Fahrzeugs geachtet. Nach einer professionellen Innenreinigung, die Stanislav selbst durchgeführt hat, erstrahlt der Mini nun vollständig: Der Innenraum sieht aus wie neu, riecht angenehm und das Auto erfreut seinen Besitzer nun jeden Tag.
 translatedFrom: fdc1131a456700d2
 ---
 

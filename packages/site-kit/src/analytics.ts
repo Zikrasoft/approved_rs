@@ -6,26 +6,24 @@ import {
   type ConsentDetail,
 } from './consent.ts';
 
-const YM_TAG_SRC = 'https://mc.yandex.ru/metrika/tag.js?id=';
 const META_PIXEL_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
-const GOOGLE_ADS_SRC = 'https://www.googletagmanager.com/gtag/js?id=';
+const GOOGLE_TAG_SRC = 'https://www.googletagmanager.com/gtag/js?id=';
 
 const META_EVENTS: Readonly<Record<string, string>> = {
   [GOALS.formSubmit]: 'Lead',
   [GOALS.contactClick]: 'Contact',
   [GOALS.addToCart]: 'AddToCart',
   [GOALS.beginCheckout]: 'InitiateCheckout',
-  [GOALS.orderPlaced]: 'Purchase',
+  [GOALS.purchase]: 'Purchase',
 };
 
 export interface AnalyticsConfig {
-  ymCounterId?: number;
   metaPixelId?: string;
   googleAdsId?: string;
+  gaMeasurementId?: string;
   googleConversionLabels?: Partial<Record<Goal, string>>;
 }
 
-type YmQueue = ((...args: unknown[]) => void) & { a?: unknown[][]; l?: number };
 type FbqQueue = ((...args: unknown[]) => void) & {
   callMethod?: (...args: unknown[]) => void;
   queue: unknown[][];
@@ -36,12 +34,11 @@ type FbqQueue = ((...args: unknown[]) => void) & {
 
 declare global {
   interface Window {
-    ym?: (...args: unknown[]) => void;
     fbq?: (...args: unknown[]) => void;
     _fbq?: (...args: unknown[]) => void;
     gtag?: (...args: unknown[]) => void;
     dataLayer?: unknown[];
-    ymReachGoal?: (goal: string, params?: Record<string, unknown>) => void;
+    trackGoal?: (goal: string, params?: Record<string, unknown>) => void;
     loadAnalytics?: () => void;
   }
 }
@@ -62,17 +59,6 @@ function whenIdle(run: () => void): void {
   };
   if (document.readyState === 'complete') schedule();
   else addEventListener('load', schedule, { once: true });
-}
-
-function stubYm(): void {
-  if (window.ym) return;
-  const queue: unknown[][] = [];
-  const ym: YmQueue = (...args) => {
-    queue.push(args);
-  };
-  ym.a = queue;
-  ym.l = Date.now();
-  window.ym = ym;
 }
 
 function stubFbq(): void {
@@ -97,18 +83,6 @@ function stubGtag(): void {
   };
 }
 
-function startYm(ymCounterId: number): void {
-  stubYm();
-  window.ym?.(ymCounterId, 'init', {
-    ssr: true,
-    webvisor: true,
-    clickmap: true,
-    accurateTrackBounce: true,
-    trackLinks: true,
-  });
-  whenIdle(() => loadOnce(`${YM_TAG_SRC}${ymCounterId}`));
-}
-
 function startMetaPixel(metaPixelId: string): void {
   stubFbq();
   window.fbq?.('init', metaPixelId);
@@ -119,20 +93,27 @@ function startMetaPixel(metaPixelId: string): void {
 function trackMetaGoal(goal: string, params?: Record<string, unknown>): void {
   const event = META_EVENTS[goal];
   if (!event) return;
-  const { total, currency } = params ?? {};
-  if (typeof total === 'number' && typeof currency === 'string')
+  const { value, currency } = params ?? {};
+  if (typeof value === 'number' && typeof currency === 'string')
     window.fbq?.('track', event, {
-      value: total,
+      value,
       currency: currency.toUpperCase(),
     });
   else window.fbq?.('track', event);
 }
 
-function startGoogleAds(googleAdsId: string): void {
+function startGoogleTag(googleAdsId?: string, gaMeasurementId?: string): void {
+  const id = googleAdsId ?? gaMeasurementId;
+  if (!id) return;
   stubGtag();
   window.gtag?.('js', new Date());
-  window.gtag?.('config', googleAdsId);
-  whenIdle(() => loadOnce(`${GOOGLE_ADS_SRC}${googleAdsId}`));
+  if (googleAdsId) window.gtag?.('config', googleAdsId);
+  if (gaMeasurementId) window.gtag?.('config', gaMeasurementId);
+  whenIdle(() => loadOnce(`${GOOGLE_TAG_SRC}${id}`));
+}
+
+function trackGa4Goal(goal: string, params?: Record<string, unknown>): void {
+  window.gtag?.('event', goal, params);
 }
 
 function trackGoogleAdsGoal(
@@ -143,10 +124,10 @@ function trackGoogleAdsGoal(
 ): void {
   const label = labels[goal as Goal];
   if (!label) return;
-  const { total, currency } = params ?? {};
+  const { value, currency } = params ?? {};
   const event: Record<string, unknown> = { send_to: `${googleAdsId}/${label}` };
-  if (typeof total === 'number' && typeof currency === 'string') {
-    event.value = total;
+  if (typeof value === 'number' && typeof currency === 'string') {
+    event.value = value;
     event.currency = currency.toUpperCase();
   }
   window.gtag?.('event', 'conversion', event);
@@ -173,16 +154,16 @@ function refused(): boolean {
 }
 
 export function defineAnalytics({
-  ymCounterId,
   metaPixelId,
   googleAdsId,
+  gaMeasurementId,
   googleConversionLabels,
 }: AnalyticsConfig): void {
   if (window.loadAnalytics) return;
 
-  window.ymReachGoal = (goal, params) => {
-    if (ymCounterId) window.ym?.(ymCounterId, 'reachGoal', goal, params);
+  window.trackGoal = (goal, params) => {
     if (metaPixelId) trackMetaGoal(goal, params);
+    if (gaMeasurementId) trackGa4Goal(goal, params);
     if (googleAdsId)
       trackGoogleAdsGoal(
         googleAdsId,
@@ -196,9 +177,8 @@ export function defineAnalytics({
   const start = (): void => {
     if (started) return;
     started = true;
-    if (ymCounterId) startYm(ymCounterId);
     if (metaPixelId) startMetaPixel(metaPixelId);
-    if (googleAdsId) startGoogleAds(googleAdsId);
+    startGoogleTag(googleAdsId, gaMeasurementId);
   };
   window.loadAnalytics = start;
   pendingStart = start;

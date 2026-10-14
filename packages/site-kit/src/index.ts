@@ -1,4 +1,8 @@
-export { safeMarkdown, safeMarkdownInline } from './safeMarkdown.ts';
+export {
+  safeMarkdown,
+  safeMarkdownInline,
+  pickRandomBanner,
+} from './safeMarkdown.ts';
 export { breadcrumbListSchema } from './breadcrumbSchema.ts';
 export {
   jsonLdText,

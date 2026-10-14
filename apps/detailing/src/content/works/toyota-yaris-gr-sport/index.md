@@ -2,34 +2,34 @@
 title: Toyota Yaris GR Sport — полная оклейка кузова PPF
 translations:
   en:
-    title: Toyota Yaris GR Sport - Full PPF Wrap
+    title: Toyota Yaris GR Sport - Complete PPF Wrap
     body: |-
-      This is a Toyota Yaris GR Sport belonging to our client from Belgrade. The car was purchased used but is in excellent condition, and the new owner decided not to wait for the first city scratches, opting to protect the body right away.
+      This is a Toyota Yaris GR Sport belonging to our client from Belgrade. The car was purchased used but is in excellent condition, and the new owner decided not to wait for the first city marks and to protect the body right away.
 
-      The Yaris is a compact car designed for urban driving, and in the city, the body takes the most hits: tight parking spots at shops and malls, neighboring vehicles, careless door openings, shopping carts from the supermarket, branches, and stones kicked up from the road. It's frustrating to get a dent or chip simply because a neighboring driver opened their door a bit too wide.
+      The Yaris is a compact city car, and in the city, the body takes the most beating: tight parking spaces near shops and malls, neighboring vehicles, doors carelessly opened, supermarket trolleys, branches, and stones kicked up from the road. It’s especially frustrating to get a dent or chip simply because the neighboring car door was opened a bit wider than it should have been.
 
-      That’s why we wrapped the entire body in a protective polyurethane film, measuring **190 microns** thick.
+      That’s why the entire body was covered with a protective polyurethane film that is **190 microns** thick.
 
-      The PPF adds a strong transparent layer to the paint, absorbing minor scratches, scuffs, light parking contact marks, road dust, and stones. This protection is especially needed for doors, fenders, bumpers, and mirrors, as they're constantly at risk. A good transparent film is nearly invisible, allowing the color, shine, and appearance of the vehicle to remain unchanged.
+      The PPF adds a robust transparent layer on top of the paint, absorbing fine scratches, scuffs, marks from light parking contacts, road sand, and stones. This is particularly important for doors, fenders, bumpers, and mirrors, which are always at risk. A good transparent film is nearly invisible, allowing the color, shine, and appearance of the car to remain unchanged.
 
-      PPF won't turn your car into a tank, and it won't protect against serious impacts or deep dents. However, it effectively shields against common urban damages, which can accumulate over a couple of years and tire the paint.
+      While PPF doesn’t turn the car into an armored vehicle, and it won’t protect against serious impacts or deep dents, it does shield the vehicle from common urban damage that can wear down the paint over a couple of years.
 
-      The Yaris left us in its factory condition, but now the body is much better prepared for the everyday challenges of city life.
+      The Yaris left in its factory condition, but now the body is much better prepared for the rigors of daily city life.
     car: Toyota Yaris GR Sport
   sr:
-    title: Toyota Yaris GR Sport — kompletna zaštita karoserije PPF
+    title: Toyota Yaris GR Sport - kompletna zaštita karoserije PPF
     body: |-
-      Toyota Yaris GR Sport naše klijentkinje iz Beograda. Automobil je kupljen polovan, ali u odličnom stanju, i nova vlasnica je odlučila da ne čeka prve gradske oštećenja, već da zaštiti karoseriju odmah.
+      Toyota Yaris GR Sport naše klijentkinje iz Beograda. Automobil je kupljen korišćen, ali u odličnom stanju, a nova vlasnica je odlučila da ne čeka prve gradske ožiljke, već da zaštiti karoseriju odmah.
 
-      Yaris je kompaktni automobil idealan za grad, a u gradu karoseriji najviše preti — uske parkinge kod prodavnica i tržnih centara, susedni automobili, nepažljivo otvorena vrata, kolica iz supermarketa, grane i kamenčići sa puta. Najgore je dobiti udubljenje ili ogrebotinu samo zato što je komšija na parkingu otvorio vrata malo šire nego što je trebalo.
+      Yaris je kompaktan automobil pogodan za grad, a u gradu karoserija najviše trpi: uska parking mesta ispred prodavnica i tržnih centara, susedni automobili, nepažljivo otvorena vrata, kolica iz supermarketa, grančice i kamenčići sa puta. Najgore je dobiti udubljenje ili ogrebotinu samo zato što je komšija na parkingu otvorio vrata malo šire nego što bi trebalo.
 
-      Zbog toga je karoserija oblepljena u potpunosti — zaštitnom poliuretanskom folijom debljine **190 mikrona**.
+      Zbog toga je karoserija oblepljena u potpunosti - zaštitnom poliuretanskom folijom debljine **190 mikrona**.
 
-      PPF stavlja čvrst proziran sloj na lak i preuzima na sebe sitne ogrebotine, abrazije, tragove lakih kontakata pri parkiranju, prašinu i kamenčiće. Najviše je potrebno zaštiti vrata, blatobrane, branike i retrovizore — oni su stalno u zoni rizika. Dobra prozirna folija pritom gotovo da nije vidljiva — boja, sjaj i izgled karoserije ostaju isti.
+      PPF postavlja čvrst proziran sloj na lak i upija male ogrebotine, strugotine, tragove lakih kontakata pri parkiranju, kao i prašinu i kamenčiće sa puta. Ovo je najpotrebnije za vrata, krila, branike i retrovizore: oni su neprekidno u riziku. Dobra prozirna folija gotovo da se ne primećuje - boja, sjaj i izgled karoserije ostaju isti.
 
-      PPF ne pretvara automobil u oklopno vozilo i ne štiti od ozbiljnog udarca ili dubokog udubljenja. Međutim, obično gradska oštećenja, koja se tokom par godina kumuliraju i čine lak umornim, uspešno zadržava.
+      PPF ne pretvara automobil u oklopno vozilo i ne štiti od ozbiljnih udaraca ili dubokih udubljenja. Ipak, redovne gradske oštećenja, koja se vremenom akumuliraju na umornom laku, ona drži pod kontrolom.
 
-      Yaris je otišao u svom fabričkom izdanju, ali sada je karoserija mnogo bolje pripremljena za svakodnevni gradski život.
+      Yaris je otišao u svom fabričkom izdanju, samo što je sada karoserija mnogo bolje pripremljena za svakodnevni gradski život.
     car: Toyota Yaris GR Sport
 car: Toyota Yaris GR Sport
 year: 2026

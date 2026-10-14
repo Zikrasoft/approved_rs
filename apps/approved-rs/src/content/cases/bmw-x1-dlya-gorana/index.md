@@ -18,46 +18,46 @@ translations:
     title: BMW X1 for Goran
     body: |-
       **BMW X1 2023 from Germany to Serbia for Goran!**\
-      Initially, we were looking for an Audi Q3 for Goran. We explored several options, inspected the cars, and compared their features and conditions. However, during our search, we decided to broaden our selection and consider the BMW X1 as well.\
-      In the end, we found a **2023 BMW X1 in black, with low mileage and a rich set of features in Germany.** The car fully met Goran's wishes, so we decided to go with it.\
-      Why did we choose the 2023 model? By 2026, such cars will be three years old, which, under certain conditions, allows for reduced customs costs when importing into Serbia. This was also taken into account during the selection process.\
-      After inspection and purchase, we organized the delivery of the BMW X1 from Germany to Serbia, went through the necessary procedures, and handed the car over to Goran.\
-      **Another important point when buying a car in Germany: reclaiming German VAT (19%).** If the car is sold with the option to reclaim the VAT, the money is usually returned about 2–4 weeks after it is exported from Germany and the required documents are processed. This significantly lowers the final purchase cost.\
-      **Full-service selection, inspection, purchase, and delivery of cars from Germany to Serbia.** We help find a suitable option among BMW, Audi, Mercedes-Benz, Volkswagen, and other brands, taking into account the budget, features, mileage, customs costs, and the possibility of reclaiming VAT.\
-      Planning to buy a car in Germany with delivery to Belgrade or another city in Serbia? Contact us, and we'll help you find and bring the car that meets your wishes.
+      Initially, we were looking for an Audi Q3 for Goran. We considered several options, checked the cars, and compared their configurations and conditions. However, during the search, we decided to broaden our horizons and also consider the BMW X1.\
+      Ultimately, we found a **2023 black BMW X1 in Germany with low mileage and a rich set of features.** The car completely matched Goran's wishes, so we decided to go with it.\
+      Why did we choose the 2023 model? By 2026, cars of this age will be three years old, which, under certain conditions, allows for reduced customs expenses when importing to Serbia. We took this into account during the selection.\
+      After checking and purchasing, we arranged for the BMW X1 to be delivered from Germany to Serbia, completed the necessary procedures, and handed over the vehicle to Goran.\
+      **Another important point when buying a car in Germany: the refund of German VAT (19%).** If the car is sold with an option for VAT refund, after its export from Germany and processing the necessary documents, the money is usually returned within about 2–4 weeks. This significantly reduces the final purchase price.\
+      **Full-service selection, inspection, purchase, and delivery of cars from Germany to Serbia.** We help find suitable options among BMW, Audi, Mercedes-Benz, Volkswagen, and other brands, considering budget, configuration, mileage, customs costs, and the possibility of VAT refund.\
+      Are you planning to buy a car in Germany with delivery to Belgrade or another city in Serbia? Contact us, and we will help you select and bring the car according to your wishes.
   sr:
     title: BMW X1 za Gorana
     body: |-
       **BMW X1 2023. godine iz Nemačke u Srbiju za Gorana!**\
-      Prvobitno smo birali za Gorana Audi Q3. Razmotrili smo nekoliko opcija, proveli provere automobila, uporedili opreme i stanje. Međutim, tokom pretrage smo odlučili da proširimo izbor i obratimo pažnju i na BMW X1.\
-      Na kraju smo pronašli u Nemačkoj **BMW X1 2023. godine u crnoj boji, sa malim pređenim kilometrima i bogatom opremom.** Vozilo je u potpunosti odgovaralo Goranovim željama, pa smo se odlučili baš za njega.\
-      Zašto smo izabrali baš 2023. godinu? U 2026. godini ovakvim vozilima navršava se tri godine, što omogućava, uz određene uslove, smanjenje troškova carinjenja prilikom uvoza u Srbiju. To smo takođe uzeli u obzir prilikom izbora.\
-      Nakon provere i kupovine organizovali smo dostavu BMW X1 iz Nemačke u Srbiju, prošli potrebne procedure i predali automobil Goranu.\
-      **Još jedan važan trenutak prilikom kupovine automobila u Nemačkoj: povrat nemačkog PDV-a (19%).** Ako se automobil prodaje uz mogućnost povrata PDV-a, nakon njegovog izvoza iz Nemačke i sređivanja potrebne dokumentacije, novac se obično vraća za otprilike 2–4 nedelje. To značajno smanjuje konačnu cenu kupovine.\
-      **Izbor, provera, kupovina i prevoz automobila iz Nemačke u Srbiju „pod ključ“.** Pomažemo vam da pronađete odgovarajuću opciju među BMW, Audi, Mercedes-Benz, Volkswagen i drugim markama, uzimajući u obzir budžet, opremu, pređene kilometre, trošak carinjenja i mogućnost povrata PDV-a.\
-      Planirate da kupite auto u Nemačkoj uz dostavu u Beograd ili neki drugi grad u Srbiji? Pišite nam, pomoći ćemo vam da pronađete i dovedete auto prema vašim željama.
+      U početku smo tražili Audi Q3 za Gorana. Razmatrali smo nekoliko opcija, obavili provere automobila, uporedili opreme i stanje. Međutim, tokom procesa pretrage odlučili smo da proširimo izbor i obratimo pažnju na BMW X1.\
+      Na kraju smo pronašli u Nemačkoj **BMW X1 2023. godine u crnoj boji, sa malim pređašnjim brojem pređenih kilometara i bogatom opremom.** Automobil je u potpunosti ispunjavao Goranove želje, pa smo se odlučili baš za njega.\
+      Zašto smo izabrali baš 2023. godinu? U 2026. godini ovakvim automobilima će biti tri godine, što omogućava, pod određenim uslovima, smanjenje troškova carinjenja prilikom uvoza u Srbiju. Ovo je takođe uzeto u obzir pri izboru.\
+      Nakon provere i kupovine organizovali smo transport BMW X1 iz Nemačke u Srbiju, prošli potrebne procedure i predali automobil Goranu.\
+      **Još jedan važan aspekt prilikom kupovine automobila u Nemačkoj: povrat nemačkog PDV-a (19%).** Ako se automobil prodaje uz mogućnost povrata PDV-a, nakon njegovog izvoza iz Nemačke i obrade potrebne dokumentacije, novac se obično vraća za otprilike 2–4 nedelje. Ovo značajno smanjuje konačnu cenu kupovine.\
+      **Izbor, provera, kupovina i transport automobila iz Nemačke u Srbiju „ključ u ruke“.** Pomažemo da pronađete odgovarajuću opciju među BMW, Audi, Mercedes-Benz, Volkswagen i drugim markama, uzimajući u obzir budžet, opremu, pređene kilometre, troškove carinjenja i mogućnost povrata PDV-a.\
+      Planirate kupiti automobil u Nemačkoj sa dostavom u Beograd ili neki drugi grad u Srbiji? Javite nam se, pomoći ćemo vam da pronađete i dovedete auto prema vašim željama.
   es:
     title: BMW X1 para Goran
     body: |-
-      **¡BMW X1 2023 desde Alemania a Serbia para Goran!**\
-      Inicialmente estábamos buscando un Audi Q3 para Goran. Consideramos varias opciones, revisamos los vehículos, comparamos las configuraciones y el estado. Pero durante el proceso de búsqueda decidimos ampliar las opciones y también prestar atención al BMW X1.\
-      Al final encontramos en Alemania un **BMW X1 2023 en color negro, con poco kilometraje y una rica configuración.** El automóvil cumplía completamente con los deseos de Goran, por lo que decidimos quedarnos con él.\
-      ¿Por qué elegimos específicamente el año 2023? En 2026, esos vehículos cumplirán tres años, lo que permite, bajo ciertas condiciones, reducir los gastos de aduana al importarlos a Serbia. Esto también lo tuvimos en cuenta durante la selección.\
-      Después de la inspección y la compra, organizamos la entrega del BMW X1 desde Alemania a Serbia, completamos los procedimientos necesarios y entregamos el automóvil a Goran.\
-      **Otro punto importante al comprar un automóvil en Alemania: reembolso del IVA alemán (19%).** Si el automóvil se vende con opción de reembolso del IVA, después de su salida de Alemania y la gestión de los documentos necesarios, el dinero generalmente se devuelve en un plazo de aproximadamente 2 a 4 semanas. Esto permite reducir significativamente el costo final de la compra.\
-      **Selección, inspección, compra y entrega de automóviles de Alemania a Serbia, todo incluido.** Ayudamos a encontrar la opción adecuada entre BMW, Audi, Mercedes-Benz, Volkswagen y otras marcas, teniendo en cuenta el presupuesto, la configuración, el kilometraje, el costo de la aduana y la posibilidad de reembolso del IVA.\
-      ¿Planeas comprar un automóvil en Alemania con entrega en Belgrado o en otra ciudad de Serbia? Escríbenos, te ayudaremos a seleccionar y traer el coche según tus deseos.
+      **¡BMW X1 2023 de Alemania a Serbia para Goran!**\
+      Inicialmente estábamos buscando un Audi Q3 para Goran. Consideramos varias opciones, revisamos los automóviles, comparamos equipamientos y condiciones. Pero en el proceso decidimos ampliar la búsqueda y también prestar atención al BMW X1.\
+      Finalmente, encontramos en Alemania un **BMW X1 2023 de color negro, con poco kilometraje y un equipamiento completo.** El automóvil cumplía totalmente con los deseos de Goran, por lo que nos decidimos por él.\
+      ¿Por qué elegimos específicamente el año 2023? En 2026, estos automóviles cumplirán tres años, lo que permite, bajo ciertas condiciones, reducir los gastos en la aduana al importarlos a Serbia. Esto también se tuvo en cuenta durante la selección.\
+      Después de la verificación y compra, organizamos el transporte del BMW X1 de Alemania a Serbia, realizamos los procedimientos necesarios y entregamos el automóvil a Goran.\
+      **Otro punto importante al comprar un automóvil en Alemania: la devolución del IVA alemán (19%).** Si el automóvil se vende con posibilidad de devolución de IVA, después de su salida de Alemania y la tramitación de los documentos necesarios, el dinero suele devolverse en aproximadamente 2 a 4 semanas. Esto permite reducir significativamente el costo total de la compra.\
+      **Búsqueda, verificación, compra y entrega de automóviles de Alemania a Serbia llave en mano.** Ayudamos a encontrar la opción adecuada entre BMW, Audi, Mercedes-Benz, Volkswagen y otras marcas, considerando el presupuesto, el equipamiento, el kilometraje, el costo de la aduana y la posibilidad de devolución del IVA.\
+      ¿Planeas comprar un automóvil en Alemania con entrega a Belgrado o a otra ciudad de Serbia? Escríbenos, te ayudaremos a encontrar y traer el coche que deseas.
   de:
     title: BMW X1 für Goran
     body: |-
       **BMW X1 2023 aus Deutschland nach Serbien für Goran!**\
-      Ursprünglich haben wir für Goran einen Audi Q3 ausgesucht. Wir haben mehrere Optionen geprüft, die Fahrzeuge begutachtet, die Ausstattungen und den Zustand miteinander verglichen. Im Verlauf der Suche haben wir uns jedoch entschieden, das Angebot zu erweitern und auch den BMW X1 in Betracht zu ziehen.\
-      Letztendlich fanden wir in Deutschland **einen BMW X1 2023 in Schwarz, mit geringem Kilometerstand und umfangreicher Ausstattung.** Das Fahrzeug entsprach vollständig Gorans Wünschen, weshalb wir uns letztendlich für dieses Modell entschieden haben.\
-      Warum haben wir uns genau für das Jahr 2023 entschieden? Im Jahr 2026 werden diese Fahrzeuge drei Jahre alt, was unter bestimmten Bedingungen die Zollkosten beim Import nach Serbien senken kann. Dies haben wir ebenfalls bei der Auswahl berücksichtigt.\
-      Nach der Überprüfung und dem Kauf organisierten wir den Transport des BMW X1 aus Deutschland nach Serbien, führten die erforderlichen Verfahren durch und übergaben das Fahrzeug an Goran.\
-      **Ein weiterer wichtiger Punkt beim Kauf eines Fahrzeugs in Deutschland: die Rückerstattung der deutschen Mehrwertsteuer (19%).** Wenn das Auto mit der Möglichkeit zur Mehrwertsteuer-Rückerstattung verkauft wird, wird das Geld gewöhnlich etwa 2–4 Wochen nach dem Export aus Deutschland und der Bearbeitung der notwendigen Unterlagen zurückerstattet. Dies hilft, die Gesamtkosten des Kaufs erheblich zu senken.\
-      **Auswahl, Überprüfung, Kauf und Transport von Fahrzeugen aus Deutschland nach Serbien schlüsselfertig.** Wir helfen Ihnen, die passende Option unter BMW, Audi, Mercedes-Benz, Volkswagen und anderen Marken zu finden, unter Berücksichtigung Ihres Budgets, der Ausstattung, des Kilometerstands, der Zollkosten und der Möglichkeit der Mehrwertsteuerrückerstattung.\
-      Planen Sie, ein Auto in Deutschland mit Lieferung nach Belgrad oder eine andere Stadt in Serbien zu kaufen? Schreiben Sie uns, wir helfen Ihnen, das passende Fahrzeug nach Ihren Wünschen zu finden und zu importieren.
+      Ursprünglich hatten wir für Goran einen Audi Q3 ausgesucht. Wir haben mehrere Optionen in Betracht gezogen, die Fahrzeuge überprüft und die Ausstattungen sowie den Zustand verglichen. Im Verlauf der Suche haben wir uns jedoch entschieden, unser Angebot zu erweitern und auch den BMW X1 in den Fokus zu rücken.\
+      Letztendlich fanden wir in Deutschland **einen schwarzer BMW X1 2023 mit geringem Kilometerstand und üppiger Ausstattung.** Das Fahrzeug entsprach voll und ganz Gorans Wünschen, weshalb wir uns für dieses entschieden haben.\
+      Warum gerade das Modell von 2023? Im Jahr 2026 werden solche Fahrzeuge drei Jahre alt, was unter bestimmten Bedingungen die Kosten für die Zollabwicklung beim Import nach Serbien senkt. Auch das haben wir bei der Auswahl berücksichtigt.\
+      Nach der Überprüfung und dem Kauf organisierten wir den Transport des BMW X1 aus Deutschland nach Serbien, durchliefen die notwendigen Verfahren und übergaben das Fahrzeug an Goran.\
+      **Ein weiterer wichtiger Aspekt beim Autokauf in Deutschland: Rückerstattung der deutschen Mehrwertsteuer (19%).** Wenn das Fahrzeug mit der Möglichkeit zur Rückerstattung der Mehrwertsteuer verkauft wird, erfolgt die Rücküberweisung in der Regel etwa 2–4 Wochen nach dem Export aus Deutschland und der Erstellung der erforderlichen Dokumente. Dies senkt den endgültigen Kaufpreis erheblich.\
+      **Anpassung, Überprüfung, Kauf und Lieferung von Fahrzeugen aus Deutschland nach Serbien schlüsselfertig.** Wir helfen Ihnen, die passende Option unter BMW, Audi, Mercedes-Benz, Volkswagen und anderen Marken zu finden, basierend auf Budget, Ausstattung, Kilometerstand, Zollkosten und der Möglichkeit der Mehrwertsteuerrückerstattung.\
+      Planen Sie, ein Auto in Deutschland mit Lieferung nach Belgrad oder in eine andere Stadt in Serbien zu kaufen? Schreiben Sie uns, wir helfen Ihnen, das Fahrzeug nach Ihren Wünschen auszuwählen und zu bringen.
 translatedFrom: a1f47d0f6ad2944a
 ---
 **BMW X1 2023 года из Германии в Сербию для Горана!**\

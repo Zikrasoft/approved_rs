@@ -3,30 +3,30 @@ title: Мотоциклы и квадроциклы — оклейка плён�
 car: Мотоциклы и квадроциклы
 translations:
   en:
-    title: Motorcycles and ATVs - Wrapping with Film
+    title: Motorcycles and ATVs - Wrapping Film
     body: |-
-      We wrap motorcycles, ATVs, and other vehicles with either transparent film to preserve the paint, or colored film if a different look is desired.
+      We wrap motorcycles, ATVs, and other vehicles in transparent film to protect the paint or in colored film for a different look.
 
-      The transparent protective film maintains the original paint finish and protects the most vulnerable parts from scratches, minor damage, and dirt.
+      The transparent protective film preserves the original paint finish and protects the most vulnerable parts from scratches, minor damages, and dirt.
 
-      The colored film does the same while transforming the appearance of the vehicle. You can choose a new color, an interesting texture, or create a custom design, and when you're ready for a change - you can rewrap it. Even every year.
+      The colored film does the same while also changing the appearance of the vehicle. You can choose a new color, an interesting texture, or create a custom design, and when you want a change, you can simply rewrap it. Even every year.
 
-      You can bring the vehicle yourself. If that’s not convenient, we have our **own transport and trailer**: we will come, pick up your motorcycle or ATV, do the work, and arrange a convenient return option.
+      You can bring your vehicle to us. If that's inconvenient, we also have **our own transportation and trailer**: we can come to pick up your motorcycle or ATV, complete the work, and arrange a convenient return option.
 
-      We operate in Belgrade and throughout the rest of Serbia.
+      We work throughout Belgrade and the rest of Serbia.
     car: Motorcycles and ATVs
   sr:
-    title: Motocikle i kvadricikli - oblačenje filmom
+    title: Motocikli i kvadricikli - oblaganje folijom
     body: |-
-      Oblačimo motocikle, kvadricikle i drugu opremu - zaštitnim filmom kako bismo očuvali lak ili obojenim filmom ako je potreban drugačiji izgled.
+      Oblažemo motocikle, kvadricikle i drugu tehniku - prozirnom folijom radi očuvanja laka ili obojenom, ako je potreban drugačiji izgled.
 
-      Prozirni zaštitni film čuva originalnu lakiranu površinu i štiti najugroženije delove od ogrebotina, sitnih oštećenja i prljavštine.
+      Prozirna zaštitna folija štiti originalnu lak-površinu i pokriva najosetljivije delove od ogrebotina, manjih oštećenja i prljavštine.
 
-      Obojen film radi istu stvar i pri tom menja izgled opreme. Možete izabrati novu boju, zanimljivu teksturu ili kreirati sopstveni dizajn, a kada poželite promenu - jednostavno prekrijte ponovo. Možete to raditi svake godine.
+      Obojena folija radi isto, a pritom menja i izgled tehnike. Možete birati novu boju, zanimljivu teksturu ili napraviti individualni dizajn, a kada poželite promenu - jednostavno je prekrijete ponovo. Čak svake godine.
 
-      Tehniku možete doneti sami. Ako nije zgodno - imamo **vlastiti prevoz i prikolicu**: doći ćemo, pokupiti motocikl ili kvadricikl, obaviti posao i dogovoriti pogodan način vraćanja.
+      Tehniku možete doneti sami. Ako to nije zgodno - imamo **vlastiti prevoz i prikolicu**: doći ćemo, pokupiti motocikl ili kvadricikl, obaviti posao i dogovoriti se oko povratka.
 
-      Radimo i po Beogradu, i po ostatku Srbije.
+      Radimo i u Beogradu, i u ostatku Srbije.
     car: Motocikli i kvadricikli
 year: 2026
 servicesApplied:

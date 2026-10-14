@@ -4,38 +4,38 @@ translations:
   en:
     title: Major Service for Peugeot 308 1.5 BlueHDi 2024
     body: |-
-      The 2024 Peugeot 308 equipped with the **1.5 BlueHDi** diesel engine came to our car service in Belgrade for a major service. We carried out a complete set of tasks:
+      The 2024 Peugeot 308 with a **1.5 BlueHDi** diesel engine came to our Russian car service in Belgrade for a major service. We performed a complete set of tasks:
 
-      - Timing belt replacement;
-      - Water pump replacement;
-      - Coolant replacement;
-      - Engine oil replacement;
-      - Filter replacements;
-      - Inspection and maintenance of all related components.
+      - timing belt replacement;
+      - water pump replacement;
+      - coolant replacement;
+      - engine oil replacement;
+      - filter replacements;
+      - inspection and servicing of all related components.
 
-      There is an important detail regarding the 1.5 BlueHDi engine that is worth noting: the camshaft drive chain. Early versions of this engine used a chain that was **7 mm** wide. Over time, this chain stretches, and in the worst-case scenario, it can break and take the engine with it.
+      There is a specific detail to note about the 1.5 BlueHDi engine: the camshaft drive chain. Early versions of the engine had a chain that was **7 mm** wide. Over time, this chain can stretch, and in the worst-case scenario, it may break, leading to severe engine damage.
 
-      When servicing these engines, it is recommended to install a reinforced **8 mm** chain, along with the camshaft bearings and the camshafts themselves. For the 2023-2024 Peugeot 308 models, the 8 mm chain comes factory-installed.
+      When servicing such engines, it is recommended to install a reinforced **8 mm** chain, along with the camshaft bed and the camshafts themselves. For the 2023-2024 Peugeot 308 models, the 8 mm chain is already factory-installed.
 
-      This means that during a major service, we need to inspect not only the timing belt but also the camshaft chain, as well as being aware of the specific known traits of the engine.
+      This means that during a major service, it's important to check not only the timing belt but also the camshaft chain, considering the known characteristics of this particular engine.
     car: Peugeot 308 SW
   sr:
     title: Veliki servis Peugeot 308 1.5 BlueHDi 2024
     body: |-
-      Peugeot 308 iz 2024. godine sa dizel motorom **1.5 BlueHDi** došao je u našu rusku automehaničarsku radnju u Beogradu na veliki servis. Izvršili smo kompletan set radova:
+      Peugeot 308 iz 2024. godine sa dizel motorom **1.5 BlueHDi** došao je kod nas u ruski auto servis u Beogradu na veliki servis. Obavili smo kompletan spektar radova:
 
       - zamena zupčastog remena;
       - zamena vodene pumpe;
       - zamena antifriza;
       - zamena motornog ulja;
       - zamena filtera;
-      - provera i servis svih povezanih komponenti.
+      - provera i održavanje svih pratećih komponenti.
 
-      Kod motora 1.5 BlueHDi postoji jedna sitnica o kojoj treba imati posebnu pažnju: lanac za odvod bregaste osovine. U ranijim verzijama motora bio je lanac širine **7 mm**. Vremenom se istegne, a u najgorem slučaju može se slomiti što vodi do oštećenja motora.
+      Kod motora 1.5 BlueHDi postoji jedan važan detalj koji vredi posebno pomenuti: lanac koji pokreće bregaste osovine. U ranijim verzijama motora bio je lanac širine **7 mm**. Vremenom se istegne, a u najgorem slučaju može da se slomi i povuče za sobom motor.
 
-      Prilikom servisiranja ovakvih motora preporučuje se ugradnja pojačanog lanca **8 mm**, zajedno s ležajem bregaste osovine i samim bregastim osovinama. Na Peugeot 308 modelima iz 2023–2024. godine, fabrika već ugrađuje lanac od 8 mm.
+      Prilikom održavanja ovakvih motora preporučuje se postavljanje pojačanog lanca **8 mm**, zajedno sa postoljem bregastih osovina i samim bregastim osovinama. Na Peugeot 308 modelima iz 2023–2024. godine lanac od **8 mm** već dolazi sa fabrike.
 
-      To znači da na velikom servisu treba obratiti pažnju ne samo na zupčasti remen, već i na lanac bregaste osovine, kao i na poznate karakteristike konkretnog motora.
+      To znači da prilikom velikog servisa treba obratiti pažnju ne samo na zupčasti remen, već i na lanac bregastih osovina, kao i na poznate karakteristike konkretnog motora.
     car: Peugeot 308 SW
 car: Peugeot 308 SW
 year: 2024

@@ -12,38 +12,38 @@ date: 2026-09-11
 published: true
 translations:
   en:
-    title: Oil Change for DSG DQ381 in Skoda Octavia
+    title: Oil Change for DSG DQ381 on Skoda Octavia
     body: |-
-      Changing the oil in the **DSG DQ381** is an essential part of maintaining the gearbox that should not be overlooked.
+      Changing oil in the **DSG DQ381** is an important part of transmission maintenance that should not be overlooked.
 
-      This time, we performed a scheduled oil change: the client chose **MEYLE** oil, which we filled and paired with the necessary additional maintenance.
+      This time we performed a scheduled oil change: the client chose **MEYLE** oil, we filled it up and completed the rest of the necessary service.
 
-      The DQ381 is a modern seven-speed DSG gearbox with wet clutches, used in many Volkswagen, Audi, Škoda, and SEAT models. When serviced on time, this gearbox can last a long time without serious issues.
+      The DQ381 is a modern seven-speed DSG automatic transmission with wet clutches, used in many Volkswagen, Audi, Škoda, and SEAT models. When maintained on time, this transmission lasts long and without serious issues.
 
-      The same goes for other common DSG models, such as the DQ250 and DQ200. They have different designs and regulations, but the condition of the oil and timely servicing directly affect the lifespan of the gearbox, the performance of the mechatronics, and the clutches.
+      The same goes for other common DSG models, the DQ250 and DQ200. While they differ in design and specifications, the condition of the oil and timely maintenance directly influence the longevity of the transmission, the function of the mechatronics, and the clutches.
 
-      We recommend being guided not only by the formal regulations but also by real-world operating conditions. If the service history is unknown, running on the same oil for 100,000 to 150,000 kilometers is definitely not advisable. It makes sense to check when and how the gearbox was serviced at least once every **100,000 km**, and for the DQ381 and DQ250, changing the oil is usually advisable much earlier.
+      We recommend considering not only the formal maintenance schedule but also the actual operating conditions. If the maintenance history is unknown, it is definitely not advisable to run the oil for 100,000–150,000 kilometers. At **100,000 km**, it makes sense to at least check when and how the transmission was serviced, and for both the DQ381 and DQ250, the oil usually should be changed much sooner.
 
-      Fresh, quality oil retains the necessary properties under various temperatures and loads, providing lubrication and dissipating heat. This helps to postpone expensive repairs.
+      Fresh, high-quality oil maintains its essential properties under various temperatures and loads, lubricates, and dissipates heat. This helps to avoid costly repairs in the long run.
 
-      If you bought a used car and are unsure when the DSG DQ381, DQ250, or DQ200 was last serviced, check the condition of the gearbox and its history in advance.
+      If you purchased a used car and are unsure when the DSG DQ381, DQ250, or DQ200 was last serviced, check the condition of the transmission and its service history in advance.
     car: Skoda Octavia
   sr:
-    title: Zamena ulja u DSG DQ381 na Škoda Octavia
+    title: Zamena ulja u DSG DQ381 na Skoda Octavia
     body: |-
-      Zamena ulja u **DSG DQ381** je deo održavanja menjača koji je najbolje ne zanemariti.
+      Zamena ulja u **DSG DQ381** je deo servisa menjača koji nikako ne bi trebalo zanemariti.
 
-      Ovaj put smo radili redovnu zamenu: klijent je izabrao ulje **MEYLE**, sipali smo ga i obavili ostalo potrebno održavanje.
+      Ovaj put smo radili redovnu zamenu: klijent je izabrao ulje **MEYLE**, sipali smo ga i izvršili ostale potrebne servise.
 
-      DQ381 je savremeni sedmostepeni robot DSG sa mokrim spojnicama, koji se koristi u mnogim Volkswagen, Audi, Škoda i SEAT vozilima. Ako se održava na vreme, ovakav menjač traje dugo i bez ozbiljnih problema.
+      DQ381 je moderni sedmostepeni DSG menjač sa mokrim kuplungom, koji se koristi u mnogim Volkswagen, Audi, Škoda i SEAT modelima. Ako se redovno servisira, ovaj menjač traje dugo i bez ozbiljnih problema.
 
-      Sa drugim popularnim DSG menjačima, DQ250 i DQ200, situacija je slična. Njihova konstrukcija i propisi se razlikuju, ali stanje ulja i pravovremeno održavanje direktno utiču na trajnost menjača, rad mehatronike i spojnica.
+      Sa drugim popularnim DSG menjačima, DQ250 i DQ200, situacija je slična. Iako imaju različitu konstrukciju i propise, stanje ulja i pravovremeni servis direktno utiču na životni vek menjača, rad mehatronike i kuplunga.
 
-      Preporučujemo da se orijentišete ne samo na formalne propise već i na stvarne uslove korišćenja. Ako vam istorija održavanja nije poznata, sigurno nije preporučljivo koristiti isto ulje duže od 100–150 hiljada kilometara. Nakon **100 000 km** ima smisla saznati kada i kako je menjač održavan, a za DQ381 i DQ250 ulje obično treba menjati znatno ranije.
+      Preporučujemo da se orijentišete ne samo na formalne servise, već i na stvarne uslove korišćenja. Ako ne znate istoriju servisa vozila, ne bi trebalo voziti na istom ulju 100–150 hiljada kilometara. Svakih **100 000 km** ima smisla proveriti kada i kako je menjač servisiran, a za DQ381 i DQ250 ulje obično treba menjati znatno ranije.
 
-      Sveže kvalitetno ulje zadržava potrebna svojstva pri različitim temperaturama i opterećenjima, podmazuje i odvodi toplotu. Zbog toga skupi popravci se odlažu.
+      Sveže, kvalitetno ulje održava potrebna svojstva pri različitim temperaturama i opterećenjima, podmazuje i odvodi toplotu. Na taj način se skupi popravak odlaže.
 
-      Kupili ste polovni automobil i ne znate kada je poslednji put održavan DSG DQ381, DQ250 ili DQ200 — proverite stanje menjača i njegovu istoriju unapred.
+      Kupili ste polovni automobil i ne znate kada je poslednji put servisiran DSG DQ381, DQ250 ili DQ200 — proverite stanje menjača i njegovu istoriju unapred.
     car: Skoda Octavia
 translatedFrom: b0a31e4f03573dff
 ---

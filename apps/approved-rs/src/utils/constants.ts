@@ -22,7 +22,7 @@ const env = readPublicEnv(import.meta.env);
 export const SITE_URL = env.SITE;
 export const SITE_NAME = BRAND.name;
 
-export const COOKIE_POLICY_VERSION = '2026-09-21';
+export const COOKIE_POLICY_VERSION = '2026-10-14';
 export const SITE_BRAND = 'APPROVED';
 export const SITE_TLD = '.rs';
 export const DEFAULT_COUNTRY = 'rs';

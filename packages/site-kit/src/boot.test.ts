@@ -27,7 +27,7 @@ describe('bootSiteKit', () => {
   it('arms every part once, in order', async () => {
     const { defineAnalytics } = await import('./analytics.ts');
     (await boot())({
-      ymCounterId: 42,
+      gaMeasurementId: 'G-42',
       metaPixelId: '7',
       googleAdsId: 'AW-1',
       googleConversionLabels: { form_submit: 'Lead1' },
@@ -42,7 +42,7 @@ describe('bootSiteKit', () => {
       'funnel',
     ]);
     expect(defineAnalytics).toHaveBeenCalledWith({
-      ymCounterId: 42,
+      gaMeasurementId: 'G-42',
       metaPixelId: '7',
       googleAdsId: 'AW-1',
       googleConversionLabels: { form_submit: 'Lead1' },
@@ -51,13 +51,17 @@ describe('bootSiteKit', () => {
 
   it('makes a second boot a no-op', async () => {
     const bootSiteKit = await boot();
-    bootSiteKit({ ymCounterId: 42, analytics: true });
-    bootSiteKit({ ymCounterId: 42, analytics: true });
+    bootSiteKit({ gaMeasurementId: 'G-42', analytics: true });
+    bootSiteKit({ gaMeasurementId: 'G-42', analytics: true });
     expect(calls).toHaveLength(6);
   });
 
   it('skips the counter when analytics is off', async () => {
-    (await boot())({ ymCounterId: 42, metaPixelId: '7', analytics: false });
+    (await boot())({
+      gaMeasurementId: 'G-42',
+      metaPixelId: '7',
+      analytics: false,
+    });
     expect(calls).not.toContain('analytics');
     expect(calls).toHaveLength(5);
   });

@@ -41,18 +41,18 @@ profile:
   langCommand: Сменить язык
 translations:
   sr:
-    greeting: Zdravo! Hvala što ste se javili, vaša prijava je primljena, majstor će uskoro odgovoriti.
-    lookingFor: Recite mi, koja je vaša kola - marka, model, godina - i šta im se dešava ili koje radove treba obaviti.
-    phoneAsk: Nemate korisničko ime (username) na Telegramu, pa majstor ne može da vam piše. Ostavite broj telefona da bismo mogli da vas kontaktiramo.
-    phoneButton: 📱 Deliti broj
-    thanks: Hvala! Prenosimo majstoru - uskoro će vas kontaktirati.
-    received: Primljeno, majstor će videti vašu poruku.
+    greeting: Zdravo! Hvala što ste se javili, vaš zahtev je primljen, majstor će vam uskoro odgovoriti.
+    lookingFor: Ispričajte kako se zove vaša mašina — marka, model, godina — i šta je pošlo po zlu ili koje radove trebate.
+    phoneAsk: Nemate korisničko ime na Telegramu, pa majstor ne može da vam piše. Ostavite svoj broj telefona da bismo mogli da vas kontaktiramo.
+    phoneButton: 📱 Podeliti broj
+    thanks: Hvala! Prosledili smo majstoru — uskoro će vas kontaktirati.
+    received: Primili smo, majstor će videti vašu poruku.
     menu:
-      text: Kako možemo pomoći? Izaberite šta vas zanima.
+      text: Kako možemo da pomognemo? Izaberite šta vas zanima.
       back: « Nazad
     services:
       button: Usluge
-      text: Evo šta radimo u servisu. Izaberite uslugu - pokazat ćemo cenu, rokove i šta je uključeno.
+      text: Evo čime se bavimo u servisu. Izaberite uslugu — pokazaćemo cenu, rokove i šta se uključuje.
     card:
       request: 📝 Ostaviti zahtev
       site: Više na sajtu
@@ -62,66 +62,66 @@ translations:
       hours: Pon–Pet 08:00–18:00 · Sub 09:00–14:00
     manager:
       button: 👤 Pisati majstoru
-      text: Postavite svoje pitanje u jednoj poruci - majstor će ovde odgovoriti.
-      handoff: Majstor je dostupan na Telegramu - kliknite da otvorite chat.
+      text: Postavite svoje pitanje u jednoj poruci — majstor će tu odgovoriti.
+      handoff: Majstor je dostupan na Telegramu — kliknite da otvorite chat.
       chat: Otvoriti chat sa majstorom ↗
     partners:
       button: Partneri
-      text: Naši partneri - izaberite kome da pišete.
+      text: Naši partneri — izaberite kome da pišete.
     request:
       button: 📝 Ostaviti zahtev
-      car: Koja su vaša kola? Napišite marku, model i godinu.
-      service: Koji radovi su potrebni? Označite jednu ili više opcija.
+      car: Koja je vaša mašina? Napišite marku, model i godinu.
+      service: Koji radovi su potrebni? Obeležite jedan ili više.
       done: Gotovo →
-      unsure: Nisam siguran, potrebna je konsultacija
+      unsure: Ne znam, potrebna je konsultacija
     language:
       button: 🌐 Jezik
-      text: Izaberite jezik na kojem je vama lakše da komunicirate.
+      text: Izaberite jezik koji vam više odgovara.
     profile:
-      description: Automehaničarska radionica u Beogradu - dijagnostika, popravka i servisiranje. Kliknite 'Start' - recite šta nije u redu sa kolima i majstor će ovde odgovoriti.
-      shortDescription: Automehaničarska radionica u Beogradu - dijagnostika, popravka, servisiranje
+      description: Autoservis u Beogradu — dijagnostika, popravka i servisiranje. Kliknite na „Start“ — ispričajte šta je sa mašinom i majstor će ovde odgovoriti.
+      shortDescription: Autoservis u Beogradu — dijagnostika, popravka, servisiranje
       menuCommand: Glavni meni
       langCommand: Promeniti jezik
   en:
-    greeting: Hello! Thanks for reaching out, your request is in, and our mechanic will get back to you soon.
-    lookingFor: Tell us about your car — make, model, year — and what happened or what needs to be done.
-    phoneAsk: We couldn't find a username in your Telegram, so the mechanic won't be able to message you. Please share your phone number so we can get in touch.
+    greeting: Hello! Thanks for reaching out, your request is in, and our mechanic will respond soon.
+    lookingFor: Tell me about your car — the make, model, year — and what happened or what work you need done.
+    phoneAsk: We couldn’t find a username in your Telegram, so the mechanic can't contact you. Please share your phone number so we can get in touch.
     phoneButton: 📱 Share phone number
-    thanks: Thank you! We've passed your info to the mechanic — they will contact you shortly.
-    received: We've received it, the mechanic will see your message.
+    thanks: Thank you! We've passed your message to the mechanic — he will get back to you soon.
+    received: Got it, the mechanic will see your message.
     menu:
-      text: How can we help you? Choose what you're interested in.
+      text: How can we help? Choose what you're interested in.
       back: « Back
     services:
       button: Services
-      text: Here’s what we do at our service. Select a service — we’ll show the price, timeframe, and what's included.
+      text: Here's what we offer at the workshop. Choose a service — we’ll show you the price, timeline, and what's included.
     card:
       request: 📝 Submit a request
-      site: More on the site
+      site: More details on the site
     contacts:
       button: Contacts
-      text: We’re in Belgrade, waiting for you at the service.
+      text: We're in Belgrade, looking forward to seeing you at the workshop.
       hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
     manager:
       button: 👤 Message the mechanic
       text: Send your question in one message — the mechanic will respond here.
-      handoff: The mechanic is available in Telegram — click to open the chat.
+      handoff: The mechanic is available on Telegram — click to open the chat.
       chat: Open chat with the mechanic ↗
     partners:
       button: Partners
-      text: Our partners — choose who to write to.
+      text: Our partners — choose who to contact.
     request:
       button: 📝 Submit a request
       car: What car do you have? Please provide the make, model, and year.
-      service: What services do you need? Please select one or more.
+      service: What work do you need? Select one or more.
       done: Done →
-      unsure: I'm not sure, I need a consultation
+      unsure: Not sure, need a consultation
     language:
       button: 🌐 Language
-      text: Choose the language you feel comfortable communicating in.
+      text: Choose the language you prefer to communicate in.
     profile:
-      description: Car service in Belgrade — diagnostics, repair, and servicing. Click 'Start' — tell us what's wrong with your car, and the mechanic will respond here.
-      shortDescription: Car service in Belgrade — diagnostics, repair, servicing
+      description: Car service in Belgrade — diagnostics, repairs, and servicing. Click 'Start' — tell us what's wrong with your car, and the mechanic will respond here.
+      shortDescription: Car service in Belgrade — diagnostics, repairs, servicing
       menuCommand: Main menu
       langCommand: Change language
 translatedFrom: e894bd7a77f929d2

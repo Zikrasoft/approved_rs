@@ -35,12 +35,12 @@ function render(lang: string, languages: readonly string[], head = ALTERNATES) {
 
 beforeEach(() => {
   localStorage.clear();
-  window.ymReachGoal = vi.fn();
+  window.trackGoal = vi.fn();
   defineLanguageSuggestion();
 });
 
 afterEach(() => {
-  delete (window as Partial<Window>).ymReachGoal;
+  delete (window as Partial<Window>).trackGoal;
   vi.restoreAllMocks();
 });
 
@@ -225,7 +225,7 @@ describe('<language-suggestion>', () => {
   it('reports the offer, so a click rate can be read against it', () => {
     render('sr', ['ru-RU']);
 
-    expect(window.ymReachGoal).toHaveBeenCalledWith(GOALS.langOfferShown, {
+    expect(window.trackGoal).toHaveBeenCalledWith(GOALS.langOfferShown, {
       from: 'sr',
       to: 'ru',
     });
@@ -236,7 +236,7 @@ describe('<language-suggestion>', () => {
     link().addEventListener('click', (event) => event.preventDefault());
     link().click();
 
-    expect(window.ymReachGoal).toHaveBeenCalledWith(GOALS.langOfferTaken, {
+    expect(window.trackGoal).toHaveBeenCalledWith(GOALS.langOfferTaken, {
       from: 'sr',
       to: 'ru',
     });
@@ -246,7 +246,7 @@ describe('<language-suggestion>', () => {
     render('sr', ['ru-RU']);
     document.querySelector<HTMLElement>('[data-lang-dismiss]')!.click();
 
-    expect(window.ymReachGoal).toHaveBeenCalledWith(GOALS.langOfferDismissed, {
+    expect(window.trackGoal).toHaveBeenCalledWith(GOALS.langOfferDismissed, {
       from: 'sr',
       to: 'ru',
     });
@@ -255,11 +255,11 @@ describe('<language-suggestion>', () => {
   it('reports nothing on a page where the bar stays hidden', () => {
     render('ru', ['ru-RU']);
 
-    expect(window.ymReachGoal).not.toHaveBeenCalled();
+    expect(window.trackGoal).not.toHaveBeenCalled();
   });
 
   it('works on a page where analytics never loaded', () => {
-    delete (window as Partial<Window>).ymReachGoal;
+    delete (window as Partial<Window>).trackGoal;
 
     expect(() => render('sr', ['ru-RU'])).not.toThrow();
     expect(bar().hidden).toBe(false);

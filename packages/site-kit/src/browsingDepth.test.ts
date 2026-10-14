@@ -8,7 +8,7 @@ const STORAGE_KEY = 'case_browsing';
 let time: number;
 
 const depths = () =>
-  (window.ymReachGoal as ReturnType<typeof vi.fn>).mock.calls.map(
+  (window.trackGoal as ReturnType<typeof vi.fn>).mock.calls.map(
     ([goal, params]) => [goal, params.depth],
   );
 
@@ -33,13 +33,13 @@ beforeEach(() => {
   localStorage.clear();
   document.body.innerHTML = '';
   time = Date.UTC(2026, 9, 5, 12);
-  window.ymReachGoal = vi.fn();
+  window.trackGoal = vi.fn();
 });
 
 afterEach(() => {
   vi.useRealTimers();
   vi.restoreAllMocks();
-  delete (window as Partial<Window>).ymReachGoal;
+  delete (window as Partial<Window>).trackGoal;
 });
 
 describe('defineBrowsingDepth', () => {

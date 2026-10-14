@@ -13,16 +13,16 @@ published: true
 translations:
   en:
     title: BMW 318d
-    body: Our client Sergey found a BMW in Serbia and closed the deal after inspecting just **2–3 vehicles**. In the very first options, we discovered a car that fully met his requirements. Before the purchase, it underwent our inspection. It has a mileage of **94,000 km**, comes with excellent specifications, and the dealer performed an official **BMW chip tuning** to **320D**, while maintaining the warranty.
+    body: "We helped our client Sergey find a BMW in Serbia, and the deal was closed after inspecting just **2–3 vehicles**: right from the start, we found a car that perfectly matched his requirements. Before the purchase, it underwent our thorough inspection. It has a mileage of **94,000 km**, comes with excellent features, and the dealer has performed an official **BMW chip tuning** to **320D** while maintaining the warranty."
   sr:
     title: BMW 318d
-    body: "Klijentu Sergeju je pronađen BMW u Srbiji i dogovorena je kupovina nakon provere **2–3 automobila**: u prvim ponuđenim modelima je pronađen auto koji je u potpunosti odgovarao njegovim zahtevima. Pre kupovine, auto je prošao našu proveru auta pre kupovine. Prešao je **94 000 km**, oprema je odlična, a kod dilera je urađen zvanični **čip-tuning BMW** do **320D** uz zadržavanje garancije."
+    body: "Klijentu Sergeju je pronađen BMW u Srbiji i zaključena je transakcija nakon provere **2–3 automobila**: u prvim ponuđenim modelima našao se automobil koji je u potpunosti ispunjavao njegove zahteve. Pre kupovine prošao je našu proveru auta pre kupovine. Pređa je **94 000 km**, oprema je odlična, a kod dilera je urađena zvanična **čip-tuning BMW** do **320D** uz očuvanje garancije."
   es:
     title: BMW 318d
-    body: "Al cliente Sergey se le encontró un BMW en Serbia y se cerró el trato después de revisar **2–3 automóviles**: en las primeras opciones se encontró un vehículo que cumplía completamente con sus requerimientos. Antes de la compra, pasó nuestra inspección. Tiene un kilometraje de **94 000 km**, la configuración es excelente, y el concesionario realizó un **chip-tuning oficial de BMW** hasta **320D** manteniendo la garantía."
+    body: "Se encontró un BMW para el cliente Sergei en Serbia y se cerró el trato después de inspeccionar **2–3 automóviles**: en las primeras opciones se halló un vehículo que cumplía totalmente con sus requisitos. Antes de la compra, pasó nuestra revisión. Tiene un kilometraje de **94 000 km**, está en excelente estado y el concesionario realizó un **tuning chip oficial de BMW** hasta **320D** manteniendo la garantía."
   de:
     title: BMW 318d
-    body: "Für den Kunden Sergey wurde in Serbien ein BMW ausgewählt und der Deal wurde bereits nach der Besichtigung **2–3 Fahrzeuge** abgeschlossen: bereits in den ersten Angeboten fand sich ein Auto, das seinen Anforderungen voll und ganz entsprach. Vor dem Kauf durchlief es unsere Überprüfung. Der Kilometerstand beträgt **94 000 km**, die Ausstattung ist ausgezeichnet und beim Händler wurde ein offizielles **BMW-Chip-Tuning** auf **320D** mit Garantieerhalt durchgeführt."
+    body: "Für den Kunden Sergey wurde in Serbien ein BMW ausgesucht und der Deal wurde bereits nach der Besichtigung von **2–3 Fahrzeugen** abgeschlossen: bereits bei den ersten Angeboten fand sich ein Auto, das seinen Anforderungen vollständig entsprach. Vor dem Kauf wurde es von uns geprüft. Der Kilometerstand beträgt **94 000 km**, die Ausstattung ist hervorragend und beim Händler wurde ein offizielles **BMW-Chiptuning** auf **320D** durchgeführt, dabei bleibt die Garantie erhalten."
 translatedFrom: 03100c41e4d11939
 ---
 

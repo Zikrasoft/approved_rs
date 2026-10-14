@@ -4,17 +4,17 @@
     "324cd53715e5dc74": "Plaćanje prilikom preuzimanja u servisu.",
     "33933d28cdcfa44f": "Payment upon pickup at the workshop.",
     "4c858982e1e40c4e": "Order Details",
-    "5e7d9abe89e664c8": "Preuzimanje iz servisa",
-    "67eebb81b4359ad5": "Čuvamo porudžbinu 3 dana. Ako ne preuzmete, porudžbina će biti otkazana, a delovi će se vratiti u prodaju.",
-    "7c97accf549be608": "Porudžbina br. {displayId} primljena",
+    "5e7d9abe89e664c8": "Samopretraga iz servisa",
+    "67eebb81b4359ad5": "Držimo porudžbinu 3 dana. Ako ne preuzmete, porudžbina će biti otkazana, a delovi vraćeni u prodaju.",
+    "7c97accf549be608": "Porudžbina №{displayId} primljena",
     "8345954f4a863dda": "Total",
     "9bf32b7ffd91f0c8": "Ukupno",
-    "9f8be0b5dec67037": "Hvala! Porudžbina je kod nas. Javićemo vam se da se dogovorimo kada da je preuzmete.",
-    "a82b8237dea72904": "Porudžbina br. {displayId} primljena - CarLab",
-    "ce3bbf0f5a85aabc": "Pickup from the Workshop",
-    "ce9c0091a345d2ca": "We will hold your order for 3 days. If not picked up, the order will be cancelled and items will return to stock.",
+    "9f8be0b5dec67037": "Hvala! Porudžbina je kod nas. Javićemo se da se dogovorimo kada da je preuzmete.",
+    "a82b8237dea72904": "Porudžbina №{displayId} primljena - CarLab",
+    "ce3bbf0f5a85aabc": "Pickup at the Workshop",
+    "ce9c0091a345d2ca": "We will hold your order for 3 days. If not picked up, the order will be canceled, and the parts will be returned to stock.",
     "de436f3418f99b55": "Order #{displayId} Confirmed - CarLab",
     "f0f9fea24c69976a": "Order #{displayId} Confirmed",
-    "fe8d95eaacc54a68": "Sadržaj porudžbine"
+    "fe8d95eaacc54a68": "Sastav porudžbine"
   }
 }

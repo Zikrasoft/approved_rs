@@ -97,7 +97,7 @@ the existing translate job — not operator-facing Russian in the package.
 **A Telegram tile no longer creates a contact click.** The capture bot writes a better Lead a moment
 later, so the beacon would only produce a duplicate and a ghost. The `contact_click` goal still fires
 in the browser, because it is the numerator of "tapped the tile" against "reached the bot"; the bot
-cannot fire a Metrika goal, having no browser, so the denominator is counted in the lead store.
+cannot fire a GA4 event, having no browser, so the denominator is counted in the lead store.
 
 **A second `/start` from the same person is a second Lead**, matching "one request from one visitor",
 except within 60 minutes — `VISITOR_MERGE_WINDOW_MS`, the window the store already uses — where it

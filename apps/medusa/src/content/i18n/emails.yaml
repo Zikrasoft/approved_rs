@@ -10,14 +10,14 @@ orderPlaced:
 translations:
   sr:
     orderPlaced:
-      subject: Porudžbina br. {displayId} primljena - CarLab
-      heading: Porudžbina br. {displayId} primljena
-      intro: Hvala! Porudžbina je kod nas. Javićemo vam se da se dogovorimo kada da je preuzmete.
-      itemsHeading: Sadržaj porudžbine
+      subject: Porudžbina №{displayId} primljena - CarLab
+      heading: Porudžbina №{displayId} primljena
+      intro: Hvala! Porudžbina je kod nas. Javićemo se da se dogovorimo kada da je preuzmete.
+      itemsHeading: Sastav porudžbine
       totalLabel: Ukupno
-      pickupHeading: Preuzimanje iz servisa
+      pickupHeading: Samopretraga iz servisa
       pickupNote: Plaćanje prilikom preuzimanja u servisu.
-      holdNote: Čuvamo porudžbinu 3 dana. Ako ne preuzmete, porudžbina će biti otkazana, a delovi će se vratiti u prodaju.
+      holdNote: Držimo porudžbinu 3 dana. Ako ne preuzmete, porudžbina će biti otkazana, a delovi vraćeni u prodaju.
   en:
     orderPlaced:
       subject: 'Order #{displayId} Confirmed - CarLab'
@@ -25,7 +25,7 @@ translations:
       intro: Thank you! We have received your order. We will contact you to arrange pickup.
       itemsHeading: Order Details
       totalLabel: Total
-      pickupHeading: Pickup from the Workshop
+      pickupHeading: Pickup at the Workshop
       pickupNote: Payment upon pickup at the workshop.
-      holdNote: We will hold your order for 3 days. If not picked up, the order will be cancelled and items will return to stock.
+      holdNote: We will hold your order for 3 days. If not picked up, the order will be canceled, and the parts will be returned to stock.
 translatedFrom: b121bf2763084315
