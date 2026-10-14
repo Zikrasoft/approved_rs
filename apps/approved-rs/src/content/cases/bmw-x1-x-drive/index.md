@@ -3,74 +3,68 @@ title: BMW X1 xDrive
 translations:
   en:
     title: BMW X1
-    body: >
-      **Car Selection in Belgrade, Serbia: BMW X1 xDrive**
+    body: |-
+      **Car Sourcing in Belgrade and Serbia: BMW X1 xDrive for Our Client**
 
+      Damir reached out to us on the recommendation of a previous client. He had just moved to Serbia, obtained his residence permit, and was finally ready to buy his own car.
 
-      Damir contacted us through a recommendation from one of our previous clients. He had recently moved to Serbia, received his residence permit and finally decided to purchase a car.
+      Initially, we considered several options — **Skoda Octavia, BMW 2 Series Gran Tourer, and BMW X1**. Ultimately, the client chose the BMW X1, and as part of the car sourcing process in Belgrade, we inspected **4 vehicles**.
 
+      The choice was made for a **BMW X1 with a mileage of around 180,000 km**, imported from Switzerland. The car is equipped with the all-wheel drive system **xDrive** and is generally in satisfactory technical condition.
 
-      Initially, several models were considered, including the **Škoda Octavia, BMW 2 Series Gran Tourer and BMW X1**. In the end, the BMW X1 became the preferred choice, and we inspected a total of **four vehicles** during the selection process.
+      The previous owner had already performed an oil change and replaced all filters. After the purchase, we recommend carrying out an **oil change for the automatic transmission**, as well as cleaning the intake system of the **BMW B47 2.0 diesel engine** — a preventive measure that is particularly relevant for these engines.
 
+      As a result, Damir received a vehicle that underwent a thorough inspection prior to the purchase.
 
-      The chosen car was a **BMW X1 with approximately 180,000 km**, imported from Switzerland and equipped with **xDrive all-wheel drive**. Overall, the vehicle was found to be in satisfactory technical condition.
-
-
-      The seller had already replaced the engine oil and all filters. After the purchase, we recommend **changing the automatic transmission oil** and cleaning the intake system of the **2.0-litre B47 diesel engine**.
-
-
-      Another successful car purchase inspection completed in Serbia.
-
-
-      We wish Damir many safe and happy kilometres on Serbian roads!
+      We wish Damir safe travels on the roads of Serbia!
   sr:
     title: BMW X1 xDrive
     body: |-
-      **Provera auta pre kupovine u Beogradu i Srbiji: BMW X1 xDrive za našeg klijenta**
+      **Autoprodaja u Beogradu i Srbiji: BMW X1 xDrive za našeg klijenta**
 
-      Na preporuku prethodnog klijenta obratio nam se Damir. Nedavno je došao u Srbiju, dobio boravišnu dozvolu i konačno odlučio da kupi svoj automobil.
+      Na preporuku prethodnog klijenta, obratio nam se Damir. Nedavno je došao u Srbiju, dobio boravišnu dozvolu i konačno odlučio da kupi svoj automobil.
 
-      Prvobitno smo razmatrali nekoliko opcija — **Skoda Octavia, BMW serije 2 Gran Tourer i BMW X1**. Na kraju se klijent odlučio za BMW X1, a u okviru provere automobila pre kupovine u Beogradu pregledali smo **4 automobila**.
+      Prvobitno su razmatrani različiti modeli — **Skoda Octavia, BMW 2 Series Gran Tourer i BMW X1**. Na kraju, klijent se odlučio za BMW X1, a u okviru autoprodaje u Beogradu pregledali smo **4 automobila**.
 
-      Izbor je pao na **BMW X1 sa pređenih oko 180.000 km**, uvežen iz Švajcarske. Automobil je opremljen sistemom pogona na sve točkove **xDrive** i generalno je u zadovoljavajućem tehničkom stanju.
+      Izbor je pao na **BMW X1 sa pređenih oko 180.000 km**, koji je dovezen iz Švajcarske. Automobil je opremljen sistemom pogona na sve točkove **xDrive** i generalno je u zadovoljavajućem tehničkom stanju.
 
-      Prethodni vlasnik je samostalno izvršio zamenu motornih ulja i svih filtera. Nakon kupovine preporučujemo da se izvrši **zamena ulja u automatskom menjaču**, kao i čišćenje usisnog sistema motora **BMW B47 2.0 dizel** — preventivna procedura koja je posebno važna za ove motore.
+      Prethodni vlasnik je već samostalno izvršio zamenu motorog ulja i svih filtera. Nakon kupovine, preporučujemo **zamenu ulja u automatskom menjaču**, kao i čišćenje usisnog sistema motora **BMW B47 2.0 dizel** — preventiva koja je posebno bitna za ove motore.
 
-      Kao rezultat, Damir je dobio automobil koji je prošao potpunu provere auta pre kupovine, a mi — još jednog zadovoljnog klijenta po preporuci.
+      Kao rezultat, Damir je dobio automobil koji je prošao kompletnu provere auta pre kupovine.
 
-      Želimo Damiru sreću na putevima Srbije!
+      Želimo Damiru srećan put po srpskim putevima!
   es:
     title: BMW X1 xDrive
     body: |-
-      **Selección de automóviles en Belgrado y Serbia: BMW X1 xDrive para nuestro cliente**
+      **Selección de coche en Belgrado y Serbia: BMW X1 xDrive para nuestro cliente**
 
-      Damir se puso en contacto con nosotros por recomendación de un cliente anterior. Recientemente llegó a Serbia, obtuvo su permiso de residencia y decidió finalmente comprar su propio automóvil.
+      Damir se puso en contacto con nosotros por recomendación de un cliente anterior. Recientemente llegó a Serbia, obtuvo su permiso de residencia y finalmente decidió adquirir su propio automóvil.
 
-      Inicialmente, se consideraron varias opciones: **Skoda Octavia, BMW Serie 2 Gran Tourer y BMW X1**. Al final, el cliente optó por el BMW X1, y como parte de nuestro servicio de selección de automóviles en Belgrado, revisamos **4 vehículos**.
+      Inicialmente se consideraron varias opciones: **Skoda Octavia, BMW Serie 2 Gran Tourer y BMW X1**. Al final, el cliente optó por el BMW X1, y en el proceso de selección de coches en Belgrado revisamos **4 vehículos**.
 
-      El elegido fue un **BMW X1 con un kilometraje de aproximadamente 180,000 km**, importado de Suiza. El coche está equipado con el sistema de tracción total **xDrive** y, en general, se encuentra en un estado técnico satisfactorio.
+      Se eligió un **BMW X1 con un kilometraje de aproximadamente 180,000 km**, importado de Suiza. El vehículo cuenta con el sistema de tracción total **xDrive** y en general se encuentra en un estado técnico satisfactorio.
 
-      El propietario anterior ya había realizado por su cuenta el cambio de aceite del motor y todos los filtros. Después de la compra, recomendamos llevar a cabo el **cambio de aceite en la transmisión automática**, así como limpiar el sistema de admisión del motor **BMW B47 2.0 diesel**; un procedimiento preventivo que es especialmente relevante para estos motores.
+      El propietario anterior ya había realizado el cambio de aceite del motor y todos los filtros. Después de la compra, recomendamos realizar un **cambio de aceite en la caja de cambios automática**, así como limpiar el sistema de admisión del motor **BMW B47 2.0 diésel** — un procedimiento preventivo que es especialmente relevante para estos motores.
 
-      Como resultado, Damir consiguió un coche que había pasado una verificación completa antes de la compra, y nosotros ganamos otro cliente satisfecho a través de una recomendación.
+      Como resultado, Damir obtuvo un vehículo que pasó una completa revisión antes de la compra.
 
-      ¡Le deseamos a Damir buena suerte en las carreteras de Serbia!
+      ¡Le deseamos a Damir mucha suerte en las carreteras de Serbia!
   de:
     title: BMW X1 xDrive
     body: |-
-      **Autokauf in Belgrad und Serbien: BMW X1 xDrive für unseren Kunden**
+      **Autowahl in Belgrad und Serbien: BMW X1 xDrive für unseren Kunden**
 
-      Durch die Empfehlung eines früheren Kunden hat sich Damir an uns gewendet. Er ist vor kurzem nach Serbien gezogen, hat die Aufenthaltserlaubnis erhalten und entschied sich nun endlich, ein eigenes Auto zu kaufen.
+      Auf Empfehlung eines früheren Kunden hat sich Damir an uns gewandt. Er ist vor kurzem nach Serbien gekommen, hat eine Aufenthaltserlaubnis erhalten und beschlossen, sich endlich ein eigenes Fahrzeug zu kaufen.
 
-      Ursprünglich wurden mehrere Optionen in Betracht gezogen – **Skoda Octavia, BMW 2er Gran Tourer und BMW X1**. Letztendlich entschied sich der Kunde für den BMW X1, und im Rahmen unserer Autosuche in Belgrad haben wir **4 Fahrzeuge** begutachtet.
+      Anfänglich wurden mehrere Optionen in Betracht gezogen – **Skoda Octavia, BMW 2er Gran Tourer und BMW X1**. Letztendlich entschied sich der Kunde für den BMW X1, und im Rahmen der Autosuche in Belgrad haben wir **4 Fahrzeuge** besichtigt.
 
-      Die Wahl fiel auf einen **BMW X1 mit einer Laufleistung von etwa 180.000 km**, der aus der Schweiz importiert wurde. Das Fahrzeug ist mit dem **xDrive** Allradantrieb ausgestattet und befindet sich insgesamt in einem zufriedenstellenden technischen Zustand.
+      Die Wahl fiel auf einen **BMW X1 mit einer Laufleistung von etwa 180.000 km**, der aus der Schweiz importiert wurde. Das Fahrzeug verfügt über das Allradsystem **xDrive** und befindet sich insgesamt in einem zufriedenstellenden technischen Zustand.
 
-      Der vorherige Besitzer hat bereits eigenständig das Motoröl und alle Filter gewechselt. Nach dem Kauf empfehlen wir, auch das **Öl im Automatikgetriebe** zu wechseln sowie das Ansaugsystem des **BMW B47 2.0 Diesel** Motors zu reinigen – eine präventive Maßnahme, die für diese Motoren besonders sinnvoll ist.
+      Der vorherige Besitzer hat bereits selbst den Ölwechsel und alle Filterwechsel durchgeführt. Nach dem Kauf empfehlen wir, **das Öl im Automatikgetriebe zu wechseln** sowie das Ansaugsystem des **BMW B47 2.0 Diesel** zu reinigen – eine vorbeugende Maßnahme, die für diese Motoren besonders wichtig ist.
 
-      Als Ergebnis erhielt Damir ein Auto, das vor dem Kauf umfassend geprüft wurde, und wir haben einen weiteren zufriedenen Kunden durch eine Empfehlung gewonnen.
+      Am Ende erhielt Damir ein Fahrzeug, das vor dem Kauf einer umfassenden Überprüfung unterzogen wurde.
 
-      Wir wünschen Damir viel Erfolg auf den Straßen Serbiens!
+      Wir wünschen Damir viel Glück auf den Straßen Serbiens!
 car: BMW X1
 year: 2016
 price:
@@ -83,7 +77,7 @@ gallery:
   - gallery/0.jpg
 date: 2026-08-12
 published: true
-translatedFrom: 0038487d985efeb7
+translatedFrom: 4818b2b70041555e
 ---
 
 **Автоподбор в Белграде и Сербии: BMW X1 xDrive для нашего клиента**

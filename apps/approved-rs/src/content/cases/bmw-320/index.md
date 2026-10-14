@@ -14,36 +14,36 @@ translations:
   en:
     title: BMW 320
     body: |-
-      ## Urgent Car Buyback in Serbia: A Deal in Just a Few Hours
+      ## Urgent Car Buyback in Serbia: A Deal Completed in Just Hours
 
-      We were approached by a young woman who needed to **sell her car urgently** before moving to another country. She didn’t have time to deal with listings, showings, negotiations, or paperwork.
+      A young woman reached out to us needing to **sell her car urgently** before moving to another country: she didn't have time for ads, viewings, or paperwork.
 
-      We swiftly conducted a pre-purchase inspection of the car, offered a **fair market price** that completely satisfied the owner, and finalized the transaction **in record time**. Within just a few hours, the car was bought, the money was received, and the client was able to peacefully head to her new country without worrying about the sale.
+      We inspected the vehicle, offered a **fair market price**, which the owner was completely satisfied with. The deal was finalized **within a few hours**: the car was purchased, the money transferred, and the client comfortably left for her new country.
   sr:
     title: BMW 320
     body: |-
-      ## Hitna kupovina automobila u Srbiji: transakcija za nekoliko sati
+      ## Hitna otkup automobila u Srbiji: transakcija za nekoliko sati
 
-      Obratila nam se devojka kojoj je bilo potrebno **hitno prodati automobil** pre odlaska u drugu zemlju. Nije imala vremena za oglašavanje, prikazivanje, pregovaranje i sređivanje dokumentacije.
+      Obratila nam se devojka kojoj je bilo potrebno **hitno prodati automobil** pre preseljenja u drugu zemlju: nije imala vremena za oglase, pokazivanje i sređivanje dokumenata.
 
-      Brzo smo izvršili proveru auta pre kupovine, ponudili **poštenu tržišnu cenu** koja je potpuno odgovarala vlasnici, i realizovali transakciju **u najkraćem roku**. Već za nekoliko sati automobil je bio otkupljen, novac primljen, a klijentkinja je mirno otišla u drugu zemlju, ne brinući se o prodaji.
+      Proverili smo auto, ponudili **poštenu tržišnu cenu**, koja je potpuno odgovarala vlasnici. Transakciju smo završili **za nekoliko sati**: automobil je otkupljen, novac prebačen, a klijentkinja je mirno otišla u drugu zemlju.
   es:
     title: BMW 320
     body: |-
-      ## Compra urgente de un automóvil en Serbia: una transacción en pocas horas
+      ## Compra urgente de un automóvil en Serbia: transacción en pocas horas
 
-      Una joven se puso en contacto con nosotros porque necesitaba **vender su automóvil urgentemente** antes de mudarse a otro país. No disponía de tiempo para publicar anuncios, realizar visitas, negociar y gestionar la documentación.
+      Una joven nos contactó porque necesitaba **vender su automóvil rápidamente** antes de mudarse a otro país: no tenía tiempo para anuncios, exhibiciones ni trámites de documentos.
 
-      Llevamos a cabo rápidamente una inspección del automóvil antes de la compra, le ofrecimos un **precio de mercado justo** que satisfizo completamente a la propietaria, y formalizamos la transacción **en el menor tiempo posible**. En pocas horas, el automóvil fue comprado, el dinero fue entregado, y la clienta se marchó tranquila hacia su nuevo destino, sin preocuparse por la venta.
+      Verificamos el coche, le ofrecimos un **precio de mercado justo**, y a la propietaria le pareció perfecto. La transacción se formalizó **en pocas horas**: compramos el automóvil, transferimos el dinero y la clienta se fue tranquilamente a su nuevo destino.
   de:
     title: BMW 320
     body: |-
-      ## Schneller Fahrzeugankauf in Serbien: Deal in wenigen Stunden
+      ## Blitzverkauf eines Autos in Serbien: Geschäft in wenigen Stunden
 
-      Eine junge Frau wandte sich an uns, weil sie ihr **Auto dringend verkaufen** musste, bevor sie in ein anderes Land umzog. Sie hatte keine Zeit, um Anzeigen zu schalten, Besichtigungen durchzuführen, zu verhandeln und die Dokumente in Ordnung zu bringen.
+      Eine junge Frau wandte sich an uns, da sie **dringend ein Auto verkaufen** musste, bevor sie in ein anderes Land zog: Sie hatte keine Zeit für Anzeigen, Besichtigungen und die Erledigung von Dokumenten.
 
-      Wir haben das Auto vor dem Kauf schnell überprüft, einen **fairen Marktpreis** angeboten, der die Besitzerin vollkommen zufrieden stellte, und den Deal **in kürzester Zeit** abgeschlossen. Schon nach wenigen Stunden war das Auto verkauft, das Geld überwiesen, und die Kundin konnte beruhigt in das andere Land aufbrechen, ohne sich um den Verkauf Gedanken machen zu müssen.
-translatedFrom: 20630acd4ed253d4
+      Wir haben das Auto überprüft, **einen fairen Marktpreis** angeboten, und die Eigentümerin war damit vollkommen zufrieden. Der Deal wurde **in wenigen Stunden** abgewickelt: Das Auto wurde gekauft, das Geld überwiesen, und die Kundin konnte entspannt in ihr neues Land aufbrechen.
+translatedFrom: d64da45342850353
 ---
 
 ## Срочный выкуп автомобиля в Сербии: сделка за несколько часов
