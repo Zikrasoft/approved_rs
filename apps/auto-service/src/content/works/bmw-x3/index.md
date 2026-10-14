@@ -2,30 +2,30 @@
 title: 'Обслуживание BMW X3 в Белграде: масло и АКПП'
 translations:
   en:
-    title: "Service of BMW X3 in Belgrade: Oil and Transmission Fluid Change"
+    title: "Service for BMW X3 in Belgrade: Oil and Automatic Transmission"
     body: |-
-      Today at our car service in Belgrade, we serviced a BMW X3. This is the second minor service we've performed on this vehicle.
+      Today, we serviced a BMW X3 at our auto repair shop in Belgrade. This is the second minor service we have performed on this vehicle.
 
-      This time, the customer requested not only the usual oil and filter change but also the transmission fluid change for the 8-speed automatic transmission **ZF**.
+      This time, the client requested not only the usual oil and filter change but also the oil change for the 8-speed automatic transmission **ZF**.
 
-      For this transmission, we change the fluid along with the pan since the filter is integrated into the pan and wear particles along with contaminants accumulate there. Simply changing the fluid alone does not constitute a complete service for this automatic transmission.
+      For this transmission, we replace the oil along with the oil pan: the filter is integrated into the pan, and contaminants accumulate there. Simply changing the oil alone does not constitute a complete service for this type of automatic transmission.
 
-      We used oil that meets **BMW Longlife-04** (BMW LL-04) specifications. For BMW, having the correct specification is crucial.
+      We used oil that meets the **BMW Longlife-04** (BMW LL-04) specification. Compliance with BMW standards is essential.
 
-      We also checked the swirl flaps in the intake. There's nothing critical at the moment, but we advised the customer that during the next minor service, it would be good to remove and clean them.
+      We also took a look at the swirl flaps in the intake. There are currently no critical issues, but we informed the client that during the next minor service, they should be removed and cleaned.
     car: BMW X3
   sr:
-    title: "Servis BMW X3 u Beogradu: ulje i automatski menjač"
+    title: "Servisiranje BMW X3 u Beogradu: ulje i automatski menjač"
     body: |-
-      Danas smo u našem autoservisu u Beogradu servisirali BMW X3. Ovo je već druga mala provera koju radimo na ovom vozilu.
+      Danas smo u našem servisu u Beogradu obavljali servis na BMW X3. Ovo je već drugo malo održavanje koje radimo na ovoj mašini.
 
-      Ovog puta je klijent tražio, pored uobičajene zamene ulja i filtera, i zamenu ulja u 8-stepenom automatskom menjaču **ZF**.
+      Ovoga puta, klijent je zamolio da pored obične zamene ulja i filtera, promenimo i ulje u 8-stepenom automatskom menjaču **ZF**.
 
-      Kod ovog menjača menjamo ulje zajedno sa karterom: filter je ugrađen u karter, a produkti habanja i zagađenja se nakupljaju tamo. Zamena samo ulja ne predstavlja potpunu uslugu za ovaj automatski menjač.
+      Na ovom menjaču menjamo ulje zajedno sa karterom: filter je ugrađen u karter, i proizvodi habanja sa zagađenjem se nakupljaju tamo. Zamena samo ulja ne predstavlja potpuno servisiranje takvog automatskog menjača.
 
-      U motor je stavljeno ulje sa odobrenjem **BMW Longlife-04** (BMW LL-04). Za BMW, odobrenje je ključno.
+      U motor je sipano ulje sa odobrenjem **BMW Longlife-04** (BMW LL-04). Za BMW odobrenje je od suštinskog značaja.
 
-      Takođe smo proverili i vortex klapne u usisu. Za sada nema kritičnih problema, ali smo klijentu rekli da ih na sledećoj maloj proverenoj provere treba skinuti i očistiti.
+      Pogledali smo i vortex zaklopke na usisu. Za sada nema kritičnih problema, ali smo klijentu rekli da ih na sledećem malom održavanju treba skinuti i očistiti.
     car: BMW X3
 car: BMW X3
 year: 2021

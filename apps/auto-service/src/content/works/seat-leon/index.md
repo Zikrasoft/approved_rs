@@ -2,30 +2,30 @@
 title: 'Большой сервис Seat Leon: ГРМ, помпа и DSG DQ250'
 translations:
   en:
-    title: "Comprehensive Service for Seat Leon: Timing Belt, Water Pump, and DSG DQ250"
+    title: "Major Service for Seat Leon: Timing Belt, Water Pump, and DSG DQ250"
     body: |-
-      A **190,000 km** SEAT LEON arrived at our Russian car service in Belgrade for a comprehensive scheduled maintenance, also known as a major service.
+      A **190,000 km** Seat Leon came into our Russian car service in Belgrade for a major scheduled maintenance, also known as a major service.
 
-      At this mileage, it's best to take care of the main components right away, so we performed the following:
+      At this mileage, it is best to service the main components all at once, so we performed the following:
 
-      - Replaced the timing belt kit;
-      - Replaced the water pump;
-      - Replaced the coolant;
-      - Changed the engine oil;
-      - Replaced all necessary filters;
-      - Changed the rear shock absorbers;
-      - Replaced the oil in the DSG DQ250 transmission.
+      - replaced the timing belt kit;
+      - replaced the water pump;
+      - replaced the coolant;
+      - changed the engine oil;
+      - replaced all necessary filters;
+      - replaced the rear shock absorbers;
+      - changed the oil in the DSG DQ250 gearbox.
 
-      For Seat, Volkswagen, Škoda, and Audi, a major service is a key maintenance point. Timely replacement of the timing belt, pump, technical fluids, and consumables helps avoid much more expensive issues down the line.
+      For Seat, Volkswagen, Škoda, and Audi, a major service is key for maintenance. Timely changes of the timing belt, pump, fluids, and consumables can prevent much more expensive problems down the road.
 
-      Regarding the **DQ250**: This is a six-speed dual-clutch transmission with wet clutches, and the transmission oil must be changed according to the recommended schedule — that’s what keeps the gearbox functioning properly.
+      A note on the **DQ250**: This is a six-speed dual-clutch transmission with wet clutches, and the transmission oil must be changed according to the schedule — this is crucial to its performance.
     car: SEAT LEON
   sr:
-    title: "Veliko servisiranje Seat Leon: GRM, pumpa i DSG DQ250"
+    title: "Veliki servis Seat Leon: GRM, pumpa i DSG DQ250"
     body: |-
-      Seat Leon sa pređenih **190 000 km** dovezen je u naš ruski auto-servis u Beogradu na veliko planirano servisiranje, poznato i kao veliko servisiranje.
+      Seat Leon sa pređenih **190 000 km** došao je u naš nezavisni auto servis u Beogradu na veliko planirano održavanje, poznato kao veliki servis.
 
-      Na ovoj kilometraži, osnovne komponente je najbolje servisirati odmah, pa smo uradili:
+      Na ovakvom broju pređenih kilometara najbolje je da se glavni sklopovi odmah servisiraju, pa smo uradili:
 
       - zamenu kompleta remena GRM;
       - zamenu vodene pumpe;
@@ -35,9 +35,9 @@ translations:
       - zamenu zadnjih amortizera;
       - zamenu ulja u DSG DQ250 menjaču.
 
-      Za Seat, Volkswagen, Škoda i Audi, veliko servisiranje je ključna tačka održavanja. Remen GRM, pumpa, tehničke tečnosti i potrošni materijal, kada se menjaju na vreme, sprečavaju mnogo skuplje neprijatnosti kasnije.
+      Za Seat, Volkswagen, Škoda i Audi, veliki servis je osnovna tačka održavanja. Remen GRM, pumpa, tehničke tečnosti i potrošni materijali, koji se menjaju na vreme, sprečavaju mnogo skuplje probleme kasnije.
 
-      Posebno o **DQ250**. Ovo je šestostepeni robot sa mokrim kuplungom, a transmisijsko ulje u njemu treba menjati prema propisima — na tome menjač opstaje.
+      Posebno o **DQ250**. Ovo je šestostepeni robot sa mokrim spojnicama, a transmisijsko ulje u njemu treba menjati prema propisima — na tom menjaču se i održava.
     car: SEAT LEON
 car: SEAT LEON
 year: 2019
