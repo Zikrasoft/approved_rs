@@ -1,0 +1,62 @@
+---
+import { getCollection } from 'astro:content';
+import Shell from '@/layouts/Shell.astro';
+import Icon from '@/components/Icon.astro';
+import PageHero from '@/components/PageHero.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import WorkGrid from '@/components/WorkGrid.astro';
+import { localeFrom } from '@/i18n/config';
+import { publishedWorks } from '@/utils/works';
+import { PathBuilder, localePaths } from '@/utils/paths';
+import { content } from '@/i18n/content';
+
+export function getStaticPaths() {
+  return localePaths();
+}
+
+const locale = localeFrom(Astro.url.pathname);
+const bmw = content(locale).pages.bmw;
+const bmwWorks = publishedWorks(await getCollection('works')).filter((work) =>
+  work.data.car.toLowerCase().includes('bmw'),
+);
+---
+
+<Shell title={bmw.metaTitle} description={bmw.metaDescription}>
+  <PageHero
+    eyebrow={bmw.eyebrow}
+    heading={bmw.heading}
+    lead={bmw.lead}
+    crumbs={[{ href: PathBuilder.bmw(locale), label: bmw.eyebrow }]}
+  />
+
+  <section class="wrap py-band md:py-band-lg">
+    <h2 class="text-section">{bmw.trustHeading}</h2>
+    <ul class="mt-5 grid gap-3 sm:grid-cols-2">
+      {
+        bmw.trust.map((item) => (
+          <li class="card flex gap-2.5 p-4 text-sm leading-relaxed text-ink-2">
+            <Icon name="check" size={13} class="mt-1 shrink-0 text-go" />
+            {item}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  {
+    bmwWorks.length > 0 && (
+      <section class="wrap pb-band">
+        <h2 class="text-xl font-semibold text-ink sm:text-2xl">
+          {bmw.worksHeading}
+        </h2>
+        <WorkGrid works={bmwWorks.slice(0, 3)} />
+      </section>
+    )
+  }
+
+  <FinalCta
+    eyebrow={bmw.ctaEyebrow}
+    heading={bmw.ctaHeading}
+    body={bmw.ctaBody}
+  />
+</Shell>
