@@ -385,11 +385,11 @@ translations:
           oemNumbers:
             label: OEM-brojevi
     units:
-      Ah: А·ч
-      A: А
-      mm: мм
-      months: мес.
-      l: л
+      Ah: Ah
+      A: A
+      mm: mm
+      months: mes.
+      l: l
     installations:
       battery-installation:
         name: Instalacija akumulatora
@@ -601,11 +601,11 @@ translations:
           oemNumbers:
             label: OEM numbers
     units:
-      Ah: A·h
+      Ah: Ah
       A: A
       mm: mm
       months: months
-      l: L
+      l: l
     installations:
       battery-installation:
         name: Battery installation
