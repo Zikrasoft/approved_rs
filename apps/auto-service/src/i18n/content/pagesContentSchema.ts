@@ -71,6 +71,22 @@ export const pagesContentSchema = z
         cta: z.string(),
       })
       .strict(),
+    bmw: z
+      .object({
+        metaTitle: z.string(),
+        metaDescription: z.string(),
+        eyebrow: z.string(),
+        heading: z.string(),
+        lead: z.string(),
+        trustHeading: z.string(),
+        trust: z.array(z.string()),
+        worksHeading: z.string(),
+        ctaEyebrow: z.string(),
+        ctaHeading: z.string(),
+        ctaBody: z.string(),
+        ctaCommentPlaceholder: z.string(),
+      })
+      .strict(),
   })
   .strict();
 
