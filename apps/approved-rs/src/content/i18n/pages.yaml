@@ -130,11 +130,11 @@ translations:
         - title: What data we collect
           text: When submitting a request, we collect your name and contact information (Telegram/phone) entered in the form. We also log the page from which the request was sent.
         - title: How we use data
-          text: Data from requests is used solely for follow-up communication. We do not share requests with third parties or use them for advertising. Web analytics operates separately - Google and Yandex receive anonymized data about page views.
+          text: The data from the application is used solely for follow-up purposes. We do not share applications with third parties and do not use them for advertising. Web analytics operates separately — Google receives anonymized data on page views.
         - title: Data storage
           text: Requests are stored in a secure Vercel Blob cloud storage; access is limited to our team. You may request deletion of your data anytime by messaging us on Telegram.
         - title: Cookies
-          text: The site uses technical cookies necessary for its operation and analytic cookies. You can opt out using the banner at the bottom of the screen; the choice is stored in the browser. Metrics record sessions - cursor movement, scrolling, and clicks. The request form is excluded from the recordings – name, phone, nickname, and comments do not appear. If you arrived via an ad and did not opt out of analytics, the site remembers this - the source and campaign - for 30 days, allowing us to see which ads generate requests.
+          text: The site uses essential technical cookies that are necessary for its operation, as well as analytical cookies. You can opt out via the banner at the bottom of the screen; your choice will be saved in the browser. If you arrived via an ad and did not opt out of analytics, the site remembers the source and campaign for 30 days, so we can see which ads generate applications.
       contactTitle: Contact
       contactBefore: 'For privacy inquiries, reach out to us through '
       contactLinkText: Telegram
@@ -215,11 +215,11 @@ translations:
         - title: Koje podatke prikupljamo
           text: Kada šaljete zahtev, prikupljamo ime i kontakt podatke (Telegram/telefon) koje unosite u formu. Takođe beležimo stranicu sa koje je zahtev poslat.
         - title: Kako koristimo podatke
-          text: Podaci iz zahteva se koriste isključivo za povratnu informaciju. Zahtev ne prosleđujemo trećim licima i ne koristimo za reklamu. Odvojeno od zahteva, vrši se veb-analitika — Google i Yandex dobijaju anonimizovane podatke o pregledima stranica.
+          text: Podaci iz zahteva se koriste samo za povratnu informaciju. Zahtev ne delimo sa trećim licima i ne koristimo ga za oglašavanje. Odvojeno od zahteva, imamo veb analitiku — Google dobija anonimizovane podatke o pregledima stranica.
         - title: Skladištenje podataka
           text: Zahtevi se čuvaju u zaštićenom oblaku Vercel Blob; pristup imaju samo članovi našeg tima. Možete zatražiti brisanje vaših podataka u bilo kojem trenutku, pišući nam na Telegram.
         - title: Cookies
-          text: Sajt koristi tehničke kolačiće bez kojih ne funkcioniše, kao i analitičke. U baneru na dnu ekrana možete se odjaviti; izbor se čuva u pretraživaču. Metrika beleži sesije — kretanje kursora, skrolovanje i klikove. Forma zahteva nije zabeležena — ime, telefon, nadimak i komentar ne ulaze u zapis. Ako ste došli preko reklame i niste se odjavili od analitike, sajt pamti ovo — izvor i kampanju — na 30 dana, kako bismo videli koja reklama donosi zahteve.
+          text: Sajt koristi tehničke kolačiće bez kojih ne može da funkcioniše, kao i analitičke kolačiće. U baneru na dnu ekrana možete da se odjavite; vaš izbor se čuva u pretraživaču. Ako ste došli preko reklame i niste se odrekli analitike, sajt pamti izvor i kampanju 30 dana kako bismo videli koja reklama donosi zahteve.
       contactTitle: Kontakt
       contactBefore: 'Za pitanja o privatnosti obratite se kroz '
       contactLinkText: Telegram
@@ -300,11 +300,11 @@ translations:
         - title: Qué datos recopilamos
           text: Al enviar una solicitud, recopilamos tu nombre y datos de contacto (Telegram/teléfono) que introduces en el formulario. También registramos la página desde la que se envió la solicitud.
         - title: Cómo usamos los datos
-          text: 'Los datos de la solicitud se utilizan solo para dar respuesta. No compartimos las solicitudes con terceros ni las usamos para publicidad. Por separado, la analítica web funciona: Google y Yandex reciben datos anonimizados sobre las visitas a las páginas.'
+          text: 'Los datos de la solicitud se utilizan únicamente para dar seguimiento a la misma. No compartimos la solicitud con terceros ni la utilizamos con fines publicitarios. Aparte de las solicitudes, contamos con análisis web: Google recibe datos anonimizados sobre la visualización de páginas.'
         - title: Almacenamiento de datos
           text: Las solicitudes se almacenan en un almacenamiento en la nube seguro de Vercel Blob; solo nuestro equipo tiene acceso. Puedes solicitar la eliminación de tus datos en cualquier momento escribiéndonos por Telegram.
         - title: Cookies
-          text: 'El sitio usa cookies técnicas, sin las cuales no funciona, y analíticas. Puedes rechazarlo en el banner en la parte inferior de la pantalla; la elección se guarda en el navegador. La métrica graba sesiones: movimiento del cursor, desplazamiento y clics. El formulario de solicitud queda excluido de la grabación — nombre, teléfono, apodo y comentario no se incluyen. Si llegaste a través de publicidad y no rechazaste la analítica, el sitio lo recuerda — fuente y campaña — por 30 días, para ver qué publicidad genera solicitudes.'
+          text: 'El sitio utiliza cookies técnicas, sin las cuales no funcionaría, y cookies analíticas. Se puede optar por no participar a través del banner en la parte inferior de la pantalla; la elección se guarda en el navegador. Si llegaste a través de un anuncio y no rechazaste el análisis, el sitio recuerda esto: la fuente y la campaña, por 30 días, para que podamos ver qué publicidad genera solicitudes.'
       contactTitle: Contacto
       contactBefore: 'Para cuestiones de privacidad, contáctanos a través de '
       contactLinkText: Telegram
@@ -385,11 +385,11 @@ translations:
         - title: Welche Daten wir sammeln
           text: Bei der Anfrage sammeln wir den Namen und die Kontaktdaten (Telegram/Telefon), die Sie in das Formular eingeben. Wir protokollieren auch die Seite, von der die Anfrage gesendet wurde.
         - title: Wie wir die Daten verwenden
-          text: Die Daten aus der Anfrage werden nur zur Rückmeldung verwendet. Wir geben die Anfrage nicht an Dritte weiter und nutzen sie nicht für Werbung. Unabhängig von den Anfragen erfolgt die Web-Analyse — Google und Yandex erhalten anonymisierte Daten über Seitenaufrufe.
+          text: Die Daten aus der Anfrage werden ausschließlich für die Rückmeldung dazu verwendet. Wir geben die Anfrage nicht an Dritte weiter und verwenden sie nicht für Werbung. Unabhängig von den Anfragen läuft die Web-Analyse - Google erhält anonymisierte Daten zu den Seitenaufrufen.
         - title: Datenspeicherung
           text: Anfragen werden in einem geschützten Cloud-Speicher Vercel Blob aufbewahrt; auf sie hat nur unser Team Zugriff. Sie können jederzeit die Löschung Ihrer Daten anfordern, indem Sie uns über Telegram kontaktieren.
         - title: Cookies
-          text: Die Website verwendet technische Cookies, ohne die sie nicht funktioniert, sowie analytische. Im Banner am unteren Bildschirmrand können Sie zustimmen oder ablehnen; die Auswahl wird im Browser gespeichert. Die Analytics registriert Sitzungen — Mausbewegungen, Scrollen und Klicks. Das Anfrageformular ist von diesen Aufzeichnungen ausgeschlossen — Name, Telefon, Nickname und Kommentar gelangen nicht hinein. Wenn Sie über Werbung gekommen sind und auf Analytics nicht verzichten, speichert die Website dies — Quelle und Kampagne — für 30 Tage, damit wir sehen können, welche Werbung Anfragen generiert.
+          text: Die Website verwendet technische Cookies, ohne die sie nicht funktioniert, sowie analytische Cookies. Im Banner am unteren Bildschirmrand kann man ablehnen; die Auswahl wird im Browser gespeichert. Wenn Sie über Werbung auf die Seite gekommen sind und die Analyse nicht abgelehnt haben, speichert die Seite dies - die Quelle und die Kampagne - für 30 Tage, damit wir sehen, welche Werbung Anfragen generiert.
       contactTitle: Kontakt
       contactBefore: 'Bei Fragen zur Privatsphäre kontaktieren Sie uns über '
       contactLinkText: Telegram
@@ -428,4 +428,4 @@ translations:
       closingLine2: was Sie suchen —
       closingLine3: wir finden auch für Sie
       closingText: Es reicht, wenn Sie Marke, Budget und ein paar zusätzliche Wünsche angeben. Wir antworten innerhalb von zwei Stunden und sagen Ihnen ehrlich, ob das für diesen Preis realistisch ist.
-translatedFrom: 2747c8c2bca630c1
+translatedFrom: 845141e1eaee917e

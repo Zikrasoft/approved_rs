@@ -363,7 +363,6 @@
     "508d8ea4b707d48e": "Contact Us",
     "559f9b8cea5491c0": "Da bismo se javili vam povodom prijave i vodili istoriju kontakta. Ne koristimo ih za slanje e-pošte i ne prosleđujemo ih trećim licima u reklamne svrhe.",
     "57d04162c6c84c5a": "What data the Details detailing studio website collects, why and how long it’s stored.",
-    "58982329d08038c7": "Sajt koristi tehnički kolačić sa izabranim jezikom interfejsa i analitički — Yandex.Metrica. Analitika se pokreće prilikom prvog učitavanja stranice; u baneru na dnu ekrana možete odbiti, i tada se pri sledećem učitavanju ne uključuje. Metrica beleži sesije — pokret kursora, skrolovanje i klikove, — ali formu prijave iz beleženja isključujemo. Reklamnih kolačića koji prate vas na drugim sajtovima ovde nema. Ako ste došli putem reklame i niste se odrekli analitike, sajt pamti to — izvor i kampanju — 30 dana, kako bismo videli koja reklama donosi prijave.",
     "5a5559a2ac07d530": "Pitanja o podacima",
     "5b46242a11dcd1cd": "Cars We've Worked On",
     "5b9f5bd668adb2f1": "Calculate Price",
@@ -388,6 +387,7 @@
     "864b6938e552ccb9": "Privacy Policy",
     "89d58cbe5bcc39a8": "Thank you for your application. We’ll get in touch during business hours to arrange an inspection.",
     "8a914693ad613621": "Koje podatke prikuplja sajt studija detaljinga Details, zašto i koliko dugo se čuvaju.",
+    "91c29ac2290f9d4d": "Sajt koristi tehnički kolačić sa odabranim jezikom interfejsa i analitički — Google Analytics. Analitika se aktivira pri prvom učitavanju stranice; u baneru na dnu ekrana možete odbiti, i tada se prilikom sledećeg učitavanja ne uključuje. Reklamni kolačići koji vas prate na drugim sajtovima ovde ne postoje. Ako ste došli putem reklame i niste odbili analitiku, sajt pamti to — izvor i kampanju — u trajanju od 30 dana, kako bismo videli koja reklama donosi zahteve.",
     "96c88262b1636fd9": "Up to two years from the last contact. We will delete it earlier at your request.",
     "9989e2e0a41d558d": "Ažurirano 12. septembra 2026",
     "9a4c2845b6aee94b": "Radno vreme",
@@ -420,7 +420,6 @@
     "c8481dd1369a6e13": "Ne prodajemo telefonom. Najbolji način je da svratite na petnaest minuta: pogledamo auto zajedno i kažemo šta mu zaista treba.",
     "c8901301e154653b": "This Page Doesn’t Exist",
     "cba69ab3a111324d": "Come See Our Shop",
-    "cd8d392ec49b664a": "The site uses a technical cookie for the selected interface language and an analytical cookie — Yandex.Metrica. The analytics starts on the first page load; you can opt-out via the banner at the bottom of the screen, and it won’t activate on the next load. The Metrica records sessions — cursor movement, scrolling, and clicks, but we excluded the form from the recording. There are no tracking cookies from other sites here. If you arrived via advertisement and did not decline analytics, the site remembers the source and campaign for 30 days so we can see which ads lead to applications.",
     "ce88b51788da2490": "Prijave se čuvaju u enkriptovanoj bazi našeg hosting provajdera i dupliraju se u naš unutrašnji radni chat. Pristup imaju samo zaposleni studija.",
     "d31e4fe8ff35dde7": "Možda je link zastareo ili je u adresi greška. Posetite početnu ili pogledajte radove.",
     "d857267a45c166a0": "Nema stock fotografija. Svaka kartica — automobil koji je bio kod nas, snimljen nakon rada.",
@@ -441,7 +440,8 @@
     "fd248535decb5f78": "You don’t need to wash your car — we’ll wash it ourselves before starting.",
     "fdd824eae1c160f0": "To contact you regarding your application and maintain a history of inquiries. We do not use it for newsletters or share it with third parties for advertising.",
     "ff27d1ba5c6926fa": "Where It’s Stored",
-    "ff6aae5be7ffcda0": "Politika privatnosti — Details"
+    "ff6aae5be7ffcda0": "Politika privatnosti — Details",
+    "ff965c8ec14c626d": "The site uses a technical cookie for the selected interface language and an analytical one — Google Analytics. The analytics start when the page is first loaded; you can decline in the banner at the bottom of the screen, and then it won't activate on your next visit. There are no advertising cookies that track you on other sites. If you arrived via an ad and did not opt out of analytics, the site remembers this — the source and campaign — for 30 days, so we can see which ads generate requests."
   },
   "src/content/i18n/services.yaml": {
     "012107dc3e5db7ec": "Keramika preko nepoliranog laka samo konzervira paukovu mrežu na nekoliko godina. Prvo ispravljamo defekte, a premaz stavljamo na gotovu površinu.",
