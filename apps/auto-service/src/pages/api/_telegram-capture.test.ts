@@ -27,7 +27,7 @@ vi.mock('@podbor/lead-crm/storage/local', () =>
 import { POST } from './telegram-capture';
 import { content } from '@/i18n/content';
 import { leadStore } from '@/lib/crm';
-import { META_PIXEL_ID } from '@/utils/metrika';
+import { META_PIXEL_ID } from '@/utils/analytics';
 import { PHONE_NUMBER, SITE_URL } from '@/utils/constants';
 
 const api = recordBotApi();

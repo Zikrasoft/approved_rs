@@ -5,6 +5,11 @@ impressions. Before this, only visits and the fact of a form submission were
 measured, so a drop in conversion could not be told apart from a change in the
 traffic mix.
 
+GA4 replaced Yandex Metrika on 2026-10-14 — [ADR-0033](../adr/0033-google-analytics-instead-of-yandex-metrica.md),
+superseding [ADR-0012](../adr/0012-yandex-metrica-only-starting-before-consent.md). All
+history before that date is in Metrika only; see
+[Breaks in the series](#breaks-in-the-series) for the final snapshot.
+
 Exclusions from the sample (our own visits, Russia) are in
 [analytics-exclusions.md](analytics-exclusions.md). Without them, any conversion
 figure is roughly doubled.
@@ -13,8 +18,8 @@ figure is roughly doubled.
 
 `packages/site-kit/src/goals.ts` is the single source of truth. The identifier is
 written there once, all three sites take it from there, and exactly that string is
-registered as a goal in Metrika. There should be no `'form_view'` literals in the
-apps.
+marked as a key event in the matching GA4 property. There should be no `'form_view'`
+literals in the apps.
 
 `packages/site-kit/src/funnel.ts` wires everything up from
 the markup and is armed by `bootSiteKit` from each app's layout. Contact clicks live
@@ -44,7 +49,7 @@ form: the approved.rs homepage has three forms, and counting them separately wou
 triple the numerator.
 
 **JS events do not deal with anything visible from the URL.** A service-page view
-and the thank-you page are registered as URL goals in Metrika directly —
+and the thank-you page are registered as URL-based key events in GA4 directly —
 duplicating them in code is pointless.
 
 `form_start` counts input, not focus. The modal puts the cursor in the first field
@@ -132,35 +137,40 @@ form itself: by that point all the form's own listeners have run and the
 
 ## The funnel
 
-The counter ids are in [deploy.md](deploy.md), to avoid keeping a third copy. Each
-has a composite goal, **"ENQUIRY FUNNEL: saw → started → submitted"**
-(`form_view` → `form_start` → `form_submit`). A composite goal only counts if every
-step happened within one visit; there can be up to five steps and up to ten
-conditions per step.
+The measurement ids are in [deploy.md](deploy.md), to avoid keeping a third copy.
+Each property has a Funnel Exploration, **"ENQUIRY FUNNEL: saw → started →
+submitted"** (`form_view` → `form_start` → `form_submit`). A funnel only counts a
+step if every step before it happened in the same session.
 
-Registered by hand in all three counters: the four form steps, the two reading
-events, `contact_click`, the three language-banner events, a URL goal on
-`/thanks/`, and the funnel itself. On approved.rs there are additionally
-`lead_modal_open`, `brand_link_click` and the URL goal "Interest — a service page
-or a case study".
+Marked as key events by hand in all three GA4 properties: the four form steps, the
+two reading events, `contact_click`, the three language-banner events, a URL-based
+key event on `/thanks/`. On approved.rs there are additionally `lead_modal_open`,
+`brand_link_click` and the URL key event "Interest — a service page or a case
+study". The funnel exploration itself is a saved report, not a key event, and is
+rebuilt by hand per property.
 
-Metrika's automatic goals (form submission, going to a messenger, clicking a phone
-number) are left alone: they count the same things independently of our code and
-serve as a cross-check.
+GA4's Enhanced Measurement (automatic `scroll`, `click`, `page_view`, …) is left on
+for all three properties: it counts overlapping things independently of our code
+and serves as a cross-check, the same role Metrika's automatic goals played.
 
 ## The CarLab shop
 
-`add_to_cart` (with a `type` parameter — the product type's key), `begin_checkout`
-and `order_placed` (with a `total` parameter, in RSD) are the shop funnel, and they
-are carlab.rs only. The goals are created in the counters when the shop moves to
-`live`, not before: while it is in `preview`, those events are only sent by
-developers with `?dev=true`, and such visits are excluded from samples the same way
-as everything else in `docs/analytics-exclusions.md`.
+`add_to_cart`, `begin_checkout` and `purchase` are the shop funnel, and they are
+carlab.rs only, using GA4's standard ecommerce schema: an `items[]` array
+(`item_id`, `item_name`, `price`, `quantity`, `item_category` where known) plus
+`value`/`currency` (`rsd`), and `purchase` additionally carries `transaction_id`
+(the order's `display_id`). `cartItems`/`cartLineItem` in
+`apps/auto-service/src/scripts/shop/cart.ts` build the array from the cart's line
+items; `purchase` has to read it before `placeOrder` clears the cart. The events
+are marked as key events in the property when the shop moves to `live`, not
+before: while it is in `preview`, those events are only sent by developers with
+`?dev=true`, and such visits are excluded from samples the same way as everything
+else in `docs/analytics-exclusions.md`.
 
 ## Meta Pixel
 
-Every goal goes through `reachGoal`, which reaches Metrika and, on a site with a
-pixel id, the Meta Pixel. The pixel shares Metrika's gate in
+Every goal goes through `reachGoal`, which reaches GA4 and, on a site with a
+pixel id, the Meta Pixel. The pixel shares the Google tag's gate in
 `packages/site-kit/src/analytics.ts`: never in dev, never under a refusal, queued
 on the first page view (`init` + `PageView`) with `fbevents.js` fetched while the
 browser is idle. There is no `<noscript>` image: the sites count nothing without
@@ -175,18 +185,19 @@ file is the one table:
 | `contact_click`  | `Contact` (every channel)                       |
 | `add_to_cart`    | `AddToCart`                                     |
 | `begin_checkout` | `InitiateCheckout`                              |
-| `order_placed`   | `Purchase`, with `value` and `currency` (`RSD`) |
+| `purchase`       | `Purchase`, with `value` and `currency` (`RSD`) |
 
-The rest (scroll depth, form steps, language offer, case views) stay
-Metrika-only: an ads optimiser learns nothing from them and custom events only
-clutter Events Manager. To send one, add its row to `META_EVENTS`. Parameters
-other than an order's `total` + `currency` never reach Meta.
+The rest (scroll depth, form steps, language offer, case views) stay GA4-only: an
+ads optimiser learns nothing from them and custom events only clutter Events
+Manager. To send one, add its row to `META_EVENTS`. Parameters other than
+`value` + `currency` never reach Meta.
 
-The pixel id sits beside the counter id in each app's `src/utils/metrika.ts` as
-`META_PIXEL_ID` and is passed to `bootSiteKit` by the layout. carlab.rs has
-`29229430643330595`; approved.rs and details.rs are `undefined`, so no pixel
-loads there. To add one, set the constant, and update that site's privacy copy
-and `COOKIE_POLICY_VERSION` (see [deploy.md](deploy.md)) in the same change.
+The pixel id sits beside the GA4 measurement id in each app's
+`src/utils/analytics.ts` as `META_PIXEL_ID` and is passed to `bootSiteKit` by the
+layout. carlab.rs has `29229430643330595`; approved.rs and details.rs are
+`undefined`, so no pixel loads there. To add one, set the constant, and update
+that site's privacy copy and `COOKIE_POLICY_VERSION` (see [deploy.md](deploy.md))
+in the same change.
 
 ### The server `Lead` event from a Capture bot
 
@@ -268,33 +279,36 @@ redeploy afterwards — Meta says test codes must not ride on production events.
 1. Add the identifier to `GOALS` and call `reachGoal` where it happens.
 2. Cover it with a test: `packages/site-kit` holds a 100% gate and CI will fail
    without one.
-3. Register the goal by hand in **all three** counters: Goals → Add goal →
-   "Target event", condition **Matches**, identifier exactly the same string.
-   Our Metrika API access is read-only, so goals are managed through the interface.
+3. Mark it a key event by hand in **all three** GA4 properties: Admin → Events,
+   wait for the event to appear after it fires once, then toggle "Mark as key
+   event". The event must be seen by the property before the toggle exists —
+   fire it once from a build (not `pnpm dev`) first.
 
-An event registered in code but not in the counter is counted nowhere and lost
-silently — it is the most common way to end up with no data.
+An event registered in code but not marked as a key event is counted nowhere in
+conversion reporting and lost silently — it is the most common way to end up with
+no data.
 
 ## What these numbers will not show
 
 Moving between sites breaks the session: going from approved.rs to details.rs means
-a different domain and a different counter, where the person is already a new
+a different domain and a different property, where the person is already a new
 visitor with approved.rs as the referrer. `brand_link_click` is the only place that
 transition is visible from approved.rs's side.
 
-To see which partner the visitor left for, open the approved.rs counter (the
-other two never fire this event), take the goal `brand_link_click` and group it
-by the visit parameter `brand`: one row for `details`, one for `carlab`. The
+To see which partner the visitor left for, open the approved.rs property (the
+other two never fire this event), take the event `brand_link_click` and group it
+by the parameter `brand`: one row for `details`, one for `carlab`. The
 language banner keeps `from` / `to`, so grouping by `to` would mix locale codes
 into the same report. Apply the standing exclusions from
 [analytics-exclusions.md](analytics-exclusions.md) before reading the numbers.
 
 Nothing from a dev server. All three layouts pass `analytics: false` to `bootSiteKit` when
-`import.meta.env.DEV`, so no Metrika script is loaded locally and `reachGoal` is a
+`import.meta.env.DEV`, so no Google tag is loaded locally and `reachGoal` is a
 no-op — verify an event against a build (`pnpm build`, then
 `pnpm --filter <app> preview`), never against `pnpm dev`. A preview serves the
-production build and so does report to the real counter, from `127.0.0.1`; the
-`only_mirrors` filter is what keeps that out of the reports.
+production build and so does report to the real property, from `127.0.0.1`; GA4's
+"Internal traffic" / "Developer traffic" data filters are what keep that out of
+reports, once configured the same way the exclusions doc describes.
 
 `form_view` rests on IntersectionObserver and needs the tab to be painting frames.
 In a background tab the event never arrives — harmless for real visits, but when
@@ -315,3 +329,25 @@ would lie. What is already broken:
 | 2026-10-02             | `contact_click` on approved.rs              | it no longer counts a control that merely opens the lead form — only the channels that reach a person (`phone`, `telegram`, `whatsapp`, `viber`), which is what `lead_modal_open` already counts. By then approved.rs was the only site still stamping a non-channel control, so only its series steps down  |
 | 2026-10-06 (this PR)   | `brand_link_click` on approved.rs           | the partner destination moved from the parameter `to` to `brand`, so it no longer shares a key with the language banner's locale codes (issue #115). The goal itself is unchanged; a report crossing the date sees `to=details` / `to=carlab` before it and `brand=details` / `brand=carlab` after           |
 | 2026-10-06 (this PR)   | `contact_click` on carlab.rs                | the homepage and service-page heroes gained a call / Telegram / WhatsApp row under a new `hero` placement, next to the booking door (issue #123). The series steps up from the zero baseline recorded on #123; `form_submit` and the `/thanks/` goal are compared against that same baseline two weeks later |
+| 2026-10-14             | every goal, all three sites                 | Yandex Metrika replaced with GA4 ([ADR-0033](../adr/0033-google-analytics-instead-of-yandex-metrica.md)). Every series restarts from zero in the new properties — there is no automated history import. `order_placed` is renamed `purchase` and gains GA4's standard `items[]` shape                        |
+
+### Final Metrika snapshot before cutover
+
+Pulled 2026-10-14, `run_report` over 2026-09-14 → 2026-10-13 (the 30 days before
+cutover), `ym:s:regionCountryName!='Россия'` applied. The owner/partner clientID
+list (`.local/analytics-exclusions.txt`) is **not** reflected here — the
+Reporting API has no clientID filter (see
+[analytics-exclusions.md](analytics-exclusions.md#how-to-apply-it)), so these
+numbers are still inflated by that known share, same as every other Metrika
+report that was not built through the Logs API by hand.
+
+| site        | visits | users | form submits | contact clicks |
+| ----------- | -----: | ----: | -----------: | -------------: |
+| approved.rs |    343 |   244 |           20 |             86 |
+| carlab.rs   |    129 |   110 |            0 |              4 |
+| details.rs  |     79 |    67 |            0 |              1 |
+
+This is the last pre-cutover reference point; the Metrika counters are not
+deleted by this change, so a deeper pull through the Logs API (with the
+clientID exclusion properly applied) is still possible later if a precise
+before/after comparison is ever needed.

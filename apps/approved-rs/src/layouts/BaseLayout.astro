@@ -151,10 +151,10 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
     <script>
       import { bootSiteKit } from '@podbor/site-kit/browser';
       import { defineSiteLeadForm } from '@podbor/site-kit/lead-form';
-      import { META_PIXEL_ID, YM_COUNTER_ID } from '@/utils/metrika';
+      import { GA_MEASUREMENT_ID, META_PIXEL_ID } from '@/utils/analytics';
 
       bootSiteKit({
-        ymCounterId: YM_COUNTER_ID,
+        gaMeasurementId: GA_MEASUREMENT_ID,
         metaPixelId: META_PIXEL_ID,
         analytics: !import.meta.env.DEV,
       });

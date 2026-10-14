@@ -35,7 +35,7 @@ beforeEach(() => {
     sent.push([String(url), body as FormData]);
     return true;
   }) as unknown as typeof navigator.sendBeacon;
-  window.ymReachGoal = vi.fn();
+  window.trackGoal = vi.fn();
   vi.stubGlobal('crypto', { randomUUID: () => UUID });
 });
 
@@ -101,7 +101,7 @@ describe('defineContactClickTracking', () => {
   it('reports the same click to the analytics counter', () => {
     track();
     click('telegram');
-    expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
+    expect(window.trackGoal).toHaveBeenCalledWith('contact_click', {
       channel: 'telegram',
       placement: 'footer',
     });
@@ -110,7 +110,7 @@ describe('defineContactClickTracking', () => {
   it('reports the placement the tapped control sits in', () => {
     track();
     click('whatsapp');
-    expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
+    expect(window.trackGoal).toHaveBeenCalledWith('contact_click', {
       channel: 'whatsapp',
       placement: 'made-up',
     });
@@ -119,7 +119,7 @@ describe('defineContactClickTracking', () => {
   it('still reports a usable goal where no placement is stamped', () => {
     track();
     click('viber');
-    expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
+    expect(window.trackGoal).toHaveBeenCalledWith('contact_click', {
       channel: 'viber',
       placement: undefined,
     });
@@ -129,7 +129,7 @@ describe('defineContactClickTracking', () => {
     track();
     click('callback');
     expect(sent).toEqual([]);
-    expect(window.ymReachGoal).not.toHaveBeenCalled();
+    expect(window.trackGoal).not.toHaveBeenCalled();
   });
 
   it('writes a lead for a Telegram tap that opens the capture bot, so the bot can pick up its page', () => {
@@ -147,7 +147,7 @@ describe('defineContactClickTracking', () => {
       </div>`;
     track();
     click('telegram');
-    expect(window.ymReachGoal).toHaveBeenCalledWith('contact_click', {
+    expect(window.trackGoal).toHaveBeenCalledWith('contact_click', {
       channel: 'telegram',
       placement: 'thanks',
     });
@@ -191,11 +191,11 @@ describe('defineContactClickTracking', () => {
     click('telegram');
     expect(link().href).toBe(href);
     expect(sent).toEqual([]);
-    expect(window.ymReachGoal).toHaveBeenCalled();
+    expect(window.trackGoal).toHaveBeenCalled();
   });
 
   it('still records the click on a page where analytics never loaded', () => {
-    delete (window as Partial<Window>).ymReachGoal;
+    delete (window as Partial<Window>).trackGoal;
     track();
     expect(() => click('telegram')).not.toThrow();
     expect(sent).toHaveLength(1);

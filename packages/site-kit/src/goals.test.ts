@@ -5,10 +5,10 @@ describe('GOALS', () => {
   it('names the shop funnel', () => {
     expect(GOALS.addToCart).toBe('add_to_cart');
     expect(GOALS.beginCheckout).toBe('begin_checkout');
-    expect(GOALS.orderPlaced).toBe('order_placed');
+    expect(GOALS.purchase).toBe('purchase');
   });
 
-  it('uses unique snake_case identifiers, the form Metrika goals are created with', () => {
+  it('uses unique snake_case identifiers, the form GA4 key events are created with', () => {
     const ids = Object.values(GOALS);
     expect(new Set(ids).size).toBe(ids.length);
     for (const id of ids) expect(id).toMatch(/^[a-z0-9]+(?:_[a-z0-9]+)*$/);

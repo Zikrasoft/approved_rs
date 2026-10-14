@@ -12,7 +12,7 @@ import {
 } from '@podbor/lead-crm/phone-kit';
 import { isTrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 import { phoneInvalid } from '../phone';
-import { currentCart, refreshCart } from './cart';
+import { cartItems, currentCart, refreshCart } from './cart';
 import { checkoutFailure, placeOrder } from './checkout';
 import { submitQueue } from './submitQueue';
 
@@ -89,7 +89,12 @@ export function defineCheckoutForm(tagName = 'checkout-form'): void {
           () => {
             if (started) return;
             started = true;
-            reachGoal(GOALS.beginCheckout);
+            const cart = currentCart();
+            reachGoal(GOALS.beginCheckout, {
+              currency: SHOP_CURRENCY,
+              value: cart?.total,
+              items: cartItems(cart),
+            });
             loadPhoneKit().then(() => {
               const kit = phoneKit();
               if (kit)
@@ -138,6 +143,7 @@ export function defineCheckoutForm(tagName = 'checkout-form'): void {
             void queue(async () => {
               if (submitLabel && this.dataset.submitting)
                 submitLabel.textContent = this.dataset.submitting;
+              const items = cartItems(currentCart());
               const order = await placeOrder(
                 {
                   name: name.value,
@@ -149,9 +155,11 @@ export function defineCheckoutForm(tagName = 'checkout-form'): void {
                 },
                 currentCart()?.total ?? 0,
               );
-              reachGoal(GOALS.orderPlaced, {
-                total: order.total,
+              reachGoal(GOALS.purchase, {
+                transaction_id: String(order.display_id),
+                value: order.total,
                 currency: SHOP_CURRENCY,
+                items,
               });
               queue.stop();
               this.dispatchEvent(

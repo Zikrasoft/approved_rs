@@ -231,7 +231,7 @@ _Avoid_: case (bare), кейс in visitor copy.
 
 **Browsing depth** — how many distinct Case studies one visitor has opened in
 one visit, the current one included. A visit ends after 30 minutes without
-opening another, the same length as Metrika's visit timeout.
+opening another, the same length as GA4's default session timeout.
 
 **Hand-written translation** — a translation a person wrote instead of the
 model. It is adopted and served, but only while the file's Russian source is

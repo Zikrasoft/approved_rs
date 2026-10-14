@@ -16,7 +16,7 @@ let observed: Element[];
 let notify: (entries: { isIntersecting: boolean }[]) => void;
 let disconnected: number;
 
-const goals = () => (window.ymReachGoal as ReturnType<typeof vi.fn>).mock.calls;
+const goals = () => (window.trackGoal as ReturnType<typeof vi.fn>).mock.calls;
 const goalNames = () => goals().map(([name]) => name);
 
 function stubIntersectionObserver(): void {
@@ -74,7 +74,7 @@ beforeEach(() => {
   observed = [];
   disconnected = 0;
   document.body.innerHTML = '';
-  window.ymReachGoal = vi.fn();
+  window.trackGoal = vi.fn();
   stubIntersectionObserver();
   stubViewport(2000, 1000);
   vi.stubGlobal('scrollY', 0);
@@ -333,7 +333,7 @@ describe('defineFunnelTracking', () => {
 
 describe('reachGoal', () => {
   it('stays silent on a page where analytics never loaded', () => {
-    delete (window as Partial<Window>).ymReachGoal;
+    delete (window as Partial<Window>).trackGoal;
     expect(() => reachGoal(GOALS.formView)).not.toThrow();
   });
 });
@@ -345,7 +345,7 @@ describe('a result event from something that is not a lead form', () => {
 
     answer(document.querySelector<HTMLFormElement>('#other')!, true);
 
-    expect(window.ymReachGoal).not.toHaveBeenCalledWith(
+    expect(window.trackGoal).not.toHaveBeenCalledWith(
       GOALS.formSubmit,
       expect.anything(),
     );

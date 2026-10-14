@@ -7,9 +7,9 @@ import { defineFunnelTracking } from './funnel.ts';
 import { defineLanguageSuggestion } from './languageSuggestion.ts';
 
 export interface SiteKitConfig {
-  ymCounterId?: number;
   metaPixelId?: string;
   googleAdsId?: string;
+  gaMeasurementId?: string;
   googleConversionLabels?: Partial<Record<Goal, string>>;
   analytics: boolean;
 }
@@ -17,9 +17,9 @@ export interface SiteKitConfig {
 let booted = false;
 
 export function bootSiteKit({
-  ymCounterId,
   metaPixelId,
   googleAdsId,
+  gaMeasurementId,
   googleConversionLabels,
   analytics,
 }: SiteKitConfig): void {
@@ -27,9 +27,9 @@ export function bootSiteKit({
   booted = true;
   if (analytics)
     defineAnalytics({
-      ymCounterId,
       metaPixelId,
       googleAdsId,
+      gaMeasurementId,
       googleConversionLabels,
     });
   rememberAdTouch();

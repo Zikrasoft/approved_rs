@@ -1,7 +1,26 @@
 import { MEDUSA_LOCALE } from '@podbor/shop-catalog/browser';
 import type { Locale } from '@/i18n/config';
 import * as api from './cartApi';
-import type { Cart } from './cartApi';
+import type { Cart, CartLine } from './cartApi';
+
+export interface GaItem {
+  item_id: string;
+  item_name: string;
+  price: number;
+  quantity: number;
+  item_category?: string;
+}
+
+export const cartLineItem = (line: CartLine, category?: string): GaItem => ({
+  item_id: line.variant_id ?? line.id,
+  item_name: line.product_title ?? line.product_handle ?? line.id,
+  price: line.unit_price,
+  quantity: line.quantity,
+  ...(category && { item_category: category }),
+});
+
+export const cartItems = (cart: Cart | null): GaItem[] =>
+  (cart?.items ?? []).map((line) => cartLineItem(line));
 
 export const CART_STORAGE_KEY = 'carlab_cart_id';
 export const CART_EVENT = 'carlab:cart';

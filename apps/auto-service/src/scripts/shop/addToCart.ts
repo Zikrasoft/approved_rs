@@ -1,6 +1,7 @@
+import { SHOP_CURRENCY } from '@podbor/shop-catalog/browser';
 import { GOALS, reachGoal } from '@podbor/site-kit/browser';
 import type { Locale } from '@/i18n/config';
-import { addToCart, loadCart } from './cart';
+import { addToCart, cartLineItem, loadCart } from './cart';
 import { isOutOfStock } from './cartApi';
 import { STOCK_EVENT, type StockDetail } from './stock';
 
@@ -51,10 +52,18 @@ export function defineAddToCart(tagName = 'add-to-cart'): void {
             say(undefined);
             try {
               await loadCart(locale as Locale);
-              await add(variant);
+              const cart = await add(variant);
               if (label) label.textContent = this.dataset.addedLabel ?? '';
               if (goCart) goCart.hidden = false;
-              reachGoal(GOALS.addToCart, { type });
+              const line = cart.items.find(
+                (item) => item.variant_id === variant,
+              );
+              const item = line ? cartLineItem(line, type) : undefined;
+              reachGoal(GOALS.addToCart, {
+                currency: SHOP_CURRENCY,
+                value: item?.price,
+                items: item ? [item] : [],
+              });
 
               const installVariant = this.dataset.installVariant;
               if (install?.checked && installVariant) {

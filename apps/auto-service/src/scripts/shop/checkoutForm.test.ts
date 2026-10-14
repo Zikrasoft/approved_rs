@@ -7,12 +7,31 @@ const checkout = vi.hoisted(() => ({
 }));
 const cart = vi.hoisted(() => ({ currentCart: vi.fn(), refreshCart: vi.fn() }));
 const goals = vi.hoisted(() => ({
-  GOALS: { beginCheckout: 'begin_checkout', orderPlaced: 'order_placed' },
+  GOALS: { beginCheckout: 'begin_checkout', purchase: 'purchase' },
   reachGoal: vi.fn(),
   markFieldValidity: vi.fn(),
 }));
 vi.mock('./checkout', () => checkout);
-vi.mock('./cart', () => cart);
+vi.mock('./cart', () => ({
+  ...cart,
+  cartItems: (c: { items: unknown[] } | null) =>
+    (c?.items ?? []).map((line) => {
+      const l = line as {
+        id: string;
+        variant_id: string | null;
+        product_handle: string | null;
+        product_title: string | null;
+        quantity: number;
+        unit_price: number;
+      };
+      return {
+        item_id: l.variant_id ?? l.id,
+        item_name: l.product_title ?? l.product_handle ?? l.id,
+        price: l.unit_price,
+        quantity: l.quantity,
+      };
+    }),
+}));
 vi.mock('@podbor/site-kit/browser', () => goals);
 vi.mock('@podbor/lead-crm/phone-input', () => ({
   bindPhoneCountry: vi.fn(),
@@ -59,9 +78,23 @@ const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 beforeAll(() => defineCheckoutForm());
 
+const LINE = {
+  id: 'li_1',
+  variant_id: 'var_1',
+  product_handle: 'akb-60ah',
+  product_title: 'Akumulator 60Ah',
+  quantity: 1,
+  unit_price: 12690,
+  total: 12690,
+};
+
 beforeEach(() => {
   vi.clearAllMocks();
-  cart.currentCart.mockReturnValue({ id: 'cart_1', total: 12690, items: [] });
+  cart.currentCart.mockReturnValue({
+    id: 'cart_1',
+    total: 12690,
+    items: [LINE],
+  });
   cart.refreshCart.mockResolvedValue(null);
   checkout.placeOrder.mockResolvedValue({
     id: 'o1',
@@ -94,9 +127,18 @@ describe('<checkout-form>', () => {
       displayId: 7,
       total: 12690,
     });
-    expect(goals.reachGoal).toHaveBeenCalledWith('order_placed', {
-      total: 12690,
+    expect(goals.reachGoal).toHaveBeenCalledWith('purchase', {
+      transaction_id: '7',
+      value: 12690,
       currency: 'rsd',
+      items: [
+        {
+          item_id: 'var_1',
+          item_name: 'Akumulator 60Ah',
+          price: 12690,
+          quantity: 1,
+        },
+      ],
     });
   });
 
@@ -148,7 +190,7 @@ describe('<checkout-form>', () => {
     expect(field('[data-form-error]').textContent).toBe('Nema');
     expect(cart.refreshCart).toHaveBeenCalled();
     expect(goals.reachGoal).not.toHaveBeenCalledWith(
-      'order_placed',
+      'purchase',
       expect.anything(),
     );
   });
@@ -165,6 +207,18 @@ describe('<checkout-form>', () => {
     expect(
       goals.reachGoal.mock.calls.filter(([goal]) => goal === 'begin_checkout'),
     ).toHaveLength(1);
+    expect(goals.reachGoal).toHaveBeenCalledWith('begin_checkout', {
+      currency: 'rsd',
+      value: 12690,
+      items: [
+        {
+          item_id: 'var_1',
+          item_name: 'Akumulator 60Ah',
+          price: 12690,
+          quantity: 1,
+        },
+      ],
+    });
   });
 
   it('still counts the start of checkout once after the async country redraw and a failed submit repaint the form', async () => {
