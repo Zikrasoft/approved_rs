@@ -21,6 +21,11 @@
       "permanent": true
     },
     {
+      "source": "/parts/:path*",
+      "destination": "/sr/parts/:path*",
+      "permanent": true
+    },
+    {
       "source": "/bmw",
       "destination": "/sr/bmw/",
       "permanent": true

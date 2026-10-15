@@ -1,6 +1,6 @@
 nav:
   services: Услуги
-  shop: Запчасти
+  parts: Запчасти
   works: Примеры работ
   process: Как работаем
   about: О сервисе
@@ -77,7 +77,6 @@ translations:
   sr:
     nav:
       services: Usluge
-      shop: Delovi
       works: Primeri radova
       process: Kako radimo
       about: O servisu
@@ -152,7 +151,6 @@ translations:
   en:
     nav:
       services: Services
-      shop: Parts
       works: Work Examples
       process: How We Work
       about: About Us

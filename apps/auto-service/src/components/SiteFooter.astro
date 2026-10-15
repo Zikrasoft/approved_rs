@@ -5,7 +5,6 @@ import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { GARAGE_ADDRESS, SITE_NAME } from '@/utils/constants';
-import { devOnly, shopBuilt } from '@/utils/shopStatus';
 import ContactControl from './ContactControl.astro';
 import { contactRegion } from '@podbor/site-kit/contact-control';
 import { content } from '@/i18n/content';
@@ -55,13 +54,8 @@ const channels = [
       </span>
       <a href={PathBuilder.works(locale)} class="link-muted">{site.nav.works}</a
       >
-      {
-        shopBuilt() && (
-          <a href={PathBuilder.shop(locale)} class="link-muted" {...devOnly()}>
-            {site.nav.shop}
-          </a>
-        )
-      }
+      <a href={PathBuilder.parts(locale)} class="link-muted">{site.nav.parts}</a
+      >
       <a href={PathBuilder.contact(locale)} class="link-muted"
         >{site.nav.contact}</a
       >

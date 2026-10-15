@@ -1,11 +1,10 @@
 indexMetaTitle: 'Услуги автосервиса в Белграде: ремонт и ТО — CarLab'
-indexMetaDescription: Диагностика, ТО и замена масла, тормоза и подвеска, двигатель и коробка, кузовной ремонт после ДТП, проверка перед покупкой. Цены, сроки, гарантия.
+indexMetaDescription: Диагностика, ТО и замена масла, тормоза и подвеска, двигатель и коробка, кузовной ремонт после ДТП, проверка перед покупкой. Цены и сроки.
 indexEyebrow: Услуги
 indexHeading: Всё, что нужно машине, в одном сервисе
 indexLead: По каждой услуге есть отдельная страница — что входит, сколько занимает, по каким признакам к нам пора и когда мы честно говорим, что делать не нужно.
 specsPriceLabel: Цена
 specsDurationLabel: Срок
-specsWarrantyLabel: Гарантия
 diagnostics:
   name: Компьютерная диагностика
   short: Находим, что стоит за кодом ошибки.
@@ -16,7 +15,6 @@ diagnostics:
   heroLead: Сканер скажет, какой датчик ругается. Виноват сам датчик или то, что он измеряет, сканер не покажет — это выясняется уже на машине.
   priceFrom: считывание ошибок — бесплатно
   duration: от 40 минут
-  warranty: 12 месяцев на устранение
   bodyHeading: Что мы делаем на диагностике
   body: |
     Сначала разговор: когда началось, при каких условиях, что менялось до этого. Часть диагнозов ставится уже здесь: «стучит только на холодную» и «стучит постоянно» — это разные узлы.
@@ -51,7 +49,6 @@ servicing:
   heroLead: У каждого мотора свой интервал и свой допуск по маслу. Мы смотрим мануал на вашу машину и делаем то, что написано там, а не среднее «раз в десять тысяч».
   priceFrom: от 90 €
   duration: 2–4 часа
-  warranty: 12 месяцев
   bodyHeading: Откуда берётся интервал для вашей машины
   body: |
     Интервалы замены у разных моторов отличаются в разы, а условия Белграда — пробки, пыль, лето под сорок — почти всегда попадают под «тяжёлые условия эксплуатации» с укороченным интервалом. По ним и считаем, что реально нужно вашей машине на этом пробеге.
@@ -77,13 +74,12 @@ brakes-suspension:
   name: Тормоза и подвеска
   short: Всё, что отвечает за то, остановится машина или нет.
   metaTitle: Ремонт тормозов и подвески в Белграде — CarLab
-  metaDescription: 'Тормоза и подвеска в Белграде: колодки, диски, суппорты, рычаги, развал-схождение. Замеры в миллиметрах, смета до работ, гарантия 12 месяцев.'
+  metaDescription: 'Тормоза и подвеска в Белграде: колодки, диски, суппорты, рычаги, развал-схождение. Замеры в миллиметрах, смета до работ.'
   heroEyebrow: Ходовая
   heroTitle: Здесь ресурс считают в миллиметрах
   heroLead: 'Мотор можно дотянуть до сервиса. Тормоза — нет. Поэтому по ходовой мы не округляем и не тянем: если ресурс кончился, говорим прямо.'
   priceFrom: от 120 €
   duration: от 3 часов
-  warranty: 12 месяцев
   bodyHeading: Как мы это делаем
   body: |
     Начинаем с замеров: толщина дисков и колодок в миллиметрах, биение, состояние шлангов и суппортов. По подвеске — проверка люфтов на подъёмнике и на вибростенде, осмотр пыльников и опор.
@@ -109,13 +105,12 @@ engine-gearbox:
   name: Двигатель и коробка
   short: От замены прокладки до ремонта с разбором — с понятной сметой.
   metaTitle: Ремонт двигателя и коробки передач в Белграде — CarLab
-  metaDescription: 'Ремонт двигателя и трансмиссии в Белграде: ГРМ, прокладки, сцепление, замена масла в АКПП. Диагностика до разбора, смета до работ, гарантия 12 месяцев.'
+  metaDescription: 'Ремонт двигателя и трансмиссии в Белграде: ГРМ, прокладки, сцепление, замена масла в АКПП. Диагностика до разбора, смета до работ.'
   heroEyebrow: Силовой агрегат
   heroTitle: «Капиталка» нужна не так часто, как её называют
   heroLead: 'Прежде чем что-то разбирать, мы проверяем то, что проверяется снаружи: компрессию, давление масла, ошибки, утечки.'
   priceFrom: по результатам диагностики
   duration: от 1 дня
-  warranty: 12 месяцев
   bodyHeading: Порядок работы
   body: |
     Сначала измеряем: компрессия по цилиндрам, давление масла, состояние свечей, ошибки по блокам, утечки под давлением. Только после этого решаем, нужно ли вскрывать мотор.
@@ -147,7 +142,6 @@ bodywork-painting:
   heroLead: Хороший кузовной ремонт не видно ни глазом, ни толщиномером на осмотре перед продажей.
   priceFrom: по результатам осмотра
   duration: от 3 дней
-  warranty: 12 месяцев на покрытие
   bodyHeading: Что входит в восстановление
   body: |
     Сначала замеряем геометрию кузова: после удара смещения бывают там, где визуально всё цело, и именно они потом дают неравномерный износ резины и увод машины. При необходимости ставим на стапель и вытягиваем по контрольным точкам.
@@ -179,7 +173,6 @@ pre-purchase-inspection:
   heroLead: Перекрашенные панели, следы сварки, скрученный пробег, утечки снизу — за час на подъёмнике это видно, хотя в объявлении об этом не пишут.
   priceFrom: от 60 €
   duration: около 1 часа
-  warranty: письменное заключение
   bodyHeading: Что мы проверяем
   body: |
     Кузов — толщиномером по всем панелям: перекрашенные элементы, шпаклёвка, следы сварки, состояние зазоров. Дальше подъёмник: подвеска, утечки, состояние выхлопа и защиты, следы ударов снизу.
@@ -200,7 +193,7 @@ pre-purchase-inspection:
     - Машина привезена из-за границы, история неизвестна
     - Цена подозрительно ниже рынка
   honestHeading: Чего проверка не даёт
-  honest: Мы честно скажем, что видим, но проверка не заменяет гарантию. Скрытый дефект, который не проявляется ни на подъёмнике, ни на диагностике, может всплыть позже — это ограничение метода, а не оговорка мелким шрифтом.
+  honest: Мы честно скажем, что видим, но ни один осмотр не ловит всё. Скрытый дефект, который не проявляется ни на подъёмнике, ни на диагностике, может всплыть позже — это ограничение метода, а не оговорка мелким шрифтом.
 translations:
   sr:
     indexMetaTitle: 'Usluge autoservisa u Beogradu: popravka i TO — CarLab'
@@ -210,7 +203,6 @@ translations:
     indexLead: Svaka usluga ima svoju stranicu — šta uključuje, koliko traje, kada je vreme da dođete kod nas i kada iskreno govorimo da nije potrebno raditi ništa.
     specsPriceLabel: Cena
     specsDurationLabel: Rok
-    specsWarrantyLabel: Garancija
     diagnostics:
       name: Računarska dijagnostika
       short: Otkrivamo šta stoji iza greške.
@@ -221,7 +213,6 @@ translations:
       heroLead: Skener će reći koji senzor ima problem. Da li je sam senzor na grešci ili ono što meri, skener ne pokazuje — to se utvrđuje na vozilu.
       priceFrom: čitanje grešaka — besplatno
       duration: od 40 minuta
-      warranty: 12 meseci na otklanjanje
       bodyHeading: Šta radimo u dijagnostici
       body: |-
         Prvo razgovor: kada je počelo, pod kojim uslovima, šta se do tada menjalo. Deo dijagnoza se postavlja već ovde: „kuca samo kad je hladno“ i „kuca stalno“ — to su različiti sklopovi.
@@ -256,7 +247,6 @@ translations:
       heroLead: Svaki motor ima svoj interval i dozvolu za ulje. Gledamo priručnik za vaš automobil i radimo ono što je tamo zapisano, a ne prosečno „jednom na deset hiljada“.
       priceFrom: od 90 €
       duration: 2–4 sata
-      warranty: 12 meseci
       bodyHeading: Odakle dolazi interval za vaš automobil
       body: |-
         Intervalli zamene kod različitih motora se drastično razlikuju, a uslovi u Beogradu — saobraćaj, prašina, leto do četrdeset — gotovo uvek spadaju pod „teške uslove korišćenja“ sa skraćenim intervalom. Na osnovu toga računamo šta je zaista potrebno vašem automobilu na ovoj kilometraži.
@@ -288,7 +278,6 @@ translations:
       heroLead: 'Motor se može izdržati do servisa. Kočnice — ne. Zato po hodnoj ne zaokružujemo i ne produžavamo: kada je resurs istekao, govorimo otvoreno.'
       priceFrom: od 120 €
       duration: od 3 sata
-      warranty: 12 meseci
       bodyHeading: Kako to radimo
       body: |-
         Počinjemo sa merenjima: debljina diskova i pločica u milimetrima, udar, stanje creva i čeljusti. Za suspenziju — provera luftova na dizalici i na vibracionom stendu, pregled gumica i potpornja.
@@ -320,7 +309,6 @@ translations:
       heroLead: 'Pre nego što nešto rasklopimo, proveravamo sve što se može proveriti spolja: kompresiju, pritisak ulja, greške, curenje.'
       priceFrom: na osnovu dijagnostike
       duration: od 1 dana
-      warranty: 12 meseci
       bodyHeading: Redosled rada
       body: |
         Prvo merimo: kompresiju po cilindrima, pritisak ulja, stanje svećica, greške po blokovima, curenja pod pritiskom. Tek nakon ovoga odlučujemo da li treba otvarati motor.
@@ -352,7 +340,6 @@ translations:
       heroLead: Dobra popravka karoserije nije vidljiva ni golim okom, ni mernim uređajem na pregledu pre prodaje.
       priceFrom: na osnovu pregleda
       duration: od 3 dana
-      warranty: 12 meseci na premaz
       bodyHeading: Šta je uključeno u obnovu
       body: |
         Prvo mjerimo geometriju karoserije: nakon udara pomeranja su moguća i tamo gde sve izgleda u redu, a to kasnije dovodi do neravnomernog trošenja guma i skretanja vozila. Ako je potrebno, postavljamo na stalak i vučemo prema kontrolnim tačkama.
@@ -384,7 +371,6 @@ translations:
       heroLead: Prefarbani paneli, tragovi zavarivanja, preokrenut pređašnji, curenja s dna — za sat vremena na dizalici ovo je uočljivo, iako u oglasu o tome ne pišu.
       priceFrom: od 60 €
       duration: oko 1 sat
-      warranty: pisani izveštaj
       bodyHeading: Šta proveravamo
       body: |
         Karoserija — merni uređaj po svim panelima: prefarbani elementi, gips, tragovi zavarivanja, stanje razmaka. Zatim dizalica: ovjes, curenja, stanje izduvnog sistema i zaštite, tragovi udaraca odozdo.
@@ -414,7 +400,6 @@ translations:
     indexLead: Each service has its own page — what’s included, how long it takes, signs you need to visit us, and when we honestly say it’s not necessary.
     specsPriceLabel: Price
     specsDurationLabel: Duration
-    specsWarrantyLabel: Warranty
     diagnostics:
       name: Computer Diagnostics
       short: We find out what’s behind the error code.
@@ -425,7 +410,6 @@ translations:
       heroLead: The scanner will tell us which sensor is malfunctioning. Whether it’s the sensor itself or what it measures won’t be revealed by the scanner — that’s determined on the car.
       priceFrom: error reading — free
       duration: from 40 minutes
-      warranty: 12 months for the repair
       bodyHeading: What We Do in Diagnostics
       body: |-
         First we talk: when it started, under what conditions, what was changed previously. Some diagnoses can be made here: ‘knocking only when cold’ and ‘knocking constantly’ refer to different components.
@@ -460,7 +444,6 @@ translations:
       heroLead: Each engine has its own interval and oil specification. We check your car’s manual and do what it states, not the average ‘every ten thousand’.
       priceFrom: from 90 €
       duration: 2–4 hours
-      warranty: 12 months
       bodyHeading: Where the Interval for Your Car Comes From
       body: |-
         Replacement intervals differ significantly among engines, and conditions in Belgrade — traffic jams, dust, summers nearing forty degrees — often fall under ‘severe operating conditions’ with shortened intervals. We base our estimate on what your car actually needs at this mileage.
@@ -492,7 +475,6 @@ translations:
       heroLead: You can stretch the engine until it's due for service. You cannot do the same with brakes. Therefore, we are precise with suspension — if the resource is gone, we tell you directly.
       priceFrom: from 120 €
       duration: from 3 hours
-      warranty: 12 months
       bodyHeading: How We Do It
       body: |-
         We start with measurements: disc and pad thickness in millimeters, runout, condition of hoses and calipers. For the suspension — we check for play on the lift and on the vibration stand, inspecting bellows and mounts.
@@ -524,7 +506,6 @@ translations:
       heroLead: "Before disassembling anything, we check what's accessible outside: compression, oil pressure, error codes, leaks."
       priceFrom: based on diagnostics results
       duration: from 1 day
-      warranty: 12 months
       bodyHeading: How we work
       body: |
         First, we measure: cylinder compression, oil pressure, spark plug condition, block errors, pressure leaks. Only after that do we decide if we need to open the engine.
@@ -556,7 +537,6 @@ translations:
       heroLead: Good body repair is not visible to the eye or a thickness gauge during a pre-sale inspection.
       priceFrom: based on inspection results
       duration: from 3 days
-      warranty: 12 months on coating
       bodyHeading: What is included in restoration
       body: |
         First, we measure the body geometry: after an accident, misalignments can exist where everything looks fine, and they lead to uneven tire wear and steering issues. If necessary, we put it on a frame machine and align it according to control points.
@@ -588,7 +568,6 @@ translations:
       heroLead: Repainted panels, welding traces, odometer fraud, leaks underneath — these are visible in an hour on the lift, though not mentioned in the ad.
       priceFrom: from 60 €
       duration: about 1 hour
-      warranty: written report
       bodyHeading: What we check
       body: |
         Body — thickness measurement on all panels: repainted parts, body filler, welding traces, gap condition. Next, we check on the lift: suspension, leaks, exhaust condition, signs of bottom impacts.

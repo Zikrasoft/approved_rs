@@ -5,18 +5,16 @@ indexHeading: Четыре направления, в каждом — до ко
 indexLead: 'По каждой услуге ниже есть отдельная страница: что входит, сколько занимает, кому подходит и когда мы честно отговариваем.'
 specsPriceLabel: Цена
 specsDurationLabel: Срок
-specsWarrantyLabel: Гарантия
 paint-protection-film:
   name: Защитная плёнка (PPF)
   short: Прозрачная полиуретановая броня против камней, песка и щёток на мойке.
   metaTitle: Оклейка защитной плёнкой PPF в Белграде — Details
-  metaDescription: 'Оклейка кузова прозрачной защитной плёнкой в Белграде: перёд, полная оклейка, заворот кромок. Плёнки XPEL и SunTek. Гарантия до 10 лет от производителя.'
+  metaDescription: 'Оклейка кузова прозрачной защитной плёнкой в Белграде: перёд, полная оклейка, заворот кромок. Плёнки XPEL и SunTek.'
   heroEyebrow: Защита кузова
   heroTitle: Плёнка, которую не видно, и сколы, которых не будет
   heroLead: Полиуретан толщиной 190 микрон принимает на себя камни с трассы, песок и следы от щёток. Краска под ним остаётся заводской — а это то, что смотрят при продаже.
   priceFrom: от 690 € за перёд
   duration: 2–6 дней
-  warranty: до 10 лет от производителя
   bodyHeading: Что это даёт
   body: |
     Главная ценность плёнки — не «блеск», а сохранённая заводская краска. Перекрашенное крыло видно любым толщиномером, и на осмотре перед покупкой это сразу минус к цене. Плёнка держит удар вместо лака: мелкие царапины на ней затягиваются сами на солнце, глубокие остаются на плёнке, а не на кузове.
@@ -50,7 +48,6 @@ colour-change-wrap:
   heroLead: Плёнка меняет машину полностью, но остаётся обратимой. Через два года можно снять её и получить ту же краску, что была с завода, — чего не даст ни одна покраска.
   priceFrom: от 1 900 € за кузов
   duration: 4–7 дней
-  warranty: 3–5 лет на плёнку
   bodyHeading: Почему плёнка, а не покраска
   body: |
     Покраска — это навсегда и это запись в истории автомобиля. Плёнка — это решение на несколько лет, которое можно отменить. При продаже вы снимаете её и отдаёте машину в родном цвете, с родным лаком под ней.
@@ -84,7 +81,6 @@ polishing-ceramic:
   heroLead: Керамика поверх непрополированного лака просто консервирует паутинку на несколько лет. Мы сначала выводим дефекты, а покрытие кладём уже на готовую поверхность.
   priceFrom: от 450 € за автомобиль
   duration: 2–3 дня
-  warranty: 2–5 лет на покрытие
   bodyHeading: Как это устроено
   body: |
     Полировка — это снятие тончайшего слоя лака вместе с рисками. Слой не бесконечный, поэтому мы начинаем с толщиномера: замеряем каждую панель и считаем, сколько запаса есть. Если на крыше или крыльях лак уже тонкий — работаем мягче или не трогаем панель вовсе.
@@ -116,7 +112,6 @@ steering-wheel-restoration:
   heroLead: 'Руль изнашивается быстрее всего салона: пот, солнце и крем для рук вытирают краску за пару лет. Восстановление стоит несоизмеримо дешевле нового руля и выглядит как заводской.'
   priceFrom: от 150 €
   duration: 2–3 дня
-  warranty: 1 год
   bodyHeading: Что мы с ним делаем
   body: |
     Сначала снимаем руль целиком — аккуратно, с отключением аккумулятора и подушки безопасности. Дальше зависит от состояния: если кожа цела и вытерлась только краска, мы её очищаем, восстанавливаем фактуру и перекрашиваем составом, который не липнет и не пачкает руки. Если кожа порвана или прошивка разошлась — перетягиваем заново, с ручной прошивкой по оригинальному рисунку.
@@ -147,7 +142,6 @@ translations:
     indexLead: 'Svaka usluga ima svoju stranicu: šta uključuje, koliko traje, kome odgovara i kada se iskreno odričemo.'
     specsPriceLabel: Cena
     specsDurationLabel: Trajanje
-    specsWarrantyLabel: Garancija
     paint-protection-film:
       name: Zaštitna folija (PPF)
       short: Prozirna poliuretanska zaštita od kamenčića, peska i četki za pranje.
@@ -158,7 +152,6 @@ translations:
       heroLead: Poliuretan debljine 190 mikrona štiti od kamenčića na putu, peska i tragova od četki. Boja ispod joj ostaje fabrička — što je važno pri prodaji.
       priceFrom: od 690 € za prednju stranu
       duration: 2–6 dana
-      warranty: do 10 godina od proizvođača
       bodyHeading: Šta to donosi
       body: |-
         Glavna vrednost folije nije "sjaj", već sačuvana fabrička boja. Prefarbano krilo može se lako primetiti svakim meračem debljine, a na pregledu pre kupovine to odmah smanjuje cenu. Folija apsorbuje udarce umesto laka: male ogrebotine na njoj se same zatvaraju na suncu, dok duboke ostaju na foliji, a ne na karoseriji.
@@ -192,7 +185,6 @@ translations:
       heroLead: Folija menja automobil u potpunosti, ali ostaje obrnuta. Posle dve godine možete je skinuti i dobiti istu boju koja je bila sa fabrike, što nijedno farbanje ne može.
       priceFrom: od 1 900 € za karoseriju
       duration: 4–7 dana
-      warranty: 3–5 godina na foliju
       bodyHeading: Zašto folija, a ne farbanje
       body: |-
         Farbanje je za uvek i to ostavlja trag u istoriji automobila. Folija je rešenje na nekoliko godina koje možete povući. Prilikom prodaje skidate je i predajete automobil u izvornoj boji, sa izvorni lakom ispod.
@@ -226,7 +218,6 @@ translations:
       heroLead: Keramika preko nepoliranog laka samo konzervira paukovu mrežu na nekoliko godina. Prvo ispravljamo defekte, a premaz stavljamo na gotovu površinu.
       priceFrom: od 450 € za automobil
       duration: 2–3 dana
-      warranty: 2–5 godina na premaz
       bodyHeading: Kako to funkcioniše
       body: |-
         Poliranje je uklanjanje najtanjeg sloja laka zajedno sa ogrebotinama. Sloj nije beskonačan, zato počinjemo sa meračem debljine: merimo svaku panel i računamo koliko imamo viška. Ako je na krovu ili krilima lak već tanak — radimo pažljivije ili uopšte ne diramo panel.
@@ -258,7 +249,6 @@ translations:
       heroLead: 'Volan se najbrže troši od celog enterijera: znoj, sunce i krema za ruke brišu boju za par godina. Obnova košta nesrazmerno manje od novog volana i izgleda kao fabrički.'
       priceFrom: od 150 €
       duration: 2–3 dana
-      warranty: 1 godina
       bodyHeading: Šta mi radimo s njim
       body: |-
         Prvo skidamo volan potpuno — pažljivo, sa isključenim akumulatorom i vazdušnim jastuakom. Dalje zavisi od stanja: ako je koža netaknuta, a samo je farba oštećena, očistimo je, obnovimo teksturu i prefarbamo sastavom koji se ne lepi i ne prlja ruke. Ako je koža pocepana ili šav se razdvojio — presvlačimo ponovo, sa ručnom šavom po originalnom uzorku.
@@ -288,7 +278,6 @@ translations:
     indexLead: "Each service has its own page below: what's included, how long it takes, who it's suitable for, and when we honestly advise against it."
     specsPriceLabel: Price
     specsDurationLabel: Duration
-    specsWarrantyLabel: Warranty
     paint-protection-film:
       name: Paint Protection Film (PPF)
       short: Clear polyurethane shield against stones, sand, and car wash brushes.
@@ -299,7 +288,6 @@ translations:
       heroLead: 190 micron thick polyurethane absorbs stones from the road, sand, and brush marks. The paint beneath it remains factory-fresh—this matters when selling.
       priceFrom: from 690 € for front
       duration: 2–6 days
-      warranty: up to 10 years from the manufacturer
       bodyHeading: What It Provides
       body: |-
         The main value of the film is not the 'shine' but the preserved factory paint. Repainted fenders are detectable with any thickness gauge, and during a pre-purchase inspection, this immediately reduces the price. The film absorbs impacts instead of the clear coat: minor scratches heal in sunlight, while deep ones remain on the film, not the body.
@@ -333,7 +321,6 @@ translations:
       heroLead: The wrap transforms the car completely, yet it remains reversible. After two years, it can be removed, revealing the original factory paint—which no repaint can guarantee.
       priceFrom: from 1,900 € for the body
       duration: 4–7 days
-      warranty: 3–5 years on the film
       bodyHeading: Why Film Instead of Paint
       body: |-
         Painting is a permanent change and a part of the vehicle's history. A wrap is a temporary solution that can be reversed. When selling, you remove it and present the car in its original color, with its original paint underneath.
@@ -367,7 +354,6 @@ translations:
       heroLead: Ceramic coating over unpolished clear coat simply preserves swirls for years. We first address defects, then apply the coating on a prepared surface.
       priceFrom: from 450 € per vehicle
       duration: 2–3 days
-      warranty: 2–5 years on the coating
       bodyHeading: How It Works
       body: |-
         Polishing involves removing a very thin layer of clear coat along with the defects. This layer is not infinite, so we start with a thickness gauge: we measure each panel and calculate how much is left. If the clear coat is already thin on the roof or fenders, we work softer or may avoid the panel altogether.
@@ -399,7 +385,6 @@ translations:
       heroLead: 'The steering wheel wears out faster than any other part of the interior: sweat, sunlight, and hand cream wear away the finish within a few years. Restoration costs far less than a new steering wheel and looks factory-fresh.'
       priceFrom: from 150 €
       duration: 2–3 days
-      warranty: 1 year
       bodyHeading: What we do with it
       body: |-
         First, we carefully remove the steering wheel — disconnecting the battery and airbag. What comes next depends on the condition: if the leather is intact but the finish is worn, we clean it, restore the texture, and repaint with a compound that won’t stick or stain hands. If the leather is torn or the stitching has come undone, we reupholster it using hand stitching to match the original design.

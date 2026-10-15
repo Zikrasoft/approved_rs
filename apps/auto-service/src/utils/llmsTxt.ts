@@ -6,6 +6,7 @@ import { shopCatalog } from '@/lib/catalog';
 import { shopTypes } from '@/lib/shopPages';
 import { shopIndexed } from '@/utils/shopStatus';
 import { SERVICE_SLUGS } from '@/utils/services';
+import { PARTS_CATEGORY_SLUGS } from '@/utils/partsCatalog';
 import { localizedWork, publishedWorks } from '@/utils/works';
 import { PathBuilder } from '@/utils/paths';
 import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
@@ -66,7 +67,20 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
           note: services[slug].short,
         })),
       },
-      ...(await shopList(locale, site.nav.shop)),
+      {
+        heading: site.nav.parts,
+        index: {
+          label: pages.partsInquiry.heading,
+          href: url(PathBuilder.parts(locale)),
+          note: pages.partsInquiry.lead,
+        },
+        entries: PARTS_CATEGORY_SLUGS.map((slug) => ({
+          label: pages.partsInquiry.categories[slug].name,
+          href: url(PathBuilder.partsCategory(locale, slug)),
+          note: pages.partsInquiry.categories[slug].lead,
+        })),
+      },
+      ...(await shopList(locale, site.nav.parts)),
       {
         heading: site.nav.works,
         index: {

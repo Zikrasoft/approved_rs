@@ -176,6 +176,20 @@ describe('createLeadsRoute', () => {
     );
   });
 
+  it('folds a VIN/chassis number into the comment, labeled, ahead of it', async () => {
+    await POST(
+      makeCtx(
+        valid({ vin: 'WBAVB13506JH12345', comment: 'Нужны тормозные колодки' }),
+      ),
+    );
+    expect(notifyLead).toHaveBeenCalledWith(
+      expect.objectContaining({
+        comment: 'VIN: WBAVB13506JH12345\nНужны тормозные колодки',
+      }),
+      '[leads]',
+    );
+  });
+
   it('passes the comment through as the owner reads it', async () => {
     await POST(makeCtx(valid({ comment: 'BMW X5 2019, стучит спереди' })));
     expect(notifyLead).toHaveBeenCalledWith(

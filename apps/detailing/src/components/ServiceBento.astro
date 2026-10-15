@@ -28,8 +28,8 @@ const GLOWS: Record<string, string> = {
 };
 
 const specsOf = (slug: (typeof SERVICE_SLUGS)[number]) => [
+  { label: services.specsPriceLabel, value: services[slug].priceFrom },
   { label: services.specsDurationLabel, value: services[slug].duration },
-  { label: services.specsWarrantyLabel, value: services[slug].warranty },
 ];
 ---
 

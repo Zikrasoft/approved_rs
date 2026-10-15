@@ -114,6 +114,7 @@ const submissionObject = z
     service: z.array(z.union([serviceSlugSchema, z.literal('')])).default([]),
     // TODO: no form posts `car` since the CarLab field was folded into the comment; drop it once pre-deploy cached pages can no longer submit.
     car: optionalText(MAX_FIELD_LENGTH),
+    vin: optionalText(MAX_FIELD_LENGTH),
     comment: optionalText(MAX_COMMENT_LENGTH),
     country: optionalText(MAX_FIELD_LENGTH),
     source_url: sourceUrlSchema,
@@ -128,7 +129,8 @@ const submissionObject = z
   })
   .transform((value) => {
     const services = value.service.filter(Boolean).slice(0, MAX_SERVICES);
-    const comment = [value.car, value.comment].filter(Boolean).join('\n');
+    const vin = value.vin ? `VIN: ${value.vin}` : null;
+    const comment = [vin, value.car, value.comment].filter(Boolean).join('\n');
     return {
       name: value.name,
       contact: value.contact,

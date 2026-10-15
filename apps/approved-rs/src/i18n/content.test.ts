@@ -74,7 +74,7 @@ describe.each(SUPPORTED_LOCALES)('content for %s', (locale) => {
 describe('content ru faq', () => {
   it('returns the authored counts', () => {
     const faq = content('ru').faq;
-    expect(faq['vehicle-sourcing'].length).toBe(6);
+    expect(faq['vehicle-sourcing'].length).toBe(5);
     expect(faq['vehicle-import'].length).toBe(4);
     expect(faq['vehicle-buyback'].length).toBe(5);
     expect(faq['vehicle-inspection'].length).toBe(4);
