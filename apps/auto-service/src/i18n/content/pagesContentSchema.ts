@@ -4,6 +4,17 @@ const privacySectionSchema = z
   .object({ title: z.string(), text: z.string() })
   .strict();
 
+const partsCategorySchema = z
+  .object({
+    name: z.string(),
+    metaTitle: z.string(),
+    metaDescription: z.string(),
+    lead: z.string(),
+    itemsHeading: z.string(),
+    items: z.array(z.string()).min(1),
+  })
+  .strict();
+
 export const pagesContentSchema = z
   .object({
     works: z
@@ -89,6 +100,21 @@ export const pagesContentSchema = z
         steps: z
           .array(z.object({ heading: z.string(), body: z.string() }))
           .min(1),
+        categoriesHeading: z.string(),
+        categoriesLead: z.string(),
+        categoryCta: z.string(),
+        categories: z
+          .object({
+            'maintenance-consumables': partsCategorySchema,
+            brakes: partsCategorySchema,
+            suspension: partsCategorySchema,
+            'engine-parts': partsCategorySchema,
+            electrics: partsCategorySchema,
+            transmission: partsCategorySchema,
+            'body-parts': partsCategorySchema,
+            'tires-wheels': partsCategorySchema,
+          })
+          .strict(),
       })
       .strict(),
     bmw: z

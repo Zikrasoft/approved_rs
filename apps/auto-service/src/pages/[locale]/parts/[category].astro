@@ -1,0 +1,75 @@
+---
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import LeadForm from '@/components/LeadForm.astro';
+import { localeFrom } from '@/i18n/config';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import {
+  PARTS_CATEGORY_SLUGS,
+  type PartsCategorySlug,
+} from '@/utils/partsCatalog';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+import { content } from '@/i18n/content';
+
+export function getStaticPaths() {
+  return withLocales(
+    PARTS_CATEGORY_SLUGS.map((slug) => ({
+      params: { category: slug },
+      props: { slug },
+    })),
+  );
+}
+
+const { slug } = Astro.props as { slug: PartsCategorySlug };
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const partsInquiry = content(locale).pages.partsInquiry;
+const category = partsInquiry.categories[slug];
+---
+
+<Shell title={category.metaTitle} description={category.metaDescription}>
+  <PageHero
+    eyebrow={partsInquiry.eyebrow}
+    heading={category.name}
+    lead={category.lead}
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: PathBuilder.partsCategory(locale, slug), label: category.name },
+    ]}
+  />
+
+  <section class="wrap flex flex-col gap-6 py-band md:py-band-lg">
+    <div class="card flex flex-col gap-3 p-5 lg:max-w-xl">
+      <h2 class="text-base font-semibold text-ink">{category.itemsHeading}</h2>
+      <ul class="flex flex-col gap-2">
+        {
+          category.items.map((item) => (
+            <li class="flex gap-2.5 text-sm leading-relaxed text-ink-2">
+              <span
+                class="mt-2 h-1.5 w-1.5 shrink-0 bg-signal"
+                aria-hidden="true"
+              />
+              {item}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="card flex flex-col gap-4 p-5 sm:p-6 lg:max-w-xl">
+      <h2 class="text-block font-semibold">{partsInquiry.formHeading}</h2>
+      <LeadForm
+        service={VIN_INQUIRY_SERVICE}
+        vin={{
+          label: partsInquiry.vinLabel,
+          placeholder: partsInquiry.vinPlaceholder,
+        }}
+        comment={`${category.name}: `}
+        commentLabel={partsInquiry.commentLabel}
+        commentPlaceholder={partsInquiry.commentPlaceholder}
+        commentNote={partsInquiry.commentNote}
+        defaultChannel="whatsapp"
+      />
+    </div>
+  </section>
+</Shell>

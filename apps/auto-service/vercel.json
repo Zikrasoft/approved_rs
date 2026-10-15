@@ -21,13 +21,8 @@
       "permanent": true
     },
     {
-      "source": "/parts",
-      "destination": "/sr/parts/",
-      "permanent": true
-    },
-    {
-      "source": "/parts/",
-      "destination": "/sr/parts/",
+      "source": "/parts/:path*",
+      "destination": "/sr/parts/:path*",
       "permanent": true
     },
     {

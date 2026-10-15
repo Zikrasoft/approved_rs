@@ -4,6 +4,7 @@ import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
 import { localeFrom } from '@/i18n/config';
 import { localePaths, PathBuilder } from '@/utils/paths';
+import { PARTS_CATEGORY_SLUGS } from '@/utils/partsCatalog';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import { content } from '@/i18n/content';
 
@@ -15,6 +16,10 @@ const locale = localeFrom(Astro.url.pathname);
 const pages = content(locale).pages;
 const site = content(locale).site;
 const copy = pages.partsInquiry;
+const categories = PARTS_CATEGORY_SLUGS.map((slug) => ({
+  slug,
+  ...copy.categories[slug],
+}));
 ---
 
 <Shell title={copy.metaTitle} description={copy.metaDescription}>
@@ -40,6 +45,31 @@ const copy = pages.partsInquiry;
         commentNote={copy.commentNote}
         defaultChannel="whatsapp"
       />
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-1">
+        <h2 class="text-section">{copy.categoriesHeading}</h2>
+        <p class="max-w-2xl text-sm leading-relaxed text-muted">
+          {copy.categoriesLead}
+        </p>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          categories.map((category) => (
+            <a
+              href={PathBuilder.partsCategory(locale, category.slug)}
+              class="card flex flex-col gap-2 p-5 transition-colors duration-150 hover:border-ink"
+            >
+              <h3 class="text-base font-semibold text-ink">{category.name}</h3>
+              <p class="text-sm leading-relaxed text-ink-2">{category.lead}</p>
+              <span class="spec mt-auto text-xs text-signal-ink">
+                {copy.categoryCta} →
+              </span>
+            </a>
+          ))
+        }
+      </div>
     </div>
 
     <div class="card flex flex-col gap-3 p-5 lg:max-w-xl">
