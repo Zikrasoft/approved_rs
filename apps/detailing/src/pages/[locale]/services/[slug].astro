@@ -34,8 +34,8 @@ const related = publishedWorks(await getCollection('works'))
 const schema = servicePageSchema(service);
 
 const specs = [
+  { label: services.specsPriceLabel, value: service.priceFrom },
   { label: services.specsDurationLabel, value: service.duration },
-  { label: services.specsWarrantyLabel, value: service.warranty },
 ];
 ---
 
