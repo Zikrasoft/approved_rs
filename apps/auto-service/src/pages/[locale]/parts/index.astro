@@ -35,18 +35,6 @@ const categories = PARTS_CATEGORY_SLUGS.map((slug) => ({
       {copy.sourcingNote}
     </p>
 
-    <div class="card flex flex-col gap-4 p-5 sm:p-6 lg:max-w-xl">
-      <h2 class="text-block font-semibold">{copy.formHeading}</h2>
-      <LeadForm
-        service={VIN_INQUIRY_SERVICE}
-        vin={{ label: copy.vinLabel, placeholder: copy.vinPlaceholder }}
-        commentLabel={copy.commentLabel}
-        commentPlaceholder={copy.commentPlaceholder}
-        commentNote={copy.commentNote}
-        defaultChannel="whatsapp"
-      />
-    </div>
-
     <div class="flex flex-col gap-3">
       <div class="flex flex-col gap-1">
         <h2 class="text-section">{copy.categoriesHeading}</h2>
@@ -93,6 +81,18 @@ const categories = PARTS_CATEGORY_SLUGS.map((slug) => ({
           ))
         }
       </ol>
+    </div>
+
+    <div id="lead" class="card flex flex-col gap-4 p-5 sm:p-6 lg:max-w-xl">
+      <h2 class="text-block font-semibold">{copy.formHeading}</h2>
+      <LeadForm
+        service={VIN_INQUIRY_SERVICE}
+        vin={{ label: copy.vinLabel, placeholder: copy.vinPlaceholder }}
+        commentLabel={copy.commentLabel}
+        commentPlaceholder={copy.commentPlaceholder}
+        commentNote={copy.commentNote}
+        defaultChannel="whatsapp"
+      />
     </div>
   </section>
 </Shell>
