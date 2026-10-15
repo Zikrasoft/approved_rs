@@ -16,16 +16,8 @@ const pathname = Astro.url.pathname;
 
 const links = [
   { href: PathBuilder.services(locale), label: site.nav.services, attrs: {} },
+  { href: PathBuilder.parts(locale), label: site.nav.parts, attrs: {} },
   { href: PathBuilder.works(locale), label: site.nav.works, attrs: {} },
-  ...(shopBuilt()
-    ? [
-        {
-          href: PathBuilder.shop(locale),
-          label: site.nav.shop,
-          attrs: devOnly(),
-        },
-      ]
-    : []),
   {
     href: `${PathBuilder.home(locale)}#process`,
     label: site.nav.process,

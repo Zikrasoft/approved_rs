@@ -286,7 +286,10 @@ jobs:
 
   deploy-medusa:
     needs: [translate, verify, medusa-image]
+    # TODO: paused pending the shop rebuild, see docs/adr/0034-pause-medusa-deploy-pending-shop-rebuild.md.
+    # Remove the `false &&` once the new shop ships.
     if: >-
+      false &&
       needs.medusa-image.result == 'success' &&
       github.ref == 'refs/heads/main' &&
       contains(fromJSON(needs.verify.outputs.changed), 'medusa')

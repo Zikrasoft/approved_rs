@@ -66,7 +66,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
           note: services[slug].short,
         })),
       },
-      ...(await shopList(locale, site.nav.shop)),
+      ...(await shopList(locale, site.nav.parts)),
       {
         heading: site.nav.works,
         index: {
@@ -81,6 +81,11 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
     ],
     other: [
       { label: site.common.homeLabel, href: url(PathBuilder.home(locale)) },
+      {
+        label: pages.partsInquiry.heading,
+        href: url(PathBuilder.parts(locale)),
+        note: pages.partsInquiry.lead,
+      },
       { label: pages.bmw.heading, href: url(PathBuilder.bmw(locale)) },
       { label: site.nav.contact, href: url(PathBuilder.contact(locale)) },
       {

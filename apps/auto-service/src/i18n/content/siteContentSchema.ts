@@ -17,7 +17,7 @@ export const siteContentSchema = z
     nav: z
       .object({
         services: z.string(),
-        shop: z.string(),
+        parts: z.string(),
         works: z.string(),
         process: z.string(),
         about: z.string(),

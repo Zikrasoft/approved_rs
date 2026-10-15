@@ -21,6 +21,16 @@
       "permanent": true
     },
     {
+      "source": "/parts",
+      "destination": "/sr/parts/",
+      "permanent": true
+    },
+    {
+      "source": "/parts/",
+      "destination": "/sr/parts/",
+      "permanent": true
+    },
+    {
       "source": "/bmw",
       "destination": "/sr/bmw/",
       "permanent": true

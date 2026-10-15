@@ -16,6 +16,7 @@ const FORM_ONLY_SLUGS = [
   'vehicle-import-eu',
   'vehicle-import-china',
   'parts-order',
+  'vin-parts-inquiry',
 ];
 const LEGACY_SLUGS = ['auto-service-belgrade', 'detailing-belgrade'];
 const PARTNER_SLUGS = Object.values(PARTNER_SERVICE);

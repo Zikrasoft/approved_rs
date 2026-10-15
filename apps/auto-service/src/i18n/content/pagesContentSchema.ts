@@ -71,6 +71,26 @@ export const pagesContentSchema = z
         cta: z.string(),
       })
       .strict(),
+    partsInquiry: z
+      .object({
+        metaTitle: z.string(),
+        metaDescription: z.string(),
+        eyebrow: z.string(),
+        heading: z.string(),
+        lead: z.string(),
+        sourcingNote: z.string(),
+        formHeading: z.string(),
+        vinLabel: z.string(),
+        vinPlaceholder: z.string(),
+        commentLabel: z.string(),
+        commentPlaceholder: z.string(),
+        commentNote: z.string(),
+        stepsHeading: z.string(),
+        steps: z
+          .array(z.object({ heading: z.string(), body: z.string() }))
+          .min(1),
+      })
+      .strict(),
     bmw: z
       .object({
         metaTitle: z.string(),

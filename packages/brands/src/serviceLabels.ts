@@ -18,6 +18,7 @@ export const SERVICE_LABELS_RU = {
   'bodywork-painting': 'Кузов и покраска',
   'pre-purchase-inspection': 'Проверка перед покупкой',
   'parts-order': 'Заказ из магазина',
+  'vin-parts-inquiry': 'Подбор запчастей по VIN',
 
   'paint-protection-film': 'Защитная плёнка (PPF)',
   'colour-change-wrap': 'Смена цвета плёнкой',

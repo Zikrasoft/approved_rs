@@ -3,7 +3,11 @@ import { localeFrom } from '@/i18n/config';
 import Icon from './Icon.astro';
 import PhoneInput from './PhoneInput.astro';
 import { PathBuilder } from '@/utils/paths';
-import { SHOP_SERVICE, type ServiceSlug } from '@/utils/services';
+import {
+  SHOP_SERVICE,
+  VIN_INQUIRY_SERVICE,
+  type ServiceSlug,
+} from '@/utils/services';
 import {
   AD_SOURCE_FIELD,
   HONEYPOT_FIELD,
@@ -13,10 +17,14 @@ import {
 import { content } from '@/i18n/content';
 
 interface Props {
-  service?: ServiceSlug | typeof SHOP_SERVICE;
+  service?: ServiceSlug | typeof SHOP_SERVICE | typeof VIN_INQUIRY_SERVICE;
   compact?: boolean;
   comment?: string;
+  commentLabel?: string;
   commentPlaceholder?: string;
+  commentNote?: string;
+  vin?: { label: string; placeholder: string };
+  defaultChannel?: 'phone' | 'whatsapp' | 'viber' | 'telegram';
   class?: string;
 }
 
@@ -24,7 +32,11 @@ const {
   service,
   compact = false,
   comment = '',
+  commentLabel,
   commentPlaceholder,
+  commentNote,
+  vin,
+  defaultChannel = 'phone',
   class: className = '',
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
@@ -32,7 +44,7 @@ const site = content(locale).site;
 
 const uid = crypto.randomUUID().slice(0, 8);
 
-const channels = [
+const CHANNELS = [
   {
     value: 'phone',
     icon: 'phone',
@@ -43,6 +55,11 @@ const channels = [
   { value: 'viber', icon: 'viber', label: 'Viber', panel: 'phone' },
   { value: 'telegram', icon: 'telegram', label: 'Telegram', panel: 'telegram' },
 ] as const;
+
+const channels = [
+  CHANNELS.find((c) => c.value === defaultChannel)!,
+  ...CHANNELS.filter((c) => c.value !== defaultChannel),
+];
 
 const channelLabelId = `channel-${uid}`;
 const panelId = {
@@ -156,6 +173,22 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
       </div>
     </div>
 
+    {
+      vin && (
+        <label class="block">
+          <span class="field-label">{vin.label}</span>
+          <input
+            name="vin"
+            type="text"
+            required
+            autocomplete="off"
+            placeholder={vin.placeholder}
+            class="field"
+          />
+        </label>
+      )
+    }
+
     <label class="block">
       <span class="field-label">{site.form.nameLabel}</span>
       <input
@@ -170,13 +203,14 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     {service && <input type="hidden" name={SERVICE_FIELD} value={service} />}
 
     <label class="block">
-      <span class="field-label">{site.form.commentLabel}</span>
+      <span class="field-label">{commentLabel ?? site.form.commentLabel}</span>
       <textarea
         name="comment"
         rows={compact ? 2 : 3}
         placeholder={commentPlaceholder ?? site.form.commentPlaceholder}
         class="field resize-none">{comment}</textarea
       >
+      {commentNote && <p class="mt-1.5 text-xs text-muted">{commentNote}</p>}
     </label>
 
     <div class="lead-submit">
