@@ -1,10 +1,14 @@
 ---
+import { Image } from 'astro:assets';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
 import { localeFrom } from '@/i18n/config';
 import { localePaths, PathBuilder } from '@/utils/paths';
-import { PARTS_CATEGORY_SLUGS } from '@/utils/partsCatalog';
+import {
+  PARTS_CATEGORY_IMAGES,
+  PARTS_CATEGORY_SLUGS,
+} from '@/utils/partsCatalog';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import { content } from '@/i18n/content';
 
@@ -47,52 +51,68 @@ const categories = PARTS_CATEGORY_SLUGS.map((slug) => ({
           categories.map((category) => (
             <a
               href={PathBuilder.partsCategory(locale, category.slug)}
-              class="card flex flex-col gap-2 p-5 transition-colors duration-150 hover:border-ink"
+              class="card group flex flex-col overflow-hidden transition-colors duration-150 hover:border-ink"
             >
-              <h3 class="text-base font-semibold text-ink">{category.name}</h3>
-              <p class="text-sm leading-relaxed text-ink-2">{category.lead}</p>
-              <span class="spec mt-auto text-xs text-signal-ink">
-                {copy.categoryCta} →
-              </span>
+              <Image
+                src={PARTS_CATEGORY_IMAGES[category.slug]}
+                alt={category.name}
+                widths={[320, 480, 640]}
+                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, calc(100vw - 2.5rem)"
+                loading="lazy"
+                class="aspect-[4/3] w-full object-cover"
+              />
+              <div class="flex flex-1 flex-col gap-2 border-t border-line p-5">
+                <h3 class="text-base font-semibold text-ink">
+                  {category.name}
+                </h3>
+                <p class="text-sm leading-relaxed text-ink-2">
+                  {category.lead}
+                </p>
+                <span class="spec mt-auto pt-2 text-xs text-signal-ink">
+                  {copy.categoryCta} →
+                </span>
+              </div>
             </a>
           ))
         }
       </div>
     </div>
 
-    <div class="card flex flex-col gap-3 p-5 lg:max-w-xl">
-      <h2 class="text-base font-semibold text-ink">{copy.stepsHeading}</h2>
-      <ol class="flex flex-col gap-4">
-        {
-          copy.steps.map((step, i) => (
-            <li class="flex gap-3">
-              <span class="spec mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-shade text-xs">
-                {i + 1}
-              </span>
-              <div class="flex flex-col gap-0.5">
-                <span class="text-sm font-semibold text-ink">
-                  {step.heading}
+    <div class="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-start">
+      <div class="card flex flex-col gap-3 p-5">
+        <h2 class="text-base font-semibold text-ink">{copy.stepsHeading}</h2>
+        <ol class="flex flex-col gap-4">
+          {
+            copy.steps.map((step, i) => (
+              <li class="flex gap-3">
+                <span class="spec mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-shade text-xs">
+                  {i + 1}
                 </span>
-                <span class="text-sm leading-relaxed text-ink-2">
-                  {step.body}
-                </span>
-              </div>
-            </li>
-          ))
-        }
-      </ol>
-    </div>
+                <div class="flex flex-col gap-0.5">
+                  <span class="text-sm font-semibold text-ink">
+                    {step.heading}
+                  </span>
+                  <span class="text-sm leading-relaxed text-ink-2">
+                    {step.body}
+                  </span>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
 
-    <div id="lead" class="card flex flex-col gap-4 p-5 sm:p-6 lg:max-w-xl">
-      <h2 class="text-block font-semibold">{copy.formHeading}</h2>
-      <LeadForm
-        service={VIN_INQUIRY_SERVICE}
-        vin={{ label: copy.vinLabel, placeholder: copy.vinPlaceholder }}
-        commentLabel={copy.commentLabel}
-        commentPlaceholder={copy.commentPlaceholder}
-        commentNote={copy.commentNote}
-        defaultChannel="whatsapp"
-      />
+      <div id="lead" class="card flex flex-col gap-4 p-5 sm:p-6">
+        <h2 class="text-block font-semibold">{copy.formHeading}</h2>
+        <LeadForm
+          service={VIN_INQUIRY_SERVICE}
+          vin={{ label: copy.vinLabel, placeholder: copy.vinPlaceholder }}
+          commentLabel={copy.commentLabel}
+          commentPlaceholder={copy.commentPlaceholder}
+          commentNote={copy.commentNote}
+          defaultChannel="whatsapp"
+        />
+      </div>
     </div>
   </section>
 </Shell>
