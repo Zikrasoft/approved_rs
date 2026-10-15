@@ -84,16 +84,15 @@ translations:
       description: 'Autoservis u Beogradu: kompjuterska dijagnostika, planirano održavanje i zamena ulja, popravka suspenzije i kočnica, motor i menjač, karoserijski popravak posle udesa.'
     hero:
       heading: Prvo cena, potom popravka
-      lead: Čitanje grešaka besplatno, pisana procena pre početka radova, garancija 12 meseci. Kažemo šta treba raditi sada, a šta može da sačeka.
+      lead: Besplatno očitavanje grešaka, pisana procena pre početka radova. Govorimo šta treba učiniti odmah, a šta može sačekati.
       ctaPrimary: Zakazati servis
       ctaSecondary: Pogledati usluge
       badges:
         - Procena pre radova
-        - Garancija 12 meseci
         - Radimo sa osiguravajućim društvima
     trust:
-      - value: 12 meseci
-        label: garancija na radove i delove
+      - value: Pismena
+        label: procena pre svih radova
       - value: 1 dan
         label: uobičajeni rok za planirano održavanje
       - value: besplatno
@@ -147,13 +146,11 @@ translations:
       - q: Koliko košta dijagnostika?
         a: Prvi pregled i čitanje grešaka — besplatno. Plaćena je samo dublja dijagnostika, kada je potrebno rastavljanje sklopova ili postavljanje automobila na sto; o ceni vas unapred obaveštavamo.
       - q: Mogu li doći sa svojim delovima?
-        a: Moguće. U tom slučaju garancija važi samo za naš rad, a ne za deo — to je pošteno i funkcioniše u oba smera.
+        a: Može. U tom slučaju mi smo odgovorni samo za naš rad, a ne za deo - to je pošteno i funkcioniše u oba pravca.
       - q: Da li radite sa osiguravajućim društvima?
         a: Da, za karoserijske popravke. Pomoći ćemo da se dokumenti pripreme i procena odobri, a ako osiguranje ne pokriva sve — odmah ćemo reći koliko će ostati na vama.
       - q: Koliko brzo mogu doći na održavanje?
         a: Obično u roku od dva do tri radna dana, a za zamenu ulja ili akumulatora često možemo primiti istog dana. Pozovite — reći ćemo tačno.
-      - q: Da li dajete garanciju?
-        a: 'Dvadeset meseci na završene radove i na delove koje smo mi ugradili. Garancijski slučaj rešavamo bez rasprave: ako je to naša greška, ponovo radimo besplatno.'
       - q: Auto na stranim tablicama — da li je to problem?
         a: Nije. Za popravku dokumenta o registraciji nisu potrebni, dođite kako jeste.
     finalCta:
@@ -167,16 +164,15 @@ translations:
       description: 'Car service in Belgrade: computer diagnostics, scheduled maintenance and oil change, suspension and brake repair, engine and gearbox work, accident repair.'
     hero:
       heading: First the price, then the repair
-      lead: Error reading is free, written estimate before work starts, 12-month warranty. We tell you what needs immediate attention and what can wait.
+      lead: Free error diagnostics, a written estimate before any work begins. We’ll explain what needs immediate attention and what can wait.
       ctaPrimary: Schedule a service appointment
       ctaSecondary: View our services
       badges:
         - Estimate before work
-        - 12-month warranty
         - We work with insurance
     trust:
-      - value: 12 mo
-        label: warranty on work and parts
+      - value: Written
+        label: estimate before any work begins
       - value: 1 day
         label: standard time for scheduled maintenance
       - value: free
@@ -230,13 +226,11 @@ translations:
       - q: How much does diagnostics cost?
         a: Initial inspection and error reading are free. Only in-depth diagnostics, requiring disassembly or a stand, incurs a cost; we inform you of the price in advance.
       - q: Can I bring my own parts?
-        a: Yes. In this case, the warranty applies only to our work, not the part — it's fair and works both ways.
+        a: Yes, you can. In this case, we take responsibility only for our work, not the part—it's fair and works both ways.
       - q: Do you work with insurance companies?
         a: Yes, for body repair. We help prepare documents and agree on estimates, and if the insurance does not cover everything — we’ll let you know how much you’ll need to pay out of pocket.
       - q: How quickly can I get a maintenance appointment?
         a: Usually within two to three business days, and for an oil change or battery replacement, we often accommodate you the same day. Call us — we’ll tell you exactly.
-      - q: Do you provide a warranty?
-        a: 'Twelve months on the work performed and the parts we install. Warranty claims are resolved without disputes: if it’s our fault, we fix it for free.'
       - q: Is having a foreign-registered car a problem?
         a: No. Registration documents are not needed for repairs, just come as you are.
     finalCta:
@@ -244,4 +238,4 @@ translations:
       heading: Tell us about your car
       body: We’ll call you back during business hours to clarify details and schedule a time. If it’s urgent — just give us a call.
       cta: Submit a request
-translatedFrom: 62abbce4c863ad39
+translatedFrom: 2ceafb860b996b11

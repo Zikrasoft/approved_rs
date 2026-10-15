@@ -1157,7 +1157,7 @@ translations:
           points:
             - Sea freight is the main timeline, plan in months rather than weeks
             - 'European origin is not confirmed: EUR1 does not apply here, duty is higher'
-            - 'Warranty and spare parts: we check if the model is supported in the destination country'
+            - 'Service and parts: we check if the model is serviced in the destination country'
             - 'Electric vehicles: we verify charging connector compatibility with local networks'
       closing:
         eyebrow: Calculating your import
@@ -1844,7 +1844,7 @@ translations:
           points:
             - Pomorski teret — osnovni rok, planirajte u mesecima, a ne u nedeljama
             - 'Evropsko poreklo nije potvrđeno: EUR1 ovde ne važi, carina je viša'
-            - 'Garancija i delovi: proveravamo, da li se model podržava u odredišnoj zemlji'
+            - 'Servis i delovi: proveravamo da li se model održava u zemlji odredišta'
             - 'Električni automobili: proveravamo utikač za punjenje i kompatibilnost sa lokalnim mrežama'
       closing:
         eyebrow: Računamo dostavu
@@ -2531,7 +2531,7 @@ translations:
           points:
             - Flete marítimo — el principal tiempo, plánifíquelo en meses, no en semanas
             - 'El origen europeo no se confirma: EUR1 no se aplica aquí, el arancel es más alto'
-            - 'Garantía y repuestos: verificamos si el modelo se encuentra soportado en el país de destino'
+            - 'Servicio y repuestos: verificamos si el modelo se da servicio en el país de destino'
             - 'Coches eléctricos: verificamos el conector de carga y la compatibilidad con las redes locales'
       closing:
         eyebrow: Calculamos la importación
@@ -3218,7 +3218,7 @@ translations:
           points:
             - Seefracht - die Hauptfrist, planen Sie in Monaten, nicht in Wochen
             - 'Europäische Herkunft wird nicht bestätigt: EUR1 findet hier keine Anwendung, Zollgebühren sind höher'
-            - 'Garantie und Ersatzteile: Wir prüfen, ob das Modell im Bestimmungsland unterstützt wird'
+            - 'Service und Teile: Wir überprüfen, ob das Modell im Bestimmungsland gewartet wird'
             - 'Elektrofahrzeuge: Wir vergleichen die Ladebuchsen und die Kompatibilität mit den lokalen Netzen'
       closing:
         eyebrow: Wir berechnen die Lieferung
@@ -3510,4 +3510,4 @@ translations:
           label: Überprüfung
         - slug: vehicle-import
           label: Anlieferung
-translatedFrom: ca746bc584b8b6c0
+translatedFrom: bfd0c7cb13803e15

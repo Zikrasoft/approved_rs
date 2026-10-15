@@ -77,6 +77,7 @@ translations:
   sr:
     nav:
       services: Usluge
+      parts: Delovi
       works: Primeri radova
       process: Kako radimo
       about: O servisu
@@ -151,6 +152,7 @@ translations:
   en:
     nav:
       services: Services
+      parts: Parts
       works: Work Examples
       process: How We Work
       about: About Us
@@ -222,4 +224,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: d982e2180dbcbc2d
+translatedFrom: 9ea40dae44828940
