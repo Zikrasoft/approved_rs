@@ -183,8 +183,8 @@ translations:
           label: godina s folijom i keramikom
         - value: 100%
           label: svojih slika, bez stockova
-        - value: 10 godina
-          label: garancija na foliju
+        - value: '1'
+          label: majstor za auto, bez čekanja
     marquee:
       - Zaštitna folija
       - Promena boje
@@ -292,7 +292,6 @@ translations:
             - Šablon po vašoj karoseriji, bez šavova na vidnim mestima
             - Preklapanje ivica gde je to moguće
             - Sloj samovraćanja
-            - Garancija proizvođača do 10 godina
         - name: Poliranje i keramika
           price: od 450 €
           unit: po automobilu
@@ -352,8 +351,8 @@ translations:
           label: years with film and ceramic
         - value: 100%
           label: our own photos, no stock images
-        - value: 10 years
-          label: warranty on film
+        - value: '1'
+          label: car expert, no waiting
     marquee:
       - Protective film
       - Color change
@@ -461,7 +460,6 @@ translations:
             - Custom fit for your body, no seams in visible areas
             - Edge wrapping where possible
             - Self-healing layer
-            - Manufacturer warranty up to 10 years
         - name: Polishing and ceramic
           price: from €450
           unit: per vehicle
@@ -504,4 +502,4 @@ translations:
       heading: Show us your car — it's easier from there
       body: Come in for an inspection or send us photos via messenger. We'll let you know honestly what needs to be done and what can wait.
       cta: Submit your request
-translatedFrom: ff3e7d5268efd554
+translatedFrom: 29209b1a404471e0

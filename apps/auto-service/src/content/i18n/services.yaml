@@ -197,7 +197,7 @@ pre-purchase-inspection:
 translations:
   sr:
     indexMetaTitle: 'Usluge autoservisa u Beogradu: popravka i TO — CarLab'
-    indexMetaDescription: Dijagnostika, TO i zamena ulja, kočnice i suspenzija, motor i menjač, karambolski popravak, provera pre kupovine. Cene, rokovi, garancija.
+    indexMetaDescription: Dijagnostika, redovno servisiranje i zamena ulja, kočnice i amortizacija, motor i menjač, popravka karoserije nakon nesreće, provera pre kupovine. Cene i rokovi.
     indexEyebrow: Usluge
     indexHeading: Sve što je vašem automobilu potrebno na jednom mestu
     indexLead: Svaka usluga ima svoju stranicu — šta uključuje, koliko traje, kada je vreme da dođete kod nas i kada iskreno govorimo da nije potrebno raditi ništa.
@@ -272,7 +272,7 @@ translations:
       name: Kočnice i suspenzija
       short: Sve što utiče na to da li će automobil stati ili ne.
       metaTitle: Popravka kočnica i suspenzije u Beogradu — CarLab
-      metaDescription: 'Kočnice i suspenzija u Beogradu: pločice, diskovi, čeljusti, poluge, podešavanje oslanjanja. Merenja u milimetrima, troškovnik pre rada, garancija 12 meseci.'
+      metaDescription: 'Kočnice i amortizacija u Beogradu: kočione obloge, diskovi, čeljusti, ramena, geometrija. Merenja u milimetrima, procena pre radova.'
       heroEyebrow: Hodna
       heroTitle: Ovde se resurs meri u milimetrima
       heroLead: 'Motor se može izdržati do servisa. Kočnice — ne. Zato po hodnoj ne zaokružujemo i ne produžavamo: kada je resurs istekao, govorimo otvoreno.'
@@ -303,7 +303,7 @@ translations:
       name: Motor i menjač
       short: Od zamene zaptivača do popravke sa razmontiranjem — uz jasan troškovnik.
       metaTitle: Popravka motora i menjača u Beogradu — CarLab
-      metaDescription: 'Popravka motora i menjača u Beogradu: GTR, pakne, kvačilo, zamena ulja u automatskoj transmisiji. Dijagnostika pre rasklapanja, procena pre radova, garancija 12 meseci.'
+      metaDescription: 'Popravka motora i menjača u Beogradu: zupčasti remen, dihtunzi, kvačilo, zamena ulja u automatskoj transmisiji. Dijagnostika pre rasklapanja, procena pre radova.'
       heroEyebrow: Pogon
       heroTitle: Kapitalna popravka nije potrebna tako često kao što se misli
       heroLead: 'Pre nego što nešto rasklopimo, proveravamo sve što se može proveriti spolja: kompresiju, pritisak ulja, greške, curenje.'
@@ -391,10 +391,10 @@ translations:
         - Auto je dovezen iz inostranstva, istorija nepoznata
         - Cena sumnjivo niža od tržišne
       honestHeading: Šta provera ne garantuje
-      honest: Iskreno ćemo reći šta vidimo, ali provera ne zamenjuje garanciju. Skriveni kvar koji se ne pokazuje ni na dizalici, ni na dijagnostici, može se kasnije pojaviti — to je ograničenje metode, a ne izuzetak sitnim slovima.
+      honest: Mi ćemo iskreno reći šta vidimo, ali nijedna proba ne otkriva sve. Skriveni kvar koji se ne manifestuje ni na dizalici, ni tokom dijagnostike, može se pojaviti kasnije - to je ograničenje metode, a ne sitna slova.
   en:
     indexMetaTitle: 'Car Services in Belgrade: Repair and Maintenance - CarLab'
-    indexMetaDescription: Diagnostics, maintenance and oil changes, brakes and suspension, engine and gearbox, accident repair, pre-purchase inspection. Prices, duration, warranty.
+    indexMetaDescription: Diagnostics, servicing and oil change, brakes and suspension, engine and gearbox, accident repair, pre-purchase inspection. Prices and timelines.
     indexEyebrow: Services
     indexHeading: Everything your car needs, in one service
     indexLead: Each service has its own page — what’s included, how long it takes, signs you need to visit us, and when we honestly say it’s not necessary.
@@ -469,7 +469,7 @@ translations:
       name: Brakes and Suspension
       short: Everything responsible for whether the car stops or not.
       metaTitle: Brake and Suspension Repair in Belgrade - CarLab
-      metaDescription: 'Brake and suspension work in Belgrade: pads, discs, calipers, arms, wheel alignment. Measurements in millimeters, estimate prior to work, 12 months warranty.'
+      metaDescription: 'Brakes and suspension in Belgrade: pads, discs, calipers, arms, alignment. Measurements in millimeters, estimate before work.'
       heroEyebrow: Chassis
       heroTitle: Resource is measured in millimeters here
       heroLead: You can stretch the engine until it's due for service. You cannot do the same with brakes. Therefore, we are precise with suspension — if the resource is gone, we tell you directly.
@@ -500,7 +500,7 @@ translations:
       name: Engine and Gearbox
       short: From gasket replacement to overhaul — with a clear estimate.
       metaTitle: Engine and Transmission Repair in Belgrade - CarLab
-      metaDescription: 'Engine and gearbox repair in Belgrade: timing belts, gaskets, clutches, automatic transmission oil changes. Diagnostics before disassembly, estimate before work, 12-month warranty.'
+      metaDescription: 'Engine and gearbox repair in Belgrade: timing belt, gaskets, clutch, oil change in automatic transmission. Diagnostics before disassembly, estimate before work.'
       heroEyebrow: Powertrain
       heroTitle: Major repairs aren't needed as often as people think
       heroLead: "Before disassembling anything, we check what's accessible outside: compression, oil pressure, error codes, leaks."
@@ -588,5 +588,5 @@ translations:
         - Car imported from abroad, unknown history
         - Price suspiciously below market
       honestHeading: Limitations of the inspection
-      honest: We will honestly tell you what we see, but the inspection does not replace a warranty. Hidden defects that don’t surface on the lift or diagnostics may emerge later — that’s a limitation of the method, not a fine-print disclaimer.
-translatedFrom: d3f350e87d1bbab0
+      honest: We will honestly tell you what we see, but no inspection catches everything. A hidden defect that does not show on the lift or during diagnostics may arise later - this is a limitation of the method, not fine print.
+translatedFrom: efcf68ce268daae0

@@ -59,8 +59,6 @@ translations:
         a: Yes, we continue the search at no extra charge until we find something that fits your needs.
       - q: Do I need to go see the car myself?
         a: No, it's not necessary—we can handle the entire transaction without your presence. If you want to come and see it yourself, that’s fine too.
-      - q: What warranty do you offer on the found vehicle?
-        a: 'There’s no formal manufacturer warranty like with a new car—this is the used car market. Your protection comes from an independent technical inspection before purchase: an expert examines the car, not you doing it blindly.'
       - q: Do you provide photo or video reports on the car before a decision?
         a: Yes, we provide a complete report with photos of the car before you make a purchasing decision.
       - q: Is there compensation if the deadlines are missed due to your fault?
@@ -114,8 +112,6 @@ translations:
         a: Da, nastavljamo potragu bez dodatne naplate, dok ne nađemo ono što vam odgovara.
       - q: Da li je potrebno da sami odete da pogledate automobil?
         a: Ne, nije obavezno - možemo obaviti celu transakciju bez vašeg prisustva. Ako želite da dođete i pogledate sami - takođe nema problema.
-      - q: Kakva je garancija na pronađeni automobil?
-        a: "Formalna garancija proizvođača, kao na nov automobil, ne postoji - ovo je sekundarno tržište. Vaša zaštita je nezavisna tehnička provera pre kupovine: automobil pregleda stručnjak, a ne vi 'na slepo'."
       - q: Dajete li foto ili video izveštaj o automobilu pre donošenja odluke?
         a: Da, potpuno izveštaj sa fotografijama o automobilu - pre nego što donesete odluku o kupovini.
       - q: Postoji li naknada ako su rokovi probijeni vašom krivicom?
@@ -169,8 +165,6 @@ translations:
         a: Sí, continuamos la búsqueda sin coste adicional hasta que encontremos lo que le conviene.
       - q: ¿Es necesario ir a ver el coche personalmente?
         a: No, no es obligatorio. Podemos llevar a cabo toda la transacción sin su presencia. Si desea venir a verlo, no hay problema.
-      - q: ¿Qué garantía hay para el coche encontrado?
-        a: "No hay garantía formal del fabricante como en un coche nuevo, ya que es un mercado secundario. Su protección es una verificación técnica independiente antes de la compra: un experto revisa el coche, no usted 'a ciegas'."
       - q: ¿Proporcionan un informe fotográfico o en video del coche antes de tomar una decisión?
         a: Sí, proporcionamos un informe completo con fotos del coche antes de que tome su decisión de compra.
       - q: ¿Hay compensación si los plazos se rompen por su culpa?
@@ -224,8 +218,6 @@ translations:
         a: Ja, wir suchen weiterhin ohne zusätzliche Gebühren, bis wir das passende Fahrzeug für Sie finden.
       - q: Muss man selbst zum Auto fahren, um es anzusehen?
         a: Nein, das ist nicht erforderlich - wir können den gesamten Deal ohne Ihr persönliches Erscheinen abwickeln. Wenn Sie selbst kommen möchten, ist das auch kein Problem.
-      - q: Welche Garantie gibt es für das gefundene Fahrzeug?
-        a: 'Es gibt keine formelle Herstellergarantie wie bei einem Neuwagen - es handelt sich um den Gebrauchtwagenmarkt. Ihr Schutz ist die unabhängige technische Überprüfung vor dem Kauf: das Auto wird von einem Experten und nicht von Ihnen „blind“ inspiziert.'
       - q: Gibt es einen Foto- oder Videobericht zum Auto vor der Kaufentscheidung?
         a: Ja, Sie erhalten einen vollständigen Bericht mit Fotos des Autos, bevor Sie eine Kaufentscheidung treffen.
       - q: Gibt es eine Entschädigung, wenn die Fristen durch Ihr Verschulden überschritten werden?
@@ -271,4 +263,4 @@ translations:
     cityExpert:
       q: Gibt es in jeder Stadt einen festgelegten Experten?
       a: In verschiedenen Städten arbeiten unterschiedliche Spezialisten von uns; in einigen Fällen reist ein Experte in eine benachbarte Stadt der Region.
-translatedFrom: 4d8387bc4738a100
+translatedFrom: f0cd611eedad0451

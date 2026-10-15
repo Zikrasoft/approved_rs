@@ -286,6 +286,133 @@ translations:
       heading: Ova stranica ne postoji
       body: Moguće je da je link zastareo ili da ima grešku u adresi. Pogledajte naše usluge ili nam pišite - pomoći ćemo vam.
       cta: Na početak
+    partsInquiry:
+      metaTitle: Odabir delova po VIN u Beogradu - CarLab
+      metaDescription: Pošaljite VIN ili broj šasije, odabraćemo delove za vaš auto i kontaktiraćemo vas. Dostavljamo iz Srbije i Evrope.
+      eyebrow: Odabir delova
+      heading: Naći ćemo potrebne delove za vaš auto
+      lead: Bavimo se prodajom i nabavkom auto delova. Pošaljite nam VIN ili broj šasije, odabraćemo odgovarajuće delove i ponuditi najbolje opcije.
+      sourcingNote: Dostavljamo delove iz Srbije i Evrope.
+      formHeading: Ostavite zahtev
+      vinLabel: VIN ili broj šasije
+      vinPlaceholder: Unesite VIN ili broj šasije
+      commentLabel: Koji delovi su potrebni? (nije obavezno)
+      commentPlaceholder: Napišite, šta vam treba, ako znate
+      commentNote: Nije obavezno znati tačan naziv dela, kontaktiraćemo vas i zajednički ćemo utvrditi šta je potrebno.
+      stepsHeading: Kako to funkcioniše
+      steps:
+        - heading: Pošaljite VIN ili broj šasije
+          body: Navedite VIN ili broj šasije i kontakt podatke.
+        - heading: Odabir odgovarajućih delova
+          body: Tražimo delove koji se tačno uklapaju u vaš auto.
+        - heading: Kontaktiramo vas
+          body: Pozvaćemo ili napisati i ponuditi najbolje opcije.
+      categoriesHeading: Koje delove odabiremo
+      categoriesLead: Približan spisak delova sa kojima radimo. Niste našli potrebnu kategoriju? Pišite nam svakako, naći ćemo i to.
+      categoryCta: Poručiti
+      categories:
+        maintenance-consumables:
+          name: Servis i potrošni materijal
+          metaTitle: Filteri, ulja i potrošni materijal za servis - CarLab
+          metaDescription: Filteri za ulje, vazduh, kabinu i gorivo, motorno ulje, antifriz, kočiona tečnost, brisači. Odabir po VIN za BMW, Mercedes-Benz i druge marke.
+          lead: Sve za redovan servis, od filtera do tehničkih tečnosti. Odabir precizno po vašem VIN, uključujući BMW, Mercedes-Benz i druge evropske marke.
+          itemsHeading: Šta obično naručuju
+          items:
+            - Filter za ulje
+            - Filter za vazduh
+            - Filter za kabinu
+            - Filter za gorivo
+            - Motorno ulje
+            - Transmisiono ulje
+            - Kočiona tečnost
+            - Antifriz
+            - Sveće
+            - Brisači
+        brakes:
+          name: Kočioni sistem
+          metaTitle: Kočione obloge, diskovi i čeljusti - CarLab
+          metaDescription: Odabir kočionih obloga, diskova, čeljusti i creva po VIN vašeg automobila.
+          lead: Obloge, diskovi i sve što ide uz njih. Odabir tačno po modelu i godini proizvodnje.
+          itemsHeading: Šta obično naručuju
+          items:
+            - Kočione obloge
+            - Kočioni diskovi
+            - Čeljusti
+            - Kočiona creva
+            - Senzori trošenja obloga
+        suspension:
+          name: Oprema i upravljanje
+          metaTitle: Amortizeri, poluge, silentbloki - CarLab
+          metaDescription: Odabir amortizera, stabilizatorskih šipki, poluga i upravljačkih zakovica po VIN.
+          lead: Od udara u suspenziji do zamene upravljačkih zakovica. Odabir dela za vaš auto.
+          itemsHeading: Šta obično naručuju
+          items:
+            - Amortizeri
+            - Stabilizatorske šipke
+            - Poluge suspenzije
+            - Silentbloki
+            - Upravljačke zakovice
+            - Olovke amortizera
+        engine-parts:
+          name: Motor
+          metaTitle: Gasketi, remeni, brizgaljke - CarLab
+          metaDescription: Odabir delova za motor po VIN, gasketi, remeni i lanci, pumpa, brizgaljke, turbine.
+          lead: Delovi za popravku i održavanje motora, od gasketi do turbine.
+          itemsHeading: Šta obično naručuju
+          items:
+            - Gasket glave
+            - Remen i rolnice
+            - Lanac
+            - Pumpa za hlađenje
+            - Brizgaljke
+            - Turbina
+        electrics:
+          name: Elektrika
+          metaTitle: Akumulatori, generatori, starteri - CarLab
+          metaDescription: Odabir akumulatora, generatora, startera, sveća za paljenje i senzora po VIN.
+          lead: Elektrika automobila, od akumulatora do senzora. Odabir dela koje tačno odgovara.
+          itemsHeading: Šta obično naručuju
+          items:
+            - Akumulator
+            - Generator
+            - Starter
+            - Sveće za paljenje
+            - Senzori (ABS, položaj radilice itd.)
+        transmission:
+          name: Transmisija i pogonski sklopovi
+          metaTitle: Kvačilo, Joint, kardani - CarLab
+          metaDescription: Odabir kompleta kvačila, Joint, panti i ležajeva po VIN.
+          lead: Delovi transmisije i pogonskih sklopova, od kvačila do ležajeva.
+          itemsHeading: Šta obično naručuju
+          items:
+            - Komplet kvačila
+            - Joint
+            - Panti
+            - Kardan
+            - Ležajevi
+        body-parts:
+          name: Karoserijski delovi
+          metaTitle: Branik, fara, ogledala, radijatori - CarLab
+          metaDescription: Odabir branika, fara, ogledala, radijatora i stakla po VIN vašeg automobila.
+          lead: Karoserijski delovi posle sudara ili jednostavno za zamenu. Odabir po VIN, da se tačno uklopi.
+          itemsHeading: Šta obično naručuju
+          items:
+            - Branik
+            - Fare i svetla
+            - Ogledala
+            - Radijatori
+            - Stakla
+        tires-wheels:
+          name: Gume i točkovi
+          metaTitle: Letnje i zimske gume, točkovi - CarLab
+          metaDescription: Odabir letnjih i zimskih guma, aluminijumskih felni i poklopaca prema veličini i VIN-u vašeg automobila.
+          lead: Gume i felne po veličini i sezoni. Pronaći ćemo opcije prema vašem budžetu.
+          itemsHeading: Šta obično naručuju
+          items:
+            - Letnje gume
+            - Zimske gume
+            - Aluminijumske felne
+            - Poklopci
     bmw:
       metaTitle: Popravka i servis BMW u Beogradu - CarLab
       metaDescription: Dijagnostika i popravka BMW na originalnoj opremi ISTA. Znam tipične probleme sa motorom i godinom proizvodnje, ne nagađam odakle početi.
@@ -375,6 +502,133 @@ translations:
       heading: This Page Does Not Exist
       body: The link may be outdated or there was a typo in the address. Check the services or message us — we will assist.
       cta: Go to Home
+    partsInquiry:
+      metaTitle: Finding Auto Parts by VIN in Belgrade - CarLab
+      metaDescription: Send us your VIN or chassis number, and we will find the suitable parts for your vehicle and get in touch. We source from Serbia and Europe.
+      eyebrow: Parts Selection
+      heading: We’ll find the right parts for your car
+      lead: We specialize in the sale and supply of auto parts. Send us your VIN or chassis number, and we'll find the right components for your vehicle and offer the best options.
+      sourcingNote: We source parts from both Serbia and Europe.
+      formHeading: Submit a Request
+      vinLabel: VIN or Chassis Number
+      vinPlaceholder: Enter VIN or chassis number
+      commentLabel: What parts do you need? (optional)
+      commentPlaceholder: Let us know what you need, if you know
+      commentNote: You don't need to know the exact name of the part, we will contact you and clarify what is needed.
+      stepsHeading: How It Works
+      steps:
+        - heading: Send VIN or chassis number
+          body: Provide the VIN or chassis number and your contact information.
+        - heading: Finding suitable parts
+          body: We will look for parts that perfectly match your vehicle.
+        - heading: We will contact you
+          body: We will call or message you with the best options.
+      categoriesHeading: What parts do we source
+      categoriesLead: Here’s a general list of what we work with. Can't find the needed category? Reach out to us, and we'll help.
+      categoryCta: Order
+      categories:
+        maintenance-consumables:
+          name: Maintenance and Consumables
+          metaTitle: Filters, Oils and Consumables for Maintenance - CarLab
+          metaDescription: Oil, air, cabin, and fuel filters, engine oil, antifreeze, brake fluid, windshield wipers. VIN selection for BMW, Mercedes-Benz and other brands.
+          lead: Everything for scheduled maintenance, from filters to fluids. We select specifically for your VIN, including for BMW, Mercedes-Benz and other European brands.
+          itemsHeading: Commonly Ordered Parts
+          items:
+            - Oil Filter
+            - Air Filter
+            - Cabin Filter
+            - Fuel Filter
+            - Engine Oil
+            - Transmission Oil
+            - Brake Fluid
+            - Antifreeze
+            - Spark Plugs
+            - Windshield Wipers
+        brakes:
+          name: Braking System
+          metaTitle: Brake Pads, Discs and Calipers - CarLab
+          metaDescription: Source brake pads, discs, calipers, and hoses according to your vehicle's VIN.
+          lead: Pads, discs, and everything related to brakes. We find parts specifically for the model and year.
+          itemsHeading: Commonly Ordered Parts
+          items:
+            - Brake Pads
+            - Brake Discs
+            - Calipers
+            - Brake Hoses
+            - Wear Sensors
+        suspension:
+          name: Suspension and Steering
+          metaTitle: Shock Absorbers, Arms, Bushings - CarLab
+          metaDescription: Source shock absorbers, stabilizer links, suspension arms, and tie rod ends by VIN.
+          lead: From knocking in the suspension to replacing tie rod ends. We'll find the right part for your vehicle.
+          itemsHeading: Commonly Ordered Parts
+          items:
+            - Shock Absorbers
+            - Stabilizer Links
+            - Suspension Arms
+            - Bushings
+            - Tie Rod Ends
+            - Shock Absorber Boots
+        engine-parts:
+          name: Engine
+          metaTitle: Gaskets, Timing Belts, Injectors - CarLab
+          metaDescription: Source engine parts by VIN, gaskets, timing belts and chains, pumps, injectors, turbos.
+          lead: Parts for engine repair and maintenance, from gaskets to turbos.
+          itemsHeading: Commonly Ordered Parts
+          items:
+            - Head Gasket
+            - Timing Belt and Pulleys
+            - Timing Chain
+            - Cooling Pump
+            - Injectors
+            - Turbocharger
+        electrics:
+          name: Electrics
+          metaTitle: Batteries, Alternators, Starters - CarLab
+          metaDescription: Source batteries, alternators, starters, ignition coils, and sensors by VIN.
+          lead: Car electrics, from batteries to sensors. We’ll find the part that fits perfectly.
+          itemsHeading: Commonly Ordered Parts
+          items:
+            - Akumulator
+            - Alternator
+            - Starter
+            - Ignition Coils
+            - Sensors (ABS, crankshaft position, etc.)
+        transmission:
+          name: Transmission and Drives
+          metaTitle: Clutch, CV Joints, Driveshaft - CarLab
+          metaDescription: Source clutch kits, CV joints, boots, and hub bearings by VIN.
+          lead: Transmission and drive parts, from clutches to hub bearings.
+          itemsHeading: Commonly Ordered Parts
+          items:
+            - Clutch Kit
+            - CV Joints
+            - CV Joint Boots
+            - Driveshaft
+            - Hub Bearings
+        body-parts:
+          name: Body Parts
+          metaTitle: Bumpers, Headlights, Mirrors, Radiators - CarLab
+          metaDescription: Source bumpers, headlights, mirrors, radiators, and glass according to your vehicle's VIN.
+          lead: Body parts after an accident or simply for replacement. We’ll find them by VIN to ensure a perfect fit.
+          itemsHeading: Commonly Ordered Parts
+          items:
+            - Bumpers
+            - Headlights and Taillights
+            - Mirrors
+            - Radiators
+            - Glass
+        tires-wheels:
+          name: Tires and Wheels
+          metaTitle: Summer and Winter Tires, Wheels - CarLab
+          metaDescription: Selection of summer and winter tires, alloy wheels, and hubcaps by size and VIN of your vehicle.
+          lead: Tires and wheels tailored to size and season. We’ll find options that fit your budget.
+          itemsHeading: Commonly Ordered Parts
+          items:
+            - Summer tires
+            - Winter tires
+            - Alloy wheels
+            - Hubcaps
     bmw:
       metaTitle: BMW Repair and Maintenance in Belgrade - CarLab
       metaDescription: Diagnostics and repair of BMW using original ISTA equipment. We know the typical issues based on engine and model year, so no guessing on where to start.
@@ -392,4 +646,4 @@ translations:
       ctaHeading: Describe the Issue with Your Car
       ctaBody: 'Model, year, engine, and any concerns: we will provide preliminary guidance on where to start and the estimated diagnostics cost.'
       ctaCommentPlaceholder: Model, year, and concerns
-translatedFrom: f9dd71fab992ccc2
+translatedFrom: 50ca46e9e24ae209
