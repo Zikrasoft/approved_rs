@@ -1,0 +1,17 @@
+**/node_modules
+**/dist
+**/.medusa
+**/.turbo
+**/.astro
+**/.vercel
+**/coverage
+**/.env
+**/.env.*
+.git
+.claude
+.superpowers
+.playwright-mcp
+graphify-out
+.local
+docs
+infra

@@ -1,0 +1,131 @@
+name: parts-backend
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: '5'
+
+services:
+  postgres:
+    image: postgres:16.15-alpine
+    restart: unless-stopped
+    logging: *logging
+    mem_limit: 512m
+    security_opt: ['no-new-privileges:true']
+    networks: [data]
+    environment:
+      POSTGRES_USER: partsshop
+      POSTGRES_DB: partsshop
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'pg_isready',
+          '-h',
+          '127.0.0.1',
+          '-U',
+          'partsshop',
+          '-d',
+          'partsshop',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.55.0
+    restart: unless-stopped
+    logging: *logging
+    mem_limit: 768m
+    security_opt: ['no-new-privileges:true']
+    networks: [data]
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:?}
+      MEILI_ENV: production
+      MEILI_NO_ANALYTICS: 'true'
+    volumes:
+      - meilidata:/meili_data
+    healthcheck:
+      test:
+        ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1:7700/health']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  parts-backend:
+    image: ${PARTS_BACKEND_IMAGE:-ghcr.io/zikrasoft/podbor-parts-backend}:${PARTS_BACKEND_TAG:?}
+    restart: unless-stopped
+    logging: *logging
+    mem_limit: 384m
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    networks: [data, edge]
+    env_file: [.env]
+    environment:
+      DATABASE_URL: postgres://partsshop:${POSTGRES_PASSWORD:?}@postgres:5432/partsshop
+      MEILI_URL: http://meilisearch:7700
+    depends_on:
+      postgres:
+        condition: service_healthy
+        restart: true
+      meilisearch:
+        condition: service_healthy
+        restart: true
+
+  caddy:
+    image: caddy:2.11.4-alpine
+    restart: unless-stopped
+    logging: *logging
+    mem_limit: 128m
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    security_opt: ['no-new-privileges:true']
+    networks: [edge]
+    environment:
+      API_HOST: ${API_HOST:-parts.carlab.rs}
+    ports:
+      - '${HTTP_PORT:-80}:80'
+      - '${HTTPS_PORT:-443}:443'
+      - '${HTTPS_PORT:-443}:443/udp'
+    depends_on:
+      parts-backend:
+        condition: service_started
+    volumes:
+      - ./caddy:/etc/caddy:ro
+      - caddydata:/data
+      - caddyconfig:/config
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'wget',
+          '-q',
+          '-O',
+          '/dev/null',
+          'http://127.0.0.1:2019/config/',
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+
+networks:
+  data:
+    internal: true
+  edge:
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: fd00:ca7:2ab::/64
+
+volumes:
+  pgdata:
+  meilidata:
+  caddydata:
+  caddyconfig:
