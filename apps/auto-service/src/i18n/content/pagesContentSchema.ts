@@ -112,7 +112,6 @@ export const pagesContentSchema = z
             electrics: partsCategorySchema,
             transmission: partsCategorySchema,
             'body-parts': partsCategorySchema,
-            'tires-wheels': partsCategorySchema,
           })
           .strict(),
       })
