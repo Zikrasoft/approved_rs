@@ -35,3 +35,7 @@ _Avoid_: Purchase (ambiguous with CarLab's own purchase from a Supplier), Cart (
 **Admin** _(in this effort's context)_:
 The staff user of the new catalog/order web panel. Distinct from the existing Telegram lead-crm bot's owner/manager persona, which stays scoped to leads and contact clicks only.
 _Avoid_: Operator (used elsewhere in this repo for the Medusa shop's staff — that shop is being deleted).
+
+**Location**:
+A physical CarLab auto-service site a customer can pick an Order up from, and where CarLab's own stock physically sits. There is one today; a second is a real but distant possibility with no timeline. Order and the CarLab Supplier's own stock each carry a Location from the start — a column kept at a single value for now rather than added later by migration — but nothing else (Admin scoping, per-Location views) is built ahead of a second Location actually existing. An external Supplier's own branch network (Inter Cars RS has several, by the stock research) is that Supplier's internal concern, not modeled here — CarLab reads one summarized price/availability answer from a Supplier, never asks which of their branches it came from.
+_Avoid_: Branch (used here for a Supplier's own internal warehouse network, e.g. Inter Cars RS's — keep the two distinct: a Supplier has Branches CarLab never models; CarLab has Locations).
