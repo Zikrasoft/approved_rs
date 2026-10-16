@@ -281,7 +281,7 @@ translations:
       eyebrow: Izbor dijelova
       heading: Naći ćemo potrebne dijelove za vašu mašinu
       lead: Bavimo se prodajom i isporukom autodijelova. Pošaljite nam VIN ili broj šasije, naći ćemo ispravne dijelove za vaš automobil i ponuditi najbolje opcije.
-      sourcingNote: Dostavljamo dijelove i iz Srbije i iz Evrope.
+      sourcingNote: Imamo rezervne delove i u Srbiji i u Evropi.
       formHeading: Ostavite zahtjev
       vinLabel: VIN ili broj šasije
       vinPlaceholder: Unesite VIN ili broj šasije
@@ -486,7 +486,7 @@ translations:
       eyebrow: Parts Selection
       heading: We’ll find the right parts for your car
       lead: We sell and supply auto parts. Send us your VIN or chassis number, and we’ll find suitable parts for your vehicle and provide the best options.
-      sourcingNote: We import parts from both Serbia and Europe.
+      sourcingNote: We have spare parts available both in Serbia and Europe.
       formHeading: Submit Request
       vinLabel: VIN or chassis number
       vinPlaceholder: Enter VIN or chassis number
@@ -613,4 +613,4 @@ translations:
       ctaHeading: Describe the Issue with Your Car
       ctaBody: 'Model, year, engine, and any concerns: we will provide preliminary guidance on where to start and the estimated diagnostics cost.'
       ctaCommentPlaceholder: Model, year, and concerns
-translatedFrom: 50ca46e9e24ae209
+translatedFrom: c0f55e172ad46844
