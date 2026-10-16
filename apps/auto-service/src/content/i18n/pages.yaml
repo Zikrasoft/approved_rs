@@ -39,7 +39,7 @@ partsInquiry:
   eyebrow: Подбор запчастей
   heading: Найдем нужные запчасти для вашей машины
   lead: Занимаемся продажей и поставкой автозапчастей. Пришлите нам VIN или номер шасси, подберем подходящие детали для вашего автомобиля и предложим лучшие варианты.
-  sourcingNote: Привозим запчасти как из Сербии, так и из Европы.
+  sourcingNote: У нас есть запасные части как в Сербии, так и в Европе.
   formHeading: Оставить заявку
   vinLabel: VIN или номер шасси
   vinPlaceholder: Введите VIN или номер шасси
@@ -149,17 +149,6 @@ partsInquiry:
         - Зеркала
         - Радиаторы
         - Стекла
-    tires-wheels:
-      name: Шины и диски
-      metaTitle: Летние и зимние шины, диски - CarLab
-      metaDescription: Подбор летних и зимних шин, литых дисков и колпаков по размеру и VIN вашего автомобиля.
-      lead: Шины и диски под размер и сезон. Подберем варианты под ваш бюджет.
-      itemsHeading: Что обычно заказывают
-      items:
-        - Летние шины
-        - Зимние шины
-        - Литые диски
-        - Колпаки
 thanks:
   metaTitle: Заявка принята — CarLab
   metaDescription: Спасибо за заявку. Перезвоним в рабочее время и согласуем время визита.
@@ -292,7 +281,7 @@ translations:
       eyebrow: Izbor dijelova
       heading: Naći ćemo potrebne dijelove za vašu mašinu
       lead: Bavimo se prodajom i isporukom autodijelova. Pošaljite nam VIN ili broj šasije, naći ćemo ispravne dijelove za vaš automobil i ponuditi najbolje opcije.
-      sourcingNote: Dostavljamo dijelove i iz Srbije i iz Evrope.
+      sourcingNote: Imamo rezervne delove i u Srbiji i u Evropi.
       formHeading: Ostavite zahtjev
       vinLabel: VIN ili broj šasije
       vinPlaceholder: Unesite VIN ili broj šasije
@@ -402,17 +391,6 @@ translations:
             - Ogledala
             - Radijatori
             - Stakla
-        tires-wheels:
-          name: Gume i točkovi
-          metaTitle: Letnje i zimske gume, točkovi - CarLab
-          metaDescription: Odabir letnjih i zimskih guma, aluminijumskih felni i kapica po dimenzijama i VIN broju vašeg automobila.
-          lead: Gume i felne prema dimenzijama i sezoni. Pronaći ćemo opcije prema vašem budžetu.
-          itemsHeading: Šta se obično poručuje
-          items:
-            - Letnje gume
-            - Zimske gume
-            - Aluminijumske felne
-            - Kapice
     bmw:
       metaTitle: Popravka i servis BMW u Beogradu - CarLab
       metaDescription: Dijagnostika i popravka BMW na originalnoj opremi ISTA. Znam tipične probleme sa motorom i godinom proizvodnje, ne nagađam odakle početi.
@@ -508,7 +486,7 @@ translations:
       eyebrow: Parts Selection
       heading: We’ll find the right parts for your car
       lead: We sell and supply auto parts. Send us your VIN or chassis number, and we’ll find suitable parts for your vehicle and provide the best options.
-      sourcingNote: We import parts from both Serbia and Europe.
+      sourcingNote: We have spare parts available both in Serbia and Europe.
       formHeading: Submit Request
       vinLabel: VIN or chassis number
       vinPlaceholder: Enter VIN or chassis number
@@ -618,17 +596,6 @@ translations:
             - Mirrors
             - Radiators
             - Glasses
-        tires-wheels:
-          name: Tires and Wheels
-          metaTitle: Summer and winter tires, rims - CarLab
-          metaDescription: Selection of summer and winter tires, alloy wheels, and hubcaps by size and VIN of your vehicle.
-          lead: Tires and wheels for the size and season. We'll find options that fit your budget.
-          itemsHeading: What’s commonly ordered
-          items:
-            - Summer tires
-            - Winter tires
-            - Alloy wheels
-            - Hubcaps
     bmw:
       metaTitle: BMW Repair and Maintenance in Belgrade - CarLab
       metaDescription: Diagnostics and repair of BMW using original ISTA equipment. We know the typical issues based on engine and model year, so no guessing on where to start.
@@ -646,4 +613,4 @@ translations:
       ctaHeading: Describe the Issue with Your Car
       ctaBody: 'Model, year, engine, and any concerns: we will provide preliminary guidance on where to start and the estimated diagnostics cost.'
       ctaCommentPlaceholder: Model, year, and concerns
-translatedFrom: 50ca46e9e24ae209
+translatedFrom: c0f55e172ad46844
