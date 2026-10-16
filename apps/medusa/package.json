@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "seed": "medusa exec ./src/scripts/seed-base.ts",
     "seed:batteries": "medusa exec ./src/scripts/seed-batteries.ts",
-    "test": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --coverage --coverageProvider=v8 --silent --runInBand --forceExit --passWithNoTests",
+    "test": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --coverage --coverageProvider=v8 --coverageReporters=text --silent --forceExit --passWithNoTests",
     "test:integration:http": "TEST_TYPE=integration:http NODE_OPTIONS=\"--experimental-vm-modules --max-old-space-size=4096\" jest --silent=false --maxWorkers=2 --forceExit"
   },
   "dependencies": {

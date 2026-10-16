@@ -94,6 +94,25 @@ describe('recordBotApi', () => {
     expect(await after.json()).toEqual({ ok: true, result: true });
   });
 
+  it('restarts message and topic ids on reset, so a test never sees ids an earlier one used', async () => {
+    const api = recordBotApi();
+    const call = (method: string) =>
+      api
+        .fetch(`https://api.telegram.org/botT/${method}`, {
+          body: JSON.stringify({ chat_id: 5 }),
+        })
+        .then((res) => res.json());
+    await call('sendMessage');
+    await call('createForumTopic');
+    api.reset();
+    expect(await call('sendMessage')).toMatchObject({
+      result: { message_id: 1000 },
+    });
+    expect(await call('createForumTopic')).toMatchObject({
+      result: { message_thread_id: 1 },
+    });
+  });
+
   it('answers a numeric chat id sent as a string with a number, as Telegram does', async () => {
     const api = recordBotApi();
     const send = (chatId: string) =>

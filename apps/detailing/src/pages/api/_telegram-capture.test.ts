@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { WORKSHOP_ADDRESS } from '@podbor/brands';
 import { formatPhone } from '@podbor/site-kit/format-phone';
 import { LEADS_PATH } from '@podbor/lead-crm';
@@ -131,6 +131,11 @@ function tap(data: string) {
   });
 }
 
+beforeEach(() => {
+  api.reset();
+  memory.storages.get(LEADS_PATH)?.seed([]);
+});
+
 describe('the Details capture bot', () => {
   it('opens a service card from the services content, in Serbian', async () => {
     await start('polishing-ceramic_sr');
@@ -173,7 +178,6 @@ describe('the Details capture bot', () => {
   });
 
   it('sends the workshop venue, then hours, phone and site', async () => {
-    api.reset();
     await tap('contacts:sr');
 
     expect(api.callsTo('sendVenue', '1002:test-capture-bot-token')).toEqual([
@@ -273,7 +277,6 @@ describe('the Details Questionnaire', () => {
 
   it('opens the services step with the card already ticked', async () => {
     const words = content('ru').captureBot;
-    api.reset();
 
     await answer('/start');
     await press('request:ru:polishing-ceramic');

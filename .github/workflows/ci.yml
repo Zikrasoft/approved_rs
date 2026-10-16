@@ -26,6 +26,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-pnpm
+      - uses: actions/cache@v4
+        with:
+          path: .turbo/cache
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-turbo-
+      - run: find .turbo/cache -type f -mtime +7 -delete 2>/dev/null || true
       - run: pnpm lint
       - run: pnpm exec prettier --check .
       - run: node --experimental-strip-types .github/scripts/yaml-content-valid.ts
@@ -144,6 +150,12 @@ jobs:
           ref: ${{ needs.translate.outputs.sha }}
           fetch-depth: 0
       - uses: ./.github/actions/setup-pnpm
+      - uses: actions/cache@v4
+        with:
+          path: .turbo/cache
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-turbo-
+      - run: find .turbo/cache -type f -mtime +7 -delete 2>/dev/null || true
       - run: pnpm test
 
       - id: scope

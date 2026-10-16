@@ -1688,7 +1688,7 @@ describe('POST /api/telegram-webhook', () => {
     });
   });
 
-  describe('a ledger file that does not parse', () => {
+  describe('a ledger file that does not parse', { shuffle: false }, () => {
     const CORRUPT = { operations: 'oops' };
 
     beforeEach(() => {

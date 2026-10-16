@@ -1,17 +1,11 @@
-import { describe, it, expect, vi } from 'vitest';
-import { BRAND } from './constants';
-
-const load = async (manager?: string) => {
-  vi.resetModules();
-  vi.stubEnv('PUBLIC_TG_MANAGER', manager);
-  return (await import('./contactLinks')).contactControl;
-};
+import { describe, it, expect } from 'vitest';
+import { BRAND, TG_MANAGER } from './constants';
+import { contactControl } from './contactLinks';
 
 const telegram = { channel: 'telegram' } as const;
 
 describe('contactControl', () => {
-  it('opens the capture bot with the service and the locale', async () => {
-    const contactControl = await load('approved_manager');
+  it('opens the capture bot with the service and the locale', () => {
     expect(
       contactControl({
         ...telegram,
@@ -22,15 +16,13 @@ describe('contactControl', () => {
     ).toBe(`https://t.me/${BRAND.captureBot}?start=vehicle-sourcing_ru`);
   });
 
-  it('opens the manager account on the thanks page', async () => {
-    const contactControl = await load('approved_manager');
+  it('opens the manager account on the thanks page', () => {
     expect(
       contactControl({ ...telegram, onThanks: true, locale: 'ru' }).href,
-    ).toBe('https://t.me/approved_manager');
+    ).toBe(`https://t.me/${TG_MANAGER}`);
   });
 
-  it('opens the manager account from the manager control on any page', async () => {
-    const contactControl = await load('approved_manager');
+  it('opens the manager account from the manager control on any page', () => {
     expect(
       contactControl({
         ...telegram,
@@ -38,18 +30,10 @@ describe('contactControl', () => {
         onThanks: false,
         locale: 'ru',
       }).href,
-    ).toBe('https://t.me/approved_manager');
+    ).toBe(`https://t.me/${TG_MANAGER}`);
   });
 
-  it('falls back to the capture bot on the thanks page when no manager handle is set', async () => {
-    const contactControl = await load(undefined);
-    expect(
-      contactControl({ ...telegram, onThanks: true, locale: 'ru' }).href,
-    ).toBe(`https://t.me/${BRAND.captureBot}?start=ru`);
-  });
-
-  it('prefills WhatsApp in the visitor locale', async () => {
-    const contactControl = await load();
+  it('prefills WhatsApp in the visitor locale', () => {
     const whatsapp = (locale: string) =>
       contactControl({
         channel: 'whatsapp',

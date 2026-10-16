@@ -9,6 +9,7 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
+    isolate: false,
     include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'],
     env: {
       PUBLIC_WHATSAPP_NUMBER: '381677702100',

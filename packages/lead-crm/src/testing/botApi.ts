@@ -115,6 +115,8 @@ export function recordBotApi() {
     reset() {
       calls.length = 0;
       responders.clear();
+      nextMessageId = 1000;
+      nextThreadId = 1;
     },
   };
 }
