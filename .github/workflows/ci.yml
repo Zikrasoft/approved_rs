@@ -52,9 +52,12 @@ jobs:
       - run: sh .github/scripts/catalog-stale.test.sh
       - run: sh infra/medusa/test/scripts.test.sh
       - run: sh infra/medusa/test/compose.test.sh
+      - run: sh infra/parts-backend/test/scripts.test.sh
+      - run: sh infra/parts-backend/test/compose.test.sh
       - run: >-
           docker run --rm -v "$PWD:/repo" -w /repo --entrypoint shellcheck "$ACTIONLINT_IMAGE"
           .github/scripts/*.sh infra/medusa/*.sh infra/medusa/test/*.sh
+          infra/parts-backend/*.sh infra/parts-backend/test/*.sh
       - run: docker run --rm -v "$PWD:/repo" -w /repo "$ACTIONLINT_IMAGE" -color
 
   medusa-integration:
