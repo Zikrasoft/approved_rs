@@ -134,6 +134,11 @@ function tap(data: string) {
   });
 }
 
+beforeEach(() => {
+  api.reset();
+  memory.storages.get(LEADS_PATH)?.seed([]);
+});
+
 describe('the CarLab capture bot', () => {
   it('opens a service card from the services content, in Serbian', async () => {
     await start('diagnostics_sr');
@@ -176,7 +181,6 @@ describe('the CarLab capture bot', () => {
   });
 
   it('sends the workshop venue, then hours, phone and site', async () => {
-    api.reset();
     await tap('contacts:sr');
 
     expect(api.callsTo('sendVenue', '1002:test-capture-bot-token')).toEqual([

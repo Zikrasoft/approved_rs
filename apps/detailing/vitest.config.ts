@@ -9,6 +9,7 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
+    isolate: false,
     include: ['src/**/*.test.ts'],
     env: {
       PUBLIC_PHONE_NUMBER: '381677210533',

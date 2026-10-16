@@ -3,7 +3,9 @@ export const prerender = false;
 import type { APIContext } from 'astro';
 import { Composer, type Context } from 'grammy';
 import { z } from 'zod';
-import { parse, isValid, format } from 'date-fns';
+import { format } from 'date-fns/format';
+import { isValid } from 'date-fns/isValid';
+import { parse } from 'date-fns/parse';
 import { START_COMMAND } from '@podbor/site-kit/contact-links';
 import { secretMatches } from '@/lib/verifySecret';
 import {

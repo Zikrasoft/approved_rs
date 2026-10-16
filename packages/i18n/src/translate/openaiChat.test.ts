@@ -54,7 +54,7 @@ describe('callOpenAiJson', () => {
       vi
         .fn()
         .mockImplementation(async () =>
-          jsonResponse({ error: { message: 'boom' } }, 500),
+          jsonResponse({ error: { message: 'boom' } }, 400),
         ),
     );
     await expect(

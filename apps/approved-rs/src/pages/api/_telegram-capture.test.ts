@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { formatPhone } from '@podbor/site-kit/format-phone';
 import { LEADS_PATH } from '@podbor/lead-crm';
 import { recordBotApi, type MemoryStorage } from '@podbor/lead-crm/testing';
@@ -130,6 +130,11 @@ function tap(data: string) {
   });
 }
 
+beforeEach(() => {
+  api.reset();
+  memory.storages.get(LEADS_PATH)?.seed([]);
+});
+
 describe('the Approved capture bot', () => {
   it('opens a service hub card from the services content, in Serbian', async () => {
     await start('vehicle-import_sr');
@@ -173,7 +178,6 @@ describe('the Approved capture bot', () => {
   });
 
   it('sends hours, phone and site with no venue', async () => {
-    api.reset();
     await tap('contacts:sr');
 
     expect(api.callsTo('sendVenue', '1002:test-capture-bot-token')).toEqual([]);
