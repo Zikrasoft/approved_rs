@@ -34,7 +34,6 @@ describe('isUnlocalized', () => {
     '/_image?href=x',
     '/robots.txt',
     '/llms.txt',
-    '/catalog-version.txt',
     '/404',
     '/sitemap-index.xml',
   ])('leaves %s alone', (pathname) => {

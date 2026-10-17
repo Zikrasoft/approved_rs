@@ -46,11 +46,6 @@ process:
       text: Присылаем список работ и запчастей с ценами. Работы начинаются только после вашего подтверждения.
     - title: Работа и выдача
       text: Делаем, проверяем на ходу, отдаём машину со старыми деталями и записью в сервисной карте.
-shopTeaser:
-  eyebrow: Запчасти
-  heading: Аккумуляторы в наличии, с установкой за 20 минут
-  body: Подбираем по марке, модели и году — не по «примерно такой же». Ставим на месте, старый забираем на утилизацию.
-  cta: Подобрать аккумулятор
 accident:
   eyebrow: После ДТП
   heading: Кузовной ремонт и покраска
@@ -127,11 +122,6 @@ translations:
           text: Šaljemo listu radova i delova sa cenama. Radovi počinju tek nakon vašeg odobrenja.
         - title: Rad i predaja
           text: Radimo, proveravamo u vožnji, predajemo auto sa starim delovima i zapisom u servisnoj karti.
-    shopTeaser:
-      eyebrow: Delovi
-      heading: Akumulatori na skladištu, sa ugradnjom za 20 minuta
-      body: Biramo po marki, modelu i godini — ne po 'približno sličnom'. Postavljamo na licu mesta, stari uzimamo na reciklažu.
-      cta: Odabrati akumulator
     accident:
       eyebrow: Posle udesa
       heading: Karoserijski popravak i farbanje
@@ -207,11 +197,6 @@ translations:
           text: We send a list of work and parts with prices. Work starts only after your approval.
         - title: Work and handover
           text: We perform the work, check on the move, return your car with the old parts and a service record.
-    shopTeaser:
-      eyebrow: Parts
-      heading: Batteries in stock, installed in 20 minutes
-      body: We match by make, model, and year — not by 'something similar'. We install it on-site and take the old one for recycling.
-      cta: Find a battery
     accident:
       eyebrow: After an accident
       heading: Body repair and painting
@@ -238,4 +223,4 @@ translations:
       heading: Tell us about your car
       body: We’ll call you back during business hours to clarify details and schedule a time. If it’s urgent — just give us a call.
       cta: Submit a request
-translatedFrom: 2ceafb860b996b11
+translatedFrom: 11291e46f93e0d9c

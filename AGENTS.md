@@ -11,15 +11,12 @@ pnpm workspace + Turborepo. Apps live in `apps/*`, shared packages in `packages/
 ```
 apps/approved-rs/     Approved.rs, the approved.rs site (Astro) — most of this document describes it
 apps/detailing/       Details, the detailing studio site — details.rs
-apps/auto-service/    CarLab, the car service site + parts shop — carlab.rs
-apps/medusa/          CarLab shop backend — Medusa 2.19, CommonJS, api.carlab.rs
-infra/medusa/         CarLab shop production: image, compose (postgres, redis, medusa, caddy), host scripts — one Hetzner VPS
+apps/auto-service/    CarLab, the car service site — carlab.rs
 packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click routes
 packages/lead-capture/ the capture bots' webhook route: the /start dialog that turns a Telegram tap into a Lead
 packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
 packages/site-kit/    brand-agnostic mechanics, never anything visual
 packages/brands/      the three brands: domains, names, locale mapping, service labels, the shared address
-packages/shop-catalog/ CarLab shop machinery (dual ESM/CJS, because Medusa consumes it)
 ```
 
 A package's contents are an `ls` away and go stale in a document, so this lists
@@ -51,10 +48,8 @@ button, `data-error-telegram` / `data-error-phone` / `data-error-consent` /
 `aria-busy`, which the apps' spinner CSS keys on.
 
 Each of the three sites owns its own `astro.config.mjs`, `keystatic.config.ts`,
-`vercel.json` and `vitest.config.ts`; every workspace app, `apps/medusa`
-included, has its own `tsconfig.json` and `.env*` (`apps/medusa` uses jest
-instead of vitest and is not a Vercel deploy, so it has neither `vercel.json`
-nor `vitest.config.ts`). Lint/format configs and the
+`vercel.json`, `vitest.config.ts` and `tsconfig.json`, and its own `.env*`.
+Lint/format configs and the
 lockfile stay at the repo root and cover every workspace. The root
 `vercel.json` holds `git.deploymentEnabled: false` — without it every branch
 push triggers a failing preview build. **The same block is now duplicated into
@@ -106,10 +101,7 @@ to approved.rs itself.
 **A `packages/*` change deploys all three sites, and that is the point.** The
 deploy filter in `ci.yml` is `turbo --filter="...[<deployed tag>]"` — the
 leading dots pull in the dependents of a changed package, so touching
-`@podbor/lead-crm` or `@podbor/i18n` marks all three sites stale at once
-(`@podbor/i18n`, `@podbor/brands` and `@podbor/shop-catalog` also mark
-`apps/medusa` stale; its `deploy-medusa` job ships it in the same run, before
-all three sites, and a failed medusa deploy holds all three back). All
+`@podbor/lead-crm` or `@podbor/i18n` marks all three sites stale at once. All
 three write the same `data/leads.json` blob, so shipping a changed package to
 one site and not the others puts two versions of the lead schema on one file:
 one site writes records another cannot parse, and they land in
@@ -198,25 +190,22 @@ Approved's trust/verification semantics.
   because two sites must not resemble each other, but because a shared token
   makes every brand's look a change to one file, and each brand owns its own.
 - Client-side imports go through a narrow subpath export
-  (`@podbor/lead-crm/contact-channel`, `@podbor/site-kit/browser`,
-  `@podbor/shop-catalog/browser`), never the package root: the root barrel
-  pulls zod, date-fns and the Telegram client into the browser bundle.
-- **A package Medusa consumes ships a CommonJS build behind a `require`
-  condition.** `apps/medusa` is CommonJS and cannot load the `.ts` sources the
-  other workspaces import. `packages/shop-catalog` (`.`, `./browser`,
-  `./order-hook`), `packages/brands` and `@podbor/i18n`'s `./translate/core` and
-  `./section` export `{ "require": dist/cjs…, "default": src/….ts }`, build with
+  (`@podbor/lead-crm/contact-channel`, `@podbor/site-kit/browser`), never the
+  package root: the root barrel pulls zod, date-fns and the Telegram client
+  into the browser bundle.
+- **A package built for a CommonJS consumer ships a CommonJS build behind a
+  `require` condition.** `packages/brands` and `@podbor/i18n`'s
+  `./translate/core` and `./section` export
+  `{ "require": dist/cjs…, "default": src/….ts }`, build with
   `tsc -p tsconfig.cjs.json` (`module: CommonJS`, `rewriteRelativeImportExtensions`)
   and stamp `dist/cjs/package.json` with `{"type":"commonjs"}`. Their `test` task
   depends on their own `build` in `turbo.json`, and a `cjs.test.ts` `require()`s
   the result — so run such a package's tests through turbo
   (`pnpm turbo run test --filter=<package>`); a bare `pnpm --filter <package> test`
-  finds no `dist/`.
-- **Two slug helpers on purpose.** Medusa product handles use
-  `apps/medusa/src/lib/translit.ts` (slugify, Russian transliteration:
-  `Аккумулятор тест` → `akkumulyator-test`); storefront landing slugs use
-  `landingSlug` in `@podbor/shop-catalog` (ASCII-folds spec values such as
-  `5W-30` or `60 Ah`). Different inputs, different jobs — do not merge them.
+  finds no `dist/`. This predates
+  [ADR-0036](docs/adr/0036-delete-the-old-medusa-shop-entirely.md) (it existed
+  for the now-deleted `apps/medusa`, a CommonJS app) and is kept: any future
+  CommonJS consumer, Medusa or otherwise, needs the same shape.
 - **A helper a lazily-loaded path depends on must live in a module that imports
   nothing heavy.** Rollup cannot code-split a module that is also statically
   imported, so putting such a helper beside a static `libphonenumber-js` import
@@ -260,8 +249,8 @@ Both new apps follow the same shape, and a third should too:
   shorter form converts better, and a lead is answerable without a name. The
   same reasoning removed the service picker from the brand forms. What posts a
   slug now is the page, through a hidden `SERVICE_FIELD` input: the service
-  pages, CarLab's cart (`parts-order`) and Details' work pages
-  (`servicesApplied[0]`). Everywhere else — the modal, the contact page, the
+  pages, CarLab's VIN-inquiry parts pages (`vin-parts-inquiry`) and Details'
+  work pages (`servicesApplied[0]`). Everywhere else — the modal, the contact page, the
   homepage forms — a lead carries no service **by design**, and the owner
   card renders `—` for it with the visited page on the `Страница:` line. A
   contact click renders `Клик: <канал>` instead: the click has a channel worth
@@ -435,18 +424,6 @@ pnpm --filter @podbor/approved-rs exec vitest run path/to/file.test.ts   # singl
 pnpm --filter @podbor/approved-rs exec vitest run -t "name substring"    # single test by name
 ```
 
-**The shop funnel walk is local-only and never a CI job.** `pnpm --filter
-@podbor/auto-service funnel` drives a browser through card → cart → checkout
-against a local Medusa and then reads the Leads and Order markers the system
-wrote; it needs the whole backend up and the env exported first. Prerequisites,
-assertions and what the layer cannot prove are in
-`apps/auto-service/funnel/README.md`. Its specs ride along in the app's existing
-`astro check`, which is CI's only involvement — do not add a workflow step and
-do not install browser binaries in CI. The four test layers the shop funnel has,
-what each one proves, what none of them prove and the standing checklists are in
-`docs/guides/shop-funnel-testing.md` — add to a layer there rather than cutting a
-fifth seam.
-
 The translate scripts resolve content paths relative to the process's working
 directory, so they must run from inside the app:
 
@@ -472,14 +449,6 @@ deployed function (`.git`, `.env*` and every other app included; it was 353 MB
 before this was fixed, 32 MB after). See `src/pages/api/admin/case-photos-*.ts`
 for the shape.
 
-**`pnpm build` for `@podbor/auto-service` needs the local Medusa up.** Its shop
-routes fetch the catalog while prerendering, so with nothing on :9009 the build
-dies at `prerendering static routes` with a bare `fetch failed` and a
-`node:net` stack — which looks like the change under test and is not. Start the
-backend first (`pnpm --filter @podbor/medusa develop`), or build the other two
-sites alone (`--filter=@podbor/approved-rs --filter=@podbor/detailing`), which
-need no backend.
-
 `pnpm build` may finish rendering every page and only then fail at the
 `@astrojs/vercel` "astro:build:done" hook locally with a `sharp` binary `ENOENT`
 — that's a local-machine artifact unrelated to code changes, not a real build
@@ -503,18 +472,6 @@ split across several agents or stages, review after each stage lands rather
 than once over the combined diff — a diff too large to judge is a review that
 finds nothing. This is not enforced by a git hook on purpose: a hook can block
 a commit but cannot run the review itself.
-
-## Medusa backend (`apps/medusa`)
-
-CommonJS, jest not vitest, its own `.env`, port 9009 locally
-(`pnpm --filter @podbor/medusa develop` — not `dev`, so the root `pnpm dev`
-leaves it alone), and production is one Hetzner VPS deployed from
-`infra/medusa`. The rules that cost a bug — the translation module's two
-switches, read-merge-write `metadata`, workflow events, the admin write guards,
-the release job's in-memory filtering, exact express path matchers, the fan-out
-on `order.placed`, how the image and the compose stack ship — are in
-[`docs/guides/medusa.md`](docs/guides/medusa.md). Read it before touching
-anything under `apps/medusa/` or `infra/medusa/`.
 
 ## Architecture
 
@@ -561,9 +518,9 @@ Event names live once in `packages/site-kit/src/goals.ts` and are fired through
 reaches Google Ads conversions where `GOOGLE_ADS_ID`/`GOOGLE_CONVERSION_LABELS`
 are set. Every event must also be marked a key event in **all three** GA4
 properties — one fired in code but not marked there is silently excluded from
-conversion reporting. The shop funnel (`add_to_cart`, `begin_checkout`,
-`purchase`) is the exception: carlab.rs only, created when the shop goes live
-— see `docs/guides/analytics.md`. The vocabulary, the
+conversion reporting. The shop funnel goals (`add_to_cart`, `begin_checkout`,
+`purchase`) are the exception: carlab.rs only, dormant and unwired since the
+old shop's teardown (ADR-0036) — see `docs/guides/analytics.md`. The vocabulary, the
 markup hooks it depends on (`data-lead-form`, `data-contact-channel`,
 `data-brand-link`, `aria-invalid`) and how to add one are in `docs/guides/analytics.md`;
 whose visits to exclude before drawing any conclusion is in
@@ -574,7 +531,7 @@ whose visits to exclude before drawing any conclusion is in
 Anything that validates data uses **zod** — no hand-rolled `typeof` guards,
 regex checks, string slicing or bare `as` casts at a trust boundary. `zod` is
 already pinned at the same exact version in `packages/lead-crm`, `packages/i18n`
-and all four apps (`apps/medusa` included), and the content-schema loaders (`src/i18n/content/*ContentSchema.ts`
+and all three apps, and the content-schema loaders (`src/i18n/content/*ContentSchema.ts`
 through `createSectionLoader`) are the pattern to copy: `z.object({…}).strict()`,
 `parse` where a failure should be loud, `safeParse` where a fallback exists.
 

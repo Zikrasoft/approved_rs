@@ -5,13 +5,12 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node --experimental-strip-types scripts/search-index.ts",
+    "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
     "test": "vitest run --passWithNoTests",
     "typecheck": "astro check",
-    "gen:og": "node --experimental-strip-types scripts/gen-og.ts",
-    "funnel": "playwright test"
+    "gen:og": "node --experimental-strip-types scripts/gen-og.ts"
   },
   "dependencies": {
     "@astrojs/react": "6.0.5",
@@ -24,7 +23,6 @@
     "@podbor/i18n": "workspace:*",
     "@podbor/lead-capture": "workspace:*",
     "@podbor/lead-crm": "workspace:*",
-    "@podbor/shop-catalog": "workspace:*",
     "@podbor/site-kit": "workspace:*",
     "@vercel/blob": "2.8.0",
     "@vercel/functions": "3.9.5",
@@ -36,11 +34,8 @@
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
-    "@playwright/test": "1.63.0",
     "@tailwindcss/vite": "4.3.3",
     "jsdom": "30.0.1",
-    "pagefind": "1.5.2",
-    "playwright-core": "1.63.0",
     "sharp": "0.35.4",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",

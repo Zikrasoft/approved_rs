@@ -28,7 +28,6 @@ export const homeContentSchema = z
         z.object({ title: z.string(), text: z.string() }).strict(),
       ),
     }),
-    shopTeaser: sectionHeadSchema.extend({ cta: z.string() }),
     accident: sectionHeadSchema.extend({
       points: z.array(z.string()),
       cta: z.string(),

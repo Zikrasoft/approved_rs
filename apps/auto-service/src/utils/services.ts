@@ -12,6 +12,5 @@ export type ServiceSlug = BrandServiceSlug<'carlab'>;
 export const isServiceSlug = (value: string): value is ServiceSlug =>
   isBrandServiceSlug('carlab', value);
 
-export const SHOP_SERVICE = 'parts-order' satisfies LabelledService;
 export const VIN_INQUIRY_SERVICE =
   'vin-parts-inquiry' satisfies LabelledService;

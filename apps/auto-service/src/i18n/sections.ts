@@ -4,7 +4,6 @@ import { captureCopySchema } from '@podbor/lead-capture/copy';
 import { homeContentSchema } from './content/homeContentSchema.ts';
 import { servicesContentSchema } from './content/servicesContentSchema.ts';
 import { pagesContentSchema } from './content/pagesContentSchema.ts';
-import { shopContentSchema } from './content/shopContentSchema.ts';
 import { promoBannersContentSchema } from './content/promoBannersContentSchema.ts';
 
 export const SECTIONS = [
@@ -28,13 +27,6 @@ export const SECTIONS = [
     schema: servicesContentSchema,
     promptSubject:
       'car service page copy (diagnostics, scheduled servicing, brakes and suspension, engine and gearbox, accident repair and respraying, pre-purchase inspection) — keep the trade terms a Serbian driver would recognise',
-  },
-  {
-    key: 'shop',
-    path: 'src/content/i18n/shop.yaml',
-    schema: shopContentSchema,
-    promptSubject:
-      'car parts shop copy (product types, spec labels and units, filters, car picker, basket, pickup checkout and order confirmation) — keep brand names, codes such as 5W-30 or AGM, and the {placeholders} exactly as they are',
   },
   {
     key: 'captureBot',

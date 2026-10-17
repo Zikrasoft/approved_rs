@@ -69,7 +69,6 @@ export const pagesContentSchema = z
         heading: z.string(),
         lastUpdated: z.string(),
         sections: z.array(privacySectionSchema),
-        shopSections: z.array(privacySectionSchema),
         contactTitle: z.string(),
         contactBefore: z.string(),
       })
