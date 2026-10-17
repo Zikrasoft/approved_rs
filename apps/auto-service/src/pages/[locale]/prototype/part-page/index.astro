@@ -1,0 +1,422 @@
+---
+// PROTOTYPE — throwaway, answers wayfinder #331 ("how should a Part page present
+// N suppliers' offers across brand-variants"). Not wired to real data, not i18n'd,
+// not production code. Three structurally different variants of the same page,
+// switchable via ?variant=A|B|C. Capture the winner, then delete this route.
+import Shell from '@/layouts/Shell.astro';
+import Icon from '@/components/Icon.astro';
+import { localePaths } from '@/utils/paths';
+
+export function getStaticPaths() {
+  return localePaths();
+}
+
+type Offer = {
+  source: string;
+  price: number;
+  qty: number | null;
+  lead: 'today' | '2-4d' | '16d' | 'oos';
+};
+
+type Variant = {
+  key: 'oem' | 'mann' | 'bosch';
+  label: string;
+  manufacturer: string;
+  number: string;
+  offers: Offer[];
+};
+
+const PART_NAME = 'Масляный фильтр';
+const PART_FITMENT = 'BMW B47 / B48, N47 (2.0 дизель/бензин)';
+
+const VARIANTS: Variant[] = [
+  {
+    key: 'oem',
+    label: 'Оригинал BMW',
+    manufacturer: 'BMW',
+    number: '11 42 8575211',
+    offers: [
+      { source: 'Наш склад, Белград', price: 1890, qty: 12, lead: 'today' },
+      { source: 'Intercars, склад РС', price: 2050, qty: 3, lead: '2-4d' },
+      {
+        source: 'Intercars, центральный склад',
+        price: 1950,
+        qty: null,
+        lead: '16d',
+      },
+    ],
+  },
+  {
+    key: 'mann',
+    label: 'Mann-Filter',
+    manufacturer: 'Mann-Filter',
+    number: 'HU 816 x',
+    offers: [
+      { source: 'Intercars, склад РС', price: 2780, qty: 6, lead: 'today' },
+    ],
+  },
+  {
+    key: 'bosch',
+    label: 'Bosch',
+    manufacturer: 'Bosch',
+    number: 'P9191',
+    offers: [
+      { source: 'Intercars, склад РС', price: 2610, qty: 0, lead: '2-4d' },
+    ],
+  },
+];
+
+const LEAD_LABEL: Record<Offer['lead'], string> = {
+  today: 'в наличии',
+  '2-4d': '2-4 дня',
+  '16d': '16 дней',
+  oos: 'под заказ',
+};
+
+function cheapest(v: Variant) {
+  return v.offers.reduce((a, b) => (b.price < a.price ? b : a));
+}
+function fastest(v: Variant) {
+  const order: Offer['lead'][] = ['today', '2-4d', '16d', 'oos'];
+  return v.offers.reduce((a, b) =>
+    order.indexOf(b.lead) < order.indexOf(a.lead) ? b : a,
+  );
+}
+function money(n: number) {
+  return `${n.toLocaleString('sr-RS')} RSD`;
+}
+---
+
+<Shell title="Prototype: part page" description="" noindex>
+  <section class="wrap py-band">
+    <nav aria-label="breadcrumbs" class="mb-3 text-xs text-muted">
+      <span>Главная</span> / <span>Запчасти</span> /{' '}
+      <span>Фильтры</span>
+    </nav>
+
+    <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <span class="eyebrow">{PART_FITMENT}</span>
+        <h1 class="text-section mt-2">{PART_NAME}</h1>
+      </div>
+    </div>
+
+    {/* ---------- VARIANT A: brand tabs + offer cards ---------- */}
+    <div data-variant-panel="A" class="hidden">
+      <div
+        class="flex flex-wrap gap-2"
+        role="tablist"
+        aria-label="Вариант детали"
+      >
+        {
+          VARIANTS.map((v, i) => (
+            <button
+              type="button"
+              class="chip data-[active]:chip-accent"
+              data-brand-tab={v.key}
+              data-active={i === 0 ? '' : undefined}
+            >
+              {v.label}
+              <span class="spec ml-1.5 text-xs opacity-70">
+                от {money(cheapest(v).price)}
+              </span>
+            </button>
+          ))
+        }
+      </div>
+
+      {
+        VARIANTS.map((v, i) => (
+          <div data-brand-panel={v.key} class={i === 0 ? '' : 'hidden'}>
+            <p class="mt-4 text-sm text-ink-2">
+              {v.manufacturer} <span class="spec text-muted">· {v.number}</span>
+            </p>
+            <div class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {v.offers.map((o) => (
+                <div class="card flex flex-col gap-3 p-4">
+                  <div class="flex items-start justify-between gap-2">
+                    <span class="text-sm text-ink-2">{o.source}</span>
+                    <span
+                      class={`chip shrink-0 text-xs ${o.lead === 'today' ? '!bg-go/10 !text-go' : ''}`}
+                    >
+                      {LEAD_LABEL[o.lead]}
+                    </span>
+                  </div>
+                  <div class="spec text-2xl font-extrabold text-ink">
+                    {money(o.price)}
+                  </div>
+                  {o.qty !== null && (
+                    <span class="text-xs text-muted">
+                      {o.qty} шт. на складе
+                    </span>
+                  )}
+                  <button type="button" class="btn btn-primary mt-auto">
+                    <Icon name="cart" size={14} /> В корзину
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    {/* ---------- VARIANT B: compact table, expandable rows ---------- */}
+    <div data-variant-panel="B" class="hidden">
+      <div class="card divide-y divide-line overflow-hidden">
+        {
+          VARIANTS.map((v, i) => (
+            <div data-row={v.key}>
+              <button
+                type="button"
+                data-row-toggle={v.key}
+                class="flex w-full items-center justify-between gap-4 p-4 text-left"
+              >
+                <span class="flex items-center gap-3">
+                  <span class="font-semibold text-ink">{v.label}</span>
+                  <span class="spec hidden text-xs text-muted sm:inline">
+                    {v.number}
+                  </span>
+                </span>
+                <span class="flex items-center gap-4">
+                  <span class="text-right">
+                    <span class="spec block font-semibold text-ink">
+                      от {money(cheapest(v).price)}
+                    </span>
+                    <span class="block text-xs text-muted">
+                      {LEAD_LABEL[fastest(v).lead]} — от{' '}
+                      {money(fastest(v).price)}
+                    </span>
+                  </span>
+                  <Icon
+                    name="chevronDown"
+                    size={14}
+                    class="shrink-0 text-muted transition-transform data-[open]:rotate-180"
+                    data-row-chevron={v.key}
+                    data-open={i === 0 ? '' : undefined}
+                  />
+                </span>
+              </button>
+              <div
+                data-row-body={v.key}
+                class={
+                  i === 0
+                    ? 'border-t border-line'
+                    : 'hidden border-t border-line'
+                }
+              >
+                <table class="spec w-full text-sm">
+                  <tbody>
+                    {v.offers.map((o) => (
+                      <tr class="border-t border-line first:border-t-0">
+                        <td class="p-3 text-ink-2">{o.source}</td>
+                        <td class="p-3 text-right text-muted">
+                          {LEAD_LABEL[o.lead]}
+                        </td>
+                        <td class="p-3 text-right text-muted">
+                          {o.qty !== null ? `${o.qty} шт.` : '—'}
+                        </td>
+                        <td class="p-3 text-right font-semibold text-ink">
+                          {money(o.price)}
+                        </td>
+                        <td class="p-2 text-right">
+                          <button
+                            type="button"
+                            class="btn btn-primary !px-3 !py-2 text-xs"
+                          >
+                            Купить
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    {/* ---------- VARIANT C: grouped by speed, not by brand ---------- */}
+    <div data-variant-panel="C" class="hidden">
+      {
+        (['today', '2-4d', '16d'] as Offer['lead'][]).map((lead) => {
+          const rows = VARIANTS.flatMap((v) =>
+            v.offers.filter((o) => o.lead === lead).map((o) => ({ v, o })),
+          ).sort((a, b) => a.o.price - b.o.price);
+          if (rows.length === 0) return null;
+          return (
+            <div class="mb-5">
+              <h2 class="mb-2 flex items-center gap-2 text-sm font-semibold text-ink-2">
+                <span
+                  class={`inline-block h-2 w-2 rounded-full ${lead === 'today' ? 'bg-go' : 'bg-signal'}`}
+                />
+                {LEAD_LABEL[lead]}
+              </h2>
+              <div class="grid gap-2 sm:grid-cols-2">
+                {rows.map(({ v, o }) => (
+                  <div class="card flex items-center justify-between gap-3 p-3.5">
+                    <div>
+                      <div class="text-sm font-medium text-ink">{v.label}</div>
+                      <div class="text-xs text-muted">{o.source}</div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <span class="spec font-semibold text-ink">
+                        {money(o.price)}
+                      </span>
+                      <button
+                        type="button"
+                        class="btn btn-primary !px-4 !py-2 text-xs"
+                      >
+                        В корзину
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })
+      }
+    </div>
+
+    {/* ---------- shared: admin markup mock ---------- */}
+    <details class="card mt-8 p-4">
+      <summary class="cursor-pointer text-sm font-semibold text-ink-2">
+        Админ: наценка по складу/поставщику
+      </summary>
+      <div class="mt-4 flex flex-col gap-3 sm:max-w-sm">
+        {
+          ['Наш склад (Белград)', 'Intercars'].map((name) => (
+            <label class="flex items-center justify-between gap-3">
+              <span class="field-label !mb-0">{name}</span>
+              <span class="flex items-center gap-1.5">
+                <input
+                  type="number"
+                  class="field !w-20 text-right"
+                  value={name.startsWith('Наш') ? 35 : 22}
+                />
+                <span class="text-sm text-muted">%</span>
+              </span>
+            </label>
+          ))
+        }
+        <p class="text-xs text-muted">
+          Применяется к закупочной цене каждого SupplierOffer этого
+          склада/поставщика.
+        </p>
+      </div>
+    </details>
+  </section>
+
+  <div
+    id="proto-switcher"
+    class="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 rounded-full border border-panel-line bg-panel px-1.5 py-1.5 text-sm text-white shadow-lg"
+  >
+    <button
+      type="button"
+      data-proto-prev
+      class="btn-on-panel rounded-full p-2"
+      aria-label="Предыдущий вариант"
+    >
+      ←
+    </button>
+    <span
+      id="proto-label"
+      class="spec min-w-32 px-2 text-center text-xs font-medium"></span>
+    <button
+      type="button"
+      data-proto-next
+      class="btn-on-panel rounded-full p-2"
+      aria-label="Следующий вариант"
+    >
+      →
+    </button>
+  </div>
+</Shell>
+
+<script>
+  const NAMES: Record<string, string> = {
+    A: 'A — вкладки по бренду',
+    B: 'B — таблица, раскрыть строку',
+    C: 'C — группировка по скорости',
+  };
+  const KEYS = ['A', 'B', 'C'];
+
+  function current(): string {
+    const v = new URLSearchParams(location.search).get('variant');
+    return v && KEYS.includes(v) ? v : 'A';
+  }
+
+  function render() {
+    const key = current();
+    for (const k of KEYS) {
+      const panel = document.querySelector<HTMLElement>(
+        `[data-variant-panel="${k}"]`,
+      );
+      panel?.classList.toggle('hidden', k !== key);
+    }
+    const label = document.getElementById('proto-label');
+    if (label) label.textContent = NAMES[key];
+  }
+
+  function setVariant(key: string) {
+    const url = new URL(location.href);
+    url.searchParams.set('variant', key);
+    history.replaceState(null, '', url);
+    render();
+  }
+
+  document.querySelector('[data-proto-prev]')?.addEventListener('click', () => {
+    const i = KEYS.indexOf(current());
+    setVariant(KEYS[(i - 1 + KEYS.length) % KEYS.length]);
+  });
+  document.querySelector('[data-proto-next]')?.addEventListener('click', () => {
+    const i = KEYS.indexOf(current());
+    setVariant(KEYS[(i + 1) % KEYS.length]);
+  });
+  document.addEventListener('keydown', (e) => {
+    const t = e.target as HTMLElement;
+    if (t.closest('input, textarea, [contenteditable]')) return;
+    if (e.key === 'ArrowLeft')
+      document.querySelector<HTMLElement>('[data-proto-prev]')?.click();
+    if (e.key === 'ArrowRight')
+      document.querySelector<HTMLElement>('[data-proto-next]')?.click();
+  });
+
+  // Variant A: brand tabs
+  document.querySelectorAll<HTMLElement>('[data-brand-tab]').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const key = tab.dataset.brandTab!;
+      document
+        .querySelectorAll('[data-brand-tab]')
+        .forEach((b) => b.removeAttribute('data-active'));
+      tab.setAttribute('data-active', '');
+      document.querySelectorAll('[data-brand-panel]').forEach((p) => {
+        (p as HTMLElement).classList.toggle(
+          'hidden',
+          (p as HTMLElement).dataset.brandPanel !== key,
+        );
+      });
+    });
+  });
+
+  // Variant B: expandable rows
+  document.querySelectorAll<HTMLElement>('[data-row-toggle]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.rowToggle!;
+      const body = document.querySelector<HTMLElement>(
+        `[data-row-body="${key}"]`,
+      );
+      const chevron = document.querySelector<HTMLElement>(
+        `[data-row-chevron="${key}"]`,
+      );
+      const open = body?.classList.toggle('hidden') === false;
+      if (open) chevron?.setAttribute('data-open', '');
+      else chevron?.removeAttribute('data-open');
+    });
+  });
+
+  render();
+</script>
