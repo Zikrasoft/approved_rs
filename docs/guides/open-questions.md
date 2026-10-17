@@ -77,41 +77,17 @@ recommendation are in
 
 ### Launching the CarLab shop
 
-The shop is in `main`, switched off: `SHOP_STATUS` defaults to `off`, so no shop
-page is built and Medusa is never called. See
-[ADR-0016](../adr/0016-carlab-shop-on-self-hosted-medusa.md) and the ten after
-it, all accepted. Getting it to production is mapped on
-[issue #61](https://github.com/Zikrasoft/approved_rs/issues/61), and what was
-deferred rather than fixed before the merge is the two-tier checklist there.
-
-Before the flag moves: a VPS ordered (check CX23 availability in the Hetzner
-Console, [#69](https://github.com/Zikrasoft/approved_rs/issues/69)), a Brevo
-account with DKIM ([#70](https://github.com/Zikrasoft/approved_rs/issues/70)),
-secrets and the first deploy
-([#71](https://github.com/Zikrasoft/approved_rs/issues/71)), the shop funnel
-goals in the carlab.rs counter
-([#72](https://github.com/Zikrasoft/approved_rs/issues/72)), real prices and
-stock, the shop's legal pages
-([#76](https://github.com/Zikrasoft/approved_rs/issues/76)), and — for online
-payment later — an answer from the accountant about e-fiskalizacija.
-
-The consumer protection act moved underneath all of that. Zakon o zaštiti
-potrošača is now «Sl. glasnik RS» br. 35/2026, in force since 02.08.2026, and
-88/2021 is repealed — any downloaded template, and any article older than August
-2026, has the wrong numbers. Whether the 14-day right of withdrawal applies to
-pickup at all is **not established**
-([#74](https://github.com/Zikrasoft/approved_rs/issues/74)). What is established
-is in `docs/research/serbia-online-shop-legal.md`.
-
-The owner answered on
-[#68](https://github.com/Zikrasoft/approved_rs/issues/68) (2026-09-30): batteries
-only at launch, under 10 SKUs typed into the Medusa admin by hand, card fields as
-already coded, installation priced «od X RSD», a 3-day reserve window, the
-manufacturer's warranty only, returns at the counter, `info@carlab.rs` as the
-sender, registrar access in the owner's hands, two admin accounts. One question
-did not close and moved to
-[#79](https://github.com/Zikrasoft/approved_rs/issues/79): the seller's poslovno
-ime, PIB, matični broj and seat, which the legal pages cannot be written without.
+Closed, the other way: the owner deleted the old Medusa-backed shop entirely
+rather than launching it (`SHOP_STATUS`, `apps/medusa`, `infra/medusa`,
+`packages/shop-catalog`, all gone — see
+[ADR-0035](../adr/0035-delete-the-old-medusa-shop-entirely.md)). The new shop
+is a from-scratch VIN-based design, tracked on the wayfinder map
+([#320](https://github.com/Zikrasoft/approved_rs/issues/320)); platform choice
+(Medusa included) is a separate open decision there
+([#329](https://github.com/Zikrasoft/approved_rs/issues/329)). Everything this
+section used to track — the VPS/Brevo/secrets checklist, the consumer
+protection act research, the owner's batteries-only launch answers — belonged
+to that deleted implementation and does not carry over.
 
 The vehicle dictionary is gone until a product type requires fitment
 ([ADR-0028](../adr/0028-no-vehicle-dictionary-until-fitment-is-required.md)), so
