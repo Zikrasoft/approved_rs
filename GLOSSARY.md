@@ -16,5 +16,18 @@ _Avoid_: part number (ambiguous about whose number), supplier SKU (that's Suppli
 One supplier's or warehouse's sellable line for a specific `PartIdentifier` (brand-variant) of a Part: their own article id, price, stock quantity, and lead-time tier (in-stock / N-days / etc, broken out per physical warehouse where the supplier's own stock feed does that). A supplier selling both the Mann-Filter and the Bosch version of the same Part creates two SupplierOffers — one per `PartIdentifier` — each its own purchasable line and its own price; the storefront never hides which brand-variant it's selling behind one generic "buy" button. Our own warehouse is a supplier like any other for this purpose.
 _Avoid_: Listing, Offer (bare) — always qualify with "supplier" or "warehouse"
 
-**Fitment candidate** _(forward reference — owned by a future ticket, recorded here because it constrains that ticket)_:
-TecDoc's vehicle-to-part linkage (by KType, not VIN directly) can return more than one Part for a single position when the right one depends on an attribute TecDoc doesn't fully disambiguate (gearbox type, steering side). Whatever Vehicle/fitment entity gets designed next must carry this as a first-class, visible "needs confirmation" state — never silently resolved to a guess.
+**Vehicle**:
+The canonical internal entity for one vehicle _configuration_ — not one physical car. Thousands of BMW 320ds with identical engine/trim/body share a single Vehicle; their owners' individual VINs do not multiply it. Mirrors `Part`'s shape: licensed external catalogues (TecDoc, BMW's own EPC) are the source of truth for what configurations exist, never a hand-maintained dictionary — that's exactly what [ADR-0028](docs/adr/0028-no-vehicle-dictionary-until-fitment-is-required.md) correctly rejected for free-text data, and this is not that.
+_Avoid_: Car, Vin — a Vehicle is a configuration, not a specific physical car and not a VIN (see `VinLookup`)
+
+**VehicleIdentifier**:
+One typed reference from a Vehicle to an external catalogue's own vehicle-variant id: `type` is `ktype` (TecDoc's KType: brand/model/type/years) or `oem-type-code` (the manufacturer's own EPC type code, e.g. BMW's). Mirrors `PartIdentifier` — a Vehicle can carry more than one, since TecDoc's and an OEM catalogue's vehicle vocabularies don't line up 1:1.
+_Avoid_: KType (bare) — always through a VehicleIdentifier row, never assumed to be the only vocabulary in play
+
+**Fitment**:
+The join between one `Part` and one `Vehicle` for one position, carrying the criteria that further narrow it: a production-date range, steering side, gearbox type — because a single Vehicle (even one TecDoc KType) can still need different Parts at the same position depending on these. Criteria live on the Fitment row, not on Vehicle — splitting Vehicle itself per date/steering/gearbox combination would multiply it into near-duplicates without resolving KType's own coarseness. **Ambiguity is not a stored flag**: it emerges when a customer's actual car doesn't carry enough resolved detail (date, steering, gearbox) to pick a single matching Fitment row from several candidates — the storefront must show this as "confirm your variant," never silently guess one.
+_Avoid_: "fits" (as a boolean) — a Fitment row's applicability is conditional, not flat
+
+**VinLookup**:
+A cached resolution of one customer-typed VIN string to the `Vehicle` it decodes to (plus the decode's own metadata and timestamp). **Not** a `VehicleIdentifier` — a VIN identifies one physical car, not a configuration, so storing it as a Vehicle-level identifier would make one Vehicle accumulate thousands of unrelated VIN strings from unrelated customers. VinLookup is where a raw VIN belongs instead: on a cart/order for staff reference, and later as the attach point for a customer's saved vehicle ("my garage"), once accounts exist — see the accounts ticket, not decided here.
+_Avoid_: storing a VIN directly on Vehicle, or treating VinLookup itself as the canonical vehicle record
