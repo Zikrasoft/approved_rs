@@ -3,9 +3,11 @@
 // N suppliers' offers across brand-variants"). Not wired to real data, not i18n'd,
 // not production code. Three structurally different variants of the same page,
 // switchable via ?variant=A|B|C. Capture the winner, then delete this route.
+import { Image } from 'astro:assets';
 import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
 import { localePaths } from '@/utils/paths';
+import partPhoto from '@/assets/parts/maintenance-consumables.jpg';
 
 export function getStaticPaths() {
   return localePaths();
@@ -94,7 +96,14 @@ function money(n: number) {
       <span>Фильтры</span>
     </nav>
 
-    <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start">
+      <Image
+        src={partPhoto}
+        alt={PART_NAME}
+        width={160}
+        height={160}
+        class="h-32 w-32 shrink-0 rounded-block border border-line object-cover sm:h-40 sm:w-40"
+      />
       <div>
         <span class="eyebrow">{PART_FITMENT}</span>
         <h1 class="text-section mt-2">{PART_NAME}</h1>
