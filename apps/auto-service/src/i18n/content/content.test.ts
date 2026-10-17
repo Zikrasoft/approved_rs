@@ -57,13 +57,9 @@ describe.each(SUPPORTED_LOCALES)('content for %s', (locale) => {
     const services = content(locale).services;
     const descriptions = [
       content(locale).home.meta.description,
-      content(locale).shop.metaDescription,
       content(locale).pages.works.metaDescription,
       content(locale).pages.contact.metaDescription,
       ...SERVICE_SLUGS.map((slug) => services[slug].metaDescription),
-      ...Object.values(content(locale).shop.types).map(
-        (type) => type.metaDescription,
-      ),
     ];
     descriptions.forEach((description) => {
       expect(description.length).toBeGreaterThan(70);

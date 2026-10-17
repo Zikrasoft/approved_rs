@@ -3,11 +3,7 @@ import { localeFrom } from '@/i18n/config';
 import Icon from './Icon.astro';
 import PhoneInput from './PhoneInput.astro';
 import { PathBuilder } from '@/utils/paths';
-import {
-  SHOP_SERVICE,
-  VIN_INQUIRY_SERVICE,
-  type ServiceSlug,
-} from '@/utils/services';
+import { VIN_INQUIRY_SERVICE, type ServiceSlug } from '@/utils/services';
 import {
   AD_SOURCE_FIELD,
   HONEYPOT_FIELD,
@@ -17,7 +13,7 @@ import {
 import { content } from '@/i18n/content';
 
 interface Props {
-  service?: ServiceSlug | typeof SHOP_SERVICE | typeof VIN_INQUIRY_SERVICE;
+  service?: ServiceSlug | typeof VIN_INQUIRY_SERVICE;
   compact?: boolean;
   comment?: string;
   commentLabel?: string;

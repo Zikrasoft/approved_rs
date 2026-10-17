@@ -4,7 +4,6 @@ node_modules/
 # Build output
 dist/
 .vercel/
-.medusa/
 
 # Astro
 .astro/
@@ -45,14 +44,3 @@ coverage/
 
 # Local, never committed: identifiers of real people (see docs/guides/analytics-exclusions.md)
 .local/
-
-# Medusa deploy state (host-only)
-infra/medusa/.previous-tag
-infra/medusa/.deploy.lock
-
-# Local-only lead store and order markers for a dev walk of the funnel
-.local-data/
-
-# Playwright output from the local funnel walk
-apps/auto-service/test-results/
-apps/auto-service/playwright-report/

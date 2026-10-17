@@ -35,7 +35,6 @@ common:
   fromPrice: от
   priceOnRequest: по запросу
   allServices: Все услуги
-  backToShop: Все запчасти
   allWorks: Все примеры работ
   emptyWorks: Примеры работ скоро появятся. Пока что позвоните — расскажем, что делали на похожих машинах.
 channels:
@@ -112,7 +111,6 @@ translations:
       fromPrice: od
       priceOnRequest: na zahtev
       allServices: Sve usluge
-      backToShop: Svi delovi
       allWorks: Svi primeri radova
       emptyWorks: Primeri radova uskoro dolaze. Za sada nazovite — reći ćemo vam šta smo radili na sličnim automobilima.
     channels:
@@ -187,7 +185,6 @@ translations:
       fromPrice: from
       priceOnRequest: upon request
       allServices: All Services
-      backToShop: All Parts
       allWorks: All Work Examples
       emptyWorks: Work examples will appear soon. In the meantime, give us a call — we’ll share what we’ve done on similar cars.
     channels:
