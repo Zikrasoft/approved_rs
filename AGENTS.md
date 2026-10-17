@@ -203,7 +203,7 @@ Approved's trust/verification semantics.
   the result — so run such a package's tests through turbo
   (`pnpm turbo run test --filter=<package>`); a bare `pnpm --filter <package> test`
   finds no `dist/`. This predates
-  [ADR-0035](docs/adr/0035-delete-the-old-medusa-shop-entirely.md) (it existed
+  [ADR-0036](docs/adr/0036-delete-the-old-medusa-shop-entirely.md) (it existed
   for the now-deleted `apps/medusa`, a CommonJS app) and is kept: any future
   CommonJS consumer, Medusa or otherwise, needs the same shape.
 - **A helper a lazily-loaded path depends on must live in a module that imports
@@ -520,7 +520,7 @@ are set. Every event must also be marked a key event in **all three** GA4
 properties — one fired in code but not marked there is silently excluded from
 conversion reporting. The shop funnel goals (`add_to_cart`, `begin_checkout`,
 `purchase`) are the exception: carlab.rs only, dormant and unwired since the
-old shop's teardown (ADR-0035) — see `docs/guides/analytics.md`. The vocabulary, the
+old shop's teardown (ADR-0036) — see `docs/guides/analytics.md`. The vocabulary, the
 markup hooks it depends on (`data-lead-form`, `data-contact-channel`,
 `data-brand-link`, `aria-invalid`) and how to add one are in `docs/guides/analytics.md`;
 whose visits to exclude before drawing any conclusion is in

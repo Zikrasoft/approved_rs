@@ -80,7 +80,7 @@ recommendation are in
 Closed, the other way: the owner deleted the old Medusa-backed shop entirely
 rather than launching it (`SHOP_STATUS`, `apps/medusa`, `infra/medusa`,
 `packages/shop-catalog`, all gone — see
-[ADR-0035](../adr/0035-delete-the-old-medusa-shop-entirely.md)). The new shop
+[ADR-0036](../adr/0036-delete-the-old-medusa-shop-entirely.md)). The new shop
 is a from-scratch VIN-based design, tracked on the wayfinder map
 ([#320](https://github.com/Zikrasoft/approved_rs/issues/320)); platform choice
 (Medusa included) is a separate open decision there

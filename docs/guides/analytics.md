@@ -156,7 +156,7 @@ and serves as a cross-check, the same role Metrika's automatic goals played.
 ## The CarLab shop
 
 The old Medusa-backed shop (catalog, cart, checkout) is gone — see
-[ADR-0035](../adr/0035-delete-the-old-medusa-shop-entirely.md). `GOALS.addToCart`
+[ADR-0036](../adr/0036-delete-the-old-medusa-shop-entirely.md). `GOALS.addToCart`
 / `beginCheckout` / `purchase` (`add_to_cart`, `begin_checkout`, `purchase` —
 GA4's standard ecommerce event names) and their row in `META_EVENTS`
 (`packages/site-kit/src/analytics.ts`) stay in the shared vocabulary dormant

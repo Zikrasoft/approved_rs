@@ -4,7 +4,7 @@ status: superseded
 
 # Pause the Medusa shop deploy, repurpose the "Запчасти"/Shop nav slot
 
-Superseded by [ADR-0035](0035-delete-the-old-medusa-shop-entirely.md): the
+Superseded by [ADR-0036](0036-delete-the-old-medusa-shop-entirely.md): the
 owner decided to delete the old shop/cart/checkout code and the Medusa
 backend entirely rather than keep them parked. The repurposed nav slot
 (`/parts/`) stays as this ADR describes it; the "not deleted, only unlinked"
