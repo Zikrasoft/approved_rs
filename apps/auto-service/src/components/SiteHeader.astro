@@ -1,13 +1,11 @@
 ---
 import Icon from './Icon.astro';
 import Wordmark from './Wordmark.astro';
-import CartButton from './CartButton.astro';
 import { localeFrom, SUPPORTED_LOCALES, LOCALE_NAME } from '@/i18n/config';
 import { PathBuilder, swapLocale } from '@/utils/paths';
 import { navCurrent, LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
 import { contactRegion } from '@podbor/site-kit/contact-control';
 import ContactControl from './ContactControl.astro';
-import { devOnly, shopBuilt } from '@/utils/shopStatus';
 import { content } from '@/i18n/content';
 
 const locale = localeFrom(Astro.url.pathname);
@@ -90,14 +88,6 @@ const links = [
             ))
           }
         </carlab-lang>
-
-        {
-          shopBuilt() && (
-            <span class="contents" {...devOnly()}>
-              <CartButton />
-            </span>
-          )
-        }
 
         <ContactControl
           channel="phone"

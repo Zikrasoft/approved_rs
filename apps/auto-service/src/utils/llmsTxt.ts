@@ -1,10 +1,7 @@
 import { getCollection } from 'astro:content';
 import { mapPlaceUrl } from '@podbor/site-kit';
-import { renderBrandLlmsTxt, type LlmsLinkList } from '@podbor/i18n';
+import { renderBrandLlmsTxt } from '@podbor/i18n';
 import { SITE_URL, SITE_NAME, GARAGE_ADDRESS } from '@/utils/constants';
-import { shopCatalog } from '@/lib/catalog';
-import { shopTypes } from '@/lib/shopPages';
-import { shopIndexed } from '@/utils/shopStatus';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { PARTS_CATEGORY_SLUGS } from '@/utils/partsCatalog';
 import { localizedWork, publishedWorks } from '@/utils/works';
@@ -13,30 +10,6 @@ import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 import { content } from '@/i18n/content';
 
 const url = (path: string) => `${SITE_URL}${path}`;
-
-async function shopList(
-  locale: Locale,
-  heading: string,
-): Promise<LlmsLinkList[]> {
-  if (!shopIndexed()) return [];
-  const shop = content(locale).shop;
-  const { products } = await shopCatalog().catalog(locale);
-  return [
-    {
-      heading,
-      index: {
-        label: shop.heading,
-        href: url(PathBuilder.shop(locale)),
-        note: shop.lead,
-      },
-      entries: shopTypes(products).map(({ key }) => ({
-        label: shop.types[key].name,
-        href: url(PathBuilder.shopType(locale, key)),
-        note: shop.types[key].lead,
-      })),
-    },
-  ];
-}
 
 export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const home = content(locale).home;
@@ -80,7 +53,6 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
           note: pages.partsInquiry.categories[slug].lead,
         })),
       },
-      ...(await shopList(locale, site.nav.parts)),
       {
         heading: site.nav.works,
         index: {

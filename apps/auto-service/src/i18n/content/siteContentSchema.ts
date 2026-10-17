@@ -58,7 +58,6 @@ export const siteContentSchema = z
         fromPrice: z.string(),
         priceOnRequest: z.string(),
         allServices: z.string(),
-        backToShop: z.string(),
         allWorks: z.string(),
         emptyWorks: z.string(),
       })

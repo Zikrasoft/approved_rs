@@ -15,8 +15,7 @@ describe('redirects', () => {
     ['/services', '/sr/services/'],
     ['/services/brakes-suspension', '/sr/services/brakes-suspension'],
     ['/works/bmw-x3', '/sr/works/bmw-x3'],
-    ['/shop/oil/f/5w-30', '/sr/shop/oil/f/5w-30'],
-    ['/cart', '/sr/cart/'],
+    ['/parts/brakes', '/sr/parts/brakes'],
     ['/contact/', '/sr/contact/'],
     ['/thanks', '/sr/thanks/'],
     ['/privacy/', '/sr/privacy/'],
@@ -25,7 +24,7 @@ describe('redirects', () => {
     expect(redirectFor(path)).toBe(target);
   });
 
-  it.each(['/', '/sr/', '/en/shop/', '/llms.txt', '/catalog-version.txt'])(
+  it.each(['/', '/sr/', '/en/parts/', '/llms.txt'])(
     'leaves %s alone',
     (path) => {
       expect(redirectFor(path)).toBeNull();

@@ -36,21 +36,6 @@
       "permanent": true
     },
     {
-      "source": "/shop/:path*",
-      "destination": "/sr/shop/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/cart",
-      "destination": "/sr/cart/",
-      "permanent": true
-    },
-    {
-      "source": "/cart/",
-      "destination": "/sr/cart/",
-      "permanent": true
-    },
-    {
       "source": "/contact",
       "destination": "/sr/contact/",
       "permanent": true

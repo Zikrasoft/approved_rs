@@ -14,13 +14,6 @@ export const PathBuilder = {
     `/${locale}/parts/${slug}/`,
   work: (locale: Locale, slug: string) => `/${locale}/works/${slug}/`,
   bmw: (locale: Locale) => `/${locale}/bmw/`,
-  shop: (locale: Locale) => `/${locale}/shop/`,
-  shopType: (locale: Locale, type: string) => `/${locale}/shop/${type}/`,
-  shopProduct: (locale: Locale, type: string, handle: string) =>
-    `/${locale}/shop/${type}/${handle}/`,
-  shopLanding: (locale: Locale, type: string, slug: string) =>
-    `/${locale}/shop/${type}/f/${slug}/`,
-  cart: (locale: Locale) => `/${locale}/cart/`,
   contact: (locale: Locale) => `/${locale}/contact/`,
   thanks: (locale: Locale) => `/${locale}/thanks/`,
   privacy: (locale: Locale) => `/${locale}/privacy/`,

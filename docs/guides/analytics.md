@@ -155,17 +155,15 @@ and serves as a cross-check, the same role Metrika's automatic goals played.
 
 ## The CarLab shop
 
-`add_to_cart`, `begin_checkout` and `purchase` are the shop funnel, and they are
-carlab.rs only, using GA4's standard ecommerce schema: an `items[]` array
-(`item_id`, `item_name`, `price`, `quantity`, `item_category` where known) plus
-`value`/`currency` (`rsd`), and `purchase` additionally carries `transaction_id`
-(the order's `display_id`). `cartItems`/`cartLineItem` in
-`apps/auto-service/src/scripts/shop/cart.ts` build the array from the cart's line
-items; `purchase` has to read it before `placeOrder` clears the cart. The events
-are marked as key events in the property when the shop moves to `live`, not
-before: while it is in `preview`, those events are only sent by developers with
-`?dev=true`, and such visits are excluded from samples the same way as everything
-else in `docs/analytics-exclusions.md`.
+The old Medusa-backed shop (catalog, cart, checkout) is gone — see
+[ADR-0036](../adr/0036-delete-the-old-medusa-shop-entirely.md). `GOALS.addToCart`
+/ `beginCheckout` / `purchase` (`add_to_cart`, `begin_checkout`, `purchase` —
+GA4's standard ecommerce event names) and their row in `META_EVENTS`
+(`packages/site-kit/src/analytics.ts`) stay in the shared vocabulary dormant
+and unwired: no code on carlab.rs currently fires them. Whatever the new shop
+turns out to be, it is expected to wire these same goals from `items[]` /
+`value`/`currency` (`rsd`) rather than invent new event names, and to mark them
+as key events in the GA4 property only once it actually ships.
 
 ## Meta Pixel
 
