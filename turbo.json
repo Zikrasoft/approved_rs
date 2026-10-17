@@ -3,7 +3,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".astro/**", ".vercel/output/**"]
+      "outputs": ["dist/**", ".astro/**", ".vercel/output/**", ".medusa/**"]
     },
     "dev": {
       "cache": false,
@@ -17,6 +17,7 @@
     "typecheck": {
       "dependsOn": ["^build"]
     },
+    "@podbor/medusa#typecheck": { "dependsOn": ["build"] },
     "lint": {}
   }
 }
