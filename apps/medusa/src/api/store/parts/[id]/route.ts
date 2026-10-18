@@ -32,6 +32,9 @@ const partResponseSchema = z.object({
   identifiers: z.array(identifierSchema),
 });
 
+const sellPrice = (costPrice: number, markupPercentage: number): number =>
+  Math.round(costPrice * (1 + markupPercentage / 100));
+
 export async function GET(
   req: MedusaRequest,
   res: MedusaResponse,
@@ -41,8 +44,24 @@ export async function GET(
   const partModuleService: PartModuleService = req.scope.resolve(PART_MODULE);
 
   const part = await partModuleService.retrievePart(id, {
-    relations: ['identifiers', 'identifiers.offers'],
+    relations: [
+      'identifiers',
+      'identifiers.offers',
+      'identifiers.offers.supplier',
+    ],
   });
 
-  res.json({ part: partResponseSchema.parse(part) });
+  const withComputedPrices = {
+    ...part,
+    identifiers: part.identifiers.map((identifier) => ({
+      ...identifier,
+      offers: identifier.offers.map((offer) => ({
+        ...offer,
+        supplier: offer.supplier.name,
+        price: sellPrice(offer.cost_price, offer.supplier.markup_percentage),
+      })),
+    })),
+  };
+
+  res.json({ part: partResponseSchema.parse(withComputedPrices) });
 }
