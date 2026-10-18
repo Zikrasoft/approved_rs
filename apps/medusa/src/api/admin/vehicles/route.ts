@@ -3,15 +3,7 @@ import { z } from 'zod';
 
 import { VEHICLE_MODULE } from '../../../modules/vehicle';
 import type VehicleModuleService from '../../../modules/vehicle/service';
-
-const vehicleResponseSchema = z.object({
-  id: z.string(),
-  make: z.string(),
-  model: z.string(),
-  engine_code: z.string(),
-  year_from: z.number().nullable(),
-  year_to: z.number().nullable(),
-});
+import { vehicleResponseSchema } from '../../../modules/vehicle/store-response';
 
 export async function GET(
   req: MedusaRequest,

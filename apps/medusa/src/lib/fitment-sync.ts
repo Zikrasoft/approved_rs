@@ -37,6 +37,13 @@ export interface ExistingFitmentRow {
   id: string;
   source: string;
   status: 'active' | 'rejected';
+  steering: FitmentSteeringSide | null;
+  gearbox: FitmentGearboxType | null;
+}
+
+export interface FitmentPositionCriteria {
+  steering: FitmentSteeringSide | null;
+  gearbox: FitmentGearboxType | null;
 }
 
 export type FitmentSyncAction =
@@ -45,12 +52,18 @@ export type FitmentSyncAction =
 export function decideFitmentSyncAction(
   existingRows: ExistingFitmentRow[],
   vendor: string,
+  criteria: FitmentPositionCriteria,
 ): FitmentSyncAction {
   if (existingRows.some((row) => row.source === 'manual')) {
     return { type: 'skip' };
   }
 
-  const ownRow = existingRows.find((row) => row.source === `auto:${vendor}`);
+  const ownRow = existingRows.find(
+    (row) =>
+      row.source === `auto:${vendor}` &&
+      row.steering === criteria.steering &&
+      row.gearbox === criteria.gearbox,
+  );
   if (!ownRow) return { type: 'create' };
   if (ownRow.status === 'rejected') return { type: 'skip' };
 
@@ -94,7 +107,10 @@ export async function runFitmentSync(
       vehicle_id: vehicleIdentifier.vehicle_id,
     });
 
-    const action = decideFitmentSyncAction(existingRows, feed.vendor);
+    const action = decideFitmentSyncAction(existingRows, feed.vendor, {
+      steering: row.steering,
+      gearbox: row.gearbox,
+    });
 
     if (action.type === 'skip') {
       summary.skipped += 1;

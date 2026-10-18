@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export const CART_ID_STORAGE_KEY = 'carlab_offer_cart_id';
 
 type ReadableStorage = Pick<Storage, 'getItem'>;
@@ -24,25 +26,35 @@ export function writeCartId(
   }
 }
 
+const offerPriceChangedErrorSchema = z.object({
+  response: z.object({
+    data: z.object({ code: z.literal('OFFER_PRICE_CHANGED') }),
+  }),
+});
+
 export function isOfferPriceChangedError(error: unknown): boolean {
-  if (typeof error !== 'object' || error === null || !('response' in error)) {
-    return false;
-  }
-  const response = (error as { response?: { data?: { code?: unknown } } })
-    .response;
-  return response?.data?.code === 'OFFER_PRICE_CHANGED';
+  return offerPriceChangedErrorSchema.safeParse(error).success;
 }
 
-type CartItem = {
-  id: string;
-  title: string;
-  quantity: number;
-  unit_price: number;
-};
+const cartItemSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  quantity: z.number(),
+  unit_price: z.number(),
+});
 
-type OfferCartResponse = {
-  cart?: { id: string; items?: CartItem[]; total?: number };
-};
+const cartSchema = z.object({
+  id: z.string(),
+  items: z.array(cartItemSchema).optional(),
+  total: z.number().optional(),
+});
+
+const offerCartResponseSchema = z.object({
+  cart: cartSchema.optional(),
+});
+
+type CartItem = z.infer<typeof cartItemSchema>;
+type OfferCartResponse = z.infer<typeof offerCartResponseSchema>;
 
 async function postJson(
   url: string,
@@ -57,11 +69,14 @@ async function postJson(
     },
     body: JSON.stringify(body),
   });
-  const data = await response.json().catch(() => ({}));
+  const rawData = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw { response: { status: response.status, data } };
+    throw { response: { status: response.status, data: rawData } };
   }
-  return { status: response.status, data };
+  return {
+    status: response.status,
+    data: offerCartResponseSchema.parse(rawData),
+  };
 }
 
 async function ensureCartId(
@@ -75,7 +90,10 @@ async function ensureCartId(
     publishableKey,
     {},
   );
-  const id = data.cart!.id;
+  if (!data.cart) {
+    throw new Error('offer-carts response had no cart');
+  }
+  const id = data.cart.id;
   writeCartId(id);
   return id;
 }
@@ -185,7 +203,9 @@ export function defineOfferCartView(tagName = 'offer-cart-view'): void {
         });
         if (!response.ok) return null;
         const body = await response.json();
-        return body.cart;
+        const cart = offerCartResponseSchema.parse(body).cart;
+        if (!cart) return null;
+        return { items: cart.items ?? [], total: cart.total ?? 0 };
       }
 
       wireCheckout(

@@ -197,6 +197,46 @@ medusaIntegrationTestRunner({
           status: 'rejected',
         });
       });
+
+      it('keeps two incoming rows for one Part+Vehicle position as separate active rows when they only differ by steering', async () => {
+        const leftRow = buildRow('ambiguous-steering');
+        const rightRow: IncomingFitment = {
+          ...leftRow,
+          steering: 'right',
+        };
+        leftRow.steering = 'left';
+
+        const { partId, vehicleId } = await seedPosition(
+          leftRow,
+          'ambiguous-steering',
+        );
+
+        await runFitmentSync(
+          createStubFitmentFeed([leftRow, rightRow]),
+          partModuleService,
+          vehicleModuleService,
+        );
+
+        const fitments = await vehicleModuleService.listFitments({
+          part_id: partId,
+          vehicle_id: vehicleId,
+        });
+        expect(fitments).toHaveLength(2);
+        expect(fitments).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              source: 'auto:stub',
+              status: 'active',
+              steering: 'left',
+            }),
+            expect.objectContaining({
+              source: 'auto:stub',
+              status: 'active',
+              steering: 'right',
+            }),
+          ]),
+        );
+      });
     });
   },
 });

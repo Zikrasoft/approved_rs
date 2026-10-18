@@ -7,6 +7,7 @@ import { VIN_LOOKUP_MODULE } from '../../../modules/vin-lookup';
 import type VinLookupModuleService from '../../../modules/vin-lookup/service';
 import { StructuralOnlyVinDecoder } from '../../../lib/vin-decoder';
 import { matchVehicleForVin } from '../../../lib/vin-vehicle-match';
+import { vehicleResponseSchema } from '../../../modules/vehicle/store-response';
 
 const bodySchema = z.object({
   vin: z
@@ -14,15 +15,6 @@ const bodySchema = z.object({
     .trim()
     .toUpperCase()
     .regex(/^[A-HJ-NPR-Z0-9]{17}$/),
-});
-
-const vehicleResponseSchema = z.object({
-  id: z.string(),
-  make: z.string(),
-  model: z.string(),
-  engine_code: z.string(),
-  year_from: z.number().nullable(),
-  year_to: z.number().nullable(),
 });
 
 const decoder = new StructuralOnlyVinDecoder();
