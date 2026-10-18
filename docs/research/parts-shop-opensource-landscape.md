@@ -16,7 +16,7 @@ No platform — general or automotive-specific — models Fitment or VIN lookup;
 every fitment feature anyone ships, at any price point, is a hand-populated
 Year/Make/Model/Engine join table, because the only thing worth adopting
 (manufacturer-verified fitment data: TecDoc in Europe, ACES/PIES in the US) is
-closed, commercially licensed *data*, not software. **Spree is the one
+closed, commercially licensed _data_, not software. **Spree is the one
 platform that changes the shape of the comparison**: BSD-3-Clause core,
 free-tier native multi-vendor marketplace (`seller_id` on `Product`, a real
 Vendors API) that maps more directly onto "N suppliers" than anything else
@@ -74,7 +74,7 @@ automotive-specific or generic-platform-plus-plugin:
 **New this pass:** checked Spree's own app store and marketplace docs
 explicitly for a fitment/compatibility bolt-on — none exists. Spree's
 multi-vendor marketplace (section 2 below) is a closer structural fit for
-*suppliers*, but it is not a fitment feature and nobody has wired one to it.
+_suppliers_, but it is not a fitment feature and nobody has wired one to it.
 
 ---
 
@@ -82,13 +82,13 @@ multi-vendor marketplace (section 2 below) is a closer structural fit for
 
 ### Spot-checks on the prior survey (re-verified this pass)
 
-| Claim (prior survey) | Verified | Source |
-|---|---|---|
-| Vendure switched to GPLv3 (Community) + a separate Commercial License (VCL) at v3.0 | **Confirmed, verbatim.** `license.md` at tag `v3.0.0`: "available under two different licenses: GNU GPLv3 as Vendure Community Edition / Vendure Commercial License (VCL)... default... without a valid VCL agreement, is the Open-Source GPLv3 license." | [P] `raw.githubusercontent.com/vendure-ecommerce/vendure/v3.0.0/LICENSE.md` |
-| Shopware's Collector/Processor is the documented markup-hiding pattern, with I/O forbidden in the processor | **Confirmed.** `CartDataCollectorInterface::collect()` is documented for querying "the database, API endpoints, or fetching data in any other way"; `CartProcessorInterface::process()` docs state it "must not execute queries, as it runs multiple times per request." | [P] developer.shopware.com guides (current URL: `.../checkout/cart/add-cart-processor-collector.html`; the exact path cited in the prior doc 404s today — Shopware reorganized its docs tree, content unchanged) |
-| Medusa ships a built-in Search Module, zero extra infrastructure, announced Sept 2026 | **Confirmed, with a correction.** Announced 2026-09-21 (`medusajs.com/blog/announcing-medusa-search`). The self-hosted path is real and free — a first-party `@medusajs/search-postgres` provider, keyword search only, no external service. **But** semantic and hybrid search are advertised as "on all Medusa Cloud plans" — i.e. the fancier half of "Medusa Search" is a managed-cloud feature, not something a self-hosted Vercel-pattern deploy gets for free. The prior doc's "zero extra infrastructure, materially stronger" framing holds for keyword search only; soften the "materially stronger" claim accordingly. | [P] `docs.medusajs.com/resources/infrastructure-modules/search`, `medusajs.com/blog/announcing-medusa-search` |
-| NHTSA vPIC is free, well-maintained, but explicitly US/Canada-scoped | **Confirmed.** No key required, up to 140 attributes/VIN, data "provided by manufacturers who make vehicles for sale in the United States," covering vehicles sold in the US since 1981; Canada coverage is a side effect of shared US specs, not a first-class input. | [P] official NHTSA vPIC docs via `vpic.nhtsa.dot.gov` |
-| Medusa's Pricing module has no cost/cost-price field; markup has to be hand-built via a Price List job | **Confirmed.** Docs describe Price Sets, Price Lists (conditional grouping) and Price Rules (a rule engine for tiered/contextual pricing) — no cost or cost-price concept anywhere in the module. | [P] `docs.medusajs.com/resources/commerce-modules/pricing` |
+| Claim (prior survey)                                                                                        | Verified                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Source                                                                                                                                                                                                           |
+| ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vendure switched to GPLv3 (Community) + a separate Commercial License (VCL) at v3.0                         | **Confirmed, verbatim.** `license.md` at tag `v3.0.0`: "available under two different licenses: GNU GPLv3 as Vendure Community Edition / Vendure Commercial License (VCL)... default... without a valid VCL agreement, is the Open-Source GPLv3 license."                                                                                                                                                                                                                                                                                                                                                                         | [P] `raw.githubusercontent.com/vendure-ecommerce/vendure/v3.0.0/LICENSE.md`                                                                                                                                      |
+| Shopware's Collector/Processor is the documented markup-hiding pattern, with I/O forbidden in the processor | **Confirmed.** `CartDataCollectorInterface::collect()` is documented for querying "the database, API endpoints, or fetching data in any other way"; `CartProcessorInterface::process()` docs state it "must not execute queries, as it runs multiple times per request."                                                                                                                                                                                                                                                                                                                                                          | [P] developer.shopware.com guides (current URL: `.../checkout/cart/add-cart-processor-collector.html`; the exact path cited in the prior doc 404s today — Shopware reorganized its docs tree, content unchanged) |
+| Medusa ships a built-in Search Module, zero extra infrastructure, announced Sept 2026                       | **Confirmed, with a correction.** Announced 2026-09-21 (`medusajs.com/blog/announcing-medusa-search`). The self-hosted path is real and free — a first-party `@medusajs/search-postgres` provider, keyword search only, no external service. **But** semantic and hybrid search are advertised as "on all Medusa Cloud plans" — i.e. the fancier half of "Medusa Search" is a managed-cloud feature, not something a self-hosted Vercel-pattern deploy gets for free. The prior doc's "zero extra infrastructure, materially stronger" framing holds for keyword search only; soften the "materially stronger" claim accordingly. | [P] `docs.medusajs.com/resources/infrastructure-modules/search`, `medusajs.com/blog/announcing-medusa-search`                                                                                                    |
+| NHTSA vPIC is free, well-maintained, but explicitly US/Canada-scoped                                        | **Confirmed.** No key required, up to 140 attributes/VIN, data "provided by manufacturers who make vehicles for sale in the United States," covering vehicles sold in the US since 1981; Canada coverage is a side effect of shared US specs, not a first-class input.                                                                                                                                                                                                                                                                                                                                                            | [P] official NHTSA vPIC docs via `vpic.nhtsa.dot.gov`                                                                                                                                                            |
+| Medusa's Pricing module has no cost/cost-price field; markup has to be hand-built via a Price List job      | **Confirmed.** Docs describe Price Sets, Price Lists (conditional grouping) and Price Rules (a rule engine for tiered/contextual pricing) — no cost or cost-price concept anywhere in the module.                                                                                                                                                                                                                                                                                                                                                                                                                                 | [P] `docs.medusajs.com/resources/commerce-modules/pricing`                                                                                                                                                       |
 
 Five spot-checks, all held up; one (Medusa Search) needed a cloud-vs-self-hosted
 correction. Everything else in the prior survey's Saleor/Vendure/Shopware/
@@ -109,7 +109,7 @@ re-re-verified line by line this pass, only these five claims were.
   `spreecommerce.org/pricing/` — the free **Community Edition** explicitly
   "covers marketplace (multi-vendor) and B2B capabilities," self-hosted. A
   separately-priced **Enterprise Edition** ("custom pricing," contact-sales,
-  no public number) adds multi-tenant *white-label* reselling, Shopify/
+  no public number) adds multi-tenant _white-label_ reselling, Shopify/
   WooCommerce sync, managed private-cloud hosting, SLA support and audit
   trails — none of which CarLab's single-brand, self-hosted scope needs.
 - **Fitment:** none, confirmed by an explicit search of Spree's own
@@ -133,7 +133,7 @@ re-re-verified line by line this pass, only these five claims were.
     This is the closest native match to this map's "each supplier/warehouse
     is a row with its own markup %" requirement found anywhere in this
     survey — but the semantics don't line up one-to-one: Spree's vendor model
-    assumes the vendor sets *their own* price and the platform skims a
+    assumes the vendor sets _their own_ price and the platform skims a
     commission, visible to the vendor. CarLab's model is the owner setting a
     hidden markup over a live Supplier Offer the "vendor" (Intercars,
     CarLab's own warehouse) never sees or prices themselves. Reusing this
@@ -192,15 +192,15 @@ re-re-verified line by line this pass, only these five claims were.
 
 ### Cross-cutting comparison (carried forward, Spree row added)
 
-| Platform | License (core) | Fitment | Search vs Typesense/Meilisearch | Admin: custom entity w/o fork | Markup-hiding mechanism | Runtime vs this repo |
-|---|---|---|---|---|---|---|
-| Saleor | BSD-3 [P] | none (1 paid agency bolt-on) | weak — real path is paid Algolia | no (iframe Apps only) | clean (`HANDLE_CHECKOUTS` price override) | Python — foreign |
-| Vendure | GPLv3 Core / VCL [P, re-verified] | none | comparable, zero-infra default | yes (plugin + TypeORM) | exact-fit (`OrderItemPriceCalculationStrategy`) | **TypeScript/Node — matches** |
-| Shopware | MIT [P] | none (DACH TecDoc agencies, paid) | ES bolt-on, heavier ops | yes (DAL custom entity) | best-documented (Collector/Processor) [P, re-verified] | PHP — foreign |
-| Sylius | MIT [P] | none | weakest besides Saleor | yes — official worked example is "Supplier" | least-documented, DIY | PHP — foreign |
-| Bagisto | MIT [P] | none | weakest (DB or ES only) | yes (package system) | DIY via custom Product Type | PHP — foreign |
-| Medusa | MIT [P] | none | strong self-hosted keyword; semantic/hybrid is Cloud-only [P, corrected] | yes (module system) | DIY via Price List job [P, re-verified] | TypeScript/Node — matches, but a separate app (this repo already tried and paused it, ADR-0034) |
-| **Spree** | **BSD-3 core / MIT storefront [P, new]** | none | **first-party Meilisearch, one config line [P, new]** | **yes — `rails g spree:admin:scaffold`, free tier [P, new]** | field exists, kept off Storefront API by scope; no live-feed pipeline out of the box [P, new] | **Ruby/Rails — foreign, and headless-only relative to this repo** |
+| Platform  | License (core)                           | Fitment                           | Search vs Typesense/Meilisearch                                          | Admin: custom entity w/o fork                                | Markup-hiding mechanism                                                                       | Runtime vs this repo                                                                            |
+| --------- | ---------------------------------------- | --------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Saleor    | BSD-3 [P]                                | none (1 paid agency bolt-on)      | weak — real path is paid Algolia                                         | no (iframe Apps only)                                        | clean (`HANDLE_CHECKOUTS` price override)                                                     | Python — foreign                                                                                |
+| Vendure   | GPLv3 Core / VCL [P, re-verified]        | none                              | comparable, zero-infra default                                           | yes (plugin + TypeORM)                                       | exact-fit (`OrderItemPriceCalculationStrategy`)                                               | **TypeScript/Node — matches**                                                                   |
+| Shopware  | MIT [P]                                  | none (DACH TecDoc agencies, paid) | ES bolt-on, heavier ops                                                  | yes (DAL custom entity)                                      | best-documented (Collector/Processor) [P, re-verified]                                        | PHP — foreign                                                                                   |
+| Sylius    | MIT [P]                                  | none                              | weakest besides Saleor                                                   | yes — official worked example is "Supplier"                  | least-documented, DIY                                                                         | PHP — foreign                                                                                   |
+| Bagisto   | MIT [P]                                  | none                              | weakest (DB or ES only)                                                  | yes (package system)                                         | DIY via custom Product Type                                                                   | PHP — foreign                                                                                   |
+| Medusa    | MIT [P]                                  | none                              | strong self-hosted keyword; semantic/hybrid is Cloud-only [P, corrected] | yes (module system)                                          | DIY via Price List job [P, re-verified]                                                       | TypeScript/Node — matches, but a separate app (this repo already tried and paused it, ADR-0034) |
+| **Spree** | **BSD-3 core / MIT storefront [P, new]** | none                              | **first-party Meilisearch, one config line [P, new]**                    | **yes — `rails g spree:admin:scaffold`, free tier [P, new]** | field exists, kept off Storefront API by scope; no live-feed pipeline out of the box [P, new] | **Ruby/Rails — foreign, and headless-only relative to this repo**                               |
 
 **What's new in this row that isn't in the others:** Spree is the only
 platform in the survey with a **native N-party entity** (`seller_id` /
@@ -232,7 +232,7 @@ Grounded in `AGENTS.md` at the repo root and a repo grep — not assumed:
   per `docs/adr/0034-pause-medusa-deploy-pending-shop-rebuild.md`. A custom
   build reuses this package directly, at 100% as much benefit as a Medusa
   rebuild would, since neither Spree nor Medusa nor any other platform would
-  let this package's logic run *inside* them — it stays an app-side
+  let this package's logic run _inside_ them — it stays an app-side
   TypeScript helper library either way.
 - **`packages/lead-crm`'s Vercel-Blob compare-and-swap store** (`data/leads.json`,
   jittered-backoff `updateRecords()`) is a real, production-proven
@@ -240,8 +240,8 @@ Grounded in `AGENTS.md` at the repo root and a repo grep — not assumed:
   under moderate write concurrency, not a relational Part/Fitment/Supplier-
   Offer/Order schema with joins, foreign keys and the query shapes a catalog
   needs (filter by make+model+year, join Part→Fitment→SupplierOffer). Reusing
-  its *pattern* (CAS loop, backoff) for a future Order-write path is
-  plausible; reusing its *storage* (one Blob, one JSON array) for the
+  its _pattern_ (CAS loop, backoff) for a future Order-write path is
+  plausible; reusing its _storage_ (one Blob, one JSON array) for the
   catalog itself is not — this repo has no Postgres today, and a custom
   build's first real new piece of infrastructure, same as any platform
   option, is a real database.
@@ -256,7 +256,7 @@ Grounded in `AGENTS.md` at the repo root and a repo grep — not assumed:
   hand-rolled i18n columns).
 - **`packages/site-kit`'s mechanics** (contact-control, visitor id, funnel
   tracking, `bootSiteKit`) are front-end/lead-pipeline concerns that attach
-  to *any* backend choice identically — a custom build gets no more or less
+  to _any_ backend choice identically — a custom build gets no more or less
   from them than a Spree- or Medusa-backed build would, since none of the
   platforms touch lead capture at all.
 - **The Astro `output: 'static'`/Vercel-adapter pattern itself** is the one
@@ -292,7 +292,7 @@ table above):
   JSON/XML/CSV. **US/Canada-scoped by construction**: data comes from what
   manufacturers submit for US-market vehicles; Serbia/EU-only trims, engines
   and homologation variants are not in it. [P]
-- **`MartinThoma/vin_decoder`** and similar — ISO 3779/3780 *structural*
+- **`MartinThoma/vin_decoder`** and similar — ISO 3779/3780 _structural_
   decode only (WMI/VDS/VIS split, check digit); cannot map a VIN to
   make/model/engine, because that mapping is manufacturer-proprietary and
   not published as an open dataset anywhere. [P]
@@ -347,8 +347,8 @@ admin over building one" standing decision:
      legal read (operating it as a backend for CarLab's own storefront very
      likely doesn't trigger GPLv3's distribution clause, per Vendure's own
      blog, but "very likely" is not "confirmed" for a commercial shop).
-   This document does not pick between them — that's #329's job, now
-   informed by a concrete Spree row that didn't exist before this pass.
+     This document does not pick between them — that's #329's job, now
+     informed by a concrete Spree row that didn't exist before this pass.
 3. **The "leaner custom Astro+DB" option is real but narrower than the prior
    survey framed it.** It reuses `packages/shop-catalog` fully and
    `packages/i18n`/`packages/site-kit` exactly as much as a platform-backed

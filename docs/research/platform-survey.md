@@ -186,8 +186,7 @@ general commerce platform. Details and the close calls are below.
   Thailand parts/accessories store, a Colombian motorcycle-parts store) — both
   are plain catalogs with no fitment feature.
 - **Catalog search vs Typesense/Meilisearch:** through 2.4.x, Elasticsearch
-  was the only alternative to default DB search. **Bagisto 2.5.0 (Oct 6
-  2026)** refactored this into an engine-agnostic Strategy+Manager
+  was the only alternative to default DB search. **Bagisto 2.5.0 (Oct 6 2026)** refactored this into an engine-agnostic Strategy+Manager
   architecture with pluggable search engines — but no Typesense or
   Meilisearch provider has been published for it yet, core or community.
   Default search without Elasticsearch has no faceting/typo-tolerance.
@@ -225,18 +224,18 @@ represent the raw cost at all.
 
 ### Cross-cutting comparison
 
-| Platform | License (core) | Fitment | Search vs Typesense/Meilisearch | Admin: custom entity w/o fork | Markup-hiding mechanism |
-|---|---|---|---|---|---|
-| Saleor | BSD-3 | none (1 paid agency bolt-on) | weak — real path is paid Algolia | no (iframe Apps only) | clean (`HANDLE_CHECKOUTS` price override) |
-| Vendure | GPLv3 (Core free) | none | comparable, zero-infra default | yes (plugin + TypeORM) | exact-fit (`OrderItemPriceCalculationStrategy`) |
-| Shopware | MIT | none (DACH TecDoc agencies, paid) | ES bolt-on, heavier ops | yes (DAL custom entity) | best-documented (Collector/Processor) |
-| Sylius | MIT | none | weakest besides Saleor | yes — official worked example is literally "Supplier" | least-documented, DIY |
-| Bagisto | MIT | none | weakest (DB or ES only) | yes (package system) | DIY via custom Product Type |
-| Medusa | MIT | none | strong, zero-infra built-in | yes (module system) | DIY via Price List job |
+| Platform | License (core)    | Fitment                           | Search vs Typesense/Meilisearch  | Admin: custom entity w/o fork                         | Markup-hiding mechanism                         |
+| -------- | ----------------- | --------------------------------- | -------------------------------- | ----------------------------------------------------- | ----------------------------------------------- |
+| Saleor   | BSD-3             | none (1 paid agency bolt-on)      | weak — real path is paid Algolia | no (iframe Apps only)                                 | clean (`HANDLE_CHECKOUTS` price override)       |
+| Vendure  | GPLv3 (Core free) | none                              | comparable, zero-infra default   | yes (plugin + TypeORM)                                | exact-fit (`OrderItemPriceCalculationStrategy`) |
+| Shopware | MIT               | none (DACH TecDoc agencies, paid) | ES bolt-on, heavier ops          | yes (DAL custom entity)                               | best-documented (Collector/Processor)           |
+| Sylius   | MIT               | none                              | weakest besides Saleor           | yes — official worked example is literally "Supplier" | least-documented, DIY                           |
+| Bagisto  | MIT               | none                              | weakest (DB or ES only)          | yes (package system)                                  | DIY via custom Product Type                     |
+| Medusa   | MIT               | none                              | strong, zero-infra built-in      | yes (module system)                                   | DIY via Price List job                          |
 
 **Takeaway:** every platform requires custom work for the two things that
 actually matter here — Fitment/VIN and the live-Supplier-price-with-hidden-
-Markup pipeline. What differs is how much *other* machinery (checkout, tax,
+Markup pipeline. What differs is how much _other_ machinery (checkout, tax,
 promotions, multi-currency, B2B workflows, a full admin SPA) you'd be
 adopting along with it, machinery CarLab's settled scope (RSD-only, pickup-
 only, no B2B) mostly doesn't need.
@@ -280,7 +279,7 @@ data dump — flagged explicitly as **not a legitimate or safe option**.
 NHTSA's vPIC API is free, well-maintained, and actively used, but is
 explicitly a US/Canada-market tool — coverage degrades sharply for European
 vehicles. Open-source VIN libraries (e.g. `MartinThoma/vin_decoder`) only do
-the ISO 3779/3780 *structural* decode (check digits, WMI/VDS/VIS split) —
+the ISO 3779/3780 _structural_ decode (check digits, WMI/VDS/VIS split) —
 they cannot map a VIN to make/model/engine, because that mapping is
 proprietary per-manufacturer and isn't published as an open dataset for any
 market. For Serbia/EU, real VIN-to-vehicle decoding realistically needs a

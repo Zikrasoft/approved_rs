@@ -97,7 +97,7 @@ validation (check digit, VDS/VIS parsing), not vehicle-spec decoding.
   the BeepAway VIN tool) are the same shape: an offline WMI table (600-2000+
   codes) plus ISO 3779 checksum/year-table logic, zero network calls, zero
   vehicle-spec data.
-- `nhtsa-vin-decoder` and `pyvin` (PyPI) are wrappers *around* the NHTSA vPIC
+- `nhtsa-vin-decoder` and `pyvin` (PyPI) are wrappers _around_ the NHTSA vPIC
   API itself (one adds an offline WMI fallback), not independent decoders, so
   they inherit vPIC's US bias from section 1 for anything beyond the WMI.
 
@@ -142,7 +142,7 @@ couldn't be scraped directly) confirms the model: **3 free VIN lookups/month,
 no credit card required**, monthly (not annual) subscription tiers above
 that, with an "always active, overage billed per-lookup" or "pause at quota"
 choice. Source: [vincario.com/pricing](https://www.vincario.com/pricing).
-Third-party resale listings (Zyla Labs / RapidAPI marketplace, *not*
+Third-party resale listings (Zyla Labs / RapidAPI marketplace, _not_
 Vincario's own pricing, flagged as such) show roughly: Basic $49.99/mo for 500
 requests, Pro $99.99/mo for 2,000, Pro Plus $199.99/mo for 7,000, Premium
 $499.99/mo for 15,000. Treat these as indicative only, not Vincario's
@@ -208,15 +208,15 @@ further here.
 
 ## Comparison table
 
-| Option | Coverage for BMW/German VINs | Depth of detail | Cost | Integration shape |
-|---|---|---|---|---|
-| NHTSA vPIC | Resolves WMI/manufacturer/plant only; check-digit + model-year validation fail on EU VINs (confirmed live) | Manufacturer/plant only; model, engine, trim, body all blank | Free | REST API (JSON/XML/CSV) |
-| `vininfo` (PyPI) / `vin-decoder` (npm) and similar | Works for any ISO 3779 VIN: country/region/manufacturer, year-candidate, checksum | WMI-level only; extra engine/trim tables exist for AvtoVAZ/Ford AU/Nissan/Opel/Renault, not BMW | Free (open-source libraries) | Embedded library (npm/pip), no network call |
-| Vincario (vindecoder.eu) | Good: recognises BMW, returns real engine/body/series/dimensions | Spec-level (~50 fields), no paint/trim/fluid | 3 free lookups/mo, paid subscription tiers above that (reseller listings suggest roughly $50-$500/mo for 500-15,000 lookups/mo) | REST API, self-serve docs + GitHub samples |
-| carVertical Business API | Unclear (no public field list); consumer BMW-capable | History/market-value focus; spec depth undocumented | Consumer ~EUR 28/report; B2B custom, "from EUR 119.90/10 reports" | REST API, contact-gated for B2B |
-| autoDNA | Strong CEE registry data, general EU coverage | Vehicle-history report, not spec; no public decode fields | EUR 24.99/report down to ~EUR 9.59/report at volume | Partner-only WebAPI, no public docs |
-| VehicleDatabases.com Europe VIN Decode | Explicitly names BMW/Mercedes/Audi/VW/Porsche | Spec-level (~20 fields: make/model/trim/body/engine type/displacement/cylinders/hp/kW/driveline/ABS), no paint/trim/fluid | 15 free credits, then contact for pricing | REST API, public docs |
-| TecDoc (flag only) | Not evaluated here (sibling ticket) | Possibly deeper, since tied to OE parts fitment rather than a generic spec API | Enterprise licensing | REST API bundled with parts-catalogue data |
+| Option                                             | Coverage for BMW/German VINs                                                                               | Depth of detail                                                                                                           | Cost                                                                                                                            | Integration shape                           |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| NHTSA vPIC                                         | Resolves WMI/manufacturer/plant only; check-digit + model-year validation fail on EU VINs (confirmed live) | Manufacturer/plant only; model, engine, trim, body all blank                                                              | Free                                                                                                                            | REST API (JSON/XML/CSV)                     |
+| `vininfo` (PyPI) / `vin-decoder` (npm) and similar | Works for any ISO 3779 VIN: country/region/manufacturer, year-candidate, checksum                          | WMI-level only; extra engine/trim tables exist for AvtoVAZ/Ford AU/Nissan/Opel/Renault, not BMW                           | Free (open-source libraries)                                                                                                    | Embedded library (npm/pip), no network call |
+| Vincario (vindecoder.eu)                           | Good: recognises BMW, returns real engine/body/series/dimensions                                           | Spec-level (~50 fields), no paint/trim/fluid                                                                              | 3 free lookups/mo, paid subscription tiers above that (reseller listings suggest roughly $50-$500/mo for 500-15,000 lookups/mo) | REST API, self-serve docs + GitHub samples  |
+| carVertical Business API                           | Unclear (no public field list); consumer BMW-capable                                                       | History/market-value focus; spec depth undocumented                                                                       | Consumer ~EUR 28/report; B2B custom, "from EUR 119.90/10 reports"                                                               | REST API, contact-gated for B2B             |
+| autoDNA                                            | Strong CEE registry data, general EU coverage                                                              | Vehicle-history report, not spec; no public decode fields                                                                 | EUR 24.99/report down to ~EUR 9.59/report at volume                                                                             | Partner-only WebAPI, no public docs         |
+| VehicleDatabases.com Europe VIN Decode             | Explicitly names BMW/Mercedes/Audi/VW/Porsche                                                              | Spec-level (~20 fields: make/model/trim/body/engine type/displacement/cylinders/hp/kW/driveline/ABS), no paint/trim/fluid | 15 free credits, then contact for pricing                                                                                       | REST API, public docs                       |
+| TecDoc (flag only)                                 | Not evaluated here (sibling ticket)                                                                        | Possibly deeper, since tied to OE parts fitment rather than a generic spec API                                            | Enterprise licensing                                                                                                            | REST API bundled with parts-catalogue data  |
 
 ## Recommendation for the carlab.rs BMW pilot
 

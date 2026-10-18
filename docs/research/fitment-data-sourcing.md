@@ -84,7 +84,7 @@ European BMW pilot.
   Neither the percentage nor the minimum is published anywhere I could find
   **[NOT ESTABLISHED]**.
 - Data points that exist, none of them a webshop data licence:
-  - TecAlliance's own shop sells the *TecDoc Catalogue* end-user app (Classic,
+  - TecAlliance's own shop sells the _TecDoc Catalogue_ end-user app (Classic,
     Garage Data, Garage Data Pro) on 12-month terms with a 14-day card trial;
     the price is only shown after login. This is a workshop lookup tool, not a
     data feed for a shop. [P] [TecAlliance shop, Garage Data](https://shop.tecalliance.net/tecdoc-catalogue-garage-data/5637251097.p)
@@ -118,12 +118,12 @@ European BMW pilot.
 
 ### OEM-catalogue (ETK-style) data
 
-| Vendor | What | Price | Source |
-| --- | --- | --- | --- |
-| **BMW AOS** (BMW's own Aftersales Online System) | Official ETK for independent operators. "Registration, use of the electronic parts catalog and the digital service booklet are free of charge." Repair info ticket from EUR 5/hour to EUR 850/year. | Parts catalogue free | [P] [AOS price list 01.02.2024 (PDF, mirrored on partnerzy-bmw.pl)](https://partnerzy-bmw.pl/file-download/MjE3) |
-| **Parts-Catalogs** (parts-catalogs.com) | OEM catalogues for 49 brands incl. BMW, VIN search, HTML widget or REST API, monthly updates. "1 request is a search of parts for 1 car, which is valid 24 hours and provides info about 200 parts." | EUR 229/mo (1,000 req) to EUR 1,299/mo (10,000 req); 2-day free demo | [P] [parts-catalogs.com/eu](https://www.parts-catalogs.com/eu) |
-| **Laximo** (Russia) | Laximo.OEM original catalogues with VIN identification and applicability; widely embedded by Russian shop platforms (ABCP, Parts-Soft, Docpart). | Not published on laximo.ru; one plugin vendor references a separately bought Laximo.OEM licence | [S] [Parts-Soft](https://parts-soft.ru/categories/vozmozhnosti-sistemy/originalnye-katalogi-laximo.html), [S] [Webasyst plugin](https://www.webasyst.ru/store/plugin/shop/laximo/) |
-| **partslink24** | Multi-brand OE catalogue (BMW included) for workshops, ordering from dealers. | Search snippet: USD 23/mo yearly, 35/mo monthly, 12/day. Primary page is JS-only. | [S] [partslink24 subscription](https://www.partslink24.com/portal-ui/subscription-menu/subscription) |
+| Vendor                                           | What                                                                                                                                                                                                 | Price                                                                                           | Source                                                                                                                                                                             |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **BMW AOS** (BMW's own Aftersales Online System) | Official ETK for independent operators. "Registration, use of the electronic parts catalog and the digital service booklet are free of charge." Repair info ticket from EUR 5/hour to EUR 850/year.  | Parts catalogue free                                                                            | [P] [AOS price list 01.02.2024 (PDF, mirrored on partnerzy-bmw.pl)](https://partnerzy-bmw.pl/file-download/MjE3)                                                                   |
+| **Parts-Catalogs** (parts-catalogs.com)          | OEM catalogues for 49 brands incl. BMW, VIN search, HTML widget or REST API, monthly updates. "1 request is a search of parts for 1 car, which is valid 24 hours and provides info about 200 parts." | EUR 229/mo (1,000 req) to EUR 1,299/mo (10,000 req); 2-day free demo                            | [P] [parts-catalogs.com/eu](https://www.parts-catalogs.com/eu)                                                                                                                     |
+| **Laximo** (Russia)                              | Laximo.OEM original catalogues with VIN identification and applicability; widely embedded by Russian shop platforms (ABCP, Parts-Soft, Docpart).                                                     | Not published on laximo.ru; one plugin vendor references a separately bought Laximo.OEM licence | [S] [Parts-Soft](https://parts-soft.ru/categories/vozmozhnosti-sistemy/originalnye-katalogi-laximo.html), [S] [Webasyst plugin](https://www.webasyst.ru/store/plugin/shop/laximo/) |
+| **partslink24**                                  | Multi-brand OE catalogue (BMW included) for workshops, ordering from dealers.                                                                                                                        | Search snippet: USD 23/mo yearly, 35/mo monthly, 12/day. Primary page is JS-only.               | [S] [partslink24 subscription](https://www.partslink24.com/portal-ui/subscription-menu/subscription)                                                                               |
 
 Notes on each:
 
@@ -159,7 +159,7 @@ Notes on each:
 - **QUANTUM-AutoMARKET** (Belgrade, above) is the local route into TecDoc
   itself, and the cheapest one to ask first.
 - **AUTODOC**: no data-licensing offer for resellers found. Its B2B arms are a
-  marketplace (selling *through* AUTODOC) and AUTODOC PRO for garages. A RapidAPI
+  marketplace (selling _through_ AUTODOC) and AUTODOC PRO for garages. A RapidAPI
   listing "Autodoc Parts Catalog" exists; I could not confirm it is operated by
   AUTODOC. [S] [AUTODOC FAQ](https://autodoc.group/en/faq/),
   [RapidAPI listing](https://rapidapi.com/autodoc/api/autodoc-parts-catalog)
@@ -204,7 +204,7 @@ full from their own docs: [P]
 - Inter Cars Serbia (Inter Cars d.o.o.) is described as a top-3 wholesaler at
   about EUR 40-45 m revenue, mostly B2B. [S]
   [Aftermarket substack, Serbia 2025](https://aftermarket.substack.com/p/serbia-automotive-aftermarket-2025)
-- Inter Cars' own *e-catalog* for workshops does vehicle lookup, almost
+- Inter Cars' own _e-catalog_ for workshops does vehicle lookup, almost
   certainly on TecDoc, but it is a UI for their customers, not licensed data you
   can republish **[NOT ESTABLISHED beyond the product page title]**.
   [S] [Inter Cars e-Catalog](https://intercars.com/en/business-solutions-inter-cars/offer-for-workshop/e-catalog)
@@ -221,7 +221,7 @@ use, because stock maps onto TecDoc articles without matching by hand.
   prices, packaging and assets. To create or receive ACES files "one must
   subscribe to one of the VCdb packages." [P]
   [Auto Care, Data Standards subscriptions](https://www.autocare.org/data-standards/subscriptions);
-  [P] [ACES](https://www.autocare.org/aces), [P] [PIES](https://www.autocare.org/data-standards/product-information-exchange-standard-(pies))
+  [P] [ACES](https://www.autocare.org/aces), [P] [PIES](<https://www.autocare.org/data-standards/product-information-exchange-standard-(pies)>)
 - **Cost of the reference data, not of any fitment data:** Light Duty VCdb is
   tiered by revenue, from USD 3,150 member / 4,410 non-member (under USD 1 m)
   to USD 8,625 / 12,075 (over USD 10 bn); an all-in Entry Level Package is
@@ -281,16 +281,16 @@ Verdict: not adaptable to this pilot at any useful cost. Skip.
 
 ## Comparison
 
-| Source | Coverage | Cost | Access lead time | BMW ~2.0 L pilot fit |
-| --- | --- | --- | --- | --- |
+| Source                                                        | Coverage                                                                                                                                                          | Cost                                                                                                                 | Access lead time                                                                       | BMW ~2.0 L pilot fit                                                                                                                                                                                     |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **TecDoc** (via QUANTUM-AutoMARKET, Belgrade, or TecAlliance) | Aftermarket articles from 1,000+ brands, KType linkage with date and variant criteria, OE-number cross-refs both ways. No OEM diagrams, no OEM-only parts. [P][S] | Not published. Reported as % of turnover vs annual minimum [S]; small modular deals have existed (GBP 600/yr UK) [S] | Unpublished; partner sale, then integration (3 to 6 months for a full shop build, [S]) | **High** for service parts on N20/B48/B47/N47 cars (filters, brakes, suspension, belts, ignition): exactly what an independent shop sells. Weak on gearbox/steering-dependent parts (KType granularity). |
-| **BMW AOS** | Official ETK, complete OEM data, VIN, diagrams. [P] | Parts catalogue free [P] | Self-registration; EEA/CH domicile likely required [S] | Perfect data, unusable as a feed: portal only, redistribution rights unknown, Serbian company may not qualify. Useful for staff verification. |
-| **Parts-Catalogs** | 49 brands incl. BMW, OEM diagrams via VIN, REST API or HTML widget [P] | EUR 229-1,299/mo by requests [P] | "Within an hour" for the widget; 2-day demo [P] | **High** for the ETK half of germsp.ru. Data provenance and redistribution rights unverified. |
-| **Laximo** | OEM catalogues with VIN and applicability, used by most Russian shop platforms [S] | Not published | Russian vendor, rouble billing | Technically fits; commercially awkward from Serbia. Second choice to Parts-Catalogs. |
-| **partslink24** | Multi-brand OE lookup and dealer ordering [S] | ~USD 23-35/mo per user [S] | Online signup | Staff tool only, no shop feed. |
-| **Inter Cars API** | Stock, price, ordering, SKU to TecDoc id. No fitment, no OE cross-refs. [P] | API free, integration on you [S] | Through the sales rep [P] | **Supply side only.** Needed for prices and stock, does not replace fitment data. |
-| **ACES/PIES** | North American vehicles (US/CA/MX) [P] | USD 2,500-12,075/yr for reference DBs, no fitment rows [P] | Immediate subscription | **None.** Wrong market. |
-| Scraped/"TecDoc alternative" APIs, leaked ETK dumps | Varies | Cheap | Immediate | Do not build on it: licence and takedown risk on the shop's core asset. |
+| **BMW AOS**                                                   | Official ETK, complete OEM data, VIN, diagrams. [P]                                                                                                               | Parts catalogue free [P]                                                                                             | Self-registration; EEA/CH domicile likely required [S]                                 | Perfect data, unusable as a feed: portal only, redistribution rights unknown, Serbian company may not qualify. Useful for staff verification.                                                            |
+| **Parts-Catalogs**                                            | 49 brands incl. BMW, OEM diagrams via VIN, REST API or HTML widget [P]                                                                                            | EUR 229-1,299/mo by requests [P]                                                                                     | "Within an hour" for the widget; 2-day demo [P]                                        | **High** for the ETK half of germsp.ru. Data provenance and redistribution rights unverified.                                                                                                            |
+| **Laximo**                                                    | OEM catalogues with VIN and applicability, used by most Russian shop platforms [S]                                                                                | Not published                                                                                                        | Russian vendor, rouble billing                                                         | Technically fits; commercially awkward from Serbia. Second choice to Parts-Catalogs.                                                                                                                     |
+| **partslink24**                                               | Multi-brand OE lookup and dealer ordering [S]                                                                                                                     | ~USD 23-35/mo per user [S]                                                                                           | Online signup                                                                          | Staff tool only, no shop feed.                                                                                                                                                                           |
+| **Inter Cars API**                                            | Stock, price, ordering, SKU to TecDoc id. No fitment, no OE cross-refs. [P]                                                                                       | API free, integration on you [S]                                                                                     | Through the sales rep [P]                                                              | **Supply side only.** Needed for prices and stock, does not replace fitment data.                                                                                                                        |
+| **ACES/PIES**                                                 | North American vehicles (US/CA/MX) [P]                                                                                                                            | USD 2,500-12,075/yr for reference DBs, no fitment rows [P]                                                           | Immediate subscription                                                                 | **None.** Wrong market.                                                                                                                                                                                  |
+| Scraped/"TecDoc alternative" APIs, leaked ETK dumps           | Varies                                                                                                                                                            | Cheap                                                                                                                | Immediate                                                                              | Do not build on it: licence and takedown risk on the shop's core asset.                                                                                                                                  |
 
 ## Recommendation for the BMW 2.0 L pilot
 
