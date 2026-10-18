@@ -13,6 +13,7 @@ export const PathBuilder = {
   partsCategory: (locale: Locale, slug: PartsCategorySlug) =>
     `/${locale}/parts/${slug}/`,
   shopPart: (locale: Locale, id: string) => `/${locale}/shop/${id}/`,
+  shopVehicles: (locale: Locale) => `/${locale}/shop/vehicles/`,
   work: (locale: Locale, slug: string) => `/${locale}/works/${slug}/`,
   bmw: (locale: Locale) => `/${locale}/bmw/`,
   contact: (locale: Locale) => `/${locale}/contact/`,

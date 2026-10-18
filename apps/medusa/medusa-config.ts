@@ -25,5 +25,8 @@ export default defineConfig({
     {
       resolve: './src/modules/part',
     },
+    {
+      resolve: './src/modules/vehicle',
+    },
   ],
 });
