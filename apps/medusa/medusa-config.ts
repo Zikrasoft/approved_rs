@@ -29,6 +29,9 @@ export default defineConfig({
       resolve: './src/modules/vehicle',
     },
     {
+      resolve: './src/modules/vin-lookup',
+    },
+    {
       resolve: '@medusajs/medusa/search',
       options: {
         default_provider: 'typesense',
