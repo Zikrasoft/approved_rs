@@ -10,6 +10,7 @@ import {
   Text,
 } from '@medusajs/ui';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type PartIdentifier = {
   id: string;
@@ -60,6 +61,8 @@ const vehicleLabel = (vehicle: Vehicle): string =>
   `${vehicle.make} ${vehicle.model} (${vehicle.engine_code})`;
 
 const FitmentsPage = () => {
+  const { t } = useTranslation('carlabAdmin');
+
   const [query, setQuery] = useState('');
   const [searched, setSearched] = useState(false);
   const [parts, setParts] = useState<Part[]>([]);
@@ -153,33 +156,35 @@ const FitmentsPage = () => {
 
   return (
     <Container className="flex flex-col gap-y-6">
-      <Heading level="h1">Fitment curation</Heading>
+      <Heading level="h1">{t('fitments.heading')}</Heading>
 
       <div className="flex flex-col gap-y-2">
-        <Label>1. Find or create the Part</Label>
+        <Label>{t('fitments.step1Label')}</Label>
         {selectedPart ? (
           <div className="flex items-center justify-between">
             <Text>
-              {selectedPart.name} ({selectedPart.identifiers.length}{' '}
-              identifier(s))
+              {t('fitments.identifierCount', {
+                name: selectedPart.name,
+                count: selectedPart.identifiers.length,
+              })}
             </Text>
             <Button
               variant="secondary"
               size="small"
               onClick={() => setSelectedPart(null)}
             >
-              Change
+              {t('fitments.change')}
             </Button>
           </div>
         ) : (
           <>
             <div className="flex gap-x-2">
               <Input
-                placeholder="OEM / manufacturer number or brand"
+                placeholder={t('fitments.searchPlaceholder')}
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
               />
-              <Button onClick={search}>Search</Button>
+              <Button onClick={search}>{t('fitments.search')}</Button>
             </div>
             {parts.length > 0 && (
               <Table>
@@ -197,7 +202,7 @@ const FitmentsPage = () => {
                           size="small"
                           onClick={() => setSelectedPart(part)}
                         >
-                          Use this Part
+                          {t('fitments.useThisPart')}
                         </Button>
                       </Table.Cell>
                     </Table.Row>
@@ -207,32 +212,34 @@ const FitmentsPage = () => {
             )}
             {searched && parts.length === 0 && (
               <div className="flex flex-col gap-y-2 border-t pt-2">
-                <Text size="small">No matching Part. Create a new one:</Text>
+                <Text size="small">{t('fitments.noMatch')}</Text>
                 <Input
-                  placeholder="Part name"
+                  placeholder={t('fitments.partNamePlaceholder')}
                   value={newPartName}
                   onChange={(event) => setNewPartName(event.target.value)}
                 />
                 <div className="flex gap-x-2">
                   <Select value={newType} onValueChange={setNewType}>
                     <Select.Trigger>
-                      <Select.Value placeholder="Identifier type" />
+                      <Select.Value
+                        placeholder={t('fitments.identifierTypePlaceholder')}
+                      />
                     </Select.Trigger>
                     <Select.Content>
                       {IDENTIFIER_TYPES.map((type) => (
                         <Select.Item key={type} value={type}>
-                          {type}
+                          {t(`fitments.identifierTypes.${type}`)}
                         </Select.Item>
                       ))}
                     </Select.Content>
                   </Select>
                   <Input
-                    placeholder="Brand"
+                    placeholder={t('fitments.brandPlaceholder')}
                     value={newBrand}
                     onChange={(event) => setNewBrand(event.target.value)}
                   />
                   <Input
-                    placeholder="Number"
+                    placeholder={t('fitments.numberPlaceholder')}
                     value={newValue}
                     onChange={(event) => setNewValue(event.target.value)}
                   />
@@ -241,7 +248,7 @@ const FitmentsPage = () => {
                   onClick={createPart}
                   disabled={!newPartName || !newBrand || !newValue}
                 >
-                  Create Part
+                  {t('fitments.createPart')}
                 </Button>
               </div>
             )}
@@ -250,10 +257,10 @@ const FitmentsPage = () => {
       </div>
 
       <div className="flex flex-col gap-y-2">
-        <Label>2. Pick the Vehicle (catalogue only)</Label>
+        <Label>{t('fitments.step2Label')}</Label>
         <Select value={vehicleId} onValueChange={setVehicleId}>
           <Select.Trigger>
-            <Select.Value placeholder="Select a Vehicle" />
+            <Select.Value placeholder={t('fitments.vehiclePlaceholder')} />
           </Select.Trigger>
           <Select.Content>
             {vehicles.map((vehicle) => (
@@ -266,7 +273,7 @@ const FitmentsPage = () => {
       </div>
 
       <div className="flex flex-col gap-y-2">
-        <Label>3. Narrowing criteria (optional)</Label>
+        <Label>{t('fitments.step3Label')}</Label>
         <div className="flex gap-x-2">
           <Input
             type="date"
@@ -280,44 +287,52 @@ const FitmentsPage = () => {
           />
           <Select value={steering} onValueChange={setSteering}>
             <Select.Trigger>
-              <Select.Value placeholder="Steering" />
+              <Select.Value placeholder={t('fitments.steeringPlaceholder')} />
             </Select.Trigger>
             <Select.Content>
               {STEERING_OPTIONS.map((side) => (
                 <Select.Item key={side} value={side}>
-                  {side}
+                  {t(`fitments.steeringOptions.${side}`)}
                 </Select.Item>
               ))}
             </Select.Content>
           </Select>
           <Select value={gearbox} onValueChange={setGearbox}>
             <Select.Trigger>
-              <Select.Value placeholder="Gearbox" />
+              <Select.Value placeholder={t('fitments.gearboxPlaceholder')} />
             </Select.Trigger>
             <Select.Content>
               {GEARBOX_OPTIONS.map((type) => (
                 <Select.Item key={type} value={type}>
-                  {type}
+                  {t(`fitments.gearboxOptions.${type}`)}
                 </Select.Item>
               ))}
             </Select.Content>
           </Select>
         </div>
         <Button onClick={createFitment} disabled={!selectedPart || !vehicleId}>
-          Create Fitment (manual, active)
+          {t('fitments.createFitment')}
         </Button>
       </div>
 
       {fitments.length > 0 && (
         <div className="flex flex-col gap-y-2">
-          <Label>Existing Fitment rows for this Part/Vehicle</Label>
+          <Label>{t('fitments.existingRows')}</Label>
           <Table>
             <Table.Header>
               <Table.Row>
-                <Table.HeaderCell>Source</Table.HeaderCell>
-                <Table.HeaderCell>Status</Table.HeaderCell>
-                <Table.HeaderCell>Steering</Table.HeaderCell>
-                <Table.HeaderCell>Gearbox</Table.HeaderCell>
+                <Table.HeaderCell>
+                  {t('fitments.columns.source')}
+                </Table.HeaderCell>
+                <Table.HeaderCell>
+                  {t('fitments.columns.status')}
+                </Table.HeaderCell>
+                <Table.HeaderCell>
+                  {t('fitments.columns.steering')}
+                </Table.HeaderCell>
+                <Table.HeaderCell>
+                  {t('fitments.columns.gearbox')}
+                </Table.HeaderCell>
                 <Table.HeaderCell />
               </Table.Row>
             </Table.Header>
@@ -325,9 +340,22 @@ const FitmentsPage = () => {
               {fitments.map((fitment) => (
                 <Table.Row key={fitment.id}>
                   <Table.Cell>{fitment.source}</Table.Cell>
-                  <Table.Cell>{fitment.status}</Table.Cell>
-                  <Table.Cell>{fitment.steering ?? '—'}</Table.Cell>
-                  <Table.Cell>{fitment.gearbox ?? '—'}</Table.Cell>
+                  <Table.Cell>
+                    {fitment.status === 'active' ||
+                    fitment.status === 'rejected'
+                      ? t(`fitments.statusValues.${fitment.status}`)
+                      : fitment.status}
+                  </Table.Cell>
+                  <Table.Cell>
+                    {fitment.steering
+                      ? t(`fitments.steeringOptions.${fitment.steering}`)
+                      : '—'}
+                  </Table.Cell>
+                  <Table.Cell>
+                    {fitment.gearbox
+                      ? t(`fitments.gearboxOptions.${fitment.gearbox}`)
+                      : '—'}
+                  </Table.Cell>
                   <Table.Cell>
                     {fitment.status === 'active' && (
                       <Button
@@ -335,7 +363,7 @@ const FitmentsPage = () => {
                         size="small"
                         onClick={() => rejectFitment(fitment.id)}
                       >
-                        Reject
+                        {t('fitments.reject')}
                       </Button>
                     )}
                   </Table.Cell>
@@ -350,7 +378,8 @@ const FitmentsPage = () => {
 };
 
 export const config = defineRouteConfig({
-  label: 'Fitments',
+  label: 'menu.fitments',
+  translationNs: 'carlabAdmin',
 });
 
 export default FitmentsPage;

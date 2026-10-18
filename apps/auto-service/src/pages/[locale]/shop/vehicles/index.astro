@@ -5,6 +5,7 @@ import { z } from 'zod';
 
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
+import SelectField from '@/components/SelectField.astro';
 import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 import { content } from '@/i18n/content';
@@ -109,58 +110,31 @@ const parts = vehicle
 
     <form method="get" class="card flex flex-col gap-4 p-5 sm:p-6">
       <div class="grid gap-4 sm:grid-cols-3">
-        <label class="flex flex-col gap-1 text-sm font-semibold text-ink">
-          {copy.makeLabel}
-          <select
-            name="make"
-            class="rounded-md border border-line bg-base px-3 py-2 text-sm"
-          >
-            <option value="">{copy.placeholderOption}</option>
-            {
-              makes.map((option) => (
-                <option value={option} selected={option === make}>
-                  {option}
-                </option>
-              ))
-            }
-          </select>
-        </label>
+        <SelectField
+          name="make"
+          label={copy.makeLabel}
+          placeholder={copy.placeholderOption}
+          options={makes}
+          selected={make}
+        />
 
-        <label class="flex flex-col gap-1 text-sm font-semibold text-ink">
-          {copy.modelLabel}
-          <select
-            name="model"
-            disabled={!make}
-            class="rounded-md border border-line bg-base px-3 py-2 text-sm disabled:opacity-50"
-          >
-            <option value="">{copy.placeholderOption}</option>
-            {
-              models.map((option) => (
-                <option value={option} selected={option === model}>
-                  {option}
-                </option>
-              ))
-            }
-          </select>
-        </label>
+        <SelectField
+          name="model"
+          label={copy.modelLabel}
+          placeholder={copy.placeholderOption}
+          options={models}
+          selected={model}
+          disabled={!make}
+        />
 
-        <label class="flex flex-col gap-1 text-sm font-semibold text-ink">
-          {copy.engineLabel}
-          <select
-            name="engine"
-            disabled={!model}
-            class="rounded-md border border-line bg-base px-3 py-2 text-sm disabled:opacity-50"
-          >
-            <option value="">{copy.placeholderOption}</option>
-            {
-              engines.map((option) => (
-                <option value={option} selected={option === engine}>
-                  {option}
-                </option>
-              ))
-            }
-          </select>
-        </label>
+        <SelectField
+          name="engine"
+          label={copy.engineLabel}
+          placeholder={copy.placeholderOption}
+          options={engines}
+          selected={engine}
+          disabled={!model}
+        />
       </div>
 
       <button type="submit" class="btn btn-primary self-start">

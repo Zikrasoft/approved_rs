@@ -341,7 +341,7 @@ importers:
         specifier: 2.9.0
         version: 2.9.0
 
-  apps/medusa:
+  apps/carlab-shop:
     dependencies:
       '@medusajs/admin-sdk':
         specifier: 2.21.2

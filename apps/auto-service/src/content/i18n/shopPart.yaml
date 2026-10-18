@@ -11,7 +11,7 @@ columns:
   price: Цена
   stock: В наличии
   leadTime: Срок поставки
-buyButtonLabel: Купить, оплата при получении
+buyButtonLabel: Купить
 buyErrorLabel: Не удалось добавить в корзину. Попробуйте еще раз.
 leadTime:
   inStock: В наличии
@@ -19,7 +19,7 @@ leadTime:
 notFoundHeading: Запчасть не найдена
 notFoundBody: Возможно, ссылка устарела или запчасть убрали из каталога. Напишите нам, поможем найти нужную деталь.
 notFoundCta: Написать нам
-translatedFrom: 8452d104b45ddc4c
+translatedFrom: 699e9a4d39f2143b
 translations:
   sr:
     metaTitleSuffix: CarLab
@@ -41,7 +41,7 @@ translations:
     notFoundHeading: Delovi nisu pronađeni
     notFoundBody: Moguće da je link zastareo ili je deo uklonjen iz kataloga. Kontaktirajte nas, pomoći ćemo vam da pronađete potrebni deo.
     notFoundCta: Kontaktirajte nas
-    buyButtonLabel: Kupiti, plaćanje prilikom preuzimanja
+    buyButtonLabel: Kupiti
     buyErrorLabel: Nije moguće dodati u korpu. Pokušajte ponovo.
   en:
     metaTitleSuffix: CarLab
@@ -63,5 +63,5 @@ translations:
     notFoundHeading: Part not found
     notFoundBody: The link may be outdated or the part has been removed from the catalog. Contact us, we will help find the needed part.
     notFoundCta: Contact us
-    buyButtonLabel: Buy, payment on delivery
+    buyButtonLabel: Buy
     buyErrorLabel: Could not add to cart. Please try again.

@@ -1,10 +1,11 @@
 {
-  "name": "@podbor/medusa",
+  "name": "@podbor/carlab-shop",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "build": "medusa build",
     "start": "cd .medusa/server && medusa start",
+    "dev": "medusa develop",
     "develop": "medusa develop",
     "db:migrate": "medusa db:migrate",
     "typecheck": "tsc --noEmit",

@@ -1,4 +1,4 @@
-name: podbor-medusa
+name: podbor-carlab-shop
 services:
   postgres:
     image: postgres:16.15-alpine
@@ -6,6 +6,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: medusa
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     ports:
       - '127.0.0.1:55432:5432'
     healthcheck:
@@ -35,3 +37,4 @@ services:
       retries: 30
 volumes:
   typesense-data:
+  postgres-data:

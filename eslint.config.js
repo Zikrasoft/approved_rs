@@ -39,7 +39,7 @@ export default defineConfig(
     rules: { '@typescript-eslint/triple-slash-reference': 'off' },
   },
   {
-    files: ['apps/medusa/**/*.js'],
+    files: ['apps/carlab-shop/**/*.js'],
     rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
   {
