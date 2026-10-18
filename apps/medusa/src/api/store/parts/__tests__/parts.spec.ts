@@ -1,0 +1,141 @@
+import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
+import { Modules } from '@medusajs/framework/utils';
+import type { IApiKeyModuleService } from '@medusajs/framework/types';
+
+import { PART_MODULE } from '../../../../modules/part';
+import type PartModuleService from '../../../../modules/part/service';
+
+medusaIntegrationTestRunner({
+  moduleName: 'part',
+  testSuite: ({ api, getContainer }) => {
+    describe('GET /store/parts/:id', () => {
+      let partId: string;
+      let oemIdentifierId: string;
+      let mannIdentifierId: string;
+      let storeHeaders: { headers: { 'x-publishable-api-key': string } };
+
+      beforeAll(async () => {
+        const partModuleService: PartModuleService =
+          getContainer().resolve(PART_MODULE);
+        const apiKeyModuleService: IApiKeyModuleService =
+          getContainer().resolve(Modules.API_KEY);
+
+        const publishableKey = await apiKeyModuleService.createApiKeys({
+          title: 'part-detail-tests',
+          type: 'publishable',
+          created_by: 'test',
+        });
+        storeHeaders = {
+          headers: { 'x-publishable-api-key': publishableKey.token },
+        };
+
+        const part = await partModuleService.createParts({
+          name: 'Oil filter, BMW B47/B48 engines',
+        });
+        partId = part.id;
+
+        const oemIdentifier = await partModuleService.createPartIdentifiers({
+          part_id: partId,
+          type: 'oem',
+          brand: 'BMW',
+          value: '11 42 8575211',
+        });
+        oemIdentifierId = oemIdentifier.id;
+
+        const mannIdentifier = await partModuleService.createPartIdentifiers({
+          part_id: partId,
+          type: 'manufacturer-number',
+          brand: 'Mann-Filter',
+          value: 'HU 816 x',
+        });
+        mannIdentifierId = mannIdentifier.id;
+
+        await partModuleService.createSupplierOffers([
+          {
+            identifier_id: oemIdentifierId,
+            supplier: 'Intercars',
+            supplier_article_id: 'IC-11428575211',
+            price: 1850,
+            stock_quantity: 12,
+            lead_time: 'in_stock',
+          },
+          {
+            identifier_id: mannIdentifierId,
+            supplier: 'Intercars',
+            supplier_article_id: 'IC-HU816X',
+            price: 1200,
+            stock_quantity: 30,
+            lead_time: 'in_stock',
+          },
+          {
+            identifier_id: mannIdentifierId,
+            supplier: 'CarLab warehouse',
+            supplier_article_id: 'WH-HU816X',
+            price: 1150,
+            stock_quantity: 4,
+            lead_time: '3_days',
+          },
+        ]);
+      });
+
+      it('returns the part with its identifiers and their supplier offers', async () => {
+        const response = await api.get(`/store/parts/${partId}`, storeHeaders);
+
+        expect(response.status).toBe(200);
+        expect(response.data.part).toMatchObject({
+          id: partId,
+          name: 'Oil filter, BMW B47/B48 engines',
+        });
+
+        const identifiers = response.data.part.identifiers;
+        expect(identifiers).toHaveLength(2);
+
+        const oem = identifiers.find(
+          (identifier: { id: string }) => identifier.id === oemIdentifierId,
+        );
+        expect(oem).toMatchObject({
+          type: 'oem',
+          brand: 'BMW',
+          value: '11 42 8575211',
+        });
+        expect(oem.offers).toEqual([
+          expect.objectContaining({
+            supplier: 'Intercars',
+            supplier_article_id: 'IC-11428575211',
+            price: 1850,
+            stock_quantity: 12,
+            lead_time: 'in_stock',
+          }),
+        ]);
+
+        const mann = identifiers.find(
+          (identifier: { id: string }) => identifier.id === mannIdentifierId,
+        );
+        expect(mann.type).toBe('manufacturer-number');
+        expect(mann.brand).toBe('Mann-Filter');
+        expect(mann.offers).toHaveLength(2);
+      });
+
+      it('never includes a cost price or markup field in the response', async () => {
+        const response = await api.get(`/store/parts/${partId}`, storeHeaders);
+
+        const raw = JSON.stringify(response.data);
+        expect(raw).not.toMatch(/cost_price|markup/i);
+      });
+
+      it('rejects a second PartIdentifier with the same (type, brand, value)', async () => {
+        const partModuleService: PartModuleService =
+          getContainer().resolve(PART_MODULE);
+
+        await expect(
+          partModuleService.createPartIdentifiers({
+            part_id: partId,
+            type: 'oem',
+            brand: 'BMW',
+            value: '11 42 8575211',
+          }),
+        ).rejects.toThrow();
+      });
+    });
+  },
+});

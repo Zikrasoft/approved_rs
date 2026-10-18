@@ -21,4 +21,9 @@ export default defineConfig({
       cookieSecret: env.COOKIE_SECRET,
     },
   },
+  modules: [
+    {
+      resolve: './src/modules/part',
+    },
+  ],
 });
