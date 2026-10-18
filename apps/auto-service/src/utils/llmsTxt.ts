@@ -16,6 +16,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const pages = content(locale).pages;
   const services = content(locale).services;
   const site = content(locale).site;
+  const vehiclePicker = content(locale).vehiclePicker;
   const works = publishedWorks(await getCollection('works'));
 
   return renderBrandLlmsTxt({
@@ -67,6 +68,11 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
     ],
     other: [
       { label: site.common.homeLabel, href: url(PathBuilder.home(locale)) },
+      {
+        label: vehiclePicker.heading,
+        href: url(PathBuilder.shopVehicles(locale)),
+        note: vehiclePicker.lead,
+      },
       { label: pages.bmw.heading, href: url(PathBuilder.bmw(locale)) },
       { label: site.nav.contact, href: url(PathBuilder.contact(locale)) },
       {

@@ -1,0 +1,189 @@
+---
+export const prerender = false;
+
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import { localeFrom } from '@/i18n/config';
+import { PathBuilder } from '@/utils/paths';
+import { content } from '@/i18n/content';
+import {
+  fetchVehicleParts,
+  fetchVehicles,
+  findVehicle,
+  listEngines,
+  listMakes,
+  listModels,
+} from '@/utils/vehiclePicker';
+
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).vehiclePicker;
+
+const backendUrl = import.meta.env.MEDUSA_BACKEND_URL;
+const publishableKey = import.meta.env.MEDUSA_PUBLISHABLE_KEY;
+
+const params = Astro.url.searchParams;
+const make = params.get('make') ?? '';
+const model = params.get('model') ?? '';
+const engine = params.get('engine') ?? '';
+
+const vehicles = await fetchVehicles({ backendUrl, publishableKey });
+const makes = listMakes(vehicles);
+const models = make ? listModels(vehicles, make) : [];
+const engines = make && model ? listEngines(vehicles, make, model) : [];
+
+const vehicle =
+  make && model && engine ? findVehicle(vehicles, make, model, engine) : null;
+const parts = vehicle
+  ? await fetchVehicleParts(vehicle.id, { backendUrl, publishableKey })
+  : null;
+---
+
+<Shell title={copy.metaTitle} description={copy.metaDescription}>
+  <PageHero
+    eyebrow={copy.eyebrow}
+    heading={copy.heading}
+    lead={copy.lead}
+    crumbs={[{ href: PathBuilder.shopVehicles(locale), label: copy.heading }]}
+  />
+
+  <section class="wrap flex flex-col gap-8 py-band md:py-band-lg">
+    <form method="get" class="card flex flex-col gap-4 p-5 sm:p-6">
+      <div class="grid gap-4 sm:grid-cols-3">
+        <label class="flex flex-col gap-1 text-sm font-semibold text-ink">
+          {copy.makeLabel}
+          <select
+            name="make"
+            class="rounded-md border border-line bg-base px-3 py-2 text-sm"
+          >
+            <option value="">{copy.placeholderOption}</option>
+            {
+              makes.map((option) => (
+                <option value={option} selected={option === make}>
+                  {option}
+                </option>
+              ))
+            }
+          </select>
+        </label>
+
+        <label class="flex flex-col gap-1 text-sm font-semibold text-ink">
+          {copy.modelLabel}
+          <select
+            name="model"
+            disabled={!make}
+            class="rounded-md border border-line bg-base px-3 py-2 text-sm disabled:opacity-50"
+          >
+            <option value="">{copy.placeholderOption}</option>
+            {
+              models.map((option) => (
+                <option value={option} selected={option === model}>
+                  {option}
+                </option>
+              ))
+            }
+          </select>
+        </label>
+
+        <label class="flex flex-col gap-1 text-sm font-semibold text-ink">
+          {copy.engineLabel}
+          <select
+            name="engine"
+            disabled={!model}
+            class="rounded-md border border-line bg-base px-3 py-2 text-sm disabled:opacity-50"
+          >
+            <option value="">{copy.placeholderOption}</option>
+            {
+              engines.map((option) => (
+                <option value={option} selected={option === engine}>
+                  {option}
+                </option>
+              ))
+            }
+          </select>
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-primary self-start">
+        {copy.submitLabel}
+      </button>
+    </form>
+
+    {
+      vehicle && (
+        <div class="flex flex-col gap-4">
+          <h2 class="text-section">{copy.resultsHeading}</h2>
+
+          {parts && parts.length === 0 && (
+            <p class="text-sm leading-relaxed text-ink-2">
+              {copy.emptyResults}
+            </p>
+          )}
+
+          {parts && parts.length > 0 && (
+            <ul class="flex flex-col gap-4">
+              {parts.map((entry) => (
+                <li class="card flex flex-col gap-3 p-5">
+                  <span class="text-base font-semibold text-ink">
+                    {entry.part.name}
+                  </span>
+
+                  {entry.ambiguous ? (
+                    <div class="flex flex-col gap-2 rounded-md bg-shade p-4">
+                      <span class="text-sm font-semibold text-ink">
+                        {copy.ambiguous.heading}
+                      </span>
+                      <p class="text-sm leading-relaxed text-ink-2">
+                        {copy.ambiguous.body}
+                      </p>
+                      <ul class="flex flex-col gap-2">
+                        {entry.candidates.map((candidate) => (
+                          <li class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-2">
+                            <span>
+                              {copy.ambiguous.steeringLabel}:{' '}
+                              {candidate.steering === 'left'
+                                ? copy.ambiguous.steeringLeft
+                                : candidate.steering === 'right'
+                                  ? copy.ambiguous.steeringRight
+                                  : copy.ambiguous.steeringUnknown}
+                            </span>
+                            <span>
+                              {copy.ambiguous.gearboxLabel}:{' '}
+                              {candidate.gearbox === 'manual'
+                                ? copy.ambiguous.gearboxManual
+                                : candidate.gearbox === 'automatic'
+                                  ? copy.ambiguous.gearboxAutomatic
+                                  : copy.ambiguous.gearboxUnknown}
+                            </span>
+                            <a
+                              href={PathBuilder.shopPart(locale, entry.part.id)}
+                              class="spec text-signal-ink"
+                            >
+                              {copy.viewPartCta} →
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <a
+                      href={PathBuilder.shopPart(locale, entry.part.id)}
+                      class="spec self-start text-signal-ink"
+                    >
+                      {copy.viewPartCta} →
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )
+    }
+
+    {
+      make && model && engine && !vehicle && (
+        <p class="text-sm leading-relaxed text-ink-2">{copy.vehicleNotFound}</p>
+      )
+    }
+  </section>
+</Shell>
