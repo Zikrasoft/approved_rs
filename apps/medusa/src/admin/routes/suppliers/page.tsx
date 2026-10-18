@@ -1,0 +1,95 @@
+import { defineRouteConfig } from '@medusajs/admin-sdk';
+import { Button, Container, Heading, Input, Table } from '@medusajs/ui';
+import { useEffect, useState } from 'react';
+
+type Supplier = {
+  id: string;
+  name: string;
+  markup_percentage: number;
+};
+
+const SuppliersPage = () => {
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [savingId, setSavingId] = useState<string | null>(null);
+
+  const load = async () => {
+    const response = await fetch('/admin/suppliers', {
+      credentials: 'include',
+    });
+    const { suppliers: data } = await response.json();
+    setSuppliers(data);
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const save = async (id: string) => {
+    const markup_percentage = Number(drafts[id]);
+    if (!Number.isFinite(markup_percentage)) {
+      return;
+    }
+
+    setSavingId(id);
+    await fetch(`/admin/suppliers/${id}`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ markup_percentage }),
+    });
+    setSavingId(null);
+    await load();
+  };
+
+  return (
+    <Container>
+      <Heading level="h1">Suppliers</Heading>
+      <Table>
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell>Name</Table.HeaderCell>
+            <Table.HeaderCell>Markup %</Table.HeaderCell>
+            <Table.HeaderCell />
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {suppliers.map((supplier) => (
+            <Table.Row key={supplier.id}>
+              <Table.Cell>{supplier.name}</Table.Cell>
+              <Table.Cell>
+                <Input
+                  type="number"
+                  value={
+                    drafts[supplier.id] ?? String(supplier.markup_percentage)
+                  }
+                  onChange={(event) =>
+                    setDrafts((prev) => ({
+                      ...prev,
+                      [supplier.id]: event.target.value,
+                    }))
+                  }
+                />
+              </Table.Cell>
+              <Table.Cell>
+                <Button
+                  size="small"
+                  isLoading={savingId === supplier.id}
+                  onClick={() => save(supplier.id)}
+                >
+                  Save
+                </Button>
+              </Table.Cell>
+            </Table.Row>
+          ))}
+        </Table.Body>
+      </Table>
+    </Container>
+  );
+};
+
+export const config = defineRouteConfig({
+  label: 'Suppliers',
+});
+
+export default SuppliersPage;
