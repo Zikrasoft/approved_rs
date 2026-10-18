@@ -17,6 +17,15 @@ describe('parseEnv', () => {
     expect(env.NODE_ENV).toBe('development');
     expect(env.PORT).toBe(9009);
     expect(env.DATABASE_SSL).toBe(false);
+    expect(env.TYPESENSE_HOST).toBe('127.0.0.1');
+    expect(env.TYPESENSE_PORT).toBe(8108);
+    expect(env.TYPESENSE_PROTOCOL).toBe('http');
+  });
+
+  it('coerces TYPESENSE_PORT from a string env value', () => {
+    const env = parseEnv({ ...VALID_ENV, TYPESENSE_PORT: '58108' });
+
+    expect(env.TYPESENSE_PORT).toBe(58108);
   });
 
   it('coerces PORT from a string env value', () => {

@@ -15,6 +15,10 @@ const envSchema = z.object({
   STORE_CORS: z.string().min(1),
   ADMIN_CORS: z.string().min(1),
   AUTH_CORS: z.string().min(1),
+  TYPESENSE_HOST: z.string().min(1).default('127.0.0.1'),
+  TYPESENSE_PORT: z.coerce.number().int().positive().default(8108),
+  TYPESENSE_PROTOCOL: z.enum(['http', 'https']).default('http'),
+  TYPESENSE_API_KEY: z.string().min(1).default('xyz'),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -46,6 +46,26 @@ export async function fetchShopPart(
   return partSchema.parse(body.part);
 }
 
+export async function fetchShopSearch(
+  q: string,
+  {
+    backendUrl,
+    publishableKey,
+  }: { backendUrl: string; publishableKey: string },
+): Promise<ShopPart | null> {
+  const response = await fetch(
+    `${backendUrl}/store/search?q=${encodeURIComponent(q)}`,
+    { headers: { 'x-publishable-api-key': publishableKey } },
+  );
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const body = await response.json();
+  return partSchema.parse(body.part);
+}
+
 const DAYS_PATTERN = /^(\d+)_days$/;
 
 export function formatLeadTime(
