@@ -14,6 +14,8 @@ export const PathBuilder = {
     `/${locale}/parts/${slug}/`,
   shopPart: (locale: Locale, id: string) => `/${locale}/shop/${id}/`,
   shopSearch: (locale: Locale) => `/${locale}/shop/search/`,
+  shopCart: (locale: Locale) => `/${locale}/shop/cart/`,
+  shopCheckout: (locale: Locale) => `/${locale}/shop/checkout/`,
   shopVehicles: (locale: Locale) => `/${locale}/shop/vehicles/`,
   work: (locale: Locale, slug: string) => `/${locale}/works/${slug}/`,
   bmw: (locale: Locale) => `/${locale}/bmw/`,

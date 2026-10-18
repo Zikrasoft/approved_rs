@@ -7,6 +7,7 @@ import { pagesContentSchema } from './content/pagesContentSchema.ts';
 import { promoBannersContentSchema } from './content/promoBannersContentSchema.ts';
 import { shopPartContentSchema } from './content/shopPartContentSchema.ts';
 import { shopSearchContentSchema } from './content/shopSearchContentSchema.ts';
+import { shopCartContentSchema } from './content/shopCartContentSchema.ts';
 import { vehiclePickerContentSchema } from './content/vehiclePickerContentSchema.ts';
 
 export const SECTIONS = [
@@ -65,6 +66,13 @@ export const SECTIONS = [
     schema: shopSearchContentSchema,
     promptSubject:
       'part-number search page copy for a car parts shop (a search box inviting any OEM or brand number, a not-found state)',
+  },
+  {
+    key: 'shopCart',
+    path: 'src/content/i18n/shopCart.yaml',
+    schema: shopCartContentSchema,
+    promptSubject:
+      'cart and checkout page copy for a car parts shop, cash-at-pickup only (empty-cart state, total, a stale-price notice asking to refresh before confirming, an order-placed confirmation)',
   },
   {
     key: 'vehiclePicker',

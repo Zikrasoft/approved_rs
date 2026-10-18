@@ -11,6 +11,8 @@ columns:
   price: Цена
   stock: В наличии
   leadTime: Срок поставки
+buyButtonLabel: Купить, оплата при получении
+buyErrorLabel: Не удалось добавить в корзину. Попробуйте еще раз.
 leadTime:
   inStock: В наличии
   daysTemplate: '{days} дн.'

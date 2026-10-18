@@ -2,6 +2,7 @@ import { ExecArgs } from '@medusajs/framework/types';
 
 import { PART_MODULE } from '../modules/part';
 import PartModuleService from '../modules/part/service';
+import { seedCashAtPickupCommerceDefaults } from '../lib/commerce-defaults';
 import { VEHICLE_MODULE } from '../modules/vehicle';
 import VehicleModuleService from '../modules/vehicle/service';
 
@@ -172,6 +173,9 @@ async function seedVehiclesAndFitment(
 
 export default async function seed({ container }: ExecArgs) {
   const logger = container.resolve('logger');
+
+  await seedCashAtPickupCommerceDefaults(container);
+
   const partModuleService: PartModuleService = container.resolve(PART_MODULE);
   const vehicleModuleService: VehicleModuleService =
     container.resolve(VEHICLE_MODULE);

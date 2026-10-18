@@ -1,0 +1,19 @@
+cartMetaTitle: Корзина — CarLab
+checkoutMetaTitle: Оформление заказа — CarLab
+cartEyebrow: Корзина
+checkoutEyebrow: Оформление заказа
+emptyHeading: Корзина пуста
+emptyBody: Добавьте запчасть из каталога, чтобы оформить заказ.
+emptyCta: В каталог запчастей
+totalLabel: Итого
+currencyLabel: RSD
+goToCheckoutLabel: Оформить заказ
+pickupNotice: Оплата наличными при получении на нашей СТО в Белграде.
+completeButtonLabel: Подтвердить заказ
+staleHeading: Цена изменилась
+staleBody: Пока вы оформляли заказ, поставщик обновил цену. Обновите корзину и подтвердите заказ еще раз.
+repriceButtonLabel: Обновить цену
+orderPlacedHeading: Заказ принят
+orderPlacedBody: Мы ждем вас на СТО — оплата наличными при получении.
+errorLabel: Не удалось оформить заказ. Попробуйте еще раз.
+translatedFrom: pending
