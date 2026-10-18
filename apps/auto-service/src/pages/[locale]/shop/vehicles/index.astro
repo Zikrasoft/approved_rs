@@ -1,6 +1,8 @@
 ---
 export const prerender = false;
 
+import { z } from 'zod';
+
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import { localeFrom } from '@/i18n/config';
@@ -22,7 +24,7 @@ const copy = content(locale).vehiclePicker;
 const backendUrl = import.meta.env.MEDUSA_BACKEND_URL;
 const publishableKey = import.meta.env.MEDUSA_PUBLISHABLE_KEY;
 
-const VIN_FORMAT = /^[A-HJ-NPR-Z0-9]{17}$/;
+const vinSchema = z.string().regex(/^[A-HJ-NPR-Z0-9]{17}$/);
 
 const params = Astro.url.searchParams;
 const make = params.get('make') ?? '';
@@ -32,7 +34,7 @@ const vin = (params.get('vin') ?? '').trim().toUpperCase();
 
 let vinError = '';
 if (vin) {
-  if (!VIN_FORMAT.test(vin)) {
+  if (!vinSchema.safeParse(vin).success) {
     vinError = copy.vin.invalid;
   } else {
     const resolved = await resolveVin(vin, { backendUrl, publishableKey });
