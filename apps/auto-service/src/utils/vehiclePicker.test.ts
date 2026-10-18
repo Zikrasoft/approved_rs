@@ -6,6 +6,7 @@ import {
   listEngines,
   listMakes,
   listModels,
+  resolveVin,
   type Vehicle,
 } from './vehiclePicker';
 
@@ -124,6 +125,62 @@ describe('fetchVehicleParts', () => {
     });
 
     expect(result).toBeNull();
+  });
+});
+
+describe('resolveVin', () => {
+  it('posts the VIN and returns the resolved vehicle', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ resolved: true, vehicle: VEHICLES[0] }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const vehicle = await resolveVin('WBA3B1C50GL123456', {
+      backendUrl: BACKEND_URL,
+      publishableKey: PUBLISHABLE_KEY,
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(`${BACKEND_URL}/store/vin-lookups`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-publishable-api-key': PUBLISHABLE_KEY,
+      },
+      body: JSON.stringify({ vin: 'WBA3B1C50GL123456' }),
+    });
+    expect(vehicle).toEqual(VEHICLES[0]);
+  });
+
+  it('returns null when the VIN does not resolve', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ resolved: false, vehicle: null }),
+      }),
+    );
+
+    const vehicle = await resolveVin('1HGCM82633A004352', {
+      backendUrl: BACKEND_URL,
+      publishableKey: PUBLISHABLE_KEY,
+    });
+
+    expect(vehicle).toBeNull();
+  });
+
+  it('returns null when the store API responds with a non-ok status', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: false, json: async () => ({}) }),
+    );
+
+    const vehicle = await resolveVin('bad-vin', {
+      backendUrl: BACKEND_URL,
+      publishableKey: PUBLISHABLE_KEY,
+    });
+
+    expect(vehicle).toBeNull();
   });
 });
 
