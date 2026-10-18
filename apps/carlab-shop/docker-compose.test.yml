@@ -1,4 +1,4 @@
-name: podbor-medusa
+name: podbor-carlab-shop
 services:
   postgres:
     image: postgres:16.15-alpine
