@@ -5,6 +5,10 @@ import { homeContentSchema } from './content/homeContentSchema.ts';
 import { servicesContentSchema } from './content/servicesContentSchema.ts';
 import { pagesContentSchema } from './content/pagesContentSchema.ts';
 import { promoBannersContentSchema } from './content/promoBannersContentSchema.ts';
+import { shopPartContentSchema } from './content/shopPartContentSchema.ts';
+import { shopSearchContentSchema } from './content/shopSearchContentSchema.ts';
+import { shopCartContentSchema } from './content/shopCartContentSchema.ts';
+import { vehiclePickerContentSchema } from './content/vehiclePickerContentSchema.ts';
 
 export const SECTIONS = [
   {
@@ -48,5 +52,33 @@ export const SECTIONS = [
     schema: promoBannersContentSchema,
     promptSubject:
       'short promo banners shown on a car service work write-up, inviting the reader to book the same kind of job at our shop in the Zvezdara district of Belgrade, keep {placeholders} if any and markdown bold spans intact',
+  },
+  {
+    key: 'shopPart',
+    path: 'src/content/i18n/shopPart.yaml',
+    schema: shopPartContentSchema,
+    promptSubject:
+      'part-detail page copy for a car parts shop (brand/supplier table column labels, stock and lead-time wording, a not-found state)',
+  },
+  {
+    key: 'shopSearch',
+    path: 'src/content/i18n/shopSearch.yaml',
+    schema: shopSearchContentSchema,
+    promptSubject:
+      'part-number search page copy for a car parts shop (a search box inviting any OEM or brand number, a not-found state)',
+  },
+  {
+    key: 'shopCart',
+    path: 'src/content/i18n/shopCart.yaml',
+    schema: shopCartContentSchema,
+    promptSubject:
+      'cart and checkout page copy for a car parts shop, cash-at-pickup only (empty-cart state, total, a stale-price notice asking to refresh before confirming, an order-placed confirmation)',
+  },
+  {
+    key: 'vehiclePicker',
+    path: 'src/content/i18n/vehiclePicker.yaml',
+    schema: vehiclePickerContentSchema,
+    promptSubject:
+      'a make/model/engine vehicle picker page for a car parts shop, including a "confirm your variant" state when a part has more than one matching fitment (steering side or gearbox) for the selected vehicle',
   },
 ] as const satisfies readonly RegistryEntry[];

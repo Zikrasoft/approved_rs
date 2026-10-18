@@ -1,0 +1,99 @@
+---
+export const prerender = false;
+
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import { localeFrom } from '@/i18n/config';
+import { PathBuilder } from '@/utils/paths';
+import { content } from '@/i18n/content';
+
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).shopCart;
+
+const backendUrl = import.meta.env.MEDUSA_BACKEND_URL;
+const publishableKey = import.meta.env.MEDUSA_PUBLISHABLE_KEY;
+---
+
+<Shell
+  title={copy.checkoutMetaTitle}
+  description={copy.checkoutMetaTitle}
+  noindex
+>
+  <PageHero
+    eyebrow={copy.checkoutEyebrow}
+    heading={copy.checkoutEyebrow}
+    crumbs={[
+      { href: PathBuilder.shopCheckout(locale), label: copy.checkoutEyebrow },
+    ]}
+  />
+
+  <section class="wrap py-band md:py-band-lg">
+    <offer-cart-view
+      data-backend-url={backendUrl}
+      data-publishable-key={publishableKey}
+      data-currency-label={copy.currencyLabel}
+      data-mode="checkout"
+    >
+      <div data-empty hidden class="card p-6">
+        <p class="text-ink">{copy.emptyHeading}</p>
+        <p class="mt-2 text-sm text-muted">{copy.emptyBody}</p>
+        <a href={PathBuilder.parts(locale)} class="btn btn-primary mt-4">
+          {copy.emptyCta}
+        </a>
+      </div>
+
+      <div data-loaded hidden class="card p-6">
+        <template>
+          <div
+            class="flex items-center justify-between gap-4 border-b border-line py-3"
+          >
+            <span data-title class="text-ink"></span>
+            <span data-quantity class="text-muted"></span>
+            <span data-price class="font-semibold text-ink"></span>
+          </div>
+        </template>
+        <div data-items></div>
+
+        <div class="mt-4 flex items-center justify-between">
+          <span class="font-semibold text-ink">{copy.totalLabel}</span>
+          <span data-total class="font-semibold text-ink"></span>
+        </div>
+
+        <p class="mt-2 text-sm text-muted">{copy.pickupNotice}</p>
+
+        <div data-checkout-form>
+          <div
+            data-stale
+            hidden
+            class="mt-4 rounded border border-amber-300 bg-amber-50 p-4"
+          >
+            <p class="font-semibold text-ink">{copy.staleHeading}</p>
+            <p class="mt-1 text-sm text-muted">{copy.staleBody}</p>
+            <button type="button" data-reprice class="btn btn-secondary mt-3">
+              {copy.repriceButtonLabel}
+            </button>
+          </div>
+
+          <span data-error hidden class="mt-2 block text-sm text-red-600">
+            {copy.errorLabel}
+          </span>
+
+          <button type="button" data-complete class="btn btn-primary mt-4">
+            {copy.completeButtonLabel}
+          </button>
+        </div>
+
+        <div data-order-placed hidden class="mt-4">
+          <p class="font-semibold text-ink">{copy.orderPlacedHeading}</p>
+          <p class="mt-1 text-sm text-muted">{copy.orderPlacedBody}</p>
+        </div>
+      </div>
+    </offer-cart-view>
+  </section>
+</Shell>
+
+<script>
+  import { defineOfferCartView } from '@/scripts/offerCart';
+
+  defineOfferCartView();
+</script>

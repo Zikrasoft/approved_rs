@@ -28,6 +28,7 @@ jobs:
       - run: pnpm lint
       - run: pnpm exec prettier --check .
       - run: node --experimental-strip-types .github/scripts/yaml-content-valid.ts
+      - uses: ./.github/actions/setup-medusa-env
       - run: pnpm typecheck
       - run: pnpm test
       - run: sh .github/scripts/pinned-deps.sh
@@ -112,6 +113,7 @@ jobs:
           ref: ${{ needs.translate.outputs.sha }}
           fetch-depth: 0
       - uses: ./.github/actions/setup-pnpm
+      - uses: ./.github/actions/setup-medusa-env
       - run: pnpm test
 
       - id: scope

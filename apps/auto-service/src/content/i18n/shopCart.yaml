@@ -1,0 +1,58 @@
+cartMetaTitle: Корзина — CarLab
+checkoutMetaTitle: Оформление заказа — CarLab
+cartEyebrow: Корзина
+checkoutEyebrow: Оформление заказа
+emptyHeading: Корзина пуста
+emptyBody: Добавьте запчасть из каталога, чтобы оформить заказ.
+emptyCta: В каталог запчастей
+totalLabel: Итого
+currencyLabel: RSD
+goToCheckoutLabel: Оформить заказ
+pickupNotice: Оплата наличными при получении на нашей СТО в Белграде.
+completeButtonLabel: Подтвердить заказ
+staleHeading: Цена изменилась
+staleBody: Пока вы оформляли заказ, поставщик обновил цену. Обновите корзину и подтвердите заказ еще раз.
+repriceButtonLabel: Обновить цену
+orderPlacedHeading: Заказ принят
+orderPlacedBody: Мы ждем вас на СТО — оплата наличными при получении.
+errorLabel: Не удалось оформить заказ. Попробуйте еще раз.
+translatedFrom: 793810a9080b7cf2
+translations:
+  sr:
+    cartMetaTitle: Korpa — CarLab
+    checkoutMetaTitle: Oformljenje narudžbine — CarLab
+    cartEyebrow: Korpa
+    checkoutEyebrow: Oformljenje narudžbine
+    emptyHeading: Korpa je prazna
+    emptyBody: Dodajte delove iz kataloga da biste izvršili narudžbinu.
+    emptyCta: U katalog delova
+    totalLabel: Ukupno
+    currencyLabel: RSD
+    goToCheckoutLabel: Izvrši narudžbinu
+    pickupNotice: Plaćanje gotovinom prilikom preuzimanja na našoj STO u Beogradu.
+    completeButtonLabel: Potvrdi narudžbinu
+    staleHeading: Cena se promenila
+    staleBody: Dok ste vršili narudžbinu, dobavljač je ažurirao cenu. Ažurirajte korpu i ponovo potvrdite narudžbinu.
+    repriceButtonLabel: Ažuriraj cenu
+    orderPlacedHeading: Narudžbina primljena
+    orderPlacedBody: Čekamo vas na STO — plaćanje gotovinom prilikom preuzimanja.
+    errorLabel: Nije moguće izvršiti narudžbinu. Pokušajte ponovo.
+  en:
+    cartMetaTitle: Cart — CarLab
+    checkoutMetaTitle: Checkout — CarLab
+    cartEyebrow: Cart
+    checkoutEyebrow: Checkout
+    emptyHeading: Your cart is empty
+    emptyBody: Add a part from the catalog to proceed with your order.
+    emptyCta: Go to parts catalog
+    totalLabel: Total
+    currencyLabel: RSD
+    goToCheckoutLabel: Proceed to checkout
+    pickupNotice: Cash payment upon pickup at our service center in Belgrade.
+    completeButtonLabel: Confirm order
+    staleHeading: Price has changed
+    staleBody: While you were checking out, the supplier updated the price. Please refresh your cart and confirm your order again.
+    repriceButtonLabel: Refresh price
+    orderPlacedHeading: Order confirmed
+    orderPlacedBody: We look forward to seeing you at the service center — cash payment upon pickup.
+    errorLabel: Failed to place order. Please try again.

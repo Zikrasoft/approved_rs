@@ -1,0 +1,70 @@
+---
+export const prerender = false;
+
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import { localeFrom } from '@/i18n/config';
+import { PathBuilder } from '@/utils/paths';
+import { content } from '@/i18n/content';
+
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).shopCart;
+
+const backendUrl = import.meta.env.MEDUSA_BACKEND_URL;
+const publishableKey = import.meta.env.MEDUSA_PUBLISHABLE_KEY;
+---
+
+<Shell title={copy.cartMetaTitle} description={copy.cartMetaTitle} noindex>
+  <PageHero
+    eyebrow={copy.cartEyebrow}
+    heading={copy.cartEyebrow}
+    crumbs={[{ href: PathBuilder.shopCart(locale), label: copy.cartEyebrow }]}
+  />
+
+  <section class="wrap py-band md:py-band-lg">
+    <offer-cart-view
+      data-backend-url={backendUrl}
+      data-publishable-key={publishableKey}
+      data-currency-label={copy.currencyLabel}
+      data-mode="cart"
+    >
+      <div data-empty hidden class="card p-6">
+        <p class="text-ink">{copy.emptyHeading}</p>
+        <p class="mt-2 text-sm text-muted">{copy.emptyBody}</p>
+        <a href={PathBuilder.parts(locale)} class="btn btn-primary mt-4">
+          {copy.emptyCta}
+        </a>
+      </div>
+
+      <div data-loaded hidden>
+        <template>
+          <div
+            class="flex items-center justify-between gap-4 border-b border-line py-3"
+          >
+            <span data-title class="text-ink"></span>
+            <span data-quantity class="text-muted"></span>
+            <span data-price class="font-semibold text-ink"></span>
+          </div>
+        </template>
+        <div data-items></div>
+
+        <div class="mt-4 flex items-center justify-between">
+          <span class="font-semibold text-ink">{copy.totalLabel}</span>
+          <span data-total class="font-semibold text-ink"></span>
+        </div>
+
+        <p class="mt-2 text-sm text-muted">{copy.pickupNotice}</p>
+
+        <a href={PathBuilder.shopCheckout(locale)} class="btn btn-primary mt-4">
+          {copy.goToCheckoutLabel}
+        </a>
+      </div>
+    </offer-cart-view>
+  </section>
+</Shell>
+
+<script>
+  import { defineOfferCartView } from '@/scripts/offerCart';
+
+  defineOfferCartView();
+</script>

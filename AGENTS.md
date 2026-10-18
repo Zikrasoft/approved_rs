@@ -12,6 +12,7 @@ pnpm workspace + Turborepo. Apps live in `apps/*`, shared packages in `packages/
 apps/approved-rs/     Approved.rs, the approved.rs site (Astro) — most of this document describes it
 apps/detailing/       Details, the detailing studio site — details.rs
 apps/auto-service/    CarLab, the car service site — carlab.rs
+apps/medusa/          the VIN parts shop backend for carlab.rs: Medusa 2.21.x, CommonJS
 packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click routes
 packages/lead-capture/ the capture bots' webhook route: the /start dialog that turns a Telegram tap into a Lead
 packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
@@ -32,7 +33,9 @@ depth on case and work pages), `data-contact-channel` /
 `data-contact-cta` (in-flow contact regions the floating CTA's `watch`
 selector hides behind — stamp it with `contactRegion`, `contactCta` and
 `CONTACT_CTA_SELECTOR` from `@podbor/site-kit/contact-control`, never as a
-literal). `packages/lead-crm` owns the `<lead-form>` hooks `leadForm.ts`
+literal) and `data-vin-input` (the VIN field `defineMyGarage` reads/fills,
+`MY_GARAGE_VIN_ATTRIBUTE` from `@podbor/site-kit/browser`, never a literal).
+`packages/lead-crm` owns the `<lead-form>` hooks `leadForm.ts`
 picks with a non-null assertion, so a missing one is a `TypeError`:
 `data-telegram`, `data-country` (with `data-display-locale`), `data-phone`,
 `data-consent`, the hidden `contact` and `contact_channel` inputs,
