@@ -82,17 +82,17 @@ translations:
       about: O servisu
       contact: Kontakt
     llms:
-      keyFacts: Ključne informacije
+      keyFacts: Ključne činjenice
       other: Ostalo
-      languages: Ostali jezici
+      languages: Drugi jezici
     header:
       menuOpenLabel: Meni
-      menuCloseLabel: Zatvoriti meni
+      menuCloseLabel: Zatvori meni
       languageLabel: Jezik
       cta: Zakaži
       phoneLabel: Pozvati
     footer:
-      tagline: Automehaničarska radnja u Beogradu. Dijagnostika, popravka, farbanje i izbor delova.
+      tagline: Autoservis u Beogradu. Dijagnostika, popravka, karoserija i farbanje, izbor delova.
       servicesHeading: Usluge
       companyHeading: Servis
       contactHeading: Kontakt
@@ -102,50 +102,50 @@ translations:
       rightsSuffix: Sva prava zadržana.
     common:
       homeLabel: Početna
-      skipToContent: Na sadržaj
-      breadcrumbLabel: Mrvica hleba
-      primaryNavLabel: Glavna navigacija
+      skipToContent: Sadržaj
+      breadcrumbLabel: Breadcrumbs
+      primaryNavLabel: Primarna navigacija
       mobileNavLabel: Mobilni meni
       faqHeading: Česta pitanja
-      closeLabel: Zatvoriti
+      closeLabel: Zatvori
       fromPrice: od
       priceOnRequest: na zahtev
       allServices: Sve usluge
       allWorks: Svi primeri radova
-      emptyWorks: Primeri radova uskoro dolaze. Za sada nazovite — reći ćemo vam šta smo radili na sličnim automobilima.
+      emptyWorks: Primeri radova će uskoro biti dostupni. Za sada pozovite – ispričaćemo vam šta smo radili na sličnim vozilima.
     channels:
       call: Pozvati
       whatsapp: WhatsApp
       viber: Viber
       telegram: Telegram
     form:
-      heading: Zakaži servis
-      subheading: Opišite problem sa automobilom. Javićemo se sa detaljima, vremenom i cenom.
+      heading: Zakažite servis
+      subheading: Opšte, šta je sa vašim autom. Pozvaćemo vas, razjasnićemo detalje i reći ćemo vreme i cenu.
       nameLabel: Ime
       namePlaceholder: Kako da vas zovemo
       contactLabel: Telefon
       contactPlaceholder: +381 11 000 0000
-      telegramPlaceholder: '@username ili telefon'
-      contactChannelLabel: Kako da vas kontaktiramo
+      telegramPlaceholder: '@korisničkoime ili telefon'
+      contactChannelLabel: Kako s vama kontaktirati
       channelPhone: Poziv
       countryLabel: Kod zemlje
-      commentLabel: Automobil i problem
-      commentPlaceholder: Marka, model, godina — šta vas muči
-      submit: Pošaljite zahtev
+      commentLabel: Automobil i šta mu je
+      commentPlaceholder: Marka, model, godina — i šta vas brine
+      submit: Pošalji zahtev
       submitting: Šaljemo…
       privacyNote: Slanjem obrasca, saglasni ste sa
-      privacyLinkText: ' Politikom privatnosti'
-      modalTitle: Zakaži servis
-      errorPhone: Proverite broj — izgleda da nije unet u potpunosti
-      errorTelegram: Unesite @username u Telegram ili broj telefona
+      privacyLinkText: politikom privatnosti
+      modalTitle: Zakažite servis
+      errorPhone: Proverite broj - izgleda da nije unet u potpunosti
+      errorTelegram: Unesite @korisničkoime na Telegramu ili broj telefona
       errorConsent: Bez saglasnosti ne možemo poslati zahtev
       errorSubmit: Zahtev nije poslat. Proverite vezu i pokušajte ponovo
     cookie:
       notice: Koristimo kolačiće.
-      more: Više informacija u
+      more: Više u
       policyLink: politici privatnosti
-      accept: Prihvatiti
-      decline: Odbiti
+      accept: Prihvatam
+      decline: Odbijam
       settings: Podešavanja kolačića
   en:
     nav:
@@ -153,7 +153,7 @@ translations:
       parts: Parts
       works: Work Examples
       process: How We Work
-      about: About Us
+      about: About the Service
       contact: Contact
     llms:
       keyFacts: Key Facts
@@ -164,56 +164,56 @@ translations:
       menuCloseLabel: Close Menu
       languageLabel: Language
       cta: Book Now
-      phoneLabel: Call Us
+      phoneLabel: Call
     footer:
-      tagline: Independent car service in Belgrade. Diagnostics, repair, bodywork, and painting, plus parts.
+      tagline: Car service in Belgrade. Diagnostics, repair, bodywork and respraying, parts selection.
       servicesHeading: Services
       companyHeading: Service
       contactHeading: Contact
       hoursHeading: Working Hours
-      hours: Mon-Fri 08:00-18:00 · Sat 09:00-14:00
+      hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
       privacyLabel: Privacy Policy
       rightsSuffix: All rights reserved.
     common:
       homeLabel: Home
-      skipToContent: Skip to Content
+      skipToContent: Skip to content
       breadcrumbLabel: Breadcrumbs
-      primaryNavLabel: Main Navigation
+      primaryNavLabel: Primary Navigation
       mobileNavLabel: Mobile Menu
       faqHeading: Frequently Asked Questions
       closeLabel: Close
       fromPrice: from
-      priceOnRequest: upon request
+      priceOnRequest: on request
       allServices: All Services
       allWorks: All Work Examples
-      emptyWorks: Work examples will appear soon. In the meantime, give us a call — we’ll share what we’ve done on similar cars.
+      emptyWorks: Work examples coming soon. In the meantime, give us a call — we'll share what we've done on similar cars.
     channels:
-      call: Call Us
+      call: Call
       whatsapp: WhatsApp
       viber: Viber
       telegram: Telegram
     form:
       heading: Book a Service
-      subheading: Describe what’s wrong with your car. We’ll call you back to clarify details and provide time and cost.
+      subheading: Describe the issue with your car. We will call you back to clarify details and provide time and price.
       nameLabel: Name
       namePlaceholder: How should we address you
       contactLabel: Phone
       contactPlaceholder: +381 11 000 0000
       telegramPlaceholder: '@username or phone number'
       contactChannelLabel: How can we reach you
-      channelPhone: Call
+      channelPhone: Phone Call
       countryLabel: Country Code
       commentLabel: Car and Issue
-      commentPlaceholder: Make, model, year — and what concerns you
-      submit: Submit Request
-      submitting: Sending...
-      privacyNote: By submitting this form, you agree to our
+      commentPlaceholder: Make, model, year — and what’s bothering you
+      submit: Submit Application
+      submitting: Submitting…
+      privacyNote: By submitting the form, you agree to our
       privacyLinkText: privacy policy
       modalTitle: Book a Service
-      errorPhone: Check the number — it seems incomplete
-      errorTelegram: Provide @username in Telegram or phone number
-      errorConsent: Without consent we cannot submit the request
-      errorSubmit: The request didn’t go through. Please check your connection and try again
+      errorPhone: Please check the number — it seems incomplete
+      errorTelegram: Please provide @username in Telegram or your phone number
+      errorConsent: Without consent, we cannot submit your application
+      errorSubmit: Application did not go through. Check your connection and try again
     cookie:
       notice: We use cookies.
       more: Learn more in the

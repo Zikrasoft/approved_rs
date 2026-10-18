@@ -11,21 +11,21 @@ translatedFrom: cdbeeb413892fb60
 translations:
   sr:
     metaTitleSuffix: CarLab
-    metaDescription: Pronađite deo po OEM broju, artiklu brenda ili barkodu u katalogu CarLab.
+    metaDescription: Pronađite deo po OEM broju, broj artikla brenda ili barkodu u CarLab katalogu.
     eyebrow: Pretraga delova
     heading: Pretraga dela po broju
     placeholder: Na primer, 11 42 8575211 ili HU 816 x
     submitLabel: Pronađi
     notFoundHeading: Nema rezultata
-    notFoundBody: Proverite broj ili nam pišite, pomoći ćemo vam da pronađete deo.
-    notFoundCta: Pišite nam
+    notFoundBody: Proverite broj ili nas kontaktirajte, pomoći ćemo vam da pronađete deo.
+    notFoundCta: Kontaktirajte nas
   en:
     metaTitleSuffix: CarLab
-    metaDescription: Find parts by OEM number, brand code, or barcode at CarLab.
+    metaDescription: Find a part by OEM number, brand code, or barcode in the CarLab catalog.
     eyebrow: Parts Search
-    heading: Search for a Part by Number
+    heading: Search for a part by number
     placeholder: For example, 11 42 8575211 or HU 816 x
     submitLabel: Search
-    notFoundHeading: No Results Found
-    notFoundBody: Check the number or contact us for assistance in finding the part.
+    notFoundHeading: Nothing Found
+    notFoundBody: Check the number or contact us, we'll help you find the part.
     notFoundCta: Contact Us

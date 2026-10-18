@@ -27,21 +27,21 @@ translations:
     namePlaceholder: Ivan
     contactLabel: How can we reach you
     telegramTab: Telegram
-    telegramPlaceholder: '@username or phone'
+    telegramPlaceholder: '@username or phone number'
     whatsappTab: WhatsApp
     viberTab: Viber
     phoneTab: Phone
     commentLabel: Make, model, budget
-    commentPlaceholder: BMW 3, 2020–2022, up to €25,000…
+    commentPlaceholder: BMW 3, 2020–2022, up to €25,000...
     consentBefore: 'I agree with '
     consentLinkText: the privacy policy
     consentError: Your consent is required
     submitLabel: Calculate cost
     errorTelegramFormat: 'Format: @username or phone number'
     errorPhoneInvalid: Please check the phone number
-    errorSubmit: The request did not go through. Please check your connection and try again.
+    errorSubmit: Submission failed. Check your connection and try again
   sr:
-    headingLine1: Javićemo se sa vama
+    headingLine1: Kontaktiraćemo vas
     headingEmphasis: u roku od 2 sata
     subtext: Besplatna konsultacija
     nameLabel: Vaše ime
@@ -54,16 +54,16 @@ translations:
     phoneTab: Telefon
     commentLabel: Marka, model, budžet
     commentPlaceholder: BMW 3, 2020–2022, do €25 000…
-    consentBefore: 'Saglasan sam sa '
+    consentBefore: 'Slažem se sa '
     consentLinkText: politikom privatnosti
-    consentError: Neophodna je vaša saglasnost
+    consentError: Potrebna je vaša saglasnost
     submitLabel: Izračunaj cenu
     errorTelegramFormat: 'Format: @username ili broj telefona'
     errorPhoneInvalid: Proverite broj telefona
-    errorSubmit: Zahtev nije otišao. Proverite vezu i pokušajte ponovo
+    errorSubmit: Zahtev nije poslat. Proverite vezu i pokušajte ponovo
   es:
     headingLine1: Nos pondremos en contacto contigo
-    headingEmphasis: dentro de 2 horas
+    headingEmphasis: en un plazo de 2 horas
     subtext: Consulta gratuita
     nameLabel: Tu nombre
     namePlaceholder: Iván
@@ -83,24 +83,24 @@ translations:
     errorPhoneInvalid: Verifica el número de teléfono
     errorSubmit: La solicitud no se ha enviado. Verifica la conexión y vuelve a intentarlo
   de:
-    headingLine1: Wir kontaktieren Sie
+    headingLine1: Wir melden uns bei Ihnen
     headingEmphasis: innerhalb von 2 Stunden
     subtext: Kostenlose Beratung
     nameLabel: Ihr Name
     namePlaceholder: Ivan
     contactLabel: Wie können wir Sie erreichen
     telegramTab: Telegram
-    telegramPlaceholder: '@Benutzername oder Telefon'
+    telegramPlaceholder: '@username oder Telefon'
     whatsappTab: WhatsApp
     viberTab: Viber
     phoneTab: Telefon
     commentLabel: Marke, Modell, Budget
-    commentPlaceholder: BMW 3, 2020–2022, bis €25.000…
+    commentPlaceholder: BMW 3, 2020–2022, bis €25 000…
     consentBefore: 'Ich stimme der '
-    consentLinkText: Datenschutzrichtlinie zu
+    consentLinkText: Datenschutzrichtlinie
     consentError: Ihre Zustimmung ist erforderlich
     submitLabel: Kosten berechnen
-    errorTelegramFormat: 'Format: @Benutzername oder Telefonnummer'
+    errorTelegramFormat: 'Format: @username oder Telefonnummer'
     errorPhoneInvalid: Überprüfen Sie die Telefonnummer
-    errorSubmit: Die Anfrage wurde nicht gesendet. Bitte überprüfen Sie die Verbindung und versuchen Sie es erneut
+    errorSubmit: Die Anfrage wurde nicht gesendet. Überprüfen Sie die Verbindung und versuchen Sie es erneut
 translatedFrom: f19e1d1a771f6292

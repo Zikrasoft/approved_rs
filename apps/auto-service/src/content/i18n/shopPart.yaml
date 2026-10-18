@@ -19,4 +19,49 @@ leadTime:
 notFoundHeading: Запчасть не найдена
 notFoundBody: Возможно, ссылка устарела или запчасть убрали из каталога. Напишите нам, поможем найти нужную деталь.
 notFoundCta: Написать нам
-translatedFrom: pending
+translatedFrom: 8452d104b45ddc4c
+translations:
+  sr:
+    metaTitleSuffix: CarLab
+    metaDescription: Brendovi, dobavljači, cene i rokovi isporuke za ovu delove u katalogu CarLab.
+    eyebrow: Delovi
+    variantsHeading: Opcije i ponude dobavljača
+    currencyLabel: RSD
+    columns:
+      brand: Brend
+      number: Broj
+      supplier: Dobavljač
+      supplierArticle: Artikal dobavljača
+      price: Cena
+      stock: Na skladištu
+      leadTime: Rok isporuke
+    leadTime:
+      inStock: Na skladištu
+      daysTemplate: '{days} d.'
+    notFoundHeading: Delovi nisu pronađeni
+    notFoundBody: Moguće da je link zastareo ili je deo uklonjen iz kataloga. Kontaktirajte nas, pomoći ćemo vam da pronađete potrebni deo.
+    notFoundCta: Kontaktirajte nas
+    buyButtonLabel: Kupiti, plaćanje prilikom preuzimanja
+    buyErrorLabel: Nije moguće dodati u korpu. Pokušajte ponovo.
+  en:
+    metaTitleSuffix: CarLab
+    metaDescription: Brands, suppliers, prices and lead times for this part in the CarLab catalog.
+    eyebrow: Part
+    variantsHeading: Options and supplier offers
+    currencyLabel: RSD
+    columns:
+      brand: Brand
+      number: Number
+      supplier: Supplier
+      supplierArticle: Supplier article
+      price: Price
+      stock: In stock
+      leadTime: Lead time
+    leadTime:
+      inStock: In stock
+      daysTemplate: '{days} days'
+    notFoundHeading: Part not found
+    notFoundBody: The link may be outdated or the part has been removed from the catalog. Contact us, we will help find the needed part.
+    notFoundCta: Contact us
+    buyButtonLabel: Buy, payment on delivery
+    buyErrorLabel: Could not add to cart. Please try again.

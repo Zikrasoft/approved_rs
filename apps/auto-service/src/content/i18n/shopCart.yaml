@@ -24,35 +24,35 @@ translations:
     cartEyebrow: Korpa
     checkoutEyebrow: Oformljenje narudžbine
     emptyHeading: Korpa je prazna
-    emptyBody: Dodajte deo iz kataloga da biste kreirali narudžbinu.
+    emptyBody: Dodajte delove iz kataloga da biste izvršili narudžbinu.
     emptyCta: U katalog delova
     totalLabel: Ukupno
     currencyLabel: RSD
-    goToCheckoutLabel: Oformiti narudžbinu
-    pickupNotice: Plaćanje gotovinom prilikom preuzimanja na našoj SSV-u u Beogradu.
+    goToCheckoutLabel: Izvrši narudžbinu
+    pickupNotice: Plaćanje gotovinom prilikom preuzimanja na našoj STO u Beogradu.
     completeButtonLabel: Potvrdi narudžbinu
     staleHeading: Cena se promenila
-    staleBody: Dok ste obavljali narudžbinu, dobavljač je ažurirao cenu. Osvežite korpu i ponovo potvrdite narudžbinu.
-    repriceButtonLabel: Osveži cenu
-    orderPlacedHeading: Narudžbina prihvaćena
-    orderPlacedBody: Očekujemo vas na SSV-u — plaćanje gotovinom prilikom preuzimanja.
-    errorLabel: Nije moguće obaviti narudžbinu. Pokušajte ponovo.
+    staleBody: Dok ste vršili narudžbinu, dobavljač je ažurirao cenu. Ažurirajte korpu i ponovo potvrdite narudžbinu.
+    repriceButtonLabel: Ažuriraj cenu
+    orderPlacedHeading: Narudžbina primljena
+    orderPlacedBody: Čekamo vas na STO — plaćanje gotovinom prilikom preuzimanja.
+    errorLabel: Nije moguće izvršiti narudžbinu. Pokušajte ponovo.
   en:
     cartMetaTitle: Cart — CarLab
     checkoutMetaTitle: Checkout — CarLab
     cartEyebrow: Cart
     checkoutEyebrow: Checkout
     emptyHeading: Your cart is empty
-    emptyBody: Add a part from the catalog to place an order.
+    emptyBody: Add a part from the catalog to proceed with your order.
     emptyCta: Go to parts catalog
     totalLabel: Total
     currencyLabel: RSD
-    goToCheckoutLabel: Place Order
+    goToCheckoutLabel: Proceed to checkout
     pickupNotice: Cash payment upon pickup at our service center in Belgrade.
-    completeButtonLabel: Confirm Order
+    completeButtonLabel: Confirm order
     staleHeading: Price has changed
-    staleBody: While you were checking out, the supplier updated the price. Please refresh the cart and confirm your order again.
-    repriceButtonLabel: Refresh Price
-    orderPlacedHeading: Order Confirmed
+    staleBody: While you were checking out, the supplier updated the price. Please refresh your cart and confirm your order again.
+    repriceButtonLabel: Refresh price
+    orderPlacedHeading: Order confirmed
     orderPlacedBody: We look forward to seeing you at the service center — cash payment upon pickup.
-    errorLabel: Failed to place the order. Please try again.
+    errorLabel: Failed to place order. Please try again.

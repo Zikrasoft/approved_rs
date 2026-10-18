@@ -35,10 +35,10 @@ vin:
 translatedFrom: acb273c17c44f730
 translations:
   sr:
-    metaTitle: Odabir delova po automobilu
-    metaDescription: Izaberite marku, model i motor — prikažemo delove koji odgovaraju vašem automobilu.
-    eyebrow: Odabir po automobilu
-    heading: Koji imate automobil?
+    metaTitle: Izbor delova po automobilu
+    metaDescription: Izaberite marku, model i motor — prikazaćemo delove koji odgovaraju vašem automobilu.
+    eyebrow: Izbor po automobilu
+    heading: Koji je vaš automobil?
     lead: Unesite marku, model i motor — ispod će se pojaviti lista odgovarajućih delova iz kataloga CarLab.
     makeLabel: Marka
     modelLabel: Model
@@ -46,11 +46,11 @@ translations:
     placeholderOption: — izaberite —
     submitLabel: Prikaži delove
     resultsHeading: Odgovarajući delovi
-    emptyResults: Za ovaj automobil trenutno nema delova u katalogu. Javite nam — pomoći ćemo vam da pronađete potrebnu komponentu.
+    emptyResults: Za ovaj automobil trenutno nema delova u katalogu. Pišite nam — pomoći ćemo vam da pronađete potrebnu komponentu.
     viewPartCta: Pogledajte opcije i cene
     ambiguous:
       heading: Potvrdite varijantu
-      body: Za ovaj automobil postoji više varijanti dela — razlikuju se po volanu ili menjaču. Precizirajte koja odgovara vašem automobilu.
+      body: Za ovaj automobil postoji nekoliko varijanti dela — razlikuju se po volanu ili menjaču. Precizirajte koji odgovara vašem automobilu.
       steeringLabel: Volan
       gearboxLabel: Menjač
       steeringLeft: levi
@@ -59,33 +59,33 @@ translations:
       gearboxManual: mehanički
       gearboxAutomatic: automatski
       gearboxUnknown: bilo koji
-    vehicleNotFound: Ova kombinacija marke, modela i motora nije dostupna u katalogu.
+    vehicleNotFound: Ova kombinacija marke, modela i motora nije u katalogu.
     vin:
       heading: Znate VIN?
-      lead: Unesite VIN — automatski ćemo odrediti automobil, bez izbora marke i modela.
+      lead: Unesite VIN — odredićemo automobil automatski, bez izbora marke i modela.
       label: VIN
       placeholder: Na primer, WBA3B1C50GL123456
-      submitLabel: Pronađi po VIN-u
+      submitLabel: Pronađi po VIN
       orDivider: ili navedite ručno
       invalid: Proverite VIN — treba da ima 17 karaktera (slova i brojevi, bez I, O i Q).
-      notFound: Nije moguće odrediti automobil prema ovom VIN-u. Izaberite marku, model i motor ručno ispod.
+      notFound: Nije uspelo da se odredi automobil po ovom VIN-u. Ručno izaberite marku, model i motor ispod.
   en:
     metaTitle: Car Parts Selection by Vehicle
-    metaDescription: Select the make, model, and engine — we’ll show parts that fit your vehicle.
+    metaDescription: Select make, model, and engine — we'll show parts that fit your vehicle.
     eyebrow: Vehicle Selection
     heading: What is your vehicle?
-    lead: Please provide the make, model, and engine — a list of suitable parts from the CarLab catalog will appear below.
+    lead: Please specify make, model, and engine — a list of compatible parts from the CarLab catalog will appear below.
     makeLabel: Make
     modelLabel: Model
     engineLabel: Engine
     placeholderOption: — select —
     submitLabel: Show Parts
-    resultsHeading: Suitable Parts
-    emptyResults: There are currently no parts available for this vehicle in the catalog. Contact us — we’ll help you find the right part.
+    resultsHeading: Compatible Parts
+    emptyResults: There are currently no parts available in the catalog for this vehicle. Contact us — we will help you find the needed part.
     viewPartCta: View options and prices
     ambiguous:
       heading: Confirm Your Variant
-      body: There are several part options for this vehicle — they differ by steering or gearbox. Please specify which one is suitable for your vehicle.
+      body: There are several part options for this vehicle — they differ by steering or gearbox. Please specify which one fits your vehicle.
       steeringLabel: Steering
       gearboxLabel: Gearbox
       steeringLeft: left
@@ -94,13 +94,13 @@ translations:
       gearboxManual: manual
       gearboxAutomatic: automatic
       gearboxUnknown: any
-    vehicleNotFound: This combination of make, model, and engine is not in the catalog.
+    vehicleNotFound: There is no such combination of make, model, and engine in the catalog.
     vin:
-      heading: Do you know the VIN?
-      lead: Enter the VIN — we will automatically identify the vehicle without selecting the make and model.
+      heading: Know the VIN?
+      lead: Enter the VIN — we'll identify the vehicle automatically, without needing to select make and model.
       label: VIN
       placeholder: For example, WBA3B1C50GL123456
       submitLabel: Find by VIN
       orDivider: or specify manually
-      invalid: Check the VIN — it must be 17 characters (letters and numbers, without I, O, and Q).
-      notFound: Could not identify the vehicle with this VIN. Please select the make, model, and engine manually below.
+      invalid: Please check the VIN — it should be 17 characters (letters and numbers, excluding I, O, and Q).
+      notFound: Could not identify the vehicle by this VIN. Please select make, model, and engine manually below.

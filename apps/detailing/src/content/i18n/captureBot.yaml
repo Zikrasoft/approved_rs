@@ -41,87 +41,87 @@ profile:
   langCommand: Сменить язык
 translations:
   sr:
-    greeting: Zdravo! Hvala što ste se javili, već vidimo vašu poruku i uskoro ćemo odgovoriti.
-    lookingFor: Recite nam, koje auto imate i šta želite da uradite — folija, poliranje, keramika ili nešto drugo?
-    phoneAsk: Nemate korisničko ime na Telegramu, pa menadžer ne može da vam piše. Ostavite broj telefona da bismo mogli da vas kontaktiramo.
-    phoneButton: 📱 Podelite broj
-    thanks: Hvala! Prosledili smo majstoru — uskoro će vas kontaktirati.
+    greeting: Zdravo! Hvala što ste se javili, već vidimo vašu poruku i ubrzo ćemo odgovoriti.
+    lookingFor: Režite nam, koja je vaša mašina i šta biste želeli da uradite — folija, poliranje, keramika ili nešto drugo.
+    phoneAsk: Nemate korisničko ime (username) na Telegramu, pa menadžer ne može da vam pošalje poruku. Ostavite broj telefona kako bismo mogli da vas kontaktiramo.
+    phoneButton: 📱 Podeliti broj
+    thanks: Hvala! Prosledili smo majstoru — ubrzo će vas kontaktirati.
     received: Primili smo, majstor će videti vašu poruku.
     menu:
       text: Kako možemo pomoći? Izaberite šta vas zanima.
       back: « Nazad
     services:
       button: Usluge
-      text: Evo šta radimo u studiju. Izaberite uslugu — pokazaćemo cenu, rokove i šta je uključeno.
+      text: Evo šta radimo u studiju. Izaberite uslugu — prikazaćemo cenu, rokove i šta je uključeno.
     card:
-      request: 📝 Ostavite zahtev
+      request: 📝 Ostaviti zahtev
       site: Više na sajtu
     contacts:
-      button: Kontakt
+      button: Kontakti
       text: Mi smo u Beogradu, čekamo vas u studiju.
       hours: Pon–Sub, 09:00–19:00
     manager:
-      button: 👤 Pišite majstoru
-      text: Postavite vaše pitanje u jednoj poruci — majstor će odgovoriti ovde.
-      handoff: Majstor je dostupan na Telegramu — kliknite da otvorite chat.
-      chat: Otvorite chat sa majstorom ↗
+      button: 👤 Pisati majstoru
+      text: Postavite svoje pitanje u jednoj poruci — majstor će odgovoriti ovde.
+      handoff: Majstor je na vezi na Telegramu — pritisnite da otvorite chat.
+      chat: Otvoriti chat s majstorom ↗
     partners:
       button: Partneri
       text: Naši partneri — izaberite kome da pišete.
     request:
-      button: 📝 Ostavite zahtev
-      car: Koje auto imate? Napišite marku, model i godinu.
-      service: Šta želite da radite sa autom? Obeležite jednu ili više usluga — ili napišite sopstvenim rečima.
+      button: 📝 Ostaviti zahtev
+      car: Koja je vaša mašina? Napišite marku, model i godinu.
+      service: Šta želite da uradite s mašinom? Obeležite jednu ili više usluga — ili napišite svojim rečima.
       done: Gotovo →
-      unsure: Nisam siguran, potrebna je konsultacija
+      unsure: Ne znam, potrebna mi je konsultacija
     language:
       button: 🌐 Jezik
-      text: Izaberite jezik na kome vam je lakše da komunicirate.
+      text: Izaberite jezik koji vam je najugodniji za komunikaciju.
     profile:
-      description: Detaljerska studija u Beogradu — foliranje, poliranje, keramika. Kliknite «Start» — recite šta želite da uradite sa autom, a majstor će odgovoriti ovde.
+      description: Detaljerska studija u Beogradu — folija, poliranje, keramika. Pritisnite "Start" — recite šta želite da uradite s mašinom, i majstor će odgovoriti ovde.
       shortDescription: Detaljerska studija u Beogradu — folija, poliranje, keramika
       menuCommand: Glavni meni
-      langCommand: Promeni jezik
+      langCommand: Promeniti jezik
   en:
     greeting: Hello! Thank you for reaching out — we see your message and will respond shortly.
-    lookingFor: Tell us about your car and what you’d like to do — paint protection film, polishing, ceramic coating, or something else.
-    phoneAsk: We don't see a username for you on Telegram, so our manager can't message you. Please provide your phone number so we can get in touch.
-    phoneButton: 📱 Share number
+    lookingFor: Tell us about your car and what you'd like to do — film wrap, polishing, ceramic coating, or something else.
+    phoneAsk: You don't have a username in Telegram, so our manager won't be able to message you. Please share your phone number so we can get in touch.
+    phoneButton: 📱 Share phone number
     thanks: Thank you! We've passed your message to the technician — they will contact you soon.
-    received: Message received, the technician will see your message.
+    received: Got it, the technician will see your message.
     menu:
-      text: How can we assist you? Choose what you're interested in.
+      text: How can we help you? Choose what you're interested in.
       back: « Back
     services:
       button: Services
-      text: Here's what we offer at our studio. Select a service — we'll show you the price, timeline, and what's included.
+      text: Here's what we offer at the studio. Choose a service — we'll show you the price, timeline, and what's included.
     card:
       request: 📝 Submit a request
-      site: Learn more on our site
+      site: Learn more on our website
     contacts:
-      button: Contact
-      text: We're located in Belgrade, looking forward to seeing you at our studio.
+      button: Contacts
+      text: We're in Belgrade, looking forward to seeing you at the studio.
       hours: Mon–Sat, 09:00–19:00
     manager:
       button: 👤 Message the technician
-      text: Please send your question in one message — the technician will respond here.
-      handoff: The technician is available on Telegram — click to open the chat.
+      text: Send your question in one message — the technician will respond here.
+      handoff: The technician is available on Telegram — click to open chat.
       chat: Open chat with the technician ↗
     partners:
       button: Partners
-      text: Our partners — choose who to write to.
+      text: Our partners — choose who to message.
     request:
       button: 📝 Submit a request
       car: What car do you have? Please provide the make, model, and year.
-      service: What would you like to do with your car? Select one or more services — or describe it in your own words.
+      service: What do you want to do with the car? Select one or more services — or describe in your own words.
       done: Done →
-      unsure: Not sure, need consultation
+      unsure: I'm not sure, need consultation
     language:
       button: 🌐 Language
-      text: Choose the language you're most comfortable communicating in.
+      text: Select the language you're most comfortable communicating in.
     profile:
-      description: Detailing studio in Belgrade — paint protection film, polishing, ceramic coating. Click 'Start' — tell us what you want to do with your car, and the technician will respond here.
-      shortDescription: Detailing studio in Belgrade — film, polishing, ceramic coating
+      description: Detailing studio in Belgrade — film wraps, polishing, ceramic coating. Click ‘Start’ — tell us what you want to do with your car, and the technician will respond here.
+      shortDescription: Detailing studio in Belgrade — wraps, polishing, ceramic coating
       menuCommand: Main menu
       langCommand: Change language
 translatedFrom: 37dfc94dfc5f26a0
