@@ -6,9 +6,12 @@ import {
   partResponseSchema,
   withComputedPrices,
 } from '../../../modules/part/store-response';
+import { VEHICLE_MODULE } from '../../../modules/vehicle';
+import type VehicleModuleService from '../../../modules/vehicle/service';
 
 const querySchema = z.object({
   q: z.string().min(1),
+  vehicle_id: z.string().min(1).optional(),
 });
 
 const PART_FIELDS = [
@@ -31,14 +34,36 @@ export async function GET(
   req: MedusaRequest,
   res: MedusaResponse,
 ): Promise<void> {
-  const { q } = querySchema.parse(req.query);
+  const { q, vehicle_id } = querySchema.parse(req.query);
+
+  const filters: Record<string, unknown> = { q };
+
+  if (vehicle_id) {
+    const vehicleModuleService: VehicleModuleService =
+      req.scope.resolve(VEHICLE_MODULE);
+
+    await vehicleModuleService.retrieveVehicle(vehicle_id);
+
+    const fitments = await vehicleModuleService.listFitments({
+      vehicle_id,
+      status: 'active',
+    });
+    const partIds = [...new Set(fitments.map((fitment) => fitment.part_id))];
+
+    if (!partIds.length) {
+      res.status(404).json({ part: null });
+      return;
+    }
+
+    filters.id = { $in: partIds };
+  }
 
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
 
   const { data } = await query.search({
     entity: 'part',
     fields: PART_FIELDS,
-    filters: { q },
+    filters,
     pagination: { take: 1 },
   });
 
