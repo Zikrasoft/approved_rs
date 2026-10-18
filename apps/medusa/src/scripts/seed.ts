@@ -1,8 +1,71 @@
 import { ExecArgs } from '@medusajs/framework/types';
 
-// TODO: seed whatever a future ticket's domain needs, idempotently by
-// identity (name/handle/code), never overwriting an admin edit.
+import { PART_MODULE } from '../modules/part';
+import PartModuleService from '../modules/part/service';
+
+const OEM_IDENTIFIER = {
+  type: 'oem' as const,
+  brand: 'BMW',
+  value: '11 42 8575211',
+};
+
+const MANUFACTURER_IDENTIFIER = {
+  type: 'manufacturer-number' as const,
+  brand: 'Mann-Filter',
+  value: 'HU 816 x',
+};
+
 export default async function seed({ container }: ExecArgs) {
   const logger = container.resolve('logger');
-  logger.info('No seed data defined yet.');
+  const partModuleService: PartModuleService = container.resolve(PART_MODULE);
+
+  const [existing] =
+    await partModuleService.listPartIdentifiers(OEM_IDENTIFIER);
+  if (existing) {
+    logger.info('B47 oil filter fixture already seeded, skipping.');
+    return;
+  }
+
+  const part = await partModuleService.createParts({
+    name: 'Oil filter, BMW B47/B48 engines',
+  });
+
+  const oemIdentifier = await partModuleService.createPartIdentifiers({
+    part_id: part.id,
+    ...OEM_IDENTIFIER,
+  });
+
+  const mannIdentifier = await partModuleService.createPartIdentifiers({
+    part_id: part.id,
+    ...MANUFACTURER_IDENTIFIER,
+  });
+
+  await partModuleService.createSupplierOffers([
+    {
+      identifier_id: oemIdentifier.id,
+      supplier: 'Intercars',
+      supplier_article_id: 'IC-11428575211',
+      price: 1850,
+      stock_quantity: 12,
+      lead_time: 'in_stock',
+    },
+    {
+      identifier_id: mannIdentifier.id,
+      supplier: 'Intercars',
+      supplier_article_id: 'IC-HU816X',
+      price: 1200,
+      stock_quantity: 30,
+      lead_time: 'in_stock',
+    },
+    {
+      identifier_id: mannIdentifier.id,
+      supplier: 'CarLab warehouse',
+      supplier_article_id: 'WH-HU816X',
+      price: 1150,
+      stock_quantity: 4,
+      lead_time: '3_days',
+    },
+  ]);
+
+  logger.info('Seeded B47 oil filter fixture.');
 }

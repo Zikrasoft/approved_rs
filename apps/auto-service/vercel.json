@@ -26,6 +26,11 @@
       "permanent": true
     },
     {
+      "source": "/shop/:path*",
+      "destination": "/sr/shop/:path*",
+      "permanent": true
+    },
+    {
       "source": "/bmw",
       "destination": "/sr/bmw/",
       "permanent": true
