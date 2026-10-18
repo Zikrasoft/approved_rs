@@ -5,6 +5,7 @@
   "scripts": {
     "build": "medusa build",
     "start": "cd .medusa/server && medusa start",
+    "dev": "medusa develop",
     "develop": "medusa develop",
     "db:migrate": "medusa db:migrate",
     "typecheck": "tsc --noEmit",
