@@ -1,0 +1,26 @@
+metaTitle: Подбор запчастей по автомобилю
+metaDescription: Выберите марку, модель и двигатель — покажем запчасти, которые подходят именно вашему автомобилю.
+eyebrow: Подбор по автомобилю
+heading: Какой у вас автомобиль?
+lead: Укажите марку, модель и двигатель — ниже появится список подходящих запчастей из каталога CarLab.
+makeLabel: Марка
+modelLabel: Модель
+engineLabel: Двигатель
+placeholderOption: — выберите —
+submitLabel: Показать запчасти
+resultsHeading: Подходящие запчасти
+emptyResults: Для этого автомобиля в каталоге пока нет запчастей. Напишите нам — поможем найти нужную деталь.
+viewPartCta: Смотреть варианты и цены
+ambiguous:
+  heading: Подтвердите вариант
+  body: Для этого автомобиля есть несколько вариантов детали — отличаются рулём или коробкой передач. Уточните, какой подходит вашему автомобилю.
+  steeringLabel: Руль
+  gearboxLabel: Коробка передач
+  steeringLeft: левый
+  steeringRight: правый
+  steeringUnknown: любой
+  gearboxManual: механическая
+  gearboxAutomatic: автоматическая
+  gearboxUnknown: любая
+vehicleNotFound: Такой комбинации марки, модели и двигателя нет в каталоге.
+translatedFrom: pending

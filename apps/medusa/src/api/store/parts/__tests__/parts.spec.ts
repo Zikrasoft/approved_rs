@@ -29,6 +29,12 @@ medusaIntegrationTestRunner({
           headers: { 'x-publishable-api-key': publishableKey.token },
         };
 
+        const [intercars, carlabWarehouse] =
+          await partModuleService.createSuppliers([
+            { name: 'Intercars', markup_percentage: 20 },
+            { name: 'CarLab warehouse', markup_percentage: 15 },
+          ]);
+
         const part = await partModuleService.createParts({
           name: 'Oil filter, BMW B47/B48 engines',
         });
@@ -53,25 +59,25 @@ medusaIntegrationTestRunner({
         await partModuleService.createSupplierOffers([
           {
             identifier_id: oemIdentifierId,
-            supplier: 'Intercars',
+            supplier_id: intercars.id,
             supplier_article_id: 'IC-11428575211',
-            price: 1850,
+            cost_price: 1542,
             stock_quantity: 12,
             lead_time: 'in_stock',
           },
           {
             identifier_id: mannIdentifierId,
-            supplier: 'Intercars',
+            supplier_id: intercars.id,
             supplier_article_id: 'IC-HU816X',
-            price: 1200,
+            cost_price: 1000,
             stock_quantity: 30,
             lead_time: 'in_stock',
           },
           {
             identifier_id: mannIdentifierId,
-            supplier: 'CarLab warehouse',
+            supplier_id: carlabWarehouse.id,
             supplier_article_id: 'WH-HU816X',
-            price: 1150,
+            cost_price: 1000,
             stock_quantity: 4,
             lead_time: '3_days',
           },

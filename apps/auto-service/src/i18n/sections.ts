@@ -7,6 +7,7 @@ import { pagesContentSchema } from './content/pagesContentSchema.ts';
 import { promoBannersContentSchema } from './content/promoBannersContentSchema.ts';
 import { shopPartContentSchema } from './content/shopPartContentSchema.ts';
 import { shopSearchContentSchema } from './content/shopSearchContentSchema.ts';
+import { vehiclePickerContentSchema } from './content/vehiclePickerContentSchema.ts';
 
 export const SECTIONS = [
   {
@@ -64,5 +65,12 @@ export const SECTIONS = [
     schema: shopSearchContentSchema,
     promptSubject:
       'part-number search page copy for a car parts shop (a search box inviting any OEM or brand number, a not-found state)',
+  },
+  {
+    key: 'vehiclePicker',
+    path: 'src/content/i18n/vehiclePicker.yaml',
+    schema: vehiclePickerContentSchema,
+    promptSubject:
+      'a make/model/engine vehicle picker page for a car parts shop, including a "confirm your variant" state when a part has more than one matching fitment (steering side or gearbox) for the selected vehicle',
   },
 ] as const satisfies readonly RegistryEntry[];

@@ -26,6 +26,9 @@ export default defineConfig({
       resolve: './src/modules/part',
     },
     {
+      resolve: './src/modules/vehicle',
+    },
+    {
       resolve: '@medusajs/medusa/search',
       options: {
         default_provider: 'typesense',
