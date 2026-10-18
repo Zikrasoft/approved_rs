@@ -253,6 +253,11 @@
     border-color: var(--color-signal);
   }
 
+  .field:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
   .chip {
     display: inline-flex;
     align-items: center;
