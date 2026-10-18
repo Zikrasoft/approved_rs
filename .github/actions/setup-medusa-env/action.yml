@@ -1,0 +1,30 @@
+name: Setup medusa env
+description: >-
+  Brings up apps/medusa's Postgres + Typesense (docker-compose.test.yml) and
+  exports the env vars medusa-config.ts requires just to be imported, so
+  typecheck/build/test don't fail before touching a real request. Must run
+  after setup-pnpm (needs the workspace checked out) and before any step
+  that runs `medusa build`, `tsc --noEmit` on apps/medusa, or its jest suite.
+
+runs:
+  using: composite
+  steps:
+    - run: >-
+        docker compose -f apps/medusa/docker-compose.test.yml up -d --wait
+      shell: bash
+
+    - run: |
+        {
+          echo "DATABASE_URL=postgres://postgres:postgres@127.0.0.1:55432/medusa"
+          echo "DATABASE_SSL=false"
+          echo "JWT_SECRET=ci-secret"
+          echo "COOKIE_SECRET=ci-secret"
+          echo "STORE_CORS=http://localhost:4321"
+          echo "ADMIN_CORS=http://localhost:9009"
+          echo "AUTH_CORS=http://localhost:9009"
+          echo "TYPESENSE_HOST=127.0.0.1"
+          echo "TYPESENSE_PORT=58108"
+          echo "TYPESENSE_PROTOCOL=http"
+          echo "TYPESENSE_API_KEY=xyz"
+        } >>"$GITHUB_ENV"
+      shell: bash
