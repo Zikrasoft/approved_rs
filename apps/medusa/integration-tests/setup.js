@@ -7,6 +7,11 @@ process.env.DB_PORT ??= '55432';
 process.env.DB_USERNAME ??= 'postgres';
 process.env.DB_PASSWORD ??= 'postgres';
 
+process.env.TYPESENSE_HOST ??= 'localhost';
+process.env.TYPESENSE_PORT ??= '58108';
+process.env.TYPESENSE_PROTOCOL ??= 'http';
+process.env.TYPESENSE_API_KEY ??= 'xyz';
+
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 const networkFetch = globalThis.fetch;
 
