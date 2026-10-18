@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { PART_MODULE } from '../../../../modules/part';
 import { PART_IDENTIFIER_TYPES } from '../../../../modules/part/models/part-identifier';
 import type PartModuleService from '../../../../modules/part/service';
+import { sellPrice } from '../../../../lib/sell-price';
 
 const paramsSchema = z.object({
   id: z.string().min(1),
@@ -41,8 +42,24 @@ export async function GET(
   const partModuleService: PartModuleService = req.scope.resolve(PART_MODULE);
 
   const part = await partModuleService.retrievePart(id, {
-    relations: ['identifiers', 'identifiers.offers'],
+    relations: [
+      'identifiers',
+      'identifiers.offers',
+      'identifiers.offers.supplier',
+    ],
   });
 
-  res.json({ part: partResponseSchema.parse(part) });
+  const withComputedPrices = {
+    ...part,
+    identifiers: part.identifiers.map((identifier) => ({
+      ...identifier,
+      offers: identifier.offers.map((offer) => ({
+        ...offer,
+        supplier: offer.supplier.name,
+        price: sellPrice(offer.cost_price, offer.supplier.markup_percentage),
+      })),
+    })),
+  };
+
+  res.json({ part: partResponseSchema.parse(withComputedPrices) });
 }

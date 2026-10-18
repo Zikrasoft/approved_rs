@@ -42,11 +42,15 @@ medusaIntegrationTestRunner({
           brand: 'BMW',
           value: '11 42 8575211',
         });
+        const supplier = await partModuleService.createSuppliers({
+          name: 'Intercars',
+          markup_percentage: 20,
+        });
         const offer = await partModuleService.createSupplierOffers({
           identifier_id: identifier.id,
-          supplier: 'Intercars',
+          supplier_id: supplier.id,
           supplier_article_id: 'IC-11428575211',
-          price: 1850,
+          cost_price: 1542,
           stock_quantity: 12,
           lead_time: 'in_stock',
         });
@@ -96,7 +100,7 @@ medusaIntegrationTestRunner({
           getContainer().resolve(PART_MODULE);
         await partModuleService.updateSupplierOffers({
           id: offerId,
-          price: 2200,
+          cost_price: 1833,
         });
 
         await expect(
@@ -110,7 +114,7 @@ medusaIntegrationTestRunner({
 
         await partModuleService.updateSupplierOffers({
           id: offerId,
-          price: 1850,
+          cost_price: 1542,
         });
       });
 
@@ -121,7 +125,7 @@ medusaIntegrationTestRunner({
           getContainer().resolve(PART_MODULE);
         await partModuleService.updateSupplierOffers({
           id: offerId,
-          price: 2200,
+          cost_price: 1833,
         });
 
         await expect(
@@ -147,7 +151,7 @@ medusaIntegrationTestRunner({
 
         await partModuleService.updateSupplierOffers({
           id: offerId,
-          price: 1850,
+          cost_price: 1542,
         });
       });
     });

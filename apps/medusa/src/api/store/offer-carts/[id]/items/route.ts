@@ -10,6 +10,7 @@ import {
   ensureCashAtPickupPaymentSession,
   OFFER_ID_METADATA_KEY,
 } from '../../../../../lib/offer-cart';
+import { sellPrice } from '../../../../../lib/sell-price';
 
 const paramsSchema = z.object({
   id: z.string().min(1),
@@ -29,7 +30,7 @@ export async function POST(
 
   const partModuleService: PartModuleService = req.scope.resolve(PART_MODULE);
   const offer = await partModuleService.retrieveSupplierOffer(offerId, {
-    relations: ['identifier', 'identifier.part'],
+    relations: ['identifier', 'identifier.part', 'supplier'],
   });
 
   await addToCartWorkflow(req.scope).run({
@@ -39,11 +40,14 @@ export async function POST(
         {
           title: `${offer.identifier.part.name} (${offer.identifier.brand})`,
           quantity,
-          unit_price: offer.price,
+          unit_price: sellPrice(
+            offer.cost_price,
+            offer.supplier.markup_percentage,
+          ),
           requires_shipping: false,
           metadata: {
             [OFFER_ID_METADATA_KEY]: offer.id,
-            supplier: offer.supplier,
+            supplier: offer.supplier.name,
             part_identifier_id: offer.identifier.id,
           },
         },

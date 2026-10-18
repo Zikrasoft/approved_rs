@@ -10,6 +10,7 @@ import {
   ensureCashAtPickupPaymentSession,
   offerIdOf,
 } from '../../../../../lib/offer-cart';
+import { sellPrice } from '../../../../../lib/sell-price';
 
 const paramsSchema = z.object({
   id: z.string().min(1),
@@ -32,10 +33,16 @@ export async function POST(
 
   const partModuleService: PartModuleService = req.scope.resolve(PART_MODULE);
   const offers = offerIds.length
-    ? await partModuleService.listSupplierOffers({ id: offerIds })
+    ? await partModuleService.listSupplierOffers(
+        { id: offerIds },
+        { relations: ['supplier'] },
+      )
     : [];
   const currentPriceByOfferId = new Map(
-    offers.map((offer) => [offer.id, offer.price]),
+    offers.map((offer) => [
+      offer.id,
+      sellPrice(offer.cost_price, offer.supplier.markup_percentage),
+    ]),
   );
 
   const repriced: string[] = [];
